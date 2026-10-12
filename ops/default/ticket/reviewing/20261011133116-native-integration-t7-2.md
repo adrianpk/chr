@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T20:15:16Z
 reviewed_at: 2026-10-12T21:10:46Z
 branch: feat/slice-7-native-candidate-review
-commits: []
+commits: ["c1c3d9dc954e9d3888c55a9a63dfac4fc04f6b59"]
 ---
 
 # T7.2: Bind review to the current candidate
@@ -81,5 +81,9 @@ Source-only native approval, stale policy reuse and lost reviewer ownership on
 queue movement were reproduced before correction. A capacity-fixture argument
 error in the initial checks was corrected; the repository and focused normal/race
 checks then passed. All owned check processes exited naturally.
+
+Implementation commit: [c1c3d9dc954e9d3888c55a9a63dfac4fc04f6b59](https://forge.adrianpk.com/adrianpk/chr/commit/c1c3d9dc954e9d3888c55a9a63dfac4fc04f6b59).
+
+Acta commit activity: `01M4RZ9E4YV2JFRSJFAAG9TPTH`.
 
 Canonical slice PR and final exact-HEAD checks remain pending.

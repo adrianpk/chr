@@ -122,6 +122,8 @@ same Go 1.27.1 fixture environment:
 - `go test -race ./internal/core ./internal/app -run '^(TestNativeReview|TestNativeSubmission|TestNativePreparation|TestWorkflowReview|TestWorkflowPreparation|TestServiceNativeReview|TestServiceWorkflowReview|TestServiceWorkflowPreparation)' -count=1` — core passed in 1012.273 s and app in 47.812 s.
 - `git diff --check` — passed.
 
+T7.2 implementation commit: [c1c3d9dc954e9d3888c55a9a63dfac4fc04f6b59](https://forge.adrianpk.com/adrianpk/chr/commit/c1c3d9dc954e9d3888c55a9a63dfac4fc04f6b59). Acta commit activity: `01M4RZ9E4YV2JFRSJFAAG9TPTH`.
+
 Source-only native approval and stale policy reuse were reproduced before
 correction. Queue movement also reproduced loss of the running reviewer
 credential. The initial repository and race checks failed only because a capacity
@@ -131,6 +133,6 @@ has not been validated.
 
 ## Risks and Follow-ups
 
-T7.1–T7.2 are implemented and checked. T7.3–T7.4 remain ready for bounded
-merger repair routing and integration drift handling. Final slice candidate
+T7.1–T7.2 are implemented and checked. T7.3 is active for bounded merger repair
+routing; T7.4 remains ready for integration drift handling. Final slice candidate
 checks and canonical PR evidence remain pending.
