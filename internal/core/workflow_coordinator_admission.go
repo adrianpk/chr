@@ -93,7 +93,11 @@ func workflowCoordinatorTargetPath(path string) bool {
 }
 
 func (s *WorkflowStore) checkWorkflowFrontierOwnership(ctx context.Context, run workflowInvocationFile) error {
-	runs, err := s.repositoryWorkflowInvocations(ctx)
+	return s.checkWorkflowFrontierOwnershipPrepared(ctx, run, (*WorkflowStore).recoverTransition)
+}
+
+func (s *WorkflowStore) checkWorkflowFrontierOwnershipPrepared(ctx context.Context, run workflowInvocationFile, prepare func(*WorkflowStore) error) error {
+	runs, err := s.repositoryWorkflowInvocationsPrepared(ctx, prepare)
 	if err != nil {
 		return err
 	}

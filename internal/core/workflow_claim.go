@@ -54,13 +54,7 @@ func (s *WorkflowStore) ClaimWorkflow(ctx context.Context, id string) (claim *Wo
 }
 
 func (s *WorkflowStore) claimWorkflow(ctx context.Context, run workflowInvocationFile) (claim *WorkflowClaim, err error) {
-	restoreWorkflowCapacityWait(&run)
-
-	if run.StopIntent != "" {
-		return nil, ErrWorkflowOwned
-	}
-
-	if err := s.reuseWorkflowValidatedTasks(ctx, &run); err != nil {
+	if err := s.prepareWorkflowClaimState(ctx, &run); err != nil {
 		return nil, err
 	}
 
@@ -100,6 +94,20 @@ func (s *WorkflowStore) claimWorkflow(ctx context.Context, run workflowInvocatio
 	}
 
 	return claim, nil
+}
+
+func (s *WorkflowStore) prepareWorkflowClaimState(ctx context.Context, run *workflowInvocationFile) error {
+	restoreWorkflowCapacityWait(run)
+
+	if run.StopIntent != "" {
+		return ErrWorkflowOwned
+	}
+
+	if err := s.guardWorkflowIntegrationExecutor(ctx, *run); err != nil {
+		return err
+	}
+
+	return s.reuseWorkflowValidatedTasks(ctx, run)
 }
 
 func (s *WorkflowStore) observeWorkflowClaim(ctx context.Context, run workflowInvocationFile) (WorkflowRecord, error) {

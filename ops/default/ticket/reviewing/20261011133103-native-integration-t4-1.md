@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133103
 title: "T4.1: Schedule eligible units deterministically"
-status: ready
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,9 @@ tags: native-integration, slice-4
 source: chat
 reported_at: 2026-10-11T13:31:03Z
 ready_at: 2026-10-11T13:31:37Z
+started_at: 2026-10-12T02:52:08Z
+branch: feat/slice-4-native-queue-scheduling
+reviewed_at: 2026-10-12T03:24:14Z
 commits: []
 ---
 
@@ -58,4 +61,12 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Implemented bounded authoritative selection of the current admitted task per native unit in durable queue order. Existing frozen-input, cumulative task-proof and receipt prerequisite checks determine eligibility. Human waits, native pauses and active ownership cannot be bypassed by next-task or direct claims. Selection remains read-only; launch rechecks its hash/revisions and delegates to the existing claim/capacity owner under common repository exclusion.
+
+Successful task checks:
+
+- `make verify`
+- `go test -race ./internal/core -run '^TestNativeSchedule|^TestNativeEntry|^TestNativeQueue|^TestNativeBudget|^TestNativeSubmission|^TestWorkflowClaim|^TestWorkflowFrontier' -count=1`
+- `git diff --check`
+
+The full pre-commit gate passed with zero lint issues, core tests in 1030.781 seconds and app tests in 82.622 seconds. The expanded focused race check passed in 166.087 seconds. [Slice 4 report](../../report/slices/native-integration-queue/slice-4-queue-scheduling.md) retains the failed initial namespace lookup and its passing correction. T4.2 through T4.4, canonical PR preparation and complete-candidate exact-HEAD validation remain pending.

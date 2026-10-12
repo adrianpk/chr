@@ -77,11 +77,15 @@ func workflowInvocationNeedsClosing(run WorkflowInvocation) bool {
 }
 
 func (s *WorkflowStore) checkWorkflowInputs(ctx context.Context, run workflowInvocationFile) error {
+	return s.checkWorkflowInputsPrepared(ctx, run, (*WorkflowStore).recoverTransition)
+}
+
+func (s *WorkflowStore) checkWorkflowInputsPrepared(ctx context.Context, run workflowInvocationFile, prepare func(*WorkflowStore) error) error {
 	if _, err := s.checkWorkflowCoordinator(ctx); err != nil {
 		return err
 	}
 
-	if err := s.checkWorkflowFrontierOwnership(ctx, run); err != nil {
+	if err := s.checkWorkflowFrontierOwnershipPrepared(ctx, run, prepare); err != nil {
 		return err
 	}
 
