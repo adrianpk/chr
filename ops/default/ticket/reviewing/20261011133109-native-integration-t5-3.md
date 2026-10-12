@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T10:21:53Z
 reviewed_at: 2026-10-12T10:56:07Z
 branch: feat/slice-5-native-method-preparation
-commits: []
+commits: [134ebaf9c8041ca92bdd184ee48f6e521a293e07]
 ---
 
 # T5.3: Enforce non-no-op and signing policy
@@ -78,6 +78,7 @@ Successful task checks:
 - `go test -race ./internal/core -run '^TestNative|^TestWorkflowPreparation|^TestWorkflowIntegration|^TestWorkflowGit|^TestWorkflowSubmission' -count=1` — pass, 705.730 seconds.
 - `git diff --check` — pass.
 
-Task commit and Acta references are bound in the following evidence commit.
+Task commit: [134ebaf9c8041ca92bdd184ee48f6e521a293e07](https://forge.adrianpk.com/adrianpk/chr/commit/134ebaf9c8041ca92bdd184ee48f6e521a293e07).
+Acta task record: `01M4QW3D3M4DHF1MHP5B7X11WR`.
 T5.4, the canonical PR and final exact-HEAD controller checks remain pending.
 This task is validated locally; it is not integrated or finalized.

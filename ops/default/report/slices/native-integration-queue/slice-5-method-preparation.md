@@ -52,6 +52,8 @@ while leaving original source mappings intact.
 
 T5.2 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/ed92e270edd489332191667c1c80201536363ba2). Acta task record: `01M4QRQTNWK814YQMJG4Q5F53K`.
 
+T5.3 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/134ebaf9c8041ca92bdd184ee48f6e521a293e07). Acta task record: `01M4QW3D3M4DHF1MHP5B7X11WR`.
+
 ## Contracts Added or Changed
 
 `WorkflowIntegrationProof.Provenance` retains bounded original and prepared
