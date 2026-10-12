@@ -5,7 +5,7 @@ Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
 Branch: `feat/slice-5-native-method-preparation`
-PR: pending
+PR: [#379](https://forge.adrianpk.com/adrianpk/chr/pulls/379)
 
 ## Purpose
 
@@ -59,6 +59,8 @@ while leaving original source mappings intact.
 T5.2 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/ed92e270edd489332191667c1c80201536363ba2). Acta task record: `01M4QRQTNWK814YQMJG4Q5F53K`.
 
 T5.3 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/134ebaf9c8041ca92bdd184ee48f6e521a293e07). Acta task record: `01M4QW3D3M4DHF1MHP5B7X11WR`.
+
+T5.4 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/a6a4d6ec83d8dc15f4bdf05712417567dc6145fc). Acta task record: `01M4QY05BSSYEYMEPHE06JK3VR`.
 
 ## Contracts Added or Changed
 
@@ -209,8 +211,18 @@ Final T5.4 pre-commit checks passed:
 - `git diff --check` — pass.
 
 Owned test fixtures completed naturally and their disposable data was cleaned
-through the test lifecycle. The final clean-HEAD controller validation follows
-the task commit and PR-reference updates.
+through the test lifecycle.
+
+Required final candidate commands, in canonical order:
+
+- `make verify`
+- `go test ./internal/core ./internal/app -count=1`
+- `go test -race ./internal/core ./internal/app -count=1`
+- `git diff --check`
+
+The controller ledger binds these commands to the final clean PR head after
+PR-reference commits and pushes. Its exact-HEAD evidence is authoritative; the
+canonical PR Validation section lists these commands only after they pass.
 
 ## Risks and Follow-ups
 
@@ -218,4 +230,6 @@ All four Slice 5 tasks are locally validated. Signed preparation is locally
 certified; live
 provider signing-profile certification remains in the recorded certification
 slice.
-The canonical PR and final exact-HEAD controller checks follow all four tasks.
+Canonical PR #379 is open against `dev`; the controller owns integration.
+Required final candidate evidence uses the controller ledger after PR-reference
+updates. All task tickets remain reviewing until verified integration.

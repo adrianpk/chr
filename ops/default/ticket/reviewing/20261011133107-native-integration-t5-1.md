@@ -12,6 +12,7 @@ reported_at: 2026-10-11T13:31:07Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T07:40:03Z
 branch: feat/slice-5-native-method-preparation
+pr: 379
 reviewed_at: 2026-10-12T08:11:05Z
 commits: [d6532b26691da0df0002f3d29753a9ae0a52be11]
 ---
@@ -69,6 +70,8 @@ Successful task checks:
 - `go test -race ./internal/core -run '^TestNativeCombined|^TestNativeRecord|^TestWorkflowPreparation|^TestWorkflowIntegration|^TestWorkflowGit' -count=1`
 - `git diff --check`
 
-Strict lint reported zero issues. The required pre-commit gate passed with core in 1269.073 seconds, app in 105.618 seconds and all other packages passing. The focused race regression passed in 262.157 seconds. [Slice 5 report](../../report/slices/native-integration-queue/slice-5-method-preparation.md) retains development failures and evidence boundaries. T5.2 through T5.4, canonical PR preparation and final exact-HEAD controller checks remain pending.
+Strict lint reported zero issues. The required pre-commit gate passed with core in 1269.073 seconds, app in 105.618 seconds and all other packages passing. The focused race regression passed in 262.157 seconds. [Slice 5 report](../../report/slices/native-integration-queue/slice-5-method-preparation.md) retains development failures and evidence boundaries. All four Slice 5 tasks are locally validated; the controller records required ordered clean-HEAD candidate checks after PR-reference updates.
 
 Task implementation: [commit](https://forge.adrianpk.com/adrianpk/chr/commit/d6532b26691da0df0002f3d29753a9ae0a52be11). Acta task record: `01M4QJN40VG8QKAKS12Z40FY3T`.
+
+Canonical slice PR: [#379](https://forge.adrianpk.com/adrianpk/chr/pulls/379).

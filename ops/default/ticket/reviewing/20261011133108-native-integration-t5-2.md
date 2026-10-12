@@ -13,6 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T08:20:13Z
 reviewed_at: 2026-10-12T09:57:20Z
 branch: feat/slice-5-native-method-preparation
+pr: 379
 commits: [ed92e270edd489332191667c1c80201536363ba2]
 ---
 
@@ -75,5 +76,7 @@ Task checks passed:
 - `git diff --check` — pass.
 
 Development failures and corrections are retained in the [Slice 5 report](../../report/slices/native-integration-queue/slice-5-method-preparation.md).
-Task commit: `ed92e270edd489332191667c1c80201536363ba2`. Acta task record: `01M4QRQTNWK814YQMJG4Q5F53K`. T5.3/T5.4,
-the canonical slice PR and final exact-HEAD controller checks remain pending.
+Task commit: `ed92e270edd489332191667c1c80201536363ba2`. Acta task record: `01M4QRQTNWK814YQMJG4Q5F53K`. All four Slice 5 tasks are locally validated; required ordered clean-HEAD
+candidate checks use the controller ledger after PR-reference updates.
+
+Canonical slice PR: [#379](https://forge.adrianpk.com/adrianpk/chr/pulls/379).

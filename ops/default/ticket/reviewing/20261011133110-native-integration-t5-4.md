@@ -13,7 +13,8 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T11:02:54Z
 reviewed_at: 2026-10-12T11:29:36Z
 branch: feat/slice-5-native-method-preparation
-commits: []
+pr: 379
+commits: [a6a4d6ec83d8dc15f4bdf05712417567dc6145fc]
 ---
 
 # T5.4: Verify preparation isolation and method proofs
@@ -80,7 +81,9 @@ Successful task checks:
 - `go test -race ./internal/core -run '^TestNativePreparationIsolation$|^TestNativeMethod|^TestNativeCombined|^TestNativeReplay|^TestNativePreparationCollision$|^TestNativeCollisionBudget$' -count=1` — pass, 17.664 seconds.
 - `git diff --check` — pass.
 
-This task is validated locally. Its task commit and canonical PR reference are
-bound in the follow-up evidence commit. Required ordered clean-HEAD checks are
-recorded through the controller after PR-reference commits. Integration remains
-controller-owned.
+Task commit: [a6a4d6ec83d8dc15f4bdf05712417567dc6145fc](https://forge.adrianpk.com/adrianpk/chr/commit/a6a4d6ec83d8dc15f4bdf05712417567dc6145fc).
+Acta task record: `01M4QY05BSSYEYMEPHE06JK3VR`.
+This task is validated locally. Required ordered clean-HEAD candidate checks use
+the controller ledger after PR-reference commits. Integration remains controller-owned.
+
+Canonical slice PR: [#379](https://forge.adrianpk.com/adrianpk/chr/pulls/379).

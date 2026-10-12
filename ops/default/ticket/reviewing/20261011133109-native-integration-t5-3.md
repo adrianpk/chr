@@ -13,6 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T10:21:53Z
 reviewed_at: 2026-10-12T10:56:07Z
 branch: feat/slice-5-native-method-preparation
+pr: 379
 commits: [134ebaf9c8041ca92bdd184ee48f6e521a293e07]
 ---
 
@@ -80,5 +81,7 @@ Successful task checks:
 
 Task commit: [134ebaf9c8041ca92bdd184ee48f6e521a293e07](https://forge.adrianpk.com/adrianpk/chr/commit/134ebaf9c8041ca92bdd184ee48f6e521a293e07).
 Acta task record: `01M4QW3D3M4DHF1MHP5B7X11WR`.
-T5.4, the canonical PR and final exact-HEAD controller checks remain pending.
+All four Slice 5 tasks are locally validated; the controller records required ordered clean-HEAD candidate checks after PR-reference updates.
 This task is validated locally; it is not integrated or finalized.
+
+Canonical slice PR: [#379](https://forge.adrianpk.com/adrianpk/chr/pulls/379).
