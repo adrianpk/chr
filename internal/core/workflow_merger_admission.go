@@ -23,6 +23,9 @@ func (s *WorkflowStore) workflowMergerAdmission(ctx context.Context, run workflo
 	}
 
 	seed, err := s.workflowMergerSeed(ctx, run, entry, request.Input)
+	if err == nil && request.Input.RepairCheckpointRef != nil {
+		_, err = s.readWorkflowMergerCheckpoint(request.Input)
+	}
 
 	return entry, budget, seed, err
 }

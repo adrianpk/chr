@@ -582,8 +582,51 @@ types fail. Generated and other procedure-bound resolutions require host
 observations of the exact regeneration and frozen validation commands and their
 input/output trees. Declared incompatible requirements or missing procedures
 produce bounded maintainer decisions tied to the input. These trusted Git ports
-consume accepted repairs; independent host acceptance, procedure execution and
-candidate validation remain required before publication.
+consume accepted repairs; candidate validation and review remain required before
+publication.
+
+## Merger host acceptance
+
+`RetainWorkflowMergerCheckpoint` verifies a host-prepared private Git checkpoint
+and seals it to the current entry, unit, scope, candidate revision and claim
+generation. Its immutable reference is part of `WorkflowMergerInput.InputHash`.
+`ExecuteWorkflowMergerRepair` checks that image and its actual Git prefix before
+claiming capacity, seeds a separate broker checkout at the exact baseline tree,
+and retains `WorkflowMergerAcceptance` with the owned attempt.
+
+After the certified driver stops, the host reconstructs the tree independently of
+its index. It compares every actual changed path with the declared paths and
+frozen scope, rejects aliases, protected/control edits, missing conflict changes,
+unresolved markers, undeclared file types and whole-side copies (including copies
+that only change surrounding whitespace). Per-conflict rationale and preserved
+requirement IDs remain evidence, rather than a semantic proof.
+
+Procedure-bound paths must remain unchanged by the model. The host runs the
+exact declared regeneration and frozen validation argv under the existing
+birth-identity supervisor, capacity claim and finite attempt deadline. At most
+eight procedures fit the existing 17-process bound including the driver. Command
+failure, truncated output, changed local Git configuration, validation mutations
+or escaped output diffs reject the result. Merger completion independently waits
+for journaled group quiescence within the original deadline; supervisor exit
+alone cannot finish an attempt while an orphan descendant remains alive. Evidence records the actual tree after
+manual edits and every subsequent input/output tree; method verification checks
+that chain against actual objects. Procedures do not dispatch another model call
+or refill its consumed budget.
+
+The host imports verified trees into the separate checkpoint object store and
+commits through `WorkflowMergerRepairGit`. Replay continues at the owning original
+step, preserving its prefix and attribution. Current S/B, generation, scope,
+method, input image and gate are checked before procedure execution, before host
+commit and afterward. Rejection retains command and failure evidence; a private
+commit observed before a stale callback is recorded as rejected.
+
+`accepted_pending_validation` and `merger_repair_pending_validation` retain a
+prepared checkpoint without granting candidate validation, review, publication or
+receipt authority. A later conflict retains another replay checkpoint. Complete
+results still require the full host combined gate and candidate-bound review;
+model local checks and declared procedure validation cannot replace them. These
+checks run as trusted host commands with a private environment. They do not
+establish an operating-system sandbox for repository code.
 
 ## Candidate review and approval
 

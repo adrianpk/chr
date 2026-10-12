@@ -126,6 +126,11 @@ func runWorkflowSupervisedProcess(ctx context.Context, claim *WorkflowClaim, pre
 	}
 
 	if registerErr == nil {
+		var quiescenceErr error
+		if prepared.input.Merger != nil {
+			quiescenceErr = waitWorkflowMergerProcessGroup(ctx, ownership, prepared.leaseUntil)
+		}
+
 		cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 		defer cancel()
 
@@ -136,7 +141,7 @@ func runWorkflowSupervisedProcess(ctx context.Context, claim *WorkflowClaim, pre
 			claim.execution.Unlock()
 		}
 
-		err = errors.Join(err, finishErr)
+		err = errors.Join(err, quiescenceErr, finishErr)
 	}
 
 	return result, err

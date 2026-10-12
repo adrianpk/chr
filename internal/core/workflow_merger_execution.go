@@ -12,6 +12,10 @@ import (
 // ExecuteWorkflowMerger runs one certified broker driver in a private owned
 // checkout. It retains a proposal; it never accepts, commits or publishes it.
 func (s *WorkflowStore) ExecuteWorkflowMerger(ctx context.Context, request WorkflowMergerRequest, harness WorkflowMergerHarness, provider WorkflowPullRequestProvider) (attempt WorkflowMergerAttempt, err error) {
+	return s.executeWorkflowMerger(ctx, request, harness, provider, nil)
+}
+
+func (s *WorkflowStore) executeWorkflowMerger(ctx context.Context, request WorkflowMergerRequest, harness WorkflowMergerHarness, provider WorkflowPullRequestProvider, git WorkflowMergerRepairGit) (attempt WorkflowMergerAttempt, err error) {
 	harness.Command = slices.Clone(harness.Command)
 
 	claim, prepared, err := s.prepareWorkflowMerger(ctx, request, harness, provider)
@@ -44,6 +48,10 @@ func (s *WorkflowStore) ExecuteWorkflowMerger(ctx context.Context, request Workf
 		if parseErr == nil {
 			attempt.Proposal = &proposal
 		}
+	}
+
+	if result.err == nil && git != nil {
+		result.err = s.acceptWorkflowMerger(deadline, claim, prepared, provider, git, &attempt)
 	}
 
 	if result.err != nil {

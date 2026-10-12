@@ -9,6 +9,10 @@ import (
 
 func (input WorkflowMergerInput) evidenceRefs() []WorkflowEvidenceRef {
 	refs := []WorkflowEvidenceRef{input.SourceManifestRef, input.ValidationContractRef}
+	if input.RepairCheckpointRef != nil {
+		refs = append(refs, *input.RepairCheckpointRef)
+	}
+
 	refs = append(refs, input.IntentRefs...)
 	refs = append(refs, input.TargetChangeRefs...)
 	refs = append(refs, input.FindingRefs...)

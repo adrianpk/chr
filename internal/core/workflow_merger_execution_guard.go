@@ -29,6 +29,10 @@ func (s *WorkflowStore) checkWorkflowMergerPrepared(ctx context.Context, claim *
 		return err
 	}
 
+	if err := claim.store.checkWorkflowPreparedInput(prepared); err != nil {
+		return err
+	}
+
 	return s.withLock(ctx, func() error { return s.checkWorkflowMergerOwned(ctx, claim, prepared) })
 }
 
@@ -38,12 +42,12 @@ func (s *WorkflowStore) checkWorkflowMergerOwned(ctx context.Context, claim *Wor
 		return err
 	}
 
-	if run.StopIntent != "" {
-		return ErrWorkflowStop
-	}
-
 	if err := checkWorkflowExecutionBinding(run, record, prepared); err != nil {
 		return err
+	}
+
+	if run.StopIntent != "" {
+		return ErrWorkflowStop
 	}
 
 	if run.Integration == nil {
@@ -63,7 +67,9 @@ func (s *WorkflowStore) checkWorkflowMergerOwned(ctx context.Context, claim *Wor
 		return err
 	}
 
-	_, err = s.workflowMergerSeed(ctx, run, entry, *prepared.input.Merger)
+	if _, err := s.workflowMergerSeed(ctx, run, entry, *prepared.input.Merger); err != nil {
+		return err
+	}
 
-	return err
+	return s.checkWorkflowMergerCommands(ctx, run, *prepared.input.Merger)
 }

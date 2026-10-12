@@ -55,6 +55,10 @@ func (s *WorkflowStore) claimWorkflowMerger(ctx context.Context, run workflowInv
 	}
 
 	lane, root, err := s.workflowMergerWorkspace(ctx, input, seed)
+	if err == nil && input.RepairCheckpointRef != nil {
+		lane, err = s.seedWorkflowMergerCheckpoint(ctx, input, lane)
+	}
+
 	if err != nil {
 		return nil, prepared, err
 	}

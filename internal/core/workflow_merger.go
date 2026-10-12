@@ -60,6 +60,7 @@ type WorkflowMergerInput struct {
 	Requirements          []WorkflowMergerRequirement `json:"requirements"`
 	Conflicts             []WorkflowMergerConflict    `json:"conflicts"`
 	HistoryCheckpoint     *WorkflowMergerCheckpoint   `json:"history_checkpoint,omitempty"`
+	RepairCheckpointRef   *WorkflowEvidenceRef        `json:"repair_checkpoint_ref,omitempty"`
 	AllowedPaths          []string                    `json:"allowed_paths"`
 	ProtectedPaths        []string                    `json:"protected_paths"`
 	ValidationContractRef WorkflowEvidenceRef         `json:"validation_contract_ref"`

@@ -53,18 +53,26 @@ func validateWorkflowTreeRepair(proof WorkflowIntegrationProof, repair WorkflowI
 func validateWorkflowRepairRegeneration(repair WorkflowIntegrationTreeRepair) error {
 	seen := map[string]bool{}
 
-	for _, evidence := range repair.Regeneration {
-		index := slices.IndexFunc(repair.Input.Conflicts, func(c WorkflowMergerConflict) bool { return c.ID == evidence.ConflictID })
-		if index < 0 || seen[evidence.ConflictID] {
-			return ErrWorkflowConflict
-		}
+	tree := repair.ProposalTree
+	if tree == "" {
+		tree = repair.BaselineTree
+	}
 
-		conflict := repair.Input.Conflicts[index]
-		if !workflowMergerProcedureRequired(conflict) || !validWorkflowRegenerationEvidence(conflict, evidence, repair.ResolvedTree) || evidence.InputTree != repair.BaselineTree {
-			return ErrWorkflowConflict
+	if !workflowCommitID(tree) {
+		return ErrWorkflowConflict
+	}
+
+	for _, evidence := range repair.Regeneration {
+		if err := validateWorkflowRegenerationStep(repair.Input, evidence, seen, tree); err != nil {
+			return err
 		}
 
 		seen[evidence.ConflictID] = true
+		tree = evidence.OutputTree
+	}
+
+	if len(repair.Regeneration) > 0 && tree != repair.ResolvedTree {
+		return ErrWorkflowConflict
 	}
 
 	for _, conflict := range repair.Input.Conflicts {
@@ -81,7 +89,7 @@ func validWorkflowRegenerationEvidence(conflict WorkflowMergerConflict, evidence
 		return false
 	}
 
-	return evidence.Command.ExitCode == 0 && evidence.Validation.ExitCode == 0 && workflowCommitID(evidence.InputTree) && evidence.OutputTree == tree && !evidence.Command.Truncated && !evidence.Validation.Truncated
+	return evidence.Command.ExitCode == 0 && evidence.Validation.ExitCode == 0 && workflowCommitID(evidence.InputTree) && workflowCommitID(evidence.OutputTree) && evidence.OutputTree == tree && !evidence.Command.Truncated && !evidence.Validation.Truncated
 }
 
 func validateWorkflowRepairPosition(repair WorkflowIntegrationTreeRepair, original, parent, source, tree string) error {
@@ -112,4 +120,18 @@ func workflowMergerChangedPaths(data string) ([]string, error) {
 	slices.Sort(paths)
 
 	return paths, nil
+}
+
+func validateWorkflowRegenerationStep(input WorkflowMergerInput, evidence WorkflowMergerRegenerationEvidence, seen map[string]bool, tree string) error {
+	index := slices.IndexFunc(input.Conflicts, func(c WorkflowMergerConflict) bool { return c.ID == evidence.ConflictID })
+	if index < 0 || seen[evidence.ConflictID] {
+		return ErrWorkflowConflict
+	}
+
+	conflict := input.Conflicts[index]
+	if !workflowMergerProcedureRequired(conflict) || !validWorkflowRegenerationEvidence(conflict, evidence, evidence.OutputTree) || evidence.InputTree != tree {
+		return ErrWorkflowConflict
+	}
+
+	return nil
 }

@@ -1,6 +1,6 @@
 # Slice 6: Bounded merger role
 
-Status: drafting
+Status: reviewing
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
@@ -56,6 +56,23 @@ requirements and unsupported generated/lockfile/binary/submodule/LFS procedures
 cannot appear as resolved proposals. Procedures require exact regeneration and
 frozen validation declarations plus host-observed tree-bound evidence.
 
+T6.4 retains verified private checkpoints against the current queue generation
+and seeds the broker checkout at the exact original replay baseline. Host
+acceptance reconstructs actual Git trees independently of the proposal/index,
+checks every changed path and file type, and rejects whole-side copies, protected
+edits, missing resolutions, aliases and stale input. Required intent identifiers
+and per-conflict rationale remain evidence; they cannot supply gate or review
+approval.
+
+Declared regeneration runs only after initial diff acceptance, through the same
+owned process supervisor, capacity claim and finite deadline. Its evidence names
+the actual manual-input tree and ordered generated trees. Validation cannot
+change the checkout or replace the frozen command. Accepted repairs commit through
+the trusted Git port and retain exact replay/method proof; rejected resolutions
+retain attributed process and failure evidence. Source/target movement after a
+private commit marks that observed result rejected. Complete results remain
+pending the combined candidate gate and review.
+
 ## Implementation Notes
 
 Protocol ownership stays in core beside existing preparation and integration
@@ -82,9 +99,13 @@ Repair method verification recomputes actual baseline trees and compares actual
 changed paths with the proposal and frozen permitted scope. It verifies original
 step/predecessor identity, original attribution and actual Git file types. Removing
 a repair record cannot hide a nondeterministic tree by recomputing the outer hash.
-The trusted Git repair ports consume host-accepted changes; wiring retained runtime
-state, independently accepting proposals and executing declared procedures belong
-to T6.4. The model cannot call these ports or supply host procedure observations.
+The trusted Git repair ports consume host-accepted changes. T6.4 freezes retained
+runtime checkpoints, independently accepts actual diffs and executes declared
+procedures. It also materializes the verified tree before host replay continuation;
+the runtime acceptance fixture exposed the earlier unstaged-checkpoint checkout
+failure. Broader checks reproduced a supervisor-exit/descendant-birth race. Merger
+process completion now waits independently for journaled group quiescence within
+the original finite deadline before confirming stopped ownership. The model cannot call these ports or supply host procedure observations.
 
 ## Contracts Added or Changed
 
@@ -111,6 +132,13 @@ and bounded ownership decisions. `WorkflowMergerRequiredDecisions` rejects
 declared incompatible intent and unsupported procedures. Original proof images
 keep their hash representation when optional repair fields are absent.
 
+`WorkflowMergerCheckpointRecord`, `RetainWorkflowMergerCheckpoint`,
+`ExecuteWorkflowMergerRepair` and `WorkflowMergerAcceptance` add generation-bound
+host acceptance. Optional checkpoint/proposal-tree fields preserve older image
+hashes when absent. Procedure execution uses the existing 17-process bound: one
+driver and at most eight regeneration/validation pairs. It does not add agent
+calls, settle unknown model usage or grant candidate validation.
+
 ## Files of Interest
 
 - [Merger contracts](../../../../../internal/core/workflow_merger.go).
@@ -124,6 +152,9 @@ keep their hash representation when optional repair fields are absent.
 - [Replay repair](../../../../../internal/core/workflow_merger_repair_continue.go).
 - [Semantic planning](../../../../../internal/core/workflow_merger_repair_plan.go).
 - [Repair method verification](../../../../../internal/core/workflow_merger_repair_verify.go).
+- [Host acceptance](../../../../../internal/core/workflow_merger_acceptance.go).
+- [Checkpoint retention](../../../../../internal/core/workflow_merger_checkpoint.go).
+- [Host procedures](../../../../../internal/core/workflow_merger_acceptance_regenerate.go).
 - [Protocol reference](../../../../../docs/reference/workflow-execution.md#merger-proposal-protocol).
 
 ## Validation
@@ -195,9 +226,39 @@ and core test process exited.
 T6.3 task commit: [97518aabe9b214d18c86440c372511c17676e958](https://forge.adrianpk.com/adrianpk/chr/commit/97518aabe9b214d18c86440c372511c17676e958).
 Acta task record: `01M4RFEYENF7PMNPSNESJB2DY3`.
 
+T6.4 focused checks on the completed host acceptance implementation:
+
+- `go test ./internal/core -run '^TestNative(Merger|Combined|Replay)' -count=1` — pass, 122.094 seconds.
+- `go test -race ./internal/core -run '^TestNative(Merger|Combined|Replay)' -count=1` — pass, 199.013 seconds.
+- `go test ./internal/core -run '^TestNativeMergerDescendants$' -count=3` — pass, 18.082 seconds.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./...` — pass, zero issues.
+
+Actual Git/broker fixtures cover accepted merge/squash/rebase checkpoints,
+whole-side copies, missing files, protected gate edits, unresolved markers,
+undeclared files, aliases, disguised binary content, stale target movement,
+checkpoint hash/Git-parent substitution, real two-procedure regeneration and
+retained command failure. Candidate publication guards remain closed after
+acceptance, and consumed model calls remain charged after restart.
+
+An initial normal broad run and repeated descendant fixture reproduced premature
+supervisor completion while an orphan group member remained alive. The bounded
+host quiescence wait corrected that failure; the subsequent broad normal/race
+checks and repeated fixture passed. A fresh task gate then caught two formatting
+findings missed by lint auto-fix output. Predicate extraction corrected those
+conditions and a fresh non-mutating strict lint check passed. Required T6.4
+pre-commit checks passed:
+
+- `make verify` — zero lint issues; core 1328.210 seconds, app 93.104 seconds and all other packages passed.
+- `git diff --check` — pass.
+
+Owned task-gate fixtures completed naturally, and the recorded runner/core
+processes exited.
+
 ## Risks and Follow-ups
 
-T6.3 semantic/replay repair passes required pre-commit checks. T6.4 host acceptance remains pending. The runtime does not yet deliver automatic
-conflict repair. No canonical Slice 6 PR is open yet. Required ordered final
-candidate checks use the controller ledger after implementation and PR-reference
-commits are pushed. No full delivery-set gate has run.
+All four Slice 6 tasks pass their focused/race and required pre-commit checks. Candidate gate/review scheduling belongs to
+Slice 7, so these core ports do not yet provide automatic end-to-end conflict
+repair. A compatible certified model driver remains an external prerequisite;
+raw worker CLIs are not enabled as merger tools. Required final candidate checks
+use the controller ledger after task and PR-reference commits are pushed. No full
+delivery-set gate has run.

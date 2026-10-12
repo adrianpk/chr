@@ -12,6 +12,7 @@ type WorkflowIntegrationTreeRepair struct {
 	PreparedParent string                               `json:"prepared_parent"`
 	Source         string                               `json:"source"`
 	BaselineTree   string                               `json:"baseline_tree"`
+	ProposalTree   string                               `json:"proposal_tree,omitempty"`
 	ResolvedTree   string                               `json:"resolved_tree"`
 	Regeneration   []WorkflowMergerRegenerationEvidence `json:"regeneration,omitempty"`
 }

@@ -94,6 +94,7 @@ func (git OSWorkflowIntegrationGit) validateQuery(query WorkflowIntegrationQuery
 
 type workflowIntegrationReader struct {
 	dir         string
+	environment []string
 	preparation *WorkflowIntegrationPreparation
 	signing     *WorkflowSSHCommitSigning
 }
@@ -138,6 +139,10 @@ func (reader workflowIntegrationReader) process(ctx context.Context, args ...str
 	}
 
 	command.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0", "GIT_NO_REPLACE_OBJECTS=1")
+	if reader.environment != nil {
+		command.Env = reader.environment
+	}
+
 	command.WaitDelay = time.Second
 
 	return command

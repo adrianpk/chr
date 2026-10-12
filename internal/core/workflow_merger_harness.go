@@ -42,14 +42,15 @@ type WorkflowMergerRequest struct {
 
 // WorkflowMergerAttempt retains a proposal independently of candidate approval.
 type WorkflowMergerAttempt struct {
-	SchemaVersion int                     `json:"schema_version"`
-	Input         WorkflowMergerInput     `json:"input"`
-	HarnessRef    WorkflowEvidenceRef     `json:"harness_ref"`
-	Harness       WorkflowCommandResult   `json:"harness"`
-	Proposal      *WorkflowMergerResult   `json:"proposal"`
-	Checks        []WorkflowCommandResult `json:"checks"`
-	TrustedUsage  *WorkflowMergerUsage    `json:"trusted_usage,omitempty"`
-	Failure       string                  `json:"failure,omitempty"`
+	Acceptance    *WorkflowMergerAcceptance `json:"acceptance,omitempty"`
+	SchemaVersion int                       `json:"schema_version"`
+	Input         WorkflowMergerInput       `json:"input"`
+	HarnessRef    WorkflowEvidenceRef       `json:"harness_ref"`
+	Harness       WorkflowCommandResult     `json:"harness"`
+	Proposal      *WorkflowMergerResult     `json:"proposal"`
+	Checks        []WorkflowCommandResult   `json:"checks"`
+	TrustedUsage  *WorkflowMergerUsage      `json:"trusted_usage,omitempty"`
+	Failure       string                    `json:"failure,omitempty"`
 }
 
 func (s *WorkflowStore) checkWorkflowMergerHarness(ctx context.Context, input WorkflowMergerInput, harness WorkflowMergerHarness) (WorkflowMergerHarnessCertificate, error) {

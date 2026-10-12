@@ -75,11 +75,12 @@ type workflowClaimExecution struct {
 }
 
 type workflowPreparedTask struct {
-	input       WorkflowTaskInput
-	inputRef    string
-	inputHash   string
-	data        []byte
-	leaseUntil  time.Time
-	environment []string
-	directory   string
+	mergerProcedure bool
+	input           WorkflowTaskInput
+	inputRef        string
+	inputHash       string
+	data            []byte
+	leaseUntil      time.Time
+	environment     []string
+	directory       string
 }

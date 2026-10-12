@@ -255,16 +255,13 @@ func TestNativeMergerChild(t *testing.T) {
 		}
 	}
 
-	if response := nativeMergerChildRequest(encoder, decoder, workflowMergerToolRequest{Operation: "write", Path: "result.txt", Content: "Preserved source and target behavior\n"}); response.Error != "" {
-		os.Exit(74)
-	}
+	nativeMergerChildEdit(encoder, decoder, call.Input)
 
 	if response := nativeMergerChildRequest(encoder, decoder, workflowMergerToolRequest{Operation: "check", Check: new(int)}); response.Error == "" {
 		os.Exit(75)
 	}
 
-	proposal := nativeMergerResolved(call.Input)
-	proposal.ChangedPaths[0], proposal.ResolutionNotes[0].Path = "result.txt", "result.txt"
+	proposal := nativeMergerChildProposal(call.Input)
 
 	data, err := json.Marshal(proposal)
 	if err != nil {
@@ -321,4 +318,31 @@ func nativeMergerChildMeter(input WorkflowMergerInput) *WorkflowMergerUsage {
 	}
 
 	return &WorkflowMergerUsage{Input: 20, Output: 10, WholeCall: true, CapabilityRevision: input.TokenAllowance.CapabilityRevision}
+}
+
+func nativeMergerChildEdit(encoder *json.Encoder, decoder *json.Decoder, input WorkflowMergerInput) {
+	path, content := "result.txt", "Preserved source and target behavior\n"
+	if strings.HasPrefix(input.ID, "merger-regenerate") {
+		path, content = "manual.txt", "Retain the approved source input\n"
+	}
+
+	if response := nativeMergerChildRequest(encoder, decoder, workflowMergerToolRequest{Operation: "write", Path: path, Content: content}); response.Error != "" {
+		os.Exit(74)
+	}
+}
+
+func nativeMergerChildProposal(input WorkflowMergerInput) WorkflowMergerResult {
+	proposal := nativeMergerResolved(input)
+
+	proposal.ChangedPaths, proposal.ResolutionNotes = nil, nil
+	for _, conflict := range input.Conflicts {
+		proposal.ChangedPaths = append(proposal.ChangedPaths, conflict.Path)
+		proposal.ResolutionNotes = append(proposal.ResolutionNotes, WorkflowMergerResolution{ConflictID: conflict.ID, Path: conflict.Path, Rationale: "Preserve independent source and target requirements through the declared repair.", RequirementIDs: conflict.RequirementIDs, RegenerationCommand: conflict.RegenerationCommand})
+	}
+
+	if strings.HasPrefix(input.ID, "merger-regenerate") {
+		proposal.ChangedPaths = append(proposal.ChangedPaths, "manual.txt")
+	}
+
+	return proposal
 }

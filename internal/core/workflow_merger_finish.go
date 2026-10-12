@@ -28,12 +28,11 @@ func (s *WorkflowStore) finishWorkflowMerger(ctx context.Context, claim *Workflo
 		failure := errors.Join(executionErr, freshErr, bindingErr)
 		if failure != nil {
 			attempt.Proposal, attempt.Failure = nil, workflowFailureText(failure)
+			rejectWorkflowMergerAcceptance(attempt)
 		}
 
-		if _, err := encodeWorkflowMergerAttempt(*attempt); err != nil {
-			attempt.Proposal, attempt.Failure = nil, "Merger proposal exceeds the retained attempt image bound."
-			attempt.Harness.Stdout, attempt.Harness.Stderr, attempt.Harness.Truncated = "", "", true
-			failure = errors.Join(failure, ErrWorkflowConflict)
+		if err := boundWorkflowMergerAttempt(attempt); err != nil {
+			failure = errors.Join(failure, err)
 		}
 
 		if err := s.persistWorkflowMergerFinish(ctx, &run, claim, *attempt); err != nil {
@@ -91,6 +90,10 @@ func workflowMergerFinishedRun(run *workflowInvocationFile, claim *WorkflowClaim
 	current.ResultRef, current.ResultHash = workflowAttemptFile(run.ID, claim.AttemptID, "result.json"), workflowHash(data)
 
 	run.Status, run.Outcome = "waiting_integration", "merger_proposal_pending"
+	if result.Acceptance != nil && result.Acceptance.Outcome == "accepted_pending_validation" {
+		run.Outcome = "merger_repair_pending_validation"
+	}
+
 	if result.Proposal == nil || result.Proposal.Outcome == "failed" {
 		current.Outcome, run.Outcome = "failed", "merger_failed"
 	}
@@ -104,4 +107,27 @@ func workflowMergerFinishedRun(run *workflowInvocationFile, claim *WorkflowClaim
 	}
 
 	return workflowFileChange{Path: current.ResultRef, After: data}
+}
+
+func rejectWorkflowMergerAcceptance(attempt *WorkflowMergerAttempt) {
+	if attempt.Acceptance != nil {
+		attempt.Acceptance.Outcome, attempt.Acceptance.Failure = "rejected", attempt.Failure
+	}
+}
+
+func boundWorkflowMergerAttempt(attempt *WorkflowMergerAttempt) error {
+	if _, err := encodeWorkflowMergerAttempt(*attempt); err == nil {
+		return nil
+	}
+
+	attempt.Proposal, attempt.Failure = nil, "Merger proposal exceeds the retained attempt image bound."
+	if attempt.Acceptance != nil {
+		attempt.Acceptance.Next, attempt.Acceptance.Repair = nil, nil
+	}
+
+	rejectWorkflowMergerAcceptance(attempt)
+
+	attempt.Harness.Stdout, attempt.Harness.Stderr, attempt.Harness.Truncated = "", "", true
+
+	return ErrWorkflowConflict
 }

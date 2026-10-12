@@ -46,33 +46,27 @@ func (reader workflowIntegrationReader) verifyMergerTreeRepair(ctx context.Conte
 		return err
 	}
 
-	data, err := reader.rawOutput(ctx, "diff", "--name-only", "-z", "--no-renames", "--no-ext-diff", "--no-textconv", tree, repair.ResolvedTree, "--")
-	if err != nil {
+	if err := reader.checkMergerObservedPaths(ctx, repair.Input, repair.Proposal, tree, repair.ResolvedTree, true); err != nil {
 		return err
 	}
 
-	paths, err := workflowMergerChangedPaths(data)
+	paths, err := reader.mergerDiffPaths(ctx, tree, repair.ResolvedTree)
 	if err != nil {
 		return err
-	}
-
-	declared := slices.Clone(repair.Proposal.ChangedPaths)
-	slices.Sort(declared)
-
-	if !slices.Equal(paths, declared) {
-		return fmt.Errorf("%w: actual repair diff differs from declared paths", ErrWorkflowConflict)
-	}
-
-	for _, path := range paths {
-		if !workflowMergerPathAllowed(repair.Input, path) {
-			return ErrWorkflowConflict
-		}
 	}
 
 	for _, path := range conflicts {
 		if !slices.Contains(paths, path) {
 			return fmt.Errorf("%w: conflicting path has no resolution change", ErrWorkflowConflict)
 		}
+	}
+
+	if err := reader.checkMergerChangedKinds(ctx, repair.Input, paths, repair.OriginalParent, repair.PreparedParent, repair.Source, repair.ResolvedTree); err != nil {
+		return err
+	}
+
+	if err := reader.verifyMergerRegenerationTrees(ctx, repair); err != nil {
+		return err
 	}
 
 	return reader.verifyMergerConflictKinds(ctx, repair, conflicts)
