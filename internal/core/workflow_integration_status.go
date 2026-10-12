@@ -1,0 +1,410 @@
+package core
+
+import (
+	"context"
+	"errors"
+	"os"
+	"path/filepath"
+	"slices"
+	"syscall"
+	"time"
+)
+
+// WorkflowRoleReservation exposes live owners without their claim credentials.
+type WorkflowRoleReservation struct {
+	InvocationID string
+	Namespace    string
+	AttemptID    string
+	Role         string
+	LeaseUntil   time.Time
+	Owner        WorkflowProcessIdentity
+}
+
+// WorkflowIntegrationCapacity is an observation, not permission to launch work.
+// All roles consume the same repository slots, including live expired groups.
+type WorkflowIntegrationCapacity struct {
+	Maximum         int
+	Available       int
+	LiveProcesses   []WorkflowProcess
+	UnexpiredOwners []WorkflowRoleReservation
+}
+
+// QueryWorkflowIntegrationCapacity observes capacity without pruning dead ledgers.
+func (s *WorkflowStore) QueryWorkflowIntegrationCapacity(ctx context.Context) (result WorkflowIntegrationCapacity, err error) {
+	err = s.withRepositoryLock(ctx, s.requireNoWorkflowTransition, func() error {
+		snapshot, readErr := s.readWorkflowIntegrationSnapshot(ctx)
+		if readErr != nil {
+			return readErr
+		}
+
+		result, readErr = s.workflowIntegrationCapacity(ctx, snapshot.Runs)
+
+		return readErr
+	})
+
+	return result, integrationRecordError("capacity observations", err)
+}
+
+func (s *WorkflowStore) workflowIntegrationCapacity(ctx context.Context, runs []workflowInvocationFile) (WorkflowIntegrationCapacity, error) {
+	limits, err := s.workflowRepositoryCapacity(ctx, runs)
+	if err != nil {
+		return WorkflowIntegrationCapacity{}, err
+	}
+
+	common, err := workflowRepositoryDirectory(ctx, s.layout.ProjectDir())
+	if err != nil {
+		return WorkflowIntegrationCapacity{}, err
+	}
+
+	processes, err := observeWorkflowIntegrationProcesses(common)
+	if err != nil {
+		return WorkflowIntegrationCapacity{}, err
+	}
+
+	result := WorkflowIntegrationCapacity{Maximum: limits.Workers, Available: limits.Workers, LiveProcesses: processes}
+	slots := map[int]bool{}
+
+	for _, process := range processes {
+		if process.CapacitySlot == 0 {
+			result.Available = 0
+		}
+
+		slots[process.CapacitySlot] = true
+	}
+
+	if err := appendWorkflowIntegrationOwners(&result, runs, slots); err != nil {
+		return result, err
+	}
+
+	if err := observeWorkflowIntegrationSlots(&result, slots, common); err != nil {
+		return result, err
+	}
+
+	if err := s.appendWorkflowIntegrationClosingOwners(ctx, &result, slots); err != nil {
+		return result, err
+	}
+
+	result.Available = max(0, result.Available-len(slots))
+
+	return result, nil
+}
+
+func appendWorkflowIntegrationOwners(result *WorkflowIntegrationCapacity, runs []workflowInvocationFile, slots map[int]bool) error {
+	now := time.Now().UTC()
+
+	for _, run := range runs {
+		for _, attempt := range run.Attempts {
+			if err := appendWorkflowIntegrationAttemptOwner(result, run, attempt, slots, now); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func appendWorkflowIntegrationAttemptOwner(result *WorkflowIntegrationCapacity, run workflowInvocationFile, attempt WorkflowAttempt, slots map[int]bool, now time.Time) error {
+	if attempt.OwnerProcess == nil || attempt.Outcome != "running" {
+		return nil
+	}
+
+	alive, err := workflowProcessAlive(*attempt.OwnerProcess)
+	if err != nil || !alive {
+		return err
+	}
+
+	occupyWorkflowIntegrationSlot(result, slots, attempt.CapacitySlot)
+
+	if !attempt.LeaseUntil.After(now) {
+		return nil
+	}
+
+	role := workflowIntegrationOwnerRole(attempt.Purpose)
+
+	result.UnexpiredOwners = append(result.UnexpiredOwners, WorkflowRoleReservation{InvocationID: run.ID, Namespace: run.Namespace, AttemptID: attempt.ID, Role: role, LeaseUntil: attempt.LeaseUntil, Owner: *attempt.OwnerProcess})
+
+	return nil
+}
+
+func occupyWorkflowIntegrationSlot(result *WorkflowIntegrationCapacity, slots map[int]bool, slot int) {
+	if slot == 0 {
+		result.Available = 0
+
+		return
+	}
+
+	slots[slot] = true
+}
+
+func observeWorkflowIntegrationSlot(path string) (held bool, err error) {
+	file, err := os.OpenFile(path, os.O_RDONLY|syscall.O_NOFOLLOW, 0)
+	if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	}
+
+	if err != nil {
+		return false, err
+	}
+	defer func() { err = errors.Join(err, file.Close()) }()
+
+	err = syscall.Flock(int(file.Fd()), syscall.LOCK_SH|syscall.LOCK_NB)
+	if errors.Is(err, syscall.EWOULDBLOCK) {
+		return true, nil
+	}
+
+	if err != nil {
+		return false, err
+	}
+
+	return false, syscall.Flock(int(file.Fd()), syscall.LOCK_UN)
+}
+
+func observeWorkflowIntegrationSlots(result *WorkflowIntegrationCapacity, slots map[int]bool, common string) error {
+	for slot := 1; slot <= workflowWorkerSlotLimit; slot++ {
+		held, err := observeWorkflowIntegrationSlot(filepath.Join(common, workflowWorkerSlotName(slot)))
+		if err != nil {
+			return err
+		}
+
+		if held {
+			slots[slot] = true
+		}
+	}
+
+	held, err := observeWorkflowIntegrationSlot(filepath.Join(common, "chr-workflow-worker.lock"))
+	if held {
+		result.Available = 0
+	}
+
+	return err
+}
+
+func (s *WorkflowStore) appendWorkflowIntegrationClosingOwners(ctx context.Context, result *WorkflowIntegrationCapacity, slots map[int]bool) error {
+	layouts, err := s.workflowRepositoryLayouts(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, layout := range layouts {
+		owner := NewWorkflowStore(layout, s.projectID)
+
+		snapshot, err := owner.readSnapshot(ctx)
+		if err != nil {
+			return err
+		}
+
+		for _, record := range snapshot.Records {
+			if record.Set == nil || record.Set.Closing == nil {
+				continue
+			}
+
+			if err := owner.appendWorkflowIntegrationClosingOwner(result, slots, record); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func (s *WorkflowStore) appendWorkflowIntegrationClosingOwner(result *WorkflowIntegrationCapacity, slots map[int]bool, set WorkflowRecord) error {
+	for i := range set.Set.Closing.Attempts {
+		state, err := s.readWorkflowClosingAttempt(set, i)
+		if err != nil {
+			return err
+		}
+
+		if state.Outcome != "running" {
+			continue
+		}
+
+		alive, err := workflowProcessAlive(state.Owner)
+		if err != nil {
+			return err
+		}
+
+		if !alive {
+			continue
+		}
+
+		occupyWorkflowIntegrationSlot(result, slots, state.CapacitySlot)
+
+		if state.LeaseUntil.After(time.Now().UTC()) {
+			result.UnexpiredOwners = append(result.UnexpiredOwners, WorkflowRoleReservation{InvocationID: state.InvocationID, Namespace: set.Namespace, AttemptID: workflowClosingAttemptID(set, state.Generation), Role: "closing", LeaseUntil: state.LeaseUntil, Owner: state.Owner})
+		}
+	}
+
+	return nil
+}
+
+func observeWorkflowIntegrationProcesses(common string) ([]WorkflowProcess, error) {
+	dir := filepath.Join(common, "chr-workflow-processes")
+
+	files, err := os.ReadDir(dir)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, nil
+	}
+
+	if err != nil || len(files) > WorkflowRecordLimit {
+		return nil, errorsOrConflict(err)
+	}
+
+	processes := []WorkflowProcess{}
+
+	for _, file := range files {
+		if !file.Type().IsRegular() {
+			return nil, ErrWorkflowConflict
+		}
+
+		process, alive, err := observeWorkflowCapacityProcess(filepath.Join(dir, file.Name()))
+		if err != nil {
+			return nil, err
+		}
+
+		if alive {
+			processes = append(processes, process)
+		}
+	}
+
+	return processes, nil
+}
+
+// WorkflowIntegrationClosureStatus reports retained receipt/fanout and gate proof.
+type WorkflowIntegrationClosureStatus struct {
+	CanClose         bool
+	ReceiptsVerified bool
+	GateVerified     bool
+	Blockers         []string
+}
+
+// QueryWorkflowIntegrationSetClosure never runs a gate or changes set status.
+func (s *WorkflowStore) QueryWorkflowIntegrationSetClosure(ctx context.Context, setPath string) (status WorkflowIntegrationClosureStatus, err error) {
+	err = s.withRepositoryLock(ctx, s.requireNoWorkflowTransition, func() error {
+		snapshot, readErr := s.readWorkflowIntegrationSnapshot(ctx)
+		if readErr != nil {
+			return readErr
+		}
+
+		set, readErr := s.readRecord(setPath)
+		if readErr != nil {
+			return readErr
+		}
+
+		if set.Set == nil {
+			return ErrWorkflowConflict
+		}
+
+		status, readErr = s.workflowIntegrationClosureStatus(ctx, snapshot, set)
+
+		return readErr
+	})
+
+	return status, integrationRecordError(setPath, err)
+}
+
+func (s *WorkflowStore) workflowIntegrationClosureStatus(ctx context.Context, snapshot workflowIntegrationSnapshot, set WorkflowRecord) (WorkflowIntegrationClosureStatus, error) {
+	status := WorkflowIntegrationClosureStatus{}
+	if err := s.checkWorkflowIntegrationSetReceipts(ctx, set); err != nil {
+		status.Blockers = append(status.Blockers, "unit_receipts_or_fanout_required")
+
+		return status, err
+	}
+
+	status.ReceiptsVerified = true
+
+	for _, journal := range snapshot.Journals {
+		if journal.Attempts[len(journal.Attempts)-1].State == "awaiting_observation" {
+			status.Blockers = append(status.Blockers, "publication_requires_observation")
+		}
+	}
+
+	capacity, err := s.workflowIntegrationCapacity(ctx, snapshot.Runs)
+	if err != nil {
+		return status, err
+	}
+
+	if len(capacity.LiveProcesses) > 0 || len(capacity.UnexpiredOwners) > 0 {
+		status.Blockers = append(status.Blockers, "live_process_requires_reconciliation")
+	}
+
+	if set.Set.Status == "completed" {
+		if _, err := s.readWorkflowClosedSet(set); err != nil {
+			return status, err
+		}
+
+		status.GateVerified = true
+	} else {
+		status.Blockers = append(status.Blockers, "final_gate_required")
+	}
+
+	status.CanClose = len(status.Blockers) == 0 && status.GateVerified
+
+	return status, nil
+}
+
+func (s *WorkflowStore) checkWorkflowIntegrationSetReceipts(ctx context.Context, set WorkflowRecord) error {
+	if _, err := s.workflowClosingMembers(ctx, set.ID); err != nil {
+		return err
+	}
+
+	for _, descriptor := range set.Set.Slices {
+		if descriptor.Phase != "integrated" || descriptor.DeliveryRef == "" {
+			return ErrWorkflowConflict
+		}
+
+		receipt, err := s.readRecord(descriptor.DeliveryRef)
+		if err != nil {
+			return err
+		}
+
+		proof, _, err := s.workflowClosingDeliveryProof(receipt)
+		if err != nil {
+			return err
+		}
+
+		if err := s.workflowClosingSliceMembers(ctx, descriptor, receipt, proof); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// QueryWorkflowPublicationBarriers returns current uncertain journal heads.
+func (s *WorkflowStore) QueryWorkflowPublicationBarriers(ctx context.Context, targetKey string) (result []WorkflowPublicationBarrier, err error) {
+	err = s.withRepositoryLock(ctx, s.requireNoWorkflowTransition, func() error {
+		journals, readErr := s.workflowIntegrationJournals(ctx)
+		if readErr != nil {
+			return readErr
+		}
+
+		for _, journal := range journals {
+			last := journal.Attempts[len(journal.Attempts)-1]
+			if last.State == "awaiting_observation" && (targetKey == "" || journal.TargetKey == targetKey) {
+				result = append(result, workflowPublicationBarrier(journal, last))
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		result = nil
+	}
+
+	slices.SortFunc(result, func(a, b WorkflowPublicationBarrier) int {
+		return compareRank(a.Submission.Attempt, b.Submission.Attempt)
+	})
+
+	return result, integrationRecordError("publication barriers", err)
+}
+
+func workflowIntegrationOwnerRole(purpose string) string {
+	switch purpose {
+	case "":
+		return "executor"
+	case workflowSliceReviewPurpose:
+		return "reviewer"
+	default:
+		return purpose
+	}
+}

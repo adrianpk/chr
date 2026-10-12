@@ -6,6 +6,10 @@ import (
 )
 
 func (s *WorkflowStore) beginWorkflowNativeSubmission(ctx context.Context, run workflowInvocationFile, fence WorkflowIntegrationBudgetGuard, provider WorkflowPublicationGuardProvider) (WorkflowSubmission, bool, error) {
+	if err := s.checkWorkflowIntegrationRetainedRecords(ctx, run); err != nil {
+		return WorkflowSubmission{}, false, err
+	}
+
 	journal, err := s.loadWorkflowSubmissionJournal(ctx, run)
 	if err != nil {
 		return WorkflowSubmission{}, false, err

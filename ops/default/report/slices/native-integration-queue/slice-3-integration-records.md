@@ -1,6 +1,6 @@
 # Slice 3: Durable integration records
 
-Status: drafting
+Status: reviewing
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
@@ -23,7 +23,7 @@ T3.3 adds an invocation-wide sealed budget with per-unit counters and stable res
 
 The native common submission journal records the original S, expected B, exact P, capability/review binding, claim generation, dispatch identity, reconciliation deadline and sanitized advertisement, command and response evidence. Git-applied publication with the original PR still pending remains awaiting observation and keeps target exclusion. Confirmation requires the physically verified native receipt, fetched exact Git proof and original canonical merged PR. Unknown response evidence survives later reconciliation.
 
-Cross-record migration and derived index validation remain T3.4 work.
+T3.4 adds bounded authoritative queue, submission, publication-barrier, capacity and closure queries. Reads report interrupted transitions and stale projections without replaying them. The existing SQLite index gains a disposable queue projection; lost or corrupt rows can be rebuilt after source validation. Explicit revision-guarded admission and budget migration retain prior allocation, usage, claims and publication history. Malformed, unsupported or unbound source images remain intact and produce typed reconciliation errors.
 
 ## Implementation Notes
 
@@ -41,6 +41,8 @@ T3.2 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commi
 
 T3.3 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/dce7077f632e9d1d93dcdde5d35ba958f4695e0f). Acta recorded the completed task as `01M4PN8W5K2TA9P691MVGK08Y9`.
 
+T3.4 keeps sequence and unit uniqueness in authoritative records. Queries and mutation guards verify ledger ownership, retained usage, reservation generations, original PR target, candidate proof, exact native journal projections and receipt ownership. Capacity observation checks real slot locks, live process groups and unexpired executor/review/closing owners without pruning process evidence. Set closure status verifies actual receipt fanout and retained final gate evidence without executing closure.
+
 ## Contracts Added or Changed
 
 - `chr-integration-candidate/v2` and `chr-workflow-receipt/v2` distinguish native proof from historical schemas.
@@ -52,6 +54,9 @@ T3.3 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commi
 - Invocation-wide budget schema/version, sealed invocation binding, compatible whole-call allowance and immutable settlement/grant history.
 - `chr-integration-journal/v2` extends the existing common journal with exact native intent, dispatch, application, observation and receipt facts; uncertain legacy attempts remain retained.
 
+- Read-only integration query contracts and a rebuildable extension to the existing SQLite index.
+- Explicit additive migration, typed source-record blockers and cross-record generation/receipt/publication guards.
+
 ## Files of Interest
 
 - `internal/core/workflow_native_records.go`: additive bindings, version dispatch and candidate hashing.
@@ -61,6 +66,10 @@ T3.3 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commi
 - `internal/core/workflow_integration_entry*.go`: queue admission, guarded transitions, durable ownership and fault/concurrency tests.
 - `internal/core/workflow_integration_budget*.go`: guarded shared ledger, counters, grants, settlement, legacy consumption and race/recovery tests.
 - `internal/core/workflow_submission_native*.go`: native common-journal extensions, transport/receipt proof checks and real Git pending/confirmed publication fixtures.
+
+- `internal/core/workflow_integration_query.go`, `workflow_integration_snapshot.go` and `workflow_integration_status.go`: bounded observational queries.
+- `internal/core/workflow_integration_index.go` and the additive SQLite migration: disposable coordinator-wide queue rows.
+- `internal/core/workflow_integration_migration.go` and `workflow_integration_records_validate.go`: guarded migration and authoritative graph checks.
 
 ## Validation
 
@@ -78,9 +87,9 @@ T3.2 focused race check passed (51.501 seconds):
 
 - `go test -race ./internal/core -run '^TestNativeEntry|^TestNativeRecord|^TestNativeReceipt' -count=1`
 
-The T3.2 required pre-commit `make verify` gate passed: strict lint reported zero issues, core tests passed in 833.592 seconds and app tests in 76.943 seconds. `git diff --check` also passed. Final exact-HEAD checks remain pending until T3.3, T3.4 and the PR-reference follow-up are complete.
+The T3.2 required pre-commit `make verify` gate passed: strict lint reported zero issues, core tests passed in 833.592 seconds and app tests in 76.943 seconds. `git diff --check` also passed. Final exact-HEAD evidence is recorded by the controller after all task and PR-reference commits.
 
-Pinned strict lint reported zero issues; the full core suite passed in 878.901 seconds and app tests in 85.979 seconds. Final Slice 3 exact-HEAD evidence remains pending until all four tasks and PR-reference follow-up commits are complete.
+Pinned strict lint reported zero issues; the full core suite passed in 878.901 seconds and app tests in 85.979 seconds. Final Slice 3 exact-HEAD evidence is recorded separately for the complete clean PR head.
 
 T3.3 checks passed:
 
@@ -90,8 +99,21 @@ T3.3 checks passed:
 
 The focused race check passed in 202.917 seconds. The completed pre-commit gate reported zero strict-lint issues; core tests passed in 937.940 seconds and app tests in 78.072 seconds. Two earlier gate attempts stopped in strict lint before running tests; the conflicting whitespace condition was split before the successful gate. Tests cover concurrent finite-ceiling reservation, idempotent retry, unknown usage after restart, exactly-once settlement, counter/grant bounds, generation retention, interrupted budget/common-journal replacement, legacy byte/consumption preservation, actual Git application with pending PR metadata, exact receipt confirmation and response-history retention.
 
+T3.4 corrected focused race check passed in 132.700 seconds:
+
+- `go test -race ./internal/core -run '^TestNativeQueue|^TestNativeBudget|^TestNativeSubmission|^TestNativeEntry|^TestNativeRecord|^TestNativeReceipt|^TestWorkflowIndex|^TestWorkflowCacheDeletion|^TestWorkflowSubmissionExclusion' -count=1`
+
+Strict lint reported zero issues. Source formatting, affected Markdown links, ticket directory/status consistency and `git diff --check` passed.
+
+T3.4 focused migration-status checks passed:
+
+- `go test ./internal/core ./internal/app -run '^TestMaintenanceDBStatus|^TestMigrationStatus' -count=1`
+- `go test ./internal/core -run '^TestWorkflowSubmissionExclusion|^TestNativeQueueCorruption' -count=1`
+
+The first focused race run exposed an invocation-reader check that rejected linked repository aliases before observing their canonical publication barrier. The reader was corrected while retaining native cross-record scope checks. The first broad gate also exposed migration-status fixtures still expecting fourteen migrations; those expectations now include the fifteenth migration. The earlier broad run completed with these migration-count failures and alias-scope regressions across linked claim, capacity, execution, recovery and publication tests. Its corrected replacement `make verify` passed with zero strict-lint issues; core tests passed in 975.617 seconds and app tests in 103.692 seconds. No running tests were interrupted.
+
 Execution uses Go 1.27.1, the repository-pinned golangci-lint v2.14.0, the retained neutral Git fixture configuration, a thirty-minute Go test timeout and the supported absent default-agent command fixture. Host settings and positive explicit provider/executor fixtures are retained. These settings do not change repository assertions or publication policy.
 
 ## Risks and Follow-ups
 
-T3.1, T3.2 and T3.3 are validated with their recorded task checks. T3.4 owns additive migration, strict cross-record validation and rebuildable queue queries and remains pending. No canonical Slice 3 PR has been opened; its required ordered exact-HEAD checks follow T3.4 and the PR-reference follow-up commits.
+All four tasks passed their recorded pre-commit and focused checks. Canonical PR preparation and its reference commits precede the controller's ordered exact-HEAD validation. Verified integration and slice closure remain pending.

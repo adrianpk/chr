@@ -134,6 +134,17 @@ func (s *WorkflowStore) AdmitWorkflowIntegration(ctx context.Context, request Wo
 			return readErr
 		}
 
+		for _, run := range runs {
+			owner, ownerErr := s.workflowOwnerStore(run)
+			if ownerErr != nil {
+				return ownerErr
+			}
+
+			if recordErr := owner.checkWorkflowIntegrationRetainedRecords(ctx, run); recordErr != nil {
+				return recordErr
+			}
+		}
+
 		entry, readErr = s.admitWorkflowIntegration(ctx, runs, request)
 
 		return readErr

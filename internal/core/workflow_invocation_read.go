@@ -46,7 +46,7 @@ func (s *WorkflowStore) readWorkflowInvocation(id string) (workflowInvocationFil
 		return run, err
 	}
 
-	if run.ID != id || run.Namespace != s.layout.Namespace() {
+	if !s.workflowInvocationScopeMatches(run, id) {
 		return run, fmt.Errorf("foreign workflow invocation scope")
 	}
 
@@ -56,7 +56,11 @@ func (s *WorkflowStore) readWorkflowInvocation(id string) (workflowInvocationFil
 }
 
 func (s *WorkflowStore) locateWorkflowInvocation(ctx context.Context, id string) (workflowInvocationFile, *WorkflowStore, error) {
-	runs, err := s.repositoryWorkflowInvocations(ctx)
+	return s.locateWorkflowInvocationPrepared(ctx, id, (*WorkflowStore).recoverTransition)
+}
+
+func (s *WorkflowStore) locateWorkflowInvocationPrepared(ctx context.Context, id string, prepare func(*WorkflowStore) error) (workflowInvocationFile, *WorkflowStore, error) {
+	runs, err := s.repositoryWorkflowInvocationsPrepared(ctx, prepare)
 	if err != nil {
 		return workflowInvocationFile{}, nil, err
 	}
@@ -91,6 +95,10 @@ func (s *WorkflowStore) workflowOwnerStore(run workflowInvocationFile) (*Workflo
 }
 
 func (s *WorkflowStore) repositoryWorkflowInvocations(ctx context.Context) ([]workflowInvocationFile, error) {
+	return s.repositoryWorkflowInvocationsPrepared(ctx, (*WorkflowStore).recoverTransition)
+}
+
+func (s *WorkflowStore) repositoryWorkflowInvocationsPrepared(ctx context.Context, prepare func(*WorkflowStore) error) ([]workflowInvocationFile, error) {
 	layouts, err := s.workflowRepositoryLayouts(ctx)
 	if err != nil {
 		return nil, err
@@ -105,7 +113,7 @@ func (s *WorkflowStore) repositoryWorkflowInvocations(ctx context.Context) ([]wo
 
 	for _, layout := range layouts {
 		store := NewWorkflowStore(layout, s.projectID)
-		if err := store.recoverTransition(); err != nil {
+		if err := prepare(store); err != nil {
 			return nil, err
 		}
 
@@ -235,4 +243,8 @@ func (s *WorkflowStore) workflowWorktreeLayouts(projectDir string) ([]OpsLayout,
 	}
 
 	return result, nil
+}
+
+func (s *WorkflowStore) workflowInvocationScopeMatches(run workflowInvocationFile, id string) bool {
+	return run.ID == id && run.Namespace == s.layout.Namespace()
 }

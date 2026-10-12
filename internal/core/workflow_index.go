@@ -38,7 +38,7 @@ type WorkflowPage struct {
 
 // RebuildWorkflowIndex replaces only the requested namespace's derived rows.
 func (i *sqliteTicketIndex) RebuildWorkflowIndex(ctx context.Context, store *WorkflowStore) error {
-	return store.withLock(ctx, func() error {
+	return store.withRepositoryLock(ctx, store.requireNoWorkflowTransition, func() error {
 		snapshot, err := store.readSnapshot(ctx)
 		if err != nil {
 			return err
@@ -202,7 +202,7 @@ func (i *sqliteTicketIndex) QueryWorkflow(ctx context.Context, store *WorkflowSt
 		return WorkflowPage{}, fmt.Errorf("workflow query page bounds exceeded")
 	}
 
-	err = store.withLock(ctx, func() error {
+	err = store.withRepositoryLock(ctx, store.requireNoWorkflowTransition, func() error {
 		snapshot, err := store.readSnapshot(ctx)
 		if err != nil {
 			return err

@@ -63,12 +63,6 @@ func workflowIntegrationPublicationStop(entry WorkflowIntegrationEntry, request 
 }
 
 func (s *WorkflowStore) checkWorkflowIntegrationTransition(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry, request WorkflowIntegrationTransition) error {
-	if run.IntegrationBudget != nil {
-		if _, err := s.readWorkflowIntegrationBudget(run); err != nil {
-			return err
-		}
-	}
-
 	if err := s.checkWorkflowInputs(ctx, run); err != nil {
 		return err
 	}
@@ -96,7 +90,11 @@ func (s *WorkflowStore) checkWorkflowIntegrationTransition(ctx context.Context, 
 		}
 	}
 
-	return s.checkWorkflowIntegrationPublication(ctx, run, entry, next)
+	if err := s.checkWorkflowIntegrationPublication(ctx, run, entry, next); err != nil {
+		return err
+	}
+
+	return s.checkWorkflowIntegrationRetainedRecords(ctx, run)
 }
 
 func updateWorkflowIntegrationEntry(entry *WorkflowIntegrationEntry, request WorkflowIntegrationTransition) {

@@ -137,10 +137,14 @@ type WorkflowTokenSettlement struct {
 
 // ReadWorkflowIntegrationBudget reads retained accounting without resetting it.
 func (s *WorkflowStore) ReadWorkflowIntegrationBudget(ctx context.Context, id string) (budget WorkflowIntegrationBudget, err error) {
-	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+	err = s.withRepositoryLock(ctx, s.requireNoWorkflowTransition, func() error {
+		run, owner, readErr := s.locateWorkflowInvocationPrepared(ctx, id, (*WorkflowStore).requireNoWorkflowTransition)
 		if readErr != nil {
 			return readErr
+		}
+
+		if recordErr := owner.checkWorkflowIntegrationRetainedRecords(ctx, run); recordErr != nil {
+			return recordErr
 		}
 
 		budget, readErr = owner.readWorkflowIntegrationBudget(run)

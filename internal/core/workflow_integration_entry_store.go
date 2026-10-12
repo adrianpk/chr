@@ -42,13 +42,14 @@ func workflowIntegrationEntryMatches(run workflowInvocationFile, binding Workflo
 	expected := [5]string{binding.EntryID, run.ID, run.ProjectID, run.Namespace, repository}
 	actual := [5]string{entry.ID, entry.InvocationID, entry.ProjectID, entry.Namespace, entry.Repository}
 
-	return expected == actual && entry.Unit == binding.Unit && entry.Revision == binding.Revision && entry.ID == workflowIntegrationEntryID(run, entry.Unit) && slices.Contains(run.RequestKeys, entry.AdmissionKey)
+	return expected == actual && workflowIntegrationRetainedUnit(run, entry.Unit) && entry.Unit == binding.Unit && entry.Revision == binding.Revision && entry.ID == workflowIntegrationEntryID(run, entry.Unit) && slices.Contains(run.RequestKeys, entry.AdmissionKey)
 }
 
 func (s *WorkflowStore) repositoryWorkflowIntegrationEntries(runs []workflowInvocationFile, coordinator workflowCoordinator) ([]WorkflowIntegrationEntry, error) {
 	entries := []WorkflowIntegrationEntry{}
 	sequences := map[uint64]bool{}
 	ids := map[string]bool{}
+	activeUnits := map[string]bool{}
 
 	for _, run := range runs {
 		owner, err := s.workflowOwnerStore(run)
@@ -64,6 +65,10 @@ func (s *WorkflowStore) repositoryWorkflowIntegrationEntries(runs []workflowInvo
 
 			if entry.CoordinatorID != coordinator.ID || sequences[entry.QueueSequence] || ids[entry.ID] || len(entries) >= WorkflowRecordLimit {
 				return nil, workflowIntegrationConflict("has foreign, duplicate or excessive allocation")
+			}
+
+			if err := retainWorkflowIntegrationActiveUnit(entry, activeUnits); err != nil {
+				return nil, err
 			}
 
 			sequences[entry.QueueSequence], ids[entry.ID] = true, true
@@ -273,4 +278,23 @@ func (s *WorkflowStore) commitWorkflowIntegrationAdmission(ctx context.Context, 
 	}
 
 	return s.commitFiles([]workflowFileChange{budgetFile, file, invocation})
+}
+
+func retainWorkflowIntegrationActiveUnit(entry WorkflowIntegrationEntry, activeUnits map[string]bool) error {
+	if workflowIntegrationTerminal(entry.State) {
+		return nil
+	}
+
+	unitKey := entry.ProjectID + "\x00" + entry.Namespace + "\x00" + entry.Unit.Kind + "\x00" + entry.Unit.ID
+	if activeUnits[unitKey] {
+		return workflowIntegrationConflict("duplicate active unit ownership")
+	}
+
+	activeUnits[unitKey] = true
+
+	return nil
+}
+
+func workflowIntegrationRetainedUnit(run workflowInvocationFile, unit WorkflowRef) bool {
+	return slices.ContainsFunc(run.Members, func(member WorkflowMember) bool { return workflowMemberOwnsUnit(member, unit) })
 }

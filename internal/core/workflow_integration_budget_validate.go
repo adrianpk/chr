@@ -92,7 +92,7 @@ func validWorkflowIntegrationGrant(grant WorkflowIntegrationGrant, revision uint
 
 func validateWorkflowIntegrationTokenGrants(b WorkflowIntegrationBudget) error {
 	if b.AdmissionTokenLimit == nil {
-		if b.TokenLimit != nil {
+		if b.TokenLimit != nil || slices.ContainsFunc(b.Grants, func(g WorkflowIntegrationGrant) bool { return g.Kind == "tokens" }) {
 			return ErrWorkflowConflict
 		}
 

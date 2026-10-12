@@ -132,8 +132,14 @@ func testMigrationFS() fstest.MapFS {
 		panic(err)
 	}
 
+	integrationMigration, err := os.ReadFile("../../cmd/chr/assets/migration/sqlite/20261012000015-add_native_integration_index.sql")
+	if err != nil {
+		panic(err)
+	}
+
 	return fstest.MapFS{
-		"assets/migration/sqlite/20261008000014-add_workflow_records.sql": {Data: workflowMigration},
+		"assets/migration/sqlite/20261012000015-add_native_integration_index.sql": {Data: integrationMigration},
+		"assets/migration/sqlite/20261008000014-add_workflow_records.sql":         {Data: workflowMigration},
 		"assets/migration/sqlite/20260518000001-create_projects.sql": {
 			Data: []byte(testCreateProjectsMigration()),
 		},

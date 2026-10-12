@@ -175,6 +175,10 @@ func (s *WorkflowStore) commitWorkflowIntegrationBudget(ctx context.Context, run
 }
 
 func (s *WorkflowStore) currentWorkflowIntegrationBudget(ctx context.Context, run workflowInvocationFile, guard WorkflowIntegrationBudgetGuard) (WorkflowIntegrationEntry, WorkflowIntegrationBudget, error) {
+	if err := s.checkWorkflowIntegrationRetainedRecords(ctx, run); err != nil {
+		return WorkflowIntegrationEntry{}, WorkflowIntegrationBudget{}, err
+	}
+
 	if run.Integration == nil || run.Integration.EntryID != guard.EntryID {
 		return WorkflowIntegrationEntry{}, WorkflowIntegrationBudget{}, ErrWorkflowConflict
 	}
@@ -197,6 +201,8 @@ func (s *WorkflowStore) currentWorkflowIntegrationBudget(ctx context.Context, ru
 	if err != nil {
 		return entry, budget, err
 	}
+
+	budget.Usage = usage
 
 	counters, err := s.workflowIntegrationLegacySubmissions(ctx, run)
 	if err == nil {

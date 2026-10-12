@@ -48,6 +48,15 @@ func workflowOccupiedProcessSlots(common string) (map[int]bool, error) {
 }
 
 func workflowCapacityProcess(path string) (WorkflowProcess, bool, error) {
+	process, alive, err := observeWorkflowCapacityProcess(path)
+	if err != nil || alive {
+		return process, alive, err
+	}
+
+	return process, false, os.Remove(path)
+}
+
+func observeWorkflowCapacityProcess(path string) (WorkflowProcess, bool, error) {
 	data, err := readWorkflowFile(path)
 	if err != nil {
 		return WorkflowProcess{}, false, err
@@ -72,7 +81,7 @@ func workflowCapacityProcess(path string) (WorkflowProcess, bool, error) {
 		return process, alive, err
 	}
 
-	return process, false, os.Remove(path)
+	return process, false, nil
 }
 
 func validWorkflowCapacityProcess(process WorkflowProcess) bool {

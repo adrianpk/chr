@@ -39,7 +39,7 @@ func validWorkflowIntegrationIdentity(entry WorkflowIntegrationEntry) bool {
 }
 
 func validWorkflowIntegrationRevisions(entry WorkflowIntegrationEntry) bool {
-	return entry.Revision > 0 && entry.StateRevision > 0 && entry.StateRevision <= entry.Revision && entry.QueueSequence > 0 && !entry.CreatedAt.IsZero() && !entry.UpdatedAt.Before(entry.CreatedAt)
+	return entry.Revision > 0 && entry.StateRevision > 0 && entry.StateRevision <= entry.Revision && entry.ClaimGeneration < entry.StateRevision && entry.QueueSequence > 0 && !entry.CreatedAt.IsZero() && !entry.UpdatedAt.Before(entry.CreatedAt)
 }
 
 func validWorkflowIntegrationTarget(entry WorkflowIntegrationEntry) bool {

@@ -142,7 +142,7 @@ Prerequisite: verified Slice 2 integration and closed task fanout.
 | T3.1 | [TKT-20261011133059](../ticket/reviewing/20261011133059-native-integration-t3-1.md) | validated | `64369b81579c8b4136609383568731067bc7bdfd` | Extend candidate and receipt schemas |
 | T3.2 | [TKT-20261011133100](../ticket/reviewing/20261011133100-native-integration-t3-2.md) | validated | `9a004ba55c6b72ac69aa0322fba531eebcc257d7` | Persist integration entries through WorkflowStore |
 | T3.3 | [TKT-20261011133101](../ticket/reviewing/20261011133101-native-integration-t3-3.md) | validated | `dce7077f632e9d1d93dcdde5d35ba958f4695e0f` | Extend attempt and budget journals |
-| T3.4 | [TKT-20261011133102](../ticket/ready/20261011133102-native-integration-t3-4.md) | ready | pending | Rebuild indexes and validate migrations |
+| T3.4 | [TKT-20261011133102](../ticket/reviewing/20261011133102-native-integration-t3-4.md) | validated | pending | Rebuild indexes and validate migrations |
 
 Required checks:
 
