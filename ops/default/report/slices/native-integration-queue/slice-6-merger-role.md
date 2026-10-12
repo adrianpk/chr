@@ -5,7 +5,7 @@ Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
 Branch: `feat/slice-6-native-merger-role`
-PR: pending
+PR: [#380](https://forge.adrianpk.com/adrianpk/chr/pulls/380)
 
 ## Purpose
 
@@ -253,6 +253,21 @@ pre-commit checks passed:
 
 Owned task-gate fixtures completed naturally, and the recorded runner/core
 processes exited.
+
+T6.4 task commit: [679063f2fca4b95d5dd9dbefe686ecb7332be6c3](https://forge.adrianpk.com/adrianpk/chr/commit/679063f2fca4b95d5dd9dbefe686ecb7332be6c3).
+Acta task record: `01M4RK837KHMAKRB118N4W3FG5`.
+Canonical PR opened event: `01M4RKF1ET83VGQV7MDCT3F8BJ`.
+
+The final clean candidate requires the following ordered controller checks after
+the PR-reference follow-up commit is pushed:
+
+- `make verify`
+- `go test ./internal/core ./internal/app -count=1`
+- `go test -race ./internal/core ./internal/app -count=1`
+- `git diff --check`
+
+The controller ledger binds results to that exact HEAD and ordered command list.
+These candidate checks and verified integration are pending.
 
 ## Risks and Follow-ups
 

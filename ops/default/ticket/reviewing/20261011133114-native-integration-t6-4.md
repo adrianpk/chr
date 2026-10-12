@@ -12,8 +12,9 @@ reported_at: 2026-10-11T13:31:14Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T16:43:20Z
 branch: feat/slice-6-native-merger-role
+pr: 380
 reviewed_at: 2026-10-12T17:40:46Z
-commits: []
+commits: [679063f2fca4b95d5dd9dbefe686ecb7332be6c3]
 ---
 
 # T6.4: Verify host acceptance of merger changes
@@ -75,6 +76,8 @@ Successful focused checks:
 - `make verify` — pass; zero lint issues, core 1328.210 seconds, app 93.104 seconds and all other packages passed.
 - `git diff --check` — pass.
 
-Task commit, Acta and canonical PR references follow after commit creation.
+Task commit: [679063f2fca4b95d5dd9dbefe686ecb7332be6c3](https://forge.adrianpk.com/adrianpk/chr/commit/679063f2fca4b95d5dd9dbefe686ecb7332be6c3).
+Acta task record: `01M4RK837KHMAKRB118N4W3FG5`.
+Canonical PR: [#380](https://forge.adrianpk.com/adrianpk/chr/pulls/380).
 The complete candidate still requires ordered exact-HEAD controller validation.
 Verified integration is pending the external controller.
