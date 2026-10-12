@@ -1,6 +1,6 @@
 # Slice 7: Combined validation and review
 
-Status: drafting
+Status: reviewing
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
@@ -70,6 +70,27 @@ fresh candidate-bound review. A valid deterministic P cannot replace the
 accepted semantic result. Rebase repair preserves original task attribution,
 replay order and raw source commit messages.
 
+T7.4 replaces native preparation after an external target or policy change.
+Queue generation, stale preparation/review and retained drift consumption
+advance together. The new isolated result receives the unchanged host gate and
+a fresh review; source task proofs and prior role consumption remain retained.
+A previous generation's accepted merger result cannot substitute for new-base
+validation. If the unchanged gate exposes a new regression, it retains fresh
+bounded merger findings.
+
+Source observation verifies the original canonical PR identity, repository and
+advertised branch as well as the PR head. New source content has no host task
+proof for the frozen scope, so the host retains both observations and blocks for
+an explicit ownership/scope decision. It does not admit appended content or
+rewind source tasks. The same decision applies after a sealed atomic rejection
+or source movement during host validation.
+
+Target movement during a clean host gate retains a stale checkpoint and permits
+replacement preparation after restart. Stops, checkout mutation and uncertain
+publication retain their existing barriers. Final target drift fails before a
+new submission intent; definitive non-application releases target exclusion
+before replacement preparation while retaining the consumed submission.
+
 ## Implementation Notes
 
 The existing preparation and process owners execute validation. The native
@@ -92,6 +113,13 @@ process quiescence, allowing the next host gate to acquire ownership. Private
 repair checkpoints import original source and base objects because rewritten
 rebase and squash results need not reach those histories.
 
+Native input replacement uses the existing queue transition and budget owners.
+Queued, preparing and validating phases are checked before their combined
+journal update, and each accepted replacement base is charged once within the
+existing invocation-wide limit. Old candidate, review and merger observations
+remain immutable history. Publication uncertainty must be sealed with existing
+non-application and dispatch-quiescence proof before replacement can proceed.
+
 ## Contracts Added or Changed
 
 `WorkflowNativePreparationProvider` observes the full capability for the exact
@@ -111,6 +139,12 @@ attaches the retained host-accepted result without substituting another proof.
 baseline; rebase repair continues through the original replay-step contract.
 Preparation input and native candidate records now bind accepted merger attempt
 references alongside the existing history and validation evidence.
+
+Native preparation now handles external target changes from validation, review
+and publication readiness. Source changes retain the typed
+`source_revision_requires_reconciliation` blocker with
+`verify_source_ownership_and_frozen_scope` as the required action. No new source
+revision gains host proof or publication authority through this decision.
 
 ## Files of Interest
 
@@ -137,6 +171,12 @@ references alongside the existing history and validation evidence.
 - `internal/core/workflow_candidate_repair_gate_test.go`: real merger, new host gate and review across all methods.
 - `internal/core/workflow_candidate_repair_guard_test.go`: clean-result and changed finding/policy/scope rejection.
 - `internal/core/workflow_candidate_repair_substitution_test.go`: accepted-result substitution rejection.
+
+- `internal/core/workflow_preparation_drift_replace.go`: atomic queue-generation replacement and retained drift budget.
+- `internal/core/workflow_preparation_source_revision.go`: canonical source observation and ownership/scope decision.
+- `internal/core/workflow_preparation_drift_checkpoint.go`: clean target-drift checkpoint recovery.
+- `internal/core/workflow_preparation_drift_parallel_test.go`: real shared-target queues and renewed combined evidence.
+- `internal/core/workflow_preparation_drift_exclusion_test.go`: publication barriers and sealed source/target rejection recovery.
 
 ## Validation
 
@@ -192,7 +232,26 @@ The repository and race checks exited naturally. All 27 changed Go files
 matched the frozen source throughout validation. No external fixture was started.
 The final slice candidate has not been validated.
 
+T7.4 development checks passed with Go 1.27.1:
+
+- `make verify` — zero lint issues; all packages passed, including core in 2091.189 s and app in 147.754 s.
+- `go test ./internal/core ./internal/app -run '^(TestNative.*Drift|TestNativeCandidate|TestNativePreparation|TestNativeReview|TestNativeSubmission|TestWorkflowPreparation|TestWorkflowReview|TestServiceNativeReview|TestServiceWorkflowPreparation|TestServiceWorkflowReview)' -count=1` — core passed in 918.729 s and app in 28.719 s.
+- `go test ./internal/core -run '^TestNativeSourceDuringGate$' -count=1` — passed in 5.180 s.
+- `go test -race ./internal/core ./internal/app -run '^(TestNative.*Drift|TestNativePreparationFence|TestNativePreparationStop|TestWorkflowParallelPublication|TestServiceNativeReview)' -count=1` — core passed in 370.330 s and app in 20.110 s.
+- `go test -race ./internal/core -run '^TestNativeSourceDuringGate$' -count=1` — passed in 8.562 s.
+
+- `git diff --check` — passed.
+
+The baseline preparation path reproduced target-drift rejection. Initial new
+fixtures required correction to avoid a target-only gate during source work,
+import prepared objects into the shared remote and replace legacy fixture
+bindings before native validation. The mid-gate regression exposed a paused
+checkpoint that required clean target-drift recovery. Initial strict linting
+rejected whitespace in a new test; the corrected lint passed. Repository
+verification and all focused checks exited naturally. No external fixture was
+started. Final exact-HEAD checks remain pending.
+
 ## Risks and Follow-ups
 
-T7.1–T7.3 are implemented and checked. T7.4 is active for integration drift
-handling. Final slice candidate checks and canonical PR evidence remain pending.
+T7.1–T7.4 are implemented and checked. Final slice candidate checks and
+canonical PR evidence remain pending.

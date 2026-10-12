@@ -1,0 +1,113 @@
+package core
+
+import "context"
+
+func (s *WorkflowStore) replaceWorkflowNativePreparation(ctx context.Context, run *workflowInvocationFile, entry WorkflowIntegrationEntry, previous WorkflowPreparationInput, source WorkflowReviewInput) error {
+	next, err := s.workflowNativeReplacementEntry(ctx, *run, entry)
+	if err != nil {
+		return err
+	}
+
+	budget, err := s.readWorkflowIntegrationBudget(*run)
+	if err != nil {
+		return err
+	}
+
+	if previous.Git.BaseCommit != source.TargetCommit {
+		if err := reserveWorkflowNativeDrift(&budget, next, source.TargetCommit); err != nil {
+			return err
+		}
+	}
+
+	budgetFile, err := s.workflowIntegrationBudgetChange(ctx, run, &budget)
+	if err != nil {
+		return err
+	}
+
+	queueFile, err := workflowIntegrationEntryChange(next, run.Integration.EntryRef.Hash)
+	if err != nil {
+		return err
+	}
+
+	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: next.ID, Unit: next.Unit, Revision: next.Revision, EntryRef: WorkflowEvidenceRef{Path: queueFile.Path, Hash: workflowHash(queueFile.After)}})
+	staleWorkflowNativePreparation(run)
+	projectWorkflowIntegrationPhase(run, next)
+
+	run.Outcome = "integration_inputs_changed"
+
+	if err := s.commitWorkflowPullRequestFiles(run, []workflowFileChange{budgetFile, queueFile}, workflowFileChange{}); err != nil {
+		return err
+	}
+
+	*run, err = s.readWorkflowInvocation(run.ID)
+
+	return err
+}
+
+func (s *WorkflowStore) workflowNativeReplacementEntry(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry) (WorkflowIntegrationEntry, error) {
+	request := workflowNativeReplacementTransition(entry, "queued")
+	if err := s.checkWorkflowCandidateRepairTransition(ctx, run, entry, request); err != nil {
+		return entry, err
+	}
+
+	updateWorkflowIntegrationEntry(&entry, request)
+
+	for _, state := range []string{"preparing", "validating"} {
+		request = workflowNativeReplacementTransition(entry, state)
+		if err := guardWorkflowIntegrationTransition(entry, request); err != nil {
+			return entry, err
+		}
+
+		if err := s.guardWorkflowPreparationTransition(ctx, run, request); err != nil {
+			return entry, err
+		}
+
+		updateWorkflowIntegrationEntry(&entry, request)
+	}
+
+	entry.CandidateRef = nil
+
+	return entry, validateWorkflowIntegrationEntry(entry)
+}
+
+func workflowNativeReplacementTransition(entry WorkflowIntegrationEntry, state string) WorkflowIntegrationTransition {
+	request := WorkflowIntegrationTransition{EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration, State: state}
+	if entry.CandidateRef != nil {
+		request.CandidateHash = entry.CandidateRef.Hash
+	}
+
+	return request
+}
+
+func reserveWorkflowNativeDrift(budget *WorkflowIntegrationBudget, entry WorkflowIntegrationEntry, base string) error {
+	id := workflowHash([]byte(entry.ID + ":drift:" + base))
+
+	reservation := WorkflowIntegrationReservation{ID: id, Kind: "drift", EntryID: entry.ID, Unit: entry.Unit, ClaimGeneration: entry.ClaimGeneration, AttemptID: id, BaseCommit: base, State: "reserved"}
+	if workflowIntegrationBaseCharged(budget.Reservations, reservation) {
+		return nil
+	}
+
+	if len(budget.Reservations) >= WorkflowRecordLimit {
+		return ErrWorkflowIntegrationBudget
+	}
+
+	if err := chargeWorkflowIntegrationCounter(budget, reservation); err != nil {
+		return err
+	}
+
+	budget.Reservations = append(budget.Reservations, reservation)
+
+	return nil
+}
+
+func staleWorkflowNativePreparation(run *workflowInvocationFile) {
+	if run.Preparation != nil {
+		run.Preparation.State = "stale"
+	}
+
+	if run.Review != nil {
+		run.Review.State = "stale"
+	}
+
+	run.CandidateRepair = nil
+}

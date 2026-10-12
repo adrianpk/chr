@@ -120,16 +120,36 @@ func (s *WorkflowStore) checkpointWorkflowPreparationFailure(ctx context.Context
 	// Only an observed command failure on the still-current clean result can
 	// request semantic repair. Stops, mutation and stale fences remain failures.
 	actionable := candidate.Input.Native != nil && workflowCandidateGateFailed(candidate.Validation) && s.checkWorkflowCandidateFailureCurrent(ctx, run, candidate, provider) == nil
+
+	targetMoved := s.workflowNativePreparationTargetMoved(ctx, run, candidate, provider)
 	if err := s.checkpointWorkflowAttempt(run, record, "interrupted", &candidate.Validation); err != nil {
 		return errors.Join(failure, err)
 	}
 
-	var repairErr error
-	if validationErr != nil && actionable {
-		repairErr = s.retainWorkflowFailedCandidate(ctx, run, candidate)
-	}
+	repairErr := s.retainWorkflowPreparationFailureRepair(ctx, run, candidate, provider, actionable && validationErr != nil, targetMoved)
 
 	return errors.Join(failure, repairErr, claim.releaseReservation())
+}
+
+func (s *WorkflowStore) retainWorkflowPreparationFailureRepair(ctx context.Context, run workflowInvocationFile, candidate WorkflowIntegrationCandidate, provider WorkflowPublicationGuardProvider, actionable, targetMoved bool) error {
+	if targetMoved {
+		return s.retainWorkflowNativeTargetDrift(run.ID)
+	}
+
+	if actionable {
+		return s.retainWorkflowFailedCandidate(ctx, run, candidate)
+	}
+
+	if candidate.Input.Native == nil {
+		return nil
+	}
+
+	current, err := s.readWorkflowInvocation(run.ID)
+	if err != nil || current.StopIntent != "" {
+		return err
+	}
+
+	return s.checkWorkflowNativeSourceRevision(ctx, &current, provider)
 }
 
 func (s *WorkflowStore) checkWorkflowCandidateFailureCurrent(ctx context.Context, run workflowInvocationFile, candidate WorkflowIntegrationCandidate, provider WorkflowPublicationGuardProvider) error {

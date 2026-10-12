@@ -28,7 +28,10 @@ func (s *WorkflowStore) acceptedWorkflowCandidateRepair(run workflowInvocationFi
 			continue
 		}
 
-		return s.readWorkflowAcceptedRepair(run, entry, attempt)
+		state, refs, err := s.readWorkflowAcceptedRepair(run, entry, attempt)
+		if state != nil || err != nil {
+			return state, refs, err
+		}
 	}
 
 	return nil, nil, nil
@@ -40,6 +43,11 @@ func (s *WorkflowStore) readWorkflowAcceptedRepair(run workflowInvocationFile, e
 	var result WorkflowMergerAttempt
 	if err := s.readWorkflowNativeEvidence(run.ID, ref, &result); err != nil {
 		return nil, nil, err
+	}
+
+	// Superseded generations remain retained history, never a new-base result.
+	if result.Input.ClaimGeneration < entry.ClaimGeneration {
+		return nil, nil, nil
 	}
 
 	if !validWorkflowAcceptedRepair(run, entry, attempt, result) {

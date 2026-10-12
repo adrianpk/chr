@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133118
 title: "T7.4: Handle external target and source movement"
-status: in_progress
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -11,6 +11,7 @@ source: chat
 reported_at: 2026-10-11T13:31:18Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T22:18:48Z
+reviewed_at: 2026-10-12T23:19:37Z
 branch: feat/slice-7-native-candidate-review
 commits: []
 ---
@@ -60,4 +61,26 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+T7.4 replaces a changed native target through a new queue generation, isolated
+host gate and candidate-bound review. Prior task proofs, review/merger usage and
+submission consumption remain retained. Old-generation semantic repairs cannot
+substitute for new-base validation; new regressions retain fresh bounded findings.
+Canonical source observations freeze unproven source revisions for an explicit
+ownership/scope decision, including during gate completion and after sealed
+non-application. Uncertain publication stays excluded; a sealed failed dispatch
+releases the target before replacement preparation.
+
+Development checks passed with Go 1.27.1:
+
+- `make verify` — zero lint issues; all packages passed.
+- `go test ./internal/core ./internal/app -run '^(TestNative.*Drift|TestNativeCandidate|TestNativePreparation|TestNativeReview|TestNativeSubmission|TestWorkflowPreparation|TestWorkflowReview|TestServiceNativeReview|TestServiceWorkflowPreparation|TestServiceWorkflowReview)' -count=1` — core and app passed.
+- `go test ./internal/core -run '^TestNativeSourceDuringGate$' -count=1` — passed.
+- `go test -race ./internal/core ./internal/app -run '^(TestNative.*Drift|TestNativePreparationFence|TestNativePreparationStop|TestWorkflowParallelPublication|TestServiceNativeReview)' -count=1` — core and app passed.
+- `go test -race ./internal/core -run '^TestNativeSourceDuringGate$' -count=1` — passed.
+- `git diff --check` — passed.
+
+The [Slice 7 report](../../report/slices/native-integration-queue/slice-7-candidate-review.md)
+retains the baseline rejection, fixture corrections and checkpoint regression.
+All owned check processes exited naturally; no external fixture was started.
+Implementation commit, Acta reference, canonical PR and final exact-HEAD checks
+remain pending binding.

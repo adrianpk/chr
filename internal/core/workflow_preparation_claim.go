@@ -51,7 +51,11 @@ func (s *WorkflowStore) workflowPreparationPreflight(ctx context.Context, run *w
 		return workflowSliceObservation{}, WorkflowReviewInput{}, WorkflowPublicationCapability{}, ErrWorkflowOwned
 	}
 
-	if err := s.guardWorkflowPublicationWork(ctx, *run); err != nil {
+	if err := s.guardWorkflowPreparationWork(ctx, *run); err != nil {
+		return workflowSliceObservation{}, WorkflowReviewInput{}, WorkflowPublicationCapability{}, err
+	}
+
+	if err := s.checkWorkflowNativeSourceRevision(ctx, run, provider); err != nil {
 		return workflowSliceObservation{}, WorkflowReviewInput{}, WorkflowPublicationCapability{}, err
 	}
 
@@ -63,6 +67,10 @@ func (s *WorkflowStore) workflowPreparationPreflight(ctx context.Context, run *w
 	capability, err := observeWorkflowPublicationCapability(ctx, provider, source)
 	if errors.Is(err, ErrWorkflowAtomicGuard) {
 		return observation, source, capability, s.blockWorkflowPublication(run, err)
+	}
+
+	if err == nil {
+		err = s.reprepareWorkflowNativeInputs(ctx, run, source, capability, provider)
 	}
 
 	if err == nil {
