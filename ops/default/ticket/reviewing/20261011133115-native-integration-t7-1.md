@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T19:18:41Z
 reviewing_at: 2026-10-12T20:12:03Z
 branch: feat/slice-7-native-candidate-review
-commits: []
+commits: ["3f1aac6910b7e8885146a544a735db69f49c1a94"]
 ---
 
 # T7.1: Run required gates on the exact prepared result
@@ -76,4 +76,8 @@ Development checks passed with Go 1.27.1:
 
 The native generation regression was reproduced before correction. The existing
 host owner now survives queue projection until its gate finishes or stops.
-Task commit, canonical slice PR and final exact-HEAD checks remain pending.
+Implementation commit: [3f1aac6910b7e8885146a544a735db69f49c1a94](https://forge.adrianpk.com/adrianpk/chr/commit/3f1aac6910b7e8885146a544a735db69f49c1a94).
+
+Acta commit activity: `01M4RW111YN23ZPXZ87AHKG9CB`.
+
+Canonical slice PR and final exact-HEAD checks remain pending.

@@ -81,12 +81,14 @@ T7.1 development checks passed before its implementation commit, using Go
 - `go test -race ./internal/core -run '^(TestNativePreparation|TestNativeRecord|TestNativeSubmission|TestWorkflowPreparation)' -count=1` — passed in 316.053 s.
 - `git diff --check` — passed.
 
+T7.1 implementation commit: [3f1aac6910b7e8885146a544a735db69f49c1a94](https://forge.adrianpk.com/adrianpk/chr/commit/3f1aac6910b7e8885146a544a735db69f49c1a94). Acta commit activity: `01M4RW111YN23ZPXZ87AHKG9CB`.
+
 The queue-generation regression was reproduced before correction. The final
 slice candidate has not been validated. All owned check processes exited
 naturally; no external fixture was started.
 
 ## Risks and Follow-ups
 
-T7.2–T7.4 remain ready in the approved tracker: candidate-bound grants, bounded
+T7.2 is active and T7.3–T7.4 remain ready in the approved tracker: candidate-bound grants, bounded
 merger repair routing and integration drift handling. Final slice candidate
 checks and canonical PR evidence remain pending.
