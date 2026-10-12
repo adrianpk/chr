@@ -67,9 +67,17 @@ func checkWorkflowConfigCLIOutput(t *testing.T, name string, output []byte) {
 	}
 
 	var result core.WorkflowConfiguration
-	if err := json.Unmarshal(output, &result); err != nil || result.Version != 1 || len(result.Values) != 14 {
+	if err := json.Unmarshal(output, &result); err != nil || result.Version != 1 || len(result.Values) != 15 {
 		t.Fatal("JSON configuration is incomplete", result, err)
 	}
+
+	for _, value := range result.Values {
+		if value.Key == "work.integration.max_prepared_per_target" && value.Value == "2" && value.Source == "version_default" {
+			return
+		}
+	}
+
+	t.Fatal("JSON configuration omitted the default prepared target bound", result)
 }
 
 // TestWorkflowConfigRestriction carries explicit CLI human-review authority to

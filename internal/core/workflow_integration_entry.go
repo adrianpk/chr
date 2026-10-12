@@ -26,25 +26,26 @@ type WorkflowIntegrationBlocker struct {
 // WorkflowIntegrationEntry is owned by an invocation, never by a queue index.
 type WorkflowIntegrationEntry struct {
 	WorkflowIdentity
-	SchemaVersion   int                         `json:"schema_version"`
-	InvocationID    string                      `json:"invocation_id"`
-	Unit            WorkflowRef                 `json:"unit"`
-	CoordinatorID   string                      `json:"coordinator_id"`
-	Repository      string                      `json:"repository_id"`
-	TargetRef       string                      `json:"target_ref"`
-	QueueSequence   uint64                      `json:"queue_sequence"`
-	AdmissionKey    string                      `json:"admission_key"`
-	FrozenScopeHash string                      `json:"frozen_scope_hash"`
-	State           string                      `json:"state"`
-	StateRevision   uint64                      `json:"state_revision"`
-	ClaimGeneration uint64                      `json:"claim_generation"`
-	BudgetRef       string                      `json:"budget_ref"`
-	CandidateRef    *WorkflowEvidenceRef        `json:"candidate_ref"`
-	SubmissionRef   *WorkflowSubmissionBinding  `json:"submission_ref"`
-	ReceiptRef      *WorkflowEvidenceRef        `json:"receipt_ref"`
-	Blocker         *WorkflowIntegrationBlocker `json:"blocker"`
-	StopIntent      string                      `json:"stop_intent"`
-	Extensions      map[string]json.RawMessage  `json:"extensions,omitempty"`
+	SchemaVersion       int                         `json:"schema_version"`
+	InvocationID        string                      `json:"invocation_id"`
+	Unit                WorkflowRef                 `json:"unit"`
+	CoordinatorID       string                      `json:"coordinator_id"`
+	Repository          string                      `json:"repository_id"`
+	TargetRef           string                      `json:"target_ref"`
+	QueueSequence       uint64                      `json:"queue_sequence"`
+	AdmissionKey        string                      `json:"admission_key"`
+	FrozenScopeHash     string                      `json:"frozen_scope_hash"`
+	State               string                      `json:"state"`
+	StateRevision       uint64                      `json:"state_revision"`
+	PreparationReserved bool                        `json:"preparation_reserved,omitempty"`
+	ClaimGeneration     uint64                      `json:"claim_generation"`
+	BudgetRef           string                      `json:"budget_ref"`
+	CandidateRef        *WorkflowEvidenceRef        `json:"candidate_ref"`
+	SubmissionRef       *WorkflowSubmissionBinding  `json:"submission_ref"`
+	ReceiptRef          *WorkflowEvidenceRef        `json:"receipt_ref"`
+	Blocker             *WorkflowIntegrationBlocker `json:"blocker"`
+	StopIntent          string                      `json:"stop_intent"`
+	Extensions          map[string]json.RawMessage  `json:"extensions,omitempty"`
 }
 
 // WorkflowIntegrationAdmission requires an explicit frozen unit and full target.

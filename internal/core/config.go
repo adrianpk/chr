@@ -319,7 +319,7 @@ func DefaultReviewProviderConfig() ReviewProviderConfig {
 // DefaultWorkConfig executes the corresponding package operation.
 func DefaultWorkConfig() WorkConfig {
 	return WorkConfig{
-		Integration:            WorkIntegrationConfig{PublicationProfile: WorkflowPublicationDisabled},
+		Integration:            WorkIntegrationConfig{PublicationProfile: WorkflowPublicationDisabled, MaxPreparedPerTarget: 2},
 		MergeStrategy:          TicketMergeStrategyRebase,
 		WorkerTimeoutSeconds:   3600,
 		CheckpointStepLimit:    WorkflowPageLimit,

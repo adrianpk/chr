@@ -106,7 +106,7 @@ func (s *WorkflowStore) blockWorkflowPublication(run *workflowInvocationFile, re
 }
 
 func (s *WorkflowStore) claimWorkflowIntegrationValidation(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, source WorkflowReviewInput, capability WorkflowPublicationCapability, provider WorkflowPublicationGuardProvider, git WorkflowPreparationGit) (claim *WorkflowClaim, prepared workflowPreparedTask, input WorkflowPreparationInput, err error) {
-	claim, err = s.reserveWorkflowClaim(ctx, *run)
+	claim, err = s.reserveWorkflowRole(ctx, *run, workflowIntegrationValidationPurpose)
 	if err != nil {
 		return nil, prepared, input, err
 	}

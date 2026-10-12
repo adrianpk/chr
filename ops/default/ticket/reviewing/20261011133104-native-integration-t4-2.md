@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133104
 title: "T4.2: Share role capacity and prevent starvation"
-status: ready
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,10 @@ tags: native-integration, slice-4
 source: chat
 reported_at: 2026-10-11T13:31:04Z
 ready_at: 2026-10-11T13:31:37Z
+started_at: 2026-10-12T03:34:55Z
+branch: feat/slice-4-native-queue-scheduling
+pr: pending
+reviewed_at: 2026-10-12T04:23:09Z
 commits: []
 ---
 
@@ -58,4 +62,12 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Implemented and validated on the recorded Slice 4 branch. Eligible validation, preparation and review receive shared repository capacity ahead of new implementation. Existing role launches and merger-purpose reservations use the same pool. Prepared-target capacity defaults to two, remains retained during pause/block/restart, and is released through guarded terminal transitions. Human approval and full/unknown target barriers do not retain runnable integration priority. Exact task commit and Acta reference follow this code commit; the canonical slice PR remains pending T4.3 and T4.4.
+
+Successful task checks:
+
+- `make verify`
+- `go test -race ./internal/core ./internal/app -run '^TestNativeRole|^TestNativePrepared|^TestNativeSchedule|^TestNativeEntry|^TestNativeQueue|^TestNativeSubmission|^TestNativeBudget|^TestNativeProfile|^TestNativeLegacy|^TestWorkflowCapacity|^TestWorkflowPreparation|^TestWorkflowReview|^TestWorkflowConfig|^TestWorkflowUpgrade|^TestInitWorkflow' -count=1`
+- `git diff --check`
+
+Strict lint: zero issues. The full normal core suite passed in 1195.940 seconds and app in 139.514 seconds. Expanded focused race checks passed for core in 680.292 seconds and app in 8.638 seconds. The canonical [Slice 4 report](../../report/slices/native-integration-queue/slice-4-queue-scheduling.md) retains corrected development failures and the task validation boundary.

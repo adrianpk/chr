@@ -100,6 +100,10 @@ func (s *WorkflowStore) retainWorkflowSubmissionObservation(ctx context.Context,
 
 // New preparation, review or repair must not invalidate a pending publication.
 func (s *WorkflowStore) guardWorkflowPublicationWork(ctx context.Context, run workflowInvocationFile) error {
+	if err := s.guardWorkflowIntegrationRoleOwner(run); err != nil {
+		return err
+	}
+
 	if run.DeliveryProofRef != "" || run.DeliveryRef != "" {
 		return ErrWorkflowOwned
 	}

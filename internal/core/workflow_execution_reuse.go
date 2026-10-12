@@ -81,11 +81,15 @@ func workflowTaskBoundary(run *workflowInvocationFile, record WorkflowRecord) bo
 }
 
 func (s *WorkflowStore) checkWorkflowReusableTask(ctx context.Context, run workflowInvocationFile, record WorkflowRecord, lane WorkflowLane) error {
+	return s.checkWorkflowReusableTaskPrepared(ctx, run, record, lane, (*WorkflowStore).recoverTransition)
+}
+
+func (s *WorkflowStore) checkWorkflowReusableTaskPrepared(ctx context.Context, run workflowInvocationFile, record WorkflowRecord, lane WorkflowLane, prepare func(*WorkflowStore) error) error {
 	if _, err := s.observeWorkflowLane(ctx, lane); err != nil {
 		return err
 	}
 
-	runs, err := s.repositoryWorkflowInvocations(ctx)
+	runs, err := s.repositoryWorkflowInvocationsPrepared(ctx, prepare)
 	if err != nil {
 		return err
 	}

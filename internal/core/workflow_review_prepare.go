@@ -117,7 +117,7 @@ func (s *WorkflowStore) prepareWorkflowReviewPolicy(ctx context.Context, run *wo
 }
 
 func (s *WorkflowStore) claimWorkflowReview(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, input WorkflowReviewInput, reviewer []string) (claim *WorkflowClaim, prepared workflowPreparedTask, err error) {
-	claim, err = s.reserveWorkflowClaim(ctx, *run)
+	claim, err = s.reserveWorkflowRole(ctx, *run, workflowSliceReviewPurpose)
 	if err != nil {
 		return nil, prepared, err
 	}

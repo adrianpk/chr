@@ -38,6 +38,7 @@ func workflowConfigIntegers(config *WorkspaceConfig) []workflowConfigInteger {
 		{"workflow.version", &config.Workflow.Version, 1, 1},
 		{"work.max_active_workers", &work.MaxActiveWorkers, 1, 8},
 		{"work.ready_queue_capacity", &work.ReadyQueueCapacity, 1, 1024},
+		{"work.integration.max_prepared_per_target", &work.Integration.MaxPreparedPerTarget, 1, 8},
 		{"work.worker_timeout_seconds", &work.WorkerTimeoutSeconds, 1, 86400},
 		{"work.validation_timeout_seconds", &work.ValidationTimeoutSeconds, 1, 86400},
 		{"work.checkpoint_step_limit", &work.CheckpointStepLimit, 1, WorkflowPageLimit},

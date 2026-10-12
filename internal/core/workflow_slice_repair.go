@@ -89,7 +89,7 @@ func (s *WorkflowStore) repairWorkflowSlice(ctx context.Context, run *workflowIn
 		}
 	}
 
-	claim, err := s.reserveWorkflowClaim(ctx, *run)
+	claim, err := s.reserveWorkflowRole(ctx, *run, workflowSliceRepairPurpose)
 	if err != nil {
 		return err
 	}

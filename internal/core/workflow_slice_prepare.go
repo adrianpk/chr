@@ -49,7 +49,7 @@ func (s *WorkflowStore) claimWorkflowSliceValidation(ctx context.Context, run wo
 		return nil, prepared, ErrWorkflowOwned
 	}
 
-	claim, err = s.reserveWorkflowClaim(ctx, run)
+	claim, err = s.reserveWorkflowRole(ctx, run, workflowSliceValidationPurpose)
 	if err != nil {
 		return nil, prepared, err
 	}

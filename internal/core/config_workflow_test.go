@@ -85,6 +85,7 @@ func TestWorkflowConfigBounds(t *testing.T) {
 		{"workflow.version", "1", "1", []string{"", "0", "2", "1.0"}},
 		{"work.max_active_workers", "1", "8", []string{"0", "9", "many"}},
 		{"work.ready_queue_capacity", "1", "1024", []string{"0", "1025", "many"}},
+		{"work.integration.max_prepared_per_target", "1", "8", []string{"0", "9", "many"}},
 		{"work.worker_timeout_seconds", "1", "86400", []string{"0", "86401", "-1"}},
 		{"work.validation_timeout_seconds", "1", "86400", []string{"0", "86401", "1.5"}},
 		{"work.checkpoint_step_limit", "1", "128", []string{"0", "129", "many"}},
@@ -185,8 +186,13 @@ func checkWorkflowConfigDefaultSource(t *testing.T, project string, test workflo
 	t.Helper()
 
 	resolved, err := ResolveWorkflowConfiguration(project, "")
-	if err != nil || len(resolved.Values) != 14 || len(resolved.Revision) != 64 {
+	if err != nil || len(resolved.Values) != 15 || len(resolved.Revision) != 64 {
 		t.Fatal("effective configuration is incomplete", resolved, err)
+	}
+
+	prepared := workflowConfigTestValue(t, resolved, "work.integration.max_prepared_per_target")
+	if prepared.Value != "2" {
+		t.Fatal("prepared default differs", prepared)
 	}
 
 	mode := workflowConfigTestValue(t, resolved, "review.mode")

@@ -54,7 +54,7 @@ func (s *WorkflowStore) beginWorkflowClosing(ctx context.Context, request Workfl
 }
 
 func (s *WorkflowStore) reserveWorkflowClosing(ctx context.Context, set WorkflowRecord, id string) (*WorkflowClaim, error) {
-	worker, err := s.reserveWorkflowClaim(ctx, workflowClosingReservation(set))
+	worker, err := s.reserveWorkflowRole(ctx, workflowClosingReservation(set), "closing")
 	if !errors.Is(err, ErrWorkflowCapacity) || id == "" {
 		return worker, err
 	}

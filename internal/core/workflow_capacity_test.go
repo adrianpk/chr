@@ -13,20 +13,23 @@ import (
 // back to a larger or separate pool; defaults and exact bounds remain usable.
 func TestWorkflowCapacityBounds(t *testing.T) {
 	cases := []struct {
-		name, fields   string
-		workers, queue int
-		fail           bool
+		name, fields             string
+		workers, queue, prepared int
+		fail                     bool
 	}{
-		{"defaults", "", 1, 64, false},
-		{"minimum", "max_active_workers: 1\n  ready_queue_capacity: 1", 1, 1, false},
-		{"maximum", "max_active_workers: 8\n  ready_queue_capacity: 1024", 8, 1024, false},
-		{"zero workers", "max_active_workers: 0", 0, 0, true},
-		{"negative workers", "max_active_workers: -1", 0, 0, true},
-		{"oversized workers", "max_active_workers: 9", 0, 0, true},
-		{"malformed workers", "max_active_workers: two", 0, 0, true},
-		{"zero queue", "ready_queue_capacity: 0", 0, 0, true},
-		{"oversized queue", "ready_queue_capacity: 1025", 0, 0, true},
-		{"malformed queue", "ready_queue_capacity: 64.5", 0, 0, true},
+		{"defaults", "", 1, 64, 2, false},
+		{"minimum", "max_active_workers: 1\n  ready_queue_capacity: 1", 1, 1, 1, false},
+		{"maximum", "max_active_workers: 8\n  ready_queue_capacity: 1024", 8, 1024, 2, false},
+		{"prepared lower", "integration.max_prepared_per_target: 1", 1, 64, 1, false},
+		{"prepared maximum", "integration.max_prepared_per_target: 8", 1, 64, 8, false},
+		{"prepared admitted bound", "ready_queue_capacity: 1\n  integration.max_prepared_per_target: 8", 1, 1, 1, false},
+		{"zero workers", "max_active_workers: 0", 0, 0, 0, true},
+		{"negative workers", "max_active_workers: -1", 0, 0, 0, true},
+		{"oversized workers", "max_active_workers: 9", 0, 0, 0, true},
+		{"malformed workers", "max_active_workers: two", 0, 0, 0, true},
+		{"zero queue", "ready_queue_capacity: 0", 0, 0, 0, true},
+		{"oversized queue", "ready_queue_capacity: 1025", 0, 0, 0, true},
+		{"malformed queue", "ready_queue_capacity: 64.5", 0, 0, 0, true},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -34,7 +37,7 @@ func TestWorkflowCapacityBounds(t *testing.T) {
 			writeWorkspaceConfig(t, dir, "work:\n  "+tc.fields+"\n")
 
 			limits, err := workflowCapacityConfig(dir)
-			if (err != nil) != tc.fail || !tc.fail && limits != (workflowCapacityLimits{Workers: tc.workers, Queue: tc.queue}) {
+			if (err != nil) != tc.fail || !tc.fail && limits != (workflowCapacityLimits{Workers: tc.workers, Queue: tc.queue, Prepared: tc.prepared}) {
 				t.Fatalf("capacity = %+v, %v", limits, err)
 			}
 		})

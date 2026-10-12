@@ -16,7 +16,8 @@ const (
 
 // WorkIntegrationConfig selects a publication mechanism independently of review.
 type WorkIntegrationConfig struct {
-	PublicationProfile string
+	PublicationProfile   string
+	MaxPreparedPerTarget int
 }
 
 // WorkflowNativePolicy contains current host-owned grants and certification.

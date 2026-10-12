@@ -81,7 +81,7 @@ func checkInitializedWorkflow(t *testing.T, project string) {
 	checkWorkflowConfigDefaultValues(t, project, workflowConfigDefaultCase{"initialized", "", "version_default", 1, ReviewWorkflowModeTrustedAutoMerge, WorkStateAuthorityTickets, WorkWorkspaceModeWorktree})
 
 	effective, err := ResolveWorkflowConfiguration(project, "")
-	if err != nil || len(effective.Values) != 14 {
+	if err != nil || len(effective.Values) != 15 {
 		t.Fatal("initialized configuration is incomplete", effective, err)
 	}
 

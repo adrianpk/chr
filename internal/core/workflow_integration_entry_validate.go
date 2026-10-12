@@ -53,6 +53,10 @@ func validWorkflowIntegrationState(state string) bool {
 }
 
 func validateWorkflowIntegrationEntryPhase(entry WorkflowIntegrationEntry) error {
+	if entry.PreparationReserved && workflowIntegrationTerminal(entry.State) {
+		return workflowIntegrationConflict("terminal entry retains speculative preparation capacity")
+	}
+
 	if !slices.Contains([]string{"", "pause", "cancel"}, entry.StopIntent) {
 		return workflowIntegrationConflict("has invalid stop intent")
 	}

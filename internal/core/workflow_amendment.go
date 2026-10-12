@@ -37,7 +37,7 @@ func (s *WorkflowStore) AmendWorkflowSet(ctx context.Context, request WorkflowSe
 	}
 
 	err = s.withLock(ctx, func() (lockErr error) {
-		reservation, readErr := s.reserveWorkflowClaim(ctx, workflowInvocationFile{WorkflowInvocation: WorkflowInvocation{WorkflowIdentity: WorkflowIdentity{ID: "set-amendment"}}})
+		reservation, readErr := s.reserveWorkflowRole(ctx, workflowInvocationFile{WorkflowInvocation: WorkflowInvocation{WorkflowIdentity: WorkflowIdentity{ID: "set-amendment"}}}, "set_amendment")
 		if readErr != nil {
 			return readErr
 		}

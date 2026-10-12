@@ -49,7 +49,11 @@ func acquireWorkflowCapacity(ctx context.Context, projectDir string) (*os.File, 
 	return file, nil
 }
 
-func (s *WorkflowStore) reserveWorkflowClaim(ctx context.Context, run workflowInvocationFile) (claim *WorkflowClaim, err error) {
+func (s *WorkflowStore) reserveWorkflowClaim(ctx context.Context, run workflowInvocationFile) (*WorkflowClaim, error) {
+	return s.reserveWorkflowRole(ctx, run, "")
+}
+
+func (s *WorkflowStore) reserveWorkflowRole(ctx context.Context, run workflowInvocationFile, purpose string) (claim *WorkflowClaim, err error) {
 	if _, err := s.checkWorkflowCoordinator(ctx); err != nil {
 		return nil, err
 	}
@@ -62,12 +66,16 @@ func (s *WorkflowStore) reserveWorkflowClaim(ctx context.Context, run workflowIn
 		return nil, s.retainWorkflowCapacityWait(run, err)
 	}
 
+	if err := s.guardWorkflowIntegrationRole(ctx, run, purpose); err != nil {
+		return nil, s.retainWorkflowCapacityWait(run, err)
+	}
+
 	file, guard, err := s.acquireWorkflowWorkerSlot(ctx)
 	if err != nil {
 		return nil, s.retainWorkflowCapacityWait(run, err)
 	}
 
-	claim = &WorkflowClaim{InvocationID: run.ID, AttemptID: fmt.Sprintf("%s-attempt-%d", run.ID, len(run.Attempts)+1), store: s, reservation: file, capacityGuard: guard, execution: &workflowClaimExecution{}}
+	claim = &WorkflowClaim{InvocationID: run.ID, AttemptID: fmt.Sprintf("%s-attempt-%d", run.ID, len(run.Attempts)+1), store: s, reservation: file, capacityGuard: guard, execution: &workflowClaimExecution{}, purpose: purpose}
 	owned := claim
 
 	defer func() {

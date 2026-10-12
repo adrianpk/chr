@@ -14,13 +14,17 @@ type workflowSliceObservation struct {
 }
 
 func (s *WorkflowStore) observeWorkflowSlice(ctx context.Context, run workflowInvocationFile) (workflowSliceObservation, error) {
-	observation, err := s.readWorkflowSliceMembership(ctx, run)
+	return s.observeWorkflowSlicePrepared(ctx, run, (*WorkflowStore).recoverTransition)
+}
+
+func (s *WorkflowStore) observeWorkflowSlicePrepared(ctx context.Context, run workflowInvocationFile, prepare func(*WorkflowStore) error) (workflowSliceObservation, error) {
+	observation, err := s.readWorkflowSliceMembershipPrepared(ctx, run, prepare)
 	if err != nil {
 		return observation, err
 	}
 
 	for _, record := range observation.tasks {
-		if err := s.checkWorkflowReusableTask(ctx, run, record, *run.Lane); err != nil {
+		if err := s.checkWorkflowReusableTaskPrepared(ctx, run, record, *run.Lane, prepare); err != nil {
 			return observation, err
 		}
 	}
@@ -29,11 +33,15 @@ func (s *WorkflowStore) observeWorkflowSlice(ctx context.Context, run workflowIn
 }
 
 func (s *WorkflowStore) readWorkflowSliceMembership(ctx context.Context, run workflowInvocationFile) (workflowSliceObservation, error) {
+	return s.readWorkflowSliceMembershipPrepared(ctx, run, (*WorkflowStore).recoverTransition)
+}
+
+func (s *WorkflowStore) readWorkflowSliceMembershipPrepared(ctx context.Context, run workflowInvocationFile, prepare func(*WorkflowStore) error) (workflowSliceObservation, error) {
 	if run.Lane == nil || run.Cursor < 1 {
 		return workflowSliceObservation{}, ErrWorkflowOwned
 	}
 
-	if err := s.checkWorkflowInputs(ctx, run); err != nil {
+	if err := s.checkWorkflowInputsPrepared(ctx, run, prepare); err != nil {
 		return workflowSliceObservation{}, err
 	}
 

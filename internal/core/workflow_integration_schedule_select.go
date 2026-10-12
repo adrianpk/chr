@@ -6,6 +6,12 @@ import (
 )
 
 func (scheduler *workflowIntegrationScheduler) selectTasks(ctx context.Context, q WorkflowIntegrationQueueQuery) ([]WorkflowIntegrationSelection, map[string]int, error) {
+	roles, err := scheduler.store.workflowIntegrationRoles(ctx, scheduler.snapshot)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	priority := len(roles) > 0
 	items := []WorkflowIntegrationSelection{}
 	excluded := map[string]int{}
 
@@ -21,6 +27,12 @@ func (scheduler *workflowIntegrationScheduler) selectTasks(ctx context.Context, 
 
 		if reason != "" {
 			excluded[reason]++
+
+			continue
+		}
+
+		if priority {
+			excluded["integration_priority"]++
 
 			continue
 		}

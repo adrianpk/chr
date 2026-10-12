@@ -27,6 +27,10 @@ func (s *WorkflowStore) transitionWorkflowIntegration(ctx context.Context, run w
 		return entry, err
 	}
 
+	if err := s.guardWorkflowPreparationTransition(ctx, run, request); err != nil {
+		return entry, err
+	}
+
 	before := run.Integration.EntryRef.Hash
 
 	updateWorkflowIntegrationEntry(&entry, request)
@@ -109,6 +113,14 @@ func updateWorkflowIntegrationEntry(entry *WorkflowIntegrationEntry, request Wor
 	entry.State, entry.Blocker = request.State, request.Blocker
 	if request.StopIntent != "" {
 		entry.StopIntent = request.StopIntent
+	}
+
+	if request.CandidateRef != nil || slices.Contains([]string{"preparing", "merging", "validating"}, request.State) {
+		entry.PreparationReserved = true
+	}
+
+	if workflowIntegrationTerminal(request.State) {
+		entry.PreparationReserved = false
 	}
 
 	entry.Revision++
@@ -313,4 +325,17 @@ func workflowIntegrationReceiptOwnerMatches(receipt *WorkflowReceipt, run workfl
 
 func workflowIntegrationNeedsRequeueProof(entry WorkflowIntegrationEntry, submission WorkflowSubmission) bool {
 	return entry.State == "queued" && submission.Native != nil
+}
+
+func (s *WorkflowStore) guardWorkflowPreparationTransition(ctx context.Context, run workflowInvocationFile, request WorkflowIntegrationTransition) error {
+	if request.CandidateRef == nil && !slices.Contains([]string{"preparing", "merging", "validating"}, request.State) {
+		return nil
+	}
+
+	snapshot, err := s.readWorkflowIntegrationSnapshot(ctx)
+	if err != nil {
+		return err
+	}
+
+	return s.guardWorkflowPreparedCapacity(ctx, snapshot, run)
 }

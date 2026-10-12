@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 )
 
 type workflowUpgradeJournal struct {
@@ -207,30 +208,39 @@ func validateWorkflowUpgradePolicyPair(journal workflowUpgradeJournal) error {
 }
 
 func validWorkflowUpgradeConfiguration(config WorkflowConfiguration) bool {
-	if len(config.Values) != 13 && len(config.Values) != 14 {
+	if len(config.Values) < 13 || len(config.Values) > 15 {
 		return false
+	}
+
+	allowed := map[string]bool{}
+	for _, value := range effectiveWorkflowConfiguration(defaultWorkspaceConfig(), "").Values {
+		allowed[value.Key] = true
 	}
 
 	seen := map[string]bool{}
 	for _, value := range config.Values {
-		if seen[value.Key] {
+		if seen[value.Key] || !allowed[value.Key] {
 			return false
 		}
 
 		seen[value.Key] = true
 	}
 
-	for _, value := range effectiveWorkflowConfiguration(defaultWorkspaceConfig(), "").Values {
-		if value.Key == "work.integration.publication_profile" && len(config.Values) == 13 {
+	for key := range allowed {
+		if workflowUpgradeOptionalKey(key) {
 			continue
 		}
 
-		if !seen[value.Key] {
+		if !seen[key] {
 			return false
 		}
 	}
 
 	return true
+}
+
+func workflowUpgradeOptionalKey(key string) bool {
+	return key == "work.integration.publication_profile" || key == "work.integration.max_prepared_per_target"
 }
 
 func workflowUpgradeJournalHash(journal workflowUpgradeJournal) (string, error) {
@@ -247,12 +257,10 @@ func checkWorkflowUpgradePolicy(data []byte, expected WorkflowConfiguration) err
 	}
 
 	configuration := effectiveWorkflowConfiguration(config, "")
-	if len(expected.Values) == 13 {
-		if config.Work.Integration.PublicationProfile != WorkflowPublicationDisabled {
-			return ErrWorkflowConflict
-		}
 
-		configuration.Values = withoutWorkflowPublicationProfile(configuration.Values)
+	configuration, err = workflowUpgradeCompatibleConfiguration(config, configuration, expected)
+	if err != nil {
+		return err
 	}
 
 	actual, err := json.Marshal(configuration)
@@ -269,14 +277,44 @@ func checkWorkflowUpgradePolicy(data []byte, expected WorkflowConfiguration) err
 }
 
 func withoutWorkflowPublicationProfile(values []WorkflowConfigurationValue) []WorkflowConfigurationValue {
+	return withoutWorkflowConfigurationKey(values, "work.integration.publication_profile")
+}
+
+func withoutWorkflowConfigurationKey(values []WorkflowConfigurationValue, key string) []WorkflowConfigurationValue {
 	result := make([]WorkflowConfigurationValue, 0, len(values))
 	for _, value := range values {
-		if value.Key != "work.integration.publication_profile" {
+		if value.Key != key {
 			result = append(result, value)
 		}
 	}
 
 	return result
+}
+
+func workflowUpgradeCompatibleConfiguration(config WorkspaceConfig, configuration, expected WorkflowConfiguration) (WorkflowConfiguration, error) {
+	defaults := defaultWorkspaceConfig().Work.Integration
+
+	optional := []struct {
+		key       string
+		unchanged bool
+	}{
+		{"work.integration.publication_profile", config.Work.Integration.PublicationProfile == defaults.PublicationProfile},
+		{"work.integration.max_prepared_per_target", config.Work.Integration.MaxPreparedPerTarget == defaults.MaxPreparedPerTarget},
+	}
+	for _, field := range optional {
+		if slices.ContainsFunc(expected.Values, func(value WorkflowConfigurationValue) bool { return value.Key == field.key }) {
+			continue
+		}
+		// An older immutable snapshot lacks these options. Only their established
+		// defaults may be projected away; omission cannot authorize another policy.
+		if !field.unchanged {
+			return configuration, ErrWorkflowConflict
+		}
+
+		configuration.Values = withoutWorkflowConfigurationKey(configuration.Values, field.key)
+	}
+
+	return configuration, nil
 }
 
 func (s *WorkflowStore) writeWorkflowUpgradeSnapshot(journal workflowUpgradeJournal) error {
