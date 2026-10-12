@@ -14,7 +14,7 @@ started_at: 2026-10-12T04:35:19Z
 branch: feat/slice-4-native-queue-scheduling
 pr: pending
 reviewed_at: 2026-10-12T05:44:40Z
-commits: []
+commits: [35d39f6b6df235d79848fb59054fd7d8b2ef0da3]
 ---
 
 # T4.3: Normalize target and coordinator identity
@@ -62,7 +62,7 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implemented and validated on the recorded Slice 4 branch. Safe public repository URL spellings resolve to the same target key across Git remote names, namespaces and linked checkouts. Registered coordinator ownership is checked before domain mutation or transition replay; copied and disconnected authority cannot reuse a native journal. Consistent records remain readable after registration loss. Actual native task execution, worker and prepared-target capacity, retained native publication barriers and byte preservation after rejected clone work are verified. The task commit and Acta reference follow in the documentation binding commit; the canonical slice PR remains pending T4.4.
+Implemented and validated on the recorded Slice 4 branch. Safe public repository URL spellings resolve to the same target key across Git remote names, namespaces and linked checkouts. Registered coordinator ownership is checked before domain mutation or transition replay; copied and disconnected authority cannot reuse a native journal. Consistent records remain readable after registration loss. Actual native task execution, worker and prepared-target capacity, retained native publication barriers and byte preservation after rejected clone work are verified. Implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/35d39f6b6df235d79848fb59054fd7d8b2ef0da3). Acta: `01M4QAACBMDJ1MYQ53FZ1K83R9`. The canonical slice PR remains pending T4.4.
 
 Successful task checks:
 

@@ -35,6 +35,8 @@ T4.1 implementation and canonical report introduction: [task commit](https://for
 
 T4.2 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/05d438047230b65833949c84e7c8b1ac99190f33). Acta recorded the task as `01M4Q5MBSA7CN05RM6356V2KE0`.
 
+T4.3 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/35d39f6b6df235d79848fb59054fd7d8b2ef0da3). Acta recorded the task as `01M4QAACBMDJ1MYQ53FZ1K83R9`.
+
 ## Contracts Added or Changed
 
 - Bounded native schedule pages with current task and invocation/entry bindings, stable pagination and exclusion counts.
