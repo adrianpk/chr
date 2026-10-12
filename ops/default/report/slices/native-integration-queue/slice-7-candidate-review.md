@@ -174,6 +174,8 @@ fixture passed a label instead of its marker path. The corrected-source checks
 passed; all owned check processes exited naturally. The final slice candidate
 has not been validated.
 
+T7.3 implementation commit: [91676739a6706575df5ee1e644acf29189cfc62b](https://forge.adrianpk.com/adrianpk/chr/commit/91676739a6706575df5ee1e644acf29189cfc62b). Acta commit activity: `01M4S33CF0TC96K7KTAP1TNASA`.
+
 T7.3 development checks passed before its implementation commit, using Go
 1.27.1 and the same isolated fixture environment:
 
@@ -192,5 +194,5 @@ The final slice candidate has not been validated.
 
 ## Risks and Follow-ups
 
-T7.1–T7.3 are implemented and checked. T7.4 remains ready for integration drift
+T7.1–T7.3 are implemented and checked. T7.4 is active for integration drift
 handling. Final slice candidate checks and canonical PR evidence remain pending.

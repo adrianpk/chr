@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T21:12:08Z
 reviewed_at: 2026-10-12T22:17:36Z
 branch: feat/slice-7-native-candidate-review
-commits: []
+commits: ["91676739a6706575df5ee1e644acf29189cfc62b"]
 ---
 
 # T7.3: Repair actionable integration findings
@@ -82,5 +82,7 @@ and a stale invocation revision after the queue transition. These were corrected
 final focused, repository and race checks passed on unchanged source. All owned
 check processes exited naturally; no external fixture was started.
 
-Implementation commit and Acta activity will be bound in the follow-up commit.
+Implementation commit: [91676739a6706575df5ee1e644acf29189cfc62b](https://forge.adrianpk.com/adrianpk/chr/commit/91676739a6706575df5ee1e644acf29189cfc62b).
+
+Acta commit activity: `01M4S33CF0TC96K7KTAP1TNASA`.
 Canonical slice PR and final exact-HEAD checks remain pending.
