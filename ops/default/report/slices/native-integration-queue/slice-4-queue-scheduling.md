@@ -1,6 +1,6 @@
 # Slice 4: Canonical queue scheduling
 
-Status: drafting
+Status: reviewing
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
@@ -22,6 +22,10 @@ Preparation consumes a retained slot in the owning queue entry. The default targ
 T4.3 normalizes safe HTTPS repository spellings before native admission, queue/role filtering and target-key derivation. Host case, DNS root spelling, an explicit default HTTPS port and the existing Git suffix resolve to one public identity. Nondefault ports and repository path case remain distinct; credential-bearing URLs and private transport aliases remain rejected as public identities. Linked checkouts and namespaces use the existing common Git directory for both worker capacity and publication journals.
 
 Mutation checks the host coordinator registration under the common lock before replaying any transition. Missing registration with retained authority, a copied registration or a foreign-host owner blocks before domain mutation or provider use. Consistent files remain readable after registration loss, but a disconnected read cannot replay a journal. A registered owner can still recover its own interrupted transition.
+
+T4.4 certifies actual native queue launches in separate host subprocesses and isolated worker checkouts. Default configuration admits one agent; configured capacity two permits two live workers with distinct slots and excludes a third native or legacy launch. Lowering the limit while both workers are live preserves their owners and denies another launch until both finish. Every admitted worker commits its source and passes its real task gate; accepted source proof remains pending canonical integration.
+
+Two existing publication owners reach provider IO concurrently for independent targets after retaining their own common-directory intents. An unknown outcome excludes a queued native unit on that target while the other publication advances its actual Git ref and obtains its verified receipt. A separately retained genuine native unknown dispatch also preserves its journal and owning namespace byte for byte while a linked alias reads status and completes an unrelated native task.
 
 ## Implementation Notes
 
@@ -63,6 +67,9 @@ T4.3 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commi
 - `internal/core/workflow_coordinator_mutation.go`, `workflow_lock.go`, `workflow_store.go` and `workflow_invocation_read.go`: registered mutation and recovery boundary.
 - `internal/core/workflow_integration_coordinator_test.go` and `workflow_repository_identity_test.go`: real remote aliases, linked checkout capacity, guarded target barriers and copied-journal preservation.
 
+- `internal/core/workflow_integration_schedule_process_test.go`: actual native subprocess overlap, default serial configuration, lowered live capacity and retained source proof.
+- `internal/core/workflow_integration_schedule_targets_test.go` and existing parallel fixtures: independent actual publication, native queue target exclusion and unknown native dispatch isolation.
+
 ## Validation
 
 T4.1 checks passed:
@@ -98,8 +105,19 @@ Development regression checks reproduced distinct default-port repository identi
 
 A full development `make verify` run failed only `TestWorkflowClaimForeignClone`, which expected a generic conflict after inspecting copied ownership. Mutation now rejects missing coordinator registration earlier. The regression requires the specific coordinator error and also verifies unchanged cloned record bytes; the expanded focused check above passed after that correction.
 
+T4.4 task checks passed:
+
+- `make lint-strict`
+- `go test -race ./internal/core -run '^TestNativeProcess|^TestWorkflowParallelExecution$|^TestWorkflowParallelBlocker$|^TestWorkflowParallelPublication$|^TestNativeTargetBarrier$|^TestNativeSubmissionUnknown$|^TestNativePreparedBound$' -count=1`
+- `go test ./internal/core -run '^TestNativeProcessTargets$' -count=1`
+- `git diff --check`
+
+Strict lint reported zero issues. The focused race regression passed in 132.880 seconds; the final target-fixture normal check passed in 6.538 seconds. New subprocess tests cover AC-001, AC-002, AC-007, AC-009, AC-011 and AC-015, with the retained same-target publication regression covering AC-008. Earlier task tests cover ordering, receipt barriers, coordination, fairness and human waits. These checks exercise actual reservations, supervised workers, isolated Git commits, source validation, retained common target journals and canonical local-fixture publication/receipt evidence. Owned subprocesses finish through their release barriers and are reaped.
+
+Development checks corrected an admission fixture that incorrectly assumed a worker lane existed before the first claim, and an independent-target PR fixture that requested the default base despite observing another base. A combined fixture attempt then failed because it tried to apply legacy submission accounting to a native entry; the final tests use each existing publication owner with its own record contract and verify their shared target barrier through an admitted native sibling. No submission owner or persistence contract was changed for that test. Strict lint found spacing and test-function complexity; formatting and a cohesive publication-result assertion helper resolved both.
+
 Execution uses Go 1.27.1, repository-pinned golangci-lint v2.14.0, the retained neutral Git/default-agent fixtures and the forty-five-minute package allowance established by Slice 3. Host settings and explicit positive executor fixtures remain intact. Complete-candidate ordered checks are recorded through the controller after all four task and PR-reference commits.
 
 ## Risks and Follow-ups
 
-T4.3 task checks are complete. T4.4 concurrency certification remains in this slice's approved task list. Final canonical PR and ordered exact-HEAD checks follow all four tasks and their reference commits.
+All four task checks are complete. Canonical PR references and required ordered candidate checks remain before handoff. The controller records those checks against the final clean PR HEAD; task-level checks above do not substitute for that evidence.

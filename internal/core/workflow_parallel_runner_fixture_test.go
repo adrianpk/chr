@@ -53,11 +53,11 @@ func TestWorkflowParallelRunner(t *testing.T) {
 	}
 
 	store := NewWorkflowStore(layout, "project-1")
-	claim, err := store.ClaimWorkflow(t.Context(), spec.ID)
+	claim, err := workflowParallelRunnerClaim(t, store, spec)
 
 	result := WorkflowTaskResult{}
 	if err == nil {
-		result, err = store.ExecuteWorkflowTask(t.Context(), claim, workflowParallelWorker(spec))
+		result, err = claim.store.ExecuteWorkflowTask(t.Context(), claim, workflowParallelWorker(spec))
 	}
 
 	observed := workflowParallelRunnerResult{Successful: result.Successful, Capacity: errors.Is(err, ErrWorkflowCapacity), Fenced: errors.Is(err, ErrWorkflowOwned)}
@@ -73,6 +73,16 @@ func TestWorkflowParallelRunner(t *testing.T) {
 	if err := atomicWorkflowFile(spec.Result, encoded); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func workflowParallelRunnerClaim(t *testing.T, store *WorkflowStore, spec workflowParallelRunnerSpec) (*WorkflowClaim, error) {
+	t.Helper()
+
+	if spec.Mode == "native" {
+		return store.ClaimNextWorkflowIntegration(t.Context(), WorkflowIntegrationScheduleQuery{InvocationID: spec.ID, Limit: 1})
+	}
+
+	return store.ClaimWorkflow(t.Context(), spec.ID)
 }
 
 func workflowParallelWorker(spec workflowParallelRunnerSpec) []string {

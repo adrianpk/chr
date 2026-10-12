@@ -66,6 +66,12 @@ func (p *workflowParallelPublicationProvider) SubmitWorkflowIntegration(ctx cont
 func workflowParallelPublicationFixture(t *testing.T, conflict bool) [2]workflowParallelPublicationLane {
 	t.Helper()
 
+	return workflowParallelPublicationTargets(t, conflict, "dev")
+}
+
+func workflowParallelPublicationTargets(t *testing.T, conflict bool, target string) [2]workflowParallelPublicationLane {
+	t.Helper()
+
 	gate := workflowPreparationGate("test -f alpha.txt || test -f beta.txt || exit 1; if test -f alpha.txt && test -f beta.txt; then printf combined; else printf single; fi")
 	paths := [2]string{"alpha.txt", "beta.txt"}
 
@@ -84,9 +90,13 @@ func workflowParallelPublicationFixture(t *testing.T, conflict bool) [2]workflow
 	workflowIntegrationCommand(t, filepath.Dir(remote), "init", "--bare", remote)
 	workflowIntegrationCommand(t, store.layout.ProjectDir(), "push", remote, request.Selection.Target.Commit+":refs/heads/dev")
 
+	if target != "dev" {
+		workflowIntegrationCommand(t, store.layout.ProjectDir(), "push", remote, request.Selection.Target.Commit+":refs/heads/"+target)
+	}
+
 	return [2]workflowParallelPublicationLane{
 		workflowParallelPublicationSource(t, store, first, request, paths[0], remote, 7),
-		workflowParallelPublicationSource(t, other, second, request, paths[1], remote, 8),
+		workflowParallelPublicationTargetSource(t, other, second, request, paths[1], remote, 8, target),
 	}
 }
 
@@ -102,6 +112,12 @@ func workflowParallelPublicationStore(t *testing.T, original *WorkflowStore) *Wo
 }
 
 func workflowParallelPublicationSource(t *testing.T, store *WorkflowStore, record WorkflowRecord, request WorkflowStartRequest, path, remote string, number int) workflowParallelPublicationLane {
+	t.Helper()
+
+	return workflowParallelPublicationTargetSource(t, store, record, request, path, remote, number, "dev")
+}
+
+func workflowParallelPublicationTargetSource(t *testing.T, store *WorkflowStore, record WorkflowRecord, request WorkflowStartRequest, path, remote string, number int, target string) workflowParallelPublicationLane {
 	t.Helper()
 
 	request.RequestKey, request.Selection.Selector.Identity = record.Task.Key, record.Task.Key
@@ -121,7 +137,7 @@ func workflowParallelPublicationSource(t *testing.T, store *WorkflowStore, recor
 	workflowTicketReviewConfig(t, store, "rebase", ReviewWorkflowModeTrustedAutoMerge)
 	workflowIntegrationCommand(t, store.layout.ProjectDir(), "push", remote, candidate.Result.Commit+":"+candidate.Lane.Branch)
 
-	pr := WorkflowPullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/" + strconv.Itoa(number), Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: request.Selection.Target.Commit, State: "open"}
+	pr := WorkflowPullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/" + strconv.Itoa(number), Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: target, HeadCommit: candidate.Result.Commit, BaseCommit: request.Selection.Target.Commit, State: "open"}
 
 	return workflowParallelPublicationPrepare(t, store, record, run.ID, remote, pr)
 }
@@ -130,7 +146,12 @@ func workflowParallelPublicationPrepare(t *testing.T, store *WorkflowStore, reco
 	t.Helper()
 
 	provider := workflowParallelPublicationProviderFor(pr, remote)
-	workflowPREnsure(t, store, id, provider)
+	content := workflowPRContent()
+
+	content.BaseBranch = pr.BaseBranch
+	if _, err := store.EnsureWorkflowSlicePullRequest(t.Context(), id, content, provider); err != nil {
+		t.Fatal(err)
+	}
 
 	fixture := workflowPreparationFixture{store: store, hierarchy: WorkflowMaterializationResult{Tasks: []WorkflowRecord{record}}, run: workflowTestRead(t, store, id), provider: provider.workflowPreparationProviderFixture, git: NewWorkflowPreparationGit(pr.Repository, remote), remote: remote, base: pr.BaseCommit}
 
