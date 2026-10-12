@@ -37,6 +37,14 @@ func validateWorkflowPublicationCapability(source WorkflowReviewInput, capabilit
 		return ErrWorkflowAtomicGuard
 	}
 
+	return validateWorkflowSignatureCapability(capability)
+}
+
+func validateWorkflowSignatureCapability(capability WorkflowPublicationCapability) error {
+	if capability.RequiredSignatures != (capability.SigningProfile != "") || (capability.RequiredSignatures && !validWorkflowNativeFingerprint(capability.SigningProfile)) {
+		return ErrWorkflowAtomicGuard
+	}
+
 	return nil
 }
 
@@ -101,6 +109,11 @@ func (s *WorkflowStore) checkWorkflowPreparationGit(ctx context.Context, candida
 	commit, tree, err := s.workflowLaneCandidate(ctx, candidate.Lane)
 
 	proof := candidate.Input.Git
+
+	capability := candidate.Input.Capability
+	if err := checkWorkflowPreparationSigning(proof, capability.RequiredSignatures, capability.SigningProfile); err != nil {
+		return err
+	}
 
 	if err != nil {
 		return fmt.Errorf("%w: prepared lane changed: %w", ErrWorkflowConflict, err)

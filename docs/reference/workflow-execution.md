@@ -391,6 +391,23 @@ candidate/history hash and must pass combined validation and review. Missing
 repair declarations, cosmetic findings, altered replay metadata and false empty
 decisions fail host verification before publication.
 
+New host preparation also records `preparation` metadata: initial and effective
+committer dates, identity, no-op collision count, and required signature policy.
+A result equal to the original source is rebuilt with the recorded committer
+timestamp advanced by one second, at most three times. Authors, messages, trees
+and replay count remain unchanged; no unrelated commit is inserted.
+
+`WorkflowPublicationCapability.required_signatures` and `signing_profile` bind
+the exact trusted signing policy. Required signatures use an explicitly supplied
+`WorkflowSSHCommitSigning` host key through `WithSSHCommitSigning`; its public
+Ed25519 key and principal identify the certified profile. Missing or mismatched
+host capability blocks preparation before validation. Every rewritten object,
+including declared integration fixes, is signed in the Git namespace. Host
+verification checks the actual signature against the exact public policy and
+records the signature hash per prepared commit. Private key paths and secrets
+are excluded from candidates and worker inputs. Unsigned provider profiles do
+not acquire signing authorization from a local key alone.
+
 Native publication observation re-proves the retained history version through
 `WorkflowPreparedIntegrationGit.VerifyPreparedWorkflowIntegration`. The trusted
 host fetches the original source and canonical target, verifies every mapped

@@ -12,7 +12,11 @@ import (
 
 // OSWorkflowPreparationGit prepares commits in an owned disposable object store
 // and attaches a separate validation worktree to the source's coordinator.
-type OSWorkflowPreparationGit struct{ transport OSWorkflowIntegrationGit }
+type OSWorkflowPreparationGit struct {
+	transport     OSWorkflowIntegrationGit
+	signing       *WorkflowSSHCommitSigning
+	committerTime time.Time
+}
 
 // NewWorkflowPreparationGit stores a canonical identity and trusted Git transport.
 func NewWorkflowPreparationGit(repository, transport string) OSWorkflowPreparationGit {
@@ -35,7 +39,11 @@ func (git OSWorkflowPreparationGit) PrepareWorkflowIntegration(ctx context.Conte
 
 	defer func() { err = errors.Join(err, os.RemoveAll(dir)) }()
 
-	reader := workflowIntegrationReader{dir: dir}
+	reader, err := git.preparationReader(dir, query)
+	if err != nil {
+		return proof, err
+	}
+
 	if err := git.fetchPreparation(ctx, reader, query); err != nil {
 		return proof, err
 	}
@@ -110,12 +118,8 @@ func (reader workflowIntegrationReader) prepareIntegration(ctx context.Context, 
 	}
 
 	var err error
-	if query.Method == "rebase" {
-		proof.ResultCommit, err = reader.prepareRebase(ctx, proof)
-	} else {
-		proof.ResultCommit, err = reader.prepareCombinedCommit(ctx, proof)
-	}
 
+	proof.ResultCommit, err = reader.prepareDistinctResult(ctx, proof)
 	if err != nil {
 		return proof, err
 	}
@@ -186,14 +190,9 @@ func (reader workflowIntegrationReader) prepareRebase(ctx context.Context, proof
 }
 
 func (reader workflowIntegrationReader) preparationCommit(ctx context.Context, tree string, parents []string) (string, error) {
-	args := []string{"-c", "user.name=Workflow Host", "-c", "user.email=workflow@example.invalid", "commit-tree", tree}
-	for _, parent := range parents {
-		args = append(args, "-p", parent)
-	}
+	author := WorkflowIntegrationIdentity{Name: "Workflow Host", Email: "workflow@example.invalid", Date: reader.preparationCommitterDate()}
 
-	args = append(args, "-m", "Prepare configured workflow integration")
-
-	return reader.output(ctx, args...)
+	return reader.preparationObject(ctx, tree, parents, author, "", "Prepare configured workflow integration\n")
 }
 
 func attachWorkflowPreparation(ctx context.Context, reader workflowIntegrationReader, query WorkflowPreparationQuery, proof WorkflowIntegrationProof) error {

@@ -92,7 +92,11 @@ func (git OSWorkflowIntegrationGit) validateQuery(query WorkflowIntegrationQuery
 	return nil
 }
 
-type workflowIntegrationReader struct{ dir string }
+type workflowIntegrationReader struct {
+	dir         string
+	preparation *WorkflowIntegrationPreparation
+	signing     *WorkflowSSHCommitSigning
+}
 
 func (reader workflowIntegrationReader) output(ctx context.Context, args ...string) (string, error) {
 	data, err := reader.rawOutput(ctx, args...)

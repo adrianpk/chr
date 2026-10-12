@@ -17,6 +17,7 @@ type WorkflowIntegrationProvenance struct {
 	Prepared          []WorkflowIntegrationAttribution `json:"prepared"`
 	Replays           []WorkflowIntegrationReplay      `json:"replays,omitempty"`
 	IntegrationFixes  []WorkflowIntegrationFix         `json:"integration_fixes,omitempty"`
+	Preparation       *WorkflowIntegrationPreparation  `json:"preparation,omitempty"`
 }
 
 func (reader workflowIntegrationReader) combinedProvenance(ctx context.Context, proof WorkflowIntegrationProof) (*WorkflowIntegrationProvenance, error) {
@@ -48,7 +49,7 @@ func (reader workflowIntegrationReader) verifyCombinedProvenance(ctx context.Con
 		return nil
 	}
 
-	actual, err := reader.combinedProvenance(ctx, *proof)
+	actual, err := reader.integrationProvenance(ctx, *proof)
 	if err != nil {
 		return err
 	}
@@ -72,6 +73,10 @@ func validateWorkflowIntegrationProvenance(proof WorkflowIntegrationProof) error
 
 	if err := validateWorkflowProvenanceCommits(proof, *p); err != nil {
 		return err
+	}
+
+	if p.Preparation != nil && !validWorkflowPreparationMetadata(proof, *p.Preparation) {
+		return ErrWorkflowConflict
 	}
 
 	data, err := json.Marshal(p)

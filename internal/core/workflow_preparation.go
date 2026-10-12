@@ -14,13 +14,15 @@ var ErrWorkflowAtomicGuard = errors.New("provider cannot atomically guard the so
 // WorkflowPublicationCapability is a trusted provider contract for one exact PR
 // and method. A source-only merge API does not satisfy AtomicSourceBase.
 type WorkflowPublicationCapability struct {
-	Repository       string `json:"repository"`
-	PullRequestURL   string `json:"pull_request_url"`
-	Method           string `json:"method"`
-	Mechanism        string `json:"mechanism"`
-	Revision         string `json:"revision"`
-	AtomicSourceBase bool   `json:"atomic_source_base"`
-	ExactResult      bool   `json:"exact_result"`
+	Repository         string `json:"repository"`
+	PullRequestURL     string `json:"pull_request_url"`
+	Method             string `json:"method"`
+	Mechanism          string `json:"mechanism"`
+	Revision           string `json:"revision"`
+	AtomicSourceBase   bool   `json:"atomic_source_base"`
+	ExactResult        bool   `json:"exact_result"`
+	RequiredSignatures bool   `json:"required_signatures,omitempty"`
+	SigningProfile     string `json:"signing_profile,omitempty"`
 }
 
 // WorkflowPublicationGuardProvider resolves current repository protections.
@@ -34,8 +36,10 @@ type WorkflowPublicationGuardProvider interface {
 // WorkflowPreparationQuery describes host-owned combined-result preparation.
 type WorkflowPreparationQuery struct {
 	WorkflowIntegrationQuery
-	BaseCommit string       `json:"base_commit"`
-	Lane       WorkflowLane `json:"lane"`
+	BaseCommit         string       `json:"base_commit"`
+	Lane               WorkflowLane `json:"lane"`
+	RequiredSignatures bool         `json:"required_signatures,omitempty"`
+	SigningProfile     string       `json:"signing_profile,omitempty"`
 }
 
 // WorkflowPreparationGit prepares a clean isolated lane without publishing.

@@ -22,11 +22,22 @@ type WorkflowIntegrationFix struct {
 }
 
 func (reader workflowIntegrationReader) integrationProvenance(ctx context.Context, proof WorkflowIntegrationProof) (*WorkflowIntegrationProvenance, error) {
+	var (
+		p   *WorkflowIntegrationProvenance
+		err error
+	)
+
 	if proof.Method == "rebase" {
-		return reader.rebaseProvenance(ctx, proof)
+		p, err = reader.rebaseProvenance(ctx, proof)
+	} else {
+		p, err = reader.combinedProvenance(ctx, proof)
 	}
 
-	return reader.combinedProvenance(ctx, proof)
+	if err != nil {
+		return nil, err
+	}
+
+	return p, reader.addPreparationMetadata(ctx, proof, p)
 }
 
 func (reader workflowIntegrationReader) rebaseProvenance(ctx context.Context, proof WorkflowIntegrationProof) (*WorkflowIntegrationProvenance, error) {

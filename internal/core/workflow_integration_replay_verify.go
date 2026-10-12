@@ -61,7 +61,7 @@ func (reader workflowIntegrationReader) verifyRebaseProvenance(ctx context.Conte
 		proof.PreparedTree, proof.VerifiedTree = entry.Tree, entry.Tree
 	}
 
-	actual, err := reader.rebaseProvenance(ctx, *proof)
+	actual, err := reader.integrationProvenance(ctx, *proof)
 	if err != nil {
 		return err
 	}

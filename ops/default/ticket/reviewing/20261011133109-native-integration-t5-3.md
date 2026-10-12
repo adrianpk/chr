@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133109
 title: "T5.3: Enforce non-no-op and signing policy"
-status: ready
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,9 @@ tags: native-integration, slice-5
 source: chat
 reported_at: 2026-10-11T13:31:09Z
 ready_at: 2026-10-11T13:31:37Z
+started_at: 2026-10-12T10:21:53Z
+reviewed_at: 2026-10-12T10:56:07Z
+branch: feat/slice-5-native-method-preparation
 commits: []
 ---
 
@@ -58,4 +61,23 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+The implementation records preparation identity, initial/effective host committer
+dates and a maximum of three identity retries. It retains source authors,
+messages, trees and commit count without adding an unrelated commit.
+
+Required signatures are bound to the current capability profile. An explicitly
+supplied host SSH signer creates and verifies every rewritten object and declared
+integration fix. Missing or mismatched signing capability blocks before a
+validation lane is attached. Public profile and per-object signature hashes enter
+provenance; private signing paths and key material are excluded.
+
+Successful task checks:
+
+- `make verify` — zero lint issues; core 1345.889 seconds, app 114.726 seconds and all other packages passed.
+- `go test ./internal/core -run '^TestNativePreparation|^TestNativeSigning|^TestNativeSignedFix|^TestNativeCollision|^TestNativeReplay|^TestNativeCombined' -count=1` — pass, 26.664 seconds.
+- `go test -race ./internal/core -run '^TestNative|^TestWorkflowPreparation|^TestWorkflowIntegration|^TestWorkflowGit|^TestWorkflowSubmission' -count=1` — pass, 705.730 seconds.
+- `git diff --check` — pass.
+
+Task commit and Acta references are bound in the following evidence commit.
+T5.4, the canonical PR and final exact-HEAD controller checks remain pending.
+This task is validated locally; it is not integrated or finalized.

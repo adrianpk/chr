@@ -107,6 +107,12 @@ func validateWorkflowPreparationCandidate(run workflowInvocationFile, candidate 
 
 func validateWorkflowPreparationProofBinding(candidate WorkflowIntegrationCandidate) error {
 	proof, source := candidate.Input.Git, candidate.Input.Source
+
+	capability := candidate.Input.Capability
+	if err := checkWorkflowPreparationSigning(proof, capability.RequiredSignatures, capability.SigningProfile); err != nil {
+		return err
+	}
+
 	if proof.SourceCommit != source.PullRequest.HeadCommit || proof.BaseCommit != source.TargetCommit || proof.Method != source.Policy.Method || proof.Repository != source.PullRequest.Repository || proof.TargetBranch != source.PullRequest.BaseBranch {
 		return ErrWorkflowConflict
 	}

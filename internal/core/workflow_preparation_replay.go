@@ -24,18 +24,40 @@ func (reader workflowIntegrationReader) replayCommit(ctx context.Context, tree, 
 }
 
 func (reader workflowIntegrationReader) attributedPreparationCommit(ctx context.Context, tree, parent string, author WorkflowIntegrationIdentity, encoding, message string) (string, error) {
-	if !workflowCommitID(tree) || !workflowCommitID(parent) || !validWorkflowCommitIdentity(author) || strings.ContainsAny(encoding, "\x00\r\n") {
+	return reader.preparationObject(ctx, tree, []string{parent}, author, encoding, message)
+}
+
+func (reader workflowIntegrationReader) preparationCommitterDate() string {
+	if reader.preparation != nil {
+		return reader.preparation.CommitterDate
+	}
+
+	return fmt.Sprintf("%d +0000", time.Now().Unix())
+}
+
+func (reader workflowIntegrationReader) preparationObject(ctx context.Context, tree string, parents []string, author WorkflowIntegrationIdentity, encoding, message string) (string, error) {
+	if !validWorkflowPreparationObject(tree, parents, author, encoding) {
 		return "", ErrWorkflowConflict
 	}
 
 	// Write exact message bytes: commit-tree normalizes terminal newlines. Old
 	// signature headers are deliberately excluded from the rewritten object.
-	header := fmt.Sprintf("tree %s\nparent %s\nauthor %s <%s> %s\ncommitter Workflow Host <workflow@example.invalid> %d +0000\n", tree, parent, author.Name, author.Email, author.Date, time.Now().Unix())
+	header := "tree " + tree + "\n"
+
+	for _, parent := range parents {
+		header += "parent " + parent + "\n"
+	}
+
+	header += fmt.Sprintf("author %s <%s> %s\ncommitter Workflow Host <workflow@example.invalid> %s\n", author.Name, author.Email, author.Date, reader.preparationCommitterDate())
 	if encoding != "" {
 		header += "encoding " + encoding + "\n"
 	}
 
-	data := header + "\n" + message
+	data, err := reader.signPreparationObject(ctx, header+"\n"+message)
+	if err != nil {
+		return "", err
+	}
+
 	if len(data) >= WorkflowFileLimit {
 		return "", ErrWorkflowConflict
 	}
@@ -45,9 +67,27 @@ func (reader workflowIntegrationReader) attributedPreparationCommit(ctx context.
 	return strings.TrimSpace(id), err
 }
 
+func validWorkflowPreparationObject(tree string, parents []string, author WorkflowIntegrationIdentity, encoding string) bool {
+	if !workflowCommitID(tree) || !validWorkflowCommitIdentity(author) || strings.ContainsAny(encoding, "\x00\r\n") || len(parents) < 1 || len(parents) > 2 {
+		return false
+	}
+
+	for _, parent := range parents {
+		if !workflowCommitID(parent) || len(parent) != len(tree) {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (reader workflowIntegrationReader) prepareRebaseFix(ctx context.Context, proof WorkflowIntegrationProof, tree string, finding AgenticReviewFinding) (WorkflowIntegrationProof, error) {
 	if !validWorkflowRebaseFixInput(proof, finding) {
 		return proof, ErrWorkflowConflict
+	}
+
+	if err := reader.requireRebaseFixSigner(proof); err != nil {
+		return proof, err
 	}
 
 	if err := reader.verifyPublicationHistory(ctx, proof); err != nil {
@@ -70,7 +110,7 @@ func (reader workflowIntegrationReader) prepareRebaseFix(ctx context.Context, pr
 	proof.Provenance = &p
 	proof.ResultCommit, proof.PreparedTree, proof.VerifiedTree = commit, tree, tree
 
-	proof.Provenance, err = reader.rebaseProvenance(ctx, proof)
+	proof.Provenance, err = reader.integrationProvenance(ctx, proof)
 	if err != nil {
 		return proof, err
 	}
@@ -81,6 +121,20 @@ func (reader workflowIntegrationReader) prepareRebaseFix(ctx context.Context, pr
 	}
 
 	return proof, reader.verifyPublicationHistory(ctx, proof)
+}
+
+func (reader workflowIntegrationReader) requireRebaseFixSigner(proof WorkflowIntegrationProof) error {
+	p := proof.Provenance.Preparation
+	if p == nil || !p.RequiredSignatures {
+		return nil
+	}
+
+	profile, err := workflowSSHSigningProfile(reader.signing)
+	if err != nil || p.Signing == nil || profile.Hash != p.Signing.Hash {
+		return fmt.Errorf("certified host commit signing path required for integration fixes")
+	}
+
+	return nil
 }
 
 func validWorkflowRebaseFixInput(proof WorkflowIntegrationProof, finding AgenticReviewFinding) bool {

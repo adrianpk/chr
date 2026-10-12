@@ -155,6 +155,8 @@ func (s *WorkflowStore) prepareWorkflowIntegrationGit(ctx context.Context, run *
 		return WorkflowPreparationInput{}, lane, err
 	}
 
+	query.RequiredSignatures, query.SigningProfile = capability.RequiredSignatures, capability.SigningProfile
+
 	proof, err := git.PrepareWorkflowIntegration(ctx, query)
 	if err != nil {
 		return WorkflowPreparationInput{}, lane, err

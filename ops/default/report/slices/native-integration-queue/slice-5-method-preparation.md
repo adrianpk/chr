@@ -29,6 +29,12 @@ sequence; host proofs reject undeclared fixes and cosmetic repair claims.
 Merge-containing histories and wholly empty integration units are blocked before
 an owned preparation lane is attached.
 
+T5.3 implements bounded source-identity retries with recorded committer dates
+and preparation identity. It adds the trusted host SSH signing path and binds
+required signatures to current capability. Every rewritten object and declared
+repair is signed and cryptographically verified against the public profile.
+Missing or mismatched signing capability blocks before validation or publication.
+
 ## Implementation Notes
 
 The additive `chr-integration-provenance/v1` proof joins the existing history
@@ -66,6 +72,9 @@ hashes. See [Workflow execution](../../../../../docs/reference/workflow-executio
 - `internal/core/workflow_preparation_replay_test.go`
 - `internal/core/review_workflow_native_observation.go`
 - `internal/core/workflow_submission_observe.go`
+- `internal/core/workflow_preparation_identity.go`
+- `internal/core/workflow_preparation_signing.go`
+- `internal/core/workflow_preparation_policy_test.go`
 
 ## Validation
 
@@ -144,8 +153,36 @@ regression after the fixture and retained-proof corrections. Owned fixture
 processes completed naturally and their disposable data was cleaned by the test
 lifecycle.
 
+T5.3 development checks:
+
+- `go test ./internal/core -run '^TestNativePreparation|^TestNativeSigning|^TestNativeCollision|^TestNativeReplay|^TestNativeCombined' -count=1` — pass, 18.903 seconds.
+
+The initial compile check found a collision with an existing SSH fixture helper;
+the new host signer command helper now has its own name. Initial strict lint
+reported complexity, nested branches and formatting; cohesive policy/object
+validators, early returns and formatting corrected those findings. The added signed-fix fixture also passes:
+
+- `go test ./internal/core -run '^TestNativePreparation|^TestNativeSigning|^TestNativeSignedFix|^TestNativeCollision|^TestNativeReplay|^TestNativeCombined' -count=1` — pass, 26.664 seconds.
+
+The expanded native/workflow race regression passed:
+
+- `go test -race ./internal/core -run '^TestNative|^TestWorkflowPreparation|^TestWorkflowIntegration|^TestWorkflowGit|^TestWorkflowSubmission' -count=1` — pass, 705.730 seconds.
+
+Final T5.3 pre-commit checks passed:
+
+- `make verify` — zero lint issues, core 1345.889 seconds, app 114.726 seconds and all other packages passed.
+- `git diff --check` — pass.
+
+The signing fixtures use owned local repositories and temporary Ed25519 keys.
+Each prepared signature is independently checked by Git before atomic
+publication and retained-proof observation. Required signing on declared repairs
+is covered without modifying the original replay manifest. Owned fixtures
+completed naturally and their temporary data was cleaned by the test lifecycle.
+
 ## Risks and Follow-ups
 
-T5.1 and T5.2 task validation are complete. T5.3 and T5.4 retain the approved
-signing/no-op, method fixture and isolation obligations.
+T5.1 through T5.3 task validation are complete. T5.4 retains the approved method
+proof and isolation obligations. Signed preparation is locally certified; live
+provider signing-profile certification remains in the recorded certification
+slice.
 The canonical PR and final exact-HEAD controller checks follow all four tasks.

@@ -101,6 +101,10 @@ func validateWorkflowSubmissionGuard(guard WorkflowPublicationGuard) error {
 		return err
 	}
 
+	if err := checkWorkflowPreparationSigning(guard.Git, guard.Capability.RequiredSignatures, guard.Capability.SigningProfile); err != nil {
+		return err
+	}
+
 	return validateWorkflowIntegrationProof(guard.Git.WorkflowIntegrationQuery, guard.Git)
 }
 
