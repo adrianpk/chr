@@ -14,7 +14,7 @@ started_at: 2026-10-12T03:34:55Z
 branch: feat/slice-4-native-queue-scheduling
 pr: pending
 reviewed_at: 2026-10-12T04:23:09Z
-commits: []
+commits: [05d438047230b65833949c84e7c8b1ac99190f33]
 ---
 
 # T4.2: Share role capacity and prevent starvation
@@ -62,7 +62,7 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implemented and validated on the recorded Slice 4 branch. Eligible validation, preparation and review receive shared repository capacity ahead of new implementation. Existing role launches and merger-purpose reservations use the same pool. Prepared-target capacity defaults to two, remains retained during pause/block/restart, and is released through guarded terminal transitions. Human approval and full/unknown target barriers do not retain runnable integration priority. Exact task commit and Acta reference follow this code commit; the canonical slice PR remains pending T4.3 and T4.4.
+Implemented and validated on the recorded Slice 4 branch. Eligible validation, preparation and review receive shared repository capacity ahead of new implementation. Existing role launches and merger-purpose reservations use the same pool. Prepared-target capacity defaults to two, remains retained during pause/block/restart, and is released through guarded terminal transitions. Human approval and full/unknown target barriers do not retain runnable integration priority. Implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/05d438047230b65833949c84e7c8b1ac99190f33). Acta: `01M4Q5MBSA7CN05RM6356V2KE0`. The canonical slice PR remains pending T4.3 and T4.4.
 
 Successful task checks:
 

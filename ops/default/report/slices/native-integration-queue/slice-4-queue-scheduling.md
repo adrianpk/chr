@@ -29,6 +29,8 @@ The configuration and upgrade-snapshot owners accept the new prepared limit whil
 
 T4.1 implementation and canonical report introduction: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/2051bb53de7b8e452f455809915d47c48352ba61). Acta recorded the task as `01M4Q27DZTATW05Z6KQWY9JTN5`.
 
+T4.2 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/05d438047230b65833949c84e7c8b1ac99190f33). Acta recorded the task as `01M4Q5MBSA7CN05RM6356V2KE0`.
+
 ## Contracts Added or Changed
 
 - Bounded native schedule pages with current task and invocation/entry bindings, stable pagination and exclusion counts.

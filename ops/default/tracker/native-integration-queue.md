@@ -172,7 +172,7 @@ Prerequisite: verified Slice 3 integration and closed task fanout.
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
 | T4.1 | [TKT-20261011133103](../ticket/reviewing/20261011133103-native-integration-t4-1.md) | validated | `2051bb53de7b8e452f455809915d47c48352ba61` | Schedule eligible units deterministically |
-| T4.2 | [TKT-20261011133104](../ticket/reviewing/20261011133104-native-integration-t4-2.md) | validated | pending | Share role capacity and prevent starvation |
+| T4.2 | [TKT-20261011133104](../ticket/reviewing/20261011133104-native-integration-t4-2.md) | validated | `05d438047230b65833949c84e7c8b1ac99190f33` | Share role capacity and prevent starvation |
 | T4.3 | [TKT-20261011133105](../ticket/ready/20261011133105-native-integration-t4-3.md) | ready | pending | Normalize target and coordinator identity |
 | T4.4 | [TKT-20261011133106](../ticket/ready/20261011133106-native-integration-t4-4.md) | ready | pending | Verify real concurrent scheduling |
 
