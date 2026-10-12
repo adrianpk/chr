@@ -44,6 +44,8 @@ decision. Rewritten objects retain original messages without newline normalizati
 and exclude old signature headers. Integration fixes extend the prepared sequence
 while leaving original source mappings intact.
 
+T5.2 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/ed92e270edd489332191667c1c80201536363ba2). Acta task record: `01M4QRQTNWK814YQMJG4Q5F53K`.
+
 ## Contracts Added or Changed
 
 `WorkflowIntegrationProof.Provenance` retains bounded original and prepared
