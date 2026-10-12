@@ -114,7 +114,15 @@ T3.4 focused migration-status checks passed:
 
 The first focused race run exposed an invocation-reader check that rejected linked repository aliases before observing their canonical publication barrier. The reader was corrected while retaining native cross-record scope checks. The first broad gate also exposed migration-status fixtures still expecting fourteen migrations; those expectations now include the fifteenth migration. The earlier broad run completed with these migration-count failures and alias-scope regressions across linked claim, capacity, execution, recovery and publication tests. Its corrected replacement `make verify` passed with zero strict-lint issues; core tests passed in 975.617 seconds and app tests in 103.692 seconds. No running tests were interrupted.
 
-Execution uses Go 1.27.1, the repository-pinned golangci-lint v2.14.0, the retained neutral Git fixture configuration, a thirty-minute Go test timeout and the supported absent default-agent command fixture. Host settings and positive explicit provider/executor fixtures are retained. These settings do not change repository assertions or publication policy.
+The first complete-candidate controller attempt at `40fc84d5c6ac75105c518ae5c077b171ef36160a` passed `make verify` (zero lint issues, core 925.486 seconds, app 90.860 seconds) and `go test ./internal/core ./internal/app -count=1` (core 926.044 seconds, app 79.525 seconds). The required race command passed app tests in 269.066 seconds but exhausted the thirty-minute package timeout while starting `TestWorkflowTicketCandidate`; no assertion or race failure preceded the timeout. Its controller diagnostic log is retained against that head.
+
+The interrupted test passed in isolation in 2.363 seconds:
+
+- `go test -race ./internal/core -run '^TestWorkflowTicketCandidate$' -count=1`
+
+The validation execution allowance is now forty-five minutes per package. Required commands, race instrumentation and assertions are unchanged. The complete ordered controller check list is rerun for the clean PR head after this documentary follow-up.
+
+Execution uses Go 1.27.1, the repository-pinned golangci-lint v2.14.0, the retained neutral Git fixture configuration, a forty-five-minute Go test timeout and the supported absent default-agent command fixture. Host settings and positive explicit provider/executor fixtures are retained. These settings do not change repository assertions or publication policy.
 
 ## Risks and Follow-ups
 
