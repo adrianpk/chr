@@ -19,6 +19,8 @@ T4.1 selects each queued unit's current admitted task in durable queue-sequence 
 
 The scheduler reads authoritative invocation entries and task records. A derived schedule or its revision/hash grants no execution ownership. Existing direct task claims also respect native entry pauses and blockers. There is no alternative admission list or receipt authority.
 
+T4.1 implementation and canonical report introduction: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/2051bb53de7b8e452f455809915d47c48352ba61). Acta recorded the task as `01M4Q27DZTATW05Z6KQWY9JTN5`.
+
 ## Contracts Added or Changed
 
 - Bounded native schedule pages with current task and invocation/entry bindings, stable pagination and exclusion counts.

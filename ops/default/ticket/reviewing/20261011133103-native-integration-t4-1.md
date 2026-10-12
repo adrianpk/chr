@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T02:52:08Z
 branch: feat/slice-4-native-queue-scheduling
 reviewed_at: 2026-10-12T03:24:14Z
-commits: []
+commits: [2051bb53de7b8e452f455809915d47c48352ba61]
 ---
 
 # T4.1: Schedule eligible units deterministically
@@ -70,3 +70,5 @@ Successful task checks:
 - `git diff --check`
 
 The full pre-commit gate passed with zero lint issues, core tests in 1030.781 seconds and app tests in 82.622 seconds. The expanded focused race check passed in 166.087 seconds. [Slice 4 report](../../report/slices/native-integration-queue/slice-4-queue-scheduling.md) retains the failed initial namespace lookup and its passing correction. T4.2 through T4.4, canonical PR preparation and complete-candidate exact-HEAD validation remain pending.
+
+Task commit: `2051bb53de7b8e452f455809915d47c48352ba61`. Acta commit record: `01M4Q27DZTATW05Z6KQWY9JTN5`.
