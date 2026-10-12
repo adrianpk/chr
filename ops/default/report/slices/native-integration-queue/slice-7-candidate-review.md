@@ -51,6 +51,25 @@ queue generation cannot inherit an older grant even with identical S/B/P.
 Restart and the transition to publication readiness preserve a current grant
 without repeating its host gate or decision.
 
+T7.3 retains actionable failures of the unchanged combined gate and native
+review as immutable, result-bound findings. The queue returns to merging without
+rewinding accepted source tasks or removing their retained evidence. Clean
+passing candidates reserve no merger attempt.
+
+Merger admission and every owned action require the current queue generation,
+source, target, method, policy, scope and finding references. The existing broker
+and persistent budget bound the repair. Stopped, mutated or stale host-gate
+results cannot request semantic repair, and the legacy task-repair path cannot
+bypass the native route.
+
+Host acceptance leaves the repaired result pending validation. After restart,
+the existing preparation entrypoint independently verifies its Git history and
+attaches exactly that accepted P to a fresh isolated checkout. It reruns the
+unchanged gate, retains merger provenance in the new candidate and requires a
+fresh candidate-bound review. A valid deterministic P cannot replace the
+accepted semantic result. Rebase repair preserves original task attribution,
+replay order and raw source commit messages.
+
 ## Implementation Notes
 
 The existing preparation and process owners execute validation. The native
@@ -67,6 +86,12 @@ capacity tied to actual process-group quiescence. The same ownership rule now
 applies to reviewers, so queue movement retains a stale review checkpoint
 before capacity is released.
 
+Native findings and the queue transition are retained together through the
+existing journal. Merger completion clears its finished task claim only after
+process quiescence, allowing the next host gate to acquire ownership. Private
+repair checkpoints import original source and base objects because rewritten
+rebase and squash results need not reach those histories.
+
 ## Contracts Added or Changed
 
 `WorkflowNativePreparationProvider` observes the full capability for the exact
@@ -77,6 +102,15 @@ complete preparation image, including method/history and policy evidence.
 `WorkflowNativeReviewInput` adds the complete native candidate, claim generation
 and capability to the existing optional review input. Publication observes the
 result-bound capability instead of the preliminary source-only guard.
+
+`WorkflowCandidateRepair` and its invocation binding retain the exact failed
+candidate and host findings. `ReadWorkflowCandidateRepair` exposes them for
+trusted request assembly without reserving a role. `WorkflowRepairedPreparationGit`
+attaches the retained host-accepted result without substituting another proof.
+`BeginWorkflowMergerCombinedRepair` provides a clean merge/squash semantic
+baseline; rebase repair continues through the original replay-step contract.
+Preparation input and native candidate records now bind accepted merger attempt
+references alongside the existing history and validation evidence.
 
 ## Files of Interest
 
@@ -94,6 +128,15 @@ result-bound capability instead of the preliminary source-only guard.
 - `internal/core/workflow_review_native_guard_test.go`: current policy, history and generation checks.
 - `internal/core/workflow_review_native_fence_test.go`: running reviewer checkpoints after queue or policy movement.
 - `internal/app/service_workflow_review_native_test.go`: shared service approval and guard behavior.
+
+- `internal/core/workflow_candidate_repair.go`: native review routing and retained findings.
+- `internal/core/workflow_candidate_repair_admission.go`: current finding, source and capability guards.
+- `internal/core/workflow_candidate_repair_gate.go`: queue resumption and exact accepted-result preparation.
+- `internal/core/workflow_candidate_repair_git.go`: independent Git verification and gate checkout attachment.
+- `internal/core/workflow_candidate_repair_combined.go`: merge/squash semantic repair baseline.
+- `internal/core/workflow_candidate_repair_gate_test.go`: real merger, new host gate and review across all methods.
+- `internal/core/workflow_candidate_repair_guard_test.go`: clean-result and changed finding/policy/scope rejection.
+- `internal/core/workflow_candidate_repair_substitution_test.go`: accepted-result substitution rejection.
 
 ## Validation
 
@@ -131,8 +174,23 @@ fixture passed a label instead of its marker path. The corrected-source checks
 passed; all owned check processes exited naturally. The final slice candidate
 has not been validated.
 
+T7.3 development checks passed before its implementation commit, using Go
+1.27.1 and the same isolated fixture environment:
+
+- `make verify` — zero lint issues; all packages passed, including core in 1981.944 s and app in 138.499 s.
+- `go test ./internal/core -run '^(TestNativeCandidate|TestNativePreparationFailure)' -count=1` — passed in 204.054 s.
+- `go test -race ./internal/core ./internal/app -run '^(TestNativeCandidate|TestNativeMerger|TestNativePreparation|TestNativeReview|TestWorkflowPreparation|TestWorkflowReview|TestServiceNativeReview|TestServiceWorkflowPreparation|TestServiceWorkflowReview)' -count=1` — core passed in 1324.484 s and app in 40.741 s.
+- `git diff --check` — passed.
+
+The initial native review test reproduced source-task rewind. Composed repair
+checks then exposed a retained finished merger claim, missing original Git
+objects for rewritten results and a stale invocation revision after the queue
+transition. Each was corrected; the final focused normal and race checks passed.
+The repository and race checks exited naturally. All 27 changed Go files
+matched the frozen source throughout validation. No external fixture was started.
+The final slice candidate has not been validated.
+
 ## Risks and Follow-ups
 
-T7.1–T7.2 are implemented and checked. T7.3 is active for bounded merger repair
-routing; T7.4 remains ready for integration drift handling. Final slice candidate
-checks and canonical PR evidence remain pending.
+T7.1–T7.3 are implemented and checked. T7.4 remains ready for integration drift
+handling. Final slice candidate checks and canonical PR evidence remain pending.

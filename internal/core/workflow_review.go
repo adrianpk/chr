@@ -75,7 +75,7 @@ func (s *WorkflowStore) ReviewWorkflowSlice(ctx context.Context, id string, prov
 
 	if err != nil || claim == nil {
 		if err == nil && binding.State == "needs_repair" {
-			_, err = s.RepairWorkflowSlice(ctx, id, binding.RepairTaskKey)
+			err = s.repairWorkflowReviewedSlice(ctx, id, binding.RepairTaskKey, provider)
 		}
 
 		return binding, err
@@ -109,7 +109,7 @@ func (s *WorkflowStore) ReviewWorkflowSlice(ctx context.Context, id string, prov
 
 	result, err = s.finishWorkflowReview(cleanup, claim, prepared, provider, decision, errors.Join(executionErr, parseErr), watched.Err() != nil)
 	if err == nil && result.State == "needs_repair" {
-		_, err = s.RepairWorkflowSlice(ctx, id, decision.RepairTaskKey)
+		err = s.repairWorkflowReviewedSlice(ctx, id, decision.RepairTaskKey, provider)
 	}
 
 	return result, err

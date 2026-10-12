@@ -105,7 +105,7 @@ func (s *WorkflowStore) finishWorkflowIntegrationValidation(ctx context.Context,
 
 		failure := owner.checkWorkflowPreparationCompletion(ctx, run, prepared, candidate, provider, validationErr)
 		if failure != nil {
-			return errors.Join(failure, owner.checkpointWorkflowAttempt(run, record, "interrupted", &candidate.Validation), claim.releaseReservation())
+			return owner.checkpointWorkflowPreparationFailure(ctx, run, record, claim, *candidate, prepared, provider, validationErr, failure)
 		}
 
 		if err := owner.persistWorkflowPreparation(&run, record, *candidate); err != nil {
@@ -114,6 +114,36 @@ func (s *WorkflowStore) finishWorkflowIntegrationValidation(ctx context.Context,
 
 		return claim.releaseReservation()
 	})
+}
+
+func (s *WorkflowStore) checkpointWorkflowPreparationFailure(ctx context.Context, run workflowInvocationFile, record WorkflowRecord, claim *WorkflowClaim, candidate WorkflowIntegrationCandidate, prepared workflowPreparedTask, provider WorkflowPublicationGuardProvider, validationErr, failure error) error {
+	// Only an observed command failure on the still-current clean result can
+	// request semantic repair. Stops, mutation and stale fences remain failures.
+	actionable := candidate.Input.Native != nil && workflowCandidateGateFailed(candidate.Validation) && s.checkWorkflowCandidateFailureCurrent(ctx, run, candidate, provider) == nil
+	if err := s.checkpointWorkflowAttempt(run, record, "interrupted", &candidate.Validation); err != nil {
+		return errors.Join(failure, err)
+	}
+
+	var repairErr error
+	if validationErr != nil && actionable {
+		repairErr = s.retainWorkflowFailedCandidate(ctx, run, candidate)
+	}
+
+	return errors.Join(failure, repairErr, claim.releaseReservation())
+}
+
+func (s *WorkflowStore) checkWorkflowCandidateFailureCurrent(ctx context.Context, run workflowInvocationFile, candidate WorkflowIntegrationCandidate, provider WorkflowPublicationGuardProvider) error {
+	return errors.Join(s.checkWorkflowPreparationSource(ctx, run, candidate.Input, provider), s.checkWorkflowPreparationGit(ctx, candidate), s.checkWorkflowNativePreparationFence(run, candidate.Input.Native))
+}
+
+func workflowCandidateGateFailed(result WorkflowTaskResult) bool {
+	for _, command := range result.Validation {
+		if command.ExitCode != 0 && !command.Truncated {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (s *WorkflowStore) checkWorkflowPreparationCompletion(ctx context.Context, run workflowInvocationFile, prepared workflowPreparedTask, candidate *WorkflowIntegrationCandidate, provider WorkflowPublicationGuardProvider, validationErr error) error {

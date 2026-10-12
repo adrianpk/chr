@@ -127,6 +127,7 @@ func TestNativePreparationFailure(t *testing.T) {
 	cases := []struct{ name, script string }{
 		{"semantic", "test ! -f target.txt || grep -q required target.txt"},
 		{"mutation", "if test -f target.txt; then printf changed >> target.txt; fi"},
+		{"mutation failure", "if test -f target.txt; then printf changed >> target.txt; exit 1; fi"},
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
@@ -139,6 +140,10 @@ func TestNativePreparationFailure(t *testing.T) {
 			}
 
 			checkNativePreparationRejected(t, fixture)
+
+			if test.name != "semantic" && workflowTestRead(t, f.store, f.run.ID).CandidateRepair != nil {
+				t.Fatal("checkout mutation was routed as actionable semantic repair")
+			}
 		})
 	}
 }

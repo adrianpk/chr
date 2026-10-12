@@ -51,7 +51,7 @@ func (s *WorkflowStore) checkWorkflowNativeCandidate(candidate WorkflowIntegrati
 		return err
 	}
 
-	if !workflowNativeJSONEqual(input, candidate.Input) {
+	if !workflowNativeJSONEqual(input, candidate.Input) || !slices.Equal(b.MergerAttemptRefs, candidate.Input.MergerAttemptRefs) {
 		return ErrWorkflowConflict
 	}
 
@@ -64,6 +64,10 @@ func (s *WorkflowStore) checkWorkflowNativeCandidate(candidate WorkflowIntegrati
 		return ErrWorkflowConflict
 	}
 
+	return s.checkWorkflowNativeCandidateHistory(candidate, b)
+}
+
+func (s *WorkflowStore) checkWorkflowNativeCandidateHistory(candidate WorkflowIntegrationCandidate, b WorkflowNativeRecordBinding) error {
 	var history WorkflowNativeHistoryManifest
 	if err := s.readWorkflowNativeEvidence(b.InvocationID, b.HistoryManifestRef, &history); err != nil {
 		return err

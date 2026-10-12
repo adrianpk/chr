@@ -167,6 +167,8 @@ func (s *WorkflowStore) persistWorkflowPreparation(run *workflowInvocationFile, 
 	record.Task.AttemptID = ""
 
 	run.Status, run.Outcome, run.Blocker = "waiting_review", "integration_validated", nil
+
+	run.CandidateRepair = nil
 	if run.Review != nil {
 		run.Review.State = "stale"
 	}

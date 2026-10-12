@@ -1,0 +1,81 @@
+package core
+
+import (
+	"context"
+	"slices"
+)
+
+func validateWorkflowCandidateRepairBinding(run workflowInvocationFile) error {
+	b := run.CandidateRepair
+	if b == nil {
+		return nil
+	}
+
+	if !slices.Contains([]string{"slice", "ticket"}, b.Unit.Kind) || b.Unit.ID == "" || !validWorkflowNativeFingerprint(b.EntryID) || b.ClaimGeneration == 0 || !validWorkflowNativeFingerprint(b.CandidateHash) {
+		return ErrWorkflowConflict
+	}
+
+	for _, ref := range []WorkflowEvidenceRef{b.RecordRef, b.FindingRef} {
+		if validateWorkflowEvidenceRef(run.ID, ref) != nil {
+			return ErrWorkflowConflict
+		}
+	}
+
+	return nil
+}
+
+func (s *WorkflowStore) checkWorkflowCandidateRepairAdmission(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry, input WorkflowMergerInput, provider WorkflowPullRequestProvider) error {
+	b := run.CandidateRepair
+	if b == nil {
+		return nil
+	}
+
+	if !workflowCandidateRepairFenceMatches(*b, run, entry, input) {
+		return ErrWorkflowConflict
+	}
+
+	repair, err := s.readWorkflowCandidateRepair(run)
+	if err != nil {
+		return err
+	}
+
+	if input.Reason != repair.Reason || !workflowMergerRepairIdentity(input, repair.Candidate.Input.Git) {
+		return ErrWorkflowConflict
+	}
+
+	for _, ref := range repair.FindingRefs {
+		if !slices.Contains(input.FindingRefs, ref) {
+			return ErrWorkflowConflict
+		}
+	}
+
+	guard, ok := provider.(WorkflowPublicationGuardProvider)
+	if !ok {
+		return ErrWorkflowAtomicGuard
+	}
+
+	return s.checkWorkflowCandidateFailureSource(ctx, run, repair.Candidate, guard)
+}
+
+func (s *WorkflowStore) checkWorkflowCandidateFailureSource(ctx context.Context, run workflowInvocationFile, candidate WorkflowIntegrationCandidate, provider WorkflowPublicationGuardProvider) error {
+	_, source, err := s.workflowReviewSourceInputs(ctx, run, provider)
+	if err != nil || checkWorkflowReviewInputHash(source, run.Preparation.SourceHash) != nil {
+		return errorsOrConflict(err)
+	}
+
+	capability, err := observeWorkflowPreparedCapability(ctx, provider, candidate.Input)
+	if err != nil || capability != candidate.Input.Capability {
+		return errorsOrConflict(err)
+	}
+
+	_, source, err = s.workflowReviewSourceInputs(ctx, run, provider)
+	if err != nil || checkWorkflowReviewInputHash(source, run.Preparation.SourceHash) != nil {
+		return errorsOrConflict(err)
+	}
+
+	return s.checkWorkflowPreparationGit(ctx, candidate)
+}
+
+func workflowCandidateRepairFenceMatches(b WorkflowCandidateRepairBinding, run workflowInvocationFile, entry WorkflowIntegrationEntry, input WorkflowMergerInput) bool {
+	return b.EntryID == entry.ID && b.ClaimGeneration == entry.ClaimGeneration && b.CandidateHash == workflowMergerCandidateHash(run, entry) && input.RepairCheckpointRef != nil
+}

@@ -35,7 +35,7 @@ func (s *WorkflowStore) finishWorkflowMerger(ctx context.Context, claim *Workflo
 			failure = errors.Join(failure, err)
 		}
 
-		if err := s.persistWorkflowMergerFinish(ctx, &run, claim, *attempt); err != nil {
+		if err := s.persistWorkflowMergerFinish(ctx, &run, record, claim, *attempt); err != nil {
 			return errors.Join(failure, err)
 		}
 
@@ -43,7 +43,7 @@ func (s *WorkflowStore) finishWorkflowMerger(ctx context.Context, claim *Workflo
 	})
 }
 
-func (s *WorkflowStore) persistWorkflowMergerFinish(ctx context.Context, run *workflowInvocationFile, claim *WorkflowClaim, result WorkflowMergerAttempt) error {
+func (s *WorkflowStore) persistWorkflowMergerFinish(ctx context.Context, run *workflowInvocationFile, record WorkflowRecord, claim *WorkflowClaim, result WorkflowMergerAttempt) error {
 	data, err := encodeWorkflowMergerAttempt(result)
 	if err != nil {
 		return err
@@ -70,13 +70,19 @@ func (s *WorkflowStore) persistWorkflowMergerFinish(ctx context.Context, run *wo
 	}
 
 	resultFile := workflowMergerFinishedRun(run, claim, result, data)
+	record.Task.AttemptID = ""
+
+	files, err := s.workflowClaimRecordChanges(run, &record)
+	if err != nil {
+		return err
+	}
 
 	file, err := s.workflowIntegrationBudgetChange(ctx, run, &budget)
 	if err != nil {
 		return err
 	}
 
-	files := []workflowFileChange{file}
+	files = append(files, file)
 	if settlement.Path != "" {
 		files = append(files, settlement)
 	}

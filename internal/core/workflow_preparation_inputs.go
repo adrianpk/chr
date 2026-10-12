@@ -140,6 +140,10 @@ func (s *WorkflowStore) checkWorkflowPreparationGit(ctx context.Context, candida
 }
 
 func validateWorkflowPreparationBinding(run workflowInvocationFile) error {
+	if err := validateWorkflowCandidateRepairBinding(run); err != nil {
+		return err
+	}
+
 	if run.PreparationCount < 0 || run.PreparationCount > WorkflowPageLimit {
 		return ErrWorkflowConflict
 	}

@@ -269,7 +269,7 @@ Prerequisite: verified Slice 6 integration and closed task fanout.
 | --- | --- | --- | --- | --- |
 | T7.1 | [TKT-20261011133115](../ticket/reviewing/20261011133115-native-integration-t7-1.md) | reviewing | [3f1aac6910b7e8885146a544a735db69f49c1a94](https://forge.adrianpk.com/adrianpk/chr/commit/3f1aac6910b7e8885146a544a735db69f49c1a94) | Run required gates on the exact prepared result |
 | T7.2 | [TKT-20261011133116](../ticket/reviewing/20261011133116-native-integration-t7-2.md) | reviewing | [c1c3d9dc954e9d3888c55a9a63dfac4fc04f6b59](https://forge.adrianpk.com/adrianpk/chr/commit/c1c3d9dc954e9d3888c55a9a63dfac4fc04f6b59) | Bind review to the current candidate |
-| T7.3 | [TKT-20261011133117](../ticket/in_progress/20261011133117-native-integration-t7-3.md) | in_progress | pending | Repair actionable integration findings |
+| T7.3 | [TKT-20261011133117](../ticket/reviewing/20261011133117-native-integration-t7-3.md) | reviewing | pending | Repair actionable integration findings |
 | T7.4 | [TKT-20261011133118](../ticket/ready/20261011133118-native-integration-t7-4.md) | ready | pending | Handle external target and source movement |
 
 Required checks:

@@ -51,6 +51,10 @@ func (s *WorkflowStore) checkWorkflowMergerAdmissionInputs(ctx context.Context, 
 		return err
 	}
 
+	if err := s.checkWorkflowCandidateRepairAdmission(ctx, run, entry, input, provider); err != nil {
+		return err
+	}
+
 	if err := s.checkWorkflowMergerCommands(ctx, run, input); err != nil {
 		return err
 	}
@@ -85,6 +89,10 @@ func (s *WorkflowStore) workflowMergerSeed(ctx context.Context, run workflowInvo
 	policy, err := s.workflowReviewPolicy(run)
 	if err != nil || policy.Method != input.Method {
 		return "", ErrWorkflowConflict
+	}
+
+	if run.CandidateRepair != nil {
+		return s.workflowCandidateRepairSeed(ctx, run)
 	}
 
 	if entry.CandidateRef == nil {
@@ -122,4 +130,13 @@ func freezeWorkflowMergerRequest(request WorkflowMergerRequest) (WorkflowMergerR
 
 func workflowMergerRunnable(run workflowInvocationFile, entry WorkflowIntegrationEntry) bool {
 	return run.StopIntent == "" && entry.StopIntent == "" && entry.State == "merging" && slices.Contains([]string{"waiting_integration", "waiting_review"}, run.Status)
+}
+
+func (s *WorkflowStore) workflowCandidateRepairSeed(ctx context.Context, run workflowInvocationFile) (string, error) {
+	repair, err := s.readWorkflowCandidateRepair(run)
+	if err != nil {
+		return "", err
+	}
+
+	return repair.Candidate.Input.Git.ResultCommit, s.checkWorkflowPreparationGit(ctx, repair.Candidate)
 }

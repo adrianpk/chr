@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133117
 title: "T7.3: Repair actionable integration findings"
-status: in_progress
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -11,6 +11,7 @@ source: chat
 reported_at: 2026-10-11T13:31:17Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T21:12:08Z
+reviewed_at: 2026-10-12T22:17:36Z
 branch: feat/slice-7-native-candidate-review
 commits: []
 ---
@@ -60,4 +61,26 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+T7.3 retains actionable native gate/review findings and routes repair through the
+existing bounded merger without rewinding source tasks. Host acceptance remains
+pending validation. A fresh isolated checkout receives exactly the accepted P,
+the unchanged host gate and a new candidate-bound review. The new candidate
+retains merger provenance and original rebase task attribution and messages.
+Clean passing candidates do not reserve a merger attempt. Changed findings,
+policy or scope and substituted results are rejected.
+
+Development checks passed with Go 1.27.1:
+
+- `make verify` — zero lint issues; all packages passed.
+- `go test ./internal/core -run '^(TestNativeCandidate|TestNativePreparationFailure)' -count=1` — passed in 204.054 s.
+- `go test -race ./internal/core ./internal/app -run '^(TestNativeCandidate|TestNativeMerger|TestNativePreparation|TestNativeReview|TestWorkflowPreparation|TestWorkflowReview|TestServiceNativeReview|TestServiceWorkflowPreparation|TestServiceWorkflowReview)' -count=1` — core passed in 1324.484 s and app in 40.741 s.
+- `git diff --check` — passed.
+
+The initial native review test reproduced source-task rewind. Composed repair
+checks exposed a retained finished merger claim, missing original Git objects
+and a stale invocation revision after the queue transition. These were corrected;
+final focused, repository and race checks passed on unchanged source. All owned
+check processes exited naturally; no external fixture was started.
+
+Implementation commit and Acta activity will be bound in the follow-up commit.
+Canonical slice PR and final exact-HEAD checks remain pending.

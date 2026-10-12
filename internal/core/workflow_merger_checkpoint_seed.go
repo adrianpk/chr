@@ -12,7 +12,9 @@ func (s *WorkflowStore) seedWorkflowMergerCheckpoint(ctx context.Context, input 
 	}
 
 	reader := workflowIntegrationReader{dir: lane.Worktree, environment: workflowMergerEnvironment(filepath.Dir(lane.Worktree))}
-	for _, object := range []string{state.PreparedParent, state.Tree} {
+	// Rebase and squash P need not reach the original source objects. Host
+	// verification still needs both histories for semantic and side checks.
+	for _, object := range []string{state.PreparedParent, state.Tree, state.Query.SourceCommit, state.Query.BaseCommit} {
 		if _, err := reader.output(ctx, "fetch", "--quiet", "--no-tags", "--no-write-fetch-head", "--", state.Query.Lane.Worktree, object); err != nil {
 			return lane, err
 		}

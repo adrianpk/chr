@@ -33,7 +33,23 @@ func (s *WorkflowStore) checkWorkflowMergerPrepared(ctx context.Context, claim *
 		return err
 	}
 
-	return s.withLock(ctx, func() error { return s.checkWorkflowMergerOwned(ctx, claim, prepared) })
+	return s.withLock(ctx, func() error {
+		if err := s.checkWorkflowMergerOwned(ctx, claim, prepared); err != nil {
+			return err
+		}
+
+		run, _, err := s.checkWorkflowClaim(ctx, claim)
+		if err != nil {
+			return err
+		}
+
+		entry, err := claim.store.readWorkflowIntegrationEntry(run, *run.Integration)
+		if err != nil {
+			return err
+		}
+
+		return claim.store.checkWorkflowCandidateRepairAdmission(ctx, run, entry, *prepared.input.Merger, provider)
+	})
 }
 
 func (s *WorkflowStore) checkWorkflowMergerOwned(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask) error {

@@ -66,6 +66,10 @@ func (s *WorkflowStore) workflowPreparationPreflight(ctx context.Context, run *w
 	}
 
 	if err == nil {
+		err = s.resumeWorkflowCandidateRepairGate(ctx, run, source)
+	}
+
+	if err == nil {
 		err = s.checkWorkflowNativePreparationAdmission(*run, source, capability, provider)
 	}
 
@@ -174,7 +178,7 @@ func (s *WorkflowStore) prepareWorkflowIntegrationGit(ctx context.Context, run *
 
 	query.RequiredSignatures, query.SigningProfile = capability.RequiredSignatures, capability.SigningProfile
 
-	proof, err := git.PrepareWorkflowIntegration(ctx, query)
+	proof, refs, err := s.prepareWorkflowCandidateRepairGit(ctx, *run, git, query)
 	if err != nil {
 		return WorkflowPreparationInput{}, lane, err
 	}
@@ -185,7 +189,7 @@ func (s *WorkflowStore) prepareWorkflowIntegrationGit(ctx context.Context, run *
 
 	lane.HeadCommit = proof.ResultCommit
 
-	input := WorkflowPreparationInput{Source: source, Capability: capability, Git: proof}
+	input := WorkflowPreparationInput{Source: source, Capability: capability, Git: proof, MergerAttemptRefs: refs}
 	if err := s.bindWorkflowNativePreparation(ctx, *run, &input, provider); err != nil {
 		return input, lane, err
 	}

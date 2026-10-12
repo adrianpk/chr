@@ -55,6 +55,7 @@ func workflowNativePreparationRecord(candidate WorkflowIntegrationCandidate) Wor
 		ObjectFormat: format, OriginalSource: proof.SourceCommit, PublishedSource: proof.ResultCommit, ValidatedBase: proof.BaseCommit,
 		PreparedResult: proof.ResultCommit, PreparedTree: proof.PreparedTree, Method: proof.Method,
 		ContractHash: input.Source.Slice.ContractHash, PolicyHash: capability.PolicyFingerprint, CapabilityHash: capability.Revision,
+		MergerAttemptRefs: input.MergerAttemptRefs,
 	}
 }
 
