@@ -75,6 +75,11 @@ reported zero issues. Required T6.1 pre-commit checks passed:
 Owned fixtures completed naturally and their disposable data was cleaned by the
 test lifecycle.
 
+T6.1 task commit: [dd376916016bc85c9f20677e03997e0b7f6a2a58](https://forge.adrianpk.com/adrianpk/chr/commit/dd376916016bc85c9f20677e03997e0b7f6a2a58).
+Acta task record: `01M4R5KBYTW86RNNWE19EJ9ZJJ`. This commit introduced the report; its
+[immutable report image](https://forge.adrianpk.com/adrianpk/chr/src/commit/dd376916016bc85c9f20677e03997e0b7f6a2a58/ops/default/report/slices/native-integration-queue/slice-6-merger-role.md)
+remains the canonical PR report link.
+
 ## Risks and Follow-ups
 
 T6.2 owned harness execution, T6.3 semantic/replay repair and T6.4 host acceptance

@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T13:02:05Z
 reviewed_at: 2026-10-12T13:41:56Z
 branch: feat/slice-6-native-merger-role
-commits: []
+commits: [dd376916016bc85c9f20677e03997e0b7f6a2a58]
 ---
 
 # T6.1: Define versioned merger input and result
@@ -80,3 +80,6 @@ approval. T6.2–T6.4 remain pending before the canonical slice PR. Required ord
 clean-HEAD candidate checks will use the controller ledger after PR-reference
 commits are pushed. Owned test fixtures completed naturally and were cleaned
 through the test lifecycle.
+
+Task commit: [dd376916016bc85c9f20677e03997e0b7f6a2a58](https://forge.adrianpk.com/adrianpk/chr/commit/dd376916016bc85c9f20677e03997e0b7f6a2a58).
+Acta task record: `01M4R5KBYTW86RNNWE19EJ9ZJJ`.
