@@ -1,23 +1,25 @@
 ---
-id: TKT-20261011133100
-title: "T3.2: Persist integration entries through WorkflowStore"
-status: reviewing
+id: TKT-20261011133059
+title: "T3.1: Extend candidate and receipt schemas"
+status: solved
 kind: task
 severity: unclassified
 priority: normal
 scope: domain
 tags: native-integration, slice-3
 source: chat
-reported_at: 2026-10-11T13:31:00Z
+reported_at: 2026-10-11T13:30:59Z
 ready_at: 2026-10-11T13:31:37Z
-started_at: 2026-10-11T22:17:47Z
+started_at: 2026-10-11T21:44:33Z
+resolution: fixed
+closed_at: 2026-10-12T02:42:44Z
 branch: feat/slice-3-native-integration-records
 pr: 377
-reviewed_at: 2026-10-11T22:47:37Z
-commits: [9a004ba55c6b72ac69aa0322fba531eebcc257d7]
+reviewed_at: 2026-10-11T22:10:52Z
+commits: [64369b81579c8b4136609383568731067bc7bdfd]
 ---
 
-# T3.2: Persist integration entries through WorkflowStore
+# T3.1: Extend candidate and receipt schemas
 
 ## Delivery Binding
 
@@ -25,7 +27,7 @@ Delivery set: native-integration-queue
 
 Slice: 3 — Durable integration records
 
-Task: T3.2
+Task: T3.1
 
 Plan: [Slice 3](../../plan/native-integration-queue.md#slice-3-durable-integration-records)
 
@@ -37,11 +39,11 @@ Model: [Native Integration Queue Model](../../spec/stable/native-integration-que
 
 ## Work
 
-Implement idempotent unit entry identity, queue sequence allocation and guarded entry/invocation transitions with the existing file transaction owner.
+Add original/published source identities, method manifests and versioned capability/transport references without rewriting historical receipts.
 
 ## Acceptance
 
-Duplicate admission consumes one entry; interrupted transitions preserve authoritative records and replay safely.
+Old schemas remain verifiable and new readers reject missing required proof or unsupported versions.
 
 Acceptance IDs and invariants: use the owning slice's explicit coverage map in the approved plan.
 
@@ -62,12 +64,11 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implemented guarded queue admission and phase transitions through the existing workflow transaction. Concurrent retry, cross-namespace ordering, capacity and arithmetic bounds, interrupted replacement/replay, stale callback, candidate ownership, malformed bytes, stop/resume and uncertain publication checks pass.
+Implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/64369b81579c8b4136609383568731067bc7bdfd).
 
-Successful task checks:
+Implemented versioned native candidate/receipt bindings, owned hashed source/history/capability/validation and transaction/observation references. Historical receipt reads preserve their exact bytes. Unsupported or incomplete native proof blocks creation and reads.
 
-- `make verify`
-- `go test -race ./internal/core -run '^TestNativeEntry|^TestNativeRecord|^TestNativeReceipt' -count=1`
-- `git diff --check`
 
-[Slice 3 report](../../report/slices/native-integration-queue/slice-3-integration-records.md) records the gate and focused evidence. The canonical Slice 3 PR, complete exact-HEAD checks and verified integration remain pending until T3.3 and T3.4 are complete.
+Report: [Slice 3](../../report/slices/native-integration-queue/slice-3-integration-records.md).
+
+Canonical PR: [#377](https://forge.adrianpk.com/adrianpk/chr/pulls/377). All four ordered Looper checks passed on `ef72c8cbabf06816a93c293161c12d03211979ba`. Canonical Rebase + Fast-forward integration into `dev` was verified at 2026-10-12T02:39:12Z; Acta merge record: `01M4PZMZF2HN2XM577G70T3DYB`.

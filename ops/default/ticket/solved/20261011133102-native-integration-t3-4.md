@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133102
 title: "T3.4: Rebuild indexes and validate migrations"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -11,6 +11,8 @@ source: chat
 reported_at: 2026-10-11T13:31:02Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-11T23:45:04Z
+resolution: fixed
+closed_at: 2026-10-12T02:42:44Z
 branch: feat/slice-3-native-integration-records
 pr: 377
 reviewed_at: 2026-10-12T00:32:59Z
@@ -72,6 +74,7 @@ Successful task checks:
 - `go test ./internal/core -run '^TestWorkflowSubmissionExclusion|^TestNativeQueueCorruption' -count=1`
 - `git diff --check`
 
-The required pre-commit gate passed with zero strict-lint issues, core tests in 975.617 seconds and app tests in 103.692 seconds. The corrected focused race check passed in 132.700 seconds. [Slice 3 report](../../report/slices/native-integration-queue/slice-3-integration-records.md) retains the earlier alias-scope and migration-count failures and their passing corrections. Canonical PR: [#377](https://forge.adrianpk.com/adrianpk/chr/pulls/377). The controller records ordered exact-HEAD checks for the complete clean PR head; verified integration remains pending.
 
 Task commit: `c7ee88bb92a27c520489effb717cecde34f2dbdf`. Acta commit record: `01M4PREJHWRNP8W33M3X20ZJ31`.
+
+Canonical PR: [#377](https://forge.adrianpk.com/adrianpk/chr/pulls/377). All four ordered Looper checks passed on `ef72c8cbabf06816a93c293161c12d03211979ba`. Canonical Rebase + Fast-forward integration into `dev` was verified at 2026-10-12T02:39:12Z; Acta merge record: `01M4PZMZF2HN2XM577G70T3DYB`.

@@ -18,9 +18,9 @@ Plan approval: approved on 2026-10-11 under the explicit instruction to process 
 
 Implementation authorization: granted for the complete ordered corrective set and its defined task/PR map.
 
-Active slice: Slice 3 — Durable integration records
+Active slice: Slice 4 — Canonical queue scheduling
 
-Next slice: Slice 4 — Canonical queue scheduling
+Next slice: Slice 5 — Method preparation and provenance
 
 Slice strategy: behavior-first
 
@@ -28,13 +28,13 @@ Reason: prove a positive remote transaction and real forge observation before bu
 
 Plan: [Native Integration Corrective Delivery](../plan/native-integration-queue.md)
 
-Progress: 2 of 13 slices integrated; 8 of 51 execution tasks delivered in this set.
+Progress: 3 of 13 slices integrated; 12 of 51 execution tasks delivered in this set.
 
 Task accounting: 47 new tickets and 4 reused original assurance tickets. Retained assurance commits are implemented evidence, not integrated task completion.
 
 ## Current Checkpoint
 
-Slice 1 is canonically integrated through [PR #375](https://forge.adrianpk.com/adrianpk/chr/pulls/375) at `79dfe32380dae9058bde15ba50b8f30c30cbaf3d`. All four ordered Looper checks passed for that exact clean HEAD; its five task tickets are solved. Slice 2 is canonically integrated through [PR #376](https://forge.adrianpk.com/adrianpk/chr/pulls/376) at `3129b5ce312df22287a4e7b78e08bf41f5958377`. All five ordered Looper checks passed for that exact clean HEAD; its three task tickets are solved. Slice 3 is active for durable integration records. T3.1 schemas and proof readers are validated. T3.2 queue persistence is validated with focused race checks and the required pre-commit gate. T3.3 budgets and native publication journals are validated with focused race checks and the required pre-commit gate. T3.4 index and migration validation is next. The [Slice 3 report](../report/slices/native-integration-queue/slice-3-integration-records.md) records development evidence; the canonical PR and final exact-HEAD checks are pending.
+Slice 1 is canonically integrated through [PR #375](https://forge.adrianpk.com/adrianpk/chr/pulls/375) at `79dfe32380dae9058bde15ba50b8f30c30cbaf3d`. All four ordered Looper checks passed for that exact clean HEAD; its five task tickets are solved. Slice 2 is canonically integrated through [PR #376](https://forge.adrianpk.com/adrianpk/chr/pulls/376) at `3129b5ce312df22287a4e7b78e08bf41f5958377`. All five ordered Looper checks passed for that exact clean HEAD; its three task tickets are solved. Slice 3 is canonically integrated through [PR #377](https://forge.adrianpk.com/adrianpk/chr/pulls/377) at `ef72c8cbabf06816a93c293161c12d03211979ba`. All four ordered Looper checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 3 report](../report/slices/native-integration-queue/slice-3-integration-records.md) retains task and final validation evidence. Slice 4 is active for canonical queue scheduling; T4.1 is the next task.
 The original controller remains inactive and blocked; its checkpoint and consumed budgets are preserved. Its assurance execution is transferred to Slice 13 under the approved plan.
 Both live repositories and their policy/access profiles are designated in [Certification Fixtures](../report/native-integration-fixtures.md). Real default rebase through both existing adapters is certified; the Slice 2 report retains the exact-head validation boundary.
 
@@ -127,7 +127,7 @@ Report/evidence: [Slice 2 report](../report/slices/native-integration-queue/slic
 
 ## Slice 3: Durable integration records
 
-Status: active
+Status: delivered
 
 Expected branch: `feat/slice-3-native-integration-records`
 
@@ -139,10 +139,10 @@ Prerequisite: verified Slice 2 integration and closed task fanout.
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T3.1 | [TKT-20261011133059](../ticket/reviewing/20261011133059-native-integration-t3-1.md) | validated | `64369b81579c8b4136609383568731067bc7bdfd` | Extend candidate and receipt schemas |
-| T3.2 | [TKT-20261011133100](../ticket/reviewing/20261011133100-native-integration-t3-2.md) | validated | `9a004ba55c6b72ac69aa0322fba531eebcc257d7` | Persist integration entries through WorkflowStore |
-| T3.3 | [TKT-20261011133101](../ticket/reviewing/20261011133101-native-integration-t3-3.md) | validated | `dce7077f632e9d1d93dcdde5d35ba958f4695e0f` | Extend attempt and budget journals |
-| T3.4 | [TKT-20261011133102](../ticket/reviewing/20261011133102-native-integration-t3-4.md) | validated | `c7ee88bb92a27c520489effb717cecde34f2dbdf` | Rebuild indexes and validate migrations |
+| T3.1 | [TKT-20261011133059](../ticket/solved/20261011133059-native-integration-t3-1.md) | done | `64369b81579c8b4136609383568731067bc7bdfd` | Extend candidate and receipt schemas |
+| T3.2 | [TKT-20261011133100](../ticket/solved/20261011133100-native-integration-t3-2.md) | done | `9a004ba55c6b72ac69aa0322fba531eebcc257d7` | Persist integration entries through WorkflowStore |
+| T3.3 | [TKT-20261011133101](../ticket/solved/20261011133101-native-integration-t3-3.md) | done | `dce7077f632e9d1d93dcdde5d35ba958f4695e0f` | Extend attempt and budget journals |
+| T3.4 | [TKT-20261011133102](../ticket/solved/20261011133102-native-integration-t3-4.md) | done | `c7ee88bb92a27c520489effb717cecde34f2dbdf` | Rebuild indexes and validate migrations |
 
 Required checks:
 
@@ -153,13 +153,13 @@ Required checks:
 
 PR: [#377](https://forge.adrianpk.com/adrianpk/chr/pulls/377)
 
-Verified merge: pending
+Verified merge: [#377](https://forge.adrianpk.com/adrianpk/chr/pulls/377), `ef72c8cbabf06816a93c293161c12d03211979ba` on `dev`
 
 Report/evidence: [Slice 3 report](../report/slices/native-integration-queue/slice-3-integration-records.md)
 
 ## Slice 4: Canonical queue scheduling
 
-Status: not_started
+Status: active
 
 Expected branch: `feat/slice-4-native-queue-scheduling`
 

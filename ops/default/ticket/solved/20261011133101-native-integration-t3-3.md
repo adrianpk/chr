@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133101
 title: "T3.3: Extend attempt and budget journals"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -11,6 +11,8 @@ source: chat
 reported_at: 2026-10-11T13:31:01Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-11T22:53:10Z
+resolution: fixed
+closed_at: 2026-10-12T02:42:44Z
 branch: feat/slice-3-native-integration-records
 pr: 377
 reviewed_at: 2026-10-11T23:36:41Z
@@ -70,4 +72,5 @@ Successful task checks:
 - `go test -race ./internal/core -run '^TestNativeBudget|^TestNativeSubmission|^TestNativeEntry|^TestNativeRecord|^TestNativeReceipt|^TestWorkflowSubmission' -count=1`
 - `git diff --check`
 
-[Slice 3 report](../../report/slices/native-integration-queue/slice-3-integration-records.md) records the actual gate and focused evidence. Canonical PR: [#377](https://forge.adrianpk.com/adrianpk/chr/pulls/377). The controller records ordered exact-HEAD checks for the complete clean PR head; verified integration remains pending.
+
+Canonical PR: [#377](https://forge.adrianpk.com/adrianpk/chr/pulls/377). All four ordered Looper checks passed on `ef72c8cbabf06816a93c293161c12d03211979ba`. Canonical Rebase + Fast-forward integration into `dev` was verified at 2026-10-12T02:39:12Z; Acta merge record: `01M4PZMZF2HN2XM577G70T3DYB`.

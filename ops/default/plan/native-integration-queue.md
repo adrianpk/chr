@@ -18,9 +18,9 @@ Plan approval: approved on 2026-10-11 under the explicit instruction to process 
 
 Implementation authorization: granted for the complete ordered corrective set and its defined task/PR map.
 
-Active slice: Slice 3 — Durable integration records
+Active slice: Slice 4 — Canonical queue scheduling
 
-Next slice: Slice 4 — Canonical queue scheduling
+Next slice: Slice 5 — Method preparation and provenance
 
 Slice strategy: behavior-first
 
@@ -176,7 +176,7 @@ Invariants: INV-08, INV-11, INV-14, INV-15, INV-23
 
 ## Slice 3: Durable integration records
 
-Status: active
+Status: delivered
 
 Expected branch: `feat/slice-3-native-integration-records`
 
@@ -185,6 +185,8 @@ Expected PR title: `feat(slice-3): persist native integration queue records`
 Expected report: `ops/default/report/slices/native-integration-queue/slice-3-integration-records.md`
 
 Canonical PR: [#377](https://forge.adrianpk.com/adrianpk/chr/pulls/377)
+
+Verified merge: `ef72c8cbabf06816a93c293161c12d03211979ba` on `dev`, 2026-10-12T02:39:12Z
 
 Prerequisite: verified Slice 2 integration and closed task fanout.
 
@@ -196,10 +198,10 @@ Invariants: INV-01, INV-02, INV-03, INV-06, INV-16, INV-17, INV-19, INV-24
 
 | Task | Ticket | Work | Acceptance boundary |
 | --- | --- | --- | --- |
-| T3.1 | [TKT-20261011133059](../ticket/reviewing/20261011133059-native-integration-t3-1.md) | Add original/published source identities, method manifests and versioned capability/transport references without rewriting historical receipts. | Old schemas remain verifiable and new readers reject missing required proof or unsupported versions. |
-| T3.2 | [TKT-20261011133100](../ticket/reviewing/20261011133100-native-integration-t3-2.md) | Implement idempotent unit entry identity, queue sequence allocation and guarded entry/invocation transitions with the existing file transaction owner. | Duplicate admission consumes one entry; interrupted transitions preserve authoritative records and replay safely. |
-| T3.3 | [TKT-20261011133101](../ticket/reviewing/20261011133101-native-integration-t3-3.md) | Add merger/drift/token reservations and explicit Git-applied/forge-pending submission facts, preserving existing consumed counters. | Restart and candidate replacement cannot refill counters or release unknown reservations. |
-| T3.4 | [TKT-20261011133102](../ticket/reviewing/20261011133102-native-integration-t3-4.md) | Add rebuildable queue queries, strict cross-record validation and additive migration with malformed-byte preservation. | Index loss is recoverable; stale or inconsistent records block mutation without manufacturing execution state. |
+| T3.1 | [TKT-20261011133059](../ticket/solved/20261011133059-native-integration-t3-1.md) | Add original/published source identities, method manifests and versioned capability/transport references without rewriting historical receipts. | Old schemas remain verifiable and new readers reject missing required proof or unsupported versions. |
+| T3.2 | [TKT-20261011133100](../ticket/solved/20261011133100-native-integration-t3-2.md) | Implement idempotent unit entry identity, queue sequence allocation and guarded entry/invocation transitions with the existing file transaction owner. | Duplicate admission consumes one entry; interrupted transitions preserve authoritative records and replay safely. |
+| T3.3 | [TKT-20261011133101](../ticket/solved/20261011133101-native-integration-t3-3.md) | Add merger/drift/token reservations and explicit Git-applied/forge-pending submission facts, preserving existing consumed counters. | Restart and candidate replacement cannot refill counters or release unknown reservations. |
+| T3.4 | [TKT-20261011133102](../ticket/solved/20261011133102-native-integration-t3-4.md) | Add rebuildable queue queries, strict cross-record validation and additive migration with malformed-byte preservation. | Index loss is recoverable; stale or inconsistent records block mutation without manufacturing execution state. |
 
 ### Required Candidate Checks
 
@@ -210,7 +212,7 @@ Invariants: INV-01, INV-02, INV-03, INV-06, INV-16, INV-17, INV-19, INV-24
 
 ## Slice 4: Canonical queue scheduling
 
-Status: not_started
+Status: active
 
 Expected branch: `feat/slice-4-native-queue-scheduling`
 

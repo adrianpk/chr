@@ -1,11 +1,12 @@
 # Slice 3: Durable integration records
 
-Status: reviewing
+Status: delivered
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
 Branch: `feat/slice-3-native-integration-records`
 PR: [#377](https://forge.adrianpk.com/adrianpk/chr/pulls/377)
+Verified merge: `ef72c8cbabf06816a93c293161c12d03211979ba` on `dev`, 2026-10-12T02:39:12Z
 
 ## Purpose
 
@@ -124,6 +125,15 @@ The validation execution allowance is now forty-five minutes per package. Requir
 
 Execution uses Go 1.27.1, the repository-pinned golangci-lint v2.14.0, the retained neutral Git fixture configuration, a forty-five-minute Go test timeout and the supported absent default-agent command fixture. Host settings and positive explicit provider/executor fixtures are retained. These settings do not change repository assertions or publication policy.
 
+All four final commands passed through Looper on exact clean HEAD `ef72c8cbabf06816a93c293161c12d03211979ba`, which is the canonical Rebase + Fast-forward merge of PR #377. Strict lint reported zero issues; the full core suite passed in 863.138 seconds, the required core/app command in 837.907/73.625 seconds and the race command in 1907.944/251.947 seconds. The ordered retained check list is:
+
+- `make verify`
+- `go test ./internal/core ./internal/app -count=1`
+- `go test -race ./internal/core ./internal/app -count=1`
+- `git diff --check`
+
+Acta records exact-HEAD preparation/validation as `01M4PZM1JDDN78M3V4QMQTABQP` and the controller-owned merge as `01M4PZMZF2HN2XM577G70T3DYB`.
+
 ## Risks and Follow-ups
 
-All four tasks passed their recorded pre-commit and focused checks. The PR-reference follow-up completes the candidate before ordered exact-HEAD validation. The controller's retained evidence binds the clean PR head to `make verify`, `go test ./internal/core ./internal/app -count=1`, `go test -race ./internal/core ./internal/app -count=1` and `git diff --check`, in that order. Verified integration and slice closure remain pending.
+All four task tickets are solved after verified integration. Canonical scheduling continues in the approved Slice 4.
