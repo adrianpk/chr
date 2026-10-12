@@ -13,7 +13,13 @@ import (
 )
 
 func (s *WorkflowStore) withLock(ctx context.Context, action func() error) (err error) {
-	return s.withRepositoryLock(ctx, s.recoverTransition, action)
+	return s.withRepositoryLock(ctx, func() error {
+		if err := s.guardWorkflowCoordinatorMutation(ctx); err != nil {
+			return err
+		}
+
+		return s.recoverTransition()
+	}, action)
 }
 
 func (s *WorkflowStore) withRepositoryLock(ctx context.Context, prepare, action func() error) (err error) {

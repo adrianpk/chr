@@ -12,7 +12,7 @@ import (
 
 // ReadWorkflow observes a retained invocation; its private token hashes stay private.
 func (s *WorkflowStore) ReadWorkflow(ctx context.Context, id string) (result WorkflowInvocation, err error) {
-	err = s.withLock(ctx, func() error {
+	err = s.withRepositoryLock(ctx, func() error { return s.prepareWorkflowRead(ctx) }, func() error {
 		run, _, readErr := s.locateWorkflowInvocation(ctx, id)
 		result = run.WorkflowInvocation
 
@@ -56,7 +56,7 @@ func (s *WorkflowStore) readWorkflowInvocation(id string) (workflowInvocationFil
 }
 
 func (s *WorkflowStore) locateWorkflowInvocation(ctx context.Context, id string) (workflowInvocationFile, *WorkflowStore, error) {
-	return s.locateWorkflowInvocationPrepared(ctx, id, (*WorkflowStore).recoverTransition)
+	return s.locateWorkflowInvocationPrepared(ctx, id, func(owner *WorkflowStore) error { return owner.prepareWorkflowRead(ctx) })
 }
 
 func (s *WorkflowStore) locateWorkflowInvocationPrepared(ctx context.Context, id string, prepare func(*WorkflowStore) error) (workflowInvocationFile, *WorkflowStore, error) {
@@ -95,7 +95,7 @@ func (s *WorkflowStore) workflowOwnerStore(run workflowInvocationFile) (*Workflo
 }
 
 func (s *WorkflowStore) repositoryWorkflowInvocations(ctx context.Context) ([]workflowInvocationFile, error) {
-	return s.repositoryWorkflowInvocationsPrepared(ctx, (*WorkflowStore).recoverTransition)
+	return s.repositoryWorkflowInvocationsPrepared(ctx, func(owner *WorkflowStore) error { return owner.prepareWorkflowRead(ctx) })
 }
 
 func (s *WorkflowStore) repositoryWorkflowInvocationsPrepared(ctx context.Context, prepare func(*WorkflowStore) error) ([]workflowInvocationFile, error) {

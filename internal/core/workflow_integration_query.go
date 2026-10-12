@@ -117,8 +117,7 @@ func validateWorkflowIntegrationQueueQuery(q WorkflowIntegrationQueueQuery) erro
 	}
 
 	if q.Repository != "" {
-		repository, err := workflowCanonicalRepository(q.Repository)
-		if err != nil || repository != q.Repository {
+		if _, err := workflowCanonicalRepository(q.Repository); err != nil {
 			return ErrWorkflowConflict
 		}
 	}
@@ -226,7 +225,17 @@ func workflowIntegrationQueryBounds(q WorkflowIntegrationQueueQuery) bool {
 }
 
 func workflowIntegrationQueryTarget(entry WorkflowIntegrationEntry, q WorkflowIntegrationQueueQuery) bool {
-	return (q.Repository == "" || entry.Repository == q.Repository) && (q.TargetRef == "" || entry.TargetRef == q.TargetRef)
+	repository := q.Repository
+	if repository != "" {
+		var err error
+
+		repository, err = workflowCanonicalRepository(repository)
+		if err != nil {
+			return false
+		}
+	}
+
+	return (repository == "" || entry.Repository == repository) && (q.TargetRef == "" || entry.TargetRef == q.TargetRef)
 }
 
 func workflowIntegrationQueryState(entry WorkflowIntegrationEntry, q WorkflowIntegrationQueueQuery) bool {

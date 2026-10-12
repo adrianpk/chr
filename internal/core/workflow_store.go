@@ -31,7 +31,7 @@ func NewWorkflowStore(layout OpsLayout, projectID string) *WorkflowStore {
 
 // Read observes one record under repository-wide mutation exclusion.
 func (s *WorkflowStore) Read(ctx context.Context, path string) (record WorkflowRecord, err error) {
-	err = s.withLock(ctx, func() error {
+	err = s.withRepositoryLock(ctx, func() error { return s.prepareWorkflowRead(ctx) }, func() error {
 		var readErr error
 
 		record, readErr = s.readRecord(path)
@@ -44,7 +44,7 @@ func (s *WorkflowStore) Read(ctx context.Context, path string) (record WorkflowR
 
 // Snapshot validates all adopted records without trusting a tracker or cache.
 func (s *WorkflowStore) Snapshot(ctx context.Context) (snapshot WorkflowSnapshot, err error) {
-	err = s.withLock(ctx, func() error {
+	err = s.withRepositoryLock(ctx, func() error { return s.prepareWorkflowRead(ctx) }, func() error {
 		var readErr error
 
 		snapshot, readErr = s.readSnapshot(ctx)

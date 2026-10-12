@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"testing"
 	"time"
@@ -297,7 +298,12 @@ func TestWorkflowClaimForeignClone(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := NewWorkflowStore(layout, "project-1").StartWorkflow(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	before := nativeQueueImages(t, layout.Root())
+	if _, err := NewWorkflowStore(layout, "project-1").StartWorkflow(t.Context(), request); !errors.Is(err, ErrWorkflowCoordinator) {
 		t.Fatalf("foreign clone reused active ownership: %v", err)
+	}
+
+	if !reflect.DeepEqual(before, nativeQueueImages(t, layout.Root())) {
+		t.Fatal("foreign clone rejection changed copied authority")
 	}
 }

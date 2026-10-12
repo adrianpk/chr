@@ -3,7 +3,6 @@ package core
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"slices"
 	"strings"
 )
@@ -105,30 +104,4 @@ func initializeWorkflowPullRequestBinding(run *workflowInvocationFile, descripto
 
 func workflowPullRequestBindingID(run workflowInvocationFile, repository string) string {
 	return workflowHash([]byte(run.ProjectID + "\x00" + run.Namespace + "\x00" + run.Lane.Unit.ID + "\x00" + repository))
-}
-
-func workflowCanonicalRepository(raw string) (string, error) {
-	parsed, err := url.Parse(raw)
-	if err != nil || !validWorkflowRepositoryURL(parsed) {
-		return "", fmt.Errorf("canonical repository must be a public HTTPS repository URL")
-	}
-
-	parsed.Path = strings.TrimSuffix(strings.TrimSuffix(parsed.Path, "/"), ".git")
-
-	parts := strings.Split(strings.TrimPrefix(parsed.Path, "/"), "/")
-	if len(parts) != 2 || !validWorkflowRepositoryPart(parts[0]) || !validWorkflowRepositoryPart(parts[1]) {
-		return "", ErrWorkflowConflict
-	}
-
-	parsed.Host = strings.ToLower(parsed.Host)
-
-	return parsed.String(), nil
-}
-
-func validWorkflowRepositoryURL(parsed *url.URL) bool {
-	return parsed.Scheme == "https" && parsed.User == nil && parsed.RawQuery == "" && parsed.Fragment == "" && parsed.RawPath == "" && parsed.Host != ""
-}
-
-func validWorkflowRepositoryPart(part string) bool {
-	return part != "" && part != "." && part != ".." && len(part) <= 128 && !strings.ContainsAny(part, " \\%\x00\r\n\t")
 }
