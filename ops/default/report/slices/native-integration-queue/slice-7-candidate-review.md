@@ -5,7 +5,7 @@ Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
 Branch: `feat/slice-7-native-candidate-review`
-PR: pending
+PR: [#381](https://forge.adrianpk.com/adrianpk/chr/pulls/381)
 
 ## Purpose
 
@@ -191,9 +191,10 @@ T7.1 development checks passed before its implementation commit, using Go
 
 T7.1 implementation commit: [3f1aac6910b7e8885146a544a735db69f49c1a94](https://forge.adrianpk.com/adrianpk/chr/commit/3f1aac6910b7e8885146a544a735db69f49c1a94). Acta commit activity: `01M4RW111YN23ZPXZ87AHKG9CB`.
 
-The queue-generation regression was reproduced before correction. The final
-slice candidate has not been validated. All owned check processes exited
-naturally; no external fixture was started.
+The queue-generation regression was reproduced before correction. These are
+task development checks; exact-HEAD slice evidence is retained separately by
+the controller and canonical PR. All owned check processes exited naturally;
+no external fixture was started.
 
 T7.2 development checks passed before its implementation commit, using the
 same Go 1.27.1 fixture environment:
@@ -211,8 +212,8 @@ Source-only native approval and stale policy reuse were reproduced before
 correction. Queue movement also reproduced loss of the running reviewer
 credential. The initial repository and race checks failed only because a capacity
 fixture passed a label instead of its marker path. The corrected-source checks
-passed; all owned check processes exited naturally. The final slice candidate
-has not been validated.
+passed; all owned check processes exited naturally. These are task development checks;
+exact-HEAD slice evidence is retained separately by the controller and canonical PR.
 
 T7.3 implementation commit: [91676739a6706575df5ee1e644acf29189cfc62b](https://forge.adrianpk.com/adrianpk/chr/commit/91676739a6706575df5ee1e644acf29189cfc62b). Acta commit activity: `01M4S33CF0TC96K7KTAP1TNASA`.
 
@@ -230,7 +231,8 @@ objects for rewritten results and a stale invocation revision after the queue
 transition. Each was corrected; the final focused normal and race checks passed.
 The repository and race checks exited naturally. All 27 changed Go files
 matched the frozen source throughout validation. No external fixture was started.
-The final slice candidate has not been validated.
+These are task development checks; exact-HEAD slice evidence is retained
+separately by the controller and canonical PR.
 
 T7.4 implementation commit: [19a339e92300df7141f57458c7892de2876cecac](https://forge.adrianpk.com/adrianpk/chr/commit/19a339e92300df7141f57458c7892de2876cecac). Acta commit activity: `01M4S6N0V0VZAQ494X453TY0SM`.
 
@@ -251,9 +253,14 @@ bindings before native validation. The mid-gate regression exposed a paused
 checkpoint that required clean target-drift recovery. Initial strict linting
 rejected whitespace in a new test; the corrected lint passed. Repository
 verification and all focused checks exited naturally. No external fixture was
-started. Final exact-HEAD checks remain pending.
+started. Exact-HEAD slice evidence is retained separately by the controller
+and canonical PR.
 
 ## Risks and Follow-ups
 
-T7.1–T7.4 are implemented and checked. Final slice candidate checks and
-canonical PR evidence remain pending.
+T7.1–T7.4 are implemented and checked. Canonical PR [#381](https://forge.adrianpk.com/adrianpk/chr/pulls/381) retains the
+slice candidate. PR-open activity: `01M4S6V1EXT2MKX1F0DWW9YCGA`.
+The controller records `make verify`,
+`go test ./internal/core ./internal/app -count=1`,
+`go test -race ./internal/core ./internal/app -count=1` and `git diff --check`
+in that order for the clean final PR head. Integration remains pending.

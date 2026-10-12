@@ -13,6 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T20:15:16Z
 reviewed_at: 2026-10-12T21:10:46Z
 branch: feat/slice-7-native-candidate-review
+pr: 381
 commits: ["c1c3d9dc954e9d3888c55a9a63dfac4fc04f6b59"]
 ---
 
@@ -86,4 +87,5 @@ Implementation commit: [c1c3d9dc954e9d3888c55a9a63dfac4fc04f6b59](https://forge.
 
 Acta commit activity: `01M4RZ9E4YV2JFRSJFAAG9TPTH`.
 
-Canonical slice PR and final exact-HEAD checks remain pending.
+Canonical slice PR: [#381](https://forge.adrianpk.com/adrianpk/chr/pulls/381). The controller records ordered exact-HEAD
+validation separately before integration; task status remains reviewing.
