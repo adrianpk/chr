@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133107
 title: "T5.1: Prepare exact merge and squash candidates"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -14,6 +14,8 @@ started_at: 2026-10-12T07:40:03Z
 branch: feat/slice-5-native-method-preparation
 pr: 379
 reviewed_at: 2026-10-12T08:11:05Z
+resolution: fixed
+closed_at: 2026-10-12T12:58:41Z
 commits: [d6532b26691da0df0002f3d29753a9ae0a52be11]
 ---
 
@@ -75,3 +77,5 @@ Strict lint reported zero issues. The required pre-commit gate passed with core 
 Task implementation: [commit](https://forge.adrianpk.com/adrianpk/chr/commit/d6532b26691da0df0002f3d29753a9ae0a52be11). Acta task record: `01M4QJN40VG8QKAKS12Z40FY3T`.
 
 Canonical slice PR: [#379](https://forge.adrianpk.com/adrianpk/chr/pulls/379).
+
+All four ordered controller checks passed on `771ae3d603f34e6c12d16243e258a125e5db4f9b`. Canonical Rebase + Fast-forward integration into `dev` was verified at 2026-10-12T12:53:28Z; Acta merge record: `01M4R2SQDTK2WNACPWQRJ7RAQR`.

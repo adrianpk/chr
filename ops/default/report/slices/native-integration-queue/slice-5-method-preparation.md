@@ -1,6 +1,6 @@
 # Slice 5: Method preparation and provenance
 
-Status: reviewing
+Status: delivered
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
@@ -220,9 +220,10 @@ Required final candidate commands, in canonical order:
 - `go test -race ./internal/core ./internal/app -count=1`
 - `git diff --check`
 
-The controller ledger binds these commands to the final clean PR head after
-PR-reference commits and pushes. Its exact-HEAD evidence is authoritative; the
-canonical PR Validation section lists these commands only after they pass.
+All four ordered commands passed at exact clean HEAD `771ae3d603f34e6c12d16243e258a125e5db4f9b`.
+The controller retains the immutable command list and log for that HEAD.
+Canonical Rebase + Fast-forward integration through PR #379 was verified at
+2026-10-12T12:53:28Z. Acta merge record: `01M4R2SQDTK2WNACPWQRJ7RAQR`.
 
 ## Risks and Follow-ups
 
@@ -230,6 +231,6 @@ All four Slice 5 tasks are locally validated. Signed preparation is locally
 certified; live
 provider signing-profile certification remains in the recorded certification
 slice.
-Canonical PR #379 is open against `dev`; the controller owns integration.
-Required final candidate evidence uses the controller ledger after PR-reference
-updates. All task tickets remain reviewing until verified integration.
+Canonical PR #379 is merged into `dev`; all four task tickets are solved.
+Required final candidate evidence is retained in the controller ledger for the
+exact integrated HEAD.

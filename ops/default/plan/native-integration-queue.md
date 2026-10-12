@@ -18,9 +18,9 @@ Plan approval: approved on 2026-10-11 under the explicit instruction to process 
 
 Implementation authorization: granted for the complete ordered corrective set and its defined task/PR map.
 
-Active slice: Slice 5 — Method preparation and provenance
+Active slice: Slice 6 — Bounded merger role
 
-Next slice: Slice 6 — Bounded merger role
+Next slice: Slice 7 — Combined validation and review
 
 Slice strategy: behavior-first
 
@@ -248,7 +248,7 @@ Invariants: INV-03, INV-04, INV-05, INV-06, INV-18, INV-20, INV-21, INV-22
 
 ## Slice 5: Method preparation and provenance
 
-Status: active
+Status: delivered
 
 Expected branch: `feat/slice-5-native-method-preparation`
 
@@ -266,10 +266,10 @@ Invariants: INV-05, INV-08, INV-09, INV-10, INV-11, INV-12, INV-15
 
 | Task | Ticket | Work | Acceptance boundary |
 | --- | --- | --- | --- |
-| T5.1 | [TKT-20261011133107](../ticket/reviewing/20261011133107-native-integration-t5-1.md) | Extend deterministic preparation to preserve B/S parents or the one-parent squash proof with complete source attribution. | Host-verified parents, combined diff and result tree match the immutable prepared candidate. |
-| T5.2 | [TKT-20261011133108](../ticket/reviewing/20261011133108-native-integration-t5-2.md) | Preserve ordered source authors/messages/dates, empty replay mappings and explicit attributed integration-fix commits. | No silent squash, dropped duplicate intent or merge-containing history bypass is accepted. |
-| T5.3 | [TKT-20261011133109](../ticket/reviewing/20261011133109-native-integration-t5-3.md) | Reprepare source-equal candidates within the approved bound and sign rewritten commits through the trusted host where required. | No artificial unrelated commit is inserted; missing certified signing capability blocks before validation/publication. |
-| T5.4 | [TKT-20261011133110](../ticket/reviewing/20261011133110-native-integration-t5-4.md) | Add real repository method/history fixtures and prove that worker lanes and user checkouts are untouched. | Merge/rebase/squash proofs reject altered trees, mappings and provenance, including no-op edge cases. |
+| T5.1 | [TKT-20261011133107](../ticket/solved/20261011133107-native-integration-t5-1.md) | Extend deterministic preparation to preserve B/S parents or the one-parent squash proof with complete source attribution. | Host-verified parents, combined diff and result tree match the immutable prepared candidate. |
+| T5.2 | [TKT-20261011133108](../ticket/solved/20261011133108-native-integration-t5-2.md) | Preserve ordered source authors/messages/dates, empty replay mappings and explicit attributed integration-fix commits. | No silent squash, dropped duplicate intent or merge-containing history bypass is accepted. |
+| T5.3 | [TKT-20261011133109](../ticket/solved/20261011133109-native-integration-t5-3.md) | Reprepare source-equal candidates within the approved bound and sign rewritten commits through the trusted host where required. | No artificial unrelated commit is inserted; missing certified signing capability blocks before validation/publication. |
+| T5.4 | [TKT-20261011133110](../ticket/solved/20261011133110-native-integration-t5-4.md) | Add real repository method/history fixtures and prove that worker lanes and user checkouts are untouched. | Merge/rebase/squash proofs reject altered trees, mappings and provenance, including no-op edge cases. |
 
 ### Required Candidate Checks
 
@@ -280,7 +280,7 @@ Invariants: INV-05, INV-08, INV-09, INV-10, INV-11, INV-12, INV-15
 
 ## Slice 6: Bounded merger role
 
-Status: not_started
+Status: active
 
 Expected branch: `feat/slice-6-native-merger-role`
 

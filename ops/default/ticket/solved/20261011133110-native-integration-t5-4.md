@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133110
 title: "T5.4: Verify preparation isolation and method proofs"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -14,6 +14,8 @@ started_at: 2026-10-12T11:02:54Z
 reviewed_at: 2026-10-12T11:29:36Z
 branch: feat/slice-5-native-method-preparation
 pr: 379
+resolution: fixed
+closed_at: 2026-10-12T12:58:41Z
 commits: [a6a4d6ec83d8dc15f4bdf05712417567dc6145fc]
 ---
 
@@ -87,3 +89,5 @@ This task is validated locally. Required ordered clean-HEAD candidate checks use
 the controller ledger after PR-reference commits. Integration remains controller-owned.
 
 Canonical slice PR: [#379](https://forge.adrianpk.com/adrianpk/chr/pulls/379).
+
+All four ordered controller checks passed on `771ae3d603f34e6c12d16243e258a125e5db4f9b`. Canonical Rebase + Fast-forward integration into `dev` was verified at 2026-10-12T12:53:28Z; Acta merge record: `01M4R2SQDTK2WNACPWQRJ7RAQR`.

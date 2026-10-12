@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133108
 title: "T5.2: Replay attributed rebase histories"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -14,6 +14,8 @@ started_at: 2026-10-12T08:20:13Z
 reviewed_at: 2026-10-12T09:57:20Z
 branch: feat/slice-5-native-method-preparation
 pr: 379
+resolution: fixed
+closed_at: 2026-10-12T12:58:41Z
 commits: [ed92e270edd489332191667c1c80201536363ba2]
 ---
 
@@ -80,3 +82,5 @@ Task commit: `ed92e270edd489332191667c1c80201536363ba2`. Acta task record: `01M4
 candidate checks use the controller ledger after PR-reference updates.
 
 Canonical slice PR: [#379](https://forge.adrianpk.com/adrianpk/chr/pulls/379).
+
+All four ordered controller checks passed on `771ae3d603f34e6c12d16243e258a125e5db4f9b`. Canonical Rebase + Fast-forward integration into `dev` was verified at 2026-10-12T12:53:28Z; Acta merge record: `01M4R2SQDTK2WNACPWQRJ7RAQR`.

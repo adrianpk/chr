@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133109
 title: "T5.3: Enforce non-no-op and signing policy"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -14,6 +14,8 @@ started_at: 2026-10-12T10:21:53Z
 reviewed_at: 2026-10-12T10:56:07Z
 branch: feat/slice-5-native-method-preparation
 pr: 379
+resolution: fixed
+closed_at: 2026-10-12T12:58:41Z
 commits: [134ebaf9c8041ca92bdd184ee48f6e521a293e07]
 ---
 
@@ -85,3 +87,5 @@ All four Slice 5 tasks are locally validated; the controller records required or
 This task is validated locally; it is not integrated or finalized.
 
 Canonical slice PR: [#379](https://forge.adrianpk.com/adrianpk/chr/pulls/379).
+
+All four ordered controller checks passed on `771ae3d603f34e6c12d16243e258a125e5db4f9b`. Canonical Rebase + Fast-forward integration into `dev` was verified at 2026-10-12T12:53:28Z; Acta merge record: `01M4R2SQDTK2WNACPWQRJ7RAQR`.
