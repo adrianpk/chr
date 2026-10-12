@@ -40,7 +40,7 @@ func (s *WorkflowStore) registerWorkflowProcess(ctx context.Context, claim *Work
 		registered = WorkflowProcess{CapacitySlot: workflowWorkerSlotNumber(claim.reservation.Name()), Identity: identity, GroupID: pid, Command: command, State: "running", StdoutRef: base + ".stdout", StderrRef: base + ".stderr"}
 		attempt.Processes = append(attempt.Processes, registered)
 
-		if err := claim.store.commitWorkflowState(&run); err != nil {
+		if err := claim.store.commitWorkflowProcessStart(ctx, &run, prepared); err != nil {
 			return err
 		}
 

@@ -65,7 +65,24 @@ func (s *WorkflowStore) checkWorkflowIntegrationReservationAdmission(ctx context
 		return err
 	}
 
-	if r.Kind == "agent_call" && !r.Allowance.Deadline.After(time.Now()) {
+	return checkWorkflowIntegrationCallDeadline(budget, r)
+}
+
+func checkWorkflowIntegrationCallDeadline(budget WorkflowIntegrationBudget, reservation WorkflowIntegrationReservation) error {
+	if reservation.Kind != "agent_call" {
+		return nil
+	}
+
+	deadline := reservation.Allowance.Deadline
+	if reservation.Allowance == (WorkflowTokenAllowance{}) {
+		deadline = reservation.RuntimeDeadline
+
+		if budget.TokenLimit != nil {
+			return ErrWorkflowIntegrationBudget
+		}
+	}
+
+	if !deadline.After(time.Now()) {
 		return ErrWorkflowConflict
 	}
 

@@ -514,6 +514,47 @@ by the role. The result has no approval, receipt, method override or publication
 grant. Protocol validation does not run a harness, accept actual changes or
 replace host validation and candidate-bound review.
 
+## Owned merger execution
+
+`ExecuteWorkflowMerger` admits a host-assembled conflict, gate-regression or
+actionable-review input only for the current merging queue entry. It rechecks
+source/target observations, generation, frozen scope, configured method, exact
+unit validation commands and retained evidence before reserving the shared agent
+slot. The existing integration ledger charges a finite merger attempt before
+launch and retains its reservation with the immutable role input.
+
+`WorkflowMergerHarness` selects an absolute driver executable and exact arguments.
+Its retained `WorkflowMergerHarnessCertificate` binds the executable checksum,
+broker protocol and capability revision. The trusted driver must disable built-in
+filesystem, shell, network and MCP tools and expose model tool requests solely
+through `chr-merger-broker/v1`. An unrestricted worker CLI is not compatible.
+The driver is a trusted host component; the broker is a model tool boundary,
+not an operating-system sandbox for that component.
+
+The host creates a private Git repository from the current source or verified
+prepared candidate. It has no remotes, credential helpers, hooks or shared writable
+object store. Driver environment and working directory are private and omit
+inherited provider credentials. The model receives hashed intent/conflict images
+and can only read, write or delete permitted regular files through the broker.
+Protected paths, symlink/hardlink aliases, traversal, shell commands, publication,
+approval, scope changes and receipt creation are denied. Local validation processes
+are also denied because repaired code could bypass the broker; the exact host gate
+remains required after independent diff acceptance.
+
+Every file request rechecks ownership and live source/target fences. JSON-line
+messages retain the protocol's strict parsing bounds, with at most 128 messages
+and 8 MiB per exchange. The existing process supervisor records birth identity
+before granting execution, owns the process group and keeps the shared slot until
+all descendants stop. Timeout, pause and cancellation retain failure and consumed
+attempt evidence; a paused invocation resumes in integration.
+
+`WorkflowMergerAttempt` retains the proposal and host-observed process evidence
+without committing or accepting edits. Only separately certified driver accounting
+can settle a finite token reservation, with exact whole-call capability and
+input/output ceilings. Unknown or partial usage stays charged. The model's usage
+fields cannot settle the ledger. Git method repair, host diff acceptance, combined
+validation and candidate-bound review remain separate operations.
+
 ## Candidate review and approval
 
 | Operation | Contract |

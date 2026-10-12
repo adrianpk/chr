@@ -195,7 +195,7 @@ func validateWorkflowIntegrationReservation(r WorkflowIntegrationReservation) er
 		return validateWorkflowIntegrationAction(r)
 	}
 
-	if !validWorkflowTokenAllowance(r.Allowance) || !slices.Contains([]string{"executor", "merger", "reviewer", "closing"}, r.Role) {
+	if !validWorkflowIntegrationCallAllowance(r) || !slices.Contains([]string{"executor", "merger", "reviewer", "closing"}, r.Role) {
 		return ErrWorkflowConflict
 	}
 
@@ -224,8 +224,16 @@ func validWorkflowTokenAllowance(a WorkflowTokenAllowance) bool {
 	return err == nil && maximum > 0 && a.Maximum == maximum && a.WholeCall && validWorkflowNativeFingerprint(a.CapabilityRevision) && !a.Deadline.IsZero()
 }
 
+func validWorkflowIntegrationCallAllowance(r WorkflowIntegrationReservation) bool {
+	if r.Allowance == (WorkflowTokenAllowance{}) {
+		return r.Role == "merger" && !r.RuntimeDeadline.IsZero() && r.State != "settled"
+	}
+
+	return validWorkflowTokenAllowance(r.Allowance) && r.RuntimeDeadline.IsZero()
+}
+
 func validateWorkflowIntegrationAction(r WorkflowIntegrationReservation) error {
-	if !slices.Contains([]string{"drift", "submission"}, r.Kind) || r.Role != "" || r.State != "reserved" || r.Allowance != (WorkflowTokenAllowance{}) {
+	if !slices.Contains([]string{"drift", "submission"}, r.Kind) || r.Role != "" || r.State != "reserved" || r.Allowance != (WorkflowTokenAllowance{}) || !r.RuntimeDeadline.IsZero() {
 		return ErrWorkflowConflict
 	}
 

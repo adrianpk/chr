@@ -64,6 +64,7 @@ type WorkflowIntegrationReservation struct {
 	AttemptID       string                 `json:"attempt_id"`
 	BaseCommit      string                 `json:"base_commit,omitempty"`
 	Allowance       WorkflowTokenAllowance `json:"allowance"`
+	RuntimeDeadline time.Time              `json:"runtime_deadline,omitempty"`
 	State           string                 `json:"state"`
 	ReportedInput   int64                  `json:"reported_input"`
 	ReportedOutput  int64                  `json:"reported_output"`

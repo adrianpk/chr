@@ -285,7 +285,7 @@ func validWorkflowReplacement(attempt WorkflowAttempt, previous map[string]Workf
 }
 
 func validateWorkflowAttemptState(attempt WorkflowAttempt) error {
-	if !slices.Contains([]string{"", workflowSliceValidationPurpose, workflowSliceRepairPurpose, workflowSliceReviewPurpose, workflowIntegrationValidationPurpose}, attempt.Purpose) {
+	if !slices.Contains([]string{"", workflowSliceValidationPurpose, workflowSliceRepairPurpose, workflowSliceReviewPurpose, workflowIntegrationValidationPurpose, workflowMergerPurpose}, attempt.Purpose) {
 		return fmt.Errorf("invalid workflow attempt purpose")
 	}
 

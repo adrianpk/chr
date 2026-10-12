@@ -47,7 +47,16 @@ func workflowSupervisedCommand(ctx context.Context, claim *WorkflowClaim, prepar
 	args = append(args, command...)
 	process := exec.CommandContext(ctx, "bash", args...)
 	process.Dir = prepared.input.Lane.Worktree
+
 	process.Env = append(os.Environ(), "CHR_WORKFLOW_INPUT="+filepathForWorkflowInput(claim, prepared))
+	if prepared.environment != nil {
+		process.Env = prepared.environment
+	}
+
+	if prepared.directory != "" {
+		process.Dir = prepared.directory
+	}
+
 	process.ExtraFiles = []*os.File{claim.reservation, gate, claim.capacityGuard}
 	process.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	process.WaitDelay = time.Second
