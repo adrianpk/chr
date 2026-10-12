@@ -251,6 +251,8 @@ func workflowIntegrationReceiptBindingMatches(run workflowInvocationFile, entry 
 }
 
 func projectWorkflowIntegrationPhase(run *workflowInvocationFile, entry WorkflowIntegrationEntry) {
+	validationOwned := workflowIntegrationValidationOwned(*run)
+
 	switch entry.State {
 	case "queued":
 		run.Status = "pending"
@@ -271,7 +273,23 @@ func projectWorkflowIntegrationPhase(run *workflowInvocationFile, entry Workflow
 		run.Blocker = nil
 	}
 
+	if validationOwned {
+		// A queue projection cannot replace the live gate credential. Its owner
+		// must retain stopped observations before releasing shared capacity.
+		run.Status = "running"
+	}
+
 	run.StopIntent = entry.StopIntent
+}
+
+func workflowIntegrationValidationOwned(run workflowInvocationFile) bool {
+	if run.Status != "running" || len(run.Attempts) == 0 {
+		return false
+	}
+
+	attempt := run.Attempts[len(run.Attempts)-1]
+
+	return attempt.Purpose == workflowIntegrationValidationPurpose && attempt.Outcome == "running"
 }
 
 func bindWorkflowIntegrationPublication(entry *WorkflowIntegrationEntry, run workflowInvocationFile) {

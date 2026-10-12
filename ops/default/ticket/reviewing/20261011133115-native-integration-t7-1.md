@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133115
 title: "T7.1: Run required gates on the exact prepared result"
-status: ready
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,9 @@ tags: native-integration, slice-7
 source: chat
 reported_at: 2026-10-11T13:31:15Z
 ready_at: 2026-10-11T13:31:37Z
+started_at: 2026-10-12T19:18:41Z
+reviewing_at: 2026-10-12T20:12:03Z
+branch: feat/slice-7-native-candidate-review
 commits: []
 ---
 
@@ -50,12 +53,27 @@ Acceptance IDs and invariants: use the owning slice's explicit coverage map in t
 
 ## Execution Gate
 
-Approved: 2026-10-11; the maintainer authorized this corrective set through Looper.
+Approved: 2026-10-11; the maintainer authorized this corrective set through the delivery controller.
 
 Execute only when this slice is active and its predecessors and external prerequisites are satisfied.
-Keep one task commit and one canonical slice PR; only Looper submits development merges.
+Keep one task commit and one canonical slice PR; only the delivery controller submits development merges.
 Use the existing Markdown ticket lifecycle; this file does not create a product runtime invocation.
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+T7.1 connects host-owned combined validation to native candidate evidence and
+queue authority. It freezes exact capability and queue generation before the
+gate, rejects semantic failures and stale images, and retains stopped process
+observations before shared capacity is released.
+
+Development checks passed with Go 1.27.1:
+
+- `make verify` — zero lint issues; all packages passed.
+- `go test ./internal/core -run '^(TestNativePreparation|TestNativeRecord|TestNativeSubmission|TestWorkflowPreparation)' -count=1` — passed.
+- `go test ./internal/core -run '^TestNativePreparationStop$' -count=1` — passed.
+- `go test -race ./internal/core -run '^(TestNativePreparation|TestNativeRecord|TestNativeSubmission|TestWorkflowPreparation)' -count=1` — passed.
+- `git diff --check` — passed.
+
+The native generation regression was reproduced before correction. The existing
+host owner now survives queue projection until its gate finishes or stops.
+Task commit, canonical slice PR and final exact-HEAD checks remain pending.

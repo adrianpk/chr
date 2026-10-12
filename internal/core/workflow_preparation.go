@@ -50,9 +50,10 @@ type WorkflowPreparationGit interface {
 // WorkflowPreparationInput freezes source proof, current policy, protection and
 // the configured method's combined result before running the host slice gate.
 type WorkflowPreparationInput struct {
-	Source     WorkflowReviewInput           `json:"source"`
-	Capability WorkflowPublicationCapability `json:"capability"`
-	Git        WorkflowIntegrationProof      `json:"git"`
+	Source     WorkflowReviewInput             `json:"source"`
+	Capability WorkflowPublicationCapability   `json:"capability"`
+	Git        WorkflowIntegrationProof        `json:"git"`
+	Native     *WorkflowNativePreparationInput `json:"native,omitempty"`
 }
 
 // WorkflowIntegrationCandidate is retained host validation of combined content.
@@ -128,7 +129,7 @@ func (s *WorkflowStore) PrepareWorkflowSliceIntegration(ctx context.Context, id 
 	cleanup, finish := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer finish()
 
-	err = s.finishWorkflowIntegrationValidation(cleanup, claim, prepared, candidate, provider, validationErr, watched.Err() != nil)
+	err = s.finishWorkflowIntegrationValidation(cleanup, claim, prepared, &candidate, provider, validationErr, watched.Err() != nil)
 
 	return candidate, errors.Join(validationErr, err)
 }

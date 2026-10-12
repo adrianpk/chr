@@ -178,6 +178,15 @@ func (s *WorkflowStore) persistWorkflowPreparation(run *workflowInvocationFile, 
 
 	files = append(files, workflowFileChange{Path: attempt.ResultRef, After: data})
 
+	if candidate.Native != nil {
+		file, err := s.workflowNativePreparedEntryChange(run, candidate)
+		if err != nil {
+			return err
+		}
+
+		files = append(files, file)
+	}
+
 	return s.commitWorkflowPullRequestFiles(run, files, workflowFileChange{Path: ref, After: data})
 }
 

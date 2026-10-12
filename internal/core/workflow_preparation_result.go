@@ -60,7 +60,14 @@ func (s *WorkflowStore) checkWorkflowPreparationSource(ctx context.Context, run 
 		return err
 	}
 
-	capability, err := observeWorkflowPublicationCapability(ctx, provider, source)
+	if err := s.checkWorkflowNativePreparationAdmission(run, source, input.Capability, provider); err != nil {
+		return err
+	}
+
+	current := input
+	current.Source = source
+
+	capability, err := observeWorkflowPreparedCapability(ctx, provider, current)
 	if err != nil {
 		return err
 	}
@@ -72,7 +79,7 @@ func (s *WorkflowStore) checkWorkflowPreparationSource(ctx context.Context, run 
 	return nil
 }
 
-func (s *WorkflowStore) finishWorkflowIntegrationValidation(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, candidate WorkflowIntegrationCandidate, provider WorkflowPublicationGuardProvider, validationErr error, interrupted bool) error {
+func (s *WorkflowStore) finishWorkflowIntegrationValidation(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, candidate *WorkflowIntegrationCandidate, provider WorkflowPublicationGuardProvider, validationErr error, interrupted bool) error {
 	return s.withLock(ctx, func() error {
 		run, record, err := s.checkWorkflowCredential(ctx, claim, false)
 		if err != nil {
@@ -96,15 +103,24 @@ func (s *WorkflowStore) finishWorkflowIntegrationValidation(ctx context.Context,
 			return err
 		}
 
-		failure := errors.Join(validationErr, owner.checkWorkflowPreparationSource(ctx, run, candidate.Input, provider), owner.checkWorkflowPreparationGit(ctx, candidate), validateWorkflowPreparationGate(prepared.input, candidate.Validation))
+		failure := owner.checkWorkflowPreparationCompletion(ctx, run, prepared, candidate, provider, validationErr)
 		if failure != nil {
 			return errors.Join(failure, owner.checkpointWorkflowAttempt(run, record, "interrupted", &candidate.Validation), claim.releaseReservation())
 		}
 
-		if err := owner.persistWorkflowPreparation(&run, record, candidate); err != nil {
+		if err := owner.persistWorkflowPreparation(&run, record, *candidate); err != nil {
 			return err
 		}
 
 		return claim.releaseReservation()
 	})
+}
+
+func (s *WorkflowStore) checkWorkflowPreparationCompletion(ctx context.Context, run workflowInvocationFile, prepared workflowPreparedTask, candidate *WorkflowIntegrationCandidate, provider WorkflowPublicationGuardProvider, validationErr error) error {
+	failure := errors.Join(validationErr, s.checkWorkflowPreparationSource(ctx, run, candidate.Input, provider), s.checkWorkflowPreparationGit(ctx, *candidate), validateWorkflowPreparationGate(prepared.input, candidate.Validation), s.checkWorkflowNativePreparationFence(run, candidate.Input.Native))
+	if failure != nil {
+		return failure
+	}
+
+	return s.sealWorkflowNativePreparation(run, candidate)
 }

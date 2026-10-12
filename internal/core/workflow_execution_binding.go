@@ -31,6 +31,12 @@ func (s *WorkflowStore) checkWorkflowPreparedClaim(ctx context.Context, claim *W
 			return ErrWorkflowStop
 		}
 
+		if input := prepared.input.Preparation; input != nil {
+			if err := claim.store.checkWorkflowNativePreparationFence(run, input.Native); err != nil {
+				return err
+			}
+		}
+
 		return checkWorkflowExecutionBinding(run, record, prepared)
 	})
 }

@@ -30,7 +30,7 @@ func (s *WorkflowStore) prepareWorkflowIntegrationValidation(ctx context.Context
 			return readErr
 		}
 
-		cached, readErr = owner.cachedWorkflowPreparation(ctx, run, source, capability)
+		cached, readErr = owner.cachedWorkflowPreparation(ctx, run, source, capability, provider)
 		if readErr != nil || cached != nil {
 			return readErr
 		}
@@ -65,10 +65,14 @@ func (s *WorkflowStore) workflowPreparationPreflight(ctx context.Context, run *w
 		return observation, source, capability, s.blockWorkflowPublication(run, err)
 	}
 
+	if err == nil {
+		err = s.checkWorkflowNativePreparationAdmission(*run, source, capability, provider)
+	}
+
 	return observation, source, capability, err
 }
 
-func (s *WorkflowStore) cachedWorkflowPreparation(ctx context.Context, run workflowInvocationFile, source WorkflowReviewInput, capability WorkflowPublicationCapability) (*WorkflowIntegrationCandidate, error) {
+func (s *WorkflowStore) cachedWorkflowPreparation(ctx context.Context, run workflowInvocationFile, source WorkflowReviewInput, capability WorkflowPublicationCapability, provider WorkflowPublicationGuardProvider) (*WorkflowIntegrationCandidate, error) {
 	if run.Preparation == nil || run.Preparation.State != "validated" {
 		return nil, nil
 	}
@@ -83,7 +87,16 @@ func (s *WorkflowStore) cachedWorkflowPreparation(ctx context.Context, run workf
 		return nil, err
 	}
 
-	if hash != run.Preparation.SourceHash || capability != candidate.Input.Capability {
+	capability, err = s.cachedWorkflowPreparationCapability(ctx, run, candidate, capability, provider)
+	if err != nil {
+		return nil, err
+	}
+
+	if !workflowPreparationInputsCurrent(run, candidate, hash, capability) {
+		if candidate.Input.Native != nil {
+			return nil, ErrWorkflowConflict
+		}
+
 		return nil, nil
 	}
 
@@ -92,6 +105,10 @@ func (s *WorkflowStore) cachedWorkflowPreparation(ctx context.Context, run workf
 	}
 
 	return &candidate, nil
+}
+
+func workflowPreparationInputsCurrent(run workflowInvocationFile, candidate WorkflowIntegrationCandidate, hash string, capability WorkflowPublicationCapability) bool {
+	return hash == run.Preparation.SourceHash && capability == candidate.Input.Capability
 }
 
 func (s *WorkflowStore) blockWorkflowPublication(run *workflowInvocationFile, reason error) error {
@@ -169,6 +186,10 @@ func (s *WorkflowStore) prepareWorkflowIntegrationGit(ctx context.Context, run *
 	lane.HeadCommit = proof.ResultCommit
 
 	input := WorkflowPreparationInput{Source: source, Capability: capability, Git: proof}
+	if err := s.bindWorkflowNativePreparation(ctx, *run, &input, provider); err != nil {
+		return input, lane, err
+	}
+
 	if err := s.checkWorkflowPreparationGit(ctx, WorkflowIntegrationCandidate{Input: input, Lane: lane}); err != nil {
 		return input, lane, err
 	}

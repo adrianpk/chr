@@ -177,6 +177,15 @@ func (s *WorkflowStore) checkWorkflowNativeValidationInput(b WorkflowNativeRecor
 		return ErrWorkflowConflict
 	}
 
+	var preparation WorkflowPreparationInput
+	if err := s.readWorkflowNativeEvidence(b.InvocationID, b.PreparationRef, &preparation); err != nil {
+		return err
+	}
+
+	if !workflowNativeJSONEqual(input.Preparation, preparation) {
+		return ErrWorkflowConflict
+	}
+
 	return validateWorkflowPreparationGate(input, result)
 }
 

@@ -267,7 +267,7 @@ Prerequisite: verified Slice 6 integration and closed task fanout.
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T7.1 | [TKT-20261011133115](../ticket/ready/20261011133115-native-integration-t7-1.md) | ready | pending | Run required gates on the exact prepared result |
+| T7.1 | [TKT-20261011133115](../ticket/reviewing/20261011133115-native-integration-t7-1.md) | reviewing | pending | Run required gates on the exact prepared result |
 | T7.2 | [TKT-20261011133116](../ticket/ready/20261011133116-native-integration-t7-2.md) | ready | pending | Bind review to the current candidate |
 | T7.3 | [TKT-20261011133117](../ticket/ready/20261011133117-native-integration-t7-3.md) | ready | pending | Repair actionable integration findings |
 | T7.4 | [TKT-20261011133118](../ticket/ready/20261011133118-native-integration-t7-4.md) | ready | pending | Handle external target and source movement |
