@@ -12,7 +12,7 @@ reported_at: 2026-10-11T13:31:04Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T03:34:55Z
 branch: feat/slice-4-native-queue-scheduling
-pr: pending
+pr: 378
 reviewed_at: 2026-10-12T04:23:09Z
 commits: [05d438047230b65833949c84e7c8b1ac99190f33]
 ---
@@ -54,10 +54,10 @@ Acceptance IDs and invariants: use the owning slice's explicit coverage map in t
 
 ## Execution Gate
 
-Approved: 2026-10-11; the maintainer authorized this corrective set through Looper.
+Approved: 2026-10-11; the maintainer authorized this corrective set through the controller.
 
 Execute only when this slice is active and its predecessors and external prerequisites are satisfied.
-Keep one task commit and one canonical slice PR; only Looper submits development merges.
+Keep one task commit and one canonical slice PR; only the controller submits development merges.
 Use the existing Markdown ticket lifecycle; this file does not create a product runtime invocation.
 
 ## Evidence
@@ -71,3 +71,5 @@ Successful task checks:
 - `git diff --check`
 
 Strict lint: zero issues. The full normal core suite passed in 1195.940 seconds and app in 139.514 seconds. Expanded focused race checks passed for core in 680.292 seconds and app in 8.638 seconds. The canonical [Slice 4 report](../../report/slices/native-integration-queue/slice-4-queue-scheduling.md) retains corrected development failures and the task validation boundary.
+
+Canonical slice PR: [#378](https://forge.adrianpk.com/adrianpk/chr/pulls/378).

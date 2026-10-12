@@ -5,7 +5,7 @@ Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
 Branch: `feat/slice-4-native-queue-scheduling`
-PR: pending
+PR: [#378](https://forge.adrianpk.com/adrianpk/chr/pulls/378)
 
 ## Purpose
 
@@ -40,6 +40,8 @@ T4.1 implementation and canonical report introduction: [task commit](https://for
 T4.2 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/05d438047230b65833949c84e7c8b1ac99190f33). Acta recorded the task as `01M4Q5MBSA7CN05RM6356V2KE0`.
 
 T4.3 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/35d39f6b6df235d79848fb59054fd7d8b2ef0da3). Acta recorded the task as `01M4QAACBMDJ1MYQ53FZ1K83R9`.
+
+T4.4 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/c08b6d6590342a45dcb21fce12d05b740f98ef6b). Acta recorded the task as `01M4QBFSQJAKPEM2CEPRJVN2BR`. The canonical Slice 4 PR was opened as [#378](https://forge.adrianpk.com/adrianpk/chr/pulls/378); Acta opening record: `01M4QBH1QZ4X8DR0N3XVS56NET`.
 
 ## Contracts Added or Changed
 
@@ -120,4 +122,9 @@ Execution uses Go 1.27.1, repository-pinned golangci-lint v2.14.0, the retained 
 
 ## Risks and Follow-ups
 
-All four task checks are complete. Canonical PR references and required ordered candidate checks remain before handoff. The controller records those checks against the final clean PR HEAD; task-level checks above do not substitute for that evidence.
+All four task checks are complete. Canonical PR references are recorded. The required candidate commands below run through the controller against the clean PR HEAD after those references are committed; their retained exact-HEAD evidence and canonical PR validation list own the final handoff. Task-level checks above do not substitute for that evidence.
+
+- `make verify`
+- `go test ./internal/core ./internal/app -count=1`
+- `go test -race ./internal/core ./internal/app -count=1`
+- `git diff --check`

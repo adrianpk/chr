@@ -12,9 +12,9 @@ reported_at: 2026-10-11T13:31:06Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T05:55:32Z
 branch: feat/slice-4-native-queue-scheduling
-pr: pending
+pr: 378
 reviewed_at: 2026-10-12T06:05:37Z
-commits: []
+commits: [c08b6d6590342a45dcb21fce12d05b740f98ef6b]
 ---
 
 # T4.4: Verify real concurrent scheduling
@@ -71,4 +71,6 @@ Successful task checks:
 - `go test ./internal/core -run '^TestNativeProcessTargets$' -count=1`
 - `git diff --check`
 
-Strict lint: zero issues. Focused race regression: 132.880 seconds. Final target fixture normal check: 6.538 seconds. Canonical PR and required ordered clean-HEAD candidate evidence are pending.
+Strict lint: zero issues. Focused race regression: 132.880 seconds. Final target fixture normal check: 6.538 seconds. Implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/c08b6d6590342a45dcb21fce12d05b740f98ef6b). Acta: `01M4QBFSQJAKPEM2CEPRJVN2BR`. Required ordered clean-HEAD candidate evidence is recorded through the controller after PR-reference commits.
+
+Canonical slice PR: [#378](https://forge.adrianpk.com/adrianpk/chr/pulls/378).

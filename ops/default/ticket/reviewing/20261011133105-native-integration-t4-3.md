@@ -12,7 +12,7 @@ reported_at: 2026-10-11T13:31:05Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T04:35:19Z
 branch: feat/slice-4-native-queue-scheduling
-pr: pending
+pr: 378
 reviewed_at: 2026-10-12T05:44:40Z
 commits: [35d39f6b6df235d79848fb59054fd7d8b2ef0da3]
 ---
@@ -72,3 +72,5 @@ Successful task checks:
 - `git diff --check`
 
 Strict lint: zero issues. The final full normal core suite passed in 1279.578 seconds and app in 113.484 seconds, with all other packages passing. The focused race regression passed in 24.308 seconds; expanded race checks passed for core in 276.815 seconds and app in 3.579 seconds. The canonical [Slice 4 report](../../report/slices/native-integration-queue/slice-4-queue-scheduling.md) retains corrected development failures and the task validation boundary.
+
+Canonical slice PR: [#378](https://forge.adrianpk.com/adrianpk/chr/pulls/378).

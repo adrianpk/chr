@@ -220,6 +220,8 @@ Expected PR title: `feat(slice-4): schedule integration across canonical target 
 
 Expected report: `ops/default/report/slices/native-integration-queue/slice-4-queue-scheduling.md`
 
+Canonical PR: [#378](https://forge.adrianpk.com/adrianpk/chr/pulls/378)
+
 Prerequisite: verified Slice 3 integration and closed task fanout.
 
 Acceptance evidence owner: Slice 4 report and its linked retained command/provider evidence.
