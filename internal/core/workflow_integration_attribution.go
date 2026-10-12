@@ -24,6 +24,7 @@ type WorkflowIntegrationAttribution struct {
 	Author      WorkflowIntegrationIdentity `json:"author"`
 	Committer   WorkflowIntegrationIdentity `json:"committer"`
 	MessageHash string                      `json:"message_hash"`
+	Encoding    string                      `json:"encoding,omitempty"`
 }
 
 func (reader workflowIntegrationReader) commitAttribution(ctx context.Context, commit string) (WorkflowIntegrationAttribution, error) {
@@ -53,6 +54,8 @@ func workflowCommitAttribution(commit, data string) (WorkflowIntegrationAttribut
 			result.Tree = value
 		case "parent":
 			result.Parents = append(result.Parents, value)
+		case "encoding":
+			result.Encoding = value
 		case "author":
 			result.Author, err = workflowIntegrationIdentity(value)
 		case "committer":
@@ -118,6 +121,10 @@ func validWorkflowCommitTimezone(zone string) bool {
 }
 
 func validWorkflowIntegrationAttribution(entry WorkflowIntegrationAttribution) bool {
+	return !strings.ContainsAny(entry.Encoding, "\x00\r\n") && validWorkflowCommitIdentity(entry.Author) && validWorkflowCommitIdentity(entry.Committer) && validWorkflowAttributionObjects(entry)
+}
+
+func validWorkflowAttributionObjects(entry WorkflowIntegrationAttribution) bool {
 	if !workflowCommitID(entry.Commit) || !workflowCommitID(entry.Tree) || len(entry.Commit) != len(entry.Tree) || len(entry.Parents) > WorkflowRecordLimit || !validWorkflowNativeFingerprint(entry.MessageHash) {
 		return false
 	}
@@ -128,7 +135,7 @@ func validWorkflowIntegrationAttribution(entry WorkflowIntegrationAttribution) b
 		}
 	}
 
-	return validWorkflowCommitIdentity(entry.Author) && validWorkflowCommitIdentity(entry.Committer)
+	return true
 }
 
 func (reader workflowIntegrationReader) sourceAttributions(ctx context.Context, proof WorkflowIntegrationProof) ([]WorkflowIntegrationAttribution, error) {

@@ -25,7 +25,21 @@ func NewWorkflowIntegrationGit(repository, transport string) OSWorkflowIntegrati
 }
 
 // VerifyWorkflowIntegration fetches the canonical target and proves its result.
-func (git OSWorkflowIntegrationGit) VerifyWorkflowIntegration(ctx context.Context, query WorkflowIntegrationQuery) (proof WorkflowIntegrationProof, err error) {
+func (git OSWorkflowIntegrationGit) VerifyWorkflowIntegration(ctx context.Context, query WorkflowIntegrationQuery) (WorkflowIntegrationProof, error) {
+	return git.verifyIntegration(ctx, query, nil)
+}
+
+// VerifyPreparedWorkflowIntegration preserves the retained proof schema while
+// checking original attribution and every prepared object on the remote target.
+func (git OSWorkflowIntegrationGit) VerifyPreparedWorkflowIntegration(ctx context.Context, query WorkflowIntegrationQuery, expected WorkflowIntegrationProof) (WorkflowIntegrationProof, error) {
+	if err := validateWorkflowIntegrationProof(query, expected); err != nil {
+		return WorkflowIntegrationProof{}, err
+	}
+
+	return git.verifyIntegration(ctx, query, &expected)
+}
+
+func (git OSWorkflowIntegrationGit) verifyIntegration(ctx context.Context, query WorkflowIntegrationQuery, expected *WorkflowIntegrationProof) (proof WorkflowIntegrationProof, err error) {
 	if err := git.validateQuery(query); err != nil {
 		return proof, err
 	}
@@ -52,7 +66,11 @@ func (git OSWorkflowIntegrationGit) VerifyWorkflowIntegration(ctx context.Contex
 		return proof, fmt.Errorf("fetch canonical integration target: %w", err)
 	}
 
-	return reader.verify(ctx, query)
+	if expected == nil {
+		return reader.verify(ctx, query)
+	}
+
+	return reader.verifyRetained(ctx, query, expected)
 }
 
 func (git OSWorkflowIntegrationGit) validateQuery(query WorkflowIntegrationQuery) error {
@@ -83,7 +101,12 @@ func (reader workflowIntegrationReader) output(ctx context.Context, args ...stri
 }
 
 func (reader workflowIntegrationReader) rawOutput(ctx context.Context, args ...string) (string, error) {
+	return reader.rawInput(ctx, "", args...)
+}
+
+func (reader workflowIntegrationReader) rawInput(ctx context.Context, input string, args ...string) (string, error) {
 	command := exec.CommandContext(ctx, "git", append([]string{"--no-replace-objects", "-C", reader.dir}, args...)...)
+	command.Stdin = strings.NewReader(input)
 	command.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	command.Cancel = func() error {
 		err := syscall.Kill(-command.Process.Pid, syscall.SIGKILL)
@@ -110,42 +133,44 @@ func (reader workflowIntegrationReader) rawOutput(ctx context.Context, args ...s
 }
 
 func (reader workflowIntegrationReader) verify(ctx context.Context, query WorkflowIntegrationQuery) (WorkflowIntegrationProof, error) {
+	return reader.verifyRetained(ctx, query, nil)
+}
+
+func (reader workflowIntegrationReader) verifyRetained(ctx context.Context, query WorkflowIntegrationQuery, expected *WorkflowIntegrationProof) (WorkflowIntegrationProof, error) {
 	proof := WorkflowIntegrationProof{WorkflowIntegrationQuery: query}
+	if expected != nil {
+		proof = *expected
+		proof.History = nil
+	}
+
 	proof.SourceDirectory = ""
 
-	target, err := reader.output(ctx, "rev-parse", "refs/heads/target^{commit}")
-	if err != nil {
+	if err := reader.observeIntegrationTarget(ctx, &proof); err != nil {
 		return proof, err
-	}
-
-	proof.ObservedTarget = target
-	if _, err := reader.output(ctx, "merge-base", "--is-ancestor", query.ResultCommit, target); err != nil {
-		return proof, fmt.Errorf("provider result is absent from the canonical target: %w", err)
-	}
-
-	tree, err := reader.tree(ctx, query.SourceCommit)
-	if err != nil || tree != query.SourceTree {
-		return proof, ErrWorkflowConflict
-	}
-
-	if _, err := reader.output(ctx, "merge-base", "--is-ancestor", query.OriginCommit, query.SourceCommit); err != nil {
-		return proof, ErrWorkflowConflict
 	}
 
 	if err := reader.verifyMethod(ctx, &proof); err != nil {
 		return proof, err
 	}
 
-	if proof.Method != "rebase" {
-		proof.Provenance, err = reader.combinedProvenance(ctx, proof)
+	if expected == nil && proof.Method != "rebase" {
+		provenance, err := reader.combinedProvenance(ctx, proof)
 		if err != nil {
 			return proof, err
 		}
+
+		proof.Provenance = provenance
 	}
+
+	var err error
 
 	proof.HistoryHash, err = workflowIntegrationHistoryHash(proof)
 	if err != nil {
 		return proof, err
+	}
+
+	if !workflowRetainedProofMatches(proof, expected) {
+		return proof, ErrWorkflowConflict
 	}
 
 	return proof, validateWorkflowIntegrationProof(query, proof)
@@ -173,4 +198,31 @@ func (reader workflowIntegrationReader) preparedTree(ctx context.Context, origin
 	}
 
 	return line, nil
+}
+
+func (reader workflowIntegrationReader) observeIntegrationTarget(ctx context.Context, proof *WorkflowIntegrationProof) error {
+	target, err := reader.output(ctx, "rev-parse", "refs/heads/target^{commit}")
+	if err != nil {
+		return err
+	}
+
+	proof.ObservedTarget = target
+	if _, err := reader.output(ctx, "merge-base", "--is-ancestor", proof.ResultCommit, target); err != nil {
+		return fmt.Errorf("provider result is absent from the canonical target: %w", err)
+	}
+
+	tree, err := reader.tree(ctx, proof.SourceCommit)
+	if err != nil || tree != proof.SourceTree {
+		return ErrWorkflowConflict
+	}
+
+	if _, err := reader.output(ctx, "merge-base", "--is-ancestor", proof.OriginCommit, proof.SourceCommit); err != nil {
+		return ErrWorkflowConflict
+	}
+
+	return nil
+}
+
+func workflowRetainedProofMatches(proof WorkflowIntegrationProof, expected *WorkflowIntegrationProof) bool {
+	return expected == nil || (proof.HistoryHash == expected.HistoryHash && proof.BaseCommit == expected.BaseCommit && proof.PreparedTree == expected.PreparedTree)
 }

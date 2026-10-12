@@ -15,6 +15,8 @@ type WorkflowIntegrationProvenance struct {
 	CombinedDiffHash  string                           `json:"combined_diff_hash"`
 	Source            []WorkflowIntegrationAttribution `json:"source"`
 	Prepared          []WorkflowIntegrationAttribution `json:"prepared"`
+	Replays           []WorkflowIntegrationReplay      `json:"replays,omitempty"`
+	IntegrationFixes  []WorkflowIntegrationFix         `json:"integration_fixes,omitempty"`
 }
 
 func (reader workflowIntegrationReader) combinedProvenance(ctx context.Context, proof WorkflowIntegrationProof) (*WorkflowIntegrationProvenance, error) {
@@ -81,16 +83,28 @@ func validateWorkflowIntegrationProvenance(proof WorkflowIntegrationProof) error
 }
 
 func validWorkflowProvenanceHeader(proof WorkflowIntegrationProof, p WorkflowIntegrationProvenance) bool {
-	if p.Schema != "chr-integration-provenance/v1" || proof.Method == "rebase" || p.AttributionPolicy != "host_author_with_original_source_manifest" || !validWorkflowNativeFingerprint(p.CombinedDiffHash) {
+	if !validWorkflowProvenanceEnvelope(proof, p) || !validWorkflowProvenanceCount(p) {
 		return false
 	}
 
+	if proof.Method == "rebase" {
+		return p.AttributionPolicy == "preserve_source_authorship" && len(p.Replays) == len(p.Source) && len(p.Prepared) == len(p.Source)+len(p.IntegrationFixes)
+	}
+
+	return p.AttributionPolicy == "host_author_with_original_source_manifest" && len(p.Prepared) == 1 && len(p.Replays) == 0 && len(p.IntegrationFixes) == 0
+}
+
+func validWorkflowProvenanceEnvelope(proof WorkflowIntegrationProof, p WorkflowIntegrationProvenance) bool {
 	expectedFormat := "sha1"
 	if len(proof.ResultCommit) == 64 {
 		expectedFormat = "sha256"
 	}
 
-	return p.ObjectFormat == expectedFormat && len(p.Source) > 0 && len(p.Source) <= WorkflowRecordLimit && len(p.Prepared) == 1
+	return p.Schema == "chr-integration-provenance/v1" && validWorkflowNativeFingerprint(p.CombinedDiffHash) && p.ObjectFormat == expectedFormat
+}
+
+func validWorkflowProvenanceCount(p WorkflowIntegrationProvenance) bool {
+	return len(p.Source) > 0 && len(p.Source) <= WorkflowRecordLimit && len(p.Prepared) > 0 && len(p.Prepared) <= WorkflowRecordLimit
 }
 
 func validWorkflowAttributedSources(proof WorkflowIntegrationProof, sources []WorkflowIntegrationAttribution) bool {
@@ -109,6 +123,10 @@ func validWorkflowAttributedSources(proof WorkflowIntegrationProof, sources []Wo
 func validateWorkflowProvenanceCommits(proof WorkflowIntegrationProof, p WorkflowIntegrationProvenance) error {
 	if !validWorkflowAttributedSources(proof, p.Source) {
 		return ErrWorkflowConflict
+	}
+
+	if proof.Method == "rebase" {
+		return validateWorkflowRebaseProvenance(proof, p)
 	}
 
 	result := p.Prepared[0]

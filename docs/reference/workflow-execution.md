@@ -376,6 +376,28 @@ original source manifest must contain the same ordered original IDs. Limits
 remain 4096 commits and 1 MiB per evidence file and Git output. Historical proofs
 without provenance retain their original hash representation and read rules.
 
+Rebase uses the attribution policy `preserve_source_authorship` and retains
+one prepared commit per original linear source commit. Authors, author dates,
+message bytes and encoding remain unchanged; rewritten commits record the host
+as committer and exclude original signature headers. The `replays` list binds
+each original/prepared pair to `nonempty`, `source_empty` or `already_applied`.
+Empty replays remain in order with their original messages. Merge-containing
+sources and wholly empty integration units require explicit operator resolution.
+
+Declared `integration_fixes` append separate attributed commits after the
+original replay sequence. Each retains an actionable finding, exact parent and
+tree, author and committer metadata. The complete sequence and finding enter the
+candidate/history hash and must pass combined validation and review. Missing
+repair declarations, cosmetic findings, altered replay metadata and false empty
+decisions fail host verification before publication.
+
+Native publication observation re-proves the retained history version through
+`WorkflowPreparedIntegrationGit.VerifyPreparedWorkflowIntegration`. The trusted
+host fetches the original source and canonical target, verifies every mapped
+commit and declared fix, and compares the retained history hash. Rich proofs
+require this port; legacy hashes remain unchanged rather than acquiring new
+metadata during observation.
+
 | Operation | Contract |
 | --- | --- |
 | `PrepareWorkflowSliceIntegration` | Resolve the current method and atomic provider capability, prepare an isolated combined result, and run the frozen slice gate against that exact clean lane. |

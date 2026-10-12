@@ -124,11 +124,9 @@ func (reader workflowIntegrationReader) prepareIntegration(ctx context.Context, 
 		return proof, err
 	}
 
-	if proof.Method != "rebase" {
-		proof.Provenance, err = reader.combinedProvenance(ctx, proof)
-		if err != nil {
-			return proof, err
-		}
+	proof.Provenance, err = reader.integrationProvenance(ctx, proof)
+	if err != nil {
+		return proof, err
 	}
 
 	proof.HistoryHash, err = workflowIntegrationHistoryHash(proof)
@@ -166,12 +164,22 @@ func (reader workflowIntegrationReader) prepareRebase(ctx context.Context, proof
 			return "", err
 		}
 
-		commit, err := reader.preparationCommit(ctx, tree, []string{base})
+		commit, err := reader.replayCommit(ctx, tree, base, source)
 		if err != nil {
 			return "", err
 		}
 
 		previousSource, base = source, commit
+	}
+
+	baseTree, err := reader.tree(ctx, proof.BaseCommit)
+	if err != nil {
+		return "", err
+	}
+
+	resultTree, err := reader.tree(ctx, base)
+	if err != nil || baseTree == resultTree {
+		return "", fmt.Errorf("%w: empty integration unit requires operator resolution", ErrWorkflowConflict)
 	}
 
 	return base, nil

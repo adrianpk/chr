@@ -204,7 +204,7 @@ Prerequisite: verified Slice 4 integration and closed task fanout.
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
 | T5.1 | [TKT-20261011133107](../ticket/reviewing/20261011133107-native-integration-t5-1.md) | validated | `d6532b26691da0df0002f3d29753a9ae0a52be11` | Prepare exact merge and squash candidates |
-| T5.2 | [TKT-20261011133108](../ticket/ready/20261011133108-native-integration-t5-2.md) | ready | pending | Replay attributed rebase histories |
+| T5.2 | [TKT-20261011133108](../ticket/reviewing/20261011133108-native-integration-t5-2.md) | validated | pending | Replay attributed rebase histories |
 | T5.3 | [TKT-20261011133109](../ticket/ready/20261011133109-native-integration-t5-3.md) | ready | pending | Enforce non-no-op and signing policy |
 | T5.4 | [TKT-20261011133110](../ticket/ready/20261011133110-native-integration-t5-4.md) | ready | pending | Verify preparation isolation and method proofs |
 

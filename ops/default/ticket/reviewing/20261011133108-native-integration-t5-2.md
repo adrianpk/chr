@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133108
 title: "T5.2: Replay attributed rebase histories"
-status: ready
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,9 @@ tags: native-integration, slice-5
 source: chat
 reported_at: 2026-10-11T13:31:08Z
 ready_at: 2026-10-11T13:31:37Z
+started_at: 2026-10-12T08:20:13Z
+reviewed_at: 2026-10-12T09:57:20Z
+branch: feat/slice-5-native-method-preparation
 commits: []
 ---
 
@@ -58,4 +61,19 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Implemented attributed linear replays with exact authors/dates/messages/encoding,
+retained empty and duplicate intent, declared integration fixes, and canonical
+host verification of retained history versions. Unsupported merge histories and
+wholly empty integration units block before lane attachment.
+
+Task checks passed:
+
+- `make verify` — zero lint issues; core 1352.893 seconds, app 124.414 seconds and all other packages passed.
+- `go test -race ./internal/core -run '^TestNative|^TestWorkflowPreparation|^TestWorkflowIntegration|^TestWorkflowGit|^TestWorkflowSubmission' -count=1` — pass, 729.202 seconds.
+- `go test ./internal/core -run '^TestNativeSubmission|^TestNativeReceipt|^TestNativeReplay|^TestNativeObservation|^TestNativeLaterSource|^TestWorkflowSubmission' -count=1` — pass, 167.016 seconds.
+- `go test ./internal/core -run '^TestWorkflowPublication' -count=1` — pass, 165.846 seconds.
+- `git diff --check` — pass.
+
+Development failures and corrections are retained in the [Slice 5 report](../../report/slices/native-integration-queue/slice-5-method-preparation.md).
+Task commit and Acta references follow in the evidence binding commit. T5.3/T5.4,
+the canonical slice PR and final exact-HEAD controller checks remain pending.

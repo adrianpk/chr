@@ -26,7 +26,7 @@ func nativeRecordReceipt(t *testing.T, store *WorkflowStore, candidate WorkflowI
 	query := candidate.Input.Git.WorkflowIntegrationQuery
 	query.SourceDirectory = candidate.Lane.Worktree
 
-	proof, err := NewWorkflowIntegrationGit(b.SourceRepository, remote).VerifyWorkflowIntegration(t.Context(), query)
+	proof, err := NewWorkflowIntegrationGit(b.SourceRepository, remote).VerifyPreparedWorkflowIntegration(t.Context(), query, candidate.Input.Git)
 	if err != nil {
 		t.Fatal(err)
 	}

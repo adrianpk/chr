@@ -76,7 +76,7 @@ func validateWorkflowIntegrationHistory(proof WorkflowIntegrationProof) error {
 	}
 
 	last := proof.History[len(proof.History)-1]
-	if last.Source != proof.SourceCommit || last.Commit != proof.ResultCommit || last.Tree != proof.PreparedTree {
+	if last.Source != proof.SourceCommit || !workflowIntegrationHistoryTipMatches(proof, last) {
 		return ErrWorkflowConflict
 	}
 
@@ -99,18 +99,9 @@ func (reader workflowIntegrationReader) verifyRebase(ctx context.Context, proof 
 		return err
 	}
 
-	results := make([]string, len(sources))
-
-	base := proof.ResultCommit
-	for i := len(results) - 1; i >= 0; i-- {
-		results[i] = base
-
-		parents, err := reader.parents(ctx, base)
-		if err != nil || len(parents) != 1 {
-			return fmt.Errorf("rebase result requires the complete ordered linear history")
-		}
-
-		base = parents[0]
+	results, base, err := reader.rebaseResults(ctx, *proof, len(sources))
+	if err != nil {
+		return err
 	}
 
 	proof.BaseCommit = base
@@ -135,11 +126,11 @@ func (reader workflowIntegrationReader) verifyRebase(ctx context.Context, proof 
 		previousSource, base = source, results[i]
 	}
 
-	return nil
+	return reader.verifyRebaseProvenance(ctx, proof)
 }
 
 func (reader workflowIntegrationReader) linearSource(ctx context.Context, proof WorkflowIntegrationProof) ([]string, error) {
-	line, err := reader.output(ctx, "rev-list", "--reverse", "--first-parent", proof.OriginCommit+".."+proof.SourceCommit)
+	line, err := reader.output(ctx, "rev-list", "--reverse", "--first-parent", "--max-count=4097", proof.OriginCommit+".."+proof.SourceCommit)
 
 	commits := strings.Fields(line)
 	if err != nil || len(commits) == 0 || len(commits) > WorkflowRecordLimit {

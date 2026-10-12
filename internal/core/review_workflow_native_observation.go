@@ -191,7 +191,7 @@ func verifyWorkflowNativeTarget(ctx context.Context, binding WorkflowNativePubli
 	query := binding.Git.WorkflowIntegrationQuery
 	query.SourceDirectory = binding.SourceDirectory
 
-	proof, err := git.VerifyWorkflowIntegration(ctx, query)
+	proof, err := observeWorkflowPreparedGit(ctx, git, query, binding.Git)
 	if err != nil {
 		return proof, err
 	}
@@ -232,4 +232,16 @@ func finishWorkflowNativeObservation(binding WorkflowNativePublicationBinding, o
 	}
 
 	return observed
+}
+
+func observeWorkflowPreparedGit(ctx context.Context, git WorkflowIntegrationGit, query WorkflowIntegrationQuery, expected WorkflowIntegrationProof) (WorkflowIntegrationProof, error) {
+	if prepared, ok := git.(WorkflowPreparedIntegrationGit); ok {
+		return prepared.VerifyPreparedWorkflowIntegration(ctx, query, expected)
+	}
+
+	if expected.Provenance != nil {
+		return WorkflowIntegrationProof{}, ErrWorkflowConflict
+	}
+
+	return git.VerifyWorkflowIntegration(ctx, query)
 }

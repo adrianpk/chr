@@ -45,6 +45,12 @@ type WorkflowIntegrationGit interface {
 	VerifyWorkflowIntegration(context.Context, WorkflowIntegrationQuery) (WorkflowIntegrationProof, error)
 }
 
+// WorkflowPreparedIntegrationGit re-proves a retained history version from the
+// actual canonical target, including declared fixes and attribution metadata.
+type WorkflowPreparedIntegrationGit interface {
+	VerifyPreparedWorkflowIntegration(context.Context, WorkflowIntegrationQuery, WorkflowIntegrationProof) (WorkflowIntegrationProof, error)
+}
+
 // WorkflowSliceDeliveryProof retains verified external delivery before finalization.
 type WorkflowSliceDeliveryProof struct {
 	Schema        string                      `json:"schema"`

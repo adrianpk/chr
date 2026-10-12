@@ -84,7 +84,7 @@ func observeWorkflowSubmittedDelivery(ctx context.Context, submission WorkflowSu
 	query := submission.Guard.Git.WorkflowIntegrationQuery
 	query.ResultCommit, query.SourceDirectory = pr.ResultCommit, submission.PreparedLane.Worktree
 
-	proof, err := git.VerifyWorkflowIntegration(ctx, query)
+	proof, err := observeWorkflowSubmissionGit(ctx, git, query, submission.Guard.Git)
 	if err != nil {
 		return submission, err
 	}
@@ -143,4 +143,12 @@ func workflowLegacySubmissionPRIdentityMatches(submission WorkflowSubmission, pr
 	expected := submission.Guard.PullRequest
 
 	return pr.URL == expected.URL && pr.Repository == expected.Repository && pr.HeadRepository == expected.HeadRepository && pr.HeadBranch == expected.HeadBranch && pr.BaseBranch == expected.BaseBranch && pr.HeadCommit == expected.HeadCommit
+}
+
+func observeWorkflowSubmissionGit(ctx context.Context, git WorkflowIntegrationGit, query WorkflowIntegrationQuery, expected WorkflowIntegrationProof) (WorkflowIntegrationProof, error) {
+	if query.ResultCommit == expected.ResultCommit {
+		return observeWorkflowPreparedGit(ctx, git, query, expected)
+	}
+
+	return git.VerifyWorkflowIntegration(ctx, query)
 }
