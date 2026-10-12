@@ -205,7 +205,7 @@ func attachWorkflowPreparation(ctx context.Context, reader workflowIntegrationRe
 		return errorsOrConflict(err)
 	}
 
-	if _, err := source.output(ctx, "fetch", "--quiet", "--no-tags", "--no-recurse-submodules", "--", reader.dir, proof.ResultCommit); err != nil {
+	if _, err := source.output(ctx, "fetch", "--quiet", "--no-tags", "--no-recurse-submodules", "--no-write-fetch-head", "--", reader.dir, proof.ResultCommit); err != nil {
 		return err
 	}
 

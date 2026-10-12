@@ -360,6 +360,10 @@ bodies 16 KiB and branch names 256 bytes.
 
 ## Combined-result preparation
 
+Preparation imports result objects without rewriting the original worker's
+`FETCH_HEAD`. Its owned validation lane leaves worker and user checkout heads,
+indexes, staged/unstaged content and original evidence unchanged.
+
 New merge and squash preparation retains `WorkflowIntegrationProof.Provenance` (`provenance` in JSON)
 with schema `chr-integration-provenance/v1`. It records the object format, every
 original commit after the frozen origin in topological order, original authors and Git dates, exact

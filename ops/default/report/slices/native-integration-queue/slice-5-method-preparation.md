@@ -1,6 +1,6 @@
 # Slice 5: Method preparation and provenance
 
-Status: drafting
+Status: reviewing
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
@@ -34,6 +34,12 @@ and preparation identity. It adds the trusted host SSH signing path and binds
 required signatures to current capability. Every rewritten object and declared
 repair is signed and cryptographically verified against the public profile.
 Missing or mismatched signing capability blocks before validation or publication.
+
+T5.4 fixtures preserve distinct dirty worker and user checkouts byte for byte,
+including staged and unstaged files, indexes, checkout heads, retained fetch
+metadata and original evidence. Importing the prepared result no longer overwrites
+the original worker's `FETCH_HEAD`. Real altered-result objects and recomputed
+proofs are rejected across merge, rebase and squash before canonical ref updates.
 
 ## Implementation Notes
 
@@ -77,6 +83,8 @@ hashes. See [Workflow execution](../../../../../docs/reference/workflow-executio
 - `internal/core/workflow_preparation_identity.go`
 - `internal/core/workflow_preparation_signing.go`
 - `internal/core/workflow_preparation_policy_test.go`
+- `internal/core/workflow_preparation_isolation_test.go`
+- `internal/core/workflow_preparation_method_test.go`
 
 ## Validation
 
@@ -181,10 +189,33 @@ publication and retained-proof observation. Required signing on declared repairs
 is covered without modifying the original replay manifest. Owned fixtures
 completed naturally and their temporary data was cleaned by the test lifecycle.
 
+T5.4 focused checks:
+
+- `go test ./internal/core -run '^TestNativePreparationIsolation$|^TestNativeMethod|^TestNativeCombined|^TestNativeReplay|^TestNativePreparationCollision$|^TestNativeCollisionBudget$' -count=1` — pass, 11.638 seconds.
+- `go test -race ./internal/core -run '^TestNativePreparationIsolation$|^TestNativeMethod|^TestNativeCombined|^TestNativeReplay|^TestNativePreparationCollision$|^TestNativeCollisionBudget$' -count=1` — pass, 17.664 seconds.
+
+The initial isolation regression failed for all methods because attachment
+overwrote the original worker's `FETCH_HEAD`. The object import now disables
+that metadata write. An altered-object fixture initially normalized replay
+messages through Git's display format; it now reads exact commit-object message
+bytes. The corrected real-object fixtures pass with truthful attribution and
+recomputed history/candidate hashes, and prove that false combined trees are
+blocked by host verification. Existing ordered replay, parent, empty-replay and
+source-identity retry fixtures pass in the same focused run.
+
+Final T5.4 pre-commit checks passed:
+
+- `make verify` — zero lint issues; core 1260.604 seconds, app 104.874 seconds and all other packages passed.
+- `git diff --check` — pass.
+
+Owned test fixtures completed naturally and their disposable data was cleaned
+through the test lifecycle. The final clean-HEAD controller validation follows
+the task commit and PR-reference updates.
+
 ## Risks and Follow-ups
 
-T5.1 through T5.3 task validation are complete. T5.4 retains the approved method
-proof and isolation obligations. Signed preparation is locally certified; live
+All four Slice 5 tasks are locally validated. Signed preparation is locally
+certified; live
 provider signing-profile certification remains in the recorded certification
 slice.
 The canonical PR and final exact-HEAD controller checks follow all four tasks.
