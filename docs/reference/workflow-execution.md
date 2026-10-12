@@ -469,6 +469,51 @@ review. Unchanged retries recheck actual Git and retained evidence and reuse the
 accepted preparation without another gate. Neither operation submits a merge
 or creates a delivery receipt.
 
+## Merger proposal protocol
+
+`WorkflowMergerInput` freezes protocol version 1, entry/unit identity, candidate
+revision/hash, claim generation, canonical source/target refs, exact S/B, selected
+method, scope hash and an opaque host-owned workspace identity. Evidence stays
+under the owning invocation with immutable SHA-256 references. Source intent,
+intervening target changes, original source manifest and the validation contract
+are required. Each declared conflict names its path, kind and preserved source
+and target requirements. A rebase checkpoint retains the exact original replay
+step, prepared parent and ordered predecessor mappings.
+
+`SealWorkflowMergerInput` validates the host-assembled contract and hashes all
+fields without changing the caller's input. It admits only preparation conflicts,
+combined-gate regressions or actionable review findings. Attempts must be positive
+and bounded by 10; the deadline must remain within the admission-time worker
+runtime, which is bounded by the existing 86400-second policy ceiling. An optional
+token allowance requires whole-call metering and the same deadline. The absence
+of an allowance does not claim token enforcement. Capacity and budget reservation
+identities are included in the immutable input; sealing never acquires a slot or
+charges a call.
+
+`CheckWorkflowMergerEvidence` verifies actual retained file hashes, source
+manifest ownership and replay position through the contained workflow store.
+References to another invocation, noncanonical relative paths, changed images
+and symlink traversal are rejected. `ParseWorkflowMergerResult` requires the
+current host fence and exact input hash. Input/output images are bounded by
+1 MiB, reference/path lists by 128 entries and JSON nesting by 32 levels. Unknown
+fields, duplicate keys, case aliases, invalid UTF-8, trailing JSON and incompatible
+versions are rejected.
+
+Results are untrusted `resolved`, `needs_decision` or `failed` proposals. They
+record changed paths, per-conflict rationale, preserved requirements, supplementary
+local-check references and optional whole-call usage. A resolved proposal must
+retain every required intent; generated, lockfile, binary, submodule and LFS
+resolutions require a declared deterministic regeneration command. Decision
+requests contain a precise issue, affected requirements, two to five options and
+an authority owner. Expired inputs never answer a decision. Nil usage remains
+unknown and cannot release a finite reservation.
+
+Allowed paths use exact file or directory boundaries. Protected validation paths,
+workflow records, agent contracts and ticket/specification scope cannot be edited
+by the role. The result has no approval, receipt, method override or publication
+grant. Protocol validation does not run a harness, accept actual changes or
+replace host validation and candidate-bound review.
+
 ## Candidate review and approval
 
 | Operation | Contract |

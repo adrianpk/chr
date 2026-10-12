@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133111
 title: "T6.1: Define versioned merger input and result"
-status: ready
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,9 @@ tags: native-integration, slice-6
 source: chat
 reported_at: 2026-10-11T13:31:11Z
 ready_at: 2026-10-11T13:31:37Z
+started_at: 2026-10-12T13:02:05Z
+reviewed_at: 2026-10-12T13:41:56Z
+branch: feat/slice-6-native-merger-role
 commits: []
 ---
 
@@ -58,4 +61,22 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Versioned merger input/result contracts and host evidence checks are implemented.
+Inputs seal exact entry/unit/candidate/generation, source/base/refs, method, scope,
+owned workspace, intent, target changes, replay checkpoint and finite allowances.
+Malformed or stale proposals, ambiguous JSON, escaped or altered evidence,
+forged approval/publication fields and incomplete intent declarations are rejected.
+
+Successful task checks:
+
+- `make verify` — zero lint issues; core 1282.104 seconds, app 94.013 seconds and all other packages passed.
+- `go test ./internal/core -run '^TestNativeMerger' -count=1` — pass, 0.132 seconds.
+- `go test -race ./internal/core -run '^TestNativeMerger' -count=1` — pass, 1.263 seconds.
+- `go test ./internal/core -run '^$' -fuzz '^FuzzNativeMergerJSON$' -fuzztime=10s -parallel=2` — pass, 37022 executions, 11.044 seconds.
+- `git diff --check` — pass.
+
+The protocol validates proposals without launching an agent or granting candidate
+approval. T6.2–T6.4 remain pending before the canonical slice PR. Required ordered
+clean-HEAD candidate checks will use the controller ledger after PR-reference
+commits are pushed. Owned test fixtures completed naturally and were cleaned
+through the test lifecycle.
