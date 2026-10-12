@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T22:18:48Z
 reviewed_at: 2026-10-12T23:19:37Z
 branch: feat/slice-7-native-candidate-review
-commits: []
+commits: ["19a339e92300df7141f57458c7892de2876cecac"]
 ---
 
 # T7.4: Handle external target and source movement
@@ -82,5 +82,7 @@ Development checks passed with Go 1.27.1:
 The [Slice 7 report](../../report/slices/native-integration-queue/slice-7-candidate-review.md)
 retains the baseline rejection, fixture corrections and checkpoint regression.
 All owned check processes exited naturally; no external fixture was started.
-Implementation commit, Acta reference, canonical PR and final exact-HEAD checks
-remain pending binding.
+Implementation commit: [19a339e92300df7141f57458c7892de2876cecac](https://forge.adrianpk.com/adrianpk/chr/commit/19a339e92300df7141f57458c7892de2876cecac).
+
+Acta commit activity: `01M4S6N0V0VZAQ494X453TY0SM`.
+Canonical slice PR and final exact-HEAD checks remain pending.

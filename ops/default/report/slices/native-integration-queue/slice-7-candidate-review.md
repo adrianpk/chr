@@ -232,6 +232,8 @@ The repository and race checks exited naturally. All 27 changed Go files
 matched the frozen source throughout validation. No external fixture was started.
 The final slice candidate has not been validated.
 
+T7.4 implementation commit: [19a339e92300df7141f57458c7892de2876cecac](https://forge.adrianpk.com/adrianpk/chr/commit/19a339e92300df7141f57458c7892de2876cecac). Acta commit activity: `01M4S6N0V0VZAQ494X453TY0SM`.
+
 T7.4 development checks passed with Go 1.27.1:
 
 - `make verify` — zero lint issues; all packages passed, including core in 2091.189 s and app in 147.754 s.
