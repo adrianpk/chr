@@ -35,7 +35,11 @@ func (reader workflowIntegrationReader) verifyMethod(ctx context.Context, proof 
 	proof.VerifiedTree, err = reader.tree(ctx, proof.ResultCommit)
 	proof.History = []WorkflowIntegrationCommit{{Source: proof.SourceCommit, Commit: proof.ResultCommit, Tree: proof.VerifiedTree, Parent: proof.BaseCommit}}
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	return reader.verifyCombinedProvenance(ctx, proof)
 }
 
 func workflowIntegrationParentsMatch(proof WorkflowIntegrationProof, parents []string) bool {
@@ -76,7 +80,7 @@ func validateWorkflowIntegrationHistory(proof WorkflowIntegrationProof) error {
 		return ErrWorkflowConflict
 	}
 
-	return nil
+	return validateWorkflowIntegrationProvenance(proof)
 }
 
 func validWorkflowIntegrationCommit(entry WorkflowIntegrationCommit) bool {
@@ -160,7 +164,8 @@ func workflowIntegrationHistoryHash(proof WorkflowIntegrationProof) (string, err
 	data, err := json.Marshal(struct {
 		Method, Source, Base, Tree string
 		History                    []WorkflowIntegrationCommit
-	}{proof.Method, proof.SourceCommit, proof.BaseCommit, proof.PreparedTree, proof.History})
+		Provenance                 *WorkflowIntegrationProvenance `json:",omitempty"`
+	}{proof.Method, proof.SourceCommit, proof.BaseCommit, proof.PreparedTree, proof.History, proof.Provenance})
 
 	return workflowHash(data), err
 }

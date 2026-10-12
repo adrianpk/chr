@@ -77,6 +77,12 @@ func (git OSWorkflowIntegrationGit) validateQuery(query WorkflowIntegrationQuery
 type workflowIntegrationReader struct{ dir string }
 
 func (reader workflowIntegrationReader) output(ctx context.Context, args ...string) (string, error) {
+	data, err := reader.rawOutput(ctx, args...)
+
+	return strings.TrimSpace(data), err
+}
+
+func (reader workflowIntegrationReader) rawOutput(ctx context.Context, args ...string) (string, error) {
 	command := exec.CommandContext(ctx, "git", append([]string{"--no-replace-objects", "-C", reader.dir}, args...)...)
 	command.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	command.Cancel = func() error {
@@ -100,7 +106,7 @@ func (reader workflowIntegrationReader) output(ctx context.Context, args ...stri
 		return "", fmt.Errorf("integration Git output exceeds file bounds")
 	}
 
-	return strings.TrimSpace(stdout.buffer.String()), nil
+	return stdout.buffer.String(), nil
 }
 
 func (reader workflowIntegrationReader) verify(ctx context.Context, query WorkflowIntegrationQuery) (WorkflowIntegrationProof, error) {
@@ -128,6 +134,13 @@ func (reader workflowIntegrationReader) verify(ctx context.Context, query Workfl
 
 	if err := reader.verifyMethod(ctx, &proof); err != nil {
 		return proof, err
+	}
+
+	if proof.Method != "rebase" {
+		proof.Provenance, err = reader.combinedProvenance(ctx, proof)
+		if err != nil {
+			return proof, err
+		}
 	}
 
 	proof.HistoryHash, err = workflowIntegrationHistoryHash(proof)

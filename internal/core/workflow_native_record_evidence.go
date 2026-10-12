@@ -320,6 +320,21 @@ func validateWorkflowNativeSourceCommits(b WorkflowNativeRecordBinding, commits 
 		seen[commit] = true
 	}
 
+	return validateWorkflowNativeSourceMapping(b, commits, git)
+}
+
+func validateWorkflowNativeSourceMapping(b WorkflowNativeRecordBinding, commits []string, git WorkflowIntegrationProof) error {
+	if git.Provenance != nil {
+		originals := make([]string, 0, len(git.Provenance.Source))
+		for _, entry := range git.Provenance.Source {
+			originals = append(originals, entry.Commit)
+		}
+
+		if !slices.Equal(commits, originals) {
+			return ErrWorkflowConflict
+		}
+	}
+
 	if b.Method != "rebase" {
 		return nil
 	}

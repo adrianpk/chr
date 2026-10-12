@@ -112,7 +112,7 @@ func (s *WorkflowStore) checkWorkflowPreparationGit(ctx context.Context, candida
 
 	reader := workflowIntegrationReader{dir: candidate.Lane.Worktree}
 
-	observed := WorkflowIntegrationProof{WorkflowIntegrationQuery: proof.WorkflowIntegrationQuery, ObservedTarget: proof.ObservedTarget}
+	observed := WorkflowIntegrationProof{WorkflowIntegrationQuery: proof.WorkflowIntegrationQuery, ObservedTarget: proof.ObservedTarget, Provenance: proof.Provenance}
 	if err := reader.verifyMethod(ctx, &observed); err != nil {
 		return err
 	}

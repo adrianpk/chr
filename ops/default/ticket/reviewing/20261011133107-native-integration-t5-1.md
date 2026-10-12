@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133107
 title: "T5.1: Prepare exact merge and squash candidates"
-status: ready
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,9 @@ tags: native-integration, slice-5
 source: chat
 reported_at: 2026-10-11T13:31:07Z
 ready_at: 2026-10-11T13:31:37Z
+started_at: 2026-10-12T07:40:03Z
+branch: feat/slice-5-native-method-preparation
+reviewed_at: 2026-10-12T08:11:05Z
 commits: []
 ---
 
@@ -58,4 +61,12 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Implemented complete merge/squash source attribution and exact result provenance. Actual Git objects retain B/S merge parents or the single squash parent B, source authors/dates/message hashes, prepared committer metadata and deterministic combined diff. Host guards reject altered metadata even with recomputed enclosing hashes. Original source evidence and canonical fixture refs remain unchanged; historical proof hashes remain verifiable.
+
+Successful task checks:
+
+- `make verify`
+- `go test -race ./internal/core -run '^TestNativeCombined|^TestNativeRecord|^TestWorkflowPreparation|^TestWorkflowIntegration|^TestWorkflowGit' -count=1`
+- `git diff --check`
+
+Strict lint reported zero issues. The required pre-commit gate passed with core in 1269.073 seconds, app in 105.618 seconds and all other packages passing. The focused race regression passed in 262.157 seconds. [Slice 5 report](../../report/slices/native-integration-queue/slice-5-method-preparation.md) retains development failures and evidence boundaries. T5.2 through T5.4, canonical PR preparation and final exact-HEAD controller checks remain pending.

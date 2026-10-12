@@ -360,6 +360,22 @@ bodies 16 KiB and branch names 256 bytes.
 
 ## Combined-result preparation
 
+New merge and squash preparation retains `WorkflowIntegrationProof.Provenance` (`provenance` in JSON)
+with schema `chr-integration-provenance/v1`. It records the object format, every
+original commit after the frozen origin in topological order, original authors and Git dates, exact
+message hashes, parent and tree identities, and the prepared commit's author
+and committer metadata. Squash uses the host as author and preserves source
+attribution through the complete original manifest. Its attribution policy is
+`host_author_with_original_source_manifest`.
+
+`combined_diff_hash` covers the deterministic binary-capable diff from B to P.
+The provenance joins the existing history hash and candidate binding. Host
+preparation and publication guards re-read actual Git objects and reject changed
+attribution or diff evidence even if its enclosing hash is recomputed. The
+original source manifest must contain the same ordered original IDs. Limits
+remain 4096 commits and 1 MiB per evidence file and Git output. Historical proofs
+without provenance retain their original hash representation and read rules.
+
 | Operation | Contract |
 | --- | --- |
 | `PrepareWorkflowSliceIntegration` | Resolve the current method and atomic provider capability, prepare an isolated combined result, and run the frozen slice gate against that exact clean lane. |

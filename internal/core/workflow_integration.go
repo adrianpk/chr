@@ -30,12 +30,13 @@ type WorkflowIntegrationCommit struct {
 // WorkflowIntegrationProof contains host observations of an actual remote target.
 type WorkflowIntegrationProof struct {
 	WorkflowIntegrationQuery
-	BaseCommit     string                      `json:"base_commit"`
-	PreparedTree   string                      `json:"prepared_tree"`
-	VerifiedTree   string                      `json:"verified_tree"`
-	ObservedTarget string                      `json:"observed_target"`
-	History        []WorkflowIntegrationCommit `json:"history"`
-	HistoryHash    string                      `json:"history_hash"`
+	BaseCommit     string                         `json:"base_commit"`
+	PreparedTree   string                         `json:"prepared_tree"`
+	VerifiedTree   string                         `json:"verified_tree"`
+	ObservedTarget string                         `json:"observed_target"`
+	History        []WorkflowIntegrationCommit    `json:"history"`
+	HistoryHash    string                         `json:"history_hash"`
+	Provenance     *WorkflowIntegrationProvenance `json:"provenance,omitempty"`
 }
 
 // WorkflowIntegrationGit is a trusted host IO port, never a worker evidence port.

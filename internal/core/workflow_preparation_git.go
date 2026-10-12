@@ -124,6 +124,13 @@ func (reader workflowIntegrationReader) prepareIntegration(ctx context.Context, 
 		return proof, err
 	}
 
+	if proof.Method != "rebase" {
+		proof.Provenance, err = reader.combinedProvenance(ctx, proof)
+		if err != nil {
+			return proof, err
+		}
+	}
+
 	proof.HistoryHash, err = workflowIntegrationHistoryHash(proof)
 	if err != nil || proof.BaseCommit != query.BaseCommit {
 		return proof, ErrWorkflowConflict
