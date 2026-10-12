@@ -1,6 +1,6 @@
 # Slice 4: Canonical queue scheduling
 
-Status: reviewing
+Status: delivered
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
@@ -118,13 +118,15 @@ Strict lint reported zero issues. The focused race regression passed in 132.880 
 
 Development checks corrected an admission fixture that incorrectly assumed a worker lane existed before the first claim, and an independent-target PR fixture that requested the default base despite observing another base. A combined fixture attempt then failed because it tried to apply legacy submission accounting to a native entry; the final tests use each existing publication owner with its own record contract and verify their shared target barrier through an admitted native sibling. No submission owner or persistence contract was changed for that test. Strict lint found spacing and test-function complexity; formatting and a cohesive publication-result assertion helper resolved both.
 
-Execution uses Go 1.27.1, repository-pinned golangci-lint v2.14.0, the retained neutral Git/default-agent fixtures and the forty-five-minute package allowance established by Slice 3. Host settings and explicit positive executor fixtures remain intact. Complete-candidate ordered checks are recorded through the controller after all four task and PR-reference commits.
+Execution uses Go 1.27.1, repository-pinned golangci-lint v2.14.0, the retained neutral Git/default-agent fixtures and the forty-five-minute package allowance established by Slice 3. Host settings and explicit positive executor fixtures remain intact. Complete-candidate ordered checks passed through the controller for clean HEAD `bb3a88888a47040f4ded39807f79623bb86d8ab7` after all four task and PR-reference commits. `make verify` reported zero lint issues, core in 1173.958 seconds and app in 88.791 seconds. The required normal core/app check passed in 1159.767/91.909 seconds; the race core/app check passed in 2304.813/265.808 seconds. `git diff --check` passed. Canonical integration at that exact commit was verified at 2026-10-12T07:28:55Z; Acta merge record: `01M4QG7EMHKEPQB0G8SHBCVD1T`.
 
-## Risks and Follow-ups
-
-All four task checks are complete. Canonical PR references are recorded. The required candidate commands below run through the controller against the clean PR HEAD after those references are committed; their retained exact-HEAD evidence and canonical PR validation list own the final handoff. Task-level checks above do not substitute for that evidence.
+Final exact-HEAD controller checks passed in this order:
 
 - `make verify`
 - `go test ./internal/core ./internal/app -count=1`
 - `go test -race ./internal/core ./internal/app -count=1`
 - `git diff --check`
+
+## Risks and Follow-ups
+
+None recorded for this slice. The approved later slices and final delivery-set gate remain pending.

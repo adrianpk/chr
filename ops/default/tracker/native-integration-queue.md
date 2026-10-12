@@ -18,9 +18,9 @@ Plan approval: approved on 2026-10-11 under the explicit instruction to process 
 
 Implementation authorization: granted for the complete ordered corrective set and its defined task/PR map.
 
-Active slice: Slice 4 — Canonical queue scheduling
+Active slice: Slice 5 — Method preparation and provenance
 
-Next slice: Slice 5 — Method preparation and provenance
+Next slice: Slice 6 — Bounded merger role
 
 Slice strategy: behavior-first
 
@@ -28,13 +28,13 @@ Reason: prove a positive remote transaction and real forge observation before bu
 
 Plan: [Native Integration Corrective Delivery](../plan/native-integration-queue.md)
 
-Progress: 3 of 13 slices integrated; 12 of 51 execution tasks delivered in this set.
+Progress: 4 of 13 slices integrated; 16 of 51 execution tasks delivered in this set.
 
 Task accounting: 47 new tickets and 4 reused original assurance tickets. Retained assurance commits are implemented evidence, not integrated task completion.
 
 ## Current Checkpoint
 
-Slice 1 is canonically integrated through [PR #375](https://forge.adrianpk.com/adrianpk/chr/pulls/375) at `79dfe32380dae9058bde15ba50b8f30c30cbaf3d`. All four ordered Looper checks passed for that exact clean HEAD; its five task tickets are solved. Slice 2 is canonically integrated through [PR #376](https://forge.adrianpk.com/adrianpk/chr/pulls/376) at `3129b5ce312df22287a4e7b78e08bf41f5958377`. All five ordered Looper checks passed for that exact clean HEAD; its three task tickets are solved. Slice 3 is canonically integrated through [PR #377](https://forge.adrianpk.com/adrianpk/chr/pulls/377) at `ef72c8cbabf06816a93c293161c12d03211979ba`. All four ordered Looper checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 3 report](../report/slices/native-integration-queue/slice-3-integration-records.md) retains task and final validation evidence. Slice 4 is active for canonical queue scheduling. T4.1 task selection is validated with the expanded focused race check and required pre-commit gate; T4.2 shared role capacity, prepared-target bounds and fairness are validated with the required pre-commit gate and expanded focused race check; T4.3 canonical target/coordinator identity is validated with the required pre-commit gate and focused race checks; T4.4 real concurrent scheduling is validated with strict lint and focused race checks; the canonical PR is open and ordered exact-HEAD candidate checks run after its reference commit.
+Slice 1 is canonically integrated through [PR #375](https://forge.adrianpk.com/adrianpk/chr/pulls/375) at `79dfe32380dae9058bde15ba50b8f30c30cbaf3d`. All four ordered Looper checks passed for that exact clean HEAD; its five task tickets are solved. Slice 2 is canonically integrated through [PR #376](https://forge.adrianpk.com/adrianpk/chr/pulls/376) at `3129b5ce312df22287a4e7b78e08bf41f5958377`. All five ordered Looper checks passed for that exact clean HEAD; its three task tickets are solved. Slice 3 is canonically integrated through [PR #377](https://forge.adrianpk.com/adrianpk/chr/pulls/377) at `ef72c8cbabf06816a93c293161c12d03211979ba`. All four ordered Looper checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 3 report](../report/slices/native-integration-queue/slice-3-integration-records.md) retains task and final validation evidence. Slice 4 is canonically integrated through [PR #378](https://forge.adrianpk.com/adrianpk/chr/pulls/378) at `bb3a88888a47040f4ded39807f79623bb86d8ab7`. All four ordered controller checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 4 report](../report/slices/native-integration-queue/slice-4-queue-scheduling.md) retains task and final validation evidence. Slice 5 is active for method preparation and provenance.
 The original controller remains inactive and blocked; its checkpoint and consumed budgets are preserved. Its assurance execution is transferred to Slice 13 under the approved plan.
 Both live repositories and their policy/access profiles are designated in [Certification Fixtures](../report/native-integration-fixtures.md). Real default rebase through both existing adapters is certified; the Slice 2 report retains the exact-head validation boundary.
 
@@ -47,9 +47,9 @@ Only Looper may merge this set's canonical PRs. Read-only status must not mutate
 | --- | --- | --- | --- | --- | --- | --- |
 | Slice 1 | Guarded Git transport | `feat/slice-1-native-git-transport` | `feat(slice-1): publish exact results through atomic Git transport` | `ops/default/report/slices/native-integration-queue/slice-1-git-transport.md` | delivered | [#375](https://forge.adrianpk.com/adrianpk/chr/pulls/375) |
 | Slice 2 | Forge publication profiles | `feat/slice-2-native-forge-profiles` | `feat(slice-2): observe native publication through existing forge adapters` | `ops/default/report/slices/native-integration-queue/slice-2-forge-profiles.md` | delivered | [#376](https://forge.adrianpk.com/adrianpk/chr/pulls/376) |
-| Slice 3 | Durable integration records | `feat/slice-3-native-integration-records` | `feat(slice-3): persist native integration queue records` | `ops/default/report/slices/native-integration-queue/slice-3-integration-records.md` | active | pending |
-| Slice 4 | Canonical queue scheduling | `feat/slice-4-native-queue-scheduling` | `feat(slice-4): schedule integration across canonical target queues` | `ops/default/report/slices/native-integration-queue/slice-4-queue-scheduling.md` | not_started | pending |
-| Slice 5 | Method preparation and provenance | `feat/slice-5-native-method-preparation` | `feat(slice-5): preserve exact integration history and provenance` | `ops/default/report/slices/native-integration-queue/slice-5-method-preparation.md` | not_started | pending |
+| Slice 3 | Durable integration records | `feat/slice-3-native-integration-records` | `feat(slice-3): persist native integration queue records` | `ops/default/report/slices/native-integration-queue/slice-3-integration-records.md` | delivered | [#377](https://forge.adrianpk.com/adrianpk/chr/pulls/377) |
+| Slice 4 | Canonical queue scheduling | `feat/slice-4-native-queue-scheduling` | `feat(slice-4): schedule integration across canonical target queues` | `ops/default/report/slices/native-integration-queue/slice-4-queue-scheduling.md` | delivered | [#378](https://forge.adrianpk.com/adrianpk/chr/pulls/378) |
+| Slice 5 | Method preparation and provenance | `feat/slice-5-native-method-preparation` | `feat(slice-5): preserve exact integration history and provenance` | `ops/default/report/slices/native-integration-queue/slice-5-method-preparation.md` | active | pending |
 | Slice 6 | Bounded merger role | `feat/slice-6-native-merger-role` | `feat(slice-6): resolve integration conflicts through a bounded merger` | `ops/default/report/slices/native-integration-queue/slice-6-merger-role.md` | not_started | pending |
 | Slice 7 | Combined validation and review | `feat/slice-7-native-candidate-review` | `feat(slice-7): revalidate repaired and rebased integration candidates` | `ops/default/report/slices/native-integration-queue/slice-7-candidate-review.md` | not_started | pending |
 | Slice 8 | Persistent limits and decisions | `feat/slice-8-native-integration-limits` | `feat(slice-8): enforce persistent merger and invocation budgets` | `ops/default/report/slices/native-integration-queue/slice-8-integration-limits.md` | not_started | pending |
@@ -159,7 +159,7 @@ Report/evidence: [Slice 3 report](../report/slices/native-integration-queue/slic
 
 ## Slice 4: Canonical queue scheduling
 
-Status: active
+Status: delivered
 
 Expected branch: `feat/slice-4-native-queue-scheduling`
 
@@ -171,10 +171,10 @@ Prerequisite: verified Slice 3 integration and closed task fanout.
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T4.1 | [TKT-20261011133103](../ticket/reviewing/20261011133103-native-integration-t4-1.md) | validated | `2051bb53de7b8e452f455809915d47c48352ba61` | Schedule eligible units deterministically |
-| T4.2 | [TKT-20261011133104](../ticket/reviewing/20261011133104-native-integration-t4-2.md) | validated | `05d438047230b65833949c84e7c8b1ac99190f33` | Share role capacity and prevent starvation |
-| T4.3 | [TKT-20261011133105](../ticket/reviewing/20261011133105-native-integration-t4-3.md) | validated | `35d39f6b6df235d79848fb59054fd7d8b2ef0da3` | Normalize target and coordinator identity |
-| T4.4 | [TKT-20261011133106](../ticket/reviewing/20261011133106-native-integration-t4-4.md) | validated | `c08b6d6590342a45dcb21fce12d05b740f98ef6b` | Verify real concurrent scheduling |
+| T4.1 | [TKT-20261011133103](../ticket/solved/20261011133103-native-integration-t4-1.md) | done | `2051bb53de7b8e452f455809915d47c48352ba61` | Schedule eligible units deterministically |
+| T4.2 | [TKT-20261011133104](../ticket/solved/20261011133104-native-integration-t4-2.md) | done | `05d438047230b65833949c84e7c8b1ac99190f33` | Share role capacity and prevent starvation |
+| T4.3 | [TKT-20261011133105](../ticket/solved/20261011133105-native-integration-t4-3.md) | done | `35d39f6b6df235d79848fb59054fd7d8b2ef0da3` | Normalize target and coordinator identity |
+| T4.4 | [TKT-20261011133106](../ticket/solved/20261011133106-native-integration-t4-4.md) | done | `c08b6d6590342a45dcb21fce12d05b740f98ef6b` | Verify real concurrent scheduling |
 
 Required checks:
 
@@ -185,13 +185,13 @@ Required checks:
 
 PR: [#378](https://forge.adrianpk.com/adrianpk/chr/pulls/378)
 
-Verified merge: pending
+Verified merge: [#378](https://forge.adrianpk.com/adrianpk/chr/pulls/378), `bb3a88888a47040f4ded39807f79623bb86d8ab7` on `dev`
 
 Report/evidence: [Slice 4 report](../report/slices/native-integration-queue/slice-4-queue-scheduling.md)
 
 ## Slice 5: Method preparation and provenance
 
-Status: not_started
+Status: active
 
 Expected branch: `feat/slice-5-native-method-preparation`
 

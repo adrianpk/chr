@@ -18,9 +18,9 @@ Plan approval: approved on 2026-10-11 under the explicit instruction to process 
 
 Implementation authorization: granted for the complete ordered corrective set and its defined task/PR map.
 
-Active slice: Slice 4 — Canonical queue scheduling
+Active slice: Slice 5 — Method preparation and provenance
 
-Next slice: Slice 5 — Method preparation and provenance
+Next slice: Slice 6 — Bounded merger role
 
 Slice strategy: behavior-first
 
@@ -212,7 +212,7 @@ Invariants: INV-01, INV-02, INV-03, INV-06, INV-16, INV-17, INV-19, INV-24
 
 ## Slice 4: Canonical queue scheduling
 
-Status: active
+Status: delivered
 
 Expected branch: `feat/slice-4-native-queue-scheduling`
 
@@ -221,6 +221,8 @@ Expected PR title: `feat(slice-4): schedule integration across canonical target 
 Expected report: `ops/default/report/slices/native-integration-queue/slice-4-queue-scheduling.md`
 
 Canonical PR: [#378](https://forge.adrianpk.com/adrianpk/chr/pulls/378)
+
+Verified merge: `bb3a88888a47040f4ded39807f79623bb86d8ab7` on `dev`
 
 Prerequisite: verified Slice 3 integration and closed task fanout.
 
@@ -232,10 +234,10 @@ Invariants: INV-03, INV-04, INV-05, INV-06, INV-18, INV-20, INV-21, INV-22
 
 | Task | Ticket | Work | Acceptance boundary |
 | --- | --- | --- | --- |
-| T4.1 | [TKT-20261011133103](../ticket/reviewing/20261011133103-native-integration-t4-1.md) | Use the admitted frontier, durable queue sequence and existing prerequisites to select independent units and skip paused/review-blocked entries. | Task and slice order remain intact; an independent eligible successor progresses when another unit waits for a human. |
-| T4.2 | [TKT-20261011133104](../ticket/reviewing/20261011133104-native-integration-t4-2.md) | Route executor, merger, reviewer and closing launches through the same repository pool; bound prepared candidates and prefer finishable integration. | Default mode runs one agent and sustained implementation cannot starve eligible integration. |
-| T4.3 | [TKT-20261011133105](../ticket/reviewing/20261011133105-native-integration-t4-3.md) | Resolve aliases/worktrees/namespaces to common repository/target keys and enforce registered coordination across clones/hosts. | Aliases cannot bypass capacity or locks; unsupported coordinator connectivity blocks before mutable work. |
-| T4.4 | [TKT-20261011133106](../ticket/reviewing/20261011133106-native-integration-t4-4.md) | Exercise subprocess overlap, per-target exclusion, independent targets, dynamic capacity and unresolved publication barriers. | Two independent lanes overlap within bounds; one uncertain target does not block unrelated targets or read-only status. |
+| T4.1 | [TKT-20261011133103](../ticket/solved/20261011133103-native-integration-t4-1.md) | Use the admitted frontier, durable queue sequence and existing prerequisites to select independent units and skip paused/review-blocked entries. | Task and slice order remain intact; an independent eligible successor progresses when another unit waits for a human. |
+| T4.2 | [TKT-20261011133104](../ticket/solved/20261011133104-native-integration-t4-2.md) | Route executor, merger, reviewer and closing launches through the same repository pool; bound prepared candidates and prefer finishable integration. | Default mode runs one agent and sustained implementation cannot starve eligible integration. |
+| T4.3 | [TKT-20261011133105](../ticket/solved/20261011133105-native-integration-t4-3.md) | Resolve aliases/worktrees/namespaces to common repository/target keys and enforce registered coordination across clones/hosts. | Aliases cannot bypass capacity or locks; unsupported coordinator connectivity blocks before mutable work. |
+| T4.4 | [TKT-20261011133106](../ticket/solved/20261011133106-native-integration-t4-4.md) | Exercise subprocess overlap, per-target exclusion, independent targets, dynamic capacity and unresolved publication barriers. | Two independent lanes overlap within bounds; one uncertain target does not block unrelated targets or read-only status. |
 
 ### Required Candidate Checks
 
@@ -246,7 +248,7 @@ Invariants: INV-03, INV-04, INV-05, INV-06, INV-18, INV-20, INV-21, INV-22
 
 ## Slice 5: Method preparation and provenance
 
-Status: not_started
+Status: active
 
 Expected branch: `feat/slice-5-native-method-preparation`
 

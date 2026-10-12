@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133103
 title: "T4.1: Schedule eligible units deterministically"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -11,6 +11,8 @@ source: chat
 reported_at: 2026-10-11T13:31:03Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T02:52:08Z
+resolution: fixed
+closed_at: 2026-10-12T07:35:05Z
 branch: feat/slice-4-native-queue-scheduling
 pr: 378
 reviewed_at: 2026-10-12T03:24:14Z
@@ -70,8 +72,10 @@ Successful task checks:
 - `go test -race ./internal/core -run '^TestNativeSchedule|^TestNativeEntry|^TestNativeQueue|^TestNativeBudget|^TestNativeSubmission|^TestWorkflowClaim|^TestWorkflowFrontier' -count=1`
 - `git diff --check`
 
-The full pre-commit gate passed with zero lint issues, core tests in 1030.781 seconds and app tests in 82.622 seconds. The expanded focused race check passed in 166.087 seconds. [Slice 4 report](../../report/slices/native-integration-queue/slice-4-queue-scheduling.md) retains the failed initial namespace lookup and its passing correction. T4.2 through T4.4, canonical PR preparation and complete-candidate exact-HEAD validation remain pending.
+The full pre-commit gate passed with zero lint issues, core tests in 1030.781 seconds and app tests in 82.622 seconds. The expanded focused race check passed in 166.087 seconds. [Slice 4 report](../../report/slices/native-integration-queue/slice-4-queue-scheduling.md) retains the failed initial namespace lookup and its passing correction.
 
 Task commit: `2051bb53de7b8e452f455809915d47c48352ba61`. Acta commit record: `01M4Q27DZTATW05Z6KQWY9JTN5`.
 
 Canonical slice PR: [#378](https://forge.adrianpk.com/adrianpk/chr/pulls/378).
+
+All four ordered controller checks passed on `bb3a88888a47040f4ded39807f79623bb86d8ab7`. Canonical Rebase + Fast-forward integration into `dev` was verified at 2026-10-12T07:28:55Z; Acta merge record: `01M4QG7EMHKEPQB0G8SHBCVD1T`.

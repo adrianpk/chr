@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133106
 title: "T4.4: Verify real concurrent scheduling"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -11,6 +11,8 @@ source: chat
 reported_at: 2026-10-11T13:31:06Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T05:55:32Z
+resolution: fixed
+closed_at: 2026-10-12T07:35:05Z
 branch: feat/slice-4-native-queue-scheduling
 pr: 378
 reviewed_at: 2026-10-12T06:05:37Z
@@ -74,3 +76,5 @@ Successful task checks:
 Strict lint: zero issues. Focused race regression: 132.880 seconds. Final target fixture normal check: 6.538 seconds. Implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/c08b6d6590342a45dcb21fce12d05b740f98ef6b). Acta: `01M4QBFSQJAKPEM2CEPRJVN2BR`. Required ordered clean-HEAD candidate evidence is recorded through the controller after PR-reference commits.
 
 Canonical slice PR: [#378](https://forge.adrianpk.com/adrianpk/chr/pulls/378).
+
+All four ordered controller checks passed on `bb3a88888a47040f4ded39807f79623bb86d8ab7`. Canonical Rebase + Fast-forward integration into `dev` was verified at 2026-10-12T07:28:55Z; Acta merge record: `01M4QG7EMHKEPQB0G8SHBCVD1T`.

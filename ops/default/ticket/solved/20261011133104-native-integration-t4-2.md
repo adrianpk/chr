@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133104
 title: "T4.2: Share role capacity and prevent starvation"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -11,6 +11,8 @@ source: chat
 reported_at: 2026-10-11T13:31:04Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T03:34:55Z
+resolution: fixed
+closed_at: 2026-10-12T07:35:05Z
 branch: feat/slice-4-native-queue-scheduling
 pr: 378
 reviewed_at: 2026-10-12T04:23:09Z
@@ -62,7 +64,7 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implemented and validated on the recorded Slice 4 branch. Eligible validation, preparation and review receive shared repository capacity ahead of new implementation. Existing role launches and merger-purpose reservations use the same pool. Prepared-target capacity defaults to two, remains retained during pause/block/restart, and is released through guarded terminal transitions. Human approval and full/unknown target barriers do not retain runnable integration priority. Implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/05d438047230b65833949c84e7c8b1ac99190f33). Acta: `01M4Q5MBSA7CN05RM6356V2KE0`. The canonical slice PR remains pending T4.3 and T4.4.
+Implemented and validated on the recorded Slice 4 branch. Eligible validation, preparation and review receive shared repository capacity ahead of new implementation. Existing role launches and merger-purpose reservations use the same pool. Prepared-target capacity defaults to two, remains retained during pause/block/restart, and is released through guarded terminal transitions. Human approval and full/unknown target barriers do not retain runnable integration priority. Implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/05d438047230b65833949c84e7c8b1ac99190f33). Acta: `01M4Q5MBSA7CN05RM6356V2KE0`.
 
 Successful task checks:
 
@@ -73,3 +75,5 @@ Successful task checks:
 Strict lint: zero issues. The full normal core suite passed in 1195.940 seconds and app in 139.514 seconds. Expanded focused race checks passed for core in 680.292 seconds and app in 8.638 seconds. The canonical [Slice 4 report](../../report/slices/native-integration-queue/slice-4-queue-scheduling.md) retains corrected development failures and the task validation boundary.
 
 Canonical slice PR: [#378](https://forge.adrianpk.com/adrianpk/chr/pulls/378).
+
+All four ordered controller checks passed on `bb3a88888a47040f4ded39807f79623bb86d8ab7`. Canonical Rebase + Fast-forward integration into `dev` was verified at 2026-10-12T07:28:55Z; Acta merge record: `01M4QG7EMHKEPQB0G8SHBCVD1T`.
