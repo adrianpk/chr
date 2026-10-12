@@ -114,10 +114,9 @@ func validateWorkflowMergerResolved(result WorkflowMergerResult, input WorkflowM
 		return ErrWorkflowConflict
 	}
 
-	for _, conflict := range input.Conflicts {
-		if conflict.Kind != "text" && conflict.Kind != "semantic" && len(conflict.RegenerationCommand) == 0 {
-			return ErrWorkflowConflict
-		}
+	decisions, err := WorkflowMergerRequiredDecisions(input)
+	if err != nil || len(decisions) != 0 {
+		return ErrWorkflowConflict
 	}
 
 	return nil

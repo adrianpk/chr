@@ -27,7 +27,7 @@ func (reader workflowIntegrationReader) verifyMethod(ctx context.Context, proof 
 		return err
 	}
 
-	proof.PreparedTree, err = reader.preparedTree(ctx, proof.OriginCommit, proof.BaseCommit, proof.SourceCommit)
+	proof.PreparedTree, err = reader.expectedIntegrationTree(ctx, *proof, proof.OriginCommit, proof.BaseCommit, proof.SourceCommit)
 	if err != nil {
 		return err
 	}
@@ -111,7 +111,7 @@ func (reader workflowIntegrationReader) verifyRebase(ctx context.Context, proof 
 
 	previousSource := proof.OriginCommit
 	for i, source := range sources {
-		tree, err := reader.preparedTree(ctx, previousSource, base, source)
+		tree, err := reader.expectedIntegrationTree(ctx, *proof, previousSource, base, source)
 		if err != nil {
 			return err
 		}

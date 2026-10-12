@@ -109,8 +109,24 @@ func (reader workflowIntegrationReader) rawOutput(ctx context.Context, args ...s
 }
 
 func (reader workflowIntegrationReader) rawInput(ctx context.Context, input string, args ...string) (string, error) {
-	command := exec.CommandContext(ctx, "git", append([]string{"--no-replace-objects", "-C", reader.dir}, args...)...)
+	command := reader.process(ctx, args...)
 	command.Stdin = strings.NewReader(input)
+	stdout, stderr := &workflowProviderOutput{}, &workflowCommandOutput{}
+	command.Stdout, command.Stderr = stdout, stderr
+
+	if err := command.Run(); err != nil {
+		return "", fmt.Errorf("integration Git observation failed: %w", err)
+	}
+
+	if stdout.overflow {
+		return "", fmt.Errorf("integration Git output exceeds file bounds")
+	}
+
+	return stdout.buffer.String(), nil
+}
+
+func (reader workflowIntegrationReader) process(ctx context.Context, args ...string) *exec.Cmd {
+	command := exec.CommandContext(ctx, "git", append([]string{"--no-replace-objects", "--literal-pathspecs", "-c", "core.hooksPath=/dev/null", "-C", reader.dir}, args...)...)
 	command.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	command.Cancel = func() error {
 		err := syscall.Kill(-command.Process.Pid, syscall.SIGKILL)
@@ -122,18 +138,9 @@ func (reader workflowIntegrationReader) rawInput(ctx context.Context, input stri
 	}
 
 	command.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0", "GIT_NO_REPLACE_OBJECTS=1")
-	stdout, stderr := &workflowProviderOutput{}, &workflowCommandOutput{}
-	command.Stdout, command.Stderr, command.WaitDelay = stdout, stderr, time.Second
+	command.WaitDelay = time.Second
 
-	if err := command.Run(); err != nil {
-		return "", fmt.Errorf("integration Git observation failed: %w", err)
-	}
-
-	if stdout.overflow {
-		return "", fmt.Errorf("integration Git output exceeds file bounds")
-	}
-
-	return stdout.buffer.String(), nil
+	return command
 }
 
 func (reader workflowIntegrationReader) verify(ctx context.Context, query WorkflowIntegrationQuery) (WorkflowIntegrationProof, error) {

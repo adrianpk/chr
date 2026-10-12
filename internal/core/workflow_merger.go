@@ -4,9 +4,10 @@ import "time"
 
 // WorkflowMergerRequirement binds required source or target intent to evidence.
 type WorkflowMergerRequirement struct {
-	ID       string              `json:"id"`
-	Origin   string              `json:"origin"`
-	Evidence WorkflowEvidenceRef `json:"evidence"`
+	ID            string              `json:"id"`
+	Origin        string              `json:"origin"`
+	Evidence      WorkflowEvidenceRef `json:"evidence"`
+	ConflictsWith []string            `json:"conflicts_with,omitempty"`
 }
 
 // WorkflowMergerConflict describes a single actionable conflict. Regeneration
@@ -18,6 +19,7 @@ type WorkflowMergerConflict struct {
 	Evidence            WorkflowEvidenceRef `json:"evidence"`
 	RequirementIDs      []string            `json:"requirement_ids"`
 	RegenerationCommand []string            `json:"regeneration_command,omitempty"`
+	ValidationCommand   []string            `json:"validation_command,omitempty"`
 }
 
 // WorkflowMergerCheckpoint names the original replay step and every predecessor.

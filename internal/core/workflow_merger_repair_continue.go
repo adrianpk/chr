@@ -1,0 +1,63 @@
+package core
+
+import (
+	"context"
+	"slices"
+	"time"
+)
+
+// ContinueWorkflowMergerRepair consumes a host-accepted repair and resumes its
+// original replay step. It cannot run validation or grant candidate approval.
+func (git OSWorkflowPreparationGit) ContinueWorkflowMergerRepair(ctx context.Context, state WorkflowMergerRepairState, repair WorkflowIntegrationTreeRepair) (WorkflowMergerRepairState, error) {
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
+	defer cancel()
+
+	reader, err := git.resumeMergerRepairReader(ctx, state)
+	if err != nil {
+		return state, err
+	}
+
+	proof := workflowMergerRepairProof(state)
+	if len(state.Repairs) >= WorkflowPageLimit || validateWorkflowTreeRepair(proof, repair) != nil {
+		return state, ErrWorkflowConflict
+	}
+
+	if err := reader.verifyMergerTreeRepair(ctx, repair, state.OriginalParent, state.PreparedParent, state.CurrentSource, state.Tree, state.Conflicts); err != nil {
+		return state, err
+	}
+
+	if err := checkWorkflowRepairPredecessors(state, repair.Input); err != nil {
+		return state, err
+	}
+
+	state.History = slices.Clone(state.History)
+	state.Repairs = append(slices.Clone(state.Repairs), repair)
+
+	state.Tree, state.Conflicts = repair.ResolvedTree, nil
+	if err := reader.commitMergerRepairStep(ctx, &state); err != nil {
+		return state, err
+	}
+
+	err = reader.advanceMergerRepair(ctx, &state)
+
+	return state, err
+}
+
+func checkWorkflowRepairPredecessors(state WorkflowMergerRepairState, input WorkflowMergerInput) error {
+	if input.Method != "rebase" {
+		return nil
+	}
+
+	checkpoint := input.HistoryCheckpoint
+	if checkpoint == nil || checkpoint.ReplayIndex != state.ReplayIndex || len(checkpoint.Predecessors) != len(state.History) {
+		return ErrWorkflowConflict
+	}
+
+	for i, entry := range state.History {
+		if checkpoint.Predecessors[i].Source != entry.Source || checkpoint.Predecessors[i].Commit != entry.Commit {
+			return ErrWorkflowConflict
+		}
+	}
+
+	return nil
+}

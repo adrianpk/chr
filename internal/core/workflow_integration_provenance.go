@@ -17,6 +17,7 @@ type WorkflowIntegrationProvenance struct {
 	Prepared          []WorkflowIntegrationAttribution `json:"prepared"`
 	Replays           []WorkflowIntegrationReplay      `json:"replays,omitempty"`
 	IntegrationFixes  []WorkflowIntegrationFix         `json:"integration_fixes,omitempty"`
+	Repairs           []WorkflowIntegrationTreeRepair  `json:"repairs,omitempty"`
 	Preparation       *WorkflowIntegrationPreparation  `json:"preparation,omitempty"`
 }
 
@@ -41,7 +42,12 @@ func (reader workflowIntegrationReader) combinedProvenance(ctx context.Context, 
 		return nil, err
 	}
 
-	return &WorkflowIntegrationProvenance{Schema: "chr-integration-provenance/v1", ObjectFormat: format, AttributionPolicy: "host_author_with_original_source_manifest", CombinedDiffHash: workflowHash([]byte(diff)), Source: source, Prepared: []WorkflowIntegrationAttribution{prepared}}, nil
+	p := &WorkflowIntegrationProvenance{Schema: "chr-integration-provenance/v1", ObjectFormat: format, AttributionPolicy: "host_author_with_original_source_manifest", CombinedDiffHash: workflowHash([]byte(diff)), Source: source, Prepared: []WorkflowIntegrationAttribution{prepared}}
+	if proof.Provenance != nil {
+		p.Repairs = slices.Clone(proof.Provenance.Repairs)
+	}
+
+	return p, nil
 }
 
 func (reader workflowIntegrationReader) verifyCombinedProvenance(ctx context.Context, proof *WorkflowIntegrationProof) error {
@@ -77,6 +83,14 @@ func validateWorkflowIntegrationProvenance(proof WorkflowIntegrationProof) error
 
 	if p.Preparation != nil && !validWorkflowPreparationMetadata(proof, *p.Preparation) {
 		return ErrWorkflowConflict
+	}
+
+	if err := validateWorkflowTreeRepairs(proof); err != nil {
+		return err
+	}
+
+	if err := validateWorkflowRepairHistory(proof); err != nil {
+		return err
 	}
 
 	data, err := json.Marshal(p)

@@ -42,6 +42,20 @@ and failure evidence. Driver exit cannot release capacity while descendants live
 Certified whole-call accounting can settle a finite allowance; unknown or partial
 usage stays charged, and model-reported usage does not settle the ledger.
 
+T6.3 retains actual Git conflicts at the correct original replay step. Host repair
+records bind frozen input, per-conflict rationale, exact parents and tree diffs.
+Continuations preserve already-applied and source-empty commits, byte-exact
+original attribution and subsequent source changes. Merge and squash retain their
+configured parents. Clean preparation produces a proof without a merger call.
+
+Semantic planning uses original Git diffs to identify a unique source owner.
+Repair can rewind that step while preserving the verified prefix. Ambiguous
+ownership requires a concrete decision or an explicitly declared actionable
+integration fix with host attribution and retained finding. Declared incompatible
+requirements and unsupported generated/lockfile/binary/submodule/LFS procedures
+cannot appear as resolved proposals. Procedures require exact regeneration and
+frozen validation declarations plus host-observed tree-bound evidence.
+
 ## Implementation Notes
 
 Protocol ownership stays in core beside existing preparation and integration
@@ -64,6 +78,14 @@ the owned process group to stop and retains stopped process/output hashes. Pause
 invocations resume in integration. Both Git object formats are supported without
 remotes, hooks, credential helpers or shared writable object storage.
 
+Repair method verification recomputes actual baseline trees and compares actual
+changed paths with the proposal and frozen permitted scope. It verifies original
+step/predecessor identity, original attribution and actual Git file types. Removing
+a repair record cannot hide a nondeterministic tree by recomputing the outer hash.
+The trusted Git repair ports consume host-accepted changes; wiring retained runtime
+state, independently accepting proposals and executing declared procedures belong
+to T6.4. The model cannot call these ports or supply host procedure observations.
+
 ## Contracts Added or Changed
 
 `WorkflowMergerInput`, `WorkflowMergerFence` and `WorkflowMergerResult` define the
@@ -83,6 +105,12 @@ limited to 128 messages and 8 MiB. Optional unmetered merger reservations retain
 a runtime deadline and consumed attempt while reporting no token enforcement;
 a finite invocation token budget requires a compatible whole-call allowance.
 
+`WorkflowMergerRepairState`, `WorkflowIntegrationTreeRepair` and
+`WorkflowMergerRepairPlan` retain actual preparation checkpoints, method effects
+and bounded ownership decisions. `WorkflowMergerRequiredDecisions` rejects
+declared incompatible intent and unsupported procedures. Original proof images
+keep their hash representation when optional repair fields are absent.
+
 ## Files of Interest
 
 - [Merger contracts](../../../../../internal/core/workflow_merger.go).
@@ -93,6 +121,9 @@ a finite invocation token budget requires a compatible whole-call allowance.
 - [Tool boundary](../../../../../internal/core/workflow_merger_tools.go).
 - [Shared lifecycle](../../../../../internal/core/workflow_merger_driver.go).
 - [Budget completion](../../../../../internal/core/workflow_merger_finish.go).
+- [Replay repair](../../../../../internal/core/workflow_merger_repair_continue.go).
+- [Semantic planning](../../../../../internal/core/workflow_merger_repair_plan.go).
+- [Repair method verification](../../../../../internal/core/workflow_merger_repair_verify.go).
 - [Protocol reference](../../../../../docs/reference/workflow-execution.md#merger-proposal-protocol).
 
 ## Validation
@@ -138,9 +169,32 @@ Owned fixtures completed through the test lifecycle.
 T6.2 task commit: [78793f6ce58fc5fabedcece6e9338698713d8739](https://forge.adrianpk.com/adrianpk/chr/commit/78793f6ce58fc5fabedcece6e9338698713d8739).
 Acta task record: `01M4RBPR0K3FB8PTX766B0K7ZH`.
 
+T6.3 focused checks:
+
+- `go test ./internal/core -run '^TestNative(Merger|Combined|Replay)' -count=1` — pass, 40.378 seconds.
+- `go test -race ./internal/core -run '^TestNative(Merger|Combined|Replay)' -count=1` — pass, 55.628 seconds.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./...` — pass, zero issues.
+
+Actual Git fixtures cover configured merge/squash parents, empty/already-applied
+replays, successive conflicts, exact author/date/message/encoding, semantic
+ownership, attributed fixes, ambiguity, unsupported procedures, disguised binary
+content and recomputed hashes without repair records. Broader checks exposed an
+empty replay-owner selection and fresh-timestamp recovery error. Corrected
+ownership handling and explicit different host timestamps reproduce those cases
+deterministically. The initial binary fixture incorrectly put a NUL in a Git argv;
+the fixture now writes binary content separately from its conventional message.
+
+Required T6.3 pre-commit checks passed:
+
+- `make verify` — zero lint issues; core 1244.924 seconds, app 95.231 seconds and all other packages passed.
+- `git diff --check` — pass.
+
+Owned fixtures completed through their test lifecycle; the recorded gate runner
+and core test process exited. Task commit and activity binding are pending.
+
 ## Risks and Follow-ups
 
-T6.3 semantic/replay repair and T6.4 host acceptance remain pending. The runtime does not yet deliver automatic
+T6.3 semantic/replay repair passes required pre-commit checks. T6.4 host acceptance remains pending. The runtime does not yet deliver automatic
 conflict repair. No canonical Slice 6 PR is open yet. Required ordered final
 candidate checks use the controller ledger after implementation and PR-reference
 commits are pushed. No full delivery-set gate has run.

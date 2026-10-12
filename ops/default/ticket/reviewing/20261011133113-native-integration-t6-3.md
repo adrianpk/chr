@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133113
 title: "T6.3: Preserve semantic intent during repair"
-status: ready
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,9 @@ tags: native-integration, slice-6
 source: chat
 reported_at: 2026-10-11T13:31:13Z
 ready_at: 2026-10-11T13:31:37Z
+started_at: 2026-10-12T15:38:23Z
+reviewed_at: 2026-10-12T16:34:17Z
+branch: feat/slice-6-native-merger-role
 commits: []
 ---
 
@@ -50,12 +53,27 @@ Acceptance IDs and invariants: use the owning slice's explicit coverage map in t
 
 ## Execution Gate
 
-Approved: 2026-10-11; the maintainer authorized this corrective set through Looper.
+Approved: 2026-10-11; the maintainer authorized this corrective set through the delivery controller.
 
 Execute only when this slice is active and its predecessors and external prerequisites are satisfied.
-Keep one task commit and one canonical slice PR; only Looper submits development merges.
+Keep one task commit and one canonical slice PR; only the delivery controller submits development merges.
 Use the existing Markdown ticket lifecycle; this file does not create a product runtime invocation.
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Implemented retained real Git conflict checkpoints, exact original replay-step
+repair, semantic ownership planning, explicit attributed integration fixes and
+bounded incompatibility/procedure decisions. Repair proof retains exact source,
+parents, tree diffs and original author/date/message/encoding. Host runtime
+acceptance and procedure execution remain owned by T6.4.
+
+Focused checks passed:
+
+- `go test ./internal/core -run '^TestNative(Merger|Combined|Replay)' -count=1` — 40.378 seconds.
+- `go test -race ./internal/core -run '^TestNative(Merger|Combined|Replay)' -count=1` — 55.628 seconds.
+- Strict lint — zero issues.
+
+Required pre-commit `make verify` passed: zero lint issues; core 1244.924 seconds,
+app 95.231 seconds and all other packages passed. `git diff --check` passed.
+Task commit and activity binding are pending.
+Canonical PR and verified integration evidence remain pending.

@@ -20,7 +20,7 @@ func validateWorkflowMergerRequirements(requirements []WorkflowMergerRequirement
 		return ErrWorkflowConflict
 	}
 
-	return nil
+	return validateWorkflowMergerIntentConflicts(requirements)
 }
 
 func validateWorkflowMergerRequirementIDs(ids []string, requirements []WorkflowMergerRequirement) error {
@@ -51,11 +51,7 @@ func validateWorkflowMergerConflicts(input WorkflowMergerInput) error {
 			return err
 		}
 
-		if !slices.Contains([]string{"text", "generated", "lockfile", "binary", "submodule", "lfs", "semantic"}, conflict.Kind) {
-			return ErrWorkflowConflict
-		}
-
-		if len(conflict.RegenerationCommand) > 0 && !validWorkflowMergerCommand(conflict.RegenerationCommand) {
+		if !validWorkflowMergerConflictProcedure(conflict) {
 			return ErrWorkflowConflict
 		}
 
@@ -63,6 +59,10 @@ func validateWorkflowMergerConflicts(input WorkflowMergerInput) error {
 	}
 
 	return nil
+}
+
+func validWorkflowMergerConflictProcedure(conflict WorkflowMergerConflict) bool {
+	return slices.Contains([]string{"text", "generated", "lockfile", "binary", "submodule", "lfs", "semantic"}, conflict.Kind) && (len(conflict.RegenerationCommand) == 0 || validWorkflowMergerCommand(conflict.RegenerationCommand)) && (len(conflict.ValidationCommand) == 0 || validWorkflowMergerCommand(conflict.ValidationCommand))
 }
 
 func validateWorkflowMergerCheckpoint(input WorkflowMergerInput) error {

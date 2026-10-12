@@ -503,7 +503,8 @@ Results are untrusted `resolved`, `needs_decision` or `failed` proposals. They
 record changed paths, per-conflict rationale, preserved requirements, supplementary
 local-check references and optional whole-call usage. A resolved proposal must
 retain every required intent; generated, lockfile, binary, submodule and LFS
-resolutions require a declared deterministic regeneration command. Decision
+resolutions require declared deterministic regeneration and frozen validation
+commands. Decision
 requests contain a precise issue, affected requirements, two to five options and
 an authority owner. Expired inputs never answer a decision. Nil usage remains
 unknown and cannot release a finite reservation.
@@ -554,6 +555,35 @@ can settle a finite token reservation, with exact whole-call capability and
 input/output ceilings. Unknown or partial usage stays charged. The model's usage
 fields cannot settle the ledger. Git method repair, host diff acceptance, combined
 validation and candidate-bound review remain separate operations.
+
+## Merger history repair
+
+`BeginWorkflowMergerRepair` creates a private Git checkpoint from exact S/B.
+Actual conflicts retain their combined tree or original replay step, prepared
+parent and verified predecessor sequence. `ContinueWorkflowMergerRepair` consumes
+a host-accepted tree repair, preserves the original author, author date, encoding
+and message, and resumes subsequent source steps. A later conflict retains its own
+checkpoint. Merge and squash preserve their configured result parents. A clean
+preparation returns method proof without requiring a merger call.
+
+`PlanWorkflowMergerRepair` resolves semantic findings against actual original Git
+diffs. A unique source owner selects that replay step;
+`BeginWorkflowMergerSemanticRepair` preserves its exact prefix and rebuilds the
+suffix. Ambiguous ownership requires a concrete decision or an explicitly declared
+actionable integration fix. `PrepareWorkflowMergerIntegrationFix` retains that
+finding and host attribution in a separate commit while preserving source replay
+mappings. Cosmetic findings cannot authorize this fix path.
+
+`WorkflowIntegrationTreeRepair` binds frozen input and per-conflict rationale to
+the original source/parent, prepared parent, baseline and repaired trees. Method
+verification recomputes actual Git trees and diffs; undeclared paths, missing
+conflict changes, incorrect replay positions and disguised binary/submodule/LFS
+types fail. Generated and other procedure-bound resolutions require host
+observations of the exact regeneration and frozen validation commands and their
+input/output trees. Declared incompatible requirements or missing procedures
+produce bounded maintainer decisions tied to the input. These trusted Git ports
+consume accepted repairs; independent host acceptance, procedure execution and
+candidate validation remain required before publication.
 
 ## Candidate review and approval
 
