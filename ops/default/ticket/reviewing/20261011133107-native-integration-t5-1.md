@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T07:40:03Z
 branch: feat/slice-5-native-method-preparation
 reviewed_at: 2026-10-12T08:11:05Z
-commits: []
+commits: [d6532b26691da0df0002f3d29753a9ae0a52be11]
 ---
 
 # T5.1: Prepare exact merge and squash candidates
@@ -70,3 +70,5 @@ Successful task checks:
 - `git diff --check`
 
 Strict lint reported zero issues. The required pre-commit gate passed with core in 1269.073 seconds, app in 105.618 seconds and all other packages passing. The focused race regression passed in 262.157 seconds. [Slice 5 report](../../report/slices/native-integration-queue/slice-5-method-preparation.md) retains development failures and evidence boundaries. T5.2 through T5.4, canonical PR preparation and final exact-HEAD controller checks remain pending.
+
+Task implementation: [commit](https://forge.adrianpk.com/adrianpk/chr/commit/d6532b26691da0df0002f3d29753a9ae0a52be11). Acta task record: `01M4QJN40VG8QKAKS12Z40FY3T`.

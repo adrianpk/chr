@@ -29,6 +29,8 @@ the same original commit list. Historical proof hashes and receipts remain
 readable without rewriting their evidence. Preparation retains the original
 4096-commit, 1 MiB output/evidence and three-minute operation bounds.
 
+T5.1 implementation and canonical report introduction: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/d6532b26691da0df0002f3d29753a9ae0a52be11). Acta task record: `01M4QJN40VG8QKAKS12Z40FY3T`.
+
 ## Contracts Added or Changed
 
 `WorkflowIntegrationProof.Provenance` retains bounded original and prepared
