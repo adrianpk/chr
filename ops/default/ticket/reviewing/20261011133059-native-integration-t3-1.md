@@ -12,6 +12,7 @@ reported_at: 2026-10-11T13:30:59Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-11T21:44:33Z
 branch: feat/slice-3-native-integration-records
+pr: 377
 reviewed_at: 2026-10-11T22:10:52Z
 commits: [64369b81579c8b4136609383568731067bc7bdfd]
 ---

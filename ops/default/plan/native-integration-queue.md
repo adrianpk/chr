@@ -184,6 +184,8 @@ Expected PR title: `feat(slice-3): persist native integration queue records`
 
 Expected report: `ops/default/report/slices/native-integration-queue/slice-3-integration-records.md`
 
+Canonical PR: [#377](https://forge.adrianpk.com/adrianpk/chr/pulls/377)
+
 Prerequisite: verified Slice 2 integration and closed task fanout.
 
 Acceptance evidence owner: Slice 3 report and its linked retained command/provider evidence.

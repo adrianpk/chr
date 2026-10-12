@@ -5,7 +5,7 @@ Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
 Branch: `feat/slice-3-native-integration-records`
-PR: pending
+PR: [#377](https://forge.adrianpk.com/adrianpk/chr/pulls/377)
 
 ## Purpose
 
@@ -42,6 +42,8 @@ T3.2 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commi
 T3.3 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/dce7077f632e9d1d93dcdde5d35ba958f4695e0f). Acta recorded the completed task as `01M4PN8W5K2TA9P691MVGK08Y9`.
 
 T3.4 keeps sequence and unit uniqueness in authoritative records. Queries and mutation guards verify ledger ownership, retained usage, reservation generations, original PR target, candidate proof, exact native journal projections and receipt ownership. Capacity observation checks real slot locks, live process groups and unexpired executor/review/closing owners without pruning process evidence. Set closure status verifies actual receipt fanout and retained final gate evidence without executing closure.
+
+T3.4 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/c7ee88bb92a27c520489effb717cecde34f2dbdf). Acta recorded the completed task as `01M4PREJHWRNP8W33M3X20ZJ31`. Canonical PR opening is recorded as `01M4PRFBG266BNBTZE3KS2H1ZB`.
 
 ## Contracts Added or Changed
 
@@ -116,4 +118,4 @@ Execution uses Go 1.27.1, the repository-pinned golangci-lint v2.14.0, the retai
 
 ## Risks and Follow-ups
 
-All four tasks passed their recorded pre-commit and focused checks. Canonical PR preparation and its reference commits precede the controller's ordered exact-HEAD validation. Verified integration and slice closure remain pending.
+All four tasks passed their recorded pre-commit and focused checks. The PR-reference follow-up completes the candidate before ordered exact-HEAD validation. The controller's retained evidence binds the clean PR head to `make verify`, `go test ./internal/core ./internal/app -count=1`, `go test -race ./internal/core ./internal/app -count=1` and `git diff --check`, in that order. Verified integration and slice closure remain pending.

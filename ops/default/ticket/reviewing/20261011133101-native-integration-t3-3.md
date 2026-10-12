@@ -12,6 +12,7 @@ reported_at: 2026-10-11T13:31:01Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-11T22:53:10Z
 branch: feat/slice-3-native-integration-records
+pr: 377
 reviewed_at: 2026-10-11T23:36:41Z
 commits: [dce7077f632e9d1d93dcdde5d35ba958f4695e0f]
 ---
@@ -69,4 +70,4 @@ Successful task checks:
 - `go test -race ./internal/core -run '^TestNativeBudget|^TestNativeSubmission|^TestNativeEntry|^TestNativeRecord|^TestNativeReceipt|^TestWorkflowSubmission' -count=1`
 - `git diff --check`
 
-[Slice 3 report](../../report/slices/native-integration-queue/slice-3-integration-records.md) records the actual gate and focused evidence. Canonical PR, final exact-HEAD checks and verified integration remain pending until T3.4 is complete.
+[Slice 3 report](../../report/slices/native-integration-queue/slice-3-integration-records.md) records the actual gate and focused evidence. Canonical PR: [#377](https://forge.adrianpk.com/adrianpk/chr/pulls/377). The controller records ordered exact-HEAD checks for the complete clean PR head; verified integration remains pending.
