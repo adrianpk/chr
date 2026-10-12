@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133111
 title: "T6.1: Define versioned merger input and result"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -14,6 +14,8 @@ started_at: 2026-10-12T13:02:05Z
 reviewed_at: 2026-10-12T13:41:56Z
 branch: feat/slice-6-native-merger-role
 pr: 380
+resolution: fixed
+closed_at: 2026-10-12T19:16:35Z
 commits: [dd376916016bc85c9f20677e03997e0b7f6a2a58]
 ---
 
@@ -85,5 +87,9 @@ through the test lifecycle.
 Task commit: [dd376916016bc85c9f20677e03997e0b7f6a2a58](https://forge.adrianpk.com/adrianpk/chr/commit/dd376916016bc85c9f20677e03997e0b7f6a2a58).
 Acta task record: `01M4R5KBYTW86RNNWE19EJ9ZJJ`.
 
-Canonical PR: [#380](https://forge.adrianpk.com/adrianpk/chr/pulls/380). Exact-HEAD candidate validation is
-pending in the controller ledger; verified integration remains pending.
+Canonical PR: [#380](https://forge.adrianpk.com/adrianpk/chr/pulls/380). Ordered exact-HEAD candidate validation and integration are verified below.
+
+Verified integration: [PR #380](https://forge.adrianpk.com/adrianpk/chr/pulls/380),
+`725128da941a5c149a2b0a5d9a6a7065f842823d` on `dev` at 2026-10-12T19:14:21Z. All four ordered
+controller checks passed for this exact clean HEAD. Controller Acta merge record:
+`01M4RRK4KT3HRPZ57T5VAW4FM0`.

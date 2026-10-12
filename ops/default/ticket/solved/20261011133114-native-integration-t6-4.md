@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133114
 title: "T6.4: Verify host acceptance of merger changes"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -13,6 +13,8 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T16:43:20Z
 branch: feat/slice-6-native-merger-role
 pr: 380
+resolution: fixed
+closed_at: 2026-10-12T19:16:35Z
 reviewed_at: 2026-10-12T17:40:46Z
 commits: [679063f2fca4b95d5dd9dbefe686ecb7332be6c3]
 ---
@@ -79,5 +81,10 @@ Successful focused checks:
 Task commit: [679063f2fca4b95d5dd9dbefe686ecb7332be6c3](https://forge.adrianpk.com/adrianpk/chr/commit/679063f2fca4b95d5dd9dbefe686ecb7332be6c3).
 Acta task record: `01M4RK837KHMAKRB118N4W3FG5`.
 Canonical PR: [#380](https://forge.adrianpk.com/adrianpk/chr/pulls/380).
-The complete candidate still requires ordered exact-HEAD controller validation.
-Verified integration is pending the external controller.
+The complete candidate passed ordered exact-HEAD controller validation and was
+merged by the external controller, as verified below.
+
+Verified integration: [PR #380](https://forge.adrianpk.com/adrianpk/chr/pulls/380),
+`725128da941a5c149a2b0a5d9a6a7065f842823d` on `dev` at 2026-10-12T19:14:21Z. All four ordered
+controller checks passed for this exact clean HEAD. Controller Acta merge record:
+`01M4RRK4KT3HRPZ57T5VAW4FM0`.

@@ -1,6 +1,6 @@
 # Slice 6: Bounded merger role
 
-Status: reviewing
+Status: delivered
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
@@ -258,22 +258,23 @@ T6.4 task commit: [679063f2fca4b95d5dd9dbefe686ecb7332be6c3](https://forge.adria
 Acta task record: `01M4RK837KHMAKRB118N4W3FG5`.
 Canonical PR opened event: `01M4RKF1ET83VGQV7MDCT3F8BJ`.
 
-The final clean candidate requires the following ordered controller checks after
-the PR-reference follow-up commit is pushed:
+Final clean candidate validation passed through the controller ledger for
+`725128da941a5c149a2b0a5d9a6a7065f842823d`, matching the integrated PR head:
 
-- `make verify`
-- `go test ./internal/core ./internal/app -count=1`
-- `go test -race ./internal/core ./internal/app -count=1`
-- `git diff --check`
+- `make verify` — pass, zero lint issues and all packages passed.
+- `go test ./internal/core ./internal/app -count=1` — pass, core 1323.560 seconds and app 94.122 seconds.
+- `go test -race ./internal/core ./internal/app -count=1` — pass, core 2472.117 seconds and app 275.658 seconds.
+- `git diff --check` — pass.
 
-The controller ledger binds results to that exact HEAD and ordered command list.
-These candidate checks and verified integration are pending.
+Canonical integration: [PR #380](https://forge.adrianpk.com/adrianpk/chr/pulls/380),
+`725128da941a5c149a2b0a5d9a6a7065f842823d` on `dev` at 2026-10-12T19:14:21Z.
+Controller Acta merge record: `01M4RRK4KT3HRPZ57T5VAW4FM0`.
+Observed owned validation processes exited naturally.
 
 ## Risks and Follow-ups
 
 All four Slice 6 tasks pass their focused/race and required pre-commit checks. Candidate gate/review scheduling belongs to
 Slice 7, so these core ports do not yet provide automatic end-to-end conflict
 repair. A compatible certified model driver remains an external prerequisite;
-raw worker CLIs are not enabled as merger tools. Required final candidate checks
-use the controller ledger after task and PR-reference commits are pushed. No full
-delivery-set gate has run.
+raw worker CLIs are not enabled as merger tools. Required final candidate checks and canonical integration are verified above.
+The delivery-set gate remains scheduled after the remaining approved slices.

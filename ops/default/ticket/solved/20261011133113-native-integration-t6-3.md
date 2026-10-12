@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133113
 title: "T6.3: Preserve semantic intent during repair"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -14,6 +14,8 @@ started_at: 2026-10-12T15:38:23Z
 reviewed_at: 2026-10-12T16:34:17Z
 branch: feat/slice-6-native-merger-role
 pr: 380
+resolution: fixed
+closed_at: 2026-10-12T19:16:35Z
 commits: [97518aabe9b214d18c86440c372511c17676e958]
 ---
 
@@ -80,5 +82,9 @@ Task commit: [97518aabe9b214d18c86440c372511c17676e958](https://forge.adrianpk.c
 Acta task record: `01M4RFEYENF7PMNPSNESJB2DY3`.
 Canonical PR and verified integration evidence remain pending.
 
-Canonical PR: [#380](https://forge.adrianpk.com/adrianpk/chr/pulls/380). Exact-HEAD candidate validation is
-pending in the controller ledger; verified integration remains pending.
+Canonical PR: [#380](https://forge.adrianpk.com/adrianpk/chr/pulls/380). Ordered exact-HEAD candidate validation and integration are verified below.
+
+Verified integration: [PR #380](https://forge.adrianpk.com/adrianpk/chr/pulls/380),
+`725128da941a5c149a2b0a5d9a6a7065f842823d` on `dev` at 2026-10-12T19:14:21Z. All four ordered
+controller checks passed for this exact clean HEAD. Controller Acta merge record:
+`01M4RRK4KT3HRPZ57T5VAW4FM0`.

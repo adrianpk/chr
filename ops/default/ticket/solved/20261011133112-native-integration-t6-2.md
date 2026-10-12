@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133112
 title: "T6.2: Execute the merger in an owned checkout"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -14,6 +14,8 @@ started_at: 2026-10-12T13:55:30Z
 reviewed_at: 2026-10-12T15:28:14Z
 branch: feat/slice-6-native-merger-role
 pr: 380
+resolution: fixed
+closed_at: 2026-10-12T19:16:35Z
 commits: [78793f6ce58fc5fabedcece6e9338698713d8739]
 ---
 
@@ -84,5 +86,9 @@ The driver is a trusted host component with built-in tools disabled, not an
 operating-system sandbox. Fixtures use a certified test driver, not a live model.
 Semantic repair and host diff acceptance remain owned by T6.3 and T6.4.
 
-Canonical PR: [#380](https://forge.adrianpk.com/adrianpk/chr/pulls/380). Exact-HEAD candidate validation is
-pending in the controller ledger; verified integration remains pending.
+Canonical PR: [#380](https://forge.adrianpk.com/adrianpk/chr/pulls/380). Ordered exact-HEAD candidate validation and integration are verified below.
+
+Verified integration: [PR #380](https://forge.adrianpk.com/adrianpk/chr/pulls/380),
+`725128da941a5c149a2b0a5d9a6a7065f842823d` on `dev` at 2026-10-12T19:14:21Z. All four ordered
+controller checks passed for this exact clean HEAD. Controller Acta merge record:
+`01M4RRK4KT3HRPZ57T5VAW4FM0`.

@@ -18,9 +18,9 @@ Plan approval: approved on 2026-10-11 under the explicit instruction to process 
 
 Implementation authorization: granted for the complete ordered corrective set and its defined task/PR map.
 
-Active slice: Slice 6 — Bounded merger role
+Active slice: Slice 7 — Combined validation and review
 
-Next slice: Slice 7 — Combined validation and review
+Next slice: Slice 8 — Persistent limits and decisions
 
 Slice strategy: behavior-first
 
@@ -280,7 +280,11 @@ Invariants: INV-05, INV-08, INV-09, INV-10, INV-11, INV-12, INV-15
 
 ## Slice 6: Bounded merger role
 
-Status: active
+Status: delivered
+
+Canonical PR: [#380](https://forge.adrianpk.com/adrianpk/chr/pulls/380)
+
+Verified merge: `725128da941a5c149a2b0a5d9a6a7065f842823d` at 2026-10-12T19:14:21Z; controller Acta `01M4RRK4KT3HRPZ57T5VAW4FM0`.
 
 Expected branch: `feat/slice-6-native-merger-role`
 
@@ -298,10 +302,10 @@ Invariants: INV-04, INV-05, INV-13, INV-14, INV-18, INV-19, INV-20
 
 | Task | Ticket | Work | Acceptance boundary |
 | --- | --- | --- | --- |
-| T6.1 | [TKT-20261011133111](../ticket/reviewing/20261011133111-native-integration-t6-1.md) | Bind intent, target changes, conflict evidence, scope, replay checkpoint and finite allowances to one immutable role input. | Malformed, oversized or stale results and escaped evidence paths are rejected before candidate acceptance. |
-| T6.2 | [TKT-20261011133112](../ticket/reviewing/20261011133112-native-integration-t6-2.md) | Run the configured harness only for actionable conflicts/regressions with shared capacity, local tool permissions and host-owned lifecycle. | The role cannot push, merge, approve, change scope or forge receipts, and timeout preserves ownership of a live child. |
-| T6.3 | [TKT-20261011133113](../ticket/reviewing/20261011133113-native-integration-t6-3.md) | Support per-conflict decisions and correct replay-step repair, declared regeneration, explicit integration fixes and ambiguity requests. | Conflicting product requirements or unsupported binary/submodule/LFS resolution stop with a concrete decision request. |
-| T6.4 | [TKT-20261011133114](../ticket/reviewing/20261011133114-native-integration-t6-4.md) | Compare actual diffs and method proof, commit through the host port and retain attributed evidence of accepted/rejected resolutions. | Blanket side selection, weakened requirements and stale or out-of-scope changes cannot yield authorization. |
+| T6.1 | [TKT-20261011133111](../ticket/solved/20261011133111-native-integration-t6-1.md) | Bind intent, target changes, conflict evidence, scope, replay checkpoint and finite allowances to one immutable role input. | Malformed, oversized or stale results and escaped evidence paths are rejected before candidate acceptance. |
+| T6.2 | [TKT-20261011133112](../ticket/solved/20261011133112-native-integration-t6-2.md) | Run the configured harness only for actionable conflicts/regressions with shared capacity, local tool permissions and host-owned lifecycle. | The role cannot push, merge, approve, change scope or forge receipts, and timeout preserves ownership of a live child. |
+| T6.3 | [TKT-20261011133113](../ticket/solved/20261011133113-native-integration-t6-3.md) | Support per-conflict decisions and correct replay-step repair, declared regeneration, explicit integration fixes and ambiguity requests. | Conflicting product requirements or unsupported binary/submodule/LFS resolution stop with a concrete decision request. |
+| T6.4 | [TKT-20261011133114](../ticket/solved/20261011133114-native-integration-t6-4.md) | Compare actual diffs and method proof, commit through the host port and retain attributed evidence of accepted/rejected resolutions. | Blanket side selection, weakened requirements and stale or out-of-scope changes cannot yield authorization. |
 
 ### Required Candidate Checks
 
@@ -312,7 +316,7 @@ Invariants: INV-04, INV-05, INV-13, INV-14, INV-18, INV-19, INV-20
 
 ## Slice 7: Combined validation and review
 
-Status: not_started
+Status: active
 
 Expected branch: `feat/slice-7-native-candidate-review`
 
