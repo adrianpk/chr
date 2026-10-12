@@ -190,7 +190,10 @@ Required T6.3 pre-commit checks passed:
 - `git diff --check` — pass.
 
 Owned fixtures completed through their test lifecycle; the recorded gate runner
-and core test process exited. Task commit and activity binding are pending.
+and core test process exited.
+
+T6.3 task commit: [97518aabe9b214d18c86440c372511c17676e958](https://forge.adrianpk.com/adrianpk/chr/commit/97518aabe9b214d18c86440c372511c17676e958).
+Acta task record: `01M4RFEYENF7PMNPSNESJB2DY3`.
 
 ## Risks and Follow-ups
 

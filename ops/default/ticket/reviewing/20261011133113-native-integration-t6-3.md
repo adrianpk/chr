@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T15:38:23Z
 reviewed_at: 2026-10-12T16:34:17Z
 branch: feat/slice-6-native-merger-role
-commits: []
+commits: [97518aabe9b214d18c86440c372511c17676e958]
 ---
 
 # T6.3: Preserve semantic intent during repair
@@ -75,5 +75,6 @@ Focused checks passed:
 
 Required pre-commit `make verify` passed: zero lint issues; core 1244.924 seconds,
 app 95.231 seconds and all other packages passed. `git diff --check` passed.
-Task commit and activity binding are pending.
+Task commit: [97518aabe9b214d18c86440c372511c17676e958](https://forge.adrianpk.com/adrianpk/chr/commit/97518aabe9b214d18c86440c372511c17676e958).
+Acta task record: `01M4RFEYENF7PMNPSNESJB2DY3`.
 Canonical PR and verified integration evidence remain pending.
