@@ -13,6 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-13T11:49:45Z
 reviewed_at: 2026-10-13T12:08:00Z
 branch: feat/slice-8-native-integration-limits
+pr: 382
 commits: ["b0574cca109c65d46a00bbbfb0b426f35fe751d1"]
 ---
 
@@ -69,9 +70,12 @@ unknown usage retains the complete token grant and rejects a hidden replacement.
 Focused normal and race checks passed in 38.816 s and 74.448 s. Strict lint
 reports zero issues. The two changed test files were unchanged throughout those
 checks. All owned fixtures and check processes finished. Required exact-head
-slice validation, canonical PR and verified integration remain pending.
+slice validation and verified integration remain pending.
 
 Evidence: [Slice 8 report](../../report/slices/native-integration-queue/slice-8-integration-limits.md).
 
 Implementation: [b0574cca109c65d46a00bbbfb0b426f35fe751d1](https://forge.adrianpk.com/adrianpk/chr/commit/b0574cca109c65d46a00bbbfb0b426f35fe751d1).
 Acta commit activity: `01M4TJKYTBQ2KTKQWSNH7NNCGN`.
+
+Canonical slice PR: [PR #382](https://forge.adrianpk.com/adrianpk/chr/pulls/382). The controller records ordered exact-HEAD
+validation separately before integration; task status remains reviewing.

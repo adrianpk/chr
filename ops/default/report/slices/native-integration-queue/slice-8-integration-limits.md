@@ -5,7 +5,7 @@ Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
 Branch: `feat/slice-8-native-integration-limits`
-PR: pending
+PR: [PR #382](https://forge.adrianpk.com/adrianpk/chr/pulls/382)
 
 ## Purpose
 
@@ -240,5 +240,6 @@ Acta commit activity: `01M4TJKYTBQ2KTKQWSNH7NNCGN`.
 
 ## Risks and Follow-ups
 
-All four tasks are implemented and development-checked. Canonical PR references
-and exact-head controller validation remain pending.
+All four tasks and canonical PR references are committed. Exact-head controller
+validation and verified integration remain pending; all task tickets remain
+reviewing until integration is verified.

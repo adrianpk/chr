@@ -13,6 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-13T06:10:27Z
 reviewed_at: 2026-10-13T06:51:34Z
 branch: feat/slice-8-native-integration-limits
+pr: 382
 commits: ["94ea7e86745e9ab30d55bc9fa931fd23a91826bc"]
 ---
 
@@ -61,7 +62,7 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Implementation and development validation are retained below; final exact-head slice validation and verified integration remain pending.
 
 ## Evidence
 
@@ -80,8 +81,10 @@ Development checks passed with Go 1.27.1:
 - `git diff --check` — passed.
 
 The oversized-deadline regression failed before correction. The existing Slice 8
-report retains that reproduction, corrected checks and remaining tasks. Canonical
-PR and final exact-head controller evidence remain pending.
+report retains that reproduction, corrected checks and task checks. Final exact-head controller evidence remains pending.
 
 T8.1 implementation: [94ea7e86745e9ab30d55bc9fa931fd23a91826bc](https://forge.adrianpk.com/adrianpk/chr/commit/94ea7e86745e9ab30d55bc9fa931fd23a91826bc).
 Acta commit activity: `01M4T0JW66X49EPFWK9J7TQV4Q`.
+
+Canonical slice PR: [PR #382](https://forge.adrianpk.com/adrianpk/chr/pulls/382). The controller records ordered exact-HEAD
+validation separately before integration; task status remains reviewing.

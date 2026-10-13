@@ -13,6 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-13T08:57:28Z
 reviewed_at: 2026-10-13T10:10:31Z
 branch: feat/slice-8-native-integration-limits
+pr: 382
 commits: ["e1e574d4c031a25452de66da886be0e1df7271a9"]
 ---
 
@@ -76,4 +77,7 @@ services finished naturally.
 
 Implementation: [e1e574d4c031a25452de66da886be0e1df7271a9](https://forge.adrianpk.com/adrianpk/chr/commit/e1e574d4c031a25452de66da886be0e1df7271a9).
 Acta commit activity: `01M4TBXAE0MJ2MGP0TE9CH7CXF`.
-The Slice 8 PR and verified integration remain pending.
+Final exact-head slice validation and verified integration remain pending.
+
+Canonical slice PR: [PR #382](https://forge.adrianpk.com/adrianpk/chr/pulls/382). The controller records ordered exact-HEAD
+validation separately before integration; task status remains reviewing.

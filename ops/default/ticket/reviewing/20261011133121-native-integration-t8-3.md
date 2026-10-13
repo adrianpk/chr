@@ -13,6 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-13T10:19:42Z
 reviewed_at: 2026-10-13T11:43:31Z
 branch: feat/slice-8-native-integration-limits
+pr: 382
 commits: ["cb24ddffc886af7db8fe2f746fdd0d9982bbcdd8"]
 ---
 
@@ -69,10 +70,13 @@ The common operation service delegates these actions to the existing owner.
 Development normal/race checks passed for decision, grant, budget and real merger
 fixtures; strict lint reports zero issues. Required pre-commit `make verify`
 passed with 27 unchanged Go files: core 2136.587 s, app 115.808 s and all other
-packages passed. Implementation and validation are complete; canonical PR and
-verified integration remain pending.
+packages passed. Implementation and development validation are complete; final exact-head slice
+validation and verified integration remain pending.
 
 Evidence: [Slice 8 report](../../report/slices/native-integration-queue/slice-8-integration-limits.md).
 
 Implementation: [cb24ddffc886af7db8fe2f746fdd0d9982bbcdd8](https://forge.adrianpk.com/adrianpk/chr/commit/cb24ddffc886af7db8fe2f746fdd0d9982bbcdd8).
 Acta commit activity: `01M4TH7SCDF346JDG9Y5J8GKJQ`.
+
+Canonical slice PR: [PR #382](https://forge.adrianpk.com/adrianpk/chr/pulls/382). The controller records ordered exact-HEAD
+validation separately before integration; task status remains reviewing.
