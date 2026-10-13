@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-13T19:24:35Z
 reviewed_at: 2026-10-13T20:39:33Z
 branch: feat/slice-9-native-publication-recovery
-commits: []
+commits: ["ae54f89aff1248e7cee90c5e033ac923ec7c77c7"]
 ---
 
 # T9.2: Reconcile atomic rejection and lost responses
@@ -89,4 +89,6 @@ All owned check processes and fixtures finished. Focused-check Acta activity:
 `01M4VCSGYGAEN61C0KYC9XAK7W`; broader normal/race activity:
 `01M4VDRC8Z5TQAX002QF2DW5TW`.
 
-Task commit reference, canonical PR and verified integration remain pending.
+Implementation: [ae54f89aff1248e7cee90c5e033ac923ec7c77c7](https://forge.adrianpk.com/adrianpk/chr/commit/ae54f89aff1248e7cee90c5e033ac923ec7c77c7).
+Acta commit activity: `01M4VFXT6NZ0S5TT0V9BJ8W6PF`.
+Canonical PR and verified integration remain pending.

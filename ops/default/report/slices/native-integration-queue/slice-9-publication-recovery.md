@@ -120,8 +120,11 @@ and canonical PR references are committed and pushed.
 T9.1 implementation: [e4531667cbbeb82922d79500cb7bd79c72e2efb9](https://forge.adrianpk.com/adrianpk/chr/commit/e4531667cbbeb82922d79500cb7bd79c72e2efb9).
 Acta commit activity: `01M4VAYVXVK7AMTY6J2RA7TYC1`.
 
+T9.2 implementation: [ae54f89aff1248e7cee90c5e033ac923ec7c77c7](https://forge.adrianpk.com/adrianpk/chr/commit/ae54f89aff1248e7cee90c5e033ac923ec7c77c7).
+Acta commit activity: `01M4VFXT6NZ0S5TT0V9BJ8W6PF`.
+
 ## Risks and Follow-ups
 
-T9.1 and T9.2 are implemented and development-checked. T9.3 and T9.4 remain
-ready for canonical convergence and crash/stop boundaries. Canonical PR and
-verified integration remain pending.
+T9.1 and T9.2 are implemented and development-checked. T9.3 is in progress
+for canonical convergence; T9.4 remains ready for crash/stop boundaries.
+Canonical PR and verified integration remain pending.
