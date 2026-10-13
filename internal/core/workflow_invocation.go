@@ -19,6 +19,8 @@ type WorkflowExecutionPolicy struct {
 	WorkerTimeoutSeconds     int    `json:"worker_timeout_seconds"`
 	MaxWorkerAttempts        int    `json:"max_worker_attempts"`
 	MaxIntegrationAttempts   int    `json:"max_integration_attempts,omitempty"`
+	MaxMergerAttempts        int    `json:"max_merger_attempts,omitempty"`
+	MaxDriftRevisions        int    `json:"max_drift_revisions,omitempty"`
 	CheckpointStepLimit      int    `json:"checkpoint_step_limit,omitempty"`
 }
 
@@ -220,7 +222,7 @@ func validWorkflowRequestKey(key string) bool {
 }
 
 func validWorkflowExecutionPolicy(policy WorkflowExecutionPolicy) bool {
-	return validWorkflowWorkerPolicy(policy) && policy.MaxIntegrationAttempts >= 0 && policy.MaxIntegrationAttempts <= 10 && policy.CheckpointStepLimit >= 0 && policy.CheckpointStepLimit <= WorkflowPageLimit && (policy.ConfigRevision == "" || len(policy.ConfigRevision) == 64)
+	return validWorkflowWorkerPolicy(policy) && validWorkflowIntegrationPolicyBounds(policy) && policy.MaxIntegrationAttempts >= 0 && policy.MaxIntegrationAttempts <= 10 && policy.CheckpointStepLimit >= 0 && policy.CheckpointStepLimit <= WorkflowPageLimit && (policy.ConfigRevision == "" || len(policy.ConfigRevision) == 64)
 }
 
 func validWorkflowWorkerPolicy(policy WorkflowExecutionPolicy) bool {

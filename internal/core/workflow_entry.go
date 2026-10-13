@@ -110,6 +110,8 @@ func workflowRequestedRetainedPolicy(requested, policy WorkflowExecutionPolicy, 
 		{requested.ValidationTimeoutSeconds, &policy.ValidationTimeoutSeconds},
 		{requested.MaxWorkerAttempts, &policy.MaxWorkerAttempts},
 		{requested.MaxIntegrationAttempts, &policy.MaxIntegrationAttempts},
+		{requested.MaxMergerAttempts, &policy.MaxMergerAttempts},
+		{requested.MaxDriftRevisions, &policy.MaxDriftRevisions},
 		{requested.CheckpointStepLimit, &policy.CheckpointStepLimit},
 	} {
 		if field.requested != 0 {

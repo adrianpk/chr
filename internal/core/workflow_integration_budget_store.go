@@ -93,7 +93,7 @@ func (s *WorkflowStore) workflowIntegrationBudgetAdmission(ctx context.Context, 
 		counters = append(counters, WorkflowIntegrationCounter{Unit: entry.Unit})
 	}
 
-	limits := WorkflowIntegrationLimits{Worker: int64(run.Policy.MaxWorkerAttempts), Review: WorkflowPageLimit, Closing: WorkflowPageLimit, Merger: 3, Drift: 5, Submission: int64(workflowIntegrationAttemptLimit(run.Policy))}
+	limits := workflowIntegrationAdmissionLimits(run.Policy)
 
 	return WorkflowIntegrationBudget{SchemaVersion: 1, InvocationID: run.ID, TokenLimit: tokenLimit, AdmissionTokenLimit: tokenLimit, AdmissionLimits: limits, LimitsSnapshot: limits, UnitCounters: counters}, nil
 }
@@ -213,6 +213,10 @@ func (s *WorkflowStore) currentWorkflowIntegrationBudget(ctx context.Context, ru
 }
 
 func (s *WorkflowStore) checkWorkflowIntegrationBudgetEvidence(run workflowInvocationFile, budget WorkflowIntegrationBudget) error {
+	if budget.AdmissionLimits != workflowIntegrationAdmissionLimits(run.Policy) {
+		return workflowIntegrationConflict("admission limits differ from frozen execution policy")
+	}
+
 	for _, reservation := range budget.Reservations {
 		if reservation.EntryID != workflowIntegrationEntryID(run, reservation.Unit) {
 			return ErrWorkflowConflict

@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133119
 title: "T8.1: Enforce merger drift and submission counters"
-status: ready
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,9 @@ tags: native-integration, slice-8
 source: chat
 reported_at: 2026-10-11T13:31:19Z
 ready_at: 2026-10-11T13:31:37Z
+started_at: 2026-10-13T06:10:27Z
+reviewed_at: 2026-10-13T06:51:34Z
+branch: feat/slice-8-native-integration-limits
 commits: []
 ---
 
@@ -59,3 +62,23 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 ## Evidence
 
 Implementation, validation, PR and verified integration evidence are pending.
+
+## Evidence
+
+T8.1 applies frozen default or explicitly bounded merger/drift limits, refuses
+budget images that disagree with admitted policy and checks role-call deadlines
+before consumption changes. Merger, drift and submission reservations remain
+charged through restart and replacement generations; retry cannot extend an
+accepted call deadline.
+
+Development checks passed with Go 1.27.1:
+
+- `make verify` — zero lint issues; all packages passed, including core in 1853.274 s and app in 99.190 s.
+- `go test ./internal/core -run '^(TestNativeBudgetDeadline|TestNativeLimitPolicy|TestNativeLimitExhaustion|TestNativeDeadlineRetry|TestWorkflowStartBounds|TestWorkflowEntry)$' -count=1` — passed in 2.308 s.
+- `go test -race ./internal/core -run '^(TestNativeBudget|TestNativeLimit|TestNativeDeadline|TestNativeMergerUnmetered|TestWorkflowStartBounds|TestWorkflowEntry)' -count=1` — passed in 14.199 s after the helper correction.
+- `make lint-strict` — passed with zero issues.
+- `git diff --check` — passed.
+
+The oversized-deadline regression failed before correction. The existing Slice 8
+report retains that reproduction, corrected checks and remaining tasks. Canonical
+PR and final exact-head controller evidence remain pending.

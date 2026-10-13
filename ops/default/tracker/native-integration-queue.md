@@ -299,7 +299,7 @@ Prerequisite: verified Slice 7 integration and closed task fanout.
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T8.1 | [TKT-20261011133119](../ticket/ready/20261011133119-native-integration-t8-1.md) | ready | pending | Enforce merger drift and submission counters |
+| T8.1 | [TKT-20261011133119](../ticket/reviewing/20261011133119-native-integration-t8-1.md) | reviewing | pending | Enforce merger drift and submission counters |
 | T8.2 | [TKT-20261011133120](../ticket/ready/20261011133120-native-integration-t8-2.md) | ready | pending | Reserve and settle optional token ceilings |
 | T8.3 | [TKT-20261011133121](../ticket/ready/20261011133121-native-integration-t8-3.md) | ready | pending | Persist operator decisions and bounded grants |
 | T8.4 | [TKT-20261011133122](../ticket/ready/20261011133122-native-integration-t8-4.md) | ready | pending | Verify process and budget recovery |
@@ -315,7 +315,7 @@ PR: pending
 
 Verified merge: pending
 
-Report/evidence: pending
+Report/evidence: [Slice 8 report](../report/slices/native-integration-queue/slice-8-integration-limits.md); T8.1 implementation and development checks passed. T8.2–T8.4 and canonical PR preparation remain pending.
 
 ## Slice 9: Publication and uncertainty recovery
 

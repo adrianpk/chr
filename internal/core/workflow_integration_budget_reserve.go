@@ -65,10 +65,10 @@ func (s *WorkflowStore) checkWorkflowIntegrationReservationAdmission(ctx context
 		return err
 	}
 
-	return checkWorkflowIntegrationCallDeadline(budget, r)
+	return checkWorkflowIntegrationCallDeadline(run.Policy, budget, r)
 }
 
-func checkWorkflowIntegrationCallDeadline(budget WorkflowIntegrationBudget, reservation WorkflowIntegrationReservation) error {
+func checkWorkflowIntegrationCallDeadline(policy WorkflowExecutionPolicy, budget WorkflowIntegrationBudget, reservation WorkflowIntegrationReservation) error {
 	if reservation.Kind != "agent_call" {
 		return nil
 	}
@@ -82,7 +82,8 @@ func checkWorkflowIntegrationCallDeadline(budget WorkflowIntegrationBudget, rese
 		}
 	}
 
-	if !deadline.After(time.Now()) {
+	now := time.Now().UTC()
+	if !deadline.After(now) || deadline.After(now.Add(time.Duration(policy.WorkerTimeoutSeconds)*time.Second)) {
 		return ErrWorkflowConflict
 	}
 
