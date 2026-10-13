@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"slices"
+	"strings"
 )
 
 // WorkflowMergerRequiredDecisions identifies incompatible intent and unsupported
@@ -22,6 +23,10 @@ func WorkflowMergerRequiredDecisions(input WorkflowMergerInput) ([]WorkflowMerge
 	if len(decisions) > 16 {
 		return nil, ErrWorkflowConflict
 	}
+
+	decisions = slices.DeleteFunc(decisions, func(d WorkflowMergerDecision) bool {
+		return input.OperatorDecisionRef != nil && strings.HasPrefix(d.ID, "intent-") && workflowDecisionResolved(input.OperatorAnswers, d.ID)
+	})
 
 	return decisions, validateWorkflowMergerDecisions(decisions, input)
 }

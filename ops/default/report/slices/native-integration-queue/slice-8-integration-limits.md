@@ -44,6 +44,29 @@ Host task and aggregate validation commands remain outside model accounting.
 A finite ceiling cannot be introduced after an unmetered call was prepared;
 the host rechecks the current ledger before granting a raw process permission.
 
+T8.3 adds immutable candidate-bound questions under the existing integration
+entry. Asking or deferring a question consumes no agent call and preserves a
+waiting state across restart. Answers require the displayed record hash/revision,
+current invocation, budget, entry and generation guards, and fresh source/base
+observations. Each explicit response retains actor, required authority, reason,
+prior revision and timestamp. All questions must be resolved before merger work
+resumes; silence and partial answers do not resume it.
+
+Resolved interpretations are sealed into a later merger input. The host verifies
+the immutable operator record, original scope, requirements, conflict context
+and unchanged validation contract. Typed replay-owner answers must name an
+original source commit; explicit integration fixes require an actionable finding.
+Neither response authorizes a scope change, an undeclared binary resolution,
+a replacement gate or publication. A stopped repair checkpoint is independently
+retained at the fresh entry revision before the resumed merger call.
+
+Positive extensions append to the same invocation ledger without changing its
+admission policy or any consumed calls, unknown allowances or historical grants.
+They work before queue admission, including the first extension of an unmetered
+worker invocation; the existing consumed history is migrated into the ledger.
+The extension retains finite token mode when configured and preserves unmetered
+mode otherwise. Existing absolute persistence and role-owner bounds still apply.
+
 ## Implementation Notes
 
 The new optional policy fields use omitted zero values, so existing default
@@ -66,6 +89,15 @@ against the sealed attempt input rather than a later queue generation. Existing
 worker/reviewer attempt counters and reservations count the same owned call once.
 A separate reservation for an already charged role/attempt is rejected.
 
+Question revisions are immutable hash-named files under the owning queue entry.
+The current entry points at the sealed record; each answer retains its previous
+revision. The common store lock and existing mutation journal commit question,
+entry and invocation images together. A merger's structured `needs_decision`
+proposal is retained atomically with its stopped attempt and charged budget.
+The adapter-neutral operation service delegates grant and decision actions to
+these same owners. Exact retries retain the existing result without reapproving
+or granting twice.
+
 ## Contracts Added or Changed
 
 - `WorkflowExecutionPolicy` accepts `max_merger_attempts` and `max_drift_revisions` with finite automatic bounds.
@@ -74,6 +106,11 @@ A separate reservation for an already charged role/attempt is rejected.
 - `WorkflowExecutionPolicy.agent_token_budget` freezes an optional positive invocation ceiling; omitted values preserve existing policy encodings.
 - `ExecuteWorkflowTaskWithHarness` and `ReviewWorkflowSliceWithHarness` require a host-certified whole-call driver and finite per-call allowances.
 - Budget reservations can retain an immutable attempt-input reference before queue admission; driver usage is retained independently of model text.
+
+- `RecordWorkflowIntegrationDecisions`, `ReadWorkflowIntegrationDecisions` and `AnswerWorkflowIntegrationDecision` retain bounded questions and explicit current answers.
+- Optional merger input decision evidence binds resolved interpretations and typed replay ownership to the original scope and contract.
+- `GrantWorkflowIntegration` permits positive guarded pre-queue extensions and preserves consumed history and absolute bounds.
+- Shared operation service methods delegate operator actions to the existing invocation owner.
 
 ## Files of Interest
 
@@ -84,6 +121,10 @@ A separate reservation for an already charged role/attempt is rejected.
 - `internal/core/workflow_integration_budget_store.go`: frozen-policy authority checks.
 - `internal/core/workflow_integration_budget_reserve.go`: pre-charge deadline admission.
 - `internal/core/workflow_invocation.go` and `internal/core/workflow_entry.go`: policy bounds and compatible entry restoration.
+
+- `internal/core/workflow_integration_decision*.go`: sealed questions, guarded answers, real merger persistence and typed repair choices.
+- `internal/core/workflow_integration_grant.go` and `workflow_integration_operator_test.go`: early extensions, retained consumption and policy compatibility.
+- `internal/app/service_workflow_operator.go`: adapter-neutral decision and grant ports.
 
 ## Validation
 
@@ -145,8 +186,28 @@ PR references are complete.
 T8.2 implementation: [e1e574d4c031a25452de66da886be0e1df7271a9](https://forge.adrianpk.com/adrianpk/chr/commit/e1e574d4c031a25452de66da886be0e1df7271a9).
 Acta commit activity: `01M4TBXAE0MJ2MGP0TE9CH7CXF`.
 
+T8.3's unmetered retry regression first failed with `workflow revision or image
+conflict`: no budget ledger existed to receive a pre-queue worker extension.
+The corrected first grant preserves the original consumed worker attempt and
+policy while authorizing one bounded retry. The regression command was
+`go test ./internal/core -run '^TestNativeGrantUnmetered$' -count=1`.
+
+T8.3 development checks passed with Go 1.27.1:
+
+- `make verify` — passed with zero lint issues; core 2136.587 s, app 115.808 s and all other packages passed.
+- `go test ./internal/core ./internal/app -run '^(TestNativeDecision.*|TestNativeGrant.*|TestNativeBudget.*|TestNativeMergerExecution|TestServiceWorkflowGrant)$' -count=1` — passed; core 64.877 s, app 0.163 s.
+- `go test -race ./internal/core ./internal/app -run '^(TestNativeDecision.*|TestNativeGrant.*|TestNativeBudget.*|TestNativeMergerExecution|TestServiceWorkflowGrant)$' -count=1` — passed; core 97.641 s, app 1.991 s.
+- `make lint-strict` — passed with zero issues.
+- `git diff --check` — passed.
+
+The pre-commit repository check passed with all 27 changed Go files unchanged
+throughout validation. All owned checks exited naturally. The real answered
+repair retains its private checkpoint at the fresh revision before execution;
+host acceptance remains pending validation and cannot replace review or publish
+a result. Exact-head controller validation remains pending until the slice
+tasks and PR-reference commits are complete.
+
 ## Risks and Follow-ups
 
-T8.1 and T8.2 are committed and checked. T8.3 and T8.4 remain recorded tasks
-for operator decisions/extensions and owned-process recovery. The canonical
-Slice 8 PR remains pending.
+T8.1, T8.2 and T8.3 implementation and development checks passed. T8.4 remains
+recorded for owned-process recovery. The canonical Slice 8 PR remains pending.

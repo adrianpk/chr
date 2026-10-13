@@ -35,6 +35,8 @@ type WorkflowMergerCheckpoint struct {
 // WorkflowMergerInput is an immutable, credential-free contract for one role
 // call. The opaque workspace identity is resolved by the host, never the agent.
 type WorkflowMergerInput struct {
+	OperatorDecisionRef   *WorkflowEvidenceRef        `json:"operator_decision_ref,omitempty"`
+	OperatorAnswers       []WorkflowIntegrationAnswer `json:"operator_answers,omitempty"`
 	ProtocolVersion       int                         `json:"protocol_version"`
 	ID                    string                      `json:"id"`
 	InvocationID          string                      `json:"invocation_id"`

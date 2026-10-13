@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133121
 title: "T8.3: Persist operator decisions and bounded grants"
-status: ready
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,9 @@ tags: native-integration, slice-8
 source: chat
 reported_at: 2026-10-11T13:31:21Z
 ready_at: 2026-10-11T13:31:37Z
+started_at: 2026-10-13T10:19:42Z
+reviewed_at: 2026-10-13T11:43:31Z
+branch: feat/slice-8-native-integration-limits
 commits: []
 ---
 
@@ -58,4 +61,15 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Implemented immutable entry-owned questions, explicit guarded answers and
+candidate-bound operator evidence for the existing merger. Positive grants work
+before queue admission and preserve policy, consumed attempts and unknown usage.
+The common operation service delegates these actions to the existing owner.
+
+Development normal/race checks passed for decision, grant, budget and real merger
+fixtures; strict lint reports zero issues. Required pre-commit `make verify`
+passed with 27 unchanged Go files: core 2136.587 s, app 115.808 s and all other
+packages passed. Implementation and validation are complete; canonical PR and
+verified integration remain pending.
+
+Evidence: [Slice 8 report](../../report/slices/native-integration-queue/slice-8-integration-limits.md).

@@ -240,6 +240,10 @@ func TestNativeMergerChild(t *testing.T) {
 		os.Exit(70)
 	}
 
+	if nativeMergerChildDecision(encoder, decoder, call.Input) {
+		os.Exit(0)
+	}
+
 	if call.Input.ID == "merger-timeout" {
 		if err := os.WriteFile("driver-started", []byte("owned driver"), 0o600); err != nil {
 			os.Exit(77)
@@ -345,4 +349,22 @@ func nativeMergerChildProposal(input WorkflowMergerInput) WorkflowMergerResult {
 	}
 
 	return proposal
+}
+
+func nativeMergerChildDecision(encoder *json.Encoder, decoder *json.Decoder, input WorkflowMergerInput) bool {
+	if input.ID != "merger-decision" {
+		return false
+	}
+
+	question := WorkflowMergerDecision{ID: "interpretation", Issue: "Select the compatible interpretation of both requirements", RequirementIDs: []string{"source-api", "target-validation"}, Options: []string{"Preserve the declared behavior", "Defer the repair"}, Authority: "maintainer"}
+	proposal := WorkflowMergerResult{ProtocolVersion: 1, InputHash: input.InputHash, Outcome: "needs_decision", DecisionRequests: []WorkflowMergerDecision{question}}
+
+	data, err := json.Marshal(proposal)
+	if err != nil {
+		os.Exit(76)
+	}
+
+	_ = nativeMergerChildRequest(encoder, decoder, workflowMergerToolRequest{Operation: "result", Result: data})
+
+	return true
 }

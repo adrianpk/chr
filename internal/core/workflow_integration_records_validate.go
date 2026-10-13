@@ -103,6 +103,16 @@ func checkWorkflowIntegrationCounterHistory(run workflowInvocationFile, budget W
 }
 
 func (s *WorkflowStore) checkWorkflowIntegrationEntryRecords(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry) error {
+	if entry.DecisionRef != nil {
+		if _, err := s.readWorkflowDecisionRecord(ctx, run, entry); err != nil {
+			return err
+		}
+	}
+
+	return s.checkWorkflowIntegrationEntryBinding(ctx, run, entry)
+}
+
+func (s *WorkflowStore) checkWorkflowIntegrationEntryBinding(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry) error {
 	if workflowIntegrationTargetChanged(run, entry) {
 		return workflowIntegrationConflict("target differs from the owning original PR")
 	}

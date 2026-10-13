@@ -67,6 +67,10 @@ func workflowIntegrationPublicationStop(entry WorkflowIntegrationEntry, request 
 }
 
 func (s *WorkflowStore) checkWorkflowIntegrationTransition(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry, request WorkflowIntegrationTransition) error {
+	if err := s.guardWorkflowDecisionTransition(ctx, run, entry, request); err != nil {
+		return err
+	}
+
 	if err := s.checkWorkflowInputs(ctx, run); err != nil {
 		return err
 	}

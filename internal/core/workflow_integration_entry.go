@@ -25,6 +25,7 @@ type WorkflowIntegrationBlocker struct {
 
 // WorkflowIntegrationEntry is owned by an invocation, never by a queue index.
 type WorkflowIntegrationEntry struct {
+	DecisionRef *WorkflowEvidenceRef `json:"decision_ref,omitempty"`
 	WorkflowIdentity
 	SchemaVersion       int                         `json:"schema_version"`
 	InvocationID        string                      `json:"invocation_id"`

@@ -9,6 +9,10 @@ import (
 
 func (input WorkflowMergerInput) evidenceRefs() []WorkflowEvidenceRef {
 	refs := []WorkflowEvidenceRef{input.SourceManifestRef, input.ValidationContractRef}
+	if input.OperatorDecisionRef != nil {
+		refs = append(refs, *input.OperatorDecisionRef)
+	}
+
 	if input.RepairCheckpointRef != nil {
 		refs = append(refs, *input.RepairCheckpointRef)
 	}
@@ -70,6 +74,10 @@ func (s *WorkflowStore) CheckWorkflowMergerEvidence(ctx context.Context, input W
 		if _, err := s.readWorkflowReviewImage(ref.Path, ref.Hash); err != nil {
 			return fmt.Errorf("%w: merger evidence changed or escaped containment", ErrWorkflowConflict)
 		}
+	}
+
+	if err := s.checkWorkflowMergerOperatorEvidence(input); err != nil {
+		return err
 	}
 
 	return s.checkWorkflowMergerManifest(input)

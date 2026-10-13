@@ -82,10 +82,15 @@ func (s *WorkflowStore) persistWorkflowMergerFinish(ctx context.Context, run *wo
 		return err
 	}
 
-	files = append(files, file)
-	if settlement.Path != "" {
-		files = append(files, settlement)
+	decisionFiles, err := s.workflowMergerDecisionFiles(ctx, run, result)
+	if err != nil {
+		return err
 	}
+
+	files = append(files, decisionFiles...)
+
+	files = append(files, file)
+	files = appendWorkflowMergerSettlement(files, settlement)
 
 	return s.commitWorkflowPullRequestFiles(run, files, resultFile)
 }
@@ -136,4 +141,12 @@ func boundWorkflowMergerAttempt(attempt *WorkflowMergerAttempt) error {
 	attempt.Harness.Stdout, attempt.Harness.Stderr, attempt.Harness.Truncated = "", "", true
 
 	return ErrWorkflowConflict
+}
+
+func appendWorkflowMergerSettlement(files []workflowFileChange, settlement workflowFileChange) []workflowFileChange {
+	if settlement.Path != "" {
+		return append(files, settlement)
+	}
+
+	return files
 }

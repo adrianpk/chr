@@ -196,12 +196,16 @@ func (s *WorkflowStore) beginWorkflowAttempt(run *workflowInvocationFile, record
 		}
 	}
 
-	limit := run.Policy.MaxWorkerAttempts
+	limit, err := s.workflowGrantedLimit(*run, "executor")
+	if err != nil {
+		return err
+	}
+
 	if slices.Contains([]string{workflowSliceReviewPurpose, workflowIntegrationValidationPurpose, workflowMergerPurpose}, claim.purpose) {
 		limit = WorkflowPageLimit
 	}
 
-	if count >= limit || len(run.Attempts) >= WorkflowRecordLimit {
+	if int64(count) >= limit || len(run.Attempts) >= WorkflowRecordLimit {
 		return fmt.Errorf("workflow worker attempt budget exhausted")
 	}
 

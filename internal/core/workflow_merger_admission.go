@@ -43,6 +43,10 @@ func (s *WorkflowStore) checkWorkflowMergerAdmissionInputs(ctx context.Context, 
 		return err
 	}
 
+	if err := checkWorkflowMergerDecisionBinding(entry, input); err != nil {
+		return err
+	}
+
 	if err := checkWorkflowMergerEntry(run, entry, input); err != nil {
 		return err
 	}

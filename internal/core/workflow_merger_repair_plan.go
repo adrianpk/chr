@@ -96,6 +96,10 @@ func workflowMergerOwnsConflict(conflicts []WorkflowMergerConflict, paths []stri
 }
 
 func workflowMergerSemanticPlan(plan WorkflowMergerRepairPlan, input WorkflowMergerInput, owners []string, fix *AgenticReviewFinding) (WorkflowMergerRepairPlan, error) {
+	if answered, found, err := workflowMergerAnsweredPlan(plan, input, owners); found || err != nil {
+		return answered, err
+	}
+
 	if len(owners) == 1 && owners[0] != "" {
 		plan.Outcome, plan.OriginalCommit = "replay_step", owners[0]
 

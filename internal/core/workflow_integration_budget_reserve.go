@@ -195,26 +195,21 @@ func (s *WorkflowStore) GrantWorkflowIntegration(ctx context.Context, request Wo
 }
 
 func (s *WorkflowStore) grantWorkflowIntegration(ctx context.Context, run workflowInvocationFile, request WorkflowIntegrationGrantRequest) (WorkflowIntegrationBudget, error) {
-	entry, budget, err := s.currentWorkflowIntegrationBudget(ctx, run, request.WorkflowIntegrationBudgetGuard)
+	entry, budget, err := s.workflowGrantBudget(ctx, run, request.WorkflowIntegrationBudgetGuard)
 	if err != nil {
 		return budget, err
 	}
 
 	grant := request.Grant
-	for _, old := range budget.Grants {
-		if old.ID != grant.ID {
-			continue
-		}
-
-		grant.PriorRevision, grant.RecordedAt = old.PriorRevision, old.RecordedAt
-		if !reflect.DeepEqual(old, grant) {
-			return budget, ErrWorkflowConflict
-		}
-
-		return budget, nil
+	if found, err := workflowIntegrationGrantRetry(budget, grant); found || err != nil {
+		return budget, err
 	}
 
-	if err := guardWorkflowIntegrationBudget(run, entry, budget, request.WorkflowIntegrationBudgetGuard); err != nil {
+	if err := guardWorkflowGrant(run, entry, budget, request.WorkflowIntegrationBudgetGuard); err != nil {
+		return budget, err
+	}
+
+	if err := s.checkWorkflowGrantInputs(ctx, run); err != nil {
 		return budget, err
 	}
 
@@ -224,6 +219,10 @@ func (s *WorkflowStore) grantWorkflowIntegration(ctx context.Context, run workfl
 	}
 
 	if err := applyWorkflowIntegrationGrant(&budget, grant); err != nil {
+		return budget, err
+	}
+
+	if err := boundedWorkflowIntegrationGrant(budget.LimitsSnapshot); err != nil {
 		return budget, err
 	}
 
@@ -316,4 +315,21 @@ func workflowAgentUnrecordedCalls(run workflowInvocationFile, budget WorkflowInt
 	}
 
 	return count
+}
+
+func workflowIntegrationGrantRetry(budget WorkflowIntegrationBudget, grant WorkflowIntegrationGrant) (bool, error) {
+	for _, old := range budget.Grants {
+		if old.ID != grant.ID {
+			continue
+		}
+
+		grant.PriorRevision, grant.RecordedAt = old.PriorRevision, old.RecordedAt
+		if !reflect.DeepEqual(old, grant) {
+			return false, ErrWorkflowConflict
+		}
+
+		return true, nil
+	}
+
+	return false, nil
 }
