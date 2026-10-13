@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-13T08:57:28Z
 reviewed_at: 2026-10-13T10:10:31Z
 branch: feat/slice-8-native-integration-limits
-commits: []
+commits: ["e1e574d4c031a25452de66da886be0e1df7271a9"]
 ---
 
 # T8.2: Reserve and settle optional token ceilings
@@ -72,5 +72,8 @@ Strict lint passed with zero issues. Corrected-source pre-commit `make verify`
 passed with all 24 changed Go files unchanged; core 2182.690 s, app 125.596 s
 and every other package passed. Late-ceiling and process-permission regressions
 passed, and focused race checks passed after the correction. Owned check
-services finished naturally. The task commit reference, Slice 8 PR and verified
-integration remain pending.
+services finished naturally.
+
+Implementation: [e1e574d4c031a25452de66da886be0e1df7271a9](https://forge.adrianpk.com/adrianpk/chr/commit/e1e574d4c031a25452de66da886be0e1df7271a9).
+Acta commit activity: `01M4TBXAE0MJ2MGP0TE9CH7CXF`.
+The Slice 8 PR and verified integration remain pending.

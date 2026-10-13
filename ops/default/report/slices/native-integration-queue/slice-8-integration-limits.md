@@ -142,7 +142,11 @@ separate reviewer without double-counting attempts. These are development
 checks; exact-head controller validation remains pending until the slice and
 PR references are complete.
 
+T8.2 implementation: [e1e574d4c031a25452de66da886be0e1df7271a9](https://forge.adrianpk.com/adrianpk/chr/commit/e1e574d4c031a25452de66da886be0e1df7271a9).
+Acta commit activity: `01M4TBXAE0MJ2MGP0TE9CH7CXF`.
+
 ## Risks and Follow-ups
 
-T8.1 and T8.2 are implemented and checked. T8.3 and T8.4 remain recorded tasks for operator
-decisions/extensions and owned-process recovery. The canonical Slice 8 PR remains pending.
+T8.1 and T8.2 are committed and checked. T8.3 and T8.4 remain recorded tasks
+for operator decisions/extensions and owned-process recovery. The canonical
+Slice 8 PR remains pending.
