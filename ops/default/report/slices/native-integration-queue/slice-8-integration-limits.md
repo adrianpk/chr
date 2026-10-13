@@ -235,6 +235,9 @@ successful normal and race checks. All owned fixtures and checks finished.
 Required exact-head controller validation remains pending until PR references
 are committed and pushed.
 
+T8.4 implementation: [b0574cca109c65d46a00bbbfb0b426f35fe751d1](https://forge.adrianpk.com/adrianpk/chr/commit/b0574cca109c65d46a00bbbfb0b426f35fe751d1).
+Acta commit activity: `01M4TJKYTBQ2KTKQWSNH7NNCGN`.
+
 ## Risks and Follow-ups
 
 All four tasks are implemented and development-checked. Canonical PR references

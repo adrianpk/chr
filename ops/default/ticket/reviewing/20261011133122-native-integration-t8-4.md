@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-13T11:49:45Z
 reviewed_at: 2026-10-13T12:08:00Z
 branch: feat/slice-8-native-integration-limits
-commits: []
+commits: ["b0574cca109c65d46a00bbbfb0b426f35fe751d1"]
 ---
 
 # T8.4: Verify process and budget recovery
@@ -72,3 +72,6 @@ checks. All owned fixtures and check processes finished. Required exact-head
 slice validation, canonical PR and verified integration remain pending.
 
 Evidence: [Slice 8 report](../../report/slices/native-integration-queue/slice-8-integration-limits.md).
+
+Implementation: [b0574cca109c65d46a00bbbfb0b426f35fe751d1](https://forge.adrianpk.com/adrianpk/chr/commit/b0574cca109c65d46a00bbbfb0b426f35fe751d1).
+Acta commit activity: `01M4TJKYTBQ2KTKQWSNH7NNCGN`.

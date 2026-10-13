@@ -302,7 +302,7 @@ Prerequisite: verified Slice 7 integration and closed task fanout.
 | T8.1 | [TKT-20261011133119](../ticket/reviewing/20261011133119-native-integration-t8-1.md) | reviewing | [94ea7e86745e9ab30d55bc9fa931fd23a91826bc](https://forge.adrianpk.com/adrianpk/chr/commit/94ea7e86745e9ab30d55bc9fa931fd23a91826bc) | Enforce merger drift and submission counters |
 | T8.2 | [TKT-20261011133120](../ticket/reviewing/20261011133120-native-integration-t8-2.md) | reviewing | [e1e574d4c031a25452de66da886be0e1df7271a9](https://forge.adrianpk.com/adrianpk/chr/commit/e1e574d4c031a25452de66da886be0e1df7271a9) | Reserve and settle optional token ceilings |
 | T8.3 | [TKT-20261011133121](../ticket/reviewing/20261011133121-native-integration-t8-3.md) | reviewing | `cb24ddffc886af7db8fe2f746fdd0d9982bbcdd8` | Persist operator decisions and bounded grants |
-| T8.4 | [TKT-20261011133122](../ticket/reviewing/20261011133122-native-integration-t8-4.md) | reviewing | pending | Verify process and budget recovery |
+| T8.4 | [TKT-20261011133122](../ticket/reviewing/20261011133122-native-integration-t8-4.md) | reviewing | [b0574cca109c65d46a00bbbfb0b426f35fe751d1](https://forge.adrianpk.com/adrianpk/chr/commit/b0574cca109c65d46a00bbbfb0b426f35fe751d1) | Verify process and budget recovery |
 
 Required checks:
 
