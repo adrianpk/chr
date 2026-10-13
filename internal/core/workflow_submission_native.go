@@ -18,6 +18,7 @@ type WorkflowNativeSubmission struct {
 	IntentTime               time.Time                `json:"intent_time"`
 	DispatchState            string                   `json:"dispatch_state"`
 	DispatchIdentity         *WorkflowProcessIdentity `json:"dispatch_identity"`
+	DispatchCompletionRef    *WorkflowEvidenceRef     `json:"dispatch_completion_ref,omitempty"`
 	AdvertisementRef         *WorkflowEvidenceRef     `json:"advertisement_observation_ref"`
 	CommandManifestRef       *WorkflowEvidenceRef     `json:"command_manifest_ref"`
 	TransportResponseRef     *WorkflowEvidenceRef     `json:"transport_response_ref"`
@@ -25,8 +26,32 @@ type WorkflowNativeSubmission struct {
 	ApplicationState         string                   `json:"application_state"`
 	ObservationDeadline      time.Time                `json:"observation_deadline"`
 	ObservationRefs          []WorkflowEvidenceRef    `json:"observation_refs"`
+	GitObservationRefs       []WorkflowEvidenceRef    `json:"git_observation_refs,omitempty"`
 	ReceiptRef               *WorkflowEvidenceRef     `json:"receipt_ref"`
 	NonApplicationRef        *WorkflowEvidenceRef     `json:"non_application_ref"`
+}
+
+// WorkflowNativeDispatchCompletion records a returned host-owned transport call.
+// It proves local quiescence, never remote non-application by itself.
+type WorkflowNativeDispatchCompletion struct {
+	SchemaVersion     int                     `json:"schema_version"`
+	SubmissionID      string                  `json:"submission_id"`
+	CandidateRevision string                  `json:"candidate_revision"`
+	Identity          WorkflowProcessIdentity `json:"identity"`
+	ResponseRef       WorkflowEvidenceRef     `json:"response_ref"`
+	FinishedAt        time.Time               `json:"finished_at"`
+}
+
+// WorkflowNativeGitObservation binds independently fetched refs and history to
+// the same intent. It asserts no forge merge metadata or delivery receipt.
+type WorkflowNativeGitObservation struct {
+	SchemaVersion     int                       `json:"schema_version"`
+	SubmissionID      string                    `json:"submission_id"`
+	CandidateRevision string                    `json:"candidate_revision"`
+	SourceCommit      string                    `json:"source_commit"`
+	TargetCommit      string                    `json:"target_commit"`
+	Condition         string                    `json:"condition"`
+	Git               *WorkflowIntegrationProof `json:"git,omitempty"`
 }
 
 // WorkflowNativeCommandManifest is sanitized evidence, never a packet trace.

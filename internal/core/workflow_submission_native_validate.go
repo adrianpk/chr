@@ -19,7 +19,7 @@ func validateWorkflowNativeSubmission(submission WorkflowSubmission, schema stri
 		return err
 	}
 
-	if native.IntentTime != submission.SubmittedAt || !native.ObservationDeadline.After(native.IntentTime) || len(native.ObservationRefs) > WorkflowPageLimit || len(native.TransportResponseHistory) > WorkflowPageLimit {
+	if native.IntentTime != submission.SubmittedAt || !native.ObservationDeadline.After(native.IntentTime) || !validWorkflowNativeSubmissionHistory(*native) {
 		return ErrWorkflowConflict
 	}
 
@@ -28,6 +28,10 @@ func validateWorkflowNativeSubmission(submission WorkflowSubmission, schema stri
 	}
 
 	return validateWorkflowNativeApplication(submission)
+}
+
+func validWorkflowNativeSubmissionHistory(native WorkflowNativeSubmission) bool {
+	return len(native.ObservationRefs) <= WorkflowPageLimit && len(native.GitObservationRefs) <= WorkflowPageLimit && len(native.TransportResponseHistory) <= WorkflowPageLimit
 }
 
 func validateWorkflowLegacySubmissionSchema(submission WorkflowSubmission, schema string) error {
@@ -48,7 +52,9 @@ func validateWorkflowNativeSubmissionRefs(native WorkflowNativeSubmission) error
 	refs := append([]WorkflowEvidenceRef{native.CandidateRef, native.ReviewGrantRef, native.FastForwardProofRef}, native.ObservationRefs...)
 
 	refs = append(refs, native.TransportResponseHistory...)
-	for _, ref := range []*WorkflowEvidenceRef{native.AdvertisementRef, native.CommandManifestRef, native.TransportResponseRef, native.ReceiptRef, native.NonApplicationRef} {
+
+	refs = append(refs, native.GitObservationRefs...)
+	for _, ref := range []*WorkflowEvidenceRef{native.AdvertisementRef, native.CommandManifestRef, native.TransportResponseRef, native.ReceiptRef, native.NonApplicationRef, native.DispatchCompletionRef} {
 		if ref != nil {
 			refs = append(refs, *ref)
 		}
@@ -98,7 +104,7 @@ func validWorkflowNativeDispatch(native WorkflowNativeSubmission) bool {
 func validWorkflowNativeUnpublished(submission WorkflowSubmission) bool {
 	native := submission.Native
 
-	return submission.State == "unpublished" && native.DispatchState == "quiescent" && native.NonApplicationRef != nil && native.ReceiptRef == nil
+	return slices.Contains([]string{"unpublished", "awaiting_observation"}, submission.State) && native.DispatchState == "quiescent" && native.NonApplicationRef != nil && native.ReceiptRef == nil
 }
 
 func validateWorkflowNativeApplied(submission WorkflowSubmission) error {
@@ -120,6 +126,10 @@ func guardWorkflowNativeSubmissionUpdate(old, next WorkflowNativeSubmission) err
 	}
 
 	if len(next.ObservationRefs) < len(old.ObservationRefs) || !slices.Equal(old.ObservationRefs, next.ObservationRefs[:len(old.ObservationRefs)]) {
+		return ErrWorkflowConflict
+	}
+
+	if len(next.GitObservationRefs) < len(old.GitObservationRefs) || !slices.Equal(old.GitObservationRefs, next.GitObservationRefs[:len(old.GitObservationRefs)]) {
 		return ErrWorkflowConflict
 	}
 
@@ -150,7 +160,7 @@ func workflowNativeApplicationProgresses(old, next WorkflowNativeSubmission) boo
 }
 
 func guardWorkflowNativeRetainedRefs(old, next WorkflowNativeSubmission) error {
-	for _, pair := range [][2]*WorkflowEvidenceRef{{old.AdvertisementRef, next.AdvertisementRef}, {old.CommandManifestRef, next.CommandManifestRef}, {old.ReceiptRef, next.ReceiptRef}, {old.NonApplicationRef, next.NonApplicationRef}} {
+	for _, pair := range [][2]*WorkflowEvidenceRef{{old.AdvertisementRef, next.AdvertisementRef}, {old.CommandManifestRef, next.CommandManifestRef}, {old.ReceiptRef, next.ReceiptRef}, {old.NonApplicationRef, next.NonApplicationRef}, {old.DispatchCompletionRef, next.DispatchCompletionRef}} {
 		if pair[0] != nil && !reflect.DeepEqual(pair[0], pair[1]) {
 			return ErrWorkflowConflict
 		}
@@ -169,8 +179,10 @@ func sameWorkflowNativeSubmissionIntent(old, next WorkflowNativeSubmission) bool
 func clearWorkflowNativeSubmissionProgress(native *WorkflowNativeSubmission) {
 	native.DispatchState, native.ApplicationState = "", ""
 	native.DispatchIdentity = nil
+	native.DispatchCompletionRef = nil
 	native.AdvertisementRef, native.CommandManifestRef, native.TransportResponseRef = nil, nil, nil
 	native.ObservationRefs = nil
+	native.GitObservationRefs = nil
 	native.TransportResponseHistory = nil
 	native.ReceiptRef, native.NonApplicationRef = nil, nil
 }

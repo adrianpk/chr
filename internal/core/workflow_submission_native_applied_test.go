@@ -66,7 +66,13 @@ func nativeSubmissionApplied(t *testing.T, f nativeSubmissionFixture, submission
 
 	update.Facts.DispatchState, update.Facts.ApplicationState, update.Facts.DispatchIdentity = "dispatching", "git_applied", &identity
 	native := update.Facts
-	advertisement := WorkflowGitPublicationAdvertisement{SourceCommit: native.OriginalSource, TargetCommit: native.ValidatedBase, Fingerprint: workflowHash([]byte("server"))}
+
+	var capability WorkflowNativeCapability
+	if err := f.store.readWorkflowNativeEvidence(native.InvocationID, native.CapabilityRef, &capability); err != nil {
+		t.Fatal(err)
+	}
+
+	advertisement := WorkflowGitPublicationAdvertisement{SourceCommit: native.OriginalSource, TargetCommit: native.ValidatedBase, Fingerprint: capability.ServerCapabilityFingerprint}
 	manifest := WorkflowNativeCommandManifest{SchemaVersion: 1, SubmissionID: submission.ID, Atomic: true, SourceRef: native.SourceRef, ExpectedSource: native.OriginalSource, NewSource: native.PreparedResult, TargetRef: native.TargetRef, ExpectedTarget: native.ValidatedBase, NewTarget: native.PreparedResult}
 	advRef := retainNativeRecordEvidence(t, f.store, native.InvocationID, "actual-advertisement", advertisement)
 	commandRef := retainNativeRecordEvidence(t, f.store, native.InvocationID, "actual-commands", manifest)

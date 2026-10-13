@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"time"
 )
 
@@ -24,12 +25,18 @@ func (s *WorkflowStore) PublishWorkflowNativeSubmission(ctx context.Context, gua
 		return submission, WorkflowGitPublicationResult{}, err
 	}
 
+	request.BeforeSend = func(ctx context.Context, advertisement WorkflowGitPublicationAdvertisement) error {
+		return s.retainWorkflowNativeSend(ctx, submission, request, advertisement)
+	}
+
 	watched, stop := s.watchWorkflowStop(ctx, &WorkflowClaim{InvocationID: guard.InvocationID})
 	defer stop()
 
 	result, err := publisher.PublishWorkflowGit(watched, request)
 
-	return submission, result, err
+	finished, finishErr := s.completeWorkflowNativeDispatch(ctx, submission, result)
+
+	return finished, result, errors.Join(err, finishErr)
 }
 
 func (s *WorkflowStore) prepareWorkflowNativeDispatch(ctx context.Context, guard WorkflowIntegrationBudgetGuard, provider WorkflowPublicationGuardProvider) (submission WorkflowSubmission, request WorkflowGitPublication, err error) {

@@ -22,6 +22,9 @@ type WorkflowGitPublication struct {
 	OwnershipRevision       string
 	CandidateRevision       string
 	Git                     WorkflowIntegrationProof
+	// BeforeSend retains the actual advertisement and exact command intent.
+	// A failed callback aborts before any update command is sent.
+	BeforeSend func(context.Context, WorkflowGitPublicationAdvertisement) error `json:"-"`
 }
 
 // WorkflowGitPublicationResult distinguishes transport application from delivery.
@@ -112,7 +115,24 @@ func (git OSWorkflowGitPublisher) PublishWorkflowGit(ctx context.Context, reques
 		return result, err
 	}
 
+	if err := retainWorkflowPublicationAdvertisement(ctx, request, advertisement, result); err != nil {
+		return result, err
+	}
+
 	return exchangeWorkflowPublication(session, request, pack, result)
+}
+
+func retainWorkflowPublicationAdvertisement(ctx context.Context, request WorkflowGitPublication, advertisement workflowAdvertisement, result WorkflowGitPublicationResult) error {
+	if request.BeforeSend == nil {
+		return nil
+	}
+
+	fingerprint, err := workflowGitCapabilityFingerprint(advertisement.capabilities)
+	if err != nil {
+		return err
+	}
+
+	return request.BeforeSend(ctx, WorkflowGitPublicationAdvertisement{SourceCommit: result.AdvertisedSourceCommit, TargetCommit: result.AdvertisedTargetCommit, Fingerprint: fingerprint})
 }
 
 func (git OSWorkflowGitPublisher) validatePublication(ctx context.Context, request WorkflowGitPublication) error {

@@ -63,6 +63,14 @@ func (s *WorkflowStore) checkWorkflowNativeTransportEvidence(ctx context.Context
 		return err
 	}
 
+	if err := s.checkWorkflowNativeDispatchCompletion(submission); err != nil {
+		return err
+	}
+
+	if err := s.checkWorkflowNativeGitObservations(submission); err != nil {
+		return err
+	}
+
 	if err := s.checkWorkflowNativeJournalObservations(submission); err != nil {
 		return err
 	}
@@ -111,7 +119,7 @@ func (s *WorkflowStore) checkWorkflowNativeCommands(submission WorkflowSubmissio
 		return err
 	}
 
-	expected := WorkflowNativeCommandManifest{SchemaVersion: 1, SubmissionID: submission.ID, Atomic: true, SourceRef: native.SourceRef, ExpectedSource: native.OriginalSource, NewSource: native.PreparedResult, TargetRef: native.TargetRef, ExpectedTarget: native.ValidatedBase, NewTarget: native.PreparedResult}
+	expected := workflowNativeCommandManifest(submission)
 	if manifest != expected {
 		return ErrWorkflowConflict
 	}
@@ -146,7 +154,23 @@ func (s *WorkflowStore) checkWorkflowNativeResponse(submission WorkflowSubmissio
 }
 
 func validWorkflowNativeResponse(native WorkflowNativeSubmission, response WorkflowGitPublicationResult) bool {
-	return response.Schema == "chr-git-publication-result/v1" && response.OriginalSourceCommit == native.OriginalSource && response.ResultCommit == native.PreparedResult && slices.Contains([]string{"not_sent", "unknown", "rejected", "applied"}, response.State)
+	if [3]string{response.Schema, response.OriginalSourceCommit, response.ResultCommit} != [3]string{"chr-git-publication-result/v1", native.OriginalSource, native.PreparedResult} {
+		return false
+	}
+
+	if response.State == "not_sent" {
+		return !response.CommandsSent && response.PublishedSourceCommit == ""
+	}
+
+	if !response.CommandsSent || response.AdvertisedSourceCommit != native.OriginalSource || response.AdvertisedTargetCommit != native.ValidatedBase {
+		return false
+	}
+
+	if response.State == "applied" {
+		return response.PublishedSourceCommit == native.PreparedResult
+	}
+
+	return slices.Contains([]string{"unknown", "rejected"}, response.State) && response.PublishedSourceCommit == ""
 }
 
 func (s *WorkflowStore) checkWorkflowNativeJournalObservations(submission WorkflowSubmission) error {
@@ -197,7 +221,9 @@ func (s *WorkflowStore) checkWorkflowNativeAppliedEvidence(submission WorkflowSu
 
 	receipt := WorkflowNativeReceipt{WorkflowNativeRecordBinding: native.WorkflowNativeRecordBinding}
 	if !validWorkflowNativeReceiptTransaction(receipt, result) {
-		return ErrWorkflowConflict
+		if result.State != "unknown" || !result.CommandsSent || !s.workflowNativeGitApplied(submission) {
+			return ErrWorkflowConflict
+		}
 	}
 
 	return s.checkWorkflowNativeTransactionRevision(receipt, result)
@@ -214,13 +240,17 @@ func (s *WorkflowStore) checkWorkflowNativeNonApplication(_ context.Context, sub
 		return err
 	}
 
-	if alive {
+	if alive && native.DispatchCompletionRef == nil {
 		return ErrWorkflowObservationRequired
 	}
 
 	var proof WorkflowNativeNonApplicationProof
 	if err := s.readWorkflowNativeEvidence(submission.InvocationID, *native.NonApplicationRef, &proof); err != nil {
 		return err
+	}
+
+	if native.DispatchCompletionRef != nil {
+		return s.checkWorkflowNativeDefiniteNonApplication(submission, proof)
 	}
 
 	if !validWorkflowNativeNonApplication(submission, proof) {
@@ -243,8 +273,15 @@ func (s *WorkflowStore) applyWorkflowNativeSubmissionEvidence(ctx context.Contex
 
 	native := submission.Native
 	if native.ApplicationState == "not_applied" {
-		submission.State = "unpublished"
-		submission.Unpublished = &WorkflowSubmissionObservation{SubmissionID: submission.ID, Unpublished: true}
+		var proof WorkflowNativeNonApplicationProof
+		if err := s.readWorkflowNativeEvidence(submission.InvocationID, *native.NonApplicationRef, &proof); err != nil {
+			return err
+		}
+
+		if proof.InputChanged {
+			submission.State = "unpublished"
+			submission.Unpublished = &WorkflowSubmissionObservation{SubmissionID: submission.ID, Unpublished: true}
+		}
 	}
 
 	if native.ReceiptRef != nil {

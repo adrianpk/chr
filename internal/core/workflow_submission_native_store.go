@@ -161,7 +161,11 @@ func projectWorkflowNativeSubmissionPhase(entry *WorkflowIntegrationEntry, last 
 		entry.State = "publishing"
 	case "not_applied":
 		entry.State = "blocked"
+
 		entry.Blocker = &WorkflowIntegrationBlocker{Reason: "native_not_applied", RequiredAction: "reconcile changed input and dispatch quiescence", ResumeState: "queued"}
+		if last.State != "unpublished" {
+			entry.Blocker = &WorkflowIntegrationBlocker{Reason: "native_publication_rejected", RequiredAction: "resolve publication permissions or capability before new authorization", ResumeState: "observing"}
+		}
 	default:
 		entry.State = "observing"
 	}
