@@ -127,7 +127,7 @@ func runWorkflowSupervisedProcess(ctx context.Context, claim *WorkflowClaim, pre
 
 	if registerErr == nil {
 		var quiescenceErr error
-		if prepared.input.Merger != nil {
+		if prepared.input.Merger != nil || prepared.input.AgentCall != nil {
 			quiescenceErr = waitWorkflowMergerProcessGroup(ctx, ownership, prepared.leaseUntil)
 		}
 

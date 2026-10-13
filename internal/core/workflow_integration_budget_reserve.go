@@ -22,7 +22,7 @@ func (s *WorkflowStore) reserveWorkflowIntegration(ctx context.Context, run work
 		return budget, err
 	}
 
-	if err := checkWorkflowIntegrationRoleBudget(budget, request.Reservation); err != nil {
+	if err := checkWorkflowIntegrationRoleBudget(run, budget, request.Reservation); err != nil {
 		return budget, err
 	}
 
@@ -251,19 +251,19 @@ func applyWorkflowIntegrationGrant(budget *WorkflowIntegrationBudget, grant Work
 	return nil
 }
 
-func checkWorkflowIntegrationRoleBudget(budget WorkflowIntegrationBudget, reservation WorkflowIntegrationReservation) error {
+func checkWorkflowIntegrationRoleBudget(run workflowInvocationFile, budget WorkflowIntegrationBudget, reservation WorkflowIntegrationReservation) error {
 	if reservation.Kind != "agent_call" || reservation.Role == "merger" {
 		return nil
 	}
 
-	consumed, limit := workflowIntegrationRoleUsage(budget, reservation.Role)
-	for _, old := range budget.Reservations {
-		if old.Kind == "agent_call" && old.Role == reservation.Role {
-			consumed++
-		}
+	if workflowAgentAttemptReserved(budget, reservation) {
+		return ErrWorkflowConflict
 	}
 
-	if consumed >= limit {
+	consumed, limit := workflowIntegrationRoleUsage(budget, reservation.Role)
+	consumed += workflowAgentUnrecordedCalls(run, budget, reservation.Role)
+
+	if consumed > limit || consumed == limit && !workflowAgentUsageRecorded(run, reservation) {
 		return ErrWorkflowIntegrationBudget
 	}
 
@@ -273,7 +273,7 @@ func checkWorkflowIntegrationRoleBudget(budget WorkflowIntegrationBudget, reserv
 func workflowIntegrationRoleUsage(budget WorkflowIntegrationBudget, role string) (int64, int64) {
 	switch role {
 	case "executor":
-		return int64(len(budget.Usage.Attempts)), budget.LimitsSnapshot.Worker
+		return int64(budget.Usage.WorkerCount), budget.LimitsSnapshot.Worker
 	case "reviewer":
 		return int64(budget.Usage.ReviewCount), budget.LimitsSnapshot.Review
 	case "closing":
@@ -287,4 +287,33 @@ func workflowIntegrationBaseCharged(reservations []WorkflowIntegrationReservatio
 	return slices.ContainsFunc(reservations, func(old WorkflowIntegrationReservation) bool {
 		return old.Kind == "drift" && old.Unit == reservation.Unit && old.BaseCommit == reservation.BaseCommit
 	})
+}
+
+func workflowAgentUsageRecorded(run workflowInvocationFile, r WorkflowIntegrationReservation) bool {
+	return slices.ContainsFunc(run.Attempts, func(a WorkflowAttempt) bool {
+		role := "executor"
+		if a.Purpose == workflowSliceReviewPurpose {
+			role = "reviewer"
+		}
+
+		return (a.Purpose == "" || a.Purpose == workflowSliceReviewPurpose) && role == r.Role && a.ID == r.AttemptID && a.Generation == r.ClaimGeneration
+	})
+}
+
+func workflowAgentAttemptReserved(budget WorkflowIntegrationBudget, r WorkflowIntegrationReservation) bool {
+	return slices.ContainsFunc(budget.Reservations, func(old WorkflowIntegrationReservation) bool {
+		return old.Kind == "agent_call" && old.Role == r.Role && old.AttemptID == r.AttemptID && old.ClaimGeneration == r.ClaimGeneration
+	})
+}
+
+func workflowAgentUnrecordedCalls(run workflowInvocationFile, budget WorkflowIntegrationBudget, role string) int64 {
+	var count int64
+
+	for _, old := range budget.Reservations {
+		if old.Kind == "agent_call" && old.Role == role && !workflowAgentUsageRecorded(run, old) {
+			count++
+		}
+	}
+
+	return count
 }

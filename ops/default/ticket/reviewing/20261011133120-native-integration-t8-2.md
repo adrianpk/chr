@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133120
 title: "T8.2: Reserve and settle optional token ceilings"
-status: ready
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,9 @@ tags: native-integration, slice-8
 source: chat
 reported_at: 2026-10-11T13:31:20Z
 ready_at: 2026-10-11T13:31:37Z
+started_at: 2026-10-13T08:57:28Z
+reviewed_at: 2026-10-13T10:10:31Z
+branch: feat/slice-8-native-integration-limits
 commits: []
 ---
 
@@ -58,4 +61,16 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Implemented invocation admission ceilings, certified executor/reviewer launch
+paths, sealed attempt-owned reservations, compatible merger accounting units,
+and trusted settlement into the existing invocation ledger. Uncertain usage
+keeps the full grant across restart; raw commands cannot bypass finite mode.
+
+Development regression and race checks passed, as recorded in the
+[Slice 8 report](../../report/slices/native-integration-queue/slice-8-integration-limits.md).
+Strict lint passed with zero issues. Corrected-source pre-commit `make verify`
+passed with all 24 changed Go files unchanged; core 2182.690 s, app 125.596 s
+and every other package passed. Late-ceiling and process-permission regressions
+passed, and focused race checks passed after the correction. Owned check
+services finished naturally. The task commit reference, Slice 8 PR and verified
+integration remain pending.

@@ -300,7 +300,7 @@ Prerequisite: verified Slice 7 integration and closed task fanout.
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
 | T8.1 | [TKT-20261011133119](../ticket/reviewing/20261011133119-native-integration-t8-1.md) | reviewing | [94ea7e86745e9ab30d55bc9fa931fd23a91826bc](https://forge.adrianpk.com/adrianpk/chr/commit/94ea7e86745e9ab30d55bc9fa931fd23a91826bc) | Enforce merger drift and submission counters |
-| T8.2 | [TKT-20261011133120](../ticket/ready/20261011133120-native-integration-t8-2.md) | ready | pending | Reserve and settle optional token ceilings |
+| T8.2 | [TKT-20261011133120](../ticket/reviewing/20261011133120-native-integration-t8-2.md) | reviewing | pending | Reserve and settle optional token ceilings |
 | T8.3 | [TKT-20261011133121](../ticket/ready/20261011133121-native-integration-t8-3.md) | ready | pending | Persist operator decisions and bounded grants |
 | T8.4 | [TKT-20261011133122](../ticket/ready/20261011133122-native-integration-t8-4.md) | ready | pending | Verify process and budget recovery |
 

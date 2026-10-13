@@ -13,6 +13,7 @@ import (
 
 // WorkflowExecutionPolicy freezes finite execution limits at admission.
 type WorkflowExecutionPolicy struct {
+	AgentTokenBudget         int64  `json:"agent_token_budget,omitempty"`
 	ConfigRevision           string `json:"config_revision,omitempty"`
 	ValidationTimeoutSeconds int    `json:"validation_timeout_seconds,omitempty"`
 	IncludeLaterTickets      bool   `json:"include_later_tickets,omitempty"`
@@ -222,7 +223,7 @@ func validWorkflowRequestKey(key string) bool {
 }
 
 func validWorkflowExecutionPolicy(policy WorkflowExecutionPolicy) bool {
-	return validWorkflowWorkerPolicy(policy) && validWorkflowIntegrationPolicyBounds(policy) && policy.MaxIntegrationAttempts >= 0 && policy.MaxIntegrationAttempts <= 10 && policy.CheckpointStepLimit >= 0 && policy.CheckpointStepLimit <= WorkflowPageLimit && (policy.ConfigRevision == "" || len(policy.ConfigRevision) == 64)
+	return policy.AgentTokenBudget >= 0 && validWorkflowWorkerPolicy(policy) && validWorkflowIntegrationPolicyBounds(policy) && policy.MaxIntegrationAttempts >= 0 && policy.MaxIntegrationAttempts <= 10 && policy.CheckpointStepLimit >= 0 && policy.CheckpointStepLimit <= WorkflowPageLimit && (policy.ConfigRevision == "" || len(policy.ConfigRevision) == 64)
 }
 
 func validWorkflowWorkerPolicy(policy WorkflowExecutionPolicy) bool {
@@ -367,7 +368,7 @@ func (s *WorkflowStore) createWorkflowInvocation(ctx context.Context, request Wo
 		return run, err
 	}
 
-	files, err := workflowInvocationCreationFiles(envelope, run)
+	files, err := s.workflowAgentCreationFiles(ctx, envelope, &run)
 	if err != nil {
 		return run, err
 	}

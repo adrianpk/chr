@@ -14,6 +14,10 @@ func (s *WorkflowStore) prepareWorkflowTask(ctx context.Context, claim *Workflow
 }
 
 func (s *WorkflowStore) prepareWorkflowTaskMode(ctx context.Context, claim *WorkflowClaim, worker []string, mode string) (prepared workflowPreparedTask, err error) {
+	return s.prepareWorkflowTaskHarness(ctx, claim, worker, mode, nil)
+}
+
+func (s *WorkflowStore) prepareWorkflowTaskHarness(ctx context.Context, claim *WorkflowClaim, worker []string, mode string, harness *WorkflowAgentHarness) (prepared workflowPreparedTask, err error) {
 	if claim == nil || claim.purpose != "" {
 		return prepared, ErrWorkflowOwned
 	}
@@ -28,7 +32,7 @@ func (s *WorkflowStore) prepareWorkflowTaskMode(ctx context.Context, claim *Work
 			return readErr
 		}
 
-		prepared, readErr = claim.store.prepareWorkflowAttempt(ctx, run, record, worker, mode)
+		prepared, readErr = claim.store.prepareWorkflowAttempt(ctx, run, record, worker, mode, harness)
 
 		return readErr
 	})
@@ -36,7 +40,7 @@ func (s *WorkflowStore) prepareWorkflowTaskMode(ctx context.Context, claim *Work
 	return prepared, err
 }
 
-func (s *WorkflowStore) prepareWorkflowAttempt(ctx context.Context, run workflowInvocationFile, record WorkflowRecord, worker []string, mode string) (workflowPreparedTask, error) {
+func (s *WorkflowStore) prepareWorkflowAttempt(ctx context.Context, run workflowInvocationFile, record WorkflowRecord, worker []string, mode string, harness *WorkflowAgentHarness) (workflowPreparedTask, error) {
 	attempt := &run.Attempts[len(run.Attempts)-1]
 	if attempt.InputRef != "" {
 		return workflowPreparedTask{}, fmt.Errorf("%w: attempt input is already prepared", ErrWorkflowOwned)
@@ -68,7 +72,7 @@ func (s *WorkflowStore) prepareWorkflowAttempt(ctx context.Context, run workflow
 
 	input.ExecutionMode = mode
 
-	return s.saveWorkflowTaskInput(run, input)
+	return s.saveWorkflowTaskInput(ctx, run, input, harness)
 }
 
 func (s *WorkflowStore) workflowTaskInput(ctx context.Context, run workflowInvocationFile, record WorkflowRecord, worker []string) (WorkflowTaskInput, error) {
@@ -86,8 +90,8 @@ func (s *WorkflowStore) workflowTaskInput(ctx context.Context, run workflowInvoc
 	return input, err
 }
 
-func (s *WorkflowStore) saveWorkflowTaskInput(run workflowInvocationFile, input WorkflowTaskInput) (workflowPreparedTask, error) {
-	prepared, file, err := encodeWorkflowTaskInput(&run, input)
+func (s *WorkflowStore) saveWorkflowTaskInput(ctx context.Context, run workflowInvocationFile, input WorkflowTaskInput, harness *WorkflowAgentHarness) (workflowPreparedTask, error) {
+	prepared, file, budgetFile, err := s.encodeWorkflowAgentInput(ctx, &run, input, harness)
 	if err != nil {
 		return workflowPreparedTask{}, err
 	}
@@ -100,7 +104,12 @@ func (s *WorkflowStore) saveWorkflowTaskInput(run workflowInvocationFile, input 
 		return workflowPreparedTask{}, err
 	}
 
-	if err := s.commitFiles([]workflowFileChange{file, state}); err != nil {
+	files := []workflowFileChange{file, state}
+	if budgetFile.Path != "" {
+		files = append(files, budgetFile)
+	}
+
+	if err := s.commitFiles(files); err != nil {
 		return workflowPreparedTask{}, err
 	}
 

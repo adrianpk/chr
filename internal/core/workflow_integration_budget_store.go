@@ -80,8 +80,23 @@ func (s *WorkflowStore) workflowIntegrationClosingUsage(snapshot WorkflowSnapsho
 }
 
 func (s *WorkflowStore) workflowIntegrationBudgetAdmission(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry, tokenLimit *int64) (WorkflowIntegrationBudget, error) {
+	if run.Policy.AgentTokenBudget > 0 {
+		if tokenLimit != nil && *tokenLimit != run.Policy.AgentTokenBudget {
+			return WorkflowIntegrationBudget{}, ErrWorkflowConflict
+		}
+
+		limit := run.Policy.AgentTokenBudget
+		tokenLimit = &limit
+	}
+
 	if run.IntegrationBudget != nil {
 		return s.extendWorkflowIntegrationBudget(run, entry, tokenLimit)
+	}
+
+	if tokenLimit != nil {
+		if err := s.checkWorkflowAgentCeilingAdmission(run); err != nil {
+			return WorkflowIntegrationBudget{}, err
+		}
 	}
 
 	counters, err := s.workflowIntegrationLegacySubmissions(ctx, run)
@@ -213,23 +228,37 @@ func (s *WorkflowStore) currentWorkflowIntegrationBudget(ctx context.Context, ru
 }
 
 func (s *WorkflowStore) checkWorkflowIntegrationBudgetEvidence(run workflowInvocationFile, budget WorkflowIntegrationBudget) error {
+	if run.Policy.AgentTokenBudget > 0 && (budget.AdmissionTokenLimit == nil || *budget.AdmissionTokenLimit != run.Policy.AgentTokenBudget) {
+		return ErrWorkflowConflict
+	}
+
 	if budget.AdmissionLimits != workflowIntegrationAdmissionLimits(run.Policy) {
 		return workflowIntegrationConflict("admission limits differ from frozen execution policy")
 	}
 
 	for _, reservation := range budget.Reservations {
-		if reservation.EntryID != workflowIntegrationEntryID(run, reservation.Unit) {
-			return ErrWorkflowConflict
-		}
-
-		if reservation.State != "settled" {
-			continue
-		}
-
-		if err := s.checkWorkflowTokenSettlement(run.ID, reservation); err != nil {
+		if err := s.checkWorkflowBudgetReservationEvidence(run, reservation); err != nil {
 			return err
 		}
 	}
 
 	return nil
+}
+
+func (s *WorkflowStore) checkWorkflowBudgetReservationEvidence(run workflowInvocationFile, reservation WorkflowIntegrationReservation) error {
+	if reservation.EntryID != workflowIntegrationEntryID(run, reservation.Unit) {
+		return ErrWorkflowConflict
+	}
+
+	if reservation.AttemptInput != nil {
+		if err := s.checkWorkflowAgentReservationEvidence(run, reservation); err != nil {
+			return err
+		}
+	}
+
+	if reservation.State != "settled" {
+		return nil
+	}
+
+	return s.checkWorkflowTokenSettlement(run.ID, reservation)
 }

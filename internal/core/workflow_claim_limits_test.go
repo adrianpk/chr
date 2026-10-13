@@ -120,6 +120,7 @@ func TestWorkflowStartBounds(t *testing.T) {
 		{"mutable target", func(r *WorkflowStartRequest) { r.Selection.Target.Commit = "dev" }},
 		{"worker deadline", func(r *WorkflowStartRequest) { r.Policy.WorkerTimeoutSeconds = 86401 }},
 		{"attempt budget", func(r *WorkflowStartRequest) { r.Policy.MaxWorkerAttempts = 129 }},
+		{"negative token limit", func(r *WorkflowStartRequest) { r.Policy.AgentTokenBudget = -1 }},
 		{"negative merger limit", func(r *WorkflowStartRequest) { r.Policy.MaxMergerAttempts = -1 }},
 		{"merger limit", func(r *WorkflowStartRequest) { r.Policy.MaxMergerAttempts = 11 }},
 		{"negative drift limit", func(r *WorkflowStartRequest) { r.Policy.MaxDriftRevisions = -1 }},

@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (s *WorkflowStore) prepareWorkflowReview(ctx context.Context, id string, provider WorkflowPullRequestProvider, reviewer []string) (claim *WorkflowClaim, prepared workflowPreparedTask, binding WorkflowReviewBinding, err error) {
+func (s *WorkflowStore) prepareWorkflowReview(ctx context.Context, id string, provider WorkflowPullRequestProvider, reviewer []string, harness *WorkflowAgentHarness) (claim *WorkflowClaim, prepared workflowPreparedTask, binding WorkflowReviewBinding, err error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Minute)
 	defer cancel()
 
@@ -49,7 +49,7 @@ func (s *WorkflowStore) prepareWorkflowReview(ctx context.Context, id string, pr
 			return nil
 		}
 
-		claim, prepared, readErr = owner.prepareWorkflowReviewPolicy(ctx, &run, observation, input, reviewer)
+		claim, prepared, readErr = owner.prepareWorkflowReviewPolicy(ctx, &run, observation, input, reviewer, harness)
 		binding = *run.Review
 
 		return readErr
@@ -95,7 +95,7 @@ func (s *WorkflowStore) replaceWorkflowReviewInput(run *workflowInvocationFile, 
 	return err
 }
 
-func (s *WorkflowStore) prepareWorkflowReviewPolicy(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, input WorkflowReviewInput, reviewer []string) (*WorkflowClaim, workflowPreparedTask, error) {
+func (s *WorkflowStore) prepareWorkflowReviewPolicy(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, input WorkflowReviewInput, reviewer []string, harness *WorkflowAgentHarness) (*WorkflowClaim, workflowPreparedTask, error) {
 	switch input.Policy.Mode {
 	case ReviewWorkflowModeHumanReview:
 		run.Review.State, run.Outcome = "waiting_approval", "slice_review_waiting_approval"
@@ -110,13 +110,13 @@ func (s *WorkflowStore) prepareWorkflowReviewPolicy(ctx context.Context, run *wo
 			return nil, workflowPreparedTask{}, fmt.Errorf("separate workflow review command required: %w", err)
 		}
 
-		return s.claimWorkflowReview(ctx, run, observation, input, reviewer)
+		return s.claimWorkflowReview(ctx, run, observation, input, reviewer, harness)
 	default:
 		return nil, workflowPreparedTask{}, ErrWorkflowConflict
 	}
 }
 
-func (s *WorkflowStore) claimWorkflowReview(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, input WorkflowReviewInput, reviewer []string) (claim *WorkflowClaim, prepared workflowPreparedTask, err error) {
+func (s *WorkflowStore) claimWorkflowReview(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, input WorkflowReviewInput, reviewer []string, harness *WorkflowAgentHarness) (claim *WorkflowClaim, prepared workflowPreparedTask, err error) {
 	claim, err = s.reserveWorkflowRole(ctx, *run, workflowSliceReviewPurpose)
 	if err != nil {
 		return nil, prepared, err
@@ -160,10 +160,12 @@ func (s *WorkflowStore) claimWorkflowReview(ctx context.Context, run *workflowIn
 	taskInput.ReviewHash = run.Review.InputHash
 	run.Review.State, run.Outcome = "running", "slice_review_running"
 
-	prepared, file, err := encodeWorkflowTaskInput(run, taskInput)
+	prepared, file, budgetFile, err := s.encodeWorkflowAgentInput(ctx, run, taskInput, harness)
 	if err != nil {
 		return nil, prepared, err
 	}
+
+	files = appendWorkflowAgentBudgetFile(files, budgetFile)
 
 	err = s.commitWorkflowPullRequestFiles(run, files, file)
 

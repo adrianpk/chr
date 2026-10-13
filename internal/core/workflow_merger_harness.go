@@ -23,6 +23,7 @@ type WorkflowMergerHarness struct {
 // and arguments to its tool and accounting contracts. Agent output cannot supply
 // this certificate or enable built-in filesystem, shell, network or MCP tools.
 type WorkflowMergerHarnessCertificate struct {
+	Accounting           string   `json:"accounting,omitempty"`
 	SchemaVersion        int      `json:"schema_version"`
 	Protocol             string   `json:"protocol"`
 	Command              []string `json:"command"`
@@ -124,7 +125,7 @@ func checkWorkflowMergerCertificate(certificate WorkflowMergerHarnessCertificate
 }
 
 func checkWorkflowMergerTokenCapability(input WorkflowMergerInput, certificate WorkflowMergerHarnessCertificate) error {
-	if allowance := input.TokenAllowance; allowance != nil && (!certificate.EnforcesWholeCall || !certificate.ReportsWholeCall || allowance.CapabilityRevision != certificate.CapabilityRevision) {
+	if allowance := input.TokenAllowance; allowance != nil && (!certificate.EnforcesWholeCall || !certificate.ReportsWholeCall || certificate.Accounting != workflowTokenAccounting || allowance.CapabilityRevision != certificate.CapabilityRevision) {
 		return fmt.Errorf("%w: whole-call token enforcement required", ErrWorkflowIntegrationBudget)
 	}
 

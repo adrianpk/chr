@@ -16,6 +16,7 @@ type WorkflowLane struct {
 
 // WorkflowTaskInput is the immutable, credential-free input supplied to a worker.
 type WorkflowTaskInput struct {
+	AgentCall                *WorkflowAgentCall        `json:"agent_call,omitempty"`
 	Merger                   *WorkflowMergerInput      `json:"merger,omitempty"`
 	MergerHarnessRef         *WorkflowEvidenceRef      `json:"merger_harness_ref,omitempty"`
 	ValidationTimeoutSeconds int                       `json:"validation_timeout_seconds,omitempty"`

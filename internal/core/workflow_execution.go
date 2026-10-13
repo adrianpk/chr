@@ -9,12 +9,21 @@ import (
 // ExecuteWorkflowTask runs one owned task, then applies host validation evidence.
 // Workers receive frozen JSON on stdin and an isolated cwd; they do not own status.
 func (s *WorkflowStore) ExecuteWorkflowTask(ctx context.Context, claim *WorkflowClaim, worker []string) (WorkflowTaskResult, error) {
+	return s.executeWorkflowTask(ctx, claim, worker, nil)
+}
+
+// ExecuteWorkflowTaskWithHarness enforces and settles a certified whole-call grant.
+func (s *WorkflowStore) ExecuteWorkflowTaskWithHarness(ctx context.Context, claim *WorkflowClaim, harness WorkflowAgentHarness) (WorkflowTaskResult, error) {
+	return s.executeWorkflowTask(ctx, claim, harness.Command, &harness)
+}
+
+func (s *WorkflowStore) executeWorkflowTask(ctx context.Context, claim *WorkflowClaim, worker []string, harness *WorkflowAgentHarness) (WorkflowTaskResult, error) {
 	if err := beginWorkflowClaimExecution(claim); err != nil {
 		return WorkflowTaskResult{}, err
 	}
 	defer endWorkflowClaimExecution(claim)
 
-	prepared, err := s.prepareWorkflowTask(ctx, claim, worker)
+	prepared, err := s.prepareWorkflowTaskHarness(ctx, claim, worker, "automatic", harness)
 	if err != nil {
 		return WorkflowTaskResult{}, err
 	}
@@ -45,7 +54,7 @@ func (s *WorkflowStore) runWorkflowTask(ctx context.Context, claim *WorkflowClai
 
 	input := prepared.input
 	result := newWorkflowTaskResult(prepared)
-	worker, err := workflowRunCommand(workerContext, claim, prepared, input.Worker)
+	worker, err := workflowRunAgentCommand(workerContext, claim, prepared, input.Worker)
 
 	result.Worker = worker
 	if err == nil {

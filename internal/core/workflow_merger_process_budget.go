@@ -2,14 +2,27 @@ package core
 
 import (
 	"context"
+	"errors"
 	"slices"
 )
 
 func (s *WorkflowStore) commitWorkflowProcessStart(ctx context.Context, run *workflowInvocationFile, prepared workflowPreparedTask) error {
+	if prepared.input.AgentCall != nil {
+		return s.commitWorkflowAgentStart(ctx, run, prepared)
+	}
+
 	if prepared.input.Merger == nil {
+		if err := s.checkWorkflowAgentProcessBudget(*run, prepared); err != nil {
+			return err
+		}
+
 		return s.commitWorkflowState(run)
 	}
 
+	return s.commitWorkflowMergerStart(ctx, run, prepared)
+}
+
+func (s *WorkflowStore) commitWorkflowMergerStart(ctx context.Context, run *workflowInvocationFile, prepared workflowPreparedTask) error {
 	budget, err := s.readWorkflowIntegrationBudget(*run)
 	if err != nil {
 		return err
@@ -65,4 +78,29 @@ func (s *WorkflowStore) commitWorkflowMergerProcedureStart(run *workflowInvocati
 	// Host procedures retain their own birth identity under the same capacity and
 	// finite deadline. They do not dispatch another model call or refill its charge.
 	return s.commitWorkflowState(run)
+}
+
+func (s *WorkflowStore) commitWorkflowAgentStart(ctx context.Context, run *workflowInvocationFile, prepared workflowPreparedTask) error {
+	if len(run.Attempts[len(run.Attempts)-1].Processes) > 1 {
+		return s.commitWorkflowState(run)
+	}
+
+	budget, err := s.readWorkflowIntegrationBudget(*run)
+	if err != nil {
+		return err
+	}
+
+	reservation, err := workflowAgentReservation(&budget, prepared.input)
+	if err != nil || reservation.State != "reserved" {
+		return errors.Join(ErrWorkflowConflict, err)
+	}
+
+	reservation.State = "launched"
+
+	file, err := s.workflowIntegrationBudgetChange(ctx, run, &budget)
+	if err != nil {
+		return err
+	}
+
+	return s.commitWorkflowPullRequestFiles(run, []workflowFileChange{file}, workflowFileChange{})
 }

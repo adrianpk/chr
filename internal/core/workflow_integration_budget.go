@@ -55,6 +55,7 @@ type WorkflowTokenAllowance struct {
 // WorkflowIntegrationReservation is retained before any possible dispatch.
 // Unknown usage keeps Maximum charged; absence of a response is no refund.
 type WorkflowIntegrationReservation struct {
+	AttemptInput    *WorkflowEvidenceRef   `json:"attempt_input,omitempty"`
 	ID              string                 `json:"id"`
 	Kind            string                 `json:"kind"`
 	Role            string                 `json:"role"`

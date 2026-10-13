@@ -55,7 +55,7 @@ func (s *WorkflowStore) ExecuteWorkflowManualTask(ctx context.Context, claim *Wo
 	workerContext, cancel := context.WithDeadline(watched, prepared.leaseUntil)
 	defer cancel()
 
-	observed, executionErr := workflowRunCommand(workerContext, claim, prepared, prepared.input.Worker)
+	observed, executionErr := workflowRunAgentCommand(workerContext, claim, prepared, prepared.input.Worker)
 	if errors.Is(executionErr, ErrWorkflowOwned) {
 		return observed, executionErr
 	}

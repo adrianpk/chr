@@ -61,6 +61,14 @@ func (s *WorkflowStore) checkWorkflowIntegrationBudgetRecords(ctx context.Contex
 
 func checkWorkflowIntegrationBudgetOwnership(run workflowInvocationFile, budget WorkflowIntegrationBudget, entries []WorkflowIntegrationEntry) error {
 	for _, reservation := range budget.Reservations {
+		if reservation.AttemptInput != nil {
+			if !workflowAgentReservationOwned(run, reservation) {
+				return ErrWorkflowConflict
+			}
+
+			continue
+		}
+
 		index := slices.IndexFunc(entries, func(e WorkflowIntegrationEntry) bool { return e.ID == reservation.EntryID })
 		if index < 0 || reservation.ClaimGeneration > entries[index].ClaimGeneration || entries[index].Unit != reservation.Unit {
 			return workflowIntegrationConflict("reservation has missing ownership or future generation")
@@ -290,7 +298,17 @@ func workflowIntegrationInvocationPublicationMatches(snapshot workflowIntegratio
 }
 
 func workflowIntegrationCounterHasOwner(run workflowInvocationFile, counter WorkflowIntegrationCounter, entries []WorkflowIntegrationEntry) bool {
-	return counter.ExistingSubmissions > 0 || slices.ContainsFunc(entries, func(entry WorkflowIntegrationEntry) bool {
+	return counter.ExistingSubmissions > 0 || workflowAgentCounterOwner(run, counter) || slices.ContainsFunc(entries, func(entry WorkflowIntegrationEntry) bool {
 		return entry.Unit == counter.Unit && workflowIntegrationEntryInvocation(run, entry)
+	})
+}
+
+func workflowAgentCounterOwner(run workflowInvocationFile, counter WorkflowIntegrationCounter) bool {
+	return counter.Merger == 0 && counter.Drift == 0 && counter.Submission == 0 && workflowIntegrationRetainedUnit(run, counter.Unit)
+}
+
+func workflowAgentReservationOwned(run workflowInvocationFile, r WorkflowIntegrationReservation) bool {
+	return r.Kind == "agent_call" && workflowAgentUsageRecorded(run, r) && workflowIntegrationRetainedUnit(run, r.Unit) && slices.ContainsFunc(run.Attempts, func(a WorkflowAttempt) bool {
+		return a.ID == r.AttemptID && a.Generation == r.ClaimGeneration && a.InputRef == r.AttemptInput.Path && a.InputHash == r.AttemptInput.Hash && a.Lane != nil && a.Lane.Unit == r.Unit
 	})
 }

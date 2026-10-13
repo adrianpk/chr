@@ -71,7 +71,16 @@ type WorkflowReviewRepairBudget struct {
 // trusted mode grants validated inputs; agentic mode runs a separate owned role.
 // It never publishes a target or completes a task.
 func (s *WorkflowStore) ReviewWorkflowSlice(ctx context.Context, id string, provider WorkflowPullRequestProvider, reviewer []string) (result WorkflowReviewBinding, err error) {
-	claim, prepared, binding, err := s.prepareWorkflowReview(ctx, id, provider, reviewer)
+	return s.reviewWorkflowSlice(ctx, id, provider, reviewer, nil)
+}
+
+// ReviewWorkflowSliceWithHarness shares the invocation ceiling with executor and merger calls.
+func (s *WorkflowStore) ReviewWorkflowSliceWithHarness(ctx context.Context, id string, provider WorkflowPullRequestProvider, harness WorkflowAgentHarness) (WorkflowReviewBinding, error) {
+	return s.reviewWorkflowSlice(ctx, id, provider, harness.Command, &harness)
+}
+
+func (s *WorkflowStore) reviewWorkflowSlice(ctx context.Context, id string, provider WorkflowPullRequestProvider, reviewer []string, harness *WorkflowAgentHarness) (result WorkflowReviewBinding, err error) {
+	claim, prepared, binding, err := s.prepareWorkflowReview(ctx, id, provider, reviewer, harness)
 
 	if err != nil || claim == nil {
 		if err == nil && binding.State == "needs_repair" {
@@ -93,7 +102,7 @@ func (s *WorkflowStore) ReviewWorkflowSlice(ctx context.Context, id string, prov
 	deadline, cancel := context.WithDeadline(watched, prepared.leaseUntil)
 	defer cancel()
 
-	command, executionErr := workflowRunCommand(deadline, claim, prepared, reviewer)
+	command, executionErr := workflowRunAgentCommand(deadline, claim, prepared, reviewer)
 	if command.Truncated {
 		executionErr = errors.Join(executionErr, errors.New("workflow review output exceeded its bounds"))
 	}

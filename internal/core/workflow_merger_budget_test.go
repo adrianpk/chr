@@ -45,6 +45,7 @@ func TestNativeMergerSettlement(t *testing.T) {
 	}
 
 	certificate.EnforcesWholeCall, certificate.ReportsWholeCall = true, true
+	certificate.Accounting = workflowTokenAccounting
 	harness.Certificate = retainNativeRecordEvidence(t, f.store, f.run.ID, "metered-harness", certificate)
 	request.Input.TokenAllowance = &WorkflowTokenAllowance{Maximum: 100, Input: 60, Output: 40, CapabilityRevision: certificate.CapabilityRevision, WholeCall: true, Deadline: request.Input.Deadline}
 

@@ -28,6 +28,22 @@ the existing unmetered merger mode. Invalid deadlines fail before consumption
 changes. Retrying a reservation cannot replace its original deadline. Restart
 and a new queue generation retain all previously charged counters and identities.
 
+T8.2 freezes an optional positive invocation token ceiling before the first
+worker can launch. Certified executor and reviewer calls reserve bounded input
+and output allowances in the same ledger used by merger and closing-role
+reservations. Missing whole-call enforcement, reporting, compatible units or
+role certification rejects admission before process birth. Raw executor,
+manual-worker and agentic-review commands cannot bypass a finite ceiling.
+
+The host seals each certified call to its immutable task input, owned attempt
+and generation. Process birth and the launched charge are retained before the
+supervisor receives permission. Successful driver accounting settles actual
+input plus output once; model text supplies no usage authority. Missing,
+partial, stale, overflowing or truncated accounting retains the complete grant.
+Host task and aggregate validation commands remain outside model accounting.
+A finite ceiling cannot be introduced after an unmetered call was prepared;
+the host rechecks the current ledger before granting a raw process permission.
+
 ## Implementation Notes
 
 The new optional policy fields use omitted zero values, so existing default
@@ -37,14 +53,32 @@ changed requested limits cannot silently replace frozen invocation authority.
 The existing ledger, mutation exclusion, counter arithmetic and grant history
 remain the owners of accounting.
 
+The certified role driver uses `chr-agent-call/v1`. Its retained certificate
+binds command arguments, executable hash, role capabilities, whole-call
+limits/reporting and `input-output-tokens/v1` units. Cached input stays in input;
+reasoning stays in output. The driver response carries explicit usage and a
+separate model-result field. The existing merger broker now requires the same
+accounting-unit contract for metered calls. No agent service or second ledger
+is introduced.
+
+Executor reservations precede queue admission, so their ownership is verified
+against the sealed attempt input rather than a later queue generation. Existing
+worker/reviewer attempt counters and reservations count the same owned call once.
+A separate reservation for an already charged role/attempt is rejected.
+
 ## Contracts Added or Changed
 
 - `WorkflowExecutionPolicy` accepts `max_merger_attempts` and `max_drift_revisions` with finite automatic bounds.
 - Budget admission limits must match the invocation's frozen execution policy.
 - Agent-call reservation deadlines cannot exceed the retained worker timeout or be extended by retry identity.
+- `WorkflowExecutionPolicy.agent_token_budget` freezes an optional positive invocation ceiling; omitted values preserve existing policy encodings.
+- `ExecuteWorkflowTaskWithHarness` and `ReviewWorkflowSliceWithHarness` require a host-certified whole-call driver and finite per-call allowances.
+- Budget reservations can retain an immutable attempt-input reference before queue admission; driver usage is retained independently of model text.
 
 ## Files of Interest
 
+- `internal/core/workflow_agent_harness.go`, `workflow_agent_reserve.go` and `workflow_agent_command.go`: certified role admission, owned launch binding and trusted accounting.
+- `internal/core/workflow_agent_driver_test.go` and `workflow_agent_review_test.go`: real certified-driver execution and shared executor/reviewer usage.
 - `internal/core/workflow_integration_limits.go`: default and bounded admission policy.
 - `internal/core/workflow_integration_limits_test.go`: persisted policy, exhaustion and deadline guards.
 - `internal/core/workflow_integration_budget_store.go`: frozen-policy authority checks.
@@ -76,8 +110,39 @@ committed and pushed.
 T8.1 implementation: [94ea7e86745e9ab30d55bc9fa931fd23a91826bc](https://forge.adrianpk.com/adrianpk/chr/commit/94ea7e86745e9ab30d55bc9fa931fd23a91826bc).
 Acta commit activity: `01M4T0JW66X49EPFWK9J7TQV4Q`.
 
+T8.2's admission regression first failed with an uncertified worker launching
+under a finite ceiling. A subsequent restart test exposed the old requirement
+for a queue entry before any reservation; sealed attempt-input ownership now
+covers executor calls without weakening queue-owner checks. A separate isolated
+late-ceiling probe then failed because admission forgot an earlier unmetered
+call; the corrected admission and process-permission guards prevent that gap.
+
+T8.2 development checks passed with Go 1.27.1:
+
+- `make verify` — passed with zero lint issues; core 2182.690 s, app 125.596 s and all other packages passed.
+- `go test ./internal/core -run '^(TestNativeAgent.*|TestNativeBudget.*|TestNativeMergerSettlement|TestNativeEntry.*|TestWorkflow(StartBounds|Entry|TaskExact|ReviewModes).*)$' -count=1` — passed in 47.155 s after the late-admission correction.
+- `go test ./internal/core -run '^TestNativeAgentPermitBudget$' -count=1` — passed in 0.347 s.
+- `go test -race ./internal/core -run '^(TestNativeAgent.*|TestNativeBudget.*|TestNativeMergerSettlement)$' -count=1` — passed in 50.583 s after the correction.
+- `make lint-strict` — passed with zero issues after function extraction and formatting corrections.
+- `git diff --check` — passed.
+
+The corrected-source pre-commit gate passed with all 24 changed Go files
+unchanged throughout validation. The earlier source check also exited normally
+but was superseded by the late-admission correction. Both owned check services
+finished naturally. The initial admission regression command was
+`go test ./internal/core -run '^TestNativeAgentAdmission$' -count=1`; its
+uncertified worker was accepted before correction. The isolated late-ceiling
+probe used `go test -overlay=/tmp/chr-native-agent-late-overlay.json ./internal/core -run '^TestNativeAgentLateCeiling$' -count=1`
+and failed before the admission guard was added.
+
+The focused fixtures include concurrent executor/merger/reviewer/closing
+reservations, complete and unknown accounting after restart, incompatible meter
+rejection, remaining-ceiling enforcement, and three executor calls plus a
+separate reviewer without double-counting attempts. These are development
+checks; exact-head controller validation remains pending until the slice and
+PR references are complete.
+
 ## Risks and Follow-ups
 
-T8.1 is implemented and checked. T8.2, T8.3 and T8.4 remain
-recorded tasks for role-wide token enforcement, operator decisions/extensions
-and owned-process recovery. The canonical Slice 8 PR remains pending.
+T8.1 and T8.2 are implemented and checked. T8.3 and T8.4 remain recorded tasks for operator
+decisions/extensions and owned-process recovery. The canonical Slice 8 PR remains pending.

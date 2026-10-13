@@ -119,6 +119,10 @@ func workflowRequestedRetainedPolicy(requested, policy WorkflowExecutionPolicy, 
 		}
 	}
 
+	if requested.AgentTokenBudget != 0 {
+		policy.AgentTokenBudget = requested.AgentTokenBudget
+	}
+
 	if requested.ConfigRevision != "" {
 		policy.ConfigRevision = requested.ConfigRevision
 	}

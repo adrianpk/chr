@@ -369,7 +369,7 @@ Invariants: INV-04, INV-13, INV-18, INV-19, INV-20
 | Task | Ticket | Work | Acceptance boundary |
 | --- | --- | --- | --- |
 | T8.1 | [TKT-20261011133119](../ticket/reviewing/20261011133119-native-integration-t8-1.md) | Apply approved default/bounded limits and retained worker timeout across unit and invocation lifecycle. | Restart, rebase and queue re-entry cannot reset consumed attempts or extend deadlines. |
-| T8.2 | [TKT-20261011133120](../ticket/ready/20261011133120-native-integration-t8-2.md) | Implement checked invocation-wide reservations across all roles with certified whole-call harness enforcement and compatible usage accounting. | Concurrent calls cannot oversubscribe; output-only metering rejects finite-token mode and unknown usage stays charged. |
+| T8.2 | [TKT-20261011133120](../ticket/reviewing/20261011133120-native-integration-t8-2.md) | Implement checked invocation-wide reservations across all roles with certified whole-call harness enforcement and compatible usage accounting. | Concurrent calls cannot oversubscribe; output-only metering rejects finite-token mode and unknown usage stays charged. |
 | T8.3 | [TKT-20261011133121](../ticket/ready/20261011133121-native-integration-t8-3.md) | Expose candidate-bound ambiguity resolution and explicit positive budget extensions using existing revision guards. | Silence does not approve; stale answers fail and grants preserve all prior consumption. |
 | T8.4 | [TKT-20261011133122](../ticket/ready/20261011133122-native-integration-t8-4.md) | Exercise launch/timeout/crash/unknown-usage checkpoints and slot retention with real owned subprocesses. | A surviving child or uncertain usage prevents hidden replacement and refunds, while serial mode remains one active agent. |
 

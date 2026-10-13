@@ -55,7 +55,7 @@ func TestNativeBudgetRace(t *testing.T) {
 
 	requests := make([]WorkflowIntegrationReserve, 8)
 	for i := range requests {
-		requests[i] = WorkflowIntegrationReserve{WorkflowIntegrationBudgetGuard: guard, Reservation: nativeBudgetReservation(entry, fmt.Sprint("call-", i), "executor", 60, 40)}
+		requests[i] = WorkflowIntegrationReserve{WorkflowIntegrationBudgetGuard: guard, Reservation: nativeBudgetReservation(entry, fmt.Sprint("call-", i), []string{"executor", "merger", "reviewer", "closing"}[i%4], 60, 40)}
 	}
 
 	results := make([]error, len(requests))
