@@ -13,7 +13,8 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-13T20:43:00Z
 reviewed_at: 2026-10-13T21:50:58Z
 branch: feat/slice-9-native-publication-recovery
-commits: []
+commits:
+  - 48a9539d023e63c96f04aa61ecb6baa46d77f9e2
 ---
 
 # T9.3: Observe canonical PR convergence
@@ -82,3 +83,5 @@ process. All owned check fixtures finished. Focused normal/race Acta activity:
 
 Canonical PR, exact-head slice validation and verified integration remain
 pending. See the [Slice 9 report](../../report/slices/native-integration-queue/slice-9-publication-recovery.md).
+
+Implementation: `48a9539d023e63c96f04aa61ecb6baa46d77f9e2`. Acta commit activity: `01M4VKZWK3H5X4ZDRMEDMHBP6J`.

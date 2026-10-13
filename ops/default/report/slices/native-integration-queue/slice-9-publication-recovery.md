@@ -156,8 +156,8 @@ check process finished. Acta activity: `01M4VHM9JAY36FRCT1QB06Z57X`.
 Pre-commit `make verify` passed with zero lint issues; core 2394.437 s, app
 108.657 s and all other packages passed. The owned service finished with exit
 status zero and no live check process. All owned check fixtures finished.
-T9.3 implementation and development validation are complete; T9.4 and canonical
-PR preparation remain pending.
+T9.3 implementation and development validation are complete. T9.4 is in progress;
+canonical PR preparation remains pending.
 
 Required ordered exact-head slice checks remain pending until all four tasks
 and canonical PR references are committed and pushed.
@@ -168,10 +168,13 @@ Acta commit activity: `01M4VAYVXVK7AMTY6J2RA7TYC1`.
 T9.2 implementation: [ae54f89aff1248e7cee90c5e033ac923ec7c77c7](https://forge.adrianpk.com/adrianpk/chr/commit/ae54f89aff1248e7cee90c5e033ac923ec7c77c7).
 Acta commit activity: `01M4VFXT6NZ0S5TT0V9BJ8W6PF`.
 
+T9.3 implementation: [48a9539d023e63c96f04aa61ecb6baa46d77f9e2](https://forge.adrianpk.com/adrianpk/chr/commit/48a9539d023e63c96f04aa61ecb6baa46d77f9e2).
+Acta commit activity: `01M4VKZWK3H5X4ZDRMEDMHBP6J`.
+
 ## Risks and Follow-ups
 
-T9.1, T9.2 and T9.3 are implemented and development-checked. T9.4 remains
-ready for crash/stop boundaries.
+T9.1, T9.2 and T9.3 are implemented and development-checked. T9.4 is in progress
+for crash/stop boundaries.
 Canonical PR and verified integration remain pending.
 
 A temporary overlay probe for the pending T9.4 stop boundary reproduced a
