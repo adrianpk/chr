@@ -1,6 +1,6 @@
 # Slice 8: Persistent limits and decisions
 
-Status: drafting
+Status: reviewing
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
@@ -67,6 +67,13 @@ worker invocation; the existing consumed history is migrated into the ledger.
 The extension retains finite token mode when configured and preserves unmetered
 mode otherwise. Existing absolute persistence and role-owner bounds still apply.
 
+T8.4 verifies real driver crashes, timeouts, missing usage and host loss at the
+process-birth and permission boundaries. Recovery retains the launched charge
+and immutable process ownership. A surviving driver prevents replacement from
+another process or linked worktree; its exit releases the serial slot while
+unknown usage retains the complete grant. Restart cannot turn that allowance
+into an uncharged replacement.
+
 ## Implementation Notes
 
 The new optional policy fields use omitted zero values, so existing default
@@ -125,6 +132,8 @@ or granting twice.
 - `internal/core/workflow_integration_decision*.go`: sealed questions, guarded answers, real merger persistence and typed repair choices.
 - `internal/core/workflow_integration_grant.go` and `workflow_integration_operator_test.go`: early extensions, retained consumption and policy compatibility.
 - `internal/app/service_workflow_operator.go`: adapter-neutral decision and grant ports.
+
+- `internal/core/workflow_agent_recovery_test.go`: real driver fault, launch-boundary crash, orphan ownership and retained-budget recovery fixtures.
 
 ## Validation
 
@@ -210,7 +219,23 @@ tasks and PR-reference commits are complete.
 T8.3 implementation: [cb24ddffc886af7db8fe2f746fdd0d9982bbcdd8](https://forge.adrianpk.com/adrianpk/chr/commit/cb24ddffc886af7db8fe2f746fdd0d9982bbcdd8).
 Acta commit activity: `01M4TH7SCDF346JDG9Y5J8GKJQ`.
 
+T8.4 development checks passed with Go 1.27.1:
+
+- `go test ./internal/core -run '^(TestNativeAgent.*|TestNativeBudget.*|TestNativeMerger(Descendants|Timeout|Stop))$' -count=1` — passed in 38.816 s.
+- `go test -race ./internal/core -run '^(TestNativeAgent.*|TestNativeBudget.*|TestNativeMerger(Descendants|Timeout|Stop))$' -count=1` — passed in 74.448 s.
+- `make lint-strict` — passed with zero issues.
+- `git diff --check` — passed.
+
+The first birth-crash run missed its injection because the fixture hook was
+attached to the caller store. Binding it to the claim's owning store corrected
+the fixture; the isolated birth-crash test then passed in 0.318 s. Linting also
+required extracting the stopped-process evidence assertion. Production code
+and assertions were unchanged. Both test files were unchanged throughout the
+successful normal and race checks. All owned fixtures and checks finished.
+Required exact-head controller validation remains pending until PR references
+are committed and pushed.
+
 ## Risks and Follow-ups
 
-T8.1, T8.2 and T8.3 are committed and checked. T8.4 remains
-recorded for owned-process recovery. The canonical Slice 8 PR remains pending.
+All four tasks are implemented and development-checked. Canonical PR references
+and exact-head controller validation remain pending.

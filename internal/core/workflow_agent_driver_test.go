@@ -43,6 +43,8 @@ func TestNativeAgentProcess(t *testing.T) {
 	}
 
 	mode := os.Args[len(os.Args)-1]
+	nativeAgentFaultMode(t, mode)
+
 	result := nativeAgentModelResult(t, input)
 
 	usedInput, usedOutput := int64(20), int64(10)

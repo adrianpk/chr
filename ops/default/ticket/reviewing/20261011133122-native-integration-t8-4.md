@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133122
 title: "T8.4: Verify process and budget recovery"
-status: ready
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,9 @@ tags: native-integration, slice-8
 source: chat
 reported_at: 2026-10-11T13:31:22Z
 ready_at: 2026-10-11T13:31:37Z
+started_at: 2026-10-13T11:49:45Z
+reviewed_at: 2026-10-13T12:08:00Z
+branch: feat/slice-8-native-integration-limits
 commits: []
 ---
 
@@ -58,4 +61,14 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Added real owned driver and host-loss fixtures for crash, timeout, missing usage,
+process birth before permission, and a surviving launched driver. Restart and
+linked worktree aliases retain the serial agent slot until the driver stops;
+unknown usage retains the complete token grant and rejects a hidden replacement.
+
+Focused normal and race checks passed in 38.816 s and 74.448 s. Strict lint
+reports zero issues. The two changed test files were unchanged throughout those
+checks. All owned fixtures and check processes finished. Required exact-head
+slice validation, canonical PR and verified integration remain pending.
+
+Evidence: [Slice 8 report](../../report/slices/native-integration-queue/slice-8-integration-limits.md).
