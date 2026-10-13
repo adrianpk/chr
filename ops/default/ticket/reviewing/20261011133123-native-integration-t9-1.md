@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-13T18:18:51Z
 reviewed_at: 2026-10-13T19:13:48Z
 branch: feat/slice-9-native-publication-recovery
-commits: []
+commits: ["e4531667cbbeb82922d79500cb7bd79c72e2efb9"]
 ---
 
 # T9.1: Fence and journal authorized dispatch
@@ -71,3 +71,6 @@ files: core 2243.062 s, app 108.440 s and all other packages passed. Canonical
 PR and verified integration remain pending.
 
 Evidence: [Slice 9 report](../../report/slices/native-integration-queue/slice-9-publication-recovery.md).
+
+Implementation: [e4531667cbbeb82922d79500cb7bd79c72e2efb9](https://forge.adrianpk.com/adrianpk/chr/commit/e4531667cbbeb82922d79500cb7bd79c72e2efb9).
+Acta commit activity: `01M4VAYVXVK7AMTY6J2RA7TYC1`.

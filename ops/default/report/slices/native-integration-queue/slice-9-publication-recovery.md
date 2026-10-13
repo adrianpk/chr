@@ -74,6 +74,9 @@ All owned focused and repository check processes and fixtures finished.
 Required ordered exact-head slice checks remain pending until all four tasks
 and canonical PR references are committed and pushed.
 
+T9.1 implementation: [e4531667cbbeb82922d79500cb7bd79c72e2efb9](https://forge.adrianpk.com/adrianpk/chr/commit/e4531667cbbeb82922d79500cb7bd79c72e2efb9).
+Acta commit activity: `01M4VAYVXVK7AMTY6J2RA7TYC1`.
+
 ## Risks and Follow-ups
 
 T9.1 is implemented and development-checked. T9.2 through T9.4 remain recorded

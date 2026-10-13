@@ -331,7 +331,7 @@ Prerequisite: verified Slice 8 integration and closed task fanout.
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T9.1 | [TKT-20261011133123](../ticket/reviewing/20261011133123-native-integration-t9-1.md) | reviewing | pending | Fence and journal authorized dispatch |
+| T9.1 | [TKT-20261011133123](../ticket/reviewing/20261011133123-native-integration-t9-1.md) | reviewing | [e4531667cbbeb82922d79500cb7bd79c72e2efb9](https://forge.adrianpk.com/adrianpk/chr/commit/e4531667cbbeb82922d79500cb7bd79c72e2efb9) | Fence and journal authorized dispatch |
 | T9.2 | [TKT-20261011133124](../ticket/ready/20261011133124-native-integration-t9-2.md) | ready | pending | Reconcile atomic rejection and lost responses |
 | T9.3 | [TKT-20261011133125](../ticket/ready/20261011133125-native-integration-t9-3.md) | ready | pending | Observe canonical PR convergence |
 | T9.4 | [TKT-20261011133126](../ticket/ready/20261011133126-native-integration-t9-4.md) | ready | pending | Verify crash and stop boundaries |
