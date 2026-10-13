@@ -27,6 +27,14 @@ func (s *WorkflowStore) checkWorkflowSourceReviewProfile() error {
 }
 
 func (s *WorkflowStore) bindWorkflowNativeReview(ctx context.Context, run workflowInvocationFile, candidate WorkflowIntegrationCandidate, provider WorkflowPullRequestProvider, input *WorkflowReviewInput) error {
+	if err := s.bindWorkflowNativeReviewCapability(ctx, run, candidate, provider, input); err != nil {
+		return err
+	}
+
+	return s.checkWorkflowNativeReviewFence(run, input)
+}
+
+func (s *WorkflowStore) bindWorkflowNativeReviewCapability(ctx context.Context, run workflowInvocationFile, candidate WorkflowIntegrationCandidate, provider WorkflowPullRequestProvider, input *WorkflowReviewInput) error {
 	native, err := workflowNativePreparationProfile(s.layout.ProjectDir(), candidate.Input.Capability)
 	if err != nil || !native {
 		return err
@@ -55,7 +63,7 @@ func (s *WorkflowStore) bindWorkflowNativeReview(ctx context.Context, run workfl
 		return err
 	}
 
-	return s.checkWorkflowNativeReviewFence(run, input)
+	return nil
 }
 
 func (s *WorkflowStore) checkWorkflowNativeReviewFence(run workflowInvocationFile, input *WorkflowReviewInput) error {

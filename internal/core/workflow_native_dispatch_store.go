@@ -1,0 +1,52 @@
+package core
+
+import (
+	"context"
+	"os"
+)
+
+func (s *WorkflowStore) retainWorkflowNativeDispatch(ctx context.Context, run workflowInvocationFile, submission WorkflowSubmission) (WorkflowSubmission, error) {
+	entry, err := s.workflowNativeDispatchEntry(run, submission)
+	if err != nil {
+		return submission, err
+	}
+
+	journal, err := s.readWorkflowSubmissionJournal(ctx, run)
+	if err != nil {
+		return submission, err
+	}
+
+	last := journal.Attempts[len(journal.Attempts)-1]
+	if last.ID != submission.ID || last.Native == nil || last.Native.DispatchState != "not_started" {
+		return last, ErrWorkflowObservationRequired
+	}
+
+	identity, err := workflowProcessIdentity(os.Getpid())
+	if err != nil {
+		return submission, err
+	}
+
+	native := *last.Native
+	native.DispatchIdentity, native.DispatchState, native.ApplicationState = &identity, "dispatching", "unknown"
+	guard := WorkflowIntegrationBudgetGuard{InvocationID: run.ID, InvocationRevision: run.Revision, BudgetRevision: run.IntegrationBudget.Revision, EntryID: entry.ID, EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration}
+	request := WorkflowNativeSubmissionUpdate{WorkflowIntegrationBudgetGuard: guard, SubmissionID: last.ID, JournalHash: journal.sourceHash, Facts: native}
+
+	return s.retainWorkflowNativeSubmission(ctx, run, request)
+}
+
+func (s *WorkflowStore) workflowNativeDispatchEntry(run workflowInvocationFile, submission WorkflowSubmission) (WorkflowIntegrationEntry, error) {
+	if run.Integration == nil || run.IntegrationBudget == nil {
+		return WorkflowIntegrationEntry{}, ErrWorkflowConflict
+	}
+
+	entry, err := s.readWorkflowIntegrationEntry(run, *run.Integration)
+	if err != nil {
+		return entry, err
+	}
+
+	if !workflowNativeSubmissionEntryMatches(submission, entry) || entry.State != "publishing" {
+		return entry, ErrWorkflowConflict
+	}
+
+	return entry, nil
+}
