@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-13T06:10:27Z
 reviewed_at: 2026-10-13T06:51:34Z
 branch: feat/slice-8-native-integration-limits
-commits: []
+commits: ["94ea7e86745e9ab30d55bc9fa931fd23a91826bc"]
 ---
 
 # T8.1: Enforce merger drift and submission counters
@@ -82,3 +82,6 @@ Development checks passed with Go 1.27.1:
 The oversized-deadline regression failed before correction. The existing Slice 8
 report retains that reproduction, corrected checks and remaining tasks. Canonical
 PR and final exact-head controller evidence remain pending.
+
+T8.1 implementation: [94ea7e86745e9ab30d55bc9fa931fd23a91826bc](https://forge.adrianpk.com/adrianpk/chr/commit/94ea7e86745e9ab30d55bc9fa931fd23a91826bc).
+Acta commit activity: `01M4T0JW66X49EPFWK9J7TQV4Q`.

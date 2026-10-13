@@ -73,6 +73,9 @@ validation. Owned checks exited naturally. Exact-head slice
 validation will be recorded separately after all tasks and PR references are
 committed and pushed.
 
+T8.1 implementation: [94ea7e86745e9ab30d55bc9fa931fd23a91826bc](https://forge.adrianpk.com/adrianpk/chr/commit/94ea7e86745e9ab30d55bc9fa931fd23a91826bc).
+Acta commit activity: `01M4T0JW66X49EPFWK9J7TQV4Q`.
+
 ## Risks and Follow-ups
 
 T8.1 is implemented and checked. T8.2, T8.3 and T8.4 remain
