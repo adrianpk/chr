@@ -14,7 +14,7 @@ started_at: 2026-10-12T19:18:41Z
 reviewing_at: 2026-10-12T20:12:03Z
 branch: feat/slice-7-native-candidate-review
 pr: 381
-commits: ["3f1aac6910b7e8885146a544a735db69f49c1a94"]
+commits: ["3f1aac6910b7e8885146a544a735db69f49c1a94", "4f4a3cc3dc1ffe0a791d484cdf1b3e2982935125"]
 ---
 
 # T7.1: Run required gates on the exact prepared result
@@ -80,6 +80,13 @@ host owner now survives queue projection until its gate finishes or stops.
 Implementation commit: [3f1aac6910b7e8885146a544a735db69f49c1a94](https://forge.adrianpk.com/adrianpk/chr/commit/3f1aac6910b7e8885146a544a735db69f49c1a94).
 
 Acta commit activity: `01M4RW111YN23ZPXZ87AHKG9CB`.
+
+Validation fixture correction: [4f4a3cc3dc1ffe0a791d484cdf1b3e2982935125](https://forge.adrianpk.com/adrianpk/chr/commit/4f4a3cc3dc1ffe0a791d484cdf1b3e2982935125)
+completes source-task setup before timing aggregate stop readiness. Focused
+normal checks, three race repetitions and strict linting passed; the existing
+deadlines and all stop/resume assertions remain intact. Acta commit activity:
+`01M4SNMPWTRW1SMWVA0F2PWZ0A`. The slice report retains the failed full race
+attempt and final exact-HEAD validation requirement.
 
 Canonical slice PR: [#381](https://forge.adrianpk.com/adrianpk/chr/pulls/381). The controller records ordered exact-HEAD
 validation separately before integration; task status remains reviewing.

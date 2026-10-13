@@ -283,7 +283,7 @@ PR: [#381](https://forge.adrianpk.com/adrianpk/chr/pulls/381)
 
 Verified merge: pending
 
-Report/evidence: [Slice 7 report](../report/slices/native-integration-queue/slice-7-candidate-review.md); all four task commits and development checks are retained there. Final exact-HEAD evidence is owned by the controller and canonical PR.
+Report/evidence: [Slice 7 report](../report/slices/native-integration-queue/slice-7-candidate-review.md); all four task commits and development checks are retained there. The required race check exposed aggregate stop fixture readiness timing; [4f4a3cc3dc1ffe0a791d484cdf1b3e2982935125](https://forge.adrianpk.com/adrianpk/chr/commit/4f4a3cc3dc1ffe0a791d484cdf1b3e2982935125) isolates that readiness wait after source-task setup, with focused normal/race and lint checks passing. Final exact-HEAD evidence is owned by the controller and canonical PR.
 
 ## Slice 8: Persistent limits and decisions
 

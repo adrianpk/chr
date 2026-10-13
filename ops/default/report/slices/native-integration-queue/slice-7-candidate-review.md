@@ -304,6 +304,9 @@ Initial strict linting required a blank line after the new setup call; the
 correction retains the same test behavior. Final controller evidence must be
 regenerated for the head containing this fixture and report update.
 
+Validation fixture correction: [4f4a3cc3dc1ffe0a791d484cdf1b3e2982935125](https://forge.adrianpk.com/adrianpk/chr/commit/4f4a3cc3dc1ffe0a791d484cdf1b3e2982935125).
+Acta commit activity: `01M4SNMPWTRW1SMWVA0F2PWZ0A`.
+
 ## Risks and Follow-ups
 
 T7.1–T7.4 are implemented and checked. Canonical PR [#381](https://forge.adrianpk.com/adrianpk/chr/pulls/381) retains the
