@@ -1,6 +1,6 @@
 # Slice 7: Combined validation and review
 
-Status: reviewing
+Status: delivered
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
@@ -307,11 +307,20 @@ regenerated for the head containing this fixture and report update.
 Validation fixture correction: [4f4a3cc3dc1ffe0a791d484cdf1b3e2982935125](https://forge.adrianpk.com/adrianpk/chr/commit/4f4a3cc3dc1ffe0a791d484cdf1b3e2982935125).
 Acta commit activity: `01M4SNMPWTRW1SMWVA0F2PWZ0A`.
 
+Final clean candidate validation passed through the controller for
+`79af9e38426e681e5b0d778ae4df2b0a84952d73`, matching the integrated PR head:
+
+- `make verify` — passed with zero lint issues; core 2100.426 s, app 113.548 s and all other packages passed.
+- `go test ./internal/core ./internal/app -count=1` — passed; core 2143.029 s and app 116.367 s.
+- `go test -race ./internal/core ./internal/app -count=1` — passed; core 3603.928 s and app 304.994 s.
+- `git diff --check` — passed.
+
+Canonical integration: [PR #381](https://forge.adrianpk.com/adrianpk/chr/pulls/381),
+`79af9e38426e681e5b0d778ae4df2b0a84952d73` on `dev` at 2026-10-13T05:58:15Z.
+Controller Acta merge: `01M4SXE559V2QJJB40S9H1S9QB`. Final validation/PR contract activity:
+`01M4SXD1B5PTKHBTDHDWQ5QW53`. Owned validation fixtures and processes exited.
+
 ## Risks and Follow-ups
 
-T7.1–T7.4 are implemented and checked. Canonical PR [#381](https://forge.adrianpk.com/adrianpk/chr/pulls/381) retains the
-slice candidate. PR-open activity: `01M4S6V1EXT2MKX1F0DWW9YCGA`.
-The controller records `make verify`,
-`go test ./internal/core ./internal/app -count=1`,
-`go test -race ./internal/core ./internal/app -count=1` and `git diff --check`
-in that order for the clean final PR head. Integration remains pending.
+All four Slice 7 tasks are integrated and solved. The complete delivery-set gate
+remains scheduled after the remaining approved slices.

@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133117
 title: "T7.3: Repair actionable integration findings"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -14,6 +14,8 @@ started_at: 2026-10-12T21:12:08Z
 reviewed_at: 2026-10-12T22:17:36Z
 branch: feat/slice-7-native-candidate-review
 pr: 381
+resolution: fixed
+closed_at: 2026-10-13T06:03:13Z
 commits: ["91676739a6706575df5ee1e644acf29189cfc62b"]
 ---
 
@@ -87,4 +89,8 @@ Implementation commit: [91676739a6706575df5ee1e644acf29189cfc62b](https://forge.
 
 Acta commit activity: `01M4S33CF0TC96K7KTAP1TNASA`.
 Canonical slice PR: [#381](https://forge.adrianpk.com/adrianpk/chr/pulls/381). The controller records ordered exact-HEAD
-validation separately before integration; task status remains reviewing.
+validation separately before integration; task status is solved.
+
+Verified integration: [PR #381](https://forge.adrianpk.com/adrianpk/chr/pulls/381),
+`79af9e38426e681e5b0d778ae4df2b0a84952d73` on `dev` at 2026-10-13T05:58:15Z. Controller Acta merge:
+`01M4SXE559V2QJJB40S9H1S9QB`. Ordered exact-head checks passed; this task is solved.

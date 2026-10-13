@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133118
 title: "T7.4: Handle external target and source movement"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -14,6 +14,8 @@ started_at: 2026-10-12T22:18:48Z
 reviewed_at: 2026-10-12T23:19:37Z
 branch: feat/slice-7-native-candidate-review
 pr: 381
+resolution: fixed
+closed_at: 2026-10-13T06:03:13Z
 commits: ["19a339e92300df7141f57458c7892de2876cecac"]
 ---
 
@@ -87,4 +89,8 @@ Implementation commit: [19a339e92300df7141f57458c7892de2876cecac](https://forge.
 
 Acta commit activity: `01M4S6N0V0VZAQ494X453TY0SM`.
 Canonical slice PR: [#381](https://forge.adrianpk.com/adrianpk/chr/pulls/381). The controller records ordered exact-HEAD
-validation separately before integration; task status remains reviewing.
+validation separately before integration; task status is solved.
+
+Verified integration: [PR #381](https://forge.adrianpk.com/adrianpk/chr/pulls/381),
+`79af9e38426e681e5b0d778ae4df2b0a84952d73` on `dev` at 2026-10-13T05:58:15Z. Controller Acta merge:
+`01M4SXE559V2QJJB40S9H1S9QB`. Ordered exact-head checks passed; this task is solved.

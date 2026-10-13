@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133115
 title: "T7.1: Run required gates on the exact prepared result"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -14,6 +14,8 @@ started_at: 2026-10-12T19:18:41Z
 reviewing_at: 2026-10-12T20:12:03Z
 branch: feat/slice-7-native-candidate-review
 pr: 381
+resolution: fixed
+closed_at: 2026-10-13T06:03:13Z
 commits: ["3f1aac6910b7e8885146a544a735db69f49c1a94", "4f4a3cc3dc1ffe0a791d484cdf1b3e2982935125"]
 ---
 
@@ -89,4 +91,8 @@ deadlines and all stop/resume assertions remain intact. Acta commit activity:
 attempt and final exact-HEAD validation requirement.
 
 Canonical slice PR: [#381](https://forge.adrianpk.com/adrianpk/chr/pulls/381). The controller records ordered exact-HEAD
-validation separately before integration; task status remains reviewing.
+validation separately before integration; task status is solved.
+
+Verified integration: [PR #381](https://forge.adrianpk.com/adrianpk/chr/pulls/381),
+`79af9e38426e681e5b0d778ae4df2b0a84952d73` on `dev` at 2026-10-13T05:58:15Z. Controller Acta merge:
+`01M4SXE559V2QJJB40S9H1S9QB`. Ordered exact-head checks passed; this task is solved.
