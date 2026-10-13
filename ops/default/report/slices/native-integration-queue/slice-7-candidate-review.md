@@ -256,6 +256,24 @@ verification and all focused checks exited naturally. No external fixture was
 started. Exact-HEAD slice evidence is retained separately by the controller
 and canonical PR.
 
+The first final-candidate attempt at
+`b7dae01db495bc06d6a1398fe24e75eee447ae3b` passed `make verify` with zero
+lint issues (core 1901.937 s, app 105.267 s), then passed
+`go test ./internal/core ./internal/app -count=1` (core 1916.874 s,
+app 111.218 s). The core race suite reached the inherited 45-minute outer
+test deadline while `TestWorkflowReviewRepairJournal` had run for six seconds.
+The app race suite passed in 297.814 s. Retained diagnostics contain a deadline
+failure, with no assertion failure or data race; the final whitespace command
+was not reached. No fixture process from that build remained after completion.
+Controller diagnostics are retained in
+`checks/b7dae01db495bc06d6a1398fe24e75eee447ae3b.log` beside the checkpoint.
+Acta diagnosis: `01M4SD6C7VG06FWC2A3KRR64VB`.
+
+The replacement final runner retains the same Go version, isolated fixture
+settings, assertions and ordered commands, with a 90-minute outer Go test
+deadline. The controller records the complete sequence against the clean head
+that includes this report update.
+
 ## Risks and Follow-ups
 
 T7.1–T7.4 are implemented and checked. Canonical PR [#381](https://forge.adrianpk.com/adrianpk/chr/pulls/381) retains the
