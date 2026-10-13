@@ -207,7 +207,10 @@ host acceptance remains pending validation and cannot replace review or publish
 a result. Exact-head controller validation remains pending until the slice
 tasks and PR-reference commits are complete.
 
+T8.3 implementation: [cb24ddffc886af7db8fe2f746fdd0d9982bbcdd8](https://forge.adrianpk.com/adrianpk/chr/commit/cb24ddffc886af7db8fe2f746fdd0d9982bbcdd8).
+Acta commit activity: `01M4TH7SCDF346JDG9Y5J8GKJQ`.
+
 ## Risks and Follow-ups
 
-T8.1, T8.2 and T8.3 implementation and development checks passed. T8.4 remains
+T8.1, T8.2 and T8.3 are committed and checked. T8.4 remains
 recorded for owned-process recovery. The canonical Slice 8 PR remains pending.

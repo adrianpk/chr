@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-13T10:19:42Z
 reviewed_at: 2026-10-13T11:43:31Z
 branch: feat/slice-8-native-integration-limits
-commits: []
+commits: ["cb24ddffc886af7db8fe2f746fdd0d9982bbcdd8"]
 ---
 
 # T8.3: Persist operator decisions and bounded grants
@@ -73,3 +73,6 @@ packages passed. Implementation and validation are complete; canonical PR and
 verified integration remain pending.
 
 Evidence: [Slice 8 report](../../report/slices/native-integration-queue/slice-8-integration-limits.md).
+
+Implementation: [cb24ddffc886af7db8fe2f746fdd0d9982bbcdd8](https://forge.adrianpk.com/adrianpk/chr/commit/cb24ddffc886af7db8fe2f746fdd0d9982bbcdd8).
+Acta commit activity: `01M4TH7SCDF346JDG9Y5J8GKJQ`.
