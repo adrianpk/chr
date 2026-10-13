@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133119
 title: "T8.1: Enforce merger drift and submission counters"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -14,6 +14,8 @@ started_at: 2026-10-13T06:10:27Z
 reviewed_at: 2026-10-13T06:51:34Z
 branch: feat/slice-8-native-integration-limits
 pr: 382
+resolution: fixed
+closed_at: 2026-10-13T18:12:40Z
 commits: ["94ea7e86745e9ab30d55bc9fa931fd23a91826bc"]
 ---
 
@@ -54,15 +56,15 @@ Acceptance IDs and invariants: use the owning slice's explicit coverage map in t
 
 ## Execution Gate
 
-Approved: 2026-10-11; the maintainer authorized this corrective set through Looper.
+Approved: 2026-10-11; the maintainer authorized this corrective set through the delivery controller.
 
 Execute only when this slice is active and its predecessors and external prerequisites are satisfied.
-Keep one task commit and one canonical slice PR; only Looper submits development merges.
+Keep one task commit and one canonical slice PR; only the delivery controller submits development merges.
 Use the existing Markdown ticket lifecycle; this file does not create a product runtime invocation.
 
 ## Evidence
 
-Implementation and development validation are retained below; final exact-head slice validation and verified integration remain pending.
+Implementation and development validation are retained below; Final exact-head slice validation and verified integration are recorded below.
 
 ## Evidence
 
@@ -81,10 +83,14 @@ Development checks passed with Go 1.27.1:
 - `git diff --check` — passed.
 
 The oversized-deadline regression failed before correction. The existing Slice 8
-report retains that reproduction, corrected checks and task checks. Final exact-head controller evidence remains pending.
+report retains that reproduction, corrected checks and task checks. Final exact-head controller evidence passed and is retained below.
 
 T8.1 implementation: [94ea7e86745e9ab30d55bc9fa931fd23a91826bc](https://forge.adrianpk.com/adrianpk/chr/commit/94ea7e86745e9ab30d55bc9fa931fd23a91826bc).
 Acta commit activity: `01M4T0JW66X49EPFWK9J7TQV4Q`.
 
 Canonical slice PR: [PR #382](https://forge.adrianpk.com/adrianpk/chr/pulls/382). The controller records ordered exact-HEAD
-validation separately before integration; task status remains reviewing.
+validation separately before integration; task status is solved.
+
+Verified integration: [PR #382](https://forge.adrianpk.com/adrianpk/chr/pulls/382),
+`0096f6e960ecc25e7aae72a8a97fdc53c689418c` on `dev` at 2026-10-13T18:09:40Z. Controller Acta merge:
+`01M4V79DVNVSXZG5D9TMZ0NMSX`. All four configured ordered exact-head checks passed; this task is solved.

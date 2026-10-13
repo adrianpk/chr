@@ -18,9 +18,9 @@ Plan approval: approved on 2026-10-11 under the explicit instruction to process 
 
 Implementation authorization: granted for the complete ordered corrective set and its defined task/PR map.
 
-Active slice: Slice 7 — Combined validation and review
+Active slice: Slice 9 — Publication and uncertainty recovery
 
-Next slice: Slice 8 — Persistent limits and decisions
+Next slice: Slice 10 — Receipts fanout and closure
 
 Slice strategy: behavior-first
 
@@ -350,7 +350,7 @@ Invariants: INV-08, INV-11, INV-12, INV-13, INV-15, INV-19, INV-21
 
 ## Slice 8: Persistent limits and decisions
 
-Status: active
+Status: delivered
 
 Expected branch: `feat/slice-8-native-integration-limits`
 
@@ -368,10 +368,10 @@ Invariants: INV-04, INV-13, INV-18, INV-19, INV-20
 
 | Task | Ticket | Work | Acceptance boundary |
 | --- | --- | --- | --- |
-| T8.1 | [TKT-20261011133119](../ticket/reviewing/20261011133119-native-integration-t8-1.md) | Apply approved default/bounded limits and retained worker timeout across unit and invocation lifecycle. | Restart, rebase and queue re-entry cannot reset consumed attempts or extend deadlines. |
-| T8.2 | [TKT-20261011133120](../ticket/reviewing/20261011133120-native-integration-t8-2.md) | Implement checked invocation-wide reservations across all roles with certified whole-call harness enforcement and compatible usage accounting. | Concurrent calls cannot oversubscribe; output-only metering rejects finite-token mode and unknown usage stays charged. |
-| T8.3 | [TKT-20261011133121](../ticket/reviewing/20261011133121-native-integration-t8-3.md) | Expose candidate-bound ambiguity resolution and explicit positive budget extensions using existing revision guards. | Silence does not approve; stale answers fail and grants preserve all prior consumption. |
-| T8.4 | [TKT-20261011133122](../ticket/reviewing/20261011133122-native-integration-t8-4.md) | Exercise launch/timeout/crash/unknown-usage checkpoints and slot retention with real owned subprocesses. | A surviving child or uncertain usage prevents hidden replacement and refunds, while serial mode remains one active agent. |
+| T8.1 | [TKT-20261011133119](../ticket/solved/20261011133119-native-integration-t8-1.md) | Apply approved default/bounded limits and retained worker timeout across unit and invocation lifecycle. | Restart, rebase and queue re-entry cannot reset consumed attempts or extend deadlines. |
+| T8.2 | [TKT-20261011133120](../ticket/solved/20261011133120-native-integration-t8-2.md) | Implement checked invocation-wide reservations across all roles with certified whole-call harness enforcement and compatible usage accounting. | Concurrent calls cannot oversubscribe; output-only metering rejects finite-token mode and unknown usage stays charged. |
+| T8.3 | [TKT-20261011133121](../ticket/solved/20261011133121-native-integration-t8-3.md) | Expose candidate-bound ambiguity resolution and explicit positive budget extensions using existing revision guards. | Silence does not approve; stale answers fail and grants preserve all prior consumption. |
+| T8.4 | [TKT-20261011133122](../ticket/solved/20261011133122-native-integration-t8-4.md) | Exercise launch/timeout/crash/unknown-usage checkpoints and slot retention with real owned subprocesses. | A surviving child or uncertain usage prevents hidden replacement and refunds, while serial mode remains one active agent. |
 
 ### Required Candidate Checks
 
@@ -382,7 +382,7 @@ Invariants: INV-04, INV-13, INV-18, INV-19, INV-20
 
 ## Slice 9: Publication and uncertainty recovery
 
-Status: not_started
+Status: active
 
 Expected branch: `feat/slice-9-native-publication-recovery`
 

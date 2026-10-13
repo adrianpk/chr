@@ -1,6 +1,6 @@
 # Slice 8: Persistent limits and decisions
 
-Status: reviewing
+Status: delivered
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
@@ -153,9 +153,7 @@ Development checks passed with Go 1.27.1:
 Initial linting required a smaller exhaustion test helper and explicit whitespace;
 the corrected source retains the same assertions. The repository pre-commit
 `make verify` check passed with all seven changed Go files unchanged throughout
-validation. Owned checks exited naturally. Exact-head slice
-validation will be recorded separately after all tasks and PR references are
-committed and pushed.
+validation. Owned checks exited naturally. Final exact-head slice validation is retained below.
 
 T8.1 implementation: [94ea7e86745e9ab30d55bc9fa931fd23a91826bc](https://forge.adrianpk.com/adrianpk/chr/commit/94ea7e86745e9ab30d55bc9fa931fd23a91826bc).
 Acta commit activity: `01M4T0JW66X49EPFWK9J7TQV4Q`.
@@ -188,9 +186,7 @@ and failed before the admission guard was added.
 The focused fixtures include concurrent executor/merger/reviewer/closing
 reservations, complete and unknown accounting after restart, incompatible meter
 rejection, remaining-ceiling enforcement, and three executor calls plus a
-separate reviewer without double-counting attempts. These are development
-checks; exact-head controller validation remains pending until the slice and
-PR references are complete.
+separate reviewer without double-counting attempts. These are development checks; final exact-head controller validation is retained below.
 
 T8.2 implementation: [e1e574d4c031a25452de66da886be0e1df7271a9](https://forge.adrianpk.com/adrianpk/chr/commit/e1e574d4c031a25452de66da886be0e1df7271a9).
 Acta commit activity: `01M4TBXAE0MJ2MGP0TE9CH7CXF`.
@@ -213,8 +209,7 @@ The pre-commit repository check passed with all 27 changed Go files unchanged
 throughout validation. All owned checks exited naturally. The real answered
 repair retains its private checkpoint at the fresh revision before execution;
 host acceptance remains pending validation and cannot replace review or publish
-a result. Exact-head controller validation remains pending until the slice
-tasks and PR-reference commits are complete.
+a result. Final exact-head controller validation is retained below.
 
 T8.3 implementation: [cb24ddffc886af7db8fe2f746fdd0d9982bbcdd8](https://forge.adrianpk.com/adrianpk/chr/commit/cb24ddffc886af7db8fe2f746fdd0d9982bbcdd8).
 Acta commit activity: `01M4TH7SCDF346JDG9Y5J8GKJQ`.
@@ -232,14 +227,24 @@ the fixture; the isolated birth-crash test then passed in 0.318 s. Linting also
 required extracting the stopped-process evidence assertion. Production code
 and assertions were unchanged. Both test files were unchanged throughout the
 successful normal and race checks. All owned fixtures and checks finished.
-Required exact-head controller validation remains pending until PR references
-are committed and pushed.
+Final exact-head controller validation is retained below.
 
 T8.4 implementation: [b0574cca109c65d46a00bbbfb0b426f35fe751d1](https://forge.adrianpk.com/adrianpk/chr/commit/b0574cca109c65d46a00bbbfb0b426f35fe751d1).
 Acta commit activity: `01M4TJKYTBQ2KTKQWSNH7NNCGN`.
 
+Final controller validation passed on clean HEAD `0096f6e960ecc25e7aae72a8a97fdc53c689418c` in configured order:
+
+- `make verify` — zero lint issues; core 2114.878 s, app 113.772 s and all other packages passed.
+- `go test ./internal/core ./internal/app -count=1` — core 2123.657 s, app 110.777 s; passed.
+- `go test -race ./internal/core ./internal/app -count=1` — core 3652.947 s, app 300.915 s; passed.
+- `git diff --check` — passed.
+
+The controller retained evidence for the exact head and ordered command list.
+Its owned validation service finished successfully; no fixture remains owned by
+that check. Canonical integration: [PR #382](https://forge.adrianpk.com/adrianpk/chr/pulls/382) at `0096f6e960ecc25e7aae72a8a97fdc53c689418c`
+on 2026-10-13T18:09:40Z. Controller Acta merge: `01M4V79DVNVSXZG5D9TMZ0NMSX`.
+All four task tickets are solved.
+
 ## Risks and Follow-ups
 
-All four tasks and canonical PR references are committed. Exact-head controller
-validation and verified integration remain pending; all task tickets remain
-reviewing until integration is verified.
+None recorded.

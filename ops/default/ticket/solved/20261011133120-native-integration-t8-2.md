@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133120
 title: "T8.2: Reserve and settle optional token ceilings"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -14,6 +14,8 @@ started_at: 2026-10-13T08:57:28Z
 reviewed_at: 2026-10-13T10:10:31Z
 branch: feat/slice-8-native-integration-limits
 pr: 382
+resolution: fixed
+closed_at: 2026-10-13T18:12:40Z
 commits: ["e1e574d4c031a25452de66da886be0e1df7271a9"]
 ---
 
@@ -54,10 +56,10 @@ Acceptance IDs and invariants: use the owning slice's explicit coverage map in t
 
 ## Execution Gate
 
-Approved: 2026-10-11; the maintainer authorized this corrective set through Looper.
+Approved: 2026-10-11; the maintainer authorized this corrective set through the delivery controller.
 
 Execute only when this slice is active and its predecessors and external prerequisites are satisfied.
-Keep one task commit and one canonical slice PR; only Looper submits development merges.
+Keep one task commit and one canonical slice PR; only the delivery controller submits development merges.
 Use the existing Markdown ticket lifecycle; this file does not create a product runtime invocation.
 
 ## Evidence
@@ -77,7 +79,11 @@ services finished naturally.
 
 Implementation: [e1e574d4c031a25452de66da886be0e1df7271a9](https://forge.adrianpk.com/adrianpk/chr/commit/e1e574d4c031a25452de66da886be0e1df7271a9).
 Acta commit activity: `01M4TBXAE0MJ2MGP0TE9CH7CXF`.
-Final exact-head slice validation and verified integration remain pending.
+Final exact-head slice validation and verified integration are recorded below.
 
 Canonical slice PR: [PR #382](https://forge.adrianpk.com/adrianpk/chr/pulls/382). The controller records ordered exact-HEAD
-validation separately before integration; task status remains reviewing.
+validation separately before integration; task status is solved.
+
+Verified integration: [PR #382](https://forge.adrianpk.com/adrianpk/chr/pulls/382),
+`0096f6e960ecc25e7aae72a8a97fdc53c689418c` on `dev` at 2026-10-13T18:09:40Z. Controller Acta merge:
+`01M4V79DVNVSXZG5D9TMZ0NMSX`. All four configured ordered exact-head checks passed; this task is solved.

@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133121
 title: "T8.3: Persist operator decisions and bounded grants"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -14,6 +14,8 @@ started_at: 2026-10-13T10:19:42Z
 reviewed_at: 2026-10-13T11:43:31Z
 branch: feat/slice-8-native-integration-limits
 pr: 382
+resolution: fixed
+closed_at: 2026-10-13T18:12:40Z
 commits: ["cb24ddffc886af7db8fe2f746fdd0d9982bbcdd8"]
 ---
 
@@ -54,10 +56,10 @@ Acceptance IDs and invariants: use the owning slice's explicit coverage map in t
 
 ## Execution Gate
 
-Approved: 2026-10-11; the maintainer authorized this corrective set through Looper.
+Approved: 2026-10-11; the maintainer authorized this corrective set through the delivery controller.
 
 Execute only when this slice is active and its predecessors and external prerequisites are satisfied.
-Keep one task commit and one canonical slice PR; only Looper submits development merges.
+Keep one task commit and one canonical slice PR; only the delivery controller submits development merges.
 Use the existing Markdown ticket lifecycle; this file does not create a product runtime invocation.
 
 ## Evidence
@@ -71,7 +73,7 @@ Development normal/race checks passed for decision, grant, budget and real merge
 fixtures; strict lint reports zero issues. Required pre-commit `make verify`
 passed with 27 unchanged Go files: core 2136.587 s, app 115.808 s and all other
 packages passed. Implementation and development validation are complete; final exact-head slice
-validation and verified integration remain pending.
+validation and verified integration are recorded below.
 
 Evidence: [Slice 8 report](../../report/slices/native-integration-queue/slice-8-integration-limits.md).
 
@@ -79,4 +81,8 @@ Implementation: [cb24ddffc886af7db8fe2f746fdd0d9982bbcdd8](https://forge.adrianp
 Acta commit activity: `01M4TH7SCDF346JDG9Y5J8GKJQ`.
 
 Canonical slice PR: [PR #382](https://forge.adrianpk.com/adrianpk/chr/pulls/382). The controller records ordered exact-HEAD
-validation separately before integration; task status remains reviewing.
+validation separately before integration; task status is solved.
+
+Verified integration: [PR #382](https://forge.adrianpk.com/adrianpk/chr/pulls/382),
+`0096f6e960ecc25e7aae72a8a97fdc53c689418c` on `dev` at 2026-10-13T18:09:40Z. Controller Acta merge:
+`01M4V79DVNVSXZG5D9TMZ0NMSX`. All four configured ordered exact-head checks passed; this task is solved.
