@@ -274,6 +274,36 @@ settings, assertions and ordered commands, with a 90-minute outer Go test
 deadline. The controller records the complete sequence against the clean head
 that includes this report update.
 
+The ordered repair attempt at `df9b58dd65214d4ab5fbc5cd737ff122ac0e43f4`
+passed `make verify` with zero lint issues (core 1983.468 s, app 104.495 s)
+and `go test ./internal/core ./internal/app -count=1` (core 2048.177 s,
+app 106.615 s). The complete race suite failed only
+`TestWorkflowSliceStop/pause`: its ten-second readiness wait expired before
+the aggregate gate started. Core completed in 3615.947 s and app passed in
+294.434 s. The final whitespace command was not reached, and the controller
+accepted no final evidence. Diagnostics remain in
+`checks/df9b58dd65214d4ab5fbc5cd737ff122ac0e43f4.log` beside the checkpoint.
+Acta diagnosis: `01M4SNC6GMQD65RHTC5X2TZMP2`.
+
+The stop fixture and its helpers are unchanged from `dev`. Focused race
+reruns passed on the candidate (21.026 s once, 61.046 s for three repetitions)
+and the pre-Slice-7 head `725128da941a5c149a2b0a5d9a6a7065f842823d`
+(20.816 s once, 61.080 s for three repetitions). Those cases include three
+source workers and their gates in the aggregate readiness wait. The correction
+uses the existing fixture helper to complete those source tasks before timing
+aggregate readiness. The ten-second wait, gate timeout, pause/cancel cases and
+all retained cursor, evidence, checkpoint and resume assertions remain intact.
+
+Focused correction checks passed:
+
+- `go test ./internal/core -run '^(TestWorkflowSliceStop|TestWorkflowSliceAggregate|TestWorkflowSliceFence)$' -count=1` — passed in 8.908 s.
+- `go test -race ./internal/core -run '^(TestWorkflowSliceStop|TestWorkflowSliceAggregate|TestWorkflowSliceFence)$' -count=3` — passed in 121.264 s.
+- `make lint-strict` — passed with zero issues after the required whitespace correction.
+
+Initial strict linting required a blank line after the new setup call; the
+correction retains the same test behavior. Final controller evidence must be
+regenerated for the head containing this fixture and report update.
+
 ## Risks and Follow-ups
 
 T7.1–T7.4 are implemented and checked. Canonical PR [#381](https://forge.adrianpk.com/adrianpk/chr/pulls/381) retains the

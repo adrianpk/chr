@@ -96,6 +96,9 @@ func testWorkflowSliceStop(t *testing.T, intent string) {
 	gate := WorkflowValidation{Required: true, Commands: [][]string{{"sh", "-c", "test -f \"$1\" && exit 0; printf started > \"$1\"; sleep 20", "gate", marker}}, TimeoutSeconds: 30}
 	store, hierarchy, request := workflowSliceFixture(t, gate)
 	run := workflowTestStart(t, store, request)
+	// Time aggregate readiness after the three source tasks reach the barrier.
+	workflowSliceBeforeGate(t, store, run.Invocation.ID)
+
 	done := make(chan error, 1)
 
 	go func() {
