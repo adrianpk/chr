@@ -88,6 +88,13 @@ func checkNativeObservedHistory(t *testing.T, observed WorkflowNativePublication
 func TestNativeLaterSource(t *testing.T) {
 	fixture := newNativeCapabilityFixture(t, "github")
 	binding := nativeObservationFixture(t, fixture)
+	git := NewWorkflowIntegrationGit(binding.Git.Repository, fixture.remote)
+
+	prior, err := verifyWorkflowNativeTarget(t.Context(), binding, git)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	later := workflowIntegrationCommit(t, binding.SourceDirectory, "later.txt", "Later external work")
 	workflowIntegrationCommand(t, binding.SourceDirectory, "push", fixture.remote, later+":"+binding.Capability.SourceRef, later+":"+binding.Capability.TargetRef)
 
@@ -96,7 +103,6 @@ func TestNativeLaterSource(t *testing.T) {
 	setNativePRFixture(t, fixture, pr)
 
 	fixture.runner.outputs[fixture.prefix+"/branches/chr%2Fworkflow%2Ffixture"] = []byte(`{"commit":{"sha":"` + later + `"}}`)
-	git := NewWorkflowIntegrationGit(binding.Git.Repository, fixture.remote)
 
 	observed, err := fixture.adapter.ObserveWorkflowNativePublication(t.Context(), binding, git)
 	if err != nil || observed.State != "merged" || observed.LaterSourceCommit != later || observed.PublishedSourceCommit != binding.Git.ResultCommit {
@@ -108,6 +114,27 @@ func TestNativeLaterSource(t *testing.T) {
 	observed, err = fixture.adapter.ObserveWorkflowNativePublication(t.Context(), binding, git)
 	if err != nil || observed.State != "reconciliation_required" {
 		t.Fatal("unknown transaction attributed a later source without proof")
+	}
+
+	checkNativeLaterAttribution(t, fixture, binding, prior, later)
+}
+
+func checkNativeLaterAttribution(t *testing.T, fixture nativeCapabilityFixture, binding WorkflowNativePublicationBinding, prior WorkflowIntegrationProof, later string) {
+	t.Helper()
+
+	git := NewWorkflowIntegrationGit(binding.Git.Repository, fixture.remote)
+
+	binding.GitApplication = &WorkflowNativeGitObservation{SchemaVersion: 1, CandidateRevision: binding.Publication.CandidateRevision, SourceCommit: binding.Git.ResultCommit, TargetCommit: prior.ObservedTarget, Condition: "result_verified", Git: &prior}
+
+	observed, err := fixture.adapter.ObserveWorkflowNativePublication(t.Context(), binding, git)
+	if err != nil || observed.State != "merged" || observed.LaterSourceCommit != later {
+		t.Fatal("retained actual application lost attribution after source advanced", err)
+	}
+
+	prior.HistoryHash = workflowHash([]byte("different history"))
+
+	if _, err := fixture.adapter.ObserveWorkflowNativePublication(t.Context(), binding, git); err == nil {
+		t.Fatal("foreign history attributed a later source")
 	}
 }
 

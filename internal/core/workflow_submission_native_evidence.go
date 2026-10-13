@@ -181,7 +181,7 @@ func (s *WorkflowStore) checkWorkflowNativeJournalObservations(submission Workfl
 			return err
 		}
 
-		if !workflowNativeJournalObservationMatches(*native, observation) {
+		if !workflowNativeJournalObservationMatches(*native, observation) || !s.workflowNativeCanonicalObservationValid(submission, observation) {
 			return ErrWorkflowConflict
 		}
 
@@ -189,7 +189,7 @@ func (s *WorkflowStore) checkWorkflowNativeJournalObservations(submission Workfl
 			continue
 		}
 
-		if !workflowNativeRecordGitMatches(native.WorkflowNativeRecordBinding, *observation.Git) {
+		if !workflowNativeRecordGitMatches(native.WorkflowNativeRecordBinding, *observation.Git) || observation.Git.HistoryHash != submission.Guard.Git.HistoryHash {
 			return ErrWorkflowConflict
 		}
 
@@ -202,10 +202,16 @@ func (s *WorkflowStore) checkWorkflowNativeJournalObservations(submission Workfl
 }
 
 func workflowNativeJournalObservationMatches(native WorkflowNativeSubmission, observation WorkflowNativePublicationObservation) bool {
-	expected := [4]string{native.CanonicalPR, native.SourceRepository, native.OriginalSource, native.PublishedSource}
-	actual := [4]string{observation.PullRequest.URL, observation.PullRequest.Repository, observation.OriginalSourceCommit, observation.PublishedSourceCommit}
+	if [2]string{native.OriginalSource, native.PublishedSource} != [2]string{observation.OriginalSourceCommit, observation.PublishedSourceCommit} {
+		return false
+	}
 
-	return expected == actual && slices.Contains([]string{"observing", "merged", "reconciliation_required"}, observation.State)
+	bound := observation.CanonicalPR == native.CanonicalPR
+	if observation.CanonicalPR == "" {
+		bound = observation.PullRequest.URL == native.CanonicalPR && observation.PullRequest.Repository == native.SourceRepository
+	}
+
+	return bound && slices.Contains([]string{"observing", "merged", "reconciliation_required"}, observation.State)
 }
 
 func (s *WorkflowStore) checkWorkflowNativeAppliedEvidence(submission WorkflowSubmission) error {

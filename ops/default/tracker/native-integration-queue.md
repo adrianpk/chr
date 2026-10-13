@@ -333,7 +333,7 @@ Prerequisite: verified Slice 8 integration and closed task fanout.
 | --- | --- | --- | --- | --- |
 | T9.1 | [TKT-20261011133123](../ticket/reviewing/20261011133123-native-integration-t9-1.md) | reviewing | [e4531667cbbeb82922d79500cb7bd79c72e2efb9](https://forge.adrianpk.com/adrianpk/chr/commit/e4531667cbbeb82922d79500cb7bd79c72e2efb9) | Fence and journal authorized dispatch |
 | T9.2 | [TKT-20261011133124](../ticket/reviewing/20261011133124-native-integration-t9-2.md) | reviewing | [ae54f89aff1248e7cee90c5e033ac923ec7c77c7](https://forge.adrianpk.com/adrianpk/chr/commit/ae54f89aff1248e7cee90c5e033ac923ec7c77c7) | Reconcile atomic rejection and lost responses |
-| T9.3 | [TKT-20261011133125](../ticket/in_progress/20261011133125-native-integration-t9-3.md) | in_progress | pending | Observe canonical PR convergence |
+| T9.3 | [TKT-20261011133125](../ticket/reviewing/20261011133125-native-integration-t9-3.md) | reviewing | pending | Observe canonical PR convergence |
 | T9.4 | [TKT-20261011133126](../ticket/ready/20261011133126-native-integration-t9-4.md) | ready | pending | Verify crash and stop boundaries |
 
 Required checks:
@@ -347,7 +347,7 @@ PR: pending
 
 Verified merge: pending
 
-Report/evidence: [Slice 9 report](../report/slices/native-integration-queue/slice-9-publication-recovery.md); T9.1 focused normal/race checks and strict lint passed. The required pre-commit repository check passed with seven unchanged Go files. T9.2 broader normal/race checks and the required pre-commit repository check passed with fourteen unchanged Go files. T9.2 implementation is recorded. T9.3 is in progress; T9.4 remains ready. Canonical PR and verified integration remain pending.
+Report/evidence: [Slice 9 report](../report/slices/native-integration-queue/slice-9-publication-recovery.md); T9.1 focused normal/race checks and strict lint passed. The required pre-commit repository check passed with seven unchanged Go files. T9.2 broader normal/race checks and the required pre-commit repository check passed with fourteen unchanged Go files. T9.2 implementation is recorded. T9.3 normal/race checks and the required pre-commit `make verify` passed on nine unchanged Go files. T9.3 implementation is complete; T9.4 remains ready. Canonical PR and verified integration remain pending.
 
 ## Slice 10: Receipts fanout and closure
 

@@ -128,7 +128,9 @@ func (s *WorkflowStore) projectWorkflowNativeSubmission(run *workflowInvocationF
 	}
 
 	run.Submission, entry.SubmissionRef = &binding, &binding
-	projectWorkflowNativeSubmissionPhase(&entry, last)
+	if err := s.projectWorkflowNativeSubmissionPhase(&entry, last); err != nil {
+		return err
+	}
 
 	entry.Revision++
 	entry.StateRevision++
@@ -149,9 +151,15 @@ func workflowNativeSubmissionProjected(run workflowInvocationFile, entry Workflo
 	return entry.SubmissionRef != nil && *entry.SubmissionRef == binding && run.Submission != nil && *run.Submission == binding
 }
 
-func projectWorkflowNativeSubmissionPhase(entry *WorkflowIntegrationEntry, last WorkflowSubmission) {
+func (s *WorkflowStore) projectWorkflowNativeSubmissionPhase(entry *WorkflowIntegrationEntry, last WorkflowSubmission) error {
+	if len(last.Native.ObservationRefs) > 0 {
+		if err := s.projectWorkflowNativeCanonicalObservation(entry, last); err != nil {
+			return err
+		}
+	}
+
 	if entry.State == "blocked" {
-		return
+		return nil
 	}
 
 	entry.Blocker = nil
@@ -169,6 +177,8 @@ func projectWorkflowNativeSubmissionPhase(entry *WorkflowIntegrationEntry, last 
 	default:
 		entry.State = "observing"
 	}
+
+	return nil
 }
 
 func (s *WorkflowStore) retainWorkflowNativeSubmission(ctx context.Context, run workflowInvocationFile, request WorkflowNativeSubmissionUpdate) (WorkflowSubmission, error) {
