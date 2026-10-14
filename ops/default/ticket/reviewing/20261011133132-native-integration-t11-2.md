@@ -13,7 +13,8 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-14T20:13:34Z
 reviewed_at: 2026-10-14T21:13:02Z
 branch: feat/slice-11-native-integration-surfaces
-commits: []
+commits:
+  - 18b307141f84534b78d38429db1f79a380417c1a
 ---
 
 # T11.2: Present CLI and TUI integration status
@@ -76,5 +77,7 @@ The owned validation service exited successfully:
 [Slice 11 report](../../report/slices/native-integration-queue/slice-11-integration-surfaces.md)
 records exact commands, fixture corrections and retained process evidence.
 
-Task commit references are added immediately after committing. Canonical PR,
+Task commit: [18b307141f84534b78d38429db1f79a380417c1a](https://forge.adrianpk.com/adrianpk/chr/commit/18b307141f84534b78d38429db1f79a380417c1a). Acta commit activity: `01M4Y4616JTEX8TRQ2J10X1GKA`.
+
+Canonical PR,
 final ordered clean-HEAD checks and verified integration remain pending.

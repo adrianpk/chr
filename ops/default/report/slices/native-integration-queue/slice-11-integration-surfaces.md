@@ -28,15 +28,16 @@ domain owner. Exact review approval retains its existing binding and revision
 guard, with the displayed integration fence checked when supplied.
 
 T11.1 implementation: [98915f97987104ae0cb3bc67ddcf3f8f91dbab0d](https://forge.adrianpk.com/adrianpk/chr/commit/98915f97987104ae0cb3bc67ddcf3f8f91dbab0d).
-Acta commit activity: `01M4Y0R3R8REK566SDYW7AMC0M`. T11.2 is implemented and validated before its task commit. CLI and TUI displays consume
+Acta commit activity: `01M4Y0R3R8REK566SDYW7AMC0M`. T11.2 is committed after passing development validation. CLI and TUI displays consume
 the same retained fields: canonical target queue and position, integration
 phase, original source/base/prepared result, actual occupied agent slots,
 remaining allowances, token accounting and precise blocker actions. Decision
 questions retain their displayed revision, hash, options and authority. No view
 infers idle lanes or publication success from approval.
 
-T11.2 task commit, remaining surface tasks and final ordered clean-HEAD validation
-are pending.
+T11.2 implementation: [18b307141f84534b78d38429db1f79a380417c1a](https://forge.adrianpk.com/adrianpk/chr/commit/18b307141f84534b78d38429db1f79a380417c1a).
+Acta commit activity: `01M4Y4616JTEX8TRQ2J10X1GKA`. T11.3 is active; remaining controls, setup
+guidance and final ordered clean-HEAD validation are pending.
 
 ## Implementation Notes
 
@@ -129,7 +130,7 @@ with command, source, process and result evidence under
 - `make verify` — passed; zero lint issues, core 2809.193 s, app 128.702 s and all TUI/Web packages passed. Acta `01M4Y44X498KK6Z58E062WY9MX`.
 
 The owned T11.2 validation service exited successfully; all five source hashes
-remained unchanged. Its task traceability is recorded after committing. Final ordered
+remained unchanged. Its task traceability is recorded above. Final ordered
 clean-HEAD checks belong to the controller after all task and PR-reference
 commits.
 
