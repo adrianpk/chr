@@ -13,7 +13,8 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-14T13:22:10Z
 reviewed_at: 2026-10-14T15:05:14Z
 branch: feat/slice-10-native-receipt-closure
-commits: []
+commits:
+  - a9b33ea1f09e16fa5167c0fe75b2a4218b7a8d47
 ---
 
 # T10.4: Enforce set closure barriers
@@ -77,5 +78,7 @@ and owned fixtures finished; the 11 Go source files remained unchanged.
 Pre-commit gate activity: `01M4XF2XHX2N5XQ3KZJW7GW6BZ`. See the existing
 [Slice 10 report](../../report/slices/native-integration-queue/slice-10-receipt-closure.md).
 
-The task commit reference follows commit creation. Canonical PR, final ordered
-clean-HEAD validation and verified integration remain pending.
+Implementation: [a9b33ea1f09e16fa5167c0fe75b2a4218b7a8d47](https://forge.adrianpk.com/adrianpk/chr/commit/a9b33ea1f09e16fa5167c0fe75b2a4218b7a8d47).
+Acta commit activity: `01M4XF61EDBVN4CXKBQYSR8H53`.
+Canonical PR, final ordered clean-HEAD validation and verified integration remain
+pending.

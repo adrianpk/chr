@@ -275,9 +275,12 @@ unchanged and owned fixtures finished. Acta race activity:
 `01M4XC51WKBG0ACGS0Q39BVECA`; pre-commit gate activity:
 `01M4XF2XHX2N5XQ3KZJW7GW6BZ`.
 
-The T10.4 task commit reference follows commit creation. Canonical Slice 10 PR
-creation, its reference follow-up and final ordered clean-HEAD controller evidence
-remain pending.
+T10.4 implementation: [a9b33ea1f09e16fa5167c0fe75b2a4218b7a8d47](https://forge.adrianpk.com/adrianpk/chr/commit/a9b33ea1f09e16fa5167c0fe75b2a4218b7a8d47).
+Acta commit activity: `01M4XF61EDBVN4CXKBQYSR8H53`.
+
+All four task implementations and development checks are recorded. Canonical
+Slice 10 PR creation, its reference follow-up and final ordered clean-HEAD
+controller evidence remain pending.
 
 ## Risks and Follow-ups
 
