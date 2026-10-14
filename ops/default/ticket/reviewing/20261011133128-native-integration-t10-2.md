@@ -13,7 +13,8 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-14T09:37:23Z
 reviewed_at: 2026-10-14T11:02:41Z
 branch: feat/slice-10-native-receipt-closure
-commits: []
+commits:
+  - c96ecba537e1bfedf6925c0324f0d49bd8332d89
 ---
 
 # T10.2: Replay task finalization exactly once
@@ -72,5 +73,6 @@ Required pre-commit `make verify` passed with zero lint issues on frozen source
 The owned validation service exited successfully with no live check process.
 See the existing [Slice 10 report](../../report/slices/native-integration-queue/slice-10-receipt-closure.md).
 
-Implementation commit and Acta references will be completed in the follow-up
-commit. PR and verified integration remain pending.
+Implementation: [c96ecba537e1bfedf6925c0324f0d49bd8332d89](https://forge.adrianpk.com/adrianpk/chr/commit/c96ecba537e1bfedf6925c0324f0d49bd8332d89).
+Acta commit activity: `01M4X1988DMQYREF39TJTH8BHV`.
+PR and verified integration remain pending.

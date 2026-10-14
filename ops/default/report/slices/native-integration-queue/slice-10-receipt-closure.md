@@ -37,8 +37,8 @@ the irreversible delivery before applying terminal stop, preserving consumed
 budgets. Corrupted receipt, candidate or delivery proof cannot change members
 or the confirmed cursor; an optimistic queue transition cannot skip fanout.
 
-T10.1 and T10.2 are implemented and development-checked. T10.3 and T10.4
-remain ready in the approved tracker.
+T10.1 and T10.2 are implemented and reviewing. T10.3 is active for descendant
+proof and divergence reconciliation; T10.4 remains ready in the approved tracker.
 
 ## Implementation Notes
 
@@ -144,6 +144,9 @@ checks passed, and the owned service finished with exit status zero and no live
 check process. All 17 Go source files remained unchanged. Final ordered
 clean-HEAD slice validation remains pending until the remaining tasks and PR
 reference commits finish.
+
+T10.2 implementation: [c96ecba537e1bfedf6925c0324f0d49bd8332d89](https://forge.adrianpk.com/adrianpk/chr/commit/c96ecba537e1bfedf6925c0324f0d49bd8332d89).
+Acta commit activity: `01M4X1988DMQYREF39TJTH8BHV`.
 
 ## Risks and Follow-ups
 
