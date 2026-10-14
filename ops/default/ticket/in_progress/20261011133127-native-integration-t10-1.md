@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133127
 title: "T10.1: Verify immutable dual-ref receipts"
-status: ready
+status: in_progress
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,8 @@ tags: native-integration, slice-10
 source: chat
 reported_at: 2026-10-11T13:31:27Z
 ready_at: 2026-10-11T13:31:37Z
+started_at: 2026-10-14T08:20:18Z
+branch: feat/slice-10-native-receipt-closure
 commits: []
 ---
 
@@ -50,10 +52,10 @@ Acceptance IDs and invariants: use the owning slice's explicit coverage map in t
 
 ## Execution Gate
 
-Approved: 2026-10-11; the maintainer authorized this corrective set through Looper.
+Approved: 2026-10-11; the maintainer authorized this corrective set through the delivery controller.
 
 Execute only when this slice is active and its predecessors and external prerequisites are satisfied.
-Keep one task commit and one canonical slice PR; only Looper submits development merges.
+Keep one task commit and one canonical slice PR; only the delivery controller submits development merges.
 Use the existing Markdown ticket lifecycle; this file does not create a product runtime invocation.
 
 ## Evidence

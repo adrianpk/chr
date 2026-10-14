@@ -1,6 +1,6 @@
 # Slice 9: Publication and uncertainty recovery
 
-Status: reviewing
+Status: delivered
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
@@ -150,7 +150,7 @@ passed on fourteen unchanged Go files, with source digest
 The owned `chr-native-slice9-t92-validation-839b196f.service` finished with
 exit status zero and no live check process. Command/process evidence is retained
 under `/tmp/chr-native-slice9-t9-2-*`. All owned fixtures finished. These are
-development checks; final exact-head slice evidence remains pending.
+development checks; final exact-HEAD slice evidence is recorded below.
 
 T9.3's later-source regression initially failed because retained actual Git
 application could not attribute a lost-response transaction after source
@@ -177,7 +177,7 @@ Pre-commit `make verify` passed with zero lint issues; core 2394.437 s, app
 108.657 s and all other packages passed. The owned service finished with exit
 status zero and no live check process. All owned check fixtures finished.
 All four tasks are implemented and development-checked. Canonical PR [PR #383](https://forge.adrianpk.com/adrianpk/chr/pulls/383)
-is open. The controller records clean-HEAD checks after all reference commits.
+is merged. Final ordered clean-HEAD validation and integration are recorded below.
 
 Required ordered exact-HEAD slice checks are recorded separately by the
 controller for the clean PR head after all task and reference commits.
@@ -259,6 +259,19 @@ T9.4 implementation: [a06c392fc7a6b9169694989e436ea6afdec4010e](https://forge.ad
 Acta commit activity: `01M4VVFZY92DBXEJYPP80BP2W8`.
 
 Canonical PR activity: `01M4VVJ0GBZ5FPZBF4XEH6XE7R`.
+
+Final controller checks passed on exact clean HEAD `8853fdb14638c853f641b82c7d19d805b41fa8fe` in configured order:
+
+- `make verify` — zero lint issues; core 2489.933 s, app 113.239 s and all other packages passed.
+- `go test ./internal/core ./internal/app -count=1` — core 2427.442 s and app 111.776 s passed.
+- `go test -race ./internal/core ./internal/app -count=1` — core 3992.461 s and app 293.292 s passed.
+- `git diff --check` — passed.
+
+The controller retained the exact HEAD, ordered command list and completed log.
+All owned validation processes and fixtures finished. [PR #383](https://forge.adrianpk.com/adrianpk/chr/pulls/383)
+merged through Rebase + Fast-forward into `dev` at 2026-10-14T08:13:24Z
+with that unchanged commit. Controller Acta merge: `01M4WQJAN50D6ZWVGHEVQ52SSW`.
+All four Slice 9 task tickets are solved.
 
 ## Risks and Follow-ups
 

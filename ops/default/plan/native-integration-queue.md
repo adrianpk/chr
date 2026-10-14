@@ -18,9 +18,9 @@ Plan approval: approved on 2026-10-11 under the explicit instruction to process 
 
 Implementation authorization: granted for the complete ordered corrective set and its defined task/PR map.
 
-Active slice: Slice 9 — Publication and uncertainty recovery
+Active slice: Slice 10 — Receipts fanout and closure
 
-Next slice: Slice 10 — Receipts fanout and closure
+Next slice: Slice 11 — Shared operation surfaces
 
 Slice strategy: behavior-first
 
@@ -382,9 +382,11 @@ Invariants: INV-04, INV-13, INV-18, INV-19, INV-20
 
 ## Slice 9: Publication and uncertainty recovery
 
-Status: reviewing
+Status: delivered
 
 PR: [#383](https://forge.adrianpk.com/adrianpk/chr/pulls/383)
+
+Verified merge: `8853fdb14638c853f641b82c7d19d805b41fa8fe` at 2026-10-14T08:13:24Z; controller Acta `01M4WQJAN50D6ZWVGHEVQ52SSW`.
 
 Expected branch: `feat/slice-9-native-publication-recovery`
 
@@ -402,10 +404,10 @@ Invariants: INV-06, INV-07, INV-08, INV-09, INV-10, INV-11, INV-15, INV-16, INV-
 
 | Task | Ticket | Work | Acceptance boundary |
 | --- | --- | --- | --- |
-| T9.1 | [TKT-20261011133123](../ticket/reviewing/20261011133123-native-integration-t9-1.md) | Acquire canonical target exclusion, re-observe current candidate/policy, persist intent and dispatch identity before external IO. | Stale callbacks cannot publish and an earlier potentially live dispatcher prevents replacement publication. |
-| T9.2 | [TKT-20261011133124](../ticket/reviewing/20261011133124-native-integration-t9-2.md) | Classify definitive not-applied, unknown and Git-applied outcomes with actual refs and method proof instead of command exit alone. | No lost response triggers another submission or partial ref update. |
-| T9.3 | [TKT-20261011133125](../ticket/reviewing/20261011133125-native-integration-t9-3.md) | Poll bounded forge/Git observations, preserve the target barrier for pending metadata and handle external PR edits or target divergence. | Closed-unmerged and inconsistent metadata cannot create receipts or trigger automatic target rollback. |
-| T9.4 | [TKT-20261011133126](../ticket/reviewing/20261011133126-native-integration-t9-4.md) | Add fault injection around intent, dispatch, server apply, response, restart, lease expiry and stop intent. | All uncertain outcomes retain exclusion and stopped work reconciles any already delivered result before terminal cancellation. |
+| T9.1 | [TKT-20261011133123](../ticket/solved/20261011133123-native-integration-t9-1.md) | Acquire canonical target exclusion, re-observe current candidate/policy, persist intent and dispatch identity before external IO. | Stale callbacks cannot publish and an earlier potentially live dispatcher prevents replacement publication. |
+| T9.2 | [TKT-20261011133124](../ticket/solved/20261011133124-native-integration-t9-2.md) | Classify definitive not-applied, unknown and Git-applied outcomes with actual refs and method proof instead of command exit alone. | No lost response triggers another submission or partial ref update. |
+| T9.3 | [TKT-20261011133125](../ticket/solved/20261011133125-native-integration-t9-3.md) | Poll bounded forge/Git observations, preserve the target barrier for pending metadata and handle external PR edits or target divergence. | Closed-unmerged and inconsistent metadata cannot create receipts or trigger automatic target rollback. |
+| T9.4 | [TKT-20261011133126](../ticket/solved/20261011133126-native-integration-t9-4.md) | Add fault injection around intent, dispatch, server apply, response, restart, lease expiry and stop intent. | All uncertain outcomes retain exclusion and stopped work reconciles any already delivered result before terminal cancellation. |
 
 ### Required Candidate Checks
 
@@ -416,7 +418,7 @@ Invariants: INV-06, INV-07, INV-08, INV-09, INV-10, INV-11, INV-15, INV-16, INV-
 
 ## Slice 10: Receipts fanout and closure
 
-Status: not_started
+Status: active
 
 Expected branch: `feat/slice-10-native-receipt-closure`
 
@@ -434,7 +436,7 @@ Invariants: INV-01, INV-02, INV-16, INV-17, INV-21, INV-23, INV-24
 
 | Task | Ticket | Work | Acceptance boundary |
 | --- | --- | --- | --- |
-| T10.1 | [TKT-20261011133127](../ticket/ready/20261011133127-native-integration-t10-1.md) | Bind the exact candidate/submission/profile, original S, published P, validated B, method history and same canonical merged PR. | An incompatible merge result, missing proof or closed-only PR cannot be accepted. |
+| T10.1 | [TKT-20261011133127](../ticket/in_progress/20261011133127-native-integration-t10-1.md) | Bind the exact candidate/submission/profile, original S, published P, validated B, method history and same canonical merged PR. | An incompatible merge result, missing proof or closed-only PR cannot be accepted. |
 | T10.2 | [TKT-20261011133128](../ticket/ready/20261011133128-native-integration-t10-2.md) | Use existing receipt/member journal keys for all slice tasks and independent tickets and expose finalizing until fanout completes. | Interrupted fanout resumes without duplicate completion or missing task receipts. |
 | T10.3 | [TKT-20261011133129](../ticket/ready/20261011133129-native-integration-t10-3.md) | Verify receipt reachability under later target advancement and expose destructive remote rewrites without erasing history. | A later descendant keeps valid delivery; removed proof creates a visible reconciliation blocker. |
 | T10.4 | [TKT-20261011133130](../ticket/ready/20261011133130-native-integration-t10-4.md) | Require intended receipts, full-gate evidence, settled finalization and no unknown publication before closure. | Original and corrective delivery closure remain separate verified outcomes with preserved historical evidence. |

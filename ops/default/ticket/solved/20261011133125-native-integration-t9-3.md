@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133125
 title: "T9.3: Observe canonical PR convergence"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -14,6 +14,8 @@ started_at: 2026-10-13T20:43:00Z
 reviewed_at: 2026-10-13T21:50:58Z
 branch: feat/slice-9-native-publication-recovery
 pr: 383
+resolution: fixed
+closed_at: 2026-10-14T08:19:39Z
 commits:
   - 48a9539d023e63c96f04aa61ecb6baa46d77f9e2
 ---
@@ -88,4 +90,8 @@ integration. See the [Slice 9 report](../../report/slices/native-integration-que
 Implementation: `48a9539d023e63c96f04aa61ecb6baa46d77f9e2`. Acta commit activity: `01M4VKZWK3H5X4ZDRMEDMHBP6J`.
 
 Canonical slice PR: [PR #383](https://forge.adrianpk.com/adrianpk/chr/pulls/383). The controller records ordered exact-HEAD
-validation separately before integration; task status is reviewing.
+validation separately before integration; task status is solved.
+
+Verified integration: [PR #383](https://forge.adrianpk.com/adrianpk/chr/pulls/383),
+`8853fdb14638c853f641b82c7d19d805b41fa8fe` on `dev` at 2026-10-14T08:13:24Z. Controller Acta merge:
+`01M4WQJAN50D6ZWVGHEVQ52SSW`. All four configured ordered exact-HEAD checks passed; this task is solved.
