@@ -13,7 +13,8 @@ reported_at: 2026-10-11T13:31:33Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-14T21:13:39Z
 branch: feat/slice-11-native-integration-surfaces
-commits: []
+commits:
+  - e37e275b49c8a16f1349c916be9f5045b4be811f
 ---
 
 # T11.3: Present Web daemon and manual controls
@@ -77,5 +78,5 @@ Acta `01M4Y6HYY5E4VEBPX4MXV2CRE7`. Required pre-commit `make verify` passed: zer
 [Slice 11 report](../../report/slices/native-integration-queue/slice-11-integration-surfaces.md)
 records exact commands, fixture corrections and retained process evidence.
 
-Task commit, canonical PR, final ordered clean-HEAD checks and verified
-integration remain pending.
+Implementation: [e37e275b49c8a16f1349c916be9f5045b4be811f](https://forge.adrianpk.com/adrianpk/chr/commit/e37e275b49c8a16f1349c916be9f5045b4be811f). Acta commit activity: `01M4Y9ACQZTX6W5SSREHCWNX35`.
+Canonical PR, final ordered clean-HEAD checks and verified integration remain pending.

@@ -36,7 +36,7 @@ questions retain their displayed revision, hash, options and authority. No view
 infers idle lanes or publication success from approval.
 
 T11.2 implementation: [18b307141f84534b78d38429db1f79a380417c1a](https://forge.adrianpk.com/adrianpk/chr/commit/18b307141f84534b78d38429db1f79a380417c1a).
-Acta commit activity: `01M4Y4616JTEX8TRQ2J10X1GKA`. T11.3 is implemented after passing development validation. Web, work/daemon commands
+Acta commit activity: `01M4Y4616JTEX8TRQ2J10X1GKA`. T11.3 is committed after passing development validation. Web, work/daemon commands
 and manual service callers submit public invocation, entry, budget, candidate
 and question fences to the same control operation. Native command and Web approval require
 the displayed guards. Grants preserve consumption; explicit resolve/defer
@@ -44,8 +44,9 @@ answers neither approve publication nor consume an agent call. Web questions
 retain their choice, authority and optional original-step or finding payload.
 Legacy review controls without native accounting retain their prior behavior.
 
-T11.3 task commit, setup guidance and final ordered clean-HEAD validation are
-pending.
+T11.3 implementation: [e37e275b49c8a16f1349c916be9f5045b4be811f](https://forge.adrianpk.com/adrianpk/chr/commit/e37e275b49c8a16f1349c916be9f5045b4be811f).
+Acta commit activity: `01M4Y9ACQZTX6W5SSREHCWNX35`. T11.4 setup/reference guidance and final ordered
+clean-HEAD validation are pending.
 
 ## Implementation Notes
 
@@ -182,7 +183,7 @@ with command, source, process and result evidence under
 - `make verify` — passed; zero lint issues, core 2855.905 s, app 198.637 s, TUI 0.073 s and Web 0.094 s; all remaining Web packages passed. Acta `01M4Y9980W7F4RHA53HB2PC1WF`.
 
 The T11.3 validation service exited successfully and all 15 source/template hashes
-remained unchanged. Its task commit is pending. Final ordered
+remained unchanged. Its task traceability is recorded above. Final ordered
 clean-HEAD checks belong to the controller after all task and PR-reference
 commits.
 

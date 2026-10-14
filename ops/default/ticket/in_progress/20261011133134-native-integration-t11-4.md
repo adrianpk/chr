@@ -1,7 +1,9 @@
 ---
 id: TKT-20261011133134
 title: "T11.4: Document and verify profile setup"
-status: ready
+status: in_progress
+started_at: 2026-10-14T22:43:28Z
+branch: feat/slice-11-native-integration-surfaces
 kind: task
 severity: unclassified
 priority: normal
@@ -50,10 +52,10 @@ Acceptance IDs and invariants: use the owning slice's explicit coverage map in t
 
 ## Execution Gate
 
-Approved: 2026-10-11; the maintainer authorized this corrective set through Looper.
+Approved: 2026-10-11; the maintainer authorized this corrective set through the delivery controller.
 
 Execute only when this slice is active and its predecessors and external prerequisites are satisfied.
-Keep one task commit and one canonical slice PR; only Looper submits development merges.
+Keep one task commit and one canonical slice PR; only the delivery controller submits development merges.
 Use the existing Markdown ticket lifecycle; this file does not create a product runtime invocation.
 
 ## Evidence
