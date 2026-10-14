@@ -28,6 +28,7 @@ type WorkflowWorkEvidence struct {
 
 // WorkflowWorkStatus distinguishes host task validation from confirmed delivery.
 type WorkflowWorkStatus struct {
+	Integration          *WorkflowIntegrationStatus           `json:"integration,omitempty"`
 	FrozenPolicy         core.WorkflowExecutionPolicy         `json:"execution_policy"`
 	Continuation         *core.WorkflowContinuationCheckpoint `json:"continuation,omitempty"`
 	NextActionOwner      string                               `json:"next_action_owner"`
@@ -95,6 +96,8 @@ func workflowWorkStatus(inspection core.WorkflowInspection, request WorkflowStat
 	}
 
 	workflowWorkProgress(&result, run)
+
+	result.Integration = workflowIntegrationStatus(inspection.Integration)
 
 	workflowWorkMembers(&result, inspection, request)
 

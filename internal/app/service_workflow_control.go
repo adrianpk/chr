@@ -6,10 +6,17 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 // WorkflowControlRequest carries the exact displayed invocation and revision.
 type WorkflowControlRequest struct {
+	Integration      *WorkflowIntegrationControlGuard
+	BudgetGrant      *core.WorkflowIntegrationGrant
+	DecisionAnswer   *core.WorkflowIntegrationAnswer
+	DecisionRevision uint64
+	DecisionHash     string
 	Action           string
 	ID               string
 	ExpectedRevision uint64
@@ -49,6 +56,12 @@ func (s service) executeWorkflowControl(ctx context.Context, request WorkflowCon
 
 		return err
 	case "approve":
+		if request.Integration != nil {
+			if _, err := s.workflowIntegrationControlGuard(ctx, request); err != nil {
+				return err
+			}
+		}
+
 		_, err := s.ApproveWorkflowSlice(ctx, request.ID, request.BindingHash, request.ExpectedRevision)
 
 		return err
@@ -56,6 +69,8 @@ func (s service) executeWorkflowControl(ctx context.Context, request WorkflowCon
 		_, err := s.ReconcileWorkflow(ctx, request.ID, request.ExpectedRevision)
 
 		return err
+	case "grant", "answer_decision":
+		return s.executeWorkflowIntegrationControl(ctx, request)
 	default:
 		return fmt.Errorf("unsupported workflow control: %s", request.Action)
 	}

@@ -10,9 +10,10 @@ import (
 // WorkflowInspection observes retained authorization and current task records.
 // Adapters project it without exposing process identities or owner credentials.
 type WorkflowInspection struct {
-	Invocation WorkflowInvocation
-	Policy     WorkflowReviewPolicy
-	Tasks      []WorkflowRecord
+	Integration *WorkflowIntegrationInspection
+	Invocation  WorkflowInvocation
+	Policy      WorkflowReviewPolicy
+	Tasks       []WorkflowRecord
 }
 
 // InspectWorkflow does not replay transitions, reconcile ownership or admit work.
@@ -35,6 +36,12 @@ func (s *WorkflowStore) InspectWorkflow(ctx context.Context, id string) (result 
 
 		snapshot, readErr := owner.readSnapshot(ctx)
 		result.Tasks = snapshot.Records
+
+		if readErr != nil {
+			return readErr
+		}
+
+		result.Integration, readErr = owner.inspectWorkflowIntegration(ctx, run)
 
 		return readErr
 	})

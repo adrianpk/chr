@@ -59,8 +59,8 @@ type WorkflowIntegrationAnswerRequest struct {
 // ReadWorkflowIntegrationDecisions returns the current sealed question record.
 // Stale decisions are reported without transferring old answers to new work.
 func (s *WorkflowStore) ReadWorkflowIntegrationDecisions(ctx context.Context, id string) (result WorkflowIntegrationDecisions, err error) {
-	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+	err = s.withWorkflowInspection(ctx, func() error {
+		run, owner, readErr := s.locateWorkflowInvocationPrepared(ctx, id, (*WorkflowStore).requireNoWorkflowTransition)
 		if readErr != nil {
 			return readErr
 		}

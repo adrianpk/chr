@@ -1,0 +1,99 @@
+# Slice 11: Shared operation surfaces
+
+Status: drafting
+Delivery set: native-integration-queue
+Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
+Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
+Branch: `feat/slice-11-native-integration-surfaces`
+PR: pending
+
+## Purpose
+
+Expose retained native integration progress and guarded operator controls through
+the existing shared application service and its execution surfaces.
+
+## Delivered Behavior
+
+T11.1 is implemented and validated before its task commit. Read-only service status now
+includes the current integration unit, canonical target queue position, phase,
+original source and prepared result, actual role occupancy, retained publication
+state and bounded budget accounting. Native questions remain tied to their
+displayed revision and hash. Claim generations, leases, process identities,
+capability fingerprints and harness inputs are excluded from the public model.
+
+Budget grants and decision answers use the existing shared control operation.
+The caller supplies displayed invocation, entry, candidate and budget revisions;
+the host derives the private claim fence and delegates mutation to the existing
+domain owner. Exact review approval retains its existing binding and revision
+guard, with the displayed integration fence checked when supplied.
+
+Task commits, remaining surface tasks and final ordered clean-HEAD validation
+are pending.
+
+## Implementation Notes
+
+Native inspection reads the current invocation, queue, budget, role capacity,
+candidate and decision evidence under repository exclusion. It contacts no
+provider and performs no recovery. The decision reader now uses the same
+read-only exclusion instead of the mutation path that can replay a journal.
+
+Public status and control results omit process credentials and lease fields.
+Review waits and approval remain separate from the retained queue phase; an
+adapter cannot project approval into publication readiness. Legacy invocations
+without retained integration accounting keep their existing status projection.
+
+## Contracts Added or Changed
+
+- `WorkflowInspection` includes retained native integration observations.
+- `WorkflowWorkStatus` includes an optional public integration projection.
+- `WorkflowControlRequest` supports revision-bound budget grants and explicit
+  decision answers through `ControlWorkExtent`.
+- `ReadWorkflowIntegrationDecisions` reports a pending transition without
+  replaying it.
+
+## Files of Interest
+
+- `internal/core/workflow_integration_inspection.go`: coherent retained domain
+  observations without provider IO or transition recovery.
+- `internal/app/service_workflow_integration_status.go` and
+  `service_workflow_integration_budget.go`: public observations and accounting.
+- `internal/app/service_workflow_integration_control.go`: displayed action
+  fences and delegation to existing domain mutations.
+- `internal/core/workflow_integration_inspection_test.go` and
+  `internal/app/service_workflow_integration_*test.go`: actual native preparation,
+  interrupted decisions, owned capacity and guarded operator actions.
+
+## Validation
+
+The first actual native service probe failed because retained integration facts
+were absent from status. It failed in 4.645 s. After adding the shared projection,
+the same probe passed in 6.530 s.
+
+- `go test ./internal/app -run '^TestServiceIntegrationStatus$' -count=1` — passed
+  before extending the probe with exact phase, identity and accounting checks.
+- `go test ./internal/core ./internal/app -run '^(TestNativeInspection.*|TestNativeDecisionInspection|TestServiceIntegration.*|TestServiceNativeReview|TestServiceWorkflowGrant)$' -count=1` — the first run passed core in 5.113 s and failed app in 23.578 s on two incorrect phase assertions. The corrected checks retain `reviewing` in the queue while separately verifying the invocation's review wait and approval.
+
+The corrected focused checks passed in 12.360 s for core and 32.820 s for app.
+Strict lint initially identified two complexity and twenty-two formatting issues;
+focused helpers and spacing corrections preserve the configured bounds.
+
+- `make lint-strict` — passed with zero issues.
+- `go test ./internal/core ./internal/app -run '^(TestNativeInspection.*|TestNativeDecision.*|TestNativeQueue.*|TestNativeGrant.*|TestServiceIntegration.*|TestServiceNativeReview|TestServiceWorkflowGrant|TestWorkflowCLIControls|TestWorkflowCLIApproval|TestServiceWorkflowStatus|TestWorkflowStatus.*)$' -count=1` — passed; core 69.682 s and app 33.102 s.
+
+Acta focused activity: `01M4XXSWZ91P9JV7JBWDQ20S78`. The 11-file development
+source is frozen at digest
+`8ddc53dce797218763bebd341c36bd8578efd8b5e4e46bfa598a2caf727428ad`.
+Owned unit `chr-native-slice11-t111-validation-8ddc53dc.service` executes these
+pre-commit checks, with source, command, process and result evidence under
+`/tmp/chr-native-slice11-t11-1-*`:
+
+- `go test -race ./internal/core ./internal/app -run '^(TestNativeInspection.*|TestNativeDecision.*|TestNativeQueue.*|TestNativeGrant.*|TestServiceIntegration.*|TestServiceNativeReview|TestServiceWorkflowGrant|TestWorkflowCLIControls|TestWorkflowCLIApproval|TestServiceWorkflowStatus|TestWorkflowStatus.*)$' -count=1` — passed; core 115.109 s and app 53.292 s. Acta `01M4XY9J5W70A20HWQ4D5VXTXM`.
+- `make verify` — passed; zero lint issues, core 2754.086 s, app 126.105 s, and all TUI/Web packages passed. Acta `01M4Y0NX6YKJTA466DP5TVQ8DA`.
+
+The owned validation service exited successfully, and all 11 source hashes remained unchanged. T11.1 task traceability is recorded after its commit. Final ordered
+clean-HEAD checks belong to the controller after all task and PR-reference
+commits.
+
+## Risks and Follow-ups
+
+None recorded.
