@@ -28,29 +28,11 @@ func (s *WorkflowStore) StopWorkflow(ctx context.Context, id, intent string, exp
 			return err
 		}
 
-		intent = workflowRetainedStopIntent(run, intent)
-		if workflowInvocationTerminal(run.Status) || run.StopIntent == intent {
-			result = run.WorkflowInvocation
-
-			return nil
-		}
-
-		run.StopIntent = intent
-		if run.Status != "running" {
-			if run.Status != "paused" {
-				run.ResumeStatus = run.Status
-			}
-
-			run.Status = workflowStopStatus(intent)
-		}
-
-		if readErr = owner.commitWorkflowState(&run); readErr != nil {
-			return readErr
-		}
+		readErr = owner.stopWorkflow(ctx, &run, intent)
 
 		result = run.WorkflowInvocation
 
-		return nil
+		return readErr
 	})
 
 	return result, err
@@ -149,4 +131,26 @@ func (s *WorkflowStore) resumeGuardedWorkflow(ctx context.Context, run workflowI
 	}
 
 	return run.WorkflowInvocation, nil
+}
+
+func (s *WorkflowStore) stopWorkflow(ctx context.Context, run *workflowInvocationFile, intent string) error {
+	intent = workflowRetainedStopIntent(*run, intent)
+	if handled, err := s.stopWorkflowNativeSubmission(ctx, run, intent); handled || err != nil {
+		return err
+	}
+
+	if workflowInvocationTerminal(run.Status) || run.StopIntent == intent {
+		return nil
+	}
+
+	run.StopIntent = intent
+	if run.Status != "running" {
+		if run.Status != "paused" {
+			run.ResumeStatus = run.Status
+		}
+
+		run.Status = workflowStopStatus(intent)
+	}
+
+	return s.commitWorkflowState(run)
 }

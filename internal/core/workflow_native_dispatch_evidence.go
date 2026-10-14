@@ -10,6 +10,10 @@ import (
 
 func (s *WorkflowStore) retainWorkflowNativeSend(ctx context.Context, submission WorkflowSubmission, request WorkflowGitPublication, advertisement WorkflowGitPublicationAdvertisement) error {
 	_, err := s.updateWorkflowNativeDispatch(ctx, submission, func(owner *WorkflowStore, native *WorkflowNativeSubmission) error {
+		if err := owner.checkWorkflowNativeSendStop(native.InvocationID); err != nil {
+			return err
+		}
+
 		var capability WorkflowNativeCapability
 		if err := owner.readWorkflowNativeEvidence(native.InvocationID, native.CapabilityRef, &capability); err != nil {
 			return err
@@ -169,4 +173,22 @@ func (s *WorkflowStore) readWorkflowOwnedDispatch(ctx context.Context, run workf
 
 func workflowNativeDispatchIntentMatches(last, expected WorkflowSubmission) bool {
 	return last.ID == expected.ID && last.Native != nil && sameWorkflowNativeSubmissionIntent(*last.Native, *expected.Native) && last.Native.DispatchIdentity != nil
+}
+
+func (s *WorkflowStore) checkWorkflowNativeSendStop(id string) error {
+	run, err := s.readWorkflowInvocation(id)
+	if err != nil {
+		return err
+	}
+
+	entry, err := s.readWorkflowIntegrationEntry(run, *run.Integration)
+	if err != nil {
+		return err
+	}
+
+	if run.StopIntent != "" || entry.StopIntent != "" {
+		return ErrWorkflowStop
+	}
+
+	return nil
 }

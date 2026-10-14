@@ -382,7 +382,7 @@ Invariants: INV-04, INV-13, INV-18, INV-19, INV-20
 
 ## Slice 9: Publication and uncertainty recovery
 
-Status: active
+Status: reviewing
 
 Expected branch: `feat/slice-9-native-publication-recovery`
 
@@ -403,7 +403,7 @@ Invariants: INV-06, INV-07, INV-08, INV-09, INV-10, INV-11, INV-15, INV-16, INV-
 | T9.1 | [TKT-20261011133123](../ticket/reviewing/20261011133123-native-integration-t9-1.md) | Acquire canonical target exclusion, re-observe current candidate/policy, persist intent and dispatch identity before external IO. | Stale callbacks cannot publish and an earlier potentially live dispatcher prevents replacement publication. |
 | T9.2 | [TKT-20261011133124](../ticket/reviewing/20261011133124-native-integration-t9-2.md) | Classify definitive not-applied, unknown and Git-applied outcomes with actual refs and method proof instead of command exit alone. | No lost response triggers another submission or partial ref update. |
 | T9.3 | [TKT-20261011133125](../ticket/reviewing/20261011133125-native-integration-t9-3.md) | Poll bounded forge/Git observations, preserve the target barrier for pending metadata and handle external PR edits or target divergence. | Closed-unmerged and inconsistent metadata cannot create receipts or trigger automatic target rollback. |
-| T9.4 | [TKT-20261011133126](../ticket/in_progress/20261011133126-native-integration-t9-4.md) | Add fault injection around intent, dispatch, server apply, response, restart, lease expiry and stop intent. | All uncertain outcomes retain exclusion and stopped work reconciles any already delivered result before terminal cancellation. |
+| T9.4 | [TKT-20261011133126](../ticket/reviewing/20261011133126-native-integration-t9-4.md) | Add fault injection around intent, dispatch, server apply, response, restart, lease expiry and stop intent. | All uncertain outcomes retain exclusion and stopped work reconciles any already delivered result before terminal cancellation. |
 
 ### Required Candidate Checks
 

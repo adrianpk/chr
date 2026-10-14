@@ -152,6 +152,10 @@ func workflowNativeSubmissionProjected(run workflowInvocationFile, entry Workflo
 }
 
 func (s *WorkflowStore) projectWorkflowNativeSubmissionPhase(entry *WorkflowIntegrationEntry, last WorkflowSubmission) error {
+	if projectWorkflowNativeStop(entry, last) {
+		return nil
+	}
+
 	if len(last.Native.ObservationRefs) > 0 {
 		if err := s.projectWorkflowNativeCanonicalObservation(entry, last); err != nil {
 			return err
@@ -242,4 +246,17 @@ func checkWorkflowNativeSubmissionCallback(run workflowInvocationFile, entry Wor
 	}
 
 	return guardWorkflowNativeSubmissionUpdate(*last.Native, request.Facts)
+}
+
+func projectWorkflowNativeStop(entry *WorkflowIntegrationEntry, last WorkflowSubmission) bool {
+	if last.State != "unpublished" || entry.StopIntent == "" {
+		return false
+	}
+
+	entry.State, entry.Blocker = workflowStopStatus(entry.StopIntent), nil
+	if entry.State == "cancelled" {
+		entry.PreparationReserved = false
+	}
+
+	return true
 }

@@ -287,7 +287,9 @@ func TestNativeCanonicalDeadline(t *testing.T) {
 	observer := &nativeCanonicalObserverFixture{observer: fixture.forge.adapter, before: func(_ context.Context, _ WorkflowNativePublicationBinding) {}}
 
 	submission, err := f.store.PollWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), observer, fixture.git)
-	if err != nil || nativeCanonicalLast(t, f.store, submission).Condition != "canonical_pr_observation_deadline" || !submission.Native.ObservationDeadline.Equal(deadline) {
+	// The persisted bound may expire during a real Git read or during backoff.
+	// Both paths retain the same deadline fact; only the read returns an IO error.
+	if err != nil && !errors.Is(err, context.DeadlineExceeded) || nativeCanonicalLast(t, f.store, submission).Condition != "canonical_pr_observation_deadline" || !submission.Native.ObservationDeadline.Equal(deadline) {
 		t.Fatal("polling renewed its deadline or lost reconciliation", err)
 	}
 
@@ -296,11 +298,18 @@ func TestNativeCanonicalDeadline(t *testing.T) {
 		t.Fatal("expired automatic polling performed more external IO", err)
 	}
 
+	checkNativeDeadlineRecovery(t, fixture, submission)
+}
+
+func checkNativeDeadlineRecovery(t *testing.T, fixture nativeCanonicalFixture, submission WorkflowSubmission) {
+	t.Helper()
+
+	f := fixture.f
 	pr := fixture.forge.request.PullRequest
 	pr.State, pr.Merged, pr.ResultCommit = "closed", true, submission.Native.PreparedResult
 	setNativePRFixture(t, fixture.forge, pr)
 
-	submission, err = f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
+	submission, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
 	if err != nil || nativeCanonicalLast(t, f.store, submission).State != "merged" || nativeReviewEntry(t, f.store, submission.InvocationID).State != "observing" || fixture.publisher.calls.Load() != 1 {
 		t.Fatal("explicit reconciliation did not recover the same publication", err)
 	}
