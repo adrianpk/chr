@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133132
 title: "T11.2: Present CLI and TUI integration status"
-status: in_progress
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -11,6 +11,7 @@ source: chat
 reported_at: 2026-10-11T13:31:32Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-14T20:13:34Z
+reviewed_at: 2026-10-14T21:13:02Z
 branch: feat/slice-11-native-integration-surfaces
 commits: []
 ---
@@ -60,4 +61,20 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+CLI/TUI text and CLI JSON expose the shared retained integration projection.
+The views identify canonical queues, original/prepared identity, actual serial
+and parallel roles, bounded accounting, questions and actionable blockers.
+Actual prepared-candidate and owned-role reads preserve authoritative bytes.
+
+Focused app regressions passed in 33.812 s and strict lint reports zero issues;
+Acta `01M4Y19DFC1ADK6N1T1ZWWYEH6`. The five-file source is frozen at
+`3d98c77273f1916314042ea00886b32695cb45b5068c69dbf01cff119069f44a`. Focused race checks passed: app 64.400 s and TUI 1.023 s; Acta
+`01M4Y1EB7NM6TFQ16NCK6CEYN3`. Required pre-commit `make verify` passed with zero lint issues, core 2809.193 s,
+app 128.702 s and all TUI/Web packages passed; Acta `01M4Y44X498KK6Z58E062WY9MX`.
+The owned validation service exited successfully:
+`chr-native-slice11-t112-validation-3d98c772.service`. The existing
+[Slice 11 report](../../report/slices/native-integration-queue/slice-11-integration-surfaces.md)
+records exact commands, fixture corrections and retained process evidence.
+
+Task commit references are added immediately after committing. Canonical PR,
+final ordered clean-HEAD checks and verified integration remain pending.

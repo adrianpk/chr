@@ -21,6 +21,7 @@ func tuiWorkflowView(status WorkflowWorkStatus) tui.WorkflowView {
 	}
 	lines = appendWorkflowExclusions(lines, status.Excluded)
 	lines = appendWorkflowBindingLines(lines, status)
+	lines = append(lines, workflowIntegrationLines(status.Integration)...)
 	lines = appendWorkflowMemberLines(lines, status)
 
 	for _, evidence := range status.Evidence[max(0, len(status.Evidence)-8):] {

@@ -73,6 +73,7 @@ func workflowStatusLines(status WorkflowWorkStatus) []string {
 	}
 	lines = append(lines, workflowPublicationLines(status.Target, status.Policy)...)
 	lines = append(lines, workflowDeliveryLines(status)...)
+	lines = append(lines, workflowIntegrationLines(status.Integration)...)
 	lines = append(lines, workflowBlockerLines(status.Blocker)...)
 	lines = append(lines, workflowExcludedLines(status.Excluded)...)
 

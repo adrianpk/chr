@@ -14,7 +14,7 @@ the existing shared application service and its execution surfaces.
 
 ## Delivered Behavior
 
-T11.1 is implemented and validated before its task commit. Read-only service status now
+T11.1 is committed after passing development validation. Read-only service status now
 includes the current integration unit, canonical target queue position, phase,
 original source and prepared result, actual role occupancy, retained publication
 state and bounded budget accounting. Native questions remain tied to their
@@ -28,8 +28,15 @@ domain owner. Exact review approval retains its existing binding and revision
 guard, with the displayed integration fence checked when supplied.
 
 T11.1 implementation: [98915f97987104ae0cb3bc67ddcf3f8f91dbab0d](https://forge.adrianpk.com/adrianpk/chr/commit/98915f97987104ae0cb3bc67ddcf3f8f91dbab0d).
-Acta commit activity: `01M4Y0R3R8REK566SDYW7AMC0M`. T11.2 is active; remaining surface tasks
-and final ordered clean-HEAD validation are pending.
+Acta commit activity: `01M4Y0R3R8REK566SDYW7AMC0M`. T11.2 is implemented and validated before its task commit. CLI and TUI displays consume
+the same retained fields: canonical target queue and position, integration
+phase, original source/base/prepared result, actual occupied agent slots,
+remaining allowances, token accounting and precise blocker actions. Decision
+questions retain their displayed revision, hash, options and authority. No view
+infers idle lanes or publication success from approval.
+
+T11.2 task commit, remaining surface tasks and final ordered clean-HEAD validation
+are pending.
 
 ## Implementation Notes
 
@@ -51,6 +58,8 @@ without retained integration accounting keep their existing status projection.
   decision answers through `ControlWorkExtent`.
 - `ReadWorkflowIntegrationDecisions` reports a pending transition without
   replaying it.
+- CLI and TUI presentation shares package-local fields over the public service
+  projection; rendering cannot allocate roles or advance integration.
 
 ## Files of Interest
 
@@ -63,6 +72,11 @@ without retained integration accounting keep their existing status projection.
 - `internal/core/workflow_integration_inspection_test.go` and
   `internal/app/service_workflow_integration_*test.go`: actual native preparation,
   interrupted decisions, owned capacity and guarded operator actions.
+
+- `internal/app/work_workflow_integration_view.go`: shared retained presentation
+  fields for CLI/TUI and their adapter mappings.
+- `internal/app/work_workflow_integration_*test.go`: real prepared-candidate
+  text/JSON reads, actual serial ownership and bounded display cases.
 
 ## Validation
 
@@ -91,7 +105,31 @@ pre-commit checks, with source, command, process and result evidence under
 - `go test -race ./internal/core ./internal/app -run '^(TestNativeInspection.*|TestNativeDecision.*|TestNativeQueue.*|TestNativeGrant.*|TestServiceIntegration.*|TestServiceNativeReview|TestServiceWorkflowGrant|TestWorkflowCLIControls|TestWorkflowCLIApproval|TestServiceWorkflowStatus|TestWorkflowStatus.*)$' -count=1` — passed; core 115.109 s and app 53.292 s. Acta `01M4XY9J5W70A20HWQ4D5VXTXM`.
 - `make verify` — passed; zero lint issues, core 2754.086 s, app 126.105 s, and all TUI/Web packages passed. Acta `01M4Y0NX6YKJTA466DP5TVQ8DA`.
 
-The owned validation service exited successfully, and all 11 source hashes remained unchanged. T11.1 task traceability is recorded above. Final ordered
+The T11.1 validation service exited successfully, and all 11 source hashes
+remained unchanged. Its task traceability is recorded above.
+
+T11.2 first reproduced the missing native phase in both actual CLI and TUI
+entrypoints; the probe failed in 5.161 s and passed in 4.540 s after mapping the
+shared public projection. The owned-role fixture initially assumed a lane before
+admission, then supplied a ticket instead of the grouped ticket's owning slice.
+The fixture now uses its frozen slice identity; admission guards remain intact.
+The corrected display checks passed in 4.777 s. Ten strict-lint spacing issues
+were corrected without changing the configured quality bounds.
+
+- `make lint-strict` — passed with zero issues.
+- `go test ./internal/app ./internal/tui -run '^(TestWorkflowIntegration.*|TestWorkflowCLI.*|TestTUIWorkflow.*|TestNativeWork.*|TestServiceIntegration.*|TestServiceWorkflowStatus)$' -count=1` — passed; app 33.812 s. The TUI package compiled with no tests matching that subset.
+
+Acta T11.2 focused activity: `01M4Y19DFC1ADK6N1T1ZWWYEH6`. The five-file development
+source is frozen at `3d98c77273f1916314042ea00886b32695cb45b5068c69dbf01cff119069f44a`.
+Owned unit `chr-native-slice11-t112-validation-3d98c772.service` executes these pre-commit checks
+with command, source, process and result evidence under
+`/tmp/chr-native-slice11-t11-2-*`:
+
+- `go test -race ./internal/app ./internal/tui -run '^(TestWorkflowIntegration.*|TestWorkflowCLI.*|TestTUIWorkflow.*|TestModelWorkflow.*|TestServiceIntegration.*|TestServiceWorkflowStatus)$' -count=1` — passed; app 64.400 s and TUI workflow model regressions 1.023 s. Acta `01M4Y1EB7NM6TFQ16NCK6CEYN3`.
+- `make verify` — passed; zero lint issues, core 2809.193 s, app 128.702 s and all TUI/Web packages passed. Acta `01M4Y44X498KK6Z58E062WY9MX`.
+
+The owned T11.2 validation service exited successfully; all five source hashes
+remained unchanged. Its task traceability is recorded after committing. Final ordered
 clean-HEAD checks belong to the controller after all task and PR-reference
 commits.
 
