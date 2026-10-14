@@ -13,7 +13,8 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-14T11:04:32Z
 reviewed_at: 2026-10-14T13:21:05Z
 branch: feat/slice-10-native-receipt-closure
-commits: []
+commits:
+  - dd7dc5b536c4a7ccd9e620824ef31b976441d87c
 ---
 
 # T10.3: Preserve descendant proof and report divergence
@@ -74,5 +75,6 @@ frozen 21-file source
 All checks and owned fixtures finished. See the existing
 [Slice 10 report](../../report/slices/native-integration-queue/slice-10-receipt-closure.md).
 
-Implementation commit and Acta references will be recorded in the follow-up.
+Implementation: [dd7dc5b536c4a7ccd9e620824ef31b976441d87c](https://forge.adrianpk.com/adrianpk/chr/commit/dd7dc5b536c4a7ccd9e620824ef31b976441d87c).
+Acta commit activity: `01M4X96ZTZ648RBXGM1EJYREJB`.
 PR and verified integration remain pending.

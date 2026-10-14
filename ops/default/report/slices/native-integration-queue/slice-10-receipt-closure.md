@@ -49,8 +49,8 @@ blocker on failure. Completed task images, receipt bytes, consumed submission
 budgets and cancellation intent survive re-observation. Fresh merged evidence
 restores an integrated unit, or leaves unfinished fanout finalizing.
 
-T10.1, T10.2 and T10.3 are reviewing. T10.4 remains ready in the approved
-tracker.
+T10.1, T10.2 and T10.3 are reviewing. T10.4 is active for set closure barriers
+in the approved tracker.
 
 ## Implementation Notes
 
@@ -211,6 +211,9 @@ Both frozen-source development checks passed. The owned service is inactive
 with exit status zero and no live check process; all 21 Go files remained
 unchanged and the owned fixtures finished. Final ordered clean-HEAD slice
 validation remains pending until T10.4 and PR-reference commits finish.
+
+T10.3 implementation: [dd7dc5b536c4a7ccd9e620824ef31b976441d87c](https://forge.adrianpk.com/adrianpk/chr/commit/dd7dc5b536c4a7ccd9e620824ef31b976441d87c).
+Acta commit activity: `01M4X96ZTZ648RBXGM1EJYREJB`.
 
 ## Risks and Follow-ups
 
