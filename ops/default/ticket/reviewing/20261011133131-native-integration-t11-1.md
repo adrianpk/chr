@@ -13,6 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-14T18:42:26Z
 reviewed_at: 2026-10-14T20:12:12Z
 branch: feat/slice-11-native-integration-surfaces
+pr: 385
 commits:
   - 98915f97987104ae0cb3bc67ddcf3f8f91dbab0d
 ---
@@ -79,5 +80,6 @@ The owned validation service exited successfully:
 
 Task commit: [98915f97987104ae0cb3bc67ddcf3f8f91dbab0d](https://forge.adrianpk.com/adrianpk/chr/commit/98915f97987104ae0cb3bc67ddcf3f8f91dbab0d). Acta commit activity: `01M4Y0R3R8REK566SDYW7AMC0M`.
 
-Canonical PR,
-final ordered clean-HEAD checks and verified integration remain pending.
+Canonical PR: [#385](https://forge.adrianpk.com/adrianpk/chr/pulls/385). PR activity: `01M4Y9KVFXPP2RAVFDH4SY62CV`.
+Final ordered clean-HEAD validation is recorded through the controller after
+PR-reference commits. Verified integration remains pending.

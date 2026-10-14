@@ -454,7 +454,9 @@ Invariants: INV-01, INV-02, INV-16, INV-17, INV-21, INV-23, INV-24
 
 ## Slice 11: Shared operation surfaces
 
-Status: active
+Status: reviewing
+
+PR: [#385](https://forge.adrianpk.com/adrianpk/chr/pulls/385)
 
 Expected branch: `feat/slice-11-native-integration-surfaces`
 

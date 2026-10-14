@@ -5,6 +5,7 @@ status: reviewing
 reviewed_at: 2026-10-14T22:46:23Z
 started_at: 2026-10-14T22:43:28Z
 branch: feat/slice-11-native-integration-surfaces
+pr: 385
 kind: task
 severity: unclassified
 priority: normal
@@ -13,7 +14,8 @@ tags: native-integration, slice-11
 source: chat
 reported_at: 2026-10-11T13:31:34Z
 ready_at: 2026-10-11T13:31:37Z
-commits: []
+commits:
+  - 266f652b0f3367a37f0ea88b7e5825c69a2a9f16
 ---
 
 # T11.4: Document and verify profile setup
@@ -78,5 +80,8 @@ Exact development command:
 - `go test ./internal/core ./internal/app -run '^(TestNativeProfileConfig|TestNativeProfileUpgrade|TestNativeLegacySnapshot|TestNativePreparedSnapshot|TestNativeCapability|TestNativeCapabilityDenials|TestNativePreparationAdmission|TestNativePreparedBound|TestNativeRolePool|TestNativeLimitPolicy|TestNativeAgentAdmission|TestNativeAgentCeiling|TestNativeAgentLateCeiling|TestNativeAgentCapability|TestWorkflowUpgradePolicy|TestWorkflowUpgradePreserves|TestWorkflowUpgradeRejects|TestWorkflowConfigDefaults|TestWorkflowConfigBounds|TestWorkflowConfigErrors|TestWorkflowConfigCLI|TestWorkflowConfigRestriction|TestWorkflowUpgradeCLI|TestWorkflowUpgradeCLIRejects)$' -count=1`
 
 The [Slice 11 report](../../report/slices/native-integration-queue/slice-11-integration-surfaces.md)
-records the executable boundaries and retained evidence. Task commit, canonical
-PR, final ordered clean-HEAD checks and verified integration remain pending.
+records the executable boundaries and retained evidence. Implementation: [266f652b0f3367a37f0ea88b7e5825c69a2a9f16](https://forge.adrianpk.com/adrianpk/chr/commit/266f652b0f3367a37f0ea88b7e5825c69a2a9f16). Acta commit activity: `01M4Y9GT1HTNDJ4EYQX8BH6ABC`.
+
+Canonical PR: [#385](https://forge.adrianpk.com/adrianpk/chr/pulls/385). PR activity: `01M4Y9KVFXPP2RAVFDH4SY62CV`.
+Final ordered clean-HEAD validation is recorded through the controller after
+PR-reference commits. Verified integration remains pending.

@@ -5,7 +5,7 @@ Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
 Branch: `feat/slice-11-native-integration-surfaces`
-PR: pending
+PR: [#385](https://forge.adrianpk.com/adrianpk/chr/pulls/385)
 
 ## Purpose
 
@@ -51,8 +51,10 @@ blocked, and documented bounds match the executable. Parallel roles share one
 capacity pool. Optional token ceilings use the existing service admission and
 certified whole-call accounting; current YAML and CLI expose no ceiling setting.
 Upgrade preserves explicit old choices. User-facing controls and configuration
-are reflected in the existing Unreleased entries. T11.4 task traceability and
-final ordered clean-HEAD validation are pending.
+are reflected in the existing Unreleased entries. T11.4 implementation: [266f652b0f3367a37f0ea88b7e5825c69a2a9f16](https://forge.adrianpk.com/adrianpk/chr/commit/266f652b0f3367a37f0ea88b7e5825c69a2a9f16).
+Acta commit activity: `01M4Y9GT1HTNDJ4EYQX8BH6ABC`. Canonical PR activity: `01M4Y9KVFXPP2RAVFDH4SY62CV`.
+Final ordered clean-HEAD validation is recorded through the controller after all
+PR-reference commits; verified integration remains pending.
 
 ## Implementation Notes
 

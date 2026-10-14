@@ -13,6 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-14T20:13:34Z
 reviewed_at: 2026-10-14T21:13:02Z
 branch: feat/slice-11-native-integration-surfaces
+pr: 385
 commits:
   - 18b307141f84534b78d38429db1f79a380417c1a
 ---
@@ -79,5 +80,6 @@ records exact commands, fixture corrections and retained process evidence.
 
 Task commit: [18b307141f84534b78d38429db1f79a380417c1a](https://forge.adrianpk.com/adrianpk/chr/commit/18b307141f84534b78d38429db1f79a380417c1a). Acta commit activity: `01M4Y4616JTEX8TRQ2J10X1GKA`.
 
-Canonical PR,
-final ordered clean-HEAD checks and verified integration remain pending.
+Canonical PR: [#385](https://forge.adrianpk.com/adrianpk/chr/pulls/385). PR activity: `01M4Y9KVFXPP2RAVFDH4SY62CV`.
+Final ordered clean-HEAD validation is recorded through the controller after
+PR-reference commits. Verified integration remains pending.
