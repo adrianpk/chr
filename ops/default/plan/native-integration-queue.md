@@ -18,9 +18,9 @@ Plan approval: approved on 2026-10-11 under the explicit instruction to process 
 
 Implementation authorization: granted for the complete ordered corrective set and its defined task/PR map.
 
-Active slice: Slice 10 — Receipts fanout and closure
+Active slice: Slice 11 — Shared operation surfaces
 
-Next slice: Slice 11 — Shared operation surfaces
+Next slice: Slice 12 — Live provider certification
 
 Slice strategy: behavior-first
 
@@ -418,7 +418,7 @@ Invariants: INV-06, INV-07, INV-08, INV-09, INV-10, INV-11, INV-15, INV-16, INV-
 
 ## Slice 10: Receipts fanout and closure
 
-Status: reviewing
+Status: delivered
 
 Expected branch: `feat/slice-10-native-receipt-closure`
 
@@ -427,6 +427,8 @@ Expected PR title: `feat(slice-10): finalize exact integration receipts and task
 Expected report: `ops/default/report/slices/native-integration-queue/slice-10-receipt-closure.md`
 
 Canonical PR: [#384](https://forge.adrianpk.com/adrianpk/chr/pulls/384)
+
+Verified merge: `9726200044d15b4e66bacfe1334de4a9410f4bdc` at 2026-10-14T18:36:18Z; controller Acta `01M4XV6YGZZBS8CGG3AJ2EHKT7`.
 
 Prerequisite: verified Slice 9 integration and closed task fanout.
 
@@ -438,10 +440,10 @@ Invariants: INV-01, INV-02, INV-16, INV-17, INV-21, INV-23, INV-24
 
 | Task | Ticket | Work | Acceptance boundary |
 | --- | --- | --- | --- |
-| T10.1 | [TKT-20261011133127](../ticket/reviewing/20261011133127-native-integration-t10-1.md) | Bind the exact candidate/submission/profile, original S, published P, validated B, method history and same canonical merged PR. | An incompatible merge result, missing proof or closed-only PR cannot be accepted. |
-| T10.2 | [TKT-20261011133128](../ticket/reviewing/20261011133128-native-integration-t10-2.md) | Use existing receipt/member journal keys for all slice tasks and independent tickets and expose finalizing until fanout completes. | Interrupted fanout resumes without duplicate completion or missing task receipts. |
-| T10.3 | [TKT-20261011133129](../ticket/reviewing/20261011133129-native-integration-t10-3.md) | Verify receipt reachability under later target advancement and expose destructive remote rewrites without erasing history. | A later descendant keeps valid delivery; removed proof creates a visible reconciliation blocker. |
-| T10.4 | [TKT-20261011133130](../ticket/reviewing/20261011133130-native-integration-t10-4.md) | Require intended receipts, full-gate evidence, settled finalization and no unknown publication before closure. | Original and corrective delivery closure remain separate verified outcomes with preserved historical evidence. |
+| T10.1 | [TKT-20261011133127](../ticket/solved/20261011133127-native-integration-t10-1.md) | Bind the exact candidate/submission/profile, original S, published P, validated B, method history and same canonical merged PR. | An incompatible merge result, missing proof or closed-only PR cannot be accepted. |
+| T10.2 | [TKT-20261011133128](../ticket/solved/20261011133128-native-integration-t10-2.md) | Use existing receipt/member journal keys for all slice tasks and independent tickets and expose finalizing until fanout completes. | Interrupted fanout resumes without duplicate completion or missing task receipts. |
+| T10.3 | [TKT-20261011133129](../ticket/solved/20261011133129-native-integration-t10-3.md) | Verify receipt reachability under later target advancement and expose destructive remote rewrites without erasing history. | A later descendant keeps valid delivery; removed proof creates a visible reconciliation blocker. |
+| T10.4 | [TKT-20261011133130](../ticket/solved/20261011133130-native-integration-t10-4.md) | Require intended receipts, full-gate evidence, settled finalization and no unknown publication before closure. | Original and corrective delivery closure remain separate verified outcomes with preserved historical evidence. |
 
 ### Required Candidate Checks
 
@@ -452,7 +454,7 @@ Invariants: INV-01, INV-02, INV-16, INV-17, INV-21, INV-23, INV-24
 
 ## Slice 11: Shared operation surfaces
 
-Status: not_started
+Status: active
 
 Expected branch: `feat/slice-11-native-integration-surfaces`
 
@@ -470,7 +472,7 @@ Invariants: INV-01, INV-11, INV-14, INV-19, INV-20, INV-22, INV-23
 
 | Task | Ticket | Work | Acceptance boundary |
 | --- | --- | --- | --- |
-| T11.1 | [TKT-20261011133131](../ticket/ready/20261011133131-native-integration-t11-1.md) | Extend the existing application service with observed queue/phase/role/budget facts and revision-bound review/decision/grant actions. | Surface callers cannot introduce alternative state transitions or optimistic delivery status. |
+| T11.1 | [TKT-20261011133131](../ticket/in_progress/20261011133131-native-integration-t11-1.md) | Extend the existing application service with observed queue/phase/role/budget facts and revision-bound review/decision/grant actions. | Surface callers cannot introduce alternative state transitions or optimistic delivery status. |
 | T11.2 | [TKT-20261011133132](../ticket/ready/20261011133132-native-integration-t11-2.md) | Show serial/parallel lanes, target queue position, active role and actionable blockers through shared service projections. | Read-only views do not retry, repair or mutate records and a serial user sees one active agent. |
 | T11.3 | [TKT-20261011133133](../ticket/ready/20261011133133-native-integration-t11-3.md) | Map existing Web/daemon/manual entrypoints to the same candidate-bound actions and evidence with stale-action rejection. | All surfaces agree on phase and blocker; private tokens, raw lease fields and credentials remain hidden. |
 | T11.4 | [TKT-20261011133134](../ticket/ready/20261011133134-native-integration-t11-4.md) | Add user-facing setup/reference guidance for source rewriting, policy support and optional bounded parallel/token operation. | Upgrade preserves old configuration, explicit opt-in is checked before work admission and supported boundaries match the executable. |

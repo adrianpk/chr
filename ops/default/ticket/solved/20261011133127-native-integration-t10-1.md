@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133127
 title: "T10.1: Verify immutable dual-ref receipts"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -14,6 +14,8 @@ started_at: 2026-10-14T08:20:18Z
 reviewed_at: 2026-10-14T09:35:54Z
 branch: feat/slice-10-native-receipt-closure
 pr: 384
+resolution: fixed
+closed_at: 2026-10-14T18:42:26Z
 commits:
   - b0a64a02dbc13ad61220cde8502fca66f7a332f9
 ---
@@ -84,5 +86,9 @@ Implementation: [b0a64a02dbc13ad61220cde8502fca66f7a332f9](https://forge.adrianp
 Acta commit activity: `01M4WWAFZQ5NQSPN1ZRKS10XTK`.
 
 Canonical slice PR: [PR #384](https://forge.adrianpk.com/adrianpk/chr/pulls/384).
-Acta opened activity: `01M4XF8TXK6RCHBWCJ5B2NKJZ8`. Final ordered clean-HEAD validation and
-verified integration remain pending; task status is reviewing.
+Acta opened activity: `01M4XF8TXK6RCHBWCJ5B2NKJZ8`. All four configured
+ordered exact-HEAD checks passed; task status is solved.
+
+Verified integration: [#384](https://forge.adrianpk.com/adrianpk/chr/pulls/384),
+`9726200044d15b4e66bacfe1334de4a9410f4bdc` on `dev` at 2026-10-14T18:36:18Z. Controller Acta merge:
+`01M4XV6YGZZBS8CGG3AJ2EHKT7`.

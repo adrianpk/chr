@@ -1,6 +1,6 @@
 # Slice 10: Receipts fanout and closure
 
-Status: reviewing
+Status: delivered
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
@@ -61,8 +61,9 @@ hashes prevent confirmation after metadata or evidence changes during that gate.
 A failed gate retains its own retry history without replaying publication or
 member fanout. Original and corrective sets keep distinct closure receipts.
 
-All four tasks are implemented and development-checked. They are reviewing;
-final ordered clean-HEAD slice validation remains pending.
+All four tasks are integrated through [#384](https://forge.adrianpk.com/adrianpk/chr/pulls/384); their tickets are solved.
+The controller retained all four successful ordered checks for the exact merged
+HEAD recorded below.
 
 ## Implementation Notes
 
@@ -176,8 +177,7 @@ Their owned check processes and fixtures finished. Acta activity:
 finished with exit status zero and no live check process. All owned check
 fixtures finished.
 
-Final ordered clean-HEAD slice validation belongs to the controller after all task and PR
-reference commits.
+The controller final validation and verified merge are recorded below.
 
 T10.1 implementation: [b0a64a02dbc13ad61220cde8502fca66f7a332f9](https://forge.adrianpk.com/adrianpk/chr/commit/b0a64a02dbc13ad61220cde8502fca66f7a332f9).
 Acta commit activity: `01M4WWAFZQ5NQSPN1ZRKS10XTK`.
@@ -201,9 +201,8 @@ these pre-commit checks, with evidence under `/tmp/chr-native-slice10-t10-2-*`:
 The broader race check and its owned fixtures finished with exit status zero.
 Acta activity: `01M4WYVYGEYJNGS5TAF486KKTJ`. Both frozen-source development
 checks passed, and the owned service finished with exit status zero and no live
-check process. All 17 Go source files remained unchanged. Final ordered
-clean-HEAD slice validation remains pending until the remaining tasks and PR
-reference commits finish.
+check process. All 17 Go source files remained unchanged. Final clean-HEAD evidence was
+recorded after the remaining tasks and PR-reference commits finished.
 
 T10.2 implementation: [c96ecba537e1bfedf6925c0324f0d49bd8332d89](https://forge.adrianpk.com/adrianpk/chr/commit/c96ecba537e1bfedf6925c0324f0d49bd8332d89).
 Acta commit activity: `01M4X1988DMQYREF39TJTH8BHV`.
@@ -239,8 +238,8 @@ Acta activity: `01M4X6DC4KS44V9TGMAP8Z4C03`. The pre-receipt compatibility
 correction and focused checks are recorded as `01M4X567V9PQ0GA2E5HWEBSVWP`.
 Both frozen-source development checks passed. The owned service is inactive
 with exit status zero and no live check process; all 21 Go files remained
-unchanged and the owned fixtures finished. Final ordered clean-HEAD slice
-validation remains pending until T10.4 and PR-reference commits finish.
+unchanged and the owned fixtures finished. Final clean-HEAD evidence was
+recorded after T10.4 and PR-reference commits finished.
 
 T10.3 implementation: [dd7dc5b536c4a7ccd9e620824ef31b976441d87c](https://forge.adrianpk.com/adrianpk/chr/commit/dd7dc5b536c4a7ccd9e620824ef31b976441d87c).
 Acta commit activity: `01M4X96ZTZ648RBXGM1EJYREJB`.
@@ -280,8 +279,24 @@ Acta commit activity: `01M4XF61EDBVN4CXKBQYSR8H53`.
 
 All four task implementations and development checks are recorded. Canonical
 Slice 10 PR: [#384](https://forge.adrianpk.com/adrianpk/chr/pulls/384). Acta opened activity:
-`01M4XF8TXK6RCHBWCJ5B2NKJZ8`. The PR reference follow-up precedes final ordered clean-HEAD
-validation, which the controller records separately before integration.
+`01M4XF8TXK6RCHBWCJ5B2NKJZ8`. All task and PR-reference commits preceded
+the final ordered controller validation.
+
+The controller retained these successful checks for exact clean HEAD
+`9726200044d15b4e66bacfe1334de4a9410f4bdc`:
+
+- `make verify` — passed with zero lint issues; core 2743.672 s, app 111.047 s
+  and all other packages passed.
+- `go test ./internal/core ./internal/app -count=1` — passed; core 2782.432 s
+  and app 111.741 s.
+- `go test -race ./internal/core ./internal/app -count=1` — passed; core 4809.506 s
+  and app 301.611 s.
+- `git diff --check` — passed.
+
+Canonical merge: [#384](https://forge.adrianpk.com/adrianpk/chr/pulls/384), `9726200044d15b4e66bacfe1334de4a9410f4bdc` on `dev` at
+2026-10-14T18:36:18Z. Controller Acta merge: `01M4XV6YGZZBS8CGG3AJ2EHKT7`. The owned final
+validation service finished with exit zero and no live check process. All four
+task tickets and Slice 10 are closed; Slice 10 of 13 completed.
 
 ## Risks and Follow-ups
 
