@@ -255,6 +255,9 @@ All owned check fixtures finished. Evidence is retained under
 `/tmp/chr-native-slice9-t9-4-*`. These are development checks; ordered clean-HEAD
 slice evidence is recorded by the controller after task and PR references.
 
+T9.4 implementation: [a06c392fc7a6b9169694989e436ea6afdec4010e](https://forge.adrianpk.com/adrianpk/chr/commit/a06c392fc7a6b9169694989e436ea6afdec4010e).
+Acta commit activity: `01M4VVFZY92DBXEJYPP80BP2W8`.
+
 ## Risks and Follow-ups
 
 None recorded.

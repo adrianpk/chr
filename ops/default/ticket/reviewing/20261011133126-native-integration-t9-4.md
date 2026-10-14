@@ -13,7 +13,8 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-13T21:52:36Z
 reviewed_at: 2026-10-14T00:01:54Z
 branch: feat/slice-9-native-publication-recovery
-commits: []
+commits:
+  - a06c392fc7a6b9169694989e436ea6afdec4010e
 ---
 
 # T9.4: Verify crash and stop boundaries
@@ -97,3 +98,6 @@ Source digest: `e305eefe0d88cebe669d08a4f8d2a7388251eec1b61a2793dd767627bcff3758
 Implementation and development validation are complete. The controller records
 ordered exact-HEAD slice validation separately before integration. Canonical
 PR and verified integration remain pending.
+
+Implementation: [a06c392fc7a6b9169694989e436ea6afdec4010e](https://forge.adrianpk.com/adrianpk/chr/commit/a06c392fc7a6b9169694989e436ea6afdec4010e).
+Acta commit activity: `01M4VVFZY92DBXEJYPP80BP2W8`.
