@@ -104,6 +104,14 @@ func (p webViewProvider) writeWorkflowAction(ctx context.Context, operations ser
 	}
 
 	control := WorkflowControlRequest{Action: strings.TrimPrefix(request.Action, "workflow."), ID: request.ID, ExpectedRevision: revision, BindingHash: request.Fields["binding_hash"], StepLimit: 1}
+
+	control, err = webWorkflowIntegrationControl(ctx, operations, control, request.Fields)
+	if err != nil {
+		status, readErr := operations.WorkflowStatus(ctx, request.ID, WorkflowStatusRequest{Limit: 8})
+
+		return webWorkflowResponse(status, errors.Join(err, readErr))
+	}
+
 	status, err := operations.ControlWorkExtent(ctx, control)
 
 	return webWorkflowResponse(status, err)

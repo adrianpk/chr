@@ -48,6 +48,23 @@ type WorkflowRunView struct {
 	NextURL                            string
 	Actions                            []string
 	CanApprove                         bool
+	Integration                        *WorkflowIntegrationControlView
+}
+
+// WorkflowIntegrationControlView carries public displayed guards and choices.
+type WorkflowIntegrationControlView struct {
+	EntryID, EntryRevision, BudgetRevision, CandidateHash string
+	GrantID, DecisionRevision, DecisionHash               string
+	GrantKinds                                            []string
+	FindingCategories                                     []string
+	Questions                                             []WorkflowIntegrationQuestionView
+}
+
+// WorkflowIntegrationQuestionView requires an explicit answer to one question.
+type WorkflowIntegrationQuestionView struct {
+	ID, Issue, Authority, AnswerID string
+	Options                        []string
+	ReplayOwnership                bool
 }
 
 func (h handler) workflows(w http.ResponseWriter, r *http.Request) {

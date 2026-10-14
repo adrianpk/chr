@@ -38,6 +38,8 @@ func newWorkCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 			newWorkControlCommand(stdout, deps, "cancel"),
 			newWorkControlCommand(stdout, deps, "resume"),
 			newWorkControlCommand(stdout, deps, "approve"),
+			newWorkControlCommand(stdout, deps, "grant"),
+			newWorkControlCommand(stdout, deps, "answer-decision"),
 			newWorkControlCommand(stdout, deps, "reconcile"),
 		},
 	}

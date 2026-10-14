@@ -1,7 +1,8 @@
 ---
 id: TKT-20261011133133
 title: "T11.3: Present Web daemon and manual controls"
-status: in_progress
+status: reviewing
+reviewed_at: 2026-10-14T22:42:31Z
 kind: task
 severity: unclassified
 priority: normal
@@ -60,4 +61,21 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Web, work/daemon commands and manual service callers now submit displayed
+invocation, entry, budget, candidate and question guards through the shared
+control operation. Explicit grants retain consumption; resolve/defer answers
+retain their declared choice and authority without granting publication.
+Private claim generations remain host-side.
+
+Actual prepared candidates, sealed questions and operator actions passed the
+focused surface regressions: app 107.195 s, TUI 0.007 s and Web handlers 0.112 s.
+Strict lint reports zero issues; Acta `01M4Y68YY6QKNVF97KGNP8BEW5`. The 15-file
+source and embedded template are frozen at
+`ff3a974203742015969c6f47c4e35dfd1809c55d2dd87a211ad532b2238461e7`. Focused race checks passed: app 216.665 s, TUI 1.032 s and Web handlers 1.218 s;
+Acta `01M4Y6HYY5E4VEBPX4MXV2CRE7`. Required pre-commit `make verify` passed: zero lint issues, core 2855.905 s, app 198.637 s, TUI 0.073 s and Web 0.094 s; all remaining Web packages passed. Acta `01M4Y9980W7F4RHA53HB2PC1WF`. The owned validation service exited successfully with unchanged source. Evidence is retained under owned unit
+`chr-native-slice11-t113-validation-ff3a9742.service`. The existing
+[Slice 11 report](../../report/slices/native-integration-queue/slice-11-integration-surfaces.md)
+records exact commands, fixture corrections and retained process evidence.
+
+Task commit, canonical PR, final ordered clean-HEAD checks and verified
+integration remain pending.

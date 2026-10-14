@@ -36,8 +36,16 @@ questions retain their displayed revision, hash, options and authority. No view
 infers idle lanes or publication success from approval.
 
 T11.2 implementation: [18b307141f84534b78d38429db1f79a380417c1a](https://forge.adrianpk.com/adrianpk/chr/commit/18b307141f84534b78d38429db1f79a380417c1a).
-Acta commit activity: `01M4Y4616JTEX8TRQ2J10X1GKA`. T11.3 is active; remaining controls, setup
-guidance and final ordered clean-HEAD validation are pending.
+Acta commit activity: `01M4Y4616JTEX8TRQ2J10X1GKA`. T11.3 is implemented after passing development validation. Web, work/daemon commands
+and manual service callers submit public invocation, entry, budget, candidate
+and question fences to the same control operation. Native command and Web approval require
+the displayed guards. Grants preserve consumption; explicit resolve/defer
+answers neither approve publication nor consume an agent call. Web questions
+retain their choice, authority and optional original-step or finding payload.
+Legacy review controls without native accounting retain their prior behavior.
+
+T11.3 task commit, setup guidance and final ordered clean-HEAD validation are
+pending.
 
 ## Implementation Notes
 
@@ -61,6 +69,10 @@ without retained integration accounting keep their existing status projection.
   replaying it.
 - CLI and TUI presentation shares package-local fields over the public service
   projection; rendering cannot allocate roles or advance integration.
+- `work` and `daemon workflow` expose guarded `grant` and `answer-decision`
+  commands. Web forms carry the same public control and question fences.
+- Transport input maps only explicit operator fields; the service retains
+  private claim generations and the existing domain owner validates meaning.
 
 ## Files of Interest
 
@@ -78,6 +90,15 @@ without retained integration accounting keep their existing status projection.
   fields for CLI/TUI and their adapter mappings.
 - `internal/app/work_workflow_integration_*test.go`: real prepared-candidate
   text/JSON reads, actual serial ownership and bounded display cases.
+
+- `internal/app/work_workflow_integration_cli.go` and
+  `work_workflow_integration_input.go`: bounded command and Web input mapping.
+- `internal/app/web_workflow_integration.go` and
+  `internal/webui/assets/templates/workflow.html`: shared observations and
+  displayed-guard forms, including explicit question responses.
+- `internal/app/work_workflow_integration_decision_*test.go` and
+  `web_workflow_integration_test.go`: actual sealed questions, grants, native
+  approval and stale operator-action rejection through each entrypoint.
 
 ## Validation
 
@@ -130,7 +151,38 @@ with command, source, process and result evidence under
 - `make verify` — passed; zero lint issues, core 2809.193 s, app 128.702 s and all TUI/Web packages passed. Acta `01M4Y44X498KK6Z58E062WY9MX`.
 
 The owned T11.2 validation service exited successfully; all five source hashes
-remained unchanged. Its task traceability is recorded above. Final ordered
+remained unchanged. Its task traceability is recorded above.
+
+T11.3 first reproduced the missing shared native phase in an actual Web
+projection; the probe failed in 5.113 s. After adding the public mapping, native
+Web status and existing CLI/Web review controls passed in 12.573 s. Actual
+work/daemon/manual grants and native CLI approval passed in 22.116 s; rendered
+Web grants, approval and stale guards passed in 17.925 s.
+
+The sealed-question fixture reads the actual set-owned slice contract, checks
+its hash and retains the real source commit manifest. Its initial compile check
+incorrectly treated slices as independent record fields; it now reads the
+existing set-owned descriptors without changing production contracts. Actual
+question answers across commands/manual/HTTP and Web resolve/defer checks
+passed in 20.211 s. Replay ownership/finding payload and bounded command-input
+checks passed in 0.008 s. Control and test complexity helpers and spacing
+corrections preserve all configured strict-lint limits.
+
+- `make lint-strict` — passed with zero issues.
+- `go test ./internal/app ./internal/tui ./internal/webui -run '^(TestWorkflowIntegration.*|TestWebIntegration.*|TestWorkflowCLI.*|TestTUIWorkflow.*|TestWebWorkflow.*|TestDaemonWorkflow.*|TestModelWorkflow.*|TestHandler.*|TestServiceIntegration.*|TestServiceWorkflowStatus)$' -count=1` — passed; app 107.195 s, TUI 0.007 s and Web handlers 0.112 s.
+
+Acta T11.3 focused activity: `01M4Y68YY6QKNVF97KGNP8BEW5`. The 15-file source, including
+the embedded Web template, is frozen at
+`ff3a974203742015969c6f47c4e35dfd1809c55d2dd87a211ad532b2238461e7`. Owned unit
+`chr-native-slice11-t113-validation-ff3a9742.service` executes these pre-commit checks
+with command, source, process and result evidence under
+`/tmp/chr-native-slice11-t11-3-*`:
+
+- `go test -race ./internal/app ./internal/tui ./internal/webui -run '^(TestWorkflowIntegration.*|TestWebIntegration.*|TestWorkflowCLI.*|TestTUIWorkflow.*|TestWebWorkflow.*|TestDaemonWorkflow.*|TestModelWorkflow.*|TestHandler.*|TestServiceIntegration.*|TestServiceWorkflowStatus)$' -count=1` — passed; app 216.665 s, TUI 1.032 s and Web handlers 1.218 s. Acta `01M4Y6HYY5E4VEBPX4MXV2CRE7`.
+- `make verify` — passed; zero lint issues, core 2855.905 s, app 198.637 s, TUI 0.073 s and Web 0.094 s; all remaining Web packages passed. Acta `01M4Y9980W7F4RHA53HB2PC1WF`.
+
+The T11.3 validation service exited successfully and all 15 source/template hashes
+remained unchanged. Its task commit is pending. Final ordered
 clean-HEAD checks belong to the controller after all task and PR-reference
 commits.
 

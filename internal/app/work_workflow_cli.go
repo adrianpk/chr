@@ -185,7 +185,9 @@ func workWorkflowControlFlags(action string) []cli.Flag {
 	case "continue":
 		return append(flags, &cli.IntFlag{Name: "max-steps", Usage: "bounded steps within the frozen invocation limit"})
 	case "approve":
-		return append(flags, &cli.StringFlag{Name: "binding", Usage: "exact displayed approval hash"})
+		return append(append(flags, &cli.StringFlag{Name: "binding", Usage: "exact displayed approval hash"}), workWorkflowIntegrationFlags(action)...)
+	case "grant", "answer-decision":
+		return append(flags, workWorkflowIntegrationFlags(action)...)
 	case "reconcile":
 		return append(flags, &cli.StringFlag{Name: "kind", Value: "ownership", Usage: "ownership, membership, submission or manual"}, &cli.StringSliceFlag{Name: "harness", Usage: "manual harness argv; repeat once per argument"})
 	default:
@@ -211,6 +213,8 @@ func workWorkflowControlInput(cmd *cli.Command, action string) error {
 		return workWorkflowPageInput(cmd.Int("offset"), cmd.Int("limit"))
 	case "reconcile":
 		return workWorkflowReconcileInput(cmd)
+	case "grant", "answer-decision":
+		return workWorkflowIntegrationInput(cmd, action)
 	}
 
 	return nil
@@ -261,14 +265,10 @@ func performWorkflowControl(ctx context.Context, operations service, id, action 
 		_, err := operations.ResumeWorkflow(ctx, id)
 
 		return err
-	case "approve":
-		_, err := operations.ApproveWorkflowSlice(ctx, id, cmd.String("binding"))
-
-		return err
 	case "reconcile":
 		return performWorkflowReconciliation(ctx, operations, id, cmd)
 	default:
-		return fmt.Errorf("unsupported workflow control")
+		return performWorkflowOperatorControl(ctx, operations, id, action, cmd)
 	}
 }
 

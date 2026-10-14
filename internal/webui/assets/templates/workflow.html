@@ -53,10 +53,66 @@
         <input type="hidden" name="id" value="{{$run.ID}}">
         <input type="hidden" name="revision" value="{{$run.Revision}}">
         <input type="hidden" name="binding_hash" value="{{$run.ApprovalHash}}">
+        {{if $run.Integration}}{{template "workflow_integration_guard.html" $run.Integration}}{{end}}
         <input type="hidden" name="confirm" value="true">
         <button class="button" data-workflow-action="{{.}}" type="submit">Confirm {{.}}</button>
       </form>
     {{end}}
   </div>
+  {{if .Integration}}{{template "workflow_integration_controls.html" .}}{{end}}
 </section>
+{{end}}
+
+{{define "workflow_integration_guard.html"}}
+<input type="hidden" name="entry_id" value="{{.EntryID}}">
+<input type="hidden" name="entry_revision" value="{{.EntryRevision}}">
+<input type="hidden" name="budget_revision" value="{{.BudgetRevision}}">
+<input type="hidden" name="candidate_hash" value="{{.CandidateHash}}">
+{{end}}
+
+{{define "workflow_integration_controls.html"}}
+{{$run := .}}{{$integration := .Integration}}
+<form class="action-form" method="post" action="/workflows/actions" hx-post="/workflows/actions" hx-target="#workspace" hx-swap="innerHTML">
+  <h3>Extend an allowance</h3>
+  <input type="hidden" name="action" value="workflow.grant">
+  <input type="hidden" name="id" value="{{.ID}}">
+  <input type="hidden" name="revision" value="{{.Revision}}">
+  <input type="hidden" name="record_id" value="{{.Integration.GrantID}}">
+  <input type="hidden" name="confirm" value="true">
+  {{template "workflow_integration_guard.html" .Integration}}
+  <label>Allowance <select name="kind" required>{{range .Integration.GrantKinds}}<option>{{.}}</option>{{end}}</select></label>
+  <label>Additional amount <input type="number" name="amount" min="1" step="1" required></label>
+  <label>Actor <input name="actor" value="operator" maxlength="128" required></label>
+  <label>Reason <input name="reason" maxlength="128" required></label>
+  <p>Consumed work remains recorded. An extension does not approve or publish a candidate.</p>
+  <button class="button" data-workflow-action="grant" type="submit">Confirm extension</button>
+</form>
+{{range .Integration.Questions}}
+<form class="action-form" method="post" action="/workflows/actions" hx-post="/workflows/actions" hx-target="#workspace" hx-swap="innerHTML">
+  <h3>{{.Issue}}</h3>
+  <p>Required authority: {{.Authority}}</p>
+  <input type="hidden" name="action" value="workflow.answer_decision">
+  <input type="hidden" name="id" value="{{$run.ID}}">
+  <input type="hidden" name="revision" value="{{$run.Revision}}">
+  <input type="hidden" name="record_id" value="{{.AnswerID}}">
+  <input type="hidden" name="decision_id" value="{{.ID}}">
+  <input type="hidden" name="decision_revision" value="{{$integration.DecisionRevision}}">
+  <input type="hidden" name="decision_hash" value="{{$integration.DecisionHash}}">
+  <input type="hidden" name="authority" value="{{.Authority}}">
+  <input type="hidden" name="confirm" value="true">
+  {{template "workflow_integration_guard.html" $integration}}
+  <label>Choice <select name="choice" required>{{range .Options}}<option>{{.}}</option>{{end}}</select></label>
+  <label>Response <select name="answer_action" required><option value="resolve">Resolve this question</option><option value="defer">Defer this question</option></select></label>
+  <label>Actor <input name="actor" value="operator" maxlength="128" required></label>
+  <label>Reason <textarea name="reason" maxlength="8192" required></textarea></label>
+  {{if .ReplayOwnership}}
+    <label>Original source commit, when identifying a source step <input name="original_commit" maxlength="64"></label>
+    <label>Integration finding category <select name="fix_category"><option value="">No finding</option>{{range $integration.FindingCategories}}<option>{{.}}</option>{{end}}</select></label>
+    <label>Integration finding title <input name="fix_title" maxlength="8192"></label>
+    <label>Integration finding detail <textarea name="fix_detail" maxlength="8192"></textarea></label>
+  {{end}}
+  <p>This answer does not approve publication or extend the work scope.</p>
+  <button class="button" data-workflow-action="answer_decision" type="submit">Confirm response</button>
+</form>
+{{end}}
 {{end}}

@@ -60,6 +60,8 @@ func webWorkflowRun(status WorkflowWorkStatus) webui.WorkflowRunView {
 	}
 	view.Fields = append(view.Fields, webWorkflowExclusions(status.Excluded)...)
 	view.Fields = append(view.Fields, webWorkflowBindings(status)...)
+	view.Fields = append(view.Fields, webWorkflowIntegrationFields(status.Integration)...)
+	view.Integration = webWorkflowIntegrationControls(status)
 
 	view.Members = webWorkflowMembers(status.Members)
 	for _, evidence := range status.Evidence[max(0, len(status.Evidence)-8):] {
