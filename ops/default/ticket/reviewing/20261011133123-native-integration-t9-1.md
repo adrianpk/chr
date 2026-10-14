@@ -13,6 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-13T18:18:51Z
 reviewed_at: 2026-10-13T19:13:48Z
 branch: feat/slice-9-native-publication-recovery
+pr: 383
 commits: ["e4531667cbbeb82922d79500cb7bd79c72e2efb9"]
 ---
 
@@ -67,10 +68,12 @@ restart and overlapping live dispatch preserve the same exclusion and budget.
 
 Focused normal and race checks passed in 254.104 s and 381.919 s; strict lint
 reports zero issues. The required pre-commit `make verify` check passed with seven unchanged Go
-files: core 2243.062 s, app 108.440 s and all other packages passed. Canonical
-PR and verified integration remain pending.
+files: core 2243.062 s, app 108.440 s and all other packages passed. Verified integration remains pending.
 
 Evidence: [Slice 9 report](../../report/slices/native-integration-queue/slice-9-publication-recovery.md).
 
 Implementation: [e4531667cbbeb82922d79500cb7bd79c72e2efb9](https://forge.adrianpk.com/adrianpk/chr/commit/e4531667cbbeb82922d79500cb7bd79c72e2efb9).
 Acta commit activity: `01M4VAYVXVK7AMTY6J2RA7TYC1`.
+
+Canonical slice PR: [PR #383](https://forge.adrianpk.com/adrianpk/chr/pulls/383). The controller records ordered exact-HEAD
+validation separately before integration; task status is reviewing.

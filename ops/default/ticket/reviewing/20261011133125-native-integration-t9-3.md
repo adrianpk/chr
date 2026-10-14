@@ -13,6 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-13T20:43:00Z
 reviewed_at: 2026-10-13T21:50:58Z
 branch: feat/slice-9-native-publication-recovery
+pr: 383
 commits:
   - 48a9539d023e63c96f04aa61ecb6baa46d77f9e2
 ---
@@ -81,7 +82,10 @@ The owned validation service finished with exit status zero and no live check
 process. All owned check fixtures finished. Focused normal/race Acta activity:
 `01M4VHAK680FBXG2P887XS9Q90`, `01M4VHM9JAY36FRCT1QB06Z57X`.
 
-Canonical PR, exact-head slice validation and verified integration remain
-pending. See the [Slice 9 report](../../report/slices/native-integration-queue/slice-9-publication-recovery.md).
+The controller records ordered exact-HEAD validation separately before
+integration. See the [Slice 9 report](../../report/slices/native-integration-queue/slice-9-publication-recovery.md).
 
 Implementation: `48a9539d023e63c96f04aa61ecb6baa46d77f9e2`. Acta commit activity: `01M4VKZWK3H5X4ZDRMEDMHBP6J`.
+
+Canonical slice PR: [PR #383](https://forge.adrianpk.com/adrianpk/chr/pulls/383). The controller records ordered exact-HEAD
+validation separately before integration; task status is reviewing.

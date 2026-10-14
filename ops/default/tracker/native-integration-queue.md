@@ -343,11 +343,11 @@ Required checks:
 - `go test -race ./internal/core ./internal/app -count=1`
 - `git diff --check`
 
-PR: pending
+PR: [#383](https://forge.adrianpk.com/adrianpk/chr/pulls/383)
 
 Verified merge: pending
 
-Report/evidence: [Slice 9 report](../report/slices/native-integration-queue/slice-9-publication-recovery.md); T9.1 focused normal/race checks and strict lint passed. The required pre-commit repository check passed with seven unchanged Go files. T9.2 broader normal/race checks and the required pre-commit repository check passed with fourteen unchanged Go files. T9.2 implementation is recorded. T9.3 normal/race checks and the required pre-commit `make verify` passed on nine unchanged Go files. T9.3 implementation is recorded. T9.4 normal/race checks and required pre-commit `make verify` passed on seven unchanged Go files. All four tasks are implemented and development-checked. The controller records ordered exact-HEAD validation before integration. Canonical PR and verified integration remain pending.
+Report/evidence: [Slice 9 report](../report/slices/native-integration-queue/slice-9-publication-recovery.md); T9.1 focused normal/race checks and strict lint passed. The required pre-commit repository check passed with seven unchanged Go files. T9.2 broader normal/race checks and the required pre-commit repository check passed with fourteen unchanged Go files. T9.2 implementation is recorded. T9.3 normal/race checks and the required pre-commit `make verify` passed on nine unchanged Go files. T9.3 implementation is recorded. T9.4 normal/race checks and required pre-commit `make verify` passed on seven unchanged Go files. All four tasks are implemented and development-checked. The controller records ordered exact-HEAD validation before integration. Canonical PR is open; verified integration remains pending.
 
 ## Slice 10: Receipts fanout and closure
 

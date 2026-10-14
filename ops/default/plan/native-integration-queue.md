@@ -384,6 +384,8 @@ Invariants: INV-04, INV-13, INV-18, INV-19, INV-20
 
 Status: reviewing
 
+PR: [#383](https://forge.adrianpk.com/adrianpk/chr/pulls/383)
+
 Expected branch: `feat/slice-9-native-publication-recovery`
 
 Expected PR title: `feat(slice-9): reconcile guarded publication without duplicate submission`

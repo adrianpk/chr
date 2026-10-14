@@ -5,7 +5,7 @@ Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
 Branch: `feat/slice-9-native-publication-recovery`
-PR: pending
+PR: [#383](https://forge.adrianpk.com/adrianpk/chr/pulls/383)
 
 ## Purpose
 
@@ -176,8 +176,8 @@ check process finished. Acta activity: `01M4VHM9JAY36FRCT1QB06Z57X`.
 Pre-commit `make verify` passed with zero lint issues; core 2394.437 s, app
 108.657 s and all other packages passed. The owned service finished with exit
 status zero and no live check process. All owned check fixtures finished.
-All four tasks are implemented and development-checked. Canonical PR
-preparation follows the recorded task commits.
+All four tasks are implemented and development-checked. Canonical PR [PR #383](https://forge.adrianpk.com/adrianpk/chr/pulls/383)
+is open. The controller records clean-HEAD checks after all reference commits.
 
 Required ordered exact-HEAD slice checks are recorded separately by the
 controller for the clean PR head after all task and reference commits.
@@ -257,6 +257,8 @@ slice evidence is recorded by the controller after task and PR references.
 
 T9.4 implementation: [a06c392fc7a6b9169694989e436ea6afdec4010e](https://forge.adrianpk.com/adrianpk/chr/commit/a06c392fc7a6b9169694989e436ea6afdec4010e).
 Acta commit activity: `01M4VVFZY92DBXEJYPP80BP2W8`.
+
+Canonical PR activity: `01M4VVJ0GBZ5FPZBF4XEH6XE7R`.
 
 ## Risks and Follow-ups
 

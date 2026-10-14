@@ -13,6 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-13T19:24:35Z
 reviewed_at: 2026-10-13T20:39:33Z
 branch: feat/slice-9-native-publication-recovery
+pr: 383
 commits: ["ae54f89aff1248e7cee90c5e033ac923ec7c77c7"]
 ---
 
@@ -91,4 +92,7 @@ All owned check processes and fixtures finished. Focused-check Acta activity:
 
 Implementation: [ae54f89aff1248e7cee90c5e033ac923ec7c77c7](https://forge.adrianpk.com/adrianpk/chr/commit/ae54f89aff1248e7cee90c5e033ac923ec7c77c7).
 Acta commit activity: `01M4VFXT6NZ0S5TT0V9BJ8W6PF`.
-Canonical PR and verified integration remain pending.
+Verified integration remains pending.
+
+Canonical slice PR: [PR #383](https://forge.adrianpk.com/adrianpk/chr/pulls/383). The controller records ordered exact-HEAD
+validation separately before integration; task status is reviewing.
