@@ -426,6 +426,8 @@ Expected PR title: `feat(slice-10): finalize exact integration receipts and task
 
 Expected report: `ops/default/report/slices/native-integration-queue/slice-10-receipt-closure.md`
 
+Canonical PR: [#384](https://forge.adrianpk.com/adrianpk/chr/pulls/384)
+
 Prerequisite: verified Slice 9 integration and closed task fanout.
 
 Acceptance evidence owner: Slice 10 report and its linked retained command/provider evidence.

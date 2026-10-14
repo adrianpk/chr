@@ -5,7 +5,7 @@ Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
 Branch: `feat/slice-10-native-receipt-closure`
-PR: pending
+PR: [#384](https://forge.adrianpk.com/adrianpk/chr/pulls/384)
 
 ## Purpose
 
@@ -279,8 +279,9 @@ T10.4 implementation: [a9b33ea1f09e16fa5167c0fe75b2a4218b7a8d47](https://forge.a
 Acta commit activity: `01M4XF61EDBVN4CXKBQYSR8H53`.
 
 All four task implementations and development checks are recorded. Canonical
-Slice 10 PR creation, its reference follow-up and final ordered clean-HEAD
-controller evidence remain pending.
+Slice 10 PR: [#384](https://forge.adrianpk.com/adrianpk/chr/pulls/384). Acta opened activity:
+`01M4XF8TXK6RCHBWCJ5B2NKJZ8`. The PR reference follow-up precedes final ordered clean-HEAD
+validation, which the controller records separately before integration.
 
 ## Risks and Follow-ups
 

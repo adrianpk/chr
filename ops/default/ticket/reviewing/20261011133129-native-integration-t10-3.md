@@ -13,6 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-14T11:04:32Z
 reviewed_at: 2026-10-14T13:21:05Z
 branch: feat/slice-10-native-receipt-closure
+pr: 384
 commits:
   - dd7dc5b536c4a7ccd9e620824ef31b976441d87c
 ---
@@ -77,4 +78,7 @@ All checks and owned fixtures finished. See the existing
 
 Implementation: [dd7dc5b536c4a7ccd9e620824ef31b976441d87c](https://forge.adrianpk.com/adrianpk/chr/commit/dd7dc5b536c4a7ccd9e620824ef31b976441d87c).
 Acta commit activity: `01M4X96ZTZ648RBXGM1EJYREJB`.
-PR and verified integration remain pending.
+
+Canonical slice PR: [PR #384](https://forge.adrianpk.com/adrianpk/chr/pulls/384).
+Acta opened activity: `01M4XF8TXK6RCHBWCJ5B2NKJZ8`. Final ordered clean-HEAD validation and
+verified integration remain pending; task status is reviewing.

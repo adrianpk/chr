@@ -13,6 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-14T08:20:18Z
 reviewed_at: 2026-10-14T09:35:54Z
 branch: feat/slice-10-native-receipt-closure
+pr: 384
 commits:
   - b0a64a02dbc13ad61220cde8502fca66f7a332f9
 ---
@@ -75,9 +76,13 @@ source; both check processes and their owned fixtures finished. Acta activity:
 `01M4WSYK9EZM99G585ZDXFTXRP`. Required pre-commit `make verify` passed on that same source with zero lint
 issues; core 2401.672 s, app 107.021 s and all other packages passed. The owned
 service finished with exit status zero and no live check process. All owned
-check fixtures finished. Canonical PR and verified integration remain pending.
+check fixtures finished.
 
 Evidence: [Slice 10 report](../../report/slices/native-integration-queue/slice-10-receipt-closure.md).
 
 Implementation: [b0a64a02dbc13ad61220cde8502fca66f7a332f9](https://forge.adrianpk.com/adrianpk/chr/commit/b0a64a02dbc13ad61220cde8502fca66f7a332f9).
 Acta commit activity: `01M4WWAFZQ5NQSPN1ZRKS10XTK`.
+
+Canonical slice PR: [PR #384](https://forge.adrianpk.com/adrianpk/chr/pulls/384).
+Acta opened activity: `01M4XF8TXK6RCHBWCJ5B2NKJZ8`. Final ordered clean-HEAD validation and
+verified integration remain pending; task status is reviewing.
