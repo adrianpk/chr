@@ -13,6 +13,7 @@ Learning-oriented walkthroughs:
 Task-oriented guides:
 
 - [User guide](how-to/user-guide/index.md)
+- [Configure native integration](how-to/configure-native-integration.md)
 - [Run the local Web UI](how-to/run-local-web-ui.md)
 - [Expose the local Web UI deliberately](how-to/expose-local-web-ui.md)
 - [Full-system lab runbook](how-to/full-system-lab-runbook.md)
@@ -71,6 +72,7 @@ Exact contracts and command behavior:
 - [Workflow execution](reference/workflow-execution.md)
 - [Workflow controls](reference/workflow-controls.md)
 - [Workflow configuration](reference/workflow-configuration.md)
+- [Native integration](reference/native-integration.md)
 - [Ticket loop](reference/ticket-loop.md)
 - [Ticket result application](reference/ticket-result-application.md)
 - [Ticket status](reference/ticket-status.md)

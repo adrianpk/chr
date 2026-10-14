@@ -33,12 +33,21 @@ work:
   include_later_tickets: false
   max_worker_attempts: 3
   max_integration_attempts: 3
+  integration:
+    publication_profile: disabled
+    max_prepared_per_target: 2
 ```
 
 The explicit human-review mode in this example overrides the version-one
 trusted-auto-merge default. Use the explicit upgrade operation below for an
 existing project so its prior policy is recorded before the marker is written.
 Reading configuration never writes the marker or converts historical records.
+Native publication remains `disabled` unless the project explicitly selects
+`work.integration.publication_profile: git_atomic_dual_ref`. Version-one defaults
+and trusted review do not authorize source rewriting. Follow
+[Configure native integration](../how-to/configure-native-integration.md) before
+admitting work; [Native integration](native-integration.md) lists the executable
+profile, policy support and service-only token/attempt options.
 
 | Key | Version-one default | Accepted values |
 | --- | --- | --- |
@@ -55,6 +64,8 @@ Reading configuration never writes the marker or converts historical records.
 | `work.include_later_tickets` | `false` | `true`, `false` |
 | `work.max_worker_attempts` | `3` | 1–128 |
 | `work.max_integration_attempts` | `3` | 1–10 |
+| `work.integration.publication_profile` | `disabled` | `disabled`, explicit `git_atomic_dual_ref`; independent of version and review mode |
+| `work.integration.max_prepared_per_target` | `2` | 1–8, bounded by ready queue capacity |
 
 Legacy absence means human review, tracker compatibility and project workspace.
 The numerical defaults otherwise match the table, except that absent legacy
@@ -63,9 +74,11 @@ Effective reporting represents that legacy absence as `0`; an explicit timeout
 of `0` is invalid.
 
 Configuration is bounded to 1 MiB. The `workflow`, `work` and `review` sections
-use unique scalar keys indented by two spaces. Duplicate sections or keys,
-unknown keys, invalid bounds, tab indentation, nested mappings and conflicting
-workspace policy block execution and publication instead of falling back.
+use unique scalar keys indented by two spaces. The supported `work.integration`
+mapping has unique scalar keys indented by four spaces. Duplicate sections or
+keys, unknown keys, invalid bounds, tab indentation, other nested mappings and
+conflicting workspace policy block execution and publication instead of falling
+back.
 Existing readiness and provider keys remain supported; see
 [Work readiness](work-readiness.md) and
 [Review workflow configuration](review-workflow-config.md).
@@ -79,7 +92,7 @@ chr work config --json --review-restriction human_review
 chr work slice --human-review slice-1
 ```
 
-`work config` is read-only. It reports the thirteen policy keys, their effective
+`work config` is read-only. It reports the fifteen policy keys, their effective
 values and sources, plus a hash of the project configuration bytes. Sources are
 `project`, `version_default`, `legacy_default` or `invocation_restriction`.
 Provider credentials and host-private configuration are excluded.
@@ -110,7 +123,10 @@ Omitting `--review-mode` preserves the prior effective review mode, including
 legacy absent human review and explicit agentic or trusted modes. An explicit
 new `--review-mode human_review|agentic_review|trusted_auto_merge` is required
 to change that choice. The version marker cannot silently enable automatic
-integration during this operation.
+integration during this operation. Upgrade preserves an explicit publication
+profile and prepared-candidate limit; absent native settings retain their disabled
+publication default and finite preparation default. It never adds source-rewrite
+authority.
 
 The credential-free snapshot at
 `.chr/default/workflow-upgrades/<request-hash>.json` records prior effective

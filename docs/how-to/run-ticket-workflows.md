@@ -3,9 +3,12 @@
 ## Select policy and work
 
 Initialize a new project with `chr init`, then inspect `chr work config --json`.
-Version one selects ticket authority, worktrees, trusted automatic integration
-and one worker. Configure `review.mode: human_review` when human approval is
-required. Existing projects retain legacy policy until an explicit selected
+Version one selects ticket authority, worktrees, trusted automatic review
+and one worker. Native publication remains disabled. Before admitting work with
+the native source-rewrite profile, follow
+[Configure native integration](configure-native-integration.md) to select the
+profile explicitly and verify current publisher/policy support. Configure
+`review.mode: human_review` when human approval is required. Existing projects retain legacy policy until an explicit selected
 upgrade; follow [Workflow configuration](../reference/workflow-configuration.md)
 to observe the revision, preserve prior review and adopt only approved work.
 
@@ -34,8 +37,8 @@ delivery references before treating a unit as delivered. See
 Use `pause`, `cancel` and `resume` on the retained ID. For dead ownership,
 membership changes or uncertain publication, use the corresponding explicit
 `reconcile` operation. A live owner or descendant blocks replacement. Human
-review waits require `approve --binding <displayed-binding>` for the exact
-current candidate. See [Workflow controls](../reference/workflow-controls.md)
+review waits require the exact displayed review binding and, for native
+integration, its displayed invocation, entry, budget and candidate guards. See [Workflow controls](../reference/workflow-controls.md)
 for arguments and read-only previews.
 
 ## Run a manual harness

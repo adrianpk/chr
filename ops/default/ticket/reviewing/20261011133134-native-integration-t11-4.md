@@ -1,7 +1,8 @@
 ---
 id: TKT-20261011133134
 title: "T11.4: Document and verify profile setup"
-status: in_progress
+status: reviewing
+reviewed_at: 2026-10-14T22:46:23Z
 started_at: 2026-10-14T22:43:28Z
 branch: feat/slice-11-native-integration-surfaces
 kind: task
@@ -60,4 +61,22 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Setup and reference guidance now explains explicit source rewriting, current
+publication policy support, shared parallel-role capacity, service admission
+limits and optional enforced whole-call token accounting. Existing configuration
+and upgrade review/profile choices remain preserved. Current unsupported YAML
+keys, protected-branch/rule combinations and unmetered finite-token calls remain
+explicitly rejected.
+
+Focused configuration, upgrade, capability, admission-limit and token checks
+passed: core 14.878 s and app 0.919 s. Documentation relative links, anchors and
+whitespace passed. Acta `01M4Y9EP3EKTFGEZ30S6PTBGXA`. Runtime and documentation hashes remained
+unchanged and the owned validation service exited successfully.
+
+Exact development command:
+
+- `go test ./internal/core ./internal/app -run '^(TestNativeProfileConfig|TestNativeProfileUpgrade|TestNativeLegacySnapshot|TestNativePreparedSnapshot|TestNativeCapability|TestNativeCapabilityDenials|TestNativePreparationAdmission|TestNativePreparedBound|TestNativeRolePool|TestNativeLimitPolicy|TestNativeAgentAdmission|TestNativeAgentCeiling|TestNativeAgentLateCeiling|TestNativeAgentCapability|TestWorkflowUpgradePolicy|TestWorkflowUpgradePreserves|TestWorkflowUpgradeRejects|TestWorkflowConfigDefaults|TestWorkflowConfigBounds|TestWorkflowConfigErrors|TestWorkflowConfigCLI|TestWorkflowConfigRestriction|TestWorkflowUpgradeCLI|TestWorkflowUpgradeCLIRejects)$' -count=1`
+
+The [Slice 11 report](../../report/slices/native-integration-queue/slice-11-integration-surfaces.md)
+records the executable boundaries and retained evidence. Task commit, canonical
+PR, final ordered clean-HEAD checks and verified integration remain pending.

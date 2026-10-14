@@ -42,8 +42,11 @@ minimal user-owned config, `.chr/default/`, and
 `.chr/default/runtime/agent/Dockerfile`.
 
 All three profiles initialize new projects with `workflow.version: 1`. Its
-defaults select ticket authority, isolated worktrees, trusted automatic integration
-and one worker. Use an explicit `review.mode: human_review` when the project
+defaults select ticket authority, isolated worktrees, trusted automatic review
+and one worker. Native publication stays disabled until explicitly selected;
+[Configure native integration](../configure-native-integration.md) explains the
+source rewrite and support checks before work admission. Use an explicit
+`review.mode: human_review` when the project
 requires human approval. See [Workflow configuration](../../reference/workflow-configuration.md)
 for effective values, sources and limits.
 
@@ -154,7 +157,8 @@ chr work upgrade --config-revision <revision> --state-authority tickets --json
 ```
 
 The operation requires quiescent work, saves the previous effective policy and
-preserves its review mode. Supply `--review-mode` only when deliberately changing
+preserves its review mode and explicit native settings. An absent publication
+profile stays disabled. Supply `--review-mode` only when deliberately changing
 that choice. Legacy records remain intact unless `--adopt-file` selects one
 approved plan and its exact task map. Retry an interrupted upgrade with the same
 revision, choices and file; see the configuration reference for the envelope and

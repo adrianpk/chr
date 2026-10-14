@@ -16,7 +16,12 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   slice sets, use cases and loose work, then inspect or continue retained
   executions. TUI and Web confirmations retain the selected revision and show stale
   conflicts, capacity waits and validated versus integrated progress. Approval
-  uses the displayed candidate binding; supervised CLI manual handoffs require
+  uses the displayed candidate binding and native invocation, entry, budget and
+  candidate guards. Native status shows each target queue, actual occupied role,
+  remaining attempts, token accounting and precise blocker or question. Work and
+  daemon commands, Web forms and manual service callers can extend a retained
+  allowance or explicitly resolve/defer a bound question; stale actions fail
+  without refilling consumed work or granting publication. Supervised CLI manual handoffs require
   host validation before progress advances. The daemon continues retained
   authorization with the same lifecycle and status; startup preserves operator
   stops and human approval waits without admitting the ready backlog.
@@ -24,8 +29,10 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   and their sources, and retain human approval restrictions for native work.
   Invalid policy blocks execution; admission freezes execution limits while
   publication rechecks current project policy. New workspaces in every profile
-  select ticket authority, isolated worktrees, trusted automatic integration and
-  one worker. Reinitialization preserves existing policy, including absent config.
+  select ticket authority, isolated worktrees, trusted automatic review and
+  one worker. Native source rewriting requires explicit `git_atomic_dual_ref`
+  opt-in and current publisher/policy support; initialization and upgrade leave
+  an absent profile disabled. Reinitialization preserves existing policy, including absent config.
   Existing projects can upgrade explicitly with a prior-policy snapshot and a
   deliberate authority choice. Upgrade preserves review policy, rejects active
   ownership and adopts only selected legacy work while retaining its history.

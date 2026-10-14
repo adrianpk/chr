@@ -1,6 +1,6 @@
 # Slice 11: Shared operation surfaces
 
-Status: drafting
+Status: reviewing
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
@@ -45,8 +45,14 @@ retain their choice, authority and optional original-step or finding payload.
 Legacy review controls without native accounting retain their prior behavior.
 
 T11.3 implementation: [e37e275b49c8a16f1349c916be9f5045b4be811f](https://forge.adrianpk.com/adrianpk/chr/commit/e37e275b49c8a16f1349c916be9f5045b4be811f).
-Acta commit activity: `01M4Y9ACQZTX6W5SSREHCWNX35`. T11.4 setup/reference guidance and final ordered
-clean-HEAD validation are pending.
+Acta commit activity: `01M4Y9ACQZTX6W5SSREHCWNX35`. T11.4 setup/reference guidance is complete: native publication stays disabled
+until explicit opt-in, protected branches and nonempty enforced rules remain
+blocked, and documented bounds match the executable. Parallel roles share one
+capacity pool. Optional token ceilings use the existing service admission and
+certified whole-call accounting; current YAML and CLI expose no ceiling setting.
+Upgrade preserves explicit old choices. User-facing controls and configuration
+are reflected in the existing Unreleased entries. T11.4 task traceability and
+final ordered clean-HEAD validation are pending.
 
 ## Implementation Notes
 
@@ -100,6 +106,21 @@ without retained integration accounting keep their existing status projection.
 - `internal/app/work_workflow_integration_decision_*test.go` and
   `web_workflow_integration_test.go`: actual sealed questions, grants, native
   approval and stale operator-action rejection through each entrypoint.
+- `docs/how-to/configure-native-integration.md` and
+  `docs/reference/native-integration.md`: explicit setup and executable policy,
+  capacity, budget and publication contracts.
+- `docs/reference/workflow-controls.md` and `workflow-configuration.md`: current
+  displayed guards, operator actions and nested configuration.
+
+## Acceptance Evidence
+
+| Acceptance IDs | Evidence owner |
+| --- | --- |
+| AC-023, AC-067, AC-068 | Retained blockers/accounting and actual guarded grants and sealed question answers through T11.1/T11.3 service, command and HTTP tests. |
+| AC-072, AC-073, AC-075 | Read-only native inspection, pending-transition rejection, actual status image/privacy checks and unchanged source evidence. |
+| AC-074 | Existing authority/index reconstruction contract retained by the full pre-commit repository checks and [Slice 3 report](slice-3-integration-records.md). |
+| AC-076, AC-077, AC-078, AC-079 | Shared retained CLI/TUI/Web projections, actual serial ownership, bounded parallel display, daemon/manual controls and stale approval/action rejection. |
+| AC-080, AC-081 | T11.4 setup/reference guidance and configuration, profile-denial, upgrade-preservation, capacity and token-admission checks. |
 
 ## Validation
 
@@ -186,6 +207,19 @@ The T11.3 validation service exited successfully and all 15 source/template hash
 remained unchanged. Its task traceability is recorded above. Final ordered
 clean-HEAD checks belong to the controller after all task and PR-reference
 commits.
+
+T11.4 documentation links, anchors and whitespace passed. The current config and
+upgrade/profile, role/preparation capacity, service limit and finite-token
+admission checks passed on unchanged runtime/documentation source
+`b51a7dea41e2566816729d985c704a99f8699fe7aa527523dfabbd5baa9846f3`:
+
+- `go test ./internal/core ./internal/app -run '^(TestNativeProfileConfig|TestNativeProfileUpgrade|TestNativeLegacySnapshot|TestNativePreparedSnapshot|TestNativeCapability|TestNativeCapabilityDenials|TestNativePreparationAdmission|TestNativePreparedBound|TestNativeRolePool|TestNativeLimitPolicy|TestNativeAgentAdmission|TestNativeAgentCeiling|TestNativeAgentLateCeiling|TestNativeAgentCapability|TestWorkflowUpgradePolicy|TestWorkflowUpgradePreserves|TestWorkflowUpgradeRejects|TestWorkflowConfigDefaults|TestWorkflowConfigBounds|TestWorkflowConfigErrors|TestWorkflowConfigCLI|TestWorkflowConfigRestriction|TestWorkflowUpgradeCLI|TestWorkflowUpgradeCLIRejects)$' -count=1` — passed; core 14.878 s and app 0.919 s.
+
+Acta `01M4Y9EP3EKTFGEZ30S6PTBGXA`. Owned unit `chr-native-slice11-t114-validation-b51a7dea.service` exited successfully;
+source, command, process and result evidence is retained under
+`/tmp/chr-native-slice11-t11-4-*`. Final controller validation will execute the
+required command prefix in its exact configured order on the clean final HEAD
+after task and PR-reference commits.
 
 ## Risks and Follow-ups
 
