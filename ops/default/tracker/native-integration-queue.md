@@ -363,7 +363,7 @@ Prerequisite: verified Slice 9 integration and closed task fanout.
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T10.1 | [TKT-20261011133127](../ticket/in_progress/20261011133127-native-integration-t10-1.md) | in_progress | pending | Verify immutable dual-ref receipts |
+| T10.1 | [TKT-20261011133127](../ticket/reviewing/20261011133127-native-integration-t10-1.md) | reviewing | pending | Verify immutable dual-ref receipts |
 | T10.2 | [TKT-20261011133128](../ticket/ready/20261011133128-native-integration-t10-2.md) | ready | pending | Replay task finalization exactly once |
 | T10.3 | [TKT-20261011133129](../ticket/ready/20261011133129-native-integration-t10-3.md) | ready | pending | Preserve descendant proof and report divergence |
 | T10.4 | [TKT-20261011133130](../ticket/ready/20261011133130-native-integration-t10-4.md) | ready | pending | Enforce set closure barriers |
@@ -379,7 +379,7 @@ PR: pending
 
 Verified merge: pending
 
-Report/evidence: pending
+Report/evidence: [Slice 10 report](../report/slices/native-integration-queue/slice-10-receipt-closure.md); T10.1 receipt confirmation is implemented; broader normal/race checks passed on nine unchanged Go files. Required pre-commit `make verify` passed on that same source. T10.1 is implemented and reviewing; T10.2 through T10.4 remain ready.
 
 ## Slice 11: Shared operation surfaces
 

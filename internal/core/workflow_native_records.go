@@ -58,8 +58,10 @@ type WorkflowNativeCandidate struct {
 type WorkflowNativeReceipt struct {
 	WorkflowNativeRecordBinding
 	CandidateHash       string                `json:"candidate_hash"`
+	Mechanism           string                `json:"mechanism,omitempty"`
 	CandidateRef        WorkflowEvidenceRef   `json:"candidate_ref"`
 	TransactionProofRef WorkflowEvidenceRef   `json:"transaction_proof_ref"`
+	GitApplicationRef   *WorkflowEvidenceRef  `json:"git_application_ref,omitempty"`
 	ObservationRefs     []WorkflowEvidenceRef `json:"observation_refs"`
 	ActualMergeResult   string                `json:"actual_merge_result"`
 }
@@ -246,6 +248,10 @@ func validateWorkflowNativeReceiptSchema(receipt WorkflowReceipt) error {
 	}
 
 	refs := append([]WorkflowEvidenceRef{native.CandidateRef, native.TransactionProofRef}, native.ObservationRefs...)
+	if native.GitApplicationRef != nil {
+		refs = append(refs, *native.GitApplicationRef)
+	}
+
 	for _, ref := range refs {
 		if err := validateWorkflowEvidenceRef(native.InvocationID, ref); err != nil {
 			return err
@@ -279,6 +285,9 @@ func workflowNativeCandidateSourceMatches(candidate WorkflowIntegrationCandidate
 
 func workflowNativeReceiptOwnerMatches(receipt WorkflowReceipt) bool {
 	native := receipt.Native
+	if native.Mechanism != "" && native.Mechanism != WorkflowPublicationGitAtomicDualRef {
+		return false
+	}
 
 	return native.Unit == receipt.Unit && native.CanonicalPR == receipt.PullRequest && validWorkflowNativeFingerprint(native.CandidateHash) && native.ActualMergeResult == receipt.ResultCommit && len(native.ObservationRefs) > 0 && len(native.ObservationRefs) <= WorkflowPageLimit
 }

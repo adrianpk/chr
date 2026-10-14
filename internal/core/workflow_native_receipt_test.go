@@ -66,6 +66,9 @@ func TestNativeReceiptProof(t *testing.T) {
 		{"transaction", func(r *WorkflowReceipt) { r.Native.TransactionProofRef.Hash = "" }},
 		{"observation", func(r *WorkflowReceipt) { r.Native.ObservationRefs = nil }},
 		{"merge", func(r *WorkflowReceipt) { r.Native.ActualMergeResult = r.SourceCommit }},
+		{"candidate", func(r *WorkflowReceipt) { r.CandidateID = "another-candidate" }},
+		{"profile", func(r *WorkflowReceipt) { r.Native.CapabilityHash = workflowHash([]byte("another-profile")) }},
+		{"mechanism", func(r *WorkflowReceipt) { r.Native.Mechanism = "another-mechanism" }},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

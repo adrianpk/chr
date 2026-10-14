@@ -133,10 +133,12 @@ func checkWorkflowSubmittedObservation(ctx context.Context, submission WorkflowS
 
 func workflowNativeSubmissionPRMatches(submission WorkflowSubmission, pr WorkflowPullRequestSnapshot) bool {
 	native := submission.Native
-	expected := [6]string{native.CanonicalPR, native.SourceRepository, native.SourceRepository, native.SourceRef, native.TargetRef, native.PublishedSource}
-	actual := [6]string{pr.URL, pr.Repository, pr.HeadRepository, "refs/heads/" + pr.HeadBranch, "refs/heads/" + pr.BaseBranch, pr.HeadCommit}
+	expected := [5]string{native.CanonicalPR, native.SourceRepository, native.SourceRepository, native.SourceRef, native.TargetRef}
+	actual := [5]string{pr.URL, pr.Repository, pr.HeadRepository, "refs/heads/" + pr.HeadBranch, "refs/heads/" + pr.BaseBranch}
 
-	return expected == actual && pr.Merged && pr.State == "closed" && pr.ResultCommit == native.PreparedResult
+	// PR head metadata may lag at S or advance after P. The immutable receipt's
+	// transaction/application evidence establishes published P independently.
+	return expected == actual && workflowCommitID(pr.HeadCommit) && pr.Merged && pr.State == "closed" && pr.ResultCommit == native.PreparedResult
 }
 
 func workflowLegacySubmissionPRIdentityMatches(submission WorkflowSubmission, pr WorkflowPullRequestSnapshot) bool {

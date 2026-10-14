@@ -2,7 +2,6 @@ package core
 
 import (
 	"encoding/json"
-	"fmt"
 	"slices"
 	"strings"
 )
@@ -213,11 +212,7 @@ func (s *WorkflowStore) checkWorkflowNativeReceipt(record WorkflowRecord) error 
 		return err
 	}
 
-	if candidate.Native == nil {
-		return ErrWorkflowConflict
-	}
-
-	if !workflowNativeJSONEqual(candidate.Native.WorkflowNativeRecordBinding, native.WorkflowNativeRecordBinding) || candidate.Native.CandidateHash != native.CandidateHash {
+	if !workflowNativeReceiptCandidateMatches(*receipt, candidate) {
 		return ErrWorkflowConflict
 	}
 
@@ -232,36 +227,40 @@ func (s *WorkflowStore) checkWorkflowNativeReceiptObservations(receipt WorkflowR
 		return err
 	}
 
-	if !validWorkflowNativeReceiptTransaction(*native, transaction) {
-		return ErrWorkflowConflict
+	if err := s.checkWorkflowNativeReceiptApplication(receipt, transaction); err != nil {
+		return err
 	}
 
 	if err := s.checkWorkflowNativeTransactionRevision(*native, transaction); err != nil {
 		return err
 	}
 
-	verified := false
-
-	for _, ref := range native.ObservationRefs {
+	for i, ref := range native.ObservationRefs {
 		var observation WorkflowNativePublicationObservation
 		if err := s.readWorkflowNativeEvidence(native.InvocationID, ref, &observation); err != nil {
 			return err
+		}
+
+		if i == len(native.ObservationRefs)-1 && observation.State != "merged" {
+			return ErrWorkflowConflict
 		}
 
 		if observation.State == "merged" {
 			if err := validateWorkflowNativeReceiptObservation(receipt, observation); err != nil {
 				return err
 			}
-
-			verified = true
 		}
 	}
 
-	if !verified {
-		return fmt.Errorf("%w: receipt requires canonical merged PR proof", ErrWorkflowConflict)
+	return nil
+}
+
+func workflowNativeReceiptCandidateMatches(receipt WorkflowReceipt, candidate WorkflowIntegrationCandidate) bool {
+	if candidate.Native == nil || receipt.CandidateID != candidate.Input.Source.CandidateID {
+		return false
 	}
 
-	return nil
+	return workflowNativeJSONEqual(candidate.Native.WorkflowNativeRecordBinding, receipt.Native.WorkflowNativeRecordBinding) && candidate.Native.CandidateHash == receipt.Native.CandidateHash
 }
 
 func (s *WorkflowStore) checkWorkflowNativeTransactionRevision(native WorkflowNativeReceipt, transaction WorkflowGitPublicationResult) error {
@@ -373,6 +372,10 @@ func validWorkflowNativeReceiptTransaction(native WorkflowNativeReceipt, transac
 
 func validWorkflowNativeReceiptObservationHeader(receipt WorkflowReceipt, observation WorkflowNativePublicationObservation) bool {
 	native, pr := receipt.Native, observation.PullRequest
+	if observation.CanonicalPR != "" && observation.CanonicalPR != native.CanonicalPR {
+		return false
+	}
+
 	expected := [9]string{native.CanonicalPR, receipt.Repository, native.ActualMergeResult, native.OriginalSource, native.PublishedSource, "closed", native.SourceRepository, native.SourceRef, native.TargetRef}
 	actual := [9]string{pr.URL, pr.Repository, pr.ResultCommit, observation.OriginalSourceCommit, observation.PublishedSourceCommit, pr.State, pr.HeadRepository, "refs/heads/" + pr.HeadBranch, "refs/heads/" + pr.BaseBranch}
 

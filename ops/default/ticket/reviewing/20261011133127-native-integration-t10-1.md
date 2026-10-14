@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133127
 title: "T10.1: Verify immutable dual-ref receipts"
-status: in_progress
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -11,6 +11,7 @@ source: chat
 reported_at: 2026-10-11T13:31:27Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-14T08:20:18Z
+reviewed_at: 2026-10-14T09:35:54Z
 branch: feat/slice-10-native-receipt-closure
 commits: []
 ---
@@ -60,4 +61,19 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+The receipt operation binds the exact retained candidate, submission and profile
+with actual Git application and the latest original canonical merged PR proof.
+Lost responses remain unknown transport evidence; a separately retained Git
+application observation may prove publication without replacing the raw result.
+Pending, closed-unmerged and incompatible results cannot create receipts.
+
+Initial focused receipt/restart checks passed before the substituted-application
+proof cases were added. Strict lint passed with zero issues on the current
+nine-file source. Broader normal/race checks passed in 375.131 s and 603.402 s on that unchanged
+source; both check processes and their owned fixtures finished. Acta activity:
+`01M4WSYK9EZM99G585ZDXFTXRP`. Required pre-commit `make verify` passed on that same source with zero lint
+issues; core 2401.672 s, app 107.021 s and all other packages passed. The owned
+service finished with exit status zero and no live check process. All owned
+check fixtures finished. Canonical PR and verified integration remain pending.
+
+Evidence: [Slice 10 report](../../report/slices/native-integration-queue/slice-10-receipt-closure.md).
