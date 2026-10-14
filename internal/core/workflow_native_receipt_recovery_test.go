@@ -17,7 +17,7 @@ func nativeReceiptMerged(t *testing.T, fixture nativeCanonicalFixture) WorkflowS
 
 	submission, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal("native merged observation", err)
 	}
 
 	return submission

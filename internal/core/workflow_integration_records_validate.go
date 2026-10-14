@@ -251,9 +251,13 @@ func (s *WorkflowStore) checkWorkflowIntegrationEntryReceipt(run workflowInvocat
 		return nil
 	}
 
-	var record WorkflowRecord
-	if err := s.readWorkflowNativeEvidence(run.ID, *entry.ReceiptRef, &record); err != nil {
+	if err := validateWorkflowEvidenceRef(run.ID, *entry.ReceiptRef); err != nil {
 		return err
+	}
+
+	record, err := s.readRecord(entry.ReceiptRef.Path)
+	if err != nil || record.SourceHash != entry.ReceiptRef.Hash {
+		return errorsOrConflict(err)
 	}
 
 	if !workflowIntegrationEntryReceiptMatches(run, entry, record) {

@@ -28,6 +28,17 @@ func (s *WorkflowStore) FinalizeWorkflowSlice(ctx context.Context, id string, pr
 }
 
 func (s *WorkflowStore) finalizeWorkflowSlice(ctx context.Context, run workflowInvocationFile, provider WorkflowPullRequestProvider, git WorkflowIntegrationGit) (WorkflowRecord, error) {
+	if run.Integration != nil {
+		handled, receipt, err := s.finalizeWorkflowNativeUnit(ctx, run)
+		if handled {
+			return receipt, err
+		}
+	}
+
+	return s.finalizeWorkflowLegacySlice(ctx, run, provider, git)
+}
+
+func (s *WorkflowStore) finalizeWorkflowLegacySlice(ctx context.Context, run workflowInvocationFile, provider WorkflowPullRequestProvider, git WorkflowIntegrationGit) (WorkflowRecord, error) {
 	if run.DeliveryRef != "" {
 		return s.readWorkflowSliceReceipt(ctx, run)
 	}

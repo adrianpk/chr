@@ -215,6 +215,10 @@ func workflowIntegrationEntryChange(entry WorkflowIntegrationEntry, before strin
 }
 
 func (s *WorkflowStore) commitWorkflowIntegrationEntry(run *workflowInvocationFile, entry WorkflowIntegrationEntry, before string) error {
+	return s.commitWorkflowIntegrationEntryFiles(run, entry, before, nil)
+}
+
+func (s *WorkflowStore) commitWorkflowIntegrationEntryFiles(run *workflowInvocationFile, entry WorkflowIntegrationEntry, before string, files []workflowFileChange) error {
 	if run.Revision == math.MaxUint64 {
 		return workflowIntegrationConflict("invocation revision exhausted")
 	}
@@ -235,7 +239,7 @@ func (s *WorkflowStore) commitWorkflowIntegrationEntry(run *workflowInvocationFi
 		return err
 	}
 
-	return s.commitFiles([]workflowFileChange{file, invocation})
+	return s.commitFiles(append(files, file, invocation))
 }
 
 func updateWorkflowIntegrationBinding(run *workflowInvocationFile, binding WorkflowIntegrationBinding) {

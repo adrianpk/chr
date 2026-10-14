@@ -34,6 +34,13 @@ func nativeSubmissionConfirmReceipt(t *testing.T, f nativeSubmissionFixture, pen
 	record.Receipt.SubmissionID = submission.ID
 	record.Receipt.Native.CandidateRef = submission.Native.CandidateRef
 
+	run, err := f.store.readWorkflowInvocation(f.entry.InvocationID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	record.ID, record.Path = workflowNativeReceiptID(run, submission), workflowNativeReceiptPath(run, submission)
+
 	created, err := f.store.CreateReceipt(t.Context(), record)
 	if err != nil {
 		t.Fatal(err)

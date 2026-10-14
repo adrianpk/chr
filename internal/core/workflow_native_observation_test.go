@@ -28,6 +28,12 @@ func nativeCanonicalPublicationFixture(t *testing.T, lost bool) nativeCanonicalF
 
 	f := newNativeSubmissionFixture(t)
 
+	return nativeCanonicalSubmissionFixture(t, f, lost)
+}
+
+func nativeCanonicalSubmissionFixture(t *testing.T, f nativeSubmissionFixture, lost bool) nativeCanonicalFixture {
+	t.Helper()
+
 	publisher, remote := nativeDispatchPublisher(t, f)
 	if lost {
 		publisher.publisher = nativeLostResponsePublisher(t, f.candidate.Native.SourceRepository, remote)
@@ -35,14 +41,14 @@ func nativeCanonicalPublicationFixture(t *testing.T, lost bool) nativeCanonicalF
 
 	submission, _, err := f.store.PublishWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
 	if !lost && err != nil || lost && err == nil {
-		t.Fatal(err)
+		t.Fatal("native canonical fixture publication", err)
 	}
 
 	b := f.candidate.Native.WorkflowNativeRecordBinding
 
 	git := NewWorkflowIntegrationGit(b.SourceRepository, remote)
 	if _, err := f.store.ReconcileWorkflowNativeGitSubmission(t.Context(), nativeBudgetGuard(t, f.store, submission.InvocationID), NewWorkflowGitPublisher(b.SourceRepository, remote), git); err != nil {
-		t.Fatal(err)
+		t.Fatal("native canonical fixture Git reconciliation", err)
 	}
 
 	runner := &workflowPRCommandFixture{fakeRemoteReviewRunner: newFakeRemoteReviewRunner()}

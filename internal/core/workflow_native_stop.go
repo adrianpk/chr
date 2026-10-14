@@ -23,7 +23,14 @@ func (s *WorkflowStore) stopWorkflowNativeSubmission(ctx context.Context, run *w
 	}
 
 	if last.State == "confirmed" && run.DeliveryRef != "" {
-		return true, s.finishWorkflowNativeStop(ctx, run, intent)
+		entry, err := s.readWorkflowIntegrationEntry(*run, *run.Integration)
+		if err != nil {
+			return true, err
+		}
+
+		if entry.State == "integrated" {
+			return true, s.finishWorkflowNativeStop(ctx, run, intent)
+		}
 	}
 
 	// Repair the common intent's projection before recording stop. A crash may

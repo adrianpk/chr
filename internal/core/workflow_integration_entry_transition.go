@@ -238,9 +238,19 @@ func (s *WorkflowStore) checkWorkflowIntegrationFinalization(ctx context.Context
 		return workflowIntegrationConflict("receipt differs from confirmed publication")
 	}
 
-	receipt, err := s.readWorkflowSliceReceipt(ctx, run)
+	return s.checkWorkflowIntegrationReceiptImages(ctx, run, next)
+}
+
+func (s *WorkflowStore) checkWorkflowIntegrationReceiptImages(ctx context.Context, run workflowInvocationFile, next WorkflowIntegrationEntry) error {
+	receipt, err := s.readWorkflowFinalizationReceipt(ctx, run)
 	if err != nil {
 		return err
+	}
+
+	if next.State == "integrated" {
+		if err := s.checkWorkflowFinalizationImages(ctx, run, receipt); err != nil {
+			return err
+		}
 	}
 
 	if !workflowIntegrationReceiptOwnerMatches(receipt.Receipt, run, next) {

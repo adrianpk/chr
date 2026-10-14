@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133128
 title: "T10.2: Replay task finalization exactly once"
-status: in_progress
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -11,6 +11,7 @@ source: chat
 reported_at: 2026-10-11T13:31:28Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-14T09:37:23Z
+reviewed_at: 2026-10-14T11:02:41Z
 branch: feat/slice-10-native-receipt-closure
 commits: []
 ---
@@ -60,4 +61,16 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Native receipt projection and existing-journal member fanout are implemented.
+Real host crashes at each changed member, set, queue and cursor image recover
+without duplicate completion or missing receipts. Independent-ticket, concurrent
+finalizer, stop, corrupted-proof and unfinished-fanout barriers are covered.
+
+Focused checks passed in 124.779 s; broader race checks passed in 843.435 s.
+Required pre-commit `make verify` passed with zero lint issues on frozen source
+`d4e17bdb213e312940bf2259465493988cd43927c4644241bb01a9f9005149ba`.
+The owned validation service exited successfully with no live check process.
+See the existing [Slice 10 report](../../report/slices/native-integration-queue/slice-10-receipt-closure.md).
+
+Implementation commit and Acta references will be completed in the follow-up
+commit. PR and verified integration remain pending.

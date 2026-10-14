@@ -72,13 +72,21 @@ func (s *WorkflowStore) readWorkflowDeliveryProof(run workflowInvocationFile) (W
 		return proof, err
 	}
 
+	if proof.NativeReceiptRef != nil {
+		return proof, s.checkWorkflowNativeDeliveryProof(run, proof)
+	}
+
+	return proof, checkWorkflowLegacyDeliveryProof(run, proof)
+}
+
+func checkWorkflowLegacyDeliveryProof(run workflowInvocationFile, proof WorkflowSliceDeliveryProof) error {
 	if !workflowDeliveryProofMatchesRun(run, proof) || !proof.PullRequest.Merged || workflowPullRequestMismatch(*run.PullRequest, []WorkflowPullRequestSnapshot{proof.PullRequest}) != "" {
-		return proof, ErrWorkflowConflict
+		return ErrWorkflowConflict
 	}
 
 	query := WorkflowIntegrationQuery{Repository: run.PullRequest.Request.Repository, TargetBranch: run.PullRequest.Request.BaseBranch, Method: proof.Git.Method, SourceCommit: run.PullRequest.SourceCommit, SourceTree: run.PullRequest.SourceTree, OriginCommit: run.ExecutionSelection().Target.Commit, ResultCommit: proof.PullRequest.ResultCommit}
 
-	return proof, validateWorkflowIntegrationProof(query, proof.Git)
+	return validateWorkflowIntegrationProof(query, proof.Git)
 }
 
 func workflowDeliveryProofMatchesRun(run workflowInvocationFile, proof WorkflowSliceDeliveryProof) bool {

@@ -124,11 +124,16 @@ func (s *WorkflowStore) projectWorkflowNativeSubmission(run *workflowInvocationF
 
 	binding := workflowSubmissionProjection(journal)
 	if workflowNativeSubmissionProjected(*run, entry, binding) {
-		return nil
+		return s.repairWorkflowNativeReceiptProjection(run, entry, last)
 	}
 
 	run.Submission, entry.SubmissionRef = &binding, &binding
 	if err := s.projectWorkflowNativeSubmissionPhase(&entry, last); err != nil {
+		return err
+	}
+
+	files, err := s.projectWorkflowNativeReceipt(run, &entry, last)
+	if err != nil {
 		return err
 	}
 
@@ -138,7 +143,7 @@ func (s *WorkflowStore) projectWorkflowNativeSubmission(run *workflowInvocationF
 	retainWorkflowIntegrationStop(&entry, *run, WorkflowIntegrationTransition{})
 	projectWorkflowIntegrationPhase(run, entry)
 
-	return s.commitWorkflowIntegrationEntry(run, entry, run.Integration.EntryRef.Hash)
+	return s.commitWorkflowIntegrationEntryFiles(run, entry, run.Integration.EntryRef.Hash, files)
 }
 
 func workflowNativeSubmissionEntryMatches(submission WorkflowSubmission, entry WorkflowIntegrationEntry) bool {
@@ -152,6 +157,10 @@ func workflowNativeSubmissionProjected(run workflowInvocationFile, entry Workflo
 }
 
 func (s *WorkflowStore) projectWorkflowNativeSubmissionPhase(entry *WorkflowIntegrationEntry, last WorkflowSubmission) error {
+	if last.State == "confirmed" {
+		return nil
+	}
+
 	if projectWorkflowNativeStop(entry, last) {
 		return nil
 	}
