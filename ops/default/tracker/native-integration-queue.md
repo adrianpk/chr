@@ -395,8 +395,8 @@ Prerequisite: verified Slice 10 integration and closed task fanout.
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T11.1 | [TKT-20261011133131](../ticket/reviewing/20261011133131-native-integration-t11-1.md) | reviewing | pending | Expose shared integration service operations |
-| T11.2 | [TKT-20261011133132](../ticket/ready/20261011133132-native-integration-t11-2.md) | ready | pending | Present CLI and TUI integration status |
+| T11.1 | [TKT-20261011133131](../ticket/reviewing/20261011133131-native-integration-t11-1.md) | reviewing | [98915f97987104ae0cb3bc67ddcf3f8f91dbab0d](https://forge.adrianpk.com/adrianpk/chr/commit/98915f97987104ae0cb3bc67ddcf3f8f91dbab0d) | Expose shared integration service operations |
+| T11.2 | [TKT-20261011133132](../ticket/in_progress/20261011133132-native-integration-t11-2.md) | in_progress | pending | Present CLI and TUI integration status |
 | T11.3 | [TKT-20261011133133](../ticket/ready/20261011133133-native-integration-t11-3.md) | ready | pending | Present Web daemon and manual controls |
 | T11.4 | [TKT-20261011133134](../ticket/ready/20261011133134-native-integration-t11-4.md) | ready | pending | Document and verify profile setup |
 
@@ -411,7 +411,7 @@ PR: pending
 
 Verified merge: pending
 
-Report/evidence: [Slice 11 report](../report/slices/native-integration-queue/slice-11-integration-surfaces.md); T11.1 shared native inspection and displayed revision-bound actions are implemented. Focused core/app checks passed in 69.682 s and 33.102 s with zero strict lint issues, recorded as Acta `01M4XXSWZ91P9JV7JBWDQ20S78`. Broader race checks passed in 115.109 s (core) and 53.292 s (app), recorded as Acta `01M4XY9J5W70A20HWQ4D5VXTXM`. Required pre-commit `make verify` passed with zero lint issues, core 2754.086 s, app 126.105 s and all TUI/Web packages passed, recorded as Acta `01M4Y0NX6YKJTA466DP5TVQ8DA`. The owned service exited successfully on frozen 11-file source `8ddc53dce797218763bebd341c36bd8578efd8b5e4e46bfa598a2caf727428ad`; T11.1 is reviewing. Remaining surface tasks, task commits and final ordered clean-HEAD validation are pending.
+Report/evidence: [Slice 11 report](../report/slices/native-integration-queue/slice-11-integration-surfaces.md); T11.1 shared native inspection and displayed revision-bound actions are implemented. Focused core/app checks passed in 69.682 s and 33.102 s with zero strict lint issues, recorded as Acta `01M4XXSWZ91P9JV7JBWDQ20S78`. Broader race checks passed in 115.109 s (core) and 53.292 s (app), recorded as Acta `01M4XY9J5W70A20HWQ4D5VXTXM`. Required pre-commit `make verify` passed with zero lint issues, core 2754.086 s, app 126.105 s and all TUI/Web packages passed, recorded as Acta `01M4Y0NX6YKJTA466DP5TVQ8DA`. The owned service exited successfully on frozen 11-file source `8ddc53dce797218763bebd341c36bd8578efd8b5e4e46bfa598a2caf727428ad`; T11.1 is reviewing at [98915f97987104ae0cb3bc67ddcf3f8f91dbab0d](https://forge.adrianpk.com/adrianpk/chr/commit/98915f97987104ae0cb3bc67ddcf3f8f91dbab0d), recorded as Acta `01M4Y0R3R8REK566SDYW7AMC0M`. T11.2 is active. Remaining surface tasks and final ordered clean-HEAD validation are pending.
 
 ## Slice 12: Live provider certification
 

@@ -27,8 +27,9 @@ the host derives the private claim fence and delegates mutation to the existing
 domain owner. Exact review approval retains its existing binding and revision
 guard, with the displayed integration fence checked when supplied.
 
-Task commits, remaining surface tasks and final ordered clean-HEAD validation
-are pending.
+T11.1 implementation: [98915f97987104ae0cb3bc67ddcf3f8f91dbab0d](https://forge.adrianpk.com/adrianpk/chr/commit/98915f97987104ae0cb3bc67ddcf3f8f91dbab0d).
+Acta commit activity: `01M4Y0R3R8REK566SDYW7AMC0M`. T11.2 is active; remaining surface tasks
+and final ordered clean-HEAD validation are pending.
 
 ## Implementation Notes
 
@@ -90,7 +91,7 @@ pre-commit checks, with source, command, process and result evidence under
 - `go test -race ./internal/core ./internal/app -run '^(TestNativeInspection.*|TestNativeDecision.*|TestNativeQueue.*|TestNativeGrant.*|TestServiceIntegration.*|TestServiceNativeReview|TestServiceWorkflowGrant|TestWorkflowCLIControls|TestWorkflowCLIApproval|TestServiceWorkflowStatus|TestWorkflowStatus.*)$' -count=1` — passed; core 115.109 s and app 53.292 s. Acta `01M4XY9J5W70A20HWQ4D5VXTXM`.
 - `make verify` — passed; zero lint issues, core 2754.086 s, app 126.105 s, and all TUI/Web packages passed. Acta `01M4Y0NX6YKJTA466DP5TVQ8DA`.
 
-The owned validation service exited successfully, and all 11 source hashes remained unchanged. T11.1 task traceability is recorded after its commit. Final ordered
+The owned validation service exited successfully, and all 11 source hashes remained unchanged. T11.1 task traceability is recorded above. Final ordered
 clean-HEAD checks belong to the controller after all task and PR-reference
 commits.
 

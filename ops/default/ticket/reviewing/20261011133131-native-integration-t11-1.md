@@ -13,7 +13,8 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-14T18:42:26Z
 reviewed_at: 2026-10-14T20:12:12Z
 branch: feat/slice-11-native-integration-surfaces
-commits: []
+commits:
+  - 98915f97987104ae0cb3bc67ddcf3f8f91dbab0d
 ---
 
 # T11.1: Expose shared integration service operations
@@ -76,5 +77,7 @@ The owned validation service exited successfully:
 `chr-native-slice11-t111-validation-8ddc53dc.service`. See the existing
 [Slice 11 report](../../report/slices/native-integration-queue/slice-11-integration-surfaces.md).
 
-Task commit references are added immediately after committing. Canonical PR,
+Task commit: [98915f97987104ae0cb3bc67ddcf3f8f91dbab0d](https://forge.adrianpk.com/adrianpk/chr/commit/98915f97987104ae0cb3bc67ddcf3f8f91dbab0d). Acta commit activity: `01M4Y0R3R8REK566SDYW7AMC0M`.
+
+Canonical PR,
 final ordered clean-HEAD checks and verified integration remain pending.
