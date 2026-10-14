@@ -25,8 +25,8 @@ later source movement. Receipt confirmation records that proof without another
 publication or submission charge. Stale invocation, entry, budget and claim
 generation callbacks cannot create receipts or change the common journal.
 
-T10.1 is implemented and development-checked. T10.2 through T10.4
-remain pending in the approved tracker.
+T10.1 is implemented and development-checked. T10.2 is active for task fanout;
+T10.3 and T10.4 remain ready in the approved tracker.
 
 ## Implementation Notes
 
@@ -91,6 +91,9 @@ fixtures finished.
 
 Final ordered clean-HEAD slice validation belongs to the controller after all task and PR
 reference commits.
+
+T10.1 implementation: [b0a64a02dbc13ad61220cde8502fca66f7a332f9](https://forge.adrianpk.com/adrianpk/chr/commit/b0a64a02dbc13ad61220cde8502fca66f7a332f9).
+Acta commit activity: `01M4WWAFZQ5NQSPN1ZRKS10XTK`.
 
 ## Risks and Follow-ups
 

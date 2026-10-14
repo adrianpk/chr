@@ -13,7 +13,8 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-14T08:20:18Z
 reviewed_at: 2026-10-14T09:35:54Z
 branch: feat/slice-10-native-receipt-closure
-commits: []
+commits:
+  - b0a64a02dbc13ad61220cde8502fca66f7a332f9
 ---
 
 # T10.1: Verify immutable dual-ref receipts
@@ -77,3 +78,6 @@ service finished with exit status zero and no live check process. All owned
 check fixtures finished. Canonical PR and verified integration remain pending.
 
 Evidence: [Slice 10 report](../../report/slices/native-integration-queue/slice-10-receipt-closure.md).
+
+Implementation: [b0a64a02dbc13ad61220cde8502fca66f7a332f9](https://forge.adrianpk.com/adrianpk/chr/commit/b0a64a02dbc13ad61220cde8502fca66f7a332f9).
+Acta commit activity: `01M4WWAFZQ5NQSPN1ZRKS10XTK`.
