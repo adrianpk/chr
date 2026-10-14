@@ -18,9 +18,9 @@ Plan approval: approved on 2026-10-11 under the explicit instruction to process 
 
 Implementation authorization: granted for the complete ordered corrective set and its defined task/PR map.
 
-Active slice: Slice 11 — Shared operation surfaces
+Active slice: Slice 12 — Live provider certification
 
-Next slice: Slice 12 — Live provider certification
+Next slice: Slice 13 — Assurance reuse and final closure
 
 Slice strategy: behavior-first
 
@@ -454,7 +454,7 @@ Invariants: INV-01, INV-02, INV-16, INV-17, INV-21, INV-23, INV-24
 
 ## Slice 11: Shared operation surfaces
 
-Status: reviewing
+Status: delivered
 
 PR: [#385](https://forge.adrianpk.com/adrianpk/chr/pulls/385)
 
@@ -474,10 +474,10 @@ Invariants: INV-01, INV-11, INV-14, INV-19, INV-20, INV-22, INV-23
 
 | Task | Ticket | Work | Acceptance boundary |
 | --- | --- | --- | --- |
-| T11.1 | [TKT-20261011133131](../ticket/reviewing/20261011133131-native-integration-t11-1.md) | Extend the existing application service with observed queue/phase/role/budget facts and revision-bound review/decision/grant actions. | Surface callers cannot introduce alternative state transitions or optimistic delivery status. |
-| T11.2 | [TKT-20261011133132](../ticket/reviewing/20261011133132-native-integration-t11-2.md) | Show serial/parallel lanes, target queue position, active role and actionable blockers through shared service projections. | Read-only views do not retry, repair or mutate records and a serial user sees one active agent. |
-| T11.3 | [TKT-20261011133133](../ticket/reviewing/20261011133133-native-integration-t11-3.md) | Map existing Web/daemon/manual entrypoints to the same candidate-bound actions and evidence with stale-action rejection. | All surfaces agree on phase and blocker; private tokens, raw lease fields and credentials remain hidden. |
-| T11.4 | [TKT-20261011133134](../ticket/reviewing/20261011133134-native-integration-t11-4.md) | Add user-facing setup/reference guidance for source rewriting, policy support and optional bounded parallel/token operation. | Upgrade preserves old configuration, explicit opt-in is checked before work admission and supported boundaries match the executable. |
+| T11.1 | [TKT-20261011133131](../ticket/solved/20261011133131-native-integration-t11-1.md) | Extend the existing application service with observed queue/phase/role/budget facts and revision-bound review/decision/grant actions. | Surface callers cannot introduce alternative state transitions or optimistic delivery status. |
+| T11.2 | [TKT-20261011133132](../ticket/solved/20261011133132-native-integration-t11-2.md) | Show serial/parallel lanes, target queue position, active role and actionable blockers through shared service projections. | Read-only views do not retry, repair or mutate records and a serial user sees one active agent. |
+| T11.3 | [TKT-20261011133133](../ticket/solved/20261011133133-native-integration-t11-3.md) | Map existing Web/daemon/manual entrypoints to the same candidate-bound actions and evidence with stale-action rejection. | All surfaces agree on phase and blocker; private tokens, raw lease fields and credentials remain hidden. |
+| T11.4 | [TKT-20261011133134](../ticket/solved/20261011133134-native-integration-t11-4.md) | Add user-facing setup/reference guidance for source rewriting, policy support and optional bounded parallel/token operation. | Upgrade preserves old configuration, explicit opt-in is checked before work admission and supported boundaries match the executable. |
 
 ### Required Candidate Checks
 
@@ -486,9 +486,11 @@ Invariants: INV-01, INV-11, INV-14, INV-19, INV-20, INV-22, INV-23
 - `go test -race ./internal/app ./internal/tui ./internal/webui -count=1`
 - `git diff --check`
 
+Verified integration: [PR #385](https://forge.adrianpk.com/adrianpk/chr/pulls/385) merged into `dev` at `12094bddb2d298f6c60fbfcb49f513b6178ff595` on 2026-10-14T23:48:48Z. All four configured checks passed on that exact clean HEAD. Controller merge activity: `01M4YD33D6YKR6AASWSDNZEEV0`; final validation activity: `01M4YD0NT7KDTBNP3ARA2RNMD8`.
+
 ## Slice 12: Live provider certification
 
-Status: not_started
+Status: in_progress
 
 Expected branch: `test/slice-12-native-provider-certification`
 
@@ -506,7 +508,7 @@ Invariants: INV-07, INV-08, INV-09, INV-10, INV-11, INV-12, INV-15, INV-16, INV-
 
 | Task | Ticket | Work | Acceptance boundary |
 | --- | --- | --- | --- |
-| T12.1 | [TKT-20261011133135](../ticket/ready/20261011133135-native-integration-t12-1.md) | Run all three exact-result methods against designated disposable Forgejo repositories, including source/target contention and metadata convergence. | Each case records canonical PR, actual Git history/tree, policy/credential role and compatible receipt proof. |
+| T12.1 | [TKT-20261011133135](../ticket/in_progress/20261011133135-native-integration-t12-1.md) | Run all three exact-result methods against designated disposable Forgejo repositories, including source/target contention and metadata convergence. | Each case records canonical PR, actual Git history/tree, policy/credential role and compatible receipt proof. |
 | T12.2 | [TKT-20261011133136](../ticket/ready/20261011133136-native-integration-t12-2.md) | Run the equivalent three cases against designated disposable GitHub repositories using the existing adapter. | Each selected method publishes exact P with the same PR observed merged and no native-queue prerequisite. |
 | T12.3 | [TKT-20261011133137](../ticket/ready/20261011133137-native-integration-t12-3.md) | Deliver a repeatable native-integration QA entrypoint and profile evidence for permission denial, incompatible native review, fork/no-atomic and transport failures. | All six positive paths and negative boundaries are explicit; missing live access remains a blocker rather than simulated success. |
 

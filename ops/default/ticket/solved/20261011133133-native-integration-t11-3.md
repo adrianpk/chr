@@ -1,7 +1,9 @@
 ---
 id: TKT-20261011133133
 title: "T11.3: Present Web daemon and manual controls"
-status: reviewing
+status: solved
+resolution: fixed
+closed_at: 2026-10-14T23:54:45Z
 reviewed_at: 2026-10-14T22:42:31Z
 kind: task
 severity: unclassified
@@ -82,4 +84,6 @@ records exact commands, fixture corrections and retained process evidence.
 Implementation: [e37e275b49c8a16f1349c916be9f5045b4be811f](https://forge.adrianpk.com/adrianpk/chr/commit/e37e275b49c8a16f1349c916be9f5045b4be811f). Acta commit activity: `01M4Y9ACQZTX6W5SSREHCWNX35`.
 Canonical PR: [#385](https://forge.adrianpk.com/adrianpk/chr/pulls/385). PR activity: `01M4Y9KVFXPP2RAVFDH4SY62CV`.
 Final ordered clean-HEAD validation is recorded through the controller after
-PR-reference commits. Verified integration remains pending.
+PR-reference commits. Verified integration is recorded below.
+
+Verified integration: [PR #385](https://forge.adrianpk.com/adrianpk/chr/pulls/385) merged into `dev` at `12094bddb2d298f6c60fbfcb49f513b6178ff595` on 2026-10-14T23:48:48Z. All four configured checks passed on that exact clean HEAD. Controller merge activity: `01M4YD33D6YKR6AASWSDNZEEV0`; final validation activity: `01M4YD0NT7KDTBNP3ARA2RNMD8`.

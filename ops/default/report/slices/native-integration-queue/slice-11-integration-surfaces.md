@@ -1,6 +1,6 @@
 # Slice 11: Shared operation surfaces
 
-Status: reviewing
+Status: delivered
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
@@ -53,8 +53,7 @@ certified whole-call accounting; current YAML and CLI expose no ceiling setting.
 Upgrade preserves explicit old choices. User-facing controls and configuration
 are reflected in the existing Unreleased entries. T11.4 implementation: [266f652b0f3367a37f0ea88b7e5825c69a2a9f16](https://forge.adrianpk.com/adrianpk/chr/commit/266f652b0f3367a37f0ea88b7e5825c69a2a9f16).
 Acta commit activity: `01M4Y9GT1HTNDJ4EYQX8BH6ABC`. Canonical PR activity: `01M4Y9KVFXPP2RAVFDH4SY62CV`.
-Final ordered clean-HEAD validation is recorded through the controller after all
-PR-reference commits; verified integration remains pending.
+Verified integration: [PR #385](https://forge.adrianpk.com/adrianpk/chr/pulls/385) merged into `dev` at `12094bddb2d298f6c60fbfcb49f513b6178ff595` on 2026-10-14T23:48:48Z. All four configured checks passed on that exact clean HEAD. Controller merge activity: `01M4YD33D6YKR6AASWSDNZEEV0`; final validation activity: `01M4YD0NT7KDTBNP3ARA2RNMD8`.
 
 ## Implementation Notes
 
@@ -219,9 +218,21 @@ admission checks passed on unchanged runtime/documentation source
 
 Acta `01M4Y9EP3EKTFGEZ30S6PTBGXA`. Owned unit `chr-native-slice11-t114-validation-b51a7dea.service` exited successfully;
 source, command, process and result evidence is retained under
-`/tmp/chr-native-slice11-t11-4-*`. Final controller validation will execute the
-required command prefix in its exact configured order on the clean final HEAD
-after task and PR-reference commits.
+`/tmp/chr-native-slice11-t11-4-*`. Final controller validation passed after all task and PR-reference commits on
+the exact integrated HEAD shown below.
+
+## Final Validation and Integration
+
+Verified integration: [PR #385](https://forge.adrianpk.com/adrianpk/chr/pulls/385) merged into `dev` at `12094bddb2d298f6c60fbfcb49f513b6178ff595` on 2026-10-14T23:48:48Z. All four configured checks passed on that exact clean HEAD. Controller merge activity: `01M4YD33D6YKR6AASWSDNZEEV0`; final validation activity: `01M4YD0NT7KDTBNP3ARA2RNMD8`.
+
+- `make verify` — passed with zero lint issues; core 2791.978 s and app 197.099 s.
+- `go test ./internal/app ./internal/tui ./internal/webui -count=1` — passed; app 182.588 s, TUI 0.037 s and Web 0.051 s.
+- `go test -race ./internal/app ./internal/tui ./internal/webui -count=1` — passed; app 406.062 s, TUI 1.219 s and Web 1.291 s.
+- `git diff --check` — passed.
+
+The controller retained exact-HEAD command and result evidence. The owned
+validation service exited successfully; no checks were repeated during closure.
+All four task tickets are solved and Slice 12 is activated.
 
 ## Risks and Follow-ups
 

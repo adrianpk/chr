@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133132
 title: "T11.2: Present CLI and TUI integration status"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -11,6 +11,8 @@ source: chat
 reported_at: 2026-10-11T13:31:32Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-14T20:13:34Z
+resolution: fixed
+closed_at: 2026-10-14T23:54:45Z
 reviewed_at: 2026-10-14T21:13:02Z
 branch: feat/slice-11-native-integration-surfaces
 pr: 385
@@ -82,4 +84,6 @@ Task commit: [18b307141f84534b78d38429db1f79a380417c1a](https://forge.adrianpk.c
 
 Canonical PR: [#385](https://forge.adrianpk.com/adrianpk/chr/pulls/385). PR activity: `01M4Y9KVFXPP2RAVFDH4SY62CV`.
 Final ordered clean-HEAD validation is recorded through the controller after
-PR-reference commits. Verified integration remains pending.
+PR-reference commits. Verified integration is recorded below.
+
+Verified integration: [PR #385](https://forge.adrianpk.com/adrianpk/chr/pulls/385) merged into `dev` at `12094bddb2d298f6c60fbfcb49f513b6178ff595` on 2026-10-14T23:48:48Z. All four configured checks passed on that exact clean HEAD. Controller merge activity: `01M4YD33D6YKR6AASWSDNZEEV0`; final validation activity: `01M4YD0NT7KDTBNP3ARA2RNMD8`.
