@@ -437,8 +437,8 @@ Invariants: INV-01, INV-02, INV-16, INV-17, INV-21, INV-23, INV-24
 | Task | Ticket | Work | Acceptance boundary |
 | --- | --- | --- | --- |
 | T10.1 | [TKT-20261011133127](../ticket/reviewing/20261011133127-native-integration-t10-1.md) | Bind the exact candidate/submission/profile, original S, published P, validated B, method history and same canonical merged PR. | An incompatible merge result, missing proof or closed-only PR cannot be accepted. |
-| T10.2 | [TKT-20261011133128](../ticket/in_progress/20261011133128-native-integration-t10-2.md) | Use existing receipt/member journal keys for all slice tasks and independent tickets and expose finalizing until fanout completes. | Interrupted fanout resumes without duplicate completion or missing task receipts. |
-| T10.3 | [TKT-20261011133129](../ticket/ready/20261011133129-native-integration-t10-3.md) | Verify receipt reachability under later target advancement and expose destructive remote rewrites without erasing history. | A later descendant keeps valid delivery; removed proof creates a visible reconciliation blocker. |
+| T10.2 | [TKT-20261011133128](../ticket/reviewing/20261011133128-native-integration-t10-2.md) | Use existing receipt/member journal keys for all slice tasks and independent tickets and expose finalizing until fanout completes. | Interrupted fanout resumes without duplicate completion or missing task receipts. |
+| T10.3 | [TKT-20261011133129](../ticket/reviewing/20261011133129-native-integration-t10-3.md) | Verify receipt reachability under later target advancement and expose destructive remote rewrites without erasing history. | A later descendant keeps valid delivery; removed proof creates a visible reconciliation blocker. |
 | T10.4 | [TKT-20261011133130](../ticket/ready/20261011133130-native-integration-t10-4.md) | Require intended receipts, full-gate evidence, settled finalization and no unknown publication before closure. | Original and corrective delivery closure remain separate verified outcomes with preserved historical evidence. |
 
 ### Required Candidate Checks

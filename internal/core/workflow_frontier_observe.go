@@ -1,6 +1,9 @@
 package core
 
-import "context"
+import (
+	"context"
+	"errors"
+)
 
 func (s *WorkflowStore) observeWorkflowFrontier(ctx context.Context, run workflowInvocationFile, receipt WorkflowRecord, candidate WorkflowSliceCandidate, ports WorkflowFrontierPorts) (WorkflowPreviewTarget, WorkflowIntegrationProof, error) {
 	if ports.Provider == nil || ports.Observer == nil || ports.Target == nil {
@@ -19,7 +22,7 @@ func (s *WorkflowStore) observeWorkflowFrontier(ctx context.Context, run workflo
 		return target, WorkflowIntegrationProof{}, ErrWorkflowConflict
 	}
 
-	proof, err := observeWorkflowFrontierProof(ctx, run, receipt, candidate, target, ports)
+	proof, err := s.workflowFrontierReceiptProof(ctx, run, receipt, candidate, target, ports)
 	if err != nil {
 		return target, proof, err
 	}
@@ -30,6 +33,25 @@ func (s *WorkflowStore) observeWorkflowFrontier(ctx context.Context, run workflo
 	}
 
 	return target, proof, s.checkWorkflowTarget(ctx, target)
+}
+
+func (s *WorkflowStore) workflowFrontierReceiptProof(ctx context.Context, run workflowInvocationFile, receipt WorkflowRecord, candidate WorkflowSliceCandidate, target WorkflowPreviewTarget, ports WorkflowFrontierPorts) (WorkflowIntegrationProof, error) {
+	if receipt.Receipt.Native == nil {
+		return observeWorkflowFrontierProof(ctx, run, receipt, candidate, target, ports)
+	}
+
+	observation, err := s.observeWorkflowNativeReceipt(ctx, receipt, ports.Provider, ports.Observer)
+
+	retained, retainErr := s.retainWorkflowNativeReceiptObservation(ctx, run, observation)
+	if failure := errors.Join(err, retainErr); failure != nil {
+		return WorkflowIntegrationProof{}, failure
+	}
+
+	if retained.Blocker != nil || observation.State != "merged" || observation.Git == nil || !workflowFrontierReceiptProofMatches(*observation.Git, receipt, target) {
+		return WorkflowIntegrationProof{}, ErrWorkflowObservationRequired
+	}
+
+	return *observation.Git, nil
 }
 
 func observeWorkflowFrontierProof(ctx context.Context, run workflowInvocationFile, receipt WorkflowRecord, candidate WorkflowSliceCandidate, target WorkflowPreviewTarget, ports WorkflowFrontierPorts) (WorkflowIntegrationProof, error) {

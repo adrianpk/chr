@@ -1,6 +1,9 @@
 package core
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 func (s *WorkflowStore) workflowNativeObservationBinding(ctx context.Context, submission WorkflowSubmission, request WorkflowGitPublication) (binding WorkflowNativePublicationBinding, err error) {
 	err = s.withLock(ctx, func() error {
@@ -17,13 +20,19 @@ func (s *WorkflowStore) workflowNativeObservationBinding(ctx context.Context, su
 
 func (s *WorkflowStore) readWorkflowNativeObservationBinding(submission WorkflowSubmission, request WorkflowGitPublication, binding *WorkflowNativePublicationBinding) error {
 	native := submission.Native
-	if native.ApplicationState != "git_applied" || native.TransportResponseRef == nil || native.ReceiptRef != nil {
+	if native.ApplicationState != "git_applied" || native.TransportResponseRef == nil {
 		return ErrWorkflowObservationRequired
 	}
 
 	binding.PullRequest, binding.Git, binding.SourceDirectory = submission.Guard.PullRequest, request.Git, request.Directory
 
 	binding.ObservationDeadline = native.ObservationDeadline
+
+	binding.ReceiptConfirmed = native.ReceiptRef != nil
+	if binding.ReceiptConfirmed {
+		binding.ObservationDeadline = time.Time{}
+	}
+
 	if err := s.readWorkflowNativeEvidence(native.InvocationID, native.CapabilityRef, &binding.Capability); err != nil {
 		return err
 	}
@@ -60,16 +69,7 @@ func (s *WorkflowStore) retainWorkflowNativeCanonicalObservation(ctx context.Con
 			return err
 		}
 
-		ref, err := owner.writeWorkflowNativeDispatchEvidence(expected, observation)
-		if err != nil {
-			return err
-		}
-
-		if err := appendWorkflowNativeCanonicalObservation(&update.Facts, ref); err != nil {
-			return err
-		}
-
-		submission, err = owner.retainWorkflowNativeSubmission(ctx, run, update)
+		submission, err = owner.recordWorkflowNativeCanonicalObservation(ctx, run, update, expected, observation)
 		if err != nil {
 			return err
 		}
@@ -88,6 +88,19 @@ func (s *WorkflowStore) retainWorkflowNativeCanonicalObservation(ctx context.Con
 	})
 
 	return submission, next, err
+}
+
+func (s *WorkflowStore) recordWorkflowNativeCanonicalObservation(ctx context.Context, run workflowInvocationFile, update WorkflowNativeSubmissionUpdate, expected WorkflowSubmission, observation WorkflowNativePublicationObservation) (WorkflowSubmission, error) {
+	ref, err := s.writeWorkflowNativeDispatchEvidence(expected, observation)
+	if err != nil {
+		return expected, err
+	}
+
+	if err := appendWorkflowNativeCanonicalObservation(&update.Facts, ref); err != nil {
+		return expected, err
+	}
+
+	return s.retainWorkflowNativeSubmission(ctx, run, update)
 }
 
 func appendWorkflowNativeCanonicalObservation(native *WorkflowNativeSubmission, ref WorkflowEvidenceRef) error {

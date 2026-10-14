@@ -29,6 +29,12 @@ type workflowPreparationFixture struct {
 func newWorkflowPreparationFixture(t *testing.T, method string, gate WorkflowValidation) workflowPreparationFixture {
 	t.Helper()
 
+	return workflowPreparationExtentFixture(t, method, "slice", gate)
+}
+
+func workflowPreparationExtentFixture(t *testing.T, method, extent string, gate WorkflowValidation) workflowPreparationFixture {
+	t.Helper()
+
 	store, opts := workflowMaterializationFixture(t)
 
 	opts.Plan.Slices[0].Validation = gate
@@ -42,7 +48,7 @@ func newWorkflowPreparationFixture(t *testing.T, method string, gate WorkflowVal
 	}
 
 	commit, _ := workflowSelectionCommit(t, store)
-	request := WorkflowStartRequest{RequestKey: "slice-prepare", Selection: WorkflowPreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice"), Target: WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
+	request := WorkflowStartRequest{RequestKey: "slice-prepare", Selection: WorkflowPreviewRequest{Selector: workflowClaimSelector(hierarchy, extent), Target: WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
 	run := workflowTestStart(t, store, request).Invocation
 
 	candidate, err := store.ExecuteWorkflowSlice(t.Context(), run.ID, workflowPRWorker())

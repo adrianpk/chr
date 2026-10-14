@@ -142,6 +142,7 @@ func (s *WorkflowStore) projectWorkflowNativeSubmission(run *workflowInvocationF
 	entry.UpdatedAt = time.Now().UTC()
 	retainWorkflowIntegrationStop(&entry, *run, WorkflowIntegrationTransition{})
 	projectWorkflowIntegrationPhase(run, entry)
+	retainWorkflowNativeReceiptStop(run, entry)
 
 	return s.commitWorkflowIntegrationEntryFiles(run, entry, run.Integration.EntryRef.Hash, files)
 }

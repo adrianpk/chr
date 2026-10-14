@@ -365,7 +365,7 @@ Prerequisite: verified Slice 9 integration and closed task fanout.
 | --- | --- | --- | --- | --- |
 | T10.1 | [TKT-20261011133127](../ticket/reviewing/20261011133127-native-integration-t10-1.md) | reviewing | [b0a64a02dbc13ad61220cde8502fca66f7a332f9](https://forge.adrianpk.com/adrianpk/chr/commit/b0a64a02dbc13ad61220cde8502fca66f7a332f9) | Verify immutable dual-ref receipts |
 | T10.2 | [TKT-20261011133128](../ticket/reviewing/20261011133128-native-integration-t10-2.md) | reviewing | [c96ecba537e1bfedf6925c0324f0d49bd8332d89](https://forge.adrianpk.com/adrianpk/chr/commit/c96ecba537e1bfedf6925c0324f0d49bd8332d89) | Replay task finalization exactly once |
-| T10.3 | [TKT-20261011133129](../ticket/in_progress/20261011133129-native-integration-t10-3.md) | in_progress | pending | Preserve descendant proof and report divergence |
+| T10.3 | [TKT-20261011133129](../ticket/reviewing/20261011133129-native-integration-t10-3.md) | reviewing | pending | Preserve descendant proof and report divergence |
 | T10.4 | [TKT-20261011133130](../ticket/ready/20261011133130-native-integration-t10-4.md) | ready | pending | Enforce set closure barriers |
 
 Required checks:
@@ -379,7 +379,7 @@ PR: pending
 
 Verified merge: pending
 
-Report/evidence: [Slice 10 report](../report/slices/native-integration-queue/slice-10-receipt-closure.md); T10.1 receipt confirmation and T10.2 existing-journal fanout are implemented and reviewing. T10.2 focused checks, broader race validation and required pre-commit `make verify` passed on its frozen 17-file development source. Real host crash replay, independent-ticket delivery, concurrent finalizers, stop and invalid-proof barriers are covered. T10.2 is recorded at `c96ecba537e1bfedf6925c0324f0d49bd8332d89` with Acta `01M4X1988DMQYREF39TJTH8BHV`; T10.3 is active for descendant proof and divergence reconciliation. T10.4 remains ready.
+Report/evidence: [Slice 10 report](../report/slices/native-integration-queue/slice-10-receipt-closure.md); T10.1 receipt confirmation and T10.2 existing-journal fanout are implemented and reviewing. T10.2 focused checks, broader race validation and required pre-commit `make verify` passed on its frozen 17-file development source. Real host crash replay, independent-ticket delivery, concurrent finalizers, stop and invalid-proof barriers are covered. T10.2 is recorded at `c96ecba537e1bfedf6925c0324f0d49bd8332d89` with Acta `01M4X1988DMQYREF39TJTH8BHV`; T10.3 descendant proof and divergence reconciliation are implemented and reviewing. Its focused checks, corrected broader race check and required pre-commit `make verify` passed on the unchanged 21-file development source; all owned check processes and fixtures finished. T10.4 remains ready.
 
 ## Slice 11: Shared operation surfaces
 

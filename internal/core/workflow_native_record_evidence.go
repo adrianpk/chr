@@ -286,7 +286,7 @@ func (s *WorkflowStore) checkWorkflowNativeTransactionRevision(native WorkflowNa
 
 func validateWorkflowNativeReceiptObservation(receipt WorkflowReceipt, observation WorkflowNativePublicationObservation) error {
 	native := receipt.Native
-	if !validWorkflowNativeReceiptObservationHeader(receipt, observation) {
+	if !workflowNativeObservationTargetValid(observation) || !validWorkflowNativeReceiptObservationHeader(receipt, observation) {
 		return ErrWorkflowConflict
 	}
 

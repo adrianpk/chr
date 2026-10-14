@@ -238,6 +238,10 @@ func (s *WorkflowStore) checkWorkflowIntegrationFinalization(ctx context.Context
 		return workflowIntegrationConflict("receipt differs from confirmed publication")
 	}
 
+	if err := s.checkWorkflowNativeReceiptContinuation(submission); err != nil {
+		return err
+	}
+
 	return s.checkWorkflowIntegrationReceiptImages(ctx, run, next)
 }
 

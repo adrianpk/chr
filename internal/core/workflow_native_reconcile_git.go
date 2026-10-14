@@ -36,6 +36,10 @@ func (s *WorkflowStore) workflowNativeReconciliationInput(ctx context.Context, g
 			return err
 		}
 
+		if err := owner.recoverWorkflowNativeReceiptProjection(ctx, &run, guard); err != nil {
+			return err
+		}
+
 		entry, budget, err := owner.currentWorkflowIntegrationBudget(ctx, run, guard)
 		if err != nil {
 			return err

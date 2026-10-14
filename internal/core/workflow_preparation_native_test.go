@@ -46,7 +46,13 @@ func (p *nativePreparationProviderFixture) WorkflowPreparedNativeCapability(_ co
 func newNativePreparationFixture(t *testing.T, method string, gate WorkflowValidation) nativePreparationFixture {
 	t.Helper()
 
-	f := newWorkflowPreparationFixture(t, method, gate)
+	return nativePreparationExtentFixture(t, method, "slice", gate)
+}
+
+func nativePreparationExtentFixture(t *testing.T, method, extent string, gate WorkflowValidation) nativePreparationFixture {
+	t.Helper()
+
+	f := workflowPreparationExtentFixture(t, method, extent, gate)
 	writeWorkflowTestConfigValue(t, f.store.layout.ProjectDir(), "work", "integration.publication_profile", WorkflowPublicationGitAtomicDualRef)
 
 	entry := nativeRoleAdmit(t, f.store, f.run.ID)

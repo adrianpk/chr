@@ -37,8 +37,20 @@ the irreversible delivery before applying terminal stop, preserving consumed
 budgets. Corrupted receipt, candidate or delivery proof cannot change members
 or the confirmed cursor; an optimistic queue transition cannot skip fanout.
 
-T10.1 and T10.2 are implemented and reviewing. T10.3 is active for descendant
-proof and divergence reconciliation; T10.4 remains ready in the approved tracker.
+T10.3 re-observes confirmed receipts through the existing canonical adapter and
+submission journal. Later descendant targets retain the verified method and
+original receipt. A fetched target excluding the known result records its actual
+commit and a typed history-divergence blocker. Transport uncertainty or lost
+merged metadata remains reconciliation without claiming removed history.
+
+Native frontier release verifies retained prepared history and preserves global
+preparation and review counts in each unit snapshot. It returns the persisted
+blocker on failure. Completed task images, receipt bytes, consumed submission
+budgets and cancellation intent survive re-observation. Fresh merged evidence
+restores an integrated unit, or leaves unfinished fanout finalizing.
+
+T10.1, T10.2 and T10.3 are reviewing. T10.4 remains ready in the approved
+tracker.
 
 ## Implementation Notes
 
@@ -58,6 +70,13 @@ observation. It does not rewrite the receipt or create a parallel receipt or
 member ledger. The queue receipt reader now uses the storage-envelope codec
 and verifies its physical hash before checking typed native ownership.
 
+Post-receipt observations append to the common journal while confirmed PR/Git
+facts continue to refer to the receipt introduction. Known result objects are
+read before negative ancestry classification; fetch failures cannot prove
+history removal. Recovery repairs a retained observation projection and fences
+the prior owner revision before new observation IO. Known inconsistent target
+fields and callbacks that skip required reconciliation are rejected.
+
 ## Contracts Added or Changed
 
 - `ConfirmWorkflowNativeReceipt` accepts only a fenced invocation guard and
@@ -68,6 +87,12 @@ and verifies its physical hash before checking typed native ownership.
 - `FinalizeWorkflowSlice` finalizes a confirmed native unit from retained host
   evidence. Queue `integrated` and the confirmed cursor follow completed member
   fanout; legacy finalization retains its original verification path.
+- `ObserveWorkflowNativeSubmission` also revalidates confirmed receipts without
+  another submission. Its queue projection preserves completed members and
+  exposes current canonical reconciliation.
+- Native frontier observation verifies the retained prepared method and keeps
+  cumulative role counts bound to their delivered-unit history. Legacy
+  preparation, review and receipt schemas remain readable.
 
 ## Files of Interest
 
@@ -84,6 +109,11 @@ and verifies its physical hash before checking typed native ownership.
 - `internal/core/workflow_native_finalization_*test.go`: real host death at every
   changed member/set/queue/cursor image, independent tickets, concurrency, stop
   and invalid-proof barriers.
+- `internal/core/workflow_native_receipt_observation.go` and
+  `workflow_native_receipt_projection.go`: immutable receipt re-observation and
+  canonical queue blockers.
+- `internal/core/workflow_frontier*.go`: native method proof and retained role
+  counter ownership at continuation.
 - `internal/core/workflow_native_receipt_*test.go`: actual atomic publication,
   lost SSH response, rejection, fencing and restart cases.
 
@@ -147,6 +177,40 @@ reference commits finish.
 
 T10.2 implementation: [c96ecba537e1bfedf6925c0324f0d49bd8332d89](https://forge.adrianpk.com/adrianpk/chr/commit/c96ecba537e1bfedf6925c0324f0d49bd8332d89).
 Acta commit activity: `01M4X1988DMQYREF39TJTH8BHV`.
+
+T10.3 first reproduced the existing observation API refusing a confirmed
+receipt. Native continuation then exposed preparation/review counts without
+active pointers after frontier release; retained unit snapshots now own those
+counts without resetting the invocation budget. Focused descendant/divergence,
+frontier, uncertainty, recovery, transition, pre-fanout, target-evidence and
+cancellation checks passed in 115.599 s. Merge, rebase and squash use actual
+owned Git repositories. Strict lint passed with zero issues; `git diff --check`
+passed. Acta activity: `01M4X3TDFAQV2XJ9F10CDB0E6X`.
+
+The first broader race check failed in the unchanged
+`TestNativeCanonicalOutcomes` after 1197.699 s: a pre-receipt target rewrite must
+retain its existing `canonical_target_unverified` condition. History-divergence
+classification is now restricted to confirmed receipts. Focused canonical,
+receipt and frontier checks passed in 51.338 s; strict lint again passed with
+zero issues. Failed-source evidence remains under
+`/tmp/chr-native-slice10-t10-3-cb2aeff9-failed`.
+
+The 21-file T10.3 development source is frozen at digest
+`976a94dd3792872b7adf022924aa276b2706d79cad96494ae59c2c4eaa8c2b01`.
+Owned unit `chr-native-slice10-t103-validation-976a94dd.service` executes these
+pre-commit checks, with evidence under `/tmp/chr-native-slice10-t10-3-*`:
+
+- `go test -race ./internal/core -run '^(TestNativeReceipt.*|TestNativeFinalization.*|TestNativeFanout.*|TestNativeSubmission.*|TestNativeCanonical.*|TestNativeGit.*|TestNativeStop.*|TestWorkflowFinalization.*|TestWorkflowFrontier.*|TestWorkflowPreparation.*|TestWorkflowReview.*)$' -count=1` — passed in 1218.447 s.
+- `make verify` — passed with zero lint issues; core tests passed in 2838.955 s,
+  application tests passed in 122.665 s and all other packages passed.
+
+The broader race check and its owned fixtures finished with exit status zero.
+Acta activity: `01M4X6DC4KS44V9TGMAP8Z4C03`. The pre-receipt compatibility
+correction and focused checks are recorded as `01M4X567V9PQ0GA2E5HWEBSVWP`.
+Both frozen-source development checks passed. The owned service is inactive
+with exit status zero and no live check process; all 21 Go files remained
+unchanged and the owned fixtures finished. Final ordered clean-HEAD slice
+validation remains pending until T10.4 and PR-reference commits finish.
 
 ## Risks and Follow-ups
 

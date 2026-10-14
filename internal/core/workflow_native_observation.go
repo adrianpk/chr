@@ -66,7 +66,7 @@ func (s *WorkflowStore) observeWorkflowNativeSubmission(ctx context.Context, gua
 		return submission, observation, next, err
 	}
 
-	if poll && !time.Now().Before(binding.ObservationDeadline) {
+	if poll && !binding.ReceiptConfirmed && !time.Now().Before(binding.ObservationDeadline) {
 		observation = workflowNativeDeadlineObservation(binding)
 	} else {
 		observation, err = observeWorkflowNativeBounded(ctx, observer, binding, git)

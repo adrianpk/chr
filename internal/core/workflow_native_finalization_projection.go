@@ -7,7 +7,7 @@ import (
 )
 
 func (s *WorkflowStore) repairWorkflowNativeReceiptProjection(run *workflowInvocationFile, entry WorkflowIntegrationEntry, last WorkflowSubmission) error {
-	if last.State != "confirmed" || entry.State == "integrated" {
+	if last.State != "confirmed" || entry.State == "integrated" || entry.State == "blocked" {
 		return nil
 	}
 
@@ -62,9 +62,8 @@ func (s *WorkflowStore) projectWorkflowNativeReceipt(run *workflowInvocationFile
 	run.DeliveryRef, run.DeliveryHash = record.Path, record.SourceHash
 	entry.ReceiptRef = ref
 
-	entry.Blocker = nil
-	if entry.State != "integrated" {
-		entry.State = "finalizing"
+	if err := s.projectWorkflowNativeReceiptObservation(run, entry, last); err != nil {
+		return nil, err
 	}
 
 	return []workflowFileChange{{Path: run.DeliveryProofRef, After: data}}, nil

@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -80,24 +81,45 @@ func (s *WorkflowStore) advanceWorkflowFrontier(ctx context.Context, run *workfl
 
 	receipt, err := s.readWorkflowSliceReceipt(ctx, *run)
 	if err != nil {
-		return err
+		return fmt.Errorf("read finalized frontier receipt: %w", err)
 	}
 
 	candidate, err := s.readWorkflowFrontierCandidate(ctx, *run)
 	if err != nil {
-		return err
+		return fmt.Errorf("read retained frontier candidate: %w", err)
 	}
 
 	target, proof, err := s.observeWorkflowFrontier(ctx, *run, receipt, candidate, ports)
+
+	err = errors.Join(err, s.refreshWorkflowNativeFrontier(run, receipt))
 	if err != nil {
-		return err
+		return fmt.Errorf("observe canonical frontier delivery: %w", err)
 	}
 
 	if err := s.checkWorkflowInputs(ctx, *run); err != nil {
 		return err
 	}
 
-	return s.commitWorkflowFrontier(run, target, proof)
+	if err := s.commitWorkflowFrontier(run, target, proof); err != nil {
+		return fmt.Errorf("retain verified frontier: %w", err)
+	}
+
+	return nil
+}
+
+func (s *WorkflowStore) refreshWorkflowNativeFrontier(run *workflowInvocationFile, receipt WorkflowRecord) error {
+	if receipt.Receipt.Native == nil {
+		return nil
+	}
+
+	// Canonical observations can retain a blocker as well as verified delivery.
+	// Return the retained owner revision even when remote verification failed.
+	current, err := s.readWorkflowInvocation(run.ID)
+	if err == nil {
+		*run = current
+	}
+
+	return err
 }
 
 func (s *WorkflowStore) workflowFrontierReady(ctx context.Context, run workflowInvocationFile) (bool, error) {

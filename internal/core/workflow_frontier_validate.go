@@ -134,8 +134,34 @@ func workflowDeliveredUnitView(run workflowInvocationFile, delivery WorkflowUnit
 	run.DeliveryProofRef, run.DeliveryProofHash = delivery.DeliveryProofRef, delivery.DeliveryProofHash
 	run.DeliveryRef, run.DeliveryHash = delivery.DeliveryRef, delivery.DeliveryHash
 	run.Preparation, run.Review, run.Submission = delivery.Preparation, delivery.Review, delivery.Submission
+	// Binding validation uses this unit's snapshot, independently of cumulative
+	// counters and later retained units in the live invocation.
+	run.Deliveries = nil
+
+	run.PreparationCount, run.ReviewCount = 0, 0
+	if delivery.Preparation != nil {
+		run.PreparationCount = delivery.Preparation.Round
+	}
+
+	if delivery.Review != nil {
+		run.ReviewCount = delivery.Review.Round
+	}
 
 	return run
+}
+
+func workflowRetainedRoleCounts(run workflowInvocationFile) (preparation, review int) {
+	for _, delivery := range run.Deliveries {
+		if delivery.Preparation != nil {
+			preparation = max(preparation, delivery.Preparation.Round)
+		}
+
+		if delivery.Review != nil {
+			review = max(review, delivery.Review.Round)
+		}
+	}
+
+	return preparation, review
 }
 
 func (s *WorkflowStore) checkWorkflowRetainedBoundaries(ctx context.Context, run workflowInvocationFile) error {

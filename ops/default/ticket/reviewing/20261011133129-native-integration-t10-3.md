@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133129
 title: "T10.3: Preserve descendant proof and report divergence"
-status: in_progress
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -11,6 +11,7 @@ source: chat
 reported_at: 2026-10-11T13:31:29Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-14T11:04:32Z
+reviewed_at: 2026-10-14T13:21:05Z
 branch: feat/slice-10-native-receipt-closure
 commits: []
 ---
@@ -60,4 +61,18 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Confirmed receipts now retain later descendant proof and expose fetched history
+divergence through the existing canonical observation and queue journal. Native
+frontier continuation preserves cumulative role counts, immutable completed
+members, consumed submission budgets and cancellation intent. Reconciliation
+cannot be skipped through an optimistic phase callback.
+
+Focused checks passed in 115.599 s; the corrected broader race check passed in
+1218.447 s. Required pre-commit `make verify` passed with zero lint issues on
+frozen 21-file source
+`976a94dd3792872b7adf022924aa276b2706d79cad96494ae59c2c4eaa8c2b01`.
+All checks and owned fixtures finished. See the existing
+[Slice 10 report](../../report/slices/native-integration-queue/slice-10-receipt-closure.md).
+
+Implementation commit and Acta references will be recorded in the follow-up.
+PR and verified integration remain pending.

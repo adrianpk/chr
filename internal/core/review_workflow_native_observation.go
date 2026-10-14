@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -9,6 +10,7 @@ import (
 // WorkflowNativePublicationBinding retains the original PR/source and exact
 // prepared history independently of the rewritten published source head.
 type WorkflowNativePublicationBinding struct {
+	ReceiptConfirmed    bool                          `json:"receipt_confirmed,omitempty"`
 	GitApplication      *WorkflowNativeGitObservation `json:"git_application,omitempty"`
 	Capability          WorkflowNativeCapability      `json:"capability"`
 	PullRequest         WorkflowPullRequestSnapshot   `json:"original_pull_request"`
@@ -30,6 +32,7 @@ type WorkflowNativePublicationObservation struct {
 	PublishedSourceCommit string                      `json:"published_source_commit"`
 	ObservedSourceCommit  string                      `json:"observed_source_commit,omitempty"`
 	LaterSourceCommit     string                      `json:"later_source_commit,omitempty"`
+	ObservedTargetCommit  string                      `json:"observed_target_commit,omitempty"`
 }
 
 // ObserveWorkflowNativePublication reads the original PR through the existing
@@ -136,12 +139,8 @@ func workflowNativeObservationCondition(binding WorkflowNativePublicationBinding
 }
 
 func workflowNativeMetadataCondition(binding WorkflowNativePublicationBinding, pr WorkflowPullRequestSnapshot) string {
-	if !pr.Merged && pr.State == "closed" {
-		return "canonical_pr_closed_unmerged"
-	}
-
-	if pr.Merged && (pr.State != "closed" || pr.ResultCommit != binding.Git.ResultCommit) {
-		return "canonical_pr_result_mismatch"
+	if condition := workflowNativeMergeCondition(binding, pr); condition != "" {
+		return condition
 	}
 
 	if !workflowNativeSourceCompatible(binding, pr) {
@@ -150,6 +149,22 @@ func workflowNativeMetadataCondition(binding WorkflowNativePublicationBinding, p
 
 	if !pr.Merged && pr.State != "open" {
 		return "canonical_pr_state_unknown"
+	}
+
+	return ""
+}
+
+func workflowNativeMergeCondition(binding WorkflowNativePublicationBinding, pr WorkflowPullRequestSnapshot) string {
+	if !pr.Merged && pr.State == "closed" {
+		return "canonical_pr_closed_unmerged"
+	}
+
+	if binding.ReceiptConfirmed && !pr.Merged {
+		return "canonical_receipt_pr_unmerged"
+	}
+
+	if pr.Merged && (pr.State != "closed" || pr.ResultCommit != binding.Git.ResultCommit) {
+		return "canonical_pr_result_mismatch"
 	}
 
 	return ""
@@ -188,11 +203,16 @@ func (adapter RemoteReviewAdapter) verifyWorkflowNativeObservation(ctx context.C
 	proof, err := verifyWorkflowNativeTarget(ctx, binding, git)
 	if err != nil {
 		observed.State, observed.Condition = "reconciliation_required", "canonical_target_unverified"
+		if workflowNativeReceiptHistoryDiverged(binding, proof, err) {
+			observed.Condition = "canonical_target_history_diverged"
+			observed.ObservedTargetCommit = proof.ObservedTarget
+		}
 
 		return observed, err
 	}
 
 	observed.Git = &proof
+	observed.ObservedTargetCommit = proof.ObservedTarget
 
 	source, err := adapter.ReadWorkflowBranch(ctx, binding.PullRequest.Repository, binding.PullRequest.HeadBranch)
 	if err != nil {
@@ -214,6 +234,10 @@ func (adapter RemoteReviewAdapter) verifyWorkflowNativeObservation(ctx context.C
 	observed.PullRequest = pr
 
 	return finishWorkflowNativeObservation(binding, observed), nil
+}
+
+func workflowNativeReceiptHistoryDiverged(binding WorkflowNativePublicationBinding, proof WorkflowIntegrationProof, err error) bool {
+	return binding.ReceiptConfirmed && errors.Is(err, ErrWorkflowHistoryDivergence) && workflowCommitID(proof.ObservedTarget)
 }
 
 func verifyWorkflowNativeTarget(ctx context.Context, binding WorkflowNativePublicationBinding, git WorkflowIntegrationGit) (WorkflowIntegrationProof, error) {
