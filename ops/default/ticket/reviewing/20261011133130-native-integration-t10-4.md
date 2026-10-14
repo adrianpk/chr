@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133130
 title: "T10.4: Enforce set closure barriers"
-status: in_progress
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -11,6 +11,7 @@ source: chat
 reported_at: 2026-10-11T13:31:30Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-14T13:22:10Z
+reviewed_at: 2026-10-14T15:05:14Z
 branch: feat/slice-10-native-receipt-closure
 commits: []
 ---
@@ -60,4 +61,21 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Native set closure now reads the existing receipt, fanout archive and confirmed
+common publication journal. It requires all intended members and receipts,
+freezes native proof hashes and rechecks canonical PR/Git evidence after the
+configured gate. Unresolved publications across namespaces block closure;
+original and corrective sets retain separate gate attempts and closure receipts.
+
+Focused native/legacy closure, frontier and finalization checks passed in
+315.057 s. The broader race check passed in 541.991 s on frozen 11-file source
+`c8933a047c6f9dfe4e0b4b887cf6e2da8baf77bd7c9e8528a072ec338dd442f0`.
+Acta race activity: `01M4XC51WKBG0ACGS0Q39BVECA`. Required pre-commit
+`make verify` passed with zero lint issues; core tests passed in 3078.743 s,
+application tests passed in 121.224 s and all other packages passed. All checks
+and owned fixtures finished; the 11 Go source files remained unchanged.
+Pre-commit gate activity: `01M4XF2XHX2N5XQ3KZJW7GW6BZ`. See the existing
+[Slice 10 report](../../report/slices/native-integration-queue/slice-10-receipt-closure.md).
+
+The task commit reference follows commit creation. Canonical PR, final ordered
+clean-HEAD validation and verified integration remain pending.

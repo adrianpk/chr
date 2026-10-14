@@ -1,6 +1,6 @@
 # Slice 10: Receipts fanout and closure
 
-Status: drafting
+Status: reviewing
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
@@ -49,8 +49,20 @@ blocker on failure. Completed task images, receipt bytes, consumed submission
 budgets and cancellation intent survive re-observation. Fresh merged evidence
 restores an integrated unit, or leaves unfinished fanout finalizing.
 
-T10.1, T10.2 and T10.3 are reviewing. T10.4 is active for set closure barriers
-in the approved tracker.
+T10.4 connects native receipts to the existing set-closing path. Closure reads
+the retained fanout proof and current integrated queue/journal binding rather
+than decoding the native verification observation as a legacy proof. All actual
+members and intended slice receipts must be finalized before a gate can start.
+
+Unresolved common-directory publications block admission, command registration
+and confirmation across namespaces. The configured host gate still runs on the
+exact canonical target. Fresh native PR/Git observation and frozen native proof
+hashes prevent confirmation after metadata or evidence changes during that gate.
+A failed gate retains its own retry history without replaying publication or
+member fanout. Original and corrective sets keep distinct closure receipts.
+
+All four tasks are implemented and development-checked. They are reviewing;
+final ordered clean-HEAD slice validation remains pending.
 
 ## Implementation Notes
 
@@ -77,6 +89,12 @@ history removal. Recovery repairs a retained observation projection and fences
 the prior owner revision before new observation IO. Known inconsistent target
 fields and callbacks that skip required reconciliation are rejected.
 
+Native set closure reuses the existing unit-delivery archive, immutable receipt,
+common publication journal and closing-attempt ledger. Its original verification
+reference remains unchanged. An independently reconciled lost transport response
+is distinct from an unresolved publication. Closing evidence now freezes the
+native capability, source/history, transaction/application and observation refs.
+
 ## Contracts Added or Changed
 
 - `ConfirmWorkflowNativeReceipt` accepts only a fenced invocation guard and
@@ -93,6 +111,12 @@ fields and callbacks that skip required reconciliation are rejected.
 - Native frontier observation verifies the retained prepared method and keeps
   cumulative role counts bound to their delivered-unit history. Legacy
   preparation, review and receipt schemas remain readable.
+- `CloseWorkflowSet` verifies settled native fanout, current confirmed journal
+  ownership and all intended receipts before running its existing closing gate.
+  Confirmation also rechecks the current native canonical PR and method proof.
+- `QueryWorkflowIntegrationSetClosure` verifies native receipts through their
+  existing delivery proof and reports unresolved common publication heads
+  without mutating execution state.
 
 ## Files of Interest
 
@@ -116,6 +140,12 @@ fields and callbacks that skip required reconciliation are rejected.
   counter ownership at continuation.
 - `internal/core/workflow_native_receipt_*test.go`: actual atomic publication,
   lost SSH response, rejection, fencing and restart cases.
+- `internal/core/workflow_closing_native.go` and `workflow_closing_publication.go`:
+  native receipt/archive ownership, immutable evidence and shared publication
+  barriers in the existing closing path.
+- `internal/core/workflow_native_closing*test.go`: actual native publication,
+  exact gates, distinct set outcomes, lost transport, changing evidence/PRs and
+  cross-namespace intent before or during a real gate.
 
 ## Validation
 
@@ -214,6 +244,40 @@ validation remains pending until T10.4 and PR-reference commits finish.
 
 T10.3 implementation: [dd7dc5b536c4a7ccd9e620824ef31b976441d87c](https://forge.adrianpk.com/adrianpk/chr/commit/dd7dc5b536c4a7ccd9e620824ef31b976441d87c).
 Acta commit activity: `01M4X96ZTZ648RBXGM1EJYREJB`.
+
+T10.4 initially failed all three native method probes because the closing path
+expected a legacy verification schema. The corrected positive probe passed in
+19.900 s. An unfinished standalone owner is rejected by the existing ownership
+guard before fanout; its test now checks that concrete boundary. The independent
+publication fixture uses the ticket executor and a real fast-forward canonical
+base without relaxing the frozen-target ancestry guard. Its admission and
+in-gate intent checks passed in 21.790 s.
+
+Strict lint passed with zero issues after preserving the configured complexity
+and formatting bounds. The 11-file development source is frozen at digest
+`c8933a047c6f9dfe4e0b4b887cf6e2da8baf77bd7c9e8528a072ec338dd442f0`.
+
+- `go test ./internal/core -run '^(TestNativeClosing.*|TestWorkflowClosing.*|TestNativeQueueClosure|TestNativeReceiptFrontier.*|TestNativeFinalization.*|TestNativeFanout.*)$' -count=1` — passed in 315.057 s, with output in `/tmp/chr-native-slice10-t10-4-focused.log`.
+
+Acta focused validation activity: `01M4XBKBVZHZP2PBAKKB00NSMP`. The focused
+check and its owned fixtures finished. Owned unit
+`chr-native-slice10-t104-validation-c8933a04.service` executes these pre-commit
+checks on the unchanged 11-file source, retaining source, command, process and
+result evidence under `/tmp/chr-native-slice10-t10-4-*`:
+
+- `go test -race ./internal/core -run '^(TestNativeClosing.*|TestWorkflowClosing.*|TestNativeQueueClosure|TestNativeReceiptFrontier.*|TestNativeFinalization.*|TestNativeFanout.*)$' -count=1` — passed in 541.991 s.
+- `make verify` — passed with zero lint issues; core tests passed in 3078.743 s,
+  application tests passed in 121.224 s and all other packages passed.
+
+Both frozen-source development checks passed. The owned service is inactive
+with exit status zero and no live check process; all 11 Go source files remained
+unchanged and owned fixtures finished. Acta race activity:
+`01M4XC51WKBG0ACGS0Q39BVECA`; pre-commit gate activity:
+`01M4XF2XHX2N5XQ3KZJW7GW6BZ`.
+
+The T10.4 task commit reference follows commit creation. Canonical Slice 10 PR
+creation, its reference follow-up and final ordered clean-HEAD controller evidence
+remain pending.
 
 ## Risks and Follow-ups
 

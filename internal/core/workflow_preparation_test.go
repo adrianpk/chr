@@ -37,6 +37,12 @@ func workflowPreparationExtentFixture(t *testing.T, method, extent string, gate 
 
 	store, opts := workflowMaterializationFixture(t)
 
+	return workflowPreparationPlanFixture(t, method, extent, gate, store, opts)
+}
+
+func workflowPreparationPlanFixture(t *testing.T, method, extent string, gate WorkflowValidation, store *WorkflowStore, opts WorkflowMaterializationOptions) workflowPreparationFixture {
+	t.Helper()
+
 	opts.Plan.Slices[0].Validation = gate
 	for i := range opts.Plan.Slices[0].Tasks {
 		opts.Plan.Slices[0].Tasks[i].Validation = WorkflowValidation{WaiverReason: "Preparation fixture validates the complete slice"}

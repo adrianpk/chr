@@ -126,6 +126,10 @@ func (s *WorkflowStore) workflowClosingReady(ctx context.Context, set WorkflowRe
 		return ErrWorkflowOwned
 	}
 
+	if err := s.checkWorkflowClosingPublications(ctx); err != nil {
+		return err
+	}
+
 	if err := s.checkWorkflowClosingEvidence(set); err != nil {
 		return err
 	}

@@ -36,7 +36,7 @@ func (s *WorkflowStore) workflowClosingSliceProof(ctx context.Context, input Wor
 		return WorkflowClosingSlice{}, err
 	}
 
-	proof, hash, err := s.workflowClosingDeliveryProof(receipt)
+	proof, hash, err := s.workflowClosingDeliveryProof(ctx, receipt)
 	if err != nil {
 		return WorkflowClosingSlice{}, err
 	}
@@ -51,6 +51,8 @@ func (s *WorkflowStore) workflowClosingSliceProof(ctx context.Context, input Wor
 	}
 
 	refs := append([]string{descriptor.ContractRef, receipt.Path, receipt.Receipt.VerificationRef}, receipt.Receipt.ValidationRefs...)
+
+	refs = append(refs, workflowClosingNativeEvidence(receipt, proof)...)
 	if err := s.workflowClosingEvidenceHashes(input.EvidenceHashes, refs); err != nil {
 		return WorkflowClosingSlice{}, err
 	}
@@ -58,9 +60,13 @@ func (s *WorkflowStore) workflowClosingSliceProof(ctx context.Context, input Wor
 	return WorkflowClosingSlice{ID: descriptor.ID, Order: descriptor.Order, Receipt: WorkflowClosingEvidence{Ref: receipt.Path, Hash: receipt.SourceHash}, Verification: WorkflowClosingEvidence{Ref: receipt.Receipt.VerificationRef, Hash: hash}, Proof: fresh}, nil
 }
 
-func (s *WorkflowStore) workflowClosingDeliveryProof(receipt WorkflowRecord) (WorkflowSliceDeliveryProof, string, error) {
+func (s *WorkflowStore) workflowClosingDeliveryProof(ctx context.Context, receipt WorkflowRecord) (WorkflowSliceDeliveryProof, string, error) {
 	if receipt.Receipt == nil || receipt.ProjectID != s.projectID || receipt.Namespace != s.layout.Namespace() {
 		return WorkflowSliceDeliveryProof{}, "", ErrWorkflowConflict
+	}
+
+	if receipt.Receipt.Native != nil {
+		return s.workflowClosingNativeDeliveryProof(ctx, receipt)
 	}
 
 	data, err := s.workflowClosingRead(receipt.Receipt.VerificationRef)
@@ -81,6 +87,14 @@ func (s *WorkflowStore) workflowClosingDeliveryProof(receipt WorkflowRecord) (Wo
 }
 
 func (s *WorkflowStore) observeWorkflowClosingSlice(ctx context.Context, input WorkflowClosingInput, receipt WorkflowRecord, retained WorkflowSliceDeliveryProof, ports WorkflowFrontierPorts) (WorkflowIntegrationProof, error) {
+	if receipt.Receipt.Native != nil {
+		return s.observeWorkflowClosingNativeSlice(ctx, input, receipt, ports)
+	}
+
+	return s.observeWorkflowClosingLegacySlice(ctx, input, receipt, retained, ports)
+}
+
+func (s *WorkflowStore) observeWorkflowClosingLegacySlice(ctx context.Context, input WorkflowClosingInput, receipt WorkflowRecord, retained WorkflowSliceDeliveryProof, ports WorkflowFrontierPorts) (WorkflowIntegrationProof, error) {
 	pr, err := ports.Provider.ReadWorkflowPullRequest(ctx, receipt.Receipt.PullRequest)
 	if err != nil {
 		return WorkflowIntegrationProof{}, err

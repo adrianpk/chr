@@ -62,6 +62,10 @@ func (s *WorkflowStore) checkWorkflowClosingConfirmation(ctx context.Context, cl
 		return errorsOrConflict(err)
 	}
 
+	if err := s.checkWorkflowClosingNativeCanonical(ctx, claim.input, ports); err != nil {
+		return err
+	}
+
 	// Observation can cross the deadline or a host edit. Recheck authority and
 	// the frozen input after that external operation before confirming closure.
 	if err := s.checkWorkflowClosingAuthority(claim); err != nil {

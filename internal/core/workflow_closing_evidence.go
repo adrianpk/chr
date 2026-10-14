@@ -39,6 +39,10 @@ func (s *WorkflowStore) workflowClosingEvidenceHashes(hashes map[string]string, 
 }
 
 func (s *WorkflowStore) checkWorkflowClosingInputs(ctx context.Context, claim *workflowClosingClaim) error {
+	if err := s.checkWorkflowClosingPublications(ctx); err != nil {
+		return err
+	}
+
 	if err := s.checkWorkflowCoordinatorTarget(ctx, claim.input.Target); err != nil {
 		return err
 	}
@@ -52,13 +56,8 @@ func (s *WorkflowStore) checkWorkflowClosingInputs(ctx context.Context, claim *w
 		return ErrWorkflowConflict
 	}
 
-	members, err := s.workflowClosingMembers(ctx, set.ID)
-	if err != nil {
+	if err := s.checkWorkflowClosingMembers(ctx, claim, set); err != nil {
 		return err
-	}
-
-	if !reflect.DeepEqual(members, claim.input.Members) {
-		return fmt.Errorf("%w: actual closing members changed", ErrWorkflowConflict)
 	}
 
 	refs := claim.input.EvidenceHashes
@@ -72,6 +71,19 @@ func (s *WorkflowStore) checkWorkflowClosingInputs(ctx context.Context, claim *w
 	}
 
 	return nil
+}
+
+func (s *WorkflowStore) checkWorkflowClosingMembers(ctx context.Context, claim *workflowClosingClaim, set WorkflowRecord) error {
+	members, err := s.workflowClosingMembers(ctx, set.ID)
+	if err != nil {
+		return err
+	}
+
+	if !reflect.DeepEqual(members, claim.input.Members) {
+		return fmt.Errorf("%w: actual closing members changed", ErrWorkflowConflict)
+	}
+
+	return s.checkWorkflowIntegrationSetReceipts(ctx, set)
 }
 
 func (s *WorkflowStore) readWorkflowClosingAttempt(set WorkflowRecord, index int) (workflowClosingAttempt, error) {

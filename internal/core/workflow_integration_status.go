@@ -357,7 +357,7 @@ func (s *WorkflowStore) checkWorkflowIntegrationSetReceipts(ctx context.Context,
 			return err
 		}
 
-		proof, _, err := s.workflowClosingDeliveryProof(receipt)
+		proof, _, err := s.workflowClosingDeliveryProof(ctx, receipt)
 		if err != nil {
 			return err
 		}
