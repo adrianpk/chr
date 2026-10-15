@@ -13,7 +13,8 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-15T00:54:01Z
 reviewed_at: 2026-10-15T01:10:13Z
 branch: test/slice-12-native-provider-certification
-commits: []
+commits:
+  - a9b780729b8d7d1fab45e0cde03ba02240e8a625
 ---
 
 # T12.2: Certify GitHub merge rebase and squash
@@ -76,3 +77,5 @@ run selected the same installed GitHub CLI directly in the fixture PATH.
 
 See the [Slice 12 report](../../report/slices/native-integration-queue/slice-12-provider-certification.md).
 Canonical delivery PR and exact-HEAD final validation remain pending.
+
+Task commit: [a9b780729b8d7d1fab45e0cde03ba02240e8a625](https://forge.adrianpk.com/adrianpk/chr/commit/a9b780729b8d7d1fab45e0cde03ba02240e8a625). Acta `01M4YHRTEX8AH2R7Y2CM0P3CPT`.

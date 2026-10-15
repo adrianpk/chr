@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133137
 title: "T12.3: Publish bounded certification and denial matrix"
-status: ready
+status: blocked
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,8 @@ tags: native-integration, slice-12
 source: chat
 reported_at: 2026-10-11T13:31:37Z
 ready_at: 2026-10-11T13:31:37Z
+started_at: 2026-10-15T01:11:09Z
+branch: test/slice-12-native-provider-certification
 commits: []
 ---
 
@@ -50,12 +52,32 @@ Acceptance IDs and invariants: use the owning slice's explicit coverage map in t
 
 ## Execution Gate
 
-Approved: 2026-10-11; the maintainer authorized this corrective set through Looper.
+Approved: 2026-10-11; the maintainer authorized this corrective set through the delivery controller.
 
 Execute only when this slice is active and its predecessors and external prerequisites are satisfied.
-Keep one task commit and one canonical slice PR; only Looper submits development merges.
+Keep one task commit and one canonical slice PR; only the delivery controller submits development merges.
 Use the existing Markdown ticket lifecycle; this file does not create a product runtime invocation.
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Strict lint and local protocol/capability guards passed. The full live QA run
+completed on unchanged 14-file source
+`435d082c526a6065bec62aee4a54ab9c4f3df988a682c6c68913feb1104c715f`: 45 of 46 real
+cases passed in a 636.930 s command. Actual anonymous/native-review denials,
+HTTPS method/contention cases, original-PR close/retarget races and lost-report
+reconciliation passed. The subsequent focused race command was not executed.
+
+## Blocker
+
+[GitHub fixture PR #27](https://github.com/adrianpk/chr-integration-qa/pull/27)
+reports original source `6a2188ec06a78566c85f952d1d2a637e273b077f` as its immutable
+merge result. Both actual refs contain prepared result
+`1bf65f7c73daa9259d21101e63784d95be38f331`. REST, GraphQL and the canonical merged
+event agree on the contradictory result. The exact-P check correctly fails with
+`canonical_pr_result_mismatch`; GitHub rebase certification is revoked.
+
+Acta `01M4YJX5T41SA4VH4Q32D96T3Z`. The owned validation unit exited with failure;
+all source hashes were unchanged. The T12.3 implementation remains uncommitted.
+A compatible provider profile or an explicitly revised approved contract is
+required. No delivery PR or exact-HEAD final validation is ready.
+See the [Slice 12 report](../../report/slices/native-integration-queue/slice-12-provider-certification.md).

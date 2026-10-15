@@ -1,6 +1,6 @@
 # Native Integration Certification Fixtures
 
-Status: designated; default rebase certified in Slice 2 worktree; final exact-HEAD checks pending
+Status: designated; Slice 12 blocked on GitHub rebase canonical result proof
 
 Date: 2026-10-11
 
@@ -77,3 +77,24 @@ Forgejo automatic Git-merge detection was enabled only for this designated repos
 | github | [Fixture PR](https://github.com/adrianpk/chr-integration-qa/pull/9) | `a5456ae7af376bcc874cee9858375f1a11f1a790` | `9a10f0740792b042d3ed50a2b47415d1427ad551` | `cbc3d631d8866119f5a69dbfd40b3c5fe4106f0a` |
 
 Full host-owned JSON evidence is retained under `${XDG_STATE_HOME:-$HOME/.local/state}/chr/qa/native-integration-slice-2/`. It includes original/published-source binding, role and policy fingerprints, exact method/history/tree proof, actual target and original PR observations. The retained synthetic refs are preserved.
+
+## Slice 12 Current Certification Boundary
+
+The initial Forgejo and GitHub merge/rebase/squash method and contention runs
+passed. The subsequent repeatable QA run passed 45 of 46 real cases, including
+HTTPS, actual anonymous and native-review denial, PR metadata changes and lost
+replies. Its GitHub SSH rebase case contradicted the required canonical result.
+
+[Fixture PR #27](https://github.com/adrianpk/chr-integration-qa/pull/27) is marked
+merged with REST, GraphQL and its merge event all reporting original S
+`6a2188ec06a78566c85f952d1d2a637e273b077f`. Both actual refs contain exact P
+`1bf65f7c73daa9259d21101e63784d95be38f331`. The observer correctly withholds
+receipt-compatible proof. GitHub rebase was removed from the host descriptor's
+certified methods; existing successful evidence and the counterexample remain.
+
+The [Slice 12 report](slices/native-integration-queue/slice-12-provider-certification.md)
+retains the exact source/base/result evidence and failed check. The uncommitted
+QA implementation is retained in the dedicated slice worktree. A compatible
+provider profile or explicitly revised approved contract is required for
+continuation. Existing credentials, synthetic refs and created denial policies
+are retained. No production or account policy was changed.

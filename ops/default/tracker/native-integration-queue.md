@@ -56,7 +56,7 @@ Only Looper may merge this set's canonical PRs. Read-only status must not mutate
 | Slice 9 | Publication and uncertainty recovery | `feat/slice-9-native-publication-recovery` | `feat(slice-9): reconcile guarded publication without duplicate submission` | `ops/default/report/slices/native-integration-queue/slice-9-publication-recovery.md` | delivered | [#383](https://forge.adrianpk.com/adrianpk/chr/pulls/383) |
 | Slice 10 | Receipts fanout and closure | `feat/slice-10-native-receipt-closure` | `feat(slice-10): finalize exact integration receipts and task delivery` | `ops/default/report/slices/native-integration-queue/slice-10-receipt-closure.md` | delivered | [#384](https://forge.adrianpk.com/adrianpk/chr/pulls/384) |
 | Slice 11 | Shared operation surfaces | `feat/slice-11-native-integration-surfaces` | `feat(slice-11): expose native integration progress and controls` | `ops/default/report/slices/native-integration-queue/slice-11-integration-surfaces.md` | delivered | [#385](https://forge.adrianpk.com/adrianpk/chr/pulls/385) |
-| Slice 12 | Live provider certification | `test/slice-12-native-provider-certification` | `test(slice-12): certify native integration across supported forge profiles` | `ops/default/report/slices/native-integration-queue/slice-12-provider-certification.md` | in_progress | pending |
+| Slice 12 | Live provider certification | `test/slice-12-native-provider-certification` | `test(slice-12): certify native integration across supported forge profiles` | `ops/default/report/slices/native-integration-queue/slice-12-provider-certification.md` | blocked | pending |
 | Slice 13 | Assurance reuse and final closure | `test/slice-13-native-integration-assurance` | `test(slice-13): complete native integration and original workflow assurance` | `ops/default/report/slices/native-integration-queue/slice-13-integration-assurance.md` | not_started | pending |
 
 ## Slice 1: Guarded Git transport
@@ -415,7 +415,7 @@ Report/evidence: [Slice 11 report](../report/slices/native-integration-queue/sli
 
 ## Slice 12: Live provider certification
 
-Status: in_progress
+Status: blocked
 
 Expected branch: `test/slice-12-native-provider-certification`
 
@@ -428,8 +428,8 @@ Prerequisite: verified Slice 11 integration and closed task fanout.
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
 | T12.1 | [TKT-20261011133135](../ticket/reviewing/20261011133135-native-integration-t12-1.md) | validated | [ae806985740281a4a77ff7e06c1d448f4a6a1a86](https://forge.adrianpk.com/adrianpk/chr/commit/ae806985740281a4a77ff7e06c1d448f4a6a1a86) | Certify Forgejo merge rebase and squash |
-| T12.2 | [TKT-20261011133136](../ticket/reviewing/20261011133136-native-integration-t12-2.md) | validated | pending | Certify GitHub merge rebase and squash |
-| T12.3 | [TKT-20261011133137](../ticket/ready/20261011133137-native-integration-t12-3.md) | ready | pending | Publish bounded certification and denial matrix |
+| T12.2 | [TKT-20261011133136](../ticket/reviewing/20261011133136-native-integration-t12-2.md) | validated | [a9b780729b8d7d1fab45e0cde03ba02240e8a625](https://forge.adrianpk.com/adrianpk/chr/commit/a9b780729b8d7d1fab45e0cde03ba02240e8a625) | Certify GitHub merge rebase and squash |
+| T12.3 | [TKT-20261011133137](../ticket/blocked/20261011133137-native-integration-t12-3.md) | blocked | pending | Publish bounded certification and denial matrix |
 
 Required checks:
 
@@ -442,7 +442,9 @@ PR: pending
 
 Verified merge: pending
 
-Report/evidence: [Slice 12 report](../report/slices/native-integration-queue/slice-12-provider-certification.md). T12.1 passed all nine real Forgejo method/publication/contention cases in 51.915 s. The provider-specific merge-policy defect is corrected with denial-preserving regression coverage. Required pre-commit repository verification passed with zero lint issues, core 2747.252 s and app 197.636 s; focused race checks passed in 10.642 s. Acta `01M4YGRAHG25NY28CDGH3JQKKN`. The owned unit exited successfully on unchanged seven-file source. T12.1 is committed and pushed; T12.2 passed all nine GitHub cases under the race detector (221.147 s package; 222.095 s command), with zero strict-lint issues and unchanged source. Acta `01M4YHQ5TQDSP5NXAZ10HHQVTZ`. T12.3 remains pending. Canonical delivery PR and final exact-HEAD checks are pending.
+Report/evidence: [Slice 12 report](../report/slices/native-integration-queue/slice-12-provider-certification.md). T12.1 passed all nine real Forgejo method/publication/contention cases in 51.915 s. The provider-specific merge-policy defect is corrected with denial-preserving regression coverage. Required pre-commit repository verification passed with zero lint issues, core 2747.252 s and app 197.636 s; focused race checks passed in 10.642 s. Acta `01M4YGRAHG25NY28CDGH3JQKKN`. The owned unit exited successfully on unchanged seven-file source. T12.1 is committed and pushed; T12.2 passed all nine GitHub cases under the race detector (221.147 s package; 222.095 s command), with zero strict-lint issues and unchanged source. Acta `01M4YHQ5TQDSP5NXAZ10HHQVTZ`. T12.2 is committed and pushed; a subsequent repeatability run blocked T12.3 on GitHub rebase result mismatch. Canonical delivery PR and final exact-HEAD checks are pending.
+
+Blocker: [GitHub fixture PR #27](https://github.com/adrianpk/chr-integration-qa/pull/27) reports original S as the canonical merge result while both refs contain exact P. REST, GraphQL and the merge event confirm the mismatch. GitHub rebase certification is revoked; the exact-P checks remain unchanged. T12.3 source is retained uncommitted; no delivery PR is ready. See the Slice 12 report and Acta `01M4YJX5T41SA4VH4Q32D96T3Z`.
 
 ## Slice 13: Assurance reuse and final closure
 
