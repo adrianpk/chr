@@ -8,3 +8,6 @@
 /.chr/default/runtime/traces/
 /.chr/default/tmp/
 /.chr/default/reports/gates/
+
+/.build/
+__pycache__/

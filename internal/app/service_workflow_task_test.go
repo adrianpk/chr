@@ -44,6 +44,10 @@ func TestServiceWorkflowTask(t *testing.T) {
 func serviceWorkflowTaskFixture(t *testing.T) (service, core.WorkflowMaterializationResult, string) {
 	t.Helper()
 
+	if testing.Short() {
+		t.Skip("real Git workflow integration runs in the nightly suite")
+	}
+
 	project := newTestWorkspace(t)
 	if output, err := exec.Command("git", "init", "-q", project).CombinedOutput(); err != nil {
 		t.Fatalf("git init: %v: %s", err, output)

@@ -14,6 +14,10 @@ type workflowGitFixture struct {
 func newWorkflowGitFixture(t *testing.T, method string) workflowGitFixture {
 	t.Helper()
 
+	if testing.Short() {
+		t.Skip("real Git workflow integration runs in the nightly suite")
+	}
+
 	root := t.TempDir()
 	actor, remote := filepath.Join(root, "actor"), filepath.Join(root, "canonical.git")
 	workflowIntegrationCommand(t, root, "init", "--quiet", "--initial-branch=dev", actor)

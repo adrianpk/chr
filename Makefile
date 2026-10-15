@@ -15,13 +15,25 @@ QA_REF ?= 001
 GATE_BASE ?= origin/main
 GATE_HEAD ?= origin/dev
 
-.PHONY: fmt test test-coverage lint lint-strict check verify check-go-style check-package-readmes dev-dirs run build build-run install clean-dev gate-dev-main qa-reset qa-test qa-smoke qa-gate qa-reset-blog qa-test-blog qa-smoke-blog qa-reset-tictactoe qa-test-tictactoe qa-smoke-tictactoe qa-native-integration qa-ticket-native-workflow
+.PHONY: fmt test test-ci test-full test-race nightly test-coverage lint lint-strict check verify check-go-style check-package-readmes dev-dirs run build build-run install clean-dev gate-dev-main qa-reset qa-test qa-smoke qa-gate qa-reset-blog qa-test-blog qa-smoke-blog qa-reset-tictactoe qa-test-tictactoe qa-smoke-tictactoe qa-native-integration qa-ticket-native-workflow
 
 fmt:
 	@$(GO) fmt ./...
 
 test:
-	@$(GO) test ./...
+	@$(GO) test -short -timeout=3m ./...
+
+test-ci:
+	@python3 -m unittest discover -s scripts/qa -p 'test_nightly.py'
+
+test-full:
+	@$(GO) test -count=1 -timeout=90m ./...
+
+test-race:
+	@$(GO) test -race -count=1 -timeout=90m ./...
+
+nightly:
+	@python3 scripts/qa/nightly.py $(GO)
 
 test-coverage:
 	@$(GO) test -coverprofile=$(COVERAGE_OUT) ./...
@@ -45,7 +57,7 @@ check-package-readmes:
 
 check: fmt check-go-style test
 
-verify: lint-strict test
+verify: lint-strict test test-ci build
 
 dev-dirs:
 	@mkdir -p $(CHR_DEV_HOME)

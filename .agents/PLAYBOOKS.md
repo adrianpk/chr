@@ -10,6 +10,7 @@ This file indexes focused playbooks under `.agents/playbooks/`.
 - `.agents/playbooks/layered-slicing.md`
 - `.agents/playbooks/slice-reporting.md`
 - `.agents/playbooks/testing-strategy.md`
+- `.agents/playbooks/nightly-verification.md`
 - `.agents/playbooks/ticket-workflow.md`
 - `.agents/playbooks/planned-delivery-workflow.md`
 - `.agents/playbooks/release-alignment.md`

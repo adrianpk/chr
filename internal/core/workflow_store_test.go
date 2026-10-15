@@ -14,6 +14,10 @@ import (
 func workflowTestStore(t *testing.T) *WorkflowStore {
 	t.Helper()
 
+	if testing.Short() {
+		t.Skip("real Git workflow integration runs in the nightly suite")
+	}
+
 	dir := t.TempDir()
 	if output, err := exec.Command("git", "init", "-q", dir).CombinedOutput(); err != nil {
 		t.Fatalf("git init: %v: %s", err, output)

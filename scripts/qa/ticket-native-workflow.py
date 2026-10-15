@@ -109,10 +109,12 @@ def stop_fixture_children():
     raise ValueError("owned fixtures did not stop within the cleanup deadline")
 
 
-def run_scenarios(command, timeout=1800):
+def run_scenarios(command, timeout=1800, env=None, stdout=None):
     own_fixture_children()
     try:
-        result = subprocess.run(command, cwd=ROOT, timeout=timeout, check=False)
+        result = subprocess.run(
+            command, cwd=ROOT, timeout=timeout, check=False, env=env, stdout=stdout
+        )
     finally:
         leaked = stop_fixture_children()
     if leaked:
@@ -120,9 +122,7 @@ def run_scenarios(command, timeout=1800):
     return result.returncode
 
 
-def main():
-    if len(sys.argv) > 2:
-        raise ValueError("usage: ticket-native-workflow.py [go-executable]")
+def scenario_names():
     tests = load_bindings("acceptance.json", "criteria", [f"A{i:02}" for i in range(1, 25)])
     faults = load_bindings(
         "faults.json", "faults", ["restart", "crash", "lost_response", "manual_edit"]
@@ -134,6 +134,13 @@ def main():
     names = sorted({name for _, name in tests})
     if len(names) > 128:
         raise ValueError("scenario suite exceeds 128 distinct tests")
+    return names
+
+
+def main():
+    if len(sys.argv) > 2:
+        raise ValueError("usage: ticket-native-workflow.py [go-executable]")
+    names = scenario_names()
     command = [sys.argv[1] if len(sys.argv) == 2 else "go", "test", *PACKAGES]
     command += ["-run", "^(" + "|".join(names) + ")$", "-count=1", "-timeout=20m", "-v"]
     print(f"Validated A01-A24 and four fault groups; running {len(names)} distinct tests.", flush=True)

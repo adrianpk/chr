@@ -12,6 +12,10 @@ import (
 func serviceWorkflowSliceFixture(t *testing.T) (service, core.WorkflowMaterializationResult, string) {
 	t.Helper()
 
+	if testing.Short() {
+		t.Skip("real Git workflow integration runs in the nightly suite")
+	}
+
 	project := newTestWorkspace(t)
 	if output, err := exec.CommandContext(t.Context(), "git", "init", "-q", project).CombinedOutput(); err != nil {
 		t.Fatalf("git init: %v: %s", err, output)

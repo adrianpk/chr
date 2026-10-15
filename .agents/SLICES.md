@@ -69,7 +69,7 @@ Each slice must:
 1. Commit the approved plan and tracker to `dev`.
 2. Create the recorded branch from current `dev`.
 3. Implement tasks in order.
-4. Run focused checks, then the broadest relevant available gate.
+4. Run focused regressions and the development gate from `.agents/LINTING.md`.
 5. Update the tracker with tasks, commits, and validation.
 6. Create or update the slice report and set it to `reviewing`.
 7. Open the recorded pull request targeting `dev`.

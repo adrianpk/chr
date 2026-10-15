@@ -11,6 +11,10 @@ import (
 // Chromium submits the rendered forms against real HTTP, Git workers and retained
 // state. The repository smoke script enables this owned browser fixture explicitly.
 func TestWebWorkflowBrowser(t *testing.T) {
+	if testing.Short() {
+		t.Skip("browser workflow integration runs in the nightly suite")
+	}
+
 	browserPath := os.Getenv("CHR_WEB_BROWSER")
 	if browserPath == "" {
 		t.Skip("run scripts/qa/web-ui-smoke.sh to enable Chromium workflow actions")

@@ -1,0 +1,55 @@
+name: Nightly Verification
+
+on:
+  schedule:
+    - cron: '17 0 * * *'
+      timezone: Europe/Warsaw
+
+concurrency:
+  group: chr-nightly-dev
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: arch
+    # Admission ends at 00:37; this deadline finishes before the next 04:17 slot.
+    timeout-minutes: 210
+    env:
+      CHR_NATIVE_INTEGRATION_QA: '1'
+    steps:
+      - name: Check out the dev candidate
+        uses: https://data.forgejo.org/actions/checkout@v6
+        with:
+          ref: dev
+          persist-credentials: false
+
+      - name: Admit one attempt in the reserved nightly window
+        id: admission
+        env:
+          CHR_ACTIONS_TOKEN: ${{ forgejo.token }}
+        run: python3 scripts/qa/nightly_admission.py
+
+      - name: Verify runner prerequisites
+        if: steps.admission.outputs.admitted == 'yes'
+        run: |
+          command -v go
+          command -v make
+          command -v git
+          command -v python3
+          command -v cc
+          command -v tea
+          command -v gh
+          command -v ssh
+          command -v acta
+          command -v chromium || command -v google-chrome || command -v google-chrome-stable
+
+      - name: Run exhaustive verification on the captured commit
+        if: steps.admission.outputs.admitted == 'yes'
+        run: make nightly
+
+      - name: Preserve exact-commit results and per-test timings
+        if: always() && steps.admission.outputs.admitted == 'yes'
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: nightly-${{ forgejo.run_id }}
+          path: .build/nightly/

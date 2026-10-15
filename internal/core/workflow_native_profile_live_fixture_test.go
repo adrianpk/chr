@@ -46,6 +46,10 @@ type nativeLiveProfile struct {
 func nativeLiveState(t *testing.T) string {
 	t.Helper()
 
+	if testing.Short() {
+		t.Skip("live forge certification runs in the nightly suite")
+	}
+
 	state := os.Getenv("XDG_STATE_HOME")
 	if state != "" {
 		return state

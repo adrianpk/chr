@@ -33,9 +33,13 @@ not add unrelated test ceremony.
 ## Validation Order
 
 1. Run the smallest focused checks that give fast feedback.
-2. Run the broadest relevant available repository gate.
-3. Run external or deployment checks only with the required authority and
-   safe credentials or test mode.
+2. Run `make verify` for slice or delivery-set integration. Select affected
+   integration regressions explicitly without `-short`, and add focused race
+   instrumentation when concurrency behavior changes.
+3. Leave complete suites and live certification to the daily Forgejo nightly
+   described in `.agents/playbooks/nightly-verification.md`.
+4. Run other external or deployment checks only with the required authority
+   and safe credentials or test mode.
 
 ## Reporting
 

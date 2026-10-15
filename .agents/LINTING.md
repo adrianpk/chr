@@ -1,85 +1,62 @@
-# Go Linting and Quality Gates
+# Go Quality Gates
 
-This repository uses focused quality gates for Go application code.
+This repository keeps interactive development checks separate from exhaustive
+scheduled verification. Use `.agents/playbooks/testing-strategy.md` for test
+selection and `.agents/playbooks/nightly-verification.md` for CI operation.
 
-For test selection and risk-based testing techniques, follow
-`.agents/playbooks/testing-strategy.md`.
+## Development Gate
 
-## Baseline checks
+`make verify` runs strict lint, short Go tests, CI script regressions and the
+application build. `make test`
+uses `go test -short -timeout=3m ./...`. Short mode skips real Git workflow
+fixtures and live-forge certification at their shared setup boundaries. Cheap
+logic, parser, policy and filesystem tests remain enabled.
 
-- Formatting:
-  - `go fmt ./...`
-- Test suite:
-  - `go test ./...`
-- Race-sensitive validation when concurrency behavior changes:
-  - `go test -race ./...`
+Before a task commit, format changed Go files and run focused regressions for
+changed behavior. Before a slice merge or delivery-set closure, run `make verify`
+and the smallest relevant regression selection. For changed IO or workflow
+behavior, explicitly select the affected integration tests without `-short`.
+For changed concurrency behavior, run that focused selection with `-race`.
 
-## Optional stricter checks
+Do not add `go test ./...`, `go test -race ./...`, coverage campaigns or full QA
+suites to each task, slice or controller final gate. Future controller
+configurations use `make verify` as their local final gate. Preserve frozen
+configurations and evidence for already active runs.
 
-If enabled by project setup:
-- `golangci-lint run ./...` for static analysis.
-- `golangci-lint run --timeout=5m ./...` for CI or stricter pre-merge validation.
-- `go vet ./...` when it is not already covered by the configured linter.
-- `go test -cover ./...` or the project's configured coverage command.
+Documentation-only changes require diff and whitespace validation.
 
-## Recommended golangci-lint shape
+## Nightly Gate
 
-Prefer a focused baseline before adding noisy style-only rules:
+`make nightly` runs lint, build, one uncached complete local suite, one complete
+race suite, one browser workflow check and the opted-in live-forge suite once. The normal and race passes
+exclude browser and live certification; separate passes run those named tests.
+Acceptance and fault manifests are checked before execution. Their tests are
+already part of the complete suite and are not repeated as a third local pass.
 
-- `govet`
-- `staticcheck`
-- `ineffassign`
-- `errcheck`
-- `unused`
-- `misspell`
-- `errorlint`
-- `bodyclose` for HTTP-heavy projects
-- `contextcheck` for context-sensitive code
+The Forgejo schedule runs once daily against the captured `dev` commit. Record
+that exact hash and retain per-test timings and failure evidence. A successful
+short gate does not establish exhaustive or live verification. A new commit
+cannot reuse an older commit's nightly result.
 
-Formatters should include:
+Run long gates locally only when the maintainer explicitly requests that run.
+Do not dispatch, emulate or repeat a nightly as part of ordinary delivery.
+Nightly failures require a focused correction followed by the next scheduled
+run, without imposing the whole suite on interactive development.
 
-- `gofmt`
-- `goimports` or `gci`
+## Commands
 
-## Hook policy
+| Command | Purpose |
+| --- | --- |
+| `make test` | Short tests, with a three-minute timeout per package |
+| `make verify` | Strict lint, short Go tests, CI script regressions and build |
+| `go test ./internal/core -run '^TestWorkflowRoundTrip$' -count=1` | Explicit focused integration regression |
+| `go test -race ./internal/core -run '^TestWorkflowRoundTrip$' -count=1` | Focused race mode when relevant |
+| `make nightly` | Complete scheduled local gate; live enabled only by fixture opt-in |
+| `make test-full` | Uncached full local tests, for explicitly requested diagnostics |
+| `make test-race` | Uncached full race tests, for explicitly requested diagnostics |
+| `make qa-ticket-native-workflow` | Explicit acceptance/fault diagnosis |
+| `make qa-native-integration` | Explicit provider and transport diagnosis |
 
-If git hooks are configured, pre-commit should run fast checks only:
-- formatting checks
-- changed-package tests where practical
-- focused lint checks for changed code
-
-Full lint and test gates should run before merge.
-
-## Commit gate
-
-Before each code commit, run formatting and the relevant focused tests for the
-changed packages.
-
-When the change touches shared contracts, generation flows, service boundaries,
-or cross-package behavior, run the repository-level gate before committing:
-
-```text
-make verify
-```
-
-If `make verify` is blocked by known unrelated lint debt, run and report the
-closest passing targeted checks, plus the exact failing gate and reason.
-
-For docs-only commits, validate the diff and whitespace instead of running
-unrelated application tests.
-
-## Rules
-
-- Do not skip tests for behavior changes.
-- Use `.agents/playbooks/testing-strategy.md` when choosing between baseline
-  table-driven tests and higher-rigor techniques such as fuzz, property, race,
-  benchmark, mutation, or CRAP-style risk review.
-- Fix failing checks before declaring work complete.
-- For docs-only changes, validate the diff and whitespace instead of running unrelated application tests.
-- Keep linter strictness high enough to catch defects, but avoid rules that encourage mechanical churn without improving maintainability.
-
-## Root-level gates
-
-- Repository-level quality tasks should run from the repository root unless the project documents a different working directory.
-- Prefer project-owned commands such as `make test`, `make lint`, `make verify`, or CI-equivalent scripts when present.
-- Report the exact command and outcome when closing work.
+Keep defect-oriented lint checks enabled. Do not remove assertions or reduce
+nightly coverage to make development checks faster. Report the exact command,
+result and evidence boundary when closing work.

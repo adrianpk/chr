@@ -62,6 +62,10 @@ func serviceWorkflowDeliveryExtentFixture(t *testing.T, extent string) (service,
 func serviceWorkflowDeliveryGit(t *testing.T, dir string, args ...string) {
 	t.Helper()
 
+	if testing.Short() {
+		t.Skip("real Git workflow integration runs in the nightly suite")
+	}
+
 	command := exec.CommandContext(t.Context(), "git", append([]string{"-C", dir}, args...)...)
 	if output, err := command.CombinedOutput(); err != nil {
 		t.Fatalf("delivery Git fixture: %v: %s", err, output)

@@ -37,7 +37,7 @@ creating a branch or changing runtime code.
 2. Create the recorded branch from current `dev`.
 3. Implement only the active slice tasks in order.
 4. Use one Conventional Commit per tracker task when practical.
-5. Run focused checks, then the broadest relevant available gate.
+5. Run focused regressions and the development gate from `.agents/LINTING.md`.
 6. Update tracker tasks, commits, and validation results.
 7. Create the report required by `.agents/playbooks/slice-reporting.md`.
 8. Set the report to `reviewing` and open one pull request targeting `dev`.
