@@ -28,6 +28,8 @@ resolve 78 distinct tests, including six existing native fault tests.
 The adapted three-publication lost-response queue passed once in 18.863 s;
 Final `go test -race ./internal/core -run '^TestWorkflowAssurance' -count=1 -timeout=5m` passed in 170.989 s, including actual native SSH report loss across three publications. Strict lint passed with zero issues. Acta `01M4ZXGH4NM29T2Q1ENX0PN03C`. Bounded `make qa-ticket-native-workflow` passed all 78 tests in 410.319 s on unchanged source `6fa423e7c5ffa4c93282d1e8f16f2f15e3759586c889749dc92f22303e52e2c7`, with no leftover owned children. Acta `01M4ZXX216AR8NEA7XBGAD4AD9`. The owned unit exited successfully.
 
+T13.2 implementation: [8e041477fa4401412316da7b1b91af4ca900c09e](https://forge.adrianpk.com/adrianpk/chr/commit/8e041477fa4401412316da7b1b91af4ca900c09e). Acta `01M4ZXZSH26BFZXTS6PRD01264`.
+
 ## Implementation Notes
 
 The composed fixture uses real worker processes, linked checkouts and the
@@ -64,6 +66,46 @@ No task is considered delivered from a transport response alone.
 - `internal/app/service_workflow_publication.go` and
   `service_workflow_continuation.go`: shared service native port binding.
 
+## Certification Reconciliation
+
+T13.3 fulfills the transferred original live-provider obligation using the
+[integrated Slice 12 certification report](https://forge.adrianpk.com/adrianpk/chr/src/commit/1c625ecce15ab3250498b4a0e24e0bc87b6ec842/ops/default/report/slices/native-integration-queue/slice-12-provider-certification.md).
+All 46 retained live-case files still match their immutable hashes. The host
+index `chr/qa/native-integration-unblock-20261015/live-evidence.json` has SHA-256
+`27ab099281cdc6c2726b525467000fd522475af21fdfc42957d2432391716c19`.
+
+All twelve positive provider/method/transport bindings preserve distinct original
+S and exact delivered P, compatible receipt proof and the original merged PR.
+Fresh canonical reads confirmed all twelve PRs and all 24 actual source/target
+refs at P. Historical PR base metadata matches its retained observation; actual
+Git refs independently prove the current target. GitHub raw source attribution
+remains admitted only by its pinned v2 contract and complete independent P proof.
+
+| Provider | Method | SSH original PR | HTTPS original PR |
+| --- | --- | --- | --- |
+| forgejo | merge | [#61](https://forge.adrianpk.com/adrianpk/chr-integration-qa/pulls/61) | [#52](https://forge.adrianpk.com/adrianpk/chr-integration-qa/pulls/52) |
+| forgejo | rebase | [#64](https://forge.adrianpk.com/adrianpk/chr-integration-qa/pulls/64) | [#55](https://forge.adrianpk.com/adrianpk/chr-integration-qa/pulls/55) |
+| forgejo | squash | [#67](https://forge.adrianpk.com/adrianpk/chr-integration-qa/pulls/67) | [#58](https://forge.adrianpk.com/adrianpk/chr-integration-qa/pulls/58) |
+| github | merge | [#47](https://github.com/adrianpk/chr-integration-qa/pull/47) | [#56](https://github.com/adrianpk/chr-integration-qa/pull/56) |
+| github | rebase | [#50](https://github.com/adrianpk/chr-integration-qa/pull/50) | [#59](https://github.com/adrianpk/chr-integration-qa/pull/59) |
+| github | squash | [#53](https://github.com/adrianpk/chr-integration-qa/pull/53) | [#62](https://github.com/adrianpk/chr-integration-qa/pull/62) |
+
+The other 34 cases retain source/target contention, permission/review denial,
+external close/retarget and lost HTTPS report outcomes. The strict-v1
+counterexample remains preserved in the Slice 12 report.
+
+This slice changes continuation routing and deterministic QA wiring. Production
+transport, history preparation, capability and native receipt/observer contracts
+remain those certified by Slice 12; no individual profile case was invalidated
+by these changes. The configured final candidate QA still rechecks live policy
+and all profiles at the exact clean HEAD. No new live access or policy change
+was made for this reconciliation.
+
+All twelve predecessor reports are delivered. Their canonical PRs #375–#386
+are merged into `dev`, their merge commits are ancestral to the current base,
+and all 47 predecessor task tickets are solved with closure metadata.
+Reconciliation Acta `01M4ZXY81C2RHH091D0M6QPP6T`.
+
 ## Validation
 
 - `go test ./internal/core -run '^TestWorkflowAssuranceOrdered$' -count=1 -timeout=5m`
@@ -88,6 +130,5 @@ Required candidate commands remain, in order: `make verify`,
 
 ## Risks and Follow-ups
 
-T13.3 certification reconciliation and T13.4 exact integrated-gate closure
-remain pending. The original controller remains inactive;
+T13.4 exact integrated-gate closure remains pending. The original controller remains inactive;
 retained implementation alone does not establish original delivery completion.

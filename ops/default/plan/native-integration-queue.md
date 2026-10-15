@@ -547,7 +547,7 @@ Invariants: INV-01, INV-02, INV-03, INV-04, INV-05, INV-06, INV-07, INV-08, INV-
 | --- | --- | --- | --- |
 | T13.1 | [TKT-20261008141429](../ticket/reviewing/20261008141429-ticket-native-t12-1.md) | Reuse original T12.1 at 4f10f1c60de1f164f727d37b4df5c02343ab6e11 and adapt ordered/loose/parallel scenarios to the real publisher. | Composed original and new acceptance passes without duplicate task implementation. |
 | T13.2 | [TKT-20261008141430](../ticket/reviewing/20261008141430-ticket-native-t12-2.md) | Reuse original T12.2 at 44e8145aa618edfc51d5efb08330c641b02f7e58 and adapt its bounded QA/restart/crash scenarios. | Both QA targets retain meaningful fault evidence and bounded real subprocess coverage. |
-| T13.3 | [TKT-20261008141431](../ticket/in_progress/20261008141431-ticket-native-t12-3.md) | Fulfill original T12.3 using current Slice 12 certification and rerun cases invalidated by later implementation or policy changes. | Every claimed provider/method has positive real proof matching delivered behavior. |
+| T13.3 | [TKT-20261008141431](../ticket/reviewing/20261008141431-ticket-native-t12-3.md) | Fulfill original T12.3 using current Slice 12 certification and rerun cases invalidated by later implementation or policy changes. | Every claimed provider/method has positive real proof matching delivered behavior. |
 | T13.4 | [TKT-20261008141432](../ticket/blocked/20261008141432-ticket-native-t12-4.md) | Fulfill original T12.4 by running exact integrated full gates and publishing original/replacement-unit and corrective closure evidence. | All tasks and acceptance obligations close after verified integration; old controller history is preserved without false completion. |
 
 ### Required Candidate Checks

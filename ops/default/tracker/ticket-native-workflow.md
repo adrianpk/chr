@@ -792,7 +792,7 @@ Plan contract: [Slice 12](../plan/ticket-native-workflow.md#slice-12-end-to-end-
 | --- | --- | --- | --- | --- |
 | T12.1 | [TKT-20261008141429](../ticket/reviewing/20261008141429-ticket-native-t12-1.md) | validated | 4f10f1c60de1f164f727d37b4df5c02343ab6e11 | Compose real-files/subprocess/Git scenarios for ordered slices, loose queues and parallel independent work. |
 | T12.2 | [TKT-20261008141430](../ticket/reviewing/20261008141430-ticket-native-t12-2.md) | validated | 44e8145aa618edfc51d5efb08330c641b02f7e58 | Add restart/crash/lost-response/manual-edit fault scenarios and a bounded repository QA entrypoint. |
-| T12.3 | [TKT-20261008141431](../ticket/in_progress/20261008141431-ticket-native-t12-3.md) | blocked | pending | Verify supported existing provider/method paths in designated disposable live repositories. |
+| T12.3 | [TKT-20261008141431](../ticket/reviewing/20261008141431-ticket-native-t12-3.md) | blocked | pending | Verify supported existing provider/method paths in designated disposable live repositories. |
 | T12.4 | [TKT-20261008141432](../ticket/blocked/20261008141432-ticket-native-t12-4.md) | blocked | pending | Run final exact-candidate gates, reconcile the acceptance matrix and publish the cycle evidence/report. |
 
 ### Validation
