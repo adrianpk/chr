@@ -32,7 +32,7 @@ T13.2 implementation: [8e041477fa4401412316da7b1b91af4ca900c09e](https://forge.a
 
 T13.3 implementation: [b2f479d536aba6df4c151303c30d822744252697](https://forge.adrianpk.com/adrianpk/chr/commit/b2f479d536aba6df4c151303c30d822744252697). Acta `01M4ZY5FCRR8Q188427ZAH8DDN`.
 
-T13.4 closure preparation: [4cb701e668d8fbf3b263d08254112ccd62b542f7](https://forge.adrianpk.com/adrianpk/chr/commit/4cb701e668d8fbf3b263d08254112ccd62b542f7). Acta `01M4ZYAEA0WPNBZ07ETNXTD7G6`. Its final integrated-gate outcome remains blocked.
+T13.4 closure preparation: [4cb701e668d8fbf3b263d08254112ccd62b542f7](https://forge.adrianpk.com/adrianpk/chr/commit/4cb701e668d8fbf3b263d08254112ccd62b542f7). Acta `01M4ZYAEA0WPNBZ07ETNXTD7G6`. Its final integrated-gate and cycle-closure outcomes are complete below.
 
 ## Implementation Notes
 
@@ -121,30 +121,30 @@ that evidence without introducing duplicate task tickets.
 | --- | --- |
 | Original A01–A24 and AC-091 | Ordered, loose and parallel native continuation plus real SSH report-loss recovery pass; the 78-test acceptance/fault target passed within its bounds. |
 | AC-001–AC-090 and AC-096–AC-100 | The approved primary ownership map, twelve delivered reports and reconciled certification retain implementation evidence; final candidate evidence belongs to the exact clean PR head. |
-| AC-092 | Required candidate checks passed in configured order on the final clean PR head; the controller's unchanged full gate must then pass on the exact integrated development revision. |
-| AC-093 | All thirteen corrective merges and 50 solved tasks are verified. T13.4 final closure remains pending on the integrated gate. |
-| AC-094 | Original T12.1–T12.4 execute as T13.1–T13.4 through this replacement PR. Original cycle closure requires the replacement merge/report and exact integrated gate evidence. |
-| AC-095 | Final closure must retain reconciliation, absence of unknown publication and verified original/corrective closure evidence. It remains pending. |
+| AC-092 | Required candidate checks passed in configured order on the final clean PR head; the controller's unchanged full gate passed on the exact integrated development revision `53205d3ef3137ac2f77ba93b948b91d290b226bf`. |
+| AC-093 | All thirteen corrective merges and all 51 solved tasks are verified, including T13.4 integrated-gate and cycle closure. |
+| AC-094 | Original T12.1–T12.4 execute as T13.1–T13.4 through this replacement PR. Original cycle closure records the verified replacement merge/report and exact integrated gate evidence. |
+| AC-095 | Verified original/corrective cycle reports retain publication reconciliation, completed task fanout and absence of a live validation or owned fixture process. |
 
-T13.4 prepares these bindings and the existing configured closure paths. The
-controller owns integration and the post-integration full gate:
+T13.4 finalizes these bindings and the configured closure paths. The controller
+completed integration and the post-integration full gate:
 
 ```sh
 make verify && go test -race ./... && make qa-ticket-native-workflow && make qa-native-integration && git diff --check
 ```
 
-After that gate succeeds, only approved closure documentation may record the
-exact development SHA, ordered results, replacement PR/report and original versus
-corrective task outcomes. The outstanding cycle reports are created during that
-closure phase, using the controller's retained evidence. Runtime changes require
-the authorized correction route and fresh validation.
+The approved closure documentation records the exact development SHA, ordered
+results, replacement PR/report and original versus corrective task outcomes. Both
+cycle reports use the controller's retained evidence. Runtime changes require the
+authorized correction route and fresh validation.
 
 The original reserved branch remains at
 `6100f7d166cc3c61466dcacae05c26baabb2460b`. Its historical blocked execution and
 consumed budgets are preserved. No original assurance PR or historical controller
 completion is invented; this Slice 13 report is the canonical replacement unit.
-Replacement integration is verified. T13.4 remains blocked on the exact integrated
-full gate and subsequent cycle closure. Neither delivery set is complete yet.
+Replacement integration and the exact integrated full gate are verified. T13.4
+and both delivery sets are complete through this replacement unit and the linked
+cycle reports. Historical original controller completion is not claimed.
 
 ## Validation
 
@@ -168,13 +168,25 @@ full gate and subsequent cycle closure. Neither delivery set is complete yet.
 
 Verified merge: `88a9c6344f5e80d5a9a03357a1ce71d106e1231f` at 2026-10-15T16:48:49Z; controller Acta `01M507ET2KEAG9ATT5QAEGKMJ6`.
 
-All five configured candidate checks passed in order on that exact clean HEAD: `make verify`, `go test -race ./...`, `make qa-ticket-native-workflow`, `make qa-native-integration`, and `git diff --check`. Validation `3GRRMCM246GSGUCZVTSUTZM6XY`; Acta `01M507ENSTTAR7FZY5KXB66DE0`. The separate integrated full gate remains controller-owned and pending.
+All five configured candidate checks passed in order on that exact clean HEAD: `make verify`, `go test -race ./...`, `make qa-ticket-native-workflow`, `make qa-native-integration`, and `git diff --check`. Validation `3GRRMCM246GSGUCZVTSUTZM6XY`; Acta `01M507ENSTTAR7FZY5KXB66DE0`. The separate controller-owned integrated full gate passed at `53205d3ef3137ac2f77ba93b948b91d290b226bf`.
 
 Successful candidate commands, in order: `make verify`,
 `go test -race ./...`, `make qa-ticket-native-workflow`,
 `make qa-native-integration`, and `git diff --check`.
 
+## Verified Integrated Gate and Closure
+
+Integrated gate: `53205d3ef3137ac2f77ba93b948b91d290b226bf`, validation `NBI367KUPEFV57HTVM4EEJPLR5`, passed 2026-10-15T19:31:48Z; Acta `01M50GZ2ZA45XK37VP318GCR9K`.
+
+`make verify && go test -race ./... && make qa-ticket-native-workflow && make qa-native-integration && git diff --check` passed. Strict lint reported zero issues; full normal and race suites, 78 bounded acceptance/fault tests and all 46 live cases passed. Twelve positive cases cover both providers, all three methods and SSH/HTTPS with receipt-compatible proof.
+
+The [corrective cycle report](../../native-integration-queue-cycle.md) and
+[original cycle report](../../ticket-native-workflow-cycle.md) retain final
+acceptance and replacement-unit evidence. Only approved documentation changes
+follow the tested candidate. The owned gate launcher/context were removed after
+validation; fixture repositories, denial policies and case evidence are retained.
+
 ## Risks and Follow-ups
 
-T13.4 exact integrated-gate closure remains pending. Retained implementation
-alone does not establish original delivery completion.
+None recorded. The strict-v1 GitHub counterexample remains retained; supported
+rebase uses the explicit v2 contract and independent exact-result proof.

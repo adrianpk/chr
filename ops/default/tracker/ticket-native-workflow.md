@@ -1,6 +1,6 @@
 # Ticket-Native Work Tracker
 
-Status: blocked
+Status: Completed
 
 Date: 2026-10-08
 
@@ -22,13 +22,13 @@ Implementation authorization: granted on 2026-10-08 for the approved delivery se
 
 Planning commit on dev: the bootstrap commit introducing this tracker; resolve with `git log --diff-filter=A --format=%H -- ops/default/tracker/ticket-native-workflow.md`
 
-Active slice: Slice 12 — End-to-end workflow assurance; execution transferred to corrective Slice 13.
+Active slice: none; final assurance delivered through corrective Slice 13
 
-Next slice: none; final delivery-set gate follows the last verified integration.
+Next slice: none; approved original delivery outcomes completed
 
 Slice strategy: behavior-first
 
-Progress: eleven original slices integrated, with the replacement assurance PR also integrated; 47 of 48 tasks done. Original T12.4 remains blocked on the integrated gate and cycle closure.
+Progress: eleven original slices plus the replacement final assurance unit are integrated; all 48 original tasks are done. Original T12.4 is solved with the exact integrated gate and cycle closure.
 
 ## Approved Corrective Execution Transfer
 
@@ -49,8 +49,8 @@ Replacement assurance is integrated through [#387](https://forge.adrianpk.com/ad
 `test/slice-13-native-integration-assurance`, with the
 [canonical Slice 13 report](../report/slices/native-integration-queue/slice-13-integration-assurance.md).
 The replacement integration is verified at `88a9c6344f5e80d5a9a03357a1ce71d106e1231f`.
-The original completion state remains blocked until the exact integrated gate
-and cycle closure are verified. Original task identities, reserved branch
+The exact integrated gate and cycle closure are verified below; all original
+delivery outcomes are complete through the replacement assurance unit. Original task identities, reserved branch
 and historical controller budgets remain preserved.
 
 
@@ -65,7 +65,7 @@ Its report is delivered and all four task tickets are solved.
 Acta records the canonical merge in `01M4HEH83Y7RY0GGS6C10NBRNF`.
 The replacement assurance unit is integrated through PR #387. Original T12.1–T12.3
 are solved through corrective T13.1–T13.3 with retained provenance and real
-provider certification. T12.4 remains blocked on the exact integrated gate.
+provider certification. T12.4 is solved with the exact integrated gate and cycle closure.
 The original reserved branch and inactive controller remain unchanged.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
@@ -103,7 +103,7 @@ Fast-forward into `dev`.
 | Slice 9 | Independent parallel runners | `feat/slice-9-workflow-concurrency` | `feat(slice-9): coordinate independent parallel runners` | `ops/default/report/slices/ticket-native-workflow/slice-9-workflow-concurrency.md` | integrated | 4/4 | [#372](https://forge.adrianpk.com/adrianpk/chr/pulls/372) |
 | Slice 10 | Shared operation controls | `feat/slice-10-workflow-controls` | `feat(slice-10): expose shared workflow controls` | `ops/default/report/slices/ticket-native-workflow/slice-10-workflow-controls.md` | integrated | 4/4 | [#373](https://forge.adrianpk.com/adrianpk/chr/pulls/373) |
 | Slice 11 | Defaults and authority transition | `feat/slice-11-workflow-defaults` | `feat(slice-11): enable versioned ticket workflow defaults` | `ops/default/report/slices/ticket-native-workflow/slice-11-workflow-defaults.md` | integrated | 4/4 | #374 |
-| Slice 12 | End-to-end workflow assurance | `test/slice-12-workflow-assurance` | `test(slice-12): verify ticket workflow end to end` | `ops/default/report/slices/ticket-native-workflow/slice-12-workflow-assurance.md` | blocked | 0/4 | pending |
+| Slice 12 | End-to-end workflow assurance | `test/slice-12-workflow-assurance` | `test(slice-12): verify ticket workflow end to end` | `ops/default/report/slices/ticket-native-workflow/slice-12-workflow-assurance.md` | integrated through replacement | 4/4 | [#387](https://forge.adrianpk.com/adrianpk/chr/pulls/387), replacement unit |
 
 ## Slice 1: Guarded workflow records
 
@@ -786,7 +786,7 @@ Acceptance: A16, A18; explicit adoption and configuration bounds in A24.
 
 ## Slice 12: End-to-end workflow assurance
 
-Status: blocked
+Status: integrated through the approved corrective Slice 13 replacement
 
 Prerequisite: satisfied by verified canonical PR #374 integration into dev.
 
@@ -803,16 +803,15 @@ Plan contract: [Slice 12](../plan/ticket-native-workflow.md#slice-12-end-to-end-
 | T12.1 | [TKT-20261008141429](../ticket/solved/20261008141429-ticket-native-t12-1.md) | done | 91a00cf358255332c9e3f9365771efbfbe5e640a | Compose real-files/subprocess/Git scenarios for ordered slices, loose queues and parallel independent work. |
 | T12.2 | [TKT-20261008141430](../ticket/solved/20261008141430-ticket-native-t12-2.md) | done | 8e041477fa4401412316da7b1b91af4ca900c09e | Add restart/crash/lost-response/manual-edit fault scenarios and a bounded repository QA entrypoint. |
 | T12.3 | [TKT-20261008141431](../ticket/solved/20261008141431-ticket-native-t12-3.md) | done | b2f479d536aba6df4c151303c30d822744252697 | Verify supported existing provider/method paths in designated disposable live repositories. |
-| T12.4 | [TKT-20261008141432](../ticket/blocked/20261008141432-ticket-native-t12-4.md) | blocked | pending | Run final exact-candidate gates, reconcile the acceptance matrix and publish the cycle evidence/report. |
+| T12.4 | [TKT-20261008141432](../ticket/solved/20261008141432-ticket-native-t12-4.md) | done | `4cb701e668d8fbf3b263d08254112ccd62b542f7` preparation; exact gate `53205d3e` | Run final exact-candidate gates, reconcile the acceptance matrix and publish the cycle evidence/report. |
 
 ### Validation
 
-Status: all five configured replacement candidate checks passed; integrated full gate pending.
+Status: all five configured replacement candidate checks and the exact integrated full gate passed.
 
-Expected focused checks: run the composed scenarios via the QA entrypoint delivered by
-T12.2, then the standard `make verify`, `go test -race ./...` and
-`git diff --check` on one immutable candidate. Future `make qa-ticket-native-workflow`
-is not a command available at planning time.
+The composed QA entrypoint, full normal/race suites and live certification passed
+on the immutable integrated candidate recorded in Final Closure. The original
+planning-time command expectations remain provenance.
 
 Required candidate checks: `make verify` and `git diff --check`.
 
@@ -823,9 +822,9 @@ Acceptance: composed confirmation of A01-A24 and live-provider limitations.
 - Replacement PR: [#387](https://forge.adrianpk.com/adrianpk/chr/pulls/387); the original reserved branch has no claimed PR.
 - Replacement merge commit: `88a9c6344f5e80d5a9a03357a1ce71d106e1231f` on 2026-10-15T16:48:49Z; controller Acta `01M507ET2KEAG9ATT5QAEGKMJ6`.
 - Canonical replacement report: [Slice 13](../report/slices/native-integration-queue/slice-13-integration-assurance.md), delivered.
-- Original T12.1–T12.3 are solved through their corrective aliases. Original retained commits remain provenance; T12.4 awaits the integrated gate.
+- All four original assurance tasks are solved through their corrective aliases. Original retained commits remain provenance; T12.4 records the integrated gate and cycle closure.
 - Candidate validation: `3GRRMCM246GSGUCZVTSUTZM6XY`, all five ordered checks passed at the replacement merge SHA; Acta `01M507ENSTTAR7FZY5KXB66DE0`.
-- Live prerequisite: both designated repositories and all supported method/transport profiles passed certification; exact integrated gate remains pending.
+- Live prerequisite: both designated repositories and all supported method/transport profiles passed certification; exact integrated gate passed at `53205d3ef3137ac2f77ba93b948b91d290b226bf`.
 
 ## Acceptance Evidence
 
@@ -834,30 +833,30 @@ behavior is tested in its primary delivery slices rather than deferred here.
 
 | Criterion | Primary slices | Evidence | State |
 | --- | --- | --- | --- |
-| A01 | 2, 5 | pending | pending |
-| A02 | 1, 2 | pending | pending |
-| A03 | 6, 7 | pending | pending |
-| A04 | 3, 7 | pending | pending |
-| A05 | 3, 8 | pending | pending |
-| A06 | 4 | pending | pending |
-| A07 | 3, 4, 7, 8 | pending | pending |
-| A08 | 5 | pending | pending |
-| A09 | 4, 9, 10 | pending | pending |
-| A10 | 9 | pending | pending |
-| A11 | 6, 9 | pending | pending |
-| A12 | 4, 9 | pending | pending |
-| A13 | 5, 6, 7, 8 | pending | pending |
-| A14 | 6 | pending | pending |
-| A15 | 6 | pending | pending |
-| A16 | 11 | pending | pending |
-| A17 | 4, 10 | pending | pending |
-| A18 | 11 | pending | pending |
-| A19 | 7, 8 | pending | pending |
-| A20 | 7 | pending | pending |
-| A21 | 4, 6, 10 | pending | pending |
-| A22 | 1, 5 | pending | pending |
-| A23 | 10 | pending | pending |
-| A24 | 1, 3, 4, 6, 7, 9, 11 | pending | pending |
+| A01 | 2, 5 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A02 | 1, 2 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A03 | 6, 7 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A04 | 3, 7 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A05 | 3, 8 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A06 | 4 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A07 | 3, 4, 7, 8 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A08 | 5 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A09 | 4, 9, 10 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A10 | 9 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A11 | 6, 9 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A12 | 4, 9 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A13 | 5, 6, 7, 8 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A14 | 6 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A15 | 6 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A16 | 11 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A17 | 4, 10 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A18 | 11 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A19 | 7, 8 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A20 | 7 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A21 | 4, 6, 10 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A22 | 1, 5 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A23 | 10 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
+| A24 | 1, 3, 4, 6, 7, 9, 11 | [Composed evidence](../report/ticket-native-workflow-cycle.md#acceptance-evidence) | verified |
 
 ## External Prerequisites
 
@@ -870,22 +869,36 @@ behavior is tested in its primary delivery slices rather than deferred here.
 
 ## Final Closure
 
-Status: not started.
+Status: Completed
 
-Expected cycle report: `ops/default/report/ticket-native-workflow-cycle.md`.
+Cycle report: [Ticket-Native Workflow Delivery Cycle](../report/ticket-native-workflow-cycle.md).
 
-Final exact-dev candidate: pending.
+Final exact-dev candidate: `53205d3ef3137ac2f77ba93b948b91d290b226bf`; validation `NBI367KUPEFV57HTVM4EEJPLR5`, passed.
 
 Required final evidence: `make verify`, `go test -race ./...`,
-the `make qa-ticket-native-workflow` entrypoint to be delivered in Slice 12,
+the delivered `make qa-ticket-native-workflow` entrypoint,
 and `git diff --check` on the recorded immutable candidate.
 
-Closure requires 48 done task tickets, 12 verified slice integrations, delivered
-canonical slice reports and A01-A24 evidence. Releases and promotion to `main`
+Closure records 48 done task tickets, eleven original verified integrations plus
+the approved replacement assurance PR, eleven original delivered reports plus the
+canonical replacement report, and A01–A24 evidence. Releases and promotion to `main`
 are separate from this delivery set.
 
 ## Open Questions
 
 No product-contract decision is open. Execution approval and 48 ticket bindings
-are recorded in the bootstrap commit. Live-provider fixture designation remains
-an external prerequisite before the affected publication validation.
+are recorded in the bootstrap commit. Both disposable fixture repositories were designated and all supported profiles
+passed real certification; no execution prerequisite remains open.
+
+## Verified Replacement Closure
+
+Integrated gate: `53205d3ef3137ac2f77ba93b948b91d290b226bf`, validation `NBI367KUPEFV57HTVM4EEJPLR5`, passed 2026-10-15T19:31:48Z; Acta `01M50GZ2ZA45XK37VP318GCR9K`.
+
+All 48 original task outcomes and A01–A24 are complete. Eleven original slice
+merges and corrective [PR #387](https://forge.adrianpk.com/adrianpk/chr/pulls/387)
+provide the approved twelve-unit outcome. The
+[original cycle report](../report/ticket-native-workflow-cycle.md) links all acceptance IDs and the
+[canonical replacement report](../report/slices/native-integration-queue/slice-13-integration-assurance.md).
+The original reserved branch remains at `6100f7d166cc3c61466dcacae05c26baabb2460b`;
+its inactive blocked controller and consumed budgets are historical provenance,
+not a resumed or completed original execution. No successor is recorded.

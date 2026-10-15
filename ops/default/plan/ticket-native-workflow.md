@@ -1,6 +1,6 @@
 # Ticket-Native Work Delivery
 
-Status: blocked
+Status: Completed
 
 Date: 2026-10-08
 
@@ -20,9 +20,9 @@ Plan approval: approved on 2026-10-08
 
 Implementation authorization: granted on 2026-10-08 for the approved delivery set through slice-loop
 
-Active slice: Slice 12 — End-to-end workflow assurance; execution transferred to corrective Slice 13.
+Active slice: none; final assurance delivered through corrective Slice 13
 
-Next slice: Slice 12 — End-to-end workflow assurance
+Next slice: none; approved original delivery outcomes completed
 
 Slice strategy: behavior-first
 
@@ -52,8 +52,8 @@ Replacement assurance is integrated through [#387](https://forge.adrianpk.com/ad
 `test/slice-13-native-integration-assurance`, with the
 [canonical Slice 13 report](../report/slices/native-integration-queue/slice-13-integration-assurance.md).
 The replacement integration is verified at `88a9c6344f5e80d5a9a03357a1ce71d106e1231f`.
-The original completion state remains blocked until the exact integrated gate
-and cycle closure are verified. Original task identities, reserved branch
+The exact integrated gate and cycle closure are verified below; all original
+delivery outcomes are complete through the replacement assurance unit. Original task identities, reserved branch
 and historical controller budgets remain preserved.
 
 
@@ -553,8 +553,9 @@ Acceptance owned: composed confirmation of A01-A24 and live-provider limitations
 
 ## Closure
 
-The set closes only after all 48 task tickets are complete, all 12 slice PRs are
-verified integrated into `dev`, and every canonical slice report is delivered.
+All 48 task outcomes are complete through eleven original canonical merges plus
+the approved corrective Slice 13 replacement PR. The eleven original reports and
+canonical replacement report are delivered; the integrated full gate passed.
 Record one final exact-`dev` validation after the last merge with `make verify`,
 the full race suite and the composed QA target. Do not repeat an unchanged green
 candidate's gate without a new concern. If integration changes the candidate,
@@ -573,3 +574,16 @@ No product-contract question blocks execution. Plan/tracker approval and
 implementation authorization are recorded above; the bootstrap commit versions
 the approved set and its 48 task bindings with Slice 1 active. The particular disposable provider repositories/access are resolved
 before live validation; they are not selected by this document.
+
+## Verified Replacement Closure
+
+Integrated gate: `53205d3ef3137ac2f77ba93b948b91d290b226bf`, validation `NBI367KUPEFV57HTVM4EEJPLR5`, passed 2026-10-15T19:31:48Z; Acta `01M50GZ2ZA45XK37VP318GCR9K`.
+
+All 48 original task outcomes and A01–A24 are complete. Eleven original slice
+merges and corrective [PR #387](https://forge.adrianpk.com/adrianpk/chr/pulls/387)
+provide the approved twelve-unit outcome. The
+[original cycle report](../report/ticket-native-workflow-cycle.md) links all acceptance IDs and the
+[canonical replacement report](../report/slices/native-integration-queue/slice-13-integration-assurance.md).
+The original reserved branch remains at `6100f7d166cc3c61466dcacae05c26baabb2460b`;
+its inactive blocked controller and consumed budgets are historical provenance,
+not a resumed or completed original execution. No successor is recorded.

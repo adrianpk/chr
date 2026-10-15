@@ -1,6 +1,6 @@
 # Native Integration Corrective Delivery
 
-Status: active
+Status: Completed
 
 Date: 2026-10-11
 
@@ -18,9 +18,9 @@ Plan approval: approved on 2026-10-11 under the explicit instruction to process 
 
 Implementation authorization: granted for the complete ordered corrective set and its defined task/PR map.
 
-Active slice: none; all thirteen slices integrated; final integrated gate pending
+Active slice: none; all thirteen slices delivered; final integrated gate passed
 
-Next slice: none; controller-owned integrated gate follows delivered-slice closure
+Next slice: none; approved delivery set completed
 
 Slice strategy: behavior-first
 
@@ -550,7 +550,7 @@ Invariants: INV-01, INV-02, INV-03, INV-04, INV-05, INV-06, INV-07, INV-08, INV-
 | T13.1 | [TKT-20261008141429](../ticket/solved/20261008141429-ticket-native-t12-1.md) | Reuse original T12.1 at 4f10f1c60de1f164f727d37b4df5c02343ab6e11 and adapt ordered/loose/parallel scenarios to the real publisher. | Composed original and new acceptance passes without duplicate task implementation. |
 | T13.2 | [TKT-20261008141430](../ticket/solved/20261008141430-ticket-native-t12-2.md) | Reuse original T12.2 at 44e8145aa618edfc51d5efb08330c641b02f7e58 and adapt its bounded QA/restart/crash scenarios. | Both QA targets retain meaningful fault evidence and bounded real subprocess coverage. |
 | T13.3 | [TKT-20261008141431](../ticket/solved/20261008141431-ticket-native-t12-3.md) | Fulfill original T12.3 using current Slice 12 certification and rerun cases invalidated by later implementation or policy changes. | Every claimed provider/method has positive real proof matching delivered behavior. |
-| T13.4 | [TKT-20261008141432](../ticket/blocked/20261008141432-ticket-native-t12-4.md) | Fulfill original T12.4 by running exact integrated full gates and publishing original/replacement-unit and corrective closure evidence. | All tasks and acceptance obligations close after verified integration; old controller history is preserved without false completion. |
+| T13.4 | [TKT-20261008141432](../ticket/solved/20261008141432-ticket-native-t12-4.md) | Fulfill original T12.4 by running exact integrated full gates and publishing original/replacement-unit and corrective closure evidence. | All tasks and acceptance obligations close after verified integration; old controller history is preserved without false completion. |
 
 ### Required Candidate Checks
 
@@ -560,13 +560,13 @@ Invariants: INV-01, INV-02, INV-03, INV-04, INV-05, INV-06, INV-07, INV-08, INV-
 - `make qa-native-integration`
 - `git diff --check`
 
-Slice 12 prerequisite verified. T13.1–T13.3 implementation and focused evidence are validated. T13.4 closure preparation is integrated, with its final outcome blocked on the exact integrated full gate. T13.1–T13.3 are delivered through PR #387; T13.4 closes only with the controller's exact integrated-gate evidence.
+Slice 12 prerequisite verified. T13.1–T13.3 implementation and focused evidence are validated. T13.1–T13.3 are delivered through PR #387. T13.4 is complete with the exact integrated full gate and both cycle reports; all reused task identities and original execution provenance are preserved.
 
 
 
 Verified merge: `88a9c6344f5e80d5a9a03357a1ce71d106e1231f` at 2026-10-15T16:48:49Z; controller Acta `01M507ET2KEAG9ATT5QAEGKMJ6`.
 
-All five configured candidate checks passed in order on that exact clean HEAD: `make verify`, `go test -race ./...`, `make qa-ticket-native-workflow`, `make qa-native-integration`, and `git diff --check`. Validation `3GRRMCM246GSGUCZVTSUTZM6XY`; Acta `01M507ENSTTAR7FZY5KXB66DE0`. The separate integrated full gate remains controller-owned and pending.
+All five configured candidate checks passed in order on that exact clean HEAD: `make verify`, `go test -race ./...`, `make qa-ticket-native-workflow`, `make qa-native-integration`, and `git diff --check`. Validation `3GRRMCM246GSGUCZVTSUTZM6XY`; Acta `01M507ENSTTAR7FZY5KXB66DE0`. The separate controller-owned integrated full gate passed at `53205d3ef3137ac2f77ba93b948b91d290b226bf`; see the final closure evidence below.
 
 ## Final Gate and Closure
 
@@ -712,3 +712,11 @@ Every acceptance ID maps to primary evidence owners below. Slice 13 owns the com
 | INV-22 | 4, 9, 11 |
 | INV-23 | 2, 9, 10, 11, 12 |
 | INV-24 | 3, 10 |
+
+## Verified Final Closure
+
+The controller-owned integrated gate passed at `53205d3ef3137ac2f77ba93b948b91d290b226bf` on 2026-10-15. Validation `NBI367KUPEFV57HTVM4EEJPLR5` ran the unchanged configured command from 16:59:33 to 19:31:48 UTC; its terminal record is passed with no active check child. Acta `01M50GZ2ZA45XK37VP318GCR9K`. All thirteen corrective PRs are verified merged, all 51 execution tickets are solved, and both cycle reports retain the exact gate and replacement-unit evidence.
+
+Integrated gate: `53205d3ef3137ac2f77ba93b948b91d290b226bf`, validation `NBI367KUPEFV57HTVM4EEJPLR5`, passed 2026-10-15T19:31:48Z; Acta `01M50GZ2ZA45XK37VP318GCR9K`.
+
+Cycle evidence: [Corrective delivery](../report/native-integration-queue-cycle.md) and [Original delivery](../report/ticket-native-workflow-cycle.md). No successor is recorded. The original reserved branch and inactive blocked controller retain their historical checkpoint and consumed budgets.
