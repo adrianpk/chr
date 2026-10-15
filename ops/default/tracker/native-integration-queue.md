@@ -464,9 +464,9 @@ Prerequisite: verified Slice 12 integration and closed task fanout.
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T13.1 | [TKT-20261008141429](../ticket/reviewing/20261008141429-ticket-native-t12-1.md) | validated | retained: 4f10f1c60de1f164f727d37b4df5c02343ab6e11 | Adapt retained composed workflow assurance |
-| T13.2 | [TKT-20261008141430](../ticket/in_progress/20261008141430-ticket-native-t12-2.md) | in_progress | retained: 44e8145aa618edfc51d5efb08330c641b02f7e58 | Adapt retained fault QA entrypoint |
-| T13.3 | [TKT-20261008141431](../ticket/ready/20261008141431-ticket-native-t12-3.md) | ready | retained: pending | Reconcile real certification with final behavior |
+| T13.1 | [TKT-20261008141429](../ticket/reviewing/20261008141429-ticket-native-t12-1.md) | validated | [91a00cf358255332c9e3f9365771efbfbe5e640a](https://forge.adrianpk.com/adrianpk/chr/commit/91a00cf358255332c9e3f9365771efbfbe5e640a) | Adapt retained composed workflow assurance |
+| T13.2 | [TKT-20261008141430](../ticket/reviewing/20261008141430-ticket-native-t12-2.md) | validated | retained: 44e8145aa618edfc51d5efb08330c641b02f7e58 | Adapt retained fault QA entrypoint |
+| T13.3 | [TKT-20261008141431](../ticket/in_progress/20261008141431-ticket-native-t12-3.md) | in_progress | retained: pending | Reconcile real certification with final behavior |
 | T13.4 | [TKT-20261008141432](../ticket/blocked/20261008141432-ticket-native-t12-4.md) | blocked | retained: pending | Run final gates and close both deliveries |
 
 Required checks:
@@ -481,9 +481,12 @@ PR: pending
 
 Verified merge: pending
 
-Report/evidence: [Slice 13 report](../report/slices/native-integration-queue/slice-13-integration-assurance.md). T13.1 adapts the retained scenarios to production atomic publication and native receipt continuation. Ordered, loose and parallel scenarios passed in 51.739 s; strict lint passed with zero issues. Expanded focused race checks passed in 452.844 s; Acta `01M4ZT1TSNNZ5CB01K2H1VM7S8`. Required pre-commit `make verify` passed in 2939.843 s on unchanged source `b28e8b30e9b4fb93c0d21079d4c21f1af2918fa80d82a5639b775a4ae2c29e67`; core 2907.443 s, app 207.917 s and all remaining packages passed with zero strict-lint issues. Acta `01M4ZWVHWVZ43BM362QWXH8QPH`. T13.1 is validated for its task commit; canonical PR and integration remain pending.
+Report/evidence: [Slice 13 report](../report/slices/native-integration-queue/slice-13-integration-assurance.md). T13.1 adapts the retained scenarios to production atomic publication and native receipt continuation. Ordered, loose and parallel scenarios passed in 51.739 s; strict lint passed with zero issues. Expanded focused race checks passed in 452.844 s; Acta `01M4ZT1TSNNZ5CB01K2H1VM7S8`. Required pre-commit `make verify` passed in 2939.843 s on unchanged source `b28e8b30e9b4fb93c0d21079d4c21f1af2918fa80d82a5639b775a4ae2c29e67`; core 2907.443 s, app 207.917 s and all remaining packages passed with zero strict-lint issues. Acta `01M4ZWVHWVZ43BM362QWXH8QPH`. T13.1 is committed and pushed at `91a00cf358255332c9e3f9365771efbfbe5e640a` (Acta `01M4ZWXQQ90GGQHNRX72TNKCK7`); canonical PR and integration remain pending.
 
-Slice 12 prerequisite verified. T13.1 validation is complete; T13.2 now adapts retained fault QA, followed by T13.3 certification reconciliation. T13.4 retains its final integrated-gate dependency and will close only with controller evidence after integration.
+Slice 12 prerequisite verified. T13.1 validation is complete; T13.2 fault QA is validated; T13.3 certification reconciliation is active. T13.4 retains its final integrated-gate dependency and will close only with controller evidence after integration.
+
+
+T13.2 final composed race checks passed in 170.989 s with zero strict-lint issues. Its retained QA manifests resolve 78 distinct tests, including six existing native fault tests. Acta `01M4ZXGH4NM29T2Q1ENX0PN03C`. Bounded `make qa-ticket-native-workflow` passed all 78 tests in 410.319 s with no leftover owned fixtures on unchanged source `6fa423e7c5ffa4c93282d1e8f16f2f15e3759586c889749dc92f22303e52e2c7`. Acta `01M4ZXX216AR8NEA7XBGAD4AD9`. T13.2 is validated for its task commit; T13.3 reconciliation is active.
 
 ## Final Delivery Gate
 

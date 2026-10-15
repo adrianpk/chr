@@ -15,7 +15,7 @@ QA_REF ?= 001
 GATE_BASE ?= origin/main
 GATE_HEAD ?= origin/dev
 
-.PHONY: fmt test test-coverage lint lint-strict check verify check-go-style check-package-readmes dev-dirs run build build-run install clean-dev gate-dev-main qa-reset qa-test qa-smoke qa-gate qa-reset-blog qa-test-blog qa-smoke-blog qa-reset-tictactoe qa-test-tictactoe qa-smoke-tictactoe qa-native-integration
+.PHONY: fmt test test-coverage lint lint-strict check verify check-go-style check-package-readmes dev-dirs run build build-run install clean-dev gate-dev-main qa-reset qa-test qa-smoke qa-gate qa-reset-blog qa-test-blog qa-smoke-blog qa-reset-tictactoe qa-test-tictactoe qa-smoke-tictactoe qa-native-integration qa-ticket-native-workflow
 
 fmt:
 	@$(GO) fmt ./...
@@ -82,6 +82,9 @@ qa-smoke:
 
 qa-gate:
 	@scripts/qa/gate.sh
+
+qa-ticket-native-workflow:
+	@python3 scripts/qa/ticket-native-workflow.py $(GO)
 
 qa-native-integration:
 	@CHR_NATIVE_INTEGRATION_QA=1 $(GO) test ./internal/core -run '^(TestNative(ForgejoMethods|GitHubMethods|HTTPSMethods|PolicyDenials|PRChanges|TransportLoss)|TestWorkflowGit(Atomic|Advertisement|HTTPS|SSH|SSHUnknown)|TestNativeCapabilityDenials)$$' -count=1 -v

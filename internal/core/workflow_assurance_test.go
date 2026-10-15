@@ -168,6 +168,19 @@ func checkWorkflowAssuranceClosure(t *testing.T, store *WorkflowStore, hierarchy
 // TestWorkflowAssuranceLoose runs a dependent priority queue from admission to
 // exhaustion through actual workers, one canonical PR per ticket and fresh bases.
 func TestWorkflowAssuranceLoose(t *testing.T) {
+	store, request, ports, provider := workflowAssuranceLooseFixture(t)
+	run := workflowTestStart(t, store, request).Invocation
+	completed := workflowAssuranceRun(t, store, run.ID, ports)
+	checkWorkflowAssuranceDelivery(t, store, completed, provider, []string{"PRJ-90", "PRJ-91", "PRJ-92"}, 3)
+
+	if completed.Outcome != "loose_exhausted" {
+		t.Fatal("loose exhaustion fabricated a set closure")
+	}
+}
+
+func workflowAssuranceLooseFixture(t *testing.T) (*WorkflowStore, WorkflowStartRequest, WorkflowContinuationPorts, *workflowAssuranceProvider) {
+	t.Helper()
+
 	store, first, request := workflowTicketFixture(t, "loose", workflowPreparationGate("ls PRJ-*.txt >/dev/null"))
 	workflowLooseClassify(t, store, first, "critical", TicketStatusReadyForDev)
 	workflowLooseCreate(t, store, first, "PRJ-91", "high", nil)
@@ -177,11 +190,6 @@ func TestWorkflowAssuranceLoose(t *testing.T) {
 	request.Policy.CheckpointStepLimit = 1
 	request.Selection.Target.Commit, _ = workflowSelectionCommit(t, store)
 	ports, provider := workflowAssurancePorts(t, store, request.Selection.Target.Commit)
-	run := workflowTestStart(t, store, request).Invocation
-	completed := workflowAssuranceRun(t, store, run.ID, ports)
-	checkWorkflowAssuranceDelivery(t, store, completed, provider, []string{"PRJ-90", "PRJ-91", "PRJ-92"}, 3)
 
-	if completed.Outcome != "loose_exhausted" {
-		t.Fatal("loose exhaustion fabricated a set closure")
-	}
+	return store, request, ports, provider
 }

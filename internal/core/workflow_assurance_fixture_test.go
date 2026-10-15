@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/url"
 	"os/exec"
@@ -14,11 +15,12 @@ import (
 // transport. These composed scenarios do not claim live-provider certification.
 type workflowAssuranceProvider struct {
 	*nativePreparationProviderFixture
-	t       *testing.T
-	remote  string
-	prs     map[string]WorkflowPullRequestSnapshot
-	creates int
-	calls   int
+	t             *testing.T
+	remote        string
+	prs           map[string]WorkflowPullRequestSnapshot
+	creates       int
+	calls         int
+	lostPublisher WorkflowGitPublisher
 }
 
 func (p *workflowAssuranceProvider) FindWorkflowPullRequests(_ context.Context, query WorkflowPullRequestQuery) ([]WorkflowPullRequestSnapshot, error) {
@@ -73,8 +75,28 @@ func (p *workflowAssuranceProvider) ReadWorkflowPullRequest(ctx context.Context,
 func (p *workflowAssuranceProvider) PublishWorkflowGit(ctx context.Context, request WorkflowGitPublication) (WorkflowGitPublicationResult, error) {
 	p.calls++
 
-	result, err := NewWorkflowGitPublisher(request.Repository, p.remote).PublishWorkflowGit(ctx, request)
-	if err == nil && result.State == "applied" {
+	var publisher WorkflowGitPublisher = NewWorkflowGitPublisher(request.Repository, p.remote)
+	if p.lostPublisher != nil {
+		publisher = p.lostPublisher
+	}
+
+	result, err := publisher.PublishWorkflowGit(ctx, request)
+	if result.CommandsSent {
+		err = errors.Join(err, p.retainPublicationFacts(ctx, request))
+	}
+
+	return result, err
+}
+
+func (p *workflowAssuranceProvider) retainPublicationFacts(ctx context.Context, request WorkflowGitPublication) error {
+	source, sourceErr := p.ReadWorkflowBranch(ctx, request.Repository, strings.TrimPrefix(request.SourceRef, "refs/heads/"))
+	target, targetErr := p.ReadWorkflowBranch(ctx, request.Repository, strings.TrimPrefix(request.TargetRef, "refs/heads/"))
+
+	if sourceErr != nil || targetErr != nil {
+		return errors.Join(sourceErr, targetErr)
+	}
+
+	if source == request.Git.ResultCommit && target == request.Git.ResultCommit {
 		for key, pr := range p.prs {
 			if "refs/heads/"+pr.HeadBranch == request.SourceRef {
 				pr.State, pr.Merged, pr.ResultCommit, pr.HeadCommit = "closed", true, request.Git.ResultCommit, request.Git.ResultCommit
@@ -83,7 +105,7 @@ func (p *workflowAssuranceProvider) PublishWorkflowGit(ctx context.Context, requ
 		}
 	}
 
-	return result, err
+	return nil
 }
 
 func (p *workflowAssuranceProvider) InspectWorkflowGitPublication(ctx context.Context, request WorkflowGitPublication) (WorkflowGitPublicationAdvertisement, error) {

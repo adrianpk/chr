@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "evidence_kind": "deterministic_local",
+  "faults": [
+    {
+      "id": "restart",
+      "tests": [
+        {
+          "package": "./internal/core",
+          "test": "TestWorkflowCacheDeletion",
+          "source": "internal/core/workflow_index_test.go"
+        },
+        {
+          "package": "./internal/core",
+          "test": "TestWorkflowContinuationTasks",
+          "source": "internal/core/workflow_continuation_test.go"
+        },
+        {
+          "package": "./internal/core",
+          "test": "TestWorkflowContinuationDelivery",
+          "source": "internal/core/workflow_continuation_test.go"
+        },
+        {
+          "package": "./internal/core",
+          "test": "TestWorkflowUpgradeRestart",
+          "source": "internal/core/workflow_upgrade_recovery_test.go"
+        },
+        {
+          "package": "./internal/core",
+          "test": "TestNativeReceiptRestart",
+          "source": "internal/core/workflow_native_receipt_recovery_test.go"
+        }
+      ]
+    },
+    {
+      "id": "crash",
+      "tests": [
+        {
+          "package": "./internal/core",
+          "test": "TestWorkflowClaimJournal",
+          "source": "internal/core/workflow_claim_process_test.go"
+        },
+        {
+          "package": "./internal/core",
+          "test": "TestWorkflowPublicationCrash",
+          "source": "internal/core/workflow_publication_recovery_test.go"
+        },
+        {
+          "package": "./internal/core",
+          "test": "TestWorkflowFinalizationCrash",
+          "source": "internal/core/workflow_finalization_recovery_test.go"
+        },
+        {
+          "package": "./internal/core",
+          "test": "TestWorkflowTrackerCrash",
+          "source": "internal/core/workflow_tracker_recovery_test.go"
+        },
+        {
+          "package": "./internal/core",
+          "test": "TestNativeFaultCrashes",
+          "source": "internal/core/workflow_native_dispatch_crash_test.go"
+        },
+        {
+          "package": "./internal/core",
+          "test": "TestNativeFanoutCrash",
+          "source": "internal/core/workflow_native_finalization_recovery_test.go"
+        }
+      ]
+    },
+    {
+      "id": "lost_response",
+      "tests": [
+        {
+          "package": "./internal/core",
+          "test": "TestWorkflowAssuranceLost",
+          "source": "internal/core/workflow_assurance_fault_test.go"
+        },
+        {
+          "package": "./internal/core",
+          "test": "TestWorkflowSlicePRObservation",
+          "source": "internal/core/workflow_pull_request_test.go"
+        },
+        {
+          "package": "./internal/core",
+          "test": "TestWorkflowPublicationUnknown",
+          "source": "internal/core/workflow_publication_boundary_test.go"
+        },
+        {
+          "package": "./internal/core",
+          "test": "TestWorkflowPublicationModes",
+          "source": "internal/core/workflow_publication_test.go"
+        },
+        {
+          "package": "./internal/core",
+          "test": "TestNativeReceiptLost",
+          "source": "internal/core/workflow_native_receipt_recovery_test.go"
+        }
+      ]
+    },
+    {
+      "id": "manual_edit",
+      "tests": [
+        {
+          "package": "./internal/core",
+          "test": "TestWorkflowTaskRecordEdit",
+          "source": "internal/core/workflow_execution_limits_test.go"
+        },
+        {
+          "package": "./internal/core",
+          "test": "TestWorkflowTrackerConcurrentEdit",
+          "source": "internal/core/workflow_tracker_recovery_test.go"
+        },
+        {
+          "package": "./internal/core",
+          "test": "TestWorkflowClosingChanges",
+          "source": "internal/core/workflow_closing_boundary_test.go"
+        },
+        {
+          "package": "./internal/core",
+          "test": "TestWorkflowUpgradeEdited",
+          "source": "internal/core/workflow_upgrade_recovery_test.go"
+        },
+        {
+          "package": "./internal/core",
+          "test": "TestNativeFanoutEvidence",
+          "source": "internal/core/workflow_native_finalization_guard_test.go"
+        },
+        {
+          "package": "./internal/core",
+          "test": "TestNativeGitFence",
+          "source": "internal/core/workflow_native_reconcile_fence_test.go"
+        }
+      ]
+    }
+  ]
+}

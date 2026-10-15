@@ -20,6 +20,14 @@ loose and parallel scenarios from
 `4f10f1c60de1f164f727d37b4df5c02343ab6e11`. The existing cumulative preparation
 and review frontier corrections are already present and are not replayed.
 
+T13.1 implementation: [91a00cf358255332c9e3f9365771efbfbe5e640a](https://forge.adrianpk.com/adrianpk/chr/commit/91a00cf358255332c9e3f9365771efbfbe5e640a). Acta `01M4ZWXQQ90GGQHNRX72TNKCK7`.
+
+T13.2 reuses the retained fault runner from
+`44e8145aa618edfc51d5efb08330c641b02f7e58`. Its acceptance/fault manifests
+resolve 78 distinct tests, including six existing native fault tests.
+The adapted three-publication lost-response queue passed once in 18.863 s;
+Final `go test -race ./internal/core -run '^TestWorkflowAssurance' -count=1 -timeout=5m` passed in 170.989 s, including actual native SSH report loss across three publications. Strict lint passed with zero issues. Acta `01M4ZXGH4NM29T2Q1ENX0PN03C`. Bounded `make qa-ticket-native-workflow` passed all 78 tests in 410.319 s on unchanged source `6fa423e7c5ffa4c93282d1e8f16f2f15e3759586c889749dc92f22303e52e2c7`, with no leftover owned children. Acta `01M4ZXX216AR8NEA7XBGAD4AD9`. The owned unit exited successfully.
+
 ## Implementation Notes
 
 The composed fixture uses real worker processes, linked checkouts and the
@@ -80,6 +88,6 @@ Required candidate commands remain, in order: `make verify`,
 
 ## Risks and Follow-ups
 
-T13.2 bounded fault QA, T13.3 certification reconciliation and T13.4 exact
-integrated-gate closure remain pending. The original controller remains inactive;
+T13.3 certification reconciliation and T13.4 exact integrated-gate closure
+remain pending. The original controller remains inactive;
 retained implementation alone does not establish original delivery completion.
