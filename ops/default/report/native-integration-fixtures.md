@@ -1,6 +1,6 @@
 # Native Integration Certification Fixtures
 
-Status: designated; Slice 12 blocked on GitHub rebase canonical result proof
+Status: designated; corrective certification passed
 
 Date: 2026-10-11
 
@@ -89,12 +89,23 @@ replies. Its GitHub SSH rebase case contradicted the required canonical result.
 merged with REST, GraphQL and its merge event all reporting original S
 `6a2188ec06a78566c85f952d1d2a637e273b077f`. Both actual refs contain exact P
 `1bf65f7c73daa9259d21101e63784d95be38f331`. The observer correctly withholds
-receipt-compatible proof. GitHub rebase was removed from the host descriptor's
+receipt-compatible proof under v1. GitHub rebase was removed from the host descriptor's
 certified methods; existing successful evidence and the counterexample remain.
 
 The [Slice 12 report](slices/native-integration-queue/slice-12-provider-certification.md)
-retains the exact source/base/result evidence and failed check. The uncommitted
-QA implementation is retained in the dedicated slice worktree. A compatible
-provider profile or explicitly revised approved contract is required for
-continuation. Existing credentials, synthetic refs and created denial policies
-are retained. No production or account policy was changed.
+retains the exact source/base/result evidence and failed check. The explicit
+GitHub `github_same_pr_git_source_attribution/v2` compatibility contract preserves
+raw original-source attribution separately from independently verified exact P,
+with the original PR reported merged and complete transaction/history/source
+proof. Historical v1 evidence is not reinterpreted.
+
+The corrective `make qa-native-integration` run passed all 46 real cases in
+644.844 s, including GitHub rebase on SSH PR #50 and HTTPS PR #59. Focused race
+checks also cover source-attributed observations, receipt contract persistence,
+later refs and declared integration repairs. Required repository pre-commit validation also passed; the Slice 12 report
+records its source identity and results. The delivery controller retains final
+clean-HEAD validation before integration.
+The GitHub descriptor now certifies all three methods under v2 and preserves
+its prior strict-v1 certificate and failure in history.
+Existing credentials, synthetic refs and created denial policies are retained.
+No production or account policy was changed.

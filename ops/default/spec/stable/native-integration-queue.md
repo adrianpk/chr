@@ -503,6 +503,20 @@ Issue a receipt only after proving:
 - Published source movement to P is attributed to the retained transaction or
   equivalent authoritative evidence; a later source update is recorded separately.
 
+Compatibility is pinned to the admitted, versioned observation contract. The
+existing v1 contracts require the forge's reported merge result to equal P.
+The explicit GitHub `github_same_pr_git_source_attribution/v2` contract also
+permits the original PR to attribute a rebase to S, provided the complete verified
+replay and any separately attributed integration repairs bind original S to exact
+P, the Git transaction and target proof establish P, and canonical source
+metadata agrees with the independently observed source
+rewrite. A later source head requires retained transaction attribution and is
+recorded separately. The original PR must still be reported merged. Retain the
+forge's raw result S separately from delivered P; never substitute P into forge
+metadata or infer a merge from reachable commits alone. Other results, methods,
+providers, or missing proof remain incompatible. Certification changes invalidate
+prior admission, and historical v1 evidence keeps its original interpretation.
+
 If Git application is proven but forge merge metadata remains missing, retain
 `observing` and the target barrier. After the observation deadline, expose a
 typed reconciliation blocker. Do not roll back delivered target history, retry

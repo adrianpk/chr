@@ -127,6 +127,7 @@ func (s *WorkflowStore) workflowNativeReceipt(run workflowInvocationFile, submis
 
 	native, git := submission.Native, *observation.Git
 	facts := &WorkflowNativeReceipt{WorkflowNativeRecordBinding: native.WorkflowNativeRecordBinding, CandidateHash: native.CandidateHash, Mechanism: native.Mechanism, CandidateRef: native.CandidateRef, TransactionProofRef: *native.TransportResponseRef, ObservationRefs: []WorkflowEvidenceRef{ref}, ActualMergeResult: observation.PullRequest.ResultCommit}
+	facts.ObservationContract = observation.ObservationContract
 
 	facts.GitApplicationRef, err = s.workflowNativeReceiptApplication(submission)
 	if err != nil {

@@ -13,6 +13,10 @@ type nativeCertificationEvidence struct {
 	Schema            string                       `json:"schema"`
 	Method            string                       `json:"method"`
 	Scenario          string                       `json:"scenario"`
+	Transport         string                       `json:"transport,omitempty"`
+	Policy            json.RawMessage              `json:"remote_policy,omitempty"`
+	HTTPStatus        int                          `json:"http_status,omitempty"`
+	Posts             int                          `json:"publication_posts,omitempty"`
 	Server            string                       `json:"server_api_profile"`
 	Role              string                       `json:"credential_role"`
 	StartedAt         time.Time                    `json:"started_at"`
@@ -54,6 +58,7 @@ func checkNativeReceiptCompatibility(t *testing.T, evidence *nativeCertification
 		CanonicalPR: binding.PullRequest.URL,
 	}
 	native := WorkflowNativeReceipt{WorkflowNativeRecordBinding: b, ActualMergeResult: observed.PullRequest.ResultCommit}
+	native.ObservationContract = observed.ObservationContract
 
 	receipt := WorkflowReceipt{
 		Native: &native, Repository: git.Repository, Method: git.Method, SourceCommit: git.SourceCommit,

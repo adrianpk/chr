@@ -269,6 +269,10 @@ func (s *WorkflowStore) checkWorkflowNativeTransactionRevision(native WorkflowNa
 		return err
 	}
 
+	if native.ObservationContract != "" && native.ObservationContract != capability.ObservationContract {
+		return ErrWorkflowConflict
+	}
+
 	var history WorkflowNativeHistoryManifest
 	if err := s.readWorkflowNativeEvidence(native.InvocationID, native.HistoryManifestRef, &history); err != nil {
 		return err
@@ -291,6 +295,10 @@ func validateWorkflowNativeReceiptObservation(receipt WorkflowReceipt, observati
 	}
 
 	git := *observation.Git
+	if native.ActualMergeResult != receipt.ResultCommit && (native.ObservationContract != observation.ObservationContract || !workflowNativeSourceResultObserved(observation)) {
+		return ErrWorkflowConflict
+	}
+
 	if !workflowNativeRecordGitMatches(native.WorkflowNativeRecordBinding, git) || !workflowReceiptGitMatches(receipt, git) {
 		return ErrWorkflowConflict
 	}
@@ -319,7 +327,7 @@ func validWorkflowNativeCapabilityRecord(capability WorkflowNativeCapability) bo
 		}
 	}
 
-	return len(capability.OwnershipRevision) > 0 && len(capability.OwnershipRevision) <= 256 && !strings.ContainsAny(capability.OwnershipRevision, "\x00\r\n") && slices.Contains([]string{"forgejo_same_pr_git_auto_merge/v1", "github_same_pr_git_merge/v1"}, capability.ObservationContract)
+	return len(capability.OwnershipRevision) > 0 && len(capability.OwnershipRevision) <= 256 && !strings.ContainsAny(capability.OwnershipRevision, "\x00\r\n") && slices.Contains([]string{"forgejo_same_pr_git_auto_merge/v1", "github_same_pr_git_merge/v1", workflowNativeSourceResultContract}, capability.ObservationContract)
 }
 
 func validateWorkflowNativeSourceCommits(b WorkflowNativeRecordBinding, commits []string, git WorkflowIntegrationProof) error {

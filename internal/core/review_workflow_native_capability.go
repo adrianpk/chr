@@ -95,7 +95,7 @@ func (adapter RemoteReviewAdapter) finishWorkflowNativeCapability(ctx context.Co
 	capability.CredentialIdentityFingerprint = workflowHash([]byte(policy.CredentialIdentityFingerprint + "\x00" + identity))
 
 	capability.Unsupported = append(capability.Unsupported, reasons...)
-	if policy.ObservationContract != contract {
+	if !workflowNativeObservationContractMatches(contract, policy.ObservationContract) {
 		capability.Unsupported = append(capability.Unsupported, WorkflowNativeUnsupported{"observation_uncertified", "Certify same-original-PR Git merge observation on this repository."})
 	}
 

@@ -64,6 +64,7 @@ type WorkflowNativeReceipt struct {
 	GitApplicationRef   *WorkflowEvidenceRef  `json:"git_application_ref,omitempty"`
 	ObservationRefs     []WorkflowEvidenceRef `json:"observation_refs"`
 	ActualMergeResult   string                `json:"actual_merge_result"`
+	ObservationContract string                `json:"observation_contract,omitempty"`
 }
 
 func validateWorkflowEvidenceRef(id string, ref WorkflowEvidenceRef) error {
@@ -289,5 +290,5 @@ func workflowNativeReceiptOwnerMatches(receipt WorkflowReceipt) bool {
 		return false
 	}
 
-	return native.Unit == receipt.Unit && native.CanonicalPR == receipt.PullRequest && validWorkflowNativeFingerprint(native.CandidateHash) && native.ActualMergeResult == receipt.ResultCommit && len(native.ObservationRefs) > 0 && len(native.ObservationRefs) <= WorkflowPageLimit
+	return native.Unit == receipt.Unit && native.CanonicalPR == receipt.PullRequest && validWorkflowNativeFingerprint(native.CandidateHash) && workflowNativeReceiptResultMatches(receipt) && len(native.ObservationRefs) > 0 && len(native.ObservationRefs) <= WorkflowPageLimit
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"strings"
 	"testing"
 	"time"
 )
@@ -26,10 +27,16 @@ func TestNativeForgejoMethods(t *testing.T) {
 func nativeMethodCases(t *testing.T, state string, profile nativeLiveProfile) {
 	t.Helper()
 
+	nativeMethodScenarios(t, state, profile, []string{"publication", "source_race", "target_race"})
+}
+
+func nativeMethodScenarios(t *testing.T, state string, profile nativeLiveProfile, scenarios []string) {
+	t.Helper()
+
 	server := readNativeCertificationServer(t, profile)
 	for _, method := range []string{"merge", "rebase", "squash"} {
 		t.Run(method, func(t *testing.T) {
-			for _, scenario := range []string{"publication", "source_race", "target_race"} {
+			for _, scenario := range scenarios {
 				t.Run(scenario, func(t *testing.T) {
 					nativeMethodCase(t, state, profile, server, method, scenario)
 				})
@@ -41,9 +48,15 @@ func nativeMethodCases(t *testing.T, state string, profile nativeLiveProfile) {
 func nativeMethodCase(t *testing.T, state string, profile nativeLiveProfile, server, method, scenario string) {
 	t.Helper()
 
+	transport := "ssh"
+	if strings.HasPrefix(scenario, "https_") {
+		transport, scenario = "https", strings.TrimPrefix(scenario, "https_")
+	}
+
 	evidence := nativeCertificationEvidence{
 		Schema: "chr-native-certification/v1", Method: method, Scenario: scenario,
-		Server: server, Role: "designated repository owner with API and Git push access",
+		Transport: transport,
+		Server:    server, Role: "designated repository owner with API and Git push access",
 		StartedAt: time.Now().UTC(), Native: nativeLiveEvidence{Profile: profile.Forge},
 	}
 
@@ -59,7 +72,7 @@ func nativeMethodCase(t *testing.T, state string, profile nativeLiveProfile, ser
 		PullRequest: pr, Git: request.Git, SourceDirectory: request.Directory,
 		ObservationDeadline: time.Now().Add(2 * time.Minute),
 	}
-	publisher := NewWorkflowGitPublisher(profile.URL, nativeLiveTransport(t, profile))
+	publisher := nativeCertificationPublisher(t, profile, request, transport)
 	evidence.Native.Binding.Capability = admitNativeMethodProbe(t, state, adapter, profile, request, pr, publisher)
 
 	advanced := installNativeContention(t, profile, &request, scenario)

@@ -327,6 +327,9 @@ remote application retains the target barrier until authoritative reconciliation
 Each observation is immutable evidence containing submission ID, timestamp,
 transport/canonical repository identity, actual refs, object/history proof,
 canonical PR state/head/merge result, adapter revision, and interpretation.
+Retain the admitted `observation_contract` with new observations and receipts;
+it must agree with the immutable capability evidence. An absent field preserves
+historical exact-P interpretation and cannot authorize source-result attribution.
 Interpretation is `pending`, `not_applied`, `applied_unconfirmed_pr`,
 `verified`, `conflicting`, or `unobservable`.
 
@@ -343,13 +346,24 @@ Interpretation is `pending`, `not_applied`, `applied_unconfirmed_pr`,
 | `validated_base`, `prepared_result` | B and P. |
 | `method`, `history_manifest_ref`, `prepared_tree` | Actual method proof and exact resulting tree. |
 | `transaction_proof_ref`, `observation_refs` | Git application and canonical PR merged evidence. |
-| `actual_merge_result`, `observed_target` | Observed compatible merge result and current target. |
+| `actual_merge_result`, `observed_target` | Raw forge merge attribution and independently observed current target. |
+| `observation_contract` | Admitted versioned interpretation; never inferred or upgraded on read. |
 | `verification_time` | Time the complete receipt was verified. |
 
 A later target descendant is valid if proof of P remains reachable. A later
 source update does not rewrite the receipt; retain separate observation history.
 An incompatible canonical merge result blocks rather than substituting a
 different method. Closing an unmerged PR creates no receipt.
+
+Under explicit GitHub `github_same_pr_git_source_attribution/v2` certification,
+`actual_merge_result` may equal original S for rebase while `prepared_result`,
+`published_source`, and the receipt's delivered Git result remain exact P. The
+ordered replay and any separately attributed integration repairs must bind S to
+P, actual target proof must retain P, and source rewrite attribution and canonical
+merged PR identity must be independently
+verified. Raw S is preserved rather than normalized to P. The receipt,
+observation, and retained capability must agree on this contract; legacy v1
+evidence still requires a reported merge result of P.
 
 ### 10.2 Fanout and closure
 

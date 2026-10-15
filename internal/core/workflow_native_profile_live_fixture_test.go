@@ -20,10 +20,11 @@ type nativeLiveProfile struct {
 	Source     string `json:"source_ref_prefix"`
 	Target     string `json:"isolated_target_ref_prefix"`
 	Role       struct {
-		Identity     string `json:"identity"`
-		APIReference string `json:"api_credential_reference"`
-		GitReference string `json:"git_credential_reference"`
-		Push         bool   `json:"push"`
+		Identity      string `json:"identity"`
+		APIReference  string `json:"api_credential_reference"`
+		GitReference  string `json:"git_credential_reference"`
+		HTTPReference string `json:"https_git_credential_reference"`
+		Push          bool   `json:"push"`
 	} `json:"role"`
 	Policy struct {
 		Review            string   `json:"review"`

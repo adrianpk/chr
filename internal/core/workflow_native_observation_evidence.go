@@ -21,11 +21,20 @@ func (s *WorkflowStore) workflowNativeCanonicalObservationValid(submission Workf
 		return false
 	}
 
+	return workflowNativeCanonicalResultValid(binding, observation)
+}
+
+func workflowNativeCanonicalResultValid(binding WorkflowNativePublicationBinding, observation WorkflowNativePublicationObservation) bool {
+	contractMatches := observation.ObservationContract == binding.Capability.ObservationContract
+
+	sourceResult := contractMatches && workflowNativeSourceResultObserved(observation)
 	if observation.State == "merged" {
-		return observation.PullRequest.Merged
+		return observation.PullRequest.Merged && (observation.PullRequest.ResultCommit == binding.Git.ResultCommit || sourceResult)
 	}
 
-	return observation.State == "observing" && !observation.PullRequest.Merged
+	pendingSource := contractMatches && workflowNativeSourceResultCompatible(binding.Capability.ObservationContract, binding.Git, observation.PullRequest) && !sourceResult
+
+	return observation.State == "observing" && (!observation.PullRequest.Merged || pendingSource)
 }
 
 func workflowNativeObservationTargetValid(observation WorkflowNativePublicationObservation) bool {
@@ -48,6 +57,10 @@ func (s *WorkflowStore) workflowNativeCanonicalEvidenceBinding(submission Workfl
 	native := submission.Native
 
 	binding := WorkflowNativePublicationBinding{PullRequest: submission.Guard.PullRequest, Git: submission.Guard.Git}
+	if s.readWorkflowNativeEvidence(native.InvocationID, native.CapabilityRef, &binding.Capability) != nil {
+		return binding, false
+	}
+
 	if native.TransportResponseRef == nil || s.readWorkflowNativeEvidence(native.InvocationID, *native.TransportResponseRef, &binding.Publication) != nil {
 		return binding, false
 	}

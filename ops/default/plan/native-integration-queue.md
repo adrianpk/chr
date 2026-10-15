@@ -490,7 +490,7 @@ Verified integration: [PR #385](https://forge.adrianpk.com/adrianpk/chr/pulls/38
 
 ## Slice 12: Live provider certification
 
-Status: blocked
+Status: in_progress
 
 Expected branch: `test/slice-12-native-provider-certification`
 
@@ -510,7 +510,7 @@ Invariants: INV-07, INV-08, INV-09, INV-10, INV-11, INV-12, INV-15, INV-16, INV-
 | --- | --- | --- | --- |
 | T12.1 | [TKT-20261011133135](../ticket/reviewing/20261011133135-native-integration-t12-1.md) | Run all three exact-result methods against designated disposable Forgejo repositories, including source/target contention and metadata convergence. | Each case records canonical PR, actual Git history/tree, policy/credential role and compatible receipt proof. |
 | T12.2 | [TKT-20261011133136](../ticket/reviewing/20261011133136-native-integration-t12-2.md) | Run the equivalent three cases against designated disposable GitHub repositories using the existing adapter. | Each selected method publishes exact P with the same PR observed merged and no native-queue prerequisite. |
-| T12.3 | [TKT-20261011133137](../ticket/blocked/20261011133137-native-integration-t12-3.md) | Deliver a repeatable native-integration QA entrypoint and profile evidence for permission denial, incompatible native review, fork/no-atomic and transport failures. | All six positive paths and negative boundaries are explicit; missing live access remains a blocker rather than simulated success. |
+| T12.3 | [TKT-20261011133137](../ticket/reviewing/20261011133137-native-integration-t12-3.md) | Deliver a repeatable native-integration QA entrypoint and profile evidence for permission denial, incompatible native review, fork/no-atomic and transport failures. | All six positive paths and negative boundaries are explicit; missing live access remains a blocker rather than simulated success. |
 
 ### Required Candidate Checks
 
@@ -519,7 +519,7 @@ Invariants: INV-07, INV-08, INV-09, INV-10, INV-11, INV-12, INV-15, INV-16, INV-
 - `go test -race ./internal/core ./internal/app -count=1`
 - `git diff --check`
 
-Blocker: [GitHub fixture PR #27](https://github.com/adrianpk/chr-integration-qa/pull/27) reports original S as the canonical merge result while both refs contain exact P. REST, GraphQL and the merge event confirm the mismatch. GitHub rebase certification is revoked; the exact-P checks remain unchanged. T12.3 source is retained uncommitted; no delivery PR is ready. See the Slice 12 report and Acta `01M4YJX5T41SA4VH4Q32D96T3Z`.
+Resolved v1 incompatibility: explicit GitHub source-attribution v2 preserves raw S separately from exact delivered P with complete transaction, history/tree, source and original merged PR proof. The corrective matrix passed all 46 cases; historical v1 evidence remains strict. Pre-commit `make verify` passed with zero lint issues, core 2919.809 s, app 192.959 s and all remaining packages passing. Validation Acta `01M4ZDFXDP7YC3Z1NXWAYS3YHK`; recovery Acta `01M4ZARSAGBGADWYHS9D0N5M9V`. The delivery controller owns final clean-HEAD validation and integration.
 
 ## Slice 13: Assurance reuse and final closure
 

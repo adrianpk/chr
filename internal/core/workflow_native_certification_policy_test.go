@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os/exec"
 	"slices"
+	"strings"
 	"testing"
 )
 
@@ -14,6 +15,7 @@ import (
 // this reader does not change the host's previously certified method list.
 type nativeMethodProbePolicy struct {
 	nativeLivePolicyReader
+	https bool
 }
 
 func (reader nativeMethodProbePolicy) ReadWorkflowNativePolicy(ctx context.Context, pr WorkflowPullRequestSnapshot, method string) (WorkflowNativePolicy, error) {
@@ -27,24 +29,41 @@ func (reader nativeMethodProbePolicy) ReadWorkflowNativePolicy(ctx context.Conte
 	}
 
 	for _, profile := range profiles {
-		if profile.Forge == reader.profile.Forge && profile.URL == pr.Repository && profile.GitRemote == reader.profile.GitRemote {
-			if !validNativeLiveProfile(profile) || !slices.Contains(profile.Policy.Methods, method) {
-				return WorkflowNativePolicy{}, fmt.Errorf("selected method lacks designated fixture authorization")
-			}
-
-			profile.Certification.Methods = []string{method}
-
-			return reader.policy(profile, method)
+		if profile.Forge != reader.profile.Forge || profile.URL != pr.Repository || profile.GitRemote != reader.profile.GitRemote {
+			continue
 		}
+
+		return reader.methodPolicy(profile, method)
 	}
 
 	return WorkflowNativePolicy{}, fmt.Errorf("designated method probe profile changed")
 }
 
+func (reader nativeMethodProbePolicy) methodPolicy(profile nativeLiveProfile, method string) (WorkflowNativePolicy, error) {
+	if !validNativeLiveProfile(profile) || !slices.Contains(profile.Policy.Methods, method) {
+		return WorkflowNativePolicy{}, fmt.Errorf("selected method lacks designated fixture authorization")
+	}
+
+	profile.Certification.Methods = []string{method}
+	if profile.Forge == "github" {
+		profile.Certification.Contract = workflowNativeSourceResultContract
+	}
+
+	if reader.https {
+		if profile.Role.HTTPReference == "" {
+			return WorkflowNativePolicy{}, fmt.Errorf("designated HTTPS publisher role is unavailable")
+		}
+
+		profile.Role.GitReference = profile.Role.HTTPReference
+	}
+
+	return reader.policy(profile, method)
+}
+
 func admitNativeMethodProbe(t *testing.T, state string, adapter RemoteReviewAdapter, profile nativeLiveProfile, request WorkflowGitPublication, pr WorkflowPullRequestSnapshot, publisher OSWorkflowGitPublisher) WorkflowNativeCapability {
 	t.Helper()
 
-	policy := nativeMethodProbePolicy{nativeLivePolicyReader{state: state, profile: profile, publication: request}}
+	policy := nativeMethodProbePolicy{nativeLivePolicyReader: nativeLivePolicyReader{state: state, profile: profile, publication: request}, https: strings.HasPrefix(publisher.transport, "https://")}
 	query := WorkflowNativeCapabilityRequest{Config: WorkIntegrationConfig{PublicationProfile: WorkflowPublicationGitAtomicDualRef}, PullRequest: pr, Publication: request}
 
 	capability, err := adapter.WorkflowNativeIntegrationCapability(t.Context(), query, policy, publisher)

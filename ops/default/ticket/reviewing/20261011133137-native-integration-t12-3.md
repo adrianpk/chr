@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133137
 title: "T12.3: Publish bounded certification and denial matrix"
-status: blocked
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -11,6 +11,7 @@ source: chat
 reported_at: 2026-10-11T13:31:37Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-15T01:11:09Z
+reviewed_at: 2026-10-15T09:16:12Z
 branch: test/slice-12-native-provider-certification
 commits: []
 ---
@@ -72,17 +73,22 @@ race command after failure.
 
 This is local development evidence; final clean-HEAD validation remains pending.
 
-## Blocker
+## Corrective Continuation
 
-[GitHub fixture PR #27](https://github.com/adrianpk/chr-integration-qa/pull/27)
-reports original source `6a2188ec06a78566c85f952d1d2a637e273b077f` as its immutable
-merge result. Both actual refs contain prepared result
-`1bf65f7c73daa9259d21101e63784d95be38f331`. REST, GraphQL and the canonical merged
-event agree on the contradictory result. The exact-P check correctly fails with
-`canonical_pr_result_mismatch`; GitHub rebase certification is revoked.
+The authorized `github_same_pr_git_source_attribution/v2` contract preserves raw
+GitHub attribution S separately from exact delivered P. Complete guarded
+transaction, rebase history/tree, source attribution and original merged PR
+proof remain mandatory. Historical v1 records retain their strict interpretation.
 
-Acta `01M4YJX5T41SA4VH4Q32D96T3Z`. The owned validation unit exited with failure;
-all source hashes were unchanged. The T12.3 implementation remains uncommitted.
-A compatible provider profile or an explicitly revised approved contract is
-required. No delivery PR or exact-HEAD final validation is ready.
+The corrective live matrix passed all 46 cases on both designated forges, all
+methods and SSH/HTTPS. Source-attribution, receipt persistence, later-source and
+integration-repair race checks passed; strict lint passed with zero issues.
+All 46 retained live evidence files match their immutable hashes. Recovery Acta
+`01M4ZARSAGBGADWYHS9D0N5M9V`.
+
+The required pre-commit `make verify` passed on unchanged 21-file source
+`15354ab5747e2c0a080f0a950dde38800aa7a4ddfda8c8e5bb6ad2c87df49648`: strict lint
+0 issues, core 2919.809 s, app 192.959 s and all remaining packages passed.
+Acta `01M4ZDFXDP7YC3Z1NXWAYS3YHK`. The delivery controller owns final clean-HEAD
+validation and integration.
 See the [Slice 12 report](../../report/slices/native-integration-queue/slice-12-provider-certification.md).

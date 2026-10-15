@@ -415,7 +415,7 @@ Report/evidence: [Slice 11 report](../report/slices/native-integration-queue/sli
 
 ## Slice 12: Live provider certification
 
-Status: blocked
+Status: in_progress
 
 Expected branch: `test/slice-12-native-provider-certification`
 
@@ -429,7 +429,7 @@ Prerequisite: verified Slice 11 integration and closed task fanout.
 | --- | --- | --- | --- | --- |
 | T12.1 | [TKT-20261011133135](../ticket/reviewing/20261011133135-native-integration-t12-1.md) | validated | [ae806985740281a4a77ff7e06c1d448f4a6a1a86](https://forge.adrianpk.com/adrianpk/chr/commit/ae806985740281a4a77ff7e06c1d448f4a6a1a86) | Certify Forgejo merge rebase and squash |
 | T12.2 | [TKT-20261011133136](../ticket/reviewing/20261011133136-native-integration-t12-2.md) | validated | [a9b780729b8d7d1fab45e0cde03ba02240e8a625](https://forge.adrianpk.com/adrianpk/chr/commit/a9b780729b8d7d1fab45e0cde03ba02240e8a625) | Certify GitHub merge rebase and squash |
-| T12.3 | [TKT-20261011133137](../ticket/blocked/20261011133137-native-integration-t12-3.md) | blocked | pending | Publish bounded certification and denial matrix |
+| T12.3 | [TKT-20261011133137](../ticket/reviewing/20261011133137-native-integration-t12-3.md) | validated | pending | Publish bounded certification and denial matrix |
 
 Required checks:
 
@@ -446,7 +446,7 @@ Report/evidence: [Slice 12 report](../report/slices/native-integration-queue/sli
 
 The remaining focused race check passed independently on the unchanged retained source: 12.113 s package time and 34.826 s command time. Acta `01M4YKF8DNFZTDZ6YFY5VJ7D0G`. This local development evidence does not resolve live certification or final clean-HEAD validation.
 
-Blocker: [GitHub fixture PR #27](https://github.com/adrianpk/chr-integration-qa/pull/27) reports original S as the canonical merge result while both refs contain exact P. REST, GraphQL and the merge event confirm the mismatch. GitHub rebase certification is revoked; the exact-P checks remain unchanged. T12.3 source is retained uncommitted; no delivery PR is ready. See the Slice 12 report and Acta `01M4YJX5T41SA4VH4Q32D96T3Z`.
+Resolved v1 incompatibility: explicit GitHub source-attribution v2 preserves raw S separately from exact delivered P with complete transaction, history/tree, source and original merged PR proof. The corrective matrix passed all 46 cases; historical v1 evidence remains strict. Pre-commit `make verify` passed with zero lint issues, core 2919.809 s, app 192.959 s and all remaining packages passing. Validation Acta `01M4ZDFXDP7YC3Z1NXWAYS3YHK`; recovery Acta `01M4ZARSAGBGADWYHS9D0N5M9V`. The delivery controller owns final clean-HEAD validation and integration.
 
 ## Slice 13: Assurance reuse and final closure
 

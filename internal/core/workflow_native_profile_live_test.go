@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -198,6 +199,12 @@ func writeNativeLiveEvidence(t *testing.T, state, key string, evidence *nativeLi
 func nativeLiveActivity(t *testing.T, adapter RemoteReviewAdapter, profile nativeLiveProfile, pr WorkflowPullRequestSnapshot, action string) {
 	t.Helper()
 
+	nativeLiveActivityContext(t, t.Context(), adapter, profile, pr, action)
+}
+
+func nativeLiveActivityContext(t *testing.T, ctx context.Context, adapter RemoteReviewAdapter, profile nativeLiveProfile, pr WorkflowPullRequestSnapshot, action string) {
+	t.Helper()
+
 	reference, _, err := adapter.resolve(pr.URL)
 	if err != nil {
 		t.Fatal(err)
@@ -206,7 +213,7 @@ func nativeLiveActivity(t *testing.T, adapter RemoteReviewAdapter, profile nativ
 	forge := strings.TrimSuffix(profile.URL, "/"+profile.Repository)
 
 	args := []string{"record", "pull-request", "--forge", forge, "--repository", profile.Repository, "--number", strconv.Itoa(reference.Number), "--action", action, "--source", "agent", "--harness", "codex", fmt.Sprintf("Native integration certification fixture PR %s; real atomic publication and same-original-PR observation.", action)}
-	if _, err := exec.CommandContext(t.Context(), "acta", args...).Output(); err != nil {
+	if _, err := exec.CommandContext(ctx, "acta", args...).Output(); err != nil {
 		t.Fatal("required fixture activity recording failed")
 	}
 }

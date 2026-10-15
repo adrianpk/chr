@@ -1,6 +1,6 @@
 # Slice 12: Live provider certification
 
-Status: blocked
+Status: reviewing
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
@@ -35,10 +35,16 @@ T12.1 implementation: [ae806985740281a4a77ff7e06c1d448f4a6a1a86](https://forge.a
 
 T12.2 is committed after passing all nine GitHub cases under the race detector.
 A subsequent repeatability run produced a GitHub rebase counterexample. Its
-canonical merge evidence contradicts exact P, so GitHub rebase certification is
-revoked and T12.3 is blocked. The six-path delivery contract is not satisfied.
+canonical merge attribution differed from exact P, so GitHub rebase certification
+was revoked under v1. The bounded compatibility correction and passing rerun are
+recorded below; final clean-HEAD delivery validation remains pending.
 
 T12.2 implementation: [a9b780729b8d7d1fab45e0cde03ba02240e8a625](https://forge.adrianpk.com/adrianpk/chr/commit/a9b780729b8d7d1fab45e0cde03ba02240e8a625). Acta `01M4YHRTEX8AH2R7Y2CM0P3CPT`.
+
+T12.3 adds the repeatable 46-case certification entrypoint, actual HTTPS and
+policy/metadata/transport denial boundaries, and the versioned GitHub observation
+contract. Raw source attribution stays separate from independently verified exact
+P; new receipts pin their interpretation to immutable capability evidence.
 
 ## Implementation Notes
 
@@ -88,6 +94,11 @@ agent socket. Setup failure evidence is retained before the initial push.
 - `internal/core/workflow_native_profile_live_*test.go`: shared method fixtures
   and original real rebase certification.
 
+- `internal/core/workflow_native_source_result.go` and its regression tests:
+  versioned source attribution, complete replay/repair proof and receipt guards.
+- Native observation and receipt records retain the admitted contract and reject
+  changes to its immutable capability binding after restart.
+
 ## Acceptance Evidence
 
 | Acceptance IDs | Current evidence boundary |
@@ -100,7 +111,7 @@ agent socket. Setup failure evidence is retained before the initial push.
 | AC-097 | Actual SSH/HTTPS publication and contention passed; actual HTTPS lost-report cases reconciled one POST without resubmission. Real local SSH/HTTPS unknown-result guards passed. |
 | AC-090 | Live evidence binds Forgejo 16.0.3+gitea-1.22.0, REST api/v1 through the existing adapter, the authorized role/policy, selected method, PR and exact Git objects. |
 | AC-085, AC-087 | GitHub merge and squash passed through SSH and HTTPS with exact P and the original PR observed merged. |
-| AC-086 | BLOCKED: subsequent GitHub rebase PR #27 reports original S as its canonical merge result while both refs contain P. Earlier successful cases do not establish repeatable certification. |
+| AC-086 | The corrective matrix passed GitHub rebase on [SSH PR #50](https://github.com/adrianpk/chr-integration-qa/pull/50) and [HTTPS PR #59](https://github.com/adrianpk/chr-integration-qa/pull/59) under explicit v2 certification. The original strict-v1 counterexample PR #27 remains retained. |
 | AC-046, AC-047, AC-089 | Both actual private repositories rejected anonymous HTTPS access before commands and rejected native-review policies on exact owned targets. Those created protections remain enforced. |
 
 T12.1 certified positive cases:
@@ -179,7 +190,7 @@ retained as Acta `01M4YHEHZC13K2TXE6MMFXZAVD`.
 
 - `CHR_NATIVE_INTEGRATION_QA=1 go test -race ./internal/core -run '^TestNativeGitHubMethods$' -count=1 -v` — passed all nine live cases; package 221.147 s and command 222.095 s on unchanged eight-file source `d4dc984fbd33e29ff8f0d6612c6bfe8bd07073b7b60191d5879affae715692e5`. Acta `01M4YHQ5TQDSP5NXAZ10HHQVTZ`. The owned unit exited successfully.
 
-T12.3 remains blocked. `make qa-native-integration` explicitly opts into the designated
+T12.3 was blocked under strict v1. `make qa-native-integration` explicitly opts into the designated
 live profiles and includes both forge/method matrices, smart HTTPS repeats,
 anonymous permission denial, retained native-review policies on exact owned
 targets, original-PR close/retarget races, and lost HTTPS report reconciliation.
@@ -200,11 +211,10 @@ result, with P in its head and base. The focused race result supplies local
 development evidence; it does not resolve live certification or provide final
 clean-HEAD controller validation.
 
-The required clean-HEAD controller checks will run after task and PR-reference
-commits in the exact configured order. No delivery PR is ready and no reserved
-full delivery gate has run.
+The delivery controller records the required clean-HEAD checks for the final PR
+revision in the exact configured order.
 
-## Certification Blocker
+## Original Certification Blocker (v1)
 
 [GitHub fixture PR #27](https://github.com/adrianpk/chr-integration-qa/pull/27)
 retains this actual counterexample:
@@ -221,9 +231,9 @@ The publisher reported applied. Authenticated Git reads and canonical API reads
 confirm both source and target equal P. The original PR first appeared closed
 and unmerged, then merged with the result S. Later REST, GraphQL and immutable
 merge-event reads agree on S. Waiting for head convergence does not supply the
-required exact result proof. The observer correctly returns
-`canonical_pr_result_mismatch`; accepting S as P would weaken the approved
-contract.
+required v1 result metadata. The observer correctly returned
+`canonical_pr_result_mismatch`. Substituting S for delivered P remains forbidden;
+the correction below retains both identities under an explicit contract.
 
 Acta failure/proof activity: `01M4YJX5T41SA4VH4Q32D96T3Z`. Canonical merged-state
 activity records the incompatible result explicitly:
@@ -231,13 +241,64 @@ activity records the incompatible result explicitly:
 host. GitHub rebase was removed from the descriptor's certified method list;
 its earlier passing evidence and this counterexample are both retained.
 
-The blocked T12.3 implementation remains uncommitted in the dedicated slice
-worktree. The QA entrypoint and all exact-P assertions remain intact. A provider
-profile that supplies the required canonical result, or an explicitly revised
-approved compatibility contract, is required before this slice can be ready.
+The original T12.3 implementation was preserved in the dedicated slice worktree.
+The QA entrypoint and all exact-P assertions remain intact.
+
+## Corrective Continuation
+
+The approved same-PR compatible-result requirement is now explicit in the
+stable specification and model. GitHub
+`github_same_pr_git_source_attribution/v2` may preserve raw canonical attribution
+S for rebase while independently proving exact delivered P. It requires the
+original PR reported merged, the unchanged guarded atomic transaction, complete
+method/history/tree proof, source rewrite attribution, and agreement between
+canonical source metadata and the separately observed source ref. Declared
+integration repairs retain their existing complete provenance checks. Foreign
+results, providers, PRs, methods and incomplete proof remain rejected.
+
+Observations and new receipts retain their admitted observation contract. The
+receipt validator checks it against immutable capability evidence after restart.
+Historical v1 records remain strict and are never upgraded on read. A missing
+contract cannot authorize S attribution. Source metadata lag stays observing
+until convergence or a typed deadline; it cannot create a premature receipt.
+The host fixture descriptor now certifies all three GitHub methods under v2,
+with both transport proofs and the previous v1 failure preserved in history.
+
+Corrective development validation:
+
+- `make lint-strict` passed with zero issues before the live matrix.
+- `go test ./internal/core -run '^TestNativeSource' -count=1 -v` passed in 32.174 s,
+  including the existing source-drift cases selected by that prefix.
+- `go test -race ./internal/core -run '^(TestNativeSource(Result.*|Receipt|Later|Contract|Capability)|TestNativeObservation.*|TestNativeCapability.*|TestNativeLaterSource|TestNativeReceipt.*)$' -count=1` passed in 303.222 s.
+- `make qa-native-integration` passed in 644.844 s: all 46 real cases passed on
+  both designated forges, all three methods, SSH/HTTPS publication and contention,
+  permission/review denials, PR metadata races and lost HTTPS reports.
+- After the matrix, the source-attribution path was aligned with the existing
+  method validator so separately attributed integration repairs remain valid.
+  Pending canonical observations were also pinned to the admitted contract.
+  `go test -race ./internal/core -run '^(TestNativeSource(Result.*|Receipt|Later|Contract|Capability|Repair)|TestNativeReplayObservation)$' -count=1 -v` passed in 6.546 s.
+- Final `make lint-strict` passed with zero issues after the helper refinements.
+
+The matrix used the directly installed GitHub CLI, the existing SSH agent, and
+the retained neutral Git/agent validation environment. Its unchanged 21-file
+source manifest is `26a5d4124c5871c0e0f8b8b1f3ce9df53eaf9a4260a410518c323585a9ac2f05`.
+Case paths and hashes are retained in the host-owned
+`chr/qa/native-integration-unblock-20261015/live-evidence.json`; the final helper
+refinements are covered by the subsequent focused race command above. These
+development checks do not replace the required repository pre-commit gate or
+clean-HEAD controller checks.
+
+Required pre-commit validation:
+
+- `make verify` passed with zero lint issues; core 2919.809 s, app 192.959 s and
+  all remaining TUI/Web packages passed. Command time was 2924.893 s on unchanged
+  21-file source `15354ab5747e2c0a080f0a950dde38800aa7a4ddfda8c8e5bb6ad2c87df49648`.
+  Acta `01M4ZDFXDP7YC3Z1NXWAYS3YHK`. The owned unit exited successfully.
+
+Recovery verified all 46 retained live-case file hashes and the complete source
+handoff. Acta `01M4ZARSAGBGADWYHS9D0N5M9V`. The delivery controller retains final
+exact-HEAD evidence before integration.
 
 ## Risks and Follow-ups
 
-T12.3 and Slice 12 remain blocked by the concrete GitHub rebase result-proof
-counterexample. There is no ready canonical delivery PR or exact-HEAD final
-validation. The remaining source changes are retained for continuation.
+None recorded.

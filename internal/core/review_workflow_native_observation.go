@@ -23,6 +23,7 @@ type WorkflowNativePublicationBinding struct {
 // WorkflowNativePublicationObservation distinguishes Git proof from canonical
 // merged metadata. Only merged supplies both; no outcome issues a receipt.
 type WorkflowNativePublicationObservation struct {
+	ObservationContract   string                      `json:"observation_contract,omitempty"`
 	CanonicalPR           string                      `json:"canonical_pr,omitempty"`
 	State                 string                      `json:"state"`
 	Condition             string                      `json:"condition,omitempty"`
@@ -39,7 +40,7 @@ type WorkflowNativePublicationObservation struct {
 // forge adapter and independently fetches the canonical target's exact history.
 // It never submits another push, merges/closes a PR, or rolls target history back.
 func (adapter RemoteReviewAdapter) ObserveWorkflowNativePublication(ctx context.Context, binding WorkflowNativePublicationBinding, git WorkflowIntegrationGit) (WorkflowNativePublicationObservation, error) {
-	observed := WorkflowNativePublicationObservation{CanonicalPR: binding.PullRequest.URL, State: "observing", OriginalSourceCommit: binding.Git.SourceCommit, PublishedSourceCommit: binding.Git.ResultCommit}
+	observed := WorkflowNativePublicationObservation{ObservationContract: binding.Capability.ObservationContract, CanonicalPR: binding.PullRequest.URL, State: "observing", OriginalSourceCommit: binding.Git.SourceCommit, PublishedSourceCommit: binding.Git.ResultCommit}
 	if err := validateWorkflowNativeBinding(binding); err != nil || git == nil {
 		return observed, fmt.Errorf("invalid native observation binding")
 	}
@@ -163,7 +164,8 @@ func workflowNativeMergeCondition(binding WorkflowNativePublicationBinding, pr W
 		return "canonical_receipt_pr_unmerged"
 	}
 
-	if pr.Merged && (pr.State != "closed" || pr.ResultCommit != binding.Git.ResultCommit) {
+	compatible := pr.ResultCommit == binding.Git.ResultCommit || workflowNativeSourceResultCompatible(binding.Capability.ObservationContract, binding.Git, pr)
+	if pr.Merged && (pr.State != "closed" || !compatible) {
 		return "canonical_pr_result_mismatch"
 	}
 
@@ -271,7 +273,7 @@ func finishWorkflowNativeObservation(binding WorkflowNativePublicationBinding, o
 		return observed
 	}
 
-	if pr.Merged {
+	if pr.Merged && (pr.ResultCommit == binding.Git.ResultCommit || workflowNativeSourceResultObserved(observed)) {
 		observed.State = "merged"
 		if observed.ObservedSourceCommit != binding.Git.SourceCommit && observed.ObservedSourceCommit != binding.Git.ResultCommit {
 			observed.LaterSourceCommit = observed.ObservedSourceCommit
