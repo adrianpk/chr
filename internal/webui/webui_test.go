@@ -365,7 +365,7 @@ func TestHandlerArtifactCatalogAndDetailRoutes(t *testing.T) {
 		want []string
 	}{
 		{path: "/cases", want: []string{"Cases", "case-table", "Blog Authoring", "Case context", "blog", "Edit", `hx-get="/cases/detail/fragment?id=blog"`}},
-		{path: "/dumps", want: []string{"Dumps", "New Dump", "For Use Case", `data-modal-template="dump-create-modal"`, `id="dump-create-modal"`, "dump-card", "Project Notes", "Project-wide", "Notes preview"}},
+		{path: "/dumps", want: []string{"Dumps", "New Dump", "For Use Case", `data-modal-template="dump-create-modal"`, `id="dump-create-modal"`, "dump-card-link", "dump-card", "Project Notes", `hx-get="/dumps/detail/fragment?id=.chr/default/dumps/project-notes.md"`, "Project-wide", "Notes preview"}},
 		{path: "/quizzes", want: []string{"Quizzes", "Project Quiz", "not_started"}},
 		{path: "/specs", want: []string{"Specs", "Project Spec"}},
 		{path: "/plans", want: []string{"Plans", "No plans found."}},
@@ -426,6 +426,42 @@ func TestHandlerDumpsCreateUsesModalTemplates(t *testing.T) {
 	for _, unwanted := range []string{`href="#dump-create"`, `href="#dump-create-case"`} {
 		if strings.Contains(recorder.Body.String(), unwanted) {
 			t.Fatalf("dumps catalog contains inline create trigger %q:\n%s", unwanted, recorder.Body.String())
+		}
+	}
+}
+
+// TestHandlerDumpDetailFragmentUsesModal keeps editing in the catalog dialog.
+func TestHandlerDumpDetailFragmentUsesModal(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data:     testShellData(),
+		Provider: testDataProvider{},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/dumps/detail/fragment?id=.chr/default/dumps/project-notes.md", nil)
+	request.Header.Set(htmx.HeaderRequest, "true")
+	handler.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
+	}
+	for _, want := range []string{
+		"modal-backdrop",
+		"dump-detail-panel",
+		"Project Notes",
+		"Full dump content",
+		"dump.save",
+		"dump.append",
+		`name="id" value=".chr/default/dumps/project-notes.md"`,
+		`name="revision" value="detail-revision"`,
+		`hx-post="/actions"`,
+		`name="surface" value="modal"`,
+	} {
+		if !strings.Contains(recorder.Body.String(), want) {
+			t.Fatalf("body does not contain %q:\n%s", want, recorder.Body.String())
 		}
 	}
 }
@@ -526,6 +562,47 @@ func TestHandlerCaseModalSaveClosesModal(t *testing.T) {
 	}
 	if recorder.Body.String() != "" {
 		t.Fatalf("body = %q, want empty", recorder.Body.String())
+	}
+}
+
+// TestDumpModalWrites keeps successful dump creation, replacement and append operations in the catalog.
+func TestDumpModalWrites(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data:     testShellData(),
+		Provider: testDataProvider{},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	for _, action := range []string{"dump.create", "dump.save", "dump.append"} {
+		t.Run(action, func(t *testing.T) {
+			form := url.Values{
+				"action":  {action},
+				"id":      {".chr/default/dumps/project-notes.md"},
+				"confirm": {"true"},
+				"surface": {"modal"},
+				"content": {"Updated content"},
+			}
+			recorder := httptest.NewRecorder()
+			request := httptest.NewRequest(http.MethodPost, "/actions", strings.NewReader(form.Encode()))
+			request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+			request.Header.Set(htmx.HeaderRequest, "true")
+			handler.ServeHTTP(recorder, request)
+
+			if recorder.Code != http.StatusOK {
+				t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
+			}
+			if got := recorder.Header().Get(htmx.HeaderRetarget); got != "#modal-root" {
+				t.Fatalf("HX-Retarget = %q, want #modal-root", got)
+			}
+			if got := recorder.Header().Get(htmx.HeaderRedirect); got != "" {
+				t.Fatalf("HX-Redirect = %q, want empty", got)
+			}
+			if recorder.Body.String() != "" {
+				t.Fatalf("body = %q, want empty", recorder.Body.String())
+			}
+		})
 	}
 }
 
@@ -988,6 +1065,7 @@ func (testDataProvider) ArtifactDetailView(_ context.Context, request ArtifactDe
 
 	return ArtifactDetailView{
 		Family:   request.Family,
+		ID:       request.ID,
 		Title:    "Project Notes",
 		Status:   "curated",
 		Scope:    "Project-wide",

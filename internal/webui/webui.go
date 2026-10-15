@@ -325,22 +325,6 @@ func (h handler) artifactDetailFragment(family string) http.HandlerFunc {
 			return
 		}
 
-		if family == "cases" {
-			data, err := h.artifactDetailPageData(r, family)
-			if err != nil {
-				http.Error(w, "load artifact", http.StatusInternalServerError)
-
-				return
-			}
-			data.CaseModal = true
-
-			if err := h.renderer.Fragment(w, "case_modal.html", data); err != nil {
-				http.Error(w, "render artifact", http.StatusInternalServerError)
-			}
-
-			return
-		}
-
 		data, err := h.artifactDetailPageData(r, family)
 		if err != nil {
 			http.Error(w, "load artifact", http.StatusInternalServerError)
@@ -348,7 +332,18 @@ func (h handler) artifactDetailFragment(family string) http.HandlerFunc {
 			return
 		}
 
-		if err := h.renderer.Fragment(w, "artifact_detail_content.html", data); err != nil {
+		fragment := "artifact_detail_content.html"
+
+		switch family {
+		case "cases":
+			data.CaseModal = true
+			fragment = "case_modal.html"
+		case "dumps":
+			data.DumpModal = true
+			fragment = "dump_modal.html"
+		}
+
+		if err := h.renderer.Fragment(w, fragment, data); err != nil {
 			http.Error(w, "render artifact", http.StatusInternalServerError)
 		}
 	}
@@ -479,10 +474,16 @@ func writeActionReservedField(key string) bool {
 }
 
 func shouldCloseModalAfterWrite(r *http.Request, request WriteActionRequest, result WriteActionResponse) bool {
-	return htmx.IsRequest(r) &&
-		result.Status == WriteStatusOK &&
-		request.Action == "case.update" &&
-		request.Surface == "modal"
+	if !htmx.IsRequest(r) || result.Status != WriteStatusOK || request.Surface != "modal" {
+		return false
+	}
+
+	switch request.Action {
+	case "case.update", "dump.create", "dump.save", "dump.append":
+		return true
+	default:
+		return false
+	}
 }
 
 func healthz(w http.ResponseWriter, _ *http.Request) {

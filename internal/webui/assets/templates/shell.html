@@ -301,11 +301,13 @@
 {{end}}
 
 {{define "dump_card.html"}}
-<article class="dump-card">
-  <h2><a href="{{.DetailURL}}">{{if .DisplayTitle}}{{.DisplayTitle}}{{else}}{{.Title}}{{end}}</a></h2>
-  {{if .Meta}}<p class="dump-card__meta">{{.Meta}}</p>{{end}}
-  <div class="dump-card__preview">{{if .Preview}}{{.Preview}}{{else}}No entries yet{{end}}</div>
-</article>
+<a class="dump-card-link" href="{{.DetailURL}}" hx-get="/dumps/detail/fragment?id={{.ID}}" hx-target="#modal-root" hx-swap="innerHTML">
+  <article class="dump-card">
+    <h2>{{if .DisplayTitle}}{{.DisplayTitle}}{{else}}{{.Title}}{{end}}</h2>
+    {{if .Meta}}<p class="dump-card__meta">{{.Meta}}</p>{{end}}
+    <div class="dump-card__preview">{{if .Preview}}{{.Preview}}{{else}}No entries yet{{end}}</div>
+  </article>
+</a>
 {{end}}
 
 {{define "case_table.html"}}
@@ -397,6 +399,25 @@
 </div>
 {{end}}
 
+{{define "dump_modal.html"}}
+{{template "revision_marker.html" .}}
+<div class="modal-backdrop" data-modal-backdrop>
+  <section class="dump-detail-panel" role="dialog" aria-modal="true" aria-labelledby="dump-detail-title">
+    <button class="icon-button dump-detail-panel__close" type="button" data-modal-close aria-label="Close dump editor">x</button>
+    <header class="dump-detail-panel__header">
+      <h2 id="dump-detail-title">{{.Detail.Title}}</h2>
+      {{if .Detail.Scope}}<p>{{.Detail.Scope}}</p>{{end}}
+    </header>
+    {{if .Detail.Missing}}
+      <p class="empty-state">Artifact not found.</p>
+    {{else}}
+      <pre class="artifact-content">{{.Detail.Content}}</pre>
+      {{template "dump_edit_forms.html" .}}
+    {{end}}
+  </section>
+</div>
+{{end}}
+
 {{define "case_edit_page.html"}}
 <div class="case-edit-page">
   <section class="case-edit-panel">
@@ -446,10 +467,11 @@
       <header class="dump-create-panel__header">
         <h2 id="dump-create-title">New Dump</h2>
       </header>
-      <form class="action-form" method="post" action="/actions" onsubmit="return confirm('Create this dump?')">
+      <form class="action-form" method="post" action="/actions" hx-post="/actions" hx-target="#modal-root" hx-swap="innerHTML" onsubmit="return confirm('Create this dump?')">
         <input type="hidden" name="action" value="dump.create">
         <input type="hidden" name="family" value="dumps">
         <input type="hidden" name="confirm" value="true">
+        <input type="hidden" name="surface" value="modal">
         <label>
           <span>Title</span>
           <input name="title" required>
@@ -470,10 +492,11 @@
       <header class="dump-create-panel__header">
         <h2 id="dump-create-case-title">For Use Case</h2>
       </header>
-      <form class="action-form" method="post" action="/actions" onsubmit="return confirm('Create this dump?')">
+      <form class="action-form" method="post" action="/actions" hx-post="/actions" hx-target="#modal-root" hx-swap="innerHTML" onsubmit="return confirm('Create this dump?')">
         <input type="hidden" name="action" value="dump.create">
         <input type="hidden" name="family" value="dumps">
         <input type="hidden" name="confirm" value="true">
+        <input type="hidden" name="surface" value="modal">
         <label>
           <span>Title</span>
           <input name="title" required>
@@ -494,24 +517,26 @@
 {{end}}
 
 {{define "dump_edit_forms.html"}}
-<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Replace this dump content?')">
+<form class="action-form" method="post" action="/actions"{{if .DumpModal}} hx-post="/actions" hx-target="#modal-root" hx-swap="innerHTML"{{end}} onsubmit="return confirm('Replace this dump content?')">
   <input type="hidden" name="action" value="dump.save">
   <input type="hidden" name="family" value="dumps">
   <input type="hidden" name="id" value="{{.Detail.ID}}">
   <input type="hidden" name="revision" value="{{.Detail.Revision}}">
   <input type="hidden" name="confirm" value="true">
+  {{if .DumpModal}}<input type="hidden" name="surface" value="modal">{{end}}
   <label>
     <span>Content</span>
     <textarea name="content" rows="12" required>{{.Detail.Content}}</textarea>
   </label>
   <button class="button button--primary" type="submit">Save</button>
 </form>
-<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Append this note to the dump?')">
+<form class="action-form" method="post" action="/actions"{{if .DumpModal}} hx-post="/actions" hx-target="#modal-root" hx-swap="innerHTML"{{end}} onsubmit="return confirm('Append this note to the dump?')">
   <input type="hidden" name="action" value="dump.append">
   <input type="hidden" name="family" value="dumps">
   <input type="hidden" name="id" value="{{.Detail.ID}}">
   <input type="hidden" name="revision" value="{{.Detail.Revision}}">
   <input type="hidden" name="confirm" value="true">
+  {{if .DumpModal}}<input type="hidden" name="surface" value="modal">{{end}}
   <label>
     <span>Append note</span>
     <textarea name="content" rows="5" required></textarea>

@@ -100,7 +100,8 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 ### Changed
 
 - Updated the Web UI with editable ticket details and comments, shared case
-  editing panels, and dump creation dialogs.
+  editing panels, and dialogs to create, edit and append to dumps. Successful
+  dump saves close the dialog and keep the catalog open.
 - Moved the application code into clearer `internal/app`, `internal/core`, and
   `internal/tui` package boundaries.
 - Reworked generated specs so spec generation remains behavior-focused and no

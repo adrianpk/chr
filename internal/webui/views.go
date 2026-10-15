@@ -32,6 +32,7 @@ type PageData struct {
 	Detail     ArtifactDetailView
 	Write      WriteActionResponse
 	CaseModal  bool
+	DumpModal  bool
 	Workflow   WorkflowView
 }
 
