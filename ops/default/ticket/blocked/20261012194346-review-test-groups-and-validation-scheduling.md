@@ -13,6 +13,7 @@ commits: [19e8eaf540cb9b526324df61cde7b1a3de50b16e]
 ready_at: 2026-10-15T19:07:29Z
 started_at: 2026-10-15T19:07:29Z
 branch: dev
+pr: https://forge.adrianpk.com/adrianpk/chr/pulls/388
 ---
 
 # Review test groups and validation scheduling
@@ -153,11 +154,12 @@ local pass. Race instrumentation remains a separate mode.
 
 ## Activation Blocker
 
-The implementation is ready on `dev`; scheduled execution is not activated.
-Forgejo discovers schedules only on the default branch, currently `main`.
-Publishing there requires the explicit authorization in `.agents/VERSIONING.md`.
-Only the workflow needs bootstrap publication; no application promotion or
-release is implied.
+The maintainer authorized the standard `dev -> main` promotion on 2026-10-15.
+[Promotion PR #388](https://forge.adrianpk.com/adrianpk/chr/pulls/388) carries the
+current `dev` state, including this workflow. Forgejo discovers its schedule
+when that PR is merged into the default branch, `main`. No selective workflow
+bootstrap or versioned release is required. Complete nightly execution remains
+pending verified runner prerequisites and the first scheduled result.
 
 The existing `arch` runner is active, but its account configuration and private
 fixture state are not readable from the development account. Verify scoped
