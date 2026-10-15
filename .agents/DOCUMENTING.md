@@ -24,6 +24,16 @@ Keep the top level of `docs/` limited to `index.md` and the four Diataxis
 directories when the repository uses a documentation index. Put additional
 structure inside the applicable quadrant.
 
+## User Guide
+
+- Use `docs/tutorials/user-guide/` as the canonical User Guide location.
+- Use `docs/tutorials/user-guide/index.md` as its entry point.
+- Use `User Guide` as the exact visible name and `user-guide` as the directory
+  name.
+- Keep its ordered chapters together as one progressive learning path.
+- Link to supporting how-to, reference, and explanation documents in their
+  applicable quadrants.
+
 ## Examples and references
 
 - Keep setup and execution examples aligned with the stack, package manager, runtime, and entrypoints actually present in the project.
