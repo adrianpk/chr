@@ -429,7 +429,7 @@ Prerequisite: verified Slice 11 integration and closed task fanout.
 | --- | --- | --- | --- | --- |
 | T12.1 | [TKT-20261011133135](../ticket/reviewing/20261011133135-native-integration-t12-1.md) | validated | [ae806985740281a4a77ff7e06c1d448f4a6a1a86](https://forge.adrianpk.com/adrianpk/chr/commit/ae806985740281a4a77ff7e06c1d448f4a6a1a86) | Certify Forgejo merge rebase and squash |
 | T12.2 | [TKT-20261011133136](../ticket/reviewing/20261011133136-native-integration-t12-2.md) | validated | [a9b780729b8d7d1fab45e0cde03ba02240e8a625](https://forge.adrianpk.com/adrianpk/chr/commit/a9b780729b8d7d1fab45e0cde03ba02240e8a625) | Certify GitHub merge rebase and squash |
-| T12.3 | [TKT-20261011133137](../ticket/reviewing/20261011133137-native-integration-t12-3.md) | validated | pending | Publish bounded certification and denial matrix |
+| T12.3 | [TKT-20261011133137](../ticket/reviewing/20261011133137-native-integration-t12-3.md) | validated | [d44cdb16a6588446cba41d6a46d2ebfebad4db91](https://forge.adrianpk.com/adrianpk/chr/commit/d44cdb16a6588446cba41d6a46d2ebfebad4db91) | Publish bounded certification and denial matrix |
 
 Required checks:
 
@@ -438,7 +438,7 @@ Required checks:
 - `go test -race ./internal/core ./internal/app -count=1`
 - `git diff --check`
 
-PR: pending
+PR: [#386](https://forge.adrianpk.com/adrianpk/chr/pulls/386)
 
 Verified merge: pending
 

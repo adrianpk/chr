@@ -13,7 +13,9 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-15T01:11:09Z
 reviewed_at: 2026-10-15T09:16:12Z
 branch: test/slice-12-native-provider-certification
-commits: []
+pr: 386
+commits:
+  - d44cdb16a6588446cba41d6a46d2ebfebad4db91
 ---
 
 # T12.3: Publish bounded certification and denial matrix

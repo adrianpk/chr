@@ -492,6 +492,8 @@ Verified integration: [PR #385](https://forge.adrianpk.com/adrianpk/chr/pulls/38
 
 Status: in_progress
 
+PR: [#386](https://forge.adrianpk.com/adrianpk/chr/pulls/386)
+
 Expected branch: `test/slice-12-native-provider-certification`
 
 Expected PR title: `test(slice-12): certify native integration across supported forge profiles`

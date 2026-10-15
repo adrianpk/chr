@@ -5,7 +5,7 @@ Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
 Branch: `test/slice-12-native-provider-certification`
-PR: pending
+PR: [#386](https://forge.adrianpk.com/adrianpk/chr/pulls/386)
 
 ## Purpose
 
@@ -37,7 +37,8 @@ T12.2 is committed after passing all nine GitHub cases under the race detector.
 A subsequent repeatability run produced a GitHub rebase counterexample. Its
 canonical merge attribution differed from exact P, so GitHub rebase certification
 was revoked under v1. The bounded compatibility correction and passing rerun are
-recorded below; final clean-HEAD delivery validation remains pending.
+recorded below. The delivery controller retains exact-HEAD evidence for the
+final PR revision.
 
 T12.2 implementation: [a9b780729b8d7d1fab45e0cde03ba02240e8a625](https://forge.adrianpk.com/adrianpk/chr/commit/a9b780729b8d7d1fab45e0cde03ba02240e8a625). Acta `01M4YHRTEX8AH2R7Y2CM0P3CPT`.
 
@@ -45,6 +46,8 @@ T12.3 adds the repeatable 46-case certification entrypoint, actual HTTPS and
 policy/metadata/transport denial boundaries, and the versioned GitHub observation
 contract. Raw source attribution stays separate from independently verified exact
 P; new receipts pin their interpretation to immutable capability evidence.
+
+T12.3 implementation: [d44cdb16a6588446cba41d6a46d2ebfebad4db91](https://forge.adrianpk.com/adrianpk/chr/commit/d44cdb16a6588446cba41d6a46d2ebfebad4db91). Acta `01M4ZDKS5RVWQ3MFFMCME1ZBW8`.
 
 ## Implementation Notes
 
