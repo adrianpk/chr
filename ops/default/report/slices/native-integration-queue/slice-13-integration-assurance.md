@@ -1,6 +1,6 @@
 # Slice 13: Native Integration and Original Workflow Assurance
 
-Status: drafting
+Status: reviewing
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
@@ -29,6 +29,8 @@ The adapted three-publication lost-response queue passed once in 18.863 s;
 Final `go test -race ./internal/core -run '^TestWorkflowAssurance' -count=1 -timeout=5m` passed in 170.989 s, including actual native SSH report loss across three publications. Strict lint passed with zero issues. Acta `01M4ZXGH4NM29T2Q1ENX0PN03C`. Bounded `make qa-ticket-native-workflow` passed all 78 tests in 410.319 s on unchanged source `6fa423e7c5ffa4c93282d1e8f16f2f15e3759586c889749dc92f22303e52e2c7`, with no leftover owned children. Acta `01M4ZXX216AR8NEA7XBGAD4AD9`. The owned unit exited successfully.
 
 T13.2 implementation: [8e041477fa4401412316da7b1b91af4ca900c09e](https://forge.adrianpk.com/adrianpk/chr/commit/8e041477fa4401412316da7b1b91af4ca900c09e). Acta `01M4ZXZSH26BFZXTS6PRD01264`.
+
+T13.3 implementation: [b2f479d536aba6df4c151303c30d822744252697](https://forge.adrianpk.com/adrianpk/chr/commit/b2f479d536aba6df4c151303c30d822744252697). Acta `01M4ZY5FCRR8Q188427ZAH8DDN`.
 
 ## Implementation Notes
 
@@ -106,6 +108,42 @@ are merged into `dev`, their merge commits are ancestral to the current base,
 and all 47 predecessor task tickets are solved with closure metadata.
 Reconciliation Acta `01M4ZXY81C2RHH091D0M6QPP6T`.
 
+## Acceptance and Closure Handoff
+
+The [approved acceptance coverage](../../../plan/native-integration-queue.md#acceptance-coverage)
+retains one primary owner for each AC-001–AC-100. Earlier slices remain primary
+implementation evidence; this replacement assurance unit composes and reconciles
+that evidence without introducing duplicate task tickets.
+
+| Obligation | Current evidence and remaining boundary |
+| --- | --- |
+| Original A01–A24 and AC-091 | Ordered, loose and parallel native continuation plus real SSH report-loss recovery pass; the 78-test acceptance/fault target passed within its bounds. |
+| AC-001–AC-090 and AC-096–AC-100 | The approved primary ownership map, twelve delivered reports and reconciled certification retain implementation evidence; exact final candidate checks are pending. |
+| AC-092 | Required candidate checks must pass in configured order on the final clean PR head; the controller's unchanged full gate must then pass on the exact integrated development revision. |
+| AC-093 | Twelve predecessor merges and 47 solved tasks are verified. Slice 13 integration and its four task finalizations remain pending. |
+| AC-094 | Original T12.1–T12.4 execute as T13.1–T13.4 through this replacement PR. Original cycle closure requires the replacement merge/report and exact integrated gate evidence. |
+| AC-095 | Final closure must retain reconciliation, absence of unknown publication and verified original/corrective closure evidence. It remains pending. |
+
+T13.4 prepares these bindings and the existing configured closure paths. The
+controller owns integration and the post-integration full gate:
+
+```sh
+make verify && go test -race ./... && make qa-ticket-native-workflow && make qa-native-integration && git diff --check
+```
+
+After that gate succeeds, only approved closure documentation may record the
+exact development SHA, ordered results, replacement PR/report and original versus
+corrective task outcomes. The outstanding cycle reports are created during that
+closure phase, using the controller's retained evidence. Runtime changes require
+the authorized correction route and fresh validation.
+
+The original reserved branch remains at
+`6100f7d166cc3c61466dcacae05c26baabb2460b`. Its historical blocked execution and
+consumed budgets are preserved. No original assurance PR or historical controller
+completion is invented; this Slice 13 report is the canonical replacement unit.
+T13.4 remains blocked on verified replacement integration and the exact integrated
+full gate. Candidate preparation does not complete either delivery set.
+
 ## Validation
 
 - `go test ./internal/core -run '^TestWorkflowAssuranceOrdered$' -count=1 -timeout=5m`
@@ -130,5 +168,5 @@ Required candidate commands remain, in order: `make verify`,
 
 ## Risks and Follow-ups
 
-T13.4 exact integrated-gate closure remains pending. The original controller remains inactive;
-retained implementation alone does not establish original delivery completion.
+T13.4 exact integrated-gate closure remains pending. Retained implementation
+alone does not establish original delivery completion.

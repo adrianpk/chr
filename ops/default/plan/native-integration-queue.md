@@ -558,7 +558,7 @@ Invariants: INV-01, INV-02, INV-03, INV-04, INV-05, INV-06, INV-07, INV-08, INV-
 - `make qa-native-integration`
 - `git diff --check`
 
-Slice 12 prerequisite verified. T13.1 adapts the retained assurance implementation first; T13.2 and T13.3 are ready in order. T13.4 retains its final integrated-gate dependency and will close only with controller evidence after integration.
+Slice 12 prerequisite verified. T13.1–T13.3 implementation and focused evidence are validated. T13.4 closure preparation is recorded, with its final outcome blocked on replacement integration and the exact integrated full gate. T13.4 retains its final integrated-gate dependency and will close only with controller evidence after integration.
 
 
 ## Final Gate and Closure
