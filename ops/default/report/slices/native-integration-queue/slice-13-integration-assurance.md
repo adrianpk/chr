@@ -5,7 +5,7 @@ Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
 Branch: `test/slice-13-native-integration-assurance`
-PR: pending
+PR: [#387](https://forge.adrianpk.com/adrianpk/chr/pulls/387)
 
 ## Purpose
 
@@ -31,6 +31,8 @@ Final `go test -race ./internal/core -run '^TestWorkflowAssurance' -count=1 -tim
 T13.2 implementation: [8e041477fa4401412316da7b1b91af4ca900c09e](https://forge.adrianpk.com/adrianpk/chr/commit/8e041477fa4401412316da7b1b91af4ca900c09e). Acta `01M4ZXZSH26BFZXTS6PRD01264`.
 
 T13.3 implementation: [b2f479d536aba6df4c151303c30d822744252697](https://forge.adrianpk.com/adrianpk/chr/commit/b2f479d536aba6df4c151303c30d822744252697). Acta `01M4ZY5FCRR8Q188427ZAH8DDN`.
+
+T13.4 closure preparation: [4cb701e668d8fbf3b263d08254112ccd62b542f7](https://forge.adrianpk.com/adrianpk/chr/commit/4cb701e668d8fbf3b263d08254112ccd62b542f7). Acta `01M4ZYAEA0WPNBZ07ETNXTD7G6`. Its final integrated-gate outcome remains blocked.
 
 ## Implementation Notes
 
@@ -118,7 +120,7 @@ that evidence without introducing duplicate task tickets.
 | Obligation | Current evidence and remaining boundary |
 | --- | --- |
 | Original A01–A24 and AC-091 | Ordered, loose and parallel native continuation plus real SSH report-loss recovery pass; the 78-test acceptance/fault target passed within its bounds. |
-| AC-001–AC-090 and AC-096–AC-100 | The approved primary ownership map, twelve delivered reports and reconciled certification retain implementation evidence; exact final candidate checks are pending. |
+| AC-001–AC-090 and AC-096–AC-100 | The approved primary ownership map, twelve delivered reports and reconciled certification retain implementation evidence; final candidate evidence belongs to the exact clean PR head. |
 | AC-092 | Required candidate checks must pass in configured order on the final clean PR head; the controller's unchanged full gate must then pass on the exact integrated development revision. |
 | AC-093 | Twelve predecessor merges and 47 solved tasks are verified. Slice 13 integration and its four task finalizations remain pending. |
 | AC-094 | Original T12.1–T12.4 execute as T13.1–T13.4 through this replacement PR. Original cycle closure requires the replacement merge/report and exact integrated gate evidence. |
@@ -160,7 +162,9 @@ full gate. Candidate preparation does not complete either delivery set.
   packages passed. Acta `01M4ZWVHWVZ43BM362QWXH8QPH`.
   The owned unit exited successfully; host manifest, log and result are retained
   under `chr/qa/native-integration-slice-13/`.
-  No clean-HEAD candidate validation or integrated delivery gate is claimed yet.
+  The delivery controller retains exact clean-HEAD candidate evidence after the
+  PR-reference commit. Development checks do not replace that evidence or the
+  post-integration gate.
 
 Required candidate commands remain, in order: `make verify`,
 `go test -race ./...`, `make qa-ticket-native-workflow`,

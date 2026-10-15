@@ -57,7 +57,7 @@ Only Looper may merge this set's canonical PRs. Read-only status must not mutate
 | Slice 10 | Receipts fanout and closure | `feat/slice-10-native-receipt-closure` | `feat(slice-10): finalize exact integration receipts and task delivery` | `ops/default/report/slices/native-integration-queue/slice-10-receipt-closure.md` | delivered | [#384](https://forge.adrianpk.com/adrianpk/chr/pulls/384) |
 | Slice 11 | Shared operation surfaces | `feat/slice-11-native-integration-surfaces` | `feat(slice-11): expose native integration progress and controls` | `ops/default/report/slices/native-integration-queue/slice-11-integration-surfaces.md` | delivered | [#385](https://forge.adrianpk.com/adrianpk/chr/pulls/385) |
 | Slice 12 | Live provider certification | `test/slice-12-native-provider-certification` | `test(slice-12): certify native integration across supported forge profiles` | `ops/default/report/slices/native-integration-queue/slice-12-provider-certification.md` | delivered | [#386](https://forge.adrianpk.com/adrianpk/chr/pulls/386) |
-| Slice 13 | Assurance reuse and final closure | `test/slice-13-native-integration-assurance` | `test(slice-13): complete native integration and original workflow assurance` | `ops/default/report/slices/native-integration-queue/slice-13-integration-assurance.md` | in_progress | pending |
+| Slice 13 | Assurance reuse and final closure | `test/slice-13-native-integration-assurance` | `test(slice-13): complete native integration and original workflow assurance` | `ops/default/report/slices/native-integration-queue/slice-13-integration-assurance.md` | in_progress | [#387](https://forge.adrianpk.com/adrianpk/chr/pulls/387) |
 
 ## Slice 1: Guarded Git transport
 
@@ -467,7 +467,7 @@ Prerequisite: verified Slice 12 integration and closed task fanout.
 | T13.1 | [TKT-20261008141429](../ticket/reviewing/20261008141429-ticket-native-t12-1.md) | validated | [91a00cf358255332c9e3f9365771efbfbe5e640a](https://forge.adrianpk.com/adrianpk/chr/commit/91a00cf358255332c9e3f9365771efbfbe5e640a) | Adapt retained composed workflow assurance |
 | T13.2 | [TKT-20261008141430](../ticket/reviewing/20261008141430-ticket-native-t12-2.md) | validated | [8e041477fa4401412316da7b1b91af4ca900c09e](https://forge.adrianpk.com/adrianpk/chr/commit/8e041477fa4401412316da7b1b91af4ca900c09e) | Adapt retained fault QA entrypoint |
 | T13.3 | [TKT-20261008141431](../ticket/reviewing/20261008141431-ticket-native-t12-3.md) | validated | [b2f479d536aba6df4c151303c30d822744252697](https://forge.adrianpk.com/adrianpk/chr/commit/b2f479d536aba6df4c151303c30d822744252697) | Reconcile real certification with final behavior |
-| T13.4 | [TKT-20261008141432](../ticket/blocked/20261008141432-ticket-native-t12-4.md) | blocked | closure preparation; commit pending | Run final gates and close both deliveries |
+| T13.4 | [TKT-20261008141432](../ticket/blocked/20261008141432-ticket-native-t12-4.md) | blocked | [4cb701e668d8fbf3b263d08254112ccd62b542f7](https://forge.adrianpk.com/adrianpk/chr/commit/4cb701e668d8fbf3b263d08254112ccd62b542f7) — closure preparation | Run final gates and close both deliveries |
 
 Required checks:
 
@@ -477,7 +477,7 @@ Required checks:
 - `make qa-native-integration`
 - `git diff --check`
 
-PR: pending
+PR: [#387](https://forge.adrianpk.com/adrianpk/chr/pulls/387)
 
 Verified merge: pending
 

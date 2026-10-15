@@ -529,6 +529,8 @@ Verified integration: [PR #386](https://forge.adrianpk.com/adrianpk/chr/pulls/38
 
 Status: in_progress
 
+PR: [#387](https://forge.adrianpk.com/adrianpk/chr/pulls/387)
+
 Expected branch: `test/slice-13-native-integration-assurance`
 
 Expected PR title: `test(slice-13): complete native integration and original workflow assurance`
