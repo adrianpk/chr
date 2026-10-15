@@ -65,7 +65,12 @@ completed on unchanged 14-file source
 `435d082c526a6065bec62aee4a54ab9c4f3df988a682c6c68913feb1104c715f`: 45 of 46 real
 cases passed in a 636.930 s command. Actual anonymous/native-review denials,
 HTTPS method/contention cases, original-PR close/retarget races and lost-report
-reconciliation passed. The subsequent focused race command was not executed.
+reconciliation passed. The live-matrix runner skipped the subsequent focused
+race command after failure.
+
+- `go test -race ./internal/core -run '^(TestNativeMergePolicy|TestWorkflowGit(Atomic|Advertisement|HTTPS|SSH|SSHUnknown)|TestNativeCapabilityDenials|TestNativeReceiptProof)$' -count=1` — an independent focused run passed in 12.113 s package time and 34.826 s command time on the same unchanged source. Acta `01M4YKF8DNFZTDZ6YFY5VJ7D0G`.
+
+This is local development evidence; final clean-HEAD validation remains pending.
 
 ## Blocker
 

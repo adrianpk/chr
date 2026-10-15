@@ -179,7 +179,7 @@ retained as Acta `01M4YHEHZC13K2TXE6MMFXZAVD`.
 
 - `CHR_NATIVE_INTEGRATION_QA=1 go test -race ./internal/core -run '^TestNativeGitHubMethods$' -count=1 -v` — passed all nine live cases; package 221.147 s and command 222.095 s on unchanged eight-file source `d4dc984fbd33e29ff8f0d6612c6bfe8bd07073b7b60191d5879affae715692e5`. Acta `01M4YHQ5TQDSP5NXAZ10HHQVTZ`. The owned unit exited successfully.
 
-T12.3 is active. `make qa-native-integration` explicitly opts into the designated
+T12.3 remains blocked. `make qa-native-integration` explicitly opts into the designated
 live profiles and includes both forge/method matrices, smart HTTPS repeats,
 anonymous permission denial, retained native-review policies on exact owned
 targets, original-PR close/retarget races, and lost HTTPS report reconciliation.
@@ -193,7 +193,12 @@ were skipped in that opt-out command and are certified separately. Acta
 `01M4YJ32QVMTX11ZKDXW9SC47Q`.
 
 - `make qa-native-integration` — failed in 636.930 s on unchanged 14-file source `435d082c526a6065bec62aee4a54ab9c4f3df988a682c6c68913feb1104c715f`: 45 of 46 real cases passed; GitHub SSH rebase publication PR #27 failed exact canonical result proof.
-- `go test -race ./internal/core -run '^(TestNativeMergePolicy|TestWorkflowGit(Atomic|Advertisement|HTTPS|SSH|SSHUnknown)|TestNativeCapabilityDenials|TestNativeReceiptProof)$' -count=1` — not executed after the failed live matrix.
+- `go test -race ./internal/core -run '^(TestNativeMergePolicy|TestWorkflowGit(Atomic|Advertisement|HTTPS|SSH|SSHUnknown)|TestNativeCapabilityDenials|TestNativeReceiptProof)$' -count=1` — the live-matrix runner skipped this command after failure. A subsequent independent focused run passed in 12.113 s package time and 34.826 s command time on the same unchanged 14-file source. Acta `01M4YKF8DNFZTDZ6YFY5VJ7D0G`.
+
+The subsequent canonical check still found S in GitHub PR #27's REST merge
+result, with P in its head and base. The focused race result supplies local
+development evidence; it does not resolve live certification or provide final
+clean-HEAD controller validation.
 
 The required clean-HEAD controller checks will run after task and PR-reference
 commits in the exact configured order. No delivery PR is ready and no reserved

@@ -444,6 +444,8 @@ Verified merge: pending
 
 Report/evidence: [Slice 12 report](../report/slices/native-integration-queue/slice-12-provider-certification.md). T12.1 passed all nine real Forgejo method/publication/contention cases in 51.915 s. The provider-specific merge-policy defect is corrected with denial-preserving regression coverage. Required pre-commit repository verification passed with zero lint issues, core 2747.252 s and app 197.636 s; focused race checks passed in 10.642 s. Acta `01M4YGRAHG25NY28CDGH3JQKKN`. The owned unit exited successfully on unchanged seven-file source. T12.1 is committed and pushed; T12.2 passed all nine GitHub cases under the race detector (221.147 s package; 222.095 s command), with zero strict-lint issues and unchanged source. Acta `01M4YHQ5TQDSP5NXAZ10HHQVTZ`. T12.2 is committed and pushed; a subsequent repeatability run blocked T12.3 on GitHub rebase result mismatch. Canonical delivery PR and final exact-HEAD checks are pending.
 
+The remaining focused race check passed independently on the unchanged retained source: 12.113 s package time and 34.826 s command time. Acta `01M4YKF8DNFZTDZ6YFY5VJ7D0G`. This local development evidence does not resolve live certification or final clean-HEAD validation.
+
 Blocker: [GitHub fixture PR #27](https://github.com/adrianpk/chr-integration-qa/pull/27) reports original S as the canonical merge result while both refs contain exact P. REST, GraphQL and the merge event confirm the mismatch. GitHub rebase certification is revoked; the exact-P checks remain unchanged. T12.3 source is retained uncommitted; no delivery PR is ready. See the Slice 12 report and Acta `01M4YJX5T41SA4VH4Q32D96T3Z`.
 
 ## Slice 13: Assurance reuse and final closure
