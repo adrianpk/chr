@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133137
 title: "T12.3: Publish bounded certification and denial matrix"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -11,6 +11,8 @@ source: chat
 reported_at: 2026-10-11T13:31:37Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-15T01:11:09Z
+resolution: fixed
+closed_at: 2026-10-15T12:29:44Z
 reviewed_at: 2026-10-15T09:16:12Z
 branch: test/slice-12-native-provider-certification
 pr: 386
@@ -94,3 +96,7 @@ The required pre-commit `make verify` passed on unchanged 21-file source
 Acta `01M4ZDFXDP7YC3Z1NXWAYS3YHK`. The delivery controller owns final clean-HEAD
 validation and integration.
 See the [Slice 12 report](../../report/slices/native-integration-queue/slice-12-provider-certification.md).
+
+## Verified Integration
+
+Verified integration: [PR #386](https://forge.adrianpk.com/adrianpk/chr/pulls/386) merged through Rebase + Fast-forward into `dev` at `acfb3e445c8056bcc198fef82bbec5a18f132304` on 2026-10-15T12:29:44Z. All five final controller checks passed on that exact clean HEAD in the recorded order. Validation `4IZI6UNUBQ2KL7PMUYI64E5T2Q`; merge Acta `01M4ZRME308JWKS62JG7DADA4X`.

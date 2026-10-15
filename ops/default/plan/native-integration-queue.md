@@ -18,9 +18,9 @@ Plan approval: approved on 2026-10-11 under the explicit instruction to process 
 
 Implementation authorization: granted for the complete ordered corrective set and its defined task/PR map.
 
-Active slice: Slice 12 — Live provider certification
+Active slice: Slice 13 — Assurance reuse and final closure
 
-Next slice: Slice 13 — Assurance reuse and final closure
+Next slice: none; final integrated gate follows Slice 13
 
 Slice strategy: behavior-first
 
@@ -490,7 +490,7 @@ Verified integration: [PR #385](https://forge.adrianpk.com/adrianpk/chr/pulls/38
 
 ## Slice 12: Live provider certification
 
-Status: in_progress
+Status: delivered
 
 PR: [#386](https://forge.adrianpk.com/adrianpk/chr/pulls/386)
 
@@ -510,9 +510,9 @@ Invariants: INV-07, INV-08, INV-09, INV-10, INV-11, INV-12, INV-15, INV-16, INV-
 
 | Task | Ticket | Work | Acceptance boundary |
 | --- | --- | --- | --- |
-| T12.1 | [TKT-20261011133135](../ticket/reviewing/20261011133135-native-integration-t12-1.md) | Run all three exact-result methods against designated disposable Forgejo repositories, including source/target contention and metadata convergence. | Each case records canonical PR, actual Git history/tree, policy/credential role and compatible receipt proof. |
-| T12.2 | [TKT-20261011133136](../ticket/reviewing/20261011133136-native-integration-t12-2.md) | Run the equivalent three cases against designated disposable GitHub repositories using the existing adapter. | Each selected method publishes exact P with the same PR observed merged and no native-queue prerequisite. |
-| T12.3 | [TKT-20261011133137](../ticket/reviewing/20261011133137-native-integration-t12-3.md) | Deliver a repeatable native-integration QA entrypoint and profile evidence for permission denial, incompatible native review, fork/no-atomic and transport failures. | All six positive paths and negative boundaries are explicit; missing live access remains a blocker rather than simulated success. |
+| T12.1 | [TKT-20261011133135](../ticket/solved/20261011133135-native-integration-t12-1.md) | Run all three exact-result methods against designated disposable Forgejo repositories, including source/target contention and metadata convergence. | Each case records canonical PR, actual Git history/tree, policy/credential role and compatible receipt proof. |
+| T12.2 | [TKT-20261011133136](../ticket/solved/20261011133136-native-integration-t12-2.md) | Run the equivalent three cases against designated disposable GitHub repositories using the existing adapter. | Each selected method publishes exact P with the same PR observed merged and no native-queue prerequisite. |
+| T12.3 | [TKT-20261011133137](../ticket/solved/20261011133137-native-integration-t12-3.md) | Deliver a repeatable native-integration QA entrypoint and profile evidence for permission denial, incompatible native review, fork/no-atomic and transport failures. | All six positive paths and negative boundaries are explicit; missing live access remains a blocker rather than simulated success. |
 
 ### Required Candidate Checks
 
@@ -521,11 +521,13 @@ Invariants: INV-07, INV-08, INV-09, INV-10, INV-11, INV-12, INV-15, INV-16, INV-
 - `go test -race ./internal/core ./internal/app -count=1`
 - `git diff --check`
 
-Resolved v1 incompatibility: explicit GitHub source-attribution v2 preserves raw S separately from exact delivered P with complete transaction, history/tree, source and original merged PR proof. The corrective matrix passed all 46 cases; historical v1 evidence remains strict. Pre-commit `make verify` passed with zero lint issues, core 2919.809 s, app 192.959 s and all remaining packages passing. Validation Acta `01M4ZDFXDP7YC3Z1NXWAYS3YHK`; recovery Acta `01M4ZARSAGBGADWYHS9D0N5M9V`. The delivery controller owns final clean-HEAD validation and integration.
+Resolved v1 incompatibility: explicit GitHub source-attribution v2 preserves raw S separately from exact delivered P with complete transaction, history/tree, source and original merged PR proof. The corrective matrix passed all 46 cases; historical v1 evidence remains strict. Pre-commit `make verify` passed with zero lint issues, core 2919.809 s, app 192.959 s and all remaining packages passing. Validation Acta `01M4ZDFXDP7YC3Z1NXWAYS3YHK`; recovery Acta `01M4ZARSAGBGADWYHS9D0N5M9V`. All five final clean-HEAD checks passed; verified integration is complete.
+
+Verified integration: [PR #386](https://forge.adrianpk.com/adrianpk/chr/pulls/386) merged through Rebase + Fast-forward into `dev` at `acfb3e445c8056bcc198fef82bbec5a18f132304` on 2026-10-15T12:29:44Z. All five final controller checks passed on that exact clean HEAD in the recorded order. Validation `4IZI6UNUBQ2KL7PMUYI64E5T2Q`; merge Acta `01M4ZRME308JWKS62JG7DADA4X`.
 
 ## Slice 13: Assurance reuse and final closure
 
-Status: not_started
+Status: in_progress
 
 Expected branch: `test/slice-13-native-integration-assurance`
 
@@ -543,9 +545,9 @@ Invariants: INV-01, INV-02, INV-03, INV-04, INV-05, INV-06, INV-07, INV-08, INV-
 
 | Task | Ticket | Work | Acceptance boundary |
 | --- | --- | --- | --- |
-| T13.1 | [TKT-20261008141429](../ticket/blocked/20261008141429-ticket-native-t12-1.md) | Reuse original T12.1 at 4f10f1c60de1f164f727d37b4df5c02343ab6e11 and adapt ordered/loose/parallel scenarios to the real publisher. | Composed original and new acceptance passes without duplicate task implementation. |
-| T13.2 | [TKT-20261008141430](../ticket/blocked/20261008141430-ticket-native-t12-2.md) | Reuse original T12.2 at 44e8145aa618edfc51d5efb08330c641b02f7e58 and adapt its bounded QA/restart/crash scenarios. | Both QA targets retain meaningful fault evidence and bounded real subprocess coverage. |
-| T13.3 | [TKT-20261008141431](../ticket/blocked/20261008141431-ticket-native-t12-3.md) | Fulfill original T12.3 using current Slice 12 certification and rerun cases invalidated by later implementation or policy changes. | Every claimed provider/method has positive real proof matching delivered behavior. |
+| T13.1 | [TKT-20261008141429](../ticket/in_progress/20261008141429-ticket-native-t12-1.md) | Reuse original T12.1 at 4f10f1c60de1f164f727d37b4df5c02343ab6e11 and adapt ordered/loose/parallel scenarios to the real publisher. | Composed original and new acceptance passes without duplicate task implementation. |
+| T13.2 | [TKT-20261008141430](../ticket/ready/20261008141430-ticket-native-t12-2.md) | Reuse original T12.2 at 44e8145aa618edfc51d5efb08330c641b02f7e58 and adapt its bounded QA/restart/crash scenarios. | Both QA targets retain meaningful fault evidence and bounded real subprocess coverage. |
+| T13.3 | [TKT-20261008141431](../ticket/ready/20261008141431-ticket-native-t12-3.md) | Fulfill original T12.3 using current Slice 12 certification and rerun cases invalidated by later implementation or policy changes. | Every claimed provider/method has positive real proof matching delivered behavior. |
 | T13.4 | [TKT-20261008141432](../ticket/blocked/20261008141432-ticket-native-t12-4.md) | Fulfill original T12.4 by running exact integrated full gates and publishing original/replacement-unit and corrective closure evidence. | All tasks and acceptance obligations close after verified integration; old controller history is preserved without false completion. |
 
 ### Required Candidate Checks
@@ -555,6 +557,9 @@ Invariants: INV-01, INV-02, INV-03, INV-04, INV-05, INV-06, INV-07, INV-08, INV-
 - `make qa-ticket-native-workflow`
 - `make qa-native-integration`
 - `git diff --check`
+
+Slice 12 prerequisite verified. T13.1 adapts the retained assurance implementation first; T13.2 and T13.3 are ready in order. T13.4 retains its final integrated-gate dependency and will close only with controller evidence after integration.
+
 
 ## Final Gate and Closure
 

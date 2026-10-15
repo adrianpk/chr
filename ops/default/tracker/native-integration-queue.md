@@ -18,9 +18,9 @@ Plan approval: approved on 2026-10-11 under the explicit instruction to process 
 
 Implementation authorization: granted for the complete ordered corrective set and its defined task/PR map.
 
-Active slice: Slice 12 — Live provider certification
+Active slice: Slice 13 — Assurance reuse and final closure
 
-Next slice: Slice 13 — Assurance reuse and final closure
+Next slice: none; final integrated gate follows Slice 13
 
 Slice strategy: behavior-first
 
@@ -28,13 +28,13 @@ Reason: prove a positive remote transaction and real forge observation before bu
 
 Plan: [Native Integration Corrective Delivery](../plan/native-integration-queue.md)
 
-Progress: 11 of 13 slices integrated; 44 of 51 execution tasks delivered in this set.
+Progress: 12 of 13 slices integrated; 47 of 51 execution tasks delivered in this set.
 
 Task accounting: 47 new tickets and 4 reused original assurance tickets. Retained assurance commits are implemented evidence, not integrated task completion.
 
 ## Current Checkpoint
 
-Slice 1 is canonically integrated through [PR #375](https://forge.adrianpk.com/adrianpk/chr/pulls/375) at `79dfe32380dae9058bde15ba50b8f30c30cbaf3d`. All four ordered Looper checks passed for that exact clean HEAD; its five task tickets are solved. Slice 2 is canonically integrated through [PR #376](https://forge.adrianpk.com/adrianpk/chr/pulls/376) at `3129b5ce312df22287a4e7b78e08bf41f5958377`. All five ordered Looper checks passed for that exact clean HEAD; its three task tickets are solved. Slice 3 is canonically integrated through [PR #377](https://forge.adrianpk.com/adrianpk/chr/pulls/377) at `ef72c8cbabf06816a93c293161c12d03211979ba`. All four ordered Looper checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 3 report](../report/slices/native-integration-queue/slice-3-integration-records.md) retains task and final validation evidence. Slice 4 is canonically integrated through [PR #378](https://forge.adrianpk.com/adrianpk/chr/pulls/378) at `bb3a88888a47040f4ded39807f79623bb86d8ab7`. All four ordered controller checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 4 report](../report/slices/native-integration-queue/slice-4-queue-scheduling.md) retains task and final validation evidence. Slice 5 is canonically integrated through [PR #379](https://forge.adrianpk.com/adrianpk/chr/pulls/379) at `771ae3d603f34e6c12d16243e258a125e5db4f9b`. All four ordered controller checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 5 report](../report/slices/native-integration-queue/slice-5-method-preparation.md) retains task and final validation evidence. Slice 6 is canonically integrated through [PR #380](https://forge.adrianpk.com/adrianpk/chr/pulls/380) at `725128da941a5c149a2b0a5d9a6a7065f842823d`. All four ordered controller checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 6 report](../report/slices/native-integration-queue/slice-6-merger-role.md) retains task and final validation evidence. Slice 7 is canonically integrated through [PR #381](https://forge.adrianpk.com/adrianpk/chr/pulls/381) at `79af9e38426e681e5b0d778ae4df2b0a84952d73`. All four ordered controller checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 7 report](../report/slices/native-integration-queue/slice-7-candidate-review.md) retains task and final validation evidence. Slice 8 is canonically integrated through [PR #382](https://forge.adrianpk.com/adrianpk/chr/pulls/382) at `0096f6e960ecc25e7aae72a8a97fdc53c689418c`. All four ordered controller checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 8 report](../report/slices/native-integration-queue/slice-8-integration-limits.md) retains task and final validation evidence. Slice 9 is canonically integrated through [PR #383](https://forge.adrianpk.com/adrianpk/chr/pulls/383) at `8853fdb14638c853f641b82c7d19d805b41fa8fe`. All four ordered controller checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 9 report](../report/slices/native-integration-queue/slice-9-publication-recovery.md) retains task and final validation evidence. Slice 10 is canonically integrated through [#384](https://forge.adrianpk.com/adrianpk/chr/pulls/384) at `9726200044d15b4e66bacfe1334de4a9410f4bdc`. All four ordered controller checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 10 report](../report/slices/native-integration-queue/slice-10-receipt-closure.md) retains task and final validation evidence. Slice 11 is canonically integrated through [PR #385](https://forge.adrianpk.com/adrianpk/chr/pulls/385) at `12094bddb2d298f6c60fbfcb49f513b6178ff595`. All four ordered controller checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 11 report](../report/slices/native-integration-queue/slice-11-integration-surfaces.md) retains task and final validation evidence. Slice 12 is active for live provider certification.
+Slice 1 is canonically integrated through [PR #375](https://forge.adrianpk.com/adrianpk/chr/pulls/375) at `79dfe32380dae9058bde15ba50b8f30c30cbaf3d`. All four ordered Looper checks passed for that exact clean HEAD; its five task tickets are solved. Slice 2 is canonically integrated through [PR #376](https://forge.adrianpk.com/adrianpk/chr/pulls/376) at `3129b5ce312df22287a4e7b78e08bf41f5958377`. All five ordered Looper checks passed for that exact clean HEAD; its three task tickets are solved. Slice 3 is canonically integrated through [PR #377](https://forge.adrianpk.com/adrianpk/chr/pulls/377) at `ef72c8cbabf06816a93c293161c12d03211979ba`. All four ordered Looper checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 3 report](../report/slices/native-integration-queue/slice-3-integration-records.md) retains task and final validation evidence. Slice 4 is canonically integrated through [PR #378](https://forge.adrianpk.com/adrianpk/chr/pulls/378) at `bb3a88888a47040f4ded39807f79623bb86d8ab7`. All four ordered controller checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 4 report](../report/slices/native-integration-queue/slice-4-queue-scheduling.md) retains task and final validation evidence. Slice 5 is canonically integrated through [PR #379](https://forge.adrianpk.com/adrianpk/chr/pulls/379) at `771ae3d603f34e6c12d16243e258a125e5db4f9b`. All four ordered controller checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 5 report](../report/slices/native-integration-queue/slice-5-method-preparation.md) retains task and final validation evidence. Slice 6 is canonically integrated through [PR #380](https://forge.adrianpk.com/adrianpk/chr/pulls/380) at `725128da941a5c149a2b0a5d9a6a7065f842823d`. All four ordered controller checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 6 report](../report/slices/native-integration-queue/slice-6-merger-role.md) retains task and final validation evidence. Slice 7 is canonically integrated through [PR #381](https://forge.adrianpk.com/adrianpk/chr/pulls/381) at `79af9e38426e681e5b0d778ae4df2b0a84952d73`. All four ordered controller checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 7 report](../report/slices/native-integration-queue/slice-7-candidate-review.md) retains task and final validation evidence. Slice 8 is canonically integrated through [PR #382](https://forge.adrianpk.com/adrianpk/chr/pulls/382) at `0096f6e960ecc25e7aae72a8a97fdc53c689418c`. All four ordered controller checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 8 report](../report/slices/native-integration-queue/slice-8-integration-limits.md) retains task and final validation evidence. Slice 9 is canonically integrated through [PR #383](https://forge.adrianpk.com/adrianpk/chr/pulls/383) at `8853fdb14638c853f641b82c7d19d805b41fa8fe`. All four ordered controller checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 9 report](../report/slices/native-integration-queue/slice-9-publication-recovery.md) retains task and final validation evidence. Slice 10 is canonically integrated through [#384](https://forge.adrianpk.com/adrianpk/chr/pulls/384) at `9726200044d15b4e66bacfe1334de4a9410f4bdc`. All four ordered controller checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 10 report](../report/slices/native-integration-queue/slice-10-receipt-closure.md) retains task and final validation evidence. Slice 11 is canonically integrated through [PR #385](https://forge.adrianpk.com/adrianpk/chr/pulls/385) at `12094bddb2d298f6c60fbfcb49f513b6178ff595`. All four ordered controller checks passed for that exact clean HEAD; its four task tickets are solved. The [Slice 11 report](../report/slices/native-integration-queue/slice-11-integration-surfaces.md) retains task and final validation evidence. Slice 12 is canonically integrated through [PR #386](https://forge.adrianpk.com/adrianpk/chr/pulls/386) at `acfb3e445c8056bcc198fef82bbec5a18f132304`. All five final controller checks passed on that exact clean HEAD; its three task tickets are solved. Slice 13 is active for assurance reuse and final closure.
 The original controller remains inactive and blocked; its checkpoint and consumed budgets are preserved. Its assurance execution is transferred to Slice 13 under the approved plan.
 Both live repositories and their policy/access profiles are designated in [Certification Fixtures](../report/native-integration-fixtures.md). Real default rebase through both existing adapters is certified; the Slice 2 report retains the exact-head validation boundary.
 
@@ -56,8 +56,8 @@ Only Looper may merge this set's canonical PRs. Read-only status must not mutate
 | Slice 9 | Publication and uncertainty recovery | `feat/slice-9-native-publication-recovery` | `feat(slice-9): reconcile guarded publication without duplicate submission` | `ops/default/report/slices/native-integration-queue/slice-9-publication-recovery.md` | delivered | [#383](https://forge.adrianpk.com/adrianpk/chr/pulls/383) |
 | Slice 10 | Receipts fanout and closure | `feat/slice-10-native-receipt-closure` | `feat(slice-10): finalize exact integration receipts and task delivery` | `ops/default/report/slices/native-integration-queue/slice-10-receipt-closure.md` | delivered | [#384](https://forge.adrianpk.com/adrianpk/chr/pulls/384) |
 | Slice 11 | Shared operation surfaces | `feat/slice-11-native-integration-surfaces` | `feat(slice-11): expose native integration progress and controls` | `ops/default/report/slices/native-integration-queue/slice-11-integration-surfaces.md` | delivered | [#385](https://forge.adrianpk.com/adrianpk/chr/pulls/385) |
-| Slice 12 | Live provider certification | `test/slice-12-native-provider-certification` | `test(slice-12): certify native integration across supported forge profiles` | `ops/default/report/slices/native-integration-queue/slice-12-provider-certification.md` | blocked | pending |
-| Slice 13 | Assurance reuse and final closure | `test/slice-13-native-integration-assurance` | `test(slice-13): complete native integration and original workflow assurance` | `ops/default/report/slices/native-integration-queue/slice-13-integration-assurance.md` | not_started | pending |
+| Slice 12 | Live provider certification | `test/slice-12-native-provider-certification` | `test(slice-12): certify native integration across supported forge profiles` | `ops/default/report/slices/native-integration-queue/slice-12-provider-certification.md` | delivered | [#386](https://forge.adrianpk.com/adrianpk/chr/pulls/386) |
+| Slice 13 | Assurance reuse and final closure | `test/slice-13-native-integration-assurance` | `test(slice-13): complete native integration and original workflow assurance` | `ops/default/report/slices/native-integration-queue/slice-13-integration-assurance.md` | in_progress | pending |
 
 ## Slice 1: Guarded Git transport
 
@@ -415,7 +415,7 @@ Report/evidence: [Slice 11 report](../report/slices/native-integration-queue/sli
 
 ## Slice 12: Live provider certification
 
-Status: in_progress
+Status: delivered
 
 Expected branch: `test/slice-12-native-provider-certification`
 
@@ -427,9 +427,9 @@ Prerequisite: verified Slice 11 integration and closed task fanout.
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T12.1 | [TKT-20261011133135](../ticket/reviewing/20261011133135-native-integration-t12-1.md) | validated | [ae806985740281a4a77ff7e06c1d448f4a6a1a86](https://forge.adrianpk.com/adrianpk/chr/commit/ae806985740281a4a77ff7e06c1d448f4a6a1a86) | Certify Forgejo merge rebase and squash |
-| T12.2 | [TKT-20261011133136](../ticket/reviewing/20261011133136-native-integration-t12-2.md) | validated | [a9b780729b8d7d1fab45e0cde03ba02240e8a625](https://forge.adrianpk.com/adrianpk/chr/commit/a9b780729b8d7d1fab45e0cde03ba02240e8a625) | Certify GitHub merge rebase and squash |
-| T12.3 | [TKT-20261011133137](../ticket/reviewing/20261011133137-native-integration-t12-3.md) | validated | [d44cdb16a6588446cba41d6a46d2ebfebad4db91](https://forge.adrianpk.com/adrianpk/chr/commit/d44cdb16a6588446cba41d6a46d2ebfebad4db91) | Publish bounded certification and denial matrix |
+| T12.1 | [TKT-20261011133135](../ticket/solved/20261011133135-native-integration-t12-1.md) | done | [ae806985740281a4a77ff7e06c1d448f4a6a1a86](https://forge.adrianpk.com/adrianpk/chr/commit/ae806985740281a4a77ff7e06c1d448f4a6a1a86) | Certify Forgejo merge rebase and squash |
+| T12.2 | [TKT-20261011133136](../ticket/solved/20261011133136-native-integration-t12-2.md) | done | [a9b780729b8d7d1fab45e0cde03ba02240e8a625](https://forge.adrianpk.com/adrianpk/chr/commit/a9b780729b8d7d1fab45e0cde03ba02240e8a625) | Certify GitHub merge rebase and squash |
+| T12.3 | [TKT-20261011133137](../ticket/solved/20261011133137-native-integration-t12-3.md) | done | [d44cdb16a6588446cba41d6a46d2ebfebad4db91](https://forge.adrianpk.com/adrianpk/chr/commit/d44cdb16a6588446cba41d6a46d2ebfebad4db91) | Publish bounded certification and denial matrix |
 
 Required checks:
 
@@ -440,17 +440,19 @@ Required checks:
 
 PR: [#386](https://forge.adrianpk.com/adrianpk/chr/pulls/386)
 
-Verified merge: pending
+Verified merge: `acfb3e445c8056bcc198fef82bbec5a18f132304` at 2026-10-15T12:29:44Z; controller Acta `01M4ZRME308JWKS62JG7DADA4X`.
 
-Report/evidence: [Slice 12 report](../report/slices/native-integration-queue/slice-12-provider-certification.md). T12.1 passed all nine real Forgejo method/publication/contention cases in 51.915 s. The provider-specific merge-policy defect is corrected with denial-preserving regression coverage. Required pre-commit repository verification passed with zero lint issues, core 2747.252 s and app 197.636 s; focused race checks passed in 10.642 s. Acta `01M4YGRAHG25NY28CDGH3JQKKN`. The owned unit exited successfully on unchanged seven-file source. T12.1 is committed and pushed; T12.2 passed all nine GitHub cases under the race detector (221.147 s package; 222.095 s command), with zero strict-lint issues and unchanged source. Acta `01M4YHQ5TQDSP5NXAZ10HHQVTZ`. T12.2 is committed and pushed; a subsequent repeatability run blocked T12.3 on GitHub rebase result mismatch. Canonical delivery PR and final exact-HEAD checks are pending.
+Report/evidence: [Slice 12 report](../report/slices/native-integration-queue/slice-12-provider-certification.md). T12.1 passed all nine real Forgejo method/publication/contention cases in 51.915 s. The provider-specific merge-policy defect is corrected with denial-preserving regression coverage. Required pre-commit repository verification passed with zero lint issues, core 2747.252 s and app 197.636 s; focused race checks passed in 10.642 s. Acta `01M4YGRAHG25NY28CDGH3JQKKN`. The owned unit exited successfully on unchanged seven-file source. T12.1 is committed and pushed; T12.2 passed all nine GitHub cases under the race detector (221.147 s package; 222.095 s command), with zero strict-lint issues and unchanged source. Acta `01M4YHQ5TQDSP5NXAZ10HHQVTZ`. T12.2 is committed and pushed; a subsequent repeatability run blocked T12.3 on GitHub rebase result mismatch. The later correction and final validation below supersede that development blocker.
 
 The remaining focused race check passed independently on the unchanged retained source: 12.113 s package time and 34.826 s command time. Acta `01M4YKF8DNFZTDZ6YFY5VJ7D0G`. This local development evidence does not resolve live certification or final clean-HEAD validation.
 
-Resolved v1 incompatibility: explicit GitHub source-attribution v2 preserves raw S separately from exact delivered P with complete transaction, history/tree, source and original merged PR proof. The corrective matrix passed all 46 cases; historical v1 evidence remains strict. Pre-commit `make verify` passed with zero lint issues, core 2919.809 s, app 192.959 s and all remaining packages passing. Validation Acta `01M4ZDFXDP7YC3Z1NXWAYS3YHK`; recovery Acta `01M4ZARSAGBGADWYHS9D0N5M9V`. The delivery controller owns final clean-HEAD validation and integration.
+Resolved v1 incompatibility: explicit GitHub source-attribution v2 preserves raw S separately from exact delivered P with complete transaction, history/tree, source and original merged PR proof. The corrective matrix passed all 46 cases; historical v1 evidence remains strict. Pre-commit `make verify` passed with zero lint issues, core 2919.809 s, app 192.959 s and all remaining packages passing. Validation Acta `01M4ZDFXDP7YC3Z1NXWAYS3YHK`; recovery Acta `01M4ZARSAGBGADWYHS9D0N5M9V`. All five final clean-HEAD checks passed; verified integration is complete.
+
+Verified integration: [PR #386](https://forge.adrianpk.com/adrianpk/chr/pulls/386) merged through Rebase + Fast-forward into `dev` at `acfb3e445c8056bcc198fef82bbec5a18f132304` on 2026-10-15T12:29:44Z. All five final controller checks passed on that exact clean HEAD in the recorded order. Validation `4IZI6UNUBQ2KL7PMUYI64E5T2Q`; merge Acta `01M4ZRME308JWKS62JG7DADA4X`.
 
 ## Slice 13: Assurance reuse and final closure
 
-Status: not_started
+Status: in_progress
 
 Expected branch: `test/slice-13-native-integration-assurance`
 
@@ -462,9 +464,9 @@ Prerequisite: verified Slice 12 integration and closed task fanout.
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T13.1 | [TKT-20261008141429](../ticket/blocked/20261008141429-ticket-native-t12-1.md) | blocked | retained: 4f10f1c60de1f164f727d37b4df5c02343ab6e11 | Adapt retained composed workflow assurance |
-| T13.2 | [TKT-20261008141430](../ticket/blocked/20261008141430-ticket-native-t12-2.md) | blocked | retained: 44e8145aa618edfc51d5efb08330c641b02f7e58 | Adapt retained fault QA entrypoint |
-| T13.3 | [TKT-20261008141431](../ticket/blocked/20261008141431-ticket-native-t12-3.md) | blocked | retained: pending | Reconcile real certification with final behavior |
+| T13.1 | [TKT-20261008141429](../ticket/in_progress/20261008141429-ticket-native-t12-1.md) | in_progress | retained: 4f10f1c60de1f164f727d37b4df5c02343ab6e11 | Adapt retained composed workflow assurance |
+| T13.2 | [TKT-20261008141430](../ticket/ready/20261008141430-ticket-native-t12-2.md) | ready | retained: 44e8145aa618edfc51d5efb08330c641b02f7e58 | Adapt retained fault QA entrypoint |
+| T13.3 | [TKT-20261008141431](../ticket/ready/20261008141431-ticket-native-t12-3.md) | ready | retained: pending | Reconcile real certification with final behavior |
 | T13.4 | [TKT-20261008141432](../ticket/blocked/20261008141432-ticket-native-t12-4.md) | blocked | retained: pending | Run final gates and close both deliveries |
 
 Required checks:
@@ -480,6 +482,8 @@ PR: pending
 Verified merge: pending
 
 Report/evidence: pending
+
+Slice 12 prerequisite verified. T13.1 adapts the retained assurance implementation first; T13.2 and T13.3 are ready in order. T13.4 retains its final integrated-gate dependency and will close only with controller evidence after integration.
 
 ## Final Delivery Gate
 

@@ -1,6 +1,6 @@
 # Slice 12: Live provider certification
 
-Status: reviewing
+Status: delivered
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
@@ -301,6 +301,20 @@ Required pre-commit validation:
 Recovery verified all 46 retained live-case file hashes and the complete source
 handoff. Acta `01M4ZARSAGBGADWYHS9D0N5M9V`. The delivery controller retains final
 exact-HEAD evidence before integration.
+
+## Verified Integration
+
+Verified integration: [PR #386](https://forge.adrianpk.com/adrianpk/chr/pulls/386) merged through Rebase + Fast-forward into `dev` at `acfb3e445c8056bcc198fef82bbec5a18f132304` on 2026-10-15T12:29:44Z. All five final controller checks passed on that exact clean HEAD in the recorded order. Validation `4IZI6UNUBQ2KL7PMUYI64E5T2Q`; merge Acta `01M4ZRME308JWKS62JG7DADA4X`.
+
+Final exact-HEAD validation:
+
+- `make verify` — passed.
+- `go test ./internal/core ./internal/app -count=1` — passed.
+- `go test -race ./internal/core ./internal/app -count=1` — passed.
+- `make qa-native-integration` — passed.
+- `git diff --check` — passed.
+
+The integrated commit matches the validated PR head. Owned validation processes exited successfully.
 
 ## Risks and Follow-ups
 

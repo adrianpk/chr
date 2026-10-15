@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133136
 title: "T12.2: Certify GitHub merge rebase and squash"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -11,6 +11,8 @@ source: chat
 reported_at: 2026-10-11T13:31:36Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-15T00:54:01Z
+resolution: fixed
+closed_at: 2026-10-15T12:29:44Z
 reviewed_at: 2026-10-15T01:10:13Z
 branch: test/slice-12-native-provider-certification
 pr: 386
@@ -80,3 +82,7 @@ See the [Slice 12 report](../../report/slices/native-integration-queue/slice-12-
 Canonical delivery PR and exact-HEAD final validation remain pending.
 
 Task commit: [a9b780729b8d7d1fab45e0cde03ba02240e8a625](https://forge.adrianpk.com/adrianpk/chr/commit/a9b780729b8d7d1fab45e0cde03ba02240e8a625). Acta `01M4YHRTEX8AH2R7Y2CM0P3CPT`.
+
+## Verified Integration
+
+Verified integration: [PR #386](https://forge.adrianpk.com/adrianpk/chr/pulls/386) merged through Rebase + Fast-forward into `dev` at `acfb3e445c8056bcc198fef82bbec5a18f132304` on 2026-10-15T12:29:44Z. All five final controller checks passed on that exact clean HEAD in the recorded order. Validation `4IZI6UNUBQ2KL7PMUYI64E5T2Q`; merge Acta `01M4ZRME308JWKS62JG7DADA4X`.
