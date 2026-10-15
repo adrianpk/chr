@@ -48,11 +48,12 @@ not resumed or reset. Do not claim the old reserved PR merged.
 Close the original remaining outcomes only after the replacement assurance unit,
 current live certification and full gate are verified through the corrective set.
 
-Replacement assurance is prepared through [#387](https://forge.adrianpk.com/adrianpk/chr/pulls/387) on
+Replacement assurance is integrated through [#387](https://forge.adrianpk.com/adrianpk/chr/pulls/387) on
 `test/slice-13-native-integration-assurance`, with the
 [canonical Slice 13 report](../report/slices/native-integration-queue/slice-13-integration-assurance.md).
-The original completion state remains blocked until the replacement integration
-and exact integrated gate are verified. Original task identities, reserved branch
+The replacement integration is verified at `88a9c6344f5e80d5a9a03357a1ce71d106e1231f`.
+The original completion state remains blocked until the exact integrated gate
+and cycle closure are verified. Original task identities, reserved branch
 and historical controller budgets remain preserved.
 
 

@@ -28,7 +28,7 @@ Next slice: none; final delivery-set gate follows the last verified integration.
 
 Slice strategy: behavior-first
 
-Progress: 11 of 12 slices integrated; 44 of 48 tasks done.
+Progress: eleven original slices integrated, with the replacement assurance PR also integrated; 47 of 48 tasks done. Original T12.4 remains blocked on the integrated gate and cycle closure.
 
 ## Approved Corrective Execution Transfer
 
@@ -45,11 +45,12 @@ not resumed or reset. Do not claim the old reserved PR merged.
 Close the original remaining outcomes only after the replacement assurance unit,
 current live certification and full gate are verified through the corrective set.
 
-Replacement assurance is prepared through [#387](https://forge.adrianpk.com/adrianpk/chr/pulls/387) on
+Replacement assurance is integrated through [#387](https://forge.adrianpk.com/adrianpk/chr/pulls/387) on
 `test/slice-13-native-integration-assurance`, with the
 [canonical Slice 13 report](../report/slices/native-integration-queue/slice-13-integration-assurance.md).
-The original completion state remains blocked until the replacement integration
-and exact integrated gate are verified. Original task identities, reserved branch
+The replacement integration is verified at `88a9c6344f5e80d5a9a03357a1ce71d106e1231f`.
+The original completion state remains blocked until the exact integrated gate
+and cycle closure are verified. Original task identities, reserved branch
 and historical controller budgets remain preserved.
 
 
@@ -62,9 +63,10 @@ Slice 11 merged head `750378ec9b7ee05399395184def0954ab47cf1d7` passed the contr
 with Go 1.27.1, the retained curation fixture and a scoped 60-minute test timeout.
 Its report is delivered and all four task tickets are solved.
 Acta records the canonical merge in `01M4HEH83Y7RY0GGS6C10NBRNF`.
-Slice 12 execution is blocked and transferred to corrective Slice 13. T12.1 and
-T12.2 have retained validated commits; their task tickets await adapted integration. Live-provider fixture designation for
-T12.3 remains an external prerequisite; no live-provider success is claimed.
+The replacement assurance unit is integrated through PR #387. Original T12.1–T12.3
+are solved through corrective T13.1–T13.3 with retained provenance and real
+provider certification. T12.4 remains blocked on the exact integrated gate.
+The original reserved branch and inactive controller remain unchanged.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -798,14 +800,14 @@ Plan contract: [Slice 12](../plan/ticket-native-workflow.md#slice-12-end-to-end-
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T12.1 | [TKT-20261008141429](../ticket/reviewing/20261008141429-ticket-native-t12-1.md) | validated | 4f10f1c60de1f164f727d37b4df5c02343ab6e11 | Compose real-files/subprocess/Git scenarios for ordered slices, loose queues and parallel independent work. |
-| T12.2 | [TKT-20261008141430](../ticket/reviewing/20261008141430-ticket-native-t12-2.md) | validated | 44e8145aa618edfc51d5efb08330c641b02f7e58 | Add restart/crash/lost-response/manual-edit fault scenarios and a bounded repository QA entrypoint. |
-| T12.3 | [TKT-20261008141431](../ticket/reviewing/20261008141431-ticket-native-t12-3.md) | blocked | pending | Verify supported existing provider/method paths in designated disposable live repositories. |
+| T12.1 | [TKT-20261008141429](../ticket/solved/20261008141429-ticket-native-t12-1.md) | done | 91a00cf358255332c9e3f9365771efbfbe5e640a | Compose real-files/subprocess/Git scenarios for ordered slices, loose queues and parallel independent work. |
+| T12.2 | [TKT-20261008141430](../ticket/solved/20261008141430-ticket-native-t12-2.md) | done | 8e041477fa4401412316da7b1b91af4ca900c09e | Add restart/crash/lost-response/manual-edit fault scenarios and a bounded repository QA entrypoint. |
+| T12.3 | [TKT-20261008141431](../ticket/solved/20261008141431-ticket-native-t12-3.md) | done | b2f479d536aba6df4c151303c30d822744252697 | Verify supported existing provider/method paths in designated disposable live repositories. |
 | T12.4 | [TKT-20261008141432](../ticket/blocked/20261008141432-ticket-native-t12-4.md) | blocked | pending | Run final exact-candidate gates, reconcile the acceptance matrix and publish the cycle evidence/report. |
 
 ### Validation
 
-Status: not run.
+Status: all five configured replacement candidate checks passed; integrated full gate pending.
 
 Expected focused checks: run the composed scenarios via the QA entrypoint delivered by
 T12.2, then the standard `make verify`, `go test -race ./...` and
@@ -818,12 +820,12 @@ Acceptance: composed confirmation of A01-A24 and live-provider limitations.
 
 ### Delivery Evidence
 
-- PR: pending.
-- Merge commit: pending.
-- Report status: not created.
-- Retained task implementations: original T12.1/T12.2 references above; tickets blocked until corrective Slice 13.
-- Validation evidence: pending.
-- External prerequisite: designated disposable live repositories and access for T12.3 are pending.
+- Replacement PR: [#387](https://forge.adrianpk.com/adrianpk/chr/pulls/387); the original reserved branch has no claimed PR.
+- Replacement merge commit: `88a9c6344f5e80d5a9a03357a1ce71d106e1231f` on 2026-10-15T16:48:49Z; controller Acta `01M507ET2KEAG9ATT5QAEGKMJ6`.
+- Canonical replacement report: [Slice 13](../report/slices/native-integration-queue/slice-13-integration-assurance.md), delivered.
+- Original T12.1–T12.3 are solved through their corrective aliases. Original retained commits remain provenance; T12.4 awaits the integrated gate.
+- Candidate validation: `3GRRMCM246GSGUCZVTSUTZM6XY`, all five ordered checks passed at the replacement merge SHA; Acta `01M507ENSTTAR7FZY5KXB66DE0`.
+- Live prerequisite: both designated repositories and all supported method/transport profiles passed certification; exact integrated gate remains pending.
 
 ## Acceptance Evidence
 

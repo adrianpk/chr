@@ -1,6 +1,6 @@
 # Slice 13: Native Integration and Original Workflow Assurance
 
-Status: reviewing
+Status: delivered
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
@@ -101,8 +101,8 @@ counterexample remains preserved in the Slice 12 report.
 This slice changes continuation routing and deterministic QA wiring. Production
 transport, history preparation, capability and native receipt/observer contracts
 remain those certified by Slice 12; no individual profile case was invalidated
-by these changes. The configured final candidate QA still rechecks live policy
-and all profiles at the exact clean HEAD. No new live access or policy change
+by these changes. The configured final candidate QA rechecked live policy
+and all profiles at the exact clean HEAD and passed. No new live access or policy change
 was made for this reconciliation.
 
 All twelve predecessor reports are delivered. Their canonical PRs #375–#386
@@ -121,8 +121,8 @@ that evidence without introducing duplicate task tickets.
 | --- | --- |
 | Original A01–A24 and AC-091 | Ordered, loose and parallel native continuation plus real SSH report-loss recovery pass; the 78-test acceptance/fault target passed within its bounds. |
 | AC-001–AC-090 and AC-096–AC-100 | The approved primary ownership map, twelve delivered reports and reconciled certification retain implementation evidence; final candidate evidence belongs to the exact clean PR head. |
-| AC-092 | Required candidate checks must pass in configured order on the final clean PR head; the controller's unchanged full gate must then pass on the exact integrated development revision. |
-| AC-093 | Twelve predecessor merges and 47 solved tasks are verified. Slice 13 integration and its four task finalizations remain pending. |
+| AC-092 | Required candidate checks passed in configured order on the final clean PR head; the controller's unchanged full gate must then pass on the exact integrated development revision. |
+| AC-093 | All thirteen corrective merges and 50 solved tasks are verified. T13.4 final closure remains pending on the integrated gate. |
 | AC-094 | Original T12.1–T12.4 execute as T13.1–T13.4 through this replacement PR. Original cycle closure requires the replacement merge/report and exact integrated gate evidence. |
 | AC-095 | Final closure must retain reconciliation, absence of unknown publication and verified original/corrective closure evidence. It remains pending. |
 
@@ -143,8 +143,8 @@ The original reserved branch remains at
 `6100f7d166cc3c61466dcacae05c26baabb2460b`. Its historical blocked execution and
 consumed budgets are preserved. No original assurance PR or historical controller
 completion is invented; this Slice 13 report is the canonical replacement unit.
-T13.4 remains blocked on verified replacement integration and the exact integrated
-full gate. Candidate preparation does not complete either delivery set.
+Replacement integration is verified. T13.4 remains blocked on the exact integrated
+full gate and subsequent cycle closure. Neither delivery set is complete yet.
 
 ## Validation
 
@@ -166,7 +166,11 @@ full gate. Candidate preparation does not complete either delivery set.
   PR-reference commit. Development checks do not replace that evidence or the
   post-integration gate.
 
-Required candidate commands remain, in order: `make verify`,
+Verified merge: `88a9c6344f5e80d5a9a03357a1ce71d106e1231f` at 2026-10-15T16:48:49Z; controller Acta `01M507ET2KEAG9ATT5QAEGKMJ6`.
+
+All five configured candidate checks passed in order on that exact clean HEAD: `make verify`, `go test -race ./...`, `make qa-ticket-native-workflow`, `make qa-native-integration`, and `git diff --check`. Validation `3GRRMCM246GSGUCZVTSUTZM6XY`; Acta `01M507ENSTTAR7FZY5KXB66DE0`. The separate integrated full gate remains controller-owned and pending.
+
+Successful candidate commands, in order: `make verify`,
 `go test -race ./...`, `make qa-ticket-native-workflow`,
 `make qa-native-integration`, and `git diff --check`.
 
