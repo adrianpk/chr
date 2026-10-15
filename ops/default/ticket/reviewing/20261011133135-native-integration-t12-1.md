@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133135
 title: "T12.1: Certify Forgejo merge rebase and squash"
-status: in_progress
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -11,6 +11,7 @@ source: chat
 reported_at: 2026-10-11T13:31:35Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-14T23:55:10Z
+reviewed_at: 2026-10-15T00:53:43Z
 branch: test/slice-12-native-provider-certification
 commits: []
 ---
@@ -60,4 +61,18 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+All nine real Forgejo merge, rebase and squash publication/source-race/target-race
+cases passed. Positive cases retain the same original PR observed merged, exact
+remote Git history/tree and compatibility with native receipt proof validation.
+Races were introduced after advertisement and preserved the other canonical ref.
+The actual provider merge-policy field mapping was corrected with a red/green
+regression covering enabled, denied, absent and wrong-provider fields.
+
+Required pre-commit `make verify` passed with zero lint issues: core 2747.252 s,
+app 197.636 s and all TUI/Web packages passed. The complete live matrix passed
+in 51.915 s; focused race checks passed in 10.642 s. Acta
+`01M4YGRAHG25NY28CDGH3JQKKN`. The owned unit exited successfully on unchanged
+seven-file source `2acd17be65196ad0f760c11bb43ff4a380fe502b8be0150260e6299cdc474f53`.
+See the [Slice 12 report](../../report/slices/native-integration-queue/slice-12-provider-certification.md).
+
+Canonical delivery PR and exact-HEAD final validation remain pending.

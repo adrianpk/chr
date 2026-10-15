@@ -67,7 +67,7 @@ func createNativeLivePR(t *testing.T, adapter RemoteReviewAdapter, profile nativ
 
 	pr, err := adapter.CreateWorkflowPullRequest(t.Context(), WorkflowPullRequestRequest{
 		WorkflowPullRequestQuery: WorkflowPullRequestQuery{Repository: profile.URL, HeadBranch: strings.TrimPrefix(request.SourceRef, "refs/heads/"), BaseBranch: request.Git.TargetBranch},
-		Title:                    "test(integration): certify native atomic rebase", Body: "Synthetic owned-source rebase fixture for exact-result publication and same-original-PR observation.",
+		Title:                    "test(integration): certify native atomic " + request.Git.Method, Body: "Synthetic owned-source fixture for exact-result publication and same-original-PR observation.",
 	})
 	if err != nil || pr.HeadCommit != request.Git.SourceCommit || pr.BaseCommit != request.Git.BaseCommit || pr.State != "open" {
 		t.Fatalf("canonical fixture PR creation: %+v, %v", pr, err)
@@ -100,17 +100,37 @@ func admitNativeLiveProfile(t *testing.T, state string, adapter RemoteReviewAdap
 func prepareNativeLiveRebase(t *testing.T, profile nativeLiveProfile) (WorkflowGitPublication, string) {
 	t.Helper()
 
-	fixture := newWorkflowGitFixture(t, "rebase")
+	return prepareNativeLiveMethod(t, profile, "rebase")
+}
+
+func prepareNativeLiveMethod(t *testing.T, profile nativeLiveProfile, method string) (WorkflowGitPublication, string) {
+	t.Helper()
+
+	request, key := buildNativeLiveMethod(t, profile, method)
+	pushNativeLiveInitialRefs(t, profile, request)
+
+	return request, key
+}
+
+func buildNativeLiveMethod(t *testing.T, profile nativeLiveProfile, method string) (WorkflowGitPublication, string) {
+	t.Helper()
+
+	fixture := newWorkflowGitFixture(t, method)
 	request := fixture.request
-	key := "native-rebase-" + strconv.FormatInt(time.Now().UnixNano(), 36)
+	key := "native-" + method + "-" + strconv.FormatInt(time.Now().UnixNano(), 36)
 	request.Repository, request.SourceRepository = profile.URL, profile.URL
 	request.SourceRef, request.TargetRef = profile.Source+key, profile.Target+key
 	request.OwnershipRevision = "qa-owned-ref/" + key
 	request.Git.Repository, request.Git.TargetBranch = profile.URL, strings.TrimPrefix(request.TargetRef, "refs/heads/")
 	sealWorkflowGitFixture(t, &request)
-	workflowIntegrationCommand(t, request.Directory, "push", profile.GitRemote, request.Git.SourceCommit+":"+request.SourceRef, request.Git.BaseCommit+":"+request.TargetRef)
 
 	return request, key
+}
+
+func pushNativeLiveInitialRefs(t *testing.T, profile nativeLiveProfile, request WorkflowGitPublication) {
+	t.Helper()
+
+	workflowIntegrationCommand(t, request.Directory, "push", profile.GitRemote, request.Git.SourceCommit+":"+request.SourceRef, request.Git.BaseCommit+":"+request.TargetRef)
 }
 
 func observeNativeLiveRebase(t *testing.T, adapter RemoteReviewAdapter, profile nativeLiveProfile, evidence *nativeLiveEvidence) {
@@ -185,7 +205,7 @@ func nativeLiveActivity(t *testing.T, adapter RemoteReviewAdapter, profile nativ
 
 	forge := strings.TrimSuffix(profile.URL, "/"+profile.Repository)
 
-	args := []string{"record", "pull-request", "--forge", forge, "--repository", profile.Repository, "--number", strconv.Itoa(reference.Number), "--action", action, "--source", "agent", "--harness", "codex", fmt.Sprintf("Native rebase certification fixture PR %s; real atomic publication and same-original-PR observation.", action)}
+	args := []string{"record", "pull-request", "--forge", forge, "--repository", profile.Repository, "--number", strconv.Itoa(reference.Number), "--action", action, "--source", "agent", "--harness", "codex", fmt.Sprintf("Native integration certification fixture PR %s; real atomic publication and same-original-PR observation.", action)}
 	if _, err := exec.CommandContext(t.Context(), "acta", args...).Output(); err != nil {
 		t.Fatal("required fixture activity recording failed")
 	}

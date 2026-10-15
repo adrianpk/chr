@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -25,13 +26,14 @@ type nativeLiveProfile struct {
 		Push         bool   `json:"push"`
 	} `json:"role"`
 	Policy struct {
-		Review            string `json:"review"`
-		TargetPublication string `json:"target_publication"`
-		Rewrite           bool   `json:"owned_source_rewrite_authorized"`
-		RewriteCondition  string `json:"rewrite_condition"`
-		NativeProtection  bool   `json:"native_branch_protection"`
-		NativeApproval    bool   `json:"native_required_approvals"`
-		Signing           bool   `json:"required_commit_signing"`
+		Review            string   `json:"review"`
+		TargetPublication string   `json:"target_publication"`
+		Rewrite           bool     `json:"owned_source_rewrite_authorized"`
+		RewriteCondition  string   `json:"rewrite_condition"`
+		NativeProtection  bool     `json:"native_branch_protection"`
+		NativeApproval    bool     `json:"native_required_approvals"`
+		Signing           bool     `json:"required_commit_signing"`
+		Methods           []string `json:"allowed_methods"`
 	} `json:"policy"`
 	Certification struct {
 		Contract string   `json:"contract"`
@@ -81,7 +83,12 @@ func readNativeLiveProfiles(t *testing.T, state string) []nativeLiveProfile {
 }
 
 func validNativeLiveProfile(profile nativeLiveProfile) bool {
-	return (profile.Forge == "forgejo" || profile.Forge == "github") && profile.Repository == "adrianpk/chr-integration-qa" && profile.Private && profile.Source == "refs/heads/chr/work/" && profile.Target == "refs/heads/chr/qa/"
+	expected := "https://forge.adrianpk.com/adrianpk/chr-integration-qa"
+	if profile.Forge == "github" {
+		expected = "https://github.com/adrianpk/chr-integration-qa"
+	}
+
+	return (profile.Forge == "forgejo" || profile.Forge == "github") && profile.Repository == "adrianpk/chr-integration-qa" && profile.URL == expected && profile.Private && profile.Source == "refs/heads/chr/work/" && profile.Target == "refs/heads/chr/qa/"
 }
 
 func loadNativeLiveProfiles(state string) ([]nativeLiveProfile, error) {
@@ -148,7 +155,7 @@ func (reader nativeLivePolicyReader) ReadWorkflowNativePolicy(ctx context.Contex
 func (reader nativeLivePolicyReader) policy(profile nativeLiveProfile, method string) (WorkflowNativePolicy, error) {
 	request := reader.publication
 
-	if method != "rebase" || profile.Role.Identity == "" || !profile.Role.Push || !profile.Certification.Enabled {
+	if !slices.Contains(profile.Certification.Methods, method) || profile.Role.Identity == "" || !profile.Role.Push || !profile.Certification.Enabled {
 		return WorkflowNativePolicy{}, fmt.Errorf("current native fixture role or observation certification changed")
 	}
 

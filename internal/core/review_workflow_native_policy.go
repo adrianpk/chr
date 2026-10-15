@@ -9,6 +9,7 @@ type workflowNativeRepositoryPolicy struct {
 	URL          string `json:"html_url"`
 	Archived     bool   `json:"archived"`
 	AllowMerge   *bool  `json:"allow_merge_commit"`
+	ForgejoMerge *bool  `json:"allow_merge_commits"`
 	AllowRebase  *bool  `json:"allow_rebase"`
 	GitHubRebase *bool  `json:"allow_rebase_merge"`
 	AllowSquash  *bool  `json:"allow_squash_merge"`
@@ -49,7 +50,7 @@ func workflowNativeRemotePolicy(responses []json.RawMessage, method, contract st
 		return nil, nil, contract, err
 	}
 
-	reasons := workflowNativeProtectionReasons(repository, target, source, method)
+	reasons := workflowNativeProtectionReasons(repository, target, source, method, contract)
 
 	for _, response := range responses[3:] {
 		var rules []json.RawMessage
@@ -65,8 +66,8 @@ func workflowNativeRemotePolicy(responses []json.RawMessage, method, contract st
 	return projection, reasons, contract, nil
 }
 
-func workflowNativeProtectionReasons(repository workflowNativeRepositoryPolicy, target, source workflowNativeBranchPolicy, method string) []WorkflowNativeUnsupported {
-	allowed := workflowNativeMethodAllowed(repository, method)
+func workflowNativeProtectionReasons(repository workflowNativeRepositoryPolicy, target, source workflowNativeBranchPolicy, method, contract string) []WorkflowNativeUnsupported {
+	allowed := workflowNativeMethodAllowed(repository, method, contract)
 	checks := []struct {
 		valid     bool
 		condition string
@@ -88,8 +89,12 @@ func workflowNativeProtectionReasons(repository workflowNativeRepositoryPolicy, 
 	return reasons
 }
 
-func workflowNativeMethodAllowed(repository workflowNativeRepositoryPolicy, method string) bool {
+func workflowNativeMethodAllowed(repository workflowNativeRepositoryPolicy, method, contract string) bool {
 	allowed := repository.AllowMerge
+	if method == "merge" && contract == "forgejo_same_pr_git_auto_merge/v1" {
+		allowed = repository.ForgejoMerge
+	}
+
 	if method == "rebase" {
 		allowed = repository.AllowRebase
 		if allowed == nil {

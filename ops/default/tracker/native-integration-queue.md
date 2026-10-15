@@ -427,7 +427,7 @@ Prerequisite: verified Slice 11 integration and closed task fanout.
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T12.1 | [TKT-20261011133135](../ticket/in_progress/20261011133135-native-integration-t12-1.md) | in_progress | pending | Certify Forgejo merge rebase and squash |
+| T12.1 | [TKT-20261011133135](../ticket/reviewing/20261011133135-native-integration-t12-1.md) | validated | pending | Certify Forgejo merge rebase and squash |
 | T12.2 | [TKT-20261011133136](../ticket/ready/20261011133136-native-integration-t12-2.md) | ready | pending | Certify GitHub merge rebase and squash |
 | T12.3 | [TKT-20261011133137](../ticket/ready/20261011133137-native-integration-t12-3.md) | ready | pending | Publish bounded certification and denial matrix |
 
@@ -442,7 +442,7 @@ PR: pending
 
 Verified merge: pending
 
-Report/evidence: pending
+Report/evidence: [Slice 12 report](../report/slices/native-integration-queue/slice-12-provider-certification.md). T12.1 passed all nine real Forgejo method/publication/contention cases in 51.915 s. The provider-specific merge-policy defect is corrected with denial-preserving regression coverage. Required pre-commit repository verification passed with zero lint issues, core 2747.252 s and app 197.636 s; focused race checks passed in 10.642 s. Acta `01M4YGRAHG25NY28CDGH3JQKKN`. The owned unit exited successfully on unchanged seven-file source. T12.2 and T12.3 remain pending; canonical delivery PR and final exact-HEAD checks are pending.
 
 ## Slice 13: Assurance reuse and final closure
 

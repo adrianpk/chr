@@ -508,7 +508,7 @@ Invariants: INV-07, INV-08, INV-09, INV-10, INV-11, INV-12, INV-15, INV-16, INV-
 
 | Task | Ticket | Work | Acceptance boundary |
 | --- | --- | --- | --- |
-| T12.1 | [TKT-20261011133135](../ticket/in_progress/20261011133135-native-integration-t12-1.md) | Run all three exact-result methods against designated disposable Forgejo repositories, including source/target contention and metadata convergence. | Each case records canonical PR, actual Git history/tree, policy/credential role and compatible receipt proof. |
+| T12.1 | [TKT-20261011133135](../ticket/reviewing/20261011133135-native-integration-t12-1.md) | Run all three exact-result methods against designated disposable Forgejo repositories, including source/target contention and metadata convergence. | Each case records canonical PR, actual Git history/tree, policy/credential role and compatible receipt proof. |
 | T12.2 | [TKT-20261011133136](../ticket/ready/20261011133136-native-integration-t12-2.md) | Run the equivalent three cases against designated disposable GitHub repositories using the existing adapter. | Each selected method publishes exact P with the same PR observed merged and no native-queue prerequisite. |
 | T12.3 | [TKT-20261011133137](../ticket/ready/20261011133137-native-integration-t12-3.md) | Deliver a repeatable native-integration QA entrypoint and profile evidence for permission denial, incompatible native review, fork/no-atomic and transport failures. | All six positive paths and negative boundaries are explicit; missing live access remains a blocker rather than simulated success. |
 
