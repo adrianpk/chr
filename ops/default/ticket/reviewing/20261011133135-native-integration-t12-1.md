@@ -13,7 +13,8 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-14T23:55:10Z
 reviewed_at: 2026-10-15T00:53:43Z
 branch: test/slice-12-native-provider-certification
-commits: []
+commits:
+  - ae806985740281a4a77ff7e06c1d448f4a6a1a86
 ---
 
 # T12.1: Certify Forgejo merge rebase and squash
@@ -76,3 +77,5 @@ seven-file source `2acd17be65196ad0f760c11bb43ff4a380fe502b8be0150260e6299cdc474
 See the [Slice 12 report](../../report/slices/native-integration-queue/slice-12-provider-certification.md).
 
 Canonical delivery PR and exact-HEAD final validation remain pending.
+
+Task commit: [ae806985740281a4a77ff7e06c1d448f4a6a1a86](https://forge.adrianpk.com/adrianpk/chr/commit/ae806985740281a4a77ff7e06c1d448f4a6a1a86). Acta `01M4YGSZ9CG7RDMTYE49P9WKY5`.
