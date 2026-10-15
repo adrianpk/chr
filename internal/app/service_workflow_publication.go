@@ -25,6 +25,14 @@ func (s service) AdvanceWorkflowSliceIntegration(ctx context.Context, id string,
 	}
 
 	ports := core.WorkflowPublicationPorts{Provider: provider, Preparer: preparer, Observer: s.workflowIntegrationObserver(run), Reviewer: reviewer}
+	bindWorkflowNativePublicationPorts(&ports, run)
 
 	return store.AdvanceWorkflowSliceIntegration(ctx, id, ports)
+}
+
+func bindWorkflowNativePublicationPorts(ports *core.WorkflowPublicationPorts, run core.WorkflowInvocation) {
+	ports.NativePublisher = core.NewWorkflowGitPublisher(run.Selection.Target.Repository, run.Selection.Target.Repository)
+	if observer, ok := ports.Provider.(core.WorkflowNativePublicationObserver); ok {
+		ports.NativeObserver = observer
+	}
 }

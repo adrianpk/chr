@@ -102,9 +102,7 @@ func (s *WorkflowStore) advanceWorkflowContinuation(ctx context.Context, run Wor
 	}
 
 	if run.DeliveryRef != "" {
-		_, err := s.AdvanceWorkflowFrontier(ctx, run.ID, WorkflowFrontierPorts{Provider: ports.Publication.Provider, Observer: ports.Publication.Observer, Target: ports.Target})
-
-		return err
+		return s.advanceWorkflowContinuationDelivery(ctx, run, ports)
 	}
 
 	if run.CandidateRef != "" {
@@ -130,6 +128,18 @@ func (s *WorkflowStore) advanceWorkflowContinuation(ctx context.Context, run Wor
 	}
 
 	return s.executeWorkflowSliceTask(ctx, run.ID, request.Worker)
+}
+
+func (s *WorkflowStore) advanceWorkflowContinuationDelivery(ctx context.Context, run WorkflowInvocation, ports WorkflowContinuationPorts) error {
+	if run.Integration != nil && run.ConfirmedCursor < run.Cursor {
+		_, err := s.AdvanceWorkflowSliceIntegration(ctx, run.ID, ports.Publication)
+
+		return err
+	}
+
+	_, err := s.AdvanceWorkflowFrontier(ctx, run.ID, WorkflowFrontierPorts{Provider: ports.Publication.Provider, Observer: ports.Publication.Observer, Target: ports.Target})
+
+	return err
 }
 
 func (s *WorkflowStore) ensureWorkflowContinuationPR(ctx context.Context, run WorkflowInvocation, request WorkflowContinuationRequest, ports WorkflowContinuationPorts) error {

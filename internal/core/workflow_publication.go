@@ -10,10 +10,12 @@ import (
 // WorkflowPublicationPorts supplies trusted canonical IO and the separate role.
 // Read-only delivery reconciliation does not require a guarded publisher.
 type WorkflowPublicationPorts struct {
-	Provider WorkflowPullRequestProvider
-	Preparer WorkflowPreparationGit
-	Observer WorkflowIntegrationGit
-	Reviewer []string
+	Provider        WorkflowPullRequestProvider
+	Preparer        WorkflowPreparationGit
+	Observer        WorkflowIntegrationGit
+	Reviewer        []string
+	NativePublisher WorkflowGitPublisher
+	NativeObserver  WorkflowNativePublicationObserver
 }
 
 // WorkflowIntegrationProgress exposes the retained barrier or shared receipt.
@@ -30,6 +32,19 @@ func (s *WorkflowStore) AdvanceWorkflowSliceIntegration(ctx context.Context, id 
 		return WorkflowIntegrationProgress{}, fmt.Errorf("canonical provider and Git observer required")
 	}
 
+	native, err := s.workflowNativeContinuationProfile(ctx, id)
+	if err != nil {
+		return s.workflowIntegrationProgress(ctx, id, nil, err)
+	}
+
+	if native {
+		return s.advanceWorkflowNativeIntegration(ctx, id, ports)
+	}
+
+	return s.advanceWorkflowLegacyIntegration(ctx, id, ports)
+}
+
+func (s *WorkflowStore) advanceWorkflowLegacyIntegration(ctx context.Context, id string, ports WorkflowPublicationPorts) (WorkflowIntegrationProgress, error) {
 	receipt, delivered, err := s.observeWorkflowPublicationCheckpoint(ctx, id, ports)
 	if err != nil || delivered {
 		return s.workflowIntegrationProgress(ctx, id, receipt, err)
