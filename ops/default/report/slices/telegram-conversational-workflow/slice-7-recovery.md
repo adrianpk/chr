@@ -1,6 +1,6 @@
 # Slice 7: Recovery and User Operation
 
-Status: drafting
+Status: reviewing
 
 Delivery set: telegram-conversational-workflow
 
@@ -23,7 +23,8 @@ T7.1 (`0c2fee3f1ad68bdba578bae9cd75605057d53b05`) gives intake, application call
 native work and delivery one 30-second shutdown grace. SIGTERM cancels only the
 receiver's owned calls. If a call does not quiesce, shutdown reports an explicit
 failure and keeps its database and configuration/bot exclusions until that call
-returns or the process exits. Cancellation cannot hide a checkpoint failure.
+returns or the process exits. Cancellation cannot hide a checkpoint failure; `8fd3713efaf1` also preserves it
+through application completion and canceled SQL transaction cleanup.
 
 Receiver startup recovers an accepted authoring request from its canonical
 receipt, preserving a paused invocation and a human review wait in other
@@ -58,7 +59,24 @@ results remain. Exact retired IDs merge only adjacent observed identities, with
 at most 1,024 intervals. Intake observes the 64-MiB logical payload bound,
 10,000 receipt-only sources plus 1,024 pending sources, and 1,024 unresolved
 outbound entries. Capacity pressure retains existing authority and refuses new
-input without acknowledging it. T7.3 is ready in the approved order.
+input without acknowledging it.
+
+T7.3 (`5546d2ab4b7726951ba885c8932ca88bdc3ea1b7`) installs an optional private
+user service for the current executable without enabling or starting it. The
+unit preserves user environment paths and reads private token/model assignments.
+Correction-required configuration, credentials, schema, poll exhaustion and
+ownership failures use exit 78; recoverable process/transport failures remain
+restartable. Explicit retry acquires receiver exclusion before opening or
+migrating its database and derives the actor from the OS user.
+
+Read-only status reports installed build, cursor/gap/retry metadata and bounded
+queue details without exposing message bodies. Doctor distinguishes changed bot
+identity, webhooks and local exclusion, reports missing/disabled/unready projects
+and the selected providers' local prerequisites, and labels model connectivity
+and remote polling ownership unchecked. A real getUpdates conflict is retained
+and blocks subsequent polls without takeover. Installed help and the receiver
+reference document service operation, retry selection, private configuration
+and retention bounds.
 
 ## Contracts Added or Changed
 
@@ -74,6 +92,11 @@ source changes; installing a candidate remains an explicit operation.
 - `internal/app/telegram_recovery_signal_test.go`: real SIGTERM and fixed executable identity.
 - `internal/app/telegram_recovery_validation_test.go`: independent live host validation.
 - `internal/core/telegram_recovery_owner_test.go`: real model-owner death and retained attempts.
+- `internal/core/telegram_retention.go`: bounded terminal compaction and recovery epochs.
+- `internal/core/telegram_transport_retry.go`: exclusion before migration and attributed cycles.
+- `internal/app/telegram_service.go`: optional inactive user-service installation.
+- `internal/app/telegram_status.go`: sanitized bounded retained-state diagnostics.
+- `docs/reference/telegram-receiver.md`: private setup, service operation and recovery.
 
 ## Validation
 
@@ -117,12 +140,58 @@ go test -race ./internal/core ./internal/app -run '^Test(TelegramRecovery(Retry|
 
 T7.2 activity receipt: `01M53CYHZ9NHH8F69ZJ9AJ2V48`.
 
-Final slice validation remains pending T7.3 and the PR-reference commits.
-It will use the controller receipt for the exact clean PR HEAD with the frozen
-ordered commands.
+T7.3 focused normal checks passed in core 0.434 seconds and app 0.526 seconds;
+the expanded operator race selection passed in core 6.731 seconds and app 4.606
+seconds. Fixtures verify the real CLI/store boundary, private token replacement
+preserving model assignments, malformed input refusal, inactive service
+installation/replacement, systemd unit syntax, HTTP identity/webhook/remote
+conflicts and live local exclusion. Strict lint reported zero issues after
+splitting helpers to meet repository complexity bounds; style and whitespace
+checks passed.
+
+```sh
+go test ./internal/core ./internal/app -run '^Test(TelegramRecovery(Environment|Offline|Operator|Service|Help|Doctor|Failures|Providers|Remote|Retry)|TelegramReceiver(Setup|Doctor|Config|Token|Identity))' -count=1 -timeout=3m
+go test -race ./internal/core ./internal/app -run '^Test(TelegramRecovery(Environment|Offline|Operator|Service|Help|Doctor|Failures|Providers|Remote|Retry|ConfigExit)|TelegramReceiver(Setup|Doctor|Config|Token|Identity))' -count=1 -timeout=3m
+go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/app ./cmd/chr
+```
+
+T7.3 activity receipt: `01M53DJPBSCRP7DH6KQ237TEK2`.
+
+The additional reply regression first failed during receiver shutdown with
+`sql: transaction has already been committed or rolled back`. Its focused
+reproduction (`go test -race ./internal/app -run '^TestTelegramControlReplyArrival$' -count=3 -timeout=3m`)
+also failed. Real canceled-transaction action/commit fixtures reproduced the
+cause before the correction. Only a bare automatic-rollback error under this
+transaction owner's canceled context becomes cancellation; uncanceled errors
+and independent joined/wrapped checkpoint failures remain visible. Application
+completion now removes expected deferral causes individually rather than
+suppressing an unrelated joined error.
+
+The corrected normal cancellation checks passed in core 0.267 seconds and app
+0.266 seconds. The combined cancellation, Unicode splitting, peer/topic/replaced
+reply and uncertain-prompt race checks passed in core 18.333 seconds and app
+7.785 seconds. Strict lint and repository style/whitespace checks passed.
+This completes deterministic TG-25 coverage with the earlier conversation and
+operation fixtures. Correction activity receipt: `01M53DZ8V64JXF4GEEWBN74T81`.
+
+```sh
+go test ./internal/core ./internal/app -run '^TestTelegramRecovery(CanceledTx|ApplicationError|HostFailure|Grace)$' -count=1 -timeout=3m
+go test -race ./internal/core ./internal/app -run '^TestTelegram(Recovery(CanceledTx|ApplicationError|HostFailure|Grace)|OperationUnicodeParts|ConversationReply(Peers|Retention|Guards)|OperationUncertainPrompt|ControlReply(Binding|Exhaustion|Priority|Arrival))$' -count=1 -timeout=3m
+```
+
+Final slice validation belongs to the controller receipt for the exact clean PR
+HEAD after the PR-reference commits. The frozen ordered sequence is:
+
+```sh
+make verify
+go test ./internal/core ./internal/app -run '^TestTelegramRecovery' -count=1 -timeout=3m
+go test -race ./internal/core ./internal/app -run '^TestTelegramRecovery' -count=1 -timeout=3m
+git diff --check
+```
 
 ## Risks and Follow-ups
 
-T7.3 operational tooling remains unfinished. The slice
-report remains drafting and no PR readiness is claimed. Live journey
-certification belongs to the next recorded slice.
+Deterministic fixture evidence does not establish a live bot/model journey or
+scheduled exhaustive certification. Both remain assigned to the next recorded
+slice. No owned fixture service remains installed or active outside temporary
+test environments.
