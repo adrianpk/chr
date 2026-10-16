@@ -52,3 +52,18 @@ request reservations, including failed preparations. Existing reservations and
 confirmed receipts remain replayable at capacity. The existing 1-MiB workflow
 file/journal limit and record lifecycle bounds also apply. Capacity failure
 creates no new canonical record.
+
+## Use-case metadata
+
+`CaseMetadataService.SaveBound` accepts the same caller-neutral binding with a
+project, namespace and metadata image. Creation allocates the existing case
+slug under owner exclusion. Updates require the observed source hash and exact
+case path. The owner stores relative references in receipts and resolves them
+against the current project root for callers.
+
+The adjacent runtime `case-mutations` directory retains immutable bindings,
+original receipts and a two-image pending journal. Existing metadata saves use
+the same owner lock and recover that journal before writing. Divergent pending
+images block writes and preserve the journal. Binding and argument bounds match
+the native record contract. `SaveContext` carries caller cancellation through
+ordinary metadata writes.

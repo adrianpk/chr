@@ -66,7 +66,7 @@ type CaseMetadataPatchRequest struct {
 func (s service) SaveCaseMetadata(metadata core.CaseMetadata) (CaseMetadataSaveResult, error) {
 	caseService := core.NewCaseMetadataService(s.projectContext.ProjectDir)
 
-	saved, err := caseService.Save(metadata)
+	saved, err := caseService.SaveContext(s.ctx, metadata)
 	if err != nil {
 		return CaseMetadataSaveResult{}, err
 	}

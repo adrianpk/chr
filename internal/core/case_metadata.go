@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -31,7 +32,8 @@ type CaseMetadata struct {
 
 // CaseMetadataService describes a package boundary value.
 type CaseMetadataService struct {
-	projectDir string
+	afterMutationReplace func(int) error
+	projectDir           string
 }
 
 // NewCaseMetadataService constructs the corresponding package service or value.
@@ -103,6 +105,23 @@ func (s CaseMetadataService) LoadPath(path string) (CaseMetadata, error) {
 
 // Save persists the requested data.
 func (s CaseMetadataService) Save(metadata CaseMetadata) (CaseMetadata, error) {
+	return s.SaveContext(context.Background(), metadata)
+}
+
+// SaveContext preserves cancellation while serializing metadata writes and recovery.
+func (s CaseMetadataService) SaveContext(ctx context.Context, metadata CaseMetadata) (saved CaseMetadata, err error) {
+	err = s.withMutationLock(ctx, func() error {
+		var saveErr error
+
+		saved, saveErr = s.save(metadata)
+
+		return saveErr
+	})
+
+	return saved, err
+}
+
+func (s CaseMetadataService) save(metadata CaseMetadata) (CaseMetadata, error) {
 	metadata.SchemaVersion = CaseMetadataSchemaVersion
 
 	err := ValidateCaseMetadata(metadata)
