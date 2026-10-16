@@ -73,12 +73,12 @@ Prerequisite: approved committed planning artifacts; execution authorized on 202
 | T1.1 | validated | `e38f90f8`, `063a2a45`; readiness completed with T1.4 | Private setup/configuration, secret handling and readiness commands. |
 | T1.2 | validated | `063a2a45`; foreground service wiring completed with T1.4 | Bounded HTTP receiver, exact identity authorization and ownership checks. |
 | T1.3 | validated | `d32b92a9`; authorization-bound delivery completed with T1.4 | Additive storage, atomic inbox/cursor, initial outbox and retained retries. |
-| T1.4 | validated | implementation commit recorded in report follow-up | Read-only registry/help/project/status operations and existing adapter compatibility. |
+| T1.4 | validated | `99f0868a` | Read-only registry/help/project/status operations and existing adapter compatibility. |
 
 Validation: plan section 6; `TestTelegramReceiver` and the named existing
 notification/import regressions, including focused race mode.
 
-Candidate / PR: being prepared on `feat/slice-1-telegram-receiver`. Verified merge: pending controller integration. Evidence: [Slice 1 report](../report/slices/telegram-conversational-workflow/slice-1-receiver.md); exact final HEAD and ordered checks are recorded through controller validation.
+Implementation candidate: `99f0868a6b616dd44dab95dc758718b91addd313`. Canonical PR: being prepared on `feat/slice-1-telegram-receiver`. Verified merge: pending controller integration. Evidence: [Slice 1 report](../report/slices/telegram-conversational-workflow/slice-1-receiver.md); exact final HEAD and ordered checks are recorded through controller validation.
 
 ## Slice 2: Conversation Routing
 
