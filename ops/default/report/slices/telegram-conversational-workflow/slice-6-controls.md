@@ -10,7 +10,7 @@ Tracker: [Telegram Conversation Tracker](../../../tracker/telegram-conversationa
 
 Branch: `feat/slice-6-telegram-controls`
 
-PR: pending
+PR: `#395`
 
 ## Purpose
 

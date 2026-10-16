@@ -16,7 +16,7 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 6, Guarded controls and capacity; T6.1 through T6.4 validated; canonical PR preparation
+Active slice: Slice 6, Guarded controls and capacity; T6.1 through T6.4 validated; PR #395 reviewing
 
 Next slice: Slice 7, Recovery and user operation; after verified Slice 6 integration
 
@@ -223,7 +223,7 @@ reserved request metadata, durable rejection and real activation-bound evidence.
 Focused normal/race and strict checks passed. T6.4 adds actual shared-worker overlap, overflow and duplicate rejection, slot reuse and native target publication exclusion. Stop polling uses the claimed owner under the existing repository/journal guards and verifies its credential; identity-only observers retain public scope resolution.
 Exact commands and results belong to the [Slice 6 report](../report/slices/telegram-conversational-workflow/slice-6-controls.md).
 
-Candidate: `feat/slice-6-telegram-controls`; PR: pending; verified merge: pending. Authoritative final checks belong to the controller receipt for the clean PR HEAD.
+Candidate: `feat/slice-6-telegram-controls`; PR: [#395](https://forge.adrianpk.com/adrianpk/chr/pulls/395); verified merge: pending. Authoritative final checks belong to the controller receipt for the clean PR HEAD.
 
 ## Slice 7: Recovery and User Operation
 
@@ -326,4 +326,4 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Exact integrated candidate passed the scheduled exhaustive nightly.
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
-Current state: Slices 1 through 5 are delivered through canonical PR #390/#391/#392/#393/#394; the latest verified merge is `c321da6917e369049583eece5a1a07951c1cc22b`. Slice 6 is active on its recorded branch. T6.1 through T6.4 have focused control, receipt, stale-reply, bounded-activation and shared-capacity evidence. Canonical Slice 6 PR preparation is active. Final validation belongs to the controller receipt for the exact clean PR HEAD; live activation and scheduled exhaustive certification remain separate.
+Current state: Slices 1 through 5 are delivered through canonical PR #390/#391/#392/#393/#394; the latest verified merge is `c321da6917e369049583eece5a1a07951c1cc22b`. Slice 6 is active on its recorded branch. T6.1 through T6.4 have focused control, receipt, stale-reply, bounded-activation and shared-capacity evidence. Canonical Slice 6 PR [#395](https://forge.adrianpk.com/adrianpk/chr/pulls/395) is open for controller validation and integration. Final validation belongs to the controller receipt for the exact clean PR HEAD; live activation and scheduled exhaustive certification remain separate.
