@@ -10,10 +10,11 @@ import (
 // WorkflowBoundAdmission supplies a durable request key and the displayed policy.
 // This mode admits without continuation; hosts activate the shared owner later.
 type WorkflowBoundAdmission struct {
-	ExecutionPolicy core.WorkflowExecutionPolicy `json:"execution_policy"`
-	RequestKey      string                       `json:"request_key"`
-	Policy          core.WorkflowReviewPolicy    `json:"publication_policy"`
-	Check           core.WorkflowAdmissionCheck  `json:"-"`
+	ReadyTicket     *core.WorkflowTicketAdmission `json:"ready_ticket,omitempty"`
+	ExecutionPolicy core.WorkflowExecutionPolicy  `json:"execution_policy"`
+	RequestKey      string                        `json:"request_key"`
+	Policy          core.WorkflowReviewPolicy     `json:"publication_policy"`
+	Check           core.WorkflowAdmissionCheck   `json:"-"`
 }
 
 func (s service) admitBoundWorkExtent(ctx context.Context, selection core.WorkflowPreviewRequest, selected *core.WorkflowSelectionGuard, steps int, bindings []WorkflowBoundAdmission) (AgentWorkResult, error) {
@@ -23,7 +24,7 @@ func (s service) admitBoundWorkExtent(ctx context.Context, selection core.Workfl
 
 	// Retained requests must reach the owner before re-reading mutable records,
 	// targets or policy. The owner checks every guard for a new admission.
-	request := core.WorkflowStartRequest{RequestKey: bindings[0].RequestKey, Selection: selection, Admission: &core.WorkflowAdmissionGuard{SnapshotHash: selection.SnapshotHash, Selected: selected, Policy: bindings[0].Policy, ExecutionPolicy: bindings[0].ExecutionPolicy}}
+	request := core.WorkflowStartRequest{RequestKey: bindings[0].RequestKey, Selection: selection, Admission: &core.WorkflowAdmissionGuard{SnapshotHash: selection.SnapshotHash, Selected: selected, Policy: bindings[0].Policy, ExecutionPolicy: bindings[0].ExecutionPolicy, ReadyTicket: bindings[0].ReadyTicket}}
 
 	store, err := s.workflowStore()
 	if err != nil {

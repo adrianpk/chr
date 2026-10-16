@@ -1162,6 +1162,13 @@ dump or spec. The response identifies the actual canonical record and receipt.
 An unchanged preparation returns that result, so a retry creates no extra ticket.
 Preparation starts no work invocation.
 
+The prepared ticket retains the accepted description and the project's
+`runtime.validation_command`, with a finite validation deadline. It stays in
+backlog until an explicit work confirmation. For this independent ticket, the
+work preview also shows the proposed readiness change and exact validation
+arguments. Confirmation makes that observed ticket ready and admits it in one
+operation; a stale decision changes neither readiness nor work ownership.
+
 Preview an exact native extent with `/work ticket <ticket-key>`. Use
 `/work --conversation <conversation> ticket <ticket-key>` to keep an existing
 conversation's project and namespace. Other extents are `slice`, `slice-set`,

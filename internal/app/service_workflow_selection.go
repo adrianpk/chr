@@ -10,9 +10,10 @@ import (
 
 // WorkflowBoundPreview freezes the displayed native selection for confirmation.
 type WorkflowBoundPreview struct {
-	Request  core.WorkflowPreviewRequest  `json:"request"`
-	Selected *core.WorkflowSelectionGuard `json:"selected,omitempty"`
-	View     WorkflowWorkPreview          `json:"preview"`
+	ReadyTicket *core.WorkflowTicketAdmission `json:"ready_ticket,omitempty"`
+	Request     core.WorkflowPreviewRequest   `json:"request"`
+	Selected    *core.WorkflowSelectionGuard  `json:"selected,omitempty"`
+	View        WorkflowWorkPreview           `json:"preview"`
 }
 
 // PreviewSelectedWork resolves a selected ticket's native hierarchy identities.
@@ -36,7 +37,16 @@ func (s service) PreviewSelectedWork(ctx context.Context, request core.WorkflowP
 
 	result.View, err = s.PreviewWorkExtent(ctx, result.Request)
 	result.Request.SnapshotHash = result.View.Preview.SnapshotHash
+
 	result.Request.Target = result.View.Target
+	if err == nil && result.Request.Selector.Extent == "ticket" && len(result.View.Preview.Members) == 1 {
+		store, storeErr := s.workflowStore()
+		if storeErr != nil {
+			return result, storeErr
+		}
+
+		result.ReadyTicket, err = store.PreviewWorkflowTicketAdmission(ctx, result.View.Preview.Members[0])
+	}
 
 	return result, err
 }

@@ -250,14 +250,20 @@ recorded bot/model/service/QA activation authority from plan section 2.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T8.1 | in_progress | pending | Authorized real bot/model request-to-integration journey and exact evidence. |
+| T8.1 | in_progress | combined fixture and admission correction in this task commit; live pending | Deterministic conversation-to-integration/replay and stale-readiness guards pass; authorized real bot/model QA journey and exact evidence remain. |
 | T8.2 | pending | pending | Chryso source development through a fixed installed receiver in isolated QA. |
-| T8.3 | pending | pending | User documentation, changelog, complete evidence audit and nightly-bound closure. |
+| T8.3 | pending | User Guide/reference/changelog updated with admission correction | Complete evidence audit, installed/live proof and nightly-bound closure remain. |
 
 Validation: plan section 13; `TestTelegramJourney`, including applicable focused
 race mode, separate authorized live proof and final exact-candidate nightly.
 
 Candidate: `test/slice-8-telegram-delivery`; PR and merge pending. The [Slice 8 report](../report/slices/telegram-conversational-workflow/slice-8-delivery.md) separates deterministic preparation from live readiness and scheduled certification.
+
+Task validation: combined journey, prepared-work, admission and automatic
+continuation regressions pass in normal and race modes. The actual asynchronous
+receiver reaches a confirmed fixture receipt after preparation and SQLite reopen.
+Strict lint reports zero issues. The report records exact commands, timings and
+the live-evidence boundary. TG-01, TG-27, TG-28 and TG-32 remain pending.
 
 ## Acceptance Evidence
 

@@ -68,6 +68,11 @@ func (s service) PrepareAuthoringWork(ctx context.Context, request AuthoringWork
 			return err
 		}
 
+		prepared.Native.Record, err = s.authoringWorkContract(prepared.Native.Record, title, request, source)
+		if err != nil {
+			return err
+		}
+
 		image, err := json.Marshal(prepared)
 		if err != nil {
 			return err

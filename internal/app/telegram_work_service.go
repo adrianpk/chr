@@ -54,5 +54,7 @@ func (s service) StartTelegramWork(ctx context.Context, target core.TelegramOper
 
 	scoped.workflowNamespace = target.Namespace
 
+	binding.ReadyTicket = preview.ReadyTicket
+
 	return scoped.StartBoundWorkExtent(ctx, preview.Request, preview.Selected, 0, binding)
 }

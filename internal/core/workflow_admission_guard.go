@@ -9,10 +9,11 @@ type WorkflowAdmissionCheck func(context.Context) error
 // WorkflowAdmissionGuard retains exactly what a caller displayed before admission.
 // It is part of the request identity; replay observes the original invocation.
 type WorkflowAdmissionGuard struct {
-	ExecutionPolicy WorkflowExecutionPolicy `json:"execution_policy"`
-	SnapshotHash    string                  `json:"snapshot_hash"`
-	Selected        *WorkflowSelectionGuard `json:"selected,omitempty"`
-	Policy          WorkflowReviewPolicy    `json:"publication_policy"`
+	ReadyTicket     *WorkflowTicketAdmission `json:"ready_ticket,omitempty"`
+	ExecutionPolicy WorkflowExecutionPolicy  `json:"execution_policy"`
+	SnapshotHash    string                   `json:"snapshot_hash"`
+	Selected        *WorkflowSelectionGuard  `json:"selected,omitempty"`
+	Policy          WorkflowReviewPolicy     `json:"publication_policy"`
 }
 
 func validateWorkflowAdmissionGuard(guard *WorkflowAdmissionGuard, selection WorkflowPreviewRequest) error {
@@ -28,6 +29,14 @@ func validateWorkflowAdmissionGuard(guard *WorkflowAdmissionGuard, selection Wor
 		return ErrWorkflowConflict
 	}
 
+	if err := validateWorkflowTicketAdmission(guard, selection); err != nil {
+		return err
+	}
+
+	return validateWorkflowAdmissionPolicy(guard)
+}
+
+func validateWorkflowAdmissionPolicy(guard *WorkflowAdmissionGuard) error {
 	if !validWorkflowExecutionPolicy(guard.ExecutionPolicy) || guard.ExecutionPolicy.ConfigRevision != guard.Policy.Revision {
 		return ErrWorkflowConflict
 	}

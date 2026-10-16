@@ -217,6 +217,19 @@ instruction, source images, description, native contract and exact scope digest
 before application. The result identifies a real backlog ticket and owner
 receipt; it creates no invocation.
 
+The prepared independent ticket contains an executable contract using the
+unchanged description and the project's `runtime.validation_command`. Its
+contract deadline uses `work.validation_timeout_seconds`, or 3600 seconds when
+that legacy setting is absent. A frozen invocation policy may impose a shorter
+deadline. No model supplies the validation command.
+
+`/work ticket <key>` previews that backlog ticket's readiness transition,
+contract hash, validation arguments and deadline. Only the bound `start`
+confirmation makes it ready, atomically with native admission. Changed records,
+policy, validation input or authority reject the decision without changing the
+ticket. Replay retains the original transition and invocation. Preparation-only
+conversations still require this separate explicit work decision.
+
 A literal `/develop` instruction can bind the first exact prepared scope. That
 first reservation is retained permanently for the conversation. An ordinary-
 language development proposal supplies no authority by itself. Missing authority

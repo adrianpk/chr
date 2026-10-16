@@ -400,12 +400,17 @@ func (s *WorkflowStore) createWorkflowInvocation(ctx context.Context, request Wo
 		return run, err
 	}
 
+	ticketFiles, err := s.workflowTicketAdmissionFiles(&run)
+	if err != nil {
+		return run, err
+	}
+
 	files, err := s.workflowAgentCreationFiles(ctx, envelope, &run)
 	if err != nil {
 		return run, err
 	}
 
-	if err := s.commitAllocatedFiles(files, guard); err != nil {
+	if err := s.commitAllocatedFiles(append(files, ticketFiles...), guard); err != nil {
 		return run, err
 	}
 

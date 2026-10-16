@@ -86,6 +86,14 @@ func telegramWorkPreviewText(preview WorkflowBoundPreview) string {
 		fmt.Fprintf(&text, "%d more tickets are bound by the snapshot; inspect native work before starting.\n", selection.Total-8)
 	}
 
+	if ticket := preview.ReadyTicket; ticket != nil {
+		fmt.Fprintf(&text, "Confirmation also makes %s revision %d ready under contract %s.\nContract validation (%ds):\n", ticket.Key, ticket.Revision, ticket.ContractHash, ticket.Validation.TimeoutSeconds)
+
+		for _, argv := range ticket.Validation.Commands {
+			fmt.Fprintf(&text, "%q\n", argv)
+		}
+	}
+
 	text.WriteString("Start exactly this extent under the displayed policy?")
 
 	return text.String()

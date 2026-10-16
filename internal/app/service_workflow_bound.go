@@ -21,7 +21,7 @@ func (s service) ResumeBoundWork(ctx context.Context, reference WorkflowRetained
 		return RetainedWorkProgress{}, err
 	}
 
-	expected := &core.WorkflowAdmissionGuard{SnapshotHash: preview.Request.SnapshotHash, Selected: preview.Selected, Policy: preview.View.Policy, ExecutionPolicy: preview.View.ExecutionPolicy}
+	expected := &core.WorkflowAdmissionGuard{SnapshotHash: preview.Request.SnapshotHash, Selected: preview.Selected, Policy: preview.View.Policy, ExecutionPolicy: preview.View.ExecutionPolicy, ReadyTicket: preview.ReadyTicket}
 	if run.RequestKey != reference.RequestKey || run.ProjectID != s.projectContext.ProjectID || run.Selection.Selector != preview.Request.Selector || run.Selection.Target != preview.Request.Target || !reflect.DeepEqual(run.Admission, expected) {
 		return RetainedWorkProgress{}, core.ErrWorkflowConflict
 	}
