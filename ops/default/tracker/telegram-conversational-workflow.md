@@ -16,11 +16,11 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 3, Replay-safe operations; implementation in progress
+Active slice: Slice 3, Replay-safe operations; tasks validated, preparing canonical PR
 
 Next slice: Slice 4, Conversational authoring; after verified Slice 3 integration
 
-Progress: 2 of 8 slices integrated; 2 of 29 tasks validated and 7 done; 7 of 32 acceptance criteria have deterministic fixture evidence.
+Progress: 2 of 8 slices integrated; 4 of 29 tasks validated and 7 done; 9 of 32 acceptance criteria have deterministic fixture evidence.
 
 Full gate: `make verify`
 
@@ -112,14 +112,14 @@ Prerequisite: verified Slice 2 integration.
 | --- | --- | --- | --- |
 | T3.1 | validated | `f39c12e96c3d2228e8411d954f0a219b86f2d497`, `1b0ec78267b3` | Caller-neutral request binding, owner journals and durable mutation receipts. |
 | T3.2 | validated | `9ebe146da339`, `5507e7041a3ddcdbd8021e9919c17f6b6ae555fc` | Guarded ticket/slice/slice-set/use-case record operations through shared owners. |
-| T3.3 | in_progress | `e5de10f0eb5e1a44cd4cc787186ab10a5da60bb3` (request/outbox foundation); single-use actions pending | Durable outbox, reply/action guards and bounded Unicode delivery. |
-| T3.4 | in_progress | `e5de10f0`, `5507e704` (owner-to-SQLite crash foundation); action/send proof pending | Real-store crash/replay proof and changed-argument rejection. |
+| T3.3 | validated | `e5de10f0eb5e1a44cd4cc787186ab10a5da60bb3`, `76c4862df1b7dd68eb366d1395c2e1ec81ea0c69` | Durable outbox, reply/action guards and bounded Unicode delivery. |
+| T3.4 | validated | `e5de10f0`, `5507e704`, `c0385ee781452a7dfdad5aadeeb971e3b62cb60e` | Real-store crash/replay proof and changed-argument rejection. |
 
 Validation: plan section 8; `TestTelegramOperation`, including focused race mode.
 
 Task validation: record owner, application and live HTTP fixtures passed in normal and race mode, including compatibility with receiver/conversation and migration checks. Strict focused lint and repository Go-style/package checks passed. Exact commands and fixture boundaries are recorded in the [Slice 3 draft report](../report/slices/telegram-conversational-workflow/slice-3-operations.md).
 
-Candidate / PR / verified merge: pending. T3.3 single-use actions, T3.4 complete action/send crash proof and final exact-HEAD controller checks remain.
+Candidate: `c0385ee781452a7dfdad5aadeeb971e3b62cb60e` implementation. Canonical PR and exact-HEAD controller validation are being prepared. Verified merge: pending.
 
 ## Slice 4: Conversational Authoring
 
@@ -230,9 +230,9 @@ report/test/live references in the Evidence column as they are verified.
 | TG-15 | pending | pending |
 | TG-16 | pending | pending |
 | TG-17 | pending | pending |
-| TG-18 | pending | pending |
+| TG-18 | validated | [Slice 3 owner, SQLite and HTTP crash fixtures](../report/slices/telegram-conversational-workflow/slice-3-operations.md) |
 | TG-19 | validated | [Slice 1 deterministic evidence](../report/slices/telegram-conversational-workflow/slice-1-receiver.md) |
-| TG-20 | pending | pending |
+| TG-20 | validated | [Slice 3 uncertain result and prompt delivery fixtures](../report/slices/telegram-conversational-workflow/slice-3-operations.md) |
 | TG-21 | pending | pending |
 | TG-22 | pending | pending |
 | TG-23 | pending | pending |
@@ -273,4 +273,4 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Exact integrated candidate passed the scheduled exhaustive nightly.
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
-Current state: Slice 2 delivered through PR #391; Slice 3 is active in `feat/slice-3-telegram-operations`. T3.1/T3.2 are validated through shared workflow/case receipts, central record operations and deterministic live commands. The retained request/outbox foundation and cross-store acknowledgement proof are committed. T3.3 single-use actions and T3.4 complete callback/send proof remain before canonical PR readiness.
+Current state: Slice 2 delivered through PR #391; Slice 3 tasks are validated in `feat/slice-3-telegram-operations`. Shared owner receipts, guarded record commands, retained requests, single-use actions and ordered Unicode outbox delivery have focused normal/race evidence, including real-store and HTTP crash boundaries. The canonical PR and exact-clean-HEAD controller checks are being prepared; Slice 4 remains pending verified integration.

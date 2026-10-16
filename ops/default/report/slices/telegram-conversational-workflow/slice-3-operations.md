@@ -1,6 +1,6 @@
 # Slice 3: Replay-safe Operations
 
-Status: drafting
+Status: reviewing
 
 Delivery set: telegram-conversational-workflow
 
@@ -14,8 +14,8 @@ PR: pending
 
 ## Purpose
 
-Provide shared-owner mutation receipts and retained transport requests before
-exposing canonical record mutations through the live receiver.
+Deliver guarded record operations, shared-owner replay receipts and durable
+Telegram requests, actions and outbound results.
 
 ## Delivered Behavior
 
@@ -71,8 +71,18 @@ project-owner calls. Reopening after a lost acknowledgement reuses the original
 owner input even if `OPS_USER` changes. A replaced registry root blocks
 application rather than redirecting it.
 
-Single-use action APIs, callback/text-answer parity and their complete crash
-proof remain under T3.3–T3.4. Their schema alone does not establish delivery.
+T3.3 completion: `76c4862df1b7dd68eb366d1395c2e1ec81ea0c69`.
+T3.4 acknowledgement proofs: `c0385ee781452a7dfdad5aadeeb971e3b62cb60e`.
+
+A prompt retains one random 128-bit action token, up to eight choices and at most
+24 hours of validity. Buttons, exact replies and `/answer` claim the same
+immutable guard and first answer request. Current peer/operator, registry root,
+conversation revision, expiry and actual owner image are rechecked. The owner
+call inherits the action deadline. Only confirmed results consume the action;
+stale or denied outcomes supersede it. Both request results, consumption, input
+acknowledgement and result outbox commit atomically. Definite send acknowledgement
+retains the exact reply binding; stale or pruned action replies cannot become
+capture text. Authorization-denied intake supersedes that peer's pending actions.
 
 ## Contracts Added or Changed
 
@@ -80,6 +90,9 @@ proof remain under T3.3–T3.4. Their schema alone does not establish delivery.
 provide caller-neutral replay. `ReadRecords`, `PrepareRecordMutation` and
 `ApplyPreparedRecordMutation` expose native ownership through the central
 service. `TelegramOperationRequest` retains transport application state.
+`TelegramActionOffer`, `TelegramActionClaim` and `TelegramActionResult` bind
+prompt delivery, the first answer and confirmed owner facts. The existing HTTP
+adapter sends optional retained inline choices with plain text.
 
 The [mutation receipt reference](../../../../../docs/reference/workflow-record-mutations.md)
 and [Telegram record reference](../../../../../docs/reference/telegram-record-operations.md)
@@ -99,13 +112,23 @@ describe identity, guards, bounds, command syntax and recovery.
 
 ## Validation
 
-Task checks for T3.1/T3.2 and the retained transport foundation passed:
+Required final controller checks, in order:
 
-- `go test ./internal/core ./internal/app -run '^Test(TelegramOperation|TelegramReceiver|TelegramConversation|MaintenanceDBStatus|CaseMetadata)' -count=1 -timeout=3m`
-- `go test -race ./internal/core ./internal/app -run '^Test(TelegramOperation|TelegramReceiver|TelegramConversation|MaintenanceDBStatus|CaseMetadata)' -count=1 -timeout=3m`
-- `go test ./internal/app -run '^Test(TelegramOperation|TelegramReceiver|TelegramConversation)' -count=1 -timeout=3m`
-- `go test -race ./internal/app -run '^Test(TelegramOperation|TelegramReceiver|TelegramConversation)' -count=1 -timeout=3m`
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app`
+- `make verify`
+- `go test ./internal/core ./internal/app -run '^TestTelegramOperation' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^TestTelegramOperation' -count=1 -timeout=3m`
+- `git diff --check`
+
+The controller records these against the exact clean PR HEAD after every PR
+reference is committed. The canonical PR validation list and controller receipt
+carry that result; task checks below are separate implementation evidence.
+
+Successful T3.3/T3.4 task checks:
+
+- `go test ./internal/core ./internal/app -run '^Test(TelegramOperation|TelegramConversation|TelegramReceiver|CaseMetadata|MaintenanceDBStatus)' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/app -run '^TestTelegramOperation(Action|Uncertain)' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^TestTelegramOperation(Action|Uncertain)' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/app`
 - `scripts/check-go-func-signatures.sh`
 - `scripts/check-package-readmes.sh`
 - `git diff --check`
@@ -120,14 +143,23 @@ original result, roll back acknowledgement at outbox capacity, reject changed or
 corrupt prepared input, order multi-part sends and exercise astral Unicode
 bounds. Real HTTP fixtures create/update/read records, reject stale observations,
 recover one ticket after lost owner acknowledgement despite a namespace change,
-and block a replacement registered root. Work admission remains absent.
+and block a replacement registered root.
 
-Final exact-HEAD controller validation is pending until the remaining Slice 3
-work and canonical PR references are committed. Task fixtures do not establish
-live bot or exhaustive scheduled certification.
+Action fixtures prove one answer across independent SQLite owners, original
+binding reuse after reopening, atomic rollback when the outbox is full and
+rejection of changed choices, wrong peers, expired prompts, changed operators,
+revoked projects, replaced roots, revisions and guards. Real HTTP tests cover
+reply/callback/explicit-answer parity, independent case edits, lost owner
+acknowledgement, uncertain result delivery and callbacks arriving before prompt
+send acknowledgement. Repeated prompts retain their token; consumed reply
+copies cannot become capture or authorize a second effect. Work admission
+remains absent.
+
+A race-mode prompt fixture initially assumed retry ordering based on execution
+speed. It now controls the retained retry timestamp, and focused normal/race
+checks pass for the intended interleaving. These deterministic fixtures do not
+establish live-bot or exhaustive scheduled certification.
 
 ## Risks and Follow-ups
 
-T3.3 still requires single-use actions, exact action reply associations and
-callback/text-answer request parity. T3.4 must complete action and uncertain-send
-crash proof. No Slice 3 PR is ready for integration yet.
+None recorded.
