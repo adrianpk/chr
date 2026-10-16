@@ -178,7 +178,7 @@ Prerequisite: verified Slice 4 integration.
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
 | T5.1 | validated | `4456f3f1bbef9b0b8368294f12e40c9cc9ca15ff` | Exact native previews/admission for all five extents and RequestKey replay. |
-| T5.2 | validated | pending task commit | Bounded asynchronous continuation under existing workflow ownership. |
+| T5.2 | validated | `d94c581ded73f5a5fbe9ba45192097ebf1634ee0` | Bounded asynchronous continuation under existing workflow ownership. |
 | T5.3 | ready | pending | Unattended policy-driven progress, review and integration. |
 | T5.4 | pending | pending | Evidence-bound results and shared CLI/TUI/Web invocation references. |
 
