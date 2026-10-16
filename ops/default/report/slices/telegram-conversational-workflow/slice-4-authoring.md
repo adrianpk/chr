@@ -58,7 +58,7 @@ T4.1 implementation and report introduction: `b54d526fd0471eff7c4df2ef769ba0abe6
 
 T4.2 implementation commit: `f7408ea2fa51d4a66ce5be156d2aa192160ad37f`.
 
-T4.3 implementation commit: pending this task's commit.
+T4.3 implementation commit: `4d1932fedf6ac79e659ce2b475b4261b822f50e6`.
 
 The shared structured provider uses the existing Codex agent runner or OpenAI
 Responses boundary. `CHR_CONVERSATION_GENERATION_BACKEND=openai` selects OpenAI;
