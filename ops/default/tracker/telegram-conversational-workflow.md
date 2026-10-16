@@ -78,7 +78,7 @@ Prerequisite: approved committed planning artifacts; execution authorized on 202
 Validation: plan section 6; `TestTelegramReceiver` and the named existing
 notification/import regressions, including focused race mode.
 
-Implementation candidate: `99f0868a6b616dd44dab95dc758718b91addd313`. Canonical PR: [#390](https://forge.adrianpk.com/adrianpk/chr/pulls/390) on `feat/slice-1-telegram-receiver`. Verified merge: pending controller integration. Evidence: [Slice 1 report](../report/slices/telegram-conversational-workflow/slice-1-receiver.md); exact final HEAD and ordered checks are recorded through controller validation.
+Primary implementation commit: `99f0868a6b616dd44dab95dc758718b91addd313`. Canonical PR: [#390](https://forge.adrianpk.com/adrianpk/chr/pulls/390) on `feat/slice-1-telegram-receiver`. Verified merge: pending controller integration. Evidence: [Slice 1 report](../report/slices/telegram-conversational-workflow/slice-1-receiver.md); exact final HEAD and ordered checks are recorded through controller validation.
 
 ## Slice 2: Conversation Routing
 

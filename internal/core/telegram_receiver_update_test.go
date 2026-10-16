@@ -63,9 +63,17 @@ func TestTelegramReceiverCallback(t *testing.T) {
 
 // TestTelegramReceiverOutputBounds protects both Unicode limits for read-only replies.
 func TestTelegramReceiverOutputBounds(t *testing.T) {
-	for _, text := range []string{strings.Repeat("a", 20000), strings.Repeat("😀", 3900), "help"} {
-		if got := BoundTelegramReceiverText(text); !validTelegramReceiverText(got) {
-			t.Fatal("output exceeded Telegram text bounds")
-		}
+	cases := map[string]string{
+		"ascii":         strings.Repeat("a", 20000),
+		"supplementary": strings.Repeat("😀", 3900),
+		"short":         "help",
+		"invalid UTF-8": string([]byte{0xff}),
+	}
+	for name, text := range cases {
+		t.Run(name, func(t *testing.T) {
+			if got := BoundTelegramReceiverText(text); !validTelegramReceiverText(got) {
+				t.Fatal("output exceeded Telegram text bounds")
+			}
+		})
 	}
 }

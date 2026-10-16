@@ -41,9 +41,10 @@ response delivery through the existing application service and user database.
 
 ## Implementation Notes
 
-Implementation candidate: `99f0868a6b616dd44dab95dc758718b91addd313`.
-The subsequent report and PR-reference commits contain delivery documentation.
-Final merge evidence must identify the exact clean PR HEAD after those commits.
+Primary implementation commit: `99f0868a6b616dd44dab95dc758718b91addd313`.
+Follow-up commits record the PR reference, align database-status assertions
+and normalize malformed UTF-8 in read output. Final merge evidence must
+identify the exact clean PR HEAD after those commits.
 
 Task commits: T1.1 `e38f90f8`, T1.2 `063a2a45`, T1.3 `d32b92a9`,
 T1.4 `99f0868a`. Connection doctor followed the transport implementation;
@@ -110,6 +111,9 @@ expect 16 and explicitly check the new receiver migration.
 `go test ./internal/app -run '^TestMaintenanceDBStatus' -count=1 -timeout=3m`
 passed after that correction. The final controller receipt supersedes the
 failed candidate's evidence.
+The malformed UTF-8 regression reproduced a slice-bounds panic in read-output
+truncation. Normalizing invalid byte sequences before applying Unicode limits
+corrected it; `go test ./internal/core -run '^TestTelegramReceiverOutputBounds$' -count=1 -timeout=3m` passed afterward.
 No live bot/model demonstration or scheduled exhaustive certification is claimed.
 
 ## Risks and Follow-ups

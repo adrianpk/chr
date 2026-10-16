@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"math"
+	"strings"
 	"unicode/utf16"
 	"unicode/utf8"
 )
@@ -184,6 +185,7 @@ func validTelegramReceiverText(text string) bool {
 
 // BoundTelegramReceiverText truncates read-only output at both Unicode boundaries.
 func BoundTelegramReceiverText(text string) string {
+	text = strings.ToValidUTF8(text, "�")
 	if validTelegramReceiverText(text) {
 		return text
 	}
