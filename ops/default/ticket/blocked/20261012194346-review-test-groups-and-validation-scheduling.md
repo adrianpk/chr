@@ -167,3 +167,28 @@ fixture authentication, Chromium, Go/C toolchain and activity recording under
 that runner account before activation. Missing live prerequisites fail early.
 No credentials, runner services, default branches or release state were changed.
 The original controller's frozen final gate remains unchanged.
+
+## Runner Activation Follow-up
+
+The [first scheduled nightly](https://forge.adrianpk.com/adrianpk/chr/actions/runs/1)
+captured `ca9f50ed0f214c6c861c7a4c7af0bf80d1e12d53` on 2026-10-16 and failed
+at admission before prerequisites or exhaustive tests. The API edge returned
+HTTP 403 with error 1010 to Python's default client identity. A bounded
+[runner probe](https://forge.adrianpk.com/adrianpk/chr-integration-qa/actions/runs/6)
+confirmed that explicit JSON accept and client identity headers permit the
+existing workflow token to read repository and run metadata with HTTP 200.
+No additional admission token or broader repository access is required.
+
+The correction also removes Forgejo's automatic GitHub-token alias from child
+environments and selects dedicated live authentication without replacing the
+runner's default tool logins. Eight Python regression tests pass, including
+authenticated request headers, token separation and dedicated configuration.
+
+Actual runner execution confirms the build tools and browser are present.
+Acta, its runtime service, the designated descriptor and fixture authentication
+still require installation. Two new write-enabled deploy keys are registered,
+each scoped to its designated QA repository. The prepared bootstrap uses a
+restricted Forgejo CI identity and a fine-grained GitHub token; developer
+credential stores are not copied. The administrator bootstrap and GitHub token
+creation remain operator prerequisites. Keep this ticket blocked until the
+scoped runner preflight and a complete scheduled result pass.

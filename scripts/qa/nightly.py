@@ -108,6 +108,17 @@ def run(output, go="go", live=False, runner=None):
             env = dict(os.environ, CHR_NATIVE_INTEGRATION_QA="1" if name == "live" else "0",
                        GOFLAGS="", GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL="/dev/null",
                        CHR_WEB_BROWSER=browser_path() if name == "browser" else "")
+            # Forgejo aliases its repository token as GITHUB_TOKEN; it is not GitHub authentication.
+            if env.get("FORGEJO_TOKEN") and env.get("GITHUB_TOKEN") == env["FORGEJO_TOKEN"]:
+                env.pop("GITHUB_TOKEN")
+            if name == "live":
+                config = Path(os.environ.get("XDG_CONFIG_HOME") or str(Path.home() / ".config")) / "chr/nightly"
+                if (config / "tea/config.yml").is_file() or (config / "gh/hosts.yml").is_file():
+                    env["XDG_CONFIG_HOME"] = str(config)
+                    env["GH_CONFIG_DIR"] = str(config / "gh")
+                    token = config / "github.token"
+                    if token.is_file():
+                        env["GH_TOKEN"] = token.read_text().strip()
             path = output / (name + (".jsonl" if name in ("normal", "race", "browser", "live") else ".log"))
             started = time.monotonic()
             print(f"Nightly {name}: {' '.join(command)}; evidence: {path}", flush=True)

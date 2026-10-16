@@ -8,6 +8,7 @@ import unittest
 from unittest.mock import patch
 
 import nightly
+import nightly_admission
 from nightly_admission import decision
 
 
@@ -88,8 +89,54 @@ class NightlyTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "authorized fixture descriptor"):
                 nightly.preflight(True)
 
+    def test_live_uses_dedicated_config_and_preserves_github_tokens(self):
+        cases = [("workflow alias", "workflow-token", None),
+                 ("explicit github token", "github-token", "github-token")]
+        for name, token, expected in cases:
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                config = root / "config"
+                dedicated = config / "chr/nightly"
+                (dedicated / "tea").mkdir(parents=True)
+                (dedicated / "tea/config.yml").write_text("{}")
+                (dedicated / "github.token").write_text("dedicated-test-token\n")
+                observed = []
+
+                def runner(command, **options):
+                    env = options["env"]
+                    self.assertEqual(env.get("GITHUB_TOKEN"), expected)
+                    if env["CHR_NATIVE_INTEGRATION_QA"] == "1":
+                        observed.append(env["XDG_CONFIG_HOME"])
+                        self.assertEqual(env["GH_TOKEN"], "dedicated-test-token")
+                    for test in nightly.LIVE_NAMES + ("TestWebWorkflowBrowser",):
+                        options["stdout"].write(json.dumps({"Test": test, "Action": "pass", "Elapsed": 0}) + "\n")
+                    return 0
+
+                with patch.dict("os.environ", {"FORGEJO_TOKEN": "workflow-token", "GITHUB_TOKEN": token,
+                                               "XDG_CONFIG_HOME": str(config)}), \
+                        patch.object(nightly, "source_commit", return_value="a" * 40), \
+                        patch.object(nightly, "preflight"):
+                    self.assertEqual(nightly.run(root / "output", live=True, runner=runner), 0)
+                self.assertEqual(observed, [str(dedicated)])
+
 
 class AdmissionTests(unittest.TestCase):
+    def test_admission_identifies_its_authenticated_api_request(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "output"
+            env = {"FORGEJO_SERVER_URL": "https://forge.example.test", "FORGEJO_REPOSITORY": "team/project",
+                   "FORGEJO_RUN_ID": "20", "CHR_ACTIONS_TOKEN": "test-token", "FORGEJO_OUTPUT": str(output)}
+            with patch.dict("os.environ", env), \
+                    patch.object(nightly_admission.urllib.request, "urlopen") as request_open, \
+                    patch.object(nightly_admission, "decision", return_value=(True, "first attempt")):
+                request_open.return_value.__enter__.return_value.read.return_value = b'{"workflow_runs": []}'
+                nightly_admission.main()
+                request = request_open.call_args.args[0]
+                self.assertEqual(request.get_header("User-agent"), "chr-nightly/1.0")
+                self.assertEqual(request.get_header("Accept"), "application/json")
+                self.assertEqual(request.get_header("Authorization"), "Bearer test-token")
+            self.assertEqual(output.read_text(), "admitted=yes\n")
+
     def test_daily_admission_and_delayed_queue(self):
         current = {"id": 20, "workflow_id": "nightly.yml", "status": "running",
                    "created": "2026-10-15T22:17:00Z"}

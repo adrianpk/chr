@@ -36,7 +36,8 @@ def main():
     repository = os.environ["FORGEJO_REPOSITORY"]
     request = urllib.request.Request(
         f"{server}/api/v1/repos/{repository}/actions/runs?limit=50",
-        headers={"Authorization": "Bearer " + os.environ["CHR_ACTIONS_TOKEN"]},
+        headers={"Authorization": "Bearer " + os.environ["CHR_ACTIONS_TOKEN"],
+                 "Accept": "application/json", "User-Agent": "chr-nightly/1.0"},
     )
     with urllib.request.urlopen(request, timeout=20) as response:
         data = response.read(1024 * 1024 + 1)

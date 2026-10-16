@@ -36,6 +36,15 @@ copy a developer's entire home directory, or upload the fixture descriptor.
 Missing live prerequisites fail before expensive test execution and cannot
 produce a complete green result.
 
+When dedicated runner authentication exists under
+`${XDG_CONFIG_HOME:-$HOME/.config}/chr/nightly/`, the live pass uses that isolated
+tool configuration. Tea stores its fixture login below `tea/`; the fine-grained
+GitHub QA token is stored in `github.token` with mode 0600 and supplied only to
+the live child environment. Default runner logins remain separate. Forgejo's
+automatic `GITHUB_TOKEN` alias is removed when it equals `FORGEJO_TOKEN`, so it
+cannot replace GitHub authentication. Explicit distinct GitHub tokens remain
+available. Admission requests identify the JSON API client explicitly.
+
 `make nightly` without `CHR_NATIVE_INTEGRATION_QA=1` runs complete local normal
 and race suites only. Its result explicitly records `live_enabled: false` and
 does not certify providers. This diagnostic mode does not replace the complete
