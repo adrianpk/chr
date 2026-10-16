@@ -223,6 +223,16 @@ func (r telegramReceiver) dispatchIntentRead(ctx context.Context, user core.Tele
 }
 
 func (r telegramReceiver) dispatchIntentPreparation(ctx context.Context, user core.TelegramAllowedUser, input core.TelegramConversationInput, intent ConversationIntent) (bool, error) {
+	if work, recognized, err := telegramIntentWork(input.Update, intent); recognized {
+		if err != nil {
+			return true, r.intentCorrection(ctx, input.Update, input.Config)
+		}
+
+		work.Input.Config, work.Input.Projects, work.Input.Namespace = input.Config, input.Projects, input.Namespace
+
+		return true, r.dispatchWork(ctx, user, work)
+	}
+
 	work, recognized, err := telegramIntentPreparedWork(input.Update, intent)
 	if recognized {
 		if err != nil {

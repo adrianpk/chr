@@ -79,12 +79,30 @@ Project listing returns only enabled, explicitly allowed registry entries.
 | `/refine <dump\|spec\|plan> <conversation> <instructions>` | Explicitly replace that session's observed output. |
 | `/explain [--project <id>\|--conversation <id>] <question>` | Explain canonical context without preparing or starting work. |
 | `/prepare-work [conversation]` | Prepare a native backlog ticket from a canonical dump or spec, preserving the session's intent. |
+| `/work [--project <id>] [--conversation <id>] [--namespace <name>] <extent> [reference]` | Preview the exact native selection and effective policy, then ask for a bound `start` decision. |
 | `/cancel [conversation]` | Cancel an unstarted session and discard its capture. |
 
 Topics contain at most 512 UTF-8 bytes. `--project` accepts one ID; use
 `/project <exact registered name>` for a name containing spaces. IDs returned by
 `/sessions` are opaque. Other slash commands remain unavailable until their
 shared operations are implemented.
+
+Work extents are `ticket`, `slice`, `slice-set`, `use-case` and `loose`.
+Only `loose` omits its reference. The preview freezes the target commit,
+membership snapshot, selected ticket revision, execution limits and publication
+policy. Buttons, replies and `/answer <token> start` use the same retained
+decision. Ordinary language proposes the same typed preview and cannot bypass
+that decision. A changed source, policy, target or authority rejects admission;
+the adapter does not silently refresh the displayed scope.
+
+Without an explicit session, `/work` creates an independent conversation bound
+to its source and resolved project/namespace. With an explicit session, it
+preserves that session's binding. Admission stores the canonical invocation ID
+with the confirmed request, source acknowledgement and outbox result. Another
+extent cannot replace that conversation's bound invocation. Replaying the same
+native request key observes its original admission before current source guards.
+Admission alone establishes neither host validation nor integration. See
+[Workflow Selection](workflow-selection.md) for native selection bounds.
 
 Project resolution uses an explicit authorized target, the session/reply's
 bound project, peer selection, authorized configured default, then the sole

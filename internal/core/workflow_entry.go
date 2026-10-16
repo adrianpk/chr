@@ -91,6 +91,10 @@ func (s *WorkflowStore) matchWorkflowEntry(runs []workflowInvocationFile, reques
 }
 
 func workflowRetainedEntryRequest(request WorkflowStartRequest, run WorkflowInvocation) WorkflowStartRequest {
+	if request.Admission == nil {
+		request.Admission = run.Admission
+	}
+
 	request.Selection.Target = run.Selection.Target
 	request.Policy = workflowRequestedRetainedPolicy(request.Policy, run.Policy, request.IncludeLaterTickets)
 

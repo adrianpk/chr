@@ -319,7 +319,7 @@ func receiveTelegramTestMessage(t *testing.T, w http.ResponseWriter, r *http.Req
 func telegramReadTestUpdates() []any {
 	var updates []any
 
-	for index, text := range []string{"/help", "/projects", "/work ticket EX-1", "private denied body"} {
+	for index, text := range []string{"/help", "/projects", "/unavailable-work ticket EX-1", "private denied body"} {
 		user := 100001
 		if index == 3 {
 			user++

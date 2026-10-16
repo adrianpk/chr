@@ -20,6 +20,7 @@ type service struct {
 	quizModel              core.QuizModelAdapter
 	conversationModel      core.StructuredModelProvider
 	workflowWorker         []string
+	workflowNamespace      string
 	workflowPullRequests   core.WorkflowPullRequestProvider
 	workflowIntegrationGit core.WorkflowIntegrationGit
 	workflowPreparationGit core.WorkflowPreparationGit

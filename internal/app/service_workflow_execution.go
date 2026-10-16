@@ -8,7 +8,7 @@ import (
 )
 
 func (s service) workflowStore() (*core.WorkflowStore, error) {
-	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir})
+	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: s.workflowNamespace})
 	if err != nil {
 		return nil, err
 	}

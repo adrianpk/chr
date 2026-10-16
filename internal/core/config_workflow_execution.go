@@ -45,6 +45,29 @@ func (s *WorkflowStore) resolveWorkflowExecutionPolicy(ctx context.Context, key 
 		return retained, err
 	}
 
+	return configuredWorkflowExecutionPolicy(config, policy, later)
+}
+
+// InspectWorkflowExecutionPolicy reads finite admission defaults without
+// allocating an invocation, refilling a budget or claiming a worker.
+func (s *WorkflowStore) InspectWorkflowExecutionPolicy(ctx context.Context) (policy WorkflowExecutionPolicy, err error) {
+	err = s.withWorkflowInspection(ctx, func() error {
+		config, readErr := LoadWorkspaceConfig(s.layout.ProjectDir())
+		if readErr != nil {
+			return readErr
+		}
+
+		policy, readErr = configuredWorkflowExecutionPolicy(config, WorkflowExecutionPolicy{}, nil)
+
+		return readErr
+	})
+
+	return policy, err
+}
+
+func configuredWorkflowExecutionPolicy(config WorkspaceConfig, policy WorkflowExecutionPolicy, later *bool) (WorkflowExecutionPolicy, error) {
+	var err error
+
 	policy, err = applyWorkflowExecutionLimits(config, policy)
 	if err != nil {
 		return policy, err

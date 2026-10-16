@@ -100,6 +100,7 @@ func retainedNativeAgentWorkRequest(request core.WorkflowStartRequest, previous 
 	}
 
 	request.RequestKey, request.Selection = previous.RequestKey, previous.Selection
+	request.Admission = previous.Admission
 	request.Policy, request.ReviewRestriction = previous.Policy, previous.ReviewRestriction
 
 	return request, nil

@@ -57,6 +57,8 @@ type TelegramConversation struct {
 	QuestionBinding      string
 	AuthoringSessionRef  string
 	AuthorizationRef     string
+	InvocationID         string
+	LastObservedRevision uint64
 	Revision             int64
 }
 
@@ -333,12 +335,17 @@ func (op telegramConversationTransaction) insertConversation(project Project, bi
 		return "", nil, telegramConversationDiagnostic("A conversation requires an intent and a topic of at most 512 UTF-8 bytes.")
 	}
 
-	sum := sha256.Sum256(fmt.Appendf(nil, "%d:%d", op.input.Update.Peer.BotID, op.input.Update.UpdateID))
-	c := TelegramConversation{ID: "tgc-" + hex.EncodeToString(sum[:16]), Peer: op.input.Update.Peer, ProjectID: project.ID, ProjectBindingDigest: binding, Namespace: namespace, Intent: op.input.Intent, Phase: "collecting", Topic: op.input.Text, Revision: 1}
+	c := TelegramConversation{ID: telegramConversationID(op.input.Update), Peer: op.input.Update.Peer, ProjectID: project.ID, ProjectBindingDigest: binding, Namespace: namespace, Intent: op.input.Intent, Phase: "collecting", Topic: op.input.Text, Revision: 1}
 	c.AuthorizationRef = op.developmentInstructionRef(c)
 	_, err := op.tx.ExecContext(op.ctx, `INSERT INTO telegram_conversations(id,bot_id,chat_id,topic_id,user_id,project_id,project_binding_digest,namespace,intent,phase,topic,authorization_ref,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, c.ID, c.Peer.BotID, c.Peer.ChatID, c.Peer.TopicID, c.Peer.UserID, c.ProjectID, c.ProjectBindingDigest, c.Namespace, c.Intent, c.Phase, c.Topic, c.AuthorizationRef, formatProjectTime(op.now), formatProjectTime(op.now))
 
 	return "Collecting session " + c.ID + " for " + c.ProjectID + " (" + c.Intent + "). Reply with text; /done finishes capture. Use /sessions or /focus <conversation> to target it.", &c, err
+}
+
+func telegramConversationID(update TelegramReceivedUpdate) string {
+	sum := sha256.Sum256(fmt.Appendf(nil, "%d:%d", update.Peer.BotID, update.UpdateID))
+
+	return "tgc-" + hex.EncodeToString(sum[:16])
 }
 
 func (op telegramConversationTransaction) developmentInstructionRef(c TelegramConversation) string {

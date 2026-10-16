@@ -36,6 +36,7 @@ func (s service) PreviewSelectedWork(ctx context.Context, request core.WorkflowP
 
 	result.View, err = s.PreviewWorkExtent(ctx, result.Request)
 	result.Request.SnapshotHash = result.View.Preview.SnapshotHash
+	result.Request.Target = result.View.Target
 
 	return result, err
 }
@@ -79,8 +80,12 @@ func workflowSelectedExtentID(extent string, task *core.WorkflowTask) string {
 
 // StartBoundWorkExtent requires the displayed snapshot and selected revision.
 // Domain admission compares both under exclusion before any attempt can start.
-func (s service) StartBoundWorkExtent(ctx context.Context, request core.WorkflowPreviewRequest, selected *core.WorkflowSelectionGuard, steps int) (AgentWorkResult, error) {
+func (s service) StartBoundWorkExtent(ctx context.Context, request core.WorkflowPreviewRequest, selected *core.WorkflowSelectionGuard, steps int, admission ...WorkflowBoundAdmission) (AgentWorkResult, error) {
 	s.ctx = ctx
+
+	if len(admission) != 0 {
+		return s.admitBoundWorkExtent(ctx, request, selected, steps, admission)
+	}
 
 	if len(request.SnapshotHash) != 64 || request.Offset != 0 || steps < 0 || steps > core.WorkflowPageLimit {
 		return AgentWorkResult{}, fmt.Errorf("confirmed workflow admission requires a snapshot, offset zero and bounded steps")
@@ -138,10 +143,10 @@ func (s service) WorkflowStatusPage(ctx context.Context, offset, limit int) (res
 
 // PreviewWorkflow exposes one adapter-neutral, read-only selection operation.
 func (s service) PreviewWorkflow(ctx context.Context, request core.WorkflowPreviewRequest) (core.WorkflowPreview, error) {
-	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir})
+	store, err := s.workflowStore()
 	if err != nil {
 		return core.WorkflowPreview{}, err
 	}
 
-	return core.NewWorkflowStore(layout, s.projectContext.ProjectID).Preview(ctx, request)
+	return store.Preview(ctx, request)
 }

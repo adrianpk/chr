@@ -15,7 +15,7 @@ func validateWorkflowInvocation(run workflowInvocationFile) error {
 		return err
 	}
 
-	request, err := normalizeWorkflowStart(WorkflowStartRequest{RequestKey: run.RequestKey, Selection: run.Selection, Policy: run.Policy, ReviewRestriction: run.ReviewRestriction})
+	request, err := normalizeWorkflowStart(WorkflowStartRequest{RequestKey: run.RequestKey, Selection: run.Selection, Policy: run.Policy, ReviewRestriction: run.ReviewRestriction, Admission: run.Admission})
 	if err != nil {
 		return err
 	}

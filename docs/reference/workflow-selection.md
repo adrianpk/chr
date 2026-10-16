@@ -52,3 +52,20 @@ Observation uses repository workflow exclusion, a ten-second shared deadline,
 prerequisite observations per page and at most 128 combined references per task. A proof-observation limit returns a blocker.
 Cancellation stops the preview without claiming work. Execution, invocation
 retention, publication and adapter controls remain separate operations.
+
+## Bound admission
+
+`PreviewSelectedWork` returns the normalized request, exact target, snapshot,
+optional selected-ticket guard, effective execution limits and publication
+policy. `StartBoundWorkExtent` accepts an optional `WorkflowBoundAdmission` with
+a stable `RequestKey` and both displayed policies. In this mode, checkpoint
+steps must be zero: admission and continuation are separate calls.
+
+The native invocation retains `admission_guard` with the displayed snapshot,
+selected revision and policies. The guard participates in the request hash.
+New admission rechecks it under workflow exclusion, together with the caller's
+last authority/target check. A stale preview rejects; it does not expand or
+refresh membership. A repeated key returns the original invocation before
+rechecking mutable source images, without launching another worker. Changing
+the scope or guard under that key remains a conflict. Existing callers without
+the optional binding retain their bounded start-and-continue behavior.

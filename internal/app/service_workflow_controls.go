@@ -10,9 +10,10 @@ import (
 
 // WorkflowWorkPreview reports the exact scope and current publication policy.
 type WorkflowWorkPreview struct {
-	Preview core.WorkflowPreview       `json:"selection"`
-	Target  core.WorkflowPreviewTarget `json:"target"`
-	Policy  core.WorkflowReviewPolicy  `json:"publication_policy"`
+	ExecutionPolicy core.WorkflowExecutionPolicy `json:"execution_policy"`
+	Preview         core.WorkflowPreview         `json:"selection"`
+	Target          core.WorkflowPreviewTarget   `json:"target"`
+	Policy          core.WorkflowReviewPolicy    `json:"publication_policy"`
 }
 
 // PreviewWorkExtent observes explicit native work without admission or fetching.
@@ -52,6 +53,13 @@ func (s service) PreviewWorkExtent(ctx context.Context, request core.WorkflowPre
 	store, err := s.workflowStore()
 	if err == nil {
 		result.Policy, err = store.InspectWorkflowPolicy(ctx)
+	}
+
+	if err == nil {
+		result.ExecutionPolicy, err = store.InspectWorkflowExecutionPolicy(ctx)
+		if err == nil && result.Policy.Revision != result.ExecutionPolicy.ConfigRevision {
+			err = core.ErrWorkflowConflict
+		}
 	}
 
 	return result, err

@@ -27,6 +27,7 @@ type WorkflowExecutionPolicy struct {
 
 // WorkflowStartRequest admits an explicit finite selection with a retry key.
 type WorkflowStartRequest struct {
+	Admission           *WorkflowAdmissionGuard `json:"admission_guard,omitempty"`
 	IncludeLaterTickets *bool                   `json:"include_later_tickets_override,omitempty"`
 	Selected            *WorkflowSelectionGuard `json:"-"`
 	RequestKey          string
@@ -77,6 +78,7 @@ type WorkflowAttempt struct {
 
 // WorkflowInvocation is the public durable checkpoint, not an execution token.
 type WorkflowInvocation struct {
+	Admission          *WorkflowAdmissionGuard           `json:"admission_guard,omitempty"`
 	IntegrationBudget  *WorkflowIntegrationBudgetBinding `json:"integration_budget,omitempty"`
 	Integration        *WorkflowIntegrationBinding       `json:"integration_binding,omitempty"`
 	IntegrationEntries []WorkflowIntegrationBinding      `json:"integration_entries,omitempty"`
@@ -142,6 +144,12 @@ type WorkflowStartResult struct {
 
 // StartWorkflow freezes membership once; retries attach without launching work.
 func (s *WorkflowStore) StartWorkflow(ctx context.Context, request WorkflowStartRequest) (result WorkflowStartResult, err error) {
+	return s.StartWorkflowGuarded(ctx, request, nil)
+}
+
+// StartWorkflowGuarded performs the caller's last effect check under exclusion,
+// after reconciling an original admission and before creating new native work.
+func (s *WorkflowStore) StartWorkflowGuarded(ctx context.Context, request WorkflowStartRequest, check WorkflowAdmissionCheck) (result WorkflowStartResult, err error) {
 	requestedPolicy := request.Policy
 
 	request, err = normalizeWorkflowStart(request)
@@ -157,13 +165,15 @@ func (s *WorkflowStore) StartWorkflow(ctx context.Context, request WorkflowStart
 
 		request.Policy = policy
 
-		if err := s.checkWorkflowSelectionGuard(ctx, request); err != nil {
-			return err
+		if request.Admission == nil {
+			if err := s.checkWorkflowSelectionGuard(ctx, request); err != nil {
+				return err
+			}
 		}
 
 		var startErr error
 
-		result, startErr = s.startWorkflow(ctx, request)
+		result, startErr = s.startWorkflow(ctx, request, check)
 
 		return startErr
 	})
@@ -172,6 +182,14 @@ func (s *WorkflowStore) StartWorkflow(ctx context.Context, request WorkflowStart
 }
 
 func normalizeWorkflowStart(request WorkflowStartRequest) (WorkflowStartRequest, error) {
+	if err := validateWorkflowAdmissionGuard(request.Admission, request.Selection); err != nil {
+		return request, err
+	}
+
+	if request.Admission != nil {
+		request.Selection.SnapshotHash = request.Admission.SnapshotHash
+	}
+
 	if request.ReviewRestriction != "" && request.ReviewRestriction != ReviewWorkflowModeHumanReview {
 		return request, fmt.Errorf("an invocation may restrict review to human_review only")
 	}
@@ -241,7 +259,7 @@ func workflowStartHash(request WorkflowStartRequest) (string, error) {
 	return workflowHash(data), err
 }
 
-func (s *WorkflowStore) startWorkflow(ctx context.Context, request WorkflowStartRequest) (WorkflowStartResult, error) {
+func (s *WorkflowStore) startWorkflow(ctx context.Context, request WorkflowStartRequest, check WorkflowAdmissionCheck) (WorkflowStartResult, error) {
 	runs, err := s.repositoryWorkflowInvocations(ctx)
 	if err != nil {
 		return WorkflowStartResult{}, err
@@ -258,6 +276,20 @@ func (s *WorkflowStore) startWorkflow(ctx context.Context, request WorkflowStart
 		}
 
 		return WorkflowStartResult{Invocation: previous.WorkflowInvocation, Attached: found}, err
+	}
+
+	return s.startNewWorkflow(ctx, request, hash, runs, check)
+}
+
+func (s *WorkflowStore) startNewWorkflow(ctx context.Context, request WorkflowStartRequest, hash string, runs []workflowInvocationFile, check WorkflowAdmissionCheck) (WorkflowStartResult, error) {
+	if err := s.checkWorkflowAdmissionGuard(ctx, request); err != nil {
+		return WorkflowStartResult{}, err
+	}
+
+	if check != nil {
+		if err := check(ctx); err != nil {
+			return WorkflowStartResult{}, err
+		}
 	}
 
 	limits, err := s.workflowRepositoryCapacity(ctx, runs)
@@ -382,6 +414,7 @@ func (s *WorkflowStore) createWorkflowInvocation(ctx context.Context, request Wo
 
 func newWorkflowInvocation(root string, identity WorkflowIdentity, request WorkflowStartRequest, hash string, preview WorkflowPreview) workflowInvocationFile {
 	invocation := WorkflowInvocation{WorkflowIdentity: identity, Schema: "chr-invocation/v1", RequestKey: request.RequestKey, RequestHash: hash, Authority: "tickets", Selection: request.Selection, Policy: request.Policy, SetOrderRule: preview.SetOrderRule, Excluded: preview.Excluded, Status: "pending"}
+	invocation.Admission = request.Admission
 	invocation.ReviewRestriction = request.ReviewRestriction
 
 	invocation.Selection.SnapshotHash = ""
