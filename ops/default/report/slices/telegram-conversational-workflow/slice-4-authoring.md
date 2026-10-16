@@ -1,6 +1,6 @@
 # Slice 4: Conversational Authoring
 
-Status: reviewing
+Status: delivered
 
 Delivery set: telegram-conversational-workflow
 
@@ -340,8 +340,7 @@ rollback and preservation after failure/reopening. A focused offer-replay test
 first reproduced a consumed prompt regressing its conversation phase; reoffering
 now leaves its consumed state, original expiry and projection intact.
 
-Final validation is recorded by the controller after canonical PR references are
-committed. Its receipt must match the clean PR HEAD and these ordered commands:
+Verified merge: `ca9fb09cb27d075aae3e24e6122b2679796385ec`, 2026-10-16, through canonical PR #393. The controller receipt records all four successful checks on that exact clean HEAD, after PR references were committed and pushed:
 
 - `make verify`
 - `go test ./internal/core ./internal/app -run '^TestTelegramAuthoring' -count=1 -timeout=3m`
