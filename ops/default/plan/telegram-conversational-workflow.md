@@ -16,9 +16,9 @@ Tracker: [Telegram Conversation Tracker](../tracker/telegram-conversational-work
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, its canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 7, Recovery and user operation; T7.1 validated; T7.2 ready
+Active slice: Slice 8, Live journey and closure; deterministic preparation active; live prerequisites under verification
 
-Next slice: Slice 8, Live journey and closure; after verified Slice 7 integration and live readiness
+Next slice: None; final slice active, followed by exact-candidate scheduled certification and closure
 
 Slice strategy: behavior-first
 
@@ -423,4 +423,4 @@ starts with every criterion pending.
 - [ ] The cycle report, tracker and plan distinguish tested code from later closure-only documentation.
 - [ ] The delivery set is closed with no pending work or unreported blocker.
 
-Current state: Slices 1 through 6 are delivered through canonical PR #390/#391/#392/#393/#394/#395; the latest verified merge is `eecdfd1e85c9593715c5e00502d0bfd0bf23c1ea`. Slice 7 is active on its recorded branch with T7.1 validated and T7.2 ready. Final slice validation belongs to the controller receipt for the exact clean PR HEAD; live activation and scheduled exhaustive certification remain separate.
+Current state: Slices 1 through 7 are delivered through canonical PR #390/#391/#392/#393/#394/#395/#396. The latest verified merge is `c14f1aea640657e27c97bb64e40b46f30f698451`. Slice 8 is active on its recorded branch. Its live QA journeys, deterministic combined regression, documentation and final evidence remain pending. Scheduled exhaustive certification remains bound to the final integrated candidate.

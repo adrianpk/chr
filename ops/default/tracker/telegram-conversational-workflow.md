@@ -16,11 +16,11 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 7, Recovery and user operation; T7.1/T7.2/T7.3 validated; PR #396 reviewing
+Active slice: Slice 8, Live journey and closure; deterministic preparation active; live QA prerequisites under verification
 
-Next slice: Slice 8, Live journey and closure; after verified Slice 7 integration and live readiness
+Next slice: None; final slice active, followed by exact-candidate scheduled certification and closure
 
-Progress: 6 of 8 slices integrated; 3 of 29 tasks validated and 23 done; 28 of 32 acceptance criteria have deterministic fixture evidence.
+Progress: 7 of 8 slices integrated; 0 of 29 tasks validated and 26 done; 28 of 32 acceptance criteria have deterministic fixture evidence.
 
 Full gate: `make verify`
 
@@ -29,7 +29,7 @@ Exhaustive certification: pending the scheduled nightly for the final integrated
 ## State and Evidence Rules
 
 Task states: `pending`, `ready`, `in_progress`, `validated`, `blocked`, `done`.
-Slice 1 through Slice 6 tasks are done after verified PR #390/#391/#392/#393/#394/#395 integration. Slice 7 is active;
+Slice 1 through Slice 7 tasks are done after verified PR #390/#391/#392/#393/#394/#395/#396 integration. Slice 8 is active;
 later tasks remain pending until their prerequisites integrate. A validated task becomes
 done after verified slice integration; a successful test or worker exit alone
 does not close it.
@@ -227,37 +227,37 @@ Candidate: `feat/slice-6-telegram-controls`; PR: [#395](https://forge.adrianpk.c
 
 ## Slice 7: Recovery and User Operation
 
-State: in_progress
+State: delivered
 
 Prerequisite: verified Slice 6 integration.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T7.1 | validated | `0c2fee3f1ad68bdba578bae9cd75605057d53b05`, `8fd3713efaf1` | Startup receipt replay, dead-owner recovery, bounded owned shutdown, independent worker/validation preservation and fixed running-image proof. |
-| T7.2 | validated | `b2647940ccdd` | Cross-restart retry budgets, attributed offline cycles, gap epochs, exact retirement and bounded authority-preserving retention. |
-| T7.3 | validated | `5546d2ab4b7726951ba885c8932ca88bdc3ea1b7` | Optional user service, local retry/status/doctor/help and operational diagnostics. |
+| T7.1 | done | `0c2fee3f1ad68bdba578bae9cd75605057d53b05`, `8fd3713efaf1` | Startup receipt replay, dead-owner recovery, bounded owned shutdown, independent worker/validation preservation and fixed running-image proof. |
+| T7.2 | done | `b2647940ccdd` | Cross-restart retry budgets, attributed offline cycles, gap epochs, exact retirement and bounded authority-preserving retention. |
+| T7.3 | done | `5546d2ab4b7726951ba885c8932ca88bdc3ea1b7` | Optional user service, local retry/status/doctor/help and operational diagnostics. |
 
 Validation: plan section 12; `TestTelegramRecovery`, including focused race mode.
 
-Candidate: `feat/slice-7-telegram-recovery`; canonical PR: [#396](https://forge.adrianpk.com/adrianpk/chr/pulls/396); merge pending. T7.1/T7.2/T7.3 focused evidence is recorded in the [Slice 7 report](../report/slices/telegram-conversational-workflow/slice-7-recovery.md); exact clean-HEAD final slice evidence remains pending.
+Canonical PR: [#396](https://forge.adrianpk.com/adrianpk/chr/pulls/396). Verified merge: `c14f1aea640657e27c97bb64e40b46f30f698451`, 2026-10-16T22:44:10Z. Controller receipt `JR526N5RLBBVIBT62W5YOZMNB6` passed all four ordered checks at that exact clean HEAD; normal core/app 2.719/21.135 seconds, race 56.358/57.946 seconds. Acta verified merge event: `01M53E66GA9C9VH1CKRKYRDM5B`. Evidence: [Slice 7 report](../report/slices/telegram-conversational-workflow/slice-7-recovery.md).
 
 ## Slice 8: Live Journey and Closure
 
-State: pending
+State: in_progress
 
 Prerequisite: verified Slice 7 integration plus private live readiness and
 recorded bot/model/service/QA activation authority from plan section 2.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T8.1 | pending | pending | Authorized real bot/model request-to-integration journey and exact evidence. |
+| T8.1 | in_progress | pending | Authorized real bot/model request-to-integration journey and exact evidence. |
 | T8.2 | pending | pending | Chryso source development through a fixed installed receiver in isolated QA. |
 | T8.3 | pending | pending | User documentation, changelog, complete evidence audit and nightly-bound closure. |
 
 Validation: plan section 13; `TestTelegramJourney`, including applicable focused
 race mode, separate authorized live proof and final exact-candidate nightly.
 
-Candidate / PR / verified merge / evidence: pending.
+Candidate: `test/slice-8-telegram-delivery`; PR and merge pending. The [Slice 8 report](../report/slices/telegram-conversational-workflow/slice-8-delivery.md) separates deterministic preparation from live readiness and scheduled certification.
 
 ## Acceptance Evidence
 
@@ -304,7 +304,7 @@ report/test/live references in the Evidence column as they are verified.
 | Requirement | State | Evidence or action |
 | --- | --- | --- |
 | Looper execution authority | granted | Maintainer instructed this exact prepared set to proceed on 2026-10-16. |
-| Dedicated bot credentials and exact identity bindings | pending private setup | Supply locally through masked setup after implementation; never in versioned artifacts. |
+| Dedicated bot credentials and exact identity bindings | private token/identity checks passed; QA binding pending | Read-only connection doctor succeeds for the supplied dedicated bot; the existing mapping targets the source checkout. Establish the isolated designated QA binding before live activation. |
 | Live service/messages/model/QA authority | granted for bounded plan validation | Use the dedicated bot, configured model and existing designated QA repositories; private readiness remains required. |
 | Final scheduled nightly on integrated candidate | pending | Use existing Forgejo schedule; do not dispatch or run the long gate interactively. |
 
@@ -326,4 +326,4 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Exact integrated candidate passed the scheduled exhaustive nightly.
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
-Current state: Slices 1 through 6 are delivered through canonical PR #390/#391/#392/#393/#394/#395; the latest verified merge is `eecdfd1e85c9593715c5e00502d0bfd0bf23c1ea`. Slice 7 is active on its recorded branch with T7.1/T7.2/T7.3 validated and canonical PR #396 reviewing. Its final validation uses the controller receipt for the exact clean PR HEAD. Final slice validation belongs to the controller receipt for the exact clean PR HEAD; live activation and scheduled exhaustive certification remain separate.
+Current state: Slices 1 through 7 are delivered through canonical PR #390/#391/#392/#393/#394/#395/#396; the latest verified merge is `c14f1aea640657e27c97bb64e40b46f30f698451`. Slice 8 is active. Private bot identity/webhook readiness is verified, while QA project isolation, an installed receiver build and authorized-user live messages still require preparation. Fixture results cannot replace the live journeys or the final scheduled exact-candidate nightly.

@@ -1,6 +1,6 @@
 # Slice 7: Recovery and User Operation
 
-Status: reviewing
+Status: delivered
 
 Delivery set: telegram-conversational-workflow
 
@@ -179,8 +179,12 @@ go test ./internal/core ./internal/app -run '^TestTelegramRecovery(CanceledTx|Ap
 go test -race ./internal/core ./internal/app -run '^TestTelegram(Recovery(CanceledTx|ApplicationError|HostFailure|Grace)|OperationUnicodeParts|ConversationReply(Peers|Retention|Guards)|OperationUncertainPrompt|ControlReply(Binding|Exhaustion|Priority|Arrival))$' -count=1 -timeout=3m
 ```
 
-Final slice validation belongs to the controller receipt for the exact clean PR
-HEAD after the PR-reference commits. The frozen ordered sequence is:
+Controller receipt `JR526N5RLBBVIBT62W5YOZMNB6` passed all four ordered checks
+at clean HEAD `c14f1aea640657e27c97bb64e40b46f30f698451`. The canonical
+forge verifies PR #396 merged that same commit into dev at 2026-10-16T22:44:10Z.
+Acta merge event: `01M53E66GA9C9VH1CKRKYRDM5B`. Normal core/app checks passed
+in 2.719/21.135 seconds; race checks passed in 56.358/57.946 seconds.
+The frozen ordered sequence was:
 
 ```sh
 make verify
