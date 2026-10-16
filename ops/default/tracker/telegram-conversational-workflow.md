@@ -20,7 +20,7 @@ Active slice: Slice 3, Replay-safe operations; implementation in progress
 
 Next slice: Slice 4, Conversational authoring; after verified Slice 3 integration
 
-Progress: 2 of 8 slices integrated; 0 of 29 tasks validated and 7 done; 7 of 32 acceptance criteria have deterministic fixture evidence.
+Progress: 2 of 8 slices integrated; 2 of 29 tasks validated and 7 done; 7 of 32 acceptance criteria have deterministic fixture evidence.
 
 Full gate: `make verify`
 
@@ -110,16 +110,16 @@ Prerequisite: verified Slice 2 integration.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T3.1 | in_progress | `f39c12e96c3d2228e8411d954f0a219b86f2d497` (workflow-owner foundation); other owner bindings complete with T3.2 | Caller-neutral request binding, owner journals and durable mutation receipts. |
-| T3.2 | ready | pending | Guarded ticket/slice/slice-set/use-case record operations through shared owners. |
-| T3.3 | ready | pending | Durable outbox, reply/action guards and bounded Unicode delivery. |
-| T3.4 | ready | pending | Real-store crash/replay proof and changed-argument rejection. |
+| T3.1 | validated | `f39c12e96c3d2228e8411d954f0a219b86f2d497`, `1b0ec78267b3` | Caller-neutral request binding, owner journals and durable mutation receipts. |
+| T3.2 | validated | `9ebe146da339`, `5507e7041a3ddcdbd8021e9919c17f6b6ae555fc` | Guarded ticket/slice/slice-set/use-case record operations through shared owners. |
+| T3.3 | in_progress | `e5de10f0eb5e1a44cd4cc787186ab10a5da60bb3` (request/outbox foundation); single-use actions pending | Durable outbox, reply/action guards and bounded Unicode delivery. |
+| T3.4 | in_progress | `e5de10f0`, `5507e704` (owner-to-SQLite crash foundation); action/send proof pending | Real-store crash/replay proof and changed-argument rejection. |
 
 Validation: plan section 8; `TestTelegramOperation`, including focused race mode.
 
-Workflow-owner foundation validation: `go test ./internal/core ./internal/app -run '^TestTelegramOperation' -count=1 -timeout=3m` and its `-race` counterpart passed; strict focused lint reported zero issues. Evidence: [Slice 3 draft report](../report/slices/telegram-conversational-workflow/slice-3-operations.md).
+Task validation: record owner, application and live HTTP fixtures passed in normal and race mode, including compatibility with receiver/conversation and migration checks. Strict focused lint and repository Go-style/package checks passed. Exact commands and fixture boundaries are recorded in the [Slice 3 draft report](../report/slices/telegram-conversational-workflow/slice-3-operations.md).
 
-Candidate / PR / verified merge: pending. T3.2–T3.4 and final exact-HEAD controller checks remain.
+Candidate / PR / verified merge: pending. T3.3 single-use actions, T3.4 complete action/send crash proof and final exact-HEAD controller checks remain.
 
 ## Slice 4: Conversational Authoring
 
@@ -273,4 +273,4 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Exact integrated candidate passed the scheduled exhaustive nightly.
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
-Current state: Slice 2 delivered through PR #391; Slice 3 is active in `feat/slice-3-telegram-operations`. Workflow-owner replay foundation is committed at `f39c12e96c3d2228e8411d954f0a219b86f2d497` with focused normal/race and lint checks passed. Record surfaces, other owner bindings, retained transport requests/actions/outbox and cross-store crash proof remain before PR readiness.
+Current state: Slice 2 delivered through PR #391; Slice 3 is active in `feat/slice-3-telegram-operations`. T3.1/T3.2 are validated through shared workflow/case receipts, central record operations and deterministic live commands. The retained request/outbox foundation and cross-store acknowledgement proof are committed. T3.3 single-use actions and T3.4 complete callback/send proof remain before canonical PR readiness.
