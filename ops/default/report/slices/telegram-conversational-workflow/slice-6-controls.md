@@ -466,11 +466,38 @@ three-minute package deadline while `TestTelegramControlSharedCapacity/8` was
 running; no assertion failure preceded the deadline. Evidence ID:
 `EM6ZSG2SETNYTQQNYDVW2AGADS`.
 
-PR #395 remains open and is not ready for integration. Its final app race
-selection still needs to complete within the configured bound, preserving all
-cases and assertions. No owned capacity-fixture processes remained after the
-failed run. Subsequent PR HEADs require a fresh complete controller receipt;
-these partial results cannot establish final readiness.
+Controller continuation at `82e3900fb157d4011174e61ee935b36860bec8d5`
+also passed `make verify` and normal controls (core 26.167 seconds, app
+64.781 seconds). Core race passed in 123.861 seconds. App exhausted the same
+three-minute package deadline during `TestTelegramControlStaleReceipt/expired`.
+Evidence ID: `OU2JGJRV5OW3MV4VFWFWA5V5LD`.
+
+T6.3 validation correction `a09bf959dc8770174fb6987849c5a104126dbdd9` removes process-wide credential
+mutation from receiver fixtures. Each fixture uses the production private token
+file with its own environment reference, repository, SQLite database and HTTP
+server. Seventeen independent control journeys now overlap through Go's parallel
+test scheduler with at most four fixtures active. Their internal case ordering,
+all assertions and restart/lost-ack boundaries remain intact. Shared-capacity and
+timing-sensitive saturation certification remain serial. No production behavior,
+frozen command, deadline or selected test is changed by this correction.
+
+Focused race validation passed all 17 journeys and 56 named subtests in
+61.269 seconds. The normal receiver/conversation/control selection passed in
+25.298 seconds. Strict focused lint, signature checks, package README checks
+and whitespace validation passed:
+
+```sh
+go test ./internal/app -run '^TestTelegram(Receiver|Conversation|Control(Decisions|DecisionGuards|StaleReview|LifecycleAck|ReceiptRetry|ReceiptRedelivery|ReceiptAuthority|ReceiptProjection|StaleReceipt|Lifecycle|Natural|Draft|Stale|Conversation|Authorization|Authority|Checkpoint))' -count=1 -timeout=3m
+go test -race ./internal/app -run '^TestTelegramControl(Decisions|DecisionGuards|StaleReview|LifecycleAck|ReceiptRetry|ReceiptRedelivery|ReceiptAuthority|ReceiptProjection|StaleReceipt|Lifecycle|Natural|Draft|Stale|Conversation|Authorization|Authority|Checkpoint)$' -json -count=1 -timeout=3m
+go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/app
+scripts/check-go-func-signatures.sh
+scripts/check-package-readmes.sh
+git diff --check
+```
+
+PR #395 remains reviewing. The retained failed attempts and focused correction
+checks do not establish final readiness. Every subsequent PR HEAD requires a
+fresh complete controller receipt for the ordered commands below.
 
 Authoritative final slice validation is the controller receipt for the clean PR
 HEAD, in this order:
