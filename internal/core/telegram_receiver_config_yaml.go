@@ -13,6 +13,7 @@ import (
 func parseTelegramReceiverConfig(data []byte) (TelegramReceiverConfig, error) {
 	config := TelegramReceiverConfig{PollTimeoutSeconds: 30}
 	parser := telegramConfigParser{config: &config, seen: map[string]bool{}}
+
 	for _, line := range strings.Split(string(data), "\n") {
 		if strings.TrimSpace(line) == "" || strings.HasPrefix(strings.TrimSpace(line), "#") {
 			continue
@@ -35,6 +36,7 @@ type telegramConfigParser struct {
 	seen       map[string]bool
 	userFields map[string]bool
 	projects   bool
+	userList   bool
 }
 
 func (p *telegramConfigParser) line(line string) error {
@@ -53,7 +55,7 @@ func (p *telegramConfigParser) line(line string) error {
 		return p.field(strings.TrimSpace(line))
 	}
 
-	if !p.seen["allowed_users"] {
+	if !p.userList {
 		return errors.New("unexpected list")
 	}
 
@@ -61,15 +63,10 @@ func (p *telegramConfigParser) line(line string) error {
 }
 
 func (p *telegramConfigParser) field(line string) error {
-	key, value, ok := strings.Cut(line, ":")
-	if !ok || p.seen[key] {
-		return errors.New("duplicate or malformed field")
+	key, value, err := p.fieldHeader(line)
+	if err != nil {
+		return err
 	}
-
-	p.seen[key] = true
-	p.projects = false
-	value = strings.TrimSpace(value)
-	var err error
 
 	switch key {
 	case "enabled":
@@ -85,14 +82,33 @@ func (p *telegramConfigParser) field(line string) error {
 	case "allowed_topic_ids":
 		err = json.Unmarshal([]byte(value), &p.config.AllowedTopicIDs)
 	case "allowed_users":
-		if value != "" {
-			err = errors.New("expected user list")
-		}
+		err = telegramUserListHeader(value)
 	default:
 		err = errors.New("unknown field")
 	}
 
 	return err
+}
+
+func telegramUserListHeader(value string) error {
+	if value != "" {
+		return errors.New("expected user list")
+	}
+
+	return nil
+}
+
+func (p *telegramConfigParser) fieldHeader(line string) (string, string, error) {
+	key, value, ok := strings.Cut(line, ":")
+	if !ok || p.seen[key] {
+		return "", "", errors.New("duplicate or malformed field")
+	}
+
+	p.seen[key] = true
+	p.projects = false
+	p.userList = key == "allowed_users"
+
+	return key, strings.TrimSpace(value), nil
 }
 
 func (p *telegramConfigParser) userLine(indent int, line string) error {
@@ -133,9 +149,11 @@ func (p *telegramConfigParser) userField(user *TelegramAllowedUser, indent int, 
 	p.userFields[key] = true
 	p.projects = false
 	value = strings.TrimSpace(value)
+
 	switch key {
 	case "operator_id":
 		var err error
+
 		user.OperatorID, err = telegramYAMLScalar(value)
 
 		return err
@@ -164,14 +182,17 @@ func telegramYAMLScalar(value string) (string, error) {
 }
 
 func renderTelegramReceiverConfig(config TelegramReceiverConfig) []byte {
-	chats, _ := json.Marshal(config.AllowedChatIDs)
-	topics, _ := json.Marshal(config.AllowedTopicIDs)
+	chats := telegramMustJSON(config.AllowedChatIDs)
+	topics := telegramMustJSON(config.AllowedTopicIDs)
+
 	var body strings.Builder
 
 	fmt.Fprintf(&body, "telegram:\n  enabled: %t\n  bot_token_env: %s\n  poll_timeout_seconds: %d\n  default_project_id: %q\n  allowed_chat_ids: %s\n  allowed_topic_ids: %s\n  allowed_users:\n",
 		config.Enabled, config.BotTokenEnv, config.PollTimeoutSeconds, config.DefaultProjectID, chats, topics)
+
 	for _, user := range config.AllowedUsers {
 		fmt.Fprintf(&body, "    - telegram_user_id: %d\n      operator_id: %s\n      project_ids:\n", user.TelegramUserID, user.OperatorID)
+
 		for _, id := range user.ProjectIDs {
 			fmt.Fprintf(&body, "        - %s\n", id)
 		}

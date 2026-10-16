@@ -15,42 +15,18 @@ import (
 
 // TestTelegramReceiverHTTP exercises real HTTP readiness, sparse intake and topic delivery.
 func TestTelegramReceiverHTTP(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var payload map[string]json.RawMessage
-		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-			t.Error(err)
-		}
-
-		result := `{"ok":true,"result":{"id":12345,"is_bot":true,"username":"example_bot"}}`
-		switch {
-		case strings.HasSuffix(r.URL.Path, "/getWebhookInfo"):
-			result = `{"ok":true,"result":{"url":""}}`
-		case strings.HasSuffix(r.URL.Path, "/getUpdates"):
-			if string(payload["offset"]) != "9001" || string(payload["limit"]) != "50" || string(payload["timeout"]) != "1" {
-				t.Error("incorrect bounded polling request")
-			}
-
-			result = `{"ok":true,"result":[{"update_id":9005,"message":{"message_id":4,"from":{"id":100001,"is_bot":false},"chat":{"id":100001,"type":"private"},"text":"/help","entities":[]}}]}`
-		case strings.HasSuffix(r.URL.Path, "/sendMessage"):
-			if string(payload["message_thread_id"]) != "7" || payload["parse_mode"] != nil {
-				t.Error("topic routing or plain text contract violated")
-			}
-
-			result = `{"ok":true,"result":{"message_id":88}}`
-		}
-
-		if _, err := fmt.Fprint(w, result); err != nil {
-			t.Error(err)
-		}
-	}))
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { telegramReceiverHTTPHandler(t, w, r) }))
 	defer server.Close()
+
 	api := TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL}
+
 	token := "12345:example_test_token_123456789"
 	if bot, err := api.CheckConnection(t.Context(), token); err != nil || bot != 12345 {
 		t.Fatal("readiness failed", bot, err)
 	}
 
 	offset := int64(9001)
+
 	updates, err := api.Poll(t.Context(), token, &offset, 1)
 	if err != nil || len(updates) != 1 || updates[0].UpdateID != 9005 || updates[0].Text != "/help" {
 		t.Fatal("intake failed", updates, err)
@@ -84,15 +60,19 @@ func TestTelegramReceiverHTTPFailures(t *testing.T) {
 
 func checkTelegramHTTPFailure(t *testing.T, body string, status int, code string, permanent bool) {
 	t.Helper()
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(status)
+
 		if _, err := fmt.Fprint(w, body); err != nil {
 			t.Error(err)
 		}
 	}))
 	defer server.Close()
+
 	api := TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL}
 	_, err := api.Poll(t.Context(), "12345:example_test_token_123456789", nil, 1)
+
 	var apiErr *TelegramAPIError
 	if !errors.As(err, &apiErr) || apiErr.Code != code || apiErr.Permanent != permanent || strings.Contains(err.Error(), "private-token") {
 		t.Fatalf("unexpected safe API result: %v", err)
@@ -118,7 +98,9 @@ func TestTelegramReceiverWebhook(t *testing.T) {
 		}
 	}))
 	defer server.Close()
+
 	_, err := (TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL}).CheckConnection(t.Context(), "12345:example_test_token_123456789")
+
 	var apiErr *TelegramAPIError
 	if !errors.As(err, &apiErr) || apiErr.Code != "webhook_conflict" {
 		t.Fatal("webhook was not refused", err)
@@ -141,6 +123,7 @@ func TestTelegramReceiverLockProcess(t *testing.T) {
 	}
 
 	root := t.TempDir()
+
 	env, err := NewUserEnvironment(UserEnvironmentOptions{DevMode: true, DevRoot: root})
 	if err != nil {
 		t.Fatal(err)
@@ -152,8 +135,10 @@ func TestTelegramReceiverLockProcess(t *testing.T) {
 	}
 
 	child := exec.CommandContext(t.Context(), os.Args[0], "-test.run=^TestTelegramReceiverLockProcess$")
+
 	child.Env = append(os.Environ(), "CHR_TEST_TELEGRAM_LOCK_ROOT="+root)
 	output, childErr := child.CombinedOutput()
+
 	if err := lock.Close(); err != nil {
 		t.Fatal(err)
 	}
@@ -170,4 +155,40 @@ func TestTelegramReceiverLockProcess(t *testing.T) {
 	if err := reopened.Close(); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func telegramReceiverHTTPHandler(t *testing.T, w http.ResponseWriter, r *http.Request) {
+	t.Helper()
+
+	var payload map[string]json.RawMessage
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		t.Error(err)
+	}
+
+	result := `{"ok":true,"result":{"id":12345,"is_bot":true,"username":"example_bot"}}`
+
+	switch {
+	case strings.HasSuffix(r.URL.Path, "/getWebhookInfo"):
+		result = `{"ok":true,"result":{"url":""}}`
+	case strings.HasSuffix(r.URL.Path, "/getUpdates"):
+		if !telegramHTTPTestPollBounds(payload) {
+			t.Error("incorrect bounded polling request")
+		}
+
+		result = `{"ok":true,"result":[{"update_id":9005,"message":{"message_id":4,"from":{"id":100001,"is_bot":false},"chat":{"id":100001,"type":"private"},"text":"/help","entities":[]}}]}`
+	case strings.HasSuffix(r.URL.Path, "/sendMessage"):
+		if string(payload["message_thread_id"]) != "7" || payload["parse_mode"] != nil {
+			t.Error("topic routing or plain text contract violated")
+		}
+
+		result = `{"ok":true,"result":{"message_id":88}}`
+	}
+
+	if _, err := fmt.Fprint(w, result); err != nil {
+		t.Error(err)
+	}
+}
+
+func telegramHTTPTestPollBounds(payload map[string]json.RawMessage) bool {
+	return string(payload["offset"]) == "9001" && string(payload["limit"]) == "50" && string(payload["timeout"]) == "1"
 }

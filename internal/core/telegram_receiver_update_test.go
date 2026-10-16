@@ -11,6 +11,7 @@ func TestTelegramReceiverAuthorization(t *testing.T) {
 	config := telegramReceiverTestConfig()
 	config.AllowedChatIDs = []int64{-100}
 	config.AllowedTopicIDs = []int64{7}
+
 	cases := []struct {
 		name, sender, chat, extra, text string
 		allowed                         bool
@@ -29,6 +30,7 @@ func TestTelegramReceiverAuthorization(t *testing.T) {
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
 			data := fmt.Sprintf(`{"update_id":1,"message":{"message_id":1,"from":%s,"chat":%s,"text":%q%s}}`, test.sender, test.chat, test.text, test.extra)
+
 			update, err := decodeTelegramReceiverUpdate([]byte(data))
 			if err != nil {
 				t.Fatal(err)
@@ -45,6 +47,7 @@ func TestTelegramReceiverAuthorization(t *testing.T) {
 // TestTelegramReceiverCallback authenticates the actual clicker and ignores non-message update kinds.
 func TestTelegramReceiverCallback(t *testing.T) {
 	data := []byte(`{"update_id":1,"callback_query":{"id":"example","from":{"id":100001},"data":"opaque:help","message":{"message_id":7,"date":1,"from":{"id":12345,"is_bot":true},"chat":{"id":100001,"type":"private"},"text":"old bot message"}}}`)
+
 	update, err := decodeTelegramReceiverUpdate(data)
 	if err != nil || update.Kind != "callback_query" || update.Peer.UserID != 100001 || update.Text != "opaque:help" {
 		t.Fatal("callback sender was not retained", update, err)

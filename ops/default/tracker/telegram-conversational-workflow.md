@@ -16,11 +16,11 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 1, Dedicated live receiver; implementation in progress
+Active slice: Slice 1, Dedicated live receiver; canonical PR preparation
 
 Next slice: Slice 2, Conversation routing; after verified Slice 1 integration
 
-Progress: 0 of 8 slices integrated; 0 of 29 tasks done; 0 of 32 acceptance criteria evidenced.
+Progress: 0 of 8 slices integrated; 4 of 29 tasks validated and 0 done; 4 of 32 acceptance criteria have deterministic fixture evidence.
 
 Full gate: `make verify`
 
@@ -29,7 +29,7 @@ Exhaustive certification: pending the scheduled nightly for the final integrated
 ## State and Evidence Rules
 
 Task states: `pending`, `ready`, `in_progress`, `validated`, `blocked`, `done`.
-Slice 1 tasks are ready under the recorded execution authorization; later
+Slice 1 tasks are validated under the recorded execution authorization; later
 tasks remain pending until their prerequisites integrate. A validated task becomes
 done after verified slice integration; a successful test or worker exit alone
 does not close it.
@@ -70,15 +70,15 @@ Prerequisite: approved committed planning artifacts; execution authorized on 202
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T1.1 | in_progress | `e38f90f8`; connection doctor added with T1.2 | Private setup/configuration, secret handling and readiness commands. |
-| T1.2 | in_progress | `063a2a45`; service wiring follows T1.3 | Bounded HTTP receiver, exact identity authorization and ownership checks. |
-| T1.3 | validated | storage task commit | Additive storage, atomic inbox/cursor, initial outbox and retained retries. |
-| T1.4 | ready | pending | Read-only registry/help/project/status operations and existing adapter compatibility. |
+| T1.1 | validated | `e38f90f8`, `063a2a45`; readiness completed with T1.4 | Private setup/configuration, secret handling and readiness commands. |
+| T1.2 | validated | `063a2a45`; foreground service wiring completed with T1.4 | Bounded HTTP receiver, exact identity authorization and ownership checks. |
+| T1.3 | validated | `d32b92a9`; authorization-bound delivery completed with T1.4 | Additive storage, atomic inbox/cursor, initial outbox and retained retries. |
+| T1.4 | validated | implementation commit recorded in report follow-up | Read-only registry/help/project/status operations and existing adapter compatibility. |
 
 Validation: plan section 6; `TestTelegramReceiver` and the named existing
 notification/import regressions, including focused race mode.
 
-Candidate / PR / verified merge / evidence: pending.
+Candidate / PR: being prepared on `feat/slice-1-telegram-receiver`. Verified merge: pending controller integration. Evidence: [Slice 1 report](../report/slices/telegram-conversational-workflow/slice-1-receiver.md); exact final HEAD and ordered checks are recorded through controller validation.
 
 ## Slice 2: Conversation Routing
 
@@ -206,8 +206,8 @@ report/test/live references in the Evidence column as they are verified.
 | Criterion | State | Evidence |
 | --- | --- | --- |
 | TG-01 | pending | pending |
-| TG-02 | pending | pending |
-| TG-03 | pending | pending |
+| TG-02 | validated | [Slice 1 deterministic evidence](../report/slices/telegram-conversational-workflow/slice-1-receiver.md) |
+| TG-03 | validated | [Slice 1 deterministic evidence](../report/slices/telegram-conversational-workflow/slice-1-receiver.md) |
 | TG-04 | pending | pending |
 | TG-05 | pending | pending |
 | TG-06 | pending | pending |
@@ -223,7 +223,7 @@ report/test/live references in the Evidence column as they are verified.
 | TG-16 | pending | pending |
 | TG-17 | pending | pending |
 | TG-18 | pending | pending |
-| TG-19 | pending | pending |
+| TG-19 | validated | [Slice 1 deterministic evidence](../report/slices/telegram-conversational-workflow/slice-1-receiver.md) |
 | TG-20 | pending | pending |
 | TG-21 | pending | pending |
 | TG-22 | pending | pending |
@@ -233,7 +233,7 @@ report/test/live references in the Evidence column as they are verified.
 | TG-26 | pending | pending |
 | TG-27 | pending | pending |
 | TG-28 | pending | pending |
-| TG-29 | pending | pending |
+| TG-29 | validated | [Slice 1 deterministic evidence](../report/slices/telegram-conversational-workflow/slice-1-receiver.md) |
 | TG-30 | pending | pending |
 | TG-31 | pending | pending |
 | TG-32 | pending | pending |
@@ -265,5 +265,4 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Exact integrated candidate passed the scheduled exhaustive nightly.
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
-Current state: execution authorized and Slice 1 ready for Looper activation;
-no implementation, integration or live validation is claimed by this entry.
+Current state: Slice 1 implementation and deterministic task validation are complete; canonical PR preparation and exact-HEAD controller validation are in progress. Integration, live activation and exhaustive certification remain pending.

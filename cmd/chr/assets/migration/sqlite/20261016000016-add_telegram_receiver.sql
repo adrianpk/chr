@@ -37,6 +37,7 @@ CREATE TABLE telegram_outbox (
     bot_id INTEGER NOT NULL REFERENCES telegram_receivers(bot_id),
     chat_id INTEGER NOT NULL, topic_id INTEGER NOT NULL CHECK(topic_id >= 0), user_id INTEGER NOT NULL,
     event_key TEXT NOT NULL,
+    config_digest TEXT NOT NULL CHECK(length(config_digest) = 64),
     kind TEXT NOT NULL CHECK(kind IN ('acknowledgement','question','progress','result','diagnostic')),
     part_index INTEGER NOT NULL DEFAULT 1 CHECK(part_index BETWEEN 1 AND 8),
     part_count INTEGER NOT NULL DEFAULT 1 CHECK(part_count BETWEEN 1 AND 8),

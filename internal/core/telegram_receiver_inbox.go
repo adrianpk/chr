@@ -16,8 +16,10 @@ func (s *TelegramReceiverStore) RetainBatch(ctx context.Context, botID int64, up
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		var epoch int64
-		var next sql.NullInt64
+		var (
+			epoch int64
+			next  sql.NullInt64
+		)
 		// Acquire SQLite's write reservation before checking quotas or cursor state.
 		if _, err := tx.ExecContext(ctx, "UPDATE telegram_receivers SET updated_at=updated_at WHERE bot_id=?", botID); err != nil {
 			return err
@@ -27,25 +29,36 @@ func (s *TelegramReceiverStore) RetainBatch(ctx context.Context, botID int64, up
 			return err
 		}
 
-		for _, update := range updates {
-			if err := retainTelegramUpdate(ctx, tx, botID, epoch, update, now); err != nil {
-				return err
-			}
+		var err error
 
-			if !next.Valid || update.UpdateID >= next.Int64 {
-				next = sql.NullInt64{Int64: update.UpdateID + 1, Valid: true}
-			}
+		next, err = retainTelegramBatchUpdates(ctx, tx, botID, epoch, next, updates, now)
+		if err != nil {
+			return err
 		}
 
 		if err := checkTelegramIntakeCapacity(ctx, tx, botID); err != nil {
 			return err
 		}
 
-		_, err := tx.ExecContext(ctx, `UPDATE telegram_receivers SET next_update_id=?,last_poll_at=?,health='ready',
+		_, err = tx.ExecContext(ctx, `UPDATE telegram_receivers SET next_update_id=?,last_poll_at=?,health='ready',
 retry_attempt=0,retry_at=NULL,last_error_code='',updated_at=? WHERE bot_id=?`, next, formatProjectTime(now), formatProjectTime(now), botID)
 
 		return err
 	})
+}
+
+func retainTelegramBatchUpdates(ctx context.Context, tx *sql.Tx, botID, epoch int64, next sql.NullInt64, updates []TelegramReceivedUpdate, now time.Time) (sql.NullInt64, error) {
+	for _, update := range updates {
+		if err := retainTelegramUpdate(ctx, tx, botID, epoch, update, now); err != nil {
+			return next, err
+		}
+
+		if !next.Valid || update.UpdateID >= next.Int64 {
+			next = sql.NullInt64{Int64: update.UpdateID + 1, Valid: true}
+		}
+	}
+
+	return next, nil
 }
 
 func retainTelegramUpdate(ctx context.Context, tx *sql.Tx, botID, epoch int64, update TelegramReceivedUpdate, now time.Time) error {
@@ -54,6 +67,7 @@ func retainTelegramUpdate(ctx context.Context, tx *sql.Tx, botID, epoch int64, u
 	}
 
 	var prior string
+
 	err := tx.QueryRowContext(ctx, "SELECT payload_digest FROM telegram_updates WHERE bot_id=? AND update_id=?", botID, update.UpdateID).Scan(&prior)
 	if err == nil {
 		if prior != update.Digest {
@@ -81,7 +95,7 @@ chat_id,topic_id,user_id,message_id,chat_type,received_at,payload,state,reason_c
 }
 
 func validateTelegramRetainedUpdate(botID int64, update TelegramReceivedUpdate) error {
-	if botID <= 0 || update.Peer.BotID != botID || update.UpdateID < 0 || update.UpdateID == math.MaxInt64 || !regexp.MustCompile(`^[a-f0-9]{64}$`).MatchString(update.Digest) {
+	if !validTelegramReceiptIdentity(botID, update) {
 		return errors.New("invalid telegram receipt identity")
 	}
 
@@ -99,6 +113,10 @@ func validateTelegramRetainedUpdate(botID int64, update TelegramReceivedUpdate) 
 	}
 
 	return nil
+}
+
+func validTelegramReceiptIdentity(botID int64, update TelegramReceivedUpdate) bool {
+	return botID > 0 && update.Peer.BotID == botID && update.UpdateID >= 0 && update.UpdateID != math.MaxInt64 && regexp.MustCompile(`^[a-f0-9]{64}$`).MatchString(update.Digest)
 }
 
 func checkTelegramIntakeCapacity(ctx context.Context, tx *sql.Tx, botID int64) error {
@@ -131,7 +149,9 @@ FROM telegram_updates WHERE bot_id=? AND state='pending' ORDER BY update_id LIMI
 		//nolint:errcheck // rows.Err is checked after the bounded iteration.
 		_ = rows.Close()
 	}()
+
 	var result []TelegramReceivedUpdate
+
 	for rows.Next() {
 		update := TelegramReceivedUpdate{Peer: TelegramPeerIdentity{BotID: botID}}
 		if err := rows.Scan(&update.UpdateID, &update.Digest, &update.Kind, &update.Peer.ChatID, &update.Peer.TopicID, &update.Peer.UserID, &update.MessageID, &update.ChatType, &update.Text); err != nil {

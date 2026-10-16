@@ -40,6 +40,14 @@ func (c TelegramReceiverConfig) Validate() error {
 		return errors.New("telegram polling or user configuration is outside its bounds")
 	}
 
+	if err := validateTelegramUsers(c); err != nil {
+		return err
+	}
+
+	return validateTelegramNumericAllowlist(c.AllowedChatIDs, c.AllowedTopicIDs)
+}
+
+func validateTelegramUsers(c TelegramReceiverConfig) error {
 	seen := map[int64]bool{}
 	for _, user := range c.AllowedUsers {
 		if user.TelegramUserID <= 0 || seen[user.TelegramUserID] || !telegramConfigID(user.OperatorID) || !telegramProjectIDs(user.ProjectIDs) {
@@ -53,7 +61,7 @@ func (c TelegramReceiverConfig) Validate() error {
 		return errors.New("invalid telegram default project")
 	}
 
-	return validateTelegramNumericAllowlist(c.AllowedChatIDs, c.AllowedTopicIDs)
+	return nil
 }
 
 func telegramConfigID(value string) bool {
@@ -99,13 +107,7 @@ func validateTelegramNumericAllowlist(chats, topics []int64) error {
 
 // AuthorizedUser checks the entire numeric peer before interpretation or lookup.
 func (c TelegramReceiverConfig) AuthorizedUser(chatID, topicID, userID int64, chatType string) (TelegramAllowedUser, bool) {
-	if topicID < 0 || (topicID != 0 && !slices.Contains(c.AllowedTopicIDs, topicID)) {
-		return TelegramAllowedUser{}, false
-	}
-
-	private := chatType == "private" && chatID == userID && topicID == 0
-	group := (chatType == "group" || chatType == "supergroup") && slices.Contains(c.AllowedChatIDs, chatID)
-	if !private && !group {
+	if !c.authorizedPeer(chatID, topicID, userID, chatType) {
 		return TelegramAllowedUser{}, false
 	}
 
@@ -118,12 +120,33 @@ func (c TelegramReceiverConfig) AuthorizedUser(chatID, topicID, userID int64, ch
 	return TelegramAllowedUser{}, false
 }
 
+func (c TelegramReceiverConfig) authorizedPeer(chatID, topicID, userID int64, chatType string) bool {
+	if topicID < 0 || (topicID != 0 && !slices.Contains(c.AllowedTopicIDs, topicID)) {
+		return false
+	}
+
+	private := chatType == "private" && chatID == userID && topicID == 0
+
+	group := (chatType == "group" || chatType == "supergroup") && slices.Contains(c.AllowedChatIDs, chatID)
+
+	return private || group
+}
+
 // Digest identifies non-secret configuration for retained receiver diagnostics.
 func (c TelegramReceiverConfig) Digest() string {
-	data, _ := json.Marshal(c) // Struct fields cannot fail JSON encoding.
+	data := telegramMustJSON(c)
 	sum := sha256.Sum256(data)
 
 	return hex.EncodeToString(sum[:])
+}
+
+func telegramMustJSON(value any) []byte {
+	data, err := json.Marshal(value)
+	if err != nil {
+		panic(err) // Callers use only statically JSON-encodable internal values.
+	}
+
+	return data
 }
 
 // LoadTelegramReceiverConfig reads bounded, private YAML without changing files.
@@ -148,6 +171,7 @@ func SaveTelegramReceiverConfig(env UserEnvironment, config TelegramReceiverConf
 	}
 
 	path := filepath.Join(env.ConfigDir(), "telegram.yml")
+
 	prior, err := LoadTelegramReceiverConfig(env)
 	if err == nil && prior.Digest() == config.Digest() {
 		return nil
@@ -184,6 +208,7 @@ func writeTelegramPrivateFile(path string, data []byte) (err error) {
 	}
 
 	defer func() { err = errors.Join(err, removeTelegramTemp(file.Name())) }()
+
 	if _, err := file.Write(data); err != nil {
 		return errors.Join(err, file.Close())
 	}

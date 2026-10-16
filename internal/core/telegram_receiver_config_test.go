@@ -9,12 +9,15 @@ import (
 )
 
 func telegramReceiverTestConfig() TelegramReceiverConfig {
-	return TelegramReceiverConfig{Enabled: true, BotTokenEnv: "EXAMPLE_BOT_TOKEN", PollTimeoutSeconds: 30,
-		AllowedUsers: []TelegramAllowedUser{{TelegramUserID: 100001, OperatorID: "maintainer", ProjectIDs: []string{"example-project"}}}}
+	return TelegramReceiverConfig{
+		Enabled: true, BotTokenEnv: "EXAMPLE_BOT_TOKEN", PollTimeoutSeconds: 30,
+		AllowedUsers: []TelegramAllowedUser{{TelegramUserID: 100001, OperatorID: "maintainer", ProjectIDs: []string{"example-project"}}},
+	}
 }
 
 func telegramReceiverTestEnv(t *testing.T) UserEnvironment {
 	t.Helper()
+
 	env, err := NewUserEnvironment(UserEnvironmentOptions{DevMode: true, DevRoot: t.TempDir()})
 	if err != nil {
 		t.Fatal(err)
@@ -26,12 +29,14 @@ func telegramReceiverTestEnv(t *testing.T) UserEnvironment {
 // TestTelegramReceiverConfig protects setup preservation, private modes and strict authority parsing.
 func TestTelegramReceiverConfig(t *testing.T) {
 	env := telegramReceiverTestEnv(t)
+
 	config := telegramReceiverTestConfig()
 	if err := SaveTelegramReceiverConfig(env, config, false); err != nil {
 		t.Fatal(err)
 	}
 
 	path := filepath.Join(env.ConfigDir(), "telegram.yml")
+
 	prior, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
@@ -63,6 +68,7 @@ func TestTelegramReceiverConfig(t *testing.T) {
 // TestTelegramReceiverConfigErrors rejects unsafe YAML and invalid numeric authority.
 func TestTelegramReceiverConfigErrors(t *testing.T) {
 	body := string(renderTelegramReceiverConfig(telegramReceiverTestConfig()))
+
 	cases := map[string]string{
 		"unknown":     body + "  token: forbidden\n",
 		"duplicate":   body + "  enabled: true\n",
@@ -86,6 +92,7 @@ func TestTelegramReceiverConfigErrors(t *testing.T) {
 func TestTelegramReceiverToken(t *testing.T) {
 	env := telegramReceiverTestEnv(t)
 	config := telegramReceiverTestConfig()
+
 	token := "12345:example_test_token_123456789"
 	if err := SaveTelegramReceiverToken(env, config, token, false); err != nil {
 		t.Fatal(err)
@@ -102,6 +109,7 @@ func TestTelegramReceiverToken(t *testing.T) {
 
 	assertTelegramPrivateMode(t, filepath.Join(env.ConfigDir(), "telegram.env"), 0o600)
 	t.Setenv(config.BotTokenEnv, "malformed-secret")
+
 	if _, err := TelegramReceiverToken(env, config); err == nil || strings.Contains(err.Error(), "malformed-secret") {
 		t.Fatal("malformed token accepted or exposed")
 	}
@@ -109,6 +117,7 @@ func TestTelegramReceiverToken(t *testing.T) {
 
 func assertTelegramPrivateMode(t *testing.T, path string, mode os.FileMode) {
 	t.Helper()
+
 	info, err := os.Stat(path)
 	if err != nil || info.Mode().Perm() != mode {
 		t.Fatalf("private mode mismatch for %s: %v", path, err)

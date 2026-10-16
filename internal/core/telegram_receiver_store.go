@@ -99,9 +99,12 @@ ON CONFLICT(bot_id) DO UPDATE SET config_digest=excluded.config_digest, updated_
 // Receiver loads retained readiness and rejects newer encoded receiver records.
 func (s *TelegramReceiverStore) Receiver(ctx context.Context, botID int64) (TelegramReceiverState, error) {
 	state := TelegramReceiverState{BotID: botID}
-	var version int
-	var next sql.NullInt64
-	var retryAt, lastPoll sql.NullString
+
+	var (
+		version           int
+		next              sql.NullInt64
+		retryAt, lastPoll sql.NullString
+	)
 
 	err := s.db.QueryRowContext(ctx, `SELECT schema_version,cursor_epoch,next_update_id,health,retry_attempt,retry_at,last_poll_at,last_error_code
 FROM telegram_receivers WHERE bot_id=?`, botID).Scan(&version, &state.Epoch, &next, &state.Health, &state.RetryAttempt, &retryAt, &lastPoll, &state.LastErrorCode)
@@ -182,6 +185,7 @@ func (s *TelegramReceiverStore) PollFailed(ctx context.Context, botID int64, fai
 	}
 
 	code, permanent, delay := telegramFailureState(failure, state.RetryAttempt)
+
 	health := "degraded"
 	if permanent {
 		health = "blocked"
@@ -195,6 +199,7 @@ func (s *TelegramReceiverStore) PollFailed(ctx context.Context, botID int64, fai
 
 func telegramFailureState(failure error, attempt int) (string, bool, time.Duration) {
 	delay := time.Second << min(4, max(0, attempt-1))
+
 	var apiErr *TelegramAPIError
 	if errors.As(failure, &apiErr) {
 		return apiErr.Code, apiErr.Permanent, max(delay, apiErr.RetryAfter)

@@ -44,6 +44,7 @@ func SaveTelegramReceiverToken(env UserEnvironment, config TelegramReceiverConfi
 
 	path := filepath.Join(env.ConfigDir(), "telegram.env")
 	wanted := config.BotTokenEnv + "=" + token + "\n"
+
 	prior, err := readTelegramPrivateFile(path, 4096)
 	if err == nil && string(prior) == wanted {
 		return nil

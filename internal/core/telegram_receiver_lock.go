@@ -47,6 +47,7 @@ func acquireTelegramFileLock(env UserEnvironment, name string) (*os.File, error)
 // clears only this binding while holding the configuration lock.
 func BindTelegramReceiverIdentity(env UserEnvironment, botID int64) error {
 	path := filepath.Join(env.StateDir(), "telegram", "bot-id")
+
 	prior, err := readTelegramPrivateFile(path, 32)
 	if errors.Is(err, os.ErrNotExist) {
 		return writeTelegramPrivateFile(path, []byte(strconv.FormatInt(botID, 10)+"\n"))

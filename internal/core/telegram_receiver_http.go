@@ -93,6 +93,7 @@ func (a TelegramReceiverAPI) Poll(ctx context.Context, token string, next *int64
 		Timeout int      `json:"timeout"`
 		Allowed []string `json:"allowed_updates"`
 	}{next, 50, timeout, []string{"message", "callback_query"}}
+
 	data, err := a.call(ctx, token, "getUpdates", payload, time.Duration(timeout+10)*time.Second)
 	if err != nil {
 		return nil, err
@@ -112,6 +113,7 @@ func (a TelegramReceiverAPI) Send(ctx context.Context, token string, peer Telegr
 		TopicID int64  `json:"message_thread_id,omitempty"`
 		Text    string `json:"text"`
 	}{peer.ChatID, peer.TopicID, text}
+
 	data, err := a.call(ctx, token, "sendMessage", payload, 10*time.Second)
 	if err != nil {
 		return 0, err
@@ -134,6 +136,7 @@ func (a TelegramReceiverAPI) call(ctx context.Context, token, method string, pay
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
+
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, errors.New("cannot encode telegram request")
@@ -145,6 +148,7 @@ func (a TelegramReceiverAPI) call(ctx context.Context, token, method string, pay
 	}
 
 	request.Header.Set("Content-Type", "application/json")
+
 	response, err := a.Client.Do(request)
 	if err != nil {
 		return nil, &TelegramAPIError{Code: "transport_failure", Uncertain: method == "sendMessage"}
@@ -192,6 +196,10 @@ func classifyTelegramAPIError(status int, envelope telegramReceiverEnvelope) err
 	case 409:
 		return &TelegramAPIError{Code: "receiver_conflict", Permanent: true}
 	case 429:
+		if envelope.Parameters.RetryAfter > 86400 {
+			return &TelegramAPIError{Code: "retry_delay_exceeds_limit", Permanent: true}
+		}
+
 		delay := max(1, min(envelope.Parameters.RetryAfter, 86400))
 
 		return &TelegramAPIError{Code: "rate_limited", RetryAfter: time.Duration(delay) * time.Second}

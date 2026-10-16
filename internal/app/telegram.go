@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/charmbracelet/x/term"
 	"github.com/urfave/cli/v3"
@@ -20,6 +21,7 @@ func newTelegramCommand(stdin io.Reader, stdout io.Writer, deps appDependencies)
 		Commands: []*cli.Command{
 			newTelegramSetupCommand(stdin, stdout),
 			newTelegramDoctorCommand(stdout),
+			newTelegramServeCommand(stdout, deps),
 			{Name: "status", Usage: "Inspect local receiver configuration", Flags: projectRegistryFlags(), Action: telegramStatusAction(stdout)},
 		},
 	}
@@ -65,10 +67,8 @@ func runTelegramSetup(cmd *cli.Command, stdin io.Reader, stdout io.Writer) (err 
 	}
 	defer func() { err = errors.Join(err, lock.Close()) }()
 
-	// Check replacement authority before prompting or storing any credential.
-	prior, loadErr := core.LoadTelegramReceiverConfig(env)
-	if !cmd.Bool("replace") && !errors.Is(loadErr, os.ErrNotExist) && (loadErr != nil || prior.Digest() != config.Digest()) {
-		return errors.New("telegram configuration exists; use --replace to change it")
+	if err := guardTelegramSetupReplacement(env, config, cmd.Bool("replace")); err != nil {
+		return err
 	}
 
 	if err := storeTelegramSetupToken(cmd, env, config, stdin, stdout); err != nil {
@@ -88,6 +88,16 @@ func runTelegramSetup(cmd *cli.Command, stdin io.Reader, stdout io.Writer) (err 
 	_, err = fmt.Fprintln(stdout, "telegram_setup: configured")
 
 	return err
+}
+
+func guardTelegramSetupReplacement(env core.UserEnvironment, config core.TelegramReceiverConfig, replace bool) error {
+	// Check replacement authority before prompting or storing any credential.
+	prior, loadErr := core.LoadTelegramReceiverConfig(env)
+	if !replace && !errors.Is(loadErr, os.ErrNotExist) && (loadErr != nil || prior.Digest() != config.Digest()) {
+		return errors.New("telegram configuration exists; use --replace to change it")
+	}
+
+	return nil
 }
 
 func telegramSetupConfig(cmd *cli.Command) core.TelegramReceiverConfig {
@@ -125,6 +135,7 @@ func storeTelegramSetupToken(cmd *cli.Command, env core.UserEnvironment, config 
 	}
 
 	defer clear(token)
+
 	if _, err := fmt.Fprintln(stdout); err != nil {
 		return err
 	}
@@ -133,7 +144,7 @@ func storeTelegramSetupToken(cmd *cli.Command, env core.UserEnvironment, config 
 }
 
 func telegramStatusAction(stdout io.Writer) cli.ActionFunc {
-	return func(_ context.Context, cmd *cli.Command) error {
+	return func(ctx context.Context, cmd *cli.Command) error {
 		env, err := newUserEnvironmentFromCommand(cmd)
 		if err != nil {
 			return err
@@ -145,8 +156,40 @@ func telegramStatusAction(stdout io.Writer) cli.ActionFunc {
 		}
 
 		_, tokenErr := core.TelegramReceiverToken(env, config)
+
 		_, err = fmt.Fprintf(stdout, "telegram: configured\ntoken_available: %t\npoll_timeout_seconds: %d\nallowed_users: %d\nconfig: %s\n", tokenErr == nil, config.PollTimeoutSeconds, len(config.AllowedUsers), filepath.Join(env.ConfigDir(), "telegram.yml"))
+		if err != nil {
+			return err
+		}
+
+		return printTelegramLocalState(ctx, env, stdout)
+	}
+}
+
+func printTelegramLocalState(ctx context.Context, env core.UserEnvironment, stdout io.Writer) error {
+	botID, err := core.TelegramBoundBotID(env)
+	if errors.Is(err, os.ErrNotExist) {
+		_, err := fmt.Fprintln(stdout, "receiver: unbound")
 
 		return err
 	}
+
+	if err != nil {
+		return err
+	}
+
+	state, err := core.InspectTelegramReceiver(ctx, env, botID)
+	if err != nil {
+		return err
+	}
+
+	cursor := "unset"
+	if state.NextUpdateID != nil {
+		cursor = fmt.Sprint(*state.NextUpdateID)
+	}
+
+	_, err = fmt.Fprintf(stdout, "receiver: %s\nbot_id: %d\ncursor_epoch: %d\nnext_update_id: %s\nlast_poll_at: %s\nretry_attempt: %d\nretry_at: %s\nlast_error_code: %s\n",
+		state.Health, botID, state.Epoch, cursor, state.LastPollAt.UTC().Format(time.RFC3339), state.RetryAttempt, state.RetryAt.UTC().Format(time.RFC3339), state.LastErrorCode)
+
+	return err
 }
