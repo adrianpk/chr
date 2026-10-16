@@ -103,6 +103,13 @@ lifecycle boundaries.
 All evidence here uses deterministic local HTTP and real temporary SQLite
 stores. An initial shutdown fixture timed out during server cleanup; explicit
 fixture release corrected it before the successful normal and race checks.
+`make verify` on initial controller candidate
+`cc106fde867cf861b1e19c2627c86003bb5609c3` failed in the two existing
+`TestMaintenanceDBStatus` cases that still expected 15 migrations. They now
+expect 16 and explicitly check the new receiver migration.
+`go test ./internal/app -run '^TestMaintenanceDBStatus' -count=1 -timeout=3m`
+passed after that correction. The final controller receipt supersedes the
+failed candidate's evidence.
 No live bot/model demonstration or scheduled exhaustive certification is claimed.
 
 ## Risks and Follow-ups
