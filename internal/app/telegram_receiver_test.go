@@ -33,6 +33,8 @@ func telegramAppTestReceiver(t *testing.T, api core.TelegramReceiverAPI) (telegr
 		t.Fatal(err)
 	}
 
+	seedTelegramAppSchema(t, env)
+
 	store, err := core.NewTelegramReceiverStore(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
