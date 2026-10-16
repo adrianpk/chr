@@ -172,7 +172,7 @@ func (s *WorkflowStore) workflowIntegrationBudgetChange(ctx context.Context, run
 	return file, nil
 }
 
-func (s *WorkflowStore) commitWorkflowIntegrationBudget(ctx context.Context, run *workflowInvocationFile, budget *WorkflowIntegrationBudget) error {
+func (s *WorkflowStore) commitWorkflowIntegrationBudget(ctx context.Context, run *workflowInvocationFile, budget *WorkflowIntegrationBudget, extra ...workflowFileChange) error {
 	file, err := s.workflowIntegrationBudgetChange(ctx, run, budget)
 	if err != nil {
 		return err
@@ -186,7 +186,7 @@ func (s *WorkflowStore) commitWorkflowIntegrationBudget(ctx context.Context, run
 		return err
 	}
 
-	return s.commitFiles([]workflowFileChange{file, invocation})
+	return s.commitFiles(append([]workflowFileChange{file, invocation}, extra...))
 }
 
 func (s *WorkflowStore) currentWorkflowIntegrationBudget(ctx context.Context, run workflowInvocationFile, guard WorkflowIntegrationBudgetGuard) (WorkflowIntegrationEntry, WorkflowIntegrationBudget, error) {

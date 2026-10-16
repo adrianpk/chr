@@ -4,14 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
 )
 
 type telegramControlArguments struct {
-	Action string `json:"action"`
-	ID     string `json:"invocation"`
+	Action     string                     `json:"action"`
+	ID         string                     `json:"invocation"`
+	Parameters *telegramControlParameters `json:"parameters,omitempty"`
 }
 
 type telegramControlPreview struct {
@@ -56,7 +58,12 @@ func (r telegramReceiver) previewControl(ctx context.Context, operations telegra
 		return nil, err
 	}
 
-	preview := telegramControlPreview{Request: WorkflowControlRequest{Action: arguments.Action, ID: arguments.ID, ExpectedRevision: status.Revision, StepLimit: 1}, Status: status}
+	control, err := telegramControlRequest(request, arguments, status)
+	if err != nil {
+		return nil, err
+	}
+
+	preview := telegramControlPreview{Request: control, Status: status}
 
 	input, err := json.Marshal(preview)
 	if err != nil {
@@ -80,7 +87,9 @@ func telegramRetainedControl(request core.TelegramOperationRequest) (telegramCon
 	}
 
 	control := preview.Request
-	if control.ID != arguments.ID || control.Action != arguments.Action || control.ExpectedRevision == 0 || control.ExpectedRevision != preview.Status.Revision || control.StepLimit != 1 {
+
+	expected, err := telegramControlRequest(request, arguments, preview.Status)
+	if err != nil || !reflect.DeepEqual(control, expected) {
 		return preview, core.ErrWorkflowConflict
 	}
 
@@ -106,7 +115,7 @@ func (r telegramReceiver) offerControl(ctx context.Context, request core.Telegra
 		return err
 	}
 
-	text := fmt.Sprintf("Native control preview: %s\nMapped operator: %s\n%s\nApply exactly this control at revision %d?", preview.Request.Action, request.Operator, telegramWorkProgressText(preview.Status), preview.Request.ExpectedRevision)
+	text := fmt.Sprintf("Native control preview: %s\nMapped operator: %s\n%s\nApply exactly this control at revision %d?", preview.Request.Action, request.Operator, telegramWorkProgressText(preview.Status)+telegramControlDecisionText(preview.Request), preview.Request.ExpectedRevision)
 	_, err = r.store.OfferTelegramAction(ctx, core.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{preview.Request.Action}, Text: text, ExpiresAt: time.Now().Add(24 * time.Hour)}, time.Now())
 
 	return err

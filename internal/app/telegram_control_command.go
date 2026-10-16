@@ -2,6 +2,7 @@ package app
 
 import (
 	"slices"
+	"strconv"
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -11,21 +12,22 @@ type telegramControlCommand struct {
 	Input      core.TelegramConversationInput
 	Action     string
 	Invocation string
+	Parameters *telegramControlParameters
 }
 
 func telegramControlRegistry() []ConversationIntentOperation {
-	return []ConversationIntentOperation{{ID: "control", Description: "Inspect or control an exact retained native invocation", Arguments: "Optional project/conversation/namespace; action=status|pause|cancel|resume|continue|reconcile; text=exact invocation (empty only for a bound conversation); no record_json"}}
+	return []ConversationIntentOperation{{ID: "control", Description: "Inspect or control an exact retained native invocation", Arguments: "Optional project/conversation/namespace; action=status|pause|cancel|resume|continue|reconcile|approve|grant|answer_decision; text=exact invocation (empty only for a bound conversation); grant record_json={kind,amount,reason}; answer_decision record_json={question_id,answer_action,option,reason}; no actor, authority or revision fields"}}
 }
 
 func telegramControlHelp() string {
-	return "/status|/pause|/cancel|/resume|/continue|/reconcile [--project <id>] [--conversation <id>] [--namespace <name>] [execution] — Inspect or confirm an exact retained invocation and revision"
+	return "/status|/pause|/cancel|/resume|/continue|/reconcile|/approve [--project <id>] [--conversation <id>] [--namespace <name>] [execution] — Inspect or confirm an exact retained invocation and revision\n/grant [scope flags] <execution> <kind> <amount> <reason> — Confirm a bounded allowance\n/answer-decision [scope flags] <execution> <question-id> <resolve|defer> <option-number> <reason> — Confirm an exact displayed answer"
 }
 
 func parseTelegramControl(update core.TelegramReceivedUpdate) (telegramControlCommand, bool, error) {
 	command := telegramControlCommand{Input: core.TelegramConversationInput{Update: update}}
 	name, body := telegramCommandWord(strings.TrimSpace(update.Text))
 
-	command.Action = strings.TrimPrefix(name, "/")
+	command.Action = strings.ReplaceAll(strings.TrimPrefix(name, "/"), "-", "_")
 	if update.Kind != "message" || !strings.HasPrefix(name, "/") || !validTelegramControlAction(command.Action) {
 		return command, false, nil
 	}
@@ -35,8 +37,10 @@ func parseTelegramControl(update core.TelegramReceivedUpdate) (telegramControlCo
 	}
 
 	body, err := parseTelegramRecordScope(&command.Input, body)
+	if err == nil {
+		err = decodeTelegramControlCommand(&command, body)
+	}
 
-	command.Invocation = body
 	if err != nil {
 		return command, true, err
 	}
@@ -45,7 +49,7 @@ func parseTelegramControl(update core.TelegramReceivedUpdate) (telegramControlCo
 }
 
 func validTelegramControlAction(action string) bool {
-	return slices.Contains([]string{"status", "pause", "cancel", "resume", "continue", "reconcile"}, action)
+	return slices.Contains([]string{"status", "pause", "cancel", "resume", "continue", "reconcile", "approve", "grant", "answer_decision"}, action)
 }
 
 func validateTelegramControlCommand(command telegramControlCommand) error {
@@ -53,7 +57,7 @@ func validateTelegramControlCommand(command telegramControlCommand) error {
 		return ErrRecordUnsupported
 	}
 
-	return nil
+	return validateTelegramControlParameters(command.Action, command.Parameters)
 }
 
 func telegramIntentControl(update core.TelegramReceivedUpdate, intent ConversationIntent) (telegramControlCommand, bool, error) {
@@ -65,8 +69,54 @@ func telegramIntentControl(update core.TelegramReceivedUpdate, intent Conversati
 	}
 
 	if a.RecordJSON != "" {
-		return command, true, ErrRecordUnsupported
+		command.Parameters = &telegramControlParameters{}
+		if err := decodeOperationJSON(a.RecordJSON, command.Parameters); err != nil {
+			return command, true, err
+		}
 	}
 
 	return command, true, validateTelegramControlCommand(command)
+}
+
+func decodeTelegramControlCommand(command *telegramControlCommand, body string) error {
+	if command.Action != "grant" && command.Action != "answer_decision" {
+		command.Invocation = body
+
+		return nil
+	}
+
+	fields := strings.Fields(body)
+
+	minimum := 4
+	if command.Action == "answer_decision" {
+		minimum = 5
+	}
+
+	if len(fields) < minimum {
+		return ErrRecordUnsupported
+	}
+
+	command.Invocation = fields[0]
+	p := &telegramControlParameters{}
+
+	command.Parameters = p
+	if command.Action == "grant" {
+		amount, err := strconv.ParseInt(fields[2], 10, 64)
+		if err != nil {
+			return ErrRecordUnsupported
+		}
+
+		p.Kind, p.Amount, p.Reason = fields[1], amount, strings.Join(fields[3:], " ")
+
+		return nil
+	}
+
+	option, err := strconv.Atoi(fields[3])
+	if err != nil {
+		return ErrRecordUnsupported
+	}
+
+	p.QuestionID, p.AnswerAction, p.Option, p.Reason = fields[1], fields[2], option, strings.Join(fields[4:], " ")
+
+	return nil
 }

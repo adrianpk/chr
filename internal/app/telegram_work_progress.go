@@ -46,6 +46,7 @@ func telegramWorkProgressText(status WorkflowWorkStatus) string {
 	}
 
 	text.WriteString(telegramWorkEvidenceText(status))
+	text.WriteString(telegramControlStatusText(status))
 	fmt.Fprintf(&text, "Project: %s; namespace: %s.\nCanonical invocation: workflow:%s\nInspect in that project: chr work status --json %s", status.ProjectID, status.Namespace, status.ID, status.ID)
 
 	return text.String()

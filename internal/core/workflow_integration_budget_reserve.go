@@ -186,7 +186,7 @@ func (s *WorkflowStore) GrantWorkflowIntegration(ctx context.Context, request Wo
 			return readErr
 		}
 
-		budget, readErr = owner.grantWorkflowIntegration(ctx, run, request)
+		budget, readErr = owner.grantWorkflowIntegration(ctx, run, request, nil)
 
 		return readErr
 	})
@@ -194,7 +194,7 @@ func (s *WorkflowStore) GrantWorkflowIntegration(ctx context.Context, request Wo
 	return budget, err
 }
 
-func (s *WorkflowStore) grantWorkflowIntegration(ctx context.Context, run workflowInvocationFile, request WorkflowIntegrationGrantRequest) (WorkflowIntegrationBudget, error) {
+func (s *WorkflowStore) grantWorkflowIntegration(ctx context.Context, run workflowInvocationFile, request WorkflowIntegrationGrantRequest, control *workflowDecisionControlCommit) (WorkflowIntegrationBudget, error) {
 	entry, budget, err := s.workflowGrantBudget(ctx, run, request.WorkflowIntegrationBudgetGuard)
 	if err != nil {
 		return budget, err
@@ -202,7 +202,7 @@ func (s *WorkflowStore) grantWorkflowIntegration(ctx context.Context, run workfl
 
 	grant := request.Grant
 	if found, err := workflowIntegrationGrantRetry(budget, grant); found || err != nil {
-		return budget, err
+		return budget, s.completeWorkflowControlRetry(ctx, run, control, err)
 	}
 
 	if err := guardWorkflowGrant(run, entry, budget, request.WorkflowIntegrationBudgetGuard); err != nil {
@@ -228,7 +228,7 @@ func (s *WorkflowStore) grantWorkflowIntegration(ctx context.Context, run workfl
 
 	budget.Grants = append(budget.Grants, grant)
 
-	return budget, s.commitWorkflowIntegrationBudget(ctx, &run, &budget)
+	return budget, s.commitWorkflowControlBudget(ctx, &run, &budget, control)
 }
 
 func applyWorkflowIntegrationGrant(budget *WorkflowIntegrationBudget, grant WorkflowIntegrationGrant) error {

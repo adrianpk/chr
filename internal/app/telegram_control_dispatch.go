@@ -82,7 +82,7 @@ func (r telegramReceiver) dispatchControl(ctx context.Context, user core.Telegra
 		return r.respondNativeStatus(ctx, operations, target, id, command.Input)
 	}
 
-	arguments, err := json.Marshal(telegramControlArguments{Action: command.Action, ID: id})
+	arguments, err := json.Marshal(telegramControlArguments{Action: command.Action, ID: id, Parameters: command.Parameters})
 	if err != nil {
 		return err
 	}

@@ -16,11 +16,11 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 6, Guarded controls and capacity; T6.1 validated, T6.2 in progress
+Active slice: Slice 6, Guarded controls and capacity; T6.1 and T6.2 validated, T6.3 in progress
 
 Next slice: Slice 7, Recovery and user operation; after verified Slice 6 integration
 
-Progress: 5 of 8 slices integrated; 1 of 29 tasks validated and 19 done; 18 of 32 acceptance criteria have deterministic fixture evidence.
+Progress: 5 of 8 slices integrated; 2 of 29 tasks validated and 19 done; 18 of 32 acceptance criteria have deterministic fixture evidence.
 
 Full gate: `make verify`
 
@@ -203,8 +203,8 @@ Prerequisite: verified Slice 5 integration.
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
 | T6.1 | validated | `a3e5e95be3b45aaa66cc0c1bc0744b73adac6770` | Shared guarded pause/cancel/resume/continue/reconcile, mapped actor, exact invocation/revision and asynchronous stop checkpoints. |
-| T6.2 | in_progress | pending | Exact-candidate review, grants and decision answers with single-use receipts. |
-| T6.3 | pending | pending | Responsive prioritized controls, stale-action handling and callback/text parity. |
+| T6.2 | validated | task commit recorded below | Exact review/candidate, entry/budget and question guards; atomic native request receipts; lost-ack and partial-journal recovery; mapped actors. |
+| T6.3 | in_progress | pending | Responsive prioritized controls, stale-action handling and callback/text parity. |
 | T6.4 | pending | pending | Shared serial/parallel capacity and cross-adapter ownership checks. |
 
 Validation: plan section 11; `TestTelegramControl`, including focused race mode.
@@ -312,4 +312,4 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Exact integrated candidate passed the scheduled exhaustive nightly.
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
-Current state: Slices 1 through 5 are delivered through canonical PR #390/#391/#392/#393/#394; the latest verified merge is `c321da6917e369049583eece5a1a07951c1cc22b`. Slice 6 is active on its recorded branch. T6.1 has focused lifecycle and authority evidence; T6.2 is active. Final Slice 6 controller validation, live activation and exhaustive certification remain pending.
+Current state: Slices 1 through 5 are delivered through canonical PR #390/#391/#392/#393/#394; the latest verified merge is `c321da6917e369049583eece5a1a07951c1cc22b`. Slice 6 is active on its recorded branch. T6.1 and T6.2 have focused lifecycle, authority and durable decision receipt evidence; T6.3 is active. Final Slice 6 controller validation, live activation and exhaustive certification remain pending.

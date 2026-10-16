@@ -77,6 +77,8 @@ func workflowIntegrationStatus(observed *core.WorkflowIntegrationInspection) *Wo
 		}
 	}
 
+	result.CandidateHash = core.WorkflowIntegrationDisplayedCandidate(observed)
+
 	return result
 }
 

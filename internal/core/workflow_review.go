@@ -140,7 +140,7 @@ func (s *WorkflowStore) ApproveWorkflowSlice(ctx context.Context, id, bindingHas
 			return err
 		}
 
-		result, readErr = owner.approveWorkflowSlice(ctx, run, bindingHash, provider)
+		result, readErr = owner.approveWorkflowSlice(ctx, run, bindingHash, provider, nil)
 
 		return readErr
 	})

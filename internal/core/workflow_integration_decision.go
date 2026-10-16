@@ -126,7 +126,7 @@ func (s *WorkflowStore) AnswerWorkflowIntegrationDecision(ctx context.Context, r
 			return readErr
 		}
 
-		result, readErr = owner.answerWorkflowDecision(ctx, run, frozen, provider)
+		result, readErr = owner.answerWorkflowDecision(ctx, run, frozen, provider, nil)
 
 		return readErr
 	})

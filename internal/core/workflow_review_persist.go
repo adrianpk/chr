@@ -43,7 +43,7 @@ func (s *WorkflowStore) persistWorkflowReviewInput(run *workflowInvocationFile, 
 	return s.commitWorkflowPullRequestFiles(run, files, workflowFileChange{Path: ref, After: data})
 }
 
-func (s *WorkflowStore) persistWorkflowReviewDecision(run *workflowInvocationFile, observation workflowSliceObservation, decision WorkflowReviewDecision, state string) error {
+func (s *WorkflowStore) persistWorkflowReviewDecision(run *workflowInvocationFile, observation workflowSliceObservation, decision WorkflowReviewDecision, state string, extra ...workflowFileChange) error {
 	if run.Review.DecisionCount >= 2 {
 		return fmt.Errorf("workflow review decision history budget exhausted")
 	}
@@ -81,6 +81,7 @@ func (s *WorkflowStore) persistWorkflowReviewDecision(run *workflowInvocationFil
 	}
 
 	files = append(files, workflowReviewAttemptResult(run, data)...)
+	files = append(files, extra...)
 
 	return s.commitWorkflowPullRequestFiles(run, files, workflowFileChange{Path: ref, After: data})
 }

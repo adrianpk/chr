@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (s *WorkflowStore) answerWorkflowDecision(ctx context.Context, run workflowInvocationFile, request WorkflowIntegrationAnswerRequest, provider WorkflowPullRequestProvider) (WorkflowIntegrationDecisions, error) {
+func (s *WorkflowStore) answerWorkflowDecision(ctx context.Context, run workflowInvocationFile, request WorkflowIntegrationAnswerRequest, provider WorkflowPullRequestProvider, control *workflowDecisionControlCommit) (WorkflowIntegrationDecisions, error) {
 	entry, budget, err := s.currentWorkflowIntegrationBudget(ctx, run, request.WorkflowIntegrationBudgetGuard)
 	if err != nil {
 		return WorkflowIntegrationDecisions{}, err
@@ -23,7 +23,7 @@ func (s *WorkflowStore) answerWorkflowDecision(ctx context.Context, run workflow
 	}
 
 	if found, err := workflowDecisionAnswerRetry(record, request); found || err != nil {
-		return record, err
+		return record, s.completeWorkflowControlRetry(ctx, run, control, err)
 	}
 
 	answer := request.Answer
@@ -52,7 +52,12 @@ func (s *WorkflowStore) answerWorkflowDecision(ctx context.Context, run workflow
 		return record, err
 	}
 
-	return record, s.commitWorkflowDecisionRecord(&run, entry, file)
+	files, err := control.files(ctx)
+	if err != nil {
+		return record, err
+	}
+
+	return record, s.commitWorkflowDecisionRecord(&run, entry, file, files...)
 }
 
 func (s *WorkflowStore) checkWorkflowDecisionCurrent(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry, record WorkflowIntegrationDecisions, provider WorkflowPullRequestProvider) error {

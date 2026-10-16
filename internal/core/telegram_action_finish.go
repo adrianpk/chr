@@ -10,6 +10,7 @@ import (
 // TelegramActionResult contains confirmed owner facts or an explicit blocked outcome.
 type TelegramActionResult struct {
 	Invocation        *TelegramInvocationBinding
+	InvocationPhase   string
 	State             string
 	ReceiptRef        string
 	Facts             json.RawMessage

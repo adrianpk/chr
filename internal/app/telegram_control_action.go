@@ -35,7 +35,11 @@ func (r telegramReceiver) applyControlAction(ctx context.Context, claim core.Tel
 	binding := core.WorkflowMutationBinding{RequestID: claim.Request.ID, Operator: claim.Request.Operator}
 
 	status, err := operations.ApplyTelegramControl(ctx, claim.Request.Target, binding, preview.Request, check)
-	if err != nil && !errors.Is(err, core.ErrWorkflowConflict) && !errors.Is(err, core.ErrWorkflowOwned) && !errors.Is(err, core.ErrWorkflowCapacity) {
+	if err != nil && status.ControlReceipt != nil {
+		return err
+	}
+
+	if err != nil && !telegramControlExpectedFailure(err) {
 		return err
 	}
 
@@ -50,6 +54,11 @@ func (r telegramReceiver) finishControlAction(ctx context.Context, claim core.Te
 		state = "confirmed"
 		receipt = fmt.Sprintf("workflow:%s:revision:%d", status.ID, status.Revision)
 		text = "Native control confirmed."
+
+		if status.ControlReceipt != nil {
+			receipt = status.ControlReceipt.ReceiptRef
+			text += "\nNative request receipt: " + receipt
+		}
 	}
 
 	if status.ID != "" {
@@ -61,5 +70,21 @@ func (r telegramReceiver) finishControlAction(ctx context.Context, claim core.Te
 		return err
 	}
 
-	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{State: state, ReceiptRef: receipt, Facts: facts, Text: text, ConfigDigest: config.Digest()}, time.Now())
+	result := core.TelegramActionResult{State: state, ReceiptRef: receipt, Facts: facts, Text: text, ConfigDigest: config.Digest()}
+	if state == "confirmed" {
+		result.Invocation = &core.TelegramInvocationBinding{ID: status.ID, Revision: status.Revision}
+		result.InvocationPhase = telegramWorkObservation(status).Phase
+	}
+
+	return r.store.FinishTelegramAction(ctx, claim, result, time.Now())
+}
+
+func telegramControlExpectedFailure(err error) bool {
+	for _, expected := range []error{core.ErrWorkflowConflict, core.ErrWorkflowOwned, core.ErrWorkflowCapacity, core.ErrWorkflowStop, core.ErrWorkflowIntegrationBudget} {
+		if errors.Is(err, expected) {
+			return true
+		}
+	}
+
+	return false
 }

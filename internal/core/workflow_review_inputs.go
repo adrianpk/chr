@@ -143,7 +143,7 @@ func (s *WorkflowStore) checkWorkflowReviewGrant(ctx context.Context, run workfl
 	return input, nil
 }
 
-func (s *WorkflowStore) approveWorkflowSlice(ctx context.Context, run workflowInvocationFile, bindingHash string, provider WorkflowPullRequestProvider) (WorkflowReviewBinding, error) {
+func (s *WorkflowStore) approveWorkflowSlice(ctx context.Context, run workflowInvocationFile, bindingHash string, provider WorkflowPullRequestProvider, control *workflowDecisionControlCommit) (WorkflowReviewBinding, error) {
 	if run.Review == nil || bindingHash != run.Review.InputHash || !slices.Contains([]string{"waiting_approval", "human_required", "authorized"}, run.Review.State) {
 		return WorkflowReviewBinding{}, fmt.Errorf("%w: approval does not name the current human decision", ErrWorkflowConflict)
 	}
@@ -163,11 +163,16 @@ func (s *WorkflowStore) approveWorkflowSlice(ctx context.Context, run workflowIn
 	}
 
 	if run.Review.State == "authorized" {
-		return *run.Review, nil
+		return *run.Review, s.retainWorkflowControlNoop(ctx, run, control)
+	}
+
+	files, err := control.files(ctx)
+	if err != nil {
+		return *run.Review, err
 	}
 
 	decision := WorkflowReviewDecision{BindingHash: hash, Result: AgenticReviewResult{Decision: IntegrationReviewDecisionPass, Summary: "Explicit human approval of this exact candidate and current policy."}}
-	err = s.persistWorkflowReviewDecision(&run, observation, decision, "authorized")
+	err = s.persistWorkflowReviewDecision(&run, observation, decision, "authorized", files...)
 
 	return *run.Review, err
 }

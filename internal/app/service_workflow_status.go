@@ -28,6 +28,7 @@ type WorkflowWorkEvidence struct {
 
 // WorkflowWorkStatus distinguishes host task validation from confirmed delivery.
 type WorkflowWorkStatus struct {
+	ControlReceipt       *core.WorkflowControlResult          `json:"control_receipt,omitempty"`
 	Integration          *WorkflowIntegrationStatus           `json:"integration,omitempty"`
 	FrozenPolicy         core.WorkflowExecutionPolicy         `json:"execution_policy"`
 	Continuation         *core.WorkflowContinuationCheckpoint `json:"continuation,omitempty"`

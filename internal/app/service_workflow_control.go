@@ -12,7 +12,8 @@ import (
 
 // WorkflowControlRequest carries the exact displayed invocation and revision.
 type WorkflowControlRequest struct {
-	AuthorizationCheck core.WorkflowAdmissionCheck `json:"-"`
+	AuthorizationCheck core.WorkflowAdmissionCheck   `json:"-"`
+	RequestBinding     *core.WorkflowMutationBinding `json:"request_binding,omitempty"`
 	Integration        *WorkflowIntegrationControlGuard
 	BudgetGrant        *core.WorkflowIntegrationGrant
 	DecisionAnswer     *core.WorkflowIntegrationAnswer
@@ -32,12 +33,15 @@ func (s service) ControlWorkExtent(ctx context.Context, request WorkflowControlR
 		return WorkflowWorkStatus{}, fmt.Errorf("workflow control requires the displayed identity and revision")
 	}
 
-	err := s.executeWorkflowControl(ctx, request)
+	receipt, err := s.executeWorkflowControlResult(ctx, request)
 
 	cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 	defer cancel()
 
 	status, readErr := s.WorkflowStatus(cleanup, request.ID, WorkflowStatusRequest{Limit: 8})
+	if err == nil {
+		status.ControlReceipt = receipt
+	}
 
 	return status, errors.Join(err, readErr)
 }

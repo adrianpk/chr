@@ -120,7 +120,7 @@ func blockWorkflowDecisionEntry(entry *WorkflowIntegrationEntry, run *workflowIn
 	run.Status, run.Outcome = "waiting_integration", "merger_waiting_decision"
 }
 
-func (s *WorkflowStore) commitWorkflowDecisionRecord(run *workflowInvocationFile, entry WorkflowIntegrationEntry, file workflowFileChange) error {
+func (s *WorkflowStore) commitWorkflowDecisionRecord(run *workflowInvocationFile, entry WorkflowIntegrationEntry, file workflowFileChange, extra ...workflowFileChange) error {
 	entryFile, err := workflowIntegrationEntryChange(entry, run.Integration.EntryRef.Hash)
 	if err != nil {
 		return err
@@ -128,7 +128,7 @@ func (s *WorkflowStore) commitWorkflowDecisionRecord(run *workflowInvocationFile
 
 	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: entryFile.Path, Hash: workflowHash(entryFile.After)}})
 
-	return s.commitWorkflowPullRequestFiles(run, []workflowFileChange{entryFile}, file)
+	return s.commitWorkflowPullRequestFiles(run, append([]workflowFileChange{entryFile}, extra...), file)
 }
 
 func (s *WorkflowStore) workflowMergerDecisionFiles(ctx context.Context, run *workflowInvocationFile, result WorkflowMergerAttempt) ([]workflowFileChange, error) {
