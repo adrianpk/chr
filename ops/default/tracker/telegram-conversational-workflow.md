@@ -16,11 +16,11 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 1, Dedicated live receiver; PR #390 reviewing
+Active slice: Slice 2, Conversation routing; implementation in progress
 
-Next slice: Slice 2, Conversation routing; after verified Slice 1 integration
+Next slice: Slice 3, Replay-safe operations; after verified Slice 2 integration
 
-Progress: 0 of 8 slices integrated; 4 of 29 tasks validated and 0 done; 4 of 32 acceptance criteria have deterministic fixture evidence.
+Progress: 1 of 8 slices integrated; 0 of 29 tasks validated and 4 done; 4 of 32 acceptance criteria have deterministic fixture evidence.
 
 Full gate: `make verify`
 
@@ -29,8 +29,8 @@ Exhaustive certification: pending the scheduled nightly for the final integrated
 ## State and Evidence Rules
 
 Task states: `pending`, `ready`, `in_progress`, `validated`, `blocked`, `done`.
-Slice 1 tasks are validated under the recorded execution authorization; later
-tasks remain pending until their prerequisites integrate. A validated task becomes
+Slice 1 tasks are done after verified PR #390 integration. Slice 2 is active;
+later tasks remain pending until their prerequisites integrate. A validated task becomes
 done after verified slice integration; a successful test or worker exit alone
 does not close it.
 
@@ -64,33 +64,33 @@ configuration. Never launch an interactive full suite to fill that evidence gap.
 
 ## Slice 1: Dedicated Live Receiver
 
-State: in_progress
+State: delivered
 
 Prerequisite: approved committed planning artifacts; execution authorized on 2026-10-16.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T1.1 | validated | `e38f90f8`, `063a2a45`; readiness completed with T1.4 | Private setup/configuration, secret handling and readiness commands. |
-| T1.2 | validated | `063a2a45`; foreground service wiring completed with T1.4 | Bounded HTTP receiver, exact identity authorization and ownership checks. |
-| T1.3 | validated | `d32b92a9`; authorization-bound delivery completed with T1.4 | Additive storage, atomic inbox/cursor, initial outbox and retained retries. |
-| T1.4 | validated | `99f0868a` | Read-only registry/help/project/status operations and existing adapter compatibility. |
+| T1.1 | done | `e38f90f8`, `063a2a45`; readiness completed with T1.4 | Private setup/configuration, secret handling and readiness commands. |
+| T1.2 | done | `063a2a45`; foreground service wiring completed with T1.4 | Bounded HTTP receiver, exact identity authorization and ownership checks. |
+| T1.3 | done | `d32b92a9`; authorization-bound delivery completed with T1.4 | Additive storage, atomic inbox/cursor, initial outbox and retained retries. |
+| T1.4 | done | `99f0868a` | Read-only registry/help/project/status operations and existing adapter compatibility. |
 
 Validation: plan section 6; `TestTelegramReceiver` and the named existing
 notification/import regressions, including focused race mode.
 
-Primary implementation commit: `99f0868a6b616dd44dab95dc758718b91addd313`. Canonical PR: [#390](https://forge.adrianpk.com/adrianpk/chr/pulls/390) on `feat/slice-1-telegram-receiver`. Verified merge: pending controller integration. Evidence: [Slice 1 report](../report/slices/telegram-conversational-workflow/slice-1-receiver.md); exact final HEAD and ordered checks are recorded through controller validation.
+Primary implementation commit: `99f0868a6b616dd44dab95dc758718b91addd313`. Canonical PR: [#390](https://forge.adrianpk.com/adrianpk/chr/pulls/390) on `feat/slice-1-telegram-receiver`. Verified merge: `3e2eb8825b4bb4c4b86585e5e2f862c4202f51b2`, 2026-10-16. Evidence: [Slice 1 report](../report/slices/telegram-conversational-workflow/slice-1-receiver.md); controller receipt for that exact clean HEAD records all four ordered checks passed.
 
 ## Slice 2: Conversation Routing
 
-State: pending
+State: in_progress
 
 Prerequisite: verified Slice 1 integration.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T2.1 | pending | pending | Frozen project/namespace bindings, peer selection and independent conversations. |
-| T2.2 | pending | pending | Exact replies/questions, duplicate-safe capture and safe completion/cancellation. |
-| T2.3 | pending | pending | Deterministic sessions/focus commands and bounded conversation views. |
+| T2.1 | in_progress | pending | Frozen project/namespace bindings, peer selection and independent conversations. |
+| T2.2 | ready | pending | Exact replies/questions, duplicate-safe capture and safe completion/cancellation. |
+| T2.3 | ready | pending | Deterministic sessions/focus commands and bounded conversation views. |
 
 Validation: plan section 7; `TestTelegramConversation`, including focused race mode.
 
@@ -265,4 +265,4 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Exact integrated candidate passed the scheduled exhaustive nightly.
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
-Current state: Slice 1 implementation and deterministic task validation are complete; canonical PR #390 is open and exact-HEAD controller validation follows this reference commit. Integration, live activation and exhaustive certification remain pending.
+Current state: Slice 1 delivered through PR #390 at `3e2eb8825b4bb4c4b86585e5e2f862c4202f51b2`; Slice 2 is active in its dedicated worktree.

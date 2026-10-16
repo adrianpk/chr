@@ -1,6 +1,6 @@
 # Slice 1: Dedicated Live Receiver
 
-Status: reviewing
+Status: delivered
 
 Delivery set: telegram-conversational-workflow
 
@@ -43,8 +43,10 @@ response delivery through the existing application service and user database.
 
 Primary implementation commit: `99f0868a6b616dd44dab95dc758718b91addd313`.
 Follow-up commits record the PR reference, align database-status assertions
-and normalize malformed UTF-8 in read output. Final merge evidence must
-identify the exact clean PR HEAD after those commits.
+and normalize malformed UTF-8 in read output. PR #390 merged through Rebase + Fast-forward into dev on 2026-10-16 at
+`3e2eb8825b4bb4c4b86585e5e2f862c4202f51b2`. The controller receipt for that
+exact clean HEAD records all four ordered checks below passed. Acta merge
+event: `01M5252BGACQYD651W2T4D9RE6`.
 
 Task commits: T1.1 `e38f90f8`, T1.2 `063a2a45`, T1.3 `d32b92a9`,
 T1.4 `99f0868a`. Connection doctor followed the transport implementation;
@@ -82,9 +84,9 @@ Successful task checks against the implementation worktree:
 - `go test -race ./internal/core ./internal/app -run '^TestTelegramReceiver(LockProcess|Shutdown|ReadJourney|Batch|Outbox|PollBudget)$' -count=1 -timeout=3m`
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/app` — zero issues.
 
-Final merge evidence is recorded through `looper validate` after report and PR
-references are committed and pushed. Its receipt supplies the immutable HEAD,
-clean worktree and exact ordered command results:
+Final merge evidence was recorded through `looper validate` after report and PR
+references were committed and pushed. Its receipt supplies the immutable HEAD,
+clean worktree and successful ordered command results:
 
 1. `make verify`
 2. `go test ./internal/core ./internal/app -run '^Test(TelegramReceiver|TelegramSender|RenderTelegramNotification|DecodeTelegramUpdates|RemoteCommandRecordFromTelegramUpdate)' -count=1 -timeout=3m`
@@ -121,5 +123,4 @@ No live bot/model demonstration or scheduled exhaustive certification is claimed
 An uncertain send can repeat a read notice. Automatic restart preserves blocked
 retry state. Explicit local retry cycles, long-outage cursor recovery and
 retirement/compaction belong to Slice 7. Conversational and mutating operations
-remain assigned to their approved successor slices. Canonical integration is
-pending the external controller; no successor is activated by this worker.
+remain assigned to their approved successor slices. Canonical integration is verified; Slice 2 is activated under the approved plan.
