@@ -1,6 +1,6 @@
 # Slice 6: Guarded Controls and Capacity
 
-Status: reviewing
+Status: delivered
 
 Delivery set: telegram-conversational-workflow
 
@@ -495,9 +495,10 @@ scripts/check-package-readmes.sh
 git diff --check
 ```
 
-PR #395 remains reviewing. The retained failed attempts and focused correction
-checks do not establish final readiness. Every subsequent PR HEAD requires a
-fresh complete controller receipt for the ordered commands below.
+PR #395 is verified merged at `eecdfd1e85c9593715c5e00502d0bfd0bf23c1ea`. Controller
+receipt `62QTJGFYZPHBQEWSAVCVDYQUYM` passed all four ordered checks at that
+exact HEAD: normal core/app 34.374/47.842 seconds and race core/app
+138.627/128.905 seconds. Earlier failed attempts remain historical evidence.
 
 Authoritative final slice validation is the controller receipt for the clean PR
 HEAD, in this order:
@@ -513,7 +514,7 @@ Live and scheduled exhaustive checks remain separate.
 
 ## Risks and Follow-ups
 
-All Slice 6 tasks have focused normal/race and strict-check evidence. Final PR
-readiness is established by the exact clean-HEAD controller receipt. Live
+All Slice 6 tasks are delivered after verified PR #395 integration and its
+exact clean-HEAD controller receipt. Live
 activation, user operation and scheduled exhaustive certification remain in
 the approved successor work.

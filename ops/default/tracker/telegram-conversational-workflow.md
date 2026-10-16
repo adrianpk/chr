@@ -16,11 +16,11 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 6, Guarded controls and capacity; T6.1 through T6.4 validated; PR #395 reviewing
+Active slice: Slice 7, Recovery and user operation; T7.1 in progress
 
-Next slice: Slice 7, Recovery and user operation; after verified Slice 6 integration
+Next slice: Slice 8, Live journey and closure; after verified Slice 7 integration and live readiness
 
-Progress: 5 of 8 slices integrated; 4 of 29 tasks validated and 19 done; 22 of 32 acceptance criteria have deterministic fixture evidence.
+Progress: 6 of 8 slices integrated; 0 of 29 tasks validated and 23 done; 22 of 32 acceptance criteria have deterministic fixture evidence.
 
 Full gate: `make verify`
 
@@ -29,7 +29,7 @@ Exhaustive certification: pending the scheduled nightly for the final integrated
 ## State and Evidence Rules
 
 Task states: `pending`, `ready`, `in_progress`, `validated`, `blocked`, `done`.
-Slice 1 through Slice 5 tasks are done after verified PR #390/#391/#392/#393/#394 integration. Slice 6 is active;
+Slice 1 through Slice 6 tasks are done after verified PR #390/#391/#392/#393/#394/#395 integration. Slice 7 is active;
 later tasks remain pending until their prerequisites integrate. A validated task becomes
 done after verified slice integration; a successful test or worker exit alone
 does not close it.
@@ -196,16 +196,16 @@ Canonical PR: [#394](https://forge.adrianpk.com/adrianpk/chr/pulls/394) on `feat
 
 ## Slice 6: Guarded Controls and Capacity
 
-State: reviewing
+State: delivered
 
 Prerequisite: verified Slice 5 integration.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T6.1 | validated | `a3e5e95be3b45aaa66cc0c1bc0744b73adac6770` | Shared guarded pause/cancel/resume/continue/reconcile, mapped actor, exact invocation/revision and asynchronous stop checkpoints. |
-| T6.2 | validated | `76b55b28ed770b13fc40da53ff39e42dbe822ae9` | Exact review/candidate, entry/budget and question guards; atomic native request receipts; lost-ack and partial-journal recovery; mapped actors. |
-| T6.3 | validated | `aaca31360292b67e72509557fa4b650021593aaf`, `b2f03c1159ea56ab4e482a2519489b1eec42e736`, `dcf386f2423a669707d1609a92eeee9a784453a5`, `27165b596e763e5117177a83592044540855a93f`, `8476423bc7aa84d116273e7df120a7916b96284f`, `8b01210ac76dd5a20cbc14e4ec2e34472adc723a`, `a09bf959dc8770174fb6987849c5a104126dbdd9` | Bounded asynchronous intake/application/delivery, shared model slots, 32 reserved pending inputs, callback/text/reply priority, native lifecycle receipts and guarded recovery through expired/replaced prompts; late reply binding, guarded current-state diagnostics, 64 reserved control request records and durable capacity rejection are validated. |
-| T6.4 | validated | `8346ab32efee666563fddc19ee335b4d86915e6d`, `a4faf4367bdaecf28577d4ed569da7d24952e725` | Two Telegram conversations, daemon and manual callers share serial/default and eight-worker native limits; actual source overlap, duplicate rejection, capacity reuse, linked-root reservations and target publication exclusion are certified. Claimed-worker stop polls retain owner and credential guards without repository-wide invocation enumeration. |
+| T6.1 | done | `a3e5e95be3b45aaa66cc0c1bc0744b73adac6770` | Shared guarded pause/cancel/resume/continue/reconcile, mapped actor, exact invocation/revision and asynchronous stop checkpoints. |
+| T6.2 | done | `76b55b28ed770b13fc40da53ff39e42dbe822ae9` | Exact review/candidate, entry/budget and question guards; atomic native request receipts; lost-ack and partial-journal recovery; mapped actors. |
+| T6.3 | done | `aaca31360292b67e72509557fa4b650021593aaf`, `b2f03c1159ea56ab4e482a2519489b1eec42e736`, `dcf386f2423a669707d1609a92eeee9a784453a5`, `27165b596e763e5117177a83592044540855a93f`, `8476423bc7aa84d116273e7df120a7916b96284f`, `8b01210ac76dd5a20cbc14e4ec2e34472adc723a`, `a09bf959dc8770174fb6987849c5a104126dbdd9` | Bounded asynchronous intake/application/delivery, shared model slots, 32 reserved pending inputs, callback/text/reply priority, native lifecycle receipts and guarded recovery through expired/replaced prompts; late reply binding, guarded current-state diagnostics, 64 reserved control request records and durable capacity rejection are validated. |
+| T6.4 | done | `8346ab32efee666563fddc19ee335b4d86915e6d`, `a4faf4367bdaecf28577d4ed569da7d24952e725` | Two Telegram conversations, daemon and manual callers share serial/default and eight-worker native limits; actual source overlap, duplicate rejection, capacity reuse, linked-root reservations and target publication exclusion are certified. Claimed-worker stop polls retain owner and credential guards without repository-wide invocation enumeration. |
 
 Validation: plan section 11; `TestTelegramControl`, including focused race mode.
 
@@ -223,17 +223,17 @@ reserved request metadata, durable rejection and real activation-bound evidence.
 Focused normal/race and strict checks passed. T6.4 adds actual shared-worker overlap, overflow and duplicate rejection, slot reuse and native target publication exclusion. Stop polling uses the claimed owner under the existing repository/journal guards and verifies its credential; identity-only observers retain public scope resolution.
 Exact commands and results belong to the [Slice 6 report](../report/slices/telegram-conversational-workflow/slice-6-controls.md).
 
-Candidate: `feat/slice-6-telegram-controls`; PR: [#395](https://forge.adrianpk.com/adrianpk/chr/pulls/395); verified merge: pending. Authoritative final checks belong to the controller receipt for the clean PR HEAD. The retained `82e3900fb157d4011174e61ee935b36860bec8d5` attempt passed `make verify` and normal controls; core race passed in 123.861s, while app reached its unchanged three-minute deadline during stale-receipt coverage. Independent control fixtures now use private credentials and a four-fixture parallel bound; focused race validation passed 17 journeys and 56 named subtests in 61.269s. PR #395 readiness requires the complete ordered checks to pass at its clean HEAD.
+Candidate: `feat/slice-6-telegram-controls`; PR: [#395](https://forge.adrianpk.com/adrianpk/chr/pulls/395); verified merge: `eecdfd1e85c9593715c5e00502d0bfd0bf23c1ea`. Controller receipt `62QTJGFYZPHBQEWSAVCVDYQUYM` passed all four configured commands at that exact HEAD. Normal core/app: 34.374/47.842 seconds; race core/app: 138.627/128.905 seconds.
 
 ## Slice 7: Recovery and User Operation
 
-State: pending
+State: in_progress
 
 Prerequisite: verified Slice 6 integration.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T7.1 | pending | pending | Startup reconciliation, owned shutdown and fixed-build self-development behavior. |
+| T7.1 | in_progress | pending | Startup reconciliation, owned shutdown and fixed-build self-development behavior. |
 | T7.2 | pending | pending | Persistent retry cycles, cursor epochs, exact retirement and bounded retention. |
 | T7.3 | pending | pending | Optional user service, local retry/status/doctor/help and operational diagnostics. |
 
@@ -326,4 +326,4 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Exact integrated candidate passed the scheduled exhaustive nightly.
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
-Current state: Slices 1 through 5 are delivered through canonical PR #390/#391/#392/#393/#394; the latest verified merge is `c321da6917e369049583eece5a1a07951c1cc22b`. Slice 6 is active on its recorded branch. T6.1 through T6.4 have focused control, receipt, stale-reply, bounded-activation and shared-capacity evidence. Canonical Slice 6 PR [#395](https://forge.adrianpk.com/adrianpk/chr/pulls/395) is open for controller validation and integration. Final validation belongs to the controller receipt for the exact clean PR HEAD; live activation and scheduled exhaustive certification remain separate.
+Current state: Slices 1 through 6 are delivered through canonical PR #390/#391/#392/#393/#394/#395; the latest verified merge is `eecdfd1e85c9593715c5e00502d0bfd0bf23c1ea`. Slice 7 is active on its recorded branch with T7.1 in progress. Final slice validation belongs to the controller receipt for the exact clean PR HEAD; live activation and scheduled exhaustive certification remain separate.
