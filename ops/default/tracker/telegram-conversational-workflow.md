@@ -16,7 +16,7 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 5, Native work continuation; T5.4 ready
+Active slice: Slice 5, Native work continuation; T5.4 in progress
 
 Next slice: Slice 6, Guarded controls and capacity; after verified Slice 5 integration
 
@@ -179,8 +179,8 @@ Prerequisite: verified Slice 4 integration.
 | --- | --- | --- | --- |
 | T5.1 | validated | `4456f3f1bbef9b0b8368294f12e40c9cc9ca15ff` | Exact native previews/admission for all five extents and RequestKey replay. |
 | T5.2 | validated | `d94c581ded73f5a5fbe9ba45192097ebf1634ee0` | Bounded asynchronous continuation under existing workflow ownership. |
-| T5.3 | validated | pending task commit | Unattended policy-driven progress, review and integration. |
-| T5.4 | ready | pending | Evidence-bound results and shared CLI/TUI/Web invocation references. |
+| T5.3 | validated | `3eb2a912f0c13058906b3e62ffc3316b14e172f4` | Unattended policy-driven progress, review and integration. |
+| T5.4 | in_progress | pending | Evidence-bound results and shared CLI/TUI/Web invocation references. |
 
 Validation: plan section 10; `TestTelegramWork`, including focused race mode.
 
