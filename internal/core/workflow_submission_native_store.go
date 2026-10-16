@@ -108,33 +108,50 @@ func (s *WorkflowStore) persistWorkflowNativeIntent(ctx context.Context, run wor
 }
 
 func (s *WorkflowStore) projectWorkflowNativeSubmission(run *workflowInvocationFile, journal workflowSubmissionJournal) error {
+	projection, err := s.prepareWorkflowNativeProjection(run, journal)
+	if err != nil || !projection.changed {
+		return err
+	}
+
+	return s.commitWorkflowIntegrationEntryFiles(run, projection.entry, run.Integration.EntryRef.Hash, projection.files)
+}
+
+// Preparing projection files separately lets stop intent and its receipt share
+// the same commit as publication-pointer repair.
+type workflowNativeProjection struct {
+	entry   WorkflowIntegrationEntry
+	files   []workflowFileChange
+	changed bool
+}
+
+func (s *WorkflowStore) prepareWorkflowNativeProjection(run *workflowInvocationFile, journal workflowSubmissionJournal) (workflowNativeProjection, error) {
 	if run.Integration == nil {
-		return ErrWorkflowConflict
+		return workflowNativeProjection{}, ErrWorkflowConflict
 	}
 
 	entry, err := s.readWorkflowIntegrationEntry(*run, *run.Integration)
 	if err != nil {
-		return err
+		return workflowNativeProjection{}, err
 	}
 
 	last := journal.Attempts[len(journal.Attempts)-1]
 	if !workflowNativeSubmissionEntryMatches(last, entry) {
-		return ErrWorkflowConflict
+		return workflowNativeProjection{}, ErrWorkflowConflict
 	}
 
 	binding := workflowSubmissionProjection(journal)
 	if workflowNativeSubmissionProjected(*run, entry, binding) {
-		return s.repairWorkflowNativeReceiptProjection(run, entry, last)
+		return s.workflowNativeReceiptProjection(run, entry, last)
 	}
 
 	run.Submission, entry.SubmissionRef = &binding, &binding
 	if err := s.projectWorkflowNativeSubmissionPhase(&entry, last); err != nil {
-		return err
+		return workflowNativeProjection{}, err
 	}
 
 	files, err := s.projectWorkflowNativeReceipt(run, &entry, last)
 	if err != nil {
-		return err
+		return workflowNativeProjection{}, err
 	}
 
 	entry.Revision++
@@ -144,7 +161,7 @@ func (s *WorkflowStore) projectWorkflowNativeSubmission(run *workflowInvocationF
 	projectWorkflowIntegrationPhase(run, entry)
 	retainWorkflowNativeReceiptStop(run, entry)
 
-	return s.commitWorkflowIntegrationEntryFiles(run, entry, run.Integration.EntryRef.Hash, files)
+	return workflowNativeProjection{entry: entry, files: files, changed: true}, nil
 }
 
 func workflowNativeSubmissionEntryMatches(submission WorkflowSubmission, entry WorkflowIntegrationEntry) bool {

@@ -30,7 +30,7 @@ func (s *WorkflowStore) reconcileWorkflowChecked(ctx context.Context, id string,
 			return err
 		}
 
-		if readErr = owner.reconcileWorkflowInvocation(ctx, run); readErr != nil {
+		if readErr = owner.reconcileWorkflowInvocation(ctx, run, nil); readErr != nil {
 			return readErr
 		}
 
@@ -43,23 +43,23 @@ func (s *WorkflowStore) reconcileWorkflowChecked(ctx context.Context, id string,
 	return result, err
 }
 
-func (s *WorkflowStore) reconcileWorkflowInvocation(ctx context.Context, run workflowInvocationFile) error {
+func (s *WorkflowStore) reconcileWorkflowInvocation(ctx context.Context, run workflowInvocationFile, control *workflowControlCommit) error {
 	if run.ClosingSet != "" {
 		set, err := s.readRecord(run.SetImages[len(run.Closures)].Path)
 		if err != nil {
 			return err
 		}
 
-		_, err = s.reconcileWorkflowClosing(ctx, set)
+		_, err = s.reconcileWorkflowClosing(ctx, set, control)
 
 		return err
 	}
 
 	if len(run.Attempts) == 0 {
-		return nil
+		return s.retainWorkflowControlNoop(ctx, run, control)
 	}
 
-	return s.reconcileWorkflowOwner(ctx, run)
+	return s.reconcileWorkflowOwner(ctx, run, control)
 }
 
 func workflowRecoverableOwner(attempt WorkflowAttempt) error {
@@ -102,7 +102,7 @@ func (s *WorkflowStore) recoveredWorkflowLocks(ctx context.Context, run workflow
 	return locks, nil
 }
 
-func (s *WorkflowStore) reconcileWorkflowOwner(ctx context.Context, run workflowInvocationFile) (err error) {
+func (s *WorkflowStore) reconcileWorkflowOwner(ctx context.Context, run workflowInvocationFile, control *workflowControlCommit) (err error) {
 	attempt := run.Attempts[len(run.Attempts)-1]
 	if err := workflowAttemptQuiescent(attempt); err != nil {
 		return err
@@ -124,9 +124,11 @@ func (s *WorkflowStore) reconcileWorkflowOwner(ctx context.Context, run workflow
 	}
 
 	if run.Status == "running" {
-		if err := s.recoverWorkflowAttempt(run, attempt); err != nil {
+		if err := s.recoverWorkflowAttempt(ctx, run, attempt, control); err != nil {
 			return err
 		}
+	} else if err := s.retainWorkflowControlNoop(ctx, run, control); err != nil {
+		return err
 	}
 
 	return releaseWorkflowAdoptionLocks(locks)
@@ -144,7 +146,7 @@ func (s *WorkflowStore) checkRecoverableWorkflow(ctx context.Context, run workfl
 	return s.checkWorkflowInputs(ctx, run)
 }
 
-func (s *WorkflowStore) recoverWorkflowAttempt(run workflowInvocationFile, attempt WorkflowAttempt) error {
+func (s *WorkflowStore) recoverWorkflowAttempt(ctx context.Context, run workflowInvocationFile, attempt WorkflowAttempt, control *workflowControlCommit) error {
 	record, err := s.readWorkflowAttemptTask(run, attempt)
 	if err != nil {
 		return err
@@ -154,7 +156,12 @@ func (s *WorkflowStore) recoverWorkflowAttempt(run workflowInvocationFile, attem
 		return ErrWorkflowConflict
 	}
 
-	return s.checkpointWorkflowAttempt(run, record, "recovered", nil)
+	files, err := control.files(ctx, run.Revision+1)
+	if err != nil {
+		return err
+	}
+
+	return s.checkpointWorkflowAttempt(run, record, "recovered", nil, files...)
 }
 
 func recoveredWorkflowLock(path, invocationID string, attempt WorkflowAttempt) (*AgentOperationLock, error) {

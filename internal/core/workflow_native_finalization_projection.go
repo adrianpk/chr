@@ -6,22 +6,23 @@ import (
 	"time"
 )
 
-func (s *WorkflowStore) repairWorkflowNativeReceiptProjection(run *workflowInvocationFile, entry WorkflowIntegrationEntry, last WorkflowSubmission) error {
+func (s *WorkflowStore) workflowNativeReceiptProjection(run *workflowInvocationFile, entry WorkflowIntegrationEntry, last WorkflowSubmission) (workflowNativeProjection, error) {
+	projection := workflowNativeProjection{entry: entry}
 	if last.State != "confirmed" || entry.State == "integrated" || entry.State == "blocked" {
-		return nil
+		return projection, nil
 	}
 
 	if entry.State == "finalizing" {
-		return s.checkWorkflowIntegrationEntryReceipt(*run, entry)
+		return projection, s.checkWorkflowIntegrationEntryReceipt(*run, entry)
 	}
 
 	if entry.Revision == math.MaxUint64 || entry.StateRevision == math.MaxUint64 {
-		return workflowIntegrationConflict("receipt projection revision exhausted")
+		return projection, workflowIntegrationConflict("receipt projection revision exhausted")
 	}
 
 	files, err := s.projectWorkflowNativeReceipt(run, &entry, last)
 	if err != nil {
-		return err
+		return projection, err
 	}
 
 	entry.Revision++
@@ -29,7 +30,7 @@ func (s *WorkflowStore) repairWorkflowNativeReceiptProjection(run *workflowInvoc
 	entry.UpdatedAt = time.Now().UTC()
 	projectWorkflowIntegrationPhase(run, entry)
 
-	return s.commitWorkflowIntegrationEntryFiles(run, entry, run.Integration.EntryRef.Hash, files)
+	return workflowNativeProjection{entry: entry, files: files, changed: true}, nil
 }
 
 func (s *WorkflowStore) projectWorkflowNativeReceipt(run *workflowInvocationFile, entry *WorkflowIntegrationEntry, last WorkflowSubmission) ([]workflowFileChange, error) {

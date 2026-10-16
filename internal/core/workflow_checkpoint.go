@@ -17,7 +17,7 @@ type WorkflowAttemptCheckpoint struct {
 	Result     *WorkflowTaskResult `json:"result"`
 }
 
-func (s *WorkflowStore) checkpointWorkflowAttempt(run workflowInvocationFile, record WorkflowRecord, reason string, result *WorkflowTaskResult) error {
+func (s *WorkflowStore) checkpointWorkflowAttempt(run workflowInvocationFile, record WorkflowRecord, reason string, result *WorkflowTaskResult, extra ...workflowFileChange) error {
 	attempt := &run.Attempts[len(run.Attempts)-1]
 	if err := workflowAttemptQuiescent(*attempt); err != nil {
 		return err
@@ -58,7 +58,7 @@ func (s *WorkflowStore) checkpointWorkflowAttempt(run workflowInvocationFile, re
 	run.Status = workflowStopStatus(run.StopIntent)
 	run.Outcome = reason
 
-	return s.commitWorkflowClaim(run, record, workflowFileChange{Path: ref, After: data})
+	return s.commitWorkflowClaim(run, record, append(extra, workflowFileChange{Path: ref, After: data})...)
 }
 
 func (s *WorkflowStore) retainWorkflowProcessOutputs(attempt *WorkflowAttempt) error {

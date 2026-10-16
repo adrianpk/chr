@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (s *WorkflowStore) answerWorkflowDecision(ctx context.Context, run workflowInvocationFile, request WorkflowIntegrationAnswerRequest, provider WorkflowPullRequestProvider, control *workflowDecisionControlCommit) (WorkflowIntegrationDecisions, error) {
+func (s *WorkflowStore) answerWorkflowDecision(ctx context.Context, run workflowInvocationFile, request WorkflowIntegrationAnswerRequest, provider WorkflowPullRequestProvider, control *workflowControlCommit) (WorkflowIntegrationDecisions, error) {
 	entry, budget, err := s.currentWorkflowIntegrationBudget(ctx, run, request.WorkflowIntegrationBudgetGuard)
 	if err != nil {
 		return WorkflowIntegrationDecisions{}, err
@@ -52,7 +52,7 @@ func (s *WorkflowStore) answerWorkflowDecision(ctx context.Context, run workflow
 		return record, err
 	}
 
-	files, err := control.files(ctx)
+	files, err := control.files(ctx, run.Revision+1)
 	if err != nil {
 		return record, err
 	}

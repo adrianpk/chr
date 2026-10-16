@@ -25,7 +25,7 @@ func TelegramBoundBotID(env UserEnvironment) (int64, error) {
 
 // InspectTelegramReceiver reads local status without migrations, network calls or state creation.
 func InspectTelegramReceiver(ctx context.Context, env UserEnvironment, botID int64) (state TelegramReceiverState, err error) {
-	db, err := openUserDatabaseReadOnly(env)
+	db, err := openUserDatabaseReadOnly(ctx, env)
 	if err != nil {
 		return state, err
 	}

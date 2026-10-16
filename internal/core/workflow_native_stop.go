@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (s *WorkflowStore) stopWorkflowNativeSubmission(ctx context.Context, run *workflowInvocationFile, intent string) (bool, error) {
+func (s *WorkflowStore) stopWorkflowNativeSubmission(ctx context.Context, run *workflowInvocationFile, intent string, control *workflowControlCommit) (bool, error) {
 	journal, err := s.readWorkflowSubmissionJournal(ctx, *run)
 	if errors.Is(err, os.ErrNotExist) {
 		return false, nil
@@ -29,27 +29,22 @@ func (s *WorkflowStore) stopWorkflowNativeSubmission(ctx context.Context, run *w
 		}
 
 		if entry.State == "integrated" {
-			return true, s.finishWorkflowNativeStop(ctx, run, intent)
+			return true, s.finishWorkflowNativeStop(ctx, run, intent, control)
 		}
 	}
 
-	// Repair the common intent's projection before recording stop. A crash may
-	// have retained publication facts without their invocation/queue pointers.
-	if err := s.projectWorkflowNativeSubmission(run, journal); err != nil {
+	projection, err := s.prepareWorkflowNativeProjection(run, journal)
+	if err != nil {
 		return true, err
 	}
 
-	return true, s.retainWorkflowNativeStop(run, intent)
+	return true, s.retainWorkflowNativeStop(ctx, run, intent, control, projection)
 }
 
-func (s *WorkflowStore) retainWorkflowNativeStop(run *workflowInvocationFile, intent string) error {
-	entry, err := s.readWorkflowIntegrationEntry(*run, *run.Integration)
-	if err != nil {
-		return err
-	}
-
-	if run.StopIntent == intent && entry.StopIntent == intent && run.Status != workflowStopStatus(intent) {
-		return nil
+func (s *WorkflowStore) retainWorkflowNativeStop(ctx context.Context, run *workflowInvocationFile, intent string, control *workflowControlCommit, projection workflowNativeProjection) error {
+	entry := projection.entry
+	if !projection.changed && run.StopIntent == intent && entry.StopIntent == intent && run.Status != workflowStopStatus(intent) {
+		return s.retainWorkflowControlNoop(ctx, *run, control)
 	}
 
 	before := run.Integration.EntryRef.Hash
@@ -59,19 +54,24 @@ func (s *WorkflowStore) retainWorkflowNativeStop(run *workflowInvocationFile, in
 	entry.UpdatedAt = time.Now().UTC()
 	projectWorkflowIntegrationPhase(run, entry)
 
-	return s.commitWorkflowIntegrationEntry(run, entry, before)
+	files, err := control.files(ctx, run.Revision+1)
+	if err != nil {
+		return err
+	}
+
+	return s.commitWorkflowIntegrationEntryFiles(run, entry, before, append(projection.files, files...))
 }
 
-func (s *WorkflowStore) finishWorkflowNativeStop(ctx context.Context, run *workflowInvocationFile, intent string) error {
+func (s *WorkflowStore) finishWorkflowNativeStop(ctx context.Context, run *workflowInvocationFile, intent string, control *workflowControlCommit) error {
 	if _, err := s.readWorkflowSliceReceipt(ctx, *run); err != nil {
 		return err
 	}
 
 	if workflowInvocationTerminal(run.Status) || run.StopIntent == intent && run.Status == workflowStopStatus(intent) {
-		return nil
+		return s.retainWorkflowControlNoop(ctx, *run, control)
 	}
 
 	run.StopIntent, run.Status = intent, workflowStopStatus(intent)
 
-	return s.commitWorkflowState(run)
+	return s.commitWorkflowControlState(ctx, run, control)
 }

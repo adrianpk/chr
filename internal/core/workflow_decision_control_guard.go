@@ -2,7 +2,7 @@ package core
 
 import "context"
 
-func (s *WorkflowStore) workflowDecisionControlGuard(ctx context.Context, run workflowInvocationFile, request WorkflowDecisionControlRequest) (WorkflowIntegrationBudgetGuard, error) {
+func (s *WorkflowStore) workflowDecisionControlGuard(ctx context.Context, run workflowInvocationFile, request WorkflowControlMutationRequest) (WorkflowIntegrationBudgetGuard, error) {
 	if err := checkWorkflowRevision(run.WorkflowInvocation, []uint64{request.ExpectedRevision}); err != nil {
 		return WorkflowIntegrationBudgetGuard{}, err
 	}

@@ -64,6 +64,23 @@ target resolution checks the original peer-context digest in its SQLite
 transaction, preventing a changed focus or session from silently retargeting
 an older model response.
 
+T6.3 lifecycle progress extends native request receipts to pause, cancel,
+resume, continue and reconcile. The existing stop/resume, task-checkpoint and
+closing owners journal each accepted effect with its immutable caller receipt.
+Publication-pointer repair, stop intent and the receipt now share one transaction,
+including an invocation whose submission projection was interrupted.
+
+A continuation receipt confirms acceptance of one bounded call. Its acceptance
+checkpoint and receipt commit before execution leaves native exclusion. Replaying
+that request returns its original acceptance and current status without starting
+another checkpoint, replacing a later pause or resetting attempts. A partial
+journal cannot be reported as a confirmed control. An accepted receipt whose
+acknowledgement meets an expected domain barrier stays pending for receipt replay;
+it does not terminate receiver intake. Existing callers without a request binding retain their prior operation APIs.
+Read-only authority and receiver-status connections now use the same bounded
+SQLite busy timeout as writers, allowing a short inbox commit to finish before
+a concurrent read fails.
+
 ## Implementation Notes
 
 Native lifecycle entry points recheck volatile caller authority while holding
@@ -72,10 +89,10 @@ project root, namespace, conversation revision, invocation and mapped operator.
 Explicit standalone controls allocate a source-stable confirmation conversation;
 status only observes state. No transport execution scheduler is introduced.
 
-Decision request identities reserve their exact payload under native exclusion.
+Control request identities reserve their exact payload under native exclusion.
 They use the existing bounded operation-binding and receipt directories, with a
-separate control schema and checksum. Native review, budget and question owners
-include the receipt in their existing commit transaction. Volatile caller
+separate control schema and checksum. Native review, budget, question, lifecycle and recovery owners include the
+receipt in their existing commit transaction. Volatile caller
 authority is checked again before that commit. Legacy callers retain their
 existing API; a final decision authority callback requires a request binding.
 
@@ -84,8 +101,10 @@ existing API; a final decision authority callback requires a request binding.
 - Shared lifecycle requests accept a final authority callback; it is never serialized.
 - Exact peer-owned conversation reads do not change focus or revision.
 - Control previews freeze the invocation revision before confirmation.
-- `ControlWorkExtent` accepts a caller-neutral request binding for review, grants
-  and answers and returns its original receipt alongside current status.
+- `ControlWorkExtent` accepts a caller-neutral request binding for all eight
+  controls and returns the original receipt alongside separately observed status.
+- A bound continuation replays its acceptance without re-entering execution.
+- Native publication projection and stop intent commit together.
 - Inbox processing class and control-reserve membership are retained with input.
 - Model context snapshots guard target resolution after external interpretation.
 - Receiver application slots and model slots have separate bounded ownership.
@@ -101,8 +120,13 @@ existing API; a final decision authority callback requires a request binding.
 - `internal/app/telegram_control_*test.go`: real HTTP/SQLite, authority, worker checkpoints and decision receipt recovery.
 - `internal/core/workflow_decision_control*.go`: shared guarded decision entry point.
 - `internal/core/workflow_control_receipt.go`: native binding and atomic receipt files.
-- `internal/core/telegram_control_receipt_test.go`: partial-journal fault recovery.
-
+- `internal/core/telegram_control_receipt_test.go`: partial-journal decision recovery.
+- `internal/core/workflow_control_request.go`: common immutable control binding.
+- `internal/core/workflow_lifecycle_control*.go`: lifecycle acceptance and atomic receipts.
+- `internal/core/telegram_control_lifecycle_test.go`: task/closing/publication crash boundaries.
+- `internal/app/telegram_control_lifecycle_ack_test.go`: five-action acknowledgement recovery and live retry.
+- `internal/core/project_registry_read.go`: bounded read-only database contention.
+- `internal/core/telegram_control_registry_test.go`: exclusive-writer/read-authority handoff.
 - `internal/app/telegram_application_host.go`: bounded asynchronous inbox calls.
 - `internal/app/telegram_activation_slots.go`: common receiver call accounting.
 - `internal/core/telegram_processing_*.go`: priority, source order and restart classification.
@@ -169,6 +193,48 @@ context changes, and real HTTP status/draft cancellation while a model is blocke
 The existing worker-load regression now waits for its status response within its
 original two-second deadline while consuming unrelated progress notices.
 
+T6.3 lifecycle progress checks passed:
+
+- `go test ./internal/core ./internal/app -run '^TestTelegramControlLifecycle(Journal|Fence|Ack)$' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/app -run '^Test(TelegramControl(Lifecycle|Natural|Journal|Decisions|Fences|Guards)|NativeStop|WorkflowClosingRecovery$|WorkflowRecoveryBudget$|WorkflowContinuation|WorkflowTerminalControl$|ServiceWorkflowContinuation|ServiceWorkflowDependency)' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^Test(TelegramControl(Lifecycle|Natural|Journal|Decisions)|NativeStopPending$|WorkflowClosingRecovery$|WorkflowRecoveryBudget$|WorkflowTerminalControl$|ServiceWorkflowContinuation|ServiceWorkflowDependency)' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/app`
+- `scripts/check-go-func-signatures.sh`
+- `scripts/check-package-readmes.sh`
+- `git diff --check`
+
+The combined normal selection completed in core 59.326 seconds and app 20.419
+seconds; the focused race selection completed in core 60.569 seconds and app
+74.499 seconds. Deterministic fixtures interrupt native journal replacement,
+recover task and closing checkpoints, repair a missing submission pointer with
+stop intent, reject late authority loss and changed actors, and recover all five
+HTTP/SQLite lifecycle acknowledgements after later native revisions. They also
+preserve legacy continuation, prerequisite resume and native publication-stop
+behavior. The initial acknowledgement fixture timed out because reopened SQLite
+owners were scoped to individual subtests; the passing fixture retains one
+owner lifecycle across the complete five-action journey.
+
+The live receipt-retry fixture exposed an unconfigured read-only SQLite busy
+timeout (`scan project: database is locked`). The reader factory now applies the
+existing bounded connection policy; an exclusive-writer fixture proves the
+read waits and succeeds after release. The production receiver also retries an
+accepted control acknowledgement without repeating its native effect and remains
+available for a subsequent status command.
+
+Follow-up checks passed:
+
+- `go test ./internal/core ./internal/app -run '^Test(TelegramReceiver|ProjectRegistry|TelegramControl(RegistryWait|LifecycleAck|ReceiptRetry)$)' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^Test(TelegramControl(RegistryWait|LifecycleAck|ReceiptRetry)$|TelegramReceiverReadJourney$|ProjectRegistry)' -count=1 -timeout=3m`
+- `go test ./internal/core -run '^TestTelegramControlRegistryWait$' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/app`
+- `scripts/check-go-func-signatures.sh`
+- `scripts/check-package-readmes.sh`
+- `git diff --check`
+
+The follow-up normal checks completed in core 1.599 seconds and app 3.419 seconds;
+race mode completed in core 6.631 seconds and app 20.054 seconds. The separate
+registry check verifies the final fixture cleanup refactoring.
+
 Required slice validation will be recorded through the controller for the final
 clean PR HEAD: `make verify`, focused `TestTelegramControl` normal and race
 commands, then `git diff --check`. Live and scheduled exhaustive checks remain
@@ -176,9 +242,12 @@ separate.
 
 ## Risks and Follow-ups
 
-T6.3 remains in progress: final expiry/replacement parity, late reply-binding
-races, request-capacity diagnostics and interrupted lifecycle-control result
-recovery still require completion. T6.4 shared serial/parallel capacity and
+T6.3 remains in progress: receipt-only recovery through expired or replaced
+Telegram prompts, final text/callback expiry parity, late reply-binding races
+and request-capacity diagnostics still require completion. Native lifecycle
+receipts and their focused crash/acknowledgement proof are implemented; the
+adapter must still distinguish historical receipt recovery from fresh effects
+when a prompt has become stale. T6.4 shared serial/parallel capacity and
 cross-adapter certification remain pending. Focused model-load and intake-reserve
 evidence does not complete either task. The Slice 6 PR and exact-HEAD controller
 checks remain pending.

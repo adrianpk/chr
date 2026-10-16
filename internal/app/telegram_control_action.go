@@ -36,7 +36,7 @@ func (r telegramReceiver) applyControlAction(ctx context.Context, claim core.Tel
 
 	status, err := operations.ApplyTelegramControl(ctx, claim.Request.Target, binding, preview.Request, check)
 	if err != nil && status.ControlReceipt != nil {
-		return err
+		return &telegramControlReceiptPending{failure: err}
 	}
 
 	if err != nil && !telegramControlExpectedFailure(err) {
@@ -45,6 +45,14 @@ func (r telegramReceiver) applyControlAction(ctx context.Context, claim core.Tel
 
 	return r.finishControlAction(ctx, claim, status, err, config)
 }
+
+// A native receipt proves acceptance while the inbox still needs its outcome.
+// The receiver may retry expected domain barriers without stopping intake.
+type telegramControlReceiptPending struct{ failure error }
+
+func (e *telegramControlReceiptPending) Error() string { return e.failure.Error() }
+
+func (e *telegramControlReceiptPending) Unwrap() error { return e.failure }
 
 func (r telegramReceiver) finishControlAction(ctx context.Context, claim core.TelegramActionClaim, status WorkflowWorkStatus, failure error, config core.TelegramReceiverConfig) error {
 	state, receipt := "blocked", ""

@@ -120,17 +120,11 @@ func (s service) ContinueWorkExtent(ctx context.Context, id string, steps int, e
 }
 
 func (s service) continueWorkExtent(ctx context.Context, id string, steps int, check core.WorkflowAdmissionCheck, expected ...uint64) (core.WorkflowContinuationProgress, error) {
-	config, err := agentWorkLoopWorkspaceConfig(s.projectContext.ProjectDir)
+	request, err := s.workflowContinuationInput(steps)
 	if err != nil {
 		return core.WorkflowContinuationProgress{}, err
 	}
 
-	worker := slices.Clone(s.workflowWorker)
-	if worker == nil {
-		worker = core.CodexWorkflowWorker()
-	}
-
-	request := core.WorkflowContinuationRequest{Worker: worker, StepLimit: steps, PullRequest: core.WorkflowSlicePullRequestRequest{BaseBranch: config.Work.BranchPolicy.IntegrationBranch, Title: "Deliver ticket-native work", Body: "Deliver the host-validated ticket candidate."}}
 	request.AuthorizationCheck = check
 
 	if len(expected) > 1 || len(expected) == 1 && expected[0] == 0 {
@@ -141,7 +135,7 @@ func (s service) continueWorkExtent(ctx context.Context, id string, steps int, c
 		request.ExpectedRevision = expected[0]
 	}
 
-	return s.ContinueWorkflow(ctx, id, request, worker)
+	return s.ContinueWorkflow(ctx, id, request, request.Worker)
 }
 
 func workflowInvocationRestriction(restrictions []core.ReviewWorkflowMode) (core.ReviewWorkflowMode, error) {
@@ -154,4 +148,20 @@ func workflowInvocationRestriction(restrictions []core.ReviewWorkflowMode) (core
 	}
 
 	return restrictions[0], nil
+}
+
+func (s service) workflowContinuationInput(steps int) (core.WorkflowContinuationRequest, error) {
+	config, err := agentWorkLoopWorkspaceConfig(s.projectContext.ProjectDir)
+	if err != nil {
+		return core.WorkflowContinuationRequest{}, err
+	}
+
+	worker := slices.Clone(s.workflowWorker)
+	if worker == nil {
+		worker = core.CodexWorkflowWorker()
+	}
+
+	request := core.WorkflowContinuationRequest{Worker: worker, StepLimit: steps, PullRequest: core.WorkflowSlicePullRequestRequest{BaseBranch: config.Work.BranchPolicy.IntegrationBranch, Title: "Deliver ticket-native work", Body: "Deliver the host-validated ticket candidate."}}
+
+	return request, nil
 }

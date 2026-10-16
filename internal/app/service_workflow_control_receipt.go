@@ -20,6 +20,10 @@ func (s service) executeWorkflowControlResult(ctx context.Context, request Workf
 		return nil, err
 	}
 
+	if !workflowDecisionControlAction(request.Action) {
+		return s.executeWorkflowLifecycleResult(ctx, store, request)
+	}
+
 	var provider core.WorkflowPullRequestProvider
 	if request.Action != "grant" {
 		provider, err = s.workflowIntegrationProvider()
@@ -28,7 +32,7 @@ func (s service) executeWorkflowControlResult(ctx context.Context, request Workf
 		}
 	}
 
-	native := core.WorkflowDecisionControlRequest{Binding: *request.RequestBinding, Integration: request.Integration, Grant: request.BudgetGrant, Answer: request.DecisionAnswer, Action: request.Action, ID: request.ID, ExpectedRevision: request.ExpectedRevision, ReviewHash: request.BindingHash, DecisionRevision: request.DecisionRevision, DecisionHash: request.DecisionHash}
+	native := core.WorkflowControlMutationRequest{Binding: *request.RequestBinding, Integration: request.Integration, Grant: request.BudgetGrant, Answer: request.DecisionAnswer, Action: request.Action, ID: request.ID, ExpectedRevision: request.ExpectedRevision, ReviewHash: request.BindingHash, DecisionRevision: request.DecisionRevision, DecisionHash: request.DecisionHash}
 
 	result, err := store.ControlWorkflowDecision(ctx, native, provider, request.AuthorizationCheck)
 	if err != nil {

@@ -1,0 +1,60 @@
+package app
+
+import (
+	"context"
+
+	"forge.adrianpk.com/chr/internal/core"
+)
+
+func (s service) executeWorkflowLifecycleResult(ctx context.Context, store *core.WorkflowStore, request WorkflowControlRequest) (*core.WorkflowControlResult, error) {
+	ports, err := s.workflowLifecycleControlPorts(ctx, store, request)
+	if err != nil {
+		return nil, err
+	}
+
+	native := core.WorkflowControlMutationRequest{Binding: *request.RequestBinding, Action: request.Action, ID: request.ID, ExpectedRevision: request.ExpectedRevision}
+	if request.Action == "continue" {
+		native.StepLimit = request.StepLimit
+	}
+
+	result, err := store.ControlWorkflowLifecycle(ctx, native, ports, request.AuthorizationCheck)
+	if result.RequestID == "" {
+		return nil, err
+	}
+
+	return &result, err
+}
+
+func (s service) workflowLifecycleControlPorts(ctx context.Context, store *core.WorkflowStore, request WorkflowControlRequest) (core.WorkflowLifecycleControlPorts, error) {
+	var ports core.WorkflowLifecycleControlPorts
+	if request.Action != "continue" && request.Action != "resume" {
+		return ports, nil
+	}
+
+	run, err := store.ReadWorkflow(ctx, request.ID)
+	if err != nil {
+		return ports, err
+	}
+
+	if request.Action == "resume" {
+		if run.Blocker != nil && run.Blocker.NextActionOwner == "prerequisite_owner" {
+			ports.Resume, err = s.workflowResumePorts(run)
+		}
+
+		return ports, err
+	}
+
+	ports.Continuation, err = s.workflowContinuationInput(request.StepLimit)
+	if err != nil {
+		return ports, err
+	}
+
+	provider, err := s.workflowIntegrationProvider()
+	if err != nil {
+		return ports, err
+	}
+
+	ports.Execution, err = s.workflowContinuationPorts(run, provider, ports.Continuation.Worker)
+
+	return ports, err
+}

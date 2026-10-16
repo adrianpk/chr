@@ -36,7 +36,7 @@ func (s *WorkflowStore) stopWorkflowChecked(ctx context.Context, id, intent stri
 			return err
 		}
 
-		readErr = owner.stopWorkflow(ctx, &run, intent)
+		readErr = owner.stopWorkflow(ctx, &run, intent, nil)
 
 		result = run.WorkflowInvocation
 
@@ -61,7 +61,7 @@ func (s *WorkflowStore) ResumeWorkflow(ctx context.Context, id string, ports ...
 			return readErr
 		}
 
-		result, readErr = owner.resumeGuardedWorkflow(ctx, run, ports)
+		result, readErr = owner.resumeGuardedWorkflow(ctx, run, ports, nil)
 
 		return readErr
 	})
@@ -110,7 +110,7 @@ func workflowRetainedStopIntent(run workflowInvocationFile, intent string) strin
 	return intent
 }
 
-func (s *WorkflowStore) resumeGuardedWorkflow(ctx context.Context, run workflowInvocationFile, ports []WorkflowResumePorts) (WorkflowInvocation, error) {
+func (s *WorkflowStore) resumeGuardedWorkflow(ctx context.Context, run workflowInvocationFile, ports []WorkflowResumePorts, control *workflowControlCommit) (WorkflowInvocation, error) {
 	if err := checkWorkflowResumeRevision(run.WorkflowInvocation, ports); err != nil {
 		return WorkflowInvocation{}, err
 	}
@@ -140,21 +140,22 @@ func (s *WorkflowStore) resumeGuardedWorkflow(ctx context.Context, run workflowI
 	}
 
 	run.StopIntent, run.ResumeStatus = "", ""
-	if err := s.commitWorkflowResume(&run, changes); err != nil {
+
+	if err := s.commitWorkflowControlResume(ctx, &run, changes, control); err != nil {
 		return WorkflowInvocation{}, err
 	}
 
 	return run.WorkflowInvocation, nil
 }
 
-func (s *WorkflowStore) stopWorkflow(ctx context.Context, run *workflowInvocationFile, intent string) error {
+func (s *WorkflowStore) stopWorkflow(ctx context.Context, run *workflowInvocationFile, intent string, control *workflowControlCommit) error {
 	intent = workflowRetainedStopIntent(*run, intent)
-	if handled, err := s.stopWorkflowNativeSubmission(ctx, run, intent); handled || err != nil {
+	if handled, err := s.stopWorkflowNativeSubmission(ctx, run, intent, control); handled || err != nil {
 		return err
 	}
 
 	if workflowInvocationTerminal(run.Status) || run.StopIntent == intent {
-		return nil
+		return s.retainWorkflowControlNoop(ctx, *run, control)
 	}
 
 	run.StopIntent = intent
@@ -166,5 +167,5 @@ func (s *WorkflowStore) stopWorkflow(ctx context.Context, run *workflowInvocatio
 		run.Status = workflowStopStatus(intent)
 	}
 
-	return s.commitWorkflowState(run)
+	return s.commitWorkflowControlState(ctx, run, control)
 }

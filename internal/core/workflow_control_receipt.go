@@ -31,12 +31,12 @@ type workflowControlReservation struct {
 	ReceiptRef       string                  `json:"receipt_ref"`
 }
 
-type workflowDecisionControlCommit struct {
+type workflowControlCommit struct {
 	receipt workflowControlReceipt
 	check   WorkflowAdmissionCheck
 }
 
-func (commit *workflowDecisionControlCommit) files(ctx context.Context) ([]workflowFileChange, error) {
+func (commit *workflowControlCommit) files(ctx context.Context, revision uint64) ([]workflowFileChange, error) {
 	if commit == nil {
 		return nil, nil
 	}
@@ -45,6 +45,7 @@ func (commit *workflowDecisionControlCommit) files(ctx context.Context) ([]workf
 		return nil, err
 	}
 
+	commit.receipt.Result.Revision = revision
 	receipt := commit.receipt
 
 	data, err := json.Marshal(receipt)
@@ -58,7 +59,7 @@ func (commit *workflowDecisionControlCommit) files(ctx context.Context) ([]workf
 	return []workflowFileChange{{Path: receipt.Result.ReceiptRef, After: data}}, err
 }
 
-func (s *WorkflowStore) readWorkflowControlReceipt(request WorkflowDecisionControlRequest, digest string) (WorkflowControlResult, bool, error) {
+func (s *WorkflowStore) readWorkflowControlReceipt(request WorkflowControlMutationRequest, digest string) (WorkflowControlResult, bool, error) {
 	path, err := s.safePath(workflowMutationReceiptPath(request.Binding.RequestID))
 	if err != nil {
 		return WorkflowControlResult{}, false, err
@@ -85,7 +86,7 @@ func (s *WorkflowStore) readWorkflowControlReceipt(request WorkflowDecisionContr
 	return receipt.Result, true, nil
 }
 
-func (s *WorkflowStore) validateWorkflowControlReceipt(receipt workflowControlReceipt, request WorkflowDecisionControlRequest, digest string) error {
+func (s *WorkflowStore) validateWorkflowControlReceipt(receipt workflowControlReceipt, request WorkflowControlMutationRequest, digest string) error {
 	checksum := receipt.Checksum
 	receipt.Checksum = ""
 
@@ -102,7 +103,7 @@ func (s *WorkflowStore) validateWorkflowControlReceipt(receipt workflowControlRe
 	return nil
 }
 
-func (s *WorkflowStore) reserveWorkflowControlBinding(request WorkflowDecisionControlRequest, digest string) error {
+func (s *WorkflowStore) reserveWorkflowControlBinding(request WorkflowControlMutationRequest, digest string) error {
 	reservation := workflowControlReservation{Schema: "chr-workflow-control-binding/v1", State: "reserved", ProjectID: s.projectID, Namespace: s.layout.Namespace(), Binding: request.Binding, Action: request.Action, InvocationID: request.ID, ArgumentDigest: digest, ExpectedRevision: request.ExpectedRevision, ReceiptRef: workflowMutationReceiptPath(request.Binding.RequestID)}
 
 	path, err := s.safePath(filepath.Join("run", "operation-bindings", workflowHash([]byte(request.Binding.RequestID))+".json"))
@@ -140,12 +141,12 @@ func (s *WorkflowStore) reserveWorkflowControlBinding(request WorkflowDecisionCo
 	return atomicWorkflowFile(path, encoded)
 }
 
-func (s *WorkflowStore) retainWorkflowControlNoop(ctx context.Context, run workflowInvocationFile, control *workflowDecisionControlCommit) error {
+func (s *WorkflowStore) retainWorkflowControlNoop(ctx context.Context, run workflowInvocationFile, control *workflowControlCommit) error {
 	if control == nil {
 		return nil
 	}
 
-	files, err := control.files(ctx)
+	files, err := control.files(ctx, run.Revision+1)
 	if err != nil {
 		return err
 	}
@@ -153,7 +154,7 @@ func (s *WorkflowStore) retainWorkflowControlNoop(ctx context.Context, run workf
 	return s.commitWorkflowPullRequestFiles(&run, files, workflowFileChange{})
 }
 
-func (s *WorkflowStore) completeWorkflowControlRetry(ctx context.Context, run workflowInvocationFile, control *workflowDecisionControlCommit, failure error) error {
+func (s *WorkflowStore) completeWorkflowControlRetry(ctx context.Context, run workflowInvocationFile, control *workflowControlCommit, failure error) error {
 	if failure != nil {
 		return failure
 	}
@@ -161,8 +162,8 @@ func (s *WorkflowStore) completeWorkflowControlRetry(ctx context.Context, run wo
 	return s.retainWorkflowControlNoop(ctx, run, control)
 }
 
-func (s *WorkflowStore) commitWorkflowControlBudget(ctx context.Context, run *workflowInvocationFile, budget *WorkflowIntegrationBudget, control *workflowDecisionControlCommit) error {
-	files, err := control.files(ctx)
+func (s *WorkflowStore) commitWorkflowControlBudget(ctx context.Context, run *workflowInvocationFile, budget *WorkflowIntegrationBudget, control *workflowControlCommit) error {
+	files, err := control.files(ctx, run.Revision+1)
 	if err != nil {
 		return err
 	}

@@ -5,11 +5,11 @@ import (
 	"testing"
 )
 
-func telegramControlJournalFixture(t *testing.T, action string) (*WorkflowStore, WorkflowDecisionControlRequest, WorkflowPullRequestProvider) {
+func telegramControlJournalFixture(t *testing.T, action string) (*WorkflowStore, WorkflowControlMutationRequest, WorkflowPullRequestProvider) {
 	t.Helper()
 
 	binding := WorkflowMutationBinding{RequestID: "control-receipt", Operator: "operator"}
-	request := WorkflowDecisionControlRequest{Binding: binding, Action: action}
+	request := WorkflowControlMutationRequest{Binding: binding, Action: action}
 
 	var (
 		store    *WorkflowStore

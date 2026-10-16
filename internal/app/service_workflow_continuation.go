@@ -20,11 +20,20 @@ func (s service) ContinueWorkflow(ctx context.Context, id string, request core.W
 		return core.WorkflowContinuationProgress{}, err
 	}
 
+	ports, err := s.workflowContinuationPorts(run, provider, reviewer)
+	if err != nil {
+		return core.WorkflowContinuationProgress{Invocation: run}, err
+	}
+
+	return store.ContinueWorkflow(ctx, id, request, ports)
+}
+
+func (s service) workflowContinuationPorts(run core.WorkflowInvocation, provider core.WorkflowPullRequestProvider, reviewer []string) (core.WorkflowContinuationPorts, error) {
 	observer := s.workflowIntegrationObserver(run)
 
 	target, ok := observer.(core.WorkflowTargetGit)
 	if !ok {
-		return core.WorkflowContinuationProgress{Invocation: run}, fmt.Errorf("configured observer cannot hydrate continuation targets")
+		return core.WorkflowContinuationPorts{}, fmt.Errorf("configured observer cannot hydrate continuation targets")
 	}
 
 	preparer := s.workflowPreparationGit
@@ -39,5 +48,5 @@ func (s service) ContinueWorkflow(ctx context.Context, id string, request core.W
 		ports.Source = source
 	}
 
-	return store.ContinueWorkflow(ctx, id, request, ports)
+	return ports, nil
 }

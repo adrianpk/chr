@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-func openUserDatabaseReadOnly(env UserEnvironment) (*sql.DB, error) {
+func openUserDatabaseReadOnly(ctx context.Context, env UserEnvironment) (*sql.DB, error) {
 	path, err := filepath.Abs(UserDatabasePath(env))
 	if err != nil {
 		return nil, err
@@ -16,7 +16,16 @@ func openUserDatabaseReadOnly(env UserEnvironment) (*sql.DB, error) {
 
 	location := url.URL{Scheme: "file", Path: path, RawQuery: "mode=ro"}
 
-	return sql.Open("sqlite", location.String())
+	db, err := sql.Open("sqlite", location.String())
+	if err != nil {
+		return nil, err
+	}
+
+	if err := configureSQLiteDatabase(ctx, db); err != nil {
+		return nil, closeDBWithError(db, err)
+	}
+
+	return db, nil
 }
 
 // ReadRegisteredProjects reads explicit identities without migrating or creating a registry.
@@ -25,7 +34,7 @@ func ReadRegisteredProjects(ctx context.Context, env UserEnvironment, ids []stri
 		return nil, errors.New("one to 50 explicit project identities are required")
 	}
 
-	db, err := openUserDatabaseReadOnly(env)
+	db, err := openUserDatabaseReadOnly(ctx, env)
 	if err != nil {
 		return nil, err
 	}

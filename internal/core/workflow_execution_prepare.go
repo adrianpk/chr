@@ -144,7 +144,7 @@ func workflowAttemptFile(invocationID, attemptID, name string) string {
 	return filepath.ToSlash(filepath.Join("run", invocationID, "extension", "chr", "attempts", attemptID, name))
 }
 
-func (s *WorkflowStore) commitWorkflowState(run *workflowInvocationFile) error {
+func (s *WorkflowStore) commitWorkflowState(run *workflowInvocationFile, extra ...workflowFileChange) error {
 	run.Revision++
 	run.UpdatedAt = time.Now().UTC()
 
@@ -153,7 +153,7 @@ func (s *WorkflowStore) commitWorkflowState(run *workflowInvocationFile) error {
 		return err
 	}
 
-	if err := s.commitFiles([]workflowFileChange{state}); err != nil {
+	if err := s.commitFiles(append(extra, state)); err != nil {
 		return err
 	}
 

@@ -194,7 +194,7 @@ func (s *WorkflowStore) GrantWorkflowIntegration(ctx context.Context, request Wo
 	return budget, err
 }
 
-func (s *WorkflowStore) grantWorkflowIntegration(ctx context.Context, run workflowInvocationFile, request WorkflowIntegrationGrantRequest, control *workflowDecisionControlCommit) (WorkflowIntegrationBudget, error) {
+func (s *WorkflowStore) grantWorkflowIntegration(ctx context.Context, run workflowInvocationFile, request WorkflowIntegrationGrantRequest, control *workflowControlCommit) (WorkflowIntegrationBudget, error) {
 	entry, budget, err := s.workflowGrantBudget(ctx, run, request.WorkflowIntegrationBudgetGuard)
 	if err != nil {
 		return budget, err

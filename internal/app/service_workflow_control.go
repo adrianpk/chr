@@ -39,9 +39,7 @@ func (s service) ControlWorkExtent(ctx context.Context, request WorkflowControlR
 	defer cancel()
 
 	status, readErr := s.WorkflowStatus(cleanup, request.ID, WorkflowStatusRequest{Limit: 8})
-	if err == nil {
-		status.ControlReceipt = receipt
-	}
+	status.ControlReceipt = receipt
 
 	return status, errors.Join(err, readErr)
 }

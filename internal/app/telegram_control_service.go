@@ -38,9 +38,7 @@ func (s service) ApplyTelegramControl(ctx context.Context, target core.TelegramO
 	scoped.workflowNamespace = target.Namespace
 
 	request.AuthorizationCheck = check
-	if workflowDecisionControlAction(request.Action) {
-		request.RequestBinding = &binding
-	}
+	request.RequestBinding = &binding
 
 	return scoped.ControlWorkExtent(ctx, request)
 }

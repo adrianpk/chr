@@ -22,7 +22,7 @@ func (s *WorkflowStore) ReconcileWorkflowClosing(ctx context.Context, setPath st
 			return ErrWorkflowConflict
 		}
 
-		result, readErr = s.reconcileWorkflowClosing(ctx, set)
+		result, readErr = s.reconcileWorkflowClosing(ctx, set, nil)
 
 		return readErr
 	})
@@ -30,10 +30,14 @@ func (s *WorkflowStore) ReconcileWorkflowClosing(ctx context.Context, setPath st
 	return result, err
 }
 
-func (s *WorkflowStore) reconcileWorkflowClosing(ctx context.Context, set WorkflowRecord) (result WorkflowRecord, err error) {
+func (s *WorkflowStore) reconcileWorkflowClosing(ctx context.Context, set WorkflowRecord, control *workflowControlCommit) (result WorkflowRecord, err error) {
 	state, err := s.readWorkflowClosingAttempt(set, len(set.Set.Closing.Attempts)-1)
-	if err != nil || state.Outcome != "running" {
+	if err != nil {
 		return set, err
+	}
+
+	if state.Outcome != "running" {
+		return set, s.retainWorkflowClosingControlNoop(ctx, control)
 	}
 
 	attempt := WorkflowAttempt{ID: workflowClosingAttemptID(set, state.Generation), OwnerProcess: &state.Owner, LeaseUntil: state.LeaseUntil, Processes: state.Processes}
@@ -66,7 +70,13 @@ func (s *WorkflowStore) reconcileWorkflowClosing(ctx context.Context, set Workfl
 	claim.state.Outcome, claim.state.FinishedAt = "interrupted", time.Now().UTC()
 
 	claim.set.Set.Status = "blocked"
-	if err := s.commitWorkflowClosingState(ctx, claim); err != nil {
+
+	files, err := s.workflowClosingControlFiles(ctx, claim, control)
+	if err != nil {
+		return set, err
+	}
+
+	if err := s.commitWorkflowClosingState(ctx, claim, files...); err != nil {
 		return set, err
 	}
 
