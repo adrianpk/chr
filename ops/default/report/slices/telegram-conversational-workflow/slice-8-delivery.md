@@ -81,8 +81,17 @@ integration, source self-development or the scheduled final-candidate gate.
 Activation documentation passed `git diff --check`. The integrated Slice 7
 binary's read-only `telegram status` and `telegram doctor --check-connection`
 checks passed. They establish local bot readiness, not live execution or model
-connectivity. The configured final Slice 8 command list and exact-HEAD controller
-validation remain pending until the remaining live work and final head are ready.
+connectivity. The controller owns execution and exact-HEAD evidence for this
+required ordered command list:
+
+- `make verify`
+- `go test ./internal/core ./internal/app -run '^TestTelegramJourney' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^TestTelegramJourney' -count=1 -timeout=3m`
+- `git diff --check`
+
+Read the controller receipt for results bound to the current candidate; a head
+change requires new evidence. Passing this list does not replace live journey
+proof or the scheduled exhaustive gate.
 
 Task checks passed:
 
@@ -96,10 +105,9 @@ controller validation or the scheduled exhaustive gate.
 
 ## Live QA Setup
 
-Owned playground:
-`/home/adrian/Projects/playground/chr/20261017-0110-telegram-journey-qa`.
-Its `fixture.json` records the executable, project registrations and exact
-bootstrap targets; `README.md` contains the bounded foreground command. Private
+The private user-state descriptor `chr/qa/telegram-conversational-workflow.json`
+locates the owned playground. Its `fixture.json` records the executable,
+project registrations and exact bootstrap targets; `README.md` contains the bounded foreground command. Private
 configuration and retained data use its isolated `receiver/` development root.
 The original user configuration and primary dev checkout are preserved.
 
