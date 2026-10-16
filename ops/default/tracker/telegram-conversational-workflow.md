@@ -14,11 +14,11 @@ Spec: [Telegram Conversation and Workflow Control](../spec/stable/telegram-conve
 
 Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conversational-workflow-model.md)
 
-Implementation authorization: Deferred until a later instruction to start Looper.
+Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: none; execution has not started
+Active slice: Slice 1, Dedicated live receiver; ready for Looper activation
 
-Next slice: Slice 1, Dedicated live receiver; pending execution authorization
+Next slice: Slice 2, Conversation routing; after verified Slice 1 integration
 
 Progress: 0 of 8 slices integrated; 0 of 29 tasks done; 0 of 32 acceptance criteria evidenced.
 
@@ -29,8 +29,8 @@ Exhaustive certification: pending the scheduled nightly for the final integrated
 ## State and Evidence Rules
 
 Task states: `pending`, `ready`, `in_progress`, `validated`, `blocked`, `done`.
-All tasks start pending because execution is deferred. On authorized activation,
-mark only the active slice's eligible tasks ready. A validated task becomes
+Slice 1 tasks are ready under the recorded execution authorization; later
+tasks remain pending until their prerequisites integrate. A validated task becomes
 done after verified slice integration; a successful test or worker exit alone
 does not close it.
 
@@ -64,16 +64,16 @@ configuration. Never launch an interactive full suite to fill that evidence gap.
 
 ## Slice 1: Dedicated Live Receiver
 
-State: pending execution authorization
+State: ready
 
-Prerequisite: approved committed planning artifacts and a later start instruction.
+Prerequisite: approved committed planning artifacts; execution authorized on 2026-10-16.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T1.1 | pending | pending | Private setup/configuration, secret handling and readiness commands. |
-| T1.2 | pending | pending | Bounded HTTP receiver, exact identity authorization and ownership checks. |
-| T1.3 | pending | pending | Additive storage, atomic inbox/cursor, initial outbox and retained retries. |
-| T1.4 | pending | pending | Read-only registry/help/project/status operations and existing adapter compatibility. |
+| T1.1 | ready | pending | Private setup/configuration, secret handling and readiness commands. |
+| T1.2 | ready | pending | Bounded HTTP receiver, exact identity authorization and ownership checks. |
+| T1.3 | ready | pending | Additive storage, atomic inbox/cursor, initial outbox and retained retries. |
+| T1.4 | ready | pending | Read-only registry/help/project/status operations and existing adapter compatibility. |
 
 Validation: plan section 6; `TestTelegramReceiver` and the named existing
 notification/import regressions, including focused race mode.
@@ -242,9 +242,9 @@ report/test/live references in the Evidence column as they are verified.
 
 | Requirement | State | Evidence or action |
 | --- | --- | --- |
-| Looper execution authority | deferred | Maintainer requested preparation for a later start. |
+| Looper execution authority | granted | Maintainer instructed this exact prepared set to proceed on 2026-10-16. |
 | Dedicated bot credentials and exact identity bindings | pending private setup | Supply locally through masked setup after implementation; never in versioned artifacts. |
-| Live service/messages/model/QA authority | deferred | Needed for Slice 8; no live action is authorized by this planning commit. |
+| Live service/messages/model/QA authority | granted for bounded plan validation | Use the dedicated bot, configured model and existing designated QA repositories; private readiness remains required. |
 | Final scheduled nightly on integrated candidate | pending | Use existing Forgejo schedule; do not dispatch or run the long gate interactively. |
 
 ## Final Candidate and Closure
@@ -265,5 +265,5 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Exact integrated candidate passed the scheduled exhaustive nightly.
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
-Current state: planning complete; no slice branch, PR, live activation or Looper
-run has been created for this delivery set.
+Current state: execution authorized and Slice 1 ready for Looper activation;
+no implementation, integration or live validation is claimed by this entry.

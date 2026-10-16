@@ -14,11 +14,11 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Tracker: [Telegram Conversation Tracker](../tracker/telegram-conversational-workflow.md)
 
-Implementation authorization: Deferred; prepare and commit the artifacts now, start Looper only after a later execution instruction.
+Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, its canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: none; execution has not started
+Active slice: Slice 1, Dedicated live receiver; ready for Looper activation
 
-Next slice: Slice 1, Dedicated live receiver; pending execution authorization
+Next slice: Slice 2, Conversation routing; after verified Slice 1 integration
 
 Slice strategy: behavior-first
 
@@ -46,9 +46,9 @@ commit-sized unit when practical; a slice is the branch and PR unit. The linked
 tracker records the task list, commits, validation and integration. Do not
 create another ticket batch merely to duplicate these planned tasks.
 
-The current instruction authorizes these planning artifacts and their commit.
-A later instruction to execute this set authorizes implementation and the
-recorded slice lifecycle. Under Looper, the controller owns canonical slice
+The maintainer first requested the planning artifacts, then instructed this
+set to proceed on 2026-10-16. That instruction authorizes implementation,
+the recorded slice lifecycle and its bounded validation. Under Looper, the controller owns canonical slice
 PR integration into `dev`; workers prepare candidates and do not merge them.
 Keep one development worker and at most one open canonical slice PR for this
 set. Product-level parallel execution is exercised through isolated fixtures.
@@ -72,12 +72,13 @@ set. Product-level parallel execution is exercised through isolated fixtures.
    identities and operator/project mapping must be supplied through private
    local setup before live activation. Never request or commit its token in
    chat, artifacts, argv, PR bodies or test output.
-6. Slice 8 requires explicit authorization for receiver/service activation,
-   live bot messages, configured model use and bounded QA repository writes.
-   Reuse designated disposable QA repositories and their host-owned access.
-   Missing authorization or readiness is an external blocker, never fixture
-   evidence substituted for live evidence. Do not create accounts, repositories
-   or credentials under this plan without their own explicit authorization.
+6. Execution authorization includes the bounded Slice 8 validation: dedicated
+   receiver/service activation, live bot messages, configured model use and
+   writes to the already designated disposable QA repositories. Use host-owned
+   access and supplied private bot/operator/project configuration. Missing
+   readiness is an external blocker, never fixture evidence substituted for
+   live evidence. Do not create accounts, repositories or credentials under
+   this plan without their own explicit authorization.
 7. The full scheduled gate must be ready for the final candidate. Scheduling
    and runner setup remain owned by the existing nightly workflow. Preserve
    unrelated schedule changes and active validations; this set does not alter
@@ -422,5 +423,5 @@ starts with every criterion pending.
 - [ ] The cycle report, tracker and plan distinguish tested code from later closure-only documentation.
 - [ ] The delivery set is closed with no pending work or unreported blocker.
 
-Current state: planning complete; implementation, live activation and exhaustive
-certification have not started.
+Current state: execution authorized and Slice 1 ready for controller activation;
+implementation, live activation and exhaustive certification are not yet evidenced.

@@ -6,7 +6,7 @@ Date: 2026-10-16
 
 Approved: maintainer, 2026-10-16; scope accepted for the requested plan and tracker.
 
-Implementation authorization: Deferred until the maintainer requests Looper execution.
+Implementation authorization: Granted on 2026-10-16 for the linked delivery set through Looper.
 
 Model: [Telegram Conversation and Workflow Model](telegram-conversational-workflow-model.md)
 
@@ -462,9 +462,10 @@ Rich media/transcription, webhook hosting and remote shell access are outside
 this text adapter.
 
 The linked plan and tracker define the implementation sequence. The maintainer
-requested their preparation and a Conventional Commit on 2026-10-16, with
-Looper execution deferred. This promotion does not activate a bot or service.
-Scope approval and authorization to execute remain separate states.
+requested their preparation and a Conventional Commit on 2026-10-16, then
+instructed execution through Looper. The linked plan records that authority
+and the private readiness requirements for live validation. Scope approval
+and authorization to execute remain separate recorded states.
 
 Transport facts are checked against the Telegram Bot API: offset acknowledgement
 and long polling, exclusive webhook delivery, a remote update retention window
