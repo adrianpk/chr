@@ -1,6 +1,6 @@
 # Slice 2: Conversation Routing
 
-Status: reviewing
+Status: delivered
 
 Delivery set: telegram-conversational-workflow
 
@@ -46,6 +46,11 @@ service/model interpretation. Valid replies outrank focus; ambiguous plain text
 asks for a session. Reads use the existing central application service.
 
 ## Implementation Notes
+
+PR #391 merged through Rebase + Fast-forward into dev on 2026-10-16 at
+`f8f33d844c083997ffb0e479e9c22068e5c30e03`. The controller receipt records all
+four ordered checks below passed on that clean HEAD. Acta merge event:
+`01M526ENWR8E56B4R4T339HTBT`.
 
 T2.1 implementation: `8e7faf9bf62c`; T2.2: `9946757b0528`. T2.3: `36f31feaa0c0c0d5b52e9d80071322a8574744b5`, adding the
 live command adapter and HTTP journey. The tracker records task references.
@@ -99,8 +104,8 @@ concurrent replay through separate SQLite handles, stale/late/pruned replies
 and rollback when association retention or response capacity fails. The live
 HTTP journey checks that no project artifacts or executions are created.
 
-Final readiness evidence is recorded through `looper validate` after the PR
-reference commit, binding the clean candidate HEAD to this ordered list:
+Final readiness evidence was recorded through `looper validate` after the PR
+reference commit, binding the integrated clean HEAD to this successful ordered list:
 
 1. `make verify`
 2. `go test ./internal/core ./internal/app -run '^TestTelegramConversation' -count=1 -timeout=3m`
