@@ -1,0 +1,66 @@
+package core
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+)
+
+type workflowMutationReservation struct {
+	Schema             string                  `json:"schema"`
+	State              string                  `json:"state"`
+	ProjectID          string                  `json:"project_id"`
+	Namespace          string                  `json:"namespace"`
+	Binding            WorkflowMutationBinding `json:"binding"`
+	Operation          string                  `json:"operation"`
+	ArgumentDigest     string                  `json:"argument_digest"`
+	ExpectedRevision   uint64                  `json:"expected_revision"`
+	ObservedSourceHash string                  `json:"observed_source_hash"`
+	ReceiptRef         string                  `json:"receipt_ref"`
+}
+
+// Reserve accepted identities before preparing any effect. A failed preparation
+// can retry its original payload, but cannot exchange it for another operation.
+func (s *WorkflowStore) reserveMutationBinding(request WorkflowMutationRequest, digest string) error {
+	reservation := workflowMutationReservation{Schema: "chr-record-binding/v1", State: "reserved", ProjectID: s.projectID, Namespace: s.layout.Namespace(), Binding: request.Binding, Operation: workflowMutationOperation(request), ArgumentDigest: digest, ExpectedRevision: request.ExpectedRevision, ObservedSourceHash: request.Record.SourceHash, ReceiptRef: workflowMutationReceiptPath(request.Binding.RequestID)}
+
+	path, err := s.safePath(filepath.Join("run", "operation-bindings", workflowHash([]byte(request.Binding.RequestID))+".json"))
+	if err != nil {
+		return err
+	}
+
+	data, err := readWorkflowFile(path)
+	if err == nil {
+		return checkWorkflowMutationReservation(data, reservation)
+	}
+
+	if !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+
+	if err := s.checkMutationCapacity(); err != nil {
+		return err
+	}
+
+	encoded, err := json.Marshal(reservation)
+	if err != nil {
+		return err
+	}
+
+	return atomicWorkflowFile(path, encoded)
+}
+
+func checkWorkflowMutationReservation(data []byte, expected workflowMutationReservation) error {
+	var retained workflowMutationReservation
+	if err := json.Unmarshal(data, &retained); err != nil {
+		return err
+	}
+	// Every field is scalar; exact comparison also rejects a newer schema or state.
+	if retained != expected {
+		return fmt.Errorf("%w: mutation identity is bound to another payload", ErrWorkflowConflict)
+	}
+
+	return nil
+}
