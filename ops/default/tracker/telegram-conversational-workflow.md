@@ -70,8 +70,8 @@ Prerequisite: approved committed planning artifacts; execution authorized on 202
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T1.1 | in_progress | task commit; connection doctor follows with T1.2 | Private setup/configuration, secret handling and readiness commands. |
-| T1.2 | ready | pending | Bounded HTTP receiver, exact identity authorization and ownership checks. |
+| T1.1 | in_progress | `e38f90f8`; connection doctor added with T1.2 | Private setup/configuration, secret handling and readiness commands. |
+| T1.2 | in_progress | transport task commit; service wiring follows T1.3 | Bounded HTTP receiver, exact identity authorization and ownership checks. |
 | T1.3 | ready | pending | Additive storage, atomic inbox/cursor, initial outbox and retained retries. |
 | T1.4 | ready | pending | Read-only registry/help/project/status operations and existing adapter compatibility. |
 

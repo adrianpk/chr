@@ -19,6 +19,7 @@ func newTelegramCommand(stdin io.Reader, stdout io.Writer, deps appDependencies)
 		Name: "telegram", Usage: "Configure and run the dedicated text receiver",
 		Commands: []*cli.Command{
 			newTelegramSetupCommand(stdin, stdout),
+			newTelegramDoctorCommand(stdout),
 			{Name: "status", Usage: "Inspect local receiver configuration", Flags: projectRegistryFlags(), Action: telegramStatusAction(stdout)},
 		},
 	}
@@ -43,7 +44,7 @@ func newTelegramSetupCommand(stdin io.Reader, stdout io.Writer) *cli.Command {
 	}
 }
 
-func runTelegramSetup(cmd *cli.Command, stdin io.Reader, stdout io.Writer) error {
+func runTelegramSetup(cmd *cli.Command, stdin io.Reader, stdout io.Writer) (err error) {
 	if cmd.NArg() != 0 {
 		return errors.New("telegram setup does not accept positional arguments")
 	}
@@ -58,6 +59,12 @@ func runTelegramSetup(cmd *cli.Command, stdin io.Reader, stdout io.Writer) error
 		return err
 	}
 
+	lock, err := core.AcquireTelegramConfigurationLock(env)
+	if err != nil {
+		return err
+	}
+	defer func() { err = errors.Join(err, lock.Close()) }()
+
 	// Check replacement authority before prompting or storing any credential.
 	prior, loadErr := core.LoadTelegramReceiverConfig(env)
 	if !cmd.Bool("replace") && !errors.Is(loadErr, os.ErrNotExist) && (loadErr != nil || prior.Digest() != config.Digest()) {
@@ -70,6 +77,12 @@ func runTelegramSetup(cmd *cli.Command, stdin io.Reader, stdout io.Writer) error
 
 	if err := core.SaveTelegramReceiverConfig(env, config, cmd.Bool("replace")); err != nil {
 		return err
+	}
+
+	if cmd.Bool("replace") {
+		if err := core.ResetTelegramReceiverIdentity(env); err != nil {
+			return err
+		}
 	}
 
 	_, err = fmt.Fprintln(stdout, "telegram_setup: configured")
