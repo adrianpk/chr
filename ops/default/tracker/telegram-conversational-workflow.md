@@ -16,7 +16,7 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 1, Dedicated live receiver; canonical PR preparation
+Active slice: Slice 1, Dedicated live receiver; PR #390 reviewing
 
 Next slice: Slice 2, Conversation routing; after verified Slice 1 integration
 
@@ -78,7 +78,7 @@ Prerequisite: approved committed planning artifacts; execution authorized on 202
 Validation: plan section 6; `TestTelegramReceiver` and the named existing
 notification/import regressions, including focused race mode.
 
-Implementation candidate: `99f0868a6b616dd44dab95dc758718b91addd313`. Canonical PR: being prepared on `feat/slice-1-telegram-receiver`. Verified merge: pending controller integration. Evidence: [Slice 1 report](../report/slices/telegram-conversational-workflow/slice-1-receiver.md); exact final HEAD and ordered checks are recorded through controller validation.
+Implementation candidate: `99f0868a6b616dd44dab95dc758718b91addd313`. Canonical PR: [#390](https://forge.adrianpk.com/adrianpk/chr/pulls/390) on `feat/slice-1-telegram-receiver`. Verified merge: pending controller integration. Evidence: [Slice 1 report](../report/slices/telegram-conversational-workflow/slice-1-receiver.md); exact final HEAD and ordered checks are recorded through controller validation.
 
 ## Slice 2: Conversation Routing
 
@@ -265,4 +265,4 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Exact integrated candidate passed the scheduled exhaustive nightly.
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
-Current state: Slice 1 implementation and deterministic task validation are complete; canonical PR preparation and exact-HEAD controller validation are in progress. Integration, live activation and exhaustive certification remain pending.
+Current state: Slice 1 implementation and deterministic task validation are complete; canonical PR #390 is open and exact-HEAD controller validation follows this reference commit. Integration, live activation and exhaustive certification remain pending.

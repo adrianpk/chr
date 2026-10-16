@@ -16,7 +16,7 @@ Tracker: [Telegram Conversation Tracker](../tracker/telegram-conversational-work
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, its canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 1, Dedicated live receiver; canonical PR preparation
+Active slice: Slice 1, Dedicated live receiver; PR #390 reviewing
 
 Next slice: Slice 2, Conversation routing; after verified Slice 1 integration
 
@@ -423,4 +423,4 @@ starts with every criterion pending.
 - [ ] The cycle report, tracker and plan distinguish tested code from later closure-only documentation.
 - [ ] The delivery set is closed with no pending work or unreported blocker.
 
-Current state: Slice 1 is implemented with deterministic task evidence and its canonical PR is being prepared. No slice is integrated yet; live activation and exhaustive certification remain pending.
+Current state: Slice 1 is implemented with deterministic task evidence and its canonical [PR #390](https://forge.adrianpk.com/adrianpk/chr/pulls/390) is reviewing. No slice is integrated yet; live activation and exhaustive certification remain pending.
