@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -25,6 +26,8 @@ type AuthoringSessionRepository interface {
 	ListSessions(ctx context.Context) ([]AuthoringSession, error)
 	AppendTranscriptEvents(ctx context.Context, sessionID string, events []AssistedTranscriptEvent) error
 	ListTranscriptEvents(ctx context.Context, sessionID string) ([]AssistedTranscriptEvent, error)
+	ObserveContinuation(context.Context, string) (AuthoringSnapshot, error)
+	ContinueAuthoring(context.Context, AuthoringContinuationRequest, AuthoringGenerator) (AuthoringContinuationResult, error)
 }
 
 // AuthoringSessionPaths describes a package boundary value.
@@ -36,7 +39,8 @@ type AuthoringSessionPaths struct {
 }
 
 type fileAuthoringSessionRepository struct {
-	projectDir string
+	projectDir           string
+	afterMutationReplace func(int) error
 }
 
 // NewAuthoringSessionRepository constructs the corresponding package service or value.
@@ -57,10 +61,7 @@ func AuthoringSessionLayout(projectDir, id string) AuthoringSessionPaths {
 }
 
 // CreateSession executes the corresponding package operation.
-func (r *fileAuthoringSessionRepository) CreateSession(
-	ctx context.Context,
-	session AuthoringSession,
-) (AuthoringSessionPaths, error) {
+func (r *fileAuthoringSessionRepository) createSession(ctx context.Context, session AuthoringSession) (AuthoringSessionPaths, error) {
 	err := ctx.Err()
 	if err != nil {
 		return AuthoringSessionPaths{}, err
@@ -102,10 +103,7 @@ func (r *fileAuthoringSessionRepository) CreateSession(
 }
 
 // UpdateSession executes the corresponding package operation.
-func (r *fileAuthoringSessionRepository) UpdateSession(
-	ctx context.Context,
-	session AuthoringSession,
-) (AuthoringSessionPaths, error) {
+func (r *fileAuthoringSessionRepository) updateSession(ctx context.Context, session AuthoringSession) (AuthoringSessionPaths, error) {
 	err := ctx.Err()
 	if err != nil {
 		return AuthoringSessionPaths{}, err
@@ -141,7 +139,7 @@ func (r *fileAuthoringSessionRepository) UpdateSession(
 }
 
 // GetSession executes the corresponding package operation.
-func (r *fileAuthoringSessionRepository) GetSession(ctx context.Context, id string) (AuthoringSession, error) {
+func (r *fileAuthoringSessionRepository) getSession(ctx context.Context, id string) (AuthoringSession, error) {
 	err := ctx.Err()
 	if err != nil {
 		return AuthoringSession{}, err
@@ -149,7 +147,7 @@ func (r *fileAuthoringSessionRepository) GetSession(ctx context.Context, id stri
 
 	paths := AuthoringSessionLayout(r.projectDir, id)
 
-	content, err := os.ReadFile(paths.SessionPath)
+	content, err := readWorkflowFile(paths.SessionPath)
 	if errors.Is(err, os.ErrNotExist) {
 		return AuthoringSession{}, fmt.Errorf("%w: %s", ErrAuthoringSessionNotFound, id)
 	}
@@ -167,37 +165,23 @@ func (r *fileAuthoringSessionRepository) GetSession(ctx context.Context, id stri
 }
 
 // ListSessions lists the requested data.
-func (r *fileAuthoringSessionRepository) ListSessions(ctx context.Context) ([]AuthoringSession, error) {
+func (r *fileAuthoringSessionRepository) listSessions(ctx context.Context) ([]AuthoringSession, error) {
 	sessionsDir := filepath.Join(r.projectDir, DirectoryName, filepath.FromSlash(AuthoringSessionsDirectory))
 	sessions := []AuthoringSession{}
+
+	visited := 0
 
 	err := filepath.WalkDir(sessionsDir, func(path string, entry os.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
 		}
 
-		err := ctx.Err()
-		if err != nil {
-			return err
+		visited++
+		if visited > 16384 {
+			return fmt.Errorf("authoring session inventory exceeds its bound")
 		}
 
-		if entry.IsDir() || filepath.Base(path) != "session.md" {
-			return nil
-		}
-
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return fmt.Errorf("read authoring session: %w", err)
-		}
-
-		session, err := ParseAuthoringSession(string(content))
-		if err != nil {
-			return err
-		}
-
-		sessions = append(sessions, session)
-
-		return nil
+		return r.appendListedAuthoringSession(ctx, &sessions, path, entry)
 	})
 	if errors.Is(err, os.ErrNotExist) {
 		return sessions, nil
@@ -211,11 +195,7 @@ func (r *fileAuthoringSessionRepository) ListSessions(ctx context.Context) ([]Au
 }
 
 // AppendTranscriptEvents executes the corresponding package operation.
-func (r *fileAuthoringSessionRepository) AppendTranscriptEvents(
-	ctx context.Context,
-	sessionID string,
-	events []AssistedTranscriptEvent,
-) error {
+func (r *fileAuthoringSessionRepository) appendTranscriptEvents(ctx context.Context, sessionID string, events []AssistedTranscriptEvent) error {
 	err := ctx.Err()
 	if err != nil {
 		return err
@@ -267,10 +247,7 @@ func (r *fileAuthoringSessionRepository) AppendTranscriptEvents(
 }
 
 // ListTranscriptEvents lists the requested data.
-func (r *fileAuthoringSessionRepository) ListTranscriptEvents(
-	ctx context.Context,
-	sessionID string,
-) ([]AssistedTranscriptEvent, error) {
+func (r *fileAuthoringSessionRepository) listTranscriptEvents(ctx context.Context, sessionID string) ([]AssistedTranscriptEvent, error) {
 	err := ctx.Err()
 	if err != nil {
 		return nil, err
@@ -287,7 +264,7 @@ func (r *fileAuthoringSessionRepository) ListTranscriptEvents(
 		return nil, err
 	}
 
-	content, err := os.ReadFile(paths.TranscriptPath)
+	content, err := readWorkflowFile(paths.TranscriptPath)
 	if errors.Is(err, os.ErrNotExist) {
 		return []AssistedTranscriptEvent{}, nil
 	}
@@ -379,6 +356,16 @@ func renderAuthoringSessionFrontmatter(output *bytes.Buffer, session AuthoringSe
 		{key: "description", value: session.Description, quoted: true},
 	}
 
+	if session.Revision > 0 {
+		fields = append(fields, struct {
+			key, value string
+			quoted     bool
+		}{key: "namespace", value: session.Namespace, quoted: true}, struct {
+			key, value string
+			quoted     bool
+		}{key: "revision", value: strconv.FormatInt(session.Revision, 10)})
+	}
+
 	for _, field := range fields {
 		value := field.value
 		if field.quoted {
@@ -452,6 +439,11 @@ func renderAuthoringProvenanceTable(output *bytes.Buffer, links []AuthoringProve
 }
 
 func authoringSessionFromMetadata(metadata map[string]string) (AuthoringSession, error) {
+	revision, err := optionalAuthoringRevision(metadata)
+	if err != nil {
+		return AuthoringSession{}, err
+	}
+
 	createdAt, err := requiredAuthoringTime(metadata["created_at"], "created_at")
 	if err != nil {
 		return AuthoringSession{}, err
@@ -474,6 +466,8 @@ func authoringSessionFromMetadata(metadata map[string]string) (AuthoringSession,
 
 	return AuthoringSession{
 		ID:          unquoteMetadataString(metadata["id"]),
+		Namespace:   unquoteMetadataString(metadata["namespace"]),
+		Revision:    revision,
 		ProjectID:   unquoteMetadataString(metadata["project_id"]),
 		Status:      AuthoringSessionStatus(unquoteMetadataString(metadata["status"])),
 		Mode:        AuthoringSessionMode(unquoteMetadataString(metadata["mode"])),
@@ -656,4 +650,52 @@ func unmarkdownCell(value string) string {
 	value = strings.ReplaceAll(value, "\\|", "|")
 
 	return value
+}
+
+func optionalAuthoringRevision(metadata map[string]string) (int64, error) {
+	value := metadata["revision"]
+	if value == "" {
+		return 0, nil
+	}
+
+	revision, err := strconv.ParseInt(value, 10, 64)
+	if err != nil || revision < 1 {
+		return 0, fmt.Errorf("invalid authoring revision")
+	}
+
+	return revision, nil
+}
+
+func (r *fileAuthoringSessionRepository) appendListedAuthoringSession(ctx context.Context, sessions *[]AuthoringSession, path string, entry os.DirEntry) error {
+	err := ctx.Err()
+	if err != nil {
+		return err
+	}
+
+	if entry.IsDir() || filepath.Base(path) != "session.md" {
+		return nil
+	}
+
+	relative, err := filepath.Rel(r.projectDir, path)
+	if err != nil {
+		return err
+	}
+
+	if _, err := r.authoringPath(relative); err != nil {
+		return err
+	}
+
+	content, err := readWorkflowFile(path)
+	if err != nil {
+		return fmt.Errorf("read authoring session: %w", err)
+	}
+
+	session, err := ParseAuthoringSession(string(content))
+	if err != nil {
+		return err
+	}
+
+	*sessions = append(*sessions, session)
+
+	return nil
 }

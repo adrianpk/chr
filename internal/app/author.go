@@ -545,7 +545,7 @@ func runAuthorContextualQuizNew(
 		return printAuthorContextualQuizPlan(stdout, plan, true, projectContext.ProjectDir)
 	}
 
-	err = core.WriteContextualQuiz(plan)
+	err = core.WriteContextualQuizContext(ctx, plan)
 	if err != nil {
 		return err
 	}
@@ -604,7 +604,7 @@ func runAuthorPromoteQuizToDraft(ctx context.Context, cmd *cli.Command, stdout i
 		return printAuthorPromotionPlan(stdout, plan, true)
 	}
 
-	err = core.WriteQuizToDraftPromotion(plan)
+	err = core.WriteQuizToDraftPromotionContext(ctx, plan)
 	if err != nil {
 		return err
 	}

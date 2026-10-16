@@ -155,7 +155,7 @@ func PlanContextualQuizGeneration(
 }
 
 // WriteContextualQuiz executes the corresponding package operation.
-func WriteContextualQuiz(plan ContextualQuizGenerationPlan) error {
+func writeContextualQuiz(plan ContextualQuizGenerationPlan) error {
 	if plan.Layout.Collision.Exists && !plan.Layout.Collision.Allowed {
 		return fmt.Errorf("authoring quiz artifact already exists: %s", plan.Layout.FullPath)
 	}

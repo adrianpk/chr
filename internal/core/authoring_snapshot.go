@@ -1,0 +1,187 @@
+package core
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"os"
+	"path/filepath"
+)
+
+// ObserveContinuation reads a consistent bounded session after journal recovery.
+func (r *fileAuthoringSessionRepository) ObserveContinuation(ctx context.Context, id string) (snapshot AuthoringSnapshot, err error) {
+	err = WithAuthoringMutation(ctx, r.projectDir, func(context.Context) error {
+		snapshot, err = r.readAuthoringSnapshot(id, nil)
+
+		return err
+	})
+
+	return snapshot, err
+}
+
+func (r *fileAuthoringSessionRepository) readAuthoringSnapshot(id string, images map[string][]byte) (AuthoringSnapshot, error) {
+	var snapshot AuthoringSnapshot
+
+	paths, err := r.authoringSessionPaths(id)
+	if err != nil {
+		return snapshot, err
+	}
+
+	relative, err := authoringRelativePaths(r.projectDir, paths)
+	if err != nil {
+		return snapshot, err
+	}
+
+	snapshot.SessionRef = relative.SessionPath
+
+	session, err := r.readAuthoringImage(relative.SessionPath, images)
+	if err != nil {
+		return snapshot, err
+	}
+
+	snapshot.Session, err = parseManagedAuthoringSession(session, id)
+	if err != nil {
+		return snapshot, err
+	}
+
+	transcript, err := r.readAuthoringImage(relative.TranscriptPath, images)
+	if err != nil {
+		return snapshot, err
+	}
+
+	snapshot.Events, err = ParseAssistedTranscriptEvents(string(transcript))
+	if err != nil {
+		return snapshot, err
+	}
+
+	if len(snapshot.Events) > 64 {
+		return snapshot, errors.New("authoring transcript capacity exceeded")
+	}
+
+	snapshot.SessionHash, snapshot.TranscriptHash = workflowHash(session), workflowHash(transcript)
+	if err := r.readAuthoringArtifacts(&snapshot, images); err != nil {
+		return snapshot, err
+	}
+
+	snapshot.SourceHash, err = authoringSnapshotDigest(snapshot)
+	if err != nil {
+		return snapshot, err
+	}
+
+	snapshot.Question, err = authoringCurrentQuestion(snapshot)
+
+	return snapshot, err
+}
+
+func (r *fileAuthoringSessionRepository) readAuthoringImage(relative string, images map[string][]byte) ([]byte, error) {
+	if data, found := images[relative]; found {
+		return data, nil
+	}
+
+	return r.authoringRead(relative)
+}
+
+func (r *fileAuthoringSessionRepository) readAuthoringArtifacts(snapshot *AuthoringSnapshot, images map[string][]byte) error {
+	refs := append(append([]AuthoringArtifactRef{}, snapshot.Session.Inputs...), snapshot.Session.Outputs...)
+	if len(refs) > 16 {
+		return errors.New("authoring artifact context capacity exceeded")
+	}
+
+	total := 0
+
+	for _, ref := range refs {
+		if !validAuthoringArtifactRef(snapshot.Session.Namespace, ref) {
+			return ErrWorkflowConflict
+		}
+
+		body, err := r.readAuthoringImage(filepath.FromSlash(ref.Path), images)
+		if err != nil {
+			return err
+		}
+
+		metadata, err := r.readAuthoringImage(filepath.Join(filepath.Dir(ref.Path), "metadata.json"), images)
+		if err != nil {
+			return err
+		}
+
+		total += len(body) + len(metadata)
+		if total > 1024*1024 {
+			return errors.New("authoring canonical context exceeds 1 MiB")
+		}
+
+		snapshot.Artifacts = append(snapshot.Artifacts, AuthoringArtifactObservation{Ref: ref, SourceHash: workflowHash(body), MetadataHash: workflowHash(metadata), Body: string(body)})
+	}
+
+	return nil
+}
+
+func authoringSnapshotDigest(snapshot AuthoringSnapshot) (string, error) {
+	guards := []string{snapshot.SessionHash, snapshot.TranscriptHash}
+	for _, artifact := range snapshot.Artifacts {
+		guards = append(guards, artifact.Ref.Path, artifact.SourceHash, artifact.MetadataHash)
+	}
+
+	encoded, err := json.Marshal(guards)
+
+	return workflowHash(encoded), err
+}
+
+func authoringCurrentQuestion(snapshot AuthoringSnapshot) (*AuthoringQuestionBinding, error) {
+	var question *AuthoringQuestionBinding
+
+	for _, event := range snapshot.Events {
+		switch event.Type {
+		case AssistedTranscriptEventQuestion:
+			encoded, err := json.Marshal(event.Question)
+			if err != nil {
+				return nil, err
+			}
+
+			question = &AuthoringQuestionBinding{SessionID: snapshot.Session.ID, TurnID: event.TurnID, QuestionID: event.Question.ID, Revision: event.Revision, ContentDigest: workflowHash(encoded)}
+		case AssistedTranscriptEventAnswer:
+			if question != nil && question.QuestionID == event.Answer.QuestionID {
+				question = nil
+			}
+		}
+	}
+
+	return question, nil
+}
+
+func (r *fileAuthoringSessionRepository) guardAuthoringSnapshot(request AuthoringContinuationRequest) (AuthoringSnapshot, error) {
+	snapshot, err := r.readAuthoringSnapshot(request.SessionID, nil)
+	if request.Action == "create" && errors.Is(err, os.ErrNotExist) {
+		return newAuthoringSnapshot(request), nil
+	}
+
+	if err != nil {
+		return snapshot, err
+	}
+
+	if snapshot.Session.ProjectID != request.ProjectID || snapshot.Session.Namespace != request.Namespace {
+		return snapshot, ErrWorkflowConflict
+	}
+
+	if request.Action == "create" || snapshot.Session.Status != AuthoringSessionStatusActive {
+		return snapshot, ErrWorkflowConflict
+	}
+
+	if snapshot.Session.Revision != request.ExpectedRevision || snapshot.SourceHash != request.ExpectedSourceHash {
+		return snapshot, ErrWorkflowConflict
+	}
+
+	return snapshot, nil
+}
+
+func parseManagedAuthoringSession(content []byte, id string) (AuthoringSession, error) {
+	session, err := ParseAuthoringSession(string(content))
+	if err != nil {
+		return session, err
+	}
+
+	if session.ID != id || session.Revision < 1 || !IsValidOpsNamespace(session.Namespace) || len(session.Inputs) == 0 {
+		return session, ErrWorkflowConflict
+	}
+
+	return session, nil
+}

@@ -28,6 +28,7 @@ type AssistedTranscriptEvent struct {
 	SessionID string
 	TurnID    string
 	TurnIndex int
+	Revision  int64
 	Type      AssistedTranscriptEventType
 	Intent    AssistedAuthoringIntent
 	Status    AssistedAuthoringTurnStatus
@@ -192,6 +193,11 @@ func renderAssistedTranscriptEventFrontmatter(output *bytes.Buffer, event Assist
 	output.WriteString("session_id: " + yamlString(event.SessionID) + "\n")
 	output.WriteString("turn_id: " + yamlString(event.TurnID) + "\n")
 	output.WriteString("turn_index: " + strconv.Itoa(event.TurnIndex) + "\n")
+
+	if event.Revision > 0 {
+		output.WriteString("revision: " + strconv.FormatInt(event.Revision, 10) + "\n")
+	}
+
 	output.WriteString("type: " + yamlString(string(event.Type)) + "\n")
 	output.WriteString("intent: " + yamlString(string(event.Intent)) + "\n")
 	output.WriteString("status: " + yamlString(string(event.Status)) + "\n")
@@ -205,15 +211,15 @@ func renderAssistedTranscriptEventBody(output *bytes.Buffer, event AssistedTrans
 	if event.Question.ID != "" {
 		output.WriteString("### Question\n\n")
 		output.WriteString("id: " + event.Question.ID + "\n\n")
-		output.WriteString("prompt: " + event.Question.Prompt + "\n\n")
-		output.WriteString("rationale: " + event.Question.Rationale + "\n\n")
+		output.WriteString("prompt: " + renderTranscriptText(event, event.Question.Prompt) + "\n\n")
+		output.WriteString("rationale: " + renderTranscriptText(event, event.Question.Rationale) + "\n\n")
 		fmt.Fprintf(output, "required: %t\n\n", event.Question.Required)
 	}
 
 	if event.Answer.QuestionID != "" {
 		output.WriteString("### Answer\n\n")
 		output.WriteString("question_id: " + event.Answer.QuestionID + "\n\n")
-		output.WriteString("text: " + event.Answer.Text + "\n\n")
+		output.WriteString("text: " + renderTranscriptText(event, event.Answer.Text) + "\n\n")
 		output.WriteString("answered_at: " + event.Answer.AnsweredAt.UTC().Format(time.RFC3339) + "\n\n")
 	}
 
@@ -221,7 +227,7 @@ func renderAssistedTranscriptEventBody(output *bytes.Buffer, event AssistedTrans
 		output.WriteString("### Result\n\n")
 		output.WriteString("completion_reason: " + string(event.Result.CompletionReason) + "\n\n")
 		output.WriteString("blocked_reason: " + string(event.Result.BlockedReason) + "\n\n")
-		output.WriteString("summary: " + event.Result.Summary + "\n\n")
+		output.WriteString("summary: " + renderTranscriptText(event, event.Result.Summary) + "\n\n")
 		output.WriteString("next_intent: " + string(event.Result.NextIntent) + "\n\n")
 	}
 }
@@ -273,7 +279,13 @@ func parseAssistedTranscriptEvent(block string) (AssistedTranscriptEvent, error)
 	body := block[bodyStart:]
 	event.Question = parseAssistedTranscriptQuestion(body)
 	event.Answer = parseAssistedTranscriptAnswer(body)
+
 	event.Result = parseAssistedTranscriptResult(body)
+	if event.Revision > 0 {
+		if err := decodeManagedTranscriptText(&event); err != nil {
+			return AssistedTranscriptEvent{}, err
+		}
+	}
 
 	err = ValidateAssistedTranscriptEvent(event)
 	if err != nil {
@@ -284,6 +296,11 @@ func parseAssistedTranscriptEvent(block string) (AssistedTranscriptEvent, error)
 }
 
 func assistedTranscriptEventFromMetadata(metadata map[string]string) (AssistedTranscriptEvent, error) {
+	revision, err := optionalAuthoringRevision(metadata)
+	if err != nil {
+		return AssistedTranscriptEvent{}, err
+	}
+
 	turnIndex, err := strconv.Atoi(unquoteMetadataString(metadata["turn_index"]))
 	if err != nil {
 		return AssistedTranscriptEvent{}, fmt.Errorf("parse assisted transcript turn index: %w", err)
@@ -299,6 +316,7 @@ func assistedTranscriptEventFromMetadata(metadata map[string]string) (AssistedTr
 		SessionID: unquoteMetadataString(metadata["session_id"]),
 		TurnID:    unquoteMetadataString(metadata["turn_id"]),
 		TurnIndex: turnIndex,
+		Revision:  revision,
 		Type:      AssistedTranscriptEventType(unquoteMetadataString(metadata["type"])),
 		Intent:    AssistedAuthoringIntent(unquoteMetadataString(metadata["intent"])),
 		Status:    AssistedAuthoringTurnStatus(unquoteMetadataString(metadata["status"])),
@@ -354,4 +372,29 @@ func transcriptValue(section, key string) string {
 	}
 
 	return ""
+}
+
+func renderTranscriptText(event AssistedTranscriptEvent, value string) string {
+	if event.Revision > 0 {
+		return strconv.Quote(value)
+	}
+
+	return value
+}
+
+func decodeManagedTranscriptText(event *AssistedTranscriptEvent) error {
+	for _, value := range []*string{&event.Question.Prompt, &event.Question.Rationale, &event.Answer.Text, &event.Result.Summary} {
+		if *value == "" {
+			continue
+		}
+
+		decoded, err := strconv.Unquote(*value)
+		if err != nil {
+			return err
+		}
+
+		*value = decoded
+	}
+
+	return nil
 }

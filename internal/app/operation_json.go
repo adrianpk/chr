@@ -84,3 +84,23 @@ func readOperationJSONKey(decoder *json.Decoder, seen map[string]bool) error {
 
 	return nil
 }
+
+func requiredOperationFields(output json.RawMessage, names []string) (map[string]json.RawMessage, error) {
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(output, &fields); err != nil {
+		return nil, err
+	}
+
+	if len(fields) != len(names) {
+		return nil, errors.New("missing or null operation field")
+	}
+
+	for _, name := range names {
+		value, found := fields[name]
+		if !found || string(value) == "null" {
+			return nil, errors.New("missing or null operation field")
+		}
+	}
+
+	return fields, nil
+}

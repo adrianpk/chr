@@ -166,32 +166,12 @@ func decodeConversationIntent(output json.RawMessage, result *ConversationIntent
 		return err
 	}
 
-	fields, err := requiredIntentFields(output, []string{"operation_id", "arguments", "unresolved", "explanation"})
+	fields, err := requiredOperationFields(output, []string{"operation_id", "arguments", "unresolved", "explanation"})
 	if err != nil {
 		return err
 	}
 
-	_, err = requiredIntentFields(fields["arguments"], []string{"project", "conversation", "namespace", "text", "action", "record_json"})
+	_, err = requiredOperationFields(fields["arguments"], []string{"project", "conversation", "namespace", "text", "action", "record_json"})
 
 	return err
-}
-
-func requiredIntentFields(output json.RawMessage, names []string) (map[string]json.RawMessage, error) {
-	var fields map[string]json.RawMessage
-	if err := json.Unmarshal(output, &fields); err != nil {
-		return nil, err
-	}
-
-	if len(fields) != len(names) {
-		return nil, errConversationIntentInvalid
-	}
-
-	for _, name := range names {
-		value, found := fields[name]
-		if !found || string(value) == "null" {
-			return nil, errConversationIntentInvalid
-		}
-	}
-
-	return fields, nil
 }

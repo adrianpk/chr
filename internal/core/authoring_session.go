@@ -112,6 +112,8 @@ const (
 // AuthoringSession describes a package boundary value.
 type AuthoringSession struct {
 	ID          string
+	Namespace   string
+	Revision    int64
 	ProjectID   string
 	Status      AuthoringSessionStatus
 	Mode        AuthoringSessionMode
@@ -337,6 +339,10 @@ func validateAuthoringProvenanceLinks(links []AuthoringProvenanceLink) error {
 }
 
 func validateAuthoringSessionTimes(session AuthoringSession) error {
+	if err := validateManagedAuthoringRevision(session); err != nil {
+		return err
+	}
+
 	if session.CreatedAt.IsZero() {
 		return fmt.Errorf("authoring session created time is required")
 	}
@@ -347,6 +353,14 @@ func validateAuthoringSessionTimes(session AuthoringSession) error {
 
 	if session.StartedAt != nil && session.FinishedAt != nil && session.FinishedAt.Before(*session.StartedAt) {
 		return fmt.Errorf("authoring session finished before it started")
+	}
+
+	return nil
+}
+
+func validateManagedAuthoringRevision(session AuthoringSession) error {
+	if session.Revision < 0 || (session.Revision > 0 && !IsValidOpsNamespace(session.Namespace)) {
+		return fmt.Errorf("invalid managed authoring revision or namespace")
 	}
 
 	return nil

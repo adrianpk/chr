@@ -95,7 +95,7 @@ func ArchivedPlanLayout(projectDir string, scope QuizScope, archivedAt time.Time
 }
 
 // WriteGeneratedPlan executes the corresponding package operation.
-func WriteGeneratedPlan(ctx context.Context, projectDir string, plan GeneratedPlan) (GeneratedPlanPaths, error) {
+func writeGeneratedPlan(ctx context.Context, projectDir string, plan GeneratedPlan) (GeneratedPlanPaths, error) {
 	err := ctx.Err()
 	if err != nil {
 		return GeneratedPlanPaths{}, err
@@ -134,12 +134,7 @@ func WriteGeneratedPlan(ctx context.Context, projectDir string, plan GeneratedPl
 }
 
 // ArchiveGeneratedPlan executes the corresponding package operation.
-func ArchiveGeneratedPlan(
-	ctx context.Context,
-	projectDir string,
-	scope QuizScope,
-	archivedAt time.Time,
-) (ArchivedPlanPaths, bool, error) {
+func archiveGeneratedPlan(ctx context.Context, projectDir string, scope QuizScope, archivedAt time.Time) (ArchivedPlanPaths, bool, error) {
 	err := ctx.Err()
 	if err != nil {
 		return ArchivedPlanPaths{}, false, err

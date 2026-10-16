@@ -58,7 +58,7 @@ func PlanQuizToDraftPromotion(opts QuizToDraftPromotionOptions) (QuizToDraftProm
 }
 
 // WriteQuizToDraftPromotion executes the corresponding package operation.
-func WriteQuizToDraftPromotion(plan QuizToDraftPromotionPlan) error {
+func writeQuizToDraftPromotion(plan QuizToDraftPromotionPlan) error {
 	if plan.Layout.Collision.Exists && !plan.Layout.Collision.Allowed {
 		return fmt.Errorf("authoring draft artifact already exists: %s", plan.Layout.FullPath)
 	}

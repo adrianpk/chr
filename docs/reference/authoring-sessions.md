@@ -304,3 +304,60 @@ Authoring sessions prepare context and documents. They do not execute tickets
 and do not run the Docker worker.
 
 The TUI remains a future surface over the same session model.
+
+## Bound Provider Continuations
+
+The application operation service exposes `ObserveAuthoring` and
+`ContinueAuthoring` for caller-neutral creation, questions, answers, generation
+and refinement. These operations use the configured structured model provider;
+they do not require the legacy fake question or summary flags shown above.
+
+`AuthoringContinuationRequest` contains an opaque request/operator binding,
+project, frozen namespace, session identity, action and target. Supported targets
+are dump, quiz, spec and plan. Creation retains its original capture in a
+canonical raw dump. Subsequent operations require both the observed session
+revision and a source hash covering the session, transcript, artifact bodies and
+metadata. Refinement may replace only that session's observed output of the
+requested kind. A new generation cannot silently replace an existing output.
+
+Managed session frontmatter adds a positive `revision` and frozen `namespace`.
+Their canonical artifacts use `ops/<namespace>/<kind>/<id>/artifact.md` and the
+normal envelope metadata, files, evidence and producer-extension directories.
+Request-derived session and artifact identities are reserved before provider
+invocation. Specs remain drafts; preparation does not create work invocations or
+change execution authority. Existing sessions remain readable through the
+original repository and CLI surfaces; the bound continuation API does not adopt
+legacy sessions implicitly.
+
+A question binds the canonical session, turn, question ID, revision and content
+digest. The owner assigns those identities. Answers must match the current
+binding and observed session; another session's prompt, an answered prompt or a
+prompt superseded by a session edit cannot accept the answer. Managed transcript
+text uses quoted escaped values so multiline text and Markdown delimiters survive
+reload without becoming transcript records.
+
+The authoring repository serializes ordinary and bound writers through an
+OS-backed owner lock. A bound operation journals its expected before images,
+intended after images and immutable result receipt together. Recovery checks all
+images before replay; divergent files preserve the journal and block mutation.
+Replaying a confirmed request returns its original receipt even after later
+independent edits. Reusing an ID with changed arguments conflicts, including
+after provider failure.
+
+Private recovery state is stored under `.chr/authoring/`:
+
+```text
+owner.lock
+pending.json
+requests/<opaque-request-hash>.json
+receipts/<opaque-request-hash>.json
+```
+
+Each provider attempt is retained before invocation. Five attempts exhaust that
+request's budget; retry deadlines and exhaustion survive reopening. The shared
+structured provider limits calls to 60 seconds and two concurrent invocations.
+Authoring also bounds captures to 64 KiB, instructions to 16 KiB, questions to
+eight per session, canonical artifact references to 16, transcript/provenance
+entries to 64, and retained request bindings to 4,096 per project. File and
+journal reads are bounded to 1 MiB. Capacity and provider failures preserve the
+previous canonical session and artifacts.

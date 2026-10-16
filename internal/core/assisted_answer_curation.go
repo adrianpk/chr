@@ -57,10 +57,7 @@ type AssistedCuratedOpenQuestion struct {
 }
 
 // CurateAssistedAnswers executes the corresponding package operation.
-func CurateAssistedAnswers(
-	ctx context.Context,
-	opts AssistedAnswerCurationOptions,
-) (AssistedAnswerCurationResult, error) {
+func curateAssistedAnswers(ctx context.Context, opts AssistedAnswerCurationOptions) (AssistedAnswerCurationResult, error) {
 	err := validateAssistedAnswerCurationOptions(opts)
 	if err != nil {
 		return AssistedAnswerCurationResult{}, err

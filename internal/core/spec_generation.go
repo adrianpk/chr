@@ -59,7 +59,7 @@ func GeneratedSpecLayout(projectDir string, scope QuizScope) (GeneratedSpecPaths
 }
 
 // WriteGeneratedSpec executes the corresponding package operation.
-func WriteGeneratedSpec(ctx context.Context, projectDir string, spec GeneratedSpec) (GeneratedSpecPaths, error) {
+func writeGeneratedSpec(ctx context.Context, projectDir string, spec GeneratedSpec) (GeneratedSpecPaths, error) {
 	err := ctx.Err()
 	if err != nil {
 		return GeneratedSpecPaths{}, err

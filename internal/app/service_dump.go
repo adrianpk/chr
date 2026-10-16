@@ -99,7 +99,7 @@ func (s service) ListDumps() (DumpListResult, error) {
 	}, nil
 }
 
-func (s service) CreateDump(request DumpCreateRequest) (DumpOperationResult, error) {
+func (s service) createDump(request DumpCreateRequest) (DumpOperationResult, error) {
 	title := strings.TrimSpace(request.Title)
 	if title == "" {
 		return DumpOperationResult{}, fmt.Errorf("dump title is required")
@@ -128,7 +128,7 @@ func (s service) CreateDump(request DumpCreateRequest) (DumpOperationResult, err
 	}, nil
 }
 
-func (s service) AppendDump(request DumpAppendRequest) (DumpOperationResult, error) {
+func (s service) appendDump(request DumpAppendRequest) (DumpOperationResult, error) {
 	path, err := s.resolveDumpPath(request.RelativePath)
 	if err != nil {
 		return DumpOperationResult{}, err
@@ -166,7 +166,7 @@ func (s service) AppendDump(request DumpAppendRequest) (DumpOperationResult, err
 	}, nil
 }
 
-func (s service) SaveDump(request DumpSaveRequest) (DumpOperationResult, error) {
+func (s service) saveDump(request DumpSaveRequest) (DumpOperationResult, error) {
 	path, err := s.resolveDumpPath(request.RelativePath)
 	if err != nil {
 		return DumpOperationResult{}, err

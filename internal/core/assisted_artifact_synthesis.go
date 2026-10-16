@@ -29,10 +29,7 @@ type AssistedArtifactSynthesisResult struct {
 }
 
 // SynthesizeAssistedArtifact executes the corresponding package operation.
-func SynthesizeAssistedArtifact(
-	ctx context.Context,
-	opts AssistedArtifactSynthesisOptions,
-) (AssistedArtifactSynthesisResult, error) {
+func synthesizeAssistedArtifact(ctx context.Context, opts AssistedArtifactSynthesisOptions) (AssistedArtifactSynthesisResult, error) {
 	err := validateAssistedArtifactSynthesisOptions(opts)
 	if err != nil {
 		return AssistedArtifactSynthesisResult{}, err
