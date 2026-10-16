@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"testing"
@@ -11,15 +12,40 @@ import (
 func fillTelegramOrdinaryIntake(t *testing.T, store *TelegramReceiverStore) {
 	t.Helper()
 
-	for start := 0; start < 992; start += 100 {
-		var batch []TelegramReceivedUpdate
-		for id := start; id < min(start+100, 992); id++ {
-			batch = append(batch, telegramRetainedTestUpdate(t, int64(id), "/help"))
+	first := telegramRetainedTestUpdate(t, 0, "/help")
+	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{first}, time.Now()); err != nil {
+		t.Fatal(err)
+	}
+
+	var backlog []TelegramReceivedUpdate
+	for id := 1; id < 991; id++ {
+		backlog = append(backlog, telegramRetainedTestUpdate(t, int64(id), "/help"))
+	}
+
+	data, err := json.Marshal(backlog)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Seed the settled backlog together with its cursor. Actual intake still
+	// exercises the final ordinary slot and every overflow/reserved boundary.
+	err = store.transaction(t.Context(), func(tx *sql.Tx) error {
+		_, err := tx.ExecContext(t.Context(), `INSERT INTO telegram_updates(bot_id,update_id,cursor_epoch,payload_digest,update_kind,chat_id,topic_id,user_id,message_id,chat_type,received_at,payload,state,reason_code,updated_at)
+SELECT u.bot_id,json_extract(j.value,'$.UpdateID'),u.cursor_epoch,json_extract(j.value,'$.Digest'),'message',u.chat_id,u.topic_id,u.user_id,json_extract(j.value,'$.MessageID'),u.chat_type,u.received_at,u.payload,'pending','',u.updated_at FROM json_each(?) j JOIN telegram_updates u ON u.bot_id=12345 AND u.update_id=0`, string(data))
+		if err != nil {
+			return err
 		}
 
-		if err := store.RetainBatch(t.Context(), 12345, batch, time.Now()); err != nil {
-			t.Fatal(err)
-		}
+		_, err = tx.ExecContext(t.Context(), `UPDATE telegram_receivers SET next_update_id=991 WHERE bot_id=12345`)
+
+		return err
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	last := telegramRetainedTestUpdate(t, 991, "/help")
+	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{last}, time.Now()); err != nil {
+		t.Fatal(err)
 	}
 }
 

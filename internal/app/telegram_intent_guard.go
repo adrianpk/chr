@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"strings"
 	"time"
 
@@ -85,6 +86,10 @@ func (r telegramReceiver) intentTarget(ctx context.Context, input core.TelegramC
 }
 
 func telegramIntentTargetFailure(err error) string {
+	if errors.Is(err, core.ErrTelegramRequestCapacity) {
+		return telegramRequestCapacityText
+	}
+
 	if diagnostic, ok := core.TelegramConversationFailure(err); ok {
 		return diagnostic
 	}

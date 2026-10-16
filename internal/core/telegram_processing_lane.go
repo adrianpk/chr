@@ -37,19 +37,25 @@ func telegramInputLane(ctx context.Context, tx *sql.Tx, update TelegramReceivedU
 		return TelegramProcessingOrdinary, false, nil
 	}
 
-	if lane, control := telegramExplicitControlLane(update); control {
+	if lane, control := TelegramExplicitControlLane(update); control {
 		return lane, true, nil
 	}
 
 	token, answer, err := telegramInputActionToken(ctx, tx, update)
-	if err != nil || !answer {
+	if err != nil {
 		return TelegramProcessingOrdinary, false, err
+	}
+
+	if !answer {
+		return telegramUnboundReplyLane(ctx, tx, update)
 	}
 
 	return telegramActionInputLane(ctx, tx, update.Peer, token)
 }
 
-func telegramExplicitControlLane(update TelegramReceivedUpdate) (TelegramProcessingLane, bool) {
+// TelegramExplicitControlLane classifies deterministic control syntax. This
+// scheduling hint grants no target, actor, execution or mutation authority.
+func TelegramExplicitControlLane(update TelegramReceivedUpdate) (TelegramProcessingLane, bool) {
 	words := strings.Fields(update.Text)
 	if update.Kind != "message" || len(words) == 0 {
 		return TelegramProcessingOrdinary, false
@@ -79,14 +85,41 @@ func telegramActionInputLane(ctx context.Context, tx *sql.Tx, p TelegramPeerIden
 		return TelegramProcessingOrdinary, false, err
 	}
 
+	lane, err := TelegramActionProcessingLane(TelegramOperationRequest{OperationID: operation, Arguments: json.RawMessage(arguments)})
+
+	return lane, true, err
+}
+
+// TelegramActionProcessingLane derives execution class from the immutable
+// retained operation, including a reply whose binding appeared after intake.
+func TelegramActionProcessingLane(request TelegramOperationRequest) (TelegramProcessingLane, error) {
+	if request.OperationID != "work.control" {
+		return TelegramProcessingOrdinary, nil
+	}
+
 	var args struct {
 		Action string `json:"action"`
 	}
-	if err := json.Unmarshal([]byte(arguments), &args); err != nil {
-		return "", false, err
+	if err := json.Unmarshal(request.Arguments, &args); err != nil {
+		return "", err
 	}
 
-	return telegramControlLane(args.Action), true, nil
+	return telegramControlLane(args.Action), nil
+}
+
+func telegramUnboundReplyLane(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate) (TelegramProcessingLane, bool, error) {
+	if update.ReplyToMessageID <= 0 {
+		return TelegramProcessingOrdinary, false, nil
+	}
+
+	state, err := resolveTelegramReplyBinding(ctx, tx, update)
+	if state == telegramReplyKnown {
+		return TelegramProcessingOrdinary, false, err
+	}
+
+	// Unknown replies only wait or produce diagnostics. They cannot execute a
+	// model and receive no reserved intake allowance before their binding exists.
+	return TelegramProcessingDecision, false, err
 }
 
 func telegramInputActionToken(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate) (string, bool, error) {
@@ -133,7 +166,7 @@ FROM telegram_updates u WHERE u.bot_id=? AND u.state='pending' AND u.processing_
 AND (u.interpretation IS NOT NULL OR u.interpretation_attempt>=5 OR u.interpretation_retry_at IS NULL OR u.interpretation_retry_at<=?)
 AND NOT EXISTS(SELECT 1 FROM telegram_requests r WHERE r.bot_id=u.bot_id AND r.update_id=u.update_id AND r.state='applying' AND r.model_result IS NULL AND r.model_attempt<5 AND r.model_retry_at>?)
 AND (u.processing_lane!='ordinary' OR NOT EXISTS(SELECT 1 FROM telegram_updates earlier WHERE earlier.bot_id=u.bot_id AND earlier.chat_id=u.chat_id AND earlier.topic_id=u.topic_id AND earlier.user_id=u.user_id AND earlier.state='pending' AND earlier.processing_lane='ordinary' AND earlier.update_id<u.update_id))
-ORDER BY u.update_id LIMIT 50`, botID, lane, formatProjectTime(now), formatProjectTime(now))
+ORDER BY CASE WHEN u.processing_lane='decision' THEN u.control_input ELSE 0 END DESC,u.update_id LIMIT 50`, botID, lane, formatProjectTime(now), formatProjectTime(now))
 	if err != nil {
 		return nil, err
 	}

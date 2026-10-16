@@ -37,7 +37,7 @@ func (r telegramReceiver) applyControlAction(ctx context.Context, claim core.Tel
 	}
 
 	if claim.ReceiptOnly {
-		return r.actionDiagnostic(ctx, claim.ResponseSource, config)
+		return r.staleActionDiagnostic(ctx, claim.ResponseSource, core.TelegramActionAnswer{Token: claim.Action.Token, Choice: claim.Choice}, config)
 	}
 
 	if err := r.validateRecordAuthority(ctx, claim.Request); err != nil {

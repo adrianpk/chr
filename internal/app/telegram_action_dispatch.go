@@ -15,11 +15,11 @@ func telegramActionHelp() string {
 func (r telegramReceiver) respondAction(ctx context.Context, user core.TelegramAllowedUser, config core.TelegramReceiverConfig, update core.TelegramReceivedUpdate) (bool, error) {
 	answer, recognized, err := r.store.ResolveTelegramActionAnswer(ctx, update)
 	if !recognized {
-		return false, nil
+		return false, r.checkCaptureReplyLane(update)
 	}
 
 	if errors.Is(err, core.ErrTelegramActionUnavailable) {
-		return true, r.actionDiagnostic(ctx, update, config)
+		return true, r.staleActionDiagnostic(ctx, update, answer, config)
 	}
 
 	if err != nil {
@@ -33,7 +33,7 @@ func (r telegramReceiver) respondAction(ctx context.Context, user core.TelegramA
 
 	claim, err := r.store.ClaimTelegramAction(ctx, core.TelegramConversationInput{Update: update, Config: config, Projects: projects}, answer, time.Now())
 	if errors.Is(err, core.ErrTelegramActionUnavailable) {
-		return true, r.actionDiagnostic(ctx, update, config)
+		return true, r.staleActionDiagnostic(ctx, update, answer, config)
 	}
 
 	if err != nil {
@@ -44,13 +44,17 @@ func (r telegramReceiver) respondAction(ctx context.Context, user core.TelegramA
 }
 
 func (r telegramReceiver) respondActionClaim(ctx context.Context, update core.TelegramReceivedUpdate, claim core.TelegramActionClaim, config core.TelegramReceiverConfig) error {
+	if err := r.checkActionLane(claim); err != nil {
+		return err
+	}
+
 	if claim.ReceiptOnly {
 		return r.applyControlAction(ctx, claim, config)
 	}
 
 	switch claim.Action.State {
 	case "expired", "superseded":
-		return r.actionDiagnostic(ctx, update, config)
+		return r.staleActionDiagnostic(ctx, update, core.TelegramActionAnswer{Token: claim.Action.Token, Choice: claim.Choice}, config)
 	case "consumed":
 		return r.store.QueueReadResponse(ctx, update, "Action already confirmed. Request: "+claim.Request.ID, config.Digest(), time.Now())
 	default:
@@ -75,5 +79,5 @@ func (r telegramReceiver) dispatchTelegramAction(ctx context.Context, claim core
 }
 
 func (r telegramReceiver) actionDiagnostic(ctx context.Context, update core.TelegramReceivedUpdate, config core.TelegramReceiverConfig) error {
-	return r.store.QueueReadResponse(ctx, update, "This action is unavailable, expired or stale for this exact peer and prompt. Read the current state before requesting a new action.", config.Digest(), time.Now())
+	return r.store.QueueReadResponse(ctx, update, telegramActionUnavailableText, config.Digest(), time.Now())
 }

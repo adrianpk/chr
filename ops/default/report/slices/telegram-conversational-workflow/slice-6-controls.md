@@ -92,6 +92,28 @@ acknowledged the first source, without allocating another effect identity.
 Acknowledgement preserves replacement conversation revisions and newer native
 observations; it does not overwrite their phase or admission reference.
 
+T6.3 completes late reply handling and capacity rejection. An unbound reply
+waits while its exact peer's sender can still commit a definite acknowledgement;
+unknown and exhausted sends produce diagnostics without reaching a model.
+The delivery transaction refreshes pending reply classes. A subsequent activation
+checks the immutable operation class again before entering a worker or model.
+Known decisions precede unresolved reply waiters within the bounded scan.
+
+All 12 ordinary adapter slots can remain occupied while exactly two urgent and
+two decision calls process status and diagnostics. A real HTTP fixture holds a
+control prompt's acknowledgement, receives its reply and confirms native
+cancellation only after the exact binding commits. Separate fixtures prove that
+neither continuation nor authoring enters a reserved activation after a late
+binding. Stale prompts include current native state only after current mapped
+actor, peer, root and namespace checks succeed.
+
+Request reservation retains 64 metadata slots for the 32 control prompt/answer
+pairs, within the existing 1,024 pending and 8,192 retained request ceilings.
+Ordinary reservations stop before consuming those slots. Exact control answers
+inherit the allowance from their retained peer-owned parent. Existing request
+bindings still replay at either ceiling. Rejected reservations leave no accepted
+request or effect and return a durable capacity diagnostic; status still works.
+
 ## Implementation Notes
 
 Native lifecycle entry points recheck volatile caller authority while holding
@@ -118,6 +140,8 @@ existing API; a final decision authority callback requires a request binding.
 - Native publication projection and stop intent commit together.
 - Receipt-only reads recover native journals without constructing execution ports.
 - Historical control acknowledgements preserve replacement conversation state.
+- Early replies cannot become unbound authoring/model input or run work in reserved slots.
+- Request-capacity rejection rolls back reservation before owner application.
 - Inbox processing class and control-reserve membership are retained with input.
 - Model context snapshots guard target resolution after external interpretation.
 - Receiver application slots and model slots have separate bounded ownership.
@@ -150,6 +174,12 @@ existing API; a final decision authority callback requires a request binding.
 - `internal/core/telegram_intake_reserve.go`: atomic capacity rejections.
 - `internal/core/telegram_model_slots.go`: shared provider exclusion and limits.
 - `internal/core/telegram_control_*test.go`: reserve, storage failure, model slots and action priority.
+- `internal/core/telegram_reply_resolution.go`: exact reply wait and exhausted-send boundary.
+- `internal/core/telegram_request_allowance.go`: bounded control request reservations.
+- `internal/app/telegram_application_lane.go`: activation class checks before effects.
+- `internal/app/telegram_control_activation_test.go`: all ordinary slots occupied with bounded control processing.
+- `internal/app/telegram_control_reply_test.go`: actual HTTP binding race and worker/model lane barriers.
+- `internal/app/telegram_control_request_capacity_test.go`: durable overflow diagnostics across operation types.
 - `internal/app/telegram_control_priority_test.go`: real HTTP receiver under model load.
 
 ## Validation
@@ -276,6 +306,34 @@ Existing action and lifecycle/decision journal regressions remain green.
 The system-installed lint v2.12.2 crashed in static analysis. The repository's
 pinned v2.14.0 completed successfully without changing checks or configuration.
 
+T6.3 completion checks passed:
+
+- `go test ./internal/core ./internal/app -run '^Test(TelegramControl(Reply|Lane|AuthoringLane|Request|StaleReceipt|ReceiptAuthority|ReceiptRetry|ModelLoad)|TelegramConversation|TelegramOperationAction|TelegramAuthoring(Bridge|Interpretation|Model))' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/app -run '^TestTelegramControl(ActivationBound|Reply|Lane|AuthoringLane|Request|StaleReceipt|Reserve$|StorageFailure$|ModelCapacity$)' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^TestTelegramControl(ActivationBound|Reply|Lane|AuthoringLane|Request|StaleReceipt|Reserve$|StorageFailure$|ModelCapacity$)' -count=1 -timeout=3m`
+- `go test ./internal/core -run '^TestTelegramControlReply' -count=1 -timeout=3m`
+- `go test -race ./internal/core -run '^TestTelegramControlReply' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/app`
+- `scripts/check-go-func-signatures.sh`
+- `scripts/check-package-readmes.sh`
+- `git diff --check`
+
+The broader normal regression completed in core 21.020 seconds and app 24.447
+seconds. Final focused normal checks completed in core 2.479 seconds and app
+5.291 seconds; the focused race run completed in core 67.497 seconds and app
+45.096 seconds. The final reply priority/exhaustion follow-up completed in core
+0.358 seconds normally and 6.858 seconds under race instrumentation. Strict
+focused lint reports zero issues.
+
+The initial broader race selection timed out in core at three minutes while
+repeatedly scanning the 8,192-row retained-capacity fixture; app passed in
+145.549 seconds. Fixtures now bulk-seed settled backlogs, keeping real intake
+at the last ordinary slot, actual overflow rollback, all 32 pending control
+pairs, and first/last retained-ceiling control pairs. The passing focused run
+retains the unchanged three-minute deadline and all hard-ceiling assertions.
+The reply fixtures also reject foreign peers, preserve sender attempt budgets,
+and prevent an exhausted fifth send from deferring an unbound reply forever.
+
 Required slice validation will be recorded through the controller for the final
 clean PR HEAD: `make verify`, focused `TestTelegramControl` normal and race
 commands, then `git diff --check`. Live and scheduled exhaustive checks remain
@@ -283,10 +341,9 @@ separate.
 
 ## Risks and Follow-ups
 
-T6.3 remains in progress: late reply-binding races, current-state diagnostics
-for unaccepted stale prompts and request-capacity reserves still require
-completion. Receipt-only recovery through expired/replaced prompts and
-text/callback/reply rejection of unaccepted stale controls are implemented.
-T6.4 shared serial/parallel capacity and cross-adapter certification remain
-pending. Focused model-load and intake-reserve evidence does not complete either task. The Slice 6 PR and exact-HEAD controller
-checks remain pending.
+T6.3 is validated through focused normal/race, actual HTTP/SQLite reply handling,
+activation bounds and request-capacity evidence. T6.4 is ready and still requires
+shared serial/default and configured parallel capacity, cross-adapter ownership,
+and publication certification. The Slice 6 PR and exact-HEAD controller checks
+remain pending. Live activation and scheduled exhaustive certification remain
+separate.

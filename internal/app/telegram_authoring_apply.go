@@ -119,6 +119,10 @@ func (r telegramReceiver) finishAuthoringFailure(ctx context.Context, request co
 }
 
 func telegramAuthoringFailure(err error) string {
+	if errors.Is(err, core.ErrTelegramRequestCapacity) {
+		return telegramRequestCapacityText
+	}
+
 	if errors.Is(err, core.ErrAuthoringProviderExhausted) {
 		return "Authoring exhausted five retained provider attempts. Prior context and artifacts are preserved. Send a new corrected instruction; this request's budget cannot restart."
 	}

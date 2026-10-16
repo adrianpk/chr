@@ -88,20 +88,19 @@ func (s *TelegramReceiverStore) telegramReplyActionAnswer(ctx context.Context, u
 
 	err := s.db.QueryRowContext(ctx, `SELECT action_token,invalidated_at FROM telegram_replies WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=? AND message_id=? AND purpose='action'`, p.BotID, p.ChatID, p.TopicID, p.UserID, update.ReplyToMessageID).Scan(&answer.Token, &invalidated)
 	if errors.Is(err, sql.ErrNoRows) {
-		return answer, false, nil
+		return s.telegramUnboundReply(ctx, update)
 	}
 
 	if err != nil {
 		return answer, true, err
 	}
 
+	answer.Choice = text
 	if invalidated.Valid {
 		if err := s.telegramReplyControlReceipt(ctx, answer.Token, p); err != nil {
 			return answer, true, err
 		}
 	}
-
-	answer.Choice = text
 
 	return checkTelegramActionAnswer(answer)
 }

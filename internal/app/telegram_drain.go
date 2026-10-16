@@ -2,10 +2,13 @@ package app
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
 )
+
+const telegramRequestCapacityText = "Receiver request capacity is full. The requested operation was not accepted. Read current state and retry after pending work drains."
 
 func (r telegramReceiver) drain(ctx context.Context) error {
 	updates, err := r.store.PendingUpdates(ctx, r.botID)
@@ -50,6 +53,10 @@ func (r telegramReceiver) respond(ctx context.Context, update core.TelegramRecei
 
 	for _, handler := range []func(context.Context, core.TelegramAllowedUser, core.TelegramReceiverConfig, core.TelegramReceivedUpdate) (bool, error){r.respondAction, r.respondControl, r.respondWork, r.respondRecord, r.respondPreparedWork, r.respondExplanation, r.respondAuthoring, r.respondIntent, r.respondConversation} {
 		if handled, err := handler(ctx, user, config, update); handled || err != nil {
+			if errors.Is(err, core.ErrTelegramRequestCapacity) {
+				return r.store.QueueReadResponse(ctx, update, telegramRequestCapacityText, config.Digest(), time.Now())
+			}
+
 			return err
 		}
 	}

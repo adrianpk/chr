@@ -15,13 +15,14 @@ import (
 )
 
 type telegramReceiver struct {
-	env        core.UserEnvironment
-	api        core.TelegramReceiverAPI
-	store      *core.TelegramReceiverStore
-	operations telegramReadService
-	botID      int64
-	token      string
-	slots      *telegramActivationSlots
+	env            core.UserEnvironment
+	api            core.TelegramReceiverAPI
+	store          *core.TelegramReceiverStore
+	operations     telegramReadService
+	botID          int64
+	token          string
+	slots          *telegramActivationSlots
+	processingLane *core.TelegramProcessingLane
 }
 
 func newTelegramServeCommand(stdout io.Writer, deps appDependencies) *cli.Command {

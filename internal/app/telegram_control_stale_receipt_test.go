@@ -102,10 +102,19 @@ func checkTelegramStaleReceiptResult(t *testing.T, f *telegramConversationAppFix
 		return
 	}
 
-	telegramWaitNotice(t, f, "unavailable, expired or stale", time.Second)
+	notice := telegramWaitNotice(t, f, "unavailable, expired or stale", time.Second)
+	checkTelegramStaleDiagnostic(t, notice)
 
 	if found && request.State == "confirmed" {
 		t.Fatal("unaccepted stale prompt authorized a new control", request)
+	}
+}
+
+func checkTelegramStaleDiagnostic(t *testing.T, notice telegramConversationNotice) {
+	t.Helper()
+
+	if !strings.Contains(notice.Text, "Current state:") || !strings.Contains(notice.Text, "Invocation:") {
+		t.Fatal("stale control omitted its authorized current native state", notice)
 	}
 }
 

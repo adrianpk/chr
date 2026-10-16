@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func telegramControlLaneFixture(t *testing.T, operation, action string) (*telegramConversationFixture, TelegramAction) {
+func telegramPendingControlLaneFixture(t *testing.T, operation, action string) (*telegramConversationFixture, TelegramAction) {
 	t.Helper()
 
 	f := newTelegramConversationFixture(t)
@@ -36,6 +36,14 @@ func telegramControlLaneFixture(t *testing.T, operation, action string) (*telegr
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	return f, a
+}
+
+func telegramControlLaneFixture(t *testing.T, operation, action string) (*telegramConversationFixture, TelegramAction) {
+	t.Helper()
+
+	f, a := telegramPendingControlLaneFixture(t, operation, action)
 
 	deliveries, err := f.store.DueDeliveries(t.Context(), 12345, time.Now())
 	if err != nil {

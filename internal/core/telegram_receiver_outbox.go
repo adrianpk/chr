@@ -203,7 +203,11 @@ func (s *TelegramReceiverStore) DeliverySent(ctx context.Context, id string, mes
 			return err
 		}
 
-		return retainTelegramReply(ctx, tx, id, messageID, now)
+		if err := retainTelegramReply(ctx, tx, id, messageID, now); err != nil {
+			return err
+		}
+
+		return refreshTelegramReplyLanes(ctx, tx, id, messageID)
 	})
 }
 

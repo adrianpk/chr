@@ -73,8 +73,11 @@ func (h *telegramApplicationHost) pump(ctx context.Context) error {
 			}
 
 			h.active[update.UpdateID] = true
+			receiver := h.receiver
+			receiver.processingLane = &lane
+
 			go func() {
-				h.finished <- telegramApplicationCompletion{update.UpdateID, lane, h.receiver.respond(ctx, update)}
+				h.finished <- telegramApplicationCompletion{update.UpdateID, lane, receiver.respond(ctx, update)}
 			}()
 		}
 	}
@@ -91,7 +94,7 @@ func (h *telegramApplicationHost) complete(result telegramApplicationCompletion)
 		return nil
 	}
 
-	if errors.Is(result.err, core.ErrStructuredModelCapacity) || errors.Is(result.err, context.Canceled) {
+	if telegramApplicationDeferred(result.err) {
 		return nil
 	}
 
@@ -101,6 +104,16 @@ func (h *telegramApplicationHost) complete(result telegramApplicationCompletion)
 	}
 
 	return result.err
+}
+
+func telegramApplicationDeferred(err error) bool {
+	for _, expected := range []error{core.ErrStructuredModelCapacity, core.ErrTelegramReplyPending, errTelegramLaneChanged, context.Canceled} {
+		if errors.Is(err, expected) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (r telegramReceiver) runDeliveries(ctx context.Context) error {
