@@ -89,8 +89,7 @@ func (s *WorkflowStore) watchWorkflowStop(ctx context.Context, claim *WorkflowCl
 			case <-watched.Done():
 				return
 			case <-ticker.C:
-				run, err := s.ReadWorkflow(watched, claim.InvocationID)
-				if err != nil || run.StopIntent != "" {
+				if err := s.checkWorkflowClaimStop(watched, claim); err != nil {
 					cancel()
 
 					return

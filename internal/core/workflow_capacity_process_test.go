@@ -48,10 +48,10 @@ func TestWorkflowCapacityProcess(t *testing.T) {
 	}
 }
 
-// TestWorkflowCapacityOverlap proves cross-process overlap at capacity two,
-// serial admission at capacity one, and rejection of a third simultaneous lane.
+// TestWorkflowCapacityOverlap proves cross-process overlap through capacity eight,
+// serial admission at capacity one, and rejection beyond the shared limit.
 func TestWorkflowCapacityOverlap(t *testing.T) {
-	for _, capacity := range []int{1, 2} {
+	for _, capacity := range []int{1, 2, 8} {
 		t.Run(strconv.Itoa(capacity), func(t *testing.T) { testWorkflowCapacityOverlap(t, capacity) })
 	}
 }
@@ -67,10 +67,12 @@ func testWorkflowCapacityOverlap(t *testing.T, capacity int) {
 	release := filepath.Join(fixture, "release")
 	commands := []*exec.Cmd{}
 
-	for index := 0; index < 3; index++ {
+	slots := map[string]bool{}
+
+	for index := 0; index <= capacity; index++ {
 		result := filepath.Join(fixture, strconv.Itoa(index))
 
-		command := workflowCapacityProcessFixture(t, []*WorkflowStore{store, linked, store}[index], result, release)
+		command := workflowCapacityProcessFixture(t, []*WorkflowStore{store, linked}[index%2], result, release)
 		if err := command.Start(); err != nil {
 			t.Fatal(err)
 		}
@@ -87,8 +89,14 @@ func testWorkflowCapacityOverlap(t *testing.T, capacity int) {
 		if (string(data) == "waiting") != (index >= capacity) {
 			t.Fatal("subprocess admission exceeded or failed capacity", index, string(data))
 		}
+
+		if index < capacity && slots[string(data)] {
+			t.Fatal("two live processes received the same worker slot", string(data))
+		}
+
+		slots[string(data)] = true
 	}
-	// These barriers are observed before releasing either admitted process. A
+	// These barriers are observed before releasing any admitted process. A
 	// single in-process mutex or an eventual race-detector pass cannot prove this.
 	if _, err := acquireWorkflowCapacity(t.Context(), store.layout.ProjectDir()); !errors.Is(err, ErrWorkflowCapacity) {
 		t.Fatal("legacy serial start bypassed live reservations", err)
