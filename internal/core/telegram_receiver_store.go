@@ -91,9 +91,11 @@ ON CONFLICT(bot_id) DO UPDATE SET config_digest=excluded.config_digest, updated_
 		return err
 	}
 
-	_, err = s.Receiver(ctx, botID)
+	if _, err := s.Receiver(ctx, botID); err != nil {
+		return err
+	}
 
-	return err
+	return s.restoreTelegramInputLanes(ctx, botID)
 }
 
 // Receiver loads retained readiness and rejects newer encoded receiver records.

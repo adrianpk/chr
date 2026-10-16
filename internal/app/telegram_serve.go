@@ -21,6 +21,7 @@ type telegramReceiver struct {
 	operations telegramReadService
 	botID      int64
 	token      string
+	slots      *telegramActivationSlots
 }
 
 func newTelegramServeCommand(stdout io.Writer, deps appDependencies) *cli.Command {
@@ -92,18 +93,27 @@ func (r telegramReceiver) run(ctx context.Context) error {
 	owned, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	finished := make(chan error, 1)
-	go func() {
-		finished <- newTelegramWorkHost(r).run(owned)
+	r.slots = newTelegramActivationSlots()
+	finished := make(chan error, 3)
 
-		cancel()
-	}()
+	for _, run := range []func(context.Context) error{newTelegramWorkHost(r).run, newTelegramApplicationHost(r).run, r.runDeliveries} {
+		go func() {
+			err := run(owned)
+			if owned.Err() != nil && errors.Is(err, owned.Err()) {
+				err = nil
+			}
+
+			finished <- err
+
+			cancel()
+		}()
+	}
 
 	err := r.runIntake(owned)
 
 	cancel()
 
-	return errors.Join(err, <-finished)
+	return errors.Join(err, <-finished, <-finished, <-finished)
 }
 
 func (r telegramReceiver) runIntake(ctx context.Context) error {
@@ -130,7 +140,7 @@ func (r telegramReceiver) step(ctx context.Context) (time.Duration, error) {
 		return 0, err
 	}
 
-	if err := r.drain(ctx); err != nil {
+	if err := r.drainSynchronous(ctx); err != nil {
 		return 0, err
 	}
 
@@ -173,7 +183,15 @@ func (r telegramReceiver) receiveBatch(ctx context.Context, config core.Telegram
 		return 0, errors.Join(err, r.store.PollFailed(ctx, r.botID, err, time.Now()))
 	}
 
-	return 0, r.drain(ctx)
+	return 0, r.drainSynchronous(ctx)
+}
+
+func (r telegramReceiver) drainSynchronous(ctx context.Context) error {
+	if r.slots != nil {
+		return nil
+	}
+
+	return r.drain(ctx)
 }
 
 func (r telegramReceiver) pollFailed(ctx context.Context, prior core.TelegramReceiverState, failure error) (time.Duration, error) {

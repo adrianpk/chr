@@ -57,7 +57,7 @@ func (r telegramReceiver) resolveIntent(ctx context.Context, operations telegram
 	update := input.Update
 
 	return r.store.ResolveTelegramInterpretation(ctx, r.env, update, time.Now(), func(callCtx context.Context) (json.RawMessage, error) {
-		modelInput, err := r.intentContext(callCtx, input)
+		modelInput, digest, err := r.intentContext(callCtx, input)
 		if err != nil {
 			return nil, err
 		}
@@ -73,6 +73,8 @@ func (r telegramReceiver) resolveIntent(ctx context.Context, operations telegram
 		if err != nil {
 			return nil, err
 		}
+
+		input.ContextDigest = digest
 
 		return r.freezeIntent(callCtx, input, result)
 	})
@@ -124,12 +126,12 @@ func (r telegramReceiver) applyIntentDecision(ctx context.Context, update core.T
 	return r.dispatchIntent(ctx, currentUser, input, decision.Intent)
 }
 
-func (r telegramReceiver) intentContext(ctx context.Context, input core.TelegramConversationInput) (ConversationIntentContext, error) {
+func (r telegramReceiver) intentContext(ctx context.Context, input core.TelegramConversationInput) (ConversationIntentContext, string, error) {
 	result := ConversationIntentContext{Message: input.Update.Text, Operations: telegramIntentRegistry()}
 
-	selected, focused, sessions, err := r.store.TelegramIntentContext(ctx, input)
+	snapshot, err := r.store.TelegramIntentContext(ctx, input)
 	if err != nil {
-		return result, err
+		return result, "", err
 	}
 
 	var allowedIDs []string
@@ -142,22 +144,22 @@ func (r telegramReceiver) intentContext(ctx context.Context, input core.Telegram
 		}
 	}
 
-	if slices.Contains(allowedIDs, selected) {
-		result.SelectedProject = selected
+	if slices.Contains(allowedIDs, snapshot.Selected) {
+		result.SelectedProject = snapshot.Selected
 	}
 
-	for _, session := range sessions {
+	for _, session := range snapshot.Sessions {
 		if !slices.Contains(allowedIDs, session.ProjectID) {
 			continue
 		}
 
 		result.Sessions = append(result.Sessions, ConversationIntentSession{ID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace, Intent: session.Intent, Phase: session.Phase, Topic: session.Topic, QuestionBinding: session.QuestionBinding, Revision: session.Revision})
-		if session.ID == focused {
-			result.FocusedConversation = focused
+		if session.ID == snapshot.Focused {
+			result.FocusedConversation = snapshot.Focused
 		}
 	}
 
-	return result, nil
+	return result, snapshot.Digest, nil
 }
 
 func (r telegramReceiver) intentCorrection(ctx context.Context, update core.TelegramReceivedUpdate, config core.TelegramReceiverConfig) error {

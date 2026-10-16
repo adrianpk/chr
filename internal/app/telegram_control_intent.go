@@ -18,6 +18,7 @@ func (r telegramReceiver) dispatchIntentControl(ctx context.Context, user core.T
 	}
 
 	command.Input.Config, command.Input.Projects = input.Config, input.Projects
+	command.Input.ContextDigest = input.ContextDigest
 
 	return true, r.dispatchControl(ctx, user, command)
 }
@@ -29,6 +30,7 @@ func (r telegramReceiver) intentControlTarget(ctx context.Context, input core.Te
 	}
 
 	command.Input.Config, command.Input.Projects = input.Config, input.Projects
+	command.Input.ContextDigest = input.ContextDigest
 	target, err := r.store.ResolveTelegramOperationTarget(ctx, command.Input, time.Now())
 
 	return target, true, err
@@ -45,6 +47,7 @@ func (r telegramReceiver) dispatchIntentNativeWork(ctx context.Context, user cor
 		}
 
 		work.Input.Config, work.Input.Projects, work.Input.Namespace = input.Config, input.Projects, input.Namespace
+		work.Input.ContextDigest = input.ContextDigest
 
 		return true, r.dispatchWork(ctx, user, work)
 	}
@@ -63,6 +66,7 @@ func (r telegramReceiver) intentNativeWorkTarget(ctx context.Context, input core
 		}
 
 		work.Input.Config, work.Input.Projects = input.Config, input.Projects
+		work.Input.ContextDigest = input.ContextDigest
 		target, err := r.store.ResolveTelegramOperationTarget(ctx, work.Input, time.Now())
 
 		return target, true, err

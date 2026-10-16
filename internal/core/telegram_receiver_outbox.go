@@ -128,7 +128,7 @@ func (s *TelegramReceiverStore) DueDeliveries(ctx context.Context, botID int64, 
 WHERE o.bot_id=? AND o.state IN ('pending','sending','uncertain') AND o.attempts<5 AND (o.retry_at IS NULL OR o.retry_at<=?)
 AND NOT EXISTS(SELECT 1 FROM telegram_outbox earlier WHERE earlier.bot_id=o.bot_id AND earlier.chat_id=o.chat_id AND earlier.topic_id=o.topic_id AND earlier.user_id=o.user_id AND earlier.event_key=o.event_key AND earlier.part_index<o.part_index AND earlier.state!='delivered')
 AND (o.kind!='progress' OR o.attempts>0 OR NOT EXISTS(SELECT 1 FROM telegram_outbox recent WHERE recent.conversation_id=o.conversation_id AND recent.kind='progress' AND recent.total_attempts>0 AND recent.event_key!=o.event_key AND recent.updated_at>?))
-ORDER BY o.created_at,o.rowid LIMIT 50`, botID, formatProjectTime(now), formatProjectTime(now.Add(-30*time.Second)))
+ORDER BY CASE (SELECT u.processing_lane FROM telegram_updates u WHERE u.bot_id=o.bot_id AND u.update_id=CAST(substr(o.event_key,8) AS INTEGER) AND o.event_key='update:'||u.update_id) WHEN 'urgent' THEN 0 WHEN 'decision' THEN 1 ELSE 2 END,o.created_at,o.rowid LIMIT 50`, botID, formatProjectTime(now), formatProjectTime(now.Add(-30*time.Second)))
 	if err != nil {
 		return nil, err
 	}

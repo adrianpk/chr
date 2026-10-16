@@ -86,12 +86,21 @@ func retainTelegramUpdate(ctx context.Context, tx *sql.Tx, botID, epoch int64, u
 		state = update.Kind
 	}
 
-	_, err = tx.ExecContext(ctx, `INSERT INTO telegram_updates(bot_id,update_id,cursor_epoch,payload_digest,update_kind,
-chat_id,topic_id,user_id,message_id,chat_type,received_at,payload,state,reason_code,updated_at,reply_to_message_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-		botID, update.UpdateID, epoch, update.Digest, update.Kind, update.Peer.ChatID, update.Peer.TopicID, update.Peer.UserID,
-		update.MessageID, update.ChatType, formatProjectTime(now), update.Text, state, update.Reason, formatProjectTime(now), update.ReplyToMessageID)
+	lane, control, err := telegramInputLane(ctx, tx, update)
 	if err != nil {
 		return err
+	}
+
+	_, err = tx.ExecContext(ctx, `INSERT INTO telegram_updates(bot_id,update_id,cursor_epoch,payload_digest,update_kind,
+chat_id,topic_id,user_id,message_id,chat_type,received_at,payload,state,reason_code,updated_at,reply_to_message_id,processing_lane,control_input) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+		botID, update.UpdateID, epoch, update.Digest, update.Kind, update.Peer.ChatID, update.Peer.TopicID, update.Peer.UserID,
+		update.MessageID, update.ChatType, formatProjectTime(now), update.Text, state, update.Reason, formatProjectTime(now), update.ReplyToMessageID, lane, control)
+	if err != nil {
+		return err
+	}
+
+	if state == "pending" {
+		return rejectTelegramIntakeOverflow(ctx, tx, update, control, now)
 	}
 
 	return revokeRejectedTelegramActions(ctx, tx, update, now)
@@ -153,21 +162,6 @@ FROM telegram_updates WHERE bot_id=? AND state='pending' ORDER BY update_id LIMI
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		//nolint:errcheck // rows.Err is checked after the bounded iteration.
-		_ = rows.Close()
-	}()
 
-	var result []TelegramReceivedUpdate
-
-	for rows.Next() {
-		update := TelegramReceivedUpdate{Peer: TelegramPeerIdentity{BotID: botID}}
-		if err := rows.Scan(&update.UpdateID, &update.Digest, &update.Kind, &update.Peer.ChatID, &update.Peer.TopicID, &update.Peer.UserID, &update.MessageID, &update.ChatType, &update.Text, &update.ReplyToMessageID); err != nil {
-			return nil, err
-		}
-
-		result = append(result, update)
-	}
-
-	return result, rows.Err()
+	return readTelegramPendingRows(rows, botID)
 }

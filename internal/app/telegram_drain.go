@@ -19,6 +19,10 @@ func (r telegramReceiver) drain(ctx context.Context) error {
 		}
 	}
 
+	return r.drainDeliveries(ctx)
+}
+
+func (r telegramReceiver) drainDeliveries(ctx context.Context) error {
 	deliveries, err := r.store.DueDeliveries(ctx, r.botID, time.Now())
 	if err != nil {
 		return err

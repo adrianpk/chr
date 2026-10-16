@@ -52,6 +52,8 @@ func (r telegramReceiver) intentTarget(ctx context.Context, input core.TelegramC
 		}
 
 		conversation.Config, conversation.Projects = input.Config, input.Projects
+
+		conversation.ContextDigest = input.ContextDigest
 		switch conversation.Action {
 		case core.TelegramConversationList:
 			return core.TelegramOperationTarget{}, false, nil
@@ -73,6 +75,7 @@ func (r telegramReceiver) intentTarget(ctx context.Context, input core.TelegramC
 		}
 
 		record.Input.Config, record.Input.Projects = input.Config, input.Projects
+		record.Input.ContextDigest = input.ContextDigest
 		target, err := r.store.ResolveTelegramOperationTarget(ctx, record.Input, time.Now())
 
 		return target, true, err
@@ -125,6 +128,7 @@ func (r telegramReceiver) intentPreparationTarget(ctx context.Context, input cor
 		}
 
 		work.Config, work.Projects = input.Config, input.Projects
+		work.ContextDigest = input.ContextDigest
 		_, target, err := r.store.ResolveTelegramAuthoringTarget(ctx, work)
 
 		return target, true, err
@@ -137,6 +141,7 @@ func (r telegramReceiver) intentPreparationTarget(ctx context.Context, input cor
 		}
 
 		explanation.Input.Config, explanation.Input.Projects = input.Config, input.Projects
+		explanation.Input.ContextDigest = input.ContextDigest
 		target, err := r.store.ResolveTelegramOperationTarget(ctx, explanation.Input, time.Now())
 
 		return target, true, err
@@ -149,6 +154,7 @@ func (r telegramReceiver) intentPreparationTarget(ctx context.Context, input cor
 		}
 
 		authoring.Input.Config, authoring.Input.Projects = input.Config, input.Projects
+		authoring.Input.ContextDigest = input.ContextDigest
 		_, target, err := r.store.ResolveTelegramAuthoringTarget(ctx, authoring.Input)
 
 		return target, true, err

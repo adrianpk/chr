@@ -204,10 +204,19 @@ Prerequisite: verified Slice 5 integration.
 | --- | --- | --- | --- |
 | T6.1 | validated | `a3e5e95be3b45aaa66cc0c1bc0744b73adac6770` | Shared guarded pause/cancel/resume/continue/reconcile, mapped actor, exact invocation/revision and asynchronous stop checkpoints. |
 | T6.2 | validated | `76b55b28ed770b13fc40da53ff39e42dbe822ae9` | Exact review/candidate, entry/budget and question guards; atomic native request receipts; lost-ack and partial-journal recovery; mapped actors. |
-| T6.3 | in_progress | pending | Responsive prioritized controls, stale-action handling and callback/text parity. |
+| T6.3 | in_progress | pending implementation reference | Bounded asynchronous intake/application/delivery, shared model slots, 32 reserved pending inputs and callback/text/reply priority; lifecycle receipt recovery and final stale-action checks remain pending. |
 | T6.4 | pending | pending | Shared serial/parallel capacity and cross-adapter ownership checks. |
 
 Validation: plan section 11; `TestTelegramControl`, including focused race mode.
+
+T6.3 progress: the receiver shares 16 application slots across inbox and native
+work calls, with separate decision and urgent control capacity. A real HTTP
+model-load fixture proves status and draft cancellation remain responsive.
+SQLite fixtures cover the 32-input reserve within the 1,024 ceiling, atomic
+capacity rejection, priority restoration, two shared model slots and context
+guards. Task completion still requires lifecycle receipt recovery, final
+expiry/replacement parity and request-capacity diagnostics; T6.4 remains pending.
+Exact commands and results belong to the [Slice 6 report](../report/slices/telegram-conversational-workflow/slice-6-controls.md).
 
 Candidate / PR / verified merge / evidence: pending.
 
@@ -312,4 +321,4 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Exact integrated candidate passed the scheduled exhaustive nightly.
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
-Current state: Slices 1 through 5 are delivered through canonical PR #390/#391/#392/#393/#394; the latest verified merge is `c321da6917e369049583eece5a1a07951c1cc22b`. Slice 6 is active on its recorded branch. T6.1 and T6.2 have focused lifecycle, authority and durable decision receipt evidence; T6.3 is active. Final Slice 6 controller validation, live activation and exhaustive certification remain pending.
+Current state: Slices 1 through 5 are delivered through canonical PR #390/#391/#392/#393/#394; the latest verified merge is `c321da6917e369049583eece5a1a07951c1cc22b`. Slice 6 is active on its recorded branch. T6.1 and T6.2 have focused lifecycle, authority and durable decision receipt evidence; T6.3 has partial asynchronous receiver, model-load and reserved-intake evidence and remains active. Final Slice 6 controller validation, live activation and exhaustive certification remain pending.

@@ -70,7 +70,8 @@ func TestTelegramReceiverBatch(t *testing.T) {
 	checkTelegramReopenedBatch(t, store)
 }
 
-// TestTelegramReceiverIntakeCapacity leaves the entire over-capacity batch and cursor unacknowledged.
+// TestTelegramReceiverIntakeCapacity retains explicit overflow rejections with
+// their diagnostics and cursor, while preserving the 32-input control reserve.
 func TestTelegramReceiverIntakeCapacity(t *testing.T) {
 	store := openTelegramReceiverTestStore(t, telegramReceiverTestEnv(t))
 
@@ -80,15 +81,19 @@ func TestTelegramReceiverIntakeCapacity(t *testing.T) {
 			updates = append(updates, telegramRetainedTestUpdate(t, int64(batch*100+i), "/help"))
 		}
 
-		err := store.RetainBatch(t.Context(), 12345, updates, time.Now())
-		if (batch == 10) != (err != nil) {
-			t.Fatal("incorrect capacity outcome", batch, err)
+		if err := store.RetainBatch(t.Context(), 12345, updates, time.Now()); err != nil {
+			t.Fatal("overflow metadata was not retained", batch, err)
 		}
 	}
 
 	state, err := store.Receiver(t.Context(), 12345)
-	if err != nil || state.NextUpdateID == nil || *state.NextUpdateID != 1000 {
-		t.Fatal("capacity failure advanced cursor", state, err)
+	if err != nil || state.NextUpdateID == nil || *state.NextUpdateID != 1100 {
+		t.Fatal("retained rejection did not advance cursor", state, err)
+	}
+
+	var pending, rejected int
+	if err := store.db.QueryRowContext(t.Context(), `SELECT SUM(state='pending'),SUM(state='rejected' AND reason_code='intake_capacity' AND payload='') FROM telegram_updates`).Scan(&pending, &rejected); err != nil || pending != 992 || rejected != 108 {
+		t.Fatal("ordinary input consumed the reserve or lacked rejection metadata", pending, rejected, err)
 	}
 }
 

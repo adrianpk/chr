@@ -49,6 +49,7 @@ func telegramControlRecoverAck(t *testing.T, f *telegramConversationAppFixture, 
 	telegramAuthoringReopen(t, f)
 
 	operations.workflowPullRequests = nil
+
 	f.receiver.operations = operations
 	if err := f.receiver.drain(t.Context()); err != nil {
 		t.Fatal(err)

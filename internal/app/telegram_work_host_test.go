@@ -6,7 +6,6 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
@@ -27,14 +26,7 @@ func TestTelegramWorkResponsive(t *testing.T) {
 	telegramWorkWaitFile(t, marker)
 	telegramWorkQueueMessage(t, f, "/status")
 
-	select {
-	case notice := <-f.notices:
-		if !strings.Contains(notice.Text, "Receiver:") {
-			t.Fatal("status did not reach the live receiver", notice)
-		}
-	case <-time.After(2 * time.Second):
-		t.Fatal("work blocked status intake")
-	}
+	telegramWaitNotice(t, f, "Receiver:", 2*time.Second)
 
 	checkTelegramWorkSharedOwner(t, operations, ref)
 

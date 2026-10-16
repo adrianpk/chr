@@ -43,6 +43,27 @@ repeating a grant, approving a successor or clearing a later operator pause.
 Control conversations retain native identity and preserve original work-admission
 authority; a control-only conversation grants no automatic execution.
 
+T6.3 progress separates durable polling, application calls and outbound delivery.
+One receiver shares 16 application slots between its work host and inbox calls:
+12 ordinary slots, two decision slots and two status/stop/reconciliation slots.
+Confirmation callbacks, explicit answers and replies derive priority from the
+same retained peer-owned action. Continuations and authoring confirmations keep
+ordinary slots because they can execute a worker or call a model.
+
+The 1,024 pending-input ceiling includes 32 slots reserved for controls. Ordinary
+overflow commits explicit rejected metadata and a capacity diagnostic with the
+complete polling batch and cursor. A failed diagnostic write rolls back the
+whole batch. Restart restores classification for existing pending input.
+Control responses precede older ordinary output while preserving chunk order.
+
+Interpretation and generation share two OS-owned model slots across store
+instances, with 60-second deadlines and bounded source-lock stripes. Waiting for
+capacity spends no retained retry attempt. Ordinary messages preserve source
+order within a peer; explicit controls can bypass a blocked model. Interpreted
+target resolution checks the original peer-context digest in its SQLite
+transaction, preventing a changed focus or session from silently retargeting
+an older model response.
+
 ## Implementation Notes
 
 Native lifecycle entry points recheck volatile caller authority while holding
@@ -65,6 +86,9 @@ existing API; a final decision authority callback requires a request binding.
 - Control previews freeze the invocation revision before confirmation.
 - `ControlWorkExtent` accepts a caller-neutral request binding for review, grants
   and answers and returns its original receipt alongside current status.
+- Inbox processing class and control-reserve membership are retained with input.
+- Model context snapshots guard target resolution after external interpretation.
+- Receiver application slots and model slots have separate bounded ownership.
 - Decision controls seal all displayed guards and attribute the native history to
   the configured operator. Receipt replay cannot exchange their payload.
 - Control-result conversation projections retain the original admission reference.
@@ -78,6 +102,14 @@ existing API; a final decision authority callback requires a request binding.
 - `internal/core/workflow_decision_control*.go`: shared guarded decision entry point.
 - `internal/core/workflow_control_receipt.go`: native binding and atomic receipt files.
 - `internal/core/telegram_control_receipt_test.go`: partial-journal fault recovery.
+
+- `internal/app/telegram_application_host.go`: bounded asynchronous inbox calls.
+- `internal/app/telegram_activation_slots.go`: common receiver call accounting.
+- `internal/core/telegram_processing_*.go`: priority, source order and restart classification.
+- `internal/core/telegram_intake_reserve.go`: atomic capacity rejections.
+- `internal/core/telegram_model_slots.go`: shared provider exclusion and limits.
+- `internal/core/telegram_control_*test.go`: reserve, storage failure, model slots and action priority.
+- `internal/app/telegram_control_priority_test.go`: real HTTP receiver under model load.
 
 ## Validation
 
@@ -116,6 +148,27 @@ disconnected-provider receipt replay, natural-language grants, malformed/spoofed
 inputs, duplicate actions and native/SQLite acknowledgement recovery.
 The existing service and CLI integration controls retain their prior behavior.
 
+T6.3 progress checks passed:
+
+- `go test ./internal/core ./internal/app -run '^Test(TelegramControl|TelegramReceiver|TelegramAuthoring(Interpretation|Model)|TelegramConversationJourney$|TelegramWorkResponsive$)' -count=1 -timeout=3m`
+- `go test ./internal/core -run '^TestTelegramControlModelCapacity$' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^Test(TelegramControl|TelegramReceiver|TelegramAuthoring(Interpretation|Model)|TelegramConversationJourney$|TelegramWorkResponsive$)' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app`
+- `scripts/check-go-func-signatures.sh`
+- `scripts/check-package-readmes.sh`
+- `git diff --check`
+
+The combined normal check completed in core 8.665 seconds and app 38.276
+seconds; race mode completed in core 111.073 seconds and app 163.656 seconds.
+The separate model-capacity check verifies the final fixture cleanup change.
+The fixtures exercise
+32 reserved inputs and the unchanged 1,024 ceiling, atomic rejection failure,
+callback/text/reply priority including worker-capable exclusions, pending-input
+reclassification, two concurrent model purposes, preserved retry budgets,
+context changes, and real HTTP status/draft cancellation while a model is blocked.
+The existing worker-load regression now waits for its status response within its
+original two-second deadline while consuming unrelated progress notices.
+
 Required slice validation will be recorded through the controller for the final
 clean PR HEAD: `make verify`, focused `TestTelegramControl` normal and race
 commands, then `git diff --check`. Live and scheduled exhaustive checks remain
@@ -123,7 +176,9 @@ separate.
 
 ## Risks and Follow-ups
 
-T6.3 and T6.4 remain pending completion. Priority under model load, reserved
-control capacity, expiry/replacement parity, interrupted lifecycle-control result
-recovery and shared capacity certification remain outside the completed task
-evidence. The full Slice 6 PR and exact-HEAD controller checks remain pending.
+T6.3 remains in progress: final expiry/replacement parity, late reply-binding
+races, request-capacity diagnostics and interrupted lifecycle-control result
+recovery still require completion. T6.4 shared serial/parallel capacity and
+cross-adapter certification remain pending. Focused model-load and intake-reserve
+evidence does not complete either task. The Slice 6 PR and exact-HEAD controller
+checks remain pending.

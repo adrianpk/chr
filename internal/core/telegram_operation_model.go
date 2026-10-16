@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -26,10 +27,13 @@ func (s *TelegramReceiverStore) ResolveTelegramOperationModel(ctx context.Contex
 		return result, err
 	}
 
-	lock, err := acquireTelegramFileLock(env, fmt.Sprintf("operation-model-%d.lock", request.Source.Peer.BotID))
+	stripe := sha256.Sum256([]byte(request.ID))
+
+	lock, err := acquireTelegramModelClaim(env, request.Source.Peer.BotID, fmt.Sprintf("operation-model-%d-%d.lock", request.Source.Peer.BotID, stripe[0]%16))
 	if err != nil {
 		return result, err
 	}
+
 	defer func() { err = errors.Join(err, lock.Close()) }()
 
 	result, ready, err := s.reserveTelegramOperationModel(ctx, request, now)

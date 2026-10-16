@@ -423,4 +423,4 @@ starts with every criterion pending.
 - [ ] The cycle report, tracker and plan distinguish tested code from later closure-only documentation.
 - [ ] The delivery set is closed with no pending work or unreported blocker.
 
-Current state: Slices 1 through 5 are delivered through canonical PR #390/#391/#392/#393/#394; the latest verified merge is `c321da6917e369049583eece5a1a07951c1cc22b`. Slice 6 is active on its recorded branch. T6.1 and T6.2 have focused lifecycle, authority and durable decision receipt evidence; T6.3 is active. Final Slice 6 controller validation, live activation and exhaustive certification remain pending.
+Current state: Slices 1 through 5 are delivered through canonical PR #390/#391/#392/#393/#394; the latest verified merge is `c321da6917e369049583eece5a1a07951c1cc22b`. Slice 6 is active on its recorded branch. T6.1 and T6.2 have focused lifecycle, authority and durable decision receipt evidence; T6.3 has partial asynchronous receiver, model-load and reserved-intake evidence and remains active. Final Slice 6 controller validation, live activation and exhaustive certification remain pending.

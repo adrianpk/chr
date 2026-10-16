@@ -26,7 +26,7 @@ func (s *TelegramReceiverStore) ResolveTelegramInterpretation(ctx context.Contex
 		return result, err
 	}
 
-	lock, err := acquireTelegramFileLock(env, fmt.Sprintf("interpretation-%d.lock", update.Peer.BotID))
+	lock, err := acquireTelegramModelClaim(env, update.Peer.BotID, fmt.Sprintf("interpretation-%d-%d.lock", update.Peer.BotID, update.UpdateID%16))
 	if err != nil {
 		return result, err
 	}
@@ -41,9 +41,7 @@ func (s *TelegramReceiverStore) ResolveTelegramInterpretation(ctx context.Contex
 	defer cancel()
 
 	decision, callErr := invoke(callCtx)
-	if callErr == nil && (len(decision) > 65536 || !json.Valid(decision)) {
-		callErr = errors.New("invalid typed interpretation")
-	}
+	callErr = telegramInterpretationCallError(callCtx, decision, callErr)
 	// The attempt is already durable if shutdown prevents the outcome write.
 	finishCtx, finishCancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer finishCancel()
@@ -69,6 +67,18 @@ func (s *TelegramReceiverStore) ResolveTelegramInterpretation(ctx context.Contex
 	})
 
 	return result, err
+}
+
+func telegramInterpretationCallError(ctx context.Context, decision json.RawMessage, callErr error) error {
+	if ctx.Err() != nil {
+		return ctx.Err()
+	}
+
+	if callErr == nil && (len(decision) > 65536 || !json.Valid(decision)) {
+		return errors.New("invalid typed interpretation")
+	}
+
+	return callErr
 }
 
 func (s *TelegramReceiverStore) reserveTelegramInterpretation(ctx context.Context, update TelegramReceivedUpdate, now time.Time) (TelegramInterpretation, bool, error) {

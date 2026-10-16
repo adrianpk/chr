@@ -32,15 +32,16 @@ const (
 // TelegramConversationInput contains current authority and a deterministic command.
 // Projects must be read from the current registry through the application service.
 type TelegramConversationInput struct {
-	Update       TelegramReceivedUpdate
-	Config       TelegramReceiverConfig
-	Projects     []Project
-	Action       TelegramConversationAction
-	Project      string
-	Conversation string
-	Namespace    string
-	Intent       string
-	Text         string
+	Update        TelegramReceivedUpdate
+	Config        TelegramReceiverConfig
+	Projects      []Project
+	Action        TelegramConversationAction
+	Project       string
+	Conversation  string
+	Namespace     string
+	Intent        string
+	Text          string
+	ContextDigest string
 }
 
 // TelegramConversation freezes routing; it does not grant execution authority.
@@ -123,9 +124,22 @@ func (s *TelegramReceiverStore) ApplyTelegramConversation(ctx context.Context, i
 
 func (op telegramConversationTransaction) ensurePeer() error {
 	p := op.input.Update.Peer
-	_, err := op.tx.ExecContext(op.ctx, `INSERT INTO telegram_peers(bot_id,chat_id,topic_id,user_id,updated_at) VALUES(?,?,?,?,?) ON CONFLICT DO NOTHING`, p.BotID, p.ChatID, p.TopicID, p.UserID, formatProjectTime(op.now))
 
-	return err
+	_, err := op.tx.ExecContext(op.ctx, `INSERT INTO telegram_peers(bot_id,chat_id,topic_id,user_id,updated_at) VALUES(?,?,?,?,?) ON CONFLICT DO NOTHING`, p.BotID, p.ChatID, p.TopicID, p.UserID, formatProjectTime(op.now))
+	if err != nil || op.input.ContextDigest == "" {
+		return err
+	}
+
+	snapshot, err := op.intentSnapshot()
+	if err != nil {
+		return err
+	}
+
+	if snapshot.Digest != op.input.ContextDigest {
+		return ErrWorkflowConflict
+	}
+
+	return nil
 }
 
 func (op telegramConversationTransaction) apply() (string, *TelegramConversation, error) {
