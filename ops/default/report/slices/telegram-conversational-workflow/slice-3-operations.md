@@ -129,6 +129,7 @@ Successful T3.3/T3.4 task checks:
 - `go test ./internal/core ./internal/app -run '^TestTelegramOperation(Action|Uncertain)' -count=1 -timeout=3m`
 - `go test -race ./internal/core ./internal/app -run '^TestTelegramOperation(Action|Uncertain)' -count=1 -timeout=3m`
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/app`
+- `go test ./internal/app -run '^TestDumpNewAndShowUseServiceCommands$' -count=1 -timeout=3m`
 - `scripts/check-go-func-signatures.sh`
 - `scripts/check-package-readmes.sh`
 - `git diff --check`
@@ -159,6 +160,13 @@ A race-mode prompt fixture initially assumed retry ordering based on execution
 speed. It now controls the retained retry timestamp, and focused normal/race
 checks pass for the intended interleaving. These deterministic fixtures do not
 establish live-bot or exhaustive scheduled certification.
+
+The first controller development gate passed strict lint and failed the existing
+dump CLI persistence assertion because its installed model provider changed
+“from CLI” to “from the CLI”. That test and production provider path were
+unchanged from `dev`. Its curation response is now supplied by a local executable
+fixture; all existing CLI assertions are preserved. The focused regression
+passes, and controller evidence is regenerated for the new candidate.
 
 ## Risks and Follow-ups
 

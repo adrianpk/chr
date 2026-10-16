@@ -1573,6 +1573,8 @@ func TestMetadataProjectSetSavesProjectMetadata(t *testing.T) {
 }
 
 func TestDumpNewAndShowUseServiceCommands(t *testing.T) {
+	configureDumpCLICuration(t)
+
 	projectDir := t.TempDir()
 	writeServiceWorkspaceQueryFixture(t, projectDir)
 
