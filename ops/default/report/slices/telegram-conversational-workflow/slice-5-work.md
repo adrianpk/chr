@@ -41,6 +41,8 @@ operator changes before a new effect reject without creating work.
 
 ## Implementation Notes
 
+T5.1 implementation: `4456f3f1bbef9b0b8368294f12e40c9cc9ca15ff`.
+
 `StartBoundWorkExtent` adds an optional stable admission binding. Its zero-step
 mode calls the existing native admission owner and leaves continuation separate.
 Existing callers retain their bounded start-and-continue behavior. The native
