@@ -34,17 +34,19 @@ the exact readiness transition, contract, validation arguments and deadline.
 The bound confirmation journals readiness and invocation creation together.
 Stale input changes neither ticket readiness nor native ownership.
 
-The dedicated private bot passes read-only credential, identity and webhook
-checks. Its current project mapping points to the registered source checkout;
-live validation must use the designated disposable QA target instead.
+The dedicated private bot passes credential, identity and webhook checks. An
+isolated user environment now permits only two registered disposable QA clones,
+with separate target refs in the existing designated QA repository.
 
 ## Implementation Notes
 
 PR #396 integration is verified at `c14f1aea640657e27c97bb64e40b46f30f698451`.
 Its three tasks are closed with their controller validation receipt. Slice 8
 uses its own worktree and leaves the primary checkout on dev. The existing
-installed CLI predates the Telegram commands; live validation requires a fixed
-receiver executable built from the integrated source.
+installed global CLI predates the Telegram commands. The isolated receiver is
+fixed at implementation commit `b72a6955cf7c038142c23b7142215b5ed83d58ec`, built
+with Go 1.27.1 and `vcs.modified=false`. Its SHA-256 is
+`c888ebbf6481d7bd6c7a44fbb09d7960eb1c3a93a0fc1ce80624e3343c4984a5`.
 
 The existing User Guide, receiver reference and pending changelog entry explain
 the prepared-ticket transition. The native owner retains the original backlog
@@ -79,8 +81,8 @@ integration, source self-development or the scheduled final-candidate gate.
 Activation documentation passed `git diff --check`. The integrated Slice 7
 binary's read-only `telegram status` and `telegram doctor --check-connection`
 checks passed. They establish local bot readiness, not live execution or model
-connectivity. Slice 8 focused checks and exact-HEAD controller validation remain
-pending until the slice's remaining live work and final head are ready.
+connectivity. The configured final Slice 8 command list and exact-HEAD controller
+validation remain pending until the remaining live work and final head are ready.
 
 Task checks passed:
 
@@ -92,10 +94,54 @@ Task checks passed:
 These are implementation-task checks. They do not constitute final clean-HEAD
 controller validation or the scheduled exhaustive gate.
 
+## Live QA Setup
+
+Owned playground:
+`/home/adrian/Projects/playground/chr/20261017-0110-telegram-journey-qa`.
+Its `fixture.json` records the executable, project registrations and exact
+bootstrap targets; `README.md` contains the bounded foreground command. Private
+configuration and retained data use its isolated `receiver/` development root.
+The original user configuration and primary dev checkout are preserved.
+
+| Registered project | Project identity | Isolated target | Bootstrap base |
+| --- | --- | --- | --- |
+| `telegram-journey-qa` | `project-0b671359780bf6ba` | `chr/qa/telegram-journey-20261017-0110-journey` | `96a3addef94da397ea4ddcc3b3ceeb19a09c0a8d` |
+| `telegram-source-qa` | `project-51b74a16735269d1` | `chr/qa/telegram-journey-20261017-0110-source` | `ac5f3f5087572a11b72a328c08d678727abc2a49` |
+
+Both targets belong to `adrianpk/chr-integration-qa` on the canonical Forgejo.
+They are setup branches, not completed bot-development results. The source QA
+bootstrap changes only its fixture policy; the executable remains fixed. The
+clone-local HTTPS credential helper references existing host access. Each
+project permits one worker, one worker attempt, one integration attempt and
+300-second worker/validation bounds, with native publication explicitly enabled.
+The ordinary project checks its README and Git whitespace; the source project
+uses `make verify`.
+
+Both `work doctor` checks report ready, and both effective configurations and
+installed command help were inspected using the fixed executable. The isolated
+`telegram doctor --check-connection` succeeds. Its legacy runtime-plan indicator
+remains false without a concrete execution workspace; native host-work readiness
+is reported separately by `work doctor`.
+
+A bounded receiver activation acknowledged an existing incoming message and its
+real outgoing response. A separate informational readiness notice was sent to
+the configured user. Neither is a development-journey result. No authoring
+conversation, model request, native invocation or confirmed integration has yet
+been produced by live user development input. TG-01, TG-27, TG-28 and TG-32 remain
+pending; the other 28 criteria retain their prior integrated fixture references.
+
+The owned receiver stopped at the end of its 300-second window. The timeout
+wrapper returned its expected status 124; the receiver process exited, both
+configuration/bot locks were released and retained SQLite `quick_check` passed.
+The executable digest is unchanged. The retained fixture has one incoming update,
+one acknowledged response, zero development conversations and zero operation
+requests. Acta setup/activation note: `01M53G6BMNSN6ERW3Y64QXNQ1T`. Reuse this
+same private development root and both targets when actual user messages arrive.
+
 ## Risks and Follow-ups
 
-Prepare an isolated binding to an existing designated QA repository and a fixed
-installed receiver. The authorized Telegram user must supply the live request
+The isolated bindings and fixed installed receiver are prepared. The authorized
+Telegram user must supply the live request
 and any bound clarification/admission messages. Record actual source/base/result
 and canonical integration receipt separately from fixtures. Scheduled exhaustive
 certification and delivery-set closure remain pending the final integrated

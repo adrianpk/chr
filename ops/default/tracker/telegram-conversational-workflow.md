@@ -16,7 +16,7 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 8, Live journey and closure; deterministic preparation active; live QA prerequisites under verification
+Active slice: Slice 8, Live journey and closure; deterministic journey passes; isolated live QA awaits authorized-user development messages
 
 Next slice: None; final slice active, followed by exact-candidate scheduled certification and closure
 
@@ -250,9 +250,9 @@ recorded bot/model/service/QA activation authority from plan section 2.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T8.1 | in_progress | combined fixture and admission correction in this task commit; live pending | Deterministic conversation-to-integration/replay and stale-readiness guards pass; authorized real bot/model QA journey and exact evidence remain. |
-| T8.2 | pending | pending | Chryso source development through a fixed installed receiver in isolated QA. |
-| T8.3 | pending | User Guide/reference/changelog updated with admission correction | Complete evidence audit, installed/live proof and nightly-bound closure remain. |
+| T8.1 | in_progress | `b72a6955cf7c` fixture and admission correction; live pending | Deterministic journey/replay and stale-readiness guards pass. Isolated live target and receiver are prepared; real bot/model development input and integration evidence remain. |
+| T8.2 | pending | isolated source QA setup complete | Source checkout is separately registered against its own QA target; fixed receiver is built from `b72a6955cf7c`. Actual source-development journey remains. |
+| T8.3 | pending | `b72a6955cf7c` User Guide/reference/changelog; installed help inspected | Complete live evidence audit and nightly-bound closure remain. |
 
 Validation: plan section 13; `TestTelegramJourney`, including applicable focused
 race mode, separate authorized live proof and final exact-candidate nightly.
@@ -310,8 +310,9 @@ report/test/live references in the Evidence column as they are verified.
 | Requirement | State | Evidence or action |
 | --- | --- | --- |
 | Looper execution authority | granted | Maintainer instructed this exact prepared set to proceed on 2026-10-16. |
-| Dedicated bot credentials and exact identity bindings | private token/identity checks passed; QA binding pending | Read-only connection doctor succeeds for the supplied dedicated bot; the existing mapping targets the source checkout. Establish the isolated designated QA binding before live activation. |
+| Dedicated bot credentials and exact identity bindings | isolated QA binding and fixed executable ready | Connection doctor succeeds; an isolated dev-root permits only the two disposable QA clones. Native work doctors report ready. Fixture details are recorded in the Slice 8 report. |
 | Live service/messages/model/QA authority | granted for bounded plan validation | Use the dedicated bot, configured model and existing designated QA repositories; private readiness remains required. |
+| Authorized-user live development messages | pending | The bounded activation acknowledged existing traffic and stopped with released locks and a healthy retained database. No live development conversation/invocation exists. Reuse the prepared fixture when the configured user supplies both QA requests and bound decisions. |
 | Final scheduled nightly on integrated candidate | pending | Use existing Forgejo schedule; do not dispatch or run the long gate interactively. |
 
 ## Final Candidate and Closure
@@ -332,4 +333,4 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Exact integrated candidate passed the scheduled exhaustive nightly.
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
-Current state: Slices 1 through 7 are delivered through canonical PR #390/#391/#392/#393/#394/#395/#396; the latest verified merge is `c14f1aea640657e27c97bb64e40b46f30f698451`. Slice 8 is active. Private bot identity/webhook readiness is verified, while QA project isolation, an installed receiver build and authorized-user live messages still require preparation. Fixture results cannot replace the live journeys or the final scheduled exact-candidate nightly.
+Current state: Slices 1 through 7 are delivered through canonical PR #390/#391/#392/#393/#394/#395/#396; the latest verified merge is `c14f1aea640657e27c97bb64e40b46f30f698451`. Slice 8's combined fixture and preparation/admission correction pass focused normal/race checks. The fixed receiver, two registered QA clones and isolated target refs are prepared. Authorized-user development messages, real model/integration evidence and final scheduled certification remain pending. No Slice 8 PR is ready.
