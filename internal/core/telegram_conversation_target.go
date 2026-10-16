@@ -21,7 +21,7 @@ func (s *TelegramReceiverStore) Conversations(ctx context.Context, peer Telegram
 }
 
 func readTelegramConversations(ctx context.Context, reader telegramConversationReader, peer TelegramPeerIdentity) ([]TelegramConversation, error) {
-	rows, err := reader.QueryContext(ctx, `SELECT `+telegramConversationColumns+` FROM telegram_conversations WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=? ORDER BY updated_at DESC,id LIMIT 50`, peer.BotID, peer.ChatID, peer.TopicID, peer.UserID)
+	rows, err := reader.QueryContext(ctx, `SELECT `+telegramConversationColumns+` FROM telegram_conversations WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=? ORDER BY phase IN ('completed','canceled','failed'),updated_at DESC,id LIMIT 50`, peer.BotID, peer.ChatID, peer.TopicID, peer.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func (op telegramConversationTransaction) target() (*TelegramConversation, error
 			return nil, err
 		}
 
-		if telegramCaptureEligible(*c) {
+		if op.targetEligible(*c) {
 			return c, nil
 		}
 	}
@@ -150,7 +150,7 @@ func (op telegramConversationTransaction) soleEligible() (*TelegramConversation,
 	var eligible []TelegramConversation
 
 	for _, c := range sessions {
-		if telegramCaptureEligible(c) {
+		if op.targetEligible(c) {
 			eligible = append(eligible, c)
 		}
 	}
@@ -227,15 +227,10 @@ func (op telegramConversationTransaction) list() (string, *TelegramConversation,
 	return text.String(), nil, nil
 }
 
-func (op telegramConversationTransaction) applyCapture() (string, *TelegramConversation, error) {
-	c, err := op.target()
-	if err != nil {
-		return "", nil, err
+func (op telegramConversationTransaction) targetEligible(c TelegramConversation) bool {
+	if op.input.Action == TelegramConversationCancel {
+		return telegramCancelable(c)
 	}
 
-	if err := op.validateTarget(c); err != nil {
-		return "", nil, err
-	}
-
-	return fmt.Sprintf("Session %s | project=%s | %s | bytes=%d | revision=%d", c.ID, c.ProjectID, c.Phase, len(c.Capture), c.Revision), c, nil
+	return telegramCaptureEligible(c)
 }

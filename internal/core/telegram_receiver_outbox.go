@@ -146,12 +146,18 @@ func (s *TelegramReceiverStore) DeliverySent(ctx context.Context, id string, mes
 		return errors.New("telegram delivery requires a definite message ID")
 	}
 
-	result, err := s.db.ExecContext(ctx, "UPDATE telegram_outbox SET state='delivered',telegram_message_id=?,retry_at=NULL,last_error_code='',updated_at=? WHERE id=? AND state='sending'", messageID, formatProjectTime(now), id)
-	if err != nil {
-		return err
-	}
+	return s.transaction(ctx, func(tx *sql.Tx) error {
+		result, err := tx.ExecContext(ctx, "UPDATE telegram_outbox SET state='delivered',telegram_message_id=?,retry_at=NULL,last_error_code='',updated_at=? WHERE id=? AND state='sending'", messageID, formatProjectTime(now), id)
+		if err != nil {
+			return err
+		}
 
-	return telegramRequireChanged(result)
+		if err := telegramRequireChanged(result); err != nil {
+			return err
+		}
+
+		return retainTelegramReply(ctx, tx, id, messageID, now)
+	})
 }
 
 // DeliveryFailed retains uncertainty or blocks a permanent/exhausted failure.

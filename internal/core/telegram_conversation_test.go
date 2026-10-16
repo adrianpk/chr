@@ -126,7 +126,7 @@ func TestTelegramConversationBinding(t *testing.T) {
 		}
 	}
 
-	if sessions[1] != original {
+	if f.session(t, original.ID) != original {
 		t.Fatal("selection mutated existing conversation", sessions)
 	}
 
@@ -190,4 +190,18 @@ func checkTelegramConversationProject(t *testing.T, f *telegramConversationFixtu
 	if len(sessions) != 1 || sessions[0].ProjectID != want {
 		t.Fatal("wrong project", sessions)
 	}
+}
+
+func (f *telegramConversationFixture) session(t *testing.T, id string) TelegramConversation {
+	t.Helper()
+
+	for _, c := range f.sessions(t) {
+		if c.ID == id {
+			return c
+		}
+	}
+
+	t.Fatal("session unavailable", id)
+
+	return TelegramConversation{}
 }
