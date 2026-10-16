@@ -124,7 +124,7 @@ func validTelegramReceiptIdentity(botID int64, update TelegramReceivedUpdate) bo
 
 func checkTelegramIntakeCapacity(ctx context.Context, tx *sql.Tx, botID int64) error {
 	var pending, total, bytes int64
-	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*),COALESCE(SUM(state IN ('pending','processing')),0),COALESCE(SUM(length(CAST(payload AS BLOB))),0)
+	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*),COALESCE(SUM(state IN ('pending','processing')),0),COALESCE(SUM(length(CAST(payload AS BLOB))+COALESCE(length(CAST(interpretation AS BLOB)),0)),0)
 FROM telegram_updates WHERE bot_id=?`, botID).Scan(&total, &pending, &bytes); err != nil {
 		return err
 	}

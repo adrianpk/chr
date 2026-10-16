@@ -44,19 +44,25 @@ func telegramReadResponse(operations telegramReadService, user core.TelegramAllo
 			continue
 		}
 
-		switch operation.ID {
-		case telegramReadProjects:
-			return telegramProjectResponse(operations, user.ProjectIDs)
-		case telegramReadStatus:
-			state, err := operations.InspectTelegramReceiver(update.Peer.BotID)
-			if err != nil {
-				return "", err
-			}
+		return telegramReadOperationResponse(operations, user, update, operation.ID)
+	}
 
-			return fmt.Sprintf("Receiver: %s\nBot: %d\nCursor epoch: %d\nPoll attempts in current failure cycle: %d\nLast error: %s", state.Health, state.BotID, state.Epoch, state.RetryAttempt, state.LastErrorCode), nil
-		case telegramReadHelp:
-			return telegramReadHelpText(), nil
+	return "Unknown or unavailable command.\n" + telegramReadHelpText(), nil
+}
+
+func telegramReadOperationResponse(operations telegramReadService, user core.TelegramAllowedUser, update core.TelegramReceivedUpdate, operation telegramReadOperation) (string, error) {
+	switch operation {
+	case telegramReadProjects:
+		return telegramProjectResponse(operations, user.ProjectIDs)
+	case telegramReadStatus:
+		state, err := operations.InspectTelegramReceiver(update.Peer.BotID)
+		if err != nil {
+			return "", err
 		}
+
+		return fmt.Sprintf("Receiver: %s\nBot: %d\nCursor epoch: %d\nPoll attempts in current failure cycle: %d\nLast error: %s", state.Health, state.BotID, state.Epoch, state.RetryAttempt, state.LastErrorCode), nil
+	case telegramReadHelp:
+		return telegramReadHelpText(), nil
 	}
 
 	return "Unknown or unavailable command.\n" + telegramReadHelpText(), nil

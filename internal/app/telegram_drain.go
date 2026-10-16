@@ -44,16 +44,10 @@ func (r telegramReceiver) respond(ctx context.Context, update core.TelegramRecei
 		return r.store.RejectPendingUpdate(ctx, update, time.Now())
 	}
 
-	if handled, err := r.respondAction(ctx, user, config, update); handled || err != nil {
-		return err
-	}
-
-	if handled, err := r.respondRecord(ctx, user, config, update); handled || err != nil {
-		return err
-	}
-
-	if handled, err := r.respondConversation(ctx, user, config, update); handled || err != nil {
-		return err
+	for _, handler := range []func(context.Context, core.TelegramAllowedUser, core.TelegramReceiverConfig, core.TelegramReceivedUpdate) (bool, error){r.respondAction, r.respondRecord, r.respondIntent, r.respondConversation} {
+		if handled, err := handler(ctx, user, config, update); handled || err != nil {
+			return err
+		}
 	}
 
 	text, err := telegramReadResponse(r.operations, user, update)

@@ -18,6 +18,7 @@ type service struct {
 	dumpEditor             DumpEditorLauncher
 	dumpCurator            DumpCurationProvider
 	quizModel              core.QuizModelAdapter
+	conversationModel      core.StructuredModelProvider
 	workflowWorker         []string
 	workflowPullRequests   core.WorkflowPullRequestProvider
 	workflowIntegrationGit core.WorkflowIntegrationGit
@@ -32,14 +33,15 @@ func newService(
 	assetsFS fs.FS,
 ) service {
 	return service{
-		ctx:            ctx,
-		env:            env,
-		assetsFS:       assetsFS,
-		projectContext: projectContext,
-		dumpEditor:     defaultDumpEditorLauncher{},
-		dumpCurator:    newDumpCurationProvider(projectContext.ProjectDir),
-		quizModel:      newQuizModelAdapter(projectContext.ProjectDir),
-		now:            time.Now,
+		ctx:               ctx,
+		env:               env,
+		assetsFS:          assetsFS,
+		projectContext:    projectContext,
+		dumpEditor:        defaultDumpEditorLauncher{},
+		dumpCurator:       newDumpCurationProvider(projectContext.ProjectDir),
+		quizModel:         newQuizModelAdapter(projectContext.ProjectDir),
+		conversationModel: core.NewConfiguredStructuredModel(openAIGenerationBackend("CHR_CONVERSATION_GENERATION_BACKEND")),
+		now:               time.Now,
 	}
 }
 

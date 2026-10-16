@@ -22,11 +22,6 @@ func (r telegramReceiver) respondRecord(ctx context.Context, user core.TelegramA
 		return true, r.recordDiagnostic(ctx, update, config, "Unsupported record arguments. Use /help and strict JSON with the displayed revision/source_hash guards.")
 	}
 
-	operations, ok := r.operations.(telegramRecordService)
-	if !ok {
-		return true, r.recordDiagnostic(ctx, update, config, "Record operations are unavailable.")
-	}
-
 	command.Input.Config = config
 
 	projects, err := r.operations.ListRegisteredProjects(user.ProjectIDs)
@@ -35,11 +30,21 @@ func (r telegramReceiver) respondRecord(ctx context.Context, user core.TelegramA
 	}
 
 	command.Input.Projects = projects
-	if command.Action == "create" || command.Action == "update" {
-		return true, r.mutateRecord(ctx, operations, user, command)
+
+	return true, r.dispatchRecord(ctx, user, command)
+}
+
+func (r telegramReceiver) dispatchRecord(ctx context.Context, user core.TelegramAllowedUser, command telegramRecordCommand) error {
+	operations, ok := r.operations.(telegramRecordService)
+	if !ok {
+		return r.recordDiagnostic(ctx, command.Input.Update, command.Input.Config, "Record operations are unavailable.")
 	}
 
-	return true, r.readRecord(ctx, operations, command)
+	if command.Action == "create" || command.Action == "update" {
+		return r.mutateRecord(ctx, operations, user, command)
+	}
+
+	return r.readRecord(ctx, operations, command)
 }
 
 func (r telegramReceiver) readRecord(ctx context.Context, operations telegramRecordService, command telegramRecordCommand) error {

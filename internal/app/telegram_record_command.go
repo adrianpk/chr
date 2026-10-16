@@ -1,9 +1,6 @@
 package app
 
 import (
-	"encoding/json"
-	"errors"
-	"io"
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -103,7 +100,7 @@ func decodeTelegramRecord(command *telegramRecordCommand, body string) error {
 	case "list", "show":
 		return decodeTelegramRecordQuery(command, body)
 	case "create", "update":
-		if err := decodeTelegramRecordJSON(body, &command.Mutation); err != nil {
+		if err := decodeOperationJSON(body, &command.Mutation); err != nil {
 			return err
 		}
 
@@ -119,30 +116,10 @@ func decodeTelegramRecord(command *telegramRecordCommand, body string) error {
 	return nil
 }
 
-func decodeTelegramRecordJSON(text string, target any) error {
-	if len(text) > 65536 || text == "" {
-		return ErrRecordUnsupported
-	}
-
-	decoder := json.NewDecoder(strings.NewReader(text))
-	decoder.DisallowUnknownFields()
-
-	if err := decoder.Decode(target); err != nil {
-		return err
-	}
-
-	var trailing any
-	if err := decoder.Decode(&trailing); !errors.Is(err, io.EOF) {
-		return ErrRecordUnsupported
-	}
-
-	return nil
-}
-
 func decodeTelegramRecordQuery(command *telegramRecordCommand, body string) error {
 	command.Query.Kind = command.Kind
 	if body != "" {
-		if err := decodeTelegramRecordJSON(body, &command.Query); err != nil {
+		if err := decodeOperationJSON(body, &command.Query); err != nil {
 			return err
 		}
 	}

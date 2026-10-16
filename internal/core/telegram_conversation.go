@@ -61,6 +61,16 @@ type telegramConversationDiagnostic string
 
 func (e telegramConversationDiagnostic) Error() string { return string(e) }
 
+// TelegramConversationFailure returns only a domain-owned safe routing diagnostic.
+func TelegramConversationFailure(err error) (string, bool) {
+	var diagnostic telegramConversationDiagnostic
+	if errors.As(err, &diagnostic) {
+		return string(diagnostic), true
+	}
+
+	return "", false
+}
+
 type telegramConversationTransaction struct {
 	ctx   context.Context
 	tx    *sql.Tx
