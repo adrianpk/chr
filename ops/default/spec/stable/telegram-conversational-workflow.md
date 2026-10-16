@@ -1,14 +1,18 @@
 # Telegram Conversation and Workflow Control
 
-Status: Draft
+Status: Approved
 
 Date: 2026-10-16
 
-Approval: Pending
+Approved: maintainer, 2026-10-16; scope accepted for the requested plan and tracker.
 
-Implementation authorization: Not granted by this document
+Implementation authorization: Deferred until the maintainer requests Looper execution.
 
 Model: [Telegram Conversation and Workflow Model](telegram-conversational-workflow-model.md)
+
+Plan: [Telegram Conversation Delivery](../../plan/telegram-conversational-workflow.md)
+
+Tracker: [Telegram Conversation Tracker](../../tracker/telegram-conversational-workflow.md)
 
 ## 1. Purpose
 
@@ -42,8 +46,8 @@ conversation below. A fixture-only authoring path cannot satisfy live delivery.
 
 Related contracts:
 
-- [Ticket-native workflow](../stable/ticket-native-workflow.md)
-- [Native integration queue](../stable/native-integration-queue.md)
+- [Ticket-native workflow](ticket-native-workflow.md)
+- [Native integration queue](native-integration-queue.md)
 - [Authoring sessions](../../../../docs/reference/authoring-sessions.md)
 - [Workflow controls](../../../../docs/reference/workflow-controls.md)
 - [Daemon coordination](../../../../docs/reference/daemon-coordination.md)
@@ -102,7 +106,7 @@ canonical project workflow state.
 
 ## 5. Installation, Configuration and Service
 
-Proposed commands:
+Required commands:
 
 ~~~sh
 chr telegram setup --user-id 100001 --operator-id maintainer --project-id example-project
@@ -128,7 +132,7 @@ Default files follow the existing user environment, including --dev-root:
 | User state directory / telegram/ | Singleton lock and bounded sanitized runtime diagnostics. |
 | User systemd directory / chr-telegram.service | Optional foreground receiver service. |
 
-Example proposed configuration:
+Example configuration:
 
 ~~~yaml
 telegram:
@@ -220,7 +224,7 @@ the model. An unsupported or ambiguous decision asks one focused question.
 No model availability means explicit commands remain available; already
 authorized work does not become failed merely because intent resolution waits.
 
-| Operation family | Proposed explicit surface | Required behavior |
+| Operation family | Explicit surface | Required behavior |
 | --- | --- | --- |
 | Help and projects | /help, /projects, /project <project> | Bounded reads and peer-local selection. |
 | Explain | /explain <question> | Read project context and answer without admitting work. |
@@ -367,10 +371,10 @@ builds are validated separately; updating the coordinating service occurs
 between active executions through an explicit installation/service action.
 The user can always inspect or recover retained work through CLI/Web.
 
-## 12. Proposed Bounds and Observable State
+## 12. Bounds and Observable State
 
-These defaults are part of the draft decision set and require approval with
-the specification. Configuration may reduce them; documented hard ceilings
+These defaults are part of the accepted planning baseline.
+Configuration may reduce them; documented hard ceilings
 cannot silently grow to accommodate a request.
 
 | Resource | Default and hard boundary |
@@ -439,10 +443,10 @@ transport, validation and domain failures.
 | TG-28 | Chryso itself can use that journey without replacing the running receiver mid-execution or depending on an external development controller. |
 | TG-29 | Existing notification and fixture-import commands keep their documented behavior and do not execute old handoffs. |
 | TG-30 | CLI/TUI/Web can observe and control the Telegram-created invocation using the same canonical references. |
-| TG-31 | The selected transport scope and proposed bounds are documented by installed help and connection diagnostics. |
+| TG-31 | The selected transport scope and bounds are documented by installed help and connection diagnostics. |
 | TG-32 | The first authorized live demonstration records exact build, request, invocation and integration evidence separately from fixture checks. |
 
-## 14. Validation and Decisions for Approval
+## 14. Validation and Delivery State
 
 Use deterministic HTTP fixtures and real temporary SQLite/project stores for
 routing, authorization, replay, crash windows, guarded actions and recovery.
@@ -451,15 +455,16 @@ interactive validation focused; full/race-wide campaigns belong to the existing
 nightly. Live bot or forge actions require the designated explicit authorization
 and report their evidence separately.
 
-The proposed delivery is text-first, supports private chats and explicitly
+The accepted delivery is text-first, supports private chats and explicitly
 authorized group topics, uses long polling and the existing registered-project
-store, and includes the complete preparation-to-integration journey. Approve
-these boundaries and the numeric defaults before planning implementation.
+store, and includes the complete preparation-to-integration journey.
 Rich media/transcription, webhook hosting and remote shell access are outside
 this text adapter.
 
-No plan, tracker, ticket batch or service activation is created by this draft.
-Approval of the document and authorization to implement remain separate states.
+The linked plan and tracker define the implementation sequence. The maintainer
+requested their preparation and a Conventional Commit on 2026-10-16, with
+Looper execution deferred. This promotion does not activate a bot or service.
+Scope approval and authorization to execute remain separate states.
 
 Transport facts are checked against the Telegram Bot API: offset acknowledgement
 and long polling, exclusive webhook delivery, a remote update retention window

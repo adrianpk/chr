@@ -1,10 +1,10 @@
 # Telegram Conversation and Workflow Model
 
-Status: Draft
+Status: Approved
 
 Date: 2026-10-16
 
-Approval: Pending with the behavior specification
+Approved: maintainer, 2026-10-16; model accepted with the behavior specification for planning.
 
 Specification: [Telegram Conversation and Workflow Control](telegram-conversational-workflow.md)
 
@@ -122,6 +122,8 @@ Business entity: TelegramUpdateReceipt. Stored table: telegram_updates.
 | state | pending, processing, processed, ignored or rejected. |
 | request_id | Nullable resulting application request. |
 | reason_code | Nullable bounded rejection/ignore reason. |
+| interpretation_attempt, interpretation_retry_at | Retained model-resolution attempt count 0-5 and nullable UTC retry deadline; reserved before each call. |
+| interpretation_error_code | Nullable bounded sanitized model failure classification. |
 | processing_owner | Nullable private local processing claim. |
 | updated_at | UTC timestamp. |
 
@@ -137,6 +139,15 @@ a second concurrently applying operation.
 Indexes: bot/state/received_at for bounded drain; peer/received_at for ordered
 conversation processing. Pending row capacity is 1,024. Intake, interpretation
 and application capacity are checked independently.
+
+Interpretation retries retain their count and deadline across restart. Once a
+typed request exists, replay observes that request instead of asking the model
+to choose another operation. Exhaustion rejects resolution with a visible
+provider failure and preserves the conversation; replay of the same source
+cannot reset it. A new explicit user instruction has a new source identity and
+still passes current scope and authority checks. Artifact-generation retries
+remain owned by the shared authoring operation and its retained request, not
+by an independent transport attempt budget.
 
 ## 5. Application Request and Domain Replay
 
