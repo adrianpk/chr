@@ -85,7 +85,28 @@ func (r telegramReceiver) completeWorkActivation(ctx context.Context, result tel
 		return core.ErrWorkflowConflict
 	}
 
-	return r.store.ObserveTelegramWork(ctx, ref, status.Revision, time.Now())
+	return r.projectWorkProgress(ctx, ref, status)
+}
+
+func (r telegramReceiver) projectWorkProgress(ctx context.Context, ref core.TelegramWorkReference, status WorkflowWorkStatus) error {
+	if err := r.validateWorkReference(ctx, ref); err != nil {
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+
+		if errors.Is(err, core.ErrWorkflowConflict) {
+			return nil
+		}
+
+		return err
+	}
+
+	config, err := r.currentConfig()
+	if err != nil {
+		return err
+	}
+
+	return r.store.ProjectTelegramWork(ctx, ref, telegramWorkObservation(status), config.Digest(), time.Now())
 }
 
 func telegramWorkActivationCode(err error) string {

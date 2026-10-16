@@ -117,6 +117,14 @@ func (h *telegramWorkHost) waitOwned(ctx context.Context) (err error) {
 
 	for len(h.active) != 0 {
 		result := <-h.finished
+		if ctx.Err() != nil {
+			// Native checkpoints survive shutdown. Reopen will project them;
+			// cancelled authority readers cannot authorize a new notice here.
+			delete(h.active, telegramWorkFlightKey(result.Reference))
+
+			continue
+		}
+
 		err = errors.Join(err, h.complete(cleanup, result))
 	}
 

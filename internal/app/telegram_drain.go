@@ -73,10 +73,19 @@ func (r telegramReceiver) deliver(ctx context.Context, delivery core.TelegramRec
 		return r.store.BlockDelivery(ctx, delivery.ID, time.Now())
 	}
 
-	if err := r.store.ReserveDelivery(ctx, delivery.ID, time.Now()); err != nil {
+	reserved, err := r.store.TryReserveDelivery(ctx, delivery.ID, time.Now())
+	if err != nil {
 		return err
 	}
 
+	if !reserved {
+		return nil
+	}
+
+	return r.sendReservedDelivery(ctx, delivery)
+}
+
+func (r telegramReceiver) sendReservedDelivery(ctx context.Context, delivery core.TelegramReceiverDelivery) error {
 	text := delivery.Text
 	if delivery.State == "sending" || delivery.State == "uncertain" {
 		text = core.BoundTelegramReceiverText("Uncertain delivery retry; this notice may repeat.\n" + text)

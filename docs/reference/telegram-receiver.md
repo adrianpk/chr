@@ -118,6 +118,15 @@ same authority check runs again under native continuation acceptance. Changing
 the selected project or `OPS_USER` does not move retained work. Shutdown cancels
 and joins the receiver's own calls before closing its local store.
 
+Conversations project canonical progress and terminal outcomes together with a
+durable outbox reservation. Never-attempted routine notices coalesce to the
+latest revision; new routine notices are delivered at most once per thirty
+seconds per conversation. Human waits, terminal results and attempted or uncertain
+sends retain their identities. A terminal result can be delivered immediately.
+If outbox capacity is exhausted, the observation remains recoverable from the
+native invocation. Automatic publication policy advances without another
+message; human policy retains its exact candidate and review wait.
+
 Project resolution uses an explicit authorized target, the session/reply's
 bound project, peer selection, authorized configured default, then the sole
 authorized enabled project. Ambiguous or conflicting targets require explicit

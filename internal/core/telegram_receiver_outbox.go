@@ -127,7 +127,8 @@ func (s *TelegramReceiverStore) DueDeliveries(ctx context.Context, botID int64, 
 	rows, err := s.db.QueryContext(ctx, `SELECT o.id,o.chat_id,o.topic_id,o.user_id,o.text,o.state,o.attempts,o.config_digest,COALESCE(o.action_token,''),COALESCE((SELECT allowed_choices FROM telegram_actions WHERE token=o.action_token),'[]') FROM telegram_outbox o
 WHERE o.bot_id=? AND o.state IN ('pending','sending','uncertain') AND o.attempts<5 AND (o.retry_at IS NULL OR o.retry_at<=?)
 AND NOT EXISTS(SELECT 1 FROM telegram_outbox earlier WHERE earlier.bot_id=o.bot_id AND earlier.chat_id=o.chat_id AND earlier.topic_id=o.topic_id AND earlier.user_id=o.user_id AND earlier.event_key=o.event_key AND earlier.part_index<o.part_index AND earlier.state!='delivered')
-ORDER BY o.created_at,o.rowid LIMIT 50`, botID, formatProjectTime(now))
+AND (o.kind!='progress' OR o.attempts>0 OR NOT EXISTS(SELECT 1 FROM telegram_outbox recent WHERE recent.conversation_id=o.conversation_id AND recent.kind='progress' AND recent.total_attempts>0 AND recent.event_key!=o.event_key AND recent.updated_at>?))
+ORDER BY o.created_at,o.rowid LIMIT 50`, botID, formatProjectTime(now), formatProjectTime(now.Add(-30*time.Second)))
 	if err != nil {
 		return nil, err
 	}
@@ -158,14 +159,32 @@ ORDER BY o.created_at,o.rowid LIMIT 50`, botID, formatProjectTime(now))
 
 // ReserveDelivery persists the attempt before sendMessage; a lost acknowledgement cannot reset it.
 func (s *TelegramReceiverStore) ReserveDelivery(ctx context.Context, id string, now time.Time) error {
-	result, err := s.db.ExecContext(ctx, `UPDATE telegram_outbox SET state='sending',attempts=attempts+1,total_attempts=total_attempts+1,
-retry_at=?,updated_at=? WHERE id=? AND state IN ('pending','sending','uncertain') AND attempts<5 AND (retry_at IS NULL OR retry_at<=?)`,
-		formatProjectTime(now.Add(16*time.Second)), formatProjectTime(now), id, formatProjectTime(now))
+	reserved, err := s.TryReserveDelivery(ctx, id, now)
 	if err != nil {
 		return err
 	}
 
-	return telegramRequireChanged(result)
+	if !reserved {
+		return errors.New("telegram retry is not due, blocked or exhausted")
+	}
+
+	return nil
+}
+
+// TryReserveDelivery skips a stale read when routine progress was coalesced.
+// Successful reservation persists its attempt before the API call.
+func (s *TelegramReceiverStore) TryReserveDelivery(ctx context.Context, id string, now time.Time) (bool, error) {
+	result, err := s.db.ExecContext(ctx, `UPDATE telegram_outbox AS o SET state='sending',attempts=attempts+1,total_attempts=total_attempts+1,
+retry_at=?,updated_at=? WHERE id=? AND state IN ('pending','sending','uncertain') AND attempts<5 AND (retry_at IS NULL OR retry_at<=?)
+AND (o.kind!='progress' OR o.attempts>0 OR NOT EXISTS(SELECT 1 FROM telegram_outbox recent WHERE recent.conversation_id=o.conversation_id AND recent.kind='progress' AND recent.total_attempts>0 AND recent.event_key!=o.event_key AND recent.updated_at>?))`,
+		formatProjectTime(now.Add(16*time.Second)), formatProjectTime(now), id, formatProjectTime(now), formatProjectTime(now.Add(-30*time.Second)))
+	if err != nil {
+		return false, err
+	}
+
+	count, err := result.RowsAffected()
+
+	return count == 1, err
 }
 
 // DeliverySent records definite API acknowledgement without applying any operation again.
