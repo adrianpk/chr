@@ -203,7 +203,7 @@ Prerequisite: verified Slice 5 integration.
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
 | T6.1 | validated | `a3e5e95be3b45aaa66cc0c1bc0744b73adac6770` | Shared guarded pause/cancel/resume/continue/reconcile, mapped actor, exact invocation/revision and asynchronous stop checkpoints. |
-| T6.2 | validated | task commit recorded below | Exact review/candidate, entry/budget and question guards; atomic native request receipts; lost-ack and partial-journal recovery; mapped actors. |
+| T6.2 | validated | `76b55b28ed770b13fc40da53ff39e42dbe822ae9` | Exact review/candidate, entry/budget and question guards; atomic native request receipts; lost-ack and partial-journal recovery; mapped actors. |
 | T6.3 | in_progress | pending | Responsive prioritized controls, stale-action handling and callback/text parity. |
 | T6.4 | pending | pending | Shared serial/parallel capacity and cross-adapter ownership checks. |
 

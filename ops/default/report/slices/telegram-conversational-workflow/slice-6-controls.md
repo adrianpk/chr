@@ -29,7 +29,7 @@ survives an older pause prompt, and both stop intents survive asynchronous real
 worker termination and retained checkpoints. Receiver status and draft
 cancellation retain their existing commands.
 
-T6.2 adds explicit and natural-language approval, bounded grants and retained
+T6.2 (`76b55b28ed770b13fc40da53ff39e42dbe822ae9`) adds explicit and natural-language approval, bounded grants and retained
 question answers. Every preview freezes the exact invocation, review/candidate,
 integration entry, budget and question revisions required by its native owner.
 The displayed option number resolves to a retained option before confirmation;
