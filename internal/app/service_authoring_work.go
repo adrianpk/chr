@@ -84,7 +84,22 @@ func (s service) PrepareAuthoringWork(ctx context.Context, request AuthoringWork
 
 // ApplyPreparedAuthoringWork creates only the previewed proposed native record.
 // A confirmed owner receipt takes precedence over later source edits on replay.
-func (s service) ApplyPreparedAuthoringWork(ctx context.Context, prepared PreparedAuthoringWork) (result AuthoringWorkResult, err error) {
+func (s service) ApplyPreparedAuthoringWork(ctx context.Context, prepared PreparedAuthoringWork) (AuthoringWorkResult, error) {
+	return s.applyPreparedAuthoringWork(ctx, prepared, nil)
+}
+
+// ApplyPreparedAuthoringWorkGuarded rechecks caller authority while holding the
+// authoring owner, immediately before a new native effect. An existing owner
+// receipt reconciles first without acquiring fresh authority for a changed scope.
+func (s service) ApplyPreparedAuthoringWorkGuarded(ctx context.Context, prepared PreparedAuthoringWork, guard core.AuthoringCommitGuard) (AuthoringWorkResult, error) {
+	if guard == nil {
+		return AuthoringWorkResult{}, core.ErrWorkflowConflict
+	}
+
+	return s.applyPreparedAuthoringWork(ctx, prepared, guard)
+}
+
+func (s service) applyPreparedAuthoringWork(ctx context.Context, prepared PreparedAuthoringWork, guard core.AuthoringCommitGuard) (result AuthoringWorkResult, err error) {
 	if err := validatePreparedAuthoringWork(prepared, s.projectContext.ProjectID); err != nil {
 		return result, err
 	}
@@ -97,7 +112,7 @@ func (s service) ApplyPreparedAuthoringWork(ctx context.Context, prepared Prepar
 	err = core.WithAuthoringMutation(ctx, s.projectContext.ProjectDir, func(ctx context.Context) error {
 		var applyErr error
 
-		result, applyErr = s.applyAuthoringWork(ctx, prepared, mutation)
+		result, applyErr = s.applyAuthoringWork(ctx, prepared, mutation, guard)
 
 		return applyErr
 	})
@@ -105,7 +120,7 @@ func (s service) ApplyPreparedAuthoringWork(ctx context.Context, prepared Prepar
 	return result, err
 }
 
-func (s service) applyAuthoringWork(ctx context.Context, prepared PreparedAuthoringWork, mutation PreparedRecordMutation) (AuthoringWorkResult, error) {
+func (s service) applyAuthoringWork(ctx context.Context, prepared PreparedAuthoringWork, mutation PreparedRecordMutation, guard core.AuthoringCommitGuard) (AuthoringWorkResult, error) {
 	result := AuthoringWorkResult{Scope: prepared.Scope, Authorization: prepared.Authorization}
 
 	store, err := s.scopedRecordStore(prepared.Scope.Namespace)
@@ -127,6 +142,12 @@ func (s service) applyAuthoringWork(ctx context.Context, prepared PreparedAuthor
 
 	if err := s.guardPreparedAuthoringSource(ctx, prepared.Scope); err != nil {
 		return result, err
+	}
+
+	if guard != nil {
+		if err := guard(ctx); err != nil {
+			return result, err
+		}
 	}
 
 	result.Result, err = s.ApplyPreparedRecordMutation(ctx, mutation)

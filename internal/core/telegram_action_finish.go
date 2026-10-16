@@ -9,11 +9,12 @@ import (
 
 // TelegramActionResult contains confirmed owner facts or an explicit blocked outcome.
 type TelegramActionResult struct {
-	State        string
-	ReceiptRef   string
-	Facts        json.RawMessage
-	Text         string
-	ConfigDigest string
+	State             string
+	ReceiptRef        string
+	Facts             json.RawMessage
+	Text              string
+	ConfigDigest      string
+	ConversationPhase string
 }
 
 // FinishTelegramAction commits both requests, action consumption, input acknowledgement
@@ -103,6 +104,14 @@ func finishTelegramActionState(ctx context.Context, tx *sql.Tx, claim TelegramAc
 }
 
 func finishTelegramActionResult(ctx context.Context, tx *sql.Tx, retained TelegramActionClaim, result TelegramActionResult, now time.Time) error {
+	if result.ConversationPhase != "" && result.State != "confirmed" {
+		return ErrWorkflowConflict
+	}
+
+	if err := projectTelegramAuthoringWorkPhase(ctx, tx, retained.Request, result.ConversationPhase, formatProjectTime(now)); err != nil {
+		return err
+	}
+
 	if err := finishTelegramActionRequests(ctx, tx, retained, result, now); err != nil {
 		return err
 	}

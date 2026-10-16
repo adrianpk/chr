@@ -13,7 +13,7 @@ type telegramExplanationService interface {
 
 // PrepareTelegramExplanation maps registry routing to the neutral source reader.
 func (s service) PrepareTelegramExplanation(ctx context.Context, target core.TelegramOperationTarget, request AuthoringExplanationRequest) (PreparedAuthoringExplanation, error) {
-	scoped, err := s.telegramExplanationProjectService(ctx, target)
+	scoped, err := s.telegramBoundProjectService(ctx, target)
 	if err != nil {
 		return PreparedAuthoringExplanation{}, err
 	}
@@ -23,7 +23,7 @@ func (s service) PrepareTelegramExplanation(ctx context.Context, target core.Tel
 
 // ExplainPreparedTelegram uses the same configured provider as other adapters.
 func (s service) ExplainPreparedTelegram(ctx context.Context, target core.TelegramOperationTarget, prepared PreparedAuthoringExplanation) (AuthoringExplanation, error) {
-	scoped, err := s.telegramExplanationProjectService(ctx, target)
+	scoped, err := s.telegramBoundProjectService(ctx, target)
 	if err != nil {
 		return AuthoringExplanation{}, err
 	}
@@ -31,7 +31,7 @@ func (s service) ExplainPreparedTelegram(ctx context.Context, target core.Telegr
 	return scoped.ExplainPreparedAuthoring(ctx, prepared)
 }
 
-func (s service) telegramExplanationProjectService(ctx context.Context, target core.TelegramOperationTarget) (service, error) {
+func (s service) telegramBoundProjectService(ctx context.Context, target core.TelegramOperationTarget) (service, error) {
 	scoped, err := s.telegramProjectService(ctx, target)
 	if err != nil {
 		return scoped, err

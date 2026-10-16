@@ -16,11 +16,11 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 4, Conversational authoring; implementation in progress
+Active slice: Slice 4, Conversational authoring; implementation validated, PR preparation
 
 Next slice: Slice 5, Native work continuation; after verified Slice 4 integration
 
-Progress: 3 of 8 slices integrated; 3 of 29 tasks validated and 11 done; 9 of 32 acceptance criteria have deterministic fixture evidence.
+Progress: 3 of 8 slices integrated; 4 of 29 tasks validated and 11 done; 13 of 32 acceptance criteria have deterministic fixture evidence.
 
 Full gate: `make verify`
 
@@ -123,7 +123,7 @@ Candidate: `c0385ee781452a7dfdad5aadeeb971e3b62cb60e` implementation. Canonical 
 
 ## Slice 4: Conversational Authoring
 
-State: in_progress
+State: reviewing
 
 Prerequisite: verified Slice 3 integration.
 
@@ -132,7 +132,7 @@ Prerequisite: verified Slice 3 integration.
 | T4.1 | validated | `b54d526fd0471eff7c4df2ef769ba0abe66476ce` | Bounded typed natural-language intent and deterministic command parity. |
 | T4.2 | validated | `f7408ea2fa51d4a66ce5be156d2aa192160ad37f` | Real configured-provider authoring with exact question/turn binding. |
 | T4.3 | validated | `4d1932fedf6ac79e659ce2b475b4261b822f50e6` | Explain/prepare/develop intent, retained scope and bounded authority. |
-| T4.4 | in_progress | `e4aa7bf44bc36ba8a5f1ca0edb82978f79bb0923`, `37a1a0aad92404cf086bf202f812bde81d39f333` partial | Canonical artifact generation/refinement, provenance and replay checks. |
+| T4.4 | validated | `e4aa7bf44bc36ba8a5f1ca0edb82978f79bb0923`, `37a1a0aad92404cf086bf202f812bde81d39f333` | Canonical artifacts, native preparation, exact scope decisions and replay checks. |
 
 Validation: plan section 9; `TestTelegramAuthoring`, including focused race mode.
 
@@ -162,9 +162,12 @@ canonical context, with independent retained provider attempts/results, guarded
 delivery and no artifact/work effects. Its real HTTP/reopened-store fixtures
 cover malformed output exhaustion, unchanged sources/intent, original result
 replay and current operator/root checks in both normal and race modes. Native
-prepared-work dispatch and final scope-decision binding remain; T4.4 is in progress.
+prepared-work and scope decisions now pass the same combined normal/race checks,
+strict lint and style checks. Real native-owner fixtures prove first-scope
+authority, changed/missing authority, button/reply/text parity, stale prompts and
+lost-acknowledgement recovery preserving independent source/ticket edits.
 
-Candidate / PR / verified merge: pending completion of the slice.
+Candidate: task implementation validated. Canonical PR: pending. Verified merge: pending controller integration.
 
 ## Slice 5: Native Work Continuation
 
@@ -244,13 +247,13 @@ report/test/live references in the Evidence column as they are verified.
 | TG-01 | pending | pending |
 | TG-02 | validated | [Slice 1 deterministic evidence](../report/slices/telegram-conversational-workflow/slice-1-receiver.md) |
 | TG-03 | validated | [Slice 1 deterministic evidence](../report/slices/telegram-conversational-workflow/slice-1-receiver.md) |
-| TG-04 | pending | pending |
-| TG-05 | pending | pending |
+| TG-04 | validated | [Slice 4 authoring and scope fixtures](../report/slices/telegram-conversational-workflow/slice-4-authoring.md) |
+| TG-05 | validated | [Slice 4 authoring and scope fixtures](../report/slices/telegram-conversational-workflow/slice-4-authoring.md) |
 | TG-06 | validated | [Slice 2 deterministic evidence](../report/slices/telegram-conversational-workflow/slice-2-conversations.md) |
 | TG-07 | validated | [Slice 2 deterministic evidence](../report/slices/telegram-conversational-workflow/slice-2-conversations.md) |
 | TG-08 | validated | [Slice 2 deterministic evidence](../report/slices/telegram-conversational-workflow/slice-2-conversations.md) |
-| TG-09 | pending | pending |
-| TG-10 | pending | pending |
+| TG-09 | validated | [Slice 4 authoring and scope fixtures](../report/slices/telegram-conversational-workflow/slice-4-authoring.md) |
+| TG-10 | validated | [Slice 4 authoring and scope fixtures](../report/slices/telegram-conversational-workflow/slice-4-authoring.md) |
 | TG-11 | pending | pending |
 | TG-12 | pending | pending |
 | TG-13 | pending | pending |
@@ -301,4 +304,4 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Exact integrated candidate passed the scheduled exhaustive nightly.
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
-Current state: Slice 3 delivered through PR [#392](https://forge.adrianpk.com/adrianpk/chr/pulls/392) at `697a3ba4b3e33c459c343e140d0337860f453918`, verified against canonical Forgejo, clean `dev` and the exact-HEAD controller receipt. Slice 4 is active on `feat/slice-4-telegram-authoring`; T4.1 through T4.3 are validated and T4.4 is in progress. Its Telegram artifact and explanation bridges have focused evidence; native prepared-work dispatch and scope-decision binding remain. The canonical Slice 4 PR has not been opened.
+Current state: Slice 3 delivered through PR [#392](https://forge.adrianpk.com/adrianpk/chr/pulls/392) at `697a3ba4b3e33c459c343e140d0337860f453918`. All four Slice 4 tasks are validated with focused normal/race and strict lint evidence. The report is reviewing; the canonical Slice 4 PR and exact clean-HEAD controller checks are being prepared. Slice 5 remains pending verified integration.

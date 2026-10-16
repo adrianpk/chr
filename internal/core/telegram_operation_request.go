@@ -209,5 +209,5 @@ func insertTelegramOperation(ctx context.Context, tx *sql.Tx, request TelegramOp
 		return err
 	}
 
-	return nil
+	return bindInitialTelegramAuthoringWork(ctx, tx, request)
 }

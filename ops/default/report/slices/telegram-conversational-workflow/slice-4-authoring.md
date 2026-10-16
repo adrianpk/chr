@@ -1,6 +1,6 @@
 # Slice 4: Conversational Authoring
 
-Status: drafting
+Status: reviewing
 
 Delivery set: telegram-conversational-workflow
 
@@ -74,6 +74,20 @@ or work. The original question and source image are retained before invocation.
 Provider budgets/results are independent of intent resolution; restart cannot
 reclassify that request, reset five attempts or regenerate an acknowledged result.
 
+`/prepare-work` and ordinary-language preparation use actual generated dump/spec
+content to prepare a native backlog ticket. The preview retains original intent,
+instruction, canonical sources and contract before dispatch. Preparation starts
+no invocation. A literal `/develop` instruction can bind only the first exact
+work reservation; a model proposal supplies no grant. Missing or changed
+authority uses one retained scope preview, with equivalent button/reply/text
+decisions. Unchanged preparation returns its existing receipt or prompt.
+
+Confirmed native receipts recover lost acknowledgement before later source
+checks, preserving independent source and ticket edits. Changed roots/operators
+block new effects, and canonical refinement invalidates the prior scope prompt.
+The User Guide, receiver reference and Unreleased notes describe the delivered
+commands and their preparation behavior.
+
 ## Implementation Notes
 
 T4.1 implementation and report introduction: `b54d526fd0471eff7c4df2ef769ba0abe66476ce`.
@@ -83,10 +97,8 @@ T4.2 implementation commit: `f7408ea2fa51d4a66ce5be156d2aa192160ad37f`.
 T4.3 implementation commit: `4d1932fedf6ac79e659ce2b475b4261b822f50e6`.
 
 T4.4 artifact-bridge implementation commit: `e4aa7bf44bc36ba8a5f1ca0edb82978f79bb0923`.
-This completes the artifact-dispatch portion; T4.4 remains in progress.
 
 T4.4 explanation-bridge implementation commit: `37a1a0aad92404cf086bf202f812bde81d39f333`.
-Native prepared-work and scope-decision dispatch remain in progress.
 
 The shared structured provider uses the existing Codex agent runner or OpenAI
 Responses boundary. `CHR_CONVERSATION_GENERATION_BACKEND=openai` selects OpenAI;
@@ -148,6 +160,17 @@ source/outbox acknowledgement. Explanation source preparation and provider
 dispatch recheck the resolved registry-root binding, and queuing rechecks current
 operator/root/conversation authority.
 
+Migration 21 pins the conversation's first work reservation with a foreign-key
+reference. Reservation and that marker commit together; later failures, reopening
+or clock changes cannot transfer the original instruction to another scope.
+Prepared native input and scope digests use the existing request owner. Missing
+authority uses the existing expiring action owner; its first answer identity is
+retained as the development decision. Reoffering a consumed prompt preserves its
+token, expiry and prepared projection. Phase projection keeps that request's
+immutable conversation revision; subsequent authoring edits advance the revision.
+The shared authoring owner rechecks host authority immediately before new native
+effects. No separate transport scheduler or work-admission path is added.
+
 ## Contracts Added or Changed
 
 - `StructuredModelRequest`, `StructuredModelProvider` and
@@ -185,6 +208,12 @@ operator/root/conversation authority.
   results and five-attempt budgets independent of intent interpretation.
 - `ValidateTelegramProjectTarget`: resolved-root validation at the adapter's
   entry to a project-scoped operation.
+- `ApplyPreparedAuthoringWorkGuarded`: caller authorization under the shared
+  authoring lock before new native effects, after original receipt reconciliation.
+- `IsInitialTelegramAuthoringWork` and `LatestTelegramAuthoringWork`: immutable
+  first-reservation identity and exact-peer retained work previews/results.
+- Retained action offers/results can project the current bound authoring phase;
+  replay does not extend expiry or restore a consumed confirmation state.
 
 ## Files of Interest
 
@@ -207,6 +236,10 @@ operator/root/conversation authority.
   retained context and guarded result delivery.
 - `internal/core/telegram_operation_model.go`: provider-result retention and
   bounded independent attempts.
+- `internal/app/telegram_prepared_work_*.go`: shared native preparation,
+  first-scope authority and retained action dispatch.
+- `internal/core/telegram_authoring_work_request.go`: atomic first-scope binding
+  and retained work lookup through the existing request owner.
 - `internal/core/telegram_authoring*_test.go` and
   `internal/app/telegram_authoring*_test.go`: real SQLite, HTTP, native owner,
   replay and authority regressions.
@@ -264,7 +297,7 @@ failed bindings and original receipt replay after independent source/ticket
 edits. The additional original-instruction fixture passed after source-recovery
 support was added; it proves reopening and operator-remapping checks.
 
-Successful partial T4.4 adapter task checks:
+Successful T4.4 adapter task checks:
 
 - `go test ./internal/core ./internal/app -run '^Test(TelegramAuthoring|TelegramConversation|TelegramOperation|TelegramReceiver|MaintenanceDBStatus)' -count=1 -timeout=3m`
 - `go test -race ./internal/core ./internal/app -run '^Test(TelegramAuthoring|TelegramConversation|TelegramOperation|TelegramReceiver|MaintenanceDBStatus)' -count=1 -timeout=3m`
@@ -294,12 +327,28 @@ during invocation and separate interpretation/result retention. Root/operator
 changes during generation block result delivery, and a root rebind before source
 preparation fails before reading the new project.
 
-Final clean-HEAD controller validation remains pending completion of all four
-Slice 4 tasks and committed canonical PR references. These task fixtures are not
-live-provider, live-bot or exhaustive scheduled evidence.
+Real Git/SQLite/HTTP native preparation fixtures prove preparation/development
+intent, actual backlog descriptions and scope metadata, unchanged-scope reuse,
+slash/NL parity, missing model-proposed authority, equivalent text/reply/button
+decisions, expanded-scope confirmation and stale prompt rejection. Both initial
+instruction and explicit-decision paths recover a lost native acknowledgement
+after independent source and ticket edits. Guard fixtures reject operator/root
+changes before native effects. Cheap core fixtures prove atomic first-reservation
+rollback and preservation after failure/reopening. A focused offer-replay test
+first reproduced a consumed prompt regressing its conversation phase; reoffering
+now leaves its consumed state, original expiry and projection intact.
+
+Final validation is recorded by the controller after canonical PR references are
+committed. Its receipt must match the clean PR HEAD and these ordered commands:
+
+- `make verify`
+- `go test ./internal/core ./internal/app -run '^TestTelegramAuthoring' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^TestTelegramAuthoring' -count=1 -timeout=3m`
+- `git diff --check`
+
+Task fixtures and controller validation are distinct from real-provider,
+real-bot and exhaustive scheduled certification.
 
 ## Risks and Follow-ups
 
-T4.4 remains in progress. The artifact and explanation bridges are implemented;
-native prepared-work dispatch, final scope-decision binding and their complete
-slash/NL journey checks remain. The report remains drafting.
+None recorded.

@@ -46,8 +46,16 @@ func (r telegramReceiver) respondAction(ctx context.Context, user core.TelegramA
 	case "consumed":
 		return true, r.store.QueueReadResponse(ctx, update, "Action already confirmed. Request: "+claim.Request.ID, config.Digest(), time.Now())
 	default:
-		return true, r.applyRecordAction(ctx, claim, config)
+		return true, r.dispatchTelegramAction(ctx, claim, config)
 	}
+}
+
+func (r telegramReceiver) dispatchTelegramAction(ctx context.Context, claim core.TelegramActionClaim, config core.TelegramReceiverConfig) error {
+	if claim.Request.OperationID == "authoring.work" {
+		return r.applyPreparedWorkAction(ctx, claim, config)
+	}
+
+	return r.applyRecordAction(ctx, claim, config)
 }
 
 func (r telegramReceiver) actionDiagnostic(ctx context.Context, update core.TelegramReceivedUpdate, config core.TelegramReceiverConfig) error {

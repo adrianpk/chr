@@ -44,8 +44,11 @@ func (s *TelegramReceiverStore) OfferTelegramAction(ctx context.Context, offer T
 		}
 
 		action, err = retainTelegramAction(op, request, offer, token)
+		if err != nil || action.State != "pending" {
+			return err
+		}
 
-		return err
+		return projectTelegramAuthoringWorkPhase(ctx, tx, request, offer.ConversationPhase, formatProjectTime(now))
 	})
 
 	return action, err

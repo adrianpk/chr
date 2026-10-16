@@ -90,7 +90,7 @@ func telegramIntentTargetFailure(err error) string {
 }
 
 func freezeTelegramIntentArguments(intent ConversationIntent, target core.TelegramOperationTarget) ConversationIntent {
-	if intent.OperationID == "prepare" || intent.OperationID == "develop" || intent.OperationID == "project" || intent.OperationID == "explain" {
+	if intent.OperationID == "prepare" || intent.OperationID == "develop" || intent.OperationID == "project" || intent.OperationID == "explain" || intent.OperationID == "prepare-work" {
 		intent.Arguments.Project = target.ProjectID
 	}
 
@@ -109,6 +109,18 @@ func freezeTelegramIntentArguments(intent ConversationIntent, target core.Telegr
 }
 
 func (r telegramReceiver) intentPreparationTarget(ctx context.Context, input core.TelegramConversationInput, intent ConversationIntent) (core.TelegramOperationTarget, bool, error) {
+	work, recognized, err := telegramIntentPreparedWork(input.Update, intent)
+	if recognized {
+		if err != nil {
+			return core.TelegramOperationTarget{}, false, err
+		}
+
+		work.Config, work.Projects = input.Config, input.Projects
+		_, target, err := r.store.ResolveTelegramAuthoringTarget(ctx, work)
+
+		return target, true, err
+	}
+
 	explanation, recognized, err := telegramIntentExplanation(input.Update, intent)
 	if recognized {
 		if err != nil {

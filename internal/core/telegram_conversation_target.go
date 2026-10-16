@@ -240,5 +240,5 @@ func (op telegramConversationTransaction) targetEligible(c TelegramConversation)
 }
 
 func telegramAuthoringEligible(c TelegramConversation) bool {
-	return telegramCaptureEligible(c) || c.Phase == "preparing" || c.Phase == "prepared"
+	return telegramCaptureEligible(c) || c.Phase == "preparing" || c.Phase == "prepared" || c.Phase == "awaiting_confirmation"
 }

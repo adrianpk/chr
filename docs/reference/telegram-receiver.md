@@ -1,10 +1,11 @@
 # Telegram Receiver
 
-The dedicated receiver supports authenticated project reads and retained text
-conversations. `/help` is generated from the available command registries.
-Unknown slash commands return help without consulting a model. Callbacks return
-an unavailable-action diagnostic. Conversations retain capture without generating
-artifacts, admitting work or executing saved remote-command handoffs.
+The dedicated receiver supports authenticated project reads, retained text
+conversations, configured-provider explanations and canonical artifact/native
+ticket preparation. `/help` is generated from the available command registries.
+Unknown slash commands return help without consulting a model. Bound actions
+accept buttons, replies and `/answer` through the same retained decision owner.
+Preparation creates no work invocation and executes no saved intake handoff.
 
 ## Private setup
 
@@ -72,7 +73,12 @@ Project listing returns only enabled, explicitly allowed registry entries.
 | `/focus <conversation>` | Focus an exact collecting session. |
 | `/reply <conversation> <text>` | Append to an exact current conversation. |
 | `/dump [conversation]` | Show bounded capture text. |
-| `/done [conversation]` | Finish capture and retain it for subsequent authoring. |
+| `/done [conversation]` | Finish capture and generate a canonical dump. |
+| `/quiz [conversation]` | Ask a real provider-generated clarification question. |
+| `/spec [conversation]`, `/plan [conversation]` | Generate a draft spec or plan from canonical context, asking missing information when needed. |
+| `/refine <dump\|spec\|plan> <conversation> <instructions>` | Explicitly replace that session's observed output. |
+| `/explain [--project <id>\|--conversation <id>] <question>` | Explain canonical context without preparing or starting work. |
+| `/prepare-work [conversation]` | Prepare a native backlog ticket from a canonical dump or spec, preserving the session's intent. |
 | `/cancel [conversation]` | Cancel an unstarted session and discard its capture. |
 
 Topics contain at most 512 UTF-8 bytes. `--project` accepts one ID; use
@@ -98,9 +104,11 @@ fall back to another session. Use explicit targeting after a stale prompt.
 
 A capture accepts at most 32 parts, 16 KiB per message and 64 KiB total, including
 one newline between parts. Overflow leaves existing capture unchanged. `/done`
-ends capture in the preparing phase; artifact generation has not run. `/cancel`
-discards only the selected unstarted capture. Both invalidate previous reply
-prompts. At most eight nonterminal sessions per peer and 128 per bot can exist.
+uses the configured provider and shared authoring owner to prepare a dump or ask
+for missing information. Actual prompts bind the canonical session, turn,
+revision and content digest. Reply to the prompt or use `/reply` to answer it.
+`/cancel` discards only the selected unstarted capture, including a pending scope
+decision. At most eight nonterminal sessions per peer and 128 per bot can exist.
 Session lists retain active entries and recent history within a 50-entry view;
 rendered output uses the normal Unicode bounds.
 
@@ -109,6 +117,37 @@ Replay cannot append a part twice. A reply association becomes usable only when
 a definite send acknowledgement is retained; at most 64 associations remain
 active per session. Current allowlists and registry bindings are checked again
 before queued input is applied.
+
+## Provider and scope decisions
+
+Ordinary-language proposals use the same typed operations as slash controls.
+Leading slash commands bypass intent interpretation; generation and explanation
+still use their configured provider. `CHR_CONVERSATION_GENERATION_BACKEND=openai`
+selects OpenAI; otherwise generation uses the configured Codex runner. Each
+boundary retains up to five attempts with backoff, a 60-second deadline and bounded
+input/output. Restart preserves decisions, questions, answers and completed
+results. Explanations retain source context independently of intent resolution.
+
+`/prepare-work` uses actual generated dump/spec content and the shared native
+record owner. A simple ticket can use its dump directly. It retains the original
+instruction, source images, description, native contract and exact scope digest
+before application. The result identifies a real backlog ticket and owner
+receipt; it creates no invocation.
+
+A literal `/develop` instruction can bind the first exact prepared scope. That
+first reservation is retained permanently for the conversation. An ordinary-
+language development proposal supplies no authority by itself. Missing authority
+or a changed scope produces one expiring preview with a `develop` choice. Use
+its button, reply `develop`, or send `/answer <action-token> develop`. All three
+bind the same displayed scope and configured operator. Other artifact steps
+require no separate development approval. Repeating an unchanged preparation
+returns its retained receipt or existing prompt without creating another ticket
+or extending the prompt's expiry.
+
+Source edits, replaced prompts, changed operators and rebound project roots
+cannot inherit an older decision. A confirmed native receipt reconciles a lost
+acknowledgement before later source checks, preserving independent edits.
+See [Authoring sessions](authoring-sessions.md) for shared contracts and bounds.
 
 ## Readiness and retained state
 

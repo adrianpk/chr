@@ -478,10 +478,27 @@ exchange its request ID for a fresh description. This operation creates no
 invocation, claims no work and changes no execution or integration policy.
 
 Telegram conversation reads expose the canonical authoring session and retained
-authorization references. A resolver proposal alone cannot create development
-authority. The explicit `/develop` source retains an opaque instruction reference;
-the adapter must bind that instruction or a new explicit decision to the
-displayed scope before dispatching shared development preparation.
+authorization references. `/prepare-work [conversation]` retains one exact native
+preview before dispatch. An unchanged request returns its prior receipt or
+pending prompt. A resolver proposal alone cannot create development authority.
+The explicit `/develop` source retains an opaque instruction reference and can
+bind only the conversation's first work reservation. Migration 21 pins that
+reservation, including failed attempts, so later requirements cannot silently
+acquire another scope from the same instruction.
+
+Missing or changed authority uses the existing retained action owner. The prompt
+shows the original instruction, canonical description reference and hashes, with
+bounded excerpts when needed. Its `develop` choice accepts a button, exact reply
+or `/answer <token> develop`, binding the first retained answer identity to the
+prepared scope. Duplicate sources reuse that decision; expiry never extends on
+replay. Conversation phases project awaiting confirmation and preparation for
+that bound request without changing its immutable conversation revision. A later
+canonical refinement advances the revision and invalidates the earlier prompt.
+
+`ApplyPreparedAuthoringWorkGuarded` rechecks current host authority under the
+authoring writer lock before a new native effect. Confirmed native receipts
+reconcile first, preserving later edits. The record envelope retains actual scope
+and authority; no work admission or integration policy is inferred from success.
 
 `ReadTelegramConversationInstruction` recovers the original retained source for
 the exact authorized peer and project binding. Reply invalidation and focus do

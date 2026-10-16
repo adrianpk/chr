@@ -1130,6 +1130,49 @@ ticket-native work controls or grant approval. Invoke admission, continuation,
 pause/cancel and reconciliation through the CLI, TUI, Web or daemon controls;
 inspect their retained evidence to establish progress.
 
+## Prepare Work Through Telegram
+
+Configure the dedicated receiver with a local operator and registered project,
+then start it:
+
+```sh
+chr telegram setup --user-id 100001 --operator-id maintainer --project-id example-project
+chr telegram doctor --check-connection
+chr telegram serve
+```
+
+Setup reads the bot token privately. In Telegram, select the project and ask an
+explanation or start a preparation-only conversation:
+
+```text
+/project example-project
+/explain How are retries bounded?
+/prepare Retain a retry ceiling
+```
+
+Send the requirements as several messages. Use `/sessions` to inspect or select
+the returned conversation ID when several conversations are active. `/done`
+generates its canonical dump. `/quiz` asks a real clarification; reply to its
+prompt or use `/reply <conversation> <answer>`. Request `/spec` or `/plan` when
+those artifacts are useful. `/refine spec <conversation> <instructions>` explicitly
+replaces an observed specification.
+
+Use `/prepare-work <conversation>` to prepare a native backlog ticket from its
+dump or spec. The response identifies the actual canonical record and receipt.
+An unchanged preparation returns that result, so a retry creates no extra ticket.
+Preparation starts no work invocation.
+
+Start with `/develop <topic>` to retain explicit development intent. Its first
+prepared scope can use that instruction. Missing authority or changed requirements
+produce an exact preview; use its button, reply `develop`, or send
+`/answer <action-token> develop`. Development authority applies only to that
+displayed scope. Ordinary-language requests use the same operations, but a model
+proposal cannot grant authority. Restart preserves the project binding, artifacts,
+questions and completed results.
+
+See [Telegram receiver](../../reference/telegram-receiver.md) for configuration,
+limits and the supported controls.
+
 ## Inspect and Recover Local State
 
 Write a local diagnostic bundle:

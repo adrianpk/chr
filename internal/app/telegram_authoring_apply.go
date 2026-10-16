@@ -176,7 +176,7 @@ func telegramAuthoringResultText(conversation string, result core.AuthoringConti
 		fmt.Fprintf(&text, "%s: %s\n", output.Kind, output.Path)
 	}
 
-	fmt.Fprintf(&text, "Use /quiz, /spec or /plan with this session; /refine explicitly replaces an observed artifact.")
+	fmt.Fprintf(&text, "Use /quiz, /spec or /plan with this session; /refine explicitly replaces an observed artifact. /prepare-work prepares a native backlog ticket.")
 
 	return text.String()
 }

@@ -11,6 +11,8 @@ import (
 // registries; neither a model result nor a command can introduce another owner.
 func telegramIntentRegistry() []ConversationIntentOperation {
 	result := telegramExplanationRegistry()
+
+	result = append(result, telegramPreparedWorkRegistry()...)
 	for _, operation := range telegramReadRegistry() {
 		result = append(result, ConversationIntentOperation{ID: strings.TrimPrefix(operation.Command, "/"), Description: operation.Help, Arguments: "No arguments"})
 	}

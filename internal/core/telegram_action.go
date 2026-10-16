@@ -27,11 +27,12 @@ type TelegramAction struct {
 
 // TelegramActionOffer contains current authority and one bounded, expiring prompt.
 type TelegramActionOffer struct {
-	Input     TelegramConversationInput
-	RequestID string
-	Choices   []string
-	Text      string
-	ExpiresAt time.Time
+	Input             TelegramConversationInput
+	RequestID         string
+	Choices           []string
+	Text              string
+	ExpiresAt         time.Time
+	ConversationPhase string
 }
 
 // TelegramActionClaim retains the original effect binding and the first answer request.

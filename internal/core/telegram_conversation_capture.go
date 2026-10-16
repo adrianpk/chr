@@ -121,5 +121,5 @@ func (op telegramConversationTransaction) saveCapture(c *TelegramConversation) e
 }
 
 func telegramCancelable(c TelegramConversation) bool {
-	return telegramCaptureEligible(c) || c.Phase == "preparing" || c.Phase == "prepared"
+	return telegramCaptureEligible(c) || c.Phase == "preparing" || c.Phase == "prepared" || c.Phase == "awaiting_confirmation"
 }
