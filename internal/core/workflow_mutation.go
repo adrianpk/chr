@@ -289,6 +289,10 @@ func (s *WorkflowStore) prepareMutation(ctx context.Context, request WorkflowMut
 		return record, nil, err
 	}
 
+	if err := s.guardMutationContracts(record, request.ExpectedRevision, snapshot); err != nil {
+		return record, nil, err
+	}
+
 	if err := replaceWorkflowSnapshot(&snapshot, record); err != nil {
 		return record, nil, err
 	}
