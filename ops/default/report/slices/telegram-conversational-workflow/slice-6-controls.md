@@ -81,7 +81,7 @@ Read-only authority and receiver-status connections now use the same bounded
 SQLite busy timeout as writers, allowing a short inbox commit to finish before
 a concurrent read fails.
 
-T6.3 receipt recovery reads a completed native control before considering a
+T6.3 receipt recovery (`dcf386f2423a669707d1609a92eeee9a784453a5`) reads a completed native control before considering a
 fresh effect. Expired or superseded prompts retain their original answer binding;
 current mapped actor, exact peer, allowed registered root and namespace remain
 mandatory. A missing receipt cannot reserve a binding or apply a control.
@@ -269,8 +269,7 @@ seconds. All 18 expiry/replacement/supersession cases remain named and cover
 accepted and unaccepted text, callback and reply sources. A shared fixture per
 stale condition reduces repeated admission setup; its normal follow-up completed
 in app 2.063 seconds and its focused race follow-up in 19.720 seconds. Additional
-fixtures prove current authority rejection,
-original-source acknowledgement followed by a new answer, replacement during
+fixtures prove current authority rejection, original-source acknowledgement followed by a new answer, replacement during
 native-to-SQLite acknowledgement, and missing-receipt probes without reservations.
 Existing action and lifecycle/decision journal regressions remain green.
 
@@ -288,6 +287,6 @@ T6.3 remains in progress: late reply-binding races, current-state diagnostics
 for unaccepted stale prompts and request-capacity reserves still require
 completion. Receipt-only recovery through expired/replaced prompts and
 text/callback/reply rejection of unaccepted stale controls are implemented.
-T6.4 shared serial/parallel capacity and cross-adapter certification remain pending. Focused model-load and intake-reserve
-evidence does not complete either task. The Slice 6 PR and exact-HEAD controller
+T6.4 shared serial/parallel capacity and cross-adapter certification remain
+pending. Focused model-load and intake-reserve evidence does not complete either task. The Slice 6 PR and exact-HEAD controller
 checks remain pending.
