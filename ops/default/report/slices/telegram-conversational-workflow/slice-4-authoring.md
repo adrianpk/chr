@@ -47,7 +47,7 @@ original receipts after independent edits. Preparation creates no work invocatio
 
 T4.1 implementation and report introduction: `b54d526fd0471eff7c4df2ef769ba0abe66476ce`.
 
-T4.2 implementation commit: pending this task's commit.
+T4.2 implementation commit: `f7408ea2fa51d4a66ce5be156d2aa192160ad37f`.
 
 The shared structured provider uses the existing Codex agent runner or OpenAI
 Responses boundary. `CHR_CONVERSATION_GENERATION_BACKEND=openai` selects OpenAI;
