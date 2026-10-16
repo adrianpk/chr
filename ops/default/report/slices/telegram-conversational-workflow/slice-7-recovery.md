@@ -10,7 +10,7 @@ Tracker: [Telegram Conversation Tracker](../../../tracker/telegram-conversationa
 
 Branch: `feat/slice-7-telegram-recovery`
 
-PR: pending
+PR: [#396](https://forge.adrianpk.com/adrianpk/chr/pulls/396)
 
 ## Purpose
 

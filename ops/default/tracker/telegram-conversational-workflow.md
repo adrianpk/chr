@@ -16,7 +16,7 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 7, Recovery and user operation; T7.1/T7.2/T7.3 validated; preparing canonical PR
+Active slice: Slice 7, Recovery and user operation; T7.1/T7.2/T7.3 validated; PR #396 reviewing
 
 Next slice: Slice 8, Live journey and closure; after verified Slice 7 integration and live readiness
 
@@ -239,7 +239,7 @@ Prerequisite: verified Slice 6 integration.
 
 Validation: plan section 12; `TestTelegramRecovery`, including focused race mode.
 
-Candidate: `feat/slice-7-telegram-recovery`; PR and merge pending. T7.1/T7.2/T7.3 focused evidence is recorded in the [Slice 7 report](../report/slices/telegram-conversational-workflow/slice-7-recovery.md); exact clean-HEAD final slice evidence remains pending.
+Candidate: `feat/slice-7-telegram-recovery`; canonical PR: [#396](https://forge.adrianpk.com/adrianpk/chr/pulls/396); merge pending. T7.1/T7.2/T7.3 focused evidence is recorded in the [Slice 7 report](../report/slices/telegram-conversational-workflow/slice-7-recovery.md); exact clean-HEAD final slice evidence remains pending.
 
 ## Slice 8: Live Journey and Closure
 
@@ -326,4 +326,4 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Exact integrated candidate passed the scheduled exhaustive nightly.
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
-Current state: Slices 1 through 6 are delivered through canonical PR #390/#391/#392/#393/#394/#395; the latest verified merge is `eecdfd1e85c9593715c5e00502d0bfd0bf23c1ea`. Slice 7 is active on its recorded branch with T7.1/T7.2/T7.3 validated; its canonical PR and exact-HEAD final evidence are being prepared. Final slice validation belongs to the controller receipt for the exact clean PR HEAD; live activation and scheduled exhaustive certification remain separate.
+Current state: Slices 1 through 6 are delivered through canonical PR #390/#391/#392/#393/#394/#395; the latest verified merge is `eecdfd1e85c9593715c5e00502d0bfd0bf23c1ea`. Slice 7 is active on its recorded branch with T7.1/T7.2/T7.3 validated and canonical PR #396 reviewing. Its final validation uses the controller receipt for the exact clean PR HEAD. Final slice validation belongs to the controller receipt for the exact clean PR HEAD; live activation and scheduled exhaustive certification remain separate.
