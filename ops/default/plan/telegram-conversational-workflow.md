@@ -16,9 +16,9 @@ Tracker: [Telegram Conversation Tracker](../tracker/telegram-conversational-work
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, its canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 5, Native work continuation; implementation validated; canonical PR #394 awaits controller integration
+Active slice: Slice 6, Guarded controls and capacity; T6.1 in progress
 
-Next slice: Slice 6, Guarded controls and capacity; after verified Slice 5 integration
+Next slice: Slice 7, Recovery and user operation; after verified Slice 6 integration
 
 Slice strategy: behavior-first
 

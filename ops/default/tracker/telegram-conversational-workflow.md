@@ -16,11 +16,11 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 5, Native work continuation; implementation validated; canonical PR #394 awaits controller integration
+Active slice: Slice 6, Guarded controls and capacity; T6.1 in progress
 
-Next slice: Slice 6, Guarded controls and capacity; after verified Slice 5 integration
+Next slice: Slice 7, Recovery and user operation; after verified Slice 6 integration
 
-Progress: 4 of 8 slices integrated; 4 of 29 tasks validated and 15 done; 18 of 32 acceptance criteria have deterministic fixture evidence.
+Progress: 5 of 8 slices integrated; 0 of 29 tasks validated and 19 done; 18 of 32 acceptance criteria have deterministic fixture evidence.
 
 Full gate: `make verify`
 
@@ -29,7 +29,7 @@ Exhaustive certification: pending the scheduled nightly for the final integrated
 ## State and Evidence Rules
 
 Task states: `pending`, `ready`, `in_progress`, `validated`, `blocked`, `done`.
-Slice 1 through Slice 4 tasks are done after verified PR #390/#391/#392/#393 integration. Slice 5 is active;
+Slice 1 through Slice 5 tasks are done after verified PR #390/#391/#392/#393/#394 integration. Slice 6 is active;
 later tasks remain pending until their prerequisites integrate. A validated task becomes
 done after verified slice integration; a successful test or worker exit alone
 does not close it.
@@ -171,16 +171,16 @@ Implementation: `392ce4b1f8bb4180ce6f227ac3340aacaec29b77`. Canonical PR: [#393]
 
 ## Slice 5: Native Work Continuation
 
-State: in_progress
+State: delivered
 
 Prerequisite: verified Slice 4 integration.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T5.1 | validated | `4456f3f1bbef9b0b8368294f12e40c9cc9ca15ff` | Exact native previews/admission for all five extents and RequestKey replay. |
-| T5.2 | validated | `d94c581ded73f5a5fbe9ba45192097ebf1634ee0` | Bounded asynchronous continuation under existing workflow ownership. |
-| T5.3 | validated | `3eb2a912f0c13058906b3e62ffc3316b14e172f4` | Unattended policy-driven progress, review and integration. |
-| T5.4 | validated | `b94e60267f7b8eeafb21e93f3cd653fafad1de1a` | Evidence-bound results and shared CLI/TUI/Web invocation references. |
+| T5.1 | done | `4456f3f1bbef9b0b8368294f12e40c9cc9ca15ff` | Exact native previews/admission for all five extents and RequestKey replay. |
+| T5.2 | done | `d94c581ded73f5a5fbe9ba45192097ebf1634ee0` | Bounded asynchronous continuation under existing workflow ownership. |
+| T5.3 | done | `3eb2a912f0c13058906b3e62ffc3316b14e172f4` | Unattended policy-driven progress, review and integration. |
+| T5.4 | done | `b94e60267f7b8eeafb21e93f3cd653fafad1de1a` | Evidence-bound results and shared CLI/TUI/Web invocation references. |
 
 Validation: plan section 10; `TestTelegramWork`, including focused race mode.
 
@@ -192,17 +192,17 @@ T5.3 task checks: actual foreground intake reaches trusted review, one guarded p
 
 T5.4 task checks: real CLI, TUI and Web reads expose the same Telegram-created invocation and accepted native evidence without writing work. Actual human review projects its candidate, open PR and exact approval hash without claiming integration. An uncertain HTTP send followed by SQLite reopen repeats only the labelled notice and preserves canonical workflow bytes. Focused normal/race, strict focused lint and repository style checks passed. User Guide and the existing Telegram changelog entry describe the usable workflow.
 
-Canonical PR: [#394](https://forge.adrianpk.com/adrianpk/chr/pulls/394) on `feat/slice-5-telegram-work`. Final readiness is bound to the controller's exact clean-HEAD receipt for the required ordered checks; integration remains pending.
+Canonical PR: [#394](https://forge.adrianpk.com/adrianpk/chr/pulls/394) on `feat/slice-5-telegram-work`. Verified merge: `c321da6917e369049583eece5a1a07951c1cc22b`, 2026-10-16; the controller receipt records all four ordered checks passed on that exact clean HEAD.
 
 ## Slice 6: Guarded Controls and Capacity
 
-State: pending
+State: in_progress
 
 Prerequisite: verified Slice 5 integration.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T6.1 | pending | pending | Shared pause/cancel/resume/continue/reconcile controls and actor mapping. |
+| T6.1 | in_progress | pending | Shared pause/cancel/resume/continue/reconcile controls and actor mapping. |
 | T6.2 | pending | pending | Exact-candidate review, grants and decision answers with single-use receipts. |
 | T6.3 | pending | pending | Responsive prioritized controls, stale-action handling and callback/text parity. |
 | T6.4 | pending | pending | Shared serial/parallel capacity and cross-adapter ownership checks. |

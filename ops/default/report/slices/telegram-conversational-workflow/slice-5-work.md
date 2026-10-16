@@ -1,6 +1,6 @@
 # Slice 5: Native Work Continuation
 
-Status: reviewing
+Status: delivered
 
 Delivery set: telegram-conversational-workflow
 
@@ -154,6 +154,10 @@ the new fixtures cover the delivered admission operation.
   shared-surface readback and notification-failure recovery.
 
 ## Validation
+
+Verified canonical PR #394 merge: `c321da6917e369049583eece5a1a07951c1cc22b`,
+2026-10-16. The controller recorded all four required ordered checks passed at
+that exact clean HEAD before its Rebase + Fast-forward integration into `dev`.
 
 Activation documentation passed `git diff --check`.
 
