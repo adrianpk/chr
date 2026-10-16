@@ -208,6 +208,8 @@ worker and host-validation deadlines and configured limits are unchanged.
 - `internal/core/workflow_capacity_process_test.go`: distinct cross-process slots through eight workers.
 - `internal/app/telegram_control_shared_capacity_test.go`: actual Telegram/daemon/manual source overlap and shared capacity reuse.
 
+- `internal/app/telegram_schema_fixture_test.go`: production-migrated immutable schema image with isolated per-fixture databases.
+
 ## Validation
 
 Activation documentation passed `git diff --check`.
@@ -401,6 +403,28 @@ go test ./internal/app -run '^TestMaintenanceDBStatusReports(PendingMigrationsWh
 
 The failed controller evidence is retained; the changed PR HEAD requires fresh
 evidence for the complete configured command list.
+
+At `454f5c8761d149ba6ab28b84b96e4158e64c2c6d`, controller `make verify`
+passed, followed by the full `TestTelegramControl` normal selection (core
+28.353 seconds, app 71.902 seconds). The configured race selection passed core
+in 135.658 seconds but reached the app package's unchanged three-minute deadline
+during fresh schema migration in `TestTelegramControlAuthoringLane`.
+
+Fixture correction `8b01210ac76dd5a20cbc14e4ec2e34472adc723a` builds one empty
+schema image through the production migrator, closes its only connection to
+checkpoint the WAL, and retains read-only bytes. Each app fixture creates its
+own database file and opens its own actual store through the public constructor.
+Receiver state and live connections are never shared. Actual empty-database
+migration tests remain independent. No test assertion, command or timeout is
+removed or relaxed.
+
+The focused normal and race commands passed in 3.014 and 36.808 seconds,
+respectively; strict focused lint and repository style checks also passed:
+
+```sh
+go test ./internal/app -run '^TestTelegram(ReceiverReadJourney|Control(AuthoringLane|RequestCapacity|StaleReceipt))$' -count=1 -timeout=3m
+go test -race ./internal/app -run '^TestTelegram(ReceiverReadJourney|Control(AuthoringLane|RequestCapacity|StaleReceipt))$' -count=1 -timeout=3m
+```
 
 Authoritative final slice validation is the controller receipt for the clean PR
 HEAD, in this order:
