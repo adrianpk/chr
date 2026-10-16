@@ -16,7 +16,7 @@ Tracker: [Telegram Conversation Tracker](../tracker/telegram-conversational-work
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, its canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 2, Conversation routing; implementation in progress
+Active slice: Slice 2, Conversation routing; PR #391 reviewing
 
 Next slice: Slice 3, Replay-safe operations; after verified Slice 2 integration
 

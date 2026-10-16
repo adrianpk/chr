@@ -16,7 +16,7 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 2, Conversation routing; implementation in progress
+Active slice: Slice 2, Conversation routing; PR #391 reviewing
 
 Next slice: Slice 3, Replay-safe operations; after verified Slice 2 integration
 
@@ -90,7 +90,7 @@ Prerequisite: verified Slice 1 integration.
 | --- | --- | --- | --- |
 | T2.1 | validated | `8e7faf9bf62c` | Frozen project/namespace bindings, peer selection and independent conversations. |
 | T2.2 | validated | `9946757b0528` | Exact replies/questions, duplicate-safe capture and safe completion/cancellation. |
-| T2.3 | validated | task commit follows this update | Deterministic sessions/focus commands and bounded conversation views. |
+| T2.3 | validated | `36f31feaa0c0` | Deterministic sessions/focus commands and bounded conversation views. |
 
 Validation: plan section 7; `TestTelegramConversation`, including focused race mode.
 
@@ -100,7 +100,7 @@ T2.2 validation: `go test ./internal/core -run '^TestTelegramConversation' -coun
 
 T2.3 validation: focused `TestTelegramConversation` normal and race commands passed in both core and app; strict focused lint reported zero issues. The [Slice 2 report](../report/slices/telegram-conversational-workflow/slice-2-conversations.md) records deterministic evidence and the required exact-HEAD controller checks.
 
-Candidate / PR: preparing canonical PR; verified merge: pending.
+Primary implementation commit: `36f31feaa0c0c0d5b52e9d80071322a8574744b5`. Canonical PR: [#391](https://forge.adrianpk.com/adrianpk/chr/pulls/391) on `feat/slice-2-telegram-conversations`. Verified merge: pending controller integration. Evidence: [Slice 2 report](../report/slices/telegram-conversational-workflow/slice-2-conversations.md); final readiness is bound to the exact clean PR HEAD and ordered checks through controller validation.
 
 ## Slice 3: Replay-safe Operations
 
@@ -271,4 +271,4 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Exact integrated candidate passed the scheduled exhaustive nightly.
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
-Current state: Slice 1 delivered through PR #390 at `3e2eb8825b4bb4c4b86585e5e2f862c4202f51b2`; Slice 2 task implementation and focused validation are complete. Canonical PR and final exact-HEAD controller evidence are being prepared.
+Current state: Slice 1 delivered through PR #390 at `3e2eb8825b4bb4c4b86585e5e2f862c4202f51b2`; Slice 2 task implementation and focused validation are complete. Canonical PR #391 is open. Exact-HEAD controller validation is required before integration.

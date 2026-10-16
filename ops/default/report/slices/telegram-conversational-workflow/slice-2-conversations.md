@@ -10,7 +10,7 @@ Tracker: [Telegram Conversation Tracker](../../../tracker/telegram-conversationa
 
 Branch: `feat/slice-2-telegram-conversations`
 
-PR: pending
+PR: [#391](https://forge.adrianpk.com/adrianpk/chr/pulls/391)
 
 ## Purpose
 
@@ -47,7 +47,7 @@ asks for a session. Reads use the existing central application service.
 
 ## Implementation Notes
 
-T2.1 implementation: `8e7faf9bf62c`; T2.2: `9946757b0528`. T2.3 adds the
+T2.1 implementation: `8e7faf9bf62c`; T2.2: `9946757b0528`. T2.3: `36f31feaa0c0c0d5b52e9d80071322a8574744b5`, adding the
 live command adapter and HTTP journey. The tracker records task references.
 Migration `20261016000017` extends the existing user database with peers,
 conversations, parts and reply associations. Allocation enforces eight active
