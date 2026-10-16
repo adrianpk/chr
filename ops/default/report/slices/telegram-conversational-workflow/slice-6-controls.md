@@ -64,7 +64,7 @@ target resolution checks the original peer-context digest in its SQLite
 transaction, preventing a changed focus or session from silently retargeting
 an older model response.
 
-T6.3 lifecycle progress extends native request receipts to pause, cancel,
+T6.3 lifecycle progress (`b2f03c1159ea56ab4e482a2519489b1eec42e736`) extends native request receipts to pause, cancel,
 resume, continue and reconcile. The existing stop/resume, task-checkpoint and
 closing owners journal each accepted effect with its immutable caller receipt.
 Publication-pointer repair, stop intent and the receipt now share one transaction,
