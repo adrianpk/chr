@@ -26,6 +26,7 @@ const (
 	TelegramConversationDone    TelegramConversationAction = "done"
 	TelegramConversationCancel  TelegramConversationAction = "cancel"
 	TelegramConversationShow    TelegramConversationAction = "show"
+	TelegramConversationAuthor  TelegramConversationAction = "author"
 )
 
 // TelegramConversationInput contains current authority and a deterministic command.

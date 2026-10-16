@@ -19,6 +19,15 @@ func telegramIntentRegistry() []ConversationIntentOperation {
 		result = append(result, ConversationIntentOperation{ID: strings.TrimPrefix(command.Name, "/"), Description: command.Help, Arguments: command.Arguments})
 	}
 
+	for _, descriptor := range telegramAuthoringRegistry() {
+		arguments := "Optional project/conversation; no text, action, namespace or record_json"
+		if descriptor.Action == core.AuthoringContinuationRefine {
+			arguments = "conversation=exact session; action=dump|spec|plan; text=the original message"
+		}
+
+		result = append(result, ConversationIntentOperation{ID: strings.TrimPrefix(descriptor.Name, "/"), Description: descriptor.Help, Arguments: arguments})
+	}
+
 	result = append(result, ConversationIntentOperation{ID: "capture", Description: "Append the original message to the targeted collecting conversation", Arguments: "Optional conversation; text must equal the original message"})
 	for _, command := range telegramRecordRegistry() {
 		result = append(result, ConversationIntentOperation{ID: strings.TrimPrefix(command.Name, "/"), Description: "Read or explicitly create/update a guarded " + string(command.Kind) + " record", Arguments: "Optional project/conversation/namespace; action=list|show|create|update; record_json=strict JSON with actual observed revision/source_hash guards"})

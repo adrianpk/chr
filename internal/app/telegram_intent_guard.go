@@ -41,6 +41,18 @@ func (r telegramReceiver) freezeIntent(ctx context.Context, input core.TelegramC
 }
 
 func (r telegramReceiver) intentTarget(ctx context.Context, input core.TelegramConversationInput, intent ConversationIntent) (core.TelegramOperationTarget, bool, error) {
+	authoring, recognized, err := telegramIntentAuthoring(input.Update, intent)
+	if recognized {
+		if err != nil {
+			return core.TelegramOperationTarget{}, false, err
+		}
+
+		authoring.Input.Config, authoring.Input.Projects = input.Config, input.Projects
+		_, target, err := r.store.ResolveTelegramAuthoringTarget(ctx, authoring.Input)
+
+		return target, true, err
+	}
+
 	conversation, recognized, err := telegramIntentConversation(input.Update, intent)
 	if recognized {
 		if err != nil {

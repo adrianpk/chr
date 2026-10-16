@@ -39,7 +39,7 @@ func normalizeAuthoringRequest(request AuthoringContinuationRequest) (AuthoringC
 }
 
 func validateAuthoringRequest(request AuthoringContinuationRequest) error {
-	if len(request.Topic) > 512 || len(request.Capture) > 65536 || len(request.Instructions) > 16384 {
+	if len(request.Topic) > 512 || len(request.Capture) > 65536 || len(request.Instructions) > 16384 || len(request.OriginalInstruction) > 16384 {
 		return errors.New("authoring input exceeds its bound")
 	}
 
@@ -64,7 +64,7 @@ func validateAuthoringActionArguments(request AuthoringContinuationRequest) erro
 		if request.Question != nil {
 			return ErrWorkflowConflict
 		}
-	case "answer":
+	case "answer", "respond":
 		if request.Question == nil || strings.TrimSpace(request.Instructions) == "" {
 			return ErrWorkflowConflict
 		}
@@ -221,5 +221,5 @@ func validateAuthoringCreation(request AuthoringContinuationRequest) error {
 }
 
 func validAuthoringObservation(request AuthoringContinuationRequest) bool {
-	return request.ExpectedRevision > 0 && len(request.ExpectedSourceHash) == 64 && request.Topic == "" && request.Capture == ""
+	return request.ExpectedRevision > 0 && len(request.ExpectedSourceHash) == 64 && request.Topic == "" && request.Capture == "" && request.OriginalInstruction == ""
 }

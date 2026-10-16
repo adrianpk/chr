@@ -52,6 +52,21 @@ Development requires an explicit configured-operator decision for that digest;
 changed scope or operator cannot reuse the prior decision. Preparation requires
 no development decision and never admits an invocation.
 
+The completed artifact portion of T4.4 connects `/done`, `/quiz`, `/spec`, `/plan`
+and explicit `/refine` controls to the shared continuation owner. Natural-language
+proposals use those same handlers. Actual provider prompts bind outgoing replies
+to their canonical session, turn, revision and digest; a clarification answer
+continues its requested generation. Captures, original instructions and answer
+whitespace remain in the canonical sources. The receiver returns actual artifact
+references and retains the conversation's frozen namespace.
+
+Transport reservations retain the complete immutable owner input before a
+provider call. Successful owner receipts reconcile lost acknowledgements without
+another generation, including after independent canonical edits. Conversation
+session/question updates, source acknowledgement and outbox creation commit
+together. Changed roots or operators during generation block new canonical
+writes; reconciliation cannot restore a conversation binding that advanced.
+
 ## Implementation Notes
 
 T4.1 implementation and report introduction: `b54d526fd0471eff7c4df2ef769ba0abe66476ce`.
@@ -105,6 +120,13 @@ The original retained instruction can be recovered independently of focus/reply
 invalidation. Its development reference is rechecked against the current operator;
 remapping the user cannot inherit the earlier operator's decision.
 
+The receiver adds a host-owned post-generation guard under the existing authoring
+writer lock. Answer-and-continue is one owner journal/receipt rather than two
+loosely coupled requests. Compact transport facts retain references and question
+bindings without copying the full session into the outbox facts limit. The
+configured provider checks cancellation before and after invocation, so a valid
+response racing cancellation cannot be accepted.
+
 ## Contracts Added or Changed
 
 - `StructuredModelRequest`, `StructuredModelProvider` and
@@ -131,6 +153,11 @@ remapping the user cannot inherit the earlier operator's decision.
   through the existing native receipt owner.
 - `ReadTelegramConversationInstruction`: original-source recovery and current
   operator checks without using a model summary as user intent.
+- `ContinueAuthoringGuarded`, `AuthoringCommitGuard` and the `respond` continuation:
+  current host authorization before writes and atomic answer/generation recovery.
+- `ResolveTelegramAuthoringTarget`, `ReservePreparedTelegramOperation` and
+  `FinishTelegramAuthoring`: frozen routing/input and atomic conversation/outbox
+  acknowledgement through the existing transport request owner.
 
 ## Files of Interest
 
@@ -145,6 +172,10 @@ remapping the user cannot inherit the earlier operator's decision.
 - `internal/app/service_authoring_work.go` and `service_authoring_explanation.go`:
   shared prepared-work and explanation operations.
 - `internal/core/authoring_work_scope.go`: immutable scope/decision validation.
+- `internal/app/telegram_authoring_{command,input,dispatch,apply}.go`: shared
+  command mapping, retained input, guarded dispatch and receipt reconciliation.
+- `internal/core/telegram_authoring_finish.go`: atomic conversation/question,
+  source and outbox transition.
 - `internal/core/telegram_authoring*_test.go` and
   `internal/app/telegram_authoring*_test.go`: real SQLite, HTTP, native owner,
   replay and authority regressions.
@@ -202,12 +233,31 @@ failed bindings and original receipt replay after independent source/ticket
 edits. The additional original-instruction fixture passed after source-recovery
 support was added; it proves reopening and operator-remapping checks.
 
+Successful partial T4.4 artifact-bridge task checks:
+
+- `go test ./internal/core ./internal/app -run '^Test(TelegramAuthoring|TelegramConversation|TelegramOperation|TelegramReceiver|MaintenanceDBStatus)' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^Test(TelegramAuthoring|TelegramConversation|TelegramOperation|TelegramReceiver|MaintenanceDBStatus)' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app`
+- `scripts/check-go-func-signatures.sh`
+- `scripts/check-package-readmes.sh`
+- `git diff --check`
+
+Real HTTP/SQLite fixtures cover the receiver's dump/quiz/spec/refine/plan journey,
+slash/NL parity, actual prompt replies, retained original instructions and raw
+capture/answer whitespace, frozen namespace, stale prompts, root/operator changes
+during generation and a lost owner acknowledgement followed by reopening and
+independent artifact edits. Owner fixtures cover atomic answer/generation journal
+recovery and failed conversation-finish rollback. A new whitespace assertion
+first reproduced trimming loss; the corrected writer passes. The combined
+regression also exposed acceptance of a model response racing cancellation; the
+provider now rejects that result and the regression passes.
+
 Final clean-HEAD controller validation remains pending completion of all four
 Slice 4 tasks and committed canonical PR references. These task fixtures are not
 live-provider, live-bot or exhaustive scheduled evidence.
 
 ## Risks and Follow-ups
 
-T4.4 remains: Telegram dispatch through the shared authoring/preparation boundary
-with conversation/outbox acknowledgement, final scope-decision binding, slash/NL
-parity and lost-acknowledgement recovery. The report remains drafting.
+T4.4 remains in progress. The artifact bridge is implemented; Telegram explanation
+and native prepared-work dispatch, final scope-decision binding and their complete
+slash/NL journey checks remain. The report remains drafting.

@@ -26,7 +26,7 @@ func telegramConversationRegistry() []telegramConversationCommand {
 		{"/focus", "<conversation>", "Focus a collecting session", core.TelegramConversationFocus, ""},
 		{"/reply", "<conversation> <text>", "Append text to an exact session", core.TelegramConversationCapture, ""},
 		{"/dump", "[conversation]", "Show bounded retained capture", core.TelegramConversationShow, ""},
-		{"/done", "[conversation]", "Finish capture and retain it for authoring", core.TelegramConversationDone, ""},
+		{"/done", "[conversation]", "Finish capture and prepare a canonical dump", core.TelegramConversationDone, ""},
 		{"/cancel", "[conversation]", "Discard an unstarted session's capture", core.TelegramConversationCancel, ""},
 	}
 }
@@ -132,6 +132,9 @@ func (r telegramReceiver) respondConversation(ctx context.Context, user core.Tel
 	}
 
 	input.Config, input.Projects = config, projects
+	if handled, err := r.dispatchAuthoringConversation(ctx, user, input); handled || err != nil {
+		return true, err
+	}
 
 	return true, r.store.ApplyTelegramConversation(ctx, input, time.Now())
 }

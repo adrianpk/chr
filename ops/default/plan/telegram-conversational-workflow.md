@@ -423,4 +423,4 @@ starts with every criterion pending.
 - [ ] The cycle report, tracker and plan distinguish tested code from later closure-only documentation.
 - [ ] The delivery set is closed with no pending work or unreported blocker.
 
-Current state: Slice 1 is implemented with deterministic task evidence and its canonical [PR #390](https://forge.adrianpk.com/adrianpk/chr/pulls/390) is reviewing. No slice is integrated yet; live activation and exhaustive certification remain pending.
+Current state: Slices 1 through 3 are integrated into `dev`; the latest verified merge is [PR #392](https://forge.adrianpk.com/adrianpk/chr/pulls/392) at `697a3ba4b3e33c459c343e140d0337860f453918`. Slice 4 is active with T4.1 through T4.3 validated and T4.4 in progress. Its artifact bridge has focused evidence; Telegram explanation, native prepared-work dispatch and scope-decision binding remain. Live activation and exhaustive certification remain pending.

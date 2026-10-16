@@ -228,9 +228,17 @@ func (op telegramConversationTransaction) list() (string, *TelegramConversation,
 }
 
 func (op telegramConversationTransaction) targetEligible(c TelegramConversation) bool {
+	if op.input.Action == TelegramConversationAuthor {
+		return telegramAuthoringEligible(c)
+	}
+
 	if op.input.Action == TelegramConversationCancel {
 		return telegramCancelable(c)
 	}
 
 	return telegramCaptureEligible(c)
+}
+
+func telegramAuthoringEligible(c TelegramConversation) bool {
+	return telegramCaptureEligible(c) || c.Phase == "preparing" || c.Phase == "prepared"
 }

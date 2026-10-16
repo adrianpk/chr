@@ -42,6 +42,10 @@ func NewConfiguredStructuredModel(openAI bool) *ConfiguredStructuredModel {
 
 // InvokeStructuredModel caps context, output, concurrency and the call deadline.
 func (p *ConfiguredStructuredModel) InvokeStructuredModel(ctx context.Context, request StructuredModelRequest) (json.RawMessage, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
 	if !p.validRequest(request) {
 		return nil, errors.New("invalid structured model request")
 	}
@@ -66,11 +70,11 @@ func (p *ConfiguredStructuredModel) InvokeStructuredModel(ctx context.Context, r
 		output, err = p.invokeCodex(ctx, request)
 	}
 
-	if err != nil {
-		if ctx.Err() != nil {
-			return nil, ctx.Err()
-		}
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
+	}
 
+	if err != nil {
 		return nil, err
 	}
 

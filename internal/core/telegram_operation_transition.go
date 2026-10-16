@@ -51,21 +51,25 @@ func (s *TelegramReceiverStore) FinishTelegramOperation(ctx context.Context, req
 			return err
 		}
 
-		result, err := tx.ExecContext(ctx, `UPDATE telegram_requests SET state=?,domain_receipt_ref=NULLIF(?,''),result=?,updated_at=? WHERE id=? AND argument_digest=? AND ((?='confirmed' AND state='applying') OR (?='rejected' AND state='prepared') OR (?='blocked' AND state IN ('prepared','ready','applying'))) `, state, receipt, string(facts), formatProjectTime(now), request.ID, request.ArgumentDigest, state, state, state)
-		if err != nil {
-			return err
-		}
-
-		if err := telegramRequireChanged(result); err != nil {
-			return err
-		}
-
-		if err := queueTelegramReferencedResponse(ctx, tx, request.Source, text, request.ID+" "+receipt, configDigest, now); err != nil {
-			return err
-		}
-
-		return bindTelegramOperationResponse(ctx, tx, request)
+		return finishTelegramOperation(ctx, tx, request, state, receipt, facts, text, configDigest, now)
 	})
+}
+
+func finishTelegramOperation(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, state, receipt string, facts json.RawMessage, text, configDigest string, now time.Time) error {
+	result, err := tx.ExecContext(ctx, `UPDATE telegram_requests SET state=?,domain_receipt_ref=NULLIF(?,''),result=?,updated_at=? WHERE id=? AND argument_digest=? AND ((?='confirmed' AND state='applying') OR (?='rejected' AND state='prepared') OR (?='blocked' AND state IN ('prepared','ready','applying'))) `, state, receipt, string(facts), formatProjectTime(now), request.ID, request.ArgumentDigest, state, state, state)
+	if err != nil {
+		return err
+	}
+
+	if err := telegramRequireChanged(result); err != nil {
+		return err
+	}
+
+	if err := queueTelegramReferencedResponse(ctx, tx, request.Source, text, request.ID+" "+receipt, configDigest, now); err != nil {
+		return err
+	}
+
+	return bindTelegramOperationResponse(ctx, tx, request)
 }
 
 func validTelegramOperationFinish(state, receipt string, facts json.RawMessage) bool {

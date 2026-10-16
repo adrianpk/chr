@@ -3,7 +3,6 @@ package core
 import (
 	"fmt"
 	"path/filepath"
-	"strings"
 	"time"
 )
 
@@ -47,12 +46,15 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringContinuation(binding au
 func (r *fileAuthoringSessionRepository) prepareAuthoringContent(binding authoringRequestBinding, snapshot AuthoringSnapshot, session *AuthoringSession, draft AuthoringDraft) ([]workflowFileChange, []AssistedTranscriptEvent, error) {
 	request := binding.Request
 
-	var changes []workflowFileChange
+	var (
+		changes []workflowFileChange
+		events  []AssistedTranscriptEvent
+	)
 
 	if request.Action == "create" {
 		capture := AuthoringContinuationArtifact(request.Namespace, request.SessionID, AuthoringArtifactKindDump, true)
 		session.Inputs = []AuthoringArtifactRef{capture}
-		raw := renderAuthoringCapture(*session, request.Capture)
+		raw := renderAuthoringCapture(*session, request.Capture, request.OriginalInstruction)
 
 		prepared, err := r.authoringArtifactChanges(binding, snapshot, capture, raw)
 		if err != nil {
@@ -66,20 +68,24 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringContent(binding authori
 		return changes, []AssistedTranscriptEvent{authoringAnswerEvent(snapshot, request, session.Revision)}, nil
 	}
 
+	if request.Action == "respond" {
+		events = append(events, authoringAnswerEvent(snapshot, request, session.Revision))
+	}
+
 	if draft.Question != "" {
 		event := authoringQuestionEvent(snapshot, session, draft)
 		if request.Target == AuthoringArtifactKindQuiz {
 			prepared, err := r.prepareAuthoringOutput(binding, snapshot, session, renderAuthoringQuiz(*session, event))
 
-			return append(changes, prepared...), []AssistedTranscriptEvent{event}, err
+			return append(changes, prepared...), append(events, event), err
 		}
 
-		return changes, []AssistedTranscriptEvent{event}, nil
+		return changes, append(events, event), nil
 	}
 
 	prepared, err := r.prepareAuthoringOutput(binding, snapshot, session, draft.Body)
 
-	return append(changes, prepared...), nil, err
+	return append(changes, prepared...), events, err
 }
 
 func (r *fileAuthoringSessionRepository) authoringTranscriptImage(binding authoringRequestBinding, snapshot AuthoringSnapshot, path string, events []AssistedTranscriptEvent) ([]byte, error) {
@@ -138,7 +144,7 @@ func authoringAnswerEvent(snapshot AuthoringSnapshot, request AuthoringContinuat
 	question.Status = AssistedAuthoringTurnAnswered
 	question.Revision = revision
 	question.CreatedAt = time.Now().UTC()
-	question.Answer = AssistedAuthoringAnswer{QuestionID: question.Question.ID, Text: strings.TrimSpace(request.Instructions), AnsweredAt: question.CreatedAt}
+	question.Answer = AssistedAuthoringAnswer{QuestionID: question.Question.ID, Text: request.Instructions, AnsweredAt: question.CreatedAt}
 
 	return question
 }
@@ -149,8 +155,13 @@ func renderAuthoringQuiz(session AuthoringSession, event AssistedTranscriptEvent
 	return RenderContextualQuizMarkdown(session, AuthoringContinuationArtifact(session.Namespace, session.ID, AuthoringArtifactKindQuiz, false), AuthoringQuizGenerationRequest{ID: event.ID, SessionID: session.ID, Topic: session.Topic, Target: session.Target}, result)
 }
 
-func renderAuthoringCapture(session AuthoringSession, capture string) string {
-	return "---\ntitle: " + yamlString(session.Topic+" Raw Capture") + "\nstatus: \"raw\"\ntype: \"dump_raw\"\n---\n\n# " + session.Topic + " Raw Capture\n\n## Raw Capture\n\n" + strings.TrimSpace(capture) + "\n"
+func renderAuthoringCapture(session AuthoringSession, capture, instruction string) string {
+	body := "---\ntitle: " + yamlString(session.Topic+" Raw Capture") + "\nstatus: \"raw\"\ntype: \"dump_raw\"\n---\n\n# " + session.Topic + " Raw Capture\n"
+	if instruction != "" {
+		body += "\n## Original Instruction\n\n" + instruction + "\n"
+	}
+
+	return body + "\n## Raw Capture\n\n" + capture + "\n"
 }
 
 // AuthoringContinuationArtifact reserves a deterministic canonical artifact ref.

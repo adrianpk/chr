@@ -8,7 +8,11 @@ import (
 )
 
 func decodeOperationJSON(text string, target any) error {
-	if len(text) > 65536 || !strings.HasPrefix(strings.TrimSpace(text), "{") {
+	return decodeBoundedOperationJSON(text, target, 65536)
+}
+
+func decodeBoundedOperationJSON(text string, target any, limit int) error {
+	if len(text) > limit || !strings.HasPrefix(strings.TrimSpace(text), "{") {
 		return errors.New("operation payload must be a bounded JSON object")
 	}
 

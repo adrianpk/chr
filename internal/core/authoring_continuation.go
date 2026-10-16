@@ -44,6 +44,7 @@ const (
 	AuthoringContinuationCreate   AuthoringContinuationAction = "create"
 	AuthoringContinuationAsk      AuthoringContinuationAction = "ask"
 	AuthoringContinuationAnswer   AuthoringContinuationAction = "answer"
+	AuthoringContinuationRespond  AuthoringContinuationAction = "respond"
 	AuthoringContinuationGenerate AuthoringContinuationAction = "generate"
 	AuthoringContinuationRefine   AuthoringContinuationAction = "refine"
 )
@@ -51,18 +52,19 @@ const (
 // AuthoringContinuationRequest binds creation, a question, an answer, generation
 // or refinement to one immutable caller-neutral request and observed image.
 type AuthoringContinuationRequest struct {
-	Binding            WorkflowMutationBinding     `json:"binding"`
-	ProjectID          string                      `json:"project_id"`
-	Namespace          string                      `json:"namespace"`
-	SessionID          string                      `json:"session_id"`
-	Action             AuthoringContinuationAction `json:"action"`
-	Target             AuthoringArtifactKind       `json:"target"`
-	Topic              string                      `json:"topic"`
-	Capture            string                      `json:"capture"`
-	Instructions       string                      `json:"instructions"`
-	ExpectedRevision   int64                       `json:"expected_revision"`
-	ExpectedSourceHash string                      `json:"expected_source_hash"`
-	Question           *AuthoringQuestionBinding   `json:"question,omitempty"`
+	Binding             WorkflowMutationBinding     `json:"binding"`
+	ProjectID           string                      `json:"project_id"`
+	Namespace           string                      `json:"namespace"`
+	SessionID           string                      `json:"session_id"`
+	Action              AuthoringContinuationAction `json:"action"`
+	Target              AuthoringArtifactKind       `json:"target"`
+	Topic               string                      `json:"topic"`
+	Capture             string                      `json:"capture"`
+	OriginalInstruction string                      `json:"original_instruction,omitempty"`
+	Instructions        string                      `json:"instructions"`
+	ExpectedRevision    int64                       `json:"expected_revision"`
+	ExpectedSourceHash  string                      `json:"expected_source_hash"`
+	Question            *AuthoringQuestionBinding   `json:"question,omitempty"`
 }
 
 // AuthoringDraft is generated data; the owner assigns identities, paths, revisions
@@ -76,6 +78,10 @@ type AuthoringDraft struct {
 // AuthoringGenerator runs with a bounded context and canonical snapshot. It must
 // use that snapshot rather than reentering this repository's mutation owner.
 type AuthoringGenerator func(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error)
+
+// AuthoringCommitGuard rechecks the caller's current authority after provider
+// preparation and before any new canonical effect, under the authoring owner.
+type AuthoringCommitGuard func(context.Context) error
 
 // AuthoringContinuationResult retains original confirmed facts without transcripts
 // or artifact bodies. It can be reconciled after an adapter loses acknowledgement.
@@ -94,6 +100,7 @@ type AuthoringContinuationResult struct {
 var (
 	ErrAuthoringProviderWait      = errors.New("authoring provider retry is not due")
 	ErrAuthoringProviderExhausted = errors.New("authoring provider attempts exhausted")
+	ErrAuthoringProviderFailure   = errors.New("authoring provider continuation failed")
 )
 
 type authoringRequestBinding struct {

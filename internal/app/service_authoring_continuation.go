@@ -26,6 +26,16 @@ func (s service) ContinueAuthoring(ctx context.Context, request core.AuthoringCo
 	return core.NewAuthoringSessionRepository(s.projectContext.ProjectDir).ContinueAuthoring(ctx, request, s.generateAuthoringDraft)
 }
 
+// ContinueAuthoringGuarded rechecks host-owned current authority under the shared
+// writer after generation. The guard is never serialized or supplied by a model.
+func (s service) ContinueAuthoringGuarded(ctx context.Context, request core.AuthoringContinuationRequest, guard core.AuthoringCommitGuard) (core.AuthoringContinuationResult, error) {
+	if request.ProjectID != s.projectContext.ProjectID {
+		return core.AuthoringContinuationResult{}, core.ErrWorkflowConflict
+	}
+
+	return core.NewAuthoringSessionRepository(s.projectContext.ProjectDir).ContinueAuthoring(ctx, request, s.generateAuthoringDraft, guard)
+}
+
 type authoringModelOutput struct {
 	Body      string `json:"body"`
 	Question  string `json:"question"`
@@ -45,12 +55,13 @@ type authoringModelAnswer struct {
 }
 
 type authoringModelInput struct {
-	Action       string                     `json:"action"`
-	Target       core.AuthoringArtifactKind `json:"target"`
-	Topic        string                     `json:"topic"`
-	Instructions string                     `json:"instructions"`
-	Sources      []authoringModelSource     `json:"sources"`
-	Answers      []authoringModelAnswer     `json:"answers"`
+	Action              string                     `json:"action"`
+	Target              core.AuthoringArtifactKind `json:"target"`
+	Topic               string                     `json:"topic"`
+	Instructions        string                     `json:"instructions"`
+	OriginalInstruction string                     `json:"original_instruction,omitempty"`
+	Sources             []authoringModelSource     `json:"sources"`
+	Answers             []authoringModelAnswer     `json:"answers"`
 }
 
 func (s service) generateAuthoringDraft(ctx context.Context, snapshot core.AuthoringSnapshot, request core.AuthoringContinuationRequest) (core.AuthoringDraft, error) {
@@ -103,6 +114,7 @@ func authoringGenerationSchema() map[string]any {
 func authoringGenerationInput(snapshot core.AuthoringSnapshot, request core.AuthoringContinuationRequest) authoringModelInput {
 	result := authoringModelInput{Action: string(request.Action), Target: request.Target, Topic: snapshot.Session.Topic, Instructions: request.Instructions, Sources: []authoringModelSource{}, Answers: []authoringModelAnswer{}}
 	if request.Action == "create" {
+		result.OriginalInstruction = request.OriginalInstruction
 		ref := core.AuthoringContinuationArtifact(request.Namespace, request.SessionID, core.AuthoringArtifactKindDump, true)
 		result.Sources = append(result.Sources, authoringModelSource{Reference: ref.Path, Content: request.Capture})
 	}
@@ -120,9 +132,27 @@ func authoringGenerationInput(snapshot core.AuthoringSnapshot, request core.Auth
 		result.Sources = append(result.Sources, authoringModelSource{Reference: artifact.Ref.Path, SourceHash: artifact.SourceHash, Content: content, Truncated: truncated})
 	}
 
+	result.Answers = authoringGenerationAnswers(snapshot, request)
+
+	return result
+}
+
+func authoringGenerationAnswers(snapshot core.AuthoringSnapshot, request core.AuthoringContinuationRequest) []authoringModelAnswer {
+	result := []authoringModelAnswer{}
+
 	for _, event := range snapshot.Events {
 		if event.Type == core.AssistedTranscriptEventAnswer {
-			result.Answers = append(result.Answers, authoringModelAnswer{Question: event.Question.Prompt, Answer: event.Answer.Text})
+			result = append(result, authoringModelAnswer{Question: event.Question.Prompt, Answer: event.Answer.Text})
+		}
+	}
+
+	if request.Action != core.AuthoringContinuationRespond {
+		return result
+	}
+
+	for _, event := range snapshot.Events {
+		if event.Type == core.AssistedTranscriptEventQuestion && event.Question.ID == request.Question.QuestionID {
+			result = append(result, authoringModelAnswer{Question: event.Question.Prompt, Answer: request.Instructions})
 		}
 	}
 

@@ -14,11 +14,16 @@ import (
 type TelegramConversationQuestion struct {
 	SessionRef    string `json:"session_ref"`
 	QuestionID    string `json:"question_id"`
+	TurnID        string `json:"turn_id,omitempty"`
 	Revision      int64  `json:"revision"`
 	ContentDigest string `json:"content_digest"`
 }
 
 func (q TelegramConversationQuestion) validate() error {
+	if len(q.TurnID) > 128 {
+		return errors.New("invalid canonical turn binding")
+	}
+
 	digest, err := hex.DecodeString(q.ContentDigest)
 	if err != nil || len(digest) != 32 || q.Revision < 1 || q.SessionRef == "" || len(q.SessionRef) > 1024 || q.QuestionID == "" || len(q.QuestionID) > 128 {
 		return errors.New("invalid canonical question binding")

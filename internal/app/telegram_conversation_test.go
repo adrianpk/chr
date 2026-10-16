@@ -151,11 +151,12 @@ func TestTelegramConversationJourney(t *testing.T) {
 	}
 
 	checkTelegramConversationRouting(t, f, first.ID, second.ID)
+	checkTelegramConversationArtifacts(t, f)
 	f.send(t, "/done "+second.ID, 0)
 	f.send(t, "/reply "+second.ID+" late", 0)
 	f.send(t, "/cancel "+first.ID, 0)
 
-	if f.session(t, second.ID).Phase != "preparing" || f.session(t, first.ID).Capture != "" {
+	if f.session(t, second.ID).Phase != "prepared" || f.session(t, second.ID).AuthoringSessionRef == "" || f.session(t, first.ID).Capture != "" {
 		t.Fatal("completion/cancel crossed sessions")
 	}
 
@@ -164,7 +165,6 @@ func TestTelegramConversationJourney(t *testing.T) {
 	}
 
 	checkTelegramNoWork(t, f.receiver.env)
-	checkTelegramConversationArtifacts(t, f)
 }
 
 func checkTelegramConversationRouting(t *testing.T, f *telegramConversationAppFixture, first, second string) {

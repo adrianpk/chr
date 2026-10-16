@@ -31,7 +31,14 @@ func telegramAuthoringIntentHTTP(t *testing.T, f *telegramConversationAppFixture
 			t.Error(err)
 		}
 
-		if err := json.NewEncoder(w).Encode(map[string]string{"output_text": reply(input)}); err != nil {
+		output := ""
+		if input.Message == "" {
+			output = telegramAuthoringServiceOutput(t, "Preserve the existing retry policy.", "")
+		} else {
+			output = reply(input)
+		}
+
+		if err := json.NewEncoder(w).Encode(map[string]string{"output_text": output}); err != nil {
 			t.Error(err)
 		}
 	}))
@@ -96,13 +103,18 @@ func TestTelegramAuthoringIntentParity(t *testing.T) {
 	f.send(t, "finish my capture", 0)
 
 	left, right := f.session(t, first.ID), f.session(t, second.ID)
+	if left.Phase != "prepared" || left.AuthoringSessionRef == "" || right.AuthoringSessionRef == "" {
+		t.Fatalf("missing canonical preparation: %+v %+v", left, right)
+	}
 
 	left.ID, right.ID = "", ""
+
+	left.AuthoringSessionRef, right.AuthoringSessionRef = "", ""
 	if left != right {
 		t.Fatalf("explicit=%+v natural=%+v", left, right)
 	}
 
-	if calls.Load() != 4 {
+	if calls.Load() != 6 {
 		t.Fatalf("model calls=%d", calls.Load())
 	}
 

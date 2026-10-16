@@ -10,49 +10,68 @@ import (
 
 // ContinueAuthoring binds arguments before provider preparation and journals the
 // canonical session, transcript, artifacts and result receipt under one owner.
-func (r *fileAuthoringSessionRepository) ContinueAuthoring(ctx context.Context, request AuthoringContinuationRequest, generate AuthoringGenerator) (result AuthoringContinuationResult, err error) {
+func (r *fileAuthoringSessionRepository) ContinueAuthoring(ctx context.Context, request AuthoringContinuationRequest, generate AuthoringGenerator, guards ...AuthoringCommitGuard) (result AuthoringContinuationResult, err error) {
+	if len(guards) > 1 || (len(guards) == 1 && guards[0] == nil) {
+		return result, errors.New("authoring accepts at most one current commit guard")
+	}
+
 	request, digest, err := normalizeAuthoringRequest(request)
 	if err != nil {
 		return result, err
 	}
 
+	var guard AuthoringCommitGuard
+	if len(guards) == 1 {
+		guard = guards[0]
+	}
+
 	err = WithAuthoringMutation(ctx, r.projectDir, func(ctx context.Context) error {
-		binding, err := r.reserveAuthoringRequest(request, digest)
-		if err != nil {
-			return err
-		}
+		var applyErr error
 
-		retained, found, err := r.readAuthoringReceipt(request, digest)
-		if err != nil || found {
-			result = retained
+		result, applyErr = r.continueAuthoring(ctx, request, digest, generate, guard)
 
-			return err
-		}
-
-		if err := validateAuthoringRequest(request); err != nil {
-			return err
-		}
-
-		snapshot, err := r.guardAuthoringSnapshot(request)
-		if err != nil {
-			return err
-		}
-
-		if err := prepareAuthoringSnapshot(&snapshot, binding); err != nil {
-			return err
-		}
-
-		draft, err := r.generateAuthoring(ctx, &binding, snapshot, generate)
-		if err != nil {
-			return err
-		}
-
-		result, err = r.commitAuthoringContinuation(ctx, binding, snapshot, draft)
-
-		return err
+		return applyErr
 	})
 
 	return result, err
+}
+
+func (r *fileAuthoringSessionRepository) continueAuthoring(ctx context.Context, request AuthoringContinuationRequest, digest string, generate AuthoringGenerator, guard AuthoringCommitGuard) (AuthoringContinuationResult, error) {
+	binding, err := r.reserveAuthoringRequest(request, digest)
+	if err != nil {
+		return AuthoringContinuationResult{}, err
+	}
+
+	retained, found, err := r.readAuthoringReceipt(request, digest)
+	if err != nil || found {
+		return retained, err
+	}
+
+	if err := validateAuthoringRequest(request); err != nil {
+		return retained, err
+	}
+
+	snapshot, err := r.guardAuthoringSnapshot(request)
+	if err != nil {
+		return retained, err
+	}
+
+	if err := prepareAuthoringSnapshot(&snapshot, binding); err != nil {
+		return retained, err
+	}
+
+	draft, err := r.generateAuthoring(ctx, &binding, snapshot, generate)
+	if err != nil {
+		return retained, err
+	}
+
+	if guard != nil {
+		if err := guard(ctx); err != nil {
+			return retained, err
+		}
+	}
+
+	return r.commitAuthoringContinuation(ctx, binding, snapshot, draft)
 }
 
 func newAuthoringSnapshot(request AuthoringContinuationRequest) AuthoringSnapshot {
@@ -62,7 +81,7 @@ func newAuthoringSnapshot(request AuthoringContinuationRequest) AuthoringSnapsho
 }
 
 func guardAuthoringContinuation(snapshot AuthoringSnapshot, request AuthoringContinuationRequest) error {
-	if request.Action == "answer" {
+	if request.Action == "answer" || request.Action == "respond" {
 		return guardAuthoringAnswer(snapshot, request)
 	}
 
@@ -118,7 +137,7 @@ func (r *fileAuthoringSessionRepository) generateAuthoring(ctx context.Context, 
 		binding.ErrorCode = authoringProviderFailure(callErr)
 		binding.RetryAt = time.Now().UTC().Add(time.Second * time.Duration(1<<(binding.Attempts-1)))
 
-		return draft, errors.Join(callErr, r.saveAuthoringRequest(*binding))
+		return draft, errors.Join(ErrAuthoringProviderFailure, callErr, r.saveAuthoringRequest(*binding))
 	}
 
 	return draft, nil

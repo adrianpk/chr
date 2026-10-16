@@ -169,6 +169,17 @@ func (r telegramReceiver) dispatchIntent(ctx context.Context, user core.Telegram
 		return r.recordDiagnostic(ctx, input.Update, input.Config, intent.Explanation)
 	}
 
+	authoring, recognized, err := telegramIntentAuthoring(input.Update, intent)
+	if recognized {
+		if err != nil {
+			return r.intentCorrection(ctx, input.Update, input.Config)
+		}
+
+		authoring.Input.Config, authoring.Input.Projects, authoring.Input.Namespace = input.Config, input.Projects, input.Namespace
+
+		return r.dispatchAuthoring(ctx, user, authoring)
+	}
+
 	conversation, recognized, err := telegramIntentConversation(input.Update, intent)
 	if recognized {
 		if err != nil {
@@ -176,6 +187,9 @@ func (r telegramReceiver) dispatchIntent(ctx context.Context, user core.Telegram
 		}
 
 		conversation.Config, conversation.Projects, conversation.Namespace = input.Config, input.Projects, input.Namespace
+		if handled, err := r.dispatchAuthoringConversation(ctx, user, conversation); handled || err != nil {
+			return err
+		}
 
 		return r.store.ApplyTelegramConversation(ctx, conversation, time.Now())
 	}

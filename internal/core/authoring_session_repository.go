@@ -27,7 +27,7 @@ type AuthoringSessionRepository interface {
 	AppendTranscriptEvents(ctx context.Context, sessionID string, events []AssistedTranscriptEvent) error
 	ListTranscriptEvents(ctx context.Context, sessionID string) ([]AssistedTranscriptEvent, error)
 	ObserveContinuation(context.Context, string) (AuthoringSnapshot, error)
-	ContinueAuthoring(context.Context, AuthoringContinuationRequest, AuthoringGenerator) (AuthoringContinuationResult, error)
+	ContinueAuthoring(context.Context, AuthoringContinuationRequest, AuthoringGenerator, ...AuthoringCommitGuard) (AuthoringContinuationResult, error)
 }
 
 // AuthoringSessionPaths describes a package boundary value.

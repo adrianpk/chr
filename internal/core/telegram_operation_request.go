@@ -133,10 +133,66 @@ func normalizeTelegramOperation(request TelegramOperationRequest) (TelegramOpera
 
 	sum := sha256.Sum256(binding)
 	request.ArgumentDigest = hex.EncodeToString(sum[:])
-	id := sha256.Sum256(fmt.Appendf(nil, "%d:%d:%d", request.Source.Peer.BotID, request.Source.UpdateID, request.Ordinal))
-	request.ID = "tgr-" + hex.EncodeToString(id[:16])
+	request.ID = TelegramOperationID(request.Source, request.Ordinal)
 
 	return request, nil
+}
+
+// TelegramOperationID derives the opaque request binding before serializing its
+// owner input. Reservation still validates and binds the complete source/target.
+func TelegramOperationID(source TelegramReceivedUpdate, ordinal int) string {
+	id := sha256.Sum256(fmt.Appendf(nil, "%d:%d:%d", source.Peer.BotID, source.UpdateID, ordinal))
+
+	return "tgr-" + hex.EncodeToString(id[:16])
+}
+
+// ReservePreparedTelegramOperation retains complete neutral owner input and its
+// immutable transport binding in one transaction, before any provider call.
+func (s *TelegramReceiverStore) ReservePreparedTelegramOperation(ctx context.Context, request TelegramOperationRequest, input json.RawMessage, now time.Time) (TelegramOperationRequest, error) {
+	request, err := normalizeTelegramOperation(request)
+	if err != nil {
+		return request, err
+	}
+
+	if len(input) == 0 || len(input) > 1048576 || !json.Valid(input) {
+		return request, ErrWorkflowConflict
+	}
+
+	err = s.transaction(ctx, func(tx *sql.Tx) error {
+		return reservePreparedTelegramOperation(ctx, tx, request, input, now)
+	})
+	if err != nil {
+		return request, err
+	}
+
+	retained, found, err := s.TelegramOperation(ctx, request.Source, request.Ordinal)
+	if err != nil {
+		return request, err
+	}
+
+	if !found || retained.ArgumentDigest != request.ArgumentDigest || string(retained.PreparedInput) != string(input) {
+		return request, ErrWorkflowConflict
+	}
+
+	return retained, nil
+}
+
+func reservePreparedTelegramOperation(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, input json.RawMessage, now time.Time) error {
+	pending, err := telegramReadResponsePending(ctx, tx, request.Source)
+	if err != nil || !pending {
+		return errors.Join(err, ErrWorkflowConflict)
+	}
+
+	if err := insertTelegramOperation(ctx, tx, request, now); err != nil {
+		return err
+	}
+
+	_, err = tx.ExecContext(ctx, `UPDATE telegram_requests SET prepared_input=?,domain_guard=?,state='ready',updated_at=? WHERE id=? AND argument_digest=? AND state='prepared' AND prepared_input IS NULL`, string(input), workflowHash(input), formatProjectTime(now), request.ID, request.ArgumentDigest)
+	if err != nil {
+		return err
+	}
+
+	return checkTelegramIntakeCapacity(ctx, tx, request.Source.Peer.BotID)
 }
 
 func validTelegramOperationEnvelope(request TelegramOperationRequest) bool {

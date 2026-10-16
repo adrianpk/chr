@@ -315,7 +315,9 @@ they do not require the legacy fake question or summary flags shown above.
 `AuthoringContinuationRequest` contains an opaque request/operator binding,
 project, frozen namespace, session identity, action and target. Supported targets
 are dump, quiz, spec and plan. Creation retains its original capture in a
-canonical raw dump. Subsequent operations require both the observed session
+canonical raw dump, preserving leading spaces and trailing blank lines. An
+optional original instruction is retained separately, with a 16 KiB bound;
+provider proposals cannot replace it. Subsequent operations require both the observed session
 revision and a source hash covering the session, transcript, artifact bodies and
 metadata. Refinement may replace only that session's observed output of the
 requested kind. A new generation cannot silently replace an existing output.
@@ -334,7 +336,15 @@ digest. The owner assigns those identities. Answers must match the current
 binding and observed session; another session's prompt, an answered prompt or a
 prompt superseded by a session edit cannot accept the answer. Managed transcript
 text uses quoted escaped values so multiline text and Markdown delimiters survive
-reload without becoming transcript records.
+reload without becoming transcript records. Answer text also preserves its
+original whitespace. `answer` records an answer alone; `respond` records the
+answer and requested generation or next clarification in one journal and receipt.
+
+`ContinueAuthoringGuarded` accepts a host-owned `AuthoringCommitGuard`. The owner
+calls it after generation and before committing canonical changes, while still
+holding its writer lock. This lets an adapter recheck current authorization and
+bindings after a provider call. Reconciliation of an existing receipt does not
+invoke the provider or acquire new write authority.
 
 The authoring repository serializes ordinary and bound writers through an
 OS-backed owner lock. A bound operation journals its expected before images,
@@ -361,6 +371,46 @@ eight per session, canonical artifact references to 16, transcript/provenance
 entries to 64, and retained request bindings to 4,096 per project. File and
 journal reads are bounded to 1 MiB. Capacity and provider failures preserve the
 previous canonical session and artifacts.
+
+## Telegram Artifact Continuations
+
+The receiver maps these commands to the same bound continuation service:
+
+| Command | Effect |
+| --- | --- |
+| `/done [conversation]` | Generate a canonical dump from the retained capture. |
+| `/quiz [conversation]` | Ask one provider-generated clarification question. |
+| `/spec [conversation]` | Generate a draft specification, or ask for missing information. |
+| `/plan [conversation]` | Generate a plan from observed canonical context. |
+| `/refine <dump\|spec\|plan> <conversation> <instructions>` | Explicitly replace the selected session's observed output. |
+
+Ordinary-language proposals use the same command registry and typed handlers.
+Slash commands and replies to a retained authoring question bypass intent
+interpretation. `/dump` remains a view of the captured conversation; it does not
+invoke generation.
+
+The receiver resolves an exact conversation, an eligible reply/focus selection,
+or the sole eligible conversation. It freezes project, root, namespace and
+conversation revision with the canonical session/source image. The complete
+owner request is retained atomically with the transport reservation before
+generation. Reopening dispatches that request rather than resolving the message
+or preparing its source images again.
+
+An actual provider question binds the canonical session, turn, question ID,
+revision and content digest to the outgoing prompt. Reply to that prompt or send
+`/reply <conversation> <answer>`. A clarification needed for a spec or plan
+continues that generation after the answer. An explicit quiz answer is retained
+without generating another artifact. Superseded prompts cannot answer the new
+question.
+
+After the shared owner confirms its receipt, `FinishTelegramAuthoring` commits
+the conversation's session/question binding, revision, source acknowledgement
+and outbox reply in one transaction. A lost acknowledgement reconciles the
+original canonical receipt without regenerating artifacts. If the conversation
+has advanced meanwhile, reconciliation reports the confirmed canonical session
+without replacing its current binding. Current operator, project and root
+authorization remain required. Neither artifact preparation nor its reply
+creates a native work invocation.
 
 ## Explanation and Prepared Work
 
