@@ -204,7 +204,7 @@ Prerequisite: verified Slice 5 integration.
 | --- | --- | --- | --- |
 | T6.1 | validated | `a3e5e95be3b45aaa66cc0c1bc0744b73adac6770` | Shared guarded pause/cancel/resume/continue/reconcile, mapped actor, exact invocation/revision and asynchronous stop checkpoints. |
 | T6.2 | validated | `76b55b28ed770b13fc40da53ff39e42dbe822ae9` | Exact review/candidate, entry/budget and question guards; atomic native request receipts; lost-ack and partial-journal recovery; mapped actors. |
-| T6.3 | validated | `aaca31360292b67e72509557fa4b650021593aaf`, `b2f03c1159ea56ab4e482a2519489b1eec42e736`, `dcf386f2423a669707d1609a92eeee9a784453a5` | Bounded asynchronous intake/application/delivery, shared model slots, 32 reserved pending inputs, callback/text/reply priority, native lifecycle receipts and guarded recovery through expired/replaced prompts; late reply binding, guarded current-state diagnostics, 64 reserved control request records and durable capacity rejection are validated. |
+| T6.3 | validated | `aaca31360292b67e72509557fa4b650021593aaf`, `b2f03c1159ea56ab4e482a2519489b1eec42e736`, `dcf386f2423a669707d1609a92eeee9a784453a5`, `27165b596e763e5117177a83592044540855a93f` | Bounded asynchronous intake/application/delivery, shared model slots, 32 reserved pending inputs, callback/text/reply priority, native lifecycle receipts and guarded recovery through expired/replaced prompts; late reply binding, guarded current-state diagnostics, 64 reserved control request records and durable capacity rejection are validated. |
 | T6.4 | ready | pending | Shared serial/parallel capacity and cross-adapter ownership checks. |
 
 Validation: plan section 11; `TestTelegramControl`, including focused race mode.
@@ -217,7 +217,8 @@ capacity rejection, priority restoration, two shared model slots and context
 guards. Native lifecycle receipts now recover interrupted stop/resume, task/closing
 reconciliation and continuation acceptance without repeating work. Recovery
 now includes receipt-only recovery through expired/replaced Telegram prompts
-and text/callback/reply parity for accepted and unaccepted stale actions. T6.3 completion adds late reply binding, guarded stale-state diagnostics,
+and text/callback/reply parity for accepted and unaccepted stale actions.
+T6.3 completion adds late reply binding, guarded stale-state diagnostics,
 reserved request metadata, durable rejection and real activation-bound evidence.
 Focused normal/race and strict checks passed; T6.4 is ready.
 Exact commands and results belong to the [Slice 6 report](../report/slices/telegram-conversational-workflow/slice-6-controls.md).

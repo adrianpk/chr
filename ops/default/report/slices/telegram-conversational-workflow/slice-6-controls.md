@@ -92,7 +92,7 @@ acknowledged the first source, without allocating another effect identity.
 Acknowledgement preserves replacement conversation revisions and newer native
 observations; it does not overwrite their phase or admission reference.
 
-T6.3 completes late reply handling and capacity rejection. An unbound reply
+T6.3 completion (`27165b596e763e5117177a83592044540855a93f`) adds late reply handling and capacity rejection. An unbound reply
 waits while its exact peer's sender can still commit a definite acknowledgement;
 unknown and exhausted sends produce diagnostics without reaching a model.
 The delivery transaction refreshes pending reply classes. A subsequent activation
