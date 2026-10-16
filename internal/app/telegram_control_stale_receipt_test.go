@@ -23,6 +23,8 @@ type telegramStaleControlFixture struct {
 // TestTelegramControlStaleReceipt recovers a committed control after prompt
 // expiry or conversation replacement without changing newer native or peer state.
 func TestTelegramControlStaleReceipt(t *testing.T) {
+	telegramControlParallel(t)
+
 	for _, stale := range []string{"expired", "replaced", "superseded"} {
 		t.Run(stale, func(t *testing.T) {
 			f, operations, ref := telegramWorkAdmitted(t)

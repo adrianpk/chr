@@ -26,6 +26,8 @@ func telegramControlOffer(t *testing.T, f *telegramConversationAppFixture, comma
 // TestTelegramControlLifecycle carries each guarded lifecycle action through
 // real HTTP, SQLite confirmation and the existing shared operation service.
 func TestTelegramControlLifecycle(t *testing.T) {
+	telegramControlParallel(t)
+
 	for _, action := range []string{"pause", "cancel", "resume", "continue", "reconcile"} {
 		t.Run(action, func(t *testing.T) { checkTelegramControlLifecycle(t, action) })
 	}
@@ -90,6 +92,8 @@ func checkTelegramControlOutcome(t *testing.T, action string, run core.WorkflowI
 // TestTelegramControlNatural sends a model-proposed control through the same
 // exact-revision confirmation path as slash commands, without eager execution.
 func TestTelegramControlNatural(t *testing.T) {
+	telegramControlParallel(t)
+
 	f, operations, ref := telegramWorkAdmitted(t)
 	calls := telegramAuthoringIntentHTTP(t, f, func(ConversationIntentContext) string {
 		return telegramAuthoringIntentJSON(t, ConversationIntent{OperationID: "control", Arguments: ConversationIntentArguments{Action: "pause", Text: ref.Invocation.ID}})
@@ -108,6 +112,8 @@ func TestTelegramControlNatural(t *testing.T) {
 // TestTelegramControlDraft keeps explicit draft cancellation on its capture
 // path, without allocating or controlling a native invocation.
 func TestTelegramControlDraft(t *testing.T) {
+	telegramControlParallel(t)
+
 	f := newTelegramConversationAppFixture(t)
 	f.send(t, "/prepare draft", 0)
 
@@ -122,6 +128,8 @@ func TestTelegramControlDraft(t *testing.T) {
 // TestTelegramControlStale preserves a newer cancellation and displays current
 // native state rather than applying an older pause confirmation.
 func TestTelegramControlStale(t *testing.T) {
+	telegramControlParallel(t)
+
 	f, operations, ref := telegramWorkAdmitted(t)
 	token := telegramControlOffer(t, f, "/pause "+ref.Invocation.ID)
 
@@ -144,6 +152,8 @@ func TestTelegramControlStale(t *testing.T) {
 // TestTelegramControlConversation resolves only the conversation's bound run;
 // draft cancellation and unqualified receiver status retain their old behavior.
 func TestTelegramControlConversation(t *testing.T) {
+	telegramControlParallel(t)
+
 	f, operations, ref := telegramWorkAdmitted(t)
 	token := telegramControlOffer(t, f, "/pause --conversation "+ref.Request.Target.ConversationID)
 	f.send(t, "/answer "+token+" pause", 0)

@@ -13,6 +13,8 @@ import (
 // TestTelegramControlDecisionGuards rejects each independently stale displayed
 // image and a last-boundary authority loss without changing native history.
 func TestTelegramControlDecisionGuards(t *testing.T) {
+	telegramControlParallel(t)
+
 	operations, id := serviceIntegrationDecisionReady(t)
 
 	before, err := operations.WorkflowStatus(t.Context(), id, WorkflowStatusRequest{Limit: 8})
@@ -97,6 +99,8 @@ func telegramControlRejected(t *testing.T, operations service, request WorkflowC
 // TestTelegramControlStaleReview keeps candidate and target movement from
 // authorizing an older preview, and displays the currently retained native state.
 func TestTelegramControlStaleReview(t *testing.T) {
+	telegramControlParallel(t)
+
 	f, operations, id := telegramControlDecisionFixture(t, "approve")
 
 	provider, ok := operations.workflowPullRequests.(*serviceNativeReviewFixture)

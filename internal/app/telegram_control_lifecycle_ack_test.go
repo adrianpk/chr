@@ -13,6 +13,8 @@ import (
 // real native invocation over HTTP/SQLite. Lost acknowledgements recover their
 // original receipt after later stop revisions without repeating work or intent.
 func TestTelegramControlLifecycleAck(t *testing.T) {
+	telegramControlParallel(t)
+
 	f, operations, ref := telegramWorkAdmitted(t)
 	for _, action := range []string{"reconcile", "pause", "resume", "continue", "cancel"} {
 		prepareTelegramLifecycleAck(t, operations, ref.Invocation.ID, action)
@@ -115,6 +117,8 @@ func telegramLifecycleAckStatus(t *testing.T, operations service, id string) Wor
 // accepted control loses its acknowledgement with a domain conflict. Its next
 // retained attempt reads the original receipt instead of repeating the effect.
 func TestTelegramControlReceiptRetry(t *testing.T) {
+	telegramControlParallel(t)
+
 	f, operations, ref := telegramWorkAdmitted(t)
 
 	before, err := operations.StopWorkflow(t.Context(), ref.Invocation.ID, "pause")

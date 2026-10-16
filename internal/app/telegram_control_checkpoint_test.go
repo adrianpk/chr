@@ -13,6 +13,8 @@ import (
 // TestTelegramControlCheckpoint preserves an operator stop when a live worker
 // asynchronously exits and journals its fenced checkpoint through the owner.
 func TestTelegramControlCheckpoint(t *testing.T) {
+	telegramControlParallel(t)
+
 	for _, action := range []string{"pause", "cancel"} {
 		t.Run(action, func(t *testing.T) { checkTelegramControlCheckpoint(t, action) })
 	}

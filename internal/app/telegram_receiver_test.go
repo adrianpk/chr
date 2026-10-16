@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -23,11 +24,14 @@ func telegramAppTestReceiver(t *testing.T, api core.TelegramReceiverAPI) (telegr
 	}
 
 	config := core.TelegramReceiverConfig{
-		Enabled: true, BotTokenEnv: "EXAMPLE_BOT_TOKEN", PollTimeoutSeconds: 1,
+		Enabled: true, BotTokenEnv: fmt.Sprintf("CHR_TEST_TELEGRAM_%x", sha256.Sum256([]byte(env.ConfigDir()))), PollTimeoutSeconds: 1,
 		AllowedUsers: []core.TelegramAllowedUser{{TelegramUserID: 100001, OperatorID: "maintainer", ProjectIDs: []string{"example-project", "disabled-project"}}},
 	}
+
 	token := "12345:example_test_token_123456789"
-	t.Setenv(config.BotTokenEnv, token)
+	if err := core.SaveTelegramReceiverToken(env, config, token, false); err != nil {
+		t.Fatal(err)
+	}
 
 	if err := core.SaveTelegramReceiverConfig(env, config, false); err != nil {
 		t.Fatal(err)

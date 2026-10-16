@@ -13,6 +13,8 @@ import (
 // TestTelegramControlReceiptRedelivery recovers the original accepted request
 // through a new answer after an older diagnostic acknowledged its first source.
 func TestTelegramControlReceiptRedelivery(t *testing.T) {
+	telegramControlParallel(t)
+
 	for _, kind := range []string{"text", "callback", "reply"} {
 		t.Run(kind, func(t *testing.T) {
 			f, operations, ref := telegramWorkAdmitted(t)
@@ -45,6 +47,8 @@ func TestTelegramControlReceiptRedelivery(t *testing.T) {
 // TestTelegramControlReceiptAuthority prevents a completed receipt from exposing
 // project facts after the operator mapping or registered root has changed.
 func TestTelegramControlReceiptAuthority(t *testing.T) {
+	telegramControlParallel(t)
+
 	for _, change := range []string{"operator", "root"} {
 		t.Run(change, func(t *testing.T) {
 			f, operations, ref := telegramWorkAdmitted(t)
@@ -89,6 +93,8 @@ func (s telegramControlReplaceAfterApply) ApplyTelegramControl(ctx context.Conte
 // TestTelegramControlReceiptProjection accepts a native receipt when another
 // conversation revision wins before SQLite acknowledgement, preserving that image.
 func TestTelegramControlReceiptProjection(t *testing.T) {
+	telegramControlParallel(t)
+
 	f, operations, ref := telegramWorkAdmitted(t)
 	token := telegramControlOffer(t, f, "/pause "+ref.Invocation.ID)
 

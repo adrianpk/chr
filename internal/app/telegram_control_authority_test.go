@@ -11,6 +11,8 @@ import (
 // TestTelegramControlAuthorization checks authority at the native effect boundary
 // for every lifecycle action, including paths that release or recover ownership.
 func TestTelegramControlAuthorization(t *testing.T) {
+	telegramControlParallel(t)
+
 	for _, action := range []string{"pause", "cancel", "resume", "continue", "reconcile"} {
 		t.Run(action, func(t *testing.T) { checkTelegramControlAuthorization(t, action) })
 	}
@@ -61,6 +63,8 @@ func (s telegramControlChangeAuthority) ApplyTelegramControl(ctx context.Context
 // TestTelegramControlAuthority rejects operator and registry-root changes after
 // the Telegram claim, while native exclusion is already held.
 func TestTelegramControlAuthority(t *testing.T) {
+	telegramControlParallel(t)
+
 	for _, change := range []string{"operator", "root"} {
 		t.Run(change, func(t *testing.T) {
 			f, operations, ref := telegramWorkAdmitted(t)

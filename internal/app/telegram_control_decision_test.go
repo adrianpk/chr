@@ -80,6 +80,8 @@ func telegramControlDecisionCommand(t *testing.T, operations service, id, action
 // over real HTTP/SQLite. Each journey loses its acknowledgement, reopens SQLite
 // and preserves a later operator pause while retaining native receipts and actors.
 func TestTelegramControlDecisions(t *testing.T) {
+	telegramControlParallel(t)
+
 	for _, action := range []string{"approve", "grant", "answer_decision"} {
 		t.Run(action, func(t *testing.T) { checkTelegramControlDecision(t, action) })
 	}
