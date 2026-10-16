@@ -43,7 +43,7 @@ repeating a grant, approving a successor or clearing a later operator pause.
 Control conversations retain native identity and preserve original work-admission
 authority; a control-only conversation grants no automatic execution.
 
-T6.3 progress separates durable polling, application calls and outbound delivery.
+T6.3 progress (`aaca31360292b67e72509557fa4b650021593aaf`) separates durable polling, application calls and outbound delivery.
 One receiver shares 16 application slots between its work host and inbox calls:
 12 ordinary slots, two decision slots and two status/stop/reconciliation slots.
 Confirmation callbacks, explicit answers and replies derive priority from the

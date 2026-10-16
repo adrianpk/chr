@@ -204,7 +204,7 @@ Prerequisite: verified Slice 5 integration.
 | --- | --- | --- | --- |
 | T6.1 | validated | `a3e5e95be3b45aaa66cc0c1bc0744b73adac6770` | Shared guarded pause/cancel/resume/continue/reconcile, mapped actor, exact invocation/revision and asynchronous stop checkpoints. |
 | T6.2 | validated | `76b55b28ed770b13fc40da53ff39e42dbe822ae9` | Exact review/candidate, entry/budget and question guards; atomic native request receipts; lost-ack and partial-journal recovery; mapped actors. |
-| T6.3 | in_progress | pending implementation reference | Bounded asynchronous intake/application/delivery, shared model slots, 32 reserved pending inputs and callback/text/reply priority; lifecycle receipt recovery and final stale-action checks remain pending. |
+| T6.3 | in_progress | `aaca31360292b67e72509557fa4b650021593aaf` | Bounded asynchronous intake/application/delivery, shared model slots, 32 reserved pending inputs and callback/text/reply priority; lifecycle receipt recovery and final stale-action checks remain pending. |
 | T6.4 | pending | pending | Shared serial/parallel capacity and cross-adapter ownership checks. |
 
 Validation: plan section 11; `TestTelegramControl`, including focused race mode.
