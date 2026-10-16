@@ -1,6 +1,6 @@
 # Slice 6: Guarded Controls and Capacity
 
-Status: drafting
+Status: reviewing
 
 Delivery set: telegram-conversational-workflow
 
@@ -114,6 +114,20 @@ inherit the allowance from their retained peer-owned parent. Existing request
 bindings still replay at either ceiling. Rejected reservations leave no accepted
 request or effect and return a durable capacity diagnostic; status still works.
 
+T6.4 (`8346ab32efee666563fddc19ee335b4d86915e6d`) certifies one native pool across two Telegram conversations,
+daemon continuation and manual task execution. The default admits one source
+worker. At the configured maximum, one Telegram worker, one daemon worker and
+six manual workers overlap behind actual source-process barriers. A ninth
+conversation, manual claim and daemon activation wait without spending a new
+attempt or continuation; duplicate activation preserves the current owner.
+Releasing one slot admits the waiting conversation, every accepted task validates
+once, and all slots return to the pool. Linked-root/namespace subprocesses also
+prove distinct reservations at capacities one, two and eight.
+
+Existing native publication fixtures verify target exclusion before competing
+provider IO, accepted and lost acknowledgments, unresolved intent retention and
+fresh combined validation/review after canonical target movement.
+
 ## Implementation Notes
 
 Native lifecycle entry points recheck volatile caller authority while holding
@@ -128,6 +142,13 @@ separate control schema and checksum. Native review, budget, question, lifecycle
 receipt in their existing commit transaction. Volatile caller
 authority is checked again before that commit. Legacy callers retain their
 existing API; a final decision authority callback requires a request binding.
+
+Claimed-worker stop polls read their canonical owner's exact invocation under
+the existing repository exclusion and journal/read guard, checking owner root,
+project, namespace and the attempt credential. They no longer enumerate every
+invocation in every source worktree every fifty milliseconds. Identity-only
+closing and publication observers retain public scope resolution. Polling,
+worker and host-validation deadlines and configured limits are unchanged.
 
 ## Contracts Added or Changed
 
@@ -181,6 +202,11 @@ existing API; a final decision authority callback requires a request binding.
 - `internal/app/telegram_control_reply_test.go`: actual HTTP binding race and worker/model lane barriers.
 - `internal/app/telegram_control_request_capacity_test.go`: durable overflow diagnostics across operation types.
 - `internal/app/telegram_control_priority_test.go`: real HTTP receiver under model load.
+
+- `internal/core/workflow_stop_watch.go`: guarded claim-scoped stop observation.
+- `internal/core/telegram_control_stop_owner_test.go`: stop, credential and identity-only polling boundaries.
+- `internal/core/workflow_capacity_process_test.go`: distinct cross-process slots through eight workers.
+- `internal/app/telegram_control_shared_capacity_test.go`: actual Telegram/daemon/manual source overlap and shared capacity reuse.
 
 ## Validation
 
@@ -334,16 +360,49 @@ retains the unchanged three-minute deadline and all hard-ceiling assertions.
 The reply fixtures also reject foreign peers, preserve sender attempt budgets,
 and prevent an exhausted fifth send from deferring an unbound reply forever.
 
-Required slice validation will be recorded through the controller for the final
-clean PR HEAD: `make verify`, focused `TestTelegramControl` normal and race
-commands, then `git diff --check`. Live and scheduled exhaustive checks remain
-separate.
+T6.4 focused checks:
+
+```sh
+go test ./internal/core ./internal/app -run '^Test(TelegramControlSharedCapacity|WorkflowCapacityOverlap|WorkflowParallelPublication)$' -count=1 -timeout=3m
+go test ./internal/core ./internal/app -run '^Test(TelegramControl(StopOwner|SharedCapacity)|Workflow(Stop|StopBarrier|ManualStop|ClosingStop|SubmissionStop)|DaemonWorkflowActiveStop)$' -count=1 -timeout=3m
+go test -race ./internal/core ./internal/app -run '^Test(TelegramControl(StopOwner|SharedCapacity)|Workflow(CapacityOverlap|ParallelPublication|Stop|StopBarrier|ManualStop|ClosingStop|SubmissionStop)|DaemonWorkflowActiveStop)$' -count=1 -timeout=3m
+go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/app
+scripts/check-go-func-signatures.sh
+scripts/check-package-readmes.sh
+git diff --check
+```
+
+Passed. The initial normal capacity/publication selection completed in core
+38.300 seconds and app 29.411 seconds. After the owner-scoped polling correction,
+the normal stop/capacity selection completed in core 24.991 seconds and app
+23.303 seconds; the final race selection passed in core 99.799 seconds and app
+58.067 seconds. Strict focused lint reports zero issues.
+
+Initial eight-worker race attempts hit the unchanged thirty-second host gate:
+the combined capacity/publication race command passed core in 73.791 seconds
+but failed app in 73.075 seconds; an app-only rerun failed in 72.677 seconds.
+Staging worker completion in pairs did not remove the failure. The claimed-owner
+stop read removes repeated repository-wide lookup from the fifty-millisecond
+poll while preserving exclusion, journal guards and final validation. The
+passing fixtures retain eight actual overlapping sources and all ownership,
+overflow, reuse and host-validation assertions. Owned fixture processes stop
+after their checks.
+
+Authoritative final slice validation is the controller receipt for the clean PR
+HEAD, in this order:
+
+```sh
+make verify
+go test ./internal/core ./internal/app -run '^TestTelegramControl' -count=1 -timeout=3m
+go test -race ./internal/core ./internal/app -run '^TestTelegramControl' -count=1 -timeout=3m
+git diff --check
+```
+
+Live and scheduled exhaustive checks remain separate.
 
 ## Risks and Follow-ups
 
-T6.3 is validated through focused normal/race, actual HTTP/SQLite reply handling,
-activation bounds and request-capacity evidence. T6.4 is ready and still requires
-shared serial/default and configured parallel capacity, cross-adapter ownership,
-and publication certification. The Slice 6 PR and exact-HEAD controller checks
-remain pending. Live activation and scheduled exhaustive certification remain
-separate.
+All Slice 6 tasks have focused normal/race and strict-check evidence. Final PR
+readiness is established by the exact clean-HEAD controller receipt. Live
+activation, user operation and scheduled exhaustive certification remain in
+the approved successor work.
