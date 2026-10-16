@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"io/fs"
 	"strings"
 	"time"
 )
@@ -17,9 +18,42 @@ type TelegramTransportRetry struct {
 	Actor      string
 }
 
+// RetryLocalTelegramTransport acquires receiver exclusion before opening or
+// migrating the store. A running receiver's schema and attempts stay untouched.
+func RetryLocalTelegramTransport(ctx context.Context, env UserEnvironment, assets fs.FS, request TelegramTransportRetry, now time.Time) (err error) {
+	lock, err := AcquireTelegramConfigurationLock(env)
+	if err != nil {
+		return err
+	}
+	defer func() { err = errors.Join(err, lock.Close()) }()
+
+	botID, err := TelegramBoundBotID(env)
+	if err != nil || botID != request.BotID {
+		return ErrWorkflowConflict
+	}
+
+	store, err := NewTelegramReceiverStore(ctx, env, assets)
+	if err != nil {
+		return err
+	}
+	defer func() { err = errors.Join(err, store.Close()) }()
+
+	return store.retryTelegramTransport(ctx, request, now)
+}
+
 // RetryTelegramTransport starts an attributable local cycle only while the
 // receiver is offline. Lifetime counts, source identities and effects survive.
 func (s *TelegramReceiverStore) RetryTelegramTransport(ctx context.Context, request TelegramTransportRetry, now time.Time) (err error) {
+	lock, err := AcquireTelegramConfigurationLock(s.env)
+	if err != nil {
+		return err
+	}
+	defer func() { err = errors.Join(err, lock.Close()) }()
+
+	return s.retryTelegramTransport(ctx, request, now)
+}
+
+func (s *TelegramReceiverStore) retryTelegramTransport(ctx context.Context, request TelegramTransportRetry, now time.Time) error {
 	if request.BotID <= 0 || request.Poll == (request.DeliveryID != "") || len(request.DeliveryID) > 128 || strings.TrimSpace(request.Actor) != request.Actor {
 		return ErrWorkflowConflict
 	}
@@ -27,12 +61,6 @@ func (s *TelegramReceiverStore) RetryTelegramTransport(ctx context.Context, requ
 	if err := validateWorkflowMutationBinding(WorkflowMutationBinding{RequestID: "telegram-transport-retry", Operator: request.Actor}); err != nil {
 		return err
 	}
-
-	lock, err := AcquireTelegramConfigurationLock(s.env)
-	if err != nil {
-		return err
-	}
-	defer func() { err = errors.Join(err, lock.Close()) }()
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
 		if _, err := tx.ExecContext(ctx, `UPDATE telegram_receivers SET updated_at=updated_at WHERE bot_id=? AND schema_version=1`, request.BotID); err != nil {

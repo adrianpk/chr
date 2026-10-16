@@ -17,6 +17,6 @@ func main() {
 	err := app.Run(context.Background(), os.Args[1:], os.Stdin, os.Stdout, os.Stderr, assetsFS)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		os.Exit(app.ExitCode(err))
 	}
 }

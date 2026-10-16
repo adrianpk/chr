@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
-	"time"
 
 	"github.com/charmbracelet/x/term"
 	"github.com/urfave/cli/v3"
@@ -18,11 +16,13 @@ import (
 func newTelegramCommand(stdin io.Reader, stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name: "telegram", Usage: "Configure and run the dedicated text receiver",
+		Description: "Receive authorized text and buttons for retained project conversations and native work. Poll/model/delivery cycles retain five attempts across restart; pending input and delivery each stop at 1,024. No webhook takeover, arbitrary shell commands or implicit service activation.",
 		Commands: []*cli.Command{
 			newTelegramSetupCommand(stdin, stdout),
 			newTelegramDoctorCommand(stdout),
 			newTelegramServeCommand(stdout, deps),
-			{Name: "status", Usage: "Inspect local receiver configuration", Flags: projectRegistryFlags(), Action: telegramStatusAction(stdout)},
+			newTelegramRetryCommand(stdout, deps),
+			{Name: "status", Usage: "Inspect retained health, retry cycles and queues without migration or network access", Flags: projectRegistryFlags(), Action: telegramStatusAction(stdout)},
 		},
 	}
 }
@@ -38,6 +38,7 @@ func newTelegramSetupCommand(stdin io.Reader, stdout io.Writer) *cli.Command {
 			&cli.Int64SliceFlag{Name: "topic-id"},
 			&cli.StringFlag{Name: "bot-token-env", Usage: "Read token from this environment reference instead of masked terminal input"},
 			&cli.IntFlag{Name: "poll-timeout-seconds", Value: 30},
+			&cli.BoolFlag{Name: "install-service", Usage: "Install a user service for this executable without enabling or starting it"},
 			&cli.BoolFlag{Name: "replace", Usage: "Explicitly replace differing receiver configuration or credentials"},
 		),
 		Action: func(_ context.Context, cmd *cli.Command) error {
@@ -79,8 +80,18 @@ func runTelegramSetup(cmd *cli.Command, stdin io.Reader, stdout io.Writer) (err 
 		return err
 	}
 
+	return finishTelegramSetup(cmd, env, stdout)
+}
+
+func finishTelegramSetup(cmd *cli.Command, env core.UserEnvironment, stdout io.Writer) (err error) {
 	if cmd.Bool("replace") {
 		if err := core.ResetTelegramReceiverIdentity(env); err != nil {
+			return err
+		}
+	}
+
+	if cmd.Bool("install-service") {
+		if err := installTelegramUserService(cmd, env, stdout); err != nil {
 			return err
 		}
 	}
@@ -141,55 +152,4 @@ func storeTelegramSetupToken(cmd *cli.Command, env core.UserEnvironment, config 
 	}
 
 	return core.SaveTelegramReceiverToken(env, config, string(token), cmd.Bool("replace"))
-}
-
-func telegramStatusAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		env, err := newUserEnvironmentFromCommand(cmd)
-		if err != nil {
-			return err
-		}
-
-		config, err := core.LoadTelegramReceiverConfig(env)
-		if err != nil {
-			return err
-		}
-
-		_, tokenErr := core.TelegramReceiverToken(env, config)
-
-		_, err = fmt.Fprintf(stdout, "telegram: configured\ntoken_available: %t\npoll_timeout_seconds: %d\nallowed_users: %d\nconfig: %s\n", tokenErr == nil, config.PollTimeoutSeconds, len(config.AllowedUsers), filepath.Join(env.ConfigDir(), "telegram.yml"))
-		if err != nil {
-			return err
-		}
-
-		return printTelegramLocalState(ctx, env, stdout)
-	}
-}
-
-func printTelegramLocalState(ctx context.Context, env core.UserEnvironment, stdout io.Writer) error {
-	botID, err := core.TelegramBoundBotID(env)
-	if errors.Is(err, os.ErrNotExist) {
-		_, err := fmt.Fprintln(stdout, "receiver: unbound")
-
-		return err
-	}
-
-	if err != nil {
-		return err
-	}
-
-	state, err := core.InspectTelegramReceiver(ctx, env, botID)
-	if err != nil {
-		return err
-	}
-
-	cursor := "unset"
-	if state.NextUpdateID != nil {
-		cursor = fmt.Sprint(*state.NextUpdateID)
-	}
-
-	_, err = fmt.Fprintf(stdout, "receiver: %s\nbot_id: %d\ncursor_epoch: %d\nnext_update_id: %s\nlast_poll_at: %s\nretry_attempt: %d\nretry_at: %s\nlast_error_code: %s\n",
-		state.Health, botID, state.Epoch, cursor, state.LastPollAt.UTC().Format(time.RFC3339), state.RetryAttempt, state.RetryAt.UTC().Format(time.RFC3339), state.LastErrorCode)
-
-	return err
 }

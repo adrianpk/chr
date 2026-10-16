@@ -29,7 +29,49 @@ All commands accept `--dev-root`. Files use the existing user environment:
 the `telegram/` user state directory. New private directories use mode 0700;
 configuration, credentials and the database use mode 0600. Tokens remain absent
 from YAML and command output. Environment values take precedence over the
-private credential file, which contains one literal `NAME=token` assignment.
+private credential file. It accepts up to 64 KiB of literal `NAME=value` lines
+and `#` comments, with unique environment names. Token replacement preserves
+other assignments. Put optional model credentials, backend selection, an
+absolute `CHR_CODEX_COMMAND`, or an explicit `PATH` in this same private file
+for the user service. Values are not shell commands and do not expand shell
+variables. Foreground model settings still use the process environment.
+
+## Optional user service
+
+Install the unit using the executable intended to remain installed:
+
+```sh
+chr telegram setup --user-id 100001 --operator-id maintainer --project-id example-project --install-service
+```
+
+This writes `chr-telegram.service` under the sibling `systemd/user` directory
+of the user config root. `--dev-root` keeps both the unit and receiver files
+inside that development environment. The unit invokes this executable by its
+absolute path, preserves explicit user environment directories and reads the
+optional private `telegram.env`; it does not inherit an interactive shell.
+Keep the executable at that path between runs. Differing unit content requires
+`--replace`. Installation never enables or starts the service, sends a message
+or creates a work database.
+
+For the normal user environment, activate it explicitly after readiness checks:
+
+```sh
+systemctl --user daemon-reload
+systemctl --user enable --now chr-telegram.service
+systemctl --user status chr-telegram.service
+journalctl --user -u chr-telegram.service
+```
+
+A development-root unit is a fixture outside the normal service search path;
+run `chr telegram serve --dev-root <root>` explicitly there. The service restarts
+recoverable transport/process failures after five seconds, bounded to five
+starts per minute. Invalid configuration, credentials, retained schema, exhausted
+polling or ownership conflicts exit with status 78 and prevent automatic restart.
+Correct the reported condition before explicitly starting it again. SIGTERM
+allows one 30-second grace for owned calls; the service permits 35 seconds
+before terminating its main process. It does not signal another adapter's
+workers. A failed nonquiescent shutdown retains local exclusion until those
+calls finish or the receiver process exits.
 
 ## Configuration
 
@@ -194,8 +236,12 @@ See [Authoring sessions](authoring-sessions.md) for shared contracts and bounds.
 
 Status reads local files and database state without migration or network IO.
 Doctor checks local project runtime files, model credential/executable presence
-and, with `--check-connection`, bot identity, webhook absence and receiver
-exclusion. Model connectivity remains unchecked; doctor starts no agent.
+and the selected conversation/dump/spec/plan provider prerequisites. Missing,
+disabled or unready projects are reported independently. With
+`--check-connection`, doctor checks bot identity, webhook absence and both local
+configuration/bot exclusions. Remote polling ownership remains unchecked until
+`serve` receives an API conflict; doctor does not poll to probe another receiver.
+Model connectivity remains unchecked; doctor starts no agent.
 A webhook, another receiver, or changed bot identity requires local correction;
 the receiver never removes webhooks or takes over polling.
 
@@ -207,14 +253,44 @@ plain text and remain within 3,900 code points and UTF-16 units.
 Intake commits a complete normalized batch and its next cursor together.
 Sparse source IDs remain distinct; changed content under an existing ID blocks
 intake. Rejected input retains no message body. Capacity limits are 1,024
-pending updates, 1,024 unresolved deliveries, 10,000 retained updates and 64 MiB
-of logical payload. Capacity failure does not advance the cursor.
+pending updates, 1,024 unresolved deliveries, 10,000 receipt-only sources in
+addition to pending input, and 64 MiB of logical payload. Capacity failure does
+not advance the cursor.
 
 Poll and delivery attempts are reserved before network calls and retained
 across restart. A cycle permits five failed attempts with bounded backoff and
 Telegram flood-control delays. Permanent errors and exhausted retries remain
-visible and blocked. Local retry-cycle controls and long-outage retirement are
-delivered by the recovery slice. An uncertain send can repeat a read response;
+visible and blocked. Stop the receiver, correct the reported condition, inspect
+`chr telegram status`, then open exactly one local transport cycle:
+
+```sh
+chr telegram retry --poll
+chr telegram retry --delivery <exact-delivery-id>
+```
+
+Choose one option per command. Status lists at most twenty unresolved delivery
+IDs, prioritizing blocked/exhausted entries. Retry requires local receiver
+exclusion and records the OS user ID, time and increasing cycle. Lifetime
+counts, source identities, model attempts, canonical receipts and native budgets
+survive. Restart the receiver explicitly afterward; retry does not start it.
+Retrying an already open cycle or a delivered response fails.
+
+Status also reports the installed build, last successful intake, cursor epoch,
+retained retry timing, active conversation and queue counts, exhausted models
+and possible remote retention gaps. It prints metadata rather than message,
+model or credential bodies.
+
+After more than 24 hours without successful intake, the next poll opens one
+new cursor epoch with no offset and asks for the earliest available remote
+update. Telegram may already have lost messages; the local inbox is preserved
+and status records the gap. No negative offset or pending-update deletion is
+used. Terminal bodies may compact after seven days only when no focused
+conversation, unresolved request/action or unsent result depends on them.
+Canonical request receipt identities remain retained. Retired source IDs are
+kept as at most 1,024 closed intervals, merging only adjacent observed IDs.
+Unobserved gaps never become a global high-water mark. When an interval or row
+bound cannot admit more work safely, existing authority remains and new input
+is refused. An uncertain send can repeat a read response;
 it cannot repeat a project mutation. Configuration changes block pending output
 rendered under the previous authorization digest.
 

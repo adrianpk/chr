@@ -58,7 +58,7 @@ func BindTelegramReceiverIdentity(env UserEnvironment, botID int64) error {
 	}
 
 	if strings.TrimSpace(string(prior)) != strconv.FormatInt(botID, 10) {
-		return errors.New("telegram bot identity changed; explicit setup --replace is required")
+		return &TelegramAPIError{Code: "bot_identity_changed", Permanent: true}
 	}
 
 	return nil

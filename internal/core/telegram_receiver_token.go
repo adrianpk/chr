@@ -15,13 +15,18 @@ func TelegramReceiverToken(env UserEnvironment, config TelegramReceiverConfig) (
 		return validateTelegramReceiverToken(token)
 	}
 
-	data, err := readTelegramPrivateFile(filepath.Join(env.ConfigDir(), "telegram.env"), 4096)
+	data, err := readTelegramPrivateFile(filepath.Join(env.ConfigDir(), "telegram.env"), 64*1024)
 	if err != nil {
 		return "", errors.New("telegram token environment reference is unavailable")
 	}
 
-	name, token, ok := strings.Cut(strings.TrimSuffix(string(data), "\n"), "=")
-	if !ok || name != config.BotTokenEnv {
+	values, err := parseTelegramEnvironment(data)
+	if err != nil {
+		return "", err
+	}
+
+	token, ok := values[config.BotTokenEnv]
+	if !ok {
 		return "", errors.New("telegram private token environment reference does not match")
 	}
 
@@ -43,16 +48,74 @@ func SaveTelegramReceiverToken(env UserEnvironment, config TelegramReceiverConfi
 	}
 
 	path := filepath.Join(env.ConfigDir(), "telegram.env")
-	wanted := config.BotTokenEnv + "=" + token + "\n"
 
-	prior, err := readTelegramPrivateFile(path, 4096)
-	if err == nil && string(prior) == wanted {
-		return nil
+	prior, err := readTelegramPrivateFile(path, 64*1024)
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return errors.New("telegram credential file is unavailable")
 	}
 
-	if !errors.Is(err, os.ErrNotExist) && !replace {
-		return errors.New("telegram credential file exists; use --replace to change it")
+	values, err := parseTelegramEnvironment(prior)
+	if err != nil {
+		return err
 	}
 
-	return writeTelegramPrivateFile(path, []byte(wanted))
+	if old, exists := values[config.BotTokenEnv]; exists {
+		if old == token {
+			return nil
+		}
+
+		if !replace {
+			return errors.New("telegram credential file exists; use --replace to change it")
+		}
+	}
+
+	wanted, err := renderTelegramTokenEnvironment(prior, config.BotTokenEnv, token)
+	if err != nil {
+		return err
+	}
+
+	return writeTelegramPrivateFile(path, wanted)
+}
+
+func renderTelegramTokenEnvironment(prior []byte, name, token string) ([]byte, error) {
+	var lines []string
+
+	for _, line := range strings.Split(strings.TrimSuffix(string(prior), "\n"), "\n") {
+		key, _, found := strings.Cut(line, "=")
+		if line != "" && (!found || key != name) {
+			lines = append(lines, line)
+		}
+	}
+
+	lines = append(lines, name+"="+token)
+
+	wanted := strings.Join(lines, "\n") + "\n"
+	if len(wanted) > 64*1024 {
+		return nil, errors.New("telegram environment file exceeds its size limit")
+	}
+
+	return []byte(wanted), nil
+}
+
+func parseTelegramEnvironment(data []byte) (map[string]string, error) {
+	values := map[string]string{}
+
+	for _, line := range strings.Split(string(data), "\n") {
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		name, value, ok := strings.Cut(line, "=")
+		if !ok || !regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]{0,127}$`).MatchString(name) || strings.ContainsAny(value, "\x00\r") {
+			return nil, errors.New("telegram environment file contains an invalid assignment")
+		}
+
+		if _, duplicate := values[name]; duplicate {
+			return nil, errors.New("telegram environment file contains a duplicate assignment")
+		}
+
+		values[name] = value
+	}
+
+	return values, nil
 }
