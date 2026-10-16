@@ -10,18 +10,26 @@ import (
 )
 
 // TelegramReceiverStore extends the existing user database with transport receipts.
-type TelegramReceiverStore struct{ db *sql.DB }
+type TelegramReceiverStore struct {
+	db  *sql.DB
+	env UserEnvironment
+}
 
 // TelegramReceiverState is local transport evidence, not workflow completion.
 type TelegramReceiverState struct {
-	BotID         int64
-	Epoch         int64
-	NextUpdateID  *int64
-	Health        string
-	RetryAttempt  int
-	RetryAt       time.Time
-	LastPollAt    time.Time
-	LastErrorCode string
+	BotID              int64
+	Epoch              int64
+	NextUpdateID       *int64
+	Health             string
+	RetryAttempt       int
+	RetryCycle         int64
+	TotalRetryAttempts int64
+	RetryActor         string
+	RetryStartedAt     time.Time
+	RetentionGapAt     time.Time
+	RetryAt            time.Time
+	LastPollAt         time.Time
+	LastErrorCode      string
 }
 
 // NewTelegramReceiverStore applies additive migrations and rejects future schemas.
@@ -52,7 +60,7 @@ func NewTelegramReceiverStore(ctx context.Context, env UserEnvironment, assets f
 		return nil, closeDBWithError(db, err)
 	}
 
-	return &TelegramReceiverStore{db: db}, nil
+	return &TelegramReceiverStore{db: db, env: env}, nil
 }
 
 func createTelegramDatabase(env UserEnvironment) error {
@@ -103,13 +111,13 @@ func (s *TelegramReceiverStore) Receiver(ctx context.Context, botID int64) (Tele
 	state := TelegramReceiverState{BotID: botID}
 
 	var (
-		version           int
-		next              sql.NullInt64
-		retryAt, lastPoll sql.NullString
+		version                                       int
+		next                                          sql.NullInt64
+		retryAt, lastPoll, retryStarted, retentionGap sql.NullString
 	)
 
-	err := s.db.QueryRowContext(ctx, `SELECT schema_version,cursor_epoch,next_update_id,health,retry_attempt,retry_at,last_poll_at,last_error_code
-FROM telegram_receivers WHERE bot_id=?`, botID).Scan(&version, &state.Epoch, &next, &state.Health, &state.RetryAttempt, &retryAt, &lastPoll, &state.LastErrorCode)
+	err := s.db.QueryRowContext(ctx, `SELECT schema_version,cursor_epoch,next_update_id,health,retry_attempt,retry_at,last_poll_at,last_error_code,retry_cycle,total_retry_attempts,retry_actor,retry_started_at,retention_gap_at
+FROM telegram_receivers WHERE bot_id=?`, botID).Scan(&version, &state.Epoch, &next, &state.Health, &state.RetryAttempt, &retryAt, &lastPoll, &state.LastErrorCode, &state.RetryCycle, &state.TotalRetryAttempts, &state.RetryActor, &retryStarted, &retentionGap)
 	if err != nil {
 		return state, err
 	}
@@ -128,6 +136,16 @@ FROM telegram_receivers WHERE bot_id=?`, botID).Scan(&version, &state.Epoch, &ne
 	}
 
 	state.LastPollAt, err = parseTelegramOptionalTime(lastPoll)
+	if err != nil {
+		return state, err
+	}
+
+	state.RetryStartedAt, err = parseTelegramOptionalTime(retryStarted)
+	if err != nil {
+		return state, err
+	}
+
+	state.RetentionGapAt, err = parseTelegramOptionalTime(retentionGap)
 
 	return state, err
 }

@@ -48,9 +48,20 @@ retry_attempt=0,retry_at=NULL,last_error_code='',updated_at=? WHERE bot_id=?`, n
 }
 
 func retainTelegramBatchUpdates(ctx context.Context, tx *sql.Tx, botID, epoch int64, next sql.NullInt64, updates []TelegramReceivedUpdate, now time.Time) (sql.NullInt64, error) {
+	intervals, err := readTelegramRetired(ctx, tx, botID)
+	if err != nil {
+		return next, err
+	}
+
 	for _, update := range updates {
-		if err := retainTelegramUpdate(ctx, tx, botID, epoch, update, now); err != nil {
+		if err := validateTelegramRetainedUpdate(botID, update); err != nil {
 			return next, err
+		}
+
+		if !telegramUpdateRetired(intervals, update.UpdateID) {
+			if err := retainTelegramUpdate(ctx, tx, botID, epoch, update, now); err != nil {
+				return next, err
+			}
 		}
 
 		if !next.Valid || update.UpdateID >= next.Int64 {
@@ -139,7 +150,7 @@ FROM telegram_updates WHERE bot_id=?`, botID).Scan(&total, &pending, &bytes); er
 	}
 
 	var outboundBytes int64
-	if err := tx.QueryRowContext(ctx, "SELECT COALESCE(SUM(length(CAST(text AS BLOB))),0) FROM telegram_outbox WHERE bot_id=?", botID).Scan(&outboundBytes); err != nil {
+	if err := tx.QueryRowContext(ctx, "SELECT COALESCE(SUM(length(CAST(text AS BLOB))+length(CAST(question_binding AS BLOB))),0) FROM telegram_outbox WHERE bot_id=?", botID).Scan(&outboundBytes); err != nil {
 		return err
 	}
 
@@ -148,7 +159,7 @@ FROM telegram_updates WHERE bot_id=?`, botID).Scan(&total, &pending, &bytes); er
 		return err
 	}
 
-	if pending > 1024 || total > 10000 || bytes+outboundBytes+retainedBytes > 64*1024*1024 {
+	if pending > 1024 || total-pending > 10000 || bytes+outboundBytes+retainedBytes > 64*1024*1024 {
 		return errors.New("telegram intake capacity exhausted")
 	}
 

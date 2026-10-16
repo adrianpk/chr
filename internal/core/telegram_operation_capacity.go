@@ -19,7 +19,7 @@ func telegramOperationCapacity(ctx context.Context, tx *sql.Tx, botID int64) (in
 	}
 
 	var conversations, actions int64
-	if err := tx.QueryRowContext(ctx, `SELECT COALESCE(SUM(length(CAST(capture AS BLOB))),0) FROM telegram_conversations WHERE bot_id=?`, botID).Scan(&conversations); err != nil {
+	if err := tx.QueryRowContext(ctx, `SELECT COALESCE(SUM(length(CAST(capture AS BLOB))+length(CAST(topic AS BLOB))+length(CAST(question_binding AS BLOB))),0) FROM telegram_conversations WHERE bot_id=?`, botID).Scan(&conversations); err != nil {
 		return 0, err
 	}
 

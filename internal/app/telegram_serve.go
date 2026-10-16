@@ -130,7 +130,7 @@ func (r telegramReceiver) step(ctx context.Context) (time.Duration, error) {
 		return 0, err
 	}
 
-	state, err := r.store.Receiver(ctx, r.botID)
+	state, err := r.store.PrepareTelegramPoll(ctx, r.botID, time.Now())
 	if err != nil {
 		return 0, err
 	}

@@ -31,5 +31,5 @@ func InspectTelegramReceiver(ctx context.Context, env UserEnvironment, botID int
 	}
 	defer func() { err = errors.Join(err, db.Close()) }()
 
-	return (&TelegramReceiverStore{db: db}).Receiver(ctx, botID)
+	return (&TelegramReceiverStore{db: db, env: env}).Receiver(ctx, botID)
 }
