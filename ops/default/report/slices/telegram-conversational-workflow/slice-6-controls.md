@@ -19,7 +19,7 @@ responsive Telegram conversations and the common workflow owner.
 
 ## Delivered Behavior
 
-T6.1 adds status and guarded pause, cancel, resume, continue and reconcile for
+T6.1 (`a3e5e95be3b45aaa66cc0c1bc0744b73adac6770`) adds status and guarded pause, cancel, resume, continue and reconcile for
 exact native invocations or bound conversations. Mutations display the mapped
 operator and native revision, then use the shared `ControlWorkExtent` service
 after explicit confirmation. Natural-language controls use that same typed path.
