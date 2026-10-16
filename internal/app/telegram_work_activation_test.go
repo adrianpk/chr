@@ -12,12 +12,12 @@ import (
 func telegramWorkAdmitted(t *testing.T, extents ...string) (*telegramConversationAppFixture, service, core.TelegramWorkReference) {
 	t.Helper()
 
-	f, operations, record := telegramWorkFixture(t)
-
 	extent := "ticket"
 	if len(extents) == 1 {
 		extent = extents[0]
 	}
+
+	f, operations, record := telegramWorkAdmissionFixture(t, extent)
 
 	selector := telegramWorkSelector(t, operations, record, extent)
 	action, _ := telegramWorkOffer(t, f, "/work --namespace default "+selector.Extent+" "+selector.Identity)
@@ -29,6 +29,22 @@ func telegramWorkAdmitted(t *testing.T, extents ...string) (*telegramConversatio
 	}
 
 	return f, operations, refs[0]
+}
+
+func telegramWorkAdmissionFixture(t *testing.T, extent string) (*telegramConversationAppFixture, service, core.WorkflowRecord) {
+	t.Helper()
+
+	if extent != "ticket" {
+		return telegramWorkFixture(t)
+	}
+
+	// Ticket control requires one independent target and an unselected grouped
+	// task. Multi-extent callers retain the complete six-task fixture plan.
+	plan := serviceWorkflowPlanFixture()
+	plan.Slices = plan.Slices[:1]
+	plan.Slices[0].Tasks = plan.Slices[0].Tasks[:1]
+
+	return telegramWorkFixture(t, plan)
 }
 
 func telegramWorkWaitActivation(t *testing.T, h *telegramWorkHost) telegramWorkCompletion {

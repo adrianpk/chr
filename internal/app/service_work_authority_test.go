@@ -61,10 +61,10 @@ func (p *serviceWorkEntryProvider) ReadWorkflowPullRequest(ctx context.Context, 
 	return p.pr, err
 }
 
-func serviceWorkNativeFixture(t *testing.T) (service, core.WorkflowRecord, core.WorkflowStartRequest, *serviceWorkEntryProvider) {
+func serviceWorkNativeFixture(t *testing.T, plans ...core.GeneratedWorkflowPlan) (service, core.WorkflowRecord, core.WorkflowStartRequest, *serviceWorkEntryProvider) {
 	t.Helper()
 
-	operations, record, request := serviceWorkflowTicketFixture(t)
+	operations, record, request := serviceWorkflowTicketFixture(t, plans...)
 	project := operations.projectContext.ProjectDir
 	writeCLIWorkspaceConfig(t, project, "ticket:\n  key_prefix: PRJ\nwork:\n  state_authority: tickets\n")
 

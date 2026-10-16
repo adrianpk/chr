@@ -10,10 +10,10 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func serviceWorkflowTicketFixture(t *testing.T) (service, core.WorkflowRecord, core.WorkflowStartRequest) {
+func serviceWorkflowTicketFixture(t *testing.T, plans ...core.GeneratedWorkflowPlan) (service, core.WorkflowRecord, core.WorkflowStartRequest) {
 	t.Helper()
 
-	operations, hierarchy, target := serviceWorkflowTaskFixture(t)
+	operations, hierarchy, target := serviceWorkflowTaskFixture(t, plans...)
 	grouped := hierarchy.Tasks[0]
 	task := *grouped.Task
 	task.Key, task.SetID, task.SliceID, task.UseCase, task.Order = "PRJ-90", "", "", "", 0

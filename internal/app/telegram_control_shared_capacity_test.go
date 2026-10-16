@@ -6,7 +6,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
+	"syscall"
 	"testing"
 	"time"
 
@@ -14,8 +17,10 @@ import (
 )
 
 type telegramControlWorker struct {
-	release string
-	done    chan error
+	release  string
+	signal   *os.File
+	done     chan error
+	finalize func(context.Context) error
 }
 
 // TestTelegramControlSharedCapacity holds actual source workers behind barriers.
@@ -30,7 +35,7 @@ func TestTelegramControlSharedCapacity(t *testing.T) {
 func checkTelegramControlSharedCapacity(t *testing.T, capacity int) {
 	t.Helper()
 
-	f, operations, record := telegramWorkFixture(t)
+	f, operations, record := telegramWorkAdmissionFixture(t, "ticket")
 	if capacity > 1 {
 		writeCLIWorkspaceConfig(t, operations.projectContext.ProjectDir, fmt.Sprintf("ticket:\n  key_prefix: PRJ\nwork:\n  state_authority: tickets\n  max_active_workers: %d\n", capacity))
 	}
@@ -57,12 +62,7 @@ func checkTelegramControlSharedCapacity(t *testing.T, capacity int) {
 
 	checkTelegramControlPool(t, operations, capacity, capacity)
 
-	for _, id := range append([]string{first.Invocation.ID, waiting.Invocation.ID}, telegramControlRunIDs(runs)...) {
-		run, err := operations.ReadWorkflow(t.Context(), id)
-		if err != nil || run.Cursor != 1 || len(run.Attempts) != 1 || run.Attempts[0].Outcome != "validated" {
-			t.Fatal("shared activation lost or duplicated its checkpoint", run, err)
-		}
-	}
+	checkTelegramControlResults(t, operations, append([]string{first.Invocation.ID, waiting.Invocation.ID}, telegramControlRunIDs(runs)...))
 }
 
 func telegramControlCapacityAdmission(t *testing.T, f *telegramConversationAppFixture, key string) core.TelegramWorkReference {
@@ -163,13 +163,17 @@ func telegramControlSharedWorker(t *testing.T, receiver telegramReceiver, operat
 	root := t.TempDir()
 	marker := filepath.Join(root, "started")
 	worker := &telegramControlWorker{release: filepath.Join(root, "release"), done: make(chan error, 1)}
-	operations.workflowWorker = []string{"sh", "-c", `printf ready > "$1"; while [ ! -f "$2" ]; do sleep 0.02; done; printf 'Delivered\n' > result.txt; git add result.txt; git -c user.name=Test -c user.email=test@example.com commit -qm 'Shared capacity result'`, "worker", marker, worker.release}
+	worker.signal = telegramControlSourceSignal(t, worker.release)
+	operations.workflowWorker = []string{"sh", "-c", `printf ready > "$1"; IFS= read -r permit < "$2"; [ "$permit" = release ] || exit 7; printf 'Delivered\n' > result.txt; git add result.txt; git -c user.name=Test -c user.email=test@example.com commit -qm 'Shared capacity result'`, "worker", marker, worker.release}
 	receiver.operations = operations
 
 	ctx, cancel := context.WithCancel(t.Context())
+
+	run, finalize := telegramControlWorkerCall(t, receiver, operations, id, ref, daemon)
+	worker.finalize = finalize
+
 	t.Cleanup(func() { finishTelegramControlWorker(t, worker); cancel() })
 
-	run := telegramControlWorkerCall(t, receiver, operations, id, ref, daemon)
 	go func() { worker.done <- run(ctx); close(worker.done) }()
 
 	telegramWorkWaitFile(t, marker)
@@ -177,7 +181,7 @@ func telegramControlSharedWorker(t *testing.T, receiver telegramReceiver, operat
 	return worker
 }
 
-func telegramControlWorkerCall(t *testing.T, receiver telegramReceiver, operations service, id string, ref *core.TelegramWorkReference, daemon bool) func(context.Context) error {
+func telegramControlWorkerCall(t *testing.T, receiver telegramReceiver, operations service, id string, ref *core.TelegramWorkReference, daemon bool) (func(context.Context) error, func(context.Context) error) {
 	t.Helper()
 
 	if ref != nil {
@@ -188,11 +192,11 @@ func telegramControlWorkerCall(t *testing.T, receiver telegramReceiver, operatio
 			}
 
 			return result.Failure
-		}
+		}, nil
 	}
 
 	if daemon {
-		return telegramControlDaemonCall(t, operations, id)
+		return telegramControlDaemonCall(t, operations, id), nil
 	}
 
 	return telegramControlManualCall(t, operations, id)
@@ -220,7 +224,7 @@ func telegramControlDaemonCall(t *testing.T, operations service, id string) func
 	}
 }
 
-func telegramControlManualCall(t *testing.T, operations service, id string) func(context.Context) error {
+func telegramControlManualCall(t *testing.T, operations service, id string) (func(context.Context) error, func(context.Context) error) {
 	t.Helper()
 
 	claim, err := operations.ClaimWorkflow(t.Context(), id)
@@ -228,22 +232,66 @@ func telegramControlManualCall(t *testing.T, operations service, id string) func
 		t.Fatal(err)
 	}
 
-	return func(ctx context.Context) (err error) {
-		defer func() { err = errors.Join(err, claim.Close()) }()
+	t.Cleanup(func() {
+		if err := claim.Close(); err != nil {
+			t.Error(err)
+		}
+	})
 
-		result, err := operations.ExecuteWorkflowTask(ctx, claim, operations.workflowWorker)
-		if err == nil && !result.Successful {
-			return errors.New("manual source did not validate")
+	task, err := operations.PrepareWorkflowManualTask(t.Context(), claim, operations.workflowWorker)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	execute := func(ctx context.Context) error {
+		result, err := operations.ExecuteWorkflowManualTask(ctx, claim)
+		if err == nil && result.ExitCode != 0 {
+			return errors.New("manual source did not exit successfully")
 		}
 
 		return err
 	}
+
+	finalize := func(ctx context.Context) error {
+		return reconcileTelegramControlManual(ctx, operations, claim, task)
+	}
+
+	return execute, finalize
+}
+
+func reconcileTelegramControlManual(ctx context.Context, operations service, claim *core.WorkflowClaim, task core.WorkflowManualTask) (err error) {
+	defer func() { err = errors.Join(err, claim.Close()) }()
+
+	output, err := exec.CommandContext(ctx, "git", "-C", task.Input.Lane.Worktree, "rev-parse", "HEAD", "HEAD^{tree}").Output()
+	if err != nil {
+		return err
+	}
+
+	identities := strings.Fields(string(output))
+	if len(identities) != 2 {
+		return errors.New("manual candidate commit/tree missing")
+	}
+
+	candidate := core.WorkflowManualCandidate{InputHash: task.InputHash, Branch: task.Input.Lane.Branch, Commit: identities[0], Tree: identities[1]}
+
+	result, err := operations.ReconcileWorkflowTask(ctx, claim, candidate)
+	if err == nil && (!result.Successful || result.ExecutionMode != "manual") {
+		return errors.New("manual source did not validate")
+	}
+
+	return err
 }
 
 func finishTelegramControlWorker(t *testing.T, worker *telegramControlWorker) {
 	t.Helper()
 
 	releaseTelegramControlWorker(t, worker)
+	waitTelegramControlWorker(t, worker)
+	reconcileTelegramControlWorker(t, worker)
+}
+
+func waitTelegramControlWorker(t *testing.T, worker *telegramControlWorker) {
+	t.Helper()
 
 	select {
 	case err := <-worker.done:
@@ -252,6 +300,24 @@ func finishTelegramControlWorker(t *testing.T, worker *telegramControlWorker) {
 		}
 	case <-time.After(30 * time.Second):
 		t.Error("owned shared-capacity worker did not finish")
+	}
+}
+
+func reconcileTelegramControlWorker(t *testing.T, worker *telegramControlWorker) {
+	t.Helper()
+
+	if worker.finalize == nil {
+		return
+	}
+
+	finalize := worker.finalize
+	worker.finalize = nil
+
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(t.Context()), 30*time.Second)
+	defer cancel()
+
+	if err := finalize(ctx); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -327,7 +393,7 @@ func checkTelegramControlDaemonWait(t *testing.T, operations service, id string)
 func releaseTelegramControlWorker(t *testing.T, worker *telegramControlWorker) {
 	t.Helper()
 
-	if err := os.WriteFile(worker.release, nil, 0o600); err != nil {
+	if _, err := worker.signal.WriteString("release\n"); err != nil {
 		t.Error(err)
 	}
 }
@@ -335,17 +401,77 @@ func releaseTelegramControlWorker(t *testing.T, worker *telegramControlWorker) {
 func finishTelegramControlWorkers(t *testing.T, workers []*telegramControlWorker) {
 	t.Helper()
 
-	// All source workers have already overlapped at the asserted capacity. Yield
-	// two at a time so their unchanged host gates do not contend with eight
-	// simultaneous validation transitions under race instrumentation.
-	for offset := 0; offset < len(workers); offset += 2 {
-		batch := workers[offset:min(offset+2, len(workers))]
-		for _, worker := range batch {
-			releaseTelegramControlWorker(t, worker)
+	// The manual adapter retains its claim after source execution. Let all
+	// source groups exit before reconciling their exact candidates through the
+	// unchanged host gates. Source overlap and every final proof remain asserted.
+	for _, worker := range workers {
+		releaseTelegramControlWorker(t, worker)
+	}
+
+	for _, worker := range workers {
+		waitTelegramControlWorker(t, worker)
+	}
+
+	for _, worker := range workers {
+		reconcileTelegramControlWorker(t, worker)
+	}
+}
+
+func telegramControlSourceSignal(t *testing.T, path string) *os.File {
+	t.Helper()
+
+	if err := syscall.Mkfifo(path, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	// Keep one host endpoint open until cleanup so an early permit remains
+	// buffered. Native sources block in read rather than spawning sleep loops.
+	file, err := os.OpenFile(path, os.O_RDWR|syscall.O_NONBLOCK, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Cleanup(func() {
+		if err := file.Close(); err != nil {
+			t.Error(err)
+		}
+	})
+
+	return file
+}
+
+func checkTelegramControlResults(t *testing.T, operations service, ids []string) {
+	t.Helper()
+
+	store, err := operations.workflowStore()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	runs, next, err := store.InspectWorkflowPage(t.Context(), 0, 16)
+	if err != nil || next != -1 || len(runs) != len(ids) {
+		t.Fatal("shared activation lost an invocation", len(runs), next, err)
+	}
+
+	wanted := map[string]bool{}
+	for _, id := range ids {
+		wanted[id] = true
+	}
+
+	for _, run := range runs {
+		if !wanted[run.ID] {
+			t.Fatal("shared activation duplicated or replaced an invocation", run.ID)
 		}
 
-		for _, worker := range batch {
-			finishTelegramControlWorker(t, worker)
-		}
+		checkTelegramControlResult(t, run)
+		delete(wanted, run.ID)
+	}
+}
+
+func checkTelegramControlResult(t *testing.T, run core.WorkflowInvocation) {
+	t.Helper()
+
+	if run.Cursor != 1 || len(run.Attempts) != 1 || run.Attempts[0].Outcome != "validated" {
+		t.Fatal("shared activation lost or duplicated its checkpoint", run.ID)
 	}
 }

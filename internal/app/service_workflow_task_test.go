@@ -41,7 +41,7 @@ func TestServiceWorkflowTask(t *testing.T) {
 	}
 }
 
-func serviceWorkflowTaskFixture(t *testing.T) (service, core.WorkflowMaterializationResult, string) {
+func serviceWorkflowTaskFixture(t *testing.T, plans ...core.GeneratedWorkflowPlan) (service, core.WorkflowMaterializationResult, string) {
 	t.Helper()
 
 	if testing.Short() {
@@ -57,7 +57,12 @@ func serviceWorkflowTaskFixture(t *testing.T) (service, core.WorkflowMaterializa
 	writeServiceWorkspaceFile(t, filepath.Join(project, "ops", "default", "plan", "approved.md"), "approved\n")
 
 	operations := newTestService(t, project)
+
 	plan := serviceWorkflowPlanFixture()
+	if len(plans) == 1 {
+		plan = plans[0]
+	}
+
 	plan.Slices[0].Tasks[0].Validation = core.WorkflowValidation{Required: true, Commands: [][]string{{"git", "show", "HEAD:result.txt"}}, TimeoutSeconds: 30}
 
 	hierarchy, err := operations.MaterializeWorkflowPlan(t.Context(), plan)

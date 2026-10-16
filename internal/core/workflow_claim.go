@@ -306,7 +306,7 @@ func (s *WorkflowStore) checkWorkflowClaim(ctx context.Context, claim *WorkflowC
 }
 
 func (s *WorkflowStore) checkWorkflowCredential(ctx context.Context, claim *WorkflowClaim, lease bool) (workflowInvocationFile, WorkflowRecord, error) {
-	run, owner, err := s.locateWorkflowInvocation(ctx, claim.InvocationID)
+	run, owner, err := s.locateWorkflowClaim(ctx, claim)
 	if err != nil {
 		return run, WorkflowRecord{}, err
 	}

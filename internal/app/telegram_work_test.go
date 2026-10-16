@@ -9,10 +9,10 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func telegramWorkFixture(t *testing.T) (*telegramConversationAppFixture, service, core.WorkflowRecord) {
+func telegramWorkFixture(t *testing.T, plans ...core.GeneratedWorkflowPlan) (*telegramConversationAppFixture, service, core.WorkflowRecord) {
 	t.Helper()
 
-	operations, record, _, _ := serviceWorkNativeFixture(t)
+	operations, record, _, _ := serviceWorkNativeFixture(t, plans...)
 	telegramWorkBindCase(t, operations)
 
 	f := newTelegramConversationAppFixture(t)
