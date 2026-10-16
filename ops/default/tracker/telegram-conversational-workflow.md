@@ -16,11 +16,11 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 7, Recovery and user operation; T7.1 in progress
+Active slice: Slice 7, Recovery and user operation; T7.1 validated; T7.2 ready
 
 Next slice: Slice 8, Live journey and closure; after verified Slice 7 integration and live readiness
 
-Progress: 6 of 8 slices integrated; 0 of 29 tasks validated and 23 done; 22 of 32 acceptance criteria have deterministic fixture evidence.
+Progress: 6 of 8 slices integrated; 1 of 29 tasks validated and 23 done; 23 of 32 acceptance criteria have deterministic fixture evidence.
 
 Full gate: `make verify`
 
@@ -233,13 +233,13 @@ Prerequisite: verified Slice 6 integration.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T7.1 | in_progress | pending | Startup reconciliation, owned shutdown and fixed-build self-development behavior. |
-| T7.2 | pending | pending | Persistent retry cycles, cursor epochs, exact retirement and bounded retention. |
+| T7.1 | validated | `0c2fee3f1ad68bdba578bae9cd75605057d53b05` | Startup receipt replay, dead-owner recovery, bounded owned shutdown, independent worker/validation preservation and fixed running-image proof. |
+| T7.2 | ready | pending | Persistent retry cycles, cursor epochs, exact retirement and bounded retention. |
 | T7.3 | pending | pending | Optional user service, local retry/status/doctor/help and operational diagnostics. |
 
 Validation: plan section 12; `TestTelegramRecovery`, including focused race mode.
 
-Candidate / PR / verified merge / evidence: pending.
+Candidate: `feat/slice-7-telegram-recovery`; PR and merge pending. T7.1 focused evidence is recorded in the [Slice 7 report](../report/slices/telegram-conversational-workflow/slice-7-recovery.md); exact clean-HEAD final slice evidence remains pending.
 
 ## Slice 8: Live Journey and Closure
 
@@ -287,7 +287,7 @@ report/test/live references in the Evidence column as they are verified.
 | TG-19 | validated | [Slice 1 deterministic evidence](../report/slices/telegram-conversational-workflow/slice-1-receiver.md) |
 | TG-20 | validated | [Slice 3 uncertain result and prompt delivery fixtures](../report/slices/telegram-conversational-workflow/slice-3-operations.md) |
 | TG-21 | pending | pending |
-| TG-22 | pending | pending |
+| TG-22 | validated | [Slice 7 startup/shutdown ownership and restart evidence](../report/slices/telegram-conversational-workflow/slice-7-recovery.md) |
 | TG-23 | pending | pending |
 | TG-24 | pending | pending |
 | TG-25 | pending | [Slice 2 session/topic evidence](../report/slices/telegram-conversational-workflow/slice-2-conversations.md); broader journey remains pending |
@@ -326,4 +326,4 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Exact integrated candidate passed the scheduled exhaustive nightly.
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
-Current state: Slices 1 through 6 are delivered through canonical PR #390/#391/#392/#393/#394/#395; the latest verified merge is `eecdfd1e85c9593715c5e00502d0bfd0bf23c1ea`. Slice 7 is active on its recorded branch with T7.1 in progress. Final slice validation belongs to the controller receipt for the exact clean PR HEAD; live activation and scheduled exhaustive certification remain separate.
+Current state: Slices 1 through 6 are delivered through canonical PR #390/#391/#392/#393/#394/#395; the latest verified merge is `eecdfd1e85c9593715c5e00502d0bfd0bf23c1ea`. Slice 7 is active on its recorded branch with T7.1 validated and T7.2 ready. Final slice validation belongs to the controller receipt for the exact clean PR HEAD; live activation and scheduled exhaustive certification remain separate.
