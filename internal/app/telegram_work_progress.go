@@ -45,7 +45,8 @@ func telegramWorkProgressText(status WorkflowWorkStatus) string {
 		text.WriteString("No confirmed integration receipt. Worker exit, validation and an open PR do not establish delivery.\n")
 	}
 
-	fmt.Fprintf(&text, "Project: %s; namespace: %s.\nInspect in that project: chr work status --json %s", status.ProjectID, status.Namespace, status.ID)
+	text.WriteString(telegramWorkEvidenceText(status))
+	fmt.Fprintf(&text, "Project: %s; namespace: %s.\nCanonical invocation: workflow:%s\nInspect in that project: chr work status --json %s", status.ProjectID, status.Namespace, status.ID, status.ID)
 
 	return text.String()
 }

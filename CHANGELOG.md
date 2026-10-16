@@ -16,7 +16,10 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   answer clarification questions, generate and refine dumps, quizzes, draft
   specifications and plans, and prepare native backlog tickets. Conversations
   retain their project and namespace across restart. Development authority binds
-  the prepared scope; changed requirements need a new explicit decision.
+  the prepared scope; changed requirements need a new explicit decision. Confirmed
+  native work continues through its configured review and integration policy
+  without another message. Progress shows checked work, confirmed receipts and
+  remaining tickets, with the same invocation available in CLI, TUI and Web.
 - Ticket-native CLI, TUI and Web controls can preview and run exact tickets, slices,
   slice sets, use cases and loose work, then inspect or continue retained
   executions. TUI and Web confirmations retain the selected revision and show stale

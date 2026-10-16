@@ -16,11 +16,11 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 5, Native work continuation; T5.4 in progress
+Active slice: Slice 5, Native work continuation; implementation validated, canonical PR preparation
 
 Next slice: Slice 6, Guarded controls and capacity; after verified Slice 5 integration
 
-Progress: 4 of 8 slices integrated; 3 of 29 tasks validated and 15 done; 13 of 32 acceptance criteria have deterministic fixture evidence.
+Progress: 4 of 8 slices integrated; 4 of 29 tasks validated and 15 done; 18 of 32 acceptance criteria have deterministic fixture evidence.
 
 Full gate: `make verify`
 
@@ -180,7 +180,7 @@ Prerequisite: verified Slice 4 integration.
 | T5.1 | validated | `4456f3f1bbef9b0b8368294f12e40c9cc9ca15ff` | Exact native previews/admission for all five extents and RequestKey replay. |
 | T5.2 | validated | `d94c581ded73f5a5fbe9ba45192097ebf1634ee0` | Bounded asynchronous continuation under existing workflow ownership. |
 | T5.3 | validated | `3eb2a912f0c13058906b3e62ffc3316b14e172f4` | Unattended policy-driven progress, review and integration. |
-| T5.4 | in_progress | pending | Evidence-bound results and shared CLI/TUI/Web invocation references. |
+| T5.4 | validated | pending task commit | Evidence-bound results and shared CLI/TUI/Web invocation references. |
 
 Validation: plan section 10; `TestTelegramWork`, including focused race mode.
 
@@ -190,7 +190,9 @@ T5.2 task checks: all five extents execute one bounded native checkpoint; the re
 
 T5.3 task checks: actual foreground intake reaches trusted review, one guarded publication to a temporary bare target and confirmed native receipt without another message. Transactional phase/outbox projection coalesces never-attempted routine progress, enforces the thirty-second interval at delivery reservation, preserves uncertain sends and terminal identity, and rolls back on capacity exhaustion. Focused normal/race and existing receiver/conversation/operation regressions passed; strict focused lint and repository style checks passed. The report records exact commands and evidence boundaries.
 
-Candidate / PR / verified merge: pending completion of T5.4.
+T5.4 task checks: real CLI, TUI and Web reads expose the same Telegram-created invocation and accepted native evidence without writing work. Actual human review projects its candidate, open PR and exact approval hash without claiming integration. An uncertain HTTP send followed by SQLite reopen repeats only the labelled notice and preserves canonical workflow bytes. Focused normal/race, strict focused lint and repository style checks passed. User Guide and the existing Telegram changelog entry describe the usable workflow.
+
+Canonical PR: pending creation. Final readiness is bound to the controller's exact clean-HEAD receipt for the required ordered checks; integration remains pending.
 
 ## Slice 6: Guarded Controls and Capacity
 
@@ -260,9 +262,9 @@ report/test/live references in the Evidence column as they are verified.
 | TG-08 | validated | [Slice 2 deterministic evidence](../report/slices/telegram-conversational-workflow/slice-2-conversations.md) |
 | TG-09 | validated | [Slice 4 authoring and scope fixtures](../report/slices/telegram-conversational-workflow/slice-4-authoring.md) |
 | TG-10 | validated | [Slice 4 authoring and scope fixtures](../report/slices/telegram-conversational-workflow/slice-4-authoring.md) |
-| TG-11 | pending | pending |
-| TG-12 | pending | pending |
-| TG-13 | pending | pending |
+| TG-11 | validated | [Slice 5 exact extent fixtures](../report/slices/telegram-conversational-workflow/slice-5-work.md) |
+| TG-12 | validated | [Slice 5 admission replay and guard fixtures](../report/slices/telegram-conversational-workflow/slice-5-work.md) |
+| TG-13 | validated | [Slice 5 unattended foreground integration fixture](../report/slices/telegram-conversational-workflow/slice-5-work.md) |
 | TG-14 | pending | pending |
 | TG-15 | pending | pending |
 | TG-16 | pending | pending |
@@ -275,11 +277,11 @@ report/test/live references in the Evidence column as they are verified.
 | TG-23 | pending | pending |
 | TG-24 | pending | pending |
 | TG-25 | pending | [Slice 2 session/topic evidence](../report/slices/telegram-conversational-workflow/slice-2-conversations.md); broader journey remains pending |
-| TG-26 | pending | pending |
+| TG-26 | validated | [Slice 5 validation, human wait and confirmed receipt projections](../report/slices/telegram-conversational-workflow/slice-5-work.md) |
 | TG-27 | pending | pending |
 | TG-28 | pending | pending |
 | TG-29 | validated | [Slice 1 deterministic evidence](../report/slices/telegram-conversational-workflow/slice-1-receiver.md) |
-| TG-30 | pending | pending |
+| TG-30 | validated | [Slice 5 CLI, TUI and Web observation fixture](../report/slices/telegram-conversational-workflow/slice-5-work.md) |
 | TG-31 | pending | pending |
 | TG-32 | pending | pending |
 

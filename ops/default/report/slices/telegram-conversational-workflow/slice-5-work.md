@@ -1,6 +1,6 @@
 # Slice 5: Native Work Continuation
 
-Status: drafting
+Status: reviewing
 
 Delivery set: telegram-conversational-workflow
 
@@ -53,6 +53,13 @@ coalesces before its first send and respects a thirty-second interval. Human
 waits and terminal results retain their identities. The real foreground fixture
 reaches trusted review, one guarded publication to a temporary bare target and
 confirmed receipt finalization with no message after admission confirmation.
+
+T5.4 returns the exact review binding, recent native evidence references and
+hashes, canonical invocation, candidate, PR and confirmed receipt. Counts retain
+the distinction between host validation, integration and remaining extent.
+Actual CLI, TUI and Web reads expose that same invocation without writing native
+state. Losing a progress send acknowledgement and reopening SQLite retries only
+the labelled notice; the native workflow image remains unchanged.
 
 ## Implementation Notes
 
@@ -141,6 +148,8 @@ the new fixtures cover the delivered admission operation.
 - `internal/core/telegram_work_projection.go`: atomic observed events and phases.
 - `internal/app/telegram_work_progress.go`: native counts and policy projection.
 - `internal/app/telegram_work_automatic_test.go`: unattended native confirmation.
+- `internal/app/telegram_work_evidence.go` and its fixture: native references,
+  shared-surface readback and notification-failure recovery.
 
 ## Validation
 
@@ -190,13 +199,23 @@ review, prepared-result validation, temporary remote Git and receipt owner. Its
 provider is deterministic; it does not certify a live forge. HTTP compatibility
 checks retain the old receiver, conversation and operation behavior.
 
-Final clean-HEAD controller validation is pending the
-complete slice and its canonical PR references. These are deterministic HTTP,
-SQLite and temporary Git fixtures; live and scheduled exhaustive evidence remain
-separate.
+T5.4 task checks passed:
+
+- `go test ./internal/app -run '^TestTelegramWork(Evidence|DeliveryFailure|HumanResult)$' -count=1 -timeout=3m`
+- `go test -race ./internal/app -run '^TestTelegramWork(Evidence|DeliveryFailure|HumanResult)$' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app` — zero issues.
+- `scripts/check-go-func-signatures.sh`
+- `scripts/check-package-readmes.sh`
+- `git diff --check`
+
+Final readiness is recorded by the controller for the exact clean PR HEAD and
+ordered commands: `make verify`, the plan's `TestTelegramWork` normal command,
+its race command, then `git diff --check`. The immutable report introduction is
+`e5e1b23a49da738916f270ff40d6771870afd245`. These are deterministic HTTP, SQLite
+and temporary Git fixtures; live and scheduled exhaustive evidence remain separate.
 
 ## Risks and Follow-ups
 
-T5.4 remains pending: evidence-bound outcomes, shared-surface observation and
-notification-failure replay proof. Combined shutdown deadline and
-exhaustion certification remain with the recorded recovery slice.
+Telegram-native stop, approval and capacity controls remain in the recorded next
+slice. Combined shutdown deadline and exhaustion certification remain with the
+recovery slice. Live journey and scheduled exhaustive evidence remain separate.

@@ -1162,6 +1162,26 @@ dump or spec. The response identifies the actual canonical record and receipt.
 An unchanged preparation returns that result, so a retry creates no extra ticket.
 Preparation starts no work invocation.
 
+Preview an exact native extent with `/work ticket <ticket-key>`. Use
+`/work --conversation <conversation> ticket <ticket-key>` to keep an existing
+conversation's project and namespace. Other extents are `slice`, `slice-set`,
+`use-case` and `loose`; loose work omits its reference. Inspect the displayed
+membership, target, execution limits and publication policy, then press its
+start button, reply `start`, or send `/answer <action-token> start`.
+
+Leave `chr telegram serve` running after confirmation. It continues the retained
+extent without another message. Automatic policy advances through review and
+integration; human policy waits on the exact displayed candidate. Routine
+progress arrives at most once per thirty seconds. Status remains available
+during work. Native pauses, capacity and other owners remain authoritative.
+
+Each response identifies the invocation, project and namespace. Open that same
+invocation in the TUI or Web, or run `chr work status --json <invocation>` in its
+registered project with the matching `OPS_USER`. Host-validated tasks, open PRs,
+confirmed receipts and remaining tickets are separate observations. A final
+confirmed receipt establishes integration. If notification delivery is uncertain,
+a labelled retry repeats the retained notice and preserves the original work.
+
 Start with `/develop <topic>` to retain explicit development intent. Its first
 prepared scope can use that instruction. Missing authority or changed requirements
 produce an exact preview; use its button, reply `develop`, or send
