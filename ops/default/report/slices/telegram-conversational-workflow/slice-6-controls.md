@@ -210,6 +210,9 @@ worker and host-validation deadlines and configured limits are unchanged.
 
 - `internal/app/telegram_schema_fixture_test.go`: production-migrated immutable schema image with isolated per-fixture databases.
 
+- `internal/core/workflow_claim_read.go`: exact-owner credential lookup with existing scope resolution for aliases and other roots.
+- `internal/core/telegram_control_claim_scope_test.go`: colliding invocation IDs cannot cross repository ownership.
+
 ## Validation
 
 Activation documentation passed `git diff --check`.
@@ -424,6 +427,36 @@ respectively; strict focused lint and repository style checks also passed:
 ```sh
 go test ./internal/app -run '^TestTelegram(ReceiverReadJourney|Control(AuthoringLane|RequestCapacity|StaleReceipt))$' -count=1 -timeout=3m
 go test -race ./internal/app -run '^TestTelegram(ReceiverReadJourney|Control(AuthoringLane|RequestCapacity|StaleReceipt))$' -count=1 -timeout=3m
+```
+
+At `67b738083ffb41052f2b6f9da6333e56fb4c8d1b`, controller `make verify`
+and the normal control selection passed (core 27.944 seconds, app 64.549 seconds).
+Core race passed in 105.537 seconds; app reached the unchanged three-minute
+limit near the end of the stale-receipt matrix. This failed evidence is retained.
+
+T6.4 correction `a4faf4367bdaecf28577d4ed569da7d24952e725` uses a direct invocation read only
+when a credential's owner root and project exactly match the current store.
+Alias and foreign-root callers retain repository scope resolution. Existing
+input, lease, token, generation and task-image checks remain unchanged. A
+normal CPU profile identified repeated repository-wide lookup in claimed work;
+the scope regression includes a foreign repository with a colliding invocation
+ID and proves that neither scope check mutates ownership.
+
+Capacity fixtures now exercise actual manual preparation, supervised execution
+and exact candidate reconciliation. All eight sources still overlap before
+capacity/duplicate assertions. FIFO permits replace busy source wait loops;
+manual candidates reconcile after all source groups exit. One native snapshot
+asserts every expected invocation, one validated attempt per invocation and no
+additional invocation. Ticket-only admission fixtures retain an independent
+target and one unselected grouped task; all five multi-extent fixtures retain
+the complete plan. No assertion, command or deadline is relaxed.
+
+The following normal/race selection passed in core 25.252/40.208 seconds and
+app 31.169/110.928 seconds. Strict focused lint and repository style checks passed.
+
+```sh
+go test ./internal/core ./internal/app -run '^Test(TelegramControl(ClaimScope|SharedCapacity|StopOwner|Lifecycle|StaleReceipt)|TelegramWork(Activation|Capacity|OtherOwner)|WorkflowClaim)' -count=1 -timeout=3m
+go test -race ./internal/core ./internal/app -run '^Test(TelegramControl(ClaimScope|SharedCapacity|StopOwner|Lifecycle|StaleReceipt)|TelegramWork(Activation|Capacity|OtherOwner)|WorkflowClaim)' -count=1 -timeout=3m
 ```
 
 Authoritative final slice validation is the controller receipt for the clean PR
