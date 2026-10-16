@@ -422,6 +422,34 @@ explanations at most 12,000 bytes. The shared provider enforces its normal
 deadline, concurrency and payload bounds. This operation neither writes a new
 authoring artifact nor prepares or admits work.
 
+`PrepareAuthoringExplanation` freezes that bounded canonical context and the
+original question without calling the provider. `ExplainPreparedAuthoring` uses
+the retained image. `ExplainAuthoring` combines these operations for callers
+that do not need a checkpoint between them.
+
+Telegram exposes `/explain <question>`, with optional `--project <id>` or
+`--conversation <id>` before the question. An exact conversation or valid reply
+uses its canonical authoring session when available. Otherwise the selected or
+sole allowed project supplies its overview. Ambiguous or conflicting targets
+require correction. Ordinary-language explanation proposals use the same
+registry and typed handler, with the original message as the question. A model
+proposal cannot rewrite the user's question or turn it into preparation.
+
+The receiver retains the complete prepared context before invoking the provider.
+Explanation attempts and results belong to the transport operation separately
+from the source's intent-resolution decision. Five retained attempts, backoff and
+sanitized failure codes survive reopening. The owner uses OS exclusion, bounds
+accepted result JSON to 64 KiB and includes it in logical transport capacity.
+No database transaction spans the provider call.
+
+A successful explanation is retained before source acknowledgement and outbox
+creation. Restart recovers that result without another provider call or replacing
+its source image with later edits. Current operator, root and conversation
+bindings are checked before dispatch and before queuing the result. The project
+service also checks its resolved root before reading context or entering the
+provider. Explanations leave captures, authoring artifacts, native records and
+execution authority unchanged.
+
 `PrepareAuthoringWork` builds a preview of one native backlog ticket from an
 observed generated dump or draft specification. It uses the existing record
 preparation operation and reserves that ticket's identity. Callers must retain

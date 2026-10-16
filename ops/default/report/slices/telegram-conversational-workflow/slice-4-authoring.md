@@ -67,6 +67,13 @@ session/question updates, source acknowledgement and outbox creation commit
 together. Changed roots or operators during generation block new canonical
 writes; reconciliation cannot restore a conversation binding that advanced.
 
+The explanation portion of T4.4 connects `/explain` and ordinary-language
+explanation proposals to the same configured-provider operation. Exact project,
+conversation and reply routing use canonical context without creating artifacts
+or work. The original question and source image are retained before invocation.
+Provider budgets/results are independent of intent resolution; restart cannot
+reclassify that request, reset five attempts or regenerate an acknowledged result.
+
 ## Implementation Notes
 
 T4.1 implementation and report introduction: `b54d526fd0471eff7c4df2ef769ba0abe66476ce`.
@@ -130,6 +137,14 @@ bindings without copying the full session into the outbox facts limit. The
 configured provider checks cancellation before and after invocation, so a valid
 response racing cancellation cannot be accepted.
 
+Migration 20 adds per-operation model attempts, retry deadlines, sanitized failure
+codes and bounded result JSON. The transport's existing logical capacity includes
+these results. An OS-backed operation-model lock protects active calls; SQLite
+transactions end before invocation. A successful result is persisted before its
+source/outbox acknowledgement. Explanation source preparation and provider
+dispatch recheck the resolved registry-root binding, and queuing rechecks current
+operator/root/conversation authority.
+
 ## Contracts Added or Changed
 
 - `StructuredModelRequest`, `StructuredModelProvider` and
@@ -161,6 +176,12 @@ response racing cancellation cannot be accepted.
 - `ResolveTelegramAuthoringTarget`, `ReservePreparedTelegramOperation` and
   `FinishTelegramAuthoring`: frozen routing/input and atomic conversation/outbox
   acknowledgement through the existing transport request owner.
+- `PrepareAuthoringExplanation`, `PreparedAuthoringExplanation` and
+  `ExplainPreparedAuthoring`: frozen canonical context for retryable explanation.
+- `ResolveTelegramOperationModel` and `TelegramOperationModel`: retained provider
+  results and five-attempt budgets independent of intent interpretation.
+- `ValidateTelegramProjectTarget`: resolved-root validation at the adapter's
+  entry to a project-scoped operation.
 
 ## Files of Interest
 
@@ -179,6 +200,10 @@ response racing cancellation cannot be accepted.
   command mapping, retained input, guarded dispatch and receipt reconciliation.
 - `internal/core/telegram_authoring_finish.go`: atomic conversation/question,
   source and outbox transition.
+- `internal/app/telegram_explanation_*.go`: deterministic/NL explanation routing,
+  retained context and guarded result delivery.
+- `internal/core/telegram_operation_model.go`: provider-result retention and
+  bounded independent attempts.
 - `internal/core/telegram_authoring*_test.go` and
   `internal/app/telegram_authoring*_test.go`: real SQLite, HTTP, native owner,
   replay and authority regressions.
@@ -236,7 +261,7 @@ failed bindings and original receipt replay after independent source/ticket
 edits. The additional original-instruction fixture passed after source-recovery
 support was added; it proves reopening and operator-remapping checks.
 
-Successful partial T4.4 artifact-bridge task checks:
+Successful partial T4.4 adapter task checks:
 
 - `go test ./internal/core ./internal/app -run '^Test(TelegramAuthoring|TelegramConversation|TelegramOperation|TelegramReceiver|MaintenanceDBStatus)' -count=1 -timeout=3m`
 - `go test -race ./internal/core ./internal/app -run '^Test(TelegramAuthoring|TelegramConversation|TelegramOperation|TelegramReceiver|MaintenanceDBStatus)' -count=1 -timeout=3m`
@@ -255,12 +280,23 @@ first reproduced trimming loss; the corrected writer passes. The combined
 regression also exposed acceptance of a model response racing cancellation; the
 provider now rejects that result and the regression passes.
 
+Explanation fixtures cover the real HTTP path for slash/NL project explanations
+and canonical-session context without changing conversation state or admitting
+work. Reopening after retained success but before acknowledgement delivers the
+original result while preserving independent edits. Malformed HTTP output
+exhausts five retained attempts without replacing intent or source context;
+deterministic status remains usable. Core fixtures prove forged source/input
+rejection, provider-call exclusion after clock jumps, independent database writes
+during invocation and separate interpretation/result retention. Root/operator
+changes during generation block result delivery, and a root rebind before source
+preparation fails before reading the new project.
+
 Final clean-HEAD controller validation remains pending completion of all four
 Slice 4 tasks and committed canonical PR references. These task fixtures are not
 live-provider, live-bot or exhaustive scheduled evidence.
 
 ## Risks and Follow-ups
 
-T4.4 remains in progress. The artifact bridge is implemented; Telegram explanation
-and native prepared-work dispatch, final scope-decision binding and their complete
+T4.4 remains in progress. The artifact and explanation bridges are implemented;
+native prepared-work dispatch, final scope-decision binding and their complete
 slash/NL journey checks remain. The report remains drafting.

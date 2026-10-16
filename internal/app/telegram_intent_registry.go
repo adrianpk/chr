@@ -10,7 +10,7 @@ import (
 // The model and deterministic parser obtain operation identities from the same
 // registries; neither a model result nor a command can introduce another owner.
 func telegramIntentRegistry() []ConversationIntentOperation {
-	var result []ConversationIntentOperation
+	result := telegramExplanationRegistry()
 	for _, operation := range telegramReadRegistry() {
 		result = append(result, ConversationIntentOperation{ID: strings.TrimPrefix(operation.Command, "/"), Description: operation.Help, Arguments: "No arguments"})
 	}

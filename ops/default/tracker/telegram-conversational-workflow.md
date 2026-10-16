@@ -153,12 +153,16 @@ recovery checks passed in both modes after that addition; strict focused lint,
 Go signature, package README and diff checks passed. Shared-operation fixtures
 prove real explanations, native backlog descriptions with canonical scope/authority,
 zero preparation invocations, guarded sources and original receipt replay.
-T4.4 artifact-bridge checks: the combined Telegram regression passed in normal
+T4.4 adapter checks: the combined Telegram regression passed in normal
 and race modes, including real HTTP generation/refinement, canonical questions,
 slash/NL parity, exact raw capture/answers, lost-acknowledgement recovery and
 post-generation authorization guards. Strict focused lint, Go signature, package
-README and diff checks passed. Telegram explanation, native prepared-work dispatch
-and final scope-decision binding remain; T4.4 is in progress.
+README and diff checks passed. T4.4 also connects slash/NL explanations to frozen
+canonical context, with independent retained provider attempts/results, guarded
+delivery and no artifact/work effects. Its real HTTP/reopened-store fixtures
+cover malformed output exhaustion, unchanged sources/intent, original result
+replay and current operator/root checks in both normal and race modes. Native prepared-work dispatch and final
+scope-decision binding remain; T4.4 is in progress.
 
 Candidate / PR / verified merge: pending completion of the slice.
 
@@ -297,4 +301,4 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Exact integrated candidate passed the scheduled exhaustive nightly.
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
-Current state: Slice 3 delivered through PR [#392](https://forge.adrianpk.com/adrianpk/chr/pulls/392) at `697a3ba4b3e33c459c343e140d0337860f453918`, verified against canonical Forgejo, clean `dev` and the exact-HEAD controller receipt. Slice 4 is active on `feat/slice-4-telegram-authoring`; T4.1 through T4.3 are validated and T4.4 is in progress. Its Telegram artifact bridge has focused normal/race evidence; explanation, native prepared-work dispatch and scope-decision binding remain. The canonical Slice 4 PR has not been opened.
+Current state: Slice 3 delivered through PR [#392](https://forge.adrianpk.com/adrianpk/chr/pulls/392) at `697a3ba4b3e33c459c343e140d0337860f453918`, verified against canonical Forgejo, clean `dev` and the exact-HEAD controller receipt. Slice 4 is active on `feat/slice-4-telegram-authoring`; T4.1 through T4.3 are validated and T4.4 is in progress. Its Telegram artifact and explanation bridges have focused evidence; native prepared-work dispatch and scope-decision binding remain. The canonical Slice 4 PR has not been opened.

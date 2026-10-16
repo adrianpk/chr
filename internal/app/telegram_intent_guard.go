@@ -41,16 +41,8 @@ func (r telegramReceiver) freezeIntent(ctx context.Context, input core.TelegramC
 }
 
 func (r telegramReceiver) intentTarget(ctx context.Context, input core.TelegramConversationInput, intent ConversationIntent) (core.TelegramOperationTarget, bool, error) {
-	authoring, recognized, err := telegramIntentAuthoring(input.Update, intent)
-	if recognized {
-		if err != nil {
-			return core.TelegramOperationTarget{}, false, err
-		}
-
-		authoring.Input.Config, authoring.Input.Projects = input.Config, input.Projects
-		_, target, err := r.store.ResolveTelegramAuthoringTarget(ctx, authoring.Input)
-
-		return target, true, err
+	if target, needed, err := r.intentPreparationTarget(ctx, input, intent); needed || err != nil {
+		return target, needed, err
 	}
 
 	conversation, recognized, err := telegramIntentConversation(input.Update, intent)
@@ -98,7 +90,7 @@ func telegramIntentTargetFailure(err error) string {
 }
 
 func freezeTelegramIntentArguments(intent ConversationIntent, target core.TelegramOperationTarget) ConversationIntent {
-	if intent.OperationID == "prepare" || intent.OperationID == "develop" || intent.OperationID == "project" {
+	if intent.OperationID == "prepare" || intent.OperationID == "develop" || intent.OperationID == "project" || intent.OperationID == "explain" {
 		intent.Arguments.Project = target.ProjectID
 	}
 
@@ -114,4 +106,32 @@ func freezeTelegramIntentArguments(intent ConversationIntent, target core.Telegr
 	}
 
 	return intent
+}
+
+func (r telegramReceiver) intentPreparationTarget(ctx context.Context, input core.TelegramConversationInput, intent ConversationIntent) (core.TelegramOperationTarget, bool, error) {
+	explanation, recognized, err := telegramIntentExplanation(input.Update, intent)
+	if recognized {
+		if err != nil {
+			return core.TelegramOperationTarget{}, false, err
+		}
+
+		explanation.Input.Config, explanation.Input.Projects = input.Config, input.Projects
+		target, err := r.store.ResolveTelegramOperationTarget(ctx, explanation.Input, time.Now())
+
+		return target, true, err
+	}
+
+	authoring, recognized, err := telegramIntentAuthoring(input.Update, intent)
+	if recognized {
+		if err != nil {
+			return core.TelegramOperationTarget{}, false, err
+		}
+
+		authoring.Input.Config, authoring.Input.Projects = input.Config, input.Projects
+		_, target, err := r.store.ResolveTelegramAuthoringTarget(ctx, authoring.Input)
+
+		return target, true, err
+	}
+
+	return core.TelegramOperationTarget{}, false, nil
 }

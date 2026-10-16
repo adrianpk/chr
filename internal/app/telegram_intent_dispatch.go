@@ -169,15 +169,8 @@ func (r telegramReceiver) dispatchIntent(ctx context.Context, user core.Telegram
 		return r.recordDiagnostic(ctx, input.Update, input.Config, intent.Explanation)
 	}
 
-	authoring, recognized, err := telegramIntentAuthoring(input.Update, intent)
-	if recognized {
-		if err != nil {
-			return r.intentCorrection(ctx, input.Update, input.Config)
-		}
-
-		authoring.Input.Config, authoring.Input.Projects, authoring.Input.Namespace = input.Config, input.Projects, input.Namespace
-
-		return r.dispatchAuthoring(ctx, user, authoring)
+	if handled, err := r.dispatchIntentPreparation(ctx, user, input, intent); handled || err != nil {
+		return err
 	}
 
 	conversation, recognized, err := telegramIntentConversation(input.Update, intent)
@@ -227,4 +220,30 @@ func (r telegramReceiver) dispatchIntentRead(ctx context.Context, user core.Tele
 	}
 
 	return r.intentCorrection(ctx, input.Update, input.Config)
+}
+
+func (r telegramReceiver) dispatchIntentPreparation(ctx context.Context, user core.TelegramAllowedUser, input core.TelegramConversationInput, intent ConversationIntent) (bool, error) {
+	explanation, recognized, err := telegramIntentExplanation(input.Update, intent)
+	if recognized {
+		if err != nil {
+			return true, r.intentCorrection(ctx, input.Update, input.Config)
+		}
+
+		explanation.Input.Config, explanation.Input.Projects, explanation.Input.Namespace = input.Config, input.Projects, input.Namespace
+
+		return true, r.dispatchExplanation(ctx, user, explanation)
+	}
+
+	authoring, recognized, err := telegramIntentAuthoring(input.Update, intent)
+	if recognized {
+		if err != nil {
+			return true, r.intentCorrection(ctx, input.Update, input.Config)
+		}
+
+		authoring.Input.Config, authoring.Input.Projects, authoring.Input.Namespace = input.Config, input.Projects, input.Namespace
+
+		return true, r.dispatchAuthoring(ctx, user, authoring)
+	}
+
+	return false, nil
 }

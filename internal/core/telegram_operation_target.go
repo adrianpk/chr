@@ -16,6 +16,25 @@ type TelegramOperationTarget struct {
 	ConversationRevision int64  `json:"conversation_revision,omitempty"`
 }
 
+// ValidateTelegramProjectTarget checks the resolved registry root immediately
+// before an adapter enters a project-scoped owner or configured provider.
+func ValidateTelegramProjectTarget(project Project, target TelegramOperationTarget) error {
+	if project.ID != target.ProjectID || !project.Enabled {
+		return ErrWorkflowConflict
+	}
+
+	binding, err := telegramProjectBinding(project)
+	if err != nil {
+		return err
+	}
+
+	if binding != target.ProjectBindingDigest {
+		return ErrWorkflowConflict
+	}
+
+	return nil
+}
+
 // ResolveTelegramOperationTarget uses the existing exact reply and project precedence.
 // The transaction ends before a caller reads or mutates a project owner.
 func (s *TelegramReceiverStore) ResolveTelegramOperationTarget(ctx context.Context, input TelegramConversationInput, now time.Time) (TelegramOperationTarget, error) {
