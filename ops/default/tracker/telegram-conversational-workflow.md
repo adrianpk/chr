@@ -132,7 +132,7 @@ Prerequisite: verified Slice 3 integration.
 | T4.1 | validated | `b54d526fd0471eff7c4df2ef769ba0abe66476ce` | Bounded typed natural-language intent and deterministic command parity. |
 | T4.2 | validated | `f7408ea2fa51d4a66ce5be156d2aa192160ad37f` | Real configured-provider authoring with exact question/turn binding. |
 | T4.3 | validated | `4d1932fedf6ac79e659ce2b475b4261b822f50e6` | Explain/prepare/develop intent, retained scope and bounded authority. |
-| T4.4 | in_progress | pending | Canonical artifact generation/refinement, provenance and replay checks. |
+| T4.4 | in_progress | `e4aa7bf44bc36ba8a5f1ca0edb82978f79bb0923` partial | Canonical artifact generation/refinement, provenance and replay checks. |
 
 Validation: plan section 9; `TestTelegramAuthoring`, including focused race mode.
 

@@ -75,6 +75,9 @@ T4.2 implementation commit: `f7408ea2fa51d4a66ce5be156d2aa192160ad37f`.
 
 T4.3 implementation commit: `4d1932fedf6ac79e659ce2b475b4261b822f50e6`.
 
+T4.4 artifact-bridge implementation commit: `e4aa7bf44bc36ba8a5f1ca0edb82978f79bb0923`.
+This completes the artifact-dispatch portion; T4.4 remains in progress.
+
 The shared structured provider uses the existing Codex agent runner or OpenAI
 Responses boundary. `CHR_CONVERSATION_GENERATION_BACKEND=openai` selects OpenAI;
 otherwise Codex is used. Existing provider model, command and credential settings
