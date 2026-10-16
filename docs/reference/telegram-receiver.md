@@ -1,9 +1,10 @@
 # Telegram Receiver
 
-The dedicated receiver currently supports authenticated text reads:
-`/help`, `/projects` and `/status`. Unknown commands and ordinary text return
-the available command list. Callbacks return an unavailable-action diagnostic.
-These inputs do not admit work or execute saved remote-command handoffs.
+The dedicated receiver supports authenticated project reads and retained text
+conversations. `/help` is generated from the available command registries.
+Unknown slash commands return help without consulting a model. Callbacks return
+an unavailable-action diagnostic. Conversations retain capture without generating
+artifacts, admitting work or executing saved remote-command handoffs.
 
 ## Private setup
 
@@ -58,6 +59,56 @@ allowed chat and user; topics additionally require their configured numeric ID.
 An empty topic list permits non-topic messages only. Bots, anonymous senders,
 channel posts, forwarded messages and unsupported content cannot enter dispatch.
 Project listing returns only enabled, explicitly allowed registry entries.
+
+## Conversations and capture
+
+| Command | Behavior |
+| --- | --- |
+| `/help`, `/projects`, `/status` | Show commands, enabled allowed projects and receiver state. |
+| `/project <project>` | Select an exact authorized ID or unique registered name. |
+| `/prepare [--project <id>] <topic>` | Create an independent preparation-only capture. |
+| `/develop [--project <id>] <topic>` | Create a capture retaining development intent. |
+| `/sessions` | Show bounded session identities, phases, focus, sizes and revisions. |
+| `/focus <conversation>` | Focus an exact collecting session. |
+| `/reply <conversation> <text>` | Append to an exact current conversation. |
+| `/dump [conversation]` | Show bounded capture text. |
+| `/done [conversation]` | Finish capture and retain it for subsequent authoring. |
+| `/cancel [conversation]` | Cancel an unstarted session and discard its capture. |
+
+Topics contain at most 512 UTF-8 bytes. `--project` accepts one ID; use
+`/project <exact registered name>` for a name containing spaces. IDs returned by
+`/sessions` are opaque. Other slash commands remain unavailable until their
+shared operations are implemented.
+
+Project resolution uses an explicit authorized target, the session/reply's
+bound project, peer selection, authorized configured default, then the sole
+authorized enabled project. Ambiguous or conflicting targets require explicit
+selection. Selection is separate for every bot/chat/topic/sender combination;
+changing it preserves existing sessions. Sessions freeze project/root identity,
+ops namespace and intent. Namespace uses the existing explicit/`OPS_USER`/default
+resolution. Root changes require an explicit new session; existing captures
+remain intact.
+
+Plain text routes by valid Telegram reply, explicit `/reply` target, focused
+collecting session, then sole collecting session. With multiple sessions and no
+focus, use `/sessions` and choose explicitly. Starting another session preserves
+older questions and capture. Replies to another user/topic, replaced questions,
+changed conversation revisions, finished captures or pruned messages cannot
+fall back to another session. Use explicit targeting after a stale prompt.
+
+A capture accepts at most 32 parts, 16 KiB per message and 64 KiB total, including
+one newline between parts. Overflow leaves existing capture unchanged. `/done`
+ends capture in the preparing phase; artifact generation has not run. `/cancel`
+discards only the selected unstarted capture. Both invalidate previous reply
+prompts. At most eight nonterminal sessions per peer and 128 per bot can exist.
+Session lists retain active entries and recent history within a 50-entry view;
+rendered output uses the normal Unicode bounds.
+
+Source acknowledgement, capture changes and the response outbox commit together.
+Replay cannot append a part twice. A reply association becomes usable only when
+a definite send acknowledgement is retained; at most 64 associations remain
+active per session. Current allowlists and registry bindings are checked again
+before queued input is applied.
 
 ## Readiness and retained state
 

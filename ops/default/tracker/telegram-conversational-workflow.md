@@ -20,7 +20,7 @@ Active slice: Slice 2, Conversation routing; implementation in progress
 
 Next slice: Slice 3, Replay-safe operations; after verified Slice 2 integration
 
-Progress: 1 of 8 slices integrated; 2 of 29 tasks validated and 4 done; 4 of 32 acceptance criteria have deterministic fixture evidence.
+Progress: 1 of 8 slices integrated; 3 of 29 tasks validated and 4 done; 7 of 32 acceptance criteria have deterministic fixture evidence.
 
 Full gate: `make verify`
 
@@ -89,8 +89,8 @@ Prerequisite: verified Slice 1 integration.
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
 | T2.1 | validated | `8e7faf9bf62c` | Frozen project/namespace bindings, peer selection and independent conversations. |
-| T2.2 | validated | task commit follows this update | Exact replies/questions, duplicate-safe capture and safe completion/cancellation. |
-| T2.3 | in_progress | pending | Deterministic sessions/focus commands and bounded conversation views. |
+| T2.2 | validated | `9946757b0528` | Exact replies/questions, duplicate-safe capture and safe completion/cancellation. |
+| T2.3 | validated | task commit follows this update | Deterministic sessions/focus commands and bounded conversation views. |
 
 Validation: plan section 7; `TestTelegramConversation`, including focused race mode.
 
@@ -98,7 +98,9 @@ Task validation: `go test ./internal/core ./internal/app -run '^Test(TelegramCon
 
 T2.2 validation: `go test ./internal/core -run '^TestTelegramConversation' -count=1 -timeout=3m` passed; strict focused lint reported zero issues.
 
-Candidate / PR / verified merge / evidence: pending.
+T2.3 validation: focused `TestTelegramConversation` normal and race commands passed in both core and app; strict focused lint reported zero issues. The [Slice 2 report](../report/slices/telegram-conversational-workflow/slice-2-conversations.md) records deterministic evidence and the required exact-HEAD controller checks.
+
+Candidate / PR: preparing canonical PR; verified merge: pending.
 
 ## Slice 3: Replay-safe Operations
 
@@ -214,9 +216,9 @@ report/test/live references in the Evidence column as they are verified.
 | TG-03 | validated | [Slice 1 deterministic evidence](../report/slices/telegram-conversational-workflow/slice-1-receiver.md) |
 | TG-04 | pending | pending |
 | TG-05 | pending | pending |
-| TG-06 | pending | pending |
-| TG-07 | pending | pending |
-| TG-08 | pending | pending |
+| TG-06 | validated | [Slice 2 deterministic evidence](../report/slices/telegram-conversational-workflow/slice-2-conversations.md) |
+| TG-07 | validated | [Slice 2 deterministic evidence](../report/slices/telegram-conversational-workflow/slice-2-conversations.md) |
+| TG-08 | validated | [Slice 2 deterministic evidence](../report/slices/telegram-conversational-workflow/slice-2-conversations.md) |
 | TG-09 | pending | pending |
 | TG-10 | pending | pending |
 | TG-11 | pending | pending |
@@ -233,7 +235,7 @@ report/test/live references in the Evidence column as they are verified.
 | TG-22 | pending | pending |
 | TG-23 | pending | pending |
 | TG-24 | pending | pending |
-| TG-25 | pending | pending |
+| TG-25 | pending | [Slice 2 session/topic evidence](../report/slices/telegram-conversational-workflow/slice-2-conversations.md); broader journey remains pending |
 | TG-26 | pending | pending |
 | TG-27 | pending | pending |
 | TG-28 | pending | pending |
@@ -269,4 +271,4 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Exact integrated candidate passed the scheduled exhaustive nightly.
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
-Current state: Slice 1 delivered through PR #390 at `3e2eb8825b4bb4c4b86585e5e2f862c4202f51b2`; Slice 2 is active in its dedicated worktree.
+Current state: Slice 1 delivered through PR #390 at `3e2eb8825b4bb4c4b86585e5e2f862c4202f51b2`; Slice 2 task implementation and focused validation are complete. Canonical PR and final exact-HEAD controller evidence are being prepared.

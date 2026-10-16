@@ -134,3 +134,63 @@ func TestTelegramConversationQuestionCAS(t *testing.T) {
 		t.Fatal("unstarted finished capture cannot be canceled")
 	}
 }
+
+// TestTelegramConversationConcurrent replays one source through independent database handles without duplicate capture.
+func TestTelegramConversationConcurrent(t *testing.T) {
+	f := newTelegramConversationFixture(t)
+	f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "alpha" })
+
+	second := openTelegramReceiverTestStore(t, f.env)
+	input := f.input
+	input.Update = telegramRetainedTestUpdate(t, 900, "concurrent part")
+
+	input.Action, input.Text = TelegramConversationCapture, "concurrent part"
+	if err := f.store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{input.Update}, time.Now()); err != nil {
+		t.Fatal(err)
+	}
+
+	results := make(chan error, 2)
+
+	for _, store := range []*TelegramReceiverStore{f.store, second} {
+		go func() { results <- store.ApplyTelegramConversation(t.Context(), input, time.Now()) }()
+	}
+
+	firstError, secondError := <-results, <-results
+	if firstError != nil || secondError != nil {
+		t.Fatal("concurrent replay failed", firstError, secondError)
+	}
+
+	if f.sessions(t)[0].Capture != "concurrent part" {
+		t.Fatal("duplicate concurrent append")
+	}
+
+	var count int
+	if err := f.store.db.QueryRowContext(t.Context(), `SELECT COUNT(*) FROM telegram_outbox`).Scan(&count); err != nil || count != 2 {
+		t.Fatal("duplicate concurrent response", count, err)
+	}
+}
+
+// TestTelegramConversationProjectNames refuses ambiguous names and unauthorized defaults.
+func TestTelegramConversationProjectNames(t *testing.T) {
+	tests := []struct {
+		name      string
+		configure func(*TelegramConversationInput)
+	}{
+		{"ambiguous name", func(i *TelegramConversationInput) {
+			i.Projects[0].Name = "Same"
+			i.Projects[1].Name = "Same"
+			i.Project = "Same"
+		}},
+		{"unauthorized default", func(i *TelegramConversationInput) { i.Config.DefaultProjectID = "private" }},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			f := newTelegramConversationFixture(t)
+			f.apply(t, TelegramConversationStart, test.configure)
+
+			if len(f.sessions(t)) != 0 {
+				t.Fatal("ambiguous project guessed")
+			}
+		})
+	}
+}

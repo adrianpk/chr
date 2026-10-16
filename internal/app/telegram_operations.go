@@ -23,7 +23,7 @@ type telegramOperationDescriptor struct {
 
 func telegramReadRegistry() []telegramOperationDescriptor {
 	return []telegramOperationDescriptor{
-		{telegramReadHelp, "/help", "Show available read-only commands"},
+		{telegramReadHelp, "/help", "Show available commands"},
 		{telegramReadProjects, "/projects", "List your enabled registered projects"},
 		{telegramReadStatus, "/status", "Show receiver health and retained polling state"},
 	}
@@ -59,7 +59,7 @@ func telegramReadResponse(operations telegramReadService, user core.TelegramAllo
 		}
 	}
 
-	return "Only read-only commands are available.\n" + telegramReadHelpText(), nil
+	return "Unknown or unavailable command.\n" + telegramReadHelpText(), nil
 }
 
 func telegramReadHelpText() string {
@@ -68,7 +68,7 @@ func telegramReadHelpText() string {
 		fmt.Fprintf(&text, "%s — %s\n", operation.Command, operation.Help)
 	}
 
-	return strings.TrimSpace(text.String())
+	return strings.TrimSpace(text.String()) + "\n" + telegramConversationHelp()
 }
 
 func telegramProjectResponse(operations telegramReadService, ids []string) (string, error) {

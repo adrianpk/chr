@@ -181,12 +181,14 @@ func telegramProjectBinding(project Project) (string, error) {
 		return "", err
 	}
 
+	registeredRoot := root
+
 	root, err = filepath.EvalSymlinks(root)
 	if err != nil {
 		return "", telegramConversationDiagnostic("The registered project root is unavailable. Resolve the registry binding before continuing.")
 	}
 
-	sum := sha256.Sum256([]byte(project.ID + "\x00" + root))
+	sum := sha256.Sum256([]byte(project.ID + "\x00" + registeredRoot + "\x00" + root))
 
 	return hex.EncodeToString(sum[:]), nil
 }

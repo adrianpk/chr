@@ -43,9 +43,8 @@ func TestTelegramConversationCapture(t *testing.T) {
 
 // TestTelegramConversationReplay proves append, source acknowledgement and outbox rollback together.
 func TestTelegramConversationReplay(t *testing.T) {
-	env := telegramReceiverTestEnv(t)
 	f := newTelegramConversationFixture(t)
-	f.store = openTelegramReceiverTestStore(t, env)
+	env := f.env
 	f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "alpha" })
 
 	input := f.input

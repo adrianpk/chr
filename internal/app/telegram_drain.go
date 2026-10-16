@@ -44,6 +44,10 @@ func (r telegramReceiver) respond(ctx context.Context, update core.TelegramRecei
 		return r.store.RejectPendingUpdate(ctx, update, time.Now())
 	}
 
+	if handled, err := r.respondConversation(ctx, user, config, update); handled || err != nil {
+		return err
+	}
+
 	text, err := telegramReadResponse(r.operations, user, update)
 	if err != nil {
 		text = "The requested read is unavailable. Use local diagnostics to inspect project readiness."

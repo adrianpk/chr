@@ -1,6 +1,6 @@
 # Slice 2: Conversation Routing
 
-Status: drafting
+Status: reviewing
 
 Delivery set: telegram-conversational-workflow
 
@@ -39,14 +39,21 @@ pruned associations cannot route answers. Canonical question bindings retain
 session, question, revision and digest independently per conversation. At most
 64 reply associations remain active for each conversation.
 
+The live command registry exposes project selection, prepare/develop capture,
+sessions/focus, explicit replies, bounded dump views and done/cancel. Help uses
+the same descriptors as parsing. Unknown slash commands return help without
+service/model interpretation. Valid replies outrank focus; ambiguous plain text
+asks for a session. Reads use the existing central application service.
+
 ## Implementation Notes
 
-T2.1 implementation: `8e7faf9bf62c` (full task references are in the tracker).
+T2.1 implementation: `8e7faf9bf62c`; T2.2: `9946757b0528`. T2.3 adds the
+live command adapter and HTTP journey. The tracker records task references.
 Migration `20261016000017` extends the existing user database with peers,
 conversations, parts and reply associations. Allocation enforces eight active
 sessions per peer and 128 per bot after acquiring the SQLite write reservation.
-No transaction spans network IO. Registry roots are resolved physically before
-freezing their identity. A changed root requires an explicit new session.
+No transaction spans network IO. Registry paths and their resolved physical roots both contribute to the
+frozen binding digest. A changed root requires an explicit new session.
 
 ## Contracts Added or Changed
 
@@ -57,6 +64,11 @@ provider or answer the canonical question. Capture completion leaves subsequent
 authoring to its recorded owner.
 
 ## Files of Interest
+
+- `internal/app/telegram_conversation.go`: deterministic command descriptors,
+  parsing and live dispatch through current central registry reads.
+- `internal/app/telegram_conversation_test.go`: HTTP/SQLite journey, decoder
+  bounds, duplicate replay and root-change diagnostics.
 
 - `internal/core/telegram_conversation*.go`: peer/project routing, retained
   capture, question guards and acknowledged reply associations.
@@ -74,8 +86,29 @@ T2.1 focused routing and migration checks passed:
 
 T2.2: `go test ./internal/core -run '^TestTelegramConversation' -count=1 -timeout=3m` passed, including byte/part limits, replay/reopening, atomic capacity rollback, peer/topic isolation, independent questions, stale revisions and 64-reply retention. Strict focused lint again reported zero issues.
 
-Remaining task and exact candidate evidence will be recorded before PR readiness.
-All current fixtures use temporary real SQLite stores and local project roots.
+T2.3 focused normal and race checks passed:
+
+- `go test ./internal/core ./internal/app -run '^TestTelegramConversation' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^TestTelegramConversation' -count=1 -timeout=3m`
+
+Strict focused lint reported zero issues after formatting. The fixtures cover
+TG-06/07/08 and the session/topic portion of TG-25: all project and conversation
+precedences, exact names and ambiguity, two projects, group users and topics,
+independent questions, root/alias changes, revocation, all byte/part bounds,
+concurrent replay through separate SQLite handles, stale/late/pruned replies
+and rollback when association retention or response capacity fails. The live
+HTTP journey checks that no project artifacts or executions are created.
+
+Final readiness evidence is recorded through `looper validate` after the PR
+reference commit, binding the clean candidate HEAD to this ordered list:
+
+1. `make verify`
+2. `go test ./internal/core ./internal/app -run '^TestTelegramConversation' -count=1 -timeout=3m`
+3. `go test -race ./internal/core ./internal/app -run '^TestTelegramConversation' -count=1 -timeout=3m`
+4. `git diff --check`
+
+All fixtures use temporary real SQLite stores, local roots and owned HTTP
+servers. The checks do not establish live-bot or scheduled nightly certification.
 
 ## Risks and Follow-ups
 

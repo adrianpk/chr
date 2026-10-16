@@ -8,6 +8,7 @@ import (
 )
 
 type telegramConversationFixture struct {
+	env   UserEnvironment
 	store *TelegramReceiverStore
 	input TelegramConversationInput
 	next  int64
@@ -20,7 +21,9 @@ func newTelegramConversationFixture(t *testing.T) *telegramConversationFixture {
 	config.AllowedUsers[0].ProjectIDs = []string{"alpha", "beta"}
 	config.DefaultProjectID = ""
 
-	return &telegramConversationFixture{store: openTelegramReceiverTestStore(t, telegramReceiverTestEnv(t)), input: TelegramConversationInput{
+	env := telegramReceiverTestEnv(t)
+
+	return &telegramConversationFixture{env: env, store: openTelegramReceiverTestStore(t, env), input: TelegramConversationInput{
 		Config: config, Projects: []Project{{ID: "alpha", Name: "Alpha Project", Path: t.TempDir(), Enabled: true}, {ID: "beta", Name: "Beta Project", Path: t.TempDir(), Enabled: true}}, Intent: "prepare", Text: "Topic",
 	}, next: 1}
 }
@@ -111,6 +114,10 @@ func TestTelegramConversationBinding(t *testing.T) {
 	f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "alpha"; i.Intent = "develop" })
 
 	original := f.sessions(t)[0]
+	if original.Namespace != "first" || original.Intent != "develop" {
+		t.Fatal("initial binding incorrect", original)
+	}
+
 	f.apply(t, TelegramConversationSelect, func(i *TelegramConversationInput) { i.Project = "beta" })
 	t.Setenv(OpsUserEnv, "second")
 	f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Conversation = original.ID })
