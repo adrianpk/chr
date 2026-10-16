@@ -108,12 +108,10 @@ func (h *telegramApplicationHost) complete(result telegramApplicationCompletion)
 
 func telegramApplicationDeferred(err error) bool {
 	for _, expected := range []error{core.ErrStructuredModelCapacity, core.ErrTelegramReplyPending, errTelegramLaneChanged, context.Canceled} {
-		if errors.Is(err, expected) {
-			return true
-		}
+		err = telegramHostFailure(err, expected)
 	}
 
-	return false
+	return err == nil
 }
 
 func (r telegramReceiver) runDeliveries(ctx context.Context) error {

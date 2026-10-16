@@ -165,10 +165,33 @@ func (s *TelegramReceiverStore) transaction(ctx context.Context, action func(*sq
 	}
 
 	if err := action(tx); err != nil {
-		return rollbackWithError(tx, err)
+		return errors.Join(telegramTransactionFailure(ctx, err), telegramTransactionFailure(ctx, tx.Rollback()))
 	}
 
-	return tx.Commit()
+	return telegramTransactionFailure(ctx, tx.Commit())
+}
+
+// This owner alone commits/rolls back the transaction. database/sql can win
+// that race after cancellation and return the bare ErrTxDone instead of the
+// context error. Wrapped/joined checkpoint failures must remain failures.
+func telegramTransactionFailure(ctx context.Context, err error) error {
+	if ctx.Err() == nil {
+		return err
+	}
+
+	if _, wrapped := err.(interface{ Unwrap() error }); wrapped {
+		return err
+	}
+
+	if _, joined := err.(interface{ Unwrap() []error }); joined {
+		return err
+	}
+
+	if errors.Is(err, sql.ErrTxDone) {
+		return ctx.Err()
+	}
+
+	return err
 }
 
 // ReservePoll checkpoints an attempt before IO; restart cannot reset exhaustion.
