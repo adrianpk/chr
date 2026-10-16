@@ -16,7 +16,7 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 1, Dedicated live receiver; ready for Looper activation
+Active slice: Slice 1, Dedicated live receiver; implementation in progress
 
 Next slice: Slice 2, Conversation routing; after verified Slice 1 integration
 
@@ -64,13 +64,13 @@ configuration. Never launch an interactive full suite to fill that evidence gap.
 
 ## Slice 1: Dedicated Live Receiver
 
-State: ready
+State: in_progress
 
 Prerequisite: approved committed planning artifacts; execution authorized on 2026-10-16.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T1.1 | ready | pending | Private setup/configuration, secret handling and readiness commands. |
+| T1.1 | in_progress | task commit; connection doctor follows with T1.2 | Private setup/configuration, secret handling and readiness commands. |
 | T1.2 | ready | pending | Bounded HTTP receiver, exact identity authorization and ownership checks. |
 | T1.3 | ready | pending | Additive storage, atomic inbox/cursor, initial outbox and retained retries. |
 | T1.4 | ready | pending | Read-only registry/help/project/status operations and existing adapter compatibility. |

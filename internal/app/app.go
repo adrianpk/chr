@@ -76,6 +76,7 @@ func newRootCommand(stdin io.Reader, stdout, stderr io.Writer, deps appDependenc
 			newSpecCommand(stdout, deps),
 			newRuntimeCommand(stdout, deps),
 			newTicketCommand(stdout, deps),
+			newTelegramCommand(stdin, stdout, deps),
 			newTUICommand(stdin, stdout, deps),
 			newWebCommand(stdout, deps),
 			newWorkCommand(stdout, deps),
