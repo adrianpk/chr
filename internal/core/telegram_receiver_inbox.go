@@ -131,7 +131,12 @@ FROM telegram_updates WHERE bot_id=?`, botID).Scan(&total, &pending, &bytes); er
 		return err
 	}
 
-	if pending > 1024 || total > 10000 || bytes+outboundBytes > 64*1024*1024 {
+	retainedBytes, err := telegramOperationCapacity(ctx, tx, botID)
+	if err != nil {
+		return err
+	}
+
+	if pending > 1024 || total > 10000 || bytes+outboundBytes+retainedBytes > 64*1024*1024 {
 		return errors.New("telegram intake capacity exhausted")
 	}
 

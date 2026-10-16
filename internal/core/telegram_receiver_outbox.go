@@ -23,7 +23,12 @@ type TelegramReceiverDelivery struct {
 // QueueReadResponse records a response and acknowledges its retained input atomically.
 // Replaying an already processed source never replaces or duplicates its response.
 func (s *TelegramReceiverStore) QueueReadResponse(ctx context.Context, update TelegramReceivedUpdate, text, configDigest string, now time.Time) error {
-	if !validTelegramReceiverText(text) || len(configDigest) != 64 {
+	return s.QueueReferencedResponse(ctx, update, text, fmt.Sprintf("update:%d", update.UpdateID), configDigest, now)
+}
+
+// QueueReferencedResponse retains bounded output with a canonical or paged reference.
+func (s *TelegramReceiverStore) QueueReferencedResponse(ctx context.Context, update TelegramReceivedUpdate, text, reference, configDigest string, now time.Time) error {
+	if text == "" || len(configDigest) != 64 {
 		return errors.New("telegram response exceeds its Unicode bounds")
 	}
 
@@ -33,17 +38,22 @@ func (s *TelegramReceiverStore) QueueReadResponse(ctx context.Context, update Te
 			return err
 		}
 
-		return queueTelegramResponse(ctx, tx, update, text, configDigest, now)
+		return queueTelegramReferencedResponse(ctx, tx, update, text, reference, configDigest, now)
 	})
 }
 
 func queueTelegramResponse(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, text, configDigest string, now time.Time) error {
+	return queueTelegramReferencedResponse(ctx, tx, update, text, fmt.Sprintf("update:%d", update.UpdateID), configDigest, now)
+}
+
+func queueTelegramReferencedResponse(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, text, reference, configDigest string, now time.Time) error {
 	var pending int
 	if err := tx.QueryRowContext(ctx, "SELECT COUNT(*) FROM telegram_outbox WHERE bot_id=? AND state!='delivered'", update.Peer.BotID).Scan(&pending); err != nil {
 		return err
 	}
 
-	if pending >= 1024 {
+	parts := TelegramResponseParts(text, reference)
+	if pending+len(parts) > 1024 {
 		return errors.New("telegram outbox capacity exhausted")
 	}
 
@@ -57,13 +67,15 @@ func queueTelegramResponse(ctx context.Context, tx *sql.Tx, update TelegramRecei
 	}
 
 	key := fmt.Sprintf("update:%d", update.UpdateID)
-	sum := sha256.Sum256(fmt.Appendf(nil, "%d:%s", update.Peer.BotID, key))
-	id := "tgd-" + hex.EncodeToString(sum[:16])
+	for index, part := range parts {
+		sum := sha256.Sum256(fmt.Appendf(nil, "%d:%s:%d", update.Peer.BotID, key, index+1))
+		id := "tgd-" + hex.EncodeToString(sum[:16])
 
-	_, err = tx.ExecContext(ctx, `INSERT INTO telegram_outbox(id,bot_id,chat_id,topic_id,user_id,event_key,config_digest,kind,text,state,created_at,updated_at)
-VALUES(?,?,?,?,?,?,?,'result',?,'pending',?,?)`, id, update.Peer.BotID, update.Peer.ChatID, update.Peer.TopicID, update.Peer.UserID, key, configDigest, text, formatProjectTime(now), formatProjectTime(now))
-	if err != nil {
-		return err
+		_, err = tx.ExecContext(ctx, `INSERT INTO telegram_outbox(id,bot_id,chat_id,topic_id,user_id,event_key,config_digest,kind,text,part_index,part_count,state,created_at,updated_at)
+VALUES(?,?,?,?,?,?,?,'result',?,?,?,'pending',?,?)`, id, update.Peer.BotID, update.Peer.ChatID, update.Peer.TopicID, update.Peer.UserID, key, configDigest, part, index+1, len(parts), formatProjectTime(now), formatProjectTime(now))
+		if err != nil {
+			return err
+		}
 	}
 
 	return checkTelegramIntakeCapacity(ctx, tx, update.Peer.BotID)
@@ -104,8 +116,10 @@ WHERE bot_id=? AND update_id=? AND state='pending'`, formatProjectTime(now), upd
 
 // DueDeliveries is bounded; sending rows after a crash retain uncertainty and budgets.
 func (s *TelegramReceiverStore) DueDeliveries(ctx context.Context, botID int64, now time.Time) ([]TelegramReceiverDelivery, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT id,chat_id,topic_id,user_id,text,state,attempts,config_digest FROM telegram_outbox
-WHERE bot_id=? AND state IN ('pending','sending','uncertain') AND attempts<5 AND (retry_at IS NULL OR retry_at<=?) ORDER BY created_at,rowid LIMIT 50`, botID, formatProjectTime(now))
+	rows, err := s.db.QueryContext(ctx, `SELECT o.id,o.chat_id,o.topic_id,o.user_id,o.text,o.state,o.attempts,o.config_digest FROM telegram_outbox o
+WHERE o.bot_id=? AND o.state IN ('pending','sending','uncertain') AND o.attempts<5 AND (o.retry_at IS NULL OR o.retry_at<=?)
+AND NOT EXISTS(SELECT 1 FROM telegram_outbox earlier WHERE earlier.bot_id=o.bot_id AND earlier.chat_id=o.chat_id AND earlier.topic_id=o.topic_id AND earlier.user_id=o.user_id AND earlier.event_key=o.event_key AND earlier.part_index<o.part_index AND earlier.state!='delivered')
+ORDER BY o.created_at,o.rowid LIMIT 50`, botID, formatProjectTime(now))
 	if err != nil {
 		return nil, err
 	}
