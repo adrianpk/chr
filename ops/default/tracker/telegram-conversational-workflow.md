@@ -20,7 +20,7 @@ Active slice: Slice 4, Conversational authoring; implementation in progress
 
 Next slice: Slice 5, Native work continuation; after verified Slice 4 integration
 
-Progress: 3 of 8 slices integrated; 2 of 29 tasks validated and 11 done; 9 of 32 acceptance criteria have deterministic fixture evidence.
+Progress: 3 of 8 slices integrated; 3 of 29 tasks validated and 11 done; 9 of 32 acceptance criteria have deterministic fixture evidence.
 
 Full gate: `make verify`
 
@@ -131,8 +131,8 @@ Prerequisite: verified Slice 3 integration.
 | --- | --- | --- | --- |
 | T4.1 | validated | `b54d526fd0471eff7c4df2ef769ba0abe66476ce` | Bounded typed natural-language intent and deterministic command parity. |
 | T4.2 | validated | `f7408ea2fa51d4a66ce5be156d2aa192160ad37f` | Real configured-provider authoring with exact question/turn binding. |
-| T4.3 | ready | pending | Explain/prepare/develop intent, retained scope and bounded authority. |
-| T4.4 | pending | pending | Canonical artifact generation/refinement, provenance and replay checks. |
+| T4.3 | validated | pending task commit | Explain/prepare/develop intent, retained scope and bounded authority. |
+| T4.4 | ready | pending | Canonical artifact generation/refinement, provenance and replay checks. |
 
 Validation: plan section 9; `TestTelegramAuthoring`, including focused race mode.
 
@@ -146,7 +146,14 @@ regressions passed in normal and race modes; strict focused lint, Go signature,
 package README and diff checks passed. Fixtures cover real prompts/answers,
 generated artifacts, guarded refinement, interrupted journal recovery, original
 receipt replay, independent owner exclusion and retained provider attempts.
-T4.3 is ready; T4.4 remains pending.
+
+T4.3 task checks: combined Telegram authoring/conversation/operation/receiver
+regressions passed in normal and race modes. Additional original-instruction
+recovery checks passed in both modes after that addition; strict focused lint,
+Go signature, package README and diff checks passed. Shared-operation fixtures
+prove real explanations, native backlog descriptions with canonical scope/authority,
+zero preparation invocations, guarded sources and original receipt replay.
+T4.4 is ready; the receiver journey and final scope-decision dispatch remain.
 
 Candidate / PR / verified merge: pending completion of the slice.
 

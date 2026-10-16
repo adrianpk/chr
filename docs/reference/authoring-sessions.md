@@ -361,3 +361,51 @@ eight per session, canonical artifact references to 16, transcript/provenance
 entries to 64, and retained request bindings to 4,096 per project. File and
 journal reads are bounded to 1 MiB. Capacity and provider failures preserve the
 previous canonical session and artifacts.
+
+## Explanation and Prepared Work
+
+`ExplainAuthoring` answers from a canonical session's observed artifacts, or the
+bound project's `README.md` when no session is selected. Context excerpts retain
+their source references and hashes. A project overview must be a regular file
+of at most 32 KiB; symlinks are rejected. Questions are at most 16 KiB and accepted
+explanations at most 12,000 bytes. The shared provider enforces its normal
+deadline, concurrency and payload bounds. This operation neither writes a new
+authoring artifact nor prepares or admits work.
+
+`PrepareAuthoringWork` builds a preview of one native backlog ticket from an
+observed generated dump or draft specification. It uses the existing record
+preparation operation and reserves that ticket's identity. Callers must retain
+the serialized `PreparedAuthoringWork` before dispatch rather than prepare it
+again on retry. A simple ticket can use a generated dump directly.
+
+The preview's `AuthoringWorkScope` retains the original user instruction,
+preparation/development intent, project and namespace, canonical session revision,
+complete source guard, description reference/hash, native contract hash and exact
+prepared record image. Instructions are at most 8 KiB and descriptions 16 KiB.
+An explanation cannot produce this preview. A pending canonical question or
+stale source image blocks preparation.
+
+`AuthorizeAuthoringWork` accepts a host-validated explicit decision for the
+displayed scope hash and configured operator. The provider cannot supply this
+authority. Preparation needs no development decision; development requires one.
+Changing requirements, the prepared record or operator cannot reuse an old
+decision. Internal artifact steps do not acquire separate execution authority.
+
+`ApplyPreparedAuthoringWork` validates that preview under the authoring owner,
+reserves immutable arguments with the native record owner and creates the
+backlog ticket through that owner. The ticket's envelope retains `authoring_scope`
+and `authoring_authorization` metadata. Its normal mutation receipt reconciles
+lost acknowledgement before inspecting later edits. A failed dispatch cannot
+exchange its request ID for a fresh description. This operation creates no
+invocation, claims no work and changes no execution or integration policy.
+
+Telegram conversation reads expose the canonical authoring session and retained
+authorization references. A resolver proposal alone cannot create development
+authority. The explicit `/develop` source retains an opaque instruction reference;
+the adapter must bind that instruction or a new explicit decision to the
+displayed scope before dispatching shared development preparation.
+
+`ReadTelegramConversationInstruction` recovers the original retained source for
+the exact authorized peer and project binding. Reply invalidation and focus do
+not replace that source. An operator remapping clears its usable development
+reference; an unavailable source requires a new explicit instruction.

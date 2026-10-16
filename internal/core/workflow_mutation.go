@@ -20,6 +20,11 @@ type WorkflowMutationBinding struct {
 	Operator  string `json:"operator"`
 }
 
+// Validate checks the opaque request and configured operator identities.
+func (binding WorkflowMutationBinding) Validate() error {
+	return validateWorkflowMutationBinding(binding)
+}
+
 // WorkflowMutationRequest creates or replaces a record through its existing owner.
 // A zero expected revision means creation; replacement requires its exact source image.
 type WorkflowMutationRequest struct {

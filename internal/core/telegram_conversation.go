@@ -54,6 +54,8 @@ type TelegramConversation struct {
 	Topic                string
 	Capture              string
 	QuestionBinding      string
+	AuthoringSessionRef  string
+	AuthorizationRef     string
 	Revision             int64
 }
 
@@ -332,7 +334,26 @@ func (op telegramConversationTransaction) insertConversation(project Project, bi
 
 	sum := sha256.Sum256(fmt.Appendf(nil, "%d:%d", op.input.Update.Peer.BotID, op.input.Update.UpdateID))
 	c := TelegramConversation{ID: "tgc-" + hex.EncodeToString(sum[:16]), Peer: op.input.Update.Peer, ProjectID: project.ID, ProjectBindingDigest: binding, Namespace: namespace, Intent: op.input.Intent, Phase: "collecting", Topic: op.input.Text, Revision: 1}
-	_, err := op.tx.ExecContext(op.ctx, `INSERT INTO telegram_conversations(id,bot_id,chat_id,topic_id,user_id,project_id,project_binding_digest,namespace,intent,phase,topic,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`, c.ID, c.Peer.BotID, c.Peer.ChatID, c.Peer.TopicID, c.Peer.UserID, c.ProjectID, c.ProjectBindingDigest, c.Namespace, c.Intent, c.Phase, c.Topic, formatProjectTime(op.now), formatProjectTime(op.now))
+	c.AuthorizationRef = op.developmentInstructionRef(c)
+	_, err := op.tx.ExecContext(op.ctx, `INSERT INTO telegram_conversations(id,bot_id,chat_id,topic_id,user_id,project_id,project_binding_digest,namespace,intent,phase,topic,authorization_ref,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, c.ID, c.Peer.BotID, c.Peer.ChatID, c.Peer.TopicID, c.Peer.UserID, c.ProjectID, c.ProjectBindingDigest, c.Namespace, c.Intent, c.Phase, c.Topic, c.AuthorizationRef, formatProjectTime(op.now), formatProjectTime(op.now))
 
 	return "Collecting session " + c.ID + " for " + c.ProjectID + " (" + c.Intent + "). Reply with text; /done finishes capture. Use /sessions or /focus <conversation> to target it.", &c, err
+}
+
+func (op telegramConversationTransaction) developmentInstructionRef(c TelegramConversation) string {
+	command := strings.Fields(op.input.Update.Text)
+	if c.Intent != string(AuthoringIntentDevelop) || len(command) < 2 || command[0] != "/develop" {
+		return ""
+	}
+
+	user, allowed := op.input.Config.AuthorizedUser(c.Peer.ChatID, c.Peer.TopicID, c.Peer.UserID, op.input.Update.ChatType)
+	if !allowed || user.OperatorID == "" {
+		return ""
+	}
+
+	// A model proposal cannot grant authority. Only the original explicit control
+	// creates this opaque source reference; the final scope still needs binding.
+	data := fmt.Appendf(nil, "%s\x00%s\x00%s\x00%s\x00%s", c.ID, user.OperatorID, c.ProjectID, c.Namespace, op.input.Update.Text)
+
+	return "instruction-" + workflowHash(data)
 }
