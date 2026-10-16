@@ -46,7 +46,16 @@ func (s *WorkflowStore) checkWorkflowSelectionGuard(ctx context.Context, request
 	return nil
 }
 
-func (s *WorkflowStore) acceptWorkflowContinuation(ctx context.Context, id string, expected uint64) (result WorkflowInvocation, err error) {
+func (s *WorkflowStore) acceptWorkflowContinuation(ctx context.Context, id string, expected uint64, checks ...WorkflowAdmissionCheck) (result WorkflowInvocation, err error) {
+	if len(checks) > 1 {
+		return result, ErrWorkflowConflict
+	}
+
+	var check WorkflowAdmissionCheck
+	if len(checks) == 1 {
+		check = checks[0]
+	}
+
 	err = s.withLock(ctx, func() error {
 		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
@@ -64,6 +73,10 @@ func (s *WorkflowStore) acceptWorkflowContinuation(ctx context.Context, id strin
 		}
 
 		if err := owner.checkWorkflowInputs(ctx, run); err != nil {
+			return err
+		}
+
+		if err := workflowCheckAuthorization(ctx, check); err != nil {
 			return err
 		}
 
@@ -87,4 +100,12 @@ func checkWorkflowResumeRevision(run WorkflowInvocation, ports []WorkflowResumeP
 	}
 
 	return nil
+}
+
+func workflowCheckAuthorization(ctx context.Context, check WorkflowAdmissionCheck) error {
+	if check == nil {
+		return nil
+	}
+
+	return check(ctx)
 }

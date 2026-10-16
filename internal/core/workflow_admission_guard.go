@@ -2,8 +2,8 @@ package core
 
 import "context"
 
-// WorkflowAdmissionCheck revalidates caller authority and target before a new
-// invocation is committed. A retained RequestKey bypasses this effect guard.
+// WorkflowAdmissionCheck revalidates volatile caller authority before admission
+// or a guarded retained activation. Original admission replay bypasses the check.
 type WorkflowAdmissionCheck func(context.Context) error
 
 // WorkflowAdmissionGuard retains exactly what a caller displayed before admission.

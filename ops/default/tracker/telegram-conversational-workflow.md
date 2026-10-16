@@ -16,11 +16,11 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 5, Native work continuation; T5.2 ready
+Active slice: Slice 5, Native work continuation; T5.3 ready
 
 Next slice: Slice 6, Guarded controls and capacity; after verified Slice 5 integration
 
-Progress: 4 of 8 slices integrated; 1 of 29 tasks validated and 15 done; 13 of 32 acceptance criteria have deterministic fixture evidence.
+Progress: 4 of 8 slices integrated; 2 of 29 tasks validated and 15 done; 13 of 32 acceptance criteria have deterministic fixture evidence.
 
 Full gate: `make verify`
 
@@ -178,15 +178,17 @@ Prerequisite: verified Slice 4 integration.
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
 | T5.1 | validated | `4456f3f1bbef9b0b8368294f12e40c9cc9ca15ff` | Exact native previews/admission for all five extents and RequestKey replay. |
-| T5.2 | ready | pending | Bounded asynchronous continuation under existing workflow ownership. |
-| T5.3 | pending | pending | Unattended policy-driven progress, review and integration. |
+| T5.2 | validated | pending task commit | Bounded asynchronous continuation under existing workflow ownership. |
+| T5.3 | ready | pending | Unattended policy-driven progress, review and integration. |
 | T5.4 | pending | pending | Evidence-bound results and shared CLI/TUI/Web invocation references. |
 
 Validation: plan section 10; `TestTelegramWork`, including focused race mode.
 
 T5.1 task checks: all five native extent previews/admissions, typed natural-language parity, changed source/policy/target rejection, root/operator guards, frozen namespace and lost native acknowledgement recovery passed. The combined Telegram/shared-work regression and its focused race selection passed; final `TestTelegramWork` normal/race checks, strict focused lint and repository style checks passed. The [Slice 5 report](../report/slices/telegram-conversational-workflow/slice-5-work.md) records exact commands and fixture boundaries.
 
-Candidate / PR / verified merge: pending completion of T5.2–T5.4.
+T5.2 task checks: all five extents execute one bounded native checkpoint; the real foreground receiver answers HTTP status during a blocked worker. Shared live owners, operator stops, human review, merger decisions, capacity waits and reopened abandoned claims retain native fences and budgets. Combined Telegram/shared/daemon normal regressions and the focused concurrency selection passed under race instrumentation. Strict focused lint and repository style checks passed; exact commands and fixture boundaries are in the [Slice 5 report](../report/slices/telegram-conversational-workflow/slice-5-work.md).
+
+Candidate / PR / verified merge: pending completion of T5.3–T5.4.
 
 ## Slice 6: Guarded Controls and Capacity
 

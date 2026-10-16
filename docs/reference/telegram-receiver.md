@@ -104,6 +104,20 @@ native request key observes its original admission before current source guards.
 Admission alone establishes neither host validation nor integration. See
 [Workflow Selection](workflow-selection.md) for native selection bounds.
 
+While the foreground receiver runs, it reattaches confirmed invocations without
+another message. A separate host permits at most sixteen concurrent calls and
+requests one shared native checkpoint per activation. Intake remains available
+during a long worker call. The common owner controls execution capacity, claims,
+recovery and frozen budgets. Live owners, operator stops, occupied capacity and
+human review or merger-decision waits preserve their native state. Dead owners
+use the common recovery operation.
+
+Each activation checks the original admission, current conversation binding,
+numeric peer authorization, mapped operator and registered project root. The
+same authority check runs again under native continuation acceptance. Changing
+the selected project or `OPS_USER` does not move retained work. Shutdown cancels
+and joins the receiver's own calls before closing its local store.
+
 Project resolution uses an explicit authorized target, the session/reply's
 bound project, peer selection, authorized configured default, then the sole
 authorized enabled project. Ambiguous or conflicting targets require explicit

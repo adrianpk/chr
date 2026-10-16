@@ -89,6 +89,24 @@ func serveTelegramReceiver(ctx context.Context, env core.UserEnvironment, assets
 }
 
 func (r telegramReceiver) run(ctx context.Context) error {
+	owned, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	finished := make(chan error, 1)
+	go func() {
+		finished <- newTelegramWorkHost(r).run(owned)
+
+		cancel()
+	}()
+
+	err := r.runIntake(owned)
+
+	cancel()
+
+	return errors.Join(err, <-finished)
+}
+
+func (r telegramReceiver) runIntake(ctx context.Context) error {
 	for ctx.Err() == nil {
 		delay, err := r.step(ctx)
 		if err != nil && ctx.Err() == nil {

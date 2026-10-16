@@ -39,6 +39,14 @@ The admission result distinguishes accepted work from validated or integrated
 work. A new extent cannot replace a conversation's bound invocation. Root and
 operator changes before a new effect reject without creating work.
 
+T5.2 reattaches confirmed invocations while the receiver runs. At most sixteen
+calls are in flight, each requesting one shared native checkpoint. Actual HTTP
+status intake remains responsive while a worker is blocked. Native capacity,
+claims, recovery, budgets and operator intent remain with the common owner.
+Pauses, cancellations, human review, unresolved merger decisions and occupied
+capacity remain observational. A real abandoned child claim is reconciled after
+receiver reopen without replacing the invocation or resetting its policy.
+
 ## Implementation Notes
 
 T5.1 implementation: `4456f3f1bbef9b0b8368294f12e40c9cc9ca15ff`.
@@ -56,6 +64,19 @@ The service retains an explicit workflow namespace instead of reading a changed
 configuration resolver. Telegram stores only adapter bindings and projections;
 it does not allocate a second scheduler or workflow owner.
 
+Continuation first matches the retained RequestKey, selector, target and frozen
+admission guard, then checks current peer/operator/project authority and the
+conversation fence. A caller-owned check runs before common recovery and again
+under native continuation acceptance. Read-only keyset pages and an in-flight
+registry provide bounded hosting; they do not allocate durable work or claims.
+Only owned calls are cancelled and joined before closing the receiver store.
+
+The common retained-work service now checks native capacity and unresolved
+merger decisions before accepting a continuation. Regression fixtures reproduced
+no-op checkpoint consumption during these waits and prove the corrected path
+preserves the invocation image. Capacity uses the existing native query even
+for invocations without the newer integration projection.
+
 The earlier receiver fixture used `/work` as an unavailable command. It now uses
 an unknown command, preserving its unknown-command and no-work assertions while
 the new fixtures cover the delivered admission operation.
@@ -72,6 +93,12 @@ the new fixtures cover the delivered admission operation.
 - `/work` accepts exact project, conversation and namespace scope plus one native
   selector. Only loose work omits its reference. Semantic proposals cannot skip
   its bound confirmation.
+- `ResumeBoundWork` verifies original scope and delegates to guarded shared
+  retained continuation; `AuthorizationCheck` requires an expected revision and
+  runs under the existing native acceptance lock.
+- Bound conversations expose pages of at most sixteen confirmed admissions.
+  Native revisions are projected monotonically without changing the original
+  admission result, authorization or conversation revision.
 
 ## Files of Interest
 
@@ -82,6 +109,12 @@ the new fixtures cover the delivered admission operation.
 - `internal/core/telegram_work_target.go`: source-stable conversation allocation.
 - `internal/app/telegram_work_*test.go` and
   `internal/core/telegram_work_admission_test.go`: real-store admission fixtures.
+- `internal/app/telegram_work_host.go`: bounded asynchronous calls and owned join.
+- `internal/app/service_workflow_bound.go` and `service_workflow_retained.go`:
+  common scope checks, eligibility and guarded continuation.
+- `internal/core/telegram_work_reference.go`: confirmed references and read projection.
+- `internal/app/telegram_work_*test.go`: actual foreground HTTP responsiveness,
+  shared live-owner exclusion, all five extents and child-process recovery.
 
 ## Validation
 
@@ -99,6 +132,22 @@ T5.1 task checks passed:
 - `git diff --check`
 
 The final focused normal/race checks passed after the last helper extraction.
+
+T5.2 task checks passed after the final continuation and eligibility changes:
+
+- `go test ./internal/core ./internal/app -run '^(TestTelegram(Work|Authoring|Conversation|Operation|Receiver)|TestWorkflowControl|TestWorkflowGuardedAdmission|TestWorkflowTerminalControl|TestServiceWorkflowContinuation|TestDaemonWorkflow(Continue|LiveOwner|Stops|Review|Recovery|Revision))' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^(TestTelegramWork|TestWorkflowControl|TestWorkflowGuardedAdmission|TestWorkflowTerminalControl|TestServiceWorkflowContinuation|TestDaemonWorkflow(Continue|LiveOwner|Stops|Review|Recovery|Revision))' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app` — zero issues.
+- `scripts/check-go-func-signatures.sh`
+- `scripts/check-package-readmes.sh`
+- `git diff --check`
+
+The race-instrumented app selection passed in 170.034 seconds. Fixtures use real
+temporary native repositories, SQLite reopen, owned child processes and HTTP
+intake, without live provider or bot access. They prove bounded activation and
+ownership behavior; automatic integration and result-notification journeys remain
+for T5.3 and T5.4.
+
 Final clean-HEAD controller validation is pending the
 complete slice and its canonical PR references. These are deterministic HTTP,
 SQLite and temporary Git fixtures; live and scheduled exhaustive evidence remain
@@ -106,5 +155,6 @@ separate.
 
 ## Risks and Follow-ups
 
-T5.2 through T5.4 remain pending: bounded asynchronous continuation, unattended
-policy-driven progress, coalesced notifications and evidence-bound delivery.
+T5.3 and T5.4 remain pending: unattended policy-driven progress, coalesced
+notifications and evidence-bound delivery. Combined shutdown deadline and
+exhaustion certification remain with the recorded recovery slice.

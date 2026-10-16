@@ -18,6 +18,12 @@ type RetainedWorkProgress struct {
 // ResumeRetainedWork never admits tickets or changes the frozen extent. Operator
 // stops and review waits remain observational; dead owners use common recovery.
 func (s service) ResumeRetainedWork(ctx context.Context, id string, revision uint64) (result RetainedWorkProgress, err error) {
+	return s.ResumeRetainedWorkGuarded(ctx, id, revision, nil)
+}
+
+// ResumeRetainedWorkGuarded rechecks volatile caller authority before recovery
+// and under the common continuation acceptance lock. It grants no new extent.
+func (s service) ResumeRetainedWorkGuarded(ctx context.Context, id string, revision uint64, check core.WorkflowAdmissionCheck) (result RetainedWorkProgress, err error) {
 	s.ctx = ctx
 
 	if !validWorkflowControlIdentity(id) || revision == 0 {
@@ -41,8 +47,21 @@ func (s service) ResumeRetainedWork(ctx context.Context, id string, revision uin
 		return result, err
 	}
 
+	ready, err := s.retainedWorkCapacityAvailable(ctx, result.Status)
+	if err != nil || !ready {
+		return result, err
+	}
+
+	if err := retainedWorkAuthorization(ctx, check); err != nil {
+		return result, err
+	}
+
 	result.Attempted = true
 
+	return s.advanceRetainedWork(ctx, result, check)
+}
+
+func (s service) advanceRetainedWork(ctx context.Context, result RetainedWorkProgress, check core.WorkflowAdmissionCheck) (RetainedWorkProgress, error) {
 	run, err := s.recoverRetainedWork(ctx, result.Status)
 	if err != nil {
 		return result, err
@@ -52,7 +71,7 @@ func (s service) ResumeRetainedWork(ctx context.Context, id string, revision uin
 		return result, nil
 	}
 
-	progress, err := s.ContinueWorkExtent(ctx, id, 1, run.Revision)
+	progress, err := s.continueWorkExtent(ctx, run.ID, 1, check, run.Revision)
 	result.Steps = progress.Steps
 
 	return result, err
@@ -63,7 +82,7 @@ func retainedWorkRunnable(status WorkflowWorkStatus) bool {
 		return true
 	}
 
-	if status.StopIntent != "" || status.ReviewState == "waiting_approval" || status.ReviewState == "human_required" {
+	if retainedWorkAwaitingAuthority(status) {
 		return false
 	}
 
@@ -75,6 +94,51 @@ func retainedWorkRunnable(status WorkflowWorkStatus) bool {
 	default:
 		return false
 	}
+}
+
+func retainedWorkAwaitingAuthority(status WorkflowWorkStatus) bool {
+	if status.StopIntent != "" || status.ReviewState == "waiting_approval" || status.ReviewState == "human_required" {
+		return true
+	}
+
+	if status.Blocker != nil && status.Blocker.NextActionOwner != "host" {
+		return true
+	}
+
+	if status.Integration == nil {
+		return false
+	}
+
+	return status.Integration.Decision != nil && status.Integration.Decision.State == "waiting"
+}
+
+func (s service) retainedWorkCapacityAvailable(ctx context.Context, status WorkflowWorkStatus) (bool, error) {
+	// A running invocation must reach common recovery, which proves whether its
+	// current owner is alive. Capacity observations cannot take over that owner.
+	if status.Status == "running" {
+		return true, nil
+	}
+
+	if status.Integration != nil {
+		return status.Integration.AvailableRoles > 0, nil
+	}
+
+	store, err := s.workflowStore()
+	if err != nil {
+		return false, err
+	}
+
+	capacity, err := store.QueryWorkflowIntegrationCapacity(ctx)
+
+	return capacity.Available > 0, err
+}
+
+func retainedWorkAuthorization(ctx context.Context, check core.WorkflowAdmissionCheck) error {
+	if check == nil {
+		return nil
+	}
+
+	return check(ctx)
 }
 
 func (s service) recoverRetainedWork(ctx context.Context, status WorkflowWorkStatus) (core.WorkflowInvocation, error) {

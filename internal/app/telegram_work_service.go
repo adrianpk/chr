@@ -11,6 +11,23 @@ type telegramWorkService interface {
 	StartTelegramWork(context.Context, core.TelegramOperationTarget, WorkflowBoundPreview, WorkflowBoundAdmission) (AgentWorkResult, error)
 }
 
+type telegramWorkContinuationService interface {
+	ResumeTelegramWork(context.Context, core.TelegramOperationTarget, WorkflowRetainedReference, WorkflowBoundPreview, core.WorkflowAdmissionCheck) (RetainedWorkProgress, error)
+}
+
+// ResumeTelegramWork restores the frozen namespace and enters the same guarded
+// retained-work operation used by other hosts, without a replacement selector.
+func (s service) ResumeTelegramWork(ctx context.Context, target core.TelegramOperationTarget, reference WorkflowRetainedReference, preview WorkflowBoundPreview, check core.WorkflowAdmissionCheck) (RetainedWorkProgress, error) {
+	scoped, err := s.telegramBoundProjectService(ctx, target)
+	if err != nil {
+		return RetainedWorkProgress{}, err
+	}
+
+	scoped.workflowNamespace = target.Namespace
+
+	return scoped.ResumeBoundWork(ctx, reference, preview, check)
+}
+
 // PreviewTelegramWork delegates exact selection and policy to the common service.
 func (s service) PreviewTelegramWork(ctx context.Context, target core.TelegramOperationTarget, selector core.WorkflowSelector) (WorkflowBoundPreview, error) {
 	scoped, err := s.telegramBoundProjectService(ctx, target)

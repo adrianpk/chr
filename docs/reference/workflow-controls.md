@@ -263,6 +263,10 @@ registered projects. It never admits the ready backlog. Each project iteration
 attempts at most 16 runnable invocations and one shared checkpoint per invocation.
 Live owners, operator stops, blockers and human review waits retain their meaning;
 dead-owner recovery uses shared process exclusion without resetting budgets.
+Occupied capacity and unresolved merger decisions remain read-only waits in the
+shared retained-work service. A caller may supply a volatile authorization check;
+guarded continuation requires an expected revision and rechecks that authority
+under the native acceptance lock before recording a continuation.
 See [Daemon coordination](daemon-coordination.md) for foreground lifecycle and
 coordinator stop behavior.
 
@@ -276,8 +280,9 @@ chr daemon workflow continue --dir /path/to/project --max-steps 1 execution-id
 chr daemon workflow pause --dir /path/to/project execution-id
 ```
 
-Existing Telegram notifications are informational. Remote command intake stores
-bounded handoff records; it does not execute ticket-native admission,
-continuation, stop, approval or reconciliation. Use the delivered CLI, TUI, Web or
-daemon controls for those actions. A notification does not certify execution or
-integration evidence.
+Existing Telegram notifications are informational. The separate dedicated
+[Telegram receiver](telegram-receiver.md) supports confirmed native admission
+and bounded shared continuation. Its conversation retains the same canonical
+invocation observed by CLI, TUI, Web and daemon status. Stop, approval and other
+native controls remain available through those existing surfaces. A notification
+does not certify execution or integration evidence.
