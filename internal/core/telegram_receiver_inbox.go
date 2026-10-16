@@ -87,9 +87,9 @@ func retainTelegramUpdate(ctx context.Context, tx *sql.Tx, botID, epoch int64, u
 	}
 
 	_, err = tx.ExecContext(ctx, `INSERT INTO telegram_updates(bot_id,update_id,cursor_epoch,payload_digest,update_kind,
-chat_id,topic_id,user_id,message_id,chat_type,received_at,payload,state,reason_code,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+chat_id,topic_id,user_id,message_id,chat_type,received_at,payload,state,reason_code,updated_at,reply_to_message_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		botID, update.UpdateID, epoch, update.Digest, update.Kind, update.Peer.ChatID, update.Peer.TopicID, update.Peer.UserID,
-		update.MessageID, update.ChatType, formatProjectTime(now), update.Text, state, update.Reason, formatProjectTime(now))
+		update.MessageID, update.ChatType, formatProjectTime(now), update.Text, state, update.Reason, formatProjectTime(now), update.ReplyToMessageID)
 
 	return err
 }
@@ -140,7 +140,7 @@ FROM telegram_updates WHERE bot_id=?`, botID).Scan(&total, &pending, &bytes); er
 
 // PendingUpdates returns at most 50 retained updates in source order.
 func (s *TelegramReceiverStore) PendingUpdates(ctx context.Context, botID int64) ([]TelegramReceivedUpdate, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT update_id,payload_digest,update_kind,chat_id,topic_id,user_id,message_id,chat_type,payload
+	rows, err := s.db.QueryContext(ctx, `SELECT update_id,payload_digest,update_kind,chat_id,topic_id,user_id,message_id,chat_type,payload,reply_to_message_id
 FROM telegram_updates WHERE bot_id=? AND state='pending' ORDER BY update_id LIMIT 50`, botID)
 	if err != nil {
 		return nil, err
@@ -154,7 +154,7 @@ FROM telegram_updates WHERE bot_id=? AND state='pending' ORDER BY update_id LIMI
 
 	for rows.Next() {
 		update := TelegramReceivedUpdate{Peer: TelegramPeerIdentity{BotID: botID}}
-		if err := rows.Scan(&update.UpdateID, &update.Digest, &update.Kind, &update.Peer.ChatID, &update.Peer.TopicID, &update.Peer.UserID, &update.MessageID, &update.ChatType, &update.Text); err != nil {
+		if err := rows.Scan(&update.UpdateID, &update.Digest, &update.Kind, &update.Peer.ChatID, &update.Peer.TopicID, &update.Peer.UserID, &update.MessageID, &update.ChatType, &update.Text, &update.ReplyToMessageID); err != nil {
 			return nil, err
 		}
 

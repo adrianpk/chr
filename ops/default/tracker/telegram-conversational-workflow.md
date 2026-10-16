@@ -20,7 +20,7 @@ Active slice: Slice 2, Conversation routing; implementation in progress
 
 Next slice: Slice 3, Replay-safe operations; after verified Slice 2 integration
 
-Progress: 1 of 8 slices integrated; 0 of 29 tasks validated and 4 done; 4 of 32 acceptance criteria have deterministic fixture evidence.
+Progress: 1 of 8 slices integrated; 1 of 29 tasks validated and 4 done; 4 of 32 acceptance criteria have deterministic fixture evidence.
 
 Full gate: `make verify`
 
@@ -88,11 +88,13 @@ Prerequisite: verified Slice 1 integration.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T2.1 | in_progress | pending | Frozen project/namespace bindings, peer selection and independent conversations. |
-| T2.2 | ready | pending | Exact replies/questions, duplicate-safe capture and safe completion/cancellation. |
+| T2.1 | validated | task commit follows this update | Frozen project/namespace bindings, peer selection and independent conversations. |
+| T2.2 | in_progress | pending | Exact replies/questions, duplicate-safe capture and safe completion/cancellation. |
 | T2.3 | ready | pending | Deterministic sessions/focus commands and bounded conversation views. |
 
 Validation: plan section 7; `TestTelegramConversation`, including focused race mode.
+
+Task validation: `go test ./internal/core ./internal/app -run '^Test(TelegramConversation|MaintenanceDBStatus)' -count=1 -timeout=3m` passed for T2.1; strict focused lint reported zero issues.
 
 Candidate / PR / verified merge / evidence: pending.
 

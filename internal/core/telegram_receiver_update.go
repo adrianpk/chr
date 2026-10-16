@@ -22,14 +22,15 @@ type TelegramPeerIdentity struct {
 
 // TelegramReceivedUpdate is normalized input; denied receipts retain no payload.
 type TelegramReceivedUpdate struct {
-	UpdateID  int64
-	Digest    string
-	Kind      string
-	Peer      TelegramPeerIdentity
-	MessageID int64
-	Text      string
-	ChatType  string
-	Reason    string
+	UpdateID         int64
+	Digest           string
+	Kind             string
+	Peer             TelegramPeerIdentity
+	MessageID        int64
+	ReplyToMessageID int64
+	Text             string
+	ChatType         string
+	Reason           string
 }
 
 type telegramReceiverMessage struct {
@@ -41,6 +42,9 @@ type telegramReceiverMessage struct {
 		ID   int64  `json:"id"`
 		Type string `json:"type"`
 	} `json:"chat"`
+	ReplyTo *struct {
+		MessageID int64 `json:"message_id"`
+	} `json:"reply_to_message"`
 	Text             string          `json:"text"`
 	SenderChat       json.RawMessage `json:"sender_chat"`
 	ForwardOrigin    json.RawMessage `json:"forward_origin"`
@@ -127,6 +131,10 @@ func normalizeTelegramReceiverMessage(update TelegramReceivedUpdate, message tel
 
 	if message.Text == "" || len(message.Text) > 16*1024 || !utf8.ValidString(message.Text) {
 		return update
+	}
+
+	if message.ReplyTo != nil {
+		update.ReplyToMessageID = message.ReplyTo.MessageID
 	}
 
 	update.Kind, update.Reason = kind, ""

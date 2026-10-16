@@ -33,36 +33,40 @@ func (s *TelegramReceiverStore) QueueReadResponse(ctx context.Context, update Te
 			return err
 		}
 
-		var pending int
-		if err := tx.QueryRowContext(ctx, "SELECT COUNT(*) FROM telegram_outbox WHERE bot_id=? AND state!='delivered'", update.Peer.BotID).Scan(&pending); err != nil {
-			return err
-		}
-
-		if pending >= 1024 {
-			return errors.New("telegram outbox capacity exhausted")
-		}
-
-		result, err := tx.ExecContext(ctx, "UPDATE telegram_updates SET state='processed',updated_at=? WHERE bot_id=? AND update_id=? AND payload_digest=? AND state='pending'", formatProjectTime(now), update.Peer.BotID, update.UpdateID, update.Digest)
-		if err != nil {
-			return err
-		}
-
-		if err := telegramRequireChanged(result); err != nil {
-			return err
-		}
-
-		key := fmt.Sprintf("update:%d", update.UpdateID)
-		sum := sha256.Sum256(fmt.Appendf(nil, "%d:%s", update.Peer.BotID, key))
-		id := "tgd-" + hex.EncodeToString(sum[:16])
-
-		_, err = tx.ExecContext(ctx, `INSERT INTO telegram_outbox(id,bot_id,chat_id,topic_id,user_id,event_key,config_digest,kind,text,state,created_at,updated_at)
-VALUES(?,?,?,?,?,?,?,'result',?,'pending',?,?)`, id, update.Peer.BotID, update.Peer.ChatID, update.Peer.TopicID, update.Peer.UserID, key, configDigest, text, formatProjectTime(now), formatProjectTime(now))
-		if err != nil {
-			return err
-		}
-
-		return checkTelegramIntakeCapacity(ctx, tx, update.Peer.BotID)
+		return queueTelegramResponse(ctx, tx, update, text, configDigest, now)
 	})
+}
+
+func queueTelegramResponse(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, text, configDigest string, now time.Time) error {
+	var pending int
+	if err := tx.QueryRowContext(ctx, "SELECT COUNT(*) FROM telegram_outbox WHERE bot_id=? AND state!='delivered'", update.Peer.BotID).Scan(&pending); err != nil {
+		return err
+	}
+
+	if pending >= 1024 {
+		return errors.New("telegram outbox capacity exhausted")
+	}
+
+	result, err := tx.ExecContext(ctx, "UPDATE telegram_updates SET state='processed',updated_at=? WHERE bot_id=? AND update_id=? AND payload_digest=? AND state='pending'", formatProjectTime(now), update.Peer.BotID, update.UpdateID, update.Digest)
+	if err != nil {
+		return err
+	}
+
+	if err := telegramRequireChanged(result); err != nil {
+		return err
+	}
+
+	key := fmt.Sprintf("update:%d", update.UpdateID)
+	sum := sha256.Sum256(fmt.Appendf(nil, "%d:%s", update.Peer.BotID, key))
+	id := "tgd-" + hex.EncodeToString(sum[:16])
+
+	_, err = tx.ExecContext(ctx, `INSERT INTO telegram_outbox(id,bot_id,chat_id,topic_id,user_id,event_key,config_digest,kind,text,state,created_at,updated_at)
+VALUES(?,?,?,?,?,?,?,'result',?,'pending',?,?)`, id, update.Peer.BotID, update.Peer.ChatID, update.Peer.TopicID, update.Peer.UserID, key, configDigest, text, formatProjectTime(now), formatProjectTime(now))
+	if err != nil {
+		return err
+	}
+
+	return checkTelegramIntakeCapacity(ctx, tx, update.Peer.BotID)
 }
 
 func telegramReadResponsePending(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate) (bool, error) {
