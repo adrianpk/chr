@@ -64,9 +64,12 @@ T6.1 checks passed:
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app`
 - `scripts/check-go-func-signatures.sh`
 - `scripts/check-package-readmes.sh`
-- `git diff --check` A broader `TestTelegramWork` selection encountered
-the unchanged `TestTelegramWorkResponsive` assertion consuming a queued native
-progress notice instead of receiver status; the isolated command
+- `git diff --check`
+
+The broader command
+`go test ./internal/core ./internal/app -run '^Test(TelegramControl|TelegramWork|TelegramConversationCommands|WorkflowControl|WorkflowTerminalControl|ServiceWorkflowContinuation|DaemonWorkflowRevision)' -count=1 -timeout=3m`
+failed at the unchanged `TestTelegramWorkResponsive` assertion, which consumed a
+queued native progress notice instead of receiver status. The isolated command
 `go test ./internal/app -run '^TestTelegramWorkResponsive$' -count=1 -timeout=3m`
 passed. No unrelated production change was made for that scheduling observation.
 
