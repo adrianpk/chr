@@ -388,6 +388,20 @@ passing fixtures retain eight actual overlapping sources and all ownership,
 overflow, reuse and host-validation assertions. Owned fixture processes stop
 after their checks.
 
+The first controller attempt at `a87bc24384a1b687154bf6df2b53539ecbc4d1a5`
+passed strict lint, then `make verify` failed in two database-status tests that
+still expected 21 migrations. Slice 6 introduces migration 22. Correction
+`8476423bc7aa84d116273e7df120a7916b96284f` keeps exact counts and adds explicit
+pending/applied assertions for `20261016000022 add_telegram_processing_lanes`.
+The focused command passed in 0.056 seconds:
+
+```sh
+go test ./internal/app -run '^TestMaintenanceDBStatusReports(PendingMigrationsWhenDatabaseIsMissing|AppliedMigrations)$' -count=1 -timeout=3m
+```
+
+The failed controller evidence is retained; the changed PR HEAD requires fresh
+evidence for the complete configured command list.
+
 Authoritative final slice validation is the controller receipt for the clean PR
 HEAD, in this order:
 
