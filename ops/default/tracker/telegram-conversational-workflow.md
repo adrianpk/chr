@@ -16,11 +16,11 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 3, Replay-safe operations; PR #392 awaiting controller integration
+Active slice: Slice 4, Conversational authoring; implementation in progress
 
-Next slice: Slice 4, Conversational authoring; after verified Slice 3 integration
+Next slice: Slice 5, Native work continuation; after verified Slice 4 integration
 
-Progress: 2 of 8 slices integrated; 4 of 29 tasks validated and 7 done; 9 of 32 acceptance criteria have deterministic fixture evidence.
+Progress: 3 of 8 slices integrated; 0 of 29 tasks validated and 11 done; 9 of 32 acceptance criteria have deterministic fixture evidence.
 
 Full gate: `make verify`
 
@@ -29,7 +29,7 @@ Exhaustive certification: pending the scheduled nightly for the final integrated
 ## State and Evidence Rules
 
 Task states: `pending`, `ready`, `in_progress`, `validated`, `blocked`, `done`.
-Slice 1 and Slice 2 tasks are done after verified PR #390/#391 integration. Slice 3 is active;
+Slice 1 through Slice 3 tasks are done after verified PR #390/#391/#392 integration. Slice 4 is active;
 later tasks remain pending until their prerequisites integrate. A validated task becomes
 done after verified slice integration; a successful test or worker exit alone
 does not close it.
@@ -104,32 +104,32 @@ Primary implementation commit: `36f31feaa0c0c0d5b52e9d80071322a8574744b5`. Canon
 
 ## Slice 3: Replay-safe Operations
 
-State: in_progress
+State: delivered
 
 Prerequisite: verified Slice 2 integration.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T3.1 | validated | `f39c12e96c3d2228e8411d954f0a219b86f2d497`, `1b0ec78267b3` | Caller-neutral request binding, owner journals and durable mutation receipts. |
-| T3.2 | validated | `9ebe146da339`, `5507e7041a3ddcdbd8021e9919c17f6b6ae555fc` | Guarded ticket/slice/slice-set/use-case record operations through shared owners. |
-| T3.3 | validated | `e5de10f0eb5e1a44cd4cc787186ab10a5da60bb3`, `76c4862df1b7dd68eb366d1395c2e1ec81ea0c69` | Durable outbox, reply/action guards and bounded Unicode delivery. |
-| T3.4 | validated | `e5de10f0`, `5507e704`, `c0385ee781452a7dfdad5aadeeb971e3b62cb60e` | Real-store crash/replay proof and changed-argument rejection. |
+| T3.1 | done | `f39c12e96c3d2228e8411d954f0a219b86f2d497`, `1b0ec78267b3` | Caller-neutral request binding, owner journals and durable mutation receipts. |
+| T3.2 | done | `9ebe146da339`, `5507e7041a3ddcdbd8021e9919c17f6b6ae555fc` | Guarded ticket/slice/slice-set/use-case record operations through shared owners. |
+| T3.3 | done | `e5de10f0eb5e1a44cd4cc787186ab10a5da60bb3`, `76c4862df1b7dd68eb366d1395c2e1ec81ea0c69` | Durable outbox, reply/action guards and bounded Unicode delivery. |
+| T3.4 | done | `e5de10f0`, `5507e704`, `c0385ee781452a7dfdad5aadeeb971e3b62cb60e` | Real-store crash/replay proof and changed-argument rejection. |
 
 Validation: plan section 8; `TestTelegramOperation`, including focused race mode.
 
-Task validation: record owner, application and live HTTP fixtures passed in normal and race mode, including compatibility with receiver/conversation and migration checks. Strict focused lint and repository Go-style/package checks passed. Exact commands and fixture boundaries are recorded in the [Slice 3 draft report](../report/slices/telegram-conversational-workflow/slice-3-operations.md).
+Task validation: record owner, application and live HTTP fixtures passed in normal and race mode, including compatibility with receiver/conversation and migration checks. Strict focused lint and repository Go-style/package checks passed. Exact commands and fixture boundaries are recorded in the [Slice 3 report](../report/slices/telegram-conversational-workflow/slice-3-operations.md).
 
-Candidate: `c0385ee781452a7dfdad5aadeeb971e3b62cb60e` implementation. Canonical PR: [#392](https://forge.adrianpk.com/adrianpk/chr/pulls/392) on `feat/slice-3-telegram-operations`. Controller validation must bind the exact clean PR HEAD and canonical ordered checks before integration. Verified merge: pending.
+Candidate: `c0385ee781452a7dfdad5aadeeb971e3b62cb60e` implementation. Canonical PR: [#392](https://forge.adrianpk.com/adrianpk/chr/pulls/392) on `feat/slice-3-telegram-operations`. Verified merge: `697a3ba4b3e33c459c343e140d0337860f453918`, 2026-10-16; the controller receipt records all four ordered checks passed on that exact clean HEAD.
 
 ## Slice 4: Conversational Authoring
 
-State: pending
+State: in_progress
 
 Prerequisite: verified Slice 3 integration.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T4.1 | pending | pending | Bounded typed natural-language intent and deterministic command parity. |
+| T4.1 | in_progress | pending | Bounded typed natural-language intent and deterministic command parity. |
 | T4.2 | pending | pending | Real configured-provider authoring with exact question/turn binding. |
 | T4.3 | pending | pending | Explain/prepare/develop intent, retained scope and bounded authority. |
 | T4.4 | pending | pending | Canonical artifact generation/refinement, provenance and replay checks. |
@@ -273,4 +273,4 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Exact integrated candidate passed the scheduled exhaustive nightly.
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
-Current state: Slice 2 delivered through PR #391; Slice 3 tasks are validated in `feat/slice-3-telegram-operations`. Shared owner receipts, guarded record commands, retained requests, single-use actions and ordered Unicode outbox delivery have focused normal/race evidence, including real-store and HTTP crash boundaries. Canonical PR [#392](https://forge.adrianpk.com/adrianpk/chr/pulls/392) awaits controller-owned integration with exact-clean-HEAD validation; Slice 4 remains pending verified integration.
+Current state: Slice 3 delivered through PR [#392](https://forge.adrianpk.com/adrianpk/chr/pulls/392) at `697a3ba4b3e33c459c343e140d0337860f453918`, verified against canonical Forgejo, clean `dev` and the exact-HEAD controller receipt. Slice 4 is active on `feat/slice-4-telegram-authoring`; T4.1 is in progress.

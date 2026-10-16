@@ -1,6 +1,6 @@
 # Slice 3: Replay-safe Operations
 
-Status: reviewing
+Status: delivered
 
 Delivery set: telegram-conversational-workflow
 
@@ -119,9 +119,10 @@ Required final controller checks, in order:
 - `go test -race ./internal/core ./internal/app -run '^TestTelegramOperation' -count=1 -timeout=3m`
 - `git diff --check`
 
-The controller records these against the exact clean PR HEAD after every PR
-reference is committed. The canonical PR validation list and controller receipt
-carry that result; task checks below are separate implementation evidence.
+All four checks passed through controller validation on clean HEAD
+`697a3ba4b3e33c459c343e140d0337860f453918`. PR #392 merged that exact commit
+into `dev` on 2026-10-16; verified against the canonical forge and local `dev`.
+Task checks below are separate implementation evidence.
 
 Successful T3.3/T3.4 task checks:
 
