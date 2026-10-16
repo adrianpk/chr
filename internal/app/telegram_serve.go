@@ -48,7 +48,9 @@ func serveTelegramReceiver(ctx context.Context, env core.UserEnvironment, assets
 	if err != nil {
 		return err
 	}
-	defer func() { err = errors.Join(err, configurationLock.Close()) }()
+
+	resources := telegramReceiverResources{closers: []io.Closer{configurationLock}}
+	defer func() { err = resources.finish(err) }()
 
 	config, err := core.LoadTelegramReceiverConfig(env)
 	if err != nil {
@@ -69,7 +71,8 @@ func serveTelegramReceiver(ctx context.Context, env core.UserEnvironment, assets
 	if err != nil {
 		return err
 	}
-	defer func() { err = errors.Join(err, botLock.Close()) }()
+
+	resources.closers = append(resources.closers, botLock)
 
 	if err := core.BindTelegramReceiverIdentity(env, botID); err != nil {
 		return err
@@ -79,7 +82,8 @@ func serveTelegramReceiver(ctx context.Context, env core.UserEnvironment, assets
 	if err != nil {
 		return err
 	}
-	defer func() { err = errors.Join(err, store.Close()) }()
+
+	resources.closers = append(resources.closers, store)
 
 	if err := store.BindReceiver(ctx, botID, config, time.Now()); err != nil {
 		return err
@@ -91,30 +95,11 @@ func serveTelegramReceiver(ctx context.Context, env core.UserEnvironment, assets
 }
 
 func (r telegramReceiver) run(ctx context.Context) error {
-	owned, cancel := context.WithCancel(ctx)
-	defer cancel()
-
 	r.slots = newTelegramActivationSlots()
-	finished := make(chan error, 3)
 
-	for _, run := range []func(context.Context) error{newTelegramWorkHost(r).run, newTelegramApplicationHost(r).run, r.runDeliveries} {
-		go func() {
-			err := run(owned)
-			if owned.Err() != nil && errors.Is(err, owned.Err()) {
-				err = nil
-			}
+	hosts := []func(context.Context) error{r.runIntake, newTelegramWorkHost(r).run, newTelegramApplicationHost(r).run, r.runDeliveries}
 
-			finished <- err
-
-			cancel()
-		}()
-	}
-
-	err := r.runIntake(owned)
-
-	cancel()
-
-	return errors.Join(err, <-finished, <-finished, <-finished)
+	return runTelegramReceiverHosts(ctx, hosts, 30*time.Second)
 }
 
 func (r telegramReceiver) runIntake(ctx context.Context) error {
