@@ -16,7 +16,7 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 4, Conversational authoring; implementation validated, PR preparation
+Active slice: Slice 4, Conversational authoring; PR #393 reviewing
 
 Next slice: Slice 5, Native work continuation; after verified Slice 4 integration
 
@@ -132,7 +132,7 @@ Prerequisite: verified Slice 3 integration.
 | T4.1 | validated | `b54d526fd0471eff7c4df2ef769ba0abe66476ce` | Bounded typed natural-language intent and deterministic command parity. |
 | T4.2 | validated | `f7408ea2fa51d4a66ce5be156d2aa192160ad37f` | Real configured-provider authoring with exact question/turn binding. |
 | T4.3 | validated | `4d1932fedf6ac79e659ce2b475b4261b822f50e6` | Explain/prepare/develop intent, retained scope and bounded authority. |
-| T4.4 | validated | `e4aa7bf44bc36ba8a5f1ca0edb82978f79bb0923`, `37a1a0aad92404cf086bf202f812bde81d39f333` | Canonical artifacts, native preparation, exact scope decisions and replay checks. |
+| T4.4 | validated | `e4aa7bf44bc36ba8a5f1ca0edb82978f79bb0923`, `37a1a0aad92404cf086bf202f812bde81d39f333`, `392ce4b1f8bb4180ce6f227ac3340aacaec29b77` | Canonical artifacts, native preparation, exact scope decisions and replay checks. |
 
 Validation: plan section 9; `TestTelegramAuthoring`, including focused race mode.
 
@@ -167,7 +167,7 @@ strict lint and style checks. Real native-owner fixtures prove first-scope
 authority, changed/missing authority, button/reply/text parity, stale prompts and
 lost-acknowledgement recovery preserving independent source/ticket edits.
 
-Candidate: task implementation validated. Canonical PR: pending. Verified merge: pending controller integration.
+Implementation: `392ce4b1f8bb4180ce6f227ac3340aacaec29b77`. Canonical PR: [#393](https://forge.adrianpk.com/adrianpk/chr/pulls/393). Verified merge: pending controller integration.
 
 ## Slice 5: Native Work Continuation
 
@@ -304,4 +304,4 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Exact integrated candidate passed the scheduled exhaustive nightly.
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
-Current state: Slice 3 delivered through PR [#392](https://forge.adrianpk.com/adrianpk/chr/pulls/392) at `697a3ba4b3e33c459c343e140d0337860f453918`. All four Slice 4 tasks are validated with focused normal/race and strict lint evidence. The report is reviewing; the canonical Slice 4 PR and exact clean-HEAD controller checks are being prepared. Slice 5 remains pending verified integration.
+Current state: Slice 3 delivered through PR [#392](https://forge.adrianpk.com/adrianpk/chr/pulls/392) at `697a3ba4b3e33c459c343e140d0337860f453918`. All four Slice 4 tasks are validated with focused normal/race and strict lint evidence. The report and canonical PR [#393](https://forge.adrianpk.com/adrianpk/chr/pulls/393) are reviewing; exact clean-HEAD controller checks follow the committed PR references. Slice 5 remains pending verified integration.

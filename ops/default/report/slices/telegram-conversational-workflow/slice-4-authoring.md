@@ -10,7 +10,7 @@ Tracker: [Telegram Conversation Tracker](../../../tracker/telegram-conversationa
 
 Branch: `feat/slice-4-telegram-authoring`
 
-PR: pending
+PR: [#393](https://forge.adrianpk.com/adrianpk/chr/pulls/393)
 
 ## Purpose
 
@@ -99,6 +99,8 @@ T4.3 implementation commit: `4d1932fedf6ac79e659ce2b475b4261b822f50e6`.
 T4.4 artifact-bridge implementation commit: `e4aa7bf44bc36ba8a5f1ca0edb82978f79bb0923`.
 
 T4.4 explanation-bridge implementation commit: `37a1a0aad92404cf086bf202f812bde81d39f333`.
+
+T4.4 native preparation implementation commit: `392ce4b1f8bb4180ce6f227ac3340aacaec29b77`.
 
 The shared structured provider uses the existing Codex agent runner or OpenAI
 Responses boundary. `CHR_CONVERSATION_GENERATION_BACKEND=openai` selects OpenAI;
