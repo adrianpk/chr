@@ -90,7 +90,8 @@ func telegramIntentTargetFailure(err error) string {
 }
 
 func freezeTelegramIntentArguments(intent ConversationIntent, target core.TelegramOperationTarget) ConversationIntent {
-	if intent.OperationID == "work" {
+	switch intent.OperationID {
+	case "work", "control":
 		intent.Arguments.Project, intent.Arguments.Namespace = target.ProjectID, target.Namespace
 	}
 
@@ -113,15 +114,8 @@ func freezeTelegramIntentArguments(intent ConversationIntent, target core.Telegr
 }
 
 func (r telegramReceiver) intentPreparationTarget(ctx context.Context, input core.TelegramConversationInput, intent ConversationIntent) (core.TelegramOperationTarget, bool, error) {
-	if work, recognized, err := telegramIntentWork(input.Update, intent); recognized {
-		if err != nil {
-			return core.TelegramOperationTarget{}, true, err
-		}
-
-		work.Input.Config, work.Input.Projects = input.Config, input.Projects
-		target, err := r.store.ResolveTelegramOperationTarget(ctx, work.Input, time.Now())
-
-		return target, true, err
+	if target, needed, err := r.intentNativeWorkTarget(ctx, input, intent); needed || err != nil {
+		return target, needed, err
 	}
 
 	work, recognized, err := telegramIntentPreparedWork(input.Update, intent)

@@ -10,6 +10,16 @@ import (
 // ResolveTelegramWorkTarget creates a source-stable conversation when /work has
 // no explicit session. No canonical work is admitted by this local allocation.
 func (s *TelegramReceiverStore) ResolveTelegramWorkTarget(ctx context.Context, input TelegramConversationInput, now time.Time) (TelegramOperationTarget, error) {
+	return s.resolveTelegramActionTarget(ctx, input, "develop", "Native work selection", now)
+}
+
+// ResolveTelegramControlTarget gives a standalone control its own retry-stable
+// confirmation conversation. Allocation grants no native execution authority.
+func (s *TelegramReceiverStore) ResolveTelegramControlTarget(ctx context.Context, input TelegramConversationInput, now time.Time) (TelegramOperationTarget, error) {
+	return s.resolveTelegramActionTarget(ctx, input, "prepare", "Native workflow control", now)
+}
+
+func (s *TelegramReceiverStore) resolveTelegramActionTarget(ctx context.Context, input TelegramConversationInput, intent, topic string, now time.Time) (TelegramOperationTarget, error) {
 	var target TelegramOperationTarget
 	if _, allowed := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType); !allowed {
 		return target, ErrWorkflowConflict
@@ -21,7 +31,7 @@ func (s *TelegramReceiverStore) ResolveTelegramWorkTarget(ctx context.Context, i
 			return err
 		}
 
-		c, err := op.workConversation()
+		c, err := op.sourceActionConversation(intent, topic)
 		if err != nil {
 			return err
 		}
@@ -34,7 +44,7 @@ func (s *TelegramReceiverStore) ResolveTelegramWorkTarget(ctx context.Context, i
 	return target, err
 }
 
-func (op telegramConversationTransaction) workConversation() (*TelegramConversation, error) {
+func (op telegramConversationTransaction) sourceActionConversation(intent, topic string) (*TelegramConversation, error) {
 	c, err := op.explicitTarget()
 	if err != nil || c != nil {
 		return c, err
@@ -53,7 +63,7 @@ func (op telegramConversationTransaction) workConversation() (*TelegramConversat
 		return nil, err
 	}
 
-	op.input.Intent, op.input.Text = "develop", "Native work selection"
+	op.input.Intent, op.input.Text = intent, topic
 
 	_, c, err = op.start()
 	if err != nil {

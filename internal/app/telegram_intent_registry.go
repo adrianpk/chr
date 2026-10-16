@@ -15,6 +15,8 @@ func telegramIntentRegistry() []ConversationIntentOperation {
 	result = append(result, telegramPreparedWorkRegistry()...)
 
 	result = append(result, telegramWorkRegistry()...)
+	result = append(result, telegramControlRegistry()...)
+
 	for _, operation := range telegramReadRegistry() {
 		result = append(result, ConversationIntentOperation{ID: strings.TrimPrefix(operation.Command, "/"), Description: operation.Help, Arguments: "No arguments"})
 	}

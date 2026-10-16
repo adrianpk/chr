@@ -12,6 +12,10 @@ import (
 // ReconcileWorkflow fences an expired or dead owner after proving its group dead
 // and acquiring capacity. It never creates an attempt or resets a retry budget.
 func (s *WorkflowStore) ReconcileWorkflow(ctx context.Context, id string, expected ...uint64) (result WorkflowInvocation, err error) {
+	return s.reconcileWorkflowChecked(ctx, id, nil, expected...)
+}
+
+func (s *WorkflowStore) reconcileWorkflowChecked(ctx context.Context, id string, check WorkflowAdmissionCheck, expected ...uint64) (result WorkflowInvocation, err error) {
 	err = s.withLock(ctx, func() error {
 		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
@@ -19,6 +23,10 @@ func (s *WorkflowStore) ReconcileWorkflow(ctx context.Context, id string, expect
 		}
 
 		if err := checkWorkflowRevision(run.WorkflowInvocation, expected); err != nil {
+			return err
+		}
+
+		if err := workflowCheckAuthorization(ctx, check); err != nil {
 			return err
 		}
 

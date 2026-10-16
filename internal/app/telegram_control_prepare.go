@@ -1,0 +1,117 @@
+package app
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"time"
+
+	"forge.adrianpk.com/chr/internal/core"
+)
+
+type telegramControlArguments struct {
+	Action string `json:"action"`
+	ID     string `json:"invocation"`
+}
+
+type telegramControlPreview struct {
+	Request WorkflowControlRequest `json:"control"`
+	Status  WorkflowWorkStatus     `json:"status"`
+}
+
+func (r telegramReceiver) prepareControl(ctx context.Context, request core.TelegramOperationRequest, config core.TelegramReceiverConfig) error {
+	if telegramPreparedWorkFinished(request.State) {
+		return nil
+	}
+
+	operations, ok := r.operations.(telegramControlService)
+	if !ok {
+		return r.finishControlPreparation(ctx, request, config)
+	}
+
+	if err := r.validateRecordAuthority(ctx, request); err != nil {
+		return r.finishControlPreparation(ctx, request, config)
+	}
+
+	if request.State == "prepared" {
+		input, err := r.previewControl(ctx, operations, request)
+		if err != nil {
+			return r.finishControlPreparation(ctx, request, config)
+		}
+
+		request.PreparedInput, request.State = input, "ready"
+	}
+
+	return r.offerControl(ctx, request)
+}
+
+func (r telegramReceiver) previewControl(ctx context.Context, operations telegramControlService, request core.TelegramOperationRequest) (json.RawMessage, error) {
+	var arguments telegramControlArguments
+	if err := decodeOperationJSON(string(request.Arguments), &arguments); err != nil {
+		return nil, err
+	}
+
+	status, err := operations.ReadTelegramControl(ctx, request.Target, arguments.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	preview := telegramControlPreview{Request: WorkflowControlRequest{Action: arguments.Action, ID: arguments.ID, ExpectedRevision: status.Revision, StepLimit: 1}, Status: status}
+
+	input, err := json.Marshal(preview)
+	if err != nil {
+		return nil, err
+	}
+
+	return input, r.store.PrepareTelegramOperation(ctx, request, input, time.Now())
+}
+
+func telegramRetainedControl(request core.TelegramOperationRequest) (telegramControlPreview, error) {
+	var (
+		preview   telegramControlPreview
+		arguments telegramControlArguments
+	)
+	if err := decodeBoundedOperationJSON(string(request.PreparedInput), &preview, 1048576); err != nil {
+		return preview, err
+	}
+
+	if err := decodeOperationJSON(string(request.Arguments), &arguments); err != nil {
+		return preview, err
+	}
+
+	control := preview.Request
+	if control.ID != arguments.ID || control.Action != arguments.Action || control.ExpectedRevision == 0 || control.ExpectedRevision != preview.Status.Revision || control.StepLimit != 1 {
+		return preview, core.ErrWorkflowConflict
+	}
+
+	if !telegramControlStatusMatches(preview.Status, control.ID, request.Target) {
+		return preview, core.ErrWorkflowConflict
+	}
+
+	return preview, nil
+}
+
+func telegramControlStatusMatches(status WorkflowWorkStatus, id string, target core.TelegramOperationTarget) bool {
+	return status.ID == id && status.ProjectID == target.ProjectID && status.Namespace == target.Namespace
+}
+
+func (r telegramReceiver) offerControl(ctx context.Context, request core.TelegramOperationRequest) error {
+	preview, err := telegramRetainedControl(request)
+	if err != nil {
+		return err
+	}
+
+	input, err := r.preparedWorkAuthorityInput(request)
+	if err != nil {
+		return err
+	}
+
+	text := fmt.Sprintf("Native control preview: %s\nMapped operator: %s\n%s\nApply exactly this control at revision %d?", preview.Request.Action, request.Operator, telegramWorkProgressText(preview.Status), preview.Request.ExpectedRevision)
+	_, err = r.store.OfferTelegramAction(ctx, core.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{preview.Request.Action}, Text: text, ExpiresAt: time.Now().Add(24 * time.Hour)}, time.Now())
+
+	return err
+}
+
+func (r telegramReceiver) finishControlPreparation(ctx context.Context, request core.TelegramOperationRequest, config core.TelegramReceiverConfig) error {
+	return r.store.FinishTelegramOperation(ctx, request, "blocked", "", json.RawMessage(`{"state":"blocked"}`), "The exact native control is unavailable for this peer, project or revision. Read current state before requesting a new control.", config.Digest(), time.Now())
+}

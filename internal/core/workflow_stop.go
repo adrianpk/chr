@@ -14,6 +14,10 @@ var ErrWorkflowStop = errors.New("workflow stop requested")
 // StopWorkflow records intent. A running attempt releases ownership only after
 // its process group is quiescent and its retained checkpoint is journaled.
 func (s *WorkflowStore) StopWorkflow(ctx context.Context, id, intent string, expected ...uint64) (result WorkflowInvocation, err error) {
+	return s.stopWorkflowChecked(ctx, id, intent, nil, expected...)
+}
+
+func (s *WorkflowStore) stopWorkflowChecked(ctx context.Context, id, intent string, check WorkflowAdmissionCheck, expected ...uint64) (result WorkflowInvocation, err error) {
 	if !slices.Contains([]string{"pause", "cancel"}, intent) {
 		return result, fmt.Errorf("workflow stop intent must be pause or cancel")
 	}
@@ -25,6 +29,10 @@ func (s *WorkflowStore) StopWorkflow(ctx context.Context, id, intent string, exp
 		}
 
 		if err := checkWorkflowRevision(run.WorkflowInvocation, expected); err != nil {
+			return err
+		}
+
+		if err := workflowCheckAuthorization(ctx, check); err != nil {
 			return err
 		}
 
@@ -105,6 +113,12 @@ func workflowRetainedStopIntent(run workflowInvocationFile, intent string) strin
 func (s *WorkflowStore) resumeGuardedWorkflow(ctx context.Context, run workflowInvocationFile, ports []WorkflowResumePorts) (WorkflowInvocation, error) {
 	if err := checkWorkflowResumeRevision(run.WorkflowInvocation, ports); err != nil {
 		return WorkflowInvocation{}, err
+	}
+
+	if len(ports) == 1 {
+		if err := workflowCheckAuthorization(ctx, ports[0].AuthorizationCheck); err != nil {
+			return WorkflowInvocation{}, err
+		}
 	}
 
 	if run.Status != "paused" || run.StopIntent == "cancel" {

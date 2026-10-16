@@ -88,6 +88,10 @@ func (s service) StopWorkflow(ctx context.Context, id, intent string, expected .
 
 // ResumeWorkflow continues a completed pause with its consumed budget retained.
 func (s service) ResumeWorkflow(ctx context.Context, id string, expected ...uint64) (core.WorkflowInvocation, error) {
+	return s.resumeWorkflowChecked(ctx, id, nil, expected...)
+}
+
+func (s service) resumeWorkflowChecked(ctx context.Context, id string, check core.WorkflowAdmissionCheck, expected ...uint64) (core.WorkflowInvocation, error) {
 	revision, err := workflowControlRevision(expected)
 	if err != nil {
 		return core.WorkflowInvocation{}, err
@@ -112,6 +116,8 @@ func (s service) ResumeWorkflow(ctx context.Context, id string, expected ...uint
 
 		ports.ExpectedRevision = revision
 	}
+
+	ports.AuthorizationCheck = check
 
 	return store.ResumeWorkflow(ctx, id, ports)
 }

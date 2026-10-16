@@ -12,16 +12,17 @@ import (
 
 // WorkflowControlRequest carries the exact displayed invocation and revision.
 type WorkflowControlRequest struct {
-	Integration      *WorkflowIntegrationControlGuard
-	BudgetGrant      *core.WorkflowIntegrationGrant
-	DecisionAnswer   *core.WorkflowIntegrationAnswer
-	DecisionRevision uint64
-	DecisionHash     string
-	Action           string
-	ID               string
-	ExpectedRevision uint64
-	BindingHash      string
-	StepLimit        int
+	AuthorizationCheck core.WorkflowAdmissionCheck `json:"-"`
+	Integration        *WorkflowIntegrationControlGuard
+	BudgetGrant        *core.WorkflowIntegrationGrant
+	DecisionAnswer     *core.WorkflowIntegrationAnswer
+	DecisionRevision   uint64
+	DecisionHash       string
+	Action             string
+	ID                 string
+	ExpectedRevision   uint64
+	BindingHash        string
+	StepLimit          int
 }
 
 // ControlWorkExtent dispatches shared lifecycle operations and returns current
@@ -44,15 +45,13 @@ func (s service) ControlWorkExtent(ctx context.Context, request WorkflowControlR
 func (s service) executeWorkflowControl(ctx context.Context, request WorkflowControlRequest) error {
 	switch request.Action {
 	case "pause", "cancel":
-		_, err := s.StopWorkflow(ctx, request.ID, request.Action, request.ExpectedRevision)
-
-		return err
+		return s.executeGuardedWorkflowControl(ctx, request)
 	case "resume":
-		_, err := s.ResumeWorkflow(ctx, request.ID, request.ExpectedRevision)
+		_, err := s.resumeWorkflowChecked(ctx, request.ID, request.AuthorizationCheck, request.ExpectedRevision)
 
 		return err
 	case "continue":
-		_, err := s.ContinueWorkExtent(ctx, request.ID, request.StepLimit, request.ExpectedRevision)
+		_, err := s.continueWorkExtent(ctx, request.ID, request.StepLimit, request.AuthorizationCheck, request.ExpectedRevision)
 
 		return err
 	case "approve":
@@ -66,14 +65,27 @@ func (s service) executeWorkflowControl(ctx context.Context, request WorkflowCon
 
 		return err
 	case "reconcile":
-		_, err := s.ReconcileWorkflow(ctx, request.ID, request.ExpectedRevision)
-
-		return err
+		return s.executeGuardedWorkflowControl(ctx, request)
 	case "grant", "answer_decision":
 		return s.executeWorkflowIntegrationControl(ctx, request)
 	default:
 		return fmt.Errorf("unsupported workflow control: %s", request.Action)
 	}
+}
+
+func (s service) executeGuardedWorkflowControl(ctx context.Context, request WorkflowControlRequest) error {
+	store, err := s.workflowStore()
+	if err != nil {
+		return err
+	}
+
+	if request.Action == "reconcile" {
+		_, err = store.ReconcileWorkflowGuarded(ctx, request.ID, request.ExpectedRevision, request.AuthorizationCheck)
+	} else {
+		_, err = store.StopWorkflowGuarded(ctx, request.ID, request.Action, request.ExpectedRevision, request.AuthorizationCheck)
+	}
+
+	return err
 }
 
 func validWorkflowControlIdentity(id string) bool {

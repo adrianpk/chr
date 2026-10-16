@@ -51,6 +51,10 @@ func (r telegramReceiver) respondAction(ctx context.Context, user core.TelegramA
 }
 
 func (r telegramReceiver) dispatchTelegramAction(ctx context.Context, claim core.TelegramActionClaim, config core.TelegramReceiverConfig) error {
+	if claim.Request.OperationID == "work.control" {
+		return r.applyControlAction(ctx, claim, config)
+	}
+
 	if claim.Request.OperationID == "work.admit" {
 		return r.applyWorkAdmission(ctx, claim, config)
 	}

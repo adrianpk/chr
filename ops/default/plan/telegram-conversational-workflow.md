@@ -16,7 +16,7 @@ Tracker: [Telegram Conversation Tracker](../tracker/telegram-conversational-work
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, its canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 6, Guarded controls and capacity; T6.1 in progress
+Active slice: Slice 6, Guarded controls and capacity; T6.1 validated, T6.2 in progress
 
 Next slice: Slice 7, Recovery and user operation; after verified Slice 6 integration
 
@@ -423,4 +423,4 @@ starts with every criterion pending.
 - [ ] The cycle report, tracker and plan distinguish tested code from later closure-only documentation.
 - [ ] The delivery set is closed with no pending work or unreported blocker.
 
-Current state: Slices 1 through 3 are integrated into `dev`; the latest verified merge is [PR #392](https://forge.adrianpk.com/adrianpk/chr/pulls/392) at `697a3ba4b3e33c459c343e140d0337860f453918`. All four Slice 4 tasks have focused deterministic validation; its canonical PR [#393](https://forge.adrianpk.com/adrianpk/chr/pulls/393) is open, with exact clean-HEAD controller checks following committed PR references. Slice 5 remains pending verified integration. Live activation and exhaustive certification remain pending.
+Current state: Slices 1 through 5 are delivered through canonical PR #390/#391/#392/#393/#394; the latest verified merge is `c321da6917e369049583eece5a1a07951c1cc22b`. Slice 6 is active on its recorded branch. T6.1 has focused lifecycle and authority evidence; T6.2 is active. Final Slice 6 controller validation, live activation and exhaustive certification remain pending.
