@@ -10,7 +10,7 @@ Tracker: [Telegram Conversation Tracker](../../../tracker/telegram-conversationa
 
 Branch: `feat/slice-5-telegram-work`
 
-PR: pending
+PR: [#394](https://forge.adrianpk.com/adrianpk/chr/pulls/394)
 
 ## Purpose
 
@@ -68,6 +68,8 @@ T5.1 implementation: `4456f3f1bbef9b0b8368294f12e40c9cc9ca15ff`.
 T5.2 implementation: `d94c581ded73f5a5fbe9ba45192097ebf1634ee0`.
 
 T5.3 implementation: `3eb2a912f0c13058906b3e62ffc3316b14e172f4`.
+
+T5.4 implementation: `b94e60267f7b8eeafb21e93f3cd653fafad1de1a`.
 
 `StartBoundWorkExtent` adds an optional stable admission binding. Its zero-step
 mode calls the existing native admission owner and leaves continuation separate.

@@ -16,7 +16,7 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 5, Native work continuation; implementation validated, canonical PR preparation
+Active slice: Slice 5, Native work continuation; implementation validated; canonical PR #394 awaits controller integration
 
 Next slice: Slice 6, Guarded controls and capacity; after verified Slice 5 integration
 
@@ -180,7 +180,7 @@ Prerequisite: verified Slice 4 integration.
 | T5.1 | validated | `4456f3f1bbef9b0b8368294f12e40c9cc9ca15ff` | Exact native previews/admission for all five extents and RequestKey replay. |
 | T5.2 | validated | `d94c581ded73f5a5fbe9ba45192097ebf1634ee0` | Bounded asynchronous continuation under existing workflow ownership. |
 | T5.3 | validated | `3eb2a912f0c13058906b3e62ffc3316b14e172f4` | Unattended policy-driven progress, review and integration. |
-| T5.4 | validated | pending task commit | Evidence-bound results and shared CLI/TUI/Web invocation references. |
+| T5.4 | validated | `b94e60267f7b8eeafb21e93f3cd653fafad1de1a` | Evidence-bound results and shared CLI/TUI/Web invocation references. |
 
 Validation: plan section 10; `TestTelegramWork`, including focused race mode.
 
@@ -192,7 +192,7 @@ T5.3 task checks: actual foreground intake reaches trusted review, one guarded p
 
 T5.4 task checks: real CLI, TUI and Web reads expose the same Telegram-created invocation and accepted native evidence without writing work. Actual human review projects its candidate, open PR and exact approval hash without claiming integration. An uncertain HTTP send followed by SQLite reopen repeats only the labelled notice and preserves canonical workflow bytes. Focused normal/race, strict focused lint and repository style checks passed. User Guide and the existing Telegram changelog entry describe the usable workflow.
 
-Canonical PR: pending creation. Final readiness is bound to the controller's exact clean-HEAD receipt for the required ordered checks; integration remains pending.
+Canonical PR: [#394](https://forge.adrianpk.com/adrianpk/chr/pulls/394) on `feat/slice-5-telegram-work`. Final readiness is bound to the controller's exact clean-HEAD receipt for the required ordered checks; integration remains pending.
 
 ## Slice 6: Guarded Controls and Capacity
 
