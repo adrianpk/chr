@@ -459,6 +459,19 @@ go test ./internal/core ./internal/app -run '^Test(TelegramControl(ClaimScope|Sh
 go test -race ./internal/core ./internal/app -run '^Test(TelegramControl(ClaimScope|SharedCapacity|StopOwner|Lifecycle|StaleReceipt)|TelegramWork(Activation|Capacity|OtherOwner)|WorkflowClaim)' -count=1 -timeout=3m
 ```
 
+Controller continuation at `1be7869a1ec8cf068da4195a109fd845638752cb` passed
+`make verify` and the full normal control selection (core 25.456 seconds, app
+67.980 seconds). Core race passed in 125.900 seconds. App reached the unchanged
+three-minute package deadline while `TestTelegramControlSharedCapacity/8` was
+running; no assertion failure preceded the deadline. Evidence ID:
+`EM6ZSG2SETNYTQQNYDVW2AGADS`.
+
+PR #395 remains open and is not ready for integration. Its final app race
+selection still needs to complete within the configured bound, preserving all
+cases and assertions. No owned capacity-fixture processes remained after the
+failed run. Subsequent PR HEADs require a fresh complete controller receipt;
+these partial results cannot establish final readiness.
+
 Authoritative final slice validation is the controller receipt for the clean PR
 HEAD, in this order:
 

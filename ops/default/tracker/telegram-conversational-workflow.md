@@ -223,7 +223,7 @@ reserved request metadata, durable rejection and real activation-bound evidence.
 Focused normal/race and strict checks passed. T6.4 adds actual shared-worker overlap, overflow and duplicate rejection, slot reuse and native target publication exclusion. Stop polling uses the claimed owner under the existing repository/journal guards and verifies its credential; identity-only observers retain public scope resolution.
 Exact commands and results belong to the [Slice 6 report](../report/slices/telegram-conversational-workflow/slice-6-controls.md).
 
-Candidate: `feat/slice-6-telegram-controls`; PR: [#395](https://forge.adrianpk.com/adrianpk/chr/pulls/395); verified merge: pending. Authoritative final checks belong to the controller receipt for the clean PR HEAD.
+Candidate: `feat/slice-6-telegram-controls`; PR: [#395](https://forge.adrianpk.com/adrianpk/chr/pulls/395); verified merge: pending. Authoritative final checks belong to the controller receipt for the clean PR HEAD. The `1be7869a1ec8cf068da4195a109fd845638752cb` attempt passed `make verify` and normal controls; core race passed in 125.900s, but app race reached its unchanged three-minute deadline in the shared-capacity fixture. PR #395 remains unready until the complete ordered checks pass at its clean HEAD.
 
 ## Slice 7: Recovery and User Operation
 
