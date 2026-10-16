@@ -5,19 +5,22 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
 )
 
-// TelegramReceiverDelivery retains a read response independently of its send outcome.
+// TelegramReceiverDelivery retains a response independently of its send outcome.
 type TelegramReceiverDelivery struct {
-	ID           string
-	Peer         TelegramPeerIdentity
-	Text         string
-	State        string
-	Attempts     int
-	ConfigDigest string
+	ID            string
+	Peer          TelegramPeerIdentity
+	Text          string
+	State         string
+	Attempts      int
+	ConfigDigest  string
+	ActionToken   string
+	ActionChoices []string
 }
 
 // QueueReadResponse records a response and acknowledges its retained input atomically.
@@ -108,15 +111,20 @@ func telegramReadResponsePending(ctx context.Context, tx *sql.Tx, update Telegra
 
 // RejectPendingUpdate discards a queued body when current authority is revoked.
 func (s *TelegramReceiverStore) RejectPendingUpdate(ctx context.Context, update TelegramReceivedUpdate, now time.Time) error {
-	_, err := s.db.ExecContext(ctx, `UPDATE telegram_updates SET state='rejected',payload='',reason_code='authorization_revoked',updated_at=?
-WHERE bot_id=? AND update_id=? AND state='pending'`, formatProjectTime(now), update.Peer.BotID, update.UpdateID)
+	return s.transaction(ctx, func(tx *sql.Tx) error {
+		if err := revokeTelegramPeerActions(ctx, tx, update.Peer, now); err != nil {
+			return err
+		}
 
-	return err
+		_, err := tx.ExecContext(ctx, `UPDATE telegram_updates SET state='rejected',payload='',reason_code='authorization_revoked',updated_at=? WHERE bot_id=? AND update_id=? AND state='pending'`, formatProjectTime(now), update.Peer.BotID, update.UpdateID)
+
+		return err
+	})
 }
 
 // DueDeliveries is bounded; sending rows after a crash retain uncertainty and budgets.
 func (s *TelegramReceiverStore) DueDeliveries(ctx context.Context, botID int64, now time.Time) ([]TelegramReceiverDelivery, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT o.id,o.chat_id,o.topic_id,o.user_id,o.text,o.state,o.attempts,o.config_digest FROM telegram_outbox o
+	rows, err := s.db.QueryContext(ctx, `SELECT o.id,o.chat_id,o.topic_id,o.user_id,o.text,o.state,o.attempts,o.config_digest,COALESCE(o.action_token,''),COALESCE((SELECT allowed_choices FROM telegram_actions WHERE token=o.action_token),'[]') FROM telegram_outbox o
 WHERE o.bot_id=? AND o.state IN ('pending','sending','uncertain') AND o.attempts<5 AND (o.retry_at IS NULL OR o.retry_at<=?)
 AND NOT EXISTS(SELECT 1 FROM telegram_outbox earlier WHERE earlier.bot_id=o.bot_id AND earlier.chat_id=o.chat_id AND earlier.topic_id=o.topic_id AND earlier.user_id=o.user_id AND earlier.event_key=o.event_key AND earlier.part_index<o.part_index AND earlier.state!='delivered')
 ORDER BY o.created_at,o.rowid LIMIT 50`, botID, formatProjectTime(now))
@@ -132,7 +140,13 @@ ORDER BY o.created_at,o.rowid LIMIT 50`, botID, formatProjectTime(now))
 
 	for rows.Next() {
 		delivery := TelegramReceiverDelivery{Peer: TelegramPeerIdentity{BotID: botID}}
-		if err := rows.Scan(&delivery.ID, &delivery.Peer.ChatID, &delivery.Peer.TopicID, &delivery.Peer.UserID, &delivery.Text, &delivery.State, &delivery.Attempts, &delivery.ConfigDigest); err != nil {
+
+		var choices string
+		if err := rows.Scan(&delivery.ID, &delivery.Peer.ChatID, &delivery.Peer.TopicID, &delivery.Peer.UserID, &delivery.Text, &delivery.State, &delivery.Attempts, &delivery.ConfigDigest, &delivery.ActionToken, &choices); err != nil {
+			return nil, err
+		}
+
+		if err := json.Unmarshal([]byte(choices), &delivery.ActionChoices); err != nil {
 			return nil, err
 		}
 

@@ -44,6 +44,10 @@ func (r telegramReceiver) respond(ctx context.Context, update core.TelegramRecei
 		return r.store.RejectPendingUpdate(ctx, update, time.Now())
 	}
 
+	if handled, err := r.respondAction(ctx, user, config, update); handled || err != nil {
+		return err
+	}
+
 	if handled, err := r.respondRecord(ctx, user, config, update); handled || err != nil {
 		return err
 	}
@@ -84,7 +88,7 @@ func (r telegramReceiver) deliver(ctx context.Context, delivery core.TelegramRec
 		text = core.BoundTelegramReceiverText("Uncertain delivery retry; this notice may repeat.\n" + text)
 	}
 
-	messageID, err := r.api.Send(ctx, r.token, delivery.Peer, text)
+	messageID, err := r.api.SendAction(ctx, r.token, delivery.Peer, text, delivery.ActionToken, delivery.ActionChoices)
 	if err != nil {
 		if ctx.Err() != nil {
 			return ctx.Err()

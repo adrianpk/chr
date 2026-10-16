@@ -87,7 +87,7 @@ func (op telegramConversationTransaction) replyTarget() (*TelegramConversation, 
 		revision    int64
 	)
 
-	err := op.tx.QueryRowContext(op.ctx, `SELECT conversation_id,conversation_revision,question_binding FROM telegram_replies WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=? AND message_id=? AND invalidated_at IS NULL`, p.BotID, p.ChatID, p.TopicID, p.UserID, op.input.Update.ReplyToMessageID).Scan(&id, &revision, &binding)
+	err := op.tx.QueryRowContext(op.ctx, `SELECT conversation_id,conversation_revision,question_binding FROM telegram_replies WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=? AND message_id=? AND purpose='capture' AND invalidated_at IS NULL`, p.BotID, p.ChatID, p.TopicID, p.UserID, op.input.Update.ReplyToMessageID).Scan(&id, &revision, &binding)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, telegramConversationDiagnostic("That reply is unavailable or expired for this peer. Use /sessions and an explicit current target.")
 	}

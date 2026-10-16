@@ -75,8 +75,7 @@ func (s *TelegramReceiverStore) ReserveTelegramOperation(ctx context.Context, re
 			return errTelegramReceiverConflict
 		}
 
-		_, err = tx.ExecContext(ctx, `INSERT INTO telegram_requests(id,bot_id,update_id,operation_ordinal,operator_id,project_id,project_binding_digest,namespace,conversation_id,expected_conversation_revision,operation_id,arguments,argument_digest,state,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,NULLIF(?,''),NULLIF(?,0),?,?,?,'prepared',?,?) ON CONFLICT(bot_id,update_id,operation_ordinal) DO NOTHING`, request.ID, request.Source.Peer.BotID, request.Source.UpdateID, request.Ordinal, request.Operator, request.Target.ProjectID, request.Target.ProjectBindingDigest, request.Target.Namespace, request.Target.ConversationID, request.Target.ConversationRevision, request.OperationID, string(request.Arguments), request.ArgumentDigest, formatProjectTime(now), formatProjectTime(now))
-		if err != nil {
+		if err := insertTelegramOperation(ctx, tx, request, now); err != nil {
 			return err
 		}
 
@@ -146,4 +145,13 @@ func validTelegramOperationEnvelope(request TelegramOperationRequest) bool {
 	}
 
 	return IsValidOpsNamespace(request.Target.Namespace) && request.Target.ProjectID != "" && len(request.Target.ProjectBindingDigest) == 64
+}
+
+func insertTelegramOperation(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, now time.Time) error {
+	_, err := tx.ExecContext(ctx, `INSERT INTO telegram_requests(id,bot_id,update_id,operation_ordinal,operator_id,project_id,project_binding_digest,namespace,conversation_id,expected_conversation_revision,operation_id,arguments,argument_digest,state,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,NULLIF(?,''),NULLIF(?,0),?,?,?,'prepared',?,?) ON CONFLICT(bot_id,update_id,operation_ordinal) DO NOTHING`, request.ID, request.Source.Peer.BotID, request.Source.UpdateID, request.Ordinal, request.Operator, request.Target.ProjectID, request.Target.ProjectBindingDigest, request.Target.Namespace, request.Target.ConversationID, request.Target.ConversationRevision, request.OperationID, string(request.Arguments), request.ArgumentDigest, formatProjectTime(now), formatProjectTime(now))
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

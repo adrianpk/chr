@@ -90,8 +90,11 @@ func retainTelegramUpdate(ctx context.Context, tx *sql.Tx, botID, epoch int64, u
 chat_id,topic_id,user_id,message_id,chat_type,received_at,payload,state,reason_code,updated_at,reply_to_message_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		botID, update.UpdateID, epoch, update.Digest, update.Kind, update.Peer.ChatID, update.Peer.TopicID, update.Peer.UserID,
 		update.MessageID, update.ChatType, formatProjectTime(now), update.Text, state, update.Reason, formatProjectTime(now), update.ReplyToMessageID)
+	if err != nil {
+		return err
+	}
 
-	return err
+	return revokeRejectedTelegramActions(ctx, tx, update, now)
 }
 
 func validateTelegramRetainedUpdate(botID int64, update TelegramReceivedUpdate) error {

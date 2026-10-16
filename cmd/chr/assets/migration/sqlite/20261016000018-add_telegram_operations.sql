@@ -34,6 +34,7 @@ CREATE TABLE telegram_actions (
  consumed_by_request TEXT UNIQUE REFERENCES telegram_requests(id),
  created_at TEXT NOT NULL, updated_at TEXT NOT NULL
 );
+CREATE UNIQUE INDEX telegram_action_request ON telegram_actions(request_id);
 CREATE INDEX telegram_action_pending ON telegram_actions(bot_id,state,expires_at);
 ALTER TABLE telegram_outbox ADD COLUMN request_id TEXT REFERENCES telegram_requests(id);
 ALTER TABLE telegram_outbox ADD COLUMN action_token TEXT REFERENCES telegram_actions(token);

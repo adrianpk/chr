@@ -68,7 +68,7 @@ func telegramReadHelpText() string {
 		fmt.Fprintf(&text, "%s — %s\n", operation.Command, operation.Help)
 	}
 
-	return strings.TrimSpace(text.String()) + "\n" + telegramConversationHelp() + "\n" + telegramRecordHelp()
+	return strings.TrimSpace(text.String()) + "\n" + telegramConversationHelp() + "\n" + telegramRecordHelp() + "\n" + telegramActionHelp()
 }
 
 func telegramProjectResponse(operations telegramReadService, ids []string) (string, error) {

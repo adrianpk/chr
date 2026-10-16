@@ -227,6 +227,10 @@ func (s *WorkflowStore) applyNewMutation(ctx context.Context, request WorkflowMu
 
 	changes = append(changes, coordinator...)
 
+	if err := ctx.Err(); err != nil {
+		return result, err
+	}
+
 	return result, s.commitAllocatedFiles(append(changes, receipt), guard)
 }
 

@@ -25,7 +25,7 @@ type telegramReceiver struct {
 
 func newTelegramServeCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
-		Name: "serve", Usage: "Run the foreground read-only receiver with durable intake and delivery",
+		Name: "serve", Usage: "Run the foreground receiver with retained conversations and guarded operations",
 		Flags: projectRegistryFlags(),
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			env, err := newUserEnvironmentFromCommand(cmd)

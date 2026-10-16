@@ -77,3 +77,31 @@ output carries the same reference; output beyond eight parts becomes a bounded
 summary with a canonical or paged reference. An uncertain retry says that the
 notice may repeat. Its persisted attempt count and original application request
 remain unchanged by notification retries.
+
+## Single-use prompts
+
+When an operation offers a confirmation, its inline buttons, exact message reply
+and `/answer <action-token> <choice>` all address the same retained action. The
+action has one random 128-bit token, at most eight bounded choice identifiers
+and an expiry no later than 24 hours after creation. Reoffering it retains its
+original token and expiry.
+
+The action binds the configured operator, full peer identity, conversation
+revision and complete prepared owner guard. Claiming it atomically retains the
+first answer request. Another callback or text answer observes that same answer
+and original owner request ID. A changed choice conflicts; it cannot replace the
+actor, target or observed image. Application rechecks current authority and
+revision, with the action expiry bounding the owner call.
+
+Only a confirmed shared-owner result consumes the action. Both request results,
+consumption, answer-source acknowledgement and result delivery commit in one
+transaction. A stale record, replaced prompt, expired binding or denied actor
+supersedes the action and preserves its retained operation state. It requires a
+fresh observation rather than refreshing an approval automatically.
+
+Definite send acknowledgement retains the exact action/message association in
+the delivery transaction. Pruned, invalidated or different-peer replies fail
+without becoming capture text. At most 64 message associations remain active per
+conversation. A send whose acknowledgement is lost can repeat the same token;
+each copy still addresses the same single-use action and carries its request
+reference.

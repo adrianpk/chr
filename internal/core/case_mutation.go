@@ -53,6 +53,10 @@ func (s CaseMetadataService) SaveBound(ctx context.Context, request CaseMutation
 			return err
 		}
 
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
 		var writeErr error
 
 		result, writeErr = s.commitCaseMutation(request, digest)

@@ -104,29 +104,7 @@ func (a TelegramReceiverAPI) Poll(ctx context.Context, token string, next *int64
 
 // Send sends one bounded plain-text delivery to its original chat and topic.
 func (a TelegramReceiverAPI) Send(ctx context.Context, token string, peer TelegramPeerIdentity, text string) (int64, error) {
-	if !validTelegramReceiverText(text) || peer.ChatID == 0 || peer.TopicID < 0 {
-		return 0, errors.New("invalid telegram delivery")
-	}
-
-	payload := struct {
-		ChatID  int64  `json:"chat_id"`
-		TopicID int64  `json:"message_thread_id,omitempty"`
-		Text    string `json:"text"`
-	}{peer.ChatID, peer.TopicID, text}
-
-	data, err := a.call(ctx, token, "sendMessage", payload, 10*time.Second)
-	if err != nil {
-		return 0, err
-	}
-
-	var message struct {
-		MessageID int64 `json:"message_id"`
-	}
-	if err := json.Unmarshal(data, &message); err != nil || message.MessageID <= 0 {
-		return 0, &TelegramAPIError{Code: "invalid_response", Permanent: true, Uncertain: true}
-	}
-
-	return message.MessageID, nil
+	return a.SendAction(ctx, token, peer, text, "", nil)
 }
 
 func (a TelegramReceiverAPI) call(ctx context.Context, token, method string, payload any, timeout time.Duration) (json.RawMessage, error) {
