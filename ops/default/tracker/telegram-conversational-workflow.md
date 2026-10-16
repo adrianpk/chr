@@ -129,7 +129,7 @@ Prerequisite: verified Slice 3 integration.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T4.1 | validated | pending task commit | Bounded typed natural-language intent and deterministic command parity. |
+| T4.1 | validated | `b54d526fd0471eff7c4df2ef769ba0abe66476ce` | Bounded typed natural-language intent and deterministic command parity. |
 | T4.2 | ready | pending | Real configured-provider authoring with exact question/turn binding. |
 | T4.3 | pending | pending | Explain/prepare/develop intent, retained scope and bounded authority. |
 | T4.4 | pending | pending | Canonical artifact generation/refinement, provenance and replay checks. |

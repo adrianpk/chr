@@ -34,6 +34,8 @@ Reopening cannot select a second operation or redirect the frozen namespace.
 
 ## Implementation Notes
 
+T4.1 implementation and report introduction: `b54d526fd0471eff7c4df2ef769ba0abe66476ce`.
+
 The shared structured provider uses the existing Codex agent runner or OpenAI
 Responses boundary. `CHR_CONVERSATION_GENERATION_BACKEND=openai` selects OpenAI;
 otherwise Codex is used. Existing provider model, command and credential settings
