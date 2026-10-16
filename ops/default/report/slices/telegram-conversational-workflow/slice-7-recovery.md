@@ -46,7 +46,19 @@ finish without a second consumer or premature database/lock closure.
 Startup uses pending source/request identities, native receipts and OS-owned
 model exclusions already delivered by earlier slices. There is no timestamp
 based transport-claim takeover and no reset of native authority or budgets.
-T7.2 is ready; T7.3 remains pending in the approved order.
+T7.2 (`b2647940ccdd`) retains poll, delivery and model attempts across reopened
+stores. An explicit offline transport retry records the local actor/time and a
+new cycle without resetting lifetime counters, source interpretation attempts
+or domain work. A poll after more than 24 hours opens one recovery epoch with
+no offset, preserving the retained inbox and reporting possible remote loss.
+
+Seven-day terminal compaction clears only resolved bodies and delivered replies;
+canonical request receipts, focused conversations, unresolved prompts and unsent
+results remain. Exact retired IDs merge only adjacent observed identities, with
+at most 1,024 intervals. Intake observes the 64-MiB logical payload bound,
+10,000 receipt-only sources plus 1,024 pending sources, and 1,024 unresolved
+outbound entries. Capacity pressure retains existing authority and refuses new
+input without acknowledging it. T7.3 is ready in the approved order.
 
 ## Contracts Added or Changed
 
@@ -90,12 +102,27 @@ scripts/check-package-readmes.sh
 git diff --check
 ```
 
-Final slice validation remains pending T7.2, T7.3 and the PR-reference commits.
+T7.2 focused normal checks passed in core 1.752 seconds and app 0.121 seconds.
+The expanded race selection passed in core 136.988 seconds and app 60.113
+seconds. Fixtures reopen exhausted poll/delivery/model budgets; exercise actual
+64-MiB payload and receipt/pending/outbox boundaries; retain sparse IDs and
+unresolved authority; and prove additive migration rollback, unknown-schema
+refusal and recovery polls without destructive offsets. Strict focused lint
+reported zero issues; repository style and whitespace checks passed.
+
+```sh
+go test ./internal/core ./internal/app -run '^Test(TelegramRecovery(Retry|Models|Sparse|Intervals|Compaction|Quota|Payload|PollEpoch|Schema|Malformed|Pending)|MaintenanceDBStatusReports)' -count=1 -timeout=3m
+go test -race ./internal/core ./internal/app -run '^Test(TelegramRecovery(Retry|Models|Sparse|Intervals|Compaction|Quota|Payload|PollEpoch|Schema|Malformed|Pending|OwnedStop|Validation|Startup)|TelegramReceiver(Batch|IntakeCapacity|OutboxCapacity|PollBudget|Migration|Identity)|MaintenanceDBStatusReports)' -count=1 -timeout=3m
+```
+
+T7.2 activity receipt: `01M53CYHZ9NHH8F69ZJ9AJ2V48`.
+
+Final slice validation remains pending T7.3 and the PR-reference commits.
 It will use the controller receipt for the exact clean PR HEAD with the frozen
 ordered commands.
 
 ## Risks and Follow-ups
 
-T7.2 retry/retention and T7.3 operational tooling remain unfinished. The slice
+T7.3 operational tooling remains unfinished. The slice
 report remains drafting and no PR readiness is claimed. Live journey
 certification belongs to the next recorded slice.
