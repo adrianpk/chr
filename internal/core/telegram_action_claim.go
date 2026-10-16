@@ -44,7 +44,7 @@ func (s *TelegramReceiverStore) ClaimTelegramAction(ctx context.Context, input T
 			return err
 		}
 
-		claim = TelegramActionClaim{Action: action, Request: request, Choice: answer.Choice}
+		claim = TelegramActionClaim{Action: action, Request: request, Choice: answer.Choice, ResponseSource: input.Update}
 		op := telegramConversationTransaction{ctx: ctx, tx: tx, input: input, now: now}
 
 		return claimTelegramAction(op, &claim)
@@ -54,10 +54,6 @@ func (s *TelegramReceiverStore) ClaimTelegramAction(ctx context.Context, input T
 }
 
 func claimTelegramAction(op telegramConversationTransaction, claim *TelegramActionClaim) error {
-	if claim.Action.State == "expired" || claim.Action.State == "superseded" {
-		return nil
-	}
-
 	user, ok := op.input.Config.AuthorizedUser(op.input.Update.Peer.ChatID, op.input.Update.Peer.TopicID, op.input.Update.Peer.UserID, op.input.Update.ChatType)
 	if !ok || user.OperatorID != claim.Request.Operator {
 		return supersedeTelegramAction(op, claim, "superseded")
@@ -67,6 +63,18 @@ func claimTelegramAction(op telegramConversationTransaction, claim *TelegramActi
 		return readTelegramActionClaimAnswer(op, claim)
 	}
 
+	if claim.Request.OperationID == "work.control" && claim.Action.AnswerRequestID != "" {
+		return claimTelegramControlReceipt(op, claim)
+	}
+
+	if claim.Action.State == "expired" || claim.Action.State == "superseded" {
+		return nil
+	}
+
+	return claimPendingTelegramAction(op, claim)
+}
+
+func claimPendingTelegramAction(op telegramConversationTransaction, claim *TelegramActionClaim) error {
 	state, err := guardTelegramActionClaim(op, claim)
 	if err != nil {
 		return err
@@ -81,6 +89,27 @@ func claimTelegramAction(op telegramConversationTransaction, claim *TelegramActi
 	}
 
 	return createTelegramActionAnswer(op, claim)
+}
+
+func claimTelegramControlReceipt(op telegramConversationTransaction, claim *TelegramActionClaim) error {
+	if err := readTelegramActionClaimAnswer(op, claim); err != nil {
+		return err
+	}
+
+	if claim.Action.State == "expired" || claim.Action.State == "superseded" {
+		claim.ReceiptOnly = true
+
+		return nil
+	}
+
+	state, err := guardTelegramActionClaim(op, claim)
+	if err != nil || state == "" {
+		return err
+	}
+
+	claim.ReceiptOnly = true
+
+	return supersedeTelegramAction(op, claim, state)
 }
 
 func readTelegramActionClaimAnswer(op telegramConversationTransaction, claim *TelegramActionClaim) error {

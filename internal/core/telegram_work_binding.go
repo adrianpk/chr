@@ -78,6 +78,32 @@ func projectTelegramAdmissionBinding(ctx context.Context, tx *sql.Tx, request Te
 }
 
 func projectTelegramControlBinding(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, result TelegramActionResult, now string) error {
+	if err := validateTelegramControlBinding(request, result); err != nil {
+		return err
+	}
+
+	target := request.Target
+	bound := result.Invocation
+
+	if target.ConversationID == "" {
+		return ErrWorkflowConflict
+	}
+
+	changed, err := tx.ExecContext(ctx, `UPDATE telegram_conversations SET invocation_id=?,last_observed_revision=MAX(COALESCE(last_observed_revision,0),?),authorization_ref=COALESCE(NULLIF(authorization_ref,''),?),phase=?,updated_at=? WHERE id=? AND revision=? AND project_id=? AND namespace=? AND project_binding_digest=? AND (invocation_id IS NULL OR invocation_id=?) AND COALESCE(last_observed_revision,0)<=?`, bound.ID, bound.Revision, request.ID, result.InvocationPhase, now, target.ConversationID, target.ConversationRevision, target.ProjectID, target.Namespace, target.ProjectBindingDigest, bound.ID, bound.Revision)
+	if err != nil {
+		return err
+	}
+
+	// A committed native receipt remains reportable after a newer conversation
+	// replaces this projection. Acknowledgement must not retarget that conversation.
+	if result.ReceiptRef == workflowMutationReceiptPath(request.ID) {
+		return nil
+	}
+
+	return telegramRequireChanged(changed)
+}
+
+func validateTelegramControlBinding(request TelegramOperationRequest, result TelegramActionResult) error {
 	bound := result.Invocation
 	if result.State != "confirmed" || !validWorkflowRequestKey(bound.ID) || bound.Revision == 0 || bound.Revision > math.MaxInt64 {
 		return ErrWorkflowConflict
@@ -91,15 +117,5 @@ func projectTelegramControlBinding(ctx context.Context, tx *sql.Tx, request Tele
 		return ErrWorkflowConflict
 	}
 
-	target := request.Target
-	if target.ConversationID == "" {
-		return ErrWorkflowConflict
-	}
-
-	changed, err := tx.ExecContext(ctx, `UPDATE telegram_conversations SET invocation_id=?,last_observed_revision=MAX(COALESCE(last_observed_revision,0),?),authorization_ref=COALESCE(NULLIF(authorization_ref,''),?),phase=?,updated_at=? WHERE id=? AND revision=? AND project_id=? AND namespace=? AND project_binding_digest=? AND (invocation_id IS NULL OR invocation_id=?)`, bound.ID, bound.Revision, request.ID, result.InvocationPhase, now, target.ConversationID, target.ConversationRevision, target.ProjectID, target.Namespace, target.ProjectBindingDigest, bound.ID)
-	if err != nil {
-		return err
-	}
-
-	return telegramRequireChanged(changed)
+	return nil
 }

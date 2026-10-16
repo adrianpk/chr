@@ -64,6 +64,22 @@ func (s *TelegramReceiverStore) ResolveTelegramOperationTarget(ctx context.Conte
 
 // ValidateTelegramOperationTarget rechecks current actor, root and conversation bindings.
 func (s *TelegramReceiverStore) ValidateTelegramOperationTarget(ctx context.Context, input TelegramConversationInput, target TelegramOperationTarget) error {
+	return s.validateTelegramOperationTarget(ctx, input, target, false)
+}
+
+// ValidateTelegramControlReceiptTarget checks current actor, peer, registry root
+// and namespace while allowing the original conversation revision to be historical.
+// This check authorizes only reading an already committed native receipt.
+func (s *TelegramReceiverStore) ValidateTelegramControlReceiptTarget(ctx context.Context, input TelegramConversationInput, request TelegramOperationRequest) error {
+	user, ok := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType)
+	if !ok || user.OperatorID != request.Operator || input.Update.Peer != request.Source.Peer || request.OperationID != "work.control" || request.Target.ConversationID == "" {
+		return ErrWorkflowConflict
+	}
+
+	return s.validateTelegramOperationTarget(ctx, input, request.Target, true)
+}
+
+func (s *TelegramReceiverStore) validateTelegramOperationTarget(ctx context.Context, input TelegramConversationInput, target TelegramOperationTarget, historical bool) error {
 	user, ok := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType)
 	if !ok || user.OperatorID == "" {
 		return ErrWorkflowConflict
@@ -96,6 +112,10 @@ func (s *TelegramReceiverStore) ValidateTelegramOperationTarget(ctx context.Cont
 
 	if err != nil {
 		return err
+	}
+
+	if historical {
+		target.ConversationRevision = conversation.Revision
 	}
 
 	return validateTelegramBoundConversation(conversation, target, binding)

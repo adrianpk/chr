@@ -10,6 +10,10 @@ import (
 )
 
 func (r telegramReceiver) validateRecordAuthority(ctx context.Context, request core.TelegramOperationRequest) error {
+	return r.validateRecordTargetAuthority(ctx, request, false)
+}
+
+func (r telegramReceiver) validateRecordTargetAuthority(ctx context.Context, request core.TelegramOperationRequest, receiptOnly bool) error {
 	config, err := r.currentConfig()
 	if err != nil {
 		return err
@@ -25,7 +29,12 @@ func (r telegramReceiver) validateRecordAuthority(ctx context.Context, request c
 		return err
 	}
 
-	return r.store.ValidateTelegramOperationTarget(ctx, core.TelegramConversationInput{Update: request.Source, Config: config, Projects: projects}, request.Target)
+	input := core.TelegramConversationInput{Update: request.Source, Config: config, Projects: projects}
+	if receiptOnly {
+		return r.store.ValidateTelegramControlReceiptTarget(ctx, input, request)
+	}
+
+	return r.store.ValidateTelegramOperationTarget(ctx, input, request.Target)
 }
 
 func (r telegramReceiver) prepareRecord(ctx context.Context, operations telegramRecordService, request core.TelegramOperationRequest) (core.TelegramOperationRequest, error) {

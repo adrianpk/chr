@@ -12,10 +12,7 @@ func (s service) executeWorkflowLifecycleResult(ctx context.Context, store *core
 		return nil, err
 	}
 
-	native := core.WorkflowControlMutationRequest{Binding: *request.RequestBinding, Action: request.Action, ID: request.ID, ExpectedRevision: request.ExpectedRevision}
-	if request.Action == "continue" {
-		native.StepLimit = request.StepLimit
-	}
+	native := workflowNativeControlRequest(request)
 
 	result, err := store.ControlWorkflowLifecycle(ctx, native, ports, request.AuthorizationCheck)
 	if result.RequestID == "" {

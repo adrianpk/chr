@@ -81,6 +81,17 @@ Read-only authority and receiver-status connections now use the same bounded
 SQLite busy timeout as writers, allowing a short inbox commit to finish before
 a concurrent read fails.
 
+T6.3 receipt recovery reads a completed native control before considering a
+fresh effect. Expired or superseded prompts retain their original answer binding;
+current mapped actor, exact peer, allowed registered root and namespace remain
+mandatory. A missing receipt cannot reserve a binding or apply a control.
+
+Explicit answers, callbacks and invalidated replies recover the same original
+receipt. A later answer can deliver that receipt after an earlier diagnostic
+acknowledged the first source, without allocating another effect identity.
+Acknowledgement preserves replacement conversation revisions and newer native
+observations; it does not overwrite their phase or admission reference.
+
 ## Implementation Notes
 
 Native lifecycle entry points recheck volatile caller authority while holding
@@ -105,6 +116,8 @@ existing API; a final decision authority callback requires a request binding.
   controls and returns the original receipt alongside separately observed status.
 - A bound continuation replays its acceptance without re-entering execution.
 - Native publication projection and stop intent commit together.
+- Receipt-only reads recover native journals without constructing execution ports.
+- Historical control acknowledgements preserve replacement conversation state.
 - Inbox processing class and control-reserve membership are retained with input.
 - Model context snapshots guard target resolution after external interpretation.
 - Receiver application slots and model slots have separate bounded ownership.
@@ -120,6 +133,10 @@ existing API; a final decision authority callback requires a request binding.
 - `internal/app/telegram_control_*test.go`: real HTTP/SQLite, authority, worker checkpoints and decision receipt recovery.
 - `internal/core/workflow_decision_control*.go`: shared guarded decision entry point.
 - `internal/core/workflow_control_receipt.go`: native binding and atomic receipt files.
+- `internal/core/workflow_control_read.go`: receipt-only native recovery.
+- `internal/app/service_workflow_control_read.go`: caller-neutral receipt observation.
+- `internal/app/telegram_control_stale_receipt_test.go`: accepted and unaccepted expiry/replacement parity.
+- `internal/app/telegram_control_recovery_guard_test.go`: revoked authority and acknowledgement races.
 - `internal/core/telegram_control_receipt_test.go`: partial-journal decision recovery.
 - `internal/core/workflow_control_request.go`: common immutable control binding.
 - `internal/core/workflow_lifecycle_control*.go`: lifecycle acceptance and atomic receipts.
@@ -235,6 +252,31 @@ The follow-up normal checks completed in core 1.599 seconds and app 3.419 second
 race mode completed in core 6.631 seconds and app 20.054 seconds. The separate
 registry check verifies the final fixture cleanup refactoring.
 
+T6.3 stale-prompt receipt checks passed:
+
+- `go test ./internal/core ./internal/app -run '^Test(TelegramControl(StaleReceipt|Receipt|Lifecycle|Decisions|Natural|Journal|Fences|Guards)|TelegramOperationAction)' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^Test(TelegramControl(StaleReceipt|Receipt|Lifecycle|Decisions|Natural|Journal|Fences|Guards)|TelegramOperationAction)' -count=1 -timeout=3m`
+- `go test ./internal/app -run '^TestTelegramControlStaleReceipt$' -count=1 -timeout=3m`
+- `go test -race ./internal/app -run '^TestTelegramControlStaleReceipt$' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/app`
+- `scripts/check-go-func-signatures.sh`
+- `scripts/check-package-readmes.sh`
+- `git diff --check`
+
+The combined normal checks completed in core 33.258 seconds and app 45.452
+seconds; the race checks completed in core 53.931 seconds and app 168.005
+seconds. All 18 expiry/replacement/supersession cases remain named and cover
+accepted and unaccepted text, callback and reply sources. A shared fixture per
+stale condition reduces repeated admission setup; its normal follow-up completed
+in app 2.063 seconds and its focused race follow-up in 19.720 seconds. Additional
+fixtures prove current authority rejection,
+original-source acknowledgement followed by a new answer, replacement during
+native-to-SQLite acknowledgement, and missing-receipt probes without reservations.
+Existing action and lifecycle/decision journal regressions remain green.
+
+The system-installed lint v2.12.2 crashed in static analysis. The repository's
+pinned v2.14.0 completed successfully without changing checks or configuration.
+
 Required slice validation will be recorded through the controller for the final
 clean PR HEAD: `make verify`, focused `TestTelegramControl` normal and race
 commands, then `git diff --check`. Live and scheduled exhaustive checks remain
@@ -242,12 +284,10 @@ separate.
 
 ## Risks and Follow-ups
 
-T6.3 remains in progress: receipt-only recovery through expired or replaced
-Telegram prompts, final text/callback expiry parity, late reply-binding races
-and request-capacity diagnostics still require completion. Native lifecycle
-receipts and their focused crash/acknowledgement proof are implemented; the
-adapter must still distinguish historical receipt recovery from fresh effects
-when a prompt has become stale. T6.4 shared serial/parallel capacity and
-cross-adapter certification remain pending. Focused model-load and intake-reserve
+T6.3 remains in progress: late reply-binding races, current-state diagnostics
+for unaccepted stale prompts and request-capacity reserves still require
+completion. Receipt-only recovery through expired/replaced prompts and
+text/callback/reply rejection of unaccepted stale controls are implemented.
+T6.4 shared serial/parallel capacity and cross-adapter certification remain pending. Focused model-load and intake-reserve
 evidence does not complete either task. The Slice 6 PR and exact-HEAD controller
 checks remain pending.

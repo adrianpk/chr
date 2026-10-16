@@ -36,14 +36,16 @@ func (s *TelegramReceiverStore) FinishTelegramAction(ctx context.Context, claim 
 			return err
 		}
 
-		pending, err := telegramReadResponsePending(ctx, tx, retained.Answer.Source)
+		source, pending, err := telegramActionResponseSource(ctx, tx, retained, result)
 		if err != nil || !pending {
 			return err
 		}
 
-		if retained.Action.State != "applying" {
+		if retained.Action.State != "applying" && !confirmedTelegramControlReceipt(retained, result) {
 			return errTelegramReceiverConflict
 		}
+
+		retained.ResponseSource = source
 
 		return finishTelegramActionResult(ctx, tx, retained, result, now)
 	})
@@ -64,15 +66,16 @@ func retainedTelegramActionClaim(ctx context.Context, tx *sql.Tx, claim Telegram
 		return claim, errTelegramReceiverConflict
 	}
 
-	retained := TelegramActionClaim{Action: action, Request: request, Choice: claim.Choice}
+	retained := TelegramActionClaim{Action: action, Request: request, Choice: claim.Choice, ResponseSource: claim.ResponseSource}
 	err = readTelegramActionClaimAnswer(telegramConversationTransaction{ctx: ctx, tx: tx}, &retained)
 
 	return retained, err
 }
 
 func finishTelegramActionRequests(ctx context.Context, tx *sql.Tx, claim TelegramActionClaim, result TelegramActionResult, now time.Time) error {
+	recovery := confirmedTelegramControlReceipt(claim, result)
 	for _, request := range []TelegramOperationRequest{claim.Request, claim.Answer} {
-		changed, err := tx.ExecContext(ctx, `UPDATE telegram_requests SET state=?,domain_receipt_ref=NULLIF(?,''),result=?,updated_at=? WHERE id=? AND argument_digest=? AND state='applying'`, result.State, result.ReceiptRef, string(result.Facts), formatProjectTime(now), request.ID, request.ArgumentDigest)
+		changed, err := tx.ExecContext(ctx, `UPDATE telegram_requests SET state=?,domain_receipt_ref=NULLIF(?,''),result=?,updated_at=? WHERE id=? AND argument_digest=? AND (state='applying' OR (? AND state='blocked'))`, result.State, result.ReceiptRef, string(result.Facts), formatProjectTime(now), request.ID, request.ArgumentDigest, recovery)
 		if err != nil {
 			return err
 		}
@@ -85,13 +88,13 @@ func finishTelegramActionRequests(ctx context.Context, tx *sql.Tx, claim Telegra
 	return nil
 }
 
-func finishTelegramActionState(ctx context.Context, tx *sql.Tx, claim TelegramActionClaim, state string, now time.Time) error {
+func finishTelegramActionState(ctx context.Context, tx *sql.Tx, claim TelegramActionClaim, result TelegramActionResult, now time.Time) error {
 	actionState := "consumed"
-	if state != "confirmed" {
+	if result.State != "confirmed" {
 		actionState = "superseded"
 	}
 
-	changed, err := tx.ExecContext(ctx, `UPDATE telegram_actions SET state=?,updated_at=? WHERE token=? AND state='applying' AND consumed_by_request=?`, actionState, formatProjectTime(now), claim.Action.Token, claim.Answer.ID)
+	changed, err := tx.ExecContext(ctx, `UPDATE telegram_actions SET state=?,updated_at=? WHERE token=? AND (state='applying' OR (? AND state IN ('expired','superseded'))) AND consumed_by_request=?`, actionState, formatProjectTime(now), claim.Action.Token, confirmedTelegramControlReceipt(claim, result), claim.Answer.ID)
 	if err != nil {
 		return err
 	}
@@ -122,16 +125,37 @@ func finishTelegramActionResult(ctx context.Context, tx *sql.Tx, retained Telegr
 		return err
 	}
 
-	if err := finishTelegramActionState(ctx, tx, retained, result.State, now); err != nil {
+	if err := finishTelegramActionState(ctx, tx, retained, result, now); err != nil {
 		return err
 	}
 
-	if err := queueTelegramReferencedResponse(ctx, tx, retained.Answer.Source, result.Text, retained.Request.ID, result.ConfigDigest, now); err != nil {
+	if err := queueTelegramReferencedResponse(ctx, tx, retained.ResponseSource, result.Text, retained.Request.ID, result.ConfigDigest, now); err != nil {
 		return err
 	}
 
 	response := retained.Request
-	response.Source = retained.Answer.Source
+	response.Source = retained.ResponseSource
 
 	return bindTelegramOperationResponse(ctx, tx, response)
+}
+
+func telegramActionResponseSource(ctx context.Context, tx *sql.Tx, claim TelegramActionClaim, result TelegramActionResult) (TelegramReceivedUpdate, bool, error) {
+	original := claim.Answer.Source
+
+	pending, err := telegramReadResponsePending(ctx, tx, original)
+	if err != nil || pending {
+		return original, pending, err
+	}
+
+	if !confirmedTelegramControlReceipt(claim, result) || claim.ResponseSource.Peer != original.Peer || claim.ResponseSource.UpdateID == 0 || claim.Action.State == "consumed" {
+		return original, false, nil
+	}
+
+	pending, err = telegramReadResponsePending(ctx, tx, claim.ResponseSource)
+
+	return claim.ResponseSource, pending, err
+}
+
+func confirmedTelegramControlReceipt(claim TelegramActionClaim, result TelegramActionResult) bool {
+	return claim.Request.OperationID == "work.control" && claim.Answer.ID != "" && result.State == "confirmed" && result.ReceiptRef == workflowMutationReceiptPath(claim.Request.ID)
 }

@@ -8,7 +8,21 @@ import (
 
 type telegramControlService interface {
 	ReadTelegramControl(context.Context, core.TelegramOperationTarget, string) (WorkflowWorkStatus, error)
+	ReadTelegramControlReceipt(context.Context, core.TelegramOperationTarget, core.WorkflowMutationBinding, WorkflowControlRequest) (WorkflowWorkStatus, bool, error)
 	ApplyTelegramControl(context.Context, core.TelegramOperationTarget, core.WorkflowMutationBinding, WorkflowControlRequest, core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error)
+}
+
+// ReadTelegramControlReceipt scopes receipt recovery to the original project.
+func (s service) ReadTelegramControlReceipt(ctx context.Context, target core.TelegramOperationTarget, binding core.WorkflowMutationBinding, request WorkflowControlRequest) (WorkflowWorkStatus, bool, error) {
+	scoped, err := s.telegramBoundProjectService(ctx, target)
+	if err != nil {
+		return WorkflowWorkStatus{}, false, err
+	}
+
+	scoped.workflowNamespace = target.Namespace
+	request.RequestBinding = &binding
+
+	return scoped.ReadWorkControlReceipt(ctx, request)
 }
 
 // ReadTelegramControl observes the frozen project and namespace through native status.

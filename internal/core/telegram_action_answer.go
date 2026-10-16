@@ -96,10 +96,34 @@ func (s *TelegramReceiverStore) telegramReplyActionAnswer(ctx context.Context, u
 	}
 
 	if invalidated.Valid {
-		return answer, true, ErrTelegramActionUnavailable
+		if err := s.telegramReplyControlReceipt(ctx, answer.Token, p); err != nil {
+			return answer, true, err
+		}
 	}
 
 	answer.Choice = text
 
 	return checkTelegramActionAnswer(answer)
+}
+
+func (s *TelegramReceiverStore) telegramReplyControlReceipt(ctx context.Context, token string, peer TelegramPeerIdentity) error {
+	action, err := readTelegramAction(ctx, s.db, token, peer)
+	if err != nil {
+		return err
+	}
+
+	if action.AnswerRequestID == "" {
+		return ErrTelegramActionUnavailable
+	}
+
+	var operation string
+	if err := s.db.QueryRowContext(ctx, `SELECT operation_id FROM telegram_requests WHERE id=?`, action.RequestID).Scan(&operation); err != nil {
+		return err
+	}
+
+	if operation != "work.control" {
+		return ErrTelegramActionUnavailable
+	}
+
+	return nil
 }

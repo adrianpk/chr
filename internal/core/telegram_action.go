@@ -38,10 +38,13 @@ type TelegramActionOffer struct {
 // TelegramActionClaim retains the original effect binding and the first answer request.
 // Duplicate callback and text sources observe this same answer, never a new effect ID.
 type TelegramActionClaim struct {
-	Action  TelegramAction
-	Request TelegramOperationRequest
-	Answer  TelegramOperationRequest
-	Choice  string
+	Action         TelegramAction
+	Request        TelegramOperationRequest
+	Answer         TelegramOperationRequest
+	Choice         string
+	ResponseSource TelegramReceivedUpdate
+	// ReceiptOnly permits recovery of an original answer, never a fresh effect.
+	ReceiptOnly bool
 }
 
 const telegramActionColumns = `token,request_id,bot_id,chat_id,topic_id,user_id,conversation_revision,guard_digest,allowed_choices,state,expires_at,COALESCE(consumed_by_request,'')`

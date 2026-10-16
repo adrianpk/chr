@@ -32,7 +32,7 @@ func (s service) executeWorkflowControlResult(ctx context.Context, request Workf
 		}
 	}
 
-	native := core.WorkflowControlMutationRequest{Binding: *request.RequestBinding, Integration: request.Integration, Grant: request.BudgetGrant, Answer: request.DecisionAnswer, Action: request.Action, ID: request.ID, ExpectedRevision: request.ExpectedRevision, ReviewHash: request.BindingHash, DecisionRevision: request.DecisionRevision, DecisionHash: request.DecisionHash}
+	native := workflowNativeControlRequest(request)
 
 	result, err := store.ControlWorkflowDecision(ctx, native, provider, request.AuthorizationCheck)
 	if err != nil {

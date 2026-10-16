@@ -21,6 +21,25 @@ func (r telegramReceiver) applyControlAction(ctx context.Context, claim core.Tel
 		return r.finishControlAction(ctx, claim, WorkflowWorkStatus{}, ErrRecordUnsupported, config)
 	}
 
+	if err := r.validateRecordTargetAuthority(ctx, claim.Request, true); err != nil {
+		return r.controlRecoveryFailure(ctx, claim, err, config)
+	}
+
+	binding := core.WorkflowMutationBinding{RequestID: claim.Request.ID, Operator: claim.Request.Operator}
+
+	status, found, err := operations.ReadTelegramControlReceipt(ctx, claim.Request.Target, binding, preview.Request)
+	if found {
+		return r.completeControlAction(ctx, claim, status, err, config)
+	}
+
+	if err != nil {
+		return r.controlRecoveryFailure(ctx, claim, err, config)
+	}
+
+	if claim.ReceiptOnly {
+		return r.actionDiagnostic(ctx, claim.ResponseSource, config)
+	}
+
 	if err := r.validateRecordAuthority(ctx, claim.Request); err != nil {
 		return r.finishControlAction(ctx, claim, WorkflowWorkStatus{}, err, config)
 	}
@@ -32,9 +51,12 @@ func (r telegramReceiver) applyControlAction(ctx context.Context, claim core.Tel
 
 		return r.validateRecordAuthority(ctx, claim.Request)
 	}
-	binding := core.WorkflowMutationBinding{RequestID: claim.Request.ID, Operator: claim.Request.Operator}
+	status, err = operations.ApplyTelegramControl(ctx, claim.Request.Target, binding, preview.Request, check)
 
-	status, err := operations.ApplyTelegramControl(ctx, claim.Request.Target, binding, preview.Request, check)
+	return r.completeControlAction(ctx, claim, status, err, config)
+}
+
+func (r telegramReceiver) completeControlAction(ctx context.Context, claim core.TelegramActionClaim, status WorkflowWorkStatus, err error, config core.TelegramReceiverConfig) error {
 	if err != nil && status.ControlReceipt != nil {
 		return &telegramControlReceiptPending{failure: err}
 	}
@@ -44,6 +66,18 @@ func (r telegramReceiver) applyControlAction(ctx context.Context, claim core.Tel
 	}
 
 	return r.finishControlAction(ctx, claim, status, err, config)
+}
+
+func (r telegramReceiver) controlRecoveryFailure(ctx context.Context, claim core.TelegramActionClaim, err error, config core.TelegramReceiverConfig) error {
+	if !telegramControlExpectedFailure(err) {
+		return err
+	}
+
+	if claim.ReceiptOnly {
+		return r.actionDiagnostic(ctx, claim.ResponseSource, config)
+	}
+
+	return r.finishControlAction(ctx, claim, WorkflowWorkStatus{}, err, config)
 }
 
 // A native receipt proves acceptance while the inbox still needs its outcome.

@@ -204,7 +204,7 @@ Prerequisite: verified Slice 5 integration.
 | --- | --- | --- | --- |
 | T6.1 | validated | `a3e5e95be3b45aaa66cc0c1bc0744b73adac6770` | Shared guarded pause/cancel/resume/continue/reconcile, mapped actor, exact invocation/revision and asynchronous stop checkpoints. |
 | T6.2 | validated | `76b55b28ed770b13fc40da53ff39e42dbe822ae9` | Exact review/candidate, entry/budget and question guards; atomic native request receipts; lost-ack and partial-journal recovery; mapped actors. |
-| T6.3 | in_progress | `aaca31360292b67e72509557fa4b650021593aaf`, `b2f03c1159ea56ab4e482a2519489b1eec42e736` | Bounded asynchronous intake/application/delivery, shared model slots, 32 reserved pending inputs, callback/text/reply priority and native lifecycle receipts; expired/replaced prompt recovery and final stale-action checks remain pending. |
+| T6.3 | in_progress | `aaca31360292b67e72509557fa4b650021593aaf`, `b2f03c1159ea56ab4e482a2519489b1eec42e736` | Bounded asynchronous intake/application/delivery, shared model slots, 32 reserved pending inputs, callback/text/reply priority, native lifecycle receipts and guarded recovery through expired/replaced prompts; late reply binding, stale-state diagnostics and request reserves remain pending. |
 | T6.4 | pending | pending | Shared serial/parallel capacity and cross-adapter ownership checks. |
 
 Validation: plan section 11; `TestTelegramControl`, including focused race mode.
@@ -216,8 +216,10 @@ SQLite fixtures cover the 32-input reserve within the 1,024 ceiling, atomic
 capacity rejection, priority restoration, two shared model slots and context
 guards. Native lifecycle receipts now recover interrupted stop/resume, task/closing
 reconciliation and continuation acceptance without repeating work. Task completion
-still requires receipt-only recovery through expired/replaced Telegram prompts,
-final expiry parity, late reply binding and request-capacity diagnostics; T6.4
+now includes receipt-only recovery through expired/replaced Telegram prompts
+and text/callback/reply parity for accepted and unaccepted stale actions. Completion
+still requires late reply binding, stale-state diagnostics and request-capacity
+reserves; T6.4
 remains pending.
 Exact commands and results belong to the [Slice 6 report](../report/slices/telegram-conversational-workflow/slice-6-controls.md).
 

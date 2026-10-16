@@ -40,13 +40,21 @@ func (r telegramReceiver) respondAction(ctx context.Context, user core.TelegramA
 		return true, err
 	}
 
+	return true, r.respondActionClaim(ctx, update, claim, config)
+}
+
+func (r telegramReceiver) respondActionClaim(ctx context.Context, update core.TelegramReceivedUpdate, claim core.TelegramActionClaim, config core.TelegramReceiverConfig) error {
+	if claim.ReceiptOnly {
+		return r.applyControlAction(ctx, claim, config)
+	}
+
 	switch claim.Action.State {
 	case "expired", "superseded":
-		return true, r.actionDiagnostic(ctx, update, config)
+		return r.actionDiagnostic(ctx, update, config)
 	case "consumed":
-		return true, r.store.QueueReadResponse(ctx, update, "Action already confirmed. Request: "+claim.Request.ID, config.Digest(), time.Now())
+		return r.store.QueueReadResponse(ctx, update, "Action already confirmed. Request: "+claim.Request.ID, config.Digest(), time.Now())
 	default:
-		return true, r.dispatchTelegramAction(ctx, claim, config)
+		return r.dispatchTelegramAction(ctx, claim, config)
 	}
 }
 
