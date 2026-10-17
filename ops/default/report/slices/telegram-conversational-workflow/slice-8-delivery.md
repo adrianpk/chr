@@ -153,18 +153,17 @@ is reported separately by `work doctor`.
 
 A bounded receiver activation acknowledged an existing incoming message and its
 real outgoing response. A separate informational readiness notice was sent to
-the configured user. Neither is a development-journey result. No authoring
-conversation, model request, native invocation or confirmed integration has yet
-been produced by live user development input. TG-01, TG-27, TG-28 and TG-32 remain
-pending; the other 28 criteria retain their prior integrated fixture references.
+the configured user. Neither was a development-journey result. This initial
+activation preceded the live development request recorded below.
 
 The owned receiver stopped at the end of its 300-second window. The timeout
 wrapper returned its expected status 124; the receiver process exited, both
 configuration/bot locks were released and retained SQLite `quick_check` passed.
-The executable digest is unchanged. The retained fixture has one incoming update,
-one acknowledged response, zero development conversations and zero operation
-requests. Acta setup/activation note: `01M53G6BMNSN6ERW3Y64QXNQ1T`. Reuse this
-same private development root and both targets when actual user messages arrive.
+The executable digest was unchanged. At that checkpoint the retained fixture
+had one incoming update, one acknowledged response, zero development
+conversations and zero operation requests. Acta setup/activation note:
+`01M53G6BMNSN6ERW3Y64QXNQ1T`. Subsequent observations reuse this same private
+development root and both targets.
 
 After the receiver image update, a genuine incoming `/help` received a
 categorized reply accepted by Telegram in Markdown mode on its first delivery
@@ -172,28 +171,63 @@ attempt, without plain fallback. This verifies the deployed help path. It does
 not establish a development conversation, native invocation or integration;
 the two complete live development journeys remain pending.
 
-The updated image matches the private fixture's recorded digest. The retained
-store now has six processed messages and six delivered application replies,
-with zero development conversations and zero operation requests. The configured
-user also received an informational notice with the two QA start commands.
-That notice is recorded privately and is not a development request or live
-journey result. The same receiver, registrations and targets remain in use.
+Before the first development request, another retained snapshot contained six
+processed messages and six delivered application replies, with zero development
+conversations and zero operation requests. The configured user also received an
+informational notice with the two QA start commands. That notice is recorded
+privately and is not a development request or live journey result.
+
+## Live QA Progress
+
+TG-01 is validated by a genuine `/develop` request in `telegram-journey-qa` and
+its delivered project-bound acknowledgement. The request starts a small README
+change that appends a verification sentence while preserving existing content.
+Conversation `tgc-38356dda2b04b98de3d419985fa97481` retains the `develop` intent,
+project `project-0b671359780bf6ba` and namespace `telegram-qa`. Its revision-one
+reply is delivered on the first attempt and has a retained Telegram
+acknowledgement. Private evidence is retained as `live-reception-qa.json` beside
+the fixture descriptor; no private peer identifiers are copied here.
+
+The receiver is fixed at source
+`14c563d40f6a3bc0c41f7e3a8b4fc52e1c2cb166`, with SHA-256
+`419cf6654b5c9a3f40cb69ab42056ebb1dd00d944e0ced4fc6043276ad16a8a6`.
+Its digest matches the private descriptor. This build remains fixed while the
+candidate documentation changes. The existing user service is managed outside
+this worker and remains active. Its retained polling health is `ready`, with no
+last error. The remaining live steps depend on the configured user's
+conversation input.
+
+The subsequent genuine `/done` produced confirmed request
+`tgr-15e80739483b1a83389faf08385db9f0` for `authoring.continue`. Its canonical
+session is `.chr/authoring/sessions/author-b041d04024ce5905d0675851/session.md`;
+the dump is
+`ops/telegram-qa/dump/00000-author-b041d04024ce5905d0675851-dump/artifact.md`.
+The shared owner's retained receipt, session and dump exist on disk; their
+bounded metadata and dump digest are retained privately in `live-qa-dump.json`.
+The bot's prepared-authoring response is delivered. This capture operation has
+zero model attempts, so it does not establish the live provider path.
+
+At this checkpoint the conversation is `prepared`, with no native invocation or
+confirmed integration. Native work readiness still reports `ready` in worktree
+mode after the generated operational files appear in the user checkout; the
+readiness report is retained privately as `doctor-after-live-dump.txt`. No
+generated files were removed and no policy was weakened. Live model
+clarification, work preparation and bound admission remain. TG-27, TG-28 and
+TG-32 remain pending. The 28 earlier criteria retain their integrated fixture
+references.
 
 ## Risks and Follow-ups
 
-T8.1 and T8.2 are blocked on genuine inbound Telegram user messages. Repeated
-bounded receiver checks retained zero development conversations and zero
-operation requests. The default store also contains no development conversation.
-No authenticated Telegram user client has been supplied; the bot credential
-cannot originate authenticated user updates. Resume with requests, clarification
-and exact admission from the configured user, or an existing authenticated user
-client. Fixture checks, synthetic inbound updates and direct application calls
-cannot supply this live evidence. The report remains drafting and the canonical
-PR remains pending while these requirements are incomplete.
+T8.1 has genuine live reception and canonical capture evidence. Model
+clarification, work preparation and exact admission remain before native
+integration can be certified.
+T8.2 still needs the separately bound source-development request and complete
+journey. Fixture checks, synthetic inbound updates and direct application calls
+cannot supply those results. The report remains drafting and the canonical PR
+remains pending while these requirements are incomplete.
 
-The isolated bindings and fixed installed receiver are prepared. The authorized
-Telegram user must supply the live request
-and any bound clarification/admission messages. Record actual source/base/result
-and canonical integration receipt separately from fixtures. Scheduled exhaustive
-certification and delivery-set closure remain pending the final integrated
-candidate.
+Continue the existing QA conversation through its remaining bot prompts. The
+source QA journey requires its own separately bound request. Record actual
+source/base/result and canonical integration receipts separately from fixtures.
+Scheduled exhaustive certification and delivery-set closure remain pending the
+final integrated candidate.

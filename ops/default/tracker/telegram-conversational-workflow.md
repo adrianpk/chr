@@ -16,11 +16,11 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 8, Live journey and closure; blocked on authorized-user Telegram input for both live QA journeys
+Active slice: Slice 8, Live journey and closure; first live canonical dump confirmed; remaining journey evidence pending
 
 Next slice: None; final slice active, followed by exact-candidate scheduled certification and closure
 
-Progress: 7 of 8 slices integrated; 0 of 29 tasks validated and 26 done; 28 of 32 acceptance criteria have deterministic fixture evidence.
+Progress: 7 of 8 slices integrated; 0 of 29 tasks validated and 26 done; 28 criteria have deterministic fixture evidence, TG-01 has live reception evidence and 3 criteria remain pending.
 
 Full gate: `make verify`
 
@@ -243,15 +243,15 @@ Canonical PR: [#396](https://forge.adrianpk.com/adrianpk/chr/pulls/396). Verifie
 
 ## Slice 8: Live Journey and Closure
 
-State: blocked
+State: in_progress
 
 Prerequisite: verified Slice 7 integration plus private live readiness and
 recorded bot/model/service/QA activation authority from plan section 2.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T8.1 | blocked | `b72a6955cf7c` fixture and admission correction; live pending | Deterministic journey/replay and stale-readiness guards pass. The isolated live target and receiver are prepared; authorized-user requests, clarification and bound admission messages are missing. |
-| T8.2 | blocked | isolated source QA setup complete | The source checkout is separately registered against its own QA target; the receiver is fixed at `7f0e49343122`. Authorized-user input for the actual source-development journey is missing. |
+| T8.1 | in_progress | `b72a6955cf7c` fixture and admission correction; live capture and dump confirmed | A genuine development request has a delivered acknowledgement in the correct QA project. Human capture completion produced a canonical dump through a confirmed authoring operation; live clarification, work preparation, admission and integration remain. |
+| T8.2 | blocked | isolated source QA setup complete | The source checkout is separately registered against its own QA target; the receiver is fixed at `14c563d40f6a`. Authorized-user input for the actual source-development journey is missing. |
 | T8.3 | pending | `b72a6955cf7c` User Guide/reference/changelog; installed help inspected | Complete live evidence audit and nightly-bound closure remain. |
 
 Validation: plan section 13; `TestTelegramJourney`, including applicable focused
@@ -259,20 +259,21 @@ race mode, separate authorized live proof and final exact-candidate nightly.
 
 Candidate: `test/slice-8-telegram-delivery`; PR and merge pending. The [Slice 8 report](../report/slices/telegram-conversational-workflow/slice-8-delivery.md) separates deterministic preparation from live readiness and scheduled certification.
 
-External blocker: the retained QA store has zero development conversations and
-zero operation requests. No authenticated Telegram user client has been supplied
-to originate the required messages. The configured bot credential receives and
-answers user updates; it cannot originate authenticated user updates. Resume
-T8.1 and T8.2 when the configured user sends the real requests and their bound
-answers, or identifies an existing authenticated user client. Keep TG-01,
-TG-27, TG-28 and TG-32 pending; receiver readiness and deterministic checks do
-not replace those journeys.
+Live progress: `tgc-38356dda2b04b98de3d419985fa97481` is bound to
+`telegram-journey-qa`. The configured user's real `/develop` request and its
+delivered project-bound acknowledgement validate TG-01. A genuine `/done`
+confirmed `authoring.continue` and created the canonical dump. The remaining
+live phases require model clarification, work preparation and any bound
+admission answers before native integration. The second source QA request is
+still pending. Keep TG-27, TG-28 and TG-32 pending until their complete live
+journeys and evidence exist. The existing receiver is managed outside this
+worker and remains active with its fixed image.
 
 Task validation: combined journey, prepared-work, admission and automatic
 continuation regressions pass in normal and race modes. The actual asynchronous
 receiver reaches a confirmed fixture receipt after preparation and SQLite reopen.
 Strict lint reports zero issues. The report records exact commands, timings and
-the live-evidence boundary. TG-01, TG-27, TG-28 and TG-32 remain pending.
+the live-evidence boundary. TG-27, TG-28 and TG-32 remain pending.
 
 ## Acceptance Evidence
 
@@ -281,7 +282,7 @@ report/test/live references in the Evidence column as they are verified.
 
 | Criterion | State | Evidence |
 | --- | --- | --- |
-| TG-01 | pending | pending |
+| TG-01 | validated | [Slice 8 live reception](../report/slices/telegram-conversational-workflow/slice-8-delivery.md#live-qa-progress); conversation `tgc-38356dda2b04b98de3d419985fa97481`, fixed receiver `14c563d40f6a3bc0c41f7e3a8b4fc52e1c2cb166`. |
 | TG-02 | validated | [Slice 1 deterministic evidence](../report/slices/telegram-conversational-workflow/slice-1-receiver.md) |
 | TG-03 | validated | [Slice 1 deterministic evidence](../report/slices/telegram-conversational-workflow/slice-1-receiver.md) |
 | TG-04 | validated | [Slice 4 authoring and scope fixtures](../report/slices/telegram-conversational-workflow/slice-4-authoring.md) |
@@ -321,7 +322,7 @@ report/test/live references in the Evidence column as they are verified.
 | Looper execution authority | granted | Maintainer instructed this exact prepared set to proceed on 2026-10-16. |
 | Dedicated bot credentials and exact identity bindings | isolated QA binding and fixed executable ready | Connection doctor succeeds; an isolated dev-root permits only the two disposable QA clones. Native work doctors report ready. Fixture details are recorded in the Slice 8 report. |
 | Live service/messages/model/QA authority | granted for bounded plan validation | Use the dedicated bot, configured model and existing designated QA repositories; private readiness remains required. |
-| Authorized-user live development messages | pending | The bounded activation acknowledged existing traffic and stopped with released locks and a healthy retained database. No live development conversation/invocation exists. Reuse the prepared fixture when the configured user supplies both QA requests and bound decisions. |
+| Authorized-user live development messages | first request and capture completion received | The genuine QA development request has a delivered project-bound acknowledgement and a confirmed canonical dump. Live model clarification, native admission/integration and the second source QA request remain pending. The externally managed receiver stays active. |
 | Final scheduled nightly on integrated candidate | pending | Use existing Forgejo schedule; do not dispatch or run the long gate interactively. |
 
 ## Final Candidate and Closure

@@ -16,7 +16,7 @@ Tracker: [Telegram Conversation Tracker](../tracker/telegram-conversational-work
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, its canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 8, Live journey and closure; blocked on authorized-user Telegram input for both live QA journeys
+Active slice: Slice 8, Live journey and closure; first live canonical dump confirmed; remaining journey evidence pending
 
 Next slice: None; final slice active, followed by exact-candidate scheduled certification and closure
 
@@ -423,4 +423,4 @@ starts with every criterion pending.
 - [ ] The cycle report, tracker and plan distinguish tested code from later closure-only documentation.
 - [ ] The delivery set is closed with no pending work or unreported blocker.
 
-Current state: Slices 1 through 7 are delivered through canonical PR #390/#391/#392/#393/#394/#395/#396. The latest verified merge is `c14f1aea640657e27c97bb64e40b46f30f698451`. Slice 8 is active on its recorded branch. Its combined deterministic journey and preparation/admission correction pass focused checks; user documentation is updated. Two isolated live QA targets and a fixed receiver build are prepared. The actual authorized-user bot/model journeys and final evidence remain pending. Scheduled exhaustive certification remains bound to the final integrated candidate.
+Current state: Slices 1 through 7 are delivered through canonical PR #390/#391/#392/#393/#394/#395/#396. The latest verified merge is `c14f1aea640657e27c97bb64e40b46f30f698451`. Slice 8 is active on its recorded branch. Its combined deterministic journey and preparation/admission correction pass focused checks; user documentation is updated. The first genuine development request has a delivered project-bound acknowledgement, validating TG-01. Human capture completion produced a confirmed canonical dump. Live model clarification, native integration, the source-development journey and final evidence remain pending. Scheduled exhaustive certification remains bound to the final integrated candidate.
