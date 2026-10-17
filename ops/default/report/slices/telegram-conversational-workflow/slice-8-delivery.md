@@ -148,6 +148,16 @@ same private development root and both targets when actual user messages arrive.
 
 ## Risks and Follow-ups
 
+T8.1 and T8.2 are blocked on genuine inbound Telegram user messages. Repeated
+bounded receiver checks retained zero development conversations and zero
+operation requests. The default store also contains no development conversation.
+No authenticated Telegram user client has been supplied; the bot credential
+cannot originate authenticated user updates. Resume with requests, clarification
+and exact admission from the configured user, or an existing authenticated user
+client. Fixture checks, synthetic inbound updates and direct application calls
+cannot supply this live evidence. The report remains drafting and the canonical
+PR remains pending while these requirements are incomplete.
+
 The isolated bindings and fixed installed receiver are prepared. The authorized
 Telegram user must supply the live request
 and any bound clarification/admission messages. Record actual source/base/result

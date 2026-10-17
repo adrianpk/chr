@@ -16,7 +16,7 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 8, Live journey and closure; deterministic journey passes; isolated live QA awaits authorized-user development messages
+Active slice: Slice 8, Live journey and closure; blocked on authorized-user Telegram input for both live QA journeys
 
 Next slice: None; final slice active, followed by exact-candidate scheduled certification and closure
 
@@ -243,21 +243,30 @@ Canonical PR: [#396](https://forge.adrianpk.com/adrianpk/chr/pulls/396). Verifie
 
 ## Slice 8: Live Journey and Closure
 
-State: in_progress
+State: blocked
 
 Prerequisite: verified Slice 7 integration plus private live readiness and
 recorded bot/model/service/QA activation authority from plan section 2.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T8.1 | in_progress | `b72a6955cf7c` fixture and admission correction; live pending | Deterministic journey/replay and stale-readiness guards pass. Isolated live target and receiver are prepared; real bot/model development input and integration evidence remain. |
-| T8.2 | pending | isolated source QA setup complete | Source checkout is separately registered against its own QA target; fixed receiver is built from `b72a6955cf7c`. Actual source-development journey remains. |
+| T8.1 | blocked | `b72a6955cf7c` fixture and admission correction; live pending | Deterministic journey/replay and stale-readiness guards pass. The isolated live target and receiver are prepared; authorized-user requests, clarification and bound admission messages are missing. |
+| T8.2 | blocked | isolated source QA setup complete | The source checkout is separately registered against its own QA target; the receiver is fixed at `b72a6955cf7c`. Authorized-user input for the actual source-development journey is missing. |
 | T8.3 | pending | `b72a6955cf7c` User Guide/reference/changelog; installed help inspected | Complete live evidence audit and nightly-bound closure remain. |
 
 Validation: plan section 13; `TestTelegramJourney`, including applicable focused
 race mode, separate authorized live proof and final exact-candidate nightly.
 
 Candidate: `test/slice-8-telegram-delivery`; PR and merge pending. The [Slice 8 report](../report/slices/telegram-conversational-workflow/slice-8-delivery.md) separates deterministic preparation from live readiness and scheduled certification.
+
+External blocker: the retained QA store has zero development conversations and
+zero operation requests. No authenticated Telegram user client has been supplied
+to originate the required messages. The configured bot credential receives and
+answers user updates; it cannot originate authenticated user updates. Resume
+T8.1 and T8.2 when the configured user sends the real requests and their bound
+answers, or identifies an existing authenticated user client. Keep TG-01,
+TG-27, TG-28 and TG-32 pending; receiver readiness and deterministic checks do
+not replace those journeys.
 
 Task validation: combined journey, prepared-work, admission and automatic
 continuation regressions pass in normal and race modes. The actual asynchronous
