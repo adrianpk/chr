@@ -80,7 +80,7 @@ func telegramProjectResponse(operations telegramReadService, ids []string) (stri
 
 	for _, project := range projects {
 		if project.Enabled {
-			lines = append(lines, project.ID+" — "+project.Name)
+			lines = append(lines, "- "+project.Name)
 		}
 	}
 
@@ -88,5 +88,5 @@ func telegramProjectResponse(operations telegramReadService, ids []string) (stri
 		return "No enabled registered projects are available for your identity.", nil
 	}
 
-	return core.BoundTelegramReceiverText(strings.Join(lines, "\n")), nil
+	return core.BoundTelegramReceiverText("Registered projects. Select one with /project <name>.\n" + strings.Join(lines, "\n")), nil
 }
