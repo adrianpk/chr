@@ -1,7 +1,7 @@
 ---
 id: TKT-20261017094606
 title: "Render categorized Telegram help from native command metadata"
-status: in_progress
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -9,7 +9,10 @@ scope: api
 tags: telegram, help, command-registry
 source: chat
 reported_at: 2026-10-17T09:46:06Z
-commits: []
+commits: [7cb7fe0c0c0aa0528338d7b54ffbf1a6812470f9]
+resolution: fixed
+reviewed_at: 2026-10-17T10:14:56Z
+closed_at: 2026-10-17T10:14:56Z
 ready_at: 2026-10-17T09:59:55Z
 started_at: 2026-10-17T09:59:55Z
 branch: dev

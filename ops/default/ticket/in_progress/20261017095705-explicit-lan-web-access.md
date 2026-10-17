@@ -1,7 +1,7 @@
 ---
 id: TKT-20261017095705
 title: "Add an explicit opt-in flag for token-free LAN Web UI access"
-status: open
+status: in_progress
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,9 @@ tags: web-ui, lan-access, navigation
 source: chat
 reported_at: 2026-10-17T09:57:05Z
 commits: []
+ready_at: 2026-10-17T10:14:56Z
+started_at: 2026-10-17T10:14:56Z
+branch: dev
 ---
 
 # Add an explicit opt-in flag for token-free LAN Web UI access
@@ -105,3 +108,9 @@ regressions. It does not authorize implementation or changes to running
 services. Repairing browser sessions for token-required operation is a
 separate concern; token propagation is not a prerequisite for this explicitly
 token-free LAN workflow.
+
+## Authorized Execution
+
+The maintainer authorized this implementation on 2026-10-17 after completion
+of Telegram help ticket TKT-20261017094606. Help is delivered on dev before
+LAN implementation starts.
