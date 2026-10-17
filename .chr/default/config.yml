@@ -3,3 +3,5 @@ tickets:
   key_prefix: CHR
 notifications:
   telegram_enabled: false
+web:
+  allow_lan: true
