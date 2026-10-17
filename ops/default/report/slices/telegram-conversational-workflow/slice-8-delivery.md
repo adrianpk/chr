@@ -164,6 +164,13 @@ attempt, without plain fallback. This verifies the deployed help path. It does
 not establish a development conversation, native invocation or integration;
 the two complete live development journeys remain pending.
 
+The updated image matches the private fixture's recorded digest. The retained
+store now has six processed messages and six delivered application replies,
+with zero development conversations and zero operation requests. The configured
+user also received an informational notice with the two QA start commands.
+That notice is recorded privately and is not a development request or live
+journey result. The same receiver, registrations and targets remain in use.
+
 ## Risks and Follow-ups
 
 T8.1 and T8.2 are blocked on genuine inbound Telegram user messages. Repeated

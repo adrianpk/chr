@@ -251,7 +251,7 @@ recorded bot/model/service/QA activation authority from plan section 2.
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
 | T8.1 | blocked | `b72a6955cf7c` fixture and admission correction; live pending | Deterministic journey/replay and stale-readiness guards pass. The isolated live target and receiver are prepared; authorized-user requests, clarification and bound admission messages are missing. |
-| T8.2 | blocked | isolated source QA setup complete | The source checkout is separately registered against its own QA target; the receiver is fixed at `b72a6955cf7c`. Authorized-user input for the actual source-development journey is missing. |
+| T8.2 | blocked | isolated source QA setup complete | The source checkout is separately registered against its own QA target; the receiver is fixed at `7f0e49343122`. Authorized-user input for the actual source-development journey is missing. |
 | T8.3 | pending | `b72a6955cf7c` User Guide/reference/changelog; installed help inspected | Complete live evidence audit and nightly-bound closure remain. |
 
 Validation: plan section 13; `TestTelegramJourney`, including applicable focused
