@@ -45,6 +45,11 @@ chr web serve --port 7340
 
 Stop the server with `ctrl+c` in the terminal that started it.
 
+For direct access from another computer on a trusted internal network, run
+`chr web serve --allow-lan`. This explicit mode requires no token and defaults
+to disabled. See [Expose the Local Web UI Deliberately](expose-local-web-ui.md)
+for the browser URL and effective bind policy.
+
 ## Local Workflow
 
 Use the Web UI as another view over the same project-local state:

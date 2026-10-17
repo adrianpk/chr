@@ -1,7 +1,6 @@
 package app
 
 import (
-	"slices"
 	"strconv"
 	"strings"
 
@@ -19,8 +18,31 @@ func telegramControlRegistry() []ConversationIntentOperation {
 	return []ConversationIntentOperation{{ID: "control", Description: "Inspect or control an exact retained native invocation", Arguments: "Optional project/conversation/namespace; action=status|pause|cancel|resume|continue|reconcile|approve|grant|answer_decision; text=exact invocation (empty only for a bound conversation); grant record_json={kind,amount,reason}; answer_decision record_json={question_id,answer_action,option,reason}; no actor, authority or revision fields"}}
 }
 
+type telegramControlDescriptor struct {
+	Name, Arguments string
+}
+
+func telegramControlCommands() []telegramControlDescriptor {
+	const scope = "[--project <id>] [--conversation <id>] [--namespace <name>] "
+
+	var commands []telegramControlDescriptor
+	for _, name := range []string{"status", "pause", "cancel", "resume", "continue", "reconcile", "approve"} {
+		commands = append(commands, telegramControlDescriptor{name, scope + "[execution]"})
+	}
+
+	return append(commands,
+		telegramControlDescriptor{"grant", scope + "<execution> <kind> <amount> <reason>"},
+		telegramControlDescriptor{"answer-decision", scope + "<execution> <question-id> <resolve|defer> <option-number> <reason>"},
+	)
+}
+
 func telegramControlHelp() string {
-	return "/status|/pause|/cancel|/resume|/continue|/reconcile|/approve [--project <id>] [--conversation <id>] [--namespace <name>] [execution] — Inspect or confirm an exact retained invocation and revision\n/grant [scope flags] <execution> <kind> <amount> <reason> — Confirm a bounded allowance\n/answer-decision [scope flags] <execution> <question-id> <resolve|defer> <option-number> <reason> — Confirm an exact displayed answer"
+	var lines []string
+	for _, command := range telegramControlCommands() {
+		lines = append(lines, telegramCommandSyntax("/"+command.Name, command.Arguments))
+	}
+
+	return strings.Join(lines, "\n")
 }
 
 func parseTelegramControl(update core.TelegramReceivedUpdate) (telegramControlCommand, bool, error) {
@@ -49,7 +71,13 @@ func parseTelegramControl(update core.TelegramReceivedUpdate) (telegramControlCo
 }
 
 func validTelegramControlAction(action string) bool {
-	return slices.Contains([]string{"status", "pause", "cancel", "resume", "continue", "reconcile", "approve", "grant", "answer_decision"}, action)
+	for _, command := range telegramControlCommands() {
+		if strings.ReplaceAll(command.Name, "-", "_") == action {
+			return true
+		}
+	}
+
+	return false
 }
 
 func validateTelegramControlCommand(command telegramControlCommand) error {

@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -27,15 +26,6 @@ func telegramAuthoringRegistry() []telegramAuthoringDescriptor {
 		{"/plan", "[conversation]", "Generate a plan from canonical context", core.AuthoringContinuationGenerate, core.AuthoringArtifactKindPlan},
 		{"/refine", "<dump|spec|plan> <conversation> <instructions>", "Refine an observed artifact with explicit replacement authority", core.AuthoringContinuationRefine, ""},
 	}
-}
-
-func telegramAuthoringHelp() string {
-	var result strings.Builder
-	for _, descriptor := range telegramAuthoringRegistry() {
-		fmt.Fprintf(&result, "%s %s — %s\n", descriptor.Name, descriptor.Arguments, descriptor.Help)
-	}
-
-	return strings.TrimSpace(result.String())
 }
 
 func parseTelegramAuthoring(update core.TelegramReceivedUpdate) (telegramAuthoringCommand, bool, error) {

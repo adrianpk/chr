@@ -7,6 +7,39 @@ Unknown slash commands return help without consulting a model. Bound actions
 accept buttons, replies and `/answer` through the same retained decision owner.
 Preparation creates no work invocation and executes no saved intake handoff.
 
+## Command help
+
+Send `/help` to read the complete command catalogue without selecting a project
+or invoking a model. Commands come from their native definitions and retain
+their arguments, aliases and overloads. Populated categories appear in this
+order: Execution, Tickets, Slice sets, Use cases, Projects, Authoring,
+Conversations, System controls and Other. Each syntax entry occupies its own
+line; descriptions and large code blocks are omitted. Entries sort by exact
+syntax within a category.
+
+Help uses Telegram's legacy `Markdown` mode, with bold headings and inline
+commands where safe. A definite entity-format rejection permits one plain-text
+fallback. Network failures, rate limits and uncertain delivery use the normal
+retained retry policy. Both renderings are frozen together when queued, so
+fallback after restart cannot read a newer command catalogue. Older queued
+plain replies keep their previous behavior; other responses remain plain text.
+
+The current catalogue fits one message through the existing 3,200
+UTF-16-unit response pipeline. Both forms, including any diagnostic prefix,
+must fit that boundary and the sender's 3,900-code-point/UTF-16-unit bounds.
+Oversized help returns an explicit diagnostic instead of a truncated catalogue.
+There are no help topic pages, navigation buttons or pagination controls.
+
+Direct `/help` remains available during capture, pending authoring questions
+and confirmations, including when sent as a reply to the prompt. It does not
+change the selected project, focused session, capture, revisions or question
+and confirmation bindings. Its response is not a new capture/confirmation
+target. Later messages remain subject to normal conversation routing.
+
+Unknown slash commands retain their diagnostic and return the same categorized
+help without a model. Existing natural-language help still passes through the
+configured intent resolver; it is not guaranteed to be model-free.
+
 ## Private setup
 
 ```sh

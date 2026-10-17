@@ -9,6 +9,12 @@ import (
 	"strings"
 )
 
+// TelegramActionAnswerCommand names the deterministic action-answer command.
+const TelegramActionAnswerCommand = "/answer"
+
+// TelegramActionAnswerUsage is the canonical syntax shared with command help.
+const TelegramActionAnswerUsage = TelegramActionAnswerCommand + " <action-token> <choice>"
+
 // ErrTelegramActionUnavailable rejects an unknown, expired or mismatched prompt binding.
 var ErrTelegramActionUnavailable = errors.New("telegram action is unavailable for this exact peer and prompt")
 
@@ -57,7 +63,7 @@ func (s *TelegramReceiverStore) ResolveTelegramActionAnswer(ctx context.Context,
 	}
 
 	words := strings.Fields(text)
-	if len(words) > 0 && words[0] == "/answer" {
+	if len(words) > 0 && words[0] == TelegramActionAnswerCommand {
 		if len(words) != 3 {
 			return TelegramActionAnswer{}, true, ErrTelegramActionUnavailable
 		}

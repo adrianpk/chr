@@ -134,7 +134,7 @@ func telegramInputActionToken(ctx context.Context, tx *sql.Tx, update TelegramRe
 	}
 
 	words := strings.Fields(text)
-	if len(words) > 0 && words[0] == "/answer" {
+	if len(words) > 0 && words[0] == TelegramActionAnswerCommand {
 		if len(words) == 3 {
 			return words[1], true, nil
 		}

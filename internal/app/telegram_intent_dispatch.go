@@ -213,12 +213,12 @@ func (r telegramReceiver) dispatchIntentRead(ctx context.Context, user core.Tele
 			continue
 		}
 
-		text, err := telegramReadOperationResponse(r.operations, user, input.Update, operation.ID)
+		reply, err := telegramReadOperationResponse(r.operations, user, input.Update, operation.ID)
 		if err != nil {
 			return err
 		}
 
-		return r.recordDiagnostic(ctx, input.Update, input.Config, text)
+		return r.queueReadReply(ctx, input.Update, input.Config, reply)
 	}
 
 	return r.intentCorrection(ctx, input.Update, input.Config)

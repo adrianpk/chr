@@ -45,6 +45,7 @@ type WebConfig struct {
 	Host                   string
 	Port                   int
 	OpenBrowser            bool
+	AllowLAN               bool
 	RequireToken           WebTokenMode
 	TokenEnv               string
 	AllowedOrigins         []string
@@ -284,6 +285,7 @@ func DefaultWebConfig() WebConfig {
 		Host:                   DefaultWebHost,
 		Port:                   DefaultWebPort,
 		OpenBrowser:            false,
+		AllowLAN:               false,
 		RequireToken:           WebTokenModeAuto,
 		TokenEnv:               DefaultWebTokenEnv,
 		AllowedOrigins:         nil,
@@ -695,10 +697,13 @@ func setWebConfigValue(config *WebConfig, key, value string) {
 		setPositiveInt(&config.Port, value)
 	case "open_browser":
 		config.OpenBrowser = configBoolValue(value)
+	case "allow_lan":
+		config.AllowLAN = configBoolValue(value)
 	case "require_token":
-		if value != "" {
-			config.RequireToken = WebTokenMode(value)
-		}
+		mode := string(config.RequireToken)
+		setString(&mode, value)
+
+		config.RequireToken = WebTokenMode(mode)
 	case "token_env":
 		setString(&config.TokenEnv, value)
 	case "allowed_origins":

@@ -265,6 +265,12 @@ Open a specific project directory:
 chr web serve --dir /path/to/project
 ```
 
+For token-free browser access from another computer on a trusted internal
+network, run `chr web serve --allow-lan`. LAN access defaults to disabled;
+`web.allow_lan: true` in the project's configuration retains the explicit
+choice. See [Expose the local Web UI](../expose-local-web-ui.md) for bind,
+token-policy and origin behavior.
+
 The browser UI can manage the Board and the same project artifact families used
 by the TUI and CLI: Cases, Dumps, Quizzes, Specs, Plans, Board, and Dash. It
 uses project-local files as the source of truth and reloads from shared state

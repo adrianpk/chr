@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -51,6 +52,10 @@ func (r telegramReceiver) respond(ctx context.Context, update core.TelegramRecei
 		return r.store.RejectPendingUpdate(ctx, update, time.Now())
 	}
 
+	if update.Kind == "message" && strings.TrimSpace(update.Text) == "/help" {
+		return r.queueReadReply(ctx, update, config, telegramHelpReply(""))
+	}
+
 	for _, handler := range []func(context.Context, core.TelegramAllowedUser, core.TelegramReceiverConfig, core.TelegramReceivedUpdate) (bool, error){r.respondAction, r.respondControl, r.respondWork, r.respondRecord, r.respondPreparedWork, r.respondExplanation, r.respondAuthoring, r.respondIntent, r.respondConversation} {
 		if handled, err := handler(ctx, user, config, update); handled || err != nil {
 			if errors.Is(err, core.ErrTelegramRequestCapacity) {
@@ -61,12 +66,12 @@ func (r telegramReceiver) respond(ctx context.Context, update core.TelegramRecei
 		}
 	}
 
-	text, err := telegramReadResponse(r.operations, user, update)
+	reply, err := telegramReadResponse(r.operations, user, update)
 	if err != nil {
-		text = "The requested read is unavailable. Use local diagnostics to inspect project readiness."
+		reply = telegramReadReply{Text: "The requested read is unavailable. Use local diagnostics to inspect project readiness."}
 	}
 
-	return r.store.QueueReadResponse(ctx, update, core.BoundTelegramReceiverText(text), config.Digest(), time.Now())
+	return r.queueReadReply(ctx, update, config, reply)
 }
 
 func (r telegramReceiver) deliver(ctx context.Context, delivery core.TelegramReceiverDelivery) error {
@@ -98,18 +103,49 @@ func (r telegramReceiver) deliver(ctx context.Context, delivery core.TelegramRec
 
 func (r telegramReceiver) sendReservedDelivery(ctx context.Context, delivery core.TelegramReceiverDelivery) error {
 	text := delivery.Text
+	if delivery.PlainFallback {
+		text = delivery.PlainText
+	}
+
 	if delivery.State == "sending" || delivery.State == "uncertain" {
 		text = core.BoundTelegramReceiverText("Uncertain delivery retry; this notice may repeat.\n" + text)
 	}
 
-	messageID, err := r.api.SendAction(ctx, r.token, delivery.Peer, text, delivery.ActionToken, delivery.ActionChoices)
+	messageID, err := r.sendDeliveryBody(ctx, delivery, text)
 	if err != nil {
 		if ctx.Err() != nil {
 			return ctx.Err()
 		}
 
-		return r.store.DeliveryFailed(ctx, delivery, err, time.Now())
+		return r.failedDelivery(ctx, delivery, err)
 	}
 
 	return r.store.DeliverySent(ctx, delivery.ID, messageID, time.Now())
+}
+
+func (r telegramReceiver) sendDeliveryBody(ctx context.Context, delivery core.TelegramReceiverDelivery, text string) (int64, error) {
+	if delivery.ParseMode == "Markdown" && !delivery.PlainFallback {
+		return r.api.SendMarkdown(ctx, r.token, delivery.Peer, text)
+	}
+
+	return r.api.SendAction(ctx, r.token, delivery.Peer, text, delivery.ActionToken, delivery.ActionChoices)
+}
+
+func (r telegramReceiver) failedDelivery(ctx context.Context, delivery core.TelegramReceiverDelivery, failure error) error {
+	var apiErr *core.TelegramAPIError
+	if delivery.ParseMode == "Markdown" && !delivery.PlainFallback && errors.As(failure, &apiErr) && apiErr.Code == "format_rejected" {
+		selected, err := r.store.SelectTelegramPlainFallback(ctx, delivery.ID, time.Now())
+		if err != nil {
+			return err
+		}
+
+		if selected {
+			delivery.PlainFallback, delivery.State = true, "pending"
+			delivery.Attempts++
+
+			return r.deliver(ctx, delivery)
+		}
+	}
+
+	return r.store.DeliveryFailed(ctx, delivery, failure, time.Now())
 }
