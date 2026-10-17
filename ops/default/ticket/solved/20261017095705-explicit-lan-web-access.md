@@ -1,7 +1,7 @@
 ---
 id: TKT-20261017095705
 title: "Add an explicit opt-in flag for token-free LAN Web UI access"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -9,10 +9,12 @@ scope: ui
 tags: web-ui, lan-access, navigation
 source: chat
 reported_at: 2026-10-17T09:57:05Z
-commits: []
+commits: [e588f01b69c8a3518dd0e1df212a5e46350fc0cc]
 ready_at: 2026-10-17T10:14:56Z
 started_at: 2026-10-17T10:14:56Z
 branch: dev
+resolution: fixed
+closed_at: 2026-10-17T10:29:14Z
 reviewed_at: 2026-10-17T10:29:00Z
 ---
 
