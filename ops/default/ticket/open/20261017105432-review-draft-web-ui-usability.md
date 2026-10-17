@@ -42,3 +42,10 @@ interaction problems belong in the same assessment.
 This ticket records the draft status and the need for future review. The
 maintainer deferred this work. Keep it open; capturing it does not start the
 review, redesign or implementation.
+
+## Findings Under Delivery
+
+The maintainer authorized these bounded changes during the ongoing review.
+The overall functional, visual and UX review remains open.
+
+1. [Keep a minimal Project page outside visible navigation](../in_progress/20261017183418-simplify-hidden-project-page.md).

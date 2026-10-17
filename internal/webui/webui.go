@@ -656,12 +656,11 @@ func (h handler) projectPageData(r *http.Request) (PageData, error) {
 	}
 
 	return PageData{
-		Shell:      h.shellData("project"),
-		View:       "project",
-		Title:      "Project",
-		Revision:   project.Revision,
-		RefreshURL: "/project/fragment",
-		Project:    project,
+		Shell:    h.shellData("project"),
+		View:     "project",
+		Title:    "Project",
+		Revision: project.Revision,
+		Project:  project,
 	}, nil
 }
 

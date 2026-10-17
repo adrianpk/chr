@@ -22,10 +22,10 @@
             <span class="brand-title">Chryso</span>
           </a>
           <div class="header-context" aria-label="Current context">
-            <a class="context-selector" href="/project">
+            <div class="context-selector context-selector--static">
               <span>Project</span>
               <strong>{{.Shell.ProjectName}}</strong>
-            </a>
+            </div>
             <div class="context-selector context-selector--muted">
               <span>Actor</span>
               <strong>local</strong>
@@ -76,32 +76,15 @@
 
 {{define "project_content.html"}}
 {{template "revision_marker.html" .}}
-<div class="summary-grid">
-  <div class="summary-item">
-    <span class="summary-label">Project ID</span>
-    <strong>{{.Project.ProjectID}}</strong>
-  </div>
-  <div class="summary-item">
-    <span class="summary-label">Bind</span>
-    <strong>{{.Project.Host}}:{{.Project.Port}}</strong>
-  </div>
-  <div class="summary-item">
-    <span class="summary-label">Refresh</span>
-    <strong>{{.Project.RefreshSeconds}}s</strong>
-  </div>
+<div class="detail-block">
+  <span class="summary-label">Project name</span>
+  <strong>{{.Shell.ProjectName}}</strong>
 </div>
 <div class="detail-block">
   <span class="summary-label">Project directory</span>
   <code>{{.Project.ProjectDir}}</code>
 </div>
-<div class="list-block">
-  {{range .Project.Paths}}
-    <div class="path-row">
-      <span>{{.Label}}</span>
-      <code>{{.Path}}</code>
-    </div>
-  {{end}}
-</div>
+<p class="summary-label">Project ID: <code>{{.Project.ProjectID}}</code></p>
 {{end}}
 
 {{define "board_content.html"}}

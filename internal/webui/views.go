@@ -42,17 +42,9 @@ func newStaticDataProvider(shell ShellData) staticDataProvider {
 
 func (p staticDataProvider) ProjectView(context.Context) (ProjectView, error) {
 	return ProjectView{
-		ProjectID:      p.shell.ProjectID,
-		ProjectDir:     p.shell.ProjectDir,
-		URL:            p.shell.URL,
-		Host:           p.shell.Host,
-		Port:           p.shell.Port,
-		RequireToken:   p.shell.RequireToken,
-		RefreshSeconds: p.shell.RefreshSeconds,
-		Paths: []ProjectPathView{
-			{Label: "Project directory", Path: p.shell.ProjectDir},
-		},
-		Revision: "static-project",
+		ProjectID:  p.shell.ProjectID,
+		ProjectDir: p.shell.ProjectDir,
+		Revision:   "static-project",
 	}, nil
 }
 
@@ -100,21 +92,9 @@ func (staticDataProvider) WriteAction(_ context.Context, request WriteActionRequ
 
 // ProjectView is the read-only project summary rendered by the Web UI.
 type ProjectView struct {
-	ProjectID      string
-	ProjectDir     string
-	URL            string
-	Host           string
-	Port           int
-	RequireToken   string
-	RefreshSeconds int
-	Paths          []ProjectPathView
-	Revision       string
-}
-
-// ProjectPathView describes one important project path.
-type ProjectPathView struct {
-	Label string
-	Path  string
+	ProjectID  string
+	ProjectDir string
+	Revision   string
 }
 
 // BoardView is the read-only board projection rendered by the Web UI.

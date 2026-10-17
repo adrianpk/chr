@@ -327,12 +327,15 @@ func TestHandlerProjectBoardDashRoutes(t *testing.T) {
 		t.Fatalf("NewHandler returned error: %v", err)
 	}
 
+	hiddenDetails := []string{"Bind", "Refresh", "User workspace", ".chr/default/tickets", ".chr/default/runtime", "hx-trigger=", `href="/project"`}
+
 	for _, tt := range []struct {
-		path string
-		want []string
+		path   string
+		want   []string
+		absent []string
 	}{
-		{path: "/", want: []string{"Project", "Project directory", "/tmp/project"}},
-		{path: "/project", want: []string{"Project", "Tickets", ".chr/default/tickets"}},
+		{path: "/", want: []string{"Project", "Project directory", "/tmp/project"}, absent: hiddenDetails},
+		{path: "/project", want: []string{"Project name", "Project One", "Project directory", "/tmp/project", "Project ID", "project-1"}, absent: hiddenDetails},
 		{path: "/board", want: []string{"Board", "Ready For Dev", "CHR-1", "Ready work"}},
 		{path: "/dash", want: []string{"Dash", "Readiness", "Queue", "worker_started"}},
 	} {
@@ -346,6 +349,12 @@ func TestHandlerProjectBoardDashRoutes(t *testing.T) {
 		for _, want := range tt.want {
 			if !strings.Contains(recorder.Body.String(), want) {
 				t.Fatalf("%s body does not contain %q:\n%s", tt.path, want, recorder.Body.String())
+			}
+		}
+
+		for _, unwanted := range tt.absent {
+			if strings.Contains(recorder.Body.String(), unwanted) {
+				t.Fatalf("%s contains unwanted project detail %q", tt.path, unwanted)
 			}
 		}
 	}
@@ -711,7 +720,6 @@ func TestHandlerFullPagesConfigurePolling(t *testing.T) {
 		revision  string
 		workspace string
 	}{
-		{path: "/", refresh: "/project/fragment", revision: "project-revision", workspace: `id="workspace"`},
 		{path: "/board", refresh: "/board/fragment", revision: "board-revision", workspace: `id="workspace"`},
 		{path: "/dash", refresh: "/dash/fragment", revision: "dash-revision", workspace: `id="workspace"`},
 		{path: "/dumps", refresh: "/dumps/fragment", revision: "dumps-revision", workspace: `id="workspace"`},
@@ -887,7 +895,7 @@ func testShellData() ShellData {
 		RequireToken:   "auto",
 		RefreshSeconds: 2,
 		Navigation: []ui.NavLink{
-			{Label: "Project", Href: "/", Active: true},
+			{Label: "Cases", Href: "/cases"},
 		},
 	}
 }
@@ -896,17 +904,9 @@ type testDataProvider struct{}
 
 func (testDataProvider) ProjectView(context.Context) (ProjectView, error) {
 	return ProjectView{
-		ProjectID:      "project-1",
-		ProjectDir:     "/tmp/project",
-		URL:            "http://127.0.0.1:7331",
-		Host:           "127.0.0.1",
-		Port:           7331,
-		RequireToken:   "auto",
-		RefreshSeconds: 2,
-		Paths: []ProjectPathView{
-			{Label: "Tickets", Path: "/tmp/project/.chr/default/tickets"},
-		},
-		Revision: "project-revision",
+		ProjectID:  "project-1",
+		ProjectDir: "/tmp/project",
+		Revision:   "project-revision",
 	}, nil
 }
 

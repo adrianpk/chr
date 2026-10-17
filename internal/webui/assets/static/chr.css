@@ -165,7 +165,7 @@ a {
   line-height: 1.1;
 }
 
-.context-selector:hover {
+.context-selector:not(.context-selector--static):hover {
   border-color: var(--line);
   background: rgb(255 255 255 / 0.58);
 }
@@ -178,7 +178,7 @@ a {
   clip: rect(0 0 0 0);
 }
 
-.context-selector::after {
+.context-selector:not(.context-selector--static)::after {
   content: "v";
   color: var(--muted);
   font-size: 10px;

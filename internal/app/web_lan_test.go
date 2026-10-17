@@ -173,7 +173,11 @@ func TestWebLANNavigation(t *testing.T) {
 		}
 	}
 
-	for _, path := range []string{"/project", "/board", "/dash", "/cases", "/dumps", "/quizzes", "/specs", "/plans"} {
+	if visited["/project"] || visited["/"] {
+		t.Fatal("project diagnostics must not appear in rendered navigation")
+	}
+
+	for _, path := range []string{"/board", "/dash", "/cases", "/dumps", "/quizzes", "/specs", "/plans"} {
 		if !visited[path] {
 			t.Fatalf("rendered navigation omitted %s", path)
 		}
@@ -182,6 +186,8 @@ func TestWebLANNavigation(t *testing.T) {
 		webLANFetch(t, server, path+"/fragment")
 	}
 
+	webLANFetch(t, server, "/project")
+	webLANFetch(t, server, "/project/fragment")
 	webLANFetch(t, server, "/assets/chr-logo.png")
 }
 

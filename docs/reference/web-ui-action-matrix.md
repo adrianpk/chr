@@ -18,7 +18,7 @@ Status values:
 | Domain | Web UI entrypoint | CLI entrypoint | TUI entrypoint | Status | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Web server | `chr web serve` | `chr web serve` | none | `web_only` | Explicit foreground process; no automatic startup from CLI or TUI workflows. |
-| Project | `/`, `/project` | `chr project current`, metadata commands | `F1` | `read_only_matched` | Shows resolved project, bind, refresh, and workspace paths. |
+| Project | `/`, `/project` (direct URL only) | `chr project current`, metadata commands | `F1` | `read_only_matched` | Shows the project name, root directory and secondary diagnostic ID; no visible navigation link or automatic polling. |
 | Cases | `/cases` | `chr metadata case set` for writes | `F2` | `matched` | Catalog and detail read project-local case metadata; detail form writes case metadata. |
 | Dumps | `/dumps` | `chr dump *` | `F3` | `matched` | Catalog, detail, create, save, and append use dump service paths. |
 | Quizzes | `/quizzes` | `chr quiz *` | `F4` | `web_subset` | Start and resume are exposed; answer, skip, complete, cancel, and mode-only updates remain CLI/TUI. |

@@ -5,7 +5,6 @@ import (
 	"context"
 	"io/fs"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -32,19 +31,8 @@ func (p webViewProvider) service(ctx context.Context) service {
 
 func (p webViewProvider) ProjectView(context.Context) (webui.ProjectView, error) {
 	view := webui.ProjectView{
-		ProjectID:      p.projectContext.ProjectID,
-		ProjectDir:     p.projectContext.ProjectDir,
-		URL:            p.config.URL,
-		Host:           p.config.Web.Host,
-		Port:           p.config.Web.Port,
-		RequireToken:   string(p.config.Web.RequireToken),
-		RefreshSeconds: p.config.Web.RefreshIntervalSeconds,
-		Paths: []webui.ProjectPathView{
-			{Label: "Workspace", Path: filepath.Join(p.projectContext.ProjectDir, core.DirectoryName)},
-			{Label: "User workspace", Path: filepath.Join(p.projectContext.ProjectDir, core.DirectoryName, core.UserDirectoryName)},
-			{Label: "Tickets", Path: filepath.Join(p.projectContext.ProjectDir, core.DirectoryName, core.UserDirectoryName, "tickets")},
-			{Label: "Runtime", Path: filepath.Join(p.projectContext.ProjectDir, core.DirectoryName, core.UserDirectoryName, "runtime")},
-		},
+		ProjectID:  p.projectContext.ProjectID,
+		ProjectDir: p.projectContext.ProjectDir,
 	}
 	view.Revision = webStableRevision(view)
 
