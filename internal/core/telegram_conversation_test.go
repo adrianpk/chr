@@ -74,13 +74,13 @@ func (f *telegramConversationFixture) lastResponse(t *testing.T) string {
 // TestTelegramConversationProjects verifies each exact project selection precedence.
 func TestTelegramConversationProjects(t *testing.T) {
 	tests := []struct {
-		name, explicit, selected, defaultID string
-		only                                bool
-		want                                string
+		name, explicit, selected, selectedName, defaultID string
+		only                                              bool
+		want                                              string
 	}{
-		{name: "explicit ID", explicit: "beta", selected: "alpha", defaultID: "alpha", want: "beta"},
+		{name: "explicit ID", explicit: "beta", selected: "alpha", selectedName: "Alpha Project", defaultID: "alpha", want: "beta"},
 		{name: "exact name", explicit: "Beta Project", want: "beta"},
-		{name: "selected", selected: "beta", defaultID: "alpha", want: "beta"},
+		{name: "selected", selected: "beta", selectedName: "Beta Project", defaultID: "alpha", want: "beta"},
 		{name: "default", defaultID: "beta", want: "beta"},
 		{name: "sole", only: true, want: "alpha"},
 		{name: "ambiguous"},
@@ -90,8 +90,13 @@ func TestTelegramConversationProjects(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			f := newTelegramConversationFixture(t)
+
 			if test.selected != "" {
 				f.apply(t, TelegramConversationSelect, func(i *TelegramConversationInput) { i.Project = test.selected })
+
+				if got := f.lastResponse(t); got != "Selected project: "+test.selectedName {
+					t.Fatal("selection did not show the registered name", got)
+				}
 			}
 
 			f.input.Config.DefaultProjectID = test.defaultID
