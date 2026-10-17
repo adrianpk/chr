@@ -24,7 +24,8 @@ real fixture HTTP/model clarification, canonical dump/spec/plan generation,
 native ticket preparation, SQLite reopen and exact work confirmation. Replaying
 the admitted update preserves the completed invocation, attempts and publication.
 This fixture uses an actual bare Git target and a simulated forge boundary.
-No live journey or Slice 8 acceptance result is claimed.
+Separate live reception and canonical capture evidence is recorded below;
+the complete live journeys remain pending.
 
 The journey reproduced a preparation/admission gap: prepared descriptions stayed
 in backlog and lacked the contract required by native execution. Preparation now
@@ -100,6 +101,17 @@ required ordered command list:
 Read the controller receipt for results bound to the current candidate; a head
 change requires new evidence. Passing this list does not replace live journey
 proof or the scheduled exhaustive gate.
+
+The acceptance traceability audit at
+`0274135cc98b4640624ab6fc634cb1b6bc69d6d5` found exactly one tracker entry
+for each of TG-01 through TG-32. All report links, section anchors and referenced
+commits resolve. The canonical forge confirms the planned title, branch, dev
+base and recorded merge commit for PRs #390 through #396; all seven merge
+commits are ancestors of the audited candidate. Their delivered reports contain
+the configured command lists, and every focused selection has matching tests in
+the candidate source. This checks traceability without rerunning earlier suites.
+The matrix retains 28 fixture-backed criteria, live reception for TG-01 and
+pending TG-27, TG-28 and TG-32.
 
 Task checks passed:
 

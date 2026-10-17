@@ -252,7 +252,7 @@ recorded bot/model/service/QA activation authority from plan section 2.
 | --- | --- | --- | --- |
 | T8.1 | in_progress | `b72a6955cf7c` fixture and admission correction; live capture and dump confirmed | A genuine development request has a delivered acknowledgement in the correct QA project. Human capture completion produced a canonical dump through a confirmed authoring operation; live clarification, work preparation, admission and integration remain. |
 | T8.2 | blocked | isolated source QA setup complete | The source checkout is separately registered against its own QA target; the receiver is fixed at `14c563d40f6a`. Authorized-user input for the actual source-development journey is missing. |
-| T8.3 | pending | `b72a6955cf7c` User Guide/reference/changelog; installed help inspected | Complete live evidence audit and nightly-bound closure remain. |
+| T8.3 | in_progress | `b72a6955cf7c` User Guide/reference/changelog; installed help inspected; acceptance traceability audited | All 32 criterion entries, report references and seven canonical merge identities are checked. Complete live evidence, the cycle report and nightly-bound closure remain. |
 
 Validation: plan section 13; `TestTelegramJourney`, including applicable focused
 race mode, separate authorized live proof and final exact-candidate nightly.
@@ -276,6 +276,12 @@ Strict lint reports zero issues. The report records exact commands, timings and
 the live-evidence boundary. TG-27, TG-28 and TG-32 remain pending.
 
 ## Acceptance Evidence
+
+Traceability audit at `0274135cc98b4640624ab6fc634cb1b6bc69d6d5`: all 32
+criteria appear exactly once, report links and anchors resolve, and the seven
+delivered slice identities and merge commits match the canonical forge. Their
+configured test selections remain nonempty in the candidate source. This audit
+preserves the existing fixture/live evidence boundary and does not rerun tests.
 
 The plan's section 14 maps every criterion to its primary tasks. Add immutable
 report/test/live references in the Evidence column as they are verified.
