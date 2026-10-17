@@ -42,11 +42,16 @@ with separate target refs in the existing designated QA repository.
 
 PR #396 integration is verified at `c14f1aea640657e27c97bb64e40b46f30f698451`.
 Its three tasks are closed with their controller validation receipt. Slice 8
-uses its own worktree and leaves the primary checkout on dev. The existing
-installed global CLI predates the Telegram commands. The isolated receiver is
-fixed at implementation commit `b72a6955cf7c038142c23b7142215b5ed83d58ec`, built
-with Go 1.27.1 and `vcs.modified=false`. Its SHA-256 is
-`c888ebbf6481d7bd6c7a44fbb09d7960eb1c3a93a0fc1ce80624e3343c4984a5`.
+uses its own worktree and leaves the primary checkout on dev. The isolated
+receiver is pinned separately from the installed developer CLI. Before any live
+development conversation began, current dev was merged into the candidate so
+the receiver includes categorized help alongside the pending admission fixes.
+The fixed source is `7f0e493431227e752fe7ce5c89f6b2950bc237ef`, built with
+Go 1.27.1 and `vcs.modified=false`. Its SHA-256 is
+`422039e26460491c0a34124a097fb4b3cd2bf5e1d2623fcf81e72e4216e3c7d9`.
+The previous fixed image at `b72a6955cf7c` is retained privately. Both source and
+digest are recorded in the private fixture descriptor; neither image was
+replaced during an active source-development journey.
 
 The existing User Guide, receiver reference and pending changelog entry explain
 the prepared-ticket transition. The native owner retains the original backlog
@@ -103,6 +108,13 @@ Task checks passed:
 These are implementation-task checks. They do not constitute final clean-HEAD
 controller validation or the scheduled exhaustive gate.
 
+The four ordered controller checks passed on source candidate
+`7f0e493431227e752fe7ce5c89f6b2950bc237ef` in 141 seconds, with validation
+receipt `UEKXWTRHXFC3WG7QWL34QC55MN`. The composed help, journey, authoring,
+admission and native-work regressions also passed before that commit. This
+report-only update follows those checks; the final PR head still needs its own
+exact-HEAD controller receipt.
+
 ## Live QA Setup
 
 The private user-state descriptor `chr/qa/telegram-conversational-workflow.json`
@@ -145,6 +157,12 @@ The executable digest is unchanged. The retained fixture has one incoming update
 one acknowledged response, zero development conversations and zero operation
 requests. Acta setup/activation note: `01M53G6BMNSN6ERW3Y64QXNQ1T`. Reuse this
 same private development root and both targets when actual user messages arrive.
+
+After the receiver image update, a genuine incoming `/help` received a
+categorized reply accepted by Telegram in Markdown mode on its first delivery
+attempt, without plain fallback. This verifies the deployed help path. It does
+not establish a development conversation, native invocation or integration;
+the two complete live development journeys remain pending.
 
 ## Risks and Follow-ups
 
