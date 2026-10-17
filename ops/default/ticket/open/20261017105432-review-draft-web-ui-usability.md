@@ -43,10 +43,10 @@ This ticket records the draft status and the need for future review. The
 maintainer deferred this work. Keep it open; capturing it does not start the
 review, redesign or implementation.
 
-## Findings Under Delivery
+## Delivered Findings
 
-The maintainer authorized these bounded changes during the ongoing review.
+The maintainer authorized and received these bounded changes during the review.
 The overall functional, visual and UX review remains open.
 
-1. [Keep a minimal Project page outside visible navigation](../in_progress/20261017183418-simplify-hidden-project-page.md).
-2. [Remove the project name from Web UI page headings](../in_progress/20261017183627-remove-project-prefix-from-page-headings.md).
+1. [Keep a minimal Project page outside visible navigation](../solved/20261017183418-simplify-hidden-project-page.md).
+2. [Remove the project name from Web UI page headings](../solved/20261017183627-remove-project-prefix-from-page-headings.md).

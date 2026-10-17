@@ -1,7 +1,7 @@
 ---
 id: TKT-20261017183627
 title: "Remove the project name from Web UI page headings"
-status: in_progress
+status: solved
 kind: task
 severity: low
 priority: normal
@@ -9,10 +9,13 @@ scope: ui
 tags: web-ui, headings, project-context
 source: chat
 reported_at: 2026-10-17T18:36:27Z
-commits: []
+commits: [37e498c87fb0d1aff7ba625212e0b45dd9952575]
 ready_at: 2026-10-17T18:36:27Z
 started_at: 2026-10-17T18:36:27Z
 branch: dev
+reviewed_at: 2026-10-17T18:38:44Z
+closed_at: 2026-10-17T18:38:44Z
+resolution: fixed
 ---
 
 # Remove the project name from Web UI page headings
@@ -39,4 +42,6 @@ The maintainer approved implementing this finding during the review.
 - Passed: focused golangci-lint checks for `internal/webui/...` and `internal/app/...`.
 - Catalog, Board, Dash, Project and artifact-detail routes assert their exact
   heading text through the existing handler tests.
-- Live installation and final delivery metadata are pending.
+- Installed the validated binary and verified the running pages from a separate
+  workstation: direct Project access, hidden navigation, minimal content and
+  unchanged working-screen refresh behavior.

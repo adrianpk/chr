@@ -1,7 +1,7 @@
 ---
 id: TKT-20261017183418
 title: "Keep a minimal Project page outside visible navigation"
-status: in_progress
+status: solved
 kind: task
 severity: low
 priority: normal
@@ -9,10 +9,13 @@ scope: ui
 tags: web-ui, navigation, project-context
 source: chat
 reported_at: 2026-10-17T18:34:18Z
-commits: []
+commits: [a83b185e43c323759f29737976b41bd7fb5241f2]
 ready_at: 2026-10-17T18:34:18Z
 started_at: 2026-10-17T18:34:18Z
 branch: dev
+reviewed_at: 2026-10-17T18:38:44Z
+closed_at: 2026-10-17T18:38:44Z
+resolution: fixed
 ---
 
 # Keep a minimal Project page outside visible navigation
@@ -43,4 +46,6 @@ The maintainer approved implementing this bounded finding during the review.
 - Passed: `go test -short ./internal/webui/... -count=1 -timeout=3m`.
 - Passed: `go test -short ./internal/app -run '^TestWeb' -count=1 -timeout=3m`.
 - Passed: focused golangci-lint checks for `internal/webui/...` and `internal/app/...`.
-- Live installation and final delivery metadata are pending.
+- Installed the validated binary and verified the running pages from a separate
+  workstation: direct Project access, hidden navigation, minimal content and
+  unchanged working-screen refresh behavior.
