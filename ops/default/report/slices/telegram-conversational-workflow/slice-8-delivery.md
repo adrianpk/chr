@@ -46,12 +46,15 @@ uses its own worktree and leaves the primary checkout on dev. The isolated
 receiver is pinned separately from the installed developer CLI. Before any live
 development conversation began, current dev was merged into the candidate so
 the receiver includes categorized help alongside the pending admission fixes.
-The fixed source is `7f0e493431227e752fe7ce5c89f6b2950bc237ef`, built with
-Go 1.27.1 and `vcs.modified=false`. Its SHA-256 is
+The categorized-help image was built from
+`7f0e493431227e752fe7ce5c89f6b2950bc237ef`, with Go 1.27.1 and
+`vcs.modified=false`; its SHA-256 was
 `422039e26460491c0a34124a097fb4b3cd2bf5e1d2623fcf81e72e4216e3c7d9`.
-The previous fixed image at `b72a6955cf7c` is retained privately. Both source and
-digest are recorded in the private fixture descriptor; neither image was
-replaced during an active source-development journey.
+The maintainer then requested reinstalling the cleaner registered-project list.
+Current dev is synchronized into this candidate before rebuilding the isolated
+receiver, preserving the pending admission fixes. The private fixture descriptor
+owns the current executable source and digest and retains retired image history.
+No development conversation was active when this upgrade was prepared.
 
 The existing User Guide, receiver reference and pending changelog entry explain
 the prepared-ticket transition. The native owner retains the original backlog
@@ -114,6 +117,11 @@ receipt `UEKXWTRHXFC3WG7QWL34QC55MN`. The composed help, journey, authoring,
 admission and native-work regressions also passed before that commit. This
 report-only update follows those checks; the final PR head still needs its own
 exact-HEAD controller receipt.
+
+The maintainer-requested project-list reinstall composition passed
+`go test ./internal/app -run '^TestTelegramReceiverReadJourney$' -count=1 -timeout=3m`,
+`make verify` and `git diff --check` before its merge commit. These checks cover
+the composed receiver implementation, not the pending live development journeys.
 
 ## Live QA Setup
 
