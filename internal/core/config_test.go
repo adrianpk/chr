@@ -40,6 +40,10 @@ func TestLoadWorkspaceConfigUsesDefaultsWhenMissing(t *testing.T) {
 	if !reflect.DeepEqual(config.Web, DefaultWebConfig()) {
 		t.Fatalf("Web = %#v, want %#v", config.Web, DefaultWebConfig())
 	}
+
+	if config.Web.AllowLAN {
+		t.Fatal("missing configuration must not enable LAN access")
+	}
 }
 
 func TestLoadWorkspaceConfigParsesTicketAndRuntimeConfig(t *testing.T) {
@@ -301,6 +305,7 @@ func TestLoadWorkspaceConfigParsesWebConfig(t *testing.T) {
   host: 0.0.0.0
   port: 7444
   open_browser: true
+  allow_lan: true
   require_token: true
   token_env: CUSTOM_CHR_WEB_TOKEN
   allowed_origins: "https://example.test,https://ops.example.test"
@@ -317,6 +322,7 @@ func TestLoadWorkspaceConfigParsesWebConfig(t *testing.T) {
 		Host:                   "0.0.0.0",
 		Port:                   7444,
 		OpenBrowser:            true,
+		AllowLAN:               true,
 		RequireToken:           WebTokenModeTrue,
 		TokenEnv:               "CUSTOM_CHR_WEB_TOKEN",
 		AllowedOrigins:         []string{"https://example.test", "https://ops.example.test"},

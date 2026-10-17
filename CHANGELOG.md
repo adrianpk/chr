@@ -107,6 +107,10 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Changed
 
+- The Web UI supports direct, token-free access from another computer on a
+  trusted internal network with `chr web serve --allow-lan`. This mode is
+  disabled by default and keeps navigation, forms and live updates usable
+  without token-bearing links.
 - Telegram `/help` groups all available commands by category, with complete
   arguments on separate readable lines and a plain-text fallback when Telegram
   rejects the formatting.

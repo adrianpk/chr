@@ -19,7 +19,47 @@ Expected boundary:
 - origins: same-origin only
 - exposure: local browser on the same machine
 
-## Private Network Or Tunnel
+## Trusted Internal Network
+
+For direct browser access from another computer on a trusted internal network:
+
+```sh
+chr web serve --allow-lan
+```
+
+Open the development server's reachable hostname or address from the browser
+computer. For example, if the server is named `devbox`:
+
+```text
+http://devbox:7331/
+```
+
+This mode requires no token, token environment variable, authentication cookie
+or custom browser header. Pages, links, refreshes, HTMX updates and forms use
+the same resolved policy. With default settings it binds to `0.0.0.0:7331`.
+An existing configured network interface is retained; explicit `--host` and
+`--port` override the bind as usual.
+
+The product default is `false`. Retain this choice for a project in its
+`.chr/default/config.yml`:
+
+```yml
+web:
+  allow_lan: true
+```
+
+Then `chr web serve` uses LAN mode without repeating the flag. An explicit
+`--allow-lan=false` overrides this setting and preserves normal host/token
+configuration resolution; with default host settings it restores the loopback
+bind. A configured or explicit `true`/`always` token requirement
+conflicts with LAN mode. Select `--require-token=false` explicitly to override
+that configured requirement, or keep the token-protected mode.
+
+Startup and `--dry-run` output show `allow_lan`, the bind and `token_required`.
+LAN mode retains origin checks, write confirmations and revision checks. It
+does not configure a firewall or filter incoming connections by private CIDR.
+
+## Token-Protected Bind
 
 Set a token before starting the server:
 
@@ -43,7 +83,9 @@ with one of these request forms:
 - `?token=<token>`
 
 The query form exists for simple browser access through private links. Avoid
-sharing URLs that contain the token.
+sharing URLs that contain the token. A query token authorizes that request;
+browser links do not inherit it. Use `--allow-lan` for token-free navigation on
+a trusted internal network.
 
 ## Allowed Origins
 

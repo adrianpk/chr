@@ -63,6 +63,11 @@ func webServeFlags() []cli.Flag {
 			Name:  "dry-run",
 			Usage: "print resolved web server config without listening on a socket",
 		},
+		&cli.BoolFlag{
+			Name:  "allow-lan",
+			Usage: "allow direct token-free Web UI access on a trusted internal network (default: false)",
+			Value: false,
+		},
 		&cli.StringFlag{
 			Name:  "require-token",
 			Usage: "web token mode override: auto, true, false, or always",
@@ -96,8 +101,8 @@ func runWebServe(ctx context.Context, cmd *cli.Command, stdout io.Writer, deps a
 		return err
 	}
 
-	webConfig := webConfigFromCommand(cmd, config.Web)
-	if err := core.ValidateWebConfig(webConfig); err != nil {
+	webConfig, err := webConfigFromCommand(cmd, config.Web)
+	if err != nil {
 		return err
 	}
 
@@ -122,7 +127,7 @@ func runWebServe(ctx context.Context, cmd *cli.Command, stdout io.Writer, deps a
 	return serveWeb(ctx, resolved)
 }
 
-func webConfigFromCommand(cmd *cli.Command, config core.WebConfig) core.WebConfig {
+func webConfigFromCommand(cmd *cli.Command, config core.WebConfig) (core.WebConfig, error) {
 	if cmd.IsSet("host") {
 		config.Host = cmd.String("host")
 	}
@@ -139,7 +144,35 @@ func webConfigFromCommand(cmd *cli.Command, config core.WebConfig) core.WebConfi
 		config.RequireToken = core.WebTokenMode(cmd.String("require-token"))
 	}
 
-	return config
+	if cmd.IsSet("allow-lan") {
+		config.AllowLAN = cmd.Bool("allow-lan")
+	}
+
+	if err := core.ValidateWebConfig(config); err != nil {
+		return core.WebConfig{}, err
+	}
+
+	return applyWebLANAccess(config, config.AllowLAN, cmd.IsSet("host"))
+}
+
+func applyWebLANAccess(config core.WebConfig, enabled, explicitHost bool) (core.WebConfig, error) {
+	config.AllowLAN = enabled
+
+	if !enabled {
+		return config, nil
+	}
+
+	if config.RequireToken == core.WebTokenModeTrue || config.RequireToken == core.WebTokenModeAlways {
+		return core.WebConfig{}, fmt.Errorf("--allow-lan conflicts with required web token protection; explicitly set --require-token=false or disable --allow-lan")
+	}
+
+	if !explicitHost && core.WebHostIsLoopback(config.Host) {
+		config.Host = "0.0.0.0"
+	}
+
+	config.RequireToken = core.WebTokenModeFalse
+
+	return config, nil
 }
 
 type resolvedWebServeConfig struct {
@@ -162,13 +195,14 @@ func printWebServeDryRun(stdout io.Writer, config resolvedWebServeConfig) error 
 
 	_, err := fmt.Fprintf(
 		stdout,
-		"web ui dry-run: %s\nproject: %s\nbind: %s\nport: %d\nenabled: %t\nopen_browser: %t\nrequire_token: %s\ntoken_required: %t\ntoken_env: %s\nallowed_origins: %s\nstatic_assets: embedded\n",
+		"web ui dry-run: %s\nproject: %s\nbind: %s\nport: %d\nenabled: %t\nopen_browser: %t\nallow_lan: %t\nrequire_token: %s\ntoken_required: %t\ntoken_env: %s\nallowed_origins: %s\nstatic_assets: embedded\n",
 		config.URL,
 		config.ProjectDir,
 		config.Web.Host,
 		config.Web.Port,
 		config.Web.Enabled,
 		config.Web.OpenBrowser,
+		config.Web.AllowLAN,
 		config.Web.RequireToken,
 		webTokenRequired(config.Web),
 		config.Web.TokenEnv,
@@ -205,10 +239,11 @@ func printWebServeStart(stdout io.Writer, config resolvedWebServeConfig) error {
 
 	_, err := fmt.Fprintf(
 		stdout,
-		"web ui: %s\nproject: %s\nbind: %s\ntoken_required: %t\nallowed_origins: %s\n",
+		"web ui: %s\nproject: %s\nbind: %s\nallow_lan: %t\ntoken_required: %t\nallowed_origins: %s\n",
 		config.URL,
 		config.ProjectDir,
 		config.Web.Host,
+		config.Web.AllowLAN,
 		webTokenRequired(config.Web),
 		webAllowedOriginsSummary(config.Web.AllowedOrigins),
 	)

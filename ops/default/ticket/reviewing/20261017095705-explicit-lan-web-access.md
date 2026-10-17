@@ -1,7 +1,7 @@
 ---
 id: TKT-20261017095705
 title: "Add an explicit opt-in flag for token-free LAN Web UI access"
-status: in_progress
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -13,6 +13,7 @@ commits: []
 ready_at: 2026-10-17T10:14:56Z
 started_at: 2026-10-17T10:14:56Z
 branch: dev
+reviewed_at: 2026-10-17T10:29:00Z
 ---
 
 # Add an explicit opt-in flag for token-free LAN Web UI access
@@ -67,6 +68,10 @@ authentication implementation. The current default bind is `127.0.0.1:7331`.
    not install firewall rules or restrict connections to private CIDRs.
 6. Add focused regressions and update CLI/reference guidance plus Unreleased
    release notes when the feature is implemented.
+7. Support the matching project setting `web.allow_lan`, default `false`, so
+   dogfooding can retain the operator's explicit choice. CLI `--allow-lan=false`
+   must override a retained `true`. Enable it in the local dogfooding setup
+   without changing the product default or publishing machine configuration.
 
 ## Acceptance and Validation
 
@@ -96,6 +101,8 @@ authentication implementation. The current default bind is `127.0.0.1:7331`.
 - `internal/app/web.go`: flags, config resolution, effective-policy output,
   `webTokenRequired` and `webAccessPolicy`.
 - `internal/core/web_config.go`: existing bind/token validation.
+- `internal/core/config.go`: persisted `web.allow_lan` setting and its disabled
+  product default.
 - `internal/webui/webui.go`: request authentication, origin checks and routes.
 - `internal/app/cli_test.go` and `internal/webui/webui_test.go`: existing
   default, token-mode, origin and handler coverage.
@@ -103,14 +110,49 @@ authentication implementation. The current default bind is `127.0.0.1:7331`.
 
 ## Scope Boundary
 
-This ticket captures one focused CLI/access-policy change and its navigation
-regressions. It does not authorize implementation or changes to running
-services. Repairing browser sessions for token-required operation is a
-separate concern; token propagation is not a prerequisite for this explicitly
-token-free LAN workflow.
+This ticket defines one focused CLI/config/access-policy change and its
+navigation regressions. Local configuration does not automatically start a
+server. Repairing browser sessions for token-required operation is a separate
+concern; token propagation is not a prerequisite for this explicitly token-free
+LAN workflow.
 
 ## Authorized Execution
 
 The maintainer authorized this implementation on 2026-10-17 after completion
 of Telegram help ticket TKT-20261017094606. Help is delivered on dev before
 LAN implementation starts.
+
+The maintainer subsequently requested persistent LAN access for CHR's own
+local dogfooding setup. This authorizes its local configuration separately
+from the product's disabled default.
+
+## Delivered Behavior
+
+- `chr web serve --allow-lan` selects token-free operation and defaults to
+  `0.0.0.0`, preserving an existing non-loopback interface or explicit host and
+  port overrides.
+- Project configuration can retain `web.allow_lan: true`; an explicit false
+  flag overrides it. Missing configuration keeps the product default false.
+  Required token modes are rejected as conflicts unless explicitly overridden.
+- Startup and dry-run output show the effective LAN selection. Existing
+  authentication, origin, confirmation and revision owners remain in use.
+- User Guide and launch/exposure guides document the one-command workflow,
+  persisted choice and existing operator-owned network boundary.
+
+## Validation Evidence
+
+- `go test ./internal/app ./internal/core -run '^(TestWebLAN|TestLoadWorkspaceConfig.*Web|TestLoadWorkspaceConfigUsesDefaults)' -count=1`
+  passed. This covers the disabled default, persisted opt-in and explicit false
+  CLI override alongside bind and token conflicts.
+- `go test ./internal/app -run '^(TestWebLAN|TestWebServe)' -count=1`
+  passed in 10.620 seconds, without short mode. It includes the actual HTTP
+  navigation journey, valid and rejected writes, and existing token-required
+  regressions.
+- No new concurrency behavior was introduced; the exhaustive suite, complete
+  race suite and live-forge verification remain scheduled nightly work.
+- `make verify GOLANGCI_LINT=/tmp/chr-lint-serial-20261017.sh` passed:
+  strict lint reported zero issues, short Go tests passed, all eight CI script
+  regressions passed and the application built. The temporary wrapper invokes
+  the same pinned linter with `--allow-serial-runners` to wait for its shared
+  process lock; it does not change checks or repository configuration.
+- `git diff --check` and focused ticket metadata/link checks passed.
