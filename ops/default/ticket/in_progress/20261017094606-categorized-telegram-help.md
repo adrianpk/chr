@@ -1,7 +1,7 @@
 ---
 id: TKT-20261017094606
 title: "Render categorized Telegram help from native command metadata"
-status: open
+status: in_progress
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,9 @@ tags: telegram, help, command-registry
 source: chat
 reported_at: 2026-10-17T09:46:06Z
 commits: []
+ready_at: 2026-10-17T09:59:55Z
+started_at: 2026-10-17T09:59:55Z
+branch: dev
 ---
 
 # Render categorized Telegram help from native command metadata
@@ -160,7 +163,7 @@ The requested Iris exchange with the KAL project is conversation
 output bounds and active-conversation isolation. Final scope review
 `3ef10deb031b6a27f338191516f75606` confirmed the bounded contract and identified
 the retained-snapshot clarification now included above. Discovery is complete;
-implementation remains unstarted.
+implementation was subsequently authorized as recorded below.
 
 The delivered reference is KAL commit
 `eda72ae69993f1483f4d37e7476dea68fde54e8e`, following PRs
@@ -178,3 +181,35 @@ splitter uses byte boundaries. Neither limitation is a required CHR behavior.
 The narrower fallback and output bounds above preserve CHR's native delivery
 guarantees. No runtime tests, live bot requests or client visual checks were
 run during ticket capture.
+
+## Authorized Execution
+
+The maintainer authorized implementation on 2026-10-17, before the LAN access
+ticket TKT-20261017095705. Delivery uses the existing native operation owners.
+
+## Implementation
+
+The native command owners now supply 34 categorized syntax entries. Formatted
+help occupies 2,086 UTF-16 units and plain help 2,002 units, both within one
+retained part. Direct help bypasses capture/confirmation handling after current
+authorization. Natural-language reads and unknown-command fallback share the
+same renderer. Migration 24 retains both response bodies and the format/fallback
+selection without changing older plain replies. Format fallback reuses the
+original outbox identity and consumes another retained send attempt only after
+a definite entity rejection.
+
+## Validation Results
+
+- The initial presentation regression failed against the flat help output.
+- `go test ./internal/app ./internal/core -run '^TestTelegramHelp' -count=1`:
+  passed, including real HTTP/SQLite, pending questions and confirmations,
+  authorization/revocation, restart, source replay, old-schema migration,
+  Unicode bounds and failure classification.
+- `go test -race ./internal/app ./internal/core -run '^TestTelegramHelp' -count=1`:
+  passed, including the explicitly selected non-short confirmation journey.
+- Focused maintenance DB status regressions: passed with migration 24 present.
+- `make verify`: passed; strict lint reported zero issues, short Go tests, eight
+  CI script regressions and the build passed.
+- `git diff --check`: passed.
+
+No live bot traffic, client visual check or exhaustive nightly was run.

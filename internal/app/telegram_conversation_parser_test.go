@@ -57,7 +57,7 @@ func TestTelegramConversationUnknown(t *testing.T) {
 	update := core.TelegramReceivedUpdate{UpdateID: 1, Digest: strings.Repeat("a", 64), Kind: "message", Peer: core.TelegramPeerIdentity{BotID: 12345, ChatID: 100001, UserID: 100001}, MessageID: 1, ChatType: "private", Text: "/invent"}
 
 	text, err := telegramReadResponse(receiver.operations, config.AllowedUsers[0], update)
-	if err != nil || !strings.Contains(text, "Unknown or unavailable") || !strings.Contains(text, "/sessions") {
+	if err != nil || !strings.Contains(text.Text, "Unknown or unavailable") || !strings.Contains(text.Text, "/sessions") {
 		t.Fatal("unknown command did not return help", text, err)
 	}
 }

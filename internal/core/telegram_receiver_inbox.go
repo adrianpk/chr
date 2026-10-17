@@ -150,7 +150,7 @@ FROM telegram_updates WHERE bot_id=?`, botID).Scan(&total, &pending, &bytes); er
 	}
 
 	var outboundBytes int64
-	if err := tx.QueryRowContext(ctx, "SELECT COALESCE(SUM(length(CAST(text AS BLOB))+length(CAST(question_binding AS BLOB))),0) FROM telegram_outbox WHERE bot_id=?", botID).Scan(&outboundBytes); err != nil {
+	if err := tx.QueryRowContext(ctx, "SELECT COALESCE(SUM(length(CAST(text AS BLOB))+length(CAST(plain_text AS BLOB))+length(CAST(question_binding AS BLOB))),0) FROM telegram_outbox WHERE bot_id=?", botID).Scan(&outboundBytes); err != nil {
 		return err
 	}
 

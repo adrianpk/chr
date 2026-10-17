@@ -23,13 +23,8 @@ func telegramRecordRegistry() []telegramRecordDescriptor {
 	return []telegramRecordDescriptor{{"/tickets", RecordTicket}, {"/ticket", RecordTicket}, {"/slices", RecordSlice}, {"/slice-sets", RecordSliceSet}, {"/use-cases", RecordUseCase}}
 }
 
-func telegramRecordHelp() string {
-	var text strings.Builder
-	for _, command := range telegramRecordRegistry() {
-		text.WriteString(command.Name + " [--project <id>] [--conversation <id>] [--namespace <name>] list|show|create|update <json>\n")
-	}
-
-	return strings.TrimSpace(text.String())
+func telegramRecordUsage(command telegramRecordDescriptor) string {
+	return command.Name + " [--project <id>] [--conversation <id>] [--namespace <name>] list|show|create|update <json>"
 }
 
 func parseTelegramRecord(update core.TelegramReceivedUpdate) (telegramRecordCommand, bool, error) {

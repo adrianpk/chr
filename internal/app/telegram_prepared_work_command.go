@@ -11,7 +11,11 @@ func telegramPreparedWorkRegistry() []ConversationIntentOperation {
 }
 
 func telegramPreparedWorkHelp() string {
-	return "/" + telegramPreparedWorkRegistry()[0].ID + " [conversation] — " + telegramPreparedWorkRegistry()[0].Description
+	return telegramPreparedWorkUsage() + " — " + telegramPreparedWorkRegistry()[0].Description
+}
+
+func telegramPreparedWorkUsage() string {
+	return "/" + telegramPreparedWorkRegistry()[0].ID + " [conversation]"
 }
 
 func parseTelegramPreparedWork(update core.TelegramReceivedUpdate) (core.TelegramConversationInput, bool, error) {

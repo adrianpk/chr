@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
@@ -29,15 +28,6 @@ func telegramConversationRegistry() []telegramConversationCommand {
 		{"/done", "[conversation]", "Finish capture and prepare a canonical dump", core.TelegramConversationDone, ""},
 		{"/cancel", "[conversation]", "Discard an unstarted session's capture", core.TelegramConversationCancel, ""},
 	}
-}
-
-func telegramConversationHelp() string {
-	var text strings.Builder
-	for _, command := range telegramConversationRegistry() {
-		fmt.Fprintf(&text, "%s %s — %s\n", command.Name, command.Arguments, command.Help)
-	}
-
-	return strings.TrimSpace(text.String())
 }
 
 func telegramConversationInput(update core.TelegramReceivedUpdate) (core.TelegramConversationInput, bool, string) {

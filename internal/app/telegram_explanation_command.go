@@ -16,7 +16,11 @@ func telegramExplanationRegistry() []ConversationIntentOperation {
 }
 
 func telegramExplanationHelp() string {
-	return "/" + telegramExplanationRegistry()[0].ID + " [--project <id>|--conversation <id>] <question> — " + telegramExplanationRegistry()[0].Description
+	return telegramExplanationUsage() + " — " + telegramExplanationRegistry()[0].Description
+}
+
+func telegramExplanationUsage() string {
+	return "/" + telegramExplanationRegistry()[0].ID + " [--project <id>|--conversation <id>] <question>"
 }
 
 func parseTelegramExplanation(update core.TelegramReceivedUpdate) (telegramExplanationCommand, bool, error) {

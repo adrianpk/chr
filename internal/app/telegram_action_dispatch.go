@@ -8,10 +8,6 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func telegramActionHelp() string {
-	return "/answer <action-token> <choice> — Answer the exact displayed action; replying or using its button has the same binding"
-}
-
 func (r telegramReceiver) respondAction(ctx context.Context, user core.TelegramAllowedUser, config core.TelegramReceiverConfig, update core.TelegramReceivedUpdate) (bool, error) {
 	answer, recognized, err := r.store.ResolveTelegramActionAnswer(ctx, update)
 	if !recognized {

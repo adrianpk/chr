@@ -16,7 +16,11 @@ func telegramWorkRegistry() []ConversationIntentOperation {
 }
 
 func telegramWorkHelp() string {
-	return "/work [--project <id>] [--conversation <id>] [--namespace <name>] ticket|slice|slice-set|use-case <reference> or loose — Preview the exact native selection and policy before admission"
+	return telegramWorkUsage() + " — Preview the exact native selection and policy before admission"
+}
+
+func telegramWorkUsage() string {
+	return "/" + telegramWorkRegistry()[0].ID + " [--project <id>] [--conversation <id>] [--namespace <name>] ticket|slice|slice-set|use-case <reference> or loose"
 }
 
 func parseTelegramWork(update core.TelegramReceivedUpdate) (telegramWorkCommand, bool, error) {

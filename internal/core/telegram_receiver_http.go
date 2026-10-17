@@ -39,10 +39,11 @@ func NewTelegramReceiverAPI() TelegramReceiverAPI {
 }
 
 type telegramReceiverEnvelope struct {
-	OK         bool            `json:"ok"`
-	Result     json.RawMessage `json:"result"`
-	ErrorCode  int             `json:"error_code"`
-	Parameters struct {
+	OK          bool            `json:"ok"`
+	Result      json.RawMessage `json:"result"`
+	ErrorCode   int             `json:"error_code"`
+	Description string          `json:"description"`
+	Parameters  struct {
 		RetryAfter int `json:"retry_after"`
 	} `json:"parameters"`
 }
@@ -169,6 +170,8 @@ func classifyTelegramAPIError(status int, envelope telegramReceiverEnvelope) err
 	}
 
 	switch code {
+	case 400:
+		return classifyTelegramBadRequest(status, envelope)
 	case 401, 403:
 		return &TelegramAPIError{Code: "credentials_or_access", Permanent: true}
 	case 409:
@@ -188,4 +191,19 @@ func classifyTelegramAPIError(status int, envelope telegramReceiverEnvelope) err
 
 func telegramAPIInvalid() error {
 	return &TelegramAPIError{Code: "invalid_response", Permanent: true}
+}
+
+// Only the bounded API envelope is inspected; raw descriptions never reach logs.
+func telegramEntityRejected(description string) bool {
+	description = strings.ToLower(description)
+
+	return strings.Contains(description, "can't parse entities") || strings.Contains(description, "cannot parse entities")
+}
+
+func classifyTelegramBadRequest(status int, envelope telegramReceiverEnvelope) error {
+	if (status == http.StatusBadRequest || status >= 200 && status < 300) && !envelope.OK && telegramEntityRejected(envelope.Description) {
+		return &TelegramAPIError{Code: "format_rejected", Permanent: true}
+	}
+
+	return &TelegramAPIError{Code: "request_failed", Permanent: true}
 }
