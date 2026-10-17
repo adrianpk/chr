@@ -52,6 +52,9 @@ for the browser URL and effective bind policy.
 
 ## Local Workflow
 
+The shared header identifies the current project. Page headings use only the
+section or artifact title.
+
 Use the Web UI as another view over the same project-local state:
 
 - Project is available by entering `/project` directly. It shows only the

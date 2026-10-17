@@ -107,6 +107,8 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Changed
 
+- Web UI page headings show the section or artifact title, with the project
+  name kept in the shared header.
 - The Project page is available by direct URL and shows only the project name,
   root directory and diagnostic ID. Removed its navigation links, internal
   paths, server settings and automatic refresh.

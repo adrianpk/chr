@@ -334,10 +334,10 @@ func TestHandlerProjectBoardDashRoutes(t *testing.T) {
 		want   []string
 		absent []string
 	}{
-		{path: "/", want: []string{"Project", "Project directory", "/tmp/project"}, absent: hiddenDetails},
-		{path: "/project", want: []string{"Project name", "Project One", "Project directory", "/tmp/project", "Project ID", "project-1"}, absent: hiddenDetails},
-		{path: "/board", want: []string{"Board", "Ready For Dev", "CHR-1", "Ready work"}},
-		{path: "/dash", want: []string{"Dash", "Readiness", "Queue", "worker_started"}},
+		{path: "/", want: []string{"<h1>Project</h1>", "Project directory", "/tmp/project"}, absent: hiddenDetails},
+		{path: "/project", want: []string{"<h1>Project</h1>", "Project name", "Project One", "Project directory", "/tmp/project", "Project ID", "project-1"}, absent: hiddenDetails},
+		{path: "/board", want: []string{"<h1>Board</h1>", "Ready For Dev", "CHR-1", "Ready work"}},
+		{path: "/dash", want: []string{"<h1>Dash</h1>", "Readiness", "Queue", "worker_started"}},
 	} {
 		recorder := httptest.NewRecorder()
 		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, tt.path, nil))
@@ -373,13 +373,13 @@ func TestHandlerArtifactCatalogAndDetailRoutes(t *testing.T) {
 		path string
 		want []string
 	}{
-		{path: "/cases", want: []string{"Cases", "case-table", "Blog Authoring", "Case context", "blog", "Edit", `hx-get="/cases/detail/fragment?id=blog"`}},
-		{path: "/dumps", want: []string{"Dumps", "New Dump", "For Use Case", `data-modal-template="dump-create-modal"`, `id="dump-create-modal"`, "dump-card-link", "dump-card", "Project Notes", `hx-get="/dumps/detail/fragment?id=.chr/default/dumps/project-notes.md"`, "Project-wide", "Notes preview"}},
-		{path: "/quizzes", want: []string{"Quizzes", "Project Quiz", "not_started"}},
-		{path: "/specs", want: []string{"Specs", "Project Spec"}},
-		{path: "/plans", want: []string{"Plans", "No plans found."}},
-		{path: "/dumps/detail?id=.chr/default/dumps/project-notes.md", want: []string{"Project Notes", "Full dump content"}},
-		{path: "/dumps/detail?id=missing.md", want: []string{"missing.md", "Artifact not found."}},
+		{path: "/cases", want: []string{"<h1>Cases</h1>", "case-table", "Blog Authoring", "Case context", "blog", "Edit", `hx-get="/cases/detail/fragment?id=blog"`}},
+		{path: "/dumps", want: []string{"<h1>Dumps</h1>", "New Dump", "For Use Case", `data-modal-template="dump-create-modal"`, `id="dump-create-modal"`, "dump-card-link", "dump-card", "Project Notes", `hx-get="/dumps/detail/fragment?id=.chr/default/dumps/project-notes.md"`, "Project-wide", "Notes preview"}},
+		{path: "/quizzes", want: []string{"<h1>Quizzes</h1>", "Project Quiz", "not_started"}},
+		{path: "/specs", want: []string{"<h1>Specs</h1>", "Project Spec"}},
+		{path: "/plans", want: []string{"<h1>Plans</h1>", "No plans found."}},
+		{path: "/dumps/detail?id=.chr/default/dumps/project-notes.md", want: []string{"<h1>Project Notes</h1>", "Full dump content"}},
+		{path: "/dumps/detail?id=missing.md", want: []string{"<h1>missing.md</h1>", "Artifact not found."}},
 	} {
 		recorder := httptest.NewRecorder()
 		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, tt.path, nil))
