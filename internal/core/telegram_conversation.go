@@ -290,13 +290,13 @@ func (op telegramConversationTransaction) selectProject() (string, *TelegramConv
 	}
 
 	if op.input.Project == "" {
-		return "Selected project: " + project.ID, nil, nil
+		return "Selected project: " + project.Name, nil, nil
 	}
 
 	p := op.input.Update.Peer
 	_, err = op.tx.ExecContext(op.ctx, `UPDATE telegram_peers SET selected_project_id=?,revision=revision+1,updated_at=? WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, project.ID, formatProjectTime(op.now), p.BotID, p.ChatID, p.TopicID, p.UserID)
 
-	return "Selected project: " + project.ID, nil, err
+	return "Selected project: " + project.Name, nil, err
 }
 
 func (op telegramConversationTransaction) start() (string, *TelegramConversation, error) {
