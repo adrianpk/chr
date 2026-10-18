@@ -30,7 +30,7 @@ with a click opening the document for reading. Plans must not be manually
 editable from this view because their content governs agent work. Tracking
 documents are internal and excluded from this catalog, as specified in the
 separate
-[internal tracking ticket](20261017200232-associate-ticket-tracking-with-each-plan-revision.md).
+[internal tracking ticket](../solved/20261017200232-associate-ticket-tracking-with-each-plan-revision.md).
 
 Capture only. No application change or service update is authorized here.
 

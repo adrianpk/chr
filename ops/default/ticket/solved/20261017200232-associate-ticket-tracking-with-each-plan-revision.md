@@ -1,7 +1,7 @@
 ---
 id: TKT-20261017200232
 title: "Require an internal tracker for deterministic ticket order"
-status: in_progress
+status: solved
 kind: task
 severity: medium
 priority: normal
@@ -14,13 +14,16 @@ branch: feat/slice-9-plan-order-tracker
 pr: "#406"
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
+reviewed_at: 2026-10-18T20:19:27Z
+closed_at: 2026-10-18T20:19:27Z
+resolution: fixed
 ---
 
 # Require an internal tracker for deterministic ticket order
 
 ## Context and Verified Baseline
 
-Part of [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
+Part of [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md).
 The maintainer requires CHR to retain an internal tracking document for every
 plan generation or regeneration. Its purpose is to give the agent the
 deterministic order for processing the plan's tickets. Task progress is recorded
@@ -109,7 +112,7 @@ its lifecycle. Only changes to the declared map or its plan binding require
 that map to be updated.
 
 Keep this ticket separate from
-[plan generation placement and source prerequisites](../solved/20261017195741-contextualize-plan-generation-and-check-source-readiness.md).
+[plan generation placement and source prerequisites](20261017195741-contextualize-plan-generation-and-check-source-readiness.md).
 
 ## Acceptance
 
@@ -159,5 +162,5 @@ repair preserve the native state owners and legacy v1 contract.
 
 Affected-package strict lint and focused plan/tracker/adoption race checks passed.
 [PR #406](https://forge.adrianpk.com/adrianpk/chr/pulls/406) and the controller
-ledger own final clean-HEAD validation evidence. The source ticket remains in
-progress until verified merge.
+ledger own final clean-HEAD validation evidence. PR #406 was verified merged into dev on 2026-10-18T20:19:27Z at
+`78f115d0789263928130493460856e1a732c5e70`; Slice 9 is delivered.

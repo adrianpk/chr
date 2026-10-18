@@ -209,7 +209,7 @@ shared create/edit modal, allowed moves and comments. Keep unrelated Dash
 failures, global navigation changes, multi-board administration, new messaging
 systems and tracker renaming outside it. The internal tracker remains absent
 from the Web UI under its
-[separate requirement](../in_progress/20261017200232-associate-ticket-tracking-with-each-plan-revision.md).
+[separate requirement](20261017200232-associate-ticket-tracking-with-each-plan-revision.md).
 
 One maintained ticket replaces the preliminary loading and modal captures.
 Implementation must remain consistent with the

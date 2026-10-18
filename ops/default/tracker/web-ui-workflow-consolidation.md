@@ -17,7 +17,7 @@ Model: [Web UI and Workflow Model](../spec/stable/web-ui-workflow-consolidation-
 Implementation authorization: granted on 2026-10-18 for this exact set through
 Looper, including controller-owned Rebase + Fast-forward integration into dev.
 
-Active slice: Slice 9, Revision-bound order-only trackers; T9.3.
+Active slice: Slice 10, Read-only Plans catalog; T10.1.
 The controller checkpoint and tickets own subsequent progress.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.
@@ -181,7 +181,7 @@ Validation: Cover no discovery, irrelevant/placeholder data, insufficient contex
 
 ### Slice 9: Revision-bound order-only trackers
 
-Ticket: [TKT-20261017200232](../ticket/in_progress/20261017200232-associate-ticket-tracking-with-each-plan-revision.md).
+Ticket: [TKT-20261017200232](../ticket/solved/20261017200232-associate-ticket-tracking-with-each-plan-revision.md).
 
 Prerequisite: Slice 8 integrated; execution authority for this set.
 

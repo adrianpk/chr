@@ -1,6 +1,6 @@
 # Slice 9: Revision-Bound Order-Only Trackers
 
-Status: reviewing
+Status: delivered
 Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
@@ -8,6 +8,11 @@ Branch: `feat/slice-9-plan-order-tracker`
 PR: `#406`
 
 [PR #406](https://forge.adrianpk.com/adrianpk/chr/pulls/406) targets dev.
+
+Merged through PR #406 on 2026-10-18T20:19:27Z at
+`78f115d0789263928130493460856e1a732c5e70`. Controller validation
+`K3HBZG3YXI6PZO4W4SXSUALN6T` passed all four ordered final checks
+for that exact candidate. Slice 9 of 12 completed.
 
 ## Purpose
 

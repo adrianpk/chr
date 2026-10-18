@@ -26,7 +26,7 @@ data that informs the TUI. The maintainer requested a ticket definition based
 on the existing code and gallery, not application implementation in this session.
 
 The internal tracker only defines ticket order under its
-[separate requirement](20261017200232-associate-ticket-tracking-with-each-plan-revision.md).
+[separate requirement](../solved/20261017200232-associate-ticket-tracking-with-each-plan-revision.md).
 Dash reads actual progress from tickets, invocations, attempts, events and
 receipts. It must not recreate processing-state maintenance in that Markdown
 artifact or depend on the development controller used to build CHR.

@@ -187,7 +187,7 @@ no Web catalog card, detail view, editor or Create Tracking form. Automatic
 creation belongs to the plan workflow. The current optional tracker contract
 is the implementation baseline, rather than the new availability requirement.
 Capture the requirement and its approval/materialization integration in
-[Require an internal tracker for deterministic ticket order](20261017200232-associate-ticket-tracking-with-each-plan-revision.md).
+[Require an internal tracker for deterministic ticket order](../solved/20261017200232-associate-ticket-tracking-with-each-plan-revision.md).
 
 ### Kanban Board and Ticket Management
 
