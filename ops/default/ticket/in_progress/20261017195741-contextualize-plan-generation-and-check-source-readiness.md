@@ -10,6 +10,7 @@ tags: plans, generation, context
 source: chat
 reported_at: 2026-10-17T19:57:41Z
 commits: []
+branch: feat/slice-8-plan-generation
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
@@ -77,7 +78,7 @@ this ticket and will be discussed separately.
    an automatic cascade or arbitrary minimum word count during implementation.
 
 Manual spec creation remains governed by the
-[Specs authoring ticket](20261017194552-present-spec-cards-and-user-selected-creation-state.md).
+[Specs authoring ticket](../solved/20261017194552-present-spec-cards-and-user-selected-creation-state.md).
 This ticket's plan-generation prerequisite does not impose dump or quiz
 requirements on writing a spec manually. Catalog appearance and read-only plan
 viewing are covered by the separate
@@ -109,3 +110,7 @@ report carry progress; the delivery tracker defines order only.
 
 Behavior, shared-domain changes and implementation design are consolidated in
 [Web UI and Workflow Consolidation](../../spec/stable/web-ui-workflow-consolidation.md).
+
+## Slice 8 Execution
+
+Activated T8.1 after verified PR #404 integration. The [Slice 8 report](../../report/slices/web-ui-workflow-consolidation/slice-8-plan-generation.md) records implementation and validation evidence.

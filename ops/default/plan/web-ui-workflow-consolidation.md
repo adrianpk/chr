@@ -21,7 +21,7 @@ slices through Looper, including canonical slice PRs and controller-owned
 Rebase + Fast-forward merges into dev. The existing Telegram run is separate.
 Use one development worker and one canonical open slice PR for this set.
 
-Active slice: Slice 7, Individual spec authoring; PR #404 reviewing.
+Active slice: Slice 8, Contextual safe plan generation; T8.1.
 The controller checkpoint and tickets own subsequent progress.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.
@@ -191,7 +191,7 @@ Validation: Cover empty, partial, answered, cancelled and completed-empty sessio
 
 ### Slice 7: Individual spec authoring
 
-Source: [TKT-20261017194552](../ticket/in_progress/20261017194552-present-spec-cards-and-user-selected-creation-state.md).
+Source: [TKT-20261017194552](../ticket/solved/20261017194552-present-spec-cards-and-user-selected-creation-state.md).
 
 Dependency: Slice 6 integrated into dev; use all earlier shared owners.
 

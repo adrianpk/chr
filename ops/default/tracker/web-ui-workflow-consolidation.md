@@ -17,7 +17,7 @@ Model: [Web UI and Workflow Model](../spec/stable/web-ui-workflow-consolidation-
 Implementation authorization: granted on 2026-10-18 for this exact set through
 Looper, including controller-owned Rebase + Fast-forward integration into dev.
 
-Active slice: Slice 7, Individual spec authoring; PR #404 reviewing.
+Active slice: Slice 8, Contextual safe plan generation; T8.1.
 The controller checkpoint and tickets own subsequent progress.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.
@@ -153,7 +153,7 @@ T6.1 complete at `836b920dd8dcc805ea8bfd899594da309ba519c8`; T6.2 complete at `1
 
 ### Slice 7: Individual spec authoring
 
-Ticket: [TKT-20261017194552](../ticket/in_progress/20261017194552-present-spec-cards-and-user-selected-creation-state.md).
+Ticket: [TKT-20261017194552](../ticket/solved/20261017194552-present-spec-cards-and-user-selected-creation-state.md).
 
 Prerequisite: Slice 6 integrated; execution authority for this set.
 

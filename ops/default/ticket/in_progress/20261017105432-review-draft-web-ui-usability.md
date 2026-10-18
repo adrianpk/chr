@@ -124,7 +124,7 @@ The maintainer also requires a single New action in Specs and a creation
 modal where the user selects draft or approved directly. Draft is a spec state,
 not a mandatory separate document stage. Capture the individual-card target and
 creation-state contract in
-[Present individual spec cards and allow choosing the initial state](20261017194552-present-spec-cards-and-user-selected-creation-state.md).
+[Present individual spec cards and allow choosing the initial state](../solved/20261017194552-present-spec-cards-and-user-selected-creation-state.md).
 The creation modal is one vertical form: Title, Use Case (Project-wide or an
 existing case), one large Body editor and a compact Create action at the bottom
 right. At most one small themed Draft switch or checkbox lets the user choose

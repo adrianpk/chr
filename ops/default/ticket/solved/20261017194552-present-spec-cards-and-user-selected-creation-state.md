@@ -1,7 +1,7 @@
 ---
 id: TKT-20261017194552
 title: "Present individual spec cards and allow choosing the initial state"
-status: in_progress
+status: solved
 kind: task
 severity: medium
 priority: normal
@@ -14,13 +14,16 @@ branch: feat/slice-7-spec-authoring
 pr: "#404"
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
+reviewed_at: 2026-10-18T18:48:07Z
+closed_at: 2026-10-18T18:48:07Z
+resolution: fixed
 ---
 
 # Present individual spec cards and allow choosing the initial state
 
 ## Context and Evidence Boundary
 
-Part of [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
+Part of [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md).
 The maintainer supplied screenshots to explain the desired card presentation
 and creation entrypoint for Specs. The requirements below describe that target
 independently. The actual CHR Specs screen has not yet been visually reviewed
@@ -206,3 +209,5 @@ dimensions with short, long and unbroken text in the owning slice and review.
 T7.1 shared create/save/state operations passed focused race, journal recovery and full affected lint checks. T7.2 concrete listing/context and bound generation publication passed focused race and affected lint checks. T7.3 Web authoring, native HTTP checks, owned browser evidence and affected lint are complete; final exact-HEAD controller validation follows PR references after verified Slice 6 integration through PR #403. The [Slice 7 report](../../report/slices/web-ui-workflow-consolidation/slice-7-spec-authoring.md) records delivery evidence.
 
 [PR #404](https://forge.adrianpk.com/adrianpk/chr/pulls/404) targets dev. T7.1, T7.2 and T7.3 commits are recorded above; the report retains focused commands and captured catalog/modal states. Final exact-HEAD evidence is bound through the controller after this reference follow-up.
+
+Verified PR #404 merged into dev at `e000dfd64924cb9c798313cab12ed3b1c16ebf5f` on 2026-10-18T18:48:07Z. Controller validation `A6KXITYKZXFPDFOWRVZJK5HBSN` passed `make verify`, focused spec race and affected browser checks, and `git diff --check` for that exact candidate. Acceptance 1–9 is delivered; screenshots and commands are in the Slice 7 report.

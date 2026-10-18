@@ -1,11 +1,16 @@
 # Slice 7: Individual Spec Authoring
 
-Status: reviewing
+Status: delivered
 Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
 Branch: `feat/slice-7-spec-authoring`
 PR: `#404`
+
+Merged into dev through PR #404 on 2026-10-18T18:48:07Z at
+`e000dfd64924cb9c798313cab12ed3b1c16ebf5f`. Controller validation
+`A6KXITYKZXFPDFOWRVZJK5HBSN` passed the recorded ordered final checks
+for that exact candidate. Slice 7 of 12 completed.
 
 ## Purpose
 
