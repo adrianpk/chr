@@ -423,5 +423,12 @@ func quizScopeName(caseSlug string) string {
 }
 
 func quizRawText(value string) string {
-	return strings.ReplaceAll(strings.TrimSpace(value), "\n## Turn\n", "\n\\## Turn\n")
+	lines := strings.Split(strings.TrimSpace(value), "\n")
+	for index, line := range lines {
+		if line == "## Turn" {
+			lines[index] = "\\" + line
+		}
+	}
+
+	return strings.Join(lines, "\n")
 }

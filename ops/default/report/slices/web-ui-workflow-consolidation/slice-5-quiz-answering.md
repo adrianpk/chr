@@ -97,6 +97,15 @@ capture, curated-note and runtime helpers now keep their parameters on the
 declaration line. The rule reports one declaration per run and checks
 the committed branch diff, so its correction is validated after committing.
 
+A second controller attempt at `245302c97947a058880fb2d37d63f07b546f32f3`
+found five full-lint findings omitted by the diff-filtered development pass.
+Quiz dispatch now uses the existing document-action classifier, and the required
+spacing is corrected. A focused raw-entry regression also reproduced leading and
+trailing `## Turn` text being parsed as record boundaries; every such display
+line is escaped while the exact entry payload remains unchanged. The focused
+round-trip and real HTTP checks passed after correction; the complete lint pass
+across core, app, TUI and Web UI reported zero issues.
+
 Final clean-HEAD development and focused results are recorded through
 `looper validate` after the PR-reference follow-up. The controller's check record
 binds that exact HEAD and ordered command list.

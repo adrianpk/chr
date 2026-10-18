@@ -65,6 +65,7 @@ func (s service) nextFastQuizQuestion(state core.QuizRuntimeState, entries []cor
 	}
 
 	state = retainUnansweredFastQuestions(state, entries)
+
 	return s.activateNextFastQuestion(state), nil
 }
 
@@ -171,6 +172,7 @@ func retainUnansweredFastQuestions(state core.QuizRuntimeState, entries []core.Q
 	for _, candidate := range state.FastQueue {
 		if !seen[candidate.ID] && !seen[candidate.Prompt] && !slices.Contains(state.FastConsumed, candidate.ID) {
 			queue = append(queue, candidate)
+
 			continue
 		}
 

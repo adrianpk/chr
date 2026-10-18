@@ -37,9 +37,6 @@ func (p webViewProvider) WriteAction(ctx context.Context, request webui.WriteAct
 	}
 
 	operations := p.service(ctx)
-	if request.Surface == "quiz" {
-		return p.writeQuizAction(operations, request)
-	}
 
 	if response, handled, err := p.writeDocumentAction(operations, request); handled || err != nil {
 		return response, err
@@ -61,6 +58,12 @@ func (p webViewProvider) WriteAction(ctx context.Context, request webui.WriteAct
 }
 
 func (p webViewProvider) writeDocumentAction(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error) {
+	if request.Surface == "quiz" {
+		response, err := p.writeQuizAction(operations, request)
+
+		return response, true, err
+	}
+
 	switch request.Action {
 	case webActionCaseUpdate:
 		response, err := p.writeCaseUpdate(operations, request)

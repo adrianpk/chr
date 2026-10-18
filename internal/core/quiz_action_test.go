@@ -111,13 +111,22 @@ func checkQuizActionReplay(t *testing.T, repo *fileQuizArtifactRepository, reque
 // Raw records preserve entry identity, timestamps and arbitrary paragraph/heading
 // content rather than deriving new answers from display text on reload.
 func TestQuizEntryExactRoundTrip(t *testing.T) {
-	entry := validQuizEntry()
-	entry.Answer = "First paragraph.\n\n## Turn\n\nSecond paragraph.\n\nAnswer:\n\nThird."
-	entry.ID = "session-1-entry-1"
+	for _, test := range []struct{ name, answer string }{
+		{"paragraphs", "First paragraph.\n\n## Turn\n\nSecond paragraph.\n\nAnswer:\n\nThird."},
+		{"only heading", "## Turn"},
+		{"leading heading", "## Turn\n\nA complete answer."},
+		{"trailing heading", "A complete answer.\n\n## Turn"},
+		{"adjacent headings", "## Turn\n## Turn\n\nComplete answer."},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			entry := validQuizEntry()
+			entry.ID, entry.Answer = "session-1-entry-1", test.answer
 
-	entries, err := ParseQuizRawCaptureEntries(RenderQuizRawCapture(validQuizRuntimeState(), entry))
-	if err != nil || len(entries) != 1 || !reflect.DeepEqual(entries[0], entry) {
-		t.Fatal("entry lost identity or content", entries, err)
+			entries, err := ParseQuizRawCaptureEntries(RenderQuizRawCapture(validQuizRuntimeState(), entry))
+			if err != nil || len(entries) != 1 || !reflect.DeepEqual(entries[0], entry) {
+				t.Fatal("entry lost identity or content", entries, err)
+			}
+		})
 	}
 }
 

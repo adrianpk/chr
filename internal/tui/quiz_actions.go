@@ -269,6 +269,7 @@ func (m *Model) startQuizAnswer() {
 	if binding.ExpectedRevision != "" {
 		binding.OperationID = rand.Text()
 	}
+
 	m.quizAnswer = QuizAnswerState{
 		Binding: binding,
 		Active:  true,

@@ -764,6 +764,7 @@ func (h handler) artifactDetailPageData(r *http.Request, family string) (PageDat
 	if detail.Quiz != nil {
 		title = "Quizzes"
 	}
+
 	return PageData{
 		Shell:      h.shellData(family),
 		View:       "artifact_detail",
