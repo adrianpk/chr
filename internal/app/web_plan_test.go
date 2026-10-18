@@ -67,7 +67,7 @@ func webPlanDetail(t *testing.T, provider webViewProvider) webui.ArtifactDetailV
 }
 
 func webPlanForm(detail webui.ArtifactDetailView) url.Values {
-	return url.Values{"action": {detail.Plan.Action}, "family": {"cases"}, "surface": {"case-plan"}, "modal": {"true"}, "id": {detail.ID}, "revision": {detail.Plan.Revision}, "case_slug": {detail.ID}, "confirm": {"true"}}
+	return url.Values{"action": {detail.Plan.Action}, "family": {"cases"}, "surface": {"case-plan"}, "modal": {"true"}, "id": {detail.ID}, "revision": {detail.Plan.Revision}, "request_id": {detail.Plan.OperationID}, "case_slug": {detail.ID}, "confirm": {"true"}}
 }
 
 func addWebPlanDiscovery(t *testing.T, provider webViewProvider) {

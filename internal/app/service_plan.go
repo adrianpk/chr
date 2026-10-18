@@ -34,14 +34,18 @@ type PlanListResult struct {
 
 // PlanGenerateRequest selects the quiz scope used to generate a plan.
 type PlanGenerateRequest struct {
-	ExpectedRevision string
-	Scope            core.QuizScope
+	OperationID        string
+	TrackerReplaceHash string
+	ExpectedRevision   string
+	Scope              core.QuizScope
 }
 
 // PlanRegenerateRequest selects the quiz scope used to replace a plan.
 type PlanRegenerateRequest struct {
-	ExpectedRevision string
-	Scope            core.QuizScope
+	OperationID        string
+	TrackerReplaceHash string
+	ExpectedRevision   string
+	Scope              core.QuizScope
 }
 
 // PlanTrackingRequest selects the plan scope used to materialize tracking
@@ -92,6 +96,10 @@ func (s service) ListPlans() (PlanListResult, error) {
 //nolint:wsl_v5 // Guard clauses read clearer in this service flow.
 func (s service) GeneratePlan(ctx context.Context, request PlanGenerateRequest) (PlanOperationResult, error) {
 	scope := s.quizScope(request.Scope)
+	operation := core.PlanPublicationOperation{ID: request.OperationID, Scope: scope, ExpectedRevision: request.ExpectedRevision, TrackerReplaceHash: request.TrackerReplaceHash}
+	if result, found, err := s.replayPlanPublication(ctx, operation); found || err != nil {
+		return result, err
+	}
 	existing, exists, err := s.existingGeneratedPlan(scope)
 	if err != nil {
 		return PlanOperationResult{}, err
@@ -109,7 +117,7 @@ func (s service) GeneratePlan(ctx context.Context, request PlanGenerateRequest) 
 	err = s.withGenerationRuntime(ctx, "plan", scope, func(ctx context.Context) error {
 		var generateErr error
 
-		result, generateErr = s.prepareAndPublishPlan(ctx, scope, request.ExpectedRevision, false)
+		result, generateErr = s.prepareAndPublishPlan(ctx, operation)
 
 		return generateErr
 	})
@@ -135,7 +143,8 @@ func (s service) existingGeneratedPlan(scope core.QuizScope) (PlanView, bool, er
 	return s.planViewFromPath(scope, paths.RelativePath, paths.Path), true, nil
 }
 
-func (s service) prepareAndPublishPlan(ctx context.Context, scope core.QuizScope, expected string, replace bool) (PlanOperationResult, error) {
+func (s service) prepareAndPublishPlan(ctx context.Context, operation core.PlanPublicationOperation) (PlanOperationResult, error) {
+	scope, expected, replace := operation.Scope, operation.ExpectedRevision, operation.Replace
 	s.appendPlanGenerationLog("generate_plan_started", map[string]string{"case_slug": scope.CaseSlug, "timeout": longGenerationTimeout.String()})
 
 	sources, state, target, err := s.preparePlanGeneration(ctx, scope, expected)
@@ -150,6 +159,13 @@ func (s service) prepareAndPublishPlan(ctx context.Context, scope core.QuizScope
 
 	plan.SourceRequestID, plan.SourceResponseID = strings.Join(requests, ","), strings.Join(responses, ",")
 	plan.ExpectedRevision, plan.SourceObservationHash = target, sources.Hash
+
+	plan.RequireOrderMap = true
+
+	plan.TrackerReplaceHash = operation.TrackerReplaceHash
+	if operation.ID != "" {
+		plan.Operation = &operation
+	}
 
 	plan.CreateOnly = !replace
 	for _, input := range sources.Inputs {
@@ -305,6 +321,7 @@ func (s service) generateStagedPlan(ctx context.Context, scope core.QuizScope, s
 		Scope:       scope,
 		Title:       outline.Title,
 		Body:        body,
+		Order:       core.PlannedOrderFromDetails(details),
 		SourcePaths: sourcePaths,
 		CreatedAt:   outline.CreatedAt.UTC(),
 	}
@@ -386,12 +403,16 @@ func (s service) generatePlanSliceDetail(ctx context.Context, state core.QuizRun
 //nolint:wsl_v5 // Keeps result capture adjacent to the guarded runtime call.
 func (s service) RegeneratePlan(ctx context.Context, request PlanRegenerateRequest) (PlanOperationResult, error) {
 	scope := s.quizScope(request.Scope)
+	operation := core.PlanPublicationOperation{ID: request.OperationID, Scope: scope, ExpectedRevision: request.ExpectedRevision, Replace: true, TrackerReplaceHash: request.TrackerReplaceHash}
+	if result, found, err := s.replayPlanPublication(ctx, operation); found || err != nil {
+		return result, err
+	}
 	var result PlanOperationResult
 
 	err := s.withGenerationRuntime(ctx, "plan", scope, func(ctx context.Context) error {
 		var err error
 
-		result, err = s.prepareAndPublishPlan(ctx, scope, request.ExpectedRevision, true)
+		result, err = s.prepareAndPublishPlan(ctx, operation)
 
 		return err
 	})

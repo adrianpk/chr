@@ -1126,6 +1126,7 @@ func serviceQuizPlanResponse(responseID string, createdAt time.Time) core.QuizMo
 			Scope:     core.QuizScope{ProjectID: "service-project"},
 			Title:     "Generated Implementation Plan",
 			Body:      "## High-level implementation strategy\n\nImplement the generated plan in one pass.\n",
+			Order:     []core.PlanOrderSlice{{ID: "slice-1", Order: 1, Title: "Foundation", Tasks: []core.PlanOrderTask{{ID: "task-t1.1", Order: 1, Title: "Implement foundation"}}}},
 			CreatedAt: createdAt,
 		},
 		RawText:   "raw generated plan",

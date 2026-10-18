@@ -163,7 +163,7 @@ func (p webViewProvider) writePlanGenerate(ctx context.Context, operations servi
 		return webValidationWrite(err), nil
 	}
 
-	result, err := operations.GeneratePlan(ctx, PlanGenerateRequest{Scope: scope, ExpectedRevision: request.Revision})
+	result, err := operations.GeneratePlan(ctx, PlanGenerateRequest{Scope: scope, ExpectedRevision: request.Revision, OperationID: request.Fields["request_id"]})
 	if err != nil {
 		return webPlanWriteFailure(err, request.ID), nil
 	}
@@ -192,7 +192,7 @@ func (p webViewProvider) writePlanRegenerate(ctx context.Context, operations ser
 		return webBlockedWrite("No current plan exists. Reload this case and use Generate Plan."), nil
 	}
 
-	result, err := operations.RegeneratePlan(ctx, PlanRegenerateRequest{Scope: scope, ExpectedRevision: request.Revision})
+	result, err := operations.RegeneratePlan(ctx, PlanRegenerateRequest{Scope: scope, ExpectedRevision: request.Revision, OperationID: request.Fields["request_id"]})
 	if err != nil {
 		return webPlanWriteFailure(err, request.ID), nil
 	}

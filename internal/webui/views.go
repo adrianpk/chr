@@ -347,7 +347,7 @@ type ArtifactCardView struct {
 
 // CasePlanView binds contextual authoring to a named case and observed plan.
 type CasePlanView struct {
-	CaseSlug, CaseTitle, Action, Label, Revision, PlanURL, DumpURL, QuizURL, BlockedReason string
+	CaseSlug, CaseTitle, Action, Label, Revision, PlanURL, DumpURL, QuizURL, BlockedReason, OperationID string
 }
 
 // ArtifactDetailView projects one concrete document or named case.

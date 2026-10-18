@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"net/url"
 
@@ -10,7 +11,7 @@ import (
 )
 
 func (p webViewProvider) casePlanningView(ctx context.Context, slug, title string) *webui.CasePlanView {
-	view := &webui.CasePlanView{CaseSlug: slug, CaseTitle: title, Action: webActionPlanGenerate, Label: "Generate Plan", DumpURL: "/dumps"}
+	view := &webui.CasePlanView{OperationID: rand.Text(), CaseSlug: slug, CaseTitle: title, Action: webActionPlanGenerate, Label: "Generate Plan", DumpURL: "/dumps"}
 	operations := p.service(ctx)
 	scope := operations.quizScope(core.QuizScope{CaseSlug: slug})
 

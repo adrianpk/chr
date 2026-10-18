@@ -578,6 +578,7 @@ func quizModelPlanResponseFromOutput(
 			Scope:     request.Scope,
 			Title:     payload.Title,
 			Body:      payload.Body,
+			Order:     payload.Order,
 			CreatedAt: request.CreatedAt.UTC(),
 		},
 		RawText:   string(output),
@@ -1023,6 +1024,8 @@ For project-wide plans, always include an Assumptions and Low-Confidence Items s
 The plan is not a roadmap, milestone list, brainstorm, or architecture essay.
 The plan is an executable implementation decomposition, sequencing mechanism, reviewable execution strategy, and bridge from specs to tickets.
 
+Return order as structured slices and tasks matching the Markdown decomposition. Use stable machine IDs (slice-1, task-t1.1), positive slice_order and task_order, titles, and nested tasks. Do not allocate ticket identities or references. This map supplies intended order only; it does not approve execution.
+
 Generate a deterministic Markdown body with these sections:
 - High-level implementation strategy
 - Slice decomposition
@@ -1430,8 +1433,9 @@ func quizModelPlanJSONSchema() map[string]any {
 	return map[string]any{
 		"type":                 "object",
 		"additionalProperties": false,
-		"required":             []string{"title", "body", "status"},
+		"required":             []string{"title", "body", "status", "order"},
 		"properties": map[string]any{
+			"order": planOrderJSONSchema(),
 			"title": map[string]any{
 				"type": "string",
 			},

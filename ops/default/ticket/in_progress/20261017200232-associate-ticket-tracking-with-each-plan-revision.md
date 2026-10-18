@@ -149,3 +149,10 @@ Behavior, shared-domain changes and implementation design are consolidated in
 ## Slice 9 Execution
 
 Activated T9.1 after verified PR #405 integration. The [Slice 9 report](../../report/slices/web-ui-workflow-consolidation/slice-9-plan-order-tracker.md) owns implementation and validation evidence.
+
+T9.1 completed: both generation paths require structured unbound companions;
+recoverable publication retains revision history and protects edited current
+output. Root-bound receipts acknowledge explicit operation retries without
+another model call or revision. Focused plan race checks and affected-package
+strict lint passed. T9.2 is active; approved materialization and execution-context
+binding remain for T9.3.

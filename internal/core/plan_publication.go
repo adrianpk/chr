@@ -72,6 +72,10 @@ func observePlanTarget(ctx context.Context, projectDir, reference string) (planT
 func (r *fileAuthoringSessionRepository) publishGeneratedPlan(ctx context.Context, paths GeneratedPlanPaths, plan GeneratedPlan) error {
 	projectDir := r.projectDir
 
+	if found, err := r.completedPlanOperation(plan); err != nil || found {
+		return err
+	}
+
 	target, err := observePlanTarget(ctx, projectDir, paths.RelativePath)
 	if err != nil {
 		return err
@@ -85,6 +89,13 @@ func (r *fileAuthoringSessionRepository) publishGeneratedPlan(ctx context.Contex
 	if err != nil {
 		return err
 	}
+
+	receipt, err := r.planPublicationReceiptChange(paths, plan, changes)
+	if err != nil {
+		return err
+	}
+
+	changes = append(changes, receipt...)
 
 	if err := ctx.Err(); err != nil {
 		return err
@@ -114,6 +125,13 @@ func generatedPlanChanges(projectDir string, paths GeneratedPlanPaths, target pl
 	metadata["source_observation_hash"], metadata["source_inputs"] = plan.SourceObservationHash, plan.SourceInputs
 	metadata["updated_at"] = plan.CreatedAt.UTC().Format("2006-01-02T15:04:05.999999999Z07:00")
 
+	body := []byte(RenderGeneratedPlan(plan))
+
+	companions, err := preparePlanOrderChanges(projectDir, paths, target, metadata, plan, body)
+	if err != nil {
+		return nil, err
+	}
+
 	encoded, err := json.MarshalIndent(metadata, "", "  ")
 	if err != nil {
 		return nil, err
@@ -121,7 +139,7 @@ func generatedPlanChanges(projectDir string, paths GeneratedPlanPaths, target pl
 
 	changes := append([]workflowFileChange(nil), target.images...)
 
-	changes[0].After, changes[1].After = []byte(RenderGeneratedPlan(plan)), append(encoded, '\n')
+	changes[0].After, changes[1].After = body, append(encoded, '\n')
 	if target.images[0].After != nil && !plan.ArchiveAt.IsZero() {
 		archive, err := generatedPlanArchiveChanges(projectDir, paths, target, plan)
 		if err != nil {
@@ -131,7 +149,7 @@ func generatedPlanChanges(projectDir string, paths GeneratedPlanPaths, target pl
 		changes = append(archive, changes...)
 	}
 
-	return changes, nil
+	return append(companions, changes...), nil
 }
 
 func generatedPlanMetadata(projectDir, reference, title string, plan GeneratedPlan) (map[string]any, error) {
@@ -165,7 +183,13 @@ func generatedPlanArchiveChanges(projectDir string, current GeneratedPlanPaths, 
 
 	metadata["id"] = strings.Split(archive.RelativePath, "/")[3]
 	metadata["status"], metadata["archived_from"] = "archived", current.RelativePath
+
 	metadata["source_metadata_hash"] = target.images[1].Before
+	if metadata["plan_binding"] != nil {
+		// Retained files stay below the canonical plan. The archive keeps their
+		// source manifest and explicit namespace-relative binding, not local copies.
+		metadata["source_files"], metadata["files"] = metadata["files"], []string{"artifact.md"}
+	}
 
 	encoded, err := json.MarshalIndent(metadata, "", "  ")
 	if err != nil {

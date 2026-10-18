@@ -20,11 +20,15 @@ type PlanSourceBinding struct{ Kind, Reference, Revision string }
 
 // GeneratedPlan holds staged model output and caller-owned publication guards.
 type GeneratedPlan struct {
-	CreateOnly            bool                `json:"-"`
-	ExpectedRevision      string              `json:"-"`
-	SourceObservationHash string              `json:"-"`
-	SourceInputs          []PlanSourceBinding `json:"-"`
-	ArchiveAt             time.Time           `json:"-"`
+	Operation             *PlanPublicationOperation `json:"-"`
+	RequireOrderMap       bool                      `json:"-"`
+	TrackerReplaceHash    string                    `json:"-"`
+	Order                 []PlanOrderSlice          `json:"order,omitempty"`
+	CreateOnly            bool                      `json:"-"`
+	ExpectedRevision      string                    `json:"-"`
+	SourceObservationHash string                    `json:"-"`
+	SourceInputs          []PlanSourceBinding       `json:"-"`
+	ArchiveAt             time.Time                 `json:"-"`
 	Scope                 QuizScope
 	Title                 string
 	Body                  string
@@ -237,6 +241,12 @@ func ValidateGeneratedPlan(plan GeneratedPlan) error {
 	err := ValidateQuizScope(plan.Scope)
 	if err != nil {
 		return err
+	}
+
+	if plan.Operation != nil || plan.RequireOrderMap || len(plan.Order) > 0 {
+		if err := ValidatePlannedOrder(plan.Order); err != nil {
+			return err
+		}
 	}
 
 	if plan.CreatedAt.IsZero() {
