@@ -34,9 +34,14 @@ func TestWebTicketRevision(t *testing.T) {
 			revisions := map[string]string{"fresh": current.Revision, "stale": original.Revision}
 			before := readWebTicketFile(t, provider, original.Key)
 
+			fields := map[string]string{"title": "Browser title", "synopsis": "Browser description."}
+			if tt.action == "ticket.comment" {
+				fields = map[string]string{"content": "Browser comment."}
+			}
+
 			result, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 				Action: tt.action, ID: original.Key, Revision: revisions[tt.revision], Confirm: true,
-				Fields: map[string]string{"title": "Browser title", "synopsis": "Browser description.", "content": "Browser comment."},
+				Fields: fields,
 			})
 			if err != nil || result.Status != tt.status {
 				t.Fatalf("WriteAction = %#v, %v; want %q", result, err, tt.status)

@@ -90,7 +90,7 @@ func addTicketComment(content string, comment ticketComment) (string, error) {
 
 	nextHeadingIndex := strings.Index(updatedContent[insertAt:], "\n# ")
 	if nextHeadingIndex < 0 {
-		return updatedContent[:insertAt] + "\n" + renderedComment, nil
+		return strings.TrimRight(updatedContent, "\n") + "\n\n" + renderedComment, nil
 	}
 
 	insertAt += nextHeadingIndex + 1

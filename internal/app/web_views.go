@@ -4,7 +4,6 @@ package app
 import (
 	"context"
 	"io/fs"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -63,23 +62,17 @@ func (p webViewProvider) BoardView(ctx context.Context, request webui.BoardReque
 }
 
 func (p webViewProvider) TicketDetailView(ctx context.Context, request webui.TicketDetailRequest) (webui.TicketDetailView, error) {
-	if p.workflowEnabled() {
-		view, found, err := p.workflowTicketDetail(ctx, request.Key)
-		if found || err != nil {
-			return view, err
-		}
-	}
-
-	ticket, err := p.service(ctx).ticketByKey(request.Key)
+	document, err := p.service(ctx).ReadTicketDocument(request.Key)
 	if err != nil {
 		return webui.TicketDetailView{}, err
 	}
 
+	ticket := document.Ticket
 	view := webui.TicketDetailView{
+		NativeWorkflow:  ticket.NativeWorkflow,
 		WorkflowEnabled: p.workflowEnabled(),
 		Key:             ticket.Key,
 		Title:           ticket.Title,
-		Synopsis:        ticket.Synopsis,
 		Priority:        ticket.Priority,
 		Status:          ticket.Status,
 		Type:            ticket.Type,
@@ -87,20 +80,26 @@ func (p webViewProvider) TicketDetailView(ctx context.Context, request webui.Tic
 		UseCase:         ticket.UseCase,
 		Slice:           ticket.Slice,
 		RelativePath:    ticket.RelativePath,
-		Comments:        webTicketComments(ticket.Path),
+		Synopsis:        document.Fields["synopsis"],
+		Description:     document.Description,
+		Fields:          document.Fields,
+		ReadOnly:        document.ReadOnly,
+		ReadOnlyReason:  document.ReadOnlyReason,
+		Phase:           document.Phase,
+		Comments:        parseWebTicketComments(document.Discussion),
 	}
-	view.Revision = webStableRevision(view)
+	view.Revision = document.Revision
+	view.RequestID = webTicketMutationBinding("").RequestID
+
+	cases, err := core.NewCaseMetadataService(p.projectContext.ProjectDir).LoadAll()
+	if err != nil {
+		return view, err
+	}
+	for _, item := range cases {
+		view.Cases = append(view.Cases, webui.TicketCaseView{Slug: item.Slug, Name: item.Name})
+	}
 
 	return view, nil
-}
-
-func webTicketComments(path string) []webui.TicketCommentView {
-	content, err := os.ReadFile(path)
-	if err != nil {
-		return nil
-	}
-
-	return parseWebTicketComments(string(content))
 }
 
 //nolint:cyclop,gocognit // The linear parser mirrors the ticket comments section grammar.

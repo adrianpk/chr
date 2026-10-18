@@ -164,6 +164,14 @@ type TicketDetailRequest struct {
 
 // TicketDetailView is the modal projection for one ticket.
 type TicketDetailView struct {
+	New             bool
+	Description     string
+	Fields          map[string]string
+	ReadOnly        map[string]string
+	ReadOnlyReason  string
+	Phase           string
+	RequestID       string
+	Cases           []TicketCaseView
 	NativeWorkflow  bool
 	WorkflowEnabled bool
 	Key             string
@@ -179,6 +187,12 @@ type TicketDetailView struct {
 	Comments        []TicketCommentView
 	Missing         bool
 	Revision        string
+}
+
+// TicketCaseView is a named association offered by the shared case owner.
+type TicketCaseView struct {
+	Slug string
+	Name string
 }
 
 // TicketCommentView is one rendered ticket comment.

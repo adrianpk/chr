@@ -53,18 +53,27 @@ func ReadTicketBoard(ctx context.Context, opts TicketBoardReadOptions) (board Bo
 }
 
 func (s *WorkflowStore) readTicketBoard(ctx context.Context, opts TicketBoardReadOptions) (Board, error) {
+	tickets, err := s.readBoardTickets(ctx, opts.NativeWorkflow)
+	if err != nil {
+		return Board{}, err
+	}
+
+	return ticketBoardPage(s.projectID, tickets, opts.Offset, opts.Limit), nil
+}
+
+func (s *WorkflowStore) readBoardTickets(ctx context.Context, native bool) ([]IndexedTicket, error) {
 	tickets := map[string]IndexedTicket{}
 	paths := map[string]bool{}
 
-	if opts.NativeWorkflow {
+	if native {
 		if err := s.readNativeBoardTickets(ctx, tickets, paths); err != nil {
-			return Board{}, err
+			return nil, err
 		}
 	}
 
 	for _, root := range []string{filepath.Join(s.layout.Root(), "ticket"), ticketsDirectory(s.layout.ProjectDir())} {
 		if err := s.readLooseBoardTickets(ctx, root, tickets, paths); err != nil {
-			return Board{}, err
+			return nil, err
 		}
 	}
 
@@ -73,7 +82,7 @@ func (s *WorkflowStore) readTicketBoard(ctx context.Context, opts TicketBoardRea
 		all = append(all, ticket)
 	}
 
-	return ticketBoardPage(s.projectID, sortedBoardTickets(all), opts.Offset, opts.Limit), nil
+	return sortedBoardTickets(all), nil
 }
 
 func (s *WorkflowStore) readNativeBoardTickets(ctx context.Context, tickets map[string]IndexedTicket, paths map[string]bool) error {

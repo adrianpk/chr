@@ -22,20 +22,19 @@ func updateTicketMetadata(content string, fields map[string]string) (string, err
 }
 
 func updateTicketMetadataField(content, key, value string) (string, error) {
-	lineStart := strings.Index(content, key+":")
-	if lineStart < 0 {
-		return "", fmt.Errorf("ticket %s metadata is required", key)
+	lines, err := ticketFrontmatterLines(content)
+	if err != nil {
+		return "", err
 	}
 
-	lineEnd := strings.IndexByte(content[lineStart:], '\n')
-	if lineEnd < 0 {
-		return "", fmt.Errorf("ticket %s metadata line is incomplete", key)
+	for _, line := range lines {
+		name, _, found := strings.Cut(line, ":")
+		if found && name == key {
+			return setTicketFrontmatterScalarField(content, key, value, nil)
+		}
 	}
 
-	lineEnd += lineStart
-	line := key + ": " + value
-
-	return content[:lineStart] + line + content[lineEnd:], nil
+	return "", fmt.Errorf("ticket %s metadata is required", key)
 }
 
 func updateTicketUpdatedAt(content string, updatedAt time.Time) (string, error) {

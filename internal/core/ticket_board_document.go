@@ -84,7 +84,7 @@ func boardDescription(data []byte) string {
 
 	for _, line := range strings.Split(text, "\n") {
 		trimmed := strings.TrimSpace(line)
-		if trimmed == "## Comments" || trimmed == "## Discussion" {
+		if trimmed == "# Comments" || trimmed == "## Comments" || trimmed == "## Discussion" {
 			break
 		}
 
