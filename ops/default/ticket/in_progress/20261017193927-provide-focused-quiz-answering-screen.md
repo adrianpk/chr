@@ -9,8 +9,9 @@ scope: ui
 tags: quizzes, interaction, quiz-modes
 source: chat
 reported_at: 2026-10-17T19:39:27Z
-commits: [c00bbcce643fbc1958bc14184e38b73e63f14bd7, 0257336d0c738ad9211047f1e8afde951b1745fa]
+commits: [c00bbcce643fbc1958bc14184e38b73e63f14bd7, 0257336d0c738ad9211047f1e8afde951b1745fa, 793621d7828bb45217c8c9517a8bcb93a3db06a2]
 branch: feat/slice-5-quiz-answering
+pr: "#402"
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---

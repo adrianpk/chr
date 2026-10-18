@@ -5,7 +5,7 @@ Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
 Branch: `feat/slice-5-quiz-answering`
-PR: pending
+PR: `#402`
 
 ## Purpose
 
@@ -39,7 +39,7 @@ append another entry. Reused answered question identities are rejected.
 
 - T5.1: `c00bbcce643fbc1958bc14184e38b73e63f14bd7` — guarded observations, retained schema and recoverable actions.
 - T5.2: `0257336d0c738ad9211047f1e8afde951b1745fa` — shared queue policy and observed TUI bindings.
-- T5.3: focused Web projection, guarded forms, draft recovery, real HTTP/browser checks and captures.
+- T5.3: `793621d7828bb45217c8c9517a8bcb93a3db06a2` — focused Web projection, guarded forms, draft recovery, real HTTP/browser checks and captures.
 
 The quiz repository uses the existing process-safe authoring owner and journal.
 Runtime, raw entries, curated notes, metadata and the action receipt publish in
