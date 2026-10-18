@@ -107,12 +107,19 @@ merged head with these commands, in order:
 - `CHR_WEB_BROWSER=/usr/sbin/chromium go test ./internal/app -run '^TestWeb(Workflow|Consolidated|Board)Browser$' -count=1`
 - `git diff --check`
 
-All slice entries are now closed. Gate prerequisites are present for the
-configured `make verify`: toolchain, pinned lint module and repository checks.
-No live services or external fixtures are required. The worker did not run the
-full gate during preparation. The controller owns that gate for the integrated
-preparation commit and final set closure. Scheduled exhaustive certification
-retains its separate exact-head evidence boundary.
+The controller's final development gate passed `make verify` on immutable
+integrated candidate `bd60cb6a7a8fa22da7eedd8f892353ec95c24893` at
+2026-10-18T21:32:38.637997142Z. Validation identity
+`KWHEQVE2DJYR4NWNDM2YQZPWGZ` and the exact-candidate check record retain the
+successful command and its log. This gate covers strict lint, short Go tests,
+nightly-script regressions and the build; the earlier focused race and browser
+checks retain their own exact candidate above.
+
+All twelve slice reports and source tickets are closed, and the plan and tracker
+are Completed. Closure changes only configured documentation paths relative to
+the tested candidate. No owned service fixtures were required or remain active.
+The worker reused the controller's evidence without rerunning the gate.
+Scheduled exhaustive certification retains its separate exact-head boundary.
 
 ## Risks and Follow-ups
 

@@ -305,5 +305,9 @@ Controller validation `YO554RDO3VE3HBFTPNQCLQACRZ` passed all four ordered
 commands for that exact clean head: `make verify`, the affected core/app/webui
 race selection, the native/consolidated/Board browser selection and
 `git diff --check`. The canonical PR and Slice 12 report retain the exact commands.
-All twelve source tickets and reports are solved/delivered. Final set closure
-remains pending the controller's gate for the integrated preparation commit.
+All twelve source tickets and reports are solved/delivered. The controller's
+final `make verify` gate passed at immutable integrated candidate
+`bd60cb6a7a8fa22da7eedd8f892353ec95c24893` on 2026-10-18T21:32:38.637997142Z,
+with validation identity `KWHEQVE2DJYR4NWNDM2YQZPWGZ`. Plan and tracker are
+Completed. Documentation-only closure stays within the configured paths relative
+to that tested candidate; scheduled exhaustive certification remains separate.

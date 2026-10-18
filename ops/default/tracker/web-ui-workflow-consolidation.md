@@ -1,6 +1,8 @@
 # Web UI and Workflow Delivery Order
 
-Status: Approved
+Status: Completed
+
+Completed: 2026-10-18
 
 Date: 2026-10-18
 
@@ -17,8 +19,9 @@ Model: [Web UI and Workflow Model](../spec/stable/web-ui-workflow-consolidation-
 Implementation authorization: granted on 2026-10-18 for this exact set through
 Looper, including controller-owned Rebase + Fast-forward integration into dev.
 
-Active slice: none; all twelve slices integrated; controller-owned final dev gate pending.
-The controller checkpoint and tickets own subsequent progress.
+Active slice: none; all twelve slices integrated and the final development gate passed.
+Final development gate: `make verify` passed at `bd60cb6a7a8fa22da7eedd8f892353ec95c24893`.
+The [Slice 12 report](../report/slices/web-ui-workflow-consolidation/slice-12-web-ui-review.md#validation) records the controller evidence and closure boundary.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.
 
