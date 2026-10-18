@@ -9,7 +9,7 @@ scope: ui
 tags: plans, catalog, reading
 source: chat
 reported_at: 2026-10-17T19:54:58Z
-commits: []
+commits: [c65b1dac7c39e7a15030fb4f7b2e28a4366e5a15]
 branch: feat/slice-10-plan-catalog
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
@@ -92,9 +92,14 @@ dimensions with short, long and unbroken text in the owning slice and review.
 
 ## Slice 10 Execution
 
-T10.1 is complete on the recorded branch: concrete plan reads, fixed opening-text
-cards, exact full-body selection and read-only details. Focused catalog and
-contextual-planning regressions passed. T10.2 remains active for removal of the
-legacy Web tracking action and direct tracker access. The
-[Slice 10 report](../../report/slices/web-ui-workflow-consolidation/slice-10-plan-catalog.md)
-owns implementation and validation evidence.
+T10.1 and T10.2 are complete on the recorded branch. Concrete plan reads retain
+exact document selection, fixed opening-text cards and complete read-only detail.
+The Web tracking form/action and direct tracker access are removed while
+internal files and contextual generation remain available through their owners.
+
+Focused core/HTTP tests, affected-package strict lint and owned Chromium
+captures passed, including mutation-free browsing and rejected legacy forms.
+The [Slice 10 report](../../report/slices/web-ui-workflow-consolidation/slice-10-plan-catalog.md)
+owns implementation, acceptance captures and task validation evidence. Final
+clean-HEAD controller checks follow PR-reference updates. The source ticket
+remains in progress until verified merge.

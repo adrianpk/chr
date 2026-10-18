@@ -6,6 +6,7 @@ package webui
 import (
 	"crypto/subtle"
 	"embed"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -286,7 +287,7 @@ func (h handler) artifactDetail(family string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		data, err := h.artifactDetailPageData(r, family)
 		if err != nil {
-			http.Error(w, "load artifact", http.StatusInternalServerError)
+			artifactReadFailure(w, r, err)
 
 			return
 		}
@@ -308,7 +309,7 @@ func (h handler) artifactDetailFragment(family string) http.HandlerFunc {
 
 		data, err := h.artifactDetailPageData(r, family)
 		if err != nil {
-			http.Error(w, "load artifact", http.StatusInternalServerError)
+			artifactReadFailure(w, r, err)
 
 			return
 		}
@@ -331,6 +332,15 @@ func (h handler) artifactDetailFragment(family string) http.HandlerFunc {
 			http.Error(w, "render artifact", http.StatusInternalServerError)
 		}
 	}
+}
+
+func artifactReadFailure(w http.ResponseWriter, r *http.Request, err error) {
+	if errors.Is(err, fs.ErrNotExist) {
+		http.NotFound(w, r)
+
+		return
+	}
+	http.Error(w, "load artifact", http.StatusInternalServerError)
 }
 
 func (h handler) writeAction(w http.ResponseWriter, r *http.Request) {

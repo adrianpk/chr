@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"errors"
 	"net/url"
-	"os"
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -124,13 +123,6 @@ func webPlanPreview(document core.PlanDocument) string {
 
 func (p webViewProvider) planArtifactDetail(ctx context.Context, request webui.ArtifactDetailRequest) (webui.ArtifactDetailView, error) {
 	document, err := core.ReadPlanDocument(ctx, p.projectContext.ProjectDir, request.ID)
-	if errors.Is(err, os.ErrNotExist) {
-		view := webui.ArtifactDetailView{Family: webArtifactFamilyPlans, ID: request.ID, Title: "Plan", Missing: true}
-		view.Revision = webStableRevision(view)
-
-		return view, nil
-	}
-
 	if err != nil {
 		return webui.ArtifactDetailView{}, err
 	}

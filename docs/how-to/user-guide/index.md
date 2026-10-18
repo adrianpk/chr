@@ -282,6 +282,11 @@ Save case edits first: planning uses saved context. Follow Add discovery context
 or Answer this case's quiz when more information is needed. The Plans catalog
 has no separate slug-based generation forms.
 
+Plans shows saved plan documents as fixed-size cards with opening body lines.
+Open a card to read that exact document in full. The detail has no manual Edit,
+Save or Append controls. Internal order trackers stay in project files and
+cannot be browsed or created through the Web UI.
+
 Planning requires useful discovery and enough information about the intended
 outcome, scope, constraints and verification. A complete dump alone, a short
 focused dump or sufficient quiz answers can qualify. A manual spec alone does

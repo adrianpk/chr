@@ -18,7 +18,7 @@ type PlanDocument struct {
 // ReadPlanDocument observes the exact canonical plan without recovery or writes.
 func ReadPlanDocument(ctx context.Context, projectDir, reference string) (PlanDocument, error) {
 	if err := validatePlanDocumentReference(reference); err != nil {
-		return PlanDocument{}, err
+		return PlanDocument{}, errors.Join(os.ErrNotExist, err)
 	}
 
 	target, err := observePlanTarget(ctx, projectDir, reference)

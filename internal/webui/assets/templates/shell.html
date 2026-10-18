@@ -179,9 +179,6 @@
     <p class="empty-state">{{.Catalog.EmptyMessage}}</p>
   {{end}}
 {{end}}
-{{if eq .Catalog.Family "plans"}}
-  {{template "plan_action_forms.html" .}}
-{{end}}
 {{end}}
 
 {{define "dump_catalog_content.html"}}
@@ -494,19 +491,6 @@
 
 {{define "revision_marker.html"}}
 <div class="state-marker" data-revision="{{.Revision}}" hidden></div>
-{{end}}
-
-{{define "plan_action_forms.html"}}
-<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Create tracking artifacts and tickets from this plan?')">
-  <input type="hidden" name="action" value="plan.tracking.create">
-  <input type="hidden" name="family" value="plans">
-  <input type="hidden" name="confirm" value="true">
-  <label>
-    <span>Case slug</span>
-    <input name="case_slug">
-  </label>
-  <button class="button" type="submit">Create Tracking</button>
-</form>
 {{end}}
 
 {{define "dash_content.html"}}

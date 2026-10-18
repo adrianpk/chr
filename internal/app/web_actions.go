@@ -17,18 +17,17 @@ const (
 	webActionDumpSave   = "dump.save"
 	webActionDumpAppend = "dump.append"
 
-	webActionTicketUpdate       = "ticket.update"
-	webActionTicketComment      = "ticket.comment"
-	webActionTicketCreate       = "ticket.create"
-	webActionTicketMove         = "ticket.move"
-	webActionSpecGenerate       = "spec.generate"
-	webActionPlanGenerate       = "plan.generate"
-	webActionPlanRegenerate     = "plan.regenerate"
-	webActionPlanTrackingCreate = "plan.tracking.create"
-	webActionQuizStart          = "quiz.start"
-	webActionQuizResume         = "quiz.resume"
-	webActionWorkPreview        = "work.preview"
-	webActionWorkDaemonStop     = "work.daemon.stop"
+	webActionTicketUpdate   = "ticket.update"
+	webActionTicketComment  = "ticket.comment"
+	webActionTicketCreate   = "ticket.create"
+	webActionTicketMove     = "ticket.move"
+	webActionSpecGenerate   = "spec.generate"
+	webActionPlanGenerate   = "plan.generate"
+	webActionPlanRegenerate = "plan.regenerate"
+	webActionQuizStart      = "quiz.start"
+	webActionQuizResume     = "quiz.resume"
+	webActionWorkPreview    = "work.preview"
+	webActionWorkDaemonStop = "work.daemon.stop"
 )
 
 func (p webViewProvider) WriteAction(ctx context.Context, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
@@ -104,10 +103,6 @@ func (p webViewProvider) writeGenerationAction(ctx context.Context, operations s
 		return response, true, err
 	case webActionPlanRegenerate:
 		response, err := p.writePlanRegenerate(ctx, operations, request)
-
-		return response, true, err
-	case webActionPlanTrackingCreate:
-		response, err := p.writePlanTrackingCreate(ctx, operations, request)
 
 		return response, true, err
 	case webActionQuizStart:
@@ -203,23 +198,6 @@ func (p webViewProvider) writePlanRegenerate(ctx context.Context, operations ser
 		ChangedFiles: compactChangedFiles(result.Plan.RelativePath),
 		RedirectURL:  "/plans",
 		Operation:    webOperation("plan.regenerate", "completed", result.Plan.RelativePath, result.Plan.Status),
-	}, nil
-}
-
-func (p webViewProvider) writePlanTrackingCreate(ctx context.Context, operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
-	result, err := operations.MaterializePlanTracking(ctx, PlanTrackingRequest{Scope: webActionScope(request)})
-	if err != nil {
-		return webValidationWrite(err), nil
-	}
-
-	files := append(compactChangedFiles(result.TrackingPath), ticketPaths(result.Tickets)...)
-
-	return webui.WriteActionResponse{
-		Status:       webui.WriteStatusOK,
-		Summary:      result.Message,
-		ChangedFiles: files,
-		RedirectURL:  "/plans",
-		Operation:    webOperation("plan.tracking.create", "completed", result.TrackingPath, result.Plan.Status),
 	}, nil
 }
 
@@ -483,15 +461,4 @@ func compactChangedFiles(paths ...string) []string {
 	}
 
 	return files
-}
-
-func ticketPaths(tickets []core.IndexedTicket) []string {
-	paths := make([]string, 0, len(tickets))
-	for _, ticket := range tickets {
-		if strings.TrimSpace(ticket.RelativePath) != "" {
-			paths = append(paths, ticket.RelativePath)
-		}
-	}
-
-	return paths
 }
