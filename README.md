@@ -128,3 +128,9 @@ Official repository: https://forge.adrianpk.com/adrianpk/chr
 Public mirrors:
 
 - https://codeberg.org/adrianpk/chr
+
+## License
+
+Copyright 2026 Adrian PK.
+
+Chryso is licensed under the [Apache License, Version 2.0](LICENSE).

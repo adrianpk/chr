@@ -154,6 +154,7 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Changed
 
+- Chryso is now licensed under Apache License 2.0.
 - Web document catalogs share the Specs and Plans layout, with consistent
   margins, fixed-size cards and opening-text previews across screen sizes.
 - Web UI page headings show the section or artifact title, with the project
