@@ -5,7 +5,7 @@ Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
 Branch: `fix/slice-3-dump-editor`
-PR: pending
+PR: `#400`
 
 ## Purpose
 
@@ -37,7 +37,7 @@ catalog refresh; desktop and narrow views use the same editor.
 ## Implementation Notes
 
 - T3.1: `600f30bf1be349403ab38b6d98fa6dad6e5b5c93` — body-only Web reads, unchanged shared Save ownership and real HTTP replacement/stale regression.
-- T3.2: single-surface templates, inline results, retained Save arguments, explicit reload and browser journeys.
+- T3.2: `21176131f4e16869c910a5c40a48ae69072317b0` — single-surface templates, inline results, retained Save arguments, explicit reload and browser journeys.
 
 The existing canonical mutation remains the only writer. Its source revision
 includes identity, complete body and metadata under the serialized owner. The
