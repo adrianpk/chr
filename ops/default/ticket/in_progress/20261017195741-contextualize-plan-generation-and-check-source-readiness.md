@@ -9,7 +9,7 @@ scope: domain
 tags: plans, generation, context
 source: chat
 reported_at: 2026-10-17T19:57:41Z
-commits: []
+commits: [c3958c22811a]
 branch: feat/slice-8-plan-generation
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
@@ -116,3 +116,5 @@ Behavior, shared-domain changes and implementation design are consolidated in
 Activated T8.1 after verified PR #404 integration. The [Slice 8 report](../../report/slices/web-ui-workflow-consolidation/slice-8-plan-generation.md) records implementation and validation evidence.
 
 T8.1 source snapshots and structured readiness passed focused filesystem/assessment regressions and full affected-package lint. T8.2 will enforce that decision and snapshot in generation/publication; no delivery claim or final candidate evidence is made yet.
+
+T8.2 now enforces readiness in the shared generation operation, freezes inputs across model stages and publishes only after source/target checks under the shared owner. Focused plan race tests and full affected core/app lint passed, including dump-only/quiz-only acceptance, preparation failures, stale inputs, competing publication and interrupted-journal recovery. T8.3 remains pending.

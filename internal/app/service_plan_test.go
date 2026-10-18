@@ -46,7 +46,7 @@ The implementation must preserve editorial review.
 	model := &fakeServiceQuizModel{
 		responses: serviceQuizStagedPlanResponses(clock()),
 	}
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	operations.quizModel = model
 	operations.now = clock
 
@@ -122,7 +122,7 @@ The implementation must preserve editorial review.
 			serviceQuizPlanResponse("response-plan", clock()),
 		},
 	}
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	operations.quizModel = model
 	operations.now = clock
 
@@ -165,14 +165,14 @@ case: "blog"
 The implementation must preserve editorial review.
 `)
 
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	scope := core.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
 	state, err := operations.specGenerationRuntimeState(scope)
 	if err != nil {
 		t.Fatalf("specGenerationRuntimeState returned error: %v", err)
 	}
 
-	request, err := operations.newPlanOutlineGenerationModelRequest(state)
+	request, err := operations.newPlanOutlineGenerationModelRequest(state, planTestSources(t, operations, scope))
 	if err != nil {
 		t.Fatalf("newPlanOutlineGenerationModelRequest returned error: %v", err)
 	}
@@ -220,14 +220,14 @@ case: "blog"
 The implementation must preserve editorial review.
 `)
 
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	scope := core.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
 	state, err := operations.specGenerationRuntimeState(scope)
 	if err != nil {
 		t.Fatalf("specGenerationRuntimeState returned error: %v", err)
 	}
 
-	request, err := operations.newPlanGenerationModelRequest(state)
+	request, err := operations.newPlanGenerationModelRequest(state, planTestSources(t, operations, scope))
 	if err != nil {
 		t.Fatalf("newPlanGenerationModelRequest returned error: %v", err)
 	}
@@ -267,7 +267,7 @@ case: "blog"
 The implementation must preserve editorial review.
 `)
 
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	scope := core.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
 	state, err := operations.specGenerationRuntimeState(scope)
 	if err != nil {
@@ -275,7 +275,7 @@ The implementation must preserve editorial review.
 	}
 
 	outline := validServiceGeneratedPlanOutline(scope, operations.now())
-	request, err := operations.newPlanSliceDetailGenerationModelRequest(state, outline, "Slice 1")
+	request, err := operations.newPlanSliceDetailGenerationModelRequest(state, planTestSources(t, operations, scope), outline, "Slice 1")
 	if err != nil {
 		t.Fatalf("newPlanSliceDetailGenerationModelRequest returned error: %v", err)
 	}
@@ -311,7 +311,7 @@ The implementation must preserve editorial review.
 	})
 }
 
-func TestServiceRegeneratePlanArchivesExistingPlanBeforeReplace(t *testing.T) {
+func TestServiceRegeneratePlanArchivesWithSuccessfulReplace(t *testing.T) {
 	t.Setenv("CHR_PLAN_GENERATION_BACKEND", "openai")
 
 	projectDir := t.TempDir()
@@ -331,7 +331,7 @@ Manual edits that must remain recoverable.
 	model := &fakeServiceQuizModel{
 		responses: serviceQuizStagedPlanResponses(clock()),
 	}
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	operations.quizModel = model
 	operations.now = clock
 
@@ -379,7 +379,7 @@ func TestServiceRegeneratePlanWithoutExistingPlanCreatesCanonicalPlan(t *testing
 	model := &fakeServiceQuizModel{
 		responses: serviceQuizStagedPlanResponses(clock()),
 	}
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	operations.quizModel = model
 	operations.now = clock
 
@@ -417,7 +417,7 @@ func TestServiceGeneratePlanDoesNotWritePlanWhenSliceDetailFails(t *testing.T) {
 			badDetail,
 		},
 	}
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	operations.quizModel = model
 	operations.now = clock
 
@@ -457,7 +457,7 @@ Implement planning foundation.
 			serviceQuizPlanTrackingResponse("response-tracking", now),
 		},
 	}
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	operations.quizModel = model
 	operations.now = fixedServiceClock(now)
 
@@ -532,7 +532,7 @@ case_slug: "blog"
 			},
 		},
 	}
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	operations.quizModel = model
 
 	_, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{
@@ -550,7 +550,7 @@ func TestServiceCreatePlanTrackingTicketsValidatesBatchBeforeWrites(t *testing.T
 	projectDir := newTestWorkspace(t)
 	writeServiceQuizFixture(t, projectDir)
 
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	payloads := []core.GeneratedPlanTrackingTicket{
 		validPlanTrackingTicketPayload(),
 		{
@@ -581,7 +581,7 @@ func TestServiceCreatePlanTrackingTicketsRejectsGeneratedKeyAndPath(t *testing.T
 	projectDir := newTestWorkspace(t)
 	writeServiceQuizFixture(t, projectDir)
 
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	payload := validPlanTrackingTicketPayload()
 	payload.Key = "LLM-99"
 	payload.Path = ".chr/default/tickets/blog/LLM-99-owned-by-model.md"
@@ -656,7 +656,7 @@ func TestServiceMaterializePlanTrackingRequiresExistingPlan(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	writeServiceQuizFixture(t, projectDir)
 	model := &fakeServiceQuizModel{}
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	operations.quizModel = model
 
 	_, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{
@@ -691,7 +691,7 @@ case_slug: "blog"
 # Blog Tracking
 `)
 	model := &fakeServiceQuizModel{}
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	operations.quizModel = model
 
 	result, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{
@@ -711,6 +711,7 @@ case_slug: "blog"
 }
 
 func TestServiceRegeneratePlanPreservesCanonicalPlanWhenArchiveFails(t *testing.T) {
+	t.Setenv("CHR_PLAN_GENERATION_BACKEND", "openai")
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
 	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "plans", "blog-plan.md"), `---
@@ -735,7 +736,7 @@ Manual edits that must remain recoverable.
 	model := &fakeServiceQuizModel{
 		responses: serviceQuizStagedPlanResponses(clock()),
 	}
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	operations.quizModel = model
 	operations.now = clock
 
@@ -751,8 +752,8 @@ Manual edits that must remain recoverable.
 		t.Fatalf("canonical plan was not preserved:\n%s", canonicalPlan)
 	}
 
-	if len(model.requests) != 0 {
-		t.Fatalf("model requests = %d, want no model invocation after archive failure", len(model.requests))
+	if len(model.requests) != 2 {
+		t.Fatalf("model requests = %d, want staged output before atomic publication checks", len(model.requests))
 	}
 }
 
@@ -790,7 +791,7 @@ case: "blog"
 	model := &fakeServiceQuizModel{
 		responses: serviceQuizStagedPlanResponses(clock()),
 	}
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	operations.quizModel = model
 	operations.now = clock
 
@@ -823,7 +824,7 @@ func TestServiceGeneratePlanUsesLongGenerationDeadline(t *testing.T) {
 	writeServiceQuizFixture(t, projectDir)
 
 	model := &deadlineCapturingPlanModel{}
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	operations.quizModel = model
 
 	_, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
@@ -857,7 +858,7 @@ Manual plan content.
 `)
 
 	model := &fakeServiceQuizModel{}
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	operations.quizModel = model
 
 	result, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
@@ -890,7 +891,7 @@ func TestTUIPlanGenerateReturnsExistingPlanForGeneratedScope(t *testing.T) {
 	model := &fakeServiceQuizModel{
 		responses: serviceQuizStagedPlanResponses(clock()),
 	}
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	operations.quizModel = model
 	operations.now = clock
 
@@ -936,7 +937,7 @@ Manual plan content.
 `)
 
 	model := &fakeServiceQuizModel{}
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	operations.quizModel = model
 
 	executor := newTUIPlanActionExecutor(operations)
@@ -964,7 +965,7 @@ func TestServiceGeneratePlanBlocksConcurrentSameScopeGeneration(t *testing.T) {
 	writeServiceQuizFixture(t, projectDir)
 
 	model := newBlockingPlanModel()
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 	operations.quizModel = model
 
 	done := make(chan error, 1)
@@ -1009,7 +1010,7 @@ case: "blog"
 Slice decomposition.
 `)
 
-	operations := newTestService(t, projectDir)
+	operations := newPlanTestService(t, projectDir)
 
 	result, err := operations.ListPlans()
 	if err != nil {
@@ -1120,4 +1121,38 @@ func (m *blockingPlanModel) requestCount() int {
 	defer m.mu.Unlock()
 
 	return m.count
+}
+
+func newPlanTestService(t *testing.T, project string) service {
+	t.Helper()
+	// Canonical source/target observations require complete native envelopes.
+	for _, kind := range []string{"spec", "plan"} {
+		paths, err := filepath.Glob(filepath.Join(project, "ops", "*", kind, "*", "artifact.md"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, path := range paths {
+			reference, err := filepath.Rel(project, path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := core.EnsureOpsArtifactBodyMetadata(project, filepath.ToSlash(reference)); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	operations := newTestService(t, project)
+	operations.conversationModel = sufficientPlanReadinessProvider()
+
+	return operations
+}
+
+func planTestSources(t *testing.T, operations service, scope core.QuizScope) core.PlanSourceObservation {
+	t.Helper()
+	sources, err := operations.observePlanContext(t.Context(), scope)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return sources
 }

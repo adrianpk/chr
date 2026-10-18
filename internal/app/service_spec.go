@@ -406,22 +406,6 @@ func sortedSpecContextNodeIDs(index core.WorkspaceIndex) []string {
 	})
 }
 
-func (s service) appendPlanGenerationContextSections(
-	sections []core.QuizModelContextSection,
-	scope core.QuizScope,
-) ([]core.QuizModelContextSection, error) {
-	return s.appendGenerationContextSections(sections, scope, sortedPlanContextNodeIDs)
-}
-
-func sortedPlanContextNodeIDs(index core.WorkspaceIndex) []string {
-	return sortedGenerationContextNodeIDs(index, []core.WorkspaceNodeKind{
-		core.WorkspaceNodeDump,
-		core.WorkspaceNodeQuiz,
-		core.WorkspaceNodeSpec,
-		core.WorkspaceNodePlan,
-	})
-}
-
 func sortedGenerationContextNodeIDs(index core.WorkspaceIndex, kinds []core.WorkspaceNodeKind) []string {
 	ids := []string{}
 

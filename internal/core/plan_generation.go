@@ -14,15 +14,24 @@ import (
 // PlanDirectory defines a package boundary constant.
 const PlanDirectory = "plans"
 
-// GeneratedPlan describes a package boundary value.
+// PlanSourceBinding retains source identities and revisions without copying
+// source bodies into the plan's metadata.
+type PlanSourceBinding struct{ Kind, Reference, Revision string }
+
+// GeneratedPlan holds staged model output and caller-owned publication guards.
 type GeneratedPlan struct {
-	Scope            QuizScope
-	Title            string
-	Body             string
-	SourcePaths      []string
-	SourceRequestID  string
-	SourceResponseID string
-	CreatedAt        time.Time
+	CreateOnly            bool                `json:"-"`
+	ExpectedRevision      string              `json:"-"`
+	SourceObservationHash string              `json:"-"`
+	SourceInputs          []PlanSourceBinding `json:"-"`
+	ArchiveAt             time.Time           `json:"-"`
+	Scope                 QuizScope
+	Title                 string
+	Body                  string
+	SourcePaths           []string
+	SourceRequestID       string
+	SourceResponseID      string
+	CreatedAt             time.Time
 }
 
 // GeneratedPlanPaths describes a package boundary value.
@@ -111,23 +120,8 @@ func writeGeneratedPlan(ctx context.Context, projectDir string, plan GeneratedPl
 		return GeneratedPlanPaths{}, err
 	}
 
-	scopeID, err := quizScopeID(plan.Scope)
-	if err != nil {
+	if err := (&fileAuthoringSessionRepository{projectDir: projectDir}).publishGeneratedPlan(ctx, paths, plan); err != nil {
 		return GeneratedPlanPaths{}, err
-	}
-
-	if err := EnsureNamedOpsArtifactMetadata(projectDir, "plan", scopeID+"-plan"); err != nil {
-		return GeneratedPlanPaths{}, err
-	}
-
-	err = os.MkdirAll(filepath.Dir(paths.Path), 0o755)
-	if err != nil {
-		return GeneratedPlanPaths{}, fmt.Errorf("create plan directory: %w", err)
-	}
-
-	err = os.WriteFile(paths.Path, []byte(RenderGeneratedPlan(plan)), 0o644)
-	if err != nil {
-		return GeneratedPlanPaths{}, fmt.Errorf("write generated plan: %w", err)
 	}
 
 	return paths, nil
