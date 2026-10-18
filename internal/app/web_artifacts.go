@@ -150,7 +150,7 @@ func (p webViewProvider) readArtifactDetail(ctx context.Context, request webui.A
 	}
 
 	if request.Family == webArtifactFamilyCases {
-		return p.caseDetailView(card)
+		return p.caseDetailView(ctx, card)
 	}
 
 	content := card.Preview
@@ -185,10 +185,8 @@ func (p webViewProvider) readArtifactDetail(ctx context.Context, request webui.A
 	return view, nil
 }
 
-func (p webViewProvider) caseDetailView(card webui.ArtifactCardView) (webui.ArtifactDetailView, error) {
-	metadata, err := core.NewCaseMetadataService(p.projectContext.ProjectDir).LoadPath(
-		core.CaseMetadataPath(p.projectContext.ProjectDir, card.ID),
-	)
+func (p webViewProvider) caseDetailView(ctx context.Context, card webui.ArtifactCardView) (webui.ArtifactDetailView, error) {
+	metadata, err := core.NewCaseMetadataService(p.projectContext.ProjectDir).ReadBounded(ctx, card.ID)
 	if err != nil {
 		return webui.ArtifactDetailView{}, err
 	}
@@ -199,6 +197,7 @@ func (p webViewProvider) caseDetailView(card webui.ArtifactCardView) (webui.Arti
 	}
 
 	view := webui.ArtifactDetailView{
+		Plan:            p.casePlanningView(ctx, card.ID, metadata.Name),
 		Family:          card.Family,
 		ID:              card.ID,
 		Title:           metadata.Name,

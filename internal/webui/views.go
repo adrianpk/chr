@@ -345,8 +345,14 @@ type ArtifactCardView struct {
 	Revision     string
 }
 
-// ArtifactDetailView is the read-only detail projection for one artifact.
+// CasePlanView binds contextual authoring to a named case and observed plan.
+type CasePlanView struct {
+	CaseSlug, CaseTitle, Action, Label, Revision, PlanURL, DumpURL, QuizURL, BlockedReason string
+}
+
+// ArtifactDetailView projects one concrete document or named case.
 type ArtifactDetailView struct {
+	Plan                           *CasePlanView
 	Spec                           *SpecEditorView
 	Quiz                           *QuizAnswerView
 	SaveRequestID, AppendRequestID string

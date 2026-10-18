@@ -1439,3 +1439,8 @@ code {
 .spec-draft { display: inline-flex; align-items: center; gap: 8px; font-size: .9rem; }
 .spec-draft input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
 @media (max-width: 347px) { .app-main:has(.document-grid) { padding-inline: 5px; } }
+
+.case-plan-panel { display: grid; gap: 12px; border-top: 1px solid var(--line); padding-top: 16px; min-width: 0; }
+.case-plan-panel h3, .case-plan-panel p { margin: 0; overflow-wrap: anywhere; }
+.case-plan-panel .detail-actions { flex-wrap: wrap; }
+.case-plan-panel .action-form { margin: 0; }

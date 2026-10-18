@@ -276,6 +276,21 @@ by the TUI and CLI: Cases, Dumps, Quizzes, Specs, Plans, Board, and Dash. It
 uses project-local files as the source of truth and reloads from shared state
 after CLI, TUI, or Web UI changes.
 
+Open a named case to generate its plan. The planning panel shows Generate Plan
+when no plan exists and Regenerate Plan for the displayed existing revision.
+Save case edits first: planning uses saved context. Follow Add discovery context
+or Answer this case's quiz when more information is needed. The Plans catalog
+has no separate slug-based generation forms.
+
+Planning requires useful discovery and enough information about the intended
+outcome, scope, constraints and verification. A complete dump alone, a short
+focused dump or sufficient quiz answers can qualify. A manual spec alone does
+not replace this discovery requirement. Missing information appears in the case
+panel; generation does not fill material gaps with assumptions. Spec generation
+and approval remain separate operations, and generating a plan does not start
+work. Failed preparation or changed sources leave the current plan in place;
+reload the case before retrying a stale operation.
+
 This first Web UI iteration is intended to be usable, not final. Expect visual
 and ergonomic refinement to continue while the local server, shared state, and
 action boundaries remain explicit.
@@ -622,9 +637,12 @@ the input for later tracking and ticket creation.
 | `r` | Refresh plans from disk. |
 
 `g` does not overwrite an existing plan. Use `G` when the existing plan should
-be replaced. Regeneration archives the existing generated plan before writing
-the replacement, so archived generated plans remain available on disk but are
-excluded from normal document loading.
+be replaced. Both actions use the same discovery readiness check as the Web UI.
+Regeneration prepares and validates the replacement first, checks that sources
+and the existing plan still match, then publishes the archive and replacement
+together. Archived generated plans remain on disk and are excluded from normal
+document loading. Provider errors, cancellation and stale inputs preserve the
+current plan.
 
 `alt+t` is available only when the selected plan exists. It creates a tracking
 Markdown file and one ticket per generated slice. If tracking already exists,

@@ -158,9 +158,14 @@ func (p webViewProvider) writeSpecGenerate(ctx context.Context, operations servi
 }
 
 func (p webViewProvider) writePlanGenerate(ctx context.Context, operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
-	result, err := operations.GeneratePlan(ctx, PlanGenerateRequest{Scope: webActionScope(request)})
+	scope, err := webCasePlanScope(ctx, operations, request)
 	if err != nil {
 		return webValidationWrite(err), nil
+	}
+
+	result, err := operations.GeneratePlan(ctx, PlanGenerateRequest{Scope: scope, ExpectedRevision: request.Revision})
+	if err != nil {
+		return webPlanWriteFailure(err, request.ID), nil
 	}
 
 	return webui.WriteActionResponse{
@@ -173,9 +178,23 @@ func (p webViewProvider) writePlanGenerate(ctx context.Context, operations servi
 }
 
 func (p webViewProvider) writePlanRegenerate(ctx context.Context, operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
-	result, err := operations.RegeneratePlan(ctx, PlanRegenerateRequest{Scope: webActionScope(request)})
+	scope, err := webCasePlanScope(ctx, operations, request)
 	if err != nil {
 		return webValidationWrite(err), nil
+	}
+
+	_, exists, err := operations.existingGeneratedPlan(operations.quizScope(scope))
+	if err != nil {
+		return webPlanWriteFailure(err, request.ID), nil
+	}
+
+	if !exists {
+		return webBlockedWrite("No current plan exists. Reload this case and use Generate Plan."), nil
+	}
+
+	result, err := operations.RegeneratePlan(ctx, PlanRegenerateRequest{Scope: scope, ExpectedRevision: request.Revision})
+	if err != nil {
+		return webPlanWriteFailure(err, request.ID), nil
 	}
 
 	return webui.WriteActionResponse{

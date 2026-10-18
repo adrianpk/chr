@@ -1,0 +1,39 @@
+{{define "case_plan_panel.html"}}
+{{with .Detail.Plan}}
+<section id="case-plan-panel" class="case-plan-panel" aria-labelledby="case-plan-title">
+  <h3 id="case-plan-title">Plan for {{.CaseTitle}}</h3>
+  <p>Uses saved case context and sufficient discovery. Save case changes before planning.</p>
+  <div class="detail-actions">
+    <a class="button" href="{{.DumpURL}}">Add discovery context</a>
+    <a class="button" href="{{.QuizURL}}">Answer this case's quiz</a>
+    {{if .PlanURL}}<a class="button" href="{{.PlanURL}}">Read current plan</a>{{end}}
+  </div>
+  <p>Spec generation and approval are separate. Generating a plan does not start work.</p>
+  {{if .BlockedReason}}<p class="diagnostic" role="status">{{.BlockedReason}}</p>{{end}}
+  <form class="action-form" data-case-plan method="post" action="/actions" hx-post="/actions" hx-target="#case-plan-result" hx-swap="innerHTML" hx-disabled-elt="find button[type='submit']">
+    <input type="hidden" name="action" value="{{.Action}}">
+    <input type="hidden" name="family" value="cases">
+    <input type="hidden" name="id" value="{{.CaseSlug}}">
+    <input type="hidden" name="case_slug" value="{{.CaseSlug}}">
+    <input type="hidden" name="revision" value="{{.Revision}}">
+    <input type="hidden" name="surface" value="case-plan">
+    <input type="hidden" name="modal" value="{{$.CaseModal}}">
+    <input type="hidden" name="confirm" value="true">
+    <button class="button button--primary" type="submit"{{if .BlockedReason}} disabled{{end}}>{{.Label}}</button>
+    <span class="htmx-indicator" role="status">Checking context and preparing the plan…</span>
+  </form>
+  <div id="case-plan-result" role="status" aria-live="polite">{{template "case_plan_result.html" $}}</div>
+</section>
+{{end}}
+{{end}}
+
+{{define "case_plan_result.html"}}
+{{if .Write.Status}}
+<div class="write-result write-result--{{.Write.Status}}" data-plan-write-status="{{.Write.Status}}">
+  <p>{{.Write.Summary}}</p>
+  {{if .Write.BlockedReason}}<p>{{.Write.BlockedReason}}</p>{{end}}
+  {{if .Write.Validation}}<ul>{{range .Write.Validation}}<li>{{.}}</li>{{end}}</ul>{{end}}
+  {{if .Write.ReloadURL}}<a class="button" href="{{.Write.ReloadURL}}" onclick="return confirm('Reload the saved case and plan context?')">Reload case</a>{{end}}
+</div>
+{{end}}
+{{end}}

@@ -9,7 +9,7 @@ scope: domain
 tags: plans, generation, context
 source: chat
 reported_at: 2026-10-17T19:57:41Z
-commits: [c3958c22811a]
+commits: [c3958c22811ae517a606e249511b971f5353274d, b840a5cdccf2a4b5c64bf26656b6b5f995946193]
 branch: feat/slice-8-plan-generation
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
@@ -118,3 +118,5 @@ Activated T8.1 after verified PR #404 integration. The [Slice 8 report](../../re
 T8.1 source snapshots and structured readiness passed focused filesystem/assessment regressions and full affected-package lint. T8.2 will enforce that decision and snapshot in generation/publication; no delivery claim or final candidate evidence is made yet.
 
 T8.2 now enforces readiness in the shared generation operation, freezes inputs across model stages and publishes only after source/target checks under the shared owner. Focused plan race tests and full affected core/app lint passed, including dump-only/quiz-only acceptance, preparation failures, stale inputs, competing publication and interrupted-journal recovery. T8.3 remains pending.
+
+T8.3 contextual Generate/Regenerate and discovery guidance are implemented. HTTP/native checks and owned desktop/narrow browser journeys passed, retaining pending case input. Acceptance 1–5 is covered by the Slice 8 report. PR-reference and clean-HEAD controller validation follow after the task commit.

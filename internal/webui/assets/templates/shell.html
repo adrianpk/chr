@@ -372,6 +372,7 @@
     <button class="button" type="submit">Save</button>
   </div>
 </form>
+{{template "case_plan_panel.html" .}}
 {{end}}
 
 {{define "dump_create_forms.html"}}
@@ -500,26 +501,6 @@
 {{end}}
 
 {{define "plan_action_forms.html"}}
-<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Generate a plan for this scope?')">
-  <input type="hidden" name="action" value="plan.generate">
-  <input type="hidden" name="family" value="plans">
-  <input type="hidden" name="confirm" value="true">
-  <label>
-    <span>Case slug</span>
-    <input name="case_slug">
-  </label>
-  <button class="button button--primary" type="submit">Generate Plan</button>
-</form>
-<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Regenerate and replace the plan for this scope?')">
-  <input type="hidden" name="action" value="plan.regenerate">
-  <input type="hidden" name="family" value="plans">
-  <input type="hidden" name="confirm" value="true">
-  <label>
-    <span>Case slug</span>
-    <input name="case_slug">
-  </label>
-  <button class="button" type="submit">Regenerate Plan</button>
-</form>
 <form class="action-form" method="post" action="/actions" onsubmit="return confirm('Create tracking artifacts and tickets from this plan?')">
   <input type="hidden" name="action" value="plan.tracking.create">
   <input type="hidden" name="family" value="plans">

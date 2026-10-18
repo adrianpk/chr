@@ -8,7 +8,7 @@ import (
 )
 
 func (h handler) artifactActionResult(w http.ResponseWriter, r *http.Request, request WriteActionRequest, result WriteActionResponse) bool {
-	return h.quizActionResult(w, r, request, result) || h.specActionResult(w, r, request, result)
+	return h.quizActionResult(w, r, request, result) || h.specActionResult(w, r, request, result) || h.planActionResult(w, r, request, result)
 }
 
 func (h handler) specActionResult(w http.ResponseWriter, r *http.Request, request WriteActionRequest, result WriteActionResponse) bool {

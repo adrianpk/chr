@@ -1,6 +1,6 @@
 # Slice 8: Contextual Safe Plan Generation
 
-Status: drafting
+Status: reviewing
 Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
@@ -9,41 +9,90 @@ PR: pending
 
 ## Purpose
 
-Deliver readiness-bound contextual plan generation under the approved
+Deliver contextual plan authoring under the approved
 [plan](../../../plan/web-ui-workflow-consolidation.md) and
 [tracker](../../../tracker/web-ui-workflow-consolidation.md). Slice 7 is verified
 integrated through PR #404 at `e000dfd64924cb9c798313cab12ed3b1c16ebf5f`.
 
 ## Delivered Behavior
 
-The shared generation operation now requires sufficient discovery, keeps every model stage on captured inputs and compares sources and the target plan before publication. Contextual Web controls remain pending.
+A named case shows Generate Plan when its plan is absent and Regenerate Plan
+for its displayed existing revision. The panel links discovery context, the
+selected case's quiz and its current plan. Plans has no detached generation
+forms. Errors retain the case form and its pending input; success replaces only
+the planning panel. A stale operation keeps its original binding and requires
+explicit reload. Native forms return to the same case.
+
+The shared operation distinguishes absent discovery, insufficient information
+and sufficient context. A complete dump alone, a short dump for a narrow case
+or sufficient quiz answers can qualify. A manual spec alone does not waive
+discovery. Readable missing-information reasons explain the next step. Spec
+generation/approval and starting work remain separate operations.
 
 ## Implementation Notes
 
-T8.1: `c3958c22811a` — root/scope-bound source observations and absent/insufficient/sufficient assessment.
+- T8.1: `c3958c22811ae517a606e249511b971f5353274d` — scoped immutable observations and structured readiness.
+- T8.2: `b840a5cdccf2a4b5c64bf26656b6b5f995946193` — readiness enforcement, frozen model inputs and guarded recoverable publication.
+- T8.3: contextual Web controls, native/HTTP/browser evidence and user-facing documentation; commit reference follows PR creation.
 
-T8.2 stages model output in memory, validates it, rechecks the observation under the shared authoring owner, and publishes the archive/body/metadata as one recoverable journal operation. Competing creates and stale source/target bindings fail without replacing current work. Original archive metadata and source bindings are retained. Existing project-scoped baseline/API behavior remains available; it cannot waive the discovery assessment. T8.3 contextual controls are next.
+Model output is staged in memory and validated. The shared authoring owner
+rechecks source identities/hashes and the target body/envelope before publishing
+an archive and replacement together. Competing creates and stale operations
+cannot overwrite current work. Archives retain the prior body, native metadata
+and source bindings. Existing project-scoped API baseline behavior remains
+available and cannot waive the shared discovery assessment.
 
 ## Contracts Added or Changed
 
-`ObservePlanSources` retains selected project/case context, canonical general and matching scoped dumps, actual retained quiz answers and applicable specs. Two complete reads reject torn observations. Hashes bind selected source identities and retained revisions, including absent quiz state and newly added matching inputs. Reads never recover or allocate state. Assembled context is limited to 96 KiB; each owner retains its document/inventory bounds.
+`ObservePlanSources` includes selected project/case context, canonical general
+and matching scoped dumps, actual retained quiz answers and applicable specs.
+Two complete reads reject torn observations; root/scope-bound hashes include
+source revisions and the selected inventory, including absent quiz state. Reads
+allocate nothing and never recover writes. Context is limited to 96 KiB in
+addition to the existing document/inventory bounds.
 
-Readiness uses the existing configured structured provider and 60-second bound. Absent meaningful discovery fails before model evaluation. Strict output validation binds the assessment hash and rejects missing, contradictory, invalid, failed or cancelled results. It imposes neither a minimum length nor a requirement for both discovery types.
+The existing configured structured provider assesses readiness within 60 seconds.
+Absent meaningful discovery fails first. Strict output validation binds the
+observation hash and rejects invalid, contradictory, failed or cancelled results.
+There is no fixed length threshold or requirement for both discovery types.
 
-Model output cannot supply publication guards. Exact source references/revisions and the observation hash are retained in plan metadata. Replacements advance native metadata revision and preserve unknown envelope fields. A pending journal blocks source/target observation until explicit mutation recovery completes. Readiness, provider/model errors, cancellation and stale inputs publish neither an archive nor a replacement.
+Caller-owned target/source guards are excluded from model serialization.
+Plan metadata retains exact source references/revisions and the observation hash,
+advances its native revision and preserves unknown envelope fields. The existing
+recovery journal publishes all images. Pending publication blocks source/target
+observation until explicit mutation recovery. Readiness/model failures,
+cancellation and stale inputs publish neither an archive nor a replacement.
 
 ## Files of Interest
 
-- `internal/core/plan_sources*.go`: bounded source observation and discovery presence.
-- `internal/app/service_plan_readiness*.go`: shared structured assessment and readable failure reasons.
-- `internal/app/service_plan.go`, `service_plan_context.go` and `internal/core/plan_publication*.go`: immutable generation inputs, target guards and recoverable publication.
+- `internal/core/plan_sources*.go` and `plan_publication*.go`: scoped observations, target guards and recovery.
+- `internal/app/service_plan*.go`: structured readiness, immutable stages and the shared publication boundary.
+- `internal/app/web_plan*.go`, `internal/webui/plan.go` and `assets/templates/plan.html`: named case actions, retained input and native/HTMX results.
+- `docs/how-to/user-guide/index.md` and `CHANGELOG.md`: current planning guidance and user-visible behavior.
 
 ## Validation
 
-- `go test ./internal/core ./internal/app -run '^(TestPlanSources|TestPlanDiscoveryPresence|TestPlanReadiness|TestPlanReadinessProviderBinding)$' -count=1` — passed. Real filesystem observations verify mutation-free reads, scope filtering and source invalidation; deterministic assessment substitutes verify absent, insufficient, sufficient and invalid/provider-failure states.
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/app` — zero issues.
-- `go test -race ./internal/core ./internal/app -run 'Plan' -count=1` — passed, including shared discovery scenarios, model/readiness/cancellation/stale failures, competing creates, journal interruption/recovery and affected TUI generation/materialization behavior. Assessment/model boundaries are deterministic; persistence and concurrency are real.
+- `go test ./internal/core ./internal/app -run '^(TestPlanSources|TestPlanDiscoveryPresence|TestPlanReadiness|TestPlanReadinessProviderBinding)$' -count=1` — passed source observation and assessment contracts.
+- `go test -race ./internal/core ./internal/app -run 'Plan' -count=1` — passed discovery variants, readiness/model/cancellation/stale failures, competing creates, interrupted journal recovery, affected TUI behavior and contextual HTTP contracts.
+- `go test ./internal/app ./internal/webui -run '^(TestWebPlanContext|TestWebPlanBindings|TestWebPlanNative|TestHandlerRendersGenerationAndWorkActionForms)$' -count=1` — passed named/revision-bound Web actions, native results and removal of global generation forms.
+- `CHR_WEB_BROWSER=/usr/sbin/chromium CHR_WEB_PLAN_SCREENSHOTS="$PWD/ops/default/report/slices/web-ui-workflow-consolidation/files/slice-8" go test ./internal/app -run '^(TestWebPlanBrowser|TestWebSpecBrowser)$' -count=1 -v` — passed owned planning journey/captures and affected shared spec-editor regression.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/app ./internal/webui` — zero issues.
 - `git diff --check` — passed.
+
+Model and semantic assessment boundaries are deterministic substitutes;
+filesystem, HTTP, shared mutation/recovery and Chromium boundaries are real.
+Owned fixtures stop after their checks. Final clean-HEAD `make verify`, focused
+plan race checks, affected browser checks and `git diff --check` are recorded
+through the controller after PR-reference commits. Its evidence binds the exact
+HEAD and ordered command list. Exhaustive/live certification remains separate.
+
+## Captured Views
+
+- [Generate](files/slice-8/generate-desktop.png), [missing context](files/slice-8/missing-context.png) and [Regenerate](files/slice-8/regenerate-desktop.png): 1280 × 1000 CSS px.
+- [Narrow planning](files/slice-8/regenerate-narrow.png): 390 × 844 CSS px, wrapped guidance/actions and retained case input without page overflow.
+
+Captures use 100% browser zoom, DPR 1 and page scale 1. Adjacent JSON records
+retain viewport, page width, panel geometry and current action.
 
 ## Risks and Follow-ups
 

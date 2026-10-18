@@ -34,7 +34,8 @@ type PlanListResult struct {
 
 // PlanGenerateRequest selects the quiz scope used to generate a plan.
 type PlanGenerateRequest struct {
-	Scope core.QuizScope
+	ExpectedRevision string
+	Scope            core.QuizScope
 }
 
 // PlanRegenerateRequest selects the quiz scope used to replace a plan.
@@ -108,7 +109,7 @@ func (s service) GeneratePlan(ctx context.Context, request PlanGenerateRequest) 
 	err = s.withGenerationRuntime(ctx, "plan", scope, func(ctx context.Context) error {
 		var generateErr error
 
-		result, generateErr = s.generatePlan(ctx, scope)
+		result, generateErr = s.prepareAndPublishPlan(ctx, scope, request.ExpectedRevision, false)
 
 		return generateErr
 	})
@@ -132,10 +133,6 @@ func (s service) existingGeneratedPlan(scope core.QuizScope) (PlanView, bool, er
 	}
 
 	return s.planViewFromPath(scope, paths.RelativePath, paths.Path), true, nil
-}
-
-func (s service) generatePlan(ctx context.Context, scope core.QuizScope) (PlanOperationResult, error) {
-	return s.prepareAndPublishPlan(ctx, scope, "", false)
 }
 
 func (s service) prepareAndPublishPlan(ctx context.Context, scope core.QuizScope, expected string, replace bool) (PlanOperationResult, error) {
