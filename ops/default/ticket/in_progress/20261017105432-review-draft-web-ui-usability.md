@@ -77,7 +77,7 @@ Track the shared behavior, existing-data decisions and UI change in
 The current editor duplicates the stored content in a yellow read-only area and
 an editable textarea, then exposes a separate append form below. The maintainer
 cannot infer their purpose or relationship. Capture the interaction problem in
-[Use one editor and Save for dump content](20261017191106-clarify-dump-reading-editing-and-appending.md).
+[Use one editor and Save for dump content](../solved/20261017191106-clarify-dump-reading-editing-and-appending.md).
 The maintainer explicitly requires one editor and Save, removing both the
 duplicate read-only panel and the separate Append textarea and button. Adding
 text at the end is ordinary editing of the same Markdown document.

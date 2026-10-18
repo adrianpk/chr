@@ -17,7 +17,7 @@ Model: [Web UI and Workflow Model](../spec/stable/web-ui-workflow-consolidation-
 Implementation authorization: granted on 2026-10-18 for this exact set through
 Looper, including controller-owned Rebase + Fast-forward integration into dev.
 
-Active slice: Slice 3, Single dump editor; T3.1.
+Active slice: Slice 4, Dumps grid width; T4.1.
 The controller checkpoint and tickets own subsequent progress.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.
@@ -96,7 +96,7 @@ Validation: Cover first/repeated/concurrent capture, retry, namespace changes, i
 
 ### Slice 3: Single dump editor
 
-Ticket: [TKT-20261017191106](../ticket/in_progress/20261017191106-clarify-dump-reading-editing-and-appending.md).
+Ticket: [TKT-20261017191106](../ticket/solved/20261017191106-clarify-dump-reading-editing-and-appending.md).
 
 Prerequisite: Slice 2 integrated; execution authority for this set.
 

@@ -1,7 +1,7 @@
 ---
 id: TKT-20261017191106
 title: "Use one editor and Save for dump content"
-status: in_progress
+status: solved
 kind: task
 severity: medium
 priority: normal
@@ -12,6 +12,9 @@ reported_at: 2026-10-17T19:11:06Z
 commits: [600f30bf1be349403ab38b6d98fa6dad6e5b5c93, 21176131f4e16869c910a5c40a48ae69072317b0]
 branch: fix/slice-3-dump-editor
 pr: "#400"
+resolution: fixed
+reviewed_at: 2026-10-18T16:35:59Z
+closed_at: 2026-10-18T16:35:59Z
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
@@ -20,7 +23,7 @@ started_at: 2026-10-18T08:34:50Z
 
 ## Context
 
-Finding from [the Web UI review](20261017105432-review-draft-web-ui-usability.md),
+Finding from [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md),
 following a maintainer-provided screenshot of the dump editor. The maintainer
 cannot understand why the same content appears in a yellow read-only area
 and an editable area, or why another Append area is needed below the editor.
@@ -118,8 +121,9 @@ The [Slice 3 report](../../report/slices/web-ui-workflow-consolidation/slice-3-d
 records the initial failures, corrections and desktop/narrow journey evidence.
 All tasks are implemented in canonical [PR #400](https://forge.adrianpk.com/adrianpk/chr/pulls/400).
 Final clean-HEAD `make verify`, focused race/browser checks and whitespace evidence
-are recorded through Looper, with the exact ordered commands in the PR. This
-ticket remains in progress until controller integration is verified.
+are recorded through Looper, with the exact ordered commands in the PR. The
+controller merged PR #400 into dev at `63b31c3ec83b706d501a79918a448a5fc3d82ce3`
+on 2026-10-18 after all four ordered exact-HEAD checks passed. The ticket is solved.
 
 ## Consolidated Design
 

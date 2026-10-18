@@ -21,7 +21,7 @@ slices through Looper, including canonical slice PRs and controller-owned
 Rebase + Fast-forward merges into dev. The existing Telegram run is separate.
 Use one development worker and one canonical open slice PR for this set.
 
-Active slice: Slice 3, Single dump editor; T3.1.
+Active slice: Slice 4, Dumps grid width; T4.1.
 The controller checkpoint and tickets own subsequent progress.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.
@@ -143,7 +143,7 @@ Validation: Cover first/repeated/concurrent capture, retry, namespace changes, i
 
 ### Slice 3: Single dump editor
 
-Source: [TKT-20261017191106](../ticket/in_progress/20261017191106-clarify-dump-reading-editing-and-appending.md).
+Source: [TKT-20261017191106](../ticket/solved/20261017191106-clarify-dump-reading-editing-and-appending.md).
 
 Dependency: Slice 2 integrated into dev; use all earlier shared owners.
 

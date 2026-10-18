@@ -1,6 +1,6 @@
 # Slice 3: Single Dump Editor
 
-Status: reviewing
+Status: delivered
 Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
@@ -12,7 +12,8 @@ PR: `#400`
 Deliver the single dump editor and guarded Save defined by the
 [plan](../../../plan/web-ui-workflow-consolidation.md) and
 [task map](../../../tracker/web-ui-workflow-consolidation.md).
-T3.1 and T3.2 are implemented following Slice 2's verified integration.
+T3.1 and T3.2 were integrated through [PR #400](https://forge.adrianpk.com/adrianpk/chr/pulls/400)
+at `63b31c3ec83b706d501a79918a448a5fc3d82ce3` on 2026-10-18.
 
 ## Delivered Behavior
 
@@ -87,7 +88,8 @@ explicit reload, focus restoration and full-page persistence. CSS viewports are
 1440 × 1000 and 390 × 844, DPR 1, at 100% zoom. Fixtures own and stop their
 Chromium/server processes and use isolated stores with deterministic curation.
 
-Final clean-HEAD validation is recorded through Looper in canonical order:
+Final clean-HEAD validation passed through Looper for
+`63b31c3ec83b706d501a79918a448a5fc3d82ce3` in canonical order:
 `make verify`, focused race regressions, the owned editor/capture/Board browser
 checks and `git diff --check`. The canonical PR lists the exact successful final
 commands; Looper retains the tested HEAD and ordered evidence. Development

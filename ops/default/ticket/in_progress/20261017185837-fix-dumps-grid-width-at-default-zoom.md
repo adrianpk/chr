@@ -10,6 +10,7 @@ tags: web-ui, dumps, responsive-layout
 source: chat
 reported_at: 2026-10-17T18:58:37Z
 commits: []
+branch: fix/slice-4-dump-grid
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
