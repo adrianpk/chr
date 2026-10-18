@@ -91,3 +91,10 @@ func WriteQuizToDraftPromotionContext(ctx context.Context, plan QuizToDraftPromo
 
 	return WithAuthoringMutation(ctx, root, func(context.Context) error { return writeQuizToDraftPromotion(plan) })
 }
+
+// WriteQuizDraftSpec publishes quiz-generated specs under the shared owner.
+func WriteQuizDraftSpec(ctx context.Context, projectDir string, spec QuizDraftSpec) (result QuizDraftSpecPaths, err error) {
+	err = WithAuthoringMutation(ctx, projectDir, func(ctx context.Context) error { result, err = writeQuizDraftSpec(ctx, projectDir, spec); return err })
+
+	return result, err
+}

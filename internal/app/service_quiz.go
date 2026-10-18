@@ -216,10 +216,17 @@ func (s service) newQuizModelRequestWithEntries(state core.QuizRuntimeState, ent
 	}, nil
 }
 
-func (s service) writeQuizDraftSpec(
-	state core.QuizRuntimeState,
-	paths core.QuizArtifactPaths,
-) error {
+func (s service) writeQuizDraftSpec(state core.QuizRuntimeState, paths core.QuizArtifactPaths) error {
+	target, err := core.QuizDraftSpecLayout(s.projectContext.ProjectDir, core.QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug})
+	if err != nil {
+		return err
+	}
+
+	revision, err := core.SpecTargetRevision(s.ctx, s.projectContext.ProjectDir, target.RelativePath)
+	if err != nil {
+		return err
+	}
+
 	request, err := s.newQuizDraftSpecModelRequest(state, paths)
 	if err != nil {
 		return err
@@ -231,6 +238,7 @@ func (s service) writeQuizDraftSpec(
 	}
 
 	spec := response.DraftSpec
+	spec.ExpectedRevision = revision
 	spec.Scope = core.QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug}
 	spec.SourceQuizPath = paths.CuratedRelativePath
 	spec.SourceRawPath = paths.RawRelativePath

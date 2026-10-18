@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
 	"time"
 )
@@ -15,6 +13,7 @@ const QuizSpecDirectory = "specs/drafts"
 
 // QuizDraftSpec describes a package boundary value.
 type QuizDraftSpec struct {
+	ExpectedRevision string
 	Scope            QuizScope
 	Title            string
 	Body             string
@@ -58,8 +57,7 @@ func QuizDraftSpecLayout(projectDir string, scope QuizScope) (QuizDraftSpecPaths
 	}, nil
 }
 
-// WriteQuizDraftSpec executes the corresponding package operation.
-func WriteQuizDraftSpec(ctx context.Context, projectDir string, spec QuizDraftSpec) (QuizDraftSpecPaths, error) {
+func writeQuizDraftSpec(ctx context.Context, projectDir string, spec QuizDraftSpec) (QuizDraftSpecPaths, error) {
 	err := ctx.Err()
 	if err != nil {
 		return QuizDraftSpecPaths{}, err
@@ -75,25 +73,9 @@ func WriteQuizDraftSpec(ctx context.Context, projectDir string, spec QuizDraftSp
 		return QuizDraftSpecPaths{}, err
 	}
 
-	scopeID, err := quizScopeID(spec.Scope)
-	if err != nil {
+	publication := GeneratedSpec{ExpectedRevision: spec.ExpectedRevision, Scope: spec.Scope, Title: spec.Title, CreatedAt: spec.CreatedAt}
+	if err := publishSpecContent(ctx, projectDir, GeneratedSpecPaths(paths), publication, RenderQuizDraftSpec(spec)); err != nil {
 		return QuizDraftSpecPaths{}, err
-	}
-
-	if err := EnsureNamedOpsArtifactMetadata(projectDir, "spec", scopeID+"-quiz-spec"); err != nil {
-		return QuizDraftSpecPaths{}, err
-	}
-
-	err = os.MkdirAll(filepath.Dir(paths.Path), 0o755)
-	if err != nil {
-		return QuizDraftSpecPaths{}, fmt.Errorf("create quiz draft spec directory: %w", err)
-	}
-
-	content := RenderQuizDraftSpec(spec)
-
-	err = os.WriteFile(paths.Path, []byte(content), 0o644)
-	if err != nil {
-		return QuizDraftSpecPaths{}, fmt.Errorf("write quiz draft spec: %w", err)
 	}
 
 	return paths, nil

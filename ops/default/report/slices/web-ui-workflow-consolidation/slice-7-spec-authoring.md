@@ -20,7 +20,7 @@ Shared manual create/save operations now allocate independent spec artifacts, ho
 
 ## Implementation Notes
 
-T7.1 uses the existing process-safe authoring owner, journal and bounded operation receipts. Creation does not call a model. T7.2 concrete listing/context and T7.3 Web authoring remain pending.
+T7.1 uses the existing process-safe authoring owner, journal and bounded operation receipts. Creation does not call a model. T7.2 adds concrete listing across namespaces independently of the existing latest-in-scope inventory. Generation selects the canonical general dump and matching scoped discovery; unrelated cases and raw/archive material stay excluded. Both spec generation paths compare their observed target revision and publish through the same shared owner/journal. T7.3 Web authoring is pending.
 
 ## Contracts Added or Changed
 
@@ -36,8 +36,12 @@ T7.1 uses the existing process-safe authoring owner, journal and bounded operati
 
 `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/app` passed with zero issues.
 
-`git diff --check` passed. Final controller validation follows the remaining tasks and PR-reference commits.
+`git diff --check` passed. Final controller validation follows the remaining task and PR-reference commits.
 
 ## Risks and Follow-ups
 
 None recorded.
+
+T7.2 validation: `go test -race ./internal/core ./internal/app -run '(Spec(Catalog|GenerationRevision|Mutation|Lifecycle|Metadata)|SpecDocumentCatalog|SpecGenerationScopes|ServiceGenerateSpec|QuizDraftSpec|Service.*DraftSpec)' -count=1` passed. This covers namespace enumeration, malformed/symlink/size rejection, stale generated targets, separate document/latest queries and matching optional discovery. Full affected lint passed with zero issues.
+
+The initial context fixture inherited a default dump provider; its result was discarded. The fixture now sets the existing deterministic fallback provider explicitly. The corrected project/case context selection passed in 0.03 seconds without generation-provider access beyond the explicit test model.

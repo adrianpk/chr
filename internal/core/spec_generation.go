@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"os"
-	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -18,6 +16,7 @@ var generatedSpecChrysoPathPattern = regexp.MustCompile(`\.chr(?:/[^\s\])"'` + "
 
 // GeneratedSpec describes a package boundary value.
 type GeneratedSpec struct {
+	ExpectedRevision string
 	Scope            QuizScope
 	Title            string
 	Body             string
@@ -77,23 +76,8 @@ func writeGeneratedSpec(ctx context.Context, projectDir string, spec GeneratedSp
 		return GeneratedSpecPaths{}, err
 	}
 
-	scopeID, err := quizScopeID(spec.Scope)
-	if err != nil {
+	if err := publishGeneratedSpec(ctx, projectDir, paths, spec); err != nil {
 		return GeneratedSpecPaths{}, err
-	}
-
-	if err := EnsureNamedOpsArtifactMetadata(projectDir, "spec", scopeID+"-spec"); err != nil {
-		return GeneratedSpecPaths{}, err
-	}
-
-	err = os.MkdirAll(filepath.Dir(paths.Path), 0o755)
-	if err != nil {
-		return GeneratedSpecPaths{}, fmt.Errorf("create spec directory: %w", err)
-	}
-
-	err = os.WriteFile(paths.Path, []byte(RenderGeneratedSpec(spec)), 0o644)
-	if err != nil {
-		return GeneratedSpecPaths{}, fmt.Errorf("write generated spec: %w", err)
 	}
 
 	return paths, nil
