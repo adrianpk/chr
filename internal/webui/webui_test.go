@@ -141,7 +141,8 @@ func TestHandlerTicketModal(t *testing.T) {
 	}
 }
 
-func TestHandlerTicketCommentRefreshesModal(t *testing.T) {
+// Comment responses replace only discussion so dirty metadata remains in the DOM.
+func TestHandlerTicketCommentRefreshesDiscussion(t *testing.T) {
 	handler, err := NewHandler(HandlerOptions{
 		Data:     testShellData(),
 		Provider: testDataProvider{},
@@ -171,7 +172,11 @@ func TestHandlerTicketCommentRefreshesModal(t *testing.T) {
 		t.Fatalf("HX-Redirect = %q, want empty", redirect)
 	}
 
-	for _, want := range []string{"ticket-modal", "Ready work", "Existing comment.", `hx-post="/board/ticket/comment"`} {
+	if strings.Contains(recorder.Body.String(), "ticket-edit-form") || strings.Contains(recorder.Body.String(), "ticket-modal") {
+		t.Fatal("comment response would replace the editor")
+	}
+
+	for _, want := range []string{"data-ticket-commented", "Comments", "Existing comment."} {
 		if !strings.Contains(recorder.Body.String(), want) {
 			t.Fatalf("body does not contain %q:\n%s", want, recorder.Body.String())
 		}

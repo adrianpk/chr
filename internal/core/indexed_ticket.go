@@ -12,6 +12,7 @@ type IndexedTicket struct {
 	RelativePath      string
 	Key               string
 	Title             string
+	Assignee          string
 	Synopsis          string
 	Status            string
 	BoardColumn       string

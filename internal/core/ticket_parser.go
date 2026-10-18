@@ -211,6 +211,7 @@ func indexedTicketFromMetadata(
 		RelativePath:      relativePath,
 		Key:               unquoteMetadataString(metadata["key"]),
 		Title:             unquoteMetadataString(metadata["title"]),
+		Assignee:          unquoteMetadataString(metadata["assignee"]),
 		Synopsis:          unquoteMetadataString(metadata["synopsis"]),
 		Status:            unquoteMetadataString(metadata["status"]),
 		Priority:          unquoteMetadataString(metadata["priority"]),

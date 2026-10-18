@@ -10,6 +10,7 @@ func workflowPlainTicketDisplay(record WorkflowRecord) (IndexedTicket, error) {
 
 	var display struct {
 		Title       string
+		Assignee    string
 		Synopsis    string
 		Priority    string
 		Severity    string
@@ -26,6 +27,7 @@ func workflowPlainTicketDisplay(record WorkflowRecord) (IndexedTicket, error) {
 
 	return IndexedTicket{
 		Title: display.Title, Synopsis: display.Synopsis, Priority: display.Priority,
+		Assignee: display.Assignee,
 		Severity: display.Severity, Type: display.Type, Tags: display.Tags,
 		Branch: display.Branch, ProjectArea: display.ProjectArea, SourceKind: display.SourceKind, SourceRef: display.SourceRef,
 	}, nil

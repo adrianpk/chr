@@ -12,6 +12,11 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
+- The Board now provides one New/Edit ticket form with full descriptions,
+  classification, ownership and delivery references. Maximize and restore retain
+  unsaved input, and comments post independently. Status selection and dragging
+  reject stale or unsupported moves with an explanation. Canonical, legacy and
+  native tickets share six readable lanes, with paging for larger projects.
 - Telegram conversations can explain project context, collect requirements,
   answer clarification questions, generate and refine dumps, quizzes, draft
   specifications and plans, and prepare native backlog tickets. Conversations

@@ -51,6 +51,7 @@ func boardTicketMetadata(ticket IndexedTicket, metadata map[string]string) Index
 	}
 
 	ticket.Status, ticket.Synopsis = value("status"), value("synopsis")
+	ticket.Assignee = value("assignee")
 	ticket.Priority, ticket.Severity, ticket.Type = value("priority"), value("severity"), value("type")
 	ticket.UseCase, ticket.ProjectArea, ticket.Slice = value("use_case"), value("project_area"), value("slice")
 	ticket.SourceKind, ticket.SourceRef, ticket.Branch = value("source_kind"), value("source_ref"), value("branch")

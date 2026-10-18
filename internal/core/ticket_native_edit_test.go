@@ -32,7 +32,7 @@ func TestTicketNativeEditing(t *testing.T) {
 		Key: created.Task.Key, Revision: original.Revision, Body: &body, Binding: ticketEditorBinding("native-save"),
 		Fields: map[string]string{"title": "Native edited", "status": TicketStatusBacklog, "priority": "high", "severity": "high", "type": "feature", "owner": "Maintainer", "assignee": "Developer"},
 	})
-	if err != nil || saved.Description != body || saved.Fields["assignee"] != "Developer" || saved.Ticket.Priority != "high" {
+	if err != nil || saved.CommittedRevision == "" || saved.CommittedRevision != saved.Revision || saved.Description != body || saved.Fields["assignee"] != "Developer" || saved.Ticket.Priority != "high" {
 		t.Fatal("native save lost body or metadata", saved.Fields, err)
 	}
 

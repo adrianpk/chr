@@ -62,6 +62,10 @@ func (p webViewProvider) BoardView(ctx context.Context, request webui.BoardReque
 }
 
 func (p webViewProvider) TicketDetailView(ctx context.Context, request webui.TicketDetailRequest) (webui.TicketDetailView, error) {
+	if request.New {
+		return p.completeTicketEditor(webui.TicketDetailView{New: true, Fields: map[string]string{"status": core.TicketStatusBacklog, "priority": "normal", "severity": "unclassified", "type": "task"}})
+	}
+
 	document, err := p.service(ctx).ReadTicketDocument(request.Key)
 	if err != nil {
 		return webui.TicketDetailView{}, err
@@ -89,17 +93,8 @@ func (p webViewProvider) TicketDetailView(ctx context.Context, request webui.Tic
 		Comments:        parseWebTicketComments(document.Discussion),
 	}
 	view.Revision = document.Revision
-	view.RequestID = webTicketMutationBinding("").RequestID
 
-	cases, err := core.NewCaseMetadataService(p.projectContext.ProjectDir).LoadAll()
-	if err != nil {
-		return view, err
-	}
-	for _, item := range cases {
-		view.Cases = append(view.Cases, webui.TicketCaseView{Slug: item.Slug, Name: item.Name})
-	}
-
-	return view, nil
+	return p.completeTicketEditor(view)
 }
 
 //nolint:cyclop,gocognit // The linear parser mirrors the ticket comments section grammar.
@@ -250,6 +245,8 @@ func webTicketViews(tickets []core.IndexedTicket) []webui.BoardTicketView {
 
 func webTicketView(ticket core.IndexedTicket) webui.BoardTicketView {
 	return webui.BoardTicketView{
+		Revision:          ticket.ContentHash,
+		Assignee:          ticket.Assignee,
 		Key:               ticket.Key,
 		Title:             ticket.Title,
 		Synopsis:          ticket.Synopsis,

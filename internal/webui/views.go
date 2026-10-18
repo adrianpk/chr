@@ -133,6 +133,8 @@ type BoardAttentionView struct {
 
 // BoardTicketView is the Web UI card projection of a ticket.
 type BoardTicketView struct {
+	Revision          string
+	Assignee          string
 	Key               string
 	Title             string
 	Synopsis          string
@@ -160,33 +162,55 @@ type BoardTicketView struct {
 // TicketDetailRequest identifies one ticket detail request.
 type TicketDetailRequest struct {
 	Key string
+	New bool
 }
 
 // TicketDetailView is the modal projection for one ticket.
 type TicketDetailView struct {
-	New             bool
-	Description     string
-	Fields          map[string]string
-	ReadOnly        map[string]string
-	ReadOnlyReason  string
-	Phase           string
-	RequestID       string
-	Cases           []TicketCaseView
-	NativeWorkflow  bool
-	WorkflowEnabled bool
-	Key             string
-	Title           string
-	Synopsis        string
-	Priority        string
-	Status          string
-	Type            string
-	ProjectArea     string
-	UseCase         string
-	Slice           string
-	RelativePath    string
-	Comments        []TicketCommentView
-	Missing         bool
-	Revision        string
+	Groups           []TicketFieldGroupView
+	CommentRequestID string
+	PreviousRevision string
+	New              bool
+	Description      string
+	Fields           map[string]string
+	ReadOnly         map[string]string
+	ReadOnlyReason   string
+	Phase            string
+	RequestID        string
+	Cases            []TicketCaseView
+	NativeWorkflow   bool
+	WorkflowEnabled  bool
+	Key              string
+	Title            string
+	Synopsis         string
+	Priority         string
+	Status           string
+	Type             string
+	ProjectArea      string
+	UseCase          string
+	Slice            string
+	RelativePath     string
+	Comments         []TicketCommentView
+	Missing          bool
+	Revision         string
+}
+
+// TicketFieldGroupView groups descriptive metadata in the shared editor.
+type TicketFieldGroupView struct {
+	Title  string
+	Fields []TicketFieldView
+}
+
+// TicketFieldView describes an input and its persistence owner's constraints.
+type TicketFieldView struct {
+	Name, Label, Value, ReadOnly string
+	Multiline                    bool
+	Options                      []TicketOptionView
+}
+
+// TicketOptionView is a named selection with a canonical stored value.
+type TicketOptionView struct {
+	Value, Label string
 }
 
 // TicketCaseView is a named association offered by the shared case owner.
@@ -355,16 +379,17 @@ const (
 
 // WriteActionResponse is the stable write result envelope returned by Web UI actions.
 type WriteActionResponse struct {
-	Workflow      *WorkflowRunView
-	Status        string
-	Summary       string
-	ChangedFiles  []string
-	Validation    []string
-	BlockedReason string
-	RedirectURL   string
-	ReloadURL     string
-	DiscardURL    string
-	Operation     OperationStateView
+	TicketRevision string
+	Workflow       *WorkflowRunView
+	Status         string
+	Summary        string
+	ChangedFiles   []string
+	Validation     []string
+	BlockedReason  string
+	RedirectURL    string
+	ReloadURL      string
+	DiscardURL     string
+	Operation      OperationStateView
 }
 
 // OperationStateView summarizes a Web UI-triggered operation result.

@@ -164,3 +164,38 @@ func writeWebBoardCanonicalTicket(t *testing.T, project string) {
 
 	writeServiceWorkspaceFile(t, filepath.Join(project, "ops", "default", "ticket", "CHR-2.md"), content)
 }
+
+// Conditional polling returns no replacement for the same semantic observation.
+func TestWebBoardConditional(t *testing.T) {
+	provider := webTicketEditorProvider(t, false)
+	writeWebBoardCanonicalTicket(t, provider.projectContext.ProjectDir)
+
+	config := provider.config
+	config.Provider = provider
+
+	handler, err := newWebServeMux(config)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	first := webWorkflowHTTP(t, handler, http.MethodGet, "/board/fragment", nil)
+	request := httptest.NewRequest(http.MethodGet, "/board/fragment", nil)
+	request.Header.Set("HX-Request", "true")
+	request.Header.Set("If-None-Match", first.Header().Get("ETag"))
+
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, request)
+
+	if first.Header().Get("ETag") == "" || response.Code != http.StatusNotModified || response.Body.Len() != 0 {
+		t.Fatal("unchanged poll replaced Board", response.Code, response.Body.String())
+	}
+
+	writeServiceWorkspaceFile(t, filepath.Join(provider.projectContext.ProjectDir, "ops", "default", "ticket", "new.md"), "---\nkey: CHR-3\ntitle: Changed observation\nstatus: backlog\n---\nBody.\n")
+
+	response = httptest.NewRecorder()
+	handler.ServeHTTP(response, request)
+
+	if response.Code != http.StatusOK || response.Header().Get("ETag") == first.Header().Get("ETag") || !strings.Contains(response.Body.String(), "Changed observation") {
+		t.Fatal("changed poll suppressed new ticket", response.Code, response.Body.String())
+	}
+}

@@ -43,8 +43,9 @@ func UpdateTicketDocument(ctx context.Context, opts TicketBoardReadOptions, requ
 		return document, err
 	}
 
+	committedRevision := workflowHash([]byte(content))
 	if document.native != nil {
-		err = writeNativeTicketEdit(ctx, opts, document, request, content)
+		committedRevision, err = writeNativeTicketEdit(ctx, opts, document, request, content)
 	} else {
 		err = writeLegacyTicketFile(ctx, document.Ticket.Path, document.content, []byte(content))
 	}
@@ -53,7 +54,12 @@ func UpdateTicketDocument(ctx context.Context, opts TicketBoardReadOptions, requ
 		return document, err
 	}
 
-	return ReadTicketDocument(ctx, opts, request.Key)
+	saved, err := ReadTicketDocument(ctx, opts, request.Key)
+	// A later observation must not authorize a dirty form to overwrite an edit
+	// made after this mutation. Return the owner's committed image separately.
+	saved.CommittedRevision = committedRevision
+
+	return saved, err
 }
 
 func validateTicketEditRequest(request TicketEditRequest) error {
@@ -214,15 +220,15 @@ func setTicketEditorField(content, key, value string) (string, error) {
 	return replaceTicketFrontmatterLines(content, append(lines, key+": "+value))
 }
 
-func writeNativeTicketEdit(ctx context.Context, opts TicketBoardReadOptions, document TicketDocument, request TicketEditRequest, content string) error {
+func writeNativeTicketEdit(ctx context.Context, opts TicketBoardReadOptions, document TicketDocument, request TicketEditRequest, content string) (string, error) {
 	record, err := prepareNativeTicketEdit(document, request, content)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	_, err = NewWorkflowStore(opts.Layout, opts.ProjectID).ApplyRecordMutation(ctx, WorkflowMutationRequest{Binding: request.Binding, Record: record, ExpectedRevision: record.Revision})
+	result, err := NewWorkflowStore(opts.Layout, opts.ProjectID).ApplyRecordMutation(ctx, WorkflowMutationRequest{Binding: request.Binding, Record: record, ExpectedRevision: record.Revision})
 
-	return err
+	return result.Record.SourceHash, err
 }
 
 func prepareNativeTicketEdit(document TicketDocument, request TicketEditRequest, content string) (WorkflowRecord, error) {

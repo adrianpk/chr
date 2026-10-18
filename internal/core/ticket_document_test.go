@@ -79,7 +79,7 @@ func ticketEditorFixture(t *testing.T, kind string) (TicketBoardReadOptions, Tic
 func checkTicketEditorSaved(t *testing.T, original, saved TicketDocument, body string, fields map[string]string) {
 	t.Helper()
 
-	if saved.Ticket.Path != original.Ticket.Path || saved.Description != strings.TrimSpace(body) || saved.Revision == original.Revision {
+	if saved.CommittedRevision == "" || saved.CommittedRevision != saved.Revision || saved.Ticket.Path != original.Ticket.Path || saved.Description != strings.TrimSpace(body) || saved.Revision == original.Revision {
 		t.Fatal("save lost document identity, full body or revision", saved)
 	}
 
@@ -103,7 +103,7 @@ func checkTicketEditorComment(t *testing.T, opts TicketBoardReadOptions, saved T
 	commented, err := UpdateTicketDocument(t.Context(), opts, TicketEditRequest{
 		Key: saved.Ticket.Key, Revision: saved.Revision, Comment: "Independent comment.", Binding: ticketEditorBinding("comment"),
 	})
-	if err != nil || commented.Description != saved.Description || commented.Fields["title"] != saved.Fields["title"] || !strings.Contains(commented.Discussion, "Independent comment.") || !strings.Contains(commented.Discussion, "Existing comment.") {
+	if err != nil || commented.CommittedRevision == "" || commented.CommittedRevision != commented.Revision || commented.Description != saved.Description || commented.Fields["title"] != saved.Fields["title"] || !strings.Contains(commented.Discussion, "Independent comment.") || !strings.Contains(commented.Discussion, "Existing comment.") {
 		t.Fatal("comment changed metadata, description or existing discussion", commented, err)
 	}
 }

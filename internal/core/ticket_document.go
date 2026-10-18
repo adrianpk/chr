@@ -11,16 +11,17 @@ import (
 
 // TicketDocument is an observed editable document with its canonical write guards.
 type TicketDocument struct {
-	Ticket         IndexedTicket
-	Description    string
-	Discussion     string
-	Fields         map[string]string
-	ReadOnly       map[string]string
-	ReadOnlyReason string
-	Revision       string
-	Phase          string
-	content        []byte
-	native         *WorkflowRecord
+	CommittedRevision string
+	Ticket            IndexedTicket
+	Description       string
+	Discussion        string
+	Fields            map[string]string
+	ReadOnly          map[string]string
+	ReadOnlyReason    string
+	Revision          string
+	Phase             string
+	content           []byte
+	native            *WorkflowRecord
 }
 
 // ReadTicketDocument resolves the same identity and authority as the Board.

@@ -93,6 +93,7 @@ func NewHandler(opts HandlerOptions) (http.Handler, error) {
 	mux.HandleFunc("/board/fragment", handler.boardFragment)
 	mux.HandleFunc("/board/ticket", handler.ticketDetail)
 	mux.HandleFunc("/board/ticket/comment", handler.ticketComment)
+	mux.HandleFunc("/board/ticket/save", handler.ticketSave)
 	mux.HandleFunc("/dash", handler.dash)
 	mux.HandleFunc("/dash/fragment", handler.dashFragment)
 
@@ -183,6 +184,14 @@ func (h handler) boardFragment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("ETag", `"`+data.Revision+`"`)
+	w.Header().Set("Cache-Control", "no-cache")
+	if r.Header.Get("If-None-Match") == `"`+data.Revision+`"` {
+		w.WriteHeader(http.StatusNotModified)
+
+		return
+	}
+
 	if err := h.renderer.Fragment(w, "board_content.html", data); err != nil {
 		http.Error(w, "render board", http.StatusInternalServerError)
 	}
@@ -202,36 +211,7 @@ func (h handler) ticketDetail(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h handler) ticketComment(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-
-		return
-	}
-
-	request := writeActionRequest(r)
-	result, err := h.provider.WriteAction(r.Context(), request)
-	if err != nil {
-		http.Error(w, "write ticket comment", http.StatusInternalServerError)
-
-		return
-	}
-
-	if result.Status != WriteStatusOK {
-		h.renderWriteResult(w, r, result)
-
-		return
-	}
-
-	data, err := h.ticketDetailPageData(ticketDetailRequest(r, request.ID))
-	if err != nil {
-		http.Error(w, "load ticket", http.StatusInternalServerError)
-
-		return
-	}
-
-	if err := h.renderer.Fragment(w, "ticket_modal.html", data); err != nil {
-		http.Error(w, "render ticket", http.StatusInternalServerError)
-	}
+	h.ticketWrite(w, r, true)
 }
 
 func (h handler) dash(w http.ResponseWriter, r *http.Request) {
@@ -697,6 +677,7 @@ func (h handler) boardPageData(r *http.Request) (PageData, error) {
 func (h handler) ticketDetailPageData(r *http.Request) (PageData, error) {
 	ticket, err := h.provider.TicketDetailView(r.Context(), TicketDetailRequest{
 		Key: strings.TrimSpace(r.URL.Query().Get("key")),
+		New: r.URL.Query().Get("new") == "1",
 	})
 	if err != nil {
 		return PageData{}, err
