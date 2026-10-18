@@ -5,7 +5,7 @@ Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
 Branch: `feat/slice-1-web-board`
-PR: pending
+PR: `#398`
 
 ## Purpose
 

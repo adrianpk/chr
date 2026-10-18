@@ -13,6 +13,7 @@ source: chat
 reported_at: 2026-10-17T20:10:15Z
 commits: [02c24fcfdc174a41755d89259810300e369d901d, f6907f9fa8b6644225a07ce2245c9aeb28299f97, 2083b518f34574a001d98ac3b5e83d2286e8c581]
 branch: feat/slice-1-web-board
+pr: https://forge.adrianpk.com/adrianpk/chr/pulls/398
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
