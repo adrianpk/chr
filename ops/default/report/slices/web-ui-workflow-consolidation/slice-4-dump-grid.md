@@ -5,7 +5,7 @@ Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
 Branch: `fix/slice-4-dump-grid`
-PR: pending
+PR: `#401`
 
 ## Purpose
 
@@ -31,7 +31,7 @@ Capture, Save, selection and modal actions retain their existing owners.
 ## Implementation Notes
 
 - T4.1: `411925a719bd0bcd61cda4de9f8886f64f5fd0b5` — measured width reproduction, fixed track/card tokens, bounded title/preview and narrow container correction.
-- T4.2: owned zoom/narrow captures, content/count geometry assertions and shared editor/capture/Board browser regressions.
+- T4.2: `1043709e4846510dba05f18c6f954b89b801b414` — owned zoom/narrow captures, content/count geometry assertions and shared editor/capture/Board browser regressions.
 
 The original auto-fit maximum reserved 404 px tracks before choosing a column
 count. In a 1280 × 900 window it displayed two columns at 100%, with a 1226 px

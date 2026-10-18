@@ -9,8 +9,9 @@ scope: ui
 tags: web-ui, dumps, responsive-layout
 source: chat
 reported_at: 2026-10-17T18:58:37Z
-commits: []
+commits: [411925a719bd0bcd61cda4de9f8886f64f5fd0b5, 1043709e4846510dba05f18c6f954b89b801b414]
 branch: fix/slice-4-dump-grid
+pr: "#401"
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
@@ -62,6 +63,36 @@ The CSS or container cause has not been established. Inspect sizing and
 breakpoints when implementation is explicitly authorized. The observation
 alone does not establish whether the cause is card width, a grid breakpoint,
 a container constraint or another layout rule.
+
+## Implementation Progress
+
+T4.1 is implemented in `411925a719bd0bcd61cda4de9f8886f64f5fd0b5`.
+A 1280 × 900 Chromium window reproduced two 404 px columns at 100% and three
+at 90%. Fixed 300 × 226 px cards now fit three at default zoom, with a fixed
+122 px inset preview and bounded titles. Available width determines column
+count; centered tracks preserve card dimensions. Dumps-scoped narrow container
+rules prevent page overflow at 320 px.
+
+T4.2 is implemented in `1043709e4846510dba05f18c6f954b89b801b414`.
+Five retained captures record 100%/90% desktop zoom and 768/390/320 px CSS views.
+JSON measurements retain viewport, DPR, geometry and overflow state. Short,
+long, unbroken, empty and single-card variants keep fixed dimensions; preview
+text clips to five complete opening lines. Existing editor/capture/Board browser
+journeys pass with the new layout. User Guide and Unreleased are updated.
+
+Successful task checks:
+
+- `CHR_WEB_BROWSER=/usr/sbin/chromium go test ./internal/app -run '^TestWebDumpGridBrowser$' -count=1 -v`
+- `CHR_WEB_BROWSER=/usr/sbin/chromium CHR_WEB_DUMP_GRID_SCREENSHOTS="$PWD/ops/default/report/slices/web-ui-workflow-consolidation/files/slice-4" go test ./internal/app -run '^(TestWebDumpGridBrowser|TestWebDumpEditorBrowser|TestWebDumpCaptureBrowser|TestWebBoardBrowser)$' -count=1`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m --new-from-rev=HEAD ./internal/app`
+- `git diff --check`
+
+The [Slice 4 report](../../report/slices/web-ui-workflow-consolidation/slice-4-dump-grid.md)
+links the captures and measurements and records the failures and corrections.
+All tasks are implemented in canonical [PR #401](https://forge.adrianpk.com/adrianpk/chr/pulls/401).
+Final clean-HEAD validation is recorded through Looper with the ordered successful
+commands in the PR. This ticket remains in progress until controller integration
+is verified.
 
 ## Consolidated Design
 
