@@ -9,8 +9,9 @@ scope: domain
 tags: tracking, tickets, plans
 source: chat
 reported_at: 2026-10-17T20:02:32Z
-commits: [fcd81c18382ea6984f5bb25229b2111c6d8f64bc, d4daafde2f2ce2e3c812ecba55c0e240107ed080]
+commits: [fcd81c18382ea6984f5bb25229b2111c6d8f64bc, d4daafde2f2ce2e3c812ecba55c0e240107ed080, 71984c3d94f8c9098dda105f851b0c65c0fc9c1b]
 branch: feat/slice-9-plan-order-tracker
+pr: "#406"
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
@@ -157,5 +158,6 @@ work and history. Required worker context, structural freshness and observed-has
 repair preserve the native state owners and legacy v1 contract.
 
 Affected-package strict lint and focused plan/tracker/adoption race checks passed.
-Canonical PR references and final clean-HEAD controller validation follow before
-integration readiness. The source ticket remains in progress until verified merge.
+[PR #406](https://forge.adrianpk.com/adrianpk/chr/pulls/406) and the controller
+ledger own final clean-HEAD validation evidence. The source ticket remains in
+progress until verified merge.

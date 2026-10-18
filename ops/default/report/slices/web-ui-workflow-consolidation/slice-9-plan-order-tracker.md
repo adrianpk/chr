@@ -5,7 +5,9 @@ Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
 Branch: `feat/slice-9-plan-order-tracker`
-PR: pending
+PR: `#406`
+
+[PR #406](https://forge.adrianpk.com/adrianpk/chr/pulls/406) targets dev.
 
 ## Purpose
 
@@ -92,9 +94,9 @@ publication, old-revision retry after regeneration, structural guards, active
 amendment rejection, required-context repair, actual Git integration and retained
 completed-task receipts. Existing v1 and legacy adoption regressions also pass.
 
-The canonical PR records the required `make verify`, affected focused race and
-browser checks, and whitespace check through controller validation for its final
-clean HEAD after PR-reference follow-up.
+Final clean-HEAD validation is pending at this report-reference commit. The
+canonical PR and controller ledger record the required `make verify`, affected
+focused race and browser checks, and whitespace check after this follow-up.
 
 ## Risks and Follow-ups
 
