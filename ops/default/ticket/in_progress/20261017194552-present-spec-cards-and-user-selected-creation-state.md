@@ -202,4 +202,4 @@ dimensions with short, long and unbroken text in the owning slice and review.
 
 ## Slice 7 Execution
 
-T7.1 shared create/save/state operations passed focused race, journal recovery and full affected lint checks. T7.2 concrete listing/context and bound generation publication passed focused race and affected lint checks. T7.3 Web authoring is active after verified Slice 6 integration through PR #403. The [Slice 7 report](../../report/slices/web-ui-workflow-consolidation/slice-7-spec-authoring.md) records delivery evidence.
+T7.1 shared create/save/state operations passed focused race, journal recovery and full affected lint checks. T7.2 concrete listing/context and bound generation publication passed focused race and affected lint checks. T7.3 Web authoring, native HTTP checks, owned browser evidence and affected lint are complete; final exact-HEAD controller validation follows PR references after verified Slice 6 integration through PR #403. The [Slice 7 report](../../report/slices/web-ui-workflow-consolidation/slice-7-spec-authoring.md) records delivery evidence.

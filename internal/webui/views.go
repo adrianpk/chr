@@ -33,6 +33,7 @@ type PageData struct {
 	Write      WriteActionResponse
 	CaseModal  bool
 	DumpModal  bool
+	SpecModal  bool
 	Workflow   WorkflowView
 }
 
@@ -346,6 +347,7 @@ type ArtifactCardView struct {
 
 // ArtifactDetailView is the read-only detail projection for one artifact.
 type ArtifactDetailView struct {
+	Spec                           *SpecEditorView
 	Quiz                           *QuizAnswerView
 	SaveRequestID, AppendRequestID string
 	WorkflowEnabled                bool
@@ -446,4 +448,11 @@ type QuizAnswerHistoryView struct {
 // QuizActionAcknowledgement binds draft clearing to the confirmed question.
 type QuizActionAcknowledgement struct {
 	Action, SessionID, QuestionID string
+}
+
+// SpecEditorView contains the concrete identity's editable fields and named scopes.
+type SpecEditorView struct {
+	Cases               []TicketCaseView
+	RequestID, CaseSlug string
+	New, Draft          bool
 }

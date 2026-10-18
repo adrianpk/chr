@@ -12,6 +12,11 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
+- Specs now supports manual draft or direct-approved creation and editing of
+  individual manual or generated documents from their cards. Named scope
+  selection, one Body editor and a compact Draft control retain identity,
+  provenance and native state. Stale saves keep the form available, and generated
+  output cannot replace an edit made while it was being prepared.
 - Quizzes now provide a focused Web answer screen with one current question,
   one answer field, Deep/Fast selection and newest-first answer history. Drafts
   survive refresh, mode changes and request errors; leaving or skipping with

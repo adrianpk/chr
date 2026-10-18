@@ -89,12 +89,22 @@ func quizCatalog(operations service) (webui.ArtifactCatalogView, error) {
 }
 
 func specCatalog(operations service) (webui.ArtifactCatalogView, error) {
-	specs, err := loadTUISpecs(operations)
+	documents, err := operations.ListSpecDocuments()
 	if err != nil {
 		return webui.ArtifactCatalogView{}, err
 	}
+	cards := make([]webui.ArtifactCardView, 0, len(documents))
+	for _, document := range documents {
+		preview := []rune(document.Body)
+		if len(preview) > 1024 {
+			preview = preview[:1024]
+		}
+		card := webui.ArtifactCardView{Family: "specs", ID: document.Reference, Title: document.Title, Preview: string(preview), Revision: document.Revision}
+		card.DetailURL = webArtifactDetailURL(card)
+		cards = append(cards, card)
+	}
 
-	return webArtifactCatalog(webArtifactFamilySpecs, webSpecCards(specs)), nil
+	return webArtifactCatalog("specs", cards), nil
 }
 
 func planCatalog(operations service) (webui.ArtifactCatalogView, error) {
@@ -107,12 +117,19 @@ func planCatalog(operations service) (webui.ArtifactCatalogView, error) {
 }
 
 func (p webViewProvider) ArtifactDetailView(ctx context.Context, request webui.ArtifactDetailRequest) (webui.ArtifactDetailView, error) {
-	if request.Family == webArtifactFamilyQuizzes {
+	switch request.Family {
+	case webArtifactFamilySpecs:
+		return p.specArtifactDetail(ctx, request)
+	case webArtifactFamilyQuizzes:
 		return p.quizArtifactDetail(ctx, request)
-	}
-	if request.Family == webArtifactFamilyDumps {
+	case webArtifactFamilyDumps:
 		return p.dumpArtifactDetail(ctx, request)
+	default:
+		return p.readArtifactDetail(ctx, request)
 	}
+}
+
+func (p webViewProvider) readArtifactDetail(ctx context.Context, request webui.ArtifactDetailRequest) (webui.ArtifactDetailView, error) {
 	catalog, err := p.CatalogView(ctx, request.Family)
 	if err != nil {
 		return webui.ArtifactDetailView{}, err
@@ -353,16 +370,6 @@ func webQuizCards(quizzes []QuizCatalogItem) []webui.ArtifactCardView {
 			Family: webArtifactFamilyQuizzes, ID: quiz.Reference, Title: quiz.Title,
 			Preview: quiz.Preview, DetailURL: quizFocusURL(quiz.Reference), Revision: quiz.Revision,
 		})
-	}
-
-	return cards
-}
-
-func webSpecCards(specs []tui.SpecView) []webui.ArtifactCardView {
-	cards := make([]webui.ArtifactCardView, 0, len(specs))
-	for _, spec := range specs {
-		card := webDocumentCard(webArtifactFamilySpecs, spec.Title, spec.Status, spec.UseCaseTitle, spec.RelativePath, spec.UpdatedAt, spec.Content)
-		cards = append(cards, card)
 	}
 
 	return cards

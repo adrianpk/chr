@@ -647,7 +647,7 @@ func TestHandlerRendersGenerationAndWorkActionForms(t *testing.T) {
 		path string
 		want []string
 	}{
-		{path: "/specs", want: []string{"spec.generate", "Generate Spec"}},
+		{path: "/specs", want: []string{"New", `hx-get="/specs/detail/fragment"`, "document-card"}},
 		{path: "/plans", want: []string{"plan.generate", "plan.regenerate", "plan.tracking.create"}},
 		{path: "/quizzes", want: []string{"New Quiz", `aria-label="Pending quizzes"`, "/quizzes/detail?id=project"}},
 		{path: "/dash", want: []string{"work.preview", "work.daemon.stop", "Preview Work"}},

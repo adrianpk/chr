@@ -16,7 +16,7 @@ var generatedSpecChrysoPathPattern = regexp.MustCompile(`\.chr(?:/[^\s\])"'` + "
 
 // GeneratedSpec describes a package boundary value.
 type GeneratedSpec struct {
-	ExpectedRevision string
+	ExpectedRevision string `json:"-"`
 	Scope            QuizScope
 	Title            string
 	Body             string

@@ -112,3 +112,31 @@ func checkSpecCatalogGuard(t *testing.T, kind string) {
 		t.Fatal("invalid source hidden")
 	}
 }
+
+// A matching revision cannot authorize reassigning an existing generated
+// identity whose retained scope differs from the requested generation scope.
+func TestSpecGenerationScope(t *testing.T) {
+	project := t.TempDir()
+	spec := GeneratedSpec{Scope: QuizScope{ProjectID: "sample-project"}, Title: "Scoped", Body: "Retained requirements.", CreatedAt: time.Now().UTC()}
+
+	paths, err := WriteGeneratedSpec(t.Context(), project, spec)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	before := specTestRead(t, project, paths.RelativePath)
+
+	content := strings.Replace(string(before.images[0].After), "case_slug: "+yamlString(""), "case_slug: "+yamlString("other-case"), 1)
+	if err := os.WriteFile(paths.Path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	spec.ExpectedRevision, err = SpecTargetRevision(t.Context(), project, paths.RelativePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := WriteGeneratedSpec(t.Context(), project, spec); !errors.Is(err, ErrWorkflowConflict) {
+		t.Fatal("generated scope changed", err)
+	}
+}

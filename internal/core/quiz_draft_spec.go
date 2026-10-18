@@ -13,7 +13,7 @@ const QuizSpecDirectory = "specs/drafts"
 
 // QuizDraftSpec describes a package boundary value.
 type QuizDraftSpec struct {
-	ExpectedRevision string
+	ExpectedRevision string `json:"-"`
 	Scope            QuizScope
 	Title            string
 	Body             string

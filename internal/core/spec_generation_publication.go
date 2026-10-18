@@ -55,8 +55,8 @@ func publishSpecContent(ctx context.Context, projectDir string, paths GeneratedS
 		return err
 	}
 
-	if spec.ExpectedRevision != "" && document.Revision != spec.ExpectedRevision {
-		return ErrWorkflowConflict
+	if err := validateSpecGenerationTarget(document, spec); err != nil {
+		return err
 	}
 
 	document, action, err := prepareGeneratedSpecDocument(projectDir, paths, document, spec, content)
@@ -132,4 +132,24 @@ func prepareGeneratedSpecDocument(projectDir string, paths GeneratedSpecPaths, d
 	separateSpecProvenance(&document)
 
 	return document, action, nil
+}
+
+func validateSpecGenerationTarget(document SpecDocument, spec GeneratedSpec) error {
+	if spec.ExpectedRevision != "" && document.Revision != spec.ExpectedRevision {
+		return ErrWorkflowConflict
+	}
+
+	if document.metadata == nil {
+		return nil
+	}
+
+	if document.CaseSlug != spec.Scope.CaseSlug {
+		return ErrWorkflowConflict
+	}
+
+	if document.ProjectID != "" && document.ProjectID != spec.Scope.ProjectID {
+		return ErrWorkflowConflict
+	}
+
+	return nil
 }

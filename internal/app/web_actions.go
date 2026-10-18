@@ -58,6 +58,12 @@ func (p webViewProvider) WriteAction(ctx context.Context, request webui.WriteAct
 }
 
 func (p webViewProvider) writeDocumentAction(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error) {
+	if request.Surface == "spec" {
+		response, err := p.writeSpecAction(operations, request)
+
+		return response, true, err
+	}
+
 	if request.Surface == "quiz" {
 		response, err := p.writeQuizAction(operations, request)
 

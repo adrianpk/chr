@@ -10,6 +10,7 @@
     <script src="/assets/htmx.min.js" defer></script>
     <script src="/assets/chr.js" defer></script>
     <script src="/assets/quiz.js" defer></script>
+    <script src="/assets/spec.js" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -50,7 +51,10 @@
             <a class="button" href="/board/ticket?new=1" hx-get="/board/ticket?new=1" hx-target="#modal-root" hx-swap="innerHTML">New</a>
           {{end}}
           {{if eq .View "catalog"}}
-            {{if eq .Catalog.Family "dumps"}}
+            {{if eq .Catalog.Family "specs"}}
+ <a class="button" href="/specs/detail" hx-get="/specs/detail/fragment" hx-target="#modal-root" hx-swap="innerHTML">New</a>
+{{end}}
+{{if eq .Catalog.Family "dumps"}}
               {{template "dump_page_actions.html" .}}
             {{end}}
           {{end}}
@@ -151,7 +155,7 @@
 
 {{define "catalog_content.html"}}
 {{template "revision_marker.html" .}}
-{{if and (ne .Catalog.Family "cases") (ne .Catalog.Family "dumps") (ne .Catalog.Family "quizzes")}}
+{{if and (ne .Catalog.Family "cases") (ne .Catalog.Family "dumps") (ne .Catalog.Family "quizzes") (ne .Catalog.Family "specs")}}
 <div class="catalog-toolbar">
   <div class="summary-item">
     <span class="summary-label">Artifacts</span>
@@ -163,6 +167,8 @@
   {{template "dump_catalog_content.html" .}}
 {{else if eq .Catalog.Family "quizzes"}}
   {{template "quiz_catalog_content.html" .}}
+{{else if eq .Catalog.Family "specs"}}
+ {{template "spec_catalog_content.html" .}}
 {{else}}
   {{if .Catalog.Items}}
     {{if eq .Catalog.Family "cases"}}
@@ -178,9 +184,6 @@
   {{if not .Catalog.Items}}
     <p class="empty-state">{{.Catalog.EmptyMessage}}</p>
   {{end}}
-{{end}}
-{{if eq .Catalog.Family "specs"}}
-  {{template "spec_generate_form.html" .}}
 {{end}}
 {{if eq .Catalog.Family "plans"}}
   {{template "plan_action_forms.html" .}}
@@ -261,7 +264,9 @@
 
 {{define "artifact_detail_content.html"}}
 {{template "revision_marker.html" .}}
-{{if .Detail.Quiz}}
+{{if .Detail.Spec}}
+ {{template "spec_editor_content.html" .}}
+{{else if .Detail.Quiz}}
   {{template "quiz_answer_content.html" .}}
 {{else if eq .Detail.Family "cases"}}
   {{template "case_edit_page.html" .}}
@@ -492,19 +497,6 @@
 
 {{define "revision_marker.html"}}
 <div class="state-marker" data-revision="{{.Revision}}" hidden></div>
-{{end}}
-
-{{define "spec_generate_form.html"}}
-<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Generate a spec for this scope?')">
-  <input type="hidden" name="action" value="spec.generate">
-  <input type="hidden" name="family" value="specs">
-  <input type="hidden" name="confirm" value="true">
-  <label>
-    <span>Case slug</span>
-    <input name="case_slug">
-  </label>
-  <button class="button button--primary" type="submit">Generate Spec</button>
-</form>
 {{end}}
 
 {{define "plan_action_forms.html"}}

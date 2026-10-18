@@ -319,6 +319,9 @@ func (h handler) artifactDetailFragment(family string) http.HandlerFunc {
 		case "cases":
 			data.CaseModal = true
 			fragment = "case_modal.html"
+		case "specs":
+			data.SpecModal = true
+			fragment = "spec_modal.html"
 		case "dumps":
 			data.DumpModal = true
 			fragment = "dump_modal.html"
@@ -345,7 +348,7 @@ func (h handler) writeAction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if h.quizActionResult(w, r, request, result) {
+	if h.artifactActionResult(w, r, request, result) {
 		return
 	}
 
@@ -764,6 +767,9 @@ func (h handler) artifactDetailPageData(r *http.Request, family string) (PageDat
 	if detail.Quiz != nil {
 		title = "Quizzes"
 	}
+	if detail.Spec != nil {
+		title = "Specs"
+	}
 
 	return PageData{
 		Shell:      h.shellData(family),
@@ -776,7 +782,7 @@ func (h handler) artifactDetailPageData(r *http.Request, family string) (PageDat
 }
 
 func artifactDetailRefreshURL(family, id string) string {
-	if family == "cases" || family == "dumps" || family == "quizzes" {
+	if family == "cases" || family == "dumps" || family == "quizzes" || family == "specs" {
 		return ""
 	}
 

@@ -42,7 +42,7 @@
   let boardScroll = 0;
   let boardMessage = "";
   let boardFocusKey = "";
-  let dumpFocusHref = "";
+  let artifactFocusHref = "";
 
   function syncModal() {
     const dialog = document.querySelector("#modal-root [role='dialog']");
@@ -52,7 +52,7 @@
     });
     if (!dialog || dialog.dataset.focusBound) return;
     dialog.dataset.focusBound = "1";
-    const first = dialog.querySelector("#ticket-title:not([disabled])") || dialog.querySelector("input:not([type='hidden']):not([disabled]), textarea:not([disabled]), button:not([disabled]), a[href]");
+    const first = dialog.querySelector("#ticket-title:not([disabled]), #spec-title") || dialog.querySelector("input:not([type='hidden']):not([disabled]), textarea:not([disabled]), button:not([disabled]), a[href]");
     if (first) first.focus({preventScroll: true});
   }
 
@@ -107,7 +107,7 @@
 
   function dumpCaptureResponse(event) {
     const parameters = event.detail.requestConfig && event.detail.requestConfig.parameters;
-    if (!parameters || !["dump.create", "dump.save"].includes(parameters.action) || event.detail.target.id !== "modal-root") return;
+    if (!parameters || !["dump.create", "dump.save", "spec.create", "spec.save"].includes(parameters.action) || event.detail.target.id !== "modal-root") return;
     if (document.querySelector("#modal-root [role='dialog']")) return;
     closeModal();
     const workspace = document.querySelector("#workspace");
@@ -234,7 +234,7 @@
       if (grid) boardScroll = grid.scrollLeft;
       const focused = document.activeElement;
       boardFocusKey = focused && focused.matches("a[data-ticket-key]") ? focused.dataset.ticketKey : "";
-      dumpFocusHref = focused && focused.matches(".dump-card-link") ? focused.getAttribute("href") : "";
+      artifactFocusHref = focused && focused.matches(".dump-card-link, .document-card") ? focused.getAttribute("href") : "";
     });
     document.addEventListener("htmx:afterSwap", function (event) {
       if (event.detail.target.id === "workspace") {
@@ -247,8 +247,8 @@
           const card = Array.from(document.querySelectorAll("a[data-ticket-key]")).find(function (element) { return element.dataset.ticketKey === boardFocusKey; });
           if (card) card.focus({preventScroll: true});
         }
-        if (dumpFocusHref) {
-          const card = Array.from(document.querySelectorAll(".dump-card-link")).find(function (element) { return element.getAttribute("href") === dumpFocusHref; });
+        if (artifactFocusHref) {
+          const card = Array.from(document.querySelectorAll(".dump-card-link, .document-card")).find(function (element) { return element.getAttribute("href") === artifactFocusHref; });
           if (card) card.focus({preventScroll: true});
         }
       }

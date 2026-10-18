@@ -1,0 +1,48 @@
+{{define "spec_modal.html"}}
+<div class="modal-backdrop" data-modal-backdrop>{{template "spec_editor_content.html" .}}</div>
+{{end}}
+
+{{define "spec_editor_content.html"}}
+<section class="ticket-modal spec-editor" data-spec-editor {{if .SpecModal}}role="dialog" aria-modal="true"{{end}} aria-labelledby="spec-editor-heading">
+  <header class="ticket-modal__header">
+    <h2 id="spec-editor-heading">{{if .Detail.Spec.New}}New Spec{{else}}Edit Spec{{end}}</h2>
+    {{if .SpecModal}}<button type="button" class="icon-button" data-modal-close aria-label="Close spec editor">×</button>{{else}}<a class="button" href="/specs">Back to Specs</a>{{end}}
+  </header>
+  <form id="spec-editor-form" data-spec-form method="post" action="/actions" hx-post="/actions" hx-target="#spec-result" hx-swap="innerHTML" hx-disabled-elt="#spec-editor-form button">
+    <input type="hidden" name="action" value="{{if .Detail.Spec.New}}spec.create{{else}}spec.save{{end}}">
+    <input type="hidden" name="family" value="specs">
+    <input type="hidden" name="surface" value="spec">
+    <input type="hidden" name="modal" value="{{.SpecModal}}">
+    <input type="hidden" name="confirm" value="true">
+    <input type="hidden" name="id" value="{{.Detail.ID}}">
+    <input type="hidden" name="revision" value="{{.Detail.Revision}}">
+    <input type="hidden" name="request_id" value="{{.Detail.Spec.RequestID}}">
+    <label class="readonly-field"><span>Title</span><input id="spec-title" name="title" required maxlength="512" value="{{.Detail.Title}}"></label>
+    <label class="readonly-field"><span>Use Case</span>
+      <select id="spec-case" name="case_slug"{{if not .Detail.Spec.New}} disabled{{end}}>
+        <option value="">Project-wide</option>
+        {{$selected := .Detail.Spec.CaseSlug}}{{range .Detail.Spec.Cases}}<option value="{{.Slug}}"{{if eq .Slug $selected}} selected{{end}}>{{.Name}}</option>{{end}}
+      </select>
+    </label>
+    {{if not .Detail.Spec.New}}<input type="hidden" name="case_slug" value="{{.Detail.Spec.CaseSlug}}">{{end}}
+    <label class="readonly-field spec-editor__body"><span>Body</span><textarea id="spec-body" name="content" required maxlength="1048576">{{.Detail.Content}}</textarea></label>
+    <div id="spec-result" role="status" aria-live="polite">{{template "spec_write_result.html" .}}</div>
+    <footer class="spec-editor__actions"><label class="spec-draft"><input id="spec-draft" type="checkbox" name="draft" value="true"{{if .Detail.Spec.Draft}} checked{{end}}>Draft</label><button class="button button--primary" type="submit">{{if .Detail.Spec.New}}Create{{else}}Save{{end}}</button></footer>
+  </form>
+</section>
+{{end}}
+
+{{define "spec_write_result.html"}}
+{{if .Write.Summary}}<p data-spec-write-status="{{.Write.Status}}">{{.Write.Summary}}</p>{{end}}
+{{range .Write.Validation}}<p>{{.}}</p>{{end}}
+{{with .Write.BlockedReason}}<p>{{.}}</p>{{end}}
+{{with .Write.ReloadURL}}<a class="button" href="{{.}}"{{if $.SpecModal}} hx-get="{{.}}" hx-target="#modal-root" hx-swap="innerHTML" hx-confirm="Reload this spec and discard the unsaved edits?"{{end}}>Reload spec</a>{{end}}
+{{end}}
+
+{{define "spec_catalog_content.html"}}
+{{if .Catalog.Items}}<div class="document-grid">{{range .Catalog.Items}}
+  <a class="document-card" href="{{.DetailURL}}" hx-get="/specs/detail/fragment?id={{.ID}}" hx-target="#modal-root" hx-swap="innerHTML">
+    <h2>{{.Title}}</h2><div class="document-card__preview"><div>{{.Preview}}</div></div>
+  </a>
+{{end}}</div>{{else}}<p class="empty-state">No specs yet. Choose New to write one.</p>{{end}}
+{{end}}

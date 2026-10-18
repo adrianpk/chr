@@ -537,6 +537,29 @@ chr quiz cancel --use-case billing
 chr quiz mode fast --use-case billing
 ```
 
+## Write and Edit Specs in the Web UI
+
+Open Specs and choose **New**. Enter a title, choose **Project-wide** or an
+existing named use case, and write the document in Body. Draft is on by default.
+Leave it on to create a draft, or turn it off to create an approved spec directly.
+Choose **Create**. Manual authoring needs no dump, quiz or model request.
+
+Each card represents one stored spec and previews its opening body text. Several
+specs can share one scope. Open the card to edit that exact document, including a
+generated spec. The editor prefills its title, body and Draft state. Its use case
+remains fixed. **Save** retains its identity, scope, creation time and provenance.
+
+Errors keep the form available for correction or retry. If another client changes
+the spec, Save rejects the stale revision. **Reload spec** explicitly discards the
+pending form and loads the current document. Background catalog refresh does not
+replace an open editor. An approved spec can be edited without first making a
+separate draft.
+
+Generated specs start in draft. Generation uses project context, the canonical
+general dump and matching optional use-case discovery. It excludes unrelated
+cases. An edit made while generation is preparing output prevents that output
+from replacing the edited document.
+
 ## Generate Specs in the TUI
 
 Open the Specs view with `F5`.
