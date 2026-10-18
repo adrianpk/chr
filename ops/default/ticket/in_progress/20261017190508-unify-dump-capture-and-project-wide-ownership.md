@@ -9,7 +9,7 @@ scope: domain
 tags: dumps, project-context, authoring
 source: chat
 reported_at: 2026-10-17T19:05:08Z
-commits: [a8bdec69d5595740a6fee1b723b1d2f1357a6ce4]
+commits: [a8bdec69d5595740a6fee1b723b1d2f1357a6ce4, f4b080aeb4a2933b87535d56ca64e9fcb74f39ef]
 branch: feat/slice-2-project-dump
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
@@ -118,9 +118,19 @@ adoption and later descriptive metadata edits.
 
 The [Slice 2 report](../../report/slices/web-ui-workflow-consolidation/slice-2-project-dump.md)
 records successful focused race, complete affected-package lint, signature and
-whitespace checks. T2.2 capture/retry routing and explicit reconciliation remain;
-T2.3's single Web New action also remains. Final controller validation has not
-run and the slice has no ready PR.
+whitespace checks.
+
+The T2.2 core reconciliation owner is implemented in `f4b080aeb4a2933b87535d56ca64e9fcb74f39ef`.
+Preview selects by creation timestamp/path with explicit invalid-time evidence.
+Apply preserves source body/metadata history, composes attributed content and
+publishes aliases, the project reference and a retry receipt through the existing
+versioned journal. Recovery and bounded alias/receipt behavior have focused race
+coverage. Live data has not been reconciled.
+
+T2.2 still requires first/general capture, Save and continuation routing, shared
+application operations and catalog integration, including committed-content
+reporting when index refresh fails. T2.3's single Web New action also remains.
+Final controller validation has not run and the slice has no ready PR.
 
 ## Consolidated Design
 
