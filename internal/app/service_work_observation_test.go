@@ -38,14 +38,14 @@ func TestWorkObservationContexts(t *testing.T) {
 	result := WorkObservation{}
 
 	for _, item := range []struct{ id, key, attempt string }{{"first", "PRJ-1", "one"}, {"second", "PRJ-2", "two"}} {
-		run := core.WorkflowInvocation{WorkflowIdentity: core.WorkflowIdentity{ID: item.id, UpdatedAt: at}, Status: "running", Attempts: []core.WorkflowAttempt{{ID: item.attempt, TaskKey: item.key, Outcome: "running", StartedAt: at}}}
+		run := core.WorkflowInvocation{WorkflowIdentity: core.WorkflowIdentity{ID: item.id, UpdatedAt: at}, Status: "running", Attempts: []core.WorkflowAttempt{{ID: item.attempt, TaskKey: item.key, Outcome: "running", StartedAt: at, Processes: []core.WorkflowProcess{{State: "running", Command: []string{"go", "test"}}}}}}
 		appendNativeWork(&result, run, tickets, records)
 	}
 
 	completed := core.WorkflowInvocation{WorkflowIdentity: core.WorkflowIdentity{ID: "complete", UpdatedAt: at}, Status: "completed", Outcome: "task_validated", Cursor: 1, Members: []core.WorkflowMember{{Admission: core.WorkflowPreviewMember{Key: "PRJ-1"}}}}
 	appendNativeWork(&result, completed, tickets, records)
 
-	if len(result.Current) != 2 || result.Current[0].Phase != "validating" || result.Current[1].Phase != "working" || len(result.Results) != 1 || result.Results[0].Confirmed != 0 {
+	if len(result.Current) != 2 || result.Current[0].Phase != "validating" || result.Current[0].Message != "Running go" || result.Current[1].Phase != "working" || len(result.Results) != 1 || result.Results[0].Confirmed != 0 {
 		t.Fatal(result)
 	}
 }

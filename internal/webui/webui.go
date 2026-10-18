@@ -358,7 +358,7 @@ func (h handler) writeAction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if h.artifactActionResult(w, r, request, result) {
+	if h.dashActionResult(w, r, request, result) || h.artifactActionResult(w, r, request, result) {
 		return
 	}
 
@@ -733,7 +733,7 @@ func ticketDetailRequest(r *http.Request, key string) *http.Request {
 }
 
 func (h handler) dashPageData(r *http.Request) (PageData, error) {
-	dash, err := h.provider.DashView(r.Context())
+	dash, err := h.readDashPage(r)
 	if err != nil {
 		return PageData{}, err
 	}
@@ -743,7 +743,7 @@ func (h handler) dashPageData(r *http.Request) (PageData, error) {
 		View:       "dash",
 		Title:      "Dash",
 		Revision:   dash.Revision,
-		RefreshURL: "/dash/fragment",
+		RefreshURL: "/dash/fragment" + dashRefreshQuery(r),
 		Dash:       dash,
 	}, nil
 }

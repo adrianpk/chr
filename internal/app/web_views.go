@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
-	"forge.adrianpk.com/chr/internal/tui"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -171,39 +170,6 @@ func webTicketCommentHeader(header string) *webui.TicketCommentView {
 	return &webui.TicketCommentView{Author: header}
 }
 
-func (p webViewProvider) DashView(ctx context.Context) (webui.DashView, error) {
-	operations := p.service(ctx)
-
-	board, err := operations.Board()
-	if err != nil {
-		return webui.DashView{}, err
-	}
-
-	readiness, err := loadTUIWorkReadiness(ctx, p.projectContext)
-	if err != nil {
-		return webui.DashView{}, err
-	}
-
-	observability, err := loadTUIObservability(ctx, p.env, p.projectContext, p.assetsFS)
-	if err != nil {
-		return webui.DashView{}, err
-	}
-
-	queue := readyWebQueue(board.Tickets)
-
-	view := webui.DashView{
-		Readiness:       webWorkReadinessView(readiness),
-		Queue:           webui.AgentQueueView{EligibleCount: len(queue), Tickets: queue},
-		Current:         webCurrentWorkView(observability.LatestEvent),
-		RecentEvents:    webAgentEventViews(observability.RecentEvents, 8),
-		LatestLoop:      webLoopRunView(observability.LatestLoop),
-		LatestExecution: webExecutionView(observability.LatestExecution),
-	}
-	view.Revision = webStableRevision(view)
-
-	return view, nil
-}
-
 func webBoardView(board core.Board) webui.BoardView {
 	columns := make([]webui.BoardColumnView, 0, len(board.Columns))
 	for _, column := range board.Columns {
@@ -269,94 +235,5 @@ func webTicketView(ticket core.IndexedTicket) webui.BoardTicketView {
 		RelativePath:      ticket.RelativePath,
 		SourceKind:        ticket.SourceKind,
 		SourceRef:         ticket.SourceRef,
-	}
-}
-
-func readyWebQueue(tickets []core.IndexedTicket) []webui.BoardTicketView {
-	queue := []webui.BoardTicketView{}
-
-	for _, ticket := range tickets {
-		if ticket.Status == core.TicketStatusReadyForDev {
-			queue = append(queue, webTicketView(ticket))
-		}
-	}
-
-	return queue
-}
-
-func webWorkReadinessView(view tui.WorkReadinessView) webui.WorkReadinessView {
-	diagnostics := make([]webui.WorkReadinessDiagnosticView, 0, len(view.Diagnostics))
-	for _, diagnostic := range view.Diagnostics {
-		diagnostics = append(diagnostics, webui.WorkReadinessDiagnosticView{
-			Code:            diagnostic.Code,
-			Severity:        diagnostic.Severity,
-			Detail:          diagnostic.Detail,
-			RepairAvailable: diagnostic.RepairAvailable,
-			RepairSafe:      diagnostic.RepairSafe,
-			RepairDetail:    diagnostic.RepairDetail,
-		})
-	}
-
-	return webui.WorkReadinessView{
-		Status:            view.Status,
-		WorkspaceMode:     view.WorkspaceMode,
-		IntegrationBranch: view.IntegrationBranch,
-		CanonicalRemote:   view.CanonicalRemote,
-		CurrentBranch:     view.CurrentBranch,
-		Diagnostics:       diagnostics,
-	}
-}
-
-func webCurrentWorkView(event tui.AgentEventView) webui.CurrentWorkView {
-	return webui.CurrentWorkView{
-		Phase:       event.Phase,
-		Message:     event.Message,
-		TicketKey:   event.TicketKey,
-		ExecutionID: event.ExecutionID,
-		LoopID:      event.LoopID,
-	}
-}
-
-func webAgentEventViews(events []tui.AgentEventView, limit int) []webui.AgentEventView {
-	if limit > 0 && len(events) > limit {
-		events = events[:limit]
-	}
-
-	views := make([]webui.AgentEventView, 0, len(events))
-	for _, event := range events {
-		views = append(views, webui.AgentEventView{
-			Time:        event.Time,
-			Level:       event.Level,
-			Phase:       event.Phase,
-			TicketKey:   event.TicketKey,
-			Message:     event.Message,
-			LoopID:      event.LoopID,
-			ExecutionID: event.ExecutionID,
-		})
-	}
-
-	return views
-}
-
-func webLoopRunView(loop tui.LoopRunView) webui.LoopRunView {
-	return webui.LoopRunView{
-		ID:             loop.ID,
-		Status:         loop.Status,
-		UpdatedAt:      loop.UpdatedAt,
-		EligibleCount:  loop.EligibleCount,
-		ProcessedCount: loop.ProcessedCount,
-		BlockedCount:   loop.BlockedCount,
-		FailedCount:    loop.FailedCount,
-		FailureReason:  loop.FailureReason,
-	}
-}
-
-func webExecutionView(execution tui.ExecutionView) webui.ExecutionView {
-	return webui.ExecutionView{
-		ID:            execution.ID,
-		TicketKey:     execution.TicketKey,
-		Status:        execution.Status,
-		UpdatedAt:     execution.UpdatedAt,
-		FailureReason: execution.FailureReason,
 	}
 }

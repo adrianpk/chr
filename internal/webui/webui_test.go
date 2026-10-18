@@ -966,11 +966,9 @@ func (testDataProvider) DashView(context.Context) (DashView, error) {
 		Readiness: WorkReadinessView{Status: "ready", WorkspaceMode: "worktree", CurrentBranch: "dev"},
 		Queue: AgentQueueView{
 			EligibleCount: 1,
-			Tickets: []BoardTicketView{
-				{Key: "CHR-1", Title: "Ready work", Status: "ready_for_dev", Priority: "high", Type: "feature"},
-			},
+			Items:         []WorkQueueItemView{{Key: "CHR-1", Title: "Ready work", Readiness: "ready"}},
 		},
-		Current: CurrentWorkView{Phase: "worker_started", Message: "worker started", TicketKey: "CHR-1"},
+		Current: []CurrentWorkView{{ID: "current", Phase: "worker_started", Message: "worker started", TicketKey: "CHR-1", Title: "Ready work", Status: "running"}},
 		RecentEvents: []AgentEventView{
 			{Time: "12:00:00", Phase: "worker_started", Message: "worker started", TicketKey: "CHR-1"},
 		},

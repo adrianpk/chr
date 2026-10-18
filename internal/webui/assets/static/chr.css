@@ -1444,3 +1444,27 @@ code {
 .case-plan-panel h3, .case-plan-panel p { margin: 0; overflow-wrap: anywhere; }
 .case-plan-panel .detail-actions { flex-wrap: wrap; }
 .case-plan-panel .action-form { margin: 0; }
+
+/* Work monitoring keeps independent contexts visible without blocking controls. */
+.dash-layout { display: grid; grid-template-columns: minmax(250px, 1fr) minmax(0, 2fr); gap: 16px; align-items: start; }
+.dash-queue { grid-row: 1 / span 2; }
+.dash-current, .dash-recent { grid-column: 2; }
+.dash-layout > *, .dash-context { min-width: 0; }
+.dash-panel__header { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.dash-context { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 12px; overflow-wrap: anywhere; }
+.dash-context h3 { margin: 0; font-size: 1rem; }
+.dash-state, .dash-summary, .dash-time { color: var(--muted); font-size: .8rem; }
+.dash-phase { font-size: 1.1rem; font-weight: 650; margin-block: 8px; }
+.dash-key { font-size: .8rem; color: var(--muted); }
+.dash-queue__items { max-height: 65vh; overflow-y: auto; }
+.dash-queue-item { padding-block: 10px; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+.dash-queue-item a { display: grid; gap: 5px; }
+.dash-queue-item p { margin-block: 5px; }
+.dash-events { max-height: 460px; overflow-y: auto; list-style: none; padding: 0; }
+.dash-event { padding-block: 10px; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+.dash-event time { color: var(--muted); font-size: .75rem; }
+.dash-event p { margin-block: 5px; }
+.dash-readiness { margin-top: 8px; font-size: .85rem; }
+.dash-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.dash-controls form { margin: 0; }
+@media (max-width: 760px) { .dash-layout { grid-template-columns: minmax(0, 1fr); } .dash-queue, .dash-current, .dash-recent { grid-column: 1; grid-row: auto; } }

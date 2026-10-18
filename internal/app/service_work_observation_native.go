@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core"
 )
@@ -93,6 +94,7 @@ func appendNativeWork(result *WorkObservation, run core.WorkflowInvocation, tick
 		current.ID, current.AttemptID, current.TicketKey = run.ID+":"+attempt.ID, attempt.ID, attempt.TaskKey
 		current.UpdatedAt = run.UpdatedAt
 		bindNativeWorkContext(&current, tickets, records)
+		bindNativeWorkProcess(&current, attempt)
 
 		result.Current = append(result.Current, current)
 		active = true
@@ -132,4 +134,19 @@ func appendNativeAttemptEvent(result *WorkObservation, id string, attempt core.W
 	}
 
 	result.Events = append(result.Events, WorkEvent{ID: id + ":" + attempt.ID + ":" + attempt.Outcome, ContextID: id + ":" + attempt.ID, TicketKey: attempt.TaskKey, Time: at, Phase: attempt.Purpose, Message: attempt.Outcome})
+}
+
+func bindNativeWorkProcess(current *WorkContext, attempt core.WorkflowAttempt) {
+	if current.Message != "" {
+		return
+	}
+
+	for index := len(attempt.Processes) - 1; index >= 0; index-- {
+		process := attempt.Processes[index]
+		if process.State == "running" && len(process.Command) > 0 {
+			current.Message = "Running " + filepath.Base(process.Command[0])
+
+			return
+		}
+	}
 }

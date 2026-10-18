@@ -100,17 +100,32 @@ func (s *WorkflowStore) observeWorkflowQueue(ctx context.Context, selection work
 			return err
 		}
 
-		if request.Offset == 0 {
-			for reason, count := range preview.Excluded {
-				observation.Excluded[reason] += count
-			}
-		}
+		appendWorkflowObservedQueue(observation, preview, request.Offset == 0)
 
-		observation.Queue = append(observation.Queue, preview.Members...)
 		if preview.NextOffset < 0 {
 			return nil
 		}
 
 		request.Offset = preview.NextOffset
+	}
+}
+
+func appendWorkflowObservedQueue(observation *WorkflowWorkObservation, preview WorkflowPreview, first bool) {
+	if first {
+		for reason, count := range preview.Excluded {
+			if reason != "slice_owned" {
+				observation.Excluded[reason] += count
+			}
+		}
+	}
+
+	for _, member := range preview.Members {
+		if member.Phase != "pending" {
+			observation.Excluded["phase_"+member.Phase]++
+
+			continue
+		}
+
+		observation.Queue = append(observation.Queue, member)
 	}
 }

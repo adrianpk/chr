@@ -227,30 +227,32 @@ type TicketCommentView struct {
 	Body      string
 }
 
-// DashView is the read-only dashboard projection rendered by the Web UI.
+// DashView observes queue, independent active contexts and retained results.
 type DashView struct {
-	Readiness       WorkReadinessView
-	Queue           AgentQueueView
-	Current         CurrentWorkView
-	RecentEvents    []AgentEventView
-	LatestLoop      LoopRunView
-	LatestExecution ExecutionView
-	Revision        string
+	Exclusions                      []string
+	Readiness                       WorkReadinessView
+	Queue                           AgentQueueView
+	Current, Results                []CurrentWorkView
+	RecentEvents                    []AgentEventView
+	Warnings                        []string
+	Authority, ObservedAt, Revision string
+	Unavailable                     bool
 }
 
-// AgentQueueView summarizes currently eligible work.
+// AgentQueueView describes one bounded page without changing native order.
 type AgentQueueView struct {
-	EligibleCount int
-	Tickets       []BoardTicketView
+	EligibleCount, TotalCount int
+	Items                     []WorkQueueItemView
+	NextURL, PreviousURL      string
 }
 
-// CurrentWorkView summarizes the most recent active work signal.
+// WorkQueueItemView retains readiness from its shared selection owner.
+type WorkQueueItemView struct{ Key, Title, Scope, Readiness, Reason, URL string }
+
+// CurrentWorkView keeps one invocation/attempt/ticket association visible.
 type CurrentWorkView struct {
-	Phase       string
-	Message     string
-	TicketKey   string
-	ExecutionID string
-	LoopID      string
+	ID, Kind, Title, Status, Phase, Message, TicketKey, Scope, UpdatedAt, ActivityAt, URL string
+	Validated, Confirmed, Remaining, Eligible, Processed, Blocked, Failed                 int
 }
 
 // WorkReadinessView is the Web UI projection of work readiness state.
@@ -273,37 +275,8 @@ type WorkReadinessDiagnosticView struct {
 	RepairDetail    string
 }
 
-// AgentEventView is one recent agent event row.
-type AgentEventView struct {
-	Time        string
-	Level       string
-	Phase       string
-	TicketKey   string
-	Message     string
-	LoopID      string
-	ExecutionID string
-}
-
-// LoopRunView summarizes the latest loop run.
-type LoopRunView struct {
-	ID             string
-	Status         string
-	UpdatedAt      string
-	EligibleCount  int
-	ProcessedCount int
-	BlockedCount   int
-	FailedCount    int
-	FailureReason  string
-}
-
-// ExecutionView summarizes the latest execution.
-type ExecutionView struct {
-	ID            string
-	TicketKey     string
-	Status        string
-	UpdatedAt     string
-	FailureReason string
-}
+// AgentEventView is one context-bound event with a stable identity.
+type AgentEventView struct{ ID, ContextID, Time, Phase, TicketKey, Message string }
 
 // ArtifactDetailRequest identifies one read-only artifact detail request.
 type ArtifactDetailRequest struct {

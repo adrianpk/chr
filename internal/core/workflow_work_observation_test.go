@@ -30,7 +30,7 @@ func TestWorkflowWorkObservation(t *testing.T) {
 	for range 4 {
 		group.Go(func() {
 			observed, err := store.InspectWorkflowWork(t.Context(), WorkflowPreviewTarget{})
-			if err != nil || !reflect.DeepEqual(observed.Queue, expected.Members) {
+			if err != nil || observed.Excluded["slice_owned"] != 0 || !reflect.DeepEqual(observed.Queue, expected.Members) {
 				t.Errorf("observation differs from shared selection: %v", err)
 			}
 		})
