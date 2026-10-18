@@ -3,9 +3,6 @@ package app
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	"os"
-	"path/filepath"
 	"slices"
 	"strings"
 
@@ -31,20 +28,6 @@ func (p webViewProvider) workflowTicketRecords(ctx context.Context) ([]core.Work
 	slices.SortFunc(records, func(a, b core.WorkflowRecord) int { return strings.Compare(a.Task.Key, b.Task.Key) })
 
 	return records, err
-}
-
-func (p webViewProvider) workflowTicketCards(ctx context.Context) ([]webui.BoardTicketView, bool, error) {
-	records, err := p.workflowTicketRecords(ctx)
-	if err != nil {
-		return nil, false, err
-	}
-
-	views := make([]webui.BoardTicketView, 0, min(len(records), 128))
-	for _, record := range records[:min(len(records), 128)] {
-		views = append(views, webui.BoardTicketView{Key: record.Task.Key, Title: webWorkflowTicketTitle(record), Status: record.Task.Status, UseCase: record.Task.UseCase, Slice: record.Task.SliceID})
-	}
-
-	return views, len(records) > 128, nil
 }
 
 func (p webViewProvider) workflowTicketDetail(ctx context.Context, key string) (webui.TicketDetailView, bool, error) {
@@ -74,15 +57,4 @@ func webWorkflowTicketTitle(record core.WorkflowRecord) string {
 	}
 
 	return record.Task.Key
-}
-
-func (p webViewProvider) workflowBoardBase(ctx context.Context) (core.Board, error) {
-	if p.workflowEnabled() {
-		legacy := filepath.Join(p.projectContext.ProjectDir, core.DirectoryName, core.UserDirectoryName, "tickets")
-		if _, err := os.Stat(legacy); errors.Is(err, os.ErrNotExist) {
-			return core.Board{ProjectID: p.projectContext.ProjectID}, nil
-		}
-	}
-
-	return p.service(ctx).Board()
 }

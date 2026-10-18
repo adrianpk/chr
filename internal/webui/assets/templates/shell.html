@@ -88,19 +88,12 @@
 {{end}}
 
 {{define "board_content.html"}}
-{{if .Board.WorkflowTickets}}
-<section aria-label="Native workflow tickets"><h2>Native workflow tickets</h2>
-  {{range .Board.WorkflowTickets}}{{template "ticket_card.html" .}}{{end}}
-  {{if .Board.WorkflowMore}}<p>Showing the first 128 native tickets. Use an explicit extent or retained workflow to continue.</p>{{end}}
-</section>
-{{end}}
 {{template "revision_marker.html" .}}
 {{if .Board.Attention}}
 <section class="attention-strip" aria-label="Attention tickets">
   {{range .Board.Attention}}
     <article class="ticket-card ticket-card--attention">
-      <div class="ticket-card__key">{{.Ticket.Key}}</div>
-      <h2>{{.Ticket.Title}}</h2>
+      {{template "ticket_card.html" .Ticket}}
       {{range .Reasons}}<p class="ticket-card__reason">{{.}}</p>{{end}}
     </article>
   {{end}}
@@ -118,11 +111,18 @@
           {{template "ticket_card.html" .}}
         {{end}}
       {{else}}
-        <p class="empty-state">No tickets in this column.</p>
+        <p class="empty-state">No tickets on this page in this column.</p>
       {{end}}
     </section>
   {{end}}
 </div>
+{{if or .Board.PreviousURL .Board.NextURL}}
+<nav class="detail-actions" aria-label="Board pages">
+  {{if .Board.PreviousURL}}<a class="button" href="{{.Board.PreviousURL}}">Previous page</a>{{end}}
+  <span>{{.Board.LoadedCount}} loaded · {{.Board.TotalCount}} total · Column counts include all pages</span>
+  {{if .Board.NextURL}}<a class="button" href="{{.Board.NextURL}}">Next page</a>{{end}}
+</nav>
+{{end}}
 {{end}}
 
 {{define "ticket_card.html"}}

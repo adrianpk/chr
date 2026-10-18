@@ -4,6 +4,8 @@ import "time"
 
 // IndexedTicket describes a package boundary value.
 type IndexedTicket struct {
+	NativeWorkflow    bool
+	AttentionReasons  []string
 	ProjectID         string
 	Namespace         string
 	Path              string

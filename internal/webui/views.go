@@ -5,7 +5,7 @@ import "context"
 // DataProvider loads read-only Web UI views from the application layer.
 type DataProvider interface {
 	ProjectView(context.Context) (ProjectView, error)
-	BoardView(context.Context) (BoardView, error)
+	BoardView(context.Context, BoardRequest) (BoardView, error)
 	TicketDetailView(context.Context, TicketDetailRequest) (TicketDetailView, error)
 	DashView(context.Context) (DashView, error)
 	CatalogView(context.Context, string) (ArtifactCatalogView, error)
@@ -48,7 +48,7 @@ func (p staticDataProvider) ProjectView(context.Context) (ProjectView, error) {
 	}, nil
 }
 
-func (p staticDataProvider) BoardView(context.Context) (BoardView, error) {
+func (p staticDataProvider) BoardView(context.Context, BoardRequest) (BoardView, error) {
 	return BoardView{ProjectID: p.shell.ProjectID, Revision: "static-board"}, nil
 }
 
@@ -97,10 +97,16 @@ type ProjectView struct {
 	Revision   string
 }
 
+// BoardRequest selects one bounded page of canonical Board tickets.
+type BoardRequest struct {
+	Offset int
+}
+
 // BoardView is the read-only board projection rendered by the Web UI.
 type BoardView struct {
-	WorkflowTickets []BoardTicketView
-	WorkflowMore    bool
+	LoadedCount     int
+	NextURL         string
+	PreviousURL     string
 	ProjectID       string
 	TotalCount      int
 	NormalCount     int

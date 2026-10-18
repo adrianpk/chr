@@ -910,7 +910,7 @@ func (testDataProvider) ProjectView(context.Context) (ProjectView, error) {
 	}, nil
 }
 
-func (testDataProvider) BoardView(context.Context) (BoardView, error) {
+func (testDataProvider) BoardView(context.Context, BoardRequest) (BoardView, error) {
 	return BoardView{
 		ProjectID:      "project-1",
 		TotalCount:     1,

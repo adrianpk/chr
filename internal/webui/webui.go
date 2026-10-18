@@ -11,6 +11,7 @@ import (
 	"io/fs"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -665,9 +666,22 @@ func (h handler) projectPageData(r *http.Request) (PageData, error) {
 }
 
 func (h handler) boardPageData(r *http.Request) (PageData, error) {
-	board, err := h.provider.BoardView(r.Context())
+	offset := 0
+	if value := r.URL.Query().Get("offset"); value != "" {
+		var err error
+		offset, err = strconv.Atoi(value)
+		if err != nil || offset < 0 || offset > 4096 {
+			return PageData{}, fmt.Errorf("invalid Board page offset")
+		}
+	}
+	board, err := h.provider.BoardView(r.Context(), BoardRequest{Offset: offset})
 	if err != nil {
 		return PageData{}, err
+	}
+
+	refresh := "/board/fragment"
+	if offset != 0 {
+		refresh += "?offset=" + strconv.Itoa(offset)
 	}
 
 	return PageData{
@@ -675,7 +689,7 @@ func (h handler) boardPageData(r *http.Request) (PageData, error) {
 		View:       "board",
 		Title:      "Board",
 		Revision:   board.Revision,
-		RefreshURL: "/board/fragment",
+		RefreshURL: refresh,
 		Board:      board,
 	}, nil
 }

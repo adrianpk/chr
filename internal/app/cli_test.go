@@ -339,7 +339,7 @@ func TestWebServeBoardUsesProjectTickets(t *testing.T) {
 	projectContext := newWebServeBoardProjectContext(t, projectDir)
 	provider := newWebServeBoardTestProvider(projectDir, env, projectContext)
 
-	board, err := provider.BoardView(t.Context())
+	board, err := provider.BoardView(t.Context(), webui.BoardRequest{})
 	if err != nil {
 		t.Fatalf("BoardView returned error: %v", err)
 	}

@@ -5,6 +5,7 @@ import (
 	"context"
 	"io/fs"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -39,20 +40,24 @@ func (p webViewProvider) ProjectView(context.Context) (webui.ProjectView, error)
 	return view, nil
 }
 
-func (p webViewProvider) BoardView(ctx context.Context) (webui.BoardView, error) {
-	board, err := p.workflowBoardBase(ctx)
+func (p webViewProvider) BoardView(ctx context.Context, request webui.BoardRequest) (webui.BoardView, error) {
+	board, err := p.service(ctx).ReadTicketBoard(request.Offset)
 	if err != nil {
 		return webui.BoardView{}, err
 	}
 
 	view := webBoardView(board)
-	if p.workflowEnabled() {
-		view.WorkflowTickets, view.WorkflowMore, err = p.workflowTicketCards(ctx)
-		if err != nil {
-			return webui.BoardView{}, err
-		}
+	view.LoadedCount = board.LoadedCount
+	if board.NextOffset >= 0 {
+		view.NextURL = "/board?offset=" + strconv.Itoa(board.NextOffset)
 	}
-	view.Revision = webStableRevision(view)
+	if request.Offset > 0 {
+		view.PreviousURL = "/board?offset=" + strconv.Itoa(max(0, request.Offset-core.WorkflowPageLimit))
+	}
+	view.Revision = webStableRevision(struct {
+		Source string
+		Offset int
+	}{board.Revision, request.Offset})
 
 	return view, nil
 }
