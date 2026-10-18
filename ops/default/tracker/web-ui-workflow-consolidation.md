@@ -17,7 +17,7 @@ Model: [Web UI and Workflow Model](../spec/stable/web-ui-workflow-consolidation-
 Implementation authorization: granted on 2026-10-18 for this exact set through
 Looper, including controller-owned Rebase + Fast-forward integration into dev.
 
-Active slice: Slice 11, Live work Dash; implementation complete in PR #408, awaiting exact-HEAD validation and controller integration.
+Active slice: Slice 12, Consolidated usability review; T12.1.
 The controller checkpoint and tickets own subsequent progress.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.
@@ -208,7 +208,7 @@ Validation: Verify short/long plan previews, exact full document selection, no b
 
 ### Slice 11: Live work Dash
 
-Ticket: [TKT-20261017202340](../ticket/in_progress/20261017202340-implement-live-agent-work-dash.md).
+Ticket: [TKT-20261017202340](../ticket/solved/20261017202340-implement-live-agent-work-dash.md).
 
 Prerequisite: Slice 10 integrated; execution authority for this set.
 

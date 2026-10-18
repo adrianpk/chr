@@ -1,6 +1,6 @@
 # Slice 11: Live Work Dash
 
-Status: reviewing
+Status: delivered
 Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
@@ -91,10 +91,13 @@ the layout uses two desktop columns and one narrow column without document-width
 overflow. Running observations retain two independent contexts and one deduplicated
 event; completed observations retain two results with no event requirement.
 
-Final clean-HEAD validation is pending at this report-reference commit. The
-canonical PR and controller ledger record required `make verify`, affected race
-checks, the Dash browser check and whitespace validation after PR-reference
-follow-up. Scheduled exhaustive verification remains a separate evidence boundary.
+PR #408 was verified merged into dev at
+`f6a01cf8ec95012109fa78bdf06629233c5088db` on 2026-10-18T21:11:16Z.
+Controller validation `J545QYBCFTMBAQ3CJCQDK2XLCO` passed the exact clean HEAD
+with `make verify`, the focused core/app/webui race selector above, the Dash
+browser command without capture output, and `git diff --check`, in that order.
+The canonical PR records all four exact commands. Scheduled exhaustive
+verification remains a separate evidence boundary.
 
 ## Risks and Follow-ups
 

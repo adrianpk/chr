@@ -21,7 +21,7 @@ slices through Looper, including canonical slice PRs and controller-owned
 Rebase + Fast-forward merges into dev. The existing Telegram run is separate.
 Use one development worker and one canonical open slice PR for this set.
 
-Active slice: Slice 11, Live work Dash; implementation complete in PR #408, awaiting exact-HEAD validation and controller integration.
+Active slice: Slice 12, Consolidated usability review; T12.1.
 The controller checkpoint and tickets own subsequent progress.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.
@@ -239,7 +239,7 @@ Validation: Verify short/long plan previews, exact full document selection, no b
 
 ### Slice 11: Live work Dash
 
-Source: [TKT-20261017202340](../ticket/in_progress/20261017202340-implement-live-agent-work-dash.md).
+Source: [TKT-20261017202340](../ticket/solved/20261017202340-implement-live-agent-work-dash.md).
 
 Dependency: Slice 10 integrated into dev; use all earlier shared owners.
 

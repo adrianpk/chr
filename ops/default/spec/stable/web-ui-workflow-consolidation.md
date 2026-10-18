@@ -47,7 +47,7 @@ application behavior.
 | [TKT-20261017195741](../../ticket/in_progress/20261017195741-contextualize-plan-generation-and-check-source-readiness.md) | Contextual generation and sufficient discovery | 8, model |
 | [TKT-20261017200232](../../ticket/solved/20261017200232-associate-ticket-tracking-with-each-plan-revision.md) | Required internal ordering document per plan revision | 9, model |
 | [TKT-20261017201015](../../ticket/solved/20261017201015-restore-board-page-loading.md) | Board, shared ticket modal, moves and comments | 10, model |
-| [TKT-20261017202340](../../ticket/in_progress/20261017202340-implement-live-agent-work-dash.md) | Live work observation | 11 |
+| [TKT-20261017202340](../../ticket/solved/20261017202340-implement-live-agent-work-dash.md) | Live work observation | 11 |
 
 Pi integration and the separate Telegram message review are outside this set.
 Existing LAN access, branding, section titles and hidden project diagnostics

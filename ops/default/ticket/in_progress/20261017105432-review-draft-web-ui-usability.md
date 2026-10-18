@@ -220,7 +220,7 @@ phase/activity and recent/final results as the operational view.
 The Web projection is partial: it does not render the latest loop/execution
 results it loads or expose the loaded native workflow page. Capture a working
 live view using canonical tickets, workflow state and events in
-[Implement Dash as a live view of agent work](20261017202340-implement-live-agent-work-dash.md).
+[Implement Dash as a live view of agent work](../solved/20261017202340-implement-live-agent-work-dash.md).
 The tracker remains an internal order document, with no processing-state
 synchronization. Monitoring must not block behind an active-action overlay,
 require a TUI process, start work as a side effect or mix concurrent runners'

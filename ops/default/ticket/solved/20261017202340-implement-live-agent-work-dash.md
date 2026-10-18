@@ -1,7 +1,7 @@
 ---
 id: TKT-20261017202340
 title: "Implement Dash as a live view of agent work"
-status: in_progress
+status: solved
 kind: task
 severity: medium
 priority: normal
@@ -14,13 +14,15 @@ branch: feat/slice-11-work-dash
 pr: "#408"
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
+closed_at: 2026-10-18T21:11:16Z
+resolution: fixed
 ---
 
 # Implement Dash as a Live View of Agent Work
 
 ## Outcome and Authorization
 
-Part of [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
+Part of [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md).
 Dash is the operational view of what CHR's agent harness is doing as it
 processes tickets and their owning workflow. Show the ready queue, current
 execution and phase, recent activity and eventual result using the same domain
@@ -28,7 +30,7 @@ data that informs the TUI. The maintainer requested a ticket definition based
 on the existing code and gallery, not application implementation in this session.
 
 The internal tracker only defines ticket order under its
-[separate requirement](../solved/20261017200232-associate-ticket-tracking-with-each-plan-revision.md).
+[separate requirement](20261017200232-associate-ticket-tracking-with-each-plan-revision.md).
 Dash reads actual progress from tickets, invocations, attempts, events and
 receipts. It must not recreate processing-state maintenance in that Markdown
 artifact or depend on the development controller used to build CHR.
@@ -165,7 +167,7 @@ Any retained control must keep its existing target, confirmation and guards,
 and refreshes must never invoke it.
 
 Coordinate the common data-loading repair with the
-[Board ticket](../solved/20261017201015-restore-board-page-loading.md) without duplicating
+[Board ticket](20261017201015-restore-board-page-loading.md) without duplicating
 its Kanban or ticket-editor work. Do not add unrelated service management,
 configuration editors or a Web-visible tracker document.
 
@@ -215,3 +217,5 @@ strict lint, HTTP and owned desktop/narrow browser checks passed. The
 [Slice 11 report](../../report/slices/web-ui-workflow-consolidation/slice-11-work-dash.md)
 owns implementation, captures and validation evidence. Final exact-HEAD checks
 follow canonical PR-reference commits. [PR #408](https://forge.adrianpk.com/adrianpk/chr/pulls/408) targets dev; verified controller integration is pending.
+
+PR #408 was verified merged into dev at `f6a01cf8ec95012109fa78bdf06629233c5088db` on 2026-10-18T21:11:16Z. Controller validation `J545QYBCFTMBAQ3CJCQDK2XLCO` passed all four exact-HEAD commands; Slice 11 is delivered.
