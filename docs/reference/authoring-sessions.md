@@ -453,6 +453,36 @@ observed source guard. Web mutations compare revisions in the owning operation
 after receipt lookup, without a separate stale-source preflight. Confirmed Web
 results expose a committed operation and any pending catalog refresh.
 
+## Bound Authoring Dump Outputs
+
+Bound authoring continuations resolve general dump outputs through the same
+project-wide destination as ordinary captures. The first output uses the default
+namespace or adopts the sole existing general identity. Later sessions append
+contributions to that identity, retaining each session's original raw input in
+its own namespace. Explicit refinement replaces the observed editable body and
+retains its previous body and metadata in immutable history.
+
+The continuation prepares dump, history, project-reference, session, transcript,
+provenance and receipt images before publishing any of them. One v2 authoring
+journal owns the complete change set. Other artifact targets retain their v1
+journal format. Reopening recovers the complete transaction, and the existing
+continuation receipt returns the original result before checking later edits or
+invoking a provider again.
+
+Session snapshots resolve retained dump aliases across namespaces. Their source
+hash includes the alias images, resolved body and metadata, and project metadata.
+Providers and native work descriptions receive the resolved body. The session's
+namespace still owns its raw capture, quizzes, specifications, plans and proposed
+native records; a project-wide dump reference does not move those records.
+A changed shared dump requires a fresh session observation before continuation.
+The owner also rechecks the project dump inventory after provider preparation.
+
+A question-only creation may retain raw input before producing its first dump.
+Its bound continuation can publish that output only when every orphaned raw
+component is one of its exact observed inputs. Unrelated raw-only inventories,
+multiple general candidates and conflicting project references still require
+explicit reconciliation.
+
 ## Project Dump Reconciliation
 
 Project metadata at `.chr/default/project.md` supports an optional

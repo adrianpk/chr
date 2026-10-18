@@ -26,14 +26,18 @@ type AuthoringArtifactObservation struct {
 
 // AuthoringSnapshot contains bounded canonical inputs and their complete image guard.
 type AuthoringSnapshot struct {
-	Session        AuthoringSession
-	SessionRef     string
-	SourceHash     string
-	SessionHash    string
-	TranscriptHash string
-	Events         []AssistedTranscriptEvent
-	Artifacts      []AuthoringArtifactObservation
-	Question       *AuthoringQuestionBinding
+	Session             AuthoringSession
+	SessionRef          string
+	SourceHash          string
+	SessionHash         string
+	TranscriptHash      string
+	Events              []AssistedTranscriptEvent
+	Artifacts           []AuthoringArtifactObservation
+	Question            *AuthoringQuestionBinding
+	projectMetadataHash string
+	dumpRevision        string
+	artifactBytes       int
+	dumpAliases         []AuthoringArtifactObservation
 }
 
 // AuthoringContinuationAction is one supported shared authoring transition.

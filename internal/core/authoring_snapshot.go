@@ -87,9 +87,15 @@ func (r *fileAuthoringSessionRepository) readAuthoringArtifacts(snapshot *Author
 		return errors.New("authoring artifact context capacity exceeded")
 	}
 
-	total := 0
-
 	for _, ref := range refs {
+		if ref.Kind == AuthoringArtifactKindDump {
+			if _, err := r.readAuthoringDumpObservations(snapshot, ref, images); err != nil {
+				return err
+			}
+
+			continue
+		}
+
 		if !validAuthoringArtifactRef(snapshot.Session.Namespace, ref) {
 			return ErrWorkflowConflict
 		}
@@ -104,12 +110,24 @@ func (r *fileAuthoringSessionRepository) readAuthoringArtifacts(snapshot *Author
 			return err
 		}
 
-		total += len(body) + len(metadata)
-		if total > 1024*1024 {
+		snapshot.artifactBytes += len(body) + len(metadata)
+		if snapshot.artifactBytes > WorkflowFileLimit {
 			return errors.New("authoring canonical context exceeds 1 MiB")
 		}
 
 		snapshot.Artifacts = append(snapshot.Artifacts, AuthoringArtifactObservation{Ref: ref, SourceHash: workflowHash(body), MetadataHash: workflowHash(metadata), Body: string(body)})
+	}
+
+	return validateAuthoringArtifactContext(*snapshot)
+}
+
+func validateAuthoringArtifactContext(snapshot AuthoringSnapshot) error {
+	if len(snapshot.Artifacts)+len(snapshot.dumpAliases) > 32 {
+		return errors.New("authoring artifact context capacity exceeded")
+	}
+
+	if snapshot.artifactBytes > WorkflowFileLimit {
+		return errors.New("authoring canonical context exceeds 1 MiB")
 	}
 
 	return nil
@@ -117,7 +135,11 @@ func (r *fileAuthoringSessionRepository) readAuthoringArtifacts(snapshot *Author
 
 func authoringSnapshotDigest(snapshot AuthoringSnapshot) (string, error) {
 	guards := []string{snapshot.SessionHash, snapshot.TranscriptHash}
-	for _, artifact := range snapshot.Artifacts {
+	if snapshot.projectMetadataHash != "" {
+		guards = append(guards, snapshot.projectMetadataHash)
+	}
+
+	for _, artifact := range append(snapshot.Artifacts[:len(snapshot.Artifacts):len(snapshot.Artifacts)], snapshot.dumpAliases...) {
 		guards = append(guards, artifact.Ref.Path, artifact.SourceHash, artifact.MetadataHash)
 	}
 

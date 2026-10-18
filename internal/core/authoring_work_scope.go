@@ -158,7 +158,7 @@ func validateAuthoringWorkPaths(scope AuthoringWorkScope) error {
 		return ErrWorkflowConflict
 	}
 
-	if !filepath.IsLocal(scope.DescriptionRef) || filepath.Clean(scope.DescriptionRef) != scope.DescriptionRef || (!validAuthoringArtifactRef(scope.Namespace, AuthoringArtifactRef{Path: scope.DescriptionRef, Kind: AuthoringArtifactKindSpec}) && !validAuthoringArtifactRef(scope.Namespace, AuthoringArtifactRef{Path: scope.DescriptionRef, Kind: AuthoringArtifactKindDump})) {
+	if !filepath.IsLocal(scope.DescriptionRef) || filepath.Clean(scope.DescriptionRef) != scope.DescriptionRef || (!validAuthoringArtifactRef(scope.Namespace, AuthoringArtifactRef{Path: scope.DescriptionRef, Kind: AuthoringArtifactKindSpec}) && ValidateProjectDumpReference(scope.DescriptionRef) != nil) {
 		return ErrWorkflowConflict
 	}
 

@@ -133,9 +133,16 @@ func telegramAuthoringCheckArtifacts(t *testing.T, operations service, result co
 		t.Fatalf("snapshot=%+v", snapshot)
 	}
 
+	project, err := core.ObserveProjectDump(t.Context(), operations.projectContext.ProjectDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	for _, artifact := range snapshot.Artifacts {
-		if !strings.HasPrefix(artifact.Ref.Path, "ops/original/") || artifact.SourceHash == "" {
-			t.Fatalf("noncanonical artifact: %+v", artifact)
+		telegramAuthoringCheckArtifactNamespace(t, artifact.Ref, project.Destination)
+
+		if artifact.SourceHash == "" {
+			t.Fatal("artifact source hash is absent", artifact.Ref)
 		}
 
 		if _, err := os.Stat(filepath.Join(operations.projectContext.ProjectDir, filepath.Dir(artifact.Ref.Path), "extension", "chr")); err != nil {
@@ -299,4 +306,16 @@ func TestTelegramAuthoringServiceClarification(t *testing.T) {
 	}
 
 	telegramAuthoringServiceNoWork(t, operations)
+}
+
+func telegramAuthoringCheckArtifactNamespace(t *testing.T, ref core.AuthoringArtifactRef, destination string) {
+	t.Helper()
+
+	if ref.Kind == core.AuthoringArtifactKindDump && ref.Role == core.AuthoringArtifactRoleOutput {
+		if ref.Path != destination {
+			t.Fatal("dump output does not match project destination", ref)
+		}
+	} else if !strings.HasPrefix(ref.Path, "ops/original/") {
+		t.Fatalf("noncanonical artifact: %+v", ref)
+	}
 }
