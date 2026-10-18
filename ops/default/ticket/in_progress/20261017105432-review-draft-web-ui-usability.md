@@ -206,7 +206,7 @@ execution-order and delivery guards rather than copying another lifecycle.
 
 The loading and modal captures have been consolidated into one maintained
 ticket with a self-contained visual and functional target and acceptance:
-[Implement the Kanban Board and shared ticket modal](20261017201015-restore-board-page-loading.md).
+[Implement the Kanban Board and shared ticket modal](../solved/20261017201015-restore-board-page-loading.md).
 The redundant preliminary modal file has been removed. This remains planning
 and ticket capture, without implementation or service changes.
 

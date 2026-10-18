@@ -163,7 +163,7 @@ Any retained control must keep its existing target, confirmation and guards,
 and refreshes must never invoke it.
 
 Coordinate the common data-loading repair with the
-[Board ticket](20261017201015-restore-board-page-loading.md) without duplicating
+[Board ticket](../solved/20261017201015-restore-board-page-loading.md) without duplicating
 its Kanban or ticket-editor work. Do not add unrelated service management,
 configuration editors or a Web-visible tracker document.
 

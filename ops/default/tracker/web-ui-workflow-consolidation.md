@@ -61,7 +61,7 @@ preserve those ownership and stale-write boundaries.
 
 ### Slice 1: Board and shared ticket modal
 
-Ticket: [TKT-20261017201015](../ticket/in_progress/20261017201015-restore-board-page-loading.md).
+Ticket: [TKT-20261017201015](../ticket/solved/20261017201015-restore-board-page-loading.md).
 
 Prerequisite: approved committed specification/model/plan/tracker and explicit execution authority.
 

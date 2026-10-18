@@ -1,7 +1,9 @@
 ---
 id: TKT-20261017201015
 title: "Implement the Kanban Board and shared ticket modal"
-status: in_progress
+status: solved
+resolution: fixed
+closed_at: 2026-10-18T10:15:07Z
 kind: task
 severity: medium
 priority: normal
@@ -9,7 +11,7 @@ scope: ui
 tags: board, kanban, tickets, modal
 source: chat
 reported_at: 2026-10-17T20:10:15Z
-commits: [02c24fcfdc174a41755d89259810300e369d901d, f6907f9fa8b6644225a07ce2245c9aeb28299f97]
+commits: [02c24fcfdc174a41755d89259810300e369d901d, f6907f9fa8b6644225a07ce2245c9aeb28299f97, 2083b518f34574a001d98ac3b5e83d2286e8c581]
 branch: feat/slice-1-web-board
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
@@ -19,7 +21,7 @@ started_at: 2026-10-18T08:34:50Z
 
 ## Outcome and Authorization
 
-Part of [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
+Part of [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md).
 Deliver a usable project Board: tickets appear as readable cards in lifecycle
 columns, opening a card edits that ticket, and New opens the same modal to
 create a ticket from scratch. This ticket consolidates the Board loading defect
@@ -206,7 +208,7 @@ shared create/edit modal, allowed moves and comments. Keep unrelated Dash
 failures, global navigation changes, multi-board administration, new messaging
 systems and tracker renaming outside it. The internal tracker remains absent
 from the Web UI under its
-[separate requirement](20261017200232-associate-ticket-tracking-with-each-plan-revision.md).
+[separate requirement](../in_progress/20261017200232-associate-ticket-tracking-with-each-plan-revision.md).
 
 One maintained ticket replaces the preliminary loading and modal captures.
 Implementation must remain consistent with the
@@ -256,11 +258,18 @@ transitions have a read-only reason. Regression fixes preserve nested metadata,
 earlier comments in a final Comments section, native status/case identity during
 metadata edits, and key allocation across namespaces and native envelopes.
 
+T1.3 is implemented in `2083b518f34574a001d98ac3b5e83d2286e8c581`.
+The shared normal/maximized New/Edit form now presents all retained fields with
+explicit ownership constraints. Selector saves and drag moves share revision
+guards; independent comments retain dirty form input. Conditional refresh keeps
+scroll and selection. Owned browser checks cover both authority modes, creation,
+comments, allowed/rejected/stale moves, conflict recovery, focus, maximize/restore
+and desktop/narrow layouts at DPR 1 and 100% zoom.
+
 The [Slice 1 report](../../report/slices/web-ui-workflow-consolidation/slice-1-web-board.md)
-records the exact successful focused race, changed-code lint, signature and
-whitespace commands. Final controller validation has not run. T1.3 shared
-modal, interactions, read-only presentation and browser evidence remain;
-the ticket is still in progress and no slice PR is ready.
+records successful task checks and screenshots. All three tasks are implemented;
+the ticket is solved under the approved pre-validation closure instruction.
+Final clean-HEAD certification and integration are recorded by the controller.
 
 ## Consolidated Design
 

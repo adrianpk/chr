@@ -108,7 +108,7 @@ following contracts define its delivered behavior and required evidence.
 
 ### Slice 1: Board and shared ticket modal
 
-Source: [TKT-20261017201015](../ticket/in_progress/20261017201015-restore-board-page-loading.md).
+Source: [TKT-20261017201015](../ticket/solved/20261017201015-restore-board-page-loading.md).
 
 Dependency: approved and committed planning inputs.
 
