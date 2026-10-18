@@ -39,6 +39,13 @@ func SynthesizeAssistedArtifact(ctx context.Context, opts AssistedArtifactSynthe
 		return result, err
 	}
 
+	if opts.TargetKind == AuthoringArtifactKindDump {
+		var cancel context.CancelFunc
+
+		ctx, cancel = context.WithTimeout(ctx, 90*time.Second)
+		defer cancel()
+	}
+
 	err = WithAuthoringMutation(ctx, opts.ProjectDir, func(ctx context.Context) error { result, err = synthesizeAssistedArtifact(ctx, opts); return err })
 
 	return result, err

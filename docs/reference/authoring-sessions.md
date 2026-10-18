@@ -483,6 +483,37 @@ component is one of its exact observed inputs. Unrelated raw-only inventories,
 multiple general candidates and conflicting project references still require
 explicit reconciliation.
 
+## Assisted Dump Synthesis
+
+`SynthesizeAssistedArtifact` routes a dump target through the canonical dump
+change builder, joining its source guard, session, provenance, body, metadata,
+raw capture, history, project reference and receipt in one v2 journal. This path
+requires the existing file authoring repository for the same project and its
+prepared `curated-summary.md` source. Source and session images are compared
+before publication. Other synthesis targets retain their existing writers.
+
+`OperationID` may bind an explicit retry. When omitted, the owner derives it
+from the project root, session identity, source reference and semantic synthesis
+arguments. Summary preparation timestamps, session update timestamps and accumulated
+outputs/provenance do not allocate another capture. The existing source must exactly match the
+requested summary, including the retained preparation timestamp. Dump captures
+remain bounded to 64 KiB, titles to 512 bytes and the whole operation to 90 seconds.
+
+The `chr-assisted-dump-receipt/v1` record uses the shared authoring receipt
+directory and retains the original session, reference and committed body/metadata
+hashes. The same journal preserves those committed images in content-addressed
+dump history. Receipt replay verifies the retained images and returns the original
+content even after later independent edits; it never repeats curation or capture.
+The result's `Mutation` exposes that immutable proof. Receipt storage remains
+bounded independently of the growing current body.
+
+`author assisted finalize --target-kind dump` first resumes an existing prepared
+summary or confirmed synthesis. Only `ErrAssistedCurationMissing` permits initial
+curation. `--operation-id` retains an explicit intent, and changed arguments or
+prepared source images conflict. `--allow-replace` does not turn a general capture
+into a replacement: new synthesis extends the shared body; explicit Save or bound
+refinement owns full-body replacement.
+
 ## Project Dump Reconciliation
 
 Project metadata at `.chr/default/project.md` supports an optional

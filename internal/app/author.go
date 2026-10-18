@@ -260,6 +260,10 @@ func authorAssistedFinalizeFlags() []cli.Flag {
 			Usage: "fake adapter curated summary",
 		},
 		&cli.StringFlag{
+			Name:  "operation-id",
+			Usage: "stable identity for a project dump finalization retry",
+		},
+		&cli.StringFlag{
 			Name:  "target-kind",
 			Usage: "target artifact kind",
 			Value: string(core.AuthoringArtifactKindSpec),
@@ -747,6 +751,10 @@ func runAuthorAssistedFinalize(ctx context.Context, cmd *cli.Command, stdout io.
 
 	now := time.Now().UTC()
 
+	if handled, err := tryAuthorAssistedDump(ctx, cmd, state, summaryText, now, stdout); handled {
+		return err
+	}
+
 	curation, err := core.CurateAssistedAnswers(ctx, core.AssistedAnswerCurationOptions{
 		Session:          state.Session,
 		SessionPaths:     state.Paths,
@@ -763,6 +771,7 @@ func runAuthorAssistedFinalize(ctx context.Context, cmd *cli.Command, stdout io.
 
 	synthesis, err := core.SynthesizeAssistedArtifact(ctx, core.AssistedArtifactSynthesisOptions{
 		ProjectDir:     state.ProjectDir,
+		OperationID:    cmd.String("operation-id"),
 		Session:        curation.Session,
 		CuratedSummary: curation.Summary,
 		SourceRef:      curation.ArtifactRef,
