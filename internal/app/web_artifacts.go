@@ -91,6 +91,9 @@ func planCatalog(operations service) (webui.ArtifactCatalogView, error) {
 }
 
 func (p webViewProvider) ArtifactDetailView(ctx context.Context, request webui.ArtifactDetailRequest) (webui.ArtifactDetailView, error) {
+	if request.Family == webArtifactFamilyDumps {
+		return p.dumpArtifactDetail(ctx, request)
+	}
 	catalog, err := p.CatalogView(ctx, request.Family)
 	if err != nil {
 		return webui.ArtifactDetailView{}, err
@@ -233,7 +236,7 @@ func webDumpCards(dumps []tui.DumpView) []webui.ArtifactCardView {
 			UpdatedAt:    webArtifactTime(dump.UpdatedAt),
 			Preview:      webDumpPreview(dump.Title, dump.Preview),
 			ContentState: webContentState(dump.RelativePath != ""),
-			Revision:     webFileRevision(dump.SourcePath),
+			Revision:     dump.Revision,
 		}
 		card.DetailURL = webArtifactDetailURL(card)
 		cards = append(cards, card)
@@ -517,4 +520,20 @@ func webContentRevision(content string) string {
 	sum := sha256.Sum256([]byte(content))
 
 	return hex.EncodeToString(sum[:])
+}
+
+func (p webViewProvider) dumpArtifactDetail(ctx context.Context, request webui.ArtifactDetailRequest) (webui.ArtifactDetailView, error) {
+	document, err := core.ReadDumpDocument(ctx, p.projectContext.ProjectDir, request.ID)
+	if errors.Is(err, os.ErrNotExist) {
+		view := webui.ArtifactDetailView{Family: request.Family, ID: request.ID, Path: request.ID, Missing: true}
+		view.Revision = webStableRevision(view)
+
+		return view, nil
+	}
+	if err != nil {
+		return webui.ArtifactDetailView{}, err
+	}
+	dump := p.service(ctx).dumpView(document)
+
+	return webui.ArtifactDetailView{Family: request.Family, ID: dump.RelativePath, Path: dump.RelativePath, Title: dump.Title, Status: dump.Status, Scope: webScopeLabel(dump.Scope.CaseSlug, dump.UseCaseTitle), SourcePath: dump.SourcePath, UpdatedAt: webArtifactTime(dump.UpdatedAt), Content: dump.Content, Revision: dump.Revision, SaveRequestID: dumpRequestID(""), AppendRequestID: dumpRequestID("")}, nil
 }

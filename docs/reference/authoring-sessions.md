@@ -424,6 +424,35 @@ metadata, project reference and receipt together. A retry recovers the journal
 or returns the existing receipt before inspecting later source changes or
 calling the preparer. A receipt never overwrites later independent edits.
 
+The central application service routes `CreateDump`, `AppendDump` and `SaveDump`
+through this owner. Requests carry `OperationID` and `ExpectedRevision`; edits
+require the revision from `ReadDump`. Named captures retain their selected ops
+namespace. The service exposes reconciliation preview/apply through the same
+boundary. Dump catalogs inventory all namespaces from canonical files, retain
+independent scoped documents and hide raw components and superseded aliases.
+Catalog inspection has a ten-second deadline. Display update time uses artifact
+metadata's update time, falling back to creation time when unavailable.
+
+Successful service writes return `Committed`, the immutable mutation result and
+its body/metadata hashes. If a later index/catalog refresh fails, they also return
+`ProjectionStale` and a pending-refresh message. The post-commit refresh has a
+ten-second deadline. An identical retry reuses the
+receipt and retries the projection. Returned content/revision belongs to that
+committed image only when it still matches the canonical body/metadata hashes.
+
+CLI writes accept `--operation-id`. `chr dump show --revision <path>` prints the
+document revision for `dump save` or `dump append`; retain it with `--revision`
+and the original operation ID when retrying an edit. A fresh edit without a
+supplied ID observes the document before dispatch. A retained edit ID requires
+its original revision. For `dump new`, an optional revision binds the project
+dump observation or selected case metadata, as in the table above.
+
+Web details and TUI editors retain the document revision and operation identity
+for Save. TUI text changes allocate a new edit identity while keeping the
+observed source guard. Web mutations compare revisions in the owning operation
+after receipt lookup, without a separate stale-source preflight. Confirmed Web
+results expose a committed operation and any pending catalog refresh.
+
 ## Project Dump Reconciliation
 
 Project metadata at `.chr/default/project.md` supports an optional

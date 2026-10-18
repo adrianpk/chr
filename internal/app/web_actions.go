@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"os"
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -292,81 +291,85 @@ func (p webViewProvider) writeCaseUpdate(operations service, request webui.Write
 
 func (p webViewProvider) writeDumpCreate(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
 	result, err := operations.CreateDump(DumpCreateRequest{
+		OperationID: dumpRequestID(request.Fields["request_id"]), ExpectedRevision: request.Revision,
 		Title:   request.Fields["title"],
 		Content: request.Fields["content"],
 		Scope:   DumpScope{CaseSlug: request.Fields["case_slug"]},
 	})
 	if err != nil {
-		return webValidationWrite(err), nil
+		return webDumpWriteFailure(err, request.ID), nil
 	}
 
 	return webui.WriteActionResponse{
 		Status:      webui.WriteStatusOK,
 		Summary:     result.Message,
+		Operation:   webDumpOperation("dump.capture", result),
 		RedirectURL: "/dumps",
 	}, nil
 }
 
 func (p webViewProvider) writeDumpSave(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
-	if response, ok, err := p.validateDumpRevision(request); ok || err != nil {
-		return response, err
-	}
-
 	result, err := operations.SaveDump(DumpSaveRequest{
+		OperationID: dumpRequestID(request.Fields["request_id"]), ExpectedRevision: request.Revision,
 		RelativePath: request.ID,
 		Content:      request.Fields["content"],
 	})
 	if err != nil {
-		return webValidationWrite(err), nil
+		return webDumpWriteFailure(err, request.ID), nil
 	}
 
 	return webui.WriteActionResponse{
 		Status:       webui.WriteStatusOK,
 		Summary:      result.Message,
-		ChangedFiles: []string{request.ID},
-		RedirectURL:  "/dumps/detail?id=" + url.QueryEscape(request.ID),
+		ChangedFiles: []string{result.RelativePath},
+		Operation:    webDumpOperation("dump.save", result),
+		RedirectURL:  "/dumps/detail?id=" + url.QueryEscape(result.RelativePath),
 	}, nil
 }
 
 func (p webViewProvider) writeDumpAppend(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
-	if response, ok, err := p.validateDumpRevision(request); ok || err != nil {
-		return response, err
-	}
-
 	result, err := operations.AppendDump(DumpAppendRequest{
+		OperationID: dumpRequestID(request.Fields["request_id"]), ExpectedRevision: request.Revision,
 		RelativePath: request.ID,
 		Content:      request.Fields["content"],
 	})
 	if err != nil {
-		return webValidationWrite(err), nil
+		return webDumpWriteFailure(err, request.ID), nil
 	}
 
 	return webui.WriteActionResponse{
 		Status:       webui.WriteStatusOK,
 		Summary:      result.Message,
-		ChangedFiles: []string{request.ID},
-		RedirectURL:  "/dumps/detail?id=" + url.QueryEscape(request.ID),
+		ChangedFiles: []string{result.RelativePath},
+		Operation:    webDumpOperation("dump.append", result),
+		RedirectURL:  "/dumps/detail?id=" + url.QueryEscape(result.RelativePath),
 	}, nil
 }
 
-func (p webViewProvider) validateDumpRevision(request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error) {
-	content, err := p.readProjectArtifact(request.ID)
-	if errors.Is(err, os.ErrNotExist) {
-		return webBlockedWrite("Dump does not exist."), true, nil
+func webDumpOperation(kind string, result DumpOperationResult) webui.OperationStateView {
+	detail := ""
+	if result.ProjectionStale {
+		detail = "Catalog refresh is pending."
 	}
 
-	if err != nil {
-		return webui.WriteActionResponse{}, false, err
+	return webOperation(kind, "committed", result.Mutation.OperationID, detail)
+}
+
+func webDumpWriteFailure(err error, reference string) webui.WriteActionResponse {
+	if errors.Is(err, core.ErrWorkflowConflict) {
+		reload := "/dumps"
+		if reference != "" {
+			reload += "/detail?id=" + url.QueryEscape(reference)
+		}
+
+		return webui.WriteActionResponse{Status: webui.WriteStatusStale, Summary: "The dump changed after it was loaded. Reload before saving.", ReloadURL: reload, DiscardURL: "/dumps"}
 	}
 
-	if stale := webStaleWrite(webContentRevision(content), request.Revision); stale.Status != "" {
-		stale.ReloadURL = "/dumps/detail?id=" + url.QueryEscape(request.ID)
-		stale.DiscardURL = "/dumps"
-
-		return stale, true, nil
+	if errors.Is(err, core.ErrProjectDumpReconciliation) {
+		return webBlockedWrite(err.Error())
 	}
 
-	return webui.WriteActionResponse{}, false, nil
+	return webValidationWrite(err)
 }
 
 func webBlockedWrite(reason string) webui.WriteActionResponse {

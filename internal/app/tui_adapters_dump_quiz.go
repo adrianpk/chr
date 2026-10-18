@@ -188,6 +188,7 @@ func (e tuiDumpActionExecutor) executeCreateDump(
 	request tui.DumpActionRequest,
 ) (tui.DumpActionResult, error) {
 	result, err := e.operations.CreateDump(DumpCreateRequest{
+		OperationID: dumpRequestID(request.OperationID), ExpectedRevision: request.Revision,
 		Title:   request.Title,
 		Content: request.Content,
 		Scope:   DumpScope{CaseSlug: request.Scope.CaseSlug},
@@ -203,6 +204,7 @@ func (e tuiDumpActionExecutor) executeAppendDump(
 	request tui.DumpActionRequest,
 ) (tui.DumpActionResult, error) {
 	result, err := e.operations.AppendDump(DumpAppendRequest{
+		OperationID: dumpRequestID(request.OperationID), ExpectedRevision: request.Revision,
 		RelativePath: request.Path,
 		Content:      request.Content,
 	})
@@ -222,9 +224,9 @@ func (e tuiDumpActionExecutor) executeEditDump(
 	}
 
 	return tui.DumpActionResult{
-		Message:      result.Message,
-		Content:      result.Content,
-		SelectedPath: request.Path,
+		Message: result.Message,
+		Content: result.Content, Revision: result.Revision,
+		SelectedPath: result.RelativePath,
 	}, nil
 }
 
@@ -232,6 +234,7 @@ func (e tuiDumpActionExecutor) executeSaveDump(
 	request tui.DumpActionRequest,
 ) (tui.DumpActionResult, error) {
 	result, err := e.operations.SaveDump(DumpSaveRequest{
+		OperationID: dumpRequestID(request.OperationID), ExpectedRevision: request.Revision,
 		RelativePath: request.Path,
 		Content:      request.Content,
 	})
@@ -244,7 +247,7 @@ func (e tuiDumpActionExecutor) executeSaveDump(
 		return tui.DumpActionResult{}, err
 	}
 
-	actionResult.SelectedPath = request.Path
+	actionResult.SelectedPath = result.RelativePath
 
 	return actionResult, nil
 }
@@ -277,11 +280,17 @@ func (e tuiDumpActionExecutor) executeRefreshDumps(
 
 func dumpActionResult(result DumpOperationResult, operations service) (tui.DumpActionResult, error) {
 	dumps, err := loadTUIDumps(operations)
-	if err != nil {
+	if err != nil && !result.Committed {
 		return tui.DumpActionResult{}, err
 	}
 
+	if err != nil && !result.ProjectionStale {
+		result.ProjectionStale = true
+		result.Message += " Catalog refresh is pending."
+	}
+
 	actionResult := tui.DumpActionResult{
+		Committed: result.Committed, ProjectionStale: result.ProjectionStale,
 		Message: result.Message,
 		Dumps:   dumps,
 	}

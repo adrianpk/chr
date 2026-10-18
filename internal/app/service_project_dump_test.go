@@ -2,6 +2,7 @@ package app
 
 import (
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -54,4 +55,35 @@ func newProjectDumpTestService(t *testing.T) (service, string) {
 	}
 
 	return newTestService(t, project), reference
+}
+
+func saveObservedDump(t *testing.T, operations service, request DumpSaveRequest) (DumpOperationResult, error) {
+	t.Helper()
+
+	observed, err := operations.ReadDump(DumpReadRequest{RelativePath: request.RelativePath})
+	if err != nil {
+		return DumpOperationResult{}, err
+	}
+
+	request.OperationID, request.ExpectedRevision = dumpRequestID(""), observed.Revision
+
+	result, err := operations.SaveDump(request)
+	if err == nil && (!result.Committed || !strings.HasSuffix(result.Content, request.Content)) {
+		t.Fatal("fixture edit did not commit its independent body", result)
+	}
+
+	return result, err
+}
+
+func appendObservedDump(t *testing.T, operations service, request DumpAppendRequest) (DumpOperationResult, error) {
+	t.Helper()
+
+	observed, err := operations.ReadDump(DumpReadRequest{RelativePath: request.RelativePath})
+	if err != nil {
+		return DumpOperationResult{}, err
+	}
+
+	request.OperationID, request.ExpectedRevision = dumpRequestID(""), observed.Revision
+
+	return operations.AppendDump(request)
 }

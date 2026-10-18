@@ -339,20 +339,21 @@ type ArtifactCardView struct {
 
 // ArtifactDetailView is the read-only detail projection for one artifact.
 type ArtifactDetailView struct {
-	WorkflowEnabled bool
-	Family          string
-	ID              string
-	Title           string
-	Description     string
-	Context         string
-	Status          string
-	Scope           string
-	Path            string
-	SourcePath      string
-	UpdatedAt       string
-	Content         string
-	Missing         bool
-	Revision        string
+	SaveRequestID, AppendRequestID string
+	WorkflowEnabled                bool
+	Family                         string
+	ID                             string
+	Title                          string
+	Description                    string
+	Context                        string
+	Status                         string
+	Scope                          string
+	Path                           string
+	SourcePath                     string
+	UpdatedAt                      string
+	Content                        string
+	Missing                        bool
+	Revision                       string
 }
 
 // WriteActionRequest describes one confirmed Web UI write action.

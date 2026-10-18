@@ -140,7 +140,7 @@ func telegramAuthoringWorkCheckProvenance(t *testing.T, record core.WorkflowReco
 func telegramAuthoringWorkCheckReplay(t *testing.T, operations service, prepared PreparedAuthoringWork, original AuthoringWorkResult) {
 	t.Helper()
 
-	if _, err := operations.SaveDump(DumpSaveRequest{RelativePath: prepared.Scope.DescriptionRef, Content: "Independent later context"}); err != nil {
+	if _, err := saveObservedDump(t, operations, DumpSaveRequest{RelativePath: prepared.Scope.DescriptionRef, Content: "Independent later context"}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -174,7 +174,7 @@ func TestTelegramAuthoringWorkGuards(t *testing.T) {
 		change func(*testing.T, service, *PreparedAuthoringWork)
 	}{
 		{"source", func(t *testing.T, s service, p *PreparedAuthoringWork) {
-			if _, err := s.SaveDump(DumpSaveRequest{RelativePath: p.Scope.DescriptionRef, Content: "Changed requirements"}); err != nil {
+			if _, err := saveObservedDump(t, s, DumpSaveRequest{RelativePath: p.Scope.DescriptionRef, Content: "Changed requirements"}); err != nil {
 				t.Fatal(err)
 			}
 		}},
@@ -227,7 +227,7 @@ func TestTelegramAuthoringWorkFailedBinding(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := operations.SaveDump(DumpSaveRequest{RelativePath: prepared.Scope.DescriptionRef, Content: "Changed canonical description"}); err != nil {
+	if _, err := saveObservedDump(t, operations, DumpSaveRequest{RelativePath: prepared.Scope.DescriptionRef, Content: "Changed canonical description"}); err != nil {
 		t.Fatal(err)
 	}
 

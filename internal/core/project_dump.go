@@ -19,8 +19,10 @@ type ProjectDumpArtifact struct {
 	Reference, Title, SourceHash, MetadataHash string
 	CaseSlug, RawReference, CuratedReference   string
 	CanonicalReference                         string
+	Status, DocumentType                       string
 	Raw                                        bool
 	CreatedAt                                  time.Time
+	UpdatedAt                                  time.Time
 	TimestampIssue                             string
 }
 
@@ -31,6 +33,7 @@ type ProjectDumpObservation struct {
 	Candidates           []ProjectDumpArtifact
 	Components           []ProjectDumpArtifact
 	Aliases              []ProjectDumpArtifact
+	Scoped               []ProjectDumpArtifact
 	Destination          string
 	Revision             string
 	ReconciliationReason string

@@ -100,6 +100,7 @@ func projectDumpArtifact(reference string, body, encoded []byte, fields, metadat
 		Reference: reference, Title: metadata["title"], SourceHash: workflowHash(body), MetadataHash: workflowHash(encoded), CaseSlug: scope,
 		Raw: fields["type"] == "dump_raw" || fields["status"] == "raw" && fields["curated"] != "", CuratedReference: fields["curated"],
 		CanonicalReference: metadata["canonical_ref"],
+		Status:             fields["status"], DocumentType: fields["type"],
 	}
 	if err := validateProjectDumpAlias(artifact); err != nil {
 		return ProjectDumpArtifact{}, err
@@ -118,7 +119,18 @@ func projectDumpArtifact(reference string, body, encoded []byte, fields, metadat
 		artifact.TimestampIssue = "creation timestamp is missing or invalid"
 	}
 
+	artifact.UpdatedAt = projectDumpUpdatedAt(metadata["updated_at"], artifact.CreatedAt)
+
 	return artifact, nil
+}
+
+func projectDumpUpdatedAt(value string, fallback time.Time) time.Time {
+	updated, err := time.Parse(time.RFC3339Nano, value)
+	if err != nil {
+		return fallback
+	}
+
+	return updated
 }
 
 func validateProjectDumpAlias(artifact ProjectDumpArtifact) error {

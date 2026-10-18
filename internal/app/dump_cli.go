@@ -46,7 +46,7 @@ func newDumpShowCommand(stdout io.Writer) *cli.Command {
 		Name:      "show",
 		Usage:     "Show dump content",
 		ArgsUsage: "<project-relative-path>",
-		Flags:     ticketProjectFlags(),
+		Flags:     append(ticketProjectFlags(), &cli.BoolFlag{Name: "revision", Usage: "print the observed document revision"}),
 		Action:    dumpShowAction(stdout),
 	}
 }
@@ -83,6 +83,8 @@ func newDumpOpenCommand(stdout io.Writer) *cli.Command {
 
 func dumpContentFlags() []cli.Flag {
 	return append(ticketProjectFlags(),
+		&cli.StringFlag{Name: "operation-id", Usage: "stable identity for retrying the same write"},
+		&cli.StringFlag{Name: "revision", Usage: "observed revision; retain with operation-id for edit retries"},
 		&cli.StringFlag{
 			Name:  "content",
 			Usage: "dump markdown content",
@@ -175,6 +177,7 @@ func runDumpNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
 	}
 
 	result, err := operations.CreateDump(DumpCreateRequest{
+		OperationID: dumpRequestID(cmd.String("operation-id")), ExpectedRevision: cmd.String("revision"),
 		Title:   cmd.String("title"),
 		Content: cmd.String("content"),
 		Scope:   DumpScope{CaseSlug: cmd.String("use-case")},
@@ -206,7 +209,12 @@ func runDumpShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 		return err
 	}
 
-	_, err = fmt.Fprint(stdout, result.Content)
+	if cmd.Bool("revision") {
+		_, err = fmt.Fprintln(stdout, result.Revision)
+	} else {
+		_, err = fmt.Fprint(stdout, result.Content)
+	}
+
 	if err != nil {
 		return fmt.Errorf("write dump show result: %w", err)
 	}
@@ -224,7 +232,13 @@ func runDumpSave(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 		return err
 	}
 
+	revision, err := dumpCLIRevision(operations, cmd)
+	if err != nil {
+		return err
+	}
+
 	result, err := operations.SaveDump(DumpSaveRequest{
+		OperationID: dumpRequestID(cmd.String("operation-id")), ExpectedRevision: revision,
 		RelativePath: cmd.Args().First(),
 		Content:      cmd.String("content"),
 	})
@@ -250,7 +264,13 @@ func runDumpAppend(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
+	revision, err := dumpCLIRevision(operations, cmd)
+	if err != nil {
+		return err
+	}
+
 	result, err := operations.AppendDump(DumpAppendRequest{
+		OperationID: dumpRequestID(cmd.String("operation-id")), ExpectedRevision: revision,
 		RelativePath: cmd.Args().First(),
 		Content:      cmd.String("content"),
 	})
@@ -291,4 +311,18 @@ func runDumpOpen(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 	}
 
 	return nil
+}
+
+func dumpCLIRevision(operations service, cmd *cli.Command) (string, error) {
+	if revision := cmd.String("revision"); revision != "" {
+		return revision, nil
+	}
+
+	if cmd.String("operation-id") != "" {
+		return "", fmt.Errorf("dump edit retries require the original --revision with --operation-id")
+	}
+
+	observed, err := operations.ReadDump(DumpReadRequest{RelativePath: cmd.Args().First()})
+
+	return observed.Revision, err
 }

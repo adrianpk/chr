@@ -51,7 +51,7 @@ func TestTelegramAuthoringBridgeLostAck(t *testing.T) {
 		t.Fatal("conversation advanced before owner acknowledgement")
 	}
 
-	root, output := telegramAuthoringLostAckEdit(t, operations)
+	root, output, retained := telegramAuthoringLostAckEdit(t, operations)
 	telegramAuthoringReopen(t, f)
 
 	f.receiver.operations = operations
@@ -63,7 +63,7 @@ func TestTelegramAuthoringBridgeLostAck(t *testing.T) {
 	}
 
 	content, err := os.ReadFile(filepath.Join(root, output))
-	if err != nil || string(content) != "Independent later edit\n" || calls.Load() != 1 || len(f.notices) != 1 {
+	if err != nil || string(content) != retained || calls.Load() != 1 || len(f.notices) != 1 {
 		t.Fatal("recovery repeated its canonical effect", string(content), calls.Load(), len(f.notices), err)
 	}
 
@@ -74,7 +74,7 @@ func TestTelegramAuthoringBridgeLostAck(t *testing.T) {
 	telegramAuthoringBridgeNoWork(t, f)
 }
 
-func telegramAuthoringLostAckEdit(t *testing.T, operations service) (string, string) {
+func telegramAuthoringLostAckEdit(t *testing.T, operations service) (string, string, string) {
 	t.Helper()
 
 	projects, err := operations.ListRegisteredProjects([]string{"example-project"})
@@ -93,11 +93,16 @@ func telegramAuthoringLostAckEdit(t *testing.T, operations service) (string, str
 	operations.projectContext = commandProjectContext{ProjectID: projects[0].ID, ProjectDir: root}
 
 	output := sessions[0].Outputs[0].Path
-	if _, err := operations.SaveDump(DumpSaveRequest{RelativePath: output, Content: "Independent later edit"}); err != nil {
+	if _, err := saveObservedDump(t, operations, DumpSaveRequest{RelativePath: output, Content: "Independent later edit"}); err != nil {
 		t.Fatal(err)
 	}
 
-	return root, output
+	retained, err := os.ReadFile(filepath.Join(root, output))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return root, output, string(retained)
 }
 
 func telegramAuthoringReopen(t *testing.T, f *telegramConversationAppFixture) {

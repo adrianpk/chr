@@ -1597,7 +1597,7 @@ func TestDumpNewAndShowUseServiceCommands(t *testing.T) {
 	dumpPath := "ops/default/dump/00000-cli-dump/artifact.md"
 	rawDumpPath := "ops/default/dump/00000-cli-dump-raw/artifact.md"
 
-	if !strings.Contains(stdout.String(), "Created dump "+dumpPath+".") {
+	if !strings.Contains(stdout.String(), "Captured dump "+dumpPath+".") {
 		t.Fatalf("dump new stdout = %q, want curated dump path", stdout.String())
 	}
 

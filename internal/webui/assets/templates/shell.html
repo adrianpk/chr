@@ -426,6 +426,7 @@
 {{define "dump_edit_forms.html"}}
 <form class="action-form" method="post" action="/actions"{{if .DumpModal}} hx-post="/actions" hx-target="#modal-root" hx-swap="innerHTML"{{end}} onsubmit="return confirm('Replace this dump content?')">
   <input type="hidden" name="action" value="dump.save">
+  <input type="hidden" name="request_id" value="{{.Detail.SaveRequestID}}">
   <input type="hidden" name="family" value="dumps">
   <input type="hidden" name="id" value="{{.Detail.ID}}">
   <input type="hidden" name="revision" value="{{.Detail.Revision}}">
@@ -439,6 +440,7 @@
 </form>
 <form class="action-form" method="post" action="/actions"{{if .DumpModal}} hx-post="/actions" hx-target="#modal-root" hx-swap="innerHTML"{{end}} onsubmit="return confirm('Append this note to the dump?')">
   <input type="hidden" name="action" value="dump.append">
+  <input type="hidden" name="request_id" value="{{.Detail.AppendRequestID}}">
   <input type="hidden" name="family" value="dumps">
   <input type="hidden" name="id" value="{{.Detail.ID}}">
   <input type="hidden" name="revision" value="{{.Detail.Revision}}">

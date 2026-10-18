@@ -25,8 +25,9 @@ func TestServiceCreateDumpUsesSuccessfulCurationProvider(t *testing.T) {
 	}
 
 	_, err := operations.CreateDump(DumpCreateRequest{
-		Title:   "Curated Notes",
-		Content: "rough dump body",
+		OperationID: dumpRequestID(""),
+		Title:       "Curated Notes",
+		Content:     "rough dump body",
 	})
 	if err != nil {
 		t.Fatalf("CreateDump returned error: %v", err)

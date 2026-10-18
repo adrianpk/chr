@@ -173,6 +173,10 @@ func projectDumpObservation(project ProjectMetadata, artifacts []ProjectDumpArti
 		}
 
 		if artifact.CaseSlug != "" {
+			if !artifact.Raw {
+				observed.Scoped = append(observed.Scoped, artifact)
+			}
+
 			continue
 		}
 

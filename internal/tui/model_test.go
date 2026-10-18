@@ -1539,7 +1539,7 @@ func TestModelSavesInternalDumpEdit(t *testing.T) {
 		},
 	}
 	model := NewModel(Options{DumpExecutor: executor})
-	model.startDumpEdit(".chr/default/dumps/project-dump.md", "# Project dump\n\nChanged Markdown.")
+	model.startDumpEdit(".chr/default/dumps/project-dump.md", "# Project dump\n\nChanged Markdown.", "")
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyCtrlS})
 
@@ -1575,7 +1575,7 @@ func TestModelRendersDumpEditPanelWithMinimalHint(t *testing.T) {
 	model.selectedPane = 1
 	model.width = 100
 	model.height = 24
-	model.startDumpEdit(".chr/default/dumps/project-dump.md", "# Project dump\n\nChanged Markdown.")
+	model.startDumpEdit(".chr/default/dumps/project-dump.md", "# Project dump\n\nChanged Markdown.", "")
 
 	view := model.View()
 
@@ -1597,7 +1597,7 @@ func TestModelCancelsInternalDumpEdit(t *testing.T) {
 			{Title: "Project dump", RelativePath: ".chr/default/dumps/project-dump.md"},
 		},
 	})
-	model.startDumpEdit(".chr/default/dumps/project-dump.md", "# Project dump")
+	model.startDumpEdit(".chr/default/dumps/project-dump.md", "# Project dump", "")
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEsc})
 

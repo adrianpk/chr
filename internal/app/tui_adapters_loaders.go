@@ -11,7 +11,7 @@ func loadTUIDumps(operations service) ([]tui.DumpView, error) {
 	dumps := make([]tui.DumpView, 0, len(result.Dumps))
 	for index, dump := range result.Dumps {
 		dumps = append(dumps, tui.DumpView{
-			Index:        index,
+			Index: index, Revision: dump.Revision,
 			NodeID:       dump.NodeID,
 			UseCaseTitle: dump.UseCaseTitle,
 			Title:        dump.Title,

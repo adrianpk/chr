@@ -205,9 +205,11 @@ func TestTelegramAuthoringServiceObservedEdit(t *testing.T) {
 	}
 
 	path := snapshot.Session.Outputs[0].Path
-	if _, err := operations.SaveDump(DumpSaveRequest{RelativePath: path, Content: "Independently edited context"}); err != nil {
+	if _, err := saveObservedDump(t, operations, DumpSaveRequest{RelativePath: path, Content: "Independently edited context"}); err != nil {
 		t.Fatal(err)
 	}
+
+	retained := readServiceWorkspaceFile(t, filepath.Join(operations.projectContext.ProjectDir, path))
 
 	request := telegramAuthoringServiceNext(before, "stale", "generate", core.AuthoringArtifactKindSpec)
 	if _, err := operations.ContinueAuthoring(t.Context(), request); !errors.Is(err, core.ErrWorkflowConflict) {
@@ -220,7 +222,7 @@ func TestTelegramAuthoringServiceObservedEdit(t *testing.T) {
 	}
 
 	content, err := os.ReadFile(filepath.Join(operations.projectContext.ProjectDir, path))
-	if err != nil || string(content) != "Independently edited context\n" {
+	if err != nil || string(content) != retained {
 		t.Fatal("later edit overwritten", err)
 	}
 }
