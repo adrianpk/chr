@@ -37,7 +37,7 @@ func (s *WorkflowStore) MaterializePlan(ctx context.Context, opts WorkflowMateri
 		return result, fmt.Errorf("native ticket key allocator is required")
 	}
 
-	err = s.withLock(ctx, func() error {
+	err = s.withWorkflowPlanMutation(ctx, func(ctx context.Context) error {
 		var materializeErr error
 
 		result, materializeErr = s.materializePlan(ctx, opts)
@@ -63,6 +63,10 @@ func (s *WorkflowStore) materializePlan(ctx context.Context, opts WorkflowMateri
 		return result, err
 	}
 
+	if err := s.validateApprovedOrder(opts.Plan, ""); err != nil {
+		return result, err
+	}
+
 	coordinator, err := s.workflowCoordinatorFiles(ctx)
 	if err != nil {
 		return result, err
@@ -83,6 +87,11 @@ func (s *WorkflowStore) materializeNewPlan(ctx context.Context, opts WorkflowMat
 		return result, err
 	}
 
+	orderFiles, err := s.materializedOrderChanges(&result, opts.Plan)
+	if err != nil {
+		return result, err
+	}
+
 	snapshot.Records = append(snapshot.Records, result.Set)
 
 	snapshot.Records = append(snapshot.Records, result.Tasks...)
@@ -95,7 +104,7 @@ func (s *WorkflowStore) materializeNewPlan(ctx context.Context, opts WorkflowMat
 		return result, err
 	}
 
-	if err := s.commitAllocatedFiles(append(files, coordinator...), guard); err != nil {
+	if err := s.commitAllocatedFiles(append(append(files, orderFiles...), coordinator...), guard); err != nil {
 		return result, err
 	}
 

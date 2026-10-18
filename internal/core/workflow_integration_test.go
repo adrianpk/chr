@@ -44,6 +44,12 @@ func workflowDeliveryPolicyFixture(t *testing.T, method, extent string, policy W
 	t.Helper()
 
 	store, hierarchy, run, provider := workflowPRPolicyFixture(t, extent, policy)
+
+	return workflowFinishDeliveryFixture(t, method, store, hierarchy, run, provider)
+}
+
+func workflowFinishDeliveryFixture(t *testing.T, method string, store *WorkflowStore, hierarchy WorkflowMaterializationResult, run WorkflowInvocation, provider *workflowPRProviderFixture) workflowIntegrationFixture {
+	t.Helper()
 	workflowPREnsure(t, store, run.ID, provider)
 
 	run = workflowTestRead(t, store, run.ID)

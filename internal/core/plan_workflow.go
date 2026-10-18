@@ -11,6 +11,7 @@ import (
 // GeneratedWorkflowPlan is explicit approved materialization input. Its request
 // identity survives retries; the store allocates the set envelope and ticket keys.
 type GeneratedWorkflowPlan struct {
+	PlanRevision      *PlanRevisionBinding     `json:"plan_revision,omitempty"`
 	MaterializationID string                   `json:"materialization_id"`
 	Title             string                   `json:"title"`
 	PlanRef           string                   `json:"plan_ref"`

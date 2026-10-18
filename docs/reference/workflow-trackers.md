@@ -67,8 +67,13 @@ V2 inspection reads native set/task owners without receipt payloads. A claim,
 checkpoint, validated result or ticket progress does not stale or rewrite the
 map. Structural changes and edited output are detected independently. Repair of
 unchanged structure retains its generation time; structural replacement updates
-it. A runner reads live tickets and receipts to determine remaining work and
-uses the map only for declared order. Neither version imports processing state
+it. Retained checksummed projection metadata preserves that time if the current
+registration is lost. Native repair also restores missing revision companions;
+edited retained output requires its exact observed hash. A runner reads live
+tickets and receipts to determine remaining work and
+uses the map only for declared order. Worker input for a revision-bound set
+requires its current registered and retained map images; stale or missing images
+block preparation until repair. Neither version imports processing state
 from Markdown.
 
 ## Edited or failed exports

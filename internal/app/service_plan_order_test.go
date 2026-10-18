@@ -1,6 +1,9 @@
 package app
 
 import (
+	"errors"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -62,5 +65,38 @@ func TestServicePlanRequiresOrder(t *testing.T) {
 
 	if _, exists, err := operations.existingGeneratedPlan(operations.quizScope(core.QuizScope{CaseSlug: "blog"})); err != nil || exists {
 		t.Fatal("invalid output was published", exists, err)
+	}
+}
+
+// The legacy action cannot allocate from a newly generated revision. It returns
+// the retained project-relative companion without another model invocation.
+func TestServicePlanOrderApprovalBoundary(t *testing.T) {
+	t.Setenv("CHR_PLAN_GENERATION_BACKEND", "codex")
+
+	project := t.TempDir()
+	writeServiceQuizFixture(t, project)
+
+	operations := newPlanTestService(t, project)
+	model := &fakeServiceQuizModel{}
+	operations.quizModel = model
+
+	scope := core.QuizScope{CaseSlug: "blog"}
+	if _, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{Scope: scope}); err != nil {
+		t.Fatal(err)
+	}
+
+	calls := len(model.requests)
+
+	result, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{Scope: scope})
+	if err != nil || len(result.Tickets) != 0 || len(model.requests) != calls || !strings.HasPrefix(result.TrackingPath, "ops/default/tracker/") {
+		t.Fatal("legacy action bypassed native approval", result, err)
+	}
+
+	if _, err := os.Stat(filepath.Join(project, result.TrackingPath)); err != nil {
+		t.Fatal("companion reference is not project-relative", err)
+	}
+
+	if _, err := os.Stat(filepath.Join(project, "ops", "default", "ticket")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatal("unapproved action allocated native tickets", err)
 	}
 }

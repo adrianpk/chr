@@ -188,7 +188,7 @@ func validPlanRevisionJournalPath(reference string) bool {
 	}
 
 	switch parts[7] {
-	case "plan.md", "order.json", "tracker.md", "planned-order.json", "planned-tracker.md", "binding.json", "planned-binding.json":
+	case "plan.md", "order.json", "tracker.md", "planned-order.json", "planned-tracker.md", "binding.json", "planned-binding.json", "projection.json":
 		return true
 	default:
 		return false
@@ -233,8 +233,8 @@ func planCurrentTrackerMetadata(layout OpsLayout, reference string, plan Generat
 		return nil, err
 	}
 
-	if metadata["schema_version"] != "ops-layout/v1" || metadata["type"] != "tracker" || metadata["namespace"] != parts[1] || metadata["id"] != parts[3] {
-		return nil, ErrWorkflowConflict
+	if err := validatePlanTrackerMetadata(metadata, reference); err != nil {
+		return nil, err
 	}
 
 	if err := advanceAuthoringMetadata(metadata); err != nil {
@@ -280,4 +280,13 @@ func planManifestFiles(value any) ([]any, error) {
 	default:
 		return nil, ErrWorkflowConflict
 	}
+}
+
+func validatePlanTrackerMetadata(metadata map[string]any, reference string) error {
+	parts := strings.Split(reference, "/")
+	if metadata["schema_version"] != "ops-layout/v1" || metadata["type"] != "tracker" || metadata["namespace"] != parts[1] || metadata["id"] != parts[3] {
+		return ErrWorkflowConflict
+	}
+
+	return nil
 }

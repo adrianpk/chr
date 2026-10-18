@@ -9,7 +9,7 @@ scope: domain
 tags: tracking, tickets, plans
 source: chat
 reported_at: 2026-10-17T20:02:32Z
-commits: [fcd81c18382ea6984f5bb25229b2111c6d8f64bc]
+commits: [fcd81c18382ea6984f5bb25229b2111c6d8f64bc, d4daafde2f2ce2e3c812ecba55c0e240107ed080]
 branch: feat/slice-9-plan-order-tracker
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
@@ -148,18 +148,14 @@ Behavior, shared-domain changes and implementation design are consolidated in
 
 ## Slice 9 Execution
 
-Activated T9.1 after verified PR #405 integration. The [Slice 9 report](../../report/slices/web-ui-workflow-consolidation/slice-9-plan-order-tracker.md) owns implementation and validation evidence.
+T9.1, T9.2 and T9.3 are complete on the recorded branch. The
+[Slice 9 report](../../report/slices/web-ui-workflow-consolidation/slice-9-plan-order-tracker.md)
+owns implementation and validation evidence. Generation retains recoverable
+unbound revision pairs and explicit retry receipts. Approved native
+materialization/amendment binds canonical references while retaining completed
+work and history. Required worker context, structural freshness and observed-hash
+repair preserve the native state owners and legacy v1 contract.
 
-T9.1 completed: both generation paths require structured unbound companions;
-recoverable publication retains revision history and protects edited current
-output. Root-bound receipts acknowledge explicit operation retries without
-another model call or revision. Focused plan race checks and affected-package
-strict lint passed. T9.2 is active; approved materialization and execution-context
-binding remain for T9.3.
-
-T9.2 completed: v2 uses structural order/reference hashing and rendering through
-the existing tracker owner, with receipt-independent observation and retained
-planned-image integrity. Claims and validated work preserve bytes, metadata,
-hash and generation time. Exact observed-hash replacement remains required for
-edited output; v1 rendering/checksums and recovery remain supported. Strict core
-lint and the expanded plan/tracker focused race selection passed. T9.3 is active.
+Affected-package strict lint and focused plan/tracker/adoption race checks passed.
+Canonical PR references and final clean-HEAD controller validation follow before
+integration readiness. The source ticket remains in progress until verified merge.

@@ -1,6 +1,6 @@
 # Slice 9: Revision-Bound Order-Only Trackers
 
-Status: drafting
+Status: reviewing
 Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
@@ -16,77 +16,86 @@ integrated through PR #405 at `e48bcd8e44991c7c89a7628928471d8039938f42`.
 
 ## Delivered Behavior
 
-Plan generation and regeneration now retain an unbound order companion for
-every committed revision. The current tracker keeps its existing scoped path.
-A new generation retains a new revision even when plan bytes match; a committed
-operation retry returns its retained body without another model call.
+Generation retains an unbound companion for each committed plan revision.
+Fresh generations retain separate revisions even when rendered body bytes match;
+explicit operation retries return the committed revision without another model
+call. Earlier bodies, maps, provenance and ticket history remain available.
 
-The native tracker owner now supports v2 structural freshness. Real claims and
-host-validated results leave current map bytes, metadata, source hash and
-generation time unchanged. Structural changes stale the map; exact observed-hash
-permission protects edited output. Existing v1 files retain their rendering and
-checksum shape.
+Approved native materialization binds canonical task references once and
+publishes the set, tickets, maps and registration together. Missing or changed
+approval inputs fail before key allocation. A later draft remains independent
+of active work. Guarded amendments retain existing identities, contracts,
+completed tickets and receipts while binding approved future work to its new
+revision. Direct record writes cannot replace the bound structural order.
+
+Workers receive the current set-specific order map. Required missing or edited
+images block preparing input until repair. Claims, validated work and real
+receipt-finalized integration leave map bytes, structural hash and generation
+time unchanged. Edited output requires exact observed-hash replacement. Legacy
+v1 exports retain their rendering, checksum shape and optional role.
 
 ## Implementation Notes
 
-T9.1 is complete. Structured single-pass output and staged slice details supply
-stable slice/task IDs, positive order and titles without reading Markdown as
-execution authority. Generated entries cannot supply allocated ticket references.
+T9.1, T9.2 and T9.3 are complete. Structured single-pass output and staged slice
+details supply identities, titles and order without parsing generated Markdown
+as execution authority. Generation allocates no tickets. The legacy tracking
+action reports the retained companion and requires native approval for allocation.
 
-The existing authoring journal publishes the plan, manifest, current companion,
-retained body/order/tracker/binding images and optional operation receipt as one
-recoverable mutation. Revision files remain under the canonical plan's `files/`
-area; archive metadata keeps the source binding and manifest without claiming
-local copies. Explicit observed-hash permission protects edited current output.
-Read-only pair inspection rejects missing or changed companions.
+The existing authoring journal publishes generation pairs and retry receipts.
+Approved binding takes authoring exclusion before workflow exclusion and stages
+all images through the existing native journal. Pending binding prevents a
+competing plan publication. Recovery reuses the same allocation. Canonical
+manifests retain revision files; archives reference the original binding and
+source manifest without claiming nonexistent local copies.
 
-T9.2 is complete. The v2 source reader uses the existing set/task owners under
-repository exclusion without opening receipt payloads. It retains immutable
-planned-image hashes independently of the later bound images. Lost registration
-can be reconstructed using the native revision binding and observed-output
-permission without adding receipt dependencies.
-
-T9.3 is active: approved materialization/amendment and execution-context binding.
+V2 source discovery reads native sets/tasks without receipt payloads or mutable
+processing fields. Immutable planned images remain separate from bound images.
+Retained checksummed projection metadata supports registration recovery without
+changing known generation time. Native repair restores required companions
+without executing work or importing edits.
 
 ## Contracts Added or Changed
 
-`PlanRevisionBinding`, structured planned order and caller-owned publication
-operation IDs extend the shared plan writer. New service generation requires
-its companion; historical body-only payload decoding and low-level legacy
-publication remain supported. The v2 journal accepts only bounded revision files
-and existing tracker envelopes. The earlier journal path contract is unchanged.
-Native sets and tracker metadata may retain the explicit revision binding. V2
-hashes and renders order, titles and canonical references without mutable status,
-phase, claim, attempt, review, receipt or closure values. Optional v1 exports
-retain their earlier state projection and checksum compatibility.
+`PlanRevisionBinding`, structured intended order and caller-owned publication
+operation IDs extend plan generation. Explicit approved workflow input supplies
+the binding, immutable body reference and observed body hash. Approval validates
+scope and retained intended order before allocation. Required v2 images retain
+blank legacy progress cells. Existing v1 and body-only legacy reads do not
+migrate artifacts. Legacy adoption remains explicit and cannot bypass required
+revision binding.
+
+The accepted ticket-native specification and owning references now distinguish
+required v2 order maps from optional v1 progress views. The User Guide and
+Unreleased notes describe revision retention, approval, amendment and repair.
 
 ## Files of Interest
 
-- `internal/core/plan_order_publication.go`: retained revision images and current tracker guards.
-- `internal/core/plan_publication_receipt.go`: root-bound committed-operation retry receipts.
-- `internal/core/plan_revision_read.go`: non-mutating pair inspection.
-- `internal/app/service_plan.go`: required companions for both generation backends.
-- `internal/core/workflow_tracker_order.go`: versioned structural images and retained source integrity.
-- `internal/core/workflow_tracker_sources.go`: receipt-independent v2 source observation.
-- `docs/reference/workflow-trackers.md`: v1/v2 export and freshness contracts.
-- Plan-order and workflow-tracker tests: real filesystem/Git, progress, legacy and interruption regressions.
+- `internal/core/plan_order_publication.go`: retained revisions and current output guards.
+- `internal/core/plan_publication_receipt.go`: committed-operation retry receipts.
+- `internal/core/workflow_plan_order_approval.go`: approval and mutation ownership.
+- `internal/core/workflow_plan_order_publish.go`: atomic native ticket/map binding.
+- `internal/core/workflow_plan_order_context.go`: required worker context and repair.
+- `internal/core/workflow_tracker_order.go`: structural v2 rendering and freshness.
+- Plan-order tests: real filesystem/Git, interruption, history, native progress and integration.
 
 ## Validation
 
 Task-level checks passed:
 
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/app ./internal/webui`
-- `go test -race ./internal/core ./internal/app -run 'Plan' -skip 'Browser' -count=1`
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core`
-- `go test -race ./internal/core ./internal/app -run 'Plan|WorkflowTracker|WorkflowOrder' -skip 'Browser' -count=1`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/app`
+- `go test -race ./internal/core ./internal/app -run 'Plan|WorkflowTracker|WorkflowOrder|WorkflowAdoption' -skip 'Browser' -count=1`
 - `git diff --check`
 
-The focused race selection covers plan publication/recovery/retry, both service
-generation paths, native v2 progress, source/registration integrity and existing
-v1 tracker recovery/receipt regressions. Fixtures substitute the model
-boundary and own their filesystem/Git inputs. Final exact-HEAD development-gate
-evidence will be recorded through the controller after T9.3.
+Fixtures own their filesystem, Git repositories, subprocesses and provider
+boundaries. The focused selection includes approved binding/retry, interrupted
+publication, old-revision retry after regeneration, structural guards, active
+amendment rejection, required-context repair, actual Git integration and retained
+completed-task receipts. Existing v1 and legacy adoption regressions also pass.
+
+The canonical PR records the required `make verify`, affected focused race and
+browser checks, and whitespace check through controller validation for its final
+clean HEAD after PR-reference follow-up.
 
 ## Risks and Follow-ups
 
-Slice 9 is incomplete until T9.3 finishes. No PR is ready for integration.
+None recorded.

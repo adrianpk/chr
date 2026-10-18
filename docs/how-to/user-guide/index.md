@@ -633,7 +633,7 @@ the input for later tracking and ticket creation.
 | `up` / `down` or `k` / `j` | Select a use case. |
 | `g` | Generate the selected plan only when it is missing. |
 | `G` | Regenerate the selected plan after confirmation. |
-| `alt+t` | Create plan tracking and tickets from the selected plan after confirmation. |
+| `alt+t` | Create legacy tracking for a historical plan without a revision-bound companion. |
 | `r` | Refresh plans from disk. |
 
 `g` does not overwrite an existing plan. Use `G` when the existing plan should
@@ -644,9 +644,23 @@ together. Archived generated plans remain on disk and are excluded from normal
 document loading. Provider errors, cancellation and stale inputs preserve the
 current plan.
 
-`alt+t` is available only when the selected plan exists. It creates a tracking
-Markdown file and one ticket per generated slice. If tracking already exists,
-the operation reports that state instead of creating duplicate tracking.
+Each successful generation retains its own internal order map. Generating a new
+revision preserves earlier maps and ticket history, even if the plan text is
+unchanged. Explicit operation retries reuse the committed revision. The initial
+map has planned identities and order; it allocates no tickets and starts no work.
+Approving a prepared native workflow binds canonical task tickets to that revision.
+Later approved changes use guarded amendment and retain completed work. The
+[materialization reference](../../reference/plan-workflow-materialization.md)
+describes the approved input contract.
+
+Workers receive the current order map and use live ticket state for progress.
+Ticket progress leaves the map unchanged. If a required map is missing or edited,
+repair it with the [native tracker commands](../../reference/workflow-trackers.md)
+before continuing. Replacing edited output requires its exact observed hash.
+
+`alt+t` remains available for historical body-only plans and retains its existing
+tracking behavior. For newly generated plans, it reports that order is already
+retained and requires native approval before ticket allocation.
 
 Plan generation, regeneration, and tracking creation are guarded so the same
 TUI cannot start overlapping plan operations.

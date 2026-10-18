@@ -120,7 +120,13 @@ func workflowPRFixtureFor(t *testing.T, extent string) (*WorkflowStore, Workflow
 func workflowPRPolicyFixture(t *testing.T, extent string, policy WorkflowExecutionPolicy) (*WorkflowStore, WorkflowMaterializationResult, WorkflowInvocation, *workflowPRProviderFixture) {
 	t.Helper()
 
-	store, opts := workflowMaterializationFixture(t)
+	return workflowPRPlanFixture(t, extent, policy, workflowMaterializationFixture)
+}
+
+func workflowPRPlanFixture(t *testing.T, extent string, policy WorkflowExecutionPolicy, planFixture func(*testing.T) (*WorkflowStore, WorkflowMaterializationOptions)) (*WorkflowStore, WorkflowMaterializationResult, WorkflowInvocation, *workflowPRProviderFixture) {
+	t.Helper()
+
+	store, opts := planFixture(t)
 	waiver := WorkflowValidation{WaiverReason: "PR lifecycle fixture uses retained immutable host waiver"}
 
 	for i := range opts.Plan.Slices {

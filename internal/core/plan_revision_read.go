@@ -10,6 +10,7 @@ import (
 
 // ObservePlanRevision reads the current retained order binding without repairing
 // or rewriting artifacts. Missing or edited companions require explicit repair.
+// A legacy or absent plan returns an empty binding without migration.
 func ObservePlanRevision(ctx context.Context, projectDir string, scope QuizScope) (PlanRevisionBinding, error) {
 	paths, err := GeneratedPlanLayout(projectDir, scope)
 	if err != nil {
@@ -22,6 +23,9 @@ func ObservePlanRevision(ctx context.Context, projectDir string, scope QuizScope
 	}
 
 	var binding PlanRevisionBinding
+	if target.metadata["plan_binding"] == nil {
+		return binding, nil
+	}
 
 	encoded, err := json.Marshal(target.metadata["plan_binding"])
 	if err != nil {

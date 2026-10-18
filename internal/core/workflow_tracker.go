@@ -18,7 +18,7 @@ type WorkflowTrackerSource struct {
 	Hash     string `json:"hash"`
 }
 
-// WorkflowTrackerStatus describes an optional view, never execution authority.
+// WorkflowTrackerStatus describes versioned order/progress views, never execution authority.
 type WorkflowTrackerStatus struct {
 	PlanRevision *PlanRevisionBinding    `json:"plan_revision,omitempty"`
 	Schema       string                  `json:"schema"`
@@ -47,7 +47,7 @@ type WorkflowTrackerOptions struct {
 // ExportWorkflowTracker registers or repairs one derived set view under exclusion.
 // It never imports tracker edits, claims work or rolls back authoritative records.
 func (s *WorkflowStore) ExportWorkflowTracker(ctx context.Context, setID string, opts WorkflowTrackerOptions) (result WorkflowTrackerStatus, err error) {
-	err = s.withLock(ctx, func() error {
+	err = s.withWorkflowPlanMutation(ctx, func(ctx context.Context) error {
 		snapshot, readErr := s.workflowTrackerSnapshot(ctx, setID, opts.Schema)
 		if readErr != nil {
 			return readErr
@@ -87,6 +87,10 @@ func (s *WorkflowStore) InspectWorkflowTracker(ctx context.Context, setID string
 			result.Detail = "authoritative sources or tracker output changed"
 		}
 
+		if imageErr := s.inspectRequiredOrderImages(snapshot, source); imageErr != nil {
+			return imageErr
+		}
+
 		return readErr
 	})
 
@@ -114,8 +118,12 @@ func (s *WorkflowStore) exportWorkflowTracker(snapshot WorkflowSnapshot, setID s
 		return s.workflowTrackerFailure(result, err)
 	}
 
-	if !workflowTrackerReplacement(result.ObservedHash, previous, opts) {
+	if !workflowTrackerMayReplace(result, previous, opts) {
 		return s.workflowTrackerFailure(result, fmt.Errorf("tracker edited; replacement requires its observed hash"))
+	}
+
+	if err := s.repairWorkflowTrackerCompanions(snapshot, result, output, opts); err != nil {
+		return s.workflowTrackerFailure(result, err)
 	}
 
 	if previous.Status == "current" && previous.SourceHash == result.SourceHash && result.ObservedHash == result.PendingHash {
@@ -133,6 +141,12 @@ func (s *WorkflowStore) workflowTrackerPrevious(setID string) (WorkflowTrackerSt
 	previous, err := s.readWorkflowTracker(setID)
 	if !errors.Is(err, errWorkflowTrackerAbsent) {
 		return previous, err
+	}
+
+	if retained, found, err := s.retainedOrderRegistration(setID); found || err != nil {
+		retained.Status, retained.Reason = "stale", "registration_missing"
+
+		return retained, err
 	}
 
 	ids, err := s.workflowTrackerRegistrations()
@@ -180,4 +194,33 @@ func (s *WorkflowStore) prepareWorkflowTrackerImage(snapshot WorkflowSnapshot, s
 	result.Status, result.Reason = "stale", "projection_stale"
 
 	return result, output, previous, nil
+}
+
+func workflowTrackerMayReplace(result, previous WorkflowTrackerStatus, opts WorkflowTrackerOptions) bool {
+	if workflowTrackerReplacement(result.ObservedHash, previous, opts) {
+		return true
+	}
+
+	return result.Schema == "chr-tracker/v2" && workflowTrackerReplacement(result.ObservedHash, previous, WorkflowTrackerOptions{})
+}
+
+func (s *WorkflowStore) inspectRequiredOrderImages(snapshot WorkflowSnapshot, source WorkflowTrackerStatus) error {
+	if source.Schema != "chr-tracker/v2" {
+		return nil
+	}
+
+	_, output, err := s.workflowOrderTrackerImage(snapshot, source.SetID)
+	if err != nil {
+		return err
+	}
+
+	return s.checkRequiredOrderImages(source, output)
+}
+
+func (s *WorkflowStore) repairWorkflowTrackerCompanions(snapshot WorkflowSnapshot, result WorkflowTrackerStatus, output []byte, opts WorkflowTrackerOptions) error {
+	if result.Schema != "chr-tracker/v2" {
+		return nil
+	}
+
+	return s.repairRequiredOrderImages(snapshot, result, output, opts)
 }

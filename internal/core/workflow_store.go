@@ -205,6 +205,10 @@ func (s *WorkflowStore) guardWrite(r *WorkflowRecord, expected uint64) error {
 		return ErrWorkflowConflict
 	}
 
+	if err := s.guardBoundWorkflowTaskOrder(old, *r); err != nil {
+		return err
+	}
+
 	if err := guardWorkflowDomain(old, *r); err != nil {
 		return err
 	}

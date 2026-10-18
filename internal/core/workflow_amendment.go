@@ -36,7 +36,7 @@ func (s *WorkflowStore) AmendWorkflowSet(ctx context.Context, request WorkflowSe
 		return result, fmt.Errorf("amendment requires an observed image and native key allocator")
 	}
 
-	err = s.withLock(ctx, func() (lockErr error) {
+	err = s.withWorkflowPlanMutation(ctx, func(ctx context.Context) (lockErr error) {
 		reservation, readErr := s.reserveWorkflowRole(ctx, workflowInvocationFile{WorkflowInvocation: WorkflowInvocation{WorkflowIdentity: WorkflowIdentity{ID: "set-amendment"}}}, "set_amendment")
 		if readErr != nil {
 			return readErr
@@ -60,6 +60,14 @@ func (s *WorkflowStore) amendWorkflowSet(ctx context.Context, request WorkflowSe
 	body, err := s.readApprovedPlan(request.Plan)
 	if err != nil {
 		return WorkflowMaterializationResult{}, err
+	}
+
+	if set.Set.PlanRevision != nil && request.Plan.PlanRevision == nil {
+		return result, ErrWorkflowConflict
+	}
+
+	if err := s.validateApprovedOrder(request.Plan, set.ID); err != nil {
+		return result, err
 	}
 
 	guard, err := s.acquireWorkflowAllocation()

@@ -29,3 +29,14 @@ func (s service) replayPlanPublication(ctx context.Context, operation core.PlanP
 
 	return PlanOperationResult{Message: "Plan generation already committed.", Plan: s.planViewFromPath(operation.Scope, reference, filepath.Join(s.projectContext.ProjectDir, filepath.FromSlash(reference)))}, true, nil
 }
+
+func (s service) retainedPlanTracking(plan PlanView, binding core.PlanRevisionBinding) (PlanTrackingResult, error) {
+	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir})
+	if err != nil {
+		return PlanTrackingResult{}, err
+	}
+
+	reference := filepath.ToSlash(filepath.Join(layout.RelativeRoot(), binding.CurrentTrackerRef))
+
+	return PlanTrackingResult{Message: "Plan order is already retained. Approve native task materialization to allocate tickets.", Plan: plan, TrackingPath: reference}, nil
+}

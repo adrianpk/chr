@@ -85,6 +85,11 @@ func (s *WorkflowStore) workflowTaskInput(ctx context.Context, run workflowInvoc
 
 	var err error
 
+	input.OrderMap, err = s.requiredWorkflowOrderMap(ctx, record)
+	if err != nil {
+		return input, err
+	}
+
 	input.Prerequisites, input.EvidenceHashes, err = s.workflowPrerequisiteImages(ctx, run, record)
 
 	return input, err

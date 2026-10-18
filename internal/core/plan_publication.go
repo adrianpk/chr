@@ -32,6 +32,10 @@ func observePlanTarget(ctx context.Context, projectDir, reference string) (planT
 	r := &fileAuthoringSessionRepository{projectDir: projectDir}
 
 	target := planTargetObservation{}
+	if err := r.checkPlanWorkflowPending(reference); err != nil {
+		return target, err
+	}
+
 	if err := r.checkProjectDumpInspection(ctx); err != nil {
 		return target, err
 	}

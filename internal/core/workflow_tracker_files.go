@@ -120,16 +120,7 @@ func (s *WorkflowStore) persistWorkflowTracker(result WorkflowTrackerStatus) err
 		return err
 	}
 
-	result.Checksum = ""
-
-	data, err := json.Marshal(result)
-	if err != nil {
-		return err
-	}
-
-	result.Checksum = workflowHash(data)
-
-	data, err = json.Marshal(result)
+	data, err := workflowTrackerMetadataBytes(result)
 	if err != nil {
 		return err
 	}
@@ -284,4 +275,22 @@ func workflowTrackerSourcesChanged(sources []WorkflowTrackerSource, changed map[
 	}
 
 	return false
+}
+
+func workflowTrackerMetadataBytes(result WorkflowTrackerStatus) ([]byte, error) {
+	result.Checksum = ""
+
+	data, err := json.Marshal(result)
+	if err != nil {
+		return nil, err
+	}
+
+	result.Checksum = workflowHash(data)
+
+	data, err = json.Marshal(result)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }

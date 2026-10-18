@@ -97,7 +97,7 @@ Integrated history and earlier closure receipts remain immutable.
 
 | Operating mode | Authority | Tracker role | Exit condition |
 | --- | --- | --- | --- |
-| `tickets` | Ticket records own task state; the owning set record owns slice contracts and integration receipts. | Optional generated view. It has no editable execution authority. | Normal target mode. |
+| `tickets` | Ticket records own task state; the owning set record owns slice contracts and integration receipts. | Required order-only companion for revision-bound plans; optional v1 view for existing workflows. Neither imports editable execution state. | Normal target mode. |
 | `tracker_compat` | One explicitly selected existing tracker owns the unadopted legacy workflow. | Existing execution map. Ticket projections are read-only and excluded from ticket-native selection. | Explicit adoption of selected active work, with identities, revisions, and delivery evidence reconciled. |
 
 New executable work uses `tickets`. Transitional mode is limited to workflows
@@ -109,12 +109,30 @@ ticket before execution. Repair of the same obligation creates another attempt
 on that ticket; an added obligation creates a new linked ticket. Neither a
 tracker checkbox nor an agent statement completes a ticket.
 
-Tracker export flows from authoritative records to the projection only. Export
-failure records `projection_stale`, preserves the successful domain transition,
-and disables continuation through that stale projection. Direct ticket-native
-execution can continue. A conflicting tracker edit is reported and is never
-imported automatically. Re-export requires either an unchanged generated file or
-explicit permission to replace the changed projection.
+Revision-bound plans retain an internal `chr-tracker/v2` Markdown companion for
+every generated revision. Before approved materialization, it declares stable
+planned identities and order without allocated tickets or execution authority.
+Approved native materialization binds canonical tickets and publishes the set,
+map, provenance and receipt through the existing recoverable workflow journal.
+A retry reuses the same allocation. A later draft does not change an active set;
+applying approved changes uses its guarded amendment operation and retains
+completed tickets, receipts and earlier revision maps.
+
+V2 hashes and renders project/namespace, plan identity/revision/body hash,
+materialization/set identity, ordered slice/task IDs and titles, and canonical
+ticket references. Status, phase, claims, attempts, review, delivery/closure state
+and whole-record revisions/hashes are excluded. Legacy progress cells stay blank.
+Ticket progress leaves map bytes and freshness unchanged. The current map is
+included in worker input; live tickets and receipts determine remaining work.
+A missing or stale required map blocks preparing execution context until repair.
+It never rolls back a successfully committed ticket transition.
+
+Tracker export flows from native records to the projection only. Conflicting
+edits are reported and never imported. Replacement requires the exact observed
+output hash; repair launches no work. Existing optional v1 views retain their
+progress projection, and their failure does not prevent direct native execution.
+Reading legacy artifacts or `tracker_compat` state never upgrades their schema
+or adopts them implicitly.
 
 Manual runners use the same claim, checkpoint, validation, and reconciliation
 operations. They can report a commit and evidence for host verification. They

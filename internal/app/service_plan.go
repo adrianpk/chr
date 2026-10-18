@@ -436,6 +436,15 @@ func (s service) MaterializePlanTracking(ctx context.Context, request PlanTracki
 		return PlanTrackingResult{}, fmt.Errorf("plan is required before tracking can be created")
 	}
 
+	binding, err := core.ObservePlanRevision(ctx, s.projectContext.ProjectDir, scope)
+	if err != nil {
+		return PlanTrackingResult{}, err
+	}
+
+	if binding.Reference != "" {
+		return s.retainedPlanTracking(plan, binding)
+	}
+
 	trackingPaths, err := core.GeneratedPlanTrackingLayout(s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return PlanTrackingResult{}, err

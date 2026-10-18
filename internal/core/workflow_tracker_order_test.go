@@ -13,32 +13,9 @@ import (
 func workflowOrderFixture(t *testing.T) (*WorkflowStore, WorkflowMaterializationResult, WorkflowTrackerStatus) {
 	t.Helper()
 
-	store, opts := workflowMaterializationFixture(t)
-	for i := range opts.Plan.Slices {
-		for j := range opts.Plan.Slices[i].Tasks {
-			opts.Plan.Slices[i].Tasks[j].Validation = WorkflowValidation{Required: true, Commands: [][]string{workflowTaskCommand(t, "gate")}, TimeoutSeconds: 30}
-		}
-	}
-
-	generated := orderedPlanCandidate()
-	generated.Scope = QuizScope{ProjectID: store.projectID}
-
-	generated.Order = plannedWorkflowOrder(opts.Plan)
-	if _, err := WriteGeneratedPlan(t.Context(), store.layout.ProjectDir(), generated); err != nil {
-		t.Fatal(err)
-	}
-
-	binding := readTestPlanBinding(t, store.layout.ProjectDir(), generated.Scope)
-	opts.Plan.PlanRef, opts.Plan.PlanHash = binding.BodyRef, binding.BodyHash
+	store, opts := workflowOrderPlanFixture(t)
 
 	hierarchy, err := store.MaterializePlan(t.Context(), opts)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	hierarchy.Set.Set.PlanRevision = &binding
-
-	hierarchy.Set, err = store.Write(t.Context(), hierarchy.Set, hierarchy.Set.Revision)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,20 +26,6 @@ func workflowOrderFixture(t *testing.T) (*WorkflowStore, WorkflowMaterialization
 	}
 
 	return store, hierarchy, projection
-}
-
-func plannedWorkflowOrder(plan GeneratedWorkflowPlan) []PlanOrderSlice {
-	result := make([]PlanOrderSlice, 0, len(plan.Slices))
-	for _, slice := range plan.Slices {
-		item := PlanOrderSlice{ID: slice.ID, Order: slice.Order, Title: slice.Title}
-		for _, task := range slice.Tasks {
-			item.Tasks = append(item.Tasks, PlanOrderTask{ID: task.ID, Order: task.Order, Title: task.Title})
-		}
-
-		result = append(result, item)
-	}
-
-	return result
 }
 
 // A real claim and host-validated worker result change authoritative processing
@@ -115,30 +78,37 @@ func checkWorkflowOrderUnchanged(t *testing.T, store *WorkflowStore, projection 
 	}
 }
 
-// Structural order/title changes stale v2 without rewriting it. Explicit export
-// refreshes the map; neither statuses nor complete record revisions are inputs.
+// Structural order/title changes alter the projection hash, but writing them
+// requires approved amendment. Rejection preserves the existing current map.
 func TestWorkflowOrderStructure(t *testing.T) {
 	store, hierarchy, first := workflowOrderFixture(t)
-	before := workflowTrackerRead(t, filepath.Join(store.layout.Root(), first.Path))
 
-	hierarchy.Set.Set.Slices[0].Title = "Approved different integration title"
-	if _, err := store.Write(t.Context(), hierarchy.Set, hierarchy.Set.Revision); err != nil {
+	snapshot, err := store.Snapshot(t.Context())
+	if err != nil {
 		t.Fatal(err)
 	}
 
-	stale, err := store.InspectWorkflowTracker(t.Context(), hierarchy.Set.ID)
-	if err != nil || stale.Status != "stale" || !bytes.Equal(before, workflowTrackerRead(t, filepath.Join(store.layout.Root(), first.Path))) {
-		t.Fatal("structural change was not observed read-only", stale, err)
+	var changed WorkflowRecord
+
+	for i := range snapshot.Records {
+		if snapshot.Records[i].ID == hierarchy.Set.ID {
+			snapshot.Records[i].Set.Slices[0].Title = "Different integration title"
+			changed = snapshot.Records[i]
+		}
 	}
 
-	changed, err := store.ExportWorkflowTracker(t.Context(), hierarchy.Set.ID, WorkflowTrackerOptions{})
-	if err != nil || changed.SourceHash == first.SourceHash || changed.GeneratedAt.Equal(first.GeneratedAt) {
-		t.Fatal("structural export did not refresh", changed, err)
+	source, output, err := store.workflowOrderTrackerImage(snapshot, hierarchy.Set.ID)
+	if err != nil || source.SourceHash == first.SourceHash || !strings.Contains(string(output), "Different integration title") {
+		t.Fatal("structural title missing from map", source, err)
 	}
 
-	content := workflowTrackerRead(t, filepath.Join(store.layout.Root(), first.Path))
-	if !strings.Contains(string(content), "Approved different integration title") {
-		t.Fatal("native order/title lost")
+	if _, err := store.Write(t.Context(), changed, changed.Revision); !errors.Is(err, ErrWorkflowConflict) {
+		t.Fatal("unapproved structural write accepted", err)
+	}
+
+	status, err := store.InspectWorkflowTracker(t.Context(), hierarchy.Set.ID)
+	if err != nil || status.Status != "current" {
+		t.Fatal("rejected amendment changed existing map", status, err)
 	}
 }
 
@@ -236,4 +206,38 @@ func TestWorkflowOrderRegistrationRecovery(t *testing.T) {
 	if err != nil || repaired.Schema != "chr-tracker/v2" || repaired.SourceHash != projection.SourceHash {
 		t.Fatal("registration recovery depended on progress receipts", repaired, err)
 	}
+
+	if !repaired.GeneratedAt.Equal(projection.GeneratedAt) {
+		t.Fatal("registration repair changed structural generation time")
+	}
+
+	status, err := store.InspectWorkflowTracker(t.Context(), projection.SetID)
+	if err != nil || status.Status != "current" {
+		t.Fatal("registration was not restored", status, err)
+	}
+}
+
+func workflowOrderPlanFixture(t *testing.T) (*WorkflowStore, WorkflowMaterializationOptions) {
+	t.Helper()
+
+	store, opts := workflowMaterializationFixture(t)
+	for i := range opts.Plan.Slices {
+		for j := range opts.Plan.Slices[i].Tasks {
+			opts.Plan.Slices[i].Tasks[j].Validation = WorkflowValidation{Required: true, Commands: [][]string{workflowTaskCommand(t, "gate")}, TimeoutSeconds: 30}
+		}
+	}
+
+	generated := orderedPlanCandidate()
+	generated.Scope = QuizScope{ProjectID: store.projectID}
+
+	generated.Order = plannedWorkflowOrder(opts.Plan)
+	if _, err := WriteGeneratedPlan(t.Context(), store.layout.ProjectDir(), generated); err != nil {
+		t.Fatal(err)
+	}
+
+	binding := readTestPlanBinding(t, store.layout.ProjectDir(), generated.Scope)
+	opts.Plan.PlanRef, opts.Plan.PlanHash = binding.BodyRef, binding.BodyHash
+	opts.Plan.PlanRevision = &binding
+
+	return store, opts
 }
