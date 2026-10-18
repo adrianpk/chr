@@ -5,7 +5,7 @@ Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
 Branch: `feat/slice-7-spec-authoring`
-PR: pending
+PR: `#404`
 
 ## Purpose
 
@@ -38,9 +38,9 @@ catalog selection.
 
 ## Implementation Notes
 
-- T7.1: `e130f1a27117` — shared manual create/save/state and guarded retained images.
-- T7.2: `88c6b43cd5eb` — concrete listing, scoped context and recoverable generation publication.
-- T7.3: task commit recorded in the PR-reference follow-up — Web cards, one editor, native state controls and owned visual/HTTP evidence.
+- T7.1: `e130f1a27117359c27e8b53d4060752e285b0e5e` — shared manual create/save/state and guarded retained images.
+- T7.2: `88c6b43cd5eb79506862897a785663af4883c3d0` — concrete listing, scoped context and recoverable generation publication.
+- T7.3: `273fcfde69ef4b317bd441421847a4a39913e903` — Web cards, one editor, native state controls and owned visual/HTTP evidence.
 
 Concrete listing is independent of the existing latest-in-scope inventory.
 Spec generation receives project context, canonical general dump and matching

@@ -9,8 +9,9 @@ scope: ui
 tags: specs, catalog, creation-state
 source: chat
 reported_at: 2026-10-17T19:45:52Z
-commits: []
+commits: [e130f1a27117359c27e8b53d4060752e285b0e5e, 88c6b43cd5eb79506862897a785663af4883c3d0, 273fcfde69ef4b317bd441421847a4a39913e903]
 branch: feat/slice-7-spec-authoring
+pr: "#404"
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
@@ -203,3 +204,5 @@ dimensions with short, long and unbroken text in the owning slice and review.
 ## Slice 7 Execution
 
 T7.1 shared create/save/state operations passed focused race, journal recovery and full affected lint checks. T7.2 concrete listing/context and bound generation publication passed focused race and affected lint checks. T7.3 Web authoring, native HTTP checks, owned browser evidence and affected lint are complete; final exact-HEAD controller validation follows PR references after verified Slice 6 integration through PR #403. The [Slice 7 report](../../report/slices/web-ui-workflow-consolidation/slice-7-spec-authoring.md) records delivery evidence.
+
+[PR #404](https://forge.adrianpk.com/adrianpk/chr/pulls/404) targets dev. T7.1, T7.2 and T7.3 commits are recorded above; the report retains focused commands and captured catalog/modal states. Final exact-HEAD evidence is bound through the controller after this reference follow-up.
