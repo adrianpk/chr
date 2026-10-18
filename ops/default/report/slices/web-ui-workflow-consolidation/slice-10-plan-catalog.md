@@ -5,7 +5,9 @@ Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
 Branch: `feat/slice-10-plan-catalog`
-PR: pending
+PR: `#407`
+
+[PR #407](https://forge.adrianpk.com/adrianpk/chr/pulls/407) targets dev.
 
 ## Purpose
 
@@ -78,7 +80,7 @@ previews remain 278×132px with clipped overflow and no internal scrollbar.
 Complete detail text exceeds the preview limit and has zero editing controls.
 All measured views avoid document-width overflow.
 
-Final clean-HEAD validation is pending at this task commit. The canonical PR
+Final clean-HEAD validation is pending at this report-reference commit. The canonical PR
 and controller ledger record required `make verify`, affected focused checks,
 plan browser regressions and whitespace validation after PR-reference follow-up.
 

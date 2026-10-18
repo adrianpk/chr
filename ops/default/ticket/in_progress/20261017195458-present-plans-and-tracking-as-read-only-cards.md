@@ -9,8 +9,9 @@ scope: ui
 tags: plans, catalog, reading
 source: chat
 reported_at: 2026-10-17T19:54:58Z
-commits: [c65b1dac7c39e7a15030fb4f7b2e28a4366e5a15]
+commits: [c65b1dac7c39e7a15030fb4f7b2e28a4366e5a15, f39a05003326d993687f0e9d0df37f1da6645a69]
 branch: feat/slice-10-plan-catalog
+pr: "#407"
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
@@ -100,6 +101,6 @@ internal files and contextual generation remain available through their owners.
 Focused core/HTTP tests, affected-package strict lint and owned Chromium
 captures passed, including mutation-free browsing and rejected legacy forms.
 The [Slice 10 report](../../report/slices/web-ui-workflow-consolidation/slice-10-plan-catalog.md)
-owns implementation, acceptance captures and task validation evidence. Final
-clean-HEAD controller checks follow PR-reference updates. The source ticket
+owns implementation, acceptance captures and task validation evidence. [PR #407](https://forge.adrianpk.com/adrianpk/chr/pulls/407) and the controller
+ledger own final clean-HEAD evidence after these PR-reference updates. The source ticket
 remains in progress until verified merge.
