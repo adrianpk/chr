@@ -545,6 +545,7 @@ func (p webViewProvider) dumpArtifactDetail(ctx context.Context, request webui.A
 		return webui.ArtifactDetailView{}, err
 	}
 	dump := p.service(ctx).dumpView(document)
+	dump.Content = document.Body
 
 	return webui.ArtifactDetailView{Family: request.Family, ID: dump.RelativePath, Path: dump.RelativePath, Title: dump.Title, Status: dump.Status, Scope: webScopeLabel(dump.Scope.CaseSlug, dump.UseCaseTitle), SourcePath: dump.SourcePath, UpdatedAt: webArtifactTime(dump.UpdatedAt), Content: dump.Content, Revision: dump.Revision, SaveRequestID: dumpRequestID(""), AppendRequestID: dumpRequestID("")}, nil
 }

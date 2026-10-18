@@ -26,9 +26,10 @@ type DumpCapturePreparation struct{ Content, RawContent string }
 type DumpCapturePreparer func(context.Context, string, string) (DumpCapturePreparation, error)
 
 // DumpDocumentObservation binds editable content to its resolved identity and root.
+// Content retains the complete stored image; Body excludes its frontmatter.
 type DumpDocumentObservation struct {
-	Artifact          ProjectDumpArtifact
-	Revision, Content string
+	Artifact                ProjectDumpArtifact
+	Revision, Content, Body string
 }
 
 // ReadDumpDocument resolves old references and returns an exact body/metadata revision.
@@ -50,6 +51,13 @@ func ReadDumpDocument(ctx context.Context, projectDir, reference string) (DumpDo
 	if err != nil {
 		return observed, err
 	}
+
+	editable, err := dumpEditableBody(body)
+	if err != nil {
+		return observed, err
+	}
+
+	observed.Body = string(editable)
 
 	return observed, r.checkProjectDumpInspection(ctx)
 }
