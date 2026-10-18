@@ -45,8 +45,32 @@ func TestWorkObservationContexts(t *testing.T) {
 	completed := core.WorkflowInvocation{WorkflowIdentity: core.WorkflowIdentity{ID: "complete", UpdatedAt: at}, Status: "completed", Outcome: "task_validated", Cursor: 1, Members: []core.WorkflowMember{{Admission: core.WorkflowPreviewMember{Key: "PRJ-1"}}}}
 	appendNativeWork(&result, completed, tickets, records)
 
-	if len(result.Current) != 2 || result.Current[0].Phase != "validating" || result.Current[0].Message != "Running go" || result.Current[1].Phase != "working" || len(result.Results) != 1 || result.Results[0].Confirmed != 0 {
+	if len(result.Current) != 2 || result.Current[0].Phase != "validating" || result.Current[0].Message != "Running go" || result.Current[1].Phase != "working" || len(result.Results) != 1 || result.Results[0].Confirmed != 0 || result.Results[0].Phase != "task_validated" {
 		t.Fatal(result)
+	}
+}
+
+// Pauses, blockers and explicit cancellation retain their lifecycle meaning
+// without requiring a phase event or inventing confirmed delivery.
+func TestWorkObservationLifecycle(t *testing.T) {
+	for _, item := range []struct {
+		name, status string
+		terminal     bool
+	}{{"blocked", "blocked", false}, {"stopped", "paused", false}, {"cancelled", "cancelled", true}} {
+		t.Run(item.name, func(t *testing.T) {
+			result := WorkObservation{}
+			run := core.WorkflowInvocation{WorkflowIdentity: core.WorkflowIdentity{ID: item.name, UpdatedAt: time.Now().UTC()}, Status: item.status}
+			appendNativeWork(&result, run, nil, nil)
+
+			contexts := result.Current
+			if item.terminal {
+				contexts = result.Results
+			}
+
+			if len(contexts) != 1 || contexts[0].Status != item.status || contexts[0].Phase != item.status || contexts[0].Confirmed != 0 {
+				t.Fatal(result)
+			}
+		})
 	}
 }
 

@@ -86,6 +86,9 @@ func (s service) ObserveWork(ctx context.Context, offset int) (result WorkObserv
 
 func finishWorkObservation(result *WorkObservation, offset int) {
 	result.Events = dedupeWorkEvents(result.Events)
+	slices.Sort(result.Warnings)
+
+	result.Warnings = slices.Compact(result.Warnings)
 	result.QueueTotal = len(result.Queue)
 	result.QueueNext = -1
 

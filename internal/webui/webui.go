@@ -217,32 +217,41 @@ func (h handler) ticketComment(w http.ResponseWriter, r *http.Request) {
 
 func (h handler) dash(w http.ResponseWriter, r *http.Request) {
 	data, err := h.dashPageData(r)
-	if err != nil {
-		http.Error(w, "load dash", http.StatusInternalServerError)
+	if errors.Is(err, errDashRequest) {
+		http.Error(w, "invalid Dash queue page", http.StatusBadRequest)
 
 		return
 	}
-
-	if err := h.renderer.Page(w, "shell.html", data); err != nil {
+	if err != nil {
+		data = h.dashPageProjection(r, DashView{Unavailable: true, Revision: "unavailable"})
+	}
+	if err = h.renderer.Page(w, "shell.html", data); err != nil {
 		http.Error(w, "render dash", http.StatusInternalServerError)
 	}
 }
 
 func (h handler) dashFragment(w http.ResponseWriter, r *http.Request) {
 	if !htmx.IsRequest(r) {
-		http.Redirect(w, r, "/dash", http.StatusSeeOther)
+		http.Redirect(w, r, "/dash"+dashRefreshQuery(r), http.StatusSeeOther)
 
 		return
 	}
-
 	data, err := h.dashPageData(r)
-	if err != nil {
-		http.Error(w, "load dash", http.StatusInternalServerError)
+	if errors.Is(err, errDashRequest) {
+		http.Error(w, "invalid Dash queue page", http.StatusBadRequest)
 
 		return
 	}
+	if err != nil {
+		w.Header().Set("Cache-Control", "no-store")
+		http.Error(w, "Work observation is unavailable", http.StatusServiceUnavailable)
 
-	if err := h.renderer.Fragment(w, "dash_content.html", data); err != nil {
+		return
+	}
+	if dashObservationHeaders(w, r, data.Dash) {
+		return
+	}
+	if err = h.renderer.Fragment(w, "dash_content.html", data); err != nil {
 		http.Error(w, "render dash", http.StatusInternalServerError)
 	}
 }
@@ -738,14 +747,7 @@ func (h handler) dashPageData(r *http.Request) (PageData, error) {
 		return PageData{}, err
 	}
 
-	return PageData{
-		Shell:      h.shellData("dash"),
-		View:       "dash",
-		Title:      "Dash",
-		Revision:   dash.Revision,
-		RefreshURL: "/dash/fragment" + dashRefreshQuery(r),
-		Dash:       dash,
-	}, nil
+	return h.dashPageProjection(r, dash), nil
 }
 
 func (h handler) catalogPageData(r *http.Request, family string) (PageData, error) {

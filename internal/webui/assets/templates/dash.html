@@ -35,6 +35,9 @@
   {{end}}
   {{range .Dash.Warnings}}<p class="diagnostic">{{.}}</p>{{end}}
 </div>
+{{end}}
+
+{{define "dash_controls.html"}}
 <div class="dash-controls">
   <a class="button" href="/workflows">Workflow details</a>
   <form method="post" action="/actions" hx-post="/actions" hx-target="#dash-action-result" hx-swap="innerHTML" hx-disabled-elt="find button" onsubmit="return confirm('Preview the ready work queue?')">
@@ -54,7 +57,7 @@
   <div class="dash-panel__header"><h3>{{if .URL}}<a href="{{.URL}}">{{.Title}}</a>{{else}}{{.Title}}{{end}}</h3><span class="dash-state">{{.Status}}</span></div>
   {{if .TicketKey}}<p class="dash-key">{{.TicketKey}}{{if .Scope}} · {{.Scope}}{{end}}</p>{{end}}
   <p class="dash-phase">{{.Phase}}</p>{{if .Message}}<p>{{.Message}}</p>{{end}}
-  <p class="dash-time">State observed in records at <time datetime="{{.UpdatedAt}}">{{.UpdatedAt}}</time>{{if .ActivityAt}} · Latest activity <time datetime="{{.ActivityAt}}">{{.ActivityAt}}</time>{{end}}</p>
+  <p class="dash-time">State updated at <time datetime="{{.UpdatedAt}}">{{.UpdatedAt}}</time>{{if .ActivityAt}} · Latest activity <time datetime="{{.ActivityAt}}">{{.ActivityAt}}</time>{{end}}</p>
   {{if eq .Kind "native"}}<p class="dash-summary">{{.Validated}} host-validated tasks · {{.Confirmed}} confirmed tickets · {{.Remaining}} awaiting confirmed delivery</p>
   {{else if eq .Kind "loop"}}<p class="dash-summary">{{.Eligible}} eligible · {{.Processed}} processed · {{.Blocked}} blocked · {{.Failed}} failed</p>{{end}}
 </article>

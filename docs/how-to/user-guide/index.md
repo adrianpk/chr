@@ -296,6 +296,22 @@ and approval remain separate operations, and generating a plan does not start
 work. Failed preparation or changed sources leave the current plan in place;
 reload the case before retrying a stale operation.
 
+Open **Dash** to observe the queue, each active ticket context and retained
+results. The queue sits at left, current work at upper right and activity/results
+below; these panels stack on narrow screens. Use the queue page links for more
+than 128 pending items. Readiness and exclusions explain why pending work cannot
+start. Native host-validated tasks and confirmed tickets are separate counts;
+a successful legacy harness run does not itself confirm integration.
+
+Dash refreshes while the tab is visible. Quiet validation remains active even
+when there is no new event. Unchanged observations keep the displayed content;
+changed observations retain scroll position, focused links and selected text
+that still exists. If a read fails, a stale notice preserves the last observation
+and its time until recovery. Reopening Dash reads retained state without
+starting work. Preview Work and Stop Daemon keep their confirmations, with
+results below the controls while monitoring remains visible. Stop Daemon requests
+a daemon stop; it does not cancel an individual ticket.
+
 This first Web UI iteration is intended to be usable, not final. Expect visual
 and ergonomic refinement to continue while the local server, shared state, and
 action boundaries remain explicit.

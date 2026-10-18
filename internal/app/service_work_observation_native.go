@@ -115,6 +115,12 @@ func bindNativeWorkContext(current *WorkContext, tickets map[string]core.Indexed
 	ticket := tickets[current.TicketKey]
 
 	current.Title, current.Scope = ticket.Title, ticket.UseCase
+
+	current.Phase = firstNonEmptyString(current.Outcome, current.Status)
+	if current.AttemptID == "" {
+		return
+	}
+
 	if record := records[current.TicketKey]; record.Task != nil {
 		current.Phase = record.Task.Phase
 		if current.AttemptID != "" && record.Task.AttemptID != current.AttemptID {

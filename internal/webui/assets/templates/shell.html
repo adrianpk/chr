@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/assets/chr.css">
     <script src="/assets/htmx.min.js" defer></script>
     <script src="/assets/chr.js" defer></script>
+    <script src="/assets/dash.js" defer></script>
     <script src="/assets/quiz.js" defer></script>
     <script src="/assets/spec.js" defer></script>
   </head>
@@ -60,7 +61,8 @@
           {{end}}
         </header>
         {{end}}
-        <section id="workspace" class="workspace-panel" data-revision="{{.Revision}}"{{if .RefreshURL}} hx-get="{{.RefreshURL}}" hx-trigger="every {{.Shell.RefreshSeconds}}s [document.visibilityState == 'visible']" hx-target="#workspace" hx-swap="innerHTML"{{end}}>
+        {{if eq .View "dash"}}<p id="dash-observation-status" class="dash-status" role="status" aria-live="polite" data-state="{{if .Dash.Unavailable}}unavailable{{else}}fresh{{end}}" data-observed-at="{{.Dash.ObservedAt}}">{{if .Dash.Unavailable}}Work data is unavailable. Waiting for an observation.{{else}}Observed at {{.Dash.ObservedAt}}{{end}}</p>{{end}}
+        <section id="workspace" class="workspace-panel" data-revision="{{.Revision}}"{{if eq .View "dash"}} hx-sync="this:drop"{{end}}{{if .RefreshURL}} hx-get="{{.RefreshURL}}" hx-trigger="every {{.Shell.RefreshSeconds}}s [document.visibilityState == 'visible']" hx-target="#workspace" hx-swap="innerHTML"{{end}}>
           {{if eq .View "board"}}
             {{template "board_content.html" .}}
           {{else if eq .View "dash"}}
@@ -77,6 +79,7 @@
             {{template "project_content.html" .}}
           {{end}}
         </section>
+        {{if eq .View "dash"}}{{template "dash_controls.html" .}}{{end}}
       </main>
       <div id="modal-root"></div>
     </div>

@@ -12,6 +12,12 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
+- Web Dash now shows the pending queue, independent active ticket contexts and
+  retained results together, with a stacked layout on narrow screens. Quiet
+  validation stays visible, and confirmed delivery remains distinct from host
+  validation or a successful harness run. Refresh preserves scroll and selection;
+  temporary outages keep the last observation with a stale notice. Preview Work
+  and Stop Daemon remain available while monitoring updates.
 - Plans can now be generated or regenerated from a named case's saved context,
   with guidance when discovery is absent or insufficient. A useful dump or
   answered quiz can supply the context without requiring both. Failed generation

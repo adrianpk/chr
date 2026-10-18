@@ -1468,3 +1468,7 @@ code {
 .dash-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
 .dash-controls form { margin: 0; }
 @media (max-width: 760px) { .dash-layout { grid-template-columns: minmax(0, 1fr); } .dash-queue, .dash-current, .dash-recent { grid-column: 1; grid-row: auto; } }
+
+.dash-status { margin: 0 0 12px; font-size: .8rem; color: var(--muted); }
+.dash-status[data-state="stale"], .dash-status[data-state="unavailable"] { padding: 10px; border: 1px solid var(--amber); border-radius: var(--radius); color: var(--ink); }
+.dash-status[aria-busy="true"]::after { content: " · refreshing"; }

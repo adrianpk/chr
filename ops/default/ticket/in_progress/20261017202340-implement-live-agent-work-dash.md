@@ -9,7 +9,7 @@ scope: ui
 tags: dash, observability, workflow
 source: chat
 reported_at: 2026-10-17T20:23:40Z
-commits: [b20d86e2cc5dc218096ea560af9f7b523662d8ea]
+commits: [b20d86e2cc5dc218096ea560af9f7b523662d8ea, e92547312b9a5a1c97fe0aac0fe7e05d7bd5cc7c]
 branch: feat/slice-11-work-dash
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
@@ -205,11 +205,12 @@ Behavior, shared-domain changes and implementation design are consolidated in
 
 ## Slice 11 Execution
 
-T11.1 and T11.2 are complete on the recorded branch: shared authority-aware work observation
-with native ordering/readiness, separate current contexts, retained results,
-bounded structured events and mutation-free source reads. Focused race and
-strict lint checks passed. Dash renders queue/current/recent panels with independent
-contexts, quiet state and retained results. T11.3 remains for bounded refresh,
-scroll/selection preservation and stale recovery. The
+T11.1, T11.2 and T11.3 are complete on the recorded branch. Shared native and
+supported legacy observations retain independent contexts, shared readiness,
+paged queues, bounded deduplicated activity and actual result counters.
+Revision-aware visible polling preserves scroll, focus, selection and pending
+controls; read outages preserve stale state until recovery. Task-level race,
+strict lint, HTTP and owned desktop/narrow browser checks passed. The
 [Slice 11 report](../../report/slices/web-ui-workflow-consolidation/slice-11-work-dash.md)
-owns implementation and validation evidence.
+owns implementation, captures and validation evidence. Final exact-HEAD checks
+follow canonical PR-reference commits; verified controller integration is pending.

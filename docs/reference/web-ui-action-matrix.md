@@ -25,7 +25,7 @@ Status values:
 | Specs | `/specs` | `chr spec list`, `chr spec generate` | `F5` | `matched` | Catalog and generation action use spec service paths. |
 | Plans | `/plans` | `chr plan *` | `F6` | `web_subset` | Concrete plan documents have fixed cards and exact full read-only details. Missing-scope placeholders and internal trackers are excluded. Generate/Regenerate stay in the selected case. |
 | Board | `/board` | `chr ticket board`, `chr ticket list`, `chr ticket show` | `F7` | `read_only_matched` | Board columns, attention, and ticket cards read the shared Board model. |
-| Dash | `/dash` | `chr work doctor`, `chr work run-all --dry-run`, `chr daemon stop` | `F8` | `web_subset` | Readiness, queue, current, recent events, work preview, and daemon stop are exposed. |
+| Dash | `/dash` | `chr work doctor`, `chr work run-all --dry-run`, `chr daemon stop` | `F8` | `web_subset` | Readiness, paged queue, independent current contexts and retained results refresh with stale recovery. Work preview and daemon stop retain separate confirmed controls. |
 
 ## Write Actions
 

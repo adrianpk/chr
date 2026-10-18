@@ -54,3 +54,21 @@ work remains active according to its retained lifecycle state. A read cannot
 claim, admit, start, stop, migrate, maintain tracker processing state or alter
 execution policy. Existing control operations retain their own authorization
 and guards.
+
+## Web Refresh
+
+Dash hashes the semantic projection separately from observation time. Fragment
+responses send an ETag and observation timestamp; matching conditional reads
+return 304. Visible tabs poll at the configured interval with one refresh in
+flight. Hidden tabs pause polling. Queue page selection changes only the display.
+
+Changed responses preserve panel/window scroll, a retained focused link and
+selected text within its original ticket, context or event when that text still
+exists. Failed reads retain the last projection with an explicit stale timestamp;
+an initial failure is unavailable rather than empty. Recovery refreshes the
+observation without admitting work. Deduplication uses stable context/event
+identities and bounded output; warning messages are deduplicated as well.
+
+Preview and daemon-stop forms stay outside the refresh region, retain their
+existing shared action/confirmation guards and update a separate result pane.
+Pending controls do not block observation or disappear during refresh.

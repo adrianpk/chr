@@ -2,10 +2,14 @@ package webui
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
 
 	"forge.adrianpk.com/chr/internal/webui/htmx"
 )
+
+var errDashRequest = errors.New("invalid Dash request")
 
 // DashRequest selects a display page without changing scheduling or readiness.
 type DashRequest struct{ QueueOffset int }
@@ -19,7 +23,7 @@ type DashPageProvider interface {
 func (h handler) readDashPage(r *http.Request) (DashView, error) {
 	offset, err := workflowQueryNumber(r.URL.Query().Get("queue_offset"), 4096)
 	if err != nil {
-		return DashView{}, err
+		return DashView{}, fmt.Errorf("%w: %w", errDashRequest, err)
 	}
 
 	if provider, ok := h.provider.(DashPageProvider); ok {
@@ -49,4 +53,23 @@ func dashRefreshQuery(r *http.Request) string {
 	}
 
 	return ""
+}
+
+func (h handler) dashPageProjection(r *http.Request, dash DashView) PageData {
+	return PageData{Shell: h.shellData("dash"), View: "dash", Title: "Dash", Revision: dash.Revision, RefreshURL: "/dash/fragment" + dashRefreshQuery(r), Dash: dash}
+}
+
+func dashObservationHeaders(w http.ResponseWriter, r *http.Request, dash DashView) bool {
+	etag := `"` + dash.Revision + `"`
+	w.Header().Set("ETag", etag)
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("X-CHR-Observed-At", dash.ObservedAt)
+
+	if r.Header.Get("If-None-Match") == etag {
+		w.WriteHeader(http.StatusNotModified)
+
+		return true
+	}
+
+	return false
 }
