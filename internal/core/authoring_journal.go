@@ -15,7 +15,11 @@ type authoringMutationJournal struct {
 }
 
 func (r *fileAuthoringSessionRepository) writeAuthoringJournal(changes []workflowFileChange) error {
-	journal := authoringMutationJournal{Schema: "chr-authoring-journal/v1", Changes: changes}
+	return r.writeAuthoringJournalVersion("chr-authoring-journal/v1", changes)
+}
+
+func (r *fileAuthoringSessionRepository) writeAuthoringJournalVersion(schema string, changes []workflowFileChange) error {
+	journal := authoringMutationJournal{Schema: schema, Changes: changes}
 
 	encoded, err := json.Marshal(journal)
 	if err != nil {
@@ -38,7 +42,7 @@ func (r *fileAuthoringSessionRepository) writeAuthoringJournal(changes []workflo
 		return err
 	}
 
-	return atomicWorkflowFile(path, encoded)
+	return atomicBoundedWorkflowFile(path, encoded, authoringJournalLimit(schema))
 }
 
 func (r *fileAuthoringSessionRepository) recoverAuthoringMutation() error {
@@ -47,7 +51,7 @@ func (r *fileAuthoringSessionRepository) recoverAuthoringMutation() error {
 		return err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := readBoundedWorkflowFile(path, projectDumpJournalBytes)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil
 	}
@@ -59,6 +63,10 @@ func (r *fileAuthoringSessionRepository) recoverAuthoringMutation() error {
 	var journal authoringMutationJournal
 	if err := decodeAuthoringState(data, &journal); err != nil {
 		return err
+	}
+
+	if len(data) > authoringJournalLimit(journal.Schema) {
+		return errors.New("authoring journal exceeds its schema limit")
 	}
 
 	if err := r.checkAuthoringJournal(journal); err != nil {
@@ -85,11 +93,11 @@ func (r *fileAuthoringSessionRepository) checkAuthoringJournal(journal authoring
 		return err
 	}
 
-	if journal.Schema != "chr-authoring-journal/v1" || len(journal.Changes) < 2 || len(journal.Changes) > 12 || checksum != workflowHash(encoded) {
+	if !validAuthoringJournalBounds(journal, len(encoded)+len(checksum)) || checksum != workflowHash(encoded) {
 		return errors.New("invalid authoring journal")
 	}
 
-	return r.checkAuthoringJournalImages(journal.Changes)
+	return r.checkAuthoringJournalImages(journal)
 }
 
 func validAuthoringJournalPath(path string) bool {
@@ -190,10 +198,10 @@ func (r *fileAuthoringSessionRepository) replayAuthoringJournal(journal authorin
 	return nil
 }
 
-func (r *fileAuthoringSessionRepository) checkAuthoringJournalImages(changes []workflowFileChange) error {
+func (r *fileAuthoringSessionRepository) checkAuthoringJournalImages(journal authoringMutationJournal) error {
 	seen := map[string]bool{}
-	for _, change := range changes {
-		if seen[change.Path] || len(change.After) > WorkflowFileLimit || !validAuthoringJournalPath(change.Path) {
+	for _, change := range journal.Changes {
+		if seen[change.Path] || len(change.After) > WorkflowFileLimit || !validAuthoringJournalVersionPath(journal.Schema, change.Path) {
 			return errors.New("invalid authoring journal target")
 		}
 

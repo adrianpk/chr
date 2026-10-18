@@ -24,6 +24,10 @@ func workflowHash(data []byte) string {
 }
 
 func readWorkflowFile(path string) ([]byte, error) {
+	return readBoundedWorkflowFile(path, WorkflowFileLimit)
+}
+
+func readBoundedWorkflowFile(path string, limit int) ([]byte, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -34,13 +38,13 @@ func readWorkflowFile(path string) ([]byte, error) {
 		_ = file.Close()
 	}()
 
-	data, err := io.ReadAll(io.LimitReader(file, WorkflowFileLimit+1))
+	data, err := io.ReadAll(io.LimitReader(file, int64(limit)+1))
 	if err != nil {
 		return nil, err
 	}
 
-	if len(data) > WorkflowFileLimit {
-		return nil, fmt.Errorf("workflow file exceeds 1 MiB: %s", filepath.Base(path))
+	if len(data) > limit {
+		return nil, fmt.Errorf("workflow file exceeds %d bytes: %s", limit, filepath.Base(path))
 	}
 
 	return data, nil
@@ -67,8 +71,12 @@ func (s *WorkflowStore) safePath(relative string) (string, error) {
 }
 
 func atomicWorkflowFile(path string, content []byte) (err error) {
-	if len(content) > WorkflowFileLimit {
-		return fmt.Errorf("workflow file exceeds 1 MiB")
+	return atomicBoundedWorkflowFile(path, content, WorkflowFileLimit)
+}
+
+func atomicBoundedWorkflowFile(path string, content []byte, limit int) (err error) {
+	if len(content) > limit {
+		return fmt.Errorf("workflow file exceeds %d bytes", limit)
 	}
 
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {

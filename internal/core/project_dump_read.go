@@ -166,6 +166,12 @@ func projectDumpObservation(project ProjectMetadata, artifacts []ProjectDumpArti
 
 	for _, artifact := range artifacts {
 		images = append(images, artifact.Reference, artifact.SourceHash, artifact.MetadataHash)
+		if artifact.CanonicalReference != "" {
+			observed.Aliases = append(observed.Aliases, artifact)
+
+			continue
+		}
+
 		if artifact.CaseSlug != "" {
 			continue
 		}

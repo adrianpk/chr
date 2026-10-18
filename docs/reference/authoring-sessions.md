@@ -369,8 +369,70 @@ structured provider limits calls to 60 seconds and two concurrent invocations.
 Authoring also bounds captures to 64 KiB, instructions to 16 KiB, questions to
 eight per session, canonical artifact references to 16, transcript/provenance
 entries to 64, and retained request bindings to 4,096 per project. File and
-journal reads are bounded to 1 MiB. Capacity and provider failures preserve the
+journal v1 reads are bounded to 1 MiB. Capacity and provider failures preserve the
 previous canonical session and artifacts.
+
+## Project Dump Reconciliation
+
+Project metadata at `.chr/default/project.md` supports an optional
+`project_dump_ref` pointing to `ops/<namespace>/dump/<id>/artifact.md`. Its
+namespace belongs to the artifact identity, independently of `OPS_USER`.
+`ObserveProjectDump` reads all namespaces without adopting a destination or
+recovering a pending journal. General dumps, raw components, scoped dumps and
+retained aliases have distinct identities. Inspection rejects unsafe paths,
+inconsistent envelopes and unresolved aliases. Ordinary project metadata saves
+preserve the reference; `AdoptProjectDump` binds a sole existing general dump
+under authoring exclusion after comparing the observation revision.
+
+`PreviewProjectDumpReconciliation` returns `Revision`, `Destination`, `Content`
+and ordered `Sources` for 2–32 general dumps. It proposes the earliest valid
+creation timestamp, using relative path to break ties. Sources with missing or
+invalid timestamps follow valid evidence in path order, retaining an explicit
+`TimestampIssue`; if all timestamps are invalid, path determines the proposal.
+The composed document retains the chosen target's frontmatter and includes each
+source body with its reference and source hash. Composition does not call a
+provider, deduplicate or summarize material.
+
+`ReconcileProjectDump` requires the preview's `ExpectedRevision`, exact proposed
+`Destination` and a stable `OperationID` of 1–128 letters, digits, dots,
+underscores or hyphens, beginning with a letter or digit. It rechecks all source
+images under the shared authoring owner. Each source's original body and
+metadata are retained byte for byte under its envelope at
+`files/history/<image-hash>/artifact.md` and `metadata.json`. The image hash binds
+the original body and metadata hashes. An existing different history image is a
+conflict. Superseded bodies stay unchanged; their metadata gains `canonical_ref`
+and `dump_history_ref`. Target metadata retains source hashes, history references,
+the observed revision, operation and original target hash in
+`dump_reconciliation`. Unknown metadata and target frontmatter survive.
+
+The existing `.chr/authoring/pending.json` journal accepts
+`chr-authoring-journal/v2` for these mutations. Its checksum and before/after
+image rules are unchanged. Version 2 permits the project metadata file and the
+dump history paths above in addition to v1 targets. It carries at most 128
+changes and 24 MiB of encoded data; individual files remain bounded to 1 MiB.
+Version 1 retains its original target, 12-change and 1 MiB limits. Recovery reads
+both versions and rejects divergent images before replay. No separate dump
+journal or recovery owner exists.
+
+The same journal publishes the composed body, preserved images, alias metadata,
+project reference and `chr-project-dump-receipt/v1` receipt. Receipts use the
+existing authoring receipt directory and retain `Schema`, `Digest`, `Checksum`
+and `Result`; the result holds operation ID, destination and committed body and
+metadata hashes. The digest binds the project root, operation, revision and
+destination. An identical retry returns that immutable result after recovery;
+changed arguments conflict. Receipt identity is shared with authoring requests,
+so another operation cannot reuse an already occupied identity.
+An existing pending authoring request also reserves its identity. New dump
+operations require fewer than 4,096 existing entries in the shared receipt
+directory; confirmed retries still replay at capacity.
+
+`ResolveProjectDumpReference` follows at most 16 alias links across namespaces,
+rejecting cycles, missing targets and aliases into raw or scoped artifacts.
+Observation excludes superseded aliases from its general candidate list. Reads
+report a pending journal without recovering it. Inventory is bounded to 4,096
+entries and 8 MiB of body/metadata images, composed bodies to 1 MiB, inspection to
+10 seconds and reconciliation to 30 seconds. These APIs do not apply a migration
+to user data merely by reading it.
 
 ## Telegram Artifact Continuations
 

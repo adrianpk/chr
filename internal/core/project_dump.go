@@ -18,6 +18,7 @@ var ErrProjectDumpReconciliation = errors.New("project dump reconciliation requi
 type ProjectDumpArtifact struct {
 	Reference, Title, SourceHash, MetadataHash string
 	CaseSlug, RawReference, CuratedReference   string
+	CanonicalReference                         string
 	Raw                                        bool
 	CreatedAt                                  time.Time
 	TimestampIssue                             string
@@ -29,6 +30,7 @@ type ProjectDumpObservation struct {
 	Project              ProjectMetadata
 	Candidates           []ProjectDumpArtifact
 	Components           []ProjectDumpArtifact
+	Aliases              []ProjectDumpArtifact
 	Destination          string
 	Revision             string
 	ReconciliationReason string
@@ -99,6 +101,10 @@ func (r *fileAuthoringSessionRepository) observeProjectDump(ctx context.Context,
 
 	artifacts, err := r.projectDumpArtifacts(ctx)
 	if err != nil {
+		return ProjectDumpObservation{}, err
+	}
+
+	if err := validateProjectDumpAliases(artifacts); err != nil {
 		return ProjectDumpObservation{}, err
 	}
 

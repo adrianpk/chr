@@ -95,7 +95,12 @@ func projectDumpArtifact(reference string, body, encoded []byte, fields, metadat
 	artifact := ProjectDumpArtifact{
 		Reference: reference, Title: metadata["title"], SourceHash: workflowHash(body), MetadataHash: workflowHash(encoded), CaseSlug: scope,
 		Raw: fields["type"] == "dump_raw" || fields["status"] == "raw" && fields["curated"] != "", CuratedReference: fields["curated"],
+		CanonicalReference: metadata["canonical_ref"],
 	}
+	if err := validateProjectDumpAlias(artifact); err != nil {
+		return ProjectDumpArtifact{}, err
+	}
+
 	if fields["title"] != "" {
 		artifact.Title = fields["title"]
 	}
@@ -110,6 +115,18 @@ func projectDumpArtifact(reference string, body, encoded []byte, fields, metadat
 	}
 
 	return artifact, nil
+}
+
+func validateProjectDumpAlias(artifact ProjectDumpArtifact) error {
+	if artifact.CanonicalReference == "" {
+		return nil
+	}
+
+	if err := ValidateProjectDumpReference(artifact.CanonicalReference); err != nil || artifact.Raw || artifact.CaseSlug != "" {
+		return fmt.Errorf("invalid canonical dump alias")
+	}
+
+	return nil
 }
 
 func projectDumpScope(values ...string) (string, error) {
