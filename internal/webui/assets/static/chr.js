@@ -42,6 +42,7 @@
   let boardScroll = 0;
   let boardMessage = "";
   let boardFocusKey = "";
+  let dumpFocusHref = "";
 
   function syncModal() {
     const dialog = document.querySelector("#modal-root [role='dialog']");
@@ -62,7 +63,10 @@
     const card = Array.from(document.querySelectorAll("[data-ticket-key]")).find(function (element) {
       return element.dataset.ticketKey === selectedKey && element.matches("a");
     });
-    const trigger = modalTrigger && modalTrigger.isConnected ? modalTrigger : card;
+    const replacement = modalTrigger && Array.from(document.querySelectorAll("a[href]")).find(function (element) {
+      return element.getAttribute("href") === modalTrigger.getAttribute("href");
+    });
+    const trigger = modalTrigger && modalTrigger.isConnected ? modalTrigger : (card || replacement);
     if (trigger) trigger.focus({preventScroll: true});
   }
 
@@ -93,9 +97,17 @@
     form.dataset.captureArguments = fingerprint;
   }
 
+  function bindDumpEditor(form) {
+    const fingerprint = JSON.stringify([form.elements.id.value, form.elements.revision.value, form.elements.content.value]);
+    if (form.dataset.saveArguments && form.dataset.saveArguments !== fingerprint) {
+      form.elements.request_id.value = newDumpCaptureID();
+    }
+    form.dataset.saveArguments = fingerprint;
+  }
+
   function dumpCaptureResponse(event) {
     const parameters = event.detail.requestConfig && event.detail.requestConfig.parameters;
-    if (!parameters || parameters.action !== "dump.create" || event.detail.target.id !== "modal-root") return;
+    if (!parameters || !["dump.create", "dump.save"].includes(parameters.action) || event.detail.target.id !== "modal-root") return;
     if (document.querySelector("#modal-root [role='dialog']")) return;
     closeModal();
     const workspace = document.querySelector("#workspace");
@@ -178,6 +190,8 @@
     document.addEventListener("submit", function (event) {
       const form = event.target.closest("[data-dump-capture]");
       if (form) bindDumpCapture(form);
+      const editor = event.target.closest("[data-dump-editor]");
+      if (editor) bindDumpEditor(editor);
     }, true);
     setupBoardEvents();
   }
@@ -220,6 +234,7 @@
       if (grid) boardScroll = grid.scrollLeft;
       const focused = document.activeElement;
       boardFocusKey = focused && focused.matches("a[data-ticket-key]") ? focused.dataset.ticketKey : "";
+      dumpFocusHref = focused && focused.matches(".dump-card-link") ? focused.getAttribute("href") : "";
     });
     document.addEventListener("htmx:afterSwap", function (event) {
       if (event.detail.target.id === "workspace") {
@@ -232,6 +247,10 @@
           const card = Array.from(document.querySelectorAll("a[data-ticket-key]")).find(function (element) { return element.dataset.ticketKey === boardFocusKey; });
           if (card) card.focus({preventScroll: true});
         }
+        if (dumpFocusHref) {
+          const card = Array.from(document.querySelectorAll(".dump-card-link")).find(function (element) { return element.getAttribute("href") === dumpFocusHref; });
+          if (card) card.focus({preventScroll: true});
+        }
       }
       syncModal();
       ticketResponse();
@@ -239,10 +258,13 @@
     });
     ["htmx:responseError", "htmx:sendError", "htmx:timeout"].forEach(function (name) {
       document.addEventListener(name, function (event) {
-        const form = event.detail.elt.closest(".ticket-edit-form, .ticket-comments__form, [data-dump-capture]");
+        const form = event.detail.elt.closest(".ticket-edit-form, .ticket-comments__form, [data-dump-capture], [data-dump-editor]");
         if (!form) return;
         const target = document.querySelector(form.getAttribute("hx-target"));
-        if (target) target.textContent = form.matches("[data-dump-capture]") ? "The request failed. Your context is retained. Retry this capture." : "The request failed. Your input is retained. Retry or reload the ticket.";
+        if (!target) return;
+        if (form.matches("[data-dump-capture]")) target.textContent = "The request failed. Your context is retained. Retry this capture.";
+        else if (form.matches("[data-dump-editor]")) target.textContent = "The request failed. Your edits are retained. Retry Save.";
+        else target.textContent = "The request failed. Your input is retained. Retry or reload the ticket.";
       });
     });
   }

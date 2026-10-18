@@ -407,6 +407,20 @@ Raw captures and earlier body versions remain preserved. Conflicting older
 general dumps require explicit reconciliation; opening a catalog never merges or
 rewrites them. See the [authoring reference](../../reference/authoring-sessions.md#project-dump-reconciliation).
 
+## Edit Dumps in the Web UI
+
+Open a dump card, edit its **Body**, and select **Save**. Correct, remove,
+reorganize or add text in that one editor. Save replaces the body of the same
+document; frontmatter, raw captures and earlier versions remain preserved.
+
+A failed or uncertain request retains your edits. Retry Save with the same body
+to recover a confirmed result. If someone changed the document after you opened
+it, Save reports a conflict and keeps your text. **Reload stored content** asks
+before discarding your pending edits and loading the current body. Catalog
+refreshes keep an open editor intact, and the full-page editor does not refresh
+automatically. A pending catalog refresh after Save is reported as already saved;
+an unchanged retry refreshes the view.
+
 ## Capture Dumps in the TUI
 
 Open the Dumps view with `F3`.

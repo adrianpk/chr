@@ -389,10 +389,7 @@ func (h handler) renderWriteResult(w http.ResponseWriter, r *http.Request, resul
 		Write: result,
 	}
 	if htmx.IsRequest(r) {
-		template := "write_result.html"
-		if r.PostFormValue("surface") == "modal" && r.PostFormValue("action") != "dump.create" || r.URL.Path == "/board/ticket/comment" {
-			template = "write_result_modal.html"
-		}
+		template := writeResultTemplate(r, &data)
 
 		if err := h.renderer.Fragment(w, template, data); err != nil {
 			http.Error(w, "render write result", http.StatusInternalServerError)
@@ -404,6 +401,23 @@ func (h handler) renderWriteResult(w http.ResponseWriter, r *http.Request, resul
 	if err := h.renderer.Page(w, "shell.html", data); err != nil {
 		http.Error(w, "render write result", http.StatusInternalServerError)
 	}
+}
+
+func writeResultTemplate(r *http.Request, data *PageData) string {
+	if r.PostFormValue("action") == "dump.save" {
+		data.DumpModal = r.PostFormValue("surface") == "modal"
+		if data.DumpModal && data.Write.ReloadURL != "" {
+			data.Write.ReloadURL = "/dumps/detail/fragment?id=" + url.QueryEscape(r.PostFormValue("id"))
+		}
+
+		return "dump_save_result.html"
+	}
+
+	if r.PostFormValue("surface") == "modal" && r.PostFormValue("action") != "dump.create" || r.URL.Path == "/board/ticket/comment" {
+		return "write_result_modal.html"
+	}
+
+	return "write_result.html"
 }
 
 func (h handler) renderProject(w http.ResponseWriter, r *http.Request) {
@@ -753,7 +767,7 @@ func (h handler) artifactDetailPageData(r *http.Request, family string) (PageDat
 }
 
 func artifactDetailRefreshURL(family, id string) string {
-	if family == "cases" {
+	if family == "cases" || family == "dumps" {
 		return ""
 	}
 

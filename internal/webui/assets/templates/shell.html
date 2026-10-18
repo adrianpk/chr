@@ -288,9 +288,10 @@
       <code>{{.Detail.Path}}</code>
     </div>
   {{end}}
-  <pre class="artifact-content">{{.Detail.Content}}</pre>
   {{if eq .Detail.Family "dumps"}}
     {{template "dump_edit_forms.html" .}}
+  {{else}}
+    <pre class="artifact-content">{{.Detail.Content}}</pre>
   {{end}}
 {{end}}
 {{end}}
@@ -317,7 +318,6 @@
     {{if .Detail.Missing}}
       <p class="empty-state">Artifact not found.</p>
     {{else}}
-      <pre class="artifact-content">{{.Detail.Content}}</pre>
       {{template "dump_edit_forms.html" .}}
     {{end}}
   </section>
@@ -404,34 +404,40 @@
 {{end}}
 
 {{define "dump_edit_forms.html"}}
-<form class="action-form" method="post" action="/actions"{{if .DumpModal}} hx-post="/actions" hx-target="#modal-root" hx-swap="innerHTML"{{end}} onsubmit="return confirm('Replace this dump content?')">
+<form class="action-form" data-dump-editor method="post" action="/actions" hx-post="/actions" hx-target="#dump-save-result" hx-swap="innerHTML" hx-disabled-elt="find textarea, find button[type='submit']" onsubmit="return confirm('Save this dump content?')">
   <input type="hidden" name="action" value="dump.save">
   <input type="hidden" name="request_id" value="{{.Detail.SaveRequestID}}">
   <input type="hidden" name="family" value="dumps">
   <input type="hidden" name="id" value="{{.Detail.ID}}">
   <input type="hidden" name="revision" value="{{.Detail.Revision}}">
   <input type="hidden" name="confirm" value="true">
-  {{if .DumpModal}}<input type="hidden" name="surface" value="modal">{{end}}
+  <input type="hidden" name="surface" value="{{if .DumpModal}}modal{{else}}editor{{end}}">
   <label>
-    <span>Content</span>
+    <span>Body</span>
     <textarea name="content" rows="12" required>{{.Detail.Content}}</textarea>
   </label>
   <button class="button button--primary" type="submit">Save</button>
+  <div id="dump-save-result" role="status" aria-live="polite"></div>
 </form>
-<form class="action-form" method="post" action="/actions"{{if .DumpModal}} hx-post="/actions" hx-target="#modal-root" hx-swap="innerHTML"{{end}} onsubmit="return confirm('Append this note to the dump?')">
-  <input type="hidden" name="action" value="dump.append">
-  <input type="hidden" name="request_id" value="{{.Detail.AppendRequestID}}">
-  <input type="hidden" name="family" value="dumps">
-  <input type="hidden" name="id" value="{{.Detail.ID}}">
-  <input type="hidden" name="revision" value="{{.Detail.Revision}}">
-  <input type="hidden" name="confirm" value="true">
-  {{if .DumpModal}}<input type="hidden" name="surface" value="modal">{{end}}
-  <label>
-    <span>Append note</span>
-    <textarea name="content" rows="5" required></textarea>
-  </label>
-  <button class="button" type="submit">Append</button>
-</form>
+{{end}}
+
+{{define "dump_save_result.html"}}
+<div class="write-result write-result--{{.Write.Status}}" data-write-status="{{.Write.Status}}">
+  {{if .Write.ProjectionStale}}
+    <p>Saved. Catalog refresh is pending. Retry Save without changing the body to refresh.</p>
+  {{else}}
+    <p>{{.Write.Summary}}</p>
+  {{end}}
+  {{if .Write.BlockedReason}}<p>{{.Write.BlockedReason}}</p>{{end}}
+  {{if .Write.Validation}}<ul>{{range .Write.Validation}}<li>{{.}}</li>{{end}}</ul>{{end}}
+  {{if and (eq .Write.Status "stale") .Write.ReloadURL}}
+    {{if .DumpModal}}
+      <button class="button" type="button" hx-get="{{.Write.ReloadURL}}" hx-target="#modal-root" hx-swap="innerHTML" hx-disabled-elt="this" hx-confirm="Discard your unsaved edits and reload the stored body?">Reload stored content</button>
+    {{else}}
+      <a class="button" href="{{.Write.ReloadURL}}" onclick="return confirm('Discard your unsaved edits and reload the stored body?')">Reload stored content</a>
+    {{end}}
+  {{end}}
+</div>
 {{end}}
 
 {{define "write_result_modal.html"}}

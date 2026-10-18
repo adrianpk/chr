@@ -477,7 +477,6 @@ func TestHandlerDumpDetailFragmentUsesModal(t *testing.T) {
 		"Project Notes",
 		"Full dump content",
 		"dump.save",
-		"dump.append",
 		`name="id" value=".chr/default/dumps/project-notes.md"`,
 		`name="revision" value="detail-revision"`,
 		`hx-post="/actions"`,
@@ -485,6 +484,12 @@ func TestHandlerDumpDetailFragmentUsesModal(t *testing.T) {
 	} {
 		if !strings.Contains(recorder.Body.String(), want) {
 			t.Fatalf("body does not contain %q:\n%s", want, recorder.Body.String())
+		}
+	}
+
+	for _, forbidden := range []string{"dump.append", "artifact-content", "Append note"} {
+		if strings.Contains(recorder.Body.String(), forbidden) {
+			t.Fatalf("dump editor contains duplicate surface %q", forbidden)
 		}
 	}
 }
@@ -737,12 +742,6 @@ func TestHandlerFullPagesConfigurePolling(t *testing.T) {
 		{path: "/board", refresh: "/board/fragment", revision: "board-revision", workspace: `id="workspace"`},
 		{path: "/dash", refresh: "/dash/fragment", revision: "dash-revision", workspace: `id="workspace"`},
 		{path: "/dumps", refresh: "/dumps/fragment", revision: "dumps-revision", workspace: `id="workspace"`},
-		{
-			path:      "/dumps/detail?id=.chr/default/dumps/project-notes.md",
-			refresh:   "/dumps/detail/fragment?id=.chr%2Fdefault%2Fdumps%2Fproject-notes.md",
-			revision:  "detail-revision",
-			workspace: `id="workspace"`,
-		},
 	} {
 		recorder := httptest.NewRecorder()
 		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, tt.path, nil))

@@ -1,6 +1,6 @@
 # Slice 3: Single Dump Editor
 
-Status: drafting
+Status: reviewing
 Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
@@ -12,44 +12,87 @@ PR: pending
 Deliver the single dump editor and guarded Save defined by the
 [plan](../../../plan/web-ui-workflow-consolidation.md) and
 [task map](../../../tracker/web-ui-workflow-consolidation.md).
-Slice 2 is integrated. T3.1 is implemented; T3.2 removes duplicate editing
-surfaces and preserves pending input.
+T3.1 and T3.2 are implemented following Slice 2's verified integration.
 
 ## Delivered Behavior
 
-Web Save replaces the observed canonical body under the existing serialized
-mutation and rejects older revisions. The editor receives only the body; the
-complete stored image, frontmatter and raw provenance remain owned by the
-shared document writer. The single-surface UI is in progress.
+Opening a dump shows one Body editor and Save in the catalog modal or full page.
+Corrections, removal and added text replace the body of the same canonical dump.
+The duplicate read-only body and manual Append form are removed. Frontmatter
+stays outside the editor, and shared writes preserve metadata, raw provenance
+and prior body/metadata history. Capture adapters retain their append primitive.
+
+Validation, transport and stale-revision failures render inside the live form
+without replacing its body or guards. Unchanged retries keep their operation
+identity; changed submitted arguments receive a new identity. Pending projection
+results state that Save committed and permit an unchanged refresh retry. Controls
+are disabled while a request is active, preventing unsubmitted changes during Save.
+
+Concurrent writes remain fenced by the serialized shared owner. Reload stored
+content asks before discarding pending edits and loads the current revision.
+Catalog refreshes preserve an open modal. Full-page editing has no automatic
+polling. Successful modal Save restores focus to the selected card across the
+catalog refresh; desktop and narrow views use the same editor.
 
 ## Implementation Notes
 
-Slice 2 already routes Web Save through the canonical serialized mutation with
-operation identity and observed document revision. Reuse that owner rather
-than introducing another writer or changing capture append behavior.
+- T3.1: `600f30bf1be349403ab38b6d98fa6dad6e5b5c93` — body-only Web reads, unchanged shared Save ownership and real HTTP replacement/stale regression.
+- T3.2: single-surface templates, inline results, retained Save arguments, explicit reload and browser journeys.
+
+The existing canonical mutation remains the only writer. Its source revision
+includes identity, complete body and metadata under the serialized owner. The
+new read field separates editable body from the exact stored image; other
+adapters keep their existing complete-document reads.
 
 ## Contracts Added or Changed
 
-`DumpDocumentObservation.Body` exposes the editable body while `Content`
-continues to retain the exact stored document image.
+`DumpDocumentObservation.Body` exposes the editable body while `Content` retains
+the exact stored image. Web detail uses Body with the same canonical ID/revision.
+Save fragments target the result region; a confirmed modal write retargets the
+modal root, while confirmed full-page Save reloads the stored document. Pending
+projection acknowledgements retain the editor and receipt binding.
+
+Save identities use the existing per-form value until submitted arguments
+change. Fingerprints bind document ID, observed revision and body. No provider,
+new persistence owner or background runtime is introduced.
 
 ## Files of Interest
 
-- `internal/app/web_actions.go` and `service_dump.go`: shared Save binding.
-- `internal/webui/assets/templates/shell.html`, `chr.js` and `webui.go`: editor and write-result retention.
+- `internal/core/dump_mutation.go` and `internal/app/web_artifacts.go`: body observation and Web mapping.
+- `internal/app/web_dump_editor_test.go`: real HTTP Save and stale replacement over canonical fixtures.
+- `internal/webui/assets/templates/shell.html`, `chr.js` and `webui.go`: one editor, inline outcomes, refresh/focus preservation and reload.
+- `internal/app/web_dump_editor_browser_test.go`: owned desktop/narrow Chromium journey with lost acknowledgement and concurrent edit boundaries.
+- `docs/how-to/user-guide/index.md`, `docs/reference/web-ui-action-matrix.md` and `CHANGELOG.md`: editing and retry behavior.
 
 ## Validation
 
-T3.1's HTTP regression first failed because frontmatter appeared in the editable
-content. Separating the body corrected that failure.
+Task checks passed before their corresponding commits:
 
-- `go test -race ./internal/core ./internal/app -run '^(TestDumpMutation(Save|Append|.*Guard.*)|TestServiceDump.*|TestWebDumpSaveDocument)$' -count=1` — passed; canonical replacement, stale writes, raw provenance and shared owner regressions.
-
+- `go test -race ./internal/core ./internal/app -run '^(TestDumpMutation(Save|Append|.*Guard.*)|TestServiceDump.*|TestWebDumpSaveDocument)$' -count=1` — canonical full-body replacement, stale writes, raw provenance and shared owner regressions passed. Existing Save history assertions verify original body/metadata images.
 - `go test ./internal/app -run '^TestWebDumpSaveDocument$' -count=1` — passed after extracting the detail assertion to meet test complexity limits.
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m --new-from-rev=HEAD ./internal/core ./internal/app` — passed with zero issues.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m --new-from-rev=HEAD ./internal/core ./internal/app` — T3.1 lint passed with zero issues.
+- `CHR_WEB_BROWSER=/usr/sbin/chromium go test ./internal/app ./internal/webui -run '^(TestWebDumpEditorBrowser|TestWebDumpCaptureBrowser|TestWebBoardBrowser|TestDump.*|TestHandlerDump.*|TestHandlerFullPagesConfigurePolling|TestHandlerWriteAction.*)$' -count=1` — editor, capture and Board browser regressions plus affected HTTP rendering checks passed.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m --new-from-rev=HEAD ./internal/app ./internal/webui/...` — T3.2 lint passed with zero issues after whitespace corrections in the browser fixture.
+- `git diff --check` — passed.
 
-Final browser and exact clean-HEAD controller evidence remain pending.
+The new HTTP regression first reproduced editable frontmatter. Rendering checks
+reproduced the duplicate body/Append surfaces and replacement of failed forms.
+The browser journey caught focus loss after catalog replacement and inherited
+HTMX disable selectors blocking explicit reload. The passing checks retain all
+assertions after those corrections.
+
+The browser covers edit/add/Save/reopen, lost acknowledgement and unchanged retry,
+changed submitted intent, concurrent stale rejection, dirty modal refresh,
+explicit reload, focus restoration and full-page persistence. CSS viewports are
+1440 × 1000 and 390 × 844, DPR 1, at 100% zoom. Fixtures own and stop their
+Chromium/server processes and use isolated stores with deterministic curation.
+
+Final clean-HEAD validation is recorded through Looper in canonical order:
+`make verify`, focused race regressions, the owned editor/capture/Board browser
+checks and `git diff --check`. The canonical PR lists the exact successful final
+commands; Looper retains the tested HEAD and ordered evidence. Development
+checks do not establish scheduled exhaustive/nightly certification.
 
 ## Risks and Follow-ups
 
-The controller owns integration into dev. No live project data is changed.
+The controller owns integration into dev. No live project data was changed.

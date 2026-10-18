@@ -20,7 +20,7 @@ Status values:
 | Web server | `chr web serve` | `chr web serve` | none | `web_only` | Explicit foreground process; no automatic startup from CLI or TUI workflows. |
 | Project | `/`, `/project` (direct URL only) | `chr project current`, metadata commands | `F1` | `read_only_matched` | Shows the project name, root directory and secondary diagnostic ID; no visible navigation link or automatic polling. |
 | Cases | `/cases` | `chr metadata case set` for writes | `F2` | `matched` | Catalog and detail read project-local case metadata; detail form writes case metadata. |
-| Dumps | `/dumps` | `chr dump *` | `F3` | `matched` | Catalog, detail, create, save, and append use dump service paths. |
+| Dumps | `/dumps` | `chr dump *` | `F3` | `matched` | Catalog, capture and one body editor use the shared dump service; append remains a transport operation. |
 | Quizzes | `/quizzes` | `chr quiz *` | `F4` | `web_subset` | Start and resume are exposed; answer, skip, complete, cancel, and mode-only updates remain CLI/TUI. |
 | Specs | `/specs` | `chr spec list`, `chr spec generate` | `F5` | `matched` | Catalog and generation action use spec service paths. |
 | Plans | `/plans` | `chr plan *` | `F6` | `matched` | Catalog, generate, regenerate, and tracking creation use plan service paths. |
@@ -33,8 +33,8 @@ Status values:
 | --- | --- | --- | --- | --- | --- |
 | Case metadata | `case.update` | `chr metadata case set` | Cases save | `matched` | Uses stale revision checks and writes project-local case metadata. |
 | Dump create | `dump.create` | `chr dump new` | Dumps create | `matched` | One New form selects Project-wide or an existing case. Retained capture identities make retries safe; general captures extend the shared dump while case captures remain independent. |
-| Dump save | `dump.save` | `chr dump save` | Dumps editor save | `matched` | Uses revision checks before replacing content. |
-| Dump append | `dump.append` | `chr dump append` | Dump append action | `matched` | Appends to the selected dump through the dump service. |
+| Dump save | `dump.save` | `chr dump save` | Dumps editor save | `matched` | One Body editor and Save use the canonical serialized revision guard, preserve metadata and retain input on failures. |
+| Dump append | `dump.append` (transport only) | `chr dump append` | none | `web_subset` | Shared append remains available to capture adapters. The manual Web editor adds text in Body and Save. |
 | Spec generate | `spec.generate` | `chr spec generate` | Specs generate | `matched` | Uses the same generation service and artifact contract. |
 | Plan generate | `plan.generate` | `chr plan generate` | Plans generate | `matched` | Uses the same generation service and existing-plan guard. |
 | Plan regenerate | `plan.regenerate` | `chr plan regenerate` | Plans regenerate | `matched` | Requires browser confirmation before replacement. |
