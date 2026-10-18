@@ -9,8 +9,9 @@ scope: ui
 tags: web-ui, ux-ui, usability
 source: chat
 reported_at: 2026-10-17T10:54:32Z
-commits: [4c4815c51d5603d2c6e9576a7d7e9195100d7162, f25ab42b7919eac78f6f85c2627027a4d4d58d17]
+commits: [4c4815c51d5603d2c6e9576a7d7e9195100d7162, f25ab42b7919eac78f6f85c2627027a4d4d58d17, d72d131e69a6170af9b640a8341eeb9f6702f7f0]
 branch: test/slice-12-web-ui-review
+pr: "#409"
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
@@ -286,7 +287,7 @@ set supplies their implementation authority and acceptance evidence.
 | Slice 9: [TKT-20261017200232](../solved/20261017200232-associate-ticket-tracking-with-each-plan-revision.md) | [PR #406](https://forge.adrianpk.com/adrianpk/chr/pulls/406) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-9-plan-order-tracker.md). |
 | Slice 10: [TKT-20261017195458](../solved/20261017195458-present-plans-and-tracking-as-read-only-cards.md) | [PR #407](https://forge.adrianpk.com/adrianpk/chr/pulls/407) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-10-plan-catalog.md). |
 | Slice 11: [TKT-20261017202340](../solved/20261017202340-implement-live-agent-work-dash.md) | [PR #408](https://forge.adrianpk.com/adrianpk/chr/pulls/408) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-11-work-dash.md). |
-| Slice 12: TKT-20261017105432 | Current canonical PR pending | Journey and acceptance work complete; controller integration pending. |
+| Slice 12: TKT-20261017105432 | [PR #409](https://forge.adrianpk.com/adrianpk/chr/pulls/409) | Journey and acceptance work complete; controller integration pending. |
 
 UI-01 through UI-09 are mapped to child regressions, screenshots and the combined
 journey in the [Slice 12 report](../../report/slices/web-ui-workflow-consolidation/slice-12-web-ui-review.md#validation).
