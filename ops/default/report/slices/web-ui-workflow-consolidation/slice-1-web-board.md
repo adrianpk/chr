@@ -99,6 +99,11 @@ inline comment errors. `go test ./internal/webui -run '^(TestHandlerTicketModal|
 and `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m --new-from-rev=HEAD ./internal/webui/...`
 passed after that contract correction.
 
+The attempt at `3b94d66d80dd13467fc0b16455b9aac679c949fd` flagged
+handler-test cognitive complexity. Response-surface assertions now use a helper;
+the focused handler command above and complete affected-package lint
+(`go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app ./internal/webui/...`) passed.
+
 The controller records final clean-HEAD evidence after the PR-reference follow-up
 commit, in this order: `make verify`, the focused race command above,
 `CHR_WEB_BROWSER=/usr/sbin/chromium go test ./internal/app -run '^TestWebBoardBrowser$' -count=1`, then `git diff --check`.

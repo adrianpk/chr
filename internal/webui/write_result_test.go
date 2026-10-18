@@ -50,14 +50,20 @@ func TestHandlerWriteFailure(t *testing.T) {
 				t.Fatal("write failure was not rendered")
 			}
 
-			if got := recorder.Header().Get(htmx.HeaderRetarget); got != tt.retarget {
-				t.Fatalf("retarget = %q, want %q", got, tt.retarget)
-			}
-
-			if modal := strings.Contains(recorder.Body.String(), `role="dialog"`); modal != tt.modal {
-				t.Fatalf("modal = %v, want %v", modal, tt.modal)
-			}
+			assertWriteFailureSurface(t, recorder, tt.modal, tt.retarget)
 		})
+	}
+}
+
+func assertWriteFailureSurface(t *testing.T, recorder *httptest.ResponseRecorder, wantModal bool, wantRetarget string) {
+	t.Helper()
+
+	if got := recorder.Header().Get(htmx.HeaderRetarget); got != wantRetarget {
+		t.Fatalf("retarget = %q, want %q", got, wantRetarget)
+	}
+
+	if modal := strings.Contains(recorder.Body.String(), `role="dialog"`); modal != wantModal {
+		t.Fatalf("modal = %v, want %v", modal, wantModal)
 	}
 }
 
