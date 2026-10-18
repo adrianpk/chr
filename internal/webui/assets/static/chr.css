@@ -5,6 +5,10 @@
   --surface: #ffffff;
   --surface-muted: #f6fbfa;
   --surface-raised: #fbfefe;
+  --document-preview-surface: #f7fbf7;
+  --dump-card-width: 300px;
+  --dump-card-height: 226px;
+  --dump-preview-height: 122px;
   --ink: #12393f;
   --ink-strong: #08282e;
   --muted: #607b7f;
@@ -795,13 +799,15 @@ a {
 
 .dump-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 404px));
+  grid-template-columns: repeat(auto-fill, var(--dump-card-width));
+  justify-content: center;
   gap: 14px;
   align-items: start;
 }
 
 .dump-card-link {
   display: block;
+  width: var(--dump-card-width);
   color: inherit;
   text-decoration: none;
 }
@@ -814,13 +820,14 @@ a {
 
 .dump-card {
   display: grid;
+  grid-template-rows: 40px 21px var(--dump-preview-height);
   gap: 6px;
-  width: 100%;
-  min-height: 206px;
+  width: var(--dump-card-width);
+  height: var(--dump-card-height);
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 14px;
-  background: var(--surface-raised);
+  background: var(--surface);
   box-shadow: var(--shadow);
   transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
 }
@@ -832,7 +839,10 @@ a {
 }
 
 .dump-card h2 {
+  min-width: 0;
   margin: 0;
+  overflow: hidden;
+  overflow-wrap: anywhere;
   color: var(--ink-strong);
   font-size: 16px;
   line-height: 1.25;
@@ -844,21 +854,36 @@ a {
 
 .dump-card__meta {
   margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: var(--muted);
   font-size: 14px;
   font-weight: 700;
 }
 
 .dump-card__preview {
-  min-height: 104px;
-  max-height: 132px;
+  grid-row: 3;
+  min-width: 0;
+  height: var(--dump-preview-height);
   overflow: hidden;
+  overflow-wrap: anywhere;
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 10px;
-  background: var(--surface-muted);
+  background: var(--document-preview-surface);
   color: var(--muted);
-  font: 13px/1.45 var(--mono);
+  font: 13px/20px var(--mono);
+}
+
+@media (max-width: 347px) {
+  html:has(.dump-catalog) {
+    min-width: 0;
+  }
+
+  .app-main:has(.dump-catalog) {
+    padding-inline: 0;
+  }
 }
 
 .dump-create-panel {

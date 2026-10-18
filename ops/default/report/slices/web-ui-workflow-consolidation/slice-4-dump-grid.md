@@ -17,17 +17,25 @@ T4.2 retains desktop zoom and narrow browser evidence.
 
 ## Delivered Behavior
 
-Implementation in progress.
+The Dumps grid packs fixed 300 × 226 px cards into available width, with a
+reserved title region and a 122 px clipped preview. Cards stay pure white;
+previews use a very pale green inset theme token. Short, long, unbroken and
+empty content retain identical geometry. Remaining track space is centered
+without stretching cards. Narrow viewports reduce column count.
 
 ## Implementation Notes
 
-Measure the existing auto-fit maximum track before changing layout. Use theme
-size tokens for fixed cards and clipped inset previews. Capture and Save
-semantics remain under their existing owners.
+T4.1 reproduced two 404 px tracks at 100% in a 1280 × 900 browser window.
+At 90% the same catalog and window fit three. The corrected fixed tracks fit
+three columns at 100% and four at 90%; 768 px fits two and 390/320 px fit one.
+Dumps-scoped minimum-width/padding handling avoids horizontal page overflow
+at 320 px while retaining card dimensions. Capture and Save owners are unchanged.
 
 ## Contracts Added or Changed
 
-Pending measured layout evidence.
+Theme tokens define dump card width/height, preview height and the shared pale
+green document-preview surface. The owned browser fixture accepts an isolated
+profile to set Chromium page zoom; CSS viewport and DPR verify the applied value.
 
 ## Files of Interest
 
@@ -36,7 +44,15 @@ Pending measured layout evidence.
 
 ## Validation
 
-Pending focused browser checks, then Looper's exact clean-HEAD development gate.
+- `CHR_WEB_BROWSER=/usr/sbin/chromium go test ./internal/app -run '^TestWebDumpGridBrowser$' -count=1 -v` — passed for 100%/90% desktop zoom and 768/390/320 px views, with identical card geometry and no horizontal overflow.
+
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m --new-from-rev=HEAD ./internal/app` — passed with zero issues after whitespace corrections in the fixture.
+- `git diff --check` — passed.
+
+Before the correction the same command reproduced the missing third column.
+The fixed-card run also caught a 320 px page minimum-width overflow; the scoped
+container correction passed without changing other pages. T4.2 screenshot and
+final clean-HEAD controller evidence follow.
 
 ## Risks and Follow-ups
 
