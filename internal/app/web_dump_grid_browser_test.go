@@ -88,7 +88,7 @@ func webDumpGridGeometry(t *testing.T, browser *webWorkflowBrowser, zoom float64
 	metrics := browser.evaluate(t, `(()=>{const c=document.querySelector('.dump-card'),p=c.querySelector('.dump-card__preview'),r=c.getBoundingClientRect(),v=p.getBoundingClientRect();return JSON.stringify({innerWidth,innerHeight,outerWidth,outerHeight,dpr:devicePixelRatio,grid:getComputedStyle(document.querySelector('.dump-list')).gridTemplateColumns,width:document.querySelector('.dump-list').getBoundingClientRect().width,cardCount:document.querySelectorAll('.dump-card').length,cardWidth:r.width,cardHeight:r.height,previewWidth:v.width,previewHeight:v.height,cardBackground:getComputedStyle(c).backgroundColor,previewBackground:getComputedStyle(p).backgroundColor,pageOverflow:document.documentElement.scrollWidth>document.documentElement.clientWidth});})()`)
 	t.Log("zoom", zoom, metrics)
 
-	if got := browser.evaluate(t, `String([...document.querySelectorAll('.dump-card')].every(e=>{const r=e.getBoundingClientRect(),p=e.querySelector('.dump-card__preview').getBoundingClientRect();return Math.abs(r.width-300)<0.1&&Math.abs(r.height-226)<0.1&&Math.abs(p.height-122)<0.1&&r.right<=document.documentElement.clientWidth+0.1;}))`); got != "true" {
+	if got := browser.evaluate(t, `String([...document.querySelectorAll('.dump-card')].every(e=>{const r=e.getBoundingClientRect(),p=e.querySelector('.dump-card__preview').getBoundingClientRect();return Math.abs(r.width-300)<0.1&&Math.abs(r.height-218)<0.1&&Math.abs(p.height-132)<0.1&&r.right<=document.documentElement.clientWidth+0.1;}))`); got != "true" {
 		t.Fatal("short, long or unbroken content changed fixed geometry or overflowed", metrics)
 	}
 
@@ -98,7 +98,7 @@ func webDumpGridGeometry(t *testing.T, browser *webWorkflowBrowser, zoom float64
 
 	// Fractional zoom rounds borders; allow less than one physical pixel from
 	// nominal preview width while requiring equal widths across all content.
-	if got := browser.evaluate(t, `(()=>{const width=document.querySelector('.dump-card__preview').getBoundingClientRect().width;return String([...document.querySelectorAll('.dump-card')].every(e=>{const p=e.querySelector('.dump-card__preview'),s=getComputedStyle(p);return Math.abs(e.querySelector('h2').getBoundingClientRect().height-40)<0.1&&Math.abs(p.getBoundingClientRect().width-width)<0.05&&Math.abs(width-270)<1/devicePixelRatio&&s.overflowY==='hidden'&&getComputedStyle(p.firstElementChild).webkitLineClamp==='5'&&getComputedStyle(p.firstElementChild).overflowY==='hidden'&&s.backgroundColor==='rgb(247, 251, 247)'&&getComputedStyle(e).backgroundColor==='rgb(255, 255, 255)';}));})()`); got != "true" {
+	if got := browser.evaluate(t, `(()=>{const width=document.querySelector('.dump-card__preview').getBoundingClientRect().width;return String([...document.querySelectorAll('.dump-card')].every(e=>{const p=e.querySelector('.dump-card__preview'),s=getComputedStyle(p);return Math.abs(e.querySelector('h2').getBoundingClientRect().height-42)<0.1&&Math.abs(p.getBoundingClientRect().width-width)<0.05&&Math.abs(width-278)<1/devicePixelRatio&&s.overflowY==='hidden'&&getComputedStyle(p.firstElementChild).webkitLineClamp==='7'&&getComputedStyle(p.firstElementChild).overflowY==='hidden'&&s.backgroundColor==='rgb(247, 251, 247)'&&getComputedStyle(e).backgroundColor==='rgb(255, 255, 255)';}));})()`); got != "true" {
 		t.Fatal("title or inset preview escaped the fixed card anatomy", metrics)
 	}
 

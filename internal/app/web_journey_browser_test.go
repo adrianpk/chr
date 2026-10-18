@@ -103,8 +103,12 @@ func webConsolidatedCapture(t *testing.T, browser *webWorkflowBrowser, name stri
 		t.Fatal("consolidated viewport overflow", metrics)
 	}
 
-	if browser.evaluate(t, `String([...document.querySelectorAll('.dump-card,.quiz-card,.document-card')].every(c=>{const p=c.querySelector('[class$=__preview]'),r=c.getBoundingClientRect(),s=getComputedStyle(p),d=c.matches('.dump-card'),q=c.matches('.quiz-card');return r.width===(q?268:300)&&r.height===(d?226:q?178:218)&&p.getBoundingClientRect().height===(d?122:q?100:132)&&s.overflowY==='hidden'&&s.backgroundColor==='rgb(247, 251, 247)'&&getComputedStyle(c).backgroundColor==='rgb(255, 255, 255)';}))`) != "true" {
+	if browser.evaluate(t, `String([...document.querySelectorAll('.dump-card,.quiz-card,.document-card')].every(c=>{const p=c.querySelector('[class$=__preview]'),r=c.getBoundingClientRect(),s=getComputedStyle(p);return r.width===300&&r.height===218&&p.getBoundingClientRect().height===132&&s.overflowY==='hidden'&&s.backgroundColor==='rgb(247, 251, 247)'&&getComputedStyle(c).backgroundColor==='rgb(255, 255, 255)';}))`) != "true" {
 		t.Fatal("shared fixed card anatomy changed", metrics)
+	}
+
+	if browser.evaluate(t, `(()=>{const card=document.querySelector('.dump-card,.quiz-card,.document-card');return String(!card||Math.abs(card.getBoundingClientRect().x-document.querySelector('h1').getBoundingClientRect().x)<0.1);})()`) != "true" {
+		t.Fatal("catalog heading and cards have different left margins", metrics)
 	}
 
 	if browser.evaluate(t, `(()=>{const d=document.querySelector('#modal-root [role=dialog]');if(!d)return 'true';const r=d.getBoundingClientRect();return String(r.x>=0&&r.right<=innerWidth&&r.y>=0&&r.bottom<=innerHeight);})()`) != "true" {

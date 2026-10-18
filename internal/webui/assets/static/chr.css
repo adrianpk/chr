@@ -6,9 +6,9 @@
   --surface-muted: #f6fbfa;
   --surface-raised: #fbfefe;
   --document-preview-surface: #f7fbf7;
-  --dump-card-width: 300px;
-  --dump-card-height: 226px;
-  --dump-preview-height: 122px;
+  --document-card-width: 300px;
+  --document-card-height: 218px;
+  --document-preview-height: 132px;
   --ink: #12393f;
   --ink-strong: #08282e;
   --muted: #607b7f;
@@ -320,7 +320,8 @@ a {
   padding: 24px 22px 22px;
 }
 
-.page-header {
+.page-header,
+.quiz-catalog__heading {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -328,7 +329,8 @@ a {
   margin-bottom: 10px;
 }
 
-.page-header h1 {
+.page-header h1,
+.quiz-catalog__heading h1 {
   margin: 0;
   color: var(--ink-strong);
   font-size: 22px;
@@ -797,101 +799,11 @@ a {
   justify-content: flex-end;
 }
 
-.dump-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, var(--dump-card-width));
-  justify-content: center;
-  gap: 14px;
-  align-items: start;
-}
-
 .dump-card-link {
   display: block;
-  width: var(--dump-card-width);
+  width: var(--document-card-width);
   color: inherit;
   text-decoration: none;
-}
-
-.dump-card-link:focus-visible {
-  outline: 2px solid var(--amber);
-  outline-offset: 3px;
-  border-radius: 10px;
-}
-
-.dump-card {
-  display: grid;
-  grid-template-rows: 40px 21px var(--dump-preview-height);
-  gap: 6px;
-  width: var(--dump-card-width);
-  height: var(--dump-card-height);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 14px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-  transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
-}
-
-.dump-card-link:hover .dump-card {
-  border-color: var(--line-strong);
-  box-shadow: 0 1px 2px rgb(8 40 46 / 0.1), 0 12px 26px rgb(8 40 46 / 0.08);
-  transform: translateY(-1px);
-}
-
-.dump-card h2 {
-  min-width: 0;
-  margin: 0;
-  overflow: hidden;
-  overflow-wrap: anywhere;
-  color: var(--ink-strong);
-  font-size: 16px;
-  line-height: 1.25;
-}
-
-.dump-card-link:hover h2 {
-  color: var(--accent);
-}
-
-.dump-card__meta {
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.dump-card__preview {
-  grid-row: 3;
-  min-width: 0;
-  height: var(--dump-preview-height);
-  overflow: hidden;
-  overflow-wrap: anywhere;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 10px;
-  background: var(--document-preview-surface);
-  color: var(--muted);
-  font: 13px/20px var(--mono);
-}
-
-.dump-card__preview-text {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 5;
-  height: 100%;
-  overflow: hidden;
-}
-
-@media (max-width: 347px) {
-  html:has(.dump-catalog) {
-    min-width: 0;
-  }
-
-  .app-main:has(.dump-catalog) {
-    padding-inline: 0;
-  }
 }
 
 .dump-create-panel {
@@ -1405,40 +1317,118 @@ code {
 .quiz-response textarea, .quiz-mode select { border: 1px solid var(--line); border-radius: var(--radius); padding: 8px; color: var(--ink); background: var(--surface); font: inherit; }
 .quiz-response textarea:focus-visible, .quiz-mode select:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
-/* Quiz cards retain their dimensions while the catalog changes column count. */
-.app-main.quiz-catalog-page { width: 100%; max-width: 860px; margin-inline: auto; padding: 20px 16px; }
-.quiz-catalog__heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 34px; margin-bottom: 12px; }
-.quiz-catalog__heading h1 { margin: 0; font-size: 1.3rem; font-weight: 600; }
-.quiz-catalog__grid { display: grid; grid-template-columns: repeat(3, 268px); gap: 10px; }
-.quiz-card { display: flex; flex-direction: column; width: 268px; height: 178px; padding: 10px; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); text-decoration: none; }
-.quiz-card h2 { height: 42px; margin: 0 0 12px; overflow: hidden; overflow-wrap: anywhere; font-size: .92rem; font-weight: 600; line-height: 20px; }
-.quiz-card__preview { flex: none; height: 100px; margin-top: auto; padding: 7px 8px; overflow: hidden; border: 1px solid var(--line); border-radius: 6px; background: var(--document-preview-surface); }
-.quiz-card__preview > div { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 6; overflow: hidden; overflow-wrap: anywhere; white-space: pre-wrap; font-size: .77rem; line-height: 14px; }
-.quiz-card:hover { border-color: var(--accent); }
-.quiz-card:focus-visible, .quiz-new > summary:focus-visible, .quiz-new__choices a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+/* Document catalogs share their gutters, fixed cards and opening-line previews. */
+.app-main.catalog-page {
+  width: 100%;
+  padding-inline: clamp(16px, 3vw, 48px);
+}
+
+.catalog-page .page-header,
+.quiz-catalog__heading {
+  min-height: 34px;
+  align-items: center;
+  flex-direction: row;
+}
+
+.document-grid,
+.dump-list,
+.quiz-catalog__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, var(--document-card-width));
+  justify-content: start;
+  align-items: start;
+  gap: 14px;
+}
+
+.document-card,
+.dump-card,
+.quiz-card {
+  display: flex;
+  flex-direction: column;
+  width: var(--document-card-width);
+  height: var(--document-card-height);
+  padding: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.document-card h2,
+.dump-card h2,
+.quiz-card h2 {
+  flex: none;
+  height: 42px;
+  margin: 0 0 12px;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font-size: .94rem;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.document-card__preview,
+.dump-card__preview,
+.quiz-card__preview {
+  flex: none;
+  height: var(--document-preview-height);
+  margin-top: auto;
+  padding: 8px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--document-preview-surface);
+}
+
+.document-card__preview > div,
+.dump-card__preview-text,
+.quiz-card__preview > div {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 7;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  font-size: .8rem;
+  line-height: 16px;
+}
+
+.document-card:hover,
+.dump-card-link:hover .dump-card,
+.quiz-card:hover {
+  border-color: var(--accent);
+  text-decoration: none;
+}
+
+.document-card:focus-visible,
+.dump-card-link:focus-visible,
+.quiz-card:focus-visible,
+.quiz-new > summary:focus-visible,
+.quiz-new__choices a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.dump-card-link:focus-visible { border-radius: 12px; }
+
 .quiz-new { position: relative; flex: none; }
 .quiz-new > summary { list-style: none; cursor: pointer; }
 .quiz-new > summary::-webkit-details-marker { display: none; }
 .quiz-new__choices { position: absolute; top: calc(100% + 6px); right: 0; z-index: 10; display: grid; width: 232px; max-width: calc(100vw - 32px); max-height: min(360px, 60vh); padding: 6px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); box-shadow: var(--shadow); }
 .quiz-new__choices a { padding: 9px 10px; border-radius: 4px; overflow-wrap: anywhere; color: var(--ink); text-decoration: none; font-size: .86rem; }
 .quiz-new__choices a:hover, .quiz-new__choices a:focus-visible { background: var(--accent-soft); }
-@media (max-width: 859px) { .quiz-catalog__grid { grid-template-columns: repeat(2, 268px); } }
-@media (max-width: 589px) { .quiz-catalog__grid { grid-template-columns: 268px; } }
-
-.document-grid { display: grid; grid-template-columns: repeat(auto-fill, 300px); gap: 14px; }
-.document-card { display: flex; flex-direction: column; width: 300px; height: 218px; padding: 10px; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); text-decoration: none; }
-.document-card h2 { height: 42px; margin: 0 0 12px; overflow: hidden; overflow-wrap: anywhere; font-size: .94rem; font-weight: 600; line-height: 20px; }
-.document-card__preview { flex: none; height: 132px; margin-top: auto; padding: 8px; overflow: hidden; border: 1px solid var(--line); border-radius: 6px; background: var(--document-preview-surface); }
-.document-card__preview > div { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 7; overflow: hidden; overflow-wrap: anywhere; white-space: pre-wrap; font-size: .8rem; line-height: 16px; }
-.document-card:hover { border-color: var(--accent); text-decoration: none; }
-.document-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .spec-editor { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow-y: auto; }
 .spec-editor > form { display: grid; gap: 14px; padding: 18px; }
 .spec-editor__body textarea { min-height: min(44vh, 380px); resize: vertical; font-family: var(--mono); line-height: 1.5; }
 .spec-editor__actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .spec-draft { display: inline-flex; align-items: center; gap: 8px; font-size: .9rem; }
 .spec-draft input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
-@media (max-width: 347px) { .app-main:has(.document-grid) { padding-inline: 5px; } }
+@media (max-width: 347px) {
+  html:has(.catalog-page) { min-width: 0; }
+  .app-main.catalog-page { padding-inline: 5px; }
+}
 
 .case-plan-panel { display: grid; gap: 12px; border-top: 1px solid var(--line); padding-top: 16px; min-width: 0; }
 .case-plan-panel h3, .case-plan-panel p { margin: 0; overflow-wrap: anywhere; }

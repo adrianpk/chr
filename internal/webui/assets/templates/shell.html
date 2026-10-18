@@ -42,7 +42,7 @@
         </div>
         <button class="top-chrome-handle" type="button" aria-label="Show navigation" aria-expanded="true"></button>
       </div>
-      <main class="app-main{{if and (eq .View "catalog") (eq .Catalog.Family "quizzes")}} quiz-catalog-page{{end}}">
+      <main class="app-main{{if eq .View "catalog"}} catalog-page{{end}}{{if and (eq .View "catalog") (eq .Catalog.Family "quizzes")}} quiz-catalog-page{{end}}">
         {{if not (and (eq .View "catalog") (eq .Catalog.Family "quizzes"))}}
         <header class="page-header">
           <div>
@@ -209,7 +209,7 @@
 <a class="dump-card-link" href="{{.DetailURL}}" hx-get="/dumps/detail/fragment?id={{.ID}}" hx-target="#modal-root" hx-swap="innerHTML">
   <article class="dump-card">
     <h2>{{if .DisplayTitle}}{{.DisplayTitle}}{{else}}{{.Title}}{{end}}</h2>
-    {{if .Meta}}<p class="dump-card__meta">{{.Meta}}</p>{{end}}
+    {{if .Meta}}<p class="dump-card__meta sr-only">{{.Meta}}</p>{{end}}
     <div class="dump-card__preview"><div class="dump-card__preview-text">{{if .Preview}}{{.Preview}}{{else}}No entries yet{{end}}</div></div>
   </article>
 </a>

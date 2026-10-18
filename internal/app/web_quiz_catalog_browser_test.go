@@ -32,9 +32,9 @@ func TestWebQuizCatalogBrowser(t *testing.T) {
 	webBoardBrowserViewport(t, browser, 1440, 1000)
 	browser.navigate(t, server.URL+"/quizzes")
 	browser.wait(t, ".quiz-card")
-	webQuizCatalogCapture(t, browser, "desktop-closed", 3)
+	webQuizCatalogCapture(t, browser, "desktop-closed", 4)
 	webQuizCatalogMenu(t, browser)
-	webQuizCatalogCapture(t, browser, "desktop-open", 3)
+	webQuizCatalogCapture(t, browser, "desktop-open", 4)
 	webQuizCatalogContinue(t, browser, provider)
 	browser.navigate(t, server.URL+"/quizzes")
 	browser.wait(t, ".quiz-card")
@@ -154,7 +154,7 @@ func webQuizCatalogAllAnswered(t *testing.T, browser *webWorkflowBrowser, provid
 		t.Fatal("New Quiz remained after all scopes were answered")
 	}
 
-	webQuizCatalogCapture(t, browser, "all-answered", 3)
+	webQuizCatalogCapture(t, browser, "all-answered", 4)
 
 	if _, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).Save(core.CaseMetadata{Slug: "new-case", Name: "Newly added case"}); err != nil {
 		t.Fatal(err)
@@ -187,7 +187,7 @@ func webQuizCatalogCapture(t *testing.T, browser *webWorkflowBrowser, name strin
 	metrics := browser.evaluate(t, `(()=>{const main=document.querySelector('.quiz-catalog-page'),grid=document.querySelector('.quiz-catalog__grid'),card=document.querySelector('.quiz-card'),preview=card.querySelector('.quiz-card__preview'),menu=document.querySelector('.quiz-new[open] .quiz-new__choices'),r=e=>{const b=e.getBoundingClientRect();return {x:b.x,y:b.y,width:b.width,height:b.height,right:b.right}};return JSON.stringify({innerWidth,innerHeight,dpr:devicePixelRatio,browserZoom:1,pageScale:visualViewport.scale,main:r(main),grid:getComputedStyle(grid).gridTemplateColumns,card:r(card),preview:r(preview),menu:menu?r(menu):null,cards:document.querySelectorAll('.quiz-card').length,pageWidth:document.documentElement.scrollWidth});})()`)
 	t.Log(name, metrics)
 
-	if got := browser.evaluate(t, `String([...document.querySelectorAll('.quiz-card')].every(c=>{const r=c.getBoundingClientRect(),p=c.querySelector('.quiz-card__preview'),s=getComputedStyle(p);return r.width===268&&r.height===178&&p.getBoundingClientRect().height===100&&r.right<=document.documentElement.clientWidth&&s.overflowY==='hidden'&&s.backgroundColor==='rgb(247, 251, 247)'&&getComputedStyle(c).backgroundColor==='rgb(255, 255, 255)';}))`); got != "true" {
+	if got := browser.evaluate(t, `String([...document.querySelectorAll('.quiz-card')].every(c=>{const r=c.getBoundingClientRect(),p=c.querySelector('.quiz-card__preview'),s=getComputedStyle(p);return r.width===300&&r.height===218&&p.getBoundingClientRect().height===132&&r.right<=document.documentElement.clientWidth&&s.overflowY==='hidden'&&s.backgroundColor==='rgb(247, 251, 247)'&&getComputedStyle(c).backgroundColor==='rgb(255, 255, 255)';}))`); got != "true" {
 		t.Fatal("fixed card geometry or preview failed", metrics)
 	}
 
