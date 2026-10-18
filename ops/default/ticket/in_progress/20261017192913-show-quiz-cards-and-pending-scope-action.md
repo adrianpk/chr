@@ -172,7 +172,7 @@ resetting it or making it inaccessible.
 
 The focused question-and-answer screen, its four actions, answer history and
 Deep/Fast behavior are captured separately in
-[Provide a focused quiz answering screen with modes and answer history](20261017193927-provide-focused-quiz-answering-screen.md).
+[Provide a focused quiz answering screen with modes and answer history](../solved/20261017193927-provide-focused-quiz-answering-screen.md).
 This catalog ticket owns entry and selection; it does not independently redefine
 question generation or declare the whole quiz review complete.
 
@@ -204,4 +204,4 @@ Behavior, shared-domain changes and implementation design are consolidated in
 
 ## Slice 6 Execution
 
-T6.1 delivers shared retained-answer membership after verified Slice 5 integration through PR #402. Its focused repository checks passed. T6.2 is active for the bounded catalog, pending menu and focused selection flow. The [Slice 6 report](../../report/slices/web-ui-workflow-consolidation/slice-6-quiz-catalog.md) owns implementation and validation evidence.
+T6.1 delivers shared retained-answer membership after verified Slice 5 integration through PR #402. Its focused repository checks passed. T6.2 delivers the fixed three-track catalog, named pending menu and explicit focused continuation/restart. Repository, real HTTP, complete affected lint and owned catalog/answering browser checks passed. Final exact-HEAD controller validation follows PR-reference commits. The [Slice 6 report](../../report/slices/web-ui-workflow-consolidation/slice-6-quiz-catalog.md) owns implementation and validation evidence.

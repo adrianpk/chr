@@ -465,7 +465,17 @@ chr dump open ops/default/dump/00000-billing-notes/artifact.md
 
 ## Answer Quizzes in the Web UI
 
-Open a quiz from Quizzes, or start/resume its scope using the catalog controls.
+Quizzes shows Project Quiz first, including **No answers yet** when empty, then
+named cases with recorded answers. Each fixed-size card previews the opening
+question and answer. Open a card to read its history or continue unfinished work.
+
+**New Quiz** appears only while a project or existing case has no recorded answers.
+Open its compact menu and choose a name. An active selection keeps its current
+question; a cancelled session offers **Resume**. A new scope offers **Start Quiz**.
+After Done, **Start new session** explicitly creates another session and retains
+earlier entries. Skipped or completed empty quizzes remain pending. When every
+scope has an answer, New Quiz disappears; adding a case makes it available again.
+
 The focused screen shows the current question, one answer field and the Deep/Fast
 selector. Recorded answers appear newest first; skipped questions are excluded.
 

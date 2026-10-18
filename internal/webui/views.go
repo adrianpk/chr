@@ -312,12 +312,18 @@ type ArtifactDetailRequest struct {
 
 // ArtifactCatalogView is the Web UI projection for one artifact family.
 type ArtifactCatalogView struct {
-	Cases        []TicketCaseView
-	Family       string
-	Title        string
-	EmptyMessage string
-	Items        []ArtifactCardView
-	Revision     string
+	PendingQuizzes []QuizScopeChoice
+	Cases          []TicketCaseView
+	Family         string
+	Title          string
+	EmptyMessage   string
+	Items          []ArtifactCardView
+	Revision       string
+}
+
+// QuizScopeChoice opens a known unanswered destination in the focused flow.
+type QuizScopeChoice struct {
+	Title, URL string
 }
 
 // ArtifactCardView is one catalog item card.
@@ -428,7 +434,7 @@ type QuizAnswerView struct {
 	ScopeSlug, SessionID, QuestionID, Revision, OperationID string
 	DraftContext                                            string
 	Mode, Question, Status, Error                           string
-	Started, Open, CanAnswer, CanResume                     bool
+	Started, Open, CanAnswer, CanResume, CanStart           bool
 	History                                                 []QuizAnswerHistoryView
 }
 

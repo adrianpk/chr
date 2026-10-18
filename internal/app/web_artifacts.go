@@ -75,12 +75,17 @@ func dumpCatalog(operations service) (webui.ArtifactCatalogView, error) {
 }
 
 func quizCatalog(operations service) (webui.ArtifactCatalogView, error) {
-	quizzes, err := loadTUIQuizzes(operations)
+	catalog, err := operations.ReadQuizCatalog()
 	if err != nil {
 		return webui.ArtifactCatalogView{}, err
 	}
+	view := webArtifactCatalog(webArtifactFamilyQuizzes, webQuizCards(catalog.Items))
+	for _, pending := range catalog.Pending {
+		view.PendingQuizzes = append(view.PendingQuizzes, webui.QuizScopeChoice{Title: pending.Title, URL: quizFocusURL(pending.Reference)})
+	}
+	view.Revision = webStableRevision(view)
 
-	return webArtifactCatalog(webArtifactFamilyQuizzes, webQuizCards(quizzes)), nil
+	return view, nil
 }
 
 func specCatalog(operations service) (webui.ArtifactCatalogView, error) {
@@ -341,24 +346,13 @@ func stripMarkdownFrontmatter(content string) string {
 	return content
 }
 
-func webQuizCards(quizzes []tui.QuizView) []webui.ArtifactCardView {
+func webQuizCards(quizzes []QuizCatalogItem) []webui.ArtifactCardView {
 	cards := make([]webui.ArtifactCardView, 0, len(quizzes))
 	for _, quiz := range quizzes {
-		path := firstNonEmptyString(quiz.CuratedPath, quiz.RuntimePath, quiz.RawPath)
-		card := webui.ArtifactCardView{
-			Family:       webArtifactFamilyQuizzes,
-			ID:           webQuizID(quiz, path),
-			Title:        quiz.Title,
-			Status:       quiz.Status,
-			Scope:        webScopeLabel(quiz.Scope.CaseSlug, quiz.Title),
-			Path:         path,
-			UpdatedAt:    webArtifactTime(quiz.UpdatedAt),
-			Preview:      firstNonEmptyString(quiz.CuratedPreview, quiz.ActiveQuestionSummary, quiz.TrailSummary),
-			ContentState: webContentState(path != ""),
-			Revision:     webFileRevision(filepath.Join(".", filepath.FromSlash(path))),
-		}
-		card.DetailURL = webArtifactDetailURL(card)
-		cards = append(cards, card)
+		cards = append(cards, webui.ArtifactCardView{
+			Family: webArtifactFamilyQuizzes, ID: quiz.Reference, Title: quiz.Title,
+			Preview: quiz.Preview, DetailURL: quizFocusURL(quiz.Reference), Revision: quiz.Revision,
+		})
 	}
 
 	return cards
@@ -482,18 +476,6 @@ func webContentState(available bool) string {
 	return "missing"
 }
 
-func webQuizID(quiz tui.QuizView, path string) string {
-	if strings.TrimSpace(path) != "" {
-		return path
-	}
-
-	if strings.TrimSpace(quiz.Scope.CaseSlug) != "" {
-		return "case:" + quiz.Scope.CaseSlug
-	}
-
-	return "project"
-}
-
 func caseRelativePath(projectDir string, metadata core.CaseMetadata) string {
 	if metadata.SourcePath == "" {
 		return ""
@@ -515,19 +497,6 @@ func firstNonEmptyString(values ...string) string {
 	}
 
 	return ""
-}
-
-func webFileRevision(path string) string {
-	if strings.TrimSpace(path) == "" {
-		return ""
-	}
-
-	content, err := os.ReadFile(path)
-	if err != nil {
-		return ""
-	}
-
-	return webContentRevision(string(content))
 }
 
 func webContentRevision(content string) string {

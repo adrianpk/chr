@@ -63,6 +63,7 @@ func webQuizAnswerView(quiz QuizView, observed core.QuizObservation) *webui.Quiz
 	view.CanAnswer = view.Open && state.Status == core.QuizRuntimeStatusActive && state.ActiveQuestion != nil
 
 	view.CanResume = webQuizCanResume(state, observed.Exists)
+	view.CanStart = !observed.Exists || state.Status == core.QuizRuntimeStatusDone
 
 	if state.ActiveQuestion != nil {
 		view.QuestionID, view.Question = state.ActiveQuestion.ID, state.ActiveQuestion.Prompt

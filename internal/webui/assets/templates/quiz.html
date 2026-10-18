@@ -2,15 +2,15 @@
 <section id="quiz-surface" class="quiz-answering" data-quiz-context="{{.Detail.Quiz.DraftContext}}" data-quiz-current-mode="{{.Detail.Quiz.Mode}}" data-quiz-session="{{.Detail.Quiz.SessionID}}" data-quiz-question="{{.Detail.Quiz.QuestionID}}" data-quiz-scope="{{.Detail.ID}}"{{with .Write.Quiz}} data-ack-action="{{.Action}}" data-ack-session="{{.SessionID}}" data-ack-question="{{.QuestionID}}"{{end}}>
   <div class="quiz-heading">
     <div><a href="/quizzes">Back to Quizzes</a><h2>{{.Detail.Title}}</h2><span class="muted">{{.Detail.Scope}} · {{.Detail.Quiz.Status}}</span></div>
-    <form class="quiz-mode" data-quiz-form data-quiz-mode="{{.Detail.Quiz.Started}}" method="post" action="/actions" hx-post="/actions" hx-target="#quiz-result" hx-swap="innerHTML" hx-disabled-elt="#quiz-surface button, #quiz-mode">
+    <form class="quiz-mode" data-quiz-form data-quiz-mode="{{and .Detail.Quiz.Started (not .Detail.Quiz.CanStart)}}" method="post" action="/actions" hx-post="/actions" hx-target="#quiz-result" hx-swap="innerHTML" hx-disabled-elt="#quiz-surface button, #quiz-mode">
       {{template "quiz_binding.html" .}}
-      <input type="hidden" name="action" value="{{if .Detail.Quiz.Started}}quiz.mode{{else}}quiz.start{{end}}">
+      <input type="hidden" name="action" value="{{if .Detail.Quiz.CanStart}}quiz.start{{else}}quiz.mode{{end}}">
       <label for="quiz-mode">Mode</label>
-      <select id="quiz-mode" name="mode" {{if and .Detail.Quiz.Started (not .Detail.Quiz.Open)}}disabled{{end}}>
+      <select id="quiz-mode" name="mode" {{if and .Detail.Quiz.Started (not .Detail.Quiz.Open) (not .Detail.Quiz.CanStart)}}disabled{{end}}>
         <option value="deep" {{if eq .Detail.Quiz.Mode "deep"}}selected{{end}}>Deep</option>
         <option value="fast" {{if eq .Detail.Quiz.Mode "fast"}}selected{{end}}>Fast</option>
       </select>
-      {{if not .Detail.Quiz.Started}}<button class="button button--primary" type="submit">Start Quiz</button>{{end}}
+      {{if .Detail.Quiz.CanStart}}<button class="button button--primary" type="submit">{{if .Detail.Quiz.Started}}Start new session{{else}}Start Quiz{{end}}</button>{{end}}
     </form>
   </div>
   <div id="quiz-result" role="status" aria-live="polite">{{template "quiz_action_result.html" .}}</div>

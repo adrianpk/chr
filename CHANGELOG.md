@@ -19,6 +19,9 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   and acknowledge retries once. Fast retains one generated batch across mode
   changes and restart; failed continuation keeps the confirmed answer available
   in history. Cancel and Done preserve earlier answers with distinct statuses.
+  The catalog shows Project Quiz and answered case cards with fixed opening-text
+  previews. New Quiz lists only unanswered named scopes, preserves unfinished
+  sessions and disappears when every scope has answers.
 
 - Project-wide context now grows in one shared dump across Web, CLI, TUI and
   authoring conversations. Web New offers Project-wide or existing case names;

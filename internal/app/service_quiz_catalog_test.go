@@ -146,7 +146,7 @@ func TestQuizCatalogNewCase(t *testing.T) {
 	catalog, err := operations.ReadQuizCatalog()
 	checkQuizCatalogCounts(t, catalog, err, 2, 0)
 
-	if _, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).Save(core.CaseMetadata{Slug: "new-case", Name: "Newly named work"}); err != nil {
+	if _, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).Save(core.CaseMetadata{SourcePath: core.CaseMetadataPath(operations.projectContext.ProjectDir, "new-case"), Name: "Newly named work"}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -171,5 +171,34 @@ func checkQuizCatalogAnswer(t *testing.T, item QuizCatalogItem) {
 
 	if item.AnswerCount != 1 || item.Preview == "" || item.SessionID == "" {
 		t.Fatal(item)
+	}
+}
+
+// With no cases or retained files, Project Quiz is both the sole card and the
+// sole pending choice. Reading it leaves the runtime and answer files absent.
+func TestQuizCatalogProjectOnly(t *testing.T) {
+	provider, model := newWebQuizFixture(t)
+
+	operations := provider.service(t.Context())
+	if err := os.Remove(core.CaseMetadataPath(operations.projectContext.ProjectDir, "named-work")); err != nil {
+		t.Fatal(err)
+	}
+
+	catalog, err := operations.ReadQuizCatalog()
+	checkQuizCatalogCounts(t, catalog, err, 1, 1)
+
+	if catalog.Items[0].Scope.CaseSlug != "" || catalog.Items[0].Preview != "" || len(model.requests) != 0 {
+		t.Fatal(catalog)
+	}
+
+	paths, err := operations.quizRepository().Paths(operations.quizScope(core.QuizScope{}))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, path := range []string{paths.RawPath, paths.CuratedPath, paths.RuntimePath} {
+		if _, err := os.Stat(path); !os.IsNotExist(err) {
+			t.Fatal("read allocated a quiz file", path, err)
+		}
 	}
 }

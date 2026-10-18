@@ -40,7 +40,8 @@
         </div>
         <button class="top-chrome-handle" type="button" aria-label="Show navigation" aria-expanded="true"></button>
       </div>
-      <main class="app-main">
+      <main class="app-main{{if and (eq .View "catalog") (eq .Catalog.Family "quizzes")}} quiz-catalog-page{{end}}">
+        {{if not (and (eq .View "catalog") (eq .Catalog.Family "quizzes"))}}
         <header class="page-header">
           <div>
             <h1>{{.Title}}</h1>
@@ -54,6 +55,7 @@
             {{end}}
           {{end}}
         </header>
+        {{end}}
         <section id="workspace" class="workspace-panel" data-revision="{{.Revision}}"{{if .RefreshURL}} hx-get="{{.RefreshURL}}" hx-trigger="every {{.Shell.RefreshSeconds}}s [document.visibilityState == 'visible']" hx-target="#workspace" hx-swap="innerHTML"{{end}}>
           {{if eq .View "board"}}
             {{template "board_content.html" .}}
@@ -149,7 +151,7 @@
 
 {{define "catalog_content.html"}}
 {{template "revision_marker.html" .}}
-{{if and (ne .Catalog.Family "cases") (ne .Catalog.Family "dumps")}}
+{{if and (ne .Catalog.Family "cases") (ne .Catalog.Family "dumps") (ne .Catalog.Family "quizzes")}}
 <div class="catalog-toolbar">
   <div class="summary-item">
     <span class="summary-label">Artifacts</span>
@@ -159,6 +161,8 @@
 {{end}}
 {{if eq .Catalog.Family "dumps"}}
   {{template "dump_catalog_content.html" .}}
+{{else if eq .Catalog.Family "quizzes"}}
+  {{template "quiz_catalog_content.html" .}}
 {{else}}
   {{if .Catalog.Items}}
     {{if eq .Catalog.Family "cases"}}
@@ -180,9 +184,6 @@
 {{end}}
 {{if eq .Catalog.Family "plans"}}
   {{template "plan_action_forms.html" .}}
-{{end}}
-{{if eq .Catalog.Family "quizzes"}}
-  {{template "quiz_action_forms.html" .}}
 {{end}}
 {{end}}
 
@@ -536,36 +537,6 @@
     <input name="case_slug">
   </label>
   <button class="button" type="submit">Create Tracking</button>
-</form>
-{{end}}
-
-{{define "quiz_action_forms.html"}}
-<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Start a quiz for this scope?')">
-  <input type="hidden" name="action" value="quiz.start">
-  <input type="hidden" name="family" value="quizzes">
-  <input type="hidden" name="confirm" value="true">
-  <label>
-    <span>Case slug</span>
-    <input name="case_slug">
-  </label>
-  <label>
-    <span>Mode</span>
-    <select name="mode">
-      <option value="deep">Deep</option>
-      <option value="fast">Fast</option>
-    </select>
-  </label>
-  <button class="button button--primary" type="submit">Start Quiz</button>
-</form>
-<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Resume this quiz scope?')">
-  <input type="hidden" name="action" value="quiz.resume">
-  <input type="hidden" name="family" value="quizzes">
-  <input type="hidden" name="confirm" value="true">
-  <label>
-    <span>Case slug</span>
-    <input name="case_slug">
-  </label>
-  <button class="button" type="submit">Resume Quiz</button>
 </form>
 {{end}}
 

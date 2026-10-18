@@ -1,4 +1,18 @@
 (function () {
+  document.addEventListener('click', function (event) {
+    const menu = document.querySelector('.quiz-new[open]');
+    if (menu && !menu.contains(event.target)) menu.open = false;
+  });
+  document.addEventListener('keydown', function (event) {
+    const menu = document.querySelector('.quiz-new[open]');
+    if (menu && event.key === 'Escape') { menu.open = false; menu.querySelector('summary').focus(); }
+  });
+  document.addEventListener('htmx:beforeRequest', function (event) {
+    if (event.detail.elt.id !== 'workspace') return;
+    const catalog = document.querySelector('.quiz-catalog');
+    // Polling must not replace an open menu or a keyboard selection.
+    if (catalog && (catalog.querySelector('.quiz-new[open]') || catalog.contains(document.activeElement))) event.preventDefault();
+  });
   function surface() { return document.querySelector('#quiz-surface'); }
   function storageKey(panel) { return 'chr-quiz-drafts:' + panel.dataset.quizContext + ':' + panel.dataset.quizSession; }
   function drafts(panel) {

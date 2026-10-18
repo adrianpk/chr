@@ -385,7 +385,7 @@ func TestHandlerArtifactCatalogAndDetailRoutes(t *testing.T) {
 	}{
 		{path: "/cases", want: []string{"<h1>Cases</h1>", "case-table", "Blog Authoring", "Case context", "blog", "Edit", `hx-get="/cases/detail/fragment?id=blog"`}},
 		{path: "/dumps", want: []string{"<h1>Dumps</h1>", "New context", "Scope", `data-modal-template="dump-create-modal"`, `id="dump-create-modal"`, "dump-card-link", "dump-card", "Project Notes", `hx-get="/dumps/detail/fragment?id=.chr/default/dumps/project-notes.md"`, "Project-wide", "Notes preview"}},
-		{path: "/quizzes", want: []string{"<h1>Quizzes</h1>", "Project Quiz", "not_started"}},
+		{path: "/quizzes", want: []string{"<h1>Quizzes</h1>", "Project Quiz", "No answers yet"}},
 		{path: "/specs", want: []string{"<h1>Specs</h1>", "Project Spec"}},
 		{path: "/plans", want: []string{"<h1>Plans</h1>", "No plans found."}},
 		{path: "/dumps/detail?id=.chr/default/dumps/project-notes.md", want: []string{"<h1>Project Notes</h1>", "Full dump content"}},
@@ -649,7 +649,7 @@ func TestHandlerRendersGenerationAndWorkActionForms(t *testing.T) {
 	}{
 		{path: "/specs", want: []string{"spec.generate", "Generate Spec"}},
 		{path: "/plans", want: []string{"plan.generate", "plan.regenerate", "plan.tracking.create"}},
-		{path: "/quizzes", want: []string{"quiz.start", "quiz.resume", "Start Quiz"}},
+		{path: "/quizzes", want: []string{"New Quiz", `aria-label="Pending quizzes"`, "/quizzes/detail?id=project"}},
 		{path: "/dash", want: []string{"work.preview", "work.daemon.stop", "Preview Work"}},
 	} {
 		recorder := httptest.NewRecorder()
@@ -987,6 +987,10 @@ func (testDataProvider) CatalogView(_ context.Context, family string) (ArtifactC
 		Revision:     family + "-revision",
 	}
 
+	if family == "quizzes" {
+		catalog.PendingQuizzes = []QuizScopeChoice{{Title: "Project Quiz", URL: "/quizzes/detail?id=project"}}
+	}
+
 	return catalog, nil
 }
 
@@ -1030,7 +1034,7 @@ func testCatalogItems(family string) []ArtifactCardView {
 				Title:        "Project Quiz",
 				Status:       "not_started",
 				Scope:        "Project-wide",
-				Preview:      "No quiz yet.",
+				Preview:      "",
 				DetailURL:    "/quizzes/detail?id=project",
 				ContentState: "missing",
 			},
