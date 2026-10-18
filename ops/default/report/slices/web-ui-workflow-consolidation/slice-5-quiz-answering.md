@@ -19,10 +19,18 @@ T5.2 applies the queue policy; T5.3 exposes the focused Web interaction.
 
 T5.1 implements versioned runtime observations, immutable action bindings and
 recoverable publication of runtime, raw capture, curated notes, metadata and
-operation receipts under the existing authoring owner. Queue policy and Web
-interaction remain in progress.
+operation receipts under the existing authoring owner. T5.2 retains one successful Fast batch across mode switches and process reloads,
+keeps the active question through switches, and consumes the queue without
+per-question generation. Deep retains adaptive follow-ups. Provider continuation
+failure retains the confirmed answer in a resumable blocked state. Cancel and
+Done preserve history with distinct statuses. The Web interaction remains in
+progress.
 
 ## Implementation Notes
+
+T5.1: `c00bbcce643f` — versioned persistence, guarded actions and journal recovery.
+T5.2: shared service queue policy and observed TUI action bindings.
+
 
 Reuse the quiz repository, existing model boundary and shared authoring owner.
 Retain versioned session/question and action bindings, entries and mode queues
@@ -49,8 +57,10 @@ Task validation:
 
 - `go test -race ./internal/core -run '^TestQuiz(Action|EntryExact|Observation|Artifact|Runtime)' -count=1` — passed, including every journal-image interruption, competing answers, receipt replay, legacy read stability, unsupported schema, size and symlink rejection.
 
-Service policy, Web/browser checks and the final exact clean-HEAD development
-gate remain pending.
+- `go test -race ./internal/core ./internal/app ./internal/tui -run 'Quiz' -count=1` — passed for shared actions, queues, continuation failure, Deep routing, model contracts and adapter regressions.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m --new-from-rev=HEAD ./internal/core ./internal/app ./internal/tui` — passed with zero issues.
+
+Web/browser checks and the final exact clean-HEAD development gate remain pending.
 
 ## Risks and Follow-ups
 

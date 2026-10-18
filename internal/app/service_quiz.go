@@ -1,6 +1,7 @@
 package app
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -90,38 +91,16 @@ func (s service) ListQuizzes() (QuizListResult, error) {
 }
 
 func (s service) StartQuiz(request QuizStartRequest) (QuizOperationResult, error) {
-	scope := s.quizScope(request.Scope)
-
 	mode := request.Mode
 	if mode == "" {
 		mode = core.QuizModeDeep
 	}
 
-	state, err := s.newQuizRuntimeState(scope, mode)
-	if err != nil {
-		return QuizOperationResult{}, err
-	}
-
-	state, err = s.generateNextQuizQuestion(state)
-	if err != nil {
-		return QuizOperationResult{}, err
-	}
-
-	_, err = s.quizRepository().SaveRuntimeState(s.ctx, state)
-	if err != nil {
-		return QuizOperationResult{}, err
-	}
-
-	return QuizOperationResult{Message: "Quiz started.", State: state}, nil
+	return s.applyQuizAction(core.QuizActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "start", Mode: mode})
 }
 
 func (s service) ResumeQuiz(request QuizResumeRequest) (QuizOperationResult, error) {
-	state, err := s.quizRepository().LoadRuntimeState(s.ctx, s.quizScope(request.Scope))
-	if err != nil {
-		return QuizOperationResult{}, err
-	}
-
-	return QuizOperationResult{Message: "Quiz resumed.", State: state}, nil
+	return s.applyQuizAction(core.QuizActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "resume"})
 }
 
 func (s service) AnswerQuiz(request QuizAnswerRequest) (QuizOperationResult, error) {
@@ -130,15 +109,15 @@ func (s service) AnswerQuiz(request QuizAnswerRequest) (QuizOperationResult, err
 		return QuizOperationResult{}, fmt.Errorf("quiz answer is required")
 	}
 
-	return s.recordQuizOutcome(s.quizScope(request.Scope), core.QuizEntryStatusAnswered, answer)
+	return s.applyQuizAction(core.QuizActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "answer", Answer: answer})
 }
 
 func (s service) SkipQuiz(request QuizSkipRequest) (QuizOperationResult, error) {
-	return s.recordQuizOutcome(s.quizScope(request.Scope), core.QuizEntryStatusSkipped, "")
+	return s.applyQuizAction(core.QuizActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "skip"})
 }
 
 func (s service) CompleteQuiz(request QuizCompleteRequest) (QuizOperationResult, error) {
-	return s.completeQuiz(s.quizScope(request.Scope))
+	return s.applyQuizAction(core.QuizActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "done"})
 }
 
 func (s service) GenerateQuizDraftSpec(request QuizDraftSpecRequest) (QuizOperationResult, error) {
@@ -146,137 +125,11 @@ func (s service) GenerateQuizDraftSpec(request QuizDraftSpecRequest) (QuizOperat
 }
 
 func (s service) CancelQuiz(request QuizCancelRequest) (QuizOperationResult, error) {
-	return s.stopQuiz(s.quizScope(request.Scope), core.QuizRuntimeStatusCancelled, "Quiz cancelled.")
+	return s.applyQuizAction(core.QuizActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "cancel"})
 }
 
 func (s service) SwitchQuizMode(request QuizModeRequest) (QuizOperationResult, error) {
-	if !request.Mode.Valid() {
-		return QuizOperationResult{}, fmt.Errorf("quiz mode is invalid: %s", request.Mode)
-	}
-
-	repository := s.quizRepository()
-
-	state, err := repository.LoadRuntimeState(s.ctx, s.quizScope(request.Scope))
-	if err != nil {
-		return QuizOperationResult{}, err
-	}
-
-	state.Mode = request.Mode
-	state.Candidates = nil
-	state.UpdatedAt = s.utcNow()
-
-	if state.Status == core.QuizRuntimeStatusIdle && state.Mode == core.QuizModeFast {
-		state, err = s.generateNextQuizQuestion(state)
-		if err != nil {
-			return QuizOperationResult{}, err
-		}
-	}
-
-	_, err = repository.SaveRuntimeState(s.ctx, state)
-	if err != nil {
-		return QuizOperationResult{}, err
-	}
-
-	return QuizOperationResult{Message: "Quiz mode switched.", State: state}, nil
-}
-
-func (s service) recordQuizOutcome(
-	scope core.QuizScope,
-	status core.QuizEntryStatus,
-	answer string,
-) (QuizOperationResult, error) {
-	repository := s.quizRepository()
-
-	state, err := repository.LoadRuntimeState(s.ctx, scope)
-	if err != nil {
-		return QuizOperationResult{}, err
-	}
-
-	if state.Status != core.QuizRuntimeStatusActive || state.ActiveQuestion == nil {
-		return QuizOperationResult{}, fmt.Errorf("quiz has no active question")
-	}
-
-	entry := quizEntryFromState(state, status, answer, s.utcNow())
-
-	_, err = repository.AppendRawCapture(s.ctx, state, entry)
-	if err != nil {
-		return QuizOperationResult{}, err
-	}
-
-	_, err = s.writeQuizCuratedNotes(scope)
-	if err != nil {
-		return QuizOperationResult{}, err
-	}
-
-	state = updateQuizStateAfterEntry(state, entry)
-	if state.QuestionsAsked < state.QuestionBudget {
-		state, err = s.generateNextQuizQuestion(state)
-		if err != nil {
-			return QuizOperationResult{}, err
-		}
-	} else {
-		state.Status = core.QuizRuntimeStatusDone
-	}
-
-	state.UpdatedAt = s.utcNow()
-
-	_, err = repository.SaveRuntimeState(s.ctx, state)
-	if err != nil {
-		return QuizOperationResult{}, err
-	}
-
-	return QuizOperationResult{Message: "Quiz answer recorded.", State: state}, nil
-}
-
-func (s service) stopQuiz(
-	scope core.QuizScope,
-	status core.QuizRuntimeStatus,
-	message string,
-) (QuizOperationResult, error) {
-	repository := s.quizRepository()
-
-	state, err := repository.LoadRuntimeState(s.ctx, scope)
-	if err != nil {
-		return QuizOperationResult{}, err
-	}
-
-	state.Status = status
-	state.ActiveQuestion = nil
-	state.Candidates = nil
-	state.UpdatedAt = s.utcNow()
-
-	_, err = repository.SaveRuntimeState(s.ctx, state)
-	if err != nil {
-		return QuizOperationResult{}, err
-	}
-
-	return QuizOperationResult{Message: message, State: state}, nil
-}
-
-func (s service) completeQuiz(scope core.QuizScope) (QuizOperationResult, error) {
-	repository := s.quizRepository()
-
-	state, err := repository.LoadRuntimeState(s.ctx, scope)
-	if err != nil {
-		return QuizOperationResult{}, err
-	}
-
-	state.Status = core.QuizRuntimeStatusDone
-	state.ActiveQuestion = nil
-	state.Candidates = nil
-	state.UpdatedAt = s.utcNow()
-
-	_, err = s.writeQuizCuratedNotes(scope)
-	if err != nil {
-		return QuizOperationResult{}, err
-	}
-
-	_, err = repository.SaveRuntimeState(s.ctx, state)
-	if err != nil {
-		return QuizOperationResult{}, err
-	}
-
-	return QuizOperationResult{Message: "Quiz completed.", State: state}, nil
+	return s.applyQuizAction(core.QuizActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "mode", Mode: request.Mode})
 }
 
 func (s service) generateQuizDraftSpec(scope core.QuizScope) (QuizOperationResult, error) {
@@ -311,49 +164,22 @@ func (s service) writeQuizCuratedNotes(scope core.QuizScope) (core.QuizArtifactP
 	return repository.WriteCuratedNotes(s.ctx, core.CurateQuizEntries(scope, entries, s.utcNow()))
 }
 
-func (s service) generateNextQuizQuestion(state core.QuizRuntimeState) (core.QuizRuntimeState, error) {
-	if len(state.Candidates) > 0 {
-		state = activateQuizCandidate(state, state.Candidates[0], s.utcNow())
-		state.Candidates = state.Candidates[1:]
-
-		return state, nil
-	}
-
-	request, err := s.newQuizModelRequest(state)
+func (s service) newQuizModelRequest(state core.QuizRuntimeState) (core.QuizModelRequest, error) {
+	entries, err := s.quizRepository().LoadRawCaptureEntries(s.ctx, core.QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug})
 	if err != nil {
-		return core.QuizRuntimeState{}, err
+		return core.QuizModelRequest{}, err
 	}
 
-	response, err := core.InvokeQuizModel(s.ctx, s.quizModel, request)
-	if err != nil {
-		return core.QuizRuntimeState{}, err
-	}
-
-	if response.Status == core.QuizModelResponseBlocked {
-		state.Status = core.QuizRuntimeStatusBlocked
-		state.ActiveQuestion = nil
-		state.UpdatedAt = response.CreatedAt.UTC()
-
-		return state, nil
-	}
-
-	state.Status = core.QuizRuntimeStatusActive
-	state = activateQuizQuestion(state, response.Question, response.CreatedAt.UTC())
-	state.Candidates = response.Candidates
-
-	return state, nil
+	return s.newQuizModelRequestWithEntries(state, entries)
 }
 
-func (s service) newQuizModelRequest(state core.QuizRuntimeState) (core.QuizModelRequest, error) {
+func (s service) newQuizModelRequestWithEntries(state core.QuizRuntimeState, entries []core.QuizEntry) (core.QuizModelRequest, error) {
 	scope := core.QuizScope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,
 	}
 
-	payload, err := s.newQuizModelPayload(scope, state, core.QuizModelActionNextQuestion)
-	if err != nil {
-		return core.QuizModelRequest{}, err
-	}
+	payload := s.quizModelPayloadWithEntries(state, core.QuizModelActionNextQuestion, entries)
 
 	coreSections, err := core.QuizModelContextSectionsForPayload(payload)
 	if err != nil {
@@ -475,13 +301,17 @@ func (s service) newQuizModelPayload(
 		return core.QuizModelPayload{}, err
 	}
 
+	return s.quizModelPayloadWithEntries(state, action, entries), nil
+}
+
+func (s service) quizModelPayloadWithEntries(state core.QuizRuntimeState, action core.QuizModelAction, entries []core.QuizEntry) core.QuizModelPayload {
 	return core.QuizModelPayload{
 		Project:         s.quizModelProjectPayload(),
 		Quiz:            quizModelQuizPayload(state),
 		RecentEntries:   quizModelRecentEntryPayloads(entries, 5),
 		CurrentQuestion: quizModelCurrentQuestionPayload(state, entries),
 		OutputContract:  core.NewQuizModelOutputContract(action, state.Mode),
-	}, nil
+	}
 }
 
 func (s service) newQuizRuntimeState(scope core.QuizScope, mode core.QuizMode) (core.QuizRuntimeState, error) {
@@ -494,6 +324,7 @@ func (s service) newQuizRuntimeState(scope core.QuizScope, mode core.QuizMode) (
 
 	return core.QuizRuntimeState{
 		ID:             "quiz-" + paths.ScopeID,
+		SessionID:      "quiz-" + rand.Text(),
 		ProjectID:      scope.ProjectID,
 		CaseSlug:       scope.CaseSlug,
 		Status:         core.QuizRuntimeStatusIdle,

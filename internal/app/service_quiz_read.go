@@ -16,6 +16,7 @@ const QuizViewStatusNotStarted = "not_started"
 
 // QuizView is the TUI-facing projection of a quiz session or available scope.
 type QuizView struct {
+	Binding               core.QuizActionBinding
 	Index                 int
 	Title                 string
 	Scope                 core.QuizScope
@@ -177,7 +178,8 @@ func (s service) quizViewFromState(title string, state core.QuizRuntimeState) (Q
 		QuestionsAsked:        state.QuestionsAsked,
 		AnswersRecorded:       state.AnswersRecorded,
 		SkipsRecorded:         state.SkipsRecorded,
-		CandidateCount:        len(state.Candidates),
+		CandidateCount:        len(state.Candidates) + len(state.FastQueue),
+		Binding:               quizStateObservationBinding(state),
 		BranchReturnReason:    state.BranchReturnReason,
 		UpdatedAt:             state.UpdatedAt,
 		ActiveQuestionSummary: quizActiveQuestionSummary(state),
@@ -189,7 +191,14 @@ func (s service) quizViewFromState(title string, state core.QuizRuntimeState) (Q
 func (s service) notStartedQuizView(title string, scope core.QuizScope) (QuizView, error) {
 	paths, err := s.quizRepository().Paths(scope)
 	if err != nil {
-		return QuizView{}, err
+		observed, err := s.quizRepository().Observe(s.ctx, scope)
+		if err != nil {
+			return QuizView{}, err
+		}
+
+		return QuizView{
+			Binding: core.QuizActionBinding{ExpectedRevision: observed.Revision},
+		}, err
 	}
 
 	return QuizView{
@@ -285,4 +294,13 @@ func quizScopeKey(scope core.QuizScope) string {
 type quizReadScope struct {
 	title string
 	scope core.QuizScope
+}
+
+func quizStateObservationBinding(state core.QuizRuntimeState) core.QuizActionBinding {
+	binding := core.QuizActionBinding{SessionID: state.SessionID, ExpectedRevision: state.Revision}
+	if state.ActiveQuestion != nil {
+		binding.QuestionID = state.ActiveQuestion.ID
+	}
+
+	return binding
 }

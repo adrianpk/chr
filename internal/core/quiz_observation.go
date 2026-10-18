@@ -121,6 +121,12 @@ func (r *fileAuthoringSessionRepository) quizRevision(scope QuizScope, images []
 }
 
 func decodeQuizObservation(observed *QuizObservation, scope QuizScope, paths QuizArtifactPaths) error {
+	entries, err := ParseQuizRawCaptureEntries(string(observed.images[1].After))
+	if err != nil {
+		return err
+	}
+
+	observed.Entries = entries
 	if observed.images[0].After == nil {
 		return nil
 	}
@@ -138,12 +144,7 @@ func decodeQuizObservation(observed *QuizObservation, scope QuizScope, paths Qui
 		return ErrWorkflowConflict
 	}
 
-	entries, err := ParseQuizRawCaptureEntries(string(observed.images[1].After))
-	if err != nil {
-		return err
-	}
-
-	observed.Exists, observed.Entries = true, entries
+	observed.Exists = true
 
 	state.Revision = observed.Revision
 	if state.SchemaVersion == 0 {

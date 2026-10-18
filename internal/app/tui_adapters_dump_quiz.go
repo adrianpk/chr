@@ -83,8 +83,9 @@ func executeQuizOperationRefresh(_ tui.QuizActionRequest) (string, error) {
 
 func (e tuiQuizActionExecutor) executeQuizOperationStart(request tui.QuizActionRequest) (string, error) {
 	result, err := e.operations.StartQuiz(QuizStartRequest{
-		Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug},
-		Mode:  core.QuizModeDeep,
+		Scope:   core.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Binding: tuiQuizBinding(request.Binding),
+		Mode:    core.QuizModeDeep,
 	})
 	if err != nil {
 		return "", err
@@ -95,7 +96,8 @@ func (e tuiQuizActionExecutor) executeQuizOperationStart(request tui.QuizActionR
 
 func (e tuiQuizActionExecutor) executeQuizOperationResume(request tui.QuizActionRequest) (string, error) {
 	result, err := e.operations.ResumeQuiz(QuizResumeRequest{
-		Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Scope:   core.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Binding: tuiQuizBinding(request.Binding),
 	})
 	if err != nil {
 		return "", err
@@ -106,8 +108,9 @@ func (e tuiQuizActionExecutor) executeQuizOperationResume(request tui.QuizAction
 
 func (e tuiQuizActionExecutor) executeQuizOperationAnswer(request tui.QuizActionRequest) (string, error) {
 	result, err := e.operations.AnswerQuiz(QuizAnswerRequest{
-		Scope:  core.QuizScope{CaseSlug: request.Scope.CaseSlug},
-		Answer: request.Answer,
+		Scope:   core.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Binding: tuiQuizBinding(request.Binding),
+		Answer:  request.Answer,
 	})
 	if err != nil {
 		return "", err
@@ -118,7 +121,8 @@ func (e tuiQuizActionExecutor) executeQuizOperationAnswer(request tui.QuizAction
 
 func (e tuiQuizActionExecutor) executeQuizOperationSkip(request tui.QuizActionRequest) (string, error) {
 	result, err := e.operations.SkipQuiz(QuizSkipRequest{
-		Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Scope:   core.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Binding: tuiQuizBinding(request.Binding),
 	})
 	if err != nil {
 		return "", err
@@ -129,7 +133,8 @@ func (e tuiQuizActionExecutor) executeQuizOperationSkip(request tui.QuizActionRe
 
 func (e tuiQuizActionExecutor) executeQuizOperationComplete(request tui.QuizActionRequest) (string, error) {
 	result, err := e.operations.CompleteQuiz(QuizCompleteRequest{
-		Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Scope:   core.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Binding: tuiQuizBinding(request.Binding),
 	})
 	if err != nil {
 		return "", err
@@ -140,7 +145,8 @@ func (e tuiQuizActionExecutor) executeQuizOperationComplete(request tui.QuizActi
 
 func (e tuiQuizActionExecutor) executeQuizOperationCancel(request tui.QuizActionRequest) (string, error) {
 	result, err := e.operations.CancelQuiz(QuizCancelRequest{
-		Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Scope:   core.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Binding: tuiQuizBinding(request.Binding),
 	})
 	if err != nil {
 		return "", err
@@ -153,8 +159,9 @@ func (e tuiQuizActionExecutor) executeQuizOperationMode(request tui.QuizActionRe
 	mode := core.QuizMode(request.Mode)
 
 	result, err := e.operations.SwitchQuizMode(QuizModeRequest{
-		Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug},
-		Mode:  mode,
+		Scope:   core.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Binding: tuiQuizBinding(request.Binding),
+		Mode:    mode,
 	})
 	if err != nil {
 		return "", err
@@ -306,4 +313,8 @@ func dumpActionResult(result DumpOperationResult, operations service) (tui.DumpA
 	}
 
 	return actionResult, nil
+}
+
+func tuiQuizBinding(binding tui.QuizActionBinding) core.QuizActionBinding {
+	return core.QuizActionBinding{SessionID: binding.SessionID, QuestionID: binding.QuestionID, ExpectedRevision: binding.ExpectedRevision, OperationID: binding.OperationID}
 }
