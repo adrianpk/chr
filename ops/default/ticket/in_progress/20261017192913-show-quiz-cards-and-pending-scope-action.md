@@ -204,4 +204,4 @@ Behavior, shared-domain changes and implementation design are consolidated in
 
 ## Slice 6 Execution
 
-T6.1 is active after verified Slice 5 integration through PR #402. T6.2 follows the shared catalog membership and continuation read model. The [Slice 6 report](../../report/slices/web-ui-workflow-consolidation/slice-6-quiz-catalog.md) owns implementation and validation evidence.
+T6.1 delivers shared retained-answer membership after verified Slice 5 integration through PR #402. Its focused repository checks passed. T6.2 is active for the bounded catalog, pending menu and focused selection flow. The [Slice 6 report](../../report/slices/web-ui-workflow-consolidation/slice-6-quiz-catalog.md) owns implementation and validation evidence.

@@ -16,23 +16,25 @@ through PR #402 at `303db92f10651f5eb36d730e25a742ff78d06cd6`.
 
 ## Delivered Behavior
 
-Implementation pending.
+The shared catalog always includes Project Quiz, followed by existing named cases with confirmed answered entries. Only scopes without answers appear as pending. Partial, cancelled and completed work uses retained entries; runtime counters, curated files and skipped entries do not imply an answer.
 
 ## Implementation Notes
 
-T6.1 precedes T6.2 under the existing shared quiz owner.
+T6.1 implements a bounded read-only projection through the existing quiz repository. Each item retains its scope, reference, observed session and revision. The focused view re-observes that same identity; catalog reads do not start sessions or invoke generation. T6.2 is pending.
 
 ## Contracts Added or Changed
 
-Pending.
+`ReadQuizCatalog` separates answered cards from eligible unanswered named scopes without changing the existing CLI/TUI inventory.
 
 ## Files of Interest
 
-Pending.
+`internal/app/service_quiz_catalog.go` and its real repository regressions.
 
 ## Validation
 
-Activation documentation: `git diff --check` passed. Runtime checks pending.
+`go test ./internal/app -run '^TestQuizCatalog' -count=1` passed, including absent, partial, skipped, cancelled, completed, counter-only and curated-only states, retained answers without runtime, all-answered and new-case membership.
+
+`git diff --check` passed. Final clean-HEAD controller validation follows T6.2 and PR-reference commits.
 
 ## Risks and Follow-ups
 
