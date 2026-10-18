@@ -10,6 +10,7 @@ tags: web-ui, ux-ui, usability
 source: chat
 reported_at: 2026-10-17T10:54:32Z
 commits: []
+branch: test/slice-12-web-ui-review
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
@@ -250,3 +251,11 @@ the card or preview, and previews have no internal scrollbar. Responsive grids
 change the number of columns rather than stretch the cards. Full content stays
 available through the existing detail/editor. Verify equal card and preview
 dimensions with short, long and unbroken text in the owning slice and review.
+
+## Slice 12 Execution
+
+T12.1 is complete: the combined persisted-workspace journey passes focused race
+and strict lint checks. It covers capture, quiz, manual/generated spec edits,
+contextual planning, approved order binding, Board metadata, Dash observation
+and mutation-free reopening. T12.2 addresses consolidated presentation/interaction
+acceptance, then T12.3 records the final matrix and candidate evidence.
