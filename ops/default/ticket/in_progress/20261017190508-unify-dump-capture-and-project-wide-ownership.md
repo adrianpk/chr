@@ -159,9 +159,16 @@ Its guarded source/session, canonical content, provenance, history, pointer and
 receipt share one recoverable publication. Semantic retries preserve original
 content after later writes; CLI finalization resumes preparation or its receipt.
 Focused race tests, affected-package lint and signature checks passed. T2.2 is
-complete. T2.3's single Web New capture form
-with existing case choices and retained capture identity remains. Final controller
-validation has not run and the slice has no ready PR.
+complete. T2.3 is implemented in `ce10f273f308a10faf48d72b5bebed9de733659d`. One New
+capture modal offers Project-wide and existing case names. Unchanged retries keep
+their identity and input; changed submitted arguments create a new intent.
+Failures and pending projections retain the form, and confirmed success restores
+focus and refreshes the catalog. Deterministic desktop/narrow browser, lost-ack,
+HTTP, scope and lint checks passed; the source report records exact commands and
+corrected fixture evidence. User Guide, reference and Unreleased are updated.
+All Slice 2 tasks are implemented. The report is reviewing; final controller
+validation and canonical PR references are being prepared. The ticket remains
+in progress until integration is verified.
 
 ## Consolidated Design
 
