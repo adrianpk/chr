@@ -43,7 +43,7 @@ application behavior.
 | [TKT-20261017192913](../../ticket/in_progress/20261017192913-show-quiz-cards-and-pending-scope-action.md) | Quiz catalog, pending scopes and continuation | 5 |
 | [TKT-20261017193927](../../ticket/in_progress/20261017193927-provide-focused-quiz-answering-screen.md) | Quiz interaction, history and modes | 6, model |
 | [TKT-20261017194552](../../ticket/in_progress/20261017194552-present-spec-cards-and-user-selected-creation-state.md) | Individual specs, creation state and editing | 7, model |
-| [TKT-20261017195458](../../ticket/in_progress/20261017195458-present-plans-and-tracking-as-read-only-cards.md) | Plan cards and read-only detail | 8 |
+| [TKT-20261017195458](../../ticket/solved/20261017195458-present-plans-and-tracking-as-read-only-cards.md) | Plan cards and read-only detail | 8 |
 | [TKT-20261017195741](../../ticket/in_progress/20261017195741-contextualize-plan-generation-and-check-source-readiness.md) | Contextual generation and sufficient discovery | 8, model |
 | [TKT-20261017200232](../../ticket/solved/20261017200232-associate-ticket-tracking-with-each-plan-revision.md) | Required internal ordering document per plan revision | 9, model |
 | [TKT-20261017201015](../../ticket/solved/20261017201015-restore-board-page-loading.md) | Board, shared ticket modal, moves and comments | 10, model |

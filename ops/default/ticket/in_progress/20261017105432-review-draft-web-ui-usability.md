@@ -147,7 +147,7 @@ the full plan for reading. The detail must be read-only: manual text changes
 could affect the agent's work. Agent-owned plan updates remain part of their
 existing workflow. Capture this presentation and
 interaction contract in
-[Present plan cards with read-only detail](20261017195458-present-plans-and-tracking-as-read-only-cards.md).
+[Present plan cards with read-only detail](../solved/20261017195458-present-plans-and-tracking-as-read-only-cards.md).
 Tracking remains an internal artifact, excluded from the Web UI as specified
 in the dedicated tracking ticket below.
 

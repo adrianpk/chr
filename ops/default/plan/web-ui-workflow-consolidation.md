@@ -21,7 +21,7 @@ slices through Looper, including canonical slice PRs and controller-owned
 Rebase + Fast-forward merges into dev. The existing Telegram run is separate.
 Use one development worker and one canonical open slice PR for this set.
 
-Active slice: Slice 10, Read-only Plans catalog; T10.2.
+Active slice: Slice 11, Live work Dash; T11.1.
 The controller checkpoint and tickets own subsequent progress.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.
@@ -227,7 +227,7 @@ Validation: Verify plan/map interruption and retry, no allocation before approva
 
 ### Slice 10: Read-only Plans catalog
 
-Source: [TKT-20261017195458](../ticket/in_progress/20261017195458-present-plans-and-tracking-as-read-only-cards.md).
+Source: [TKT-20261017195458](../ticket/solved/20261017195458-present-plans-and-tracking-as-read-only-cards.md).
 
 Dependency: Slice 9 integrated into dev; use all earlier shared owners.
 

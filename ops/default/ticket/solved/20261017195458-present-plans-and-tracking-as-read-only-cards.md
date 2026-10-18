@@ -1,7 +1,7 @@
 ---
 id: TKT-20261017195458
 title: "Present plan cards with read-only detail"
-status: in_progress
+status: solved
 kind: task
 severity: medium
 priority: normal
@@ -14,13 +14,16 @@ branch: feat/slice-10-plan-catalog
 pr: "#407"
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
+reviewed_at: 2026-10-18T20:32:57Z
+closed_at: 2026-10-18T20:32:57Z
+resolution: fixed
 ---
 
 # Present plan cards with read-only detail
 
 ## Context and Evidence
 
-Part of [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
+Part of [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md).
 The maintainer supplied the current Plans page HTML. It contains an Artifacts
 counter, status/availability chips, repeated scope information, document paths
 and document text inside catalog cards. Some previews include raw frontmatter
@@ -32,7 +35,7 @@ with a click opening the document for reading. Plans must not be manually
 editable from this view because their content governs agent work. Tracking
 documents are internal and excluded from this catalog, as specified in the
 separate
-[internal tracking ticket](../solved/20261017200232-associate-ticket-tracking-with-each-plan-revision.md).
+[internal tracking ticket](20261017200232-associate-ticket-tracking-with-each-plan-revision.md).
 
 Capture only. No application change or service update is authorized here.
 
@@ -41,7 +44,7 @@ Capture only. No application change or service update is authorized here.
 1. Remove the Artifacts counter from Plans. Keep the catalog focused on its
    document cards instead of artifact statistics and technical metadata.
 2. Use the same card anatomy as the
-   [Specs catalog](../solved/20261017194552-present-spec-cards-and-user-selected-creation-state.md):
+   [Specs catalog](20261017194552-present-spec-cards-and-user-selected-creation-state.md):
    a document title above a bounded inset preview of its actual opening body
    lines, with consistent dimensions and spacing. Do not turn the preview into
    a full document dump or fill it with frontmatter, paths and generic badges.
@@ -102,5 +105,5 @@ Focused core/HTTP tests, affected-package strict lint and owned Chromium
 captures passed, including mutation-free browsing and rejected legacy forms.
 The [Slice 10 report](../../report/slices/web-ui-workflow-consolidation/slice-10-plan-catalog.md)
 owns implementation, acceptance captures and task validation evidence. [PR #407](https://forge.adrianpk.com/adrianpk/chr/pulls/407) and the controller
-ledger own final clean-HEAD evidence after these PR-reference updates. The source ticket
-remains in progress until verified merge.
+ledger own final clean-HEAD evidence after these PR-reference updates. PR #407 was verified merged into dev on 2026-10-18T20:32:57Z at
+`ce1a19c0c10a50c27807b976fa353c81a0f6912e`; Slice 10 is delivered.

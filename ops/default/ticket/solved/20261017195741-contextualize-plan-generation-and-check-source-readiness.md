@@ -86,7 +86,7 @@ Manual spec creation remains governed by the
 This ticket's plan-generation prerequisite does not impose dump or quiz
 requirements on writing a spec manually. Catalog appearance and read-only plan
 viewing are covered by the separate
-[Plans catalog ticket](../in_progress/20261017195458-present-plans-and-tracking-as-read-only-cards.md).
+[Plans catalog ticket](20261017195458-present-plans-and-tracking-as-read-only-cards.md).
 
 ## Acceptance
 

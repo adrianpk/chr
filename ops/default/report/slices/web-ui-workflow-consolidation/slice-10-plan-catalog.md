@@ -1,6 +1,6 @@
 # Slice 10: Read-only Plans Catalog
 
-Status: reviewing
+Status: delivered
 Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
@@ -8,6 +8,11 @@ Branch: `feat/slice-10-plan-catalog`
 PR: `#407`
 
 [PR #407](https://forge.adrianpk.com/adrianpk/chr/pulls/407) targets dev.
+
+Merged through PR #407 on 2026-10-18T20:32:57Z at
+`ce1a19c0c10a50c27807b976fa353c81a0f6912e`. Controller validation
+`NGKA7ZIHYZU3W7HNMLIL2MLIZ3` passed all four ordered final checks
+for that exact candidate. Slice 10 of 12 completed.
 
 ## Purpose
 
