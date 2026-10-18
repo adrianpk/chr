@@ -1,0 +1,248 @@
+package app
+
+import (
+	"os"
+	"path/filepath"
+	"reflect"
+	"testing"
+	"time"
+
+	"forge.adrianpk.com/chr/internal/core"
+)
+
+// The public service chooses native records even with an unrelated corrupt
+// legacy store, retains separate persisted invocations, and never starts them.
+func TestWorkObservationNative(t *testing.T) {
+	operations, ids := nativeWorkObservationFixture(t)
+	provider := webViewProvider{projectContext: operations.projectContext}
+	before := webPlanFiles(t, provider)
+
+	observed, err := operations.ObserveWork(t.Context(), 0)
+	if err != nil || observed.Authority != core.WorkStateAuthorityTickets || len(observed.Current) != 2 {
+		t.Fatal(observed, err)
+	}
+
+	checkObservedContextBindings(t, observed, ids)
+
+	if !reflect.DeepEqual(before, webPlanFiles(t, provider)) {
+		t.Fatal("observation changed retained state")
+	}
+}
+
+// A quiet validation remains bound to its attempt; another invocation's latest
+// event cannot overwrite it. Completed results survive without phase events.
+func TestWorkObservationContexts(t *testing.T) {
+	at := time.Now().UTC()
+	tickets := map[string]core.IndexedTicket{"PRJ-1": {Key: "PRJ-1", Title: "First"}, "PRJ-2": {Key: "PRJ-2", Title: "Second"}}
+	records := map[string]core.WorkflowRecord{"PRJ-1": {Task: &core.WorkflowTask{Phase: "validating", AttemptID: "one"}}, "PRJ-2": {Task: &core.WorkflowTask{Phase: "working", AttemptID: "two"}}}
+	result := WorkObservation{}
+
+	for _, item := range []struct{ id, key, attempt string }{{"first", "PRJ-1", "one"}, {"second", "PRJ-2", "two"}} {
+		run := core.WorkflowInvocation{WorkflowIdentity: core.WorkflowIdentity{ID: item.id, UpdatedAt: at}, Status: "running", Attempts: []core.WorkflowAttempt{{ID: item.attempt, TaskKey: item.key, Outcome: "running", StartedAt: at}}}
+		appendNativeWork(&result, run, tickets, records)
+	}
+
+	completed := core.WorkflowInvocation{WorkflowIdentity: core.WorkflowIdentity{ID: "complete", UpdatedAt: at}, Status: "completed", Outcome: "task_validated", Cursor: 1, Members: []core.WorkflowMember{{Admission: core.WorkflowPreviewMember{Key: "PRJ-1"}}}}
+	appendNativeWork(&result, completed, tickets, records)
+
+	if len(result.Current) != 2 || result.Current[0].Phase != "validating" || result.Current[1].Phase != "working" || len(result.Results) != 1 || result.Results[0].Confirmed != 0 {
+		t.Fatal(result)
+	}
+}
+
+// Legacy status records remain visible without an event phase, while event
+// matching rejects newer messages from other tickets, executions or projects.
+func TestWorkObservationLegacy(t *testing.T) {
+	operations := newTestService(t, newTestWorkspace(t))
+	writeCLIWorkspaceConfig(t, operations.projectContext.ProjectDir, "work:\n  state_authority: tracker_compat\n  mode: no_git_enforcement\n")
+
+	observed, err := operations.ObserveWork(t.Context(), 0)
+	if err != nil || len(observed.Current) != 0 || len(observed.Results) != 0 {
+		t.Fatal(observed, err)
+	}
+
+	if observed.Authority != core.WorkStateAuthorityTrackerCompat {
+		t.Fatal(observed.Authority)
+	}
+}
+
+// Deduplication and context matching do not infer lifecycle from event silence.
+func TestWorkObservationEventBinding(t *testing.T) {
+	operations := newTestService(t, newTestWorkspace(t))
+	now := time.Now().UTC()
+	current := WorkContext{ID: "execution:one", TicketKey: "PRJ-1", Status: "running", UpdatedAt: now}
+
+	event := core.AgentEvent{ProjectID: operations.projectContext.ProjectID, ExecutionID: "two", TicketKey: "PRJ-2", Timestamp: now.Add(time.Hour), Phase: core.AgentEventPhaseWorkFailed, Message: "Different task"}
+	if legacyWorkEventMatches(event, operations.projectContext.ProjectID, "one", "") {
+		t.Fatal("mixed executions")
+	}
+
+	event.ExecutionID, event.TicketKey = "one", "PRJ-1"
+	event.Phase = core.AgentEventPhaseValidationStarted
+	event.Timestamp = now.Add(-time.Minute)
+
+	result := WorkObservation{}
+	for range 2 {
+		if err := appendObservedLegacyEvent(&result, &current, event); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	finishWorkObservation(&result, 0)
+
+	if len(result.Events) != 1 || current.Status != "running" || current.Phase != "validation_started" {
+		t.Fatal(result, current)
+	}
+
+	if legacyWorkEventMatches(event, "other-project", "one", "") {
+		t.Fatal("mixed projects")
+	}
+}
+
+func checkObservedContextBindings(t *testing.T, observed WorkObservation, ids []string) {
+	t.Helper()
+
+	for _, current := range observed.Current {
+		if current.InvocationID != ids[0] && current.InvocationID != ids[1] {
+			t.Fatal(current)
+		}
+
+		if current.Title == "" || current.TicketKey == "" {
+			t.Fatal("lost ticket binding", current)
+		}
+	}
+}
+
+func nativeWorkObservationFixture(t *testing.T) (service, []string) {
+	t.Helper()
+
+	operations, independent, request := serviceWorkflowTicketFixture(t)
+	writeCLIWorkspaceConfig(t, operations.projectContext.ProjectDir, "ticket:\n  key_prefix: PRJ\nwork:\n  state_authority: tickets\n  max_active_workers: 2\n")
+
+	var ids []string
+
+	for _, key := range []string{independent.Task.Key, observedNativeGroupedKey(t, operations)} {
+		request.RequestKey = "observe-" + key
+		request.Selection.Selector.Identity = key
+
+		start, err := operations.StartWorkflow(t.Context(), request)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		ids = append(ids, start.Invocation.ID)
+		claimObservedWork(t, operations, start.Invocation.ID)
+	}
+
+	path := filepath.Join(operations.projectContext.ProjectDir, ".chr/default/tickets/broken.md")
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(path, []byte("---\nkey: [invalid\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	return operations, ids
+}
+
+func observedNativeGroupedKey(t *testing.T, operations service) string {
+	t.Helper()
+
+	store, err := operations.workflowStore()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	snapshot, err := store.InspectWorkflowRecords(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, record := range snapshot.Records {
+		if record.Task != nil && record.Task.SetID != "" {
+			return record.Task.Key
+		}
+	}
+
+	t.Fatal("grouped fixture ticket missing")
+
+	return ""
+}
+
+// Persisted legacy results remain observable after the queue drains, without
+// any event stream or latest phase, and keep actual loop counters separate.
+func TestWorkObservationRetained(t *testing.T) {
+	operations := newTestService(t, newTestWorkspace(t))
+	writeCLIWorkspaceConfig(t, operations.projectContext.ProjectDir, "work:\n  state_authority: tracker_compat\n  mode: no_git_enforcement\n")
+	seedObservedWorkResults(t, operations)
+
+	observed, err := operations.ObserveWork(t.Context(), 0)
+	if err != nil || len(observed.Results) != 3 || len(observed.Current) != 1 || len(observed.Queue) != 0 {
+		t.Fatal(observed, err)
+	}
+
+	for _, result := range observed.Results {
+		if result.Kind == "loop" && (result.Processed != 1 || result.Failed != 1) {
+			t.Fatal(result)
+		}
+	}
+
+	if len(observed.Events) != 0 {
+		t.Fatal("invented events")
+	}
+}
+
+func seedObservedWorkResults(t *testing.T, operations service) {
+	t.Helper()
+
+	repository, err := core.NewExecutionRepository(t.Context(), operations.env, operations.assetsFS)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	now := time.Now().UTC()
+	for _, status := range []core.ExecutionStatus{core.ExecutionStatusRunning, core.ExecutionStatusSucceeded, core.ExecutionStatusFailed} {
+		record := core.ExecutionRecord{ID: string(status), ProjectID: operations.projectContext.ProjectID, TicketKey: "PRJ-" + string(status), Status: status, CreatedAt: now, UpdatedAt: now}
+		if err = repository.CreateExecution(t.Context(), record); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err = repository.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	loops, err := core.NewLoopRunRepository(t.Context(), operations.env, operations.assetsFS)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	record := core.LoopRunRecord{ID: "retained-loop", ProjectID: operations.projectContext.ProjectID, Status: core.LoopRunStatusSucceeded, EligibleCount: 2, ProcessedCount: 1, FailedCount: 1, CreatedAt: now, UpdatedAt: now}
+	if err = loops.CreateLoopRun(t.Context(), record); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = loops.Close(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func claimObservedWork(t *testing.T, operations service, id string) {
+	t.Helper()
+
+	claim, err := operations.ClaimWorkflow(t.Context(), id)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if claim == nil {
+		t.Fatal("native fixture did not acquire its claim")
+	}
+
+	t.Cleanup(func() {
+		if err := claim.Close(); err != nil {
+			t.Error(err)
+		}
+	})
+}
