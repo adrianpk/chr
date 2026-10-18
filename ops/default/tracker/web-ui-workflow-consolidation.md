@@ -25,8 +25,10 @@ First planned slice: Slice 1, Board and shared ticket modal; T1.1.
 ## Ordering Contract
 
 Required catalog presentation, clarified 2026-10-18: fixed width/height per card
-type and a fixed preview of opening lines with clipped overflow. Content never
-enlarges a card or preview; responsive grids vary column count. The owning
+type and a fixed preview of opening lines with clipped overflow. Put the preview
+inside the card below the title, in a very pale green, almost-white inset
+surface subtly distinct from the pure-white card. Content never enlarges a
+card or preview; responsive grids vary column count. The owning
 catalog slices and final review verify this under the linked specification.
 
 Read slices in ascending numeric order and tasks in their listed order. Every

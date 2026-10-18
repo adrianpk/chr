@@ -43,6 +43,9 @@ an interactive full suite as a substitute.
 Maintainer clarification, 2026-10-18: all document catalog cards have fixed
 width and height per type, including Dumps, Quizzes, Specs and Plans. Their
 preview areas also stay fixed and show only opening lines with clipped overflow.
+The preview sits inside the card below its title, in a very pale green,
+almost-white inset surface subtly distinct from the pure-white card. It
+resembles the beginning of a small document.
 Responsive grids change column count, not card geometry. Apply this contract in
 the owning UI slices and verify identical geometry for short/long bodies in
 the final review. This clarifies existing acceptance; slice identities and

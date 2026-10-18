@@ -96,6 +96,12 @@ contract and its tests during implementation, without converting legacy
    availability badges. Board column counts and Dash readiness counters have
    distinct useful meanings and remain.
 3. Use real opening body text for document previews, with a bounded inset area.
+   Place that area inside the card below its title, with a very pale green,
+   almost-white background subtly distinct from the pure-white card surface,
+   inset padding and a subtle boundary. It should resemble the beginning of a
+   small document contained within the card. Use a theme token for this pale
+   green surface and retain readable text contrast. Apply this same anatomy to
+   Dumps, Quizzes, Specs and Plans.
    Parse frontmatter structurally; omit a duplicate document heading when the
    card already displays it. Do not replace the preview with an LLM summary.
    Escape text and use the existing safe Markdown rendering path for detail.
@@ -212,7 +218,8 @@ that reserve space for the title and fixed preview; 16:9 is a landscape design
 reference, not an instruction to derive variable height from available width.
 Long content is clipped within those regions and cannot increase card height.
 
-The pale inset preview has a subtle border, 6px radius, about 7px by 8px padding
+The very pale green, almost-white inset preview is subtly distinct from the
+pure-white card. It has a subtle border, 6px radius, about 7px by 8px padding
 and a bounded 96-106px content area displaying up to six useful short lines.
 The empty project preview uses the same position and geometry. Use two then
 one column as space narrows. The right-aligned pending menu is approximately
@@ -494,7 +501,7 @@ This is the dependency order for later planning, not a new execution tracker:
 
 | Acceptance group | Required evidence |
 | --- | --- |
-| UI-01: catalog composition | Dumps at the same desktop width at 100%/90% zoom; responsive fixed-size tracks; Quizzes menu open/closed/all-answered; actual opening-line previews without metadata clutter; short, long and unbroken content has identical card/preview dimensions and no preview scrollbar |
+| UI-01: catalog composition | Dumps at the same desktop width at 100%/90% zoom; responsive fixed-size tracks; Quizzes menu open/closed/all-answered; title above a very pale green, almost-white inset opening-line preview subtly distinct from every pure-white document card; short, long and unbroken content has identical card/preview dimensions, no metadata clutter and no preview scrollbar |
 | UI-02: dump integrity | First capture, later capture, two concurrent captures, retry, Save/reopen, stale Save, namespace switch, restart/index rebuild and reconciliation preserving source bytes/references |
 | UI-03: quiz state | Empty/partial/answered/cancelled scope membership; correct question binding; all four actions; retained history; draft-preserving switches; one successful Fast batch generation and no per-question calls |
 | UI-04: spec authoring | Multiple documents per scope; manual draft/approved creation without model access; generated/manual editing of the same identity; correct context isolation and retained state |

@@ -241,7 +241,11 @@ Behavior, shared-domain changes and implementation design are consolidated in
 
 Maintainer clarification, 2026-10-18: catalog cards always use fixed width and
 height per type. Their preview area is also fixed and shows the document's
-first lines with excess text clipped. Content and long titles cannot enlarge
+first lines with excess text clipped. Place this preview inside the card below
+its title, with a very pale green, almost-white background subtly distinct
+from the pure-white card, inset padding and a subtle boundary so it resembles
+the beginning of a small document.
+Content and long titles cannot enlarge
 the card or preview, and previews have no internal scrollbar. Responsive grids
 change the number of columns rather than stretch the cards. Full content stays
 available through the existing detail/editor. Verify equal card and preview
