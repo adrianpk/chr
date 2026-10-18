@@ -163,7 +163,7 @@ the need for a quiz; mere file presence is not readiness.
 Additional dump content or quiz answers can improve the spec and inform plan
 regeneration. Keep the document operations distinct and make their scope clear.
 Capture placement, prerequisites and regeneration context in
-[Generate plans from use-case context with sufficient source material](20261017195741-contextualize-plan-generation-and-check-source-readiness.md).
+[Generate plans from use-case context with sufficient source material](../solved/20261017195741-contextualize-plan-generation-and-check-source-readiness.md).
 Tracking creation and behavior are excluded from that ticket. Manual spec
 creation still does not require a dump or quiz.
 

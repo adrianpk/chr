@@ -1,7 +1,7 @@
 ---
 id: TKT-20261017195741
 title: "Generate plans from use-case context with sufficient source material"
-status: in_progress
+status: solved
 kind: task
 severity: medium
 priority: normal
@@ -14,13 +14,16 @@ branch: feat/slice-8-plan-generation
 pr: "#405"
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
+reviewed_at: 2026-10-18T19:18:28Z
+closed_at: 2026-10-18T19:18:28Z
+resolution: fixed
 ---
 
 # Generate plans from use-case context with sufficient source material
 
 ## Context and Evidence
 
-Part of [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
+Part of [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md).
 The supplied Plans HTML places separate Generate Plan and Regenerate Plan
 forms below the catalog. Both ask the user to type a Case slug. These are
 contextless operational forms in a document-listing screen.
@@ -123,3 +126,5 @@ core/app/Web lint checks. Acceptance 1–5 is covered by the
 [PR #405](https://forge.adrianpk.com/adrianpk/chr/pulls/405) targets dev. Final clean-HEAD `make verify`, plan race checks,
 affected browser checks and `git diff --check` are bound through the controller
 after this PR-reference follow-up. Integration remains controller-owned.
+
+Verified PR #405 merged into dev at `e48bcd8e44991c7c89a7628928471d8039938f42` on 2026-10-18T19:18:28Z. Controller validation `YTOTYO25GSVLCFGSANHXXM5OHW` passed the exact ordered development/race/browser/diff checks for that candidate. Acceptance 1–5 is delivered.

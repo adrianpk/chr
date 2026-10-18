@@ -17,7 +17,7 @@ Model: [Web UI and Workflow Model](../spec/stable/web-ui-workflow-consolidation-
 Implementation authorization: granted on 2026-10-18 for this exact set through
 Looper, including controller-owned Rebase + Fast-forward integration into dev.
 
-Active slice: Slice 8, Contextual safe plan generation; PR #405 reviewing.
+Active slice: Slice 9, Revision-bound order-only trackers; T9.1.
 The controller checkpoint and tickets own subsequent progress.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.
@@ -167,7 +167,7 @@ Validation: Create multiple specs in one scope, one draft and one directly appro
 
 ### Slice 8: Contextual safe plan generation
 
-Ticket: [TKT-20261017195741](../ticket/in_progress/20261017195741-contextualize-plan-generation-and-check-source-readiness.md).
+Ticket: [TKT-20261017195741](../ticket/solved/20261017195741-contextualize-plan-generation-and-check-source-readiness.md).
 
 Prerequisite: Slice 7 integrated; execution authority for this set.
 

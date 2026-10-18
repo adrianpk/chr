@@ -10,6 +10,7 @@ tags: tracking, tickets, plans
 source: chat
 reported_at: 2026-10-17T20:02:32Z
 commits: []
+branch: feat/slice-9-plan-order-tracker
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
@@ -107,7 +108,7 @@ its lifecycle. Only changes to the declared map or its plan binding require
 that map to be updated.
 
 Keep this ticket separate from
-[plan generation placement and source prerequisites](20261017195741-contextualize-plan-generation-and-check-source-readiness.md).
+[plan generation placement and source prerequisites](../solved/20261017195741-contextualize-plan-generation-and-check-source-readiness.md).
 
 ## Acceptance
 
@@ -144,3 +145,7 @@ report carry progress; the delivery tracker defines order only.
 
 Behavior, shared-domain changes and implementation design are consolidated in
 [Web UI and Workflow Consolidation](../../spec/stable/web-ui-workflow-consolidation.md).
+
+## Slice 9 Execution
+
+Activated T9.1 after verified PR #405 integration. The [Slice 9 report](../../report/slices/web-ui-workflow-consolidation/slice-9-plan-order-tracker.md) owns implementation and validation evidence.

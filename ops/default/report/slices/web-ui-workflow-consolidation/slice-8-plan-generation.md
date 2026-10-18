@@ -1,6 +1,6 @@
 # Slice 8: Contextual Safe Plan Generation
 
-Status: reviewing
+Status: delivered
 Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
@@ -8,6 +8,11 @@ Branch: `feat/slice-8-plan-generation`
 PR: `#405`
 
 [PR #405](https://forge.adrianpk.com/adrianpk/chr/pulls/405) targets dev.
+
+Merged through PR #405 on 2026-10-18T19:18:28Z at
+`e48bcd8e44991c7c89a7628928471d8039938f42`. Controller validation
+`YTOTYO25GSVLCFGSANHXXM5OHW` passed all four ordered final checks for
+that exact candidate. Slice 8 of 12 completed.
 
 ## Purpose
 
