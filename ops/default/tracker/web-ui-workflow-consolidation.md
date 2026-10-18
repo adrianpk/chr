@@ -17,7 +17,7 @@ Model: [Web UI and Workflow Model](../spec/stable/web-ui-workflow-consolidation-
 Implementation authorization: granted on 2026-10-18 for this exact set through
 Looper, including controller-owned Rebase + Fast-forward integration into dev.
 
-Active slice: Slice 6, Scope-driven quiz catalog; PR #403 reviewing.
+Active slice: Slice 7, Individual spec authoring; T7.1.
 The controller checkpoint and tickets own subsequent progress.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.
@@ -138,7 +138,7 @@ T5.1 complete at `c00bbcce643fbc1958bc14184e38b73e63f14bd7`; T5.2 complete at `0
 
 ### Slice 6: Scope-driven quiz catalog
 
-Ticket: [TKT-20261017192913](../ticket/in_progress/20261017192913-show-quiz-cards-and-pending-scope-action.md).
+Ticket: [TKT-20261017192913](../ticket/solved/20261017192913-show-quiz-cards-and-pending-scope-action.md).
 
 Prerequisite: Slice 5 integrated; execution authority for this set.
 
@@ -149,7 +149,7 @@ Prerequisite: Slice 5 integrated; execution authority for this set.
 
 Validation: Cover empty, partial, answered, cancelled and completed-empty sessions, adding a case and all-answered action removal; capture closed/open menu, long content and narrow views at declared viewport/zoom.
 
-T6.1 complete at `836b920dd8dcc805ea8bfd899594da309ba519c8`; T6.2 complete at `14cd4d91361ab726e44c5bf30f3e56f9fb50ca9c`. Shared membership, real HTTP, affected lint and owned catalog/answering browser checks passed. [PR #403](https://forge.adrianpk.com/adrianpk/chr/pulls/403) targets dev; the controller check record retains final exact-HEAD evidence.
+T6.1 complete at `836b920dd8dcc805ea8bfd899594da309ba519c8`; T6.2 complete at `14cd4d91361ab726e44c5bf30f3e56f9fb50ca9c`. Shared membership, real HTTP, affected lint and owned catalog/answering browser checks passed. [PR #403](https://forge.adrianpk.com/adrianpk/chr/pulls/403) was verified merged into dev at `c9e0679951b63ed5257a4c40e3b9d3f3fcc69d40`; Slice 6 is delivered.
 
 ### Slice 7: Individual spec authoring
 

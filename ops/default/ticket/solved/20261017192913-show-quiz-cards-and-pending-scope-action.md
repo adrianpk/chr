@@ -1,7 +1,7 @@
 ---
 id: TKT-20261017192913
 title: "Make the quiz catalog readable and scope-driven"
-status: in_progress
+status: solved
 kind: task
 severity: medium
 priority: normal
@@ -12,6 +12,9 @@ reported_at: 2026-10-17T19:29:13Z
 commits: [836b920dd8dcc805ea8bfd899594da309ba519c8, 14cd4d91361ab726e44c5bf30f3e56f9fb50ca9c]
 branch: feat/slice-6-quiz-catalog
 pr: "#403"
+resolution: fixed
+reviewed_at: 2026-10-18T18:11:23Z
+closed_at: 2026-10-18T18:11:23Z
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
@@ -20,7 +23,7 @@ started_at: 2026-10-18T08:34:50Z
 
 ## Context and Evidence
 
-Finding from [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
+Finding from [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md).
 The maintainer has now supplied two screenshots covering the upper catalog and
 the lower action area of CHR's Quizzes page. The observations below describe
 that actual interface. The expected behavior is stated independently of any
@@ -211,3 +214,7 @@ T6.1: `836b920dd8dcc805ea8bfd899594da309ba519c8`. T6.2: `14cd4d91361ab726e44c5bf
 [PR #403](https://forge.adrianpk.com/adrianpk/chr/pulls/403) targets dev. The report
 records successful focused commands and desktop/open/all-answered/narrow captures.
 The controller binds final clean-HEAD evidence after this reference follow-up.
+
+## Integration
+
+PR #403 merged into dev at `c9e0679951b63ed5257a4c40e3b9d3f3fcc69d40` on 2026-10-18. Exact-HEAD controller validation `PAXV7QJREBKMMKR4TDHAANNOGP` passed all four recorded commands.

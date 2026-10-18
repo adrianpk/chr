@@ -1,6 +1,6 @@
 # Slice 6: Scope-driven Quiz Catalog
 
-Status: reviewing
+Status: delivered
 Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
@@ -102,3 +102,5 @@ counts. The 390px capture has a scrollbar-reduced document width of 380px.
 ## Risks and Follow-ups
 
 None recorded.
+
+Integration verified: PR #403 merged into dev at `c9e0679951b63ed5257a4c40e3b9d3f3fcc69d40` on 2026-10-18. Controller validation `PAXV7QJREBKMMKR4TDHAANNOGP` passed its four exact-HEAD commands.

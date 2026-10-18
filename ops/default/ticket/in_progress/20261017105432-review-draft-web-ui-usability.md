@@ -90,7 +90,7 @@ Quiz and Resume Quiz forms below it requiring typed case slugs. The maintainer
 wants a readable quiz-card catalog and a conditional New Quiz action offering
 only pending project or existing-case scopes. Capture the observed problems
 and the self-contained expected behavior in
-[Make the quiz catalog readable and scope-driven](20261017192913-show-quiz-cards-and-pending-scope-action.md).
+[Make the quiz catalog readable and scope-driven](../solved/20261017192913-show-quiz-cards-and-pending-scope-action.md).
 The catalog ticket includes a self-contained visual target: bounded centered
 content, title and conditional action on one row, consistent landscape cards,
 aligned inset excerpts and a compact pending-scope menu. Its acceptance requires

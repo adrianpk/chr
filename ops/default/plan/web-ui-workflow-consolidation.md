@@ -21,7 +21,7 @@ slices through Looper, including canonical slice PRs and controller-owned
 Rebase + Fast-forward merges into dev. The existing Telegram run is separate.
 Use one development worker and one canonical open slice PR for this set.
 
-Active slice: Slice 6, Scope-driven quiz catalog; PR #403 reviewing.
+Active slice: Slice 7, Individual spec authoring; T7.1.
 The controller checkpoint and tickets own subsequent progress.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.
@@ -179,7 +179,7 @@ Validation: Cover duplicate/stale Answer and Skip, Done with queued questions, c
 
 ### Slice 6: Scope-driven quiz catalog
 
-Source: [TKT-20261017192913](../ticket/in_progress/20261017192913-show-quiz-cards-and-pending-scope-action.md).
+Source: [TKT-20261017192913](../ticket/solved/20261017192913-show-quiz-cards-and-pending-scope-action.md).
 
 Dependency: Slice 5 integrated into dev; use all earlier shared owners.
 
