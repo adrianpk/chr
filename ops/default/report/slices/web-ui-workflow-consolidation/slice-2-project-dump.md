@@ -13,8 +13,8 @@ Deliver one evolving project-wide dump through the existing authoring and
 metadata owners, following the [plan](../../../plan/web-ui-workflow-consolidation.md)
 and [ordered task map](../../../tracker/web-ui-workflow-consolidation.md).
 T2.1, the T2.2 core owners and application/CLI/TUI/Web edit integration are
-implemented, along with bound authoring/Telegram dump continuations. Assisted
-synthesis and T2.3 remain.
+implemented, along with bound authoring/Telegram continuations and assisted
+synthesis. T2.2 is complete; T2.3 remains.
 
 ## Delivered Behavior
 
@@ -60,8 +60,7 @@ observed document revision inside exclusion. Save replaces editable content whil
 retaining frontmatter, unknown metadata, capture provenance and the exact prior
 body/metadata history. Alias edits target the canonical document while retaining
 the superseded original. The central application service now routes capture, Save and Append through
-these operations. Bound authoring and Telegram continuations also use the destination. Assisted
-synthesis remains to be routed.
+these operations. Bound authoring, Telegram continuations and assisted synthesis also use the destination.
 
 Project metadata saves share the authoring owner and compare source hashes after
 exclusion. Name/context edits retain the canonical reference and unknown
@@ -108,14 +107,25 @@ when all raw-only components are its exact observed inputs. Unrelated orphan
 captures still require explicit reconciliation. Original raw bytes remain intact.
 Refinement without a session output fails before provider dispatch.
 
+Assisted dump synthesis now joins guarded session/prepared-summary images,
+canonical content, raw capture, history, project reference, provenance and a typed
+receipt in one v2 journal. Semantic operation identity ignores preparation/update
+timestamps and accumulated outputs/provenance while binding the root and synthesis
+arguments. The operation has a 90-second deadline and the existing capture bounds.
+Committed body/metadata images are retained in immutable history, allowing bounded
+receipts to return the original content after later edits. CLI finalization resumes
+prepared curation or its confirmed receipt before attempting initial curation.
+Changed arguments, stale session/source images and reserved identities conflict.
+
 ## Implementation Notes
 
 T2.1 commit: `a8bdec69d5595740a6fee1b723b1d2f1357a6ce4`.
 
 T2.2 core reconciliation commit: `f4b080aeb4a2933b87535d56ca64e9fcb74f39ef`.
 T2.2 core mutation commit: `b18c795c115463d37bd676e9968b9ae1e25e47f1`.
-T2.2 application routing commit: `14735ffbd247419294adcc9ef93c164fe63471bf`. The task remains open.
+T2.2 application routing commit: `14735ffbd247419294adcc9ef93c164fe63471bf`.
 T2.2 bound authoring integration commit: `ac1e17b9257ac2ee53e821b7c87876fdf5d1c4c6`.
+T2.2 assisted synthesis integration commit: `df5013c7629bd54d0ac2ecf49c55363a1b9c99ed`. T2.2 is complete.
 
 The prior dump service serialized create/append/save but allocated separate
 general pairs and performed direct file writes. Those application writers are
@@ -178,7 +188,7 @@ arguments, stale or cross-project document bindings, unresolved general ownershi
 unknown cases, raw edits and provider scope/type/component-link changes. It can
 be nested under an existing authoring claim; bound continuations still need to
 include the prepared changes in their own session/receipt journal. This integration
-is implemented for bound continuations; assisted synthesis remains pending.
+is implemented for bound continuations and assisted synthesis.
 
 ## Files of Interest
 
@@ -220,16 +230,21 @@ Bound authoring development checks passed before the integration commit:
 - `scripts/check-go-func-signatures.sh` — passed.
 - `git diff --check` — passed.
 
+Assisted synthesis development checks passed before its integration commit:
+
+- `go test -race ./internal/core ./internal/app -run '^(TestAssistedDump.*|TestSynthesizeAssistedArtifact.*|TestAuthorAssisted.*|TestAuthoringDump.*)$' -count=1` — passed. Covers first/ordinary/concurrent captures, legacy adoption, every changed publication image, guarded no-op sources, divergence, copied-root receipts, semantic retries after later edits and actual CLI finalization retry/changed arguments.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app` — passed with zero issues on the final task tree.
+- `scripts/check-go-func-signatures.sh` — passed.
+- `git diff --check` — passed.
+
 Final clean-HEAD slice validation through Looper, including `make verify`, has not
 run. These task checks do not establish complete Slice 2 or nightly evidence.
 
 ## Risks and Follow-ups
 
-T2.2 remains open for assisted authoring synthesis. Its artifact, session,
-provenance and receipt changes must join the shared dump transaction. Application,
-CLI, TUI, Web edits and bound authoring/Telegram continuations now use the canonical
-owner. T2.3 remains: one Web New capture form with Project-wide and existing named
-cases, including a retained per-form capture identity. Final controller validation
-and the canonical slice PR remain pending. No reconciliation has been applied to
-live data. The source ticket stays in progress until all Slice 2 contracts are
-delivered.
+T2.2 is complete across application, CLI, TUI, Web edits, bound authoring/Telegram
+continuations and assisted synthesis. T2.3 remains: one Web New capture form with
+Project-wide and existing named cases, including a retained per-form capture
+identity. Final controller validation and the canonical slice PR remain pending.
+No reconciliation has been applied to live data. The source ticket stays in
+progress until all Slice 2 contracts are delivered.

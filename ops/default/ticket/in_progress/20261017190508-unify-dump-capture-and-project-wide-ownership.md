@@ -154,7 +154,12 @@ checks cover all changed publication replacements, retries, stale/provider edits
 legacy adoption and question-only raw input; affected-package lint and signature
 checks passed.
 
-T2.2 still requires assisted synthesis routing. T2.3's single Web New capture form
+Assisted synthesis is implemented in `df5013c7629bd54d0ac2ecf49c55363a1b9c99ed`.
+Its guarded source/session, canonical content, provenance, history, pointer and
+receipt share one recoverable publication. Semantic retries preserve original
+content after later writes; CLI finalization resumes preparation or its receipt.
+Focused race tests, affected-package lint and signature checks passed. T2.2 is
+complete. T2.3's single Web New capture form
 with existing case choices and retained capture identity remains. Final controller
 validation has not run and the slice has no ready PR.
 
