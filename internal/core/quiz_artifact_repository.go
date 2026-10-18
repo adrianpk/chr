@@ -106,11 +106,7 @@ func (r *fileQuizArtifactRepository) Paths(scope QuizScope) (QuizArtifactPaths, 
 }
 
 // AppendRawCapture executes the corresponding package operation.
-func (r *fileQuizArtifactRepository) appendRawCapture(
-	ctx context.Context,
-	state QuizRuntimeState,
-	entry QuizEntry,
-) (QuizArtifactPaths, error) {
+func (r *fileQuizArtifactRepository) appendRawCapture(ctx context.Context, state QuizRuntimeState, entry QuizEntry) (QuizArtifactPaths, error) {
 	err := ctx.Err()
 	if err != nil {
 		return QuizArtifactPaths{}, err
