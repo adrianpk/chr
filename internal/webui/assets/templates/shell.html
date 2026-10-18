@@ -202,8 +202,7 @@
 
 {{define "dump_page_actions.html"}}
 <div class="dump-catalog__actions">
-  <button class="button" type="button" data-modal-template="dump-create-modal">New Dump</button>
-  <button class="button" type="button" data-modal-template="dump-create-case-modal">For Use Case</button>
+  <button class="button" type="button" data-modal-template="dump-create-modal">New</button>
 </div>
 {{end}}
 
@@ -370,53 +369,34 @@
 <template id="dump-create-modal">
   <div class="modal-backdrop" data-modal-backdrop>
     <section class="dump-create-panel" role="dialog" aria-modal="true" aria-labelledby="dump-create-title">
-      <button class="icon-button dump-create-panel__close" type="button" data-modal-close aria-label="Close dump creator">x</button>
+      <button class="icon-button dump-create-panel__close" type="button" data-modal-close aria-label="Close capture form">x</button>
       <header class="dump-create-panel__header">
-        <h2 id="dump-create-title">New Dump</h2>
+        <h2 id="dump-create-title">New context</h2>
+        <p>Add context to the project-wide dump or capture it for an existing case.</p>
       </header>
-      <form class="action-form" method="post" action="/actions" hx-post="/actions" hx-target="#modal-root" hx-swap="innerHTML" onsubmit="return confirm('Create this dump?')">
+      <form class="action-form" data-dump-capture method="post" action="/actions" hx-post="/actions" hx-target="#dump-create-result" hx-swap="innerHTML" onsubmit="return confirm('Add this context?')">
         <input type="hidden" name="action" value="dump.create">
         <input type="hidden" name="family" value="dumps">
         <input type="hidden" name="confirm" value="true">
         <input type="hidden" name="surface" value="modal">
+        <input type="hidden" name="request_id" value="">
+        <label>
+          <span>Scope</span>
+          <select name="case_slug">
+            <option value="">Project-wide</option>
+            {{range .Catalog.Cases}}<option value="{{.Slug}}">{{.Name}}</option>{{end}}
+          </select>
+        </label>
         <label>
           <span>Title</span>
-          <input name="title" required>
+          <input name="title" maxlength="512" required>
         </label>
         <label>
           <span>Content</span>
-          <textarea name="content" rows="6" required></textarea>
+          <textarea name="content" rows="6" maxlength="65536" required></textarea>
         </label>
-        <button class="button button--primary" type="submit">Create</button>
-      </form>
-    </section>
-  </div>
-</template>
-<template id="dump-create-case-modal">
-  <div class="modal-backdrop" data-modal-backdrop>
-    <section class="dump-create-panel" role="dialog" aria-modal="true" aria-labelledby="dump-create-case-title">
-      <button class="icon-button dump-create-panel__close" type="button" data-modal-close aria-label="Close dump creator">x</button>
-      <header class="dump-create-panel__header">
-        <h2 id="dump-create-case-title">For Use Case</h2>
-      </header>
-      <form class="action-form" method="post" action="/actions" hx-post="/actions" hx-target="#modal-root" hx-swap="innerHTML" onsubmit="return confirm('Create this dump?')">
-        <input type="hidden" name="action" value="dump.create">
-        <input type="hidden" name="family" value="dumps">
-        <input type="hidden" name="confirm" value="true">
-        <input type="hidden" name="surface" value="modal">
-        <label>
-          <span>Title</span>
-          <input name="title" required>
-        </label>
-        <label>
-          <span>Case slug</span>
-          <input name="case_slug" required>
-        </label>
-        <label>
-          <span>Content</span>
-          <textarea name="content" rows="6" required></textarea>
-        </label>
-        <button class="button button--primary" type="submit">Create</button>
+        <div id="dump-create-result" role="status" aria-live="polite"></div>
+        <button class="button button--primary" type="submit">Add context</button>
       </form>
     </section>
   </div>

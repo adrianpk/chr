@@ -390,6 +390,23 @@ intent, edge cases, and notes that do not belong in a one-line summary.
 
 Refresh is blocked while use-case edits are active or unsaved.
 
+## Capture Project Context in the Web UI
+
+Open **Dumps**, select **New**, and choose **Project-wide** or an existing case
+name. Enter a title and content, then select **Add context**. The first
+project-wide capture creates the shared dump; later captures extend that same
+document, including captures made through CLI, TUI or authoring conversations.
+Case captures remain separate documents associated with the selected case.
+
+A failed request retains the form. Keep the same fields when retrying an uncertain
+request; changing them submits a new capture. If the capture is committed but its
+catalog refresh is pending, the form shows that result and an unchanged retry
+refreshes the view without capturing the material again.
+
+Raw captures and earlier body versions remain preserved. Conflicting older
+general dumps require explicit reconciliation; opening a catalog never merges or
+rewrites them. See the [authoring reference](../../reference/authoring-sessions.md#project-dump-reconciliation).
+
 ## Capture Dumps in the TUI
 
 Open the Dumps view with `F3`.
@@ -397,7 +414,9 @@ Open the Dumps view with `F3`.
 Dumps are free-form Markdown context. They can be project-wide or tied to a use
 case. A dump is a document type for material the user already knows or
 remembers; quizzes complement dumps by prompting for missing or latent context.
-Creating a dump writes a curated primary document plus a raw capture sibling.
+The first project-wide capture creates a curated document and raw capture. Later
+project-wide captures extend that document and retain their raw material. A
+use-case capture creates an independent scoped document.
 The TUI lists curated dumps by use case, shows the selected curated content in
 the detail pane, and shows the raw sibling path when one exists.
 

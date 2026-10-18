@@ -453,6 +453,15 @@ observed source guard. Web mutations compare revisions in the owning operation
 after receipt lookup, without a separate stale-source preflight. Confirmed Web
 results expose a committed operation and any pending catalog refresh.
 
+The Web Dumps catalog has one New capture form with Project-wide and bounded
+existing case choices. Each live form receives a new capture identity. Its first
+submission freezes title, content and scope; unchanged retries retain the identity,
+and changed arguments receive a new one. HTTP capture requires that identity.
+Validation and transport failures render inside the same form. Confirmed writes
+close it and refresh the catalog; pending projections retain the committed result
+and form so an unchanged retry can repair the view. Opening, polling and selecting
+scope do not allocate artifacts or invoke generation.
+
 ## Bound Authoring Dump Outputs
 
 Bound authoring continuations resolve general dump outputs through the same

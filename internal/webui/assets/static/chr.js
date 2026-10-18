@@ -72,8 +72,34 @@
     if (!root || !template) return;
     root.innerHTML = "";
     root.appendChild(template.content.cloneNode(true));
+    root.querySelectorAll("[data-dump-capture]").forEach(function (form) {
+      form.elements.request_id.value = newDumpCaptureID();
+    });
     if (window.htmx) window.htmx.process(root);
     syncModal();
+  }
+
+  function newDumpCaptureID() {
+    const bytes = new Uint8Array(16);
+    window.crypto.getRandomValues(bytes);
+    return "web-dump-" + Array.from(bytes, function (value) { return value.toString(16).padStart(2, "0"); }).join("");
+  }
+
+  function bindDumpCapture(form) {
+    const fingerprint = JSON.stringify([form.elements.title.value, form.elements.content.value, form.elements.case_slug.value]);
+    if (form.dataset.captureArguments && form.dataset.captureArguments !== fingerprint) {
+      form.elements.request_id.value = newDumpCaptureID();
+    }
+    form.dataset.captureArguments = fingerprint;
+  }
+
+  function dumpCaptureResponse(event) {
+    const parameters = event.detail.requestConfig && event.detail.requestConfig.parameters;
+    if (!parameters || parameters.action !== "dump.create" || event.detail.target.id !== "modal-root") return;
+    if (document.querySelector("#modal-root [role='dialog']")) return;
+    closeModal();
+    const workspace = document.querySelector("#workspace");
+    if (workspace && window.htmx) window.htmx.ajax("GET", workspace.getAttribute("hx-get"), {source: workspace, target: workspace, swap: "innerHTML"});
   }
 
   function refreshBoard() {
@@ -149,6 +175,10 @@
       if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     });
+    document.addEventListener("submit", function (event) {
+      const form = event.target.closest("[data-dump-capture]");
+      if (form) bindDumpCapture(form);
+    }, true);
     setupBoardEvents();
   }
 
@@ -205,13 +235,14 @@
       }
       syncModal();
       ticketResponse();
+      dumpCaptureResponse(event);
     });
     ["htmx:responseError", "htmx:sendError", "htmx:timeout"].forEach(function (name) {
       document.addEventListener(name, function (event) {
-        const form = event.detail.elt.closest(".ticket-edit-form, .ticket-comments__form");
+        const form = event.detail.elt.closest(".ticket-edit-form, .ticket-comments__form, [data-dump-capture]");
         if (!form) return;
         const target = document.querySelector(form.getAttribute("hx-target"));
-        if (target) target.textContent = "The request failed. Your input is retained. Retry or reload the ticket.";
+        if (target) target.textContent = form.matches("[data-dump-capture]") ? "The request failed. Your context is retained. Retry this capture." : "The request failed. Your input is retained. Retry or reload the ticket.";
       });
     });
   }

@@ -60,7 +60,18 @@ func dumpCatalog(operations service) (webui.ArtifactCatalogView, error) {
 		return webui.ArtifactCatalogView{}, err
 	}
 
-	return webArtifactCatalog(webArtifactFamilyDumps, webDumpCards(dumps)), nil
+	cases, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, core.WorkflowRecordLimit)
+	if err != nil {
+		return webui.ArtifactCatalogView{}, err
+	}
+
+	view := webArtifactCatalog(webArtifactFamilyDumps, webDumpCards(dumps))
+	for _, item := range cases {
+		view.Cases = append(view.Cases, webui.TicketCaseView{Slug: item.Slug, Name: item.Name})
+	}
+	view.Revision = webStableRevision(view)
+
+	return view, nil
 }
 
 func quizCatalog(operations service) (webui.ArtifactCatalogView, error) {

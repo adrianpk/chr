@@ -312,6 +312,7 @@ type ArtifactDetailRequest struct {
 
 // ArtifactCatalogView is the Web UI projection for one artifact family.
 type ArtifactCatalogView struct {
+	Cases        []TicketCaseView
 	Family       string
 	Title        string
 	EmptyMessage string
@@ -380,17 +381,18 @@ const (
 
 // WriteActionResponse is the stable write result envelope returned by Web UI actions.
 type WriteActionResponse struct {
-	TicketRevision string
-	Workflow       *WorkflowRunView
-	Status         string
-	Summary        string
-	ChangedFiles   []string
-	Validation     []string
-	BlockedReason  string
-	RedirectURL    string
-	ReloadURL      string
-	DiscardURL     string
-	Operation      OperationStateView
+	ProjectionStale bool
+	TicketRevision  string
+	Workflow        *WorkflowRunView
+	Status          string
+	Summary         string
+	ChangedFiles    []string
+	Validation      []string
+	BlockedReason   string
+	RedirectURL     string
+	ReloadURL       string
+	DiscardURL      string
+	Operation       OperationStateView
 }
 
 // OperationStateView summarizes a Web UI-triggered operation result.

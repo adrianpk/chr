@@ -694,19 +694,24 @@ func TestWebServeWriteActionCreatesDump(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	writeWebServeArtifactFixture(t, projectDir)
 
-	provider := newWebServeBoardTestProvider(
+	base := newWebServeBoardTestProvider(
 		projectDir,
 		newWebServeBoardTestEnv(t, t.TempDir()),
 		newWebServeBoardProjectContext(t, projectDir),
 	)
+
+	operations := base.service(t.Context())
+	operations.dumpCurator = &countingDumpCurator{}
+	provider := webDumpCaptureProvider{webViewProvider: base, operations: operations}
 
 	result, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 		Action:  "dump.create",
 		Family:  "dumps",
 		Confirm: true,
 		Fields: map[string]string{
-			"title":   "New Web Dump",
-			"content": "Captured from web.",
+			"request_id": "web-capture-fixture",
+			"title":      "New Web Dump",
+			"content":    "Captured from web.",
 		},
 	})
 	if err != nil {

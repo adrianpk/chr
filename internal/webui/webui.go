@@ -353,7 +353,7 @@ func (h handler) writeAction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if result.Status == WriteStatusOK && result.RedirectURL != "" {
+	if result.Status == WriteStatusOK && result.RedirectURL != "" && !result.ProjectionStale {
 		h.redirectAfterWrite(w, r, result.RedirectURL)
 
 		return
@@ -390,7 +390,7 @@ func (h handler) renderWriteResult(w http.ResponseWriter, r *http.Request, resul
 	}
 	if htmx.IsRequest(r) {
 		template := "write_result.html"
-		if r.PostFormValue("surface") == "modal" || r.URL.Path == "/board/ticket/comment" {
+		if r.PostFormValue("surface") == "modal" && r.PostFormValue("action") != "dump.create" || r.URL.Path == "/board/ticket/comment" {
 			template = "write_result_modal.html"
 		}
 
@@ -455,7 +455,7 @@ func writeActionReservedField(key string) bool {
 }
 
 func shouldCloseModalAfterWrite(r *http.Request, request WriteActionRequest, result WriteActionResponse) bool {
-	if !htmx.IsRequest(r) || result.Status != WriteStatusOK || request.Surface != "modal" {
+	if !htmx.IsRequest(r) || result.Status != WriteStatusOK || request.Surface != "modal" || result.ProjectionStale {
 		return false
 	}
 

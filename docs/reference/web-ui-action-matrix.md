@@ -32,7 +32,7 @@ Status values:
 | Domain | Web action | CLI command | TUI action | Status | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Case metadata | `case.update` | `chr metadata case set` | Cases save | `matched` | Uses stale revision checks and writes project-local case metadata. |
-| Dump create | `dump.create` | `chr dump new` | Dumps create | `matched` | Creates curated dump artifacts through the dump service. |
+| Dump create | `dump.create` | `chr dump new` | Dumps create | `matched` | One New form selects Project-wide or an existing case. Retained capture identities make retries safe; general captures extend the shared dump while case captures remain independent. |
 | Dump save | `dump.save` | `chr dump save` | Dumps editor save | `matched` | Uses revision checks before replacing content. |
 | Dump append | `dump.append` | `chr dump append` | Dump append action | `matched` | Appends to the selected dump through the dump service. |
 | Spec generate | `spec.generate` | `chr spec generate` | Specs generate | `matched` | Uses the same generation service and artifact contract. |

@@ -290,6 +290,10 @@ func (p webViewProvider) writeCaseUpdate(operations service, request webui.Write
 }
 
 func (p webViewProvider) writeDumpCreate(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
+	if request.Fields["request_id"] == "" {
+		return webui.WriteActionResponse{Status: webui.WriteStatusValidation, Summary: "Reopen New before submitting this capture."}, nil
+	}
+
 	result, err := operations.CreateDump(DumpCreateRequest{
 		OperationID: dumpRequestID(request.Fields["request_id"]), ExpectedRevision: request.Revision,
 		Title:   request.Fields["title"],
@@ -301,10 +305,11 @@ func (p webViewProvider) writeDumpCreate(operations service, request webui.Write
 	}
 
 	return webui.WriteActionResponse{
-		Status:      webui.WriteStatusOK,
-		Summary:     result.Message,
-		Operation:   webDumpOperation("dump.capture", result),
-		RedirectURL: "/dumps",
+		Status:          webui.WriteStatusOK,
+		Summary:         result.Message,
+		Operation:       webDumpOperation("dump.capture", result),
+		ProjectionStale: result.ProjectionStale,
+		RedirectURL:     "/dumps",
 	}, nil
 }
 
@@ -319,11 +324,12 @@ func (p webViewProvider) writeDumpSave(operations service, request webui.WriteAc
 	}
 
 	return webui.WriteActionResponse{
-		Status:       webui.WriteStatusOK,
-		Summary:      result.Message,
-		ChangedFiles: []string{result.RelativePath},
-		Operation:    webDumpOperation("dump.save", result),
-		RedirectURL:  "/dumps/detail?id=" + url.QueryEscape(result.RelativePath),
+		Status:          webui.WriteStatusOK,
+		Summary:         result.Message,
+		ChangedFiles:    []string{result.RelativePath},
+		Operation:       webDumpOperation("dump.save", result),
+		ProjectionStale: result.ProjectionStale,
+		RedirectURL:     "/dumps/detail?id=" + url.QueryEscape(result.RelativePath),
 	}, nil
 }
 
@@ -338,11 +344,12 @@ func (p webViewProvider) writeDumpAppend(operations service, request webui.Write
 	}
 
 	return webui.WriteActionResponse{
-		Status:       webui.WriteStatusOK,
-		Summary:      result.Message,
-		ChangedFiles: []string{result.RelativePath},
-		Operation:    webDumpOperation("dump.append", result),
-		RedirectURL:  "/dumps/detail?id=" + url.QueryEscape(result.RelativePath),
+		Status:          webui.WriteStatusOK,
+		Summary:         result.Message,
+		ChangedFiles:    []string{result.RelativePath},
+		Operation:       webDumpOperation("dump.append", result),
+		ProjectionStale: result.ProjectionStale,
+		RedirectURL:     "/dumps/detail?id=" + url.QueryEscape(result.RelativePath),
 	}, nil
 }
 

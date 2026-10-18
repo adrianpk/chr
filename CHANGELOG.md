@@ -12,6 +12,11 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
+- Project-wide context now grows in one shared dump across Web, CLI, TUI and
+  authoring conversations. Web New offers Project-wide or existing case names;
+  case captures remain independent. Retries preserve confirmed captures, edits
+  retain raw material and prior versions, and explicit reconciliation preserves
+  older documents and their references.
 - The Board now provides one New/Edit ticket form with full descriptions,
   classification, ownership and delivery references. Maximize and restore retain
   unsaved input, and comments post independently. Status selection and dragging
