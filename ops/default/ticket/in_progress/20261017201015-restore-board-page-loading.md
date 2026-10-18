@@ -9,7 +9,7 @@ scope: ui
 tags: board, kanban, tickets, modal
 source: chat
 reported_at: 2026-10-17T20:10:15Z
-commits: [02c24fcfdc174a41755d89259810300e369d901d]
+commits: [02c24fcfdc174a41755d89259810300e369d901d, f6907f9fa8b6644225a07ce2245c9aeb28299f97]
 branch: feat/slice-1-web-board
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
@@ -246,10 +246,20 @@ deduplicates native projections, retains attention records and pages beyond
 128 tickets with complete column totals. Native inspection preserves canonical
 bytes and rejects pending transitions without recovery.
 
+T1.2 is implemented in `f6907f9fa8b6644225a07ce2245c9aeb28299f97`.
+Shared operations now read and create canonical ticket documents and persist
+full descriptions, classification, descriptive ownership, delivery references
+and separate comments. Source comparison occurs at the existing persistence
+owner; native execution, membership and receipt guards remain authoritative.
+Repository classification aliases are explicit, and unsupported status-directory
+transitions have a read-only reason. Regression fixes preserve nested metadata,
+earlier comments in a final Comments section, native status/case identity during
+metadata edits, and key allocation across namespaces and native envelopes.
+
 The [Slice 1 report](../../report/slices/web-ui-workflow-consolidation/slice-1-web-board.md)
 records the exact successful focused race, changed-code lint, signature and
-whitespace commands. Final controller validation has not run. T1.2 shared
-ticket writes/detail and T1.3 modal/interactions/browser evidence remain;
+whitespace commands. Final controller validation has not run. T1.3 shared
+modal, interactions, read-only presentation and browser evidence remain;
 the ticket is still in progress and no slice PR is ready.
 
 ## Consolidated Design
