@@ -9,7 +9,7 @@ scope: domain
 tags: dumps, project-context, authoring
 source: chat
 reported_at: 2026-10-17T19:05:08Z
-commits: [a8bdec69d5595740a6fee1b723b1d2f1357a6ce4, f4b080aeb4a2933b87535d56ca64e9fcb74f39ef, b18c795c115463d37bd676e9968b9ae1e25e47f1]
+commits: [a8bdec69d5595740a6fee1b723b1d2f1357a6ce4, f4b080aeb4a2933b87535d56ca64e9fcb74f39ef, b18c795c115463d37bd676e9968b9ae1e25e47f1, 14735ffbd247419294adcc9ef93c164fe63471bf]
 branch: feat/slice-2-project-dump
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
@@ -135,10 +135,19 @@ prior body/metadata history survive edits and recovery. Focused race tests cover
 the replacement interruption points, retained preparation, stale/alias/root
 bindings, provider ownership validation and affected existing workflows.
 
-T2.2 still requires application, CLI/TUI/Web, assisted authoring and continuation
-routing, shared reconciliation operations and catalog integration, including
-committed-content reporting when index refresh fails. T2.3's single Web New action
-also remains. Final controller validation has not run and the slice has no ready PR.
+Application integration is implemented in `14735ffbd247419294adcc9ef93c164fe63471bf`.
+The service routes capture/Save/Append through retained core writes, exposes
+reconciliation, and reads canonical catalogs/aliases across namespaces. CLI edits
+retain operation/revision fields, TUI retains unchanged Save bindings and Web
+writes replay receipts before checking current revisions. Confirmed content is
+reported with projection-stale evidence when a later index/catalog refresh fails.
+The old direct file writers are removed. Focused race checks, affected-package
+lint, signature and whitespace checks passed; the Slice 2 report records them.
+
+T2.2 still requires assisted synthesis and bound authoring/Telegram continuation
+routing into the same destination and recovery journal. T2.3's single Web New
+capture form with existing case choices and retained capture identity remains.
+Final controller validation has not run and the slice has no ready PR.
 
 ## Consolidated Design
 
