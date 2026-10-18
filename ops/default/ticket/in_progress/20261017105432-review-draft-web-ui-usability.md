@@ -106,7 +106,7 @@ the top right. Answered question/response cards accumulate below, newest first.
 Done closes the quiz even with questions remaining. Deep permits adaptive
 nested follow-ups; Fast generates a flat set in one LLM generation request.
 Capture the self-contained conceptual layout and shared-operation behavior in
-[Provide a focused quiz answering screen with modes and answer history](20261017193927-provide-focused-quiz-answering-screen.md).
+[Provide a focused quiz answering screen with modes and answer history](../solved/20261017193927-provide-focused-quiz-answering-screen.md).
 No palette match or application implementation is authorized by this capture.
 
 ### Spec Card Presentation

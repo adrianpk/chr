@@ -1,7 +1,7 @@
 ---
 id: TKT-20261017193927
 title: "Provide a focused quiz answering screen with modes and answer history"
-status: in_progress
+status: solved
 kind: task
 severity: medium
 priority: normal
@@ -12,6 +12,9 @@ reported_at: 2026-10-17T19:39:27Z
 commits: [c00bbcce643fbc1958bc14184e38b73e63f14bd7, 0257336d0c738ad9211047f1e8afde951b1745fa, 793621d7828bb45217c8c9517a8bcb93a3db06a2]
 branch: feat/slice-5-quiz-answering
 pr: "#402"
+resolution: fixed
+reviewed_at: 2026-10-18T17:54:53Z
+closed_at: 2026-10-18T17:54:53Z
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
@@ -20,7 +23,7 @@ started_at: 2026-10-18T08:34:50Z
 
 ## Context and Authority
 
-Part of [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
+Part of [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md).
 The maintainer supplied a visual example and explicitly described the desired
 conceptual layout and behavior for CHR's quiz answering screen. The target
 below is self-contained. It does not require another application as a design
@@ -37,7 +40,7 @@ The [Slice 5 report](../../report/slices/web-ui-workflow-consolidation/slice-5-q
 records retained actions, mode queues, focused interaction and validation.
 
 Catalog entry, card membership and pending scope selection are owned by
-[the quiz catalog ticket](20261017192913-show-quiz-cards-and-pending-scope-action.md).
+[the quiz catalog ticket](../in_progress/20261017192913-show-quiz-cards-and-pending-scope-action.md).
 
 ## Conceptual Layout
 
@@ -176,3 +179,7 @@ report carry progress; the delivery tracker defines order only.
 
 Behavior, shared-domain changes and implementation design are consolidated in
 [Web UI and Workflow Consolidation](../../spec/stable/web-ui-workflow-consolidation.md).
+
+## Integration
+
+PR #402 merged into dev at `303db92f10651f5eb36d730e25a742ff78d06cd6` on 2026-10-18. Controller validation `PFMCWI6B2IAURCUFL76I2UB6DZ` passed `make verify`, focused quiz race checks, the quiz/editor/Board browser selection and `git diff --check` at that exact HEAD.

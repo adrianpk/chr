@@ -10,6 +10,7 @@ tags: quizzes, catalog, interaction
 source: chat
 reported_at: 2026-10-17T19:29:13Z
 commits: []
+branch: feat/slice-6-quiz-catalog
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
@@ -200,3 +201,7 @@ report carry progress; the delivery tracker defines order only.
 
 Behavior, shared-domain changes and implementation design are consolidated in
 [Web UI and Workflow Consolidation](../../spec/stable/web-ui-workflow-consolidation.md).
+
+## Slice 6 Execution
+
+T6.1 is active after verified Slice 5 integration through PR #402. T6.2 follows the shared catalog membership and continuation read model. The [Slice 6 report](../../report/slices/web-ui-workflow-consolidation/slice-6-quiz-catalog.md) owns implementation and validation evidence.

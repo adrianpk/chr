@@ -1,6 +1,6 @@
 # Slice 5: Focused Quiz Answering
 
-Status: reviewing
+Status: delivered
 Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
@@ -123,3 +123,5 @@ within the 390 px viewport.
 ## Risks and Follow-ups
 
 None recorded.
+
+Integration verified: PR #402 merged into dev at `303db92f10651f5eb36d730e25a742ff78d06cd6` on 2026-10-18. Exact-HEAD controller validation `PFMCWI6B2IAURCUFL76I2UB6DZ` passed all four recorded commands.
