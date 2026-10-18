@@ -40,6 +40,10 @@ func (r *fileAuthoringSessionRepository) readProjectDumpArtifact(reference strin
 }
 
 func (r *fileAuthoringSessionRepository) readAuthoringDocument(relative string) ([]byte, error) {
+	return r.readBoundedAuthoringDocument(relative, WorkflowFileLimit)
+}
+
+func (r *fileAuthoringSessionRepository) readBoundedAuthoringDocument(relative string, limit int) ([]byte, error) {
 	path, err := r.authoringPath(filepath.FromSlash(relative))
 	if err != nil {
 		return nil, err
@@ -54,7 +58,7 @@ func (r *fileAuthoringSessionRepository) readAuthoringDocument(relative string) 
 		return nil, fmt.Errorf("authoring document is not a regular file")
 	}
 
-	return readWorkflowFile(path)
+	return readBoundedWorkflowFile(path, limit)
 }
 
 func decodeProjectDumpMetadata(reference string, data []byte) (map[string]string, error) {
@@ -87,7 +91,7 @@ func projectDumpBodyFields(body []byte) (map[string]string, error) {
 }
 
 func projectDumpArtifact(reference string, body, encoded []byte, fields, metadata map[string]string) (ProjectDumpArtifact, error) {
-	scope, err := projectDumpScope(fields["case"], fields["use_case"], metadata["case"], metadata["use_case"])
+	scope, err := projectDumpScope(fields["case"], fields["use_case"], fields["case_slug"], metadata["case"], metadata["use_case"], metadata["case_slug"])
 	if err != nil {
 		return ProjectDumpArtifact{}, err
 	}

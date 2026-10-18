@@ -372,6 +372,58 @@ entries to 64, and retained request bindings to 4,096 per project. File and
 journal v1 reads are bounded to 1 MiB. Capacity and provider failures preserve the
 previous canonical session and artifacts.
 
+## Dump Mutation API
+
+`ReadDumpDocument` resolves a retained dump reference and returns its artifact,
+full document content and a semantic `Revision`. The revision binds the project
+root, resolved reference and exact body/metadata hashes. Inspection follows the
+same read-only alias and pending-journal rules as project dump observation.
+
+`MutateDump` accepts `DumpMutationRequest` with `OperationID`, `Action`,
+`Namespace`, `Reference`, `ExpectedRevision`, `Title`, `Content` and `CaseSlug`:
+
+| Action | Destination and revision |
+| --- | --- |
+| `capture`, general | Leave namespace, reference and case empty. Resolve the existing project destination or allocate the first pair in `default`. An optional expected revision binds the complete project dump observation. |
+| `capture`, named | Supply an existing case slug and its selected namespace. Allocate a distinct case capture; an optional expected revision binds that case's metadata source hash. |
+| `append` | Supply the document reference and revision from `ReadDumpDocument`; extend that observed document. |
+| `save` | Supply the document reference and revision from `ReadDumpDocument`; replace the editable body, retaining the original frontmatter. |
+
+Capture requires a title and at most 64 KiB of content. Titles are at most 512
+bytes, case/namespace identities 128 bytes and revisions 64 bytes. Append and
+Save require nonempty content of at most 1 MiB. The final document and each raw
+component remain bounded to 1 MiB, including retained frontmatter. Raw components
+cannot be edited as canonical dumps. Scoped edits validate the existing case.
+Old alias references target the resolved canonical document; their original
+superseded bodies remain unchanged.
+
+An optional `DumpCapturePreparer` receives the resolved body and raw references
+and returns the prepared documents. Their scope and raw/curated relationships
+must match the retained operation. Without a preparer, the owner retains the
+capture text directly. Later general captures append the prepared editable body
+to the same canonical document. Every capture retains its raw component and
+source hashes; every replacement retains the prior exact body and metadata in
+immutable artifact history. Body saves preserve unknown metadata and do not
+change frontmatter ownership or provenance.
+
+The existing authoring request directory retains a
+`chr-project-dump-request/v1` binding containing `Schema`, `Digest`, `Checksum`,
+`Request`, `Destination`, `RawReference`, optional `Prepared` documents and
+`Attempts`. Its encoded size is bounded to 8 MiB. The digest binds the project
+root and original arguments. The owner reserves arguments and destination
+before preparation, retains a successful preparation before publication and
+allows at most five preparation attempts across restarts. Each preparation has
+a 60-second timeout; the complete mutation, including owner acquisition, has
+a 90-second timeout. New bindings and receipts use the existing authoring
+capacity limits. Reusing an identity for changed arguments or a different
+resolved destination conflicts, including after preparation failure.
+
+Publication uses the same journal v2 and immutable result receipt as
+reconciliation. A first general capture publishes its body, raw component,
+metadata, project reference and receipt together. A retry recovers the journal
+or returns the existing receipt before inspecting later source changes or
+calling the preparer. A receipt never overwrites later independent edits.
+
 ## Project Dump Reconciliation
 
 Project metadata at `.chr/default/project.md` supports an optional
