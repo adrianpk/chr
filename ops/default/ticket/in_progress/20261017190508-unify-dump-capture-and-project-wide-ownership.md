@@ -9,7 +9,7 @@ scope: domain
 tags: dumps, project-context, authoring
 source: chat
 reported_at: 2026-10-17T19:05:08Z
-commits: [a8bdec69d5595740a6fee1b723b1d2f1357a6ce4, f4b080aeb4a2933b87535d56ca64e9fcb74f39ef]
+commits: [a8bdec69d5595740a6fee1b723b1d2f1357a6ce4, f4b080aeb4a2933b87535d56ca64e9fcb74f39ef, b18c795c115463d37bd676e9968b9ae1e25e47f1]
 branch: feat/slice-2-project-dump
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
@@ -127,10 +127,18 @@ publishes aliases, the project reference and a retry receipt through the existin
 versioned journal. Recovery and bounded alias/receipt behavior have focused race
 coverage. Live data has not been reconciled.
 
-T2.2 still requires first/general capture, Save and continuation routing, shared
-application operations and catalog integration, including committed-content
-reporting when index refresh fails. T2.3's single Web New action also remains.
-Final controller validation has not run and the slice has no ready PR.
+The T2.2 core dump mutation owner is implemented in `b18c795c115463d37bd676e9968b9ae1e25e47f1`.
+It journals first and later general captures, retains prepared input and retry
+bindings, validates independent named captures, and guards full-body Save/Append
+with exact document revisions. Unknown frontmatter/metadata, raw captures and
+prior body/metadata history survive edits and recovery. Focused race tests cover
+the replacement interruption points, retained preparation, stale/alias/root
+bindings, provider ownership validation and affected existing workflows.
+
+T2.2 still requires application, CLI/TUI/Web, assisted authoring and continuation
+routing, shared reconciliation operations and catalog integration, including
+committed-content reporting when index refresh fails. T2.3's single Web New action
+also remains. Final controller validation has not run and the slice has no ready PR.
 
 ## Consolidated Design
 

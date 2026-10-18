@@ -12,8 +12,8 @@ PR: pending
 Deliver one evolving project-wide dump through the existing authoring and
 metadata owners, following the [plan](../../../plan/web-ui-workflow-consolidation.md)
 and [ordered task map](../../../tracker/web-ui-workflow-consolidation.md).
-T2.1 and the T2.2 core reconciliation owner are implemented. Shared capture
-routing, application/adapter integration and T2.3 remain.
+T2.1 and the T2.2 core reconciliation and dump mutation owners are implemented.
+Application/adapter routing and T2.3 remain.
 
 ## Delivered Behavior
 
@@ -45,6 +45,22 @@ return the original receipt, including after later edits or receipt capacity;
 changed arguments or a reserved authoring identity conflict. Divergent source or
 history bytes are retained and block publication/recovery.
 
+The core dump mutation API resolves the first general capture in the default
+namespace or adopts the sole existing general identity. First publication includes
+body, raw component, metadata, project reference and receipt in one recoverable
+journal. Later general captures extend that identity under authoring exclusion.
+Named captures validate existing cases, retain the selected namespace and create
+independent documents. Legacy `case_slug` declarations remain scoped records.
+
+The owner reserves operation arguments and resolved references before preparation,
+retains a successful prepared capture before publication, and returns confirmed
+receipts before inspecting later edits. Full-body Save and Append compare an
+observed document revision inside exclusion. Save replaces editable content while
+retaining frontmatter, unknown metadata, capture provenance and the exact prior
+body/metadata history. Alias edits target the canonical document while retaining
+the superseded original. These core operations are not yet wired into application
+capture writers, continuations or Web actions.
+
 Project metadata saves share the authoring owner and compare source hashes after
 exclusion. Name/context edits retain the canonical reference and unknown
 frontmatter. Ordinary metadata saves cannot bind, rebind or clear the reference.
@@ -56,7 +72,8 @@ also binds the project root so byte-identical copies cannot reuse an observation
 
 T2.1 commit: `a8bdec69d5595740a6fee1b723b1d2f1357a6ce4`.
 
-T2.2 core reconciliation commit: `f4b080aeb4a2933b87535d56ca64e9fcb74f39ef`. The task remains open.
+T2.2 core reconciliation commit: `f4b080aeb4a2933b87535d56ca64e9fcb74f39ef`.
+T2.2 core mutation commit: `b18c795c115463d37bd676e9968b9ae1e25e47f1`. The task remains open.
 
 The prior dump service already serialized create/append/save through
 `WithAuthoringMutation`, but project metadata saved outside that owner. Existing
@@ -81,6 +98,16 @@ and raw/scoped destinations. Reconciliation times out after 30 seconds. New dump
 operations require fewer than 4096 existing receipts; confirmed retries replay
 first. The shared bounded directory reader treats an empty directory as capacity.
 
+Dump mutation requests share the existing request/receipt directories and v2
+journal. A retained typed request binds the root, caller input and resolved
+destination; successful preparation is cached before publication. The five-attempt preparation
+budget survives reopening; each preparation has a 60-second timeout and each
+mutation has a 90-second timeout.
+Request JSON is bounded to 8 MiB, capture input to 64 KiB and edited bodies to
+1 MiB; canonical images retain the existing 1 MiB limit. A supplied general capture
+revision binds the full project observation, a named capture revision binds its
+case metadata, and Save/Append require a root/document/body/metadata revision.
+
 ## Contracts Added or Changed
 
 `ProjectMetadata.ProjectDumpRef` and `ProjectMetadataService.SaveContext` extend the
@@ -100,28 +127,30 @@ Its receipt binds the project root and arguments to immutable committed body and
 metadata hashes. Pending authoring requests reserve their operation identities.
 These operations are not yet exposed by the central application service.
 
+`MutateDump`, `DumpMutationRequest`, `DumpCapturePreparer` and `ReadDumpDocument`
+provide the shared core capture/edit boundary. The mutation rejects changed
+arguments, stale or cross-project document bindings, unresolved general ownership,
+unknown cases, raw edits and provider scope/type/component-link changes. It can
+be nested under an existing authoring claim; bound continuations still need to
+include the prepared changes in their own session/receipt journal.
+
 ## Files of Interest
 
 - `internal/core/project_metadata.go` and `project_metadata_fields.go`: persisted reference, source checks, serialization and preserved frontmatter.
 - `internal/core/project_dump.go`: reference validation, observation and guarded adoption.
 - `internal/core/project_dump_read.go` and `project_dump_artifact.go`: bounded cross-namespace inventory and component classification.
 - `internal/core/project_dump_reconciliation.go`, `project_dump_composition.go`, `project_dump_receipt.go`, `project_dump_alias.go` and `project_dump_journal.go`: deterministic migration, immutable history/receipts and bounded journal/alias contracts.
+- `internal/core/dump_mutation*.go`: retained capture preparation, destination selection, source-bound edits and recoverable content/history publication.
 - `docs/reference/authoring-sessions.md`: project dump and recovery format reference.
 - `internal/app/service_project_dump.go` and `service_metadata.go`: shared application entrypoints and context propagation.
 - `internal/core/project_dump_test.go`, `project_dump_validation_test.go` and `internal/app/service_project_dump_test.go`: isolated persistence, ownership and service regressions.
 
 ## Validation
 
-T2.1 task development checks passed on the implementation tree before its commit:
+Latest core task development checks passed on the implementation tree before
+`b18c795c115463d37bd676e9968b9ae1e25e47f1`:
 
-- `go test -race ./internal/core ./internal/app -run '^(TestProjectDump.*|TestProjectMetadata.*|TestParseProjectMetadata.*|TestService(ProjectDump|SaveProjectMetadata)|TestAuthoringSessionRepository.*|TestTelegramAuthoringOwner.*|TestService.*Dump.*)$' -count=1` — passed. Covers adoption across namespaces, raw/history preservation, read-only and pending-journal behavior, stable revisions, stale and cross-project binding, concurrent metadata writes, unsafe/invalid sources, cancellation and affected authoring/dump regressions.
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app ./internal/webui/...` — passed with zero issues.
-- `scripts/check-go-func-signatures.sh` — passed.
-- `git diff --check` — passed.
-
-T2.2 core task development checks passed on its implementation tree before commit:
-
-- `go test -race ./internal/core ./internal/app -run '^(TestProjectDump.*|TestProjectMetadata.*|TestParseProjectMetadata.*|TestService(ProjectDump|SaveProjectMetadata)|TestAuthoringSessionRepository.*|TestTelegramAuthoring(Owner.*|RespondRecovery|CommitGuard|ModelReceipt|InitialRollback)|TestService.*Dump.*)$' -count=1` — passed. Covers deterministic timestamp ordering, original/unknown-field preservation, all twelve replacement interruption points, large multi-image recovery, divergent recovery, stale sources/targets/history, concurrent confirmations, alias cycles/depth/ownership, receipt conflicts/capacity and affected v1 authoring regressions.
+- `go test -race ./internal/core ./internal/app -run '^(TestDumpMutation.*|TestProjectDump.*|TestProjectMetadata.*|TestParseProjectMetadata.*|TestService(ProjectDump|SaveProjectMetadata)|TestAuthoringSessionRepository.*|TestTelegramAuthoring(Owner.*|RespondRecovery|CommitGuard|ModelReceipt|InitialRollback)|TestService.*Dump.*)$' -count=1` — passed. Covers first/repeated/concurrent core capture, namespace changes, existing adoption, independent named captures and stale case bindings; every first/capture/append/Save replacement interruption; retained preparation/cancellation/budget; stale/cross-project/alias edits; preserved originals and unknown fields; deterministic reconciliation, divergent recovery and bounded aliases/receipts; affected v1 authoring and existing application dump regressions.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app ./internal/webui/...` — passed with zero issues.
 - `scripts/check-go-func-signatures.sh` — passed.
 - `git diff --check` — passed.
@@ -131,12 +160,13 @@ run. These task checks do not establish complete Slice 2 or nightly evidence.
 
 ## Risks and Follow-ups
 
-T2.2 remains open for recoverable first-capture publication, general capture and
-Save request/receipt binding, all writer routing (including assisted authoring
-and Telegram continuations), shared application reconciliation operations and
-catalog/old-reference integration. The core observation hides aliases, but the
-existing application catalog and readers still require routing to those rules.
+T2.2 remains open for routing the central application capture/Save/Append and all
+other general writers through these core rules, including assisted authoring and
+Telegram continuations. Shared application reconciliation operations, catalog
+filtering/cross-namespace discovery and old-reference readers still need routing.
 Post-commit index refresh must return committed-content/projection-stale evidence.
+The existing application capture path still allocates separate general pairs;
+passing core tests does not establish that every adapter shares the singleton.
 T2.3 remains: one Web New capture form with Project-wide and existing named cases.
 No reconciliation has been applied to live project data. The source ticket stays
 in progress until all Slice 2 contracts are delivered.
