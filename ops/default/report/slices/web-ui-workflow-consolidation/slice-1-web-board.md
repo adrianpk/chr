@@ -85,6 +85,13 @@ Task development checks passed before their implementation commits:
 - `git diff --check` — passed.
 - `CHR_WEB_BROWSER=/usr/sbin/chromium CHR_WEB_BOARD_SCREENSHOTS=/home/adrian/Projects/worktrees/chr/20261018-1111-slice-1-web-board/ops/default/report/slices/web-ui-workflow-consolidation/files/slice-1 go test ./internal/app -run '^TestWebBoardBrowser$' -count=1` — passed; covers creation, selector and allowed/rejected/stale drags, dirty comments, stale comment/save retention, reload/discard, native read-only contracts, maximize/restore, focus and scroll preservation.
 
+The first controller attempt at `2a9a0216348b606c2369347679a68934da9bd951`
+failed `make verify` on ticket-parser complexity and whitespace. Field decoding
+was extracted into a helper without changing accepted metadata or guards.
+`go test ./internal/core -run '^(TestTicketParser.*|TestTicketDocument.*|TestTicketNative.*)$' -count=1`
+and `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m --new-from-rev=HEAD ./internal/core`
+then passed.
+
 The controller records final clean-HEAD evidence after the PR-reference follow-up
 commit, in this order: `make verify`, the focused race command above,
 `CHR_WEB_BROWSER=/usr/sbin/chromium go test ./internal/app -run '^TestWebBoardBrowser$' -count=1`, then `git diff --check`.

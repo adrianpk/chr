@@ -87,18 +87,11 @@ func parseTicketFrontmatter(content string) (ticketFrontmatter, error) {
 
 	lines := strings.Split(frontmatter, "\n")
 	for index := 0; index < len(lines); index++ {
-		line := lines[index]
-		if strings.HasPrefix(line, " ") || strings.HasPrefix(line, "\t") {
-			continue
-		}
-
-		key, value, ok := strings.Cut(line, ":")
+		key, value, ok := ticketFrontmatterField(lines[index])
 		if !ok {
 			continue
 		}
 
-		key = strings.TrimSpace(key)
-		value = strings.TrimSpace(value)
 		if key == "commits" && value == "" {
 			values, next := parseTicketScalarList(lines, index+1)
 			metadata[key], index = yamlStringList(values), next-1
@@ -118,6 +111,16 @@ func parseTicketFrontmatter(content string) (ticketFrontmatter, error) {
 	}
 
 	return ticketFrontmatter{Metadata: metadata, ReviewRefs: reviewRefs}, nil
+}
+
+func ticketFrontmatterField(line string) (string, string, bool) {
+	if strings.HasPrefix(line, " ") || strings.HasPrefix(line, "\t") {
+		return "", "", false
+	}
+
+	key, value, found := strings.Cut(line, ":")
+
+	return strings.TrimSpace(key), strings.TrimSpace(value), found
 }
 
 func parseTicketScalarList(lines []string, start int) ([]string, int) {
