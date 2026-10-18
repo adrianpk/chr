@@ -5,7 +5,9 @@ Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
 Branch: `feat/slice-8-plan-generation`
-PR: pending
+PR: `#405`
+
+[PR #405](https://forge.adrianpk.com/adrianpk/chr/pulls/405) targets dev.
 
 ## Purpose
 
@@ -33,7 +35,7 @@ generation/approval and starting work remain separate operations.
 
 - T8.1: `c3958c22811ae517a606e249511b971f5353274d` — scoped immutable observations and structured readiness.
 - T8.2: `b840a5cdccf2a4b5c64bf26656b6b5f995946193` — readiness enforcement, frozen model inputs and guarded recoverable publication.
-- T8.3: contextual Web controls, native/HTTP/browser evidence and user-facing documentation; commit reference follows PR creation.
+- T8.3: `b3bbdc65ff2cb02af9b103133d6167f4ca255c87` — contextual Web controls, native/HTTP/browser evidence and user-facing documentation.
 
 Model output is staged in memory and validated. The shared authoring owner
 rechecks source identities/hashes and the target body/envelope before publishing
