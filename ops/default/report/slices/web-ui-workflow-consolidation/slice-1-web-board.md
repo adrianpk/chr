@@ -104,6 +104,13 @@ handler-test cognitive complexity. Response-surface assertions now use a helper;
 the focused handler command above and complete affected-package lint
 (`go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app ./internal/webui/...`) passed.
 
+At `89ea94060e508fe445616505d9e6eb39c4d1e623`, `make verify` and
+the focused race checks passed. Without screenshot capture, the browser fixture
+could interact before HTMX installed listeners and settled attributes. It now
+waits on the framework request/swap/settle boundary before synthetic actions.
+`CHR_WEB_BROWSER=/usr/sbin/chromium go test ./internal/app -run '^TestWebBoardBrowser$' -count=3`
+and complete affected-package lint passed with all journey assertions retained.
+
 The controller records final clean-HEAD evidence after the PR-reference follow-up
 commit, in this order: `make verify`, the focused race command above,
 `CHR_WEB_BROWSER=/usr/sbin/chromium go test ./internal/app -run '^TestWebBoardBrowser$' -count=1`, then `git diff --check`.

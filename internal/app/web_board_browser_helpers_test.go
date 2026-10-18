@@ -9,8 +9,23 @@ import (
 	"testing"
 )
 
+// DOM insertion precedes HTMX listener installation and attribute settling.
+// Wait for the observable framework boundary before a synthetic user action.
+func webBoardBrowserReady(t *testing.T, browser *webWorkflowBrowser) {
+	t.Helper()
+	webBoardBrowserWait(t, browser, `!document.querySelector('.htmx-settling, .htmx-swapping, .htmx-request')`)
+}
+
+func webBoardBrowserClick(t *testing.T, browser *webWorkflowBrowser, selector string) {
+	t.Helper()
+	browser.wait(t, selector)
+	webBoardBrowserReady(t, browser)
+	browser.click(t, selector)
+}
+
 func webBoardBrowserSet(t *testing.T, browser *webWorkflowBrowser, selector, value string) {
 	t.Helper()
+	webBoardBrowserReady(t, browser)
 	browser.evaluate(t, `(()=>{const e=document.querySelector(`+strconv.Quote(selector)+`);e.value=`+strconv.Quote(value)+`;e.dispatchEvent(new Event('input',{bubbles:true}));return 'set';})()`)
 }
 
@@ -21,6 +36,7 @@ func webBoardBrowserWait(t *testing.T, browser *webWorkflowBrowser, expression s
 
 func webBoardBrowserDrag(t *testing.T, browser *webWorkflowBrowser, status string) {
 	t.Helper()
+	webBoardBrowserReady(t, browser)
 	browser.evaluate(t, `(()=>{const card=document.querySelector('a[data-ticket-key="CHR-1"]'),column=document.querySelector('[data-board-column="'+`+strconv.Quote(status)+`+'"]'),data=new DataTransfer();card.dispatchEvent(new DragEvent('dragstart',{bubbles:true,dataTransfer:data}));column.dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:data}));return 'dropped';})()`)
 }
 

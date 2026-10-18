@@ -17,19 +17,19 @@ func webBoardBrowserNative(t *testing.T, browser *webWorkflowBrowser) {
 
 	webBoardBrowserViewport(t, browser, 1440, 1000)
 	browser.navigate(t, server.URL+"/board")
-	browser.click(t, "a[data-ticket-key='"+key+"']")
+	webBoardBrowserClick(t, browser, "a[data-ticket-key='"+key+"']")
 	browser.wait(t, "#ticket-description[readonly]")
 	webBoardBrowserWait(t, browser, "!document.querySelector('[name=use_case]') && Boolean(document.querySelector('.ticket-system-phase'))")
 	webBoardBrowserSet(t, browser, "#ticket-title", "Descriptive native title")
 	webBoardBrowserSet(t, browser, "[name='content']", "Native discussion remains independent.")
-	browser.click(t, ".ticket-comments__form button[type='submit']")
+	webBoardBrowserClick(t, browser, ".ticket-comments__form button[type='submit']")
 	browser.wait(t, ".ticket-comment")
 
 	if got := browser.evaluate(t, "document.querySelector('#ticket-title').value"); got != "Descriptive native title" {
 		t.Fatal("native comment discarded dirty title", got)
 	}
 
-	browser.click(t, "button[form='ticket-editor-form']")
+	webBoardBrowserClick(t, browser, "button[form='ticket-editor-form']")
 	browser.wait(t, "#modal-root:empty")
 
 	document, err := operations.ReadTicketDocument(key)

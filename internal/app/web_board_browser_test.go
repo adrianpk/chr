@@ -66,23 +66,23 @@ func webBoardBrowserFixture(t *testing.T) webViewProvider {
 
 func webBoardBrowserEdit(t *testing.T, browser *webWorkflowBrowser, provider webViewProvider) {
 	t.Helper()
-	browser.click(t, "a[data-ticket-key='CHR-1']")
+	webBoardBrowserClick(t, browser, "a[data-ticket-key='CHR-1']")
 	browser.wait(t, "#ticket-description")
 	webBoardBrowserCapture(t, browser, "desktop-edit")
 	webBoardBrowserSet(t, browser, "#ticket-title", "Unsaved Board title")
 	webBoardBrowserSet(t, browser, "#ticket-description", "Unsaved complete description.\n\nRetained paragraph.")
 	webBoardBrowserSet(t, browser, "[name='assignee']", "Board developer")
 	webBoardBrowserSet(t, browser, "[name='status']", "ready_for_dev")
-	browser.click(t, "[data-ticket-maximize]")
+	webBoardBrowserClick(t, browser, "[data-ticket-maximize]")
 	browser.wait(t, ".ticket-modal--maximized")
 	webBoardBrowserCapture(t, browser, "desktop-maximized")
-	browser.click(t, "[data-ticket-maximize]")
+	webBoardBrowserClick(t, browser, "[data-ticket-maximize]")
 	webBoardBrowserWait(t, browser, "!document.querySelector('.ticket-modal--maximized')")
 	webBoardBrowserCheckDirty(t, browser)
 	browser.evaluate(t, `document.querySelector('.ticket-modal__body').scrollTop = 100000; 'scrolled'`)
 	webBoardBrowserCapture(t, browser, "desktop-edit-lower")
 	webBoardBrowserSet(t, browser, "[name='content']", "Independent comment while metadata is dirty.")
-	browser.click(t, ".ticket-comments__form button[type='submit']")
+	webBoardBrowserClick(t, browser, ".ticket-comments__form button[type='submit']")
 	browser.wait(t, ".ticket-comment:nth-child(2)")
 	webBoardBrowserCheckDirty(t, browser)
 
@@ -91,7 +91,7 @@ func webBoardBrowserEdit(t *testing.T, browser *webWorkflowBrowser, provider web
 		t.Fatal("comment saved metadata or lost discussion", saved)
 	}
 
-	browser.click(t, "button[form='ticket-editor-form']")
+	webBoardBrowserClick(t, browser, "button[form='ticket-editor-form']")
 	browser.wait(t, "#modal-root:empty")
 
 	saved = webBoardBrowserDetail(t, provider)
@@ -139,29 +139,29 @@ func webBoardBrowserMoves(t *testing.T, browser *webWorkflowBrowser, provider we
 
 func webBoardBrowserConflict(t *testing.T, browser *webWorkflowBrowser, provider webViewProvider) {
 	t.Helper()
-	browser.click(t, "a[data-ticket-key='CHR-1']")
+	webBoardBrowserClick(t, browser, "a[data-ticket-key='CHR-1']")
 	browser.wait(t, "#ticket-title")
 	webBoardBrowserSet(t, browser, "#ticket-title", "Retain stale input")
 	webBoardBrowserSet(t, browser, "[name='content']", "Retain stale comment")
 	webBoardBrowserExternalEdit(t, provider, "Current external title")
-	browser.click(t, ".ticket-comments__form button[type='submit']")
+	webBoardBrowserClick(t, browser, ".ticket-comments__form button[type='submit']")
 	browser.wait(t, "#ticket-comment-result [data-write-status='stale']")
 
 	if got := browser.evaluate(t, "document.querySelector('[name=content]').value"); got != "Retain stale comment" {
 		t.Fatal("stale comment discarded input", got)
 	}
 
-	browser.click(t, "button[form='ticket-editor-form']")
+	webBoardBrowserClick(t, browser, "button[form='ticket-editor-form']")
 	browser.wait(t, "#ticket-save-result [data-write-status='stale']")
 
 	if got := browser.evaluate(t, "document.querySelector('#ticket-title').value"); got != "Retain stale input" {
 		t.Fatal("stale save discarded input", got)
 	}
 
-	browser.click(t, "#ticket-save-result a")
+	webBoardBrowserClick(t, browser, "#ticket-save-result a")
 	webBoardBrowserWait(t, browser, `document.querySelector('#ticket-title').value === 'Current external title'`)
 	webBoardBrowserFocus(t, browser)
-	browser.click(t, "[data-modal-close]")
+	webBoardBrowserClick(t, browser, "[data-modal-close]")
 	browser.wait(t, "#modal-root:empty")
 
 	if got := browser.evaluate(t, "document.activeElement.dataset.ticketKey || ''"); got != "CHR-1" {
@@ -171,7 +171,7 @@ func webBoardBrowserConflict(t *testing.T, browser *webWorkflowBrowser, provider
 
 func webBoardBrowserNew(t *testing.T, browser *webWorkflowBrowser, provider webViewProvider) {
 	t.Helper()
-	browser.click(t, "a[href='/board/ticket?new=1']")
+	webBoardBrowserClick(t, browser, "a[href='/board/ticket?new=1']")
 	browser.wait(t, "#ticket-title")
 
 	if got := browser.evaluate(t, `String(document.querySelector('#ticket-title').value === '' && !document.querySelector('.ticket-comments'))`); got != "true" {
@@ -182,7 +182,7 @@ func webBoardBrowserNew(t *testing.T, browser *webWorkflowBrowser, provider webV
 	webBoardBrowserSet(t, browser, "#ticket-title", "Created in shared modal")
 	webBoardBrowserSet(t, browser, "#ticket-description", "Complete independent description.")
 	webBoardBrowserSet(t, browser, "[name='use_case']", "named-work")
-	browser.click(t, "button[form='ticket-editor-form']")
+	webBoardBrowserClick(t, browser, "button[form='ticket-editor-form']")
 	browser.wait(t, "#modal-root:empty")
 	browser.wait(t, "a[data-ticket-key='CHR-8']")
 
@@ -196,21 +196,21 @@ func webBoardBrowserNarrow(t *testing.T, browser *webWorkflowBrowser) {
 	t.Helper()
 	webBoardBrowserViewport(t, browser, 390, 844)
 	webBoardBrowserCapture(t, browser, "narrow-board")
-	browser.click(t, "a[data-ticket-key='CHR-1']")
+	webBoardBrowserClick(t, browser, "a[data-ticket-key='CHR-1']")
 	browser.wait(t, "#ticket-description")
 	webBoardBrowserCapture(t, browser, "narrow-edit")
 	browser.evaluate(t, `document.querySelector('.ticket-modal__body').scrollTop = 100000; 'scrolled'`)
 	webBoardBrowserCapture(t, browser, "narrow-edit-lower")
 	webBoardBrowserWait(t, browser, `Array.from(document.querySelectorAll('[data-ticket-editor] input, [data-ticket-editor] textarea, [data-ticket-editor] select')).filter(e=>e.type!=='hidden').every(e=>e.getBoundingClientRect().right<=innerWidth)`)
-	browser.click(t, "[data-ticket-maximize]")
+	webBoardBrowserClick(t, browser, "[data-ticket-maximize]")
 	browser.wait(t, ".ticket-modal--maximized")
 	webBoardBrowserCapture(t, browser, "narrow-maximized")
-	browser.click(t, "[data-modal-close]")
+	webBoardBrowserClick(t, browser, "[data-modal-close]")
 	browser.wait(t, "#modal-root:empty")
-	browser.click(t, "a[href='/board/ticket?new=1']")
+	webBoardBrowserClick(t, browser, "a[href='/board/ticket?new=1']")
 	browser.wait(t, "#ticket-title")
 	webBoardBrowserCapture(t, browser, "narrow-new")
-	browser.click(t, "[data-modal-close]")
+	webBoardBrowserClick(t, browser, "[data-modal-close]")
 	browser.wait(t, "#modal-root:empty")
 }
 
