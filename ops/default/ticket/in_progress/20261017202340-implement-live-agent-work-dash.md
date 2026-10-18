@@ -9,8 +9,9 @@ scope: ui
 tags: dash, observability, workflow
 source: chat
 reported_at: 2026-10-17T20:23:40Z
-commits: [b20d86e2cc5dc218096ea560af9f7b523662d8ea, e92547312b9a5a1c97fe0aac0fe7e05d7bd5cc7c]
+commits: [b20d86e2cc5dc218096ea560af9f7b523662d8ea, e92547312b9a5a1c97fe0aac0fe7e05d7bd5cc7c, 4edf8d889276c851ba1423f14b841969617656de]
 branch: feat/slice-11-work-dash
+pr: "#408"
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
@@ -213,4 +214,4 @@ controls; read outages preserve stale state until recovery. Task-level race,
 strict lint, HTTP and owned desktop/narrow browser checks passed. The
 [Slice 11 report](../../report/slices/web-ui-workflow-consolidation/slice-11-work-dash.md)
 owns implementation, captures and validation evidence. Final exact-HEAD checks
-follow canonical PR-reference commits; verified controller integration is pending.
+follow canonical PR-reference commits. [PR #408](https://forge.adrianpk.com/adrianpk/chr/pulls/408) targets dev; verified controller integration is pending.
