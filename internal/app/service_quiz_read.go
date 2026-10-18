@@ -121,7 +121,7 @@ func (s service) quizReadScopes() ([]quizReadScope, error) {
 		scope: core.QuizScope{ProjectID: s.projectContext.ProjectID},
 	}}
 
-	cases, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).LoadAll()
+	cases, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).LoadBounded(s.ctx, core.WorkflowRecordLimit)
 	if err != nil {
 		return nil, err
 	}

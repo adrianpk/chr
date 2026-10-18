@@ -112,7 +112,12 @@ func (s service) prepareQuizOutcome(request core.QuizActionRequest, observed cor
 		status = core.QuizEntryStatusSkipped
 	}
 
-	entry := quizEntryFromState(state, status, request.Answer, s.utcNow())
+	answer := request.Answer
+	if status == core.QuizEntryStatusSkipped {
+		answer = ""
+	}
+
+	entry := quizEntryFromState(state, status, answer, s.utcNow())
 	entry.ID = fmt.Sprintf("%s-entry-%03d", state.SessionID, state.QuestionsAsked)
 	state = updateQuizStateAfterEntry(state, entry)
 	state = s.continueQuiz(state, append(append([]core.QuizEntry(nil), observed.Entries...), entry))
@@ -172,6 +177,7 @@ func (s service) prepareQuizMode(mode core.QuizMode, observed core.QuizObservati
 	}
 
 	if mode == core.QuizModeFast {
+		state = retainUnansweredFastQuestions(state, observed.Entries)
 		state = s.activateNextFastQuestion(state)
 	}
 

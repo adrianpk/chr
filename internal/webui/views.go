@@ -340,6 +340,7 @@ type ArtifactCardView struct {
 
 // ArtifactDetailView is the read-only detail projection for one artifact.
 type ArtifactDetailView struct {
+	Quiz                           *QuizAnswerView
 	SaveRequestID, AppendRequestID string
 	WorkflowEnabled                bool
 	Family                         string
@@ -381,6 +382,7 @@ const (
 
 // WriteActionResponse is the stable write result envelope returned by Web UI actions.
 type WriteActionResponse struct {
+	Quiz            *QuizActionAcknowledgement
 	ProjectionStale bool
 	TicketRevision  string
 	Workflow        *WorkflowRunView
@@ -419,4 +421,23 @@ func CatalogTitle(family string) string {
 	default:
 		return "Artifacts"
 	}
+}
+
+// QuizAnswerView projects a retained session without exposing model envelopes.
+type QuizAnswerView struct {
+	ScopeSlug, SessionID, QuestionID, Revision, OperationID string
+	DraftContext                                            string
+	Mode, Question, Status, Error                           string
+	Started, Open, CanAnswer, CanResume                     bool
+	History                                                 []QuizAnswerHistoryView
+}
+
+// QuizAnswerHistoryView is one confirmed answer, ordered by answered time and ID.
+type QuizAnswerHistoryView struct {
+	ID, Question, Answer, AnsweredAt string
+}
+
+// QuizActionAcknowledgement binds draft clearing to the confirmed question.
+type QuizActionAcknowledgement struct {
+	Action, SessionID, QuestionID string
 }

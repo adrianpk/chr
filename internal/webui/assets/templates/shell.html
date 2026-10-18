@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/assets/chr.css">
     <script src="/assets/htmx.min.js" defer></script>
     <script src="/assets/chr.js" defer></script>
+    <script src="/assets/quiz.js" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -259,7 +260,9 @@
 
 {{define "artifact_detail_content.html"}}
 {{template "revision_marker.html" .}}
-{{if eq .Detail.Family "cases"}}
+{{if .Detail.Quiz}}
+  {{template "quiz_answer_content.html" .}}
+{{else if eq .Detail.Family "cases"}}
   {{template "case_edit_page.html" .}}
 {{else}}
 <div class="detail-actions">

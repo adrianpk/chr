@@ -9,7 +9,7 @@ scope: ui
 tags: quizzes, interaction, quiz-modes
 source: chat
 reported_at: 2026-10-17T19:39:27Z
-commits: []
+commits: [c00bbcce643fbc1958bc14184e38b73e63f14bd7, 0257336d0c738ad9211047f1e8afde951b1745fa]
 branch: feat/slice-5-quiz-answering
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
@@ -30,8 +30,10 @@ yet been demonstrated in this walkthrough. This ticket records the requested
 target and verified adapter capabilities, rather than inventing observations
 about an unseen CHR detail screen.
 
-Capture only. No implementation, quiz execution, model request or service
-update is authorized. The ongoing quiz review may refine this ticket.
+Approved implementation is Slice 5 of
+[web-ui-workflow-consolidation](../../plan/web-ui-workflow-consolidation.md).
+The [Slice 5 report](../../report/slices/web-ui-workflow-consolidation/slice-5-quiz-answering.md)
+records retained actions, mode queues, focused interaction and validation.
 
 Catalog entry, card membership and pending scope selection are owned by
 [the quiz catalog ticket](20261017192913-show-quiz-cards-and-pending-scope-action.md).

@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -41,6 +42,12 @@ func (s service) nextQuizQuestion(state core.QuizRuntimeState, entries []core.Qu
 		return state, nil
 	}
 
+	for _, entry := range entries {
+		if quizSessionEntry(state, entry) && entry.QuestionID == response.Question.ID {
+			return state, fmt.Errorf("quiz provider reused an answered question identity")
+		}
+	}
+
 	state = activateQuizQuestion(state, response.Question, response.CreatedAt.UTC())
 	state.Candidates = response.Candidates
 
@@ -57,6 +64,7 @@ func (s service) nextFastQuizQuestion(state core.QuizRuntimeState, entries []cor
 		}
 	}
 
+	state = retainUnansweredFastQuestions(state, entries)
 	return s.activateNextFastQuestion(state), nil
 }
 
@@ -118,7 +126,7 @@ func fastQuizBatchQuestions(state core.QuizRuntimeState, entries []core.QuizEntr
 	}
 
 	for _, entry := range entries {
-		if strings.HasPrefix(entry.ID, state.SessionID+"-entry-") || strings.HasPrefix(state.SessionID, "legacy-") {
+		if quizSessionEntry(state, entry) {
 			seen[entry.QuestionID], seen[entry.Question] = true, true
 		}
 	}
@@ -141,4 +149,37 @@ func fastQuizBatchQuestions(state core.QuizRuntimeState, entries []core.QuizEntr
 	}
 
 	return queue
+}
+
+func quizSessionEntry(state core.QuizRuntimeState, entry core.QuizEntry) bool {
+	return strings.HasPrefix(entry.ID, state.SessionID+"-entry-") || strings.HasPrefix(state.SessionID, "legacy-")
+}
+
+func retainUnansweredFastQuestions(state core.QuizRuntimeState, entries []core.QuizEntry) core.QuizRuntimeState {
+	seen := map[string]bool{}
+	if state.ActiveQuestion != nil {
+		seen[state.ActiveQuestion.ID], seen[state.ActiveQuestion.Prompt] = true, true
+	}
+
+	for _, entry := range entries {
+		if quizSessionEntry(state, entry) {
+			seen[entry.QuestionID], seen[entry.Question] = true, true
+		}
+	}
+
+	queue := make([]core.QuizCandidate, 0, len(state.FastQueue))
+	for _, candidate := range state.FastQueue {
+		if !seen[candidate.ID] && !seen[candidate.Prompt] && !slices.Contains(state.FastConsumed, candidate.ID) {
+			queue = append(queue, candidate)
+			continue
+		}
+
+		if !slices.Contains(state.FastConsumed, candidate.ID) {
+			state.FastConsumed = append(state.FastConsumed, candidate.ID)
+		}
+	}
+
+	state.FastQueue = queue
+
+	return state
 }

@@ -12,6 +12,14 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
+- Quizzes now provide a focused Web answer screen with one current question,
+  one answer field, Deep/Fast selection and newest-first answer history. Drafts
+  survive refresh, mode changes and request errors; leaving or skipping with
+  unsent text requires a discard decision. Shared actions reject stale questions
+  and acknowledge retries once. Fast retains one generated batch across mode
+  changes and restart; failed continuation keeps the confirmed answer available
+  in history. Cancel and Done preserve earlier answers with distinct statuses.
+
 - Project-wide context now grows in one shared dump across Web, CLI, TUI and
   authoring conversations. Web New offers Project-wide or existing case names;
   case captures remain independent. Retries preserve confirmed captures, edits

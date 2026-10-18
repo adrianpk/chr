@@ -21,7 +21,7 @@ slices through Looper, including canonical slice PRs and controller-owned
 Rebase + Fast-forward merges into dev. The existing Telegram run is separate.
 Use one development worker and one canonical open slice PR for this set.
 
-Active slice: Slice 5, Focused quiz answering; T5.1.
+Active slice: Slice 5, Focused quiz answering; awaiting PR and exact-HEAD validation.
 The controller checkpoint and tickets own subsequent progress.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.

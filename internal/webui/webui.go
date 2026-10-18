@@ -345,6 +345,10 @@ func (h handler) writeAction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if h.quizActionResult(w, r, request, result) {
+		return
+	}
+
 	if shouldCloseModalAfterWrite(r, request, result) {
 		htmx.Retarget(w, "#modal-root")
 		htmx.Reswap(w, htmx.SwapInner)
@@ -756,10 +760,14 @@ func (h handler) artifactDetailPageData(r *http.Request, family string) (PageDat
 		return PageData{}, err
 	}
 
+	title := detail.Title
+	if detail.Quiz != nil {
+		title = "Quizzes"
+	}
 	return PageData{
 		Shell:      h.shellData(family),
 		View:       "artifact_detail",
-		Title:      detail.Title,
+		Title:      title,
 		Revision:   detail.Revision,
 		RefreshURL: artifactDetailRefreshURL(family, r.URL.Query().Get("id")),
 		Detail:     detail,
@@ -767,7 +775,7 @@ func (h handler) artifactDetailPageData(r *http.Request, family string) (PageDat
 }
 
 func artifactDetailRefreshURL(family, id string) string {
-	if family == "cases" || family == "dumps" {
+	if family == "cases" || family == "dumps" || family == "quizzes" {
 		return ""
 	}
 

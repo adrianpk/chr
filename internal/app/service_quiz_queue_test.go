@@ -259,3 +259,50 @@ func checkStoppedQuizState(t *testing.T, state core.QuizRuntimeState, want core.
 		t.Fatal("stopped session lost retained facts", state)
 	}
 }
+
+// A provider cannot reuse a recorded question identity for a different prompt;
+// old browser drafts and stale callers must never bind to a newly asked question.
+func TestServiceQuizQuestionIdentity(t *testing.T) {
+	operations, model := newRetainedQuizFixture(t)
+	model.responses[1].Question.ID = "first"
+
+	started, err := operations.StartQuiz(QuizStartRequest{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	answered, err := operations.AnswerQuiz(QuizAnswerRequest{Answer: "Keep the question identity stable.", Binding: quizStateBinding(started.State, "identity")})
+	if err != nil || answered.State.ActiveQuestion != nil || !answered.State.ContinuationPending || answered.State.AnswersRecorded != 1 {
+		t.Fatal("reused question was activated", answered, err)
+	}
+}
+
+// Deep may surface a question already retained in Fast work. Returning to Fast
+// keeps that active question once and removes its duplicate from the pending queue.
+func TestServiceQuizCoveredFastQuestion(t *testing.T) {
+	operations, model := newRetainedQuizFixture(t)
+	model.responses[1].Question.ID = "fast-2"
+	model.responses[1].Question.Prompt = "Which constraint applies?"
+
+	if _, err := operations.StartQuiz(QuizStartRequest{Mode: core.QuizModeFast}); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := operations.SwitchQuizMode(QuizModeRequest{Mode: core.QuizModeDeep}); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := operations.AnswerQuiz(QuizAnswerRequest{Answer: "Preserve ownership."}); err != nil {
+		t.Fatal(err)
+	}
+
+	resumed, err := operations.SwitchQuizMode(QuizModeRequest{Mode: core.QuizModeFast})
+	if err != nil || resumed.State.ActiveQuestion.ID != "fast-2" || len(resumed.State.FastQueue) != 1 {
+		t.Fatal("covered Fast question remained queued", resumed, err)
+	}
+
+	answered, err := operations.AnswerQuiz(QuizAnswerRequest{Answer: "Keep the boundary explicit."})
+	if err != nil || answered.State.ActiveQuestion.ID != "fast-3" || len(model.requests) != 2 {
+		t.Fatal("Fast repeated a covered question", answered, err)
+	}
+}

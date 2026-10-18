@@ -37,6 +37,9 @@ func (p webViewProvider) WriteAction(ctx context.Context, request webui.WriteAct
 	}
 
 	operations := p.service(ctx)
+	if request.Surface == "quiz" {
+		return p.writeQuizAction(operations, request)
+	}
 
 	if response, handled, err := p.writeDocumentAction(operations, request); handled || err != nil {
 		return response, err
@@ -204,7 +207,7 @@ func (p webViewProvider) writeQuizStart(operations service, request webui.WriteA
 	return webui.WriteActionResponse{
 		Status:      webui.WriteStatusOK,
 		Summary:     result.Message,
-		RedirectURL: "/quizzes",
+		RedirectURL: quizFocusURL(result.State.CuratedPath),
 		Operation:   webOperation("quiz.start", string(result.State.Status), quizOperationID(result.State), result.State.BranchReturnReason),
 	}, nil
 }
@@ -218,7 +221,7 @@ func (p webViewProvider) writeQuizResume(operations service, request webui.Write
 	return webui.WriteActionResponse{
 		Status:      webui.WriteStatusOK,
 		Summary:     result.Message,
-		RedirectURL: "/quizzes",
+		RedirectURL: quizFocusURL(result.State.CuratedPath),
 		Operation:   webOperation("quiz.resume", string(result.State.Status), quizOperationID(result.State), result.State.BranchReturnReason),
 	}, nil
 }

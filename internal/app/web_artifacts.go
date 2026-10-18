@@ -102,6 +102,9 @@ func planCatalog(operations service) (webui.ArtifactCatalogView, error) {
 }
 
 func (p webViewProvider) ArtifactDetailView(ctx context.Context, request webui.ArtifactDetailRequest) (webui.ArtifactDetailView, error) {
+	if request.Family == webArtifactFamilyQuizzes {
+		return p.quizArtifactDetail(ctx, request)
+	}
 	if request.Family == webArtifactFamilyDumps {
 		return p.dumpArtifactDetail(ctx, request)
 	}

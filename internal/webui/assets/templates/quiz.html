@@ -1,0 +1,63 @@
+{{define "quiz_answer_content.html"}}
+<section id="quiz-surface" class="quiz-answering" data-quiz-context="{{.Detail.Quiz.DraftContext}}" data-quiz-current-mode="{{.Detail.Quiz.Mode}}" data-quiz-session="{{.Detail.Quiz.SessionID}}" data-quiz-question="{{.Detail.Quiz.QuestionID}}" data-quiz-scope="{{.Detail.ID}}"{{with .Write.Quiz}} data-ack-action="{{.Action}}" data-ack-session="{{.SessionID}}" data-ack-question="{{.QuestionID}}"{{end}}>
+  <div class="quiz-heading">
+    <div><a href="/quizzes">Back to Quizzes</a><h2>{{.Detail.Title}}</h2><span class="muted">{{.Detail.Scope}} · {{.Detail.Quiz.Status}}</span></div>
+    <form class="quiz-mode" data-quiz-form data-quiz-mode="{{.Detail.Quiz.Started}}" method="post" action="/actions" hx-post="/actions" hx-target="#quiz-result" hx-swap="innerHTML" hx-disabled-elt="#quiz-surface button, #quiz-mode">
+      {{template "quiz_binding.html" .}}
+      <input type="hidden" name="action" value="{{if .Detail.Quiz.Started}}quiz.mode{{else}}quiz.start{{end}}">
+      <label for="quiz-mode">Mode</label>
+      <select id="quiz-mode" name="mode" {{if and .Detail.Quiz.Started (not .Detail.Quiz.Open)}}disabled{{end}}>
+        <option value="deep" {{if eq .Detail.Quiz.Mode "deep"}}selected{{end}}>Deep</option>
+        <option value="fast" {{if eq .Detail.Quiz.Mode "fast"}}selected{{end}}>Fast</option>
+      </select>
+      {{if not .Detail.Quiz.Started}}<button class="button button--primary" type="submit">Start Quiz</button>{{end}}
+    </form>
+  </div>
+  <div id="quiz-result" role="status" aria-live="polite">{{template "quiz_action_result.html" .}}</div>
+  {{with .Detail.Quiz.Error}}<p class="quiz-error" role="alert">{{.}}</p>{{end}}
+  {{if .Detail.Quiz.CanAnswer}}
+    <div class="quiz-question" aria-label="Current question"><h3>Current question</h3><p>{{.Detail.Quiz.Question}}</p></div>
+  {{else if .Detail.Quiz.Open}}<p class="empty-state">{{if .Detail.Quiz.CanResume}}Resume to continue with the next question.{{else}}The question queue is finished. Choose Done when you are ready.{{end}}</p>
+  {{else if .Detail.Quiz.Started}}<p class="empty-state">This quiz is {{.Detail.Quiz.Status}}. Your recorded answers remain below.</p>{{end}}
+  {{if .Detail.Quiz.Started}}
+  <form class="quiz-response" data-quiz-form method="post" action="/actions" hx-post="/actions" hx-target="#quiz-result" hx-swap="innerHTML" hx-disabled-elt="#quiz-surface button, #quiz-mode">
+    {{template "quiz_binding.html" .}}
+    {{if .Detail.Quiz.CanAnswer}}<label for="quiz-answer">Your answer</label><textarea id="quiz-answer" name="answer" rows="7" maxlength="65536" placeholder="Answer…"></textarea>{{end}}
+    <div class="quiz-actions">
+      {{if .Detail.Quiz.CanResume}}<button class="button" type="submit" name="action" value="quiz.resume">Resume</button>{{end}}
+      {{if .Detail.Quiz.Open}}
+      <button class="button" type="submit" name="action" value="quiz.skip" {{if not .Detail.Quiz.CanAnswer}}disabled{{end}}>Skip</button>
+      <button class="button button--primary" type="submit" name="action" value="quiz.answer" {{if not .Detail.Quiz.CanAnswer}}disabled{{end}}>Answer</button>
+      <button class="button" type="submit" name="action" value="quiz.cancel">Cancel</button>
+      <button class="button" type="submit" name="action" value="quiz.done">Done</button>
+      {{end}}
+    </div>
+  </form>
+  {{end}}
+  <div data-quiz-retained></div>
+  <section class="quiz-history" aria-label="Answered questions"><h3>Answered questions</h3>
+  {{range .Detail.Quiz.History}}
+    <article class="quiz-history-card" data-answer-id="{{.ID}}"><time datetime="{{.AnsweredAt}}">{{.AnsweredAt}}</time><h4>{{.Question}}</h4><p>{{.Answer}}</p></article>
+  {{else}}<p class="muted">No answers recorded yet.</p>{{end}}
+  </section>
+</section>
+{{end}}
+
+{{define "quiz_binding.html"}}
+<input type="hidden" name="family" value="quizzes">
+<input type="hidden" name="surface" value="quiz">
+<input type="hidden" name="confirm" value="true">
+<input type="hidden" name="id" value="{{.Detail.ID}}">
+<input type="hidden" name="case_slug" value="{{.Detail.Quiz.ScopeSlug}}">
+<input type="hidden" name="session_id" value="{{.Detail.Quiz.SessionID}}">
+<input type="hidden" name="question_id" value="{{.Detail.Quiz.QuestionID}}">
+<input type="hidden" name="revision" value="{{.Detail.Quiz.Revision}}">
+<input type="hidden" name="request_id" value="{{.Detail.Quiz.OperationID}}">
+{{end}}
+
+{{define "quiz_action_result.html"}}
+{{if .Write.Summary}}<p data-quiz-write-status="{{.Write.Status}}">{{.Write.Summary}}</p>{{end}}
+{{range .Write.Validation}}<p>{{.}}</p>{{end}}
+{{with .Write.BlockedReason}}<p>{{.}}</p>{{end}}
+{{with .Write.ReloadURL}}<a class="button" data-quiz-reload href="{{.}}">Reload current question</a>{{end}}
+{{end}}

@@ -17,7 +17,7 @@ Model: [Web UI and Workflow Model](../spec/stable/web-ui-workflow-consolidation-
 Implementation authorization: granted on 2026-10-18 for this exact set through
 Looper, including controller-owned Rebase + Fast-forward integration into dev.
 
-Active slice: Slice 5, Focused quiz answering; T5.3.
+Active slice: Slice 5, Focused quiz answering; awaiting PR and exact-HEAD validation.
 The controller checkpoint and tickets own subsequent progress.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.
@@ -134,7 +134,7 @@ Prerequisite: Slice 4 integrated; execution authority for this set.
 
 Validation: Cover duplicate/stale Answer and Skip, Done with queued questions, cancellation, answer committed before continuation failure, mode switch/restart and one successful Fast batch with no per-question generation; focused race and browser checks.
 
-T5.1 complete at `c00bbcce643fbc1958bc14184e38b73e63f14bd7`; T5.2 implemented with retained Fast batches, preserved current questions, guarded shared actions and resumable continuation failure. Focused quiz race checks passed across core, app and TUI. T5.3 remains active.
+T5.1 complete at `c00bbcce643fbc1958bc14184e38b73e63f14bd7`; T5.2 complete at `0257336d0c738ad9211047f1e8afde951b1745fa`; T5.3 implements the focused Web view, guarded forms, draft recovery and owned captures. Focused quiz race, HTTP and browser checks passed. PR reference and exact-HEAD controller validation follow.
 
 ### Slice 6: Scope-driven quiz catalog
 

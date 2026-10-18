@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -61,6 +62,10 @@ func validateQuizAction(request QuizActionRequest) error {
 
 	if request.Binding.ExpectedRevision == "" {
 		return errors.New("quiz revision is required")
+	}
+
+	if request.Action == "answer" && strings.TrimSpace(request.Answer) == "" {
+		return errors.New("quiz answer is required")
 	}
 
 	switch request.Action {

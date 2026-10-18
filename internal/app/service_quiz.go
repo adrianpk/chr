@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -645,7 +646,7 @@ func quizModelStrategy(mode core.QuizMode) string {
 func (s service) listQuizRuntimeStates() ([]core.QuizRuntimeState, error) {
 	root := core.UserPath(s.projectContext.ProjectDir, filepath.FromSlash(core.QuizRuntimeDirectory))
 
-	entries, err := os.ReadDir(root)
+	entries, err := readQuizRuntimeDirectory(root)
 	if errors.Is(err, os.ErrNotExist) {
 		return []core.QuizRuntimeState{}, nil
 	}
@@ -891,4 +892,26 @@ func quizTrailForQuestion(trail []core.QuizTrailNode, question core.QuizQuestion
 	next = append(next, node)
 
 	return next
+}
+
+func readQuizRuntimeDirectory(root string) ([]os.DirEntry, error) {
+	directory, err := os.Open(root)
+	if err != nil {
+		return nil, err
+	}
+
+	entries, readErr := directory.ReadDir(core.WorkflowRecordLimit + 1)
+	if errors.Is(readErr, io.EOF) {
+		readErr = nil
+	}
+
+	if err := errors.Join(readErr, directory.Close()); err != nil {
+		return nil, err
+	}
+
+	if len(entries) > core.WorkflowRecordLimit {
+		return nil, fmt.Errorf("quiz runtime inventory capacity exceeded")
+	}
+
+	return entries, nil
 }

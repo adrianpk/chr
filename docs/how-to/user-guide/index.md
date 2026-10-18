@@ -463,6 +463,30 @@ chr dump append ops/default/dump/00000-billing-notes/artifact.md --content "Addi
 chr dump open ops/default/dump/00000-billing-notes/artifact.md
 ```
 
+## Answer Quizzes in the Web UI
+
+Open a quiz from Quizzes, or start/resume its scope using the catalog controls.
+The focused screen shows the current question, one answer field and the Deep/Fast
+selector. Recorded answers appear newest first; skipped questions are excluded.
+
+Answer records the response and advances. Skip advances without an answer. Done
+completes the session, including when questions remain; Cancel leaves it cancelled
+and preserves earlier answers. With an unsent answer, Skip, Cancel, Done and links
+away from the screen require an explicit discard decision.
+
+Deep generates adaptive follow-ups within the question/depth budget. Fast generates
+one successful flat batch and then advances without further per-question model
+calls. Switching modes preserves the active question and unsent answer. Deep
+suspends the retained Fast queue; returning to Fast resumes that queue. When Fast
+is exhausted, choose Done or switch to Deep and Resume to continue.
+
+Unsent drafts survive refresh and mode changes in the current browser tab. A
+successful Answer clears only its question's draft. Request failures keep the
+input available for retry. If another client changes the question, reload the
+current state; an earlier unsent draft remains separate from the new answer field.
+If question generation fails after an answer, the recorded answer stays in history
+and Resume retries continuation without recording it again.
+
 ## Run Quizzes in the TUI
 
 Open the Quizzes view with `F4`.
@@ -473,7 +497,7 @@ The TUI shows quiz state, active question, recorded answers, and curated notes.
 | Key | Behavior |
 | --- | --- |
 | `up` / `down` or `k` / `j` | Select a quiz. |
-| `s` | Start or restart the selected quiz. |
+| `s` | Start a quiz, or restart a completed/cancelled session. |
 | `enter` | Answer the active question. |
 | `r` | Refresh quiz state from disk. |
 
