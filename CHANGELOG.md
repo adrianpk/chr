@@ -57,6 +57,8 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   unsaved input, and comments post independently. Status selection and dragging
   reject stale or unsupported moves with an explanation. Canonical, legacy and
   native tickets share six readable lanes, with paging for larger projects.
+  Plan-bound task titles now display their ownership guard before a rename can
+  be submitted; permitted metadata and independent comments remain editable.
 - Telegram conversations can explain project context, collect requirements,
   answer clarification questions, generate and refine dumps, quizzes, draft
   specifications and plans, and prepare native backlog tickets. Conversations

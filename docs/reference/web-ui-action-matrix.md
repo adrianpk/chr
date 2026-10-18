@@ -21,10 +21,10 @@ Status values:
 | Project | `/`, `/project` (direct URL only) | `chr project current`, metadata commands | `F1` | `read_only_matched` | Shows the project name, root directory and secondary diagnostic ID; no visible navigation link or automatic polling. |
 | Cases | `/cases` | `chr metadata case set` for writes | `F2` | `matched` | Catalog and detail read project-local case metadata; detail form writes case metadata. |
 | Dumps | `/dumps` | `chr dump *` | `F3` | `matched` | Catalog, capture and one body editor use the shared dump service; append remains a transport operation. |
-| Quizzes | `/quizzes` | `chr quiz *` | `F4` | `web_subset` | Start and resume are exposed; answer, skip, complete, cancel, and mode-only updates remain CLI/TUI. |
-| Specs | `/specs` | `chr spec list`, `chr spec generate` | `F5` | `matched` | Catalog and generation action use spec service paths. |
+| Quizzes | `/quizzes` | `chr quiz *` | `F4` | `matched` | Named pending scopes and retained answering support Start, Resume, Answer, Skip, Done, Cancel and Deep/Fast mode changes with question/revision guards. |
+| Specs | `/specs` | `chr spec list`, `chr spec generate` | `F5` | `matched` | Individual manual/generated documents share New/Edit, initial Draft/approved state and revision-safe Save through the authoring owner. |
 | Plans | `/plans` | `chr plan *` | `F6` | `web_subset` | Concrete plan documents have fixed cards and exact full read-only details. Missing-scope placeholders and internal trackers are excluded. Generate/Regenerate stay in the selected case. |
-| Board | `/board` | `chr ticket board`, `chr ticket list`, `chr ticket show` | `F7` | `read_only_matched` | Board columns, attention, and ticket cards read the shared Board model. |
+| Board | `/board` | `chr ticket board`, `chr ticket list`, `chr ticket show` | `F7` | `matched` | Six lanes, attention and paging share one New/Edit form, guarded moves and independent comments. Plan-bound titles and execution-owned fields show their guards. |
 | Dash | `/dash` | `chr work doctor`, `chr work run-all --dry-run`, `chr daemon stop` | `F8` | `web_subset` | Readiness, paged queue, independent current contexts and retained results refresh with stale recovery. Work preview and daemon stop retain separate confirmed controls. |
 
 ## Write Actions
@@ -41,6 +41,9 @@ Status values:
 | Plan tracking create | none | `chr plan tracking create` | Legacy Plans tracking action | `cli_tui_only` | Internal maps are retained during generation and bound through native approval. The former Web action is unsupported; direct tracker URLs cannot expose the files. |
 | Quiz start | `quiz.start` | `chr quiz start` | Quizzes start | `matched` | Supports project or case scope and deep or fast mode. |
 | Quiz resume | `quiz.resume` | `chr quiz resume` | Quizzes resume | `matched` | Resumes the selected project or case quiz scope. |
+| Quiz answering | `quiz.answer`, `quiz.skip`, `quiz.done`, `quiz.cancel`, `quiz.mode` | `chr quiz answer`, `skip`, `complete`, `cancel`, `mode` | Focused quiz actions | `matched` | Retains question/session binding, idempotent actions, confirmed history and real Deep/Fast queues. |
+| Manual spec authoring | `spec.create`, `spec.save` | none | none | `web_only` | Manual and generated documents use shared revision-safe authoring operations; generation remains a separate action. |
+| Ticket editing | `ticket.create`, `ticket.update`, `ticket.move`, `ticket.comment` | `chr ticket *` | Board ticket actions | `matched` | Shared document ownership and revision guards preserve native contracts, comments and delivery references. |
 | Work preview | `work.preview` | `chr work run-all --dry-run` | Dash work preview | `matched` | Previews queue selection without starting agent execution. |
 | Daemon stop | `work.daemon.stop` | `chr daemon stop` | Dash stop request | `matched` | Requests stop through the shared daemon stop path. |
 

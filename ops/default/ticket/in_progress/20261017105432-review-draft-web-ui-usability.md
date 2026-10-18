@@ -9,7 +9,7 @@ scope: ui
 tags: web-ui, ux-ui, usability
 source: chat
 reported_at: 2026-10-17T10:54:32Z
-commits: [4c4815c51d5603d2c6e9576a7d7e9195100d7162]
+commits: [4c4815c51d5603d2c6e9576a7d7e9195100d7162, f25ab42b7919eac78f6f85c2627027a4d4d58d17]
 branch: test/slice-12-web-ui-review
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
@@ -263,5 +263,42 @@ acceptance, then T12.3 records the final matrix and candidate evidence.
 T12.2 is complete: the combined browser verifies desktop/narrow geometry,
 focus/labels, dirty forms and independent comments. The plan-bound title guard
 was reproduced and corrected through the existing ticket/order owners. Focused
-core/app/webui race and strict lint checks pass. T12.3 remains for the complete
-source acceptance matrix, user-facing documentation and final candidate evidence.
+core/app/webui race and strict lint checks pass. T12.3 completes the source acceptance matrix and user-facing documentation;
+final exact-HEAD controller validation follows canonical PR-reference commits.
+
+## Source Acceptance Matrix
+
+Canonical Forgejo reads verify PRs #398 through #408 merged at the checkpoint's
+recorded heads. All eleven child tickets and reports are solved/delivered.
+Earlier capture-only notes remain historical context; this approved delivery
+set supplies their implementation authority and acceptance evidence.
+
+| Slice/source | Canonical delivery | Current acceptance |
+| --- | --- | --- |
+| Slice 1: [TKT-20261017201015](../solved/20261017201015-restore-board-page-loading.md) | [PR #398](https://forge.adrianpk.com/adrianpk/chr/pulls/398) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-1-web-board.md). |
+| Slice 2: [TKT-20261017190508](../solved/20261017190508-unify-dump-capture-and-project-wide-ownership.md) | [PR #399](https://forge.adrianpk.com/adrianpk/chr/pulls/399) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-2-project-dump.md). |
+| Slice 3: [TKT-20261017191106](../solved/20261017191106-clarify-dump-reading-editing-and-appending.md) | [PR #400](https://forge.adrianpk.com/adrianpk/chr/pulls/400) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-3-dump-editor.md). |
+| Slice 4: [TKT-20261017185837](../solved/20261017185837-fix-dumps-grid-width-at-default-zoom.md) | [PR #401](https://forge.adrianpk.com/adrianpk/chr/pulls/401) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-4-dump-grid.md). |
+| Slice 5: [TKT-20261017193927](../solved/20261017193927-provide-focused-quiz-answering-screen.md) | [PR #402](https://forge.adrianpk.com/adrianpk/chr/pulls/402) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-5-quiz-answering.md). |
+| Slice 6: [TKT-20261017192913](../solved/20261017192913-show-quiz-cards-and-pending-scope-action.md) | [PR #403](https://forge.adrianpk.com/adrianpk/chr/pulls/403) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-6-quiz-catalog.md). |
+| Slice 7: [TKT-20261017194552](../solved/20261017194552-present-spec-cards-and-user-selected-creation-state.md) | [PR #404](https://forge.adrianpk.com/adrianpk/chr/pulls/404) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-7-spec-authoring.md). |
+| Slice 8: [TKT-20261017195741](../solved/20261017195741-contextualize-plan-generation-and-check-source-readiness.md) | [PR #405](https://forge.adrianpk.com/adrianpk/chr/pulls/405) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-8-plan-generation.md). |
+| Slice 9: [TKT-20261017200232](../solved/20261017200232-associate-ticket-tracking-with-each-plan-revision.md) | [PR #406](https://forge.adrianpk.com/adrianpk/chr/pulls/406) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-9-plan-order-tracker.md). |
+| Slice 10: [TKT-20261017195458](../solved/20261017195458-present-plans-and-tracking-as-read-only-cards.md) | [PR #407](https://forge.adrianpk.com/adrianpk/chr/pulls/407) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-10-plan-catalog.md). |
+| Slice 11: [TKT-20261017202340](../solved/20261017202340-implement-live-agent-work-dash.md) | [PR #408](https://forge.adrianpk.com/adrianpk/chr/pulls/408) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-11-work-dash.md). |
+| Slice 12: TKT-20261017105432 | Current canonical PR pending | Journey and acceptance work complete; controller integration pending. |
+
+UI-01 through UI-09 are mapped to child regressions, screenshots and the combined
+journey in the [Slice 12 report](../../report/slices/web-ui-workflow-consolidation/slice-12-web-ui-review.md#validation).
+The User Guide now gives the complete Web flow and Board editing rules; the
+Web action matrix reflects retained quiz actions, manual/generated spec editing
+and full Board operations. Scheduled browser certification requires the native
+workflow and consolidated journey to pass, with incomplete evidence rejected.
+Its campaign remains separate and was not dispatched during this slice.
+
+T12.1, T12.2 and T12.3 implementation work is complete. Task-level focused race,
+strict lint, owned browser and nightly-script regressions pass. Final clean-HEAD
+`make verify`, affected race/browser checks and whitespace evidence will be
+recorded through the controller after PR-reference follow-up. The parent remains
+in progress until verified controller integration; final set closure remains
+with the controller's exact integrated gate evidence.

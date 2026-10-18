@@ -321,6 +321,43 @@ networking or a tunnel. See [Run the local Web
 UI](../run-local-web-ui.md) and [Expose the local Web UI
 deliberately](../expose-local-web-ui.md).
 
+## Complete a Web Workflow
+
+1. Capture project context in Dumps. Choose a named case for details that belong
+   only to that case; later Project-wide captures extend the shared document.
+2. Open Quizzes to answer unresolved questions. Choose Deep for adaptive
+   follow-ups or Fast for a retained flat batch. Done preserves earlier answers.
+3. Create or edit individual Specs. Manual specs need no discovery or model
+   access; editing a generated spec uses the same editor.
+4. Open the named case to Generate or Regenerate its plan from saved, sufficient
+   discovery. Missing context produces guidance and leaves an earlier plan intact.
+5. Read the full result from Plans. Plan generation does not approve execution
+   or allocate task tickets. Internal order maps remain outside Web browsing;
+   approved native materialization binds their tickets through the workflow owner.
+6. Open Board to edit allowed ticket metadata or add comments. Execution-owned
+   fields explain their guards; pending edits remain separate from comments.
+7. Open Dash to observe the same ticket identities, current work and retained
+   outcomes. Opening or refreshing a view does not start work.
+
+## Manage Tickets in the Web UI
+
+Board has six status lanes and a separate attention area for blocked or unknown
+states. Larger projects expose page links; horizontal lane scrolling keeps cards
+readable on narrow screens. Choose **New** for an empty ticket form or open a card
+to edit the selected ticket. Maximize and restore keep the same pending input.
+
+The form groups classification, ownership and delivery fields with one description
+editor. Save applies the displayed revision. Status selection and dragging reject
+unsupported or stale moves with an explanation; reload before replacing newer
+changes. Existing tickets have an independent comment composer, which does not
+save or discard pending metadata.
+
+Approved native plan order owns bound task titles, membership and case association;
+the execution contract owns their description. These fields show their guard in
+the editor. Use the existing approved amendment operation for contract changes.
+Active claims and verified delivery receipts retain their own editing restrictions.
+Unbound titles and other permitted metadata remain editable.
+
 ## Navigate the TUI
 
 Use the function-key tabs:
