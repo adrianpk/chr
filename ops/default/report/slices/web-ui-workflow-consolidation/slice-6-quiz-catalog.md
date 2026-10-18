@@ -5,7 +5,7 @@ Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
 Branch: `feat/slice-6-quiz-catalog`
-PR: pending
+PR: `#403`
 
 ## Purpose
 
@@ -38,8 +38,8 @@ polling cannot replace an open menu or a focused catalog selection.
 
 ## Implementation Notes
 
-- T6.1: `836b920dd8dc` — shared read-only membership through the existing bounded quiz repository.
-- T6.2: task commit recorded in the PR-reference follow-up — dedicated Web projection, templates, scoped styling, pending navigation, explicit restart and owned browser evidence.
+- T6.1: `836b920dd8dcc805ea8bfd899594da309ba519c8` — shared read-only membership through the existing bounded quiz repository.
+- T6.2: `14cd4d91361ab726e44c5bf30f3e56f9fb50ca9c` — dedicated Web projection, templates, scoped styling, pending navigation, explicit restart and owned browser evidence.
 
 The shared projection observes at most the existing 4096-scope/record ceiling
 and existing 1 MiB image bounds. It retains canonical scope/reference, observed

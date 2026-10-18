@@ -17,7 +17,7 @@ Model: [Web UI and Workflow Model](../spec/stable/web-ui-workflow-consolidation-
 Implementation authorization: granted on 2026-10-18 for this exact set through
 Looper, including controller-owned Rebase + Fast-forward integration into dev.
 
-Active slice: Slice 6, Scope-driven quiz catalog; T6.1.
+Active slice: Slice 6, Scope-driven quiz catalog; PR #403 reviewing.
 The controller checkpoint and tickets own subsequent progress.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.
@@ -148,6 +148,8 @@ Prerequisite: Slice 5 integrated; execution authority for this set.
 | T6.2 | Deliver the specified bounded three-track catalog and compact pending menu; remove detached slug forms and link selection to the focused retained quiz flow. |
 
 Validation: Cover empty, partial, answered, cancelled and completed-empty sessions, adding a case and all-answered action removal; capture closed/open menu, long content and narrow views at declared viewport/zoom.
+
+T6.1 complete at `836b920dd8dcc805ea8bfd899594da309ba519c8`; T6.2 complete at `14cd4d91361ab726e44c5bf30f3e56f9fb50ca9c`. Shared membership, real HTTP, affected lint and owned catalog/answering browser checks passed. [PR #403](https://forge.adrianpk.com/adrianpk/chr/pulls/403) targets dev; the controller check record retains final exact-HEAD evidence.
 
 ### Slice 7: Individual spec authoring
 

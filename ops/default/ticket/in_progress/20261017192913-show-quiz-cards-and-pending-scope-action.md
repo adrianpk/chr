@@ -9,8 +9,9 @@ scope: ui
 tags: quizzes, catalog, interaction
 source: chat
 reported_at: 2026-10-17T19:29:13Z
-commits: []
+commits: [836b920dd8dcc805ea8bfd899594da309ba519c8, 14cd4d91361ab726e44c5bf30f3e56f9fb50ca9c]
 branch: feat/slice-6-quiz-catalog
+pr: "#403"
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
@@ -205,3 +206,8 @@ Behavior, shared-domain changes and implementation design are consolidated in
 ## Slice 6 Execution
 
 T6.1 delivers shared retained-answer membership after verified Slice 5 integration through PR #402. Its focused repository checks passed. T6.2 delivers the fixed three-track catalog, named pending menu and explicit focused continuation/restart. Repository, real HTTP, complete affected lint and owned catalog/answering browser checks passed. Final exact-HEAD controller validation follows PR-reference commits. The [Slice 6 report](../../report/slices/web-ui-workflow-consolidation/slice-6-quiz-catalog.md) owns implementation and validation evidence.
+
+T6.1: `836b920dd8dcc805ea8bfd899594da309ba519c8`. T6.2: `14cd4d91361ab726e44c5bf30f3e56f9fb50ca9c`.
+[PR #403](https://forge.adrianpk.com/adrianpk/chr/pulls/403) targets dev. The report
+records successful focused commands and desktop/open/all-answered/narrow captures.
+The controller binds final clean-HEAD evidence after this reference follow-up.
