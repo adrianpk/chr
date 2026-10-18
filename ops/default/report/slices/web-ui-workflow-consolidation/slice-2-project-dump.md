@@ -66,13 +66,13 @@ do not allocate artifacts or start generation.
 
 ## Implementation Notes
 
-- T2.1 metadata/adoption: `a8bdec69d5595740a6fee1b723b1d2f1357a6ce4`.
-- T2.2 reconciliation: `f4b080aeb4a2933b87535d56ca64e9fcb74f39ef`.
-- T2.2 retained mutation owner: `b18c795c115463d37bd676e9968b9ae1e25e47f1`.
-- T2.2 application/adapters: `14735ffbd247419294adcc9ef93c164fe63471bf`.
-- T2.2 bound authoring: `ac1e17b9257ac2ee53e821b7c87876fdf5d1c4c6`.
-- T2.2 assisted synthesis: `df5013c7629bd54d0ac2ecf49c55363a1b9c99ed`.
-- T2.3 Web capture, documentation and changelog: `ce10f273f308a10faf48d72b5bebed9de733659d`.
+- T2.1 metadata/adoption: `7f4b82f629696b39dc2f1a4326f90a11459db1d3`.
+- T2.2 reconciliation: `78b9165e07963d74ab856b68a223034f39e4a609`.
+- T2.2 retained mutation owner: `7bd9c09ad018e279d04726844e62896b0c365908`.
+- T2.2 application/adapters: `67dfdbd3937618b1003c914784ee952418f895ba`.
+- T2.2 bound authoring: `cdd413c861723380a13b56ccc90bc1f7e27d092d`.
+- T2.2 assisted synthesis: `467d2e083c3fb2d66c6de7bbf2ed8aad33e571e4`.
+- T2.3 Web capture, documentation and changelog: `2c553693b3fe1efb8f40af7a17f619f88ab188de`.
 
 One existing authoring owner and recovery journal govern publication; no nested
 standalone dump transaction publishes ahead of its session. Catalogs read bounded

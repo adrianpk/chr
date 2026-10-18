@@ -9,7 +9,7 @@ scope: domain
 tags: dumps, project-context, authoring
 source: chat
 reported_at: 2026-10-17T19:05:08Z
-commits: [a8bdec69d5595740a6fee1b723b1d2f1357a6ce4, f4b080aeb4a2933b87535d56ca64e9fcb74f39ef, b18c795c115463d37bd676e9968b9ae1e25e47f1, 14735ffbd247419294adcc9ef93c164fe63471bf]
+commits: [7f4b82f629696b39dc2f1a4326f90a11459db1d3, 78b9165e07963d74ab856b68a223034f39e4a609, 7bd9c09ad018e279d04726844e62896b0c365908, 67dfdbd3937618b1003c914784ee952418f895ba]
 branch: feat/slice-2-project-dump
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
@@ -108,7 +108,7 @@ remaining ambiguity during refinement rather than silently changing its rules.
 
 ## Implementation Progress
 
-T2.1 is implemented in `a8bdec69d5595740a6fee1b723b1d2f1357a6ce4`. Project metadata now retains
+T2.1 is implemented in `7f4b82f629696b39dc2f1a4326f90a11459db1d3`. Project metadata now retains
 one validated `project_dump_ref`, with shared authoring exclusion for metadata
 saves and source-bound adoption of an unambiguous existing general dump. The
 read-only inventory spans namespaces, distinguishes raw and case-scoped records,
@@ -120,14 +120,14 @@ The [Slice 2 report](../../report/slices/web-ui-workflow-consolidation/slice-2-p
 records successful focused race, complete affected-package lint, signature and
 whitespace checks.
 
-The T2.2 core reconciliation owner is implemented in `f4b080aeb4a2933b87535d56ca64e9fcb74f39ef`.
+The T2.2 core reconciliation owner is implemented in `78b9165e07963d74ab856b68a223034f39e4a609`.
 Preview selects by creation timestamp/path with explicit invalid-time evidence.
 Apply preserves source body/metadata history, composes attributed content and
 publishes aliases, the project reference and a retry receipt through the existing
 versioned journal. Recovery and bounded alias/receipt behavior have focused race
 coverage. Live data has not been reconciled.
 
-The T2.2 core dump mutation owner is implemented in `b18c795c115463d37bd676e9968b9ae1e25e47f1`.
+The T2.2 core dump mutation owner is implemented in `7bd9c09ad018e279d04726844e62896b0c365908`.
 It journals first and later general captures, retains prepared input and retry
 bindings, validates independent named captures, and guards full-body Save/Append
 with exact document revisions. Unknown frontmatter/metadata, raw captures and
@@ -135,7 +135,7 @@ prior body/metadata history survive edits and recovery. Focused race tests cover
 the replacement interruption points, retained preparation, stale/alias/root
 bindings, provider ownership validation and affected existing workflows.
 
-Application integration is implemented in `14735ffbd247419294adcc9ef93c164fe63471bf`.
+Application integration is implemented in `67dfdbd3937618b1003c914784ee952418f895ba`.
 The service routes capture/Save/Append through retained core writes, exposes
 reconciliation, and reads canonical catalogs/aliases across namespaces. CLI edits
 retain operation/revision fields, TUI retains unchanged Save bindings and Web
@@ -144,7 +144,7 @@ reported with projection-stale evidence when a later index/catalog refresh fails
 The old direct file writers are removed. Focused race checks, affected-package
 lint, signature and whitespace checks passed; the Slice 2 report records them.
 
-Bound authoring integration is implemented in `ac1e17b9257ac2ee53e821b7c87876fdf5d1c4c6`.
+Bound authoring integration is implemented in `cdd413c861723380a13b56ccc90bc1f7e27d092d`.
 General session/Telegram output extends the shared dump across namespaces;
 refinement replaces only an observed session output and retains exact history.
 Dump, project-reference, session, transcript, provenance and receipt images publish
@@ -154,12 +154,12 @@ checks cover all changed publication replacements, retries, stale/provider edits
 legacy adoption and question-only raw input; affected-package lint and signature
 checks passed.
 
-Assisted synthesis is implemented in `df5013c7629bd54d0ac2ecf49c55363a1b9c99ed`.
+Assisted synthesis is implemented in `467d2e083c3fb2d66c6de7bbf2ed8aad33e571e4`.
 Its guarded source/session, canonical content, provenance, history, pointer and
 receipt share one recoverable publication. Semantic retries preserve original
 content after later writes; CLI finalization resumes preparation or its receipt.
 Focused race tests, affected-package lint and signature checks passed. T2.2 is
-complete. T2.3 is implemented in `ce10f273f308a10faf48d72b5bebed9de733659d`. One New
+complete. T2.3 is implemented in `2c553693b3fe1efb8f40af7a17f619f88ab188de`. One New
 capture modal offers Project-wide and existing case names. Unchanged retries keep
 their identity and input; changed submitted arguments create a new intent.
 Failures and pending projections retain the form, and confirmed success restores
