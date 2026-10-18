@@ -1,15 +1,17 @@
 ---
 id: TKT-20261017200232
 title: "Require an internal tracker for deterministic ticket order"
-status: open
+status: in_progress
 kind: task
-severity: unclassified
-priority: unclassified
+severity: medium
+priority: normal
 scope: domain
 tags: tracking, tickets, plans
 source: chat
 reported_at: 2026-10-17T20:02:32Z
 commits: []
+ready_at: 2026-10-18T08:34:50Z
+started_at: 2026-10-18T08:34:50Z
 ---
 
 # Require an internal tracker for deterministic ticket order
@@ -131,3 +133,13 @@ Keep this ticket separate from
 6. Existing tracker naming and compatible structure are retained. No rename
    migration or maintenance of legacy progress fields is required for this
    transition.
+
+## Consolidated Design
+
+Selected for coordinated Web UI specification work on 2026-10-18. The earlier
+capture-only statements describe the initial capture boundary. The current
+request authorizes classification, this in-progress status, specification and
+commit; application implementation remains a separate step.
+
+Behavior, shared-domain changes and implementation design are consolidated in
+[Web UI and Workflow Consolidation](../../spec/drafts/web-ui-workflow-consolidation-draft.md).

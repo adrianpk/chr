@@ -1,15 +1,17 @@
 ---
 id: TKT-20261017190508
 title: "Unify dump capture around one evolving project-wide dump"
-status: open
+status: in_progress
 kind: task
-severity: unclassified
-priority: unclassified
+severity: medium
+priority: normal
 scope: domain
 tags: dumps, project-context, authoring
 source: chat
 reported_at: 2026-10-17T19:05:08Z
 commits: []
+ready_at: 2026-10-18T08:34:50Z
+started_at: 2026-10-18T08:34:50Z
 ---
 
 # Unify dump capture around one evolving project-wide dump
@@ -102,3 +104,13 @@ remaining ambiguity during refinement rather than silently changing its rules.
    reconciliation strategy, with content and references preserved.
 7. Record focused service, persistence and adapter validation when this work is
    authorized. This capture runs no implementation or migration checks.
+
+## Consolidated Design
+
+Selected for coordinated Web UI specification work on 2026-10-18. The earlier
+capture-only statements describe the initial capture boundary. The current
+request authorizes classification, this in-progress status, specification and
+commit; application implementation remains a separate step.
+
+Behavior, shared-domain changes and implementation design are consolidated in
+[Web UI and Workflow Consolidation](../../spec/drafts/web-ui-workflow-consolidation-draft.md).

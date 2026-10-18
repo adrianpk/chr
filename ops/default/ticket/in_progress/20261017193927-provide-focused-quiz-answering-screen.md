@@ -1,15 +1,17 @@
 ---
 id: TKT-20261017193927
 title: "Provide a focused quiz answering screen with modes and answer history"
-status: open
+status: in_progress
 kind: task
-severity: unclassified
-priority: unclassified
+severity: medium
+priority: normal
 scope: ui
 tags: quizzes, interaction, quiz-modes
 source: chat
 reported_at: 2026-10-17T19:39:27Z
 commits: []
+ready_at: 2026-10-18T08:34:50Z
+started_at: 2026-10-18T08:34:50Z
 ---
 
 # Provide a focused quiz answering screen with modes and answer history
@@ -159,3 +161,13 @@ duplicate answered entries.
 8. Keep this work separate from catalog membership and presentation. Run
    focused adapter/service and browser checks only when implementation is
    explicitly authorized.
+
+## Consolidated Design
+
+Selected for coordinated Web UI specification work on 2026-10-18. The earlier
+capture-only statements describe the initial capture boundary. The current
+request authorizes classification, this in-progress status, specification and
+commit; application implementation remains a separate step.
+
+Behavior, shared-domain changes and implementation design are consolidated in
+[Web UI and Workflow Consolidation](../../spec/drafts/web-ui-workflow-consolidation-draft.md).

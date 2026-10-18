@@ -1,15 +1,17 @@
 ---
 id: TKT-20261017185837
 title: "Use available Dumps grid width at default browser zoom"
-status: open
+status: in_progress
 kind: bug
-severity: unclassified
-priority: unclassified
+severity: medium
+priority: normal
 scope: ui
 tags: web-ui, dumps, responsive-layout
 source: chat
 reported_at: 2026-10-17T18:58:37Z
 commits: []
+ready_at: 2026-10-18T08:34:50Z
+started_at: 2026-10-18T08:34:50Z
 ---
 
 # Use available Dumps grid width at default browser zoom
@@ -59,3 +61,13 @@ The CSS or container cause has not been established. Inspect sizing and
 breakpoints when implementation is explicitly authorized. The observation
 alone does not establish whether the cause is card width, a grid breakpoint,
 a container constraint or another layout rule.
+
+## Consolidated Design
+
+Selected for coordinated Web UI specification work on 2026-10-18. The earlier
+capture-only statements describe the initial capture boundary. The current
+request authorizes classification, this in-progress status, specification and
+commit; application implementation remains a separate step.
+
+Behavior, shared-domain changes and implementation design are consolidated in
+[Web UI and Workflow Consolidation](../../spec/drafts/web-ui-workflow-consolidation-draft.md).

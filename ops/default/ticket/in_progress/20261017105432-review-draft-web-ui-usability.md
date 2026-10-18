@@ -1,15 +1,17 @@
 ---
 id: TKT-20261017105432
 title: "Review draft Web UI functionality, visual design and UX"
-status: open
+status: in_progress
 kind: follow_up
-severity: unclassified
-priority: unclassified
+severity: medium
+priority: normal
 scope: ui
 tags: web-ui, ux-ui, usability
 source: chat
 reported_at: 2026-10-17T10:54:32Z
 commits: []
+ready_at: 2026-10-18T08:34:50Z
+started_at: 2026-10-18T08:34:50Z
 ---
 
 # Review draft Web UI functionality, visual design and UX
@@ -223,3 +225,13 @@ The tracker remains an internal order document, with no processing-state
 synchronization. Monitoring must not block behind an active-action overlay,
 require a TUI process, start work as a side effect or mix concurrent runners'
 ticket and event context.
+
+## Consolidated Design
+
+Selected for coordinated Web UI specification work on 2026-10-18. The earlier
+capture-only statements describe the initial capture boundary. The current
+request authorizes classification, this in-progress status, specification and
+commit; application implementation remains a separate step.
+
+Behavior, shared-domain changes and implementation design are consolidated in
+[Web UI and Workflow Consolidation](../../spec/drafts/web-ui-workflow-consolidation-draft.md).

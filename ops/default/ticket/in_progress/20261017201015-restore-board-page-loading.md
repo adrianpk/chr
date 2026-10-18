@@ -1,15 +1,17 @@
 ---
 id: TKT-20261017201015
 title: "Implement the Kanban Board and shared ticket modal"
-status: open
+status: in_progress
 kind: task
-severity: unclassified
-priority: unclassified
+severity: medium
+priority: normal
 scope: ui
 tags: board, kanban, tickets, modal
 source: chat
 reported_at: 2026-10-17T20:10:15Z
 commits: []
+ready_at: 2026-10-18T08:34:50Z
+started_at: 2026-10-18T08:34:50Z
 ---
 
 # Implement the Kanban Board and Shared Ticket Modal
@@ -232,3 +234,13 @@ Implementation must remain consistent with the
    and actions, and retained input when maximizing/restoring.
 7. Use focused validation for the repaired read path, shared ticket mutations
    and Web interactions, following the repository's normal development gates.
+
+## Consolidated Design
+
+Selected for coordinated Web UI specification work on 2026-10-18. The earlier
+capture-only statements describe the initial capture boundary. The current
+request authorizes classification, this in-progress status, specification and
+commit; application implementation remains a separate step.
+
+Behavior, shared-domain changes and implementation design are consolidated in
+[Web UI and Workflow Consolidation](../../spec/drafts/web-ui-workflow-consolidation-draft.md).

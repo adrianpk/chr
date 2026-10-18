@@ -1,15 +1,17 @@
 ---
 id: TKT-20261017194552
 title: "Present individual spec cards and allow choosing the initial state"
-status: open
+status: in_progress
 kind: task
-severity: unclassified
-priority: unclassified
+severity: medium
+priority: normal
 scope: ui
 tags: specs, catalog, creation-state
 source: chat
 reported_at: 2026-10-17T19:45:52Z
 commits: []
+ready_at: 2026-10-18T08:34:50Z
+started_at: 2026-10-18T08:34:50Z
 ---
 
 # Present individual spec cards and allow choosing the initial state
@@ -171,3 +173,13 @@ does not require.
 9. Capture visual evidence of the catalog, the New entrypoint and the selected
    modal state when implementation is authorized. Validate the shared state
    and scope persistence as well as the visible UI.
+
+## Consolidated Design
+
+Selected for coordinated Web UI specification work on 2026-10-18. The earlier
+capture-only statements describe the initial capture boundary. The current
+request authorizes classification, this in-progress status, specification and
+commit; application implementation remains a separate step.
+
+Behavior, shared-domain changes and implementation design are consolidated in
+[Web UI and Workflow Consolidation](../../spec/drafts/web-ui-workflow-consolidation-draft.md).

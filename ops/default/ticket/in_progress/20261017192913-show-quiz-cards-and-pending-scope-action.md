@@ -1,15 +1,17 @@
 ---
 id: TKT-20261017192913
 title: "Make the quiz catalog readable and scope-driven"
-status: open
+status: in_progress
 kind: task
-severity: unclassified
-priority: unclassified
+severity: medium
+priority: normal
 scope: ui
 tags: quizzes, catalog, interaction
 source: chat
 reported_at: 2026-10-17T19:29:13Z
 commits: []
+ready_at: 2026-10-18T08:34:50Z
+started_at: 2026-10-18T08:34:50Z
 ---
 
 # Make the quiz catalog readable and scope-driven
@@ -187,3 +189,13 @@ question generation or declare the whole quiz review complete.
    verification screenshots alongside focused catalog/state and navigation
    evidence when implementation is explicitly authorized. Capturing this
    ticket does not execute quiz actions.
+
+## Consolidated Design
+
+Selected for coordinated Web UI specification work on 2026-10-18. The earlier
+capture-only statements describe the initial capture boundary. The current
+request authorizes classification, this in-progress status, specification and
+commit; application implementation remains a separate step.
+
+Behavior, shared-domain changes and implementation design are consolidated in
+[Web UI and Workflow Consolidation](../../spec/drafts/web-ui-workflow-consolidation-draft.md).

@@ -1,15 +1,17 @@
 ---
 id: TKT-20261017202340
 title: "Implement Dash as a live view of agent work"
-status: open
+status: in_progress
 kind: task
-severity: unclassified
-priority: unclassified
+severity: medium
+priority: normal
 scope: ui
 tags: dash, observability, workflow
 source: chat
 reported_at: 2026-10-17T20:23:40Z
 commits: []
+ready_at: 2026-10-18T08:34:50Z
+started_at: 2026-10-18T08:34:50Z
 ---
 
 # Implement Dash as a Live View of Agent Work
@@ -188,3 +190,13 @@ configuration editors or a Web-visible tracker document.
    completed states. Use focused read-model, refresh and presentation checks
    when implementation is authorized; do not start live production work merely
    to capture a screenshot.
+
+## Consolidated Design
+
+Selected for coordinated Web UI specification work on 2026-10-18. The earlier
+capture-only statements describe the initial capture boundary. The current
+request authorizes classification, this in-progress status, specification and
+commit; application implementation remains a separate step.
+
+Behavior, shared-domain changes and implementation design are consolidated in
+[Web UI and Workflow Consolidation](../../spec/drafts/web-ui-workflow-consolidation-draft.md).

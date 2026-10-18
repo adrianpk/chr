@@ -1,15 +1,17 @@
 ---
 id: TKT-20261017195741
 title: "Generate plans from use-case context with sufficient source material"
-status: open
+status: in_progress
 kind: task
-severity: unclassified
-priority: unclassified
+severity: medium
+priority: normal
 scope: domain
 tags: plans, generation, context
 source: chat
 reported_at: 2026-10-17T19:57:41Z
 commits: []
+ready_at: 2026-10-18T08:34:50Z
+started_at: 2026-10-18T08:34:50Z
 ---
 
 # Generate plans from use-case context with sufficient source material
@@ -96,3 +98,13 @@ viewing are covered by the separate
 5. A failed readiness check does not generate or replace the selected plan.
    Verify the shared operation and the browser entrypoint when implementation
    is authorized. Do not create or modify tracking artifacts for this ticket.
+
+## Consolidated Design
+
+Selected for coordinated Web UI specification work on 2026-10-18. The earlier
+capture-only statements describe the initial capture boundary. The current
+request authorizes classification, this in-progress status, specification and
+commit; application implementation remains a separate step.
+
+Behavior, shared-domain changes and implementation design are consolidated in
+[Web UI and Workflow Consolidation](../../spec/drafts/web-ui-workflow-consolidation-draft.md).

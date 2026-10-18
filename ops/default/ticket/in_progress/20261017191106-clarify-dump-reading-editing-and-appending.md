@@ -1,15 +1,17 @@
 ---
 id: TKT-20261017191106
 title: "Use one editor and Save for dump content"
-status: open
+status: in_progress
 kind: task
-severity: unclassified
-priority: unclassified
+severity: medium
+priority: normal
 scope: ui
 tags: dumps, editing, interaction
 source: chat
 reported_at: 2026-10-17T19:11:06Z
 commits: []
+ready_at: 2026-10-18T08:34:50Z
+started_at: 2026-10-18T08:34:50Z
 ---
 
 # Use one editor and Save for dump content
@@ -86,3 +88,13 @@ end of that file; it does not create a separate note entity or database row.
 - `internal/webui/assets/templates/shell.html`: dump modal and shared edit forms.
 - `internal/app/web_actions.go`: save/append actions and revision checks.
 - `internal/app/service_dump.go`: full-body replacement and append behavior.
+
+## Consolidated Design
+
+Selected for coordinated Web UI specification work on 2026-10-18. The earlier
+capture-only statements describe the initial capture boundary. The current
+request authorizes classification, this in-progress status, specification and
+commit; application implementation remains a separate step.
+
+Behavior, shared-domain changes and implementation design are consolidated in
+[Web UI and Workflow Consolidation](../../spec/drafts/web-ui-workflow-consolidation-draft.md).
