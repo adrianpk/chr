@@ -1,12 +1,14 @@
 package core
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // ProjectMetadataSchemaVersion defines a package boundary constant.
@@ -17,13 +19,15 @@ var ErrProjectMetadataNotFound = errors.New("project metadata not found")
 
 // ProjectMetadata describes a package boundary value.
 type ProjectMetadata struct {
-	SchemaVersion int
-	Name          string
-	Description   string
-	Context       string
-	SourcePath    string
-	SourceHash    string
-	Exists        bool
+	ProjectDumpRef string
+	frontmatter    string
+	SchemaVersion  int
+	Name           string
+	Description    string
+	Context        string
+	SourcePath     string
+	SourceHash     string
+	Exists         bool
 }
 
 // ProjectMetadataService describes a package boundary value.
@@ -40,7 +44,12 @@ func NewProjectMetadataService(projectDir string) ProjectMetadataService {
 func (s ProjectMetadataService) Load() (ProjectMetadata, error) {
 	path := ProjectMetadataPath(s.projectDir)
 
-	content, err := os.ReadFile(path)
+	relative, err := filepath.Rel(s.projectDir, path)
+	if err != nil {
+		return ProjectMetadata{}, err
+	}
+
+	content, err := (&fileAuthoringSessionRepository{projectDir: s.projectDir}).readAuthoringDocument(relative)
 	if errors.Is(err, os.ErrNotExist) {
 		return defaultProjectMetadata(s.projectDir), nil
 	}
@@ -63,6 +72,24 @@ func (s ProjectMetadataService) Load() (ProjectMetadata, error) {
 
 // Save persists the requested data.
 func (s ProjectMetadataService) Save(metadata ProjectMetadata) (ProjectMetadata, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	return s.SaveContext(ctx, metadata)
+}
+
+// SaveContext compares the source image inside the shared authoring owner.
+func (s ProjectMetadataService) SaveContext(ctx context.Context, metadata ProjectMetadata) (saved ProjectMetadata, err error) {
+	err = WithAuthoringMutation(ctx, s.projectDir, func(context.Context) error {
+		saved, err = s.save(metadata, false)
+
+		return err
+	})
+
+	return saved, err
+}
+
+func (s ProjectMetadataService) save(metadata ProjectMetadata, bindDump bool) (ProjectMetadata, error) {
 	metadata.SchemaVersion = ProjectMetadataSchemaVersion
 
 	err := ValidateProjectMetadata(metadata)
@@ -70,16 +97,32 @@ func (s ProjectMetadataService) Save(metadata ProjectMetadata) (ProjectMetadata,
 		return ProjectMetadata{}, err
 	}
 
-	path := ProjectMetadataPath(s.projectDir)
-
-	err = validateProjectMetadataWriteHash(path, metadata)
+	current, err := s.Load()
 	if err != nil {
 		return ProjectMetadata{}, err
 	}
 
-	content := RenderProjectMetadata(metadata)
+	if err := validateProjectMetadataWriteHash(current, metadata); err != nil {
+		return ProjectMetadata{}, err
+	}
 
-	err = writeFileAtomically(path, []byte(content))
+	if !bindDump {
+		if metadata.ProjectDumpRef != "" && metadata.ProjectDumpRef != current.ProjectDumpRef {
+			return ProjectMetadata{}, fmt.Errorf("%w: project_dump_ref changes require dump adoption or reconciliation", ErrProjectDumpReconciliation)
+		}
+
+		metadata.ProjectDumpRef = current.ProjectDumpRef
+	}
+
+	metadata.frontmatter = current.frontmatter
+	path := ProjectMetadataPath(s.projectDir)
+
+	content := RenderProjectMetadata(metadata)
+	if len(content) > WorkflowFileLimit {
+		return ProjectMetadata{}, fmt.Errorf("project metadata exceeds the file limit")
+	}
+
+	err = atomicWorkflowFile(path, []byte(content))
 	if err != nil {
 		return ProjectMetadata{}, fmt.Errorf("write project metadata: %w", err)
 	}
@@ -91,22 +134,16 @@ func (s ProjectMetadataService) Save(metadata ProjectMetadata) (ProjectMetadata,
 	return metadata, nil
 }
 
-func validateProjectMetadataWriteHash(path string, metadata ProjectMetadata) error {
+func validateProjectMetadataWriteHash(current, metadata ProjectMetadata) error {
 	if metadata.SourceHash == "" {
 		return nil
 	}
 
-	current, err := os.ReadFile(path)
-	if errors.Is(err, os.ErrNotExist) {
+	if !current.Exists {
 		return fmt.Errorf("project metadata file changed outside CHR: source file is missing")
 	}
 
-	if err != nil {
-		return fmt.Errorf("read current project metadata before write: %w", err)
-	}
-
-	currentHash := contentHash(current)
-	if currentHash != metadata.SourceHash {
+	if current.SourceHash != metadata.SourceHash {
 		return fmt.Errorf("project metadata file changed outside CHR: refresh before saving")
 	}
 
@@ -125,18 +162,23 @@ func ParseProjectMetadata(content string) (ProjectMetadata, error) {
 		return ProjectMetadata{}, err
 	}
 
-	fields := parseSimpleYAMLFields(frontmatter)
+	values, err := projectDocumentFields(frontmatter)
+	if err != nil {
+		return ProjectMetadata{}, err
+	}
 
-	schemaVersion, err := strconv.Atoi(unquoteMetadataString(fields["schema_version"]))
+	schemaVersion, err := strconv.Atoi(values["schema_version"])
 	if err != nil {
 		return ProjectMetadata{}, fmt.Errorf("parse project metadata schema_version: %w", err)
 	}
 
 	metadata := ProjectMetadata{
-		SchemaVersion: schemaVersion,
-		Name:          unquoteMetadataString(fields["name"]),
-		Description:   unquoteMetadataString(fields["description"]),
-		Context:       strings.TrimSpace(body),
+		ProjectDumpRef: values["project_dump_ref"],
+		frontmatter:    frontmatter,
+		SchemaVersion:  schemaVersion,
+		Name:           values["name"],
+		Description:    values["description"],
+		Context:        strings.TrimSpace(body),
 	}
 
 	err = ValidateProjectMetadata(metadata)
@@ -149,23 +191,7 @@ func ParseProjectMetadata(content string) (ProjectMetadata, error) {
 
 // RenderProjectMetadata renders the corresponding package data.
 func RenderProjectMetadata(metadata ProjectMetadata) string {
-	var output strings.Builder
-
-	output.WriteString("---\n")
-	output.WriteString("schema_version: ")
-	output.WriteString(strconv.Itoa(ProjectMetadataSchemaVersion))
-	output.WriteString("\n")
-	output.WriteString("name: ")
-	output.WriteString(yamlString(metadata.Name))
-	output.WriteString("\n")
-	output.WriteString("description: ")
-	output.WriteString(yamlString(metadata.Description))
-	output.WriteString("\n")
-	output.WriteString("---\n\n")
-	output.WriteString(strings.TrimSpace(metadata.Context))
-	output.WriteString("\n")
-
-	return output.String()
+	return "---\n" + renderProjectMetadataFields(metadata) + "\n---\n\n" + strings.TrimSpace(metadata.Context) + "\n"
 }
 
 // ValidateProjectMetadata validates the corresponding package boundary value.
@@ -182,7 +208,7 @@ func ValidateProjectMetadata(metadata ProjectMetadata) error {
 		return fmt.Errorf("project metadata description is required")
 	}
 
-	return nil
+	return ValidateProjectDumpReference(metadata.ProjectDumpRef)
 }
 
 func defaultProjectMetadata(projectDir string) ProjectMetadata {
