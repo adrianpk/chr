@@ -49,11 +49,16 @@ func webBoardBrowserViewport(t *testing.T, browser *webWorkflowBrowser, width, h
 func webBoardBrowserCapture(t *testing.T, browser *webWorkflowBrowser, name string) {
 	t.Helper()
 
-	directory := os.Getenv("CHR_WEB_BOARD_SCREENSHOTS")
+	webBrowserCapture(t, browser, os.Getenv("CHR_WEB_BOARD_SCREENSHOTS"), name)
+}
+
+func webBrowserCapture(t *testing.T, browser *webWorkflowBrowser, directory, name string) {
+	t.Helper()
+
 	if directory == "" {
 		return
 	}
-	// A paint boundary captures the declared CSS viewport at DPR 1 and 100% zoom.
+	// Capture after paint; the caller records viewport, DPR and browser zoom.
 	browser.evaluate(t, `new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(()=>r('painted'))))`)
 
 	result := browser.call(t, "Page.captureScreenshot", map[string]any{"format": "png", "captureBeyondViewport": false})

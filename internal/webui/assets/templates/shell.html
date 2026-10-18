@@ -211,7 +211,7 @@
   <article class="dump-card">
     <h2>{{if .DisplayTitle}}{{.DisplayTitle}}{{else}}{{.Title}}{{end}}</h2>
     {{if .Meta}}<p class="dump-card__meta">{{.Meta}}</p>{{end}}
-    <div class="dump-card__preview">{{if .Preview}}{{.Preview}}{{else}}No entries yet{{end}}</div>
+    <div class="dump-card__preview"><div class="dump-card__preview-text">{{if .Preview}}{{.Preview}}{{else}}No entries yet{{end}}</div></div>
   </article>
 </a>
 {{end}}

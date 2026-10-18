@@ -398,6 +398,10 @@ project-wide capture creates the shared dump; later captures extend that same
 document, including captures made through CLI, TUI or authoring conversations.
 Case captures remain separate documents associated with the selected case.
 
+The catalog fits more fixed-size cards across wider windows. Short or long
+content keeps the same card and inset preview size; previews show only opening
+text. Narrow windows reduce the column count. Open a card for the full body.
+
 A failed request retains the form. Keep the same fields when retrying an uncertain
 request; changing them submits a new capture. If the capture is committed but its
 catalog refresh is pending, the form shows that result and an unchanged retry

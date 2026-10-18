@@ -157,6 +157,10 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Fixed
 
+- The Dumps catalog fits a third card column at normal desktop zoom. Cards
+  keep the same size for short and long documents, with clipped opening text
+  in a pale green inset preview. Narrow windows reduce the column count.
+
 - Prevented outdated ticket forms and comments from changing a ticket after
   another edit. Reload the board before submitting again.
 - Made failed Web UI form submissions display their error and reload actions

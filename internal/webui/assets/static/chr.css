@@ -876,6 +876,14 @@ a {
   font: 13px/20px var(--mono);
 }
 
+.dump-card__preview-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  height: 100%;
+  overflow: hidden;
+}
+
 @media (max-width: 347px) {
   html:has(.dump-catalog) {
     min-width: 0;

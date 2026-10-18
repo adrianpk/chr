@@ -39,13 +39,24 @@ func TestWebDumpGridBrowser(t *testing.T) {
 		browser := webDumpGridBrowser(t, path, zoom)
 		browser.navigate(t, server.URL+"/dumps")
 		browser.wait(t, ".dump-card")
-		webDumpGridGeometry(t, browser, zoom, 1280)
+
+		metrics := webDumpGridGeometry(t, browser, zoom, 1280)
+		webDumpGridCapture(t, browser, "desktop-"+strconv.Itoa(int(math.Round(zoom*100))), metrics)
 
 		if zoom == 1 {
 			for _, width := range []int{768, 390, 320} {
 				webBoardBrowserViewport(t, browser, width, 844)
-				webDumpGridGeometry(t, browser, 1, width)
+				webBoardBrowserWait(t, browser, "innerWidth==="+strconv.Itoa(width))
+
+				metrics := webDumpGridGeometry(t, browser, 1, width)
+				webDumpGridCapture(t, browser, "width-"+strconv.Itoa(width), metrics)
 			}
+
+			// Card count changes cannot stretch the surviving card.
+			browser.call(t, "Emulation.clearDeviceMetricsOverride", map[string]any{})
+			webBoardBrowserWait(t, browser, "innerWidth===1280")
+			browser.evaluate(t, `document.querySelectorAll('.dump-card-link').forEach((e,i)=>{if(i)e.remove();}); 'one card'`)
+			webDumpGridGeometry(t, browser, 1, 1280)
 		}
 	}
 }
@@ -71,10 +82,10 @@ func webDumpGridFixture(t *testing.T) webDumpCaptureProvider {
 	return provider
 }
 
-func webDumpGridGeometry(t *testing.T, browser *webWorkflowBrowser, zoom float64, width int) {
+func webDumpGridGeometry(t *testing.T, browser *webWorkflowBrowser, zoom float64, width int) string {
 	t.Helper()
 
-	metrics := browser.evaluate(t, `JSON.stringify({innerWidth,innerHeight,outerWidth,outerHeight,dpr:devicePixelRatio,grid:getComputedStyle(document.querySelector('.dump-list')).gridTemplateColumns,width:document.querySelector('.dump-list').getBoundingClientRect().width})`)
+	metrics := browser.evaluate(t, `(()=>{const c=document.querySelector('.dump-card'),p=c.querySelector('.dump-card__preview'),r=c.getBoundingClientRect(),v=p.getBoundingClientRect();return JSON.stringify({innerWidth,innerHeight,outerWidth,outerHeight,dpr:devicePixelRatio,grid:getComputedStyle(document.querySelector('.dump-list')).gridTemplateColumns,width:document.querySelector('.dump-list').getBoundingClientRect().width,cardCount:document.querySelectorAll('.dump-card').length,cardWidth:r.width,cardHeight:r.height,previewWidth:v.width,previewHeight:v.height,cardBackground:getComputedStyle(c).backgroundColor,previewBackground:getComputedStyle(p).backgroundColor,pageOverflow:document.documentElement.scrollWidth>document.documentElement.clientWidth});})()`)
 	t.Log("zoom", zoom, metrics)
 
 	if got := browser.evaluate(t, `String([...document.querySelectorAll('.dump-card')].every(e=>{const r=e.getBoundingClientRect(),p=e.querySelector('.dump-card__preview').getBoundingClientRect();return Math.abs(r.width-300)<0.1&&Math.abs(r.height-226)<0.1&&Math.abs(p.height-122)<0.1&&r.right<=document.documentElement.clientWidth+0.1;}))`); got != "true" {
@@ -83,6 +94,12 @@ func webDumpGridGeometry(t *testing.T, browser *webWorkflowBrowser, zoom float64
 
 	if got := browser.evaluate(t, `String(document.documentElement.scrollWidth<=document.documentElement.clientWidth)`); got != "true" {
 		t.Fatal("Dumps layout overflows the viewport", metrics)
+	}
+
+	// Fractional zoom rounds borders; allow less than one physical pixel from
+	// nominal preview width while requiring equal widths across all content.
+	if got := browser.evaluate(t, `(()=>{const width=document.querySelector('.dump-card__preview').getBoundingClientRect().width;return String([...document.querySelectorAll('.dump-card')].every(e=>{const p=e.querySelector('.dump-card__preview'),s=getComputedStyle(p);return Math.abs(e.querySelector('h2').getBoundingClientRect().height-40)<0.1&&Math.abs(p.getBoundingClientRect().width-width)<0.05&&Math.abs(width-270)<1/devicePixelRatio&&s.overflowY==='hidden'&&getComputedStyle(p.firstElementChild).webkitLineClamp==='5'&&getComputedStyle(p.firstElementChild).overflowY==='hidden'&&s.backgroundColor==='rgb(247, 251, 247)'&&getComputedStyle(e).backgroundColor==='rgb(255, 255, 255)';}));})()`); got != "true" {
+		t.Fatal("title or inset preview escaped the fixed card anatomy", metrics)
 	}
 
 	var measured struct{ DPR float64 }
@@ -97,6 +114,23 @@ func webDumpGridGeometry(t *testing.T, browser *webWorkflowBrowser, zoom float64
 
 	if got := browser.evaluate(t, `String(getComputedStyle(document.querySelector('.dump-list')).gridTemplateColumns.split(' ').length)`); got != columns {
 		t.Fatal("grid did not pack fixed tracks into available width", got, columns, metrics)
+	}
+
+	return metrics
+}
+
+func webDumpGridCapture(t *testing.T, browser *webWorkflowBrowser, name, metrics string) {
+	t.Helper()
+
+	directory := os.Getenv("CHR_WEB_DUMP_GRID_SCREENSHOTS")
+	if directory == "" {
+		return
+	}
+
+	webBrowserCapture(t, browser, directory, name)
+
+	if err := os.WriteFile(filepath.Join(directory, name+".json"), []byte(metrics+"\n"), 0o644); err != nil {
+		t.Fatal(err)
 	}
 }
 
