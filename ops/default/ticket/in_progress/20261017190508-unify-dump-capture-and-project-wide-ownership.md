@@ -9,7 +9,8 @@ scope: domain
 tags: dumps, project-context, authoring
 source: chat
 reported_at: 2026-10-17T19:05:08Z
-commits: []
+commits: [a8bdec69d5595740a6fee1b723b1d2f1357a6ce4]
+branch: feat/slice-2-project-dump
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
@@ -104,6 +105,22 @@ remaining ambiguity during refinement rather than silently changing its rules.
    reconciliation strategy, with content and references preserved.
 7. Record focused service, persistence and adapter validation when this work is
    authorized. This capture runs no implementation or migration checks.
+
+## Implementation Progress
+
+T2.1 is implemented in `a8bdec69d5595740a6fee1b723b1d2f1357a6ce4`. Project metadata now retains
+one validated `project_dump_ref`, with shared authoring exclusion for metadata
+saves and source-bound adoption of an unambiguous existing general dump. The
+read-only inventory spans namespaces, distinguishes raw and case-scoped records,
+retains original artifact bytes, and rejects stale/cross-project observations,
+unsafe paths and conflicting destinations. Unknown project frontmatter survives
+adoption and later descriptive metadata edits.
+
+The [Slice 2 report](../../report/slices/web-ui-workflow-consolidation/slice-2-project-dump.md)
+records successful focused race, complete affected-package lint, signature and
+whitespace checks. T2.2 capture/retry routing and explicit reconciliation remain;
+T2.3's single Web New action also remains. Final controller validation has not
+run and the slice has no ready PR.
 
 ## Consolidated Design
 
