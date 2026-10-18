@@ -9,7 +9,7 @@ scope: domain
 tags: tracking, tickets, plans
 source: chat
 reported_at: 2026-10-17T20:02:32Z
-commits: []
+commits: [fcd81c18382ea6984f5bb25229b2111c6d8f64bc]
 branch: feat/slice-9-plan-order-tracker
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
@@ -156,3 +156,10 @@ output. Root-bound receipts acknowledge explicit operation retries without
 another model call or revision. Focused plan race checks and affected-package
 strict lint passed. T9.2 is active; approved materialization and execution-context
 binding remain for T9.3.
+
+T9.2 completed: v2 uses structural order/reference hashing and rendering through
+the existing tracker owner, with receipt-independent observation and retained
+planned-image integrity. Claims and validated work preserve bytes, metadata,
+hash and generation time. Exact observed-hash replacement remains required for
+edited output; v1 rendering/checksums and recovery remain supported. Strict core
+lint and the expanded plan/tracker focused race selection passed. T9.3 is active.

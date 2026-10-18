@@ -64,7 +64,7 @@ func (r *fileAuthoringSessionRepository) validatePlanReceiptResult(scope QuizSco
 	}
 
 	root := filepath.Join(OpsDirectoryName, namespace)
-	images := map[string]string{binding.BodyRef: binding.BodyHash, filepath.ToSlash(filepath.Join(filepath.Dir(binding.OrderRef), "planned-order.json")): binding.OrderHash, filepath.ToSlash(filepath.Join(filepath.Dir(binding.TrackerRef), "planned-tracker.md")): binding.TrackerHash}
+	images := map[string]string{binding.BodyRef: binding.BodyHash, filepath.ToSlash(filepath.Join(filepath.Dir(binding.OrderRef), "planned-order.json")): binding.PlannedOrderHash, filepath.ToSlash(filepath.Join(filepath.Dir(binding.TrackerRef), "planned-tracker.md")): binding.PlannedTrackerHash}
 
 	return r.checkPlanImages(root, images)
 }

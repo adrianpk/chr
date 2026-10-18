@@ -20,6 +20,7 @@ type WorkflowTrackerSource struct {
 
 // WorkflowTrackerStatus describes an optional view, never execution authority.
 type WorkflowTrackerStatus struct {
+	PlanRevision *PlanRevisionBinding    `json:"plan_revision,omitempty"`
 	Schema       string                  `json:"schema"`
 	ProjectID    string                  `json:"project_id"`
 	Namespace    string                  `json:"namespace"`
@@ -39,6 +40,7 @@ type WorkflowTrackerStatus struct {
 
 // WorkflowTrackerOptions grants replacement only for exactly observed output bytes.
 type WorkflowTrackerOptions struct {
+	Schema      string `json:"schema,omitempty"`
 	ReplaceHash string `json:"replace_hash,omitempty"`
 }
 
@@ -46,7 +48,7 @@ type WorkflowTrackerOptions struct {
 // It never imports tracker edits, claims work or rolls back authoritative records.
 func (s *WorkflowStore) ExportWorkflowTracker(ctx context.Context, setID string, opts WorkflowTrackerOptions) (result WorkflowTrackerStatus, err error) {
 	err = s.withLock(ctx, func() error {
-		snapshot, readErr := s.readSnapshot(ctx)
+		snapshot, readErr := s.workflowTrackerSnapshot(ctx, setID, opts.Schema)
 		if readErr != nil {
 			return readErr
 		}
@@ -62,17 +64,19 @@ func (s *WorkflowStore) ExportWorkflowTracker(ctx context.Context, setID string,
 // InspectWorkflowTracker observes source and output hashes without repairing files.
 func (s *WorkflowStore) InspectWorkflowTracker(ctx context.Context, setID string) (result WorkflowTrackerStatus, err error) {
 	err = s.withRepositoryLock(ctx, s.requireNoWorkflowTransition, func() error {
-		snapshot, readErr := s.readSnapshot(ctx)
-		if readErr != nil {
-			return readErr
-		}
+		var readErr error
 
 		result, readErr = s.readWorkflowTracker(setID)
 		if readErr != nil {
 			return readErr
 		}
 
-		source, _, readErr := s.workflowTrackerImage(snapshot, setID)
+		snapshot, readErr := s.workflowTrackerSnapshot(ctx, setID, result.Schema)
+		if readErr != nil {
+			return readErr
+		}
+
+		source, _, readErr := s.versionedWorkflowTrackerImage(snapshot, setID, result.Schema)
 		if readErr != nil {
 			return readErr
 		}
@@ -100,19 +104,10 @@ func workflowTrackerResult(result WorkflowTrackerStatus, err error) (WorkflowTra
 }
 
 func (s *WorkflowStore) exportWorkflowTracker(snapshot WorkflowSnapshot, setID string, opts WorkflowTrackerOptions) (WorkflowTrackerStatus, error) {
-	result, output, err := s.workflowTrackerImage(snapshot, setID)
+	result, output, previous, err := s.prepareWorkflowTrackerImage(snapshot, setID, opts)
 	if err != nil {
 		return result, err
 	}
-
-	previous, err := s.workflowTrackerPrevious(setID)
-	if err != nil {
-		return result, err
-	}
-
-	result.OutputHash, result.PendingHash = previous.OutputHash, workflowHash(output)
-	result.GeneratedAt = previous.GeneratedAt
-	result.Status, result.Reason = "stale", "projection_stale"
 
 	result.ObservedHash, err = s.workflowTrackerOutput(setID)
 	if err != nil {
@@ -160,4 +155,29 @@ func (s *WorkflowStore) workflowTrackerFailure(result WorkflowTrackerStatus, fai
 	result.Status, result.Reason, result.Detail = "stale", "projection_stale", failure.Error()
 
 	return result, errors.Join(ErrWorkflowProjectionStale, failure, s.persistWorkflowTracker(result))
+}
+
+func (s *WorkflowStore) prepareWorkflowTrackerImage(snapshot WorkflowSnapshot, setID string, opts WorkflowTrackerOptions) (WorkflowTrackerStatus, []byte, WorkflowTrackerStatus, error) {
+	previous, err := s.workflowTrackerPrevious(setID)
+	if err != nil {
+		return WorkflowTrackerStatus{}, nil, previous, err
+	}
+
+	schema := workflowTrackerSchema(snapshot, setID, opts.Schema, previous.Schema)
+
+	result, output, err := s.versionedWorkflowTrackerImage(snapshot, setID, schema)
+	if err != nil {
+		return result, nil, previous, err
+	}
+
+	result.OutputHash, result.PendingHash = previous.OutputHash, workflowHash(output)
+
+	result.GeneratedAt = previous.GeneratedAt
+	if result.Schema == "chr-tracker/v2" && result.SourceHash != previous.SourceHash {
+		result.GeneratedAt = time.Time{}
+	}
+
+	result.Status, result.Reason = "stale", "projection_stale"
+
+	return result, output, previous, nil
 }

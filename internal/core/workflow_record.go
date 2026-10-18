@@ -86,6 +86,7 @@ type WorkflowSlice struct {
 
 // WorkflowSet owns ordered slices and its closing contract.
 type WorkflowSet struct {
+	PlanRevision      *PlanRevisionBinding    `json:"plan_revision,omitempty"`
 	Closing           *WorkflowClosingBinding `json:"closing,omitempty"`
 	Amendments        []WorkflowAmendmentRef  `json:"amendments,omitempty"`
 	Schema            string                  `json:"workflow_schema"`

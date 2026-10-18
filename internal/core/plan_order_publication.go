@@ -35,6 +35,7 @@ func preparePlanOrderChanges(projectDir string, paths GeneratedPlanPaths, target
 	}
 
 	binding.OrderHash, binding.TrackerHash = workflowHash(encoded), workflowHash(tracker)
+	binding.PlannedOrderHash, binding.PlannedTrackerHash = binding.OrderHash, binding.TrackerHash
 	r := &fileAuthoringSessionRepository{projectDir: projectDir}
 
 	changes, err := r.planRetainedImages(document.Namespace, binding, body, encoded, tracker)

@@ -67,6 +67,10 @@ func (r WorkflowRecord) validateDomain() error {
 	case r.Kind == "ticket" && r.Task != nil:
 		return validateWorkflowTask(*r.Task)
 	case r.Kind == "plan" && r.Set != nil:
+		if err := validateWorkflowPlanRevision(r.Namespace, *r.Set); err != nil {
+			return err
+		}
+
 		return validateWorkflowSet(*r.Set)
 	case r.Kind == "receipt" && r.Receipt != nil:
 		return validateWorkflowReceipt(*r.Receipt)
