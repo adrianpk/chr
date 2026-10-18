@@ -144,10 +144,19 @@ reported with projection-stale evidence when a later index/catalog refresh fails
 The old direct file writers are removed. Focused race checks, affected-package
 lint, signature and whitespace checks passed; the Slice 2 report records them.
 
-T2.2 still requires assisted synthesis and bound authoring/Telegram continuation
-routing into the same destination and recovery journal. T2.3's single Web New
-capture form with existing case choices and retained capture identity remains.
-Final controller validation has not run and the slice has no ready PR.
+Bound authoring integration is implemented in `ac1e17b9257ac2ee53e821b7c87876fdf5d1c4c6`.
+General session/Telegram output extends the shared dump across namespaces;
+refinement replaces only an observed session output and retains exact history.
+Dump, project-reference, session, transcript, provenance and receipt images publish
+through one existing recovery journal. Alias-aware observations guard the resolved
+body and project metadata, and native work retains its own namespace. Focused race
+checks cover all changed publication replacements, retries, stale/provider edits,
+legacy adoption and question-only raw input; affected-package lint and signature
+checks passed.
+
+T2.2 still requires assisted synthesis routing. T2.3's single Web New capture form
+with existing case choices and retained capture identity remains. Final controller
+validation has not run and the slice has no ready PR.
 
 ## Consolidated Design
 

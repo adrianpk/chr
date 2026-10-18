@@ -13,7 +13,8 @@ Deliver one evolving project-wide dump through the existing authoring and
 metadata owners, following the [plan](../../../plan/web-ui-workflow-consolidation.md)
 and [ordered task map](../../../tracker/web-ui-workflow-consolidation.md).
 T2.1, the T2.2 core owners and application/CLI/TUI/Web edit integration are
-implemented. Assisted/bound authoring continuation routing and T2.3 remain.
+implemented, along with bound authoring/Telegram dump continuations. Assisted
+synthesis and T2.3 remain.
 
 ## Delivered Behavior
 
@@ -59,8 +60,8 @@ observed document revision inside exclusion. Save replaces editable content whil
 retaining frontmatter, unknown metadata, capture provenance and the exact prior
 body/metadata history. Alias edits target the canonical document while retaining
 the superseded original. The central application service now routes capture, Save and Append through
-these operations. Assisted and bound authoring continuation writers remain to be
-routed.
+these operations. Bound authoring and Telegram continuations also use the destination. Assisted
+synthesis remains to be routed.
 
 Project metadata saves share the authoring owner and compare source hashes after
 exclusion. Name/context edits retain the canonical reference and unknown
@@ -88,6 +89,25 @@ intent when the text changes. Web detail forms bind Save/Append to the observed
 document and look up receipts before stale-source checks. The two Web capture
 forms still await T2.3's single New flow.
 
+Bound authoring and Telegram dump outputs join canonical content, retained raw
+inputs, history, project reference, session, transcript, provenance and receipt
+in one v2 journal. Other artifact targets retain their v1 publication format.
+Later sessions append to the shared identity across namespaces; explicit
+refinement replaces its observed editable body and retains the previous images.
+No nested standalone dump operation publishes ahead of the session transaction.
+
+Session observations resolve retained aliases to the canonical body while guarding
+both original alias images and the destination. Their source hash also binds
+project metadata. Providers and proposed native work use the resolved body while
+session-owned raw captures, quizzes, specs, plans and records retain their own
+namespace. An independent shared edit requires a fresh observation. The owner
+also rechecks the complete dump inventory after provider preparation.
+
+A question-only creation's bound continuation may bootstrap its first dump only
+when all raw-only components are its exact observed inputs. Unrelated orphan
+captures still require explicit reconciliation. Original raw bytes remain intact.
+Refinement without a session output fails before provider dispatch.
+
 ## Implementation Notes
 
 T2.1 commit: `a8bdec69d5595740a6fee1b723b1d2f1357a6ce4`.
@@ -95,6 +115,7 @@ T2.1 commit: `a8bdec69d5595740a6fee1b723b1d2f1357a6ce4`.
 T2.2 core reconciliation commit: `f4b080aeb4a2933b87535d56ca64e9fcb74f39ef`.
 T2.2 core mutation commit: `b18c795c115463d37bd676e9968b9ae1e25e47f1`.
 T2.2 application routing commit: `14735ffbd247419294adcc9ef93c164fe63471bf`. The task remains open.
+T2.2 bound authoring integration commit: `ac1e17b9257ac2ee53e821b7c87876fdf5d1c4c6`.
 
 The prior dump service serialized create/append/save but allocated separate
 general pairs and performed direct file writes. Those application writers are
@@ -156,7 +177,8 @@ provide the shared core capture/edit boundary. The mutation rejects changed
 arguments, stale or cross-project document bindings, unresolved general ownership,
 unknown cases, raw edits and provider scope/type/component-link changes. It can
 be nested under an existing authoring claim; bound continuations still need to
-include the prepared changes in their own session/receipt journal.
+include the prepared changes in their own session/receipt journal. This integration
+is implemented for bound continuations; assisted synthesis remains pending.
 
 ## Files of Interest
 
@@ -165,6 +187,7 @@ include the prepared changes in their own session/receipt journal.
 - `internal/core/project_dump_read.go` and `project_dump_artifact.go`: bounded cross-namespace inventory and component classification.
 - `internal/core/project_dump_reconciliation.go`, `project_dump_composition.go`, `project_dump_receipt.go`, `project_dump_alias.go` and `project_dump_journal.go`: deterministic migration, immutable history/receipts and bounded journal/alias contracts.
 - `internal/core/dump_mutation*.go`: retained capture preparation, destination selection, source-bound edits and recoverable content/history publication.
+- `internal/core/authoring_dump.go`, `authoring_dump_snapshot.go` and the existing continuation owner: joined session/dump publication, alias-aware context and shared-source guards.
 - `docs/reference/authoring-sessions.md`: project dump and recovery format reference.
 - `internal/app/service_dump_owner.go`, `service_dump_catalog.go`, `service_project_dump.go`, `dump_cli.go` and `tui_adapters_dump_quiz.go`: application mutation, catalog, explicit reconciliation and adapter binding.
 - `internal/app/web_actions.go`, `web_artifacts.go`, `internal/tui/dump_actions.go` and the existing Web detail forms: revision-bound edits and receipt-aware results.
@@ -188,18 +211,25 @@ Application integration development checks passed before `14735ffbd247419294adcc
 - `scripts/check-go-func-signatures.sh` — passed.
 - `git diff --check` — passed.
 
+Bound authoring development checks passed before the integration commit:
+
+- `go test -race ./internal/core ./internal/app -run '^(TestAuthoringDump.*|TestTelegramAuthoring.*)$' -count=1` — passed. Covers all affected bound authoring and Telegram continuations, native preparation, authority guards and receipt replay, with new concurrent namespace, alias, stale-source, provider-edit and publication-fault regressions.
+- `go test -race ./internal/core -run '^(TestAuthoringDump.*|TestTelegramAuthoringOwner.*)$' -count=1` — passed after adding legacy adoption and tightening refinement ownership.
+- `go test -race ./internal/core -run '^TestAuthoringDump' -count=1` — passed after adding refinement-without-output rejection. Publication faults cover every changed image of first capture, later capture and refinement; unchanged transcript images do not perform a replacement.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app` — passed with zero issues on the final task tree.
+- `scripts/check-go-func-signatures.sh` — passed.
+- `git diff --check` — passed.
+
 Final clean-HEAD slice validation through Looper, including `make verify`, has not
 run. These task checks do not establish complete Slice 2 or nightly evidence.
 
 ## Risks and Follow-ups
 
-T2.2 remains open for assisted authoring synthesis and bound session/Telegram
-continuation writers. Their session, artifact, provenance and receipt changes
-must share the canonical dump destination and one recovery journal; a nested
-standalone mutation must not publish content ahead of its session transaction.
-The application, CLI, TUI and Web edit routes now use the shared owner, but the
-remaining authoring writers can still allocate per-session general outputs.
-T2.3 remains: one Web New capture form with Project-wide and existing named cases,
-including a retained per-form capture operation identity. The current two capture
-forms have not yet been replaced. No reconciliation has been applied to live data.
-The source ticket stays in progress until all Slice 2 contracts are delivered.
+T2.2 remains open for assisted authoring synthesis. Its artifact, session,
+provenance and receipt changes must join the shared dump transaction. Application,
+CLI, TUI, Web edits and bound authoring/Telegram continuations now use the canonical
+owner. T2.3 remains: one Web New capture form with Project-wide and existing named
+cases, including a retained per-form capture identity. Final controller validation
+and the canonical slice PR remain pending. No reconciliation has been applied to
+live data. The source ticket stays in progress until all Slice 2 contracts are
+delivered.
