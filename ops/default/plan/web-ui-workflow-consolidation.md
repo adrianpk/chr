@@ -40,6 +40,14 @@ an interactive full suite as a substitute.
 
 ## 1. Delivery Units and State Ownership
 
+Maintainer clarification, 2026-10-18: all document catalog cards have fixed
+width and height per type, including Dumps, Quizzes, Specs and Plans. Their
+preview areas also stay fixed and show only opening lines with clipped overflow.
+Responsive grids change column count, not card geometry. Apply this contract in
+the owning UI slices and verify identical geometry for short/long bodies in
+the final review. This clarifies existing acceptance; slice identities and
+execution ownership remain unchanged.
+
 This plan contains twelve ordered slices, one branch and one PR targeting
 `dev` per existing source ticket. The tracker supplies deterministic order and
 commit-sized task instructions. Those instructions do not create more tickets.

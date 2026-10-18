@@ -24,6 +24,11 @@ First planned slice: Slice 1, Board and shared ticket modal; T1.1.
 
 ## Ordering Contract
 
+Required catalog presentation, clarified 2026-10-18: fixed width/height per card
+type and a fixed preview of opening lines with clipped overflow. Content never
+enlarges a card or preview; responsive grids vary column count. The owning
+catalog slices and final review verify this under the linked specification.
+
 Read slices in ascending numeric order and tasks in their listed order. Every
 slice uses its one existing source ticket, one branch and one PR targeting dev.
 Task IDs are commit-sized instructions within that ticket, not extra tickets.

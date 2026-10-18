@@ -74,3 +74,13 @@ report carry progress; the delivery tracker defines order only.
 
 Behavior, shared-domain changes and implementation design are consolidated in
 [Web UI and Workflow Consolidation](../../spec/stable/web-ui-workflow-consolidation.md).
+
+## Fixed Card Geometry
+
+Maintainer clarification, 2026-10-18: catalog cards always use fixed width and
+height per type. Their preview area is also fixed and shows the document's
+first lines with excess text clipped. Content and long titles cannot enlarge
+the card or preview, and previews have no internal scrollbar. Responsive grids
+change the number of columns rather than stretch the cards. Full content stays
+available through the existing detail/editor. Verify equal card and preview
+dimensions with short, long and unbroken text in the owning slice and review.

@@ -90,12 +90,12 @@ measurements taken from a raster screenshot.
 
 | Element | Target presentation |
 | --- | --- |
-| Desktop grid | Three equal-width tracks within the bounded container, with a 10px gap. One or two cards keep the same track width and align from the left; they do not stretch to fill the whole row. |
+| Desktop grid | Three equal fixed-width tracks within the bounded container, with a 10px gap. One or two cards keep that exact width and align from the left; they do not stretch to fill the row. |
 | Card surface | White or the equivalent raised theme surface, thin subdued border, 12px corner radius, approximately 10px inner padding and restrained hover/focus accent. |
-| Card geometry | Broad landscape cards, using 16:9 as the baseline aspect ratio and 120px as the minimum height. Keep cards aligned and prevent incidental metadata from making individual cards tall. |
+| Card geometry | Explicit fixed width and height for every quiz card. Use a broad landscape composition with room reserved for title and preview. Content cannot change either dimension; minimum height alone is insufficient. |
 | Card title | Top-left, approximately 0.92rem with semibold weight. Use Project Quiz or the case's recognizable name. |
 | Content excerpt | A distinct pale neutral inset panel below the title, anchored consistently toward the card bottom. Use a subtle border, 6px radius and approximately 7px vertical / 8px horizontal padding. |
-| Excerpt height | A bounded area of approximately 96–106px, displaying up to six short meaningful quiz-content lines. Truncate long lines with an ellipsis rather than exposing paths or making the card grow indefinitely. |
+| Excerpt height | One fixed area selected in the approximately 96–106px range, showing only opening quiz-content lines. Clip excess text without a preview scrollbar; short or long content never changes preview or card dimensions. |
 | Empty project quiz | Show No answers yet in the same inset-panel position and geometry. |
 | Interaction | The card is the selection target, with a clear pointer and keyboard focus treatment; keep a dense collection of secondary controls out of the card. |
 

@@ -99,15 +99,22 @@ contract and its tests during implementation, without converting legacy
    Parse frontmatter structurally; omit a duplicate document heading when the
    card already displays it. Do not replace the preview with an LLM summary.
    Escape text and use the existing safe Markdown rendering path for detail.
-4. Give cards consistent title, excerpt, border, padding and focus treatment.
-   Long titles must wrap without hiding actions; long bodies must not enlarge
-   a card into a document viewer. Reuse theme tokens rather than add a second
-   component system or an editor framework.
-5. Use the available container width. Size grid tracks and breakpoints from
-   CSS viewport measurements, including padding and gaps. At the reviewed
-   desktop width, Dumps must show the usable third column at 100% zoom. Reduce
-   columns at smaller widths before text becomes unreadable. Do not fix this
-   by forcing all catalogs into one identical width.
+4. Catalog cards always have an explicit fixed width and height per card type.
+   This applies to Dumps, Quizzes, Specs, Plans and other document catalogs in
+   this set. Content length, title length, missing text and the number of cards
+   cannot change those dimensions. Keep title, preview and actions in bounded
+   regions with consistent border, padding and focus treatment. Reuse theme
+   size tokens rather than introduce another component system.
+5. The preview has its own fixed area inside the card and shows only the
+   document's first lines. Clip excess text; do not expand the area, add an
+   internal preview scrollbar or use an auto-height/min-height-only card.
+   Opening the existing detail/editor provides the full content. Short and
+   very long documents must produce the same card and preview dimensions.
+   Pack fixed-size tracks into the available container width, accounting for
+   padding and gaps. Responsive layout changes the number of columns rather
+   than stretching cards to fill a row. At the reviewed desktop width, Dumps
+   must fit the usable third column at 100% zoom. These are the maintainer's
+   explicit card-size and first-lines clarification of 2026-10-18.
 6. Use accessible labels, keyboard selection and focus visibility. Modals
    contain focus, restore it to their trigger and expose reachable close and
    submit controls. Maximize/restore preserves the same form and input.
@@ -197,11 +204,13 @@ Use a centered container of at most 860 CSS px, 20px vertical and 16px
 horizontal padding. Align Quizzes and the conditional action on one title row.
 The title is approximately 1.3rem/600. Start the grid about 12px below it.
 
-At desktop width use three equal tracks and 10px gaps. One or two cards retain
-their track width. Use a raised surface, thin border, approximately 12px corner
-radius and 10px padding. Card titles are approximately 0.92rem/600; cards use
-16:9 as a starting proportion with a minimum height of 120px. Allow enough
-height for readable title and preview rather than clip either to force a ratio.
+At desktop width use three equal fixed-width tracks and 10px gaps. One or two
+cards retain that exact width and never stretch to fill the row. Use a raised
+surface, thin border, approximately 12px corner radius and 10px padding. Card
+titles are approximately 0.92rem/600. Choose explicit fixed card dimensions
+that reserve space for the title and fixed preview; 16:9 is a landscape design
+reference, not an instruction to derive variable height from available width.
+Long content is clipped within those regions and cannot increase card height.
 
 The pale inset preview has a subtle border, 6px radius, about 7px by 8px padding
 and a bounded 96-106px content area displaying up to six useful short lines.
@@ -485,7 +494,7 @@ This is the dependency order for later planning, not a new execution tracker:
 
 | Acceptance group | Required evidence |
 | --- | --- |
-| UI-01: catalog composition | Dumps at the same desktop width at 100%/90% zoom; responsive layouts; Quizzes menu open/closed/all-answered; actual body previews without metadata clutter |
+| UI-01: catalog composition | Dumps at the same desktop width at 100%/90% zoom; responsive fixed-size tracks; Quizzes menu open/closed/all-answered; actual opening-line previews without metadata clutter; short, long and unbroken content has identical card/preview dimensions and no preview scrollbar |
 | UI-02: dump integrity | First capture, later capture, two concurrent captures, retry, Save/reopen, stale Save, namespace switch, restart/index rebuild and reconciliation preserving source bytes/references |
 | UI-03: quiz state | Empty/partial/answered/cancelled scope membership; correct question binding; all four actions; retained history; draft-preserving switches; one successful Fast batch generation and no per-question calls |
 | UI-04: spec authoring | Multiple documents per scope; manual draft/approved creation without model access; generated/manual editing of the same identity; correct context isolation and retained state |
