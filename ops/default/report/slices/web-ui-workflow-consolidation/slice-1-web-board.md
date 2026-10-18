@@ -92,6 +92,13 @@ was extracted into a helper without changing accepted metadata or guards.
 and `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m --new-from-rev=HEAD ./internal/core`
 then passed.
 
+The next attempt at `7e25439cec0007ed512bfb12b18170a9d0d54a57` passed
+strict lint but exposed old handler assertions for Synopsis editing and full-modal
+comment failures. Fixtures and assertions now require the full Description and
+inline comment errors. `go test ./internal/webui -run '^(TestHandlerTicketModal|TestHandlerTicketComment.*|TestHandlerWriteFailure)$' -count=1`
+and `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m --new-from-rev=HEAD ./internal/webui/...`
+passed after that contract correction.
+
 The controller records final clean-HEAD evidence after the PR-reference follow-up
 commit, in this order: `make verify`, the focused race command above,
 `CHR_WEB_BROWSER=/usr/sbin/chromium go test ./internal/app -run '^TestWebBoardBrowser$' -count=1`, then `git diff --check`.

@@ -125,12 +125,14 @@ func TestHandlerTicketModal(t *testing.T) {
 	for _, want := range []string{
 		"ticket-modal",
 		"Ready work",
-		"Ready work synopsis.",
+		"Full ticket description.",
+		"A retained second paragraph.",
 		"Comments",
 		"Existing comment.",
 		`name="action" value="ticket.update"`,
-		`input name="title" required value="Ready work"`,
-		`textarea name="synopsis" required`,
+		`id="ticket-title" name="title" required`,
+		`value="Ready work"`,
+		`id="ticket-description" name="description" required`,
 		`name="action" value="ticket.comment"`,
 		`hx-post="/board/ticket/comment"`,
 		`textarea name="content" required`,
@@ -138,6 +140,9 @@ func TestHandlerTicketModal(t *testing.T) {
 		if !strings.Contains(detail.Body.String(), want) {
 			t.Fatalf("detail body does not contain %q:\n%s", want, detail.Body.String())
 		}
+	}
+	if strings.Contains(detail.Body.String(), `name="synopsis"`) {
+		t.Fatal("modal exposed a competing synopsis editor")
 	}
 }
 
@@ -940,6 +945,7 @@ func (testDataProvider) TicketDetailView(_ context.Context, request TicketDetail
 		Key:          request.Key,
 		Title:        "Ready work",
 		Synopsis:     "Ready work synopsis.",
+		Description:  "Full ticket description.\n\nA retained second paragraph.",
 		Priority:     "high",
 		Status:       "ready_for_dev",
 		Type:         "feature",
