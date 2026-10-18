@@ -270,7 +270,7 @@ and desktop/narrow layouts at DPR 1 and 100% zoom.
 The [Slice 1 report](../../report/slices/web-ui-workflow-consolidation/slice-1-web-board.md)
 records successful task checks and screenshots. All three tasks are implemented;
 the ticket is solved under the approved pre-validation closure instruction.
-Final clean-HEAD certification and integration are recorded by the controller.
+The controller validated `56f6ce02df0c549a0f85368f214e383ad8ab9dc3` with the report's four ordered commands and merged PR #398 into dev on 2026-10-18.
 
 ## Consolidated Design
 

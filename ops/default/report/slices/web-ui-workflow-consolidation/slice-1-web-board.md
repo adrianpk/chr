@@ -1,6 +1,6 @@
 # Slice 1: Board and Shared Ticket Modal
 
-Status: reviewing
+Status: delivered
 Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
@@ -12,7 +12,7 @@ PR: `#398`
 Deliver the Board and shared ticket editor defined by the
 [plan](../../../plan/web-ui-workflow-consolidation.md) and
 [ordered task map](../../../tracker/web-ui-workflow-consolidation.md).
-All three Slice 1 tasks are implemented.
+All three Slice 1 tasks are implemented and integrated through [PR #398](https://forge.adrianpk.com/adrianpk/chr/pulls/398) at `56f6ce02df0c549a0f85368f214e383ad8ab9dc3`.
 
 ## Delivered Behavior
 
@@ -111,8 +111,8 @@ waits on the framework request/swap/settle boundary before synthetic actions.
 `CHR_WEB_BROWSER=/usr/sbin/chromium go test ./internal/app -run '^TestWebBoardBrowser$' -count=3`
 and complete affected-package lint passed with all journey assertions retained.
 
-The controller records final clean-HEAD evidence after the PR-reference follow-up
-commit, in this order: `make verify`, the focused race command above,
+The controller recorded successful final clean-HEAD evidence for
+`56f6ce02df0c549a0f85368f214e383ad8ab9dc3` after the PR-reference follow-up commit, in this order: `make verify`, the focused race command above,
 `CHR_WEB_BROWSER=/usr/sbin/chromium go test ./internal/app -run '^TestWebBoardBrowser$' -count=1`, then `git diff --check`.
 These task checks are development evidence; exhaustive and live certification
 remain in the existing scheduled nightly.
@@ -132,5 +132,5 @@ stores and Chromium process; all stop when the check finishes.
 ## Risks and Follow-ups
 
 Repository ticket status-directory transitions and workflow-owned native fields
-remain read-only with their owner's reason. Final integration is controller
-owned; this report remains reviewing until that merge is verified.
+remain read-only with their owner's reason. Controller-owned Rebase + Fast-forward
+integration was verified on dev on 2026-10-18. No unresolved Slice 1 follow-ups.
