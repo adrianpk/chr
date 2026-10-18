@@ -1,16 +1,24 @@
 # Web UI and Workflow Consolidation
 
-Status: Draft
+Status: Approved
 
 Date: 2026-10-18
 
+Approved: maintainer, 2026-10-18; the explicit request to proceed with Looper accepts this set and its implementation design.
+
 Source baseline: `a0383b84722c63bda9734cdfcf7633b044c967af`.
 
-Model: [Web UI and Workflow Model](web-ui-workflow-consolidation-draft-model.md).
+Model: [Web UI and Workflow Model](web-ui-workflow-consolidation-model.md).
 
-Authorization: ticket classification, in-progress selection, specification and
-commit. This document proposes the implementation design; application changes,
-data migration, service updates and execution are separate work.
+Plan: [Web UI and Workflow Delivery](../../plan/web-ui-workflow-consolidation.md).
+
+Tracker: [Web UI and Workflow Delivery Order](../../tracker/web-ui-workflow-consolidation.md).
+
+Implementation authorization: granted on 2026-10-18 for this exact delivery
+set through Looper, including its canonical slice PRs and controller-owned
+Rebase + Fast-forward integration into dev. Validate domain/migration behavior
+on isolated fixtures; applying reconciliation to live user data or changing
+production services is outside this execution authority.
 
 ## 1. Purpose and Scope
 
@@ -72,8 +80,8 @@ with canonical-ops and supported legacy fixtures before changing the read path.
 Do not infer that all failures have the same cause or hide errors as empty data.
 
 Preserve the ownership and adoption boundaries of the
-[ticket-native workflow](../stable/ticket-native-workflow.md) and
-[native integration queue](../stable/native-integration-queue.md). Section 9
+[ticket-native workflow](ticket-native-workflow.md) and
+[native integration queue](native-integration-queue.md). Section 9
 proposes a deliberate change to the optional tracker contract; align that
 contract and its tests during implementation, without converting legacy
 `tracker_compat` projects or modifying an active controller's frozen inputs.
@@ -505,7 +513,7 @@ whitespace validation, without runtime tests or live model requests.
 The user's interaction and ownership requirements above are settled inputs.
 The canonical project reference, reconciliation policy, quiz queue transitions,
 manual spec write model, semantic readiness assessment and tracker schema
-evolution are proposed implementation decisions, detailed in the companion.
-Review them with this specification before approving a delivery set. No
+evolution are accepted implementation decisions, detailed in the companion.
+The linked plan and tracker define their authorized delivery order. No
 unresolved product question is delegated to an implementing agent by an
 unexplained reference to another application.

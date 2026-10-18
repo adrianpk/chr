@@ -228,10 +228,11 @@ ticket and event context.
 
 ## Consolidated Design
 
-Selected for coordinated Web UI specification work on 2026-10-18. The earlier
-capture-only statements describe the initial capture boundary. The current
-request authorizes classification, this in-progress status, specification and
-commit; application implementation remains a separate step.
+Selected for coordinated Web UI delivery on 2026-10-18. The earlier
+capture-only statements describe the initial capture boundary. Implementation
+is now authorized for the linked approved set through Looper, its recorded
+slice PRs and controller-owned integration into dev. The ticket and slice
+report carry progress; the delivery tracker defines order only.
 
 Behavior, shared-domain changes and implementation design are consolidated in
-[Web UI and Workflow Consolidation](../../spec/drafts/web-ui-workflow-consolidation-draft.md).
+[Web UI and Workflow Consolidation](../../spec/stable/web-ui-workflow-consolidation.md).

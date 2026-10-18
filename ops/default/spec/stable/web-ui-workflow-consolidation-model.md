@@ -1,15 +1,18 @@
 # Web UI and Workflow Model
 
-Status: Draft
+Status: Approved
 
 Date: 2026-10-18
 
-Specification: [Web UI and Workflow Consolidation](web-ui-workflow-consolidation-draft.md).
+Approved: maintainer, 2026-10-18; the explicit request to proceed with Looper accepts this set and its implementation design.
 
-This companion defines proposed durable changes and read contracts. Existing
+Specification: [Web UI and Workflow Consolidation](web-ui-workflow-consolidation.md).
+
+This companion defines the approved durable changes and read contracts. Existing
 Markdown/ops artifact and native workflow owners remain authoritative. SQLite
-indexes and Web view models remain rebuildable projections. This design does
-not authorize a migration or mutate the current project artifacts.
+indexes and Web view models remain rebuildable projections. The approved
+set implements and tests these changes with isolated fixtures; applying a
+reconciliation to live user data requires its own explicit operation.
 
 ## 1. Identity, Scope and Write Binding
 
