@@ -21,7 +21,7 @@ slices through Looper, including canonical slice PRs and controller-owned
 Rebase + Fast-forward merges into dev. The existing Telegram run is separate.
 Use one development worker and one canonical open slice PR for this set.
 
-Active slice: Slice 4, Dumps grid width; T4.1.
+Active slice: Slice 5, Focused quiz answering; T5.1.
 The controller checkpoint and tickets own subsequent progress.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.
@@ -155,7 +155,7 @@ Validation: Exercise successful and stale full-body replacement, unsaved input, 
 
 ### Slice 4: Dumps grid width
 
-Source: [TKT-20261017185837](../ticket/in_progress/20261017185837-fix-dumps-grid-width-at-default-zoom.md).
+Source: [TKT-20261017185837](../ticket/solved/20261017185837-fix-dumps-grid-width-at-default-zoom.md).
 
 Dependency: Slice 3 integrated into dev; use all earlier shared owners.
 

@@ -17,7 +17,7 @@ Model: [Web UI and Workflow Model](../spec/stable/web-ui-workflow-consolidation-
 Implementation authorization: granted on 2026-10-18 for this exact set through
 Looper, including controller-owned Rebase + Fast-forward integration into dev.
 
-Active slice: Slice 4, Dumps grid width; T4.1.
+Active slice: Slice 5, Focused quiz answering; T5.1.
 The controller checkpoint and tickets own subsequent progress.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.
@@ -109,7 +109,7 @@ Validation: Exercise successful and stale full-body replacement, unsaved input, 
 
 ### Slice 4: Dumps grid width
 
-Ticket: [TKT-20261017185837](../ticket/in_progress/20261017185837-fix-dumps-grid-width-at-default-zoom.md).
+Ticket: [TKT-20261017185837](../ticket/solved/20261017185837-fix-dumps-grid-width-at-default-zoom.md).
 
 Prerequisite: Slice 3 integrated; execution authority for this set.
 

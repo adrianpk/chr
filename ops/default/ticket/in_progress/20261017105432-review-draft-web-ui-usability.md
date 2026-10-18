@@ -59,7 +59,7 @@ the three-column table layout visually balanced.
 A subsequent screenshot review identified a separate card-grid distribution
 issue: at 100% browser zoom, two columns leave a large unused region; three
 columns appear at 90%. Capture this in
-[Use available Dumps grid width at default browser zoom](20261017185837-fix-dumps-grid-width-at-default-zoom.md).
+[Use available Dumps grid width at default browser zoom](../solved/20261017185837-fix-dumps-grid-width-at-default-zoom.md).
 This finding does not authorize implementation or changes to other aspects of
 the view.
 

@@ -1,6 +1,6 @@
 # Slice 4: Dumps Grid Width
 
-Status: reviewing
+Status: delivered
 Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
@@ -12,7 +12,8 @@ PR: `#401`
 Deliver the measured Dumps catalog sizing defined by the
 [plan](../../../plan/web-ui-workflow-consolidation.md) and
 [task map](../../../tracker/web-ui-workflow-consolidation.md).
-T4.1 and T4.2 are implemented following Slice 3's verified integration.
+T4.1 and T4.2 were integrated through [PR #401](https://forge.adrianpk.com/adrianpk/chr/pulls/401)
+at `54fb4f6eeba8407c05893a77c4b54c74668018e6` on 2026-10-18.
 
 ## Delivered Behavior
 
@@ -93,7 +94,8 @@ isolated store with deterministic curation.
 | Narrow 100% | 390 × 844 | 1 | 1 | [390 px](files/slice-4/width-390.png) | [JSON](files/slice-4/width-390.json) |
 | Minimum 100% | 320 × 844 | 1 | 1 | [320 px](files/slice-4/width-320.png) | [JSON](files/slice-4/width-320.json) |
 
-Final clean-HEAD validation is recorded through Looper in canonical order:
+Final clean-HEAD validation passed through Looper for
+`54fb4f6eeba8407c05893a77c4b54c74668018e6` in canonical order:
 `make verify`, the focused grid/editor/capture/Board browser command and
 `git diff --check`. The canonical PR lists the exact successful final commands;
 Looper retains the tested HEAD and ordered evidence. Development checks do not

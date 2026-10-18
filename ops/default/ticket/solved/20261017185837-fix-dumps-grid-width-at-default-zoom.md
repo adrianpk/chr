@@ -1,7 +1,7 @@
 ---
 id: TKT-20261017185837
 title: "Use available Dumps grid width at default browser zoom"
-status: in_progress
+status: solved
 kind: bug
 severity: medium
 priority: normal
@@ -12,6 +12,9 @@ reported_at: 2026-10-17T18:58:37Z
 commits: [411925a719bd0bcd61cda4de9f8886f64f5fd0b5, 1043709e4846510dba05f18c6f954b89b801b414]
 branch: fix/slice-4-dump-grid
 pr: "#401"
+resolution: fixed
+reviewed_at: 2026-10-18T16:53:55Z
+closed_at: 2026-10-18T16:53:55Z
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
@@ -20,7 +23,7 @@ started_at: 2026-10-18T08:34:50Z
 
 ## Context
 
-Finding from [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
+Finding from [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md).
 The maintainer supplied a screenshot and compared browser zoom levels while
 actively reviewing the Dumps catalog. This ticket captures the finding only;
 implementation requires a separate explicit request.
@@ -91,8 +94,9 @@ The [Slice 4 report](../../report/slices/web-ui-workflow-consolidation/slice-4-d
 links the captures and measurements and records the failures and corrections.
 All tasks are implemented in canonical [PR #401](https://forge.adrianpk.com/adrianpk/chr/pulls/401).
 Final clean-HEAD validation is recorded through Looper with the ordered successful
-commands in the PR. This ticket remains in progress until controller integration
-is verified.
+commands in the PR. The controller merged PR #401 into dev at
+`54fb4f6eeba8407c05893a77c4b54c74668018e6` on 2026-10-18 after all
+three ordered exact-HEAD checks passed. The ticket is solved.
 
 ## Consolidated Design
 
