@@ -174,10 +174,7 @@ func (r *fileQuizArtifactRepository) prepareRawCaptureArtifact(state QuizRuntime
 }
 
 // WriteCuratedNotes writes the requested output.
-func (r *fileQuizArtifactRepository) writeCuratedNotes(
-	ctx context.Context,
-	notes QuizCuratedNotes,
-) (QuizArtifactPaths, error) {
+func (r *fileQuizArtifactRepository) writeCuratedNotes(ctx context.Context, notes QuizCuratedNotes) (QuizArtifactPaths, error) {
 	err := ctx.Err()
 	if err != nil {
 		return QuizArtifactPaths{}, err
@@ -254,10 +251,7 @@ func (r *fileQuizArtifactRepository) LoadRawCaptureEntries(
 }
 
 // SaveRuntimeState persists the requested data.
-func (r *fileQuizArtifactRepository) saveRuntimeState(
-	ctx context.Context,
-	state QuizRuntimeState,
-) (QuizArtifactPaths, error) {
+func (r *fileQuizArtifactRepository) saveRuntimeState(ctx context.Context, state QuizRuntimeState) (QuizArtifactPaths, error) {
 	err := ctx.Err()
 	if err != nil {
 		return QuizArtifactPaths{}, err

@@ -93,7 +93,8 @@ scrollbar-reduced document width from horizontal page overflow.
 
 The first controller attempt at `b21ce52d6229a3f162de1eea637b206666784e14`
 stopped at the function-signature rule before lint or tests. The renamed raw
-capture helper now keeps its parameters on the declaration line. The rule checks
+capture, curated-note and runtime helpers now keep their parameters on the
+declaration line. The rule reports one declaration per run and checks
 the committed branch diff, so its correction is validated after committing.
 
 Final clean-HEAD development and focused results are recorded through
