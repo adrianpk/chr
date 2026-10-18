@@ -107,15 +107,6 @@ func specCatalog(operations service) (webui.ArtifactCatalogView, error) {
 	return webArtifactCatalog("specs", cards), nil
 }
 
-func planCatalog(operations service) (webui.ArtifactCatalogView, error) {
-	plans, err := loadTUIPlans(operations)
-	if err != nil {
-		return webui.ArtifactCatalogView{}, err
-	}
-
-	return webArtifactCatalog(webArtifactFamilyPlans, webPlanCards(plans)), nil
-}
-
 func (p webViewProvider) ArtifactDetailView(ctx context.Context, request webui.ArtifactDetailRequest) (webui.ArtifactDetailView, error) {
 	switch request.Family {
 	case webArtifactFamilySpecs:
@@ -124,6 +115,8 @@ func (p webViewProvider) ArtifactDetailView(ctx context.Context, request webui.A
 		return p.quizArtifactDetail(ctx, request)
 	case webArtifactFamilyDumps:
 		return p.dumpArtifactDetail(ctx, request)
+	case webArtifactFamilyPlans:
+		return p.planArtifactDetail(ctx, request)
 	default:
 		return p.readArtifactDetail(ctx, request)
 	}
@@ -372,34 +365,6 @@ func webQuizCards(quizzes []QuizCatalogItem) []webui.ArtifactCardView {
 	}
 
 	return cards
-}
-
-func webPlanCards(plans []tui.PlanView) []webui.ArtifactCardView {
-	cards := make([]webui.ArtifactCardView, 0, len(plans))
-	for _, plan := range plans {
-		card := webDocumentCard(webArtifactFamilyPlans, plan.Title, plan.Status, plan.UseCaseTitle, plan.RelativePath, plan.UpdatedAt, plan.Content)
-		cards = append(cards, card)
-	}
-
-	return cards
-}
-
-func webDocumentCard(family, title, status, scope, relativePath string, updatedAt time.Time, content string) webui.ArtifactCardView {
-	card := webui.ArtifactCardView{
-		Family:       family,
-		ID:           firstNonEmptyString(relativePath, title),
-		Title:        title,
-		Status:       status,
-		Scope:        scope,
-		Path:         relativePath,
-		UpdatedAt:    webArtifactTime(updatedAt),
-		Preview:      content,
-		ContentState: webContentState(relativePath != ""),
-		Revision:     webContentRevision(content),
-	}
-	card.DetailURL = webArtifactDetailURL(card)
-
-	return card
 }
 
 func (p webViewProvider) readProjectArtifact(relativePath string) (string, error) {

@@ -10,6 +10,7 @@ tags: plans, catalog, reading
 source: chat
 reported_at: 2026-10-17T19:54:58Z
 commits: []
+branch: feat/slice-10-plan-catalog
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
@@ -39,7 +40,7 @@ Capture only. No application change or service update is authorized here.
 1. Remove the Artifacts counter from Plans. Keep the catalog focused on its
    document cards instead of artifact statistics and technical metadata.
 2. Use the same card anatomy as the
-   [Specs catalog](20261017194552-present-spec-cards-and-user-selected-creation-state.md):
+   [Specs catalog](../solved/20261017194552-present-spec-cards-and-user-selected-creation-state.md):
    a document title above a bounded inset preview of its actual opening body
    lines, with consistent dimensions and spacing. Do not turn the preview into
    a full document dump or fill it with frontmatter, paths and generic badges.
@@ -88,3 +89,12 @@ the card or preview, and previews have no internal scrollbar. Responsive grids
 change the number of columns rather than stretch the cards. Full content stays
 available through the existing detail/editor. Verify equal card and preview
 dimensions with short, long and unbroken text in the owning slice and review.
+
+## Slice 10 Execution
+
+T10.1 is complete on the recorded branch: concrete plan reads, fixed opening-text
+cards, exact full-body selection and read-only details. Focused catalog and
+contextual-planning regressions passed. T10.2 remains active for removal of the
+legacy Web tracking action and direct tracker access. The
+[Slice 10 report](../../report/slices/web-ui-workflow-consolidation/slice-10-plan-catalog.md)
+owns implementation and validation evidence.

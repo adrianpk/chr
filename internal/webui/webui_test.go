@@ -387,7 +387,7 @@ func TestHandlerArtifactCatalogAndDetailRoutes(t *testing.T) {
 		{path: "/dumps", want: []string{"<h1>Dumps</h1>", "New context", "Scope", `data-modal-template="dump-create-modal"`, `id="dump-create-modal"`, "dump-card-link", "dump-card", "Project Notes", `hx-get="/dumps/detail/fragment?id=.chr/default/dumps/project-notes.md"`, "Project-wide", "Notes preview"}},
 		{path: "/quizzes", want: []string{"<h1>Quizzes</h1>", "Project Quiz", "No answers yet"}},
 		{path: "/specs", want: []string{"<h1>Specs</h1>", "Project Spec"}},
-		{path: "/plans", want: []string{"<h1>Plans</h1>", "No plans found."}},
+		{path: "/plans", want: []string{"<h1>Plans</h1>", "No plans yet."}},
 		{path: "/dumps/detail?id=.chr/default/dumps/project-notes.md", want: []string{"<h1>Project Notes</h1>", "Full dump content"}},
 		{path: "/dumps/detail?id=missing.md", want: []string{"<h1>missing.md</h1>", "Artifact not found."}},
 	} {

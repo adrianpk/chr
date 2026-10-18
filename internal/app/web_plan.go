@@ -5,6 +5,8 @@ import (
 	"crypto/rand"
 	"errors"
 	"net/url"
+	"os"
+	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
 	"forge.adrianpk.com/chr/internal/webui"
@@ -86,4 +88,52 @@ func webPlanWriteFailure(err error, slug string) webui.WriteActionResponse {
 	}
 
 	return response
+}
+
+func planCatalog(operations service) (webui.ArtifactCatalogView, error) {
+	documents, err := operations.ListPlanDocuments()
+	if err != nil {
+		return webui.ArtifactCatalogView{}, err
+	}
+
+	cards := make([]webui.ArtifactCardView, 0, len(documents))
+	for _, document := range documents {
+		card := webui.ArtifactCardView{Family: webArtifactFamilyPlans, ID: document.Reference, Title: document.Title, Preview: webPlanPreview(document), Revision: document.Revision}
+		card.DetailURL = webArtifactDetailURL(card)
+		cards = append(cards, card)
+	}
+
+	return webArtifactCatalog(webArtifactFamilyPlans, cards), nil
+}
+
+func webPlanPreview(document core.PlanDocument) string {
+	body := strings.TrimSpace(document.Body)
+
+	heading, remaining, _ := strings.Cut(body, "\n")
+	if strings.TrimSpace(heading) == "# "+document.Title {
+		body = strings.TrimSpace(remaining)
+	}
+
+	preview := []rune(body)
+	if len(preview) > 1024 {
+		preview = preview[:1024]
+	}
+
+	return string(preview)
+}
+
+func (p webViewProvider) planArtifactDetail(ctx context.Context, request webui.ArtifactDetailRequest) (webui.ArtifactDetailView, error) {
+	document, err := core.ReadPlanDocument(ctx, p.projectContext.ProjectDir, request.ID)
+	if errors.Is(err, os.ErrNotExist) {
+		view := webui.ArtifactDetailView{Family: webArtifactFamilyPlans, ID: request.ID, Title: "Plan", Missing: true}
+		view.Revision = webStableRevision(view)
+
+		return view, nil
+	}
+
+	if err != nil {
+		return webui.ArtifactDetailView{}, err
+	}
+
+	return webui.ArtifactDetailView{Family: webArtifactFamilyPlans, ID: document.Reference, Title: document.Title, Content: document.Body, Revision: document.Revision}, nil
 }

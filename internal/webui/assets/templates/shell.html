@@ -155,20 +155,14 @@
 
 {{define "catalog_content.html"}}
 {{template "revision_marker.html" .}}
-{{if and (ne .Catalog.Family "cases") (ne .Catalog.Family "dumps") (ne .Catalog.Family "quizzes") (ne .Catalog.Family "specs")}}
-<div class="catalog-toolbar">
-  <div class="summary-item">
-    <span class="summary-label">Artifacts</span>
-    <strong>{{len .Catalog.Items}}</strong>
-  </div>
-</div>
-{{end}}
 {{if eq .Catalog.Family "dumps"}}
   {{template "dump_catalog_content.html" .}}
 {{else if eq .Catalog.Family "quizzes"}}
   {{template "quiz_catalog_content.html" .}}
 {{else if eq .Catalog.Family "specs"}}
  {{template "spec_catalog_content.html" .}}
+{{else if eq .Catalog.Family "plans"}}
+ {{template "plan_catalog_content.html" .}}
 {{else}}
   {{if .Catalog.Items}}
     {{if eq .Catalog.Family "cases"}}
@@ -268,6 +262,8 @@
  {{template "spec_editor_content.html" .}}
 {{else if .Detail.Quiz}}
   {{template "quiz_answer_content.html" .}}
+{{else if eq .Detail.Family "plans"}}
+ {{template "plan_detail_content.html" .}}
 {{else if eq .Detail.Family "cases"}}
   {{template "case_edit_page.html" .}}
 {{else}}

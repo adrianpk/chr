@@ -15,7 +15,7 @@ import (
 func ListSpecDocuments(ctx context.Context, projectDir string) ([]SpecDocument, error) {
 	r := &fileAuthoringSessionRepository{projectDir: projectDir}
 
-	namespaces, err := r.specDirectoryEntries(OpsDirectoryName)
+	namespaces, err := r.authoringDirectoryEntries(OpsDirectoryName)
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +30,7 @@ func ListSpecDocuments(ctx context.Context, projectDir string) ([]SpecDocument, 
 
 		root := filepath.Join(OpsDirectoryName, namespace.Name(), "spec")
 
-		entries, err := r.specDirectoryEntries(root)
+		entries, err := r.authoringDirectoryEntries(root)
 		if err != nil {
 			return nil, err
 		}
@@ -53,7 +53,7 @@ func ListSpecDocuments(ctx context.Context, projectDir string) ([]SpecDocument, 
 	return documents, r.checkProjectDumpInspection(ctx)
 }
 
-func (r *fileAuthoringSessionRepository) specDirectoryEntries(reference string) ([]os.DirEntry, error) {
+func (r *fileAuthoringSessionRepository) authoringDirectoryEntries(reference string) ([]os.DirEntry, error) {
 	path, err := r.authoringPath(reference)
 	if err != nil {
 		return nil, err
@@ -76,7 +76,7 @@ func (r *fileAuthoringSessionRepository) specDirectoryEntries(reference string) 
 	}
 
 	if len(entries) > WorkflowRecordLimit {
-		return nil, fmt.Errorf("spec directory exceeds %d entries", WorkflowRecordLimit)
+		return nil, fmt.Errorf("authoring directory exceeds %d entries", WorkflowRecordLimit)
 	}
 
 	return entries, nil
