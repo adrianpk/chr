@@ -9,7 +9,7 @@ scope: ui
 tags: web-ui, ux-ui, usability
 source: chat
 reported_at: 2026-10-17T10:54:32Z
-commits: []
+commits: [4c4815c51d5603d2c6e9576a7d7e9195100d7162]
 branch: test/slice-12-web-ui-review
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
@@ -259,3 +259,9 @@ and strict lint checks. It covers capture, quiz, manual/generated spec edits,
 contextual planning, approved order binding, Board metadata, Dash observation
 and mutation-free reopening. T12.2 addresses consolidated presentation/interaction
 acceptance, then T12.3 records the final matrix and candidate evidence.
+
+T12.2 is complete: the combined browser verifies desktop/narrow geometry,
+focus/labels, dirty forms and independent comments. The plan-bound title guard
+was reproduced and corrected through the existing ticket/order owners. Focused
+core/app/webui race and strict lint checks pass. T12.3 remains for the complete
+source acceptance matrix, user-facing documentation and final candidate evidence.

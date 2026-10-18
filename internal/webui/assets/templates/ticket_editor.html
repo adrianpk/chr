@@ -18,7 +18,7 @@
         <input type="hidden" name="confirm" value="true">
         <fieldset class="ticket-edit-layout"{{if .Ticket.ReadOnlyReason}} disabled{{end}}>
           <div class="ticket-editor-main">
-            <label class="readonly-field"><span>Title</span><input id="ticket-title" name="title" required maxlength="8192" value="{{.Ticket.Title}}"></label>
+            <label class="readonly-field"><span>Title</span><input id="ticket-title"{{if index .Ticket.ReadOnly "title"}} readonly aria-describedby="ticket-title-guard"{{else}} name="title" required{{end}} maxlength="8192" value="{{.Ticket.Title}}">{{with index .Ticket.ReadOnly "title"}}<small id="ticket-title-guard">{{.}}</small>{{end}}</label>
             <label class="readonly-field ticket-description"><span>Description</span>
               <textarea id="ticket-description"{{if index .Ticket.ReadOnly "body"}} readonly{{else}} name="description" required{{end}}>{{.Ticket.Description}}</textarea>
               {{with index .Ticket.ReadOnly "body"}}<small>{{.}}</small>{{end}}

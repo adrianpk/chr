@@ -172,6 +172,7 @@ func (s *WorkflowStore) nativeTicketDocument(ctx context.Context, document Ticke
 
 		document.Fields["key"], document.Fields["status"], document.Fields["use_case"] = record.Task.Key, record.Task.Status, record.Task.UseCase
 		nativeTicketReadOnly(&document, record)
+		nativeTicketOrderReadOnly(&document, record, snapshot)
 
 		return document, nil
 	}
@@ -227,6 +228,16 @@ func nativeTicketReadOnly(document *TicketDocument, record WorkflowRecord) {
 
 		for _, name := range []string{"branch", "pr", "commits"} {
 			document.ReadOnly[name] = "The verified delivery receipt owns this value."
+		}
+	}
+}
+
+func nativeTicketOrderReadOnly(document *TicketDocument, record WorkflowRecord, snapshot WorkflowSnapshot) {
+	for _, owner := range snapshot.Records {
+		if owner.Set != nil && owner.ID == record.Task.SetID && owner.Set.PlanRevision != nil {
+			document.ReadOnly["title"] = "The approved plan order owns this title; use its amendment operation."
+
+			return
 		}
 	}
 }
