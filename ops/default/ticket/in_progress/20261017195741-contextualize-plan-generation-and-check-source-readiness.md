@@ -114,3 +114,5 @@ Behavior, shared-domain changes and implementation design are consolidated in
 ## Slice 8 Execution
 
 Activated T8.1 after verified PR #404 integration. The [Slice 8 report](../../report/slices/web-ui-workflow-consolidation/slice-8-plan-generation.md) records implementation and validation evidence.
+
+T8.1 source snapshots and structured readiness passed focused filesystem/assessment regressions and full affected-package lint. T8.2 will enforce that decision and snapshot in generation/publication; no delivery claim or final candidate evidence is made yet.
