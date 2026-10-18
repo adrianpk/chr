@@ -23,7 +23,7 @@ started_at: 2026-10-18T08:34:50Z
 
 ## Context
 
-Finding from [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md).
+Finding from [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
 The maintainer supplied a screenshot and compared browser zoom levels while
 actively reviewing the Dumps catalog. This ticket captures the finding only;
 implementation requires a separate explicit request.

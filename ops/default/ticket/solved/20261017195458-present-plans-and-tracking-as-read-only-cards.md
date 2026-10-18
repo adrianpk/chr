@@ -23,7 +23,7 @@ resolution: fixed
 
 ## Context and Evidence
 
-Part of [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md).
+Part of [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
 The maintainer supplied the current Plans page HTML. It contains an Artifacts
 counter, status/availability chips, repeated scope information, document paths
 and document text inside catalog cards. Some previews include raw frontmatter

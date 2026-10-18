@@ -1,6 +1,6 @@
 # Slice 12: Consolidated Web UI Journeys
 
-Status: reviewing
+Status: delivered
 Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
@@ -12,8 +12,8 @@ PR: `#409`
 Complete the final slice of the approved [plan](../../../plan/web-ui-workflow-consolidation.md)
 and [tracker](../../../tracker/web-ui-workflow-consolidation.md). PRs #398 through
 #408 are verified merged into dev at their recorded exact heads; all eleven
-child source tickets and reports are solved/delivered. The parent ticket remains
-in progress pending this slice's controller integration.
+child source tickets and reports are solved/delivered. PR #409 is also verified
+merged; the parent source ticket is solved and all twelve reports are delivered.
 
 ## Delivered Behavior
 
@@ -53,7 +53,7 @@ separate from development validation; the campaign was not dispatched here.
 - `internal/core/ticket_document.go` and ticket editor template: visible, shared plan-bound title guard.
 - `scripts/qa/nightly.py` and `test_nightly.py`: explicit scheduled browser selection and completeness checks.
 - User Guide and Web action matrix: current complete Web flow and action boundaries.
-- [Parent source acceptance](../../../ticket/in_progress/20261017105432-review-draft-web-ui-usability.md#source-acceptance-matrix): all twelve sources and their canonical delivery state.
+- [Parent source acceptance](../../../ticket/solved/20261017105432-review-draft-web-ui-usability.md#source-acceptance-matrix): all twelve sources and their canonical delivery state.
 
 ## Validation
 
@@ -97,12 +97,22 @@ matrix makes that reuse explicit.
 | UI-08: Dash | [Slice 11](slice-11-work-dash.md): concurrent/quiet/blocked/stopped/failed/completed, outages and mutation-free refresh | Dash observes the edited Board identity and reopening changes neither stored files nor model calls. |
 | UI-09: journey | Child functional/browser evidence above | One retained workspace, six-view browser navigation, desktop/narrow measurements, modal labels/focus/return and dirty input across refresh/comments. |
 
-Final clean-HEAD validation is pending at this report-reference commit. The
-canonical PR and controller ledger record `make verify`, affected focused race
-checks, selected owned browser checks and `git diff --check` after PR-reference
-follow-up. The controller separately validates the final integrated dev
-candidate. No full-suite, live-provider or nightly success is claimed by these
-focused development checks; scheduled certification retains its own exact head.
+PR #409 was verified merged into dev at
+`1c72b3af85703ee430e7de9d77d3bc2535d204e9` on 2026-10-18T21:29:15Z.
+Controller validation `YO554RDO3VE3HBFTPNQCLQACRZ` passed the exact clean
+merged head with these commands, in order:
+
+- `make verify`
+- `go test -race ./internal/core ./internal/app ./internal/webui -run 'TicketNative|TicketDocument|WorkflowPlanOrder|WorkflowTrackerOrder|WebConsolidated|WebTicket|HandlerTicket' -count=1`
+- `CHR_WEB_BROWSER=/usr/sbin/chromium go test ./internal/app -run '^TestWeb(Workflow|Consolidated|Board)Browser$' -count=1`
+- `git diff --check`
+
+All slice entries are now closed. Gate prerequisites are present for the
+configured `make verify`: toolchain, pinned lint module and repository checks.
+No live services or external fixtures are required. The worker did not run the
+full gate during preparation. The controller owns that gate for the integrated
+preparation commit and final set closure. Scheduled exhaustive certification
+retains its separate exact-head evidence boundary.
 
 ## Risks and Follow-ups
 

@@ -23,7 +23,7 @@ resolution: fixed
 
 ## Context and Evidence Boundary
 
-Part of [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md).
+Part of [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
 The maintainer supplied screenshots to explain the desired card presentation
 and creation entrypoint for Specs. The requirements below describe that target
 independently. The actual CHR Specs screen has not yet been visually reviewed

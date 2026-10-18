@@ -22,7 +22,7 @@ started_at: 2026-10-18T08:34:50Z
 
 ## Outcome and Authorization
 
-Part of [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md).
+Part of [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
 Deliver a usable project Board: tickets appear as readable cards in lifecycle
 columns, opening a card edits that ticket, and New opens the same modal to
 create a ticket from scratch. This ticket consolidates the Board loading defect

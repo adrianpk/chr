@@ -17,7 +17,7 @@ Model: [Web UI and Workflow Model](../spec/stable/web-ui-workflow-consolidation-
 Implementation authorization: granted on 2026-10-18 for this exact set through
 Looper, including controller-owned Rebase + Fast-forward integration into dev.
 
-Active slice: Slice 12, Consolidated usability review; implementation complete in PR #409, awaiting exact-HEAD validation and controller integration.
+Active slice: none; all twelve slices integrated; controller-owned final dev gate pending.
 The controller checkpoint and tickets own subsequent progress.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.
@@ -222,7 +222,7 @@ Validation: Cover queued, quiet, blocked, failed, stopped and completed work, tw
 
 ### Slice 12: Consolidated usability review
 
-Ticket: [TKT-20261017105432](../ticket/in_progress/20261017105432-review-draft-web-ui-usability.md).
+Ticket: [TKT-20261017105432](../ticket/solved/20261017105432-review-draft-web-ui-usability.md).
 
 Prerequisite: Slice 11 integrated; execution authority for this set.
 

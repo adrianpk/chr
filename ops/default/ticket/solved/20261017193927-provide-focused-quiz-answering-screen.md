@@ -23,7 +23,7 @@ started_at: 2026-10-18T08:34:50Z
 
 ## Context and Authority
 
-Part of [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md).
+Part of [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
 The maintainer supplied a visual example and explicitly described the desired
 conceptual layout and behavior for CHR's quiz answering screen. The target
 below is self-contained. It does not require another application as a design
@@ -40,7 +40,7 @@ The [Slice 5 report](../../report/slices/web-ui-workflow-consolidation/slice-5-q
 records retained actions, mode queues, focused interaction and validation.
 
 Catalog entry, card membership and pending scope selection are owned by
-[the quiz catalog ticket](../in_progress/20261017192913-show-quiz-cards-and-pending-scope-action.md).
+[the quiz catalog ticket](20261017192913-show-quiz-cards-and-pending-scope-action.md).
 
 ## Conceptual Layout
 

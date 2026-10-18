@@ -23,7 +23,7 @@ started_at: 2026-10-18T08:34:50Z
 
 ## Context and Evidence
 
-Finding from [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md).
+Finding from [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
 The maintainer has now supplied two screenshots covering the upper catalog and
 the lower action area of CHR's Quizzes page. The observations below describe
 that actual interface. The expected behavior is stated independently of any

@@ -22,7 +22,7 @@ resolution: fixed
 
 ## Outcome and Authorization
 
-Part of [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md).
+Part of [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
 Dash is the operational view of what CHR's agent harness is doing as it
 processes tickets and their owning workflow. Show the ready queue, current
 execution and phase, recent activity and eventual result using the same domain

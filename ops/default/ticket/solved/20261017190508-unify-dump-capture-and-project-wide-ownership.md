@@ -23,7 +23,7 @@ started_at: 2026-10-18T08:34:50Z
 
 ## Context
 
-Finding from [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md).
+Finding from [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
 The catalog currently supports many separate project-wide dumps and exposes
 separate New Dump and For Use Case buttons. The maintainer wants project-wide
 context to accumulate in one evolving dump rather than fragment into many

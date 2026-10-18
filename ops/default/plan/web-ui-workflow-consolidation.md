@@ -21,7 +21,7 @@ slices through Looper, including canonical slice PRs and controller-owned
 Rebase + Fast-forward merges into dev. The existing Telegram run is separate.
 Use one development worker and one canonical open slice PR for this set.
 
-Active slice: Slice 12, Consolidated usability review; implementation complete in PR #409, awaiting exact-HEAD validation and controller integration.
+Active slice: none; all twelve slices integrated; controller-owned final dev gate pending.
 The controller checkpoint and tickets own subsequent progress.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.
@@ -251,7 +251,7 @@ Validation: Cover queued, quiet, blocked, failed, stopped and completed work, tw
 
 ### Slice 12: Consolidated usability review
 
-Source: [TKT-20261017105432](../ticket/in_progress/20261017105432-review-draft-web-ui-usability.md).
+Source: [TKT-20261017105432](../ticket/solved/20261017105432-review-draft-web-ui-usability.md).
 
 Dependency: Slice 11 integrated into dev; use all earlier shared owners.
 

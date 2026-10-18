@@ -23,7 +23,7 @@ resolution: fixed
 
 ## Context and Evidence
 
-Part of [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md).
+Part of [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
 The supplied Plans HTML places separate Generate Plan and Regenerate Plan
 forms below the catalog. Both ask the user to type a Case slug. These are
 contextless operational forms in a document-listing screen.

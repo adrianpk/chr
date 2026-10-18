@@ -23,7 +23,7 @@ started_at: 2026-10-18T08:34:50Z
 
 ## Context
 
-Finding from [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md),
+Finding from [the Web UI review](20261017105432-review-draft-web-ui-usability.md),
 following a maintainer-provided screenshot of the dump editor. The maintainer
 cannot understand why the same content appears in a yellow read-only area
 and an editable area, or why another Append area is needed below the editor.

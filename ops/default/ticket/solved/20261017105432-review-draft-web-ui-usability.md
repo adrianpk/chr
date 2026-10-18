@@ -1,7 +1,7 @@
 ---
 id: TKT-20261017105432
 title: "Review draft Web UI functionality, visual design and UX"
-status: in_progress
+status: solved
 kind: follow_up
 severity: medium
 priority: normal
@@ -14,6 +14,8 @@ branch: test/slice-12-web-ui-review
 pr: "#409"
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
+closed_at: 2026-10-18T21:29:15Z
+resolution: fixed
 ---
 
 # Review draft Web UI functionality, visual design and UX
@@ -61,7 +63,7 @@ the three-column table layout visually balanced.
 A subsequent screenshot review identified a separate card-grid distribution
 issue: at 100% browser zoom, two columns leave a large unused region; three
 columns appear at 90%. Capture this in
-[Use available Dumps grid width at default browser zoom](../solved/20261017185837-fix-dumps-grid-width-at-default-zoom.md).
+[Use available Dumps grid width at default browser zoom](20261017185837-fix-dumps-grid-width-at-default-zoom.md).
 This finding does not authorize implementation or changes to other aspects of
 the view.
 
@@ -72,14 +74,14 @@ general contributions extend it instead of creating separate general dumps.
 Use-case captures retain their selected case scope. The Web UI should expose
 one New action with Project-wide or an existing use case selected in the form.
 Track the shared behavior, existing-data decisions and UI change in
-[Unify dump capture around one evolving project-wide dump](../solved/20261017190508-unify-dump-capture-and-project-wide-ownership.md).
+[Unify dump capture around one evolving project-wide dump](20261017190508-unify-dump-capture-and-project-wide-ownership.md).
 
 ### Dump Reading, Editing and Appending
 
 The current editor duplicates the stored content in a yellow read-only area and
 an editable textarea, then exposes a separate append form below. The maintainer
 cannot infer their purpose or relationship. Capture the interaction problem in
-[Use one editor and Save for dump content](../solved/20261017191106-clarify-dump-reading-editing-and-appending.md).
+[Use one editor and Save for dump content](20261017191106-clarify-dump-reading-editing-and-appending.md).
 The maintainer explicitly requires one editor and Save, removing both the
 duplicate read-only panel and the separate Append textarea and button. Adding
 text at the end is ordinary editing of the same Markdown document.
@@ -92,7 +94,7 @@ Quiz and Resume Quiz forms below it requiring typed case slugs. The maintainer
 wants a readable quiz-card catalog and a conditional New Quiz action offering
 only pending project or existing-case scopes. Capture the observed problems
 and the self-contained expected behavior in
-[Make the quiz catalog readable and scope-driven](../solved/20261017192913-show-quiz-cards-and-pending-scope-action.md).
+[Make the quiz catalog readable and scope-driven](20261017192913-show-quiz-cards-and-pending-scope-action.md).
 The catalog ticket includes a self-contained visual target: bounded centered
 content, title and conditional action on one row, consistent landscape cards,
 aligned inset excerpts and a compact pending-scope menu. Its acceptance requires
@@ -108,7 +110,7 @@ the top right. Answered question/response cards accumulate below, newest first.
 Done closes the quiz even with questions remaining. Deep permits adaptive
 nested follow-ups; Fast generates a flat set in one LLM generation request.
 Capture the self-contained conceptual layout and shared-operation behavior in
-[Provide a focused quiz answering screen with modes and answer history](../solved/20261017193927-provide-focused-quiz-answering-screen.md).
+[Provide a focused quiz answering screen with modes and answer history](20261017193927-provide-focused-quiz-answering-screen.md).
 No palette match or application implementation is authorized by this capture.
 
 ### Spec Card Presentation
@@ -126,7 +128,7 @@ The maintainer also requires a single New action in Specs and a creation
 modal where the user selects draft or approved directly. Draft is a spec state,
 not a mandatory separate document stage. Capture the individual-card target and
 creation-state contract in
-[Present individual spec cards and allow choosing the initial state](../solved/20261017194552-present-spec-cards-and-user-selected-creation-state.md).
+[Present individual spec cards and allow choosing the initial state](20261017194552-present-spec-cards-and-user-selected-creation-state.md).
 The creation modal is one vertical form: Title, Use Case (Project-wide or an
 existing case), one large Body editor and a compact Create action at the bottom
 right. At most one small themed Draft switch or checkbox lets the user choose
@@ -149,7 +151,7 @@ the full plan for reading. The detail must be read-only: manual text changes
 could affect the agent's work. Agent-owned plan updates remain part of their
 existing workflow. Capture this presentation and
 interaction contract in
-[Present plan cards with read-only detail](../solved/20261017195458-present-plans-and-tracking-as-read-only-cards.md).
+[Present plan cards with read-only detail](20261017195458-present-plans-and-tracking-as-read-only-cards.md).
 Tracking remains an internal artifact, excluded from the Web UI as specified
 in the dedicated tracking ticket below.
 
@@ -165,7 +167,7 @@ the need for a quiz; mere file presence is not readiness.
 Additional dump content or quiz answers can improve the spec and inform plan
 regeneration. Keep the document operations distinct and make their scope clear.
 Capture placement, prerequisites and regeneration context in
-[Generate plans from use-case context with sufficient source material](../solved/20261017195741-contextualize-plan-generation-and-check-source-readiness.md).
+[Generate plans from use-case context with sufficient source material](20261017195741-contextualize-plan-generation-and-check-source-readiness.md).
 Tracking creation and behavior are excluded from that ticket. Manual spec
 creation still does not require a dump or quiz.
 
@@ -189,7 +191,7 @@ no Web catalog card, detail view, editor or Create Tracking form. Automatic
 creation belongs to the plan workflow. The current optional tracker contract
 is the implementation baseline, rather than the new availability requirement.
 Capture the requirement and its approval/materialization integration in
-[Require an internal tracker for deterministic ticket order](../solved/20261017200232-associate-ticket-tracking-with-each-plan-revision.md).
+[Require an internal tracker for deterministic ticket order](20261017200232-associate-ticket-tracking-with-each-plan-revision.md).
 
 ### Kanban Board and Ticket Management
 
@@ -208,7 +210,7 @@ execution-order and delivery guards rather than copying another lifecycle.
 
 The loading and modal captures have been consolidated into one maintained
 ticket with a self-contained visual and functional target and acceptance:
-[Implement the Kanban Board and shared ticket modal](../solved/20261017201015-restore-board-page-loading.md).
+[Implement the Kanban Board and shared ticket modal](20261017201015-restore-board-page-loading.md).
 The redundant preliminary modal file has been removed. This remains planning
 and ticket capture, without implementation or service changes.
 
@@ -222,7 +224,7 @@ phase/activity and recent/final results as the operational view.
 The Web projection is partial: it does not render the latest loop/execution
 results it loads or expose the loaded native workflow page. Capture a working
 live view using canonical tickets, workflow state and events in
-[Implement Dash as a live view of agent work](../solved/20261017202340-implement-live-agent-work-dash.md).
+[Implement Dash as a live view of agent work](20261017202340-implement-live-agent-work-dash.md).
 The tracker remains an internal order document, with no processing-state
 synchronization. Monitoring must not block behind an active-action overlay,
 require a TUI process, start work as a side effect or mix concurrent runners'
@@ -265,7 +267,7 @@ T12.2 is complete: the combined browser verifies desktop/narrow geometry,
 focus/labels, dirty forms and independent comments. The plan-bound title guard
 was reproduced and corrected through the existing ticket/order owners. Focused
 core/app/webui race and strict lint checks pass. T12.3 completes the source acceptance matrix and user-facing documentation;
-final exact-HEAD controller validation follows canonical PR-reference commits.
+final exact-HEAD controller validation passed after canonical PR-reference commits.
 
 ## Source Acceptance Matrix
 
@@ -276,18 +278,18 @@ set supplies their implementation authority and acceptance evidence.
 
 | Slice/source | Canonical delivery | Current acceptance |
 | --- | --- | --- |
-| Slice 1: [TKT-20261017201015](../solved/20261017201015-restore-board-page-loading.md) | [PR #398](https://forge.adrianpk.com/adrianpk/chr/pulls/398) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-1-web-board.md). |
-| Slice 2: [TKT-20261017190508](../solved/20261017190508-unify-dump-capture-and-project-wide-ownership.md) | [PR #399](https://forge.adrianpk.com/adrianpk/chr/pulls/399) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-2-project-dump.md). |
-| Slice 3: [TKT-20261017191106](../solved/20261017191106-clarify-dump-reading-editing-and-appending.md) | [PR #400](https://forge.adrianpk.com/adrianpk/chr/pulls/400) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-3-dump-editor.md). |
-| Slice 4: [TKT-20261017185837](../solved/20261017185837-fix-dumps-grid-width-at-default-zoom.md) | [PR #401](https://forge.adrianpk.com/adrianpk/chr/pulls/401) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-4-dump-grid.md). |
-| Slice 5: [TKT-20261017193927](../solved/20261017193927-provide-focused-quiz-answering-screen.md) | [PR #402](https://forge.adrianpk.com/adrianpk/chr/pulls/402) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-5-quiz-answering.md). |
-| Slice 6: [TKT-20261017192913](../solved/20261017192913-show-quiz-cards-and-pending-scope-action.md) | [PR #403](https://forge.adrianpk.com/adrianpk/chr/pulls/403) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-6-quiz-catalog.md). |
-| Slice 7: [TKT-20261017194552](../solved/20261017194552-present-spec-cards-and-user-selected-creation-state.md) | [PR #404](https://forge.adrianpk.com/adrianpk/chr/pulls/404) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-7-spec-authoring.md). |
-| Slice 8: [TKT-20261017195741](../solved/20261017195741-contextualize-plan-generation-and-check-source-readiness.md) | [PR #405](https://forge.adrianpk.com/adrianpk/chr/pulls/405) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-8-plan-generation.md). |
-| Slice 9: [TKT-20261017200232](../solved/20261017200232-associate-ticket-tracking-with-each-plan-revision.md) | [PR #406](https://forge.adrianpk.com/adrianpk/chr/pulls/406) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-9-plan-order-tracker.md). |
-| Slice 10: [TKT-20261017195458](../solved/20261017195458-present-plans-and-tracking-as-read-only-cards.md) | [PR #407](https://forge.adrianpk.com/adrianpk/chr/pulls/407) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-10-plan-catalog.md). |
-| Slice 11: [TKT-20261017202340](../solved/20261017202340-implement-live-agent-work-dash.md) | [PR #408](https://forge.adrianpk.com/adrianpk/chr/pulls/408) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-11-work-dash.md). |
-| Slice 12: TKT-20261017105432 | [PR #409](https://forge.adrianpk.com/adrianpk/chr/pulls/409) | Journey and acceptance work complete; controller integration pending. |
+| Slice 1: [TKT-20261017201015](20261017201015-restore-board-page-loading.md) | [PR #398](https://forge.adrianpk.com/adrianpk/chr/pulls/398) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-1-web-board.md). |
+| Slice 2: [TKT-20261017190508](20261017190508-unify-dump-capture-and-project-wide-ownership.md) | [PR #399](https://forge.adrianpk.com/adrianpk/chr/pulls/399) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-2-project-dump.md). |
+| Slice 3: [TKT-20261017191106](20261017191106-clarify-dump-reading-editing-and-appending.md) | [PR #400](https://forge.adrianpk.com/adrianpk/chr/pulls/400) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-3-dump-editor.md). |
+| Slice 4: [TKT-20261017185837](20261017185837-fix-dumps-grid-width-at-default-zoom.md) | [PR #401](https://forge.adrianpk.com/adrianpk/chr/pulls/401) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-4-dump-grid.md). |
+| Slice 5: [TKT-20261017193927](20261017193927-provide-focused-quiz-answering-screen.md) | [PR #402](https://forge.adrianpk.com/adrianpk/chr/pulls/402) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-5-quiz-answering.md). |
+| Slice 6: [TKT-20261017192913](20261017192913-show-quiz-cards-and-pending-scope-action.md) | [PR #403](https://forge.adrianpk.com/adrianpk/chr/pulls/403) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-6-quiz-catalog.md). |
+| Slice 7: [TKT-20261017194552](20261017194552-present-spec-cards-and-user-selected-creation-state.md) | [PR #404](https://forge.adrianpk.com/adrianpk/chr/pulls/404) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-7-spec-authoring.md). |
+| Slice 8: [TKT-20261017195741](20261017195741-contextualize-plan-generation-and-check-source-readiness.md) | [PR #405](https://forge.adrianpk.com/adrianpk/chr/pulls/405) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-8-plan-generation.md). |
+| Slice 9: [TKT-20261017200232](20261017200232-associate-ticket-tracking-with-each-plan-revision.md) | [PR #406](https://forge.adrianpk.com/adrianpk/chr/pulls/406) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-9-plan-order-tracker.md). |
+| Slice 10: [TKT-20261017195458](20261017195458-present-plans-and-tracking-as-read-only-cards.md) | [PR #407](https://forge.adrianpk.com/adrianpk/chr/pulls/407) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-10-plan-catalog.md). |
+| Slice 11: [TKT-20261017202340](20261017202340-implement-live-agent-work-dash.md) | [PR #408](https://forge.adrianpk.com/adrianpk/chr/pulls/408) | Solved; verified merged exact head and [report](../../report/slices/web-ui-workflow-consolidation/slice-11-work-dash.md). |
+| Slice 12: TKT-20261017105432 | [PR #409](https://forge.adrianpk.com/adrianpk/chr/pulls/409) | Solved; PR #409 verified merged at its exact tested head. |
 
 UI-01 through UI-09 are mapped to child regressions, screenshots and the combined
 journey in the [Slice 12 report](../../report/slices/web-ui-workflow-consolidation/slice-12-web-ui-review.md#validation).
@@ -297,9 +299,11 @@ and full Board operations. Scheduled browser certification requires the native
 workflow and consolidated journey to pass, with incomplete evidence rejected.
 Its campaign remains separate and was not dispatched during this slice.
 
-T12.1, T12.2 and T12.3 implementation work is complete. Task-level focused race,
-strict lint, owned browser and nightly-script regressions pass. Final clean-HEAD
-`make verify`, affected race/browser checks and whitespace evidence will be
-recorded through the controller after PR-reference follow-up. The parent remains
-in progress until verified controller integration; final set closure remains
-with the controller's exact integrated gate evidence.
+T12.1, T12.2 and T12.3 are delivered through PR #409, verified merged into dev
+at `1c72b3af85703ee430e7de9d77d3bc2535d204e9` on 2026-10-18T21:29:15Z.
+Controller validation `YO554RDO3VE3HBFTPNQCLQACRZ` passed all four ordered
+commands for that exact clean head: `make verify`, the affected core/app/webui
+race selection, the native/consolidated/Board browser selection and
+`git diff --check`. The canonical PR and Slice 12 report retain the exact commands.
+All twelve source tickets and reports are solved/delivered. Final set closure
+remains pending the controller's gate for the integrated preparation commit.
