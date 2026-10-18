@@ -166,8 +166,9 @@ Failures and pending projections retain the form, and confirmed success restores
 focus and refreshes the catalog. Deterministic desktop/narrow browser, lost-ack,
 HTTP, scope and lint checks passed; the source report records exact commands and
 corrected fixture evidence. User Guide, reference and Unreleased are updated.
-All Slice 2 tasks are implemented. The report is reviewing; final controller
-validation and canonical PR references are being prepared. The ticket remains
+All Slice 2 tasks are implemented. The report is reviewing in canonical PR
+[#399](https://forge.adrianpk.com/adrianpk/chr/pulls/399). Exact clean-HEAD
+validation is recorded through Looper before handoff. The ticket remains
 in progress until integration is verified.
 
 ## Consolidated Design
