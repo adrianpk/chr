@@ -3,6 +3,7 @@ package core
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -36,6 +37,8 @@ type QuizArtifactRepository interface {
 	WriteCuratedNotes(ctx context.Context, notes QuizCuratedNotes) (QuizArtifactPaths, error)
 	SaveRuntimeState(ctx context.Context, state QuizRuntimeState) (QuizArtifactPaths, error)
 	LoadRuntimeState(ctx context.Context, scope QuizScope) (QuizRuntimeState, error)
+	Observe(ctx context.Context, scope QuizScope) (QuizObservation, error)
+	ApplyAction(ctx context.Context, request QuizActionRequest, transition QuizTransitionFunc) (QuizActionResult, error)
 }
 
 // QuizCuratedNotes describes a package boundary value.
@@ -53,7 +56,8 @@ type QuizCuratedNotes struct {
 }
 
 type fileQuizArtifactRepository struct {
-	projectDir string
+	projectDir           string
+	afterMutationReplace func(int) error
 }
 
 // NewQuizArtifactRepository constructs the corresponding package service or value.
@@ -102,7 +106,7 @@ func (r *fileQuizArtifactRepository) Paths(scope QuizScope) (QuizArtifactPaths, 
 }
 
 // AppendRawCapture executes the corresponding package operation.
-func (r *fileQuizArtifactRepository) AppendRawCapture(
+func (r *fileQuizArtifactRepository) appendRawCapture(
 	ctx context.Context,
 	state QuizRuntimeState,
 	entry QuizEntry,
@@ -174,7 +178,7 @@ func (r *fileQuizArtifactRepository) prepareRawCaptureArtifact(state QuizRuntime
 }
 
 // WriteCuratedNotes writes the requested output.
-func (r *fileQuizArtifactRepository) WriteCuratedNotes(
+func (r *fileQuizArtifactRepository) writeCuratedNotes(
 	ctx context.Context,
 	notes QuizCuratedNotes,
 ) (QuizArtifactPaths, error) {
@@ -239,7 +243,9 @@ func (r *fileQuizArtifactRepository) LoadRawCaptureEntries(
 		return nil, err
 	}
 
-	content, err := os.ReadFile(paths.RawPath)
+	owner := &fileAuthoringSessionRepository{projectDir: r.projectDir}
+
+	content, err := owner.authoringRead(paths.RawRelativePath)
 	if os.IsNotExist(err) {
 		return []QuizEntry{}, nil
 	}
@@ -252,7 +258,7 @@ func (r *fileQuizArtifactRepository) LoadRawCaptureEntries(
 }
 
 // SaveRuntimeState persists the requested data.
-func (r *fileQuizArtifactRepository) SaveRuntimeState(
+func (r *fileQuizArtifactRepository) saveRuntimeState(
 	ctx context.Context,
 	state QuizRuntimeState,
 ) (QuizArtifactPaths, error) {
@@ -291,34 +297,12 @@ func (r *fileQuizArtifactRepository) SaveRuntimeState(
 
 // LoadRuntimeState loads the requested data.
 func (r *fileQuizArtifactRepository) LoadRuntimeState(ctx context.Context, scope QuizScope) (QuizRuntimeState, error) {
-	err := ctx.Err()
-	if err != nil {
-		return QuizRuntimeState{}, err
+	observation, err := r.Observe(ctx, scope)
+	if err == nil && !observation.Exists {
+		err = fmt.Errorf("read quiz runtime state: %w", os.ErrNotExist)
 	}
 
-	paths, err := r.Paths(scope)
-	if err != nil {
-		return QuizRuntimeState{}, err
-	}
-
-	content, err := os.ReadFile(paths.RuntimePath)
-	if err != nil {
-		return QuizRuntimeState{}, fmt.Errorf("read quiz runtime state: %w", err)
-	}
-
-	var state QuizRuntimeState
-
-	err = json.Unmarshal(content, &state)
-	if err != nil {
-		return QuizRuntimeState{}, fmt.Errorf("decode quiz runtime state: %w", err)
-	}
-
-	err = ValidateQuizRuntimeState(state)
-	if err != nil {
-		return QuizRuntimeState{}, err
-	}
-
-	return state, nil
+	return observation.State, err
 }
 
 // RenderQuizRawCapture renders the corresponding package data.
@@ -335,6 +319,11 @@ func RenderQuizRawCapture(state QuizRuntimeState, entry QuizEntry) string {
 	output.WriteString("updated_at: " + yamlTimestamp(state.UpdatedAt) + "\n")
 	output.WriteString("---\n\n")
 	output.WriteString("## Turn\n\n")
+
+	if encoded, err := json.Marshal(entry); err == nil {
+		output.WriteString("- entry_json: " + base64.RawStdEncoding.EncodeToString(encoded) + "\n")
+	}
+
 	output.WriteString("- question_id: " + entry.QuestionID + "\n")
 	output.WriteString("- status: " + string(entry.Status) + "\n")
 	output.WriteString("- mode: " + string(entry.Mode) + "\n")
@@ -352,12 +341,12 @@ func RenderQuizRawCapture(state QuizRuntimeState, entry QuizEntry) string {
 	if strings.TrimSpace(entry.PromptIntent) != "" {
 		output.WriteString("\n")
 		output.WriteString("Prompt intent:\n\n")
-		output.WriteString(strings.TrimSpace(entry.PromptIntent) + "\n")
+		output.WriteString(quizRawText(entry.PromptIntent) + "\n")
 	}
 
 	output.WriteString("\n")
 	output.WriteString("Question:\n\n")
-	output.WriteString(strings.TrimSpace(entry.Question) + "\n\n")
+	output.WriteString(quizRawText(entry.Question) + "\n\n")
 
 	if entry.Status == QuizEntryStatusSkipped {
 		output.WriteString("Skipped: true\n\n")
@@ -366,7 +355,7 @@ func RenderQuizRawCapture(state QuizRuntimeState, entry QuizEntry) string {
 	}
 
 	output.WriteString("Answer:\n\n")
-	output.WriteString(strings.TrimSpace(entry.Answer) + "\n\n")
+	output.WriteString(quizRawText(entry.Answer) + "\n\n")
 
 	return output.String()
 }
@@ -441,4 +430,8 @@ func quizScopeName(caseSlug string) string {
 	}
 
 	return "use_case"
+}
+
+func quizRawText(value string) string {
+	return strings.ReplaceAll(strings.TrimSpace(value), "\n## Turn\n", "\n\\## Turn\n")
 }

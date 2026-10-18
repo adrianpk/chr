@@ -44,7 +44,16 @@ func validAuthoringJournalVersionPath(schema, reference string) bool {
 		return true
 	}
 
-	return validProjectDumpHistoryPath(reference)
+	return validProjectDumpHistoryPath(reference) || validQuizRuntimeJournalPath(reference)
+}
+
+func validQuizRuntimeJournalPath(reference string) bool {
+	parts := strings.Split(filepath.ToSlash(reference), "/")
+	if len(parts) != 5 || parts[0] != DirectoryName || !IsValidOpsNamespace(parts[1]) || parts[2] != "tmp" || parts[3] != "quiz-runtime" {
+		return false
+	}
+
+	return strings.HasSuffix(parts[4], ".json") && validateAuthoringSessionID(strings.TrimSuffix(parts[4], ".json")) == nil
 }
 
 func validProjectDumpHistoryPath(reference string) bool {

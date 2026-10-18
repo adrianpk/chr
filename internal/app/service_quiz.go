@@ -27,29 +27,34 @@ type QuizOperationResult struct {
 
 // QuizStartRequest selects the scope for a new quiz session.
 type QuizStartRequest struct {
-	Scope core.QuizScope
-	Mode  core.QuizMode
+	Binding core.QuizActionBinding
+	Scope   core.QuizScope
+	Mode    core.QuizMode
 }
 
 // QuizResumeRequest selects the scope for a resumed quiz session.
 type QuizResumeRequest struct {
-	Scope core.QuizScope
+	Binding core.QuizActionBinding
+	Scope   core.QuizScope
 }
 
 // QuizAnswerRequest submits an answer for the active quiz question.
 type QuizAnswerRequest struct {
-	Scope  core.QuizScope
-	Answer string
+	Binding core.QuizActionBinding
+	Scope   core.QuizScope
+	Answer  string
 }
 
 // QuizSkipRequest skips the active quiz question for the selected scope.
 type QuizSkipRequest struct {
-	Scope core.QuizScope
+	Binding core.QuizActionBinding
+	Scope   core.QuizScope
 }
 
 // QuizCompleteRequest completes the quiz for the selected scope.
 type QuizCompleteRequest struct {
-	Scope core.QuizScope
+	Binding core.QuizActionBinding
+	Scope   core.QuizScope
 }
 
 // QuizDraftSpecRequest selects the quiz scope used to draft a spec.
@@ -59,13 +64,15 @@ type QuizDraftSpecRequest struct {
 
 // QuizCancelRequest cancels the quiz for the selected scope.
 type QuizCancelRequest struct {
-	Scope core.QuizScope
+	Binding core.QuizActionBinding
+	Scope   core.QuizScope
 }
 
 // QuizModeRequest changes the quiz interaction mode for the selected scope.
 type QuizModeRequest struct {
-	Scope core.QuizScope
-	Mode  core.QuizMode
+	Binding core.QuizActionBinding
+	Scope   core.QuizScope
+	Mode    core.QuizMode
 }
 
 func (s service) ListQuizzes() (QuizListResult, error) {

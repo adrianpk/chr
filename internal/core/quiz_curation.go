@@ -1,6 +1,7 @@
 package core
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"sort"
@@ -11,7 +12,15 @@ import (
 
 // ParseQuizRawCaptureEntries parses the corresponding package data.
 func ParseQuizRawCaptureEntries(content string) ([]QuizEntry, error) {
+	if len(content) > WorkflowFileLimit {
+		return nil, fmt.Errorf("quiz raw capture exceeds file limit")
+	}
+
 	blocks := strings.Split(content, "\n## Turn\n\n")
+	if len(blocks) > WorkflowRecordLimit+1 {
+		return nil, fmt.Errorf("quiz entry capacity exceeded")
+	}
+
 	entries := []QuizEntry{}
 
 	for index, block := range blocks[1:] {
@@ -165,6 +174,19 @@ func parseQuizRawTurn(index int, block string) (QuizEntry, error) {
 		ID: fmt.Sprintf("entry-%03d", index),
 	}
 	metadata, body := splitQuizTurnMetadata(block)
+
+	if encoded, exists := metadata["entry_json"]; exists {
+		data, err := base64.RawStdEncoding.DecodeString(encoded)
+		if err != nil {
+			return entry, err
+		}
+
+		if err := json.Unmarshal(data, &entry); err != nil {
+			return entry, err
+		}
+
+		return entry, ValidateQuizEntry(entry)
+	}
 
 	entry.QuestionID = metadata["question_id"]
 	entry.Status = QuizEntryStatus(metadata["status"])

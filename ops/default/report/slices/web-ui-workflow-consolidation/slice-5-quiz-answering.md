@@ -17,7 +17,10 @@ T5.2 applies the queue policy; T5.3 exposes the focused Web interaction.
 
 ## Delivered Behavior
 
-Implementation in progress.
+T5.1 implements versioned runtime observations, immutable action bindings and
+recoverable publication of runtime, raw capture, curated notes, metadata and
+operation receipts under the existing authoring owner. Queue policy and Web
+interaction remain in progress.
 
 ## Implementation Notes
 
@@ -27,7 +30,12 @@ in one recovery boundary. Model and browser fixtures remain deterministic.
 
 ## Contracts Added or Changed
 
-Pending guarded runtime and action contracts.
+Quiz runtime schema 2 retains session identity and suspended Fast work. Schema 0
+reads retain the legacy interpretation and leave stored bytes unchanged. Actions
+compare scope, session, question and complete source revision under the shared
+owner; identical retries replay the committed receipt, while stale or changed
+arguments fail. Only journal v2 admits the bounded quiz-runtime path. Raw turn
+records retain exact entry IDs, timestamps and multiline content.
 
 ## Files of Interest
 
@@ -37,8 +45,12 @@ Pending guarded runtime and action contracts.
 
 ## Validation
 
-Pending focused persistence, concurrency, service and browser evidence, followed
-by Looper's exact clean-HEAD development gate.
+Task validation:
+
+- `go test -race ./internal/core -run '^TestQuiz(Action|EntryExact|Observation|Artifact|Runtime)' -count=1` — passed, including every journal-image interruption, competing answers, receipt replay, legacy read stability, unsupported schema, size and symlink rejection.
+
+Service policy, Web/browser checks and the final exact clean-HEAD development
+gate remain pending.
 
 ## Risks and Follow-ups
 
