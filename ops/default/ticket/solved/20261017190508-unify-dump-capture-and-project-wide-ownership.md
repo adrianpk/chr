@@ -1,7 +1,7 @@
 ---
 id: TKT-20261017190508
 title: "Unify dump capture around one evolving project-wide dump"
-status: in_progress
+status: solved
 kind: task
 severity: medium
 priority: normal
@@ -11,6 +11,10 @@ source: chat
 reported_at: 2026-10-17T19:05:08Z
 commits: [7f4b82f629696b39dc2f1a4326f90a11459db1d3, 78b9165e07963d74ab856b68a223034f39e4a609, 7bd9c09ad018e279d04726844e62896b0c365908, 67dfdbd3937618b1003c914784ee952418f895ba]
 branch: feat/slice-2-project-dump
+pr: "#399"
+resolution: fixed
+reviewed_at: 2026-10-18T16:20:03Z
+closed_at: 2026-10-18T16:20:03Z
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
@@ -19,7 +23,7 @@ started_at: 2026-10-18T08:34:50Z
 
 ## Context
 
-Finding from [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
+Finding from [the Web UI review](../in_progress/20261017105432-review-draft-web-ui-usability.md).
 The catalog currently supports many separate project-wide dumps and exposes
 separate New Dump and For Use Case buttons. The maintainer wants project-wide
 context to accumulate in one evolving dump rather than fragment into many
@@ -168,8 +172,9 @@ HTTP, scope and lint checks passed; the source report records exact commands and
 corrected fixture evidence. User Guide, reference and Unreleased are updated.
 All Slice 2 tasks are implemented. The report is reviewing in canonical PR
 [#399](https://forge.adrianpk.com/adrianpk/chr/pulls/399). Exact clean-HEAD
-validation is recorded through Looper before handoff. The ticket remains
-in progress until integration is verified.
+validation is recorded through Looper before handoff. The controller merged PR #399 into dev at
+`aadb6b2bd5060334e0290b441472a93bf952ea92` on 2026-10-18. All four
+ordered exact-HEAD checks passed through Looper; the ticket is solved.
 
 ## Consolidated Design
 

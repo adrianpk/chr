@@ -21,7 +21,7 @@ slices through Looper, including canonical slice PRs and controller-owned
 Rebase + Fast-forward merges into dev. The existing Telegram run is separate.
 Use one development worker and one canonical open slice PR for this set.
 
-Active slice: Slice 2, Canonical project dump; T2.2.
+Active slice: Slice 3, Single dump editor; T3.1.
 The controller checkpoint and tickets own subsequent progress.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.
@@ -131,7 +131,7 @@ Validation: Cover canonical-only, legacy, mixed and empty stores, more than 128 
 
 ### Slice 2: Canonical project dump
 
-Source: [TKT-20261017190508](../ticket/in_progress/20261017190508-unify-dump-capture-and-project-wide-ownership.md).
+Source: [TKT-20261017190508](../ticket/solved/20261017190508-unify-dump-capture-and-project-wide-ownership.md).
 
 Dependency: Slice 1 integrated into dev; use all earlier shared owners.
 

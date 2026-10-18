@@ -10,6 +10,7 @@ tags: dumps, editing, interaction
 source: chat
 reported_at: 2026-10-17T19:11:06Z
 commits: []
+branch: fix/slice-3-dump-editor
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
@@ -28,7 +29,7 @@ this manual editing interface. The requested interaction is one editor and
 Save. Capture only; no interface or application changes are authorized.
 
 Related behavior work:
-[One evolving project-wide dump](20261017190508-unify-dump-capture-and-project-wide-ownership.md).
+[One evolving project-wide dump](../solved/20261017190508-unify-dump-capture-and-project-wide-ownership.md).
 Keep the interaction finding distinct from canonical dump ownership.
 
 ## Confirmed Current Behavior

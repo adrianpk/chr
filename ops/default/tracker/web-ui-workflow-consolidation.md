@@ -17,7 +17,7 @@ Model: [Web UI and Workflow Model](../spec/stable/web-ui-workflow-consolidation-
 Implementation authorization: granted on 2026-10-18 for this exact set through
 Looper, including controller-owned Rebase + Fast-forward integration into dev.
 
-Active slice: Slice 2, Canonical project dump; T2.2.
+Active slice: Slice 3, Single dump editor; T3.1.
 The controller checkpoint and tickets own subsequent progress.
 
 First planned slice: Slice 1, Board and shared ticket modal; T1.1.
@@ -82,7 +82,7 @@ Validation: Cover canonical-only, legacy, mixed and empty stores, more than 128 
 
 ### Slice 2: Canonical project dump
 
-Ticket: [TKT-20261017190508](../ticket/in_progress/20261017190508-unify-dump-capture-and-project-wide-ownership.md).
+Ticket: [TKT-20261017190508](../ticket/solved/20261017190508-unify-dump-capture-and-project-wide-ownership.md).
 
 Prerequisite: Slice 1 integrated; execution authority for this set.
 

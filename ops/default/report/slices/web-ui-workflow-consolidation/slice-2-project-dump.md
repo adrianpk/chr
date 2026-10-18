@@ -1,6 +1,6 @@
 # Slice 2: Canonical Project Dump
 
-Status: reviewing
+Status: delivered
 Delivery set: web-ui-workflow-consolidation
 Plan: `ops/default/plan/web-ui-workflow-consolidation.md`
 Tracker: `ops/default/tracker/web-ui-workflow-consolidation.md`
@@ -12,7 +12,8 @@ PR: `#399`
 Deliver one evolving project-wide dump and one Web capture form through the
 existing metadata, authoring and application owners, following the
 [plan](../../../plan/web-ui-workflow-consolidation.md) and
-[task map](../../../tracker/web-ui-workflow-consolidation.md). T2.1–T2.3 are implemented.
+[task map](../../../tracker/web-ui-workflow-consolidation.md). T2.1–T2.3 were integrated through [PR #399](https://forge.adrianpk.com/adrianpk/chr/pulls/399)
+at `aadb6b2bd5060334e0290b441472a93bf952ea92` on 2026-10-18.
 
 ## Delivered Behavior
 
@@ -135,7 +136,8 @@ The corrected fixture substitutes deterministic curation while retaining real
 HTTP, publication and unchanged assertions; the passing browser command above
 uses that boundary. Owned browser/server fixtures stop after their checks.
 
-Final candidate validation runs through Looper on the clean PR head, in this
+Final candidate validation passed through Looper on the clean integrated head
+`aadb6b2bd5060334e0290b441472a93bf952ea92`, in this
 order: `make verify`, focused race regressions, the owned capture/Board browser
 checks and `git diff --check`. Looper retains the exact HEAD and ordered command
 list; the canonical PR's Validation section records the successful final commands.

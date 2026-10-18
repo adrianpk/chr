@@ -70,7 +70,7 @@ general contributions extend it instead of creating separate general dumps.
 Use-case captures retain their selected case scope. The Web UI should expose
 one New action with Project-wide or an existing use case selected in the form.
 Track the shared behavior, existing-data decisions and UI change in
-[Unify dump capture around one evolving project-wide dump](20261017190508-unify-dump-capture-and-project-wide-ownership.md).
+[Unify dump capture around one evolving project-wide dump](../solved/20261017190508-unify-dump-capture-and-project-wide-ownership.md).
 
 ### Dump Reading, Editing and Appending
 
