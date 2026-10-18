@@ -9,7 +9,8 @@ scope: ui
 tags: board, kanban, tickets, modal
 source: chat
 reported_at: 2026-10-17T20:10:15Z
-commits: []
+commits: [02c24fcfdc174a41755d89259810300e369d901d]
+branch: feat/slice-1-web-board
 ready_at: 2026-10-18T08:34:50Z
 started_at: 2026-10-18T08:34:50Z
 ---
@@ -234,6 +235,22 @@ Implementation must remain consistent with the
    and actions, and retained input when maximizing/restoring.
 7. Use focused validation for the repaired read path, shared ticket mutations
    and Web interactions, following the repository's normal development gates.
+
+## Implementation Progress
+
+T1.1 is implemented in `02c24fcfdc174a41755d89259810300e369d901d`.
+Canonical-only and empty stores previously failed because the legacy ticket
+directory was required; mixed stores omitted canonical tickets. The shared
+Board read now combines selected native authority and supported loose documents,
+deduplicates native projections, retains attention records and pages beyond
+128 tickets with complete column totals. Native inspection preserves canonical
+bytes and rejects pending transitions without recovery.
+
+The [Slice 1 report](../../report/slices/web-ui-workflow-consolidation/slice-1-web-board.md)
+records the exact successful focused race, changed-code lint, signature and
+whitespace commands. Final controller validation has not run. T1.2 shared
+ticket writes/detail and T1.3 modal/interactions/browser evidence remain;
+the ticket is still in progress and no slice PR is ready.
 
 ## Consolidated Design
 
