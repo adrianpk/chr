@@ -65,3 +65,15 @@ Before slice review/integration, run `make verify` and `git diff --check`.
 These commands are planned checks, not recorded successful executions.
 Retain commits, PR, validation and blocker evidence here and in the slice report;
 the tracker remains an order map.
+
+## Implementation Progress
+
+T6.1 is implemented. Project `h` opens the shared selection/readiness projection,
+with separate retained worker bindings, keyboard previews, cancellation,
+asynchronous read correlation and bounded compact rendering. Real application
+assembly and a claimed invocation are exercised without a driver launch or
+configuration mutation.
+
+Passed: `go test ./internal/tui ./internal/app -run '^TestTUIHarnessSelection' -count=1 -timeout=3m`.
+
+T6.2 revision-bound saves and independent-process refresh acceptance are next.

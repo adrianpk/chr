@@ -352,6 +352,7 @@ func newTUIOptions(data tuiOptionsData) tui.Options {
 		ProjectExecutor:      newTUIProjectMetadataExecutor(data.operations),
 		CaseExecutor:         newTUICaseMetadataExecutor(data.operations),
 		SourceExecutor:       newTUISourceOpenExecutor(data.operations),
+		HarnessExecutor:      newTUIHarnessSelectionExecutor(data.operations),
 	}
 }
 
