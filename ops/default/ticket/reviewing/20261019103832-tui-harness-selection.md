@@ -1,7 +1,7 @@
 ---
 id: TKT-20261019103832
 title: "TUI harness selection"
-status: in_progress
+status: reviewing
 kind: task
 severity: medium
 priority: normal
@@ -12,7 +12,8 @@ reported_at: 2026-10-19T10:38:32Z
 ready_at: 2026-10-19T10:38:33Z
 started_at: 2026-10-19T17:19:15Z
 branch: feat/slice-6-tui-harness-selection
-commits: []
+reviewed_at: 2026-10-19T17:32:58Z
+commits: [03d0027706c678d6a6587f895f1765e590911d56]
 ---
 
 # TUI harness selection
@@ -57,23 +58,31 @@ Acceptance: HP-19, HP-20, HP-21.
 
 ## Validation
 
-Exercise keyboard/event-driven update behavior through the real TUI adapter with temporary workspace configuration, cancellation, stale revision and independent process changes; retain existing compact layout behavior.
+Passed focused application/model events:
+`go test ./internal/tui ./internal/app -run '^TestTUIHarnessSelection' -count=1 -timeout=3m`.
 
-Focused regression (planned): `go test ./internal/tui ./internal/app -run '^TestTUIHarnessSelection' -count=1 -timeout=3m`.
+Passed focused asynchronous interaction checks with race instrumentation:
+`go test -race ./internal/tui ./internal/app -run '^TestTUIHarnessSelection' -count=1 -timeout=3m`.
 
-Before slice review/integration, run `make verify` and `git diff --check`.
-These commands are planned checks, not recorded successful executions.
-Retain commits, PR, validation and blocker evidence here and in the slice report;
-the tracker remains an order map.
+The real model/application journey covers both role saves and clear, local
+actor authority, active versus new worker bindings, receipt replay after a lost
+acknowledgement, cancellation and independent-process persistence. An owned
+second process saves through real Web/application adapters; stale keyboard
+input is retained and explicit refresh sees the external persisted revision.
+Model fixtures cover late results, in-flight exclusion, setup failure, mouse
+ownership and compact/wide layouts with scrolling.
+
+The controller records the ordered development gate and focused checks against
+the clean PR head after PR-reference follow-up commits.
 
 ## Implementation Progress
 
-T6.1 is implemented. Project `h` opens the shared selection/readiness projection,
-with separate retained worker bindings, keyboard previews, cancellation,
-asynchronous read correlation and bounded compact rendering. Real application
-assembly and a claimed invocation are exercised without a driver launch or
-configuration mutation.
+T6.1 and T6.2 are implemented. Project `h` opens the compact shared selection and
+readiness projection, with retained worker bindings shown separately. Exact
+revision-bound saves use the central configuration owner and local actor
+mapping. Rejected input remains visible, unchanged retries recover receipts and
+the running TUI sees persisted changes on reload without another settings store.
 
-Passed: `go test ./internal/tui ./internal/app -run '^TestTUIHarnessSelection' -count=1 -timeout=3m`.
+Report: [Slice 6](../../report/slices/codex-pi-harnesses/slice-6-tui-harness-selection.md).
 
-T6.2 revision-bound saves and independent-process refresh acceptance are next.
+Canonical PR reference is added after creation. Integration remains controller-owned.

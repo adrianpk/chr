@@ -11,12 +11,20 @@ import (
 )
 
 type harnessSelectionFixture struct {
-	view HarnessSelectionView
-	err  error
+	view    HarnessSelectionView
+	err     error
+	saveErr error
+	request HarnessSelectionRequest
 }
 
 func (f *harnessSelectionFixture) InspectHarnessSelections() (HarnessSelectionView, error) {
 	return f.view, f.err
+}
+
+func (f *harnessSelectionFixture) SaveHarnessSelections(request HarnessSelectionRequest) (HarnessSelectionView, error) {
+	f.request = request
+
+	return f.view, f.saveErr
 }
 
 // The project key opens an asynchronous compact picker. Late reads cannot

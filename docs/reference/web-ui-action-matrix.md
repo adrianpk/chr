@@ -19,7 +19,7 @@ Status values:
 | --- | --- | --- | --- | --- | --- |
 | Web server | `chr web serve` | `chr web serve` | none | `web_only` | Explicit foreground process; no automatic startup from CLI or TUI workflows. |
 | Project | `/`, `/project` (direct URL only) | `chr project current`, metadata commands | `F1` | `read_only_matched` | Shows the project name, root directory and secondary diagnostic ID; no visible navigation link or automatic polling. |
-| Harness defaults | `/project/harnesses`, project context | none | none | `web_only` | Separate worker/generation choices, local readiness and retained worker bindings use the shared selection projection. |
+| Harness defaults | `/project/harnesses`, project context | none | Project `h` | `matched` | Separate worker/generation choices, local readiness and retained worker bindings use the shared selection projection. |
 | Cases | `/cases` | `chr metadata case set` for writes | `F2` | `matched` | Catalog and detail read project-local case metadata; detail form writes case metadata. |
 | Dumps | `/dumps` | `chr dump *` | `F3` | `matched` | Catalog, capture and one body editor use the shared dump service; append remains a transport operation. |
 | Quizzes | `/quizzes` | `chr quiz *` | `F4` | `matched` | Named pending scopes and retained answering support Start, Resume, Answer, Skip, Done, Cancel and Deep/Fast mode changes with question/revision guards. |
@@ -32,7 +32,7 @@ Status values:
 
 | Domain | Web action | CLI command | TUI action | Status | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Harness defaults | `harnesses.change` at `/project/harnesses` | none | none | `web_only` | Named profile selection and clear use the shared configuration owner, exact project/revision/request identity and existing login/origin guards. |
+| Harness defaults | `harnesses.change` at `/project/harnesses` | none | Project `h`, Enter | `matched` | Named profile selection and clear use the shared configuration owner, exact project/revision/request identity and existing login/origin guards. |
 | Case metadata | `case.update` | `chr metadata case set` | Cases save | `matched` | Uses stale revision checks and writes project-local case metadata. |
 | Dump create | `dump.create` | `chr dump new` | Dumps create | `matched` | One New form selects Project-wide or an existing case. Retained capture identities make retries safe; general captures extend the shared dump while case captures remain independent. |
 | Dump save | `dump.save` | `chr dump save` | Dumps editor save | `matched` | One Body editor and Save use the canonical serialized revision guard, preserve metadata and retain input on failures. |

@@ -13,10 +13,12 @@ import (
 // HarnessSelectionExecutor observes shared project defaults and retained work.
 type HarnessSelectionExecutor interface {
 	InspectHarnessSelections() (HarnessSelectionView, error)
+	SaveHarnessSelections(HarnessSelectionRequest) (HarnessSelectionView, error)
 }
 
 // HarnessSelectionView contains public selection identities, never private paths.
 type HarnessSelectionView struct {
+	RequestID          string
 	Snapshot           core.HarnessSelectionSnapshot
 	Worker, Generation core.HarnessSelection
 	Profiles           []HarnessProfileView
@@ -41,6 +43,7 @@ const harnessKeepProfile = ":keep"
 
 type harnessSelectionState struct {
 	Active, Busy       bool
+	Saving             bool
 	Session            uint64
 	View               HarnessSelectionView
 	Worker, Generation string
@@ -82,7 +85,7 @@ func (m *Model) reloadHarnessPicker() tea.Cmd {
 
 func (m *Model) completeHarnessRead(msg harnessSelectionLoadedMsg) {
 	state := &m.harnessSelection
-	if !state.Active || state.Session != msg.Session {
+	if !state.Active || !state.Busy || state.Saving || state.Session != msg.Session {
 		return
 	}
 
@@ -99,6 +102,10 @@ func (m *Model) completeHarnessRead(msg harnessSelectionLoadedMsg) {
 }
 
 func (m Model) updateHarnessKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	if m.harnessSelection.Saving {
+		return m, nil
+	}
+
 	if msg.Type == tea.KeyEsc {
 		m.harnessSelection = harnessSelectionState{}
 
@@ -112,21 +119,33 @@ func (m Model) updateHarnessKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "r":
 		return m, m.reloadHarnessPicker()
+	case "enter", "ctrl+s":
+		return m, m.saveHarnessPicker()
+	default:
+		m.updateHarnessChoiceKey(msg.String())
+	}
+
+	return m, nil
+}
+
+func (m *Model) updateHarnessChoiceKey(key string) {
+	switch key {
 	case "tab", "shift+tab":
+		m.harnessSelection.Scroll = 0
 		m.harnessSelection.Field = 1 - m.harnessSelection.Field
 	case "left", "up", "k":
 		m.cycleHarnessProfile(-1)
 	case "right", "down", "j":
 		m.cycleHarnessProfile(1)
 	case "c":
+		m.harnessSelection.Scroll = 0
 		*m.harnessChoice() = ""
 	case "pgdown":
-		m.harnessSelection.Scroll++
+		maximum := maxInt(len(m.harnessSelectionLines(maxInt(m.width-4, 56)))-m.harnessVisibleRows(), 0)
+		m.harnessSelection.Scroll = minInt(m.harnessSelection.Scroll+1, maximum)
 	case "pgup":
 		m.harnessSelection.Scroll = maxInt(m.harnessSelection.Scroll-1, 0)
 	}
-
-	return m, nil
 }
 
 func (m *Model) harnessChoice() *string {
@@ -138,6 +157,8 @@ func (m *Model) harnessChoice() *string {
 }
 
 func (m *Model) cycleHarnessProfile(direction int) {
+	m.harnessSelection.Scroll = 0
+
 	choices := []string{harnessKeepProfile, ""}
 	for _, profile := range m.harnessSelection.View.Profiles {
 		choices = append(choices, profile.Name)
@@ -156,7 +177,7 @@ func (m *Model) cycleHarnessProfile(direction int) {
 }
 
 func (m Model) renderHarnessWorkspace(width, height int) string {
-	keys := []string{"Tab: role · arrows: profile · c: clear · Esc: cancel", "r: reload/discard choices · PgUp/PgDn: scroll"}
+	keys := []string{"Tab: role · arrows: profile · c: clear", "Enter: save · r: reload/discard · Esc: cancel · PgUp/Dn"}
 	content := m.harnessSelectionLines(maxInt(width-4, 1))
 	lines := append(keys, scrollLines(content, m.harnessSelection.Scroll, maxInt(height-3-len(keys), 1))...)
 
@@ -175,10 +196,10 @@ func (m Model) harnessSelectionLines(width int) []string {
 		return lines
 	}
 
-	lines = append(lines, harnessRoleLines("Worker", state.View.Worker, false, width)...)
 	lines = append(lines, harnessWrap(m.harnessChoiceLine("Worker", state.Worker, state.Field == 0), width)...)
-	lines = append(lines, harnessRoleLines("Generation", state.View.Generation, true, width)...)
 	lines = append(lines, harnessWrap(m.harnessChoiceLine("Generation", state.Generation, state.Field == 1), width)...)
+	lines = append(lines, harnessRoleLines("Worker", state.View.Worker, false, width)...)
+	lines = append(lines, harnessRoleLines("Generation", state.View.Generation, true, width)...)
 	lines = append(lines, "Retained worker bindings:")
 
 	for _, retained := range state.View.Retained {
@@ -191,11 +212,11 @@ func (m Model) harnessSelectionLines(width int) []string {
 	}
 
 	if state.View.RetainedProblem != "" {
-		lines = append(lines, state.View.RetainedProblem)
+		lines = append(lines, harnessWrap(state.View.RetainedProblem, width)...)
 	}
 
 	if state.View.More {
-		lines = append(lines, "First four retained invocations; Workflows has more.")
+		lines = append(lines, "First four retained invocations; use workflow status.")
 	}
 
 	return lines
@@ -223,7 +244,11 @@ func harnessRoleLines(name string, selection core.HarnessSelection, generation b
 }
 
 func (m Model) harnessChoiceLine(role, choice string, focused bool) string {
-	label := "Keep current default"
+	label := "Unavailable: " + choice
+	if choice == harnessKeepProfile {
+		label = "Keep current default"
+	}
+
 	if choice == "" {
 		label = "Restore legacy dispatch"
 	}
@@ -273,4 +298,12 @@ func harnessIdentity(profile, identity, provider, model string) string {
 
 func harnessWrap(text string, width int) []string {
 	return strings.Split(lipgloss.NewStyle().Width(maxInt(width, 1)).Render(text), "\n")
+}
+
+func (m Model) harnessVisibleRows() int {
+	width := maxInt(m.width, 60)
+	height := maxInt(m.height, minShellHeight)
+	height -= lineCount(m.renderShellTopbar(width)) + lineCount(m.renderShellFooter(width)) + lineCount(m.renderShellStatus(width))
+
+	return maxInt(height-5, 1)
 }

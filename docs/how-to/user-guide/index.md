@@ -235,6 +235,14 @@ quizzes, specs, plans, tickets, and execution activity. It loads durable
 workspace files from disk and writes normal Markdown artifacts back to the
 core.
 
+In **Project** (`F1`), press `h` to inspect harness defaults. Tab selects the
+worker or generation role; arrows choose a named profile and `c` restores legacy
+dispatch for that role. Press Enter to save or Esc to discard unsent choices.
+Stale or failed saves retain the choices. Press `r` to discard them and reload
+current defaults, including changes from another interface or process. Running,
+paused and resumed work keeps its original binding. See [TUI harness defaults](../../reference/project-workspace.md#tui-harness-defaults)
+for readiness, retry and scrolling controls.
+
 ## Open the Local Web UI
 
 The Web UI is a browser surface over the same project state. It does

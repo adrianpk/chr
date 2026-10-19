@@ -356,6 +356,10 @@ func (m Model) updateSystemMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 
 func (m Model) updateActionFinishedMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 	switch typedMsg := msg.(type) {
+	case harnessSelectionSavedMsg:
+		m.completeHarnessSave(typedMsg)
+
+		return m, nil, true
 	case harnessSelectionLoadedMsg:
 		m.completeHarnessRead(typedMsg)
 

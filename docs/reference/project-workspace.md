@@ -303,6 +303,32 @@ lost, retry the same form to recover the original receipt. Closing the chooser
 discards unsent choices. The control edits named selections only; private paths,
 credentials and runtime setup remain outside the form.
 
+## TUI Harness Defaults
+
+In Project (`F1`), press `h` to open the harness picker. It reads the same
+persisted project selections and prepared named profiles as the Web control.
+Worker and generation choices are separate from the retained worker bindings.
+Local readiness does not test remote authentication.
+
+Use Tab or Shift+Tab to select a role and arrows (or `j`/`k`) to cycle its
+profiles. **Keep current default** leaves that role unchanged. Press `c` to
+choose **Restore legacy dispatch**, then Enter or Ctrl+S to save. Both changed
+roles are published together using the observed revision, exact choices and
+request identity. The application resolves the active local operator.
+
+A rejected or unacknowledged save keeps its choices and original request.
+Retry unchanged to recover a committed receipt. If another process changed the
+configuration, press `r` to discard the preview and reload before saving.
+Esc discards unsent choices; an in-flight save finishes before the picker can
+close. Changes affect new operations without restarting the TUI or service.
+Admitted work keeps its retained binding.
+
+PgUp/PgDn scroll the compact content while controls remain visible. The picker
+shows the first four retained worker invocations. For further inspection, close
+the picker and use **Inspect retained workflow status** in the command palette.
+Profile inspection and selection do not provision credentials, install runtimes
+or call a model.
+
 ## Notification Config
 
 `.chr/default/config.yml` may also define notification settings under
