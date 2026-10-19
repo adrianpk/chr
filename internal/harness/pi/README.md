@@ -12,11 +12,11 @@ level. Automatic retry, compaction and cache warming are disabled. Intermediate
 events do not reset host limits. Missing usage remains unknown; reported
 counters never certify whole-call token enforcement.
 
-Each call uses a private temporary home, agent directory, credential copy,
+Each native generation call uses a private temporary home, agent directory, credential copy,
 settings and session state. Only the selected provider's static API-key entry
 and credential-free model definition are copied. Model semantics retain their
 frozen hash; credentials may rotate at the same explicit private reference.
-OAuth, credential commands, environment expansion and credential-bearing model
+OAuth generation, credential commands, environment expansion and credential-bearing model
 settings fail with local preparation errors. No constructor or readiness check
 spawns Pi. An owned version check requires 1.3.0 when a call starts.
 
@@ -53,3 +53,23 @@ before releasing exclusion. Its action must reap Pi before returning. A valid
 refresh survives a later call failure; malformed updates or an operator's
 uncoordinated replacement cannot overwrite the retained source. Lock waits obey
 the caller's context. This owner does not add model retries or capacity.
+
+Selected Docker workers retain `WorkerRuntimeOptions` in their private host
+command and freeze the image ID before admission. The host launcher removes
+that argv from model context. It mounts only the execution checkout, Git
+metadata, the admitted capacity files, selected profile resources and the
+retained CHR bridge. The bridge and RPC process execute inside that container;
+they receive private writable state and a replacement model environment.
+
+The model process works from private state. Only the embedded `worker.mjs`
+extension registers the pinned SDK's seven builtin implementations at the
+host-selected checkout. This prevents project Pi settings from changing the
+call. Project instructions arrive through explicit host context. Discovery,
+MCP, retry, compaction and cache warming remain disabled.
+
+The bridge holds shared references to the existing admitted slot and guard;
+new admissions still require an exclusive slot. Host disconnection cancels the
+RPC context, and adopted detached tools are stopped and reaped before capacity
+or refreshed credentials are released. Normalized output remains distinct from
+host task validation and publication. Protocol streams stay ephemeral; provider
+failure details are redacted with the current credentials before excerpting.

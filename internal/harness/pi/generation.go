@@ -22,7 +22,7 @@ type Runner struct{}
 
 // Capabilities reports technical support, never whole-call usage certification.
 func (Runner) Capabilities() harness.Capabilities {
-	return harness.Capabilities{Generation: true, ReadOnlyFiles: true}
+	return harness.Capabilities{Generation: true, Worker: true, ReadOnlyFiles: true}
 }
 
 // RunAgent preserves caller-owned schemas, output paths and deadlines.

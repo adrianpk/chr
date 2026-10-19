@@ -143,11 +143,12 @@ func (s *session) finalResult() error {
 }
 
 type assistantMessage struct {
-	Role       string `json:"role"`
-	Provider   string `json:"provider"`
-	Model      string `json:"model"`
-	StopReason string `json:"stopReason"`
-	Content    []struct {
+	Role         string `json:"role"`
+	Provider     string `json:"provider"`
+	Model        string `json:"model"`
+	StopReason   string `json:"stopReason"`
+	ErrorMessage string `json:"errorMessage"`
+	Content      []struct {
 		Type string `json:"type"`
 		Text string `json:"text"`
 		ID   string `json:"id"`
@@ -196,7 +197,7 @@ func (s *session) message(data json.RawMessage) error {
 	}
 
 	if message.StopReason != "stop" {
-		s.finalErr = fmt.Errorf("assistant did not complete: %w", ErrProvider)
+		s.finalErr = &providerFailure{message: message.ErrorMessage}
 
 		return nil
 	}

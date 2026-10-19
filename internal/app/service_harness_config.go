@@ -63,7 +63,7 @@ func (s service) InspectHarnessSelections(ctx context.Context, action string) (H
 	}{
 		{core.HarnessWorker, "", config.Harnesses.Worker, &result.Worker}, {core.HarnessGeneration, action, config.Harnesses.Generation, &result.Generation},
 	} {
-		resolved, err := resolveConfiguredHarnessSelection(config, profiles, field.name, field.role, field.action, s.env.ConfigDir())
+		resolved, err := resolveConfiguredHarnessSelection(ctx, config, profiles, field.name, field.role, field.action, s.env.ConfigDir())
 		*field.target = resolved.View
 
 		if err != nil {
@@ -71,16 +71,16 @@ func (s service) InspectHarnessSelections(ctx context.Context, action string) (H
 		}
 	}
 
-	result.Profiles = harnessProfileChoices(config, profiles, s.env.ConfigDir())
+	result.Profiles = harnessProfileChoices(ctx, config, profiles, s.env.ConfigDir())
 
 	return result, nil
 }
 
-func harnessProfileChoices(config core.WorkspaceConfig, profiles map[string]core.HarnessProfile, configDir string) []HarnessProfileStatus {
+func harnessProfileChoices(ctx context.Context, config core.WorkspaceConfig, profiles map[string]core.HarnessProfile, configDir string) []HarnessProfileStatus {
 	choices := make([]HarnessProfileStatus, 0, len(profiles))
 	for _, profile := range profiles {
-		worker := prepareHarnessSelection(config, profile, core.HarnessWorker, "", configDir)
-		generation := prepareHarnessSelection(config, profile, core.HarnessGeneration, "", configDir)
+		worker := prepareHarnessSelection(ctx, config, profile, core.HarnessWorker, "", configDir)
+		generation := prepareHarnessSelection(ctx, config, profile, core.HarnessGeneration, "", configDir)
 		choices = append(choices, HarnessProfileStatus{Name: profile.Name, Harness: profile.Harness, ModelProvider: profile.ModelProvider, Model: worker.View.Model, Thinking: profile.Thinking, Revision: profile.Revision, Worker: worker.View.Readiness, Generation: generation.View.Readiness})
 	}
 

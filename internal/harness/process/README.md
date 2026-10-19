@@ -9,3 +9,8 @@ call; retained diagnostic truncation never creates an accepted JSON result.
 Its handler owns framing, while the same process owner bounds and spools both
 streams, closes stdin for shutdown, applies a finite exit grace, and reaps the
 process group. Internal failure cleanup does not imply caller cancellation.
+
+An independently owned Linux worker bridge can enable child adoption and reap
+model tools that detached from the original process group. This capability is
+never enabled on a shared application host. Reaping completes before the bridge
+releases its existing runtime capacity reservation.

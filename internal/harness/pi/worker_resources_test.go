@@ -57,7 +57,7 @@ func TestPiCredentialRefresh(t *testing.T) {
 
 	var group sync.WaitGroup
 
-	failures := make(chan error, 9)
+	failures := make(chan error, 10)
 
 	for range 8 {
 		private := filepath.Join(newWorkerPrivateDirectory(t), "auth.json")
@@ -66,6 +66,16 @@ func TestPiCredentialRefresh(t *testing.T) {
 			failures <- incrementWorkerCredential(t.Context(), source, private)
 		})
 	}
+
+	group.Go(func() {
+		for range 30 {
+			if _, err := ResolveWorkerResources(t.Context(), "", source, "", "fixture"); err != nil {
+				failures <- err
+
+				return
+			}
+		}
+	})
 
 	command := exec.CommandContext(t.Context(), os.Args[0], "-test.run=^TestPiCredentialRefreshChild$")
 	command.Env = append(os.Environ(), "CHR_REFRESH_SOURCE="+source, "CHR_REFRESH_PRIVATE="+filepath.Join(newWorkerPrivateDirectory(t), "auth.json"))
@@ -250,7 +260,7 @@ func TestPiCredentialRefreshResources(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			resources, err := ResolveWorkerResources("", path, "", "fixture")
+			resources, err := ResolveWorkerResources(t.Context(), "", path, "", "fixture")
 			if (err == nil) != scenario.wantOK || resources.OAuth != scenario.wantOAuth {
 				t.Fatalf("resources = %#v, %v", resources, err)
 			}
@@ -289,5 +299,19 @@ func TestPiCredentialRefreshCanceled(t *testing.T) {
 
 	if _, err := os.Stat(filepath.Join(filepath.Dir(source), refreshLockName)); !os.IsNotExist(err) {
 		t.Fatalf("canceled call created a refresh lock: %v", err)
+	}
+}
+
+// An empty home is still not a dedicated credential owner. New unrelated home
+// files must never become visible to a running worker through such a mount.
+func TestPiCredentialRefreshHome(t *testing.T) {
+	home := newWorkerPrivateDirectory(t)
+	t.Setenv("HOME", home)
+
+	path := filepath.Join(home, "auth.json")
+	writeWorkerAuth(t, path, "fixture")
+
+	if _, err := ResolveWorkerResources(t.Context(), "", path, "", "fixture"); err == nil {
+		t.Fatal("OAuth owner mounted the developer home")
 	}
 }

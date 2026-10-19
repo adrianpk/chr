@@ -12,7 +12,7 @@ reported_at: 2026-10-19T10:38:30Z
 ready_at: 2026-10-19T10:38:33Z
 started_at: 2026-10-19T15:01:47Z
 branch: feat/slice-4-pi-worker-runtime
-commits: [77bea3e585b26aed356594524e9162dbd2cb914c]
+commits: [77bea3e585b26aed356594524e9162dbd2cb914c, 4e6a54bb85c4784564877bc1dcac01080f81d858]
 ---
 
 # Pi Docker workers and private runtime setup
@@ -127,3 +127,59 @@ T4.2 remains in progress: container bridge dispatch, exact mounts, per-call stat
 and actual pinned Pi refresh integration are still required. T4.3 admission,
 capacity/capability regressions and container-reachable endpoint validation are
 pending. No PR or final exact-head controller evidence exists yet.
+
+### T4.2 container dispatch component
+
+Frozen worker commands now launch the retained Linux CHR bridge inside the
+selected immutable Pi image. Only checkout/Git metadata, existing reservation
+files, selected profile resources and the owned bridge are mounted. Private
+writable call state and a replacement model environment exclude host home,
+blanket environment forwarding and discovered Pi resources. The host supplies
+project instructions explicitly and excludes private argv from model context.
+
+The embedded worker extension reuses all seven pinned SDK builtin tools at the
+host-selected checkout while Pi itself runs from private state. The original
+invocation, claims, attempts and host validation remain authoritative. Existing
+slot/guard descriptors are delegated under their capacity coordinator; the
+runtime retains those same files until reaping. A lost host connection cancels
+RPC, and adopted detached tool children are killed and waited before capacity
+or refreshed credentials are released.
+
+Credential publication and directory inspection now coordinate on the source
+inode, preventing inspection of a partially written temporary file without
+holding up readiness for the entire model call. The concurrent owner regression
+also inspects resources during publication. Its initial stress run found an
+inspector retaining an inode replaced by atomic publication. Inspectors now
+verify canonical inode identity after locking and reopen a replaced source;
+three repeated concurrent refresh runs pass without relaxing private-file rules.
+
+Successful focused checks:
+
+- `go test -race ./internal/harness/pi -run '^TestPiCredentialRefresh' -count=3 -timeout=1m`
+- `go test ./internal/harness/... ./internal/core ./internal/app -run '^(TestPiTransport|TestPiGeneration|TestPiRuntime|TestPiWorker|TestPiCredentialRefresh|TestHarnessBinding|TestHarnessSelection)' -count=1 -timeout=3m`
+- `go test -race ./internal/harness/pi ./internal/harness/process ./internal/core ./internal/app -run '^(TestPiWorker|TestPiCredentialRefresh|TestAgentRunProcessReaper)' -count=1 -timeout=3m`
+- `CHR_TEST_PI_RUNTIME_IMAGE=chr-agent-pi:1.3.0 go test ./internal/app -run '^TestPiWorkerContainer$' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/harness/... ./internal/core ./internal/app`
+- `scripts/check-go-func-signatures.sh`
+- `scripts/check-package-readmes.sh`
+- `git diff --check`
+
+The actual image completed a disposable task through an owned endpoint container,
+committed its result and passed host Git validation after service recovery and
+private profile replacement. No real account or paid model was used. The initial
+host-gateway fixture timed out; the explicit container-network fixture works.
+An initial SDK tool-context mismatch was rejected by host validation, then fixed
+by binding the tool execution context to the checkout. Owned fixtures stopped.
+
+Remaining before the canonical PR:
+
+- Exercise two actual isolated container calls against the shared capacity and
+  preserve overflow/source exclusions across harness choices.
+- Verify the pinned Pi credential-storage API under concurrent owned OAuth
+  refresh fixtures; simulated owner writes alone do not certify that boundary.
+- Complete role/readiness edge cases, including bridge versus generation
+  executables, finite budgets and merger-broker rejection.
+- Record final clean-head controller checks, open the exact canonical PR and
+  complete its report/ticket reference follow-up commit and push.
+
+The report remains drafting and no canonical PR is open.

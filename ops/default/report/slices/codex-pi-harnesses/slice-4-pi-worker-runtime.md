@@ -44,9 +44,32 @@ copies and a dedicated OAuth directory with cross-process exclusion. Its action
 must reap Pi before returning. Valid refresh writes survive a later model failure;
 invalid updates or conflicting operator replacement cannot overwrite the source.
 
-Container bridge dispatch, private runtime state, actual pinned Pi refresh
-integration and T4.3 admission/capacity/endpoint checks remain in this slice.
-The new owner and transport profiles are not yet connected to worker dispatch.
+The T4.2 dispatch component now connects frozen selections to a Linux CHR host
+launcher and a bridge inside the selected image. The bridge and Pi RPC run in
+the container through owned pipes. The launcher retains image identity and
+model-resource semantics; it removes private argv before supplying model context.
+
+The model process runs from private state with controlled settings. Its embedded
+host extension reuses the pinned SDK's seven builtin tool implementations at the
+execution checkout. Tool execution context explicitly retains that root; project
+Pi settings cannot redirect it. Project instructions are supplied explicitly.
+
+Core delegates shared references to the existing slot and guard under the
+capacity coordinator. New admissions still need an exclusive slot. The container
+keeps that reservation after host descriptors close, and host disconnection
+cancels the owned RPC context. A private bridge adopts and reaps detached model
+tools before publishing refreshed credentials or releasing capacity.
+
+OAuth directory inspection shares a short publication lock on the credential
+inode. Refresh publication takes the exclusive counterpart. Concurrent readiness
+therefore cannot observe a half-written temporary file, and it does not wait for
+the whole model call. A stress run caught a stale inode after atomic rename;
+inspection now reopens the canonical source after checking its locked identity.
+Three repeated concurrent refresh runs pass. No extra credential store or
+capacity pool was added.
+
+Actual pinned OAuth storage integration, concurrent container acceptance and the
+remaining T4.3 readiness/capability checks are still pending.
 
 ## Contracts Added or Changed
 
@@ -54,13 +77,20 @@ The new owner and transport profiles are not yet connected to worker dispatch.
 - Missing-asset upgrade preserves project-owned runtime files.
 - Explicit worker tool correlation and separate worker/generation output bounds.
 - Private selected-provider worker resources and atomic OAuth credential owner.
+- Existing capacity reservation delegated to an independently owned runtime.
+- Bounded host connection framing and cancellation, explicit project instructions
+  and child adoption/reaping inside the container.
 
 ## Files of Interest
 
 - `cmd/chr/assets/workspace/profiles/*/runtime/agent/pi/`
 - `internal/harness/pi/runtime.go`, `worker_resources.go`
 - `internal/harness/pi/transport.go`, `inspection_events.go`
-- `internal/app/pi_runtime_test.go`
+- `internal/app/pi_worker.go`, `service_harness_worker.go`, `service_harness_selection.go`
+- `internal/harness/pi/worker_container.go`, `worker_bridge.go`, `worker.mjs`
+- `internal/core/worker_runtime.go`, `worker_runtime_reservation.go`
+- `internal/harness/process/subreaper_linux.go`
+- `internal/app/pi_worker_container_test.go`, `pi_runtime_test.go`
 - `docs/reference/project-workspace.md`
 
 ## Validation
@@ -94,7 +124,34 @@ bounds also pass. The provider's actual refresh behavior still needs the planned
 pinned-container integration; these fixtures do not establish OAuth authentication.
 Owned subprocesses ended.
 
+Passed focused dispatch component checks:
+
+- `go test -race ./internal/harness/pi -run '^TestPiCredentialRefresh' -count=3 -timeout=1m`
+
+- `go test ./internal/harness/... ./internal/core ./internal/app -run '^(TestPiTransport|TestPiGeneration|TestPiRuntime|TestPiWorker|TestPiCredentialRefresh|TestHarnessBinding|TestHarnessSelection)' -count=1 -timeout=3m`
+- `go test -race ./internal/harness/pi ./internal/harness/process ./internal/core ./internal/app -run '^(TestPiWorker|TestPiCredentialRefresh|TestAgentRunProcessReaper)' -count=1 -timeout=3m`
+- `CHR_TEST_PI_RUNTIME_IMAGE=chr-agent-pi:1.3.0 go test ./internal/app -run '^TestPiWorkerContainer$' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/harness/... ./internal/core ./internal/app`
+- `scripts/check-go-func-signatures.sh`
+- `scripts/check-package-readmes.sh`
+- `git diff --check`
+
+The actual pinned image made two protocol/model requests to an owned deterministic
+endpoint container, executed its tool in the retained worktree, committed the
+fixture result and passed host validation after service recovery and private
+profile replacement. The fixture uses no real account. All owned containers and
+subprocesses stopped after their checks.
+
+The initial host-gateway endpoint timed out from Docker. The fixture now supplies
+its explicit container-network endpoint; worker networking and retry policy were
+retained. The private-directory tool wrapper initially inherited Pi's private
+working directory. Host validation rejected the success reply without a valid
+checkout commit. Binding the SDK tool execution context to the selected checkout
+corrected the dispatch without weakening that host validation.
+
 ## Risks and Follow-ups
 
-T4.2 and T4.3 remain within this slice. Real paid model acceptance remains the
-approved opt-in final acceptance item.
+Remaining work covers two actual isolated workers against shared capacity,
+pinned OAuth credential-storage integration, role/readiness negative cases and
+final exact-head validation and PR references. Real paid model acceptance remains
+the approved opt-in final acceptance item.

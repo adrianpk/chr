@@ -344,6 +344,56 @@ build with a preparation error. Codex-only use does not probe or build Pi.
 Runtime inspection validates the Linux platform and Pi version labels and
 returns the immutable Docker image ID for worker admission.
 
+### Prepared Pi worker profile
+
+A Pi worker profile in the private user `harnesses.yml` names the Linux CHR
+executable that supplies its bridge, the prepared image and explicit resources:
+
+```yaml
+profiles:
+  pi-worker:
+    harness: pi
+    command: /opt/chr/bin/chr
+    model_provider: example-provider
+    model: exact-model
+    thinking: off
+    credential_ref: pi-worker/auth.json
+    model_config_ref: pi-worker-models.json
+    runtime_ref: chr-agent-pi:1.3.0
+```
+
+Resource references are relative to that private configuration directory unless
+absolute. Keep `harnesses.yml`, authentication and model settings private. The
+authentication file contains only the selected provider. For OAuth, its parent
+must be a private directory containing only that auth file and the managed
+refresh lock; keep model settings outside that directory. The bridge serializes
+refreshes across processes and publishes valid refreshed credentials atomically.
+A static API-key source is mounted read-only.
+
+Worker admission freezes the bridge executable and immutable image ID. A later
+profile change or image retag cannot rebind admitted work. Credentials may rotate
+at their retained reference; changed model definitions or credential types fail
+instead of changing the operation. Prepare a native Pi executable profile for
+generation separately from the container worker bridge profile.
+
+Each worker receives its execution checkout and Git metadata, the selected
+resources and private writable state. It receives no host home, Docker socket,
+SSH configuration or blanket environment forwarding. Pi runs from private state;
+only the host-owned extension binds its seven builtin tools to the execution
+checkout. Project instructions are supplied explicitly. Discovered Pi settings,
+extensions, MCP servers, skills and context files cannot replace the selection.
+
+Custom endpoints must be reachable from the container. Literal loopback endpoints
+are rejected. Explicit `host.docker.internal` endpoints add Docker's host-gateway
+mapping; host firewall and listener policy still apply. A container-network
+endpoint is another valid choice. The bridge does not enable host networking.
+Local readiness checks preparation; they do not prove remote authentication.
+
+Workers retain the existing invocation, claims, retries, shared capacity and host
+validation. The runtime holds the same admitted capacity reservation until its
+processes stop, including after a host disconnect. Pi's observed usage does not
+certify a finite whole-call budget or qualify it as a merger broker.
+
 ## Runtime Plan
 
 The runtime planner computes a side-effect-free Docker boundary plan from the
