@@ -6,6 +6,15 @@ import (
 	"strings"
 )
 
+// Planning consumes discovery content; routing controls remain in the retained
+// quiz observation. The source reference and revision bind the complete history.
+type planQuizAnswer struct {
+	ID         string `json:"id"`
+	QuestionID string `json:"question_id"`
+	Question   string `json:"question"`
+	Answer     string `json:"answer"`
+}
+
 func appendPlanQuiz(ctx context.Context, projectDir string, observed *PlanSourceObservation) error {
 	repository := NewQuizArtifactRepository(projectDir)
 
@@ -21,11 +30,11 @@ func appendPlanQuiz(ctx context.Context, projectDir string, observed *PlanSource
 
 	observed.Quiz = quiz
 
-	var answers []QuizEntry
+	answers := make([]planQuizAnswer, 0, len(quiz.Entries))
 
 	for _, entry := range quiz.Entries {
 		if entry.Status == QuizEntryStatusAnswered && strings.TrimSpace(entry.Answer) != "" {
-			answers = append(answers, entry)
+			answers = append(answers, planQuizAnswer{ID: entry.ID, QuestionID: entry.QuestionID, Question: entry.Question, Answer: entry.Answer})
 		}
 	}
 
