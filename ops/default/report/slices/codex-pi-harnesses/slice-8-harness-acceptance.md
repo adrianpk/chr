@@ -1,6 +1,6 @@
 # Slice 8: Harness Acceptance and Operator Guidance
 
-Status: reviewing
+Status: delivered
 Delivery set: codex-pi-harnesses
 Plan: [Selectable Harness Delivery](../../../plan/codex-pi-harnesses.md)
 Tracker: [Selectable Harness Delivery Order](../../../tracker/codex-pi-harnesses.md)
@@ -104,25 +104,33 @@ Routine fixtures use synthetic credentials and perform no provider/bot calls.
 The combined check runs the journey and missing-access guard; the real-provider
 root is explicitly skipped until its separate authorization and access exist.
 
-Final validation will be recorded through the controller on the clean final
-PR head after live-proof authorization and access are available. The required
-prefix is:
+Controller evidence `X76A5QQJWBGQKBA6LQYP2VJ6DO` passed the following exact ordered
+checks on clean PR head `d05c7171df4f5fab4318e12299d4886fb5f11cfe`:
 
 - `make verify`
 - `go test ./internal/app -run '^TestHarnessJourney$' -count=1 -timeout=3m`
 - `go test -race ./internal/app -run '^TestHarnessJourney$' -count=1 -timeout=3m`
+- `go test ./internal/app -run '^TestHarnessLivePiGuard$' -count=1 -timeout=3m`
+- `git diff --check`
 
-The focused missing-access guard and one opted-in live proof follow that prefix,
-then `git diff --check`. These final checks have not run for this candidate.
-After controller integration, the controller owns the unchanged development gate
-and final documentation closure. This PR does not close the original ticket.
+Canonical PR #419 was verified merged into dev at that same commit through
+controller-owned Rebase + Fast-forward. Acta merge event:
+`01M5APYM2AQS2JKMWWKD8WE3NT`. Delivered status records that integration;
+the original feature ticket remains blocked on the required live proof.
+
+The configured delivery-set gate remains `make verify`: strict lint, short Go
+tests, CI script regressions and build. Go and Python are available. It needs
+no persistent fixture or Docker service, and live Pi opt-in is unset. The
+controller owns its execution on the clean post-closure dev candidate. The
+worker has not run this post-closure gate. Its result and the separately
+authorized real-provider proof are both required before final ticket closure.
 
 ## Acceptance Evidence
 
 These rows point to the owning merged-slice evidence and the bounded current
 journey. Earlier successful commands were not rerun as an exhaustive matrix.
-Final clean-candidate checks and post-merge development-gate evidence remain
-separate controller records.
+The successful PR checks above and pending post-merge development-gate evidence
+remain separate controller records.
 
 | Criterion | Owning evidence and current result |
 | --- | --- |

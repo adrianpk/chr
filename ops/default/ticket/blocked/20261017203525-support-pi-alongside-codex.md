@@ -1,7 +1,7 @@
 ---
 id: TKT-20261017203525
 title: "Support Pi alongside Codex for execution and generation"
-status: reviewing
+status: blocked
 reviewed_at: 2026-10-19T18:24:09Z
 started_at: 2026-10-19T18:07:20Z
 branch: test/slice-8-harness-acceptance
@@ -13,7 +13,7 @@ scope: domain
 tags: agents, pi, models
 source: chat
 reported_at: 2026-10-17T20:35:25Z
-commits: [c1374d643d4db2c3bcfa4cdef9a600b9c039fdc2, 297042e63d220d553f830928626e68ac9d55c908, d131373dc63526920bb4c88728a9f477d0e56f5e]
+commits: [c1374d643d4db2c3bcfa4cdef9a600b9c039fdc2, 297042e63d220d553f830928626e68ac9d55c908, d131373dc63526920bb4c88728a9f477d0e56f5e, d05c7171df4f5fab4318e12299d4886fb5f11cfe]
 pr: https://forge.adrianpk.com/adrianpk/chr/pulls/419
 ---
 
@@ -75,9 +75,9 @@ Expected PR title: `test(slice-8): verify selectable harnesses and live configur
 
 Expected report: `ops/default/report/slices/codex-pi-harnesses/slice-8-harness-acceptance.md`.
 
-Activated after canonical PR #418 was verified merged into dev. T8.1 is the
-next recorded task. Real model calls remain subject to the explicit live-proof
-authorization required by T8.3.
+Activated after canonical PR #418 was verified merged into dev. Slice 8's
+implementation is now integrated through PR #419. Real model calls remain
+subject to the explicit live-proof authorization required by T8.3.
 
 Prerequisite: Slice 7 integrated into dev; implementation authorization for this set.
 
@@ -138,3 +138,24 @@ Docker access. Native Pi 1.3.0 and a compatible static credential are available;
 the proposed proof is `zai/glm-4.7` with thinking off. This worker cannot access
 the Docker socket and passwordless sudo is unavailable. No real model call has
 run. The original ticket cannot close while that acceptance remains unresolved.
+
+## Integration and Gate Preparation
+
+Canonical PR #419 merged through controller-owned Rebase + Fast-forward into
+dev at `d05c7171df4f5fab4318e12299d4886fb5f11cfe`. The Slice 8 report records
+the delivered implementation; this ticket remains blocked on live acceptance.
+
+Controller evidence `X76A5QQJWBGQKBA6LQYP2VJ6DO` passed these exact ordered
+checks on that clean PR head:
+
+- `make verify`
+- `go test ./internal/app -run '^TestHarnessJourney$' -count=1 -timeout=3m`
+- `go test -race ./internal/app -run '^TestHarnessJourney$' -count=1 -timeout=3m`
+- `go test ./internal/app -run '^TestHarnessLivePiGuard$' -count=1 -timeout=3m`
+- `git diff --check`
+
+The post-closure delivery-set gate remains pending and belongs to the
+controller. Its configured `make verify` requires no persistent fixture;
+available Go/Python tools and unset live Pi opt-in prepare the deterministic
+gate. A successful gate does not supply the missing real-provider proof or
+authorize closing this ticket without it.
