@@ -16,9 +16,10 @@ Plan: [Selectable Harness Delivery](../../plan/codex-pi-harnesses.md).
 
 Tracker: [Selectable Harness Delivery Order](../../tracker/codex-pi-harnesses.md).
 
-Implementation gate: this approved contract authorizes preparing the delivery
-set. Runtime implementation, controller startup and live model calls have not
-started through this planning change.
+Implementation authorization: granted by the maintainer on 2026-10-19 for the
+linked eight-slice plan through Looper, including its canonical PRs and
+controller-owned Rebase + Fast-forward merges into dev. Live acceptance retains
+the plan's fixture, access and explicit-authorization requirements.
 
 ## 1. Outcome
 

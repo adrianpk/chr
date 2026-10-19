@@ -1,6 +1,6 @@
 # Selectable Harness Delivery
 
-Status: Ready
+Status: Approved
 
 Date: 2026-10-19
 
@@ -8,6 +8,8 @@ Delivery set: codex-pi-harnesses
 
 Scope approval: maintainer, 2026-10-19; the specification is approved and this
 slicing preparation was explicitly requested.
+
+Approved: maintainer, 2026-10-19; explicit instruction to execute this set through Looper.
 
 Spec: [Selectable Codex and Pi Harnesses](../spec/stable/codex-pi-harnesses.md).
 
@@ -17,13 +19,15 @@ Tracker: [Selectable Harness Delivery Order](../tracker/codex-pi-harnesses.md).
 
 Planning baseline: `79c789acc842a4e71757203df275ece5296875b1`.
 
-Implementation authorization: pending; this change prepares and versions the
-delivery map. No controller, worker, paid model call or service activation is
-started by creating this plan. Existing controller configurations and services
-remain separately owned.
+Implementation authorization: granted on 2026-10-19 for these eight slices
+through Looper, including canonical slice PRs and controller-owned Rebase +
+Fast-forward merges into dev. Use one active development slice and one open
+canonical PR for this set. The live acceptance prerequisites below remain in
+force. Existing controller configurations and user services remain separately
+owned.
 
 First planned slice: Slice 1, Neutral contracts and Codex extraction; T1.1.
-No slice implementation has started.
+Actual processing state belongs to the source tickets and slice reports.
 
 Slice strategy: behavior-first
 
