@@ -1,7 +1,7 @@
 ---
 id: TKT-20261019103833
 title: "Telegram harness selection"
-status: reviewing
+status: solved
 kind: task
 severity: medium
 priority: normal
@@ -11,9 +11,11 @@ source: chat
 reported_at: 2026-10-19T10:38:33Z
 ready_at: 2026-10-19T10:38:33Z
 started_at: 2026-10-19T17:37:13Z
+closed_at: 2026-10-19T18:07:09Z
+resolution: fixed
 branch: feat/slice-7-telegram-harness-selection
 reviewed_at: 2026-10-19T18:01:45Z
-commits: [472d576a34f70a94611626d3d2a0c652f42b842f, 92a45627362a4dcb7c7c1b5a27f655f5eca21033, 5c27c9beac5242f9543bb2247c2b546b1c3fd01f]
+commits: [472d576a34f70a94611626d3d2a0c652f42b842f, 92a45627362a4dcb7c7c1b5a27f655f5eca21033, 5c27c9beac5242f9543bb2247c2b546b1c3fd01f, abf189641fec2dcc1183274bdce474398160fe1d]
 pr: https://forge.adrianpk.com/adrianpk/chr/pulls/418
 ---
 
@@ -100,3 +102,10 @@ Final clean-HEAD validation is delegated to the controller after PR-reference
 follow-up commits. Its required prefix is `make verify`, focused selection and
 focused race; affected existing action/configuration regressions follow, then
 `git diff --check`. The report lists the exact ordered commands.
+
+## Integration
+
+Canonical PR #418 merged into dev at `abf189641fec2dcc1183274bdce474398160fe1d`.
+Controller evidence `ZSAGYCBEM6RLRO7V3FLMZOAY6R` passed all five exact-HEAD checks
+listed in the delivered Slice 7 report. Acta merge event:
+`01M5ANF2566P7C03CXJV8698RT`.

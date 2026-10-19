@@ -139,8 +139,8 @@ The specification links the pinned Pi CLI/RPC contract.
 | Slice 4 | Pi Docker workers and private runtime setup | [TKT-20261019103830](../ticket/solved/20261019103830-pi-worker-runtime.md) | `feat/slice-4-pi-worker-runtime` | `feat(slice-4): execute Pi workers in their selected Docker runtime` | `ops/default/report/slices/codex-pi-harnesses/slice-4-pi-worker-runtime.md` |
 | Slice 5 | Web harness selection | [TKT-20261019103831](../ticket/solved/20261019103831-web-harness-selection.md) | `feat/slice-5-web-harness-selection` | `feat(slice-5): change project harness selections from the Web UI` | `ops/default/report/slices/codex-pi-harnesses/slice-5-web-harness-selection.md` |
 | Slice 6 | TUI harness selection | [TKT-20261019103832](../ticket/solved/20261019103832-tui-harness-selection.md) | `feat/slice-6-tui-harness-selection` | `feat(slice-6): change project harness selections from the TUI` | `ops/default/report/slices/codex-pi-harnesses/slice-6-tui-harness-selection.md` |
-| Slice 7 | Telegram harness selection | [TKT-20261019103833](../ticket/reviewing/20261019103833-telegram-harness-selection.md) | `feat/slice-7-telegram-harness-selection` | `feat(slice-7): change project harness selections through Telegram` | `ops/default/report/slices/codex-pi-harnesses/slice-7-telegram-harness-selection.md` |
-| Slice 8 | Cross-interface acceptance and operator guidance | [TKT-20261017203525](../ticket/ready/20261017203525-support-pi-alongside-codex.md) | `test/slice-8-harness-acceptance` | `test(slice-8): verify selectable harnesses and live configuration end to end` | `ops/default/report/slices/codex-pi-harnesses/slice-8-harness-acceptance.md` |
+| Slice 7 | Telegram harness selection | [TKT-20261019103833](../ticket/solved/20261019103833-telegram-harness-selection.md) | `feat/slice-7-telegram-harness-selection` | `feat(slice-7): change project harness selections through Telegram` | `ops/default/report/slices/codex-pi-harnesses/slice-7-telegram-harness-selection.md` |
+| Slice 8 | Cross-interface acceptance and operator guidance | [TKT-20261017203525](../ticket/in_progress/20261017203525-support-pi-alongside-codex.md) | `test/slice-8-harness-acceptance` | `test(slice-8): verify selectable harnesses and live configuration end to end` | `ops/default/report/slices/codex-pi-harnesses/slice-8-harness-acceptance.md` |
 
 ## 5. Slice Contracts
 
@@ -250,7 +250,7 @@ Focused regression (planned): `go test ./internal/tui ./internal/app -run '^Test
 
 ### Slice 7: Telegram harness selection
 
-Ticket: [TKT-20261019103833](../ticket/reviewing/20261019103833-telegram-harness-selection.md).
+Ticket: [TKT-20261019103833](../ticket/solved/20261019103833-telegram-harness-selection.md).
 
 Dependency: Slice 6 integrated into dev.
 
@@ -268,7 +268,7 @@ Focused concurrency regression (planned): `go test -race ./internal/app -run '^T
 
 ### Slice 8: Cross-interface acceptance and operator guidance
 
-Ticket: [TKT-20261017203525](../ticket/ready/20261017203525-support-pi-alongside-codex.md).
+Ticket: [TKT-20261017203525](../ticket/in_progress/20261017203525-support-pi-alongside-codex.md).
 
 Dependency: Slice 7 integrated into dev.
 

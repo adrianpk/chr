@@ -1,7 +1,9 @@
 ---
 id: TKT-20261017203525
 title: "Support Pi alongside Codex for execution and generation"
-status: ready
+status: in_progress
+started_at: 2026-10-19T18:07:20Z
+branch: test/slice-8-harness-acceptance
 ready_at: 2026-10-19T10:38:33Z
 kind: task
 severity: unclassified
@@ -71,8 +73,9 @@ Expected PR title: `test(slice-8): verify selectable harnesses and live configur
 
 Expected report: `ops/default/report/slices/codex-pi-harnesses/slice-8-harness-acceptance.md`.
 
-These are planned identities; no implementation branch, PR or report exists
-merely because this ticket is ready.
+Activated after canonical PR #418 was verified merged into dev. T8.1 is the
+next recorded task. Real model calls remain subject to the explicit live-proof
+authorization required by T8.3.
 
 Prerequisite: Slice 7 integrated into dev; implementation authorization for this set.
 

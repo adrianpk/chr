@@ -1,6 +1,6 @@
 # Slice 7: Telegram Harness Selection
 
-Status: reviewing
+Status: delivered
 Delivery set: codex-pi-harnesses
 Plan: [Selectable Harness Delivery](../../../plan/codex-pi-harnesses.md)
 Tracker: [Selectable Harness Delivery Order](../../../tracker/codex-pi-harnesses.md)
@@ -95,8 +95,8 @@ reservation rollback, expiry and rejected preparation without image or receipt.
 The active-work fixture checks a live claim, nested/resumed generation artifacts,
 new admissions and existing Web/TUI readers plus an independent process.
 
-Before integration, the controller records the following ordered checks against
-the final clean PR head; these entries are planned until its evidence is recorded:
+Controller evidence `ZSAGYCBEM6RLRO7V3FLMZOAY6R` passed the following exact ordered
+checks on clean head `abf189641fec2dcc1183274bdce474398160fe1d`:
 
 - `make verify`
 - `go test ./internal/core ./internal/app -run '^TestTelegramHarnessSelection' -count=1 -timeout=3m`
@@ -107,6 +107,10 @@ the final clean PR head; these entries are planned until its evidence is recorde
 Fixtures use owned temporary HTTP/SQLite/Git state and local profile resources;
 no message is sent to the live bot. Generation checks retain real production
 bindings and do not invoke a remote model or worker driver.
+
+Canonical PR #418 was verified merged into dev at that same commit through
+controller-owned Rebase + Fast-forward. Acta merge event:
+`01M5ANF2566P7C03CXJV8698RT`.
 
 ## Risks and Follow-ups
 
