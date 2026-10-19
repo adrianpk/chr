@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+// ErrHarnessSelectionPreparation identifies a rejected candidate before any
+// selection image or receipt is published; transport failures remain distinct.
+var ErrHarnessSelectionPreparation = errors.New("harness selection preparation failed")
+
 // HarnessSelectionAudit records the last accepted change without private resources.
 type HarnessSelectionAudit struct {
 	ProjectRef    string `json:"project_ref"`
@@ -189,7 +193,7 @@ func prepareHarnessSelectionChange(ctx context.Context, project string, opts Har
 	}
 
 	if err := opts.Validate(ctx, candidate); err != nil {
-		return journal, err
+		return journal, fmt.Errorf("%w: %w", ErrHarnessSelectionPreparation, err)
 	}
 
 	result, err := candidate.HarnessSelections(opts.Request.ProjectRef)

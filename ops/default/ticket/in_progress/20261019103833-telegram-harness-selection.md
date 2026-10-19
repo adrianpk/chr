@@ -78,5 +78,12 @@ defaults from admitted work. Help includes the strict named-role syntax.
 
 Passed: `go test ./internal/core ./internal/app -run '^(TestTelegramHarnessSelection|TestTelegramHelp)' -count=1 -timeout=3m`.
 
-T7.2 exact confirmation and T7.3 retained redelivery/cross-interface acceptance
-are next. The inspection path changes no project selection configuration.
+T7.2 is implemented: exact deterministic confirmations bind mapped actor,
+project/root, choices, full revision and retained request ID. Current authority
+is checked at publication through the shared configuration owner. Stale or
+unauthorized actions cannot publish; uncertain owner failures retain their
+request identity for recovery. Terminal confirmation contexts release capacity.
+
+Passed: `go test ./internal/core ./internal/app -run '^(TestTelegramHarnessSelection|TestTelegramOperationAction|TestHarnessSelectionChange)' -count=1 -timeout=3m`.
+
+T7.3 retained redelivery/cross-interface acceptance is next.

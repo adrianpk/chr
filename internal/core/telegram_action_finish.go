@@ -109,6 +109,10 @@ func finishTelegramActionState(ctx context.Context, tx *sql.Tx, claim TelegramAc
 }
 
 func finishTelegramActionResult(ctx context.Context, tx *sql.Tx, retained TelegramActionClaim, result TelegramActionResult, now time.Time) error {
+	if err := finishTelegramHarnessConversation(ctx, tx, retained.Request, result.State, now); err != nil {
+		return err
+	}
+
 	if err := projectTelegramWorkBinding(ctx, tx, retained.Request, result, formatProjectTime(now)); err != nil {
 		return err
 	}

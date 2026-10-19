@@ -59,6 +59,10 @@ func (r telegramReceiver) respondActionClaim(ctx context.Context, update core.Te
 }
 
 func (r telegramReceiver) dispatchTelegramAction(ctx context.Context, claim core.TelegramActionClaim, config core.TelegramReceiverConfig) error {
+	if claim.Request.OperationID == core.TelegramHarnessSelectionOperation {
+		return r.applyHarnessAction(ctx, claim, config)
+	}
+
 	if claim.Request.OperationID == "work.control" {
 		return r.applyControlAction(ctx, claim, config)
 	}

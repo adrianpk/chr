@@ -65,6 +65,10 @@ func finishTelegramOperation(ctx context.Context, tx *sql.Tx, request TelegramOp
 		return err
 	}
 
+	if err := finishTelegramHarnessConversation(ctx, tx, request, state, now); err != nil {
+		return err
+	}
+
 	if err := queueTelegramReferencedResponse(ctx, tx, request.Source, text, request.ID+" "+receipt, configDigest, now); err != nil {
 		return err
 	}

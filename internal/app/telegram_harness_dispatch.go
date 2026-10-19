@@ -37,7 +37,7 @@ func (r telegramReceiver) respondHarness(ctx context.Context, user core.Telegram
 	}
 
 	if choices.Worker != nil || choices.Generation != nil {
-		return true, r.recordDiagnostic(ctx, update, config, "Selection confirmation is unavailable.")
+		return true, r.prepareHarnessChange(ctx, operations, user, input, target, choices)
 	}
 
 	status, err := operations.InspectTelegramHarnessSelections(ctx, target)
