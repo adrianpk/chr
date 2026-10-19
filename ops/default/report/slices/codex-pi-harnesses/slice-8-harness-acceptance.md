@@ -5,7 +5,7 @@ Delivery set: codex-pi-harnesses
 Plan: [Selectable Harness Delivery](../../../plan/codex-pi-harnesses.md)
 Tracker: [Selectable Harness Delivery Order](../../../tracker/codex-pi-harnesses.md)
 Branch: `test/slice-8-harness-acceptance`
-PR: pending
+PR: [#419](https://forge.adrianpk.com/adrianpk/chr/pulls/419)
 
 ## Purpose
 
@@ -64,6 +64,10 @@ The real test skips without opt-in; that skip is not live evidence.
 T8.3 authorized live execution remains pending. The deterministic fixtures establish
 shared application/transport behavior and do not stand in for a real model call.
 
+Task commits: T8.1 `c1374d643d4db2c3bcfa4cdef9a600b9c039fdc2`,
+T8.2 `297042e63d220d553f830928626e68ac9d55c908`, and T8.3 preparation
+`d131373dc63526920bb4c88728a9f477d0e56f5e`.
+
 ## Contracts Added or Changed
 
 - `TestHarnessJourney` covers active work, role combinations, all four adapters,
@@ -99,6 +103,19 @@ caller validates its typed output before retaining successful parser evidence.
 Routine fixtures use synthetic credentials and perform no provider/bot calls.
 The combined check runs the journey and missing-access guard; the real-provider
 root is explicitly skipped until its separate authorization and access exist.
+
+Final validation will be recorded through the controller on the clean final
+PR head after live-proof authorization and access are available. The required
+prefix is:
+
+- `make verify`
+- `go test ./internal/app -run '^TestHarnessJourney$' -count=1 -timeout=3m`
+- `go test -race ./internal/app -run '^TestHarnessJourney$' -count=1 -timeout=3m`
+
+The focused missing-access guard and one opted-in live proof follow that prefix,
+then `git diff --check`. These final checks have not run for this candidate.
+After controller integration, the controller owns the unchanged development gate
+and final documentation closure. This PR does not close the original ticket.
 
 ## Acceptance Evidence
 

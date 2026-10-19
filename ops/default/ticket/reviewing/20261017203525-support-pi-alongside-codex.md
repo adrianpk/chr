@@ -1,7 +1,8 @@
 ---
 id: TKT-20261017203525
 title: "Support Pi alongside Codex for execution and generation"
-status: in_progress
+status: reviewing
+reviewed_at: 2026-10-19T18:24:09Z
 started_at: 2026-10-19T18:07:20Z
 branch: test/slice-8-harness-acceptance
 ready_at: 2026-10-19T10:38:33Z
@@ -12,7 +13,8 @@ scope: domain
 tags: agents, pi, models
 source: chat
 reported_at: 2026-10-17T20:35:25Z
-commits: [c1374d643d4db2c3bcfa4cdef9a600b9c039fdc2, 297042e63d22]
+commits: [c1374d643d4db2c3bcfa4cdef9a600b9c039fdc2, 297042e63d220d553f830928626e68ac9d55c908, d131373dc63526920bb4c88728a9f477d0e56f5e]
+pr: https://forge.adrianpk.com/adrianpk/chr/pulls/419
 ---
 
 # Support Pi alongside Codex for execution and generation
