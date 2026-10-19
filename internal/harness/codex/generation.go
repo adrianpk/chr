@@ -260,6 +260,10 @@ func codexAgentProgram(request harness.AgentRunRequest) string {
 }
 
 func codexAgentModel(request harness.AgentRunRequest) string {
+	if request.FrozenSelection {
+		return request.Model
+	}
+
 	if model := strings.TrimSpace(request.Model); model != "" {
 		return model
 	}

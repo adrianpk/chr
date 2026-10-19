@@ -14,6 +14,11 @@ func RunAgent(ctx context.Context, runner harness.AgentRunner, request harness.A
 		return harness.AgentRunResult{}, fmt.Errorf("agent runner is required")
 	}
 
+	request, err := prepareBoundGenerationRequest(ctx, request)
+	if err != nil {
+		return harness.AgentRunResult{}, err
+	}
+
 	if err := harness.ValidateAgentRunRequest(request); err != nil {
 		return harness.AgentRunResult{}, err
 	}
@@ -22,8 +27,14 @@ func RunAgent(ctx context.Context, runner harness.AgentRunner, request harness.A
 		request.RunDir = UserPath(request.ProjectDir, "tmp", "agent-runs", request.ID)
 	}
 
+	metadata, err := startHarnessGenerationRun(ctx, request)
+	if err != nil {
+		return harness.AgentRunResult{}, err
+	}
+
 	request.OnStart = func(result harness.AgentRunResult) { recordAgentRequest(ctx, request, result) }
 	result, err := runner.RunAgent(ctx, request)
+	err = finishHarnessGenerationRun(request, result, metadata, err)
 
 	if !request.DeferResponseTrace {
 		status := "ready"

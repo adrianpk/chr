@@ -1,0 +1,151 @@
+package core
+
+import (
+	"context"
+	"os"
+	"path/filepath"
+	"strconv"
+	"testing"
+
+	"forge.adrianpk.com/chr/internal/harness"
+)
+
+// An admission holds the same config owner as role changes. Its complete old
+// revision remains coherent; the next independent operation sees both new roles.
+func TestHarnessGenerationBindingSelectionOrder(t *testing.T) {
+	project := t.TempDir()
+	program := generationBindingProgram(t, project)
+	original := "harnesses:\n  worker: alpha\n  generation: alpha\n"
+	writeHarnessSelectionTestFile(t, UserPath(project, "config.yml"), original)
+
+	entered, release := make(chan struct{}), make(chan struct{})
+	resolve := generationBindingResolver(program, "model-alpha")
+	finished := make(chan generationBindingAdmissionResult, 1)
+
+	go func() {
+		operation, err := FreezeHarnessGeneration(t.Context(), project, "ordered-operation", "plan_generation", func(ctx context.Context, c WorkspaceConfig) (HarnessGenerationBinding, string, error) {
+			close(entered)
+			<-release
+
+			return resolve(ctx, c)
+		})
+		finished <- generationBindingAdmissionResult{operation, err}
+	}()
+
+	select {
+	case <-entered:
+	case result := <-finished:
+		t.Fatal("admission failed before reaching its resolver", result.err)
+	}
+
+	changed := make(chan error, 1)
+
+	go func() {
+		request := harnessSelectionTestRequest("ordered-switch", workflowHash([]byte(original)), "beta")
+
+		_, err := ChangeHarnessSelections(t.Context(), project, harnessSelectionTestOptions(request))
+		changed <- err
+	}()
+
+	close(release)
+
+	admission := <-finished
+	if admission.err != nil || admission.operation.Binding.Selection.SelectionRevision != workflowHash([]byte(original)) {
+		t.Fatal("admission observed a mixed configuration image", admission.err)
+	}
+
+	if err := <-changed; err != nil {
+		t.Fatal("ordered switch failed", err)
+	}
+
+	fresh, err := FreezeHarnessGeneration(t.Context(), project, "after-switch", "plan_generation", generationBindingResolver(program, "model-beta"))
+	if err != nil || fresh.Binding.Selection.Profile != "beta" {
+		t.Fatal("independent admission retained old role", err)
+	}
+}
+
+type generationBindingAdmissionResult struct {
+	operation HarnessGenerationOperation
+	err       error
+}
+
+// Direct API identity is retained without inventing a CLI executable or routing
+// a legacy API operation into a replacement harness process.
+func TestHarnessGenerationBindingDirectAPI(t *testing.T) {
+	project := t.TempDir()
+
+	operation, err := FreezeHarnessGeneration(t.Context(), project, "api-operation", "quiz_next_question", func(_ context.Context, c WorkspaceConfig) (HarnessGenerationBinding, string, error) {
+		binding, err := SealHarnessGenerationBinding(HarnessGenerationBinding{
+			Selection: HarnessSelection{
+				Role: HarnessGeneration, Action: "quiz_next_question", Backend: "openai", Source: "legacy", ModelProvider: "openai", Model: "fixture-api-model",
+				SelectionRevision: c.Revision(), ProfileRevision: workflowHash([]byte("fixture-api-profile")),
+				Readiness: HarnessReadiness{Supported: true, Executable: "not_required", Credentials: "api_managed", Runtime: "not_required"},
+			}, ProtocolRevision: "responses/v1",
+		})
+
+		return binding, "", err
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	runner := &generationBindingRunner{}
+	if _, err := RunAgent(WithHarnessGeneration(t.Context(), operation), runner, generationBindingRequest(project)); err == nil || runner.calls != 0 {
+		t.Fatal("direct API operation dispatched through a harness", err)
+	}
+
+	retained, err := FreezeHarnessGeneration(t.Context(), project, operation.ID, operation.Purpose, nil)
+	if err != nil || retained != operation {
+		t.Fatal("direct API recovery changed identity", err)
+	}
+}
+
+// Reaching the retained-identity limit fails before model dispatch and preserves
+// prior identities; no eviction can silently rebind an interrupted operation.
+func TestHarnessGenerationBindingCapacity(t *testing.T) {
+	project, operation := generationBindingFixture(t)
+
+	path, err := harnessGenerationOperationPath(project, operation.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for i := 1; i < WorkflowRecordLimit; i++ {
+		if err := os.WriteFile(filepath.Join(filepath.Dir(path), "fixture-"+strconv.Itoa(i)+".json"), nil, 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	_, err = FreezeHarnessGeneration(t.Context(), project, "over-capacity", operation.Purpose, generationBindingResolver(operation.program, "model-alpha"))
+	if err == nil {
+		t.Fatal("identity capacity silently evicted an existing operation")
+	}
+
+	if retained, err := FreezeHarnessGeneration(t.Context(), project, operation.ID, operation.Purpose, nil); err != nil || retained != operation {
+		t.Fatal("capacity exhaustion broke existing recovery", err)
+	}
+}
+
+// A retained call cannot exchange its original input or schema on retry.
+func TestHarnessGenerationBindingInputIdentity(t *testing.T) {
+	project, operation := generationBindingFixture(t)
+	ctx := WithHarnessGeneration(t.Context(), operation)
+	request := generationBindingRequest(project)
+
+	runner := &generationBindingRunner{result: harness.AgentRunResult{Output: []byte(`{}`)}}
+	if _, err := RunAgent(ctx, runner, request); err != nil {
+		t.Fatal(err)
+	}
+
+	request.Prompt = "replacement input"
+	if _, err := RunAgent(ctx, runner, request); err == nil || runner.calls != 1 {
+		t.Fatal("same request exchanged its input", err)
+	}
+
+	request = generationBindingRequest(project)
+
+	request.OutputSchema = []byte(`{"type":"array"}`)
+	if _, err := RunAgent(ctx, runner, request); err == nil || runner.calls != 1 {
+		t.Fatal("same request exchanged its schema", err)
+	}
+}

@@ -86,6 +86,24 @@ func TestHarnessCodexCommand(t *testing.T) {
 	}
 }
 
+// Frozen CLI-default deliberately omits a model flag even when the process
+// environment changes after admission; ordinary legacy calls retain env defaults.
+func TestHarnessCodexFrozenDefault(t *testing.T) {
+	t.Setenv("CHR_CODEX_MODEL", "replacement-model")
+
+	request := fixtureRequest(t, `printf '{"ok":true}' > "$output"`)
+	request.FrozenSelection = true
+
+	result, err := (Runner{}).RunAgent(t.Context(), request)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if strings.Contains(strings.Join(result.Command, " "), "--model") || result.Model != "" {
+		t.Fatal("CLI-default rebound through generation environment")
+	}
+}
+
 // Adapter deadlines and stream overflow must fail without accepting output.
 func TestHarnessCodexCancellation(t *testing.T) {
 	request := fixtureRequest(t, `sleep 30`)

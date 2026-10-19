@@ -42,6 +42,8 @@ type AgentRunRequest struct {
 	Timeout            time.Duration
 	OutputLimit        int
 	DeferResponseTrace bool
+	// FrozenSelection prevents an adapter from rebinding empty legacy defaults.
+	FrozenSelection bool
 	// OnStart is called synchronously after preparation and before process launch.
 	OnStart func(AgentRunResult)
 }
@@ -143,6 +145,10 @@ func ValidateAgentRunRequest(request AgentRunRequest) error {
 
 	if request.OutputName != "" && (filepath.Base(request.OutputName) != request.OutputName || request.OutputName == "." || request.OutputName == "..") {
 		return fmt.Errorf("agent run output name must be a file name")
+	}
+
+	if request.FrozenSelection && !filepath.IsAbs(request.Program) {
+		return fmt.Errorf("frozen agent selection requires an absolute program")
 	}
 
 	return nil

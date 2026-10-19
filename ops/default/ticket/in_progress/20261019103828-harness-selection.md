@@ -12,7 +12,7 @@ reported_at: 2026-10-19T10:38:28Z
 ready_at: 2026-10-19T10:38:33Z
 started_at: 2026-10-19T11:23:17Z
 branch: feat/slice-2-harness-selection
-commits: [d9b19ac1b2ce4e1b577d9497443b2d207c4c1ce7, 3ed1b443972fe4532f3df295c4df0d8e5c4ad657]
+commits: [d9b19ac1b2ce4e1b577d9497443b2d207c4c1ce7, 3ed1b443972fe4532f3df295c4df0d8e5c4ad657, f7f94be12eee99bd747aef2b6cf8e72e63f7ddb7]
 ---
 
 # Live role selection and retained bindings
@@ -179,3 +179,39 @@ nested calls, later stages, retries and interrupted-operation recovery. Fresh
 independent operations must reload persisted defaults. Generation dispatch and
 run-metadata wiring remain pending. No Slice 2 PR is ready; the configured final
 exact-HEAD checks have not run for this partial slice.
+
+
+T2.4 is in progress. Its core operation-binding unit retains a sealed selection
+and private executable reference in the existing agent-run artifact tree before
+the first call. The configuration owner excludes concurrent switches during first
+publication. Nested calls share the owning context; restart recovery reads the
+retained operation before live configuration or profiles. Bound dispatch rejects
+changed programs/models, changed executable bytes and cross-project artifact
+identities. A bounded retained-identity directory fails closed at capacity.
+
+Host-written `chr-harness-run/v1` metadata now records started/completed/failure
+outcomes, output hashes, independent caller validation and measured usage without
+copying prompts, executable paths or private profiles. Requested models are not
+reported as observed models. CLI-default bindings prevent later environment model
+changes from adding a model flag. Direct API identity remains distinct from CLI
+execution. Existing retry, capacity and budget owners are unchanged.
+
+Successful T2.4 core-unit checks:
+
+- `go test ./internal/core ./internal/app ./internal/harness/codex -run '^(TestHarnessSelection|TestHarnessBinding|TestHarnessGenerationBinding|TestHarnessCodex|TestAgentRun|TestStructured)' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^(TestHarnessSelection|TestHarnessBinding|TestHarnessGenerationBinding)' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/harness/codex`
+- `scripts/check-go-func-signatures.sh`
+- `git diff --check`
+
+The focused fixtures cover an independent host restart, an admission concurrent
+with a role switch, private/corrupt/future-schema artifacts, executable and input
+identity fences, capacity exhaustion, separate process/parser outcomes and
+unknown/partial/known usage. Owned subprocess fixtures have stopped.
+
+Remaining T2.4 work: assemble the selected generation adapters at each existing
+operation owner; retain request identities through quiz continuation, authoring,
+conversation, Dump curation, plan stages and agentic review; connect parser
+validation and direct API metadata; preserve shared structured-model capacity.
+The core API is not yet connected to those production call families. The Slice 2
+report, canonical PR and final exact-HEAD controller validation remain pending.

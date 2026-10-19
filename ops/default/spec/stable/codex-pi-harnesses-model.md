@@ -131,6 +131,19 @@ Extend existing local agent-run artifacts with a bounded host-written metadata
 record, `chr-harness-run/v1`. Keep existing output names and caller
 parsers stable. This record explains a model call, not a task completion.
 
+Retain the owning selection in a private `chr-harness-operation/v1` artifact
+under `.chr/default/tmp/agent-runs/operations/<operation-id-sha256>.json` before
+the first call. It contains the operation ID and purpose, sealed non-secret
+selection, private resolved program reference and a checksum. The configuration
+owner serializes its first write with live selection changes. A retained
+operation is read before live configuration or profiles; nested calls use the
+same operation, and a retry cannot exchange its purpose or selection. This is
+identity retention within the existing run artifacts, not another task or retry
+authority. Limit each operation/metadata record to 16 KiB and retain at most
+4,096 operation identities without eviction; capacity exhaustion fails closed.
+Operation and purpose identities are bounded to 256 bytes. The corresponding
+per-call record is `harness-run.json` in the existing caller-owned run bundle.
+
 | Field | Stored rule |
 | --- | --- |
 | request_id, purpose | Existing caller-owned identity and operation purpose. |
@@ -146,6 +159,10 @@ parsers stable. This record explains a model call, not a task completion.
 | usage_status | Known, partial or unknown; unknown is not numeric zero. |
 | started_at, finished_at | UTC timestamps for this owned call. |
 | diagnostics_ref | Bounded sanitized private diagnostic artifact. |
+
+Measured counts use host normalization revision `chr-harness-observed/v1`.
+This observation does not certify whole-call enforcement. Unmeasured counters
+remain absent.
 
 No token, password, environment value, authorization header or complete private
 profile is serialized into this record or into command/event traces. Semantic
