@@ -1,7 +1,9 @@
 ---
 id: TKT-20261018092430
 title: "Protect LAN Web UI access with single-user login"
-status: reviewing
+status: solved
+resolution: fixed
+closed_at: 2026-10-19T09:52:23Z
 kind: task
 severity: unclassified
 priority: unclassified
@@ -76,17 +78,19 @@ for setup, bounds, network behavior and password replacement.
 The nightly browser selection now includes the login journey. This records
 local focused validation, not a completed exhaustive scheduled nightly.
 
-## Review Handoff
+## Verified Delivery
 
-[PR #411](https://forge.adrianpk.com/adrianpk/chr/pulls/411) targets `dev`.
-Implementation and local validation are complete. Keep this ticket `reviewing`
-until integration is verified; do not infer deployment from the PR or its checks.
+[PR #411](https://forge.adrianpk.com/adrianpk/chr/pulls/411) merged into `dev`
+at `b4b4195f1b3c9dd3b189ed847e4eb480aaf8ca93` on 2026-10-19T09:50:50Z.
+The implementation, local validation and maintainer acceptance are complete.
+This ticket is solved with resolution `fixed`.
+
 The separately configured Web preview is active. On 2026-10-19, the maintainer
-confirmed that login works and accepted the ticket's functional result.
-Configured-account login, logout and subsequent anonymous-access denial also
-passed against that running preview. Credentials remain in private local
-storage and are not part of this ticket or pull request.
+confirmed that login works and accepted the functional result. Configured-account
+login, logout and subsequent anonymous-access denial also passed against that
+running preview. Credentials remain in private local storage and are not part
+of this ticket or pull request.
 
-Only PR integration and the post-merge ticket transition remain for delivery
-closure. The default Web service still uses its existing installed build;
-acceptance of the preview does not claim that service has been upgraded.
+The default Web service still uses its existing installed build. This delivery
+closure does not claim that service has been upgraded or that the separate
+exhaustive scheduled nightly has completed.
