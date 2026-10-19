@@ -1,7 +1,7 @@
 ---
 id: TKT-20261018092430
 title: "Protect LAN Web UI access with single-user login"
-status: in_progress
+status: reviewing
 kind: task
 severity: unclassified
 priority: unclassified
@@ -9,10 +9,12 @@ scope: api
 tags: web-ui, authentication, lan
 source: chat
 reported_at: 2026-10-18T09:24:30Z
-commits: []
+commits: [22ec35740e8294468f7c8c48f6b7d8defe6febc0]
 ready_at: 2026-10-19T09:06:23Z
 started_at: 2026-10-19T09:06:23Z
 branch: feat/ticket-20261018092430-web-login
+pr: https://forge.adrianpk.com/adrianpk/chr/pulls/411
+reviewed_at: 2026-10-19T09:10:50Z
 ---
 
 # Protect LAN Web UI access with single-user login
@@ -73,3 +75,11 @@ for setup, bounds, network behavior and password replacement.
 
 The nightly browser selection now includes the login journey. This records
 local focused validation, not a completed exhaustive scheduled nightly.
+
+## Review Handoff
+
+[PR #411](https://forge.adrianpk.com/adrianpk/chr/pulls/411) targets `dev`.
+Implementation and local validation are complete. Keep this ticket `reviewing`
+until integration is verified; do not infer deployment from the PR or its checks.
+The operator's running Web service still uses its existing build and access
+policy. Account setup and service activation follow integration.
