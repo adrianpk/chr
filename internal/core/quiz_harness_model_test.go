@@ -4,11 +4,13 @@ import (
 	"context"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/harness"
 )
 
 type fakeAgentRunner struct {
-	Request AgentRunRequest
-	Result  AgentRunResult
+	Request harness.AgentRunRequest
+	Result  harness.AgentRunResult
 	Err     error
 }
 
@@ -17,16 +19,16 @@ type fakeRoutingQuizModelAdapter struct {
 	Called  bool
 }
 
-func (r *fakeAgentRunner) RunAgent(_ context.Context, request AgentRunRequest) (AgentRunResult, error) {
+func (r *fakeAgentRunner) RunAgent(_ context.Context, request harness.AgentRunRequest) (harness.AgentRunResult, error) {
 	r.Request = request
 
-	return r.Result, r.Err
+	result := r.Result
+	result.Provider = "fixture-harness"
+
+	return result, r.Err
 }
 
-func (a *fakeRoutingQuizModelAdapter) InvokeQuizModel(
-	_ context.Context,
-	request QuizModelRequest,
-) (QuizModelResponse, error) {
+func (a *fakeRoutingQuizModelAdapter) InvokeQuizModel(_ context.Context, request QuizModelRequest) (QuizModelResponse, error) {
 	a.Request = request
 	a.Called = true
 
@@ -40,16 +42,16 @@ func (a *fakeRoutingQuizModelAdapter) InvokeQuizModel(
 	}, nil
 }
 
-func TestCodexQuizModelAdapterGeneratesSpecThroughAgentRunner(t *testing.T) {
+func TestHarnessQuizModelAdapterGeneratesSpecThroughAgentRunner(t *testing.T) {
 	runner := &fakeAgentRunner{
-		Result: AgentRunResult{
+		Result: harness.AgentRunResult{
 			ID:     "spec-generation-blog",
 			Output: []byte(`{"title":"Blog Spec","body":"Spec body.","status":"draft"}`),
 		},
 	}
 	request := validCodexQuizModelRequest(QuizModelActionGenerateSpec)
 
-	response, err := (CodexQuizModelAdapter{
+	response, err := (HarnessQuizModelAdapter{
 		ProjectDir: t.TempDir(),
 		Runner:     runner,
 	}).InvokeQuizModel(context.Background(), request)
@@ -57,8 +59,8 @@ func TestCodexQuizModelAdapterGeneratesSpecThroughAgentRunner(t *testing.T) {
 		t.Fatalf("InvokeQuizModel returned error: %v", err)
 	}
 
-	if response.Provider != QuizModelProviderCodex {
-		t.Fatalf("Provider = %q, want codex", response.Provider)
+	if response.Provider != "fixture-harness" {
+		t.Fatalf("Provider = %q, want fixture-harness", response.Provider)
 	}
 
 	if response.DraftSpec.Title != "Blog Spec" {
@@ -80,16 +82,16 @@ func TestCodexQuizModelAdapterGeneratesSpecThroughAgentRunner(t *testing.T) {
 	assertCodexDecisionDiscoveryPrompt(t, runner.Request.Prompt, "the generated spec")
 }
 
-func TestCodexQuizModelAdapterGeneratesPlanThroughAgentRunner(t *testing.T) {
+func TestHarnessQuizModelAdapterGeneratesPlanThroughAgentRunner(t *testing.T) {
 	runner := &fakeAgentRunner{
-		Result: AgentRunResult{
+		Result: harness.AgentRunResult{
 			ID:     "plan-generation-blog",
 			Output: []byte(`{"title":"Blog Plan","body":"Plan body.","status":"planned"}`),
 		},
 	}
 	request := validCodexQuizModelRequest(QuizModelActionGeneratePlan)
 
-	response, err := (CodexQuizModelAdapter{
+	response, err := (HarnessQuizModelAdapter{
 		ProjectDir: t.TempDir(),
 		Runner:     runner,
 	}).InvokeQuizModel(context.Background(), request)
@@ -97,8 +99,8 @@ func TestCodexQuizModelAdapterGeneratesPlanThroughAgentRunner(t *testing.T) {
 		t.Fatalf("InvokeQuizModel returned error: %v", err)
 	}
 
-	if response.Provider != QuizModelProviderCodex {
-		t.Fatalf("Provider = %q, want codex", response.Provider)
+	if response.Provider != "fixture-harness" {
+		t.Fatalf("Provider = %q, want fixture-harness", response.Provider)
 	}
 
 	if response.Plan.Title != "Blog Plan" {
@@ -112,9 +114,9 @@ func TestCodexQuizModelAdapterGeneratesPlanThroughAgentRunner(t *testing.T) {
 	assertCodexDecisionDiscoveryPrompt(t, runner.Request.Prompt, "the generated plan")
 }
 
-func TestCodexQuizModelAdapterGeneratesPlanTrackingThroughAgentRunner(t *testing.T) {
+func TestHarnessQuizModelAdapterGeneratesPlanTrackingThroughAgentRunner(t *testing.T) {
 	runner := &fakeAgentRunner{
-		Result: AgentRunResult{
+		Result: harness.AgentRunResult{
 			ID: "plan-tracking-blog",
 			Output: []byte(`{
 				"title":"Blog Tracking",
@@ -137,7 +139,7 @@ func TestCodexQuizModelAdapterGeneratesPlanTrackingThroughAgentRunner(t *testing
 	}
 	request := validCodexQuizModelRequest(QuizModelActionMaterializePlanTracking)
 
-	response, err := (CodexQuizModelAdapter{
+	response, err := (HarnessQuizModelAdapter{
 		ProjectDir: t.TempDir(),
 		Runner:     runner,
 	}).InvokeQuizModel(context.Background(), request)
@@ -145,8 +147,8 @@ func TestCodexQuizModelAdapterGeneratesPlanTrackingThroughAgentRunner(t *testing
 		t.Fatalf("InvokeQuizModel returned error: %v", err)
 	}
 
-	if response.Provider != QuizModelProviderCodex {
-		t.Fatalf("Provider = %q, want codex", response.Provider)
+	if response.Provider != "fixture-harness" {
+		t.Fatalf("Provider = %q, want fixture-harness", response.Provider)
 	}
 
 	if response.PlanTracking.Title != "Blog Tracking" {
@@ -162,7 +164,7 @@ func TestCodexQuizModelAdapterGeneratesPlanTrackingThroughAgentRunner(t *testing
 }
 
 func TestCodexWorkspaceDiscoveryOmitsQuestionActions(t *testing.T) {
-	if got := codexWorkspaceDiscoveryInstructions(QuizModelActionNextQuestion); got != "" {
+	if got := workspaceDiscoveryInstructions(QuizModelActionNextQuestion); got != "" {
 		t.Fatalf("discovery instructions = %q, want empty", got)
 	}
 }

@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
 func TestParseProvingObjective(t *testing.T) {
@@ -41,7 +43,7 @@ func TestPlanProvingSandboxRunRendersDockerCommands(t *testing.T) {
 	projectDir := newTestProvingProject(t)
 	objectivePath := filepath.Join(DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
 
-	result, err := PlanProvingSandboxRun(projectDir, objectivePath)
+	result, err := PlanProvingSandboxRun(projectDir, objectivePath, codex.Runner{})
 	if err != nil {
 		t.Fatalf("PlanProvingSandboxRun returned error: %v", err)
 	}
@@ -71,6 +73,7 @@ func TestRunProvingSandboxDryRunDoesNotExecuteCommands(t *testing.T) {
 	executor := &recordingHarnessExecutor{}
 
 	result, err := RunProvingSandbox(context.Background(), ProvingSandboxRunOptions{
+		Worker:        codex.Runner{},
 		ProjectDir:    projectDir,
 		ObjectivePath: objectivePath,
 		DryRun:        true,
@@ -93,7 +96,7 @@ func TestRenderProvingWorkerContextIncludesObjective(t *testing.T) {
 	projectDir := newTestProvingProject(t)
 	objectivePath := filepath.Join(DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
 
-	result, err := PlanProvingSandboxRun(projectDir, objectivePath)
+	result, err := PlanProvingSandboxRun(projectDir, objectivePath, codex.Runner{})
 	if err != nil {
 		t.Fatalf("PlanProvingSandboxRun returned error: %v", err)
 	}
@@ -160,6 +163,7 @@ func TestRunProvingRalphLoopStopsOnValidationPass(t *testing.T) {
 	validations := 0
 
 	result, err := RunProvingRalphLoop(context.Background(), ProvingRalphLoopOptions{
+		Worker:        codex.Runner{},
 		ProjectDir:    projectDir,
 		ObjectivePath: objectivePath,
 		Executor:      executor,
@@ -213,6 +217,7 @@ func TestRunProvingRalphLoopFeedsFailureIntoNextAttempt(t *testing.T) {
 	validations := 0
 
 	result, err := RunProvingRalphLoop(context.Background(), ProvingRalphLoopOptions{
+		Worker:        codex.Runner{},
 		ProjectDir:    projectDir,
 		ObjectivePath: objectivePath,
 		Executor:      executor,
@@ -270,6 +275,7 @@ func TestRunProvingRalphLoopStopsOnRepeatedFailure(t *testing.T) {
 	objectivePath := filepath.Join(DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
 
 	result, err := RunProvingRalphLoop(context.Background(), ProvingRalphLoopOptions{
+		Worker:        codex.Runner{},
 		ProjectDir:    projectDir,
 		ObjectivePath: objectivePath,
 		Executor:      &recordingHarnessExecutor{},

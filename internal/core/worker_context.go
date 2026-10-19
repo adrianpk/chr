@@ -8,15 +8,17 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/harness"
 )
 
-// CodexWorkerContextMaterializer defines a package boundary interface.
-type CodexWorkerContextMaterializer interface {
-	MaterializeContext(ctx context.Context, opts MaterializeCodexWorkerContextOptions) error
+// WorkerContextMaterializer defines a package boundary interface.
+type WorkerContextMaterializer interface {
+	MaterializeContext(ctx context.Context, opts MaterializeWorkerContextOptions) error
 }
 
-// MaterializeCodexWorkerContextOptions describes a package boundary value.
-type MaterializeCodexWorkerContextOptions struct {
+// MaterializeWorkerContextOptions describes a package boundary value.
+type MaterializeWorkerContextOptions struct {
 	Path                  string
 	ExecutionID           string
 	TicketKey             string
@@ -30,12 +32,12 @@ type MaterializeCodexWorkerContextOptions struct {
 	TicketBranch          string
 	WorkspaceBaseRef      string
 	WorkspaceBaseSHA      string
-	RepairHandoff         *CodexWorkerRepairHandoff
+	RepairHandoff         *WorkerRepairHandoff
 	Evidence              *WorkerEvidenceContext
 }
 
-// CodexWorkerRepairHandoff describes a package boundary value.
-type CodexWorkerRepairHandoff struct {
+// WorkerRepairHandoff describes a package boundary value.
+type WorkerRepairHandoff struct {
 	Branch            string
 	PullRequestURL    string
 	ReviewCommentsURL string
@@ -53,20 +55,16 @@ type WorkerEvidenceContext struct {
 	Policy         EvidencePolicyContext
 }
 
-type codexWorkerContextMaterializer struct{}
+type workerContextMaterializer struct{}
 
-// NewCodexWorkerContextMaterializer constructs the corresponding package service or value.
-func NewCodexWorkerContextMaterializer() CodexWorkerContextMaterializer {
-	return &codexWorkerContextMaterializer{}
+// NewWorkerContextMaterializer constructs the corresponding package service or value.
+func NewWorkerContextMaterializer() WorkerContextMaterializer {
+	return &workerContextMaterializer{}
 }
 
-// MaterializeCodexWorkerContextForExecution executes the corresponding package operation.
-func MaterializeCodexWorkerContextForExecution(
-	ctx context.Context,
-	record ExecutionRecord,
-	plan RuntimePlan,
-) error {
-	repairHandoff, err := codexWorkerRepairHandoff(ctx, plan.ProjectDir, record.TicketPath)
+// MaterializeWorkerContextForExecution executes the corresponding package operation.
+func MaterializeWorkerContextForExecution(ctx context.Context, record ExecutionRecord, plan RuntimePlan) error {
+	repairHandoff, err := workerRepairHandoff(ctx, plan.ProjectDir, record.TicketPath)
 	if err != nil {
 		return err
 	}
@@ -76,7 +74,7 @@ func MaterializeCodexWorkerContextForExecution(
 		return err
 	}
 
-	return NewCodexWorkerContextMaterializer().MaterializeContext(ctx, MaterializeCodexWorkerContextOptions{
+	return NewWorkerContextMaterializer().MaterializeContext(ctx, MaterializeWorkerContextOptions{
 		Path:                  plan.WorkerContextPath,
 		ExecutionID:           record.ID,
 		TicketKey:             record.TicketKey,
@@ -96,40 +94,40 @@ func MaterializeCodexWorkerContextForExecution(
 }
 
 // MaterializeContext executes the corresponding package operation.
-func (m *codexWorkerContextMaterializer) MaterializeContext(
-	ctx context.Context,
-	opts MaterializeCodexWorkerContextOptions,
-) error {
+func (m *workerContextMaterializer) MaterializeContext(ctx context.Context, opts MaterializeWorkerContextOptions) error {
 	err := ctx.Err()
 	if err != nil {
 		return err
 	}
 
-	err = validateCodexWorkerContextOptions(opts)
+	err = validateWorkerContextOptions(opts)
 	if err != nil {
 		return err
 	}
 
 	err = os.MkdirAll(filepath.Dir(opts.Path), 0o755)
 	if err != nil {
-		return fmt.Errorf("create codex worker context directory: %w", err)
+		return fmt.Errorf("create worker context directory: %w", err)
 	}
 
-	content := RenderCodexWorkerContext(opts)
+	content := RenderWorkerContext(opts)
+	if len(content) > harness.MaxInput {
+		return fmt.Errorf("worker context exceeds byte ceiling")
+	}
 
 	err = os.WriteFile(opts.Path, []byte(content), 0o644)
 	if err != nil {
-		return fmt.Errorf("write codex worker context: %w", err)
+		return fmt.Errorf("write worker context: %w", err)
 	}
 
 	return nil
 }
 
-// RenderCodexWorkerContext renders the corresponding package data.
-func RenderCodexWorkerContext(opts MaterializeCodexWorkerContextOptions) string {
+// RenderWorkerContext renders the corresponding package data.
+func RenderWorkerContext(opts MaterializeWorkerContextOptions) string {
 	var output strings.Builder
 
-	output.WriteString("# Codex Worker Context\n\n")
+	output.WriteString("# Worker Context\n\n")
 	output.WriteString("## Ticket\n\n")
 	output.WriteString("- execution_id: ")
 	output.WriteString(opts.ExecutionID)
@@ -140,7 +138,7 @@ func RenderCodexWorkerContext(opts MaterializeCodexWorkerContextOptions) string 
 	output.WriteString("- ticket_path: ")
 	output.WriteString(opts.TicketPath)
 	output.WriteString("\n\n")
-	writeCodexWorkerWorkspaceContext(&output, opts)
+	writeWorkerWorkspaceContext(&output, opts)
 	output.WriteString("## Artifacts\n\n")
 	output.WriteString("- result_path: ")
 	output.WriteString(opts.ResultPath)
@@ -151,8 +149,8 @@ func RenderCodexWorkerContext(opts MaterializeCodexWorkerContextOptions) string 
 	output.WriteString("- validation_path: ")
 	output.WriteString(opts.ValidationPath)
 	output.WriteString("\n\n")
-	writeCodexWorkerRepairHandoff(&output, opts)
-	writeCodexWorkerEvidenceStrategy(&output, opts)
+	writeWorkerRepairHandoff(&output, opts)
+	writeWorkerEvidenceStrategy(&output, opts)
 	output.WriteString("## Result Contract\n\n")
 	output.WriteString("Write a JSON object to `result_path` with these fields:\n\n")
 	output.WriteString("- `execution_id`: must match the execution ID above.\n")
@@ -167,7 +165,7 @@ func RenderCodexWorkerContext(opts MaterializeCodexWorkerContextOptions) string 
 	return output.String()
 }
 
-func writeCodexWorkerWorkspaceContext(output *strings.Builder, opts MaterializeCodexWorkerContextOptions) {
+func writeWorkerWorkspaceContext(output *strings.Builder, opts MaterializeWorkerContextOptions) {
 	output.WriteString("## Workspace\n\n")
 	output.WriteString("- workspace_mode: ")
 	output.WriteString(nonEmptyWorkerContextValue(string(opts.WorkspaceMode), string(WorkWorkspaceModeProject)))
@@ -189,11 +187,11 @@ func writeCodexWorkerWorkspaceContext(output *strings.Builder, opts MaterializeC
 	output.WriteString("\n\n")
 }
 
-func writeCodexWorkerEvidenceStrategy(output *strings.Builder, opts MaterializeCodexWorkerContextOptions) {
+func writeWorkerEvidenceStrategy(output *strings.Builder, opts MaterializeWorkerContextOptions) {
 	output.WriteString("## Evidence Strategy\n\n")
-	writeCodexWorkerEvidenceStrategyConfig(output, opts.Evidence)
-	writeCodexWorkerEvidencePolicy(output, opts.Evidence)
-	writeCodexWorkerEvidenceStrategyChecklist(output, opts.Evidence)
+	writeWorkerEvidenceStrategyConfig(output, opts.Evidence)
+	writeWorkerEvidencePolicy(output, opts.Evidence)
+	writeWorkerEvidenceStrategyChecklist(output, opts.Evidence)
 	output.WriteString("Before modifying project files:\n\n")
 	output.WriteString("1. Read the ticket and any existing evidence-strategy checklist.\n")
 	output.WriteString("2. Classify the change kind and risk.\n")
@@ -210,7 +208,7 @@ func writeCodexWorkerEvidenceStrategy(output *strings.Builder, opts MaterializeC
 	output.WriteString("The ticket checklist is the operational source of truth.\n\n")
 }
 
-func writeCodexWorkerEvidenceStrategyConfig(output *strings.Builder, evidence *WorkerEvidenceContext) {
+func writeWorkerEvidenceStrategyConfig(output *strings.Builder, evidence *WorkerEvidenceContext) {
 	if evidence == nil {
 		return
 	}
@@ -241,7 +239,7 @@ func writeCodexWorkerEvidenceStrategyConfig(output *strings.Builder, evidence *W
 	output.WriteString("\n\n")
 }
 
-func writeCodexWorkerEvidencePolicy(output *strings.Builder, evidence *WorkerEvidenceContext) {
+func writeWorkerEvidencePolicy(output *strings.Builder, evidence *WorkerEvidenceContext) {
 	if evidence == nil {
 		return
 	}
@@ -250,12 +248,12 @@ func writeCodexWorkerEvidencePolicy(output *strings.Builder, evidence *WorkerEvi
 		return
 	}
 
-	writeCodexWorkerGherkinPolicy(output, evidence.Policy.Gherkin)
-	writeCodexWorkerSuggestedStrategy(output, evidence.Policy.Guidance)
-	writeCodexWorkerDecisionMatrix(output)
+	writeWorkerGherkinPolicy(output, evidence.Policy.Gherkin)
+	writeWorkerSuggestedStrategy(output, evidence.Policy.Guidance)
+	writeWorkerDecisionMatrix(output)
 }
 
-func writeCodexWorkerGherkinPolicy(output *strings.Builder, gherkin EvidenceGherkinContext) {
+func writeWorkerGherkinPolicy(output *strings.Builder, gherkin EvidenceGherkinContext) {
 	output.WriteString("### Project Gherkin\n\n")
 	output.WriteString("- policy: ")
 	output.WriteString(string(gherkin.Policy))
@@ -284,10 +282,10 @@ func writeCodexWorkerGherkinPolicy(output *strings.Builder, gherkin EvidenceGher
 	}
 
 	output.WriteString("\n")
-	writeCodexWorkerGherkinQualityPolicy(output, gherkin)
+	writeWorkerGherkinQualityPolicy(output, gherkin)
 }
 
-func writeCodexWorkerGherkinQualityPolicy(output *strings.Builder, gherkin EvidenceGherkinContext) {
+func writeWorkerGherkinQualityPolicy(output *strings.Builder, gherkin EvidenceGherkinContext) {
 	if !gherkin.Active || !gherkin.Applies {
 		return
 	}
@@ -301,7 +299,7 @@ func writeCodexWorkerGherkinQualityPolicy(output *strings.Builder, gherkin Evide
 	output.WriteString("- If the existing feature is intentionally unchanged, record the concrete reason in the ticket evidence checklist and evidence summary.\n\n")
 }
 
-func writeCodexWorkerSuggestedStrategy(output *strings.Builder, guidance EvidenceStrategyGuidance) {
+func writeWorkerSuggestedStrategy(output *strings.Builder, guidance EvidenceStrategyGuidance) {
 	output.WriteString("### Suggested Strategy\n\n")
 	output.WriteString("- change_kind: ")
 	output.WriteString(nonEmptyWorkerContextValue(guidance.ChangeKind, "unknown"))
@@ -323,7 +321,7 @@ func writeCodexWorkerSuggestedStrategy(output *strings.Builder, guidance Evidenc
 	output.WriteString("\n\n")
 }
 
-func writeCodexWorkerDecisionMatrix(output *strings.Builder) {
+func writeWorkerDecisionMatrix(output *strings.Builder) {
 	output.WriteString("### Evidence Decision Matrix\n\n")
 
 	for _, row := range EvidenceDecisionMatrixRows() {
@@ -337,7 +335,7 @@ func writeCodexWorkerDecisionMatrix(output *strings.Builder) {
 	output.WriteString("\n")
 }
 
-func writeCodexWorkerEvidenceStrategyChecklist(output *strings.Builder, evidence *WorkerEvidenceContext) {
+func writeWorkerEvidenceStrategyChecklist(output *strings.Builder, evidence *WorkerEvidenceContext) {
 	if evidence == nil {
 		return
 	}
@@ -367,13 +365,13 @@ func writeCodexWorkerEvidenceStrategyChecklist(output *strings.Builder, evidence
 			continue
 		}
 
-		writeCodexWorkerChecklistItem(output, item)
+		writeWorkerChecklistItem(output, item)
 	}
 
 	output.WriteString("\n")
 }
 
-func writeCodexWorkerChecklistItem(output *strings.Builder, item EvidenceStrategyChecklistItem) {
+func writeWorkerChecklistItem(output *strings.Builder, item EvidenceStrategyChecklistItem) {
 	checked := "false"
 	if item.Checked {
 		checked = "true"
@@ -402,7 +400,7 @@ func nonEmptyWorkerContextValue(value, fallback string) string {
 	return value
 }
 
-func writeCodexWorkerRepairHandoff(output *strings.Builder, opts MaterializeCodexWorkerContextOptions) {
+func writeWorkerRepairHandoff(output *strings.Builder, opts MaterializeWorkerContextOptions) {
 	if opts.RepairHandoff == nil {
 		return
 	}
@@ -428,12 +426,12 @@ func writeCodexWorkerRepairHandoff(output *strings.Builder, opts MaterializeCode
 	output.WriteString("- review_round: ")
 	output.WriteString(strconv.Itoa(handoff.ReviewRound))
 	output.WriteString("\n")
-	writeCodexWorkerRepairFindings(output, handoff.BlockingFindings)
+	writeWorkerRepairFindings(output, handoff.BlockingFindings)
 	output.WriteString("\n")
 	output.WriteString("Use the local blocking findings and remote review comments as the source of repair work. Do not duplicate remote comments into the ticket.\n\n")
 }
 
-func writeCodexWorkerRepairFindings(output *strings.Builder, findings []string) {
+func writeWorkerRepairFindings(output *strings.Builder, findings []string) {
 	if len(findings) == 0 {
 		output.WriteString("- blocking_findings: []\n")
 
@@ -502,7 +500,7 @@ func parseWorkerEvidenceChecklist(content string) (*EvidenceStrategyChecklist, s
 	return &checklist, ""
 }
 
-func codexWorkerRepairHandoff(ctx context.Context, projectDir, ticketPath string) (*CodexWorkerRepairHandoff, error) {
+func workerRepairHandoff(ctx context.Context, projectDir, ticketPath string) (*WorkerRepairHandoff, error) {
 	ticket, err := NewTicketParser().ParseTicket(ctx, ParseTicketOptions{
 		ProjectDir: projectDir,
 		Path:       ticketPath,
@@ -529,7 +527,7 @@ func codexWorkerRepairHandoff(ctx context.Context, projectDir, ticketPath string
 		return nil, fmt.Errorf("repair handoff requires review_comments_url")
 	}
 
-	return &CodexWorkerRepairHandoff{
+	return &WorkerRepairHandoff{
 		Branch:            ticket.Branch,
 		PullRequestURL:    ref.URL,
 		ReviewCommentsURL: ticket.ReviewCommentsURL,
@@ -540,7 +538,7 @@ func codexWorkerRepairHandoff(ctx context.Context, projectDir, ticketPath string
 	}, nil
 }
 
-func validateCodexWorkerContextOptions(opts MaterializeCodexWorkerContextOptions) error {
+func validateWorkerContextOptions(opts MaterializeWorkerContextOptions) error {
 	required := []struct {
 		name  string
 		value string
@@ -556,7 +554,7 @@ func validateCodexWorkerContextOptions(opts MaterializeCodexWorkerContextOptions
 
 	for _, field := range required {
 		if strings.TrimSpace(field.value) == "" {
-			return fmt.Errorf("codex worker %s is required", field.name)
+			return fmt.Errorf("worker %s is required", field.name)
 		}
 	}
 

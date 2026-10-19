@@ -10,6 +10,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/harness"
 )
 
 const (
@@ -103,10 +105,10 @@ type FakeAuthoringQuizQuestionProvider struct {
 	Err      error
 }
 
-// CodexAuthoringQuizQuestionProvider describes a package boundary value.
-type CodexAuthoringQuizQuestionProvider struct {
+// HarnessAuthoringQuizQuestionProvider describes a package boundary value.
+type HarnessAuthoringQuizQuestionProvider struct {
 	Program string
-	Runner  AgentRunner
+	Runner  harness.AgentRunner
 }
 
 // PlanContextualQuizGeneration executes the corresponding package operation.
@@ -333,28 +335,22 @@ func (p *FakeAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(
 }
 
 // GenerateAuthoringQuizQuestions generates the requested artifact.
-func (p CodexAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(
-	ctx context.Context,
-	request AuthoringQuizGenerationRequest,
-) (AuthoringQuizGenerationResult, error) {
+func (p HarnessAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx context.Context, request AuthoringQuizGenerationRequest) (AuthoringQuizGenerationResult, error) {
 	err := ValidateAuthoringQuizGenerationRequest(request)
 	if err != nil {
 		return AuthoringQuizGenerationResult{}, err
 	}
 
 	program := strings.TrimSpace(p.Program)
-	if program == "" {
-		program = CodexWorkerProgram
-	}
 
 	payload, err := json.MarshalIndent(request, "", "  ")
 	if err != nil {
 		return AuthoringQuizGenerationResult{}, fmt.Errorf("marshal authoring quiz request: %w", err)
 	}
 
-	prompt := authoringQuizCodexPrompt(string(payload))
+	prompt := authoringQuizHarnessPrompt(string(payload))
 
-	run, err := runCodexAgent(ctx, p.agentRunner(), AgentRunRequest{
+	run, err := RunAgent(ctx, p.Runner, harness.AgentRunRequest{
 		ID:                 request.ID,
 		Purpose:            request.Action,
 		ProjectDir:         request.ProjectDir,
@@ -369,7 +365,7 @@ func (p CodexAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(
 
 	result, err := ParseAuthoringQuizGenerationResult(run.Output)
 	if err != nil {
-		recordAgentRunResponseEvent(ctx, AgentRunRequest{
+		recordAgentRunResponseEvent(ctx, harness.AgentRunRequest{
 			ID:         request.ID,
 			Purpose:    request.Action,
 			ProjectDir: request.ProjectDir,
@@ -378,24 +374,16 @@ func (p CodexAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(
 		return AuthoringQuizGenerationResult{}, err
 	}
 
-	result.Provider = "codex"
+	result.Provider = run.Provider
 	result.Strategy = AuthoringQuizGenerationStrategyDeep
 	result.RawText = string(run.Output)
-	recordAgentRunResponseEvent(ctx, AgentRunRequest{
+	recordAgentRunResponseEvent(ctx, harness.AgentRunRequest{
 		ID:         request.ID,
 		Purpose:    request.Action,
 		ProjectDir: request.ProjectDir,
 	}, run, "ready", nil)
 
 	return result, nil
-}
-
-func (p CodexAuthoringQuizQuestionProvider) agentRunner() AgentRunner {
-	if p.Runner != nil {
-		return p.Runner
-	}
-
-	return CodexAgentRunner{}
 }
 
 // ValidateAuthoringQuizGenerationRequest validates the corresponding package boundary value.
@@ -475,7 +463,6 @@ func ParseAuthoringQuizGenerationResult(output []byte) (AuthoringQuizGenerationR
 	}
 
 	return AuthoringQuizGenerationResult{
-		Provider:  "codex",
 		Strategy:  AuthoringQuizGenerationStrategyDeep,
 		Questions: questions,
 		RawText:   string(output),
@@ -665,11 +652,7 @@ func authoringQuizGoInventorySection(projectDir string) AuthoringQuizContextSect
 	}
 }
 
-func authoringQuizRelativePaths(
-	projectDir string,
-	root string,
-	include func(string) bool,
-) []string {
+func authoringQuizRelativePaths(projectDir, root string, include func(string) bool) []string {
 	paths := []string{}
 
 	walkErr := filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
@@ -760,7 +743,7 @@ func authoringQuizContainsSensitivePrompt(value string) bool {
 	return false
 }
 
-func authoringQuizCodexPrompt(payload string) string {
+func authoringQuizHarnessPrompt(payload string) string {
 	return strings.TrimSpace(`
 You generate context-aware authoring quiz questions for Chryso.
 

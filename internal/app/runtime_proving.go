@@ -229,7 +229,7 @@ func runRuntimeValidate(ctx context.Context, cmd *cli.Command, stdout io.Writer)
 		return err
 	}
 
-	result, err := core.ValidateRuntime(core.RuntimeValidationOptions{
+	result, err := validateCodexRuntime(core.RuntimeValidationOptions{
 		ProjectDir: projectContext.ProjectDir,
 		Config:     config.Runtime,
 	})
@@ -260,6 +260,7 @@ func runProvingRun(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 	}
 
 	result, err := core.RunProvingSandbox(ctx, core.ProvingSandboxRunOptions{
+		Worker:        newCodexWorker(),
 		ProjectDir:    cmd.String("dir"),
 		ObjectivePath: objectivePath,
 		DryRun:        cmd.Bool("dry-run"),
@@ -282,6 +283,7 @@ func runProvingRalph(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 	}
 
 	result, err := core.RunProvingRalphLoop(ctx, core.ProvingRalphLoopOptions{
+		Worker:        newCodexWorker(),
 		ProjectDir:    cmd.String("dir"),
 		ObjectivePath: objectivePath,
 		MaxAttempts:   cmd.Int("max-attempts"),

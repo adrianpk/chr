@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/harness"
 )
 
 const (
@@ -58,7 +60,7 @@ type AgenticReviewArtifact struct {
 	ContextPath string
 	ResultPath  string
 	SummaryPath string
-	Run         AgentRunResult
+	Run         harness.AgentRunResult
 	Result      AgenticReviewResult
 }
 
@@ -74,13 +76,13 @@ type AgenticReviewRunner interface {
 	Review(ctx context.Context, review AgenticReviewContext) (AgenticReviewArtifact, error)
 }
 
-// CodexAgenticReviewRunner runs the high-level review through Codex.
-type CodexAgenticReviewRunner struct {
-	Runner AgentRunner
+// HarnessAgenticReviewRunner runs a high-level review through the injected harness.
+type HarnessAgenticReviewRunner struct {
+	Runner harness.AgentRunner
 }
 
 // Review executes the corresponding operation.
-func (r CodexAgenticReviewRunner) Review(ctx context.Context, review AgenticReviewContext) (AgenticReviewArtifact, error) {
+func (r HarnessAgenticReviewRunner) Review(ctx context.Context, review AgenticReviewContext) (AgenticReviewArtifact, error) {
 	if err := ValidateAgenticReviewContext(review); err != nil {
 		return AgenticReviewArtifact{}, err
 	}
@@ -97,7 +99,7 @@ func (r CodexAgenticReviewRunner) Review(ctx context.Context, review AgenticRevi
 		return AgenticReviewArtifact{}, fmt.Errorf("write agentic review context: %w", err)
 	}
 
-	agentRun, err := RunCodexAgent(ctx, r.agentRunner(), AgentRunRequest{
+	agentRun, err := RunAgent(ctx, r.Runner, harness.AgentRunRequest{
 		ID:           "review-" + review.Ticket.Key + "-" + review.Execution.ID,
 		Purpose:      "agentic_review",
 		ProjectDir:   review.ProjectDir,
@@ -231,7 +233,7 @@ func RenderAgenticReviewContext(review AgenticReviewContext) string {
 	return output.String()
 }
 
-// AgenticReviewPrompt renders the Codex reviewer prompt.
+// AgenticReviewPrompt renders the harness reviewer prompt.
 func AgenticReviewPrompt(contextBody string) string {
 	return strings.TrimSpace(`You are reviewing one completed implementation ticket.
 
@@ -254,7 +256,7 @@ Return only JSON matching the provided schema.
 `+contextBody) + "\n"
 }
 
-// AgenticReviewOutputSchema returns the JSON schema for Codex review output.
+// AgenticReviewOutputSchema returns the JSON schema for harness review output.
 func AgenticReviewOutputSchema() []byte {
 	return []byte(`{
   "type": "object",
@@ -394,14 +396,6 @@ func WriteAgenticReviewSummary(artifact AgenticReviewArtifact) error {
 	}
 
 	return nil
-}
-
-func (r CodexAgenticReviewRunner) agentRunner() AgentRunner {
-	if r.Runner != nil {
-		return r.Runner
-	}
-
-	return CodexAgentRunner{}
 }
 
 func agenticReviewFindings(result AgenticReviewResult) []AgenticReviewFinding {

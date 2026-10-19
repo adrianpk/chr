@@ -20,9 +20,10 @@ func agentWorkLoopEventSink(projectDir string, record core.LoopRunRecord) core.A
 	}
 
 	plan, err := core.PlanRuntime(core.RuntimePlanOptions{
-		ProjectDir: projectDir,
-		Config:     config.Runtime,
-		RunID:      record.ID,
+		ExtraMounts: legacyCodexMounts(),
+		ProjectDir:  projectDir,
+		Config:      config.Runtime,
+		RunID:       record.ID,
 	})
 	if err != nil {
 		return nil

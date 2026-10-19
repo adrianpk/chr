@@ -2,13 +2,15 @@ package core
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/harness"
 )
 
 // RuntimePlanOptions describes a package boundary value.
 type RuntimePlanOptions struct {
+	ExtraMounts           []harness.RuntimeMount
 	ProjectDir            string
 	Config                RuntimeConfig
 	Workspace             WorkWorkspaceConfig
@@ -37,7 +39,7 @@ type RuntimePlan struct {
 	DockerfilePath        string
 	Image                 string
 	ContainerWorkdir      string
-	Mounts                []RuntimeMount
+	Mounts                []harness.RuntimeMount
 	ArtifactDir           string
 	RunArtifactDir        string
 	WorkerContextPath     string
@@ -45,14 +47,6 @@ type RuntimePlan struct {
 	LogPath               string
 	ValidationPath        string
 	ValidationCommand     string
-}
-
-// RuntimeMount describes a package boundary value.
-type RuntimeMount struct {
-	Source      string
-	Target      string
-	ReadOnly    bool
-	Description string
 }
 
 // PlanRuntime executes the corresponding package operation.
@@ -104,7 +98,7 @@ func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 		DockerfilePath:        dockerfilePath,
 		Image:                 config.Image,
 		ContainerWorkdir:      config.Workdir,
-		Mounts:                runtimeMounts(projectDir, executionWorkspaceDir, workspace.Mode, config.Workdir),
+		Mounts:                append(runtimeMounts(projectDir, executionWorkspaceDir, workspace.Mode, config.Workdir), opts.ExtraMounts...),
 		ArtifactDir:           artifactDir,
 		RunArtifactDir:        runArtifactDir,
 		WorkerContextPath:     workerContextPath,
@@ -304,7 +298,7 @@ func runtimeOpsLayout(projectDir, configuredArtifactDir string, opts RuntimePlan
 	return OpsLayout{}, "", false, nil
 }
 
-func runtimeMounts(projectDir, executionWorkspaceDir string, mode WorkWorkspaceMode, workdir string) []RuntimeMount {
+func runtimeMounts(projectDir, executionWorkspaceDir string, mode WorkWorkspaceMode, workdir string) []harness.RuntimeMount {
 	mountSource := projectDir
 	mountDescription := "project workspace"
 
@@ -313,51 +307,13 @@ func runtimeMounts(projectDir, executionWorkspaceDir string, mode WorkWorkspaceM
 		mountDescription = "execution workspace"
 	}
 
-	mounts := []RuntimeMount{
+	mounts := []harness.RuntimeMount{
 		{
 			Source:      mountSource,
 			Target:      cleanContainerPath(workdir),
 			ReadOnly:    false,
 			Description: mountDescription,
 		},
-	}
-
-	homeDir, err := os.UserHomeDir()
-	if err == nil {
-		mounts = append(mounts, codexCredentialMounts(homeDir)...)
-	}
-
-	return mounts
-}
-
-func codexCredentialMounts(homeDir string) []RuntimeMount {
-	candidates := []struct {
-		source string
-		target string
-	}{
-		{
-			source: filepath.Join(homeDir, ".codex", "auth.json"),
-			target: "/root/.codex/auth.json",
-		},
-		{
-			source: filepath.Join(homeDir, ".codex", "config.toml"),
-			target: "/root/.codex/config.toml",
-		},
-	}
-
-	mounts := make([]RuntimeMount, 0, len(candidates))
-	for _, candidate := range candidates {
-		_, err := os.Stat(candidate.source)
-		if err != nil {
-			continue
-		}
-
-		mounts = append(mounts, RuntimeMount{
-			Source:      candidate.source,
-			Target:      candidate.target,
-			ReadOnly:    true,
-			Description: "codex credential",
-		})
 	}
 
 	return mounts

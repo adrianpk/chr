@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/harness"
 )
 
 func TestParseAgenticReviewResultAcceptsCleanPassWithCosmeticNotes(t *testing.T) {
@@ -64,7 +66,7 @@ func TestParseAgenticReviewResultRejectsUnknownFindingCategory(t *testing.T) {
 	}
 }
 
-func TestCodexAgenticReviewRunnerWritesArtifacts(t *testing.T) {
+func TestHarnessAgenticReviewRunnerWritesArtifacts(t *testing.T) {
 	projectDir := t.TempDir()
 
 	ticketPath := filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md")
@@ -75,7 +77,7 @@ func TestCodexAgenticReviewRunnerWritesArtifacts(t *testing.T) {
 	now := time.Date(2026, 6, 20, 12, 0, 0, 0, time.UTC)
 	review := testAgenticReviewContext(projectDir, ticketPath, now)
 
-	runner := CodexAgenticReviewRunner{Runner: fakeAgenticReviewAgentRunner{}}
+	runner := HarnessAgenticReviewRunner{Runner: fakeAgenticReviewAgentRunner{}}
 
 	artifact, err := runner.Review(context.Background(), review)
 	if err != nil {
@@ -268,7 +270,7 @@ func TestApplyAgenticReviewResultNeedsChangesMovesTicketToReadyForDev(t *testing
 
 type fakeAgenticReviewAgentRunner struct{}
 
-func (fakeAgenticReviewAgentRunner) RunAgent(_ context.Context, request AgentRunRequest) (AgentRunResult, error) {
+func (fakeAgenticReviewAgentRunner) RunAgent(_ context.Context, request harness.AgentRunRequest) (harness.AgentRunResult, error) {
 	output := []byte(`{
 		"decision": "pass",
 		"summary": "Looks correct.",
@@ -277,10 +279,10 @@ func (fakeAgenticReviewAgentRunner) RunAgent(_ context.Context, request AgentRun
 	}`)
 
 	if err := os.WriteFile(filepath.Join(request.RunDir, request.OutputName), output, 0o644); err != nil {
-		return AgentRunResult{}, err
+		return harness.AgentRunResult{}, err
 	}
 
-	return AgentRunResult{
+	return harness.AgentRunResult{
 		ID:         request.ID,
 		RunDir:     request.RunDir,
 		OutputPath: filepath.Join(request.RunDir, request.OutputName),
@@ -328,7 +330,7 @@ func readAgenticReviewTicket(t *testing.T, path string) string {
 func agenticReviewArtifactForTest(result AgenticReviewResult) AgenticReviewArtifact {
 	return AgenticReviewArtifact{
 		SummaryPath: "/tmp/chr-agentic-review-summary.md",
-		Run: AgentRunResult{
+		Run: harness.AgentRunResult{
 			ID: "review-1",
 		},
 		Result: result,

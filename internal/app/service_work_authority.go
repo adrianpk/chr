@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
 func nativeAgentWorkSelection(opts AgentWorkSelectionOptions) core.WorkflowPreviewRequest {
@@ -118,7 +119,7 @@ func (s service) startNativeAgentWork(config core.WorkspaceConfig, selection cor
 
 	worker := slices.Clone(s.workflowWorker)
 	if worker == nil {
-		worker = core.CodexWorkflowWorker()
+		worker = (codex.Runner{}).WorkflowWorker()
 	}
 
 	request := core.WorkflowContinuationRequest{Worker: worker, StepLimit: limit, PullRequest: core.WorkflowSlicePullRequestRequest{BaseBranch: config.Work.BranchPolicy.IntegrationBranch, Title: "Deliver ticket-native work", Body: "Deliver the host-validated ticket candidate."}}

@@ -25,6 +25,7 @@ const (
 
 // Runner implements generation and worker command capabilities without IO at construction.
 type Runner struct {
+	Mounts          []harness.RuntimeMount
 	CommandExecutor harness.AgentCommandExecutor
 }
 
@@ -53,6 +54,10 @@ func (r Runner) RunAgent(ctx context.Context, request harness.AgentRunRequest) (
 	run, err := prepareAgentRun(request)
 	if err != nil {
 		return harness.AgentRunResult{}, err
+	}
+
+	if request.OnStart != nil {
+		request.OnStart(run.Result)
 	}
 
 	command := codexAgentCommand(run)

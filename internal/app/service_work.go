@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
 // WorkOperationResult is the TUI-facing result for agent work operations.
@@ -72,7 +73,7 @@ type agentWorkPostDevelopmentOptions struct {
 }
 
 var newAgenticReviewRunner = func() core.AgenticReviewRunner {
-	return core.CodexAgenticReviewRunner{}
+	return core.HarnessAgenticReviewRunner{Runner: codex.Runner{}}
 }
 
 func (s service) StartSelectedTicket(ticketKey string) (WorkOperationResult, error) {

@@ -12,6 +12,11 @@ and adapter-facing service operations. It delegates durable domain behavior,
 workspace indexing, persistence, ticket management, generation, and validation
 to `internal/core`.
 
+This package assembles `internal/harness/codex` for generation and worker calls,
+including contextual Quiz, structured conversation, Dump curation, review,
+native workflow commands and Docker/proving commands. Existing action-specific
+direct OpenAI selections remain in the same dispatch path.
+
 ## API
 
 The public package entrypoint is `Run`, which accepts explicit process IO,

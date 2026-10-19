@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
 func TestPlanContextualQuizGenerationUsesProviderAndProjectContext(t *testing.T) {
@@ -158,7 +160,7 @@ func TestValidateAuthoringQuizGenerationResultRejectsGenericUnsafeOutput(t *test
 	}
 }
 
-func TestCodexAuthoringQuizQuestionProviderRecordsTraceEvents(t *testing.T) {
+func TestHarnessAuthoringQuizQuestionProviderRecordsTraceEvents(t *testing.T) {
 	projectDir := t.TempDir()
 	t.Setenv(ActiveOperatorIDEnv, "adrian")
 	t.Setenv(LLMTraceEnabledEnv, "1")
@@ -169,7 +171,7 @@ printf '%s\n' '{"questions":[{"id":"Q1","question":"Which workflow should this s
 `)
 	request := validAuthoringQuizGenerationRequest(projectDir)
 
-	result, err := (CodexAuthoringQuizQuestionProvider{Program: program}).GenerateAuthoringQuizQuestions(context.Background(), request)
+	result, err := (HarnessAuthoringQuizQuestionProvider{Program: program, Runner: codex.Runner{}}).GenerateAuthoringQuizQuestions(context.Background(), request)
 	if err != nil {
 		t.Fatalf("GenerateAuthoringQuizQuestions returned error: %v", err)
 	}
@@ -183,7 +185,7 @@ printf '%s\n' '{"questions":[{"id":"Q1","question":"Which workflow should this s
 	assertCodexTraceEventsWithoutPayloads(t, events)
 }
 
-func TestCodexAuthoringQuizQuestionProviderRecordsTracePayloadsWhenEnabled(t *testing.T) {
+func TestHarnessAuthoringQuizQuestionProviderRecordsTracePayloadsWhenEnabled(t *testing.T) {
 	projectDir := t.TempDir()
 	t.Setenv(ActiveOperatorIDEnv, "adrian")
 	t.Setenv(LLMTraceEnabledEnv, "1")
@@ -195,7 +197,7 @@ printf '%s\n' '{"questions":[{"id":"Q1","question":"Which workflow should this s
 `)
 	request := validAuthoringQuizGenerationRequest(projectDir)
 
-	_, err := (CodexAuthoringQuizQuestionProvider{Program: program}).GenerateAuthoringQuizQuestions(context.Background(), request)
+	_, err := (HarnessAuthoringQuizQuestionProvider{Program: program, Runner: codex.Runner{}}).GenerateAuthoringQuizQuestions(context.Background(), request)
 	if err != nil {
 		t.Fatalf("GenerateAuthoringQuizQuestions returned error: %v", err)
 	}
@@ -210,7 +212,7 @@ printf '%s\n' '{"questions":[{"id":"Q1","question":"Which workflow should this s
 	}
 }
 
-func TestCodexAuthoringQuizQuestionProviderRecordsParseFailureTrace(t *testing.T) {
+func TestHarnessAuthoringQuizQuestionProviderRecordsParseFailureTrace(t *testing.T) {
 	projectDir := t.TempDir()
 	t.Setenv(ActiveOperatorIDEnv, "adrian")
 	t.Setenv(LLMTraceEnabledEnv, "1")
@@ -221,7 +223,7 @@ printf '%s\n' 'not-json'
 `)
 	request := validAuthoringQuizGenerationRequest(projectDir)
 
-	_, err := (CodexAuthoringQuizQuestionProvider{Program: program}).GenerateAuthoringQuizQuestions(context.Background(), request)
+	_, err := (HarnessAuthoringQuizQuestionProvider{Program: program, Runner: codex.Runner{}}).GenerateAuthoringQuizQuestions(context.Background(), request)
 	if err == nil {
 		t.Fatal("GenerateAuthoringQuizQuestions returned nil error")
 	}

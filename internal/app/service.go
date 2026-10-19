@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
 type service struct {
@@ -41,7 +42,7 @@ func newService(
 		dumpEditor:        defaultDumpEditorLauncher{},
 		dumpCurator:       newDumpCurationProvider(projectContext.ProjectDir),
 		quizModel:         newQuizModelAdapter(projectContext.ProjectDir),
-		conversationModel: core.NewConfiguredStructuredModel(openAIGenerationBackend("CHR_CONVERSATION_GENERATION_BACKEND")),
+		conversationModel: newConversationModel(),
 		now:               time.Now,
 	}
 }
@@ -51,7 +52,7 @@ func newDumpCurationProvider(projectDir string) DumpCurationProvider {
 		return openAIDumpCurationProvider{ProjectDir: projectDir}
 	}
 
-	return codexDumpCurationProvider{ProjectDir: projectDir}
+	return harnessDumpCurationProvider{ProjectDir: projectDir, Runner: codex.Runner{}}
 }
 
 func newQuizModelAdapter(projectDir string) core.QuizModelAdapter {
@@ -59,19 +60,19 @@ func newQuizModelAdapter(projectDir string) core.QuizModelAdapter {
 	actionAdapters := map[core.QuizModelAction]core.QuizModelAdapter{}
 
 	if codexGenerationBackend("CHR_SPEC_GENERATION_BACKEND") {
-		actionAdapters[core.QuizModelActionGenerateSpec] = core.CodexQuizModelAdapter{ProjectDir: projectDir}
+		actionAdapters[core.QuizModelActionGenerateSpec] = core.HarnessQuizModelAdapter{ProjectDir: projectDir, Runner: codex.Runner{}}
 	}
 
 	if codexGenerationBackend("CHR_ACCEPTANCE_FEATURE_GENERATION_BACKEND") {
-		actionAdapters[core.QuizModelActionGenerateAcceptanceFeature] = core.CodexQuizModelAdapter{ProjectDir: projectDir}
+		actionAdapters[core.QuizModelActionGenerateAcceptanceFeature] = core.HarnessQuizModelAdapter{ProjectDir: projectDir, Runner: codex.Runner{}}
 	}
 
 	if codexGenerationBackend("CHR_PLAN_GENERATION_BACKEND") {
-		actionAdapters[core.QuizModelActionGeneratePlan] = core.CodexQuizModelAdapter{ProjectDir: projectDir}
+		actionAdapters[core.QuizModelActionGeneratePlan] = core.HarnessQuizModelAdapter{ProjectDir: projectDir, Runner: codex.Runner{}}
 	}
 
 	if codexGenerationBackend("CHR_PLAN_TRACKING_GENERATION_BACKEND") {
-		actionAdapters[core.QuizModelActionMaterializePlanTracking] = core.CodexQuizModelAdapter{ProjectDir: projectDir}
+		actionAdapters[core.QuizModelActionMaterializePlanTracking] = core.HarnessQuizModelAdapter{ProjectDir: projectDir, Runner: codex.Runner{}}
 	}
 
 	if len(actionAdapters) == 0 {
@@ -90,4 +91,11 @@ func codexGenerationBackend(name string) bool {
 
 func openAIGenerationBackend(name string) bool {
 	return strings.EqualFold(strings.TrimSpace(os.Getenv(name)), "openai")
+}
+
+func newConversationModel() *core.ConfiguredStructuredModel {
+	model := core.NewConfiguredStructuredModel(openAIGenerationBackend("CHR_CONVERSATION_GENERATION_BACKEND"))
+	model.Runner = codex.Runner{}
+
+	return model
 }

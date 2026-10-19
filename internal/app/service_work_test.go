@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/harness"
 )
 
 func TestServiceStartAgentWorkTicketReusesTicketExecution(t *testing.T) {
@@ -849,7 +850,7 @@ func (r *fakeServiceAgenticReviewRunner) Review(_ context.Context, review core.A
 		ContextPath: contextPath,
 		ResultPath:  resultPath,
 		SummaryPath: filepath.Join(runDir, "summary.md"),
-		Run: core.AgentRunResult{
+		Run: harness.AgentRunResult{
 			ID:     "review-" + review.Ticket.Key,
 			RunDir: runDir,
 		},

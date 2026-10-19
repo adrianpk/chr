@@ -4,6 +4,9 @@ import (
 	"path/filepath"
 	"slices"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/harness"
+	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
 func TestNewHarnessInvocationRendersDockerBuildCommand(t *testing.T) {
@@ -11,6 +14,7 @@ func TestNewHarnessInvocationRendersDockerBuildCommand(t *testing.T) {
 	plan := testHarnessRuntimePlan(dir)
 
 	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
+		Worker:      codex.Runner{},
 		ExecutionID: "exec-123",
 		TicketKey:   "CHR-1",
 		TicketPath:  filepath.Join(dir, ".chr", "default", "tickets", "CHR-1.md"),
@@ -43,6 +47,7 @@ func TestNewHarnessInvocationRendersDockerRunCommand(t *testing.T) {
 	plan := testHarnessRuntimePlan(dir)
 
 	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
+		Worker:      codex.Runner{},
 		ExecutionID: "exec-123",
 		TicketKey:   "CHR-1",
 		TicketPath:  filepath.Join(dir, ".chr", "default", "tickets", "CHR-1.md"),
@@ -80,7 +85,7 @@ func TestNewHarnessInvocationRendersDockerRunCommand(t *testing.T) {
 		"chr-agent-runtime:local",
 		"/bin/sh",
 		"-lc",
-		"CHR_EXECUTION_ID='exec-123' CHR_TICKET_KEY='CHR-1' CHR_TICKET_PATH='/workspace/.chr/default/tickets/CHR-1.md' CHR_WORKER_CONTEXT_PATH='/workspace/ops/default/run/CHR-1/exec-123/context.md' CHR_RESULT_PATH='/workspace/ops/default/run/CHR-1/exec-123/result.json' CHR_LOG_PATH='/workspace/ops/default/run/CHR-1/exec-123/runtime.log' CHR_VALIDATION_PATH='/workspace/ops/default/run/CHR-1/exec-123/validation.log' 'codex' 'exec' '--skip-git-repo-check' '--dangerously-bypass-approvals-and-sandbox' < \"$CHR_WORKER_CONTEXT_PATH\"",
+		"CHR_EXECUTION_ID='exec-123' CHR_TICKET_KEY='CHR-1' CHR_TICKET_PATH='/workspace/.chr/default/tickets/CHR-1.md' CHR_WORKER_CONTEXT_PATH='/workspace/ops/default/run/CHR-1/exec-123/context.md' CHR_RESULT_PATH='/workspace/ops/default/run/CHR-1/exec-123/result.json' CHR_LOG_PATH='/workspace/ops/default/run/CHR-1/exec-123/runtime.log' CHR_VALIDATION_PATH='/workspace/ops/default/run/CHR-1/exec-123/validation.log' 'codex' 'exec' '--skip-git-repo-check' '--dangerously-bypass-approvals-and-sandbox' < '/workspace/ops/default/run/CHR-1/exec-123/context.md'",
 	}
 
 	if invocation.Run.Program != "docker" {
@@ -97,6 +102,7 @@ func TestNewHarnessInvocationRendersDockerValidationCommand(t *testing.T) {
 	plan := testHarnessRuntimePlan(dir)
 
 	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
+		Worker:      codex.Runner{},
 		ExecutionID: "exec-123",
 		TicketKey:   "CHR-1",
 		TicketPath:  filepath.Join(dir, ".chr", "default", "tickets", "CHR-1.md"),
@@ -155,6 +161,7 @@ func TestNewHarnessInvocationRendersWorktreeDockerRunCommand(t *testing.T) {
 	}
 
 	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
+		Worker:      codex.Runner{},
 		ExecutionID: "exec-123",
 		TicketKey:   "CHR-1",
 		TicketPath:  filepath.Join(executionWorkspaceDir, ".chr", "default", "tickets", "CHR-1.md"),
@@ -206,6 +213,7 @@ func TestNewHarnessInvocationRendersWorktreeDockerValidationCommand(t *testing.T
 	}
 
 	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
+		Worker:      codex.Runner{},
 		ExecutionID: "exec-123",
 		TicketKey:   "CHR-1",
 		TicketPath:  filepath.Join(executionWorkspaceDir, ".chr", "default", "tickets", "CHR-1.md"),
@@ -231,6 +239,7 @@ func TestNewHarnessInvocationRendersWorktreeDockerValidationCommand(t *testing.T
 
 func TestNewHarnessInvocationRejectsMissingIdentity(t *testing.T) {
 	_, err := NewHarnessInvocation(HarnessInvocationOptions{
+		Worker:     codex.Runner{},
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(t.TempDir(), ".chr", "default", "tickets", "CHR-1.md"),
 		Plan:       testHarnessRuntimePlan(t.TempDir()),
@@ -248,7 +257,7 @@ func testHarnessRuntimePlan(projectDir string) RuntimePlan {
 		DockerfilePath:   filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile"),
 		Image:            "chr-agent-runtime:local",
 		ContainerWorkdir: "/workspace",
-		Mounts: []RuntimeMount{
+		Mounts: []harness.RuntimeMount{
 			{
 				Source:      projectDir,
 				Target:      "/workspace",

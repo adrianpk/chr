@@ -42,6 +42,8 @@ type AgentRunRequest struct {
 	Timeout            time.Duration
 	OutputLimit        int
 	DeferResponseTrace bool
+	// OnStart is called synchronously after preparation and before process launch.
+	OnStart func(AgentRunResult)
 }
 
 // Usage preserves unknown usage as nil; observed usage is not certification.
@@ -108,14 +110,16 @@ type WorkerRequest struct {
 
 // WorkerCommand describes an invocation in the host-selected execution lane.
 type WorkerCommand struct {
-	Program   string
-	Args      []string
-	Env       []EnvironmentVariable
-	InputPath string
+	ForwardEnv []string
+	Program    string
+	Args       []string
+	Env        []EnvironmentVariable
+	InputPath  string
 }
 
 // Worker constructs commands; the host owns execution and result validation.
 type Worker interface {
+	RuntimeMounts() []RuntimeMount
 	WorkerCommand(WorkerRequest) (WorkerCommand, error)
 	WorkflowWorker() []string
 }
@@ -142,4 +146,12 @@ func ValidateAgentRunRequest(request AgentRunRequest) error {
 	}
 
 	return nil
+}
+
+// RuntimeMount is an explicitly resolved container mount; adapters never import domain types.
+type RuntimeMount struct {
+	Source      string
+	Target      string
+	ReadOnly    bool
+	Description string
 }

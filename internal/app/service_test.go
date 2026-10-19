@@ -133,7 +133,7 @@ func TestNewQuizModelAdapterCanRouteArtifactGenerationToOpenAI(t *testing.T) {
 func TestNewDumpCurationProviderUsesCodexByDefault(t *testing.T) {
 	provider := newDumpCurationProvider(t.TempDir())
 
-	if _, ok := provider.(codexDumpCurationProvider); !ok {
+	if _, ok := provider.(harnessDumpCurationProvider); !ok {
 		t.Fatalf("dump curation provider = %T, want codex provider", provider)
 	}
 }

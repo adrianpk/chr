@@ -14,6 +14,10 @@ evidence models.
 Adapters such as `internal/app` and `internal/tui` may call this package,
 but this package should not import UI, CLI, or transport adapters.
 
+Agent callers depend on `internal/harness` contracts. App injects the concrete
+generation runner and worker command adapter. Core retains prompts, schemas,
+semantic validation, artifact layout, tracing and workflow execution authority.
+
 ## API
 
 Exported types are internal application contracts shared across adapters and

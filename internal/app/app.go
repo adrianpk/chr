@@ -405,7 +405,7 @@ func loadTUIObservability(
 		return tui.ObservabilityView{}, err
 	}
 
-	runtime, err := core.ValidateRuntime(core.RuntimeValidationOptions{
+	runtime, err := validateCodexRuntime(core.RuntimeValidationOptions{
 		ProjectDir: projectContext.ProjectDir,
 		Config:     config.Runtime,
 	})
@@ -449,9 +449,10 @@ func loadTUIAgentEvents(ctx context.Context, projectDir string, config core.Runt
 	loop := latestTUILoopRun(loops)
 	if loop.ID != "" {
 		plan, err := core.PlanRuntime(core.RuntimePlanOptions{
-			ProjectDir: projectDir,
-			Config:     config,
-			RunID:      loop.ID,
+			ExtraMounts: legacyCodexMounts(),
+			ProjectDir:  projectDir,
+			Config:      config,
+			RunID:       loop.ID,
 		})
 		if err == nil {
 			events = append(events, readTUIAgentEvents(ctx, core.AgentEventStreamPath(plan.RunArtifactDir))...)

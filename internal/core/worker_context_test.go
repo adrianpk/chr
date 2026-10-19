@@ -9,11 +9,11 @@ import (
 	"time"
 )
 
-func TestCodexWorkerContextMaterializerWritesContext(t *testing.T) {
+func TestWorkerContextMaterializerWritesContext(t *testing.T) {
 	path := filepath.Join(t.TempDir(), ".chr", "default", "runtime", "runs", "CHR-1", "exec-1", "context.md")
-	opts := testCodexWorkerContextOptions(path)
+	opts := testWorkerContextOptions(path)
 
-	err := NewCodexWorkerContextMaterializer().MaterializeContext(context.Background(), opts)
+	err := NewWorkerContextMaterializer().MaterializeContext(context.Background(), opts)
 	if err != nil {
 		t.Fatalf("MaterializeContext returned error: %v", err)
 	}
@@ -24,7 +24,7 @@ func TestCodexWorkerContextMaterializerWritesContext(t *testing.T) {
 	}
 
 	for _, want := range []string{
-		"# Codex Worker Context",
+		"# Worker Context",
 		"- execution_id: exec-1",
 		"- ticket_key: CHR-1",
 		"- ticket_path: /workspace/.chr/default/tickets/CHR-1.md",
@@ -53,7 +53,7 @@ func TestCodexWorkerContextMaterializerWritesContext(t *testing.T) {
 	}
 }
 
-func TestMaterializeCodexWorkerContextForExecutionUsesContainerPaths(t *testing.T) {
+func TestMaterializeWorkerContextForExecutionUsesContainerPaths(t *testing.T) {
 	projectDir := t.TempDir()
 	runDir := filepath.Join(projectDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 	plan := RuntimePlan{
@@ -80,20 +80,20 @@ func TestMaterializeCodexWorkerContextForExecutionUsesContainerPaths(t *testing.
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md"),
 	}
-	writeCodexWorkerContextTicket(t, record.TicketPath, Ticket{
+	writeWorkerContextTicket(t, record.TicketPath, Ticket{
 		Key:       "CHR-1",
 		Title:     "Ready work",
 		Status:    TicketStatusReadyForDev,
 		Priority:  "normal",
 		Severity:  "normal",
 		Type:      "feature",
-		CreatedAt: testCodexWorkerContextTime(),
-		UpdatedAt: testCodexWorkerContextTime(),
+		CreatedAt: testWorkerContextTime(),
+		UpdatedAt: testWorkerContextTime(),
 	})
 
-	err := MaterializeCodexWorkerContextForExecution(context.Background(), record, plan)
+	err := MaterializeWorkerContextForExecution(context.Background(), record, plan)
 	if err != nil {
-		t.Fatalf("MaterializeCodexWorkerContextForExecution returned error: %v", err)
+		t.Fatalf("MaterializeWorkerContextForExecution returned error: %v", err)
 	}
 
 	content, err := os.ReadFile(plan.WorkerContextPath)
@@ -113,15 +113,15 @@ func TestMaterializeCodexWorkerContextForExecutionUsesContainerPaths(t *testing.
 	}
 }
 
-func TestMaterializeCodexWorkerContextForExecutionUsesWorktreeContainerPaths(t *testing.T) {
+func TestMaterializeWorkerContextForExecutionUsesWorktreeContainerPaths(t *testing.T) {
 	projectDir := t.TempDir()
 	executionWorkspaceDir := filepath.Join(projectDir, ".chr", "default", "worktrees", "CHR-1")
-	plan := testCodexWorkerContextWorktreeRuntimePlan(projectDir, executionWorkspaceDir)
-	record := testCodexWorkerContextWorktreeRecord(t, executionWorkspaceDir)
+	plan := testWorkerContextWorktreeRuntimePlan(projectDir, executionWorkspaceDir)
+	record := testWorkerContextWorktreeRecord(t, executionWorkspaceDir)
 
-	err := MaterializeCodexWorkerContextForExecution(context.Background(), record, plan)
+	err := MaterializeWorkerContextForExecution(context.Background(), record, plan)
 	if err != nil {
-		t.Fatalf("MaterializeCodexWorkerContextForExecution returned error: %v", err)
+		t.Fatalf("MaterializeWorkerContextForExecution returned error: %v", err)
 	}
 
 	content, err := os.ReadFile(plan.WorkerContextPath)
@@ -147,16 +147,16 @@ func TestMaterializeCodexWorkerContextForExecutionUsesWorktreeContainerPaths(t *
 	}
 }
 
-func TestMaterializeCodexWorkerContextForExecutionIncludesRepairHandoff(t *testing.T) {
+func TestMaterializeWorkerContextForExecutionIncludesRepairHandoff(t *testing.T) {
 	projectDir := t.TempDir()
 	runDir := filepath.Join(projectDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
-	plan := testCodexWorkerContextRuntimePlan(projectDir, runDir)
+	plan := testWorkerContextRuntimePlan(projectDir, runDir)
 	record := ExecutionRecord{
 		ID:         "exec-1",
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md"),
 	}
-	writeCodexWorkerContextTicket(t, record.TicketPath, Ticket{
+	writeWorkerContextTicket(t, record.TicketPath, Ticket{
 		Key:               "CHR-1",
 		Title:             "Repair work",
 		Status:            TicketStatusReadyForDev,
@@ -176,13 +176,13 @@ func TestMaterializeCodexWorkerContextForExecutionIncludesRepairHandoff(t *testi
 			ID:       "279",
 			Status:   "open",
 		}},
-		CreatedAt: testCodexWorkerContextTime(),
-		UpdatedAt: testCodexWorkerContextTime(),
+		CreatedAt: testWorkerContextTime(),
+		UpdatedAt: testWorkerContextTime(),
 	})
 
-	err := MaterializeCodexWorkerContextForExecution(context.Background(), record, plan)
+	err := MaterializeWorkerContextForExecution(context.Background(), record, plan)
 	if err != nil {
-		t.Fatalf("MaterializeCodexWorkerContextForExecution returned error: %v", err)
+		t.Fatalf("MaterializeWorkerContextForExecution returned error: %v", err)
 	}
 
 	content, err := os.ReadFile(plan.WorkerContextPath)
@@ -205,10 +205,10 @@ func TestMaterializeCodexWorkerContextForExecutionIncludesRepairHandoff(t *testi
 	}
 }
 
-func TestMaterializeCodexWorkerContextForExecutionIncludesEvidenceStrategy(t *testing.T) {
+func TestMaterializeWorkerContextForExecutionIncludesEvidenceStrategy(t *testing.T) {
 	projectDir := t.TempDir()
 	runDir := filepath.Join(projectDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
-	plan := testCodexWorkerContextRuntimePlan(projectDir, runDir)
+	plan := testWorkerContextRuntimePlan(projectDir, runDir)
 	record := ExecutionRecord{
 		ID:         "exec-1",
 		TicketKey:  "CHR-1",
@@ -220,7 +220,7 @@ func TestMaterializeCodexWorkerContextForExecutionIncludesEvidenceStrategy(t *te
 		t.Fatalf("RenderEvidenceStrategyChecklist returned error: %v", err)
 	}
 
-	writeCodexWorkerContextTicket(t, record.TicketPath, Ticket{
+	writeWorkerContextTicket(t, record.TicketPath, Ticket{
 		Key:       "CHR-1",
 		Title:     "Behavior work",
 		Status:    TicketStatusReadyForDev,
@@ -228,13 +228,13 @@ func TestMaterializeCodexWorkerContextForExecutionIncludesEvidenceStrategy(t *te
 		Severity:  "normal",
 		Type:      "feature",
 		Body:      "# Description\n\nImplement behavior.\n\n" + checklist,
-		CreatedAt: testCodexWorkerContextTime(),
-		UpdatedAt: testCodexWorkerContextTime(),
+		CreatedAt: testWorkerContextTime(),
+		UpdatedAt: testWorkerContextTime(),
 	})
 
-	err = MaterializeCodexWorkerContextForExecution(context.Background(), record, plan)
+	err = MaterializeWorkerContextForExecution(context.Background(), record, plan)
 	if err != nil {
-		t.Fatalf("MaterializeCodexWorkerContextForExecution returned error: %v", err)
+		t.Fatalf("MaterializeWorkerContextForExecution returned error: %v", err)
 	}
 
 	content, err := os.ReadFile(plan.WorkerContextPath)
@@ -259,17 +259,17 @@ func TestMaterializeCodexWorkerContextForExecutionIncludesEvidenceStrategy(t *te
 	}
 }
 
-func TestMaterializeCodexWorkerContextForExecutionIncludesGherkinPolicyGuidance(t *testing.T) {
+func TestMaterializeWorkerContextForExecutionIncludesGherkinPolicyGuidance(t *testing.T) {
 	projectDir := t.TempDir()
 	runDir := filepath.Join(projectDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
-	plan := testCodexWorkerContextRuntimePlan(projectDir, runDir)
+	plan := testWorkerContextRuntimePlan(projectDir, runDir)
 	record := ExecutionRecord{
 		ID:         "exec-1",
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md"),
 	}
 	writeEvidencePolicyFeature(t, projectDir, ".chr/default/acceptance/checkout.feature")
-	writeCodexWorkerContextTicket(t, record.TicketPath, Ticket{
+	writeWorkerContextTicket(t, record.TicketPath, Ticket{
 		Key:         "CHR-1",
 		Title:       "Add CLI checkout command",
 		Status:      TicketStatusReadyForDev,
@@ -278,13 +278,13 @@ func TestMaterializeCodexWorkerContextForExecutionIncludesGherkinPolicyGuidance(
 		Type:        "feature",
 		UseCase:     "checkout",
 		ProjectArea: "cli",
-		CreatedAt:   testCodexWorkerContextTime(),
-		UpdatedAt:   testCodexWorkerContextTime(),
+		CreatedAt:   testWorkerContextTime(),
+		UpdatedAt:   testWorkerContextTime(),
 	})
 
-	err := MaterializeCodexWorkerContextForExecution(context.Background(), record, plan)
+	err := MaterializeWorkerContextForExecution(context.Background(), record, plan)
 	if err != nil {
-		t.Fatalf("MaterializeCodexWorkerContextForExecution returned error: %v", err)
+		t.Fatalf("MaterializeWorkerContextForExecution returned error: %v", err)
 	}
 
 	content, err := os.ReadFile(plan.WorkerContextPath)
@@ -312,7 +312,7 @@ func TestMaterializeCodexWorkerContextForExecutionIncludesGherkinPolicyGuidance(
 	}
 }
 
-func TestRenderCodexWorkerContextIncludesDocsOnlyEvidenceStrategy(t *testing.T) {
+func TestRenderWorkerContextIncludesDocsOnlyEvidenceStrategy(t *testing.T) {
 	checklist := EvidenceStrategyChecklist{
 		Found: true,
 		Items: map[string]EvidenceStrategyChecklistItem{
@@ -343,13 +343,13 @@ func TestRenderCodexWorkerContextIncludesDocsOnlyEvidenceStrategy(t *testing.T) 
 		},
 	}
 
-	opts := testCodexWorkerContextOptions("/tmp/context.md")
+	opts := testWorkerContextOptions("/tmp/context.md")
 	opts.Evidence = &WorkerEvidenceContext{
 		Config:    DefaultEvidenceStrategyConfig(),
 		Checklist: &checklist,
 	}
 
-	content := RenderCodexWorkerContext(opts)
+	content := RenderWorkerContext(opts)
 
 	for _, want := range []string{
 		"- Evidence strategy: checked=false; status=planned; change_kind=docs_only",
@@ -363,7 +363,7 @@ func TestRenderCodexWorkerContextIncludesDocsOnlyEvidenceStrategy(t *testing.T) 
 	}
 }
 
-func TestRenderCodexWorkerContextIncludesBehaviorChangeEvidenceStrategy(t *testing.T) {
+func TestRenderWorkerContextIncludesBehaviorChangeEvidenceStrategy(t *testing.T) {
 	checklist := EvidenceStrategyChecklist{
 		Found: true,
 		Items: map[string]EvidenceStrategyChecklistItem{
@@ -394,13 +394,13 @@ func TestRenderCodexWorkerContextIncludesBehaviorChangeEvidenceStrategy(t *testi
 		},
 	}
 
-	opts := testCodexWorkerContextOptions("/tmp/context.md")
+	opts := testWorkerContextOptions("/tmp/context.md")
 	opts.Evidence = &WorkerEvidenceContext{
 		Config:    DefaultEvidenceStrategyConfig(),
 		Checklist: &checklist,
 	}
 
-	content := RenderCodexWorkerContext(opts)
+	content := RenderWorkerContext(opts)
 
 	for _, want := range []string{
 		"- Evidence strategy: checked=false; status=planned; change_kind=behavior",
@@ -414,16 +414,16 @@ func TestRenderCodexWorkerContextIncludesBehaviorChangeEvidenceStrategy(t *testi
 	}
 }
 
-func TestMaterializeCodexWorkerContextForExecutionBlocksRepairWithoutReviewComments(t *testing.T) {
+func TestMaterializeWorkerContextForExecutionBlocksRepairWithoutReviewComments(t *testing.T) {
 	projectDir := t.TempDir()
 	runDir := filepath.Join(projectDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
-	plan := testCodexWorkerContextRuntimePlan(projectDir, runDir)
+	plan := testWorkerContextRuntimePlan(projectDir, runDir)
 	record := ExecutionRecord{
 		ID:         "exec-1",
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md"),
 	}
-	writeCodexWorkerContextTicket(t, record.TicketPath, Ticket{
+	writeWorkerContextTicket(t, record.TicketPath, Ticket{
 		Key:          "CHR-1",
 		Title:        "Repair work",
 		Status:       TicketStatusReadyForDev,
@@ -440,39 +440,39 @@ func TestMaterializeCodexWorkerContextForExecutionBlocksRepairWithoutReviewComme
 			ID:       "279",
 			Status:   "open",
 		}},
-		CreatedAt: testCodexWorkerContextTime(),
-		UpdatedAt: testCodexWorkerContextTime(),
+		CreatedAt: testWorkerContextTime(),
+		UpdatedAt: testWorkerContextTime(),
 	})
 
-	err := MaterializeCodexWorkerContextForExecution(context.Background(), record, plan)
+	err := MaterializeWorkerContextForExecution(context.Background(), record, plan)
 	if err == nil || !strings.Contains(err.Error(), "repair handoff requires review_comments_url") {
-		t.Fatalf("MaterializeCodexWorkerContextForExecution error = %v, want review_comments_url blocker", err)
+		t.Fatalf("MaterializeWorkerContextForExecution error = %v, want review_comments_url blocker", err)
 	}
 }
 
-func TestRenderCodexWorkerContextIsDeterministic(t *testing.T) {
-	opts := testCodexWorkerContextOptions("/tmp/context.md")
+func TestRenderWorkerContextIsDeterministic(t *testing.T) {
+	opts := testWorkerContextOptions("/tmp/context.md")
 
-	first := RenderCodexWorkerContext(opts)
-	second := RenderCodexWorkerContext(opts)
+	first := RenderWorkerContext(opts)
+	second := RenderWorkerContext(opts)
 
 	if first != second {
 		t.Fatalf("context render is not deterministic:\nfirst:\n%s\nsecond:\n%s", first, second)
 	}
 }
 
-func TestCodexWorkerContextMaterializerRejectsMissingRequiredFields(t *testing.T) {
-	opts := testCodexWorkerContextOptions(filepath.Join(t.TempDir(), "context.md"))
+func TestWorkerContextMaterializerRejectsMissingRequiredFields(t *testing.T) {
+	opts := testWorkerContextOptions(filepath.Join(t.TempDir(), "context.md"))
 	opts.TicketPath = ""
 
-	err := NewCodexWorkerContextMaterializer().MaterializeContext(context.Background(), opts)
+	err := NewWorkerContextMaterializer().MaterializeContext(context.Background(), opts)
 	if err == nil {
 		t.Fatal("MaterializeContext returned nil error")
 	}
 }
 
-func testCodexWorkerContextOptions(path string) MaterializeCodexWorkerContextOptions {
-	return MaterializeCodexWorkerContextOptions{
+func testWorkerContextOptions(path string) MaterializeWorkerContextOptions {
+	return MaterializeWorkerContextOptions{
 		Path:                  path,
 		ExecutionID:           "exec-1",
 		TicketKey:             "CHR-1",
@@ -489,7 +489,7 @@ func testCodexWorkerContextOptions(path string) MaterializeCodexWorkerContextOpt
 	}
 }
 
-func testCodexWorkerContextRuntimePlan(projectDir, runDir string) RuntimePlan {
+func testWorkerContextRuntimePlan(projectDir, runDir string) RuntimePlan {
 	return RuntimePlan{
 		ProjectDir:            projectDir,
 		ProjectCheckoutDir:    projectDir,
@@ -511,7 +511,7 @@ func testCodexWorkerContextRuntimePlan(projectDir, runDir string) RuntimePlan {
 	}
 }
 
-func testCodexWorkerContextWorktreeRuntimePlan(projectDir, executionWorkspaceDir string) RuntimePlan {
+func testWorkerContextWorktreeRuntimePlan(projectDir, executionWorkspaceDir string) RuntimePlan {
 	runDir := filepath.Join(executionWorkspaceDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 
 	return RuntimePlan{
@@ -535,7 +535,7 @@ func testCodexWorkerContextWorktreeRuntimePlan(projectDir, executionWorkspaceDir
 	}
 }
 
-func testCodexWorkerContextWorktreeRecord(t *testing.T, executionWorkspaceDir string) ExecutionRecord {
+func testWorkerContextWorktreeRecord(t *testing.T, executionWorkspaceDir string) ExecutionRecord {
 	t.Helper()
 
 	record := ExecutionRecord{
@@ -543,21 +543,21 @@ func testCodexWorkerContextWorktreeRecord(t *testing.T, executionWorkspaceDir st
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(executionWorkspaceDir, ".chr", "default", "tickets", "CHR-1.md"),
 	}
-	writeCodexWorkerContextTicket(t, record.TicketPath, Ticket{
+	writeWorkerContextTicket(t, record.TicketPath, Ticket{
 		Key:       "CHR-1",
 		Title:     "Ready work",
 		Status:    TicketStatusReadyForDev,
 		Priority:  "normal",
 		Severity:  "normal",
 		Type:      "feature",
-		CreatedAt: testCodexWorkerContextTime(),
-		UpdatedAt: testCodexWorkerContextTime(),
+		CreatedAt: testWorkerContextTime(),
+		UpdatedAt: testWorkerContextTime(),
 	})
 
 	return record
 }
 
-func writeCodexWorkerContextTicket(t *testing.T, path string, ticket Ticket) {
+func writeWorkerContextTicket(t *testing.T, path string, ticket Ticket) {
 	t.Helper()
 
 	content, err := NewTicketRenderer().RenderTicket(ticket)
@@ -576,6 +576,6 @@ func writeCodexWorkerContextTicket(t *testing.T, path string, ticket Ticket) {
 	}
 }
 
-func testCodexWorkerContextTime() time.Time {
+func testWorkerContextTime() time.Time {
 	return time.Date(2026, 6, 1, 12, 0, 0, 0, time.UTC)
 }

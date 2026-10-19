@@ -73,7 +73,7 @@ func (m *contextPackageMaterializer) MaterializeContextPackage(
 func RenderMainContextPackage(opts MaterializeContextPackageOptions) string {
 	var output strings.Builder
 
-	output.WriteString("# Codex Worker Context\n\n")
+	output.WriteString("# Worker Context\n\n")
 	writeMainContextExecution(&output, opts)
 	writeMainContextPackageLinks(&output, opts)
 	writeMainContextReadOrder(&output)

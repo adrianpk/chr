@@ -6,18 +6,17 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/harness"
 )
 
-// QuizModelProviderCodex defines a package boundary constant.
-const QuizModelProviderCodex = AgentProviderCodex
-
-// CodexQuizModelAdapter describes a package boundary value.
-type CodexQuizModelAdapter struct {
+// HarnessQuizModelAdapter describes a package boundary value.
+type HarnessQuizModelAdapter struct {
 	ProjectDir string
 	Command    string
 	Model      string
 	Timeout    time.Duration
-	Runner     AgentRunner
+	Runner     harness.AgentRunner
 }
 
 // ActionRoutingQuizModelAdapter describes a package boundary value.
@@ -27,10 +26,7 @@ type ActionRoutingQuizModelAdapter struct {
 }
 
 // InvokeQuizModel invokes the configured model adapter.
-func (a ActionRoutingQuizModelAdapter) InvokeQuizModel(
-	ctx context.Context,
-	request QuizModelRequest,
-) (QuizModelResponse, error) {
+func (a ActionRoutingQuizModelAdapter) InvokeQuizModel(ctx context.Context, request QuizModelRequest) (QuizModelResponse, error) {
 	if adapter, ok := a.ActionAdapters[request.Action]; ok {
 		if adapter == nil {
 			return QuizModelResponse{}, fmt.Errorf("%s quiz model adapter is required", request.Action)
@@ -47,25 +43,22 @@ func (a ActionRoutingQuizModelAdapter) InvokeQuizModel(
 }
 
 // InvokeQuizModel invokes the configured model adapter.
-func (a CodexQuizModelAdapter) InvokeQuizModel(
-	ctx context.Context,
-	request QuizModelRequest,
-) (QuizModelResponse, error) {
+func (a HarnessQuizModelAdapter) InvokeQuizModel(ctx context.Context, request QuizModelRequest) (QuizModelResponse, error) {
 	if err := ValidateQuizModelRequest(request); err != nil {
 		return QuizModelResponse{}, err
 	}
 
-	schema, err := codexQuizModelOutputSchema(request.Action)
+	schema, err := harnessQuizModelOutputSchema(request.Action)
 	if err != nil {
 		return QuizModelResponse{}, err
 	}
 
-	prompt, err := codexQuizModelPrompt(request)
+	prompt, err := harnessQuizModelPrompt(request)
 	if err != nil {
 		return QuizModelResponse{}, err
 	}
 
-	run, err := runCodexAgent(ctx, a.agentRunner(), AgentRunRequest{
+	run, err := RunAgent(ctx, a.Runner, harness.AgentRunRequest{
 		ID:                 request.ID,
 		Purpose:            string(request.Action),
 		ProjectDir:         a.ProjectDir,
@@ -88,30 +81,22 @@ func (a CodexQuizModelAdapter) InvokeQuizModel(
 		return QuizModelResponse{}, err
 	}
 
-	response.Provider = QuizModelProviderCodex
+	response.Provider = run.Provider
 
 	recordAgentRunResponseEvent(ctx, a.agentRunRequest(request), run, "ready", nil)
 
 	return response, nil
 }
 
-func (a CodexQuizModelAdapter) agentRunner() AgentRunner {
-	if a.Runner != nil {
-		return a.Runner
-	}
-
-	return CodexAgentRunner{}
-}
-
-func (a CodexQuizModelAdapter) agentRunRequest(request QuizModelRequest) AgentRunRequest {
-	return AgentRunRequest{
+func (a HarnessQuizModelAdapter) agentRunRequest(request QuizModelRequest) harness.AgentRunRequest {
+	return harness.AgentRunRequest{
 		ID:         request.ID,
 		Purpose:    string(request.Action),
 		ProjectDir: a.ProjectDir,
 	}
 }
 
-func codexQuizModelOutputSchema(action QuizModelAction) ([]byte, error) {
+func harnessQuizModelOutputSchema(action QuizModelAction) ([]byte, error) {
 	var schema map[string]any
 
 	switch action {
@@ -124,21 +109,21 @@ func codexQuizModelOutputSchema(action QuizModelAction) ([]byte, error) {
 	case QuizModelActionMaterializePlanTracking:
 		schema = quizModelPlanTrackingJSONSchema()
 	default:
-		return nil, fmt.Errorf("codex quiz model adapter does not support action %s", action)
+		return nil, fmt.Errorf("harness quiz model adapter does not support action %s", action)
 	}
 
 	content, err := json.MarshalIndent(schema, "", "  ")
 	if err != nil {
-		return nil, fmt.Errorf("marshal Codex output schema: %w", err)
+		return nil, fmt.Errorf("marshal harness output schema: %w", err)
 	}
 
 	return content, nil
 }
 
-func codexQuizModelPrompt(request QuizModelRequest) (string, error) {
+func harnessQuizModelPrompt(request QuizModelRequest) (string, error) {
 	payload, err := json.MarshalIndent(quizModelProviderPayload(request), "", "  ")
 	if err != nil {
-		return "", fmt.Errorf("marshal Codex quiz payload: %w", err)
+		return "", fmt.Errorf("marshal harness quiz payload: %w", err)
 	}
 
 	var prompt strings.Builder
@@ -151,7 +136,7 @@ func codexQuizModelPrompt(request QuizModelRequest) (string, error) {
 	prompt.WriteString("Instructions:\n")
 	prompt.WriteString(quizModelInstructions(request))
 
-	if discovery := codexWorkspaceDiscoveryInstructions(request.Action); discovery != "" {
+	if discovery := workspaceDiscoveryInstructions(request.Action); discovery != "" {
 		prompt.WriteString("\n\nWorkspace discovery:\n")
 		prompt.WriteString(discovery)
 	}
@@ -163,24 +148,24 @@ func codexQuizModelPrompt(request QuizModelRequest) (string, error) {
 	return prompt.String(), nil
 }
 
-func codexWorkspaceDiscoveryInstructions(action QuizModelAction) string {
+func workspaceDiscoveryInstructions(action QuizModelAction) string {
 	switch action {
 	case QuizModelActionGenerateSpec:
-		return codexDecisionDocumentDiscoveryInstructions("the generated spec")
+		return decisionDocumentDiscoveryInstructions("the generated spec")
 	case QuizModelActionGenerateAcceptanceFeature:
-		return codexDecisionDocumentDiscoveryInstructions("the generated acceptance feature")
+		return decisionDocumentDiscoveryInstructions("the generated acceptance feature")
 	case QuizModelActionGeneratePlan,
 		QuizModelActionGeneratePlanOutline,
 		QuizModelActionGeneratePlanSliceDetail:
-		return codexDecisionDocumentDiscoveryInstructions("the generated plan")
+		return decisionDocumentDiscoveryInstructions("the generated plan")
 	case QuizModelActionMaterializePlanTracking:
-		return codexDecisionDocumentDiscoveryInstructions("the generated tracking and tickets")
+		return decisionDocumentDiscoveryInstructions("the generated tracking and tickets")
 	default:
 		return ""
 	}
 }
 
-func codexDecisionDocumentDiscoveryInstructions(target string) string {
+func decisionDocumentDiscoveryInstructions(target string) string {
 	return strings.TrimSpace(`
 Before generating the artifact, search the workspace for architecture decision records or equivalent decision documents.
 Look for ADRs, decision records, architecture decisions, RFCs, engineering principles, decision logs, or similarly named files and directories.

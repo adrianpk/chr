@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
 // Actual foreground startup executes a retained task using an owned local
@@ -24,7 +25,7 @@ func TestDaemonWorkflowAuthorizedStartup(t *testing.T) {
 	workerDir := t.TempDir()
 
 	worker := "#!/bin/sh\nset -eu\ncat >/dev/null\nprintf 'Delivered\\n' > result.txt\ngit add result.txt\ngit -c user.name=Test -c user.email=test@example.com commit -qm 'Daemon task'\n"
-	if err := os.WriteFile(filepath.Join(workerDir, core.CodexWorkerProgram), []byte(worker), 0o700); err != nil {
+	if err := os.WriteFile(filepath.Join(workerDir, codex.Program), []byte(worker), 0o700); err != nil {
 		t.Fatal(err)
 	}
 

@@ -14,10 +14,11 @@ func (Runner) WorkerCommand(request harness.WorkerRequest) (harness.WorkerComman
 	}
 
 	return harness.WorkerCommand{
-		Program:   Program,
-		Args:      workerArguments(),
-		Env:       append([]harness.EnvironmentVariable(nil), request.Env...),
-		InputPath: request.InputPath,
+		ForwardEnv: []string{"OPENAI_API_KEY"},
+		Program:    Program,
+		Args:       workerArguments(),
+		Env:        append([]harness.EnvironmentVariable(nil), request.Env...),
+		InputPath:  request.InputPath,
 	}, nil
 }
 

@@ -13,6 +13,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
 func newAuthorCommand(stdout io.Writer, deps appDependencies) *cli.Command {
@@ -29,7 +30,7 @@ func newAuthorCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 }
 
 var newAuthoringQuizQuestionProvider = func() core.AuthoringQuizQuestionProvider {
-	return core.CodexAuthoringQuizQuestionProvider{}
+	return core.HarnessAuthoringQuizQuestionProvider{Program: codex.Program, Runner: codex.Runner{}}
 }
 
 func newAuthorAssistedCommand(stdout io.Writer) *cli.Command {
@@ -1027,13 +1028,7 @@ func resolveAuthoringSession(
 	return core.AuthoringSession{}, fmt.Errorf("%w: %s", core.ErrAuthoringSessionNotFound, handle)
 }
 
-func resolveAuthoringSessionForPromotion(
-	ctx context.Context,
-	repository core.AuthoringSessionRepository,
-	projectDir string,
-	handle string,
-	artifactPath string,
-) (core.AuthoringSession, error) {
+func resolveAuthoringSessionForPromotion(ctx context.Context, repository core.AuthoringSessionRepository, projectDir, handle, artifactPath string) (core.AuthoringSession, error) {
 	if strings.TrimSpace(handle) != "" {
 		return resolveAuthoringSession(ctx, repository, handle)
 	}
@@ -1041,12 +1036,7 @@ func resolveAuthoringSessionForPromotion(
 	return resolveAuthoringSessionFromArtifact(ctx, repository, projectDir, artifactPath)
 }
 
-func resolveAuthoringSessionFromArtifact(
-	ctx context.Context,
-	repository core.AuthoringSessionRepository,
-	projectDir string,
-	artifactPath string,
-) (core.AuthoringSession, error) {
+func resolveAuthoringSessionFromArtifact(ctx context.Context, repository core.AuthoringSessionRepository, projectDir, artifactPath string) (core.AuthoringSession, error) {
 	sessions, err := repository.ListSessions(ctx)
 	if err != nil {
 		return core.AuthoringSession{}, err
@@ -1072,11 +1062,7 @@ func resolveAuthoringSessionFromArtifact(
 	return core.AuthoringSession{}, fmt.Errorf("authoring session is required when artifact metadata cannot identify one session")
 }
 
-func authoringSessionHasArtifact(
-	session core.AuthoringSession,
-	projectDir string,
-	artifactPath string,
-) bool {
+func authoringSessionHasArtifact(session core.AuthoringSession, projectDir, artifactPath string) bool {
 	for _, artifact := range session.Outputs {
 		if normalizeAuthoringArtifactPath(projectDir, artifact.Path) == artifactPath {
 			return true

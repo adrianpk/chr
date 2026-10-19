@@ -8,26 +8,24 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/harness"
 )
 
-type codexDumpCurationProvider struct {
+type harnessDumpCurationProvider struct {
 	ProjectDir string
 	Command    string
 	Model      string
 	Timeout    time.Duration
-	Runner     core.AgentRunner
+	Runner     harness.AgentRunner
 }
 
-func (p codexDumpCurationProvider) CurateDump(
-	ctx context.Context,
-	request DumpCurationRequest,
-) (DumpCurationResult, error) {
+func (p harnessDumpCurationProvider) CurateDump(ctx context.Context, request DumpCurationRequest) (DumpCurationResult, error) {
 	runRequest, err := p.agentRunRequest(request)
 	if err != nil {
 		return DumpCurationResult{}, err
 	}
 
-	run, err := core.RunCodexAgent(ctx, p.agentRunner(), runRequest)
+	run, err := core.RunAgent(ctx, p.Runner, runRequest)
 	if err != nil {
 		return DumpCurationResult{}, err
 	}
@@ -44,15 +42,15 @@ func (p codexDumpCurationProvider) CurateDump(
 	return curation, nil
 }
 
-func (p codexDumpCurationProvider) agentRunRequest(request DumpCurationRequest) (core.AgentRunRequest, error) {
-	prompt, err := codexDumpCurationPrompt(request)
+func (p harnessDumpCurationProvider) agentRunRequest(request DumpCurationRequest) (harness.AgentRunRequest, error) {
+	prompt, err := harnessDumpCurationPrompt(request)
 	if err != nil {
-		return core.AgentRunRequest{}, err
+		return harness.AgentRunRequest{}, err
 	}
 
 	schema, err := json.MarshalIndent(dumpCurationJSONSchema(), "", "  ")
 	if err != nil {
-		return core.AgentRunRequest{}, fmt.Errorf("marshal Codex dump curation schema: %w", err)
+		return harness.AgentRunRequest{}, fmt.Errorf("marshal harness dump curation schema: %w", err)
 	}
 
 	projectDir := strings.TrimSpace(p.ProjectDir)
@@ -60,7 +58,7 @@ func (p codexDumpCurationProvider) agentRunRequest(request DumpCurationRequest) 
 		projectDir = request.ProjectDir
 	}
 
-	return core.AgentRunRequest{
+	return harness.AgentRunRequest{
 		ID:                 dumpCurationRequestID(request),
 		Purpose:            "dump_curation",
 		ProjectDir:         projectDir,
@@ -74,18 +72,10 @@ func (p codexDumpCurationProvider) agentRunRequest(request DumpCurationRequest) 
 	}, nil
 }
 
-func (p codexDumpCurationProvider) agentRunner() core.AgentRunner {
-	if p.Runner != nil {
-		return p.Runner
-	}
-
-	return core.CodexAgentRunner{}
-}
-
-func codexDumpCurationPrompt(request DumpCurationRequest) (string, error) {
+func harnessDumpCurationPrompt(request DumpCurationRequest) (string, error) {
 	input, err := json.MarshalIndent(openAIDumpCurationProvider{}.openAIInput(request), "", "  ")
 	if err != nil {
-		return "", fmt.Errorf("marshal Codex dump curation input: %w", err)
+		return "", fmt.Errorf("marshal harness dump curation input: %w", err)
 	}
 
 	var prompt strings.Builder
