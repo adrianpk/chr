@@ -646,6 +646,10 @@ func quizModelPlanTrackingResponseFromOutput(
 	request QuizModelRequest,
 	output []byte,
 ) (QuizModelResponse, error) {
+	if request.Strategy == QuizModelStrategyPlanDelivery {
+		return quizModelPlanDeliveryResponse(request, output)
+	}
+
 	payload, err := DecodeQuizModelPlanTrackingPayload(extractJSONObject(output))
 	if err != nil {
 		return QuizModelResponse{}, err
@@ -933,7 +937,7 @@ func quizModelRecentTopicStreak(entries []QuizModelEntryPayload) map[string]any 
 func quizModelInstructions(request QuizModelRequest) string {
 	switch {
 	case request.Action == QuizModelActionMaterializePlanTracking:
-		return quizModelPlanTrackingInstructions()
+		return quizModelTrackingInstructions(request)
 	case request.Action == QuizModelActionGeneratePlan:
 		return quizModelPlanGenerationInstructions()
 	case request.Action == QuizModelActionGeneratePlanOutline:
@@ -1175,11 +1179,7 @@ Return only the JSON object required by the response schema.
 func quizModelOpenAIFormat(request QuizModelRequest) openAIResponsesTextFormat {
 	switch {
 	case request.Action == QuizModelActionMaterializePlanTracking:
-		return quizModelJSONSchemaTextFormat(
-			"plan_tracking_artifacts",
-			"Plan tracking and ticket payloads derived from an existing implementation plan.",
-			quizModelPlanTrackingJSONSchema(),
-		)
+		return quizModelTrackingFormat(request)
 	case request.Action == QuizModelActionGeneratePlan:
 		return quizModelJSONSchemaTextFormat(
 			"generated_plan",

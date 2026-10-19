@@ -287,6 +287,7 @@ type ArtifactDetailRequest struct {
 
 // ArtifactCatalogView is the Web UI projection for one artifact family.
 type ArtifactCatalogView struct {
+	PlanChoices    []PlanGenerationChoice
 	PendingQuizzes []QuizScopeChoice
 	Cases          []TicketCaseView
 	Family         string
@@ -294,6 +295,11 @@ type ArtifactCatalogView struct {
 	EmptyMessage   string
 	Items          []ArtifactCardView
 	Revision       string
+}
+
+// PlanGenerationChoice binds a saved named use case to its observed plan target.
+type PlanGenerationChoice struct {
+	CaseSlug, CaseTitle, SpecTitle, Revision string
 }
 
 // QuizScopeChoice opens a known unanswered destination in the focused flow.

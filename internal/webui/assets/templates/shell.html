@@ -12,6 +12,7 @@
     <script src="/assets/dash.js" defer></script>
     <script src="/assets/quiz.js" defer></script>
     <script src="/assets/spec.js" defer></script>
+    <script src="/assets/plan.js" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -60,6 +61,9 @@
           {{if eq .View "catalog"}}
             {{if eq .Catalog.Family "cases"}}
               <button class="button" type="button" data-modal-template="case-create-modal">New</button>
+            {{end}}
+            {{if and (eq .Catalog.Family "plans") .Catalog.PlanChoices}}
+              <button class="button button--primary" type="button" data-modal-template="plan-generate-modal">Generate Plan</button>
             {{end}}
             {{if eq .Catalog.Family "specs"}}
               <div class="page-header-actions">
@@ -416,7 +420,6 @@
     <button class="button" type="submit">Save</button>
   </div>
 </form>
-{{template "case_plan_panel.html" .}}
 {{end}}
 
 {{define "dump_create_forms.html"}}

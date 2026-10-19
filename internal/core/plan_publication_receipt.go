@@ -11,6 +11,7 @@ import (
 // PlanPublicationOperation binds retries to caller-owned intent, independently
 // of model output, timestamps, or the newly observed target after a commit.
 type PlanPublicationOperation struct {
+	TicketDelivery     bool `json:",omitempty"`
 	ID                 string
 	Scope              QuizScope
 	ExpectedRevision   string

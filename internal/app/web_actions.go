@@ -168,6 +168,10 @@ func (p webViewProvider) writeSpecGenerate(ctx context.Context, operations servi
 }
 
 func (p webViewProvider) writePlanGenerate(ctx context.Context, operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
+	if request.Surface == "plan" {
+		return p.writePlanDelivery(ctx, operations, request)
+	}
+
 	scope, err := webCasePlanScope(ctx, operations, request)
 	if err != nil {
 		return webValidationWrite(err), nil

@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
@@ -12,6 +13,7 @@ import (
 // generation lookup and internal tracker projections.
 type PlanDocument struct {
 	Reference, Revision, Title, Body string
+	OriginReference                  string
 	size                             int
 }
 
@@ -54,7 +56,39 @@ func ReadPlanDocument(ctx context.Context, projectDir, reference string) (PlanDo
 		return PlanDocument{}, errors.New("plan title is required")
 	}
 
-	return PlanDocument{Reference: reference, Revision: target.revision, Title: title, Body: string(body), size: len(target.images[0].After) + len(target.images[1].After)}, nil
+	origin, err := planDocumentOrigin(target.metadata)
+	if err != nil {
+		return PlanDocument{}, err
+	}
+
+	return PlanDocument{Reference: reference, Revision: target.revision, Title: title, Body: string(body), OriginReference: origin, size: len(target.images[0].After) + len(target.images[1].After)}, nil
+}
+
+func planDocumentOrigin(metadata map[string]any) (string, error) {
+	if metadata["workflow"] == nil {
+		return "", nil
+	}
+
+	data, err := json.Marshal(metadata["workflow"])
+	if err != nil {
+		return "", err
+	}
+
+	var set WorkflowSet
+	if err := json.Unmarshal(data, &set); err != nil {
+		return "", err
+	}
+
+	if set.PlanRevision == nil {
+		return "", nil
+	}
+
+	namespace, ok := metadata["namespace"].(string)
+	if !ok || !IsValidOpsNamespace(namespace) {
+		return "", errors.New("invalid plan namespace")
+	}
+
+	return filepath.ToSlash(filepath.Join(OpsDirectoryName, namespace, set.PlanRevision.Reference)), nil
 }
 
 func validatePlanDocumentReference(reference string) error {

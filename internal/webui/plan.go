@@ -8,6 +8,12 @@ import (
 )
 
 func (h handler) planActionResult(w http.ResponseWriter, r *http.Request, request WriteActionRequest, result WriteActionResponse) bool {
+	if request.Surface == "plan" {
+		h.planDeliveryResult(w, r, result)
+
+		return true
+	}
+
 	if request.Surface != "case-plan" {
 		return false
 	}
@@ -29,6 +35,18 @@ func (h handler) planActionResult(w http.ResponseWriter, r *http.Request, reques
 	h.renderCasePlanResult(w, r, request, result)
 
 	return true
+}
+
+func (h handler) planDeliveryResult(w http.ResponseWriter, r *http.Request, result WriteActionResponse) {
+	if !htmx.IsRequest(r) && result.Status == WriteStatusOK {
+		h.redirectAfterWrite(w, r, result.RedirectURL)
+
+		return
+	}
+
+	if err := h.renderer.Fragment(w, "plan_generation_result.html", PageData{Write: result}); err != nil {
+		http.Error(w, "render plan generation result", http.StatusInternalServerError)
+	}
 }
 
 func (h handler) renderCasePlanResult(w http.ResponseWriter, r *http.Request, request WriteActionRequest, result WriteActionResponse) {

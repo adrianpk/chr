@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"errors"
+	"fmt"
 	"net/url"
 	"strings"
 
@@ -97,12 +98,83 @@ func planCatalog(operations service) (webui.ArtifactCatalogView, error) {
 
 	cards := make([]webui.ArtifactCardView, 0, len(documents))
 	for _, document := range documents {
+		if document.OriginReference != "" && document.OriginReference != document.Reference {
+			continue
+		}
+
 		card := webui.ArtifactCardView{Family: webArtifactFamilyPlans, ID: document.Reference, Title: document.Title, Preview: webPlanPreview(document), Revision: document.Revision}
 		card.DetailURL = webArtifactDetailURL(card)
 		cards = append(cards, card)
 	}
 
-	return webArtifactCatalog(webArtifactFamilyPlans, cards), nil
+	view := webArtifactCatalog(webArtifactFamilyPlans, cards)
+
+	view.PlanChoices, err = planGenerationChoices(operations)
+	if err != nil {
+		return webui.ArtifactCatalogView{}, err
+	}
+
+	view.Revision = webStableRevision(view)
+
+	return view, nil
+}
+
+func planGenerationChoices(operations service) ([]webui.PlanGenerationChoice, error) {
+	cases, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, core.WorkflowRecordLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	specs, err := operations.ListSpecDocuments()
+	if err != nil {
+		return nil, err
+	}
+
+	titles := map[string]string{}
+	for _, spec := range specs {
+		titles[spec.CaseSlug] = spec.Title
+	}
+
+	var choices []webui.PlanGenerationChoice
+
+	for _, item := range cases {
+		if titles[item.Slug] == "" {
+			continue
+		}
+
+		revision, err := core.PlanTargetRevision(operations.ctx, operations.projectContext.ProjectDir, operations.quizScope(core.QuizScope{CaseSlug: item.Slug}))
+		if err != nil {
+			return nil, err
+		}
+
+		choices = append(choices, webui.PlanGenerationChoice{CaseSlug: item.Slug, CaseTitle: item.Name, SpecTitle: titles[item.Slug], Revision: revision})
+	}
+
+	return choices, nil
+}
+
+func (p webViewProvider) writePlanDelivery(ctx context.Context, operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
+	scope := webActionScope(request)
+	if request.Family != "plans" || scope.CaseSlug == "" || request.ID != scope.CaseSlug || request.Revision == "" || request.Fields["request_id"] == "" {
+		return webValidationWrite(errors.New("select a saved use case in Plans before generating")), nil
+	}
+
+	result, err := operations.GeneratePlanDelivery(ctx, PlanGenerateRequest{Scope: scope, ExpectedRevision: request.Revision, OperationID: request.Fields["request_id"]})
+	if err != nil {
+		response := webValidationWrite(err)
+		if errors.Is(err, core.ErrWorkflowConflict) {
+			response.Status = webui.WriteStatusStale
+		}
+
+		return response, nil
+	}
+
+	layout, err := core.GeneratedPlanLayout(operations.projectContext.ProjectDir, operations.quizScope(scope))
+	if err != nil {
+		return webValidationWrite(err), nil
+	}
+
+	return webui.WriteActionResponse{Status: webui.WriteStatusOK, Summary: fmt.Sprintf("Plan ready with %d tickets in %d slices. Work has not started.", len(result.Workflow.Tasks), len(result.Workflow.Set.Set.Slices)), RedirectURL: "/plans/detail?id=" + url.QueryEscape(layout.RelativePath), Operation: webOperation("plan.generate", "completed", layout.RelativePath, "tickets_created")}, nil
 }
 
 func webPlanPreview(document core.PlanDocument) string {

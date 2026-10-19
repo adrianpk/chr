@@ -32,7 +32,11 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   validation or a successful harness run. Refresh preserves scroll and selection;
   temporary outages keep the last observation with a stale notice. Preview Work
   and Stop Daemon remain available while monitoring updates.
-- Plans can now be generated or regenerated from a named case's saved context,
+- Plans now offers Generate Plan directly. One submission prepares the plan,
+  its task tickets and the internal order map; no separate tracking or ticket
+  approval step is needed. Existing plans and ticket identities survive retries,
+  and authoring does not start execution.
+  Plans can also be generated or regenerated from a named case's saved context,
   with guidance when discovery is absent or insufficient. A useful dump or
   answered quiz can supply the context without requiring both. Failed generation
   and intervening edits keep the existing plan available; spec approval and

@@ -44,7 +44,43 @@
   <a class="document-card" href="{{.DetailURL}}">
     <h2>{{.Title}}</h2><div class="document-card__preview"><div>{{.Preview}}</div></div>
   </a>
-{{end}}</div>{{else}}<p class="empty-state">No plans yet. Open a use case to generate its plan.</p>{{end}}
+{{end}}</div>{{else}}<p class="empty-state">No plans yet. {{if .Catalog.PlanChoices}}Choose Generate Plan to prepare a plan and its tickets.{{else}}Save a spec for a use case to make it available here.{{end}}</p>{{end}}
+{{if .Catalog.PlanChoices}}<template id="plan-generate-modal">
+  <div class="modal-backdrop" data-modal-backdrop>
+    <section class="ticket-modal spec-editor" data-modal-explicit-close role="dialog" aria-modal="true" aria-labelledby="plan-generate-heading">
+      <header class="ticket-modal__header">
+        <h2 id="plan-generate-heading">Generate Plan</h2>
+        <button type="button" class="icon-button" data-modal-close aria-label="Close plan generation">×</button>
+      </header>
+      <form id="plan-generate-form" data-plan-generate method="post" action="/actions" hx-post="/actions" hx-target="#plan-result" hx-swap="innerHTML" hx-disabled-elt="#plan-generate-form button, #plan-generate-form select" hx-sync="this:drop">
+        <input type="hidden" name="action" value="plan.generate">
+        <input type="hidden" name="family" value="plans">
+        <input type="hidden" name="surface" value="plan">
+        <input type="hidden" name="confirm" value="true">
+        <input type="hidden" name="id" value="">
+        <input type="hidden" name="revision" value="">
+        <input type="hidden" name="request_id" value="">
+        <p>Creates the implementation plan and its tickets together, using the saved specs and discovery for this use case.</p>
+        <label class="readonly-field"><span>Use Case</span>
+          <select id="plan-generate-case" name="case_slug" required>
+            {{range .Catalog.PlanChoices}}<option value="{{.CaseSlug}}" data-plan-revision="{{.Revision}}" data-spec-title="{{.SpecTitle}}">{{.CaseTitle}}</option>{{end}}
+          </select>
+        </label>
+        <p data-plan-spec></p>
+        <p>Generating a plan does not start execution. An existing plan is kept; retries finish creating its tickets.</p>
+        <div id="plan-result" role="status" aria-live="polite"></div>
+        <footer class="spec-editor__actions"><button class="button button--primary" type="submit">Generate Plan</button></footer>
+      </form>
+    </section>
+  </div>
+</template>{{end}}
+{{end}}
+
+{{define "plan_generation_result.html"}}
+{{if .Write.Summary}}<p data-plan-write-status="{{.Write.Status}}">{{.Write.Summary}}</p>{{end}}
+{{range .Write.Validation}}<p>{{.}}</p>{{end}}
+{{with .Write.BlockedReason}}<p>{{.}}</p>{{end}}
+{{if eq .Write.Status "ok"}}<div class="detail-actions"><a class="button" href="{{.Write.RedirectURL}}">Open Plan</a><a class="button" href="/board">View Tickets</a></div>{{end}}
 {{end}}
 
 {{define "plan_detail_content.html"}}

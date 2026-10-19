@@ -34,6 +34,7 @@ type PlanListResult struct {
 
 // PlanGenerateRequest selects the quiz scope used to generate a plan.
 type PlanGenerateRequest struct {
+	TicketDelivery     bool
 	OperationID        string
 	TrackerReplaceHash string
 	ExpectedRevision   string
@@ -58,8 +59,9 @@ type PlanTrackingRequest struct {
 
 // PlanOperationResult is the TUI-facing result for plan generation operations.
 type PlanOperationResult struct {
-	Message string
-	Plan    PlanView
+	Existing bool
+	Message  string
+	Plan     PlanView
 }
 
 // PlanTrackingResult reports generated tracking artifacts for a plan.
@@ -97,7 +99,7 @@ func (s service) ListPlans() (PlanListResult, error) {
 //nolint:wsl_v5 // Guard clauses read clearer in this service flow.
 func (s service) GeneratePlan(ctx context.Context, request PlanGenerateRequest) (PlanOperationResult, error) {
 	scope := s.quizScope(request.Scope)
-	operation := core.PlanPublicationOperation{ID: request.OperationID, Scope: scope, ExpectedRevision: request.ExpectedRevision, TrackerReplaceHash: request.TrackerReplaceHash}
+	operation := core.PlanPublicationOperation{ID: request.OperationID, Scope: scope, ExpectedRevision: request.ExpectedRevision, TrackerReplaceHash: request.TrackerReplaceHash, TicketDelivery: request.TicketDelivery}
 	if result, found, err := s.replayPlanPublication(ctx, operation); found || err != nil {
 		return result, err
 	}
@@ -108,8 +110,9 @@ func (s service) GeneratePlan(ctx context.Context, request PlanGenerateRequest) 
 
 	if exists {
 		return PlanOperationResult{
-			Message: "Plan already exists. Use regenerate plan to replace it.",
-			Plan:    existing,
+			Existing: true,
+			Message:  "Plan already exists. Use regenerate plan to replace it.",
+			Plan:     existing,
 		}, nil
 	}
 
@@ -168,6 +171,7 @@ func (s service) prepareAndPublishPlan(ctx context.Context, operation core.PlanP
 	plan.ExpectedRevision, plan.SourceObservationHash = target, sources.Hash
 
 	plan.RequireOrderMap = true
+	plan.Order = core.ScopePlanDeliveryOrder(plan.Order, operation)
 
 	plan.TrackerReplaceHash = operation.TrackerReplaceHash
 	if operation.ID != "" {

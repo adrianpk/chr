@@ -1,0 +1,178 @@
+package app
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core"
+)
+
+// PlanDeliveryResult completes authoring with tickets and their internal order
+// map. It neither admits execution nor starts a worker.
+type PlanDeliveryResult struct {
+	Plan     PlanView
+	Workflow core.WorkflowMaterializationResult
+}
+
+// GeneratePlanDelivery creates a plan and its tickets in one user operation.
+// A saved plan survives a later failure; repeating the operation resumes its
+// retained generation and native materialization instead of allocating twice.
+func (s service) GeneratePlanDelivery(ctx context.Context, request PlanGenerateRequest) (PlanDeliveryResult, error) {
+	if err := s.validatePlanDeliveryScope(ctx, request.Scope); err != nil {
+		return PlanDeliveryResult{}, err
+	}
+
+	request.TicketDelivery = true
+
+	generated, err := s.GeneratePlan(ctx, request)
+	if err != nil {
+		return PlanDeliveryResult{}, err
+	}
+
+	result := PlanDeliveryResult{Plan: generated.Plan}
+
+	err = s.withGenerationRuntime(ctx, "plan_delivery", s.quizScope(request.Scope), func(ctx context.Context) error {
+		var materializeErr error
+
+		result.Workflow, materializeErr = s.materializeGeneratedPlan(ctx, request, generated)
+
+		return materializeErr
+	})
+	if err != nil {
+		return result, fmt.Errorf("plan saved; ticket creation is incomplete. Retry Generate Plan to finish: %w", err)
+	}
+
+	return result, nil
+}
+
+func (s service) validatePlanDeliveryScope(ctx context.Context, scope core.QuizScope) error {
+	if scope.CaseSlug == "" {
+		return fmt.Errorf("select an existing use case with a saved spec")
+	}
+
+	if _, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).ReadBounded(ctx, scope.CaseSlug); err != nil {
+		return err
+	}
+
+	documents, err := s.ListSpecDocuments()
+	if err != nil {
+		return err
+	}
+
+	for _, document := range documents {
+		if document.CaseSlug == scope.CaseSlug {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("save a spec for this use case before generating its plan")
+}
+
+func (s service) materializeGeneratedPlan(ctx context.Context, request PlanGenerateRequest, generated PlanOperationResult) (core.WorkflowMaterializationResult, error) {
+	input, layout, err := s.planDeliveryInput(ctx, request, generated)
+	if err != nil {
+		return core.WorkflowMaterializationResult{}, err
+	}
+
+	store := core.NewWorkflowStore(layout, s.projectContext.ProjectID)
+
+	if result, found, err := store.ResumePlanDelivery(ctx, input); found || err != nil {
+		if err == nil {
+			err = s.refreshWorkflowProjection(ctx, store)
+		}
+
+		return result, err
+	}
+
+	retained := filepath.ToSlash(filepath.Join(layout.RelativeRoot(), input.PlanRef))
+	planView := s.planViewFromPath(s.quizScope(request.Scope), retained, filepath.Join(s.projectContext.ProjectDir, filepath.FromSlash(retained)))
+
+	plan, err := s.generatePlanTicketContracts(ctx, input, planView)
+	if err != nil {
+		return core.WorkflowMaterializationResult{}, err
+	}
+
+	return s.MaterializeWorkflowPlan(ctx, plan)
+}
+
+func (s service) planDeliveryInput(ctx context.Context, request PlanGenerateRequest, generated PlanOperationResult) (core.GeneratedWorkflowPlan, core.OpsLayout, error) {
+	scope := s.quizScope(request.Scope)
+
+	input, err := core.ObservePlanWorkflow(ctx, s.projectContext.ProjectDir, scope)
+	if err != nil {
+		return input, core.OpsLayout{}, err
+	}
+
+	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir})
+	if err != nil {
+		return input, layout, err
+	}
+
+	canonical := filepath.ToSlash(filepath.Join(layout.RelativeRoot(), input.PlanRevision.Reference))
+	retained := filepath.ToSlash(filepath.Join(layout.RelativeRoot(), input.PlanRef))
+
+	if generated.Plan.RelativePath != canonical && generated.Plan.RelativePath != retained {
+		return input, layout, core.ErrWorkflowConflict
+	}
+
+	if generated.Existing {
+		if err := s.checkDeliveryTarget(ctx, scope, request.ExpectedRevision); err != nil {
+			return input, layout, err
+		}
+	}
+
+	input.UseCase = scope.CaseSlug
+
+	return input, layout, nil
+}
+
+func (s service) checkDeliveryTarget(ctx context.Context, scope core.QuizScope, expected string) error {
+	current, err := core.PlanTargetRevision(ctx, s.projectContext.ProjectDir, scope)
+	if err != nil {
+		return err
+	}
+
+	if expected != "" && expected != current {
+		return core.ErrWorkflowConflict
+	}
+
+	return nil
+}
+
+func (s service) generatePlanTicketContracts(ctx context.Context, input core.GeneratedWorkflowPlan, plan PlanView) (core.GeneratedWorkflowPlan, error) {
+	bound, ctx, err := s.bindGeneration(ctx, input.MaterializationID, string(core.QuizModelActionMaterializePlanTracking))
+	if err != nil {
+		return input, err
+	}
+
+	state, err := bound.specGenerationRuntimeState(plan.Scope)
+	if err != nil {
+		return input, err
+	}
+
+	request, err := bound.newPlanTrackingModelRequest(state, plan)
+	if err != nil {
+		return input, err
+	}
+
+	encoded, err := json.Marshal(input)
+	if err != nil {
+		return input, err
+	}
+
+	request.Strategy = core.QuizModelStrategyPlanDelivery
+	request.ContextSections = append(request.ContextSections, core.QuizModelContextSection{Name: "planned_workflow", Layer: "plan", Authority: input.PlanRef, Content: string(encoded)})
+
+	response, err := core.InvokeQuizModel(ctx, bound.quizModel, request)
+	if err != nil {
+		return input, err
+	}
+
+	if response.PlanTracking.Workflow == nil {
+		return input, fmt.Errorf("the provider did not return native ticket contracts")
+	}
+
+	return *response.PlanTracking.Workflow, nil
+}

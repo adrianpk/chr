@@ -106,16 +106,14 @@ func TestWebPlanBindings(t *testing.T) {
 	checkWebPlanCatalog(t, webQuizHandler(t, provider))
 }
 
-// The native form preserves a readable case result on failure and redirects
-// back to that same named case after successful preparation.
+// Native submission reports incomplete authoring on failure and redirects to
+// the saved plan only after its tickets and order map are ready.
 func TestWebPlanNative(t *testing.T) {
 	for _, ready := range []bool{false, true} {
-		provider, _ := webPlanFixture(t)
-		if ready {
-			addWebPlanDiscovery(t, provider)
-		}
+		provider, model := webPlanDeliveryFixture(t)
+		model.fail = !ready
 
-		form := webPlanForm(webPlanDetail(t, provider))
+		form := webPlanDeliveryForm(t, provider)
 		request := httptest.NewRequest(http.MethodPost, "/actions", strings.NewReader(form.Encode()))
 		request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
@@ -123,10 +121,10 @@ func TestWebPlanNative(t *testing.T) {
 		webQuizHandler(t, provider).ServeHTTP(response, request)
 
 		if ready {
-			if response.Code != http.StatusSeeOther || response.Header().Get("Location") != "/cases/detail?id=named-work" {
+			if response.Code != http.StatusSeeOther || !strings.HasPrefix(response.Header().Get("Location"), "/plans/detail?id=") {
 				t.Fatal(response.Code, response.Header())
 			}
-		} else if !strings.Contains(response.Body.String(), "Plan for Named work") || !strings.Contains(response.Body.String(), "absent") {
+		} else if !strings.Contains(response.Body.String(), "ticket creation is incomplete") {
 			t.Fatal(response.Body.String())
 		}
 	}
