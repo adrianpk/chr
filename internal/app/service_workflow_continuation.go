@@ -20,6 +20,13 @@ func (s service) ContinueWorkflow(ctx context.Context, id string, request core.W
 		return core.WorkflowContinuationProgress{}, err
 	}
 
+	if run.HarnessBinding != nil {
+		request.Worker, err = store.WorkflowHarnessWorker(ctx, id)
+		if err != nil {
+			return core.WorkflowContinuationProgress{Invocation: run}, err
+		}
+	}
+
 	ports, err := s.workflowContinuationPorts(run, provider, reviewer)
 	if err != nil {
 		return core.WorkflowContinuationProgress{Invocation: run}, err

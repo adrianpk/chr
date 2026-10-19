@@ -19,12 +19,16 @@ const (
 	// Program is the legacy Codex executable name.
 	Program = "codex"
 	// Identity is the harness identity, separate from its model provider.
-	Identity       = "codex"
+	Identity = "codex"
+	// WorkerProtocol identifies the bounded native worker argv contract.
+	WorkerProtocol = "codex-exec/v1"
 	defaultTimeout = 20 * time.Minute
 )
 
 // Runner implements generation and worker command capabilities without IO at construction.
 type Runner struct {
+	WorkerProgram   string
+	WorkerModel     string
 	Mounts          []harness.RuntimeMount
 	CommandExecutor harness.AgentCommandExecutor
 }

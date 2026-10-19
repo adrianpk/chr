@@ -174,7 +174,7 @@ func workflowProcessInput(t *testing.T) WorkflowTaskInput {
 	}
 
 	cwd, err := os.Getwd()
-	if err != nil || cwd != input.Lane.Worktree || input.Schema != "chr-task-input/v1" {
+	if err != nil || cwd != input.Lane.Worktree || validateWorkflowTaskHarnessSchema(input) != nil {
 		t.Fatal("worker received a mutable or shared checkout")
 	}
 

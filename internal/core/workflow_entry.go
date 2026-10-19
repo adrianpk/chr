@@ -95,6 +95,10 @@ func workflowRetainedEntryRequest(request WorkflowStartRequest, run WorkflowInvo
 		request.Admission = run.Admission
 	}
 
+	if request.HarnessBinding == nil {
+		request.HarnessBinding = cloneHarnessBinding(run.HarnessBinding)
+	}
+
 	request.Selection.Target = run.Selection.Target
 	request.Policy = workflowRequestedRetainedPolicy(request.Policy, run.Policy, request.IncludeLaterTickets)
 

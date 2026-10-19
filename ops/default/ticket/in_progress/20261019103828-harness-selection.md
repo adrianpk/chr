@@ -12,7 +12,7 @@ reported_at: 2026-10-19T10:38:28Z
 ready_at: 2026-10-19T10:38:33Z
 started_at: 2026-10-19T11:23:17Z
 branch: feat/slice-2-harness-selection
-commits: [d9b19ac1b2ce4e1b577d9497443b2d207c4c1ce7]
+commits: [d9b19ac1b2ce4e1b577d9497443b2d207c4c1ce7, 3ed1b443972fe4532f3df295c4df0d8e5c4ad657]
 ---
 
 # Live role selection and retained bindings
@@ -131,7 +131,51 @@ updates, stale/unauthorized/unprepared changes, unknown-field preservation,
 receipt capacity, interrupted publication/replay, an upgrade fence, fresh service
 inspection and the actual root CLI. The owned subprocess fixtures have stopped.
 
-Next recorded task: T2.3, invocation v2 bindings and historical v1 compatibility.
-T2.4 operation-level generation bindings also remains pending. Production
-admission and generation caller wiring are not complete. No Slice 2 PR is ready;
-the configured final exact-HEAD checks have not run for this partial slice.
+T2.3 is implemented: new explicit worker admissions use `chr-invocation/v2`
+with a sealed, non-secret harness binding. It retains profile/selection revisions,
+requested model/provider provenance, native runtime identity, adapter protocol,
+capabilities and executable/argv hashes. The existing private invocation fields
+retain the resolved host command; public invocation projections expose only its
+hash evidence. Codex worker command assembly owns selected executable/model flags
+for both native and container command forms. Unsupported explicit Codex provider
+options fail readiness instead of being accepted and ignored.
+
+Admission and selection changes share the configuration owner's exclusion. The
+execution policy and binding therefore come from one complete image. A retained
+request key bypasses current profile resolution and restores the original command;
+a changed binding conflicts. Compatibility entrypoints recover the same binding.
+Claims and model dispatch check the admitted executable identity, including a
+256 MiB fingerprint ceiling and regular-file checks that cannot block on a FIFO.
+A worker command override cannot replace the bound program.
+
+Bound worker input uses `chr-task-input/v2`, carries the same binding and includes
+it in the frozen input digest. Pending tickets, pause/resume, an independent host
+process and lost-response replay retain that identity. Manual handoffs retain
+their explicit execution mode; an omitted manual command does not launch a model.
+Descriptive adapter capabilities do not replace whole-call certification: the
+existing finite budget owner still rejects an uncertified bound worker before
+launch. Existing claims, capacity and budget records retain their owners.
+
+Omitted worker selections preserve the historical v1 execution path. Read and
+same-key replay keep v1 checkpoint bytes and the original request hash unchanged,
+even when current selections name an unavailable profile. Historical worker argv
+remains CLI-default; inspection does not advertise the generation-only environment
+model as a frozen worker model. A fixed v1-only consumer fixture rejects a v2
+checkpoint before its dispatch effect. Mandatory-binding tampering, schema
+downgrades, unknown future schemas and executable replacement fail closed.
+
+Successful T2.3 checks:
+
+- `go test ./internal/core ./internal/app ./internal/harness/codex -run '^(TestHarnessBinding|TestHarnessSelection|TestHarnessCodexWorker)' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^(TestHarnessBinding|TestHarnessSelection)' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/app -run '^(TestWorkflowInvocation|TestWorkflowEntry|TestWorkflowManual|TestWorkflowTaskExact|TestWorkflowTaskCumulative|TestWorkflowConfigAdmission|TestWorkflowCLIAdmission|TestServiceWorkflowClaim|TestServiceWorkflowTask|TestServiceWorkflowManual|TestNativeAgentAdmission|TestTelegramWorkLostAck|TestTelegramWorkAuthority|TestTelegramWorkStalePreview)' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/app ./internal/harness/codex`
+- `scripts/check-go-func-signatures.sh`
+- `git diff --check`
+
+The owned subprocess fixtures have stopped. Next recorded task: T2.4, freeze one
+generation selection for each owning authoring/conversation operation, including
+nested calls, later stages, retries and interrupted-operation recovery. Fresh
+independent operations must reload persisted defaults. Generation dispatch and
+run-metadata wiring remain pending. No Slice 2 PR is ready; the configured final
+exact-HEAD checks have not run for this partial slice.

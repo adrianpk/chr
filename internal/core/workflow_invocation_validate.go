@@ -15,7 +15,7 @@ func validateWorkflowInvocation(run workflowInvocationFile) error {
 		return err
 	}
 
-	request, err := normalizeWorkflowStart(WorkflowStartRequest{RequestKey: run.RequestKey, Selection: run.Selection, Policy: run.Policy, ReviewRestriction: run.ReviewRestriction, Admission: run.Admission})
+	request, err := normalizeWorkflowStart(WorkflowStartRequest{RequestKey: run.RequestKey, Selection: run.Selection, Policy: run.Policy, ReviewRestriction: run.ReviewRestriction, Admission: run.Admission, HarnessBinding: run.HarnessBinding, HarnessCommand: run.HarnessCommand})
 	if err != nil {
 		return err
 	}
@@ -33,7 +33,11 @@ func validateWorkflowInvocation(run workflowInvocationFile) error {
 }
 
 func validateWorkflowInvocationHeader(run workflowInvocationFile) error {
-	if run.Schema != "chr-invocation/v1" || run.Authority != "tickets" || !filepath.IsAbs(run.OwnerRoot) {
+	if err := validateWorkflowInvocationHarness(run); err != nil {
+		return err
+	}
+
+	if run.Authority != "tickets" || !filepath.IsAbs(run.OwnerRoot) {
 		return fmt.Errorf("unsupported workflow invocation schema, authority or owner")
 	}
 

@@ -23,6 +23,8 @@ func (s service) StartWorkflow(ctx context.Context, request core.WorkflowStartRe
 		return core.WorkflowStartResult{}, err
 	}
 
+	request.ResolveHarness = s.prepareWorkflowHarness
+
 	return store.StartWorkflow(ctx, request)
 }
 

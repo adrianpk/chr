@@ -49,3 +49,25 @@ func TestHarnessCodexWorker(t *testing.T) {
 		t.Fatalf("native command = %q", got)
 	}
 }
+
+// Native and container commands carry the same host-selected executable/model;
+// the empty/default selection preserves the original legacy command exactly.
+func TestHarnessCodexWorkerSelection(t *testing.T) {
+	for _, tc := range []struct{ name, model string }{{"legacy", ""}, {"CLI default", "cli_default"}, {"exact", "exact model"}} {
+		t.Run(tc.name, func(t *testing.T) {
+			model := tc.model
+			runner := Runner{WorkerProgram: "/host/selected-codex", WorkerModel: model}
+			native := runner.WorkflowWorker()
+
+			container, err := runner.WorkerCommand(harness.WorkerRequest{InputPath: "/input"})
+			if err != nil || container.Program != native[0] || !slices.Equal(container.Args, native[1:len(native)-1]) {
+				t.Fatal("worker transports disagree on selection", err)
+			}
+
+			hasModel := slices.Contains(native, "--model")
+			if hasModel != (model == "exact model") {
+				t.Fatal("worker lost explicit/default model semantics", native)
+			}
+		})
+	}
+}

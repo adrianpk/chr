@@ -73,7 +73,7 @@ func (s *WorkflowStore) readWorkflowManualInput(attempt WorkflowAttempt) (workfl
 		return workflowPreparedTask{}, err
 	}
 
-	if input.Schema != "chr-task-input/v1" || input.ExecutionMode != "manual" {
+	if validateWorkflowTaskHarnessSchema(input) != nil || input.ExecutionMode != "manual" {
 		return workflowPreparedTask{}, ErrWorkflowOwned
 	}
 

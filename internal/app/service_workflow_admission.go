@@ -30,6 +30,8 @@ func (s service) admitBoundWorkExtent(ctx context.Context, selection core.Workfl
 		return AgentWorkResult{}, err
 	}
 
+	request.ResolveHarness = s.prepareWorkflowHarness
+
 	started, err := store.StartWorkflowGuarded(ctx, request, s.boundAdmissionCheck(selection, bindings[0].Check))
 	if err != nil {
 		return AgentWorkResult{}, err

@@ -125,13 +125,17 @@ func harnessProfileReadiness(profile core.HarnessProfile, role core.HarnessRole,
 		r.Supported = false
 	}
 
-	// Reasoning, private credential injection and custom model resources require
+	// Explicit Codex providers, reasoning, credentials and custom model resources require
 	// their adapter-owned dispatch path; they cannot be accepted and then ignored.
-	if profile.Thinking != "" || profile.CredentialRef != "" || profile.ModelConfigRef != "" {
+	if !harnessProfileOptionsSupported(profile) {
 		r.Supported = false
 	}
 
 	return r
+}
+
+func harnessProfileOptionsSupported(profile core.HarnessProfile) bool {
+	return profile.Thinking == "" && profile.CredentialRef == "" && profile.ModelConfigRef == "" && (profile.Harness != codex.Identity || profile.ModelProvider == "")
 }
 
 func privateHarnessReference(configDir, reference string) bool {
@@ -165,6 +169,12 @@ func legacyHarnessSelection(config core.WorkspaceConfig, role core.HarnessRole, 
 	profile := core.HarnessProfile{Harness: codex.Identity, Command: strings.TrimSpace(os.Getenv("CHR_CODEX_COMMAND")), Model: strings.TrimSpace(os.Getenv("CHR_CODEX_MODEL"))}
 	if profile.Command == "" || action == "contextual_quiz" || role == core.HarnessWorker {
 		profile.Command = codex.Program
+	}
+
+	// Historical worker argv did not pass CHR_CODEX_MODEL. Preserve CLI-default
+	// provenance rather than advertising that generation-only setting as frozen.
+	if role == core.HarnessWorker {
+		profile.Model = ""
 	}
 
 	profile.Revision = core.HarnessProfileRevision(profile)
