@@ -107,3 +107,17 @@ Before slice review/integration, run `make verify` and `git diff --check`.
 These commands are planned checks, not recorded successful executions.
 Retain commits, PR, validation and blocker evidence here and in the slice report;
 the tracker remains an order map.
+
+## Implementation Progress
+
+T8.1 is implemented: one deterministic journey exercises all four role
+combinations through Web, TUI, Telegram and CLI while a generation subprocess
+and a worker claim remain active. New admissions read current defaults; nested,
+resumed and paused work keeps its original binding. Codex-only preparation,
+legacy direct API selection, process visibility and unrelated bytes are covered.
+
+Passed: `go test ./internal/app -run '^TestHarnessJourney$' -count=1 -timeout=3m -v`.
+
+T8.2 guidance/evidence mapping is next. T8.3 real-provider proof requires explicit
+operator authorization and working Docker access; neither is established by
+routine protocol fixtures.
