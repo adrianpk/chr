@@ -12,7 +12,7 @@ scope: domain
 tags: agents, pi, models
 source: chat
 reported_at: 2026-10-17T20:35:25Z
-commits: []
+commits: [c1374d643d4db2c3bcfa4cdef9a600b9c039fdc2, 297042e63d22]
 ---
 
 # Support Pi alongside Codex for execution and generation
@@ -125,5 +125,14 @@ report maps HP-01 through HP-21 to owning evidence and marks real-provider proof
 pending. The legacy generation reference now states the implemented precedence
 and rejected unsupported backends.
 
-T8.3 real-provider proof requires explicit operator authorization and working
-Docker access; neither is established by routine protocol fixtures.
+T8.3 preparation is implemented: the opt-in fixture requires explicit private
+provider/model/resources, preflights both roles before any model call and retains
+exact candidate/runtime/model/host evidence. It permits one structured call and
+one disposable worker task with a 90-second deadline and one attempt. The guard
+proves missing credentials fail before launching a model.
+
+Real-provider proof still requires explicit operator authorization and working
+Docker access. Native Pi 1.3.0 and a compatible static credential are available;
+the proposed proof is `zai/glm-4.7` with thinking off. This worker cannot access
+the Docker socket and passwordless sudo is unavailable. No real model call has
+run. The original ticket cannot close while that acceptance remains unresolved.

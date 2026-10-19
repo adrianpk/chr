@@ -1,6 +1,6 @@
 # Slice 8: Harness Acceptance and Operator Guidance
 
-Status: drafting
+Status: reviewing
 Delivery set: codex-pi-harnesses
 Plan: [Selectable Harness Delivery](../../../plan/codex-pi-harnesses.md)
 Tracker: [Selectable Harness Delivery Order](../../../tracker/codex-pi-harnesses.md)
@@ -46,7 +46,22 @@ state explicit-profile precedence, legacy direct API behavior, native Pi's
 static-key limitation and observed-versus-certified usage. Registered-project
 selection is documented consistently across adapters.
 
-T8.3 authorized live proof remains pending. The deterministic fixtures establish
+T8.3 provides `TestHarnessLivePi`, an opt-in real-provider fixture. Its closed
+input requires a private root, explicit native Pi/bridge/image, provider/model
+and private auth source. It copies only the selected provider into private
+fixture credentials. Both roles and Docker readiness are checked before any
+model call. One structured call uses the existing 60-second deadline; one
+worker task uses 90 seconds, one attempt and one checkpoint. Host validation
+requires the committed `result.txt` to contain exactly `Delivered` and no other
+file change. No push or external repository mutation is requested.
+
+The fixture retains candidate, provider/model, pinned Pi version, immutable
+runtime, worker commit/output hash, observed generation usage and caller
+validation in private `evidence.json`. The missing-access guard runs an owned
+child with synthetic configuration and verifies failure before a model launches.
+The real test skips without opt-in; that skip is not live evidence.
+
+T8.3 authorized live execution remains pending. The deterministic fixtures establish
 shared application/transport behavior and do not stand in for a real model call.
 
 ## Contracts Added or Changed
@@ -62,6 +77,7 @@ shared application/transport behavior and do not stand in for a real model call.
 - `docs/how-to/select-harnesses.md`
 - `docs/reference/artifact-generation-backends.md`
 - `docs/how-to/user-guide/index.md`, `docs/index.md`
+- `internal/app/harness_live_pi_test.go`, `harness_live_pi_guard_test.go`
 
 ## Validation
 
@@ -69,6 +85,7 @@ Passed focused task checks:
 
 - `go test ./internal/app -run '^TestHarnessJourney$' -count=1 -timeout=3m -v`
 - `go test ./internal/app -run '^TestHarnessJourney$' -count=1 -timeout=3m`
+- `go test ./internal/app -run '^(TestHarnessJourney|TestHarnessLivePi|TestHarnessLivePiGuard)$' -count=1 -timeout=3m -v`
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --allow-serial-runners --fix --timeout=5m ./internal/app`
 - `git diff --check`
 
@@ -80,6 +97,8 @@ The four named adapter cases executed. Owned HTTP servers, SQLite handles,
 claims and generation subprocesses finished their cleanup. The actual generation
 caller validates its typed output before retaining successful parser evidence.
 Routine fixtures use synthetic credentials and perform no provider/bot calls.
+The combined check runs the journey and missing-access guard; the real-provider
+root is explicitly skipped until its separate authorization and access exist.
 
 ## Acceptance Evidence
 
@@ -117,5 +136,7 @@ separate controller records.
 T8.3 requires explicit operator authorization for one real Pi structured call
 and one bounded disposable Docker worker task. Native Pi 1.3.0 is available,
 but this worker cannot access the Docker socket and passwordless sudo is not
-available. Real-provider proof has not run. The original feature ticket remains
+available. The proposed fixed proof is `zai/glm-4.7` with thinking off, using the existing
+selected static credential. This is a proposal, not authorization. Real-provider
+proof has not run. The original feature ticket remains
 open until required evidence and controller-owned integration/closure complete.
