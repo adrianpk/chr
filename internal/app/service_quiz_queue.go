@@ -28,7 +28,7 @@ func (s service) nextQuizQuestion(state core.QuizRuntimeState, entries []core.Qu
 		return state, err
 	}
 
-	response, err := core.InvokeQuizModel(s.ctx, s.quizModel, request)
+	response, err := s.invokeQuizGeneration(state, request)
 	if err != nil {
 		return state, err
 	}
@@ -94,7 +94,7 @@ func (s service) generateFastQuizBatch(state core.QuizRuntimeState, entries []co
 		return state, err
 	}
 
-	response, err := core.InvokeQuizModel(s.ctx, s.quizModel, request)
+	response, err := s.invokeQuizGeneration(state, request)
 	if err != nil {
 		return state, err
 	}

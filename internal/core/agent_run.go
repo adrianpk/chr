@@ -23,6 +23,8 @@ func RunAgent(ctx context.Context, runner harness.AgentRunner, request harness.A
 		return harness.AgentRunResult{}, err
 	}
 
+	request.ID = HarnessGenerationRequestID(ctx, request.ID)
+
 	if request.RunDir == "" {
 		request.RunDir = UserPath(request.ProjectDir, "tmp", "agent-runs", request.ID)
 	}
@@ -58,6 +60,8 @@ func recordAgentRequest(ctx context.Context, request harness.AgentRunRequest, re
 }
 
 func recordAgentRunResponseEvent(ctx context.Context, request harness.AgentRunRequest, result harness.AgentRunResult, status string, runErr error) {
+	request.ID = HarnessGenerationRequestID(ctx, request.ID)
+
 	event := map[string]any{
 		"event":                  "llm_response",
 		"llm_call_id":            result.ID,

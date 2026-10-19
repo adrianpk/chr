@@ -92,7 +92,7 @@ func checkHarnessRunIdentity(request harness.AgentRunRequest, record HarnessRunM
 
 func sameHarnessRunCall(left, right HarnessRunMetadata) bool {
 	return left.Schema == right.Schema && left.RequestID == right.RequestID && left.Purpose == right.Purpose && left.OperationID == right.OperationID &&
-		left.Selection.BindingHash == right.Selection.BindingHash && left.InputRef == right.InputRef && left.SchemaRef == right.SchemaRef
+		left.Selection.BindingHash == right.Selection.BindingHash
 }
 
 func finishHarnessGenerationRun(request harness.AgentRunRequest, result harness.AgentRunResult, record *HarnessRunMetadata, runErr error) error {
@@ -184,6 +184,8 @@ func harnessRunMetadataPath(request harness.AgentRunRequest) string {
 // ValidateHarnessGenerationOutput records the caller's parser result. Process
 // success never implies schema validity or approval of an authoring artifact.
 func ValidateHarnessGenerationOutput(ctx context.Context, request harness.AgentRunRequest, validationErr error) error {
+	request.ID = HarnessGenerationRequestID(ctx, request.ID)
+
 	id, binding, bound := HarnessGenerationSelection(ctx)
 	if !bound {
 		return validationErr

@@ -133,7 +133,7 @@ func (s service) resolveDumpPath(relativePath string) (string, error) {
 	return filepath.Join(s.projectContext.ProjectDir, filepath.FromSlash(observed.Reference)), nil
 }
 
-func (s service) curateDump(request DumpCreateRequest) DumpCurationResult {
+func (s service) curateDump(request DumpCreateRequest) (DumpCurationResult, error) {
 	provider := s.dumpCurator
 	if provider == nil {
 		provider = fallbackDumpCurationProvider{Reason: "dump curation provider is not configured"}
@@ -147,7 +147,11 @@ func (s service) curateDump(request DumpCreateRequest) DumpCurationResult {
 		Scope:      request.Scope,
 	})
 	if err == nil {
-		return normalizeDumpCurationResult(result, request.Content)
+		return normalizeDumpCurationResult(result, request.Content), nil
+	}
+
+	if _, binding, bound := core.HarnessGenerationSelection(s.ctx); bound && binding.Selection.Source == "project" {
+		return DumpCurationResult{}, err
 	}
 
 	fallback, fallbackErr := (fallbackDumpCurationProvider{
@@ -159,11 +163,8 @@ func (s service) curateDump(request DumpCreateRequest) DumpCurationResult {
 		Content:    request.Content,
 		Scope:      request.Scope,
 	})
-	if fallbackErr != nil {
-		return normalizeDumpCurationResult(DumpCurationResult{}, request.Content)
-	}
 
-	return fallback
+	return fallback, fallbackErr
 }
 
 func dumpSlug(value string) string {

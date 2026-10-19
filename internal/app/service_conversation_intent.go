@@ -68,6 +68,15 @@ func (s service) ResolveConversationIntent(ctx context.Context, requestID string
 		return result, errors.New("invalid conversation intent context")
 	}
 
+	var err error
+
+	s, ctx, err = s.bindIntentGeneration(ctx, requestID, input)
+	if err != nil {
+		return result, err
+	}
+
+	project := s.projectContext.ProjectDir
+
 	payload, err := json.Marshal(input)
 	if err != nil {
 		return result, err
@@ -78,20 +87,22 @@ func (s service) ResolveConversationIntent(ctx context.Context, requestID string
 		return result, errors.New("conversation provider is unavailable")
 	}
 
-	output, err := provider.InvokeStructuredModel(ctx, core.StructuredModelRequest{ID: requestID, Purpose: "conversation_intent", ProjectDir: s.env.StateDir(), Input: payload, Schema: conversationIntentSchema(input.Operations), Instructions: conversationIntentInstructions})
+	modelRequest := core.StructuredModelRequest{ID: requestID, Purpose: "conversation_intent", ProjectDir: project, Input: payload, Schema: conversationIntentSchema(input.Operations), Instructions: conversationIntentInstructions}
+
+	output, err := provider.InvokeStructuredModel(ctx, modelRequest)
 	if err != nil {
 		return result, err
 	}
 
 	if err := decodeConversationIntent(output, &result); err != nil {
-		return result, fmt.Errorf("%w: %w", errConversationIntentInvalid, err)
+		return result, core.ValidateStructuredModelOutput(ctx, modelRequest, fmt.Errorf("%w: %w", errConversationIntentInvalid, err))
 	}
 
 	if err := validateConversationIntent(result, input.Operations); err != nil {
-		return result, fmt.Errorf("%w: %w", errConversationIntentInvalid, err)
+		return result, core.ValidateStructuredModelOutput(ctx, modelRequest, fmt.Errorf("%w: %w", errConversationIntentInvalid, err))
 	}
 
-	return result, nil
+	return result, core.ValidateStructuredModelOutput(ctx, modelRequest, nil)
 }
 
 const conversationIntentInstructions = `Choose one allowed operation using the current message and bounded context. Never invent a target, actor, revision, credential or authority. Use capture for an answer or captured context in an existing collecting conversation. Explicit explanation/preparation does not authorize development. Return unresolved fields and one focused correction question when unsupported, ambiguous or missing information; use operation_id=clarify and empty arguments. Do not guess record guards. For record operations, record_json contains the strict JSON payload accepted by that operation, never a command. The original message, not your explanation, is the retained user instruction.`

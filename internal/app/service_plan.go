@@ -51,8 +51,9 @@ type PlanRegenerateRequest struct {
 // PlanTrackingRequest selects the plan scope used to materialize tracking
 // artifacts.
 type PlanTrackingRequest struct {
-	Workflow *core.GeneratedWorkflowPlan
-	Scope    core.QuizScope
+	OperationID string
+	Workflow    *core.GeneratedWorkflowPlan
+	Scope       core.QuizScope
 }
 
 // PlanOperationResult is the TUI-facing result for plan generation operations.
@@ -144,6 +145,12 @@ func (s service) existingGeneratedPlan(scope core.QuizScope) (PlanView, bool, er
 }
 
 func (s service) prepareAndPublishPlan(ctx context.Context, operation core.PlanPublicationOperation) (PlanOperationResult, error) {
+	bound, ctx, err := s.bindGeneration(ctx, "plan-"+dumpRequestID(operation.ID), string(core.QuizModelActionGeneratePlan))
+	if err != nil {
+		return PlanOperationResult{}, err
+	}
+
+	s = bound
 	scope, expected, replace := operation.Scope, operation.ExpectedRevision, operation.Replace
 	s.appendPlanGenerationLog("generate_plan_started", map[string]string{"case_slug": scope.CaseSlug, "timeout": longGenerationTimeout.String()})
 
@@ -255,7 +262,7 @@ func (s service) publishObservedPlan(ctx context.Context, plan core.GeneratedPla
 }
 
 func (s service) generatePlanWithConfiguredBackend(ctx context.Context, scope core.QuizScope, state core.QuizRuntimeState, sources core.PlanSourceObservation) (core.GeneratedPlan, []string, []string, error) {
-	if codexGenerationBackend("CHR_PLAN_GENERATION_BACKEND") {
+	if s.singlePassPlan(ctx) {
 		return s.generateSinglePassPlan(ctx, scope, state, sources)
 	}
 
@@ -468,7 +475,7 @@ func (s service) MaterializePlanTracking(ctx context.Context, request PlanTracki
 	err = s.withGenerationRuntime(ctx, "plan_tracking", scope, func(ctx context.Context) error {
 		var materializeErr error
 
-		result, materializeErr = s.materializePlanTracking(ctx, scope, plan, trackingPaths.RelativePath)
+		result, materializeErr = s.materializeBoundPlanTracking(ctx, request.OperationID, scope, plan, trackingPaths.RelativePath)
 
 		return materializeErr
 	})
@@ -801,7 +808,7 @@ func (s service) newPlanningModelRequest(state core.QuizRuntimeState, sources co
 	}
 
 	return core.QuizModelRequest{
-		ID: fmt.Sprintf("%s-%s", idPrefix, specScopeID(scope)), Action: action, Strategy: strategy, Scope: scope, Mode: state.Mode, RuntimeState: state, Payload: payload, ContextSections: sections,
+		ID: core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("%s-%s", idPrefix, specScopeID(scope))), Action: action, Strategy: strategy, Scope: scope, Mode: state.Mode, RuntimeState: state, Payload: payload, ContextSections: sections,
 		OutputContract: core.QuizModelOutputContract{RequiredFields: payload.OutputContract.RequiredFields}, CreatedAt: s.utcNow(),
 	}, nil
 }
@@ -885,7 +892,7 @@ func (s service) newPlanTrackingModelRequest(
 	})
 
 	return core.QuizModelRequest{
-		ID:              fmt.Sprintf("plan-tracking-%s", specScopeID(scope)),
+		ID:              core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("plan-tracking-%s", specScopeID(scope))),
 		Action:          core.QuizModelActionMaterializePlanTracking,
 		Strategy:        "plan_tracking_materialization",
 		Scope:           scope,

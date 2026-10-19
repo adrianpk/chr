@@ -65,6 +65,12 @@ type authoringModelInput struct {
 }
 
 func (s service) generateAuthoringDraft(ctx context.Context, snapshot core.AuthoringSnapshot, request core.AuthoringContinuationRequest) (core.AuthoringDraft, error) {
+	bound, ctx, err := s.bindGeneration(ctx, "authoring-"+request.Binding.RequestID, "conversation")
+	if err != nil {
+		return core.AuthoringDraft{}, err
+	}
+
+	s = bound
 	if s.conversationModel == nil {
 		return core.AuthoringDraft{}, errors.New("configured authoring provider is unavailable")
 	}
@@ -74,11 +80,19 @@ func (s service) generateAuthoringDraft(ctx context.Context, snapshot core.Autho
 		return core.AuthoringDraft{}, err
 	}
 
-	output, err := s.conversationModel.InvokeStructuredModel(ctx, core.StructuredModelRequest{ID: request.Binding.RequestID, Purpose: "authoring_" + string(request.Target), ProjectDir: s.projectContext.ProjectDir, Input: payload, Schema: authoringGenerationSchema(), Instructions: authoringGenerationInstructions})
+	modelRequest := core.StructuredModelRequest{ID: request.Binding.RequestID, Purpose: "authoring_" + string(request.Target), ProjectDir: s.projectContext.ProjectDir, Input: payload, Schema: authoringGenerationSchema(), Instructions: authoringGenerationInstructions}
+
+	output, err := s.conversationModel.InvokeStructuredModel(ctx, modelRequest)
 	if err != nil {
 		return core.AuthoringDraft{}, err
 	}
 
+	draft, parseErr := parseAuthoringDraft(snapshot, request, output)
+
+	return draft, core.ValidateStructuredModelOutput(ctx, modelRequest, parseErr)
+}
+
+func parseAuthoringDraft(snapshot core.AuthoringSnapshot, request core.AuthoringContinuationRequest, output []byte) (core.AuthoringDraft, error) {
 	var response authoringModelOutput
 	if err := decodeOperationJSON(string(output), &response); err != nil {
 		return core.AuthoringDraft{}, err

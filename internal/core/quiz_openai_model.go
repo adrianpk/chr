@@ -99,6 +99,8 @@ func (a OpenAIQuizModelAdapter) InvokeQuizModel(
 	ctx context.Context,
 	request QuizModelRequest,
 ) (QuizModelResponse, error) {
+	request.ID = HarnessGenerationRequestID(ctx, request.ID)
+
 	err := ValidateQuizModelRequest(request)
 	if err != nil {
 		return QuizModelResponse{}, err
@@ -106,7 +108,7 @@ func (a OpenAIQuizModelAdapter) InvokeQuizModel(
 
 	trace := a.newOpenAIQuizTrace(request)
 
-	output, result, err := a.invokeOpenAI(ctx, request, trace)
+	output, result, err := a.invokeBoundQuizAPI(ctx, request, trace)
 	if err != nil {
 		a.recordOpenAIQuizResponse(ctx, request, trace, result, "error", err, QuizModelResponse{})
 
@@ -114,6 +116,9 @@ func (a OpenAIQuizModelAdapter) InvokeQuizModel(
 	}
 
 	response, err := quizModelResponseFromOutput(request, output)
+	err = validateParsedQuizModelResponse(response, err)
+
+	err = ValidateHarnessGenerationOutput(ctx, a.quizAPIRunRequest(request, trace), err)
 	if err != nil {
 		a.recordOpenAIQuizResponse(ctx, request, trace, result, "parse_error", err, QuizModelResponse{})
 
@@ -367,6 +372,11 @@ func (a OpenAIQuizModelAdapter) openAIModel() string {
 	}
 
 	return model
+}
+
+// ResolvedModel exposes the non-secret legacy model identity for admission.
+func (a OpenAIQuizModelAdapter) ResolvedModel() string {
+	return a.openAIModel()
 }
 
 func (a OpenAIQuizModelAdapter) openAIBaseURL() string {

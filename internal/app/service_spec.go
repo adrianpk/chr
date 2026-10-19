@@ -33,7 +33,8 @@ type SpecListResult struct {
 
 // SpecGenerateRequest selects the quiz scope used to generate a spec.
 type SpecGenerateRequest struct {
-	Scope core.QuizScope
+	OperationID string
+	Scope       core.QuizScope
 }
 
 // SpecOperationResult is the TUI-facing result for spec generation.
@@ -71,9 +72,12 @@ func (s service) GenerateSpec(ctx context.Context, request SpecGenerateRequest) 
 	var result SpecOperationResult
 
 	err := s.withGenerationRuntime(ctx, "spec", scope, func(ctx context.Context) error {
-		var err error
+		bound, ctx, err := s.bindGeneration(ctx, "spec-"+dumpRequestID(request.OperationID), string(core.QuizModelActionGenerateSpec))
+		if err != nil {
+			return err
+		}
 
-		result, err = s.generateSpec(ctx, scope)
+		result, err = bound.generateSpec(ctx, scope)
 
 		return err
 	})
@@ -320,7 +324,7 @@ func (s service) newSpecGenerationModelRequest(state core.QuizRuntimeState) (cor
 	}
 
 	return core.QuizModelRequest{
-		ID:              fmt.Sprintf("spec-generation-%s", specScopeID(scope)),
+		ID:              core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("spec-generation-%s", specScopeID(scope))),
 		Action:          core.QuizModelActionGenerateSpec,
 		Strategy:        "spec_generation",
 		Scope:           scope,

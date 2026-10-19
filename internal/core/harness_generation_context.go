@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"path/filepath"
+	"strings"
 
 	"forge.adrianpk.com/chr/internal/harness"
 )
@@ -21,6 +22,30 @@ func HarnessGenerationSelection(ctx context.Context) (string, HarnessGenerationB
 	operation, ok := ctx.Value(harnessGenerationContextKey{}).(HarnessGenerationOperation)
 
 	return operation.ID, operation.Binding, ok
+}
+
+// HarnessGenerationLocationFromContext returns retained host routing for a call.
+// Adapters must recheck access to ProjectRef before using an interrupted request.
+func HarnessGenerationLocationFromContext(ctx context.Context) (HarnessGenerationLocation, bool) {
+	operation, ok := ctx.Value(harnessGenerationContextKey{}).(HarnessGenerationOperation)
+
+	return HarnessGenerationLocation{ConfigDir: operation.configDir, ExecutionDir: operation.executionDir, ProjectRef: operation.ProjectRef}, ok
+}
+
+// HarnessGenerationRequestID namespaces a caller's logical call within its
+// owning operation. Retries are stable; independent requests cannot overwrite it.
+func HarnessGenerationRequestID(ctx context.Context, id string) string {
+	operation, ok := ctx.Value(harnessGenerationContextKey{}).(HarnessGenerationOperation)
+	if !ok {
+		return id
+	}
+
+	prefix := "generation-" + workflowHash([]byte(operation.ID))[:16] + "-"
+	if strings.HasPrefix(id, prefix) && len(id) == len(prefix)+64 {
+		return id
+	}
+
+	return prefix + workflowHash([]byte(id))
 }
 
 func prepareBoundGenerationRequest(ctx context.Context, request harness.AgentRunRequest) (harness.AgentRunRequest, error) {
@@ -52,7 +77,7 @@ func prepareBoundGenerationRequest(ctx context.Context, request harness.AgentRun
 
 func checkGenerationRequestOwner(operation HarnessGenerationOperation, request harness.AgentRunRequest) error {
 	project, err := filepath.Abs(request.ProjectDir)
-	if err != nil || project != operation.project || !filepath.IsLocal(request.ID) || filepath.Base(request.ID) != request.ID || request.ID == "operations" {
+	if err != nil || project != operation.executionDir || !filepath.IsLocal(request.ID) || filepath.Base(request.ID) != request.ID || request.ID == "operations" {
 		return errors.New("generation call must belong to its owning project and a local request artifact")
 	}
 

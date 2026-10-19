@@ -1020,6 +1020,9 @@ func newTestService(t *testing.T, projectDir string) service {
 		ProjectID:  "service-project",
 	}, testAssetsFS())
 	operations.dumpCurator = fallbackDumpCurationProvider{Reason: "test fallback"}
+	// These fixtures inject model fakes to isolate their existing operation
+	// contracts. Harness binding fixtures use production assembly and owned drivers.
+	operations.generationBinder = func(_ service, ctx context.Context, _, _ string) (context.Context, error) { return ctx, nil }
 
 	return operations
 }

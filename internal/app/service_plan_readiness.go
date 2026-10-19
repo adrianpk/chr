@@ -54,10 +54,12 @@ func (s service) assessPlanReadiness(ctx context.Context, observed core.PlanSour
 	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 
-	output, err := s.conversationModel.InvokeStructuredModel(ctx, core.StructuredModelRequest{
+	modelRequest := core.StructuredModelRequest{
 		ID: "plan-readiness-" + observed.Hash, Purpose: "plan_readiness", ProjectDir: s.projectContext.ProjectDir,
 		Input: input, Schema: planReadinessSchema(), Instructions: planReadinessInstructions,
-	})
+	}
+
+	output, err := s.conversationModel.InvokeStructuredModel(ctx, modelRequest)
 	if ctx.Err() != nil {
 		return decision, ctx.Err()
 	}
@@ -66,7 +68,16 @@ func (s service) assessPlanReadiness(ctx context.Context, observed core.PlanSour
 		return decision, fmt.Errorf("assess plan context: %w", err)
 	}
 
-	return decodePlanReadiness(output, observed.Hash)
+	decision, err = decodePlanReadiness(output, observed.Hash)
+
+	validationErr := err
+
+	var insufficient *PlanReadinessError
+	if errors.As(err, &insufficient) {
+		validationErr = nil
+	}
+
+	return decision, errors.Join(err, core.ValidateStructuredModelOutput(ctx, modelRequest, validationErr))
 }
 
 func decodePlanReadiness(output []byte, hash string) (PlanReadiness, error) {

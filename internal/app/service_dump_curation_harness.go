@@ -31,6 +31,8 @@ func (p harnessDumpCurationProvider) CurateDump(ctx context.Context, request Dum
 	}
 
 	curation, err := decodeDumpCurationPayload(run.Output)
+
+	err = core.ValidateHarnessGenerationOutput(ctx, runRequest, err)
 	if err != nil {
 		core.RecordAgentRunResponseEvent(ctx, runRequest, run, "parse_error", err)
 

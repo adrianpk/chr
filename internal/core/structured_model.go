@@ -42,6 +42,15 @@ func NewConfiguredStructuredModel(openAI bool) *ConfiguredStructuredModel {
 	return &ConfiguredStructuredModel{OpenAI: openAI, slots: make(chan struct{}, 2)}
 }
 
+// WithGenerationSelection copies dispatch settings while retaining the existing
+// shared capacity channel. A role switch never allocates another provider pool.
+func (p *ConfiguredStructuredModel) WithGenerationSelection(openAI bool, model string, runner harness.AgentRunner) *ConfiguredStructuredModel {
+	selected := *p
+	selected.OpenAI, selected.API.Model, selected.Runner = openAI, model, runner
+
+	return &selected
+}
+
 // InvokeStructuredModel caps context, output, concurrency and the call deadline.
 func (p *ConfiguredStructuredModel) InvokeStructuredModel(ctx context.Context, request StructuredModelRequest) (json.RawMessage, error) {
 	if err := ctx.Err(); err != nil {
@@ -67,7 +76,7 @@ func (p *ConfiguredStructuredModel) InvokeStructuredModel(ctx context.Context, r
 		err    error
 	)
 	if p.OpenAI {
-		output, err = p.invokeOpenAI(ctx, request)
+		output, err = p.invokeBoundOpenAI(ctx, request)
 	} else {
 		output, err = p.invokeHarness(ctx, request)
 	}
@@ -81,10 +90,21 @@ func (p *ConfiguredStructuredModel) InvokeStructuredModel(ctx context.Context, r
 	}
 
 	if len(output) > 65536 || !json.Valid(output) {
-		return nil, ErrStructuredModelOutput
+		return nil, ValidateStructuredModelOutput(ctx, request, ErrStructuredModelOutput)
 	}
 
 	return json.RawMessage(output), nil
+}
+
+func (p *ConfiguredStructuredModel) invokeBoundOpenAI(ctx context.Context, request StructuredModelRequest) ([]byte, error) {
+	schema, err := json.Marshal(request.Schema)
+	if err != nil {
+		return nil, err
+	}
+
+	call := harness.AgentRunRequest{ID: request.ID, Purpose: request.Purpose, ProjectDir: request.ProjectDir, Prompt: request.Instructions + "\n" + string(request.Input), OutputSchema: schema, OutputName: "output.json"}
+
+	return RunAPIGeneration(ctx, call, func(ctx context.Context) ([]byte, error) { return p.invokeOpenAI(ctx, request) })
 }
 
 func (p *ConfiguredStructuredModel) invokeHarness(ctx context.Context, request StructuredModelRequest) ([]byte, error) {

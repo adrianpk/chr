@@ -126,7 +126,8 @@ func TestHarnessGenerationBindingCapacity(t *testing.T) {
 	}
 }
 
-// A retained call cannot exchange its original input or schema on retry.
+// The original owner may refresh bounded input on a legitimate provider retry.
+// Metadata records current input while the operation's selection stays frozen.
 func TestHarnessGenerationBindingInputIdentity(t *testing.T) {
 	project, operation := generationBindingFixture(t)
 	ctx := WithHarnessGeneration(t.Context(), operation)
@@ -138,14 +139,12 @@ func TestHarnessGenerationBindingInputIdentity(t *testing.T) {
 	}
 
 	request.Prompt = "replacement input"
-	if _, err := RunAgent(ctx, runner, request); err == nil || runner.calls != 1 {
-		t.Fatal("same request exchanged its input", err)
+	if _, err := RunAgent(ctx, runner, request); err != nil || runner.calls != 2 {
+		t.Fatal("retry introduced another argument-replay authority", err)
 	}
 
-	request = generationBindingRequest(project)
-
-	request.OutputSchema = []byte(`{"type":"array"}`)
-	if _, err := RunAgent(ctx, runner, request); err == nil || runner.calls != 1 {
-		t.Fatal("same request exchanged its schema", err)
+	record := generationBindingReadMetadata(t, request)
+	if record.InputRef != "sha256:"+workflowHash([]byte(request.Prompt)) || record.Selection != operation.Binding {
+		t.Fatal("retry lost current input or original selection", record)
 	}
 }

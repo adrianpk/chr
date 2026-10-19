@@ -40,6 +40,7 @@ func readHarnessGenerationOperation(project, id, purpose string) (HarnessGenerat
 	}
 
 	record.Operation.program, record.Operation.project = record.Program, project
+	record.Operation.configDir, record.Operation.executionDir = record.ConfigDir, record.ExecutionDir
 
 	return record.Operation, validateGenerationOperation(record.Operation)
 }
@@ -54,7 +55,7 @@ func writeHarnessGenerationOperation(operation HarnessGenerationOperation) error
 		return err
 	}
 
-	record := harnessGenerationOperationFile{Schema: "chr-harness-operation/v1", Operation: operation, Program: operation.program}
+	record := harnessGenerationOperationFile{Schema: "chr-harness-operation/v1", Operation: operation, Program: operation.program, ConfigDir: operation.configDir, ExecutionDir: operation.executionDir}
 
 	encoded, err := json.Marshal(record)
 	if err != nil {

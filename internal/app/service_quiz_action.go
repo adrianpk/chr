@@ -49,6 +49,8 @@ func (s service) quizActionBinding(scope core.QuizScope, binding core.QuizAction
 }
 
 func (s service) prepareQuizAction(request core.QuizActionRequest, observed core.QuizObservation) (core.QuizTransition, error) {
+	observed.State.GenerationOperationID = quizGenerationOperationID(request, observed.State)
+
 	state := observed.State
 
 	switch request.Action {
@@ -95,6 +97,8 @@ func (s service) prepareQuizStart(request core.QuizActionRequest, observed core.
 	if err != nil {
 		return core.QuizTransition{}, err
 	}
+
+	state.GenerationOperationID = "quiz-" + request.Binding.OperationID
 
 	state, err = s.nextQuizQuestion(state, observed.Entries)
 

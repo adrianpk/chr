@@ -20,6 +20,9 @@ type service struct {
 	dumpCurator            DumpCurationProvider
 	quizModel              core.QuizModelAdapter
 	conversationModel      core.StructuredModelProvider
+	generationBinder       generationOperationBinder
+	generationArtifactsDir string
+	generationExecutionDir string
 	workflowWorker         []string
 	workflowNamespace      string
 	workflowPullRequests   core.WorkflowPullRequestProvider
@@ -34,7 +37,7 @@ func newService(
 	projectContext commandProjectContext,
 	assetsFS fs.FS,
 ) service {
-	return service{
+	operations := service{
 		ctx:               ctx,
 		env:               env,
 		assetsFS:          assetsFS,
@@ -45,6 +48,9 @@ func newService(
 		conversationModel: newConversationModel(),
 		now:               time.Now,
 	}
+	operations.generationBinder = service.bindHarnessGeneration
+
+	return operations
 }
 
 func newDumpCurationProvider(projectDir string) DumpCurationProvider {

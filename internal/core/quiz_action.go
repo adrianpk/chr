@@ -76,12 +76,20 @@ func validateQuizAction(request QuizActionRequest) error {
 	}
 }
 
+func validateQuizGenerationState(state QuizRuntimeState) error {
+	if state.GenerationOperationID != "" && !validGenerationOperationIdentity(state.GenerationOperationID) {
+		return errors.New("quiz generation operation identity exceeds its bound")
+	}
+
+	return ValidateQuizRuntimeState(state)
+}
+
 func validateRetainedQuizState(state QuizRuntimeState) error {
 	if state.SchemaVersion != 0 && state.SchemaVersion != 2 {
 		return errors.New("unsupported quiz runtime schema")
 	}
 
-	if err := ValidateQuizRuntimeState(state); err != nil {
+	if err := validateQuizGenerationState(state); err != nil {
 		return err
 	}
 

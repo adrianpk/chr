@@ -44,11 +44,12 @@ func (a ActionRoutingQuizModelAdapter) InvokeQuizModel(ctx context.Context, requ
 
 // InvokeQuizModel invokes the configured model adapter.
 func (a HarnessQuizModelAdapter) InvokeQuizModel(ctx context.Context, request QuizModelRequest) (QuizModelResponse, error) {
+	request.ID = HarnessGenerationRequestID(ctx, request.ID)
 	if err := ValidateQuizModelRequest(request); err != nil {
 		return QuizModelResponse{}, err
 	}
 
-	schema, err := harnessQuizModelOutputSchema(request.Action)
+	schema, err := harnessQuizModelOutputSchema(request)
 	if err != nil {
 		return QuizModelResponse{}, err
 	}
@@ -75,13 +76,15 @@ func (a HarnessQuizModelAdapter) InvokeQuizModel(ctx context.Context, request Qu
 	}
 
 	response, err := quizModelResponseFromOutput(request, run.Output)
+	response.Provider = run.Provider
+	err = validateParsedQuizModelResponse(response, err)
+
+	err = ValidateHarnessGenerationOutput(ctx, a.agentRunRequest(request), err)
 	if err != nil {
 		recordAgentRunResponseEvent(ctx, a.agentRunRequest(request), run, "parse_error", err)
 
 		return QuizModelResponse{}, err
 	}
-
-	response.Provider = run.Provider
 
 	recordAgentRunResponseEvent(ctx, a.agentRunRequest(request), run, "ready", nil)
 
@@ -96,21 +99,8 @@ func (a HarnessQuizModelAdapter) agentRunRequest(request QuizModelRequest) harne
 	}
 }
 
-func harnessQuizModelOutputSchema(action QuizModelAction) ([]byte, error) {
-	var schema map[string]any
-
-	switch action {
-	case QuizModelActionGenerateSpec:
-		schema = quizModelDraftSpecJSONSchema()
-	case QuizModelActionGenerateAcceptanceFeature:
-		schema = quizModelFeatureJSONSchema()
-	case QuizModelActionGeneratePlan:
-		schema = quizModelPlanJSONSchema()
-	case QuizModelActionMaterializePlanTracking:
-		schema = quizModelPlanTrackingJSONSchema()
-	default:
-		return nil, fmt.Errorf("harness quiz model adapter does not support action %s", action)
-	}
+func harnessQuizModelOutputSchema(request QuizModelRequest) ([]byte, error) {
+	schema := quizModelOpenAIFormat(request).Schema
 
 	content, err := json.MarshalIndent(schema, "", "  ")
 	if err != nil {

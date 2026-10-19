@@ -134,6 +134,12 @@ func (s service) SwitchQuizMode(request QuizModeRequest) (QuizOperationResult, e
 }
 
 func (s service) generateQuizDraftSpec(scope core.QuizScope) (QuizOperationResult, error) {
+	bound, _, err := s.bindGeneration(s.ctx, "", string(core.QuizModelActionDraftSpec))
+	if err != nil {
+		return QuizOperationResult{}, err
+	}
+
+	s = bound
 	repository := s.quizRepository()
 
 	state, err := repository.LoadRuntimeState(s.ctx, scope)
@@ -201,7 +207,7 @@ func (s service) newQuizModelRequestWithEntries(state core.QuizRuntimeState, ent
 	}
 
 	return core.QuizModelRequest{
-		ID:              fmt.Sprintf("quiz-request-%d", state.QuestionsAsked+1),
+		ID:              core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("quiz-request-%d", state.QuestionsAsked+1)),
 		Action:          core.QuizModelActionNextQuestion,
 		Strategy:        quizModelStrategy(state.Mode),
 		Scope:           scope,
@@ -285,7 +291,7 @@ func (s service) newQuizDraftSpecModelRequest(
 	)
 
 	return core.QuizModelRequest{
-		ID:              fmt.Sprintf("quiz-draft-spec-%s", paths.ScopeID),
+		ID:              core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("quiz-draft-spec-%s", paths.ScopeID)),
 		Action:          core.QuizModelActionDraftSpec,
 		Strategy:        "draft_spec",
 		Scope:           scope,

@@ -134,8 +134,12 @@ parsers stable. This record explains a model call, not a task completion.
 Retain the owning selection in a private `chr-harness-operation/v1` artifact
 under `.chr/default/tmp/agent-runs/operations/<operation-id-sha256>.json` before
 the first call. It contains the operation ID and purpose, sealed non-secret
-selection, private resolved program reference and a checksum. The configuration
-owner serializes its first write with live selection changes. A retained
+selection, private resolved program reference, registered project reference,
+private configuration/execution roots and a checksum. Project-local calls use
+that project as their artifact owner. An existing host conversation retains its
+artifact owner across project routing changes; a review can use its host-owned
+execution worktree. The artifact owner excludes duplicate first writes, then
+the selected configuration owner serializes resolution with live changes. A retained
 operation is read before live configuration or profiles; nested calls use the
 same operation, and a retry cannot exchange its purpose or selection. This is
 identity retention within the existing run artifacts, not another task or retry
@@ -143,6 +147,12 @@ authority. Limit each operation/metadata record to 16 KiB and retain at most
 4,096 operation identities without eviction; capacity exhaustion fails closed.
 Operation and purpose identities are bounded to 256 bytes. The corresponding
 per-call record is `harness-run.json` in the existing caller-owned run bundle.
+Caller request IDs are namespaced by operation for ordinary run bundles, so
+independent operations cannot overwrite each other's call evidence. Retried
+calls may refresh their input under the original owning request's argument and
+attempt guards; run metadata does not add another replay or retry authority.
+Quiz state retains its pending generation operation ID, allowing a resume to
+keep that binding while a later independent answer resolves current settings.
 
 | Field | Stored rule |
 | --- | --- |

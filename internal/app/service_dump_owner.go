@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"crypto/rand"
+	"errors"
 	"strings"
 	"time"
 
@@ -10,7 +11,7 @@ import (
 )
 
 func (s service) CreateDump(request DumpCreateRequest) (DumpOperationResult, error) {
-	mutation := core.DumpMutationRequest{OperationID: request.OperationID, ExpectedRevision: request.ExpectedRevision, Action: "capture", Namespace: request.Namespace, CaseSlug: request.Scope.CaseSlug, Title: strings.TrimSpace(request.Title), Content: request.Content}
+	mutation := core.DumpMutationRequest{OperationID: dumpRequestID(request.OperationID), ExpectedRevision: request.ExpectedRevision, Action: "capture", Namespace: request.Namespace, CaseSlug: request.Scope.CaseSlug, Title: strings.TrimSpace(request.Title), Content: request.Content}
 	if request.Scope.CaseSlug != "" {
 		layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: request.Namespace})
 		if err != nil {
@@ -21,9 +22,21 @@ func (s service) CreateDump(request DumpCreateRequest) (DumpOperationResult, err
 	}
 
 	result, err := core.MutateDump(s.ctx, s.projectContext.ProjectDir, mutation, func(ctx context.Context, destination, raw string) (core.DumpCapturePreparation, error) {
-		preparer := s
-		preparer.ctx = ctx
-		curation := preparer.curateDump(request)
+		preparer, _, err := s.bindGeneration(ctx, "dump-"+mutation.OperationID, "dump_curation")
+		if err != nil {
+			if !errors.Is(err, errLegacyGenerationUnavailable) {
+				return core.DumpCapturePreparation{}, err
+			}
+
+			preparer = s
+			preparer.ctx = ctx
+			preparer.dumpCurator = fallbackDumpCurationProvider{Reason: err.Error()}
+		}
+
+		curation, err := preparer.curateDump(request)
+		if err != nil {
+			return core.DumpCapturePreparation{}, err
+		}
 
 		return core.DumpCapturePreparation{Content: renderCuratedDumpMarkdown(mutation.Title, request.Scope, raw, curation), RawContent: renderRawDumpMarkdown(mutation.Title, request.Scope, destination, request.Content, curation)}, nil
 	})

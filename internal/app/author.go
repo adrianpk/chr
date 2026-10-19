@@ -533,6 +533,13 @@ func runAuthorContextualQuizNew(
 	session core.AuthoringSession,
 	now time.Time,
 ) error {
+	provider, callCtx, err := contextualQuizGenerationProvider(ctx, cmd, projectContext, session.ID)
+	if err != nil {
+		return err
+	}
+
+	ctx = callCtx
+
 	plan, err := core.PlanContextualQuizGeneration(ctx, core.ContextualQuizGenerationOptions{
 		ProjectDir:    projectContext.ProjectDir,
 		Session:       session,
@@ -540,7 +547,7 @@ func runAuthorContextualQuizNew(
 		AllowReplace:  cmd.Bool("allow-replace"),
 		DryRun:        cmd.Bool("dry-run"),
 		QuestionCount: cmd.Int("question-count"),
-		Provider:      contextualQuizProviderFromCommand(),
+		Provider:      provider,
 	})
 	if err != nil {
 		return err

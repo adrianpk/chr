@@ -342,6 +342,9 @@ func (p HarnessAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx
 	}
 
 	program := strings.TrimSpace(p.Program)
+	if _, _, bound := HarnessGenerationSelection(ctx); bound {
+		program = ""
+	}
 
 	payload, err := json.MarshalIndent(request, "", "  ")
 	if err != nil {
@@ -364,6 +367,8 @@ func (p HarnessAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx
 	}
 
 	result, err := ParseAuthoringQuizGenerationResult(run.Output)
+
+	err = ValidateHarnessGenerationOutput(ctx, harness.AgentRunRequest{ID: request.ID, Purpose: request.Action, ProjectDir: request.ProjectDir}, err)
 	if err != nil {
 		recordAgentRunResponseEvent(ctx, harness.AgentRunRequest{
 			ID:         request.ID,

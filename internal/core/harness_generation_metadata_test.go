@@ -196,7 +196,7 @@ func TestHarnessGenerationBindingCallIdentity(t *testing.T) {
 		t.Fatal("reused call artifact was overwritten by another operation", err)
 	}
 
-	if _, err := os.Stat(filepath.Join(UserPath(project, "tmp", "agent-runs", request.ID), "output.json")); err != nil {
+	if _, err := os.Stat(filepath.Join(request.RunDir, "output.json")); err != nil {
 		t.Fatal("conflicting request damaged original output", err)
 	}
 }

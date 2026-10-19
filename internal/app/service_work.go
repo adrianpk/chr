@@ -571,6 +571,14 @@ func (s service) runAgenticReviewCycle(selected core.IndexedTicket, execution co
 	}
 
 	ticket = agentWorkTicketWithSelectedReviewMetadata(ticket, selected)
+	s.generationExecutionDir = reviewProjectDir
+
+	bound, _, err := s.bindGeneration(s.ctx, "review-"+execution.ID, "agentic_review")
+	if err != nil {
+		return core.IndexedTicket{}, err
+	}
+
+	s = bound
 
 	artifact, err := newAgenticReviewRunner().Review(s.ctx, core.AgenticReviewContext{
 		ProjectID:           s.projectContext.ProjectID,

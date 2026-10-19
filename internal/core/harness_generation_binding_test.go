@@ -200,7 +200,7 @@ func TestHarnessGenerationBindingDispatchFence(t *testing.T) {
 }
 
 func generationBindingRequest(project string) harness.AgentRunRequest {
-	return harness.AgentRunRequest{ID: "fixture-call", Purpose: "plan_outline_generation", ProjectDir: project, Prompt: "Private fixture prompt.", OutputSchema: []byte(`{"type":"object"}`), OutputName: "output.json"}
+	return harness.AgentRunRequest{ID: "fixture-call", Purpose: "plan_outline_generation", ProjectDir: project, RunDir: UserPath(project, "tmp", "generation-fixture"), Prompt: "Private fixture prompt.", OutputSchema: []byte(`{"type":"object"}`), OutputName: "output.json"}
 }
 
 type generationBindingRunner struct {

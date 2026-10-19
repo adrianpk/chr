@@ -13,27 +13,41 @@ const harnessGenerationRecordLimit = 16 * 1024
 // HarnessGenerationOperation is an immutable host-owned operation identity.
 // The private executable path is retained locally and omitted from projections.
 type HarnessGenerationOperation struct {
-	ID      string                   `json:"id"`
-	Purpose string                   `json:"purpose"`
-	Binding HarnessGenerationBinding `json:"binding"`
-	program string
-	project string
+	ID           string                   `json:"id"`
+	Purpose      string                   `json:"purpose"`
+	ProjectRef   string                   `json:"project_ref,omitempty"`
+	Binding      HarnessGenerationBinding `json:"binding"`
+	program      string
+	project      string
+	configDir    string
+	executionDir string
+}
+
+// HarnessGenerationLocation separates an existing host's artifact owner from
+// the selected project's configuration and the host-owned execution directory.
+// Empty directories use the artifact owner, preserving project-local calls.
+type HarnessGenerationLocation struct {
+	ConfigDir    string
+	ExecutionDir string
+	ProjectRef   string
 }
 
 // HarnessGenerationResolver prepares one complete selection under the config owner.
 type HarnessGenerationResolver func(context.Context, WorkspaceConfig) (HarnessGenerationBinding, string, error)
 
 type harnessGenerationOperationFile struct {
-	Schema    string                     `json:"schema"`
-	Operation HarnessGenerationOperation `json:"operation"`
-	Program   string                     `json:"program,omitempty"`
-	Checksum  string                     `json:"checksum"`
+	Schema       string                     `json:"schema"`
+	Operation    HarnessGenerationOperation `json:"operation"`
+	Program      string                     `json:"program,omitempty"`
+	ConfigDir    string                     `json:"config_dir"`
+	ExecutionDir string                     `json:"execution_dir"`
+	Checksum     string                     `json:"checksum"`
 }
 
 // FreezeHarnessGeneration resolves a new operation once. Retrying an existing
 // operation reads its artifact before consulting current profiles or settings.
 // This artifact retains identity only; callers still own retries and budgets.
-func FreezeHarnessGeneration(ctx context.Context, project, id, purpose string, resolve HarnessGenerationResolver) (HarnessGenerationOperation, error) {
+func FreezeHarnessGeneration(ctx context.Context, project, id, purpose string, resolve HarnessGenerationResolver, locations ...HarnessGenerationLocation) (HarnessGenerationOperation, error) {
 	var operation HarnessGenerationOperation
 	if project == "" {
 		return operation, errors.New("generation requires bounded operation and purpose identities and a project")
@@ -56,10 +70,15 @@ func FreezeHarnessGeneration(ctx context.Context, project, id, purpose string, r
 		return operation, errors.New("generation requires bounded operation and purpose identities")
 	}
 
+	location, err := generationOperationLocation(root, locations)
+	if err != nil {
+		return operation, err
+	}
+
 	err = withWorkspaceConfigLock(ctx, root, func() error {
 		var err error
 
-		operation, err = freezeHarnessGenerationLocked(ctx, root, id, purpose, resolve)
+		operation, err = freezeHarnessGenerationLocked(ctx, root, id, purpose, resolve, location)
 
 		return err
 	})
@@ -67,7 +86,7 @@ func FreezeHarnessGeneration(ctx context.Context, project, id, purpose string, r
 	return operation, err
 }
 
-func freezeHarnessGenerationLocked(ctx context.Context, project, id, purpose string, resolve HarnessGenerationResolver) (HarnessGenerationOperation, error) {
+func freezeHarnessGenerationLocked(ctx context.Context, project, id, purpose string, resolve HarnessGenerationResolver, location HarnessGenerationLocation) (HarnessGenerationOperation, error) {
 	operation, err := readHarnessGenerationOperation(project, id, purpose)
 	if !errors.Is(err, os.ErrNotExist) {
 		return operation, err
@@ -77,7 +96,25 @@ func freezeHarnessGenerationLocked(ctx context.Context, project, id, purpose str
 		return operation, errors.New("generation selection resolver is required for a new operation")
 	}
 
-	config, err := LoadWorkspaceConfig(project)
+	if location.ConfigDir == project {
+		return prepareHarnessGenerationOperation(ctx, project, id, purpose, resolve, location)
+	}
+
+	err = withWorkspaceConfigLock(ctx, location.ConfigDir, func() error {
+		var prepareErr error
+
+		operation, prepareErr = prepareHarnessGenerationOperation(ctx, project, id, purpose, resolve, location)
+
+		return prepareErr
+	})
+
+	return operation, err
+}
+
+func prepareHarnessGenerationOperation(ctx context.Context, project, id, purpose string, resolve HarnessGenerationResolver, location HarnessGenerationLocation) (HarnessGenerationOperation, error) {
+	var operation HarnessGenerationOperation
+
+	config, err := LoadWorkspaceConfig(location.ConfigDir)
 	if err != nil {
 		return operation, err
 	}
@@ -87,7 +124,7 @@ func freezeHarnessGenerationLocked(ctx context.Context, project, id, purpose str
 		return operation, err
 	}
 
-	operation = HarnessGenerationOperation{ID: id, Purpose: purpose, Binding: binding, program: program, project: project}
+	operation = HarnessGenerationOperation{ID: id, Purpose: purpose, ProjectRef: location.ProjectRef, Binding: binding, program: program, project: project, configDir: location.ConfigDir, executionDir: location.ExecutionDir}
 	if err := validateGenerationOperation(operation); err != nil {
 		return operation, err
 	}
@@ -103,6 +140,35 @@ func freezeHarnessGenerationLocked(ctx context.Context, project, id, purpose str
 	return operation, writeHarnessGenerationOperation(operation)
 }
 
+func generationOperationLocation(root string, locations []HarnessGenerationLocation) (HarnessGenerationLocation, error) {
+	location := HarnessGenerationLocation{ConfigDir: root, ExecutionDir: root}
+	if len(locations) > 1 {
+		return location, errors.New("generation accepts one host-owned location")
+	}
+
+	if len(locations) == 1 {
+		location.ProjectRef = locations[0].ProjectRef
+		if locations[0].ConfigDir != "" {
+			location.ConfigDir = locations[0].ConfigDir
+		}
+
+		if locations[0].ExecutionDir != "" {
+			location.ExecutionDir = locations[0].ExecutionDir
+		}
+	}
+
+	var err error
+
+	location.ConfigDir, err = filepath.Abs(location.ConfigDir)
+	if err != nil {
+		return location, err
+	}
+
+	location.ExecutionDir, err = filepath.Abs(location.ExecutionDir)
+
+	return location, err
+}
+
 func validGenerationOperationIdentity(value string) bool {
 	return strings.TrimSpace(value) != "" && len(value) <= 256 && !strings.ContainsAny(value, "\x00\r\n")
 }
@@ -114,6 +180,10 @@ func validateGenerationOperation(operation HarnessGenerationOperation) error {
 
 	if operation.Binding.Selection.Action != operation.Purpose {
 		return ErrWorkflowConflict
+	}
+
+	if !filepath.IsAbs(operation.configDir) || !filepath.IsAbs(operation.executionDir) || len(operation.ProjectRef) > 256 {
+		return errors.New("generation operation requires retained host locations")
 	}
 
 	if operation.Binding.Selection.Backend == "openai" {

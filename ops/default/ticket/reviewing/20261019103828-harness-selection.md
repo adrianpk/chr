@@ -1,7 +1,7 @@
 ---
 id: TKT-20261019103828
 title: "Live role selection and retained bindings"
-status: in_progress
+status: reviewing
 kind: task
 severity: medium
 priority: normal
@@ -12,7 +12,8 @@ reported_at: 2026-10-19T10:38:28Z
 ready_at: 2026-10-19T10:38:33Z
 started_at: 2026-10-19T11:23:17Z
 branch: feat/slice-2-harness-selection
-commits: [d9b19ac1b2ce4e1b577d9497443b2d207c4c1ce7, 3ed1b443972fe4532f3df295c4df0d8e5c4ad657, f7f94be12eee99bd747aef2b6cf8e72e63f7ddb7]
+reviewed_at: 2026-10-19T13:03:53Z
+commits: [d9b19ac1b2ce4e1b577d9497443b2d207c4c1ce7, 3ed1b443972fe4532f3df295c4df0d8e5c4ad657, f7f94be12eee99bd747aef2b6cf8e72e63f7ddb7, 17fcef85e99ac8025f87bc1cbd47df5760a5c50f]
 ---
 
 # Live role selection and retained bindings
@@ -35,8 +36,8 @@ Expected PR title: `feat(slice-2): retain live harness selections and invocation
 
 Expected report: `ops/default/report/slices/codex-pi-harnesses/slice-2-harness-selection.md`.
 
-The assigned implementation branch is active. No Slice 2 PR is ready yet;
-the report will be introduced when the complete slice is ready for integration.
+Implementation tasks are complete and the canonical report is ready for the
+Slice 2 PR. Final validation will be recorded on the clean PR head.
 
 Prerequisite: Slice 1 integrated into dev; implementation authorization for this set.
 
@@ -173,21 +174,14 @@ Successful T2.3 checks:
 - `scripts/check-go-func-signatures.sh`
 - `git diff --check`
 
-The owned subprocess fixtures have stopped. Next recorded task: T2.4, freeze one
-generation selection for each owning authoring/conversation operation, including
-nested calls, later stages, retries and interrupted-operation recovery. Fresh
-independent operations must reload persisted defaults. Generation dispatch and
-run-metadata wiring remain pending. No Slice 2 PR is ready; the configured final
-exact-HEAD checks have not run for this partial slice.
+The owned subprocess fixtures have stopped.
 
-
-T2.4 is in progress. Its core operation-binding unit retains a sealed selection
+T2.4 is implemented. Its core operation-binding unit retains a sealed selection
 and private executable reference in the existing agent-run artifact tree before
 the first call. The configuration owner excludes concurrent switches during first
 publication. Nested calls share the owning context; restart recovery reads the
 retained operation before live configuration or profiles. Bound dispatch rejects
-changed programs/models, changed executable bytes and cross-project artifact
-identities. A bounded retained-identity directory fails closed at capacity.
+changed programs/models, changed executable bytes and execution outside the retained host directory. A bounded retained-identity directory fails closed at capacity.
 
 Host-written `chr-harness-run/v1` metadata now records started/completed/failure
 outcomes, output hashes, independent caller validation and measured usage without
@@ -205,13 +199,45 @@ Successful T2.4 core-unit checks:
 - `git diff --check`
 
 The focused fixtures cover an independent host restart, an admission concurrent
-with a role switch, private/corrupt/future-schema artifacts, executable and input
-identity fences, capacity exhaustion, separate process/parser outcomes and
+with a role switch, private/corrupt/future-schema artifacts, executable identity fences and bounded refreshed retry input, capacity exhaustion, separate process/parser outcomes and
 unknown/partial/known usage. Owned subprocess fixtures have stopped.
 
-Remaining T2.4 work: assemble the selected generation adapters at each existing
-operation owner; retain request identities through quiz continuation, authoring,
-conversation, Dump curation, plan stages and agentic review; connect parser
-validation and direct API metadata; preserve shared structured-model capacity.
-The core API is not yet connected to those production call families. The Slice 2
-report, canonical PR and final exact-HEAD controller validation remain pending.
+All production generation call families now resolve their selection through the
+central operation service. One operation covers plan readiness, outline and detail
+calls. Authoring requests retain their selected identity through provider failure
+and a rebuilt service while the original authoring owner retains attempt counts.
+Quiz continuation stores its pending generation operation ID: a confirmed answer
+survives model failure, resume uses that binding, and a later independent answer
+reads the live selection. Contextual quizzes, Spec/acceptance/tracking generation,
+Dump curation, conversation intent, explanation and agentic review use the same
+binding contract. Omitted roles keep their legacy action/provider behavior.
+
+Existing host conversation artifacts retain project routing independently of the
+currently selected project. Retried intent requests recheck registered project
+availability, root and current allowed projects before model execution. Agentic
+review retains configuration from the selected project and its host-owned worktree
+as the execution directory. No new SQLite store or retry scheduler was added.
+
+Direct API calls receive the same bounded host run metadata. Parser validity is
+recorded separately from process/network success and authoring approval. Configured
+structured-model copies retain the existing two-slot channel across selections.
+The existing operation owners keep argument replay, publication and budget guards;
+metadata records refreshed retry input without adding a second replay policy.
+
+Successful T2.4 application/caller checks:
+
+- `go test ./internal/core ./internal/app ./internal/harness/codex -run '^(TestHarnessSelection|TestHarnessBinding|TestHarnessGenerationBinding|TestHarnessQuizModel|TestAgenticReview|TestAuthoringQuiz|TestStructured|TestHarnessCodex|TestService.*(Quiz|Spec|Plan|Dump|Acceptance)|TestTelegram.*(Intent|Authoring))' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^(TestHarnessSelection|TestHarnessBinding|TestHarnessGenerationBinding)' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/app ./internal/harness/codex`
+- `git diff --check`
+
+The fixtures use real private profiles, configuration changes, owned executables,
+HTTP requests and canonical authoring/quiz/plan owners. They cover switches during
+staged generation, authoring and quiz recovery, host intent routing/access checks,
+current selections for independent requests and the shared capacity pool. Owned
+subprocesses, HTTP servers and fixture database connections have stopped.
+
+The canonical Slice 2 report is
+`ops/default/report/slices/codex-pi-harnesses/slice-2-harness-selection.md`.
+Final exact-HEAD validation and the PR reference are recorded before handoff;
+controller integration remains pending.
