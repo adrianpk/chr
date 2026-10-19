@@ -5,7 +5,7 @@ Delivery set: codex-pi-harnesses
 Plan: [Selectable Harness Delivery](../../../plan/codex-pi-harnesses.md)
 Tracker: [Selectable Harness Delivery Order](../../../tracker/codex-pi-harnesses.md)
 Branch: `feat/slice-3-pi-generation`
-PR: pending
+PR: [#414](https://forge.adrianpk.com/adrianpk/chr/pulls/414)
 
 ## Purpose
 
@@ -51,7 +51,7 @@ migration. Absent resources preserve existing Codex/API operation bytes and
 checksums. Agentic review keeps the canonical project's selection inside its
 separate execution workspace.
 
-T3.3 loads only explicitly selected static API-key resources into a private
+T3.3 (`c1f0495e670804d2925f3f018f3c35fc434b36b2`) loads only explicitly selected static API-key resources into a private
 per-call agent directory with a replacement environment. OAuth generation
 requires a refresh owner and is rejected. Credential commands, interpolation,
 embedded endpoint credentials, authentication headers and discovered resources
