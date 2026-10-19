@@ -68,8 +68,12 @@ inspection now reopens the canonical source after checking its locked identity.
 Three repeated concurrent refresh runs pass. No extra credential store or
 capacity pool was added.
 
-Actual pinned OAuth storage integration, concurrent container acceptance and the
-remaining T4.3 readiness/capability checks are still pending.
+Two concurrent network-disabled containers now use the actual Pi 1.3.0
+`AuthStorage.modify` implementation on separate private copies. Both synthetic
+OAuth rotations survive source publication, and the second owner observes the
+first rotation. This verifies the pinned storage boundary; provider refresh IO
+is synthetic and no account authentication is certified. T4.2 is implemented.
+T4.3 concurrent worker acceptance and readiness/capability checks are pending.
 
 ## Contracts Added or Changed
 
@@ -149,9 +153,18 @@ working directory. Host validation rejected the success reply without a valid
 checkout commit. Binding the SDK tool execution context to the selected checkout
 corrected the dispatch without weakening that host validation.
 
+The pinned-storage container fixture also passed:
+
+- `CHR_TEST_PI_RUNTIME_IMAGE=chr-agent-pi:1.3.0 go test ./internal/harness/pi -run '^TestPiCredentialRefreshStorage$' -count=1 -timeout=3m`
+
+Both owned containers reached a barrier before their actions and then preserved
+both sequential credential rotations. Their network was disabled; the SDK
+storage API was real and provider refresh IO was synthetic. Owned containers
+stopped after the check.
+
 ## Risks and Follow-ups
 
 Remaining work covers two actual isolated workers against shared capacity,
-pinned OAuth credential-storage integration, role/readiness negative cases and
+role/readiness negative cases and
 final exact-head validation and PR references. Real paid model acceptance remains
 the approved opt-in final acceptance item.

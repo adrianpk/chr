@@ -12,7 +12,7 @@ reported_at: 2026-10-19T10:38:30Z
 ready_at: 2026-10-19T10:38:33Z
 started_at: 2026-10-19T15:01:47Z
 branch: feat/slice-4-pi-worker-runtime
-commits: [77bea3e585b26aed356594524e9162dbd2cb914c, 4e6a54bb85c4784564877bc1dcac01080f81d858]
+commits: [77bea3e585b26aed356594524e9162dbd2cb914c, 4e6a54bb85c4784564877bc1dcac01080f81d858, 29ee737a40ee280057376cd16bc35a69e2c075ae]
 ---
 
 # Pi Docker workers and private runtime setup
@@ -183,3 +183,17 @@ Remaining before the canonical PR:
   complete its report/ticket reference follow-up commit and push.
 
 The report remains drafting and no canonical PR is open.
+
+### T4.2 pinned storage integration
+
+Two concurrently started network-disabled containers invoke Pi 1.3.0's actual
+`AuthStorage.modify` API on isolated private auth copies. Both synthetic OAuth
+rotations survive the host owner's exclusion and atomic publication. The second
+call observes the first published rotation; the retained owner remains private
+and valid. This verifies the pinned storage boundary with synthetic provider IO,
+not authentication against a real provider.
+
+Passed: `CHR_TEST_PI_RUNTIME_IMAGE=chr-agent-pi:1.3.0 go test ./internal/harness/pi -run '^TestPiCredentialRefreshStorage$' -count=1 -timeout=3m`.
+
+T4.2 is implemented. T4.3 concurrent worker/capacity acceptance, role readiness,
+finite-budget checks and final exact-head PR preparation remain pending.
