@@ -13,7 +13,8 @@ ready_at: 2026-10-19T10:38:33Z
 started_at: 2026-10-19T17:19:15Z
 branch: feat/slice-6-tui-harness-selection
 reviewed_at: 2026-10-19T17:32:58Z
-commits: [03d0027706c678d6a6587f895f1765e590911d56]
+commits: [03d0027706c678d6a6587f895f1765e590911d56, c44527f3920af192e2dd19c9eb30b95ca14253a9]
+pr: https://forge.adrianpk.com/adrianpk/chr/pulls/417
 ---
 
 # TUI harness selection
@@ -85,4 +86,4 @@ the running TUI sees persisted changes on reload without another settings store.
 
 Report: [Slice 6](../../report/slices/codex-pi-harnesses/slice-6-tui-harness-selection.md).
 
-Canonical PR reference is added after creation. Integration remains controller-owned.
+Canonical PR: [#417](https://forge.adrianpk.com/adrianpk/chr/pulls/417). Integration remains controller-owned.
