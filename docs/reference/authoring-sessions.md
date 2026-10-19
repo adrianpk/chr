@@ -365,7 +365,9 @@ receipts/<opaque-request-hash>.json
 
 Each provider attempt is retained before invocation. Five attempts exhaust that
 request's budget; retry deadlines and exhaustion survive reopening. The shared
-structured provider limits calls to 60 seconds and two concurrent invocations.
+structured provider defaults to 60 seconds and two concurrent invocations.
+Plan readiness uses the existing five-minute authoring budget and propagates it
+to the selected harness. An earlier caller deadline or cancellation still applies.
 Authoring also bounds captures to 64 KiB, instructions to 16 KiB, questions to
 eight per session, canonical artifact references to 16, transcript/provenance
 entries to 64, and retained request bindings to 4,096 per project. File and

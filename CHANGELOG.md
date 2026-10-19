@@ -38,8 +38,10 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   and authoring does not start execution.
   Plans can also be generated or regenerated from a named case's saved context,
   with guidance when discovery is absent or insufficient. A useful dump or
-  answered quiz can supply the context without requiring both. Failed generation
-  and intervening edits keep the existing plan available; spec approval and
+  answered quiz can supply the context without requiring both. Plan readiness
+  uses the existing five-minute authoring budget through the selected harness
+  instead of stopping after one minute. Failed generation and intervening edits
+  keep the existing plan available; spec approval and
   starting work remain separate actions. Every generated revision now retains
   its own internal order map. Approved native materialization binds task tickets
   once, and approved amendments retain completed work and earlier maps. Ticket

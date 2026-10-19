@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
 )
@@ -51,12 +50,13 @@ func (s service) assessPlanReadiness(ctx context.Context, observed core.PlanSour
 		return decision, err
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, longGenerationTimeout)
 	defer cancel()
 
 	modelRequest := core.StructuredModelRequest{
 		ID: "plan-readiness-" + observed.Hash, Purpose: "plan_readiness", ProjectDir: s.projectContext.ProjectDir,
 		Input: input, Schema: planReadinessSchema(), Instructions: planReadinessInstructions,
+		Timeout: longGenerationTimeout,
 	}
 
 	output, err := s.conversationModel.InvokeStructuredModel(ctx, modelRequest)

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"strings"
 	"testing"
+	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
 )
@@ -91,10 +92,22 @@ func checkPlanReadinessDecision(t *testing.T, decision PlanReadiness, err error,
 	}
 }
 
-// The common ready substitute echoes the caller-owned observation binding.
+// Readiness keeps its observation binding and the authoring deadline instead of
+// imposing a shorter deadline on the configured generation provider.
 func TestPlanReadinessProviderBinding(t *testing.T) {
 	operations := newTestService(t, t.TempDir())
-	operations.conversationModel = sufficientPlanReadinessProvider()
+	operations.conversationModel = planReadinessTestProvider(func(ctx context.Context, request core.StructuredModelRequest) (json.RawMessage, error) {
+		deadline, ok := ctx.Deadline()
+		if !ok || time.Until(deadline) < longGenerationTimeout-time.Second {
+			t.Fatal("readiness shortened the authoring deadline")
+		}
+
+		if request.Timeout != longGenerationTimeout {
+			t.Fatal("readiness did not propagate its authoring timeout")
+		}
+
+		return sufficientPlanReadinessProvider()(ctx, request)
+	})
 
 	decision, err := operations.assessPlanReadiness(t.Context(), core.PlanSourceObservation{Hash: "binding", HasDiscovery: true})
 	if err != nil || decision.ObservationHash != "binding" || !decision.Sufficient {
