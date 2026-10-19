@@ -82,6 +82,11 @@ unauthorized updates, crash/replay, unchanged v1 records, executable/schema fenc
 staged generation, authoring/quiz/intent recovery and shared model capacity. The
 v1-only compatibility consumer is a fixed reader fixture. All owned fixtures ended.
 
+The initial final-head `make verify` at `e24cdc6a47e8e1a6ca7b5d8424b6e8b7df7b384a`
+failed strict lint because the shared request validator exceeded the complexity
+limit. Extracting its output-name check preserves validation and error order.
+The focused `go test ./internal/harness/... -count=1 -timeout=3m` passed afterward.
+
 Before handoff, Looper records the required `make verify`, configured focused and
 race commands, caller regressions and `git diff --check` on the exact clean PR head.
 The controller ledger supplies the final validation evidence for that head.

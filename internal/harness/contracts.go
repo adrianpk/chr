@@ -143,12 +143,20 @@ func ValidateAgentRunRequest(request AgentRunRequest) error {
 		return fmt.Errorf("agent run input exceeds byte ceiling")
 	}
 
-	if request.OutputName != "" && (filepath.Base(request.OutputName) != request.OutputName || request.OutputName == "." || request.OutputName == "..") {
-		return fmt.Errorf("agent run output name must be a file name")
+	if err := validateAgentRunOutputName(request.OutputName); err != nil {
+		return err
 	}
 
 	if request.FrozenSelection && !filepath.IsAbs(request.Program) {
 		return fmt.Errorf("frozen agent selection requires an absolute program")
+	}
+
+	return nil
+}
+
+func validateAgentRunOutputName(name string) error {
+	if name != "" && (filepath.Base(name) != name || name == "." || name == "..") {
+		return fmt.Errorf("agent run output name must be a file name")
 	}
 
 	return nil

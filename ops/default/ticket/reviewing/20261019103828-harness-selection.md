@@ -243,3 +243,9 @@ The canonical Slice 2 report is
 `ops/default/report/slices/codex-pi-harnesses/slice-2-harness-selection.md`.
 PR #413 targets dev. The final exact-HEAD validation ledger is recorded before
 handoff; controller integration remains pending.
+
+Final-head validation initially stopped at strict lint on the neutral request
+validator at `e24cdc6a47e8e1a6ca7b5d8424b6e8b7df7b384a`. Its output-name check is
+now a focused helper, preserving rule and error order. The targeted
+`go test ./internal/harness/... -count=1 -timeout=3m` passed. The unchanged final
+ordered sequence is recorded again against the updated clean head.
