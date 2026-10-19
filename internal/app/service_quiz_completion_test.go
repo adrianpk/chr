@@ -1,0 +1,129 @@
+package app
+
+import (
+	"encoding/json"
+	"fmt"
+	"strings"
+	"testing"
+
+	"forge.adrianpk.com/chr/internal/core"
+)
+
+// Discovery retains answers outside the recent-five window, including the
+// answer being committed, so a new provider process can avoid resolved topics.
+func TestServiceQuizFullHistory(t *testing.T) {
+	operations, _ := newRetainedQuizFixture(t)
+
+	state, err := operations.newQuizRuntimeState(operations.quizScope(core.QuizScope{}), core.QuizModeDeep)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	entries := make([]core.QuizEntry, 8)
+	for index := range entries {
+		entries[index] = core.QuizEntry{Question: fmt.Sprintf("Decision %d?", index), Answer: fmt.Sprintf("Answer %d.", index), Status: core.QuizEntryStatusAnswered}
+	}
+
+	request, err := operations.newQuizModelRequestWithEntries(state, entries)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, section := range request.ContextSections {
+		if section.Name != "quiz_history" {
+			continue
+		}
+
+		var history []core.QuizModelEntryPayload
+		if err := json.Unmarshal([]byte(section.Content), &history); err != nil {
+			t.Fatal(err)
+		}
+
+		if len(history) != len(entries) || history[0].Answer != entries[0].Answer || history[7].Answer != entries[7].Answer {
+			t.Fatal("discovery omitted confirmed answers", history)
+		}
+
+		return
+	}
+
+	t.Fatal("quiz request has no complete discovery history")
+}
+
+// Provider completion and budget exhaustion stop generation without losing the
+// final answer; a repeated resolved question blocks instead of being presented.
+func TestServiceQuizNaturalStop(t *testing.T) {
+	for _, name := range []string{"recommendation", "budget", "duplicate"} {
+		t.Run(name, func(t *testing.T) { checkQuizNaturalStop(t, name) })
+	}
+}
+
+func checkQuizNaturalStop(t *testing.T, name string) {
+	t.Helper()
+
+	operations, model := newRetainedQuizFixture(t)
+	first := serviceQuizModelResponse("first", "first", serviceQuizClock()())
+	second := serviceQuizModelResponse("second", "second", serviceQuizClock()())
+
+	second.Question.Required = name != "recommendation"
+	if name == "duplicate" {
+		second.Question.Prompt = "  " + strings.ToUpper(first.Question.Prompt) + "  "
+	}
+
+	model.responses = []core.QuizModelResponse{first, second}
+
+	started, err := operations.StartQuiz(QuizStartRequest{Mode: core.QuizModeDeep})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if name == "budget" {
+		started.State.QuestionBudget = 1
+		if _, err := operations.quizRepository().SaveRuntimeState(t.Context(), started.State); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	answered, err := operations.AnswerQuiz(QuizAnswerRequest{Answer: "Keep the saved decision."})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := core.QuizRuntimeStatusDone
+	if name == "duplicate" {
+		want = core.QuizRuntimeStatusBlocked
+	}
+
+	checkQuizFinalAnswer(t, operations, answered.State, want)
+
+	if name == "duplicate" {
+		checkQuizDuplicateRecovery(t, operations, model, answered.State)
+	}
+}
+
+func checkQuizDuplicateRecovery(t *testing.T, operations service, model *fakeServiceQuizModel, state core.QuizRuntimeState) {
+	t.Helper()
+
+	if state.GenerationOperationID != "" {
+		t.Fatal("resume would replay the rejected provider output")
+	}
+
+	model.responses = []core.QuizModelResponse{serviceQuizModelResponse("third", "third", serviceQuizClock()())}
+
+	resumed, err := operations.ResumeQuiz(QuizResumeRequest{})
+	if err != nil || resumed.State.ActiveQuestion == nil || resumed.State.AnswersRecorded != 1 || resumed.State.ContinuationPending {
+		t.Fatal("new question could not recover rejected continuation", resumed, err)
+	}
+}
+
+func checkQuizFinalAnswer(t *testing.T, operations service, state core.QuizRuntimeState, want core.QuizRuntimeStatus) {
+	t.Helper()
+
+	if state.Status != want || state.ActiveQuestion != nil || state.QuestionsAsked != 1 || state.AnswersRecorded != 1 {
+		t.Fatal("quiz did not stop safely", state)
+	}
+
+	entries, err := operations.quizRepository().LoadRawCaptureEntries(t.Context(), operations.quizScope(core.QuizScope{}))
+	if err != nil || len(entries) != 1 || entries[0].Answer != "Keep the saved decision." {
+		t.Fatal("final answer was lost", entries, err)
+	}
+}

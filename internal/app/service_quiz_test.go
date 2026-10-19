@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"slices"
@@ -471,7 +472,7 @@ func TestServiceQuizUpdatesCuratedNotesIteratively(t *testing.T) {
 		"## Implementation Implications",
 	})
 
-	if strings.Contains(curated, "What should the workflow preserve?") {
+	if strings.Contains(curated, "What should the workflow preserve") {
 		t.Fatalf("curated notes mirrored raw question:\n%s", curated)
 	}
 
@@ -1055,7 +1056,7 @@ func serviceQuizModelResponse(
 		Status:    core.QuizModelResponseReady,
 		Question: core.QuizQuestion{
 			ID:        questionID,
-			Prompt:    "What should the workflow preserve?",
+			Prompt:    fmt.Sprintf("What should the workflow preserve for %s?", questionID),
 			Required:  true,
 			Topic:     "workflow",
 			Depth:     1,

@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"crypto/rand"
+	"errors"
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -102,7 +103,12 @@ func (s service) prepareQuizStart(request core.QuizActionRequest, observed core.
 
 	state, err = s.nextQuizQuestion(state, observed.Entries)
 
-	return core.QuizTransition{State: state, Message: "Quiz started."}, err
+	message := "Quiz started."
+	if state.Status == core.QuizRuntimeStatusDone {
+		message = "Quiz completed. The saved context is sufficient."
+	}
+
+	return core.QuizTransition{State: state, Message: message}, err
 }
 
 func (s service) prepareQuizOutcome(request core.QuizActionRequest, observed core.QuizObservation) (core.QuizTransition, error) {
@@ -135,21 +141,29 @@ func (s service) prepareQuizOutcome(request core.QuizActionRequest, observed cor
 		message += " Continuation failed; reload and resume to retry."
 	}
 
+	if state.Status == core.QuizRuntimeStatusDone {
+		message += " Quiz completed."
+	}
+
 	return core.QuizTransition{State: state, Entry: &entry, Message: message}, nil
 }
 
 func (s service) continueQuiz(state core.QuizRuntimeState, entries []core.QuizEntry) core.QuizRuntimeState {
 	state.ContinuationPending, state.ContinuationError = false, ""
 	if state.QuestionsAsked >= state.QuestionBudget {
-		state.Status, state.ActiveQuestion = core.QuizRuntimeStatusIdle, nil
-
-		return state
+		return s.finishQuiz(state)
 	}
 
 	next, err := s.nextQuizQuestion(state, entries)
 	if err != nil {
 		state.Status, state.ActiveQuestion = core.QuizRuntimeStatusBlocked, nil
 		state.ContinuationPending, state.ContinuationError = true, "Question generation failed. Resume to retry."
+
+		if errors.Is(err, errRepeatedQuizQuestion) {
+			state.ContinuationError = "Question generation repeated an answered question. Resume to retry."
+			state.GenerationOperationID = ""
+		}
+
 		state.UpdatedAt = s.utcNow()
 
 		return state

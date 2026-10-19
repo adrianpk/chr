@@ -965,6 +965,11 @@ If acceptance_readiness.decision is not_applicable, continue normal dump-oriente
 Ask exactly one concise question about one specific operational aspect at a time.
 Use follow-ups only when they materially improve clarity.
 Shift topics when routing_state shows one area is becoming overrepresented.
+Use quiz_history as the complete prior question-and-answer context, including project-wide decisions.
+Do not repeat a resolved requirement, even with different wording; use recent_entries only for immediate continuity.
+The remaining question budget is a safety ceiling, not a target to fill.
+Set completion_recommended to true when the supplied context is sufficient for a useful specification and no material unresolved decisions remain.
+When recommending completion, put a brief completion statement in question instead of inventing another question.
 Do not include examples or options unless they are truly necessary.
 Do not ask the user to rank, pick a top N list, enumerate a full option set, or justify several choices at once.
 Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
@@ -982,6 +987,8 @@ When acceptance_readiness is present, use it as guidance for whether the use cas
 If acceptance_readiness.decision is needs_more_info, bias early questions toward concrete use-case behavior that may clarify missing acceptance slots, without naming Gherkin or the slot schema.
 If acceptance_readiness.decision is not_applicable, continue normal dump-oriented discovery and do not force Gherkin terminology.
 Prepare concise questions, each about one specific operational aspect.
+Use quiz_history as the complete prior question-and-answer context and avoid resolved requirements, including paraphrases.
+The question budget is a safety ceiling, not a target; do not add redundant questions to fill it.
 Use follow-ups only when they materially improve clarity.
 Shift topics when routing_state shows one area is becoming overrepresented.
 Do not include examples or options unless they are truly necessary.

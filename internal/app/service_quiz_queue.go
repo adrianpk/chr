@@ -42,10 +42,12 @@ func (s service) nextQuizQuestion(state core.QuizRuntimeState, entries []core.Qu
 		return state, nil
 	}
 
-	for _, entry := range entries {
-		if quizSessionEntry(state, entry) && entry.QuestionID == response.Question.ID {
-			return state, fmt.Errorf("quiz provider reused an answered question identity")
-		}
+	if !response.Question.Required {
+		return s.finishQuiz(state), nil
+	}
+
+	if err := validateNextQuizQuestion(state, entries, response.Question); err != nil {
+		return state, err
 	}
 
 	state = activateQuizQuestion(state, response.Question, response.CreatedAt.UTC())

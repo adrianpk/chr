@@ -198,6 +198,13 @@ func (s service) newQuizModelRequestWithEntries(state core.QuizRuntimeState, ent
 		return core.QuizModelRequest{}, err
 	}
 
+	history, err := s.quizHistoryContext(scope, entries)
+	if err != nil {
+		return core.QuizModelRequest{}, err
+	}
+
+	supplementalSections = append(supplementalSections, history)
+
 	readiness := quizAcceptanceReadinessFromContext(state, append(coreSections, supplementalSections...))
 	payload.AcceptanceReadiness = &readiness
 
