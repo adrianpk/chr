@@ -1,6 +1,6 @@
 # Slice 2: Live Role Selection and Retained Bindings
 
-Status: reviewing
+Status: delivered
 Delivery set: codex-pi-harnesses
 Plan: [Selectable Harness Delivery](../../../plan/codex-pi-harnesses.md)
 Tracker: [Selectable Harness Delivery Order](../../../tracker/codex-pi-harnesses.md)
@@ -95,9 +95,18 @@ profiles and owned drivers. The streamed ceiling is 512 MiB, with a positive
 300 MiB fixture and the existing oversized/non-regular/hash rejection checks.
 The targeted caller regression selection passed after these corrections.
 
-Before handoff, the controller records the required `make verify`, configured focused and
-race commands, caller regressions and `git diff --check` on the exact clean PR head.
-The controller ledger supplies the final validation evidence for that head.
+The controller recorded all five checks passing on the clean PR head
+`698cda11aab88b7b5f0994fa5d7faa8c9aa361fe` (evidence
+`XRCUOWBCLESSXUH6I7GROBHLCY`):
+
+- `make verify` (pass)
+- `go test ./internal/core ./internal/app -run '^(TestHarnessSelection|TestHarnessBinding|TestHarnessGenerationBinding)' -count=1 -timeout=3m` (pass)
+- `go test -race ./internal/core ./internal/app -run '^(TestHarnessSelection|TestHarnessBinding|TestHarnessGenerationBinding)' -count=1 -timeout=3m` (pass)
+- `go test ./internal/harness/codex ./internal/core ./internal/app -run '^(TestHarnessCodex|TestHarnessQuizModel|TestAgenticReview|TestAuthoringQuiz|TestStructured|TestService.*(Quiz|Spec|Plan|Dump|Acceptance)|TestTelegram.*(Intent|Authoring))' -count=1 -timeout=3m` (pass)
+- `git diff --check` (pass)
+
+PR #413 was verified merged into dev at that exact commit on 2026-10-19.
+Slice 2 of 8 completed; Slice 3 is the next recorded unit.
 
 ## Risks and Follow-ups
 

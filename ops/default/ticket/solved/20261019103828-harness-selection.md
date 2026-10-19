@@ -1,7 +1,7 @@
 ---
 id: TKT-20261019103828
 title: "Live role selection and retained bindings"
-status: reviewing
+status: solved
 kind: task
 severity: medium
 priority: normal
@@ -13,8 +13,10 @@ ready_at: 2026-10-19T10:38:33Z
 started_at: 2026-10-19T11:23:17Z
 branch: feat/slice-2-harness-selection
 pr: "https://forge.adrianpk.com/adrianpk/chr/pulls/413"
-reviewed_at: 2026-10-19T13:03:53Z
-commits: [d9b19ac1b2ce4e1b577d9497443b2d207c4c1ce7, 3ed1b443972fe4532f3df295c4df0d8e5c4ad657, f7f94be12eee99bd747aef2b6cf8e72e63f7ddb7, 17fcef85e99ac8025f87bc1cbd47df5760a5c50f, 737162d3c1b6d8472e951d2ae1b6711626002fda, e86c9e97903a8ef270ba156e34ff8da8e03a3195]
+reviewed_at: 2026-10-19T13:24:40Z
+closed_at: 2026-10-19T13:24:40Z
+resolution: fixed
+commits: [d9b19ac1b2ce4e1b577d9497443b2d207c4c1ce7, 3ed1b443972fe4532f3df295c4df0d8e5c4ad657, f7f94be12eee99bd747aef2b6cf8e72e63f7ddb7, 17fcef85e99ac8025f87bc1cbd47df5760a5c50f, 737162d3c1b6d8472e951d2ae1b6711626002fda, e86c9e97903a8ef270ba156e34ff8da8e03a3195, 698cda11aab88b7b5f0994fa5d7faa8c9aa361fe]
 ---
 
 # Live role selection and retained bindings
@@ -37,9 +39,9 @@ Expected PR title: `feat(slice-2): retain live harness selections and invocation
 
 Expected report: `ops/default/report/slices/codex-pi-harnesses/slice-2-harness-selection.md`.
 
-Implementation tasks are complete. Canonical PR [#413](https://forge.adrianpk.com/adrianpk/chr/pulls/413)
-is open with its immutable report link. Final validation is recorded on the
-clean PR head before handoff.
+Canonical PR [#413](https://forge.adrianpk.com/adrianpk/chr/pulls/413) was verified
+merged into dev at `698cda11aab88b7b5f0994fa5d7faa8c9aa361fe`.
+Slice 2 of 8 completed; the final exact-head checks passed.
 
 Prerequisite: Slice 1 integrated into dev; implementation authorization for this set.
 
@@ -241,8 +243,7 @@ subprocesses, HTTP servers and fixture database connections have stopped.
 
 The canonical Slice 2 report is
 `ops/default/report/slices/codex-pi-harnesses/slice-2-harness-selection.md`.
-PR #413 targets dev. The final exact-HEAD validation ledger is recorded before
-handoff; controller integration remains pending.
+PR #413 merged into dev at its validated head; controller integration is complete.
 
 Final-head validation initially stopped at strict lint on the neutral request
 validator at `e24cdc6a47e8e1a6ca7b5d8424b6e8b7df7b384a`. Its output-name check is
@@ -263,5 +264,14 @@ Successful focused correction check:
 - `go test ./internal/core ./internal/app -run '^(TestHarnessBindingLargeExecutable|TestHarnessBindingExecutableFiles|TestHarnessGenerationBinding|TestWebServeWriteActionCreatesDump|TestWebServeWriteActionGeneratesSpecWithService|TestSpecDocumentCatalog|TestSpecGenerationScopes|TestServiceStartAllReadyAgentWork|TestWebDumpCapture|TestWebDumpSaveDocument|TestWebPlanInternal|TestWebPlanContext|TestWebPlanNative|TestWebSpecAuthoring)' -count=1 -timeout=3m`
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/app ./internal/harness/...`
 
-The unchanged full ordered validation sequence follows on the updated clean PR
-head. No checks or test assertions were removed.
+All five ordered controller checks passed on the merged head
+`698cda11aab88b7b5f0994fa5d7faa8c9aa361fe` (evidence
+`XRCUOWBCLESSXUH6I7GROBHLCY`):
+
+- `make verify` (pass)
+- `go test ./internal/core ./internal/app -run '^(TestHarnessSelection|TestHarnessBinding|TestHarnessGenerationBinding)' -count=1 -timeout=3m` (pass)
+- `go test -race ./internal/core ./internal/app -run '^(TestHarnessSelection|TestHarnessBinding|TestHarnessGenerationBinding)' -count=1 -timeout=3m` (pass)
+- `go test ./internal/harness/codex ./internal/core ./internal/app -run '^(TestHarnessCodex|TestHarnessQuizModel|TestAgenticReview|TestAuthoringQuiz|TestStructured|TestService.*(Quiz|Spec|Plan|Dump|Acceptance)|TestTelegram.*(Intent|Authoring))' -count=1 -timeout=3m` (pass)
+- `git diff --check` (pass)
+
+No checks or test assertions were removed. Slice 3 is the next recorded unit.
