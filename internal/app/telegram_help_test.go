@@ -28,7 +28,7 @@ func TestTelegramHelpPresentation(t *testing.T) {
 func TestTelegramHelpMetadata(t *testing.T) {
 	entries := telegramHelpMetadata()
 
-	want := len(telegramReadRegistry()) + len(telegramConversationRegistry()) + len(telegramAuthoringRegistry()) + len(telegramControlCommands()) + len(telegramRecordRegistry()) + 4
+	want := len(telegramReadRegistry()) + len(telegramConversationRegistry()) + len(telegramAuthoringRegistry()) + len(telegramControlCommands()) + len(telegramRecordRegistry()) + 5
 	if len(entries) != want {
 		t.Fatalf("metadata entries = %d, want %d", len(entries), want)
 	}

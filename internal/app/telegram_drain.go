@@ -56,7 +56,7 @@ func (r telegramReceiver) respond(ctx context.Context, update core.TelegramRecei
 		return r.queueReadReply(ctx, update, config, telegramHelpReply(""))
 	}
 
-	for _, handler := range []func(context.Context, core.TelegramAllowedUser, core.TelegramReceiverConfig, core.TelegramReceivedUpdate) (bool, error){r.respondAction, r.respondControl, r.respondWork, r.respondRecord, r.respondPreparedWork, r.respondExplanation, r.respondAuthoring, r.respondIntent, r.respondConversation} {
+	for _, handler := range []func(context.Context, core.TelegramAllowedUser, core.TelegramReceiverConfig, core.TelegramReceivedUpdate) (bool, error){r.respondAction, r.respondHarness, r.respondControl, r.respondWork, r.respondRecord, r.respondPreparedWork, r.respondExplanation, r.respondAuthoring, r.respondIntent, r.respondConversation} {
 		if handled, err := handler(ctx, user, config, update); handled || err != nil {
 			if errors.Is(err, core.ErrTelegramRequestCapacity) {
 				return r.store.QueueReadResponse(ctx, update, telegramRequestCapacityText, config.Digest(), time.Now())

@@ -68,3 +68,15 @@ Before slice review/integration, run `make verify` and `git diff --check`.
 These commands are planned checks, not recorded successful executions.
 Retain commits, PR, validation and blocker evidence here and in the slice report;
 the tracker remains an order map.
+
+## Implementation Progress
+
+T7.1 is implemented: deterministic `/harness` inspection uses the selected
+registered project, shared readiness and separate retained worker bindings.
+The bounded reply keeps private setup local and distinguishes new-operation
+defaults from admitted work. Help includes the strict named-role syntax.
+
+Passed: `go test ./internal/core ./internal/app -run '^(TestTelegramHarnessSelection|TestTelegramHelp)' -count=1 -timeout=3m`.
+
+T7.2 exact confirmation and T7.3 retained redelivery/cross-interface acceptance
+are next. The inspection path changes no project selection configuration.
