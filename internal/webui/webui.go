@@ -451,7 +451,7 @@ func writeResultTemplate(r *http.Request, data *PageData) string {
 		return "dump_save_result.html"
 	}
 
-	if r.PostFormValue("surface") == "modal" && r.PostFormValue("action") != "dump.create" || r.URL.Path == "/board/ticket/comment" {
+	if r.PostFormValue("surface") == "modal" && r.PostFormValue("action") != "dump.create" && r.PostFormValue("action") != "case.create" || r.URL.Path == "/board/ticket/comment" {
 		return "write_result_modal.html"
 	}
 
@@ -512,7 +512,7 @@ func shouldCloseModalAfterWrite(r *http.Request, request WriteActionRequest, res
 	}
 
 	switch request.Action {
-	case "case.update", "dump.create", "dump.save", "dump.append":
+	case "case.create", "case.update", "dump.create", "dump.save", "dump.append":
 		return true
 	default:
 		return false

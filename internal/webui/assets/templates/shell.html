@@ -58,6 +58,9 @@
             <a class="button" href="/board/ticket?new=1" hx-get="/board/ticket?new=1" hx-target="#modal-root" hx-swap="innerHTML">New</a>
           {{end}}
           {{if eq .View "catalog"}}
+            {{if eq .Catalog.Family "cases"}}
+              <button class="button" type="button" data-modal-template="case-create-modal">New</button>
+            {{end}}
             {{if eq .Catalog.Family "specs"}}
  <a class="button" href="/specs/detail" hx-get="/specs/detail/fragment" hx-target="#modal-root" hx-swap="innerHTML">New</a>
 {{end}}
@@ -175,6 +178,9 @@
 {{else if eq .Catalog.Family "plans"}}
  {{template "plan_catalog_content.html" .}}
 {{else}}
+  {{if eq .Catalog.Family "cases"}}
+    {{template "case_create_form.html" .}}
+  {{end}}
   {{if .Catalog.Items}}
     {{if eq .Catalog.Family "cases"}}
     {{template "case_table.html" .}}
@@ -221,6 +227,37 @@
     <div class="dump-card__preview"><div class="dump-card__preview-text">{{if .Preview}}{{.Preview}}{{else}}No entries yet{{end}}</div></div>
   </article>
 </a>
+{{end}}
+
+{{define "case_create_form.html"}}
+<template id="case-create-modal">
+  <div class="modal-backdrop" data-modal-backdrop>
+    <section class="case-edit-panel case-edit-panel--modal" role="dialog" aria-modal="true" aria-labelledby="case-create-title">
+      <button class="icon-button case-edit-panel__close" type="button" data-modal-close aria-label="Close new case">×</button>
+      <header class="case-edit-panel__header"><h2 id="case-create-title">New Case</h2></header>
+      <form class="case-edit-form" data-case-create method="post" action="/actions" hx-post="/actions" hx-target="#case-create-result" hx-swap="innerHTML" hx-sync="this:drop" hx-disabled-elt="find button[type='submit']">
+        <input type="hidden" name="action" value="case.create">
+        <input type="hidden" name="family" value="cases">
+        <input type="hidden" name="confirm" value="true">
+        <input type="hidden" name="surface" value="modal">
+        <label class="readonly-field">
+          <span>Name</span>
+          <input name="name" maxlength="512" required>
+        </label>
+        <label class="readonly-field readonly-field--multi">
+          <span>Description</span>
+          <textarea name="description" rows="4" maxlength="65536"></textarea>
+        </label>
+        <label class="readonly-field readonly-field--multi">
+          <span>Context</span>
+          <textarea name="context" rows="6" maxlength="65536"></textarea>
+        </label>
+        <div id="case-create-result" role="status" aria-live="polite"></div>
+        <div class="case-edit-form__actions"><button class="button" type="submit">Create</button></div>
+      </form>
+    </section>
+  </div>
+</template>
 {{end}}
 
 {{define "case_table.html"}}

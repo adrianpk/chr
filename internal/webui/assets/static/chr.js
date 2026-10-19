@@ -107,7 +107,7 @@
 
   function dumpCaptureResponse(event) {
     const parameters = event.detail.requestConfig && event.detail.requestConfig.parameters;
-    if (!parameters || !["dump.create", "dump.save", "spec.create", "spec.save"].includes(parameters.action) || event.detail.target.id !== "modal-root") return;
+    if (!parameters || !["case.create", "dump.create", "dump.save", "spec.create", "spec.save"].includes(parameters.action) || event.detail.target.id !== "modal-root") return;
     if (document.querySelector("#modal-root [role='dialog']")) return;
     closeModal();
     const workspace = document.querySelector("#workspace");
@@ -258,12 +258,13 @@
     });
     ["htmx:responseError", "htmx:sendError", "htmx:timeout"].forEach(function (name) {
       document.addEventListener(name, function (event) {
-        const form = event.detail.elt.closest(".ticket-edit-form, .ticket-comments__form, [data-dump-capture], [data-dump-editor]");
+        const form = event.detail.elt.closest(".ticket-edit-form, .ticket-comments__form, [data-case-create], [data-dump-capture], [data-dump-editor]");
         if (!form) return;
         const target = document.querySelector(form.getAttribute("hx-target"));
         if (!target) return;
         if (form.matches("[data-dump-capture]")) target.textContent = "The request failed. Your context is retained. Retry this capture.";
         else if (form.matches("[data-dump-editor]")) target.textContent = "The request failed. Your edits are retained. Retry Save.";
+        else if (form.matches("[data-case-create]")) target.textContent = "The request failed. Your case details are retained. Retry Create.";
         else target.textContent = "The request failed. Your input is retained. Retry or reload the ticket.";
       });
     });

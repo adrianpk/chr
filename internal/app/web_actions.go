@@ -12,6 +12,7 @@ import (
 )
 
 const (
+	webActionCaseCreate = "case.create"
 	webActionCaseUpdate = "case.update"
 	webActionDumpCreate = "dump.create"
 	webActionDumpSave   = "dump.save"
@@ -71,6 +72,10 @@ func (p webViewProvider) writeDocumentAction(operations service, request webui.W
 	switch request.Action {
 	case webui.HarnessSelectionAction:
 		return p.writeHarnessSelection(operations.ctx, operations, request), true, nil
+	case webActionCaseCreate:
+		response, err := p.writeCaseCreate(operations, request)
+
+		return response, true, err
 	case webActionCaseUpdate:
 		response, err := p.writeCaseUpdate(operations, request)
 
@@ -263,6 +268,28 @@ func (p webViewProvider) writeWorkDaemonStop(operations service) (webui.WriteAct
 		Summary:     result.Message,
 		RedirectURL: "/dash",
 		Operation:   webOperation("work.daemon.stop", "completed", "daemon", result.Message),
+	}, nil
+}
+
+func (p webViewProvider) writeCaseCreate(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
+	if request.Family != webArtifactFamilyCases || request.ID != "" {
+		return webBlockedWrite("Create cases from the Cases page."), nil
+	}
+
+	result, err := operations.SaveCaseMetadata(core.CaseMetadata{
+		Name:        strings.TrimSpace(request.Fields["name"]),
+		Description: request.Fields["description"],
+		Context:     request.Fields["context"],
+	})
+	if err != nil {
+		return webValidationWrite(err), nil
+	}
+
+	return webui.WriteActionResponse{
+		Status:       webui.WriteStatusOK,
+		Summary:      "Case created.",
+		ChangedFiles: []string{caseRelativePath(p.projectContext.ProjectDir, result.Case)},
+		RedirectURL:  "/cases",
 	}, nil
 }
 
