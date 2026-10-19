@@ -5,7 +5,8 @@ Delivery set: codex-pi-harnesses
 Plan: [Selectable Harness Delivery](../../../plan/codex-pi-harnesses.md)
 Tracker: [Selectable Harness Delivery Order](../../../tracker/codex-pi-harnesses.md)
 Branch: `refactor/slice-1-harness-codex`
-PR: pending
+Ticket: [TKT-20261019103827](../../../ticket/reviewing/20261019103827-harness-codex.md)
+PR: [#412](https://forge.adrianpk.com/adrianpk/chr/pulls/412)
 
 ## Purpose
 
