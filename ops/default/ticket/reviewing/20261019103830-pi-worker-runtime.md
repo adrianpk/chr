@@ -116,4 +116,13 @@ protocol and development failure/correction evidence. The controller records
 final ordered checks against the clean PR HEAD. Owned fixtures stopped after
 their checks. Real-model acceptance remains the approved final opt-in item.
 
+The initial controller `make verify` on
+`aaefde93704f35fa51d995365a392a762ccff5fa` failed the process cancellation
+regression after strict lint passed. A descendant was observed before SIGKILL
+had stopped it. The process owner now waits within a one-second cleanup bound
+for remaining Linux group members to stop executing before returning. The
+original descendant assertion remains; normal parent exit is also covered.
+Both scenarios passed 200 runs with:
+`go test ./internal/harness/process -run '^TestAgentRunProcessCancellation$' -count=200 -timeout=1m`.
+
 Canonical PR: [#415](https://forge.adrianpk.com/adrianpk/chr/pulls/415).

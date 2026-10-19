@@ -122,6 +122,17 @@ assertions were retained. Initial concurrent fixtures also retained slice-owned
 contract fields and a wrong auth mount assertion; their setup was corrected
 without changing production ownership or mount policy.
 
+The first controller `make verify` on
+`aaefde93704f35fa51d995365a392a762ccff5fa` passed strict lint but failed
+`TestAgentRunProcessCancellation`: a descendant was still running immediately
+after shutdown. The unchanged focused test passed 200 isolated runs. The process
+owner sent SIGKILL and waited only for its direct child; it now also waits within
+a one-second cleanup bound for remaining Linux group members to stop executing.
+The original descendant assertion is retained and normal parent exit is covered.
+Both scenarios passed 200 runs after the correction:
+
+- `go test ./internal/harness/process -run '^TestAgentRunProcessCancellation$' -count=200 -timeout=1m`
+
 The controller records final validation against the clean PR HEAD and its exact
 ordered command list. The canonical PR carries that candidate's successful
 commands; task checks above are component evidence.

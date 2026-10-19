@@ -77,7 +77,7 @@ func (e Executor) RunAgentCommand(ctx context.Context, command harness.AgentComm
 
 	err = cmd.Run()
 	if cmd.Process != nil {
-		err = errors.Join(err, killGroup(cmd.Process.Pid))
+		err = errors.Join(err, killGroup(ctx, cmd.Process.Pid))
 	}
 
 	stdout, outErr := out.read(harness.MaxStructuredOutput + 1)
@@ -138,13 +138,17 @@ func (s *spool) remove() error {
 	return errors.Join(s.file.Close(), os.Remove(s.file.Name()))
 }
 
-func killGroup(pid int) error {
+func killGroup(ctx context.Context, pid int) error {
 	err := syscall.Kill(-pid, syscall.SIGKILL)
 	if errors.Is(err, syscall.ESRCH) {
 		return nil
 	}
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	return waitKilledGroup(ctx, pid)
 }
 
 // ReadOutput rejects oversized files before exposing any partial result.

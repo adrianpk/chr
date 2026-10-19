@@ -80,7 +80,7 @@ func exchangeCommand(ctx context.Context, command harness.AgentCommand, out, dia
 
 	grace.Stop()
 
-	return errors.Join(err, closeErr, drainErr, waitErr, killGroup(cmd.Process.Pid))
+	return errors.Join(err, closeErr, drainErr, waitErr, killGroup(ctx, cmd.Process.Pid))
 }
 
 func closeExchangePipe(pipe io.Closer) error {

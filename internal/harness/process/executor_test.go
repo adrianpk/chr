@@ -39,29 +39,47 @@ func TestAgentRunProcessStreams(t *testing.T) {
 	}
 }
 
-// Cancellation must stop the process group, including a child holding pipes.
+// Cancellation and normal parent exit must stop descendants before returning.
 func TestAgentRunProcessCancellation(t *testing.T) {
+	for _, mode := range []string{"cancel", "exit"} {
+		t.Run(mode, func(t *testing.T) { checkProcessDescendantStop(t, mode) })
+	}
+}
+
+func checkProcessDescendantStop(t *testing.T, mode string) {
+	t.Helper()
+
 	dir := t.TempDir()
 
 	ctx, cancel := context.WithCancel(t.Context())
 	defer cancel()
 
 	done := make(chan error, 1)
+	script := "sleep 30 & child=$!; echo $child > child; wait"
+
+	var expected error
+	if mode == "cancel" {
+		expected = context.Canceled
+	} else {
+		script = "sleep 30 >/dev/null 2>&1 & child=$!; echo $child > child"
+	}
 
 	go func() {
 		_, err := (Executor{}).RunAgentCommand(ctx, harness.AgentCommand{
-			Program: "sh", Dir: dir, Args: []string{"-c", "sleep 30 & child=$!; echo $child > child; wait"},
+			Program: "sh", Dir: dir, Args: []string{"-c", script},
 		}, "", time.Now())
 		done <- err
 	}()
 
 	pid := waitChildPID(t, dir)
 
-	cancel()
+	if mode == "cancel" {
+		cancel()
+	}
 
 	select {
 	case err := <-done:
-		if !errors.Is(err, context.Canceled) {
+		if !errors.Is(err, expected) {
 			t.Fatalf("cancellation = %v", err)
 		}
 	case <-time.After(3 * time.Second):
