@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"syscall"
 	"testing"
 	"time"
 
@@ -43,10 +42,12 @@ func TestAgentRunProcessStreams(t *testing.T) {
 // Cancellation must stop the process group, including a child holding pipes.
 func TestAgentRunProcessCancellation(t *testing.T) {
 	dir := t.TempDir()
+
 	ctx, cancel := context.WithCancel(t.Context())
 	defer cancel()
 
 	done := make(chan error, 1)
+
 	go func() {
 		_, err := (Executor{}).RunAgentCommand(ctx, harness.AgentCommand{
 			Program: "sh", Dir: dir, Args: []string{"-c", "sleep 30 & child=$!; echo $child > child; wait"},
@@ -55,6 +56,7 @@ func TestAgentRunProcessCancellation(t *testing.T) {
 	}()
 
 	pid := waitChildPID(t, dir)
+
 	cancel()
 
 	select {
@@ -81,8 +83,6 @@ func waitChildPID(t *testing.T, dir string) int {
 		if err == nil {
 			pid, err := strconv.Atoi(strings.TrimSpace(string(data)))
 			if err == nil {
-				t.Cleanup(func() { _ = syscall.Kill(pid, syscall.SIGKILL) })
-
 				return pid
 			}
 		}
@@ -116,6 +116,7 @@ func TestAgentRunProcessBounds(t *testing.T) {
 // Sanitize before retaining excerpts, including a credential split by pipe reads.
 func TestAgentRunProcessDiagnostics(t *testing.T) {
 	t.Setenv("EXAMPLE_API_KEY", "example-private-value")
+
 	data := Diagnostic([]byte("example-private-value Authorization: Bearer example-bearer token=example-token"))
 	for _, secret := range []string{"example-private-value", "example-bearer", "example-token"} {
 		if strings.Contains(string(data), secret) {

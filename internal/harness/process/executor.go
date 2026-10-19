@@ -39,6 +39,7 @@ func (s *spool) Write(data []byte) (int, error) {
 	}
 
 	s.remaining -= len(data)
+
 	n, err := s.file.Write(data)
 	if err != nil {
 		s.err = err
@@ -49,7 +50,7 @@ func (s *spool) Write(data []byte) (int, error) {
 }
 
 // RunAgentCommand drains both streams and kills all owned descendants on exit.
-func (e Executor) RunAgentCommand(ctx context.Context, command harness.AgentCommand, stdin string, startedAt time.Time) (harness.AgentCommandResult, error) {
+func (e Executor) RunAgentCommand(ctx context.Context, command harness.AgentCommand, stdin string, startedAt time.Time) (result harness.AgentCommandResult, err error) {
 	if len(stdin) > harness.MaxInput {
 		return harness.AgentCommandResult{}, fmt.Errorf("stdin: %w", ErrLimit)
 	}
@@ -61,24 +62,25 @@ func (e Executor) RunAgentCommand(ctx context.Context, command harness.AgentComm
 	if err != nil {
 		return harness.AgentCommandResult{}, err
 	}
-	defer out.remove()
+	defer func() { err = errors.Join(err, out.remove()) }()
 
 	diagnostic, err := newSpool(e.StderrLimit, harness.MaxStderr, cancel)
 	if err != nil {
 		return harness.AgentCommandResult{}, err
 	}
-	defer diagnostic.remove()
+	defer func() { err = errors.Join(err, diagnostic.remove()) }()
 
 	cmd := ownedCommand(ctx, command, stdin)
 	cmd.Stdout, cmd.Stderr = out, diagnostic
+
 	err = cmd.Run()
 	if cmd.Process != nil {
-		_ = syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
+		err = errors.Join(err, killGroup(cmd.Process.Pid))
 	}
 
 	stdout, outErr := out.read(harness.MaxStructuredOutput + 1)
 	stderr, diagnosticErr := diagnostic.read(harness.MaxStderr)
-	result := harness.AgentCommandResult{Stdout: stdout, Stderr: Diagnostic(stderr), Latency: time.Since(startedAt)}
+	result = harness.AgentCommandResult{Stdout: stdout, Stderr: Diagnostic(stderr), Latency: time.Since(startedAt)}
 
 	return result, errors.Join(err, out.err, diagnostic.err, outErr, diagnosticErr, ctx.Err())
 }
@@ -122,20 +124,28 @@ func (s *spool) read(limit int) ([]byte, error) {
 	return io.ReadAll(io.LimitReader(s.file, int64(limit)))
 }
 
-func (s *spool) remove() {
-	_ = s.file.Close()
-	_ = os.Remove(s.file.Name())
+func (s *spool) remove() error {
+	return errors.Join(s.file.Close(), os.Remove(s.file.Name()))
+}
+
+func killGroup(pid int) error {
+	err := syscall.Kill(-pid, syscall.SIGKILL)
+	if errors.Is(err, syscall.ESRCH) {
+		return nil
+	}
+
+	return err
 }
 
 // ReadOutput rejects oversized files before exposing any partial result.
-func ReadOutput(path string, limit int) ([]byte, error) {
+func ReadOutput(path string, limit int) (data []byte, err error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = file.Close() }()
+	defer func() { err = errors.Join(err, file.Close()) }()
 
-	data, err := io.ReadAll(io.LimitReader(file, int64(limit)+1))
+	data, err = io.ReadAll(io.LimitReader(file, int64(limit)+1))
 	if err != nil {
 		return nil, err
 	}

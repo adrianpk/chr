@@ -3,6 +3,9 @@ package harness
 
 import (
 	"context"
+	"fmt"
+	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -115,4 +118,28 @@ type WorkerCommand struct {
 type Worker interface {
 	WorkerCommand(WorkerRequest) (WorkerCommand, error)
 	WorkflowWorker() []string
+}
+
+// ValidateAgentRunRequest checks technical input before spawning an adapter.
+func ValidateAgentRunRequest(request AgentRunRequest) error {
+	for _, field := range []struct{ name, value string }{
+		{"id", request.ID},
+		{"purpose", request.Purpose},
+		{"project dir", request.ProjectDir},
+		{"prompt", request.Prompt},
+	} {
+		if strings.TrimSpace(field.value) == "" {
+			return fmt.Errorf("agent run %s is required", field.name)
+		}
+	}
+
+	if len(request.Prompt) > MaxInput || len(request.OutputSchema) > MaxStructuredOutput {
+		return fmt.Errorf("agent run input exceeds byte ceiling")
+	}
+
+	if request.OutputName != "" && (filepath.Base(request.OutputName) != request.OutputName || request.OutputName == "." || request.OutputName == "..") {
+		return fmt.Errorf("agent run output name must be a file name")
+	}
+
+	return nil
 }

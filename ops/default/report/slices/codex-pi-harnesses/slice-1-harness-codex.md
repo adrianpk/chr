@@ -14,9 +14,10 @@ contracts while keeping workflow authority and semantic validation in core.
 
 ## Delivered Behavior
 
-T1.1 supplies neutral request, result, capability and worker contracts and a
-bounded subprocess supervisor. Adapter extraction and caller injection remain
-in progress.
+T1.1 supplies neutral technical contracts and bounded process supervision.
+T1.2 adds the Codex generation and worker adapter, with private run bundles,
+legacy executable/model/timeout resolution and unchanged command flags.
+Caller migration remains in progress.
 
 ## Implementation Notes
 
@@ -41,8 +42,10 @@ Passed during T1.1:
 
 - `go test ./internal/harness/... -run '^TestAgentRunProcess' -count=1 -timeout=30s`
 
+- `go test ./internal/harness/... -run '^(TestHarnessCodex|TestAgentRunProcess)' -count=1 -timeout=30s`
+
 The configured slice checks remain pending.
 
 ## Risks and Follow-ups
 
-T1.2 and T1.3 remain in progress. No PR is ready yet.
+T1.3 caller migration remains in progress. No PR is ready yet.
