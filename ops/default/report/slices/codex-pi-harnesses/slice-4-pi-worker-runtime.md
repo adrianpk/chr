@@ -1,6 +1,6 @@
 # Slice 4: Pi Docker Workers and Private Runtime Setup
 
-Status: reviewing
+Status: delivered
 Delivery set: codex-pi-harnesses
 Plan: [Selectable Harness Delivery](../../../plan/codex-pi-harnesses.md)
 Tracker: [Selectable Harness Delivery Order](../../../tracker/codex-pi-harnesses.md)
@@ -136,6 +136,20 @@ Both scenarios passed 200 runs after the correction:
 The controller records final validation against the clean PR HEAD and its exact
 ordered command list. The canonical PR carries that candidate's successful
 commands; task checks above are component evidence.
+
+The controller recorded all six ordered checks passing on the clean PR head
+`9701dca52063f329ddb76cf6bed523e6405edd66` (evidence
+`B7KX37KEJWPFAYDHI72RV3G33J`):
+
+- `make verify` (pass)
+- `go test ./internal/core ./internal/app -run '^(TestPiWorker|TestPiRuntime|TestHarnessBinding)' -count=1 -timeout=3m` (pass)
+- `go test -race ./internal/core ./internal/app -run '^(TestPiWorkerIsolation|TestPiCredentialRefresh)' -count=1 -timeout=3m` (pass)
+- `go test ./internal/harness/... -run '^(TestPiTransport|TestPiGeneration|TestPiRuntime|TestPiWorker|TestPiCredentialRefresh|TestAgentRunProcess)' -count=1 -timeout=3m` (pass)
+- `CHR_TEST_PI_RUNTIME_IMAGE=chr-agent-pi:1.3.0 go test -race ./internal/harness/pi ./internal/harness/process ./internal/app -run '^(TestPiWorker|TestPiCredentialRefresh|TestPiRuntimeImage|TestAgentRunProcess)' -count=1 -timeout=3m` (pass)
+- `git diff --check` (pass)
+
+Canonical PR #415 was verified merged into dev at that exact commit on
+2026-10-19. Slice 4 of 8 completed; Slice 5 is the next recorded unit.
 
 ## Risks and Follow-ups
 

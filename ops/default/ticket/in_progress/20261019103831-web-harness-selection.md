@@ -1,7 +1,7 @@
 ---
 id: TKT-20261019103831
 title: "Web harness selection"
-status: ready
+status: in_progress
 kind: task
 severity: medium
 priority: normal
@@ -10,6 +10,8 @@ tags: harnesses, pi, codex
 source: chat
 reported_at: 2026-10-19T10:38:31Z
 ready_at: 2026-10-19T10:38:33Z
+started_at: 2026-10-19T16:50:50Z
+branch: feat/slice-5-web-harness-selection
 commits: []
 ---
 
@@ -33,8 +35,9 @@ Expected PR title: `feat(slice-5): change project harness selections from the We
 
 Expected report: `ops/default/report/slices/codex-pi-harnesses/slice-5-web-harness-selection.md`.
 
-These are planned identities; no implementation branch, PR or report exists
-merely because this ticket is ready.
+Activated after canonical PR #415 was verified merged into dev.
+T5.1 is the first recorded task. Introduce the canonical report with the first
+implementation task commit; no PR is open yet.
 
 Prerequisite: Slice 4 integrated into dev; implementation authorization for this set.
 

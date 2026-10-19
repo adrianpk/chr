@@ -1,7 +1,7 @@
 ---
 id: TKT-20261019103830
 title: "Pi Docker workers and private runtime setup"
-status: reviewing
+status: solved
 kind: task
 severity: medium
 priority: normal
@@ -12,8 +12,11 @@ reported_at: 2026-10-19T10:38:30Z
 ready_at: 2026-10-19T10:38:33Z
 started_at: 2026-10-19T15:01:47Z
 reviewing_at: 2026-10-19T16:38:20Z
+reviewed_at: 2026-10-19T16:50:24Z
+closed_at: 2026-10-19T16:50:24Z
+resolution: fixed
 branch: feat/slice-4-pi-worker-runtime
-commits: [77bea3e585b26aed356594524e9162dbd2cb914c, 4e6a54bb85c4784564877bc1dcac01080f81d858, 29ee737a40ee280057376cd16bc35a69e2c075ae, c9dd7d4f950721de3bc1d24b44fb2c6b96c66f86, 1903ecd5860d8c9f1eedb31703d1b737442c1059]
+commits: [77bea3e585b26aed356594524e9162dbd2cb914c, 4e6a54bb85c4784564877bc1dcac01080f81d858, 29ee737a40ee280057376cd16bc35a69e2c075ae, c9dd7d4f950721de3bc1d24b44fb2c6b96c66f86, 1903ecd5860d8c9f1eedb31703d1b737442c1059, 9701dca52063f329ddb76cf6bed523e6405edd66]
 pr: https://forge.adrianpk.com/adrianpk/chr/pulls/415
 ---
 
@@ -126,3 +129,18 @@ Both scenarios passed 200 runs with:
 `go test ./internal/harness/process -run '^TestAgentRunProcessCancellation$' -count=200 -timeout=1m`.
 
 Canonical PR: [#415](https://forge.adrianpk.com/adrianpk/chr/pulls/415).
+
+## Integration Evidence
+
+PR #415 was verified merged into dev at `9701dca52063f329ddb76cf6bed523e6405edd66`.
+The controller recorded all six ordered checks passing at that clean head
+(evidence `B7KX37KEJWPFAYDHI72RV3G33J`):
+
+- `make verify` (pass)
+- `go test ./internal/core ./internal/app -run '^(TestPiWorker|TestPiRuntime|TestHarnessBinding)' -count=1 -timeout=3m` (pass)
+- `go test -race ./internal/core ./internal/app -run '^(TestPiWorkerIsolation|TestPiCredentialRefresh)' -count=1 -timeout=3m` (pass)
+- `go test ./internal/harness/... -run '^(TestPiTransport|TestPiGeneration|TestPiRuntime|TestPiWorker|TestPiCredentialRefresh|TestAgentRunProcess)' -count=1 -timeout=3m` (pass)
+- `CHR_TEST_PI_RUNTIME_IMAGE=chr-agent-pi:1.3.0 go test -race ./internal/harness/pi ./internal/harness/process ./internal/app -run '^(TestPiWorker|TestPiCredentialRefresh|TestPiRuntimeImage|TestAgentRunProcess)' -count=1 -timeout=3m` (pass)
+- `git diff --check` (pass)
+
+Slice 4 of 8 completed. Slice 5 is activated through its existing ticket.
