@@ -12,8 +12,9 @@ reported_at: 2026-10-19T10:38:28Z
 ready_at: 2026-10-19T10:38:33Z
 started_at: 2026-10-19T11:23:17Z
 branch: feat/slice-2-harness-selection
+pr: "https://forge.adrianpk.com/adrianpk/chr/pulls/413"
 reviewed_at: 2026-10-19T13:03:53Z
-commits: [d9b19ac1b2ce4e1b577d9497443b2d207c4c1ce7, 3ed1b443972fe4532f3df295c4df0d8e5c4ad657, f7f94be12eee99bd747aef2b6cf8e72e63f7ddb7, 17fcef85e99ac8025f87bc1cbd47df5760a5c50f]
+commits: [d9b19ac1b2ce4e1b577d9497443b2d207c4c1ce7, 3ed1b443972fe4532f3df295c4df0d8e5c4ad657, f7f94be12eee99bd747aef2b6cf8e72e63f7ddb7, 17fcef85e99ac8025f87bc1cbd47df5760a5c50f, 737162d3c1b6d8472e951d2ae1b6711626002fda]
 ---
 
 # Live role selection and retained bindings
@@ -36,8 +37,9 @@ Expected PR title: `feat(slice-2): retain live harness selections and invocation
 
 Expected report: `ops/default/report/slices/codex-pi-harnesses/slice-2-harness-selection.md`.
 
-Implementation tasks are complete and the canonical report is ready for the
-Slice 2 PR. Final validation will be recorded on the clean PR head.
+Implementation tasks are complete. Canonical PR [#413](https://forge.adrianpk.com/adrianpk/chr/pulls/413)
+is open with its immutable report link. Final validation is recorded on the
+clean PR head before handoff.
 
 Prerequisite: Slice 1 integrated into dev; implementation authorization for this set.
 
@@ -239,5 +241,5 @@ subprocesses, HTTP servers and fixture database connections have stopped.
 
 The canonical Slice 2 report is
 `ops/default/report/slices/codex-pi-harnesses/slice-2-harness-selection.md`.
-Final exact-HEAD validation and the PR reference are recorded before handoff;
-controller integration remains pending.
+PR #413 targets dev. The final exact-HEAD validation ledger is recorded before
+handoff; controller integration remains pending.
