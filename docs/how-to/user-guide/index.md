@@ -276,6 +276,15 @@ by the TUI and CLI: Cases, Dumps, Quizzes, Specs, Plans, Board, and Dash. It
 uses project-local files as the source of truth and reloads from shared state
 after CLI, TUI, or Web UI changes.
 
+Open **Harnesses** in the project context to choose named worker and generation
+defaults. Each role shows its local readiness separately from retained worker
+invocations. Select **Save defaults** to persist choices without restarting the
+service, or **Restore legacy dispatch** to clear a role. These changes apply to
+new operations; running, paused and resumed work keeps its original binding.
+Rejected saves retain your choices. Reload current defaults before retrying a
+stale form. See [Web harness defaults](../../reference/project-workspace.md#web-harness-defaults)
+for readiness, retry and private-setup boundaries.
+
 Open a named case to generate its plan. The planning panel shows Generate Plan
 when no plan exists and Regenerate Plan for the displayed existing revision.
 Save case edits first: planning uses saved context. Follow Add discovery context

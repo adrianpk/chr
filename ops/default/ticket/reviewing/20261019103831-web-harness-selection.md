@@ -1,7 +1,7 @@
 ---
 id: TKT-20261019103831
 title: "Web harness selection"
-status: in_progress
+status: reviewing
 kind: task
 severity: medium
 priority: normal
@@ -11,8 +11,9 @@ source: chat
 reported_at: 2026-10-19T10:38:31Z
 ready_at: 2026-10-19T10:38:33Z
 started_at: 2026-10-19T16:50:50Z
+reviewed_at: 2026-10-19T17:15:15Z
 branch: feat/slice-5-web-harness-selection
-commits: []
+commits: [57aca35d38f424236a93b34602f215bed4b5198e]
 ---
 
 # Web harness selection
@@ -36,8 +37,7 @@ Expected PR title: `feat(slice-5): change project harness selections from the We
 Expected report: `ops/default/report/slices/codex-pi-harnesses/slice-5-web-harness-selection.md`.
 
 Activated after canonical PR #415 was verified merged into dev.
-T5.1 is the first recorded task. Introduce the canonical report with the first
-implementation task commit; no PR is open yet.
+T5.1 introduced the canonical report in its implementation commit.
 
 Prerequisite: Slice 4 integrated into dev; implementation authorization for this set.
 
@@ -58,26 +58,28 @@ Acceptance: HP-19, HP-20, HP-21.
 
 ## Validation
 
-Exercise real HTTP action/authentication boundaries and one focused browser journey on wide and narrow layouts, including a switch while an invocation remains active. Inspect the persisted result from an independent process.
+Passed focused HTTP/application checks:
+`go test ./internal/webui ./internal/app -run '^TestWebHarnessSelection' -count=1 -timeout=3m`.
 
-Focused regression (planned): `go test ./internal/webui ./internal/app -run '^TestWebHarnessSelection' -count=1 -timeout=3m`.
+Passed the owned browser journey and the same focused regressions:
+`CHR_WEB_BROWSER=/usr/sbin/chromium go test ./internal/webui ./internal/app -run '^TestWebHarnessSelection' -count=1 -timeout=3m`.
 
-Before slice review/integration, run `make verify` and `git diff --check`.
-These commands are planned checks, not recorded successful executions.
-Retain commits, PR, validation and blocker evidence here and in the slice report;
-the tracker remains an order map.
+The journey covers login, both role changes while a claim remains active,
+original versus new invocation bindings, independent-process persistence,
+lost acknowledgement/replay, stale input, cancel and 1280/390 px layouts.
+HTTP tests also cover project/confirmation/origin guards, closed bounded fields,
+unavailable profiles, clear, private-setup failure and full-page fallback.
+The final ordered development gate and focused checks are recorded by the
+controller against the clean PR head after PR-reference follow-up commits.
 
 ## Implementation Progress
 
-T5.1 is implemented: the project context opens a compact chooser from shared
-selection/readiness projections, with separate retained worker bindings and a
-bounded eight-invocation list. Named choices include explicit keep and restore
-legacy options. The existing workflow status exposes its public frozen binding;
-there is no interface-owned settings or progress store.
+T5.1 and T5.2 are implemented. The compact project-context chooser observes shared
+selection/readiness and retained worker bindings. Exact revision-bound saves use
+the existing authenticated action path and shared configuration owner. Rejected
+input remains selected, receipt retries are idempotent, and new operations see
+persisted defaults without restarting the service.
 
-Passed: `go test ./internal/webui ./internal/app -run '^TestWebHarnessSelection' -count=1 -timeout=3m`.
+Report: [Slice 5](../../report/slices/codex-pi-harnesses/slice-5-web-harness-selection.md).
 
-Real application profiles and a claimed invocation are inspected without changing
-its revision or binding. Private references are excluded and the owned driver
-is not launched. T5.2 revision-bound saves, authentication/origin and browser
-acceptance remain pending. No canonical PR is open.
+Canonical PR reference is added after creation. Integration remains controller-owned.

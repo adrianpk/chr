@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"crypto/rand"
+	"errors"
 	"strings"
 	"time"
 
@@ -20,6 +21,8 @@ func (p webViewProvider) HarnessSelectionView(ctx context.Context) (webui.Harnes
 	status, err := operations.InspectHarnessSelections(ctx, "spec_generation")
 
 	view := webui.HarnessSelectionView{ProjectID: p.projectContext.ProjectID, Revision: status.Snapshot.Revision, RequestID: rand.Text()}
+
+	view.FormRevision = view.Revision
 	if err != nil {
 		return view, err
 	}
@@ -55,6 +58,8 @@ func (p webViewProvider) HarnessSelectionView(ctx context.Context) (webui.Harnes
 
 func webHarnessRole(selection core.HarnessSelection, profile string, generation bool) webui.HarnessRoleView {
 	view := webui.HarnessRoleView{Current: webHarnessLabel(profile, selection.Harness, selection.ModelProvider, selection.Model), Problem: selection.Readiness.Problem}
+
+	view.Selected = webui.HarnessKeepProfile
 	if profile == "" {
 		view.Current = "Legacy dispatch · Codex CLI default"
 		if generation {
@@ -66,6 +71,67 @@ func webHarnessRole(selection core.HarnessSelection, profile string, generation 
 	view.Setup = "Local setup" + webHarnessChoiceSetup(readiness) + ". Credentials: " + strings.ReplaceAll(readiness.Credentials, "_", " ") + "; runtime: " + strings.ReplaceAll(readiness.Runtime, "_", " ") + ". Remote authentication: " + strings.ReplaceAll(readiness.RemoteAuthentication, "_", " ") + "."
 
 	return view
+}
+
+func (p webViewProvider) writeHarnessSelection(ctx context.Context, operations service, request webui.WriteActionRequest) webui.WriteActionResponse {
+	if !webHarnessEnvelopeValid(request) || !webHarnessFieldsValid(request.Fields) {
+		return webValidationWrite(errors.New("use the exact project harness form and named profile choices"))
+	}
+
+	if request.Fields["project_ref"] != p.projectContext.ProjectID {
+		return webBlockedWrite("Selection changes belong to the current project.")
+	}
+
+	worker, generation := webHarnessChoice(request.Fields["worker"]), webHarnessChoice(request.Fields["generation"])
+	if worker == nil && generation == nil {
+		return webValidationWrite(errors.New("choose a change for at least one role"))
+	}
+
+	actor, err := core.ResolveProjectUserspace(core.ResolveProjectUserspaceOptions{ProjectDir: operations.projectContext.ProjectDir})
+	if err != nil {
+		return webBlockedWrite("The active local operator is unavailable.")
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	_, err = operations.ChangeHarnessSelections(ctx, core.HarnessSelectionChangeRequest{
+		Binding:    core.WorkflowMutationBinding{RequestID: request.Fields["request_id"], Operator: actor.OperatorID},
+		ProjectRef: request.Fields["project_ref"], ExpectedRevision: request.Revision, Worker: worker, Generation: generation,
+	}, localHarnessSelectionAuthority(operations.projectContext.ProjectDir, actor.OperatorID))
+	if errors.Is(err, core.ErrWorkflowConflict) {
+		return webui.WriteActionResponse{Status: webui.WriteStatusStale, Summary: "The defaults or request identity changed. Your choices are retained; reload current defaults before saving."}
+	}
+
+	if err != nil {
+		return webValidationWrite(errors.New("the selected profiles are unavailable or not locally ready; check private profile setup and choose a prepared profile"))
+	}
+
+	return webui.WriteActionResponse{Status: webui.WriteStatusOK, Summary: "Harness defaults saved. Changes apply to new operations."}
+}
+
+func webHarnessEnvelopeValid(request webui.WriteActionRequest) bool {
+	return request.Action == webui.HarnessSelectionAction && request.Surface == "harnesses" && request.ID == "" && request.Family == "" && len(request.Revision) == 64 && len(request.Fields) == 4
+}
+
+func webHarnessFieldsValid(fields map[string]string) bool {
+	limits := map[string]int{"project_ref": 256, "request_id": 256, "worker": 128, "generation": 128}
+	for name, value := range fields {
+		limit, found := limits[name]
+		if !found || len(value) > limit {
+			return false
+		}
+	}
+
+	return true
+}
+
+func webHarnessChoice(value string) *string {
+	if value == webui.HarnessKeepProfile {
+		return nil
+	}
+
+	return &value
 }
 
 func webHarnessChoiceSetup(readiness core.HarnessReadiness) string {

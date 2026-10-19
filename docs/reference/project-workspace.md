@@ -277,6 +277,32 @@ web:
 Non-loopback binds print an exposure warning. In `auto` mode, non-loopback binds
 also require the token value to be present in `token_env`.
 
+## Web Harness Defaults
+
+Open **Harnesses** in the Web UI project context to inspect the worker and
+content-generation defaults. Each named profile shows its harness, model and
+local readiness for that role. Local readiness does not test remote
+authentication. Prepare executables, runtimes and credentials privately before
+selecting a profile.
+
+Choose a profile for either role and select **Save defaults**. **Keep current
+default** leaves that role unchanged. **Restore legacy dispatch** clears its
+selection: workers use the existing Codex default and generation keeps its
+operation-specific dispatch. Changes are persisted for the current project and
+become visible to new operations without restarting the Web service.
+
+Running, paused and resumed operations keep their admitted bindings. The chooser
+lists the first eight retained worker invocations separately from current
+defaults; **View workflows** opens their existing status view.
+
+Saves use the current project, configuration revision and a retained request
+identity through the existing Web authentication and origin guards. A stale or
+invalid save keeps the attempted choices. Use **Reload current defaults** to
+inspect a newer configuration before saving again. If an acknowledgement is
+lost, retry the same form to recover the original receipt. Closing the chooser
+discards unsent choices. The control edits named selections only; private paths,
+credentials and runtime setup remain outside the form.
+
 ## Notification Config
 
 `.chr/default/config.yml` may also define notification settings under

@@ -36,7 +36,6 @@ func (p webViewProvider) WriteAction(ctx context.Context, request webui.WriteAct
 	}
 
 	operations := p.service(ctx)
-
 	if response, handled, err := p.writeDocumentAction(operations, request); handled || err != nil {
 		return response, err
 	}
@@ -70,6 +69,8 @@ func (p webViewProvider) writeDocumentAction(operations service, request webui.W
 	}
 
 	switch request.Action {
+	case webui.HarnessSelectionAction:
+		return p.writeHarnessSelection(operations.ctx, operations, request), true, nil
 	case webActionCaseUpdate:
 		response, err := p.writeCaseUpdate(operations, request)
 

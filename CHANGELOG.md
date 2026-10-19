@@ -13,8 +13,9 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 ### Added
 
 - Projects can select Codex or Pi independently for workers and content
-  generation. Prepared Pi workers run in Docker with private call state and
-  explicit credentials. Admitted work keeps its selected runtime when project
+  generation. The Web project context offers named defaults, local readiness
+  and revision-checked saves without a service restart. Prepared Pi workers run
+  in Docker with private call state and explicit credentials. Admitted work keeps its selected runtime when project
   configuration changes.
 
 - Protect the Web UI with one locally configured account. Log in once and

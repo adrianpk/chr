@@ -19,7 +19,7 @@ func (p harnessViewProvider) HarnessSelectionView(context.Context) (HarnessSelec
 		return HarnessSelectionView{}, errors.New("private /credential/location must not be rendered")
 	}
 
-	return HarnessSelectionView{ProjectID: "project-1", Worker: HarnessRoleView{Current: "alpha · Codex · model-a"}, Generation: HarnessRoleView{Current: "Legacy dispatch · varies by operation"}}, nil
+	return HarnessSelectionView{ProjectID: "project-1", FormRevision: "fixture-revision", Worker: HarnessRoleView{Current: "alpha · Codex · model-a"}, Generation: HarnessRoleView{Current: "Legacy dispatch · varies by operation"}}, nil
 }
 
 // Unsupported providers hide the control, and expected setup failures render

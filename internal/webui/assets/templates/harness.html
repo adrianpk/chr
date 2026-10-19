@@ -9,12 +9,23 @@
 
 {{define "harness_content.html"}}
 <section class="harness-content" id="harness-content" data-project-id="{{.Harnesses.ProjectID}}" data-revision="{{.Harnesses.Revision}}">
+  {{if .Harnesses.Message}}<p role="status" aria-live="polite" data-harness-write-status="{{.Harnesses.Status}}">{{.Harnesses.Message}}</p>{{end}}
   <p>Changes apply to new operations. Running, paused and resumed work keeps its original binding.</p>
-  {{if .Harnesses.Problem}}<p class="diagnostic" role="alert">{{.Harnesses.Problem}}</p>{{else}}
+  {{if .Harnesses.Problem}}<p class="diagnostic" role="alert">{{.Harnesses.Problem}}</p>{{end}}
+  {{if .Harnesses.FormRevision}}
+  <form id="harness-selection-form" method="post" action="/project/harnesses" {{if .Harnesses.Modal}}hx-post="/project/harnesses" hx-target="#modal-root" hx-swap="innerHTML" hx-sync="this:drop"{{end}}>
+    <input type="hidden" name="action" value="harnesses.change">
+    <input type="hidden" name="surface" value="harnesses">
+    <input type="hidden" name="confirm" value="true">
+    <input type="hidden" name="project_ref" value="{{.Harnesses.ProjectID}}">
+    <input type="hidden" name="revision" value="{{.Harnesses.FormRevision}}">
+    <input type="hidden" name="request_id" value="{{.Harnesses.RequestID}}">
   <div class="harness-roles">
-    <section aria-labelledby="harness-worker-label"><h3 id="harness-worker-label">Worker default</h3>{{template "harness_role.html" .Harnesses.Worker}}<label class="readonly-field"><span>Worker profile</span><select id="harness-worker" name="worker"><option value=":keep">Keep current default</option><option value="">Restore legacy dispatch</option>{{range .Harnesses.Worker.Choices}}<option value="{{.Value}}">{{.Label}}</option>{{end}}</select></label></section>
-    <section aria-labelledby="harness-generation-label"><h3 id="harness-generation-label">Generation default</h3>{{template "harness_role.html" .Harnesses.Generation}}<label class="readonly-field"><span>Generation profile</span><select id="harness-generation" name="generation"><option value=":keep">Keep current default</option><option value="">Restore legacy dispatch</option>{{range .Harnesses.Generation.Choices}}<option value="{{.Value}}">{{.Label}}</option>{{end}}</select></label></section>
+    <section aria-labelledby="harness-worker-label"><h3 id="harness-worker-label">Worker default</h3>{{template "harness_role.html" .Harnesses.Worker}}<label class="readonly-field"><span>Worker profile</span><select id="harness-worker" name="worker">{{$current := .Harnesses.Worker.Selected}}<option value=":keep"{{if eq $current ":keep"}} selected{{end}}>Keep current default</option><option value=""{{if eq $current ""}} selected{{end}}>Restore legacy dispatch</option>{{range .Harnesses.Worker.Choices}}<option value="{{.Value}}"{{if eq $current .Value}} selected{{end}}>{{.Label}}</option>{{end}}</select></label></section>
+    <section aria-labelledby="harness-generation-label"><h3 id="harness-generation-label">Generation default</h3>{{template "harness_role.html" .Harnesses.Generation}}<label class="readonly-field"><span>Generation profile</span><select id="harness-generation" name="generation">{{$current := .Harnesses.Generation.Selected}}<option value=":keep"{{if eq $current ":keep"}} selected{{end}}>Keep current default</option><option value=""{{if eq $current ""}} selected{{end}}>Restore legacy dispatch</option>{{range .Harnesses.Generation.Choices}}<option value="{{.Value}}"{{if eq $current .Value}} selected{{end}}>{{.Label}}</option>{{end}}</select></label></section>
   </div>
+  <div class="detail-actions harness-actions"><button class="button" type="submit">Save defaults</button><a class="button" href="/project/harnesses" {{if .Harnesses.Modal}}hx-get="/project/harnesses" hx-target="#modal-root" hx-swap="innerHTML"{{end}}>Reload current defaults</a></div>
+  </form>
   <p class="summary-label">Local setup is separate from remote authentication. Inspecting or choosing profiles does not call a model.</p>
   {{end}}
   <section class="harness-retained" aria-label="Retained worker invocations"><h3>Retained worker invocations</h3>

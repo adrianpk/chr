@@ -366,6 +366,12 @@ func (h handler) writeAction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	request := writeActionRequest(r)
+	if request.Action == HarnessSelectionAction {
+		http.Error(w, "use the project harness form", http.StatusBadRequest)
+
+		return
+	}
+
 	result, err := h.provider.WriteAction(r.Context(), request)
 	if err != nil {
 		http.Error(w, "write action", http.StatusInternalServerError)
