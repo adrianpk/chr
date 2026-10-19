@@ -1,7 +1,7 @@
 ---
 id: TKT-20261019103828
 title: "Live role selection and retained bindings"
-status: ready
+status: in_progress
 kind: task
 severity: medium
 priority: normal
@@ -10,6 +10,8 @@ tags: harnesses, pi, codex
 source: chat
 reported_at: 2026-10-19T10:38:28Z
 ready_at: 2026-10-19T10:38:33Z
+started_at: 2026-10-19T11:23:17Z
+branch: feat/slice-2-harness-selection
 commits: []
 ---
 
@@ -33,8 +35,8 @@ Expected PR title: `feat(slice-2): retain live harness selections and invocation
 
 Expected report: `ops/default/report/slices/codex-pi-harnesses/slice-2-harness-selection.md`.
 
-These are planned identities; no implementation branch, PR or report exists
-merely because this ticket is ready.
+The assigned implementation branch is active. No Slice 2 PR is ready yet;
+the report will be introduced when the complete slice is ready for integration.
 
 Prerequisite: Slice 1 integrated into dev; implementation authorization for this set.
 
@@ -67,3 +69,33 @@ Before slice review/integration, run `make verify` and `git diff --check`.
 These commands are planned checks, not recorded successful executions.
 Retain commits, PR, validation and blocker evidence here and in the slice report;
 the tracker remains an order map.
+
+## Implementation Evidence
+
+T2.1 is implemented: the configuration owner parses strict worker/generation
+profile references and exposes its complete persisted revision. Private named
+profiles have bounded parsing and readable, path-free projections. Resolution
+preserves each legacy action default and direct OpenAI selection, observes fresh
+workspace choices without restart, and rejects unknown or unsupported explicit
+choices without fallback. Inspection does not launch the model executable.
+
+Local readiness distinguishes executable availability, managed or explicit
+credentials, runtime support and remote authentication, which is not tested by
+inspection. Pi dispatch and profile resources without an implemented dispatch
+path are reported unsupported rather than accepted and ignored.
+
+Successful T2.1 checks:
+
+- `go test ./internal/core ./internal/app -run '^TestHarnessSelection' -count=1 -timeout=3m`
+- `go test ./internal/core -run '^(TestLoadWorkspaceConfig|TestWorkflowConfig)' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/app`
+- `scripts/check-go-func-signatures.sh`
+- `git diff --check`
+
+Next recorded task: T2.2, shared authorized inspect/change operations and CLI,
+whole-document compare-and-swap, cross-process exclusion, atomic role updates
+and bounded mutation replay. Reuse the existing configuration owner and
+WorkflowMutationBinding identity; do not introduce an interface settings store.
+T2.3 invocation bindings and T2.4 operation-level generation bindings also remain
+pending. Production admission and generation caller wiring are not complete.
+The configured final exact-HEAD checks have not run for this partial slice.

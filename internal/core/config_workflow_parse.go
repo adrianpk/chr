@@ -65,7 +65,7 @@ func guardWorkflowConfigValue(key, value string) error {
 }
 
 func workflowConfigSection(section string) bool {
-	return section == "workflow" || section == "work" || section == "review" || section == "work.integration"
+	return section == "workflow" || section == "work" || section == "review" || section == "work.integration" || section == "harnesses"
 }
 
 func guardWorkflowConfigIndent(raw, previous, key string, parsed bool) error {
@@ -167,6 +167,7 @@ func knownWorkflowConfigKey(key string) bool {
 	}
 
 	return slices.Contains([]string{
+		"harnesses.worker", "harnesses.generation",
 		"work.integration.publication_profile",
 		"work.state_authority", "work.workspace_mode", "work.merge_strategy", "work.include_later_tickets",
 		"work.mode", "work.integration_branch", "work.canonical_remote", "work.require_clean_worktree",

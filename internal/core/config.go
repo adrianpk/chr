@@ -12,6 +12,7 @@ import (
 
 // WorkspaceConfig describes a package boundary value.
 type WorkspaceConfig struct {
+	Harnesses       HarnessSelectionConfig
 	Workflow        WorkflowConfig
 	TicketKeyPrefix string
 	Runtime         RuntimeConfig
