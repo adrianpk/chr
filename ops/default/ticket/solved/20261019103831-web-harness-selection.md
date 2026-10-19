@@ -1,7 +1,7 @@
 ---
 id: TKT-20261019103831
 title: "Web harness selection"
-status: reviewing
+status: solved
 kind: task
 severity: medium
 priority: normal
@@ -11,9 +11,11 @@ source: chat
 reported_at: 2026-10-19T10:38:31Z
 ready_at: 2026-10-19T10:38:33Z
 started_at: 2026-10-19T16:50:50Z
-reviewed_at: 2026-10-19T17:15:15Z
+reviewed_at: 2026-10-19T17:19:15Z
+closed_at: 2026-10-19T17:19:15Z
+resolution: fixed
 branch: feat/slice-5-web-harness-selection
-commits: [57aca35d38f424236a93b34602f215bed4b5198e, 8df1d8911dca3858896dbe9862052aecbdf3c147]
+commits: [57aca35d38f424236a93b34602f215bed4b5198e, 8df1d8911dca3858896dbe9862052aecbdf3c147, 267620747ba34760df8a90101847beb010cf9547]
 pr: https://forge.adrianpk.com/adrianpk/chr/pulls/416
 ---
 
@@ -84,3 +86,10 @@ persisted defaults without restarting the service.
 Report: [Slice 5](../../report/slices/codex-pi-harnesses/slice-5-web-harness-selection.md).
 
 Canonical PR: [#416](https://forge.adrianpk.com/adrianpk/chr/pulls/416). Integration remains controller-owned.
+
+## Integration
+
+PR #416 merged into dev at `267620747ba34760df8a90101847beb010cf9547`.
+Controller evidence `57CXO5LYCSGP5I2DP4USMEBMAE` passed all four ordered
+commands recorded in the report. Acta confirms the Rebase + Fast-forward merge
+in event `01M5AJQM76C0SZKVP4GZ2VMC7Z`. Slice 6 is the next recorded unit.

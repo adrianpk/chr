@@ -1,7 +1,7 @@
 ---
 id: TKT-20261019103832
 title: "TUI harness selection"
-status: ready
+status: in_progress
 kind: task
 severity: medium
 priority: normal
@@ -10,6 +10,8 @@ tags: harnesses, pi, codex
 source: chat
 reported_at: 2026-10-19T10:38:32Z
 ready_at: 2026-10-19T10:38:33Z
+started_at: 2026-10-19T17:19:15Z
+branch: feat/slice-6-tui-harness-selection
 commits: []
 ---
 
@@ -33,8 +35,8 @@ Expected PR title: `feat(slice-6): change project harness selections from the TU
 
 Expected report: `ops/default/report/slices/codex-pi-harnesses/slice-6-tui-harness-selection.md`.
 
-These are planned identities; no implementation branch, PR or report exists
-merely because this ticket is ready.
+Activated after canonical PR #416 was verified merged into dev. T6.1 is
+the first recorded task; the canonical report accompanies its implementation.
 
 Prerequisite: Slice 5 integrated into dev; implementation authorization for this set.
 

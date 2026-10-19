@@ -1,6 +1,6 @@
 # Slice 5: Web Harness Selection
 
-Status: reviewing
+Status: delivered
 Delivery set: codex-pi-harnesses
 Plan: [Selectable Harness Delivery](../../../plan/codex-pi-harnesses.md)
 Tracker: [Selectable Harness Delivery Order](../../../tracker/codex-pi-harnesses.md)
@@ -91,9 +91,17 @@ The same journey checks 1280 px and 390 px layouts, narrow-screen clear, cancel
 and private-field exclusion. Both screenshots were inspected. The owned browser,
 HTTP server, claim and subprocess are stopped by fixture cleanup.
 
-The controller records the final ordered `make verify`, focused HTTP/application,
-focused browser and whitespace checks against the clean PR head after reference
-follow-up commits. That exact-head evidence is separate from these task checks.
+Controller evidence `57CXO5LYCSGP5I2DP4USMEBMAE` passed this exact ordered
+list on clean head `267620747ba34760df8a90101847beb010cf9547`:
+
+- `make verify`
+- `go test ./internal/webui ./internal/app -run '^TestWebHarnessSelection' -count=1 -timeout=3m`
+- `CHR_WEB_BROWSER=/usr/sbin/chromium go test ./internal/app -run '^TestWebHarnessSelectionBrowser$' -count=1 -timeout=3m`
+- `git diff --check`
+
+Canonical PR #416 was verified merged into dev at that same commit through
+controller-owned Rebase + Fast-forward. Acta merge event:
+`01M5AJQM76C0SZKVP4GZ2VMC7Z`.
 
 ## Risks and Follow-ups
 
