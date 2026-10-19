@@ -13,7 +13,8 @@ ready_at: 2026-10-19T10:38:33Z
 started_at: 2026-10-19T15:01:47Z
 reviewing_at: 2026-10-19T16:38:20Z
 branch: feat/slice-4-pi-worker-runtime
-commits: [77bea3e585b26aed356594524e9162dbd2cb914c, 4e6a54bb85c4784564877bc1dcac01080f81d858, 29ee737a40ee280057376cd16bc35a69e2c075ae, c9dd7d4f950721de3bc1d24b44fb2c6b96c66f86]
+commits: [77bea3e585b26aed356594524e9162dbd2cb914c, 4e6a54bb85c4784564877bc1dcac01080f81d858, 29ee737a40ee280057376cd16bc35a69e2c075ae, c9dd7d4f950721de3bc1d24b44fb2c6b96c66f86, 1903ecd5860d8c9f1eedb31703d1b737442c1059]
+pr: https://forge.adrianpk.com/adrianpk/chr/pulls/415
 ---
 
 # Pi Docker workers and private runtime setup
@@ -115,4 +116,4 @@ protocol and development failure/correction evidence. The controller records
 final ordered checks against the clean PR HEAD. Owned fixtures stopped after
 their checks. Real-model acceptance remains the approved final opt-in item.
 
-Canonical PR: pending.
+Canonical PR: [#415](https://forge.adrianpk.com/adrianpk/chr/pulls/415).
