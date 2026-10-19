@@ -5,7 +5,7 @@ Delivery set: codex-pi-harnesses
 Plan: [Selectable Harness Delivery](../../../plan/codex-pi-harnesses.md)
 Tracker: [Selectable Harness Delivery Order](../../../tracker/codex-pi-harnesses.md)
 Branch: `feat/slice-7-telegram-harness-selection`
-PR: pending
+PR: [#418](https://forge.adrianpk.com/adrianpk/chr/pulls/418)
 
 ## Purpose
 
@@ -53,6 +53,10 @@ owned Git workflow claims and persisted generation bindings. A lost owner
 acknowledgement recovers the original result even after private profile setup
 becomes unreadable. The result notice includes its request ID. Synthetic model
 responses cannot authorize a configuration command or private setup.
+
+Task commits: T7.1 `472d576a34f70a94611626d3d2a0c652f42b842f`,
+T7.2 `92a45627362a4dcb7c7c1b5a27f655f5eca21033`, and
+T7.3 `5c27c9beac5242f9543bb2247c2b546b1c3fd01f`.
 
 ## Contracts Added or Changed
 

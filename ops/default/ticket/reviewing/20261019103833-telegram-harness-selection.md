@@ -13,7 +13,8 @@ ready_at: 2026-10-19T10:38:33Z
 started_at: 2026-10-19T17:37:13Z
 branch: feat/slice-7-telegram-harness-selection
 reviewed_at: 2026-10-19T18:01:45Z
-commits: [472d576a34f70a94611626d3d2a0c652f42b842f, 92a45627362a4dcb7c7c1b5a27f655f5eca21033]
+commits: [472d576a34f70a94611626d3d2a0c652f42b842f, 92a45627362a4dcb7c7c1b5a27f655f5eca21033, 5c27c9beac5242f9543bb2247c2b546b1c3fd01f]
+pr: https://forge.adrianpk.com/adrianpk/chr/pulls/418
 ---
 
 # Telegram harness selection
