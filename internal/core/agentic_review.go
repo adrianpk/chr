@@ -100,13 +100,15 @@ func (r HarnessAgenticReviewRunner) Review(ctx context.Context, review AgenticRe
 	}
 
 	agentRun, err := RunAgent(ctx, r.Runner, harness.AgentRunRequest{
-		ID:           "review-" + review.Ticket.Key + "-" + review.Execution.ID,
-		Purpose:      "agentic_review",
-		ProjectDir:   review.ProjectDir,
-		RunDir:       runDir,
-		Prompt:       AgenticReviewPrompt(contextBody),
-		OutputSchema: AgenticReviewOutputSchema(),
-		OutputName:   "result.json",
+		ID:            "review-" + review.Ticket.Key + "-" + review.Execution.ID,
+		Purpose:       "agentic_review",
+		ProjectDir:    review.ProjectDir,
+		RunDir:        runDir,
+		Prompt:        AgenticReviewPrompt(contextBody),
+		OutputSchema:  AgenticReviewOutputSchema(),
+		OutputName:    "result.json",
+		ReadOnlyFiles: true,
+		ReadOnlyRefs:  []string{review.ExecutionReportPath, review.Application.Evidence.ResultPath, review.Application.Evidence.ValidationPath, review.Application.Evidence.LogPath},
 	})
 	if err != nil {
 		return AgenticReviewArtifact{}, err

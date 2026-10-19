@@ -34,6 +34,8 @@ type record struct {
 	ErrorMessage string          `json:"errorMessage"`
 	FinalError   string          `json:"finalError"`
 	Result       json.RawMessage `json:"result"`
+	ToolName     string          `json:"toolName"`
+	ToolCallID   string          `json:"toolCallId"`
 }
 
 type session struct {
@@ -49,6 +51,8 @@ type session struct {
 	finalErr      error
 	usage         usageTotals
 	secrets       []string
+	tools         map[string]bool
+	toolCalls     int
 }
 
 func newSession(request Request) *session {

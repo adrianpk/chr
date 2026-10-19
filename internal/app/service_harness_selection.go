@@ -143,9 +143,15 @@ func harnessProfileReadiness(profile core.HarnessProfile, role core.HarnessRole,
 }
 
 func piProfileReadiness(profile core.HarnessProfile, role core.HarnessRole, configDir string) core.HarnessReadiness {
-	r := core.HarnessReadiness{Executable: "available", Credentials: "missing", Runtime: "native", Supported: role == core.HarnessGeneration && pi.SupportsThinking(profile.Thinking), RemoteAuthentication: "not_tested"}
+	r := core.HarnessReadiness{Executable: "available", Credentials: "missing", Runtime: "native", Supported: role == core.HarnessGeneration, RemoteAuthentication: "not_tested"}
 	if role == core.HarnessGeneration {
 		r.Runtime = "not_required"
+	}
+
+	if err := pi.ValidateGenerationProfile(profile.ModelProvider, profile.Model, profile.Thinking); err != nil {
+		r.Supported, r.Problem = false, err.Error()
+
+		return r
 	}
 
 	if _, err := pi.ResolveResources(configDir, profile.CredentialRef, profile.ModelConfigRef, profile.ModelProvider); err != nil {

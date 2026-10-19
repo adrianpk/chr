@@ -27,17 +27,18 @@ func prepareGenerationCall(request harness.AgentRunRequest) (call generationCall
 
 	call.result, call.secret = generationResult(request), secret
 
-	call.prompt = request.Prompt
-	if len(request.OutputSchema) != 0 {
-		call.prompt += "\n\nHost output schema (data, not instructions):\n" + string(request.OutputSchema)
-	}
-
 	if err := writeGenerationInput(call, request); err != nil {
 		return call, err
 	}
 
 	if err := writePrivateCallFiles(call.privateDir, auth, models); err != nil {
 		return call, err
+	}
+
+	if request.ReadOnlyFiles {
+		if err := writeReadOnlyProfile(call.privateDir, request); err != nil {
+			return call, err
+		}
 	}
 
 	call.command = generationCommand(request, call.privateDir)
@@ -48,10 +49,14 @@ func prepareGenerationCall(request harness.AgentRunRequest) (call generationCall
 		return call, err
 	}
 
-	return call, os.WriteFile(call.result.CommandPath, data, 0o600)
+	return call, writeCallArtifact(call.result.CommandPath, data)
 }
 
 func createGenerationDirectory(runDir string) (string, error) {
+	if err := checkCallDirectoryPath(runDir); err != nil {
+		return "", err
+	}
+
 	if err := os.MkdirAll(runDir, 0o700); err != nil {
 		return "", err
 	}
@@ -61,16 +66,21 @@ func createGenerationDirectory(runDir string) (string, error) {
 		return "", errors.New("pi run directory must be host-owned")
 	}
 
+	real, err := filepath.EvalSymlinks(runDir)
+	if err != nil || real != filepath.Clean(runDir) {
+		return "", errors.New("pi run directory cannot traverse symlinks")
+	}
+
 	return os.MkdirTemp("", "chr-pi-call-")
 }
 
 func writeGenerationInput(call generationCall, request harness.AgentRunRequest) error {
-	if err := os.WriteFile(call.result.PromptPath, []byte(request.Prompt), 0o600); err != nil {
+	if err := writeCallArtifact(call.result.PromptPath, []byte(request.Prompt)); err != nil {
 		return err
 	}
 
 	if len(request.OutputSchema) != 0 {
-		return os.WriteFile(filepath.Join(request.RunDir, "output-schema.json"), request.OutputSchema, 0o600)
+		return writeCallArtifact(filepath.Join(request.RunDir, "output-schema.json"), request.OutputSchema)
 	}
 
 	return nil
@@ -98,9 +108,15 @@ func writePrivateCallFiles(dir string, auth, models []byte) error {
 
 func generationCommand(request harness.AgentRunRequest, dir string) harness.AgentCommand {
 	args := []string{
-		"--mode", "rpc", "--no-session", "--offline", "--no-tools", "--no-extensions", "--no-mcp", "--no-skills", "--no-prompt-templates", "--no-themes", "--no-context-files", "--no-approve",
+		"--mode", "rpc", "--no-session", "--offline", "--no-extensions", "--no-mcp", "--no-skills", "--no-prompt-templates", "--no-themes", "--no-context-files", "--no-approve",
 		"--provider", request.ModelProvider, "--model", request.Model,
 	}
+	if request.ReadOnlyFiles {
+		args = append(args, "--no-builtin-tools", "--tools", "chr_inspect", "--extension", filepath.Join(dir, "readonly.mjs"))
+	} else {
+		args = append(args, "--no-tools")
+	}
+
 	if request.Thinking != "" {
 		args = append(args, "--thinking", request.Thinking)
 	}

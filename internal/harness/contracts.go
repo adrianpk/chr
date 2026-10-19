@@ -56,6 +56,8 @@ type AgentRunRequest struct {
 	ModelProvider      string
 	Thinking           string
 	Resources          GenerationResources
+	ReadOnlyFiles      bool
+	ReadOnlyRefs       []string
 	Timeout            time.Duration
 	OutputLimit        int
 	DeferResponseTrace bool

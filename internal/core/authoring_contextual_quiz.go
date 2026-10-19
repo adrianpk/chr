@@ -360,6 +360,7 @@ func (p HarnessAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx
 		Prompt:             prompt,
 		OutputName:         "output.json",
 		Program:            program,
+		ReadOnlyFiles:      true,
 		DeferResponseTrace: true,
 	})
 	if err != nil {
@@ -367,6 +368,13 @@ func (p HarnessAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx
 	}
 
 	result, err := ParseAuthoringQuizGenerationResult(run.Output)
+	result.Provider = run.Provider
+	result.Strategy = AuthoringQuizGenerationStrategyDeep
+
+	result.RawText = string(run.Output)
+	if err == nil {
+		err = ValidateAuthoringQuizGenerationResult(result)
+	}
 
 	err = ValidateHarnessGenerationOutput(ctx, harness.AgentRunRequest{ID: request.ID, Purpose: request.Action, ProjectDir: request.ProjectDir}, err)
 	if err != nil {
@@ -379,9 +387,6 @@ func (p HarnessAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx
 		return AuthoringQuizGenerationResult{}, err
 	}
 
-	result.Provider = run.Provider
-	result.Strategy = AuthoringQuizGenerationStrategyDeep
-	result.RawText = string(run.Output)
 	recordAgentRunResponseEvent(ctx, harness.AgentRunRequest{
 		ID:         request.ID,
 		Purpose:    request.Action,

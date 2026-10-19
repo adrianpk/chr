@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -127,6 +128,17 @@ func selectedModels(path, provider string) ([]byte, error) {
 		return nil, ErrCapability
 	}
 
+	fields, ok := definition.(map[string]any)
+	if !ok || len(fields) == 0 {
+		return nil, errors.New("pi model provider must be a nonempty definition")
+	}
+
+	for key := range fields {
+		if !providerModelField(key) {
+			return nil, fmt.Errorf("unsupported Pi model provider field; use a credential-free 1.3.0 definition: %w", ErrCapability)
+		}
+	}
+
 	if err := validateModelDefinition(definition, 0); err != nil {
 		return nil, err
 	}
@@ -163,6 +175,12 @@ func validateModelFields(fields map[string]any, depth int) error {
 			return fmt.Errorf("keep credentials in the selected auth file; model resources cannot supply authentication or commands: %w", ErrCapability)
 		}
 
+		if key == "baseUrl" {
+			if err := validateModelEndpoint(child); err != nil {
+				return err
+			}
+		}
+
 		if err := validateModelDefinition(child, depth+1); err != nil {
 			return err
 		}
@@ -173,11 +191,31 @@ func validateModelFields(fields map[string]any, depth int) error {
 
 func forbiddenModelField(key string) bool {
 	switch strings.ToLower(key) {
-	case "apikey", "headers", "authorization", "password", "token", "env", "command":
+	case "apikey", "api_key", "headers", "authorization", "password", "token", "secret", "credentials", "oauth", "access", "refresh", "env", "command":
 		return true
 	default:
 		return false
 	}
+}
+
+func providerModelField(key string) bool {
+	switch key {
+	case "name", "api", "baseUrl", "compat", "authHeader", "models", "modelOverrides":
+		return true
+	default:
+		return false
+	}
+}
+
+func validateModelEndpoint(value any) error {
+	text, ok := value.(string)
+
+	parsed, err := url.Parse(text)
+	if !ok || err != nil || parsed.Hostname() == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.User != nil || parsed.RawQuery != "" || parsed.Fragment != "" {
+		return fmt.Errorf("pi model endpoints require an HTTP(S) URL without embedded credentials, queries or fragments: %w", ErrCapability)
+	}
+
+	return nil
 }
 
 func resourceHash(data []byte) string {

@@ -36,11 +36,12 @@ type Transport struct {
 
 // Request describes one independently owned RPC call with exact model identity.
 type Request struct {
-	Prompt      string
-	Provider    string
-	Model       string
-	Thinking    string
-	OutputLimit int
+	Prompt        string
+	Provider      string
+	Model         string
+	Thinking      string
+	OutputLimit   int
+	ReadOnlyFiles bool
 }
 
 // Result contains only a settled final assistant message and observed counters.

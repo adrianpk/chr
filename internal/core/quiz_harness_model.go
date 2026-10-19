@@ -69,6 +69,7 @@ func (a HarnessQuizModelAdapter) InvokeQuizModel(ctx context.Context, request Qu
 		Program:            a.Command,
 		Model:              a.Model,
 		Timeout:            a.Timeout,
+		ReadOnlyFiles:      workspaceDiscoveryInstructions(request.Action) != "",
 		DeferResponseTrace: true,
 	})
 	if err != nil {

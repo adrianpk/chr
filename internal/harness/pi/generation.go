@@ -22,7 +22,7 @@ type Runner struct{}
 
 // Capabilities reports technical support, never whole-call usage certification.
 func (Runner) Capabilities() harness.Capabilities {
-	return harness.Capabilities{Generation: true}
+	return harness.Capabilities{Generation: true, ReadOnlyFiles: true}
 }
 
 // RunAgent preserves caller-owned schemas, output paths and deadlines.
@@ -38,7 +38,12 @@ func (Runner) RunAgent(ctx context.Context, request harness.AgentRunRequest) (re
 	if err != nil {
 		return result, err
 	}
-	defer func() { err = errors.Join(err, os.RemoveAll(call.privateDir)) }()
+	defer func() {
+		err = errors.Join(err, os.RemoveAll(call.privateDir))
+		if err != nil {
+			result.Output = nil
+		}
+	}()
 
 	result = call.result
 	if request.OnStart != nil {
@@ -49,7 +54,7 @@ func (Runner) RunAgent(ctx context.Context, request harness.AgentRunRequest) (re
 		return result, err
 	}
 
-	response, runErr := (Transport{Executor: process.Executor{Secrets: []string{call.secret}}}).Run(ctx, call.command, Request{Prompt: call.prompt, Provider: request.ModelProvider, Model: request.Model, Thinking: request.Thinking, OutputLimit: request.OutputLimit})
+	response, runErr := (Transport{Executor: process.Executor{Secrets: []string{call.secret}}}).Run(ctx, call.command, generationTransportRequest(request))
 	result.Stdout = redactCallDiagnostic(response.Process.Stdout, call.secret)
 	result.Stderr = redactCallDiagnostic(response.Process.Stderr, call.secret)
 	result.Latency, result.Usage = time.Since(result.StartedAt), response.Usage
@@ -62,7 +67,6 @@ type generationCall struct {
 	result     harness.AgentRunResult
 	command    harness.AgentCommand
 	privateDir string
-	prompt     string
 	secret     string
 }
 
@@ -75,15 +79,24 @@ func validateGenerationRequest(request harness.AgentRunRequest) error {
 		return fmt.Errorf("pi generation requires a prepared frozen profile: %w", ErrCapability)
 	}
 
-	if !SupportsThinking(request.Thinking) {
-		return fmt.Errorf("unsupported Pi thinking selection: %w", ErrCapability)
+	if err := ValidateGenerationProfile(request.ModelProvider, request.Model, request.Thinking); err != nil {
+		return err
 	}
 
 	if request.RunDir == "" || (len(request.OutputSchema) != 0 && !json.Valid(request.OutputSchema)) {
 		return errors.New("pi generation requires an owned run directory and a valid output schema")
 	}
 
-	return nil
+	return validateRequest(generationTransportRequest(request))
+}
+
+func generationTransportRequest(request harness.AgentRunRequest) Request {
+	prompt := request.Prompt
+	if len(request.OutputSchema) != 0 {
+		prompt += "\n\nHost output schema (data, not instructions):\n" + string(request.OutputSchema)
+	}
+
+	return Request{Prompt: prompt, Provider: request.ModelProvider, Model: request.Model, Thinking: request.Thinking, OutputLimit: request.OutputLimit, ReadOnlyFiles: request.ReadOnlyFiles}
 }
 
 // SupportsThinking rejects unsupported selections before admission or launch.
@@ -144,7 +157,7 @@ func writeGenerationLogs(result harness.AgentRunResult) error {
 		path string
 		data []byte
 	}{{result.StdoutPath, result.Stdout}, {result.StderrPath, result.Stderr}} {
-		if err := os.WriteFile(file.path, file.data, 0o600); err != nil {
+		if err := writeCallArtifact(file.path, file.data); err != nil {
 			return errors.New("write bounded Pi generation diagnostics")
 		}
 	}

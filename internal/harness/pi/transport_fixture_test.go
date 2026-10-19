@@ -128,6 +128,8 @@ func fixtureResponseFault(response map[string]any, scenario, kind string) {
 	switch scenario {
 	case "command rejected":
 		response["success"], response["error"] = false, "Model not available"
+	case "command diagnostic":
+		response["success"], response["error"] = false, strings.Repeat("X", 262141)+"FIXTURE_PRIVATE_BOUNDARY_KEY"
 	case "wrong correlation":
 		response["id"] = "unowned"
 	}
@@ -146,6 +148,7 @@ func fixturePrompt(t *testing.T, scenario string, request command) {
 
 	fixtureJSON(t, scenario, map[string]any{"type": "agent_start"})
 	fixtureContinuation(t, scenario)
+	fixtureInspection(t, scenario)
 
 	message := fixtureMessage(scenario)
 	fixtureJSON(t, scenario, map[string]any{"type": "message_end", "message": message})

@@ -52,6 +52,15 @@ def prompt(command):
     }
     (directory / (uuid.uuid4().hex + ".json")).write_text(json.dumps(call))
     (fixture / "started").touch()
+    scenario_path = fixture / "scenario"
+    scenario = scenario_path.read_text() if scenario_path.exists() else "success"
+    if scenario == "diagnostic":
+        secret = credentials[provider]["key"].encode()
+        os.write(2, b"X" * (262144 - 3) + secret[:5])
+        os.write(2, secret[5:])
+        raise SystemExit(7)
+    if scenario == "deadline":
+        time.sleep(30)
     deadline = time.monotonic() + 10
     while (fixture / "block").exists() and not (fixture / "release").exists():
         if time.monotonic() >= deadline:
@@ -76,9 +85,13 @@ def prompt(command):
         "content": [{"type": "text", "text": output}],
         "usage": {"input": 17, "output": 8, "cacheRead": 0, "cacheWrite": 0},
     }
+    if scenario == "unknown usage":
+        del message["usage"]
     emit({"type": "message_end", "message": message})
     emit({"type": "agent_end", "willRetry": False})
     emit({"type": "agent_settled", "aborted": False})
+    if scenario == "failed exit":
+        raise SystemExit(7)
 
 
 for line in sys.stdin:

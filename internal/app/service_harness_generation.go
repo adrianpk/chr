@@ -77,6 +77,10 @@ func (s service) prepareGenerationBinding(ctx context.Context, config core.Works
 			return core.HarnessGenerationBinding{}, core.HarnessGenerationLaunch{}, errLegacyGenerationUnavailable
 		}
 
+		if selection.Readiness.Problem != "" {
+			return core.HarnessGenerationBinding{}, core.HarnessGenerationLaunch{}, fmt.Errorf("selected generation profile is not locally ready: %s", selection.Readiness.Problem)
+		}
+
 		return core.HarnessGenerationBinding{}, core.HarnessGenerationLaunch{}, errors.New("selected generation profile is not locally ready")
 	}
 

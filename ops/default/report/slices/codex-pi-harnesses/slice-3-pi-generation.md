@@ -1,6 +1,6 @@
 # Slice 3: Pi RPC and Structured Generation
 
-Status: drafting
+Status: reviewing
 Delivery set: codex-pi-harnesses
 Plan: [Selectable Harness Delivery](../../../plan/codex-pi-harnesses.md)
 Tracker: [Selectable Harness Delivery Order](../../../tracker/codex-pi-harnesses.md)
@@ -9,119 +9,109 @@ PR: pending
 
 ## Purpose
 
-Allow a prepared native Pi profile to generate validated structured content
-through existing operation owners. T3.1 supplies the transport and T3.2 wires
-the selected runner. T3.3 resource/tool restrictions remain in progress.
+Generate structured content through a prepared native Pi profile while keeping
+operation selection, domain validation, publication, capacity and deadlines
+under their existing owners.
 
 ## Delivered Behavior
 
-- T3.1: Pi 1.3.0 RPC uses the shared owned-process supervisor for concurrent
-  pipes, bounded input/stdout/stderr, sanitized diagnostic excerpts and cleanup.
-- Correlated setup commands select and verify the exact provider/model and
-  requested thinking level. Automatic retry and compaction are disabled before
-  prompting; an occupied or incompatible session fails before model work.
-- Strict LF framing accepts fragmented UTF-8 and CRLF without splitting Unicode
-  line/paragraph separators. Malformed, oversized or unterminated records fail.
-- Prompt acceptance, streaming deltas, reasoning and `agent_end` cannot become
-  final output. The call waits for both its prompt acknowledgment and
-  `agent_settled`, including intermediate retry/compaction events.
-- Provider failure, abort, early exit, unsupported capability, process exit,
-  caller cancellation and deadline remain distinct failures. Even complete
-  assistant output is discarded after a failed process exit or shutdown.
-- Observed input/output usage is aggregated without certification. Missing,
-  negative or overflowing counters stay unknown, including earlier calls and
-  unmeasured compaction work.
-
-- T3.2: Specs, acceptance features, Plans, tracking, Quiz questions, contextual
-  Quiz, Dump curation, explanations, structured conversation and agentic review
-  dispatch through the retained Pi generation selection and original validators.
-- Live profile changes preserve admitted model/provider/thinking and executable
-  identity. The selected private resource references survive operation recovery;
-  model definitions retain a credential-free semantic hash.
-- Fast Quiz batches keep buffered questions without another call. Concurrent
-  Pi profiles reuse the existing structured-model capacity pool. Each call has
-  separate writable session/authentication state that is removed after reaping.
-- Successful process output and domain validation remain separate host facts.
-  Invalid Spec/acceptance output leaves prior canonical artifacts unchanged.
+- Pi serves Specs, acceptance features, Plans, tracking, fast/deep Quiz,
+  contextual Quiz, Dump curation, explanations, conversation and agentic review.
+  Codex and direct API dispatch retain their established paths.
+- Provider/model/thinking, executable identity and private resource references
+  remain frozen across switches, retries and service recovery. Credential
+  rotation at the retained reference preserves the model-definition identity.
+- Correlated Pi 1.3.0 RPC waits for prompt acceptance, a completed assistant
+  answer and `agent_settled`. Intermediate answers, retries, compaction,
+  reasoning and tool results cannot become the final output.
+- Ordinary structured calls disable tools. Discovery/review callers receive
+  only bounded read-only inspection of their project and exact host-provided
+  evidence files. Automatic local resources cannot change the call's authority.
+- Per-call home, credentials, settings and session state are private and removed
+  after process reaping. Unsupported or unavailable preparation fails without
+  fallback. Invalid output preserves prior canonical artifacts.
+- Optional usage/cache counters remain absent when unknown. Observations never
+  certify finite-budget or whole-call token enforcement. Concurrent selections
+  reuse the existing structured-model capacity pool.
 
 ## Implementation Notes
 
-Each transport call creates its own bounded correlation state and subprocess.
-It adds no retry policy, scheduler or capacity pool. The process owner closes
-stdin after completion and allows one second for orderly exit before stopping
-and reaping the owned group. Cancellation used for internal cleanup is separate
-from caller cancellation. Protocol input travels over stdin rather than argv.
+T3.1 introduced bounded full-duplex transport through `process.Executor`.
+Strict LF framing accepts fragmented UTF-8 and CRLF while preserving Unicode
+line/paragraph separators. Records, input, diagnostics and complete streams have
+explicit ceilings. Setup verifies exact model/thinking and idle private state;
+retry and compaction are disabled before prompting. Internal cleanup cancellation
+is distinct from caller cancellation. Closing stdin allows one second for
+orderly exit before stopping and reaping the owned group.
 
-The deterministic peer runs as an owned test executable. It exercises actual
-pipe backpressure, out-of-order command responses, late acknowledgment, continued
-work after a valid earlier answer, and a descendant holding protocol pipes.
-It does not establish remote model authentication or a live Pi generation result.
+T3.2 wires the runner through existing shared services and caller parsers.
+The existing private operation artifact retains launch references and a hash
+of only the selected credential-free model semantics. It adds no store or
+migration. Absent resources preserve existing Codex/API operation bytes and
+checksums. Agentic review keeps the canonical project's selection inside its
+separate execution workspace.
 
-The generation adapter supplies only the explicitly selected static API-key
-provider and credential-free model definition. Ambient authentication, home,
-project settings and discovered resources are excluded. OAuth generation is
-rejected with an actionable refresh-owner requirement. Native version checking
-requires Pi 1.3.0; readiness itself never launches a model or executable.
+T3.3 loads only explicitly selected static API-key resources into a private
+per-call agent directory with a replacement environment. OAuth generation
+requires a refresh owner and is rejected. Credential commands, interpolation,
+embedded endpoint credentials, authentication headers and discovered resources
+are rejected or disabled. Input/artifact preparation rejects redirected,
+non-regular or non-private files without replacing their targets.
 
-A sibling deterministic RPC peer drives the real application service and CLI
-boundaries. Review retains the canonical project's selection while executing
-inside its separate workspace. The existing private operation artifact stores
-resource references without adding a store, migration or public credential path.
+The explicit inspection profile loads only the embedded host extension. It
+opens files read-only, checks opened descriptors, confines access to the project
+and at most 16 exact evidence references, and excludes selected credential/model
+files. Scans/results are bounded to 4096 entries and 64 KiB; RPC permits at most
+64 correlated inspection calls. Intermediate tool output remains unapproved.
+Contextual Quiz applies its existing domain validator before recording output
+validation, including an empty-question rejection.
 
 ## Contracts Added or Changed
 
-- Shared `process.Executor.Exchange` for bounded bidirectional process calls.
-- Sibling `harness/pi` transport pinned to `pi-rpc/1.3.0`, with exact model
-  verification and distinguishable protocol/provider/capability failure values.
-- Optional private generation launch resources in the existing operation file;
-  omitted resources preserve legacy Codex/API operation bytes and checksums.
-- Adapter-neutral protocol/abort errors, observed model and optional cache
-  counters in host run evidence. Unknown usage never becomes certification.
-- Explicit replacement subprocess environments and pre-truncation diagnostic
-  redaction for selected file-backed secrets. Result publication stays with core.
+- Sibling Pi generation runner and `pi-rpc/1.3.0` settled RPC transport.
+- Private launch-resource references in the existing generation operation file.
+- Explicit subprocess environments and selected-secret diagnostic redaction
+  before excerpt truncation.
+- Host-requested read-only inspection and exact evidence-file capabilities.
+- Adapter-neutral protocol/abort errors, observed model and optional cache usage
+  in host run metadata. Process completion and domain validation remain distinct.
 
 ## Files of Interest
 
-- `internal/harness/process/exchange.go`
-- `internal/harness/pi/transport.go`, `session.go` and `events.go`
-- `internal/harness/pi/transport_test.go` and `transport_fixture_test.go`
-
-- `internal/harness/pi/generation.go`, `generation_setup.go`, `resources.go`
-- `internal/app/service_harness_generation.go`, `author_generation.go`, `service_work.go`
+- `internal/harness/process/exchange.go`, `diagnostics.go`
+- `internal/harness/pi/transport.go`, `session.go`, `events.go`
+- `internal/harness/pi/generation.go`, `resources.go`, `generation_files.go`, `readonly.mjs`
 - `internal/core/harness_generation_operation.go`, `harness_generation_run.go`
+- `internal/app/service_harness_generation.go`, `author_generation.go`, `service_work.go`
+- `internal/harness/generation_contract_test.go`, `internal/harness/pi/generation_pinned_test.go`
 - `internal/app/service_pi_generation*_test.go`
 
 ## Validation
 
-Passed focused T3.1 implementation checks for source commit
-`2a256f9612d20734aa2cdce5562e8aeb96ddfe8c`:
+Focused task checks passed for real subprocess transport, real application/CLI
+callers, retained bindings, shared capacity, cancellation, filesystem failures,
+usage gaps, invalid output and redaction. Exact commands and source task commits
+are retained in the slice ticket. Owned fixtures stopped after their checks.
 
-- `go test ./internal/harness/... -count=1 -timeout=1m`
-- `go test -race ./internal/harness/pi ./internal/harness/process -run '^(TestPiTransport|TestAgentRunProcess)' -count=1 -timeout=1m`
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/harness/pi ./internal/harness/process`
-- `scripts/check-go-func-signatures.sh`
-- `scripts/check-package-readmes.sh`
+The prepared Pi 1.3.0 binary also passed an owned loopback model fixture for
+allowed file reads, exact outside evidence, path/symlink/hard-link escape,
+selected credential denial, oversized/non-text/FIFO input, list/find and invalid
+tool arguments. It exposed only `chr_inspect` and excluded poisoned project
+context/extensions. This establishes local native protocol/resource behavior;
+it does not establish paid provider authentication.
+
+Before PR readiness, record the following ordered checks through the controller
+on the final clean PR head; the exact result belongs to that head:
+
+- `make verify`
+- `go test ./internal/harness/... ./internal/core ./internal/app -run '^(TestPiTransport|TestPiGeneration|TestHarnessGenerationBinding)' -count=1 -timeout=3m`
+- `go test -race ./internal/harness/pi ./internal/app -run '^(TestPiTransport|TestPiGeneration)' -count=1 -timeout=3m`
+- `CHR_TEST_PI_EXECUTABLE="$(mise where pi@1.3.0)/pi/pi" go test ./internal/harness/pi -run '^TestPiGenerationPinnedInspection$' -count=1 -timeout=1m`
 - `git diff --check`
-
-Passed focused T3.2 task checks:
-
-- `go test ./internal/harness/... ./internal/core ./internal/app -run '^(TestPiGeneration|TestHarnessGenerationBinding|TestHarnessSelection|TestHarnessCodex|TestAgentRunProcess)' -count=1 -timeout=3m`
-- `go test -race ./internal/harness/pi ./internal/harness/process ./internal/app -run '^(TestPiGeneration|TestHarnessGenerationBinding|TestAgentRunProcess)' -count=1 -timeout=3m`
-- `go test -race ./internal/app -run '^TestPiGenerationCapacity$' -count=1 -timeout=30s`
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/harness/... ./internal/core ./internal/app`
-- `scripts/check-go-func-signatures.sh`
-- `scripts/check-package-readmes.sh`
-- `git diff --check`
-
-Fixtures exposed and now cover an oversized unterminated record at the byte
-boundary and cleanup cancellation incorrectly appearing as caller cancellation.
-All owned fixtures stopped after their checks. Required slice-level commands
-will be recorded through the controller on the final clean PR head after T3.3
-and PR-reference follow-up commits.
 
 ## Risks and Follow-ups
 
-T3.3 must complete resource/discovery restrictions, explicit read-only file
-inspection for callers that require it, and negative capability/usage/resource
-fixtures. No canonical PR is ready until that task and the configured checks
-are complete. The current T3.2 adapter disables all tools.
+Native generation requires an explicit private static API-key reference. OAuth
+is unsupported without an owned refresh protocol. Worker/runtime behavior
+remains the next recorded slice; real-model acceptance remains the approved
+opt-in final acceptance item.

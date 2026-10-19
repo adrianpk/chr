@@ -32,7 +32,23 @@ func TestPiGenerationExplanation(t *testing.T) {
 
 // The actual contextual Quiz CLI receives Pi through its shared operation binder.
 func TestPiGenerationContextualQuiz(t *testing.T) {
-	operations, driver := piGenerationFixture(t, `{"questions":[{"id":"scope","question":"What behavior must be preserved?","tags":["scope"],"follow_up_depth":0,"completion_recommended":false}]}`)
+	piGenerationContextualQuizCase(t, true)
+}
+
+// Malformed contextual output cannot publish a Quiz or invoke a fallback provider.
+func TestPiGenerationContextualQuizInvalid(t *testing.T) {
+	piGenerationContextualQuizCase(t, false)
+}
+
+func piGenerationContextualQuizCase(t *testing.T, valid bool) {
+	t.Helper()
+
+	output := `{"questions":[{"id":"scope","question":"What behavior must be preserved?","tags":["scope"],"follow_up_depth":0,"completion_recommended":false}]}`
+	if !valid {
+		output = `{"questions":[]}`
+	}
+
+	operations, driver := piGenerationFixture(t, output)
 	project := operations.projectContext.ProjectDir
 	writeServiceQuizFixture(t, project)
 
@@ -53,20 +69,40 @@ func TestPiGenerationContextualQuiz(t *testing.T) {
 	}
 
 	var stdout bytes.Buffer
-	if err := run(t.Context(), []string{"author", "quiz", "new", "--dir", project, "--dev-root", devRoot, "--target", "spec", "--topic", "Prepared scope"}, &stdout, &bytes.Buffer{}); err != nil {
-		t.Fatal("contextual Pi Quiz failed", err)
+	if err := run(t.Context(), []string{"author", "quiz", "new", "--dir", project, "--dev-root", devRoot, "--target", "spec", "--topic", "Prepared scope"}, &stdout, &bytes.Buffer{}); (err == nil) != valid {
+		t.Fatal("unexpected contextual Pi Quiz validation", err)
 	}
 
 	if len(piGenerationCalls(t, driver)) != 1 {
 		t.Fatal("contextual Quiz missed selected Pi runner")
 	}
 
-	checkPiGenerationMetadata(t, project, 1, 0)
+	if valid {
+		checkPiGenerationMetadata(t, project, 1, 0)
+	} else {
+		checkPiGenerationMetadata(t, project, 0, 1)
+	}
 }
 
 // Review uses the canonical project's selection inside its distinct execution workspace.
 func TestPiGenerationReview(t *testing.T) {
-	operations, driver := piGenerationFixture(t, `{"decision":"needs_changes","summary":"A required check is missing.","blocking_findings":[{"category":"evidence","title":"Missing check","detail":"Run the required focused check."}],"non_blocking_notes":[],"reviewed_artifacts":["result.json"]}`)
+	piGenerationReviewCase(t, true)
+}
+
+// Invalid review output cannot apply a review decision to the ticket.
+func TestPiGenerationReviewInvalid(t *testing.T) {
+	piGenerationReviewCase(t, false)
+}
+
+func piGenerationReviewCase(t *testing.T, valid bool) {
+	t.Helper()
+
+	output := `{"decision":"needs_changes","summary":"A required check is missing.","blocking_findings":[{"category":"evidence","title":"Missing check","detail":"Run the required focused check."}],"non_blocking_notes":[],"reviewed_artifacts":["result.json"]}`
+	if !valid {
+		output = `{"decision":"pass","summary":""}`
+	}
+
+	operations, driver := piGenerationFixture(t, output)
 	worktree := t.TempDir()
 	ticket := testLoopTicketWithPullRequestRef("CHR-1", "Prepared review")
 	ticket.Status = core.TicketStatusReadyForReview
@@ -84,8 +120,8 @@ func TestPiGenerationReview(t *testing.T) {
 	}
 
 	result, err := operations.runAgenticReviewCycle(indexed, execution, core.ResultApplication{TicketPath: path}, core.ReviewWorkflowConfig{})
-	if err != nil || result.Status != core.TicketStatusReadyForDev {
-		t.Fatal("Pi review failed", err)
+	if (err == nil) != valid || valid && result.Status != core.TicketStatusReadyForDev {
+		t.Fatal("unexpected Pi review validation", err)
 	}
 
 	if len(piGenerationCalls(t, driver)) != 1 {

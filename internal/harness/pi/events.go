@@ -95,6 +95,10 @@ func (s *session) continuationEvent(event record) error {
 			s.finalErr = fmt.Errorf("compaction failed: %w", ErrProvider)
 		}
 	default:
+		if strings.HasPrefix(event.Type, "tool_execution_") {
+			return s.toolEvent(event)
+		}
+
 		return rejectUnexpectedCapability(event.Type)
 	}
 
@@ -114,7 +118,7 @@ func rejectUnexpectedCapability(kind string) error {
 }
 
 func (s *session) settle(event record) error {
-	if !s.started || event.Aborted == nil {
+	if !s.started || event.Aborted == nil || len(s.tools) != 0 {
 		return fmt.Errorf("settled event missing run state: %w", ErrProtocol)
 	}
 
@@ -146,6 +150,8 @@ type assistantMessage struct {
 	Content    []struct {
 		Type string `json:"type"`
 		Text string `json:"text"`
+		ID   string `json:"id"`
+		Name string `json:"name"`
 	} `json:"content"`
 	Usage *observedUsage `json:"usage"`
 }
@@ -174,11 +180,19 @@ func (s *session) message(data json.RawMessage) error {
 
 	s.usage.add(message.Usage)
 
+	if message.Provider != s.request.Provider || message.Model != s.request.Model {
+		return fmt.Errorf("assistant model changed: %w", ErrCapability)
+	}
+
 	s.output = nil
 	if message.StopReason == "aborted" {
 		s.finalErr = ErrAborted
 
 		return nil
+	}
+
+	if message.StopReason == "toolUse" {
+		return s.readOnlyCalls(message)
 	}
 
 	if message.StopReason != "stop" {
@@ -191,8 +205,8 @@ func (s *session) message(data json.RawMessage) error {
 }
 
 func (s *session) completedMessage(message assistantMessage) error {
-	if message.Provider != s.request.Provider || message.Model != s.request.Model {
-		return fmt.Errorf("assistant model changed: %w", ErrCapability)
+	if len(s.tools) != 0 {
+		return fmt.Errorf("assistant output before tools completed: %w", ErrProtocol)
 	}
 
 	limit := s.request.OutputLimit
