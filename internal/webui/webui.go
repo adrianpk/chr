@@ -26,17 +26,18 @@ var assetsFS embed.FS
 
 // ShellData contains the presentation data needed by the shell template.
 type ShellData struct {
-	Title          string
-	ProjectDir     string
-	ProjectID      string
-	ProjectName    string
-	URL            string
-	Host           string
-	Port           int
-	RequireToken   string
-	RefreshSeconds int
-	Navigation     []ui.NavLink
-	LoginEnabled   bool
+	Title            string
+	ProjectDir       string
+	ProjectID        string
+	ProjectName      string
+	URL              string
+	Host             string
+	Port             int
+	RequireToken     string
+	RefreshSeconds   int
+	Navigation       []ui.NavLink
+	LoginEnabled     bool
+	HarnessesEnabled bool
 }
 
 // HandlerOptions configures the Web UI HTTP handler.
@@ -92,6 +93,7 @@ func NewHandler(opts HandlerOptions) (http.Handler, error) {
 	mux.HandleFunc("/", handler.shell)
 	mux.HandleFunc("/project", handler.project)
 	mux.HandleFunc("/project/fragment", handler.projectFragment)
+	mux.HandleFunc("/project/harnesses", handler.harnesses)
 	mux.HandleFunc("/board", handler.board)
 	mux.HandleFunc("/board/fragment", handler.boardFragment)
 	mux.HandleFunc("/board/ticket", handler.ticketDetail)
@@ -807,6 +809,7 @@ func artifactDetailRefreshURL(family, id string) string {
 
 func (h handler) shellData(active string) ShellData {
 	data := h.data
+	_, data.HarnessesEnabled = h.provider.(HarnessSelectionProvider)
 	if strings.TrimSpace(data.ProjectName) == "" {
 		data.ProjectName = data.ProjectID
 	}

@@ -66,3 +66,18 @@ Before slice review/integration, run `make verify` and `git diff --check`.
 These commands are planned checks, not recorded successful executions.
 Retain commits, PR, validation and blocker evidence here and in the slice report;
 the tracker remains an order map.
+
+## Implementation Progress
+
+T5.1 is implemented: the project context opens a compact chooser from shared
+selection/readiness projections, with separate retained worker bindings and a
+bounded eight-invocation list. Named choices include explicit keep and restore
+legacy options. The existing workflow status exposes its public frozen binding;
+there is no interface-owned settings or progress store.
+
+Passed: `go test ./internal/webui ./internal/app -run '^TestWebHarnessSelection' -count=1 -timeout=3m`.
+
+Real application profiles and a claimed invocation are inspected without changing
+its revision or binding. Private references are excluded and the owned driver
+is not launched. T5.2 revision-bound saves, authentication/origin and browser
+acceptance remain pending. No canonical PR is open.

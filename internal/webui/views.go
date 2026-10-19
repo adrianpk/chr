@@ -35,6 +35,7 @@ type PageData struct {
 	DumpModal  bool
 	SpecModal  bool
 	Workflow   WorkflowView
+	Harnesses  HarnessSelectionView
 }
 
 func newStaticDataProvider(shell ShellData) staticDataProvider {

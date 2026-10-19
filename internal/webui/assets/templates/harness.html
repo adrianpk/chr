@@ -1,0 +1,29 @@
+{{define "harness_modal.html"}}
+<div class="modal-backdrop" data-modal-backdrop>
+  <section class="ticket-modal harness-modal" role="dialog" aria-modal="true" aria-labelledby="harness-title">
+    <header class="ticket-modal__header"><h2 id="harness-title">Harness defaults</h2><button class="icon-button" type="button" data-modal-close aria-label="Close harness defaults">×</button></header>
+    <div class="ticket-modal__body">{{template "harness_content.html" .}}</div>
+  </section>
+</div>
+{{end}}
+
+{{define "harness_content.html"}}
+<section class="harness-content" id="harness-content" data-project-id="{{.Harnesses.ProjectID}}" data-revision="{{.Harnesses.Revision}}">
+  <p>Changes apply to new operations. Running, paused and resumed work keeps its original binding.</p>
+  {{if .Harnesses.Problem}}<p class="diagnostic" role="alert">{{.Harnesses.Problem}}</p>{{else}}
+  <div class="harness-roles">
+    <section aria-labelledby="harness-worker-label"><h3 id="harness-worker-label">Worker default</h3>{{template "harness_role.html" .Harnesses.Worker}}<label class="readonly-field"><span>Worker profile</span><select id="harness-worker" name="worker"><option value=":keep">Keep current default</option><option value="">Restore legacy dispatch</option>{{range .Harnesses.Worker.Choices}}<option value="{{.Value}}">{{.Label}}</option>{{end}}</select></label></section>
+    <section aria-labelledby="harness-generation-label"><h3 id="harness-generation-label">Generation default</h3>{{template "harness_role.html" .Harnesses.Generation}}<label class="readonly-field"><span>Generation profile</span><select id="harness-generation" name="generation"><option value=":keep">Keep current default</option><option value="">Restore legacy dispatch</option>{{range .Harnesses.Generation.Choices}}<option value="{{.Value}}">{{.Label}}</option>{{end}}</select></label></section>
+  </div>
+  <p class="summary-label">Local setup is separate from remote authentication. Inspecting or choosing profiles does not call a model.</p>
+  {{end}}
+  <section class="harness-retained" aria-label="Retained worker invocations"><h3>Retained worker invocations</h3>
+    {{if .Harnesses.RetainedProblem}}<p role="status">{{.Harnesses.RetainedProblem}}</p>{{else if .Harnesses.Retained}}<ul>{{range .Harnesses.Retained}}<li data-harness-invocation="{{.ID}}"><a href="/workflows?id={{.ID}}">{{.ID}}</a> · {{.Status}}<p>{{.Label}}</p></li>{{end}}</ul>{{else}}<p>No retained invocations on this page.</p>{{end}}
+    {{if .Harnesses.More}}<p>Showing the first eight retained invocations.</p>{{end}}<a href="/workflows">View workflows</a>
+  </section>
+</section>
+{{end}}
+
+{{define "harness_role.html"}}
+<p class="harness-current">{{.Current}}</p><p class="summary-label">{{.Setup}}</p>{{if .Problem}}<p class="diagnostic">{{.Problem}}</p>{{end}}
+{{end}}

@@ -1493,3 +1493,19 @@ code {
 .login-card .action-form {
   display: grid;
 }
+
+/* Harness defaults live in the existing project context and modal. */
+.harness-modal { width: min(780px, calc(100vw - 32px)); }
+.harness-content, .harness-roles > section { min-width: 0; }
+.harness-content p, .harness-retained li { overflow-wrap: anywhere; }
+.harness-roles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.harness-roles select { width: 100%; min-width: 0; }
+.harness-current { font-weight: 600; }
+.harness-retained { margin-top: 24px; border-top: 1px solid var(--line); padding-top: 16px; }
+.harness-retained ul { padding-left: 20px; }
+.harness-retained li + li { margin-top: 12px; }
+.harness-retained li p { margin: 4px 0; }
+@media (max-width: 640px) {
+  .harness-modal { width: calc(100vw - 16px); }
+  .harness-roles { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+}

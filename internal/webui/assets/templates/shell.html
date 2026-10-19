@@ -29,6 +29,7 @@
               <span>Project</span>
               <strong>{{.Shell.ProjectName}}</strong>
             </div>
+            {{if .Shell.HarnessesEnabled}}<a class="button harness-context" href="/project/harnesses" hx-get="/project/harnesses" hx-target="#modal-root" hx-swap="innerHTML">Harnesses</a>{{end}}
             <div class="context-selector context-selector--muted">
               <span>Actor</span>
               <strong>local</strong>
@@ -78,6 +79,8 @@
             {{template "artifact_detail_content.html" .}}
           {{else if eq .View "workflows"}}
             {{template "workflow_content.html" .}}
+          {{else if eq .View "harnesses"}}
+            {{template "harness_content.html" .}}
           {{else if eq .View "write_result"}}
             {{template "write_result.html" .}}
           {{else}}
