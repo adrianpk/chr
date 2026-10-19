@@ -50,10 +50,20 @@ func readWorkflowConfigValues(data []byte) (map[string]string, error) {
 			return nil, err
 		}
 
-		values[qualified] = value
+		values[qualified] = workflowConfigScalarImage(qualified, line, value)
 	}
 
 	return values, scanner.Err()
+}
+
+func workflowConfigScalarImage(key, line, value string) string {
+	if key != "harnesses.worker" && key != "harnesses.generation" {
+		return value
+	}
+
+	_, raw, _ := strings.Cut(line, ":")
+
+	return strings.TrimSpace(raw)
 }
 
 func guardWorkflowConfigValue(key, value string) error {
@@ -168,6 +178,7 @@ func knownWorkflowConfigKey(key string) bool {
 
 	return slices.Contains([]string{
 		"harnesses.worker", "harnesses.generation",
+		"harnesses.project_ref", "harnesses.changed_by", "harnesses.changed_at", "harnesses.request_id", "harnesses.request_digest",
 		"work.integration.publication_profile",
 		"work.state_authority", "work.workspace_mode", "work.merge_strategy", "work.include_later_tickets",
 		"work.mode", "work.integration_branch", "work.canonical_remote", "work.require_clean_worktree",

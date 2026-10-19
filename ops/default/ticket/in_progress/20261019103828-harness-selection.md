@@ -12,7 +12,7 @@ reported_at: 2026-10-19T10:38:28Z
 ready_at: 2026-10-19T10:38:33Z
 started_at: 2026-10-19T11:23:17Z
 branch: feat/slice-2-harness-selection
-commits: []
+commits: [d9b19ac1b2ce4e1b577d9497443b2d207c4c1ce7]
 ---
 
 # Live role selection and retained bindings
@@ -92,10 +92,46 @@ Successful T2.1 checks:
 - `scripts/check-go-func-signatures.sh`
 - `git diff --check`
 
-Next recorded task: T2.2, shared authorized inspect/change operations and CLI,
-whole-document compare-and-swap, cross-process exclusion, atomic role updates
-and bounded mutation replay. Reuse the existing configuration owner and
-WorkflowMutationBinding identity; do not introduce an interface settings store.
-T2.3 invocation bindings and T2.4 operation-level generation bindings also remain
-pending. Production admission and generation caller wiring are not complete.
-The configured final exact-HEAD checks have not run for this partial slice.
+T2.2 is implemented: shared inspection reads both roles and their full-document
+revision together, lists private named choices through path-free readiness
+projections, and keeps invalid explicit choices visible. `chr harness status`,
+`chr harness select` and `chr harness clear` delegate to the shared operation
+service. Local mutations derive the configured operator rather than accepting
+an arbitrary actor flag. Other trusted adapters must supply their current
+actor/project authorization check; authority is checked again inside exclusion,
+including receipt replay.
+
+The existing configuration owner serializes role updates and workflow upgrades
+through one file lock. Each accepted change compares the entire persisted
+configuration revision inside that lock, validates changed profiles and local
+readiness, preserves unrelated fields/comments, and atomically publishes both
+roles with project, actor, UTC timestamp and request-digest metadata. Clearing
+one role retains the other and restores the cleared role's legacy dispatch.
+The named profile `null` remains distinct from an unquoted null selection.
+
+A bounded configuration journal retains choices and digests rather than copying
+unrelated configuration. Recovery recognizes only the exact prior or accepted
+image, completes the original result across each publication boundary, and
+rejects conflicting edits or changed arguments for an interrupted request ID.
+Receipts are limited to 16 KiB each and 4,096 accepted identities; exhaustion
+rejects new changes while preserving prior replay. A replay returns the original
+snapshot even after later changes or profile unavailability. No workflow record
+store, interface settings store, scheduler or capacity pool was added.
+
+Successful T2.2 checks:
+
+- `go test ./internal/core ./internal/app -run '^(TestHarnessSelection|TestWorkflowUpgrade|TestLoadWorkspaceConfig|TestWorkflowConfig)' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^TestHarnessSelection' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/app`
+- `scripts/check-go-func-signatures.sh`
+- `git diff --check`
+
+These focused tests include independent writer processes, atomic two-role
+updates, stale/unauthorized/unprepared changes, unknown-field preservation,
+receipt capacity, interrupted publication/replay, an upgrade fence, fresh service
+inspection and the actual root CLI. The owned subprocess fixtures have stopped.
+
+Next recorded task: T2.3, invocation v2 bindings and historical v1 compatibility.
+T2.4 operation-level generation bindings also remains pending. Production
+admission and generation caller wiring are not complete. No Slice 2 PR is ready;
+the configured final exact-HEAD checks have not run for this partial slice.

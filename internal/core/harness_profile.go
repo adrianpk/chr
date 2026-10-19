@@ -124,6 +124,8 @@ func applyHarnessSelection(config *WorkspaceConfig, values map[string]string) er
 			continue
 		}
 
+		value = configStringValue(value)
+
 		if !validHarnessProfileName(value) {
 			return errors.New("harness selection requires a named profile or null")
 		}

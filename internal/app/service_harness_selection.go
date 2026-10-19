@@ -55,12 +55,22 @@ func (s service) resolveHarnessSelection(ctx context.Context, config core.Worksp
 		return resolvedHarnessSelection{}, err
 	}
 
-	profile, found := profiles[name]
-	if !found {
-		return resolvedHarnessSelection{}, fmt.Errorf("unknown harness profile %q; configure it in private harnesses.yml", name)
+	return resolveConfiguredHarnessSelection(config, profiles, name, role, action, s.env.ConfigDir())
+}
+
+func resolveConfiguredHarnessSelection(config core.WorkspaceConfig, profiles map[string]core.HarnessProfile, name string, role core.HarnessRole, action, configDir string) (resolvedHarnessSelection, error) {
+	if name == "" {
+		return legacyHarnessSelection(config, role, action)
 	}
 
-	resolved := prepareHarnessSelection(config, profile, role, action, s.env.ConfigDir())
+	profile, found := profiles[name]
+	if !found {
+		view := core.HarnessSelection{Role: role, Action: action, Profile: name, Source: "project", SelectionRevision: config.Revision()}
+
+		return resolvedHarnessSelection{View: view}, fmt.Errorf("unknown harness profile %q; configure it in private harnesses.yml", name)
+	}
+
+	resolved := prepareHarnessSelection(config, profile, role, action, configDir)
 	if !resolved.View.Readiness.Ready() {
 		return resolved, fmt.Errorf("harness profile %q is not locally ready for %s", name, role)
 	}
@@ -142,8 +152,14 @@ func legacyHarnessSelection(config core.WorkspaceConfig, role core.HarnessRole, 
 		Model: "cli_default", SelectionRevision: config.Revision(),
 		Readiness: core.HarnessReadiness{Executable: "not_required", Credentials: "api_managed", Runtime: "not_required", Supported: true, RemoteAuthentication: "not_tested"},
 	}
-	if err != nil || backend == "openai" {
+	if err != nil {
+		view.Readiness.Supported = false
+
 		return resolvedHarnessSelection{View: view}, err
+	}
+
+	if backend == "openai" {
+		return resolvedHarnessSelection{View: view}, nil
 	}
 
 	profile := core.HarnessProfile{Harness: codex.Identity, Command: strings.TrimSpace(os.Getenv("CHR_CODEX_COMMAND")), Model: strings.TrimSpace(os.Getenv("CHR_CODEX_MODEL"))}

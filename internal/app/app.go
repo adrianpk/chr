@@ -63,6 +63,7 @@ func newRootCommand(stdin io.Reader, stdout, stderr io.Writer, deps appDependenc
 			newDaemonCommand(stdout, deps),
 			newDumpCommand(stdout, deps),
 			newGateCommand(stdout, deps),
+			newHarnessCommand(stdout, deps),
 			newIndexCommand(stdout, deps),
 			newInitCommand(stdout, deps),
 			newMaintenanceCommand(stdout, deps),
