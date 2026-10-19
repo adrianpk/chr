@@ -48,8 +48,8 @@
         </div>
         <button class="top-chrome-handle" type="button" aria-label="Show navigation" aria-expanded="true"></button>
       </div>
-      <main class="app-main{{if eq .View "catalog"}} catalog-page{{end}}{{if and (eq .View "catalog") (eq .Catalog.Family "quizzes")}} quiz-catalog-page{{end}}">
-        {{if not (and (eq .View "catalog") (eq .Catalog.Family "quizzes"))}}
+      <main class="app-main{{if eq .View "catalog"}} catalog-page{{end}}{{if and (eq .View "catalog") (eq .Catalog.Family "quizzes")}} quiz-catalog-page{{end}}{{if and (eq .View "artifact_detail") .Detail.Quiz}} quiz-answer-page{{end}}">
+        {{if not (or (and (eq .View "catalog") (eq .Catalog.Family "quizzes")) (and (eq .View "artifact_detail") .Detail.Quiz))}}
         <header class="page-header">
           <div>
             <h1>{{.Title}}</h1>

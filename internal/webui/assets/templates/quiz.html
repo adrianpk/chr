@@ -1,45 +1,58 @@
 {{define "quiz_answer_content.html"}}
-<section id="quiz-surface" class="quiz-answering" data-quiz-context="{{.Detail.Quiz.DraftContext}}" data-quiz-current-mode="{{.Detail.Quiz.Mode}}" data-quiz-session="{{.Detail.Quiz.SessionID}}" data-quiz-question="{{.Detail.Quiz.QuestionID}}" data-quiz-scope="{{.Detail.ID}}"{{with .Write.Quiz}} data-ack-action="{{.Action}}" data-ack-session="{{.SessionID}}" data-ack-question="{{.QuestionID}}"{{end}}>
-  <div class="quiz-heading">
-    <div><a href="/quizzes">Back to Quizzes</a><h2>{{.Detail.Title}}</h2><span class="muted">{{.Detail.Scope}} · {{.Detail.Quiz.Status}}</span></div>
-    <form class="quiz-mode" data-quiz-form data-quiz-mode="{{and .Detail.Quiz.Started (not .Detail.Quiz.CanStart)}}" method="post" action="/actions" hx-post="/actions" hx-target="#quiz-result" hx-swap="innerHTML" hx-disabled-elt="#quiz-surface button, #quiz-mode">
+<section id="quiz-surface" class="quiz-answering" data-quiz-context="{{.Detail.Quiz.DraftContext}}" data-quiz-current-mode="{{.Detail.Quiz.Mode}}" data-quiz-session="{{.Detail.Quiz.SessionID}}" data-quiz-question="{{.Detail.Quiz.QuestionID}}" data-quiz-scope="{{.Detail.ID}}" data-quiz-auto-start="{{and .Detail.Quiz.CanStart (not .Detail.Quiz.Started)}}"{{with .Write.Quiz}} data-ack-action="{{.Action}}" data-ack-session="{{.SessionID}}" data-ack-question="{{.QuestionID}}"{{end}}>
+  <header class="quiz-heading">
+    <h1>{{.Detail.Title}}</h1>
+    <form id="quiz-mode-form" class="quiz-mode" data-quiz-form data-quiz-mode="{{and .Detail.Quiz.Started (not .Detail.Quiz.CanStart)}}" method="post" action="/actions" hx-post="/actions" hx-target="#quiz-result" hx-swap="innerHTML" hx-disabled-elt="#quiz-surface button, #quiz-mode, #quiz-answer" hx-sync="#quiz-surface:drop">
       {{template "quiz_binding.html" .}}
       <input type="hidden" name="action" value="{{if .Detail.Quiz.CanStart}}quiz.start{{else}}quiz.mode{{end}}">
-      <label for="quiz-mode">Mode</label>
-      <select id="quiz-mode" name="mode" {{if and .Detail.Quiz.Started (not .Detail.Quiz.Open) (not .Detail.Quiz.CanStart)}}disabled{{end}}>
-        <option value="deep" {{if eq .Detail.Quiz.Mode "deep"}}selected{{end}}>Deep</option>
-        <option value="fast" {{if eq .Detail.Quiz.Mode "fast"}}selected{{end}}>Fast</option>
-      </select>
-      {{if .Detail.Quiz.CanStart}}<button class="button button--primary" type="submit">{{if .Detail.Quiz.Started}}Start new session{{else}}Start Quiz{{end}}</button>{{end}}
+      <fieldset id="quiz-mode" class="quiz-mode-toggle" {{if and .Detail.Quiz.Started (not .Detail.Quiz.Open) (not .Detail.Quiz.CanStart)}}disabled{{end}}>
+        <legend class="sr-only">Question mode</legend>
+        <input class="sr-only" type="radio" id="quiz-mode-deep" name="mode" value="deep" {{if eq .Detail.Quiz.Mode "deep"}}checked{{end}}>
+        <label for="quiz-mode-deep">Deep</label>
+        <input class="sr-only" type="radio" id="quiz-mode-fast" name="mode" value="fast" {{if eq .Detail.Quiz.Mode "fast"}}checked{{end}}>
+        <label for="quiz-mode-fast">Fast</label>
+      </fieldset>
     </form>
-  </div>
+  </header>
+  <p class="quiz-progress" role="status" aria-live="polite"></p>
   <div id="quiz-result" role="status" aria-live="polite">{{template "quiz_action_result.html" .}}</div>
+  {{if and .Detail.Quiz.CanStart (not .Detail.Quiz.Started)}}<button class="button quiz-retry" type="submit" form="quiz-mode-form" data-quiz-retry-start hidden>Retry loading question</button>{{end}}
   {{with .Detail.Quiz.Error}}<p class="quiz-error" role="alert">{{.}}</p>{{end}}
-  {{if .Detail.Quiz.CanAnswer}}
-    <div class="quiz-question" aria-label="Current question"><h3>Current question</h3><p>{{.Detail.Quiz.Question}}</p></div>
-  {{else if .Detail.Quiz.Open}}<p class="empty-state">{{if .Detail.Quiz.CanResume}}Resume to continue with the next question.{{else}}The question queue is finished. Choose Done when you are ready.{{end}}</p>
-  {{else if .Detail.Quiz.Started}}<p class="empty-state">This quiz is {{.Detail.Quiz.Status}}. Your recorded answers remain below.</p>{{end}}
-  {{if .Detail.Quiz.Started}}
-  <form class="quiz-response" data-quiz-form method="post" action="/actions" hx-post="/actions" hx-target="#quiz-result" hx-swap="innerHTML" hx-disabled-elt="#quiz-surface button, #quiz-mode">
+  <div class="quiz-panel">
+    <div class="quiz-question" aria-label="{{if and .Detail.Quiz.CanStart (not .Detail.Quiz.Started)}}Preparing question{{else}}Current question{{end}}">{{if and .Detail.Quiz.CanStart (not .Detail.Quiz.Started)}}<span class="quiz-question-placeholder" aria-hidden="true"></span>{{else}}<p>{{if .Detail.Quiz.CanAnswer}}{{.Detail.Quiz.Question}}{{else if .Detail.Quiz.CanStart}}This session is complete. Start a new session to explore more questions.{{else if .Detail.Quiz.CanResume}}Resume the quiz to continue with the next question.{{else if .Detail.Quiz.Open}}There are no more questions. Choose Done to finish.{{else}}This session is closed. Your recorded answers remain below.{{end}}</p>{{end}}</div>
+  <form class="quiz-response" data-quiz-form method="post" action="/actions" hx-post="/actions" hx-target="#quiz-result" hx-swap="innerHTML" hx-disabled-elt="#quiz-surface button, #quiz-mode, #quiz-answer" hx-sync="#quiz-surface:drop">
     {{template "quiz_binding.html" .}}
-    {{if .Detail.Quiz.CanAnswer}}<label for="quiz-answer">Your answer</label><textarea id="quiz-answer" name="answer" rows="7" maxlength="65536" placeholder="Answer…"></textarea>{{end}}
+    <label class="sr-only" for="quiz-answer">Your answer</label>
+    <textarea id="quiz-answer" name="answer" rows="12" maxlength="65536" placeholder="Answer…" {{if not .Detail.Quiz.CanAnswer}}disabled{{end}}></textarea>
     <div class="quiz-actions">
+      {{if and .Detail.Quiz.CanStart (not .Detail.Quiz.Started)}}
+      <button class="button" type="button" disabled>Skip</button>
+      <button class="button" type="button" disabled>Answer</button>
+      <a class="button" href="/quizzes">Cancel</a>
+      <button class="button" type="button" disabled>Done</button>
+      {{else if .Detail.Quiz.CanStart}}
+      <a class="button" href="/quizzes">Cancel</a>
+      <button class="button button--primary" type="submit" form="quiz-mode-form" data-quiz-start>{{if .Detail.Quiz.Started}}Start new session{{else}}Start Quiz{{end}}</button>
+      {{else}}
       {{if .Detail.Quiz.CanResume}}<button class="button" type="submit" name="action" value="quiz.resume">Resume</button>{{end}}
       {{if .Detail.Quiz.Open}}
       <button class="button" type="submit" name="action" value="quiz.skip" {{if not .Detail.Quiz.CanAnswer}}disabled{{end}}>Skip</button>
-      <button class="button button--primary" type="submit" name="action" value="quiz.answer" {{if not .Detail.Quiz.CanAnswer}}disabled{{end}}>Answer</button>
+      <button class="button" type="submit" name="action" value="quiz.answer" {{if not .Detail.Quiz.CanAnswer}}disabled{{end}}>Answer</button>
       <button class="button" type="submit" name="action" value="quiz.cancel">Cancel</button>
       <button class="button" type="submit" name="action" value="quiz.done">Done</button>
       {{end}}
+      {{end}}
     </div>
   </form>
-  {{end}}
+  </div>
   <div data-quiz-retained></div>
+  {{if .Detail.Quiz.History}}
   <section class="quiz-history" aria-label="Answered questions"><h3>Answered questions</h3>
   {{range .Detail.Quiz.History}}
     <article class="quiz-history-card" data-answer-id="{{.ID}}"><time datetime="{{.AnsweredAt}}">{{.AnsweredAt}}</time><h4>{{.Question}}</h4><p>{{.Answer}}</p></article>
-  {{else}}<p class="muted">No answers recorded yet.</p>{{end}}
+  {{end}}
   </section>
+  {{end}}
 </section>
 {{end}}
 
@@ -56,7 +69,7 @@
 {{end}}
 
 {{define "quiz_action_result.html"}}
-{{if .Write.Summary}}<p data-quiz-write-status="{{.Write.Status}}">{{.Write.Summary}}</p>{{end}}
+{{if .Write.Summary}}<p{{if eq .Write.Status "ok"}} class="sr-only"{{end}} data-quiz-write-status="{{.Write.Status}}">{{.Write.Summary}}</p>{{end}}
 {{range .Write.Validation}}<p>{{.}}</p>{{end}}
 {{with .Write.BlockedReason}}<p>{{.}}</p>{{end}}
 {{with .Write.ReloadURL}}<a class="button" data-quiz-reload href="{{.}}">Reload current question</a>{{end}}

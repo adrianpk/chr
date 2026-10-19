@@ -48,8 +48,11 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   selection, one Body editor and a compact Draft control retain identity,
   provenance and native state. Stale saves keep the form available, and generated
   output cannot replace an edit made while it was being prepared.
-- Quizzes now provide a focused Web answer screen with one current question,
-  one answer field, Deep/Fast selection and newest-first answer history. Drafts
+- Quizzes now provide a focused Web answer screen with one question and a
+  spacious answer editor in a single panel, a Deep/Fast segmented selector and
+  a compact action row. Opening a new quiz prepares its first question directly,
+  with progress feedback and retry on failure. Answer history appears only after
+  answers exist. Drafts
   survive refresh, mode changes and request errors; leaving or skipping with
   unsent text requires a discard decision. Shared actions reject stale questions
   and acknowledge retries once. Fast retains one generated batch across mode

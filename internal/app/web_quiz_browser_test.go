@@ -146,7 +146,7 @@ func webQuizBrowserDraftModes(t *testing.T, browser *webWorkflowBrowser, base, r
 func webQuizBrowserMode(t *testing.T, browser *webWorkflowBrowser, mode string) {
 	t.Helper()
 	webQuizBrowserChangeMode(t, browser, mode)
-	webBoardBrowserWait(t, browser, "document.querySelector('#quiz-mode option:checked').value==="+strconv.Quote(mode)+"&&document.querySelector('[data-quiz-write-status]')?.textContent.includes('mode switched')")
+	webBoardBrowserWait(t, browser, "document.querySelector('#quiz-mode input:checked').value==="+strconv.Quote(mode)+"&&document.querySelector('[data-quiz-write-status]')?.textContent.includes('mode switched')")
 	webBoardBrowserReady(t, browser)
 }
 
@@ -209,7 +209,7 @@ func webQuizBrowserCapture(t *testing.T, browser *webWorkflowBrowser, name strin
 		return
 	}
 
-	measurements := browser.evaluate(t, `JSON.stringify({width:innerWidth,height:innerHeight,dpr:devicePixelRatio,scrollWidth:document.documentElement.scrollWidth,mode:document.querySelector('#quiz-mode').value,history:document.querySelectorAll('.quiz-history-card').length,question:document.querySelector('.quiz-question p').textContent})`)
+	measurements := browser.evaluate(t, `JSON.stringify({width:innerWidth,height:innerHeight,dpr:devicePixelRatio,scrollWidth:document.documentElement.scrollWidth,mode:document.querySelector('#quiz-mode input:checked').value,history:document.querySelectorAll('.quiz-history-card').length,question:document.querySelector('.quiz-question p').textContent})`)
 	if err := os.WriteFile(filepath.Join(directory, name+".json"), []byte(measurements+"\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -263,12 +263,12 @@ func webQuizBrowserChangeMode(t *testing.T, browser *webWorkflowBrowser, mode st
 	t.Helper()
 	webBoardBrowserReady(t, browser)
 
-	browser.evaluate(t, "(()=>{const e=document.querySelector('#quiz-mode');e.value="+strconv.Quote(mode)+";e.dispatchEvent(new Event('change',{bubbles:true}));return 'changed';})()")
+	webBoardBrowserClick(t, browser, `label[for="quiz-mode-`+mode+`"]`)
 }
 
 func webQuizBrowserModeFailure(t *testing.T, browser *webWorkflowBrowser) {
 	t.Helper()
 	webQuizBrowserChangeMode(t, browser, "deep")
-	webBoardBrowserWait(t, browser, "document.querySelector('#quiz-result').textContent.includes('Your draft is retained')&&document.querySelector('#quiz-mode').value==='fast'")
+	webBoardBrowserWait(t, browser, "document.querySelector('#quiz-result').textContent.includes('Your draft is retained')&&document.querySelector('#quiz-mode input:checked').value==='fast'")
 	webQuizBrowserValue(t, browser, "An unsent answer must survive refresh and mode changes.")
 }

@@ -183,8 +183,8 @@ func checkWebQuizConfirmedEntry(t *testing.T, operations service, want string) {
 	}
 }
 
-// Opening an unstarted scope leaves the retained runtime absent and does not
-// invoke generation or manufacture an answer while projecting the focused view.
+// The focused HTTP read stays side-effect-free; the browser receives a guarded
+// initial POST binding without creating a session or an answer during projection.
 func TestWebQuizReadOnly(t *testing.T) {
 	provider, model := newWebQuizFixture(t)
 	operations := provider.service(t.Context())
@@ -197,7 +197,7 @@ func TestWebQuizReadOnly(t *testing.T) {
 	detail := webQuizDetail(t, provider, paths.CuratedRelativePath)
 
 	content := webQuizGET(t, webQuizHandler(t, provider), paths.CuratedRelativePath)
-	if detail.Quiz.Started || !strings.Contains(content, "Start Quiz") || len(model.requests) != 0 {
+	if detail.Quiz.Started || !strings.Contains(content, `data-quiz-auto-start="true"`) || len(model.requests) != 0 {
 		t.Fatal("GET started a quiz", detail, content)
 	}
 
