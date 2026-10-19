@@ -155,6 +155,12 @@ func piProfileReadiness(ctx context.Context, profile core.HarnessProfile, role c
 		return piWorkerReadiness(ctx, profile, configDir, r)
 	}
 
+	if chr, _ := piWorkerBridgePreparation(profile.Command); chr {
+		r.Supported, r.Problem = false, "configure the native Pi executable for generation in a separate profile"
+
+		return r, ""
+	}
+
 	if _, err := pi.ResolveResources(configDir, profile.CredentialRef, profile.ModelConfigRef, profile.ModelProvider); err != nil {
 		r.Problem = err.Error()
 	} else {
@@ -168,6 +174,12 @@ func piWorkerReadiness(ctx context.Context, profile core.HarnessProfile, configD
 	r.Runtime = "unavailable"
 	if runtime.GOOS != "linux" {
 		r.Supported, r.Problem = false, "prepare the Pi worker bridge on a supported Linux host"
+
+		return r, ""
+	}
+
+	if _, prepared := piWorkerBridgePreparation(profile.Command); !prepared {
+		r.Supported, r.Problem = false, "prepare the Linux CHR worker bridge with CGO_ENABLED=0 and configure its executable as command"
 
 		return r, ""
 	}

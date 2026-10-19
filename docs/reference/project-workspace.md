@@ -347,7 +347,12 @@ returns the immutable Docker image ID for worker admission.
 ### Prepared Pi worker profile
 
 A Pi worker profile in the private user `harnesses.yml` names the Linux CHR
-executable that supplies its bridge, the prepared image and explicit resources:
+executable that supplies its bridge, the prepared image and explicit resources.
+
+Build that Linux bridge with `CGO_ENABLED=0 go build -o /opt/chr/bin/chr ./cmd/chr`
+from the selected source revision, using a writable installation path. Readiness
+inspects its build metadata without executing it and requires the host's Linux
+architecture. Generation uses a separate native Pi executable profile. For example:
 
 ```yaml
 profiles:

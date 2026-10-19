@@ -25,8 +25,9 @@ func TestPiWorkerContainer(t *testing.T) {
 
 	bridge := buildPiWorkerFixture(t)
 	operations, hierarchy, target := serviceWorkflowTaskFixture(t)
-	endpoint, calls := piWorkerEndpoint(t)
-	configurePiWorkerFixture(t, operations, bridge, image, endpoint)
+	endpoint := piWorkerEndpoint(t, false)
+	configurePiWorkerFixture(t, operations, bridge, image, endpoint.URL)
+	assertPiBridgeGenerationRejection(t, operations)
 
 	request := core.WorkflowStartRequest{RequestKey: "pi-worker", Selection: core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: core.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
 
@@ -46,8 +47,22 @@ func TestPiWorkerContainer(t *testing.T) {
 	defer cancel()
 
 	result, err := restarted.ExecuteWorkflowTask(ctx, claim, nil)
-	if err != nil || !result.Successful || result.Commit == target || calls() != 2 {
-		t.Fatalf("container worker: successful=%t, failure=%s, calls=%d, error=%v, worker=%+v", result.Successful, result.Failure, calls(), err, result.Worker)
+	if err != nil || !result.Successful || result.Commit == target || endpoint.calls(t) != 2 {
+		t.Fatalf("container worker: successful=%t, failure=%s, calls=%d, error=%v, worker=%+v", result.Successful, result.Failure, endpoint.calls(t), err, result.Worker)
+	}
+}
+
+func assertPiBridgeGenerationRejection(t *testing.T, operations service) {
+	t.Helper()
+
+	profiles, err := core.LoadHarnessProfiles(operations.env.ConfigDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	readiness, _ := piProfileReadiness(t.Context(), profiles["worker"], core.HarnessGeneration, operations.env.ConfigDir())
+	if readiness.Ready() || !strings.Contains(readiness.Problem, "native Pi executable") {
+		t.Fatal("worker bridge was advertised as a generation executable")
 	}
 }
 
@@ -67,6 +82,11 @@ func buildPiWorkerFixture(t *testing.T) string {
 
 func configurePiWorkerFixture(t *testing.T, operations service, bridge, image, endpoint string) {
 	t.Helper()
+	configurePiWorkerProfile(t, operations, bridge, image, endpoint, "worker-fixture-only", 1)
+}
+
+func configurePiWorkerProfile(t *testing.T, operations service, bridge, image, endpoint, key string, capacity int) {
+	t.Helper()
 
 	private := t.TempDir()
 	if err := os.Chmod(private, 0o700); err != nil {
@@ -74,13 +94,15 @@ func configurePiWorkerFixture(t *testing.T, operations service, bridge, image, e
 	}
 
 	auth, models := filepath.Join(private, "auth.json"), filepath.Join(t.TempDir(), "models.json")
-	harnessSelectionWrite(t, auth, `{"chr-fixture":{"type":"api_key","key":"worker-fixture-only"}}`)
+	harnessSelectionWrite(t, auth, fmt.Sprintf(`{"chr-fixture":{"type":"api_key","key":%q}}`, key))
 	harnessSelectionWrite(t, models, fmt.Sprintf(`{"providers":{"chr-fixture":{"api":"openai-completions","baseUrl":%q,"models":[{"id":"model","contextWindow":32768,"maxTokens":2048}]}}}`, endpoint+"/v1"))
 	harnessSelectionWrite(t, filepath.Join(operations.env.ConfigDir(), "harnesses.yml"), fmt.Sprintf("profiles:\n  worker:\n    harness: pi\n    command: %s\n    model_provider: chr-fixture\n    model: model\n    thinking: off\n    credential_ref: %s\n    model_config_ref: %s\n    runtime_ref: %s\n", bridge, auth, models, image))
-	writeCLIWorkspaceConfig(t, operations.projectContext.ProjectDir, "ticket:\n  key_prefix: PRJ\nharnesses:\n  worker: worker\n")
+	writeCLIWorkspaceConfig(t, operations.projectContext.ProjectDir, fmt.Sprintf("ticket:\n  key_prefix: PRJ\nwork:\n  max_active_workers: %d\nharnesses:\n  worker: worker\n", capacity))
 }
 
-func piWorkerEndpoint(t *testing.T) (string, func() int) {
+type piWorkerModelFixture struct{ URL, Name string }
+
+func piWorkerEndpoint(t *testing.T, isolation bool) piWorkerModelFixture {
 	t.Helper()
 
 	image := os.Getenv("CHR_TEST_PI_RUNTIME_IMAGE")
@@ -91,7 +113,7 @@ func piWorkerEndpoint(t *testing.T) (string, func() int) {
 	}
 
 	name := "chr-pi-model-" + filepath.Base(t.TempDir()) + "-" + fmt.Sprint(time.Now().UnixNano())
-	dockerPiFixture(t, "run", "--detach", "--rm", "--pull=never", "--name", name, "--mount", "type=bind,src="+fixture+",dst=/fixture.mjs,readonly", image, "node", "/fixture.mjs")
+	dockerPiFixture(t, "run", "--detach", "--rm", "--pull=never", "--name", name, "--env", fmt.Sprintf("CHR_FIXTURE_ISOLATION=%d", map[bool]int{false: 0, true: 1}[isolation]), "--mount", "type=bind,src="+fixture+",dst=/fixture.mjs,readonly", image, "node", "/fixture.mjs")
 	t.Cleanup(func() {
 		ctx, cancel := context.WithTimeout(context.WithoutCancel(t.Context()), 10*time.Second)
 		defer cancel()
@@ -116,28 +138,58 @@ func piWorkerEndpoint(t *testing.T) (string, func() int) {
 	}
 
 	ip := strings.TrimSpace(dockerPiFixture(t, "inspect", "--format", "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}", name))
-	readCalls := func() int {
-		logs := dockerPiFixture(t, "logs", "--tail", "16", name)
-		t.Logf("owned fixture observations: %s", logs)
 
-		calls := 0
+	return piWorkerModelFixture{URL: "http://" + ip + ":4317", Name: name}
+}
 
-		for _, line := range strings.Split(strings.TrimSpace(logs), "\n") {
-			var record struct {
-				Calls   int
-				Invalid bool
-			}
-			if json.Unmarshal([]byte(line), &record) != nil || record.Invalid {
-				t.Fatal("model fixture observed invalid private context or tools")
-			}
+func (fixture piWorkerModelFixture) calls(t *testing.T) int {
+	t.Helper()
 
-			calls = record.Calls
+	logs := dockerPiFixture(t, "logs", "--tail", "16", fixture.Name)
+	calls := 0
+
+	for _, line := range strings.Split(strings.TrimSpace(logs), "\n") {
+		var record struct {
+			Calls   int
+			Invalid bool
+		}
+		if json.Unmarshal([]byte(line), &record) != nil || record.Invalid {
+			t.Fatal("model fixture observed invalid private context or tools")
 		}
 
-		return calls
+		if record.Calls != 0 {
+			calls = record.Calls
+		}
 	}
 
-	return "http://" + ip + ":4317", readCalls
+	return calls
+}
+
+func (fixture piWorkerModelFixture) wait(t *testing.T, workers int) {
+	t.Helper()
+
+	ctx, cancel := context.WithTimeout(t.Context(), 30*time.Second)
+	defer cancel()
+
+	for {
+		script := `fetch("http://127.0.0.1:4317/health").then(r=>r.json()).then(x=>console.log(x.waiting))`
+
+		output, err := exec.CommandContext(ctx, "docker", "exec", fixture.Name, "node", "-e", script).Output()
+		if err == nil && strings.TrimSpace(string(output)) == fmt.Sprint(workers) {
+			return
+		}
+
+		select {
+		case <-ctx.Done():
+			t.Fatal("concurrent Pi calls did not reach the endpoint barrier")
+		case <-time.After(20 * time.Millisecond):
+		}
+	}
+}
+
+func (fixture piWorkerModelFixture) release(t *testing.T) {
+	t.Helper()
+	dockerPiFixture(t, "exec", fixture.Name, "node", "-e", `fetch("http://127.0.0.1:4317/release",{method:"POST"}).then(r=>{if(!r.ok)process.exit(1)})`)
 }
 
 func dockerPiFixture(t *testing.T, args ...string) string {

@@ -224,11 +224,34 @@ func checkHarnessBindingReplayModel(t *testing.T, store *WorkflowStore, request 
 // Descriptive capabilities cannot bypass the original finite whole-call budget
 // authority; an uncertified bound worker is rejected before launching a model.
 func TestHarnessBindingBudget(t *testing.T) {
+	for _, identity := range []string{"codex", "pi"} {
+		t.Run(identity, func(t *testing.T) { checkHarnessBindingBudget(t, identity) })
+	}
+}
+
+func checkHarnessBindingBudget(t *testing.T, identity string) {
+	t.Helper()
+
 	store, _, request := workflowExecutionFixture(t, workflowTaskCommand(t, "gate"), 30)
 	writeWorkspaceConfig(t, store.layout.ProjectDir(), "harnesses:\n  worker: alpha\n")
 
 	request.Policy.AgentTokenBudget = 100
-	request.ResolveHarness = harnessBindingTestResolver(t, workflowTaskCommand(t, "worker"))
+	resolver := harnessBindingTestResolver(t, workflowTaskCommand(t, "worker"))
+	request.ResolveHarness = func(ctx context.Context, config WorkspaceConfig) (*HarnessBinding, []string, error) {
+		binding, command, err := resolver(ctx, config)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		binding.Harness = identity
+		if identity == "pi" {
+			binding.RuntimeRef = "sha256:" + workflowHash([]byte("pi-runtime"))
+		}
+
+		sealed, err := SealHarnessBinding(*binding)
+
+		return &sealed, command, err
+	}
 	started := workflowTestStart(t, store, request)
 
 	claim := workflowTestClaim(t, store, started.Invocation.ID)

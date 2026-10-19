@@ -1,6 +1,6 @@
 # Slice 4: Pi Docker Workers and Private Runtime Setup
 
-Status: drafting
+Status: reviewing
 Delivery set: codex-pi-harnesses
 Plan: [Selectable Harness Delivery](../../../plan/codex-pi-harnesses.md)
 Tracker: [Selectable Harness Delivery Order](../../../tracker/codex-pi-harnesses.md)
@@ -14,157 +14,120 @@ host-owned invocation, capacity, retry and result validation.
 
 ## Delivered Behavior
 
-- All three bundled profiles install sibling Pi runtime assets. Explicit
-  `chr runtime init` adds missing files without replacing Codex runtime files.
-- The Pi image uses the approved Go manifest, verified platform-specific Node
-  22.23.3 archive and Pi 1.3.0 with a committed transitive npm lock. Installation
-  disables dependency lifecycle scripts. Asset installation performs no probes,
-  image builds, authentication or role changes.
-- Bounded local image inspection validates platform/version labels and returns
-  the immutable image ID. Unsupported or Codex-only images fail preparation.
-- A separate worker transport profile admits only pinned builtin tools and
-  correlates their names and IDs. Generation retains its restricted tools and
-  stricter output ceiling.
-- The worker credential owner serializes OAuth actions across processes and
-  atomically publishes valid refreshed credentials after process reaping.
-  Each call has a private copy; failure, cancellation and conflicting operator
-  replacement preserve the owner boundary.
+- Standard, minimal and personal profiles include sibling Pi runtime assets.
+  Explicit `chr runtime init` adds missing files without replacing Codex assets.
+  The locked image contains Node 22.23.3 and Pi 1.3.0; dependency lifecycle
+  scripts are disabled and unsupported platforms fail preparation.
+- Worker admission checks an explicitly prepared static Linux CHR bridge and
+  local Docker metadata, then freezes the executable, immutable image identity
+  and selected model semantics. Native generation uses a separate Pi profile.
+  Missing or incompatible preparation fails with setup guidance.
+- The host bridge runs Pi RPC and its seven explicit builtin tools inside the
+  selected container. Each call has private writable state and selected profile
+  resources. Project instructions are supplied explicitly; discovered Pi
+  settings/extensions cannot replace the frozen selection.
+- OAuth has a dedicated private credential owner with cross-process exclusion.
+  Each call uses a private copy. Valid refreshes are atomically published after
+  process reaping, including a refresh followed by model failure. Invalid updates
+  or conflicting operator replacement cannot overwrite the owner.
+- Containers retain the existing admitted capacity files until their processes
+  stop. Concurrent Pi, Codex and native operations use the same repository
+  capacity boundary. Host disconnection cancels RPC; adopted detached tools are
+  reaped before capacity or refreshed credentials are released.
+- Frozen work survives live profile replacement. Claims, attempts, validation,
+  artifacts and completion remain host-owned. Pi remains uncertified for finite
+  whole-call budgets and merger-broker authority. Container-reachable custom
+  endpoints work without enabling host networking.
 
 ## Implementation Notes
 
-T4.1 adds `runtime/agent/pi/` to standard, minimal and personal profiles. Its
-Dockerfile uses that directory as the build context. Existing runtime paths and
-images remain valid. The standard image built as
-`sha256:4e2a6c5c80a972f8668307ad782db247b3869c186267f0a20a4440ce36ea18f8`.
-The first build verified the Node checksum but exposed a missing `xz` extractor;
-adding the required archive utility made the unchanged pinned input build pass.
+T4.1 installs the sibling runtime and bounded local inspection. The tested image
+is `sha256:4e2a6c5c80a972f8668307ad782db247b3869c186267f0a20a4440ce36ea18f8`.
+The first image build exposed a missing `xz` extractor; the required utility was
+added while retaining all approved pins and the committed dependency lock.
 
-The T4.2 worker contract component adds selected-provider credentials, private
-copies and a dedicated OAuth directory with cross-process exclusion. Its action
-must reap Pi before returning. Valid refresh writes survive a later model failure;
-invalid updates or conflicting operator replacement cannot overwrite the source.
+T4.2 delegates transport to the existing Pi RPC adapter through owned pipes.
+A host-owned extension reuses the pinned SDK builtin tools with execution
+context bound to the checkout while Pi runs from private state. Only the
+checkout, Git metadata, existing reservation files, bridge and selected resources
+are mounted. The container has a read-only root, private tmpfs state, dropped
+capabilities and no host home, Docker socket or blanket environment forwarding.
 
-The T4.2 dispatch component now connects frozen selections to a Linux CHR host
-launcher and a bridge inside the selected image. The bridge and Pi RPC run in
-the container through owned pipes. The launcher retains image identity and
-model-resource semantics; it removes private argv before supplying model context.
+Slot conversion and delegation happen under the existing capacity coordinator.
+The independently owned container bridge holds those same files and adopts and
+reaps detached tool children. No second scheduler, workflow engine, credential
+store or capacity pool was introduced.
 
-The model process runs from private state with controlled settings. Its embedded
-host extension reuses the pinned SDK's seven builtin tool implementations at the
-execution checkout. Tool execution context explicitly retains that root; project
-Pi settings cannot redirect it. Project instructions are supplied explicitly.
+Credential inspection takes a short shared publication lock; atomic refresh
+publication takes its exclusive counterpart. Inspectors verify canonical inode
+identity after locking and reopen a source replaced by rename. This avoids
+observing publication temporaries without waiting through the whole model call.
 
-Core delegates shared references to the existing slot and guard under the
-capacity coordinator. New admissions still need an exclusive slot. The container
-keeps that reservation after host descriptors close, and host disconnection
-cancels the owned RPC context. A private bridge adopts and reaps detached model
-tools before publishing refreshed credentials or releasing capacity.
-
-OAuth directory inspection shares a short publication lock on the credential
-inode. Refresh publication takes the exclusive counterpart. Concurrent readiness
-therefore cannot observe a half-written temporary file, and it does not wait for
-the whole model call. A stress run caught a stale inode after atomic rename;
-inspection now reopens the canonical source after checking its locked identity.
-Three repeated concurrent refresh runs pass. No extra credential store or
-capacity pool was added.
-
-Two concurrent network-disabled containers now use the actual Pi 1.3.0
-`AuthStorage.modify` implementation on separate private copies. Both synthetic
-OAuth rotations survive source publication, and the second owner observes the
-first rotation. This verifies the pinned storage boundary; provider refresh IO
-is synthetic and no account authentication is certified. T4.2 is implemented.
-T4.3 concurrent worker acceptance and readiness/capability checks are pending.
+T4.3 inspects executable build metadata without running a configured program,
+keeps finite-budget and merger restrictions, and rejects container loopback
+endpoints. Explicit host-gateway mapping still depends on host listener/firewall
+policy. The working owned fixture uses an explicit container-network endpoint.
 
 ## Contracts Added or Changed
 
-- Sibling Pi image preparation and local immutable image inspection.
-- Missing-asset upgrade preserves project-owned runtime files.
-- Explicit worker tool correlation and separate worker/generation output bounds.
-- Private selected-provider worker resources and atomic OAuth credential owner.
+- Pinned sibling Pi image preparation and immutable local runtime inspection.
+- Distinct worker tool correlation and worker/generation output bounds.
+- Selected-provider credentials, private copies and atomic OAuth publication.
 - Existing capacity reservation delegated to an independently owned runtime.
-- Bounded host connection framing and cancellation, explicit project instructions
-  and child adoption/reaping inside the container.
+- Bounded connection framing, cancellation, explicit instructions and reaping.
+- Separate native generation and static Linux worker bridge preparation.
 
 ## Files of Interest
 
 - `cmd/chr/assets/workspace/profiles/*/runtime/agent/pi/`
-- `internal/harness/pi/runtime.go`, `worker_resources.go`
-- `internal/harness/pi/transport.go`, `inspection_events.go`
-- `internal/app/pi_worker.go`, `service_harness_worker.go`, `service_harness_selection.go`
-- `internal/harness/pi/worker_container.go`, `worker_bridge.go`, `worker.mjs`
+- `internal/harness/pi/runtime.go`, `worker_resources.go`, `worker_container.go`
+- `internal/harness/pi/worker_bridge.go`, `worker_connection.go`, `worker.mjs`
+- `internal/app/pi_worker.go`, `pi_worker_preparation.go`, `service_harness_worker.go`
 - `internal/core/worker_runtime.go`, `worker_runtime_reservation.go`
 - `internal/harness/process/subreaper_linux.go`
-- `internal/app/pi_worker_container_test.go`, `pi_runtime_test.go`
-- `docs/reference/project-workspace.md`
+- `internal/app/pi_worker_container_test.go`, `pi_worker_isolation_test.go`
+- `internal/harness/pi/worker_storage_test.go`, `docs/reference/project-workspace.md`
 
 ## Validation
 
-Passed focused T4.1 checks:
+Successful focused task checks include:
 
 - `docker build --file cmd/chr/assets/workspace/profiles/standard/runtime/agent/pi/Dockerfile --tag chr-agent-pi:1.3.0 cmd/chr/assets/workspace/profiles/standard/runtime/agent/pi`
 - `CHR_TEST_PI_RUNTIME_IMAGE=chr-agent-pi:1.3.0 go test ./internal/harness/pi ./internal/core ./internal/app -run '^(TestPiRuntime|TestRuntimeInit|TestInit.*Profile)' -count=1 -timeout=3m`
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/harness/pi ./internal/app`
-- `scripts/check-go-func-signatures.sh`
-- `scripts/check-package-readmes.sh`
-- `git diff --check`
-
-The opt-in image check inspects the real image and verifies both binary versions
-inside a container with networking disabled. Owned containers exited and were
-removed. This establishes image preparation; it does not establish worker model
-execution or authentication. Final exact-head checks remain pending.
-
-Passed focused T4.2 component checks:
-
-- `go test ./internal/harness/... ./internal/core ./internal/app -run '^(TestPiTransport|TestPiGeneration|TestPiCredentialRefresh|TestPiRuntime|TestHarnessBinding)' -count=1 -timeout=3m`
-- `go test -race ./internal/harness/pi -run '^(TestPiCredentialRefresh|TestPiTransport|TestPiGeneration)' -count=1 -timeout=2m`
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/harness/pi`
-- `scripts/check-go-func-signatures.sh`
-- `scripts/check-package-readmes.sh`
-- `git diff --check`
-
-Eight concurrent callers and one independent subprocess preserve every simulated
-refresh update. Failure/cancellation, unknown usage, tool authority and output
-bounds also pass. The provider's actual refresh behavior still needs the planned
-pinned-container integration; these fixtures do not establish OAuth authentication.
-Owned subprocesses ended.
-
-Passed focused dispatch component checks:
-
-- `go test -race ./internal/harness/pi -run '^TestPiCredentialRefresh' -count=3 -timeout=1m`
-
 - `go test ./internal/harness/... ./internal/core ./internal/app -run '^(TestPiTransport|TestPiGeneration|TestPiRuntime|TestPiWorker|TestPiCredentialRefresh|TestHarnessBinding|TestHarnessSelection)' -count=1 -timeout=3m`
-- `go test -race ./internal/harness/pi ./internal/harness/process ./internal/core ./internal/app -run '^(TestPiWorker|TestPiCredentialRefresh|TestAgentRunProcessReaper)' -count=1 -timeout=3m`
-- `CHR_TEST_PI_RUNTIME_IMAGE=chr-agent-pi:1.3.0 go test ./internal/app -run '^TestPiWorkerContainer$' -count=1 -timeout=3m`
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/harness/... ./internal/core ./internal/app`
-- `scripts/check-go-func-signatures.sh`
-- `scripts/check-package-readmes.sh`
-- `git diff --check`
-
-The actual pinned image made two protocol/model requests to an owned deterministic
-endpoint container, executed its tool in the retained worktree, committed the
-fixture result and passed host validation after service recovery and private
-profile replacement. The fixture uses no real account. All owned containers and
-subprocesses stopped after their checks.
-
-The initial host-gateway endpoint timed out from Docker. The fixture now supplies
-its explicit container-network endpoint; worker networking and retry policy were
-retained. The private-directory tool wrapper initially inherited Pi's private
-working directory. Host validation rejected the success reply without a valid
-checkout commit. Binding the SDK tool execution context to the selected checkout
-corrected the dispatch without weakening that host validation.
-
-The pinned-storage container fixture also passed:
-
+- `go test -race ./internal/harness/pi -run '^TestPiCredentialRefresh' -count=3 -timeout=1m`
 - `CHR_TEST_PI_RUNTIME_IMAGE=chr-agent-pi:1.3.0 go test ./internal/harness/pi -run '^TestPiCredentialRefreshStorage$' -count=1 -timeout=3m`
+- `go test ./internal/harness/pi ./internal/core ./internal/app -run '^(TestPiWorker|TestHarnessBindingBudget|TestHarnessSelection)' -count=1 -timeout=3m`
+- `CHR_TEST_PI_RUNTIME_IMAGE=chr-agent-pi:1.3.0 go test -race ./internal/app -run '^(TestPiWorkerIsolationContainer|TestPiWorkerContainer)$' -count=1 -timeout=3m`
 
-Both owned containers reached a barrier before their actions and then preserved
-both sequential credential rotations. Their network was disabled; the SDK
-storage API was real and provider refresh IO was synthetic. Owned containers
-stopped after the check.
+The actual image completed a disposable task after service recovery and profile
+replacement. Two further workers reached an endpoint barrier concurrently with
+different credentials, separate private state and independent Git outputs. Both
+committed results passed host validation. Docker inspection checked the intended
+mounts and process restrictions. Occupied Pi slots rejected a new Codex claim and
+a native operation; the pool became available after the workers stopped.
+Poisoned project Pi settings/extensions were excluded while explicit project
+instructions reached the model context.
+
+Two concurrent network-disabled containers also used Pi 1.3.0's actual
+`AuthStorage.modify` API. Both synthetic OAuth rotations survived publication,
+and the second owner observed the first rotation. Eight goroutines plus an
+independent subprocess cover owner exclusion, failure and cancellation. This
+establishes pinned storage behavior with synthetic provider IO, not real-account
+authentication. All owned fixtures stopped after their checks.
+
+Development checks caught and corrected the SDK tool-context mismatch and the
+credential inspection/rename race. The original host validation and private-file
+assertions were retained. Initial concurrent fixtures also retained slice-owned
+contract fields and a wrong auth mount assertion; their setup was corrected
+without changing production ownership or mount policy.
+
+The controller records final validation against the clean PR HEAD and its exact
+ordered command list. The canonical PR carries that candidate's successful
+commands; task checks above are component evidence.
 
 ## Risks and Follow-ups
 
-Remaining work covers two actual isolated workers against shared capacity,
-role/readiness negative cases and
-final exact-head validation and PR references. Real paid model acceptance remains
-the approved opt-in final acceptance item.
+Real paid-model acceptance remains the approved opt-in final acceptance item.
+OAuth provider network refresh is not certified by synthetic storage fixtures.
+Host-gateway reachability remains subject to explicit host networking policy.
