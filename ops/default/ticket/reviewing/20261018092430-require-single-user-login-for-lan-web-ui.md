@@ -14,7 +14,7 @@ ready_at: 2026-10-19T09:06:23Z
 started_at: 2026-10-19T09:06:23Z
 branch: feat/ticket-20261018092430-web-login
 pr: https://forge.adrianpk.com/adrianpk/chr/pulls/411
-reviewed_at: 2026-10-19T09:10:50Z
+reviewed_at: 2026-10-19T09:31:25Z
 ---
 
 # Protect LAN Web UI access with single-user login
@@ -81,5 +81,12 @@ local focused validation, not a completed exhaustive scheduled nightly.
 [PR #411](https://forge.adrianpk.com/adrianpk/chr/pulls/411) targets `dev`.
 Implementation and local validation are complete. Keep this ticket `reviewing`
 until integration is verified; do not infer deployment from the PR or its checks.
-The operator's running Web service still uses its existing build and access
-policy. Account setup and service activation follow integration.
+The separately configured Web preview is active. On 2026-10-19, the maintainer
+confirmed that login works and accepted the ticket's functional result.
+Configured-account login, logout and subsequent anonymous-access denial also
+passed against that running preview. Credentials remain in private local
+storage and are not part of this ticket or pull request.
+
+Only PR integration and the post-merge ticket transition remain for delivery
+closure. The default Web service still uses its existing installed build;
+acceptance of the preview does not claim that service has been upgraded.
