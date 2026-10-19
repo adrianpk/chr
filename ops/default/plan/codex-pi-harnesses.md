@@ -1,6 +1,6 @@
 # Selectable Harness Delivery
 
-Status: Approved
+Status: Completed
 
 Date: 2026-10-19
 
@@ -39,6 +39,12 @@ documentation rather than accumulating a separate test-only implementation gap.
 Development gate: `make verify`, the affected focused regressions and
 `git diff --check`. Full Go/race, provider/model and architecture matrices stay
 in the existing scheduled nightly.
+
+Closure: all eight recorded slices are integrated and the configured development
+gate passed. The [final report](../report/slices/codex-pi-harnesses/slice-8-harness-acceptance.md)
+owns the exact candidate and acceptance evidence. Completion records that
+implementation delivery; the [source ticket](../ticket/blocked/20261017203525-support-pi-alongside-codex.md)
+remains blocked on the separately authorized live Pi proof.
 
 ## 1. Delivery Ownership and Boundaries
 

@@ -118,19 +118,26 @@ controller-owned Rebase + Fast-forward. Acta merge event:
 `01M5APYM2AQS2JKMWWKD8WE3NT`. Delivered status records that integration;
 the original feature ticket remains blocked on the required live proof.
 
-The configured delivery-set gate remains `make verify`: strict lint, short Go
-tests, CI script regressions and build. Go and Python are available. It needs
-no persistent fixture or Docker service, and live Pi opt-in is unset. The
-controller owns its execution on the clean post-closure dev candidate. The
-worker has not run this post-closure gate. Its result and the separately
-authorized real-provider proof are both required before final ticket closure.
+The controller passed the configured delivery-set gate, `make verify`, on
+immutable integrated dev candidate `37acac4a310fdd5b186cab70963dc4b2676d2662`.
+Strict lint reported zero issues; short Go tests, eight CI-script regressions
+and the application build passed. The retained gate record is
+`checks/37acac4a310fdd5b186cab70963dc4b2676d2662.json`, with log
+`checks/37acac4a310fdd5b186cab70963dc4b2676d2662.OTJBYC3AQYBHJ3N6VOWDAHB3M7.log`,
+relative to the controller state directory.
+
+Documentation closure is restricted to the configured closure paths relative
+to that tested candidate. No persistent fixture was started for the gate.
+The original feature ticket remains blocked on separately authorized
+real-provider proof; the development gate does not establish that evidence.
 
 ## Acceptance Evidence
 
 These rows point to the owning merged-slice evidence and the bounded current
 journey. Earlier successful commands were not rerun as an exhaustive matrix.
-The successful PR checks above and pending post-merge development-gate evidence
-remain separate controller records.
+The successful PR checks and integrated-dev development gate above have
+separate controller records. Real-provider acceptance remains pending where
+marked below.
 
 | Criterion | Owning evidence and current result |
 | --- | --- |
@@ -163,5 +170,5 @@ and one bounded disposable Docker worker task. Native Pi 1.3.0 is available,
 but this worker cannot access the Docker socket and passwordless sudo is not
 available. The proposed fixed proof is `zai/glm-4.7` with thinking off, using the existing
 selected static credential. This is a proposal, not authorization. Real-provider
-proof has not run. The original feature ticket remains
-open until required evidence and controller-owned integration/closure complete.
+proof has not run. The original feature ticket remains blocked pending explicit
+authorization, working Docker access and successful live proof.

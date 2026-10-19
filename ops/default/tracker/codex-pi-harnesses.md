@@ -1,6 +1,6 @@
 # Selectable Harness Delivery Order
 
-Status: Approved
+Status: Completed
 
 Date: 2026-10-19
 
@@ -15,6 +15,8 @@ Plan: [Selectable Harness Delivery](../plan/codex-pi-harnesses.md).
 Spec: [Selectable Codex and Pi Harnesses](../spec/stable/codex-pi-harnesses.md).
 
 Model: [Harness Selection and Retained Bindings](../spec/stable/codex-pi-harnesses-model.md).
+
+Closure evidence: [Slice 8 report](../report/slices/codex-pi-harnesses/slice-8-harness-acceptance.md).
 
 Implementation authorization: granted on 2026-10-19 for this exact eight-slice
 set through Looper, including controller-owned Rebase + Fast-forward merges

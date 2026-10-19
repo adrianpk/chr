@@ -139,7 +139,7 @@ the proposed proof is `zai/glm-4.7` with thinking off. This worker cannot access
 the Docker socket and passwordless sudo is unavailable. No real model call has
 run. The original ticket cannot close while that acceptance remains unresolved.
 
-## Integration and Gate Preparation
+## Integration and Gate Evidence
 
 Canonical PR #419 merged through controller-owned Rebase + Fast-forward into
 dev at `d05c7171df4f5fab4318e12299d4886fb5f11cfe`. The Slice 8 report records
@@ -154,8 +154,10 @@ checks on that clean PR head:
 - `go test ./internal/app -run '^TestHarnessLivePiGuard$' -count=1 -timeout=3m`
 - `git diff --check`
 
-The post-closure delivery-set gate remains pending and belongs to the
-controller. Its configured `make verify` requires no persistent fixture;
-available Go/Python tools and unset live Pi opt-in prepare the deterministic
-gate. A successful gate does not supply the missing real-provider proof or
-authorize closing this ticket without it.
+The controller passed the configured delivery-set gate, `make verify`, on
+immutable integrated dev candidate `37acac4a310fdd5b186cab70963dc4b2676d2662`.
+The [Slice 8 report](../../report/slices/codex-pi-harnesses/slice-8-harness-acceptance.md)
+records its exact retained evidence and HP-01 through HP-21 acceptance map.
+The completed plan/tracker record implementation delivery and that development
+gate. This ticket remains blocked because the required real-provider proof
+has not run.
