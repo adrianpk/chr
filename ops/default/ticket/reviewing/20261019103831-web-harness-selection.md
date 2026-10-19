@@ -13,7 +13,8 @@ ready_at: 2026-10-19T10:38:33Z
 started_at: 2026-10-19T16:50:50Z
 reviewed_at: 2026-10-19T17:15:15Z
 branch: feat/slice-5-web-harness-selection
-commits: [57aca35d38f424236a93b34602f215bed4b5198e]
+commits: [57aca35d38f424236a93b34602f215bed4b5198e, 8df1d8911dca3858896dbe9862052aecbdf3c147]
+pr: https://forge.adrianpk.com/adrianpk/chr/pulls/416
 ---
 
 # Web harness selection
@@ -82,4 +83,4 @@ persisted defaults without restarting the service.
 
 Report: [Slice 5](../../report/slices/codex-pi-harnesses/slice-5-web-harness-selection.md).
 
-Canonical PR reference is added after creation. Integration remains controller-owned.
+Canonical PR: [#416](https://forge.adrianpk.com/adrianpk/chr/pulls/416). Integration remains controller-owned.

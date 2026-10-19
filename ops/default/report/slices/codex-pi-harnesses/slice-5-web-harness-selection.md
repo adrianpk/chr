@@ -5,7 +5,7 @@ Delivery set: codex-pi-harnesses
 Plan: [Selectable Harness Delivery](../../../plan/codex-pi-harnesses.md)
 Tracker: [Selectable Harness Delivery Order](../../../tracker/codex-pi-harnesses.md)
 Branch: `feat/slice-5-web-harness-selection`
-PR: pending
+PR: [#416](https://forge.adrianpk.com/adrianpk/chr/pulls/416)
 
 ## Purpose
 
