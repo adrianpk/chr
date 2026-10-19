@@ -4,3 +4,8 @@ Owns bounded subprocess streams, cancellation, process-group cleanup and
 sanitized diagnostics. Each call spools its output to private temporary files
 and removes them after reaping the owned process. Stream overflow fails the
 call; retained diagnostic truncation never creates an accepted JSON result.
+
+`Executor.Exchange` supports protocols that need concurrent input and output.
+Its handler owns framing, while the same process owner bounds and spools both
+streams, closes stdin for shutdown, applies a finite exit grace, and reaps the
+process group. Internal failure cleanup does not imply caller cancellation.
