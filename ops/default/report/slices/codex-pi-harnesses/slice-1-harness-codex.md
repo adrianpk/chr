@@ -1,11 +1,11 @@
 # Slice 1: Neutral contracts and Codex extraction
 
-Status: reviewing
+Status: delivered
 Delivery set: codex-pi-harnesses
 Plan: [Selectable Harness Delivery](../../../plan/codex-pi-harnesses.md)
 Tracker: [Selectable Harness Delivery Order](../../../tracker/codex-pi-harnesses.md)
 Branch: `refactor/slice-1-harness-codex`
-Ticket: [TKT-20261019103827](../../../ticket/reviewing/20261019103827-harness-codex.md)
+Ticket: [TKT-20261019103827](../../../ticket/solved/20261019103827-harness-codex.md)
 PR: [#412](https://forge.adrianpk.com/adrianpk/chr/pulls/412)
 
 ## Purpose
@@ -84,11 +84,18 @@ parse failures, artifact validation, runtime paths and unchanged OpenAI dispatch
 The app conversation fixture exercises default service assembly through a real
 owned executable. Import and caller inventories confirmed the dependency path.
 
-Integration requires controller-retained evidence for the exact clean PR HEAD,
-including `make verify`, both configured focused commands, the additional
-caller/runtime and process-race checks, and `git diff --check`. The canonical PR
-lists the exact successful ordered commands. This development evidence does not
-replace scheduled exhaustive or live-provider certification.
+PR #412 was integrated into dev at `6d2692935353d5b36fb70f5d27e2fb6818c4ca7b`.
+All six ordered controller checks passed for that exact candidate:
+
+- `make verify`
+- `go test ./internal/harness/... ./internal/core ./internal/app -run '^(TestHarnessCodex|TestCodex|TestAgentRun|TestStructured)' -count=1 -timeout=3m`
+- `go test -race ./internal/harness/... -run '^TestHarnessCodex' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/app -run '^(TestHarness|TestNewHarnessInvocation|Test.*Proving|Test.*Runtime|Test.*WorkerContext|TestNewQuizModelAdapter|TestNewDumpCurationProvider)' -count=1 -timeout=3m`
+- `go test -race ./internal/harness/process -run '^TestAgentRunProcess' -count=1 -timeout=3m`
+- `git diff --check`
+
+This development evidence does not replace scheduled exhaustive or
+live-provider certification.
 
 ## Risks and Follow-ups
 
