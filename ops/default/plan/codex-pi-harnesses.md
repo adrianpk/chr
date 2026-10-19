@@ -135,8 +135,8 @@ The specification links the pinned Pi CLI/RPC contract.
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | Neutral contracts and Codex extraction | [TKT-20261019103827](../ticket/solved/20261019103827-harness-codex.md) | `refactor/slice-1-harness-codex` | `refactor(slice-1): extract Codex behind neutral harness contracts` | `ops/default/report/slices/codex-pi-harnesses/slice-1-harness-codex.md` |
 | Slice 2 | Live role selection and retained bindings | [TKT-20261019103828](../ticket/solved/20261019103828-harness-selection.md) | `feat/slice-2-harness-selection` | `feat(slice-2): retain live harness selections and invocation bindings` | `ops/default/report/slices/codex-pi-harnesses/slice-2-harness-selection.md` |
-| Slice 3 | Pi RPC and structured generation | [TKT-20261019103829](../ticket/in_progress/20261019103829-pi-generation.md) | `feat/slice-3-pi-generation` | `feat(slice-3): generate structured content through the Pi adapter` | `ops/default/report/slices/codex-pi-harnesses/slice-3-pi-generation.md` |
-| Slice 4 | Pi Docker workers and private runtime setup | [TKT-20261019103830](../ticket/ready/20261019103830-pi-worker-runtime.md) | `feat/slice-4-pi-worker-runtime` | `feat(slice-4): execute Pi workers in their selected Docker runtime` | `ops/default/report/slices/codex-pi-harnesses/slice-4-pi-worker-runtime.md` |
+| Slice 3 | Pi RPC and structured generation | [TKT-20261019103829](../ticket/solved/20261019103829-pi-generation.md) | `feat/slice-3-pi-generation` | `feat(slice-3): generate structured content through the Pi adapter` | `ops/default/report/slices/codex-pi-harnesses/slice-3-pi-generation.md` |
+| Slice 4 | Pi Docker workers and private runtime setup | [TKT-20261019103830](../ticket/in_progress/20261019103830-pi-worker-runtime.md) | `feat/slice-4-pi-worker-runtime` | `feat(slice-4): execute Pi workers in their selected Docker runtime` | `ops/default/report/slices/codex-pi-harnesses/slice-4-pi-worker-runtime.md` |
 | Slice 5 | Web harness selection | [TKT-20261019103831](../ticket/ready/20261019103831-web-harness-selection.md) | `feat/slice-5-web-harness-selection` | `feat(slice-5): change project harness selections from the Web UI` | `ops/default/report/slices/codex-pi-harnesses/slice-5-web-harness-selection.md` |
 | Slice 6 | TUI harness selection | [TKT-20261019103832](../ticket/ready/20261019103832-tui-harness-selection.md) | `feat/slice-6-tui-harness-selection` | `feat(slice-6): change project harness selections from the TUI` | `ops/default/report/slices/codex-pi-harnesses/slice-6-tui-harness-selection.md` |
 | Slice 7 | Telegram harness selection | [TKT-20261019103833](../ticket/ready/20261019103833-telegram-harness-selection.md) | `feat/slice-7-telegram-harness-selection` | `feat(slice-7): change project harness selections through Telegram` | `ops/default/report/slices/codex-pi-harnesses/slice-7-telegram-harness-selection.md` |
@@ -182,7 +182,7 @@ Focused concurrency regression (planned): `go test -race ./internal/core ./inter
 
 ### Slice 3: Pi RPC and structured generation
 
-Ticket: [TKT-20261019103829](../ticket/in_progress/20261019103829-pi-generation.md).
+Ticket: [TKT-20261019103829](../ticket/solved/20261019103829-pi-generation.md).
 
 Dependency: Slice 2 integrated into dev.
 
@@ -200,7 +200,7 @@ Focused concurrency regression (planned): `go test -race ./internal/harness/pi .
 
 ### Slice 4: Pi Docker workers and private runtime setup
 
-Ticket: [TKT-20261019103830](../ticket/ready/20261019103830-pi-worker-runtime.md).
+Ticket: [TKT-20261019103830](../ticket/in_progress/20261019103830-pi-worker-runtime.md).
 
 Dependency: Slice 3 integrated into dev.
 

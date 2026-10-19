@@ -1,7 +1,7 @@
 ---
 id: TKT-20261019103830
 title: "Pi Docker workers and private runtime setup"
-status: ready
+status: in_progress
 kind: task
 severity: medium
 priority: normal
@@ -10,6 +10,8 @@ tags: harnesses, pi, codex
 source: chat
 reported_at: 2026-10-19T10:38:30Z
 ready_at: 2026-10-19T10:38:33Z
+started_at: 2026-10-19T15:01:47Z
+branch: feat/slice-4-pi-worker-runtime
 commits: []
 ---
 
@@ -33,8 +35,9 @@ Expected PR title: `feat(slice-4): execute Pi workers in their selected Docker r
 
 Expected report: `ops/default/report/slices/codex-pi-harnesses/slice-4-pi-worker-runtime.md`.
 
-These are planned identities; no implementation branch, PR or report exists
-merely because this ticket is ready.
+Activated after canonical PR #414 was verified merged into dev.
+Tasks proceed in recorded order; isolated container fixtures use deterministic
+owned endpoints without paid provider calls.
 
 Prerequisite: Slice 3 integrated into dev; implementation authorization for this set.
 

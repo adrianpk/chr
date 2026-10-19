@@ -1,6 +1,6 @@
 # Slice 3: Pi RPC and Structured Generation
 
-Status: reviewing
+Status: delivered
 Delivery set: codex-pi-harnesses
 Plan: [Selectable Harness Delivery](../../../plan/codex-pi-harnesses.md)
 Tracker: [Selectable Harness Delivery Order](../../../tracker/codex-pi-harnesses.md)
@@ -108,14 +108,18 @@ when no marker can match; Unicode folding and secret redaction are unchanged.
 The unchanged completion/backpressure and redaction checks passed three race
 runs. Record volume, byte limits, instrumentation and deadlines were retained.
 
-Before PR readiness, record the following ordered checks through the controller
-on the final clean PR head; the exact result belongs to that head:
+The controller recorded all five ordered checks passing on the clean PR head
+`23bafd38e143105c003075d71125455713e23696` (evidence
+`2IBN2CQFNCLIQRXSFCQ6QSFGZQ`):
 
-- `make verify`
-- `go test ./internal/harness/... ./internal/core ./internal/app -run '^(TestPiTransport|TestPiGeneration|TestHarnessGenerationBinding)' -count=1 -timeout=3m`
-- `go test -race ./internal/harness/pi ./internal/app -run '^(TestPiTransport|TestPiGeneration)' -count=1 -timeout=3m`
-- `CHR_TEST_PI_EXECUTABLE="$(mise where pi@1.3.0)/pi/pi" go test ./internal/harness/pi -run '^TestPiGenerationPinnedInspection$' -count=1 -timeout=1m`
-- `git diff --check`
+- `make verify` (pass)
+- `go test ./internal/harness/... ./internal/core ./internal/app -run '^(TestPiTransport|TestPiGeneration|TestHarnessGenerationBinding)' -count=1 -timeout=3m` (pass)
+- `go test -race ./internal/harness/pi ./internal/app -run '^(TestPiTransport|TestPiGeneration)' -count=1 -timeout=3m` (pass)
+- `CHR_TEST_PI_EXECUTABLE="$(mise where pi@1.3.0)/pi/pi" go test ./internal/harness/pi -run '^TestPiGenerationPinnedInspection$' -count=1 -timeout=1m` (pass)
+- `git diff --check` (pass)
+
+Canonical PR #414 was verified merged into dev at that exact commit on
+2026-10-19. Slice 3 of 8 completed; Slice 4 is the next recorded unit.
 
 ## Risks and Follow-ups
 
