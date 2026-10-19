@@ -41,6 +41,10 @@ func (p webViewProvider) specArtifactDetail(ctx context.Context, request webui.A
 }
 
 func (p webViewProvider) writeSpecAction(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
+	if request.Action == webActionSpecGenerate {
+		return p.writeSpecGenerate(operations.ctx, operations, request)
+	}
+
 	status := "approved"
 	if request.Fields["draft"] == "true" {
 		status = "draft"

@@ -62,7 +62,10 @@
               <button class="button" type="button" data-modal-template="case-create-modal">New</button>
             {{end}}
             {{if eq .Catalog.Family "specs"}}
- <a class="button" href="/specs/detail" hx-get="/specs/detail/fragment" hx-target="#modal-root" hx-swap="innerHTML">New</a>
+              <div class="page-header-actions">
+                <a class="button" href="/specs/detail" hx-get="/specs/detail/fragment" hx-target="#modal-root" hx-swap="innerHTML">New</a>
+                {{if .Catalog.Cases}}<button class="button" type="button" data-modal-template="spec-generate-modal">Generate</button>{{end}}
+              </div>
 {{end}}
 {{if eq .Catalog.Family "dumps"}}
               {{template "dump_page_actions.html" .}}

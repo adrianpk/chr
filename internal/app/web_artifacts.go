@@ -104,7 +104,18 @@ func specCatalog(operations service) (webui.ArtifactCatalogView, error) {
 		cards = append(cards, card)
 	}
 
-	return webArtifactCatalog("specs", cards), nil
+	cases, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, core.WorkflowRecordLimit)
+	if err != nil {
+		return webui.ArtifactCatalogView{}, err
+	}
+
+	view := webArtifactCatalog("specs", cards)
+	for _, item := range cases {
+		view.Cases = append(view.Cases, webui.TicketCaseView{Slug: item.Slug, Name: item.Name})
+	}
+	view.Revision = webStableRevision(view)
+
+	return view, nil
 }
 
 func (p webViewProvider) ArtifactDetailView(ctx context.Context, request webui.ArtifactDetailRequest) (webui.ArtifactDetailView, error) {

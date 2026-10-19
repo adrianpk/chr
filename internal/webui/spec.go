@@ -17,13 +17,7 @@ func (h handler) specActionResult(w http.ResponseWriter, r *http.Request, reques
 	}
 
 	if result.Status == WriteStatusOK {
-		if htmx.IsRequest(r) && request.Fields["modal"] == "true" {
-			htmx.Retarget(w, "#modal-root")
-			htmx.Reswap(w, htmx.SwapInner)
-			w.WriteHeader(http.StatusOK)
-		} else {
-			h.redirectAfterWrite(w, r, "/specs")
-		}
+		h.specWriteSuccess(w, r, request, result)
 
 		return true
 	}
@@ -37,11 +31,48 @@ func (h handler) specActionResult(w http.ResponseWriter, r *http.Request, reques
 		if err := h.renderer.Fragment(w, "spec_write_result.html", data); err != nil {
 			http.Error(w, "render spec result", http.StatusInternalServerError)
 		}
+
+		return true
+	}
+
+	if request.Action == "spec.generate" {
+		h.renderWriteResult(w, r, result)
 	} else {
 		h.specFailurePage(w, r, request, result)
 	}
 
 	return true
+}
+
+func (h handler) specWriteSuccess(w http.ResponseWriter, r *http.Request, request WriteActionRequest, result WriteActionResponse) {
+	if !htmx.IsRequest(r) || request.Fields["modal"] != "true" {
+		h.redirectAfterWrite(w, r, "/specs")
+
+		return
+	}
+
+	htmx.Retarget(w, "#modal-root")
+	htmx.Reswap(w, htmx.SwapInner)
+
+	if request.Action != "spec.generate" {
+		w.WriteHeader(http.StatusOK)
+
+		return
+	}
+
+	r.URL.RawQuery = "id=" + url.QueryEscape(result.Operation.ID)
+
+	data, err := h.artifactDetailPageData(r, "specs")
+	if err != nil {
+		http.Error(w, "Spec saved. Reload Specs to open it.", http.StatusInternalServerError)
+
+		return
+	}
+
+	data.SpecModal, data.Write = true, result
+	if err := h.renderer.Fragment(w, "spec_modal.html", data); err != nil {
+		http.Error(w, "Spec saved. Reload Specs to open it.", http.StatusInternalServerError)
+	}
 }
 
 func (h handler) specFailurePage(w http.ResponseWriter, r *http.Request, request WriteActionRequest, result WriteActionResponse) {

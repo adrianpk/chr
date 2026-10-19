@@ -171,6 +171,10 @@ func NormalizeGeneratedSpecChrysoPathReferences(body string) string {
 			return match
 		}
 
+		if strings.HasPrefix(path, ".chr/default/") {
+			return match
+		}
+
 		if strings.HasPrefix(path, ".chr/") {
 			return ".chr/default/" + strings.TrimPrefix(path, ".chr/") + suffix
 		}
@@ -190,6 +194,7 @@ func generatedSpecChrysoPathReferenceAllowed(path string) bool {
 	}
 
 	for _, directory := range []string{
+		"agents",
 		"cases",
 		"dumps",
 		"quizzes",

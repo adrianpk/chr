@@ -144,7 +144,16 @@ func (p webViewProvider) writeWorkAction(ctx context.Context, operations service
 }
 
 func (p webViewProvider) writeSpecGenerate(ctx context.Context, operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
-	result, err := operations.GenerateSpec(ctx, SpecGenerateRequest{Scope: webActionScope(request)})
+	scope := webActionScope(request)
+	if scope.CaseSlug == "" {
+		return webValidationWrite(fmt.Errorf("select an existing use case to generate its spec")), nil
+	}
+
+	if _, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).ReadBounded(ctx, scope.CaseSlug); err != nil {
+		return webValidationWrite(err), nil
+	}
+
+	result, err := operations.GenerateSpec(ctx, SpecGenerateRequest{Scope: scope, OperationID: request.Fields["request_id"]})
 	if err != nil {
 		return webValidationWrite(err), nil
 	}

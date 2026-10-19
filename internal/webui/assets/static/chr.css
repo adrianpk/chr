@@ -343,6 +343,12 @@ a {
   align-self: flex-start;
 }
 
+.page-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .eyebrow {
   margin: 0;
   font-weight: 650;

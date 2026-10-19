@@ -107,7 +107,7 @@
 
   function dumpCaptureResponse(event) {
     const parameters = event.detail.requestConfig && event.detail.requestConfig.parameters;
-    if (!parameters || !["case.create", "dump.create", "dump.save", "spec.create", "spec.save"].includes(parameters.action) || event.detail.target.id !== "modal-root") return;
+    if (!parameters || !["case.create", "dump.create", "dump.save", "spec.create", "spec.save", "spec.generate"].includes(parameters.action) || event.detail.target.id !== "modal-root") return;
     if (document.querySelector("#modal-root [role='dialog']")) return;
     closeModal();
     const workspace = document.querySelector("#workspace");
@@ -174,12 +174,15 @@
         maximize.setAttribute("aria-pressed", String(expanded));
         maximize.textContent = expanded ? "Restore" : "Maximize";
       }
-      if (event.target.matches("[data-modal-backdrop]")) closeModal();
+      if (event.target.matches("[data-modal-backdrop]") && !document.querySelector("#modal-root [data-modal-explicit-close]")) closeModal();
     });
     document.addEventListener("keydown", function (event) {
       const dialog = document.querySelector("#modal-root [role='dialog']");
       if (!dialog) return;
-      if (event.key === "Escape") { closeModal(); return; }
+      if (event.key === "Escape") {
+        if (!dialog.hasAttribute("data-modal-explicit-close")) closeModal();
+        return;
+      }
       if (event.key !== "Tab") return;
       const focusable = Array.from(dialog.querySelectorAll("a[href], button, input:not([type='hidden']), textarea, select, [tabindex='0']"))
         .filter(function (element) { return !element.disabled && element.getClientRects().length > 0; });

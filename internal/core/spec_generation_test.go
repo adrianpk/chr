@@ -6,6 +6,33 @@ import (
 	"time"
 )
 
+// Valid workspace protocol references survive publication unchanged; legacy
+// paths normalize once and unsupported namespaced paths remain rejectable.
+func TestGeneratedSpecProtocolPaths(t *testing.T) {
+	for _, item := range []struct {
+		name, path, want string
+		valid            bool
+	}{
+		{"canonical", ".chr/default/agents/ARCHITECTURE.md", ".chr/default/agents/ARCHITECTURE.md", true},
+		{"legacy", ".chr/agents/ARCHITECTURE.md", ".chr/default/agents/ARCHITECTURE.md", true},
+		{"unsupported", ".chr/default/invented/data.json", ".chr/default/invented/data.json", false},
+	} {
+		t.Run(item.name, func(t *testing.T) {
+			body := "See `" + item.path + "`."
+
+			got := NormalizeGeneratedSpecChrysoPathReferences(body)
+			if got != "See `"+item.want+"`." || NormalizeGeneratedSpecChrysoPathReferences(got) != got {
+				t.Fatal("normalization altered the namespace", got)
+			}
+
+			err := ValidateGeneratedSpec(GeneratedSpec{Scope: QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"}, Title: "Newsletter requirements", Body: got, CreatedAt: time.Now().UTC()})
+			if (err == nil) != item.valid {
+				t.Fatal("incorrect protocol reference validation", err)
+			}
+		})
+	}
+}
+
 func TestRenderGeneratedSpecRemovesDuplicateTitleHeading(t *testing.T) {
 	spec := GeneratedSpec{
 		Scope:            QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"},

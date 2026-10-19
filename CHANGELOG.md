@@ -48,6 +48,12 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   selection, one Body editor and a compact Draft control retain identity,
   provenance and native state. Stale saves keep the form available, and generated
   output cannot replace an edit made while it was being prepared.
+  Generate now selects an existing named use case and combines its saved dumps
+  and quiz answers with shared project context, with progress feedback during
+  generation. Project-wide context is not offered as a generation target.
+  A successful generation opens its saved document in the editor. Generation
+  results and errors remain available until explicitly closed. Valid workspace
+  protocol references survive publication without duplicating their namespace.
 - Quizzes now provide a focused Web answer screen with one question and a
   spacious answer editor in a single panel, a Deep/Fast segmented selector and
   a compact action row. Opening a new quiz prepares its first question directly,
