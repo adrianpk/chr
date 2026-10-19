@@ -61,7 +61,8 @@ It does not establish remote model authentication or a live Pi generation result
 
 ## Validation
 
-Passed focused T3.1 implementation checks:
+Passed focused T3.1 implementation checks for source commit
+`2a256f9612d20734aa2cdce5562e8aeb96ddfe8c`:
 
 - `go test ./internal/harness/... -count=1 -timeout=1m`
 - `go test -race ./internal/harness/pi ./internal/harness/process -run '^(TestPiTransport|TestAgentRunProcess)' -count=1 -timeout=1m`
