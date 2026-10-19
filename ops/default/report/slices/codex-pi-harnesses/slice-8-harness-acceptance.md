@@ -41,7 +41,13 @@ The CLI selects the registered project through its existing active-project
 store. An explicit directory has its own directory-derived project identity;
 it cannot replace the selected registry identity in this journey.
 
-T8.2 guidance/evidence mapping and T8.3 authorized live proof remain in progress.
+T8.2 adds the setup/recovery guide and corrects the generation reference to
+state explicit-profile precedence, legacy direct API behavior, native Pi's
+static-key limitation and observed-versus-certified usage. Registered-project
+selection is documented consistently across adapters.
+
+T8.3 authorized live proof remains pending. The deterministic fixtures establish
+shared application/transport behavior and do not stand in for a real model call.
 
 ## Contracts Added or Changed
 
@@ -53,6 +59,9 @@ T8.2 guidance/evidence mapping and T8.3 authorized live proof remain in progress
 - `internal/app/harness_journey_test.go`
 - `internal/app/harness_journey_fixture_test.go`
 - `internal/app/harness_journey_adapters_test.go`
+- `docs/how-to/select-harnesses.md`
+- `docs/reference/artifact-generation-backends.md`
+- `docs/how-to/user-guide/index.md`, `docs/index.md`
 
 ## Validation
 
@@ -63,10 +72,45 @@ Passed focused task checks:
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --allow-serial-runners --fix --timeout=5m ./internal/app`
 - `git diff --check`
 
+Documentation checks verified 129 local Markdown link targets.
+`go list -f '{{join .Imports "\n"}}' ./internal/core` showed only neutral
+harness/process dependencies, with no concrete Codex/Pi adapter import.
+
 The four named adapter cases executed. Owned HTTP servers, SQLite handles,
 claims and generation subprocesses finished their cleanup. The actual generation
 caller validates its typed output before retaining successful parser evidence.
 Routine fixtures use synthetic credentials and perform no provider/bot calls.
+
+## Acceptance Evidence
+
+These rows point to the owning merged-slice evidence and the bounded current
+journey. Earlier successful commands were not rerun as an exhaustive matrix.
+Final clean-candidate checks and post-merge development-gate evidence remain
+separate controller records.
+
+| Criterion | Owning evidence and current result |
+| --- | --- |
+| HP-01 | [Slice 1](slice-1-harness-codex.md) Codex contract regressions; current journey prepares and binds Codex without Pi profiles or Docker inspection. |
+| HP-02 | Current journey admits and generates all four independent role combinations through real shared operations. |
+| HP-03 | [Slice 3](slice-3-pi-generation.md) covers all generation families, contextual Quiz, conversation, explanations, review and tracking; current journey dispatches both native generation protocols. |
+| HP-04 | [Slice 2](slice-2-harness-selection.md) legacy action dispatch and Slice 3 API-to-Pi Plan transitions; current journey clears a profile and calls the original direct API path. |
+| HP-05 | Slice 1 common process/contract suite and Slice 3 Pi transport cancellation, output and capability coverage. |
+| HP-06 | Slice 1 neutral core ownership; current production core import graph has no concrete Codex/Pi adapter dependency. |
+| HP-07 | [Slice 4](slice-4-pi-worker-runtime.md) real container task/host validation; current resumed worker produces host-validated Git output without an integration claim. |
+| HP-08 | Slice 4 actual pinned Docker image and disposable task passed against an owned model endpoint. T8.3 additionally requires the authorized real-provider Docker task; pending. |
+| HP-09 | Slice 3 pinned Pi structured output and invalid-artifact preservation passed with owned provider IO. T8.3 additionally requires the authorized real-provider structured call; pending. |
+| HP-10 | Slice 3 shared JSONL framing, bounds, interleaving, provider/exit/abort cases and Slice 4 worker tool correlation. |
+| HP-11 | Slice 3 native generation inspection/isolation and Slice 4 poisoned-context container assertions keep discovered tools/extensions/settings out. |
+| HP-12 | Slice 2 readiness, Slice 3 explicit resource/profile rejection and Slice 4 bridge/image/network preparation checks reject missing setup without fallback. |
+| HP-13 | Slice 3 shared capacity/private state; Slice 4 concurrent real containers use distinct credentials/state and the same admitted capacity pool. |
+| HP-14 | Slice 2 retained invocation/generation artifacts and current journey's active completion, nested generation, pause/resume and original worker execution. |
+| HP-15 | Slice 2 `TestHarnessBindingOldReader` rejects the mandatory new invocation format before execution. |
+| HP-16 | Slice 3 unknown/observed usage and Slice 4 worker budget/merger refusal; guidance states that observations do not certify whole-call enforcement. |
+| HP-17 | Slice 4 actual container-network endpoint and loopback/host-gateway boundary tests; remote model access remains part of pending T8.3 proof. |
+| HP-18 | Setup/recovery guide, corrected generation reference, User Guide links and the existing Unreleased Codex/Pi capability cover both roles and interfaces. |
+| HP-19 | [Slice 5](slice-5-web-harness-selection.md), [Slice 6](slice-6-tui-harness-selection.md), [Slice 7](slice-7-telegram-harness-selection.md) adapter guards; current journey writes/reads all four adapters and an independent process. |
+| HP-20 | Current journey switches while the original generation subprocess and worker claim remain active; fresh admissions change while nested/resumed work keeps its binding/policy. |
+| HP-21 | Slice 2 atomic image/replay and unrelated bytes, Slices 5-7 stale/unauthorized/lost acknowledgements, and current journey's complete-revision admissions/unrelated-byte preservation. |
 
 ## Risks and Follow-ups
 

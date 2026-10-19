@@ -118,6 +118,12 @@ legacy direct API selection, process visibility and unrelated bytes are covered.
 
 Passed: `go test ./internal/app -run '^TestHarnessJourney$' -count=1 -timeout=3m -v`.
 
-T8.2 guidance/evidence mapping is next. T8.3 real-provider proof requires explicit
-operator authorization and working Docker access; neither is established by
-routine protocol fixtures.
+T8.2 is implemented: setup and recovery guidance covers both roles, static-key
+versus OAuth boundaries, private runtime/model resources, registered project
+identity, all four controls and observed-versus-certified usage. The Slice 8
+report maps HP-01 through HP-21 to owning evidence and marks real-provider proof
+pending. The legacy generation reference now states the implemented precedence
+and rejected unsupported backends.
+
+T8.3 real-provider proof requires explicit operator authorization and working
+Docker access; neither is established by routine protocol fixtures.

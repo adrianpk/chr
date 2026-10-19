@@ -13,6 +13,7 @@ Learning-oriented walkthroughs:
 Task-oriented guides:
 
 - [User guide](how-to/user-guide/index.md)
+- [Select worker and generation harnesses](how-to/select-harnesses.md)
 - [Configure native integration](how-to/configure-native-integration.md)
 - [Run the local Web UI](how-to/run-local-web-ui.md)
 - [Configure single-user Web login](how-to/configure-web-login.md)

@@ -102,6 +102,22 @@ Preview validation without running Docker:
 chr runtime validate --dry-run
 ```
 
+## Select Worker and Generation Harnesses
+
+Projects may use Codex or Pi independently for workers and content generation.
+Prepare named profiles in private user configuration, select the registered
+project with `chr project use`, and inspect `chr harness status --json` before
+changing either default. The [harness setup and recovery guide](../select-harnesses.md)
+covers native Pi generation, the separate Docker worker bridge, credentials,
+custom endpoints and exact revision/request handling.
+
+Web Harnesses, TUI Project `h`, Telegram `/harness` and the CLI share those
+persisted defaults. A switch affects new operations; pending, running, paused
+and resumed work keeps its original binding. Local readiness does not test
+remote authentication or certify the selected model's tool/structured-output
+capabilities. Missing usage remains unknown, and observed usage does not certify
+hard token-budget enforcement.
+
 ## Configure Work Readiness
 
 Work readiness protects the project before Chryso starts agent work. The
