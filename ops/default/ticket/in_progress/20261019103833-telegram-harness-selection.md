@@ -1,7 +1,7 @@
 ---
 id: TKT-20261019103833
 title: "Telegram harness selection"
-status: ready
+status: in_progress
 kind: task
 severity: medium
 priority: normal
@@ -10,6 +10,8 @@ tags: harnesses, pi, codex
 source: chat
 reported_at: 2026-10-19T10:38:33Z
 ready_at: 2026-10-19T10:38:33Z
+started_at: 2026-10-19T17:37:13Z
+branch: feat/slice-7-telegram-harness-selection
 commits: []
 ---
 
@@ -33,8 +35,8 @@ Expected PR title: `feat(slice-7): change project harness selections through Tel
 
 Expected report: `ops/default/report/slices/codex-pi-harnesses/slice-7-telegram-harness-selection.md`.
 
-These are planned identities; no implementation branch, PR or report exists
-merely because this ticket is ready.
+Activated after canonical PR #417 was verified merged into dev. T7.1 is
+the first recorded task; the canonical report accompanies its implementation.
 
 Prerequisite: Slice 6 integrated into dev; implementation authorization for this set.
 

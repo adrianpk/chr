@@ -1,6 +1,6 @@
 # Slice 6: TUI Harness Selection
 
-Status: reviewing
+Status: delivered
 Delivery set: codex-pi-harnesses
 Plan: [Selectable Harness Delivery](../../../plan/codex-pi-harnesses.md)
 Tracker: [Selectable Harness Delivery Order](../../../tracker/codex-pi-harnesses.md)
@@ -104,10 +104,17 @@ and 60×24 shells retain both role choices and controls, wrap long model labels
 and scroll to retained bindings. Focused race instrumentation covers these
 asynchronous interaction boundaries. Owned claims/subprocesses finish cleanup.
 
-The controller records the final ordered development gate, focused application
-checks, focused race checks and whitespace validation against the clean PR head
-after reference follow-up commits. That exact-head evidence is separate from
-these task checks.
+Controller evidence `WSFV4HWI36FGR3GTGSC63VY2P3` passed this exact ordered
+list on clean head `6d6489c539c7f38cab30f5565fa399c6480a807a`:
+
+- `make verify`
+- `go test ./internal/tui ./internal/app -run '^TestTUIHarnessSelection' -count=1 -timeout=3m`
+- `go test -race ./internal/tui ./internal/app -run '^TestTUIHarnessSelection' -count=1 -timeout=3m`
+- `git diff --check`
+
+Canonical PR #417 was verified merged into dev at that same commit through
+controller-owned Rebase + Fast-forward. Acta merge event:
+`01M5AKRR4RQF5084R8KBTXADMC`.
 
 ## Risks and Follow-ups
 

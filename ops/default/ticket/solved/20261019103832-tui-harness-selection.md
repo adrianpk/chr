@@ -1,7 +1,7 @@
 ---
 id: TKT-20261019103832
 title: "TUI harness selection"
-status: reviewing
+status: solved
 kind: task
 severity: medium
 priority: normal
@@ -11,9 +11,11 @@ source: chat
 reported_at: 2026-10-19T10:38:32Z
 ready_at: 2026-10-19T10:38:33Z
 started_at: 2026-10-19T17:19:15Z
+closed_at: 2026-10-19T17:37:13Z
+resolution: fixed
 branch: feat/slice-6-tui-harness-selection
-reviewed_at: 2026-10-19T17:32:58Z
-commits: [03d0027706c678d6a6587f895f1765e590911d56, c44527f3920af192e2dd19c9eb30b95ca14253a9]
+reviewed_at: 2026-10-19T17:37:13Z
+commits: [03d0027706c678d6a6587f895f1765e590911d56, c44527f3920af192e2dd19c9eb30b95ca14253a9, 6d6489c539c7f38cab30f5565fa399c6480a807a]
 pr: https://forge.adrianpk.com/adrianpk/chr/pulls/417
 ---
 
@@ -87,3 +89,10 @@ the running TUI sees persisted changes on reload without another settings store.
 Report: [Slice 6](../../report/slices/codex-pi-harnesses/slice-6-tui-harness-selection.md).
 
 Canonical PR: [#417](https://forge.adrianpk.com/adrianpk/chr/pulls/417). Integration remains controller-owned.
+
+## Integration
+
+PR #417 merged into dev at `6d6489c539c7f38cab30f5565fa399c6480a807a`.
+Controller evidence `WSFV4HWI36FGR3GTGSC63VY2P3` passed all four ordered
+commands recorded in the report. Acta confirms the Rebase + Fast-forward merge
+in event `01M5AKRR4RQF5084R8KBTXADMC`. Slice 7 is the next recorded unit.
