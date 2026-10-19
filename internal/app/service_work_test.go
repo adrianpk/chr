@@ -809,10 +809,13 @@ func newAgentWorkTestService(t *testing.T, devRoot, projectDir string) service {
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	return newService(t.Context(), env, commandProjectContext{
+	operations := newService(t.Context(), env, commandProjectContext{
 		ProjectDir: projectDir,
 		ProjectID:  projectID(projectDir),
 	}, testAssetsFS())
+	operations.generationBinder = testGenerationBinder
+
+	return operations
 }
 
 type fakeServiceAgenticReviewRunner struct {

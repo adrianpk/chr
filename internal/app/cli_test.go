@@ -866,6 +866,7 @@ func newContextTestService(t *testing.T, ctx context.Context, projectDir string)
 		ProjectID:  "service-project",
 	}, testAssetsFS())
 	operations.dumpCurator = fallbackDumpCurationProvider{Reason: "test fallback"}
+	operations.generationBinder = testGenerationBinder
 
 	return operations
 }
@@ -881,10 +882,13 @@ func newContextAgentWorkTestService(t *testing.T, ctx context.Context, devRoot, 
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	return newService(ctx, env, commandProjectContext{
+	operations := newService(ctx, env, commandProjectContext{
 		ProjectDir: projectDir,
 		ProjectID:  projectID(projectDir),
 	}, testAssetsFS())
+	operations.generationBinder = testGenerationBinder
+
+	return operations
 }
 
 func writeWebServeBoardTestTicket(t *testing.T, projectDir string) {
@@ -963,7 +967,7 @@ func newWebServeBoardProjectContext(t *testing.T, projectDir string) commandProj
 }
 
 func newWebServeBoardTestProvider(projectDir string, env core.UserEnvironment, projectContext commandProjectContext) webViewProvider {
-	return webViewProvider{
+	provider := webViewProvider{
 		env:            env,
 		assetsFS:       testAssetsFS(),
 		projectContext: projectContext,
@@ -973,6 +977,14 @@ func newWebServeBoardTestProvider(projectDir string, env core.UserEnvironment, p
 			Web:        core.DefaultWebConfig(),
 		},
 	}
+	provider.serviceFactory = func(ctx context.Context) service {
+		operations := newService(ctx, env, projectContext, testAssetsFS())
+		operations.generationBinder = testGenerationBinder
+
+		return operations
+	}
+
+	return provider
 }
 
 func TestAcceptanceFeatureGenerateOutputGenerated(t *testing.T) {

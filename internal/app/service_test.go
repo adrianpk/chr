@@ -1022,7 +1022,7 @@ func newTestService(t *testing.T, projectDir string) service {
 	operations.dumpCurator = fallbackDumpCurationProvider{Reason: "test fallback"}
 	// These fixtures inject model fakes to isolate their existing operation
 	// contracts. Harness binding fixtures use production assembly and owned drivers.
-	operations.generationBinder = func(_ service, ctx context.Context, _, _ string) (context.Context, error) { return ctx, nil }
+	operations.generationBinder = testGenerationBinder
 
 	return operations
 }
@@ -1181,4 +1181,10 @@ func opsArtifactSlugForServiceFixture(value string) string {
 
 func testTime() time.Time {
 	return time.Date(2026, 5, 23, 10, 0, 0, 0, time.UTC)
+}
+
+// Domain fixtures inject their model boundary independently of private setup.
+// Harness generation fixtures use production assembly and owned executable files.
+func testGenerationBinder(_ service, ctx context.Context, _, _ string) (context.Context, error) {
+	return ctx, nil
 }

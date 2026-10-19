@@ -125,6 +125,11 @@ does not claim an exact underlying model was frozen. Exact model reproducibility
 requires configuring a model. Record the observed model separately when the
 transport supplies reliable evidence; an absent observation remains unknown.
 
+Executable fingerprinting streams a regular executable file with a 512 MiB
+ceiling. It rejects larger or non-regular files before admission and rejects
+changed bytes before dispatch. This accommodates supported CLI distribution
+sizes without increasing the retained metadata or in-memory stream bounds.
+
 ## 5. Generation Run Metadata
 
 Extend existing local agent-run artifacts with a bounded host-written metadata

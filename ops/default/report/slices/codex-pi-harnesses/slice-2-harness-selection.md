@@ -87,7 +87,15 @@ failed strict lint because the shared request validator exceeded the complexity
 limit. Extracting its output-name check preserves validation and error order.
 The focused `go test ./internal/harness/... -count=1 -timeout=3m` passed afterward.
 
-Before handoff, Looper records the required `make verify`, configured focused and
+The next final-head attempt at `e86c9e97903a8ef270ba156e34ff8da8e03a3195`
+exposed legacy Web/review fake-provider fixtures that did not inject the generation
+binder and a 256 MiB ceiling below supported CLI footprints. Domain fixtures now
+inject that boundary explicitly. Production binding fixtures still use prepared
+profiles and owned drivers. The streamed ceiling is 512 MiB, with a positive
+300 MiB fixture and the existing oversized/non-regular/hash rejection checks.
+The targeted caller regression selection passed after these corrections.
+
+Before handoff, the controller records the required `make verify`, configured focused and
 race commands, caller regressions and `git diff --check` on the exact clean PR head.
 The controller ledger supplies the final validation evidence for that head.
 

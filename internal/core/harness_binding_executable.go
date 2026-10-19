@@ -13,7 +13,7 @@ import (
 	"syscall"
 )
 
-const harnessExecutableLimit = 256 << 20
+const harnessExecutableLimit = 512 << 20
 
 // FreezeHarnessExecutable resolves a host-selected program once and binds its
 // regular executable file and argv. It never launches the executable.
@@ -59,7 +59,7 @@ func harnessExecutableHash(program string) (string, error) {
 
 	info, err := file.Stat()
 	if err != nil || !info.Mode().IsRegular() || info.Mode().Perm()&0o111 == 0 || info.Size() > harnessExecutableLimit {
-		return "", errors.New("harness executable requires a regular executable file within 256 MiB")
+		return "", errors.New("harness executable requires a regular executable file within 512 MiB")
 	}
 
 	hash := sha256.New()

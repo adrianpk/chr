@@ -14,7 +14,7 @@ started_at: 2026-10-19T11:23:17Z
 branch: feat/slice-2-harness-selection
 pr: "https://forge.adrianpk.com/adrianpk/chr/pulls/413"
 reviewed_at: 2026-10-19T13:03:53Z
-commits: [d9b19ac1b2ce4e1b577d9497443b2d207c4c1ce7, 3ed1b443972fe4532f3df295c4df0d8e5c4ad657, f7f94be12eee99bd747aef2b6cf8e72e63f7ddb7, 17fcef85e99ac8025f87bc1cbd47df5760a5c50f, 737162d3c1b6d8472e951d2ae1b6711626002fda]
+commits: [d9b19ac1b2ce4e1b577d9497443b2d207c4c1ce7, 3ed1b443972fe4532f3df295c4df0d8e5c4ad657, f7f94be12eee99bd747aef2b6cf8e72e63f7ddb7, 17fcef85e99ac8025f87bc1cbd47df5760a5c50f, 737162d3c1b6d8472e951d2ae1b6711626002fda, e86c9e97903a8ef270ba156e34ff8da8e03a3195]
 ---
 
 # Live role selection and retained bindings
@@ -148,7 +148,7 @@ execution policy and binding therefore come from one complete image. A retained
 request key bypasses current profile resolution and restores the original command;
 a changed binding conflicts. Compatibility entrypoints recover the same binding.
 Claims and model dispatch check the admitted executable identity, including a
-256 MiB fingerprint ceiling and regular-file checks that cannot block on a FIFO.
+512 MiB fingerprint ceiling and regular-file checks that cannot block on a FIFO.
 A worker command override cannot replace the bound program.
 
 Bound worker input uses `chr-task-input/v2`, carries the same binding and includes
@@ -249,3 +249,19 @@ validator at `e24cdc6a47e8e1a6ca7b5d8424b6e8b7df7b384a`. Its output-name check i
 now a focused helper, preserving rule and error order. The targeted
 `go test ./internal/harness/... -count=1 -timeout=3m` passed. The unchanged final
 ordered sequence is recorded again against the updated clean head.
+
+The next `make verify` attempt at `e86c9e97903a8ef270ba156e34ff8da8e03a3195`
+passed strict lint and exposed Web/review domain fixtures that did not inject
+the generation binder. Those fake-provider helpers now inject the same isolated
+boundary as other domain fixtures; all existing behavior assertions remain.
+The executable fingerprint ceiling is 512 MiB, accommodating supported CLI
+footprints with streamed hashing. A 300 MiB positive fixture and the unchanged
+above-ceiling/non-regular/changed-byte fixtures enforce the boundary.
+
+Successful focused correction check:
+
+- `go test ./internal/core ./internal/app -run '^(TestHarnessBindingLargeExecutable|TestHarnessBindingExecutableFiles|TestHarnessGenerationBinding|TestWebServeWriteActionCreatesDump|TestWebServeWriteActionGeneratesSpecWithService|TestSpecDocumentCatalog|TestSpecGenerationScopes|TestServiceStartAllReadyAgentWork|TestWebDumpCapture|TestWebDumpSaveDocument|TestWebPlanInternal|TestWebPlanContext|TestWebPlanNative|TestWebSpecAuthoring)' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/core ./internal/app ./internal/harness/...`
+
+The unchanged full ordered validation sequence follows on the updated clean PR
+head. No checks or test assertions were removed.

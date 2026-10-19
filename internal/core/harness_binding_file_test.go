@@ -1,11 +1,32 @@
 package core
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"syscall"
 	"testing"
 )
+
+// Supported CLI distributions can exceed 256 MiB. Fingerprinting remains
+// streaming and bounded, while the existing over-ceiling fixture still rejects.
+func TestHarnessBindingLargeExecutable(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "large-driver")
+
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0o700)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resizeErr := file.Truncate(300 << 20)
+	if err := errors.Join(resizeErr, file.Close()); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, _, err := FreezeHarnessExecutable([]string{path}); err != nil {
+		t.Fatal("supported CLI footprint was rejected", err)
+	}
+}
 
 // Host preparation accepts resolved regular executables and rejects non-files
 // and oversized images before reading or blocking on an executable candidate.
