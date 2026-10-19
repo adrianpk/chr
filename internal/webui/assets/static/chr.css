@@ -1462,3 +1462,34 @@ code {
 .dash-status { margin: 0 0 12px; font-size: .8rem; color: var(--muted); }
 .dash-status[data-state="stale"], .dash-status[data-state="unavailable"] { padding: 10px; border: 1px solid var(--amber); border-radius: var(--radius); color: var(--ink); }
 .dash-status[aria-busy="true"]::after { content: " · refreshing"; }
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.login-card {
+  width: min(100%, 360px);
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.login-logo {
+  display: block;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+  object-fit: contain;
+}
+
+.login-card h1,
+.login-card > p {
+  text-align: center;
+}
+
+.login-card .action-form {
+  display: grid;
+}

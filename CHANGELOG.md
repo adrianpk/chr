@@ -12,6 +12,11 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
+- Protect the Web UI with one locally configured account. Log in once and
+  navigate without URL tokens; sessions expire after 12 hours and can be
+  revoked with Log out. Private terminal setup keeps passwords out of command
+  arguments and project files.
+
 - Web Dash now shows the pending queue, independent active ticket contexts and
   retained results together, with a stacked layout on narrow screens. Quiet
   validation stays visible, and confirmed delivery remains distinct from host

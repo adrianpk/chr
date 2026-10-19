@@ -52,6 +52,11 @@ for the browser URL and effective bind policy.
 
 ## Local Workflow
 
+To protect the UI with one local account, follow
+[Configure Single-user Web Login](configure-web-login.md). A configured account
+applies to both local and LAN access. Use `--require-login` to refuse startup
+without it.
+
 The shared header identifies the current project. Page headings use only the
 section or artifact title.
 

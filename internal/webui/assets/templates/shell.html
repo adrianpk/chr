@@ -35,6 +35,11 @@
             </div>
             <input class="nav-pin" id="nav-pin" type="checkbox" checked>
             <label class="nav-pin-toggle" for="nav-pin">Pin</label>
+            {{if .Shell.LoginEnabled}}
+            <form method="post" action="/logout">
+              <button class="button" type="submit">Log out</button>
+            </form>
+            {{end}}
           </div>
         </header>
         <div class="top-nav-rail">

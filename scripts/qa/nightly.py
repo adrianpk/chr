@@ -18,7 +18,7 @@ LIVE_NAMES = ("TestNativeForgejoMethods", "TestNativeGitHubMethods", "TestNative
               "TestNativePolicyDenials", "TestNativePRChanges", "TestNativeTransportLoss",
               "TestWorkflowNativeRebase")
 LIVE_TESTS = "^(" + "|".join(LIVE_NAMES) + ")$"
-BROWSER_NAMES = ("TestWebWorkflowBrowser", "TestWebConsolidatedBrowser")
+BROWSER_NAMES = ("TestWebWorkflowBrowser", "TestWebConsolidatedBrowser", "TestWebLoginBrowser")
 BROWSER_TESTS = "^(" + "|".join(BROWSER_NAMES) + ")$"
 BUDGET_SECONDS = 200 * 60
 

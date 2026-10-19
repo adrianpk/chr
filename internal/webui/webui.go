@@ -36,6 +36,7 @@ type ShellData struct {
 	RequireToken   string
 	RefreshSeconds int
 	Navigation     []ui.NavLink
+	LoginEnabled   bool
 }
 
 // HandlerOptions configures the Web UI HTTP handler.
@@ -44,6 +45,7 @@ type HandlerOptions struct {
 	Provider    DataProvider
 	Access      AccessPolicy
 	LogRequests io.Writer
+	Login       *LoginCredentials
 }
 
 // AccessPolicy describes request access controls for the local Web UI.
@@ -83,8 +85,8 @@ func NewHandler(opts HandlerOptions) (http.Handler, error) {
 		handler.provider = newStaticDataProvider(opts.Data)
 	}
 
-	if handler.access.RequireToken && strings.TrimSpace(handler.access.Token) == "" {
-		return nil, fmt.Errorf("web token is required but empty")
+	if err := handler.configureLogin(opts.Login); err != nil {
+		return nil, err
 	}
 
 	mux.HandleFunc("/", handler.shell)
@@ -111,12 +113,14 @@ func NewHandler(opts HandlerOptions) (http.Handler, error) {
 	mux.HandleFunc("/workflows/actions", handler.workflowAction)
 	mux.HandleFunc("/bootstrap", handler.projectFragment)
 	mux.HandleFunc("/healthz", healthz)
+	mux.HandleFunc("/logout", handler.logout)
 	mux.Handle("/assets/", http.StripPrefix("/assets/", handler.static))
 
 	return handler.withRequestLogging(handler.withAccessControl(mux)), nil
 }
 
 type handler struct {
+	login       *loginState
 	renderer    render.Renderer
 	static      http.Handler
 	data        ShellData
@@ -528,7 +532,7 @@ func (h handler) withAccessControl(next http.Handler) http.Handler {
 			return
 		}
 
-		if !h.allowToken(w, r) {
+		if !h.allowLogin(w, r) || !h.allowToken(w, r) {
 			return
 		}
 
