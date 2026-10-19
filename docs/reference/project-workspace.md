@@ -322,6 +322,28 @@ Initialize runtime defaults for another project directory:
 chr runtime init --dir /path/to/project
 ```
 
+### Pi runtime assets
+
+All bundled profiles also install `.chr/default/runtime/agent/pi/` with a
+sibling Dockerfile, minimal npm manifest and complete dependency lock. Existing
+projects add these missing assets with `chr runtime init`; this explicit upgrade
+preserves every existing runtime file and the configured Codex image/Dockerfile.
+Installing assets does not install Pi, build an image or change role selections.
+
+Build the Pi image explicitly, using that directory as its build context:
+
+```sh
+docker build --file .chr/default/runtime/agent/pi/Dockerfile \
+  --tag chr-agent-pi:1.3.0 .chr/default/runtime/agent/pi
+```
+
+The image pins the Go base manifest, verifies the Node 22.23.3 Linux amd64/arm64
+archive checksum and installs Pi 1.3.0 through `npm ci` with the committed lock.
+Dependency lifecycle scripts are disabled. Other Linux architectures fail the
+build with a preparation error. Codex-only use does not probe or build Pi.
+Runtime inspection validates the Linux platform and Pi version labels and
+returns the immutable Docker image ID for worker admission.
+
 ## Runtime Plan
 
 The runtime planner computes a side-effect-free Docker boundary plan from the

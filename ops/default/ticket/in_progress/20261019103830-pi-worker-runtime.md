@@ -69,3 +69,29 @@ Before slice review/integration, run `make verify` and `git diff --check`.
 These commands are planned checks, not recorded successful executions.
 Retain commits, PR, validation and blocker evidence here and in the slice report;
 the tracker remains an order map.
+
+## Implementation Progress
+
+T4.1 runtime assets and inspection are implemented. Standard, minimal and personal
+initialization include the sibling Pi Dockerfile and exact npm dependency lock.
+The explicit missing-asset upgrade is non-destructive. Bounded image inspection
+rejects unsupported platform/version metadata and returns the immutable ID for
+worker admission. Dispatch/readiness integration follows in T4.2 and T4.3.
+
+The selected image built as
+`sha256:4e2a6c5c80a972f8668307ad782db247b3869c186267f0a20a4440ce36ea18f8`.
+The initial build found a missing `xz` extractor after verifying the Node archive;
+adding the required utility produced a successful build without changing pins.
+
+Successful focused checks:
+
+- `docker build --file cmd/chr/assets/workspace/profiles/standard/runtime/agent/pi/Dockerfile --tag chr-agent-pi:1.3.0 cmd/chr/assets/workspace/profiles/standard/runtime/agent/pi`
+- `CHR_TEST_PI_RUNTIME_IMAGE=chr-agent-pi:1.3.0 go test ./internal/harness/pi ./internal/core ./internal/app -run '^(TestPiRuntime|TestRuntimeInit|TestInit.*Profile)' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/harness/pi ./internal/app`
+- `scripts/check-go-func-signatures.sh`
+- `scripts/check-package-readmes.sh`
+- `git diff --check`
+
+The real container version check uses no network or credentials. All owned
+containers exited and were removed. No model call occurred. T4.2 and T4.3 are
+pending; no canonical PR is open yet.
