@@ -51,7 +51,7 @@ type session struct {
 	finalErr      error
 	usage         usageTotals
 	secrets       []string
-	tools         map[string]bool
+	tools         map[string]toolState
 	toolCalls     int
 }
 

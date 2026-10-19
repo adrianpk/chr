@@ -12,7 +12,7 @@ reported_at: 2026-10-19T10:38:30Z
 ready_at: 2026-10-19T10:38:33Z
 started_at: 2026-10-19T15:01:47Z
 branch: feat/slice-4-pi-worker-runtime
-commits: []
+commits: [77bea3e585b26aed356594524e9162dbd2cb914c]
 ---
 
 # Pi Docker workers and private runtime setup
@@ -95,3 +95,35 @@ Successful focused checks:
 The real container version check uses no network or credentials. All owned
 containers exited and were removed. No model call occurred. T4.2 and T4.3 are
 pending; no canonical PR is open yet.
+
+### T4.2 worker contract component
+
+Worker transport now has a distinct explicit builtin-tool capability profile,
+correlates tool names and IDs, and allows a 1 MiB normalized worker result.
+Generation retains its restricted tools and stricter 64 KiB result ceiling.
+
+The worker resource/refresh owner accepts only the selected provider's private
+credentials. OAuth requires a dedicated private directory and cross-process
+exclusion. Each action gets a private auth copy; after the action reaps Pi, the
+owner atomically publishes valid refreshed credentials before releasing its
+lock. Failed calls preserve valid token rotations, malformed updates preserve
+the source, operator replacement conflicts, and cancellation bounds lock waits.
+
+Successful focused component checks:
+
+- `go test ./internal/harness/... ./internal/core ./internal/app -run '^(TestPiTransport|TestPiGeneration|TestPiCredentialRefresh|TestPiRuntime|TestHarnessBinding)' -count=1 -timeout=3m`
+- `go test -race ./internal/harness/pi -run '^(TestPiCredentialRefresh|TestPiTransport|TestPiGeneration)' -count=1 -timeout=2m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/harness/pi`
+- `scripts/check-go-func-signatures.sh`
+- `scripts/check-package-readmes.sh`
+- `git diff --check`
+
+The owner fixture uses eight concurrent callers plus an independent subprocess.
+Refresh writes are simulated at the provider IO boundary; no real OAuth account
+or model is used. Initial fixture directories were too permissive and were made
+private without relaxing the production check. All owned subprocesses ended.
+
+T4.2 remains in progress: container bridge dispatch, exact mounts, per-call state
+and actual pinned Pi refresh integration are still required. T4.3 admission,
+capacity/capability regressions and container-reachable endpoint validation are
+pending. No PR or final exact-head controller evidence exists yet.

@@ -52,8 +52,7 @@ type runtimeImageMetadata struct {
 func parseRuntimeImage(data []byte) (RuntimeImage, error) {
 	var metadata runtimeImageMetadata
 
-	if json.Unmarshal(data, &metadata) != nil || !regexp.MustCompile(`^sha256:[a-f0-9]{64}$`).MatchString(metadata.ID) || metadata.OS != "linux" ||
-		(metadata.Architecture != "amd64" && metadata.Architecture != "arm64") {
+	if json.Unmarshal(data, &metadata) != nil || !regexp.MustCompile(`^sha256:[a-f0-9]{64}$`).MatchString(metadata.ID) || !validRuntimePlatform(metadata) {
 		return RuntimeImage{}, errors.New("pi runtime requires one inspectable Linux amd64 or arm64 image")
 	}
 
@@ -62,4 +61,8 @@ func parseRuntimeImage(data []byte) (RuntimeImage, error) {
 	}
 
 	return RuntimeImage{ID: metadata.ID, Architecture: metadata.Architecture}, nil
+}
+
+func validRuntimePlatform(metadata runtimeImageMetadata) bool {
+	return metadata.OS == "linux" && (metadata.Architecture == "amd64" || metadata.Architecture == "arm64")
 }

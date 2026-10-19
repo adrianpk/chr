@@ -38,3 +38,18 @@ its [event stream](https://github.com/earendil-works/pi/blob/v1.3.0/packages/cod
 and [explicit extensions](https://github.com/earendil-works/pi/blob/v1.3.0/packages/coding-agent/docs/extensions.md).
 The optional `CHR_TEST_PI_EXECUTABLE` fixture uses a prepared pinned binary with
 an owned loopback model endpoint; it requires no paid provider or real key.
+
+Worker transport has a separate explicit capability profile for the pinned
+`read`, `bash`, `edit`, `write`, `grep`, `find` and `ls` builtins. Tool IDs and
+names must match their registered calls; a settled run cannot have unfinished
+tools. Its normalized output ceiling is 1 MiB. Generation keeps its existing
+64 KiB ceiling and cannot acquire worker tools through its request mapping.
+
+Worker resource preparation requires a private credential file containing only
+the selected provider. OAuth additionally requires a dedicated private owner
+directory. `WithWorkerCredential` excludes concurrent owners across processes,
+creates a private call copy, and atomically publishes a valid refreshed entry
+before releasing exclusion. Its action must reap Pi before returning. A valid
+refresh survives a later call failure; malformed updates or an operator's
+uncoordinated replacement cannot overwrite the retained source. Lock waits obey
+the caller's context. This owner does not add model retries or capacity.

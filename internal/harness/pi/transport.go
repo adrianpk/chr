@@ -42,6 +42,8 @@ type Request struct {
 	Thinking      string
 	OutputLimit   int
 	ReadOnlyFiles bool
+	// WorkerTools is reserved for an owned container bridge.
+	WorkerTools bool
 }
 
 // Result contains only a settled final assistant message and observed counters.
@@ -76,6 +78,10 @@ func (t Transport) Run(ctx context.Context, command harness.AgentCommand, reques
 }
 
 func validateRequest(request Request) error {
+	if request.ReadOnlyFiles && request.WorkerTools {
+		return fmt.Errorf("pi inspection and worker tools are separate capability profiles: %w", ErrCapability)
+	}
+
 	if strings.TrimSpace(request.Prompt) == "" || request.Provider == "" || request.Model == "" {
 		return fmt.Errorf("pi requires input and an exact provider/model: %w", ErrCapability)
 	}

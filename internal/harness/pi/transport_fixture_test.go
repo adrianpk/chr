@@ -188,6 +188,8 @@ func fixtureMessage(scenario string) map[string]any {
 	switch scenario {
 	case "provider failure":
 		message["stopReason"] = "error"
+	case "worker output":
+		message["content"] = []map[string]any{{"type": "text", "text": strings.Repeat("x", 65_537)}}
 	case "output overflow":
 		message["content"] = []map[string]any{{"type": "text", "text": strings.Repeat("x", 257)}}
 	case "unknown usage":

@@ -192,7 +192,7 @@ func (s *session) message(data json.RawMessage) error {
 	}
 
 	if message.StopReason == "toolUse" {
-		return s.readOnlyCalls(message)
+		return s.registerToolMessage(message)
 	}
 
 	if message.StopReason != "stop" {
@@ -210,8 +210,14 @@ func (s *session) completedMessage(message assistantMessage) error {
 	}
 
 	limit := s.request.OutputLimit
-	if limit <= 0 || limit > harness.MaxStructuredOutput {
-		limit = harness.MaxStructuredOutput
+
+	ceiling := harness.MaxStructuredOutput
+	if s.request.WorkerTools {
+		ceiling = harness.MaxRecord
+	}
+
+	if limit <= 0 || limit > ceiling {
+		limit = ceiling
 	}
 
 	var text strings.Builder
