@@ -100,6 +100,14 @@ tool arguments. It exposed only `chr_inspect` and excluded poisoned project
 context/extensions. This establishes local native protocol/resource behavior;
 it does not establish paid provider authentication.
 
+The initial controller run on `612d16edb59d3842f414f785d04f9cf23f52857e`
+passed `make verify` and the required normal selection, then reproduced a
+three-second race-mode backpressure timeout. A CPU profile located credential
+regexp scans over the diagnostic lookahead. An ASCII prefilter skips scans only
+when no marker can match; Unicode folding and secret redaction are unchanged.
+The unchanged completion/backpressure and redaction checks passed three race
+runs. Record volume, byte limits, instrumentation and deadlines were retained.
+
 Before PR readiness, record the following ordered checks through the controller
 on the final clean PR head; the exact result belongs to that head:
 

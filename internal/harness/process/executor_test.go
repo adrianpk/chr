@@ -124,6 +124,12 @@ func TestAgentRunProcessDiagnostics(t *testing.T) {
 		}
 	}
 
+	for _, text := range []string{"PaSsWoRd=fixture-value", "Paſſword=fixture-value", "Token=fixture-value", "API_KEY=fixture-value", "Bearer fixture-value"} {
+		if strings.Contains(string(Diagnostic([]byte(text))), "fixture-value") {
+			t.Fatal("credential prefilter changed case-folded redaction")
+		}
+	}
+
 	if got := len(Diagnostic([]byte(strings.Repeat("x", harness.MaxDiagnostic+1)))); got != harness.MaxDiagnostic {
 		t.Fatalf("excerpt length = %d", got)
 	}

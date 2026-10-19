@@ -5,6 +5,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"unicode/utf8"
 
 	"forge.adrianpk.com/chr/internal/harness"
 )
@@ -26,10 +27,32 @@ func Sanitize(data []byte) []byte {
 		}
 	}
 
+	if !needsCredentialPatterns(value) {
+		return []byte(value)
+	}
+
 	value = bearerValue.ReplaceAllString(value, "Bearer [REDACTED]")
 	value = assignedSecret.ReplaceAllString(value, "${1}[REDACTED]")
 
 	return []byte(value)
+}
+
+func needsCredentialPatterns(value string) bool {
+	// Keep regexp Unicode folding unchanged; the fast path is ASCII-only.
+	for _, char := range value {
+		if char >= utf8.RuneSelf {
+			return true
+		}
+	}
+
+	lower := strings.ToLower(value)
+	for _, marker := range []string{"bearer", "api", "token", "password", "secret"} {
+		if strings.Contains(lower, marker) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // Diagnostic retains a sanitized excerpt within the diagnostic ceiling.
