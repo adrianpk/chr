@@ -90,7 +90,7 @@ func (r telegramReceiver) applyHarnessAction(ctx context.Context, claim core.Tel
 		return r.finishHarnessActionFailure(ctx, claim, config, err)
 	}
 
-	text := fmt.Sprintf("Harness defaults saved for %s.\nWorker: %s\nGeneration: %s\nRevision: %s\nNew operations only; admitted work keeps its binding.", result.ProjectRef, telegramHarnessSavedRole(result.Worker), telegramHarnessSavedRole(result.Generation), result.Revision)
+	text := fmt.Sprintf("Harness defaults saved for %s.\nWorker: %s\nGeneration: %s\nRevision: %s\nRequest: %s\nNew operations only; admitted work keeps its binding.", result.ProjectRef, telegramHarnessSavedRole(result.Worker), telegramHarnessSavedRole(result.Generation), result.Revision, result.RequestID)
 
 	return r.finishHarnessAction(ctx, claim, config, "confirmed", &result, text)
 }

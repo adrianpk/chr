@@ -1,7 +1,7 @@
 ---
 id: TKT-20261019103833
 title: "Telegram harness selection"
-status: in_progress
+status: reviewing
 kind: task
 severity: medium
 priority: normal
@@ -12,7 +12,8 @@ reported_at: 2026-10-19T10:38:33Z
 ready_at: 2026-10-19T10:38:33Z
 started_at: 2026-10-19T17:37:13Z
 branch: feat/slice-7-telegram-harness-selection
-commits: []
+reviewed_at: 2026-10-19T18:01:45Z
+commits: [472d576a34f70a94611626d3d2a0c652f42b842f, 92a45627362a4dcb7c7c1b5a27f655f5eca21033]
 ---
 
 # Telegram harness selection
@@ -86,4 +87,15 @@ request identity for recovery. Terminal confirmation contexts release capacity.
 
 Passed: `go test ./internal/core ./internal/app -run '^(TestTelegramHarnessSelection|TestTelegramOperationAction|TestHarnessSelectionChange)' -count=1 -timeout=3m`.
 
-T7.3 retained redelivery/cross-interface acceptance is next.
+T7.3 is implemented: receiver redelivery, lost owner acknowledgements and lost
+Telegram send acknowledgements preserve one request/receipt. Existing Web/TUI
+readers and an independent process see the published image; live claims and
+nested/resumed generation keep their binding, while new admissions use the new
+default. Model-only proposals and private setup fields grant no authority.
+
+Passed: `go test ./internal/core ./internal/app -run '^TestTelegramHarnessSelection' -count=1 -timeout=3m`.
+
+Final clean-HEAD validation is delegated to the controller after PR-reference
+follow-up commits. Its required prefix is `make verify`, focused selection and
+focused race; affected existing action/configuration regressions follow, then
+`git diff --check`. The report lists the exact ordered commands.

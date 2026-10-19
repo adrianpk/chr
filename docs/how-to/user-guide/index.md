@@ -1357,6 +1357,23 @@ explanation or start a preparation-only conversation:
 /prepare Retain a retry ceiling
 ```
 
+Inspect or change harness defaults for that selected project without restarting
+the receiver:
+
+```text
+/harness
+/harness worker=code generation=writing
+```
+
+Replace `code` and `writing` with locally prepared profile names. Read the exact
+project and choices in the confirmation, then reply `confirm` or `cancel` (or use
+`/answer <token> confirm`). Omitted roles stay unchanged; `generation=-` restores
+legacy generation dispatch. Confirmations expire after ten minutes and reject
+changed revisions or authority. New operations see saved defaults; running,
+paused and resumed work keeps its original binding. Configuration and private
+setup cannot be authorized by a model proposal. See
+[Telegram harness defaults](../../reference/telegram-receiver.md#harness-defaults).
+
 Send the requirements as several messages. Use `/sessions` to inspect or select
 the returned conversation ID when several conversations are active. `/done`
 generates its canonical dump. `/quiz` asks a real clarification; reply to its

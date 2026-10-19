@@ -329,6 +329,20 @@ the picker and use **Inspect retained workflow status** in the command palette.
 Profile inspection and selection do not provision credentials, install runtimes
 or call a model.
 
+## Telegram Harness Defaults
+
+After `/project <name>`, send `/harness` to inspect the same persisted defaults,
+locally prepared profiles and retained worker bindings. Send
+`/harness worker=PROFILE generation=PROFILE` to preview an exact change, then
+confirm its retained prompt. Omit a role to keep it; use `-` to restore legacy
+dispatch. Both changed roles publish together under the mapped operator and
+observed configuration revision. Other interfaces see the update on their next
+operation; admitted work keeps its original binding.
+
+See [Telegram harness defaults](telegram-receiver.md#harness-defaults) for
+confirmation expiry, stale requests and recovery. Private profile preparation
+remains local; inspection and selection invoke no model.
+
 ## Notification Config
 
 `.chr/default/config.yml` may also define notification settings under
