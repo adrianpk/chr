@@ -1,6 +1,6 @@
 # Slice 7: Recovery and User Operation
 
-Status: reviewing
+Status: delivered
 
 Delivery set: telegram-conversational-workflow
 
@@ -188,6 +188,13 @@ go test ./internal/core ./internal/app -run '^TestTelegramRecovery' -count=1 -ti
 go test -race ./internal/core ./internal/app -run '^TestTelegramRecovery' -count=1 -timeout=3m
 git diff --check
 ```
+
+Verified integration, audited 2026-10-19: [PR #396](https://forge.adrianpk.com/adrianpk/chr/pulls/396)
+merged into `dev` at `c14f1aea640657e27c97bb64e40b46f30f698451` on
+2026-10-16T22:44:10Z. Controller validation `JR526N5RLBBVIBT62W5YOZMNB6`
+records the four commands above in order on that exact clean HEAD; all passed.
+The focused normal run passed in core 2.719 seconds and app 21.135 seconds;
+the focused race run passed in core 56.358 seconds and app 57.946 seconds.
 
 ## Risks and Follow-ups
 

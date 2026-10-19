@@ -152,7 +152,7 @@ local pass. Race instrumentation remains a separate mode.
   Warsaw timezone, immutable captured dev checkout and bounded job duration.
 - `git diff --check`: passed.
 
-## Activation Blocker
+## Activation History
 
 The maintainer authorized the standard `dev -> main` promotion on 2026-10-15.
 [Promotion PR #388](https://forge.adrianpk.com/adrianpk/chr/pulls/388) carries the
@@ -168,7 +168,7 @@ that runner account before activation. Missing live prerequisites fail early.
 No credentials, runner services, default branches or release state were changed.
 The original controller's frozen final gate remains unchanged.
 
-## Runner Activation Follow-up
+## Runner Activation History
 
 The [first scheduled nightly](https://forge.adrianpk.com/adrianpk/chr/actions/runs/1)
 captured `ca9f50ed0f214c6c861c7a4c7af0bf80d1e12d53` on 2026-10-16 and failed
@@ -192,3 +192,23 @@ restricted Forgejo CI identity and a fine-grained GitHub token; developer
 credential stores are not copied. The administrator bootstrap and GitHub token
 creation remain operator prerequisites. Keep this ticket blocked until the
 scoped runner preflight and a complete scheduled result pass.
+
+## Current Audit: 2026-10-19
+
+The development-gate changes are implemented and merged. Promotion PR #388
+and the later [alignment PR #410](https://forge.adrianpk.com/adrianpk/chr/pulls/410)
+are merged; discovery of the nightly workflow on `main` is no longer pending.
+The current candidate is `92b5b9b6b28b2b1f32c3de86301d4c17833072f2`.
+
+The [latest scheduled run](https://forge.adrianpk.com/adrianpk/chr/actions/runs/4)
+was created at 00:17:54 Europe/Warsaw on 2026-10-19, but started at 03:08:21.
+Its admission step reported that it was outside the reserved 00:17-00:37 start
+window. The guarded prerequisite and exhaustive verification steps did not
+run. The successful workflow conclusion therefore does not certify the full
+test selection, private fixture readiness or complete nightly timings.
+
+Keep this ticket `blocked` until scoped runner readiness and one complete
+scheduled exhaustive result are verified. Earlier setup requirements above are
+historical evidence, not a fresh claim about which credentials or services are
+still missing. This audit changes no schedules, services, credentials, gates or
+controller state and starts no exhaustive tests.
