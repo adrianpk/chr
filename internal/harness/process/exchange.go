@@ -35,7 +35,7 @@ func (e Executor) Exchange(ctx context.Context, command harness.AgentCommand, st
 	// Keep one record of lookahead so sanitization precedes excerpt truncation.
 	stdout, outErr := out.read(harness.MaxDiagnostic + harness.MaxRecord)
 	stderr, diagnosticErr := diagnostic.read(harness.MaxStderr)
-	result = harness.AgentCommandResult{Stdout: Diagnostic(stdout), Stderr: Diagnostic(stderr), Latency: time.Since(startedAt)}
+	result = harness.AgentCommandResult{Stdout: e.diagnostic(stdout), Stderr: e.diagnostic(stderr), Latency: time.Since(startedAt)}
 
 	return result, errors.Join(err, out.err, diagnostic.err, outErr, diagnosticErr, callerCtx.Err())
 }

@@ -21,6 +21,8 @@ var ErrLimit = errors.New("harness byte limit exceeded")
 type Executor struct {
 	StdoutLimit int
 	StderrLimit int
+	// Explicit secrets are redacted before diagnostic excerpts are truncated.
+	Secrets []string
 }
 
 type spool struct {
@@ -80,14 +82,22 @@ func (e Executor) RunAgentCommand(ctx context.Context, command harness.AgentComm
 
 	stdout, outErr := out.read(harness.MaxStructuredOutput + 1)
 	stderr, diagnosticErr := diagnostic.read(harness.MaxStderr)
-	result = harness.AgentCommandResult{Stdout: stdout, Stderr: Diagnostic(stderr), Latency: time.Since(startedAt)}
+	result = harness.AgentCommandResult{Stdout: stdout, Stderr: e.diagnostic(stderr), Latency: time.Since(startedAt)}
 
 	return result, errors.Join(err, out.err, diagnostic.err, outErr, diagnosticErr, ctx.Err())
 }
 
 func ownedCommand(ctx context.Context, command harness.AgentCommand, stdin string) *exec.Cmd {
 	cmd := exec.CommandContext(ctx, command.Program, command.Args...)
+
 	cmd.Dir = command.Dir
+	if command.Env != nil {
+		cmd.Env = make([]string, 0, len(command.Env))
+		for _, variable := range command.Env {
+			cmd.Env = append(cmd.Env, variable.Name+"="+variable.Value)
+		}
+	}
+
 	cmd.Stdin = strings.NewReader(stdin)
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	cmd.WaitDelay = time.Second

@@ -11,8 +11,12 @@ import (
 // The host retains an intent's binding outside the selected project's mutable
 // routing. Switching projects or roles cannot rebind an interrupted request.
 func TestHarnessGenerationBindingConversation(t *testing.T) {
+	generationBindingConversationCase(t, harnessGenerationFixture)
+}
+
+func generationBindingConversationCase(t *testing.T, fixture func(*testing.T, string) (service, string)) {
 	output := `{"operation_id":"status","arguments":{"project":"","conversation":"","namespace":"","text":"","action":"","record_json":""},"unresolved":[],"explanation":"Read the current status."}`
-	projectService, _ := harnessGenerationFixture(t, output)
+	projectService, _ := fixture(t, output)
 	project := projectService.projectContext.ProjectDir
 	second := registerGenerationProjects(t, projectService)
 	global := newService(t.Context(), projectService.env, commandProjectContext{}, testAssetsFS())

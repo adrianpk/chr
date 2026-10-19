@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	"forge.adrianpk.com/chr/internal/harness/codex"
+	"forge.adrianpk.com/chr/internal/harness/pi"
 )
 
 type resolvedHarnessSelection struct {
@@ -72,7 +73,7 @@ func resolveConfiguredHarnessSelection(config core.WorkspaceConfig, profiles map
 
 	resolved := prepareHarnessSelection(config, profile, role, action, configDir)
 	if !resolved.View.Readiness.Ready() {
-		return resolved, fmt.Errorf("harness profile %q is not locally ready for %s", name, role)
+		return resolved, fmt.Errorf("harness profile %q is not locally ready for %s: %s", name, role, resolved.View.Readiness.Problem)
 	}
 
 	return resolved, nil
@@ -91,8 +92,11 @@ func prepareHarnessSelection(config core.WorkspaceConfig, profile core.HarnessPr
 	}
 
 	view.Readiness = harnessProfileReadiness(profile, role, configDir)
-	if profile.Harness == codex.Identity {
+	switch profile.Harness {
+	case codex.Identity:
 		view.Capabilities = (codex.Runner{}).Capabilities()
+	case pi.Identity:
+		view.Capabilities = (pi.Runner{}).Capabilities()
 	}
 
 	executable, err := exec.LookPath(profile.Command)
@@ -104,6 +108,10 @@ func prepareHarnessSelection(config core.WorkspaceConfig, profile core.HarnessPr
 }
 
 func harnessProfileReadiness(profile core.HarnessProfile, role core.HarnessRole, configDir string) core.HarnessReadiness {
+	if profile.Harness == pi.Identity {
+		return piProfileReadiness(profile, role, configDir)
+	}
+
 	r := core.HarnessReadiness{
 		Executable: "available", Credentials: "cli_managed", Runtime: "native",
 		Supported: profile.Harness == codex.Identity, RemoteAuthentication: "not_tested",
@@ -129,6 +137,21 @@ func harnessProfileReadiness(profile core.HarnessProfile, role core.HarnessRole,
 	// their adapter-owned dispatch path; they cannot be accepted and then ignored.
 	if !harnessProfileOptionsSupported(profile) {
 		r.Supported = false
+	}
+
+	return r
+}
+
+func piProfileReadiness(profile core.HarnessProfile, role core.HarnessRole, configDir string) core.HarnessReadiness {
+	r := core.HarnessReadiness{Executable: "available", Credentials: "missing", Runtime: "native", Supported: role == core.HarnessGeneration && pi.SupportsThinking(profile.Thinking), RemoteAuthentication: "not_tested"}
+	if role == core.HarnessGeneration {
+		r.Runtime = "not_required"
+	}
+
+	if _, err := pi.ResolveResources(configDir, profile.CredentialRef, profile.ModelConfigRef, profile.ModelProvider); err != nil {
+		r.Problem = err.Error()
+	} else {
+		r.Credentials = "present"
 	}
 
 	return r

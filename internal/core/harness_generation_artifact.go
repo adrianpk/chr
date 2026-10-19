@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"syscall"
+
+	"forge.adrianpk.com/chr/internal/harness"
 )
 
 func harnessGenerationOperationPath(project, id string) (string, error) {
@@ -40,7 +42,11 @@ func readHarnessGenerationOperation(project, id, purpose string) (HarnessGenerat
 	}
 
 	record.Operation.program, record.Operation.project = record.Program, project
+
 	record.Operation.configDir, record.Operation.executionDir = record.ConfigDir, record.ExecutionDir
+	if record.Resources != nil {
+		record.Operation.resources = *record.Resources
+	}
 
 	return record.Operation, validateGenerationOperation(record.Operation)
 }
@@ -56,6 +62,9 @@ func writeHarnessGenerationOperation(operation HarnessGenerationOperation) error
 	}
 
 	record := harnessGenerationOperationFile{Schema: "chr-harness-operation/v1", Operation: operation, Program: operation.program, ConfigDir: operation.configDir, ExecutionDir: operation.executionDir}
+	if operation.resources != (harness.GenerationResources{}) {
+		record.Resources = &operation.resources
+	}
 
 	encoded, err := json.Marshal(record)
 	if err != nil {

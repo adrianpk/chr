@@ -580,7 +580,13 @@ func (s service) runAgenticReviewCycle(selected core.IndexedTicket, execution co
 
 	s = bound
 
-	artifact, err := newAgenticReviewRunner().Review(s.ctx, core.AgenticReviewContext{
+	runner := newAgenticReviewRunner()
+	if native, ok := runner.(core.HarnessAgenticReviewRunner); ok && s.generationRunner != nil {
+		native.Runner = s.generationRunner
+		runner = native
+	}
+
+	artifact, err := runner.Review(s.ctx, core.AgenticReviewContext{
 		ProjectID:           s.projectContext.ProjectID,
 		ProjectDir:          reviewProjectDir,
 		Ticket:              ticket,

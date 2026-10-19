@@ -85,20 +85,24 @@ func checkGenerationRequestOwner(operation HarnessGenerationOperation, request h
 }
 
 func applyGenerationRequestSelection(operation HarnessGenerationOperation, request harness.AgentRunRequest) (harness.AgentRunRequest, error) {
-	if request.Program != "" && request.Program != operation.program {
-		return request, ErrWorkflowConflict
-	}
-
 	model := operation.Binding.Selection.Model
 	if model == "cli_default" {
 		model = ""
 	}
 
-	if request.Model != "" && request.Model != model {
+	selection := operation.Binding.Selection
+	for _, field := range []struct{ actual, expected string }{{request.Program, operation.program}, {request.Model, model}, {request.ModelProvider, selection.ModelProvider}, {request.Thinking, selection.Thinking}} {
+		if field.actual != "" && field.actual != field.expected {
+			return request, ErrWorkflowConflict
+		}
+	}
+
+	if request.Resources != (harness.GenerationResources{}) && request.Resources != operation.resources {
 		return request, ErrWorkflowConflict
 	}
 
 	request.Program, request.Model, request.FrozenSelection = operation.program, model, true
+	request.ModelProvider, request.Thinking, request.Resources = selection.ModelProvider, selection.Thinking, operation.resources
 
 	return request, nil
 }

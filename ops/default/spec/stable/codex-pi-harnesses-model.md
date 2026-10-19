@@ -152,6 +152,12 @@ authority. Limit each operation/metadata record to 16 KiB and retain at most
 4,096 operation identities without eviction; capacity exhaustion fails closed.
 Operation and purpose identities are bounded to 256 bytes. The corresponding
 per-call record is `harness-run.json` in the existing caller-owned run bundle.
+Pi operations additionally retain private credential/model-file references and
+a digest of the selected credential-free model definition in that same operation
+file. These optional resources are absent from older Codex/API records and all
+readable bindings. Credential bytes are never hashed or retained in the operation
+record. A retry uses the original references; changed model semantics fail before
+launch. Each call copies only the selected provider into private temporary state.
 Caller request IDs are namespaced by operation for ordinary run bundles, so
 independent operations cannot overwrite each other's call evidence. Retried
 calls may refresh their input under the original owning request's argument and

@@ -21,10 +21,10 @@ const ProtocolRevision = "pi-rpc/1.3.0"
 
 // Transport failures remain distinguishable from cancellation and process exit.
 var (
-	ErrProtocol   = errors.New("invalid Pi RPC protocol")
+	ErrProtocol   = fmt.Errorf("pi RPC: %w", harness.ErrProtocol)
 	ErrEarlyExit  = errors.New("pi exited before settled completion")
 	ErrProvider   = errors.New("pi provider failed")
-	ErrAborted    = errors.New("pi run aborted")
+	ErrAborted    = fmt.Errorf("pi run: %w", harness.ErrAborted)
 	ErrCapability = errors.New("unsupported Pi capability")
 )
 
@@ -58,6 +58,7 @@ func (t Transport) Run(ctx context.Context, command harness.AgentCommand, reques
 	}
 
 	session := newSession(request)
+	session.secrets = t.Executor.Secrets
 	result, err := t.Executor.Exchange(ctx, command, time.Now(), func(stdout io.Reader, stdin io.WriteCloser, stop context.CancelFunc) error {
 		return session.exchange(ctx, stdout, stdin, recordLimit(t.RecordLimit), stop)
 	})

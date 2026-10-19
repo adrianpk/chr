@@ -10,8 +10,8 @@ PR: pending
 ## Purpose
 
 Allow a prepared native Pi profile to generate validated structured content
-through existing operation owners. T3.1 supplies the transport; generation
-assembly and private resource restrictions remain T3.2 and T3.3.
+through existing operation owners. T3.1 supplies the transport and T3.2 wires
+the selected runner. T3.3 resource/tool restrictions remain in progress.
 
 ## Delivered Behavior
 
@@ -32,6 +32,18 @@ assembly and private resource restrictions remain T3.2 and T3.3.
   negative or overflowing counters stay unknown, including earlier calls and
   unmeasured compaction work.
 
+- T3.2: Specs, acceptance features, Plans, tracking, Quiz questions, contextual
+  Quiz, Dump curation, explanations, structured conversation and agentic review
+  dispatch through the retained Pi generation selection and original validators.
+- Live profile changes preserve admitted model/provider/thinking and executable
+  identity. The selected private resource references survive operation recovery;
+  model definitions retain a credential-free semantic hash.
+- Fast Quiz batches keep buffered questions without another call. Concurrent
+  Pi profiles reuse the existing structured-model capacity pool. Each call has
+  separate writable session/authentication state that is removed after reaping.
+- Successful process output and domain validation remain separate host facts.
+  Invalid Spec/acceptance output leaves prior canonical artifacts unchanged.
+
 ## Implementation Notes
 
 Each transport call creates its own bounded correlation state and subprocess.
@@ -45,19 +57,39 @@ pipe backpressure, out-of-order command responses, late acknowledgment, continue
 work after a valid earlier answer, and a descendant holding protocol pipes.
 It does not establish remote model authentication or a live Pi generation result.
 
+The generation adapter supplies only the explicitly selected static API-key
+provider and credential-free model definition. Ambient authentication, home,
+project settings and discovered resources are excluded. OAuth generation is
+rejected with an actionable refresh-owner requirement. Native version checking
+requires Pi 1.3.0; readiness itself never launches a model or executable.
+
+A sibling deterministic RPC peer drives the real application service and CLI
+boundaries. Review retains the canonical project's selection while executing
+inside its separate workspace. The existing private operation artifact stores
+resource references without adding a store, migration or public credential path.
+
 ## Contracts Added or Changed
 
 - Shared `process.Executor.Exchange` for bounded bidirectional process calls.
 - Sibling `harness/pi` transport pinned to `pi-rpc/1.3.0`, with exact model
   verification and distinguishable protocol/provider/capability failure values.
-- No workflow, artifact schema, frozen binding or existing Codex path changed
-  during T3.1. Generation result publication remains with its existing owner.
+- Optional private generation launch resources in the existing operation file;
+  omitted resources preserve legacy Codex/API operation bytes and checksums.
+- Adapter-neutral protocol/abort errors, observed model and optional cache
+  counters in host run evidence. Unknown usage never becomes certification.
+- Explicit replacement subprocess environments and pre-truncation diagnostic
+  redaction for selected file-backed secrets. Result publication stays with core.
 
 ## Files of Interest
 
 - `internal/harness/process/exchange.go`
 - `internal/harness/pi/transport.go`, `session.go` and `events.go`
 - `internal/harness/pi/transport_test.go` and `transport_fixture_test.go`
+
+- `internal/harness/pi/generation.go`, `generation_setup.go`, `resources.go`
+- `internal/app/service_harness_generation.go`, `author_generation.go`, `service_work.go`
+- `internal/core/harness_generation_operation.go`, `harness_generation_run.go`
+- `internal/app/service_pi_generation*_test.go`
 
 ## Validation
 
@@ -71,15 +103,25 @@ Passed focused T3.1 implementation checks for source commit
 - `scripts/check-package-readmes.sh`
 - `git diff --check`
 
+Passed focused T3.2 task checks:
+
+- `go test ./internal/harness/... ./internal/core ./internal/app -run '^(TestPiGeneration|TestHarnessGenerationBinding|TestHarnessSelection|TestHarnessCodex|TestAgentRunProcess)' -count=1 -timeout=3m`
+- `go test -race ./internal/harness/pi ./internal/harness/process ./internal/app -run '^(TestPiGeneration|TestHarnessGenerationBinding|TestAgentRunProcess)' -count=1 -timeout=3m`
+- `go test -race ./internal/app -run '^TestPiGenerationCapacity$' -count=1 -timeout=30s`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/harness/... ./internal/core ./internal/app`
+- `scripts/check-go-func-signatures.sh`
+- `scripts/check-package-readmes.sh`
+- `git diff --check`
+
 Fixtures exposed and now cover an oversized unterminated record at the byte
 boundary and cleanup cancellation incorrectly appearing as caller cancellation.
 All owned fixtures stopped after their checks. Required slice-level commands
-will be recorded through the controller on the final clean PR head after T3.2,
-T3.3 and PR-reference follow-up commits.
+will be recorded through the controller on the final clean PR head after T3.3
+and PR-reference follow-up commits.
 
 ## Risks and Follow-ups
 
-T3.2 must wire the Pi runner through all generation families while retaining
-operation bindings, validators and shared capacity. T3.3 must enforce private
-per-call state and resource/tool discovery restrictions. No canonical PR is
-ready until those tasks and the configured slice checks are complete.
+T3.3 must complete resource/discovery restrictions, explicit read-only file
+inspection for callers that require it, and negative capability/usage/resource
+fixtures. No canonical PR is ready until that task and the configured checks
+are complete. The current T3.2 adapter disables all tools.

@@ -12,7 +12,11 @@ import (
 // An answer commits even when its continuation fails. Resume after restart uses
 // that answer's binding; the next independent answer reads the current role.
 func TestHarnessGenerationBindingQuiz(t *testing.T) {
-	operations, driverDir := harnessGenerationFixture(t, generationQuestionFixture("Which behavior must remain?"))
+	generationBindingQuizCase(t, harnessGenerationFixture)
+}
+
+func generationBindingQuizCase(t *testing.T, fixture func(*testing.T, string) (service, string)) {
+	operations, driverDir := fixture(t, generationQuestionFixture("Which behavior must remain?"))
 	project := operations.projectContext.ProjectDir
 	writeServiceQuizFixture(t, project)
 
@@ -45,7 +49,12 @@ func resumeGenerationFixture(t *testing.T, operations service, driverDir string,
 		t.Fatal(err)
 	}
 
-	original := "  other:\n    harness: codex\n    command: " + filepath.Join(driverDir, "driver")
+	harnessName := "codex"
+	if strings.Contains(string(data), "harness: pi") {
+		harnessName = "pi"
+	}
+
+	original := "  other:\n    harness: " + harnessName + "\n    command: " + filepath.Join(driverDir, "driver")
 	harnessSelectionWrite(t, profiles, strings.Replace(string(data), original, "  other:\n    harness: codex\n    command: /unavailable-fixture", 1))
 
 	restarted := newService(t.Context(), operations.env, operations.projectContext, testAssetsFS())

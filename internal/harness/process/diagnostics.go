@@ -38,3 +38,20 @@ func Diagnostic(data []byte) []byte {
 
 	return clean[:min(len(clean), harness.MaxDiagnostic)]
 }
+
+func (e Executor) diagnostic(data []byte) []byte {
+	return DiagnosticWithSecrets(data, e.Secrets...)
+}
+
+// DiagnosticWithSecrets redacts selected file credentials before excerpt truncation.
+func DiagnosticWithSecrets(data []byte, secrets ...string) []byte {
+	value := string(data)
+
+	for _, secret := range secrets {
+		if secret != "" {
+			value = strings.ReplaceAll(value, secret, "[REDACTED]")
+		}
+	}
+
+	return Diagnostic([]byte(value))
+}

@@ -151,8 +151,10 @@ type assistantMessage struct {
 }
 
 type observedUsage struct {
-	Input  *int64 `json:"input"`
-	Output *int64 `json:"output"`
+	Input      *int64 `json:"input"`
+	Output     *int64 `json:"output"`
+	CacheRead  *int64 `json:"cacheRead"`
+	CacheWrite *int64 `json:"cacheWrite"`
 }
 
 func (s *session) message(data json.RawMessage) error {
@@ -220,25 +222,31 @@ func (s *session) completedMessage(message assistantMessage) error {
 }
 
 type usageTotals struct {
-	input, output int64
-	inputKnown    bool
-	outputKnown   bool
-	seen          bool
+	input, output                   int64
+	cacheRead, cacheWrite           int64
+	inputKnown                      bool
+	outputKnown                     bool
+	cacheReadKnown, cacheWriteKnown bool
+	seen                            bool
 }
 
 func (u *usageTotals) add(usage *observedUsage) {
 	if !u.seen {
 		u.inputKnown, u.outputKnown, u.seen = true, true, true
+		u.cacheReadKnown, u.cacheWriteKnown = true, true
 	}
 
 	if usage == nil {
 		u.inputKnown, u.outputKnown = false, false
+		u.cacheReadKnown, u.cacheWriteKnown = false, false
 
 		return
 	}
 
 	u.input, u.inputKnown = addUsage(u.input, usage.Input, u.inputKnown)
 	u.output, u.outputKnown = addUsage(u.output, usage.Output, u.outputKnown)
+	u.cacheRead, u.cacheReadKnown = addUsage(u.cacheRead, usage.CacheRead, u.cacheReadKnown)
+	u.cacheWrite, u.cacheWriteKnown = addUsage(u.cacheWrite, usage.CacheWrite, u.cacheWriteKnown)
 }
 
 func addUsage(total int64, observed *int64, known bool) (int64, bool) {
@@ -257,6 +265,14 @@ func (s *session) measuredUsage() harness.Usage {
 
 	if s.usage.outputKnown {
 		result.Output = &s.usage.output
+	}
+
+	if s.usage.cacheReadKnown {
+		result.CacheRead = &s.usage.cacheRead
+	}
+
+	if s.usage.cacheWriteKnown {
+		result.CacheWrite = &s.usage.cacheWrite
 	}
 
 	return result

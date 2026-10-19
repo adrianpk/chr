@@ -48,6 +48,7 @@ type session struct {
 	observedModel string
 	finalErr      error
 	usage         usageTotals
+	secrets       []string
 }
 
 func newSession(request Request) *session {
@@ -132,7 +133,7 @@ func (s *session) response(event record) error {
 	delete(s.pending, event.ID)
 
 	if !*event.Success {
-		return fmt.Errorf("command %s rejected: %w: %s", expected, ErrCapability, process.Diagnostic([]byte(event.Error)))
+		return fmt.Errorf("command %s rejected: %w: %s", expected, ErrCapability, process.DiagnosticWithSecrets([]byte(event.Error), s.secrets...))
 	}
 
 	if err := s.responseData(event); err != nil {

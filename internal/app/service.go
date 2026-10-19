@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/harness"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
@@ -23,6 +24,7 @@ type service struct {
 	generationBinder       generationOperationBinder
 	generationArtifactsDir string
 	generationExecutionDir string
+	generationRunner       harness.AgentRunner
 	workflowWorker         []string
 	workflowNamespace      string
 	workflowPullRequests   core.WorkflowPullRequestProvider

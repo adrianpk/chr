@@ -16,7 +16,11 @@ import (
 // Actual authoring admission, provider failure and a rebuilt service retain the
 // first profile. A later independent request observes the live replacement.
 func TestHarnessGenerationBindingAuthoring(t *testing.T) {
-	operations, driverDir := harnessGenerationFixture(t, `{"body":"Preserve the supplied scope and retained retry ceiling.","question":"","rationale":""}`)
+	generationBindingAuthoringCase(t, harnessGenerationFixture)
+}
+
+func generationBindingAuthoringCase(t *testing.T, fixture func(*testing.T, string) (service, string)) {
+	operations, driverDir := fixture(t, `{"body":"Preserve the supplied scope and retained retry ceiling.","question":"","rationale":""}`)
 	project := operations.projectContext.ProjectDir
 	request := telegramAuthoringServiceRequest()
 	request.ProjectID = operations.projectContext.ProjectID

@@ -72,10 +72,10 @@ func generationBindingProgram(t *testing.T, project string) string {
 }
 
 func generationBindingResolver(program, model string) HarnessGenerationResolver {
-	return func(_ context.Context, config WorkspaceConfig) (HarnessGenerationBinding, string, error) {
+	return func(_ context.Context, config WorkspaceConfig) (HarnessGenerationBinding, HarnessGenerationLaunch, error) {
 		executable, command, err := FreezeHarnessExecutable([]string{program})
 		if err != nil {
-			return HarnessGenerationBinding{}, "", err
+			return HarnessGenerationBinding{}, HarnessGenerationLaunch{}, err
 		}
 
 		selection := HarnessSelection{
@@ -87,7 +87,7 @@ func generationBindingResolver(program, model string) HarnessGenerationResolver 
 		}
 		binding, err := SealHarnessGenerationBinding(HarnessGenerationBinding{Selection: selection, ExecutableRef: executable, ProtocolRevision: "fixture-generation/v1"})
 
-		return binding, command[0], err
+		return binding, HarnessGenerationLaunch{Program: command[0]}, err
 	}
 }
 

@@ -23,7 +23,7 @@ func TestHarnessGenerationBindingSelectionOrder(t *testing.T) {
 	finished := make(chan generationBindingAdmissionResult, 1)
 
 	go func() {
-		operation, err := FreezeHarnessGeneration(t.Context(), project, "ordered-operation", "plan_generation", func(ctx context.Context, c WorkspaceConfig) (HarnessGenerationBinding, string, error) {
+		operation, err := FreezeHarnessGeneration(t.Context(), project, "ordered-operation", "plan_generation", func(ctx context.Context, c WorkspaceConfig) (HarnessGenerationBinding, HarnessGenerationLaunch, error) {
 			close(entered)
 			<-release
 
@@ -74,7 +74,7 @@ type generationBindingAdmissionResult struct {
 func TestHarnessGenerationBindingDirectAPI(t *testing.T) {
 	project := t.TempDir()
 
-	operation, err := FreezeHarnessGeneration(t.Context(), project, "api-operation", "quiz_next_question", func(_ context.Context, c WorkspaceConfig) (HarnessGenerationBinding, string, error) {
+	operation, err := FreezeHarnessGeneration(t.Context(), project, "api-operation", "quiz_next_question", func(_ context.Context, c WorkspaceConfig) (HarnessGenerationBinding, HarnessGenerationLaunch, error) {
 		binding, err := SealHarnessGenerationBinding(HarnessGenerationBinding{
 			Selection: HarnessSelection{
 				Role: HarnessGeneration, Action: "quiz_next_question", Backend: "openai", Source: "legacy", ModelProvider: "openai", Model: "fixture-api-model",
@@ -83,7 +83,7 @@ func TestHarnessGenerationBindingDirectAPI(t *testing.T) {
 			}, ProtocolRevision: "responses/v1",
 		})
 
-		return binding, "", err
+		return binding, HarnessGenerationLaunch{}, err
 	})
 	if err != nil {
 		t.Fatal(err)

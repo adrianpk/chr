@@ -38,6 +38,8 @@ type HarnessRunMetadata struct {
 type HarnessRunUsage struct {
 	Input              *int64 `json:"input,omitempty"`
 	Output             *int64 `json:"output,omitempty"`
+	CacheRead          *int64 `json:"cache_read,omitempty"`
+	CacheWrite         *int64 `json:"cache_write,omitempty"`
 	AccountingRevision string `json:"accounting_revision"`
 }
 
@@ -104,6 +106,7 @@ func finishHarnessGenerationRun(request harness.AgentRunRequest, result harness.
 	record.FinishedAt = &finished
 	record.ProcessOutcome = harnessRunProcessOutcome(runErr)
 	record.Usage, record.UsageStatus = harnessRunMeasuredUsage(result.Usage)
+	record.ObservedModel = result.ObservedModel
 
 	if runErr == nil {
 		runErr = retainNormalizedHarnessOutput(request, result.Output, record)
@@ -150,10 +153,12 @@ func harnessRunProcessOutcome(err error) string {
 		return "completed"
 	case errors.Is(err, context.DeadlineExceeded):
 		return "timed_out"
+	case errors.Is(err, harness.ErrAborted):
+		return "cancelled"
+	case errors.Is(err, harness.ErrProtocol), errors.Is(err, process.ErrLimit):
+		return "protocol_error"
 	case errors.Is(err, context.Canceled):
 		return "cancelled"
-	case errors.Is(err, process.ErrLimit):
-		return "protocol_error"
 	default:
 		return "failed"
 	}
@@ -165,11 +170,22 @@ func harnessRunMeasuredUsage(usage harness.Usage) (*HarnessRunUsage, string) {
 	}
 
 	measured := &HarnessRunUsage{Input: usage.Input, Output: usage.Output, AccountingRevision: "chr-harness-observed/v1"}
+	measured.CacheRead = optionalMeasuredCounter(usage.CacheRead)
+	measured.CacheWrite = optionalMeasuredCounter(usage.CacheWrite)
+
 	if usage.Input == nil || usage.Output == nil {
 		return measured, "partial"
 	}
 
 	return measured, "known"
+}
+
+func optionalMeasuredCounter(value *int64) *int64 {
+	if value != nil && *value >= 0 {
+		return value
+	}
+
+	return nil
 }
 
 func harnessRunMetadataPath(request harness.AgentRunRequest) string {

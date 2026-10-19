@@ -3,11 +3,25 @@ package harness
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
 	"time"
 )
+
+// Protocol and abort outcomes remain adapter-neutral for host run metadata.
+var (
+	ErrProtocol = errors.New("invalid harness protocol")
+	ErrAborted  = errors.New("harness run aborted")
+)
+
+// GenerationResources contains private host references, never credential values.
+type GenerationResources struct {
+	CredentialFile  string `json:"credential_file,omitempty"`
+	ModelConfigFile string `json:"model_config_file,omitempty"`
+	ModelConfigHash string `json:"model_config_hash,omitempty"`
+}
 
 // Byte ceilings apply before accepting a call or a complete result.
 const (
@@ -39,6 +53,9 @@ type AgentRunRequest struct {
 	OutputName         string
 	Program            string
 	Model              string
+	ModelProvider      string
+	Thinking           string
+	Resources          GenerationResources
 	Timeout            time.Duration
 	OutputLimit        int
 	DeferResponseTrace bool
@@ -50,28 +67,31 @@ type AgentRunRequest struct {
 
 // Usage preserves unknown usage as nil; observed usage is not certification.
 type Usage struct {
-	Input  *int64
-	Output *int64
+	Input      *int64
+	Output     *int64
+	CacheRead  *int64
+	CacheWrite *int64
 }
 
 // AgentRunResult contains normalized output and bounded sanitized diagnostics.
 type AgentRunResult struct {
-	ID          string
-	Provider    string
-	Model       string
-	RunDir      string
-	PromptPath  string
-	OutputPath  string
-	StdoutPath  string
-	StderrPath  string
-	CommandPath string
-	Command     []string
-	Output      []byte
-	Stdout      []byte
-	Stderr      []byte
-	Usage       Usage
-	StartedAt   time.Time
-	Latency     time.Duration
+	ID            string
+	Provider      string
+	Model         string
+	ObservedModel string
+	RunDir        string
+	PromptPath    string
+	OutputPath    string
+	StdoutPath    string
+	StderrPath    string
+	CommandPath   string
+	Command       []string
+	Output        []byte
+	Stdout        []byte
+	Stderr        []byte
+	Usage         Usage
+	StartedAt     time.Time
+	Latency       time.Duration
 }
 
 // AgentRunner performs one independently owned generation call.
@@ -84,6 +104,8 @@ type AgentCommand struct {
 	Program string
 	Args    []string
 	Dir     string
+	// A non-nil environment replaces inheritance. Values never enter command logs.
+	Env []EnvironmentVariable `json:"-"`
 }
 
 // AgentCommandResult retains bounded diagnostics and a complete stdout fallback.

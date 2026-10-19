@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/harness"
 )
 
 const harnessGenerationRecordLimit = 16 * 1024
@@ -21,6 +23,13 @@ type HarnessGenerationOperation struct {
 	project      string
 	configDir    string
 	executionDir string
+	resources    harness.GenerationResources
+}
+
+// HarnessGenerationLaunch retains only private host-resolved launch references.
+type HarnessGenerationLaunch struct {
+	Program   string
+	Resources harness.GenerationResources
 }
 
 // HarnessGenerationLocation separates an existing host's artifact owner from
@@ -33,15 +42,16 @@ type HarnessGenerationLocation struct {
 }
 
 // HarnessGenerationResolver prepares one complete selection under the config owner.
-type HarnessGenerationResolver func(context.Context, WorkspaceConfig) (HarnessGenerationBinding, string, error)
+type HarnessGenerationResolver func(context.Context, WorkspaceConfig) (HarnessGenerationBinding, HarnessGenerationLaunch, error)
 
 type harnessGenerationOperationFile struct {
-	Schema       string                     `json:"schema"`
-	Operation    HarnessGenerationOperation `json:"operation"`
-	Program      string                     `json:"program,omitempty"`
-	ConfigDir    string                     `json:"config_dir"`
-	ExecutionDir string                     `json:"execution_dir"`
-	Checksum     string                     `json:"checksum"`
+	Schema       string                       `json:"schema"`
+	Operation    HarnessGenerationOperation   `json:"operation"`
+	Program      string                       `json:"program,omitempty"`
+	Resources    *harness.GenerationResources `json:"resources,omitempty"`
+	ConfigDir    string                       `json:"config_dir"`
+	ExecutionDir string                       `json:"execution_dir"`
+	Checksum     string                       `json:"checksum"`
 }
 
 // FreezeHarnessGeneration resolves a new operation once. Retrying an existing
@@ -119,12 +129,12 @@ func prepareHarnessGenerationOperation(ctx context.Context, project, id, purpose
 		return operation, err
 	}
 
-	binding, program, err := resolve(ctx, config)
+	binding, launch, err := resolve(ctx, config)
 	if err != nil {
 		return operation, err
 	}
 
-	operation = HarnessGenerationOperation{ID: id, Purpose: purpose, ProjectRef: location.ProjectRef, Binding: binding, program: program, project: project, configDir: location.ConfigDir, executionDir: location.ExecutionDir}
+	operation = HarnessGenerationOperation{ID: id, Purpose: purpose, ProjectRef: location.ProjectRef, Binding: binding, program: launch.Program, resources: launch.Resources, project: project, configDir: location.ConfigDir, executionDir: location.ExecutionDir}
 	if err := validateGenerationOperation(operation); err != nil {
 		return operation, err
 	}
@@ -187,15 +197,49 @@ func validateGenerationOperation(operation HarnessGenerationOperation) error {
 	}
 
 	if operation.Binding.Selection.Backend == "openai" {
-		if operation.program != "" {
+		if operation.program != "" || operation.resources != (harness.GenerationResources{}) {
 			return ErrWorkflowConflict
 		}
 
 		return nil
 	}
 
+	if err := validateGenerationResources(operation.resources, operation.Binding.Selection.Backend); err != nil {
+		return err
+	}
+
 	// The generic command-image check does no worker-role or live-profile IO.
 	return checkHarnessCommandImage(HarnessBinding{ExecutableRef: operation.Binding.ExecutableRef}, []string{operation.program})
+}
+
+func validateGenerationResources(resources harness.GenerationResources, backend string) error {
+	if backend != "pi" && resources != (harness.GenerationResources{}) {
+		return errors.New("generation resources require a supported adapter")
+	}
+
+	for _, path := range []string{resources.CredentialFile, resources.ModelConfigFile} {
+		if !validGenerationResourcePath(path) {
+			return errors.New("generation resources require bounded private absolute references")
+		}
+	}
+
+	if resources.ModelConfigFile == "" {
+		if resources.ModelConfigHash != "" {
+			return errors.New("generation model resource requires a file reference")
+		}
+
+		return nil
+	}
+
+	if !harnessSelectionDigest(resources.ModelConfigHash) {
+		return errors.New("generation model resource requires identity evidence")
+	}
+
+	return nil
+}
+
+func validGenerationResourcePath(path string) bool {
+	return path == "" || (filepath.IsAbs(path) && len(path) <= 4096 && !strings.ContainsAny(path, "\x00\r\n"))
 }
 
 func checkGenerationExecutable(operation HarnessGenerationOperation) error {

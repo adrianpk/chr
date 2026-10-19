@@ -13,10 +13,14 @@ import (
 // Readiness, outline and slice detail are one real plan operation. A switch
 // during its first HTTP call affects a subsequent independent Spec, not stages.
 func TestHarnessGenerationBindingPlan(t *testing.T) {
+	generationBindingPlanCase(t, harnessGenerationFixture)
+}
+
+func generationBindingPlanCase(t *testing.T, fixture func(*testing.T, string) (service, string)) {
 	t.Setenv("CHR_PLAN_GENERATION_BACKEND", "openai")
 	t.Setenv("CHR_OPENAI_MODEL", "api-model-alpha")
 
-	operations, _ := harnessGenerationFixture(t, `{"title":"Bounded Spec","body":"Preserve the selected operation scope.","status":"draft"}`)
+	operations, _ := fixture(t, `{"title":"Bounded Spec","body":"Preserve the selected operation scope.","status":"draft"}`)
 	project := operations.projectContext.ProjectDir
 	writeServiceQuizFixture(t, project)
 	switchGenerationFixture(t, operations, "")

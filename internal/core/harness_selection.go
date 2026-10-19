@@ -9,6 +9,7 @@ type HarnessReadiness struct {
 	Runtime              string `json:"runtime"`
 	Supported            bool   `json:"supported"`
 	RemoteAuthentication string `json:"remote_authentication"`
+	Problem              string `json:"problem,omitempty"`
 }
 
 // Ready reports whether local dispatch is supported; it makes no remote call.

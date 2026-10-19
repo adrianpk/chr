@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	"forge.adrianpk.com/chr/internal/harness/codex"
+	"forge.adrianpk.com/chr/internal/harness/pi"
 )
 
 type generationOperationBinder func(service, context.Context, string, string) (context.Context, error)
@@ -26,7 +27,9 @@ func (s service) bindGeneration(ctx context.Context, id, purpose string) (servic
 
 	s.ctx = ctx
 
-	return s.generationAdapters(ctx), ctx, nil
+	bound, err := s.generationAdapters(ctx)
+
+	return bound, ctx, err
 }
 
 func (s service) bindHarnessGeneration(ctx context.Context, id, purpose string) (context.Context, error) {
@@ -44,7 +47,7 @@ func (s service) bindHarnessGeneration(ctx context.Context, id, purpose string) 
 		location.ExecutionDir = s.projectContext.ProjectDir
 	}
 
-	operation, err := core.FreezeHarnessGeneration(ctx, root, id, purpose, func(ctx context.Context, config core.WorkspaceConfig) (core.HarnessGenerationBinding, string, error) {
+	operation, err := core.FreezeHarnessGeneration(ctx, root, id, purpose, func(ctx context.Context, config core.WorkspaceConfig) (core.HarnessGenerationBinding, core.HarnessGenerationLaunch, error) {
 		return s.prepareGenerationBinding(ctx, config, purpose)
 	}, location)
 	if err != nil {
@@ -54,16 +57,14 @@ func (s service) bindHarnessGeneration(ctx context.Context, id, purpose string) 
 	return core.WithHarnessGeneration(ctx, operation), nil
 }
 
-func (s service) prepareGenerationBinding(ctx context.Context, config core.WorkspaceConfig, purpose string) (core.HarnessGenerationBinding, string, error) {
-	if config.Harnesses.Generation == "" && purpose == "conversation" {
-		if provider, ok := s.conversationModel.(*core.ConfiguredStructuredModel); ok && provider.OpenAI {
-			return prepareLegacyAPIGeneration(config, purpose, provider.API.ResolvedModel())
-		}
+func (s service) prepareGenerationBinding(ctx context.Context, config core.WorkspaceConfig, purpose string) (core.HarnessGenerationBinding, core.HarnessGenerationLaunch, error) {
+	if model, ok := s.legacyConversationModel(config, purpose); ok {
+		return prepareLegacyAPIGeneration(config, purpose, model)
 	}
 
 	resolved, err := s.resolveHarnessSelection(ctx, config, core.HarnessGeneration, purpose)
 	if err != nil {
-		return core.HarnessGenerationBinding{}, "", err
+		return core.HarnessGenerationBinding{}, core.HarnessGenerationLaunch{}, err
 	}
 
 	selection := resolved.View
@@ -73,20 +74,37 @@ func (s service) prepareGenerationBinding(ctx context.Context, config core.Works
 
 	if !selection.Readiness.Ready() {
 		if selection.Source == "legacy" {
-			return core.HarnessGenerationBinding{}, "", errLegacyGenerationUnavailable
+			return core.HarnessGenerationBinding{}, core.HarnessGenerationLaunch{}, errLegacyGenerationUnavailable
 		}
 
-		return core.HarnessGenerationBinding{}, "", errors.New("selected generation profile is not locally ready")
+		return core.HarnessGenerationBinding{}, core.HarnessGenerationLaunch{}, errors.New("selected generation profile is not locally ready")
+	}
+
+	if selection.Backend == pi.Identity {
+		return preparePiGenerationBinding(selection, resolved, s.env.ConfigDir())
 	}
 
 	if selection.Backend != codex.Identity {
-		return core.HarnessGenerationBinding{}, "", fmt.Errorf("unsupported generation harness %q", selection.Backend)
+		return core.HarnessGenerationBinding{}, core.HarnessGenerationLaunch{}, fmt.Errorf("unsupported generation harness %q", selection.Backend)
 	}
 
 	return prepareCodexGenerationBinding(selection, resolved.Executable)
 }
 
-func prepareLegacyAPIGeneration(config core.WorkspaceConfig, purpose, model string) (core.HarnessGenerationBinding, string, error) {
+func (s service) legacyConversationModel(config core.WorkspaceConfig, purpose string) (string, bool) {
+	if config.Harnesses.Generation != "" || purpose != "conversation" {
+		return "", false
+	}
+
+	provider, ok := s.conversationModel.(*core.ConfiguredStructuredModel)
+	if !ok || !provider.OpenAI {
+		return "", false
+	}
+
+	return provider.API.ResolvedModel(), true
+}
+
+func prepareLegacyAPIGeneration(config core.WorkspaceConfig, purpose, model string) (core.HarnessGenerationBinding, core.HarnessGenerationLaunch, error) {
 	selection := core.HarnessSelection{
 		Role: core.HarnessGeneration, Action: purpose, Backend: "openai", Source: "legacy", ModelProvider: "openai", Model: model,
 		SelectionRevision: config.Revision(), ProfileRevision: core.HarnessProfileRevision(core.HarnessProfile{ModelProvider: "openai", Model: model}),
@@ -94,13 +112,13 @@ func prepareLegacyAPIGeneration(config core.WorkspaceConfig, purpose, model stri
 	}
 	binding, err := core.SealHarnessGenerationBinding(core.HarnessGenerationBinding{Selection: selection, ProtocolRevision: "openai-responses/v1"})
 
-	return binding, "", err
+	return binding, core.HarnessGenerationLaunch{}, err
 }
 
-func prepareCodexGenerationBinding(selection core.HarnessSelection, program string) (core.HarnessGenerationBinding, string, error) {
+func prepareCodexGenerationBinding(selection core.HarnessSelection, program string) (core.HarnessGenerationBinding, core.HarnessGenerationLaunch, error) {
 	executable, command, err := core.FreezeHarnessExecutable([]string{program})
 	if err != nil {
-		return core.HarnessGenerationBinding{}, "", err
+		return core.HarnessGenerationBinding{}, core.HarnessGenerationLaunch{}, err
 	}
 
 	if selection.ModelProvider == "" {
@@ -109,25 +127,38 @@ func prepareCodexGenerationBinding(selection core.HarnessSelection, program stri
 
 	binding, err := core.SealHarnessGenerationBinding(core.HarnessGenerationBinding{Selection: selection, ExecutableRef: executable, ProtocolRevision: "codex-exec-generation/v1"})
 
-	return binding, command[0], err
+	return binding, core.HarnessGenerationLaunch{Program: command[0]}, err
 }
 
-func (s service) generationAdapters(ctx context.Context) service {
+func (s service) generationAdapters(ctx context.Context) (service, error) {
 	_, binding, bound := core.HarnessGenerationSelection(ctx)
 	if !bound {
-		return s
+		return s, nil
 	}
 
 	selection := binding.Selection
+	switch selection.Backend {
+	case pi.Identity:
+		if binding.ProtocolRevision != pi.ProtocolRevision {
+			return s, errors.New("unsupported retained Pi generation protocol")
+		}
+
+		s.generationRunner = pi.Runner{}
+	case codex.Identity:
+		s.generationRunner = codex.Runner{}
+	case "openai":
+	default:
+		return s, errors.New("unsupported retained generation harness")
+	}
 
 	s.quizModel = s.boundQuizAdapter(selection)
 	if provider, ok := s.conversationModel.(*core.ConfiguredStructuredModel); ok {
-		s.conversationModel = provider.WithGenerationSelection(selection.Backend == "openai", selection.Model, codex.Runner{})
+		s.conversationModel = provider.WithGenerationSelection(selection.Backend == "openai", selection.Model, s.generationRunner)
 	}
 
 	s.dumpCurator = s.boundDumpCurator(selection)
 
-	return s
+	return s, nil
 }
 
 func (s service) boundQuizAdapter(selection core.HarnessSelection) core.QuizModelAdapter {
@@ -158,7 +189,7 @@ func (s service) selectedQuizAdapter(selection core.HarnessSelection, api core.O
 		return api
 	}
 
-	return core.HarnessQuizModelAdapter{ProjectDir: s.projectContext.ProjectDir, Runner: codex.Runner{}}
+	return core.HarnessQuizModelAdapter{ProjectDir: s.projectContext.ProjectDir, Runner: s.generationRunner}
 }
 
 func (s service) boundDumpCurator(selection core.HarnessSelection) DumpCurationProvider {
@@ -178,7 +209,23 @@ func (s service) boundDumpCurator(selection core.HarnessSelection) DumpCurationP
 		return openAIDumpCurationProvider{ProjectDir: s.projectContext.ProjectDir, Model: selection.Model}
 	}
 
-	return harnessDumpCurationProvider{ProjectDir: s.projectContext.ProjectDir, Runner: codex.Runner{}}
+	return harnessDumpCurationProvider{ProjectDir: s.projectContext.ProjectDir, Runner: s.generationRunner}
+}
+
+func preparePiGenerationBinding(selection core.HarnessSelection, resolved resolvedHarnessSelection, configDir string) (core.HarnessGenerationBinding, core.HarnessGenerationLaunch, error) {
+	resources, err := pi.ResolveResources(configDir, resolved.Profile.CredentialRef, resolved.Profile.ModelConfigRef, selection.ModelProvider)
+	if err != nil {
+		return core.HarnessGenerationBinding{}, core.HarnessGenerationLaunch{}, err
+	}
+
+	executable, command, err := core.FreezeHarnessExecutable([]string{resolved.Executable})
+	if err != nil {
+		return core.HarnessGenerationBinding{}, core.HarnessGenerationLaunch{}, err
+	}
+
+	binding, err := core.SealHarnessGenerationBinding(core.HarnessGenerationBinding{Selection: selection, ExecutableRef: executable, ProtocolRevision: pi.ProtocolRevision})
+
+	return binding, core.HarnessGenerationLaunch{Program: command[0], Resources: resources}, err
 }
 
 func (s service) singlePassPlan(ctx context.Context) bool {
