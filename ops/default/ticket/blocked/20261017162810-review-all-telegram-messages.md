@@ -1,7 +1,7 @@
 ---
 id: TKT-20261017162810
 title: "Review every Telegram message and conversational UX"
-status: open
+status: blocked
 kind: follow_up
 severity: unclassified
 priority: unclassified
@@ -10,6 +10,9 @@ tags: telegram, conversational-ux, message-design
 source: chat
 reported_at: 2026-10-17T16:28:10Z
 commits: []
+ready_at: 2026-10-20T20:23:49Z
+started_at: 2026-10-20T20:23:49Z
+branch: dev
 ---
 
 # Review every Telegram message and conversational UX
@@ -92,3 +95,16 @@ the user must do next.
 This ticket captures an exhaustive review task and replacement-message
 proposals. Keep it open until the review is scheduled; capturing the request
 does not begin the audit or change the running Telegram workflow.
+
+## Execution Update: 2026-10-20
+
+The maintainer scheduled this review through the project GTD work queue.
+The [source review](../../report/telegram-message-review.md) inventories 48
+message families across both outbound transports, records a disposition for
+each, proposes replacement layouts and maps bounded implementation follow-ups.
+No runtime copy or running receiver was changed.
+
+Status is `blocked` on actual Telegram mobile/desktop visual evidence and
+configured-user continuation of the complete live development conversations.
+Source and renderer/HTTP fixture evidence do not satisfy those acceptance
+items. Replacement proposals are not implementation approval.
