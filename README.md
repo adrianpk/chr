@@ -52,54 +52,9 @@ Review happens at integration checkpoints rather than after every small task.
 It focuses on consistency, scope, contracts, and execution evidence. See the
 [Agent review model](https://forge.adrianpk.com/adrianpk/chr/src/branch/main/docs/explanation/agent-review-model.md).
 
-The Web UI runs only when explicitly started with `chr web serve`. It binds to
-localhost by default and can be exposed through private networking. It is
-functional but still undergoing refinement.
-
-## Install
-
-Build the CLI locally:
-
-```sh
-make build
-```
-
-Run it from the repository:
-
-```sh
-./bin/chr --help
-```
-
-Install it into the active Go environment:
-
-```sh
-make install
-```
-
-## First Project
-
-Inside a project you want Chryso to manage:
-
-```sh
-chr init
-chr runtime validate --dry-run
-chr ticket new "Fix the failing task workflow" --type bug --priority high
-chr ticket list
-```
-
-This initializes the project workspace, checks the configured runtime boundary,
-creates a first ticket, and lists the tickets available to the agent.
-
-To use the project registry:
-
-```sh
-chr project add /path/to/project
-chr project select /path/to/project
-chr project current
-```
-
 ## Documentation
 
+- [Installation](docs/tutorials/getting-started.md#build-the-cli)
 - [User Guide](docs/how-to/user-guide/index.md)
 - [Documentation index](docs/index.md)
 - [Changelog](CHANGELOG.md)
