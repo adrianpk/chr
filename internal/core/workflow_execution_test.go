@@ -52,7 +52,7 @@ func TestWorkflowTaskExact(t *testing.T) {
 	store, hierarchy, request := workflowExecutionFixture(t, workflowTaskCommand(t, "gate"), 30)
 	run := workflowTestStart(t, store, request)
 
-	proof := workflowTestExecute(t, store, run.Invocation.ID, "worker")
+	proof := workflowTestExecute(t, store, run.Invocation.ID, "instructed worker")
 	if !proof.Successful || proof.Commit == request.Selection.Target.Commit || len(proof.Validation) != 1 || !proof.IntegrationPending || proof.Outcome != "task_validated" {
 		t.Fatal("host did not validate the worker commit")
 	}

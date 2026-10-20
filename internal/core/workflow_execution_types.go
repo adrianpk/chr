@@ -25,6 +25,7 @@ type WorkflowTaskInput struct {
 	Preparation              *WorkflowPreparationInput `json:"preparation,omitempty"`
 	Review                   *WorkflowReviewInput      `json:"review,omitempty"`
 	ReviewHash               string                    `json:"review_hash,omitempty"`
+	Instructions             string                    `json:"instructions,omitempty"`
 	Schema                   string                    `json:"schema"`
 	ExecutionMode            string                    `json:"execution_mode"`
 	InvocationID             string                    `json:"invocation_id"`

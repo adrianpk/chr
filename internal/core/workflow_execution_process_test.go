@@ -51,8 +51,13 @@ func workflowProcessWorker(t *testing.T, input WorkflowTaskInput, path, mode str
 	t.Helper()
 
 	switch mode {
-	case "worker":
+	case "worker", "instructed worker":
 		workflowProcessWrite(t, path, input.TaskKey+"\n")
+		// Model a worker that edits successfully but needs explicit commit authority.
+		if mode == "instructed worker" && !strings.Contains(input.Instructions, "Commit the task changes") {
+			return
+		}
+
 		workflowProcessCommit(t, input.Lane.Worktree)
 	case "repair worker":
 		workflowProcessWrite(t, path+".repair", "Repaired\n")
@@ -143,7 +148,7 @@ func workflowProcessGate(t *testing.T, input WorkflowTaskInput, path, mode strin
 func workflowProcessAggregateGate(t *testing.T, input WorkflowTaskInput) {
 	t.Helper()
 
-	if input.ExecutionMode != "aggregate" || input.Slice == nil || len(input.Slice.Tasks) != 3 {
+	if input.ExecutionMode != "aggregate" || input.Instructions != "" || input.Slice == nil || len(input.Slice.Tasks) != 3 {
 		t.Fatal("aggregate gate received partial task input")
 	}
 

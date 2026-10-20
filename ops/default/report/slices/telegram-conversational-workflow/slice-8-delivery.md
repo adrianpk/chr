@@ -228,18 +228,60 @@ clarification, work preparation and bound admission remain. TG-27, TG-28 and
 TG-32 remain pending. The 28 earlier criteria retain their integrated fixture
 references.
 
+## Live Execution Checkpoint: 2026-10-21
+
+Genuine user messages completed model clarification, spec generation and native
+ticket preparation for `TGQA-1`. The first admitted invocation,
+`00002-workflow-invocation`, never started a worker because its frozen target
+omitted the coordinator marker created by authoring. The maintainer authorized
+pausing it. The designated QA target was repaired at
+`03c16df809f841924f1c4b3cd458644bf77b1381` by committing only that marker, and
+the obsolete invocation was cancelled with zero attempts. Its evidence remains.
+
+A fresh user-confirmed preview admitted `00003-workflow-invocation` on that
+repaired target. One real Codex worker appended the exact requested paragraph
+while preserving the original README bytes, but left its edit uncommitted.
+The worker exited zero; native execution correctly paused with
+`task_validation_failed` and `workflow lane must be clean`. No host validation
+or integration was confirmed. Independent inspection of the retained lane
+verified the exact append and the configured README/whitespace checks.
+
+The executor input omitted an explicit commit instruction. New task inputs now
+freeze scoped edit, validation and commit instructions alongside the task
+contract. Publication and workflow state remain host-owned. The existing real
+Git regression now uses a worker that commits only when instructed: it failed
+with the same dirty-lane error before the correction and passes afterwards.
+Dirty-worker rejection is retained, and aggregate validation receives no task
+commit instruction. Focused task, aggregate, manual, certified-driver and
+Telegram journey checks passed:
+
+`go test ./internal/core ./internal/app -run '^Test(WorkflowTask(Exact|Failures|Independent|Cumulative)|WorkflowSliceAggregate|WorkflowManualExact|NativeAgent(Settlement|Capability)|TelegramJourney)' -count=1 -timeout=3m`
+
+Core/app completed in 33.640/11.684 seconds. `make verify` also passed: strict
+lint reported zero issues, short core/app tests completed in 17.107/28.524
+seconds, all eight CI script regressions passed and the application built.
+Local document links and `git diff --check` passed. These development checks do
+not replace the clean-HEAD controller receipt or scheduled exhaustive gate and
+do not prove that the real model follows the corrected instructions. The failed live
+attempt and its dirty lane remain intact. The running receiver still uses
+`14c563d40f6a`; activation of a corrected build and a successful real retry are
+pending. The user-guided slash-command sequence is diagnostic progress. A
+complete conversation from an ordinary natural-language request through
+confirmed integration remains a separate acceptance requirement.
+
 ## Risks and Follow-ups
 
-T8.1 has genuine live reception and canonical capture evidence. Model
-clarification, work preparation and exact admission remain before native
-integration can be certified.
+T8.1 has genuine live reception, clarification, canonical authoring, prepared
+work and exact admission evidence. Native integration remains blocked on
+activating the executor handoff correction and proving a successful live run.
 T8.2 still needs the separately bound source-development request and complete
 journey. Fixture checks, synthetic inbound updates and direct application calls
 cannot supply those results. The report remains drafting and the canonical PR
 remains pending while these requirements are incomplete.
 
-Continue the existing QA conversation through its remaining bot prompts. The
-source QA journey requires its own separately bound request. Record actual
+Retain the existing QA attempts and use a new authorized attempt after the
+receiver correction. The source QA journey requires its own separately bound
+request and fixed receiver image. Record actual
 source/base/result and canonical integration receipts separately from fixtures.
 Scheduled exhaustive certification and delivery-set closure remain pending the
 final integrated candidate.

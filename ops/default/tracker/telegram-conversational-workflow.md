@@ -250,7 +250,7 @@ recorded bot/model/service/QA activation authority from plan section 2.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T8.1 | blocked | `b72a6955cf7c` fixture and admission correction; live capture and dump confirmed | A genuine development request has a delivered acknowledgement in the correct QA project. Human capture completion produced a canonical dump through a confirmed authoring operation; live clarification, work preparation, admission and integration remain. |
+| T8.1 | blocked | `b72a6955cf7c` admission correction; executor handoff correction prepared | Genuine clarification, spec generation, TGQA-1 preparation and exact admission reached a real Codex worker. The worker made the correct edit without a commit; native execution paused before host validation. Scoped commit instructions, their regression and make verify pass locally; receiver activation, live integration and a complete natural-language journey remain pending. |
 | T8.2 | blocked | isolated source QA setup complete | The source checkout is separately registered against its own QA target; the receiver is fixed at `14c563d40f6a`. Authorized-user input for the actual source-development journey is missing. |
 | T8.3 | in_progress | `b72a6955cf7c` User Guide/reference/changelog; installed help inspected; acceptance traceability audited | All 32 criterion entries, report references and seven canonical merge identities are checked. Complete live evidence, the cycle report and nightly-bound closure remain. |
 

@@ -108,6 +108,13 @@ lane, worker argv and prerequisite record/evidence images. Workers receive this
 JSON on stdin, their input-file location through `CHR_WORKFLOW_INPUT`, and the
 lane as cwd. They do not receive the owner token.
 
+New executor inputs include host-owned `instructions` to implement only the
+bound task, run its required validation, commit the task changes on the assigned
+lane branch and leave a clean worktree before returning success. Pushing,
+merging and changing workflow state remain host operations. These instructions
+are retained with the frozen input and its hash; aggregate validation and
+review inputs do not receive the executor's commit instruction.
+
 Host validation runs the contract's ordered commands or records its explicit
 waiver. Success binds the clean branch, full commit and tree to
 `chr-task-validation/v1` evidence. The result also retains execution mode, input

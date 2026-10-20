@@ -9,6 +9,12 @@ import (
 	"time"
 )
 
+const workflowTaskInstructions = `Complete the execution_contract in lane.worktree on the assigned lane.branch.
+Stay within the task scope and preserve unrelated work. Run the required validation commands.
+Commit the task changes with a Conventional Commit message and leave the worktree clean before returning success.
+Do not push, merge, switch branches, or edit chr workflow state. The host owns validation and integration.
+If the task, validation, or commit cannot be completed, report the failure instead of claiming success.`
+
 func (s *WorkflowStore) prepareWorkflowTask(ctx context.Context, claim *WorkflowClaim, worker []string) (prepared workflowPreparedTask, err error) {
 	return s.prepareWorkflowTaskMode(ctx, claim, worker, "automatic")
 }
@@ -72,6 +78,7 @@ func (s *WorkflowStore) prepareWorkflowAttempt(ctx context.Context, run workflow
 	}
 
 	input.ExecutionMode = mode
+	input.Instructions = workflowTaskInstructions
 
 	return s.saveWorkflowTaskInput(ctx, run, input, harness)
 }
