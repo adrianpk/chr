@@ -84,6 +84,13 @@ In `project` mode, the project checkout and execution workspace are the same
 directory. In `worktree` mode, chr prepares a ticket-specific Git
 worktree and uses that path as the execution workspace.
 
+Newly initialized projects select worktree mode through `workflow.version: 1`.
+Unversioned projects retain the legacy project-mode default, and explicit
+workspace configuration takes precedence. In worktree mode, unrelated edits in
+the user's checkout are preserved and are not copied into the worker workspace.
+Use `chr work doctor --ticket <ticket-key>` to inspect the selected workspace;
+the worker context and execution report retain its actual path and base.
+
 ## Ticket Start Preflight
 
 `chr ticket start <ticket-key>` prepares one ticket execution without invoking

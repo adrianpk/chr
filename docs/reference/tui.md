@@ -280,6 +280,15 @@ chr work run-all
 
 ## Dash View
 
+The work-readiness panel shows the effective workspace mode, current branch,
+expected integration branch and selected ticket worktree state. In worktree
+mode, user checkout changes are informational; dirty or unsafe execution
+worktrees block work. The expected branch identifies the integration policy
+and does not require switching a user's unrelated checkout in worktree mode.
+Use `chr work doctor --ticket <ticket-key>` for the detailed workspace paths,
+and inspect the execution report or worker context to find where the agent
+writes. See [Work readiness](work-readiness.md).
+
 Dash shows agent-work operations:
 
 - work readiness status and repair guidance;

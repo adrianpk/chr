@@ -1510,6 +1510,11 @@ Docker receives the same files through the project mount, usually under
 - Project mode mounts the user-visible checkout into Docker.
 - Worktree mode prepares a ticket-specific Git worktree and mounts that
   execution workspace into Docker.
+- New projects use worktree mode through `workflow.version: 1`. Existing
+  unversioned projects retain project mode unless deliberately changed.
+- In worktree mode, unrelated edits in your checkout remain separate from
+  agent work. `chr work doctor --ticket <ticket-key>` distinguishes your
+  checkout from the selected ticket worktree; dirty ticket worktrees block work.
 - Avoid editing the mounted execution workspace while an agent run is active.
 - PAT-backed push from inside the container is not part of the current local
   runtime boundary.

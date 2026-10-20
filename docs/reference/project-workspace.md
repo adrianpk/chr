@@ -190,7 +190,9 @@ Supported work fields:
   repairs.
 - `allow_branch_creation`: whether safe repair may create the configured local
   branch.
-- `workspace_mode`: workspace execution mode. Defaults to `project`.
+- `workspace_mode`: workspace execution mode. Defaults to `worktree` with
+  `workflow.version: 1`, and to `project` without that marker. Explicit values
+  override the version default; existing policy is preserved by initialization.
 - `worktree_root`: required canonical `ops/default/worktree` root for ticket worktrees; the active namespace replaces `default` at runtime. Custom and legacy roots are rejected.
 - `worktree_base`: base selection policy for ticket worktree creation.
   Supported values are `remote_integration_branch`, `local_integration_branch`,

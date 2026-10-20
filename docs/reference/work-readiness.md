@@ -38,7 +38,8 @@ worktree roots are rejected.
 
 ## Defaults
 
-Default work policy:
+Branch-policy defaults are unchanged across workflow versions. The workspace
+default depends on the nested `workflow.version` marker:
 
 | Field | Default |
 | --- | --- |
@@ -49,13 +50,17 @@ Default work policy:
 | `require_remote_tracking` | `true` |
 | `allow_safe_repair` | `true` |
 | `allow_branch_creation` | `false` |
-| `workspace_mode` | `project` |
+| `workspace_mode` | `worktree` with `workflow.version: 1`; otherwise `project` |
 | `worktree_root` | `ops/default/worktree` |
 | `worktree_base` | `remote_integration_branch` |
 | `worktree_cleanup` | `after_merge` |
 
-The defaults preserve chr's own `dev` plus `origin` workflow while
-making the policy explicit and replaceable per project.
+Newly initialized projects select `workflow.version: 1` and isolated worktrees.
+Existing projects without that marker keep legacy project-mounted execution;
+an explicit `work.workspace_mode` overrides either default. Initialization
+preserves existing policy. Use `chr work config --json` to inspect effective
+values and their sources. See [Workflow configuration](workflow-configuration.md)
+for deliberate legacy adoption.
 
 ## Modes
 
@@ -79,16 +84,17 @@ prepared before the Docker runtime starts.
 | `worktree_base` | `remote_integration_branch`, `local_integration_branch`, `current_branch` | Base selection policy for ticket worktree creation. |
 | `worktree_cleanup` | `after_merge`, `manual`, `never` | Cleanup policy for clean merged ticket worktrees. |
 
-Default behavior remains project-mounted execution for compatibility. Projects
-that set `workspace_mode: worktree` get a deterministic ticket worktree under
+Projects using `workspace_mode: worktree` get a deterministic ticket worktree under
 `worktree_root`, execution paths inside that worktree, and worktree metadata
 under `<worktree_root>/.metadata/`.
 
-In worktree mode, chr still checks the user checkout before starting
-work. The user checkout readiness check protects the integration branch and
-remote tracking state, while the ticket worktree inspection reports whether the
-isolated execution workspace is missing, clean, dirty, mismatched, branch-owned
-elsewhere, or orphaned.
+In worktree mode, user checkout dirtiness is informational and does not require
+switching or cleaning the user's branch. With the default remote-base policy,
+chr fetches the canonical integration ref and checks that base instead of
+requiring the user's checkout to contain it. In-progress Git operations remain
+blocking. Ticket worktree inspection separately reports whether the isolated
+execution workspace is missing, clean, dirty, mismatched, branch-owned elsewhere
+or orphaned. Dirty or unsafe ticket worktrees block execution.
 
 ## Diagnostics
 
@@ -104,7 +110,12 @@ Typical blocking diagnostics include:
 - `wrong_branch`: current branch does not match the configured integration
   branch.
 - `missing_branch`: the configured branch is missing locally.
-- `dirty_worktree`: user-owned changes are visible.
+- `dirty_worktree`: user-owned changes block project-mounted execution.
+- `dirty_ticket_worktree`: the selected isolated workspace has local changes.
+- `unsafe_ticket_worktree`: the selected workspace has a conflicting identity
+  or branch owner.
+- `orphaned_ticket_worktree`: the selected workspace cannot be matched safely
+  to its Git registration.
 - `runtime_artifacts_visible`: chr runtime artifacts are visible to
   Git and can be safely ignored.
 - `missing_remote_ref`: the configured remote tracking ref is missing.
@@ -116,6 +127,9 @@ Typical blocking diagnostics include:
 - `worktree_root_missing`: the configured ticket worktree root does not exist.
 
 Work may start only when there are no blocking diagnostics.
+`dirty_user_checkout` is informational in worktree mode. Branch-location and
+local branch-containment checks above apply to project mode; worktree mode
+checks its selected base and execution workspace separately.
 
 ## Safe Repair
 
