@@ -29,9 +29,14 @@ none
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
 - [x] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
+- [x] Validate completed slicing with `make verify`.
 
 ## Slice Status
+
+Closure audit on 2026-10-20 verified final PR #232 merged at
+`3386771d1a497b85cd091dea3c3f798d61f42cc8`, an ancestor of dev. `make verify`
+passed on current baseline `de2ebb48cb6000670bd2973b98b8f86dafe93f95`; this closes
+the missing current gate evidence without inventing a historical run result.
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |

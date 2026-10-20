@@ -1,11 +1,14 @@
 # Slice 11: Maximized Board
 
-Status: in review
+Status: delivered
 Slicing: Board Ticket Operations
 Plan: `.prj/plans/slicing-board-ticket-operations-plan.md`
 Tracker: `.prj/trackers/slicing-board-ticket-operations-tracker.md`
 Branch: `feat/slice-11-maximized-board`
-PR: pending
+PR: #223
+
+Verified merge: `34c1e76dabefc1ee80874b38a4e049bd4931c31e`, an ancestor of dev
+as checked on 2026-10-20.
 
 ## Purpose
 

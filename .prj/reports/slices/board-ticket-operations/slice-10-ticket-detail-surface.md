@@ -1,11 +1,14 @@
 # Slice 10: Ticket Detail Surface
 
-Status: in review
+Status: delivered
 Slicing: Board Ticket Operations
 Plan: `.prj/plans/slicing-board-ticket-operations-plan.md`
 Tracker: `.prj/trackers/slicing-board-ticket-operations-tracker.md`
 Branch: `feat/slice-10-ticket-detail-surface`
-PR: pending
+PR: #222
+
+Verified merge: `0e0c14a2e096c142408d1e225505a2c9f342c1a0`, an ancestor of dev
+as checked on 2026-10-20.
 
 ## Purpose
 
