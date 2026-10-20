@@ -1,6 +1,6 @@
 # Telegram Conversation Delivery
 
-Status: Approved
+Status: Blocked
 
 Date: 2026-10-16
 
@@ -16,7 +16,7 @@ Tracker: [Telegram Conversation Tracker](../tracker/telegram-conversational-work
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, its canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 8, Live journey and closure; first live canonical dump confirmed; remaining journey evidence pending
+Active slice: Slice 8, Live journey and closure; first live canonical dump confirmed; blocked on remaining live input and evidence
 
 Next slice: None; final slice active, followed by exact-candidate scheduled certification and closure
 
@@ -38,7 +38,7 @@ language and explicit commands use the same typed application operations.
 The accepted specification and model remain normative. All 32 acceptance
 criteria are assigned below. Serial execution remains the default; configured
 parallel projects retain the existing shared capacity and integration queue.
-Developing Chryso through this adapter is supported and preferred when useful,
+Developing chr through this adapter is supported and preferred when useful,
 without making that workflow mandatory.
 
 This set contains eight ordered slices and 29 tracker tasks. A task is a
@@ -68,7 +68,7 @@ set. Product-level parallel execution is exercised through isolated fixtures.
 4. Slices 1-7 use deterministic HTTP/model boundaries, real temporary SQLite
    databases and project stores. They do not require a bot secret, external
    repository writes or a live model subscription to pass their regressions.
-5. The maintainer has a dedicated new Chryso bot. Its token, allowed numeric
+5. The maintainer has a dedicated new chr bot. Its token, allowed numeric
    identities and operator/project mapping must be supplied through private
    local setup before live activation. Never request or commit its token in
    chat, artifacts, argv, PR bodies or test output.
@@ -351,7 +351,7 @@ prerequisite is blocked; the slice cannot claim delivered without that proof.
 | Task | Required work |
 | --- | --- |
 | T8.1 | Run one bounded authorized live bot/model journey against a designated QA project: request a small real change, clarify, prepare, admit the exact extent and observe native integration. Record build, sanitized request/invocation references, source/base/result and confirmed receipt separately from fixture evidence. |
-| T8.2 | Demonstrate the same journey with a separately registered Chryso source checkout in the designated QA repository. Make a small real source/documentation change through the installed receiver, keeping its build fixed while candidate source changes. Use no external development controller for that invocation; never give Chryso and Looper ownership of the same production PR. Label QA integration accurately. |
+| T8.2 | Demonstrate the same journey with a separately registered chr source checkout in the designated QA repository. Make a small real source/documentation change through the installed receiver, keeping its build fixed while candidate source changes. Use no external development controller for that invocation; never give chr and Looper ownership of the same production PR. Label QA integration accurately. |
 | T8.3 | Complete installed help, the existing User Guide and reference documentation, a concise reader-facing changelog entry, acceptance evidence and the cycle report. Audit all 32 criteria, integrate the slice, record the exact candidate and close only after its scheduled nightly is green. |
 
 Acceptance: TG-01, TG-27, TG-28 and TG-32, with the complete prior matrix audited.
@@ -369,7 +369,7 @@ Place the cycle report at
 `ops/default/report/telegram-conversational-workflow-cycle.md` when real evidence
 exists. It records exact integrated candidate, scheduled run/result, live proof,
 all canonical PRs and remaining limitations. Product documentation shows normal
-Chryso operation; Looper belongs only to this delivery's development procedure.
+chr operation; Looper belongs only to this delivery's development procedure.
 
 ## 14. Acceptance Ownership
 
@@ -406,7 +406,7 @@ starts with every criterion pending.
 | TG-25 | T3.3, T6.3, T7.2 | Unicode, splitting, topics and stale prompt handling. |
 | TG-26 | T5.4 | Actual integration receipt distinguished from intermediate success. |
 | TG-27 | T8.1 | Real bounded request-to-integration bot journey. |
-| TG-28 | T8.2 | Chryso source development using Chryso with a fixed receiver build. |
+| TG-28 | T8.2 | chr source development using chr with a fixed receiver build. |
 | TG-29 | T1.4, T3.4 | Existing sender/import regressions and no historical execution. |
 | TG-30 | T5.4 | Existing adapters observe/control the same canonical invocation. |
 | TG-31 | T7.3, T8.3 | Installed help, readiness diagnostics and documented bounds. |
@@ -424,3 +424,24 @@ starts with every criterion pending.
 - [ ] The delivery set is closed with no pending work or unreported blocker.
 
 Current state: Slices 1 through 7 are delivered through canonical PR #390/#391/#392/#393/#394/#395/#396. The latest verified merge is `c14f1aea640657e27c97bb64e40b46f30f698451`. Slice 8 is active on its recorded branch. Its combined deterministic journey and preparation/admission correction pass focused checks; user documentation is updated. The first genuine development request has a delivered project-bound acknowledgement, validating TG-01. Human capture completion produced a confirmed canonical dump. Live model clarification, native integration, the source-development journey and final evidence remain pending. Scheduled exhaustive certification remains bound to the final integrated candidate.
+
+## Continuation Audit: 2026-10-20
+
+Current `dev` through `6037036b2fba` is synchronized into the Slice 8 branch.
+The capture evidence and pending admission correction are preserved alongside
+the canonical merged Slice 7 evidence. The receiver remains on its fixed
+`14c563d40f6a` executable and matching private descriptor digest. Read-only
+status reports ready, one conversation, no pending updates/deliveries and no
+exhausted model requests.
+
+The retained Looper run `run-5ffcddf0ca78104f80d09ad5` remains blocked after
+repeated turns without observable progress. Its last exact-head validation
+passed on `4e4fbf8fadef`; that receipt does not validate this newer composition.
+No controller is resumed, reset or reconfigured by this synchronization.
+
+Remaining dependencies are genuine configured-user conversation input, real
+model clarification and ordinary QA integration, separately bound source
+self-development, complete live/visual evidence and the scheduled exhaustive
+certificate for the final integrated candidate. The source message-review
+report is available at `ops/default/report/telegram-message-review.md`; its
+replacement proposals are separate from this slice's runtime scope.

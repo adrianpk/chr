@@ -14,6 +14,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/harness"
 )
 
 // ProvingObjective describes a package boundary value.
@@ -32,6 +34,7 @@ type ProvingObjective struct {
 
 // ProvingSandboxRunOptions describes a package boundary value.
 type ProvingSandboxRunOptions struct {
+	Worker        harness.Worker
 	ProjectDir    string
 	ObjectivePath string
 	DryRun        bool
@@ -71,6 +74,7 @@ type ProvingValidationRunner func(context.Context, string, ProvingObjective) (Pr
 
 // ProvingRalphLoopOptions describes a package boundary value.
 type ProvingRalphLoopOptions struct {
+	Worker           harness.Worker
 	ProjectDir       string
 	ObjectivePath    string
 	MaxAttempts      int
@@ -197,7 +201,7 @@ func RunProvingSandboxForObjective(
 	projectDir string,
 	objective ProvingObjective,
 ) (ProvingSandboxRunResult, error) {
-	result, err := PlanProvingSandboxRunForObjective(projectDir, objective)
+	result, err := PlanProvingSandboxRunForObjective(projectDir, objective, opts.Worker)
 	if err != nil {
 		return ProvingSandboxRunResult{}, err
 	}
@@ -241,7 +245,7 @@ func RunProvingValidationForObjective(
 	projectDir string,
 	objective ProvingObjective,
 ) (ProvingValidationResult, error) {
-	planned, err := PlanProvingSandboxRunForObjective(projectDir, objective)
+	planned, err := planProvingRuntime(projectDir, objective, nil)
 	if err != nil {
 		return ProvingValidationResult{}, err
 	}
@@ -383,6 +387,7 @@ func runProvingRalphLoopAttempt(
 	attempt := provingRalphLoopAttempt(attemptNumber, attemptObjective)
 
 	sandbox, sandboxErr := RunProvingSandboxForObjective(ctx, ProvingSandboxRunOptions{
+		Worker:     opts.Worker,
 		ProjectDir: projectDir,
 		DryRun:     false,
 		Executor:   opts.Executor,
@@ -697,27 +702,51 @@ func ProvingValidationFailureSignature(result ProvingValidationResult) string {
 }
 
 // PlanProvingSandboxRun executes the corresponding package operation.
-func PlanProvingSandboxRun(projectDir, objectivePath string) (ProvingSandboxRunResult, error) {
+func PlanProvingSandboxRun(projectDir, objectivePath string, worker harness.Worker) (ProvingSandboxRunResult, error) {
 	projectDir, objective, err := loadProvingObjectiveForProject(projectDir, objectivePath)
 	if err != nil {
 		return ProvingSandboxRunResult{}, err
 	}
 
-	return PlanProvingSandboxRunForObjective(projectDir, objective)
+	return PlanProvingSandboxRunForObjective(projectDir, objective, worker)
 }
 
 // PlanProvingSandboxRunForObjective executes the corresponding package operation.
-func PlanProvingSandboxRunForObjective(projectDir string, objective ProvingObjective) (ProvingSandboxRunResult, error) {
+func PlanProvingSandboxRunForObjective(projectDir string, objective ProvingObjective, worker harness.Worker) (ProvingSandboxRunResult, error) {
+	if worker == nil {
+		return ProvingSandboxRunResult{}, fmt.Errorf("worker adapter is required")
+	}
+
+	result, err := planProvingRuntime(projectDir, objective, worker.RuntimeMounts())
+	if err != nil {
+		return ProvingSandboxRunResult{}, err
+	}
+
+	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
+		ExecutionID: objective.ID, TicketKey: objective.TicketKey,
+		TicketPath: result.TicketPath, Plan: result.Plan, Worker: worker,
+	})
+	if err != nil {
+		return ProvingSandboxRunResult{}, err
+	}
+
+	result.Build, result.Run = invocation.Build, invocation.Run
+
+	return result, nil
+}
+
+func planProvingRuntime(projectDir string, objective ProvingObjective, mounts []harness.RuntimeMount) (ProvingSandboxRunResult, error) {
 	config, err := LoadWorkspaceConfig(projectDir)
 	if err != nil {
 		return ProvingSandboxRunResult{}, err
 	}
 
 	plan, err := PlanRuntime(RuntimePlanOptions{
-		ProjectDir: projectDir,
-		Config:     config.Runtime,
-		TicketKey:  objective.TicketKey,
-		RunID:      objective.ID,
+		ExtraMounts: mounts,
+		ProjectDir:  projectDir,
+		Config:      config.Runtime,
+		TicketKey:   objective.TicketKey,
+		RunID:       objective.ID,
 	})
 	if err != nil {
 		return ProvingSandboxRunResult{}, err
@@ -734,23 +763,7 @@ func PlanProvingSandboxRunForObjective(projectDir string, objective ProvingObjec
 		return ProvingSandboxRunResult{}, err
 	}
 
-	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
-		ExecutionID: objective.ID,
-		TicketKey:   objective.TicketKey,
-		TicketPath:  ticketPath,
-		Plan:        plan,
-	})
-	if err != nil {
-		return ProvingSandboxRunResult{}, err
-	}
-
-	return ProvingSandboxRunResult{
-		Objective:  objective,
-		Plan:       plan,
-		Build:      invocation.Build,
-		Run:        invocation.Run,
-		TicketPath: ticketPath,
-	}, nil
+	return ProvingSandboxRunResult{Objective: objective, Plan: plan, TicketPath: ticketPath}, nil
 }
 
 func loadProvingObjectiveForProject(projectDir, objectivePath string) (string, ProvingObjective, error) {

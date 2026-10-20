@@ -1,11 +1,14 @@
 # Slice 8: TUI Index Consumers
 
-Status: reviewing
+Status: delivered
 Slicing: Workspace Index And Semantic Cache
 Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 Tracker: `.prj/trackers/slicing-workspace-index-semantic-cache-tracker.md`
 Branch: `feat/slice-8-tui-index-consumers`
-PR: pending
+PR: #171
+
+Verified merge: `dec1921c9b2ee93459a0e7a9f10e3eabbe2d9ab4`, an ancestor of dev
+as checked on 2026-10-20.
 
 ## Purpose
 

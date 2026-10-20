@@ -279,5 +279,5 @@ func ValidateGeneratedPlanTrackingTicketModelContent(ticket GeneratedPlanTrackin
 
 // HasContent executes the corresponding package operation.
 func (t GeneratedPlanTracking) HasContent() bool {
-	return strings.TrimSpace(t.Title) != "" || strings.TrimSpace(t.Body) != "" || len(t.Tickets) > 0
+	return t.Workflow != nil || strings.TrimSpace(t.Title) != "" || strings.TrimSpace(t.Body) != "" || len(t.Tickets) > 0
 }

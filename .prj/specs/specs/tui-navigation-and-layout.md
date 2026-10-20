@@ -10,7 +10,7 @@ Sources:
 
 ## Purpose
 
-Define the primary navigation model and screen layout for the Chryso TUI.
+Define the primary navigation model and screen layout for the chr TUI.
 
 The design should make project state scannable first and actionable second. It
 should be efficient for keyboard use and predictable enough that terminal users

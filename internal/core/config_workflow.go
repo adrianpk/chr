@@ -75,6 +75,14 @@ func parseWorkflowConfig(data []byte) (WorkspaceConfig, error) {
 		return config, err
 	}
 
+	if err := applyHarnessSelection(&config, values); err != nil {
+		return config, err
+	}
+
+	if err := applyHarnessSelectionAudit(&config, values); err != nil {
+		return config, err
+	}
+
 	config.workflowRevision = workflowHash(data)
 	config.workflowExplicit = make(map[string]bool, len(values))
 

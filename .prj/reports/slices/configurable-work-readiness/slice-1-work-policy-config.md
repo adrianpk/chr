@@ -10,7 +10,7 @@ PR: #313
 ## Purpose
 
 Move work branch assumptions into workspace configuration so projects can keep
-Chryso's default `dev` workflow or configure a different branch policy.
+chr's default `dev` workflow or configure a different branch policy.
 
 ## Delivered Behavior
 

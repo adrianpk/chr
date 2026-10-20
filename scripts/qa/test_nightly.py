@@ -49,7 +49,7 @@ class NightlyTests(unittest.TestCase):
 
         def runner(command, **options):
             modes.append((command, options["env"]["CHR_NATIVE_INTEGRATION_QA"]))
-            for name in (nightly.LIVE_NAMES if options["env"]["CHR_NATIVE_INTEGRATION_QA"] == "1" else ("TestWebWorkflowBrowser",)):
+            for name in (nightly.LIVE_NAMES if options["env"]["CHR_NATIVE_INTEGRATION_QA"] == "1" else nightly.BROWSER_NAMES):
                 options["stdout"].write(json.dumps({"Test": name, "Action": "pass", "Elapsed": 0}) + "\n")
             return 0
 
@@ -64,14 +64,19 @@ class NightlyTests(unittest.TestCase):
         self.assertTrue(all("-short" not in command and "-run" not in command for command in full))
 
     def test_missing_browser_test_cannot_get_green_evidence(self):
-        with self.assertRaisesRegex(ValueError, "incomplete test evidence"):
-            nightly.check_selected_tests("browser", [])
+        cases = [[], [{"Test": "TestWebWorkflowBrowser", "Action": "pass"}],
+                 [{"Test": name, "Action": "skip" if name == "TestWebConsolidatedBrowser" else "pass"}
+                  for name in nightly.BROWSER_NAMES]]
+        for evidence in cases:
+            with self.subTest(evidence=evidence), self.assertRaisesRegex(ValueError, "incomplete test evidence"):
+                nightly.check_selected_tests("browser", evidence)
         with self.assertRaisesRegex(ValueError, "incomplete test evidence"):
             nightly.check_selected_tests("live", [{"Test": name, "Action": "skip"} for name in nightly.LIVE_NAMES])
 
     def test_candidate_change_cannot_produce_green_evidence(self):
         def runner(command, **options):
-            options["stdout"].write(json.dumps({"Test": "TestWebWorkflowBrowser", "Action": "pass", "Elapsed": 0}) + "\n")
+            for name in nightly.BROWSER_NAMES:
+                options["stdout"].write(json.dumps({"Test": name, "Action": "pass", "Elapsed": 0}) + "\n")
             return 0
 
         with tempfile.TemporaryDirectory() as directory, \
@@ -108,7 +113,7 @@ class NightlyTests(unittest.TestCase):
                     if env["CHR_NATIVE_INTEGRATION_QA"] == "1":
                         observed.append(env["XDG_CONFIG_HOME"])
                         self.assertEqual(env["GH_TOKEN"], "dedicated-test-token")
-                    for test in nightly.LIVE_NAMES + ("TestWebWorkflowBrowser",):
+                    for test in nightly.LIVE_NAMES + nightly.BROWSER_NAMES:
                         options["stdout"].write(json.dumps({"Test": test, "Action": "pass", "Elapsed": 0}) + "\n")
                     return 0
 

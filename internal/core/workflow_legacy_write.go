@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 )
 
 // ErrWorkflowAuthority prevents legacy execution of an adopted task or projection.
@@ -102,6 +103,10 @@ func writeLegacyTicketFile(ctx context.Context, path string, observed, replaceme
 	}
 
 	action := func() error {
+		if err := CheckLegacyWorkTicket(path); err != nil {
+			return err
+		}
+
 		current, err := readLegacyTicketFile(path)
 		if err != nil {
 			return err
@@ -111,12 +116,12 @@ func writeLegacyTicketFile(ctx context.Context, path string, observed, replaceme
 			return ErrWorkflowConflict
 		}
 
-		return os.WriteFile(path, replacement, 0o644)
+		return atomicWorkflowFile(path, replacement)
 	}
 	if root == "" {
 		// WorkflowStore requires Git coordination, so non-Git legacy tickets
 		// cannot race an executable workflow adoption.
-		return action()
+		return withLegacyTicketLock(ctx, path, action)
 	}
 
 	layout := OpsLayout{projectDir: root, namespace: DefaultOpsNamespace}
@@ -132,6 +137,23 @@ func writeLegacyTicketFile(ctx context.Context, path string, observed, replaceme
 	}
 
 	return NewWorkflowStore(layout, "").withLock(ctx, action)
+}
+
+func withLegacyTicketLock(ctx context.Context, path string, action func() error) (err error) {
+	file, err := os.OpenFile(path+".lock", os.O_CREATE|os.O_RDWR, 0o600)
+	if err != nil {
+		return err
+	}
+
+	defer func() { err = errors.Join(err, file.Close()) }()
+
+	if err := acquireWorkflowLock(ctx, file); err != nil {
+		return err
+	}
+
+	defer func() { err = errors.Join(err, syscall.Flock(int(file.Fd()), syscall.LOCK_UN)) }()
+
+	return action()
 }
 
 func legacyTicketGitRoot(path string) (string, error) {

@@ -14,7 +14,7 @@ Sources:
 
 Define the records the TUI must expose and the fields each screen should show.
 
-The TUI should make Chryso's Markdown-first state navigable without forcing
+The TUI should make chr's Markdown-first state navigable without forcing
 the user to understand every internal path.
 
 ## Overview Screen

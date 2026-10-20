@@ -83,6 +83,10 @@ func (m Model) renderShellTopbar(width int) string {
 }
 
 func (m Model) renderWorkspace(width, height int) string {
+	if m.harnessSelection.Active {
+		return m.renderHarnessWorkspace(width, height)
+	}
+
 	overlay := m.renderShellOverlay()
 	if overlay != "" {
 		return m.renderOverlayWorkspace(width, height, overlay)
@@ -178,6 +182,10 @@ func (m Model) renderProjectContextLines(width int) []string {
 
 	for _, line := range m.renderProjectFieldBody(projectFieldContext, m.projectMetadata.Context, width) {
 		lines = append(lines, "  "+line)
+	}
+
+	if m.harnessExecutor != nil {
+		lines = append(lines, "", "h: Harness defaults")
 	}
 
 	if m.projectDirty {

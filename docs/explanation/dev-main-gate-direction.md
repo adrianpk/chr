@@ -1,6 +1,6 @@
 # Dev to Main Gate Direction
 
-Chryso does not currently implement this gate.
+chr does not currently implement this gate.
 
 This document captures the need and direction for a future `dev` to `main`
 promotion gate. The goal is to make promotion evidence-driven without turning
@@ -16,7 +16,7 @@ Promotion should be based on facts produced by tools.
 The preferred model is:
 
 ```text
-Go tools + git + Chryso artifacts produce evidence.
+Go tools + git + chr artifacts produce evidence.
 Optional AI may summarize evidence.
 The human decides promotion.
 ```

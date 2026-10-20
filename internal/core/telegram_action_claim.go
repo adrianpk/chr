@@ -211,7 +211,11 @@ func supersedeTelegramAction(op telegramConversationTransaction, claim *Telegram
 	_, err = op.tx.ExecContext(op.ctx, `UPDATE telegram_requests SET state='blocked',updated_at=? WHERE id IN (?,?) AND state NOT IN ('confirmed','rejected')`, formatProjectTime(op.now), claim.Request.ID, claim.Action.AnswerRequestID)
 	claim.Action.State = state
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	return finishTelegramHarnessConversation(op.ctx, op.tx, claim.Request, "blocked", op.now)
 }
 
 func guardTelegramActionClaim(op telegramConversationTransaction, claim *TelegramActionClaim) (string, error) {

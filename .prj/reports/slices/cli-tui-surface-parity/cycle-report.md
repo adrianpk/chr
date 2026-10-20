@@ -7,7 +7,7 @@ Tracker: `.prj/trackers/slicing-cli-tui-surface-parity-tracker.md`
 
 ## Purpose
 
-Summarize the completed five-slice parity cycle that aligned Chryso CLI
+Summarize the completed five-slice parity cycle that aligned chr CLI
 and TUI operation surfaces.
 
 ## Delivered Slices

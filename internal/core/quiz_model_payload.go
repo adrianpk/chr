@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -112,9 +113,10 @@ type QuizModelFeaturePayload struct {
 
 // QuizModelPlanPayload describes a package boundary value.
 type QuizModelPlanPayload struct {
-	Title  string `json:"title"`
-	Body   string `json:"body"`
-	Status string `json:"status"`
+	Order  []PlanOrderSlice `json:"order,omitempty"`
+	Title  string           `json:"title"`
+	Body   string           `json:"body"`
+	Status string           `json:"status"`
 }
 
 // QuizModelPlanOutlinePayload describes a package boundary value.
@@ -237,7 +239,11 @@ func NewQuizModelOutputContract(action QuizModelAction, mode QuizMode) QuizModel
 		}
 	}
 
-	if action == QuizModelActionDraftSpec || action == QuizModelActionGenerateSpec || action == QuizModelActionGeneratePlan {
+	if action == QuizModelActionGeneratePlan {
+		return QuizModelOutputContractPayload{RequiredFields: []string{"title", "body", "status", "order"}, RenderedTextField: "body"}
+	}
+
+	if action == QuizModelActionDraftSpec || action == QuizModelActionGenerateSpec {
 		return QuizModelOutputContractPayload{
 			RequiredFields:    []string{"title", "body", "status"},
 			RenderedTextField: "body",
@@ -414,7 +420,12 @@ func DecodeQuizModelPlanPayload(content []byte) (QuizModelPlanPayload, error) {
 		return QuizModelPlanPayload{}, err
 	}
 
-	err = validateQuizModelExactFields(fields, []string{"title", "body", "status"})
+	required := []string{"title", "body", "status"}
+	if slices.Contains(fields, "order") {
+		required = append(required, "order")
+	}
+
+	err = validateQuizModelExactFields(fields, required)
 	if err != nil {
 		return QuizModelPlanPayload{}, err
 	}
@@ -554,6 +565,7 @@ func ValidateQuizModelFeaturePayload(payload QuizModelFeaturePayload) (QuizModel
 // ValidateQuizModelPlanPayload validates the corresponding package boundary value.
 func ValidateQuizModelPlanPayload(payload QuizModelPlanPayload) (QuizModelPlanPayload, error) {
 	normalized := QuizModelPlanPayload{
+		Order:  payload.Order,
 		Title:  strings.TrimSpace(payload.Title),
 		Body:   strings.TrimSpace(payload.Body),
 		Status: strings.TrimSpace(payload.Status),
@@ -569,6 +581,12 @@ func ValidateQuizModelPlanPayload(payload QuizModelPlanPayload) (QuizModelPlanPa
 
 	if normalized.Status != "planned" {
 		return QuizModelPlanPayload{}, fmt.Errorf("generated plan status must be planned")
+	}
+
+	if normalized.Order != nil {
+		if err := ValidatePlannedOrder(normalized.Order); err != nil {
+			return QuizModelPlanPayload{}, err
+		}
 	}
 
 	return normalized, nil

@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"crypto/rand"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -29,21 +30,24 @@ type DumpActionExecutor interface {
 
 // DumpActionRequest carries selected dump action input.
 type DumpActionRequest struct {
-	Action  DumpActionID
-	Title   string
-	Content string
-	Scope   DumpScope
-	Path    string
+	OperationID, Revision string
+	Action                DumpActionID
+	Title                 string
+	Content               string
+	Scope                 DumpScope
+	Path                  string
 }
 
 // DumpActionResult contains refreshed dump state after an action.
 type DumpActionResult struct {
-	Message                  string
-	Dumps                    []DumpView
-	Content                  string
-	SelectedPath             string
-	EditorCommand            *exec.Cmd
-	EditorCommandDescription string
+	Committed, ProjectionStale bool
+	Revision                   string
+	Message                    string
+	Dumps                      []DumpView
+	Content                    string
+	SelectedPath               string
+	EditorCommand              *exec.Cmd
+	EditorCommandDescription   string
 }
 
 // DumpActionState stores pending confirmation state for a dump action.
@@ -56,9 +60,10 @@ type DumpActionState struct {
 
 // DumpEditState stores in-terminal dump editing state.
 type DumpEditState struct {
-	Active bool
-	Path   string
-	Input  textarea.Model
+	OperationID, Revision string
+	Active                bool
+	Path                  string
+	Input                 textarea.Model
 }
 
 func (m Model) renderDumpAction() string {
@@ -104,7 +109,13 @@ func (m Model) updateDumpEditKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
+	previous := m.dumpEdit.Input.Value()
+
 	input, cmd := m.dumpEdit.Input.Update(msg)
+	if previous != input.Value() {
+		m.dumpEdit.OperationID = rand.Text()
+	}
+
 	m.dumpEdit.Input = input
 
 	return m, cmd
@@ -151,7 +162,7 @@ func (m *Model) confirmDumpAction() tea.Cmd {
 	}
 
 	if strings.TrimSpace(result.SelectedPath) != "" && result.Dumps == nil {
-		m.startDumpEdit(result.SelectedPath, result.Content)
+		m.startDumpEdit(result.SelectedPath, result.Content, result.Revision)
 
 		return nil
 	}
@@ -161,7 +172,7 @@ func (m *Model) confirmDumpAction() tea.Cmd {
 	return nil
 }
 
-func (m *Model) startDumpEdit(path, content string) {
+func (m *Model) startDumpEdit(path, content, revision string) {
 	input := textarea.New()
 	input.SetValue(content)
 	input.Focus()
@@ -171,6 +182,7 @@ func (m *Model) startDumpEdit(path, content string) {
 	input.CharLimit = 0
 
 	m.dumpEdit = DumpEditState{
+		OperationID: rand.Text(), Revision: revision,
 		Active: true,
 		Path:   path,
 		Input:  input,
@@ -188,7 +200,7 @@ func (m *Model) saveDumpEdit() {
 	}
 
 	result, err := m.dumpExecutor.ExecuteDumpAction(DumpActionRequest{
-		Action:  DumpActionSave,
+		Action: DumpActionSave, OperationID: m.dumpEdit.OperationID, Revision: m.dumpEdit.Revision,
 		Path:    m.dumpEdit.Path,
 		Content: m.dumpEdit.Input.Value(),
 	})
@@ -314,7 +326,7 @@ func (m Model) newDumpActionState(action DumpActionID) DumpActionState {
 
 func (m Model) newCreateDumpActionState(action DumpActionID) DumpActionState {
 	request := DumpActionRequest{
-		Action:  action,
+		Action: action, OperationID: rand.Text(),
 		Title:   m.defaultDumpTitle(),
 		Content: "Initial dump created from the TUI.",
 		Scope:   m.defaultDumpScope(),
@@ -351,8 +363,8 @@ func (m Model) newSelectedDumpActionState(action DumpActionID, title string) Dum
 	}
 
 	request := DumpActionRequest{
-		Action: action,
-		Path:   dump.RelativePath,
+		Action: action, OperationID: rand.Text(), Revision: dump.Revision,
+		Path: dump.RelativePath,
 	}
 
 	if action == DumpActionAppend {

@@ -52,9 +52,19 @@ for the browser URL and effective bind policy.
 
 ## Local Workflow
 
+To protect the UI with one local account, follow
+[Configure Single-user Web Login](configure-web-login.md). A configured account
+applies to both local and LAN access. Use `--require-login` to refuse startup
+without it.
+
+The shared header identifies the current project. Page headings use only the
+section or artifact title.
+
 Use the Web UI as another view over the same project-local state:
 
-- Project shows the resolved workspace and Web UI runtime boundary.
+- Project is available by entering `/project` directly. It shows only the
+  project name, root directory and diagnostic project ID, and has no navigation
+  link or automatic refresh.
 - Board and Dash show ticket, readiness, queue, and runtime status.
 - Cases, Dumps, Quizzes, Specs, and Plans read the same Markdown artifacts used
   by CLI and TUI workflows.

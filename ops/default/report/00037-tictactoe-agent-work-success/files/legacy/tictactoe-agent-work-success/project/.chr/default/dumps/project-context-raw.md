@@ -14,10 +14,10 @@ big domain model.
 
 Keep it boring. It should be Go, no third-party libraries, no persistence, no
 networking, no fancy terminal package, and no AI in the app. The app is only
-there to test whether Chryso can turn normal project context into tickets
+there to test whether chr can turn normal project context into tickets
 and then have Codex workers finish the implementation.
 
 I do not want to answer a long quiz every time I reset the scenario. Seed the
 normal project and use-case context, including raw-ish notes and curated notes,
 but do not provide ready-made tickets for the main implementation. The tickets
-should come from Chryso's generated plan.
+should come from chr's generated plan.

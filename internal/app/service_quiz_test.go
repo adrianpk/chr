@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"slices"
@@ -79,8 +80,7 @@ func TestServiceAnswerQuizRecordsRawCaptureAndAdvances(t *testing.T) {
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
 		responses: []core.QuizModelResponse{
-			serviceQuizModelResponse("response-1", "question-1", clock()),
-			serviceQuizModelResponse("response-2", "question-2", clock()),
+			serviceQuizModelResponseWithCandidates("response-1", "question-1", clock(), []core.QuizCandidate{serviceQuizCandidate("question-2", "Which constraint matters next?", clock())}),
 		},
 	}
 	operations := newTestService(t, projectDir)
@@ -115,7 +115,7 @@ func TestServiceAnswerQuizRecordsRawCaptureAndAdvances(t *testing.T) {
 		t.Fatalf("ActiveQuestion = %#v, want question-2", result.State.ActiveQuestion)
 	}
 
-	rawPath := filepath.Join(projectDir, ".chr", "default", "quizzes", "blog-quiz-raw.md")
+	rawPath := filepath.Join(projectDir, "ops", "default", "quiz", "00000-blog-quiz-raw", "artifact.md")
 	rawContent := readServiceWorkspaceFile(t, rawPath)
 
 	for _, want := range []string{
@@ -178,7 +178,7 @@ func TestServiceAnswerQuizReusesPersistedPromptIntent(t *testing.T) {
 		t.Fatalf("follow_up_depth = %#v, want persisted value 2", metadata["follow_up_depth"])
 	}
 
-	rawPath := filepath.Join(projectDir, ".chr", "default", "quizzes", "blog-quiz-raw.md")
+	rawPath := filepath.Join(projectDir, "ops", "default", "quiz", "00000-blog-quiz-raw", "artifact.md")
 	rawContent := readServiceWorkspaceFile(t, rawPath)
 
 	if !strings.Contains(rawContent, `"routing_state":{"phase":"follow_up"}`) {
@@ -426,8 +426,8 @@ func TestServiceFastQuizActivatesBufferedCandidatesWithoutRawCapture(t *testing.
 		t.Fatalf("StartQuiz returned error: %v", err)
 	}
 
-	if len(startResult.State.Candidates) != 2 {
-		t.Fatalf("Candidates = %#v, want two buffered candidates", startResult.State.Candidates)
+	if len(startResult.State.FastQueue) != 2 {
+		t.Fatalf("Candidates = %#v, want two buffered candidates", startResult.State.FastQueue)
 	}
 
 	firstAnswer, err := operations.AnswerQuiz(QuizAnswerRequest{
@@ -446,11 +446,11 @@ func TestServiceFastQuizActivatesBufferedCandidatesWithoutRawCapture(t *testing.
 		t.Fatalf("ActiveQuestion = %#v, want candidate-2", firstAnswer.State.ActiveQuestion)
 	}
 
-	if len(firstAnswer.State.Candidates) != 1 {
-		t.Fatalf("Candidates = %#v, want one remaining candidate", firstAnswer.State.Candidates)
+	if len(firstAnswer.State.FastQueue) != 1 {
+		t.Fatalf("Candidates = %#v, want one remaining candidate", firstAnswer.State.FastQueue)
 	}
 
-	rawPath := filepath.Join(projectDir, ".chr", "default", "quizzes", "blog-quiz-raw.md")
+	rawPath := filepath.Join(projectDir, "ops", "default", "quiz", "00000-blog-quiz-raw", "artifact.md")
 	rawContent := readServiceWorkspaceFile(t, rawPath)
 
 	if strings.Contains(rawContent, "candidate-2") {
@@ -464,7 +464,7 @@ func TestServiceQuizUpdatesCuratedNotesIteratively(t *testing.T) {
 
 	_, result := answerServiceQuiz(t, projectDir)
 
-	curated := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "quizzes", "blog-quiz.md"))
+	curated := readServiceWorkspaceFile(t, filepath.Join(projectDir, "ops", "default", "quiz", "00000-blog-quiz", "artifact.md"))
 	assertServiceQuizContentContains(t, curated, []string{
 		`status: "curated"`,
 		"## Decisions",
@@ -472,7 +472,7 @@ func TestServiceQuizUpdatesCuratedNotesIteratively(t *testing.T) {
 		"## Implementation Implications",
 	})
 
-	if strings.Contains(curated, "What should the workflow preserve?") {
+	if strings.Contains(curated, "What should the workflow preserve") {
 		t.Fatalf("curated notes mirrored raw question:\n%s", curated)
 	}
 
@@ -763,7 +763,7 @@ func TestServiceQuizLifecycleOperations(t *testing.T) {
 	model := &fakeServiceQuizModel{
 		responses: []core.QuizModelResponse{
 			serviceQuizModelResponse("response-1", "question-1", clock()),
-			serviceQuizModelResponse("response-2", "question-2", clock()),
+			serviceQuizModelResponseWithCandidates("response-2", "question-2", clock(), []core.QuizCandidate{serviceQuizCandidate("question-3", "Which constraint matters next?", clock())}),
 		},
 	}
 	operations := newTestService(t, projectDir)
@@ -1056,7 +1056,7 @@ func serviceQuizModelResponse(
 		Status:    core.QuizModelResponseReady,
 		Question: core.QuizQuestion{
 			ID:        questionID,
-			Prompt:    "What should the workflow preserve?",
+			Prompt:    fmt.Sprintf("What should the workflow preserve for %s?", questionID),
 			Required:  true,
 			Topic:     "workflow",
 			Depth:     1,
@@ -1127,6 +1127,7 @@ func serviceQuizPlanResponse(responseID string, createdAt time.Time) core.QuizMo
 			Scope:     core.QuizScope{ProjectID: "service-project"},
 			Title:     "Generated Implementation Plan",
 			Body:      "## High-level implementation strategy\n\nImplement the generated plan in one pass.\n",
+			Order:     []core.PlanOrderSlice{{ID: "slice-1", Order: 1, Title: "Foundation", Tasks: []core.PlanOrderTask{{ID: "task-t1.1", Order: 1, Title: "Implement foundation"}}}},
 			CreatedAt: createdAt,
 		},
 		RawText:   "raw generated plan",

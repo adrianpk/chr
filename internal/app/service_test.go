@@ -133,7 +133,7 @@ func TestNewQuizModelAdapterCanRouteArtifactGenerationToOpenAI(t *testing.T) {
 func TestNewDumpCurationProviderUsesCodexByDefault(t *testing.T) {
 	provider := newDumpCurationProvider(t.TempDir())
 
-	if _, ok := provider.(codexDumpCurationProvider); !ok {
+	if _, ok := provider.(harnessDumpCurationProvider); !ok {
 		t.Fatalf("dump curation provider = %T, want codex provider", provider)
 	}
 }
@@ -276,17 +276,19 @@ func TestServiceCreateDumpWritesProjectAndCaseScopedDumps(t *testing.T) {
 	operations := newTestService(t, projectDir)
 
 	projectResult, err := operations.CreateDump(DumpCreateRequest{
-		Title:   "Project Notes",
-		Content: "Project-wide dump body.",
+		OperationID: dumpRequestID(""),
+		Title:       "Project Notes",
+		Content:     "Project-wide dump body.",
 	})
 	if err != nil {
 		t.Fatalf("CreateDump project returned error: %v", err)
 	}
 
 	caseResult, err := operations.CreateDump(DumpCreateRequest{
-		Title:   "Blog Notes",
-		Content: "Case-scoped dump body.",
-		Scope:   DumpScope{CaseSlug: "blog"},
+		OperationID: dumpRequestID(""),
+		Title:       "Blog Notes",
+		Content:     "Case-scoped dump body.",
+		Scope:       DumpScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("CreateDump case returned error: %v", err)
@@ -309,44 +311,43 @@ func TestServiceCreateDumpWritesProjectAndCaseScopedDumps(t *testing.T) {
 	}
 }
 
-func TestServiceCreateDumpPreservesUniqueSlugBehaviorForPairs(t *testing.T) {
+func TestServiceCreateDumpExtendsProjectDump(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceWorkspaceQueryFixture(t, projectDir)
 
 	operations := newTestService(t, projectDir)
 
 	first, err := operations.CreateDump(DumpCreateRequest{
-		Title:   "Collision Notes",
-		Content: "First body.",
+		OperationID: dumpRequestID(""),
+		Title:       "Collision Notes",
+		Content:     "First body.",
 	})
 	if err != nil {
 		t.Fatalf("CreateDump first returned error: %v", err)
 	}
 
 	second, err := operations.CreateDump(DumpCreateRequest{
-		Title:   "Collision Notes",
-		Content: "Second body.",
+		OperationID: dumpRequestID(""),
+		Title:       "Collision Notes",
+		Content:     "Second body.",
 	})
 	if err != nil {
 		t.Fatalf("CreateDump second returned error: %v", err)
 	}
 
-	if first.Message != "Created dump ops/default/dump/00000-collision-notes/artifact.md." {
-		t.Fatalf("first message = %q", first.Message)
+	if first.RelativePath != second.RelativePath || len(second.Dumps) != 1 {
+		t.Fatal("general capture created another logical dump", first, second)
 	}
 
-	if second.Message != "Created dump ops/default/dump/00000-collision-notes-2/artifact.md." {
-		t.Fatalf("second message = %q", second.Message)
+	observed, err := operations.ReadProjectDump()
+	if err != nil || len(observed.Candidates) != 1 || len(observed.Components) != 2 {
+		t.Fatal("raw captures lost ownership", observed, err)
 	}
 
-	for _, path := range []string{
-		"ops/default/dump/00000-collision-notes/artifact.md",
-		"ops/default/dump/00000-collision-notes-raw/artifact.md",
-		"ops/default/dump/00000-collision-notes-2/artifact.md",
-		"ops/default/dump/00000-collision-notes-2-raw/artifact.md",
-	} {
-		if _, err := os.Stat(filepath.Join(projectDir, filepath.FromSlash(path))); err != nil {
-			t.Fatalf("stat %s: %v", path, err)
+	content := second.Dumps[0].Content
+	for _, text := range []string{"First body.", "Second body."} {
+		if strings.Count(content, text) != 1 {
+			t.Fatal("capture lost or duplicated material", content)
 		}
 	}
 }
@@ -374,7 +375,7 @@ Original body.
 	}
 	operations.dumpEditor = editor
 
-	appendResult, err := operations.AppendDump(DumpAppendRequest{
+	appendResult, err := appendObservedDump(t, operations, DumpAppendRequest{
 		RelativePath: "ops/default/dump/00000-project-notes/artifact.md",
 		Content:      "Appended body.",
 	})
@@ -478,6 +479,7 @@ func TestServiceRejectsDumpPathsOutsideDumpDirectory(t *testing.T) {
 	operations := newTestService(t, t.TempDir())
 
 	_, err := operations.AppendDump(DumpAppendRequest{
+		OperationID: "invalid-path", ExpectedRevision: strings.Repeat("a", 64),
 		RelativePath: ".chr/default/project.md",
 		Content:      "bad",
 	})
@@ -1018,6 +1020,9 @@ func newTestService(t *testing.T, projectDir string) service {
 		ProjectID:  "service-project",
 	}, testAssetsFS())
 	operations.dumpCurator = fallbackDumpCurationProvider{Reason: "test fallback"}
+	// These fixtures inject model fakes to isolate their existing operation
+	// contracts. Harness binding fixtures use production assembly and owned drivers.
+	operations.generationBinder = testGenerationBinder
 
 	return operations
 }
@@ -1105,6 +1110,22 @@ func writeServiceWorkspaceFile(t *testing.T, path, content string) {
 	if err != nil {
 		t.Fatalf("WriteFile returned error: %v", err)
 	}
+
+	root := path
+	for range 5 {
+		root = filepath.Dir(root)
+	}
+
+	if kind, ok := core.OpsArtifactTypeForBodyPath(root, path); ok && kind == "dump" {
+		relative, err := filepath.Rel(root, path)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if err := core.EnsureOpsArtifactBodyMetadata(root, filepath.ToSlash(relative)); err != nil {
+			t.Fatal(err)
+		}
+	}
 }
 
 func canonicalServiceWorkspaceFixturePath(path string) string {
@@ -1160,4 +1181,10 @@ func opsArtifactSlugForServiceFixture(value string) string {
 
 func testTime() time.Time {
 	return time.Date(2026, 5, 23, 10, 0, 0, 0, time.UTC)
+}
+
+// Domain fixtures inject their model boundary independently of private setup.
+// Harness generation fixtures use production assembly and owned executable files.
+func testGenerationBinder(_ service, ctx context.Context, _, _ string) (context.Context, error) {
+	return ctx, nil
 }

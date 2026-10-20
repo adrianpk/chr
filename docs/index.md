@@ -1,6 +1,6 @@
 # Documentation
 
-Chryso documentation follows Diataxis.
+chr documentation follows Diataxis.
 
 ## Tutorials
 
@@ -13,8 +13,10 @@ Learning-oriented walkthroughs:
 Task-oriented guides:
 
 - [User guide](how-to/user-guide/index.md)
+- [Select worker and generation harnesses](how-to/select-harnesses.md)
 - [Configure native integration](how-to/configure-native-integration.md)
 - [Run the local Web UI](how-to/run-local-web-ui.md)
+- [Configure single-user Web login](how-to/configure-web-login.md)
 - [Expose the local Web UI deliberately](how-to/expose-local-web-ui.md)
 - [Full-system lab runbook](how-to/full-system-lab-runbook.md)
 - [Observe agent work](how-to/observe-agent-work.md)

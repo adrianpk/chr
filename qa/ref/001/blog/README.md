@@ -1,6 +1,6 @@
 # Blog
 
-Small headless blog service used as a Chryso QA reference project.
+Small headless blog service used as a chr QA reference project.
 
 From the parent `chr` repository:
 

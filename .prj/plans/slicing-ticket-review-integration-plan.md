@@ -11,7 +11,7 @@ Mirror: `.chr/default/plans/ticket-review-integration-plan.md`
 
 ## Purpose
 
-Implement ticket-level review integration for Chryso so agent-produced
+Implement ticket-level review integration for chr so agent-produced
 ticket work can move through branch, pull request, review, repair, and merge
 states without relying on informal chat memory or ad hoc remote inspection.
 

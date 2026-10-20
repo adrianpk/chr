@@ -40,7 +40,7 @@ func (s service) InspectProjectReadiness(project core.Project) projectReadiness 
 		return result
 	}
 
-	runtime, err := core.ValidateRuntime(core.RuntimeValidationOptions{ProjectDir: project.Path, Config: config.Runtime, Workspace: config.Work.Workspace})
+	runtime, err := core.ValidateRuntime(core.RuntimeValidationOptions{ExtraMounts: legacyCodexMounts(), ProjectDir: project.Path, Config: config.Runtime, Workspace: config.Work.Workspace})
 	result.RuntimeReady = err == nil && core.RuntimeValidationPassed(runtime.Checks)
 
 	return result

@@ -60,37 +60,80 @@ func dumpCatalog(operations service) (webui.ArtifactCatalogView, error) {
 		return webui.ArtifactCatalogView{}, err
 	}
 
-	return webArtifactCatalog(webArtifactFamilyDumps, webDumpCards(dumps)), nil
+	cases, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, core.WorkflowRecordLimit)
+	if err != nil {
+		return webui.ArtifactCatalogView{}, err
+	}
+
+	view := webArtifactCatalog(webArtifactFamilyDumps, webDumpCards(dumps))
+	for _, item := range cases {
+		view.Cases = append(view.Cases, webui.TicketCaseView{Slug: item.Slug, Name: item.Name})
+	}
+	view.Revision = webStableRevision(view)
+
+	return view, nil
 }
 
 func quizCatalog(operations service) (webui.ArtifactCatalogView, error) {
-	quizzes, err := loadTUIQuizzes(operations)
+	catalog, err := operations.ReadQuizCatalog()
 	if err != nil {
 		return webui.ArtifactCatalogView{}, err
 	}
+	view := webArtifactCatalog(webArtifactFamilyQuizzes, webQuizCards(catalog.Items))
+	for _, pending := range catalog.Pending {
+		view.PendingQuizzes = append(view.PendingQuizzes, webui.QuizScopeChoice{Title: pending.Title, URL: quizFocusURL(pending.Reference)})
+	}
+	view.Revision = webStableRevision(view)
 
-	return webArtifactCatalog(webArtifactFamilyQuizzes, webQuizCards(quizzes)), nil
+	return view, nil
 }
 
 func specCatalog(operations service) (webui.ArtifactCatalogView, error) {
-	specs, err := loadTUISpecs(operations)
+	documents, err := operations.ListSpecDocuments()
+	if err != nil {
+		return webui.ArtifactCatalogView{}, err
+	}
+	cards := make([]webui.ArtifactCardView, 0, len(documents))
+	for _, document := range documents {
+		preview := []rune(document.Body)
+		if len(preview) > 1024 {
+			preview = preview[:1024]
+		}
+		card := webui.ArtifactCardView{Family: "specs", ID: document.Reference, Title: document.Title, Preview: string(preview), Revision: document.Revision}
+		card.DetailURL = webArtifactDetailURL(card)
+		cards = append(cards, card)
+	}
+
+	cases, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, core.WorkflowRecordLimit)
 	if err != nil {
 		return webui.ArtifactCatalogView{}, err
 	}
 
-	return webArtifactCatalog(webArtifactFamilySpecs, webSpecCards(specs)), nil
-}
-
-func planCatalog(operations service) (webui.ArtifactCatalogView, error) {
-	plans, err := loadTUIPlans(operations)
-	if err != nil {
-		return webui.ArtifactCatalogView{}, err
+	view := webArtifactCatalog("specs", cards)
+	for _, item := range cases {
+		view.Cases = append(view.Cases, webui.TicketCaseView{Slug: item.Slug, Name: item.Name})
 	}
+	view.Revision = webStableRevision(view)
 
-	return webArtifactCatalog(webArtifactFamilyPlans, webPlanCards(plans)), nil
+	return view, nil
 }
 
 func (p webViewProvider) ArtifactDetailView(ctx context.Context, request webui.ArtifactDetailRequest) (webui.ArtifactDetailView, error) {
+	switch request.Family {
+	case webArtifactFamilySpecs:
+		return p.specArtifactDetail(ctx, request)
+	case webArtifactFamilyQuizzes:
+		return p.quizArtifactDetail(ctx, request)
+	case webArtifactFamilyDumps:
+		return p.dumpArtifactDetail(ctx, request)
+	case webArtifactFamilyPlans:
+		return p.planArtifactDetail(ctx, request)
+	default:
+		return p.readArtifactDetail(ctx, request)
+	}
+}
+
+func (p webViewProvider) readArtifactDetail(ctx context.Context, request webui.ArtifactDetailRequest) (webui.ArtifactDetailView, error) {
 	catalog, err := p.CatalogView(ctx, request.Family)
 	if err != nil {
 		return webui.ArtifactDetailView{}, err
@@ -111,7 +154,7 @@ func (p webViewProvider) ArtifactDetailView(ctx context.Context, request webui.A
 	}
 
 	if request.Family == webArtifactFamilyCases {
-		return p.caseDetailView(card)
+		return p.caseDetailView(ctx, card)
 	}
 
 	content := card.Preview
@@ -146,10 +189,8 @@ func (p webViewProvider) ArtifactDetailView(ctx context.Context, request webui.A
 	return view, nil
 }
 
-func (p webViewProvider) caseDetailView(card webui.ArtifactCardView) (webui.ArtifactDetailView, error) {
-	metadata, err := core.NewCaseMetadataService(p.projectContext.ProjectDir).LoadPath(
-		core.CaseMetadataPath(p.projectContext.ProjectDir, card.ID),
-	)
+func (p webViewProvider) caseDetailView(ctx context.Context, card webui.ArtifactCardView) (webui.ArtifactDetailView, error) {
+	metadata, err := core.NewCaseMetadataService(p.projectContext.ProjectDir).ReadBounded(ctx, card.ID)
 	if err != nil {
 		return webui.ArtifactDetailView{}, err
 	}
@@ -160,6 +201,7 @@ func (p webViewProvider) caseDetailView(card webui.ArtifactCardView) (webui.Arti
 	}
 
 	view := webui.ArtifactDetailView{
+		Plan:            p.casePlanningView(ctx, card.ID, metadata.Name),
 		Family:          card.Family,
 		ID:              card.ID,
 		Title:           metadata.Name,
@@ -233,7 +275,7 @@ func webDumpCards(dumps []tui.DumpView) []webui.ArtifactCardView {
 			UpdatedAt:    webArtifactTime(dump.UpdatedAt),
 			Preview:      webDumpPreview(dump.Title, dump.Preview),
 			ContentState: webContentState(dump.RelativePath != ""),
-			Revision:     webFileRevision(dump.SourcePath),
+			Revision:     dump.Revision,
 		}
 		card.DetailURL = webArtifactDetailURL(card)
 		cards = append(cards, card)
@@ -324,65 +366,16 @@ func stripMarkdownFrontmatter(content string) string {
 	return content
 }
 
-func webQuizCards(quizzes []tui.QuizView) []webui.ArtifactCardView {
+func webQuizCards(quizzes []QuizCatalogItem) []webui.ArtifactCardView {
 	cards := make([]webui.ArtifactCardView, 0, len(quizzes))
 	for _, quiz := range quizzes {
-		path := firstNonEmptyString(quiz.CuratedPath, quiz.RuntimePath, quiz.RawPath)
-		card := webui.ArtifactCardView{
-			Family:       webArtifactFamilyQuizzes,
-			ID:           webQuizID(quiz, path),
-			Title:        quiz.Title,
-			Status:       quiz.Status,
-			Scope:        webScopeLabel(quiz.Scope.CaseSlug, quiz.Title),
-			Path:         path,
-			UpdatedAt:    webArtifactTime(quiz.UpdatedAt),
-			Preview:      firstNonEmptyString(quiz.CuratedPreview, quiz.ActiveQuestionSummary, quiz.TrailSummary),
-			ContentState: webContentState(path != ""),
-			Revision:     webFileRevision(filepath.Join(".", filepath.FromSlash(path))),
-		}
-		card.DetailURL = webArtifactDetailURL(card)
-		cards = append(cards, card)
+		cards = append(cards, webui.ArtifactCardView{
+			Family: webArtifactFamilyQuizzes, ID: quiz.Reference, Title: quiz.Title,
+			Preview: quiz.Preview, DetailURL: quizFocusURL(quiz.Reference), Revision: quiz.Revision,
+		})
 	}
 
 	return cards
-}
-
-func webSpecCards(specs []tui.SpecView) []webui.ArtifactCardView {
-	cards := make([]webui.ArtifactCardView, 0, len(specs))
-	for _, spec := range specs {
-		card := webDocumentCard(webArtifactFamilySpecs, spec.Title, spec.Status, spec.UseCaseTitle, spec.RelativePath, spec.UpdatedAt, spec.Content)
-		cards = append(cards, card)
-	}
-
-	return cards
-}
-
-func webPlanCards(plans []tui.PlanView) []webui.ArtifactCardView {
-	cards := make([]webui.ArtifactCardView, 0, len(plans))
-	for _, plan := range plans {
-		card := webDocumentCard(webArtifactFamilyPlans, plan.Title, plan.Status, plan.UseCaseTitle, plan.RelativePath, plan.UpdatedAt, plan.Content)
-		cards = append(cards, card)
-	}
-
-	return cards
-}
-
-func webDocumentCard(family, title, status, scope, relativePath string, updatedAt time.Time, content string) webui.ArtifactCardView {
-	card := webui.ArtifactCardView{
-		Family:       family,
-		ID:           firstNonEmptyString(relativePath, title),
-		Title:        title,
-		Status:       status,
-		Scope:        scope,
-		Path:         relativePath,
-		UpdatedAt:    webArtifactTime(updatedAt),
-		Preview:      content,
-		ContentState: webContentState(relativePath != ""),
-		Revision:     webContentRevision(content),
-	}
-	card.DetailURL = webArtifactDetailURL(card)
-
-	return card
 }
 
 func (p webViewProvider) readProjectArtifact(relativePath string) (string, error) {
@@ -465,18 +458,6 @@ func webContentState(available bool) string {
 	return "missing"
 }
 
-func webQuizID(quiz tui.QuizView, path string) string {
-	if strings.TrimSpace(path) != "" {
-		return path
-	}
-
-	if strings.TrimSpace(quiz.Scope.CaseSlug) != "" {
-		return "case:" + quiz.Scope.CaseSlug
-	}
-
-	return "project"
-}
-
 func caseRelativePath(projectDir string, metadata core.CaseMetadata) string {
 	if metadata.SourcePath == "" {
 		return ""
@@ -500,21 +481,25 @@ func firstNonEmptyString(values ...string) string {
 	return ""
 }
 
-func webFileRevision(path string) string {
-	if strings.TrimSpace(path) == "" {
-		return ""
-	}
-
-	content, err := os.ReadFile(path)
-	if err != nil {
-		return ""
-	}
-
-	return webContentRevision(string(content))
-}
-
 func webContentRevision(content string) string {
 	sum := sha256.Sum256([]byte(content))
 
 	return hex.EncodeToString(sum[:])
+}
+
+func (p webViewProvider) dumpArtifactDetail(ctx context.Context, request webui.ArtifactDetailRequest) (webui.ArtifactDetailView, error) {
+	document, err := core.ReadDumpDocument(ctx, p.projectContext.ProjectDir, request.ID)
+	if errors.Is(err, os.ErrNotExist) {
+		view := webui.ArtifactDetailView{Family: request.Family, ID: request.ID, Path: request.ID, Missing: true}
+		view.Revision = webStableRevision(view)
+
+		return view, nil
+	}
+	if err != nil {
+		return webui.ArtifactDetailView{}, err
+	}
+	dump := p.service(ctx).dumpView(document)
+	dump.Content = document.Body
+
+	return webui.ArtifactDetailView{Family: request.Family, ID: dump.RelativePath, Path: dump.RelativePath, Title: dump.Title, Status: dump.Status, Scope: webScopeLabel(dump.Scope.CaseSlug, dump.UseCaseTitle), SourcePath: dump.SourcePath, UpdatedAt: webArtifactTime(dump.UpdatedAt), Content: dump.Content, Revision: dump.Revision, SaveRequestID: dumpRequestID(""), AppendRequestID: dumpRequestID("")}, nil
 }

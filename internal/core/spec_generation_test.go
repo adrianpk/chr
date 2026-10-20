@@ -6,6 +6,33 @@ import (
 	"time"
 )
 
+// Valid workspace protocol references survive publication unchanged; legacy
+// paths normalize once and unsupported namespaced paths remain rejectable.
+func TestGeneratedSpecProtocolPaths(t *testing.T) {
+	for _, item := range []struct {
+		name, path, want string
+		valid            bool
+	}{
+		{"canonical", ".chr/default/agents/ARCHITECTURE.md", ".chr/default/agents/ARCHITECTURE.md", true},
+		{"legacy", ".chr/agents/ARCHITECTURE.md", ".chr/default/agents/ARCHITECTURE.md", true},
+		{"unsupported", ".chr/default/invented/data.json", ".chr/default/invented/data.json", false},
+	} {
+		t.Run(item.name, func(t *testing.T) {
+			body := "See `" + item.path + "`."
+
+			got := NormalizeGeneratedSpecChrPathReferences(body)
+			if got != "See `"+item.want+"`." || NormalizeGeneratedSpecChrPathReferences(got) != got {
+				t.Fatal("normalization altered the namespace", got)
+			}
+
+			err := ValidateGeneratedSpec(GeneratedSpec{Scope: QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"}, Title: "Newsletter requirements", Body: got, CreatedAt: time.Now().UTC()})
+			if (err == nil) != item.valid {
+				t.Fatal("incorrect protocol reference validation", err)
+			}
+		})
+	}
+}
+
 func TestRenderGeneratedSpecRemovesDuplicateTitleHeading(t *testing.T) {
 	spec := GeneratedSpec{
 		Scope:            QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"},
@@ -44,7 +71,7 @@ func TestRenderGeneratedSpecKeepsDifferentBodyHeading(t *testing.T) {
 	}
 }
 
-func TestValidateGeneratedSpecRejectsUnsupportedChrysoPathReference(t *testing.T) {
+func TestValidateGeneratedSpecRejectsUnsupportedChrPathReference(t *testing.T) {
 	spec := GeneratedSpec{
 		Scope:     QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"},
 		Title:     "Newsletter Distribution",
@@ -76,7 +103,7 @@ func TestValidateGeneratedSpecAllowsGherkinExample(t *testing.T) {
 	}
 }
 
-func TestValidateGeneratedSpecAllowsKnownChrysoPathReferences(t *testing.T) {
+func TestValidateGeneratedSpecAllowsKnownChrPathReferences(t *testing.T) {
 	spec := GeneratedSpec{
 		Scope: QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"},
 		Title: "Newsletter Distribution",
@@ -92,20 +119,20 @@ func TestValidateGeneratedSpecAllowsKnownChrysoPathReferences(t *testing.T) {
 	}
 }
 
-func TestNormalizeGeneratedSpecChrysoPathReferencesKeepsKnownPaths(t *testing.T) {
+func TestNormalizeGeneratedSpecChrPathReferencesKeepsKnownPaths(t *testing.T) {
 	body := "See .chr/default/project.md and .chr/default/dumps/newsletter.md."
 
-	got := NormalizeGeneratedSpecChrysoPathReferences(body)
+	got := NormalizeGeneratedSpecChrPathReferences(body)
 
 	if got != body {
 		t.Fatalf("normalized body = %q, want %q", got, body)
 	}
 }
 
-func TestNormalizeGeneratedSpecChrysoPathReferencesMovesUnknownPathsOutOfChryso(t *testing.T) {
+func TestNormalizeGeneratedSpecChrPathReferencesMovesUnknownPathsOutOfChr(t *testing.T) {
 	body := "Store drafts in .chr/newsletters/drafts/<post-slug>.md, then export them."
 
-	got := NormalizeGeneratedSpecChrysoPathReferences(body)
+	got := NormalizeGeneratedSpecChrPathReferences(body)
 
 	if strings.Contains(got, ".chr/newsletters") {
 		t.Fatalf("normalized body still contains unsupported .chr path: %q", got)

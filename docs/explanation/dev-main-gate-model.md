@@ -15,7 +15,7 @@ The gate provides:
 - Git range evidence collection;
 - validation command execution;
 - Markdown and JSON gate reports;
-- Chryso execution evidence classification;
+- chr execution evidence classification;
 - manual or external change listing;
 - missing agent evidence failures;
 - `.chr/default/config/gates.yml` policy configuration;
@@ -29,7 +29,7 @@ inside the managed project core.
 
 ## Workspace Boundary
 
-The gate is a Chryso product feature. It uses:
+The gate is a chr product feature. It uses:
 
 ```text
 .chr/default/
@@ -51,24 +51,24 @@ The gate combines three evidence types:
 - Git evidence: refs, SHAs, commits, changed files, statuses, and diff stats.
 - Validation evidence: configured command, exit code, duration, stdout, and
   stderr.
-- Chryso evidence: execution reports and result paths that connect changed
+- chr evidence: execution reports and result paths that connect changed
   files to agent-managed work.
 
 Manual or external changes are not errors by default. They are listed as
 context because projects often have legitimate human changes, especially during
 adoption.
 
-Missing agent evidence is different. When Chryso recorded work but the
+Missing agent evidence is different. When chr recorded work but the
 expected result evidence is unavailable, the gate can fail because the project
 has lost traceability for work it claims was agent-managed.
 
 ## Adoption Model
 
 Greenfield projects can start strict because all new work can be shaped through
-Chryso from the beginning.
+chr from the beginning.
 
 Existing projects need a baseline period. Their history and current branch diffs
-were often created before Chryso existed in the project, so strict missing
+were often created before chr existed in the project, so strict missing
 evidence checks would produce noise.
 
 The recommended adoption path is:
@@ -76,7 +76,7 @@ The recommended adoption path is:
 1. initialize `.chr/default/`;
 2. use a permissive gate policy;
 3. run the gate to capture baseline evidence;
-4. process new work through Chryso tickets;
+4. process new work through chr tickets;
 5. tighten traceability after the project has enough agent-managed evidence.
 
 That keeps the gate useful immediately without pretending that older work has
@@ -106,7 +106,7 @@ The current implementation does not create an adoption baseline object with a
 dedicated command. Baseline adoption is a documented workflow using the gate
 report and permissive policy.
 
-Projects that want Chryso-managed execution evidence need a real
+Projects that want chr-managed execution evidence need a real
 `.chr/default/` workspace created by `chr init`.
 
 The current Woodpecker integration does not write Forgejo comments or call

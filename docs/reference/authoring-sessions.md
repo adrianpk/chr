@@ -194,7 +194,7 @@ Context-aware quizzes are generated from a structured request that includes the
 authoring session, project context sections, the target artifact, the topic,
 and an output contract.
 
-The model response must be structured and validated before Chryso writes
+The model response must be structured and validated before chr writes
 the Markdown quiz artifact. Generic template questions are not used as a
 fallback.
 
@@ -365,12 +365,227 @@ receipts/<opaque-request-hash>.json
 
 Each provider attempt is retained before invocation. Five attempts exhaust that
 request's budget; retry deadlines and exhaustion survive reopening. The shared
-structured provider limits calls to 60 seconds and two concurrent invocations.
+structured provider defaults to 60 seconds and two concurrent invocations.
+Plan readiness uses the existing five-minute authoring budget and propagates it
+to the selected harness. An earlier caller deadline or cancellation still applies.
 Authoring also bounds captures to 64 KiB, instructions to 16 KiB, questions to
 eight per session, canonical artifact references to 16, transcript/provenance
 entries to 64, and retained request bindings to 4,096 per project. File and
-journal reads are bounded to 1 MiB. Capacity and provider failures preserve the
+journal v1 reads are bounded to 1 MiB. Capacity and provider failures preserve the
 previous canonical session and artifacts.
+
+## Dump Mutation API
+
+`ReadDumpDocument` resolves a retained dump reference and returns its artifact,
+full document content and a semantic `Revision`. The revision binds the project
+root, resolved reference and exact body/metadata hashes. Inspection follows the
+same read-only alias and pending-journal rules as project dump observation.
+
+`MutateDump` accepts `DumpMutationRequest` with `OperationID`, `Action`,
+`Namespace`, `Reference`, `ExpectedRevision`, `Title`, `Content` and `CaseSlug`:
+
+| Action | Destination and revision |
+| --- | --- |
+| `capture`, general | Leave namespace, reference and case empty. Resolve the existing project destination or allocate the first pair in `default`. An optional expected revision binds the complete project dump observation. |
+| `capture`, named | Supply an existing case slug and its selected namespace. Allocate a distinct case capture; an optional expected revision binds that case's metadata source hash. |
+| `append` | Supply the document reference and revision from `ReadDumpDocument`; extend that observed document. |
+| `save` | Supply the document reference and revision from `ReadDumpDocument`; replace the editable body, retaining the original frontmatter. |
+
+Capture requires a title and at most 64 KiB of content. Titles are at most 512
+bytes, case/namespace identities 128 bytes and revisions 64 bytes. Append and
+Save require nonempty content of at most 1 MiB. The final document and each raw
+component remain bounded to 1 MiB, including retained frontmatter. Raw components
+cannot be edited as canonical dumps. Scoped edits validate the existing case.
+Old alias references target the resolved canonical document; their original
+superseded bodies remain unchanged.
+
+An optional `DumpCapturePreparer` receives the resolved body and raw references
+and returns the prepared documents. Their scope and raw/curated relationships
+must match the retained operation. Without a preparer, the owner retains the
+capture text directly. Later general captures append the prepared editable body
+to the same canonical document. Every capture retains its raw component and
+source hashes; every replacement retains the prior exact body and metadata in
+immutable artifact history. Body saves preserve unknown metadata and do not
+change frontmatter ownership or provenance.
+
+The existing authoring request directory retains a
+`chr-project-dump-request/v1` binding containing `Schema`, `Digest`, `Checksum`,
+`Request`, `Destination`, `RawReference`, optional `Prepared` documents and
+`Attempts`. Its encoded size is bounded to 8 MiB. The digest binds the project
+root and original arguments. The owner reserves arguments and destination
+before preparation, retains a successful preparation before publication and
+allows at most five preparation attempts across restarts. Each preparation has
+a 60-second timeout; the complete mutation, including owner acquisition, has
+a 90-second timeout. New bindings and receipts use the existing authoring
+capacity limits. Reusing an identity for changed arguments or a different
+resolved destination conflicts, including after preparation failure.
+
+Publication uses the same journal v2 and immutable result receipt as
+reconciliation. A first general capture publishes its body, raw component,
+metadata, project reference and receipt together. A retry recovers the journal
+or returns the existing receipt before inspecting later source changes or
+calling the preparer. A receipt never overwrites later independent edits.
+
+The central application service routes `CreateDump`, `AppendDump` and `SaveDump`
+through this owner. Requests carry `OperationID` and `ExpectedRevision`; edits
+require the revision from `ReadDump`. Named captures retain their selected ops
+namespace. The service exposes reconciliation preview/apply through the same
+boundary. Dump catalogs inventory all namespaces from canonical files, retain
+independent scoped documents and hide raw components and superseded aliases.
+Catalog inspection has a ten-second deadline. Display update time uses artifact
+metadata's update time, falling back to creation time when unavailable.
+
+Successful service writes return `Committed`, the immutable mutation result and
+its body/metadata hashes. If a later index/catalog refresh fails, they also return
+`ProjectionStale` and a pending-refresh message. The post-commit refresh has a
+ten-second deadline. An identical retry reuses the
+receipt and retries the projection. Returned content/revision belongs to that
+committed image only when it still matches the canonical body/metadata hashes.
+
+CLI writes accept `--operation-id`. `chr dump show --revision <path>` prints the
+document revision for `dump save` or `dump append`; retain it with `--revision`
+and the original operation ID when retrying an edit. A fresh edit without a
+supplied ID observes the document before dispatch. A retained edit ID requires
+its original revision. For `dump new`, an optional revision binds the project
+dump observation or selected case metadata, as in the table above.
+
+Web details and TUI editors retain the document revision and operation identity
+for Save. TUI text changes allocate a new edit identity while keeping the
+observed source guard. Web mutations compare revisions in the owning operation
+after receipt lookup, without a separate stale-source preflight. Confirmed Web
+results expose a committed operation and any pending catalog refresh.
+
+The Web Dumps catalog has one New capture form with Project-wide and bounded
+existing case choices. Each live form receives a new capture identity. Its first
+submission freezes title, content and scope; unchanged retries retain the identity,
+and changed arguments receive a new one. HTTP capture requires that identity.
+Validation and transport failures render inside the same form. Confirmed writes
+close it and refresh the catalog; pending projections retain the committed result
+and form so an unchanged retry can repair the view. Opening, polling and selecting
+scope do not allocate artifacts or invoke generation.
+
+## Bound Authoring Dump Outputs
+
+Bound authoring continuations resolve general dump outputs through the same
+project-wide destination as ordinary captures. The first output uses the default
+namespace or adopts the sole existing general identity. Later sessions append
+contributions to that identity, retaining each session's original raw input in
+its own namespace. Explicit refinement replaces the observed editable body and
+retains its previous body and metadata in immutable history.
+
+The continuation prepares dump, history, project-reference, session, transcript,
+provenance and receipt images before publishing any of them. One v2 authoring
+journal owns the complete change set. Other artifact targets retain their v1
+journal format. Reopening recovers the complete transaction, and the existing
+continuation receipt returns the original result before checking later edits or
+invoking a provider again.
+
+Session snapshots resolve retained dump aliases across namespaces. Their source
+hash includes the alias images, resolved body and metadata, and project metadata.
+Providers and native work descriptions receive the resolved body. The session's
+namespace still owns its raw capture, quizzes, specifications, plans and proposed
+native records; a project-wide dump reference does not move those records.
+A changed shared dump requires a fresh session observation before continuation.
+The owner also rechecks the project dump inventory after provider preparation.
+
+A question-only creation may retain raw input before producing its first dump.
+Its bound continuation can publish that output only when every orphaned raw
+component is one of its exact observed inputs. Unrelated raw-only inventories,
+multiple general candidates and conflicting project references still require
+explicit reconciliation.
+
+## Assisted Dump Synthesis
+
+`SynthesizeAssistedArtifact` routes a dump target through the canonical dump
+change builder, joining its source guard, session, provenance, body, metadata,
+raw capture, history, project reference and receipt in one v2 journal. This path
+requires the existing file authoring repository for the same project and its
+prepared `curated-summary.md` source. Source and session images are compared
+before publication. Other synthesis targets retain their existing writers.
+
+`OperationID` may bind an explicit retry. When omitted, the owner derives it
+from the project root, session identity, source reference and semantic synthesis
+arguments. Summary preparation timestamps, session update timestamps and accumulated
+outputs/provenance do not allocate another capture. The existing source must exactly match the
+requested summary, including the retained preparation timestamp. Dump captures
+remain bounded to 64 KiB, titles to 512 bytes and the whole operation to 90 seconds.
+
+The `chr-assisted-dump-receipt/v1` record uses the shared authoring receipt
+directory and retains the original session, reference and committed body/metadata
+hashes. The same journal preserves those committed images in content-addressed
+dump history. Receipt replay verifies the retained images and returns the original
+content even after later independent edits; it never repeats curation or capture.
+The result's `Mutation` exposes that immutable proof. Receipt storage remains
+bounded independently of the growing current body.
+
+`author assisted finalize --target-kind dump` first resumes an existing prepared
+summary or confirmed synthesis. Only `ErrAssistedCurationMissing` permits initial
+curation. `--operation-id` retains an explicit intent, and changed arguments or
+prepared source images conflict. `--allow-replace` does not turn a general capture
+into a replacement: new synthesis extends the shared body; explicit Save or bound
+refinement owns full-body replacement.
+
+## Project Dump Reconciliation
+
+Project metadata at `.chr/default/project.md` supports an optional
+`project_dump_ref` pointing to `ops/<namespace>/dump/<id>/artifact.md`. Its
+namespace belongs to the artifact identity, independently of `OPS_USER`.
+`ObserveProjectDump` reads all namespaces without adopting a destination or
+recovering a pending journal. General dumps, raw components, scoped dumps and
+retained aliases have distinct identities. Inspection rejects unsafe paths,
+inconsistent envelopes and unresolved aliases. Ordinary project metadata saves
+preserve the reference; `AdoptProjectDump` binds a sole existing general dump
+under authoring exclusion after comparing the observation revision.
+
+`PreviewProjectDumpReconciliation` returns `Revision`, `Destination`, `Content`
+and ordered `Sources` for 2–32 general dumps. It proposes the earliest valid
+creation timestamp, using relative path to break ties. Sources with missing or
+invalid timestamps follow valid evidence in path order, retaining an explicit
+`TimestampIssue`; if all timestamps are invalid, path determines the proposal.
+The composed document retains the chosen target's frontmatter and includes each
+source body with its reference and source hash. Composition does not call a
+provider, deduplicate or summarize material.
+
+`ReconcileProjectDump` requires the preview's `ExpectedRevision`, exact proposed
+`Destination` and a stable `OperationID` of 1–128 letters, digits, dots,
+underscores or hyphens, beginning with a letter or digit. It rechecks all source
+images under the shared authoring owner. Each source's original body and
+metadata are retained byte for byte under its envelope at
+`files/history/<image-hash>/artifact.md` and `metadata.json`. The image hash binds
+the original body and metadata hashes. An existing different history image is a
+conflict. Superseded bodies stay unchanged; their metadata gains `canonical_ref`
+and `dump_history_ref`. Target metadata retains source hashes, history references,
+the observed revision, operation and original target hash in
+`dump_reconciliation`. Unknown metadata and target frontmatter survive.
+
+The existing `.chr/authoring/pending.json` journal accepts
+`chr-authoring-journal/v2` for these mutations. Its checksum and before/after
+image rules are unchanged. Version 2 permits the project metadata file and the
+dump history paths above in addition to v1 targets. It carries at most 128
+changes and 24 MiB of encoded data; individual files remain bounded to 1 MiB.
+Version 1 retains its original target, 12-change and 1 MiB limits. Recovery reads
+both versions and rejects divergent images before replay. No separate dump
+journal or recovery owner exists.
+
+The same journal publishes the composed body, preserved images, alias metadata,
+project reference and `chr-project-dump-receipt/v1` receipt. Receipts use the
+existing authoring receipt directory and retain `Schema`, `Digest`, `Checksum`
+and `Result`; the result holds operation ID, destination and committed body and
+metadata hashes. The digest binds the project root, operation, revision and
+destination. An identical retry returns that immutable result after recovery;
+changed arguments conflict. Receipt identity is shared with authoring requests,
+so another operation cannot reuse an already occupied identity.
+An existing pending authoring request also reserves its identity. New dump
+operations require fewer than 4,096 existing entries in the shared receipt
+directory; confirmed retries still replay at capacity.
+
+`ResolveProjectDumpReference` follows at most 16 alias links across namespaces,
+rejecting cycles, missing targets and aliases into raw or scoped artifacts.
+Observation excludes superseded aliases from its general candidate list. Reads
+report a pending journal without recovering it. Inventory is bounded to 4,096
+entries and 8 MiB of body/metadata images, composed bodies to 1 MiB, inspection to
+10 seconds and reconciliation to 30 seconds. These APIs do not apply a migration
+to user data merely by reading it.
 
 ## Telegram Artifact Continuations
 

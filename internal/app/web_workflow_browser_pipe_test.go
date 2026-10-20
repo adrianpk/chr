@@ -26,11 +26,17 @@ type webWorkflowBrowser struct {
 func newWebWorkflowBrowser(t *testing.T, path string) *webWorkflowBrowser {
 	t.Helper()
 
+	return newWebWorkflowBrowserProfile(t, path, t.TempDir())
+}
+
+func newWebWorkflowBrowserProfile(t *testing.T, path, profile string) *webWorkflowBrowser {
+	t.Helper()
+
 	browserInput, writer := webWorkflowBrowserPipe(t)
 	reader, browserOutput := webWorkflowBrowserPipe(t)
 
 	ctx, cancel := context.WithTimeout(t.Context(), 2*time.Minute)
-	cmd := exec.CommandContext(ctx, path, "--headless=new", "--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--remote-debugging-pipe", "--user-data-dir="+t.TempDir(), "about:blank")
+	cmd := exec.CommandContext(ctx, path, "--headless=new", "--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--remote-debugging-pipe", "--user-data-dir="+profile, "about:blank")
 	cmd.ExtraFiles = []*os.File{browserInput, browserOutput}
 
 	cmd.Stderr = io.Discard

@@ -56,7 +56,7 @@ func (r *fileAuthoringSessionRepository) continueAuthoring(ctx context.Context, 
 		return retained, err
 	}
 
-	if err := prepareAuthoringSnapshot(&snapshot, binding); err != nil {
+	if err := r.prepareAuthoringSnapshot(ctx, &snapshot, binding); err != nil {
 		return retained, err
 	}
 
@@ -172,7 +172,7 @@ func validateAuthoringDraft(draft AuthoringDraft, request AuthoringContinuationR
 }
 
 func (r *fileAuthoringSessionRepository) commitAuthoringContinuation(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, draft AuthoringDraft) (AuthoringContinuationResult, error) {
-	changes, err := r.prepareAuthoringContinuation(binding, snapshot, draft)
+	changes, err := r.prepareAuthoringContinuation(ctx, binding, snapshot, draft)
 	if err != nil {
 		return AuthoringContinuationResult{}, err
 	}
@@ -195,7 +195,7 @@ func (r *fileAuthoringSessionRepository) commitAuthoringContinuation(ctx context
 		return result, err
 	}
 
-	if err := r.writeAuthoringJournal(changes); err != nil {
+	if err := r.writeAuthoringContinuationJournal(binding.Request.Target, changes); err != nil {
 		return result, err
 	}
 
@@ -250,13 +250,17 @@ func authoringQuestionCount(snapshot AuthoringSnapshot) int {
 	return count
 }
 
-func prepareAuthoringSnapshot(snapshot *AuthoringSnapshot, binding authoringRequestBinding) error {
+func (r *fileAuthoringSessionRepository) prepareAuthoringSnapshot(ctx context.Context, snapshot *AuthoringSnapshot, binding authoringRequestBinding) error {
 	if binding.Request.Action == "create" {
 		snapshot.Session.CreatedAt = binding.CreatedAt
 		snapshot.Session.StartedAt = &binding.CreatedAt
 	}
 
-	return guardAuthoringContinuation(*snapshot, binding.Request)
+	if err := guardAuthoringContinuation(*snapshot, binding.Request); err != nil {
+		return err
+	}
+
+	return r.prepareAuthoringDumpSnapshot(ctx, snapshot, binding.Request)
 }
 
 func guardAuthoringAnswer(snapshot AuthoringSnapshot, request AuthoringContinuationRequest) error {
@@ -277,4 +281,12 @@ func validateGeneratedAuthoring(ctx context.Context, draft AuthoringDraft, snaps
 	}
 
 	return ctx.Err()
+}
+
+func (r *fileAuthoringSessionRepository) writeAuthoringContinuationJournal(target AuthoringArtifactKind, changes []workflowFileChange) error {
+	if target == AuthoringArtifactKindDump {
+		return r.writeAuthoringJournalVersion(projectDumpJournalSchema, changes)
+	}
+
+	return r.writeAuthoringJournal(changes)
 }

@@ -8,12 +8,12 @@ completed change in the project.
 1. A ticket describes the work and carries metadata used for filtering.
 2. The user selects the ticket directly or lets a loop select an eligible
    ticket.
-3. Chryso creates an execution record for the attempt.
+3. chr creates an execution record for the attempt.
 4. The host process composes the execution context.
 5. The sandboxed runtime starts the harness.
 6. The harness works on the ticket and runs validation.
 7. The harness writes result data and evidence.
-8. Chryso applies the result back to the ticket when requested by the
+8. chr applies the result back to the ticket when requested by the
    workflow.
 9. The ticket records status, checklist progress, comments, blockers, and
    handoff notes.
@@ -22,7 +22,7 @@ completed change in the project.
 
 The agent should not loop forever on the same failing problem.
 
-When repeated attempts fail, Chryso can preserve failure evidence and stop
+When repeated attempts fail, chr can preserve failure evidence and stop
 or escalate according to configured thresholds. The exact notification transport
 is separate from ticket resolution. Future integrations may send blocker or
 status information through Telegram or email.

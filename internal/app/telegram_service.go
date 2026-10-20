@@ -59,7 +59,7 @@ func renderTelegramUserService(env core.UserEnvironment, executable, devRoot str
 	}
 
 	var unit strings.Builder
-	unit.WriteString("[Unit]\nDescription=Chryso Telegram receiver\nStartLimitIntervalSec=60\nStartLimitBurst=5\n\n[Service]\nType=simple\n")
+	unit.WriteString("[Unit]\nDescription=chr Telegram receiver\nStartLimitIntervalSec=60\nStartLimitBurst=5\n\n[Service]\nType=simple\n")
 	unit.WriteString("ExecStart=" + command + "\n")
 
 	for _, variable := range []struct{ name, directory string }{

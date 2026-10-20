@@ -8,7 +8,7 @@ Plan the `UX Operation Surface` slicing created from full-system lab feedback.
 
 This slicing covers the use case:
 
-> A user can operate Chryso efficiently from a readable CLI and a local TUI
+> A user can operate chr efficiently from a readable CLI and a local TUI
 > without memorizing opaque IDs, copying absolute paths, or configuring internal
 > invariants.
 
@@ -186,7 +186,7 @@ Expected report: `.prj/reports/slices/ux-operation-surface/slice-3-protocol-doc-
 
 Goal:
 
-Separate project documentation guidance from Chryso operational artifact
+Separate project documentation guidance from chr operational artifact
 contracts.
 
 Candidate scope:
@@ -194,7 +194,7 @@ Candidate scope:
 - review generated `.chr/agents/*.md` files;
 - keep `DOCUMENTING.md` focused on project durable documentation;
 - remove `.chr/` operational layout rules from project documentation guidance;
-- move Chryso artifact layout explanation into docs/reference or a clear
+- move chr artifact layout explanation into docs/reference or a clear
   workspace guide;
 - ensure operational artifact layout is enforced by code, not convention text;
 - update context composition if manifest/protocol sources change;
@@ -203,7 +203,7 @@ Candidate scope:
 Expected outcome:
 
 - generated protocol docs guide project work without implying that the project
-  can redefine Chryso's internal artifact contracts.
+  can redefine chr's internal artifact contracts.
 
 ### Slice 4: Authoring Session Ergonomics
 
@@ -245,7 +245,7 @@ Expected report: `.prj/reports/slices/ux-operation-surface/slice-5-context-aware
 
 Goal:
 
-Add a Chryso-native question generation path that can produce useful
+Add a chr-native question generation path that can produce useful
 questions for a target artifact.
 
 Candidate scope:

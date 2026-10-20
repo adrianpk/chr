@@ -108,7 +108,7 @@ func runGateGitEvidenceGit(t *testing.T, projectDir string, args ...string) {
 
 	cmdArgs := append([]string{
 		"-C", projectDir,
-		"-c", "user.name=Chryso Test",
+		"-c", "user.name=chr Test",
 		"-c", "user.email=chr@example.test",
 	}, args...)
 	cmd := exec.Command("git", cmdArgs...)

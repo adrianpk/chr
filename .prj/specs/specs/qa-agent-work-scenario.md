@@ -4,12 +4,12 @@ Status: accepted
 
 ## Purpose
 
-Define a manually reproducible QA scenario for validating the Chryso flow
+Define a manually reproducible QA scenario for validating the chr flow
 from seeded project context through spec generation, plan generation, tracking
 and ticket materialization, single-ticket execution, and agent-work loop
 execution.
 
-The scenario exists to test Chryso behavior, not to be a complex product
+The scenario exists to test chr behavior, not to be a complex product
 sample. The reference project must be realistic enough to exercise project
 structure, tests, documentation, `.chr` artifacts, and Git branching without
 making the domain implementation the source of most failures.
@@ -100,11 +100,11 @@ The seeded test suite must fail immediately after reset because of this bug.
 `make qa-test-blog` must run `go test ./...` in the active project and expose
 that expected failure.
 
-## Seeded Chryso Context
+## Seeded chr Context
 
 The reference project must include a `.chr` tree that respects the current
-project artifact layout. Generated or user-facing Chryso artifacts must
-live under `.chr/default/...` except for root files that CHR requires for project
+project artifact layout. Generated or user-facing chr artifacts must
+live under `.chr/default/...` except for root files that chr requires for project
 configuration or manifest compatibility.
 
 Seeded context must include:
@@ -130,7 +130,7 @@ The manual bug ticket must:
 ## Project Documentation
 
 Architecture decision records are project documentation, not hidden
-Chryso-only context.
+chr-only context.
 
 The blog reference project should use Diataxis documentation layout. ADRs should
 live under:
@@ -174,7 +174,7 @@ failures easy to reproduce, inspect, reset, and retry.
 
 ## Testing Preference
 
-The reference project and Chryso itself should express a test-based
+The reference project and chr itself should express a test-based
 engineering preference:
 
 - reproduce bugs with a failing test when feasible;
@@ -198,14 +198,14 @@ The first scenario does not need:
 - external dependencies;
 - remote Git hosting;
 - automatic execution of the full QA flow from one command;
-- formal ADR entities in the CHR model;
+- formal ADR entities in the chr model;
 - configurable ADR paths.
 
 ## Open Questions
 
 - Whether future scenarios should cover bugs that require the agent to create
   the first failing test.
-- Whether CHR should eventually initialize managed project Git repositories on
+- Whether chr should eventually initialize managed project Git repositories on
   demand.
 - Whether larger blog variants should reuse the same reference project lineage
   or live as separate numbered scenarios.

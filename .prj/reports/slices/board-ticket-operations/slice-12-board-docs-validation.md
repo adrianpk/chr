@@ -1,11 +1,14 @@
 # Slice 12: Board Docs Validation
 
-Status: in review
+Status: delivered
 Slicing: Board Ticket Operations
 Plan: `.prj/plans/slicing-board-ticket-operations-plan.md`
 Tracker: `.prj/trackers/slicing-board-ticket-operations-tracker.md`
 Branch: `feat/slice-12-board-docs-validation`
-PR: pending
+PR: #224
+
+Verified merge: `cc2d7d87e864425b4b40061b7573949b7dc7caaf`, an ancestor of dev
+as checked on 2026-10-20.
 
 ## Purpose
 

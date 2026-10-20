@@ -1,6 +1,6 @@
 # Architecture
 
-Chryso separates project-local workflow files from user-level coordination
+chr separates project-local workflow files from user-level coordination
 state.
 
 ## Project-Local State

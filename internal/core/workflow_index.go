@@ -3,7 +3,6 @@ package core
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"sort"
@@ -161,14 +160,18 @@ func workflowIndexedTicket(ctx context.Context, store *WorkflowStore, r Workflow
 
 	body := filepath.Join(filepath.Dir(r.Path), "artifact.md")
 
-	title := ""
-	if raw, ok := r.Metadata["title"]; ok {
-		if err := json.Unmarshal(raw, &title); err != nil {
-			return IndexedTicket{}, err
-		}
+	display, err := workflowPlainTicketDisplay(r)
+	if err != nil {
+		return IndexedTicket{}, err
 	}
 
-	return IndexedTicket{ProjectID: r.ProjectID, Namespace: r.Namespace, Key: r.Task.Key, Title: title, Status: r.Task.Status, UseCase: r.Task.UseCase, Path: filepath.Join(store.layout.Root(), body), RelativePath: body, CreatedAt: &r.CreatedAt, UpdatedAt: &r.UpdatedAt, FileMTime: r.UpdatedAt, FileSize: int64(len(r.Body)), ContentHash: r.SourceHash, IndexedAt: time.Now().UTC()}, nil
+	display.ProjectID, display.Namespace, display.Key = r.ProjectID, r.Namespace, r.Task.Key
+	display.Status, display.UseCase = r.Task.Status, r.Task.UseCase
+	display.Path, display.RelativePath = filepath.Join(store.layout.Root(), body), body
+	display.CreatedAt, display.UpdatedAt, display.FileMTime = &r.CreatedAt, &r.UpdatedAt, r.UpdatedAt
+	display.FileSize, display.ContentHash, display.IndexedAt = int64(len(r.Body)), r.SourceHash, time.Now().UTC()
+
+	return display, nil
 }
 
 func workflowCanonicalTicket(ctx context.Context, store *WorkflowStore, r WorkflowRecord) (IndexedTicket, error) {

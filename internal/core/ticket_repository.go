@@ -2,7 +2,6 @@ package core
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -199,53 +198,13 @@ func ticketStatusOrDefault(status string) string {
 	return status
 }
 
-func (r *fileTicketRepository) nextKeyNumber(ctx context.Context) (int, error) {
-	ticketsDir := UserPath(r.projectDir, "tickets")
-	highest := 0
-
-	err := filepath.WalkDir(ticketsDir, func(path string, entry os.DirEntry, walkErr error) error {
-		if walkErr != nil {
-			return walkErr
-		}
-
-		err := ctx.Err()
-		if err != nil {
-			return err
-		}
-
-		if entry.IsDir() || filepath.Ext(path) != ".md" {
-			return nil
-		}
-
-		number, found, err := r.ticketNumber(path)
-		if err != nil {
-			return err
-		}
-
-		if found && number > highest {
-			highest = number
-		}
-
-		return nil
-	})
-	if errors.Is(err, os.ErrNotExist) {
-		return 1, nil
-	}
-
-	if err != nil {
-		return 0, fmt.Errorf("scan existing tickets: %w", err)
-	}
-
-	return highest + 1, nil
-}
-
 func (r *fileTicketRepository) ticketNumber(path string) (int, bool, error) {
 	number, ok := keyNumberFromText(r.keyPrefix, filepath.Base(path))
 	if ok {
 		return number, true, nil
 	}
 
-	content, err := os.ReadFile(path)
+	content, err := readWorkflowFile(path)
 	if err != nil {
 		return 0, false, fmt.Errorf("read ticket metadata: %w", err)
 	}

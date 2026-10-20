@@ -2,13 +2,13 @@
 
 ## Root
 
-Chryso uses `.chr/` as the project-local hidden directory.
+chr uses `.chr/` as the project-local hidden directory.
 
 The `chr` command creates and manages this directory inside the project where it runs. The directory is intentionally tied to the CLI name rather than the target repository name.
 
 Project ticket files and project protocol assets are local to `.chr/` inside each managed project.
 
-Chryso may also keep user-level state outside the project for daemon operation, project registration, and derived indexes. User-level state does not replace the project-local `.chr/` source files.
+chr may also keep user-level state outside the project for daemon operation, project registration, and derived indexes. User-level state does not replace the project-local `.chr/` source files.
 
 Board and ticket operations use both layers:
 
@@ -138,11 +138,11 @@ The workspace index is an in-memory structural model that may be cached under
 `.chr/default/tmp/`. That cache is discardable and must not become the durable source of
 truth.
 
-The `.chr/` directory and Markdown-first artifact model are Chryso
+The `.chr/` directory and Markdown-first artifact model are chr
 invariants. They are not configured by generated workspace files.
 
 The generated files under `.chr/default/agents/` guide how an agent should work inside
-the managed project. They do not define or override Chryso's operational
+the managed project. They do not define or override chr's operational
 artifact layout. Directory placement for tickets, runtime evidence, reports,
 indexes, and authoring artifacts is a product contract owned by `chr`.
 
@@ -186,11 +186,13 @@ Supported work fields:
 - `require_clean_worktree`: whether visible changes block agent work.
 - `require_remote_tracking`: whether the configured branch must track the
   configured remote ref.
-- `allow_safe_repair`: whether Chryso may run non-destructive readiness
+- `allow_safe_repair`: whether chr may run non-destructive readiness
   repairs.
 - `allow_branch_creation`: whether safe repair may create the configured local
   branch.
-- `workspace_mode`: workspace execution mode. Defaults to `project`.
+- `workspace_mode`: workspace execution mode. Defaults to `worktree` with
+  `workflow.version: 1`, and to `project` without that marker. Explicit values
+  override the version default; existing policy is preserved by initialization.
 - `worktree_root`: required canonical `ops/default/worktree` root for ticket worktrees; the active namespace replaces `default` at runtime. Custom and legacy roots are rejected.
 - `worktree_base`: base selection policy for ticket worktree creation.
   Supported values are `remote_integration_branch`, `local_integration_branch`,
@@ -277,6 +279,72 @@ web:
 Non-loopback binds print an exposure warning. In `auto` mode, non-loopback binds
 also require the token value to be present in `token_env`.
 
+## Web Harness Defaults
+
+Open **Harnesses** in the Web UI project context to inspect the worker and
+content-generation defaults. Each named profile shows its harness, model and
+local readiness for that role. Local readiness does not test remote
+authentication. Prepare executables, runtimes and credentials privately before
+selecting a profile.
+
+Choose a profile for either role and select **Save defaults**. **Keep current
+default** leaves that role unchanged. **Restore legacy dispatch** clears its
+selection: workers use the existing Codex default and generation keeps its
+operation-specific dispatch. Changes are persisted for the current project and
+become visible to new operations without restarting the Web service.
+
+Running, paused and resumed operations keep their admitted bindings. The chooser
+lists the first eight retained worker invocations separately from current
+defaults; **View workflows** opens their existing status view.
+
+Saves use the current project, configuration revision and a retained request
+identity through the existing Web authentication and origin guards. A stale or
+invalid save keeps the attempted choices. Use **Reload current defaults** to
+inspect a newer configuration before saving again. If an acknowledgement is
+lost, retry the same form to recover the original receipt. Closing the chooser
+discards unsent choices. The control edits named selections only; private paths,
+credentials and runtime setup remain outside the form.
+
+## TUI Harness Defaults
+
+In Project (`F1`), press `h` to open the harness picker. It reads the same
+persisted project selections and prepared named profiles as the Web control.
+Worker and generation choices are separate from the retained worker bindings.
+Local readiness does not test remote authentication.
+
+Use Tab or Shift+Tab to select a role and arrows (or `j`/`k`) to cycle its
+profiles. **Keep current default** leaves that role unchanged. Press `c` to
+choose **Restore legacy dispatch**, then Enter or Ctrl+S to save. Both changed
+roles are published together using the observed revision, exact choices and
+request identity. The application resolves the active local operator.
+
+A rejected or unacknowledged save keeps its choices and original request.
+Retry unchanged to recover a committed receipt. If another process changed the
+configuration, press `r` to discard the preview and reload before saving.
+Esc discards unsent choices; an in-flight save finishes before the picker can
+close. Changes affect new operations without restarting the TUI or service.
+Admitted work keeps its retained binding.
+
+PgUp/PgDn scroll the compact content while controls remain visible. The picker
+shows the first four retained worker invocations. For further inspection, close
+the picker and use **Inspect retained workflow status** in the command palette.
+Profile inspection and selection do not provision credentials, install runtimes
+or call a model.
+
+## Telegram Harness Defaults
+
+After `/project <name>`, send `/harness` to inspect the same persisted defaults,
+locally prepared profiles and retained worker bindings. Send
+`/harness worker=PROFILE generation=PROFILE` to preview an exact change, then
+confirm its retained prompt. Omit a role to keep it; use `-` to restore legacy
+dispatch. Both changed roles publish together under the mapped operator and
+observed configuration revision. Other interfaces see the update on their next
+operation; admitted work keeps its original binding.
+
+See [Telegram harness defaults](telegram-receiver.md#harness-defaults) for
+confirmation expiry, stale requests and recovery. Private profile preparation
+remains local; inspection and selection invoke no model.
+
 ## Notification Config
 
 `.chr/default/config.yml` may also define notification settings under
@@ -322,6 +390,83 @@ Initialize runtime defaults for another project directory:
 chr runtime init --dir /path/to/project
 ```
 
+### Pi runtime assets
+
+All bundled profiles also install `.chr/default/runtime/agent/pi/` with a
+sibling Dockerfile, minimal npm manifest and complete dependency lock. Existing
+projects add these missing assets with `chr runtime init`; this explicit upgrade
+preserves every existing runtime file and the configured Codex image/Dockerfile.
+Installing assets does not install Pi, build an image or change role selections.
+
+Build the Pi image explicitly, using that directory as its build context:
+
+```sh
+docker build --file .chr/default/runtime/agent/pi/Dockerfile \
+  --tag chr-agent-pi:1.3.0 .chr/default/runtime/agent/pi
+```
+
+The image pins the Go base manifest, verifies the Node 22.23.3 Linux amd64/arm64
+archive checksum and installs Pi 1.3.0 through `npm ci` with the committed lock.
+Dependency lifecycle scripts are disabled. Other Linux architectures fail the
+build with a preparation error. Codex-only use does not probe or build Pi.
+Runtime inspection validates the Linux platform and Pi version labels and
+returns the immutable Docker image ID for worker admission.
+
+### Prepared Pi worker profile
+
+A Pi worker profile in the private user `harnesses.yml` names the Linux chr
+executable that supplies its bridge, the prepared image and explicit resources.
+
+Build that Linux bridge with `CGO_ENABLED=0 go build -o /opt/chr/bin/chr ./cmd/chr`
+from the selected source revision, using a writable installation path. Readiness
+inspects its build metadata without executing it and requires the host's Linux
+architecture. Generation uses a separate native Pi executable profile. For example:
+
+```yaml
+profiles:
+  pi-worker:
+    harness: pi
+    command: /opt/chr/bin/chr
+    model_provider: example-provider
+    model: exact-model
+    thinking: off
+    credential_ref: pi-worker/auth.json
+    model_config_ref: pi-worker-models.json
+    runtime_ref: chr-agent-pi:1.3.0
+```
+
+Resource references are relative to that private configuration directory unless
+absolute. Keep `harnesses.yml`, authentication and model settings private. The
+authentication file contains only the selected provider. For OAuth, its parent
+must be a private directory containing only that auth file and the managed
+refresh lock; keep model settings outside that directory. The bridge serializes
+refreshes across processes and publishes valid refreshed credentials atomically.
+A static API-key source is mounted read-only.
+
+Worker admission freezes the bridge executable and immutable image ID. A later
+profile change or image retag cannot rebind admitted work. Credentials may rotate
+at their retained reference; changed model definitions or credential types fail
+instead of changing the operation. Prepare a native Pi executable profile for
+generation separately from the container worker bridge profile.
+
+Each worker receives its execution checkout and Git metadata, the selected
+resources and private writable state. It receives no host home, Docker socket,
+SSH configuration or blanket environment forwarding. Pi runs from private state;
+only the host-owned extension binds its seven builtin tools to the execution
+checkout. Project instructions are supplied explicitly. Discovered Pi settings,
+extensions, MCP servers, skills and context files cannot replace the selection.
+
+Custom endpoints must be reachable from the container. Literal loopback endpoints
+are rejected. Explicit `host.docker.internal` endpoints add Docker's host-gateway
+mapping; host firewall and listener policy still apply. A container-network
+endpoint is another valid choice. The bridge does not enable host networking.
+Local readiness checks preparation; they do not prove remote authentication.
+
+Workers retain the existing invocation, claims, retries, shared capacity and host
+validation. The runtime holds the same admitted capacity reservation until its
+processes stop, including after a host disconnect. Pi's observed usage does not
+certify a finite whole-call budget or qualify it as a merger broker.
+
 ## Runtime Plan
 
 The runtime planner computes a side-effect-free Docker boundary plan from the
@@ -350,7 +495,7 @@ Docker mount contract:
 
 Project mode remains fully compatible with existing managed projects because
 the execution workspace is the user-visible project checkout. Worktree mode
-changes only the execution workspace: Chryso prepares a ticket-specific Git
+changes only the execution workspace: chr prepares a ticket-specific Git
 worktree and mounts that path into Docker.
 
 The planner only computes paths and mount metadata. It does not create

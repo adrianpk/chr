@@ -1,6 +1,6 @@
 # Agent Operating Contract
 
-This is a Chryso proving-ground fixture.
+This is a chr proving-ground fixture.
 
 ## Scope
 

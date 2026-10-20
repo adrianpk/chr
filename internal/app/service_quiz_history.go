@@ -1,0 +1,41 @@
+package app
+
+import (
+	"encoding/json"
+	"fmt"
+
+	"forge.adrianpk.com/chr/internal/core"
+)
+
+const (
+	quizHistoryEntryLimit = 100
+	quizHistoryByteLimit  = 128 * 1024
+)
+
+func (s service) quizHistoryContext(scope core.QuizScope, entries []core.QuizEntry) (core.QuizModelContextSection, error) {
+	if scope.CaseSlug != "" {
+		general, err := s.quizRepository().LoadRawCaptureEntries(s.ctx, core.QuizScope{ProjectID: scope.ProjectID})
+		if err != nil {
+			return core.QuizModelContextSection{}, err
+		}
+
+		entries = append(general, entries...)
+	}
+
+	if len(entries) > quizHistoryEntryLimit {
+		return core.QuizModelContextSection{}, fmt.Errorf("quiz discovery history exceeds %d entries; narrow the selected scope", quizHistoryEntryLimit)
+	}
+
+	content, err := json.Marshal(quizModelRecentEntryPayloads(entries, len(entries)))
+	if err != nil {
+		return core.QuizModelContextSection{}, err
+	}
+
+	if len(content) > quizHistoryByteLimit {
+		return core.QuizModelContextSection{}, fmt.Errorf("quiz discovery history exceeds %d bytes; narrow the selected scope", quizHistoryByteLimit)
+	}
+
+	return core.QuizModelContextSection{
+		Name: "quiz_history", Layer: "quiz", Authority: "quiz_context", Content: string(content),
+	}, nil
+}

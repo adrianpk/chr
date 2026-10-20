@@ -8,7 +8,7 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 
 ## Summary
 
-Chryso should show useful live feedback while long-running agent work is
+chr should show useful live feedback while long-running agent work is
 executing.
 
 Today, when a user starts `Run all ready tickets` from the TUI Dash, the UI
@@ -89,7 +89,7 @@ The screen should keep updating while the foreground work action runs.
 
 ### Event Stream
 
-Events should be emitted by Chryso-owned runtime boundaries at lifecycle
+Events should be emitted by chr-owned runtime boundaries at lifecycle
 points such as:
 
 - loop started;

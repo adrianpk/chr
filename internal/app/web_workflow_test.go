@@ -146,7 +146,7 @@ func webWorkflowHandler(t *testing.T, operations service) http.Handler {
 
 	provider := webViewProvider{projectContext: operations.projectContext, serviceFactory: func(ctx context.Context) service { copy := operations; copy.ctx = ctx; return copy }}
 
-	handler, err := webui.NewHandler(webui.HandlerOptions{Provider: provider, Data: webui.ShellData{Title: "Chryso", RefreshSeconds: 30}})
+	handler, err := webui.NewHandler(webui.HandlerOptions{Provider: provider, Data: webui.ShellData{Title: "chr", RefreshSeconds: 30}})
 	if err != nil {
 		t.Fatal(err)
 	}

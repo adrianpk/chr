@@ -7,7 +7,7 @@ review and quiz sessions before becoming an implementation spec.
 
 ## Intent
 
-Chryso should eventually provide a way to decide whether a `dev` to `main`
+chr should eventually provide a way to decide whether a `dev` to `main`
 promotion has enough objective evidence to proceed.
 
 The gate should focus on facts produced by tools, not linguistic judgment about
@@ -21,7 +21,7 @@ where promotion checks can become visible and enforceable.
 
 ## Problem
 
-Chryso can generate specs, plans, trackers, tickets, and agent execution
+chr can generate specs, plans, trackers, tickets, and agent execution
 evidence. It can also run slices that move through `dev` before the user
 promotes the accumulated work to `main`.
 
@@ -60,7 +60,7 @@ This feature should not:
 - use an LLM as the authority for pass/fail;
 - require every project to use the same strictness profile;
 - make every slice wait for a human review;
-- require Chryso to understand every Go code quality problem at launch.
+- require chr to understand every Go code quality problem at launch.
 
 ## Principles
 
@@ -73,16 +73,16 @@ Facts should come from deterministic tools:
 - configured linters;
 - coverage tooling;
 - complexity tooling;
-- Chryso ticket and execution artifacts;
+- chr ticket and execution artifacts;
 - CI environment metadata.
 
 AI can summarize the report later, but the gate must be useful without AI.
 
 ### Project Portable
 
-The gate must work for a generic Go project managed by Chryso. It should
+The gate must work for a generic Go project managed by chr. It should
 not assume a particular repository shape beyond a Git repository and a
-`.chr/default/` workspace when Chryso is initialized.
+`.chr/default/` workspace when chr is initialized.
 
 ### Forgejo First
 
@@ -193,7 +193,7 @@ git diff --stat <base>..<head>
 git diff --numstat <base>..<head>
 ```
 
-### Chryso Evidence
+### chr Evidence
 
 Collect from `.chr/default/`:
 
@@ -383,7 +383,7 @@ or project config:
 .chr/default/config.yml
 ```
 
-Open design point: Chryso recently moved project data under user
+Open design point: chr recently moved project data under user
 directories. Gate config should follow that rule unless there is a deliberate
 project-wide config story.
 
@@ -433,7 +433,7 @@ steps:
 
 Open questions:
 
-- Should CI build Chryso from the repository under test or use an installed
+- Should CI build chr from the repository under test or use an installed
   binary?
 - How should artifacts be uploaded in Woodpecker?
 - Should the command emit Woodpecker-friendly annotations?
@@ -445,7 +445,7 @@ First implementation can avoid Forgejo API calls and rely only on git refs.
 
 Forgejo support should not require GitHub-compatible review bots.
 
-The initial design can work entirely from local git data and Chryso
+The initial design can work entirely from local git data and chr
 artifacts. Forgejo API integration can come later for:
 
 - PR metadata;
@@ -548,14 +548,14 @@ These questions should be answered before turning this draft into a formal spec:
 5. How should commits map to tickets?
 6. Should gate reports be committed, kept as local artifacts, or uploaded only
    as CI artifacts?
-7. Should the PR body reference the report manually or should Chryso update
+7. Should the PR body reference the report manually or should chr update
    it through Forgejo later?
 8. What Woodpecker artifact mechanism should be the first supported path?
 9. Should coverage be part of the first implementation or deferred?
 10. Which complexity tool should be preferred for Go?
 11. How strict should high-risk path checks be?
 12. Should the gate be project-neutral or Go-first in its first version?
-13. Should CI use the Chryso binary from the repo under test or from a
+13. Should CI use the chr binary from the repo under test or from a
     trusted prebuilt image?
 14. Should AI summarization be completely out of scope for the first spec?
 

@@ -75,7 +75,7 @@ The target model keeps Markdown as the durable ticket body and uses SQLite as
 the operational metadata index for Board selection, filtering, source
 traceability, synopsis display, and attention.
 
-New Chryso-created tickets use Board statuses:
+New chr-created tickets use Board statuses:
 
 - `backlog`
 - `ready_for_dev`
@@ -223,7 +223,7 @@ Expected behavior:
 - CLI ticket creation can accept synopsis.
 - Board/TUI-created tickets use `backlog` by default.
 - Service-level ticket creation validates required fields for
-  Chryso-created tickets.
+  chr-created tickets.
 - Ticket creation updates or refreshes the SQLite index.
 - Key allocation uses the new Board-safe allocation path when available.
 

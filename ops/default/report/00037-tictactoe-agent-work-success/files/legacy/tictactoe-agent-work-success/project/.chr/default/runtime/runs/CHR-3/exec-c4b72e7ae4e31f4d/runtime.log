@@ -198,7 +198,7 @@ exec
 
 Read this document before working in this reference project.
 
-This project is a Chryso QA scenario. Follow generated Chryso tickets
+This project is a chr QA scenario. Follow generated chr tickets
 and keep changes scoped to the selected ticket.
 
 Use only Go's standard library. Do not add external dependencies, persistence,
@@ -4038,7 +4038,7 @@ ok  	example.com/chr-qa-tictactoe/cmd/tictactoe	0.005s
 ok  	example.com/chr-qa-tictactoe/internal/game	(cached)
 
 codex
-Validation passes. I’m reviewing the scoped diff, then I’ll write the required Chryso result JSON.
+Validation passes. I’m reviewing the scoped diff, then I’ll write the required chr result JSON.
 exec
 /bin/bash -lc 'git -c safe.directory=/workspace diff -- cmd/tictactoe/render.go cmd/tictactoe/render_test.go' in /workspace
  succeeded in 0ms:

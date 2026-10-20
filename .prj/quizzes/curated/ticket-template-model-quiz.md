@@ -7,7 +7,7 @@ Model: `.prj/specs/specs/ticket-template-model.md`
 
 ## Purpose
 
-Define the initial file-based ticket template model for Chryso.
+Define the initial file-based ticket template model for chr.
 
 ## Decisions
 

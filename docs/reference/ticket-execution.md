@@ -70,19 +70,26 @@ ops/<namespace>/run/<artifact-id>/
 ```
 
 The namespace is `default` unless `OPS_USER` is set. The artifact ID is a
-namespace-global, zero-padded sequence with a stable title slug. CHR keeps its
+namespace-global, zero-padded sequence with a stable title slug. chr keeps its
 execution ID in `metadata.json.external_ids` and persists the shared artifact
 ID with the execution record.
 
 The shared envelope uses `artifact.md`, `metadata.json`, `files/`,
-`evidence/`, and `extension/chr/`. CHR writes the worker context to
+`evidence/`, and `extension/chr/`. chr writes the worker context to
 `files/context.md`; execution result, logs, events, and generated reports are
 written under `evidence/`. The metadata file indexes shared files and excludes
 the private `extension/chr/` directory.
 
 In `project` mode, the project checkout and execution workspace are the same
-directory. In `worktree` mode, Chryso prepares a ticket-specific Git
+directory. In `worktree` mode, chr prepares a ticket-specific Git
 worktree and uses that path as the execution workspace.
+
+Newly initialized projects select worktree mode through `workflow.version: 1`.
+Unversioned projects retain the legacy project-mode default, and explicit
+workspace configuration takes precedence. In worktree mode, unrelated edits in
+the user's checkout are preserved and are not copied into the worker workspace.
+Use `chr work doctor --ticket <ticket-key>` to inspect the selected workspace;
+the worker context and execution report retain its actual path and base.
 
 ## Ticket Start Preflight
 
@@ -102,7 +109,7 @@ On success, the command creates a `pending` execution record with:
 - execution-scoped run, result, log, and validation artifact paths;
 - required lifecycle timestamps.
 
-The execution ID remains CHR's internal attempt identity. The shared artifact
+The execution ID remains chr's internal attempt identity. The shared artifact
 ID identifies the interoperable operation directory.
 
 The run envelope can later contain:

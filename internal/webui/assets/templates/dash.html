@@ -1,0 +1,64 @@
+{{define "dash_content.html"}}
+{{template "revision_marker.html" .}}
+<div class="dash-observation" data-dash-observation data-observed-at="{{.Dash.ObservedAt}}">
+  {{if .Dash.Unavailable}}<p class="diagnostic" role="status">Work observation is unavailable. Retrying does not start work.</p>{{else}}
+  <div class="dash-layout">
+    <section class="dash-panel dash-queue" aria-labelledby="dash-queue-title">
+      <h2 id="dash-queue-title">Queue</h2>
+      <p class="dash-summary">{{.Dash.Queue.EligibleCount}} eligible · {{.Dash.Queue.TotalCount}} pending in declared order</p>
+      {{if .Dash.Queue.Items}}<div class="dash-queue__items">{{range .Dash.Queue.Items}}
+        <article class="dash-queue-item" data-dash-key="{{.Key}}">
+          <a href="{{.URL}}"><span class="dash-key">{{.Key}}</span><strong>{{.Title}}</strong></a>
+          {{if .Scope}}<p>{{.Scope}}</p>{{end}}<span class="dash-state">{{.Readiness}}</span>
+          {{if .Reason}}<p class="diagnostic">{{.Reason}}</p>{{end}}
+        </article>
+      {{end}}</div>{{else}}<p class="empty-state">No pending eligible work. Active and retained work remain visible here.</p>{{end}}
+      {{if .Dash.Exclusions}}<details class="dash-readiness"><summary>Excluded work</summary><ul>{{range .Dash.Exclusions}}<li>{{.}}</li>{{end}}</ul></details>{{end}}
+      {{if or .Dash.Queue.PreviousURL .Dash.Queue.NextURL}}<nav class="detail-actions" aria-label="Queue pages">
+        {{with .Dash.Queue.PreviousURL}}<a class="button" href="{{.}}">Previous queue page</a>{{end}}
+        {{with .Dash.Queue.NextURL}}<a class="button" href="{{.}}">Next queue page</a>{{end}}
+      </nav>{{end}}
+    </section>
+    <section class="dash-panel dash-current" aria-labelledby="dash-current-title">
+      <header class="dash-panel__header"><h2 id="dash-current-title">Current work</h2><span class="dash-state">Readiness: {{.Dash.Readiness.Status}}</span></header>
+      {{if .Dash.Readiness.Diagnostics}}<details class="dash-readiness"><summary>Readiness details</summary>{{range .Dash.Readiness.Diagnostics}}<p class="diagnostic">{{.Detail}}</p>{{end}}</details>{{end}}
+      {{range .Dash.Current}}{{template "dash_context.html" .}}{{else}}<p class="empty-state">No active execution. Known results stay below.</p>{{end}}
+    </section>
+    <section class="dash-panel dash-recent" aria-labelledby="dash-recent-title">
+      <h2 id="dash-recent-title">Activity and results</h2>
+      {{range .Dash.Results}}{{template "dash_context.html" .}}{{end}}
+      {{if .Dash.RecentEvents}}<ol class="dash-events" aria-label="Recent activity">{{range .Dash.RecentEvents}}
+        <li class="dash-event" data-event-id="{{.ID}}" data-context-id="{{.ContextID}}"><time datetime="{{.Time}}">{{.Time}}</time> {{if .TicketKey}}<strong>{{.TicketKey}}</strong>{{end}} <span>{{.Phase}}</span><p>{{.Message}}</p></li>
+      {{end}}</ol>{{else if not .Dash.Results}}<p class="empty-state">No activity recorded yet.</p>{{end}}
+    </section>
+  </div>
+  {{end}}
+  {{range .Dash.Warnings}}<p class="diagnostic">{{.}}</p>{{end}}
+</div>
+{{end}}
+
+{{define "dash_controls.html"}}
+<div class="dash-controls">
+  <a class="button" href="/workflows">Workflow details</a>
+  <form method="post" action="/actions" hx-post="/actions" hx-target="#dash-action-result" hx-swap="innerHTML" hx-disabled-elt="find button" onsubmit="return confirm('Preview the ready work queue?')">
+    <input type="hidden" name="action" value="work.preview"><input type="hidden" name="surface" value="dash"><input type="hidden" name="confirm" value="true">
+    <button class="button" type="submit">Preview Work</button>
+  </form>
+  <form method="post" action="/actions" hx-post="/actions" hx-target="#dash-action-result" hx-swap="innerHTML" hx-disabled-elt="find button" onsubmit="return confirm('Request daemon stop?')">
+    <input type="hidden" name="action" value="work.daemon.stop"><input type="hidden" name="surface" value="dash"><input type="hidden" name="confirm" value="true">
+    <button class="button button--danger" type="submit">Stop Daemon</button>
+  </form>
+</div>
+<div id="dash-action-result" role="status" aria-live="polite"></div>
+{{end}}
+
+{{define "dash_context.html"}}
+<article class="dash-context" data-context-id="{{.ID}}">
+  <div class="dash-panel__header"><h3>{{if .URL}}<a href="{{.URL}}">{{.Title}}</a>{{else}}{{.Title}}{{end}}</h3><span class="dash-state">{{.Status}}</span></div>
+  {{if .TicketKey}}<p class="dash-key">{{.TicketKey}}{{if .Scope}} · {{.Scope}}{{end}}</p>{{end}}
+  <p class="dash-phase">{{.Phase}}</p>{{if .Message}}<p>{{.Message}}</p>{{end}}
+  <p class="dash-time">State updated at <time datetime="{{.UpdatedAt}}">{{.UpdatedAt}}</time>{{if .ActivityAt}} · Latest activity <time datetime="{{.ActivityAt}}">{{.ActivityAt}}</time>{{end}}</p>
+  {{if eq .Kind "native"}}<p class="dash-summary">{{.Validated}} host-validated tasks · {{.Confirmed}} confirmed tickets · {{.Remaining}} awaiting confirmed delivery</p>
+  {{else if eq .Kind "loop"}}<p class="dash-summary">{{.Eligible}} eligible · {{.Processed}} processed · {{.Blocked}} blocked · {{.Failed}} failed</p>{{end}}
+</article>
+{{end}}

@@ -10,7 +10,7 @@ PR: #187
 ## Purpose
 
 Connect the TUI Quizzes screen to the service-owned quiz operations so users
-can drive the one-question-at-a-time deep quiz loop from inside CHR.
+can drive the one-question-at-a-time deep quiz loop from inside chr.
 
 ## Delivered Behavior
 

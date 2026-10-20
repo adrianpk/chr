@@ -1,7 +1,6 @@
 package core
 
 import (
-	"os"
 	"path/filepath"
 	"testing"
 )
@@ -317,45 +316,5 @@ func TestPlanRuntimePreservesProjectModeWorkspaceMount(t *testing.T) {
 
 	if plan.Mounts[0].Description != "project workspace" {
 		t.Fatalf("Mount description = %q, want project workspace", plan.Mounts[0].Description)
-	}
-}
-
-func TestCodexCredentialMountsUseReadOnlyRootCodexPaths(t *testing.T) {
-	homeDir := t.TempDir()
-	writeRuntimePlanTestFile(t, filepath.Join(homeDir, ".codex", "auth.json"), "{}\n")
-	writeRuntimePlanTestFile(t, filepath.Join(homeDir, ".codex", "config.toml"), "model = \"gpt-5.5\"\n")
-
-	mounts := codexCredentialMounts(homeDir)
-	if len(mounts) != 2 {
-		t.Fatalf("len(mounts) = %d, want 2", len(mounts))
-	}
-
-	wantTargets := []string{
-		"/root/.codex/auth.json",
-		"/root/.codex/config.toml",
-	}
-
-	for index, wantTarget := range wantTargets {
-		if mounts[index].Target != wantTarget {
-			t.Fatalf("mount target %d = %q, want %q", index, mounts[index].Target, wantTarget)
-		}
-
-		if !mounts[index].ReadOnly {
-			t.Fatalf("mount %d is writable, want read-only", index)
-		}
-	}
-}
-
-func writeRuntimePlanTestFile(t *testing.T, path, content string) {
-	t.Helper()
-
-	err := os.MkdirAll(filepath.Dir(path), 0o755)
-	if err != nil {
-		t.Fatalf("create runtime plan test directory: %v", err)
-	}
-
-	err = os.WriteFile(path, []byte(content), 0o644)
-	if err != nil {
-		t.Fatalf("write runtime plan test file: %v", err)
 	}
 }

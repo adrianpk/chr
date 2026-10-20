@@ -34,7 +34,7 @@ cp -a "$ref_dir/." "$active_dir/"
 
 git -C "$active_dir" init -q
 git -C "$active_dir" checkout -B main >/dev/null 2>&1
-git -C "$active_dir" config user.name "Chryso QA"
+git -C "$active_dir" config user.name "chr QA"
 git -C "$active_dir" config user.email "qa@example.invalid"
 git -C "$active_dir" add .
 git -C "$active_dir" commit -q -m "chore: seed qa scenario"

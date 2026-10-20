@@ -2,13 +2,13 @@
 set -euo pipefail
 
 repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-source_workspace="${1:-/home/adrian/Projects/labs/chr/projects/chr-blog-work}"
+source_workspace="${1:-/workspaces/labs/chr/projects/chr-blog-work}"
 workspace_root="${CHR_PROBE_WORKSPACE_ROOT:-$(mktemp -d -t chr-codex-artifacts-XXXXXX)}"
 workspace="${workspace_root}/chr-blog-work"
 case_slug="artifact-backend-audit"
 
 if [[ ! -d "${source_workspace}/.chr/default" ]]; then
-  echo "source workspace does not look like a Chryso workspace: ${source_workspace}" >&2
+  echo "source workspace does not look like a chr workspace: ${source_workspace}" >&2
   exit 1
 fi
 

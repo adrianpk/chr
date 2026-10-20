@@ -4,7 +4,7 @@ Status: delivered
 
 ## Purpose
 
-Add the first Chryso protocol defaults to the `standard` workspace profile.
+Add the first chr protocol defaults to the `standard` workspace profile.
 
 The defaults should give a managed Go project a coherent agent protocol without copying this repository's `.agents/` files mechanically.
 

@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"crypto/rand"
 	"fmt"
 	"strings"
 
@@ -29,12 +30,18 @@ type QuizActionExecutor interface {
 	ExecuteQuizAction(request QuizActionRequest) (QuizActionResult, error)
 }
 
+// QuizActionBinding retains the question observed before confirmation or editing.
+type QuizActionBinding struct {
+	SessionID, QuestionID, ExpectedRevision, OperationID string
+}
+
 // QuizActionRequest carries selected quiz action input.
 type QuizActionRequest struct {
-	Action QuizActionID
-	Scope  QuizScope
-	Mode   string
-	Answer string
+	Binding QuizActionBinding
+	Action  QuizActionID
+	Scope   QuizScope
+	Mode    string
+	Answer  string
 }
 
 // QuizActionResult contains refreshed quiz state after an action.
@@ -54,9 +61,10 @@ type QuizActionState struct {
 
 // QuizAnswerState stores in-terminal quiz answer editing state.
 type QuizAnswerState struct {
-	Active bool
-	Scope  QuizScope
-	Input  textarea.Model
+	Binding QuizActionBinding
+	Active  bool
+	Scope   QuizScope
+	Input   textarea.Model
 }
 
 type quizActionFinishedMsg struct {
@@ -113,21 +121,25 @@ func (m Model) updateQuizAnswerKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, cmd
 	case "alt+s":
 		scope := m.quizAnswer.Scope
+		binding := m.quizAnswer.Binding
 		m.quizAnswer = QuizAnswerState{}
 
 		cmd := m.startQuizAction(QuizActionRequest{
-			Action: QuizActionSkip,
-			Scope:  scope,
+			Action:  QuizActionSkip,
+			Binding: binding,
+			Scope:   scope,
 		})
 
 		return m, cmd
 	case "alt+d":
 		scope := m.quizAnswer.Scope
+		binding := m.quizAnswer.Binding
 		m.quizAnswer = QuizAnswerState{}
 
 		cmd := m.startQuizAction(QuizActionRequest{
-			Action: QuizActionComplete,
-			Scope:  scope,
+			Action:  QuizActionComplete,
+			Binding: binding,
+			Scope:   scope,
 		})
 
 		return m, cmd
@@ -167,12 +179,14 @@ func (m *Model) confirmQuizAction() (tea.Model, tea.Cmd) {
 func (m *Model) saveQuizAnswer() (tea.Model, tea.Cmd) {
 	answer := m.quizAnswer.Input.Value()
 	scope := m.quizAnswer.Scope
+	binding := m.quizAnswer.Binding
 	m.quizAnswer = QuizAnswerState{}
 
 	cmd := m.startQuizAction(QuizActionRequest{
-		Action: QuizActionAnswer,
-		Scope:  scope,
-		Answer: answer,
+		Action:  QuizActionAnswer,
+		Binding: binding,
+		Scope:   scope,
+		Answer:  answer,
 	})
 
 	return *m, cmd
@@ -251,10 +265,16 @@ func (m *Model) startQuizAnswer() {
 	input.Prompt = ""
 	input.CharLimit = 0
 
+	binding := quiz.Binding
+	if binding.ExpectedRevision != "" {
+		binding.OperationID = rand.Text()
+	}
+
 	m.quizAnswer = QuizAnswerState{
-		Active: true,
-		Scope:  quiz.Scope,
-		Input:  input,
+		Binding: binding,
+		Active:  true,
+		Scope:   quiz.Scope,
+		Input:   input,
 	}
 	m.selectedPane = 1
 	m.maximizedPane = 1

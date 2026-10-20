@@ -1,0 +1,23 @@
+{{define "quiz_catalog_content.html"}}
+<div class="quiz-catalog">
+  <div class="quiz-catalog__heading">
+    <h1>Quizzes</h1>
+    {{if .Catalog.PendingQuizzes}}
+    <details class="quiz-new">
+      <summary class="button">New Quiz</summary>
+      <nav class="quiz-new__choices" aria-label="Pending quizzes">
+        {{range .Catalog.PendingQuizzes}}<a href="{{.URL}}">{{.Title}}</a>{{end}}
+      </nav>
+    </details>
+    {{end}}
+  </div>
+  <div class="quiz-catalog__grid">
+    {{range .Catalog.Items}}
+    <a class="quiz-card" href="{{.DetailURL}}">
+      <h2>{{.Title}}</h2>
+      <div class="quiz-card__preview"><div>{{if .Preview}}{{.Preview}}{{else}}No answers yet{{end}}</div></div>
+    </a>
+    {{end}}
+  </div>
+</div>
+{{end}}

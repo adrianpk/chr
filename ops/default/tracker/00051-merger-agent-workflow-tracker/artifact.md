@@ -1,6 +1,6 @@
 ---
 title: "Merger Agent Workflow Tracker"
-project_id: "chryso"
+project_id: "chr"
 case_slug: "ticket-execution-loop"
 status: "completed"
 source_request_id: "chat-2026-06-02-merger-agent-role"
@@ -12,7 +12,7 @@ mirror: ".prj/trackers/slicing-merger-agent-workflow-tracker.md"
 # Merger Agent Workflow Tracker
 
 This tracker mirrors `.prj/trackers/slicing-merger-agent-workflow-tracker.md`
-during Chryso self-adoption. The `.prj` tracker remains the operational
+during chr self-adoption. The `.prj` tracker remains the operational
 source for task completion, commit mapping, validation logs, and slice closure.
 
 ## Slice Status

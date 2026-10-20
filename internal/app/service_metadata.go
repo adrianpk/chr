@@ -26,7 +26,7 @@ type ProjectMetadataPatchRequest struct {
 func (s service) SaveProjectMetadata(
 	metadata core.ProjectMetadata,
 ) (ProjectMetadataSaveResult, error) {
-	saved, err := core.NewProjectMetadataService(s.projectContext.ProjectDir).Save(metadata)
+	saved, err := core.NewProjectMetadataService(s.projectContext.ProjectDir).SaveContext(s.ctx, metadata)
 	if err != nil {
 		return ProjectMetadataSaveResult{}, err
 	}

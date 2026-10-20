@@ -30,11 +30,11 @@ combined text before retaining the reply, so a growing list can lose commands
 through truncation. The HTTP sender currently sends plain text only.
 
 Provide a complete, readable command reference inside Telegram while retaining
-CHR's existing command semantics, authorization and durable delivery model.
+chr's existing command semantics, authorization and durable delivery model.
 
 ## Requested Work
 
-1. Project the authoritative CHR command definitions into read-only help
+1. Project the authoritative chr command definitions into read-only help
    metadata with a stable identity, category and canonical syntax. Derive text
    from the existing help/usage fields without rewriting argument names,
    optional parameters or whitespace. Add missing usage metadata beside the
@@ -45,7 +45,7 @@ CHR's existing command semantics, authorization and durable delivery model.
 2. Render short headings and one canonical syntax entry per line, with a blank
    line between sections. Use this section order: Execution, Tickets, Slice
    sets, Use cases, Projects, Authoring, Conversations, System controls, Other.
-   Emit only populated sections. Assign categories from CHR's command owners;
+   Emit only populated sections. Assign categories from chr's command owners;
    unknown owners use Other. Sort exact syntax text within each section.
    Keep descriptions out of the rendered list. Do not use a large code fence.
    Rendering must be deterministic, leave input metadata unchanged and return
@@ -84,7 +84,7 @@ CHR's existing command semantics, authorization and durable delivery model.
    uncertain delivery. Record actual attempts using the existing delivery
    owner; restart must not reset the attempt budget or repeat a known-successful
    formatted send. The format-specific fallback must not affect other replies.
-7. Demonstrate that the complete current CHR help fits one message through the
+7. Demonstrate that the complete current chr help fits one message through the
    actual retention and delivery pipeline. Account for the existing 3,200
    UTF-16-unit chunk threshold and the sender's 3,900-code-point/UTF-16-unit
    limits for both formatted and plain bodies, including diagnostic prefixes,
@@ -117,7 +117,7 @@ CHR's existing command semantics, authorization and durable delivery model.
 
 ## Acceptance and Validation
 
-1. Compare the rendered syntax multiset with the actual CHR definitions,
+1. Compare the rendered syntax multiset with the actual chr definitions,
    including usage-only entries, aliases, overloaded commands and scoped
    arguments. Inject and modify test registry entries to prove that the
    renderer does not own another command list. Cover ordering, empty input,
@@ -177,11 +177,11 @@ The delivered reference is KAL commit
 Reviewed source includes `internal/telegram/help/{metadata,render,escape}.go`,
 `internal/app/telegram_help_metadata.go`, the help HTTP/acceptance tests and
 `docs/reference/telegram-help.md` in that repository. These are provenance;
-the requirements above define the self-contained CHR change.
+the requirements above define the self-contained chr change.
 
 The reference's generic fallback retries on any send error and its common
-splitter uses byte boundaries. Neither limitation is a required CHR behavior.
-The narrower fallback and output bounds above preserve CHR's native delivery
+splitter uses byte boundaries. Neither limitation is a required chr behavior.
+The narrower fallback and output bounds above preserve chr's native delivery
 guarantees. No runtime tests, live bot requests or client visual checks were
 run during ticket capture.
 

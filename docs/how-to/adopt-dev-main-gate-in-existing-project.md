@@ -1,10 +1,10 @@
 # Adopt The Dev To Main Gate In An Existing Project
 
 This guide starts from a Go project that already has history, tests, and
-development habits before Chryso is introduced.
+development habits before chr is introduced.
 
 The goal is gradual adoption. Existing work should become visible as baseline
-context, not fail because it was created before Chryso managed the
+context, not fail because it was created before chr managed the
 project.
 
 ## Initialize The Workspace
@@ -15,7 +15,7 @@ From the project root:
 chr init
 ```
 
-This creates the project-local Chryso workspace under:
+This creates the project-local chr workspace under:
 
 ```text
 .chr/default/
@@ -48,7 +48,7 @@ gates:
 ```
 
 This runs validation, writes reports, and lists manual or external changes
-without blocking the project because older work has no Chryso execution
+without blocking the project because older work has no chr execution
 evidence.
 
 ## Run The First Gate
@@ -66,7 +66,7 @@ chr gate dev-main --base origin/main --head origin/dev
 ```
 
 Use local refs that match the project's branch model. The command requires a
-Git repository and a Chryso core.
+Git repository and a chr core.
 
 ## Read The Baseline Evidence
 
@@ -86,14 +86,14 @@ Read the Markdown report first. It shows:
 - high-risk manual changes when configured.
 
 The first report for an existing project is an adoption baseline. It records
-what Chryso can observe at the point where the project starts using the
+what chr can observe at the point where the project starts using the
 gate.
 
 ## Add Agent-Managed Work Over Time
 
-After adoption, create or generate tickets and let Chryso execute new work.
+After adoption, create or generate tickets and let chr execute new work.
 Those executions create evidence under `.chr/default/` that later gate runs can
-classify as Chryso-managed.
+classify as chr-managed.
 
 Manual work can continue to exist. The default recommendation is to list it as
 context first, then tighten policy only when the project has enough agent-run
@@ -139,4 +139,4 @@ chr gate woodpecker init
 ```
 
 Existing `.woodpecker.yml` files are left unchanged unless they were generated
-by Chryso and `--write` is provided.
+by chr and `--write` is provided.

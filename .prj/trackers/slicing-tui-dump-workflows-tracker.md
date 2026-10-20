@@ -1,6 +1,6 @@
 # TUI Dump Workflows Slicing Tracker
 
-Status: active
+Status: delivered
 
 Plan: `.prj/plans/slicing-tui-dump-workflows-plan.md`
 
@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-tui-dump-workflows-plan.md`
 
 Slicing name: TUI Dump Workflows
 
-Active slice number: Slice 7
+Active slice number: none
 
-Active slice short name: dump editing ux polish
+Active slice short name: none
 
-Expected branch name: `feat/slice-7-dump-editing-ux-polish`
+Expected branch name: none
 
-Expected PR title: `feat(slice-7): dump editing ux polish`
+Expected PR title: none
 
 Expected report path:
-`.prj/reports/slices/tui-dump-workflows/slice-7-dump-editing-ux-polish.md`
+none
 
 Prerequisite PRs or delivered work:
 
@@ -201,6 +201,10 @@ Validation:
   reads, or service-provided summaries.
 
 ## Completion Notes
+
+Closure audit on 2026-10-20 verified PR #181 merged at
+`c4fe395f7cbdb5c52eb196b65e78977e75aef512`, an ancestor of dev. All seven slices
+are delivered; the tuning notes below describe the completed original cycle.
 
 - Post-slice tuning needed: yes.
 - Slice 6 covers conversion of the current path-resolution edit command into

@@ -9,13 +9,13 @@ PR: #217
 
 ## Purpose
 
-Harden Chryso-created tickets so manual and generated creation paths produce
+Harden chr-created tickets so manual and generated creation paths produce
 Board-ready metadata and immediately refresh the SQLite ticket index.
 
 ## Delivered Behavior
 
 - `CreateTicketRequest` and the CLI `ticket new` command accept `synopsis`.
-- Chryso-created tickets require non-empty title and synopsis before key
+- chr-created tickets require non-empty title and synopsis before key
   allocation.
 - Tickets created without an explicit status default to `backlog`.
 - Ticket key allocation uses the SQLite `ticket_key_sequences` table with the

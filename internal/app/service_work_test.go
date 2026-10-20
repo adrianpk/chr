@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/harness"
 )
 
 func TestServiceStartAgentWorkTicketReusesTicketExecution(t *testing.T) {
@@ -808,10 +809,13 @@ func newAgentWorkTestService(t *testing.T, devRoot, projectDir string) service {
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	return newService(t.Context(), env, commandProjectContext{
+	operations := newService(t.Context(), env, commandProjectContext{
 		ProjectDir: projectDir,
 		ProjectID:  projectID(projectDir),
 	}, testAssetsFS())
+	operations.generationBinder = testGenerationBinder
+
+	return operations
 }
 
 type fakeServiceAgenticReviewRunner struct {
@@ -849,7 +853,7 @@ func (r *fakeServiceAgenticReviewRunner) Review(_ context.Context, review core.A
 		ContextPath: contextPath,
 		ResultPath:  resultPath,
 		SummaryPath: filepath.Join(runDir, "summary.md"),
-		Run: core.AgentRunResult{
+		Run: harness.AgentRunResult{
 			ID:     "review-" + review.Ticket.Key,
 			RunDir: runDir,
 		},

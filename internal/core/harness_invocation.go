@@ -4,10 +4,14 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/harness"
+	"forge.adrianpk.com/chr/internal/harness/process"
 )
 
 // HarnessInvocationOptions describes a package boundary value.
 type HarnessInvocationOptions struct {
+	Worker      harness.Worker
 	ExecutionID string
 	TicketKey   string
 	TicketPath  string
@@ -49,7 +53,7 @@ func NewHarnessInvocation(opts HarnessInvocationOptions) (HarnessInvocation, err
 		return HarnessInvocation{}, fmt.Errorf("runtime project dir is required")
 	}
 
-	run, err := harnessRunCommand(opts.ExecutionID, opts.TicketKey, opts.TicketPath, opts.Plan)
+	run, err := harnessRunCommand(opts.ExecutionID, opts.TicketKey, opts.TicketPath, opts.Plan, opts.Worker)
 	if err != nil {
 		return HarnessInvocation{}, err
 	}
@@ -79,8 +83,8 @@ func harnessBuildCommand(plan RuntimePlan) HarnessCommand {
 	}
 }
 
-func harnessRunCommand(executionID, ticketKey, ticketPath string, plan RuntimePlan) (HarnessCommand, error) {
-	workerScript, err := harnessWorkerShellScript(executionID, ticketKey, ticketPath, plan)
+func harnessRunCommand(executionID, ticketKey, ticketPath string, plan RuntimePlan, worker harness.Worker) (HarnessCommand, error) {
+	workerCommand, err := harnessWorkerCommand(executionID, ticketKey, ticketPath, plan, worker)
 	if err != nil {
 		return HarnessCommand{}, err
 	}
@@ -105,11 +109,16 @@ func harnessRunCommand(executionID, ticketKey, ticketPath string, plan RuntimePl
 		"--env", "CHR_RESULT_PATH="+containerProjectPath(plan, plan.ResultPath),
 		"--env", "CHR_LOG_PATH="+containerProjectPath(plan, plan.LogPath),
 		"--env", "CHR_VALIDATION_PATH="+containerProjectPath(plan, plan.ValidationPath),
-		"--env", "OPENAI_API_KEY",
+	)
+	for _, name := range workerCommand.ForwardEnv {
+		args = append(args, "--env", name)
+	}
+
+	args = append(args,
 		plan.Image,
 		"/bin/sh",
 		"-lc",
-		workerScript,
+		process.WorkerShellScript(workerCommand),
 	)
 
 	return HarnessCommand{
@@ -146,24 +155,33 @@ func harnessValidationCommand(executionID string, plan RuntimePlan) HarnessComma
 	}
 }
 
-func harnessWorkerShellScript(executionID, ticketKey, ticketPath string, plan RuntimePlan) (string, error) {
-	command, err := NewCodexWorkerCommand(CodexWorkerCommandOptions{
-		ExecutionID:    executionID,
-		TicketKey:      ticketKey,
-		TicketPath:     containerProjectPath(plan, ticketPath),
-		ContextPath:    containerProjectPath(plan, plan.WorkerContextPath),
-		ResultPath:     containerProjectPath(plan, plan.ResultPath),
-		LogPath:        containerProjectPath(plan, plan.LogPath),
-		ValidationPath: containerProjectPath(plan, plan.ValidationPath),
-	})
-	if err != nil {
-		return "", err
+func harnessWorkerCommand(executionID, ticketKey, ticketPath string, plan RuntimePlan, worker harness.Worker) (harness.WorkerCommand, error) {
+	if worker == nil {
+		return harness.WorkerCommand{}, fmt.Errorf("worker adapter is required")
 	}
 
-	return RenderCodexWorkerShellScript(command), nil
+	contextPath := containerProjectPath(plan, plan.WorkerContextPath)
+
+	command, err := worker.WorkerCommand(harness.WorkerRequest{
+		InputPath: contextPath,
+		Env: []harness.EnvironmentVariable{
+			{Name: "CHR_EXECUTION_ID", Value: executionID},
+			{Name: "CHR_TICKET_KEY", Value: ticketKey},
+			{Name: "CHR_TICKET_PATH", Value: containerProjectPath(plan, ticketPath)},
+			{Name: "CHR_WORKER_CONTEXT_PATH", Value: contextPath},
+			{Name: "CHR_RESULT_PATH", Value: containerProjectPath(plan, plan.ResultPath)},
+			{Name: "CHR_LOG_PATH", Value: containerProjectPath(plan, plan.LogPath)},
+			{Name: "CHR_VALIDATION_PATH", Value: containerProjectPath(plan, plan.ValidationPath)},
+		},
+	})
+	if err != nil {
+		return harness.WorkerCommand{}, err
+	}
+
+	return command, nil
 }
 
-func dockerVolumeArg(mount RuntimeMount) string {
+func dockerVolumeArg(mount harness.RuntimeMount) string {
 	arg := mount.Source + ":" + mount.Target
 	if mount.ReadOnly {
 		arg += ":ro"

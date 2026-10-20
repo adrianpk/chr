@@ -6,7 +6,7 @@ name: "Tictactoe"
 
 # Tictactoe
 
-Chryso QA reference workspace for a small Go CLI tic-tac-toe project.
+chr QA reference workspace for a small Go CLI tic-tac-toe project.
 
 Use this workspace to evaluate spec generation, plan generation, plan tracking,
 ticket creation, and Codex-backed agent execution from preseeded context.

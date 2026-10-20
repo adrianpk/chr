@@ -299,7 +299,7 @@ func newTestInitializer() Workspace {
 			Data: []byte("FROM ubuntu:24.04\n"),
 		},
 		"assets/workspace/profiles/standard/manifest.md": {
-			Data: []byte("# Chryso Workspace\n\nThis directory stores Chryso's project-local working material.\n\n- `tickets/` stores project-local work items.\n- `runtime/` stores sandbox execution assets and evidence.\n"),
+			Data: []byte("# chr Workspace\n\nThis directory stores chr's project-local working material.\n\n- `tickets/` stores project-local work items.\n- `runtime/` stores sandbox execution assets and evidence.\n"),
 		},
 		"assets/workspace/profiles/standard/agents/CONVENTIONS.md": {
 			Data: []byte("# Conventions\n"),

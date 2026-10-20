@@ -15,6 +15,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
 var (
@@ -1646,7 +1647,7 @@ func buildLegacyTicketStartPreflight(ctx context.Context, env core.UserEnvironme
 
 	record.Artifacts.ArtifactID = artifact.ID
 
-	result, err := core.ValidateRuntime(core.RuntimeValidationOptions{
+	result, err := validateCodexRuntime(core.RuntimeValidationOptions{
 		ProjectDir:            projectContext.ProjectDir,
 		Config:                config.Runtime,
 		Workspace:             config.Work.Workspace,
@@ -1889,12 +1890,13 @@ func runTicketStartExecution(
 	emitBranchPreparedAgentEvent(ctx, events, record)
 	emitExecutionCreatedAgentEvent(ctx, events, record)
 
-	err = core.MaterializeCodexWorkerContextForExecution(ctx, record, result.Plan)
+	err = core.MaterializeWorkerContextForExecution(ctx, record, result.Plan)
 	if err != nil {
 		return core.ExecutionRecord{}, core.NewExecutionFailure(core.ExecutionFailurePreflight, err)
 	}
 
 	invocation, err := core.NewHarnessInvocation(core.HarnessInvocationOptions{
+		Worker:      codex.Runner{},
 		ExecutionID: record.ID,
 		TicketKey:   record.TicketKey,
 		TicketPath:  record.TicketPath,

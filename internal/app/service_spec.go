@@ -33,7 +33,8 @@ type SpecListResult struct {
 
 // SpecGenerateRequest selects the quiz scope used to generate a spec.
 type SpecGenerateRequest struct {
-	Scope core.QuizScope
+	OperationID string
+	Scope       core.QuizScope
 }
 
 // SpecOperationResult is the TUI-facing result for spec generation.
@@ -71,9 +72,12 @@ func (s service) GenerateSpec(ctx context.Context, request SpecGenerateRequest) 
 	var result SpecOperationResult
 
 	err := s.withGenerationRuntime(ctx, "spec", scope, func(ctx context.Context) error {
-		var err error
+		bound, ctx, err := s.bindGeneration(ctx, "spec-"+dumpRequestID(request.OperationID), string(core.QuizModelActionGenerateSpec))
+		if err != nil {
+			return err
+		}
 
-		result, err = s.generateSpec(ctx, scope)
+		result, err = bound.generateSpec(ctx, scope)
 
 		return err
 	})
@@ -95,6 +99,15 @@ func (s service) generateSpec(ctx context.Context, scope core.QuizScope) (SpecOp
 			"error":     err.Error(),
 		})
 
+		return SpecOperationResult{}, err
+	}
+
+	target, err := core.GeneratedSpecLayout(s.projectContext.ProjectDir, scope)
+	if err != nil {
+		return SpecOperationResult{}, err
+	}
+	targetRevision, err := core.SpecTargetRevision(ctx, s.projectContext.ProjectDir, target.RelativePath)
+	if err != nil {
 		return SpecOperationResult{}, err
 	}
 
@@ -133,6 +146,7 @@ func (s service) generateSpec(ctx context.Context, scope core.QuizScope) (SpecOp
 	})
 
 	spec := core.GeneratedSpec{
+		ExpectedRevision: targetRevision,
 		Scope:            scope,
 		Title:            response.DraftSpec.Title,
 		Body:             response.DraftSpec.Body,
@@ -272,6 +286,10 @@ func (s service) specGenerationRuntimeState(scope core.QuizScope) (core.QuizRunt
 		return state, nil
 	}
 
+	if !errors.Is(err, os.ErrNotExist) {
+		return core.QuizRuntimeState{}, err
+	}
+
 	state, err = s.newQuizRuntimeState(scope, core.QuizModeDeep)
 	if err != nil {
 		return core.QuizRuntimeState{}, err
@@ -306,7 +324,7 @@ func (s service) newSpecGenerationModelRequest(state core.QuizRuntimeState) (cor
 	}
 
 	return core.QuizModelRequest{
-		ID:              fmt.Sprintf("spec-generation-%s", specScopeID(scope)),
+		ID:              core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("spec-generation-%s", specScopeID(scope))),
 		Action:          core.QuizModelActionGenerateSpec,
 		Strategy:        "spec_generation",
 		Scope:           scope,
@@ -321,11 +339,13 @@ func (s service) newSpecGenerationModelRequest(state core.QuizRuntimeState) (cor
 	}, nil
 }
 
-func (s service) appendSpecGenerationContextSections(
-	sections []core.QuizModelContextSection,
-	scope core.QuizScope,
-) ([]core.QuizModelContextSection, error) {
-	return s.appendGenerationContextSections(sections, scope, sortedSpecContextNodeIDs)
+func (s service) appendSpecGenerationContextSections(sections []core.QuizModelContextSection, scope core.QuizScope) ([]core.QuizModelContextSection, error) {
+	dumps, err := s.specGenerationSources()
+	if err != nil {
+		return nil, err
+	}
+
+	return s.appendGenerationContextSections(sections, scope, func(index core.WorkspaceIndex) []string { return specContextNodeIDs(index, scope, dumps) })
 }
 
 func (s service) appendGenerationContextSections(
@@ -387,22 +407,6 @@ func sortedSpecContextNodeIDs(index core.WorkspaceIndex) []string {
 	return sortedGenerationContextNodeIDs(index, []core.WorkspaceNodeKind{
 		core.WorkspaceNodeDump,
 		core.WorkspaceNodeQuiz,
-	})
-}
-
-func (s service) appendPlanGenerationContextSections(
-	sections []core.QuizModelContextSection,
-	scope core.QuizScope,
-) ([]core.QuizModelContextSection, error) {
-	return s.appendGenerationContextSections(sections, scope, sortedPlanContextNodeIDs)
-}
-
-func sortedPlanContextNodeIDs(index core.WorkspaceIndex) []string {
-	return sortedGenerationContextNodeIDs(index, []core.WorkspaceNodeKind{
-		core.WorkspaceNodeDump,
-		core.WorkspaceNodeQuiz,
-		core.WorkspaceNodeSpec,
-		core.WorkspaceNodePlan,
 	})
 }
 

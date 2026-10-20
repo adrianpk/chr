@@ -76,24 +76,34 @@ const (
 
 // QuizRuntimeState describes a package boundary value.
 type QuizRuntimeState struct {
-	ID                 string
-	ProjectID          string
-	CaseSlug           string
-	Status             QuizRuntimeStatus
-	Mode               QuizMode
-	QuestionBudget     int
-	QuestionsAsked     int
-	AnswersRecorded    int
-	SkipsRecorded      int
-	ActiveTopic        string
-	Coverage           []QuizCoverageTopic
-	ActiveQuestion     *QuizQuestion
-	Trail              []QuizTrailNode
-	BranchReturnReason string
-	Candidates         []QuizCandidate
-	RawPath            string
-	CuratedPath        string
-	UpdatedAt          time.Time
+	SchemaVersion         int
+	SessionID             string
+	Revision              string `json:"-"`
+	FastBatchID           string
+	FastSourceHash        string
+	FastQueue             []QuizCandidate
+	FastConsumed          []string
+	ContinuationPending   bool
+	ContinuationError     string
+	GenerationOperationID string `json:",omitempty"`
+	ID                    string
+	ProjectID             string
+	CaseSlug              string
+	Status                QuizRuntimeStatus
+	Mode                  QuizMode
+	QuestionBudget        int
+	QuestionsAsked        int
+	AnswersRecorded       int
+	SkipsRecorded         int
+	ActiveTopic           string
+	Coverage              []QuizCoverageTopic
+	ActiveQuestion        *QuizQuestion
+	Trail                 []QuizTrailNode
+	BranchReturnReason    string
+	Candidates            []QuizCandidate
+	RawPath               string
+	CuratedPath           string
+	UpdatedAt             time.Time
 }
 
 // QuizQuestion describes a package boundary value.

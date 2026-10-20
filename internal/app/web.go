@@ -21,12 +21,13 @@ import (
 	"forge.adrianpk.com/chr/internal/webui/ui"
 )
 
-func newWebCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func newWebCommand(stdin io.Reader, stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:  "web",
 		Usage: "Run the local Web UI",
 		Commands: []*cli.Command{
 			newWebServeCommand(stdout, deps),
+			newWebLoginCommand(stdin, stdout),
 		},
 	}
 }
@@ -72,6 +73,10 @@ func webServeFlags() []cli.Flag {
 			Name:  "require-token",
 			Usage: "web token mode override: auto, true, false, or always",
 		},
+		&cli.BoolFlag{
+			Name:  "require-login",
+			Usage: "refuse startup unless a private single-user login is configured",
+		},
 	)
 }
 
@@ -114,6 +119,14 @@ func runWebServe(ctx context.Context, cmd *cli.Command, stdout io.Writer, deps a
 		ProjectContext: projectContext,
 		AssetsFS:       deps.assetsFS,
 		LogRequests:    stdout,
+	}
+
+	resolved.Login, err = loadWebLogin(env, cmd.Bool("require-login"))
+	if err != nil {
+		return err
+	}
+	if resolved.Login != nil {
+		resolved.Web.RequireToken = core.WebTokenModeFalse
 	}
 
 	if cmd.Bool("dry-run") {
@@ -176,6 +189,7 @@ func applyWebLANAccess(config core.WebConfig, enabled, explicitHost bool) (core.
 }
 
 type resolvedWebServeConfig struct {
+	Login          *webui.LoginCredentials
 	ProjectDir     string
 	Web            core.WebConfig
 	URL            string
@@ -187,7 +201,7 @@ type resolvedWebServeConfig struct {
 }
 
 func printWebServeDryRun(stdout io.Writer, config resolvedWebServeConfig) error {
-	if err := printWebExposureWarnings(stdout, config.Web); err != nil {
+	if err := printWebExposureWarnings(stdout, config.Web, config.Login != nil); err != nil {
 		return err
 	}
 
@@ -208,11 +222,16 @@ func printWebServeDryRun(stdout io.Writer, config resolvedWebServeConfig) error 
 		config.Web.TokenEnv,
 		allowedOrigins,
 	)
+	if err != nil {
+		return err
+	}
+
+	_, err = fmt.Fprintf(stdout, "login_required: %t\n", config.Login != nil)
 
 	return err
 }
 
-func printWebExposureWarnings(stdout io.Writer, config core.WebConfig) error {
+func printWebExposureWarnings(stdout io.Writer, config core.WebConfig, loginEnabled bool) error {
 	if core.WebHostIsLoopback(config.Host) {
 		return nil
 	}
@@ -221,7 +240,7 @@ func printWebExposureWarnings(stdout io.Writer, config core.WebConfig) error {
 		return err
 	}
 
-	if webTokenRequired(config) {
+	if webTokenRequired(config) || loginEnabled {
 		return nil
 	}
 
@@ -233,7 +252,7 @@ func printWebExposureWarnings(stdout io.Writer, config core.WebConfig) error {
 }
 
 func printWebServeStart(stdout io.Writer, config resolvedWebServeConfig) error {
-	if err := printWebExposureWarnings(stdout, config.Web); err != nil {
+	if err := printWebExposureWarnings(stdout, config.Web, config.Login != nil); err != nil {
 		return err
 	}
 
@@ -247,6 +266,11 @@ func printWebServeStart(stdout io.Writer, config resolvedWebServeConfig) error {
 		webTokenRequired(config.Web),
 		webAllowedOriginsSummary(config.Web.AllowedOrigins),
 	)
+	if err != nil {
+		return err
+	}
+
+	_, err = fmt.Fprintf(stdout, "login_required: %t\n", config.Login != nil)
 
 	return err
 }
@@ -310,17 +334,23 @@ func newWebServeMux(config resolvedWebServeConfig) (http.Handler, error) {
 		}
 	}
 
-	access, err := webAccessPolicy(config.Web)
+	accessConfig := config.Web
+	if config.Login != nil {
+		accessConfig.RequireToken = core.WebTokenModeFalse
+	}
+
+	access, err := webAccessPolicy(accessConfig)
 	if err != nil {
 		return nil, err
 	}
 
 	return webui.NewHandler(webui.HandlerOptions{
+		Login:       config.Login,
 		Provider:    provider,
 		Access:      access,
 		LogRequests: config.LogRequests,
 		Data: webui.ShellData{
-			Title:          "Chryso",
+			Title:          "chr",
 			ProjectDir:     config.ProjectDir,
 			ProjectID:      projectContext.ProjectID,
 			ProjectName:    projectContext.ProjectName,
@@ -330,7 +360,6 @@ func newWebServeMux(config resolvedWebServeConfig) (http.Handler, error) {
 			RequireToken:   string(config.Web.RequireToken),
 			RefreshSeconds: config.Web.RefreshIntervalSeconds,
 			Navigation: []ui.NavLink{
-				{Label: "Project", Href: "/", Active: true},
 				{Label: "Cases", Href: "/cases"},
 				{Label: "Dumps", Href: "/dumps"},
 				{Label: "Quizzes", Href: "/quizzes"},

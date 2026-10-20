@@ -1,7 +1,7 @@
 ---
 schema_version: 1
 name: "QA Scenarios"
-description: "Maintain reproducible scenarios for validating Chryso workflows."
+description: "Maintain reproducible scenarios for validating chr workflows."
 ---
 
 This use case covers versioned reference projects, resettable active projects, gallery-oriented demo data, and smoke scripts.

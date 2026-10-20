@@ -28,7 +28,7 @@ that can exercise the manual agent-work flow.
 ## Implementation Notes
 
 The service uses only the Go standard library and modern `http.ServeMux`
-method/path patterns. It avoids router dependencies so the scenario tests CHR
+method/path patterns. It avoids router dependencies so the scenario tests chr
 workflow behavior rather than framework setup.
 
 The failing test is intentional. `make qa-test-blog` must fail until a later

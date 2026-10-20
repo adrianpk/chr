@@ -42,7 +42,7 @@ func createDumpThroughTUIAdapter(t *testing.T, executor tuiDumpActionExecutor) s
 		t.Fatalf("ExecuteDumpAction create returned error: %v", err)
 	}
 
-	if createResult.Message != "Created dump ops/default/dump/00000-adapter-notes/artifact.md." {
+	if createResult.Message != "Captured dump ops/default/dump/00000-adapter-notes/artifact.md." {
 		t.Fatalf("create message = %q, want created dump message", createResult.Message)
 	}
 
@@ -68,9 +68,14 @@ func editDumpThroughTUIAdapter(t *testing.T, executor tuiDumpActionExecutor, dum
 func saveDumpThroughTUIAdapter(t *testing.T, executor tuiDumpActionExecutor, dumpPath string) {
 	t.Helper()
 
+	observed, err := executor.operations.ReadDump(DumpReadRequest{RelativePath: dumpPath})
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	saveResult, err := executor.ExecuteDumpAction(tui.DumpActionRequest{
-		Action: tui.DumpActionSave,
-		Path:   dumpPath,
+		Action: tui.DumpActionSave, OperationID: "tui-save", Revision: observed.Revision,
+		Path: dumpPath,
 		Content: `---
 title: "Adapter Notes"
 status: "raw"

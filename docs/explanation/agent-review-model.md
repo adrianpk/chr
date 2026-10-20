@@ -1,6 +1,6 @@
 # Agent Review Model
 
-Chryso does not model agent review as a direct copy of human pull request
+chr does not model agent review as a direct copy of human pull request
 review.
 
 Human review exists for many reasons that do not transfer cleanly to agentic

@@ -21,6 +21,11 @@ Expected boundary:
 
 ## Trusted Internal Network
 
+For password-protected navigation, configure
+[single-user login](configure-web-login.md), then use
+`chr web serve --allow-lan --require-login`. The trusted-LAN mode below describes
+access without a configured login.
+
 For direct browser access from another computer on a trusted internal network:
 
 ```sh
@@ -34,7 +39,7 @@ computer. For example, if the server is named `devbox`:
 http://devbox:7331/
 ```
 
-This mode requires no token, token environment variable, authentication cookie
+Without a configured login, this mode requires no token, token environment variable, authentication cookie
 or custom browser header. Pages, links, refreshes, HTMX updates and forms use
 the same resolved policy. With default settings it binds to `0.0.0.0:7331`.
 An existing configured network interface is retained; explicit `--host` and
@@ -60,6 +65,9 @@ LAN mode retains origin checks, write confirmations and revision checks. It
 does not configure a firewall or filter incoming connections by private CIDR.
 
 ## Token-Protected Bind
+
+A configured single-user login takes precedence over this legacy token mode.
+Tokens do not bypass login.
 
 Set a token before starting the server:
 
@@ -105,7 +113,7 @@ Allowed origins must be exact origins. Wildcards are not supported.
 
 ## Operator-Owned Boundary
 
-Chryso does not configure or manage Tailscale, Cloudflare Tunnel, reverse
+chr does not configure or manage Tailscale, Cloudflare Tunnel, reverse
 proxies, firewall rules, DNS, certificates, or public hosting. Keep those
 systems outside `chr` and expose the Web UI only through infrastructure you
 control.

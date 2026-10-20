@@ -1,6 +1,6 @@
 # Old Gallery
 
-Visual examples of the earlier Chryso gallery pass.
+Visual examples of the earlier chr gallery pass.
 
 These screenshots use a seeded CRM dialer project to show the main TUI surfaces
 without requiring a live agent run.

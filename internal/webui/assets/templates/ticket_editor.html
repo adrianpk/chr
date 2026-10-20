@@ -1,0 +1,94 @@
+{{define "ticket_modal.html"}}
+<div class="modal-backdrop" data-modal-backdrop>
+  <section class="ticket-modal ticket-editor" data-ticket-editor role="dialog" aria-modal="true" aria-labelledby="ticket-modal-title">
+    <header class="ticket-modal__header">
+      <h2 id="ticket-modal-title">{{if .Ticket.New}}New ticket{{else}}Edit {{.Ticket.Key}}{{end}}</h2>
+      <div class="detail-actions">
+        <button class="button" type="button" data-ticket-maximize aria-pressed="false">Maximize</button>
+        <button class="icon-button" type="button" data-modal-close aria-label="Close ticket editor">×</button>
+      </div>
+    </header>
+    <div class="ticket-modal__body">
+      {{if .Ticket.ReadOnlyReason}}<p class="diagnostic" role="status">{{.Ticket.ReadOnlyReason}}</p>{{end}}
+      <form id="ticket-editor-form" class="ticket-edit-form" method="post" action="/board/ticket/save" hx-post="/board/ticket/save" hx-target="#ticket-save-result" hx-swap="innerHTML" hx-sync="closest [data-ticket-editor]:drop">
+        <input type="hidden" name="action" value="{{if .Ticket.New}}ticket.create{{else}}ticket.update{{end}}">
+        <input type="hidden" name="id" value="{{.Ticket.Key}}">
+        <input type="hidden" name="revision" value="{{.Ticket.Revision}}">
+        <input type="hidden" name="request_id" value="{{.Ticket.RequestID}}">
+        <input type="hidden" name="confirm" value="true">
+        <fieldset class="ticket-edit-layout"{{if .Ticket.ReadOnlyReason}} disabled{{end}}>
+          <div class="ticket-editor-main">
+            <label class="readonly-field"><span>Title</span><input id="ticket-title"{{if index .Ticket.ReadOnly "title"}} readonly aria-describedby="ticket-title-guard"{{else}} name="title" required{{end}} maxlength="8192" value="{{.Ticket.Title}}">{{with index .Ticket.ReadOnly "title"}}<small id="ticket-title-guard">{{.}}</small>{{end}}</label>
+            <label class="readonly-field ticket-description"><span>Description</span>
+              <textarea id="ticket-description"{{if index .Ticket.ReadOnly "body"}} readonly{{else}} name="description" required{{end}}>{{.Ticket.Description}}</textarea>
+              {{with index .Ticket.ReadOnly "body"}}<small>{{.}}</small>{{end}}
+            </label>
+          </div>
+          <div class="ticket-editor-metadata">
+            {{if .Ticket.Phase}}<p class="ticket-system-phase">System phase: <strong>{{.Ticket.Phase}}</strong> · workflow owned</p>{{end}}
+            {{if .Ticket.Slice}}<p>Slice: <strong>{{.Ticket.Slice}}</strong> · immutable membership</p>{{end}}
+            {{range .Ticket.Groups}}
+            <fieldset class="ticket-field-group">
+              <legend>{{.Title}}</legend>
+              <div class="ticket-field-grid">{{range .Fields}}{{template "ticket_editor_field.html" .}}{{end}}</div>
+            </fieldset>
+            {{end}}
+          </div>
+        </fieldset>
+      </form>
+      {{if not .Ticket.New}}
+      {{if .Ticket.WorkflowEnabled}}<div class="detail-actions" aria-label="Ticket workflow controls"><a class="button" data-workflow-ticket href="/workflows?extent=ticket&amp;key={{.Ticket.Key}}">Preview ticket work</a><a class="button" href="/workflows">Retained workflows</a></div>{{end}}
+      <section class="ticket-comments" aria-label="Ticket comments">
+        <div id="ticket-discussion-content">{{template "ticket_discussion.html" .}}</div>
+        <form class="ticket-comments__form" method="post" action="/board/ticket/comment" hx-post="/board/ticket/comment" hx-target="#ticket-discussion-content" hx-swap="innerHTML" hx-sync="closest [data-ticket-editor]:drop">
+          <input type="hidden" name="action" value="ticket.comment">
+          <input type="hidden" name="id" value="{{.Ticket.Key}}">
+          <input type="hidden" name="revision" value="{{.Ticket.Revision}}">
+          <input type="hidden" name="request_id" value="{{.Ticket.CommentRequestID}}">
+          <input type="hidden" name="confirm" value="true">
+          <label class="readonly-field ticket-comments__composer"><span>Add comment</span><textarea name="content" required maxlength="65536"{{if .Ticket.ReadOnlyReason}} disabled{{end}}></textarea></label>
+          <div id="ticket-comment-result" role="status" aria-live="polite"></div>
+          <div class="ticket-comments__actions"><button class="button" type="submit"{{if .Ticket.ReadOnlyReason}} disabled{{end}}>Add comment</button></div>
+        </form>
+      </section>
+      {{end}}
+    </div>
+    <footer class="ticket-editor-footer">
+      <div id="ticket-save-result" role="status" aria-live="polite"></div>
+      <div class="detail-actions"><button class="button" type="button" data-modal-close>Cancel</button><button class="button" type="submit" form="ticket-editor-form"{{if .Ticket.ReadOnlyReason}} disabled{{end}}>{{if .Ticket.New}}Create{{else}}Save changes{{end}}</button></div>
+    </footer>
+  </section>
+</div>
+{{end}}
+
+{{define "ticket_editor_field.html"}}
+<label class="readonly-field{{if or .Multiline (eq .Name "use_case")}} ticket-field-wide{{end}}">
+  <span>{{.Label}}</span>
+  {{if .ReadOnly}}
+    {{if .Multiline}}<textarea readonly>{{.Value}}</textarea>{{else}}<input readonly value="{{.Value}}">{{end}}
+    <small>{{.ReadOnly}}</small>
+  {{else if .Options}}
+    <select name="{{.Name}}">{{$current := .Value}}{{range .Options}}<option value="{{.Value}}"{{if eq .Value $current}} selected{{end}}>{{.Label}}</option>{{end}}</select>
+  {{else if .Multiline}}<textarea name="{{.Name}}" maxlength="8192" rows="3">{{.Value}}</textarea>
+  {{else}}<input name="{{.Name}}" maxlength="8192" value="{{.Value}}">
+  {{end}}
+</label>
+{{end}}
+
+{{define "ticket_discussion.html"}}
+<div{{if eq .Write.Status "ok"}} data-ticket-commented data-revision="{{.Ticket.Revision}}" data-previous-revision="{{.Ticket.PreviousRevision}}" data-request-id="{{.Ticket.CommentRequestID}}"{{end}}>
+  <header class="ticket-comments__header"><h3>Comments</h3><span>{{len .Ticket.Comments}} comments</span></header>
+  {{if .Ticket.Comments}}<div class="ticket-comments__list">{{range .Ticket.Comments}}
+    <article class="ticket-comment"><header><strong>{{.Author}}</strong>{{if .CreatedAt}}<time>{{.CreatedAt}}</time>{{end}}</header><p>{{.Body}}</p></article>
+  {{end}}</div>{{else}}<p class="ticket-comments__empty">No comments yet.</p>{{end}}
+</div>
+{{end}}
+
+{{define "ticket_write_result.html"}}
+<div class="ticket-write-result" data-ticket-write data-write-status="{{.Write.Status}}" data-ticket-action="{{.Write.Operation.Kind}}" data-ticket-key="{{.Write.Operation.ID}}">
+  <p>{{.Write.Summary}}</p>
+  {{if .Write.BlockedReason}}<p>{{.Write.BlockedReason}}</p>{{end}}
+  {{range .Write.Validation}}<p>{{.}}</p>{{end}}
+  {{if eq .Write.Status "stale"}}<a class="button" href="/board/ticket?key={{.Write.Operation.ID}}" hx-get="/board/ticket?key={{.Write.Operation.ID}}" hx-target="#modal-root" hx-swap="innerHTML">Reload and discard edits</a>{{end}}
+</div>
+{{end}}

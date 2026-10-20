@@ -11,6 +11,10 @@ import (
 )
 
 func (s *WorkflowStore) readWorkflowSelection(ctx context.Context) (workflowSelection, error) {
+	return s.readWorkflowSelectionSources(ctx, true)
+}
+
+func (s *WorkflowStore) readWorkflowSelectionSources(ctx context.Context, unprepared bool) (workflowSelection, error) {
 	snapshot, err := s.readSnapshot(ctx)
 	if err != nil {
 		return workflowSelection{}, err
@@ -46,7 +50,7 @@ func (s *WorkflowStore) readWorkflowSelection(ctx context.Context) (workflowSele
 		return workflowSelection{}, fmt.Errorf("workflow slice observation bound exceeded")
 	}
 
-	if err := s.readUnpreparedTickets(ctx, &selection, paths); err != nil {
+	if err := s.appendWorkflowUnprepared(ctx, &selection, paths, unprepared); err != nil {
 		return workflowSelection{}, err
 	}
 
@@ -217,4 +221,12 @@ func (s *WorkflowStore) workflowEvidenceHash(relative string) (string, error) {
 	}
 
 	return workflowHash(data), nil
+}
+
+func (s *WorkflowStore) appendWorkflowUnprepared(ctx context.Context, selection *workflowSelection, paths map[string]bool, enabled bool) error {
+	if !enabled {
+		return nil
+	}
+
+	return s.readUnpreparedTickets(ctx, selection, paths)
 }

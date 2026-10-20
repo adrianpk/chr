@@ -3,7 +3,7 @@
 This artifact preserves the completed output of the tictactoe QA exercise.
 
 The resettable seed fixture remains under `qa/ref/003/tictactoe`. This artifact
-captures the active project after Chryso generated the spec, plan,
+captures the active project after chr generated the spec, plan,
 tracking document, tickets, and ran Codex-backed agent work for all generated
 tickets.
 

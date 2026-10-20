@@ -88,7 +88,7 @@ blockers.
 
 ## Assumptions
 
-- Chryso continues to operate serially with one active agent role in the
+- chr continues to operate serially with one active agent role in the
   repository at a time.
 - Ticket metadata remains the source of truth for workflow state.
 - Remote pull request providers remain the place for provider-native merge and

@@ -136,6 +136,42 @@ An empty topic list permits non-topic messages only. Bots, anonymous senders,
 channel posts, forwarded messages and unsupported content cannot enter dispatch.
 Project listing returns only enabled, explicitly allowed registry entries.
 
+## Harness defaults
+
+Select an enabled, authorized registered project with `/project <name>`, then
+send `/harness` as a new message. Explicit project selection is required even
+when a default project is configured. The reply shows worker and generation
+defaults, up to eight configured profiles with local readiness for each role,
+and up to four retained worker bindings. Local readiness does not verify remote
+authentication. Inspection does not allocate a conversation or call a model.
+
+```text
+/harness
+/harness worker=code generation=writing
+/harness generation=-
+```
+
+Use your privately configured profile names. Omitted roles stay unchanged;
+`-` restores legacy dispatch for that role. The command accepts only these two
+named role fields. Executables, runtime images, credentials and model endpoint
+setup remain local.
+
+A change produces a ten-minute confirmation bound to the mapped operator,
+selected project/root, exact role/profile choices, observed configuration
+revision and original request. Reply `confirm` or `cancel`, use its button, or
+send `/answer <token> confirm` (or `cancel`). Both changed roles publish together.
+Changed project selection, root, actor mapping, access, configuration revision
+or unavailable local setup rejects the old confirmation. Inspect `/harness`
+and issue a new change after resolving the condition.
+
+Changes become visible to other interfaces and new operations without restarting
+the receiver. Running, paused, retried and resumed work keeps its admitted
+binding, including nested generation. Retrying the same confirmation recovers
+its original result; reusing its token cannot exchange choices. Lost Telegram
+send acknowledgements produce a labelled notice retry, preserving the request
+identity. Private setup and configuration changes cannot be authorized by a
+model proposal.
+
 ## Conversations and capture
 
 | Command | Behavior |

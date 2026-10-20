@@ -1,6 +1,6 @@
 ---
 title: "Ticket Review Integration Plan"
-project_id: "chryso"
+project_id: "chr"
 case_slug: "ticket-execution-loop"
 status: "planned"
 source_request_id: "chat-2026-06-01-ticket-review-integration"
@@ -12,7 +12,7 @@ mirror: ".prj/plans/slicing-ticket-review-integration-plan.md"
 # Ticket Review Integration Plan
 
 This plan mirrors `.prj/plans/slicing-ticket-review-integration-plan.md` during
-Chryso self-adoption. The `.prj` plan remains the operational source for
+chr self-adoption. The `.prj` plan remains the operational source for
 slice branch names, PR titles, and implementation report paths.
 
 ## Slice Map

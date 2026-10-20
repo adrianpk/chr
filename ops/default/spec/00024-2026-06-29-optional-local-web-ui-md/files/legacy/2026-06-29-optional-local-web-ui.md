@@ -16,7 +16,7 @@ Related:
 
 ## Summary
 
-Chryso should provide an optional local Web UI for the same managed-project
+chr should provide an optional local Web UI for the same managed-project
 operations currently available through the TUI and CLI.
 
 The Web UI is an additional operator surface. It is not a replacement for the
@@ -32,7 +32,7 @@ The Web UI must:
 - use the same project-local Markdown files and user-level indexes as the TUI;
 - stay synchronized with TUI and CLI changes by reloading shared state;
 - preserve the existing TUI board model and operational views;
-- use a Chryso-specific visual palette and simple agent avatar;
+- use a chr-specific visual palette and simple agent avatar;
 - avoid introducing a separate product workflow.
 
 ## Motivation
@@ -118,8 +118,8 @@ composition should match the reference application selected during
 implementation, across Board, Dash, Dumps, Quizzes, Specs, Plans, Project,
 Cases, Help, and command surfaces. Use that reference for layout, spacing, pane
 structure, card density, navigation, editing surfaces, and operational
-ergonomics. Preserve the Chryso TUI operational model and change only the
-visual identity needed to make the UI belong to Chryso.
+ergonomics. Preserve the chr TUI operational model and change only the
+visual identity needed to make the UI belong to chr.
 
 ### No Workflow Expansion
 
@@ -154,7 +154,7 @@ The user runs:
 chr web serve
 ```
 
-Chryso starts an HTTP server bound to `127.0.0.1` and prints:
+chr starts an HTTP server bound to `127.0.0.1` and prints:
 
 ```text
 web ui: http://127.0.0.1:7331
@@ -181,7 +181,7 @@ web:
   port: 7331
 ```
 
-Chryso prints an explicit warning:
+chr prints an explicit warning:
 
 ```text
 warning: web ui is bound to a non-loopback interface
@@ -190,7 +190,7 @@ warning: web ui is bound to a non-loopback interface
 The user is responsible for private-network access, firewall rules, reverse
 proxy, private tunnel, or TLS termination.
 
-Chryso should remain useful behind private overlay networks and local
+chr should remain useful behind private overlay networks and local
 tunnels, but it should not require or manage those systems.
 
 ## Configuration
@@ -447,7 +447,7 @@ HTTP route
 ## Internal Web UI Helpers
 
 The Web UI may copy and adapt small local helper primitives for HTML and htmx
-work into Chryso-owned internal packages.
+work into chr-owned internal packages.
 
 The copied helpers must live under an internal Web UI boundary, such as:
 
@@ -470,11 +470,11 @@ Allowed helper categories:
 Rules:
 
 - copy or adapt only the primitives needed by the current slice;
-- keep helper package names and APIs local to Chryso;
+- keep helper package names and APIs local to chr;
 - do not add a module dependency on the source helper library;
 - do not import Web UI helpers from business, core, app, persistence, or TUI
   packages;
-- do not put Chryso business behavior in helper packages;
+- do not put chr business behavior in helper packages;
 - add local tests for copied or adapted primitives;
 - preserve clear escaping boundaries by using `html/template` types only where
   the rendered HTML is intentionally trusted.
@@ -912,15 +912,15 @@ Rules:
   dash, help, and command interaction patterns closely;
 - preserve dense operational panes;
 - preserve browser-first operational ergonomics while mapping actions to
-  Chryso semantics;
+  chr semantics;
 - avoid marketing-page composition;
 - avoid decorative hero sections;
 - avoid redesigning the information architecture;
-- change only the identity layer needed for Chryso.
+- change only the identity layer needed for chr.
 
 ### Palette
 
-Use a Chrysocolla-inspired palette that remains close enough to Go-adjacent
+Use a Chrcolla-inspired palette that remains close enough to Go-adjacent
 colors to feel natural for a Go software tool.
 
 Suggested tokens:
@@ -950,7 +950,7 @@ The final palette should be checked against:
 
 ### Avatar
 
-The central avatar should be a simple Chryso agent mark.
+The central avatar should be a simple chr agent mark.
 
 Required traits:
 
@@ -963,7 +963,7 @@ Required traits:
 - usable at small sizes;
 - usable as favicon or app mark later.
 
-The avatar should use the Chryso palette, especially cyan, turquoise, and
+The avatar should use the chr palette, especially cyan, turquoise, and
 stone tones.
 
 It must not become the center of the product experience. The board and
@@ -1178,7 +1178,7 @@ Docs must clearly state:
 | Slice 4 | View parity foundations | Add Cases, Dumps, Quizzes, Specs, and Plans read views with shared view models and refresh behavior. |
 | Slice 5 | Confirmed write actions | Add project metadata, case metadata, dump editing, status transitions, and confirmation flow. |
 | Slice 6 | Work actions and Dash parity | Add start-work, run-ready, repair, stop request, busy states, and event refresh. |
-| Slice 7 | Visual identity and reference layout pass | Apply the selected reference layout, Chryso palette, avatar, accessibility checks, and screenshot-based verification. |
+| Slice 7 | Visual identity and reference layout pass | Apply the selected reference layout, chr palette, avatar, accessibility checks, and screenshot-based verification. |
 | Slice 8 | Security and exposure hardening | Add token mode, CORS policy, CSRF or same-origin write guard, non-loopback warnings, and docs. |
 
 ## Open Questions

@@ -20,7 +20,7 @@ why a work run is blocked before launching an expensive agent loop.
   Git state.
 - Added `chr work doctor` to print readiness status for the resolved project.
 - Classified common blockers such as wrong branch, missing integration branch,
-  dirty worktree, visible Chryso runtime artifacts, missing remote ref,
+  dirty worktree, visible chr runtime artifacts, missing remote ref,
   branch behind remote, Git operation in progress, Git unavailable, and invalid
   work policy.
 - Missing remote refs are reported as `missing_remote_ref`, not surfaced as raw
@@ -32,7 +32,7 @@ why a work run is blocked before launching an expensive agent loop.
   this slice.
 - `no_git_enforcement` mode returns ready without calling Git.
 - Runtime artifacts and user-visible worktree changes are split into separate
-  diagnostics so Slice 3 can repair Chryso-owned runtime dirtiness without
+  diagnostics so Slice 3 can repair chr-owned runtime dirtiness without
   hiding user edits.
 - CLI output uses stable line-oriented fields consistent with existing work
   commands.

@@ -1,6 +1,6 @@
 # Board Ticket Operations Slicing Tracker
 
-Status: in progress
+Status: delivered
 
 Plan: `.prj/plans/slicing-board-ticket-operations-plan.md`
 
@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-board-ticket-operations-plan.md`
 
 Slicing name: Board Ticket Operations
 
-Active slice number: Slice 12
+Active slice number: none
 
-Active slice short name: board docs validation
+Active slice short name: none
 
-Expected branch name: `feat/slice-12-board-docs-validation`
+Expected branch name: none
 
-Expected PR title: `feat(slice-12): board docs validation`
+Expected PR title: none
 
 Expected report path:
-`.prj/reports/slices/board-ticket-operations/slice-12-board-docs-validation.md`
+none
 
 Prerequisite PRs or delivered work:
 
@@ -39,7 +39,7 @@ Prerequisite PRs or delivered work:
 - [x] Select the first pending slice for implementation.
 - [x] Complete all planned slices.
 - [x] Validate completed slicing with `make verify`.
-- [ ] Decide whether post-slice tuning is needed.
+- [x] Decide whether post-slice tuning is needed.
 
 ## Slice Status
 
@@ -56,7 +56,7 @@ Prerequisite PRs or delivered work:
 | Slice 9: Attention View | Delivered | `feat/slice-9-attention-view` | `feat(slice-9): attention view` | `.prj/reports/slices/board-ticket-operations/slice-9-attention-view.md` | PR `#221`; virtual attention view and plain-text reasons; `make verify` passed. |
 | Slice 10: Ticket Detail Surface | Delivered | `feat/slice-10-ticket-detail-surface` | `feat(slice-10): ticket detail surface` | `.prj/reports/slices/board-ticket-operations/slice-10-ticket-detail-surface.md` | PR `#222`; synopsis, source refs, Markdown previews, and detail tests; `make verify` passed. |
 | Slice 11: Maximized Board | Delivered | `feat/slice-11-maximized-board` | `feat(slice-11): maximized board` | `.prj/reports/slices/board-ticket-operations/slice-11-maximized-board.md` | PR `#223`; responsive maximized normal columns and separate attention rendering; `make verify` passed. |
-| Slice 12: Board Docs Validation | In review | `feat/slice-12-board-docs-validation` | `feat(slice-12): board docs validation` | `.prj/reports/slices/board-ticket-operations/slice-12-board-docs-validation.md` | User guide, TUI reference, command reference, parity matrix, SQLite/ticket references; `make verify` passed. |
+| Slice 12: Board Docs Validation | Delivered | `feat/slice-12-board-docs-validation` | `feat(slice-12): board docs validation` | `.prj/reports/slices/board-ticket-operations/slice-12-board-docs-validation.md` | PR #224 merged into dev; user and reference documentation delivered; `make verify` passed. |
 
 ## Slice 1: Ticket Metadata Contract
 
@@ -179,7 +179,7 @@ Candidate tasks:
 
 - [x] T5.1 Add synopsis to `CreateTicketRequest` and CLI flags.
 - [x] T5.2 Default Board/TUI-created tickets to `backlog`.
-- [x] T5.3 Validate required metadata for Chryso-created tickets.
+- [x] T5.3 Validate required metadata for chr-created tickets.
 - [x] T5.4 Use SQLite-backed key allocation or the Slice 3 allocation boundary.
 - [x] T5.5 Refresh affected ticket index after creation.
 - [x] T5.6 Add CLI/service tests.
@@ -366,8 +366,8 @@ Validation:
 
 ## Completion
 
-Planned slices are implemented through Slice 12 and awaiting final Slice 12
-review/merge.
+All twelve slices are integrated into dev. Closure audit on 2026-10-20 verified
+PR #224 merged at `cc2d7d87e864425b4b40061b7573949b7dc7caaf`, an ancestor of dev.
 
 Final validation:
 
@@ -378,9 +378,9 @@ Final validation:
 
 Post-slice tuning needed:
 
-- Pending.
+- No additional tuning slice is scheduled for this completed delivery set.
 
-Known deferred work:
+Historical deferred ideas, retained as context rather than active delivery work:
 
 - Full `.chr/operators/<operator-id>/...` multi-operator layout.
 - Manual Markdown sync with LLM-assisted empty synopsis generation.

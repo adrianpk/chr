@@ -6,7 +6,7 @@ Date: 2026-10-08
 
 Approved: 2026-10-08
 
-Product: CHR
+Product: chr
 
 Model: [Ticket-Native Work Model](ticket-native-workflow-model.md)
 
@@ -14,14 +14,14 @@ Plan: [Ticket-Native Work Delivery](../../plan/ticket-native-workflow.md)
 
 Tracker: [Ticket-Native Work Tracker](../../tracker/ticket-native-workflow.md)
 
-This specification defines the approved CHR contract. Commands,
+This specification defines the approved chr contract. Commands,
 configuration keys, records, and guarantees below are requirements for delivery,
 not claims about the current executable. Specification approval and implementation
 authorization remain separate decisions.
 
 ## 1. Outcome and Scope
 
-CHR must execute approved work through durable tickets, from selection through
+chr must execute approved work through durable tickets, from selection through
 verified integration. A user can resolve an independent ticket, one slice, one
 slice set, the slices of a use case, or a filtered queue of loose tickets. The
 same state and rules serve automated runners and manual Codex/Pi work.
@@ -36,12 +36,12 @@ readable. Historical conversion, release publication, and promotion to `main`
 are outside this execution contract. The integration target is explicit; the
 normal development target is `dev`.
 
-## 2. Verified CHR Baseline and Required Changes
+## 2. Verified chr Baseline and Required Changes
 
 The baseline inspected for this specification is commit
 `d36dee206c3e4ad3ab6a6230365fd0812b5923a9` on `dev`.
 
-| Capability | Current CHR evidence | Required contract |
+| Capability | Current chr evidence | Required contract |
 | --- | --- | --- |
 | Ticket identity and classification | [Ticket](../../../../internal/core/ticket.go) has `key`, `use_case`, `project_area`, priority, severity, and a textual `slice`. | Preserve these concepts; add stable hierarchy identity and task order. |
 | Plan materialization | [Slice detail](../../../../internal/core/plan_slice_detail.go) contains tasks; [plan service](../../../../internal/app/service_plan.go) creates slice tickets. | Materialize one ticket for every task and retain one PR for the owning slice. |
@@ -97,7 +97,7 @@ Integrated history and earlier closure receipts remain immutable.
 
 | Operating mode | Authority | Tracker role | Exit condition |
 | --- | --- | --- | --- |
-| `tickets` | Ticket records own task state; the owning set record owns slice contracts and integration receipts. | Optional generated view. It has no editable execution authority. | Normal target mode. |
+| `tickets` | Ticket records own task state; the owning set record owns slice contracts and integration receipts. | Required order-only companion for revision-bound plans; optional v1 view for existing workflows. Neither imports editable execution state. | Normal target mode. |
 | `tracker_compat` | One explicitly selected existing tracker owns the unadopted legacy workflow. | Existing execution map. Ticket projections are read-only and excluded from ticket-native selection. | Explicit adoption of selected active work, with identities, revisions, and delivery evidence reconciled. |
 
 New executable work uses `tickets`. Transitional mode is limited to workflows
@@ -109,12 +109,30 @@ ticket before execution. Repair of the same obligation creates another attempt
 on that ticket; an added obligation creates a new linked ticket. Neither a
 tracker checkbox nor an agent statement completes a ticket.
 
-Tracker export flows from authoritative records to the projection only. Export
-failure records `projection_stale`, preserves the successful domain transition,
-and disables continuation through that stale projection. Direct ticket-native
-execution can continue. A conflicting tracker edit is reported and is never
-imported automatically. Re-export requires either an unchanged generated file or
-explicit permission to replace the changed projection.
+Revision-bound plans retain an internal `chr-tracker/v2` Markdown companion for
+every generated revision. Before approved materialization, it declares stable
+planned identities and order without allocated tickets or execution authority.
+Approved native materialization binds canonical tickets and publishes the set,
+map, provenance and receipt through the existing recoverable workflow journal.
+A retry reuses the same allocation. A later draft does not change an active set;
+applying approved changes uses its guarded amendment operation and retains
+completed tickets, receipts and earlier revision maps.
+
+V2 hashes and renders project/namespace, plan identity/revision/body hash,
+materialization/set identity, ordered slice/task IDs and titles, and canonical
+ticket references. Status, phase, claims, attempts, review, delivery/closure state
+and whole-record revisions/hashes are excluded. Legacy progress cells stay blank.
+Ticket progress leaves map bytes and freshness unchanged. The current map is
+included in worker input; live tickets and receipts determine remaining work.
+A missing or stale required map blocks preparing execution context until repair.
+It never rolls back a successfully committed ticket transition.
+
+Tracker export flows from native records to the projection only. Conflicting
+edits are reported and never imported. Replacement requires the exact observed
+output hash; repair launches no work. Existing optional v1 views retain their
+progress projection, and their failure does not prevent direct native execution.
+Reading legacy artifacts or `tracker_compat` state never upgrades their schema
+or adopts them implicitly.
 
 Manual runners use the same claim, checkpoint, validation, and reconciliation
 operations. They can report a commit and evidence for host verification. They
@@ -171,12 +189,12 @@ Exhaustion completes that invocation; it does not subscribe to future tickets.
 
 ## 6. Task, Slice, and Set Lifecycle
 
-Before a claim, CHR validates expected outcome, scope, acceptance criteria,
+Before a claim, chr validates expected outcome, scope, acceptance criteria,
 validation commands, hierarchy, prerequisites, observed revisions, and target.
 Explicitly selected unprepared work returns a blocker. Queue discovery excludes
 unprepared work and reports the reason and count.
 
-For one slice, CHR must:
+For one slice, chr must:
 
 1. Reconstruct tickets, attempts, branch/worktree, PR, and integration evidence.
 2. Reconcile retained results and skip already verified work.
@@ -228,7 +246,7 @@ general-purpose parallel DAG scheduler.
 Within a slice, a task dependency needs validated evidence from the current
 cumulative branch. A dependency outside that slice needs verified integration
 on the selected target. A status label alone satisfies neither condition.
-Dependencies outside an invocation block it; CHR does not add them to its scope.
+Dependencies outside an invocation block it; chr does not add them to its scope.
 Resume observes them again. A blocker stops that invocation before later work;
 it does not stop unrelated independent lanes.
 
@@ -238,7 +256,7 @@ admitted work resumes from its checkpoint; users cannot make a completed ticket
 eligible by adding `done` to a status filter. Legacy aliases remain readable,
 but execution requires explicit identity and evidence normalization.
 
-Keep `project_area` as CHR's canonical free-form classification. Trim values;
+Keep `project_area` as chr's canonical free-form classification. Trim values;
 compare them exactly and case-sensitively, as the current query does. Filters
 combine with AND across fields and OR within an area's or rank's value list;
 every requested tag must match. Exact priority/severity lists and optional
@@ -300,7 +318,7 @@ Merge proof binds source/base and resulting tree; rebase proof binds base and
 ordered commit trees; squash proof binds base and exactly one combined commit.
 Original source ancestry alone is insufficient for rewritten histories.
 
-Immediately before publication, CHR rechecks policy, candidate revision, canonical
+Immediately before publication, chr rechecks policy, candidate revision, canonical
 PR repository/number/head/base, target SHA, validation evidence, and any approval
 binding. A moved target requires preparing and validating the new combined result.
 It cannot reuse approval for different content. Approval is for one exact
@@ -309,7 +327,7 @@ candidate and does not approve later slices.
 Publication must atomically guard the source and validated target base, through
 the provider's capability or an equivalent guarded fast-forward operation on
 the same canonical PR. A local target lock cannot exclude external writers.
-If the selected provider/method cannot protect that boundary, CHR blocks it;
+If the selected provider/method cannot protect that boundary, chr blocks it;
 checking the target only before an unguarded API call is insufficient.
 
 Record submission intent before provider IO. A timeout or lost response retains
@@ -356,7 +374,7 @@ not hold the publication lock until a submission is authorized. An uncertain
 submitted result keeps target exclusion even after worker/lease expiry.
 
 If lane A integrates while lane B develops, B may finish local work. Before B
-publishes, CHR refreshes the target, prepares B against that target, validates
+publishes, chr refreshes the target, prepares B against that target, validates
 the combined result, and repeats review when its bound inputs changed. A conflict
 blocks B; A remains integrated. Workers never force-push the shared target or
 edit another lane's worktree. Resource scarcity produces `waiting_capacity`,
@@ -378,7 +396,7 @@ new work or inventing completion events.
 Restart reconciles partial writes, live/dead ownership, retained candidate and
 PR identities, submitted operations, actual target history, and ticket finalization
 before admitting another task. Incompatible manual edits return
-`reconciliation_required`; CHR never overwrites them with an old worker result.
+`reconciliation_required`; chr never overwrites them with an old worker result.
 Finalizing several task tickets after a slice merge is replayable and cannot
 create another PR, merge, or receipt.
 
@@ -477,7 +495,7 @@ and race-sensitive tests; this specification-only change requires document check
 ## 13. Accepted Decisions
 
 The requested workflow, per-task tickets, one PR per slice, prospective adoption,
-and independent CHR contract are approved requirements. The maintainer accepted
+and independent chr contract are approved requirements. The maintainer accepted
 the following design decisions with this specification on 2026-10-08:
 
 | Decision | Accepted contract |

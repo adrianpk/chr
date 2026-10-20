@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/harness"
 )
 
 func TestServiceCreateDumpUsesSuccessfulCurationProvider(t *testing.T) {
@@ -25,8 +26,9 @@ func TestServiceCreateDumpUsesSuccessfulCurationProvider(t *testing.T) {
 	}
 
 	_, err := operations.CreateDump(DumpCreateRequest{
-		Title:   "Curated Notes",
-		Content: "rough dump body",
+		OperationID: dumpRequestID(""),
+		Title:       "Curated Notes",
+		Content:     "rough dump body",
 	})
 	if err != nil {
 		t.Fatalf("CreateDump returned error: %v", err)
@@ -93,12 +95,12 @@ func TestCodexDumpCurationProviderUsesAgentRunner(t *testing.T) {
 	writeServiceWorkspaceQueryFixture(t, projectDir)
 
 	runner := &fakeDumpCurationAgentRunner{
-		result: core.AgentRunResult{
+		result: harness.AgentRunResult{
 			ID:     "dump-curation-trace-dump",
 			Output: []byte(`{"polished_body":"Polished body.","highlights":["Source point."],"warnings":[]}`),
 		},
 	}
-	provider := codexDumpCurationProvider{
+	provider := harnessDumpCurationProvider{
 		ProjectDir: projectDir,
 		Runner:     runner,
 	}
@@ -218,15 +220,12 @@ type fakeDumpCurationProvider struct {
 }
 
 type fakeDumpCurationAgentRunner struct {
-	request core.AgentRunRequest
-	result  core.AgentRunResult
+	request harness.AgentRunRequest
+	result  harness.AgentRunResult
 	err     error
 }
 
-func (r *fakeDumpCurationAgentRunner) RunAgent(
-	_ context.Context,
-	request core.AgentRunRequest,
-) (core.AgentRunResult, error) {
+func (r *fakeDumpCurationAgentRunner) RunAgent(_ context.Context, request harness.AgentRunRequest) (harness.AgentRunResult, error) {
 	r.request = request
 
 	return r.result, r.err

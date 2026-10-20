@@ -28,7 +28,7 @@ func TestContextPackageMaterializerWritesArtifactLayout(t *testing.T) {
 		t.Fatalf("MaterializeContextPackage returned error: %v", err)
 	}
 
-	assertContextPackageFile(t, composition.Paths.MainContextPath, "Codex Worker Context")
+	assertContextPackageFile(t, composition.Paths.MainContextPath, "Worker Context")
 	assertContextPackageFile(t, composition.Paths.AgentPath, "# Agent")
 	assertContextPackageFile(t, composition.Paths.ProjectPath, "# Project")
 	assertContextPackageFile(t, composition.Paths.ProtocolsPath, "# Protocols")

@@ -1,4 +1,4 @@
-# Chryso CLI Output Polish Notes
+# chr CLI Output Polish Notes
 
 Status: Draft note
 
@@ -79,9 +79,9 @@ session: created
 id: auth-20260522-063839
 target: spec
 topic: CLI blog project validation
-path: /home/adrian/Projects/labs/ghc/projects/chr-blog-work/.chr/authoring/sessions/auth-20260522-063839/session.md
-transcript: /home/adrian/Projects/labs/ghc/projects/chr-blog-work/.chr/authoring/sessions/auth-20260522-063839/transcript.md
-artifacts: /home/adrian/Projects/labs/ghc/projects/chr-blog-work/.chr/authoring/sessions/auth-20260522-063839/artifacts.md
+path: /workspaces/labs/ghc/projects/chr-blog-work/.chr/authoring/sessions/auth-20260522-063839/session.md
+transcript: /workspaces/labs/ghc/projects/chr-blog-work/.chr/authoring/sessions/auth-20260522-063839/transcript.md
+artifacts: /workspaces/labs/ghc/projects/chr-blog-work/.chr/authoring/sessions/auth-20260522-063839/artifacts.md
 ```
 
 This is technically useful, but too verbose for the default success path. The
@@ -124,13 +124,13 @@ session: created
 id: auth-20260522-065402
 target: spec
 topic: CLI blog project validation
-path: /home/adrian/Projects/labs/ghc/projects/chr-blog-work/.chr/authoring/sessions/auth-20260522-065402/session.md
-transcript: /home/adrian/Projects/labs/ghc/projects/chr-blog-work/.chr/authoring/sessions/auth-20260522-065402/transcript.md
-artifacts: /home/adrian/Projects/labs/ghc/projects/chr-blog-work/.chr/authoring/sessions/auth-20260522-065402/artifacts.md
+path: /workspaces/labs/ghc/projects/chr-blog-work/.chr/authoring/sessions/auth-20260522-065402/session.md
+transcript: /workspaces/labs/ghc/projects/chr-blog-work/.chr/authoring/sessions/auth-20260522-065402/transcript.md
+artifacts: /workspaces/labs/ghc/projects/chr-blog-work/.chr/authoring/sessions/auth-20260522-065402/artifacts.md
 quiz: planned
 dry_run: false
 session: auth-20260522-065402
-path: /home/adrian/Projects/labs/ghc/projects/chr-blog-work/.chr/quizzes/auth-20260522-065402-cli-blog-project-validation.md
+path: /workspaces/labs/ghc/projects/chr-blog-work/.chr/quizzes/auth-20260522-065402-cli-blog-project-validation.md
 questions: 6
 ```
 
@@ -274,7 +274,7 @@ What target-specific details should shape the spec artifact?
 
 These questions are too generic to reliably cook a high-quality spec from a
 real project. They are usable as a minimal editable checklist, but they are not
-equivalent to the questionnaire behavior Chryso needs for useful
+equivalent to the questionnaire behavior chr needs for useful
 knowledge extraction.
 
 Useful questionnaire behavior requires a context-aware question engine and a
@@ -288,7 +288,7 @@ stronger prompt contract:
 - repeated or malformed questions have fallback behavior;
 - candidate questions are kept separate from final answered quiz entries.
 
-Current Chryso static quiz generation is deterministic and hardcoded. It
+Current chr static quiz generation is deterministic and hardcoded. It
 does not inspect the project, the topic beyond naming the file, the target
 artifact shape, existing docs, code, tickets, or prior answers. Therefore, it
 cannot currently generate inquisitive project-specific questions.
@@ -309,7 +309,7 @@ Potential direction:
 - name modes clearly so users understand whether they are getting a static
   template or context-aware quiz generation.
 
-The model should remain Chryso-native:
+The model should remain chr-native:
 
 - state lives inside the managed project under `.chr/`;
 - generated questions, answers, curated notes, and promotions are Markdown-first
@@ -387,11 +387,11 @@ workspace directory and should be treated as a product invariant.
 Observed generated manifest content:
 
 ```md
-# Chryso Workspace
+# chr Workspace
 
 ## Identity
 
-- system: Chryso
+- system: chr
 - command: chr
 - workspace root: .chr
 
@@ -439,7 +439,7 @@ Suggested categories:
 - `docs/reference/`
 - `docs/explanation/`
 
-## Chryso Artifacts
+## chr Artifacts
 
 Use `.chr/` for project-local operational artifacts such as tickets, plans, trackers, reports, context, and runtime traces.
 
@@ -454,38 +454,38 @@ Use `.chr/` for project-local operational artifacts such as tickets, plans, trac
 Potential issue:
 
 `DOCUMENTING.md` has historically meant "how this project documents itself."
-Inside a managed project, it currently also describes where Chryso stores
+Inside a managed project, it currently also describes where chr stores
 its own operational artifacts. That may be useful, but it creates a mixed
 purpose:
 
 - project documentation rules;
-- Chryso workspace/artifact placement rules;
+- chr workspace/artifact placement rules;
 - agent protocol hints.
 
-The `Chryso Artifacts` section is especially self-referential. It explains
-Chryso's internal workspace model inside a document that otherwise reads as
+The `chr Artifacts` section is especially self-referential. It explains
+chr's internal workspace model inside a document that otherwise reads as
 general documentation guidance for the project.
 
 Stronger concern:
 
 The layout and documentation shape of `.chr/` operational artifacts should not
 be project-influencable convention. Tickets, drafts, plans, trackers, reports,
-context packages, indexes, and runtime traces are Chryso operational
+context packages, indexes, and runtime traces are chr operational
 contracts. Their placement and canonical structure should be enforced by the
 binary, not negotiated through a generated Markdown convention document.
 
 Project documentation conventions can guide `docs/` and other user-authored
-material. They should not define or override Chryso's operational artifact
+material. They should not define or override chr's operational artifact
 layout.
 
 Questions to revisit:
 
-- Should project documentation rules and Chryso artifact rules live in the
+- Should project documentation rules and chr artifact rules live in the
   same protocol document?
 - Should `.chr/` artifact placement be explained in the workspace manifest or a
   dedicated workspace guide instead?
 - Should `DOCUMENTING.md` stay focused on durable project docs only?
-- Should protocol docs avoid naming Chryso unless the section is explicitly
+- Should protocol docs avoid naming chr unless the section is explicitly
   about the `.chr/` workspace?
 
 Potential direction:

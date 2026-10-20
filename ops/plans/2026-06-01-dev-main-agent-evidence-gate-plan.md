@@ -11,7 +11,7 @@ Tracker: `ops/trackers/2026-06-01-dev-main-agent-evidence-gate-tracker.md`
 
 Implement the approved dev-to-main gate spec as a sequence of behavior-first
 slices. The gate must produce objective promotion evidence for Forgejo and
-Woodpecker workflows without treating manual work outside the Chryso board
+Woodpecker workflows without treating manual work outside the chr board
 as an error.
 
 ## Delivery Rules
@@ -82,22 +82,22 @@ Tasks:
 
 ## Slice 3: Agent Evidence Classification
 
-Goal: classify Chryso-managed evidence separately from manual or external
+Goal: classify chr-managed evidence separately from manual or external
 changes without producing false positives.
 
 Behavior:
 
-- The gate discovers available Chryso run/report artifacts.
+- The gate discovers available chr run/report artifacts.
 - Run reports are the minimum evidence for v1 agent-managed work.
 - Manual or external changes are listed as informational by default.
-- Missing evidence for Chryso-recorded work is a failure.
+- Missing evidence for chr-recorded work is a failure.
 
 Tasks:
 
 - T3.1 Discover gate-relevant reports under `.chr/default/reports`.
 - T3.2 Classify agent-managed evidence from available run reports.
 - T3.3 Classify unmatched changed files as manual or external info.
-- T3.4 Add failure checks for missing Chryso-owned run evidence.
+- T3.4 Add failure checks for missing chr-owned run evidence.
 - T3.5 Add tests for agent-managed, manual/external, and missing-evidence cases.
 - T3.6 Add slice report and tracker updates.
 

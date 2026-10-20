@@ -9,29 +9,39 @@
     <link rel="stylesheet" href="/assets/chr.css">
     <script src="/assets/htmx.min.js" defer></script>
     <script src="/assets/chr.js" defer></script>
+    <script src="/assets/dash.js" defer></script>
+    <script src="/assets/quiz.js" defer></script>
+    <script src="/assets/spec.js" defer></script>
+    <script src="/assets/plan.js" defer></script>
   </head>
   <body>
     <div class="app-shell">
       <div class="top-chrome" data-nav-state="expanded">
         <header class="app-header">
           <div class="header-spacer" aria-hidden="true"></div>
-          <a class="brand-lockup" href="/board" aria-label="Chryso board">
+          <a class="brand-lockup" href="/board" aria-label="chr board">
             <span class="brand-mark" aria-hidden="true">
-              <img src="/assets/chr-logo.png" alt="">
+              <img src="/assets/chr-logo-alpha.png" alt="">
             </span>
-            <span class="brand-title">Chryso</span>
+            <span class="brand-title">chr</span>
           </a>
           <div class="header-context" aria-label="Current context">
-            <a class="context-selector" href="/project">
+            <div class="context-selector context-selector--static">
               <span>Project</span>
               <strong>{{.Shell.ProjectName}}</strong>
-            </a>
+            </div>
+            {{if .Shell.HarnessesEnabled}}<a class="button harness-context" href="/project/harnesses" hx-get="/project/harnesses" hx-target="#modal-root" hx-swap="innerHTML">Harnesses</a>{{end}}
             <div class="context-selector context-selector--muted">
               <span>Actor</span>
               <strong>local</strong>
             </div>
             <input class="nav-pin" id="nav-pin" type="checkbox" checked>
             <label class="nav-pin-toggle" for="nav-pin">Pin</label>
+            {{if .Shell.LoginEnabled}}
+            <form method="post" action="/logout">
+              <button class="button" type="submit">Log out</button>
+            </form>
+            {{end}}
           </div>
         </header>
         <div class="top-nav-rail">
@@ -39,18 +49,36 @@
         </div>
         <button class="top-chrome-handle" type="button" aria-label="Show navigation" aria-expanded="true"></button>
       </div>
-      <main class="app-main">
+      <main class="app-main{{if eq .View "catalog"}} catalog-page{{end}}{{if and (eq .View "catalog") (eq .Catalog.Family "quizzes")}} quiz-catalog-page{{end}}{{if and (eq .View "artifact_detail") .Detail.Quiz}} quiz-answer-page{{end}}">
+        {{if not (or (and (eq .View "catalog") (eq .Catalog.Family "quizzes")) (and (eq .View "artifact_detail") .Detail.Quiz))}}
         <header class="page-header">
           <div>
-            <h1>{{.Shell.ProjectName}} {{.Title}}</h1>
+            <h1>{{.Title}}</h1>
           </div>
+          {{if eq .View "board"}}
+            <a class="button" href="/board/ticket?new=1" hx-get="/board/ticket?new=1" hx-target="#modal-root" hx-swap="innerHTML">New</a>
+          {{end}}
           {{if eq .View "catalog"}}
-            {{if eq .Catalog.Family "dumps"}}
+            {{if eq .Catalog.Family "cases"}}
+              <button class="button" type="button" data-modal-template="case-create-modal">New</button>
+            {{end}}
+            {{if and (eq .Catalog.Family "plans") .Catalog.PlanChoices}}
+              <button class="button button--primary" type="button" data-modal-template="plan-generate-modal">Generate Plan</button>
+            {{end}}
+            {{if eq .Catalog.Family "specs"}}
+              <div class="page-header-actions">
+                <a class="button" href="/specs/detail" hx-get="/specs/detail/fragment" hx-target="#modal-root" hx-swap="innerHTML">New</a>
+                {{if .Catalog.Cases}}<button class="button" type="button" data-modal-template="spec-generate-modal">Generate</button>{{end}}
+              </div>
+{{end}}
+{{if eq .Catalog.Family "dumps"}}
               {{template "dump_page_actions.html" .}}
             {{end}}
           {{end}}
         </header>
-        <section id="workspace" class="workspace-panel" data-revision="{{.Revision}}"{{if .RefreshURL}} hx-get="{{.RefreshURL}}" hx-trigger="every {{.Shell.RefreshSeconds}}s [document.visibilityState == 'visible']" hx-target="#workspace" hx-swap="innerHTML"{{end}}>
+        {{end}}
+        {{if eq .View "dash"}}<p id="dash-observation-status" class="dash-status" role="status" aria-live="polite" data-state="{{if .Dash.Unavailable}}unavailable{{else}}fresh{{end}}" data-observed-at="{{.Dash.ObservedAt}}">{{if .Dash.Unavailable}}Work data is unavailable. Waiting for an observation.{{else}}Observed at {{.Dash.ObservedAt}}{{end}}</p>{{end}}
+        <section id="workspace" class="workspace-panel" data-revision="{{.Revision}}"{{if eq .View "dash"}} hx-sync="this:drop"{{end}}{{if .RefreshURL}} hx-get="{{.RefreshURL}}" hx-trigger="every {{.Shell.RefreshSeconds}}s [document.visibilityState == 'visible']" hx-target="#workspace" hx-swap="innerHTML"{{end}}>
           {{if eq .View "board"}}
             {{template "board_content.html" .}}
           {{else if eq .View "dash"}}
@@ -61,12 +89,15 @@
             {{template "artifact_detail_content.html" .}}
           {{else if eq .View "workflows"}}
             {{template "workflow_content.html" .}}
+          {{else if eq .View "harnesses"}}
+            {{template "harness_content.html" .}}
           {{else if eq .View "write_result"}}
             {{template "write_result.html" .}}
           {{else}}
             {{template "project_content.html" .}}
           {{end}}
         </section>
+        {{if eq .View "dash"}}{{template "dash_controls.html" .}}{{end}}
       </main>
       <div id="modal-root"></div>
     </div>
@@ -76,48 +107,25 @@
 
 {{define "project_content.html"}}
 {{template "revision_marker.html" .}}
-<div class="summary-grid">
-  <div class="summary-item">
-    <span class="summary-label">Project ID</span>
-    <strong>{{.Project.ProjectID}}</strong>
-  </div>
-  <div class="summary-item">
-    <span class="summary-label">Bind</span>
-    <strong>{{.Project.Host}}:{{.Project.Port}}</strong>
-  </div>
-  <div class="summary-item">
-    <span class="summary-label">Refresh</span>
-    <strong>{{.Project.RefreshSeconds}}s</strong>
-  </div>
+<div class="detail-block">
+  <span class="summary-label">Project name</span>
+  <strong>{{.Shell.ProjectName}}</strong>
 </div>
 <div class="detail-block">
   <span class="summary-label">Project directory</span>
   <code>{{.Project.ProjectDir}}</code>
 </div>
-<div class="list-block">
-  {{range .Project.Paths}}
-    <div class="path-row">
-      <span>{{.Label}}</span>
-      <code>{{.Path}}</code>
-    </div>
-  {{end}}
-</div>
+<p class="summary-label">Project ID: <code>{{.Project.ProjectID}}</code></p>
 {{end}}
 
 {{define "board_content.html"}}
-{{if .Board.WorkflowTickets}}
-<section aria-label="Native workflow tickets"><h2>Native workflow tickets</h2>
-  {{range .Board.WorkflowTickets}}{{template "ticket_card.html" .}}{{end}}
-  {{if .Board.WorkflowMore}}<p>Showing the first 128 native tickets. Use an explicit extent or retained workflow to continue.</p>{{end}}
-</section>
-{{end}}
 {{template "revision_marker.html" .}}
+<div id="board-notice" role="status" aria-live="polite"></div>
 {{if .Board.Attention}}
 <section class="attention-strip" aria-label="Attention tickets">
   {{range .Board.Attention}}
     <article class="ticket-card ticket-card--attention">
-      <div class="ticket-card__key">{{.Ticket.Key}}</div>
-      <h2>{{.Ticket.Title}}</h2>
+      {{template "ticket_card.html" .Ticket}}
       {{range .Reasons}}<p class="ticket-card__reason">{{.}}</p>{{end}}
     </article>
   {{end}}
@@ -125,7 +133,7 @@
 {{end}}
 <div class="board-grid">
   {{range .Board.Columns}}
-    <section class="board-column">
+    <section class="board-column" data-board-column="{{.ID}}">
       <header class="board-column__header">
         <h2>{{.Title}}</h2>
         {{(chip .Count).Muted.Render}}
@@ -135,123 +143,51 @@
           {{template "ticket_card.html" .}}
         {{end}}
       {{else}}
-        <p class="empty-state">No tickets in this column.</p>
+        <p class="empty-state">No tickets on this page in this column.</p>
       {{end}}
     </section>
   {{end}}
 </div>
+{{if or .Board.PreviousURL .Board.NextURL}}
+<nav class="detail-actions" aria-label="Board pages">
+  {{if .Board.PreviousURL}}<a class="button" href="{{.Board.PreviousURL}}">Previous page</a>{{end}}
+  <span>{{.Board.LoadedCount}} loaded · {{.Board.TotalCount}} total · Column counts include all pages</span>
+  {{if .Board.NextURL}}<a class="button" href="{{.Board.NextURL}}">Next page</a>{{end}}
+</nav>
+{{end}}
 {{end}}
 
 {{define "ticket_card.html"}}
-<a class="ticket-card" href="/board/ticket?key={{.Key}}" hx-get="/board/ticket?key={{.Key}}" hx-target="#modal-root" hx-swap="innerHTML">
+<a class="ticket-card" draggable="true" data-ticket-key="{{.Key}}" data-ticket-revision="{{.Revision}}" href="/board/ticket?key={{.Key}}" hx-get="/board/ticket?key={{.Key}}" hx-target="#modal-root" hx-swap="innerHTML">
   <div class="ticket-card__meta">
     <span class="ticket-card__key">{{.Key}}</span>
     {{if .Priority}}<span class="ticket-card__priority">{{.Priority}}</span>{{end}}
   </div>
   <h3>{{.Title}}</h3>
   {{if .Synopsis}}<p>{{.Synopsis}}</p>{{end}}
-  {{if .ProjectArea}}
-    <div class="ticket-card__footer">{{(chip .ProjectArea).Primary.Render}}</div>
-  {{else if .UseCase}}
-    <div class="ticket-card__footer">{{(chip .UseCase).Primary.Render}}</div>
+  {{if or .ProjectArea .UseCase .Assignee}}
+    <div class="ticket-card__footer">
+      {{if .ProjectArea}}{{(chip .ProjectArea).Primary.Render}}{{else if .UseCase}}{{(chip .UseCase).Primary.Render}}{{end}}
+      {{if .Assignee}}<span>{{.Assignee}}</span>{{end}}
+    </div>
   {{end}}
 </a>
 {{end}}
 
-{{define "ticket_modal.html"}}
-<div class="modal-backdrop" data-modal-backdrop>
-  <section class="ticket-modal" role="dialog" aria-modal="true" aria-labelledby="ticket-modal-title">
-    <header class="ticket-modal__header">
-      <h2 id="ticket-modal-title">Ticket</h2>
-      <button class="icon-button" type="button" data-modal-close aria-label="Close ticket detail">x</button>
-    </header>
-    <div class="ticket-modal__body">
-      {{if .Ticket.NativeWorkflow}}<h3>{{.Ticket.Key}} — {{.Ticket.Title}}</h3><pre class="artifact-content">{{.Ticket.Synopsis}}</pre><p>{{.Ticket.Status}} / {{.Ticket.Slice}}</p>{{else}}
-      <form class="ticket-edit-form" method="post" action="/actions">
-        <input type="hidden" name="action" value="ticket.update">
-        <input type="hidden" name="id" value="{{.Ticket.Key}}">
-        <input type="hidden" name="revision" value="{{.Ticket.Revision}}">
-        <input type="hidden" name="confirm" value="true">
-        <label class="readonly-field">
-          <span>Key</span>
-          <strong>{{.Ticket.Key}}</strong>
-        </label>
-        <label class="readonly-field">
-          <span>Title</span>
-          <input name="title" required value="{{.Ticket.Title}}">
-        </label>
-        <label class="readonly-field readonly-field--multi">
-          <span>Description</span>
-          <textarea name="synopsis" required>{{.Ticket.Synopsis}}</textarea>
-        </label>
-        <div class="ticket-comments__actions">
-          <button class="button" type="submit">Save</button>
-        </div>
-      </form>
-      {{end}}
-      {{if .Ticket.WorkflowEnabled}}
-        <div class="detail-actions" aria-label="Ticket workflow controls">
-          <a class="button" data-workflow-ticket href="/workflows?extent=ticket&amp;key={{.Ticket.Key}}">Preview ticket work</a>
-          <a class="button" href="/workflows?extent=slice&amp;key={{.Ticket.Key}}">Preview owning slice</a>
-          <a class="button" href="/workflows?extent=slice_set&amp;key={{.Ticket.Key}}">Preview owning set</a>
-          <a class="button" href="/workflows?extent=use_case&amp;key={{.Ticket.Key}}">Preview owning use case</a>
-          <a class="button" href="/workflows">Retained workflows</a>
-        </div>
-      {{end}}
-      {{if not .Ticket.NativeWorkflow}}
-      <section class="ticket-comments" aria-label="Ticket comments">
-        <header class="ticket-comments__header">
-          <h3>Comments</h3>
-          <span>{{len .Ticket.Comments}} comments</span>
-        </header>
-        {{if .Ticket.Comments}}
-          <div class="ticket-comments__list">
-            {{range .Ticket.Comments}}
-              <article class="ticket-comment">
-                <header>
-                  <strong>{{.Author}}</strong>
-                  {{if .CreatedAt}}<time>{{.CreatedAt}}</time>{{end}}
-                </header>
-                <p>{{.Body}}</p>
-              </article>
-            {{end}}
-          </div>
-        {{else}}
-          <p class="ticket-comments__empty">No comments yet.</p>
-        {{end}}
-        <form class="ticket-comments__form" method="post" action="/board/ticket/comment" hx-post="/board/ticket/comment" hx-target="#modal-root" hx-swap="innerHTML">
-          <input type="hidden" name="action" value="ticket.comment">
-          <input type="hidden" name="id" value="{{.Ticket.Key}}">
-          <input type="hidden" name="revision" value="{{.Ticket.Revision}}">
-          <input type="hidden" name="confirm" value="true">
-          <label class="readonly-field readonly-field--multi ticket-comments__composer">
-            <span>Add comment</span>
-            <textarea name="content" required placeholder="Leave a Markdown comment."></textarea>
-          </label>
-          <div class="ticket-comments__actions">
-            <button class="button" type="submit">Add comment</button>
-          </div>
-        </form>
-      </section>
-      {{end}}
-    </div>
-  </section>
-</div>
-{{end}}
-
 {{define "catalog_content.html"}}
 {{template "revision_marker.html" .}}
-{{if and (ne .Catalog.Family "cases") (ne .Catalog.Family "dumps")}}
-<div class="catalog-toolbar">
-  <div class="summary-item">
-    <span class="summary-label">Artifacts</span>
-    <strong>{{len .Catalog.Items}}</strong>
-  </div>
-</div>
-{{end}}
 {{if eq .Catalog.Family "dumps"}}
   {{template "dump_catalog_content.html" .}}
+{{else if eq .Catalog.Family "quizzes"}}
+  {{template "quiz_catalog_content.html" .}}
+{{else if eq .Catalog.Family "specs"}}
+ {{template "spec_catalog_content.html" .}}
+{{else if eq .Catalog.Family "plans"}}
+ {{template "plan_catalog_content.html" .}}
 {{else}}
+  {{if eq .Catalog.Family "cases"}}
+    {{template "case_create_form.html" .}}
+  {{end}}
   {{if .Catalog.Items}}
     {{if eq .Catalog.Family "cases"}}
     {{template "case_table.html" .}}
@@ -266,15 +202,6 @@
   {{if not .Catalog.Items}}
     <p class="empty-state">{{.Catalog.EmptyMessage}}</p>
   {{end}}
-{{end}}
-{{if eq .Catalog.Family "specs"}}
-  {{template "spec_generate_form.html" .}}
-{{end}}
-{{if eq .Catalog.Family "plans"}}
-  {{template "plan_action_forms.html" .}}
-{{end}}
-{{if eq .Catalog.Family "quizzes"}}
-  {{template "quiz_action_forms.html" .}}
 {{end}}
 {{end}}
 
@@ -295,8 +222,7 @@
 
 {{define "dump_page_actions.html"}}
 <div class="dump-catalog__actions">
-  <button class="button" type="button" data-modal-template="dump-create-modal">New Dump</button>
-  <button class="button" type="button" data-modal-template="dump-create-case-modal">For Use Case</button>
+  <button class="button" type="button" data-modal-template="dump-create-modal">New</button>
 </div>
 {{end}}
 
@@ -304,10 +230,41 @@
 <a class="dump-card-link" href="{{.DetailURL}}" hx-get="/dumps/detail/fragment?id={{.ID}}" hx-target="#modal-root" hx-swap="innerHTML">
   <article class="dump-card">
     <h2>{{if .DisplayTitle}}{{.DisplayTitle}}{{else}}{{.Title}}{{end}}</h2>
-    {{if .Meta}}<p class="dump-card__meta">{{.Meta}}</p>{{end}}
-    <div class="dump-card__preview">{{if .Preview}}{{.Preview}}{{else}}No entries yet{{end}}</div>
+    {{if .Meta}}<p class="dump-card__meta sr-only">{{.Meta}}</p>{{end}}
+    <div class="dump-card__preview"><div class="dump-card__preview-text">{{if .Preview}}{{.Preview}}{{else}}No entries yet{{end}}</div></div>
   </article>
 </a>
+{{end}}
+
+{{define "case_create_form.html"}}
+<template id="case-create-modal">
+  <div class="modal-backdrop" data-modal-backdrop>
+    <section class="case-edit-panel case-edit-panel--modal" role="dialog" aria-modal="true" aria-labelledby="case-create-title">
+      <button class="icon-button case-edit-panel__close" type="button" data-modal-close aria-label="Close new case">×</button>
+      <header class="case-edit-panel__header"><h2 id="case-create-title">New Case</h2></header>
+      <form class="case-edit-form" data-case-create method="post" action="/actions" hx-post="/actions" hx-target="#case-create-result" hx-swap="innerHTML" hx-sync="this:drop" hx-disabled-elt="find button[type='submit']">
+        <input type="hidden" name="action" value="case.create">
+        <input type="hidden" name="family" value="cases">
+        <input type="hidden" name="confirm" value="true">
+        <input type="hidden" name="surface" value="modal">
+        <label class="readonly-field">
+          <span>Name</span>
+          <input name="name" maxlength="512" required>
+        </label>
+        <label class="readonly-field readonly-field--multi">
+          <span>Description</span>
+          <textarea name="description" rows="4" maxlength="65536"></textarea>
+        </label>
+        <label class="readonly-field readonly-field--multi">
+          <span>Context</span>
+          <textarea name="context" rows="6" maxlength="65536"></textarea>
+        </label>
+        <div id="case-create-result" role="status" aria-live="polite"></div>
+        <div class="case-edit-form__actions"><button class="button" type="submit">Create</button></div>
+      </form>
+    </section>
+  </div>
+</template>
 {{end}}
 
 {{define "case_table.html"}}
@@ -353,7 +310,13 @@
 
 {{define "artifact_detail_content.html"}}
 {{template "revision_marker.html" .}}
-{{if eq .Detail.Family "cases"}}
+{{if .Detail.Spec}}
+ {{template "spec_editor_content.html" .}}
+{{else if .Detail.Quiz}}
+  {{template "quiz_answer_content.html" .}}
+{{else if eq .Detail.Family "plans"}}
+ {{template "plan_detail_content.html" .}}
+{{else if eq .Detail.Family "cases"}}
   {{template "case_edit_page.html" .}}
 {{else}}
 <div class="detail-actions">
@@ -382,9 +345,10 @@
       <code>{{.Detail.Path}}</code>
     </div>
   {{end}}
-  <pre class="artifact-content">{{.Detail.Content}}</pre>
   {{if eq .Detail.Family "dumps"}}
     {{template "dump_edit_forms.html" .}}
+  {{else}}
+    <pre class="artifact-content">{{.Detail.Content}}</pre>
   {{end}}
 {{end}}
 {{end}}
@@ -411,7 +375,6 @@
     {{if .Detail.Missing}}
       <p class="empty-state">Artifact not found.</p>
     {{else}}
-      <pre class="artifact-content">{{.Detail.Content}}</pre>
       {{template "dump_edit_forms.html" .}}
     {{end}}
   </section>
@@ -463,53 +426,34 @@
 <template id="dump-create-modal">
   <div class="modal-backdrop" data-modal-backdrop>
     <section class="dump-create-panel" role="dialog" aria-modal="true" aria-labelledby="dump-create-title">
-      <button class="icon-button dump-create-panel__close" type="button" data-modal-close aria-label="Close dump creator">x</button>
+      <button class="icon-button dump-create-panel__close" type="button" data-modal-close aria-label="Close capture form">x</button>
       <header class="dump-create-panel__header">
-        <h2 id="dump-create-title">New Dump</h2>
+        <h2 id="dump-create-title">New context</h2>
+        <p>Add context to the project-wide dump or capture it for an existing case.</p>
       </header>
-      <form class="action-form" method="post" action="/actions" hx-post="/actions" hx-target="#modal-root" hx-swap="innerHTML" onsubmit="return confirm('Create this dump?')">
+      <form class="action-form" data-dump-capture method="post" action="/actions" hx-post="/actions" hx-target="#dump-create-result" hx-swap="innerHTML" onsubmit="return confirm('Add this context?')">
         <input type="hidden" name="action" value="dump.create">
         <input type="hidden" name="family" value="dumps">
         <input type="hidden" name="confirm" value="true">
         <input type="hidden" name="surface" value="modal">
+        <input type="hidden" name="request_id" value="">
+        <label>
+          <span>Scope</span>
+          <select name="case_slug">
+            <option value="">Project-wide</option>
+            {{range .Catalog.Cases}}<option value="{{.Slug}}">{{.Name}}</option>{{end}}
+          </select>
+        </label>
         <label>
           <span>Title</span>
-          <input name="title" required>
+          <input name="title" maxlength="512" required>
         </label>
         <label>
           <span>Content</span>
-          <textarea name="content" rows="6" required></textarea>
+          <textarea name="content" rows="6" maxlength="65536" required></textarea>
         </label>
-        <button class="button button--primary" type="submit">Create</button>
-      </form>
-    </section>
-  </div>
-</template>
-<template id="dump-create-case-modal">
-  <div class="modal-backdrop" data-modal-backdrop>
-    <section class="dump-create-panel" role="dialog" aria-modal="true" aria-labelledby="dump-create-case-title">
-      <button class="icon-button dump-create-panel__close" type="button" data-modal-close aria-label="Close dump creator">x</button>
-      <header class="dump-create-panel__header">
-        <h2 id="dump-create-case-title">For Use Case</h2>
-      </header>
-      <form class="action-form" method="post" action="/actions" hx-post="/actions" hx-target="#modal-root" hx-swap="innerHTML" onsubmit="return confirm('Create this dump?')">
-        <input type="hidden" name="action" value="dump.create">
-        <input type="hidden" name="family" value="dumps">
-        <input type="hidden" name="confirm" value="true">
-        <input type="hidden" name="surface" value="modal">
-        <label>
-          <span>Title</span>
-          <input name="title" required>
-        </label>
-        <label>
-          <span>Case slug</span>
-          <input name="case_slug" required>
-        </label>
-        <label>
-          <span>Content</span>
-          <textarea name="content" rows="6" required></textarea>
-        </label>
-        <button class="button button--primary" type="submit">Create</button>
+        <div id="dump-create-result" role="status" aria-live="polite"></div>
+        <button class="button button--primary" type="submit">Add context</button>
       </form>
     </section>
   </div>
@@ -517,32 +461,40 @@
 {{end}}
 
 {{define "dump_edit_forms.html"}}
-<form class="action-form" method="post" action="/actions"{{if .DumpModal}} hx-post="/actions" hx-target="#modal-root" hx-swap="innerHTML"{{end}} onsubmit="return confirm('Replace this dump content?')">
+<form class="action-form" data-dump-editor method="post" action="/actions" hx-post="/actions" hx-target="#dump-save-result" hx-swap="innerHTML" hx-disabled-elt="find textarea, find button[type='submit']" onsubmit="return confirm('Save this dump content?')">
   <input type="hidden" name="action" value="dump.save">
+  <input type="hidden" name="request_id" value="{{.Detail.SaveRequestID}}">
   <input type="hidden" name="family" value="dumps">
   <input type="hidden" name="id" value="{{.Detail.ID}}">
   <input type="hidden" name="revision" value="{{.Detail.Revision}}">
   <input type="hidden" name="confirm" value="true">
-  {{if .DumpModal}}<input type="hidden" name="surface" value="modal">{{end}}
+  <input type="hidden" name="surface" value="{{if .DumpModal}}modal{{else}}editor{{end}}">
   <label>
-    <span>Content</span>
+    <span>Body</span>
     <textarea name="content" rows="12" required>{{.Detail.Content}}</textarea>
   </label>
   <button class="button button--primary" type="submit">Save</button>
+  <div id="dump-save-result" role="status" aria-live="polite"></div>
 </form>
-<form class="action-form" method="post" action="/actions"{{if .DumpModal}} hx-post="/actions" hx-target="#modal-root" hx-swap="innerHTML"{{end}} onsubmit="return confirm('Append this note to the dump?')">
-  <input type="hidden" name="action" value="dump.append">
-  <input type="hidden" name="family" value="dumps">
-  <input type="hidden" name="id" value="{{.Detail.ID}}">
-  <input type="hidden" name="revision" value="{{.Detail.Revision}}">
-  <input type="hidden" name="confirm" value="true">
-  {{if .DumpModal}}<input type="hidden" name="surface" value="modal">{{end}}
-  <label>
-    <span>Append note</span>
-    <textarea name="content" rows="5" required></textarea>
-  </label>
-  <button class="button" type="submit">Append</button>
-</form>
+{{end}}
+
+{{define "dump_save_result.html"}}
+<div class="write-result write-result--{{.Write.Status}}" data-write-status="{{.Write.Status}}">
+  {{if .Write.ProjectionStale}}
+    <p>Saved. Catalog refresh is pending. Retry Save without changing the body to refresh.</p>
+  {{else}}
+    <p>{{.Write.Summary}}</p>
+  {{end}}
+  {{if .Write.BlockedReason}}<p>{{.Write.BlockedReason}}</p>{{end}}
+  {{if .Write.Validation}}<ul>{{range .Write.Validation}}<li>{{.}}</li>{{end}}</ul>{{end}}
+  {{if and (eq .Write.Status "stale") .Write.ReloadURL}}
+    {{if .DumpModal}}
+      <button class="button" type="button" hx-get="{{.Write.ReloadURL}}" hx-target="#modal-root" hx-swap="innerHTML" hx-disabled-elt="this" hx-confirm="Discard your unsaved edits and reload the stored body?">Reload stored content</button>
+    {{else}}
+      <a class="button" href="{{.Write.ReloadURL}}" onclick="return confirm('Discard your unsaved edits and reload the stored body?')">Reload stored content</a>
+    {{end}}
+  {{end}}
+</div>
 {{end}}
 
 {{define "write_result_modal.html"}}
@@ -593,161 +545,4 @@
 
 {{define "revision_marker.html"}}
 <div class="state-marker" data-revision="{{.Revision}}" hidden></div>
-{{end}}
-
-{{define "spec_generate_form.html"}}
-<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Generate a spec for this scope?')">
-  <input type="hidden" name="action" value="spec.generate">
-  <input type="hidden" name="family" value="specs">
-  <input type="hidden" name="confirm" value="true">
-  <label>
-    <span>Case slug</span>
-    <input name="case_slug">
-  </label>
-  <button class="button button--primary" type="submit">Generate Spec</button>
-</form>
-{{end}}
-
-{{define "plan_action_forms.html"}}
-<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Generate a plan for this scope?')">
-  <input type="hidden" name="action" value="plan.generate">
-  <input type="hidden" name="family" value="plans">
-  <input type="hidden" name="confirm" value="true">
-  <label>
-    <span>Case slug</span>
-    <input name="case_slug">
-  </label>
-  <button class="button button--primary" type="submit">Generate Plan</button>
-</form>
-<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Regenerate and replace the plan for this scope?')">
-  <input type="hidden" name="action" value="plan.regenerate">
-  <input type="hidden" name="family" value="plans">
-  <input type="hidden" name="confirm" value="true">
-  <label>
-    <span>Case slug</span>
-    <input name="case_slug">
-  </label>
-  <button class="button" type="submit">Regenerate Plan</button>
-</form>
-<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Create tracking artifacts and tickets from this plan?')">
-  <input type="hidden" name="action" value="plan.tracking.create">
-  <input type="hidden" name="family" value="plans">
-  <input type="hidden" name="confirm" value="true">
-  <label>
-    <span>Case slug</span>
-    <input name="case_slug">
-  </label>
-  <button class="button" type="submit">Create Tracking</button>
-</form>
-{{end}}
-
-{{define "quiz_action_forms.html"}}
-<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Start a quiz for this scope?')">
-  <input type="hidden" name="action" value="quiz.start">
-  <input type="hidden" name="family" value="quizzes">
-  <input type="hidden" name="confirm" value="true">
-  <label>
-    <span>Case slug</span>
-    <input name="case_slug">
-  </label>
-  <label>
-    <span>Mode</span>
-    <select name="mode">
-      <option value="deep">Deep</option>
-      <option value="fast">Fast</option>
-    </select>
-  </label>
-  <button class="button button--primary" type="submit">Start Quiz</button>
-</form>
-<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Resume this quiz scope?')">
-  <input type="hidden" name="action" value="quiz.resume">
-  <input type="hidden" name="family" value="quizzes">
-  <input type="hidden" name="confirm" value="true">
-  <label>
-    <span>Case slug</span>
-    <input name="case_slug">
-  </label>
-  <button class="button" type="submit">Resume Quiz</button>
-</form>
-{{end}}
-
-{{define "dash_content.html"}}
-<div class="detail-actions"><a class="button" href="/workflows">Native workflows</a></div>
-{{template "revision_marker.html" .}}
-<div class="dash-grid">
-  <section class="dash-panel">
-    <h2>Readiness</h2>
-    <div class="summary-item">
-      <span class="summary-label">Status</span>
-      <strong>{{.Dash.Readiness.Status}}</strong>
-    </div>
-    <dl class="kv-list">
-      <div><dt>Workspace</dt><dd>{{.Dash.Readiness.WorkspaceMode}}</dd></div>
-      <div><dt>Current branch</dt><dd>{{.Dash.Readiness.CurrentBranch}}</dd></div>
-      <div><dt>Expected branch</dt><dd>{{.Dash.Readiness.IntegrationBranch}}</dd></div>
-    </dl>
-    {{if .Dash.Readiness.Diagnostics}}
-      <div class="stack">
-        {{range .Dash.Readiness.Diagnostics}}
-          <p class="diagnostic">{{.Severity}}: {{.Code}} {{.Detail}}</p>
-        {{end}}
-      </div>
-    {{else}}
-      <p class="empty-state">No readiness diagnostics.</p>
-    {{end}}
-  </section>
-  <section class="dash-panel">
-    <h2>Queue</h2>
-    <div class="summary-item">
-      <span class="summary-label">Eligible</span>
-      <strong>{{.Dash.Queue.EligibleCount}}</strong>
-    </div>
-    {{if .Dash.Queue.Tickets}}
-      {{range .Dash.Queue.Tickets}}{{template "ticket_card.html" .}}{{end}}
-    {{else}}
-      <p class="empty-state">No ready tickets queued.</p>
-    {{end}}
-  </section>
-  <section class="dash-panel">
-    <h2>Current</h2>
-    {{if .Dash.Current.Phase}}
-      <dl class="kv-list">
-        <div><dt>Phase</dt><dd>{{.Dash.Current.Phase}}</dd></div>
-        <div><dt>Ticket</dt><dd>{{.Dash.Current.TicketKey}}</dd></div>
-        <div><dt>Execution</dt><dd>{{.Dash.Current.ExecutionID}}</dd></div>
-      </dl>
-      <p>{{.Dash.Current.Message}}</p>
-    {{else}}
-      <p class="empty-state">No current work signal.</p>
-    {{end}}
-  </section>
-  <section class="dash-panel">
-    <h2>Recent</h2>
-    {{if .Dash.RecentEvents}}
-      <div class="event-list">
-        {{range .Dash.RecentEvents}}
-          <article class="event-row">
-            <span>{{.Time}}</span>
-            <strong>{{.Phase}}</strong>
-            <p>{{.Message}}</p>
-          </article>
-        {{end}}
-      </div>
-    {{else}}
-      <p class="empty-state">No recent events.</p>
-    {{end}}
-  </section>
-</div>
-<div class="command-strip">
-  <form class="action-form" method="post" action="/actions" onsubmit="return confirm('Preview the ready work queue?')">
-    <input type="hidden" name="action" value="work.preview">
-    <input type="hidden" name="confirm" value="true">
-    <button class="button" type="submit">Preview Work</button>
-  </form>
-  <form class="action-form" method="post" action="/actions" onsubmit="return confirm('Request daemon stop?')">
-    <input type="hidden" name="action" value="work.daemon.stop">
-    <input type="hidden" name="confirm" value="true">
-    <button class="button button--danger" type="submit">Stop Daemon</button>
-  </form>
-</div>
 {{end}}

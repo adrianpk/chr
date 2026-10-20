@@ -6,4 +6,4 @@ name: "Dialer"
 
 # Dialer
 
-Gallery-oriented Chryso example workspace for a small Go CRM dialer.
+Gallery-oriented chr example workspace for a small Go CRM dialer.

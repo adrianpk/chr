@@ -46,6 +46,8 @@ func (m Model) updateProjectKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	}
 
 	switch msg.String() {
+	case "h":
+		return m, m.openHarnessPicker()
 	case "ctrl+s", "s":
 		m.saveProjectMetadata()
 	case "r":

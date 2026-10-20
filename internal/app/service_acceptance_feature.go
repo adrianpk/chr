@@ -11,7 +11,8 @@ import (
 
 // AcceptanceFeatureGenerateRequest selects the scope used to generate an acceptance feature.
 type AcceptanceFeatureGenerateRequest struct {
-	Scope core.QuizScope
+	OperationID string
+	Scope       core.QuizScope
 }
 
 // AcceptanceFeatureOperationResult is the service-facing result for feature generation.
@@ -30,9 +31,12 @@ func (s service) GenerateAcceptanceFeature(ctx context.Context, request Acceptan
 	var result AcceptanceFeatureOperationResult
 
 	err := s.withGenerationRuntime(ctx, "acceptance_feature", scope, func(ctx context.Context) error {
-		var err error
+		bound, ctx, err := s.bindGeneration(ctx, "acceptance_feature-"+dumpRequestID(request.OperationID), string(core.QuizModelActionGenerateAcceptanceFeature))
+		if err != nil {
+			return err
+		}
 
-		result, err = s.generateAcceptanceFeature(ctx, scope)
+		result, err = bound.generateAcceptanceFeature(ctx, scope)
 
 		return err
 	})
@@ -210,7 +214,7 @@ func (s service) newAcceptanceFeatureModelRequest(state core.QuizRuntimeState) (
 	}
 
 	return core.QuizModelRequest{
-		ID:              fmt.Sprintf("acceptance-feature-generation-%s", specScopeID(scope)),
+		ID:              core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("acceptance-feature-generation-%s", specScopeID(scope))),
 		Action:          core.QuizModelActionGenerateAcceptanceFeature,
 		Strategy:        "acceptance_feature_generation",
 		Scope:           scope,

@@ -8,7 +8,7 @@ Tracker: `ops/trackers/2026-06-18-tictactoe-qa-reference-tracker.md`
 
 ## Purpose
 
-Add a resettable QA reference project that exercises Chryso's full
+Add a resettable QA reference project that exercises chr's full
 generation and agent-work loop against a small but realistic CLI application.
 
 The reference project is a Go standard-library tic-tac-toe CLI. It should give
@@ -35,7 +35,7 @@ implementation work for generated agent tickets.
 ## Slice 1: Tictactoe QA Reference
 
 Goal: add a new resettable QA reference project under `qa/ref/003/tictactoe`
-for validating end-to-end Chryso generation and agent execution.
+for validating end-to-end chr generation and agent execution.
 
 Behavior:
 
@@ -46,14 +46,14 @@ Behavior:
 - The project includes enough `.chr/default` context for spec and plan generation
   without requiring repeated manual quiz answers.
 - The primary use case does not include prewritten generated specs, plans,
-  tracking, or tickets, so Chryso can create them during the exercise.
+  tracking, or tickets, so chr can create them during the exercise.
 - The generated agent-work tickets should be able to run through
   `chr work run-all --use-case cli-gameplay --order key`.
 
 Tasks:
 
 - T1.1 Add the tictactoe Go reference project with a compilable incomplete CLI.
-- T1.2 Seed Chryso project, use-case, dump, and quiz artifacts for the
+- T1.2 Seed chr project, use-case, dump, and quiz artifacts for the
   CLI gameplay workflow.
 - T1.3 Add reset/test/smoke wiring and documentation for the tictactoe QA case.
 - T1.4 Validate the resettable scenario and add the slice implementation report.

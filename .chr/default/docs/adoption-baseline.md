@@ -1,12 +1,12 @@
-# Chryso Self-Adoption Baseline
+# chr Self-Adoption Baseline
 
 Status: active
 
-Chryso is being adopted into its own repository as a managed project without deleting the existing `.prj/` delivery history.
+chr is being adopted into its own repository as a managed project without deleting the existing `.prj/` delivery history.
 
 ## Boundary
 
-- `.chr/default/` is the active Chryso workspace for this repository.
+- `.chr/default/` is the active chr workspace for this repository.
 - `.prj/` remains historical internal delivery context.
 - `ops/` remains existing spec, plan, and tracker history.
 - No execution reports are fabricated during adoption.
@@ -20,7 +20,7 @@ The initial dev-to-main gate policy is intentionally informational for traceabil
 - manual or external changes: listed and warned
 - missing agent evidence: not blocking during adoption
 
-This avoids treating pre-adoption work as missing Chryso evidence.
+This avoids treating pre-adoption work as missing chr evidence.
 
 ## Baseline Sources
 
@@ -39,4 +39,4 @@ The initial project and use-case metadata was inferred from:
 
 ## Next Adoption Step
 
-Future work can start creating real tickets, specs, plans, and execution evidence under `.chr/default/`. Once new work is consistently executed through Chryso, the gate policy can be tightened to fail on missing agent evidence.
+Future work can start creating real tickets, specs, plans, and execution evidence under `.chr/default/`. Once new work is consistently executed through chr, the gate policy can be tightened to fail on missing agent evidence.

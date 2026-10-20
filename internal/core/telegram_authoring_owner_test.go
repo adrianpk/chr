@@ -34,6 +34,13 @@ func TestTelegramAuthoringOwnerQuestions(t *testing.T) {
 	repo := NewAuthoringSessionRepository(t.TempDir())
 	first := telegramAuthoringCreateOwner(t, repo, "first")
 	second := telegramAuthoringCreateOwner(t, repo, "second")
+
+	current, err := repo.ObserveContinuation(t.Context(), first.Session.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	first.SourceHash = current.SourceHash
 	question := telegramAuthoringQuestionOwner(t, repo, first)
 
 	snapshot, err := repo.ObserveContinuation(t.Context(), first.Session.ID)

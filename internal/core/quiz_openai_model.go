@@ -99,6 +99,8 @@ func (a OpenAIQuizModelAdapter) InvokeQuizModel(
 	ctx context.Context,
 	request QuizModelRequest,
 ) (QuizModelResponse, error) {
+	request.ID = HarnessGenerationRequestID(ctx, request.ID)
+
 	err := ValidateQuizModelRequest(request)
 	if err != nil {
 		return QuizModelResponse{}, err
@@ -106,7 +108,7 @@ func (a OpenAIQuizModelAdapter) InvokeQuizModel(
 
 	trace := a.newOpenAIQuizTrace(request)
 
-	output, result, err := a.invokeOpenAI(ctx, request, trace)
+	output, result, err := a.invokeBoundQuizAPI(ctx, request, trace)
 	if err != nil {
 		a.recordOpenAIQuizResponse(ctx, request, trace, result, "error", err, QuizModelResponse{})
 
@@ -114,6 +116,9 @@ func (a OpenAIQuizModelAdapter) InvokeQuizModel(
 	}
 
 	response, err := quizModelResponseFromOutput(request, output)
+	err = validateParsedQuizModelResponse(response, err)
+
+	err = ValidateHarnessGenerationOutput(ctx, a.quizAPIRunRequest(request, trace), err)
 	if err != nil {
 		a.recordOpenAIQuizResponse(ctx, request, trace, result, "parse_error", err, QuizModelResponse{})
 
@@ -369,6 +374,11 @@ func (a OpenAIQuizModelAdapter) openAIModel() string {
 	return model
 }
 
+// ResolvedModel exposes the non-secret legacy model identity for admission.
+func (a OpenAIQuizModelAdapter) ResolvedModel() string {
+	return a.openAIModel()
+}
+
 func (a OpenAIQuizModelAdapter) openAIBaseURL() string {
 	baseURL := strings.TrimSpace(a.BaseURL)
 	if baseURL == "" {
@@ -578,6 +588,7 @@ func quizModelPlanResponseFromOutput(
 			Scope:     request.Scope,
 			Title:     payload.Title,
 			Body:      payload.Body,
+			Order:     payload.Order,
 			CreatedAt: request.CreatedAt.UTC(),
 		},
 		RawText:   string(output),
@@ -635,6 +646,10 @@ func quizModelPlanTrackingResponseFromOutput(
 	request QuizModelRequest,
 	output []byte,
 ) (QuizModelResponse, error) {
+	if request.Strategy == QuizModelStrategyPlanDelivery {
+		return quizModelPlanDeliveryResponse(request, output)
+	}
+
 	payload, err := DecodeQuizModelPlanTrackingPayload(extractJSONObject(output))
 	if err != nil {
 		return QuizModelResponse{}, err
@@ -922,7 +937,7 @@ func quizModelRecentTopicStreak(entries []QuizModelEntryPayload) map[string]any 
 func quizModelInstructions(request QuizModelRequest) string {
 	switch {
 	case request.Action == QuizModelActionMaterializePlanTracking:
-		return quizModelPlanTrackingInstructions()
+		return quizModelTrackingInstructions(request)
 	case request.Action == QuizModelActionGeneratePlan:
 		return quizModelPlanGenerationInstructions()
 	case request.Action == QuizModelActionGeneratePlanOutline:
@@ -954,6 +969,11 @@ If acceptance_readiness.decision is not_applicable, continue normal dump-oriente
 Ask exactly one concise question about one specific operational aspect at a time.
 Use follow-ups only when they materially improve clarity.
 Shift topics when routing_state shows one area is becoming overrepresented.
+Use quiz_history as the complete prior question-and-answer context, including project-wide decisions.
+Do not repeat a resolved requirement, even with different wording; use recent_entries only for immediate continuity.
+The remaining question budget is a safety ceiling, not a target to fill.
+Set completion_recommended to true when the supplied context is sufficient for a useful specification and no material unresolved decisions remain.
+When recommending completion, put a brief completion statement in question instead of inventing another question.
 Do not include examples or options unless they are truly necessary.
 Do not ask the user to rank, pick a top N list, enumerate a full option set, or justify several choices at once.
 Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
@@ -971,6 +991,8 @@ When acceptance_readiness is present, use it as guidance for whether the use cas
 If acceptance_readiness.decision is needs_more_info, bias early questions toward concrete use-case behavior that may clarify missing acceptance slots, without naming Gherkin or the slot schema.
 If acceptance_readiness.decision is not_applicable, continue normal dump-oriented discovery and do not force Gherkin terminology.
 Prepare concise questions, each about one specific operational aspect.
+Use quiz_history as the complete prior question-and-answer context and avoid resolved requirements, including paraphrases.
+The question budget is a safety ceiling, not a target; do not add redundant questions to fill it.
 Use follow-ups only when they materially improve clarity.
 Shift topics when routing_state shows one area is becoming overrepresented.
 Do not include examples or options unless they are truly necessary.
@@ -1022,6 +1044,8 @@ For project-wide plans, always include an Assumptions and Low-Confidence Items s
 
 The plan is not a roadmap, milestone list, brainstorm, or architecture essay.
 The plan is an executable implementation decomposition, sequencing mechanism, reviewable execution strategy, and bridge from specs to tickets.
+
+Return order as structured slices and tasks matching the Markdown decomposition. Use stable machine IDs (slice-1, task-t1.1), positive slice_order and task_order, titles, and nested tasks. Do not allocate ticket identities or references. This map supplies intended order only; it does not approve execution.
 
 Generate a deterministic Markdown body with these sections:
 - High-level implementation strategy
@@ -1111,7 +1135,8 @@ Do not introduce new commands, flags, APIs, exit codes, or persistence fields as
 Keep implementation checklists secondary to behavioral requirements and avoid making them more authoritative than the spec decisions.
 Fence every multi-line example in a Markdown code block with a language tag, such as yaml, json, shell, or text.
 Never emit raw front matter, YAML, JSON, command output, or code snippets as plain paragraphs or headings.
-Set status to draft because generated specs require user review.
+Set the response status field to draft; the application stores document lifecycle in metadata.
+Keep the body lifecycle-neutral: do not restate this document's draft, review or approval state or add an approval disclaimer. Requirements about review or approval in the product itself remain valid behavioral requirements.
 Return body without a top-level title heading; the renderer adds the H1 from title.
 Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
 Return only the JSON object required by the response schema.
@@ -1146,6 +1171,7 @@ func quizModelDraftSpecInstructions() string {
 You generate a draft specification from a completed project dump and quiz.
 Use the structured request payload and all context sections as the sole source of truth.
 The output must be a formal draft spec grounded in the provided dump and quiz material.
+Document lifecycle belongs in application metadata. Keep the body lifecycle-neutral rather than embedding this document's draft, review or approval state; product requirements about review and approval remain valid.
 Do not invent facts not grounded in context.
 Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
 Return only the JSON object required by the response schema.
@@ -1155,11 +1181,7 @@ Return only the JSON object required by the response schema.
 func quizModelOpenAIFormat(request QuizModelRequest) openAIResponsesTextFormat {
 	switch {
 	case request.Action == QuizModelActionMaterializePlanTracking:
-		return quizModelJSONSchemaTextFormat(
-			"plan_tracking_artifacts",
-			"Plan tracking and ticket payloads derived from an existing implementation plan.",
-			quizModelPlanTrackingJSONSchema(),
-		)
+		return quizModelTrackingFormat(request)
 	case request.Action == QuizModelActionGeneratePlan:
 		return quizModelJSONSchemaTextFormat(
 			"generated_plan",
@@ -1430,8 +1452,9 @@ func quizModelPlanJSONSchema() map[string]any {
 	return map[string]any{
 		"type":                 "object",
 		"additionalProperties": false,
-		"required":             []string{"title", "body", "status"},
+		"required":             []string{"title", "body", "status", "order"},
 		"properties": map[string]any{
+			"order": planOrderJSONSchema(),
 			"title": map[string]any{
 				"type": "string",
 			},

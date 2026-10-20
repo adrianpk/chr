@@ -1,0 +1,23 @@
+{
+  "continuations": [],
+  "created_at": "2026-10-17T20:00:03Z",
+  "external_ids": [
+    "project-plan"
+  ],
+  "files": [
+    "artifact.md"
+  ],
+  "id": "00000-project-plan",
+  "namespace": "default",
+  "producer": {
+    "name": "chr",
+    "version": "0.0.0"
+  },
+  "revision": 1,
+  "schema_version": "ops-layout/v1",
+  "sources": [],
+  "status": "created",
+  "title": "project-plan",
+  "type": "plan",
+  "updated_at": "2026-10-17T20:00:03Z"
+}

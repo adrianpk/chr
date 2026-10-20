@@ -36,6 +36,7 @@ func telegramHelpMetadata() []telegramHelpEntry {
 		telegramHelpEntry{"explain", "Authoring", telegramExplanationUsage()},
 		telegramHelpEntry{"prepare-work", "Authoring", telegramPreparedWorkUsage()},
 		telegramHelpEntry{"work", "Execution", telegramWorkUsage()},
+		telegramHelpEntry{"harness", "Projects", telegramHarnessUsage},
 		telegramHelpEntry{core.TelegramActionAnswerCommand, "System controls", core.TelegramActionAnswerUsage},
 	)
 

@@ -45,6 +45,13 @@ func (s *WorkflowStore) finishWorkflowAmendment(ctx context.Context, builder *wo
 	set.Set.Amendments = append(set.Set.Amendments, WorkflowAmendmentRef{Revision: set.Revision + 1, Ref: builder.result.ReceiptRef, Hash: workflowHash(data)})
 	set.Set.PlanRef, set.Set.PlanHash = builder.root+"/plan.md", request.Plan.PlanHash
 	set.Set.ClosingValidation = request.Plan.ClosingValidation
+
+	orderFiles, err := s.materializedOrderChanges(&builder.result, request.Plan)
+	if err != nil {
+		return err
+	}
+
+	builder.files = append(builder.files, orderFiles...)
 	set.Revision++
 	set.UpdatedAt = receipt.RecordedAt
 	builder.files = append(builder.files, workflowFileChange{Path: builder.result.ReceiptRef, After: data}, workflowFileChange{Path: set.Set.PlanRef, After: body})

@@ -10,7 +10,7 @@ Sources:
 
 ## Purpose
 
-Define the `Project` screen for the Chryso TUI.
+Define the `Project` screen for the chr TUI.
 
 The `Project` tab is the place where the user sees and edits the managed
 project's own identity and project-level context. It is not an agent dashboard,
@@ -18,7 +18,7 @@ not an application branding surface, and not a workspace diagnostics screen.
 
 The tab must answer one question clearly:
 
-> What is this project, and what compact context should Chryso keep about
+> What is this project, and what compact context should chr keep about
 > it?
 
 ## User Model
@@ -71,7 +71,7 @@ The file is human-editable and belongs to the managed project workspace.
 ---
 schema_version: 1
 name: chr-blog-work
-description: CLI/blog workspace used to validate CHR authoring flows.
+description: CLI/blog workspace used to validate chr authoring flows.
 ---
 
 Long-form project context.
@@ -106,7 +106,7 @@ it, but must not depend on arbitrary body prose to populate structured columns.
 
 ## Persistence Model
 
-Chryso has one durable representation of project data:
+chr has one durable representation of project data:
 
 - `.chr/project.md` as the human-editable project file.
 
@@ -172,7 +172,7 @@ Executor -> Service: Save(metadata)
 Service -> Service: validate schema and required fields
 Service -> File: read current file hash
 
-alt source hash changed outside CHR
+alt source hash changed outside chr
     Service --> Executor: conflict error
     Executor --> UI: report refresh required
 else source hash matches or file is new
@@ -278,7 +278,7 @@ with other primary TUI screens.
 │ [ chr-blog-work                                                           ] │
 │                                                                             │
 │ Description                                                                 │
-│ [ CLI/blog workspace used to validate CHR authoring flows.                ] │
+│ [ CLI/blog workspace used to validate chr authoring flows.                ] │
 ├──────────────────────────────────────────────┬──────────────────────────────┤
 │ Context                                      │ Artifacts                    │
 │ [ Long-form Markdown project context...    ] │ tickets        12            │

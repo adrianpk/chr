@@ -1,11 +1,14 @@
 # Slice 9: Draft Artifact Removal
 
-Status: reviewing
+Status: delivered
 Slicing: Workspace Index And Semantic Cache
 Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 Tracker: `.prj/trackers/slicing-workspace-index-semantic-cache-tracker.md`
 Branch: `feat/slice-9-remove-draft-artifact`
 PR: #172
+
+Verified merge: `6c56d2e84d56d54ea0f4449ce60457f62c7a5d77`, an ancestor of dev
+as checked on 2026-10-20.
 
 ## Purpose
 

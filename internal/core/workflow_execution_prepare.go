@@ -22,12 +22,13 @@ func (s *WorkflowStore) prepareWorkflowTaskHarness(ctx context.Context, claim *W
 		return prepared, ErrWorkflowOwned
 	}
 
-	if err := validateWorkflowInputWorker(mode, worker); err != nil {
-		return prepared, fmt.Errorf("workflow worker: %w", err)
-	}
-
 	err = s.withLock(ctx, func() error {
 		run, record, readErr := s.checkWorkflowClaim(ctx, claim)
+		if readErr != nil {
+			return readErr
+		}
+
+		worker, readErr = workflowBoundTaskWorker(run, worker, mode)
 		if readErr != nil {
 			return readErr
 		}
@@ -79,11 +80,21 @@ func (s *WorkflowStore) workflowTaskInput(ctx context.Context, run workflowInvoc
 	attempt := run.Attempts[len(run.Attempts)-1]
 
 	input := WorkflowTaskInput{Schema: "chr-task-input/v1", InvocationID: run.ID, AttemptID: attempt.ID, Generation: attempt.Generation, TaskKey: record.Task.Key, InputRevision: attempt.InputRevision, SourceHash: record.SourceHash, ContractHash: record.Task.ContractHash, Body: string(record.Body), Target: run.ExecutionSelection().Target, Lane: *run.Lane, Worker: slices.Clone(worker)}
+	if run.HarnessBinding != nil && attempt.Purpose == "" {
+		input.HarnessBinding = cloneHarnessBinding(run.HarnessBinding)
+		input.Schema = "chr-task-input/v2"
+	}
+
 	if err := json.Unmarshal(record.Domain["execution_contract"], &input.Contract); err != nil {
 		return input, err
 	}
 
 	var err error
+
+	input.OrderMap, err = s.requiredWorkflowOrderMap(ctx, record)
+	if err != nil {
+		return input, err
+	}
 
 	input.Prerequisites, input.EvidenceHashes, err = s.workflowPrerequisiteImages(ctx, run, record)
 

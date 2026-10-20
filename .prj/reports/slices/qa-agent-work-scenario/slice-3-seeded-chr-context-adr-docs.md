@@ -1,4 +1,4 @@
-# Slice 3: Seeded CHR Context And ADR Docs
+# Slice 3: Seeded chr Context And ADR Docs
 
 Status: reviewing
 Slicing: QA Agent Work Scenario
@@ -9,7 +9,7 @@ PR: pending
 
 ## Purpose
 
-Seed the blog QA reference with the Chryso context needed to generate the
+Seed the blog QA reference with the chr context needed to generate the
 comments spec, plan, tracking document, and tickets while also providing a
 manual bug ticket for single-ticket execution.
 
@@ -27,7 +27,7 @@ manual bug ticket for single-ticket execution.
 
 ## Implementation Notes
 
-All Chryso-owned project artifacts live under `.chr/default/...`. ADRs are
+All chr-owned project artifacts live under `.chr/default/...`. ADRs are
 normal project documentation under the Diataxis explanation quadrant instead of
 hidden CHR-only context.
 

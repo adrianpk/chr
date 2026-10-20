@@ -12,7 +12,7 @@ Sources:
 
 ## Purpose
 
-Define the role of the Bubble Tea TUI in Chryso.
+Define the role of the Bubble Tea TUI in chr.
 
 The TUI is the primary local human operation surface over the existing CLI and
 domain services. It is not a replacement for command-line capabilities. Every
@@ -29,7 +29,7 @@ The primary user is one local operator working on one managed project at a time.
 
 The operator may be:
 
-- bootstrapping a new Go project into Chryso;
+- bootstrapping a new Go project into chr;
 - reviewing project-local tickets, documents, reports, and runtime evidence;
 - creating or refining authoring artifacts;
 - running a ticket directly;
@@ -38,7 +38,7 @@ The operator may be:
 - preparing the next implementation slice.
 
 The TUI should assume technical literacy, but it should not assume that the user
-remembers Chryso's internal path layout or every command option.
+remembers chr's internal path layout or every command option.
 
 ## Product Role
 

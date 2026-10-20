@@ -14,6 +14,7 @@ type DumpScope struct {
 
 // DumpView is the terminal projection of a dump document.
 type DumpView struct {
+	Revision     string
 	Index        int
 	NodeID       string
 	UseCaseTitle string

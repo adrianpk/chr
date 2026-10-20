@@ -9,7 +9,7 @@ PR: #230
 
 ## Purpose
 
-Wire the reusable LLM trace sink into Chryso-owned LLM calls so quiz,
+Wire the reusable LLM trace sink into chr-owned LLM calls so quiz,
 spec, plan, plan-tracking, and local authoring quiz generation calls can be
 inspected from the active project userspace when tracing is enabled.
 

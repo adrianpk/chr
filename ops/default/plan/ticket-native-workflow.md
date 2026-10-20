@@ -193,7 +193,7 @@ PR title: `feat(slice-1): persist guarded workflow records`
 
 Report: `ops/default/report/slices/ticket-native-workflow/slice-1-workflow-records.md`
 
-Outcome: CHR can persist and reload versioned workflow records, reject invalid
+Outcome: chr can persist and reload versioned workflow records, reject invalid
 hierarchy and stale writers, and recover interrupted shared transitions without
 depending on a tracker or SQLite cache.
 

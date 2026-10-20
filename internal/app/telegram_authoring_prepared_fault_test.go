@@ -93,7 +93,7 @@ func telegramAuthoringPreparedIndependentEdit(t *testing.T, f *telegramConversat
 		t.Fatal(err)
 	}
 
-	if _, err := operations.SaveDump(DumpSaveRequest{RelativePath: prepared.Scope.DescriptionRef, Content: "Independent later source edit"}); err != nil {
+	if _, err := saveObservedDump(t, operations, DumpSaveRequest{RelativePath: prepared.Scope.DescriptionRef, Content: "Independent later source edit"}); err != nil {
 		t.Fatal(err)
 	}
 

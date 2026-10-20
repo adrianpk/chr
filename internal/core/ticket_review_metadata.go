@@ -185,7 +185,7 @@ func setTicketFrontmatterScalarField(
 
 	for index, line := range lines {
 		lineKey, _, ok := strings.Cut(line, ":")
-		if ok && strings.TrimSpace(lineKey) == key {
+		if ok && lineKey == key {
 			lines[index] = key + ": " + value
 
 			return replaceTicketFrontmatterLines(content, lines)
@@ -234,7 +234,7 @@ func replaceTicketFrontmatterLines(content string, lines []string) (string, erro
 func ticketFrontmatterBlockRange(lines []string, key string) (int, int) {
 	for index, line := range lines {
 		lineKey, _, ok := strings.Cut(line, ":")
-		if !ok || strings.TrimSpace(lineKey) != key {
+		if !ok || lineKey != key {
 			continue
 		}
 

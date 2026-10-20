@@ -72,4 +72,4 @@ Markdown report writing under `.chr/default/reports/gates/`.
 - Forgejo/Woodpecker behavior is intentionally deferred to Slice 5.
 - End-to-end gate execution against this repository is intentionally deferred
   until the later QA slice because the repository is not initialized as a
-  Chryso-managed project at `.chr/`.
+  chr-managed project at `.chr/`.

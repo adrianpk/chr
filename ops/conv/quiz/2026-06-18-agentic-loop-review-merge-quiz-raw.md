@@ -19,12 +19,12 @@ and artifact ownership without overfitting to one provider.
 ### Question 1
 
 Question: For a new managed project, which automatic loop mode should
-Chryso use by default: development only, development plus review, or
+chr use by default: development only, development plus review, or
 development plus review plus merge?
 
 Answer: The default should be the natural full cycle, `dev_review_merge`.
 Project configuration may allow automatic merge. When a feature has been
-developed, tested, and validated successfully, Chryso should be able to
+developed, tested, and validated successfully, chr should be able to
 merge the pull request automatically instead of leaving extra manual review and
 merge interventions in the path.
 
@@ -47,7 +47,7 @@ review passes and validation succeeds, or should the default require the user to
 opt in through configuration?
 
 Answer: Automatic merge is repository configuration. In this discussion,
-`automerge` means Chryso does not launch separate reviewer and merger agent
+`automerge` means chr does not launch separate reviewer and merger agent
 roles for that path. A pull request is still desirable as evidence so a human can
 inspect the development history and resulting change. When the feature is
 developed, tested, and validated, the repository policy may allow the pull
@@ -56,7 +56,7 @@ request to merge automatically.
 ### Question 4
 
 Question: For new projects, should this automatic merge policy default to off
-until the project explicitly enables it, or should Chryso initialize new
+until the project explicitly enables it, or should chr initialize new
 projects with it enabled?
 
 Answer: Automatic merge should be the default method for new projects. The
@@ -67,7 +67,7 @@ intensive test coverage because it is an important supported workflow.
 ### Question 5
 
 Question: When automatic merge is enabled, what minimum evidence must exist
-before Chryso may merge a ticket pull request?
+before chr may merge a ticket pull request?
 
 Answer: The development agent must be strict about implementation quality. The
 implementation includes extensive tests: unit tests, table-driven tests,
@@ -79,15 +79,15 @@ runability conditions are satisfied.
 
 ### Question 6
 
-Question: Should Chryso encode those quality requirements as a configurable
+Question: Should chr encode those quality requirements as a configurable
 validation profile, or should it only rely on the project's existing validation
 command to enforce them?
 
 Answer: The immediate enforcement mechanism should remain the project
-`validation_command`. This deserves review, but Chryso should use the
+`validation_command`. This deserves review, but chr should use the
 initial setup path to influence the project baseline toward the strongest
 practical code-quality gate the project can support. When the setup context
-allows it, Chryso should be exhaustive and help establish tests, linting,
+allows it, chr should be exhaustive and help establish tests, linting,
 runability checks, and stronger quality practices as part of the baseline
 validation command.
 
@@ -114,7 +114,7 @@ Answer: In the current sequential process, the remote branch is normally the sam
 branch currently checked out locally, unless a user or another actor is changing
 state in parallel. If the reviewer verifies that it is really on the expected
 branch, it should be able to run tests and validation. It must not mutate code.
-This raises a stronger future design consideration: Chryso may eventually
+This raises a stronger future design consideration: chr may eventually
 need a git worktree model so the user remains free to interact with the original
 repository while agent roles run in isolated workspaces. This is not required for
 the immediate implementation but should be considered for the future.
@@ -122,11 +122,11 @@ the immediate implementation but should be considered for the future.
 ### Question 9
 
 Question: When the reviewer finds problems, should it write findings only to the
-local Chryso artifact at first, or should it also publish comments to the
+local chr artifact at first, or should it also publish comments to the
 pull request by default?
 
 Answer: Findings should be local first. This keeps the workflow simple, avoids
-API integration requirements, and lets Chryso leave messages, update local
+API integration requirements, and lets chr leave messages, update local
 state, and reassign or return the ticket without depending on a forge provider.
 Publishing comments to the pull request, and even obtaining the diff from the
 remote provider, would make the workflow more similar to traditional review and
@@ -167,10 +167,10 @@ Question: Should local review artifacts be stored under the project workspace
 runtime area, under `ops/artifacts`, or under a dedicated review directory that
 is intended to be versioned?
 
-Answer: Operational Chryso artifacts should live under `./.chr`. If an
+Answer: Operational chr artifacts should live under `./.chr`. If an
 `ops` directory is inside `.chr`, then the policy is already clear. If `ops` is
 outside `.chr`, that should be reconsidered for this workflow. It is not correct
-for Chryso's own operational activity to be reflected in directories outside
+for chr's own operational activity to be reflected in directories outside
 `./.chr`.
 
 ### Question 13
@@ -185,7 +185,7 @@ artifacts.
 ### Question 14
 
 Question: When review finds issues and returns work to development, should the
-same ticket, branch, and pull request be reused, or should Chryso create a
+same ticket, branch, and pull request be reused, or should chr create a
 new repair branch or pull request?
 
 Answer: The same ticket, branch, and pull request should be reused. Traditional
@@ -196,7 +196,7 @@ request carries the review cycle.
 ### Question 15
 
 Question: What should be the default maximum number of review repair rounds
-before Chryso blocks the ticket for human attention?
+before chr blocks the ticket for human attention?
 
 Answer: The default maximum should be one repair cycle. In an agent-based system
 with established architecture, conventions, and linting, there is no ego-driven
@@ -206,11 +206,11 @@ default and should block for human attention.
 ### Question 16
 
 Question: When a ticket blocks after the maximum repair round, should the whole
-loop stop immediately, or may Chryso skip that ticket and continue with
+loop stop immediately, or may chr skip that ticket and continue with
 later independent tickets?
 
 Answer: The loop must stop. The workflow is intentionally sequential: a single,
-steady cycle. Chryso should not continue advancing the slicing sequence
+steady cycle. chr should not continue advancing the slicing sequence
 when one unit blocks.
 
 ### Question 17

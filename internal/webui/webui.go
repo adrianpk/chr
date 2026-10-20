@@ -6,11 +6,13 @@ package webui
 import (
 	"crypto/subtle"
 	"embed"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -24,16 +26,18 @@ var assetsFS embed.FS
 
 // ShellData contains the presentation data needed by the shell template.
 type ShellData struct {
-	Title          string
-	ProjectDir     string
-	ProjectID      string
-	ProjectName    string
-	URL            string
-	Host           string
-	Port           int
-	RequireToken   string
-	RefreshSeconds int
-	Navigation     []ui.NavLink
+	Title            string
+	ProjectDir       string
+	ProjectID        string
+	ProjectName      string
+	URL              string
+	Host             string
+	Port             int
+	RequireToken     string
+	RefreshSeconds   int
+	Navigation       []ui.NavLink
+	LoginEnabled     bool
+	HarnessesEnabled bool
 }
 
 // HandlerOptions configures the Web UI HTTP handler.
@@ -42,6 +46,7 @@ type HandlerOptions struct {
 	Provider    DataProvider
 	Access      AccessPolicy
 	LogRequests io.Writer
+	Login       *LoginCredentials
 }
 
 // AccessPolicy describes request access controls for the local Web UI.
@@ -81,17 +86,19 @@ func NewHandler(opts HandlerOptions) (http.Handler, error) {
 		handler.provider = newStaticDataProvider(opts.Data)
 	}
 
-	if handler.access.RequireToken && strings.TrimSpace(handler.access.Token) == "" {
-		return nil, fmt.Errorf("web token is required but empty")
+	if err := handler.configureLogin(opts.Login); err != nil {
+		return nil, err
 	}
 
 	mux.HandleFunc("/", handler.shell)
 	mux.HandleFunc("/project", handler.project)
 	mux.HandleFunc("/project/fragment", handler.projectFragment)
+	mux.HandleFunc("/project/harnesses", handler.harnesses)
 	mux.HandleFunc("/board", handler.board)
 	mux.HandleFunc("/board/fragment", handler.boardFragment)
 	mux.HandleFunc("/board/ticket", handler.ticketDetail)
 	mux.HandleFunc("/board/ticket/comment", handler.ticketComment)
+	mux.HandleFunc("/board/ticket/save", handler.ticketSave)
 	mux.HandleFunc("/dash", handler.dash)
 	mux.HandleFunc("/dash/fragment", handler.dashFragment)
 
@@ -108,12 +115,14 @@ func NewHandler(opts HandlerOptions) (http.Handler, error) {
 	mux.HandleFunc("/workflows/actions", handler.workflowAction)
 	mux.HandleFunc("/bootstrap", handler.projectFragment)
 	mux.HandleFunc("/healthz", healthz)
+	mux.HandleFunc("/logout", handler.logout)
 	mux.Handle("/assets/", http.StripPrefix("/assets/", handler.static))
 
 	return handler.withRequestLogging(handler.withAccessControl(mux)), nil
 }
 
 type handler struct {
+	login       *loginState
 	renderer    render.Renderer
 	static      http.Handler
 	data        ShellData
@@ -182,6 +191,14 @@ func (h handler) boardFragment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("ETag", `"`+data.Revision+`"`)
+	w.Header().Set("Cache-Control", "no-cache")
+	if r.Header.Get("If-None-Match") == `"`+data.Revision+`"` {
+		w.WriteHeader(http.StatusNotModified)
+
+		return
+	}
+
 	if err := h.renderer.Fragment(w, "board_content.html", data); err != nil {
 		http.Error(w, "render board", http.StatusInternalServerError)
 	}
@@ -201,66 +218,46 @@ func (h handler) ticketDetail(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h handler) ticketComment(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-
-		return
-	}
-
-	request := writeActionRequest(r)
-	result, err := h.provider.WriteAction(r.Context(), request)
-	if err != nil {
-		http.Error(w, "write ticket comment", http.StatusInternalServerError)
-
-		return
-	}
-
-	if result.Status != WriteStatusOK {
-		h.renderWriteResult(w, r, result)
-
-		return
-	}
-
-	data, err := h.ticketDetailPageData(ticketDetailRequest(r, request.ID))
-	if err != nil {
-		http.Error(w, "load ticket", http.StatusInternalServerError)
-
-		return
-	}
-
-	if err := h.renderer.Fragment(w, "ticket_modal.html", data); err != nil {
-		http.Error(w, "render ticket", http.StatusInternalServerError)
-	}
+	h.ticketWrite(w, r, true)
 }
 
 func (h handler) dash(w http.ResponseWriter, r *http.Request) {
 	data, err := h.dashPageData(r)
-	if err != nil {
-		http.Error(w, "load dash", http.StatusInternalServerError)
+	if errors.Is(err, errDashRequest) {
+		http.Error(w, "invalid Dash queue page", http.StatusBadRequest)
 
 		return
 	}
-
-	if err := h.renderer.Page(w, "shell.html", data); err != nil {
+	if err != nil {
+		data = h.dashPageProjection(r, DashView{Unavailable: true, Revision: "unavailable"})
+	}
+	if err = h.renderer.Page(w, "shell.html", data); err != nil {
 		http.Error(w, "render dash", http.StatusInternalServerError)
 	}
 }
 
 func (h handler) dashFragment(w http.ResponseWriter, r *http.Request) {
 	if !htmx.IsRequest(r) {
-		http.Redirect(w, r, "/dash", http.StatusSeeOther)
+		http.Redirect(w, r, "/dash"+dashRefreshQuery(r), http.StatusSeeOther)
 
 		return
 	}
-
 	data, err := h.dashPageData(r)
-	if err != nil {
-		http.Error(w, "load dash", http.StatusInternalServerError)
+	if errors.Is(err, errDashRequest) {
+		http.Error(w, "invalid Dash queue page", http.StatusBadRequest)
 
 		return
 	}
+	if err != nil {
+		w.Header().Set("Cache-Control", "no-store")
+		http.Error(w, "Work observation is unavailable", http.StatusServiceUnavailable)
 
-	if err := h.renderer.Fragment(w, "dash_content.html", data); err != nil {
+		return
+	}
+	if dashObservationHeaders(w, r, data.Dash) {
+		return
+	}
+	if err = h.renderer.Fragment(w, "dash_content.html", data); err != nil {
 		http.Error(w, "render dash", http.StatusInternalServerError)
 	}
 }
@@ -305,7 +302,7 @@ func (h handler) artifactDetail(family string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		data, err := h.artifactDetailPageData(r, family)
 		if err != nil {
-			http.Error(w, "load artifact", http.StatusInternalServerError)
+			artifactReadFailure(w, r, err)
 
 			return
 		}
@@ -327,7 +324,7 @@ func (h handler) artifactDetailFragment(family string) http.HandlerFunc {
 
 		data, err := h.artifactDetailPageData(r, family)
 		if err != nil {
-			http.Error(w, "load artifact", http.StatusInternalServerError)
+			artifactReadFailure(w, r, err)
 
 			return
 		}
@@ -338,6 +335,9 @@ func (h handler) artifactDetailFragment(family string) http.HandlerFunc {
 		case "cases":
 			data.CaseModal = true
 			fragment = "case_modal.html"
+		case "specs":
+			data.SpecModal = true
+			fragment = "spec_modal.html"
 		case "dumps":
 			data.DumpModal = true
 			fragment = "dump_modal.html"
@@ -349,6 +349,15 @@ func (h handler) artifactDetailFragment(family string) http.HandlerFunc {
 	}
 }
 
+func artifactReadFailure(w http.ResponseWriter, r *http.Request, err error) {
+	if errors.Is(err, fs.ErrNotExist) {
+		http.NotFound(w, r)
+
+		return
+	}
+	http.Error(w, "load artifact", http.StatusInternalServerError)
+}
+
 func (h handler) writeAction(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -357,10 +366,20 @@ func (h handler) writeAction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	request := writeActionRequest(r)
+	if request.Action == HarnessSelectionAction {
+		http.Error(w, "use the project harness form", http.StatusBadRequest)
+
+		return
+	}
+
 	result, err := h.provider.WriteAction(r.Context(), request)
 	if err != nil {
 		http.Error(w, "write action", http.StatusInternalServerError)
 
+		return
+	}
+
+	if h.dashActionResult(w, r, request, result) || h.artifactActionResult(w, r, request, result) {
 		return
 	}
 
@@ -372,7 +391,7 @@ func (h handler) writeAction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if result.Status == WriteStatusOK && result.RedirectURL != "" {
+	if result.Status == WriteStatusOK && result.RedirectURL != "" && !result.ProjectionStale {
 		h.redirectAfterWrite(w, r, result.RedirectURL)
 
 		return
@@ -408,10 +427,7 @@ func (h handler) renderWriteResult(w http.ResponseWriter, r *http.Request, resul
 		Write: result,
 	}
 	if htmx.IsRequest(r) {
-		template := "write_result.html"
-		if r.PostFormValue("surface") == "modal" || r.URL.Path == "/board/ticket/comment" {
-			template = "write_result_modal.html"
-		}
+		template := writeResultTemplate(r, &data)
 
 		if err := h.renderer.Fragment(w, template, data); err != nil {
 			http.Error(w, "render write result", http.StatusInternalServerError)
@@ -423,6 +439,23 @@ func (h handler) renderWriteResult(w http.ResponseWriter, r *http.Request, resul
 	if err := h.renderer.Page(w, "shell.html", data); err != nil {
 		http.Error(w, "render write result", http.StatusInternalServerError)
 	}
+}
+
+func writeResultTemplate(r *http.Request, data *PageData) string {
+	if r.PostFormValue("action") == "dump.save" {
+		data.DumpModal = r.PostFormValue("surface") == "modal"
+		if data.DumpModal && data.Write.ReloadURL != "" {
+			data.Write.ReloadURL = "/dumps/detail/fragment?id=" + url.QueryEscape(r.PostFormValue("id"))
+		}
+
+		return "dump_save_result.html"
+	}
+
+	if r.PostFormValue("surface") == "modal" && r.PostFormValue("action") != "dump.create" && r.PostFormValue("action") != "case.create" || r.URL.Path == "/board/ticket/comment" {
+		return "write_result_modal.html"
+	}
+
+	return "write_result.html"
 }
 
 func (h handler) renderProject(w http.ResponseWriter, r *http.Request) {
@@ -474,12 +507,12 @@ func writeActionReservedField(key string) bool {
 }
 
 func shouldCloseModalAfterWrite(r *http.Request, request WriteActionRequest, result WriteActionResponse) bool {
-	if !htmx.IsRequest(r) || result.Status != WriteStatusOK || request.Surface != "modal" {
+	if !htmx.IsRequest(r) || result.Status != WriteStatusOK || request.Surface != "modal" || result.ProjectionStale {
 		return false
 	}
 
 	switch request.Action {
-	case "case.update", "dump.create", "dump.save", "dump.append":
+	case "case.create", "case.update", "dump.create", "dump.save", "dump.append":
 		return true
 	default:
 		return false
@@ -507,7 +540,7 @@ func (h handler) withAccessControl(next http.Handler) http.Handler {
 			return
 		}
 
-		if !h.allowToken(w, r) {
+		if !h.allowLogin(w, r) || !h.allowToken(w, r) {
 			return
 		}
 
@@ -656,19 +689,31 @@ func (h handler) projectPageData(r *http.Request) (PageData, error) {
 	}
 
 	return PageData{
-		Shell:      h.shellData("project"),
-		View:       "project",
-		Title:      "Project",
-		Revision:   project.Revision,
-		RefreshURL: "/project/fragment",
-		Project:    project,
+		Shell:    h.shellData("project"),
+		View:     "project",
+		Title:    "Project",
+		Revision: project.Revision,
+		Project:  project,
 	}, nil
 }
 
 func (h handler) boardPageData(r *http.Request) (PageData, error) {
-	board, err := h.provider.BoardView(r.Context())
+	offset := 0
+	if value := r.URL.Query().Get("offset"); value != "" {
+		var err error
+		offset, err = strconv.Atoi(value)
+		if err != nil || offset < 0 || offset > 4096 {
+			return PageData{}, fmt.Errorf("invalid Board page offset")
+		}
+	}
+	board, err := h.provider.BoardView(r.Context(), BoardRequest{Offset: offset})
 	if err != nil {
 		return PageData{}, err
+	}
+
+	refresh := "/board/fragment"
+	if offset != 0 {
+		refresh += "?offset=" + strconv.Itoa(offset)
 	}
 
 	return PageData{
@@ -676,7 +721,7 @@ func (h handler) boardPageData(r *http.Request) (PageData, error) {
 		View:       "board",
 		Title:      "Board",
 		Revision:   board.Revision,
-		RefreshURL: "/board/fragment",
+		RefreshURL: refresh,
 		Board:      board,
 	}, nil
 }
@@ -684,6 +729,7 @@ func (h handler) boardPageData(r *http.Request) (PageData, error) {
 func (h handler) ticketDetailPageData(r *http.Request) (PageData, error) {
 	ticket, err := h.provider.TicketDetailView(r.Context(), TicketDetailRequest{
 		Key: strings.TrimSpace(r.URL.Query().Get("key")),
+		New: r.URL.Query().Get("new") == "1",
 	})
 	if err != nil {
 		return PageData{}, err
@@ -708,19 +754,12 @@ func ticketDetailRequest(r *http.Request, key string) *http.Request {
 }
 
 func (h handler) dashPageData(r *http.Request) (PageData, error) {
-	dash, err := h.provider.DashView(r.Context())
+	dash, err := h.readDashPage(r)
 	if err != nil {
 		return PageData{}, err
 	}
 
-	return PageData{
-		Shell:      h.shellData("dash"),
-		View:       "dash",
-		Title:      "Dash",
-		Revision:   dash.Revision,
-		RefreshURL: "/dash/fragment",
-		Dash:       dash,
-	}, nil
+	return h.dashPageProjection(r, dash), nil
 }
 
 func (h handler) catalogPageData(r *http.Request, family string) (PageData, error) {
@@ -748,10 +787,18 @@ func (h handler) artifactDetailPageData(r *http.Request, family string) (PageDat
 		return PageData{}, err
 	}
 
+	title := detail.Title
+	if detail.Quiz != nil {
+		title = "Quizzes"
+	}
+	if detail.Spec != nil {
+		title = "Specs"
+	}
+
 	return PageData{
 		Shell:      h.shellData(family),
 		View:       "artifact_detail",
-		Title:      detail.Title,
+		Title:      title,
 		Revision:   detail.Revision,
 		RefreshURL: artifactDetailRefreshURL(family, r.URL.Query().Get("id")),
 		Detail:     detail,
@@ -759,7 +806,7 @@ func (h handler) artifactDetailPageData(r *http.Request, family string) (PageDat
 }
 
 func artifactDetailRefreshURL(family, id string) string {
-	if family == "cases" {
+	if family == "cases" || family == "dumps" || family == "quizzes" || family == "specs" {
 		return ""
 	}
 
@@ -768,6 +815,7 @@ func artifactDetailRefreshURL(family, id string) string {
 
 func (h handler) shellData(active string) ShellData {
 	data := h.data
+	_, data.HarnessesEnabled = h.provider.(HarnessSelectionProvider)
 	if strings.TrimSpace(data.ProjectName) == "" {
 		data.ProjectName = data.ProjectID
 	}

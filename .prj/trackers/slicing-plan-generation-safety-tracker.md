@@ -1,6 +1,6 @@
 # Plan Generation Safety Slicing Tracker
 
-Status: active
+Status: delivered
 
 Plan: `.prj/plans/slicing-plan-generation-safety-plan.md`
 
@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-plan-generation-safety-plan.md`
 
 Slicing name: Plan Generation Safety
 
-Active slice number: Slice 4
+Active slice number: none
 
-Active slice short name: generation runtime safety
+Active slice short name: none
 
-Expected branch name: `feat/slice-4-generation-runtime-safety`
+Expected branch name: none
 
-Expected PR title: `feat(slice-4): generation runtime safety`
+Expected PR title: none
 
 Expected report path:
-`.prj/reports/slices/plan-generation-safety/slice-4-generation-runtime-safety.md`
+none
 
 Prerequisite PRs or delivered work:
 
@@ -150,8 +150,14 @@ Slicing validation:
   plan, spec, and TUI code.
 
 Tuning decision: no additional tuning slice is planned for this slicing. The
-remaining blocker is repository-wide lint debt, not unfinished plan generation
-safety behavior.
+original validation was blocked by repository-wide lint debt, not unfinished
+plan generation safety behavior. Historical failures below remain unchanged.
+
+Closure audit on 2026-10-20 verified PR #201 merged at
+`6def9bf24e102d9de82b3c552b9d42725ef964d2`, an ancestor of dev. The current
+development gate, `make verify`, passed on
+`de2ebb48cb6000670bd2973b98b8f86dafe93f95` with zero lint issues. This is current
+development evidence, not a replacement for historical results or nightly proof.
 
 ## Slice 4: Generation Runtime Safety
 

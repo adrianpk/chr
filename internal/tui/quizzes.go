@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"crypto/rand"
 	"fmt"
 	"strings"
 	"time"
@@ -15,6 +16,7 @@ type QuizScope struct {
 
 // QuizView is the terminal projection of a quiz session or available scope.
 type QuizView struct {
+	Binding               QuizActionBinding
 	Index                 int
 	Title                 string
 	Scope                 QuizScope
@@ -265,12 +267,22 @@ func (m Model) newQuizActionState(action QuizActionID) QuizActionState {
 	scope := m.selectedQuizScope()
 	title := quizActionTitle(action)
 
+	var binding QuizActionBinding
+	if quiz, ok := m.selectedQuizView(); ok {
+		binding = quiz.Binding
+	}
+
+	if binding.ExpectedRevision != "" {
+		binding.OperationID = rand.Text()
+	}
+
 	return QuizActionState{
 		Pending: true,
 		Request: QuizActionRequest{
-			Action: action,
-			Scope:  scope,
-			Mode:   quizActionMode(action),
+			Binding: binding,
+			Action:  action,
+			Scope:   scope,
+			Mode:    quizActionMode(action),
 		},
 		Title: title,
 		Details: []string{

@@ -174,9 +174,9 @@ Additional validation should include `go run ./cmd/tictactoe --help`, one script
 - source: request_context
 - source: quiz_context
 - source: request_context
-- source: /home/adrian/Projects/chryso/qa/project/tictactoe/AGENTS.md
-- source: /home/adrian/Projects/chryso/qa/project/tictactoe/.chr/default/project.md
-- source: /home/adrian/Projects/chryso/qa/project/tictactoe/.chr/default/cases/cli-gameplay.md
+- source: /workspaces/chr/qa/project/tictactoe/AGENTS.md
+- source: /workspaces/chr/qa/project/tictactoe/.chr/default/project.md
+- source: /workspaces/chr/qa/project/tictactoe/.chr/default/cases/cli-gameplay.md
 - source: .chr/default/dumps/cli-gameplay-context.md
 - source: .chr/default/dumps/project-context.md
 - source: .chr/default/plans/cli-gameplay-plan.md

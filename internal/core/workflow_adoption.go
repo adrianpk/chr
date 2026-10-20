@@ -38,6 +38,10 @@ func (s *WorkflowStore) AdoptPlanWorkflow(ctx context.Context, opts WorkflowPlan
 		return result, err
 	}
 
+	if opts.Plan.PlanRevision != nil {
+		return result, fmt.Errorf("revision-bound plans require native materialization")
+	}
+
 	if opts.CheckQuiescent == nil {
 		return result, fmt.Errorf("legacy ownership observation is required")
 	}
@@ -49,7 +53,11 @@ func (s *WorkflowStore) AdoptPlanWorkflow(ctx context.Context, opts WorkflowPlan
 
 	defer func() { err = errors.Join(err, releaseWorkflowAdoptionLocks(locks)) }()
 
-	err = s.withLock(ctx, func() error {
+	err = s.withWorkflowPlanMutation(ctx, func(ctx context.Context) error {
+		if err := s.requirePlanRevisionBinding(opts.Plan.PlanRef); err != nil {
+			return err
+		}
+
 		var adoptErr error
 
 		result, adoptErr = s.adoptPlanWorkflow(ctx, opts)

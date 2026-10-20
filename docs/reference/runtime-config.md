@@ -3,7 +3,7 @@
 Runtime configuration may live in the managed project's `.chr/default/config.yml` file
 under the `runtime:` key.
 
-When fields are omitted, Chryso uses local defaults suitable for the
+When fields are omitted, chr uses local defaults suitable for the
 project-owned runtime scaffold.
 
 New workspaces omit runtime defaults from generated config so users only edit
@@ -56,14 +56,17 @@ executing the validation command.
 The runtime plan also records the effective workspace execution metadata from
 `work:`:
 
-- `workspace_mode`: `project` by default.
+- `workspace_mode`: `worktree` with `workflow.version: 1`; otherwise the legacy
+  default is `project`. Explicit project configuration overrides the default.
 - `project_checkout`: the user-visible project checkout.
 - `execution_workspace`: the path intended for agent work. In `project` mode
   this is the project checkout. In `worktree` mode this is the prepared ticket
   worktree.
 
-Existing projects keep project-mounted execution unless they explicitly opt
-into `work.workspace_mode: worktree`. In worktree mode, ticket execution
+New projects initialized with `workflow.version: 1` use isolated worktrees.
+Existing unversioned projects keep project-mounted execution unless they
+explicitly opt into `work.workspace_mode: worktree` or deliberately adopt the
+versioned policy. In worktree mode, ticket execution
 prepares the isolated Git worktree first and the runtime mount points Docker at
 that execution workspace.
 

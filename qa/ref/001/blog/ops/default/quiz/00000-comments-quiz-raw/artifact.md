@@ -42,5 +42,5 @@ Which comments capabilities should be excluded from the first implementation?
 Answer:
 
 Do not include moderation, persistence, authentication, rate limiting, or admin
-operations. Keep the feature small and focused on validating the CHR generation
+operations. Keep the feature small and focused on validating the chr generation
 and ticket loop flow.

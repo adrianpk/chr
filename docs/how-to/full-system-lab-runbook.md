@@ -1,8 +1,8 @@
 # Full-System Lab Runbook
 
-This runbook defines a repeatable lab for exercising Chryso end to end.
+This runbook defines a repeatable lab for exercising chr end to end.
 It is intentionally broader than a quick smoke test. The goal is to create a
-moderately realistic Go project, initialize it with Chryso, drive the
+moderately realistic Go project, initialize it with chr, drive the
 available workflows, record failures, and use those failures to decide what
 needs to be fixed next.
 
@@ -11,7 +11,7 @@ when it is captured with the command, output, artifact path, and next action.
 
 ## Lab Shape
 
-Use a dedicated lab root outside the Chryso repository:
+Use a dedicated lab root outside the chr repository:
 
 ```sh
 export CHR_LAB_ROOT="$HOME/Projects/labs/ghc"
@@ -32,7 +32,7 @@ mkdir -p "$CHR_PROJECTS" "$CHR_LOG_DIR" "$CHR_ARTIFACT_DIR" "$CHR_SCRIPTS"
 The reference project is treated as immutable after it is created:
 
 - `chr-blog-ref` is the clean reset source.
-- `chr-blog-work` is the project Chryso operates on.
+- `chr-blog-work` is the project chr operates on.
 - `logs` stores copied command output for later diagnosis.
 - `artifacts` stores snapshots, bundles, and exported evidence.
 - `scripts` may later contain reset helpers.
@@ -42,7 +42,7 @@ Do not run destructive reset commands outside `$CHR_LAB_ROOT`.
 The command path below is written like a final user would run it from inside the
 managed project. It does not include developer-only flags such as `--dev-root`.
 Use a separate shell environment when you need to isolate user-level state while
-developing Chryso itself.
+developing chr itself.
 
 ## Reference Project
 
@@ -171,7 +171,7 @@ artifacts.
 
 ## TUI Quiz Parity Validation
 
-Run this validation from the Chryso repository after building the current
+Run this validation from the chr repository after building the current
 branch:
 
 ```sh
@@ -223,9 +223,9 @@ Expected evidence:
 - skipped follow-up branches do not force the next question to stay on the same
   branch.
 
-## Install Chryso
+## Install chr
 
-From the Chryso repository:
+From the chr repository:
 
 ```sh
 make install
@@ -246,7 +246,7 @@ run `make build` immediately before testing a repository-local binary.
 
 ## Initialize the Work Project
 
-Initialize Chryso inside the resettable work project:
+Initialize chr inside the resettable work project:
 
 ```sh
 cd "$CHR_WORK_PROJECT"
@@ -627,7 +627,7 @@ For every unexpected failure, record:
 - Follow-up ticket:
 ```
 
-If the failure is in Chryso, create a Chryso ticket after the run. If
+If the failure is in chr, create a chr ticket after the run. If
 the failure is only in the lab fixture, fix the fixture or reset it from the
 reference project.
 

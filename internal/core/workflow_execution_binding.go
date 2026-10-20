@@ -48,6 +48,10 @@ func (s *WorkflowStore) checkWorkflowPreparedClaim(ctx context.Context, claim *W
 }
 
 func checkWorkflowExecutionBinding(run workflowInvocationFile, record WorkflowRecord, prepared workflowPreparedTask) error {
+	if err := checkWorkflowTaskHarness(run, prepared.input); err != nil {
+		return err
+	}
+
 	hash, err := workflowExecutionScopeHash(run)
 	if err != nil || hash != prepared.input.ScopeHash {
 		return fmt.Errorf("%w: frozen execution checkpoint changed", ErrWorkflowConflict)

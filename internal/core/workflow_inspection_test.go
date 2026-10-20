@@ -107,6 +107,11 @@ func TestWorkflowInspectionLinked(t *testing.T) {
 		{"invocation", func() error { _, err := store.InspectWorkflow(t.Context(), run.Invocation.ID); return err }},
 		{"page", func() error { _, _, err := store.InspectWorkflowPage(t.Context(), 0, 8); return err }},
 		{"records", func() error { _, err := store.InspectWorkflowRecords(t.Context()); return err }},
+		{"board", func() error {
+			_, err := ReadTicketBoard(t.Context(), TicketBoardReadOptions{Layout: store.layout, ProjectID: store.projectID, NativeWorkflow: true})
+
+			return err
+		}},
 		{"policy", func() error { _, err := store.InspectWorkflowPolicy(t.Context()); return err }},
 	}
 	for _, check := range checks {

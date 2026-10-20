@@ -17,7 +17,7 @@ Related:
 
 ## Summary
 
-Chryso should move ticket execution from the user's active checkout into an
+chr should move ticket execution from the user's active checkout into an
 isolated Git worktree created per ticket execution or per ticket branch.
 
 The system remains sequential: one active agent, one active ticket, one active
@@ -41,7 +41,7 @@ origin/<integration_branch>
   published operational base for agent work
 
 ticket worktree
-  created by Chryso from the published operational base
+  created by chr from the published operational base
   mounted into Docker as the writable workspace
   kept until ticket branch / PR lifecycle is complete
 ```
@@ -61,7 +61,7 @@ the user's local checkout state as the starting point for managed work.
 - Mount the ticket worktree, not the user's checkout, into the runtime
   container.
 - Let the user keep editing, browsing, or experimenting in the main checkout
-  while Chryso runs an agent task.
+  while chr runs an agent task.
 - Preserve deterministic runtime artifacts, event streams, execution reports,
   validation logs, and result application behavior.
 - Tie each ticket worktree to the ticket branch and PR lifecycle.
@@ -75,7 +75,7 @@ the user's local checkout state as the starting point for managed work.
 
 - Do not introduce parallel ticket execution.
 - Do not allow multiple active agents by default.
-- Do not require the user to adopt Chryso's own branch names.
+- Do not require the user to adopt chr's own branch names.
 - Do not copy uncommitted user changes into ticket worktrees automatically.
 - Do not treat the user's local integration branch as the source of truth when
   the canonical remote tracking ref is available.
@@ -129,7 +129,7 @@ ProjectDir
   the user-facing managed project checkout
 
 ExecutionWorkspaceDir
-  the Chryso-owned ticket worktree mounted into the runtime container
+  the chr-owned ticket worktree mounted into the runtime container
 ```
 
 The Docker harness should mount:
@@ -184,12 +184,12 @@ Possible values:
 
 `worktree`
 
-: Ticket execution happens in a Chryso-owned Git worktree created from an
+: Ticket execution happens in a chr-owned Git worktree created from an
   explicit base ref.
 
 `worktree_root`
 
-: Project-relative directory where Chryso stores ticket worktrees.
+: Project-relative directory where chr stores ticket worktrees.
   Default: `.chr/default/runtime/worktrees`.
 
 `worktree_base`
@@ -293,13 +293,13 @@ should make that field operational:
 ticket.branch -> git branch checked out by ticket worktree
 ```
 
-If the ticket branch is missing, Chryso creates it from the selected base
+If the ticket branch is missing, chr creates it from the selected base
 ref.
 
-If the ticket branch exists locally and remotely, Chryso must verify that
+If the ticket branch exists locally and remotely, chr must verify that
 the relationship is safe before reusing it.
 
-If the branch exists with unrelated history, Chryso must block and report
+If the branch exists with unrelated history, chr must block and report
 the conflict.
 
 ## Base Ref Selection
@@ -316,7 +316,7 @@ Usually:
 refs/remotes/origin/dev
 ```
 
-Before creating or updating a ticket worktree, Chryso should fetch the
+Before creating or updating a ticket worktree, chr should fetch the
 canonical remote.
 
 The operation must not use local `dev` merely because it exists. Local `dev`
@@ -419,7 +419,7 @@ There are two different dirty states.
 
 `ticket worktree dirty`
 
-: The Chryso-owned ticket worktree has uncommitted changes.
+: The chr-owned ticket worktree has uncommitted changes.
 
 In `worktree` mode:
 
@@ -444,7 +444,7 @@ Avoid generic `dirty_worktree` wording when more precise language is available.
 
 The user checkout may be stale without blocking isolated execution.
 
-The remote tracking ref may not be stale. Before execution, Chryso should
+The remote tracking ref may not be stale. Before execution, chr should
 fetch the canonical remote and verify that the selected base ref exists.
 
 If fetch fails:
@@ -512,7 +512,7 @@ depend on inference forever.
 
 ## Worktree Metadata
 
-A ticket worktree should be inspectable by Chryso without relying only on
+A ticket worktree should be inspectable by chr without relying only on
 Git's internal worktree list.
 
 Minimum metadata:
@@ -691,7 +691,7 @@ The user may:
 - reset example projects;
 - open files in an editor.
 
-CHR should avoid surprising the user by:
+chr should avoid surprising the user by:
 
 - not writing implementation changes into the active checkout;
 - reporting where work is actually happening;
@@ -777,7 +777,7 @@ runtime boundary.
 
 The safety improvement is filesystem ownership:
 
-- Codex writes to a Chryso-owned worktree;
+- Codex writes to a chr-owned worktree;
 - user checkout changes are not modified;
 - destructive repair can be scoped to the ticket worktree and still remain
   non-destructive by default.

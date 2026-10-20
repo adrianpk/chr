@@ -1,18 +1,18 @@
 # User Guide
 
-This guide covers the Chryso workflow that exists today.
+This guide covers the chr workflow that exists today.
 
 For native plan execution, retained controls, supervised manual handoffs and
 optional tracker export/repair, follow
 [Run ticket-native workflows](../run-ticket-workflows.md).
 
-Chryso is local-first. A managed project has a `.chr/` directory, while
+chr is local-first. A managed project has a `.chr/` directory, while
 user-level state stores project registration, indexes, execution records, loop
 records, and daemon state.
 
 ## Initialize a Workspace
 
-Create project-local Chryso state:
+Create project-local chr state:
 
 ```sh
 chr init
@@ -102,9 +102,25 @@ Preview validation without running Docker:
 chr runtime validate --dry-run
 ```
 
+## Select Worker and Generation Harnesses
+
+Projects may use Codex or Pi independently for workers and content generation.
+Prepare named profiles in private user configuration, select the registered
+project with `chr project use`, and inspect `chr harness status --json` before
+changing either default. The [harness setup and recovery guide](../select-harnesses.md)
+covers native Pi generation, the separate Docker worker bridge, credentials,
+custom endpoints and exact revision/request handling.
+
+Web Harnesses, TUI Project `h`, Telegram `/harness` and the CLI share those
+persisted defaults. A switch affects new operations; pending, running, paused
+and resumed work keeps its original binding. Local readiness does not test
+remote authentication or certify the selected model's tool/structured-output
+capabilities. Missing usage remains unknown, and observed usage does not certify
+hard token-budget enforcement.
+
 ## Configure Work Readiness
 
-Work readiness protects the project before Chryso starts agent work. The
+Work readiness protects the project before chr starts agent work. The
 default policy expects a clean `dev` branch with `origin` as the canonical
 remote, but projects can configure their own branch posture in
 `.chr/default/config.yml`.
@@ -128,7 +144,7 @@ Inspect readiness:
 chr work doctor
 ```
 
-Apply safe repair when Chryso reports one:
+Apply safe repair when chr reports one:
 
 ```sh
 chr work doctor --fix-safe
@@ -235,6 +251,14 @@ quizzes, specs, plans, tickets, and execution activity. It loads durable
 workspace files from disk and writes normal Markdown artifacts back to the
 core.
 
+In **Project** (`F1`), press `h` to inspect harness defaults. Tab selects the
+worker or generation role; arrows choose a named profile and `c` restores legacy
+dispatch for that role. Press Enter to save or Esc to discard unsent choices.
+Stale or failed saves retain the choices. Press `r` to discard them and reload
+current defaults, including changes from another interface or process. Running,
+paused and resumed work keeps its original binding. See [TUI harness defaults](../../reference/project-workspace.md#tui-harness-defaults)
+for readiness, retry and scrolling controls.
+
 ## Open the Local Web UI
 
 The Web UI is a browser surface over the same project state. It does
@@ -276,6 +300,51 @@ by the TUI and CLI: Cases, Dumps, Quizzes, Specs, Plans, Board, and Dash. It
 uses project-local files as the source of truth and reloads from shared state
 after CLI, TUI, or Web UI changes.
 
+Open **Harnesses** in the project context to choose named worker and generation
+defaults. Each role shows its local readiness separately from retained worker
+invocations. Select **Save defaults** to persist choices without restarting the
+service, or **Restore legacy dispatch** to clear a role. These changes apply to
+new operations; running, paused and resumed work keeps its original binding.
+Rejected saves retain your choices. Reload current defaults before retrying a
+stale form. See [Web harness defaults](../../reference/project-workspace.md#web-harness-defaults)
+for readiness, retry and private-setup boundaries.
+
+Open a named case to generate its plan. The planning panel shows Generate Plan
+when no plan exists and Regenerate Plan for the displayed existing revision.
+Save case edits first: planning uses saved context. Follow Add discovery context
+or Answer this case's quiz when more information is needed. The Plans catalog
+has no separate slug-based generation forms.
+
+Plans shows saved plan documents as fixed-size cards with opening body lines.
+Open a card to read that exact document in full. The detail has no manual Edit,
+Save or Append controls. Internal order trackers stay in project files and
+cannot be browsed or created through the Web UI.
+
+Planning requires useful discovery and enough information about the intended
+outcome, scope, constraints and verification. A complete dump alone, a short
+focused dump or sufficient quiz answers can qualify. A manual spec alone does
+not replace this discovery requirement. Missing information appears in the case
+panel; generation does not fill material gaps with assumptions. Spec generation
+and approval remain separate operations, and generating a plan does not start
+work. Failed preparation or changed sources leave the current plan in place;
+reload the case before retrying a stale operation.
+
+Open **Dash** to observe the queue, each active ticket context and retained
+results. The queue sits at left, current work at upper right and activity/results
+below; these panels stack on narrow screens. Use the queue page links for more
+than 128 pending items. Readiness and exclusions explain why pending work cannot
+start. Native host-validated tasks and confirmed tickets are separate counts;
+a successful legacy harness run does not itself confirm integration.
+
+Dash refreshes while the tab is visible. Quiet validation remains active even
+when there is no new event. Unchanged observations keep the displayed content;
+changed observations retain scroll position, focused links and selected text
+that still exists. If a read fails, a stale notice preserves the last observation
+and its time until recovery. Reopening Dash reads retained state without
+starting work. Preview Work and Stop Daemon keep their confirmations, with
+results below the controls while monitoring remains visible. Stop Daemon requests
+a daemon stop; it does not cancel an individual ticket.
+
 This first Web UI iteration is intended to be usable, not final. Expect visual
 and ergonomic refinement to continue while the local server, shared state, and
 action boundaries remain explicit.
@@ -284,6 +353,43 @@ Keep it local unless you deliberately expose it through operator-owned private
 networking or a tunnel. See [Run the local Web
 UI](../run-local-web-ui.md) and [Expose the local Web UI
 deliberately](../expose-local-web-ui.md).
+
+## Complete a Web Workflow
+
+1. Capture project context in Dumps. Choose a named case for details that belong
+   only to that case; later Project-wide captures extend the shared document.
+2. Open Quizzes to answer unresolved questions. Choose Deep for adaptive
+   follow-ups or Fast for a retained flat batch. Done preserves earlier answers.
+3. Create or edit individual Specs. Manual specs need no discovery or model
+   access; editing a generated spec uses the same editor.
+4. Open the named case to Generate or Regenerate its plan from saved, sufficient
+   discovery. Missing context produces guidance and leaves an earlier plan intact.
+5. Read the full result from Plans. Plan generation does not approve execution
+   or allocate task tickets. Internal order maps remain outside Web browsing;
+   approved native materialization binds their tickets through the workflow owner.
+6. Open Board to edit allowed ticket metadata or add comments. Execution-owned
+   fields explain their guards; pending edits remain separate from comments.
+7. Open Dash to observe the same ticket identities, current work and retained
+   outcomes. Opening or refreshing a view does not start work.
+
+## Manage Tickets in the Web UI
+
+Board has six status lanes and a separate attention area for blocked or unknown
+states. Larger projects expose page links; horizontal lane scrolling keeps cards
+readable on narrow screens. Choose **New** for an empty ticket form or open a card
+to edit the selected ticket. Maximize and restore keep the same pending input.
+
+The form groups classification, ownership and delivery fields with one description
+editor. Save applies the displayed revision. Status selection and dragging reject
+unsupported or stale moves with an explanation; reload before replacing newer
+changes. Existing tickets have an independent comment composer, which does not
+save or discard pending metadata.
+
+Approved native plan order owns bound task titles, membership and case association;
+the execution contract owns their description. These fields show their guard in
+the editor. Use the existing approved amendment operation for contract changes.
+Active claims and verified delivery receipts retain their own editing restrictions.
+Unbound titles and other permitted metadata remain editable.
 
 ## Navigate the TUI
 
@@ -371,7 +477,7 @@ and tickets.
 
 Use the description as the short human-facing summary for lists, selectors, and
 previews. Use the context field for longer use-case material that should be
-included when Chryso builds the total agent context: constraints, decisions,
+included when chr builds the total agent context: constraints, decisions,
 intent, edge cases, and notes that do not belong in a one-line summary.
 
 | Key | Behavior |
@@ -390,6 +496,41 @@ intent, edge cases, and notes that do not belong in a one-line summary.
 
 Refresh is blocked while use-case edits are active or unsaved.
 
+## Capture Project Context in the Web UI
+
+Open **Dumps**, select **New**, and choose **Project-wide** or an existing case
+name. Enter a title and content, then select **Add context**. The first
+project-wide capture creates the shared dump; later captures extend that same
+document, including captures made through CLI, TUI or authoring conversations.
+Case captures remain separate documents associated with the selected case.
+
+The catalog fits more fixed-size cards across wider windows. Short or long
+content keeps the same card and inset preview size; previews show only opening
+text. Narrow windows reduce the column count. Open a card for the full body.
+
+A failed request retains the form. Keep the same fields when retrying an uncertain
+request; changing them submits a new capture. If the capture is committed but its
+catalog refresh is pending, the form shows that result and an unchanged retry
+refreshes the view without capturing the material again.
+
+Raw captures and earlier body versions remain preserved. Conflicting older
+general dumps require explicit reconciliation; opening a catalog never merges or
+rewrites them. See the [authoring reference](../../reference/authoring-sessions.md#project-dump-reconciliation).
+
+## Edit Dumps in the Web UI
+
+Open a dump card, edit its **Body**, and select **Save**. Correct, remove,
+reorganize or add text in that one editor. Save replaces the body of the same
+document; frontmatter, raw captures and earlier versions remain preserved.
+
+A failed or uncertain request retains your edits. Retry Save with the same body
+to recover a confirmed result. If someone changed the document after you opened
+it, Save reports a conflict and keeps your text. **Reload stored content** asks
+before discarding your pending edits and loading the current body. Catalog
+refreshes keep an open editor intact, and the full-page editor does not refresh
+automatically. A pending catalog refresh after Save is reported as already saved;
+an unchanged retry refreshes the view.
+
 ## Capture Dumps in the TUI
 
 Open the Dumps view with `F3`.
@@ -397,7 +538,9 @@ Open the Dumps view with `F3`.
 Dumps are free-form Markdown context. They can be project-wide or tied to a use
 case. A dump is a document type for material the user already knows or
 remembers; quizzes complement dumps by prompting for missing or latent context.
-Creating a dump writes a curated primary document plus a raw capture sibling.
+The first project-wide capture creates a curated document and raw capture. Later
+project-wide captures extend that document and retain their raw material. A
+use-case capture creates an independent scoped document.
 The TUI lists curated dumps by use case, shows the selected curated content in
 the detail pane, and shows the raw sibling path when one exists.
 
@@ -426,6 +569,40 @@ chr dump append ops/default/dump/00000-billing-notes/artifact.md --content "Addi
 chr dump open ops/default/dump/00000-billing-notes/artifact.md
 ```
 
+## Answer Quizzes in the Web UI
+
+Quizzes shows Project Quiz first, including **No answers yet** when empty, then
+named cases with recorded answers. Each fixed-size card previews the opening
+question and answer. Open a card to read its history or continue unfinished work.
+
+**New Quiz** appears only while a project or existing case has no recorded answers.
+Open its compact menu and choose a name. An active selection keeps its current
+question; a cancelled session offers **Resume**. A new scope offers **Start Quiz**.
+After Done, **Start new session** explicitly creates another session and retains
+earlier entries. Skipped or completed empty quizzes remain pending. When every
+scope has an answer, New Quiz disappears; adding a case makes it available again.
+
+The focused screen shows the current question, one answer field and the Deep/Fast
+selector. Recorded answers appear newest first; skipped questions are excluded.
+
+Answer records the response and advances. Skip advances without an answer. Done
+completes the session, including when questions remain; Cancel leaves it cancelled
+and preserves earlier answers. With an unsent answer, Skip, Cancel, Done and links
+away from the screen require an explicit discard decision.
+
+Deep generates adaptive follow-ups within the question/depth budget. Fast generates
+one successful flat batch and then advances without further per-question model
+calls. Switching modes preserves the active question and unsent answer. Deep
+suspends the retained Fast queue; returning to Fast resumes that queue. When Fast
+is exhausted, choose Done or switch to Deep and Resume to continue.
+
+Unsent drafts survive refresh and mode changes in the current browser tab. A
+successful Answer clears only its question's draft. Request failures keep the
+input available for retry. If another client changes the question, reload the
+current state; an earlier unsent draft remains separate from the new answer field.
+If question generation fails after an answer, the recorded answer stays in history
+and Resume retries continuation without recording it again.
+
 ## Run Quizzes in the TUI
 
 Open the Quizzes view with `F4`.
@@ -436,7 +613,7 @@ The TUI shows quiz state, active question, recorded answers, and curated notes.
 | Key | Behavior |
 | --- | --- |
 | `up` / `down` or `k` / `j` | Select a quiz. |
-| `s` | Start or restart the selected quiz. |
+| `s` | Start a quiz, or restart a completed/cancelled session. |
 | `enter` | Answer the active question. |
 | `r` | Refresh quiz state from disk. |
 
@@ -465,6 +642,29 @@ chr quiz complete --use-case billing
 chr quiz cancel --use-case billing
 chr quiz mode fast --use-case billing
 ```
+
+## Write and Edit Specs in the Web UI
+
+Open Specs and choose **New**. Enter a title, choose **Project-wide** or an
+existing named use case, and write the document in Body. Draft is on by default.
+Leave it on to create a draft, or turn it off to create an approved spec directly.
+Choose **Create**. Manual authoring needs no dump, quiz or model request.
+
+Each card represents one stored spec and previews its opening body text. Several
+specs can share one scope. Open the card to edit that exact document, including a
+generated spec. The editor prefills its title, body and Draft state. Its use case
+remains fixed. **Save** retains its identity, scope, creation time and provenance.
+
+Errors keep the form available for correction or retry. If another client changes
+the spec, Save rejects the stale revision. **Reload spec** explicitly discards the
+pending form and loads the current document. Background catalog refresh does not
+replace an open editor. An approved spec can be edited without first making a
+separate draft.
+
+Generated specs start in draft. Generation uses project context, the canonical
+general dump and matching optional use-case discovery. It excludes unrelated
+cases. An edit made while generation is preparing output prevents that output
+from replacing the edited document.
 
 ## Generate Specs in the TUI
 
@@ -524,17 +724,34 @@ the input for later tracking and ticket creation.
 | `up` / `down` or `k` / `j` | Select a use case. |
 | `g` | Generate the selected plan only when it is missing. |
 | `G` | Regenerate the selected plan after confirmation. |
-| `alt+t` | Create plan tracking and tickets from the selected plan after confirmation. |
+| `alt+t` | Create legacy tracking for a historical plan without a revision-bound companion. |
 | `r` | Refresh plans from disk. |
 
 `g` does not overwrite an existing plan. Use `G` when the existing plan should
-be replaced. Regeneration archives the existing generated plan before writing
-the replacement, so archived generated plans remain available on disk but are
-excluded from normal document loading.
+be replaced. Both actions use the same discovery readiness check as the Web UI.
+Regeneration prepares and validates the replacement first, checks that sources
+and the existing plan still match, then publishes the archive and replacement
+together. Archived generated plans remain on disk and are excluded from normal
+document loading. Provider errors, cancellation and stale inputs preserve the
+current plan.
 
-`alt+t` is available only when the selected plan exists. It creates a tracking
-Markdown file and one ticket per generated slice. If tracking already exists,
-the operation reports that state instead of creating duplicate tracking.
+Each successful generation retains its own internal order map. Generating a new
+revision preserves earlier maps and ticket history, even if the plan text is
+unchanged. Explicit operation retries reuse the committed revision. The initial
+map has planned identities and order; it allocates no tickets and starts no work.
+Approving a prepared native workflow binds canonical task tickets to that revision.
+Later approved changes use guarded amendment and retain completed work. The
+[materialization reference](../../reference/plan-workflow-materialization.md)
+describes the approved input contract.
+
+Workers receive the current order map and use live ticket state for progress.
+Ticket progress leaves the map unchanged. If a required map is missing or edited,
+repair it with the [native tracker commands](../../reference/workflow-trackers.md)
+before continuing. Replacing edited output requires its exact observed hash.
+
+`alt+t` remains available for historical body-only plans and retains its existing
+tracking behavior. For newly generated plans, it reports that order is already
+retained and requires native approval before ticket allocation.
 
 Plan generation, regeneration, and tracking creation are guarded so the same
 TUI cannot start overlapping plan operations.
@@ -889,7 +1106,7 @@ chr ticket review CHR-1 \
 ```
 
 When review requests changes, the ticket returns to `ready_for_dev` with repair
-handoff metadata. In `agentic_review` loop mode, Chryso runs one default
+handoff metadata. In `agentic_review` loop mode, chr runs one default
 repair execution for that same ticket, reviews it again, and only then merges
 or blocks. Later normal tickets do not start while that repair cycle is
 unfinished.
@@ -1156,6 +1373,23 @@ explanation or start a preparation-only conversation:
 /prepare Retain a retry ceiling
 ```
 
+Inspect or change harness defaults for that selected project without restarting
+the receiver:
+
+```text
+/harness
+/harness worker=code generation=writing
+```
+
+Replace `code` and `writing` with locally prepared profile names. Read the exact
+project and choices in the confirmation, then reply `confirm` or `cancel` (or use
+`/answer <token> confirm`). Omitted roles stay unchanged; `generation=-` restores
+legacy generation dispatch. Confirmations expire after ten minutes and reject
+changed revisions or authority. New operations see saved defaults; running,
+paused and resumed work keeps its original binding. Configuration and private
+setup cannot be authorized by a model proposal. See
+[Telegram harness defaults](../../reference/telegram-receiver.md#harness-defaults).
+
 Send the requirements as several messages. Use `/sessions` to inspect or select
 the returned conversation ID when several conversations are active. `/done`
 generates its canonical dump. `/quiz` asks a real clarification; reply to its
@@ -1251,7 +1485,7 @@ Use these commands for local runtime proofing, not as the main ticket workflow.
 
 ## Execution Context
 
-Before agent work, Chryso can compose a context package with:
+Before agent work, chr can compose a context package with:
 
 - agent identity;
 - applicable `AGENTS.md` and `.chr/` protocol files;
@@ -1283,6 +1517,11 @@ Docker receives the same files through the project mount, usually under
 - Project mode mounts the user-visible checkout into Docker.
 - Worktree mode prepares a ticket-specific Git worktree and mounts that
   execution workspace into Docker.
+- New projects use worktree mode through `workflow.version: 1`. Existing
+  unversioned projects retain project mode unless deliberately changed.
+- In worktree mode, unrelated edits in your checkout remain separate from
+  agent work. `chr work doctor --ticket <ticket-key>` distinguishes your
+  checkout from the selected ticket worktree; dirty ticket worktrees block work.
 - Avoid editing the mounted execution workspace while an agent run is active.
 - PAT-backed push from inside the container is not part of the current local
   runtime boundary.

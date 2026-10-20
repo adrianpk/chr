@@ -46,13 +46,19 @@ func (s *WorkflowStore) UpgradeWorkflowConfiguration(ctx context.Context, opts W
 	defer func() { err = errors.Join(err, releaseWorkflowAdoptionLocks(locks)) }()
 
 	err = s.withLock(ctx, func() (err error) {
-		if err := s.checkWorkflowUpgradeQuiescent(ctx, opts); err != nil {
+		return withWorkspaceConfigLock(ctx, s.layout.ProjectDir(), func() error {
+			if err := requireNoHarnessSelectionChange(s.layout.ProjectDir()); err != nil {
+				return err
+			}
+
+			if err := s.checkWorkflowUpgradeQuiescent(ctx, opts); err != nil {
+				return err
+			}
+
+			result, err = s.upgradeWorkflowConfiguration(ctx, opts)
+
 			return err
-		}
-
-		result, err = s.upgradeWorkflowConfiguration(ctx, opts)
-
-		return err
+		})
 	})
 
 	return result, err

@@ -18,6 +18,8 @@ LIVE_NAMES = ("TestNativeForgejoMethods", "TestNativeGitHubMethods", "TestNative
               "TestNativePolicyDenials", "TestNativePRChanges", "TestNativeTransportLoss",
               "TestWorkflowNativeRebase")
 LIVE_TESTS = "^(" + "|".join(LIVE_NAMES) + ")$"
+BROWSER_NAMES = ("TestWebWorkflowBrowser", "TestWebConsolidatedBrowser", "TestWebLoginBrowser")
+BROWSER_TESTS = "^(" + "|".join(BROWSER_NAMES) + ")$"
 BUDGET_SECONDS = 200 * 60
 
 
@@ -30,7 +32,7 @@ def commands(go, live):
         ("normal", [*test, "./..."]),
         ("race", [*test, "-race", "./..."]),
         ("browser", [go, "test", "-count=1", "-timeout=5m", "-json",
-                     "./internal/app", "-run", "^TestWebWorkflowBrowser$"]),
+                     "./internal/app", "-run", BROWSER_TESTS]),
     ]
     if live:
         checks.append(("live", [go, "test", "-count=1", "-timeout=30m", "-json",
@@ -56,7 +58,7 @@ def test_timings(path):
 def check_selected_tests(name, timings):
     if name not in ("live", "browser"):
         return
-    expected = LIVE_NAMES if name == "live" else ("TestWebWorkflowBrowser",)
+    expected = LIVE_NAMES if name == "live" else BROWSER_NAMES
     actual = {row["Test"]: row["Action"] for row in timings if "/" not in row["Test"]}
     if any(actual.get(test) != "pass" for test in expected):
         raise ValueError(f"{name} produced incomplete test evidence")

@@ -27,6 +27,9 @@ type WorkflowExecutionPolicy struct {
 
 // WorkflowStartRequest admits an explicit finite selection with a retry key.
 type WorkflowStartRequest struct {
+	HarnessBinding      *HarnessBinding         `json:"harness_binding,omitempty"`
+	HarnessCommand      []string                `json:"-"`
+	ResolveHarness      WorkflowHarnessResolver `json:"-"`
 	Admission           *WorkflowAdmissionGuard `json:"admission_guard,omitempty"`
 	IncludeLaterTickets *bool                   `json:"include_later_tickets_override,omitempty"`
 	Selected            *WorkflowSelectionGuard `json:"-"`
@@ -78,6 +81,7 @@ type WorkflowAttempt struct {
 
 // WorkflowInvocation is the public durable checkpoint, not an execution token.
 type WorkflowInvocation struct {
+	HarnessBinding     *HarnessBinding                   `json:"harness_binding,omitempty"`
 	Admission          *WorkflowAdmissionGuard           `json:"admission_guard,omitempty"`
 	IntegrationBudget  *WorkflowIntegrationBudgetBinding `json:"integration_budget,omitempty"`
 	Integration        *WorkflowIntegrationBinding       `json:"integration_binding,omitempty"`
@@ -128,6 +132,7 @@ type WorkflowInvocation struct {
 }
 
 type workflowInvocationFile struct {
+	HarnessCommand []string `json:"harness_command,omitempty"`
 	WorkflowInvocation
 	OwnerRoot   string            `json:"owner_root"`
 	Owners      map[string]string `json:"owner_token_hashes"`
@@ -158,31 +163,38 @@ func (s *WorkflowStore) StartWorkflowGuarded(ctx context.Context, request Workfl
 	}
 
 	err = s.withLock(ctx, func() error {
-		policy, resolveErr := s.resolveWorkflowExecutionPolicy(ctx, request.RequestKey, requestedPolicy, request.IncludeLaterTickets)
-		if resolveErr != nil {
-			return resolveErr
-		}
-
-		request.Policy = policy
-
-		if request.Admission == nil {
-			if err := s.checkWorkflowSelectionGuard(ctx, request); err != nil {
-				return err
+		return withWorkspaceConfigLock(ctx, s.layout.ProjectDir(), func() error {
+			policy, resolveErr := s.resolveWorkflowExecutionPolicy(ctx, request.RequestKey, requestedPolicy, request.IncludeLaterTickets)
+			if resolveErr != nil {
+				return resolveErr
 			}
-		}
 
-		var startErr error
+			request.Policy = policy
 
-		result, startErr = s.startWorkflow(ctx, request, check)
+			request, resolveErr = s.resolveWorkflowHarnessRequest(ctx, request)
+			if resolveErr != nil {
+				return resolveErr
+			}
 
-		return startErr
+			if request.Admission == nil {
+				if err := s.checkWorkflowSelectionGuard(ctx, request); err != nil {
+					return err
+				}
+			}
+
+			var startErr error
+
+			result, startErr = s.startWorkflow(ctx, request, check)
+
+			return startErr
+		})
 	})
 
 	return result, err
 }
 
 func normalizeWorkflowStart(request WorkflowStartRequest) (WorkflowStartRequest, error) {
-	if err := validateWorkflowAdmissionGuard(request.Admission, request.Selection); err != nil {
+	if err := validateWorkflowStartGuards(request); err != nil {
 		return request, err
 	}
 
@@ -218,6 +230,14 @@ func normalizeWorkflowStart(request WorkflowStartRequest) (WorkflowStartRequest,
 	}
 
 	return request, validateWorkflowPreviewRequest(request.Selection)
+}
+
+func validateWorkflowStartGuards(request WorkflowStartRequest) error {
+	if err := validateWorkflowRequestedHarness(request.HarnessBinding, request.HarnessCommand); err != nil {
+		return err
+	}
+
+	return validateWorkflowAdmissionGuard(request.Admission, request.Selection)
 }
 
 func normalizeWorkflowExecutionPolicy(policy WorkflowExecutionPolicy) WorkflowExecutionPolicy {
@@ -419,6 +439,12 @@ func (s *WorkflowStore) createWorkflowInvocation(ctx context.Context, request Wo
 
 func newWorkflowInvocation(root string, identity WorkflowIdentity, request WorkflowStartRequest, hash string, preview WorkflowPreview) workflowInvocationFile {
 	invocation := WorkflowInvocation{WorkflowIdentity: identity, Schema: "chr-invocation/v1", RequestKey: request.RequestKey, RequestHash: hash, Authority: "tickets", Selection: request.Selection, Policy: request.Policy, SetOrderRule: preview.SetOrderRule, Excluded: preview.Excluded, Status: "pending"}
+
+	invocation.HarnessBinding = cloneHarnessBinding(request.HarnessBinding)
+	if invocation.HarnessBinding != nil {
+		invocation.Schema = "chr-invocation/v2"
+	}
+
 	invocation.Admission = request.Admission
 	invocation.ReviewRestriction = request.ReviewRestriction
 
@@ -431,7 +457,7 @@ func newWorkflowInvocation(root string, identity WorkflowIdentity, request Workf
 		invocation.LooseQueue = newWorkflowLooseQueue(invocation.Members)
 	}
 
-	return workflowInvocationFile{WorkflowInvocation: invocation, OwnerRoot: root, Owners: map[string]string{}, RequestKeys: []string{request.RequestKey}}
+	return workflowInvocationFile{WorkflowInvocation: invocation, HarnessCommand: slices.Clone(request.HarnessCommand), OwnerRoot: root, Owners: map[string]string{}, RequestKeys: []string{request.RequestKey}}
 }
 
 func (s *WorkflowStore) attachWorkflowInvocation(run workflowInvocationFile, key string) (workflowInvocationFile, error) {

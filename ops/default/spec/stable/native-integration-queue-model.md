@@ -6,7 +6,7 @@ Approved: 2026-10-11; accepted together with the behavioral specification.
 
 Date: 2026-10-11
 
-Product: CHR
+Product: chr
 
 Specification: [Native Integration Queue and Merger](native-integration-queue.md)
 

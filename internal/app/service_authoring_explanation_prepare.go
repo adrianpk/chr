@@ -42,6 +42,13 @@ func (s service) ExplainPreparedAuthoring(ctx context.Context, prepared Prepared
 		return result, core.ErrWorkflowConflict
 	}
 
+	bound, ctx, err := s.bindGeneration(ctx, "explanation-"+prepared.Request.ID, "conversation")
+	if err != nil {
+		return result, err
+	}
+
+	s = bound
+
 	if s.conversationModel == nil {
 		return result, errors.New("configured authoring provider is unavailable")
 	}
@@ -56,12 +63,16 @@ func (s service) ExplainPreparedAuthoring(ctx context.Context, prepared Prepared
 
 	schema := map[string]any{"type": "object", "additionalProperties": false, "required": []string{"explanation"}, "properties": map[string]any{"explanation": map[string]any{"type": "string", "maxLength": 12000}}}
 
-	output, err := s.conversationModel.InvokeStructuredModel(ctx, core.StructuredModelRequest{ID: prepared.Request.ID, Purpose: "authoring_explanation", ProjectDir: s.projectContext.ProjectDir, Input: payload, Schema: schema, Instructions: authoringExplanationInstructions})
+	modelRequest := core.StructuredModelRequest{ID: prepared.Request.ID, Purpose: "authoring_explanation", ProjectDir: s.projectContext.ProjectDir, Input: payload, Schema: schema, Instructions: authoringExplanationInstructions}
+
+	output, err := s.conversationModel.InvokeStructuredModel(ctx, modelRequest)
 	if err != nil {
 		return result, err
 	}
 
 	result.Text, err = decodeAuthoringExplanation(output)
+
+	err = core.ValidateStructuredModelOutput(ctx, modelRequest, err)
 	if err != nil {
 		return result, err
 	}

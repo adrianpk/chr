@@ -1,6 +1,6 @@
 # Workspace Index And Semantic Cache Slicing Tracker
 
-Status: active
+Status: delivered
 
 Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 
@@ -221,6 +221,10 @@ Task commits:
   active draft references cause classification churn.
 
 ## Validation Log
+
+Closure audit on 2026-10-20 verified final PR #172 merged at
+`6c56d2e84d56d54ea0f4449ce60457f62c7a5d77`, an ancestor of dev. All nine slices
+are delivered. The entries below retain their original validation boundaries.
 
 - 2026-05-23: `make verify` passed for plan and tracker creation.
 - 2026-05-23: `make verify` passed for Slice 1.

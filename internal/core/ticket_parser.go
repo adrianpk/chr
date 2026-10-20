@@ -87,15 +87,17 @@ func parseTicketFrontmatter(content string) (ticketFrontmatter, error) {
 
 	lines := strings.Split(frontmatter, "\n")
 	for index := 0; index < len(lines); index++ {
-		line := lines[index]
-
-		key, value, ok := strings.Cut(line, ":")
+		key, value, ok := ticketFrontmatterField(lines[index])
 		if !ok {
 			continue
 		}
 
-		key = strings.TrimSpace(key)
-		value = strings.TrimSpace(value)
+		if key == "commits" && value == "" {
+			values, next := parseTicketScalarList(lines, index+1)
+			metadata[key], index = yamlStringList(values), next-1
+
+			continue
+		}
 
 		if key == "review_refs" && value != "[]" {
 			parsedRefs, nextIndex := parseTicketReviewRefsBlock(lines, index+1)
@@ -109,6 +111,34 @@ func parseTicketFrontmatter(content string) (ticketFrontmatter, error) {
 	}
 
 	return ticketFrontmatter{Metadata: metadata, ReviewRefs: reviewRefs}, nil
+}
+
+func ticketFrontmatterField(line string) (string, string, bool) {
+	if strings.HasPrefix(line, " ") || strings.HasPrefix(line, "\t") {
+		return "", "", false
+	}
+
+	key, value, found := strings.Cut(line, ":")
+
+	return strings.TrimSpace(key), strings.TrimSpace(value), found
+}
+
+func parseTicketScalarList(lines []string, start int) ([]string, int) {
+	values := []string{}
+	index := start
+
+	for ; index < len(lines); index++ {
+		line := lines[index]
+		if !strings.HasPrefix(line, " ") && !strings.HasPrefix(line, "\t") {
+			break
+		}
+
+		if value, found := strings.CutPrefix(strings.TrimSpace(line), "- "); found {
+			values = append(values, unquoteMetadataString(value))
+		}
+	}
+
+	return values, index
 }
 
 func parseTicketReviewRefsBlock(lines []string, start int) ([]TicketReviewRef, int) {
@@ -184,6 +214,7 @@ func indexedTicketFromMetadata(
 		RelativePath:      relativePath,
 		Key:               unquoteMetadataString(metadata["key"]),
 		Title:             unquoteMetadataString(metadata["title"]),
+		Assignee:          unquoteMetadataString(metadata["assignee"]),
 		Synopsis:          unquoteMetadataString(metadata["synopsis"]),
 		Status:            unquoteMetadataString(metadata["status"]),
 		Priority:          unquoteMetadataString(metadata["priority"]),

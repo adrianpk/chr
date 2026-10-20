@@ -1,12 +1,12 @@
 ---
-title: "Chryso Project Context"
+title: "chr Project Context"
 status: "curated"
 type: "dump"
 ---
 
-# Chryso Project Context
+# chr Project Context
 
-Chryso is a local orchestrator for agentic software development in Go projects.
+chr is a local orchestrator for agentic software development in Go projects.
 
 Its core workflow is:
 

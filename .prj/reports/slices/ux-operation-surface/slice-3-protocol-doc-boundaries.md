@@ -9,7 +9,7 @@ PR: #136
 
 ## Purpose
 
-Separate generated project protocol guidance from Chryso operational
+Separate generated project protocol guidance from chr operational
 workspace contracts.
 
 ## Delivered Behavior
@@ -37,7 +37,7 @@ workspace contracts.
 ## Contracts Added or Changed
 
 - Project documentation guidance lives in generated `DOCUMENTING.md`.
-- Chryso artifact layout is documented in product reference docs and
+- chr artifact layout is documented in product reference docs and
   enforced by code paths, not by generated documentation convention text.
 - Generated protocol files may mention tool-managed workspace state, but they
   must not define `.chr/` layout as a project convention.

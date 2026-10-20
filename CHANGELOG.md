@@ -12,6 +12,85 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
+- Create use cases directly from the Web Cases page. Enter a name, description
+  and context; the new case is immediately available when capturing a dump.
+
+- Projects can select Codex or Pi independently for workers and content
+  generation. Web, TUI and confirmed Telegram controls offer named defaults,
+  local readiness and revision-checked saves without a service restart. Prepared
+  Pi workers run in Docker with private call state and explicit credentials. Admitted work
+  keeps its selected runtime when project configuration changes.
+
+- Protect the Web UI with one locally configured account. Log in once and
+  navigate without URL tokens; sessions expire after 12 hours and can be
+  revoked with Log out. Private terminal setup keeps passwords out of command
+  arguments and project files.
+
+- Web Dash now shows the pending queue, independent active ticket contexts and
+  retained results together, with a stacked layout on narrow screens. Quiet
+  validation stays visible, and confirmed delivery remains distinct from host
+  validation or a successful harness run. Refresh preserves scroll and selection;
+  temporary outages keep the last observation with a stale notice. Preview Work
+  and Stop Daemon remain available while monitoring updates.
+- Plans now offers Generate Plan directly. One submission prepares the plan,
+  its task tickets and the internal order map; no separate tracking or ticket
+  approval step is needed. Existing plans and ticket identities survive retries,
+  and authoring does not start execution.
+  Plans can also be generated or regenerated from a named case's saved context,
+  with guidance when discovery is absent or insufficient. A useful dump or
+  answered quiz can supply the context without requiring both. Plan readiness
+  uses the existing five-minute authoring budget through the selected harness
+  instead of stopping after one minute. Failed generation and intervening edits
+  keep the existing plan available; spec approval and
+  starting work remain separate actions. Every generated revision now retains
+  its own internal order map. Approved native materialization binds task tickets
+  once, and approved amendments retain completed work and earlier maps. Ticket
+  progress leaves the map unchanged; missing or edited required maps must be
+  repaired before workers can prepare their context. The Web catalog shows saved
+  plans as fixed-size opening-text cards with complete read-only details; internal
+  trackers stay out of Web browsing and creation.
+- Specs now supports manual draft or direct-approved creation and editing of
+  individual manual or generated documents from their cards. Named scope
+  selection, one Body editor and a compact Draft control retain identity,
+  provenance and native state. Stale saves keep the form available, and generated
+  output cannot replace an edit made while it was being prepared.
+  Generate now selects an existing named use case and combines its saved dumps
+  and quiz answers with shared project context, with progress feedback during
+  generation. Project-wide context is not offered as a generation target.
+  A successful generation opens its saved document in the editor. Generation
+  results and errors remain available until explicitly closed. Valid workspace
+  protocol references survive publication without duplicating their namespace.
+- Quizzes now provide a focused Web answer screen with one question and a
+  spacious answer editor in a single panel, a Deep/Fast segmented selector and
+  a compact action row. Opening a new quiz prepares its first question directly,
+  with progress feedback and retry on failure. Answer history appears only after
+  answers exist. Drafts
+  survive refresh, mode changes and request errors; leaving or skipping with
+  unsent text requires a discard decision. Shared actions reject stale questions
+  and acknowledge retries once. Fast retains one generated batch across mode
+  changes and restart; failed continuation keeps the confirmed answer available
+  in history. Cancel and Done preserve earlier answers with distinct statuses.
+  Deep discovery retains the full scoped answer history, honors completion
+  recommendations and stops at its safety budget. Repeated answered questions
+  are rejected without losing the latest answer.
+  The catalog shows Project Quiz and answered case cards with fixed opening-text
+  previews. New Quiz lists only unanswered named scopes, preserves unfinished
+  sessions and disappears when every scope has answers.
+
+- Project-wide context now grows in one shared dump across Web, CLI, TUI and
+  authoring conversations. Web New offers Project-wide or existing case names;
+  case captures remain independent. Retries preserve confirmed captures, edits
+  retain raw material and prior versions, and explicit reconciliation preserves
+  older documents and their references. Dump editing uses one Body field and
+  Save, retains pending edits after failures, and requires reloading before
+  replacing newer changes.
+- The Board now provides one New/Edit ticket form with full descriptions,
+  classification, ownership and delivery references. Maximize and restore retain
+  unsaved input, and comments post independently. Status selection and dragging
+  reject stale or unsupported moves with an explanation. Canonical, legacy and
+  native tickets share six readable lanes, with paging for larger projects.
+  Plan-bound task titles now display their ownership guard before a rename can
+  be submitted; permitted metadata and independent comments remain editable.
 - Telegram conversations can explain project context, collect requirements,
   answer clarification questions, generate and refine dumps, quizzes, draft
   specifications and plans, and prepare native backlog tickets. Conversations
@@ -97,7 +176,7 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 - Added a first usable iteration of the optional local Web UI served by
   `chr web serve`, including localhost-only defaults, token and origin
   controls, server-rendered pages, htmx refresh behavior, document and work
-  actions, Chryso visual identity, documentation, and browser smoke
+  actions, chr visual identity, documentation, and browser smoke
   tooling.
 - Added Markdown-first authoring sessions and assisted authoring flows for
   generating and promoting project documentation artifacts.
@@ -109,6 +188,16 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Changed
 
+- The product name is chr. Commands continue to use `chr`.
+
+- chr is now licensed under Apache License 2.0.
+- Web document catalogs share the Specs and Plans layout, with consistent
+  margins, fixed-size cards and opening-text previews across screen sizes.
+- Web UI page headings show the section or artifact title, with the project
+  name kept in the shared header.
+- The Project page is available by direct URL and shows only the project name,
+  root directory and diagnostic ID. Removed its navigation links, internal
+  paths, server settings and automatic refresh.
 - The Web UI supports direct, token-free access from another computer on a
   trusted internal network with `chr web serve --allow-lan`. This mode is
   disabled by default and keeps navigation, forms and live updates usable
@@ -136,11 +225,19 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   service paths where both surfaces exist.
 - Updated workspace initialization profiles, protocol assets, runtime
   Dockerfiles, and generated project files to match the current workflow.
-- Migrated CHR operational artifacts to the canonical `ops/<namespace>/...`
+- Migrated chr operational artifacts to the canonical `ops/<namespace>/...`
   layout, using `ops/default` for no-user workspaces, while preserving `.chr/`
   for CHR-private project configuration and state.
 
 ### Fixed
+
+- Plan generation recognizes saved spec approval even when older text still
+  calls the document a draft. Newly generated specs keep review state in
+  metadata instead of embedding approval disclaimers in the body.
+
+- The Dumps catalog fits a third card column at normal desktop zoom. Cards
+  keep the same size for short and long documents, with clipped opening text
+  in a pale green inset preview. Narrow windows reduce the column count.
 
 - Prevented outdated ticket forms and comments from changing a ticket after
   another edit. Reload the board before submitting again.
@@ -150,7 +247,7 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   satisfy Codex feature schema expectations.
 - Fixed spec generation context so generated specs stay neutral and do not
   accidentally produce feature artifacts.
-- Fixed work readiness so Chryso-owned runtime artifacts can be repaired
+- Fixed work readiness so chr-owned runtime artifacts can be repaired
   safely without treating them as user-owned dirty state.
 - Fixed work readiness diagnostics so missing branches, missing remote refs,
   behind-remote branches, invalid policy, dirty worktrees, and Git in-progress

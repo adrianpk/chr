@@ -145,8 +145,8 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T9.1 | Define CSS tokens for color, type, spacing, borders, shadows, and status colors. | done | `9920097` | Chrysocolla/Go-adjacent identity with amber and danger accents. |
-| T9.2 | Implement the Chryso avatar asset in the repo-native asset format chosen by the implementation. | done | `9920097` | Added a rounded bot/agent SVG mark. |
+| T9.1 | Define CSS tokens for color, type, spacing, borders, shadows, and status colors. | done | `9920097` | Chrcolla/Go-adjacent identity with amber and danger accents. |
+| T9.2 | Implement the chr avatar asset in the repo-native asset format chosen by the implementation. | done | `9920097` | Added a rounded bot/agent SVG mark. |
 | T9.3 | Apply reference-layout parity to Board and Dash. | done | `9920097` | Board and Dash use denser operational panels and responsive grid rules. |
 | T9.4 | Apply reference-layout parity to Dumps, Quizzes, Specs, and Plans. | done | `9920097` | Artifact catalogs and command forms share the refined card/action styling. |
 | T9.5 | Apply reference-layout parity to Project, Cases, Help, and command surfaces. | done | `9920097` | Project, Cases, detail panes, and command surfaces use the same tokens and density. |

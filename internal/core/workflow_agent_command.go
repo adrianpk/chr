@@ -10,6 +10,10 @@ import (
 )
 
 func workflowRunAgentCommand(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, command []string) (WorkflowCommandResult, error) {
+	if err := checkHarnessExecutable(prepared.input.HarnessBinding, command); err != nil {
+		return WorkflowCommandResult{}, err
+	}
+
 	if prepared.input.AgentCall == nil {
 		return workflowRunCommand(ctx, claim, prepared, command)
 	}

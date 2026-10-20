@@ -11,6 +11,7 @@ import (
 // AssistedArtifactSynthesisOptions describes a package boundary value.
 type AssistedArtifactSynthesisOptions struct {
 	ProjectDir     string
+	OperationID    string
 	Session        AuthoringSession
 	CuratedSummary AssistedCuratedAnswerSummary
 	SourceRef      AuthoringArtifactRef
@@ -26,6 +27,8 @@ type AssistedArtifactSynthesisResult struct {
 	Session AuthoringSession
 	Layout  AuthoringArtifactLayout
 	Content string
+	// Mutation retains committed dump hashes independently of later edits.
+	Mutation *ProjectDumpMutationResult
 }
 
 // SynthesizeAssistedArtifact executes the corresponding package operation.
@@ -33,6 +36,10 @@ func synthesizeAssistedArtifact(ctx context.Context, opts AssistedArtifactSynthe
 	err := validateAssistedArtifactSynthesisOptions(opts)
 	if err != nil {
 		return AssistedArtifactSynthesisResult{}, err
+	}
+
+	if opts.TargetKind == AuthoringArtifactKindDump {
+		return synthesizeAssistedDump(ctx, opts)
 	}
 
 	layout, err := PlanAuthoringArtifactLayout(AuthoringArtifactLayoutOptions{

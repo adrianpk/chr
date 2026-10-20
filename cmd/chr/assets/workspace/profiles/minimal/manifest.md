@@ -1,6 +1,6 @@
-# Chryso Workspace
+# chr Workspace
 
-This directory stores Chryso's project-local working material.
+This directory stores chr's project-local working material.
 
 The Markdown files in this workspace are meant to be inspectable and editable
 when you know what you are changing. Runtime logs, indexes, locks, and traces

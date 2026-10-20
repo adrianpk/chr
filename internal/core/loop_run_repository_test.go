@@ -130,8 +130,8 @@ func newTestLoopRunRepository(t *testing.T) LoopRunRepository {
 
 	addTestProject(t, registry, Project{
 		ID:           "project-1",
-		Name:         "chryso",
-		Path:         "/tmp/chryso",
+		Name:         "chr",
+		Path:         "/tmp/chr",
 		Enabled:      true,
 		RegisteredAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	})

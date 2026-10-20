@@ -4,7 +4,7 @@ Notification configuration lives in the managed project's `.chr/default/config.y
 file under the `notifications:` key.
 
 Notifications are disabled by default. A project must explicitly enable a
-channel before Chryso treats it as dispatchable.
+channel before chr treats it as dispatchable.
 
 ## Telegram Fields
 

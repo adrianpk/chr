@@ -9,7 +9,7 @@ PR: #306
 
 ## Purpose
 
-Add a resettable tic-tac-toe QA reference project for validating Chryso's
+Add a resettable tic-tac-toe QA reference project for validating chr's
 generation and Codex-backed agent-work loop against a small CLI application.
 
 ## Delivered Behavior
@@ -19,7 +19,7 @@ seed project. The seed is intentionally incomplete but compilable: it exposes a
 placeholder command, a small `internal/game` package, and baseline tests for
 move parsing and placement.
 
-The reference includes project-local Chryso context under `.chr/default`:
+The reference includes project-local chr context under `.chr/default`:
 project metadata, one `cli-gameplay` use case, raw and curated project dumps,
 raw and curated use-case dumps, and raw and curated quiz notes. It does not
 include generated specs, plans, tracking documents, or tickets for the primary

@@ -92,7 +92,7 @@ func (s *WorkflowStore) validateWorkflowTracker(result WorkflowTrackerStatus, se
 		return err
 	}
 
-	if result.Schema != "chr-tracker/v1" || result.SetID != setID || result.ProjectID != s.projectID || result.Namespace != s.layout.Namespace() || result.Path != "tracker/"+setID+".md" || workflowHash(data) != checksum {
+	if !validWorkflowTrackerSchema(result.Schema) || result.SetID != setID || result.ProjectID != s.projectID || result.Namespace != s.layout.Namespace() || result.Path != "tracker/"+setID+".md" || workflowHash(data) != checksum {
 		return fmt.Errorf("%w: invalid or edited tracker metadata", ErrWorkflowProjectionStale)
 	}
 
@@ -120,16 +120,7 @@ func (s *WorkflowStore) persistWorkflowTracker(result WorkflowTrackerStatus) err
 		return err
 	}
 
-	result.Checksum = ""
-
-	data, err := json.Marshal(result)
-	if err != nil {
-		return err
-	}
-
-	result.Checksum = workflowHash(data)
-
-	data, err = json.Marshal(result)
+	data, err := workflowTrackerMetadataBytes(result)
 	if err != nil {
 		return err
 	}
@@ -165,7 +156,10 @@ func (s *WorkflowStore) confirmWorkflowTracker(result WorkflowTrackerStatus, out
 	result.OutputHash, result.PendingHash, result.ObservedHash = workflowHash(output), "", workflowHash(output)
 	result.Status, result.Reason, result.Detail = "current", "", ""
 
-	result.GeneratedAt = time.Now().UTC()
+	if result.Schema != "chr-tracker/v2" || result.GeneratedAt.IsZero() {
+		result.GeneratedAt = time.Now().UTC()
+	}
+
 	if err := s.persistWorkflowTracker(result); err != nil {
 		result.Status, result.Reason = "stale", "projection_stale"
 
@@ -263,7 +257,7 @@ func (s *WorkflowStore) markWorkflowTrackersStale(changes []workflowFileChange) 
 
 	for _, id := range ids {
 		result, err := s.readWorkflowTracker(id)
-		if err != nil || !workflowTrackerSourcesChanged(result.Sources, changed) {
+		if err != nil || result.Schema == "chr-tracker/v2" || !workflowTrackerSourcesChanged(result.Sources, changed) {
 			continue
 		}
 
@@ -281,4 +275,22 @@ func workflowTrackerSourcesChanged(sources []WorkflowTrackerSource, changed map[
 	}
 
 	return false
+}
+
+func workflowTrackerMetadataBytes(result WorkflowTrackerStatus) ([]byte, error) {
+	result.Checksum = ""
+
+	data, err := json.Marshal(result)
+	if err != nil {
+		return nil, err
+	}
+
+	result.Checksum = workflowHash(data)
+
+	data, err = json.Marshal(result)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }

@@ -4,11 +4,11 @@ Status: active
 
 ## Purpose
 
-Add opt-in LLM request and response tracing for Chryso model-backed
+Add opt-in LLM request and response tracing for chr model-backed
 operations.
 
 The tracing surface must make expensive model calls debuggable without changing
-normal runtime behavior. When enabled, Chryso writes structured rolling
+normal runtime behavior. When enabled, chr writes structured rolling
 JSONL trace events under the active project userspace:
 
 ```text
@@ -39,7 +39,7 @@ External implementation reference:
 - A sibling project has an LLM trace writer and request/response recorder that
   use opt-in tracing, JSONL records, redaction, and rolling files. This plan
   captures the transferable pattern without naming or documenting that project
-  in Chryso artifacts.
+  in chr artifacts.
 
 Conversation decisions:
 

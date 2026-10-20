@@ -44,7 +44,7 @@ runtime behavior yet.
 
 Behavior:
 
-- Chryso has explicit acceptance readiness decisions:
+- chr has explicit acceptance readiness decisions:
   `generate`, `needs_more_info`, and `not_applicable`.
 - Readiness captures stable acceptance slots: actor, trigger, initial state,
   observable outcome, success path, failure path, and boundaries.
@@ -92,7 +92,7 @@ be treated as an acceptance artifact.
 
 Behavior:
 
-- Chryso can validate a `.feature` body with deterministic static checks.
+- chr can validate a `.feature` body with deterministic static checks.
 - Feature checks require Feature/Scenario structure and Given/When/Then steps.
 - Scenarios must link to source spec behavior and must not rely on open
   questions.

@@ -21,7 +21,7 @@ ticket to review.
 Question: Where should the Test/Evidence Strategy be persisted?
 
 Answer: The primary operational location should be the ticket tasklist/checklist,
-not a loose comment. Comments are acceptable only if Chryso can recognize
+not a loose comment. Comments are acceptable only if chr can recognize
 their semantics later. The execution report may duplicate more detailed
 information, but that report is closer to a trace or log and should not be the
 primary operational surface.
@@ -50,7 +50,7 @@ implementation and closure.
 
 ### Question 4
 
-Question: Should the checklist have a fixed minimum shape so Chryso can
+Question: Should the checklist have a fixed minimum shape so chr can
 recognize it later?
 
 Answer: The checklist should be as parseable as possible to avoid ambiguity for

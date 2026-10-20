@@ -5,7 +5,7 @@ the runtime boundary.
 
 ## Build the CLI
 
-From the Chryso repository:
+From the chr repository:
 
 ```sh
 make build

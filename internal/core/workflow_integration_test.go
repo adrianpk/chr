@@ -44,6 +44,12 @@ func workflowDeliveryPolicyFixture(t *testing.T, method, extent string, policy W
 	t.Helper()
 
 	store, hierarchy, run, provider := workflowPRPolicyFixture(t, extent, policy)
+
+	return workflowFinishDeliveryFixture(t, method, store, hierarchy, run, provider)
+}
+
+func workflowFinishDeliveryFixture(t *testing.T, method string, store *WorkflowStore, hierarchy WorkflowMaterializationResult, run WorkflowInvocation, provider *workflowPRProviderFixture) workflowIntegrationFixture {
+	t.Helper()
 	workflowPREnsure(t, store, run.ID, provider)
 
 	run = workflowTestRead(t, store, run.ID)
@@ -107,7 +113,7 @@ func workflowIntegrationCommit(t *testing.T, dir, file, text string) string {
 	}
 
 	workflowIntegrationCommand(t, dir, "add", file)
-	workflowIntegrationCommand(t, dir, "commit", "-m", "test(integration): "+text)
+	workflowIntegrationCommand(t, dir, "-c", "user.name=Fixture", "-c", "user.email=fixture@example.com", "commit", "-m", "test(integration): "+text)
 
 	return workflowIntegrationCommand(t, dir, "rev-parse", "HEAD")
 }

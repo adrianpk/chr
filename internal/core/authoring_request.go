@@ -3,6 +3,7 @@ package core
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -111,7 +112,11 @@ func (r *fileAuthoringSessionRepository) saveAuthoringRequest(binding authoringR
 }
 
 func (r *fileAuthoringSessionRepository) authoringRequestCapacity() error {
-	path, err := r.authoringPath(authoringRuntimeRef("requests"))
+	return r.authoringStateCapacity("requests")
+}
+
+func (r *fileAuthoringSessionRepository) authoringStateCapacity(directory string) error {
+	path, err := r.authoringPath(authoringRuntimeRef(directory))
 	if err != nil {
 		return err
 	}
@@ -130,13 +135,13 @@ func (r *fileAuthoringSessionRepository) authoringRequestCapacity() error {
 		_ = dir.Close()
 	}()
 
-	entries, err := dir.ReadDir(4097)
-	if err != nil && len(entries) == 0 {
+	entries, err := dir.ReadDir(WorkflowRecordLimit + 1)
+	if err != nil && !errors.Is(err, io.EOF) {
 		return err
 	}
 
-	if len(entries) >= 4096 {
-		return errors.New("authoring request capacity exhausted")
+	if len(entries) >= WorkflowRecordLimit {
+		return errors.New("authoring " + strings.TrimSuffix(directory, "s") + " capacity exhausted")
 	}
 
 	return nil

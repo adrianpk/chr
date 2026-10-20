@@ -6,7 +6,7 @@ Approved: 2026-10-11; maintainer approved the specification and authorized Loope
 
 Date: 2026-10-11
 
-Product: CHR
+Product: chr
 
 Model: [Native Integration Queue Model](native-integration-queue-model.md)
 
@@ -25,9 +25,9 @@ committed slice identities and task-ticket bindings.
 
 ## 1. Required Outcome
 
-CHR must finish approved ticket work through a real, guarded publication path.
+chr must finish approved ticket work through a real, guarded publication path.
 The user can run one agent at a time or enable parallel independent work without
-changing the correctness contract. CHR owns integration scheduling, preparation,
+changing the correctness contract. chr owns integration scheduling, preparation,
 conflict resolution, validation, publication, and recovery. Its core does not
 depend on a forge's native merge queue.
 
@@ -44,7 +44,7 @@ capability for every real provider is safe behavior but cannot satisfy delivery.
 
 - Native queue behavior for standalone tickets and slice integration units.
 - Serial default operation and bounded parallel independent implementation.
-- Per-target publication exclusion, including writers outside CHR.
+- Per-target publication exclusion, including writers outside chr.
 - Exact prepared-result publication for `merge`, `rebase`, and `squash`.
 - An explicit, certified Git publication profile for existing forge adapters.
 - Intelligent conflict repair with finite attempts, time, and optional tokens.
@@ -57,10 +57,10 @@ capability for every real provider is safe behavior but cannot satisfy delivery.
 This work does not introduce a distributed consensus system, a new mandatory
 service, speculative execution of later ordered slices, arbitrary concurrent
 edits inside one slice, a new forge adapter, release publication, or automatic
-promotion to `main`. Separate CHR clones or hosts must use one registered
+promotion to `main`. Separate chr clones or hosts must use one registered
 coordinator; unsupported coordinator connectivity blocks mutation.
 
-External Git writers need not register with CHR. Their updates are handled by
+External Git writers need not register with chr. Their updates are handled by
 remote ref guards and renewed preparation. A Git server without the required
 transaction or an incompatible branch policy remains explicitly unsupported
 until an equally strong adapter mechanism is certified.
@@ -120,12 +120,12 @@ and receipt schemas remain intact.
 | Serial operation | `work.max_active_workers: 1` remains the default. No idle merger agent is launched. |
 | Parallel operation | Independent eligible lanes may execute concurrently within the shared configured pool. |
 | Ordered work | Tasks inside a slice and slices inside a set preserve their existing order and receipt barriers. |
-| Queue ownership | CHR owns queue state and scheduling; provider queues are not prerequisites. |
+| Queue ownership | chr owns queue state and scheduling; provider queues are not prerequisites. |
 | Publication ownership | One active publication per canonical repository and full target ref. Different targets may proceed independently. |
 | Role execution | The merger is a role of a configured harness, not necessarily a separate permanent agent or process. |
 | Default method | Preserve existing `rebase` default and explicitly selected alternatives. No automatic method substitution. |
 | Forge coverage | Certify the existing Forgejo and GitHub adapters for declared profiles; core rules remain provider neutral. |
-| Remote changes | Human and other-machine updates are normal concurrent events, including when CHR is configured serially. |
+| Remote changes | Human and other-machine updates are normal concurrent events, including when chr is configured serially. |
 | Coordination | Reuse the registered repository coordinator; do not create independent per-checkout queues. |
 | Delivery accounting | Preserve task tickets and one PR per slice. Granularity follows real deliverable tasks, without a fixed ticket-count target. |
 
@@ -150,7 +150,7 @@ Terms used below:
 | --- | --- |
 | INV-01 | Tickets and their owning workflow records remain execution authority. |
 | INV-02 | A slice has one canonical PR and one verified delivery receipt shared by its tasks. |
-| INV-03 | At most one CHR owner may mutate an integration unit at a time. |
+| INV-03 | At most one chr owner may mutate an integration unit at a time. |
 | INV-04 | All agent roles consume the same repository worker-capacity pool. |
 | INV-05 | No role shares another role's mutable checkout. |
 | INV-06 | One target key has at most one active or uncertain publication. |
@@ -547,7 +547,7 @@ disabling safeguards as an automatic recovery action.
 | Target changes during atomic publication | Entire transaction fails; source remains unchanged by this attempt. |
 | Method, required command, contract, or review policy changes | New candidate binding and required review; no reuse of old authorization. |
 | Only an unrelated queue projection changes | Preserve candidate evidence; refresh projection without redoing domain work. |
-| Another CHR unit integrates first | Rebase on the confirmed new target; keep valid task-level evidence but rerun the combined gate. |
+| Another chr unit integrates first | Rebase on the confirmed new target; keep valid task-level evidence but rerun the combined gate. |
 | Another target has uncertain publication | This target may proceed if coordinator capacity and ownership allow. |
 | External writer integrates the same work | Verify exact equivalence and canonical PR facts before adopting a receipt; otherwise request reconciliation. |
 
@@ -670,7 +670,7 @@ every claimed case. A mock-only result cannot certify remote Git or forge behavi
 | AC-005 | Repeated admission with the same key returns the retained entry without duplicating queue capacity. |
 | AC-006 | Queue overflow rejects new admission while preserving every previously accepted entry. |
 | AC-007 | Worktree, namespace, and remote aliases share the canonical capacity and target key. |
-| AC-008 | Two CHR publishers for one target cannot both reach external dispatch concurrently. |
+| AC-008 | Two chr publishers for one target cannot both reach external dispatch concurrently. |
 | AC-009 | Two independent targets can publish concurrently when capacity and policy allow. |
 | AC-010 | Human-review waiting releases the worker slot and does not hold the publication lock. |
 | AC-011 | An unknown publication blocks its target while unrelated targets remain usable. |
@@ -721,7 +721,7 @@ every claimed case. A mock-only result cannot certify remote Git or forge behavi
 | AC-046 | Permission or branch-protection denial leaves both refs unchanged by the attempt. |
 | AC-047 | A policy requiring incompatible native merge/review semantics is reported unsupported without bypass. |
 | AC-048 | A policy/profile change after review invalidates authorization before dispatch. |
-| AC-049 | A serial CHR run handles an external target writer by re-preparing and revalidating. |
+| AC-049 | A serial chr run handles an external target writer by re-preparing and revalidating. |
 | AC-050 | Two parallel independent lanes integrate in turn with renewed base validation. |
 | AC-051 | No merge-method substitution or legacy unguarded API call occurs on failure. |
 | AC-052 | The prepared P and actual published tree/history match for every selected method. |
@@ -829,7 +829,7 @@ The maintainer approved the following design decisions on 2026-10-11.
 Approval authorizes implementation, not a claim of delivered behavior:
 
 1. Enable an opt-in same-repository owned-source rewrite profile with the dual-ref transaction.
-2. Keep one registered coordinator as the supported cross-host CHR topology.
+2. Keep one registered coordinator as the supported cross-host chr topology.
 3. Use three merger attempts, five drift revisions, and existing submission/worker bounds by default.
 4. Add optional enforceable invocation token budgeting without requiring a new agent service.
 5. Deliver one corrective set and finish the original assurance/closure through the approved mapped transition.

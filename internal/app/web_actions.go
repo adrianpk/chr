@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"os"
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -13,21 +12,23 @@ import (
 )
 
 const (
+	webActionCaseCreate = "case.create"
 	webActionCaseUpdate = "case.update"
 	webActionDumpCreate = "dump.create"
 	webActionDumpSave   = "dump.save"
 	webActionDumpAppend = "dump.append"
 
-	webActionTicketUpdate       = "ticket.update"
-	webActionTicketComment      = "ticket.comment"
-	webActionSpecGenerate       = "spec.generate"
-	webActionPlanGenerate       = "plan.generate"
-	webActionPlanRegenerate     = "plan.regenerate"
-	webActionPlanTrackingCreate = "plan.tracking.create"
-	webActionQuizStart          = "quiz.start"
-	webActionQuizResume         = "quiz.resume"
-	webActionWorkPreview        = "work.preview"
-	webActionWorkDaemonStop     = "work.daemon.stop"
+	webActionTicketUpdate   = "ticket.update"
+	webActionTicketComment  = "ticket.comment"
+	webActionTicketCreate   = "ticket.create"
+	webActionTicketMove     = "ticket.move"
+	webActionSpecGenerate   = "spec.generate"
+	webActionPlanGenerate   = "plan.generate"
+	webActionPlanRegenerate = "plan.regenerate"
+	webActionQuizStart      = "quiz.start"
+	webActionQuizResume     = "quiz.resume"
+	webActionWorkPreview    = "work.preview"
+	webActionWorkDaemonStop = "work.daemon.stop"
 )
 
 func (p webViewProvider) WriteAction(ctx context.Context, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
@@ -36,7 +37,6 @@ func (p webViewProvider) WriteAction(ctx context.Context, request webui.WriteAct
 	}
 
 	operations := p.service(ctx)
-
 	if response, handled, err := p.writeDocumentAction(operations, request); handled || err != nil {
 		return response, err
 	}
@@ -57,7 +57,25 @@ func (p webViewProvider) WriteAction(ctx context.Context, request webui.WriteAct
 }
 
 func (p webViewProvider) writeDocumentAction(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error) {
+	if request.Surface == "spec" {
+		response, err := p.writeSpecAction(operations, request)
+
+		return response, true, err
+	}
+
+	if request.Surface == "quiz" {
+		response, err := p.writeQuizAction(operations, request)
+
+		return response, true, err
+	}
+
 	switch request.Action {
+	case webui.HarnessSelectionAction:
+		return p.writeHarnessSelection(operations.ctx, operations, request), true, nil
+	case webActionCaseCreate:
+		response, err := p.writeCaseCreate(operations, request)
+
+		return response, true, err
 	case webActionCaseUpdate:
 		response, err := p.writeCaseUpdate(operations, request)
 
@@ -93,10 +111,6 @@ func (p webViewProvider) writeGenerationAction(ctx context.Context, operations s
 		response, err := p.writePlanRegenerate(ctx, operations, request)
 
 		return response, true, err
-	case webActionPlanTrackingCreate:
-		response, err := p.writePlanTrackingCreate(ctx, operations, request)
-
-		return response, true, err
 	case webActionQuizStart:
 		response, err := p.writeQuizStart(operations, request)
 
@@ -108,49 +122,6 @@ func (p webViewProvider) writeGenerationAction(ctx context.Context, operations s
 	default:
 		return webui.WriteActionResponse{}, false, nil
 	}
-}
-
-func (p webViewProvider) writeTicketAction(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error) {
-	if request.Action != webActionTicketUpdate && request.Action != webActionTicketComment {
-		return webui.WriteActionResponse{}, false, nil
-	}
-
-	if response := p.validateTicketRevision(operations.ctx, request); response.Status != "" {
-		return response, true, nil
-	}
-
-	switch request.Action {
-	case webActionTicketUpdate:
-		response, err := p.writeTicketUpdate(operations, request)
-
-		return response, true, err
-	case webActionTicketComment:
-		response, err := p.writeTicketComment(operations, request)
-
-		return response, true, err
-	default:
-		return webui.WriteActionResponse{}, false, nil
-	}
-}
-
-func (p webViewProvider) validateTicketRevision(ctx context.Context, request webui.WriteActionRequest) webui.WriteActionResponse {
-	if strings.TrimSpace(request.Revision) == "" {
-		return webValidationWrite(errors.New("ticket revision is required; reload before saving"))
-	}
-
-	current, err := p.TicketDetailView(ctx, webui.TicketDetailRequest{Key: request.ID})
-	if err != nil {
-		return webValidationWrite(err)
-	}
-
-	if stale := webStaleWrite(current.Revision, request.Revision); stale.Status != "" {
-		stale.ReloadURL = "/board"
-		stale.DiscardURL = "/board"
-
-		return stale
-	}
-
-	return webui.WriteActionResponse{}
 }
 
 func (p webViewProvider) writeWorkAction(ctx context.Context, operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error) {
@@ -172,56 +143,17 @@ func (p webViewProvider) writeWorkAction(ctx context.Context, operations service
 	}
 }
 
-func (p webViewProvider) writeTicketUpdate(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
-	ticket, err := operations.ticketByKey(request.ID)
-	if err != nil {
-		return webValidationWrite(err), nil
-	}
-
-	result, err := operations.UpdateTicketMetadata(TicketMetadataUpdateRequest{
-		Key:      request.ID,
-		Title:    request.Fields["title"],
-		Synopsis: request.Fields["synopsis"],
-	})
-	if err != nil {
-		return webValidationWrite(err), nil
-	}
-
-	return webui.WriteActionResponse{
-		Status:       webui.WriteStatusOK,
-		Summary:      result.Message,
-		ChangedFiles: compactChangedFiles(ticket.RelativePath),
-		RedirectURL:  "/board",
-		Operation:    webOperation("ticket.update", "completed", ticket.Key, ticket.Status),
-	}, nil
-}
-
-func (p webViewProvider) writeTicketComment(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
-	ticket, err := operations.ticketByKey(request.ID)
-	if err != nil {
-		return webValidationWrite(err), nil
-	}
-
-	result, err := operations.AddTicketComment(TicketCommentRequest{
-		Key:    request.ID,
-		Author: "web",
-		Body:   request.Fields["content"],
-	})
-	if err != nil {
-		return webValidationWrite(err), nil
-	}
-
-	return webui.WriteActionResponse{
-		Status:       webui.WriteStatusOK,
-		Summary:      result.Message,
-		ChangedFiles: compactChangedFiles(ticket.RelativePath),
-		RedirectURL:  "/board",
-		Operation:    webOperation("ticket.comment", "completed", ticket.Key, ticket.Status),
-	}, nil
-}
-
 func (p webViewProvider) writeSpecGenerate(ctx context.Context, operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
-	result, err := operations.GenerateSpec(ctx, SpecGenerateRequest{Scope: webActionScope(request)})
+	scope := webActionScope(request)
+	if scope.CaseSlug == "" {
+		return webValidationWrite(fmt.Errorf("select an existing use case to generate its spec")), nil
+	}
+
+	if _, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).ReadBounded(ctx, scope.CaseSlug); err != nil {
+		return webValidationWrite(err), nil
+	}
+
+	result, err := operations.GenerateSpec(ctx, SpecGenerateRequest{Scope: scope, OperationID: request.Fields["request_id"]})
 	if err != nil {
 		return webValidationWrite(err), nil
 	}
@@ -236,9 +168,18 @@ func (p webViewProvider) writeSpecGenerate(ctx context.Context, operations servi
 }
 
 func (p webViewProvider) writePlanGenerate(ctx context.Context, operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
-	result, err := operations.GeneratePlan(ctx, PlanGenerateRequest{Scope: webActionScope(request)})
+	if request.Surface == "plan" {
+		return p.writePlanDelivery(ctx, operations, request)
+	}
+
+	scope, err := webCasePlanScope(ctx, operations, request)
 	if err != nil {
 		return webValidationWrite(err), nil
+	}
+
+	result, err := operations.GeneratePlan(ctx, PlanGenerateRequest{Scope: scope, ExpectedRevision: request.Revision, OperationID: request.Fields["request_id"]})
+	if err != nil {
+		return webPlanWriteFailure(err, request.ID), nil
 	}
 
 	return webui.WriteActionResponse{
@@ -251,9 +192,23 @@ func (p webViewProvider) writePlanGenerate(ctx context.Context, operations servi
 }
 
 func (p webViewProvider) writePlanRegenerate(ctx context.Context, operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
-	result, err := operations.RegeneratePlan(ctx, PlanRegenerateRequest{Scope: webActionScope(request)})
+	scope, err := webCasePlanScope(ctx, operations, request)
 	if err != nil {
 		return webValidationWrite(err), nil
+	}
+
+	_, exists, err := operations.existingGeneratedPlan(operations.quizScope(scope))
+	if err != nil {
+		return webPlanWriteFailure(err, request.ID), nil
+	}
+
+	if !exists {
+		return webBlockedWrite("No current plan exists. Reload this case and use Generate Plan."), nil
+	}
+
+	result, err := operations.RegeneratePlan(ctx, PlanRegenerateRequest{Scope: scope, ExpectedRevision: request.Revision, OperationID: request.Fields["request_id"]})
+	if err != nil {
+		return webPlanWriteFailure(err, request.ID), nil
 	}
 
 	return webui.WriteActionResponse{
@@ -262,23 +217,6 @@ func (p webViewProvider) writePlanRegenerate(ctx context.Context, operations ser
 		ChangedFiles: compactChangedFiles(result.Plan.RelativePath),
 		RedirectURL:  "/plans",
 		Operation:    webOperation("plan.regenerate", "completed", result.Plan.RelativePath, result.Plan.Status),
-	}, nil
-}
-
-func (p webViewProvider) writePlanTrackingCreate(ctx context.Context, operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
-	result, err := operations.MaterializePlanTracking(ctx, PlanTrackingRequest{Scope: webActionScope(request)})
-	if err != nil {
-		return webValidationWrite(err), nil
-	}
-
-	files := append(compactChangedFiles(result.TrackingPath), ticketPaths(result.Tickets)...)
-
-	return webui.WriteActionResponse{
-		Status:       webui.WriteStatusOK,
-		Summary:      result.Message,
-		ChangedFiles: files,
-		RedirectURL:  "/plans",
-		Operation:    webOperation("plan.tracking.create", "completed", result.TrackingPath, result.Plan.Status),
 	}, nil
 }
 
@@ -294,7 +232,7 @@ func (p webViewProvider) writeQuizStart(operations service, request webui.WriteA
 	return webui.WriteActionResponse{
 		Status:      webui.WriteStatusOK,
 		Summary:     result.Message,
-		RedirectURL: "/quizzes",
+		RedirectURL: quizFocusURL(result.State.CuratedPath),
 		Operation:   webOperation("quiz.start", string(result.State.Status), quizOperationID(result.State), result.State.BranchReturnReason),
 	}, nil
 }
@@ -308,7 +246,7 @@ func (p webViewProvider) writeQuizResume(operations service, request webui.Write
 	return webui.WriteActionResponse{
 		Status:      webui.WriteStatusOK,
 		Summary:     result.Message,
-		RedirectURL: "/quizzes",
+		RedirectURL: quizFocusURL(result.State.CuratedPath),
 		Operation:   webOperation("quiz.resume", string(result.State.Status), quizOperationID(result.State), result.State.BranchReturnReason),
 	}, nil
 }
@@ -346,6 +284,28 @@ func (p webViewProvider) writeWorkDaemonStop(operations service) (webui.WriteAct
 	}, nil
 }
 
+func (p webViewProvider) writeCaseCreate(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
+	if request.Family != webArtifactFamilyCases || request.ID != "" {
+		return webBlockedWrite("Create cases from the Cases page."), nil
+	}
+
+	result, err := operations.SaveCaseMetadata(core.CaseMetadata{
+		Name:        strings.TrimSpace(request.Fields["name"]),
+		Description: request.Fields["description"],
+		Context:     request.Fields["context"],
+	})
+	if err != nil {
+		return webValidationWrite(err), nil
+	}
+
+	return webui.WriteActionResponse{
+		Status:       webui.WriteStatusOK,
+		Summary:      "Case created.",
+		ChangedFiles: []string{caseRelativePath(p.projectContext.ProjectDir, result.Case)},
+		RedirectURL:  "/cases",
+	}, nil
+}
+
 func (p webViewProvider) writeCaseUpdate(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
 	current, err := core.NewCaseMetadataService(p.projectContext.ProjectDir).LoadPath(
 		core.CaseMetadataPath(p.projectContext.ProjectDir, request.ID),
@@ -380,82 +340,93 @@ func (p webViewProvider) writeCaseUpdate(operations service, request webui.Write
 }
 
 func (p webViewProvider) writeDumpCreate(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
+	if request.Fields["request_id"] == "" {
+		return webui.WriteActionResponse{Status: webui.WriteStatusValidation, Summary: "Reopen New before submitting this capture."}, nil
+	}
+
 	result, err := operations.CreateDump(DumpCreateRequest{
+		OperationID: dumpRequestID(request.Fields["request_id"]), ExpectedRevision: request.Revision,
 		Title:   request.Fields["title"],
 		Content: request.Fields["content"],
 		Scope:   DumpScope{CaseSlug: request.Fields["case_slug"]},
 	})
 	if err != nil {
-		return webValidationWrite(err), nil
+		return webDumpWriteFailure(err, request.ID), nil
 	}
 
 	return webui.WriteActionResponse{
-		Status:      webui.WriteStatusOK,
-		Summary:     result.Message,
-		RedirectURL: "/dumps",
+		Status:          webui.WriteStatusOK,
+		Summary:         result.Message,
+		Operation:       webDumpOperation("dump.capture", result),
+		ProjectionStale: result.ProjectionStale,
+		RedirectURL:     "/dumps",
 	}, nil
 }
 
 func (p webViewProvider) writeDumpSave(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
-	if response, ok, err := p.validateDumpRevision(request); ok || err != nil {
-		return response, err
-	}
-
 	result, err := operations.SaveDump(DumpSaveRequest{
+		OperationID: dumpRequestID(request.Fields["request_id"]), ExpectedRevision: request.Revision,
 		RelativePath: request.ID,
 		Content:      request.Fields["content"],
 	})
 	if err != nil {
-		return webValidationWrite(err), nil
+		return webDumpWriteFailure(err, request.ID), nil
 	}
 
 	return webui.WriteActionResponse{
-		Status:       webui.WriteStatusOK,
-		Summary:      result.Message,
-		ChangedFiles: []string{request.ID},
-		RedirectURL:  "/dumps/detail?id=" + url.QueryEscape(request.ID),
+		Status:          webui.WriteStatusOK,
+		Summary:         result.Message,
+		ChangedFiles:    []string{result.RelativePath},
+		Operation:       webDumpOperation("dump.save", result),
+		ProjectionStale: result.ProjectionStale,
+		RedirectURL:     "/dumps/detail?id=" + url.QueryEscape(result.RelativePath),
 	}, nil
 }
 
 func (p webViewProvider) writeDumpAppend(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
-	if response, ok, err := p.validateDumpRevision(request); ok || err != nil {
-		return response, err
-	}
-
 	result, err := operations.AppendDump(DumpAppendRequest{
+		OperationID: dumpRequestID(request.Fields["request_id"]), ExpectedRevision: request.Revision,
 		RelativePath: request.ID,
 		Content:      request.Fields["content"],
 	})
 	if err != nil {
-		return webValidationWrite(err), nil
+		return webDumpWriteFailure(err, request.ID), nil
 	}
 
 	return webui.WriteActionResponse{
-		Status:       webui.WriteStatusOK,
-		Summary:      result.Message,
-		ChangedFiles: []string{request.ID},
-		RedirectURL:  "/dumps/detail?id=" + url.QueryEscape(request.ID),
+		Status:          webui.WriteStatusOK,
+		Summary:         result.Message,
+		ChangedFiles:    []string{result.RelativePath},
+		Operation:       webDumpOperation("dump.append", result),
+		ProjectionStale: result.ProjectionStale,
+		RedirectURL:     "/dumps/detail?id=" + url.QueryEscape(result.RelativePath),
 	}, nil
 }
 
-func (p webViewProvider) validateDumpRevision(request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error) {
-	content, err := p.readProjectArtifact(request.ID)
-	if errors.Is(err, os.ErrNotExist) {
-		return webBlockedWrite("Dump does not exist."), true, nil
+func webDumpOperation(kind string, result DumpOperationResult) webui.OperationStateView {
+	detail := ""
+	if result.ProjectionStale {
+		detail = "Catalog refresh is pending."
 	}
 
-	if err != nil {
-		return webui.WriteActionResponse{}, false, err
+	return webOperation(kind, "committed", result.Mutation.OperationID, detail)
+}
+
+func webDumpWriteFailure(err error, reference string) webui.WriteActionResponse {
+	if errors.Is(err, core.ErrWorkflowConflict) {
+		reload := "/dumps"
+		if reference != "" {
+			reload += "/detail?id=" + url.QueryEscape(reference)
+		}
+
+		return webui.WriteActionResponse{Status: webui.WriteStatusStale, Summary: "The dump changed after it was loaded. Reload before saving.", ReloadURL: reload, DiscardURL: "/dumps"}
 	}
 
-	if stale := webStaleWrite(webContentRevision(content), request.Revision); stale.Status != "" {
-		stale.ReloadURL = "/dumps/detail?id=" + url.QueryEscape(request.ID)
-		stale.DiscardURL = "/dumps"
-
-		return stale, true, nil
+	if errors.Is(err, core.ErrProjectDumpReconciliation) {
+		return webBlockedWrite(err.Error())
 	}
 
-	return webui.WriteActionResponse{}, false, nil
+	return webValidationWrite(err)
 }
 
 func webBlockedWrite(reason string) webui.WriteActionResponse {
@@ -531,15 +502,4 @@ func compactChangedFiles(paths ...string) []string {
 	}
 
 	return files
-}
-
-func ticketPaths(tickets []core.IndexedTicket) []string {
-	paths := make([]string, 0, len(tickets))
-	for _, ticket := range tickets {
-		if strings.TrimSpace(ticket.RelativePath) != "" {
-			paths = append(paths, ticket.RelativePath)
-		}
-	}
-
-	return paths
 }

@@ -1,7 +1,7 @@
 # Dev To Main Gate
 
 The dev-to-main gate collects promotion evidence before aligning `dev` into
-`main`. It is designed for generic Go projects managed by Chryso.
+`main`. It is designed for generic Go projects managed by chr.
 
 ## Command
 
@@ -32,9 +32,9 @@ The gate records:
 - commits in the selected range;
 - changed files and Git statuses;
 - validation command, status, exit code, duration, stdout, and stderr;
-- Chryso-managed work detected from execution reports;
+- chr-managed work detected from execution reports;
 - manual or external changes when listing is enabled;
-- missing agent evidence when Chryso-owned work lacks result paths;
+- missing agent evidence when chr-owned work lacks result paths;
 - high-risk manual changes when configured.
 
 ## Reports
@@ -130,9 +130,9 @@ gates:
 ```
 
 This records evidence and warns about manual or external changes without
-blocking adoption because old work has no Chryso execution history.
+blocking adoption because old work has no chr execution history.
 
-After new work is consistently executed through Chryso tickets, projects
+After new work is consistently executed through chr tickets, projects
 can tighten policy:
 
 ```yml

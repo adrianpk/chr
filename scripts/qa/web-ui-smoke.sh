@@ -108,7 +108,7 @@ if [ -z "$ready" ]; then
 	exit 1
 fi
 
-fetch_expect "/" "Chryso"
+fetch_expect "/" "chr"
 fetch_expect "/project" "$project_dir"
 fetch_expect "/board" "Smoke ticket"
 fetch_expect "/dash" "Readiness"

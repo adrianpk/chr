@@ -7,7 +7,7 @@ Tracker: `.prj/trackers/slice-6-core-package-consolidation-tracker.md`
 
 ## Purpose
 
-Consolidate core Chryso behavior under `internal/chr` before adding user environment, project registry, daemon, and global index behavior.
+Consolidate core chr behavior under `internal/chr` before adding user environment, project registry, daemon, and global index behavior.
 
 The current `internal/workspace` package name conflicts with the emerging model where a project workspace is only one core `chr` concept.
 

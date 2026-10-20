@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
 // WorkOperationResult is the TUI-facing result for agent work operations.
@@ -72,7 +73,7 @@ type agentWorkPostDevelopmentOptions struct {
 }
 
 var newAgenticReviewRunner = func() core.AgenticReviewRunner {
-	return core.CodexAgenticReviewRunner{}
+	return core.HarnessAgenticReviewRunner{Runner: codex.Runner{}}
 }
 
 func (s service) StartSelectedTicket(ticketKey string) (WorkOperationResult, error) {
@@ -570,8 +571,22 @@ func (s service) runAgenticReviewCycle(selected core.IndexedTicket, execution co
 	}
 
 	ticket = agentWorkTicketWithSelectedReviewMetadata(ticket, selected)
+	s.generationExecutionDir = reviewProjectDir
 
-	artifact, err := newAgenticReviewRunner().Review(s.ctx, core.AgenticReviewContext{
+	bound, _, err := s.bindGeneration(s.ctx, "review-"+execution.ID, "agentic_review")
+	if err != nil {
+		return core.IndexedTicket{}, err
+	}
+
+	s = bound
+
+	runner := newAgenticReviewRunner()
+	if native, ok := runner.(core.HarnessAgenticReviewRunner); ok && s.generationRunner != nil {
+		native.Runner = s.generationRunner
+		runner = native
+	}
+
+	artifact, err := runner.Review(s.ctx, core.AgenticReviewContext{
 		ProjectID:           s.projectContext.ProjectID,
 		ProjectDir:          reviewProjectDir,
 		Ticket:              ticket,

@@ -26,7 +26,7 @@ func TestHandlerShellAndBootstrap(t *testing.T) {
 		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
 	}
 
-	for _, want := range []string{"Chryso", "project-1", "/assets/chr.css"} {
+	for _, want := range []string{`<span class="brand-title">chr</span>`, `aria-label="chr board"`, "project-1", "/assets/chr.css"} {
 		if !strings.Contains(recorder.Body.String(), want) {
 			t.Fatalf("body does not contain %q:\n%s", want, recorder.Body.String())
 		}
@@ -78,7 +78,7 @@ func TestHandlerAssetsAndHealthz(t *testing.T) {
 		"/assets/chr.css":      ".app-shell",
 		"/assets/chr.js":       "openTemplateModal",
 		"/assets/chr-logo.png": "",
-		"/assets/favicon.svg":  "Chr",
+		"/assets/favicon.svg":  "chr",
 		"/assets/htmx.min.js":  "htmx",
 		"/healthz":             "ok\n",
 	} {
@@ -125,12 +125,14 @@ func TestHandlerTicketModal(t *testing.T) {
 	for _, want := range []string{
 		"ticket-modal",
 		"Ready work",
-		"Ready work synopsis.",
+		"Full ticket description.",
+		"A retained second paragraph.",
 		"Comments",
 		"Existing comment.",
 		`name="action" value="ticket.update"`,
-		`input name="title" required value="Ready work"`,
-		`textarea name="synopsis" required`,
+		`id="ticket-title" name="title" required`,
+		`value="Ready work"`,
+		`id="ticket-description" name="description" required`,
 		`name="action" value="ticket.comment"`,
 		`hx-post="/board/ticket/comment"`,
 		`textarea name="content" required`,
@@ -139,9 +141,13 @@ func TestHandlerTicketModal(t *testing.T) {
 			t.Fatalf("detail body does not contain %q:\n%s", want, detail.Body.String())
 		}
 	}
+	if strings.Contains(detail.Body.String(), `name="synopsis"`) {
+		t.Fatal("modal exposed a competing synopsis editor")
+	}
 }
 
-func TestHandlerTicketCommentRefreshesModal(t *testing.T) {
+// Comment responses replace only discussion so dirty metadata remains in the DOM.
+func TestHandlerTicketCommentRefreshesDiscussion(t *testing.T) {
 	handler, err := NewHandler(HandlerOptions{
 		Data:     testShellData(),
 		Provider: testDataProvider{},
@@ -171,7 +177,11 @@ func TestHandlerTicketCommentRefreshesModal(t *testing.T) {
 		t.Fatalf("HX-Redirect = %q, want empty", redirect)
 	}
 
-	for _, want := range []string{"ticket-modal", "Ready work", "Existing comment.", `hx-post="/board/ticket/comment"`} {
+	if strings.Contains(recorder.Body.String(), "ticket-edit-form") || strings.Contains(recorder.Body.String(), "ticket-modal") {
+		t.Fatal("comment response would replace the editor")
+	}
+
+	for _, want := range []string{"data-ticket-commented", "Comments", "Existing comment."} {
 		if !strings.Contains(recorder.Body.String(), want) {
 			t.Fatalf("body does not contain %q:\n%s", want, recorder.Body.String())
 		}
@@ -327,14 +337,17 @@ func TestHandlerProjectBoardDashRoutes(t *testing.T) {
 		t.Fatalf("NewHandler returned error: %v", err)
 	}
 
+	hiddenDetails := []string{"Bind", "Refresh", "User workspace", ".chr/default/tickets", ".chr/default/runtime", "hx-trigger=", `href="/project"`}
+
 	for _, tt := range []struct {
-		path string
-		want []string
+		path   string
+		want   []string
+		absent []string
 	}{
-		{path: "/", want: []string{"Project", "Project directory", "/tmp/project"}},
-		{path: "/project", want: []string{"Project", "Tickets", ".chr/default/tickets"}},
-		{path: "/board", want: []string{"Board", "Ready For Dev", "CHR-1", "Ready work"}},
-		{path: "/dash", want: []string{"Dash", "Readiness", "Queue", "worker_started"}},
+		{path: "/", want: []string{"<h1>Project</h1>", "Project directory", "/tmp/project"}, absent: hiddenDetails},
+		{path: "/project", want: []string{"<h1>Project</h1>", "Project name", "Project One", "Project directory", "/tmp/project", "Project ID", "project-1"}, absent: hiddenDetails},
+		{path: "/board", want: []string{"<h1>Board</h1>", "Ready For Dev", "CHR-1", "Ready work"}},
+		{path: "/dash", want: []string{"<h1>Dash</h1>", "Readiness", "Queue", "worker_started"}},
 	} {
 		recorder := httptest.NewRecorder()
 		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, tt.path, nil))
@@ -346,6 +359,12 @@ func TestHandlerProjectBoardDashRoutes(t *testing.T) {
 		for _, want := range tt.want {
 			if !strings.Contains(recorder.Body.String(), want) {
 				t.Fatalf("%s body does not contain %q:\n%s", tt.path, want, recorder.Body.String())
+			}
+		}
+
+		for _, unwanted := range tt.absent {
+			if strings.Contains(recorder.Body.String(), unwanted) {
+				t.Fatalf("%s contains unwanted project detail %q", tt.path, unwanted)
 			}
 		}
 	}
@@ -364,13 +383,13 @@ func TestHandlerArtifactCatalogAndDetailRoutes(t *testing.T) {
 		path string
 		want []string
 	}{
-		{path: "/cases", want: []string{"Cases", "case-table", "Blog Authoring", "Case context", "blog", "Edit", `hx-get="/cases/detail/fragment?id=blog"`}},
-		{path: "/dumps", want: []string{"Dumps", "New Dump", "For Use Case", `data-modal-template="dump-create-modal"`, `id="dump-create-modal"`, "dump-card-link", "dump-card", "Project Notes", `hx-get="/dumps/detail/fragment?id=.chr/default/dumps/project-notes.md"`, "Project-wide", "Notes preview"}},
-		{path: "/quizzes", want: []string{"Quizzes", "Project Quiz", "not_started"}},
-		{path: "/specs", want: []string{"Specs", "Project Spec"}},
-		{path: "/plans", want: []string{"Plans", "No plans found."}},
-		{path: "/dumps/detail?id=.chr/default/dumps/project-notes.md", want: []string{"Project Notes", "Full dump content"}},
-		{path: "/dumps/detail?id=missing.md", want: []string{"missing.md", "Artifact not found."}},
+		{path: "/cases", want: []string{"<h1>Cases</h1>", "case-table", "Blog Authoring", "Case context", "blog", "Edit", `hx-get="/cases/detail/fragment?id=blog"`}},
+		{path: "/dumps", want: []string{"<h1>Dumps</h1>", "New context", "Scope", `data-modal-template="dump-create-modal"`, `id="dump-create-modal"`, "dump-card-link", "dump-card", "Project Notes", `hx-get="/dumps/detail/fragment?id=.chr/default/dumps/project-notes.md"`, "Project-wide", "Notes preview"}},
+		{path: "/quizzes", want: []string{"<h1>Quizzes</h1>", "Project Quiz", "No answers yet"}},
+		{path: "/specs", want: []string{"<h1>Specs</h1>", "Project Spec"}},
+		{path: "/plans", want: []string{"<h1>Plans</h1>", "No plans yet."}},
+		{path: "/dumps/detail?id=.chr/default/dumps/project-notes.md", want: []string{"<h1>Project Notes</h1>", "Full dump content"}},
+		{path: "/dumps/detail?id=missing.md", want: []string{"<h1>missing.md</h1>", "Artifact not found."}},
 	} {
 		recorder := httptest.NewRecorder()
 		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, tt.path, nil))
@@ -423,7 +442,11 @@ func TestHandlerDumpsCreateUsesModalTemplates(t *testing.T) {
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
 	}
-	for _, unwanted := range []string{`href="#dump-create"`, `href="#dump-create-case"`} {
+	if got := strings.Count(recorder.Body.String(), `name="action" value="dump.create"`); got != 1 {
+		t.Fatalf("capture form count = %d, want one", got)
+	}
+
+	for _, unwanted := range []string{`href="#dump-create"`, `href="#dump-create-case"`, `id="dump-create-case-modal"`, "For Use Case", `<input name="case_slug"`} {
 		if strings.Contains(recorder.Body.String(), unwanted) {
 			t.Fatalf("dumps catalog contains inline create trigger %q:\n%s", unwanted, recorder.Body.String())
 		}
@@ -454,7 +477,6 @@ func TestHandlerDumpDetailFragmentUsesModal(t *testing.T) {
 		"Project Notes",
 		"Full dump content",
 		"dump.save",
-		"dump.append",
 		`name="id" value=".chr/default/dumps/project-notes.md"`,
 		`name="revision" value="detail-revision"`,
 		`hx-post="/actions"`,
@@ -462,6 +484,12 @@ func TestHandlerDumpDetailFragmentUsesModal(t *testing.T) {
 	} {
 		if !strings.Contains(recorder.Body.String(), want) {
 			t.Fatalf("body does not contain %q:\n%s", want, recorder.Body.String())
+		}
+	}
+
+	for _, forbidden := range []string{"dump.append", "artifact-content", "Append note"} {
+		if strings.Contains(recorder.Body.String(), forbidden) {
+			t.Fatalf("dump editor contains duplicate surface %q", forbidden)
 		}
 	}
 }
@@ -619,9 +647,9 @@ func TestHandlerRendersGenerationAndWorkActionForms(t *testing.T) {
 		path string
 		want []string
 	}{
-		{path: "/specs", want: []string{"spec.generate", "Generate Spec"}},
-		{path: "/plans", want: []string{"plan.generate", "plan.regenerate", "plan.tracking.create"}},
-		{path: "/quizzes", want: []string{"quiz.start", "quiz.resume", "Start Quiz"}},
+		{path: "/specs", want: []string{"New", `hx-get="/specs/detail/fragment"`, "document-card"}},
+		{path: "/plans", want: []string{"No plans yet."}},
+		{path: "/quizzes", want: []string{"New Quiz", `aria-label="Pending quizzes"`, "/quizzes/detail?id=project"}},
 		{path: "/dash", want: []string{"work.preview", "work.daemon.stop", "Preview Work"}},
 	} {
 		recorder := httptest.NewRecorder()
@@ -711,16 +739,9 @@ func TestHandlerFullPagesConfigurePolling(t *testing.T) {
 		revision  string
 		workspace string
 	}{
-		{path: "/", refresh: "/project/fragment", revision: "project-revision", workspace: `id="workspace"`},
 		{path: "/board", refresh: "/board/fragment", revision: "board-revision", workspace: `id="workspace"`},
 		{path: "/dash", refresh: "/dash/fragment", revision: "dash-revision", workspace: `id="workspace"`},
 		{path: "/dumps", refresh: "/dumps/fragment", revision: "dumps-revision", workspace: `id="workspace"`},
-		{
-			path:      "/dumps/detail?id=.chr/default/dumps/project-notes.md",
-			refresh:   "/dumps/detail/fragment?id=.chr%2Fdefault%2Fdumps%2Fproject-notes.md",
-			revision:  "detail-revision",
-			workspace: `id="workspace"`,
-		},
 	} {
 		recorder := httptest.NewRecorder()
 		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, tt.path, nil))
@@ -877,7 +898,7 @@ func TestHandlerWriteActionRendersBlockedEnvelope(t *testing.T) {
 
 func testShellData() ShellData {
 	return ShellData{
-		Title:          "Chryso",
+		Title:          "chr",
 		ProjectDir:     "/tmp/project",
 		ProjectID:      "project-1",
 		ProjectName:    "Project One",
@@ -887,7 +908,7 @@ func testShellData() ShellData {
 		RequireToken:   "auto",
 		RefreshSeconds: 2,
 		Navigation: []ui.NavLink{
-			{Label: "Project", Href: "/", Active: true},
+			{Label: "Cases", Href: "/cases"},
 		},
 	}
 }
@@ -896,21 +917,13 @@ type testDataProvider struct{}
 
 func (testDataProvider) ProjectView(context.Context) (ProjectView, error) {
 	return ProjectView{
-		ProjectID:      "project-1",
-		ProjectDir:     "/tmp/project",
-		URL:            "http://127.0.0.1:7331",
-		Host:           "127.0.0.1",
-		Port:           7331,
-		RequireToken:   "auto",
-		RefreshSeconds: 2,
-		Paths: []ProjectPathView{
-			{Label: "Tickets", Path: "/tmp/project/.chr/default/tickets"},
-		},
-		Revision: "project-revision",
+		ProjectID:  "project-1",
+		ProjectDir: "/tmp/project",
+		Revision:   "project-revision",
 	}, nil
 }
 
-func (testDataProvider) BoardView(context.Context) (BoardView, error) {
+func (testDataProvider) BoardView(context.Context, BoardRequest) (BoardView, error) {
 	return BoardView{
 		ProjectID:      "project-1",
 		TotalCount:     1,
@@ -935,6 +948,7 @@ func (testDataProvider) TicketDetailView(_ context.Context, request TicketDetail
 		Key:          request.Key,
 		Title:        "Ready work",
 		Synopsis:     "Ready work synopsis.",
+		Description:  "Full ticket description.\n\nA retained second paragraph.",
 		Priority:     "high",
 		Status:       "ready_for_dev",
 		Type:         "feature",
@@ -952,11 +966,9 @@ func (testDataProvider) DashView(context.Context) (DashView, error) {
 		Readiness: WorkReadinessView{Status: "ready", WorkspaceMode: "worktree", CurrentBranch: "dev"},
 		Queue: AgentQueueView{
 			EligibleCount: 1,
-			Tickets: []BoardTicketView{
-				{Key: "CHR-1", Title: "Ready work", Status: "ready_for_dev", Priority: "high", Type: "feature"},
-			},
+			Items:         []WorkQueueItemView{{Key: "CHR-1", Title: "Ready work", Readiness: "ready"}},
 		},
-		Current: CurrentWorkView{Phase: "worker_started", Message: "worker started", TicketKey: "CHR-1"},
+		Current: []CurrentWorkView{{ID: "current", Phase: "worker_started", Message: "worker started", TicketKey: "CHR-1", Title: "Ready work", Status: "running"}},
 		RecentEvents: []AgentEventView{
 			{Time: "12:00:00", Phase: "worker_started", Message: "worker started", TicketKey: "CHR-1"},
 		},
@@ -971,6 +983,10 @@ func (testDataProvider) CatalogView(_ context.Context, family string) (ArtifactC
 		EmptyMessage: "No " + family + " found.",
 		Items:        testCatalogItems(family),
 		Revision:     family + "-revision",
+	}
+
+	if family == "quizzes" {
+		catalog.PendingQuizzes = []QuizScopeChoice{{Title: "Project Quiz", URL: "/quizzes/detail?id=project"}}
 	}
 
 	return catalog, nil
@@ -1016,7 +1032,7 @@ func testCatalogItems(family string) []ArtifactCardView {
 				Title:        "Project Quiz",
 				Status:       "not_started",
 				Scope:        "Project-wide",
-				Preview:      "No quiz yet.",
+				Preview:      "",
 				DetailURL:    "/quizzes/detail?id=project",
 				ContentState: "missing",
 			},

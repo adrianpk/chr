@@ -103,9 +103,10 @@ type Options struct {
 	ProjectExecutor      ProjectMetadataExecutor
 	CaseExecutor         CaseMetadataExecutor
 	SourceExecutor       SourceOpenExecutor
+	HarnessExecutor      HarnessSelectionExecutor
 }
 
-// Model is the Bubble Tea model for the Chryso TUI.
+// Model is the Bubble Tea model for the chr TUI.
 type Model struct {
 	projectDir               string
 	projectID                string
@@ -185,6 +186,9 @@ type Model struct {
 	caseExecutor             CaseMetadataExecutor
 	sourceExecutor           SourceOpenExecutor
 	detailScroll             int
+	harnessExecutor          HarnessSelectionExecutor
+	harnessSelection         harnessSelectionState
+	harnessSequence          uint64
 	statusMessage            string
 }
 
@@ -273,6 +277,7 @@ func NewModel(opts Options) Model {
 		projectExecutor:          opts.ProjectExecutor,
 		caseExecutor:             opts.CaseExecutor,
 		sourceExecutor:           opts.SourceExecutor,
+		harnessExecutor:          opts.HarnessExecutor,
 	}
 }
 
@@ -351,6 +356,14 @@ func (m Model) updateSystemMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 
 func (m Model) updateActionFinishedMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 	switch typedMsg := msg.(type) {
+	case harnessSelectionSavedMsg:
+		m.completeHarnessSave(typedMsg)
+
+		return m, nil, true
+	case harnessSelectionLoadedMsg:
+		m.completeHarnessRead(typedMsg)
+
+		return m, nil, true
 	case quizActionFinishedMsg:
 		m.completeQuizAction(typedMsg)
 
@@ -405,6 +418,12 @@ func (m Model) View() string {
 	output.WriteString(m.renderQuizAction())
 	output.WriteString(m.renderSpecAction())
 	output.WriteString(m.renderPlanAction())
+
+	if m.harnessSelection.Active {
+		output.WriteString("\n\nHarness defaults\n")
+		output.WriteString(strings.Join(m.harnessSelectionLines(76), "\n"))
+	}
+
 	output.WriteString(m.renderCommandPalette())
 	output.WriteString("\n\n")
 	output.WriteString(m.renderKeys())
@@ -419,6 +438,10 @@ func (m Model) SelectedView() View {
 }
 
 func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	if m.harnessSelection.Active {
+		return m.updateHarnessKey(msg)
+	}
+
 	if updated, cmd, handled := m.updateActiveModeKey(msg); handled {
 		return updated, cmd
 	}
@@ -545,6 +568,10 @@ func (m *Model) handleGlobalKey(msg tea.KeyMsg) (tea.Cmd, bool) {
 }
 
 func (m Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
+	if m.harnessSelection.Active {
+		return m, nil
+	}
+
 	event := tea.MouseEvent(msg)
 
 	if event.Action == tea.MouseActionRelease {

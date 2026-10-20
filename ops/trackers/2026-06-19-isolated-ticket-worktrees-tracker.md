@@ -114,12 +114,12 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T8.1 | Update runtime config, work readiness, ticket execution, and user guide docs. | pending | pending | Explain default and migration posture. |
-| T8.2 | Update Dash/TUI reference docs for workspace visibility. | pending | pending | User should know where agent writes. |
+| T8.1 | Update runtime config, work readiness, ticket execution, and user guide docs. | done | 2026-10-20 documentation reconciliation | Version-one worktree defaults, legacy project mode and actual execution paths documented. |
+| T8.2 | Update Dash/TUI reference docs for workspace visibility. | done | 2026-10-20 documentation reconciliation | Dash state and detailed doctor/report inspection documented from current source. |
 | T8.3 | Add or update QA reference fixtures to exercise isolated worktree mode. | pending | pending | Resettable scenarios required. |
 | T8.4 | Add smoke scripts or make targets for the worktree QA scenarios. | pending | pending | Prefer reusable commands. |
-| T8.5 | Run end-to-end QA proving with a dirty user checkout and a clean ticket worktree. | pending | pending | Proves core user benefit. |
-| T8.6 | Record the default-switch decision in tracker notes with validation evidence. | pending | pending | Do not flip default without evidence. |
+| T8.5 | Run end-to-end QA proving with a dirty user checkout and a clean ticket worktree. | pending | pending | Real Git isolation passes; Docker worker journey remains pending socket access and actual evidence. |
+| T8.6 | Record the default-switch decision in tracker notes with validation evidence. | done | `750378ec9b7ee05399395184def0954ab47cf1d7` | Later PR #374 delivered prospective worktree defaults with explicit legacy preservation. |
 | T8.7 | Add the slice implementation report and final cycle report. | pending | pending | Final report summarizes all slices. |
 
 ## Validation Log
@@ -156,12 +156,12 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 
 - Final config placement: resolved as `work.workspace_mode` with related
   `work.worktree_*` fields.
-- Whether execution workspace metadata requires a SQLite migration in Slice 5
-  or can remain report-only until the behavior is proven.
-- Whether worktree metadata should be central-only, file-based under the
-  worktree root, or both.
-- Whether `worktree` becomes the default for new projects during Slice 8 or
-  remains opt-in until another proving cycle.
+- Execution workspace persistence: resolved by Slice 5 additive SQLite migration
+  and report metadata; see T5.2.
+- Worktree metadata: resolved as advisory `.metadata/<ticket>.json` files under
+  the canonical namespaced worktree root; Git remains authoritative.
+- New-project defaults: resolved by later PR #374. Nested `workflow.version: 1`
+  selects `worktree`; absent markers retain `project`, and explicit values win.
 
 ## Notes
 
@@ -174,3 +174,17 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 - The first implementation should prefer clear diagnostics over automatic
   repair whenever Git state is ambiguous.
 - Slice 8 must update the changelog for the isolated ticket worktrees cycle.
+
+## Reconciliation: 2026-10-20
+
+The [current reconciliation report](../default/report/isolated-worktree-reconciliation.md)
+maps later delivered policy, documentation corrections and focused local Git
+evidence to the old Slice 8 tasks. T8.1, T8.2 and T8.6 are resolved; T8.3–T8.5
+and T8.7 remain pending. Slice 8 has no newly delivered PR or final cycle
+certificate. The earlier planned branch and historical gates remain unchanged.
+
+The focused non-short isolation/default/readiness selection passed on
+`a66b9e5bebf9` in 0.587 seconds with global/system Git config excluded.
+Preparation preserves staged, unstaged and untracked user content across
+merge/rebase/squash in real local repositories. This is separate from the
+pending real Docker worker journey and scheduled exhaustive verification.

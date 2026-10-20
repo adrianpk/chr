@@ -1,28 +1,22 @@
-# Chryso
+# chr
 
 <p align="center">
-  <img src="assets/img/home/chryso-hero.png" alt="Chryso hero" width="760">
+  <img src="assets/img/home/chr-hero.png" alt="chr hero" width="760">
 </p>
 
 [Gallery](docs/explanation/gallery.md)
 
-Chryso is a local software-development orchestrator for agentic work.
+chr is a **local software factory built in Go**.
+It turns development goals into specifications and tickets, then coordinates
+AI coding agents to execute them in isolated environments.
 
-Think of it as a controlled, Go-oriented software factory that turns rough
-intent into organized implementation work, then allows agents to execute that
-work ticket by ticket while leaving a reviewable trail behind.
-
-Running `chr init` in the root of an existing Go project creates a reserved
-`.chr/` workspace where Chryso stores project context, generated documents,
-tickets, runtime artifacts, and execution state.
+A local TUI and Telegram interface provide access to the work queue, agent
+execution, and results. Each execution leaves behind artifacts that can be
+inspected and reviewed.
 
 ## Workflow
 
-<div align="center">
-
-<img src="assets/img/home/chryso-workflow.png" alt="Chryso workflow">
-
-</div>
+Idea → Dump and quiz → Spec → Plan → Tickets → Start loop → Execution → Review evidence
 
 You provide the initial intent, project context, and answers to focused
 questions. The agent does the heavy work after that. It formalizes the feature,
@@ -35,96 +29,42 @@ while keeping execution explicit and inspectable.
 
 ## Control Surface
 
-Chryso is operated through a TUI, mirrored CLI commands, and an optional
-local Web UI. The TUI gives the user a project-manager view: specs, Gherkin
-feature files, plans, tickets, board state, runtime activity, and review
-evidence. The CLI exposes the same workflow as commands that users can script
-and agents can invoke when they need to interact with the project workflow
-directly. The Web UI is an explicit local server for operators who want to
-manage the same board and project artifacts from a browser; it does not start
-unless the user runs `chr web serve`.
+chr provides three interfaces: a TUI, a CLI, and an optional local Web UI.
+All three operate on the same project state.
 
-Dumps and quizzes capture context. Specs and Gherkin feature files describe the
-expected behavior. Plans organize the work. Tickets are the executable unit. The
-board shows what is ready, running, blocked, or waiting for review.
+The TUI and Web UI provide access to specifications, plans, tickets, the Kanban
+board, agent activity, and execution results. The CLI exposes the same
+operations for scripting and agent use.
 
-The Web UI can be enabled for local browser operation or deliberately exposed
-through operator-owned private networking. By default it binds to localhost and
-uses the same project-local files and service paths as the TUI and CLI.
-This first Web UI iteration is intended to be usable, not final; intensive
-visual and ergonomic refinement is expected from here.
+The workflow is organized around a few artifacts:
 
-Once the queue is shaped, the agent can work autonomously through ready tickets.
-The user can still run one ticket, run the full queue, stop the loop, inspect
-the output, and review the result before promoting the work.
+- **Dumps and quizzes** capture and clarify context.
+- **Specs and Gherkin features** define expected behavior.
+- **Plans** break work into manageable steps.
+- **Tickets** define executable units of work.
+- **Kanban board** tracks progress and execution state.
 
-Review is treated as an integration checkpoint, not as a replica of human PR
-review after every small slice. The review model focuses on accumulated
-coherence, scope, contracts, and evidence before work is promoted. See
-[Agent review model](docs/explanation/agent-review-model.md).
+Agents execute ready tickets in isolated environments. Execution can be
+triggered for a single ticket or run continuously through the queue. Users can
+stop execution, inspect results, and review work before integration.
 
-## Install
-
-Build the CLI locally:
-
-```sh
-make build
-```
-
-Run it from the repository:
-
-```sh
-./bin/chr --help
-```
-
-Install it into the active Go environment:
-
-```sh
-make install
-```
-
-## First Project
-
-Inside a project you want Chryso to manage:
-
-```sh
-chr init
-chr runtime validate --dry-run
-chr ticket new "Fix the failing task workflow" --type bug --priority high
-chr ticket list
-```
-
-This initializes the project workspace, checks the configured runtime boundary,
-creates a first ticket, and lists the tickets available to the agent.
-
-To use the project registry:
-
-```sh
-chr project add /path/to/project
-chr project select /path/to/project
-chr project current
-```
+Review happens at integration checkpoints rather than after every small task.
+It focuses on consistency, scope, contracts, and execution evidence. See the
+[Agent review model](https://forge.adrianpk.com/adrianpk/chr/src/branch/main/docs/explanation/agent-review-model.md).
 
 ## Documentation
 
-More documentation:
-
+- [Installation](docs/tutorials/getting-started.md#build-the-cli)
+- [User Guide](docs/how-to/user-guide/index.md)
 - [Documentation index](docs/index.md)
-- [Getting started tutorial](docs/tutorials/getting-started.md)
-- [User guide](docs/how-to/user-guide/index.md)
-- [Run the local Web UI](docs/how-to/run-local-web-ui.md)
-- [Expose the local Web UI deliberately](docs/how-to/expose-local-web-ui.md)
-- [Observe agent work](docs/how-to/observe-agent-work.md)
-- [Inspect and recover local state](docs/how-to/inspect-and-recover-local-state.md)
-- [Find execution and loop evidence](docs/how-to/find-execution-and-loop-evidence.md)
-- [Reference](docs/reference/project-workspace.md)
-- [Explanation](docs/explanation/architecture.md)
 - [Changelog](CHANGELOG.md)
 
-## Repositories
+## Repos
 
-Official repository: https://forge.adrianpk.com/adrianpk/chr
+- Official: https://forge.adrianpk.com/adrianpk/chr
+- Codeberg: https://codeberg.org/adrianpk/chr
+- GitHub: https://github.com/adrianpk/chr
 
-Public mirrors:
+## License
 
-- https://codeberg.org/adrianpk/chr
+chr is licensed under the [Apache License, Version 2.0](LICENSE).

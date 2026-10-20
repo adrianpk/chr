@@ -4,7 +4,7 @@ Status: draft
 
 ## Summary
 
-Chryso should extend the dump, quiz, and spec workflow so that behavior-testable
+chr should extend the dump, quiz, and spec workflow so that behavior-testable
 use cases can produce an associated Gherkin feature artifact alongside the
 generated specification.
 

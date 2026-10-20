@@ -54,6 +54,10 @@ func (s *WorkflowStore) ClaimWorkflow(ctx context.Context, id string) (claim *Wo
 }
 
 func (s *WorkflowStore) claimWorkflow(ctx context.Context, run workflowInvocationFile) (claim *WorkflowClaim, err error) {
+	if err := checkHarnessExecutable(run.HarnessBinding, run.HarnessCommand); err != nil {
+		return nil, err
+	}
+
 	if err := s.prepareWorkflowClaimState(ctx, &run); err != nil {
 		return nil, err
 	}

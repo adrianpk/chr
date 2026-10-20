@@ -29,6 +29,10 @@ type BoardQueryOptions struct {
 
 // Board describes a package boundary value.
 type Board struct {
+	Revision        string
+	Offset          int
+	LoadedCount     int
+	NextOffset      int
 	ProjectID       string
 	Columns         []BoardColumn
 	Attention       []BoardAttentionTicket
@@ -152,7 +156,7 @@ func boardFromColumns(
 
 // BoardAttentionReasons executes the corresponding package operation.
 func BoardAttentionReasons(ticket IndexedTicket) []string {
-	reasons := []string{}
+	reasons := append([]string(nil), ticket.AttentionReasons...)
 
 	if ticket.Status == TicketStatusBlockedLegacy {
 		reasons = append(reasons, "status is blocked")

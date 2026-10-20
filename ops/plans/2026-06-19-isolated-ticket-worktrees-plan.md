@@ -10,7 +10,7 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 
 ## Purpose
 
-Move ticket execution from the user's active checkout into a Chryso-owned
+Move ticket execution from the user's active checkout into a chr-owned
 Git worktree while preserving the current sequential agent model.
 
 This delivery must keep one active ticket and one active runtime worker at a
@@ -27,7 +27,7 @@ origin/<integration_branch>
   fetched published base for agent work
 
 ticket worktree
-  Chryso-owned execution workspace
+  chr-owned execution workspace
   mounted into Docker as /workspace
   kept until the ticket branch / PR lifecycle completes
 ```
@@ -241,7 +241,7 @@ Behavior:
 - Existing branch metadata in the ticket is authoritative when present and
   valid.
 - Branch conflicts block instead of forcing reset or overwriting history.
-- Commit, push, and PR creation continue to happen through host-side CHR
+- Commit, push, and PR creation continue to happen through host-side chr
   orchestration, not from inside the worker container.
 - `run-all` still executes one ticket at a time and prepares one worktree at a
   time.

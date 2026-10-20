@@ -157,7 +157,7 @@ func (p openAIDumpCurationProvider) CurateDump(
 
 	p.recordRequest(ctx, trace)
 
-	result, err := p.executeOpenAIRequest(httpRequest, trace.StartedAt)
+	result, err := p.executeBoundDumpAPI(ctx, request, httpRequest, trace)
 	if err != nil {
 		p.recordResponse(ctx, trace, result, "error", err)
 
@@ -165,6 +165,8 @@ func (p openAIDumpCurationProvider) CurateDump(
 	}
 
 	curation, err := decodeDumpCurationPayload(result.Output)
+
+	err = core.ValidateHarnessGenerationOutput(ctx, p.dumpAPIRunRequest(request, trace), err)
 	if err != nil {
 		p.recordResponse(ctx, trace, result, "parse_error", err)
 
@@ -482,7 +484,7 @@ func (p openAIDumpCurationProvider) recordResponse(
 
 func dumpCurationInstructions() string {
 	return strings.TrimSpace(`
-You curate one Chryso dump capture.
+You curate one chr dump capture.
 Use only the structured request payload and context sections as the source of truth.
 Preserve the user's intent, meaningful wording, decisions, tensions, uncertainty, and open questions.
 Correct spelling, punctuation, grammar, paragraph flow, and obvious transcription noise.

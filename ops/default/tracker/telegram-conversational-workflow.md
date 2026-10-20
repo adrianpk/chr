@@ -1,6 +1,6 @@
 # Telegram Conversation Tracker
 
-Status: Approved
+Status: Blocked
 
 Date: 2026-10-16
 
@@ -16,11 +16,11 @@ Model: [Telegram Conversation and Workflow Model](../spec/stable/telegram-conver
 
 Implementation authorization: Granted by the maintainer on 2026-10-16 for this exact set, canonical slice PRs and Looper-owned Rebase + Fast-forward merges into dev.
 
-Active slice: Slice 8, Live journey and closure; first live canonical dump confirmed; remaining journey evidence pending
+Active slice: Slice 8, Live journey and closure; first live canonical dump confirmed; blocked on remaining live input and evidence
 
 Next slice: None; final slice active, followed by exact-candidate scheduled certification and closure
 
-Progress: 7 of 8 slices integrated; 0 of 29 tasks validated and 26 done; 28 criteria have deterministic fixture evidence, TG-01 has live reception evidence and 3 criteria remain pending.
+Progress: 7 of 8 slices integrated; 26 of 29 tasks done and 3 not delivered; 28 criteria have deterministic fixture evidence, TG-01 has live reception evidence and 3 criteria remain pending.
 
 Full gate: `make verify`
 
@@ -243,14 +243,14 @@ Canonical PR: [#396](https://forge.adrianpk.com/adrianpk/chr/pulls/396). Verifie
 
 ## Slice 8: Live Journey and Closure
 
-State: in_progress
+State: blocked
 
 Prerequisite: verified Slice 7 integration plus private live readiness and
 recorded bot/model/service/QA activation authority from plan section 2.
 
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
-| T8.1 | in_progress | `b72a6955cf7c` fixture and admission correction; live capture and dump confirmed | A genuine development request has a delivered acknowledgement in the correct QA project. Human capture completion produced a canonical dump through a confirmed authoring operation; live clarification, work preparation, admission and integration remain. |
+| T8.1 | blocked | `b72a6955cf7c` fixture and admission correction; live capture and dump confirmed | A genuine development request has a delivered acknowledgement in the correct QA project. Human capture completion produced a canonical dump through a confirmed authoring operation; live clarification, work preparation, admission and integration remain. |
 | T8.2 | blocked | isolated source QA setup complete | The source checkout is separately registered against its own QA target; the receiver is fixed at `14c563d40f6a`. Authorized-user input for the actual source-development journey is missing. |
 | T8.3 | in_progress | `b72a6955cf7c` User Guide/reference/changelog; installed help inspected; acceptance traceability audited | All 32 criterion entries, report references and seven canonical merge identities are checked. Complete live evidence, the cycle report and nightly-bound closure remain. |
 
@@ -274,6 +274,13 @@ continuation regressions pass in normal and race modes. The actual asynchronous
 receiver reaches a confirmed fixture receipt after preparation and SQLite reopen.
 Strict lint reports zero issues. The report records exact commands, timings and
 the live-evidence boundary. TG-27, TG-28 and TG-32 remain pending.
+
+Audit, 2026-10-19: the retained controller reports 7/8 slices integrated and
+stopped after repeated turns without observable progress. Its later passing
+local validation does not establish the required live journeys or Slice 8
+delivery. Preserve the checkpoint, conversation and budgets; this status audit
+does not restart execution. No Slice 8 report or verified integration is
+present on `dev`.
 
 ## Acceptance Evidence
 
@@ -350,3 +357,24 @@ Cycle report: expected at `ops/default/report/telegram-conversational-workflow-c
 - [ ] Cycle report and closure metadata finalized without changing tested code.
 
 Current state: Slices 1 through 7 are delivered through canonical PR #390/#391/#392/#393/#394/#395/#396; the latest verified merge is `c14f1aea640657e27c97bb64e40b46f30f698451`. Slice 8's combined fixture and preparation/admission correction pass focused normal/race checks. The fixed receiver, two registered QA clones and isolated target refs are prepared. Authorized-user development messages, real model/integration evidence and final scheduled certification remain pending. No Slice 8 PR is ready.
+
+## Continuation Audit: 2026-10-20
+
+Current `dev` through `6037036b2fba` is synchronized into the Slice 8 branch.
+The capture evidence and pending admission correction are preserved alongside
+the canonical merged Slice 7 evidence. The receiver remains on its fixed
+`14c563d40f6a` executable and matching private descriptor digest. Read-only
+status reports ready, one conversation, no pending updates/deliveries and no
+exhausted model requests.
+
+The retained Looper run `run-5ffcddf0ca78104f80d09ad5` remains blocked after
+repeated turns without observable progress. Its last exact-head validation
+passed on `4e4fbf8fadef`; that receipt does not validate this newer composition.
+No controller is resumed, reset or reconfigured by this synchronization.
+
+Remaining dependencies are genuine configured-user conversation input, real
+model clarification and ordinary QA integration, separately bound source
+self-development, complete live/visual evidence and the scheduled exhaustive
+certificate for the final integrated candidate. The source message-review
+report is available at `ops/default/report/telegram-message-review.md`; its
+replacement proposals are separate from this slice's runtime scope.

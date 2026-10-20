@@ -58,11 +58,13 @@ func newRootCommand(stdin io.Reader, stdout, stderr io.Writer, deps appDependenc
 		EnableShellCompletion: true,
 		Action:                runDefaultTUIAction(stdin, stdout, deps),
 		Commands: []*cli.Command{
+			newPiWorkerCommand(stdin, stdout), newPiBridgeCommand(stdin, stdout),
 			newAcceptanceCommand(stdout, deps),
 			newAuthorCommand(stdout, deps),
 			newDaemonCommand(stdout, deps),
 			newDumpCommand(stdout, deps),
 			newGateCommand(stdout, deps),
+			newHarnessCommand(stdout, deps),
 			newIndexCommand(stdout, deps),
 			newInitCommand(stdout, deps),
 			newMaintenanceCommand(stdout, deps),
@@ -78,7 +80,7 @@ func newRootCommand(stdin io.Reader, stdout, stderr io.Writer, deps appDependenc
 			newTicketCommand(stdout, deps),
 			newTelegramCommand(stdin, stdout, deps),
 			newTUICommand(stdin, stdout, deps),
-			newWebCommand(stdout, deps),
+			newWebCommand(stdin, stdout, deps),
 			newWorkCommand(stdout, deps),
 		},
 	}
@@ -87,7 +89,7 @@ func newRootCommand(stdin io.Reader, stdout, stderr io.Writer, deps appDependenc
 func newTUICommand(stdin io.Reader, stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:   "tui",
-		Usage:  "Open the local Chryso operational console",
+		Usage:  "Open the local chr operational console",
 		Flags:  tuiFlags(),
 		Action: runTUICommandAction(stdin, stdout, deps),
 	}
@@ -350,6 +352,7 @@ func newTUIOptions(data tuiOptionsData) tui.Options {
 		ProjectExecutor:      newTUIProjectMetadataExecutor(data.operations),
 		CaseExecutor:         newTUICaseMetadataExecutor(data.operations),
 		SourceExecutor:       newTUISourceOpenExecutor(data.operations),
+		HarnessExecutor:      newTUIHarnessSelectionExecutor(data.operations),
 	}
 }
 
@@ -405,7 +408,7 @@ func loadTUIObservability(
 		return tui.ObservabilityView{}, err
 	}
 
-	runtime, err := core.ValidateRuntime(core.RuntimeValidationOptions{
+	runtime, err := validateCodexRuntime(core.RuntimeValidationOptions{
 		ProjectDir: projectContext.ProjectDir,
 		Config:     config.Runtime,
 	})
@@ -449,9 +452,10 @@ func loadTUIAgentEvents(ctx context.Context, projectDir string, config core.Runt
 	loop := latestTUILoopRun(loops)
 	if loop.ID != "" {
 		plan, err := core.PlanRuntime(core.RuntimePlanOptions{
-			ProjectDir: projectDir,
-			Config:     config,
-			RunID:      loop.ID,
+			ExtraMounts: legacyCodexMounts(),
+			ProjectDir:  projectDir,
+			Config:      config,
+			RunID:       loop.ID,
 		})
 		if err == nil {
 			events = append(events, readTUIAgentEvents(ctx, core.AgentEventStreamPath(plan.RunArtifactDir))...)

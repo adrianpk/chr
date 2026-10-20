@@ -3,10 +3,13 @@ package core
 import (
 	"fmt"
 	"os"
+
+	"forge.adrianpk.com/chr/internal/harness"
 )
 
 // RuntimeValidationOptions describes a package boundary value.
 type RuntimeValidationOptions struct {
+	ExtraMounts           []harness.RuntimeMount
 	ProjectDir            string
 	Config                RuntimeConfig
 	Workspace             WorkWorkspaceConfig

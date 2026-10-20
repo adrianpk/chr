@@ -1,7 +1,7 @@
 # Slice 1: Ops Artifact Boundary
 
 Status: reviewing
-Slicing: CHR Operational Artifacts to Ops
+Slicing: chr Operational Artifacts to Ops
 Plan: `ops/plans/2026-07-14-chr-operational-artifacts-to-ops-plan.md`
 Tracker: `ops/trackers/2026-07-14-chr-operational-artifacts-to-ops-tracker.md`
 Branch: `fix/slice-1-ops-artifact-boundary`
@@ -31,7 +31,7 @@ Complete the corrective migration from legacy `.chr/default/...` operational art
 - Operational Markdown artifacts are addressed as `ops/<namespace>/<type>/<id>/artifact.md`.
 - Gate report JSON is report evidence, not a sibling flat report file.
 - `ops/default` is the default no-user namespace.
-- `.chr/` remains private CHR configuration/state, not a shared operational artifact root.
+- `.chr/` remains private chr configuration/state, not a shared operational artifact root.
 
 ## Files of Interest
 

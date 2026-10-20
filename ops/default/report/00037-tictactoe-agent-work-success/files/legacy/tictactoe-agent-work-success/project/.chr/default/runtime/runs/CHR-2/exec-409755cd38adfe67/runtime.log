@@ -304,7 +304,7 @@ exec
 
 Read this document before working in this reference project.
 
-This project is a Chryso QA scenario. Follow generated Chryso tickets
+This project is a chr QA scenario. Follow generated chr tickets
 and keep changes scoped to the selected ticket.
 
 Use only Go's standard library. Do not add external dependencies, persistence,
@@ -553,10 +553,10 @@ exec
  succeeded in 0ms:
 # Tictactoe
 
-Small Go CLI tic-tac-toe project used as a Chryso QA reference scenario.
+Small Go CLI tic-tac-toe project used as a chr QA reference scenario.
 
 The seed intentionally contains only a small, compilable base. It has enough
-project context for Chryso to generate a gameplay specification, plan,
+project context for chr to generate a gameplay specification, plan,
 tracking document, and implementation tickets, but the gameplay loop itself is
 not implemented yet.
 
@@ -567,7 +567,7 @@ make qa-reset QA_CASE=tictactoe QA_REF=003
 make qa-test QA_CASE=tictactoe
 ```
 
-After reset, open Chryso in the active project:
+After reset, open chr in the active project:
 
 ```sh
 cd qa/project/tictactoe
@@ -662,7 +662,7 @@ internal/game/game_test.go:61:		t.Fatal("Place returned nil error for occupied c
 .chr/default/dumps/cli-gameplay-context-raw.md:27:like accepted moves always point inside the board. Do not add mutation testing
 .chr/default/dumps/project-context-raw.md:10:I want a tiny example app that is not another HTTP service. A terminal
 .chr/default/dumps/project-context-raw.md:16:networking, no fancy terminal package, and no AI in the app. The app is only
-.chr/default/dumps/project-context-raw.md:17:there to test whether Chryso can turn normal project context into tickets
+.chr/default/dumps/project-context-raw.md:17:there to test whether chr can turn normal project context into tickets
 .chr/default/plans/cli-gameplay-tracking.md:2:title: "CLI Gameplay Execution Tracking"
 .chr/default/plans/cli-gameplay-tracking.md:10:# CLI Gameplay Execution Tracking
 .chr/default/plans/cli-gameplay-tracking.md:22:| 1 | `S01` Game outcome rules | `cli-gameplay-s01-game-outcomes` | `feature/cli-gameplay/s01-game-outcomes` | None | Not started |
@@ -705,7 +705,7 @@ internal/game/game_test.go:61:		t.Fatal("Place returned nil error for occupied c
 .chr/default/plans/cli-gameplay-plan.md:167:The use case is complete when `go test ./...` passes, `tictactoe` can run a full local two-player game from stdin/stdout, the initial board shows positions `1` through `9`, `X` starts, turns alternate only after valid moves, invalid text and out-of-range positions are recoverable without advancing the turn, occupied cells are rejected without advancing the turn, all wins and draws produce a clear final result, and the final board is printed before exit.
 .chr/default/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:2:title: "CLI Gameplay Implementation Plan"
 .chr/default/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:13:# CLI Gameplay Implementation Plan
-.chr/default/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:19:Workspace decision discovery found no ADR, RFC, decision-log, or engineering-principles files. The binding constraints are the project agent protocol, `.agents/CONVENTIONS.md`, and curated Chryso context: keep rules in `internal/game`, keep process I/O in `cmd/tictactoe`, use only the Go standard library, reject invalid moves without advancing the turn, and exclude replay from the first useful version.
+.chr/default/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:19:Workspace decision discovery found no ADR, RFC, decision-log, or engineering-principles files. The binding constraints are the project agent protocol, `.agents/CONVENTIONS.md`, and curated chr context: keep rules in `internal/game`, keep process I/O in `cmd/tictactoe`, use only the Go standard library, reject invalid moves without advancing the turn, and exclude replay from the first useful version.
 .chr/default/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:25:### S01 - Game Outcome Rules
 .chr/default/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:28:- title: Game outcome rules
 .chr/default/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:30:- implementation rationale: The CLI loop needs reliable terminal-state detection before turn flow can be safely implemented.
@@ -2204,7 +2204,7 @@ index 1e1b53e27b0d32d0872181edacefd2a1cc2b7487..e2602ad10fea8c0c1cc3877b228d5eee
 ok  	example.com/chr-qa-tictactoe/internal/game	0.005s
 
 codex
-`go test ./...` passes. I’m doing a final inspection of the changed domain files and then I’ll write the required Chryso result JSON.
+`go test ./...` passes. I’m doing a final inspection of the changed domain files and then I’ll write the required chr result JSON.
 exec
 /bin/bash -lc "sed -n '1,260p' internal/game/game.go" in /workspace
  succeeded in 0ms:
@@ -5412,7 +5412,7 @@ index 1e1b53e27b0d32d0872181edacefd2a1cc2b7487..e2602ad10fea8c0c1cc3877b228d5eee
 ok  	example.com/chr-qa-tictactoe/internal/game	(cached)
 
 codex
-`jq` is not installed, so I’ll validate the result JSON with the standard Python JSON parser and leave the file as written. The Git status also shows pre-existing unrelated Chryso runtime/ticket changes, which I’m not touching.
+`jq` is not installed, so I’ll validate the result JSON with the standard Python JSON parser and leave the file as written. The Git status also shows pre-existing unrelated chr runtime/ticket changes, which I’m not touching.
 exec
 /bin/bash -lc "sed -n '1,220p' .chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/result.json" in /workspace
  succeeded in 0ms:

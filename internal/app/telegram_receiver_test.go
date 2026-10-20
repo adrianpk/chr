@@ -56,6 +56,9 @@ func telegramAppTestReceiver(t *testing.T, api core.TelegramReceiverAPI) (telegr
 
 	operations := newService(t.Context(), env, commandProjectContext{}, testAssetsFS())
 	operations.conversationModel = telegramCaptureIntentTestProvider{}
+	// Receiver authority fixtures inject their model boundary; real harness
+	// selection and host routing are exercised by generation binding fixtures.
+	operations.generationBinder = testGenerationBinder
 
 	return telegramReceiver{env: env, api: api, store: store, operations: operations, botID: 12345, token: token}, config
 }

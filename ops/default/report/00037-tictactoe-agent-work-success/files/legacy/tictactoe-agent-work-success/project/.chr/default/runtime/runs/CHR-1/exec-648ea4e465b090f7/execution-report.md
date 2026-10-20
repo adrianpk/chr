@@ -5,7 +5,7 @@
 - execution: exec-648ea4e465b090f7
 - project: project-7c98c4f4cf644493
 - ticket: CHR-1
-- ticket_path: /home/adrian/Projects/chryso/qa/project/tictactoe/.chr/default/tickets/cli-gameplay/CHR-1-Game-outcome-rules.md
+- ticket_path: /workspaces/chr/qa/project/tictactoe/.chr/default/tickets/cli-gameplay/CHR-1-Game-outcome-rules.md
 - status: succeeded
 - failure_kind: none
 
@@ -19,23 +19,23 @@
 ## Runtime
 
 - image: chr-agent-runtime:local
-- dockerfile: /home/adrian/Projects/chryso/qa/project/tictactoe/.chr/default/runtime/agent/Dockerfile
+- dockerfile: /workspaces/chr/qa/project/tictactoe/.chr/default/runtime/agent/Dockerfile
 - container_workdir: /workspace
 - validation_command: go test ./...
 
 ## Artifacts
 
-- run_dir: /home/adrian/Projects/chryso/qa/project/tictactoe/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7
-- result: /home/adrian/Projects/chryso/qa/project/tictactoe/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/result.json
-- log: /home/adrian/Projects/chryso/qa/project/tictactoe/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/runtime.log
-- validation: /home/adrian/Projects/chryso/qa/project/tictactoe/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/validation.log
-- report: /home/adrian/Projects/chryso/qa/project/tictactoe/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/execution-report.md
+- run_dir: /workspaces/chr/qa/project/tictactoe/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7
+- result: /workspaces/chr/qa/project/tictactoe/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/result.json
+- log: /workspaces/chr/qa/project/tictactoe/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/runtime.log
+- validation: /workspaces/chr/qa/project/tictactoe/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/validation.log
+- report: /workspaces/chr/qa/project/tictactoe/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/execution-report.md
 
 ## Validation
 
 - status: succeeded
 - command: go test ./...
-- path: /home/adrian/Projects/chryso/qa/project/tictactoe/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/validation.log
+- path: /workspaces/chr/qa/project/tictactoe/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/validation.log
 
 ## Result
 

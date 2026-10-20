@@ -35,8 +35,8 @@ gates:
 EOF
 
 git -C "$project_dir" init >/dev/null
-git -C "$project_dir" -c user.name="Chryso QA" -c user.email="qa@example.test" add .
-git -C "$project_dir" -c user.name="Chryso QA" -c user.email="qa@example.test" commit -m "base" >/dev/null
+git -C "$project_dir" -c user.name="chr QA" -c user.email="qa@example.test" add .
+git -C "$project_dir" -c user.name="chr QA" -c user.email="qa@example.test" commit -m "base" >/dev/null
 
 base_ref="$(git -C "$project_dir" rev-parse HEAD)"
 
@@ -46,8 +46,8 @@ cat >"$project_dir/README.md" <<'EOF'
 This file gives the gate a concrete Git change to report.
 EOF
 
-git -C "$project_dir" -c user.name="Chryso QA" -c user.email="qa@example.test" add README.md
-git -C "$project_dir" -c user.name="Chryso QA" -c user.email="qa@example.test" commit -m "change" >/dev/null
+git -C "$project_dir" -c user.name="chr QA" -c user.email="qa@example.test" add README.md
+git -C "$project_dir" -c user.name="chr QA" -c user.email="qa@example.test" commit -m "change" >/dev/null
 
 output_file="$project_dir/gate-output.txt"
 go_cache="$project_dir/go-build-cache"

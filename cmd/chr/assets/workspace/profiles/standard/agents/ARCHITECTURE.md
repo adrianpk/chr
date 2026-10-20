@@ -1,6 +1,6 @@
 # Architecture
 
-This project is managed by Chryso.
+This project is managed by chr.
 
 ## Repository Shape
 
@@ -14,7 +14,7 @@ docs/         durable project documentation
 AGENTS.md     root agent entrypoint
 ```
 
-Chryso stores its own project-local workspace under `.chr/`. Treat that
+chr stores its own project-local workspace under `.chr/`. Treat that
 directory as tool-managed project state, not as part of the application's
 package layout.
 

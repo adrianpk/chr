@@ -10,7 +10,7 @@ PR: #139
 ## Purpose
 
 Create the first Bubble Tea application boundary and entry behavior for the
-local Chryso operational console.
+local chr operational console.
 
 This slice intentionally avoids domain mutations and real board/document data
 loading. It establishes the package boundary, command routing, and placeholder

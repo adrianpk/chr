@@ -1,6 +1,6 @@
 # Acceptance Feature Generation
 
-When a use case is naturally behavior-testable, Chryso should generate a
+When a use case is naturally behavior-testable, chr should generate a
 linked Gherkin `.feature` artifact from the canonical Markdown spec and related
 quiz/dump context. The spec remains the source of truth. The feature file is
 supporting acceptance evidence.
@@ -49,7 +49,7 @@ ops/default/spec/00000-<scope>-acceptance-feature/artifact.md
 
 Spec generation does not write this file. It generates only the Markdown spec.
 
-When generation needs more information, Chryso writes feature-round notes:
+When generation needs more information, chr writes feature-round notes:
 
 ```text
 ops/default/spec/00000-<scope>-acceptance-feature-round/artifact.md
@@ -58,7 +58,7 @@ ops/default/spec/00000-<scope>-acceptance-feature-round/artifact.md
 Those notes contain focused prompts with inferred defaults and empty answer
 slots. A later generation attempt reads the notes as acceptance context.
 
-Current limitation: Chryso writes the feature-round prompts, but the TUI
+Current limitation: chr writes the feature-round prompts, but the TUI
 does not yet collect their answers with the quiz-style interaction loop. Until
 that flow exists, the answers must be recorded in the feature-round note before
 retrying generation.

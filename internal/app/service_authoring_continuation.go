@@ -65,6 +65,12 @@ type authoringModelInput struct {
 }
 
 func (s service) generateAuthoringDraft(ctx context.Context, snapshot core.AuthoringSnapshot, request core.AuthoringContinuationRequest) (core.AuthoringDraft, error) {
+	bound, ctx, err := s.bindGeneration(ctx, "authoring-"+request.Binding.RequestID, "conversation")
+	if err != nil {
+		return core.AuthoringDraft{}, err
+	}
+
+	s = bound
 	if s.conversationModel == nil {
 		return core.AuthoringDraft{}, errors.New("configured authoring provider is unavailable")
 	}
@@ -74,11 +80,19 @@ func (s service) generateAuthoringDraft(ctx context.Context, snapshot core.Autho
 		return core.AuthoringDraft{}, err
 	}
 
-	output, err := s.conversationModel.InvokeStructuredModel(ctx, core.StructuredModelRequest{ID: request.Binding.RequestID, Purpose: "authoring_" + string(request.Target), ProjectDir: s.projectContext.ProjectDir, Input: payload, Schema: authoringGenerationSchema(), Instructions: authoringGenerationInstructions})
+	modelRequest := core.StructuredModelRequest{ID: request.Binding.RequestID, Purpose: "authoring_" + string(request.Target), ProjectDir: s.projectContext.ProjectDir, Input: payload, Schema: authoringGenerationSchema(), Instructions: authoringGenerationInstructions}
+
+	output, err := s.conversationModel.InvokeStructuredModel(ctx, modelRequest)
 	if err != nil {
 		return core.AuthoringDraft{}, err
 	}
 
+	draft, parseErr := parseAuthoringDraft(snapshot, request, output)
+
+	return draft, core.ValidateStructuredModelOutput(ctx, modelRequest, parseErr)
+}
+
+func parseAuthoringDraft(snapshot core.AuthoringSnapshot, request core.AuthoringContinuationRequest, output []byte) (core.AuthoringDraft, error) {
 	var response authoringModelOutput
 	if err := decodeOperationJSON(string(output), &response); err != nil {
 		return core.AuthoringDraft{}, err
@@ -184,7 +198,7 @@ func renderAuthoringGeneration(snapshot core.AuthoringSnapshot, request core.Aut
 
 		return renderCuratedDumpMarkdown(snapshot.Session.Topic, DumpScope{}, raw.Path, DumpCurationResult{PolishedBody: body}), nil
 	case core.AuthoringArtifactKindSpec:
-		spec := core.GeneratedSpec{Scope: core.QuizScope{ProjectID: request.ProjectID}, Title: snapshot.Session.Topic, Body: core.NormalizeGeneratedSpecChrysoPathReferences(body), SourcePaths: paths, SourceRequestID: request.Binding.RequestID, SourceResponseID: request.Binding.RequestID + "-response", CreatedAt: time.Now().UTC()}
+		spec := core.GeneratedSpec{Scope: core.QuizScope{ProjectID: request.ProjectID}, Title: snapshot.Session.Topic, Body: core.NormalizeGeneratedSpecChrPathReferences(body), SourcePaths: paths, SourceRequestID: request.Binding.RequestID, SourceResponseID: request.Binding.RequestID + "-response", CreatedAt: time.Now().UTC()}
 		if err := core.ValidateGeneratedSpec(spec); err != nil {
 			return "", err
 		}

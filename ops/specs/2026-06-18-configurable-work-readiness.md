@@ -8,13 +8,13 @@ Model: `ops/specs/2026-06-18-configurable-work-readiness-model.md`
 
 ## Summary
 
-Chryso should prepare and validate agent work from a configurable project
+chr should prepare and validate agent work from a configurable project
 policy instead of assuming one hardcoded Git shape.
 
 The current work-selection preflight protects the user's repository before
 running agent work, but the protection is too rigid and too opaque. It assumes
 that work must happen on local `dev`, that `origin/dev` must exist, and that the
-worktree must be clean. Those defaults are useful for Chryso's own delivery
+worktree must be clean. Those defaults are useful for chr's own delivery
 workflow, but they should be project policy rather than product law.
 
 The desired behavior is a work readiness layer that:
@@ -35,13 +35,13 @@ The desired behavior is a work readiness layer that:
 - Replace raw Git failures such as `exit status 128` with classified work
   readiness diagnostics.
 - Add a `chr work doctor` surface for checking and explaining readiness.
-- Add safe repair behavior for issues Chryso can resolve without losing
+- Add safe repair behavior for issues chr can resolve without losing
   user work.
 - Make Dash show the same readiness information before agent work starts.
 
 ## Non-Goals
 
-- Do not remove the default `dev` workflow from Chryso's own repository.
+- Do not remove the default `dev` workflow from chr's own repository.
 - Do not force every project to use `dev`.
 - Do not automatically stash, reset, rebase, force-push, or resolve divergent
   histories.
@@ -105,7 +105,7 @@ Readiness checks should report concrete issues:
 - current branch does not match configured policy;
 - configured integration branch is missing;
 - worktree has user changes;
-- Chryso runtime artifacts are visible to Git;
+- chr runtime artifacts are visible to Git;
 - configured remote tracking ref is missing;
 - integration branch is behind its configured remote;
 - Git repository is absent or unreadable;
@@ -133,8 +133,8 @@ does not discard user work.
 
 Allowed safe repairs:
 
-- add Chryso-owned runtime paths to a local ignore mechanism;
-- remove stale Chryso operation locks when they are proven dead;
+- add chr-owned runtime paths to a local ignore mechanism;
+- remove stale chr operation locks when they are proven dead;
 - fetch the configured remote;
 - fast-forward the configured integration branch when it is cleanly behind;
 - switch to an existing configured integration branch when the worktree is
@@ -191,10 +191,10 @@ states.
   `exit status 128` as the primary error.
 - `chr work doctor` prints readiness status and diagnostics for the resolved
   project.
-- Safe repair can resolve Chryso-owned runtime artifact dirtiness and at
+- Safe repair can resolve chr-owned runtime artifact dirtiness and at
   least one branch/remote readiness issue without destructive Git operations.
 - Dash displays work readiness diagnostics when work cannot start.
-- Existing default behavior remains protective for Chryso's own workflow.
+- Existing default behavior remains protective for chr's own workflow.
 - Tests cover default policy, custom branch policy, current-branch mode,
   no-Git-enforcement mode, diagnostics, and safe repair behavior.
 

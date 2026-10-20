@@ -81,11 +81,11 @@ chr ticket review CHR-1 \
   --finding "Handle the nil input path before calling the parser."
 ```
 
-When changes are requested, Chryso writes finding comments to the pull
+When changes are requested, chr writes finding comments to the pull
 request, stores `review_comments_url`, and moves the ticket back to
 `ready_for_dev`.
 
-When review passes, Chryso stores passed review metadata and moves the
+When review passes, chr stores passed review metadata and moves the
 ticket to `ready_for_merge`.
 
 ## Merge Reviewed Work
@@ -106,10 +106,10 @@ The merge command verifies the ticket handoff, pull request readability, target
 base branch, head branch, mergeability, serial repair blockers, and merge
 strategy before calling the provider merge operation.
 
-On success, Chryso moves the ticket to `done` and records merge metadata.
+On success, chr moves the ticket to `done` and records merge metadata.
 Clean merges do not write ceremonial pull request comments.
 
-When the merge is blocked, Chryso keeps the ticket in `ready_for_merge`
+When the merge is blocked, chr keeps the ticket in `ready_for_merge`
 with compact `merge_state`, `merge_result`, and `merge_blocker` metadata. The
 Board does not need a separate merge-failure column.
 

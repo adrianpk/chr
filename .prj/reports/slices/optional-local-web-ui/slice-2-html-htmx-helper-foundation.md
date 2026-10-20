@@ -18,7 +18,7 @@ PR: `#344`
 
 - Added the internal `webui` package boundary for server-rendered Web UI
   presentation.
-- Added Chryso-owned htmx, render, and UI helper primitives without adding
+- Added chr-owned htmx, render, and UI helper primitives without adding
   an external module dependency.
 - Added embedded templates, CSS, htmx asset, root shell route, bootstrap
   fragment route, static asset serving, and shell smoke coverage.

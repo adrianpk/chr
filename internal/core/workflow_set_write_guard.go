@@ -6,6 +6,10 @@ import (
 )
 
 func guardWorkflowSetChange(old, next WorkflowSet) error {
+	if err := guardBoundWorkflowSetOrder(old, next); err != nil {
+		return err
+	}
+
 	if old.Status == "completed" {
 		return fmt.Errorf("completed set requires an explicit approved reopening")
 	}
@@ -19,4 +23,30 @@ func guardWorkflowSetChange(old, next WorkflowSet) error {
 	}
 
 	return nil
+}
+
+func guardBoundWorkflowSetOrder(old, next WorkflowSet) error {
+	if old.PlanRevision == nil {
+		return nil
+	}
+
+	if !reflect.DeepEqual(old.PlanRevision, next.PlanRevision) || old.PlanRef != next.PlanRef || old.PlanHash != next.PlanHash {
+		return fmt.Errorf("%w: plan revision requires approved amendment", ErrWorkflowConflict)
+	}
+
+	before, after := boundWorkflowSliceOrder(old), boundWorkflowSliceOrder(next)
+	if !reflect.DeepEqual(before, after) {
+		return fmt.Errorf("%w: ordered hierarchy requires approved amendment", ErrWorkflowConflict)
+	}
+
+	return nil
+}
+
+func boundWorkflowSliceOrder(set WorkflowSet) []PlanOrderSlice {
+	result := make([]PlanOrderSlice, 0, len(set.Slices))
+	for _, slice := range set.Slices {
+		result = append(result, PlanOrderSlice{ID: slice.ID, Order: slice.Order, Title: slice.Title})
+	}
+
+	return orderedPlanSlices(result)
 }

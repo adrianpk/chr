@@ -11,7 +11,7 @@ func loadTUIDumps(operations service) ([]tui.DumpView, error) {
 	dumps := make([]tui.DumpView, 0, len(result.Dumps))
 	for index, dump := range result.Dumps {
 		dumps = append(dumps, tui.DumpView{
-			Index:        index,
+			Index: index, Revision: dump.Revision,
 			NodeID:       dump.NodeID,
 			UseCaseTitle: dump.UseCaseTitle,
 			Title:        dump.Title,
@@ -36,6 +36,7 @@ func loadTUIQuizzes(operations service) ([]tui.QuizView, error) {
 	quizzes := make([]tui.QuizView, 0, len(result.Views))
 	for index, quiz := range result.Views {
 		quizzes = append(quizzes, tui.QuizView{
+			Binding:               tui.QuizActionBinding{SessionID: quiz.Binding.SessionID, QuestionID: quiz.Binding.QuestionID, ExpectedRevision: quiz.Binding.ExpectedRevision},
 			Index:                 index,
 			Title:                 quiz.Title,
 			Scope:                 tui.QuizScope{CaseSlug: quiz.Scope.CaseSlug},

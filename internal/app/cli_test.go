@@ -299,7 +299,7 @@ func TestWebServeShell(t *testing.T) {
 		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
 	}
 
-	for _, want := range []string{"Chryso", filepath.Base(projectDir), projectDir, "/assets/htmx.min.js"} {
+	for _, want := range []string{`<span class="brand-title">chr</span>`, filepath.Base(projectDir), projectDir, "/assets/htmx.min.js"} {
 		if !strings.Contains(recorder.Body.String(), want) {
 			t.Fatalf("body does not contain %q:\n%s", want, recorder.Body.String())
 		}
@@ -339,7 +339,7 @@ func TestWebServeBoardUsesProjectTickets(t *testing.T) {
 	projectContext := newWebServeBoardProjectContext(t, projectDir)
 	provider := newWebServeBoardTestProvider(projectDir, env, projectContext)
 
-	board, err := provider.BoardView(t.Context())
+	board, err := provider.BoardView(t.Context(), webui.BoardRequest{})
 	if err != nil {
 		t.Fatalf("BoardView returned error: %v", err)
 	}
@@ -694,19 +694,24 @@ func TestWebServeWriteActionCreatesDump(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	writeWebServeArtifactFixture(t, projectDir)
 
-	provider := newWebServeBoardTestProvider(
+	base := newWebServeBoardTestProvider(
 		projectDir,
 		newWebServeBoardTestEnv(t, t.TempDir()),
 		newWebServeBoardProjectContext(t, projectDir),
 	)
+
+	operations := base.service(t.Context())
+	operations.dumpCurator = &countingDumpCurator{}
+	provider := webDumpCaptureProvider{webViewProvider: base, operations: operations}
 
 	result, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 		Action:  "dump.create",
 		Family:  "dumps",
 		Confirm: true,
 		Fields: map[string]string{
-			"title":   "New Web Dump",
-			"content": "Captured from web.",
+			"request_id": "web-capture-fixture",
+			"title":      "New Web Dump",
+			"content":    "Captured from web.",
 		},
 	})
 	if err != nil {
@@ -861,6 +866,7 @@ func newContextTestService(t *testing.T, ctx context.Context, projectDir string)
 		ProjectID:  "service-project",
 	}, testAssetsFS())
 	operations.dumpCurator = fallbackDumpCurationProvider{Reason: "test fallback"}
+	operations.generationBinder = testGenerationBinder
 
 	return operations
 }
@@ -876,10 +882,13 @@ func newContextAgentWorkTestService(t *testing.T, ctx context.Context, devRoot, 
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	return newService(ctx, env, commandProjectContext{
+	operations := newService(ctx, env, commandProjectContext{
 		ProjectDir: projectDir,
 		ProjectID:  projectID(projectDir),
 	}, testAssetsFS())
+	operations.generationBinder = testGenerationBinder
+
+	return operations
 }
 
 func writeWebServeBoardTestTicket(t *testing.T, projectDir string) {
@@ -958,7 +967,7 @@ func newWebServeBoardProjectContext(t *testing.T, projectDir string) commandProj
 }
 
 func newWebServeBoardTestProvider(projectDir string, env core.UserEnvironment, projectContext commandProjectContext) webViewProvider {
-	return webViewProvider{
+	provider := webViewProvider{
 		env:            env,
 		assetsFS:       testAssetsFS(),
 		projectContext: projectContext,
@@ -968,6 +977,14 @@ func newWebServeBoardTestProvider(projectDir string, env core.UserEnvironment, p
 			Web:        core.DefaultWebConfig(),
 		},
 	}
+	provider.serviceFactory = func(ctx context.Context) service {
+		operations := newService(ctx, env, projectContext, testAssetsFS())
+		operations.generationBinder = testGenerationBinder
+
+		return operations
+	}
+
+	return provider
 }
 
 func TestAcceptanceFeatureGenerateOutputGenerated(t *testing.T) {
@@ -1496,7 +1513,7 @@ func TestInitStandardProfileInstallsProtocolAssets(t *testing.T) {
 
 	documenting := readTestFile(t, filepath.Join(projectDir, ".chr", "default", "agents", "DOCUMENTING.md"))
 	for _, unwanted := range []string{
-		"Chryso Artifacts",
+		"chr Artifacts",
 		"Use `.chr/` for project-local operational artifacts",
 		"generated operational records",
 	} {
@@ -1506,7 +1523,7 @@ func TestInitStandardProfileInstallsProtocolAssets(t *testing.T) {
 	}
 
 	architecture := readTestFile(t, filepath.Join(projectDir, ".chr", "default", "agents", "ARCHITECTURE.md"))
-	if strings.Contains(architecture, ".chr/         Chryso project-local state") {
+	if strings.Contains(architecture, ".chr/         chr project-local state") {
 		t.Fatalf("ARCHITECTURE.md exposes .chr as application layout:\n%s", architecture)
 	}
 
@@ -1597,7 +1614,7 @@ func TestDumpNewAndShowUseServiceCommands(t *testing.T) {
 	dumpPath := "ops/default/dump/00000-cli-dump/artifact.md"
 	rawDumpPath := "ops/default/dump/00000-cli-dump-raw/artifact.md"
 
-	if !strings.Contains(stdout.String(), "Created dump "+dumpPath+".") {
+	if !strings.Contains(stdout.String(), "Captured dump "+dumpPath+".") {
 		t.Fatalf("dump new stdout = %q, want curated dump path", stdout.String())
 	}
 
@@ -2925,7 +2942,7 @@ func TestNotifyTelegramTestDryRunPrintsPlan(t *testing.T) {
 		"dry_run: true",
 		"bot_token_env: CHR_TELEGRAM_BOT_TOKEN",
 		"chat_id: 123456",
-		"message: Chryso Telegram notification test",
+		"message: chr Telegram notification test",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -3132,7 +3149,7 @@ func assertTelegramPayload(t *testing.T, gotPayload *testTelegramPayload) {
 		t.Fatalf("telegram chat_id = %q, want 123456", gotPayload.ChatID)
 	}
 
-	if !strings.Contains(gotPayload.Text, "Chryso Telegram notification test") {
+	if !strings.Contains(gotPayload.Text, "chr Telegram notification test") {
 		t.Fatalf("telegram text = %q, want test message", gotPayload.Text)
 	}
 }
@@ -8596,7 +8613,7 @@ func runGateCLIGit(t *testing.T, projectDir string, args ...string) {
 
 	cmdArgs := append([]string{
 		"-C", projectDir,
-		"-c", "user.name=Chryso Test",
+		"-c", "user.name=chr Test",
 		"-c", "user.email=chr@example.test",
 	}, args...)
 	cmd := exec.Command("git", cmdArgs...)
