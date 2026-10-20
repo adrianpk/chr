@@ -113,7 +113,7 @@ func workflowIntegrationCommit(t *testing.T, dir, file, text string) string {
 	}
 
 	workflowIntegrationCommand(t, dir, "add", file)
-	workflowIntegrationCommand(t, dir, "commit", "-m", "test(integration): "+text)
+	workflowIntegrationCommand(t, dir, "-c", "user.name=Fixture", "-c", "user.email=fixture@example.com", "commit", "-m", "test(integration): "+text)
 
 	return workflowIntegrationCommand(t, dir, "rev-parse", "HEAD")
 }

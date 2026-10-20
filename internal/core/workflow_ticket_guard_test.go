@@ -26,6 +26,9 @@ func workflowTicketValidated(t *testing.T) (*WorkflowStore, WorkflowRecord, Work
 // TestWorkflowTicketCandidateGuard rejects altered host inputs/results, task
 // projections and lane history before PR creation or delivery can consume them.
 func TestWorkflowTicketCandidateGuard(t *testing.T) {
+	t.Setenv("GIT_CONFIG_GLOBAL", filepath.Join(t.TempDir(), "global.gitconfig"))
+	t.Setenv("GIT_CONFIG_NOSYSTEM", "1")
+
 	cases := []struct {
 		name   string
 		mutate func(*testing.T, *WorkflowStore, WorkflowInvocation)

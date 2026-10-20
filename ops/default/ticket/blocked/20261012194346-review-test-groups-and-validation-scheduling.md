@@ -212,3 +212,44 @@ scheduled exhaustive result are verified. Earlier setup requirements above are
 historical evidence, not a fresh claim about which credentials or services are
 still missing. This audit changes no schedules, services, credentials, gates or
 controller state and starts no exhaustive tests.
+
+## Current Audit: 2026-10-20
+
+[Scheduled run 5](https://forge.adrianpk.com/adrianpk/chr/actions/runs/5)
+passed admission and runner prerequisites on candidate
+`92b5b9b6b28b2b1f32c3de86301d4c17833072f2`, then failed the full normal
+Go suite. Run API id `958`, job `1492`, retained artifact `nightly-958`
+(id `1025`) contain the failure evidence and per-test timings. The race,
+browser and live passes were not reached; this is not exhaustive success.
+
+The retained JSON events identify missing Git author identity in
+`TestWorkflowIntegrationChangedInput/during_IO`, `TestNativeCanonicalLost`,
+`TestNativeReviewInputs/result` and `TestWorkflowTicketCandidateGuard/lane`.
+`TestNativeCandidateRepair/rebase/combined_gate_regression` exhausted the
+fixture's 30-second merger deadline during real Git/persistence IO.
+
+A focused run with `GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1`
+reproduced the lane identity failure before correction. The shared fixture
+commit helper now supplies a per-command identity, and the guard fixture
+permanently excludes host-global/system Git configuration. The happy-path
+candidate-repair fixture allows up to two minutes within the unchanged worker
+policy; dedicated deadline and admission guards remain intact. No production
+timeout, assertion, scheduled selection or retry policy was relaxed.
+
+Validation passed after correction:
+
+```sh
+GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1 go test -json ./internal/core -run '^Test(WorkflowIntegrationChangedInput|NativeCanonicalLost|NativeReviewInputs|WorkflowTicketCandidateGuard|NativeCandidateRepair|NativeMergerInput)$' -count=1 -timeout=10m
+make verify
+git diff --check
+```
+
+The non-short selection passed in 170.149 seconds, including all three Git
+strategies and both candidate-repair triggers. The development gate reported
+zero lint issues, passed short tests, eight CI script regressions and build.
+Temporary local logs are `/tmp/chr-nightly-fixture-regression-20261020.jsonl`
+and `/tmp/chr-nightly-fixture-verify-20261020.log`.
+
+Keep the ticket `blocked` until the next scheduled exhaustive run certifies its
+recorded candidate. The correction and focused checks do not certify the full
+normal/race/browser/live selection. No manual nightly dispatch was performed.
