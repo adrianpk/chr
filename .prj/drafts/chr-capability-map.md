@@ -1,4 +1,4 @@
-# Chryso Capability Map
+# chr Capability Map
 
 Status: draft
 
@@ -8,7 +8,7 @@ Current alignment: partially superseded by `.prj/specs/specs/user-daemon-and-glo
 
 Capture the current capability map for `chr` so product shaping can continue without prematurely locking implementation details.
 
-This is not an implementation plan. It is a map of the areas Chryso is expected to cover.
+This is not an implementation plan. It is a map of the areas chr is expected to cover.
 
 ## Evolution Note
 
@@ -22,11 +22,11 @@ Later design work refined the runtime model:
 - a user-level project registry is needed so one daemon can coordinate multiple projects;
 - a global user SQLite database is used as a derived operational index, not as the canonical ticket source.
 
-The early statement that Chryso should not keep a global project registry is superseded by the user-daemon model. The replacement decision is narrower: user-level state may record registered local projects and derived indexes, while canonical project state remains in each project's `.chr/`.
+The early statement that chr should not keep a global project registry is superseded by the user-daemon model. The replacement decision is narrower: user-level state may record registered local projects and derived indexes, while canonical project state remains in each project's `.chr/`.
 
 ## Product Shape
 
-Chryso is a Go-focused CLI tool for managing agent-assisted development workflows across local Go projects.
+chr is a Go-focused CLI tool for managing agent-assisted development workflows across local Go projects.
 
 The tool creates and manages `.chr/` in target Go projects.
 
@@ -100,7 +100,7 @@ The exact ticket schema remains open.
 
 ## Execution Primitives
 
-Chryso needs bounded execution primitives comparable in spirit to:
+chr needs bounded execution primitives comparable in spirit to:
 
 - read files,
 - write files,
@@ -139,7 +139,7 @@ This Dockerfile is not the project's production Dockerfile and not necessarily t
 
 The user should be able to tune this Dockerfile near project setup time.
 
-Chryso may provide a template and may later assist with edits, but the system should not depend on an LLM fully generating or fully owning this file. Once the user has shaped a working agent runtime, ticket execution can run with less intervention.
+chr may provide a template and may later assist with edits, but the system should not depend on an LLM fully generating or fully owning this file. Once the user has shaped a working agent runtime, ticket execution can run with less intervention.
 
 The expected distinction is:
 
@@ -161,7 +161,7 @@ The ticket loop should support:
 - validation after agent output,
 - recording blocker reasons.
 
-When a ticket cannot progress after configured thresholds, Chryso should record the blocker and notify the user when user input can unblock the work.
+When a ticket cannot progress after configured thresholds, chr should record the blocker and notify the user when user input can unblock the work.
 
 ## Conversation Capture
 

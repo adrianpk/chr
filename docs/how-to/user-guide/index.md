@@ -1,18 +1,18 @@
 # User Guide
 
-This guide covers the Chryso workflow that exists today.
+This guide covers the chr workflow that exists today.
 
 For native plan execution, retained controls, supervised manual handoffs and
 optional tracker export/repair, follow
 [Run ticket-native workflows](../run-ticket-workflows.md).
 
-Chryso is local-first. A managed project has a `.chr/` directory, while
+chr is local-first. A managed project has a `.chr/` directory, while
 user-level state stores project registration, indexes, execution records, loop
 records, and daemon state.
 
 ## Initialize a Workspace
 
-Create project-local Chryso state:
+Create project-local chr state:
 
 ```sh
 chr init
@@ -120,7 +120,7 @@ hard token-budget enforcement.
 
 ## Configure Work Readiness
 
-Work readiness protects the project before Chryso starts agent work. The
+Work readiness protects the project before chr starts agent work. The
 default policy expects a clean `dev` branch with `origin` as the canonical
 remote, but projects can configure their own branch posture in
 `.chr/default/config.yml`.
@@ -144,7 +144,7 @@ Inspect readiness:
 chr work doctor
 ```
 
-Apply safe repair when Chryso reports one:
+Apply safe repair when chr reports one:
 
 ```sh
 chr work doctor --fix-safe
@@ -477,7 +477,7 @@ and tickets.
 
 Use the description as the short human-facing summary for lists, selectors, and
 previews. Use the context field for longer use-case material that should be
-included when Chryso builds the total agent context: constraints, decisions,
+included when chr builds the total agent context: constraints, decisions,
 intent, edge cases, and notes that do not belong in a one-line summary.
 
 | Key | Behavior |
@@ -1106,7 +1106,7 @@ chr ticket review CHR-1 \
 ```
 
 When review requests changes, the ticket returns to `ready_for_dev` with repair
-handoff metadata. In `agentic_review` loop mode, Chryso runs one default
+handoff metadata. In `agentic_review` loop mode, chr runs one default
 repair execution for that same ticket, reviews it again, and only then merges
 or blocks. Later normal tickets do not start while that repair cycle is
 unfinished.
@@ -1478,7 +1478,7 @@ Use these commands for local runtime proofing, not as the main ticket workflow.
 
 ## Execution Context
 
-Before agent work, Chryso can compose a context package with:
+Before agent work, chr can compose a context package with:
 
 - agent identity;
 - applicable `AGENTS.md` and `.chr/` protocol files;

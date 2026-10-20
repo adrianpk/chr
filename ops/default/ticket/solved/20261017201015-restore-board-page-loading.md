@@ -73,7 +73,7 @@ self-contained and requires no access to that example.
    using the correct canonical owner for the selected workflow mode. Fix the
    HTTP 500 without disguising it as an empty result or requiring valid tickets
    to be recreated or moved back to obsolete storage.
-3. Preserve CHR's six normal columns in their current order: Backlog, Ready For
+3. Preserve chr's six normal columns in their current order: Backlog, Ready For
    Dev, In Progress, Ready For Review, Ready For Merge and Done. Do not replace
    those stages with a different product's four-stage lifecycle. Resolve legacy
    aliases through the existing shared status mapping.
@@ -159,8 +159,8 @@ single-column form rather than clipping fields or actions.
 | Group | Controls and behavior |
 | --- | --- |
 | Main content | Title text input and one large Description editor. |
-| Workflow | Status selector mapped to allowed CHR transitions; system-owned workflow state is read-only when it adds distinct information. |
-| Scope and classification | Named Use Case selector including Project-wide; Priority, Kind, Severity, Scope, Source and Resolution controls. Kind maps to the native type field; use CHR's actual enum values and defaults. |
+| Workflow | Status selector mapped to allowed chr transitions; system-owned workflow state is read-only when it adds distinct information. |
+| Scope and classification | Named Use Case selector including Project-wide; Priority, Kind, Severity, Scope, Source and Resolution controls. Kind maps to the native type field; use chr's actual enum values and defaults. |
 | Ownership | Assignee and Owner metadata. These are descriptive responsibility fields, never editable execution claims or runner ownership tokens. |
 | Delivery | Branch, PR reference and multiline commit references, using the shared evidence model and its write guards. System-owned verified evidence remains read-only where applicable. |
 | Submission | Create for new tickets; Save changes for existing tickets. |

@@ -99,7 +99,7 @@ body, acceptance criteria, slice identifier, dependencies, and source
 references.
 
 For manually created tickets, the TUI should ask for synopsis. For assisted
-manual creation, Chryso may help generate a synopsis.
+manual creation, chr may help generate a synopsis.
 
 External Markdown without synopsis should display poorly but should not
 necessarily become attention. A later sync workflow may generate missing
@@ -168,7 +168,7 @@ another way.
 
 The spec must also record the future direction:
 
-- generated Chryso artifacts should eventually live under an operator
+- generated chr artifacts should eventually live under an operator
   namespace;
 - a likely future shape is `.chr/operators/<operator-id>/...`;
 - MVP may start with `.chr/default/` and a single configured operator id;
@@ -185,7 +185,7 @@ MVP should include:
 - compact Board column navigation;
 - maximized Board view concept;
 - manual ticket creation from Board;
-- mandatory synopsis for Chryso-created tickets;
+- mandatory synopsis for chr-created tickets;
 - generated ticket contract with synopsis;
 - conservative attention signals;
 - right-pane ticket detail inspection;

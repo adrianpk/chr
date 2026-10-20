@@ -36,10 +36,10 @@ Keep Codex usable without installing Pi. Preserve existing direct OpenAI API
 generation paths and their established defaults. Harness identity, model-provider
 identity and forge-provider identity are distinct concepts.
 
-CHR continues to own ticket state, deterministic order, claims, capacity,
+chr continues to own ticket state, deterministic order, claims, capacity,
 validation, review, publication and delivery receipts. Harnesses perform bounded
 calls under that authority. This is product functionality, independent of the
-controller or harness used to develop CHR.
+controller or harness used to develop chr.
 
 ## 2. Verified Starting Point
 
@@ -49,7 +49,7 @@ The current implementation has no self-contained Codex module:
 | --- | --- |
 | `internal/core/agent_run.go` | Neutral request/result types, local artifacts, process execution and Codex flags are mixed. |
 | `internal/core/codex_worker.go` | Codex worker commands and shell rendering. |
-| `internal/core/codex_worker_context.go` | Mostly CHR ticket, context and evidence rules with Codex names. |
+| `internal/core/codex_worker_context.go` | Mostly chr ticket, context and evidence rules with Codex names. |
 | `internal/core/quiz_codex_model.go` | Artifact prompts/parsing mixed with harness invocation. |
 | `internal/core/structured_model.go` | Shared limits and capacity mixed with Codex/OpenAI dispatch. |
 | `internal/app/service_dump_curation_codex.go` | Dump business preparation mixed with a Codex-specific provider. |
@@ -77,7 +77,7 @@ internal/
     process/              # Shared bounded process and stream supervision.
     codex/                # Codex commands, transport, events and runtime requirements.
     pi/                   # Pi commands, transport, events and runtime requirements.
-  core/                   # CHR workflow, prompts, schemas and domain validation.
+  core/                   # chr workflow, prompts, schemas and domain validation.
   app/                    # Resolve profiles and assemble the selected adapters.
 ```
 
@@ -96,7 +96,7 @@ adapters through the same boundary.
 
 Keep task-input construction, worker instructions, evidence requirements,
 authoring prompts, output schemas and semantic validators in their existing
-CHR owners. Rename generic Codex-labelled context/provider types when removing
+chr owners. Rename generic Codex-labelled context/provider types when removing
 the coupling. Do not copy those rules into Pi. Core callers receive a runner;
 they no longer instantiate a hidden default Codex runner. Existing direct API
 behavior stays available without an unrelated API-client redesign.
@@ -107,7 +107,7 @@ Expose two small capabilities rather than one method with unrelated modes:
 
 1. Structured generation: explicit input/context, instructions, schema, output
    limit, deadline and request identity; returns normalized output and observed
-   harness/model metadata. CHR parses and validates the result.
+   harness/model metadata. chr parses and validates the result.
 2. Worker execution: host-frozen task input, execution lane, selected runtime,
    result locations and bounded lifetime. It preserves the existing native and
    Docker worker contracts, including durable result validation.
@@ -249,13 +249,13 @@ the shared schema and domain validators regardless of a provider's structured
 output features; invalid output is a failed call, not a committed artifact.
 
 Pi generation uses a tool-disabled profile and no discovered extensions, MCP
-servers, skills, prompt templates, themes or context files. CHR assembles the
+servers, skills, prompt templates, themes or context files. chr assembles the
 required context explicitly. Where an existing operation needs read-only file
 inspection, supply an explicit read-only capability profile; never enable shell
 or write tools merely to obtain structured output.
 
 Worker tools are explicitly enabled inside the owned execution environment.
-Project instructions are supplied through the existing CHR context path;
+Project instructions are supplied through the existing chr context path;
 automatic local Pi resources cannot change the model, credentials, tools or
 authority of a frozen run. Do not import an operator's unrelated extensions.
 
@@ -300,7 +300,7 @@ oversized records or output fail rather than produce truncated accepted JSON.
 Spool bounded diagnostics instead of accumulating unbounded byte buffers.
 
 The host owns retry attempts, stop intent, claims, validation and publication.
-Configure Pi internal retries to fit the retained CHR deadline/attempt policy;
+Configure Pi internal retries to fit the retained chr deadline/attempt policy;
 they cannot reset a budget or create an unobserved infinite continuation.
 Exit zero, a model's success claim or a written result file alone never proves
 validation, integration or ticket completion.
@@ -386,5 +386,5 @@ is part of ordinary interactive validation.
 - [Pi 1.3.0 installation requirements](https://github.com/earendil-works/pi/blob/v1.3.0/packages/coding-agent/README.md)
 
 These references describe verified upstream capabilities. Package boundaries,
-selection rules, persistence changes and acceptance criteria above are CHR's
-accepted design, not claims that Pi implements CHR's workflow.
+selection rules, persistence changes and acceptance criteria above are chr's
+accepted design, not claims that Pi implements chr's workflow.

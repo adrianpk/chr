@@ -39,7 +39,7 @@ fixture descriptor, not a product configuration schema.
 - Tests own source refs under `refs/heads/chr/work/`. Independent cases may use
   target refs under `refs/heads/chr/qa/`; the baseline target is `refs/heads/dev`.
 - The baseline target has no native branch protection, required native
-  approvals or signing rule. CHR must validate and review the exact prepared
+  approvals or signing rule. chr must validate and review the exact prepared
   candidate before its explicitly authorized fast-forward target publication.
 - All three methods, merge, rebase and squash, are enabled. Automatic source
   deletion is disabled to retain certification evidence.

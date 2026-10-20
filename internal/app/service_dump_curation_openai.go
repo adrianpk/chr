@@ -484,7 +484,7 @@ func (p openAIDumpCurationProvider) recordResponse(
 
 func dumpCurationInstructions() string {
 	return strings.TrimSpace(`
-You curate one Chryso dump capture.
+You curate one chr dump capture.
 Use only the structured request payload and context sections as the source of truth.
 Preserve the user's intent, meaningful wording, decisions, tensions, uncertainty, and open questions.
 Correct spelling, punctuation, grammar, paragraph flow, and obvious transcription noise.

@@ -18,7 +18,7 @@ Related:
 
 ## Summary
 
-Chryso's ready-ticket loop must become a serialized integration loop.
+chr's ready-ticket loop must become a serialized integration loop.
 
 The loop must not treat development as the whole unit of progress. It must treat
 one ticket integration cycle as the unit:

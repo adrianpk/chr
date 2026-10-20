@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Chryso uses embedded SQLite migrations for user-level database schema setup.
+chr uses embedded SQLite migrations for user-level database schema setup.
 
 The global user database is derived local state. It supports project registration, ticket indexing, daemon queries, and messaging workflows.
 

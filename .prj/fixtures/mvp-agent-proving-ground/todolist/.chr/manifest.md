@@ -2,7 +2,7 @@
 
 ## Identity
 
-- system: Chryso
+- system: chr
 - fixture: MVP Agent Proving Ground
 - workspace root: `.chr`
 

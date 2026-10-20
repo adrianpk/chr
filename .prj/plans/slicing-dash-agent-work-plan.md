@@ -4,7 +4,7 @@ Status: active
 
 ## Purpose
 
-Add a coherent agent-work surface where users can tell Chryso to resolve
+Add a coherent agent-work surface where users can tell chr to resolve
 one ticket or start resolving all eligible tickets, with matching CLI and TUI
 behavior and a Dash view that shows live progress.
 

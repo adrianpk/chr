@@ -4,7 +4,7 @@ Status: draft
 
 ## Summary
 
-Chryso should extend the dump, quiz, and spec workflow so that
+chr should extend the dump, quiz, and spec workflow so that
 behavior-testable use cases can generate an associated Gherkin `.feature`
 artifact alongside the canonical specification.
 
@@ -68,7 +68,7 @@ worded. The useful pattern is:
 - forbidden-slot metadata that keeps a question focused on one topic;
 - bounded readiness questions that persist answers into reusable context.
 
-Chryso should use this pattern for acceptance readiness:
+chr should use this pattern for acceptance readiness:
 
 - keep stable acceptance slots internally;
 - let the LLM choose natural question wording;

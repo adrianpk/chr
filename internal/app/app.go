@@ -89,7 +89,7 @@ func newRootCommand(stdin io.Reader, stdout, stderr io.Writer, deps appDependenc
 func newTUICommand(stdin io.Reader, stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:   "tui",
-		Usage:  "Open the local Chryso operational console",
+		Usage:  "Open the local chr operational console",
 		Flags:  tuiFlags(),
 		Action: runTUICommandAction(stdin, stdout, deps),
 	}

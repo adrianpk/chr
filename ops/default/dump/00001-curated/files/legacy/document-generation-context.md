@@ -7,7 +7,7 @@ case_slug: "spec-to-tickets"
 
 # Document Generation Context
 
-Chryso treats project knowledge as Markdown-first material.
+chr treats project knowledge as Markdown-first material.
 
 Dumps capture broad project or use-case context. Quizzes capture missing knowledge through bounded questions. Specs formalize expected behavior. Plans decompose specs into slices, tasks, dependencies, validation criteria, branches, and PR expectations. Plan tracking creates the execution map and tickets.
 

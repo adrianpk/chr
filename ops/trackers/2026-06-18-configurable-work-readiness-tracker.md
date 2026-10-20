@@ -82,6 +82,6 @@ Model: `ops/specs/2026-06-18-configurable-work-readiness-model.md`
 
 ## Notes
 
-- Defaults intentionally keep Chryso's own `dev` plus `origin` workflow.
+- Defaults intentionally keep chr's own `dev` plus `origin` workflow.
 - The feature should make those defaults configurable instead of hardcoded.
 - Repair behavior must stay non-destructive.

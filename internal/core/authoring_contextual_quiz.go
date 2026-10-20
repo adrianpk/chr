@@ -755,7 +755,7 @@ func authoringQuizContainsSensitivePrompt(value string) bool {
 
 func authoringQuizHarnessPrompt(payload string) string {
 	return strings.TrimSpace(`
-You generate context-aware authoring quiz questions for Chryso.
+You generate context-aware authoring quiz questions for chr.
 
 Use the provided structured request and context sections.
 Ask concrete, project-specific questions that help produce the requested target artifact.

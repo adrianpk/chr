@@ -10,7 +10,7 @@ Sources:
 
 ## Purpose
 
-Define the `Cases` screen for the Chryso TUI.
+Define the `Cases` screen for the chr TUI.
 
 The `Cases` screen is where the user lists, creates, edits, searches, and
 orients work around project-local use cases. A case is a lightweight container
@@ -21,7 +21,7 @@ The screen must answer two questions clearly:
 
 > Which case am I working in?
 
-> What compact context should Chryso keep for that case?
+> What compact context should chr keep for that case?
 
 ## User Model
 
@@ -39,7 +39,7 @@ view rebuilt from files.
 - The tab label is `Cases`.
 - A case belongs to the current project by containment under the project's
   `.chr/` directory.
-- Do not store owner fields. Chryso is a local single-user app in this
+- Do not store owner fields. chr is a local single-user app in this
   model.
 - Do not store `project_id` in case frontmatter for normal operation.
 - The primary editable fields are:
@@ -109,7 +109,7 @@ not be parsed for structured columns.
 
 ## Persistence Model
 
-Chryso has one durable representation of case data:
+chr has one durable representation of case data:
 
 - `.chr/cases/<case-slug>.md` as the human-editable case file.
 
@@ -171,7 +171,7 @@ Executor -> Service: Save(metadata)
 Service -> Service: validate required fields and schema
 Service -> File: read current file hash
 
-alt source hash changed outside CHR
+alt source hash changed outside chr
     Service --> Executor: conflict error
     Executor --> UI: report refresh required
 else source hash matches or case is new

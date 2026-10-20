@@ -95,7 +95,7 @@ containers use Pi 1.3.0's actual `AuthStorage.modify` API on private copies and
 retain both synthetic OAuth rotations. No real account was used.
 
 T4.3: role preparation distinguishes native Pi generation from the static Linux
-CHR worker bridge without launching it. Missing or incompatible preparation gives
+chr worker bridge without launching it. Missing or incompatible preparation gives
 setup guidance without fallback. Finite budgets reject uncertified workers before
 launch; merger-broker input is rejected. Custom container-network endpoints work
 without host networking; container loopback endpoints fail preparation.

@@ -98,7 +98,7 @@ body in SQLite. SQLite should store operational metadata and references:
 Long body, comments, and full context remain in Markdown. The Board can list
 and filter from SQLite while the right pane can read Markdown by path.
 
-Synopsis should be mandatory in Chryso-created flows:
+Synopsis should be mandatory in chr-created flows:
 
 - LLM-generated tickets must include synopsis.
 - manually created tickets from Board should require synopsis.

@@ -41,7 +41,7 @@ Prerequisite PRs or delivered work:
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: QA Workspace Reset Scaffold | Completed | `feat/slice-1-qa-workspace-reset-scaffold` | `feat(slice-1): qa workspace reset scaffold` | `.prj/reports/slices/qa-agent-work-scenario/slice-1-qa-workspace-reset-scaffold.md` | Merged into `dev`. |
 | Slice 2: Blog Reference Project | Completed | `feat/slice-2-blog-reference-project` | `feat(slice-2): blog reference project` | `.prj/reports/slices/qa-agent-work-scenario/slice-2-blog-reference-project.md` | Merged into `dev`. |
-| Slice 3: Seeded CHR Context And ADR Docs | Completed | `feat/slice-3-seeded-chr-context-adr-docs` | `feat(slice-3): seeded chr context adr docs` | `.prj/reports/slices/qa-agent-work-scenario/slice-3-seeded-chr-context-adr-docs.md` | Merged into `dev`. |
+| Slice 3: Seeded chr Context And ADR Docs | Completed | `feat/slice-3-seeded-chr-context-adr-docs` | `feat(slice-3): seeded chr context adr docs` | `.prj/reports/slices/qa-agent-work-scenario/slice-3-seeded-chr-context-adr-docs.md` | Merged into `dev`. |
 | Slice 4: Test Based Agent Guidance | Completed | `feat/slice-4-test-based-agent-guidance` | `feat(slice-4): test based agent guidance` | `.prj/reports/slices/qa-agent-work-scenario/slice-4-test-based-agent-guidance.md` | Merged into `dev`. |
 | Slice 5: QA Runbook And Smoke Validation | Completed | `feat/slice-5-qa-runbook-smoke-validation` | `feat(slice-5): qa runbook smoke validation` | `.prj/reports/slices/qa-agent-work-scenario/slice-5-qa-runbook-smoke-validation.md` | Merged into `dev`. |
 
@@ -99,7 +99,7 @@ Validation:
 - `make verify`
 - `git diff --check`
 
-## Slice 3: Seeded CHR Context And ADR Docs
+## Slice 3: Seeded chr Context And ADR Docs
 
 Candidate tasks:
 
@@ -108,7 +108,7 @@ Candidate tasks:
 - [x] T3.3 Add a ready bug ticket for the unknown-slug behavior.
 - [x] T3.4 Add ADR documentation under `docs/explanation/adr/`.
 - [x] T3.5 Ensure no generated comments spec/plan/tracking/tickets are seeded.
-- [x] T3.6 Validate CHR can open the active project after reset.
+- [x] T3.6 Validate chr can open the active project after reset.
 - [x] T3.7 Add slice implementation report and run quality gates.
 
 Task commits:
@@ -132,7 +132,7 @@ Validation:
 
 Candidate tasks:
 
-- [x] T4.1 Update CHR agent conventions with test-based guidance.
+- [x] T4.1 Update chr agent conventions with test-based guidance.
 - [x] T4.2 Update generated tracking/ticket prompt instructions with the same
       preference.
 - [x] T4.3 Add tests that assert prompt guidance is present where relevant.

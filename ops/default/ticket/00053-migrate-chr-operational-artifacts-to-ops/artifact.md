@@ -1,6 +1,6 @@
 ---
 id: TKT-20260714151004
-title: Migrate CHR operational artifacts to ops layout
+title: Migrate chr operational artifacts to ops layout
 status: reviewing
 kind: task
 severity: high
@@ -20,7 +20,7 @@ commits:
 resolution: implemented pending review
 ---
 
-# Migrate CHR operational artifacts to ops layout
+# Migrate chr operational artifacts to ops layout
 
 ## Problem
 
@@ -30,7 +30,7 @@ shape instead of completing the operational artifact migration.
 
 ## Expected Outcome
 
-- CHR-private configuration and local CHR state may remain under `.chr/`.
+- CHR-private configuration and local chr state may remain under `.chr/`.
 - Operational artifacts are stored under the canonical `ops/<namespace>/...`
   layout, with `ops/default` used for no-user workspaces.
 - Active code no longer writes or discovers operational artifacts under

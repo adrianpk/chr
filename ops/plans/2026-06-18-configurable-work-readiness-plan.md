@@ -13,10 +13,10 @@ Model: `ops/specs/2026-06-18-configurable-work-readiness-model.md`
 ## Purpose
 
 Make work execution readiness configurable, diagnosable, and safely repairable
-without weakening Chryso's default `dev` plus `origin` workflow.
+without weakening chr's default `dev` plus `origin` workflow.
 
 The delivery should turn the rigid preflight exposed by the dialer exercise into
-a reusable product capability for any project that uses Chryso to automate
+a reusable product capability for any project that uses chr to automate
 development.
 
 ## Delivery Rules
@@ -87,7 +87,7 @@ Goal: repair non-destructive readiness problems when policy allows it.
 Behavior:
 
 - `chr work doctor --fix-safe` applies safe repairs.
-- Chryso runtime artifacts can be excluded from Git dirtiness without
+- chr runtime artifacts can be excluded from Git dirtiness without
   editing user code.
 - Existing configured integration branches can be switched to when safe.
 - Remote fetch and fast-forward repair are available when clean and

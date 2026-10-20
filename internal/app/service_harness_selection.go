@@ -179,7 +179,7 @@ func piWorkerReadiness(ctx context.Context, profile core.HarnessProfile, configD
 	}
 
 	if _, prepared := piWorkerBridgePreparation(profile.Command); !prepared {
-		r.Supported, r.Problem = false, "prepare the Linux CHR worker bridge with CGO_ENABLED=0 and configure its executable as command"
+		r.Supported, r.Problem = false, "prepare the Linux chr worker bridge with CGO_ENABLED=0 and configure its executable as command"
 
 		return r, ""
 	}

@@ -23,7 +23,7 @@ commits: []
 ## Context
 
 The full-system lab run against `chr-blog-work` exposed a coherent UX problem:
-Chryso has a useful command foundation, but the human operation path is too
+chr has a useful command foundation, but the human operation path is too
 noisy for daily use.
 
 The CLI must remain complete because it is valuable for automation, testing,
@@ -55,7 +55,7 @@ The lab surfaced several linked issues:
   `canonical_assets`, runtime workdir, and artifact paths.
 - The workspace manifest repeats invariant/config-like facts instead of helping
   users understand the workspace.
-- Generated protocol docs blur project documentation rules with Chryso
+- Generated protocol docs blur project documentation rules with chr
   operational artifact layout.
 - The runbook originally overexposed developer-only flags such as `--dev-root`.
 - The CLI is necessary but insufficient as the daily human workflow surface.
@@ -73,7 +73,7 @@ The lab surfaced several linked issues:
 - `.chr/config.yml` exposes only meaningful user decisions.
 - `.chr/manifest.md` is either useful orientation or removed from the required
   context path.
-- Chryso operational artifact layout is enforced by the binary, not by
+- chr operational artifact layout is enforced by the binary, not by
   generated Markdown convention text.
 - A Bubble Tea TUI is specified as the main human workflow surface over the same
   command/domain operations.

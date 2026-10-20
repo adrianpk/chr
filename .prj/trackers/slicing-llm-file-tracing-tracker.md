@@ -112,6 +112,6 @@ Tuning needed: no.
 Evidence:
 
 - Slice 1 delivered the reusable trace sink.
-- Slice 2 connected tracing to Chryso-owned LLM calls outside ticket
+- Slice 2 connected tracing to chr-owned LLM calls outside ticket
   execution containers.
 - `go test ./...` passed after Slice 2 delivery.

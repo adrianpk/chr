@@ -194,7 +194,7 @@ Context-aware quizzes are generated from a structured request that includes the
 authoring session, project context sections, the target artifact, the topic,
 and an output contract.
 
-The model response must be structured and validated before Chryso writes
+The model response must be structured and validated before chr writes
 the Markdown quiz artifact. Generic template questions are not used as a
 fallback.
 

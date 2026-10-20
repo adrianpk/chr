@@ -1,4 +1,4 @@
-# CHR Operational Artifacts to Ops Plan
+# chr Operational Artifacts to Ops Plan
 
 Status: planned
 Ticket: `ops/tickets/open/20260714151004-migrate-chr-operational-artifacts-to-ops.md`
@@ -6,7 +6,7 @@ Tracker: `ops/trackers/2026-07-14-chr-operational-artifacts-to-ops-tracker.md`
 
 ## Purpose
 
-Complete the CHR operational artifact migration by moving active artifact
+Complete the chr operational artifact migration by moving active artifact
 readers/writers from the intermediate `.chr/default/...` pseudo-user tree to the
 canonical `ops/<namespace>/...` layout, while preserving `.chr/` for CHR-private
 configuration and local state.
@@ -41,7 +41,7 @@ configuration and local state.
 
 ## Slice 1 Tasks
 
-- T1.1 Define code-level path helpers for CHR private state versus operational
+- T1.1 Define code-level path helpers for chr private state versus operational
   artifacts.
 - T1.2 Retarget active operational artifact producers/readers to
   `ops/<namespace>/<type>/...` where existing behavior expects filesystem-backed

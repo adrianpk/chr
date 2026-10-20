@@ -113,7 +113,7 @@ Allowed origins must be exact origins. Wildcards are not supported.
 
 ## Operator-Owned Boundary
 
-Chryso does not configure or manage Tailscale, Cloudflare Tunnel, reverse
+chr does not configure or manage Tailscale, Cloudflare Tunnel, reverse
 proxies, firewall rules, DNS, certificates, or public hosting. Keep those
 systems outside `chr` and expose the Web UI only through infrastructure you
 control.

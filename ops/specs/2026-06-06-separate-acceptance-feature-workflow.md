@@ -6,7 +6,7 @@ Date: 2026-06-06
 
 ## Summary
 
-Chryso should separate acceptance feature generation from general
+chr should separate acceptance feature generation from general
 requirements discovery and specification generation.
 
 The current workflow can bias quiz questions toward Gherkin-oriented slots and

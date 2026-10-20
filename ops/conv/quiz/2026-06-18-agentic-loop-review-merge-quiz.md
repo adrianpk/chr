@@ -12,7 +12,7 @@ Spec: `ops/specs/2026-06-18-agentic-loop-review-merge.md`
 
 ## Summary
 
-The default Chryso loop should be a steady sequential cycle that develops a
+The default chr loop should be a steady sequential cycle that develops a
 ticket, creates pull request evidence, validates the work, merges when policy
 allows it, and then continues to the next ticket.
 
@@ -36,7 +36,7 @@ traditional review workflow.
 - If review requests changes, the same ticket, branch, and pull request are
   reused.
 - The default maximum review repair allowance is one cycle.
-- A blocked ticket stops the automatic loop; Chryso should not skip it and
+- A blocked ticket stops the automatic loop; chr should not skip it and
   continue later slicing work.
 - The merger role should not re-run validation only to add ceremony.
 
@@ -44,7 +44,7 @@ traditional review workflow.
 
 The immediate enforcement mechanism is the project `validation_command`.
 
-Chryso should influence the initial project baseline toward the strongest
+chr should influence the initial project baseline toward the strongest
 practical validation command the project can support. Depending on stack and
 context, that may include:
 
@@ -68,17 +68,17 @@ compact and point to review artifacts rather than embedding long review text
 directly in the ticket.
 
 Provider-backed review remains valuable for a more traditional workflow.
-Chryso should aim to support:
+chr should aim to support:
 
 - Forgejo through `tea`;
 - GitHub through `gh`.
 
 Provider comments, remote diffs, and `@` mentions are useful integrations, but
-local Chryso artifacts remain the handoff record.
+local chr artifacts remain the handoff record.
 
 ## Artifact Policy
 
-Operational Chryso artifacts should live under `./.chr`.
+Operational chr artifacts should live under `./.chr`.
 
 Review artifact versioning should be configurable, with versioned review
 artifacts as the default.

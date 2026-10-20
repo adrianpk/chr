@@ -14,7 +14,7 @@ Related draft spec:
 
 ## Summary
 
-The user wants Chryso to bias early quiz generation toward discovering
+The user wants chr to bias early quiz generation toward discovering
 whether a use case is naturally suitable for Gherkin-style acceptance scenarios.
 The quiz should not force a fixed set of hardcoded questions or a fixed language.
 Instead, it should use the initial dump and existing context to infer whether

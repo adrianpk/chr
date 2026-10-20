@@ -1,5 +1,5 @@
 ---
-title: "Chryso Project-wide Planning and Ticket Continuity Gap Plan"
+title: "chr Project-wide Planning and Ticket Continuity Gap Plan"
 project_id: "project-f14593e169cfa218"
 case_slug: ""
 status: "planned"
@@ -8,7 +8,7 @@ source_response_id: "response-plan-generation-project"
 created_at: "2026-10-17T19:55:52Z"
 ---
 
-# Chryso Project-wide Planning and Ticket Continuity Gap Plan
+# chr Project-wide Planning and Ticket Continuity Gap Plan
 
 ## Current Implementation Baseline
 

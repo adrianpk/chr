@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Agent work observability is the contract for seeing what Chryso is doing
+Agent work observability is the contract for seeing what chr is doing
 while ticket execution or a ready-ticket queue is running.
 
 Observability is file-first. Runtime work writes durable reports, logs, result
@@ -35,7 +35,7 @@ Each event records:
 | --- | --- |
 | `schema_version` | Event schema version. |
 | `timestamp` | UTC RFC3339 event time. |
-| `project_id` | Project id known to Chryso. |
+| `project_id` | Project id known to chr. |
 | `loop_id` | Loop id when the event belongs to a multi-ticket run. |
 | `execution_id` | Execution id when the event belongs to one ticket run. |
 | `ticket_key` | Ticket key such as `CHR-1`. |

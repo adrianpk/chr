@@ -58,7 +58,7 @@ Selected Docker workers retain `WorkerRuntimeOptions` in their private host
 command and freeze the image ID before admission. The host launcher removes
 that argv from model context. It mounts only the execution checkout, Git
 metadata, the admitted capacity files, selected profile resources and the
-retained CHR bridge. The bridge and RPC process execute inside that container;
+retained chr bridge. The bridge and RPC process execute inside that container;
 they receive private writable state and a replacement model environment.
 
 The model process works from private state. Only the embedded `worker.mjs`

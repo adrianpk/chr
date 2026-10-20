@@ -1,12 +1,12 @@
 # Agent Operating Contract
 
-This project is managed by Chryso.
+This project is managed by chr.
 
 Read this file before making changes in this repository.
 
 ## Workspace
 
-Chryso project state lives under `.chr/`.
+chr project state lives under `.chr/`.
 
 Start with:
 
@@ -18,4 +18,4 @@ Start with:
 - Keep changes inside the requested scope.
 - Prefer small, reviewable changes.
 - Run the validation commands documented for this project before handoff.
-- Do not overwrite Chryso workspace files unless the task explicitly asks for it.
+- Do not overwrite chr workspace files unless the task explicitly asks for it.

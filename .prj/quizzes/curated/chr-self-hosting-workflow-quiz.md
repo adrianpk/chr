@@ -1,4 +1,4 @@
-# Chryso Self-Hosting Workflow Notes
+# chr Self-Hosting Workflow Notes
 
 Status: curated
 
@@ -8,7 +8,7 @@ Status: curated
 
 ## Context
 
-Chryso is being developed with agent collaboration rules stored in `AGENTS.md` and `.agents/`.
+chr is being developed with agent collaboration rules stored in `AGENTS.md` and `.agents/`.
 
 The tool being built is intended to provide a related but more formal project-local operating model for Go projects. That managed model will eventually use `.chr/` in target repositories.
 
@@ -16,11 +16,11 @@ For this repository, `.chr/` should not be created yet because the tool is under
 
 ## Curated Decisions
 
-- The product name is Chryso.
+- The product name is chr.
 - The CLI command is `chr`.
 - The Go module path is `forge.adrianpk.com/chr`.
 - The managed project-local workspace root will be `.chr/`.
-- This repository may use `.prj/` as a temporary scaffold to emulate future Chryso artifacts.
+- This repository may use `.prj/` as a temporary scaffold to emulate future chr artifacts.
 - The first product surface is the CLI.
 - A TUI may be added later, possibly in the same binary.
 - The CLI should use `urfave/cli`.
@@ -32,7 +32,7 @@ For this repository, `.chr/` should not be created yet because the tool is under
 ## Preserved Tensions
 
 - `.agents/` and `AGENTS.md` guide current repository collaboration, while future `.chr/` is product-managed runtime state.
-- `.prj/` should help this repository practice the intended workflow without pretending that Chryso is already self-hosting.
+- `.prj/` should help this repository practice the intended workflow without pretending that chr is already self-hosting.
 - Docker appears stronger for sandboxing, but it is heavier.
 - Git worktrees are useful for branch and checkout isolation, but they are not a security boundary.
 - Command names should remain discoverable and mnemonic without over-crystallizing the final CLI too early.

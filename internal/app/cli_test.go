@@ -299,7 +299,7 @@ func TestWebServeShell(t *testing.T) {
 		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
 	}
 
-	for _, want := range []string{"Chryso", filepath.Base(projectDir), projectDir, "/assets/htmx.min.js"} {
+	for _, want := range []string{`<span class="brand-title">chr</span>`, filepath.Base(projectDir), projectDir, "/assets/htmx.min.js"} {
 		if !strings.Contains(recorder.Body.String(), want) {
 			t.Fatalf("body does not contain %q:\n%s", want, recorder.Body.String())
 		}
@@ -1513,7 +1513,7 @@ func TestInitStandardProfileInstallsProtocolAssets(t *testing.T) {
 
 	documenting := readTestFile(t, filepath.Join(projectDir, ".chr", "default", "agents", "DOCUMENTING.md"))
 	for _, unwanted := range []string{
-		"Chryso Artifacts",
+		"chr Artifacts",
 		"Use `.chr/` for project-local operational artifacts",
 		"generated operational records",
 	} {
@@ -1523,7 +1523,7 @@ func TestInitStandardProfileInstallsProtocolAssets(t *testing.T) {
 	}
 
 	architecture := readTestFile(t, filepath.Join(projectDir, ".chr", "default", "agents", "ARCHITECTURE.md"))
-	if strings.Contains(architecture, ".chr/         Chryso project-local state") {
+	if strings.Contains(architecture, ".chr/         chr project-local state") {
 		t.Fatalf("ARCHITECTURE.md exposes .chr as application layout:\n%s", architecture)
 	}
 
@@ -2942,7 +2942,7 @@ func TestNotifyTelegramTestDryRunPrintsPlan(t *testing.T) {
 		"dry_run: true",
 		"bot_token_env: CHR_TELEGRAM_BOT_TOKEN",
 		"chat_id: 123456",
-		"message: Chryso Telegram notification test",
+		"message: chr Telegram notification test",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -3149,7 +3149,7 @@ func assertTelegramPayload(t *testing.T, gotPayload *testTelegramPayload) {
 		t.Fatalf("telegram chat_id = %q, want 123456", gotPayload.ChatID)
 	}
 
-	if !strings.Contains(gotPayload.Text, "Chryso Telegram notification test") {
+	if !strings.Contains(gotPayload.Text, "chr Telegram notification test") {
 		t.Fatalf("telegram text = %q, want test message", gotPayload.Text)
 	}
 }
@@ -8613,7 +8613,7 @@ func runGateCLIGit(t *testing.T, projectDir string, args ...string) {
 
 	cmdArgs := append([]string{
 		"-C", projectDir,
-		"-c", "user.name=Chryso Test",
+		"-c", "user.name=chr Test",
 		"-c", "user.email=chr@example.test",
 	}, args...)
 	cmd := exec.Command("git", cmdArgs...)

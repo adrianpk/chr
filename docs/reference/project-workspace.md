@@ -2,13 +2,13 @@
 
 ## Root
 
-Chryso uses `.chr/` as the project-local hidden directory.
+chr uses `.chr/` as the project-local hidden directory.
 
 The `chr` command creates and manages this directory inside the project where it runs. The directory is intentionally tied to the CLI name rather than the target repository name.
 
 Project ticket files and project protocol assets are local to `.chr/` inside each managed project.
 
-Chryso may also keep user-level state outside the project for daemon operation, project registration, and derived indexes. User-level state does not replace the project-local `.chr/` source files.
+chr may also keep user-level state outside the project for daemon operation, project registration, and derived indexes. User-level state does not replace the project-local `.chr/` source files.
 
 Board and ticket operations use both layers:
 
@@ -138,11 +138,11 @@ The workspace index is an in-memory structural model that may be cached under
 `.chr/default/tmp/`. That cache is discardable and must not become the durable source of
 truth.
 
-The `.chr/` directory and Markdown-first artifact model are Chryso
+The `.chr/` directory and Markdown-first artifact model are chr
 invariants. They are not configured by generated workspace files.
 
 The generated files under `.chr/default/agents/` guide how an agent should work inside
-the managed project. They do not define or override Chryso's operational
+the managed project. They do not define or override chr's operational
 artifact layout. Directory placement for tickets, runtime evidence, reports,
 indexes, and authoring artifacts is a product contract owned by `chr`.
 
@@ -186,7 +186,7 @@ Supported work fields:
 - `require_clean_worktree`: whether visible changes block agent work.
 - `require_remote_tracking`: whether the configured branch must track the
   configured remote ref.
-- `allow_safe_repair`: whether Chryso may run non-destructive readiness
+- `allow_safe_repair`: whether chr may run non-destructive readiness
   repairs.
 - `allow_branch_creation`: whether safe repair may create the configured local
   branch.
@@ -412,7 +412,7 @@ returns the immutable Docker image ID for worker admission.
 
 ### Prepared Pi worker profile
 
-A Pi worker profile in the private user `harnesses.yml` names the Linux CHR
+A Pi worker profile in the private user `harnesses.yml` names the Linux chr
 executable that supplies its bridge, the prepared image and explicit resources.
 
 Build that Linux bridge with `CGO_ENABLED=0 go build -o /opt/chr/bin/chr ./cmd/chr`
@@ -493,7 +493,7 @@ Docker mount contract:
 
 Project mode remains fully compatible with existing managed projects because
 the execution workspace is the user-visible project checkout. Worktree mode
-changes only the execution workspace: Chryso prepares a ticket-specific Git
+changes only the execution workspace: chr prepares a ticket-specific Git
 worktree and mounts that path into Docker.
 
 The planner only computes paths and mount metadata. It does not create

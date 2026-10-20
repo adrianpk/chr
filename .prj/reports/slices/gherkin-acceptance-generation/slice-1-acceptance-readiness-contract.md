@@ -15,7 +15,7 @@ prompt intent shape that later slices can reuse.
 
 ## Delivered Behavior
 
-Chryso now has package-level types for acceptance readiness decisions:
+chr now has package-level types for acceptance readiness decisions:
 `generate`, `needs_more_info`, and `not_applicable`.
 
 Readiness validation now normalizes reasons, inferred elements, missing slots,

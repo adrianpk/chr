@@ -43,7 +43,7 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 | T3.1 | Discover gate-relevant reports under `.chr/default/reports`. | done | `9fccea6` | Reused project report discovery and resolved execution result paths from report metadata. |
 | T3.2 | Classify agent-managed evidence from available run reports. | done | `ba4342f` | Added report fields and command integration for agent-managed work. |
 | T3.3 | Classify unmatched changed files as manual or external info. | done | `ba4342f` | Unmatched Git changes are reported as manual or external context. |
-| T3.4 | Add failure checks for missing Chryso-owned run evidence. | done | `e2a9299` | Missing execution evidence now fails the gate. |
+| T3.4 | Add failure checks for missing chr-owned run evidence. | done | `e2a9299` | Missing execution evidence now fails the gate. |
 | T3.5 | Add tests for agent-managed, manual/external, and missing-evidence cases. | done | `9bf60d3` | Added CLI assertions for manual context and missing evidence failures. |
 | T3.6 | Add slice report and tracker updates. | done | this commit | Added the Slice 3 report and validation log. |
 
@@ -100,7 +100,7 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 - Slice 5: `make verify` (pass)
 - Slice 6: `make verify` (pass)
 - Slice 6: `make qa-gate` (pass)
-- Slice 6: `GOCACHE=/tmp/chr-gate-self.aRZ3ao/.go-build-cache go run /home/adrian/Projects/chryso/cmd/chr gate dev-main --dir /tmp/chr-gate-self.aRZ3ao --base origin/dev --head HEAD` (pass)
+- Slice 6: `GOCACHE=/tmp/chr-gate-self.aRZ3ao/.go-build-cache go run /workspaces/chr/cmd/chr gate dev-main --dir /tmp/chr-gate-self.aRZ3ao --base origin/dev --head HEAD` (pass)
 
 ## Notes
 

@@ -176,7 +176,7 @@ func validateCaseMetadataWriteHash(path string, metadata CaseMetadata) error {
 
 	current, err := os.ReadFile(path)
 	if errors.Is(err, os.ErrNotExist) {
-		return fmt.Errorf("case metadata file changed outside CHR: source file is missing")
+		return fmt.Errorf("case metadata file changed outside chr: source file is missing")
 	}
 
 	if err != nil {
@@ -185,7 +185,7 @@ func validateCaseMetadataWriteHash(path string, metadata CaseMetadata) error {
 
 	currentHash := contentHash(current)
 	if currentHash != metadata.SourceHash {
-		return fmt.Errorf("case metadata file changed outside CHR: refresh before saving")
+		return fmt.Errorf("case metadata file changed outside chr: refresh before saving")
 	}
 
 	return nil

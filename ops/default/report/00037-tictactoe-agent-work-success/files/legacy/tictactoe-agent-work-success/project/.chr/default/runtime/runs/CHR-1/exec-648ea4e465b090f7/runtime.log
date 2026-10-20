@@ -3911,7 +3911,7 @@ index 5bfe0b78904341172935c425f4eb488d7ee96d75..1e1b53e27b0d32d0872181edacefd2a1
 +}
 
 codex
-The diff is limited to `internal/game` implementation and tests. I’m running the final validation command again, then I’ll write the Chryso result file.
+The diff is limited to `internal/game` implementation and tests. I’m running the final validation command again, then I’ll write the chr result file.
 exec
 /bin/bash -lc 'go test ./...' in /workspace
 diff --git a/internal/game/game.go b/internal/game/game.go

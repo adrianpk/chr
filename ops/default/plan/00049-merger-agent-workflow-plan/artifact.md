@@ -1,6 +1,6 @@
 ---
 title: "Merger Agent Workflow Plan"
-project_id: "chryso"
+project_id: "chr"
 case_slug: "ticket-execution-loop"
 status: "planned"
 source_request_id: "chat-2026-06-02-merger-agent-role"
@@ -12,7 +12,7 @@ mirror: ".prj/plans/slicing-merger-agent-workflow-plan.md"
 # Merger Agent Workflow Plan
 
 This plan mirrors `.prj/plans/slicing-merger-agent-workflow-plan.md` during
-Chryso self-adoption. The `.prj` plan remains the operational source for
+chr self-adoption. The `.prj` plan remains the operational source for
 slice branch names, PR titles, and implementation report paths.
 
 ## Slice Map

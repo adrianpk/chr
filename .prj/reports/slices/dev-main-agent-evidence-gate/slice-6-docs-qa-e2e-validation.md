@@ -26,7 +26,7 @@ gate behavior, and validate the completed slice set.
 
 The QA scenario uses a temporary Go project and a temporary Go build cache so it
 does not depend on the user's global Go cache or leave managed-project artifacts
-inside the Chryso repository.
+inside the chr repository.
 
 The self-gate validation used a temporary worktree to avoid writing `.chr/`
 artifacts into the active checkout.
@@ -51,7 +51,7 @@ artifacts into the active checkout.
 
 - `make verify` (pass)
 - `make qa-gate` (pass)
-- `GOCACHE=/tmp/chr-gate-self.aRZ3ao/.go-build-cache go run /home/adrian/Projects/chryso/cmd/chr gate dev-main --dir /tmp/chr-gate-self.aRZ3ao --base origin/dev --head HEAD` (pass)
+- `GOCACHE=/tmp/chr-gate-self.aRZ3ao/.go-build-cache go run /workspaces/chr/cmd/chr gate dev-main --dir /tmp/chr-gate-self.aRZ3ao --base origin/dev --head HEAD` (pass)
 
 ## Risks and Follow-ups
 

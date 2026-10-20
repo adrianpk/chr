@@ -38,7 +38,7 @@ language and explicit commands use the same typed application operations.
 The accepted specification and model remain normative. All 32 acceptance
 criteria are assigned below. Serial execution remains the default; configured
 parallel projects retain the existing shared capacity and integration queue.
-Developing Chryso through this adapter is supported and preferred when useful,
+Developing chr through this adapter is supported and preferred when useful,
 without making that workflow mandatory.
 
 This set contains eight ordered slices and 29 tracker tasks. A task is a
@@ -68,7 +68,7 @@ set. Product-level parallel execution is exercised through isolated fixtures.
 4. Slices 1-7 use deterministic HTTP/model boundaries, real temporary SQLite
    databases and project stores. They do not require a bot secret, external
    repository writes or a live model subscription to pass their regressions.
-5. The maintainer has a dedicated new Chryso bot. Its token, allowed numeric
+5. The maintainer has a dedicated new chr bot. Its token, allowed numeric
    identities and operator/project mapping must be supplied through private
    local setup before live activation. Never request or commit its token in
    chat, artifacts, argv, PR bodies or test output.
@@ -351,7 +351,7 @@ prerequisite is blocked; the slice cannot claim delivered without that proof.
 | Task | Required work |
 | --- | --- |
 | T8.1 | Run one bounded authorized live bot/model journey against a designated QA project: request a small real change, clarify, prepare, admit the exact extent and observe native integration. Record build, sanitized request/invocation references, source/base/result and confirmed receipt separately from fixture evidence. |
-| T8.2 | Demonstrate the same journey with a separately registered Chryso source checkout in the designated QA repository. Make a small real source/documentation change through the installed receiver, keeping its build fixed while candidate source changes. Use no external development controller for that invocation; never give Chryso and Looper ownership of the same production PR. Label QA integration accurately. |
+| T8.2 | Demonstrate the same journey with a separately registered chr source checkout in the designated QA repository. Make a small real source/documentation change through the installed receiver, keeping its build fixed while candidate source changes. Use no external development controller for that invocation; never give chr and Looper ownership of the same production PR. Label QA integration accurately. |
 | T8.3 | Complete installed help, the existing User Guide and reference documentation, a concise reader-facing changelog entry, acceptance evidence and the cycle report. Audit all 32 criteria, integrate the slice, record the exact candidate and close only after its scheduled nightly is green. |
 
 Acceptance: TG-01, TG-27, TG-28 and TG-32, with the complete prior matrix audited.
@@ -369,7 +369,7 @@ Place the cycle report at
 `ops/default/report/telegram-conversational-workflow-cycle.md` when real evidence
 exists. It records exact integrated candidate, scheduled run/result, live proof,
 all canonical PRs and remaining limitations. Product documentation shows normal
-Chryso operation; Looper belongs only to this delivery's development procedure.
+chr operation; Looper belongs only to this delivery's development procedure.
 
 ## 14. Acceptance Ownership
 
@@ -406,7 +406,7 @@ starts with every criterion pending.
 | TG-25 | T3.3, T6.3, T7.2 | Unicode, splitting, topics and stale prompt handling. |
 | TG-26 | T5.4 | Actual integration receipt distinguished from intermediate success. |
 | TG-27 | T8.1 | Real bounded request-to-integration bot journey. |
-| TG-28 | T8.2 | Chryso source development using Chryso with a fixed receiver build. |
+| TG-28 | T8.2 | chr source development using chr with a fixed receiver build. |
 | TG-29 | T1.4, T3.4 | Existing sender/import regressions and no historical execution. |
 | TG-30 | T5.4 | Existing adapters observe/control the same canonical invocation. |
 | TG-31 | T7.3, T8.3 | Installed help, readiness diagnostics and documented bounds. |

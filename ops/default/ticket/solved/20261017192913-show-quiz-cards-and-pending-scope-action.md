@@ -25,7 +25,7 @@ started_at: 2026-10-18T08:34:50Z
 
 Finding from [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
 The maintainer has now supplied two screenshots covering the upper catalog and
-the lower action area of CHR's Quizzes page. The observations below describe
+the lower action area of chr's Quizzes page. The observations below describe
 that actual interface. The expected behavior is stated independently of any
 other application.
 
@@ -106,7 +106,7 @@ measurements taken from a raster screenshot.
 
 The visible card anatomy is title plus useful quiz-content excerpt. Do not
 recreate the current stack of two technical badges, a repeated scope row and a
-multiline storage path with different colors. Retain CHR's identity and use its
+multiline storage path with different colors. Retain chr's identity and use its
 compatible theme tokens; this is a Quizzes surface change, not a global
 rebranding task.
 
@@ -168,7 +168,7 @@ establish this ticket's visual outcome.
 
 ## Remaining Refinement
 
-Map answered, pending and partially answered sessions to CHR's actual native
+Map answered, pending and partially answered sessions to chr's actual native
 quiz states and retained answer data. Do not infer those facts solely from a
 not_started badge, migration metadata or the existence of an artifact file.
 Determine the display and continuation of partially answered work without

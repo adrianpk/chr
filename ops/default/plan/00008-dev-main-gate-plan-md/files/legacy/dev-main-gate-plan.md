@@ -1,6 +1,6 @@
 ---
 title: "Dev To Main Gate Plan"
-project_id: "chryso"
+project_id: "chr"
 case_slug: "dev-main-gate"
 status: "completed"
 source_request_id: "self-adoption-baseline"
@@ -10,7 +10,7 @@ created_at: "2026-06-01T00:00:00Z"
 
 # Dev To Main Gate Plan
 
-This plan records the completed implementation sequence imported during Chryso self-adoption.
+This plan records the completed implementation sequence imported during chr self-adoption.
 
 ## Completed Slices
 

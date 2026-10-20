@@ -118,7 +118,7 @@ func harnessQuizModelPrompt(request QuizModelRequest) (string, error) {
 	}
 
 	var prompt strings.Builder
-	prompt.WriteString("You are the Chryso ")
+	prompt.WriteString("You are the chr ")
 	prompt.WriteString(string(request.Action))
 	prompt.WriteString(" backend.\n")
 	prompt.WriteString("Generate the requested artifact and return only the final JSON object matching the provided output schema.\n")

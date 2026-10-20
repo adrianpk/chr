@@ -5,7 +5,7 @@ generated specs, generated tickets, and Codex-backed agent execution.
 
 ## Reset The Scenario
 
-From the Chryso repository:
+From the chr repository:
 
 ```sh
 make qa-reset-tictactoe
@@ -33,9 +33,9 @@ make qa-smoke-tictactoe
 The smoke check resets the scenario, verifies the independent Git repository,
 confirms work readiness is ready, and runs the baseline tests.
 
-## Open CHR
+## Open chr
 
-Open CHR against the active scenario:
+Open chr against the active scenario:
 
 ```sh
 cd qa/project/tictactoe
@@ -71,7 +71,7 @@ chr work run-all --use-case cli-gameplay --order key
 In Dash, blocked work readiness appears in the Current panel. Use `x` to apply
 a safe repair when one is available, then retry the work action.
 
-Use this scenario to observe whether Chryso can preserve preseeded human
+Use this scenario to observe whether chr can preserve preseeded human
 context into generated artifacts, launch Codex worker executions for generated
 tickets, run project validation, and move tickets to `reviewing` or `blocked`.
 

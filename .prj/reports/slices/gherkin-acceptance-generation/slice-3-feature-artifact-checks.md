@@ -14,7 +14,7 @@ feature artifacts before later slices write them alongside specs.
 
 ## Delivered Behavior
 
-Chryso now has a canonical acceptance feature artifact layout under
+chr now has a canonical acceptance feature artifact layout under
 `.chr/default/acceptance/<scope>.feature`.
 
 Generated feature artifacts can be checked without executing `godog`. Static

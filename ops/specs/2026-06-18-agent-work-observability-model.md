@@ -24,7 +24,7 @@ Fields:
 | --- | --- | --- |
 | `schema_version` | yes | Event schema version. Initial value: `1`. |
 | `timestamp` | yes | UTC RFC3339 timestamp for when the event was emitted. |
-| `project_id` | yes | Chryso project id. |
+| `project_id` | yes | chr project id. |
 | `loop_id` | no | Loop/run id when the event belongs to a multi-ticket loop. |
 | `execution_id` | no | Execution id when the event belongs to one ticket execution. |
 | `ticket_key` | no | Ticket key such as `CHR-1`. |

@@ -25,14 +25,14 @@ started_at: 2026-10-18T08:34:50Z
 
 Part of [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
 The maintainer supplied a visual example and explicitly described the desired
-conceptual layout and behavior for CHR's quiz answering screen. The target
+conceptual layout and behavior for chr's quiz answering screen. The target
 below is self-contained. It does not require another application as a design
 source, a matching palette or identical decorative details.
 
-CHR's catalog has been visually reviewed; its detailed answering view has not
+chr's catalog has been visually reviewed; its detailed answering view has not
 yet been demonstrated in this walkthrough. This ticket records the requested
 target and verified adapter capabilities, rather than inventing observations
-about an unseen CHR detail screen.
+about an unseen chr detail screen.
 
 Approved implementation is Slice 5 of
 [web-ui-workflow-consolidation](../../plan/web-ui-workflow-consolidation.md).

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`internal/core` contains the core Chryso application behavior.
+`internal/core` contains the core chr application behavior.
 
 ## Boundary
 

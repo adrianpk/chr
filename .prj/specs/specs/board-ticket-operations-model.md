@@ -26,7 +26,7 @@ The ticket Markdown frontmatter should support:
 | --- | --- | --- |
 | `key` | yes | Human-facing ticket id such as `CHR-123`. |
 | `title` | yes | Short ticket title. |
-| `synopsis` | yes for new Chryso-created tickets | One short operational summary for Board rows and detail. |
+| `synopsis` | yes for new chr-created tickets | One short operational summary for Board rows and detail. |
 | `status` | yes | Board lifecycle status. |
 | `priority` | yes for Board-created tickets | Scheduling importance. |
 | `severity` | yes for Board-created tickets | Impact level. |
@@ -183,7 +183,7 @@ The implementation should resolve this deliberately:
 
 ## Validation Rules
 
-- New Chryso-created tickets require non-empty title and synopsis.
+- New chr-created tickets require non-empty title and synopsis.
 - New Board-created tickets default to `backlog`.
 - New generated tickets must include source metadata when generated from plan
   tracking.

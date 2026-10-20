@@ -177,7 +177,7 @@ func workerMountArgument(mount harness.RuntimeMount) (string, error) {
 func copyWorkerBridge(target string) (err error) {
 	file, err := os.Open("/proc/self/exe")
 	if err != nil {
-		return errors.New("pi workers require a prepared Linux CHR bridge")
+		return errors.New("pi workers require a prepared Linux chr bridge")
 	}
 	defer func() { err = errors.Join(err, file.Close()) }()
 

@@ -64,7 +64,7 @@ docker build --file .chr/default/runtime/agent/pi/Dockerfile \
   --tag chr-agent-pi:1.3.0 .chr/default/runtime/agent/pi
 ```
 
-From the selected CHR source revision, build the Linux bridge into a writable
+From the selected chr source revision, build the Linux bridge into a writable
 installation directory:
 
 ```sh
@@ -155,8 +155,8 @@ availability or the model's support for required tools/structured output.
 | Observation | Required action |
 | --- | --- |
 | Unknown profile or missing executable | Correct the private profile and prepare its named executable; no fallback occurs. |
-| Native Pi selected as worker | Select the static Linux CHR bridge and prepared image in a separate worker profile. |
-| CHR bridge selected for generation | Select native Pi 1.3.0 in the generation profile. |
+| Native Pi selected as worker | Select the static Linux chr bridge and prepared image in a separate worker profile. |
+| chr bridge selected for generation | Select native Pi 1.3.0 in the generation profile. |
 | Image unavailable or labels/platform rejected | Restore Docker access, explicitly build the pinned image for the host architecture and inspect status again. |
 | Credential/resource rejected | Use a private regular file, static generation key, selected-provider-only worker auth and unchanged model definitions. |
 | Provider rejects authentication/model or required capability | Resolve that exact provider/model setup privately; unsupported capability remains a failure. |

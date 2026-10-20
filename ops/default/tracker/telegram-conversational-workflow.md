@@ -255,7 +255,7 @@ recorded bot/model/service/QA activation authority from plan section 2.
 | Task | State | Commit | Work |
 | --- | --- | --- | --- |
 | T8.1 | pending | pending | Authorized real bot/model request-to-integration journey and exact evidence. |
-| T8.2 | pending | pending | Chryso source development through a fixed installed receiver in isolated QA. |
+| T8.2 | pending | pending | chr source development through a fixed installed receiver in isolated QA. |
 | T8.3 | pending | pending | User documentation, changelog, complete evidence audit and nightly-bound closure. |
 
 Validation: plan section 13; `TestTelegramJourney`, including applicable focused

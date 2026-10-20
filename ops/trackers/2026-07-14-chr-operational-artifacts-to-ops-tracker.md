@@ -1,4 +1,4 @@
-# CHR Operational Artifacts to Ops Tracker
+# chr Operational Artifacts to Ops Tracker
 
 Status: implemented
 Plan: `ops/plans/2026-07-14-chr-operational-artifacts-to-ops-plan.md`
@@ -14,7 +14,7 @@ Status: implemented
 
 ### Tasks
 
-- [x] T1.1 Define code-level path helpers for CHR private state versus operational artifacts.
+- [x] T1.1 Define code-level path helpers for chr private state versus operational artifacts.
 - [x] T1.2 Retarget active operational artifact producers/readers to `ops/<namespace>/<type>/...`.
 - [x] T1.3 Preserve `.chr/` configuration paths and update docs/scripts/tests.
 - [x] T1.4 Validate with focused scans, `make verify`, ops layout validation, and diff hygiene.

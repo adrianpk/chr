@@ -20,8 +20,8 @@ This repository already had project material before `.chr/default/` adoption.
 - `ops/trackers/` contains tracking documents for planned work.
 - `.prj/reports/slices/` contains slice delivery reports.
 
-## Chryso Workspace Material
+## chr Workspace Material
 
-Going forward, `.chr/default/` is the project-local workspace Chryso commands read and write.
+Going forward, `.chr/default/` is the project-local workspace chr commands read and write.
 
 Seeded `.chr/default/` material should summarize or point to existing material instead of pretending old work was produced by the new workspace.

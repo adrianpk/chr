@@ -4,7 +4,7 @@ Status: draft
 
 ## Purpose
 
-Define the local Chryso approach for embedding default assets into the `chr` binary while keeping those assets editable as normal repository files.
+Define the local chr approach for embedding default assets into the `chr` binary while keeping those assets editable as normal repository files.
 
 ## Current Direction
 
@@ -33,7 +33,7 @@ The binary embeds the top-level `assets` directory once.
 
 ## Init Profiles
 
-Chryso supports three initial workspace profiles:
+chr supports three initial workspace profiles:
 
 - `standard`: the default profile used by `chr init`.
 - `personal`: the full opinionated workflow for the author's own use.
@@ -81,9 +81,9 @@ Users may edit generated `.chr/` files freely after initialization.
 
 `AGENTS.md` is a required root-level file in managed projects.
 
-Even though most Chryso-managed state lives under `.chr/`, `AGENTS.md` must be materialized at the project root because external tools may look for it there.
+Even though most chr-managed state lives under `.chr/`, `AGENTS.md` must be materialized at the project root because external tools may look for it there.
 
-The root file should point to the project-local Chryso protocol under `.chr/` while still being useful to tools that only read `AGENTS.md`.
+The root file should point to the project-local chr protocol under `.chr/` while still being useful to tools that only read `AGENTS.md`.
 
 ## Default Agent Harness
 

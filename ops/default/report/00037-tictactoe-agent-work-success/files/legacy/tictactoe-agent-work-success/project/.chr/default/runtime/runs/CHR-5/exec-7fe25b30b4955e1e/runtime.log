@@ -1077,7 +1077,7 @@ exec
 
 Read this document before working in this reference project.
 
-This project is a Chryso QA scenario. Follow generated Chryso tickets
+This project is a chr QA scenario. Follow generated chr tickets
 and keep changes scoped to the selected ticket.
 
 Use only Go's standard library. Do not add external dependencies, persistence,
@@ -1253,7 +1253,7 @@ func mustApplyGameMoves(t *testing.T, moves []renderMove) game.Game {
 }
 
 codex
-The worktree already contains prior slice changes and test files, so I’m treating them as existing context and leaving unrelated Chryso metadata alone. The current tests already hit much of the ticket; I’m checking for the remaining gaps before editing.
+The worktree already contains prior slice changes and test files, so I’m treating them as existing context and leaving unrelated chr metadata alone. The current tests already hit much of the ticket; I’m checking for the remaining gaps before editing.
 exec
 /bin/bash -lc "sed -n '220,520p' internal/game/game_test.go" in /workspace
  succeeded in 0ms:
@@ -2926,7 +2926,7 @@ PASS
 ok  	example.com/chr-qa-tictactoe/internal/game	5.138s
 
 codex
-Both required validations passed, including the 5-second fuzz run. I’m checking the final workspace state and then I’ll write the Chryso result JSON.
+Both required validations passed, including the 5-second fuzz run. I’m checking the final workspace state and then I’ll write the chr result JSON.
 exec
 /bin/bash -lc 'git -c safe.directory=/workspace status --short' in /workspace
  succeeded in 0ms:

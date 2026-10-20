@@ -23,7 +23,7 @@ resolution: fixed
 ## Outcome and Authorization
 
 Part of [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
-Dash is the operational view of what CHR's agent harness is doing as it
+Dash is the operational view of what chr's agent harness is doing as it
 processes tickets and their owning workflow. Show the ready queue, current
 execution and phase, recent activity and eventual result using the same domain
 data that informs the TUI. The maintainer requested a ticket definition based
@@ -33,7 +33,7 @@ The internal tracker only defines ticket order under its
 [separate requirement](20261017200232-associate-ticket-tracking-with-each-plan-revision.md).
 Dash reads actual progress from tickets, invocations, attempts, events and
 receipts. It must not recreate processing-state maintenance in that Markdown
-artifact or depend on the development controller used to build CHR.
+artifact or depend on the development controller used to build chr.
 
 ## Verified Baseline and References
 

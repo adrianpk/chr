@@ -12,7 +12,7 @@ import (
 // SpecDirectory defines a package boundary constant.
 const SpecDirectory = "specs"
 
-var generatedSpecChrysoPathPattern = regexp.MustCompile(`\.chr(?:/[^\s\])"'` + "`" + `]+)?`)
+var generatedSpecChrPathPattern = regexp.MustCompile(`\.chr(?:/[^\s\])"'` + "`" + `]+)?`)
 
 // GeneratedSpec describes a package boundary value.
 type GeneratedSpec struct {
@@ -64,7 +64,7 @@ func writeGeneratedSpec(ctx context.Context, projectDir string, spec GeneratedSp
 		return GeneratedSpecPaths{}, err
 	}
 
-	spec.Body = NormalizeGeneratedSpecChrysoPathReferences(spec.Body)
+	spec.Body = NormalizeGeneratedSpecChrPathReferences(spec.Body)
 
 	err = ValidateGeneratedSpec(spec)
 	if err != nil {
@@ -131,7 +131,7 @@ func ValidateGeneratedSpec(spec GeneratedSpec) error {
 		return fmt.Errorf("generated spec body is required")
 	}
 
-	err := validateGeneratedSpecChrysoPathReferences(spec.Body)
+	err := validateGeneratedSpecChrPathReferences(spec.Body)
 	if err != nil {
 		return err
 	}
@@ -148,26 +148,26 @@ func ValidateGeneratedSpec(spec GeneratedSpec) error {
 	return nil
 }
 
-func validateGeneratedSpecChrysoPathReferences(body string) error {
-	for _, match := range generatedSpecChrysoPathPattern.FindAllString(body, -1) {
+func validateGeneratedSpecChrPathReferences(body string) error {
+	for _, match := range generatedSpecChrPathPattern.FindAllString(body, -1) {
 		path := strings.TrimRight(match, ".,;:")
-		if generatedSpecChrysoPathReferenceAllowed(path) {
+		if generatedSpecChrPathReferenceAllowed(path) {
 			continue
 		}
 
-		return fmt.Errorf("generated spec body references unsupported Chryso path %q", path)
+		return fmt.Errorf("generated spec body references unsupported chr path %q", path)
 	}
 
 	return nil
 }
 
-// NormalizeGeneratedSpecChrysoPathReferences executes the corresponding package operation.
-func NormalizeGeneratedSpecChrysoPathReferences(body string) string {
-	return generatedSpecChrysoPathPattern.ReplaceAllStringFunc(body, func(match string) string {
+// NormalizeGeneratedSpecChrPathReferences executes the corresponding package operation.
+func NormalizeGeneratedSpecChrPathReferences(body string) string {
+	return generatedSpecChrPathPattern.ReplaceAllStringFunc(body, func(match string) string {
 		path := strings.TrimRight(match, ".,;:")
 		suffix := strings.TrimPrefix(match, path)
 
-		if generatedSpecChrysoPathReferenceAllowed(path) {
+		if generatedSpecChrPathReferenceAllowed(path) {
 			return match
 		}
 
@@ -183,7 +183,7 @@ func NormalizeGeneratedSpecChrysoPathReferences(body string) string {
 	})
 }
 
-func generatedSpecChrysoPathReferenceAllowed(path string) bool {
+func generatedSpecChrPathReferenceAllowed(path string) bool {
 	if path == ".chr" || path == ".chr/" || path == ".chr/default" || path == ".chr/default/" {
 		return true
 	}

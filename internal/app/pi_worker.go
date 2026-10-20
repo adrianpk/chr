@@ -22,7 +22,7 @@ import (
 func newPiWorkerCommand(stdin io.Reader, stdout io.Writer) *cli.Command {
 	return &cli.Command{Name: "_pi-worker", Hidden: true, Flags: []cli.Flag{&cli.StringFlag{Name: "runtime", Required: true}}, Action: func(ctx context.Context, cmd *cli.Command) error {
 		if runtime.GOOS != "linux" || cmd.NArg() != 0 || len(cmd.String("runtime")) > 16_384 {
-			return errors.New("pi workers require the prepared Linux CHR bridge")
+			return errors.New("pi workers require the prepared Linux chr bridge")
 		}
 
 		var options pi.WorkerRuntimeOptions

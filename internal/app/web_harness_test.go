@@ -122,7 +122,7 @@ func webHarnessProvider(operations service) webViewProvider {
 func webHarnessHandler(t *testing.T, provider webViewProvider, login *webui.LoginCredentials) http.Handler {
 	t.Helper()
 
-	handler, err := webui.NewHandler(webui.HandlerOptions{Provider: provider, Login: login, Data: webui.ShellData{Title: "Chryso", ProjectID: provider.projectContext.ProjectID, ProjectName: "Fixture project", RefreshSeconds: 30}})
+	handler, err := webui.NewHandler(webui.HandlerOptions{Provider: provider, Login: login, Data: webui.ShellData{Title: "chr", ProjectID: provider.projectContext.ProjectID, ProjectName: "Fixture project", RefreshSeconds: 30}})
 	if err != nil {
 		t.Fatal(err)
 	}

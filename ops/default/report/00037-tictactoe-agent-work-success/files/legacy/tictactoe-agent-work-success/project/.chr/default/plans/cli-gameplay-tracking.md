@@ -13,7 +13,7 @@ created_at: "2026-06-18T08:51:15Z"
 
 Initial status: planned; no implementation work has started.
 
-Workspace decision discovery found no ADR, RFC, decision-log, engineering-principles, or equivalent accepted/active decision documents. The binding constraints are `AGENTS.md`, `.agents/CONVENTIONS.md`, the CLI gameplay plan, curated Chryso context, and quiz answers.
+Workspace decision discovery found no ADR, RFC, decision-log, engineering-principles, or equivalent accepted/active decision documents. The binding constraints are `AGENTS.md`, `.agents/CONVENTIONS.md`, the CLI gameplay plan, curated chr context, and quiz answers.
 
 ## Ordered Slices
 

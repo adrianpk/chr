@@ -5,7 +5,7 @@ Status: accepted
 ## Context
 
 The blog reference project is intentionally small. It exists to validate
-Chryso artifact generation and agent-work execution, not to model a
+chr artifact generation and agent-work execution, not to model a
 production publishing system.
 
 ## Decision

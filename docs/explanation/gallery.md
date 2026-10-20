@@ -1,6 +1,6 @@
 # Gallery
 
-Visual examples of Chryso in use.
+Visual examples of chr in use.
 
 This gallery follows a seeded reference project through context, specification,
 planning, board state, ticket execution, review state, and runtime proof.

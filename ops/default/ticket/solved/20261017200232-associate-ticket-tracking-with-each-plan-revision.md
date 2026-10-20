@@ -24,7 +24,7 @@ resolution: fixed
 ## Context and Verified Baseline
 
 Part of [the Web UI review](20261017105432-review-draft-web-ui-usability.md).
-The maintainer requires CHR to retain an internal tracking document for every
+The maintainer requires chr to retain an internal tracking document for every
 plan generation or regeneration. Its purpose is to give the agent the
 deterministic order for processing the plan's tickets. Task progress is recorded
 in the tickets, rather than marked as processed in the tracking document.

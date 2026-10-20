@@ -18,7 +18,7 @@ host-owned invocation, capacity, retry and result validation.
   Explicit `chr runtime init` adds missing files without replacing Codex assets.
   The locked image contains Node 22.23.3 and Pi 1.3.0; dependency lifecycle
   scripts are disabled and unsupported platforms fail preparation.
-- Worker admission checks an explicitly prepared static Linux CHR bridge and
+- Worker admission checks an explicitly prepared static Linux chr bridge and
   local Docker metadata, then freezes the executable, immutable image identity
   and selected model semantics. Native generation uses a separate Pi profile.
   Missing or incompatible preparation fails with setup guidance.

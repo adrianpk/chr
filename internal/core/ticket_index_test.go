@@ -160,8 +160,8 @@ func newTestTicketIndex(t *testing.T) TicketIndex {
 
 	addTestProject(t, registry, Project{
 		ID:           "project-1",
-		Name:         "chryso",
-		Path:         "/tmp/chryso",
+		Name:         "chr",
+		Path:         "/tmp/chr",
 		Enabled:      true,
 		RegisteredAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	})
@@ -187,7 +187,7 @@ func testIndexedTicket(key string, tags []string) IndexedTicket {
 
 	return IndexedTicket{
 		ProjectID:    "project-1",
-		Path:         "/tmp/chryso/.chr/default/tickets/" + key + ".md",
+		Path:         "/tmp/chr/.chr/default/tickets/" + key + ".md",
 		RelativePath: key + ".md",
 		Key:          key,
 		Title:        "Do something",

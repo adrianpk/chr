@@ -10,7 +10,7 @@ raw_path: "ops/default/dump/<id>/artifact.mdproject-context-raw.md"
 ## Summary
 
 The project is a small Go command-line tic-tac-toe game used to test
-Chryso's generation and agent execution workflow. It should stay simple
+chr's generation and agent execution workflow. It should stay simple
 enough for multiple generated tickets to complete quickly while still requiring
 real implementation judgment.
 
@@ -21,7 +21,7 @@ real implementation judgment.
 - Do not add persistence, networking, external UI packages, or third-party test
   libraries.
 - Seed context enough to avoid repeated manual quiz work.
-- Let Chryso generate the spec, plan, tracking document, and tickets for
+- Let chr generate the spec, plan, tracking document, and tickets for
   the main gameplay implementation.
 
 ## Open Questions

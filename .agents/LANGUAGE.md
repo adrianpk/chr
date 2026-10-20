@@ -22,3 +22,10 @@ This document defines language and locale boundaries for versioned artifacts.
 
 Before committing, inspect staged natural-language content and remove unintended
 non-English text.
+
+## Product Name
+
+- Write the product name as `chr`, always in lowercase, including headings
+  and sentence starts.
+- Use `chr` for commands and existing lowercase technical identifiers.
+- Preserve established environment variable names, ticket keys, and wire formats.

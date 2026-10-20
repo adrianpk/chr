@@ -16,7 +16,7 @@ PR: `#351`
 
 ## Summary
 
-- Added Chryso Web UI visual identity using a chrysocolla/Go-adjacent
+- Added chr Web UI visual identity using a chrcolla/Go-adjacent
   palette with amber and danger accents.
 - Added a repo-native rounded bot/agent avatar asset.
 - Refined layout density and responsive behavior across Project, Board, Dash,
@@ -27,7 +27,7 @@ PR: `#351`
 ## Changes
 
 - `internal/webui/assets/static/chr-avatar.svg`
-  - Adds the Chryso Web UI avatar asset.
+  - Adds the chr Web UI avatar asset.
 - `internal/webui/assets/templates/shell.html`
   - Replaces the text-only brand mark with the embedded avatar image.
 - `internal/webui/assets/static/chr.css`

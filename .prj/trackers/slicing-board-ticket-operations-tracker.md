@@ -179,7 +179,7 @@ Candidate tasks:
 
 - [x] T5.1 Add synopsis to `CreateTicketRequest` and CLI flags.
 - [x] T5.2 Default Board/TUI-created tickets to `backlog`.
-- [x] T5.3 Validate required metadata for Chryso-created tickets.
+- [x] T5.3 Validate required metadata for chr-created tickets.
 - [x] T5.4 Use SQLite-backed key allocation or the Slice 3 allocation boundary.
 - [x] T5.5 Refresh affected ticket index after creation.
 - [x] T5.6 Add CLI/service tests.

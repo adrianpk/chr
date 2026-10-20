@@ -2,7 +2,7 @@
 
 ## Language
 
-Use English for code, comments, documentation, commit messages, and Chryso artifacts.
+Use English for code, comments, documentation, commit messages, and chr artifacts.
 
 ## Go Code
 

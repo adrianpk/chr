@@ -10,7 +10,7 @@ application service logic.
 The goal is to make every real TUI operation auditable against an equivalent
 CLI operation, or an explicit documented gap. The CLI is not a legacy or
 secondary compatibility surface. It must be usable by operators and agents as
-part of normal Chryso workflows.
+part of normal chr workflows.
 
 ## Source
 

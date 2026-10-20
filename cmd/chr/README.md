@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`cmd/chr` is the executable assembly point for the Chryso command-line
+`cmd/chr` is the executable assembly point for the chr command-line
 application.
 
 ## Boundary

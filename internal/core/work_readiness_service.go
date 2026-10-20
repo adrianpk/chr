@@ -889,7 +889,7 @@ func workspaceWorkReadinessRepair(diagnostic WorkReadinessDiagnostic) (WorkReadi
 			Available: true,
 			Code:      WorkReadinessRepairIgnoreRuntimeArtifacts,
 			Safe:      true,
-			Detail:    "exclude Chryso runtime artifacts from local Git status",
+			Detail:    "exclude chr runtime artifacts from local Git status",
 		}, true
 	case WorkReadinessDiagnosticWorktreeRootMissing:
 		return WorkReadinessRepair{
@@ -1008,7 +1008,7 @@ func runtimeArtifactsVisibleDiagnostic(mode WorkWorkspaceMode, count int) WorkRe
 	return WorkReadinessDiagnostic{
 		Code:     WorkReadinessDiagnosticRuntimeArtifactsVisible,
 		Severity: severity,
-		Detail:   fmt.Sprintf("chryso runtime artifacts are visible to git: %d", count),
+		Detail:   fmt.Sprintf("chr runtime artifacts are visible to git: %d", count),
 	}
 }
 

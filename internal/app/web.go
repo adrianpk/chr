@@ -350,7 +350,7 @@ func newWebServeMux(config resolvedWebServeConfig) (http.Handler, error) {
 		Access:      access,
 		LogRequests: config.LogRequests,
 		Data: webui.ShellData{
-			Title:          "Chryso",
+			Title:          "chr",
 			ProjectDir:     config.ProjectDir,
 			ProjectID:      projectContext.ProjectID,
 			ProjectName:    projectContext.ProjectName,

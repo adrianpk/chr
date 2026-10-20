@@ -1,11 +1,11 @@
 # QA Agent Work Scenario
 
-This runbook exercises the seeded blog QA scenario from reset through CHR
+This runbook exercises the seeded blog QA scenario from reset through chr
 artifact generation and ticket execution.
 
 ## Reset The Scenario
 
-From the Chryso repository:
+From the chr repository:
 
 ```sh
 make qa-reset-blog
@@ -35,9 +35,9 @@ the parent repository, confirms it has an independent Git repository, and
 confirms work readiness is ready before manual TUI runs. It also confirms the
 expected failing test is still present.
 
-## Open CHR
+## Open chr
 
-Open CHR against the active scenario:
+Open chr against the active scenario:
 
 ```sh
 cd qa/project/blog
@@ -90,5 +90,5 @@ Run the generated ticket loop:
 chr work run-all --use-case comments --order key
 ```
 
-Use this scenario to observe whether CHR can preserve context from seeded
+Use this scenario to observe whether chr can preserve context from seeded
 inputs into specs, plans, tracking, tickets, and implementation work.

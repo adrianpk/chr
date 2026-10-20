@@ -12,7 +12,7 @@ created_at: "2026-06-18T08:45:31Z"
 
 **Purpose**
 
-This specification defines the first useful version of the Tictactoe project: a small Go command-line tic-tac-toe game for two human players sharing one terminal. The game must run locally, use standard input and standard output, and remain simple enough to serve as a Chryso QA reference project.
+This specification defines the first useful version of the Tictactoe project: a small Go command-line tic-tac-toe game for two human players sharing one terminal. The game must run locally, use standard input and standard output, and remain simple enough to serve as a chr QA reference project.
 
 **Decision Discovery**
 
@@ -169,8 +169,8 @@ No other unresolved behavior is required to complete the first useful version.
 - source: request_context
 - source: quiz_context
 - source: request_context
-- source: /home/adrian/Projects/chryso/qa/project/tictactoe/AGENTS.md
-- source: /home/adrian/Projects/chryso/qa/project/tictactoe/.chr/default/project.md
+- source: /workspaces/chr/qa/project/tictactoe/AGENTS.md
+- source: /workspaces/chr/qa/project/tictactoe/.chr/default/project.md
 - source: .chr/default/dumps/cli-gameplay-context.md
 - source: .chr/default/dumps/project-context.md
 - source: .chr/default/quizzes/cli-gameplay-quiz.md

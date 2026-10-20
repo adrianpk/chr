@@ -5,7 +5,7 @@
 - execution: exec-7fe25b30b4955e1e
 - project: project-7c98c4f4cf644493
 - ticket: CHR-5
-- ticket_path: /home/adrian/Projects/chryso/qa/project/tictactoe/.chr/default/tickets/cli-gameplay/CHR-5-Test-coverage-hardening.md
+- ticket_path: /workspaces/chr/qa/project/tictactoe/.chr/default/tickets/cli-gameplay/CHR-5-Test-coverage-hardening.md
 - status: succeeded
 - failure_kind: none
 
@@ -19,23 +19,23 @@
 ## Runtime
 
 - image: chr-agent-runtime:local
-- dockerfile: /home/adrian/Projects/chryso/qa/project/tictactoe/.chr/default/runtime/agent/Dockerfile
+- dockerfile: /workspaces/chr/qa/project/tictactoe/.chr/default/runtime/agent/Dockerfile
 - container_workdir: /workspace
 - validation_command: go test ./...
 
 ## Artifacts
 
-- run_dir: /home/adrian/Projects/chryso/qa/project/tictactoe/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e
-- result: /home/adrian/Projects/chryso/qa/project/tictactoe/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/result.json
-- log: /home/adrian/Projects/chryso/qa/project/tictactoe/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/runtime.log
-- validation: /home/adrian/Projects/chryso/qa/project/tictactoe/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/validation.log
-- report: /home/adrian/Projects/chryso/qa/project/tictactoe/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/execution-report.md
+- run_dir: /workspaces/chr/qa/project/tictactoe/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e
+- result: /workspaces/chr/qa/project/tictactoe/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/result.json
+- log: /workspaces/chr/qa/project/tictactoe/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/runtime.log
+- validation: /workspaces/chr/qa/project/tictactoe/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/validation.log
+- report: /workspaces/chr/qa/project/tictactoe/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/execution-report.md
 
 ## Validation
 
 - status: succeeded
 - command: go test ./...
-- path: /home/adrian/Projects/chryso/qa/project/tictactoe/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/validation.log
+- path: /workspaces/chr/qa/project/tictactoe/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/validation.log
 
 ## Result
 

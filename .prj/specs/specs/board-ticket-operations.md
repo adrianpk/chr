@@ -7,7 +7,7 @@ Source quiz: `.prj/quizzes/curated/dashboard-board-ticket-operations-quiz.md`
 
 ## Purpose
 
-Define the Board MVP as the operational ticket-flow surface for Chryso.
+Define the Board MVP as the operational ticket-flow surface for chr.
 
 The Board is not the later metrics dashboard. The later `F8` Dashboard may
 become a broader Grafana-like view for activity, throughput, validation, and
@@ -72,7 +72,7 @@ UI labels should be human-readable and avoid underscores:
 Existing ticket status values should be migrated or aliased deliberately. The
 current historical values include `open`, `ready`, `reviewing`, `solved`,
 `merged`, and `closed`. The Board implementation must preserve readability for
-existing tickets while moving new Chryso-created tickets to the Board
+existing tickets while moving new chr-created tickets to the Board
 status vocabulary.
 
 ## Attention View
@@ -213,7 +213,7 @@ Future sync may:
 - fill empty synopsis through LLM assistance when the body is useful;
 - preserve non-empty synopsis text.
 
-For the MVP, tickets created through Chryso should update the SQLite index
+For the MVP, tickets created through chr should update the SQLite index
 through service boundaries. Existing index rebuild and status commands remain
 the recovery path.
 
@@ -233,7 +233,7 @@ scriptable.
 
 ## Acceptance Criteria
 
-- New Chryso-created tickets include `synopsis`.
+- New chr-created tickets include `synopsis`.
 - New ticket statuses use the Board vocabulary.
 - Existing legacy statuses are mapped or surfaced without hiding tickets.
 - The SQLite ticket index stores Board metadata needed for list/detail views.

@@ -1,6 +1,6 @@
 # Documentation
 
-Chryso documentation follows Diataxis.
+chr documentation follows Diataxis.
 
 ## Tutorials
 

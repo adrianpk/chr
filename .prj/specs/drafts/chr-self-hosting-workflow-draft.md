@@ -1,12 +1,12 @@
-# Chryso Self-Hosting Workflow
+# chr Self-Hosting Workflow
 
 Status: draft
 
 ## Purpose
 
-Capture the early workflow for developing Chryso with a project-local asset directory that emulates the future `.chr/` workspace without using `.chr/` in this repository yet.
+Capture the early workflow for developing chr with a project-local asset directory that emulates the future `.chr/` workspace without using `.chr/` in this repository yet.
 
-This draft exists because Chryso is not usable enough to manage its own development directly, but the project should still exercise the same operating ideas that the tool is meant to provide later.
+This draft exists because chr is not usable enough to manage its own development directly, but the project should still exercise the same operating ideas that the tool is meant to provide later.
 
 ## Paired Notes
 
@@ -16,7 +16,7 @@ This draft exists because Chryso is not usable enough to manage its own developm
 
 Use `.prj/` as a temporary project-local operating directory for this repository.
 
-`.prj/` is not the Chryso runtime directory. It is a development scaffold used to test the approach before `chr` can create and manage `.chr/` workspaces itself.
+`.prj/` is not the chr runtime directory. It is a development scaffold used to test the approach before `chr` can create and manage `.chr/` workspaces itself.
 
 The eventual managed workspace root remains `.chr/`.
 
@@ -26,7 +26,7 @@ The repository already has `AGENTS.md` and `.agents/` for human-agent collaborat
 
 `.prj/` gives the project a controlled place to store draft specifications, curated discussion, and early operating artifacts while keeping `.chr/` reserved for workspaces created by the `chr` binary.
 
-If Chryso becomes capable enough, the project can later use `chr` to manage its own development through a real `.chr/` workspace.
+If chr becomes capable enough, the project can later use `chr` to manage its own development through a real `.chr/` workspace.
 
 ## Scope
 
@@ -49,7 +49,7 @@ This draft does not define:
 
 ## Early Direction
 
-Chryso starts as a CLI-first Go tool.
+chr starts as a CLI-first Go tool.
 
 The future TUI may live in the same binary, but it is not the first official surface.
 
@@ -76,7 +76,7 @@ chr ticket loop
 
 Tickets are expected to become the main operational unit.
 
-Chryso should eventually support:
+chr should eventually support:
 
 - working on a specific ticket,
 - working in a loop across multiple eligible tickets,

@@ -198,7 +198,7 @@ func renderAuthoringGeneration(snapshot core.AuthoringSnapshot, request core.Aut
 
 		return renderCuratedDumpMarkdown(snapshot.Session.Topic, DumpScope{}, raw.Path, DumpCurationResult{PolishedBody: body}), nil
 	case core.AuthoringArtifactKindSpec:
-		spec := core.GeneratedSpec{Scope: core.QuizScope{ProjectID: request.ProjectID}, Title: snapshot.Session.Topic, Body: core.NormalizeGeneratedSpecChrysoPathReferences(body), SourcePaths: paths, SourceRequestID: request.Binding.RequestID, SourceResponseID: request.Binding.RequestID + "-response", CreatedAt: time.Now().UTC()}
+		spec := core.GeneratedSpec{Scope: core.QuizScope{ProjectID: request.ProjectID}, Title: snapshot.Session.Topic, Body: core.NormalizeGeneratedSpecChrPathReferences(body), SourcePaths: paths, SourceRequestID: request.Binding.RequestID, SourceResponseID: request.Binding.RequestID + "-response", CreatedAt: time.Now().UTC()}
 		if err := core.ValidateGeneratedSpec(spec); err != nil {
 			return "", err
 		}

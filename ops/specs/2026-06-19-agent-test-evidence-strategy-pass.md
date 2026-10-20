@@ -21,7 +21,7 @@ Related:
 
 ## Summary
 
-Chryso should add a mandatory Test/Evidence Strategy pass to development
+chr should add a mandatory Test/Evidence Strategy pass to development
 worker execution.
 
 The pass happens after a ticket is selected and before the development worker
@@ -41,7 +41,7 @@ strategy before the ticket can move to `ready_for_review`.
   strategy before code changes.
 - Persist the strategy in the ticket checklist/tasklist as the primary
   operational source.
-- Keep the checklist parseable enough for Chryso and future workers to
+- Keep the checklist parseable enough for chr and future workers to
   recognize and validate.
 - Keep the checklist readable enough for humans to inspect and edit.
 - Allow user-authored checklist edits without making user-authored strategy the
@@ -85,7 +85,7 @@ strategy before the ticket can move to `ready_for_review`.
 
 `Primary operational source`
 
-: The artifact Chryso should inspect to determine whether the ticket has an
+: The artifact chr should inspect to determine whether the ticket has an
   evidence strategy. For this feature, the primary source is the ticket
   checklist/tasklist.
 
@@ -146,7 +146,7 @@ Markdown so humans can read and edit them.
 
 ### Required Labels
 
-Chryso must recognize these labels inside the strategy block:
+chr must recognize these labels inside the strategy block:
 
 - `Evidence strategy`
 - `Gherkin`
@@ -441,7 +441,7 @@ The runtime execution report should include:
 The report must not be the only place where strategy exists.
 
 If the report and ticket checklist disagree, the ticket checklist is the
-operational source and Chryso should surface a diagnostic.
+operational source and chr should surface a diagnostic.
 
 ## Configuration
 
@@ -517,7 +517,7 @@ Existing tickets without evidence-strategy checklists should remain readable.
 When a worker picks such a ticket, it should insert the strategy block during the
 initial strategy pass.
 
-Chryso should not require bulk migration of existing tickets before the
+chr should not require bulk migration of existing tickets before the
 feature is used.
 
 If a project disables the feature through config, existing checklist blocks
@@ -525,7 +525,7 @@ should be preserved but not enforced.
 
 ## Diagnostics
 
-Chryso should provide clear diagnostics for blocked outcomes.
+chr should provide clear diagnostics for blocked outcomes.
 
 Initial diagnostic reasons:
 

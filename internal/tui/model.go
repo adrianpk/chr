@@ -106,7 +106,7 @@ type Options struct {
 	HarnessExecutor      HarnessSelectionExecutor
 }
 
-// Model is the Bubble Tea model for the Chryso TUI.
+// Model is the Bubble Tea model for the chr TUI.
 type Model struct {
 	projectDir               string
 	projectID                string

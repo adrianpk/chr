@@ -1,7 +1,7 @@
 # Observe Agent Work
 
 Use this guide when an agent ticket run or ready-ticket queue is active and you
-want to see what Chryso is doing.
+want to see what chr is doing.
 
 ## Open Dash
 

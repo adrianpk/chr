@@ -4,15 +4,15 @@ Status: approved
 
 ## Summary
 
-Chryso needs a `dev` to `main` promotion gate that checks objective
+chr needs a `dev` to `main` promotion gate that checks objective
 evidence before accumulated work is promoted.
 
 The gate must be tooling-first and agent-aware. It must not behave like a
 generic PR reviewer, and it must not treat every project change as work that
-should be tracked through the Chryso board.
+should be tracked through the chr board.
 
 The board is primarily for agent-managed work. Human or external changes may
-exist outside Chryso and must not produce warnings or failures by default.
+exist outside chr and must not produce warnings or failures by default.
 
 ## Problem
 
@@ -23,13 +23,13 @@ sanity check, but it is not enough to justify a new gate.
 The missing value is promotion evidence:
 
 - which agent-managed work is included;
-- whether Chryso's own recorded runs have evidence;
+- whether chr's own recorded runs have evidence;
 - whether completed agent tickets have result artifacts;
 - whether the report matches the exact base/head being promoted;
 - what manual or external changes are present for context;
 - which validation commands passed or failed.
 
-The gate should verify Chryso's own claims about agent work. It should not
+The gate should verify chr's own claims about agent work. It should not
 accuse manual work of being missing from the board.
 
 ## Goals
@@ -46,8 +46,8 @@ accuse manual work of being missing from the board.
 ## Non-Goals
 
 - Do not implement an AI code reviewer.
-- Do not require every project change to have a Chryso ticket.
-- Do not require humans to create Chryso tickets for their own manual work.
+- Do not require every project change to have a chr ticket.
+- Do not require humans to create chr tickets for their own manual work.
 - Do not fail on manual or external changes by default.
 - Do not require coverage, CRAP, mutation testing, or fuzzing in the first
   version.
@@ -55,7 +55,7 @@ accuse manual work of being missing from the board.
 
 ## Core Rule
 
-Only Chryso-managed work is required to have Chryso evidence.
+Only chr-managed work is required to have chr evidence.
 
 Manual or external changes are listed for context only unless project policy
 explicitly configures stricter behavior.
@@ -73,7 +73,7 @@ stale base/head report -> fail
 
 ### Agent-Managed Work
 
-Work is agent-managed when Chryso has recorded it as part of ticket
+Work is agent-managed when chr has recorded it as part of ticket
 execution or loop execution.
 
 Signals may include:
@@ -84,12 +84,12 @@ Signals may include:
 - loop report;
 - result artifact;
 - changed-file summary;
-- commit SHA recorded by Chryso;
-- branch created or managed by Chryso.
+- commit SHA recorded by chr;
+- branch created or managed by chr.
 
 ### Manual or External Work
 
-Work is manual or external when it appears in the Git diff but Chryso has
+Work is manual or external when it appears in the Git diff but chr has
 no evidence that it produced it.
 
 This is not an error by default.
@@ -106,7 +106,7 @@ It should not emit a warning unless explicit policy asks for it.
 
 ### Evidence
 
-Evidence is structured or semi-structured data produced by Chryso or
+Evidence is structured or semi-structured data produced by chr or
 configured tools.
 
 Examples:
@@ -242,19 +242,19 @@ Collect:
 - diff stat;
 - file status: added, modified, deleted, renamed.
 
-### Chryso
+### chr
 
 Collect:
 
-- tickets touched by Chryso runs;
+- tickets touched by chr runs;
 - execution reports;
 - loop reports;
 - run IDs;
 - result artifacts;
 - changed-file summaries;
-- ticket status transitions caused by Chryso.
+- ticket status transitions caused by chr.
 
-The first version can be best-effort. If Chryso cannot map a Git change to
+The first version can be best-effort. If chr cannot map a Git change to
 agent-managed work, it should classify it as manual or external.
 
 ### Validation
@@ -279,18 +279,18 @@ The default gate fails when:
 - base or head cannot be resolved;
 - validation command fails;
 - report cannot be written;
-- a Chryso-recorded run references missing result artifacts;
-- a Chryso-managed ticket is marked completed by the system without
+- a chr-recorded run references missing result artifacts;
+- a chr-managed ticket is marked completed by the system without
   evidence;
 - an existing report is being verified and its base/head SHAs are stale.
 
 The default gate does not fail when:
 
-- files changed without Chryso tickets;
+- files changed without chr tickets;
 - commits lack ticket IDs;
 - docs changed manually;
 - code changed manually;
-- a human did not use the Chryso board.
+- a human did not use the chr board.
 
 ## Policy
 
@@ -410,7 +410,7 @@ It should present:
 
 - objective failures;
 - validation results;
-- Chryso-managed work and its evidence;
+- chr-managed work and its evidence;
 - manual or external changes for context;
 - exact base/head SHAs.
 
@@ -424,7 +424,7 @@ The first implementation should include:
 2. Git base/head/merge-base resolution.
 3. Commit and changed-file collection.
 4. Validation command execution.
-5. Basic Chryso report discovery under `.chr/default/reports`.
+5. Basic chr report discovery under `.chr/default/reports`.
 6. Classification into agent-managed vs manual/external when evidence is clear.
 7. JSON and Markdown report generation.
 8. Default failure conditions.
@@ -456,7 +456,7 @@ Draft model:
 
 ## Acceptance Criteria
 
-- The command works in a generic Go project initialized with Chryso.
+- The command works in a generic Go project initialized with chr.
 - The command does not require GitHub or GitLab.
 - Forgejo is supported as the first-class forge target.
 - The command can run in Woodpecker CI.
@@ -464,11 +464,11 @@ Draft model:
 - The command writes Markdown and JSON reports under `.chr/default/reports/gates/`.
 - The report records base/head SHAs.
 - The report lists validation results.
-- The report lists agent-managed work when Chryso evidence exists.
+- The report lists agent-managed work when chr evidence exists.
 - The report lists manual or external changes neutrally.
 - The default policy does not warn or fail merely because a change lacks a
-  Chryso ticket.
-- The default policy fails when Chryso's own recorded work lacks required
+  chr ticket.
+- The default policy fails when chr's own recorded work lacks required
   evidence.
 - Failing gates block promotion through the Forgejo/Woodpecker status path.
 - Passing gates with warnings do not block by default, but warnings are visible

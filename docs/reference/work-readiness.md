@@ -2,12 +2,12 @@
 
 ## Purpose
 
-Work readiness is the preflight contract Chryso checks before starting
+Work readiness is the preflight contract chr checks before starting
 agent work.
 
 It protects the managed project from starting a ticket execution or ready queue
 from an unexpected repository state. The policy is project-local and
-configurable, so projects do not need to follow Chryso's own branch names.
+configurable, so projects do not need to follow chr's own branch names.
 
 ## Configuration
 
@@ -32,7 +32,7 @@ Generated config may omit these fields. Omitted fields use the default work
 policy.
 
 When `workspace_mode` is `worktree`, `worktree_root` must be
-`ops/default/worktree`. CHR resolves the active `OPS_USER` namespace at
+`ops/default/worktree`. chr resolves the active `OPS_USER` namespace at
 runtime, so configuration never needs a user-specific path. Legacy or custom
 worktree roots are rejected.
 
@@ -54,7 +54,7 @@ Default work policy:
 | `worktree_base` | `remote_integration_branch` |
 | `worktree_cleanup` | `after_merge` |
 
-The defaults preserve Chryso's own `dev` plus `origin` workflow while
+The defaults preserve chr's own `dev` plus `origin` workflow while
 making the policy explicit and replaceable per project.
 
 ## Modes
@@ -84,7 +84,7 @@ that set `workspace_mode: worktree` get a deterministic ticket worktree under
 `worktree_root`, execution paths inside that worktree, and worktree metadata
 under `<worktree_root>/.metadata/`.
 
-In worktree mode, Chryso still checks the user checkout before starting
+In worktree mode, chr still checks the user checkout before starting
 work. The user checkout readiness check protects the integration branch and
 remote tracking state, while the ticket worktree inspection reports whether the
 isolated execution workspace is missing, clean, dirty, mismatched, branch-owned
@@ -105,7 +105,7 @@ Typical blocking diagnostics include:
   branch.
 - `missing_branch`: the configured branch is missing locally.
 - `dirty_worktree`: user-owned changes are visible.
-- `runtime_artifacts_visible`: Chryso runtime artifacts are visible to
+- `runtime_artifacts_visible`: chr runtime artifacts are visible to
   Git and can be safely ignored.
 - `missing_remote_ref`: the configured remote tracking ref is missing.
 - `branch_behind_remote`: the local branch is behind the configured remote ref.
@@ -128,7 +128,7 @@ chr work doctor --fix-safe
 
 Safe repair may:
 
-- add Chryso runtime artifact paths to local ignore state;
+- add chr runtime artifact paths to local ignore state;
 - create the configured ticket worktree root;
 - fetch the configured canonical remote;
 - fast-forward the configured integration branch;

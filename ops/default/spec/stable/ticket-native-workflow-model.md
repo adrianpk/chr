@@ -9,13 +9,13 @@ Approved: 2026-10-08
 Specification: [Ticket-Native Work Execution](ticket-native-workflow.md)
 
 All fields and schema additions below are part of the approved contract and
-remain implementation requirements. They extend CHR's ticket,
+remain implementation requirements. They extend chr's ticket,
 ops artifact, execution and integration models. They do not introduce a second
 application service, private scheduling database, or independent adapter state.
 
 ## 1. Storage and Authority
 
-Use CHR's project-local `ops/<namespace>/` layout and existing artifact envelope
+Use chr's project-local `ops/<namespace>/` layout and existing artifact envelope
 allocator. Canonical artifact metadata keeps `ops-layout/v1`; new workflow domain
 objects have an explicit `chr-workflow/v1` discriminator. Do not reinterpret an
 unversioned plan, tracker, or arbitrary Markdown file as an executable set.
@@ -45,7 +45,7 @@ fingerprint before execution or closure.
 ## 2. Identity and Ticket Fields
 
 Identity is `(project_id, namespace, id)`. For existing tickets, `id` is their
-stable CHR `key`; adopting a canonical envelope retains that key as the domain
+stable chr `key`; adopting a canonical envelope retains that key as the domain
 ticket key instead of substituting an allocated artifact directory ID. Artifact
 ID and ticket key are separately typed references where both exist.
 
@@ -251,7 +251,7 @@ Upgrade snapshots prior effective defaults before writing any version marker.
 
 ## 8. Configuration and Bounds
 
-These are approved additions to CHR project configuration, pending delivery. Existing
+These are approved additions to chr project configuration, pending delivery. Existing
 `review.mode` and `work.workspace_mode` keep their current names.
 
 | Key or bound | Version-1 default | Allowed values / behavior |

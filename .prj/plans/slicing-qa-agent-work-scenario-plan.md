@@ -4,13 +4,13 @@ Status: active
 
 ## Purpose
 
-Implement the first reproducible QA scenario for exercising Chryso's
+Implement the first reproducible QA scenario for exercising chr's
 agent-work flow end to end: reset a seeded project, run a single bug ticket,
 generate a comments spec, generate a plan, materialize tracking and tickets,
 and run the agent loop over the generated work.
 
 The scenario should be easy to reset and inspect manually. It must not turn into
-a large product sample before the CHR workflow itself is proven.
+a large product sample before the chr workflow itself is proven.
 
 ## Source
 
@@ -39,7 +39,7 @@ Conversation decisions:
   quizzes, and ADRs.
 - ADRs live as reusable project documentation under `docs/explanation/adr/`.
 - Test-based development and table-driven tests are baseline engineering
-  preferences for both CHR and the QA reference project.
+  preferences for both chr and the QA reference project.
 
 ## Current State
 
@@ -77,7 +77,7 @@ The first QA scenario provides:
 - a known failing test for the seeded bug ticket;
 - seeded `.chr` context for comments spec generation;
 - project documentation including ADRs under Diataxis explanation docs;
-- CHR and project agent conventions that prefer reproducing bugs with tests and
+- chr and project agent conventions that prefer reproducing bugs with tests and
   table-driven tests for input/output behavior.
 
 ## Slice Map
@@ -139,7 +139,7 @@ Out of scope:
 
 - Full blog app implementation.
 - Seeded `.chr` artifacts.
-- CHR prompt changes.
+- chr prompt changes.
 
 ## Slice 2: Blog Reference Project
 
@@ -168,18 +168,18 @@ Candidate tasks:
 Out of scope:
 
 - Comments implementation.
-- CHR seeded context.
+- chr seeded context.
 - Bug fix.
 
-## Slice 3: Seeded CHR Context And ADR Docs
+## Slice 3: Seeded chr Context And ADR Docs
 
-Seed the blog reference project with the context required for CHR to generate
+Seed the blog reference project with the context required for chr to generate
 the comments spec, plan, tracking, and tickets.
 
 Expected behavior:
 
 - The reference project contains `.chr` root files only where required.
-- User-owned CHR artifacts live under `.chr/default/...`.
+- User-owned chr artifacts live under `.chr/default/...`.
 - The project has metadata and a `comments` use case.
 - Dumps and curated quiz notes describe the comments feature.
 - No comments spec, plan, tracking, or generated tickets are present.
@@ -193,18 +193,18 @@ Candidate tasks:
 - T3.3 Add a ready bug ticket for the unknown-slug behavior.
 - T3.4 Add ADR documentation under `docs/explanation/adr/`.
 - T3.5 Ensure no generated comments spec/plan/tracking/tickets are seeded.
-- T3.6 Validate CHR can open the active project after reset.
+- T3.6 Validate chr can open the active project after reset.
 - T3.7 Add slice implementation report and run quality gates.
 
 Out of scope:
 
 - Implementing comments.
 - Running Codex generation.
-- Changing CHR prompt policy.
+- Changing chr prompt policy.
 
 ## Slice 4: Test Based Agent Guidance
 
-Make the test-based development preference explicit in CHR and in generated work
+Make the test-based development preference explicit in chr and in generated work
 units.
 
 Expected behavior:
@@ -220,7 +220,7 @@ Expected behavior:
 
 Candidate tasks:
 
-- T4.1 Update CHR agent conventions with test-based guidance.
+- T4.1 Update chr agent conventions with test-based guidance.
 - T4.2 Update generated tracking/ticket prompt instructions with the same
       preference.
 - T4.3 Add tests that assert prompt guidance is present where relevant.
@@ -239,7 +239,7 @@ Document and verify the manual QA flow.
 
 Expected behavior:
 
-- Documentation explains how to reset, run tests, open CHR, resolve the manual
+- Documentation explains how to reset, run tests, open chr, resolve the manual
   bug ticket, generate comments artifacts, and run the generated ticket loop.
 - The runbook is concise and operational.
 - Smoke validation proves reset creates an independent Git repo and expected
@@ -269,8 +269,8 @@ The slicing is complete when:
 - `make qa-test-blog` runs `go test ./...` in the active project;
 - the reset baseline has the expected failing bug test;
 - the active project is an independent Git repo ignored by the parent repo;
-- the active project contains seeded CHR context for comments generation;
+- the active project contains seeded chr context for comments generation;
 - the active project contains ADRs under `docs/explanation/adr/`;
-- CHR conventions and generated ticket guidance express the test-based
+- chr conventions and generated ticket guidance express the test-based
   preference;
 - docs explain the manual QA flow.

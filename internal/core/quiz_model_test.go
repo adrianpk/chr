@@ -886,7 +886,7 @@ func TestQuizModelSpecGenerationInstructionsDoNotOverfitPathPolicy(t *testing.T)
 
 	for _, forbidden := range []string{
 		"Do not propose arbitrary domain directories",
-		"Do not invent new Chryso persistence locations",
+		"Do not invent new chr persistence locations",
 	} {
 		if strings.Contains(instructions, forbidden) {
 			t.Fatalf("spec generation instructions contain overfitted path policy %q in: %q", forbidden, instructions)

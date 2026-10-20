@@ -6,7 +6,7 @@ usage() {
 Usage:
   scripts/assets/normalize-gallery-screenshots.sh IMAGE [...]
 
-Normalizes Chryso TUI gallery screenshots in place.
+Normalizes chr TUI gallery screenshots in place.
 
 Supported source geometries:
   1920x1080 -> 1850x888, crop 1850x888+34+142

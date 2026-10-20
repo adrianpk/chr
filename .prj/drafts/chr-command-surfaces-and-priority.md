@@ -1,4 +1,4 @@
-# Chryso Command Surfaces and Priority
+# chr Command Surfaces and Priority
 
 Status: draft
 
@@ -21,7 +21,7 @@ This is not an executable slice plan. A slice becomes executable only after a pl
 
 These surfaces should not imply that the user sends messages to themselves from the terminal. Manual notification commands are only useful as setup and validation tools.
 
-Chryso is a single-operator orchestration tool. Its goal is to let one
+chr is a single-operator orchestration tool. Its goal is to let one
 operator bootstrap a project, create or refine tickets, and then let `chr`
 drive serial agent work with minimal intervention. CLI, Telegram, and email are
 control surfaces for the same local coordinator, not separate collaboration

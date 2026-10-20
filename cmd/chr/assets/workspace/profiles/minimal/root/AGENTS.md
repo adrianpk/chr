@@ -1,5 +1,5 @@
 # Agent Operating Contract
 
-This project is managed by Chryso.
+This project is managed by chr.
 
-Project-local Chryso state lives under `.chr/`.
+Project-local chr state lives under `.chr/`.

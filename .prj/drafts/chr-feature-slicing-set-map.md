@@ -1,10 +1,10 @@
-# Chryso Feature Slicing Set Map
+# chr Feature Slicing Set Map
 
 Status: draft
 
 ## Purpose
 
-Define a meta-level map of the known and inferred Chryso feature set, grouped into slicings.
+Define a meta-level map of the known and inferred chr feature set, grouped into slicings.
 
 In this document:
 
@@ -14,7 +14,7 @@ In this document:
 
 ## Product Boundary
 
-Chryso is a simple orchestration tool for working on one local project with
+chr is a simple orchestration tool for working on one local project with
 minimal operator intervention after bootstrap.
 
 The steady-state workflow is:
@@ -28,7 +28,7 @@ The operator may command or observe the system from the CLI, Telegram, or email.
 Remote command surfaces exist to unblock work, inspect status, and provide
 decisions when a running loop or daemon needs input.
 
-Chryso is not a multi-user collaboration system and not a concurrent
+chr is not a multi-user collaboration system and not a concurrent
 multi-agent editing system. The assumed operating model is one local operator
 and at most one active agent mutating a workspace at a time. A daemon may
 coordinate registered projects and loops, but it should serialize work for a

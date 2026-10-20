@@ -1,14 +1,14 @@
-# Chryso
+# chr
 
 <p align="center">
-  <img src="assets/img/home/chryso-hero.png" alt="Chryso hero" width="760">
+  <img src="assets/img/home/chr-hero.png" alt="chr hero" width="760">
 </p>
 
 [Gallery](docs/explanation/gallery.md)
 
-Chryso is a **local software factory built in Go**. It turns development goals
-into specifications and tickets, then coordinates AI coding agents to execute
-them in isolated environments.
+chr is a **local software factory built in Go**.
+It turns development goals into specifications and tickets, then coordinates
+AI coding agents to execute them in isolated environments.
 
 A local TUI and Telegram interface provide access to the work queue, agent
 execution, and results. Each execution leaves behind artifacts that can be
@@ -29,7 +29,7 @@ while keeping execution explicit and inspectable.
 
 ## Control Surface
 
-Chryso provides three interfaces: a TUI, a CLI, and an optional local Web UI.
+chr provides three interfaces: a TUI, a CLI, and an optional local Web UI.
 All three operate on the same project state.
 
 The TUI and Web UI provide access to specifications, plans, tickets, the Kanban
@@ -67,4 +67,4 @@ It focuses on consistency, scope, contracts, and execution evidence. See the
 
 ## License
 
-Chryso is licensed under the [Apache License, Version 2.0](LICENSE).
+chr is licensed under the [Apache License, Version 2.0](LICENSE).

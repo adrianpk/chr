@@ -16,11 +16,11 @@ Sources:
 
 ## Purpose
 
-Define the Chryso Bubble Tea terminal interface as a first-class local
+Define the chr Bubble Tea terminal interface as a first-class local
 operational console.
 
 The TUI is not a decorative wrapper around commands. It is the main human
-surface for operating a local Chryso project from a desktop development
+surface for operating a local chr project from a desktop development
 environment while preserving the CLI as the automation and expert surface.
 
 The TUI should make the system feel like one coherent local agent workflow
@@ -29,7 +29,7 @@ and implementation reports.
 
 ## Product Position
 
-Chryso remains a single local tool.
+chr remains a single local tool.
 
 The default human entry point is:
 

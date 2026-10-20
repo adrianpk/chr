@@ -10,7 +10,7 @@ PR: #214
 ## Purpose
 
 Introduce the project-local active userspace boundary needed by later Board
-work without relocating existing Chryso artifacts.
+work without relocating existing chr artifacts.
 
 ## Delivered Behavior
 

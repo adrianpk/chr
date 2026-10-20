@@ -6,7 +6,7 @@ Status: delivered
 
 Materialize a root-level `AGENTS.md` when `chr init` initializes a managed project.
 
-External agent tooling may look for `AGENTS.md` at the project root, so the root file must exist outside `.chr/` even though Chryso-owned workspace state lives under `.chr/`.
+External agent tooling may look for `AGENTS.md` at the project root, so the root file must exist outside `.chr/` even though chr-owned workspace state lives under `.chr/`.
 
 ## Scope
 
@@ -43,4 +43,4 @@ go run ./cmd/chr init --dir "$tmpdir"
 go run ./cmd/chr init --dir "$tmpdir" --dry-run
 ```
 
-Both checks must avoid creating `.chr/` in the Chryso repository itself.
+Both checks must avoid creating `.chr/` in the chr repository itself.

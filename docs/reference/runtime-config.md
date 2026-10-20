@@ -3,7 +3,7 @@
 Runtime configuration may live in the managed project's `.chr/default/config.yml` file
 under the `runtime:` key.
 
-When fields are omitted, Chryso uses local defaults suitable for the
+When fields are omitted, chr uses local defaults suitable for the
 project-owned runtime scaffold.
 
 New workspaces omit runtime defaults from generated config so users only edit

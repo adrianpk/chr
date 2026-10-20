@@ -9,14 +9,14 @@ PR: pending
 
 ## Purpose
 
-Make the test-based development preference explicit for CHR agents and for
+Make the test-based development preference explicit for chr agents and for
 generated tracking/ticket work units.
 
 ## Delivered Behavior
 
-- CHR agent conventions now prefer reproducing bug fixes with a failing test
+- chr agent conventions now prefer reproducing bug fixes with a failing test
   when feasible.
-- CHR agent conventions keep table-driven tests as the default for input/output
+- chr agent conventions keep table-driven tests as the default for input/output
   behavior.
 - Advanced testing approaches are documented as use-case dependent rather than
   required ceremony.

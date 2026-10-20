@@ -1,4 +1,4 @@
-# Chryso Slicing Map
+# chr Slicing Map
 
 Status: draft
 
@@ -6,7 +6,7 @@ Current alignment: historical draft, superseded by committed slice plans and run
 
 ## Purpose
 
-Define an initial implementation slicing map for Chryso.
+Define an initial implementation slicing map for chr.
 
 This is not a formal delivery plan. It is a working sequence to help turn the capability map into small implementation slices.
 

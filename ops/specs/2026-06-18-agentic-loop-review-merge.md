@@ -18,12 +18,12 @@ Related:
 
 ## Summary
 
-Chryso should support a foreground loop that continues from ticket
+chr should support a foreground loop that continues from ticket
 development into pull request evidence and merge, while preserving predictable
 ordering and explicit project policy.
 
 The default path for new projects is automatic merge after strict development
-validation. In this path, Chryso does not launch separate reviewer and
+validation. In this path, chr does not launch separate reviewer and
 merger agent roles. The development agent implements the ticket, creates or
 updates the branch and pull request, produces validation evidence, and merges the
 pull request when repository policy allows it.
@@ -146,9 +146,9 @@ In this path:
 - the development agent implements the ticket;
 - the development agent creates or updates the ticket branch and pull request;
 - the pull request remains available as evidence for human inspection;
-- Chryso records branch, pull request, validation, and merge evidence
+- chr records branch, pull request, validation, and merge evidence
   locally;
-- Chryso merges the pull request automatically when repository policy,
+- chr merges the pull request automatically when repository policy,
   validation evidence, and provider preflight allow it;
 - no separate reviewer or merger agent role is launched.
 
@@ -164,13 +164,13 @@ implementation includes, as applicable to the project:
 - evidence that the application can run when runability is relevant.
 
 The `validation_command` remains the immediate enforcement mechanism. During
-project initialization or baseline setup, Chryso should help projects define
+project initialization or baseline setup, chr should help projects define
 the strongest practical validation command the stack can support.
 
 ### Development Completion
 
 When development creates or updates a pull request for the selected ticket,
-Chryso must attach the branch and review reference to the ticket metadata.
+chr must attach the branch and review reference to the ticket metadata.
 
 In the default automatic merge path, the ticket may proceed directly to merge
 preflight after validation evidence is available.
@@ -198,7 +198,7 @@ The formal path uses operational roles:
   lacks evidence, or needs a human decision.
 - `merger`: merge only already-approved work after objective preflight.
 
-The same model provider may power all phases, but Chryso must treat them as
+The same model provider may power all phases, but chr must treat them as
 separate operations. Each phase gets a bounded prompt and a narrow decision.
 
 The reviewer may run read-only validation after verifying it is on the expected
@@ -221,13 +221,13 @@ Baseline criteria:
   constraints;
 - documentation or changelog changes are present when the ticket requires them.
 
-Project-specific criteria may be configured later. They should be Chryso
+Project-specific criteria may be configured later. They should be chr
 native and may be produced from a future quiz/checklist workflow. The reviewer
 must include the exact criteria version or source in its evidence.
 
 ### Review Evidence
 
-Review output should be persisted as a local Chryso review artifact.
+Review output should be persisted as a local chr review artifact.
 
 The artifact should record:
 
@@ -242,14 +242,14 @@ The artifact should record:
 - outcome;
 - next handoff.
 
-Review artifacts are operational Chryso artifacts and should live under
+Review artifacts are operational chr artifacts and should live under
 `./.chr`. Versioning should be configurable, with versioned review artifacts as
 the default.
 
 Local ticket comments or metadata should stay compact and point to the review
 artifact instead of embedding long review text directly in the ticket.
 
-Provider comments are optional. If configured, Chryso may publish blocking
+Provider comments are optional. If configured, chr may publish blocking
 findings to a pull request and may use provider-native diff or review surfaces.
 Formal provider integrations should aim to support Forgejo through `tea` and
 GitHub through `gh`, while preserving local artifacts as the handoff record.
@@ -283,7 +283,7 @@ The workflow must prevent endless loops between `dev` and `reviewer`.
 
 Each ticket tracks review rounds. The default maximum is one repair cycle.
 
-When the maximum is reached, Chryso stops automatic processing and marks the
+When the maximum is reached, chr stops automatic processing and marks the
 ticket blocked with:
 
 - latest review artifact;
@@ -291,7 +291,7 @@ ticket blocked with:
 - attempted round count;
 - recommended human action.
 
-The loop stops when a ticket blocks. Chryso should not skip the blocked
+The loop stops when a ticket blocks. chr should not skip the blocked
 ticket and continue advancing later slicing work in the same automatic run.
 
 ### Merge Phase
@@ -368,7 +368,7 @@ tickets with reasons.
 - Default auto-merge mode requires valid development evidence before merge.
 - Tickets with pull requests waiting for review move to `ready_for_review` when
   auto-merge is disabled, unavailable, or blocked.
-- Formal reviewer execution produces a local Chryso-native review artifact.
+- Formal reviewer execution produces a local chr-native review artifact.
 - Formal review pass moves the ticket to `ready_for_merge`.
 - Formal review findings move the ticket back to `ready_for_dev` with repair
   handoff metadata pointing to the local review artifact.

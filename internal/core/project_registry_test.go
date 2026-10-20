@@ -19,8 +19,8 @@ func TestProjectRegistryAddsListsAndGetsProjects(t *testing.T) {
 
 	err := registry.AddProject(context.Background(), Project{
 		ID:            "project-1",
-		Name:          "chryso",
-		Path:          "/home/adrian/Projects/chryso",
+		Name:          "chr",
+		Path:          "/workspaces/chr",
 		Enabled:       true,
 		RegisteredAt:  registeredAt,
 		LastIndexedAt: &lastIndexedAt,
@@ -40,14 +40,14 @@ func TestProjectRegistryAddsListsAndGetsProjects(t *testing.T) {
 
 	assertProject(t, projects[0], Project{
 		ID:            "project-1",
-		Name:          "chryso",
-		Path:          "/home/adrian/Projects/chryso",
+		Name:          "chr",
+		Path:          "/workspaces/chr",
 		Enabled:       true,
 		RegisteredAt:  registeredAt,
 		LastIndexedAt: &lastIndexedAt,
 	})
 
-	project, err := registry.GetProjectByName(context.Background(), "chryso")
+	project, err := registry.GetProjectByName(context.Background(), "chr")
 	if err != nil {
 		t.Fatalf("GetProjectByName returned error: %v", err)
 	}
@@ -61,7 +61,7 @@ func TestProjectRegistryAddsListsAndGetsProjects(t *testing.T) {
 
 	assertProject(t, project, projects[0])
 
-	project, err = registry.GetProjectByPath(context.Background(), "/home/adrian/Projects/chryso")
+	project, err = registry.GetProjectByPath(context.Background(), "/workspaces/chr")
 	if err != nil {
 		t.Fatalf("GetProjectByPath returned error: %v", err)
 	}
@@ -102,8 +102,8 @@ func TestProjectRegistryRejectsDuplicateName(t *testing.T) {
 	registry := newTestProjectRegistry(t)
 	project := Project{
 		ID:           "project-1",
-		Name:         "chryso",
-		Path:         "/tmp/chryso",
+		Name:         "chr",
+		Path:         "/tmp/chr",
 		Enabled:      true,
 		RegisteredAt: time.Date(2026, 5, 18, 12, 30, 0, 0, time.UTC),
 	}

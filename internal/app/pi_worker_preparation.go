@@ -11,7 +11,7 @@ import (
 )
 
 // Inspect executable metadata without running a configured program. A worker
-// profile selects the static Linux CHR bridge; generation selects native Pi.
+// profile selects the static Linux chr bridge; generation selects native Pi.
 // Image and executable hashes are frozen separately at admission.
 func piWorkerBridgePreparation(program string) (chr, prepared bool) {
 	info := piBridgeBuildInfo(program)

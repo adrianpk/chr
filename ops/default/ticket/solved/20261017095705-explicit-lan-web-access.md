@@ -22,7 +22,7 @@ reviewed_at: 2026-10-17T10:29:00Z
 
 ## Problem
 
-A user needs to run Chryso on a development server and use its Web UI from a
+A user needs to run chr on a development server and use its Web UI from a
 different computer on the internal network. Opening an individual page with
 `?token=...` can pass authentication, but subsequent navigation and HTMX
 requests omit the token and return `web token required`.
@@ -124,7 +124,7 @@ The maintainer authorized this implementation on 2026-10-17 after completion
 of Telegram help ticket TKT-20261017094606. Help is delivered on dev before
 LAN implementation starts.
 
-The maintainer subsequently requested persistent LAN access for CHR's own
+The maintainer subsequently requested persistent LAN access for chr's own
 local dogfooding setup. This authorizes its local configuration separately
 from the product's disabled default.
 

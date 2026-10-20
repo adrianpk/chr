@@ -21,7 +21,7 @@ pr: https://forge.adrianpk.com/adrianpk/chr/pulls/419
 
 ## Need
 
-Allow users to choose Pi as an alternative to Codex in CHR. Keep Codex
+Allow users to choose Pi as an alternative to Codex in chr. Keep Codex
 supported without forcing existing users to replace their harness or migrate
 their setup.
 
@@ -36,7 +36,7 @@ self-hosted endpoints.
    including Dumps, Quiz questions, Specs, Plans and related generation.
 3. Users can choose the same harness for both roles or select them
    independently, with the desired model and provider supported by that harness.
-4. Harness selection preserves CHR's ticket lifecycle, execution order,
+4. Harness selection preserves chr's ticket lifecycle, execution order,
    validation requirements, result semantics and workflow ownership.
 5. Existing Codex setups remain usable without requiring Pi.
 

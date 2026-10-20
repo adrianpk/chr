@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`internal/tui` implements the local terminal UI for Chryso project
+`internal/tui` implements the local terminal UI for chr project
 operation.
 
 ## Boundary

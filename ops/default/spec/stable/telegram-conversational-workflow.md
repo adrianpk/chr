@@ -16,14 +16,14 @@ Tracker: [Telegram Conversation Tracker](../../tracker/telegram-conversational-w
 
 ## 1. Purpose
 
-An operator can discuss a change with Chryso through its own Telegram bot,
+An operator can discuss a change with chr through its own Telegram bot,
 prepare the required artifacts, authorize a bounded work extent, follow its
 execution and resolve questions until the change is integrated. The operator
 does not need a terminal to advance an otherwise supported development cycle.
 
-Developing Chryso through Chryso is a preferred use of this capability. It is
+Developing chr through chr is a preferred use of this capability. It is
 not mandatory and does not prevent another development workflow when needed.
-The bot, credentials, configuration, service and state belong to Chryso.
+The bot, credentials, configuration, service and state belong to chr.
 
 This specification defines a complete text conversation and execution adapter.
 It introduces no alternative ticket scheduler, agent runner or merger. Existing
@@ -365,7 +365,7 @@ owned activations through existing process supervision. It does not cancel
 another adapter's worker or revoke retained work authorization. Bounded
 shutdown must report a failure if quiescence cannot be established.
 
-Chryso can be registered like any other project. The installed receiver stays
+chr can be registered like any other project. The installed receiver stays
 fixed to its running build while an agent changes repository source. Candidate
 builds are validated separately; updating the coordinating service occurs
 between active executions through an explicit installation/service action.
@@ -439,8 +439,8 @@ transport, validation and domain failures.
 | TG-24 | Bounded retention preserves unresolved records and prevents retired updates from becoming new commands. |
 | TG-25 | Replies correctly handle Unicode, message splitting, group topic isolation and references to replaced prompts. |
 | TG-26 | Final output distinguishes confirmed integration from worker exit, validation success or an open PR. |
-| TG-27 | A small real change can be requested, clarified, authorized and integrated from Telegram using the normal Chryso engine. |
-| TG-28 | Chryso itself can use that journey without replacing the running receiver mid-execution or depending on an external development controller. |
+| TG-27 | A small real change can be requested, clarified, authorized and integrated from Telegram using the normal chr engine. |
+| TG-28 | chr itself can use that journey without replacing the running receiver mid-execution or depending on an external development controller. |
 | TG-29 | Existing notification and fixture-import commands keep their documented behavior and do not execute old handoffs. |
 | TG-30 | CLI/TUI/Web can observe and control the Telegram-created invocation using the same canonical references. |
 | TG-31 | The selected transport scope and bounds are documented by installed help and connection diagnostics. |

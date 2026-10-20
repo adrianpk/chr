@@ -20,8 +20,8 @@ func TestGeneratedSpecProtocolPaths(t *testing.T) {
 		t.Run(item.name, func(t *testing.T) {
 			body := "See `" + item.path + "`."
 
-			got := NormalizeGeneratedSpecChrysoPathReferences(body)
-			if got != "See `"+item.want+"`." || NormalizeGeneratedSpecChrysoPathReferences(got) != got {
+			got := NormalizeGeneratedSpecChrPathReferences(body)
+			if got != "See `"+item.want+"`." || NormalizeGeneratedSpecChrPathReferences(got) != got {
 				t.Fatal("normalization altered the namespace", got)
 			}
 
@@ -71,7 +71,7 @@ func TestRenderGeneratedSpecKeepsDifferentBodyHeading(t *testing.T) {
 	}
 }
 
-func TestValidateGeneratedSpecRejectsUnsupportedChrysoPathReference(t *testing.T) {
+func TestValidateGeneratedSpecRejectsUnsupportedChrPathReference(t *testing.T) {
 	spec := GeneratedSpec{
 		Scope:     QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"},
 		Title:     "Newsletter Distribution",
@@ -103,7 +103,7 @@ func TestValidateGeneratedSpecAllowsGherkinExample(t *testing.T) {
 	}
 }
 
-func TestValidateGeneratedSpecAllowsKnownChrysoPathReferences(t *testing.T) {
+func TestValidateGeneratedSpecAllowsKnownChrPathReferences(t *testing.T) {
 	spec := GeneratedSpec{
 		Scope: QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"},
 		Title: "Newsletter Distribution",
@@ -119,20 +119,20 @@ func TestValidateGeneratedSpecAllowsKnownChrysoPathReferences(t *testing.T) {
 	}
 }
 
-func TestNormalizeGeneratedSpecChrysoPathReferencesKeepsKnownPaths(t *testing.T) {
+func TestNormalizeGeneratedSpecChrPathReferencesKeepsKnownPaths(t *testing.T) {
 	body := "See .chr/default/project.md and .chr/default/dumps/newsletter.md."
 
-	got := NormalizeGeneratedSpecChrysoPathReferences(body)
+	got := NormalizeGeneratedSpecChrPathReferences(body)
 
 	if got != body {
 		t.Fatalf("normalized body = %q, want %q", got, body)
 	}
 }
 
-func TestNormalizeGeneratedSpecChrysoPathReferencesMovesUnknownPathsOutOfChryso(t *testing.T) {
+func TestNormalizeGeneratedSpecChrPathReferencesMovesUnknownPathsOutOfChr(t *testing.T) {
 	body := "Store drafts in .chr/newsletters/drafts/<post-slug>.md, then export them."
 
-	got := NormalizeGeneratedSpecChrysoPathReferences(body)
+	got := NormalizeGeneratedSpecChrPathReferences(body)
 
 	if strings.Contains(got, ".chr/newsletters") {
 		t.Fatalf("normalized body still contains unsupported .chr path: %q", got)

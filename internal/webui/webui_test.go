@@ -26,7 +26,7 @@ func TestHandlerShellAndBootstrap(t *testing.T) {
 		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
 	}
 
-	for _, want := range []string{"Chryso", "project-1", "/assets/chr.css"} {
+	for _, want := range []string{`<span class="brand-title">chr</span>`, `aria-label="chr board"`, "project-1", "/assets/chr.css"} {
 		if !strings.Contains(recorder.Body.String(), want) {
 			t.Fatalf("body does not contain %q:\n%s", want, recorder.Body.String())
 		}
@@ -78,7 +78,7 @@ func TestHandlerAssetsAndHealthz(t *testing.T) {
 		"/assets/chr.css":      ".app-shell",
 		"/assets/chr.js":       "openTemplateModal",
 		"/assets/chr-logo.png": "",
-		"/assets/favicon.svg":  "Chr",
+		"/assets/favicon.svg":  "chr",
 		"/assets/htmx.min.js":  "htmx",
 		"/healthz":             "ok\n",
 	} {
@@ -898,7 +898,7 @@ func TestHandlerWriteActionRendersBlockedEnvelope(t *testing.T) {
 
 func testShellData() ShellData {
 	return ShellData{
-		Title:          "Chryso",
+		Title:          "chr",
 		ProjectDir:     "/tmp/project",
 		ProjectID:      "project-1",
 		ProjectName:    "Project One",

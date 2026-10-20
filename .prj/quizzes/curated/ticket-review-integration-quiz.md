@@ -8,7 +8,7 @@ Mirror: `.chr/default/quizzes/curated/ticket-review-integration-quiz.md`
 
 ## Purpose
 
-Clarify how Chryso should handle agentic review for tickets that reach
+Clarify how chr should handle agentic review for tickets that reach
 `ready_for_review`, especially the handoff between development agents, reviewer
 agents, pull request comments, ticket metadata, and serialized slice execution.
 
@@ -17,10 +17,10 @@ agents, pull request comments, ticket metadata, and serialized slice execution.
 - In `agentic_review` mode, a rejected ticket should return to the development
   loop without interrupting the human user.
 - Missing remote pull request access is an evidence failure for agentic review.
-  Chryso should not perform a local-only substitute review in the first
+  chr should not perform a local-only substitute review in the first
   design.
 - The remote pull request is the primary surface for detailed review comments.
-- The Chryso ticket should stay clean and record only state, metadata, and
+- The chr ticket should stay clean and record only state, metadata, and
   a minimal pointer to pull request comments.
 - Inline pull request comments are preferred when the provider can anchor them
   reliably.
@@ -35,7 +35,7 @@ agents, pull request comments, ticket metadata, and serialized slice execution.
   workflow. Use `pass` plus metadata or counters if needed.
 - References such as `@dev`, `@reviewer`, and `@user` are conventional text for
   now, not formal user identities.
-- Chryso may later search for actor references in Markdown or pull request
+- chr may later search for actor references in Markdown or pull request
   comments without requiring a full user model first.
 - Repair context should point to the remote pull request review surface rather
   than duplicating detailed findings into ticket comments.

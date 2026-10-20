@@ -1,6 +1,6 @@
 # Evidence Strategy Configuration
 
-Evidence strategy configuration controls how Chryso prepares ticket
+Evidence strategy configuration controls how chr prepares ticket
 workers to decide and record testing, validation, Gherkin, and runtime evidence.
 
 The configuration controls ticket checklist writing, worker context, execution
@@ -88,7 +88,7 @@ still allowing projects to relax or redirect the behavior through config.
 
 ## Visibility Surfaces
 
-The ticket checklist is the primary operational source. Chryso derives
+The ticket checklist is the primary operational source. chr derives
 short evidence summaries from that checklist for user-facing views.
 
 - Board ticket detail shows the overall evidence state and each checklist item.
@@ -111,7 +111,7 @@ The summary statuses are:
 ## Review Transition Gate
 
 When `enabled: true`, `ticket_checklist: required`, and
-`strict_ready_for_review: true`, Chryso blocks `ready_for_review` until the
+`strict_ready_for_review: true`, chr blocks `ready_for_review` until the
 ticket evidence is ready.
 
 The gate runs when:
