@@ -58,7 +58,7 @@ ticket worktree
 | Slice 5 | execution workspace results | `feat/slice-5-execution-workspace-results` | `feat(slice-5): execution workspace results` | `.prj/reports/slices/isolated-ticket-worktrees/slice-5-execution-workspace-results.md` |
 | Slice 6 | branch and PR lifecycle | `feat/slice-6-branch-and-pr-lifecycle` | `feat(slice-6): branch and PR lifecycle` | `.prj/reports/slices/isolated-ticket-worktrees/slice-6-branch-and-pr-lifecycle.md` |
 | Slice 7 | review repair and cleanup | `feat/slice-7-review-repair-and-cleanup` | `feat(slice-7): review repair and cleanup` | `.prj/reports/slices/isolated-ticket-worktrees/slice-7-review-repair-and-cleanup.md` |
-| Slice 8 | docs and QA proving | `feat/slice-8-docs-and-qa-proving` | `docs(slice-8): docs and QA proving` | `.prj/reports/slices/isolated-ticket-worktrees/slice-8-docs-and-qa-proving.md` |
+| Slice 8 | docs and QA proving | `feat/slice-8-docs-and-qa-proving` | `docs(slice-8): docs and QA proving` | `ops/default/report/slices/isolated-ticket-worktrees/slice-8-docs-and-qa-proving.md` |
 
 ## Slice 1: Workspace Execution Config
 
@@ -373,3 +373,12 @@ QA proving should add project-level smoke commands once the fixtures exist.
 - Container-side commit/push support with explicit credentials.
 - Worktree disk usage reporting in Dash.
 - Scheduled cleanup for stale merged worktrees.
+
+## Slice 8 Continuation: 2026-10-20
+
+The maintainer authorized tackling the existing project GTD queue. Current
+reconciliation resolved documentation and the later version-one default decision.
+Continue the recorded Slice 8 branch for the remaining resettable fixture and
+local smoke tasks. Keep real Docker worker execution and final cycle closure
+blocked until their actual evidence exists. This does not authorize a model
+call, a default switch, a new controller, or main/release publication.
