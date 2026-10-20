@@ -1,7 +1,7 @@
 ---
 id: TKT-20261019232506
 title: "Keep generated spec prose consistent with saved approval"
-status: open
+status: in_progress
 kind: bug
 severity: unclassified
 priority: unclassified
@@ -10,6 +10,9 @@ tags: spec-lifecycle, plan-generation, web-ui
 source: chat
 reported_at: 2026-10-19T23:25:06Z
 commits: []
+ready_at: 2026-10-20T20:06:00Z
+started_at: 2026-10-20T20:06:00Z
+branch: dev
 ---
 
 # Keep generated spec prose consistent with saved approval
@@ -67,5 +70,7 @@ with focused regressions.
 ## Current Boundary
 
 The contradictory wording in the manual test spec was corrected with explicit
-permission. The permanent generation and approval-validation correction remains
-pending. This ticket captures that work; it does not begin implementation.
+permission. The permanent correction is now implemented in the selected-source
+projection and shared generation/readiness instructions. Focused regressions
+pass for preserved stale prose, saved approval, unapproved documents and genuine
+missing behavior. Development-gate validation and delivery remain in progress.

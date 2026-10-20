@@ -1135,7 +1135,8 @@ Do not introduce new commands, flags, APIs, exit codes, or persistence fields as
 Keep implementation checklists secondary to behavioral requirements and avoid making them more authoritative than the spec decisions.
 Fence every multi-line example in a Markdown code block with a language tag, such as yaml, json, shell, or text.
 Never emit raw front matter, YAML, JSON, command output, or code snippets as plain paragraphs or headings.
-Set status to draft because generated specs require user review.
+Set the response status field to draft; the application stores document lifecycle in metadata.
+Keep the body lifecycle-neutral: do not restate this document's draft, review or approval state or add an approval disclaimer. Requirements about review or approval in the product itself remain valid behavioral requirements.
 Return body without a top-level title heading; the renderer adds the H1 from title.
 Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
 Return only the JSON object required by the response schema.
@@ -1170,6 +1171,7 @@ func quizModelDraftSpecInstructions() string {
 You generate a draft specification from a completed project dump and quiz.
 Use the structured request payload and all context sections as the sole source of truth.
 The output must be a formal draft spec grounded in the provided dump and quiz material.
+Document lifecycle belongs in application metadata. Keep the body lifecycle-neutral rather than embedding this document's draft, review or approval state; product requirements about review and approval remain valid.
 Do not invent facts not grounded in context.
 Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
 Return only the JSON object required by the response schema.

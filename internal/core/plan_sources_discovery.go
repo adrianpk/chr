@@ -43,7 +43,7 @@ func appendPlanQuiz(ctx context.Context, projectDir string, observed *PlanSource
 		return err
 	}
 
-	observed.Inputs = append(observed.Inputs, PlanSourceInput{"quiz", paths.RawRelativePath, quiz.Revision, string(content)})
+	observed.Inputs = append(observed.Inputs, PlanSourceInput{Kind: "quiz", Reference: paths.RawRelativePath, Revision: quiz.Revision, Content: string(content)})
 	observed.HasDiscovery = observed.HasDiscovery || len(answers) > 0
 
 	return nil
@@ -60,7 +60,7 @@ func appendPlanSpecs(ctx context.Context, projectDir string, observed *PlanSourc
 			continue
 		}
 
-		observed.Inputs = append(observed.Inputs, PlanSourceInput{"spec", document.Reference, document.Revision, string(document.images[0].After)})
+		observed.Inputs = append(observed.Inputs, PlanSourceInput{Kind: "spec", Reference: document.Reference, Revision: document.Revision, Content: string(document.images[0].After), Status: document.Status})
 	}
 
 	return nil

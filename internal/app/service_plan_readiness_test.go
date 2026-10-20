@@ -114,3 +114,112 @@ func TestPlanReadinessProviderBinding(t *testing.T) {
 		t.Fatal(decision, err)
 	}
 }
+
+// The real spec writer preserves prose while its saved lifecycle reaches the
+// semantic boundary separately; approval cannot waive genuine missing context.
+func TestPlanSpecApproval(t *testing.T) {
+	for _, item := range []struct {
+		name, status, prose, missing string
+	}{
+		{"approved stale draft", "approved", "This is a draft awaiting user review.", ""},
+		{"approved missing behavior", "approved", "This is a draft awaiting user review.", "Define the required error behavior"},
+		{"draft claims approval", "draft", "This specification is approved and ready for implementation.", "Spec approval is required"},
+	} {
+		t.Run(item.name, func(t *testing.T) {
+			operations, scope, generated := planApprovalFixture(t, item.status, item.prose)
+			before := readServiceWorkspaceFile(t, generated.Path)
+			operations.conversationModel = specApprovalTestProvider(t, item.status, item.prose, item.missing)
+
+			_, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{Scope: scope})
+			checkPlanApprovalResult(t, err, item.missing)
+
+			if readServiceWorkspaceFile(t, generated.Path) != before {
+				t.Fatal("plan readiness rewrote saved spec content")
+			}
+		})
+	}
+}
+
+func planApprovalFixture(t *testing.T, status, prose string) (service, core.QuizScope, core.GeneratedSpecPaths) {
+	t.Helper()
+
+	operations, scope, _ := planPublicationFixture(t, "Print hello once. Verify stdout is hello.")
+	project := operations.projectContext.ProjectDir
+
+	generated, err := core.WriteGeneratedSpec(t.Context(), project, core.GeneratedSpec{Scope: scope, Title: "Greeting", Body: prose + "\n\nPrint hello once.", CreatedAt: operations.utcNow()})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	document, err := core.ReadSpecDocument(t.Context(), project, generated.RelativePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = core.MutateSpec(t.Context(), project, core.SpecMutationRequest{OperationID: "save-approval", Action: "save", Reference: document.Reference, ExpectedRevision: document.Revision, ProjectID: scope.ProjectID, CaseSlug: scope.CaseSlug, Title: document.Title, Body: document.Body, Status: status})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return operations, scope, generated
+}
+
+func checkPlanApprovalResult(t *testing.T, err error, missing string) {
+	t.Helper()
+
+	if missing == "" {
+		if err != nil {
+			t.Fatal("approved spec rejected", err)
+		}
+
+		return
+	}
+
+	var rejected *PlanReadinessError
+	if !errors.As(err, &rejected) || rejected.Decision.Status != "insufficient" {
+		t.Fatal("missing approval or behavior was accepted", err)
+	}
+}
+
+func specApprovalTestProvider(t *testing.T, status, prose, missing string) planReadinessTestProvider {
+	t.Helper()
+
+	return func(_ context.Context, request core.StructuredModelRequest) (json.RawMessage, error) {
+		hash := checkSpecApprovalInput(t, request.Input, status, prose)
+
+		reasons := []string{}
+		if missing != "" {
+			reasons = append(reasons, missing)
+		}
+
+		return json.Marshal(map[string]any{"sufficient": missing == "", "missing": reasons, "observation_hash": hash})
+	}
+}
+
+func checkSpecApprovalInput(t *testing.T, data []byte, status, prose string) string {
+	t.Helper()
+
+	var input struct {
+		Inputs []struct{ Kind, Status, Content string }
+		Hash   string `json:"observation_hash"`
+	}
+	if err := json.Unmarshal(data, &input); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, source := range input.Inputs {
+		if source.Kind != "spec" {
+			continue
+		}
+
+		if source.Status != status || !strings.Contains(source.Content, prose) {
+			t.Fatal("readiness lost canonical lifecycle or preserved prose", source.Status)
+		}
+
+		return input.Hash
+	}
+
+	t.Fatal("readiness omitted the selected spec")
+
+	return ""
+}

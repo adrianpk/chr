@@ -229,6 +229,10 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Fixed
 
+- Plan generation recognizes saved spec approval even when older text still
+  calls the document a draft. Newly generated specs keep review state in
+  metadata instead of embedding approval disclaimers in the body.
+
 - The Dumps catalog fits a third card column at normal desktop zoom. Cards
   keep the same size for short and long documents, with clipped opening text
   in a pale green inset preview. Narrow windows reduce the column count.

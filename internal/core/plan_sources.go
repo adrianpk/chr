@@ -12,6 +12,8 @@ import (
 // PlanSourceInput binds one selected source to its exact retained image.
 type PlanSourceInput struct {
 	Kind, Reference, Revision, Content string
+	// Status is the normalized saved spec lifecycle; other sources leave it empty.
+	Status string `json:",omitempty"`
 }
 
 // PlanSourceObservation is a bounded, read-only generation snapshot. Its hash
@@ -144,7 +146,7 @@ func appendPlanDumps(ctx context.Context, projectDir string, dumps ProjectDumpOb
 			return err
 		}
 
-		observed.Inputs = append(observed.Inputs, PlanSourceInput{"dump", reference, document.Revision, document.Body})
+		observed.Inputs = append(observed.Inputs, PlanSourceInput{Kind: "dump", Reference: reference, Revision: document.Revision, Content: document.Body})
 		observed.HasDiscovery = observed.HasDiscovery || usablePlanDiscovery(document.Body)
 	}
 
