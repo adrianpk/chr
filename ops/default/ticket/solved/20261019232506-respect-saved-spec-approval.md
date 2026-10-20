@@ -1,7 +1,7 @@
 ---
 id: TKT-20261019232506
 title: "Keep generated spec prose consistent with saved approval"
-status: in_progress
+status: solved
 kind: bug
 severity: unclassified
 priority: unclassified
@@ -9,10 +9,12 @@ scope: domain
 tags: spec-lifecycle, plan-generation, web-ui
 source: chat
 reported_at: 2026-10-19T23:25:06Z
-commits: []
+commits: [4b3604e46fee57b651b0ef846d0a35b62c7ec0a7]
 ready_at: 2026-10-20T20:06:00Z
 started_at: 2026-10-20T20:06:00Z
 branch: dev
+resolution: fixed
+closed_at: 2026-10-20T20:11:39Z
 ---
 
 # Keep generated spec prose consistent with saved approval
@@ -73,4 +75,13 @@ The contradictory wording in the manual test spec was corrected with explicit
 permission. The permanent correction is now implemented in the selected-source
 projection and shared generation/readiness instructions. Focused regressions
 pass for preserved stale prose, saved approval, unapproved documents and genuine
-missing behavior. Development-gate validation and delivery remain in progress.
+missing behavior. The development gate passed and the correction is committed on dev.
+
+## Delivery Evidence
+
+Implementation: `4b3604e46fee57b651b0ef846d0a35b62c7ec0a7`.
+
+Passed: `go test ./internal/core ./internal/app -run '^Test(PlanSpecApproval|PlanSources|PlanReadiness|PlanGenerationDiscovery|SpecLifecycleAliases|WebSpecAuthoring)$' -count=1 -timeout=3m` and `make verify`.
+
+The model boundary was substituted for deterministic regressions; no live
+provider request or running-service change was performed.
