@@ -20,12 +20,15 @@ func telegramHelpRequest(update core.TelegramReceivedUpdate) (telegramReadReply,
 	if update.Kind != "message" {
 		return telegramReadReply{}, false
 	}
+
 	name, group := telegramCommandWord(strings.TrimSpace(update.Text))
 	if name != "/help" {
 		return telegramReadReply{}, false
 	}
+
 	if group == "" {
 		return telegramBasicHelp(), true
 	}
+
 	return telegramGroupedHelp(group), true
 }

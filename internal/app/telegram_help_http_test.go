@@ -16,8 +16,9 @@ import (
 )
 
 type telegramHelpHTTPBody struct {
-	Text      string `json:"text"`
-	ParseMode string `json:"parse_mode"`
+	Entities  []core.TelegramTextEntity `json:"entities"`
+	Text      string                    `json:"text"`
+	ParseMode string                    `json:"parse_mode"`
 }
 
 // Real HTTP and SQLite distinguish definite format rejection from uncertain delivery.

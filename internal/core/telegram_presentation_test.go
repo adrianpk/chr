@@ -117,7 +117,11 @@ func checkTelegramPresentationFallback(t *testing.T, store *TelegramReceiverStor
 		t.Fatal(err)
 	}
 
-	if err := decodeTelegramPresentation(string(payload), &due[0]); err == nil {
+	if _, err := store.db.ExecContext(t.Context(), "UPDATE telegram_outbox SET presentation=? WHERE id=?", string(payload), id); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := store.DueDeliveries(t.Context(), 12345, now); err == nil {
 		t.Fatal("future presentation accepted")
 	}
 }

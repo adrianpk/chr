@@ -147,18 +147,23 @@ func telegramBasicHelp() telegramReadReply {
 
 func telegramGroupedHelp(group string) telegramReadReply {
 	categories := map[string]string{"execution": "Execution", "tickets": "Tickets", "slices": "Slice sets", "cases": "Use cases", "projects": "Projects", "authoring": "Authoring", "conversations": "Conversations", "system": "System controls"}
+
 	if group == "all" {
 		return telegramReadReply{Text: "Choose a command group:\n\n/help execution\n/help tickets\n/help slices\n/help cases\n/help projects\n/help authoring\n/help conversations\n/help system"}
 	}
+
 	category, ok := categories[group]
 	if !ok {
 		return telegramReadReply{Text: "Send /help all to choose a command group."}
 	}
+
 	var entries []telegramHelpEntry
+
 	for _, entry := range telegramHelpMetadata() {
 		if entry.Category == category {
 			entries = append(entries, entry)
 		}
 	}
+
 	return renderTelegramHelp(entries, "")
 }
