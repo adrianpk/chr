@@ -254,7 +254,12 @@ func (adapter workWorkflowCLI) control(ctx context.Context, cmd *cli.Command, op
 func performWorkflowControl(ctx context.Context, operations service, id, action string, cmd *cli.Command) error {
 	switch action {
 	case "continue":
-		_, err := operations.ContinueWorkExtent(ctx, id, cmd.Int("max-steps"))
+		run, err := operations.ReadWorkflow(ctx, id)
+		if err != nil {
+			return err
+		}
+
+		_, err = operations.ContinueWorkExtent(ctx, id, cmd.Int("max-steps"), run.Revision)
 
 		return err
 	case "pause", "cancel":

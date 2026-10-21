@@ -173,6 +173,14 @@ The existing positive HTTPS rebase certification is selected for that isolated
 host target. Candidate activation and confirmed integration remain pending at
 this checkpoint.
 
+Candidate `a577d03490fe57262657e72954240cb0c156a610` passed clean development,
+focused normal and race checks and was activated with the existing certified
+HTTPS publisher profile. A real CLI continuation then exposed a silent no-op:
+the CLI omitted its observed revision, so the deliberately unbound call could
+not authorize preparation retry. The CLI now reads that revision and forwards
+it to the same guarded operation. Its regression reproduces the no-op before
+the correction and requires completed preparation afterward.
+
 ## Risks and Follow-ups
 
 Real mobile/desktop client observations and the user-operated journey require
