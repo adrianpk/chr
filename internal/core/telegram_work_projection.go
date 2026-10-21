@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"math"
 	"time"
@@ -15,6 +16,7 @@ type TelegramWorkObservation struct {
 	Phase    string
 	Kind     string
 	Text     string
+	Message  *TelegramMessageBlocks
 }
 
 // ProjectTelegramWork reserves an observed notice and local phase atomically.
@@ -72,6 +74,21 @@ func queueTelegramWorkObservation(ctx context.Context, tx *sql.Tx, ref TelegramW
 	key := fmt.Sprintf("work:%s:%d", ref.Request.Target.ConversationID, observation.Revision)
 
 	parts := TelegramResponseParts(observation.Text, "workflow:"+ref.Invocation.ID)
+
+	var presentation []byte
+
+	if observation.Message != nil {
+		view := RenderTelegramMessage(*observation.Message)
+		parts = []string{view.PlainFallback}
+
+		var err error
+
+		presentation, err = json.Marshal(view)
+		if err != nil {
+			return err
+		}
+	}
+
 	if pending+len(parts) > 1024 {
 		return fmt.Errorf("telegram outbox capacity exhausted")
 	}
@@ -79,6 +96,12 @@ func queueTelegramWorkObservation(ctx context.Context, tx *sql.Tx, ref TelegramW
 	for index, part := range parts {
 		if err := insertTelegramWorkNotice(ctx, tx, ref, observation.Kind, key, part, configDigest, index+1, len(parts), now); err != nil {
 			return err
+		}
+
+		if len(presentation) != 0 {
+			if _, err := tx.ExecContext(ctx, "UPDATE telegram_outbox SET presentation=?,presentation_hash=? WHERE bot_id=? AND event_key=?", string(presentation), workflowHash(presentation), ref.Request.Source.Peer.BotID, key); err != nil {
+				return err
+			}
 		}
 	}
 

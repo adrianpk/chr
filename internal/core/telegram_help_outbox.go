@@ -22,7 +22,7 @@ func (s *TelegramReceiverStore) QueueFormattedReadResponse(ctx context.Context, 
 		}
 
 		key := fmt.Sprintf("update:%d", update.UpdateID)
-		if err := queueTelegramReferencedResponse(ctx, tx, update, text, key, configDigest, now); err != nil {
+		if err := queueTelegramResponseParts(ctx, tx, update, []string{text}, configDigest, now); err != nil {
 			return err
 		}
 

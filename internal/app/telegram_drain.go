@@ -8,7 +8,9 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-const telegramRequestCapacityText = "Receiver request capacity is full. The requested operation was not accepted. Read current state and retry after pending work drains."
+const telegramUncertainDeliveryText = "Delivery confirmation was lost; this notice may be repeated."
+
+const telegramRequestCapacityText = "The request queue is full. This request was not accepted. Retry after pending requests finish; existing work is unchanged."
 
 func (r telegramReceiver) drain(ctx context.Context) error {
 	updates, err := r.store.PendingUpdates(ctx, r.botID)
@@ -58,7 +60,7 @@ func (r telegramReceiver) respond(ctx context.Context, update core.TelegramRecei
 	for _, handler := range []func(context.Context, core.TelegramAllowedUser, core.TelegramReceiverConfig, core.TelegramReceivedUpdate) (bool, error){r.respondAction, r.respondHarness, r.respondControl, r.respondWork, r.respondRecord, r.respondPreparedWork, r.respondExplanation, r.respondAuthoring, r.respondIntent, r.respondConversation} {
 		if handled, err := handler(ctx, user, config, update); handled || err != nil {
 			if errors.Is(err, core.ErrTelegramRequestCapacity) {
-				return r.store.QueueReadResponse(ctx, update, telegramRequestCapacityText, config.Digest(), time.Now())
+				return r.store.QueuePresentationResponse(ctx, update, core.TelegramMessageBlocks{Family: "42", InitialText: telegramRequestCapacityText}, config.Digest(), time.Now())
 			}
 
 			return err
@@ -67,7 +69,7 @@ func (r telegramReceiver) respond(ctx context.Context, update core.TelegramRecei
 
 	reply, err := telegramReadResponse(r.operations, user, update)
 	if err != nil {
-		reply = telegramReadReply{Text: "The requested read is unavailable. Use local diagnostics to inspect project readiness."}
+		reply = telegramReadReply{Text: "The requested read is unavailable. Saved state is unchanged. Run chr telegram doctor locally before retrying."}
 	}
 
 	return r.queueReadReply(ctx, update, config, reply)
@@ -111,7 +113,7 @@ func (r telegramReceiver) sendReservedDelivery(ctx context.Context, delivery cor
 	}
 
 	if delivery.State == "sending" || delivery.State == "uncertain" {
-		text = core.BoundTelegramReceiverText("Uncertain delivery retry; this notice may repeat.\n" + text)
+		text = core.BoundTelegramReceiverText(telegramUncertainDeliveryText + "\n" + text)
 	}
 
 	if delivery.DocumentID != "" {

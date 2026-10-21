@@ -3,6 +3,7 @@ package app
 import (
 	"slices"
 	"strings"
+	"unicode/utf16"
 
 	"forge.adrianpk.com/chr/internal/core"
 )
@@ -63,7 +64,7 @@ func renderTelegramHelp(entries []telegramHelpEntry, prefix string) telegramRead
 }
 
 func telegramHelpFits(text string) bool {
-	return text != "" && core.BoundTelegramReceiverText(text) == text && len(core.TelegramResponseParts(text, "help")) == 1
+	return text != "" && core.BoundTelegramReceiverText(text) == text && len(utf16.Encode([]rune(text))) <= 3200
 }
 
 func compareTelegramHelp(left, right telegramHelpEntry) int {

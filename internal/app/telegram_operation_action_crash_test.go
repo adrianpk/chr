@@ -122,7 +122,7 @@ func TestTelegramOperationUncertainActionSend(t *testing.T) {
 	}
 
 	retry := telegramOperationNotice(t, f)
-	if calls != 1 || !strings.Contains(first.Text, action.RequestID) || !strings.Contains(retry.Text, action.RequestID) || !strings.Contains(retry.Text, "Uncertain delivery retry") {
+	if calls != 1 || !strings.Contains(first.Text, action.RequestID) || !strings.Contains(retry.Text, action.RequestID) || !strings.Contains(retry.Text, "Delivery confirmation was lost") {
 		t.Fatal("send retry changed application or uncertainty", calls, first, retry)
 	}
 
@@ -169,7 +169,7 @@ func TestTelegramOperationUncertainPrompt(t *testing.T) {
 	}
 
 	repeat := telegramOperationNotice(t, f)
-	if repeat.ID == prompt.ID || !strings.Contains(repeat.Text, action.Token) || !strings.Contains(repeat.Text, "Uncertain delivery retry") {
+	if repeat.ID == prompt.ID || !strings.Contains(repeat.Text, action.Token) || !strings.Contains(repeat.Text, "Delivery confirmation was lost") {
 		t.Fatal("uncertain prompt lost its original binding", repeat)
 	}
 

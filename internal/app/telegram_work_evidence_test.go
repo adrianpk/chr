@@ -24,7 +24,7 @@ func TestTelegramWorkEvidence(t *testing.T) {
 	status := result.Progress.Status
 
 	text := telegramWorkProgressText(status)
-	if !strings.Contains(text, "No confirmed integration receipt") || !strings.Contains(text, status.Evidence[0].ResultHash) || !strings.Contains(text, "workflow:"+status.ID) {
+	if !strings.Contains(text, "No confirmed integration receipt") || strings.Contains(text, status.Evidence[0].ResultHash) || !strings.Contains(text, "chr work status --json "+status.ID) {
 		t.Fatal("projection lost native evidence or claimed delivery", text)
 	}
 
@@ -76,7 +76,7 @@ func TestTelegramWorkDeliveryFailure(t *testing.T) {
 
 	retry := telegramWorkDrainNotice(t, f)
 
-	if !strings.Contains(first.Text, ref.Invocation.ID) || !strings.Contains(retry.Text, first.Text) || !strings.Contains(retry.Text, "Uncertain delivery retry") {
+	if !strings.Contains(first.Text, ref.Invocation.ID) || !strings.Contains(retry.Text, first.Text) || !strings.Contains(retry.Text, "Delivery confirmation was lost") {
 		t.Fatal("notification retry lost native identity or uncertainty", first, retry)
 	}
 
@@ -105,9 +105,9 @@ func TestTelegramWorkHumanResult(t *testing.T) {
 	status := result.Progress.Status
 
 	notice := telegramWorkDrainNotice(t, f)
-	for _, value := range []string{status.CandidateHash, status.ApprovalHash, status.PullRequest.URL, "No confirmed integration receipt"} {
+	for _, value := range []string{status.PullRequest.URL, "No confirmed integration receipt", "/status " + status.ID} {
 		if value == "" || !strings.Contains(notice.Text, value) {
-			t.Fatal("human wait lost evidence or claimed delivery", value, notice)
+			t.Fatal("human wait lost its review route or claimed delivery", value, notice)
 		}
 	}
 

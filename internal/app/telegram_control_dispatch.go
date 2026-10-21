@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -130,7 +129,6 @@ func (r telegramReceiver) respondNativeStatus(ctx context.Context, operations te
 		return r.recordDiagnostic(ctx, input.Update, input.Config, "The exact native execution is unavailable in this project and namespace.")
 	}
 
-	text := telegramWorkProgressText(status)
 	if status.ID != id || status.ProjectID != target.ProjectID || status.Namespace != target.Namespace {
 		return core.ErrWorkflowConflict
 	}
@@ -149,5 +147,5 @@ func (r telegramReceiver) respondNativeStatus(ctx context.Context, operations te
 		return err
 	}
 
-	return r.store.QueueReferencedResponse(ctx, input.Update, text, fmt.Sprintf("workflow:%s revision:%d", id, status.Revision), input.Config.Digest(), time.Now())
+	return r.store.QueuePresentationResponse(ctx, input.Update, telegramWorkProgressMessage(status, telegramWorkProjectName(input.Projects, status.ProjectID)), input.Config.Digest(), time.Now())
 }

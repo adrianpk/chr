@@ -188,6 +188,10 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Changed
 
+- Telegram progress separates validated work, capacity/review waits and confirmed
+  integration. Short views retain a status inspection route, preserve saved
+  results on failures and identify notices repeated after a lost delivery acknowledgement.
+
 - The product name is chr. Commands continue to use `chr`.
 
 - chr is now licensed under Apache License 2.0.

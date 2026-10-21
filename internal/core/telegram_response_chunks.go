@@ -1,40 +1,25 @@
 package core
 
 import (
-	"fmt"
 	"strings"
 	"unicode/utf16"
 	"unicode/utf8"
 )
 
-// TelegramResponseParts renders plain text within both Telegram Unicode limits.
-// Oversized output becomes a bounded summary with its retained canonical reference.
+// TelegramResponseParts bounds newly composed responses to one short view.
+// Existing multipart rows retain their stored text, order and retry guards.
 func TelegramResponseParts(text, reference string) []string {
 	text = strings.ToValidUTF8(text, "�")
-
-	reference = BoundTelegramReceiverText(reference)
-	if len(reference) > 512 {
-		reference = "retained request; use local diagnostics"
-	}
-
-	if text == "" {
+	if strings.TrimSpace(text) == "" {
 		text = "No records."
 	}
 
-	parts := splitTelegramResponse(text)
-	if len(parts) > 8 {
-		return []string{BoundTelegramReceiverText("Summary: " + telegramResponsePrefix(text, 2800) + "\nFull output exceeds eight parts. Reference: " + reference)}
+	message := TelegramMessageBlocks{Family: "44", Content: text}
+	if telegramVisibleUnits(text) > telegramPresentationLimit-64 {
+		message.SecondaryText = "Output shortened. Narrow your request or inspect the original operation locally.\nReference: " + boundTelegramPresentationBlock(strings.ToValidUTF8(reference, "�"), 256)
 	}
 
-	if len(parts) == 1 {
-		return parts
-	}
-
-	for index := range parts {
-		parts[index] = fmt.Sprintf("[%d/%d | %s]\n%s", index+1, len(parts), reference, parts[index])
-	}
-
-	return parts
+	return []string{RenderTelegramMessage(message).PlainFallback}
 }
 
 func splitTelegramResponse(text string) []string {

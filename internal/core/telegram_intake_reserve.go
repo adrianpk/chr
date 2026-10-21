@@ -21,8 +21,8 @@ func rejectTelegramIntakeOverflow(ctx context.Context, tx *sql.Tx, update Telegr
 		return err
 	}
 
-	text := "Receiver input capacity is full. This request was rejected before applying an operation. Retry after pending work drains; explicit status, stop and reconciliation have reserved capacity."
-	if err := queueTelegramResponse(ctx, tx, update, text, digest, now); err != nil {
+	text := "The input queue is full. This request was not accepted. Retry after pending requests finish. Existing work is unchanged; status, stop and reconciliation retain reserved capacity."
+	if err := queueTelegramPresentation(ctx, tx, update, TelegramMessageBlocks{Family: "42", InitialText: text}, digest, now); err != nil {
 		return err
 	}
 

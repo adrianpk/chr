@@ -28,6 +28,7 @@ type WorkflowWorkEvidence struct {
 
 // WorkflowWorkStatus distinguishes host task validation from confirmed delivery.
 type WorkflowWorkStatus struct {
+	WorkTitle            string                               `json:"work_title,omitempty"`
 	HarnessBinding       *core.HarnessBinding                 `json:"harness_binding,omitempty"`
 	ControlReceipt       *core.WorkflowControlResult          `json:"control_receipt,omitempty"`
 	Integration          *WorkflowIntegrationStatus           `json:"integration,omitempty"`
@@ -93,6 +94,12 @@ func workflowWorkStatus(inspection core.WorkflowInspection, request WorkflowStat
 	run := inspection.Invocation
 
 	result := WorkflowWorkStatus{WorkflowIdentity: run.WorkflowIdentity, Selector: run.Selection.Selector, Authority: run.Authority, Status: run.Status, Outcome: run.Outcome, Target: run.Selection.Target, Policy: inspection.Policy, SetOrderRule: run.SetOrderRule, Excluded: maps.Clone(run.Excluded), Total: len(run.Members), ValidatedTasks: run.Cursor, ConfirmedTickets: run.ConfirmedCursor, IntegratedUnits: len(run.Deliveries), Remaining: len(run.Members) - run.ConfirmedCursor, StopIntent: run.StopIntent, Blocker: run.Blocker, CandidateRef: run.CandidateRef, CandidateHash: run.CandidateHash, PullRequest: run.PullRequest, DeliveryRef: run.DeliveryRef, DeliveryHash: run.DeliveryHash, Members: []core.WorkflowPreviewMember{}, Evidence: []WorkflowWorkEvidence{}, TotalAttempts: len(run.Attempts), NextOffset: -1}
+
+	for _, record := range inspection.Tasks {
+		if record.Task != nil && run.Selection.Selector.Extent == "ticket" && record.Task.Key == run.Selection.Selector.Identity {
+			result.WorkTitle = nativeRecordView(record, RecordTicket).Title
+		}
+	}
 
 	result.HarnessBinding = run.HarnessBinding
 	if run.Review != nil {

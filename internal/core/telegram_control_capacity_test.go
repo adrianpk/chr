@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 )
@@ -84,6 +85,7 @@ func TestTelegramControlReserve(t *testing.T) {
 		t.Fatal("overflow lacks durable diagnostic", deliveries, err)
 	}
 
+	checkTelegramCapacityMessages(t, deliveries)
 	checkTelegramControlIntakeCounts(t, store)
 }
 
@@ -226,5 +228,15 @@ func TestTelegramControlContextGuard(t *testing.T) {
 
 	if _, err := f.store.ResolveTelegramConversationTarget(t.Context(), input); !errors.Is(err, ErrWorkflowConflict) {
 		t.Fatal("model result followed changed context", err)
+	}
+}
+
+func checkTelegramCapacityMessages(t *testing.T, deliveries []TelegramReceiverDelivery) {
+	t.Helper()
+
+	for _, delivery := range deliveries {
+		if delivery.Presentation == nil || delivery.Presentation.Family != "42" || !strings.Contains(delivery.Text, "This request was not accepted") {
+			t.Fatal("capacity rejection was presented as accepted work", delivery)
+		}
 	}
 }

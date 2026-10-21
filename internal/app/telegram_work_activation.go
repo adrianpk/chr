@@ -106,7 +106,12 @@ func (r telegramReceiver) projectWorkProgress(ctx context.Context, ref core.Tele
 		return err
 	}
 
-	return r.store.ProjectTelegramWork(ctx, ref, telegramWorkObservation(status), config.Digest(), time.Now())
+	projects, err := r.operations.ListRegisteredProjects([]string{status.ProjectID})
+	if err != nil {
+		return err
+	}
+
+	return r.store.ProjectTelegramWork(ctx, ref, telegramWorkObservation(status, telegramWorkProjectName(projects, status.ProjectID)), config.Digest(), time.Now())
 }
 
 func telegramWorkActivationCode(err error) string {

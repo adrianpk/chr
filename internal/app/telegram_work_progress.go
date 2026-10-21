@@ -7,7 +7,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func telegramWorkObservation(status WorkflowWorkStatus) core.TelegramWorkObservation {
+func telegramWorkObservation(status WorkflowWorkStatus, projectName string) core.TelegramWorkObservation {
 	phase, kind := "executing", "progress"
 
 	switch status.Status {
@@ -15,7 +15,9 @@ func telegramWorkObservation(status WorkflowWorkStatus) core.TelegramWorkObserva
 		phase, kind = "completed", "result"
 	case "cancelled":
 		phase, kind = "canceled", "result"
-	case "paused", "blocked", "waiting_capacity", "waiting_review":
+	case "failed":
+		phase, kind = "failed", "result"
+	case "paused", "blocked", "waiting_capacity", "waiting_review", "waiting_integration":
 		phase = "waiting"
 	}
 
@@ -23,31 +25,86 @@ func telegramWorkObservation(status WorkflowWorkStatus) core.TelegramWorkObserva
 		phase, kind = "waiting", "diagnostic"
 	}
 
-	return core.TelegramWorkObservation{Revision: status.Revision, Phase: phase, Kind: kind, Text: telegramWorkProgressText(status)}
+	message := telegramWorkProgressMessage(status, projectName)
+
+	return core.TelegramWorkObservation{Revision: status.Revision, Phase: phase, Kind: kind, Text: core.RenderTelegramMessage(message).PlainFallback, Message: &message}
 }
 
 func telegramWorkProgressText(status WorkflowWorkStatus) string {
-	var text strings.Builder
-	fmt.Fprintf(&text, "Native work: %s %s\nInvocation: %s\nRevision: %d; state: %s; outcome: %s\nHost-validated tasks: %d/%d; confirmed tickets: %d; integrated units: %d; remaining tickets: %d.\n", status.Selector.Extent, status.Selector.Identity, status.ID, status.Revision, status.Status, status.Outcome, status.ValidatedTasks, status.Total, status.ConfirmedTickets, status.IntegratedUnits, status.Remaining)
-	fmt.Fprintf(&text, "Publication policy: %s; review: %s; next action: %s.\n", status.Policy.Mode, status.ReviewState, status.NextActionOwner)
+	return core.RenderTelegramMessage(telegramWorkProgressMessage(status, "")).PlainFallback
+}
 
-	if status.CandidateRef != "" {
-		fmt.Fprintf(&text, "Checked candidate: %s\nCandidate hash: %s\n", status.CandidateRef, status.CandidateHash)
+func telegramWorkProgressMessage(status WorkflowWorkStatus, projectName string) core.TelegramMessageBlocks {
+	title := telegramWorkLabel(status.WorkTitle)
+	if title == "" {
+		title = "Selected " + strings.ReplaceAll(status.Selector.Extent, "_", " ") + " work"
+	}
+
+	if projectName != "" {
+		title += " in " + telegramWorkLabel(projectName)
+	}
+
+	content := fmt.Sprintf("Validated tasks: %d/%d; confirmed tickets: %d; integrated units: %d; remaining tickets: %d.", status.ValidatedTasks, status.Total, status.ConfirmedTickets, status.IntegratedUnits, status.Remaining)
+	if status.Blocker != nil {
+		content += "\nBlocker: " + telegramControlExcerpt(status.Blocker.Reason)
 	}
 
 	if status.PullRequest != nil {
-		fmt.Fprintf(&text, "Pull request: %s\n", status.PullRequest.URL)
+		content += "\nPull request: " + status.PullRequest.URL
 	}
 
-	if status.DeliveryRef != "" {
-		fmt.Fprintf(&text, "Confirmed receipt: %s\nReceipt hash: %s\n", status.DeliveryRef, status.DeliveryHash)
-	} else {
-		text.WriteString("No confirmed integration receipt. Worker exit, validation and an open PR do not establish delivery.\n")
+	secondary := "No confirmed integration receipt. Validation or an open pull request alone does not confirm integration."
+	if status.DeliveryRef != "" && status.DeliveryHash != "" {
+		secondary = fmt.Sprintf("Integration confirmed for %d unit(s) by retained native receipts.", status.IntegratedUnits)
 	}
 
-	text.WriteString(telegramWorkEvidenceText(status))
-	text.WriteString(telegramControlStatusText(status))
-	fmt.Fprintf(&text, "Project: %s; namespace: %s.\nCanonical invocation: workflow:%s\nInspect in that project: chr work status --json %s", status.ProjectID, status.Namespace, status.ID, status.ID)
+	secondary += "\n" + telegramWorkNextAction(status)
+	secondary += "\nInspect complete retained state locally: chr work status --json " + status.ID
 
-	return text.String()
+	return core.TelegramMessageBlocks{Family: "33", InitialText: telegramWorkStateText(status) + "\n" + title, Content: content, SecondaryText: secondary}
+}
+
+func telegramWorkStateText(status WorkflowWorkStatus) string {
+	if status.StopIntent != "" && status.Status != "paused" && status.Status != "cancelled" {
+		return "Stop requested; an active worker may still be stopping."
+	}
+
+	states := map[string]string{"pending": "Work is admitted; execution has not started.", "running": "Work is running.", "admitted": "Work is admitted; execution has not started.", "waiting_capacity": "Work is waiting for execution capacity.", "waiting_review": "Work is waiting for review.", "waiting_integration": "Work is waiting for integration.", "paused": "Work is paused; saved results are retained.", "blocked": "Work is blocked; saved results are retained.", "completed": "Work has finished.", "cancelled": "Work was canceled; saved results are retained.", "failed": "Work failed; saved results are retained."}
+	if state, ok := states[status.Status]; ok {
+		return state
+	}
+
+	return "Current work state: " + status.Status + "."
+}
+
+func telegramWorkNextAction(status WorkflowWorkStatus) string {
+	if status.Outcome == "recovered" {
+		return "Recovered the same saved work. Inspect its current state before authorizing another step."
+	}
+
+	owners := map[string]string{"host": "Next: the existing workflow host continues when eligible.", "current_owner": "Next: wait for the current worker or host to release capacity.", "operator": "Next: inspect the current state with /status " + status.ID + " before approving a control.", "none": "No further action is requested."}
+	if text, ok := owners[status.NextActionOwner]; ok {
+		return text
+	}
+
+	return "Inspect the current state with /status " + status.ID + " before continuing."
+}
+
+func telegramWorkLabel(value string) string {
+	runes := []rune(value)
+	if len(runes) > 80 {
+		return string(runes[:80]) + "… [shortened]"
+	}
+
+	return value
+}
+
+func telegramWorkProjectName(projects []core.Project, id string) string {
+	for _, project := range projects {
+		if project.ID == id {
+			return project.Name
+		}
+	}
+
+	return ""
 }

@@ -55,12 +55,15 @@ func queueTelegramResponse(ctx context.Context, tx *sql.Tx, update TelegramRecei
 }
 
 func queueTelegramReferencedResponse(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, text, reference, configDigest string, now time.Time) error {
+	return queueTelegramResponseParts(ctx, tx, update, TelegramResponseParts(text, reference), configDigest, now)
+}
+
+func queueTelegramResponseParts(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, parts []string, configDigest string, now time.Time) error {
 	var pending int
 	if err := tx.QueryRowContext(ctx, "SELECT COUNT(*) FROM telegram_outbox WHERE bot_id=? AND state!='delivered'", update.Peer.BotID).Scan(&pending); err != nil {
 		return err
 	}
 
-	parts := TelegramResponseParts(text, reference)
 	if pending+len(parts) > 1024 {
 		return errors.New("telegram outbox capacity exhausted")
 	}

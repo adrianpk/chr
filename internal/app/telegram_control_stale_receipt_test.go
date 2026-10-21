@@ -115,7 +115,7 @@ func checkTelegramStaleReceiptResult(t *testing.T, f *telegramConversationAppFix
 func checkTelegramStaleDiagnostic(t *testing.T, notice telegramConversationNotice) {
 	t.Helper()
 
-	if !strings.Contains(notice.Text, "Current state:") || !strings.Contains(notice.Text, "Invocation:") {
+	if !strings.Contains(notice.Text, "Current state:") || !strings.Contains(notice.Text, "chr work status --json ") {
 		t.Fatal("stale control omitted its authorized current native state", notice)
 	}
 }
