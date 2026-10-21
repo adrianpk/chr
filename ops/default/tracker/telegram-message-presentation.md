@@ -43,9 +43,9 @@ The plan owns exact branch names, PR titles, report paths and focused commands.
 | T2.2 | delivered | `bb6a5575d69dbaa4d804e82c73adcb6dae561ca2` | Document upload, caption, acknowledgement and fallback |
 | T2.3 | delivered | `c48039eb4af550ee760e35af0c0dc8c9de648de6` | Primary artifact/export families 21-24 and 28 |
 | T2.4 | delivered | `7e2b7d21e1368ffe1eea6bbf83ad70fe3520f6b6` | Exact bytes, bounds, rollback and recovery evidence |
-| T3.1 | pending | pending | Human guarded previews and controls |
-| T3.2 | pending | pending | Original operation, document and action bindings |
-| T3.3 | pending | pending | Stale scope, ambiguity and replay regressions |
+| T3.1 | implemented | `b7a1174a5d099a663c93ba4d746903725301b264` | Human guarded previews and controls |
+| T3.2 | implemented | `94975b70a20b87639e1df5ee1d9ebca4fbb741de` | Original operation, document and action bindings |
+| T3.3 | implemented | `099b9a965b0bbe2690ca0191c3d51250a39deadb` | Stale scope, ambiguity and replay regressions |
 | T4.1 | pending | pending | Progress, waits, failures and partial/final results |
 | T4.2 | pending | pending | Notification sender and event snapshot integration |
 | T4.3 | pending | pending | Both-path faults, legacy records and truthful outcomes |
@@ -86,23 +86,23 @@ regression and client result as each row is delivered.
 | 22 | Authoring wait/failure from real owner state | Slice 2 | Keep: existing durable provider wait/retry ownership and context-preserving failure; omit an unscheduled retry promise; `app/telegram_authoring_apply.go`; `TestTelegramAuthoringExplainFailure`, `TestTelegramAuthoringBridgeLostAck`. |
 | 23 | Saved result after conversation advances | Slice 2 | Changed: attach the saved result while preserving the advanced conversation; `app/telegram_authoring_apply.go`; `TestTelegramPresentationDocumentAdvancedConversation`. |
 | 24 | Bounded explanation, with full content when needed | Slice 2 | Changed: bounded explanation preview and complete identified Markdown export with canonical sources; `app/telegram_explanation_dispatch.go`; `TestTelegramAuthoringExplainRouting`. |
-| 25 | Short ticket scope and bound complete document | Slice 3 | pending |
-| 26 | Prepared backlog result and correct next step | Slice 3 | pending |
-| 27 | Explicit missing intent/context for preparation | Slice 3 | pending |
+| 25 | Short ticket scope and bound complete document | Slice 3 | Changed: readable preparation scope and complete identified confirmation export; `app/telegram_prepared_work_result.go`, `telegram_confirmation_document.go`; `TestTelegramAuthoringPreparedAction`, `TestTelegramPresentationConfirmationBinding`. |
+| 26 | Prepared backlog result and correct next step | Slice 3 | Changed: backlog result and exact next work preview; replay shows the original result without raw JSON; `app/telegram_prepared_work_result.go`; `TestTelegramAuthoringPreparedIntent`. |
+| 27 | Explicit missing intent/context for preparation | Slice 3 | Keep: actual missing-instruction/intent diagnostics preserve retained context and never infer authority; `core/telegram_conversation_instruction.go`, `app/telegram_authoring_apply.go`; existing prepared-work intent/failure regressions. |
 | 28 | Readable/paginated records and identified full export | Slice 2 | Changed: human record rows and explicit complete records-page JSON export; preserve pagination; `app/telegram_record_dispatch.go`; `TestTelegramOperationLiveRecords`. |
-| 29 | Readable proposed record change and consequence | Slice 3 | pending |
-| 30 | Actionable malformed/stale record failure | Slice 3 | pending |
-| 31 | Exact work selection, policy, validation and scope | Slice 3 | pending |
-| 32 | Admission/current-owner/capacity state | Slice 3 | pending |
+| 29 | Readable proposed record change and consequence | Slice 3 | Changed: human record title/state and canonical reference in results; retain existing direct typed metadata-write ownership and legacy confirmation semantics; `app/telegram_record_apply.go`, `telegram_action_record.go`; `TestTelegramOperationLiveRecords`, `TestTelegramOperationActionReplay`. |
+| 30 | Actionable malformed/stale record failure | Slice 3 | Changed: malformed JSON gives a concrete correction and unchanged-record outcome; retain stale revision/source and unsupported-lifecycle guards; `app/telegram_record_dispatch.go`; existing record action/live regressions. |
+| 31 | Exact work selection, policy, validation and scope | Slice 3 | Changed: human selection, target, policy, limits and validation; full selected source/contracts attached; incomplete scope refuses a prompt; `app/telegram_work_dispatch.go`, `service_workflow_selection.go`; `TestTelegramPresentationActionWork`, `TestTelegramPresentationConfirmationIncomplete`. |
+| 32 | Admission/current-owner/capacity state | Slice 3 | Changed: admission is distinct from execution/integration; owner and capacity failures are separate; `app/telegram_work_action.go`, `telegram_work_failure.go`; `TestTelegramWorkExtents`, `TestTelegramWorkLostAck`. |
 | 33 | Real progress, review and partial/final result | Slice 4 | pending |
 | 34 | Durable progress/recovery without a duplicate action | Slice 4 | pending |
-| 35 | Exact control scope, effect and bounds | Slice 3 | pending |
-| 36 | Confirmed/replayed/stale control outcome | Slice 3 | pending |
-| 37 | Decision question and supported bound choices | Slice 3 | pending |
-| 38 | Readable harness selections and actual readiness | Slice 3 | pending |
-| 39 | Explicit harness-change consequence | Slice 3 | pending |
-| 40 | Original receipt, expired action and safe retry | Slice 3 | pending |
-| 41 | Human button labels; original tokens/choice keys | Slice 3 | pending |
+| 35 | Exact control scope, effect and bounds | Slice 3 | Changed: exact control effect, bound scope and remaining allowance with complete confirmation export; `app/telegram_action_presentation.go`, `telegram_control_prepare.go`; `TestTelegramPresentationControlPreview`, existing lifecycle/decision regressions. |
+| 36 | Confirmed/replayed/stale control outcome | Slice 3 | Changed: actual control result and retained original receipt; no extra mutation on replay; `app/telegram_control_action.go`; existing lifecycle acknowledgement and stale-receipt regressions. |
+| 37 | Decision question and supported bound choices | Slice 3 | Changed: one actual question first, bounded choices and exact answer-preview command; complete questions/options/candidate bindings exported; `app/telegram_control_status.go`; `TestTelegramPresentationControlQuestions`. |
+| 38 | Readable harness selections and actual readiness | Slice 3 | Changed: concise role defaults and local readiness through the shared renderer; retain remote-authentication distinction and admitted bindings; `app/telegram_harness_dispatch.go`; existing harness visibility/preparation regressions. |
+| 39 | Explicit harness-change consequence | Slice 3 | Changed: new-operations-only preview, original save/cancel guards and retained result replay; `app/telegram_harness_prepare.go`, `telegram_harness_action.go`; `TestTelegramHarnessSelectionConfirm`, `TestTelegramHarnessSelectionSendRetry`. |
+| 40 | Original receipt, expired action and safe retry | Slice 3 | Changed: original saved result on repeat, current-preview recovery on unavailable actions; `app/telegram_action_dispatch.go`, `telegram_control_diagnostic.go`; `TestTelegramPresentationActionWork`, existing stale action/receipt regressions. |
+| 41 | Human button labels; original tokens/choice keys | Slice 3 | Changed: human labels with original token/choice keys; labels, choices and complete image are sealed together; `core/telegram_action_presentation.go`; `TestTelegramPresentationActionLabels`, `TestTelegramPresentationConfirmationGuards`. |
 | 42 | Queue rejection versus waiting and actual acceptance | Slice 4 | pending |
 | 43 | Uncertain send and bounded plain fallback | Slice 4 | pending |
 | 44 | Bounded text, Unicode and full-document route | Slice 4 | pending |
@@ -120,11 +120,11 @@ regression and client result as each row is delivered.
 | TMP-03 | T1.1, T1.3, T4.3 | pending |
 | TMP-04 | T2.3 | Slice 2 fixtures verified and integrated; client acceptance pending |
 | TMP-05 | T2.1, T2.2, T2.4 | Slice 2 fixtures verified and integrated; client acceptance pending |
-| TMP-06 | T1.2, T3.1 | pending |
-| TMP-07 | T3.2, T3.3 | pending |
-| TMP-08 | T2.4, T3.3, T4.3 | Slice 2 snapshot/recovery fixtures verified; later owners pending |
-| TMP-09 | T2.4, T3.3, T4.3 | Slice 2 source/quota/upload failures verified; later owners pending |
-| TMP-10 | T2.1, T2.4, T3.3, T4.2 | Receiver document migration verified; action/notification owners pending |
+| TMP-06 | T1.2, T3.1 | Slice 3 fixtures verified; integration/client acceptance pending |
+| TMP-07 | T3.2, T3.3 | Guard, original-result and exact-scope fixtures verified; integration pending |
+| TMP-08 | T2.4, T3.3, T4.3 | Slice 2 integrated; Slice 3 guard/recovery fixtures verified; Slice 4 pending |
+| TMP-09 | T2.4, T3.3, T4.3 | Slice 2 integrated; Slice 3 fail-closed scope/quota fixtures verified; Slice 4 pending |
+| TMP-10 | T2.1, T2.4, T3.3, T4.2 | Receiver/action migration fixtures verified; notification owner pending |
 | TMP-11 | T5.1 | pending |
 | TMP-12 | T5.2, T5.3 | pending |
 
@@ -134,7 +134,7 @@ regression and client result as each row is delivered.
 - Specification/model promotion and implementation approval: completed on 2026-10-21.
 - Slice 1: delivered through [#424](https://forge.adrianpk.com/adrianpk/chr/pulls/424) at `a2bb0974eac21b1fe33cac78e21f4c1845871e96`.
 - Slice 2: delivered through [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425) at `a5c6a7e068a8e5ec547d13d73d39afe1f0477335`.
-- Slice 3: active; prerequisite repairs integrated through [#426](https://forge.adrianpk.com/adrianpk/chr/pulls/426) at `ff5c7d3838d8b2dea472485358d0842c69059e3f`.
+- Slice 3: T3.1-T3.3 implemented; report reviewing; canonical PR pending. Prerequisite repairs integrated through [#426](https://forge.adrianpk.com/adrianpk/chr/pulls/426) at `ff5c7d3838d8b2dea472485358d0842c69059e3f`.
 - Slices 4-5: pending.
 - Mobile/desktop and user-operated journey evidence: pending.
 - Exact final candidate and scheduled nightly: pending.
@@ -155,6 +155,21 @@ records all five ordered checks passed on the exact merged candidate.
 
 [Slice 2 report](../report/slices/telegram-message-presentation/slice-2-document-delivery.md)
 records immutable snapshots, upload/producer behavior, quota admission,
-retention, migration and fault fixtures. Final ordered checks, including the
-required focused race pass, must be recorded by Looper on the clean PR head
-following its PR-reference commit.
+retention, migration and fault fixtures. Looper evidence
+`NQQQ4DVYVPESUBCN7TURIYUTUC` records five ordered checks passed on the exact
+merged candidate `a5c6a7e068a8e5ec547d13d73d39afe1f0477335`.
+
+## Slice 3 Validation and Publication
+
+[Slice 3 report](../report/slices/telegram-message-presentation/slice-3-action-presentation.md)
+records scope exports, action sealing, original-result recovery and normal
+HTTP/SQLite fixtures. Strict package lint passed. Required final normal/race
+checks and affected legacy regressions remain to be recorded through Looper
+after the canonical PR-reference follow-up.
+
+The local candidate is based on canonical `dev` at
+`83802941df1c46bc34ab53201d56811a0e353156`. The published Slice 3 branch
+still contains the earlier closure/blocker commit. Its guarded replacement
+awaits explicit approval under the repository's published-history rule. The
+candidate is retained in its dedicated worktree; no merge or force push is
+claimed.
