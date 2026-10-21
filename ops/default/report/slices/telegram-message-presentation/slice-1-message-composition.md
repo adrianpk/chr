@@ -1,6 +1,6 @@
 # Slice 1: Readable Text and Conversation Messages
 
-Status: reviewing
+Status: delivered
 Delivery set: Telegram Message Presentation
 Plan: [ops/default/plan/telegram-message-presentation.md](../../../plan/telegram-message-presentation.md)
 Tracker: [ops/default/tracker/telegram-message-presentation.md](../../../tracker/telegram-message-presentation.md)
@@ -103,3 +103,12 @@ work. Later slices own document delivery, guarded action presentation, progress
 and notification producers. Existing authoring and workflow owners retain their
 current state and authority; this slice does not substitute presentation receipts
 for operation or integration evidence.
+
+## Integration
+
+PR [#424](https://forge.adrianpk.com/adrianpk/chr/pulls/424) was merged by the
+controller through Rebase + Fast-forward into dev at
+`a2bb0974eac21b1fe33cac78e21f4c1845871e96`. Canonical Forgejo, dev ancestry and
+Acta merge event `01M5F5AATQPJW7DV1AB99E4Q2A` agree. Controller evidence
+`UYX4BPRVESSKGMZMYMQQG72NMA` records all five ordered checks passed on that
+exact clean candidate, including `make verify` and whitespace validation.

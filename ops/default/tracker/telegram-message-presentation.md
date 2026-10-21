@@ -16,7 +16,7 @@ Inventory: [48-family review](../report/telegram-message-review.md)
 
 Implementation and merge authorization: granted for this delivery set and
 Looper-owned Rebase + Fast-forward slice PR merges into dev.
-Active slice: Slice 1 of 5, Readable text and conversation messages.
+Active slice: Slice 2 of 5, Document excerpts and complete attachments.
 
 ## Canonical Slice Map
 
@@ -30,15 +30,15 @@ Active slice: Slice 1 of 5, Readable text and conversation messages.
 
 ## Tasks
 
-Slice 1 tasks are implemented and awaiting canonical PR integration. Later
-slices remain pending. The plan owns exact branch names, PR titles, report
+Slice 1 is delivered through PR #424. Slice 2 is active. Later slices remain
+pending. The plan owns exact branch names, PR titles, report
 paths and focused commands.
 
 | Task | State | Commit | Required outcome |
 | --- | --- | --- | --- |
-| T1.1 | implemented | `ffcbc9b4dabc8fbff111e46ef74ad1b55b172b2a` | Shared optional blocks and bounded rich/plain renderer |
-| T1.2 | implemented | `c5665e602b5f9b00203e0366216d7a2dbdd7f3ae` | Readable conversation/text families 01-20 |
-| T1.3 | implemented | `eb7096813576290130d4f4edd583195a62ea443a` | Renderer, transport and conversation regressions |
+| T1.1 | delivered | `ffcbc9b4dabc8fbff111e46ef74ad1b55b172b2a` | Shared optional blocks and bounded rich/plain renderer |
+| T1.2 | delivered | `c5665e602b5f9b00203e0366216d7a2dbdd7f3ae` | Readable conversation/text families 01-20 |
+| T1.3 | delivered | `eb7096813576290130d4f4edd583195a62ea443a` | Renderer, transport and conversation regressions |
 | T2.1 | pending | pending | Durable receiver snapshots, migrations and quota |
 | T2.2 | pending | pending | Document upload, caption, acknowledgement and fallback |
 | T2.3 | pending | pending | Primary artifact/export families 21-24 and 28 |
@@ -132,8 +132,9 @@ regression and client result as each row is delivered.
 
 - Planning artifacts: accepted; local links, whitespace, family/task coverage and acceptance mappings checked.
 - Specification/model promotion and implementation approval: completed on 2026-10-21.
-- Slice 1: T1.1-T1.3 implemented; report reviewing; canonical PR [#424](https://forge.adrianpk.com/adrianpk/chr/pulls/424) open against dev.
-- Slices 2-5: pending.
+- Slice 1: delivered through [#424](https://forge.adrianpk.com/adrianpk/chr/pulls/424) at `a2bb0974eac21b1fe33cac78e21f4c1845871e96`.
+- Slice 2: active; T2.1-T2.4 pending.
+- Slices 3-5: pending.
 - Mobile/desktop and user-operated journey evidence: pending.
 - Exact final candidate and scheduled nightly: pending.
 
@@ -146,5 +147,5 @@ pending corrections; real client and journey evidence remain required.
 
 Focused presentation, existing conversation/help/authoring regressions and strict
 package lint passed. [Slice 1 report](../report/slices/telegram-message-presentation/slice-1-message-composition.md)
-records commands and coverage. Final ordered validation must be recorded through
-Looper on the clean PR head after its PR-reference follow-up commit.
+records commands and coverage. Looper evidence `UYX4BPRVESSKGMZMYMQQG72NMA`
+records all five ordered checks passed on the exact merged candidate.
