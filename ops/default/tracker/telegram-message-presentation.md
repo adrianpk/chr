@@ -16,7 +16,7 @@ Inventory: [48-family review](../report/telegram-message-review.md)
 
 Implementation and merge authorization: granted for this delivery set and
 Looper-owned Rebase + Fast-forward slice PR merges into dev.
-Active slice: Slice 2 of 5, Document excerpts and complete attachments.
+Active slice: Slice 3 of 5, Clear guarded confirmations and controls.
 
 ## Canonical Slice Map
 
@@ -30,19 +30,19 @@ Active slice: Slice 2 of 5, Document excerpts and complete attachments.
 
 ## Tasks
 
-Slice 1 is delivered through PR #424. Slice 2 tasks are implemented and
-awaiting canonical PR integration. Later slices remain pending. The plan owns exact branch names, PR titles, report
-paths and focused commands.
+Slices 1 and 2 are delivered through PRs #424 and #425. Slice 3 is active after
+the prerequisite repairs integrated through PR #426. Later tasks remain pending.
+The plan owns exact branch names, PR titles, report paths and focused commands.
 
 | Task | State | Commit | Required outcome |
 | --- | --- | --- | --- |
 | T1.1 | delivered | `ffcbc9b4dabc8fbff111e46ef74ad1b55b172b2a` | Shared optional blocks and bounded rich/plain renderer |
 | T1.2 | delivered | `c5665e602b5f9b00203e0366216d7a2dbdd7f3ae` | Readable conversation/text families 01-20 |
 | T1.3 | delivered | `eb7096813576290130d4f4edd583195a62ea443a` | Renderer, transport and conversation regressions |
-| T2.1 | implemented | `0c50fa368801ef245c1e59a28e5386bc7df58f81` | Durable receiver snapshots, migrations and quota |
-| T2.2 | implemented | `bb6a5575d69dbaa4d804e82c73adcb6dae561ca2` | Document upload, caption, acknowledgement and fallback |
-| T2.3 | implemented | `c48039eb4af550ee760e35af0c0dc8c9de648de6` | Primary artifact/export families 21-24 and 28 |
-| T2.4 | implemented | `7e2b7d21e1368ffe1eea6bbf83ad70fe3520f6b6` | Exact bytes, bounds, rollback and recovery evidence |
+| T2.1 | delivered | `0c50fa368801ef245c1e59a28e5386bc7df58f81` | Durable receiver snapshots, migrations and quota |
+| T2.2 | delivered | `bb6a5575d69dbaa4d804e82c73adcb6dae561ca2` | Document upload, caption, acknowledgement and fallback |
+| T2.3 | delivered | `c48039eb4af550ee760e35af0c0dc8c9de648de6` | Primary artifact/export families 21-24 and 28 |
+| T2.4 | delivered | `7e2b7d21e1368ffe1eea6bbf83ad70fe3520f6b6` | Exact bytes, bounds, rollback and recovery evidence |
 | T3.1 | pending | pending | Human guarded previews and controls |
 | T3.2 | pending | pending | Original operation, document and action bindings |
 | T3.3 | pending | pending | Stale scope, ambiguity and replay regressions |
@@ -118,8 +118,8 @@ regression and client result as each row is delivered.
 | TMP-01 | T1.1, T4.1 | pending |
 | TMP-02 | T4.2, T4.3 | pending |
 | TMP-03 | T1.1, T1.3, T4.3 | pending |
-| TMP-04 | T2.3 | Slice 2 fixtures verified; integration pending |
-| TMP-05 | T2.1, T2.2, T2.4 | Slice 2 fixtures verified; integration pending |
+| TMP-04 | T2.3 | Slice 2 fixtures verified and integrated; client acceptance pending |
+| TMP-05 | T2.1, T2.2, T2.4 | Slice 2 fixtures verified and integrated; client acceptance pending |
 | TMP-06 | T1.2, T3.1 | pending |
 | TMP-07 | T3.2, T3.3 | pending |
 | TMP-08 | T2.4, T3.3, T4.3 | Slice 2 snapshot/recovery fixtures verified; later owners pending |
@@ -133,15 +133,16 @@ regression and client result as each row is delivered.
 - Planning artifacts: accepted; local links, whitespace, family/task coverage and acceptance mappings checked.
 - Specification/model promotion and implementation approval: completed on 2026-10-21.
 - Slice 1: delivered through [#424](https://forge.adrianpk.com/adrianpk/chr/pulls/424) at `a2bb0974eac21b1fe33cac78e21f4c1845871e96`.
-- Slice 2: T2.1-T2.4 implemented; report reviewing; [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425) open against dev.
-- Slices 3-5: pending.
+- Slice 2: delivered through [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425) at `a5c6a7e068a8e5ec547d13d73d39afe1f0477335`.
+- Slice 3: active; prerequisite repairs integrated through [#426](https://forge.adrianpk.com/adrianpk/chr/pulls/426) at `ff5c7d3838d8b2dea472485358d0842c69059e3f`.
+- Slices 4-5: pending.
 - Mobile/desktop and user-operated journey evidence: pending.
 - Exact final candidate and scheduled nightly: pending.
 
 The existing conversational workflow and its active QA evidence retain their
 own controller, tracker and invocation states. This set uses a separate Looper
-configuration. Its Slice 3 depends on canonical disposition of the earlier
-pending corrections; real client and journey evidence remain required.
+configuration. Its Slice 3 prerequisite is resolved by the canonical repair
+integration; real client and journey evidence remain required.
 
 ## Slice 1 Validation
 

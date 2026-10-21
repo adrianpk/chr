@@ -1,6 +1,6 @@
 # Telegram Message Presentation Delivery
 
-Status: approved
+Status: implementing
 
 Approved: maintainer, 2026-10-21; specification, model, slice map and Looper execution accepted.
 
@@ -23,7 +23,7 @@ Planning scope: requested by the maintainer on 2026-10-21.
 Implementation and merge authorization: granted for this delivery set and
 Looper-owned Rebase + Fast-forward slice PR merges into dev.
 
-Active slice: Slice 2 of 5, Document excerpts and complete attachments.
+Active slice: Slice 3 of 5, Clear guarded confirmations and controls.
 
 ## 1. Outcome and Strategy
 
@@ -58,6 +58,14 @@ at activation. Slices 1-2 can proceed against current dev. Before Slice 3,
 consume the corrections through their canonical integration or record the
 dependency as blocked. Do not copy them into this set or acquire the retained
 controller's work.
+
+Dependency resolved: [PR #426](https://forge.adrianpk.com/adrianpk/chr/pulls/426)
+integrated the admission and executor handoff repairs into dev at
+`ff5c7d3838d8b2dea472485358d0842c69059e3f` on 2026-10-21. That commit retains
+the original repair ancestry and passed all five ordered development, normal/
+race journey and affected workflow/presentation/recovery checks. Slice 3 may
+proceed; the earlier set's real journey acceptance and final closure remain
+pending under its retained owner.
 
 The maintainer authorized the accepted package and Looper execution on
 2026-10-21. Commit and push these artifacts before starting the new controller.

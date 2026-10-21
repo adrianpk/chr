@@ -44,6 +44,12 @@ grace and real SQLite journey selection passed with race instrumentation:
 `go test -race ./internal/app -run '^Test(TelegramJourney$|TelegramRecovery(HostFailure|StorageCancel|ApplicationError|Grace)$)' -count=1 -timeout=3m`.
 The final committed head still requires the complete ordered PR checks.
 
+Repair integration verified: PR #426 merged into dev at
+`ff5c7d3838d8b2dea472485358d0842c69059e3f`. Validation receipt
+`2Q4Q7QXT2ZAPX723WXLQEBLJAZ` records all five ordered checks passed on that
+exact candidate. The report remains reviewing because live acceptance and
+Slice 8 closure are still pending; only the deterministic repairs are integrated.
+
 ## Delivered Behavior
 
 The deterministic combined journey reaches confirmed native integration after

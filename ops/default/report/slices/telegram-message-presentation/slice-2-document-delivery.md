@@ -1,11 +1,15 @@
 # Slice 2: Document Excerpts and Complete Attachments
 
-Status: reviewing
+Status: delivered
 Delivery set: Telegram Message Presentation
 Plan: [ops/default/plan/telegram-message-presentation.md](../../../plan/telegram-message-presentation.md)
 Tracker: [ops/default/tracker/telegram-message-presentation.md](../../../tracker/telegram-message-presentation.md)
 Branch: `feat/slice-2-telegram-document-delivery`
 PR: [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425)
+
+Integration verified: `a5c6a7e068a8e5ec547d13d73d39afe1f0477335` on 2026-10-21.
+Exact-head controller receipt `NQQQ4DVYVPESUBCN7TURIYUTUC` records all five
+ordered checks passed. Real Telegram client acceptance remains Slice 5 work.
 
 ## Purpose
 

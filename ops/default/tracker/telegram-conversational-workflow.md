@@ -10,6 +10,10 @@ does not complete those tasks or change the retained QA invocations.
 
 Repair PR: [#426](https://forge.adrianpk.com/adrianpk/chr/pulls/426).
 
+Repairs integrated at `ff5c7d3838d8b2dea472485358d0842c69059e3f` with all five
+ordered checks passed. The original controller and QA invocations remain at
+their retained checkpoints; this does not complete the remaining live tasks.
+
 Date: 2026-10-16
 
 Approved: maintainer, 2026-10-16; specification scope and delivery design accepted through the request for spec, plan and tracker.
@@ -28,7 +32,7 @@ Active slice: Slice 8, Live journey and closure; first live canonical dump confi
 
 Next slice: None; final slice active, followed by exact-candidate scheduled certification and closure
 
-Progress: 7 of 8 slices integrated; 26 of 29 tasks done and 3 not delivered; 28 criteria have deterministic fixture evidence, TG-01 has live reception evidence and 3 criteria remain pending.
+Progress: 7 of 8 slices delivered; Slice 8 repairs integrated, with acceptance pending. 26 of 29 tasks are done and 3 not delivered; 28 criteria have deterministic fixture evidence, TG-01 has live reception evidence and 3 criteria remain pending.
 
 Full gate: `make verify`
 
