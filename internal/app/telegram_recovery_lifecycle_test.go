@@ -156,6 +156,7 @@ func TestTelegramRecoveryStorageCancel(t *testing.T) {
 
 				return test.failure
 			}
+
 			err := runTelegramReceiverHosts(ctx, []func(context.Context) error{host}, time.Second)
 			if !errors.Is(err, test.want) {
 				t.Fatal("shutdown lost the original failure semantics", err)

@@ -32,6 +32,7 @@ func runTelegramReceiverHosts(ctx context.Context, hosts []func(context.Context)
 	}
 
 	result = telegramStorageShutdownFailure(result, owned.Err())
+
 	cancel()
 
 	result = telegramHostFailure(result, owned.Err())
