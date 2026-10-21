@@ -40,9 +40,9 @@ func (a TelegramReceiverAPI) SendDocument(ctx context.Context, token string, pee
 		return acknowledgement, err
 	}
 
-	data, err := a.callBody(ctx, token, "sendDocument", bytes.NewReader(body), contentType, 30*time.Second)
+	data, err := a.callBody(ctx, token, "sendDocument", bytes.NewReader(body), contentType, 10*time.Second)
 	if err != nil {
-		return acknowledgement, err
+		return acknowledgement, telegramDocumentSendFailure(err)
 	}
 
 	return decodeTelegramDocumentAcknowledgement(data)
@@ -59,7 +59,7 @@ func decodeTelegramDocumentAcknowledgement(data []byte) (TelegramDocumentAcknowl
 		}
 	)
 	if err := json.Unmarshal(data, &message); err != nil || message.MessageID <= 0 || message.Document.FileID == "" || len(message.Document.FileID) > 256 {
-		return acknowledgement, &TelegramAPIError{Code: "invalid_document_response", Permanent: true, Uncertain: true}
+		return acknowledgement, &TelegramAPIError{Code: "invalid_document_response", Uncertain: true}
 	}
 
 	return TelegramDocumentAcknowledgement{MessageID: message.MessageID, FileID: message.Document.FileID}, nil
@@ -125,4 +125,13 @@ func telegramDocumentJSONFields(fields map[string]string, entities []TelegramTex
 	}
 
 	return nil
+}
+
+func telegramDocumentSendFailure(err error) error {
+	var apiErr *TelegramAPIError
+	if errors.As(err, &apiErr) && apiErr.Code == "invalid_response" {
+		return &TelegramAPIError{Code: "invalid_document_response", Uncertain: true}
+	}
+
+	return err
 }

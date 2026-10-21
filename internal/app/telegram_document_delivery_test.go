@@ -36,11 +36,7 @@ func telegramDocumentHTTPFixture(t *testing.T, uploads chan<- telegramDocumentUp
 		uploads <- upload
 
 		if calls.Add(1) == 1 && status != 0 {
-			w.WriteHeader(status)
-
-			if _, err := fmt.Fprintf(w, `{"ok":false,"error_code":%d,"description":"Bad Request: can't parse entities"}`, status); err != nil {
-				t.Error(err)
-			}
+			writeTelegramDocumentFailure(t, w, status)
 
 			return
 		}
@@ -129,6 +125,9 @@ func TestTelegramPresentationDeliveryHTTP(t *testing.T) {
 		{"upload", "", 0, 1, 0},
 		{"plain fallback", "", 400, 2, 0},
 		{"uncertain", "uncertain", 503, 1, 1},
+		{"lost acknowledgement", "uncertain", -1, 1, 1},
+		{"missing file identity", "uncertain", -2, 1, 1},
+		{"malformed envelope", "uncertain", -3, 1, 1},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			uploads := make(chan telegramDocumentUpload, 3)
@@ -205,5 +204,50 @@ func checkTelegramDocumentFile(t *testing.T, upload telegramDocumentUpload, want
 
 	if upload.Filename != "example.md" || !bytes.Equal(upload.Payload, want) || upload.Fields["chat_id"] != "100001" {
 		t.Fatal("upload changed bytes, filename or destination", upload)
+	}
+}
+
+func closeTelegramDocumentConnection(t *testing.T, w http.ResponseWriter) {
+	t.Helper()
+
+	hijacker, ok := w.(http.Hijacker)
+	if !ok {
+		t.Error("HTTP fixture cannot lose acknowledgement")
+
+		return
+	}
+
+	connection, _, err := hijacker.Hijack()
+	if err != nil {
+		t.Error(err)
+
+		return
+	}
+
+	if err := connection.Close(); err != nil {
+		t.Error(err)
+	}
+}
+
+func writeTelegramDocumentFailure(t *testing.T, w http.ResponseWriter, status int) {
+	t.Helper()
+
+	switch status {
+	case -1:
+		closeTelegramDocumentConnection(t, w)
+	case -2:
+		if _, err := io.WriteString(w, `{"ok":true,"result":{"message_id":77}}`); err != nil {
+			t.Error(err)
+		}
+	case -3:
+		if _, err := io.WriteString(w, `{"ok":`); err != nil {
+			t.Error(err)
+		}
+	default:
+		w.WriteHeader(status)
+
+		if _, err := fmt.Fprintf(w, `{"ok":false,"error_code":%d,"description":"Bad Request: can't parse entities"}`, status); err != nil {
+			t.Error(err)
+		}
 	}
 }

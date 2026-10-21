@@ -2,8 +2,10 @@ package app
 
 import (
 	"bytes"
+	"context"
 	"strings"
 	"testing"
+	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
 )
@@ -76,4 +78,71 @@ func assertTelegramArtifactUpload(t *testing.T, document telegramDocumentUpload,
 	}
 
 	t.Fatal("attachment differs from its complete canonical artifact", document.Filename)
+}
+
+type telegramAdvanceAfterAuthoring struct {
+	service
+	advance func() error
+}
+
+func (s telegramAdvanceAfterAuthoring) ContinueTelegramAuthoring(ctx context.Context, target core.TelegramOperationTarget, request core.AuthoringContinuationRequest, guard core.AuthoringCommitGuard) (core.AuthoringContinuationResult, error) {
+	result, err := s.service.ContinueTelegramAuthoring(ctx, target, request, guard)
+	if err == nil {
+		err = s.advance()
+	}
+
+	return result, err
+}
+
+// A confirmed owner result remains downloadable when an independent cancellation
+// advances the receiver conversation before its local completion projection.
+func TestTelegramPresentationDocumentAdvancedConversation(t *testing.T) {
+	f := newTelegramConversationAppFixture(t)
+	telegramAuthoringBridgeHTTP(t, f, func(authoringModelInput) string {
+		return telegramAuthoringServiceOutput(t, "# Requirements\nKeep the retry ceiling.", "")
+	}, telegramAuthoringBridgeCapture)
+	f.send(t, "/prepare advanced conversation", 0)
+
+	original := f.sessions(t)[0]
+	operations := telegramOperationConcreteService(t, f.receiver)
+	f.receiver.operations = telegramAdvanceAfterAuthoring{service: operations, advance: func() error {
+		input := telegramOperationRetainInput(t, f, "/cancel "+original.ID)
+		input.Action, input.Conversation = core.TelegramConversationCancel, original.ID
+
+		return f.receiver.store.ApplyTelegramConversation(t.Context(), input, time.Now())
+	}}
+
+	input := telegramOperationRetainInput(t, f, "/done "+original.ID)
+	if err := f.receiver.respond(t.Context(), input.Update); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := f.receiver.drainDeliveries(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+
+	request, found, err := f.receiver.store.TelegramOperation(t.Context(), input.Update, 0)
+	if err != nil || !found || request.State != "confirmed" || request.ReceiptRef == "" {
+		t.Fatal("advanced conversation lost original receipt", request, err)
+	}
+
+	checkTelegramAdvancedDocument(t, f, original)
+}
+
+func checkTelegramAdvancedDocument(t *testing.T, f *telegramConversationAppFixture, original core.TelegramConversation) {
+	t.Helper()
+
+	current := f.session(t, original.ID)
+	if current.Phase != "canceled" || current.Capture != "" || current.AuthoringSessionRef != "" || current.ProjectID != original.ProjectID {
+		t.Fatal("completed presentation overwrote current selection", current)
+	}
+
+	if len(f.documents) != 1 {
+		t.Fatal("advanced result lost or duplicated attachment", len(f.documents))
+	}
+
+	document := telegramLatestDocument(t, f, "dump-")
+	if !strings.Contains(document.Fields["caption"], "current selection is preserved") {
+		t.Fatal("advanced result did not explain preserved selection", document.Fields["caption"])
+	}
 }

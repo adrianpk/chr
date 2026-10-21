@@ -2,6 +2,8 @@ package core
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -50,13 +52,21 @@ func TestTelegramPresentationDocumentSnapshot(t *testing.T) {
 	}
 
 	original := telegramTestDocumentResponse()
+
+	source := filepath.Join(t.TempDir(), "example.md")
+	if err := os.WriteFile(source, original.Document.Payload, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
 	if err := store.QueueDocumentResponse(t.Context(), update, original, telegramReceiverTestConfig().Digest(), now); err != nil {
 		t.Fatal(err)
 	}
 
 	changed := telegramTestDocumentResponse()
 
-	changed.Document.Payload = []byte("changed after snapshot")
+	changed.Document.Payload = changeTelegramDocumentSource(t, source)
+
+	changed.Document.SourceHash = workflowHash(changed.Document.Payload)
 	if err := store.QueueDocumentResponse(t.Context(), update, changed, telegramReceiverTestConfig().Digest(), now); err != nil {
 		t.Fatal(err)
 	}
@@ -125,4 +135,19 @@ func TestTelegramPresentationDocumentRollback(t *testing.T) {
 	if err := store.db.QueryRowContext(t.Context(), "SELECT COUNT(*) FROM telegram_document_snapshots").Scan(&count); err != nil || count != 0 {
 		t.Fatal("partial snapshot admitted", count, err)
 	}
+}
+
+func changeTelegramDocumentSource(t *testing.T, source string) []byte {
+	t.Helper()
+
+	if err := os.WriteFile(source, []byte("changed after snapshot"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	payload, err := os.ReadFile(source)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return payload
 }
