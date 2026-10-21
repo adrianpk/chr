@@ -9,36 +9,75 @@ Preparation creates no work invocation and executes no saved intake handoff.
 
 ## Command help
 
-Send `/help` to read the complete command catalogue without selecting a project
-or invoking a model. Commands come from their native definitions and retain
-their arguments, aliases and overloads. Populated categories appear in this
-order: Execution, Tickets, Slice sets, Use cases, Projects, Authoring,
-Conversations, System controls and Other. Each syntax entry occupies its own
-line; descriptions and large code blocks are omitted. Entries sort by exact
-syntax within a category.
+Send `/help` for the first command view. It keeps common project, conversation
+and work commands together. Send `/help all` for the advanced group index, then
+choose `/help execution`, `/help tickets`, `/help slices`, `/help cases`,
+`/help projects`, `/help authoring`, `/help conversations` or `/help system`.
+Commands are generated from their native definitions with complete arguments,
+aliases and overloads. Unknown groups point back to `/help all`.
 
-Help uses Telegram's legacy `Markdown` mode, with bold headings and inline
-commands where safe. A definite entity-format rejection permits one plain-text
-fallback. Network failures, rate limits and uncertain delivery use the normal
-retained retry policy. Both renderings are frozen together when queued, so
-fallback after restart cannot read a newer command catalogue. Older queued
-plain replies keep their previous behavior; other responses remain plain text.
+Entries use categorized headings and one exact syntax per line. The existing
+help formatter retains legacy `Markdown` and its 3,200 UTF-16-unit hard safety
+bound. Oversized help returns a local-reference diagnostic. A definite
+entity-format rejection permits one frozen plain-text fallback; network errors,
+rate limits and uncertain responses retain the existing transport retry policy.
+Previously queued help is not regenerated from a newer command catalogue.
 
-The current catalogue fits one message through the existing 3,200
-UTF-16-unit response pipeline. Both forms, including any diagnostic prefix,
-must fit that boundary and the sender's 3,900-code-point/UTF-16-unit bounds.
-Oversized help returns an explicit diagnostic instead of a truncated catalogue.
-There are no help topic pages, navigation buttons or pagination controls.
+Help remains available during capture, pending questions and confirmations,
+including when sent as a reply to their prompt. It does not change project
+selection, capture, session revisions or action/question bindings. Unknown slash
+commands return a correction without consulting a model. Ordinary-language help
+uses the configured intent resolver.
 
-Direct `/help` remains available during capture, pending authoring questions
-and confirmations, including when sent as a reply to the prompt. It does not
-change the selected project, focused session, capture, revisions or question
-and confirmation bindings. Its response is not a new capture/confirmation
-target. Later messages remain subject to normal conversation routing.
+## Message presentation and attachments
 
-Unknown slash commands retain their diagnostic and return the same categorized
-help without a model. Existing natural-language help still passes through the
-configured intent resolver; it is not guaranteed to be model-free.
+Responses compose only the relevant state, content and next-step blocks. Human
+project/work names precede diagnostic references. Body text preserves literal
+Markdown, code delimiters and Unicode through explicit entities. Short views
+retain space for a supported next input or local inspection route.
+
+| Item | Bound |
+| --- | --- |
+| Opening document excerpt | First 6 nonempty body lines, at most 600 UTF-16 units |
+| Newly composed text | 1,800 UTF-16 units including visible secondary text |
+| Document caption | 900 UTF-16 units including visible secondary text |
+| Complete document | 2 MiB, one primary attachment per logical response |
+| Retained document bytes | 64 MiB across both snapshot tables in the owning database |
+
+Opening excerpts omit YAML front matter and routine audit fields. Dump, spec
+and plan results attach the complete canonical source. Explanations and record
+pages identify their complete Markdown or JSON export. Long bodies are not
+split into automatic document chunks. Lists retain their existing page routes.
+Legacy queued multipart replies retain their original ordering and retry state.
+
+Document-backed confirmations send their caption, complete scope file and
+existing keyboard together. Read the attachment before confirming a scope that
+is shortened in the caption. Buttons describe actual effects, while original
+peer, operator, project/root, namespace, revision, expiry and exact-scope guards
+remain authoritative. Required-document failure offers no action. An already
+successful operation keeps its original receipt if later document preparation
+or delivery fails.
+
+The original request or notification event freezes the view and attachment
+before IO. Source edits, reopen and plain fallback retain those same bytes.
+Missing images, future presentation versions and partial new mappings are
+refused before transmission. Genuine legacy rows keep their old payload and
+guards. A Telegram acknowledgement records transport delivery only. Host
+validation, work completion and integration require their native evidence.
+A lost acknowledgement can repeat the same notice within its retained allowance.
+
+Changed authorization or destination bindings block transmission. Eligible
+cleanup purges at most twenty terminal, unreferenced images per pass after at
+least seven days. Unresolved delivery or a live confirmation retains its bytes;
+hashes and original receipts survive eligible byte cleanup. Purged content
+requires a fresh authorized view rather than a silent replacement file.
+
+The configured notification sender uses the same renderer, document values and
+uploader under its existing event repository. Workflow notices attach one
+complete original event JSON export; manual notification tests remain short and
+identify their project and test purpose. The sender retains its configured
+triggers and destination and gains no interactive controls or receiver. See
+[Notifications](notifications.md#workflow-notifications) for audit outcomes.
 
 ## Private setup
 
@@ -180,7 +219,7 @@ model proposal.
 | `/project <project>` | Select an exact authorized ID or unique registered name. |
 | `/prepare [--project <id>] <topic>` | Create an independent preparation-only capture. |
 | `/develop [--project <id>] <topic>` | Create a capture retaining development intent. |
-| `/sessions` | Show bounded session identities, phases, focus, sizes and revisions. |
+| `/sessions` | Show human project/topic rows, state, focus and an exact targeting command. |
 | `/focus <conversation>` | Focus an exact collecting session. |
 | `/reply <conversation> <text>` | Append to an exact current conversation. |
 | `/dump [conversation]` | Show bounded capture text. |

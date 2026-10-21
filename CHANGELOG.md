@@ -188,11 +188,15 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Changed
 
-- Telegram progress separates validated work, capacity/review waits and confirmed
-  integration. Short views retain a status inspection route, preserve saved
-  results on failures and identify notices repeated after a lost delivery acknowledgement.
-  Workflow notifications use the same short views with one complete event export;
-  notification tests name the project and their test purpose.
+- Telegram messages show human project/work context, the current state and a
+  useful next step. Generated documents and explanations pair short literal
+  excerpts with complete attachments. Confirmations include their complete
+  scope, and buttons distinguish preparing a ticket, starting work and applying
+  a control. Retries preserve the original scope, document and saved result.
+  Progress separates validation, review waits and confirmed integration, with
+  clear queue rejection and lost-delivery notices. Workflow notifications attach
+  complete event exports; manual tests state their project and test purpose.
+  `/help` keeps common commands first and links to the complete advanced groups.
 
 - The product name is chr. Commands continue to use `chr`.
 
@@ -208,12 +212,6 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   trusted internal network with `chr web serve --allow-lan`. This mode is
   disabled by default and keeps navigation, forms and live updates usable
   without token-bearing links.
-- Telegram `/help` groups all available commands by category, with complete
-  arguments on separate readable lines and a plain-text fallback when Telegram
-  rejects the formatting.
-- Telegram confirmations pair short scope previews with complete attached details.
-  Buttons distinguish preparing a ticket, starting work and applying a control.
-  Retried confirmations retain their original scope and saved result.
 - Updated the Web UI with editable ticket details and comments, shared case
   editing panels, and dialogs to create, edit and append to dumps. Successful
   dump saves close the dialog and keep the catalog open.

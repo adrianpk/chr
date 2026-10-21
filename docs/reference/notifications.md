@@ -148,6 +148,28 @@ Workflow notifications are configuration-gated for delivery:
 - dispatch failures are recorded in the notification audit event and do not
   replace the ticket or loop result.
 
+New Telegram workflow notices lead with a concise human project/activity view
+and attach one complete original event JSON export. Worker summaries are labelled
+as reported content; a loop-finished event does not establish integration. The
+notification event repository freezes the view, destination/root binding and
+export before dispatch. It shares the 64 MiB owning-database snapshot quota with
+receiver documents, with a 2 MiB limit per complete export.
+
+New text delivery requires a positive Telegram message acknowledgement. Document
+delivery also requires a nonempty file identity. A definite entity-format
+rejection can select one plain fallback for the same view/export; uncertain
+responses retain their consumed allowance and original bytes without automatic
+notification replay. A changed sender, destination, namespace or root prevents
+transmission. Missing or partial new mappings are failures; NULL/version-zero
+legacy records with no new mapping retain their original sender and payload.
+
+Transport acknowledgement is separate from native validation and integration.
+A failed upload or export preparation remains a failed notification audit event
+and preserves the completed ticket or loop result. Unresolved/uncertain images
+remain retained; only aged terminal unreferenced bytes qualify for bounded
+cleanup. See [Telegram presentation](telegram-receiver.md#message-presentation-and-attachments)
+for shared bounds and confirmation behavior.
+
 Ticket-blocked events include ticket and execution references. Loop events
 include the loop run reference. All workflow events include the managed project
 identifier.
@@ -181,7 +203,9 @@ chr notify telegram test
 
 This command reads the bot token from the environment variable named by
 `telegram_bot_token_env`, sends the rendered test message through Telegram, and
-records a notification audit event with `channel` set to `telegram`.
+records a notification audit event with `channel` set to `telegram`. The short
+message names the project and its explicit test purpose. It does not attach an
+event export or show the project directory in the chat.
 
 If dispatch fails after the audit event is created, the event is updated to
 `failed` with the failure reason.

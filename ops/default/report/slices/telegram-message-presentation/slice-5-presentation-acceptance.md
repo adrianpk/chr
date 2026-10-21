@@ -31,9 +31,15 @@ T5.1 is implemented:
   target. Replaying confirmation creates no additional publication.
 
 T5.2 real mobile/desktop inspection and user-operated acceptance remain pending.
-T5.3 product guidance and the cycle report are being updated.
+T5.3 product guidance is prepared: the existing User Guide, Telegram transport
+and notification references describe the actual help groups, attachment bounds,
+complete confirmation scope, retry behavior and native evidence. Unreleased
+notes describe one user outcome. The cycle report keeps client acceptance and
+exact-candidate scheduled certification open.
 
 ## Implementation Notes
+
+T5.1 is `ec0ea0f4c959188cee4477bc45888406f739a3a1`.
 
 Activated from canonical `dev` at
 `ae8d8d1b79ba6efddd75fdd287f235b6556babab` after PR #428 integration.
@@ -52,7 +58,9 @@ separate decision under the approved plan.
 
 - The approved plan, tracker and 48-family source review
 - `internal/app/telegram*_test.go` and `internal/core/telegram*_test.go`
-- Existing User Guide and Telegram transport reference
+- Existing `docs/how-to/user-guide/index.md`
+- `docs/reference/telegram-receiver.md` and `notifications.md`
+- `CHANGELOG.md` and the delivery cycle report
 
 ## Validation
 

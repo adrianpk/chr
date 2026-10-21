@@ -30,7 +30,9 @@ Active slice: Slice 5 of 5, Complete coverage and real client acceptance.
 
 ## Tasks
 
-Slices 1-4 are delivered through PRs #424, #425, #427 and #428. Slice 5 is active.
+Slices 1-4 are delivered through PRs #424, #425, #427 and #428. Slice 5 is active;
+T5.1 is implemented, T5.2 needs real client evidence and T5.3 has documentation
+prepared with final candidate/nightly evidence still open.
 The plan owns exact branch names, PR titles, report paths and focused commands.
 
 | Task | State | Commit | Required outcome |
@@ -48,9 +50,9 @@ The plan owns exact branch names, PR titles, report paths and focused commands.
 | T4.1 | delivered | `708afec21584e546624848391a287a59fb5da5d4` | Progress, waits, failures and partial/final results |
 | T4.2 | delivered | `04fddeb15cf6184f4c263a55bdb222fcd74a6b1e` | Notification sender and event snapshot integration |
 | T4.3 | delivered | `01d9be1341e5c207c1748a22ced4a5aac8eafe1d` | Both-path faults, legacy records and truthful outcomes |
-| T5.1 | pending | pending | Complete producer and variant coverage |
+| T5.1 | implemented | `ec0ea0f4c959188cee4477bc45888406f739a3a1` | Complete producer and variant coverage |
 | T5.2 | pending | pending | Real mobile/desktop and natural-language journey |
-| T5.3 | pending | pending | User documentation, cycle evidence and exact nightly |
+| T5.3 | in progress | pending | User documentation, cycle evidence and exact nightly |
 
 ## Message-Family Coverage
 
@@ -124,7 +126,7 @@ Real client observations remain a separate acceptance obligation.
 | TMP-08 | T2.4, T3.3, T4.3 | Slice 2 integrated; Slice 3 guard/recovery fixtures verified; Slice 4 both-owner recovery fixtures verified |
 | TMP-09 | T2.4, T3.3, T4.3 | Slice 2 integrated; Slice 3 fail-closed scope/quota fixtures verified; Slice 4 shared quota/target/failure fixtures verified |
 | TMP-10 | T2.1, T2.4, T3.3, T4.2 | Receiver/action and physical pre-28 notification migrations verified; NULL/version-zero legacy payload semantics preserved; partial new mappings refused before IO |
-| TMP-11 | T5.1 | pending |
+| TMP-11 | T5.1 | All 48 families reconciled; 90 exact roots selected by passing bounded normal commands; actual client observations remain separate |
 | TMP-12 | T5.2, T5.3 | pending |
 
 ## Completion State
@@ -135,7 +137,7 @@ Real client observations remain a separate acceptance obligation.
 - Slice 2: delivered through [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425) at `a5c6a7e068a8e5ec547d13d73d39afe1f0477335`.
 - Slice 3: delivered through [PR #427](https://forge.adrianpk.com/adrianpk/chr/pulls/427) at `a4d0a865e8bb32a3caac65395a28839b573ed369`.
 - Slice 4: delivered through [PR #428](https://forge.adrianpk.com/adrianpk/chr/pulls/428) at `ae8d8d1b79ba6efddd75fdd287f235b6556babab`.
-- Slice 5: active; coverage reconciliation, client acceptance and documentation pending.
+- Slice 5: active; T5.1 committed with passing normal/race fixture checks; client activation/observations and final certification remain open.
 - Mobile/desktop and user-operated journey evidence: pending.
 - Exact final candidate and scheduled nightly: pending.
 
@@ -201,3 +203,23 @@ The retained QA receiver is active on its existing workflow-owned binary.
 No receiver activation, inbound message or native invocation is inferred from
 this slice's activation. Real acceptance and exact-candidate scheduled evidence
 remain open.
+
+## Slice 5 Development Evidence
+
+T5.1 is `ec0ea0f4c959188cee4477bc45888406f739a3a1`. The two bounded normal
+commands in the Slice 5 report include all 90 exact matrix roots and passed
+within the unchanged three-minute package budget. The focused new capture/
+request/empty-view/composed-journey selection passed with race instrumentation.
+Source-owner paths, named test declarations, local documentation links and
+whitespace were checked. No additional semantic message family was found.
+
+Existing User Guide, transport and notification references now describe actual
+help groups, literal previews, complete attachments, exact confirmation scope,
+recovery and native-result truth. Unreleased notes are consolidated by the user
+outcome. The [cycle report](../report/telegram-message-presentation-cycle.md)
+retains `awaiting_user_acceptance` and `awaiting_nightly`.
+
+T5.2 remains open. The live QA executable is the retained earlier source, not a
+presentation candidate. Its local status is readable; retained waits and an
+unconsumed confirmation must remain intact. The plan's activation boundary and
+actual mobile/desktop observations cannot be replaced by local fixture passes.

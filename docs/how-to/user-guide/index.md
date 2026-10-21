@@ -1390,12 +1390,25 @@ paused and resumed work keeps its original binding. Configuration and private
 setup cannot be authorized by a model proposal. See
 [Telegram harness defaults](../../reference/telegram-receiver.md#harness-defaults).
 
+Send `/help` for common commands and `/help all` to choose an advanced group.
+Help remains available while a question or confirmation is pending. Use the
+registered project name to orient yourself; use the exact session reference
+when several conversations are active.
+
 Send the requirements as several messages. Use `/sessions` to inspect or select
 the returned conversation ID when several conversations are active. `/done`
 generates its canonical dump. `/quiz` asks a real clarification; reply to its
 prompt or use `/reply <conversation> <answer>`. Request `/spec` or `/plan` when
 those artifacts are useful. `/refine spec <conversation> <instructions>` explicitly
 replaces an observed specification.
+
+Generated dumps, specs, plans and explanations arrive with a short opening
+excerpt and one complete attachment. Code and Markdown excerpts preserve their
+literal characters. Open the file to read the complete result; an excerpt can
+be shortened while the attachment keeps the original content. Record lists also
+provide an identified full export and retain their page controls. See
+[Message bounds and attachments](../../reference/telegram-receiver.md#message-presentation-and-attachments)
+for limits and recovery behavior.
 
 Use `/prepare-work <conversation>` to prepare a native backlog ticket from its
 dump or spec. The response identifies the actual canonical record and receipt.
@@ -1413,8 +1426,10 @@ Preview an exact native extent with `/work ticket <ticket-key>`. Use
 `/work --conversation <conversation> ticket <ticket-key>` to keep an existing
 conversation's project and namespace. Other extents are `slice`, `slice-set`,
 `use-case` and `loose`; loose work omits its reference. Inspect the displayed
-membership, target, execution limits and publication policy, then press its
-start button, reply `start`, or send `/answer <action-token> start`.
+membership, target, execution limits and publication policy. Read the attached
+complete confirmation scope, then press Start work, reply `start`, or send
+`/answer <action-token> start`. A missing required scope file leaves the action
+unavailable; inspect the local diagnostic before requesting another preview.
 
 Leave `chr telegram serve` running after confirmation. It continues the retained
 extent without another message. Automatic policy advances through review and
@@ -1422,12 +1437,17 @@ integration; human policy waits on the exact displayed candidate. Routine
 progress arrives at most once per thirty seconds. Status remains available
 during work. Native pauses, capacity and other owners remain authoritative.
 
-Each response identifies the invocation, project and namespace. Open that same
-invocation in the TUI or Web, or run `chr work status --json <invocation>` in its
+Progress identifies the work and project, its actual state and counts, and the
+next responsible party. Use its inspection reference to open the same invocation
+in the TUI or Web, or run `chr work status --json <invocation>` in its
 registered project with the matching `OPS_USER`. Host-validated tasks, open PRs,
 confirmed receipts and remaining tickets are separate observations. A final
 confirmed receipt establishes integration. If notification delivery is uncertain,
 a labelled retry repeats the retained notice and preserves the original work.
+A full request queue means the new request was not accepted. Wait for capacity
+before submitting it again; existing saved work and controls remain available.
+An unavailable read identifies unchanged saved state and directs the local
+operator to `chr telegram doctor`.
 
 Start with `/develop <topic>` to retain explicit development intent. Its first
 prepared scope can use that instruction. Missing authority or changed requirements
