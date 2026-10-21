@@ -31,6 +31,7 @@ func runTelegramReceiverHosts(ctx context.Context, hosts []func(context.Context)
 	case <-ctx.Done():
 	}
 
+	result = telegramStorageShutdownFailure(result, owned.Err())
 	cancel()
 
 	result = telegramHostFailure(result, owned.Err())
@@ -41,6 +42,7 @@ func runTelegramReceiverHosts(ctx context.Context, hosts []func(context.Context)
 	for remaining > 0 {
 		select {
 		case err := <-finished:
+			err = telegramStorageShutdownFailure(err, owned.Err())
 			result = errors.Join(result, telegramHostFailure(err, owned.Err()))
 			remaining--
 		case <-timer.C:
@@ -67,6 +69,20 @@ func telegramHostFailure(err, cancellation error) error {
 		}
 
 		return nil
+	}
+
+	return err
+}
+
+func telegramStorageShutdownFailure(err, cancellation error) error {
+	// SQLite reports SQLITE_INTERRUPT (9) for canceled calls. Only discard that
+	// exact driver cause after cancellation, preserving joined checkpoint errors.
+	var databaseError interface {
+		error
+		Code() int
+	}
+	if cancellation != nil && errors.As(err, &databaseError) && databaseError.Code() == 9 {
+		return telegramHostFailure(err, databaseError)
 	}
 
 	return err

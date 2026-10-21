@@ -116,3 +116,50 @@ func TestTelegramRecoveryHostFailure(t *testing.T) {
 		})
 	}
 }
+
+type telegramTestDatabaseError int
+
+func (e telegramTestDatabaseError) Error() string { return fmt.Sprintf("database error (%d)", e) }
+
+func (e telegramTestDatabaseError) Code() int { return int(e) }
+
+// TestTelegramRecoveryStorageCancel covers the driver's interrupt result during
+// shutdown without hiding an unrelated database or checkpoint failure.
+func TestTelegramRecoveryStorageCancel(t *testing.T) {
+	interrupted, busy := telegramTestDatabaseError(9), telegramTestDatabaseError(5)
+	checkpoint := errors.New("checkpoint failed")
+	plain := errors.New("interrupted (9)")
+
+	for _, test := range []struct {
+		name    string
+		failure error
+		cancel  bool
+		want    error
+	}{
+		{"interrupted", interrupted, true, nil},
+		{"wrapped", fmt.Errorf("query: %w", interrupted), true, nil},
+		{"not canceled", interrupted, false, interrupted},
+		{"other database failure", busy, true, busy},
+		{"joined checkpoint", errors.Join(interrupted, checkpoint), true, checkpoint},
+		{"wrapped checkpoint", fmt.Errorf("host: %w", errors.Join(interrupted, checkpoint)), true, checkpoint},
+		{"plain message", plain, true, plain},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			ctx, cancel := context.WithCancel(t.Context())
+			defer cancel()
+
+			host := func(owned context.Context) error {
+				if test.cancel {
+					cancel()
+					<-owned.Done()
+				}
+
+				return test.failure
+			}
+			err := runTelegramReceiverHosts(ctx, []func(context.Context) error{host}, time.Second)
+			if !errors.Is(err, test.want) {
+				t.Fatal("shutdown lost the original failure semantics", err)
+			}
+		})
+	}
+}

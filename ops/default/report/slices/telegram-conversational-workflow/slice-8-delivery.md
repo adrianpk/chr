@@ -30,6 +30,20 @@ focused race checks, plus affected executor/presentation regressions. Read the
 exact-head validation receipt for the current result. The retained live QA
 invocations, fixed receiver and blocked earlier controller are preserved.
 
+Validation receipt `HG3COYPQ7RY4QT7LGBZHIAGFFZ` rejected candidate
+`6f2f2f0ce7e445014d127a7d952a5f9370529fba`: the development gate and normal
+journey passed, but the race journey returned SQLite `interrupted (9)` while
+canceling the receiver. The isolated race journey then passed, confirming the
+shutdown timing sensitivity rather than establishing a corrected candidate.
+
+A focused regression reproduced the missing cancellation handling. Receiver
+shutdown now removes that exact driver interrupt only after cancellation,
+preserving unexpected interrupts, other database errors and joined checkpoint
+failures. The focused host-failure, storage-cancellation, application-error,
+grace and real SQLite journey selection passed with race instrumentation:
+`go test -race ./internal/app -run '^Test(TelegramJourney$|TelegramRecovery(HostFailure|StorageCancel|ApplicationError|Grace)$)' -count=1 -timeout=3m`.
+The final committed head still requires the complete ordered PR checks.
+
 ## Delivered Behavior
 
 The deterministic combined journey reaches confirmed native integration after

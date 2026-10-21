@@ -231,6 +231,10 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Fixed
 
+- Stopping the Telegram receiver no longer reports a database interruption as
+  a failure when its queries were canceled during shutdown. Unrelated database
+  and checkpoint failures remain visible.
+
 - Native workers receive explicit instructions to validate and commit their
   changes before handing work back, preventing completed edits from stopping
   delivery because they were left uncommitted.
