@@ -49,6 +49,7 @@ func (r *sqliteNotificationEventRepository) ReadTelegramNotification(ctx context
 		if !m.isLegacy() {
 			return delivery, true, ErrTelegramDocumentUnavailable
 		}
+
 		return delivery, false, nil
 	}
 
