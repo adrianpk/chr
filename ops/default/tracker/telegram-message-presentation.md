@@ -16,7 +16,7 @@ Inventory: [48-family review](../report/telegram-message-review.md)
 
 Implementation and merge authorization: granted for this delivery set and
 Looper-owned Rebase + Fast-forward slice PR merges into dev.
-Active slice: Slice 3 of 5, Clear guarded confirmations and controls.
+Active slice: Slice 4 of 5, Progress, notifications and failure consistency.
 
 ## Canonical Slice Map
 
@@ -30,8 +30,8 @@ Active slice: Slice 3 of 5, Clear guarded confirmations and controls.
 
 ## Tasks
 
-Slices 1 and 2 are delivered through PRs #424 and #425. Slice 3 is active after
-the prerequisite repairs integrated through PR #426. Later tasks remain pending.
+Slices 1-3 are delivered through PRs #424, #425 and #427. Slice 4 is active;
+its tasks and Slice 5 remain pending.
 The plan owns exact branch names, PR titles, report paths and focused commands.
 
 | Task | State | Commit | Required outcome |
@@ -43,9 +43,9 @@ The plan owns exact branch names, PR titles, report paths and focused commands.
 | T2.2 | delivered | `bb6a5575d69dbaa4d804e82c73adcb6dae561ca2` | Document upload, caption, acknowledgement and fallback |
 | T2.3 | delivered | `c48039eb4af550ee760e35af0c0dc8c9de648de6` | Primary artifact/export families 21-24 and 28 |
 | T2.4 | delivered | `7e2b7d21e1368ffe1eea6bbf83ad70fe3520f6b6` | Exact bytes, bounds, rollback and recovery evidence |
-| T3.1 | implemented | `b7a1174a5d099a663c93ba4d746903725301b264` | Human guarded previews and controls |
-| T3.2 | implemented | `94975b70a20b87639e1df5ee1d9ebca4fbb741de` | Original operation, document and action bindings |
-| T3.3 | implemented | `099b9a965b0bbe2690ca0191c3d51250a39deadb` | Stale scope, ambiguity and replay regressions |
+| T3.1 | delivered | `b7a1174a5d099a663c93ba4d746903725301b264` | Human guarded previews and controls |
+| T3.2 | delivered | `94975b70a20b87639e1df5ee1d9ebca4fbb741de` | Original operation, document and action bindings |
+| T3.3 | delivered | `099b9a965b0bbe2690ca0191c3d51250a39deadb` | Stale scope, ambiguity and replay regressions |
 | T4.1 | pending | pending | Progress, waits, failures and partial/final results |
 | T4.2 | pending | pending | Notification sender and event snapshot integration |
 | T4.3 | pending | pending | Both-path faults, legacy records and truthful outcomes |
@@ -120,8 +120,8 @@ regression and client result as each row is delivered.
 | TMP-03 | T1.1, T1.3, T4.3 | pending |
 | TMP-04 | T2.3 | Slice 2 fixtures verified and integrated; client acceptance pending |
 | TMP-05 | T2.1, T2.2, T2.4 | Slice 2 fixtures verified and integrated; client acceptance pending |
-| TMP-06 | T1.2, T3.1 | Slice 3 fixtures verified; integration/client acceptance pending |
-| TMP-07 | T3.2, T3.3 | Guard, original-result and exact-scope fixtures verified; integration pending |
+| TMP-06 | T1.2, T3.1 | Slice 3 fixtures verified and integrated; client acceptance pending |
+| TMP-07 | T3.2, T3.3 | Guard, original-result and exact-scope fixtures verified and integrated |
 | TMP-08 | T2.4, T3.3, T4.3 | Slice 2 integrated; Slice 3 guard/recovery fixtures verified; Slice 4 pending |
 | TMP-09 | T2.4, T3.3, T4.3 | Slice 2 integrated; Slice 3 fail-closed scope/quota fixtures verified; Slice 4 pending |
 | TMP-10 | T2.1, T2.4, T3.3, T4.2 | Receiver/action migration fixtures verified; notification owner pending |
@@ -134,8 +134,9 @@ regression and client result as each row is delivered.
 - Specification/model promotion and implementation approval: completed on 2026-10-21.
 - Slice 1: delivered through [#424](https://forge.adrianpk.com/adrianpk/chr/pulls/424) at `a2bb0974eac21b1fe33cac78e21f4c1845871e96`.
 - Slice 2: delivered through [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425) at `a5c6a7e068a8e5ec547d13d73d39afe1f0477335`.
-- Slice 3: T3.1-T3.3 implemented; report reviewing; canonical [PR #427](https://forge.adrianpk.com/adrianpk/chr/pulls/427) open against `dev`. Prerequisite repairs integrated through [#426](https://forge.adrianpk.com/adrianpk/chr/pulls/426) at `ff5c7d3838d8b2dea472485358d0842c69059e3f`.
-- Slices 4-5: pending.
+- Slice 3: delivered through [PR #427](https://forge.adrianpk.com/adrianpk/chr/pulls/427) at `a4d0a865e8bb32a3caac65395a28839b573ed369`.
+- Slice 4: active; T4.1-T4.3 pending.
+- Slice 5: pending.
 - Mobile/desktop and user-operated journey evidence: pending.
 - Exact final candidate and scheduled nightly: pending.
 
@@ -159,20 +160,19 @@ retention, migration and fault fixtures. Looper evidence
 `NQQQ4DVYVPESUBCN7TURIYUTUC` records five ordered checks passed on the exact
 merged candidate `a5c6a7e068a8e5ec547d13d73d39afe1f0477335`.
 
-## Slice 3 Validation and Publication
+## Slice 3 Validation
 
 [Slice 3 report](../report/slices/telegram-message-presentation/slice-3-action-presentation.md)
-records scope exports, action sealing, original-result recovery and normal
-HTTP/SQLite fixtures. Strict package lint passed. Looper evidence
-`TX3WMIKAGXJZLJOVJS4EN6ZSUI` records the affected legacy regressions and
-`git diff --check` passed on the exact clean candidate
-`8ab3b25bfe3fc4bcd85b676db2137506dfb2ff4d`. The required final development,
-normal and race sequence remains to be recorded after the canonical
-PR-reference follow-up.
+records complete scope exports, action sealing, original-result recovery and
+normal/race HTTP/SQLite fixtures. Looper evidence `RUKJK7R5AERILO54DESZZNK6UW`
+records all four ordered checks passed on exact merged candidate
+`a4d0a865e8bb32a3caac65395a28839b573ed369`. Canonical PR #427 and Acta merge
+event `01M5FRH8SFP1F2QX0PDWA4AJ4B` agree.
 
-The candidate is based on canonical `dev` at
-`83802941df1c46bc34ab53201d56811a0e353156`. The earlier published closure/blocker
-commit is retained through history reconciliation. Current implementation and
-validation evidence are preserved. The reconciled branch is published through
-an ordinary fast-forward push. Canonical [PR #427](https://forge.adrianpk.com/adrianpk/chr/pulls/427)
-targets `dev`; its reference follow-up precedes the final exact-head checks.
+## Slice 4 Activation
+
+The dedicated Slice 4 branch starts from exact canonical `dev`
+`a4d0a865e8bb32a3caac65395a28839b573ed369`. T4.1-T4.3 cover progress,
+receiver failures and the existing notification sender/repository. The
+[Slice 4 report](../report/slices/telegram-message-presentation/slice-4-status-presentation.md)
+is drafting; implementation and final normal/race evidence remain pending.

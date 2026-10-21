@@ -1,6 +1,6 @@
 # Slice 3: Clear Guarded Confirmations and Controls
 
-Status: reviewing
+Status: delivered
 Delivery set: Telegram Message Presentation
 Plan: [ops/default/plan/telegram-message-presentation.md](../../../plan/telegram-message-presentation.md)
 Tracker: [ops/default/tracker/telegram-message-presentation.md](../../../tracker/telegram-message-presentation.md)
@@ -30,6 +30,11 @@ complete scope, authority, expiry and native receipt.
   transition or follow-up action was added.
 
 ## Implementation Notes
+
+PR [#427](https://forge.adrianpk.com/adrianpk/chr/pulls/427) was verified merged
+into `dev` through Rebase + Fast-forward on 2026-10-21 at
+`a4d0a865e8bb32a3caac65395a28839b573ed369`. Canonical Forgejo, `origin/dev`
+and Acta merge event `01M5FRH8SFP1F2QX0PDWA4AJ4B` agree.
 
 T3.1 is `b7a1174a5d09`, T3.2 is `94975b70a20b` and T3.3 is `099b9a965b0b`;
 full identities are in the tracker. PR #426 resolved the earlier dependency at
@@ -75,41 +80,28 @@ authority, arguments, consumed choice or receipt identity.
 
 ## Validation
 
-Successful development checks:
+Looper evidence `RUKJK7R5AERILO54DESZZNK6UW` records these four checks
+passed in order on the exact clean, pushed and merged candidate
+`a4d0a865e8bb32a3caac65395a28839b573ed369`:
 
-- `go test ./internal/core ./internal/app -run '^Test(TelegramPresentation(Action|Control|Confirmation)|TelegramAuthoringPreparedIntent|TelegramHarnessSelection(Confirm|SendRetry))' -count=1 -timeout=3m`
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/core ./internal/app` — zero issues.
-- `go test ./internal/core ./internal/app -run '^Test(TelegramOperationAction|TelegramControl|TelegramHarness|TelegramAuthoringPrepared|TelegramWork(Extents|LostAck|StalePreview|Admission|Namespace|CommandBounds)|MaintenanceDBStatusReports)' -count=1 -timeout=3m`
+- `make verify`
+- `go test ./internal/core ./internal/app -run '^TestTelegramPresentation(Action|Control|Confirmation)' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^TestTelegramPresentation(Action|Control|Confirmation)' -count=1 -timeout=3m`
 - `git diff --check`
 
-The normal selection took 1.226 seconds for core and 2.033 seconds for app,
-excluding compilation. It includes the actual 64 MiB quota fixture, independent
-SQLite connections, old physical-schema upgrade, complete scope upload and
-original-result replay. The three-minute package budget is unchanged.
+Strict lint reported zero issues; short tests, eight CI script regressions and
+build passed. Focused normal core/app tests took 1.426/1.178 seconds; focused
+race took 32.121/12.513 seconds within the unchanged three-minute package budget.
+The canonical PR contract passed after the PR-reference follow-up was pushed.
 
-The broader development legacy selection first exposed obsolete chat-audit
-assertions and a lost-ack injector limited to sendMessage. Those fixtures now
-check retained owner identity and document-upload acknowledgement loss. The
-complete affected legacy selection then passed in 27.933 seconds for core and
-43.048 seconds for app. Looper evidence `TX3WMIKAGXJZLJOVJS4EN6ZSUI`
-records that command followed by `git diff --check` on the exact clean candidate
-`8ab3b25bfe3fc4bcd85b676db2137506dfb2ff4d`. This is focused development
-evidence, separate from the required final command sequence.
-
-Final exact clean-HEAD evidence must be recorded through `looper validate`
-after canonical publication and the PR-reference commit: `make verify`, the
-configured normal selection, its race selection, then `git diff --check`.
-No final gate or real Telegram client acceptance is
-claimed here.
+Affected legacy action, control, harness, preparation, work-admission and database
+status regressions also passed on development candidate
+`8ab3b25bfe3fc4bcd85b676db2137506dfb2ff4d` under Looper evidence
+`TX3WMIKAGXJZLJOVJS4EN6ZSUI`. That earlier evidence is separate from the exact
+merged-head sequence above. Local HTTP/SQLite fixtures do not establish real
+Telegram client acceptance or scheduled exhaustive validation.
 
 ## Risks and Follow-ups
-
-History reconciliation retains the earlier published closure/blocker commit
-as an ancestor of the current candidate. Conflict resolution keeps the current
-Slice 2 delivery evidence, active Slice 3 implementation and resolved admission
-prerequisite. Runtime files are unchanged. The reconciled branch is published
-through an ordinary fast-forward push and PR #427 targets `dev`; final PR-head
-validation follows this reference commit.
 
 Selections whose complete source/contract view exceeds the retained bounds
 require a smaller selection or local inspection before a new confirmation.

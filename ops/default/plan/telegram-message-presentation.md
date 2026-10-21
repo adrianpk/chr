@@ -23,7 +23,7 @@ Planning scope: requested by the maintainer on 2026-10-21.
 Implementation and merge authorization: granted for this delivery set and
 Looper-owned Rebase + Fast-forward slice PR merges into dev.
 
-Active slice: Slice 3 of 5, Clear guarded confirmations and controls.
+Active slice: Slice 4 of 5, Progress, notifications and failure consistency.
 
 ## 1. Outcome and Strategy
 
