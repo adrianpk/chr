@@ -1,6 +1,6 @@
 # Slice 4: Progress, Notifications and Failure Consistency
 
-Status: reviewing
+Status: delivered
 Delivery set: Telegram Message Presentation
 Plan: [ops/default/plan/telegram-message-presentation.md](../../../plan/telegram-message-presentation.md)
 Tracker: [ops/default/tracker/telegram-message-presentation.md](../../../tracker/telegram-message-presentation.md)
@@ -65,6 +65,10 @@ T4.3 adds fault evidence for both owners:
   without sending a shortened substitute.
 
 ## Implementation Notes
+
+Canonical PR #428 merged into `dev` at
+`ae8d8d1b79ba6efddd75fdd287f235b6556babab` on 2026-10-21. The canonical
+forge, Git and Acta merge event `01M5FVP9ZEWAC07X8DM2ZDSEB6` agree.
 
 Activated from canonical `dev` at
 `a4d0a865e8bb32a3caac65395a28839b573ed369` after verified PR #427 integration.
@@ -143,7 +147,9 @@ candidate in this order:
 - `go test ./internal/core ./internal/app -run '^Test(TelegramWorkDeliveryFailure|TelegramHelp(HTTP|Unauthorized)|TelegramRecovery(Failures|Doctor|PollEpoch)|TelegramPresentationDelivery(HTTP|Revocation)|TelegramOperation(UnicodeParts|PartOrder))' -count=1 -timeout=3m`
 - `git diff --check`
 
-Controller evidence is tied to the clean PR head and this ordered command list;
+Looper evidence `4T2N7JVJ73C4VBTAPKQZIRVNZN` records all five checks passed
+on the exact merged candidate. Controller evidence is tied to that clean head
+and this ordered command list;
 the development results above do not replace it. Real client acceptance is
 recorded separately in Slice 5.
 

@@ -16,7 +16,7 @@ Inventory: [48-family review](../report/telegram-message-review.md)
 
 Implementation and merge authorization: granted for this delivery set and
 Looper-owned Rebase + Fast-forward slice PR merges into dev.
-Active slice: Slice 4 of 5, Progress, notifications and failure consistency.
+Active slice: Slice 5 of 5, Complete coverage and real client acceptance.
 
 ## Canonical Slice Map
 
@@ -30,8 +30,7 @@ Active slice: Slice 4 of 5, Progress, notifications and failure consistency.
 
 ## Tasks
 
-Slices 1-3 are delivered through PRs #424, #425 and #427. Slice 4 is active;
-T4.1-T4.3 are implemented. Slice 5 remains pending.
+Slices 1-4 are delivered through PRs #424, #425, #427 and #428. Slice 5 is active.
 The plan owns exact branch names, PR titles, report paths and focused commands.
 
 | Task | State | Commit | Required outcome |
@@ -46,9 +45,9 @@ The plan owns exact branch names, PR titles, report paths and focused commands.
 | T3.1 | delivered | `b7a1174a5d099a663c93ba4d746903725301b264` | Human guarded previews and controls |
 | T3.2 | delivered | `94975b70a20b87639e1df5ee1d9ebca4fbb741de` | Original operation, document and action bindings |
 | T3.3 | delivered | `099b9a965b0bbe2690ca0191c3d51250a39deadb` | Stale scope, ambiguity and replay regressions |
-| T4.1 | implemented | `708afec21584e546624848391a287a59fb5da5d4` | Progress, waits, failures and partial/final results |
-| T4.2 | implemented | `04fddeb15cf6184f4c263a55bdb222fcd74a6b1e` | Notification sender and event snapshot integration |
-| T4.3 | implemented | `01d9be1341e5c207c1748a22ced4a5aac8eafe1d` | Both-path faults, legacy records and truthful outcomes |
+| T4.1 | delivered | `708afec21584e546624848391a287a59fb5da5d4` | Progress, waits, failures and partial/final results |
+| T4.2 | delivered | `04fddeb15cf6184f4c263a55bdb222fcd74a6b1e` | Notification sender and event snapshot integration |
+| T4.3 | delivered | `01d9be1341e5c207c1748a22ced4a5aac8eafe1d` | Both-path faults, legacy records and truthful outcomes |
 | T5.1 | pending | pending | Complete producer and variant coverage |
 | T5.2 | pending | pending | Real mobile/desktop and natural-language journey |
 | T5.3 | pending | pending | User documentation, cycle evidence and exact nightly |
@@ -135,8 +134,8 @@ regression and client result as each row is delivered.
 - Slice 1: delivered through [#424](https://forge.adrianpk.com/adrianpk/chr/pulls/424) at `a2bb0974eac21b1fe33cac78e21f4c1845871e96`.
 - Slice 2: delivered through [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425) at `a5c6a7e068a8e5ec547d13d73d39afe1f0477335`.
 - Slice 3: delivered through [PR #427](https://forge.adrianpk.com/adrianpk/chr/pulls/427) at `a4d0a865e8bb32a3caac65395a28839b573ed369`.
-- Slice 4: active; T4.1-T4.3 implemented; [PR #428](https://forge.adrianpk.com/adrianpk/chr/pulls/428) targets `dev`; report reviewing.
-- Slice 5: pending.
+- Slice 4: delivered through [PR #428](https://forge.adrianpk.com/adrianpk/chr/pulls/428) at `ae8d8d1b79ba6efddd75fdd287f235b6556babab`.
+- Slice 5: active; coverage reconciliation, client acceptance and documentation pending.
 - Mobile/desktop and user-operated journey evidence: pending.
 - Exact final candidate and scheduled nightly: pending.
 
@@ -181,3 +180,24 @@ The report records the final ordered command list. Looper retains clean-HEAD
 validation after the PR-reference follow-up commit; the PR validation block
 records those successful commands. Development checks above do not replace that
 candidate-bound evidence.
+
+## Slice 4 Integration
+
+Canonical PR #428 merged into `dev` at
+`ae8d8d1b79ba6efddd75fdd287f235b6556babab`. Looper evidence
+`4T2N7JVJ73C4VBTAPKQZIRVNZN` records all five ordered checks passed on that
+exact candidate. Acta merge event `01M5FVP9ZEWAC07X8DM2ZDSEB6` agrees.
+
+## Slice 5 Activation
+
+The dedicated Slice 5 branch starts from that integrated candidate. Its
+[canonical report](../report/slices/telegram-message-presentation/slice-5-presentation-acceptance.md)
+is drafting. T5.1 reconciles producers and meaningful regressions; T5.2 requires
+actual mobile/desktop observations and a user-operated journey on a fixed
+candidate. T5.3 updates existing product documentation and records the scheduled
+nightly outcome without dispatching the exhaustive gate.
+
+The retained QA receiver is active on its existing workflow-owned binary.
+No receiver activation, inbound message or native invocation is inferred from
+this slice's activation. Real acceptance and exact-candidate scheduled evidence
+remain open.

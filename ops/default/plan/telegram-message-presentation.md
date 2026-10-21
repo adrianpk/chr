@@ -23,7 +23,7 @@ Planning scope: requested by the maintainer on 2026-10-21.
 Implementation and merge authorization: granted for this delivery set and
 Looper-owned Rebase + Fast-forward slice PR merges into dev.
 
-Active slice: Slice 4 of 5, Progress, notifications and failure consistency.
+Active slice: Slice 5 of 5, Complete coverage and real client acceptance.
 
 ## 1. Outcome and Strategy
 
@@ -205,6 +205,6 @@ is ops/default/report/telegram-message-presentation-cycle.md. It is not
 pre-created as successful evidence.
 
 The specification/model are accepted, the plan/tracker are approved and
-Slices 1 and 2 are delivered through PRs #424 and #425. Slice 3 is active after canonical repair PR #426 integration.
+Slices 1-4 are delivered through PRs #424, #425, #427 and #428. Slice 5 is active after verified PR #428 integration.
 Record real implementation and acceptance results as they become available;
 approval does not establish delivery or client evidence.
