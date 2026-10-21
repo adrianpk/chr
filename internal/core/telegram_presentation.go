@@ -156,5 +156,6 @@ func telegramMessageBlockLimit(limit int) int {
 	if limit < telegramPresentationLimit {
 		return 150
 	}
+
 	return 600
 }

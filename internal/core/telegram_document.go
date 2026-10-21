@@ -41,11 +41,13 @@ func validateTelegramDocument(document TelegramDocument) error {
 	if len(document.Payload) == 0 || len(document.Payload) > telegramDocumentLimit || !utf8.Valid(document.Payload) {
 		return ErrTelegramDocumentUnavailable
 	}
+
 	for _, err := range []error{validateTelegramDocumentTarget(document), validateTelegramDocumentSource(document), validateTelegramDocumentFilename(document.Filename)} {
 		if err != nil {
 			return err
 		}
 	}
+
 	switch document.MediaType {
 	case "text/markdown", "application/json", "text/plain":
 		return nil
@@ -58,10 +60,12 @@ func validateTelegramDocumentTarget(document TelegramDocument) error {
 	if document.ProjectID == "" || !IsValidOpsNamespace(document.Namespace) {
 		return ErrTelegramDocumentUnavailable
 	}
+
 	decoded, err := hex.DecodeString(document.ProjectBindingDigest)
 	if err != nil || len(decoded) != 32 {
 		return ErrTelegramDocumentUnavailable
 	}
+
 	return nil
 }
 
@@ -69,10 +73,12 @@ func validateTelegramDocumentSource(document TelegramDocument) error {
 	if len(document.SourceRef) == 0 || len(document.SourceRef) > 4096 || !filepath.IsLocal(document.SourceRef) {
 		return ErrTelegramDocumentUnavailable
 	}
+
 	decoded, err := hex.DecodeString(document.SourceHash)
 	if err != nil || len(decoded) != 32 {
 		return ErrTelegramDocumentUnavailable
 	}
+
 	return nil
 }
 
@@ -80,6 +86,7 @@ func validateTelegramDocumentFilename(filename string) error {
 	if filename == "" || len(filename) > 128 || strings.ContainsAny(filename, "/\\\r\n\x00\"") || strings.HasPrefix(filename, ".") {
 		return ErrTelegramDocumentUnavailable
 	}
+
 	return nil
 }
 

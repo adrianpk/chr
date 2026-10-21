@@ -110,6 +110,10 @@ func (r telegramReceiver) sendReservedDelivery(ctx context.Context, delivery cor
 		text = core.BoundTelegramReceiverText("Uncertain delivery retry; this notice may repeat.\n" + text)
 	}
 
+	if delivery.DocumentID != "" {
+		return r.sendDocumentDelivery(ctx, delivery, text)
+	}
+
 	messageID, err := r.sendDeliveryBody(ctx, delivery, text)
 	if err != nil {
 		if ctx.Err() != nil {
@@ -124,12 +128,7 @@ func (r telegramReceiver) sendReservedDelivery(ctx context.Context, delivery cor
 
 func (r telegramReceiver) sendDeliveryBody(ctx context.Context, delivery core.TelegramReceiverDelivery, text string) (int64, error) {
 	if delivery.Presentation != nil && !delivery.PlainFallback {
-		entities := append([]core.TelegramTextEntity(nil), delivery.Presentation.Entities...)
-		prefixUnits := len([]rune(text)) - len([]rune(delivery.Text))
-		// The retry notice contains only ASCII; its length is also its UTF-16 length.
-		for index := range entities {
-			entities[index].Offset += prefixUnits
-		}
+		entities := telegramDeliveryEntities(delivery, text)
 
 		return r.api.SendPresentation(ctx, r.token, delivery.Peer, text, entities)
 	}

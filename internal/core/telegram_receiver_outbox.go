@@ -198,12 +198,26 @@ AND (o.kind!='progress' OR o.attempts>0 OR NOT EXISTS(SELECT 1 FROM telegram_out
 
 // DeliverySent records definite API acknowledgement without applying any operation again.
 func (s *TelegramReceiverStore) DeliverySent(ctx context.Context, id string, messageID int64, now time.Time) error {
+	return s.deliverySent(ctx, id, messageID, "", now)
+}
+
+// DeliveryDocumentSent retains the original upload acknowledgement without
+// changing its immutable source image or allocating another operation.
+func (s *TelegramReceiverStore) DeliveryDocumentSent(ctx context.Context, id string, ack TelegramDocumentAcknowledgement, now time.Time) error {
+	if ack.FileID == "" || len(ack.FileID) > 256 {
+		return errors.New("telegram document requires a definite file identity")
+	}
+
+	return s.deliverySent(ctx, id, ack.MessageID, ack.FileID, now)
+}
+
+func (s *TelegramReceiverStore) deliverySent(ctx context.Context, id string, messageID int64, fileID string, now time.Time) error {
 	if messageID <= 0 {
 		return errors.New("telegram delivery requires a definite message ID")
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		result, err := tx.ExecContext(ctx, "UPDATE telegram_outbox SET state='delivered',telegram_message_id=?,retry_at=NULL,last_error_code='',updated_at=? WHERE id=? AND state='sending'", messageID, formatProjectTime(now), id)
+		result, err := tx.ExecContext(ctx, "UPDATE telegram_outbox SET state='delivered',telegram_message_id=?,telegram_file_id=NULLIF(?,''),retry_at=NULL,last_error_code='',updated_at=? WHERE id=? AND state='sending' AND ((document_id IS NULL AND ?='') OR (document_id IS NOT NULL AND ?!=''))", messageID, fileID, formatProjectTime(now), id, fileID, fileID)
 		if err != nil {
 			return err
 		}

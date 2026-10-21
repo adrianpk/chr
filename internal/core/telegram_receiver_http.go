@@ -109,6 +109,15 @@ func (a TelegramReceiverAPI) Send(ctx context.Context, token string, peer Telegr
 }
 
 func (a TelegramReceiverAPI) call(ctx context.Context, token, method string, payload any, timeout time.Duration) (json.RawMessage, error) {
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return nil, errors.New("cannot encode telegram request")
+	}
+
+	return a.callBody(ctx, token, method, bytes.NewReader(body), "application/json", timeout)
+}
+
+func (a TelegramReceiverAPI) callBody(ctx context.Context, token, method string, body io.Reader, contentType string, timeout time.Duration) (json.RawMessage, error) {
 	if _, err := validateTelegramReceiverToken(token); err != nil {
 		return nil, err
 	}
@@ -116,25 +125,20 @@ func (a TelegramReceiverAPI) call(ctx context.Context, token, method string, pay
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	body, err := json.Marshal(payload)
-	if err != nil {
-		return nil, errors.New("cannot encode telegram request")
-	}
-
-	request, err := http.NewRequestWithContext(ctx, http.MethodPost, strings.TrimRight(a.BaseURL, "/")+"/bot"+token+"/"+method, bytes.NewReader(body))
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, strings.TrimRight(a.BaseURL, "/")+"/bot"+token+"/"+method, body)
 	if err != nil {
 		return nil, errors.New("invalid telegram endpoint")
 	}
 
-	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Content-Type", contentType)
 
 	response, err := a.Client.Do(request)
 	if err != nil {
-		return nil, &TelegramAPIError{Code: "transport_failure", Uncertain: method == "sendMessage"}
+		return nil, &TelegramAPIError{Code: "transport_failure", Uncertain: method == "sendMessage" || method == "sendDocument"}
 	}
 
 	defer func() {
-		//nolint:errcheck // The bounded body read reports response failures.
+		//nolint:errcheck // The bounded body reader reports response failures.
 		_ = response.Body.Close()
 	}()
 
