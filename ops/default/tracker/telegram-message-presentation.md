@@ -1,6 +1,6 @@
 # Telegram Message Presentation Tracker
 
-Status: approved
+Status: implementing
 
 Approved: maintainer, 2026-10-21; specification, model, slice map and Looper execution accepted.
 
@@ -30,15 +30,15 @@ Active slice: Slice 1 of 5, Readable text and conversation messages.
 
 ## Tasks
 
-All entries are approved obligations, with no implementation commit, PR, merge
-or runtime validation claimed. The plan owns exact branch names, PR titles,
-report paths and focused commands.
+Slice 1 tasks are implemented and awaiting canonical PR integration. Later
+slices remain pending. The plan owns exact branch names, PR titles, report
+paths and focused commands.
 
 | Task | State | Commit | Required outcome |
 | --- | --- | --- | --- |
-| T1.1 | pending | pending | Shared optional blocks and bounded rich/plain renderer |
-| T1.2 | pending | pending | Readable conversation/text families 01-20 |
-| T1.3 | pending | pending | Renderer, transport and conversation regressions |
+| T1.1 | implemented | `ffcbc9b4dabc8fbff111e46ef74ad1b55b172b2a` | Shared optional blocks and bounded rich/plain renderer |
+| T1.2 | implemented | `c5665e602b5f9b00203e0366216d7a2dbdd7f3ae` | Readable conversation/text families 01-20 |
+| T1.3 | implemented | `eb7096813576290130d4f4edd583195a62ea443a` | Renderer, transport and conversation regressions |
 | T2.1 | pending | pending | Durable receiver snapshots, migrations and quota |
 | T2.2 | pending | pending | Document upload, caption, acknowledgement and fallback |
 | T2.3 | pending | pending | Primary artifact/export families 21-24 and 28 |
@@ -55,33 +55,33 @@ report paths and focused commands.
 
 ## Message-Family Coverage
 
-Numbers retain the source review's identities. These are required outcomes,
-not implementation evidence. Evidence is pending for every row. Record the
-actual source owner, test/fixture and applicable client result as each row is
-delivered; family numbers alone do not prove dynamic-variant coverage.
+Numbers retain the source review's identities. Rows 01-20 record Slice 1
+implementation and fixture evidence; integration and real client acceptance
+remain separate. Later rows remain obligations. Record the actual source owner,
+regression and client result as each row is delivered.
 
 | Family | Required presentation/outcome | Owning slice | Evidence |
 | --- | --- | --- | --- |
-| 01 | Readable help; advanced material conditional | Slice 1 | pending |
-| 02 | Relevant command/unsupported-action guidance | Slice 1 | pending |
-| 03 | Human project list and empty state | Slice 1 | pending |
-| 04 | Selected-project acknowledgement | Slice 1 | pending |
-| 05 | Safe project/reply/root ambiguity and recovery | Slice 1 | pending |
-| 06 | Receiver health and next responsible party | Slice 1 | pending |
-| 07 | Request acknowledged; extra capture details optional | Slice 1 | pending |
-| 08 | Concrete start/capacity limits | Slice 1 | pending |
-| 09 | Human session topics, states and targeting choices | Slice 1 | pending |
-| 10 | Clear focus effect or actual unavailable state | Slice 1 | pending |
-| 11 | Stale/conflicting prompt and preserved work | Slice 1 | pending |
-| 12 | Details saved; one useful next action | Slice 1 | pending |
-| 13 | Readable retained capture and inspection | Slice 1 | pending |
-| 14 | Capture/finished-state errors with unchanged context | Slice 1 | pending |
-| 15 | Saved request and truthful generation state | Slice 1 | pending |
-| 16 | Explicit unstarted-capture discard | Slice 1 | pending |
-| 17 | Relevant syntax/example only | Slice 1 | pending |
-| 18 | One concrete natural-language target question | Slice 1 | pending |
-| 19 | Interpretation failure/retry exhaustion guidance | Slice 1 | pending |
-| 20 | Actual clarification question and clear answer route | Slice 1 | pending |
+| 01 | Readable help; advanced material conditional | Slice 1 | Changed: bounded basic help and explicit complete groups; `app/telegram_help.go`; `TestTelegramPresentationConversationHelp`, `TestTelegramHelpHTTP`. |
+| 02 | Relevant command/unsupported-action guidance | Slice 1 | Changed: concise unsupported-command guidance; keep unavailable callback wording; `app/telegram_operations.go`; `TestTelegramConversationUnknown`, `TestTelegramHelpHTTP`. |
+| 03 | Human project list and empty state | Slice 1 | Changed: human project list and explicit local setup for empty access; `app/telegram_operations.go`; `TestTelegramReceiverReadJourney`, `TestTelegramPresentationConversationReads`. |
+| 04 | Selected-project acknowledgement | Slice 1 | Keep: selected registered name, omit an unnecessary next step; `core/telegram_conversation.go`; `TestTelegramConversationProjects`. |
+| 05 | Safe project/reply/root ambiguity and recovery | Slice 1 | Changed: safe project/root/target recovery; `core/telegram_conversation.go`; `TestTelegramConversationBinding`, `TestTelegramConversationProjectNames`, `TestTelegramAuthoringIntentRootChange`. |
+| 06 | Receiver health and next responsible party | Slice 1 | Changed: health and relevant retry/error guidance; omit bot/cursor metadata; `app/telegram_operations.go`; `TestTelegramPresentationConversationReads`, `TestTelegramHelpHTTP`. |
+| 07 | Request acknowledged; extra capture details optional | Slice 1 | Changed: acknowledge the retained request and optional extra details; `core/telegram_conversation.go`; `TestTelegramPresentationConversationJourney`. |
+| 08 | Concrete start/capacity limits | Slice 1 | Changed: explicit topic/allocation bounds and session selection; `core/telegram_conversation.go`; `TestTelegramConversationIsolation`, `TestTelegramConversationBotQuota`. |
+| 09 | Human session topics, states and targeting choices | Slice 1 | Changed: human topics, project names, states and complete exact target rows; `core/telegram_conversation_presentation.go`; `TestTelegramPresentationConversationJourney`. |
+| 10 | Clear focus effect or actual unavailable state | Slice 1 | Changed: focus effect or actual noncollecting state; `core/telegram_conversation_target.go`; `TestTelegramConversationFocus`, `TestTelegramPresentationConversationJourney`. |
+| 11 | Stale/conflicting prompt and preserved work | Slice 1 | Changed: stale/conflicting reply guidance preserves saved context; `core/telegram_conversation_target.go`; `TestTelegramConversationReplies`, `TestTelegramConversationReplyGuards`, `TestTelegramConversationReplyPeers`. |
+| 12 | Details saved; one useful next action | Slice 1 | Changed: concise acknowledgement, accounting only near bounds; `core/telegram_conversation_presentation.go`; `TestTelegramPresentationConversationJourney`, `TestTelegramConversationCapture`. |
+| 13 | Readable retained capture and inspection | Slice 1 | Changed: human capture view and literal Markdown entity; `core/telegram_conversation_presentation.go`; `TestTelegramPresentationConversationJourney`, `TestTelegramPresentationFormatHTTP`. |
+| 14 | Capture/finished-state errors with unchanged context | Slice 1 | Changed: relevant capture limit and preserved-context guidance; `core/telegram_conversation_capture.go`; `TestTelegramConversationCapture`, `TestTelegramConversationCompletion`. |
+| 15 | Saved request and truthful generation state | Slice 1 | Changed: saved capture versus confirmed canonical dump generation; `app/telegram_authoring_apply.go`; `TestTelegramAuthoringBridgeJourney`, `TestTelegramConversationCompletion`. |
+| 16 | Explicit unstarted-capture discard | Slice 1 | Changed: explicit discard of unstarted capture; `core/telegram_conversation_capture.go`; `TestTelegramPresentationConversationJourney`, `TestTelegramConversationCompletion`. |
+| 17 | Relevant syntax/example only | Slice 1 | Changed: only relevant command syntax and a start example; `app/telegram_conversation.go`, `app/telegram_authoring_command.go`; `TestTelegramConversationCommands`. |
+| 18 | One concrete natural-language target question | Slice 1 | Changed: concrete operation/target question; keep retained target guards; `app/telegram_intent_dispatch.go`, `app/telegram_intent_guard.go`; `TestTelegramAuthoringIntentInvalid`, `TestTelegramAuthoringIntentRootChange`. |
+| 19 | Interpretation failure/retry exhaustion guidance | Slice 1 | Changed: interpretation unavailable/exhausted guidance preserves prior conversations; `app/telegram_intent_dispatch.go`; `TestTelegramAuthoringIntentProviderFailure`. |
+| 20 | Actual clarification question and clear answer route | Slice 1 | Changed: actual question first with original reply route; `app/telegram_authoring_apply.go`; `TestTelegramPresentationConversationQuestion`, `TestTelegramHelpQuestion`. |
 | 21 | Primary generated artifact excerpt and full file | Slice 2 | pending |
 | 22 | Authoring wait/failure from real owner state | Slice 2 | pending |
 | 23 | Saved result after conversation advances | Slice 2 | pending |
@@ -132,7 +132,8 @@ delivered; family numbers alone do not prove dynamic-variant coverage.
 
 - Planning artifacts: accepted; local links, whitespace, family/task coverage and acceptance mappings checked.
 - Specification/model promotion and implementation approval: completed on 2026-10-21.
-- All five slices, their PRs and reports: pending.
+- Slice 1: T1.1-T1.3 implemented; report reviewing; canonical PR pending.
+- Slices 2-5: pending.
 - Mobile/desktop and user-operated journey evidence: pending.
 - Exact final candidate and scheduled nightly: pending.
 
@@ -140,3 +141,10 @@ The existing conversational workflow and its active QA evidence retain their
 own controller, tracker and invocation states. This set uses a separate Looper
 configuration. Its Slice 3 depends on canonical disposition of the earlier
 pending corrections; real client and journey evidence remain required.
+
+## Slice 1 Validation
+
+Focused presentation, existing conversation/help/authoring regressions and strict
+package lint passed. [Slice 1 report](../report/slices/telegram-message-presentation/slice-1-message-composition.md)
+records commands and coverage. Final ordered validation must be recorded through
+Looper on the clean PR head after its PR-reference follow-up commit.
