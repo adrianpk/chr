@@ -78,12 +78,21 @@ Successful development checks:
 - `go test ./internal/core ./internal/app -run '^TestTelegramPresentation' -count=1 -timeout=3m`
 - `go test ./internal/core ./internal/app -run '^(TestTelegramConversation|TestTelegramHelp|TestTelegramReceiverRead|TestTelegramAuthoringBridge|TestTelegramAuthoringIntent|TestTelegramControlAuthoringLane)' -count=1 -timeout=3m`
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/core ./internal/app` — zero remaining issues.
+- `go test ./internal/app -run '^(TestMaintenanceDBStatusReports(PendingMigrationsWhenDatabaseIsMissing|AppliedMigrations)|TestTelegramControlModelLoad)$' -count=1 -timeout=3m`
 - `git diff --check`
+
+The initial `make verify` at `0c83951f1b2260676cf29d8961e2e7fbe89307eb`
+failed on stale migration-count and cancellation/target-diagnostic expectations.
+Controller attempt `4AOGSXL2ESCN672UHLH44HBTLO` retains the diagnostics. The
+focused correction updates both migration listings for migration 25 and the
+expected user-facing notices; all existing state, capture and single-model-call
+assertions remain. The focused correction command above passed.
 
 The authoritative final-head evidence belongs to `looper validate` after the
 PR-reference follow-up commit. Its ordered commands are `make verify`, the
 configured `TestTelegramPresentation(Text|Format|Conversation)` selection,
-the affected legacy regression selection above and `git diff --check` last.
+the affected legacy regression and correction selections above and
+`git diff --check` last.
 These are local development/HTTP/SQLite checks, not exhaustive scheduled or
 real Telegram client evidence.
 
