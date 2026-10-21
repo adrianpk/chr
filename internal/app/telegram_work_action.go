@@ -70,32 +70,22 @@ func telegramRetainedWorkPreview(request core.TelegramOperationRequest) (Workflo
 
 func telegramWorkPreviewText(preview WorkflowBoundPreview) string {
 	var text strings.Builder
-
-	selection := preview.View.Preview
-	policy := preview.View.Policy
-	fmt.Fprintf(&text, "Native work preview: %s %s\nSnapshot: %s\nTarget commit: %s\nPublication: %s (%s, %s)\nPolicy revision: %s\nSelected tickets: %d; displayed: %d\n", selection.Selector.Extent, selection.Selector.Identity, selection.SnapshotHash, preview.View.Target.Commit, policy.Mode, policy.Method, policy.Source, policy.Revision, selection.Total, len(selection.Members))
-
-	execution := preview.View.ExecutionPolicy
-	fmt.Fprintf(&text, "Include later tickets: %t; worker timeout: %ds; maximum worker attempts: %d; validation timeout: %ds (zero uses each contract).\n", execution.IncludeLaterTickets, execution.WorkerTimeoutSeconds, execution.MaxWorkerAttempts, execution.ValidationTimeoutSeconds)
-
+	selection, policy, execution := preview.View.Preview, preview.View.Policy, preview.View.ExecutionPolicy
+	fmt.Fprintf(&text, "Start %s %s?\n\nSelected tickets: %d. Publication: %s (%s).\n", strings.ReplaceAll(selection.Selector.Extent, "_", " "), selection.Selector.Identity, selection.Total, policy.Mode, policy.Method)
+	fmt.Fprintf(&text, "Limits: %d worker attempts; %ds per worker; %ds validation (zero uses each ticket contract). Include later tickets: %t.\n", execution.MaxWorkerAttempts, execution.WorkerTimeoutSeconds, execution.ValidationTimeoutSeconds, execution.IncludeLaterTickets)
 	for _, member := range selection.Members[:min(8, len(selection.Members))] {
-		fmt.Fprintf(&text, "%s revision %d contract %s; %s\n", member.Key, member.Revision, member.ContractHash, member.Readiness)
+		fmt.Fprintf(&text, "- %s · %s\n", member.Key, member.Readiness)
 	}
-
-	if selection.Total > 8 {
-		fmt.Fprintf(&text, "%d more tickets are bound by the snapshot; inspect native work before starting.\n", selection.Total-8)
+	if selection.Total > len(selection.Members) || len(selection.Members) > 8 {
+		text.WriteString("This is a shortened selection view. Review the complete scope before confirming.\n")
 	}
-
 	if ticket := preview.ReadyTicket; ticket != nil {
-		fmt.Fprintf(&text, "Confirmation also makes %s revision %d ready under contract %s.\nContract validation (%ds):\n", ticket.Key, ticket.Revision, ticket.ContractHash, ticket.Validation.TimeoutSeconds)
-
+		fmt.Fprintf(&text, "Confirmation also makes ticket %s ready. Its validation commands:\n", ticket.Key)
 		for _, argv := range ticket.Validation.Commands {
 			fmt.Fprintf(&text, "%q\n", argv)
 		}
 	}
-
-	text.WriteString("Start exactly this extent under the displayed policy?")
-
+	text.WriteString("Confirming admits this exact selection under the displayed policy.")
 	return text.String()
 }
 
@@ -120,7 +110,7 @@ func (r telegramReceiver) finishWorkAdmission(ctx context.Context, claim core.Te
 		return err
 	}
 
-	text := fmt.Sprintf("Native work admitted.\nInvocation: %s\nRequest: %s\nExtent: %s %s\nState: %s; admitted tickets: %d. Admission is not evidence of validation or integration.", run.ID, claim.Request.ID, run.Selection.Selector.Extent, run.Selection.Selector.Identity, run.Status, len(run.Members))
+	text := fmt.Sprintf("Work admitted: %s %s.\n\nState: %s; selected tickets: %d. Execution, validation and integration are reported separately.\nUse /status %s to inspect this work.", run.Selection.Selector.Extent, run.Selection.Selector.Identity, run.Status, len(run.Members), run.ID)
 
 	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{State: "confirmed", ReceiptRef: "workflow:" + run.ID, Facts: facts, Text: text, ConfigDigest: config.Digest(), Invocation: &binding}, time.Now())
 }

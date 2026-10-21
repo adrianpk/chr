@@ -99,7 +99,7 @@ func checkTelegramLifecycleAckRecovery(t *testing.T, f *telegramConversationAppF
 		t.Fatal("original lifecycle receipt unavailable", request, err)
 	}
 
-	telegramWaitNotice(t, f, "Native request receipt:", 3*time.Second)
+	telegramWaitNotice(t, f, "The original control receipt is retained.", 3*time.Second)
 }
 
 func telegramLifecycleAckStatus(t *testing.T, operations service, id string) WorkflowWorkStatus {
@@ -131,7 +131,7 @@ func TestTelegramControlReceiptRetry(t *testing.T) {
 	f.receiver.operations = lost
 	telegramControlRunReceiver(t, f.receiver, func() {})
 	telegramWorkQueueMessage(t, f, "/answer "+token+" pause")
-	telegramWaitNotice(t, f, "Native control confirmed.", 3*time.Second)
+	telegramWaitNotice(t, f, "Control confirmed:", 3*time.Second)
 
 	after, err := operations.ReadWorkflow(t.Context(), ref.Invocation.ID)
 	if err != nil || !lost.lost.Load() || after.Revision != before.Revision+1 || after.StopIntent != "pause" {

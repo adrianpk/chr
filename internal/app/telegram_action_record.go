@@ -44,7 +44,7 @@ func (r telegramReceiver) applyRecordAction(ctx context.Context, claim core.Tele
 		return err
 	}
 
-	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{State: "confirmed", ReceiptRef: result.ReceiptRef, Facts: facts, Text: "Confirmed record mutation.\nRequest: " + claim.Request.ID + "\n" + string(facts), ConfigDigest: config.Digest()}, time.Now())
+	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{State: "confirmed", ReceiptRef: result.ReceiptRef, Facts: facts, Text: telegramRecordResultText(result), ConfigDigest: config.Digest()}, time.Now())
 }
 
 func (r telegramReceiver) finishRecordActionFailure(ctx context.Context, claim core.TelegramActionClaim, failure error, config core.TelegramReceiverConfig) error {

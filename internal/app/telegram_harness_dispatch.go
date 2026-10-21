@@ -52,7 +52,7 @@ func telegramHarnessText(status telegramHarnessStatus) string {
 	s := status.Selections
 
 	var text strings.Builder
-	fmt.Fprintf(&text, "Harness defaults for %s\nRevision: %s\nNew operations only; running, paused and resumed work keeps its binding.\n", s.Snapshot.ProjectRef, s.Snapshot.Revision)
+	fmt.Fprintf(&text, "Harness defaults for %s\n\nNew operations only; running, paused and resumed work keeps its binding.\n", s.Snapshot.ProjectRef)
 	text.WriteString(telegramHarnessRole("Worker", s.Worker, false))
 	text.WriteString(telegramHarnessRole("Generation", s.Generation, true))
 	text.WriteString("Named profiles (local readiness; remote authentication not tested):\n")

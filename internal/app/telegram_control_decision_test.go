@@ -112,7 +112,7 @@ func checkTelegramControlDecision(t *testing.T, action string) {
 
 	select {
 	case notice := <-f.notices:
-		if !strings.Contains(notice.Text, "Native request receipt: run/operation-receipts/") {
+		if !strings.Contains(notice.Text, "The original control receipt is retained.") {
 			t.Fatal("native receipt unavailable", notice)
 		}
 	default:

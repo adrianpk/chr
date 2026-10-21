@@ -12,23 +12,17 @@ import (
 
 func telegramPreparedWorkPreview(prepared PreparedAuthoringWork) string {
 	scope := prepared.Scope
-
-	instruction := []rune(scope.Instruction)
-	if len(instruction) > 1024 {
-		instruction = append(instruction[:1024], []rune("\n[Instruction excerpt]")...)
-	}
-
-	body := ""
+	title, body := "the retained request", ""
 	if prepared.Mutation.Native != nil {
 		body = string(prepared.Mutation.Native.Record.Body)
+		if value := prepared.Mutation.Native.Record.Metadata["title"]; len(value) > 0 {
+			if err := json.Unmarshal(value, &title); err != nil {
+				title = "the retained request"
+			}
+		}
 	}
-
-	excerpt, truncated := authoringSourceExcerpt(body)
-	if truncated {
-		excerpt += "\n[Description excerpt; read the canonical source below.]"
-	}
-
-	return fmt.Sprintf("Native backlog ticket preview\nIntent: %s\nProject: %s\nNamespace: %s\nScope hash: %s\nCanonical source: %s\nDescription hash: %s\nContract hash: %s\nOriginal instruction:\n%s\n\nDescription:\n%s\nNo work invocation has started.", scope.Intent, scope.ProjectID, scope.Namespace, scope.Hash, scope.DescriptionRef, scope.DescriptionHash, scope.ContractHash, string(instruction), excerpt)
+	excerpt := core.TelegramDocumentExcerpt([]byte(body))
+	return fmt.Sprintf("Prepare ticket %s in %s?\n\n%s\n\nOriginal request: %s\nConfirming authorizes this exact scope and creates the ticket in the backlog. Execution does not start.", title, scope.ProjectID, excerpt, core.TelegramDocumentExcerpt([]byte(scope.Instruction)))
 }
 
 func telegramPreparedWorkFacts(result AuthoringWorkResult) (json.RawMessage, error) {
@@ -38,7 +32,7 @@ func telegramPreparedWorkFacts(result AuthoringWorkResult) (json.RawMessage, err
 }
 
 func telegramPreparedWorkResultText(result AuthoringWorkResult) string {
-	return fmt.Sprintf("Native backlog ticket prepared: %s\nCanonical record: %s\nScope hash: %s\nIntent: %s\nOwner receipt: %s\nNo work invocation has started.", result.Result.Record.Identity, result.Result.Record.Reference, result.Scope.Hash, result.Scope.Intent, result.Result.ReceiptRef)
+	return fmt.Sprintf("Ticket prepared in backlog: %s — %s.\n\nExecution has not started. Use /work ticket %s to review its exact start confirmation.\nCanonical record: %s", result.Result.Record.Identity, result.Result.Record.Title, result.Result.Record.Identity, result.Result.Record.Reference)
 }
 
 func (r telegramReceiver) finishPreparedWork(ctx context.Context, request core.TelegramOperationRequest, result AuthoringWorkResult, config core.TelegramReceiverConfig) error {

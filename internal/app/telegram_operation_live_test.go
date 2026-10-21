@@ -36,7 +36,7 @@ func TestTelegramOperationLiveRecords(t *testing.T) {
 	f := telegramOperationAppFixture(t)
 
 	notice := f.send(t, `/tickets create {"title":"Remote task","synopsis":"One useful outcome"}`, 0)
-	if !strings.Contains(notice.Text, "Confirmed record mutation") || !strings.Contains(notice.Text, "PRJ-1") {
+	if !strings.Contains(notice.Text, "Record saved") || !strings.Contains(notice.Text, "PRJ-1") {
 		t.Fatal("ticket mutation unavailable", notice)
 	}
 
@@ -48,7 +48,7 @@ func TestTelegramOperationLiveRecords(t *testing.T) {
 	first := page.Records[0]
 
 	update := fmt.Sprintf(`/ticket update {"identity":"PRJ-1","revision":%d,"source_hash":%q,"title":"Updated remotely"}`, first.Revision, first.SourceHash)
-	if notice := f.send(t, update, 0); !strings.Contains(notice.Text, "Confirmed record mutation") {
+	if notice := f.send(t, update, 0); !strings.Contains(notice.Text, "Record saved") {
 		t.Fatal("guarded update failed", notice)
 	}
 
@@ -56,7 +56,7 @@ func TestTelegramOperationLiveRecords(t *testing.T) {
 		t.Fatal("stale revision accepted", notice)
 	}
 
-	if notice := f.send(t, `/use-cases create {"title":"Remote case","synopsis":"Retained case"}`, 0); !strings.Contains(notice.Text, "Confirmed record mutation") {
+	if notice := f.send(t, `/use-cases create {"title":"Remote case","synopsis":"Retained case"}`, 0); !strings.Contains(notice.Text, "Record saved") {
 		t.Fatal("case mutation failed", notice)
 	}
 
@@ -158,7 +158,7 @@ func checkTelegramOperationRecoveredRecord(t *testing.T, f *telegramConversation
 	}
 
 	notice := <-f.notices
-	if !strings.Contains(notice.Text, "Confirmed record mutation") {
+	if !strings.Contains(notice.Text, "Record saved") {
 		t.Fatal("owner result was not confirmed", notice)
 	}
 

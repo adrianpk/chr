@@ -99,7 +99,7 @@ func checkTelegramStaleReceiptResult(t *testing.T, f *telegramConversationAppFix
 			t.Fatal("stale prompt hid the accepted native receipt", request)
 		}
 
-		telegramWaitNotice(t, f, "Native request receipt:", time.Second)
+		telegramWaitNotice(t, f, "The original control receipt is retained.", time.Second)
 
 		return
 	}

@@ -54,7 +54,7 @@ func TestTelegramOperationActionLostAcknowledgement(t *testing.T) {
 	}
 
 	notice := telegramOperationNotice(t, f)
-	if !strings.Contains(notice.Text, "Confirmed record mutation") {
+	if !strings.Contains(notice.Text, "Record saved") {
 		t.Fatal("action recovery did not confirm receipt", notice)
 	}
 
@@ -157,7 +157,7 @@ func TestTelegramOperationUncertainPrompt(t *testing.T) {
 	}
 
 	confirmed := telegramOperationNotice(t, f)
-	if !strings.Contains(confirmed.Text, "Confirmed record mutation") {
+	if !strings.Contains(confirmed.Text, "Record saved") {
 		t.Fatal("unacknowledged prompt callback failed", confirmed)
 	}
 

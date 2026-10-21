@@ -36,7 +36,7 @@ func telegramAuthoringPreparedOffer(t *testing.T, f *telegramConversationAppFixt
 	request := telegramAuthoringPreparedLatest(t, f, id)
 
 	action, err := f.receiver.store.TelegramRequestAction(t.Context(), request)
-	if err != nil || request.State != "awaiting_confirmation" || f.session(t, id).Phase != "awaiting_confirmation" || !strings.Contains(prompt.Text, "Scope hash:") {
+	if err != nil || request.State != "awaiting_confirmation" || f.session(t, id).Phase != "awaiting_confirmation" || !strings.Contains(prompt.Text, "Original request:") {
 		t.Fatal("scope decision was not retained", prompt, request, err)
 	}
 
@@ -87,7 +87,7 @@ func TestTelegramAuthoringPreparedDecision(t *testing.T) {
 			}
 
 			notice := telegramAuthoringPreparedAnswer(t, f, action, prompt, mode)
-			if !strings.Contains(notice.Text, "Native backlog ticket prepared") {
+			if !strings.Contains(notice.Text, "Ticket prepared in backlog") {
 				t.Fatal("scope decision failed", notice)
 			}
 

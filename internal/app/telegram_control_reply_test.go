@@ -55,7 +55,7 @@ func telegramControlPromptRequest(request *http.Request) (bool, error) {
 
 	readErr := json.NewDecoder(body).Decode(&data)
 
-	return strings.Contains(data.Text, "Native control preview:"), errors.Join(readErr, body.Close())
+	return strings.Contains(data.Text, "Current state:"), errors.Join(readErr, body.Close())
 }
 
 // TestTelegramControlReplyArrival holds an actual HTTP send acknowledgement while
@@ -76,7 +76,7 @@ func TestTelegramControlReplyArrival(t *testing.T) {
 	telegramControlRunReceiver(t, f.receiver, func() { once.Do(func() { close(release) }) })
 	telegramWorkQueueMessage(t, f, "/cancel "+ref.Invocation.ID)
 
-	prompt := telegramWaitNotice(t, f, "Native control preview:", 3*time.Second)
+	prompt := telegramWaitNotice(t, f, "Current state:", 3*time.Second)
 	queueTelegramControlReply(t, f, prompt.ID, "cancel")
 	checkTelegramControlReplyWaiting(t, f)
 
@@ -85,7 +85,7 @@ func TestTelegramControlReplyArrival(t *testing.T) {
 	}
 
 	once.Do(func() { close(release) })
-	telegramWaitNotice(t, f, "Native control confirmed.", 3*time.Second)
+	telegramWaitNotice(t, f, "Control confirmed:", 3*time.Second)
 	checkTelegramControlOutcome(t, "cancel", checkTelegramWorkRunCount(t, operations, 1))
 }
 

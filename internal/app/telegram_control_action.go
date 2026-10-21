@@ -95,11 +95,11 @@ func (r telegramReceiver) finishControlAction(ctx context.Context, claim core.Te
 	if failure == nil {
 		state = "confirmed"
 		receipt = fmt.Sprintf("workflow:%s:revision:%d", status.ID, status.Revision)
-		text = "Native control confirmed."
+		text = "Control confirmed: " + telegramControlTitle(claim.Choice) + "."
 
 		if status.ControlReceipt != nil {
 			receipt = status.ControlReceipt.ReceiptRef
-			text += "\nNative request receipt: " + receipt
+			text += "\nThe original control receipt is retained."
 		}
 	}
 

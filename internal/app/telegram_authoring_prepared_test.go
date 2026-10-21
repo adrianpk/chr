@@ -140,7 +140,7 @@ func TestTelegramAuthoringPreparedIntent(t *testing.T) {
 			f, id, calls := telegramAuthoringPreparedFixture(t, "/"+intent+" retry ceiling")
 
 			notice := f.send(t, "/prepare-work "+id, 0)
-			if !strings.Contains(notice.Text, "Native backlog ticket prepared") {
+			if !strings.Contains(notice.Text, "Ticket prepared in backlog") {
 				t.Fatal("native preparation failed", notice)
 			}
 
@@ -165,7 +165,7 @@ func TestTelegramAuthoringPreparedParity(t *testing.T) {
 	f, id, calls := telegramAuthoringPreparedFixture(t, "/prepare retry ceiling")
 
 	notice := f.send(t, "Prepare the native ticket.", 0)
-	if !strings.Contains(notice.Text, "Native backlog ticket prepared") || calls.Load() != 1 {
+	if !strings.Contains(notice.Text, "Ticket prepared in backlog") || calls.Load() != 1 {
 		t.Fatal(notice, calls.Load())
 	}
 

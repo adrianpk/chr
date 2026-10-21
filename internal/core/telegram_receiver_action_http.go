@@ -83,8 +83,16 @@ func telegramActionKeyboard(token string, choices []string) (*telegramInlineKeyb
 			return nil, err
 		}
 
-		keyboard.Rows = append(keyboard.Rows, []telegramInlineButton{{Text: choice, CallbackData: data}})
+		keyboard.Rows = append(keyboard.Rows, []telegramInlineButton{{Text: telegramActionLabel(choice), CallbackData: data}})
 	}
 
 	return keyboard, nil
+}
+
+func telegramActionLabel(choice string) string {
+	labels := map[string]string{"start": "Start work", "develop": "Prepare ticket", "confirm": "Confirm change", "cancel": "Cancel", "pause": "Pause work", "resume": "Resume work", "continue": "Continue one step", "reconcile": "Check work state", "approve": "Approve review", "grant": "Grant allowance", "answer_decision": "Confirm answer"}
+	if label := labels[choice]; label != "" {
+		return label
+	}
+	return choice
 }

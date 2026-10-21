@@ -115,7 +115,7 @@ func TestTelegramOperationActionJourney(t *testing.T) {
 	action, prompt := telegramOperationOfferRecord(t, f)
 
 	reply := f.send(t, "confirm", prompt.ID)
-	if !strings.Contains(reply.Text, "Confirmed record mutation") {
+	if !strings.Contains(reply.Text, "Record saved") {
 		t.Fatal("exact action reply failed", reply)
 	}
 

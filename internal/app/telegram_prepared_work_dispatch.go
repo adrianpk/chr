@@ -124,7 +124,7 @@ func (r telegramReceiver) reusePreparedWork(ctx context.Context, input core.Tele
 
 func (r telegramReceiver) reusePreparedWorkResult(ctx context.Context, input core.TelegramConversationInput, previous core.TelegramOperationRequest, prepared PreparedAuthoringWork) (bool, error) {
 	if previous.State == "confirmed" {
-		return true, r.recordDiagnostic(ctx, input.Update, input.Config, "Previously prepared native work is confirmed by receipt "+previous.ReceiptRef+".\n"+string(previous.Result))
+		return true, r.recordDiagnostic(ctx, input.Update, input.Config, telegramPreparedWorkReplay(previous))
 	}
 
 	action, err := r.store.TelegramRequestAction(ctx, previous)

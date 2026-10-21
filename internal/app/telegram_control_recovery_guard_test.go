@@ -107,7 +107,7 @@ func TestTelegramControlReceiptProjection(t *testing.T) {
 	}}
 
 	text := f.send(t, "/answer "+token+" pause", 0).Text
-	if !strings.Contains(text, "Native request receipt:") || f.session(t, replacement.ID) != replacement {
+	if !strings.Contains(text, "The original control receipt is retained.") || f.session(t, replacement.ID) != replacement {
 		t.Fatal("accepted receipt acknowledgement replaced newer peer state", text)
 	}
 

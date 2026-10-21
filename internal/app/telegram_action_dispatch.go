@@ -52,7 +52,7 @@ func (r telegramReceiver) respondActionClaim(ctx context.Context, update core.Te
 	case "expired", "superseded":
 		return r.staleActionDiagnostic(ctx, update, core.TelegramActionAnswer{Token: claim.Action.Token, Choice: claim.Choice}, config)
 	case "consumed":
-		return r.store.QueueReadResponse(ctx, update, "Action already confirmed. Request: "+claim.Request.ID, config.Digest(), time.Now())
+		return r.store.QueueReadResponse(ctx, update, telegramActionReplayText(claim.Request), config.Digest(), time.Now())
 	default:
 		return r.dispatchTelegramAction(ctx, claim, config)
 	}

@@ -76,7 +76,7 @@ func prepareTelegramHarnessChange(status HarnessSelectionStatus, binding core.Wo
 	}
 
 	change := core.HarnessSelectionChangeRequest{Binding: binding, ProjectRef: status.Snapshot.ProjectRef, ExpectedRevision: status.Snapshot.Revision, Worker: choices.Worker, Generation: choices.Generation}
-	preview := fmt.Sprintf("Change harness defaults for %s?\nWorker profile: %s\nGeneration profile: %s\nObserved revision: %s\nNew operations only. Running, paused and resumed work keeps its binding. No model call or private setup is performed.", change.ProjectRef, worker, generation, change.ExpectedRevision)
+	preview := fmt.Sprintf("Change harness defaults for %s?\nWorker profile: %s\nGeneration profile: %s\nNew operations only. Running, paused and resumed work keeps its binding. No model call or private setup is performed.", change.ProjectRef, worker, generation)
 
 	return telegramHarnessPrepared{Change: change, Preview: core.BoundTelegramReceiverText(preview), ExpiresAt: time.Now().Add(10 * time.Minute)}, nil
 }

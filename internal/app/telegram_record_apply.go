@@ -96,7 +96,7 @@ func (r telegramReceiver) applyRecord(ctx context.Context, operations telegramRe
 		return err
 	}
 
-	text := "Confirmed record mutation.\nRequest: " + request.ID + "\nProject: " + request.Target.ProjectID + "\n" + string(facts)
+	text := telegramRecordResultText(result)
 
 	return r.store.FinishTelegramOperation(ctx, request, "confirmed", result.ReceiptRef, facts, text, config.Digest(), time.Now())
 }

@@ -19,7 +19,7 @@ func (r telegramReceiver) respondRecord(ctx context.Context, user core.TelegramA
 	}
 
 	if parseErr != nil {
-		return true, r.recordDiagnostic(ctx, update, config, "Unsupported record arguments. Use /help and strict JSON with the displayed revision/source_hash guards.")
+		return true, r.recordDiagnostic(ctx, update, config, "The record request is malformed. Use /help for its JSON fields; read the current record before retrying an update. No record was changed.")
 	}
 
 	command.Input.Config = config

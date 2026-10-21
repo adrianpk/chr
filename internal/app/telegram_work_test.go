@@ -108,7 +108,7 @@ func telegramWorkOffer(t *testing.T, f *telegramConversationAppFixture, command 
 	t.Helper()
 
 	prompt := f.send(t, command, 0)
-	if !strings.Contains(prompt.Text, "Native work preview:") || !strings.Contains(prompt.Text, "Policy revision:") {
+	if !strings.Contains(prompt.Text, "Start ") || !strings.Contains(prompt.Text, "Publication:") {
 		t.Fatal("missing exact selection/policy preview", prompt)
 	}
 
@@ -139,7 +139,7 @@ func TestTelegramWorkExtents(t *testing.T) {
 			checkTelegramWorkRunCount(t, operations, 0)
 
 			notice := f.send(t, "start", prompt.ID)
-			if !strings.Contains(notice.Text, "Native work admitted.") {
+			if !strings.Contains(notice.Text, "Work admitted:") {
 				t.Fatal("exact decision did not admit native work", notice, action)
 			}
 

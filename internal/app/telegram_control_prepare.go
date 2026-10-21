@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"reflect"
 	"time"
 
@@ -115,7 +114,7 @@ func (r telegramReceiver) offerControl(ctx context.Context, request core.Telegra
 		return err
 	}
 
-	text := fmt.Sprintf("Native control preview: %s\nMapped operator: %s\n%s\nApply exactly this control at revision %d?", preview.Request.Action, request.Operator, telegramWorkProgressText(preview.Status)+telegramControlDecisionText(preview.Request), preview.Request.ExpectedRevision)
+	text := telegramControlPreviewText(preview)
 	_, err = r.store.OfferTelegramAction(ctx, core.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{preview.Request.Action}, Text: text, ExpiresAt: time.Now().Add(24 * time.Hour)}, time.Now())
 
 	return err

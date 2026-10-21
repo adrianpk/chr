@@ -7,33 +7,23 @@ import (
 
 func telegramControlStatusText(status WorkflowWorkStatus) string {
 	var text strings.Builder
-
 	integration := status.Integration
 	if integration == nil || integration.EntryID == "" {
 		return ""
 	}
-
-	fmt.Fprintf(&text, "Integration: %s; entry revision: %d; budget revision: %d; candidate: %s.\n", integration.EntryID, integration.EntryRevision, integration.Budget.Revision, integration.CandidateHash)
-
 	decision := integration.Decision
-	if decision == nil {
-		return text.String()
+	if decision == nil || len(decision.Requests) == 0 {
+		return fmt.Sprintf("Integration state: %s.\n", integration.Phase)
 	}
-
-	fmt.Fprintf(&text, "Questions: %s; revision: %d; hash: %s; state: %s.\n", decision.ID, decision.Revision, decision.Hash, decision.State)
-
-	for _, question := range decision.Requests[:min(3, len(decision.Requests))] {
-		fmt.Fprintf(&text, "Question %s: %s\n", question.ID, telegramControlExcerpt(question.Issue))
-
-		for index, option := range question.Options {
-			fmt.Fprintf(&text, "  %d. %s\n", index+1, telegramControlExcerpt(option))
-		}
+	question := decision.Requests[0]
+	fmt.Fprintf(&text, "%s\n\n", telegramControlExcerpt(question.Issue))
+	for index, option := range question.Options[:min(8, len(question.Options))] {
+		fmt.Fprintf(&text, "%d. %s\n", index+1, telegramControlExcerpt(option))
 	}
-
-	if len(decision.Requests) > 3 {
-		text.WriteString("More retained questions are available in canonical invocation status.\n")
+	fmt.Fprintf(&text, "Request a bound answer preview with /answer-decision %s %s resolve <option-number> <reason>.\n", status.ID, question.ID)
+	if len(decision.Requests) > 1 || len(question.Options) > 8 {
+		text.WriteString("This view is shortened. Inspect the complete retained questions and options before answering.\n")
 	}
-
 	return text.String()
 }
 

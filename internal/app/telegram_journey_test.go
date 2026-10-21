@@ -44,7 +44,7 @@ func TestTelegramJourney(t *testing.T) {
 	checkTelegramWorkRunCount(t, operations, 0)
 
 	notice := f.send(t, "/answer "+action.Token+" start", 0)
-	if !strings.Contains(notice.Text, "Native work admitted.") {
+	if !strings.Contains(notice.Text, "Work admitted:") {
 		t.Fatal("prepared conversation could not enter native work", notice.Text)
 	}
 
@@ -96,7 +96,7 @@ func prepareTelegramJourney(t *testing.T, f *telegramConversationAppFixture) (st
 	f.send(t, "/plan "+conversation, 0)
 
 	notice := f.send(t, "/prepare-work "+conversation, 0)
-	if !strings.Contains(notice.Text, "Native backlog ticket prepared:") {
+	if !strings.Contains(notice.Text, "Ticket prepared in backlog:") {
 		t.Fatal("native work was not prepared", notice)
 	}
 

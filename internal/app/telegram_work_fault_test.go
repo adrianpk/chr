@@ -149,7 +149,7 @@ func TestTelegramWorkNamespace(t *testing.T) {
 
 	operations.workflowNamespace = "default"
 
-	if text := f.send(t, "/answer "+action.Token+" start", 0).Text; !strings.Contains(text, "Native work admitted.") {
+	if text := f.send(t, "/answer "+action.Token+" start", 0).Text; !strings.Contains(text, "Work admitted:") {
 		t.Fatal("environment retargeted frozen work", text)
 	}
 

@@ -108,7 +108,7 @@ func TestTelegramHelpConfirmation(t *testing.T) {
 		t.Fatal("help was intercepted by a pending confirmation")
 	}
 
-	if text := f.send(t, "/answer "+action.Token+" confirm", 0).Text; !strings.Contains(text, "Confirmed record mutation") {
+	if text := f.send(t, "/answer "+action.Token+" confirm", 0).Text; !strings.Contains(text, "Record saved") {
 		t.Fatal("help changed the pending confirmation", text)
 	}
 }

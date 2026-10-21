@@ -11,7 +11,7 @@ func telegramControlOffer(t *testing.T, f *telegramConversationAppFixture, comma
 	t.Helper()
 
 	notice := f.send(t, command, 0)
-	if !strings.Contains(notice.Text, "Native control preview:") || !strings.Contains(notice.Text, "Mapped operator:") {
+	if !strings.Contains(notice.Text, "for work ") || !strings.Contains(notice.Text, "Current state:") {
 		t.Fatal("native control preview unavailable", notice)
 	}
 
@@ -51,7 +51,7 @@ func checkTelegramControlLifecycle(t *testing.T, action string) {
 	}
 
 	notice := f.send(t, "/answer "+token+" "+action, 0)
-	if !strings.Contains(notice.Text, "Native control confirmed.") {
+	if !strings.Contains(notice.Text, "Control confirmed:") {
 		t.Fatal("confirmed control unavailable", notice)
 	}
 
