@@ -132,7 +132,7 @@ regression and client result as each row is delivered.
 
 - Planning artifacts: accepted; local links, whitespace, family/task coverage and acceptance mappings checked.
 - Specification/model promotion and implementation approval: completed on 2026-10-21.
-- Slice 1: T1.1-T1.3 implemented; report reviewing; canonical PR pending.
+- Slice 1: T1.1-T1.3 implemented; report reviewing; canonical PR [#424](https://forge.adrianpk.com/adrianpk/chr/pulls/424) open against dev.
 - Slices 2-5: pending.
 - Mobile/desktop and user-operated journey evidence: pending.
 - Exact final candidate and scheduled nightly: pending.
