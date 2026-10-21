@@ -30,8 +30,8 @@ Active slice: Slice 2 of 5, Document excerpts and complete attachments.
 
 ## Tasks
 
-Slice 1 is delivered through PR #424. Slice 2 is active. Later slices remain
-pending. The plan owns exact branch names, PR titles, report
+Slice 1 is delivered through PR #424. Slice 2 tasks are implemented and
+awaiting canonical PR integration. Later slices remain pending. The plan owns exact branch names, PR titles, report
 paths and focused commands.
 
 | Task | State | Commit | Required outcome |
@@ -39,10 +39,10 @@ paths and focused commands.
 | T1.1 | delivered | `ffcbc9b4dabc8fbff111e46ef74ad1b55b172b2a` | Shared optional blocks and bounded rich/plain renderer |
 | T1.2 | delivered | `c5665e602b5f9b00203e0366216d7a2dbdd7f3ae` | Readable conversation/text families 01-20 |
 | T1.3 | delivered | `eb7096813576290130d4f4edd583195a62ea443a` | Renderer, transport and conversation regressions |
-| T2.1 | pending | pending | Durable receiver snapshots, migrations and quota |
-| T2.2 | pending | pending | Document upload, caption, acknowledgement and fallback |
-| T2.3 | pending | pending | Primary artifact/export families 21-24 and 28 |
-| T2.4 | pending | pending | Exact bytes, bounds, rollback and recovery evidence |
+| T2.1 | implemented | `0c50fa368801ef245c1e59a28e5386bc7df58f81` | Durable receiver snapshots, migrations and quota |
+| T2.2 | implemented | `bb6a5575d69dbaa4d804e82c73adcb6dae561ca2` | Document upload, caption, acknowledgement and fallback |
+| T2.3 | implemented | `c48039eb4af550ee760e35af0c0dc8c9de648de6` | Primary artifact/export families 21-24 and 28 |
+| T2.4 | implemented | `7e2b7d21e1368ffe1eea6bbf83ad70fe3520f6b6` | Exact bytes, bounds, rollback and recovery evidence |
 | T3.1 | pending | pending | Human guarded previews and controls |
 | T3.2 | pending | pending | Original operation, document and action bindings |
 | T3.3 | pending | pending | Stale scope, ambiguity and replay regressions |
@@ -82,14 +82,14 @@ regression and client result as each row is delivered.
 | 18 | One concrete natural-language target question | Slice 1 | Changed: concrete operation/target question; keep retained target guards; `app/telegram_intent_dispatch.go`, `app/telegram_intent_guard.go`; `TestTelegramAuthoringIntentInvalid`, `TestTelegramAuthoringIntentRootChange`. |
 | 19 | Interpretation failure/retry exhaustion guidance | Slice 1 | Changed: interpretation unavailable/exhausted guidance preserves prior conversations; `app/telegram_intent_dispatch.go`; `TestTelegramAuthoringIntentProviderFailure`. |
 | 20 | Actual clarification question and clear answer route | Slice 1 | Changed: actual question first with original reply route; `app/telegram_authoring_apply.go`; `TestTelegramPresentationConversationQuestion`, `TestTelegramHelpQuestion`. |
-| 21 | Primary generated artifact excerpt and full file | Slice 2 | pending |
-| 22 | Authoring wait/failure from real owner state | Slice 2 | pending |
-| 23 | Saved result after conversation advances | Slice 2 | pending |
-| 24 | Bounded explanation, with full content when needed | Slice 2 | pending |
+| 21 | Primary generated artifact excerpt and full file | Slice 2 | Changed: one primary complete dump/spec/plan with direct literal excerpt; `app/telegram_document_results.go`; `TestTelegramPresentationDocumentAuthoring`. |
+| 22 | Authoring wait/failure from real owner state | Slice 2 | Keep: existing durable provider wait/retry ownership and context-preserving failure; omit an unscheduled retry promise; `app/telegram_authoring_apply.go`; `TestTelegramAuthoringExplainFailure`, `TestTelegramAuthoringBridgeLostAck`. |
+| 23 | Saved result after conversation advances | Slice 2 | Changed: attach the saved result while preserving the advanced conversation; `app/telegram_authoring_apply.go`; `TestTelegramPresentationDocumentAdvancedConversation`. |
+| 24 | Bounded explanation, with full content when needed | Slice 2 | Changed: bounded explanation preview and complete identified Markdown export with canonical sources; `app/telegram_explanation_dispatch.go`; `TestTelegramAuthoringExplainRouting`. |
 | 25 | Short ticket scope and bound complete document | Slice 3 | pending |
 | 26 | Prepared backlog result and correct next step | Slice 3 | pending |
 | 27 | Explicit missing intent/context for preparation | Slice 3 | pending |
-| 28 | Readable/paginated records and identified full export | Slice 2 | pending |
+| 28 | Readable/paginated records and identified full export | Slice 2 | Changed: human record rows and explicit complete records-page JSON export; preserve pagination; `app/telegram_record_dispatch.go`; `TestTelegramOperationLiveRecords`. |
 | 29 | Readable proposed record change and consequence | Slice 3 | pending |
 | 30 | Actionable malformed/stale record failure | Slice 3 | pending |
 | 31 | Exact work selection, policy, validation and scope | Slice 3 | pending |
@@ -118,13 +118,13 @@ regression and client result as each row is delivered.
 | TMP-01 | T1.1, T4.1 | pending |
 | TMP-02 | T4.2, T4.3 | pending |
 | TMP-03 | T1.1, T1.3, T4.3 | pending |
-| TMP-04 | T2.3 | pending |
-| TMP-05 | T2.1, T2.2, T2.4 | pending |
+| TMP-04 | T2.3 | Slice 2 fixtures verified; integration pending |
+| TMP-05 | T2.1, T2.2, T2.4 | Slice 2 fixtures verified; integration pending |
 | TMP-06 | T1.2, T3.1 | pending |
 | TMP-07 | T3.2, T3.3 | pending |
-| TMP-08 | T2.4, T3.3, T4.3 | pending |
-| TMP-09 | T2.4, T3.3, T4.3 | pending |
-| TMP-10 | T2.1, T2.4, T3.3, T4.2 | pending |
+| TMP-08 | T2.4, T3.3, T4.3 | Slice 2 snapshot/recovery fixtures verified; later owners pending |
+| TMP-09 | T2.4, T3.3, T4.3 | Slice 2 source/quota/upload failures verified; later owners pending |
+| TMP-10 | T2.1, T2.4, T3.3, T4.2 | Receiver document migration verified; action/notification owners pending |
 | TMP-11 | T5.1 | pending |
 | TMP-12 | T5.2, T5.3 | pending |
 
@@ -133,7 +133,7 @@ regression and client result as each row is delivered.
 - Planning artifacts: accepted; local links, whitespace, family/task coverage and acceptance mappings checked.
 - Specification/model promotion and implementation approval: completed on 2026-10-21.
 - Slice 1: delivered through [#424](https://forge.adrianpk.com/adrianpk/chr/pulls/424) at `a2bb0974eac21b1fe33cac78e21f4c1845871e96`.
-- Slice 2: active; T2.1-T2.4 pending.
+- Slice 2: T2.1-T2.4 implemented; report reviewing; canonical PR pending.
 - Slices 3-5: pending.
 - Mobile/desktop and user-operated journey evidence: pending.
 - Exact final candidate and scheduled nightly: pending.
@@ -149,3 +149,11 @@ Focused presentation, existing conversation/help/authoring regressions and stric
 package lint passed. [Slice 1 report](../report/slices/telegram-message-presentation/slice-1-message-composition.md)
 records commands and coverage. Looper evidence `UYX4BPRVESSKGMZMYMQQG72NMA`
 records all five ordered checks passed on the exact merged candidate.
+
+## Slice 2 Validation
+
+[Slice 2 report](../report/slices/telegram-message-presentation/slice-2-document-delivery.md)
+records immutable snapshots, upload/producer behavior, quota admission,
+retention, migration and fault fixtures. Final ordered checks, including the
+required focused race pass, must be recorded by Looper on the clean PR head
+following its PR-reference commit.
