@@ -102,3 +102,14 @@ func telegramIntentAuthoring(update core.TelegramReceivedUpdate, intent Conversa
 
 	return command, false, nil
 }
+
+func telegramAuthoringUsage(update core.TelegramReceivedUpdate) string {
+	name, _ := telegramCommandWord(strings.TrimSpace(update.Text))
+	for _, descriptor := range telegramAuthoringRegistry() {
+		if descriptor.Name == name {
+			return "Usage: " + telegramCommandSyntax(name, descriptor.Arguments)
+		}
+	}
+
+	return "Send /help to choose an authoring command."
+}

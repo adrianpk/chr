@@ -17,6 +17,10 @@ func (s *TelegramReceiverStore) PrepareTelegramPoll(ctx context.Context, botID i
 			return err
 		}
 
+		if err := purgeTelegramDocuments(ctx, tx, botID, now); err != nil {
+			return err
+		}
+
 		if err := compactTelegramConversations(ctx, tx, botID, now); err != nil {
 			return err
 		}

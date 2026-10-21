@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
-	"fmt"
 	"unicode/utf8"
 )
 
@@ -19,7 +18,7 @@ func (op telegramConversationTransaction) applyCapture() (string, *TelegramConve
 	}
 
 	if op.input.Action == TelegramConversationShow {
-		return telegramCaptureView(*c), c, nil
+		return c.Capture, c, nil
 	}
 
 	if op.input.Action == TelegramConversationCancel && telegramCancelable(*c) {
@@ -40,14 +39,10 @@ func (op telegramConversationTransaction) applyCapture() (string, *TelegramConve
 	}
 }
 
-func telegramCaptureView(c TelegramConversation) string {
-	return fmt.Sprintf("Session %s | project=%s | namespace=%s | intent=%s | %s | bytes=%d | revision=%d\n%s", c.ID, c.ProjectID, c.Namespace, c.Intent, c.Phase, len(c.Capture), c.Revision, c.Capture)
-}
-
 func (op telegramConversationTransaction) appendCapture(c *TelegramConversation) (string, *TelegramConversation, error) {
 	text := op.input.Text
 	if text == "" || len(text) > 16*1024 || !utf8.ValidString(text) {
-		return "", nil, telegramConversationDiagnostic("Each capture part must contain valid UTF-8 text of at most 16 KiB.")
+		return "", nil, telegramConversationDiagnostic("Each detail message must contain valid UTF-8 text of at most 16 KiB. Saved details are unchanged; send a shorter message or /done.")
 	}
 
 	var parts int
@@ -77,7 +72,7 @@ func (op telegramConversationTransaction) appendCapture(c *TelegramConversation)
 		return "", nil, err
 	}
 
-	return fmt.Sprintf("Retained part %d in %s (%d/65536 bytes). /done finishes capture.", parts+1, c.ID, len(c.Capture)), c, nil
+	return telegramCaptureSavedText(*c, parts+1), c, nil
 }
 
 func (op telegramConversationTransaction) finishCapture(c *TelegramConversation) (string, *TelegramConversation, error) {
@@ -86,7 +81,7 @@ func (op telegramConversationTransaction) finishCapture(c *TelegramConversation)
 		return "", nil, err
 	}
 
-	return "Capture finished for " + c.ID + ". Text is retained for authoring; artifact generation has not run.", c, nil
+	return "Your request and details are saved. Artifact generation has not run. Use /sessions to inspect the conversation.", c, nil
 }
 
 func (op telegramConversationTransaction) cancelCapture(c *TelegramConversation) (string, *TelegramConversation, error) {
@@ -99,7 +94,7 @@ func (op telegramConversationTransaction) cancelCapture(c *TelegramConversation)
 		return "", nil, err
 	}
 
-	return "Canceled unstarted session " + c.ID + " and discarded its capture.", c, nil
+	return "Conversation canceled. Its collected details were discarded.", c, nil
 }
 
 func (op telegramConversationTransaction) saveCapture(c *TelegramConversation) error {

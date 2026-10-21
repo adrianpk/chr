@@ -82,7 +82,7 @@ func telegramAuthoringExplainRoute(t *testing.T, mode string) {
 	message, before := telegramAuthoringExplainMessage(t, f, mode)
 
 	notice := f.send(t, message, 0)
-	if !strings.Contains(notice.Text, "configured retry ceiling") || !strings.Contains(notice.Text, "Canonical sources:") {
+	if !strings.Contains(notice.Text, "configured retry ceiling") || !strings.Contains(string(telegramLatestDocument(t, f, "explanation").Payload), "Canonical sources:") {
 		t.Fatal("missing canonical explanation", notice)
 	}
 

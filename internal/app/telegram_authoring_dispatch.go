@@ -23,7 +23,7 @@ func (r telegramReceiver) respondAuthoring(ctx context.Context, user core.Telegr
 	}
 
 	if err != nil {
-		return true, r.recordDiagnostic(ctx, update, config, "Use /quiz, /spec, /plan [conversation], or /refine <dump|spec|plan> <conversation> <instructions>.")
+		return true, r.recordDiagnostic(ctx, update, config, telegramAuthoringUsage(update))
 	}
 
 	command.Input.Config = config

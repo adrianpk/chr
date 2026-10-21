@@ -17,17 +17,18 @@ type telegramConversationNotice struct {
 	Text string
 }
 type telegramConversationAppFixture struct {
-	receiver telegramReceiver
-	updates  chan json.RawMessage
-	notices  chan telegramConversationNotice
-	next     int64
-	last     json.RawMessage
+	receiver  telegramReceiver
+	updates   chan json.RawMessage
+	notices   chan telegramConversationNotice
+	documents chan telegramDocumentUpload
+	next      int64
+	last      json.RawMessage
 }
 
 func newTelegramConversationAppFixture(t *testing.T) *telegramConversationAppFixture {
 	t.Helper()
 
-	f := &telegramConversationAppFixture{updates: make(chan json.RawMessage, 1), notices: make(chan telegramConversationNotice, 100), next: 1}
+	f := &telegramConversationAppFixture{updates: make(chan json.RawMessage, 1), notices: make(chan telegramConversationNotice, 100), documents: make(chan telegramDocumentUpload, 100), next: 1}
 
 	var messageID atomic.Int64
 
@@ -49,14 +50,26 @@ func newTelegramConversationAppFixture(t *testing.T) *telegramConversationAppFix
 		var body struct {
 			Text string `json:"text"`
 		}
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+
+		document := strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data")
+		if document {
+			upload := readTelegramDocumentUpload(t, r)
+			f.documents <- upload
+
+			body.Text = upload.Fields["caption"]
+		} else if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Error(err)
 		}
 
 		id := messageID.Add(1)
 		f.notices <- telegramConversationNotice{id, body.Text}
 
-		if err := json.NewEncoder(w).Encode(map[string]any{"ok": true, "result": map[string]any{"message_id": id}}); err != nil {
+		result := map[string]any{"message_id": id}
+		if document {
+			result["document"] = map[string]string{"file_id": "original-document"}
+		}
+
+		if err := json.NewEncoder(w).Encode(map[string]any{"ok": true, "result": result}); err != nil {
 			t.Error(err)
 		}
 	}))

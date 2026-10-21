@@ -44,7 +44,7 @@ func (r telegramReceiver) respondIntent(ctx context.Context, user core.TelegramA
 
 	if len(resolution.Decision) == 0 {
 		if resolution.Attempts >= 5 {
-			return true, r.recordDiagnostic(ctx, update, config, "Intent resolution exhausted five retained attempts. Prior conversations are preserved. Send an explicit command or a new corrected instruction; this source will not restart its retry budget.")
+			return true, r.recordDiagnostic(ctx, update, config, "I could not understand this request after five attempts. Prior conversations are preserved. Send /help for commands, or send a new corrected instruction.")
 		}
 
 		return true, nil
@@ -66,7 +66,7 @@ func (r telegramReceiver) resolveIntent(ctx context.Context, operations telegram
 
 		result, err := operations.ResolveConversationIntent(callCtx, "intent-"+hex.EncodeToString(hash[:16]), modelInput)
 		if errors.Is(err, errConversationIntentInvalid) || errors.Is(err, core.ErrStructuredModelOutput) {
-			result = telegramIntentClarification("The model returned an unsupported or malformed decision. Which exact operation and target did you intend?")
+			result = telegramIntentClarification("Which operation should I use, and for which project or conversation?")
 			err = nil
 		}
 
@@ -163,7 +163,7 @@ func (r telegramReceiver) intentContext(ctx context.Context, input core.Telegram
 }
 
 func (r telegramReceiver) intentCorrection(ctx context.Context, update core.TelegramReceivedUpdate, config core.TelegramReceiverConfig) error {
-	return r.recordDiagnostic(ctx, update, config, "The interpretation has unsupported or incomplete arguments. Name the exact project/session and requested operation, or use /help for deterministic controls.")
+	return r.recordDiagnostic(ctx, update, config, "Which current project or conversation should this request use? The prior target or arguments are no longer valid. Send /sessions to see your conversations.")
 }
 
 func (r telegramReceiver) dispatchIntent(ctx context.Context, user core.TelegramAllowedUser, input core.TelegramConversationInput, intent ConversationIntent) error {

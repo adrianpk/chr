@@ -47,7 +47,7 @@ func telegramReadResponse(operations telegramReadService, user core.TelegramAllo
 		return telegramReadOperationResponse(operations, user, update, operation.ID)
 	}
 
-	return telegramHelpReply("Unknown or unavailable command.\n"), nil
+	return telegramReadReply{Text: "I could not use that command. Send /help to see available commands."}, nil
 }
 
 func telegramReadOperationResponse(operations telegramReadService, user core.TelegramAllowedUser, update core.TelegramReceivedUpdate, operation telegramReadOperation) (telegramReadReply, error) {
@@ -62,12 +62,12 @@ func telegramReadOperationResponse(operations telegramReadService, user core.Tel
 			return telegramReadReply{}, err
 		}
 
-		return telegramReadReply{Text: fmt.Sprintf("Receiver: %s\nBot: %d\nCursor epoch: %d\nPoll attempts in current failure cycle: %d\nLast error: %s", state.Health, state.BotID, state.Epoch, state.RetryAttempt, state.LastErrorCode)}, nil
+		return telegramReadReply{Text: telegramReceiverHealthText(state)}, nil
 	case telegramReadHelp:
-		return telegramHelpReply(""), nil
+		return telegramBasicHelp(), nil
 	}
 
-	return telegramHelpReply("Unknown or unavailable command.\n"), nil
+	return telegramReadReply{Text: "I could not use that command. Send /help to see available commands."}, nil
 }
 
 func telegramProjectResponse(operations telegramReadService, ids []string) (string, error) {
@@ -85,8 +85,21 @@ func telegramProjectResponse(operations telegramReadService, ids []string) (stri
 	}
 
 	if len(lines) == 0 {
-		return "No enabled registered projects are available for your identity.", nil
+		return "No projects are available to you. Project access must be configured locally.", nil
 	}
 
-	return core.BoundTelegramReceiverText("Registered projects. Select one with /project <name>.\n" + strings.Join(lines, "\n")), nil
+	return core.RenderTelegramMessage(core.TelegramMessageBlocks{InitialText: "Available projects", ContentKind: "list", Content: strings.Join(lines, "\n"), SecondaryText: "Select one with /project <name>."}).PlainFallback, nil
+}
+
+func telegramReceiverHealthText(state core.TelegramReceiverState) string {
+	text := fmt.Sprintf("Receiver: %s", state.Health)
+	if state.RetryAttempt > 0 {
+		text += fmt.Sprintf("\nPolling retry attempt: %d of 5.", state.RetryAttempt)
+	}
+
+	if state.LastErrorCode != "" {
+		text += "\nLast error: " + state.LastErrorCode + "\n\nA local operator can inspect the receiver diagnostics."
+	}
+
+	return text
 }

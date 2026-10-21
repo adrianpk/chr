@@ -94,7 +94,7 @@ func telegramIntentTargetFailure(err error) string {
 		return diagnostic
 	}
 
-	return "The target or arguments are unavailable, ambiguous or conflict with the reply. Which exact current project/session and operation should be used?"
+	return "Which current project or conversation should I use? Send /sessions to see your conversations; a reply must match its original target."
 }
 
 func freezeTelegramIntentArguments(intent ConversationIntent, target core.TelegramOperationTarget) ConversationIntent {

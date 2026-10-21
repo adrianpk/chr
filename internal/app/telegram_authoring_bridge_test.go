@@ -118,7 +118,7 @@ func TestTelegramAuthoringBridgeJourney(t *testing.T) {
 	c := f.sessions(t)[0]
 	f.send(t, "  Preserve existing defaults.\n\n", 0)
 
-	if text := f.send(t, "/done "+c.ID, 0).Text; !strings.Contains(text, "Prepared authoring") {
+	if text := f.send(t, "/done "+c.ID, 0).Text; !strings.Contains(text, "saved as a dump") {
 		t.Fatal("capture did not generate a dump", text)
 	}
 

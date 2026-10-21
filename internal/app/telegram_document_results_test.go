@@ -1,0 +1,148 @@
+package app
+
+import (
+	"bytes"
+	"context"
+	"strings"
+	"testing"
+	"time"
+
+	"forge.adrianpk.com/chr/internal/core"
+)
+
+func telegramLatestDocument(t *testing.T, f *telegramConversationAppFixture, prefix string) telegramDocumentUpload {
+	t.Helper()
+
+	var found telegramDocumentUpload
+
+	for len(f.documents) > 0 {
+		document := <-f.documents
+		if strings.HasPrefix(document.Filename, prefix) {
+			found = document
+		}
+	}
+
+	if found.Filename == "" {
+		t.Fatal("primary document unavailable", prefix)
+	}
+
+	return found
+}
+
+// Real authoring, receiver HTTP and SQLite send only the primary new artifact,
+// preserving its complete source image rather than resending older outputs.
+func TestTelegramPresentationDocumentAuthoring(t *testing.T) {
+	f := newTelegramConversationAppFixture(t)
+	telegramAuthoringBridgeHTTP(t, f, func(authoringModelInput) string {
+		return telegramAuthoringServiceOutput(t, "# Requirements\n\nKeep the retry ceiling.\n\n## Validation\n\nVerify recovery.", "")
+	}, telegramAuthoringBridgeCapture)
+	f.send(t, "/prepare readable documents", 0)
+
+	c := f.sessions(t)[0]
+	for _, step := range []struct {
+		command string
+		kind    core.AuthoringArtifactKind
+	}{
+		{"/done", core.AuthoringArtifactKindDump},
+		{"/spec", core.AuthoringArtifactKindSpec},
+		{"/refine spec", core.AuthoringArtifactKindSpec},
+		{"/plan", core.AuthoringArtifactKindPlan},
+	} {
+		t.Run(step.command, func(t *testing.T) {
+			command := step.command + " " + c.ID
+			if strings.HasPrefix(step.command, "/refine") {
+				command += " retain the same scope"
+			}
+
+			notice := f.send(t, command, 0)
+			if !strings.Contains(notice.Text, "Complete document attached") || len(f.documents) != 1 {
+				t.Fatal("missing or repeated primary document", notice, len(f.documents))
+			}
+
+			document := telegramLatestDocument(t, f, string(step.kind)+"-")
+			snapshot := telegramAuthoringBridgeSnapshot(t, f, c.ID)
+			assertTelegramArtifactUpload(t, document, snapshot, step.kind)
+		})
+	}
+
+	checkTelegramNoWork(t, f.receiver.env)
+}
+
+func assertTelegramArtifactUpload(t *testing.T, document telegramDocumentUpload, snapshot core.AuthoringSnapshot, kind core.AuthoringArtifactKind) {
+	t.Helper()
+
+	for _, artifact := range snapshot.Artifacts {
+		if artifact.Ref.Kind == kind && bytes.Equal([]byte(artifact.Body), document.Payload) {
+			return
+		}
+	}
+
+	t.Fatal("attachment differs from its complete canonical artifact", document.Filename)
+}
+
+type telegramAdvanceAfterAuthoring struct {
+	service
+	advance func() error
+}
+
+func (s telegramAdvanceAfterAuthoring) ContinueTelegramAuthoring(ctx context.Context, target core.TelegramOperationTarget, request core.AuthoringContinuationRequest, guard core.AuthoringCommitGuard) (core.AuthoringContinuationResult, error) {
+	result, err := s.service.ContinueTelegramAuthoring(ctx, target, request, guard)
+	if err == nil {
+		err = s.advance()
+	}
+
+	return result, err
+}
+
+// A confirmed owner result remains downloadable when an independent cancellation
+// advances the receiver conversation before its local completion projection.
+func TestTelegramPresentationDocumentAdvancedConversation(t *testing.T) {
+	f := newTelegramConversationAppFixture(t)
+	telegramAuthoringBridgeHTTP(t, f, func(authoringModelInput) string {
+		return telegramAuthoringServiceOutput(t, "# Requirements\nKeep the retry ceiling.", "")
+	}, telegramAuthoringBridgeCapture)
+	f.send(t, "/prepare advanced conversation", 0)
+
+	original := f.sessions(t)[0]
+	operations := telegramOperationConcreteService(t, f.receiver)
+	f.receiver.operations = telegramAdvanceAfterAuthoring{service: operations, advance: func() error {
+		input := telegramOperationRetainInput(t, f, "/cancel "+original.ID)
+		input.Action, input.Conversation = core.TelegramConversationCancel, original.ID
+
+		return f.receiver.store.ApplyTelegramConversation(t.Context(), input, time.Now())
+	}}
+
+	input := telegramOperationRetainInput(t, f, "/done "+original.ID)
+	if err := f.receiver.respond(t.Context(), input.Update); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := f.receiver.drainDeliveries(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+
+	request, found, err := f.receiver.store.TelegramOperation(t.Context(), input.Update, 0)
+	if err != nil || !found || request.State != "confirmed" || request.ReceiptRef == "" {
+		t.Fatal("advanced conversation lost original receipt", request, err)
+	}
+
+	checkTelegramAdvancedDocument(t, f, original)
+}
+
+func checkTelegramAdvancedDocument(t *testing.T, f *telegramConversationAppFixture, original core.TelegramConversation) {
+	t.Helper()
+
+	current := f.session(t, original.ID)
+	if current.Phase != "canceled" || current.Capture != "" || current.AuthoringSessionRef != "" || current.ProjectID != original.ProjectID {
+		t.Fatal("completed presentation overwrote current selection", current)
+	}
+
+	if len(f.documents) != 1 {
+		t.Fatal("advanced result lost or duplicated attachment", len(f.documents))
+	}
+
+	document := telegramLatestDocument(t, f, "dump-")
+	if !strings.Contains(document.Fields["caption"], "current selection is preserved") {
+		t.Fatal("advanced result did not explain preserved selection", document.Fields["caption"])
+	}
+}

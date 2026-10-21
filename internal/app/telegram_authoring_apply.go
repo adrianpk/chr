@@ -156,11 +156,24 @@ func (r telegramReceiver) finishAuthoring(ctx context.Context, request core.Tele
 	}
 
 	text := telegramAuthoringResultText(request.Target.ConversationID, result)
+
+	request.Delivery, err = r.authoringDocument(ctx, request, result)
+	if err != nil {
+		text = "The authoring result is saved. The complete document could not be attached because its source is unavailable or changed. Use local project commands to inspect the saved result."
+	} else if request.Delivery != nil {
+		text = request.Delivery.Message.InitialText
+	}
+
 	progress := core.TelegramAuthoringProgress{SessionRef: result.SessionRef, Question: question}
 
 	err = r.store.FinishTelegramAuthoring(ctx, request, progress, result.ReceiptRef, facts, text, config.Digest(), time.Now())
 	if errors.Is(err, core.ErrWorkflowConflict) {
-		text = "Canonical authoring was confirmed, but this conversation has advanced. Its current binding is unchanged.\n" + result.SessionRef
+		text += "\n\nThis conversation has moved on; its current selection is preserved."
+
+		if request.Delivery != nil {
+			request.Delivery.Message.Family = "23"
+			request.Delivery.Message.SecondaryText = "Complete document attached. This conversation has moved on; its current selection is preserved."
+		}
 
 		return r.store.FinishTelegramOperation(ctx, request, "confirmed", result.ReceiptRef, facts, text, config.Digest(), time.Now())
 	}
@@ -170,7 +183,11 @@ func (r telegramReceiver) finishAuthoring(ctx context.Context, request core.Tele
 
 func telegramAuthoringResultText(conversation string, result core.AuthoringContinuationResult) string {
 	if result.Question != nil {
-		return fmt.Sprintf("Question for session %s:\n\n%s\n\nReply to this message or use /reply %s <answer>.", conversation, result.Prompt, conversation)
+		return core.RenderTelegramMessage(core.TelegramMessageBlocks{Content: result.Prompt, SecondaryText: "Reply to this message to answer. Use /reply " + conversation + " <answer> when you cannot reply directly."}).PlainFallback
+	}
+
+	if result.Session.Target == core.AuthoringTargetDump {
+		return core.RenderTelegramMessage(core.TelegramMessageBlocks{Family: "15", InitialText: "Your request and details are saved as a dump for " + result.Session.Topic + ".", SecondaryText: "Use /quiz " + conversation + " to clarify the requirements."}).PlainFallback
 	}
 
 	var text strings.Builder

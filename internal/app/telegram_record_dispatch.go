@@ -60,17 +60,21 @@ func (r telegramReceiver) readRecord(ctx context.Context, operations telegramRec
 		return r.recordDiagnostic(ctx, update, config, telegramRecordFailure(err))
 	}
 
-	text, err := json.MarshalIndent(page, "", "  ")
+	if len(page.Records) == 0 {
+		return r.store.QueuePresentationResponse(ctx, update, core.TelegramMessageBlocks{Family: "28", InitialText: "No records matched this view."}, config.Digest(), time.Now())
+	}
+
+	response, err := telegramRecordDocument(target, command, page)
 	if err != nil {
 		return err
 	}
 
-	reference := fmt.Sprintf("project=%s ops/%s %s offset=%d", target.ProjectID, target.Namespace, command.Kind, command.Query.Offset)
-	if len(page.Records) == 1 && command.Query.Identity != "" {
-		reference = target.ProjectID + " " + page.Records[0].Reference
+	err = r.store.QueueDocumentResponse(ctx, update, response, config.Digest(), time.Now())
+	if errors.Is(err, core.ErrTelegramDocumentUnavailable) {
+		return r.recordDiagnostic(ctx, update, config, "The records export could not be attached: its image is invalid or document storage is full. Use local project commands to inspect the records.")
 	}
 
-	return r.store.QueueReferencedResponse(ctx, update, string(text), reference, config.Digest(), time.Now())
+	return err
 }
 
 func (r telegramReceiver) recordDiagnostic(ctx context.Context, update core.TelegramReceivedUpdate, config core.TelegramReceiverConfig, text string) error {

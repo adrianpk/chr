@@ -175,7 +175,7 @@ func TestTelegramControlAuthoringLane(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	telegramWaitNotice(t, f, "Prepared authoring", time.Second)
+	telegramWaitNotice(t, f, "saved as a dump", time.Second)
 
 	if calls.Load() != 1 {
 		t.Fatal("ordinary reply did not generate exactly once", calls.Load())

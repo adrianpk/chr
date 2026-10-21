@@ -66,11 +66,20 @@ func TestTelegramOperationLiveRecords(t *testing.T) {
 func telegramOperationReadPage(t *testing.T, f *telegramConversationAppFixture, command string) RecordPage {
 	t.Helper()
 
-	text := f.send(t, command, 0).Text
+	for len(f.documents) > 0 {
+		<-f.documents
+	}
+
+	notice := f.send(t, command, 0)
+	if strings.Contains(notice.Text, "No records matched") {
+		return RecordPage{}
+	}
+
+	document := telegramLatestDocument(t, f, "records-")
 
 	var page RecordPage
-	if err := json.Unmarshal([]byte(text), &page); err != nil {
-		t.Fatal("record page unavailable", text, err)
+	if err := json.Unmarshal(document.Payload, &page); err != nil {
+		t.Fatal("records-page export unavailable", err)
 	}
 
 	return page

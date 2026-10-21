@@ -112,3 +112,58 @@ func telegramHelpEntity(text, delimiter string) string {
 func escapeTelegramHelp(text string) string {
 	return strings.NewReplacer("\\", "\\\\", "_", "\\_", "*", "\\*", "`", "\\`", "[", "\\[").Replace(text)
 }
+
+// Keep the first help view focused; the complete native catalogue remains
+// explicitly available without inspecting or changing a pending work binding.
+func telegramBasicHelp() telegramReadReply {
+	var entries []telegramHelpEntry
+
+	for _, entry := range telegramHelpMetadata() {
+		switch entry.Category {
+		case "Tickets", "Slice sets", "Use cases":
+			continue
+		}
+
+		if entry.Category == "Execution" && entry.ID != "work" {
+			continue
+		}
+
+		if entry.ID == "harness" || entry.ID == "prepare-work" || entry.ID == "explain" || entry.ID == core.TelegramActionAnswerCommand {
+			continue
+		}
+
+		entries = append(entries, entry)
+	}
+
+	reply := renderTelegramHelp(entries, "")
+
+	reply.Text += "\n\nSend /help all to choose an advanced command group."
+	if reply.PlainText != "" {
+		reply.PlainText += "\n\nSend /help all to choose an advanced command group."
+	}
+
+	return reply
+}
+
+func telegramGroupedHelp(group string) telegramReadReply {
+	categories := map[string]string{"execution": "Execution", "tickets": "Tickets", "slices": "Slice sets", "cases": "Use cases", "projects": "Projects", "authoring": "Authoring", "conversations": "Conversations", "system": "System controls"}
+
+	if group == "all" {
+		return telegramReadReply{Text: "Choose a command group:\n\n/help execution\n/help tickets\n/help slices\n/help cases\n/help projects\n/help authoring\n/help conversations\n/help system"}
+	}
+
+	category, ok := categories[group]
+	if !ok {
+		return telegramReadReply{Text: "Send /help all to choose a command group."}
+	}
+
+	var entries []telegramHelpEntry
+
+	for _, entry := range telegramHelpMetadata() {
+		if entry.Category == category {
+			entries = append(entries, entry)
+		}
+	}
+
+	return renderTelegramHelp(entries, "")
+}

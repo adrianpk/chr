@@ -2,6 +2,12 @@
 
 Status: Blocked
 
+Repair integration authorization: maintainer, 2026-10-21. Review and integrate
+the existing prepared-ticket admission and committed executor handoff repairs
+through the canonical Slice 8 PR, preserving pending live acceptance and final
+closure. This bounded integration unblocks the presentation delivery's Slice 3;
+it does not mark Slice 8 delivered or resume its live QA invocations.
+
 Date: 2026-10-16
 
 Approved: maintainer, 2026-10-16; specification scope and delivery design accepted through the request for spec, plan and tracker.

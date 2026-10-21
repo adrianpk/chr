@@ -108,3 +108,17 @@ Status is `blocked` on actual Telegram mobile/desktop visual evidence and
 configured-user continuation of the complete live development conversations.
 Source and renderer/HTTP fixture evidence do not satisfy those acceptance
 items. Replacement proposals are not implementation approval.
+
+## Presentation Planning: 2026-10-21
+
+The maintainer requested and then approved a specification and slice plan based
+on the review on 2026-10-21.
+The [presentation specification](../../spec/stable/telegram-message-presentation.md)
+defines flexible message blocks, bounded literal Markdown views, complete
+document attachments and truthful actions across both send paths. Its model
+describes frozen document delivery and preserved confirmation guards.
+
+The [approved delivery plan](../../plan/telegram-message-presentation.md) and
+its tracker map five slices, sixteen tasks and all 48 message families.
+Looper implementation and slice PR integration are authorized. Implementation
+results and actual mobile/desktop acceptance remain pending.

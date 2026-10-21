@@ -39,14 +39,14 @@ func TestTelegramControlModelLoad(t *testing.T) {
 	telegramWorkQueueMessage(t, f, "/status")
 	telegramWaitNotice(t, f, "Receiver:", 3*time.Second)
 	telegramWorkQueueMessage(t, f, "/cancel "+c.ID)
-	telegramWaitNotice(t, f, "Canceled", 3*time.Second)
+	telegramWaitNotice(t, f, "Conversation canceled. Its collected details were discarded.", 3*time.Second)
 
 	if current := f.session(t, c.ID); current.Phase != "canceled" || current.Capture != "" || calls.Load() != 1 {
 		t.Fatal("stop waited for or duplicated model work", current, calls.Load())
 	}
 
 	once.Do(func() { close(release) })
-	telegramWaitNotice(t, f, "target or arguments", 3*time.Second)
+	telegramWaitNotice(t, f, "Which current project or conversation should I use?", 3*time.Second)
 
 	if current := f.session(t, c.ID); current.Phase != "canceled" || current.Capture != "" {
 		t.Fatal("stale interpretation changed cancelled context", current)

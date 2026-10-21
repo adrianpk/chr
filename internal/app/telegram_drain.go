@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"errors"
-	"strings"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -52,8 +51,8 @@ func (r telegramReceiver) respond(ctx context.Context, update core.TelegramRecei
 		return r.store.RejectPendingUpdate(ctx, update, time.Now())
 	}
 
-	if update.Kind == "message" && strings.TrimSpace(update.Text) == "/help" {
-		return r.queueReadReply(ctx, update, config, telegramHelpReply(""))
+	if reply, ok := telegramHelpRequest(update); ok {
+		return r.queueReadReply(ctx, update, config, reply)
 	}
 
 	for _, handler := range []func(context.Context, core.TelegramAllowedUser, core.TelegramReceiverConfig, core.TelegramReceivedUpdate) (bool, error){r.respondAction, r.respondHarness, r.respondControl, r.respondWork, r.respondRecord, r.respondPreparedWork, r.respondExplanation, r.respondAuthoring, r.respondIntent, r.respondConversation} {
@@ -111,6 +110,10 @@ func (r telegramReceiver) sendReservedDelivery(ctx context.Context, delivery cor
 		text = core.BoundTelegramReceiverText("Uncertain delivery retry; this notice may repeat.\n" + text)
 	}
 
+	if delivery.DocumentID != "" {
+		return r.sendDocumentDelivery(ctx, delivery, text)
+	}
+
 	messageID, err := r.sendDeliveryBody(ctx, delivery, text)
 	if err != nil {
 		if ctx.Err() != nil {
@@ -124,6 +127,12 @@ func (r telegramReceiver) sendReservedDelivery(ctx context.Context, delivery cor
 }
 
 func (r telegramReceiver) sendDeliveryBody(ctx context.Context, delivery core.TelegramReceiverDelivery, text string) (int64, error) {
+	if delivery.Presentation != nil && !delivery.PlainFallback {
+		entities := telegramDeliveryEntities(delivery, text)
+
+		return r.api.SendPresentation(ctx, r.token, delivery.Peer, text, entities)
+	}
+
 	if delivery.ParseMode == "Markdown" && !delivery.PlainFallback {
 		return r.api.SendMarkdown(ctx, r.token, delivery.Peer, text)
 	}
@@ -133,7 +142,7 @@ func (r telegramReceiver) sendDeliveryBody(ctx context.Context, delivery core.Te
 
 func (r telegramReceiver) failedDelivery(ctx context.Context, delivery core.TelegramReceiverDelivery, failure error) error {
 	var apiErr *core.TelegramAPIError
-	if delivery.ParseMode == "Markdown" && !delivery.PlainFallback && errors.As(failure, &apiErr) && apiErr.Code == "format_rejected" {
+	if (delivery.ParseMode == "Markdown" || delivery.Presentation != nil) && !delivery.PlainFallback && errors.As(failure, &apiErr) && apiErr.Code == "format_rejected" {
 		selected, err := r.store.SelectTelegramPlainFallback(ctx, delivery.ID, time.Now())
 		if err != nil {
 			return err

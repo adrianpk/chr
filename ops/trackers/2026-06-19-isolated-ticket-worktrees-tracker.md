@@ -17,7 +17,7 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 | Slice 5 | execution workspace results | delivered | `feat/slice-5-execution-workspace-results` | `#332` | `.prj/reports/slices/isolated-ticket-worktrees/slice-5-execution-workspace-results.md` |
 | Slice 6 | branch and PR lifecycle | delivered | `feat/slice-6-branch-and-pr-lifecycle` | `#333` | `.prj/reports/slices/isolated-ticket-worktrees/slice-6-branch-and-pr-lifecycle.md` |
 | Slice 7 | review repair and cleanup | delivered | `feat/slice-7-review-repair-and-cleanup` | `#334` | `.prj/reports/slices/isolated-ticket-worktrees/slice-7-review-repair-and-cleanup.md` |
-| Slice 8 | docs and QA proving | planned | `feat/slice-8-docs-and-qa-proving` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-8-docs-and-qa-proving.md` |
+| Slice 8 | docs and QA proving | in_progress | `feat/slice-8-docs-and-qa-proving` | pending | `ops/default/report/slices/isolated-ticket-worktrees/slice-8-docs-and-qa-proving.md` |
 
 ## Slice 1 Tasks
 

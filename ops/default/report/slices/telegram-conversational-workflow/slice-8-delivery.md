@@ -1,6 +1,6 @@
 # Slice 8: Live Journey and Closure
 
-Status: drafting
+Status: reviewing
 
 Delivery set: telegram-conversational-workflow
 
@@ -16,6 +16,19 @@ PR: pending
 
 Certify the complete Telegram preparation and native development journey,
 including bounded live QA, source self-development and exact-candidate closure.
+
+## Repair Integration Checkpoint: 2026-10-21
+
+The maintainer authorized review and integration of the prepared-ticket
+admission and committed executor handoff corrections before the remaining
+live acceptance. This canonical Slice 8 PR integrates the deterministic repairs
+and their fixtures against current dev, including the first two presentation
+slices. Its merge does not complete T8.1-T8.3 or certify either live journey.
+
+The final clean PR head must pass the configured development, journey and
+focused race checks, plus affected executor/presentation regressions. Read the
+exact-head validation receipt for the current result. The retained live QA
+invocations, fixed receiver and blocked earlier controller are preserved.
 
 ## Delivered Behavior
 
