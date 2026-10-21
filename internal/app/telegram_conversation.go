@@ -51,7 +51,7 @@ func telegramConversationInput(update core.TelegramReceivedUpdate) (core.Telegra
 
 		input.Action, input.Intent = command.Action, command.Intent
 		if !parseTelegramConversationArguments(&input, body) {
-			return input, true, "Usage: " + command.Name + " " + command.Arguments
+			return input, true, telegramConversationUsage(command)
 		}
 
 		return input, true, ""
@@ -103,7 +103,7 @@ func parseTelegramConversationStart(input *core.TelegramConversationInput, body 
 
 	input.Text = body
 
-	return input.Text != "" && len(input.Text) <= 512
+	return input.Text != ""
 }
 
 func (r telegramReceiver) respondConversation(ctx context.Context, user core.TelegramAllowedUser, config core.TelegramReceiverConfig, update core.TelegramReceivedUpdate) (bool, error) {
@@ -127,4 +127,13 @@ func (r telegramReceiver) respondConversation(ctx context.Context, user core.Tel
 	}
 
 	return true, r.store.ApplyTelegramConversation(ctx, input, time.Now())
+}
+
+func telegramConversationUsage(command telegramConversationCommand) string {
+	usage := "Usage: " + telegramCommandSyntax(command.Name, command.Arguments)
+	if command.Action == core.TelegramConversationStart {
+		usage += "\n\nExample: " + command.Name + " update the README"
+	}
+
+	return usage
 }

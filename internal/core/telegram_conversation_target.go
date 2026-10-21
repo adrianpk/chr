@@ -57,7 +57,7 @@ func (op telegramConversationTransaction) conversation(id string) (*TelegramConv
 
 	c, err := scanTelegramConversation(op.tx.QueryRowContext(op.ctx, `SELECT `+telegramConversationColumns+` FROM telegram_conversations WHERE id=? AND bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, id, p.BotID, p.ChatID, p.TopicID, p.UserID))
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, telegramConversationDiagnostic("That session is unavailable for this exact peer. Use /sessions.")
+		return nil, telegramConversationDiagnostic("That conversation is unavailable here. Send /sessions to choose one of your current conversations.")
 	}
 
 	if err != nil {
@@ -89,7 +89,7 @@ func (op telegramConversationTransaction) replyTarget() (*TelegramConversation, 
 
 	err := op.tx.QueryRowContext(op.ctx, `SELECT conversation_id,conversation_revision,question_binding FROM telegram_replies WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=? AND message_id=? AND purpose='capture' AND invalidated_at IS NULL`, p.BotID, p.ChatID, p.TopicID, p.UserID, op.input.Update.ReplyToMessageID).Scan(&id, &revision, &binding)
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, telegramConversationDiagnostic("That reply is unavailable or expired for this peer. Use /sessions and an explicit current target.")
+		return nil, telegramConversationDiagnostic("That reply is unavailable or expired here. Saved details are unchanged. Use /sessions and an explicit current target.")
 	}
 
 	if err != nil {
@@ -102,11 +102,11 @@ func (op telegramConversationTransaction) replyTarget() (*TelegramConversation, 
 	}
 
 	if c.Revision != revision || c.QuestionBinding != binding || !telegramCaptureEligible(*c) {
-		return nil, telegramConversationDiagnostic("That prompt was replaced or finished. Use an explicit current session.")
+		return nil, telegramConversationDiagnostic("That prompt was replaced or finished. Saved details are unchanged. Use /sessions to choose an explicit current session.")
 	}
 
 	if op.input.Conversation != "" && op.input.Conversation != c.ID {
-		return nil, telegramConversationDiagnostic("The explicit conversation conflicts with the reply. Choose a matching target.")
+		return nil, telegramConversationDiagnostic("The explicit conversation conflicts with the reply. Saved details are unchanged. Use /sessions to choose a matching target.")
 	}
 
 	return c, nil
@@ -195,13 +195,13 @@ func (op telegramConversationTransaction) focus() (string, *TelegramConversation
 	}
 
 	if !telegramCaptureEligible(*c) {
-		return "", nil, telegramConversationDiagnostic("Only a collecting session can receive focus.")
+		return "", nil, telegramConversationDiagnostic("This conversation is " + telegramConversationState(c.Phase) + ". Use /sessions to choose a conversation that can collect details.")
 	}
 
 	p := op.input.Update.Peer
 	_, err = op.tx.ExecContext(op.ctx, `UPDATE telegram_peers SET focused_conversation_id=?,revision=revision+1,updated_at=? WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, c.ID, formatProjectTime(op.now), p.BotID, p.ChatID, p.TopicID, p.UserID)
 
-	return "Focused session: " + c.ID, c, err
+	return "Your next details will go to " + telegramConversationLabel(c.Topic) + " in " + op.projectLabel(c.ProjectID) + ".", c, err
 }
 
 func (op telegramConversationTransaction) list() (string, *TelegramConversation, error) {
@@ -220,8 +220,17 @@ func (op telegramConversationTransaction) list() (string, *TelegramConversation,
 	}
 
 	var text strings.Builder
-	for _, c := range sessions {
-		fmt.Fprintf(&text, "%s | project=%s | %s | intent=%s | bytes=%d | revision=%d | focused=%t\n", c.ID, c.ProjectID, c.Phase, c.Intent, len(c.Capture), c.Revision, c.ID == focus)
+	text.WriteString("Your conversations\n")
+
+	for index, c := range sessions {
+		row := op.conversationListRow(c, focus)
+		if telegramVisibleUnits(text.String()+row) > 1500 {
+			fmt.Fprintf(&text, "\nShowing %d of %d retained conversations. References in earlier messages still select their original conversation.", index, len(sessions))
+
+			break
+		}
+
+		text.WriteString(row)
 	}
 
 	return text.String(), nil, nil

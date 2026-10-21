@@ -170,7 +170,11 @@ func (r telegramReceiver) finishAuthoring(ctx context.Context, request core.Tele
 
 func telegramAuthoringResultText(conversation string, result core.AuthoringContinuationResult) string {
 	if result.Question != nil {
-		return fmt.Sprintf("Question for session %s:\n\n%s\n\nReply to this message or use /reply %s <answer>.", conversation, result.Prompt, conversation)
+		return core.RenderTelegramMessage(core.TelegramMessageBlocks{Content: result.Prompt, SecondaryText: "Reply to this message to answer. Use /reply " + conversation + " <answer> when you cannot reply directly."}).PlainFallback
+	}
+
+	if result.Session.Target == core.AuthoringTargetDump {
+		return core.RenderTelegramMessage(core.TelegramMessageBlocks{Family: "15", InitialText: "Your request and details are saved as a dump for " + result.Session.Topic + ".", SecondaryText: "Use /quiz " + conversation + " to clarify the requirements."}).PlainFallback
 	}
 
 	var text strings.Builder

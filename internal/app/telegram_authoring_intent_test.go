@@ -91,7 +91,7 @@ func TestTelegramAuthoringIntentParity(t *testing.T) {
 	first := f.sessions(t)[0]
 
 	captured := f.send(t, "keep the existing retry policy", explicit.ID)
-	if !strings.Contains(captured.Text, "Retained part") {
+	if !strings.Contains(captured.Text, "Details saved") {
 		t.Fatalf("capture=%q", captured.Text)
 	}
 
@@ -260,7 +260,7 @@ func TestTelegramAuthoringIntentRootChange(t *testing.T) {
 	})
 
 	notice := f.send(t, "prepare a bounded change", 0)
-	if !strings.Contains(notice.Text, "unsupported or incomplete") || len(f.sessions(t)) != 0 {
+	if !strings.Contains(notice.Text, "prior target or arguments are no longer valid") || len(f.sessions(t)) != 0 {
 		t.Fatalf("notice=%q sessions=%+v", notice.Text, f.sessions(t))
 	}
 

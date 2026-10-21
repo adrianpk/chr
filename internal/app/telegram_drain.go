@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"errors"
-	"strings"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -52,8 +51,8 @@ func (r telegramReceiver) respond(ctx context.Context, update core.TelegramRecei
 		return r.store.RejectPendingUpdate(ctx, update, time.Now())
 	}
 
-	if update.Kind == "message" && strings.TrimSpace(update.Text) == "/help" {
-		return r.queueReadReply(ctx, update, config, telegramHelpReply(""))
+	if reply, ok := telegramHelpRequest(update); ok {
+		return r.queueReadReply(ctx, update, config, reply)
 	}
 
 	for _, handler := range []func(context.Context, core.TelegramAllowedUser, core.TelegramReceiverConfig, core.TelegramReceivedUpdate) (bool, error){r.respondAction, r.respondHarness, r.respondControl, r.respondWork, r.respondRecord, r.respondPreparedWork, r.respondExplanation, r.respondAuthoring, r.respondIntent, r.respondConversation} {

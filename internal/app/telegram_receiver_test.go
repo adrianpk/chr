@@ -105,7 +105,7 @@ func TestTelegramReceiverReadJourney(t *testing.T) {
 	}
 
 	help, projects, work := <-sent, <-sent, <-sent
-	if !strings.Contains(help, "/status") || projects != "Registered projects. Select one with /project <name>.\n- example-project" || !strings.Contains(work, "unavailable command") {
+	if !strings.Contains(help, "/status") || projects != "Available projects\n\n- example-project\n\nSelect one with /project <name>." || !strings.Contains(work, "Send /help") {
 		t.Fatal("incorrect bounded read responses", help, projects, work)
 	}
 

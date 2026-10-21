@@ -107,7 +107,7 @@ func (s *TelegramReceiverStore) ApplyTelegramConversation(ctx context.Context, i
 			return err
 		}
 
-		if err := queueTelegramResponse(ctx, tx, input.Update, BoundTelegramReceiverText(text), input.Config.Digest(), now); err != nil {
+		if err := queueTelegramPresentation(ctx, tx, input.Update, operation.presentation(text, conversation), input.Config.Digest(), now); err != nil {
 			return err
 		}
 
@@ -116,7 +116,7 @@ func (s *TelegramReceiverStore) ApplyTelegramConversation(ctx context.Context, i
 
 	var diagnostic telegramConversationDiagnostic
 	if errors.As(err, &diagnostic) {
-		return s.QueueReadResponse(ctx, input.Update, BoundTelegramReceiverText(string(diagnostic)), input.Config.Digest(), now)
+		return s.QueuePresentationResponse(ctx, input.Update, TelegramMessageBlocks{InitialText: string(diagnostic)}, input.Config.Digest(), now)
 	}
 
 	return err
@@ -198,7 +198,7 @@ func exactTelegramProject(projects []Project, target string) (Project, error) {
 	}
 
 	if len(matches) != 1 {
-		return Project{}, telegramConversationDiagnostic("Select an exact authorized project ID or unique registered name with /project <project>.")
+		return Project{}, telegramConversationDiagnostic("That project is unavailable or its name is ambiguous. Send /projects, then select an exact ID or unique name with /project <project>.")
 	}
 
 	return matches[0], nil
@@ -214,7 +214,7 @@ func telegramProjectBinding(project Project) (string, error) {
 
 	root, err = filepath.EvalSymlinks(root)
 	if err != nil {
-		return "", telegramConversationDiagnostic("The registered project root is unavailable. Resolve the registry binding before continuing.")
+		return "", telegramConversationDiagnostic("The project folder is unavailable. Saved conversations are unchanged. A local operator must restore the registered folder before you continue.")
 	}
 
 	sum := sha256.Sum256([]byte(project.ID + "\x00" + registeredRoot + "\x00" + root))
@@ -231,7 +231,7 @@ func (op telegramConversationTransaction) resolveProject(bound *TelegramConversa
 		}
 
 		if bound != nil && bound.ProjectID != project.ID {
-			return Project{}, telegramConversationDiagnostic("The explicit project conflicts with the bound conversation. Choose a matching target.")
+			return Project{}, telegramConversationDiagnostic("The explicit project conflicts with this conversation. Saved details are unchanged. Use /sessions to choose a matching target.")
 		}
 
 		return project, nil
@@ -338,7 +338,7 @@ func (op telegramConversationTransaction) checkAllocation() error {
 	}
 
 	if peerCount >= 8 || botCount >= 128 {
-		return telegramConversationDiagnostic("Conversation capacity reached. Finish or cancel an existing session before creating another.")
+		return telegramConversationDiagnostic("Conversation capacity reached. Finish or cancel an existing conversation before starting another. Send /sessions to choose one.")
 	}
 
 	return nil
@@ -346,14 +346,17 @@ func (op telegramConversationTransaction) checkAllocation() error {
 
 func (op telegramConversationTransaction) insertConversation(project Project, binding, namespace string) (string, *TelegramConversation, error) {
 	if !slices.Contains([]string{"explain", "prepare", "develop"}, op.input.Intent) || len(op.input.Text) > 512 || strings.TrimSpace(op.input.Text) == "" {
-		return "", nil, telegramConversationDiagnostic("A conversation requires an intent and a topic of at most 512 UTF-8 bytes.")
+		return "", nil, telegramConversationDiagnostic("Start with a nonempty topic of at most 512 UTF-8 bytes. This conversation was not created.")
 	}
 
 	c := TelegramConversation{ID: telegramConversationID(op.input.Update), Peer: op.input.Update.Peer, ProjectID: project.ID, ProjectBindingDigest: binding, Namespace: namespace, Intent: op.input.Intent, Phase: "collecting", Topic: op.input.Text, Revision: 1}
 	c.AuthorizationRef = op.developmentInstructionRef(c)
 	_, err := op.tx.ExecContext(op.ctx, `INSERT INTO telegram_conversations(id,bot_id,chat_id,topic_id,user_id,project_id,project_binding_digest,namespace,intent,phase,topic,authorization_ref,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, c.ID, c.Peer.BotID, c.Peer.ChatID, c.Peer.TopicID, c.Peer.UserID, c.ProjectID, c.ProjectBindingDigest, c.Namespace, c.Intent, c.Phase, c.Topic, c.AuthorizationRef, formatProjectTime(op.now), formatProjectTime(op.now))
 
-	return "Collecting session " + c.ID + " for " + c.ProjectID + " (" + c.Intent + "). Reply with text; /done finishes capture. Use /sessions or /focus <conversation> to target it.", &c, err
+	text := "Your request for " + telegramConversationLabel(c.Topic) + " in " + telegramConversationLabel(project.Name) + " is retained."
+	text += "\n\nYou can add more details, or send /done " + c.ID + " to finish collecting them."
+
+	return text, &c, err
 }
 
 func telegramConversationID(update TelegramReceivedUpdate) string {

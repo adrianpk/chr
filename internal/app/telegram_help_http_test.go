@@ -28,7 +28,7 @@ func TestTelegramHelpHTTP(t *testing.T) {
 		modes                      []string
 	}{
 		{"formatted", "/help", "", "", 0, 0, []string{"Markdown"}},
-		{"unknown command", "/invent", "", "", 0, 0, []string{"Markdown"}},
+		{"unknown command", "/invent", "", "", 0, 0, []string{""}},
 		{"plain reply", "/status", "", "", 0, 0, []string{""}},
 		{"format fallback", "/help", "Bad Request: can't parse entities: unsupported entity", "", 400, 0, []string{"Markdown", ""}},
 		{"ordinary rejection", "/help", "Bad Request: chat not found", "blocked", 400, 1, []string{"Markdown"}},
@@ -194,14 +194,17 @@ func assertTelegramHelpBody(t *testing.T, payload telegramHelpHTTPBody, command 
 		return
 	}
 
-	prefix := ""
 	if command == "/invent" {
-		prefix = "Unknown or unavailable command.\n"
+		if payload.Text != "I could not use that command. Send /help to see available commands." {
+			t.Fatal("unknown command lost its focused help route")
+		}
+
+		return
 	}
 
-	want := telegramHelpReply(prefix).Text
+	want := telegramBasicHelp().Text
 	if payload.ParseMode == "" {
-		want = telegramHelpReply(prefix).PlainText
+		want = telegramBasicHelp().PlainText
 	}
 
 	if payload.Text != want {
