@@ -66,6 +66,14 @@ func writeNativeHostProfile(t *testing.T, configDir string, profile WorkflowNati
 // The real remote adapter prepares and reviews combined content before the
 // production atomic transport advances both owned refs. Worker work is reused.
 func TestNativeHostPublication(t *testing.T) {
+	for _, mode := range []string{"automatic", "explicit"} {
+		t.Run(mode, func(t *testing.T) { nativeHostPublication(t, mode) })
+	}
+}
+
+func nativeHostPublication(t *testing.T, mode string) {
+	t.Helper()
+
 	host := newNativeHostFixture(t)
 	f, provider := host.f, host.provider
 	entry := nativeRoleAdmit(t, f.store, f.run.ID)
@@ -108,6 +116,48 @@ func TestNativeHostPublication(t *testing.T) {
 	}
 
 	checkNativeHostPublishedRefs(t, host, candidate.Input.Git.ResultCommit)
+	checkNativeHostReceipt(t, host, candidate.Input.Git.ResultCommit, mode)
+}
+
+func checkNativeHostReceipt(t *testing.T, host nativeHostFixture, result, mode string) {
+	t.Helper()
+
+	if _, ok := any(host.provider).(WorkflowGitPublicationInspector); !ok {
+		t.Fatal("production publisher cannot reconcile its own publication")
+	}
+
+	pr := host.f.provider.pr
+	pr.State, pr.Merged, pr.HeadCommit, pr.BaseCommit, pr.ResultCommit = "closed", true, result, result, result
+	setNativePRFixture(t, host.forge, pr)
+
+	host.forge.runner.outputs[host.forge.prefix+"/branches/"+url.PathEscape(pr.HeadBranch)] = []byte(`{"protected":false,"commit":{"id":"` + result + `"}}`)
+
+	ports := WorkflowPublicationPorts{Provider: host.provider, Preparer: host.f.git, Observer: NewWorkflowIntegrationGit(pr.Repository, host.f.remote), NativePublisher: host.provider, NativeObserver: host.provider}
+	if err := confirmNativeHostReceipt(t, host, ports, mode); err != nil {
+		t.Fatal("real provider could not confirm its publication receipt", err)
+	}
+
+	if _, err := host.f.store.AdvanceWorkflowSliceIntegration(t.Context(), host.f.run.ID, ports); err != nil {
+		t.Fatal("real provider could not finalize its publication receipt", err)
+	}
+
+	if run := workflowTestRead(t, host.f.store, host.f.run.ID); run.DeliveryRef == "" {
+		t.Fatal("publication did not produce a canonical delivery receipt")
+	}
+}
+
+func confirmNativeHostReceipt(t *testing.T, host nativeHostFixture, ports WorkflowPublicationPorts, mode string) error {
+	t.Helper()
+
+	if mode == "explicit" {
+		_, err := host.f.store.ReconcileWorkflowNativeIntegration(t.Context(), host.f.run.ID, ports)
+
+		return err
+	}
+
+	_, err := host.f.store.AdvanceWorkflowSliceIntegration(t.Context(), host.f.run.ID, ports)
+
+	return err
 }
 
 func checkNativeHostRevocation(t *testing.T, host nativeHostFixture) {

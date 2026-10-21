@@ -181,6 +181,17 @@ not authorize preparation retry. The CLI now reads that revision and forwards
 it to the same guarded operation. Its regression reproduces the no-op before
 the correction and requires completed preparation afterward.
 
+The guarded real CLI recovery completed preparation without repeating its
+original worker. The native host then reviewed and atomically published the
+candidate; canonical Git and the original PR both reported the prepared result.
+Receipt progression exposed one more missing adapter capability: the wrapper
+did not forward the publisher's read-only inspection interface. It now exposes
+that interface through the configured target transport. The real-provider test
+covers both automatic observation and explicit native reconciliation through
+canonical receipt finalization. Explicit submission reconciliation also uses
+the native owner, allowing observation after the retained polling deadline
+without another publication or a deadline/budget reset.
+
 ## Risks and Follow-ups
 
 Real mobile/desktop client observations and the user-operated journey require

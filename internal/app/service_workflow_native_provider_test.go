@@ -34,6 +34,10 @@ func TestServiceNativeProvider(t *testing.T) {
 		t.Fatal("service bypassed the configured native publisher or observer")
 	}
 
+	if _, ok := ports.NativePublisher.(core.WorkflowGitPublicationInspector); !ok {
+		t.Fatal("configured publisher cannot inspect its native submission")
+	}
+
 	lifecycle, err := operations.workflowLifecycleControlPorts(t.Context(), store, WorkflowControlRequest{Action: "continue", ID: id, StepLimit: 1})
 	if err != nil {
 		t.Fatal(err)

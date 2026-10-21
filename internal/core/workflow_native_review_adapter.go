@@ -104,3 +104,14 @@ func (adapter *WorkflowNativeReviewAdapter) PublishWorkflowGit(ctx context.Conte
 
 	return NewWorkflowGitPublisher(profile.Repository, profile.Transport).PublishWorkflowGit(ctx, request)
 }
+
+// InspectWorkflowGitPublication keeps the configured transport available for
+// read-only reconciliation, including after publication authorization stops.
+func (adapter *WorkflowNativeReviewAdapter) InspectWorkflowGitPublication(ctx context.Context, request WorkflowGitPublication) (WorkflowGitPublicationAdvertisement, error) {
+	profile, err := LoadWorkflowNativePublisher(adapter.configDir, request.Repository, request.TargetRef)
+	if err != nil {
+		return WorkflowGitPublicationAdvertisement{}, err
+	}
+
+	return NewWorkflowGitPublisher(profile.Repository, profile.Transport).InspectWorkflowGitPublication(ctx, request)
+}

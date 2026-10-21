@@ -100,6 +100,11 @@ and original worker proof, and consumes the existing bounds. Replaying the same
 control receipt cannot prepare again. Failed validation gates and operator stops
 keep their existing resolution requirements.
 
+After the polling deadline, `chr work reconcile --kind submission` explicitly
+observes the existing native submission through the same configured transport
+and canonical PR adapter. It can confirm an already applied result; it cannot
+dispatch another publication, change the method or refill a budget.
+
 | Condition | Required action |
 | --- | --- |
 | `profile_disabled` | Explicitly select the authorized profile. |

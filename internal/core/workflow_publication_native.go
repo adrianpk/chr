@@ -132,10 +132,14 @@ func (s *WorkflowStore) transitionWorkflowNativeContinuation(ctx context.Context
 }
 
 func (s *WorkflowStore) observeWorkflowNativeContinuation(ctx context.Context, guard WorkflowIntegrationBudgetGuard, ports WorkflowPublicationPorts) error {
+	return s.observeWorkflowNativeIntegration(ctx, guard, ports, true)
+}
+
+func (s *WorkflowStore) observeWorkflowNativeIntegration(ctx context.Context, guard WorkflowIntegrationBudgetGuard, ports WorkflowPublicationPorts, poll bool) error {
 	inspector, ok := ports.NativePublisher.(WorkflowGitPublicationInspector)
 	git, prepared := ports.Observer.(WorkflowPreparedIntegrationGit)
 
-	if !ok || !prepared {
+	if !ok || !prepared || ports.NativeObserver == nil {
 		return ErrWorkflowAtomicGuard
 	}
 
@@ -148,7 +152,13 @@ func (s *WorkflowStore) observeWorkflowNativeContinuation(ctx context.Context, g
 		return err
 	}
 
-	if _, err := s.PollWorkflowNativeSubmission(ctx, guard, ports.NativeObserver, ports.Observer); err != nil {
+	if poll {
+		_, err = s.PollWorkflowNativeSubmission(ctx, guard, ports.NativeObserver, ports.Observer)
+	} else {
+		_, err = s.ObserveWorkflowNativeSubmission(ctx, guard, ports.NativeObserver, ports.Observer)
+	}
+
+	if err != nil {
 		return err
 	}
 

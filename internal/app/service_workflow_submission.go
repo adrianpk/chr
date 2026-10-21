@@ -24,6 +24,15 @@ func (s service) ReconcileWorkflowSubmission(ctx context.Context, id string) (co
 		return core.WorkflowSubmission{}, err
 	}
 
+	if run.Integration != nil {
+		ports, err := s.workflowContinuationPorts(run, provider, nil)
+		if err != nil {
+			return core.WorkflowSubmission{}, err
+		}
+
+		return store.ReconcileWorkflowNativeIntegration(ctx, id, ports.Publication)
+	}
+
 	return store.ReconcileWorkflowSubmission(ctx, id, provider, s.workflowIntegrationObserver(run))
 }
 
