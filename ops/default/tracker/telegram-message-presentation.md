@@ -135,7 +135,7 @@ regression and client result as each row is delivered.
 - Slice 1: delivered through [#424](https://forge.adrianpk.com/adrianpk/chr/pulls/424) at `a2bb0974eac21b1fe33cac78e21f4c1845871e96`.
 - Slice 2: delivered through [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425) at `a5c6a7e068a8e5ec547d13d73d39afe1f0477335`.
 - Slice 3: delivered through [PR #427](https://forge.adrianpk.com/adrianpk/chr/pulls/427) at `a4d0a865e8bb32a3caac65395a28839b573ed369`.
-- Slice 4: active; T4.1-T4.3 implemented; report reviewing, PR and final exact-head validation pending.
+- Slice 4: active; T4.1-T4.3 implemented; [PR #428](https://forge.adrianpk.com/adrianpk/chr/pulls/428) targets `dev`; report reviewing.
 - Slice 5: pending.
 - Mobile/desktop and user-operated journey evidence: pending.
 - Exact final candidate and scheduled nightly: pending.
@@ -176,6 +176,8 @@ The dedicated Slice 4 branch starts from exact canonical `dev`
 receiver failures and the existing notification sender/repository. The
 [Slice 4 report](../report/slices/telegram-message-presentation/slice-4-status-presentation.md)
 is reviewing. All three tasks are committed and focused normal/race checks passed.
-PR references and final clean-HEAD checks remain pending. Required final commands
-are recorded by Looper after the PR-reference follow-up commit; development
-checks are not presented as final candidate evidence.
+Canonical [PR #428](https://forge.adrianpk.com/adrianpk/chr/pulls/428) targets `dev`.
+The report records the final ordered command list. Looper retains clean-HEAD
+validation after the PR-reference follow-up commit; the PR validation block
+records those successful commands. Development checks above do not replace that
+candidate-bound evidence.

@@ -5,7 +5,7 @@ Delivery set: Telegram Message Presentation
 Plan: [ops/default/plan/telegram-message-presentation.md](../../../plan/telegram-message-presentation.md)
 Tracker: [ops/default/tracker/telegram-message-presentation.md](../../../tracker/telegram-message-presentation.md)
 Branch: `feat/slice-4-telegram-status-presentation`
-PR: pending
+PR: [#428](https://forge.adrianpk.com/adrianpk/chr/pulls/428)
 
 ## Purpose
 
@@ -124,10 +124,19 @@ These local HTTP/SQLite/native fixtures exercise both delivery owners, including
 real lost acknowledgements, revoked input/destinations and local-only outage
 classification. They retain the three-minute package budget.
 
-Required final clean-HEAD checks remain `make verify`, the configured normal
-progress/notification/failure selection, its focused race selection and
-`git diff --check`, recorded through the controller after PR references.
-No final gate or actual Telegram client acceptance is claimed here.
+Final clean-HEAD evidence is recorded through Looper after the PR-reference
+follow-up commit. The canonical PR lists successful commands from that exact
+candidate in this order:
+
+- `make verify`
+- `go test ./internal/core ./internal/app -run '^TestTelegramPresentation(Progress|Notification|Failure)' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^TestTelegramPresentation(Progress|Notification|Failure)' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/app -run '^Test(TelegramWorkDeliveryFailure|TelegramHelp(HTTP|Unauthorized)|TelegramRecovery(Failures|Doctor|PollEpoch)|TelegramPresentationDelivery(HTTP|Revocation)|TelegramOperation(UnicodeParts|PartOrder))' -count=1 -timeout=3m`
+- `git diff --check`
+
+Controller evidence is tied to the clean PR head and this ordered command list;
+the development results above do not replace it. Real client acceptance is
+recorded separately in Slice 5.
 
 ## Risks and Follow-ups
 
