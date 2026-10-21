@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"slices"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -73,18 +72,4 @@ func telegramDecisionAnswerRequest(request core.TelegramOperationRequest, contro
 	}
 
 	return control, core.ErrWorkflowConflict
-}
-
-func telegramControlDecisionText(control WorkflowControlRequest) string {
-	text := ""
-
-	if grant := control.BudgetGrant; grant != nil {
-		text += fmt.Sprintf("\nGrant: %d %s; reason: %s", grant.Amount, grant.Kind, grant.Reason)
-	}
-
-	if answer := control.DecisionAnswer; answer != nil {
-		text += fmt.Sprintf("\nQuestion: %s; revision: %d; hash: %s\nAnswer: %s; choice: %s\nReason: %s", answer.DecisionID, control.DecisionRevision, control.DecisionHash, answer.Action, answer.Choice, answer.Reason)
-	}
-
-	return text
 }

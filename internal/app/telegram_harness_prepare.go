@@ -129,9 +129,7 @@ func (r telegramReceiver) offerHarnessChange(ctx context.Context, request core.T
 		return r.finishHarnessPreparationFailure(ctx, request, input.Config, core.ErrWorkflowConflict)
 	}
 
-	_, err = r.store.OfferTelegramAction(ctx, core.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"confirm", "cancel"}, Text: prepared.Preview, ExpiresAt: prepared.ExpiresAt}, time.Now())
-
-	return err
+	return r.offerConfirmationDocument(ctx, request, core.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"confirm", "cancel"}, ExpiresAt: prepared.ExpiresAt}, "39", prepared.Preview, "Only new operations use these defaults. Admitted work keeps its original binding.")
 }
 
 func (r telegramReceiver) finishHarnessPreparationFailure(ctx context.Context, request core.TelegramOperationRequest, config core.TelegramReceiverConfig, failure error) error {

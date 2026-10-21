@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -113,9 +114,20 @@ func (r telegramReceiver) offerWorkAdmission(ctx context.Context, request core.T
 		return err
 	}
 
-	_, err = r.store.OfferTelegramAction(ctx, core.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"start"}, Text: telegramWorkPreviewText(preview), ExpiresAt: time.Now().Add(24 * time.Hour)}, time.Now())
+	complete, err := r.workConfirmationContents(ctx, request, preview)
+	if errors.Is(err, core.ErrTelegramDocumentUnavailable) {
+		return r.unavailableConfirmationDocument(ctx, request, input.Config)
+	}
 
-	return err
+	if errors.Is(err, core.ErrWorkflowConflict) {
+		return r.finishWorkFailure(ctx, request, "blocked", err, input.Config)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return r.offerConfirmationDocument(ctx, request, core.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"start"}, ExpiresAt: time.Now().Add(24 * time.Hour)}, "31", telegramWorkPreviewText(preview), complete)
 }
 
 func (r telegramReceiver) validateWorkAdmissionAuthority(ctx context.Context, request core.TelegramOperationRequest) error {

@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -159,4 +160,49 @@ func (s service) PreviewWorkflow(ctx context.Context, request core.WorkflowPrevi
 	}
 
 	return store.Preview(ctx, request)
+}
+
+var errWorkflowConfirmationBound = errors.New("complete workflow confirmation exceeds source bounds")
+
+func (s service) workflowConfirmationRecords(ctx context.Context, preview WorkflowBoundPreview) ([]core.WorkflowRecord, error) {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	selection := preview.View.Preview
+	if selection.Total != len(selection.Members) || len(selection.Members) > core.WorkflowPageLimit {
+		return nil, errWorkflowConfirmationBound
+	}
+
+	store, err := s.workflowStore()
+	if err != nil {
+		return nil, err
+	}
+
+	var records []core.WorkflowRecord
+
+	size := 0
+
+	for _, member := range selection.Members {
+		record, err := store.Read(ctx, member.Path)
+		if err != nil {
+			return nil, err
+		}
+
+		if !s.workflowConfirmationRecordMatches(record, member) {
+			return nil, core.ErrWorkflowConflict
+		}
+
+		size += len(record.Body) + len(record.Domain["execution_contract"])
+		if size > core.WorkflowFileLimit {
+			return nil, errWorkflowConfirmationBound
+		}
+
+		records = append(records, record)
+	}
+
+	return records, nil
+}
+
+func (s service) workflowConfirmationRecordMatches(record core.WorkflowRecord, member core.WorkflowPreviewMember) bool {
+	return record.Task != nil && record.ProjectID == s.projectContext.ProjectID && record.Namespace == s.workflowNamespace && record.Task.Key == member.Key && record.Revision == member.Revision && record.SourceHash == member.SourceHash && record.Task.ContractHash == member.ContractHash
 }

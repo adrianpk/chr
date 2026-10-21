@@ -62,7 +62,7 @@ func retainedTelegramActionClaim(ctx context.Context, tx *sql.Tx, claim Telegram
 		return claim, err
 	}
 
-	if action.AnswerRequestID != claim.Answer.ID || request.ID != claim.Request.ID || request.ArgumentDigest != claim.Request.ArgumentDigest || action.GuardDigest != telegramActionGuard(request) {
+	if action.AnswerRequestID != claim.Answer.ID || request.ID != claim.Request.ID || request.ArgumentDigest != claim.Request.ArgumentDigest || !telegramActionDigestMatches(action, request) {
 		return claim, errTelegramReceiverConflict
 	}
 

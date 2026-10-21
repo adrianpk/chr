@@ -115,9 +115,8 @@ func (r telegramReceiver) offerControl(ctx context.Context, request core.Telegra
 	}
 
 	text := telegramControlPreviewText(preview)
-	_, err = r.store.OfferTelegramAction(ctx, core.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{preview.Request.Action}, Text: text, ExpiresAt: time.Now().Add(24 * time.Hour)}, time.Now())
 
-	return err
+	return r.offerConfirmationDocument(ctx, request, core.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{preview.Request.Action}, ExpiresAt: time.Now().Add(24 * time.Hour)}, "35", text, "The complete retained control, decision options, grant and candidate binding follow.")
 }
 
 func (r telegramReceiver) finishControlPreparation(ctx context.Context, request core.TelegramOperationRequest, config core.TelegramReceiverConfig) error {

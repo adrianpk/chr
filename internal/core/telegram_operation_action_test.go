@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func telegramOperationActionFixture(t *testing.T) (*telegramConversationFixture, TelegramActionOffer, TelegramAction) {
+func telegramOperationActionFixture(t *testing.T, options ...func(TelegramOperationRequest, *TelegramActionOffer)) (*telegramConversationFixture, TelegramActionOffer, TelegramAction) {
 	t.Helper()
 
 	f := newTelegramConversationFixture(t)
@@ -32,6 +32,10 @@ func telegramOperationActionFixture(t *testing.T) (*telegramConversationFixture,
 	}
 
 	offer := TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"confirm", "cancel"}, Text: "Apply the observed record?", ExpiresAt: time.Now().Add(time.Hour)}
+
+	for _, option := range options {
+		option(request, &offer)
+	}
 
 	action, err := f.store.OfferTelegramAction(t.Context(), offer, time.Now())
 	if err != nil {

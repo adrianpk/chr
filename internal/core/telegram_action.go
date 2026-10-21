@@ -19,6 +19,8 @@ type TelegramAction struct {
 	Peer                 TelegramPeerIdentity
 	ConversationRevision int64
 	GuardDigest          string
+	GuardVersion         int
+	PresentationHash     string
 	Choices              []string
 	State                string
 	ExpiresAt            time.Time
@@ -27,6 +29,7 @@ type TelegramAction struct {
 
 // TelegramActionOffer contains current authority and one bounded, expiring prompt.
 type TelegramActionOffer struct {
+	Delivery          *TelegramDocumentResponse
 	Input             TelegramConversationInput
 	RequestID         string
 	Choices           []string
@@ -47,7 +50,7 @@ type TelegramActionClaim struct {
 	ReceiptOnly bool
 }
 
-const telegramActionColumns = `token,request_id,bot_id,chat_id,topic_id,user_id,conversation_revision,guard_digest,allowed_choices,state,expires_at,COALESCE(consumed_by_request,'')`
+const telegramActionColumns = `token,request_id,bot_id,chat_id,topic_id,user_id,conversation_revision,guard_digest,allowed_choices,state,expires_at,COALESCE(consumed_by_request,''),guard_version,COALESCE(presentation_hash,'')`
 
 func readTelegramAction(ctx context.Context, reader telegramConversationReader, token string, peer TelegramPeerIdentity) (TelegramAction, error) {
 	var (
@@ -55,7 +58,7 @@ func readTelegramAction(ctx context.Context, reader telegramConversationReader, 
 		choices, expiry string
 	)
 
-	err := reader.QueryRowContext(ctx, `SELECT `+telegramActionColumns+` FROM telegram_actions WHERE token=? AND bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, token, peer.BotID, peer.ChatID, peer.TopicID, peer.UserID).Scan(&action.Token, &action.RequestID, &action.Peer.BotID, &action.Peer.ChatID, &action.Peer.TopicID, &action.Peer.UserID, &action.ConversationRevision, &action.GuardDigest, &choices, &action.State, &expiry, &action.AnswerRequestID)
+	err := reader.QueryRowContext(ctx, `SELECT `+telegramActionColumns+` FROM telegram_actions WHERE token=? AND bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, token, peer.BotID, peer.ChatID, peer.TopicID, peer.UserID).Scan(&action.Token, &action.RequestID, &action.Peer.BotID, &action.Peer.ChatID, &action.Peer.TopicID, &action.Peer.UserID, &action.ConversationRevision, &action.GuardDigest, &choices, &action.State, &expiry, &action.AnswerRequestID, &action.GuardVersion, &action.PresentationHash)
 	if err != nil {
 		return action, err
 	}
@@ -66,6 +69,10 @@ func readTelegramAction(ctx context.Context, reader telegramConversationReader, 
 
 	action.ExpiresAt, err = parseProjectTime(expiry)
 
+	if err == nil && action.GuardVersion != 0 && action.GuardVersion != 1 {
+		return action, ErrTelegramActionUnavailable
+	}
+
 	return action, err
 }
 
@@ -74,7 +81,7 @@ func telegramActionGuard(request TelegramOperationRequest) string {
 }
 
 func validateTelegramActionOffer(offer TelegramActionOffer, now time.Time) error {
-	if len(offer.Text) == 0 || len(offer.Text) > 16384 || !offer.ExpiresAt.After(now) || offer.ExpiresAt.After(now.Add(24*time.Hour)) {
+	if !telegramActionOfferHasView(offer) || len(offer.Text) > 16384 || !offer.ExpiresAt.After(now) || offer.ExpiresAt.After(now.Add(24*time.Hour)) {
 		return errTelegramReceiverConflict
 	}
 
@@ -138,11 +145,15 @@ func validateTelegramActionTarget(op telegramConversationTransaction, request Te
 }
 
 func telegramActionUnavailable(err error) bool {
-	return errors.Is(err, sql.ErrNoRows) || errors.Is(err, ErrWorkflowConflict)
+	return errors.Is(err, sql.ErrNoRows) || errors.Is(err, ErrWorkflowConflict) || errors.Is(err, ErrTelegramActionUnavailable)
 }
 
 func telegramActionTargetConflict(err error) bool {
 	var diagnostic telegramConversationDiagnostic
 
 	return errors.Is(err, ErrWorkflowConflict) || errors.As(err, &diagnostic)
+}
+
+func telegramActionOfferHasView(offer TelegramActionOffer) bool {
+	return offer.Text != "" || offer.Delivery != nil
 }

@@ -223,8 +223,16 @@ func guardTelegramActionClaim(op telegramConversationTransaction, claim *Telegra
 		return "expired", nil
 	}
 
-	if claim.Action.GuardDigest != telegramActionGuard(claim.Request) || claim.Action.ConversationRevision != claim.Request.Target.ConversationRevision {
+	if !telegramActionDigestMatches(claim.Action, claim.Request) || claim.Action.ConversationRevision != claim.Request.Target.ConversationRevision {
 		return "superseded", nil
+	}
+
+	if err := validateTelegramActionPresentation(op.ctx, op.tx, claim.Action, claim.Request, op.input.Config.Digest()); err != nil {
+		if telegramActionUnavailable(err) {
+			return "superseded", nil
+		}
+
+		return "", err
 	}
 
 	if err := validateTelegramActionTarget(op, claim.Request); err != nil {

@@ -33,7 +33,7 @@ func (r telegramReceiver) sendDocumentDelivery(ctx context.Context, delivery cor
 		return r.failedDelivery(ctx, delivery, &core.TelegramAPIError{Code: "document_unavailable_or_revoked", Permanent: true})
 	}
 
-	acknowledgement, err := r.api.SendDocument(ctx, r.token, delivery.Peer, document, text, telegramDeliveryEntities(delivery, text), delivery.ActionToken, delivery.ActionChoices)
+	acknowledgement, err := r.api.SendDocument(ctx, r.token, delivery.Peer, document, text, telegramDeliveryEntities(delivery, text), delivery.ActionToken, delivery.ActionChoices, delivery.Presentation.ActionLabels)
 	if err != nil {
 		if ctx.Err() != nil {
 			return ctx.Err()

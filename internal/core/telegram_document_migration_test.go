@@ -11,6 +11,7 @@ import (
 func TestTelegramPresentationMigrationDocuments(t *testing.T) {
 	env := telegramReceiverTestEnv(t)
 	assets := telegramRecoveryMigrationAssets(t)
+	delete(assets, "assets/migration/sqlite/20261021000027-add_telegram_action_presentation.sql")
 	delete(assets, "assets/migration/sqlite/20261021000026-add_telegram_document_snapshots.sql")
 
 	store, err := NewTelegramReceiverStore(t.Context(), env, assets)

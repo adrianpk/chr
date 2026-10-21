@@ -20,7 +20,7 @@ type TelegramDocumentAcknowledgement struct {
 
 // SendDocument uploads frozen bytes and a bounded caption through the same
 // receiver HTTP boundary. The outbox alone owns fallback and attempt allowance.
-func (a TelegramReceiverAPI) SendDocument(ctx context.Context, token string, peer TelegramPeerIdentity, document TelegramDocument, caption string, entities []TelegramTextEntity, actionToken string, choices []string) (TelegramDocumentAcknowledgement, error) {
+func (a TelegramReceiverAPI) SendDocument(ctx context.Context, token string, peer TelegramPeerIdentity, document TelegramDocument, caption string, entities []TelegramTextEntity, actionToken string, choices []string, labels ...[]string) (TelegramDocumentAcknowledgement, error) {
 	var acknowledgement TelegramDocumentAcknowledgement
 	if err := validateTelegramDocument(document); err != nil {
 		return acknowledgement, err
@@ -30,7 +30,7 @@ func (a TelegramReceiverAPI) SendDocument(ctx context.Context, token string, pee
 		return acknowledgement, errors.New("invalid telegram document caption")
 	}
 
-	keyboard, err := telegramActionKeyboard(actionToken, choices)
+	keyboard, err := telegramActionKeyboard(actionToken, choices, labels...)
 	if err != nil {
 		return acknowledgement, err
 	}

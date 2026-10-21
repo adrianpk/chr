@@ -101,6 +101,10 @@ func (r telegramReceiver) deliver(ctx context.Context, delivery core.TelegramRec
 }
 
 func (r telegramReceiver) sendReservedDelivery(ctx context.Context, delivery core.TelegramReceiverDelivery) error {
+	if err := r.store.ValidateTelegramActionDelivery(ctx, delivery); err != nil {
+		return r.failedDelivery(ctx, delivery, &core.TelegramAPIError{Code: "action_presentation_unavailable", Permanent: true})
+	}
+
 	text := delivery.Text
 	if delivery.PlainFallback {
 		text = delivery.PlainText
@@ -130,11 +134,15 @@ func (r telegramReceiver) sendDeliveryBody(ctx context.Context, delivery core.Te
 	if delivery.Presentation != nil && !delivery.PlainFallback {
 		entities := telegramDeliveryEntities(delivery, text)
 
-		return r.api.SendPresentation(ctx, r.token, delivery.Peer, text, entities)
+		return r.api.SendActionPresentation(ctx, r.token, delivery.Peer, text, entities, delivery.ActionToken, delivery.ActionChoices, delivery.Presentation.ActionLabels)
 	}
 
 	if delivery.ParseMode == "Markdown" && !delivery.PlainFallback {
 		return r.api.SendMarkdown(ctx, r.token, delivery.Peer, text)
+	}
+
+	if delivery.Presentation != nil {
+		return r.api.SendActionPresentation(ctx, r.token, delivery.Peer, text, nil, delivery.ActionToken, delivery.ActionChoices, delivery.Presentation.ActionLabels)
 	}
 
 	return r.api.SendAction(ctx, r.token, delivery.Peer, text, delivery.ActionToken, delivery.ActionChoices)

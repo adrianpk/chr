@@ -29,6 +29,10 @@ type TelegramPresentation struct {
 	Version          int    `json:"version"`
 	TemplateRevision string `json:"template_revision"`
 	TelegramMessageBlocks
+	ActionRef     string               `json:"action_ref,omitempty"`
+	ScopeDigest   string               `json:"scope_digest,omitempty"`
+	ActionChoices []string             `json:"action_choices,omitempty"`
+	ActionLabels  []string             `json:"action_labels,omitempty"`
 	DocumentID    string               `json:"document_id,omitempty"`
 	DocumentHash  string               `json:"document_hash,omitempty"`
 	PlainFallback string               `json:"plain_fallback"`

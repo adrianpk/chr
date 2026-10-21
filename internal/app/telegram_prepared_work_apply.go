@@ -115,9 +115,12 @@ func (r telegramReceiver) offerPreparedWorkScope(ctx context.Context, request co
 		return err
 	}
 
-	_, err = r.store.OfferTelegramAction(ctx, core.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"develop"}, Text: telegramPreparedWorkPreview(prepared) + "\nAuthorize development of this exact scope?", ExpiresAt: time.Now().Add(time.Hour), ConversationPhase: "awaiting_confirmation"}, time.Now())
+	complete := ""
+	if prepared.Mutation.Native != nil {
+		complete = "## Complete proposed ticket\n\n" + string(prepared.Mutation.Native.Record.Body)
+	}
 
-	return err
+	return r.offerConfirmationDocument(ctx, request, core.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"develop"}, ExpiresAt: time.Now().Add(time.Hour), ConversationPhase: "awaiting_confirmation"}, "25", telegramPreparedWorkPreview(prepared), complete)
 }
 
 func telegramPreparedWorkFinished(state string) bool {

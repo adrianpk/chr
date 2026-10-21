@@ -70,22 +70,29 @@ func telegramRetainedWorkPreview(request core.TelegramOperationRequest) (Workflo
 
 func telegramWorkPreviewText(preview WorkflowBoundPreview) string {
 	var text strings.Builder
+
 	selection, policy, execution := preview.View.Preview, preview.View.Policy, preview.View.ExecutionPolicy
 	fmt.Fprintf(&text, "Start %s %s?\n\nSelected tickets: %d. Publication: %s (%s).\n", strings.ReplaceAll(selection.Selector.Extent, "_", " "), selection.Selector.Identity, selection.Total, policy.Mode, policy.Method)
 	fmt.Fprintf(&text, "Limits: %d worker attempts; %ds per worker; %ds validation (zero uses each ticket contract). Include later tickets: %t.\n", execution.MaxWorkerAttempts, execution.WorkerTimeoutSeconds, execution.ValidationTimeoutSeconds, execution.IncludeLaterTickets)
+
 	for _, member := range selection.Members[:min(8, len(selection.Members))] {
 		fmt.Fprintf(&text, "- %s · %s\n", member.Key, member.Readiness)
 	}
+
 	if selection.Total > len(selection.Members) || len(selection.Members) > 8 {
 		text.WriteString("This is a shortened selection view. Review the complete scope before confirming.\n")
 	}
+
 	if ticket := preview.ReadyTicket; ticket != nil {
 		fmt.Fprintf(&text, "Confirmation also makes ticket %s ready. Its validation commands:\n", ticket.Key)
+
 		for _, argv := range ticket.Validation.Commands {
 			fmt.Fprintf(&text, "%q\n", argv)
 		}
 	}
+
 	text.WriteString("Confirming admits this exact selection under the displayed policy.")
+
 	return text.String()
 }
 

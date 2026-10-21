@@ -86,6 +86,10 @@ func retainTelegramAction(op telegramConversationTransaction, request TelegramOp
 		return TelegramAction{}, err
 	}
 
+	if err := sealTelegramOfferedAction(op, request, offer, token); err != nil {
+		return TelegramAction{}, err
+	}
+
 	return readTelegramAction(op.ctx, op.tx, token, p)
 }
 
@@ -100,7 +104,7 @@ func queueTelegramActionPrompt(op telegramConversationTransaction, request Teleg
 	}
 
 	text := offer.Text + "\nRequest: " + request.ID + "\nReply with " + strings.Join(offer.Choices, ", ") + " or use /answer " + token + " <choice>."
-	if err := queueTelegramReferencedResponse(op.ctx, op.tx, request.Source, text, request.ID, offer.Input.Config.Digest(), op.now); err != nil {
+	if err := queueTelegramActionView(op, request, offer, token, text); err != nil {
 		return err
 	}
 
@@ -115,7 +119,7 @@ func queueTelegramActionPrompt(op telegramConversationTransaction, request Teleg
 
 func replayTelegramAction(op telegramConversationTransaction, token string, request TelegramOperationRequest, choices []string) (TelegramAction, error) {
 	action, err := readTelegramAction(op.ctx, op.tx, token, request.Source.Peer)
-	if err == nil && (action.GuardDigest != telegramActionGuard(request) || !slices.Equal(action.Choices, choices)) {
+	if err == nil && (!telegramActionDigestMatches(action, request) || !slices.Equal(action.Choices, choices)) {
 		return action, errTelegramReceiverConflict
 	}
 

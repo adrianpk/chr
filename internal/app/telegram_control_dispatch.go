@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -132,6 +133,20 @@ func (r telegramReceiver) respondNativeStatus(ctx context.Context, operations te
 	text := telegramWorkProgressText(status)
 	if status.ID != id || status.ProjectID != target.ProjectID || status.Namespace != target.Namespace {
 		return core.ErrWorkflowConflict
+	}
+
+	if status.Integration != nil && status.Integration.Decision != nil && len(status.Integration.Decision.Requests) > 0 {
+		response, err := telegramQuestionDocument(target, status)
+		if err != nil {
+			return err
+		}
+
+		err = r.store.QueueDocumentResponse(ctx, input.Update, response, input.Config.Digest(), time.Now())
+		if errors.Is(err, core.ErrTelegramDocumentUnavailable) {
+			return r.recordDiagnostic(ctx, input.Update, input.Config, "The complete questions export could not be attached under the document or storage limits. Inspect canonical work status locally before answering.")
+		}
+
+		return err
 	}
 
 	return r.store.QueueReferencedResponse(ctx, input.Update, text, fmt.Sprintf("workflow:%s revision:%d", id, status.Revision), input.Config.Digest(), time.Now())

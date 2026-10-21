@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 
 	"forge.adrianpk.com/chr/internal/core"
 )
@@ -57,4 +58,22 @@ func (s service) StartTelegramWork(ctx context.Context, target core.TelegramOper
 	binding.ReadyTicket = preview.ReadyTicket
 
 	return scoped.StartBoundWorkExtent(ctx, preview.Request, preview.Selected, 0, binding)
+}
+
+// ReadTelegramWorkConfirmation reads the exact selected source and contract images
+// through the existing scoped workflow owner, without changing readiness.
+func (s service) ReadTelegramWorkConfirmation(ctx context.Context, target core.TelegramOperationTarget, preview WorkflowBoundPreview) ([]core.WorkflowRecord, error) {
+	scoped, err := s.telegramBoundProjectService(ctx, target)
+	if err != nil {
+		return nil, err
+	}
+
+	scoped.workflowNamespace = target.Namespace
+
+	records, err := scoped.workflowConfirmationRecords(ctx, preview)
+	if errors.Is(err, errWorkflowConfirmationBound) {
+		return nil, core.ErrTelegramDocumentUnavailable
+	}
+
+	return records, err
 }

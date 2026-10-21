@@ -36,7 +36,7 @@ func telegramAuthoringPreparedOffer(t *testing.T, f *telegramConversationAppFixt
 	request := telegramAuthoringPreparedLatest(t, f, id)
 
 	action, err := f.receiver.store.TelegramRequestAction(t.Context(), request)
-	if err != nil || request.State != "awaiting_confirmation" || f.session(t, id).Phase != "awaiting_confirmation" || !strings.Contains(prompt.Text, "Original request:") {
+	if err != nil || request.State != "awaiting_confirmation" || f.session(t, id).Phase != "awaiting_confirmation" || !strings.Contains(prompt.Text, "complete scope attached") {
 		t.Fatal("scope decision was not retained", prompt, request, err)
 	}
 

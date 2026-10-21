@@ -3,7 +3,10 @@ package app
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"maps"
+	"mime"
+	"mime/multipart"
 	"net/http"
 	"strings"
 	"sync"
@@ -40,13 +43,19 @@ func (c *telegramHoldControlAck) Do(request *http.Request) (*http.Response, erro
 }
 
 func telegramControlPromptRequest(request *http.Request) (bool, error) {
-	if !strings.HasSuffix(request.URL.Path, "/sendMessage") || request.GetBody == nil {
+	if (!strings.HasSuffix(request.URL.Path, "/sendMessage") && !strings.HasSuffix(request.URL.Path, "/sendDocument")) || request.GetBody == nil {
 		return false, nil
 	}
 
 	body, err := request.GetBody()
 	if err != nil {
 		return false, err
+	}
+
+	if strings.HasSuffix(request.URL.Path, "/sendDocument") {
+		caption, err := telegramControlMultipartCaption(body, request.Header.Get("Content-Type"))
+
+		return strings.Contains(caption, "Current state:"), errors.Join(err, body.Close())
 	}
 
 	var data struct {
@@ -179,5 +188,26 @@ func TestTelegramControlAuthoringLane(t *testing.T) {
 
 	if calls.Load() != 1 {
 		t.Fatal("ordinary reply did not generate exactly once", calls.Load())
+	}
+}
+
+func telegramControlMultipartCaption(body io.Reader, contentType string) (string, error) {
+	_, parameters, err := mime.ParseMediaType(contentType)
+	if err != nil {
+		return "", err
+	}
+
+	reader := multipart.NewReader(body, parameters["boundary"])
+	for {
+		part, err := reader.NextPart()
+		if err != nil {
+			return "", err
+		}
+
+		if part.FormName() == "caption" {
+			data, err := io.ReadAll(io.LimitReader(part, 4096))
+
+			return string(data), err
+		}
 	}
 }

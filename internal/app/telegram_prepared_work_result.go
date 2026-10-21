@@ -12,16 +12,15 @@ import (
 
 func telegramPreparedWorkPreview(prepared PreparedAuthoringWork) string {
 	scope := prepared.Scope
+
 	title, body := "the retained request", ""
 	if prepared.Mutation.Native != nil {
 		body = string(prepared.Mutation.Native.Record.Body)
-		if value := prepared.Mutation.Native.Record.Metadata["title"]; len(value) > 0 {
-			if err := json.Unmarshal(value, &title); err != nil {
-				title = "the retained request"
-			}
-		}
+		title = telegramPreparedWorkTitle(prepared.Mutation.Native.Record)
 	}
+
 	excerpt := core.TelegramDocumentExcerpt([]byte(body))
+
 	return fmt.Sprintf("Prepare ticket %s in %s?\n\n%s\n\nOriginal request: %s\nConfirming authorizes this exact scope and creates the ticket in the backlog. Execution does not start.", title, scope.ProjectID, excerpt, core.TelegramDocumentExcerpt([]byte(scope.Instruction)))
 }
 
@@ -53,4 +52,13 @@ func (r telegramReceiver) finishPreparedWork(ctx context.Context, request core.T
 	}
 
 	return err
+}
+
+func telegramPreparedWorkTitle(record core.WorkflowRecord) string {
+	var title string
+	if err := json.Unmarshal(record.Metadata["title"], &title); err != nil || title == "" {
+		return "the retained request"
+	}
+
+	return title
 }

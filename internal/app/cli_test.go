@@ -6584,7 +6584,7 @@ func TestMaintenanceDBStatusReportsPendingMigrationsWhenDatabaseIsMissing(t *tes
 		"database_exists: false",
 		"schema_migrations_exists: false",
 		"applied: 0",
-		"pending: 26",
+		"pending: 27",
 		"unknown: 0",
 		"pending_migration: 20260518000001 create_projects",
 		"pending_migration: 20260601000009 add_ticket_review_metadata",
@@ -6604,6 +6604,7 @@ func TestMaintenanceDBStatusReportsPendingMigrationsWhenDatabaseIsMissing(t *tes
 		"pending_migration: 20261017000024 add_telegram_help_format",
 		"pending_migration: 20261021000025 add_telegram_text_presentation",
 		"pending_migration: 20261021000026 add_telegram_document_snapshots",
+		"pending_migration: 20261021000027 add_telegram_action_presentation",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
@@ -6642,8 +6643,8 @@ func TestMaintenanceDBStatusReportsAppliedMigrations(t *testing.T) {
 	for _, want := range []string{
 		"database_exists: true",
 		"schema_migrations_exists: true",
-		"available: 26",
-		"applied: 26",
+		"available: 27",
+		"applied: 27",
 		"pending: 0",
 		"unknown: 0",
 		"applied_migration: 20260518000001 create_projects",
@@ -6664,6 +6665,7 @@ func TestMaintenanceDBStatusReportsAppliedMigrations(t *testing.T) {
 		"applied_migration: 20261017000024 add_telegram_help_format",
 		"applied_migration: 20261021000025 add_telegram_text_presentation",
 		"applied_migration: 20261021000026 add_telegram_document_snapshots",
+		"applied_migration: 20261021000027 add_telegram_action_presentation",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
