@@ -170,9 +170,8 @@ HTTP/SQLite fixtures. Strict package lint passed. Looper evidence
 normal and race sequence remains to be recorded after the canonical
 PR-reference follow-up.
 
-The local candidate is based on canonical `dev` at
-`83802941df1c46bc34ab53201d56811a0e353156`. The published Slice 3 branch
-still contains the earlier closure/blocker commit. Its guarded replacement
-awaits explicit approval under the repository's published-history rule. The
-candidate is retained in its dedicated worktree; no merge or force push is
-claimed.
+The candidate is based on canonical `dev` at
+`83802941df1c46bc34ab53201d56811a0e353156`. The earlier published closure/blocker
+commit is retained through history reconciliation. Current implementation and
+validation evidence are preserved. Ordinary branch publication, canonical PR
+references and final exact-head checks remain before integration.

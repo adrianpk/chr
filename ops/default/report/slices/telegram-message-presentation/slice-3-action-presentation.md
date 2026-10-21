@@ -104,10 +104,11 @@ claimed here.
 
 ## Risks and Follow-ups
 
-The published branch still contains its earlier documentation-only blocker
-commit. Replacement by this candidate awaits explicit guarded-rewrite approval;
-the existing commit remains preserved. This report and candidate stay in the
-dedicated worktree until that publication is authorized.
+History reconciliation retains the earlier published closure/blocker commit
+as an ancestor of the current candidate. Conflict resolution keeps the current
+Slice 2 delivery evidence, active Slice 3 implementation and resolved admission
+prerequisite. Runtime files are unchanged. Publication can use an ordinary
+fast-forward push; final PR-head validation remains required.
 
 Selections whose complete source/contract view exceeds the retained bounds
 require a smaller selection or local inspection before a new confirmation.

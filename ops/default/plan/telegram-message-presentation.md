@@ -205,6 +205,6 @@ is ops/default/report/telegram-message-presentation-cycle.md. It is not
 pre-created as successful evidence.
 
 The specification/model are accepted, the plan/tracker are approved and
-Slice 1 is delivered through PR #424 and Slice 2 is active. Execution starts only from the committed and pushed package.
+Slices 1 and 2 are delivered through PRs #424 and #425. Slice 3 is active after canonical repair PR #426 integration.
 Record real implementation and acceptance results as they become available;
 approval does not establish delivery or client evidence.
