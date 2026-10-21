@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"time"
@@ -31,21 +32,60 @@ func (s *TelegramReceiverStore) ProjectTelegramWork(ctx context.Context, ref Tel
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		target := ref.Request.Target
-		key := fmt.Sprintf("work:%s:%d", target.ConversationID, observation.Revision)
-
-		changed, err := tx.ExecContext(ctx, `UPDATE telegram_conversations SET last_observed_revision=?,phase=?,updated_at=? WHERE id=? AND revision=? AND invocation_id=? AND authorization_ref=? AND phase IN ('executing','waiting') AND COALESCE(last_observed_revision,0)<=? AND NOT EXISTS(SELECT 1 FROM telegram_outbox WHERE conversation_id=? AND event_key=?)`, observation.Revision, observation.Phase, formatProjectTime(now), target.ConversationID, ref.ConversationRevision, ref.Invocation.ID, ref.Request.ID, observation.Revision, target.ConversationID, key)
-		if err != nil {
-			return err
-		}
-
-		count, err := changed.RowsAffected()
-		if err != nil || count == 0 {
-			return err
-		}
-
-		return queueTelegramWorkObservation(ctx, tx, ref, observation, configDigest, now)
+		return projectTelegramWork(ctx, tx, ref, observation, configDigest, now)
 	})
+}
+
+func projectTelegramWork(ctx context.Context, tx *sql.Tx, ref TelegramWorkReference, observation TelegramWorkObservation, configDigest string, now time.Time) error {
+	target := ref.Request.Target
+	key := fmt.Sprintf("work:%s:%d", target.ConversationID, observation.Revision)
+
+	unchanged, err := sameTelegramWorkNotice(ctx, tx, ref, observation)
+	if err != nil {
+		return err
+	}
+
+	changed, err := tx.ExecContext(ctx, `UPDATE telegram_conversations SET last_observed_revision=?,phase=?,updated_at=? WHERE id=? AND revision=? AND invocation_id=? AND authorization_ref=? AND phase IN ('executing','waiting') AND COALESCE(last_observed_revision,0)<=? AND NOT EXISTS(SELECT 1 FROM telegram_outbox WHERE conversation_id=? AND event_key=?)`, observation.Revision, observation.Phase, formatProjectTime(now), target.ConversationID, ref.ConversationRevision, ref.Invocation.ID, ref.Request.ID, observation.Revision, target.ConversationID, key)
+	if err != nil {
+		return err
+	}
+
+	count, err := changed.RowsAffected()
+	if err != nil || count == 0 || unchanged {
+		return err
+	}
+
+	return queueTelegramWorkObservation(ctx, tx, ref, observation, configDigest, now)
+}
+
+func sameTelegramWorkNotice(ctx context.Context, tx *sql.Tx, ref TelegramWorkReference, observation TelegramWorkObservation) (bool, error) {
+	if observation.Kind == "result" {
+		return false, nil
+	}
+
+	var kind, text, presentationHash, phase string
+
+	err := tx.QueryRowContext(ctx, `SELECT o.kind,o.text,COALESCE(o.presentation_hash,''),c.phase FROM telegram_outbox o JOIN telegram_conversations c ON c.id=o.conversation_id WHERE o.conversation_id=? AND o.request_id=? AND o.event_key LIKE 'work:%' ORDER BY o.rowid DESC LIMIT 1`, ref.Request.Target.ConversationID, ref.Request.ID).Scan(&kind, &text, &presentationHash, &phase)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+
+	if err != nil {
+		return false, err
+	}
+
+	hash := ""
+
+	if observation.Message != nil {
+		image, err := json.Marshal(RenderTelegramMessage(*observation.Message))
+		if err != nil {
+			return false, err
+		}
+
+		hash = workflowHash(image)
+	}
+
+	return kind == observation.Kind && phase == observation.Phase && text == observation.Text && presentationHash == hash, nil
 }
 
 func validTelegramWorkObservation(observation TelegramWorkObservation) bool {

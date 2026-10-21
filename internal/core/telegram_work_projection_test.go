@@ -135,6 +135,66 @@ func telegramWorkNoticeCount(t *testing.T, f *telegramConversationFixture, query
 	return count
 }
 
+// A bookkeeping revision cannot resend unchanged progress, including after
+// reopening SQLite. The observed revision still advances and real changes notify.
+func TestTelegramWorkProjectionUnchanged(t *testing.T) {
+	f := newTelegramConversationFixture(t)
+	ref := telegramWorkReferenceFixture(t, f, "run-unchanged")
+	now := time.Date(2030, 1, 1, 0, 0, 0, 0, time.UTC)
+	telegramWorkDeliverInitial(t, f, now)
+
+	message := TelegramMessageBlocks{Family: "33", InitialText: "Waiting for review"}
+
+	observation := TelegramWorkObservation{Revision: 1, Phase: "waiting", Kind: "progress", Text: RenderTelegramMessage(message).PlainFallback, Message: &message}
+	if err := f.store.ProjectTelegramWork(t.Context(), ref, observation, f.input.Config.Digest(), now); err != nil {
+		t.Fatal(err)
+	}
+
+	first := telegramWorkDueNotice(t, f, now, observation.Text)
+	telegramWorkDeliverNotice(t, f, first.ID, now)
+
+	if err := f.store.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	f.store = openTelegramReceiverTestStore(t, f.env)
+
+	observation.Revision = 2
+	if err := f.store.ProjectTelegramWork(t.Context(), ref, observation, f.input.Config.Digest(), now.Add(time.Minute)); err != nil {
+		t.Fatal(err)
+	}
+
+	if count := telegramWorkNoticeCount(t, f, `SELECT COUNT(*) FROM telegram_outbox WHERE conversation_id=? AND kind='progress'`, ref.Request.Target.ConversationID); count != 1 {
+		t.Fatal("unchanged progress was repeated", count)
+	}
+
+	refs, err := f.store.TelegramWorkReferences(t.Context(), 12345, "", 16)
+	if err != nil || len(refs) != 1 || refs[0].Invocation.Revision != 2 {
+		t.Fatal("suppression lost the latest native revision", refs, err)
+	}
+
+	message.InitialText = "Integration confirmed"
+
+	observation.Revision, observation.Text = 3, RenderTelegramMessage(message).PlainFallback
+	if err := f.store.ProjectTelegramWork(t.Context(), ref, observation, f.input.Config.Digest(), now.Add(2*time.Minute)); err != nil {
+		t.Fatal(err)
+	}
+
+	telegramWorkDueNotice(t, f, now.Add(2*time.Minute), observation.Text)
+}
+
+func telegramWorkDeliverNotice(t *testing.T, f *telegramConversationFixture, id string, now time.Time) {
+	t.Helper()
+
+	if err := f.store.ReserveDelivery(t.Context(), id, now); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := f.store.DeliverySent(t.Context(), id, 21001, now); err != nil {
+		t.Fatal(err)
+	}
+}
+
 // TestTelegramWorkProjectionFull proves terminal projection rolls back when its
 // outbox reservation cannot fit, so reopen can observe and reserve it again.
 func TestTelegramWorkProjectionFull(t *testing.T) {
