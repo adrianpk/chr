@@ -36,8 +36,9 @@ repair distinguishes document-read intent from explanation, reads the selected
 canonical dump/spec/plan without generation, and freezes its full original
 bytes for delivery. Missing documents and changed sources remain failures.
 The desktop retry subsequently delivered all 937 bytes of the original
-specification. Mobile/desktop coverage and user-operated native completion
-remain pending.
+specification. The real user-started native journey subsequently completed with
+a verified delivery receipt and the ticket marked done. Its operator-assisted
+recovery and remaining mobile/desktop coverage are recorded below.
 T5.3 product guidance is prepared: the existing User Guide, Telegram transport
 and notification references describe the actual help groups, attachment bounds,
 complete confirmation scope, retry behavior and native evidence. Unreleased
@@ -192,11 +193,34 @@ canonical receipt finalization. Explicit submission reconciliation also uses
 the native owner, allowing observation after the retained polling deadline
 without another publication or a deadline/budget reset.
 
+Clean candidate `8d5d13a0215dbbd7d5ecd9a6d138e9f8ff412c67` passed:
+
+- `make verify` — zero lint issues; short Go tests, eight CI helper tests and build passed.
+- `go test ./internal/core ./internal/app -run '^Test(NativeHostPublication|ServiceNativeProvider)$' -count=1 -timeout=3m` — core/app passed in 26.815/18.944 seconds.
+- `go test -race ./internal/core ./internal/app -run '^Test(NativeHostPublication|ServiceNativeProvider)$' -count=1 -timeout=3m` — core/app passed in 30.673/24.211 seconds.
+- `git diff --check` — passed.
+
+That exact clean executable is active in the retained QA receiver. The genuine
+user-started request reached `completed` / `ticket_integrated`: one validated
+task, one confirmed ticket, zero remaining tickets and a hash-verified native
+delivery receipt. The canonical PR and both remote refs identify the prepared
+result. Its README preserves the entire original content and appends exactly the
+requested paragraph; no other file changed. The terminal notification was
+delivered through the existing receiver.
+
+This was an operator-assisted recovery, not a fresh unattended acceptance run.
+It reused the original worker, retained the failed preparation, retried only
+preparation under the observed revision and reconciled the already-published
+result after the observation deadline. There was one Git publication; original
+limits and the deadline were unchanged. Prior paused/cancelled invocations were
+verified byte-identical. Private client evidence retains the exact run, receipt,
+remote observations, content hashes and activation records.
+
 ## Risks and Follow-ups
 
-Real mobile/desktop client observations and the user-operated journey require
-participation and the fixed validated repair candidate. The original pending
-confirmation and native invocation ownership remain preserved. T5.2 cannot close
-from local fixture evidence. The existing scheduled
-nightly must certify the exact integrated final candidate; keep
+Remaining real mobile/desktop coverage is still open. The delivered standalone
+ticket notification also exposes misleading zero-unit integration wording;
+YAML frontmatter, opaque identifiers and long record paths remain tracked client
+findings. T5.2 cannot close from the recovered native journey alone. The existing
+scheduled nightly must certify the exact integrated final candidate; keep
 `awaiting_nightly` until that evidence exists.
