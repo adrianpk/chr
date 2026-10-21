@@ -69,7 +69,7 @@ func finishTelegramOperation(ctx context.Context, tx *sql.Tx, request TelegramOp
 		return err
 	}
 
-	if err := queueTelegramReferencedResponse(ctx, tx, request.Source, text, request.ID+" "+receipt, configDigest, now); err != nil {
+	if err := queueTelegramOperationResult(ctx, tx, request, text, receipt, configDigest, now); err != nil {
 		return err
 	}
 

@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"encoding/json"
-	"strings"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -143,10 +142,9 @@ func (r telegramReceiver) finishExplanationModel(ctx context.Context, request co
 		return err
 	}
 
-	text := result.Text
-	if len(result.SourceRefs) > 0 {
-		text += "\n\nCanonical sources:\n" + strings.Join(result.SourceRefs, "\n")
-	}
+	response := telegramExplanationDocument(request.Target, request.ID, result, model.Response)
+	request.Delivery = &response
+	text := response.Message.InitialText
 
 	return r.store.FinishTelegramOperation(ctx, request, "confirmed", "telegram-model:"+request.ID, model.Response, text, current.Digest(), time.Now())
 }

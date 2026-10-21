@@ -158,6 +158,7 @@ func checkTelegramDocumentUploads(t *testing.T, uploads <-chan telegramDocumentU
 	for index := range sends {
 		upload := <-uploads
 		checkTelegramDocumentFile(t, upload, want)
+
 		if index == 0 {
 			caption = upload.Fields["caption"]
 
@@ -201,8 +202,8 @@ func TestTelegramPresentationDeliveryRevocation(t *testing.T) {
 
 func checkTelegramDocumentFile(t *testing.T, upload telegramDocumentUpload, want []byte) {
 	t.Helper()
+
 	if upload.Filename != "example.md" || !bytes.Equal(upload.Payload, want) || upload.Fields["chat_id"] != "100001" {
 		t.Fatal("upload changed bytes, filename or destination", upload)
 	}
-
 }
