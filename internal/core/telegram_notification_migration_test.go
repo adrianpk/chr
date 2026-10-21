@@ -70,6 +70,8 @@ func checkTelegramLegacyNotification(t *testing.T, repository NotificationEventR
 func TestTelegramPresentationFailureNotificationMapping(t *testing.T) {
 	for _, mutation := range []struct{ name, query string }{
 		{"future", `UPDATE notification_events SET telegram_presentation=json_set(telegram_presentation,'$.version',999)`},
+		{"missing manifest", `UPDATE notification_events SET telegram_presentation=NULL`},
+		{"partial version zero", `UPDATE notification_events SET telegram_presentation='{"version":0}',telegram_presentation_hash=NULL,telegram_document_id=NULL`},
 		{"corrupt manifest", `UPDATE notification_events SET telegram_presentation='{'`},
 		{"corrupt hash", `UPDATE notification_events SET telegram_presentation_hash=printf('%064d',0)`},
 		{"missing image", `UPDATE telegram_notification_documents SET payload=NULL,purged_at='2030-01-01T00:00:00Z'`},

@@ -201,11 +201,13 @@ func revokeTelegramNotification(t *testing.T, project commandProjectContext, cha
 // Future versions and missing images cannot escape the retained reader into
 // HTTP. Definite local failure is saved without a false transport receipt.
 func TestTelegramPresentationFailureNotificationBeforeIO(t *testing.T) {
-	for _, query := range []string{
-		`UPDATE notification_events SET telegram_presentation=json_set(telegram_presentation,'$.version',999)`,
-		`UPDATE telegram_notification_documents SET payload=NULL,purged_at='2030-01-01T00:00:00Z'`,
+	for _, item := range []struct{ name, query string }{
+		{"future manifest", `UPDATE notification_events SET telegram_presentation=json_set(telegram_presentation,'$.version',999)`},
+		{"missing image", `UPDATE telegram_notification_documents SET payload=NULL,purged_at='2030-01-01T00:00:00Z'`},
+		{"missing manifest", `UPDATE notification_events SET telegram_presentation=NULL`},
+		{"partial version zero", `UPDATE notification_events SET telegram_presentation='{"version":0}',telegram_presentation_hash=NULL,telegram_document_id=NULL`},
 	} {
-		t.Run(strings.Split(query, " ")[1], func(t *testing.T) { checkTelegramNotificationBeforeIO(t, query) })
+		t.Run(item.name, func(t *testing.T) { checkTelegramNotificationBeforeIO(t, item.query) })
 	}
 }
 

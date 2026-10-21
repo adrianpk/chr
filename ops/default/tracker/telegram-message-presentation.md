@@ -124,7 +124,7 @@ regression and client result as each row is delivered.
 | TMP-07 | T3.2, T3.3 | Guard, original-result and exact-scope fixtures verified and integrated |
 | TMP-08 | T2.4, T3.3, T4.3 | Slice 2 integrated; Slice 3 guard/recovery fixtures verified; Slice 4 both-owner recovery fixtures verified |
 | TMP-09 | T2.4, T3.3, T4.3 | Slice 2 integrated; Slice 3 fail-closed scope/quota fixtures verified; Slice 4 shared quota/target/failure fixtures verified |
-| TMP-10 | T2.1, T2.4, T3.3, T4.2 | Receiver/action and physical pre-28 notification migrations verified; NULL/version-zero legacy payload semantics preserved |
+| TMP-10 | T2.1, T2.4, T3.3, T4.2 | Receiver/action and physical pre-28 notification migrations verified; NULL/version-zero legacy payload semantics preserved; partial new mappings refused before IO |
 | TMP-11 | T5.1 | pending |
 | TMP-12 | T5.2, T5.3 | pending |
 

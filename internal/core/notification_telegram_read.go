@@ -46,6 +46,9 @@ func (r *sqliteNotificationEventRepository) ReadTelegramNotification(ctx context
 	}
 
 	if !m.payload.Valid {
+		if !m.isLegacy() {
+			return delivery, true, ErrTelegramDocumentUnavailable
+		}
 		return delivery, false, nil
 	}
 
@@ -77,15 +80,23 @@ func decodeTelegramNotificationManifest(m telegramNotificationManifest, target T
 		return presentation, true, fmt.Errorf("%w: %w", ErrTelegramDocumentUnavailable, err)
 	}
 
-	if presentation.Version == 0 && !m.hash.Valid && !m.document.Valid {
+	if presentation.Version == 0 && m.isLegacy() {
 		return presentation, false, nil
 	}
 
-	if !m.matchesTarget(target) || !m.hash.Valid {
+	if !m.matchesTarget(target) {
 		return presentation, true, ErrTelegramNotificationTargetUnavailable
 	}
 
+	if !m.hash.Valid {
+		return presentation, true, ErrTelegramDocumentUnavailable
+	}
+
 	return presentation, true, validateTelegramNotificationManifest(m, presentation)
+}
+
+func (m telegramNotificationManifest) isLegacy() bool {
+	return !m.hash.Valid && !m.document.Valid && !m.destination.Valid && !m.digest.Valid && !m.namespace.Valid && !m.root.Valid
 }
 
 func (m telegramNotificationManifest) matchesTarget(target TelegramNotificationTarget) bool {

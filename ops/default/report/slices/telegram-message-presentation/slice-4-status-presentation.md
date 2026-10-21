@@ -56,7 +56,9 @@ T4.3 adds fault evidence for both owners:
   uncertain and recent images plus all original hashes/transport receipts.
 - A physical pre-28 notification database retains original events and NULL or
   version-zero payload meaning. Legacy dispatch reads persisted payload and
-  refuses a stale caller's attempt to resend an already delivered event.
+  refuses a stale caller's attempt to resend an already delivered event. Partial
+  new mappings cannot become legacy: missing manifests or version-zero manifests
+  with retained new binding metadata are refused before IO.
 - An unavailable receiver read identifies unchanged state and local diagnostics.
   Notification rejection leaves a successful native ticket-loop result and its
   sole execution intact. Oversized export preparation records a failed audit
@@ -119,6 +121,13 @@ Successful T4.3 development checks:
 
 - `go test ./internal/core ./internal/app -run '^Test(TelegramPresentation(Progress|Notification|Failure)|TelegramWorkDeliveryFailure|TelegramHelp(HTTP|Unauthorized)|TelegramRecovery(Failures|Doctor|PollEpoch)|TelegramPresentationDelivery(HTTP|Revocation)|TelegramOperation(UnicodeParts|PartOrder))' -count=1 -timeout=3m` — core/app passed in 1.586/2.909 seconds.
 - `go test -race ./internal/core ./internal/app -run '^Test(TelegramPresentation(Progress|Notification|Failure)|TelegramWorkDeliveryFailure|TelegramHelp(HTTP|Unauthorized)|TelegramRecovery(Failures|Doctor|PollEpoch)|TelegramPresentationDelivery(HTTP|Revocation)|TelegramOperation(UnicodeParts|PartOrder))' -count=1 -timeout=3m` — core/app passed in 40.639/49.615 seconds.
+
+The retained-row consistency regressions reproduced a legacy fall-through before
+correction: missing/partial manifests reached the legacy sender. The reader now
+requires all new mapping metadata to be NULL for a genuine legacy row. The
+focused post-correction command passed (core/app: 0.581/0.461 seconds):
+
+- `go test ./internal/core ./internal/app -run '^TestTelegramPresentation(NotificationLegacy|NotificationMigration|FailureNotification(Mapping|BeforeIO))' -count=1 -timeout=3m`
 
 These local HTTP/SQLite/native fixtures exercise both delivery owners, including
 real lost acknowledgements, revoked input/destinations and local-only outage
