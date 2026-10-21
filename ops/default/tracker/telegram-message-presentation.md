@@ -223,3 +223,12 @@ T5.2 remains open. The live QA executable is the retained earlier source, not a
 presentation candidate. Its local status is readable; retained waits and an
 unconsumed confirmation must remain intact. The plan's activation boundary and
 actual mobile/desktop observations cannot be replaced by local fixture passes.
+
+The full configured five-command sequence in the Slice 5 report passed on clean,
+pushed candidate `658f39ae34747bd85c6ff2b8b777306da87e0f73`, recorded by Looper
+receipt `5I4WQ32LVGGE7LXENUNTHC3G7T` and Acta validation event
+`01M5FXC5GBT86M8QP7WDEWV65B`. Its matching executable and exact-title canonical
+PR payload are staged. QA activation approval, actual client evidence and the
+user-operated native receipt remain pending; no Slice 5 PR has been submitted.
+The named proof covers that candidate only. Acceptance and PR-reference commits
+require fresh validation before `pr_ready`.

@@ -80,9 +80,29 @@ count assertions remain intact. All passes retain the three-minute package
 budget. Real client observations and final PR-reference clean-HEAD validation
 remain pending.
 
+Looper receipt `5I4WQ32LVGGE7LXENUNTHC3G7T` passed the complete configured
+ordered command list on clean, pushed candidate
+`658f39ae34747bd85c6ff2b8b777306da87e0f73`:
+
+- `make verify`
+- `go test ./internal/core ./internal/app -run '^TestTelegramPresentation(Coverage|Journey)' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/app -run '^TestTelegramPresentation' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^TestTelegramPresentation(Document|Delivery|Migration|Action|Control|Confirmation|Progress|Notification|Failure)' -count=1 -timeout=3m`
+- `git diff --check`
+
+The staged executable records that exact clean source and SHA-256
+`b5c32a29a11593f3e2f1d088c4a89beb39707ce501b6153b592706d6c2466c04`.
+The canonical PR payload is prepared with report-introduction commit
+`8260c0d484521883db7c01f38e44991118e963e1`; it has not been submitted.
+This receipt belongs to the named candidate and cannot certify later report,
+acceptance or PR-reference commits.
+
 ## Risks and Follow-ups
 
 Real mobile/desktop client observations and the user-operated journey require
-participation and a fixed authorized candidate receiver. The existing scheduled
+participation and a fixed authorized candidate receiver. Candidate activation
+approval remains pending under the approved plan; the retained receiver and its
+unconsumed confirmation remain unchanged. T5.2 cannot close from local fixture
+evidence. The existing scheduled
 nightly must certify the exact integrated final candidate; keep
 `awaiting_nightly` until that evidence exists.
