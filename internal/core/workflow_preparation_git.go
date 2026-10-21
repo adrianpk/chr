@@ -44,6 +44,11 @@ func (git OSWorkflowPreparationGit) PrepareWorkflowIntegration(ctx context.Conte
 		return proof, err
 	}
 
+	reader, err = reader.withSourceCredentials(ctx, query.SourceDirectory)
+	if err != nil {
+		return proof, err
+	}
+
 	if err := git.fetchPreparation(ctx, reader, query); err != nil {
 		return proof, err
 	}

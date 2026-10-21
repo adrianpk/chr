@@ -87,6 +87,19 @@ profiles, unsupported methods, missing certification or nonprivate files reject
 the publisher. See [Configure native integration](../how-to/configure-native-integration.md)
 for its format and location.
 
+Preparation and verification preserve the retained source repository's local
+credential-helper settings while fetching into disposable object stores. Those
+settings remain in the child process environment; credentials are resolved by
+the existing host helper and are not written into temporary Git configuration
+or integration evidence.
+
+If preparation fails before its validation input is retained, correct the
+underlying host configuration and explicitly continue the displayed invocation.
+That revision-bound control retries only preparation, retains the failed attempt
+and original worker proof, and consumes the existing bounds. Replaying the same
+control receipt cannot prepare again. Failed validation gates and operator stops
+keep their existing resolution requirements.
+
 | Condition | Required action |
 | --- | --- |
 | `profile_disabled` | Explicitly select the authorized profile. |

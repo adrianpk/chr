@@ -149,6 +149,30 @@ run is retained as failed evidence; the bounded exact-root selection above is
 the focused regression proof. Clean-candidate development checks and activation
 of this provider repair remain separate from these local results.
 
+The clean native-provider candidate
+`0a9f83d954454dbb28276c67d7ea5850b99a239e` passed `make verify`, the bounded
+normal selection and focused race checks. Its activation preserved the original
+worker proof and prior stopped invocations. The real host then admitted native
+integration and exposed an authentication-context defect: its disposable bare
+repository did not inherit the retained project's credential helper.
+
+A real authenticated HTTP Git fixture first reproduced that preparation failure.
+The correction carries only local credential settings into child environments
+for both preparation and verification. A separate control regression exposed
+the raw adapter in request-bound continuation; lifecycle and decision controls
+now use the same native provider. Explicit revision-bound continuation can
+recover an interrupted preparation before its validation input exists, retaining
+the failure and all counters. Unbound calls, stopped runs, accepted validation
+inputs and receipt replay cannot retry that work. The real-provider fixture
+uses a standalone ticket with one worker and one submission allowed.
+
+The bounded credentials/recovery selection passed in core/app in 9.672/5.167
+seconds. The private read-only Git preflight also passed using the receiver's
+own environment and the retained project's helper context, with no SSH agent.
+The existing positive HTTPS rebase certification is selected for that isolated
+host target. Candidate activation and confirmed integration remain pending at
+this checkpoint.
+
 ## Risks and Follow-ups
 
 Real mobile/desktop client observations and the user-operated journey require

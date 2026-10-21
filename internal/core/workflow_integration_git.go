@@ -58,6 +58,12 @@ func (git OSWorkflowIntegrationGit) verifyIntegration(ctx context.Context, query
 	defer func() { err = errors.Join(err, os.RemoveAll(dir)) }()
 
 	reader := workflowIntegrationReader{dir: dir}
+
+	reader, err = reader.withSourceCredentials(ctx, query.SourceDirectory)
+	if err != nil {
+		return proof, err
+	}
+
 	if _, err := reader.output(ctx, "init", "--bare", "--quiet"); err != nil {
 		return proof, err
 	}

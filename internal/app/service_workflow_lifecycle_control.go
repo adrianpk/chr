@@ -46,7 +46,7 @@ func (s service) workflowLifecycleControlPorts(ctx context.Context, store *core.
 		return ports, err
 	}
 
-	provider, err := s.workflowIntegrationProvider()
+	_, provider, err := s.workflowReviewDependencies(request.ID)
 	if err != nil {
 		return ports, err
 	}

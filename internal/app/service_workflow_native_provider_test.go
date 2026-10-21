@@ -13,7 +13,7 @@ func TestServiceNativeProvider(t *testing.T) {
 	operations.workflowPullRequests = nil
 	writeCLIWorkspaceConfig(t, operations.projectContext.ProjectDir, "review:\n  mode: trusted_auto_merge\nwork:\n  merge_strategy: rebase\n  integration:\n    publication_profile: git_atomic_dual_ref\n")
 
-	_, provider, err := operations.workflowReviewDependencies(id)
+	store, provider, err := operations.workflowReviewDependencies(id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -32,5 +32,14 @@ func TestServiceNativeProvider(t *testing.T) {
 
 	if any(ports.NativePublisher) != any(provider) || any(ports.NativeObserver) != any(provider) {
 		t.Fatal("service bypassed the configured native publisher or observer")
+	}
+
+	lifecycle, err := operations.workflowLifecycleControlPorts(t.Context(), store, WorkflowControlRequest{Action: "continue", ID: id, StepLimit: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, ok := lifecycle.Execution.Publication.Provider.(core.WorkflowNativePreparationProvider); !ok {
+		t.Fatal("bound continuation bypassed the production native provider")
 	}
 }

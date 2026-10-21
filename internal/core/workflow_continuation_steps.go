@@ -16,6 +16,10 @@ func (s *WorkflowStore) continueWorkflowSteps(ctx context.Context, id string, re
 			continue
 		}
 
+		if workflowContinuationPreparationRetry(run, request, steps) {
+			return s.retryWorkflowContinuationPreparation(ctx, id, ports)
+		}
+
 		if reason := workflowContinuationBefore(run); reason != "" {
 			return steps, reason, nil
 		}

@@ -18,7 +18,9 @@ type nativeHostFixture struct {
 func newNativeHostFixture(t *testing.T) nativeHostFixture {
 	t.Helper()
 
-	f := newWorkflowPreparationFixture(t, "rebase", workflowPreparationGate("test -f result.txt && if test -f target.txt; then printf combined; else printf source; fi"))
+	f, _ := workflowTicketConfiguredFixture(t, "rebase", "ticket", func(_ *WorkflowStore, _ WorkflowRecord, request *WorkflowStartRequest) {
+		request.Policy.MaxWorkerAttempts, request.Policy.MaxIntegrationAttempts = 1, 1
+	})
 	writeWorkflowTestConfigValue(t, f.store.layout.ProjectDir(), "work", "integration.publication_profile", WorkflowPublicationGitAtomicDualRef)
 
 	runner := &workflowPRCommandFixture{fakeRemoteReviewRunner: newFakeRemoteReviewRunner()}
