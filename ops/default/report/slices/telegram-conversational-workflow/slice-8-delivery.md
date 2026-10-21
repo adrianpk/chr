@@ -10,7 +10,7 @@ Tracker: [Telegram Conversation Tracker](../../../tracker/telegram-conversationa
 
 Branch: `test/slice-8-telegram-delivery`
 
-PR: pending
+PR: [#426](https://forge.adrianpk.com/adrianpk/chr/pulls/426)
 
 ## Purpose
 

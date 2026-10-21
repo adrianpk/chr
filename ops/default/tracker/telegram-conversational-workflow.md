@@ -8,6 +8,8 @@ PR. The report is reviewing for that bounded change. T8.1-T8.3, real journey
 evidence and final closure remain pending; canonical repair integration alone
 does not complete those tasks or change the retained QA invocations.
 
+Repair PR: [#426](https://forge.adrianpk.com/adrianpk/chr/pulls/426).
+
 Date: 2026-10-16
 
 Approved: maintainer, 2026-10-16; specification scope and delivery design accepted through the request for spec, plan and tracker.

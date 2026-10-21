@@ -8,6 +8,8 @@ through the canonical Slice 8 PR, preserving pending live acceptance and final
 closure. This bounded integration unblocks the presentation delivery's Slice 3;
 it does not mark Slice 8 delivered or resume its live QA invocations.
 
+Repair PR: [#426](https://forge.adrianpk.com/adrianpk/chr/pulls/426).
+
 Date: 2026-10-16
 
 Approved: maintainer, 2026-10-16; specification scope and delivery design accepted through the request for spec, plan and tracker.
