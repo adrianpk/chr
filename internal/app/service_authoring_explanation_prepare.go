@@ -24,6 +24,17 @@ func (s service) PrepareAuthoringExplanation(ctx context.Context, request Author
 		return result, err
 	}
 
+	if request.DocumentKind != "" {
+		artifact, err := s.authoringDocument(ctx, request.SessionID, request.DocumentKind)
+		if err != nil {
+			return result, err
+		}
+
+		result.Sources = []authoringModelSource{{Reference: artifact.Ref.Path, SourceHash: artifact.SourceHash}}
+
+		return result, nil
+	}
+
 	sources, err := s.authoringExplanationSources(ctx, request.SessionID)
 	result.Sources = sources
 
@@ -40,6 +51,10 @@ func (s service) ExplainPreparedAuthoring(ctx context.Context, prepared Prepared
 
 	if prepared.ProjectID != s.projectContext.ProjectID {
 		return result, core.ErrWorkflowConflict
+	}
+
+	if prepared.Request.DocumentKind != "" {
+		return result, errors.New("read the original document without generating an explanation")
 	}
 
 	bound, ctx, err := s.bindGeneration(ctx, "explanation-"+prepared.Request.ID, "conversation")

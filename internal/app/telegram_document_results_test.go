@@ -33,9 +33,18 @@ func telegramLatestDocument(t *testing.T, f *telegramConversationAppFixture, pre
 // preserving its complete source image rather than resending older outputs.
 func TestTelegramPresentationDocumentAuthoring(t *testing.T) {
 	f := newTelegramConversationAppFixture(t)
-	telegramAuthoringBridgeHTTP(t, f, func(authoringModelInput) string {
-		return telegramAuthoringServiceOutput(t, "# Requirements\n\nKeep the retry ceiling.\n\n## Validation\n\nVerify recovery.", "")
-	}, telegramAuthoringBridgeCapture)
+	calls := telegramAuthoringBridgeHTTP(t, f, func(authoringModelInput) string {
+		return telegramAuthoringServiceOutput(t, "# Requirements\n\n"+strings.Repeat("Keep the retry ceiling.\n", 450)+"\n## Validation\n\nVerify recovery.", "")
+	}, func(input ConversationIntentContext) ConversationIntent {
+		kind := strings.TrimSuffix(strings.TrimPrefix(input.Message, "Show the "), " document.")
+		if len(input.Sessions) != 1 {
+			t.Error("document read requires one observed conversation")
+
+			return telegramIntentClarification("Which conversation?")
+		}
+
+		return ConversationIntent{OperationID: "explain", Arguments: ConversationIntentArguments{Text: input.Message, Action: kind, Conversation: input.Sessions[0].ID}}
+	})
 	f.send(t, "/prepare readable documents", 0)
 
 	c := f.sessions(t)[0]
@@ -62,10 +71,34 @@ func TestTelegramPresentationDocumentAuthoring(t *testing.T) {
 			document := telegramLatestDocument(t, f, string(step.kind)+"-")
 			snapshot := telegramAuthoringBridgeSnapshot(t, f, c.ID)
 			assertTelegramArtifactUpload(t, document, snapshot, step.kind)
+
+			generations := calls.Load()
+
+			checkTelegramOriginalDocumentRead(t, f, snapshot, step.kind, c.ID)
+
+			if calls.Load() != generations {
+				t.Fatal("document read regenerated content or changed canonical state")
+			}
 		})
 	}
 
 	checkTelegramNoWork(t, f.receiver.env)
+}
+
+func checkTelegramOriginalDocumentRead(t *testing.T, f *telegramConversationAppFixture, snapshot core.AuthoringSnapshot, kind core.AuthoringArtifactKind, conversation string) {
+	t.Helper()
+
+	notice := f.send(t, "Show the "+string(kind)+" document.", 0)
+	if !strings.Contains(notice.Text, "Complete original document attached") || len(f.documents) != 1 {
+		t.Fatal("document read did not attach the original", notice, len(f.documents))
+	}
+
+	document := telegramLatestDocument(t, f, string(kind)+".md")
+	assertTelegramArtifactUpload(t, document, snapshot, kind)
+
+	if telegramAuthoringBridgeSnapshot(t, f, conversation).SourceHash != snapshot.SourceHash {
+		t.Fatal("document read changed canonical state")
+	}
 }
 
 func assertTelegramArtifactUpload(t *testing.T, document telegramDocumentUpload, snapshot core.AuthoringSnapshot, kind core.AuthoringArtifactKind) {

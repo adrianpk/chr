@@ -9,6 +9,7 @@ import (
 type telegramExplanationService interface {
 	PrepareTelegramExplanation(context.Context, core.TelegramOperationTarget, AuthoringExplanationRequest) (PreparedAuthoringExplanation, error)
 	ExplainPreparedTelegram(context.Context, core.TelegramOperationTarget, PreparedAuthoringExplanation) (AuthoringExplanation, error)
+	ReadPreparedTelegramDocument(context.Context, core.TelegramOperationTarget, PreparedAuthoringExplanation) (core.AuthoringArtifactObservation, error)
 }
 
 // PrepareTelegramExplanation maps registry routing to the neutral source reader.
@@ -29,6 +30,16 @@ func (s service) ExplainPreparedTelegram(ctx context.Context, target core.Telegr
 	}
 
 	return scoped.ExplainPreparedAuthoring(ctx, prepared)
+}
+
+// ReadPreparedTelegramDocument resolves the current registry before reading the original.
+func (s service) ReadPreparedTelegramDocument(ctx context.Context, target core.TelegramOperationTarget, prepared PreparedAuthoringExplanation) (core.AuthoringArtifactObservation, error) {
+	scoped, err := s.telegramBoundProjectService(ctx, target)
+	if err != nil {
+		return core.AuthoringArtifactObservation{}, err
+	}
+
+	return scoped.ReadPreparedAuthoringDocument(ctx, prepared)
 }
 
 func (s service) telegramBoundProjectService(ctx context.Context, target core.TelegramOperationTarget) (service, error) {

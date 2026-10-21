@@ -7,12 +7,13 @@ import (
 )
 
 type telegramExplanationCommand struct {
-	Input    core.TelegramConversationInput
-	Question string
+	Input        core.TelegramConversationInput
+	Question     string
+	DocumentKind core.AuthoringArtifactKind
 }
 
 func telegramExplanationRegistry() []ConversationIntentOperation {
-	return []ConversationIntentOperation{{ID: "explain", Description: "Explain canonical project or session context without preparing or starting work", Arguments: "Optional project/conversation; text must equal the original message; no namespace, action or record_json"}}
+	return []ConversationIntentOperation{{ID: "explain", Description: "Explain canonical context, or show an existing original document without preparing or starting work", Arguments: "To show, read, open or download an existing dump/spec/plan, use action=dump|spec|plan and an exact observed conversation; for questions or explanations leave action empty. Optional project; text must equal the original message; no namespace or record_json. Clarify an ambiguous document or conversation."}}
 }
 
 func telegramExplanationHelp() string {
@@ -50,12 +51,12 @@ func parseTelegramExplanation(update core.TelegramReceivedUpdate) (telegramExpla
 func telegramIntentExplanation(update core.TelegramReceivedUpdate, intent ConversationIntent) (telegramExplanationCommand, bool, error) {
 	a := intent.Arguments
 
-	command := telegramExplanationCommand{Input: core.TelegramConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation}, Question: update.Text}
+	command := telegramExplanationCommand{Input: core.TelegramConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation}, Question: update.Text, DocumentKind: core.AuthoringArtifactKind(a.Action)}
 	if intent.OperationID != telegramExplanationRegistry()[0].ID {
 		return command, false, nil
 	}
 
-	if a.Text != update.Text || a.Namespace != "" || a.Action != "" || a.RecordJSON != "" || len(a.Text) > 16384 {
+	if a.Text != update.Text || a.Namespace != "" || a.RecordJSON != "" || len(a.Text) > 16384 || (a.Action != "" && !validAuthoringDocumentKind(command.DocumentKind)) {
 		return command, true, ErrRecordUnsupported
 	}
 

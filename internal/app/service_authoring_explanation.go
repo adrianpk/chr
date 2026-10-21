@@ -17,9 +17,10 @@ import (
 // AuthoringExplanationRequest asks about the project and optional canonical
 // session. It has no mutation, command, approval or work-admission fields.
 type AuthoringExplanationRequest struct {
-	ID        string `json:"id"`
-	Question  string `json:"question"`
-	SessionID string `json:"session_id,omitempty"`
+	ID           string                     `json:"id"`
+	Question     string                     `json:"question"`
+	SessionID    string                     `json:"session_id,omitempty"`
+	DocumentKind core.AuthoringArtifactKind `json:"document_kind,omitempty"`
 }
 
 // AuthoringExplanation returns bounded prose and the canonical sources supplied
@@ -49,6 +50,10 @@ func validateAuthoringExplanation(request AuthoringExplanationRequest, project c
 
 	if project.ProjectDir == "" || project.ProjectID == "" {
 		return errors.New("explanation requires a bound project")
+	}
+
+	if request.DocumentKind != "" && (!validAuthoringDocumentKind(request.DocumentKind) || request.SessionID == "") {
+		return errors.New("reading an original document requires a session and dump, spec or plan kind")
 	}
 
 	return nil

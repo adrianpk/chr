@@ -1410,6 +1410,12 @@ provide an identified full export and retain their page controls. See
 [Message bounds and attachments](../../reference/telegram-receiver.md#message-presentation-and-attachments)
 for limits and recovery behavior.
 
+To read an existing document, ask to show the specification, plan or saved dump
+for the relevant project and conversation. The reply includes a short excerpt
+and the original complete file. Asking a question about that document returns
+an explanation instead. Reading an existing document does not regenerate it
+or authorize development.
+
 Use `/prepare-work <conversation>` to prepare a native backlog ticket from its
 dump or spec. The response identifies the actual canonical record and receipt.
 An unchanged preparation returns that result, so a retry creates no extra ticket.

@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -45,6 +46,10 @@ func (r telegramReceiver) dispatchExplanation(ctx context.Context, user core.Tel
 
 	request, err := r.reserveExplanation(ctx, operations, user, command)
 	if err != nil {
+		if errors.Is(err, errAuthoringDocumentUnavailable) {
+			return r.recordDiagnostic(ctx, command.Input.Update, command.Input.Config, "There is no saved "+string(command.DocumentKind)+" document in that conversation. No document was generated or changed.")
+		}
+
 		return r.recordDiagnostic(ctx, command.Input.Update, command.Input.Config, telegramIntentTargetFailure(err))
 	}
 
@@ -81,7 +86,8 @@ func (r telegramReceiver) reserveExplanation(ctx context.Context, operations tel
 }
 
 func (r telegramReceiver) continueExplanation(ctx context.Context, request core.TelegramOperationRequest, config core.TelegramReceiverConfig) error {
-	if request.State == "confirmed" || request.State == "blocked" || request.State == "rejected" {
+	switch request.State {
+	case "confirmed", "blocked", "rejected":
 		return nil
 	}
 
@@ -102,6 +108,10 @@ func (r telegramReceiver) continueExplanation(ctx context.Context, request core.
 
 	if err := r.store.BeginTelegramOperation(ctx, request, time.Now()); err != nil {
 		return err
+	}
+
+	if prepared.Request.DocumentKind != "" {
+		return r.finishOriginalDocument(ctx, operations, request, prepared, current)
 	}
 
 	model, err := r.store.ResolveTelegramOperationModel(ctx, r.env, request, time.Now(), func(ctx context.Context) (json.RawMessage, error) {
@@ -168,7 +178,7 @@ func telegramRetainedExplanation(request core.TelegramOperationRequest) (Prepare
 }
 
 func (r telegramReceiver) explanationOwnerRequest(ctx context.Context, command telegramExplanationCommand, target core.TelegramOperationTarget) (AuthoringExplanationRequest, error) {
-	owner := AuthoringExplanationRequest{ID: core.TelegramOperationID(command.Input.Update, 0), Question: command.Question}
+	owner := AuthoringExplanationRequest{ID: core.TelegramOperationID(command.Input.Update, 0), Question: command.Question, DocumentKind: command.DocumentKind}
 	if target.ConversationID == "" {
 		return owner, nil
 	}

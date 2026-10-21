@@ -1,0 +1,63 @@
+package app
+
+import (
+	"context"
+	"errors"
+
+	"forge.adrianpk.com/chr/internal/core"
+)
+
+var errAuthoringDocumentUnavailable = errors.New("requested original authoring document is unavailable")
+
+func validAuthoringDocumentKind(kind core.AuthoringArtifactKind) bool {
+	switch kind {
+	case core.AuthoringArtifactKindDump, core.AuthoringArtifactKindSpec, core.AuthoringArtifactKindPlan:
+		return true
+	default:
+		return false
+	}
+}
+
+func (s service) authoringDocument(ctx context.Context, sessionID string, kind core.AuthoringArtifactKind) (core.AuthoringArtifactObservation, error) {
+	snapshot, err := s.ObserveAuthoring(ctx, sessionID)
+	if err != nil {
+		return core.AuthoringArtifactObservation{}, err
+	}
+
+	if snapshot.Session.ProjectID != s.projectContext.ProjectID {
+		return core.AuthoringArtifactObservation{}, core.ErrWorkflowConflict
+	}
+
+	for index := len(snapshot.Artifacts) - 1; index >= 0; index-- {
+		artifact := snapshot.Artifacts[index]
+		if artifact.Ref.Kind == kind && artifact.Body != "" {
+			return artifact, nil
+		}
+	}
+
+	return core.AuthoringArtifactObservation{}, errAuthoringDocumentUnavailable
+}
+
+// ReadPreparedAuthoringDocument reads the exact selected canonical artifact.
+// A changed source is a conflict; an excerpt or generated answer is never a substitute.
+func (s service) ReadPreparedAuthoringDocument(ctx context.Context, prepared PreparedAuthoringExplanation) (core.AuthoringArtifactObservation, error) {
+	if err := validateAuthoringExplanation(prepared.Request, s.projectContext); err != nil {
+		return core.AuthoringArtifactObservation{}, err
+	}
+
+	if prepared.ProjectID != s.projectContext.ProjectID || !validAuthoringDocumentKind(prepared.Request.DocumentKind) || len(prepared.Sources) != 1 {
+		return core.AuthoringArtifactObservation{}, core.ErrWorkflowConflict
+	}
+
+	artifact, err := s.authoringDocument(ctx, prepared.Request.SessionID, prepared.Request.DocumentKind)
+	if err != nil {
+		return artifact, err
+	}
+
+	source := prepared.Sources[0]
+	if artifact.Ref.Path != source.Reference || artifact.SourceHash != source.SourceHash {
+		return core.AuthoringArtifactObservation{}, core.ErrWorkflowConflict
+	}
+
+	return artifact, nil
+}

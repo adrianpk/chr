@@ -50,6 +50,14 @@ pages identify their complete Markdown or JSON export. Long bodies are not
 split into automatic document chunks. Lists retain their existing page routes.
 Legacy queued multipart replies retain their original ordering and retry state.
 
+Asking to show, read, open or download an existing dump, specification or plan
+selects its original canonical document in the resolved conversation. The
+attachment preserves the complete file, including frontmatter and provenance;
+only the caption is shortened. This read does not generate an explanation,
+replace an artifact or start work. An ambiguous target needs clarification;
+a missing document or changed prepared source cannot fall back to generated
+prose. Questions about the document continue to return an identified explanation.
+
 Document-backed confirmations send their caption, complete scope file and
 existing keyboard together. Read the attachment before confirming a scope that
 is shortened in the caption. Buttons describe actual effects, while original

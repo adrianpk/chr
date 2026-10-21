@@ -30,7 +30,12 @@ T5.1 is implemented:
   reopens SQLite and reaches a canonical native receipt on a real temporary Git
   target. Replaying confirmation creates no additional publication.
 
-T5.2 real mobile/desktop inspection and user-operated acceptance remain pending.
+T5.2 is in progress. The first real desktop request to show a specification
+delivered an explanation export rather than the original file. The authorized
+repair distinguishes document-read intent from explanation, reads the selected
+canonical dump/spec/plan without generation, and freezes its full original
+bytes for delivery. Missing documents and changed sources remain failures.
+Mobile/desktop acceptance and user-operated native completion remain pending.
 T5.3 product guidance is prepared: the existing User Guide, Telegram transport
 and notification references describe the actual help groups, attachment bounds,
 complete confirmation scope, retry behavior and native evidence. Unreleased
@@ -43,16 +48,19 @@ T5.1 is `ec0ea0f4c959188cee4477bc45888406f739a3a1`.
 
 Activated from canonical `dev` at
 `ae8d8d1b79ba6efddd75fdd287f235b6556babab` after PR #428 integration.
-The retained live QA receiver and its native invocations remain under their
-existing owner. This slice does not restart that receiver or fabricate input.
+The validated presentation candidate was activated in the retained isolated QA
+receiver for user-operated acceptance. Its existing data, unconsumed confirmation
+and native invocation ownership were preserved. No inbound input was fabricated.
 
 ## Contracts Added or Changed
 
 The accepted presentation bounds and operation guards remain unchanged. Fixture
 certification remains separate from actual mobile/desktop observations and a
-user-operated journey. The retained receiver is still on its earlier fixed
-source `5bde31118db47c4fe52bff416555049a66d22911`; its activation requires a
-separate decision under the approved plan.
+user-operated journey. Natural-language document reads use the existing
+explanation operation with a validated dump/spec/plan selector and an exact
+observed conversation. The shared service binds the original path and hash;
+the read cannot substitute model context excerpts or generated prose. The
+existing explanation route and retained requests remain compatible.
 
 ## Files of Interest
 
@@ -97,12 +105,21 @@ The canonical PR payload is prepared with report-introduction commit
 This receipt belongs to the named candidate and cannot certify later report,
 acceptance or PR-reference commits.
 
+The desktop capture and durable delivery snapshot confirmed a 546-byte generated
+explanation where the user requested a 937-byte canonical specification. That
+is a failed document-selection observation, not successful acceptance. The
+repair regression first failed at the document-read boundary. Focused checks
+cover complete original dump/spec/plan bytes beyond the 8 KiB model excerpt,
+unchanged authoring state and generation count, missing/changed source and root
+guards, and original bytes after SQLite reopen and an independent file edit.
+Final repair-candidate checks and the actual client retry are recorded separately
+from the earlier candidate's receipt.
+
 ## Risks and Follow-ups
 
 Real mobile/desktop client observations and the user-operated journey require
-participation and a fixed authorized candidate receiver. Candidate activation
-approval remains pending under the approved plan; the retained receiver and its
-unconsumed confirmation remain unchanged. T5.2 cannot close from local fixture
-evidence. The existing scheduled
+participation and the fixed validated repair candidate. The original pending
+confirmation and native invocation ownership remain preserved. T5.2 cannot close
+from local fixture evidence. The existing scheduled
 nightly must certify the exact integrated final candidate; keep
 `awaiting_nightly` until that evidence exists.
