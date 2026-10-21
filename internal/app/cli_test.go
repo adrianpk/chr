@@ -2942,7 +2942,7 @@ func TestNotifyTelegramTestDryRunPrintsPlan(t *testing.T) {
 		"dry_run: true",
 		"bot_token_env: CHR_TELEGRAM_BOT_TOKEN",
 		"chat_id: 123456",
-		"message: chr Telegram notification test",
+		"message: Telegram notification test",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -3102,12 +3102,23 @@ func installTestTelegramSender(t *testing.T) *testTelegramPayload {
 
 	gotPayload := &testTelegramPayload{}
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		err := json.NewDecoder(request.Body).Decode(gotPayload)
-		if err != nil {
-			t.Fatalf("decode telegram payload: %v", err)
+		var err error
+		if strings.HasPrefix(request.Header.Get("Content-Type"), "multipart/form-data") {
+			err = request.ParseMultipartForm(3 << 20)
+			if err == nil {
+				gotPayload.ChatID = request.FormValue("chat_id")
+				gotPayload.Text = request.FormValue("caption")
+			}
+		} else {
+			err = json.NewDecoder(request.Body).Decode(gotPayload)
 		}
+		if err != nil {
+			t.Errorf("decode telegram payload: %v", err)
+			writer.WriteHeader(http.StatusBadRequest)
 
-		_, err = writer.Write([]byte(`{"ok":true}`))
+			return
+		}
+		_, err = writer.Write([]byte(`{"ok":true,"result":{"message_id":1001,"document":{"file_id":"notification-file"}}}`))
 		if err != nil {
 			t.Fatalf("write telegram response: %v", err)
 		}
@@ -3149,7 +3160,7 @@ func assertTelegramPayload(t *testing.T, gotPayload *testTelegramPayload) {
 		t.Fatalf("telegram chat_id = %q, want 123456", gotPayload.ChatID)
 	}
 
-	if !strings.Contains(gotPayload.Text, "chr Telegram notification test") {
+	if !strings.Contains(gotPayload.Text, "Telegram notification test") {
 		t.Fatalf("telegram text = %q, want test message", gotPayload.Text)
 	}
 }
@@ -4207,7 +4218,7 @@ func TestTicketLoopDispatchesConfiguredFinishedNotification(t *testing.T) {
 		t.Fatalf("telegram chat id = %q, want configured chat id", gotPayload.ChatID)
 	}
 
-	if !strings.Contains(gotPayload.Text, "Ticket loop loop-") {
+	if !strings.Contains(gotPayload.Text, "Ticket loop finished") {
 		t.Fatalf("telegram text = %q, want loop notification", gotPayload.Text)
 	}
 }
@@ -6584,7 +6595,7 @@ func TestMaintenanceDBStatusReportsPendingMigrationsWhenDatabaseIsMissing(t *tes
 		"database_exists: false",
 		"schema_migrations_exists: false",
 		"applied: 0",
-		"pending: 27",
+		"pending: 28",
 		"unknown: 0",
 		"pending_migration: 20260518000001 create_projects",
 		"pending_migration: 20260601000009 add_ticket_review_metadata",
@@ -6605,6 +6616,7 @@ func TestMaintenanceDBStatusReportsPendingMigrationsWhenDatabaseIsMissing(t *tes
 		"pending_migration: 20261021000025 add_telegram_text_presentation",
 		"pending_migration: 20261021000026 add_telegram_document_snapshots",
 		"pending_migration: 20261021000027 add_telegram_action_presentation",
+		"pending_migration: 20261021000028 add_telegram_notification_presentation",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
@@ -6643,8 +6655,8 @@ func TestMaintenanceDBStatusReportsAppliedMigrations(t *testing.T) {
 	for _, want := range []string{
 		"database_exists: true",
 		"schema_migrations_exists: true",
-		"available: 27",
-		"applied: 27",
+		"available: 28",
+		"applied: 28",
 		"pending: 0",
 		"unknown: 0",
 		"applied_migration: 20260518000001 create_projects",
@@ -6666,6 +6678,7 @@ func TestMaintenanceDBStatusReportsAppliedMigrations(t *testing.T) {
 		"applied_migration: 20261021000025 add_telegram_text_presentation",
 		"applied_migration: 20261021000026 add_telegram_document_snapshots",
 		"applied_migration: 20261021000027 add_telegram_action_presentation",
+		"applied_migration: 20261021000028 add_telegram_notification_presentation",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout = %q, want %q", stdout.String(), want)

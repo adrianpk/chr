@@ -10,6 +10,7 @@ import (
 func TestTelegramPresentationFormatMigration(t *testing.T) {
 	env := telegramReceiverTestEnv(t)
 	assets := telegramRecoveryMigrationAssets(t)
+	delete(assets, "assets/migration/sqlite/20261021000028-add_telegram_notification_presentation.sql")
 	delete(assets, "assets/migration/sqlite/20261021000027-add_telegram_action_presentation.sql")
 	delete(assets, "assets/migration/sqlite/20261021000025-add_telegram_text_presentation.sql")
 

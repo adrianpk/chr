@@ -29,13 +29,31 @@ T4.1 is implemented:
   predecessor acknowledgement and blocking; formatted help keeps its existing
   bounded command navigation.
 
-T4.2 notification snapshots/sending and T4.3 both-path fault coverage remain pending.
+T4.2 is implemented:
+
+- Workflow notifications retain a concise human/project summary and one complete
+  JSON event export. Manual tests identify their test purpose and project without
+  displaying the workspace directory.
+- The notification event and its view/export are committed atomically under the
+  existing event repository. Both snapshot tables share the 64 MiB core database
+  quota. Current sender, destination, namespace and root bindings are rechecked
+  before each transmission.
+- Real positive message/file acknowledgements establish delivery. One definite
+  format rejection can select plain formatting for the same bytes; uncertain
+  responses retain their event, snapshot and consumed allowance.
+
+T4.3 both-path fault coverage remains pending.
 
 ## Implementation Notes
 
 Activated from canonical `dev` at
 `a4d0a865e8bb32a3caac65395a28839b573ed369` after verified PR #427 integration.
 T4.1 is `708afec21584e546624848391a287a59fb5da5d4`.
+
+Migration 28 adds nullable notification presentation and document mappings,
+transport evidence and bounded safe retention. Historical NULL/version-zero
+records retain the old notification sender and payload. The shared uploader
+supports the existing string destination without relaxing receiver token checks.
 
 The existing notification event repository owns its dispatch and audit records;
 no receiver, scheduler, trigger or workflow authority is added.
@@ -68,6 +86,11 @@ Normal core/app checks took 0.833/17.477 seconds; the focused race selection too
 HTTP/SQLite/native-work fixtures cover original-result and acknowledgement
 recovery, legacy message ordering and unchanged CLI/TUI/Web evidence access.
 Long-title checks reserve the state and inspection route before truncation.
+
+Successful T4.2 development checks:
+
+- `go test ./internal/core ./internal/app -run '^Test(TelegramPresentation(Notification|Document|Migration|Confirmation)|NotificationEventRepository|NotifyTelegramTest|TicketLoop(DispatchesConfiguredFinishedNotification|RecordsFailedNotification|RecordsBlockedNotifications)|TicketApplyResultRecordsBlockedNotification|MaintenanceDBStatusReports)' -count=1 -timeout=3m` — core/app passed in 2.746/1.480 seconds.
+- `go test -race ./internal/core ./internal/app -run '^TestTelegramPresentationNotification' -count=1 -timeout=3m` — core/app passed in 4.984/3.083 seconds.
 
 Required final clean-HEAD checks remain `make verify`, the configured normal
 progress/notification/failure selection, its focused race selection and

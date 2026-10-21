@@ -122,6 +122,10 @@ func (a TelegramReceiverAPI) callBody(ctx context.Context, token, method string,
 		return nil, err
 	}
 
+	return a.postBody(ctx, token, method, body, contentType, timeout)
+}
+
+func (a TelegramReceiverAPI) postBody(ctx context.Context, token, method string, body io.Reader, contentType string, timeout time.Duration) (json.RawMessage, error) {
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 

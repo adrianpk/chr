@@ -333,7 +333,7 @@ func printNotifyTelegramTestPlan(
 		"project_dir: " + projectContext.ProjectDir,
 		"bot_token_env: " + telegram.BotTokenEnv,
 		"chat_id: " + telegram.ChatID,
-		"message: chr Telegram notification test for " + projectContext.ProjectID,
+		"message: Telegram notification test for " + projectContext.ProjectName,
 	})
 }
 
@@ -362,36 +362,12 @@ func runNotifyTelegramTestDispatch(
 		_ = repository.Close()
 	}()
 
-	err = repository.CreateNotificationEvent(ctx, record)
+	target, err := createTelegramNotification(ctx, repository, record, projectContext, telegram)
 	if err != nil {
 		return err
 	}
 
-	message := core.RenderTelegramNotificationMessage(event)
-	message.ChatID = telegram.ChatID
-
-	token := os.Getenv(telegram.BotTokenEnv)
-	result, sendErr := notifyTelegramSender.SendMessage(ctx, token, message)
-	finishedAt := time.Now().UTC()
-
-	if sendErr != nil {
-		record.Event.Status = core.NotificationStatusFailed
-		record.Event.FailureReason = sendErr.Error()
-		record.Event.UpdatedAt = finishedAt
-
-		updateErr := repository.UpdateNotificationEvent(ctx, record)
-		if updateErr != nil {
-			return updateErr
-		}
-
-		return sendErr
-	}
-
-	record.Event.Status = core.NotificationStatusDelivered
-	record.Event.DeliveredAt = &finishedAt
-	record.Event.UpdatedAt = finishedAt
-
-	err = repository.UpdateNotificationEvent(ctx, record)
+	result, err := dispatchTelegramNotification(ctx, repository, record, projectContext, target)
 	if err != nil {
 		return err
 	}

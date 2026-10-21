@@ -191,6 +191,8 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 - Telegram progress separates validated work, capacity/review waits and confirmed
   integration. Short views retain a status inspection route, preserve saved
   results on failures and identify notices repeated after a lost delivery acknowledgement.
+  Workflow notifications use the same short views with one complete event export;
+  notification tests name the project and their test purpose.
 
 - The product name is chr. Commands continue to use `chr`.
 

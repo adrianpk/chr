@@ -24,13 +24,14 @@ func TestTelegramPresentationConfirmationMigration(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, migration := range migrations {
-		if migration.Version == "20261021000027" {
+	for index := len(migrations) - 1; index >= 0; index-- {
+		migration := migrations[index]
+		if migration.Version == "20261021000028" || migration.Version == "20261021000027" {
 			execTelegramRecoverySQL(t, f.store, migration.DownSQL)
 		}
 	}
 
-	execTelegramRecoverySQL(t, f.store, "DELETE FROM schema_migrations WHERE version='20261021000027'")
+	execTelegramRecoverySQL(t, f.store, "DELETE FROM schema_migrations WHERE version IN ('20261021000027','20261021000028')")
 
 	if err := f.store.Close(); err != nil {
 		t.Fatal(err)

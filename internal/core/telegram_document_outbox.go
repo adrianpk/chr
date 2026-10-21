@@ -66,7 +66,7 @@ func retainTelegramDocument(ctx context.Context, tx *sql.Tx, id, owner string, p
 	// The outbox insertion already owns SQLite's write reservation. Quota check
 	// and admission therefore serialize with other admissions and cleanup.
 	result, err := tx.ExecContext(ctx, `INSERT INTO telegram_document_snapshots(id,owner_kind,owner_id,bot_id,chat_id,topic_id,user_id,config_digest,project_id,namespace,project_binding_digest,source_ref,source_hash,content_hash,filename,media_type,byte_count,payload,created_at)
- SELECT ?,'receiver',?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,? WHERE (SELECT COALESCE(SUM(length(payload)),0) FROM telegram_document_snapshots)+?<=?`, id, owner, peer.BotID, peer.ChatID, peer.TopicID, peer.UserID, configDigest, document.ProjectID, document.Namespace, document.ProjectBindingDigest, document.SourceRef, document.SourceHash, workflowHash(document.Payload), document.Filename, document.MediaType, len(document.Payload), document.Payload, formatProjectTime(now), len(document.Payload), telegramDocumentQuota)
+ SELECT ?,'receiver',?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,? WHERE (SELECT COALESCE(SUM(length(payload)),0) FROM telegram_document_snapshots)+(SELECT COALESCE(SUM(length(payload)),0) FROM telegram_notification_documents)+?<=?`, id, owner, peer.BotID, peer.ChatID, peer.TopicID, peer.UserID, configDigest, document.ProjectID, document.Namespace, document.ProjectBindingDigest, document.SourceRef, document.SourceHash, workflowHash(document.Payload), document.Filename, document.MediaType, len(document.Payload), document.Payload, formatProjectTime(now), len(document.Payload), telegramDocumentQuota)
 	if err != nil {
 		return err
 	}

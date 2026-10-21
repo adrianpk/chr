@@ -4,9 +4,9 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io/fs"
-	"os"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -130,16 +130,39 @@ func emitWorkflowNotification(
 		_ = repository.Close()
 	}()
 
-	err = repository.CreateNotificationEvent(ctx, record)
-	if err != nil {
-		return err
+	if record.Event.Status != core.NotificationStatusPending {
+		return repository.CreateNotificationEvent(ctx, record)
 	}
 
-	if record.Event.Status != core.NotificationStatusPending {
+	target, err := createTelegramNotification(ctx, repository, record, projectContext, config.Notifications.Telegram)
+	if err != nil {
+		return workflowNotificationFailure(ctx, repository, record.Event.ID, err)
+	}
+
+	_, sendErr := dispatchTelegramNotification(ctx, repository, record, projectContext, target)
+
+	return workflowNotificationFailure(ctx, repository, record.Event.ID, sendErr)
+}
+
+func workflowNotificationFailure(ctx context.Context, repository core.NotificationEventRepository, id string, failure error) error {
+	if ctx.Err() != nil {
+		return ctx.Err()
+	}
+
+	if failure == nil {
 		return nil
 	}
 
-	return dispatchWorkflowTelegramNotification(ctx, repository, record, config.Notifications.Telegram)
+	saved, err := repository.GetNotificationEvent(ctx, id)
+	if err != nil {
+		return errors.Join(failure, err)
+	}
+
+	if saved.Event.Status == core.NotificationStatusFailed {
+		return nil
+	}
+
+	return failure
 }
 
 func workflowNotificationAuditRecord(
@@ -167,38 +190,10 @@ func workflowNotificationAuditRecord(
 	return record
 }
 
-func dispatchWorkflowTelegramNotification(
-	ctx context.Context,
-	repository core.NotificationEventRepository,
-	record core.NotificationAuditRecord,
-	telegram core.TelegramNotificationConfig,
-) error {
-	message := core.RenderTelegramNotificationMessage(record.Event)
-	message.ChatID = telegram.ChatID
-
-	token := os.Getenv(telegram.BotTokenEnv)
-	_, sendErr := notifyTelegramSender.SendMessage(ctx, token, message)
-	finishedAt := time.Now().UTC()
-
-	if sendErr != nil {
-		record.Event.Status = core.NotificationStatusFailed
-		record.Event.FailureReason = sendErr.Error()
-		record.Event.UpdatedAt = finishedAt
-
-		return repository.UpdateNotificationEvent(ctx, record)
-	}
-
-	record.Event.Status = core.NotificationStatusDelivered
-	record.Event.DeliveredAt = &finishedAt
-	record.Event.UpdatedAt = finishedAt
-
-	return repository.UpdateNotificationEvent(ctx, record)
-}
-
 func ticketBlockedNotificationDetail(plan ticketApplyResultPlan) string {
-	detail := fmt.Sprintf("Execution: %s\nResult: %s", plan.Application.ExecutionID, plan.Result.Status)
+	detail := fmt.Sprintf("Result: %s", plan.Result.Status)
 	if plan.Result.Summary != "" {
-		detail = detail + "\nSummary: " + plan.Result.Summary
+		detail = detail + "\nWorker-reported summary: " + plan.Result.Summary
 	}
 
 	return detail
@@ -207,13 +202,13 @@ func ticketBlockedNotificationDetail(plan ticketApplyResultPlan) string {
 func loopRunNotificationSummary(record core.LoopRunRecord) string {
 	switch record.Status {
 	case core.LoopRunStatusSucceeded:
-		return fmt.Sprintf("Ticket loop %s finished", record.ID)
+		return "Ticket loop finished"
 	case core.LoopRunStatusBlocked:
-		return fmt.Sprintf("Ticket loop %s stopped on a blocker", record.ID)
+		return "Ticket loop stopped on a blocker"
 	case core.LoopRunStatusFailed:
-		return fmt.Sprintf("Ticket loop %s failed", record.ID)
+		return "Ticket loop failed"
 	default:
-		return fmt.Sprintf("Ticket loop %s changed state", record.ID)
+		return "Ticket loop changed state"
 	}
 }
 

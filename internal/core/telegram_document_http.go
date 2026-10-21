@@ -66,13 +66,17 @@ func decodeTelegramDocumentAcknowledgement(data []byte) (TelegramDocumentAcknowl
 }
 
 func telegramDocumentMultipart(peer TelegramPeerIdentity, document TelegramDocument, caption string, entities []TelegramTextEntity, keyboard *telegramInlineKeyboard) ([]byte, string, error) {
+	return telegramDocumentMultipartDestination(strconv.FormatInt(peer.ChatID, 10), peer.TopicID, document, caption, entities, keyboard)
+}
+
+func telegramDocumentMultipartDestination(destination string, topic int64, document TelegramDocument, caption string, entities []TelegramTextEntity, keyboard *telegramInlineKeyboard) ([]byte, string, error) {
 	var body bytes.Buffer
 
 	writer := multipart.NewWriter(&body)
 
-	fields := map[string]string{"chat_id": strconv.FormatInt(peer.ChatID, 10), "caption": caption, "disable_content_type_detection": "true"}
-	if peer.TopicID > 0 {
-		fields["message_thread_id"] = strconv.FormatInt(peer.TopicID, 10)
+	fields := map[string]string{"chat_id": destination, "caption": caption, "disable_content_type_detection": "true"}
+	if topic > 0 {
+		fields["message_thread_id"] = strconv.FormatInt(topic, 10)
 	}
 
 	if err := telegramDocumentJSONFields(fields, entities, keyboard); err != nil {

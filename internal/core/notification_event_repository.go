@@ -24,6 +24,10 @@ type NotificationAuditRecord struct {
 
 // NotificationEventRepository defines a package boundary interface.
 type NotificationEventRepository interface {
+	CreateTelegramNotification(context.Context, TelegramNotificationInput) error
+	ReadTelegramNotification(context.Context, string, TelegramNotificationTarget) (TelegramNotificationDelivery, bool, error)
+	ReserveTelegramNotification(context.Context, string, TelegramNotificationTarget, bool) (bool, error)
+	FinishTelegramNotification(context.Context, string, TelegramNotificationTarget, TelegramDocumentAcknowledgement, string, bool, time.Time) error
 	CreateNotificationEvent(ctx context.Context, record NotificationAuditRecord) error
 	UpdateNotificationEvent(ctx context.Context, record NotificationAuditRecord) error
 	GetNotificationEvent(ctx context.Context, id string) (NotificationAuditRecord, error)
@@ -90,27 +94,7 @@ func (r *sqliteNotificationEventRepository) CreateNotificationEvent(
 		return err
 	}
 
-	event := record.Event
-
-	_, err = r.db.ExecContext(ctx, insertNotificationEventSQL(),
-		event.ID,
-		event.ProjectID,
-		string(event.Type),
-		string(event.Severity),
-		string(event.Status),
-		string(event.Source),
-		record.Channel,
-		event.References.TicketKey,
-		event.References.ExecutionID,
-		event.References.LoopRunID,
-		event.References.DaemonPID,
-		event.Payload.Summary,
-		event.Payload.Detail,
-		event.FailureReason,
-		formatProjectTime(event.CreatedAt),
-		formatOptionalNotificationTime(event.DeliveredAt),
-		formatProjectTime(event.UpdatedAt),
-	)
+	_, err = r.db.ExecContext(ctx, insertNotificationEventSQL(), notificationEventArguments(record)...)
 	if err != nil {
 		return fmt.Errorf("create notification event: %w", err)
 	}
@@ -341,4 +325,10 @@ func parseOptionalNotificationTime(value sql.NullString) (*time.Time, error) {
 	}
 
 	return &parsed, nil
+}
+
+func notificationEventArguments(record NotificationAuditRecord) []any {
+	event := record.Event
+
+	return []any{event.ID, event.ProjectID, string(event.Type), string(event.Severity), string(event.Status), string(event.Source), record.Channel, event.References.TicketKey, event.References.ExecutionID, event.References.LoopRunID, event.References.DaemonPID, event.Payload.Summary, event.Payload.Detail, event.FailureReason, formatProjectTime(event.CreatedAt), formatOptionalNotificationTime(event.DeliveredAt), formatProjectTime(event.UpdatedAt)}
 }
