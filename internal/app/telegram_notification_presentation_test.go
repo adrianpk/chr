@@ -72,7 +72,7 @@ func (c *telegramNotificationCapture) receive(t *testing.T) http.HandlerFunc {
 	}
 }
 
-func newTelegramNotificationAppInput(t *testing.T) (core.NotificationEventRepository, core.TelegramNotificationInput, commandProjectContext) {
+func newTelegramNotificationAppInput(t *testing.T) (core.NotificationEventRepository, core.TelegramNotificationInput, commandProjectContext, core.UserEnvironment) {
 	t.Helper()
 
 	dir := newTestWorkspace(t)
@@ -111,13 +111,13 @@ func newTelegramNotificationAppInput(t *testing.T) (core.NotificationEventReposi
 
 	input.Message.ContentKind = "code"
 
-	return repository, input, project
+	return repository, input, project, env
 }
 
 // HTTP and SQLite prove a format fallback sends the same complete export and
 // caption through the notification owner without a receiver or another trigger.
 func TestTelegramPresentationNotificationDispatch(t *testing.T) {
-	repository, input, project := newTelegramNotificationAppInput(t)
+	repository, input, project, _ := newTelegramNotificationAppInput(t)
 	capture := &telegramNotificationCapture{}
 	server := httptest.NewServer(capture.receive(t))
 	t.Cleanup(server.Close)

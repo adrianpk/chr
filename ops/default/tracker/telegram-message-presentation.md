@@ -31,7 +31,7 @@ Active slice: Slice 4 of 5, Progress, notifications and failure consistency.
 ## Tasks
 
 Slices 1-3 are delivered through PRs #424, #425 and #427. Slice 4 is active;
-T4.1 is implemented; T4.2-T4.3 and Slice 5 remain pending.
+T4.1-T4.2 are implemented; T4.3 fault regressions passed and are ready for commit. Slice 5 remains pending.
 The plan owns exact branch names, PR titles, report paths and focused commands.
 
 | Task | State | Commit | Required outcome |
@@ -47,7 +47,7 @@ The plan owns exact branch names, PR titles, report paths and focused commands.
 | T3.2 | delivered | `94975b70a20b87639e1df5ee1d9ebca4fbb741de` | Original operation, document and action bindings |
 | T3.3 | delivered | `099b9a965b0bbe2690ca0191c3d51250a39deadb` | Stale scope, ambiguity and replay regressions |
 | T4.1 | implemented | `708afec21584e546624848391a287a59fb5da5d4` | Progress, waits, failures and partial/final results |
-| T4.2 | pending | pending | Notification sender and event snapshot integration |
+| T4.2 | implemented | `04fddeb15cf6184f4c263a55bdb222fcd74a6b1e` | Notification sender and event snapshot integration |
 | T4.3 | pending | pending | Both-path faults, legacy records and truthful outcomes |
 | T5.1 | pending | pending | Complete producer and variant coverage |
 | T5.2 | pending | pending | Real mobile/desktop and natural-language journey |
@@ -106,10 +106,10 @@ regression and client result as each row is delivered.
 | 42 | Queue rejection versus waiting and actual acceptance | Slice 4 | Changed: full queue means the new request was not accepted; retained work and reserved controls stay available; `app/telegram_drain.go`, `core/telegram_intake_reserve.go`; `TestTelegramControlReserve`. |
 | 43 | Uncertain send and bounded plain fallback | Slice 4 | Changed: lost-ack repeat warning; retain original content, identities and bounded formatting fallback; `app/telegram_drain.go`; existing work/action/harness lost-ack and help-format HTTP regressions. |
 | 44 | Bounded text, Unicode and full-document route | Slice 4 | Changed: one bounded new plain view with narrowing/local inspection route, without automatic content chunks; keep stored legacy multipart ordering and formatted help; `core/telegram_response_chunks.go`; Unicode/legacy-part/help regressions. |
-| 45 | Unavailable service and preserved state | Slice 4 | Changed: failed read identifies the unavailable operation, preserved state and local doctor command; existing preparation/record outcomes retain their owners; `app/telegram_drain.go`; explicit service-failure coverage pending T4.3. |
-| 46 | Silent unauthorized rejection; local outage diagnosis | Slice 4 | Keep: unauthorized/revoked input and delivery remain silent; poll/config failures use local-only classified diagnostics; `app/telegram_failure.go`, `telegram_serve.go`, `telegram_drain.go`; explicit authorization/outage reuse pending T4.3. |
-| 47 | Concise workflow notifications and full details | Slice 4 | pending |
-| 48 | Clearly labelled notification test | Slice 4 | pending |
+| 45 | Unavailable service and preserved state | Slice 4 | Changed: failed read identifies the unavailable operation, preserved state and local doctor command; existing preparation/record outcomes retain their owners; `app/telegram_drain.go`; `TestTelegramPresentationFailureRead` injects an unavailable read and verifies unchanged saved state and bounded recovery. |
+| 46 | Silent unauthorized rejection; local outage diagnosis | Slice 4 | Keep: unauthorized/revoked input and delivery remain silent; poll/config failures use local-only classified diagnostics; `app/telegram_failure.go`, `telegram_serve.go`, `telegram_drain.go`; `TestTelegramHelpUnauthorized`, `TestTelegramPresentationDeliveryRevocation`, `TestTelegramRecoveryFailures`, `TestTelegramRecoveryDoctor` and `TestTelegramRecoveryPollEpoch` passed normally and with race instrumentation. |
+| 47 | Concise workflow notifications and full details | Slice 4 | Changed: human project/work activity and receipt distinction, one complete frozen event JSON export; `app/telegram_notification_presentation.go`, existing notification repository and sender; `TestTelegramPresentationNotificationDispatch`, snapshot/HTTP fault tests. |
+| 48 | Clearly labelled notification test | Slice 4 | Changed: short human project name and explicit test purpose, omit routine directory and attachment; `app/telegram_notification_presentation.go`, `notify.go`; `TestNotifyTelegramTest`. |
 
 ## Acceptance Evidence
 
@@ -135,7 +135,7 @@ regression and client result as each row is delivered.
 - Slice 1: delivered through [#424](https://forge.adrianpk.com/adrianpk/chr/pulls/424) at `a2bb0974eac21b1fe33cac78e21f4c1845871e96`.
 - Slice 2: delivered through [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425) at `a5c6a7e068a8e5ec547d13d73d39afe1f0477335`.
 - Slice 3: delivered through [PR #427](https://forge.adrianpk.com/adrianpk/chr/pulls/427) at `a4d0a865e8bb32a3caac65395a28839b573ed369`.
-- Slice 4: active; T4.1 implemented, T4.2-T4.3 pending; report drafting.
+- Slice 4: active; T4.1-T4.2 implemented, T4.3 fault validation in progress; report drafting.
 - Slice 5: pending.
 - Mobile/desktop and user-operated journey evidence: pending.
 - Exact final candidate and scheduled nightly: pending.

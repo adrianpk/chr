@@ -40,12 +40,12 @@ func dispatchTelegramNotification(ctx context.Context, repository core.Notificat
 		return core.TelegramSendResult{}, errors.Join(err, saveErr)
 	}
 
-	if !frozen {
-		return dispatchLegacyTelegramNotification(ctx, repository, record, project)
-	}
-
 	if delivery.Status != core.NotificationStatusPending {
 		return core.TelegramSendResult{}, nil
+	}
+
+	if !frozen {
+		return dispatchLegacyTelegramNotification(ctx, repository, record, project)
 	}
 
 	reserved, err := repository.ReserveTelegramNotification(ctx, record.Event.ID, target, false)
@@ -101,6 +101,11 @@ func sendTelegramNotification(ctx context.Context, project commandProjectContext
 }
 
 func dispatchLegacyTelegramNotification(ctx context.Context, repository core.NotificationEventRepository, record core.NotificationAuditRecord, project commandProjectContext) (core.TelegramSendResult, error) {
+	record, err := repository.GetNotificationEvent(ctx, record.Event.ID)
+	if err != nil {
+		return core.TelegramSendResult{}, err
+	}
+
 	config, err := core.LoadWorkspaceConfig(project.ProjectDir)
 	if err != nil {
 		return core.TelegramSendResult{}, err

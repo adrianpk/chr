@@ -42,13 +42,32 @@ T4.2 is implemented:
   format rejection can select plain formatting for the same bytes; uncertain
   responses retain their event, snapshot and consumed allowance.
 
-T4.3 both-path fault coverage remains pending.
+T4.3 adds fault evidence for both owners:
+
+- Lost, missing and server-failed notification acknowledgements retain the
+  original bytes and consumed attempt after reopening; they never claim delivery
+  or silently dispatch another event. Access rejection is a definite failure.
+- Future/corrupt manifests, missing images and changed destinations, token,
+  namespace or canonical root fail before transmission. A changed sender between
+  format rejection and fallback prevents the second upload.
+- Receiver and notification admissions race for the last 2 MiB of the shared
+  database quota. Only one commits; the other leaves no partial owner/image.
+  Cleanup removes at most twenty aged terminal images and retains unresolved,
+  uncertain and recent images plus all original hashes/transport receipts.
+- A physical pre-28 notification database retains original events and NULL or
+  version-zero payload meaning. Legacy dispatch reads persisted payload and
+  refuses a stale caller's attempt to resend an already delivered event.
+- An unavailable receiver read identifies unchanged state and local diagnostics.
+  Notification rejection leaves a successful native ticket-loop result and its
+  sole execution intact. Oversized export preparation records a failed audit
+  without sending a shortened substitute.
 
 ## Implementation Notes
 
 Activated from canonical `dev` at
 `a4d0a865e8bb32a3caac65395a28839b573ed369` after verified PR #427 integration.
 T4.1 is `708afec21584e546624848391a287a59fb5da5d4`.
+T4.2 is `04fddeb15cf6184f4c263a55bdb222fcd74a6b1e`.
 
 Migration 28 adds nullable notification presentation and document mappings,
 transport evidence and bounded safe retention. Historical NULL/version-zero
@@ -70,6 +89,9 @@ send reservation ownership. Existing stored rows are not rerendered.
 - `internal/app/telegram_work_progress.go`, `telegram_work_activation.go` and `telegram_control_dispatch.go`
 - `internal/core/telegram_work_projection.go` and `telegram_response_chunks.go`
 - `internal/app/telegram_progress_presentation_test.go` and `internal/core/telegram_progress_presentation_test.go`
+- `internal/core/notification_telegram_*.go` and migration 28
+- `internal/core/telegram_notification_delivery.go` and `internal/app/telegram_notification_*.go`
+- Notification HTTP, migration, quota, retention and failure fixtures
 - Existing native-work, control, harness, help, capacity and legacy multipart fixtures
 
 ## Validation
@@ -91,6 +113,15 @@ Successful T4.2 development checks:
 
 - `go test ./internal/core ./internal/app -run '^Test(TelegramPresentation(Notification|Document|Migration|Confirmation)|NotificationEventRepository|NotifyTelegramTest|TicketLoop(DispatchesConfiguredFinishedNotification|RecordsFailedNotification|RecordsBlockedNotifications)|TicketApplyResultRecordsBlockedNotification|MaintenanceDBStatusReports)' -count=1 -timeout=3m` — core/app passed in 2.746/1.480 seconds.
 - `go test -race ./internal/core ./internal/app -run '^TestTelegramPresentationNotification' -count=1 -timeout=3m` — core/app passed in 4.984/3.083 seconds.
+
+Successful T4.3 development checks:
+
+- `go test ./internal/core ./internal/app -run '^Test(TelegramPresentation(Progress|Notification|Failure)|TelegramWorkDeliveryFailure|TelegramHelp(HTTP|Unauthorized)|TelegramRecovery(Failures|Doctor|PollEpoch)|TelegramPresentationDelivery(HTTP|Revocation)|TelegramOperation(UnicodeParts|PartOrder))' -count=1 -timeout=3m` — core/app passed in 1.586/2.909 seconds.
+- `go test -race ./internal/core ./internal/app -run '^Test(TelegramPresentation(Progress|Notification|Failure)|TelegramWorkDeliveryFailure|TelegramHelp(HTTP|Unauthorized)|TelegramRecovery(Failures|Doctor|PollEpoch)|TelegramPresentationDelivery(HTTP|Revocation)|TelegramOperation(UnicodeParts|PartOrder))' -count=1 -timeout=3m` — core/app passed in 40.639/49.615 seconds.
+
+These local HTTP/SQLite/native fixtures exercise both delivery owners, including
+real lost acknowledgements, revoked input/destinations and local-only outage
+classification. They retain the three-minute package budget.
 
 Required final clean-HEAD checks remain `make verify`, the configured normal
 progress/notification/failure selection, its focused race selection and
