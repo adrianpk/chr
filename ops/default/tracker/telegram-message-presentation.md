@@ -163,9 +163,12 @@ merged candidate `a5c6a7e068a8e5ec547d13d73d39afe1f0477335`.
 
 [Slice 3 report](../report/slices/telegram-message-presentation/slice-3-action-presentation.md)
 records scope exports, action sealing, original-result recovery and normal
-HTTP/SQLite fixtures. Strict package lint passed. Required final normal/race
-checks and affected legacy regressions remain to be recorded through Looper
-after the canonical PR-reference follow-up.
+HTTP/SQLite fixtures. Strict package lint passed. Looper evidence
+`TX3WMIKAGXJZLJOVJS4EN6ZSUI` records the affected legacy regressions and
+`git diff --check` passed on the exact clean candidate
+`8ab3b25bfe3fc4bcd85b676db2137506dfb2ff4d`. The required final development,
+normal and race sequence remains to be recorded after the canonical
+PR-reference follow-up.
 
 The local candidate is based on canonical `dev` at
 `83802941df1c46bc34ab53201d56811a0e353156`. The published Slice 3 branch

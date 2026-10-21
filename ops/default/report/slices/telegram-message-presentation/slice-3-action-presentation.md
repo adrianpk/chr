@@ -79,6 +79,7 @@ Successful development checks:
 
 - `go test ./internal/core ./internal/app -run '^Test(TelegramPresentation(Action|Control|Confirmation)|TelegramAuthoringPreparedIntent|TelegramHarnessSelection(Confirm|SendRetry))' -count=1 -timeout=3m`
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/core ./internal/app` — zero issues.
+- `go test ./internal/core ./internal/app -run '^Test(TelegramOperationAction|TelegramControl|TelegramHarness|TelegramAuthoringPrepared|TelegramWork(Extents|LostAck|StalePreview|Admission|Namespace|CommandBounds)|MaintenanceDBStatusReports)' -count=1 -timeout=3m`
 - `git diff --check`
 
 The normal selection took 1.226 seconds for core and 2.033 seconds for app,
@@ -88,13 +89,17 @@ original-result replay. The three-minute package budget is unchanged.
 
 The broader development legacy selection first exposed obsolete chat-audit
 assertions and a lost-ack injector limited to sendMessage. Those fixtures now
-check retained owner identity and document-upload acknowledgement loss; the
-corrected authoring/harness roots passed with the new presentation selection.
+check retained owner identity and document-upload acknowledgement loss. The
+complete affected legacy selection then passed in 27.933 seconds for core and
+43.048 seconds for app. Looper evidence `TX3WMIKAGXJZLJOVJS4EN6ZSUI`
+records that command followed by `git diff --check` on the exact clean candidate
+`8ab3b25bfe3fc4bcd85b676db2137506dfb2ff4d`. This is focused development
+evidence, separate from the required final command sequence.
 
 Final exact clean-HEAD evidence must be recorded through `looper validate`
 after canonical publication and the PR-reference commit: `make verify`, the
-configured normal selection, its race selection, affected legacy regressions,
-then `git diff --check`. No final gate or real Telegram client acceptance is
+configured normal selection, its race selection, then `git diff --check`.
+No final gate or real Telegram client acceptance is
 claimed here.
 
 ## Risks and Follow-ups
