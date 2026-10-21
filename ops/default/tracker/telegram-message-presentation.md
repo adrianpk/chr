@@ -31,7 +31,7 @@ Active slice: Slice 4 of 5, Progress, notifications and failure consistency.
 ## Tasks
 
 Slices 1-3 are delivered through PRs #424, #425 and #427. Slice 4 is active;
-its tasks and Slice 5 remain pending.
+T4.1 is implemented; T4.2-T4.3 and Slice 5 remain pending.
 The plan owns exact branch names, PR titles, report paths and focused commands.
 
 | Task | State | Commit | Required outcome |
@@ -46,7 +46,7 @@ The plan owns exact branch names, PR titles, report paths and focused commands.
 | T3.1 | delivered | `b7a1174a5d099a663c93ba4d746903725301b264` | Human guarded previews and controls |
 | T3.2 | delivered | `94975b70a20b87639e1df5ee1d9ebca4fbb741de` | Original operation, document and action bindings |
 | T3.3 | delivered | `099b9a965b0bbe2690ca0191c3d51250a39deadb` | Stale scope, ambiguity and replay regressions |
-| T4.1 | pending | pending | Progress, waits, failures and partial/final results |
+| T4.1 | implemented | `708afec21584e546624848391a287a59fb5da5d4` | Progress, waits, failures and partial/final results |
 | T4.2 | pending | pending | Notification sender and event snapshot integration |
 | T4.3 | pending | pending | Both-path faults, legacy records and truthful outcomes |
 | T5.1 | pending | pending | Complete producer and variant coverage |
@@ -94,8 +94,8 @@ regression and client result as each row is delivered.
 | 30 | Actionable malformed/stale record failure | Slice 3 | Changed: malformed JSON gives a concrete correction and unchanged-record outcome; retain stale revision/source and unsupported-lifecycle guards; `app/telegram_record_dispatch.go`; existing record action/live regressions. |
 | 31 | Exact work selection, policy, validation and scope | Slice 3 | Changed: human selection, target, policy, limits and validation; full selected source/contracts attached; incomplete scope refuses a prompt; `app/telegram_work_dispatch.go`, `service_workflow_selection.go`; `TestTelegramPresentationActionWork`, `TestTelegramPresentationConfirmationIncomplete`. |
 | 32 | Admission/current-owner/capacity state | Slice 3 | Changed: admission is distinct from execution/integration; owner and capacity failures are separate; `app/telegram_work_action.go`, `telegram_work_failure.go`; `TestTelegramWorkExtents`, `TestTelegramWorkLostAck`. |
-| 33 | Real progress, review and partial/final result | Slice 4 | pending |
-| 34 | Durable progress/recovery without a duplicate action | Slice 4 | pending |
+| 33 | Real progress, review and partial/final result | Slice 4 | Changed: human work/project view, actual counts, wait/stop/review and positive native-receipt distinction; `app/telegram_work_progress.go`; `TestTelegramPresentationProgressStates`, existing native evidence/automatic integration fixtures. |
+| 34 | Durable progress/recovery without a duplicate action | Slice 4 | Changed: frozen bounded presentation under the original monotonic revision; same-operation recovery and original retry allowance; `core/telegram_work_projection.go`; `TestTelegramPresentationProgressRetention`, `TestTelegramWorkProjection`, `TestTelegramWorkDeliveryFailure`. |
 | 35 | Exact control scope, effect and bounds | Slice 3 | Changed: exact control effect, bound scope and remaining allowance with complete confirmation export; `app/telegram_action_presentation.go`, `telegram_control_prepare.go`; `TestTelegramPresentationControlPreview`, existing lifecycle/decision regressions. |
 | 36 | Confirmed/replayed/stale control outcome | Slice 3 | Changed: actual control result and retained original receipt; no extra mutation on replay; `app/telegram_control_action.go`; existing lifecycle acknowledgement and stale-receipt regressions. |
 | 37 | Decision question and supported bound choices | Slice 3 | Changed: one actual question first, bounded choices and exact answer-preview command; complete questions/options/candidate bindings exported; `app/telegram_control_status.go`; `TestTelegramPresentationControlQuestions`. |
@@ -103,11 +103,11 @@ regression and client result as each row is delivered.
 | 39 | Explicit harness-change consequence | Slice 3 | Changed: new-operations-only preview, original save/cancel guards and retained result replay; `app/telegram_harness_prepare.go`, `telegram_harness_action.go`; `TestTelegramHarnessSelectionConfirm`, `TestTelegramHarnessSelectionSendRetry`. |
 | 40 | Original receipt, expired action and safe retry | Slice 3 | Changed: original saved result on repeat, current-preview recovery on unavailable actions; `app/telegram_action_dispatch.go`, `telegram_control_diagnostic.go`; `TestTelegramPresentationActionWork`, existing stale action/receipt regressions. |
 | 41 | Human button labels; original tokens/choice keys | Slice 3 | Changed: human labels with original token/choice keys; labels, choices and complete image are sealed together; `core/telegram_action_presentation.go`; `TestTelegramPresentationActionLabels`, `TestTelegramPresentationConfirmationGuards`. |
-| 42 | Queue rejection versus waiting and actual acceptance | Slice 4 | pending |
-| 43 | Uncertain send and bounded plain fallback | Slice 4 | pending |
-| 44 | Bounded text, Unicode and full-document route | Slice 4 | pending |
-| 45 | Unavailable service and preserved state | Slice 4 | pending |
-| 46 | Silent unauthorized rejection; local outage diagnosis | Slice 4 | pending |
+| 42 | Queue rejection versus waiting and actual acceptance | Slice 4 | Changed: full queue means the new request was not accepted; retained work and reserved controls stay available; `app/telegram_drain.go`, `core/telegram_intake_reserve.go`; `TestTelegramControlReserve`. |
+| 43 | Uncertain send and bounded plain fallback | Slice 4 | Changed: lost-ack repeat warning; retain original content, identities and bounded formatting fallback; `app/telegram_drain.go`; existing work/action/harness lost-ack and help-format HTTP regressions. |
+| 44 | Bounded text, Unicode and full-document route | Slice 4 | Changed: one bounded new plain view with narrowing/local inspection route, without automatic content chunks; keep stored legacy multipart ordering and formatted help; `core/telegram_response_chunks.go`; Unicode/legacy-part/help regressions. |
+| 45 | Unavailable service and preserved state | Slice 4 | Changed: failed read identifies the unavailable operation, preserved state and local doctor command; existing preparation/record outcomes retain their owners; `app/telegram_drain.go`; explicit service-failure coverage pending T4.3. |
+| 46 | Silent unauthorized rejection; local outage diagnosis | Slice 4 | Keep: unauthorized/revoked input and delivery remain silent; poll/config failures use local-only classified diagnostics; `app/telegram_failure.go`, `telegram_serve.go`, `telegram_drain.go`; explicit authorization/outage reuse pending T4.3. |
 | 47 | Concise workflow notifications and full details | Slice 4 | pending |
 | 48 | Clearly labelled notification test | Slice 4 | pending |
 
@@ -135,7 +135,7 @@ regression and client result as each row is delivered.
 - Slice 1: delivered through [#424](https://forge.adrianpk.com/adrianpk/chr/pulls/424) at `a2bb0974eac21b1fe33cac78e21f4c1845871e96`.
 - Slice 2: delivered through [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425) at `a5c6a7e068a8e5ec547d13d73d39afe1f0477335`.
 - Slice 3: delivered through [PR #427](https://forge.adrianpk.com/adrianpk/chr/pulls/427) at `a4d0a865e8bb32a3caac65395a28839b573ed369`.
-- Slice 4: active; T4.1-T4.3 pending.
+- Slice 4: active; T4.1 implemented, T4.2-T4.3 pending; report drafting.
 - Slice 5: pending.
 - Mobile/desktop and user-operated journey evidence: pending.
 - Exact final candidate and scheduled nightly: pending.
@@ -175,4 +175,5 @@ The dedicated Slice 4 branch starts from exact canonical `dev`
 `a4d0a865e8bb32a3caac65395a28839b573ed369`. T4.1-T4.3 cover progress,
 receiver failures and the existing notification sender/repository. The
 [Slice 4 report](../report/slices/telegram-message-presentation/slice-4-status-presentation.md)
-is drafting; implementation and final normal/race evidence remain pending.
+is drafting. T4.1 normal, focused race and strict lint checks passed; T4.2-T4.3
+implementation and final exact-head validation remain pending.
