@@ -1,6 +1,6 @@
 # Slice 4: Progress, Notifications and Failure Consistency
 
-Status: drafting
+Status: reviewing
 Delivery set: Telegram Message Presentation
 Plan: [ops/default/plan/telegram-message-presentation.md](../../../plan/telegram-message-presentation.md)
 Tracker: [ops/default/tracker/telegram-message-presentation.md](../../../tracker/telegram-message-presentation.md)
@@ -68,6 +68,7 @@ Activated from canonical `dev` at
 `a4d0a865e8bb32a3caac65395a28839b573ed369` after verified PR #427 integration.
 T4.1 is `708afec21584e546624848391a287a59fb5da5d4`.
 T4.2 is `04fddeb15cf6184f4c263a55bdb222fcd74a6b1e`.
+T4.3 is `01d9be1341e5c207c1748a22ced4a5aac8eafe1d`.
 
 Migration 28 adds nullable notification presentation and document mappings,
 transport evidence and bounded safe retention. Historical NULL/version-zero
