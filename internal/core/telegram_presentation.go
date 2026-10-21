@@ -29,6 +29,8 @@ type TelegramPresentation struct {
 	Version          int    `json:"version"`
 	TemplateRevision string `json:"template_revision"`
 	TelegramMessageBlocks
+	DocumentID    string               `json:"document_id,omitempty"`
+	DocumentHash  string               `json:"document_hash,omitempty"`
 	PlainFallback string               `json:"plain_fallback"`
 	Entities      []TelegramTextEntity `json:"entities,omitempty"`
 }
@@ -38,9 +40,13 @@ const telegramPresentationLimit = 1800
 // RenderTelegramMessage bounds visible blocks before computing entity offsets.
 // A shortened body never consumes the space reserved for its next instruction.
 func RenderTelegramMessage(message TelegramMessageBlocks) TelegramPresentation {
-	message = boundTelegramMessage(normalizeTelegramMessage(message))
+	return renderTelegramMessage(message, telegramPresentationLimit, "text-v1")
+}
 
-	result := TelegramPresentation{Version: 1, TemplateRevision: "text-v1", TelegramMessageBlocks: message}
+func renderTelegramMessage(message TelegramMessageBlocks, limit int, revision string) TelegramPresentation {
+	message = boundTelegramMessage(normalizeTelegramMessage(message), limit)
+
+	result := TelegramPresentation{Version: 1, TemplateRevision: revision, TelegramMessageBlocks: message}
 
 	result.PlainFallback = joinTelegramMessageBlocks(message)
 	if message.Content != "" {
@@ -67,22 +73,24 @@ func normalizeTelegramMessage(message TelegramMessageBlocks) TelegramMessageBloc
 	return message
 }
 
-func boundTelegramMessage(message TelegramMessageBlocks) TelegramMessageBlocks {
-	secondaryLimit := telegramPresentationLimit - 64
+func boundTelegramMessage(message TelegramMessageBlocks, limit int) TelegramMessageBlocks {
+	blockLimit := telegramMessageBlockLimit(limit)
+
+	secondaryLimit := limit - 64
 	if message.InitialText != "" || message.Content != "" {
-		secondaryLimit = 600
+		secondaryLimit = blockLimit
 	}
 
 	message.SecondaryText = boundTelegramPresentationBlock(message.SecondaryText, secondaryLimit)
 
-	remaining := telegramPresentationLimit - 64 - telegramVisibleUnits(message.SecondaryText)
+	remaining := limit - 64 - telegramVisibleUnits(message.SecondaryText)
 	if message.SecondaryText != "" && (message.InitialText != "" || message.Content != "") {
 		remaining -= 2
 	}
 
 	initialLimit := remaining
 	if message.Content != "" && message.InitialText != "" {
-		initialLimit = min(600, remaining-2)
+		initialLimit = min(blockLimit, remaining-2)
 	}
 
 	message.InitialText = boundTelegramPresentationBlock(message.InitialText, initialLimit)
@@ -142,4 +150,11 @@ func boundTelegramPresentationBlock(text string, limit int) string {
 	const marker = "\n[shortened]"
 
 	return telegramResponsePrefix(text, max(0, limit-len(marker))) + marker
+}
+
+func telegramMessageBlockLimit(limit int) int {
+	if limit < telegramPresentationLimit {
+		return 150
+	}
+	return 600
 }

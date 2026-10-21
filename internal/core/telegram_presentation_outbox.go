@@ -38,7 +38,7 @@ func queueTelegramPresentation(ctx context.Context, tx *sql.Tx, update TelegramR
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx, "UPDATE telegram_outbox SET presentation=? WHERE bot_id=? AND event_key=?", string(payload), update.Peer.BotID, fmt.Sprintf("update:%d", update.UpdateID))
+	_, err = tx.ExecContext(ctx, "UPDATE telegram_outbox SET presentation=?,presentation_hash=? WHERE bot_id=? AND event_key=?", string(payload), workflowHash(payload), update.Peer.BotID, fmt.Sprintf("update:%d", update.UpdateID))
 	if err != nil {
 		return err
 	}
@@ -56,17 +56,37 @@ func decodeTelegramPresentation(payload string, delivery *TelegramReceiverDelive
 		return err
 	}
 
-	if presentation.Version != 1 || presentation.TemplateRevision != "text-v1" {
+	if presentation.Version != 1 || (presentation.TemplateRevision != "text-v1" && presentation.TemplateRevision != "document-v1") {
 		return errors.New("unsupported telegram presentation version")
 	}
 
 	rendered := RenderTelegramMessage(presentation.TelegramMessageBlocks)
+	if presentation.TemplateRevision == "document-v1" {
+		rendered = RenderTelegramDocument(presentation.TelegramMessageBlocks)
+	}
+
 	if rendered.PlainFallback != presentation.PlainFallback || delivery.Text != presentation.PlainFallback || !slices.Equal(rendered.Entities, presentation.Entities) {
 		return errors.New("invalid retained telegram presentation")
 	}
 
 	delivery.Presentation = &presentation
 	delivery.PlainText = presentation.PlainFallback
+
+	return nil
+}
+
+func decodeTelegramPresentationHash(payload, hash string, delivery *TelegramReceiverDelivery) error {
+	if hash != "" && workflowHash([]byte(payload)) != hash {
+		return errors.New("retained telegram presentation hash mismatch")
+	}
+
+	if err := decodeTelegramPresentation(payload, delivery); err != nil {
+		return err
+	}
+
+	if delivery.DocumentID != "" && (delivery.Presentation == nil || delivery.Presentation.DocumentID != delivery.DocumentID || hash == "") {
+		return ErrTelegramDocumentUnavailable
+	}
 
 	return nil
 }
