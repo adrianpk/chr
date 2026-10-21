@@ -18,16 +18,21 @@ type telegramInlineKeyboard struct {
 // SendAction sends plain text and optional choices for an already retained action.
 // Buttons contain only the same opaque binding used by explicit and reply answers.
 func (a TelegramReceiverAPI) SendAction(ctx context.Context, token string, peer TelegramPeerIdentity, text, actionToken string, choices []string) (int64, error) {
-	return a.sendAction(ctx, token, peer, text, "", actionToken, choices)
+	return a.sendAction(ctx, token, peer, text, "", actionToken, choices, nil)
 }
 
 // SendMarkdown sends one bounded legacy-Markdown help body without retrying.
 // The durable outbox owns format fallback and every actual send attempt.
 func (a TelegramReceiverAPI) SendMarkdown(ctx context.Context, token string, peer TelegramPeerIdentity, text string) (int64, error) {
-	return a.sendAction(ctx, token, peer, text, "Markdown", "", nil)
+	return a.sendAction(ctx, token, peer, text, "Markdown", "", nil, nil)
 }
 
-func (a TelegramReceiverAPI) sendAction(ctx context.Context, token string, peer TelegramPeerIdentity, text, parseMode, actionToken string, choices []string) (int64, error) {
+// SendPresentation sends frozen visible text with explicit formatting entities.
+func (a TelegramReceiverAPI) SendPresentation(ctx context.Context, token string, peer TelegramPeerIdentity, text string, entities []TelegramTextEntity) (int64, error) {
+	return a.sendAction(ctx, token, peer, text, "", "", nil, entities)
+}
+
+func (a TelegramReceiverAPI) sendAction(ctx context.Context, token string, peer TelegramPeerIdentity, text, parseMode, actionToken string, choices []string, entities []TelegramTextEntity) (int64, error) {
 	if !validTelegramReceiverText(text) || peer.ChatID == 0 || peer.TopicID < 0 {
 		return 0, errors.New("invalid telegram delivery")
 	}
@@ -42,8 +47,9 @@ func (a TelegramReceiverAPI) sendAction(ctx context.Context, token string, peer 
 		TopicID   int64                   `json:"message_thread_id,omitempty"`
 		Text      string                  `json:"text"`
 		ParseMode string                  `json:"parse_mode,omitempty"`
+		Entities  []TelegramTextEntity    `json:"entities,omitempty"`
 		Keyboard  *telegramInlineKeyboard `json:"reply_markup,omitempty"`
-	}{peer.ChatID, peer.TopicID, text, parseMode, keyboard}
+	}{peer.ChatID, peer.TopicID, text, parseMode, entities, keyboard}
 
 	data, err := a.call(ctx, token, "sendMessage", payload, 10*time.Second)
 	if err != nil {

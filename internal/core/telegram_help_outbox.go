@@ -38,8 +38,8 @@ func (s *TelegramReceiverStore) QueueFormattedReadResponse(ctx context.Context, 
 // SelectTelegramPlainFallback retains one definite format rejection before another
 // send can be reserved. It preserves response identity and all attempt counters.
 func (s *TelegramReceiverStore) SelectTelegramPlainFallback(ctx context.Context, id string, now time.Time) (bool, error) {
-	result, err := s.db.ExecContext(ctx, `UPDATE telegram_outbox SET plain_fallback=1,state='pending',retry_at=NULL,last_error_code='format_rejected',updated_at=?
-WHERE id=? AND state='sending' AND parse_mode='Markdown' AND plain_fallback=0 AND attempts<5`, formatProjectTime(now), id)
+	result, err := s.db.ExecContext(ctx, `UPDATE telegram_outbox SET plain_fallback=CASE WHEN parse_mode='Markdown' THEN 1 ELSE plain_fallback END,presentation_fallback=CASE WHEN presentation IS NOT NULL THEN 1 ELSE presentation_fallback END,state='pending',retry_at=NULL,last_error_code='format_rejected',updated_at=?
+WHERE id=? AND state='sending' AND (parse_mode='Markdown' OR presentation IS NOT NULL) AND plain_fallback=0 AND presentation_fallback=0 AND attempts<5`, formatProjectTime(now), id)
 	if err != nil {
 		return false, err
 	}

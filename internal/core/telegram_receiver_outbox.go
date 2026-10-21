@@ -24,6 +24,7 @@ type TelegramReceiverDelivery struct {
 	ParseMode     string
 	PlainText     string
 	PlainFallback bool
+	Presentation  *TelegramPresentation
 }
 
 // QueueReadResponse records a response and acknowledges its retained input atomically.
@@ -127,7 +128,7 @@ func (s *TelegramReceiverStore) RejectPendingUpdate(ctx context.Context, update 
 
 // DueDeliveries is bounded; sending rows after a crash retain uncertainty and budgets.
 func (s *TelegramReceiverStore) DueDeliveries(ctx context.Context, botID int64, now time.Time) ([]TelegramReceiverDelivery, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT o.id,o.chat_id,o.topic_id,o.user_id,o.text,o.state,o.attempts,o.config_digest,COALESCE(o.action_token,''),COALESCE((SELECT allowed_choices FROM telegram_actions WHERE token=o.action_token),'[]'),o.parse_mode,o.plain_text,o.plain_fallback FROM telegram_outbox o
+	rows, err := s.db.QueryContext(ctx, `SELECT o.id,o.chat_id,o.topic_id,o.user_id,o.text,o.state,o.attempts,o.config_digest,COALESCE(o.action_token,''),COALESCE((SELECT allowed_choices FROM telegram_actions WHERE token=o.action_token),'[]'),o.parse_mode,o.plain_text,(o.plain_fallback OR o.presentation_fallback),COALESCE(o.presentation,'') FROM telegram_outbox o
 WHERE o.bot_id=? AND o.state IN ('pending','sending','uncertain') AND o.attempts<5 AND (o.retry_at IS NULL OR o.retry_at<=?)
 AND NOT EXISTS(SELECT 1 FROM telegram_outbox earlier WHERE earlier.bot_id=o.bot_id AND earlier.chat_id=o.chat_id AND earlier.topic_id=o.topic_id AND earlier.user_id=o.user_id AND earlier.event_key=o.event_key AND earlier.part_index<o.part_index AND earlier.state!='delivered')
 AND (o.kind!='progress' OR o.attempts>0 OR NOT EXISTS(SELECT 1 FROM telegram_outbox recent WHERE recent.conversation_id=o.conversation_id AND recent.kind='progress' AND recent.total_attempts>0 AND recent.event_key!=o.event_key AND recent.updated_at>?))
@@ -145,12 +146,16 @@ ORDER BY CASE (SELECT u.processing_lane FROM telegram_updates u WHERE u.bot_id=o
 	for rows.Next() {
 		delivery := TelegramReceiverDelivery{Peer: TelegramPeerIdentity{BotID: botID}}
 
-		var choices string
-		if err := rows.Scan(&delivery.ID, &delivery.Peer.ChatID, &delivery.Peer.TopicID, &delivery.Peer.UserID, &delivery.Text, &delivery.State, &delivery.Attempts, &delivery.ConfigDigest, &delivery.ActionToken, &choices, &delivery.ParseMode, &delivery.PlainText, &delivery.PlainFallback); err != nil {
+		var choices, presentation string
+		if err := rows.Scan(&delivery.ID, &delivery.Peer.ChatID, &delivery.Peer.TopicID, &delivery.Peer.UserID, &delivery.Text, &delivery.State, &delivery.Attempts, &delivery.ConfigDigest, &delivery.ActionToken, &choices, &delivery.ParseMode, &delivery.PlainText, &delivery.PlainFallback, &presentation); err != nil {
 			return nil, err
 		}
 
 		if err := json.Unmarshal([]byte(choices), &delivery.ActionChoices); err != nil {
+			return nil, err
+		}
+
+		if err := decodeTelegramPresentation(presentation, &delivery); err != nil {
 			return nil, err
 		}
 

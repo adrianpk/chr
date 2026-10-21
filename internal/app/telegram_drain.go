@@ -124,6 +124,17 @@ func (r telegramReceiver) sendReservedDelivery(ctx context.Context, delivery cor
 }
 
 func (r telegramReceiver) sendDeliveryBody(ctx context.Context, delivery core.TelegramReceiverDelivery, text string) (int64, error) {
+	if delivery.Presentation != nil && !delivery.PlainFallback {
+		entities := append([]core.TelegramTextEntity(nil), delivery.Presentation.Entities...)
+		prefixUnits := len([]rune(text)) - len([]rune(delivery.Text))
+		// The retry notice contains only ASCII; its length is also its UTF-16 length.
+		for index := range entities {
+			entities[index].Offset += prefixUnits
+		}
+
+		return r.api.SendPresentation(ctx, r.token, delivery.Peer, text, entities)
+	}
+
 	if delivery.ParseMode == "Markdown" && !delivery.PlainFallback {
 		return r.api.SendMarkdown(ctx, r.token, delivery.Peer, text)
 	}
@@ -133,7 +144,7 @@ func (r telegramReceiver) sendDeliveryBody(ctx context.Context, delivery core.Te
 
 func (r telegramReceiver) failedDelivery(ctx context.Context, delivery core.TelegramReceiverDelivery, failure error) error {
 	var apiErr *core.TelegramAPIError
-	if delivery.ParseMode == "Markdown" && !delivery.PlainFallback && errors.As(failure, &apiErr) && apiErr.Code == "format_rejected" {
+	if (delivery.ParseMode == "Markdown" || delivery.Presentation != nil) && !delivery.PlainFallback && errors.As(failure, &apiErr) && apiErr.Code == "format_rejected" {
 		selected, err := r.store.SelectTelegramPlainFallback(ctx, delivery.ID, time.Now())
 		if err != nil {
 			return err
