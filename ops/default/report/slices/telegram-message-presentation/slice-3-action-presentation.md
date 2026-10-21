@@ -5,7 +5,7 @@ Delivery set: Telegram Message Presentation
 Plan: [ops/default/plan/telegram-message-presentation.md](../../../plan/telegram-message-presentation.md)
 Tracker: [ops/default/tracker/telegram-message-presentation.md](../../../tracker/telegram-message-presentation.md)
 Branch: `feat/slice-3-telegram-action-presentation`
-PR: pending
+PR: [#427](https://forge.adrianpk.com/adrianpk/chr/pulls/427)
 
 ## Purpose
 
@@ -107,8 +107,9 @@ claimed here.
 History reconciliation retains the earlier published closure/blocker commit
 as an ancestor of the current candidate. Conflict resolution keeps the current
 Slice 2 delivery evidence, active Slice 3 implementation and resolved admission
-prerequisite. Runtime files are unchanged. Publication can use an ordinary
-fast-forward push; final PR-head validation remains required.
+prerequisite. Runtime files are unchanged. The reconciled branch is published
+through an ordinary fast-forward push and PR #427 targets `dev`; final PR-head
+validation follows this reference commit.
 
 Selections whose complete source/contract view exceeds the retained bounds
 require a smaller selection or local inspection before a new confirmation.

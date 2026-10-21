@@ -134,7 +134,7 @@ regression and client result as each row is delivered.
 - Specification/model promotion and implementation approval: completed on 2026-10-21.
 - Slice 1: delivered through [#424](https://forge.adrianpk.com/adrianpk/chr/pulls/424) at `a2bb0974eac21b1fe33cac78e21f4c1845871e96`.
 - Slice 2: delivered through [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425) at `a5c6a7e068a8e5ec547d13d73d39afe1f0477335`.
-- Slice 3: T3.1-T3.3 implemented; report reviewing; canonical PR pending. Prerequisite repairs integrated through [#426](https://forge.adrianpk.com/adrianpk/chr/pulls/426) at `ff5c7d3838d8b2dea472485358d0842c69059e3f`.
+- Slice 3: T3.1-T3.3 implemented; report reviewing; canonical [PR #427](https://forge.adrianpk.com/adrianpk/chr/pulls/427) open against `dev`. Prerequisite repairs integrated through [#426](https://forge.adrianpk.com/adrianpk/chr/pulls/426) at `ff5c7d3838d8b2dea472485358d0842c69059e3f`.
 - Slices 4-5: pending.
 - Mobile/desktop and user-operated journey evidence: pending.
 - Exact final candidate and scheduled nightly: pending.
@@ -173,5 +173,6 @@ PR-reference follow-up.
 The candidate is based on canonical `dev` at
 `83802941df1c46bc34ab53201d56811a0e353156`. The earlier published closure/blocker
 commit is retained through history reconciliation. Current implementation and
-validation evidence are preserved. Ordinary branch publication, canonical PR
-references and final exact-head checks remain before integration.
+validation evidence are preserved. The reconciled branch is published through
+an ordinary fast-forward push. Canonical [PR #427](https://forge.adrianpk.com/adrianpk/chr/pulls/427)
+targets `dev`; its reference follow-up precedes the final exact-head checks.
