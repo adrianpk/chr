@@ -43,6 +43,45 @@ configuration. Inspection reads policy; it does not certify the remote server.
 
 ## Verify support before admitting work
 
+Configure the trusted publisher in the chr host configuration directory, outside
+the worker project. `native-publishers.json` must be a regular private file with
+mode `0600`, at most 64 KiB and at most 64 profiles. With `--dev-root ROOT`, use
+`ROOT/config/chr/native-publishers.json`; otherwise use the normal chr
+configuration directory. Each profile names one exact repository and target:
+
+```json
+{
+  "schema": "chr-native-publishers/v1",
+  "profiles": [
+    {
+      "repository": "https://forge.example.invalid/team/project",
+      "target_ref": "refs/heads/dev",
+      "transport": "https://forge.example.invalid/team/project.git",
+      "credential_ref": "project-publisher",
+      "api_identity_fingerprint": "<SHA-256 of the canonical API identity>",
+      "observation_contract": "forgejo_same_pr_git_auto_merge/v1",
+      "certified_methods": ["rebase"],
+      "certification_ref": "<retained acceptance evidence for this repository and method>"
+    }
+  ]
+}
+```
+
+The identity fingerprint hashes compact UTF-8 JSON with fields `id` and `login`,
+in that order, from the publisher's authenticated `/user` response. The Git
+transport uses its existing credential store; `credential_ref` identifies that
+host credential binding without containing its secret. Populate certification
+from successful native-publication acceptance for that actual repository and
+method. Configuring a profile authorizes publication to its exact target and
+rewriting only the source proven to belong to the current invocation. A branch
+name prefix does not prove ownership.
+
+The service reopens this host profile and checks the current API identity,
+repository policy and prepared-result transport before publication. Removing
+the profile or changing its identity, transport or certification invalidates
+the retained publication grant. Missing or unsupported profiles block; they
+never fall back to the provider merge API.
+
 The configured trusted publisher must verify the actual canonical repository and
 both full refs before native work is admitted: the source is in the same
 repository and rewrite-authorized, the target permits the authorized

@@ -30,7 +30,7 @@ func (s service) ReadWorkflowIntegrationDecisions(ctx context.Context, id string
 // RecordWorkflowIntegrationDecisions delegates bounded ambiguity to the common
 // owner rather than creating an adapter-owned approval record.
 func (s service) RecordWorkflowIntegrationDecisions(ctx context.Context, request core.WorkflowIntegrationDecisionRequest) (core.WorkflowIntegrationDecisions, error) {
-	store, provider, err := s.workflowReviewDependencies()
+	store, provider, err := s.workflowReviewDependencies(request.InvocationID)
 	if err != nil {
 		return core.WorkflowIntegrationDecisions{}, err
 	}
@@ -41,7 +41,7 @@ func (s service) RecordWorkflowIntegrationDecisions(ctx context.Context, request
 // AnswerWorkflowIntegrationDecision requires the displayed decision and all
 // current mutation guards. The publication policy remains a separate authority.
 func (s service) AnswerWorkflowIntegrationDecision(ctx context.Context, request core.WorkflowIntegrationAnswerRequest) (core.WorkflowIntegrationDecisions, error) {
-	store, provider, err := s.workflowReviewDependencies()
+	store, provider, err := s.workflowReviewDependencies(request.InvocationID)
 	if err != nil {
 		return core.WorkflowIntegrationDecisions{}, err
 	}

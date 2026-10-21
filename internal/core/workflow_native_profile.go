@@ -32,6 +32,7 @@ type WorkflowNativePolicy struct {
 	HostCandidateReview           bool               `json:"host_candidate_review"`
 	ReviewMode                    ReviewWorkflowMode `json:"review_mode"`
 	CredentialIdentityFingerprint string             `json:"credential_identity_fingerprint"`
+	APIIdentityFingerprint        string             `json:"api_identity_fingerprint,omitempty"`
 	ObservationContract           string             `json:"observation_contract"`
 	CertifiedMethods              []string           `json:"certified_methods"`
 }

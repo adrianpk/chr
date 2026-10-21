@@ -38,7 +38,7 @@ func (s service) ReadWorkflowSubmission(ctx context.Context, id string) (core.Wo
 }
 
 func (s service) workflowSubmissionDependencies(ctx context.Context, id string) (*core.WorkflowStore, core.WorkflowPublicationProvider, core.WorkflowInvocation, error) {
-	store, guarded, err := s.workflowPreparationDependencies()
+	store, guarded, err := s.workflowPreparationDependencies(id)
 	if err != nil {
 		return nil, nil, core.WorkflowInvocation{}, err
 	}

@@ -35,7 +35,9 @@ delivered an explanation export rather than the original file. The authorized
 repair distinguishes document-read intent from explanation, reads the selected
 canonical dump/spec/plan without generation, and freezes its full original
 bytes for delivery. Missing documents and changed sources remain failures.
-Mobile/desktop acceptance and user-operated native completion remain pending.
+The desktop retry subsequently delivered all 937 bytes of the original
+specification. Mobile/desktop coverage and user-operated native completion
+remain pending.
 T5.3 product guidance is prepared: the existing User Guide, Telegram transport
 and notification references describe the actual help groups, attachment bounds,
 complete confirmation scope, retry behavior and native evidence. Unreleased
@@ -61,6 +63,23 @@ explanation operation with a validated dump/spec/plan selector and an exact
 observed conversation. The shared service binds the original path and hash;
 the read cannot substitute model context excerpts or generated prose. The
 existing explanation route and retained requests remain compatible.
+
+Real work admission exposed another acceptance defect: the application supplied
+the ordinary remote adapter without the prepared-native capability used by the
+test providers. The validated task and canonical PR remained waiting while
+bookkeeping revisions repeatedly generated identical progress notices. Commit
+`9c5cea5de904d0cd8f84d847e746765912a70737` suppresses unchanged notices across
+receiver restart while preserving the observed native revision and real changes.
+
+The native integration repair binds the default service's preparation, review,
+controls and continuation to the exact retained invocation. A private host
+publisher profile supplies the certified repository/target, transport and
+credential binding. Current source ownership, API identity, repository policy
+and actual receive-pack capability are checked before publication. Host profile
+changes invalidate the existing grant. No branch prefix, source-only merge API
+or worker-reported validation can authorize publication. The same configured
+publisher performs the existing atomic exchange and retains its original PR.
+The setup and native-integration reference document the host profile format.
 
 ## Files of Interest
 
@@ -114,6 +133,21 @@ unchanged authoring state and generation count, missing/changed source and root
 guards, and original bytes after SQLite reopen and an independent file edit.
 Final repair-candidate checks and the actual client retry are recorded separately
 from the earlier candidate's receipt.
+
+The native provider regression first failed with
+`production provider cannot prepare native publication`. After the repair:
+
+- `go test ./internal/core ./internal/app -run '^Test(NativeHost(Publication|Denials)|NativePublisherProfiles|NativeCapability|NativePreparation(Methods|Admission)|ServiceNative(Provider|Review))$' -count=1 -timeout=3m` passed, core/app in 40.549/13.969 seconds.
+- `go test -race ./internal/core -run '^TestNativeHost(Publication|Denials)$' -count=1 -timeout=3m` passed in 19.049 seconds.
+- `go test -race ./internal/core ./internal/app -run '^Test(NativeHost|NativePublisherProfiles|ServiceNativeProvider)$' -count=1 -timeout=3m` passed the profile and service-wiring roots; the host-publication roots are covered by the separate command above.
+- A private read-only preflight passed against the retained real invocation and
+  canonical PR, using existing QA credentials and repository/method certification.
+
+An earlier broad prefix selection exceeded the three-minute package budget
+while enumerating unrelated native review-capability cases. That incomplete
+run is retained as failed evidence; the bounded exact-root selection above is
+the focused regression proof. Clean-candidate development checks and activation
+of this provider repair remain separate from these local results.
 
 ## Risks and Follow-ups
 

@@ -77,6 +77,16 @@ blocks protected branches and nonempty enforced-rule responses. Supporting those
 policies requires equivalent certified enforcement; existing protections remain
 in place while publication is blocked.
 
+The default application service connects the remote adapter to the invocation's
+retained source ownership and the host's private `native-publishers.json` file.
+Each host profile binds one canonical repository and full target ref, Git
+transport, credential reference, API identity fingerprint, observation contract
+and certified methods with an acceptance-evidence reference. The file is bounded
+to 64 KiB and 64 unique repository/target pairs. Unknown fields, duplicate
+profiles, unsupported methods, missing certification or nonprivate files reject
+the publisher. See [Configure native integration](../how-to/configure-native-integration.md)
+for its format and location.
+
 | Condition | Required action |
 | --- | --- |
 | `profile_disabled` | Explicitly select the authorized profile. |

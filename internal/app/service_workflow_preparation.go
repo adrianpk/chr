@@ -9,7 +9,7 @@ import (
 
 // PrepareWorkflowSliceIntegration runs the shared guarded combined-result gate.
 func (s service) PrepareWorkflowSliceIntegration(ctx context.Context, id string) (core.WorkflowIntegrationCandidate, error) {
-	store, provider, err := s.workflowPreparationDependencies()
+	store, provider, err := s.workflowPreparationDependencies(id)
 	if err != nil {
 		return core.WorkflowIntegrationCandidate{}, err
 	}
@@ -29,7 +29,7 @@ func (s service) PrepareWorkflowSliceIntegration(ctx context.Context, id string)
 
 // CheckWorkflowPublicationGuard returns exact current authority for submission.
 func (s service) CheckWorkflowPublicationGuard(ctx context.Context, id string) (core.WorkflowPublicationGuard, error) {
-	store, provider, err := s.workflowPreparationDependencies()
+	store, provider, err := s.workflowPreparationDependencies(id)
 	if err != nil {
 		return core.WorkflowPublicationGuard{}, err
 	}
@@ -37,8 +37,8 @@ func (s service) CheckWorkflowPublicationGuard(ctx context.Context, id string) (
 	return store.CheckWorkflowPublicationGuard(ctx, id, provider)
 }
 
-func (s service) workflowPreparationDependencies() (*core.WorkflowStore, core.WorkflowPublicationGuardProvider, error) {
-	store, provider, err := s.workflowReviewDependencies()
+func (s service) workflowPreparationDependencies(id string) (*core.WorkflowStore, core.WorkflowPublicationGuardProvider, error) {
+	store, provider, err := s.workflowReviewDependencies(id)
 	if err != nil {
 		return nil, nil, err
 	}

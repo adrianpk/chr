@@ -92,6 +92,10 @@ func (adapter RemoteReviewAdapter) finishWorkflowNativeCapability(ctx context.Co
 		return capability, err
 	}
 
+	if policy.APIIdentityFingerprint != "" && identity != policy.APIIdentityFingerprint {
+		return capability, fmt.Errorf("%w: publisher identity changed", ErrWorkflowConflict)
+	}
+
 	capability.CredentialIdentityFingerprint = workflowHash([]byte(policy.CredentialIdentityFingerprint + "\x00" + identity))
 
 	capability.Unsupported = append(capability.Unsupported, reasons...)

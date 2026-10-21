@@ -9,7 +9,7 @@ import (
 // AdvanceWorkflowSliceIntegration reconciles delivery before guarded publication.
 // Adapters share this operation; it never starts another task or slice.
 func (s service) AdvanceWorkflowSliceIntegration(ctx context.Context, id string, reviewer []string) (core.WorkflowIntegrationProgress, error) {
-	store, provider, err := s.workflowReviewDependencies()
+	store, provider, err := s.workflowReviewDependencies(id)
 	if err != nil {
 		return core.WorkflowIntegrationProgress{}, err
 	}
@@ -32,6 +32,10 @@ func (s service) AdvanceWorkflowSliceIntegration(ctx context.Context, id string,
 
 func bindWorkflowNativePublicationPorts(ports *core.WorkflowPublicationPorts, run core.WorkflowInvocation) {
 	ports.NativePublisher = core.NewWorkflowGitPublisher(run.Selection.Target.Repository, run.Selection.Target.Repository)
+	if publisher, ok := ports.Provider.(core.WorkflowGitPublisher); ok {
+		ports.NativePublisher = publisher
+	}
+
 	if observer, ok := ports.Provider.(core.WorkflowNativePublicationObserver); ok {
 		ports.NativeObserver = observer
 	}
