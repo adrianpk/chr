@@ -14,8 +14,12 @@ func telegramWorkFailure(failure error) string {
 		return "Work conflict: the displayed selection, policy, target or authority changed. Read current native work before requesting a new preview."
 	}
 
-	if errors.Is(failure, core.ErrWorkflowOwned) || errors.Is(failure, core.ErrWorkflowCapacity) {
-		return "Native work is already owned or capacity is occupied. Inspect the existing invocation before requesting another admission."
+	if errors.Is(failure, core.ErrWorkflowOwned) {
+		return "This selection already has an execution owner. Inspect the retained work before requesting another start."
+	}
+
+	if errors.Is(failure, core.ErrWorkflowCapacity) {
+		return "Execution capacity is occupied. This request has no confirmed new admission. Inspect active work before retrying."
 	}
 
 	return "Native work is unavailable. Inspect the project's workflow readiness; this request has no confirmed admission."
@@ -46,5 +50,5 @@ func (r telegramReceiver) finishWorkActionFailure(ctx context.Context, claim cor
 		return err
 	}
 
-	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{State: "blocked", Facts: facts, Text: text, ConfigDigest: config.Digest()}, time.Now())
+	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{Message: telegramOutcomeMessage("32", text), State: "blocked", Facts: facts, Text: text, ConfigDigest: config.Digest()}, time.Now())
 }

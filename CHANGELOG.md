@@ -205,6 +205,9 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 - Telegram `/help` groups all available commands by category, with complete
   arguments on separate readable lines and a plain-text fallback when Telegram
   rejects the formatting.
+- Telegram confirmations pair short scope previews with complete attached details.
+  Buttons distinguish preparing a ticket, starting work and applying a control.
+  Retried confirmations retain their original scope and saved result.
 - Updated the Web UI with editable ticket details and comments, shared case
   editing panels, and dialogs to create, edit and append to dumps. Successful
   dump saves close the dialog and keep the catalog open.

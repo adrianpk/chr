@@ -112,7 +112,7 @@ func (r telegramReceiver) finishControlAction(ctx context.Context, claim core.Te
 		return err
 	}
 
-	result := core.TelegramActionResult{State: state, ReceiptRef: receipt, Facts: facts, Text: text, ConfigDigest: config.Digest()}
+	result := core.TelegramActionResult{Message: telegramOutcomeMessage("36", text), State: state, ReceiptRef: receipt, Facts: facts, Text: text, ConfigDigest: config.Digest()}
 	if state == "confirmed" {
 		result.Invocation = &core.TelegramInvocationBinding{ID: status.ID, Revision: status.Revision}
 		result.InvocationPhase = telegramWorkObservation(status).Phase

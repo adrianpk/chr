@@ -72,7 +72,7 @@ func telegramWorkPreviewText(preview WorkflowBoundPreview) string {
 	var text strings.Builder
 
 	selection, policy, execution := preview.View.Preview, preview.View.Policy, preview.View.ExecutionPolicy
-	fmt.Fprintf(&text, "Start %s %s?\n\nSelected tickets: %d. Publication: %s (%s).\n", strings.ReplaceAll(selection.Selector.Extent, "_", " "), selection.Selector.Identity, selection.Total, policy.Mode, policy.Method)
+	fmt.Fprintf(&text, "Start %s %s?\n\nSelected tickets: %d. Publication: %s (%s).\nTarget: %s\n", strings.ReplaceAll(selection.Selector.Extent, "_", " "), selection.Selector.Identity, selection.Total, policy.Mode, policy.Method, preview.View.Target.Repository)
 	fmt.Fprintf(&text, "Limits: %d worker attempts; %ds per worker; %ds validation (zero uses each ticket contract). Include later tickets: %t.\n", execution.MaxWorkerAttempts, execution.WorkerTimeoutSeconds, execution.ValidationTimeoutSeconds, execution.IncludeLaterTickets)
 
 	for _, member := range selection.Members[:min(8, len(selection.Members))] {
@@ -119,5 +119,5 @@ func (r telegramReceiver) finishWorkAdmission(ctx context.Context, claim core.Te
 
 	text := fmt.Sprintf("Work admitted: %s %s.\n\nState: %s; selected tickets: %d. Execution, validation and integration are reported separately.\nUse /status %s to inspect this work.", run.Selection.Selector.Extent, run.Selection.Selector.Identity, run.Status, len(run.Members), run.ID)
 
-	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{State: "confirmed", ReceiptRef: "workflow:" + run.ID, Facts: facts, Text: text, ConfigDigest: config.Digest(), Invocation: &binding}, time.Now())
+	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{Message: telegramOutcomeMessage("32", text), State: "confirmed", ReceiptRef: "workflow:" + run.ID, Facts: facts, Text: text, ConfigDigest: config.Digest(), Invocation: &binding}, time.Now())
 }

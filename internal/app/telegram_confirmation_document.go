@@ -57,29 +57,40 @@ type telegramWorkConfirmationService interface {
 	ReadTelegramWorkConfirmation(context.Context, core.TelegramOperationTarget, WorkflowBoundPreview) ([]core.WorkflowRecord, error)
 }
 
-func (r telegramReceiver) workConfirmationContents(ctx context.Context, request core.TelegramOperationRequest, preview WorkflowBoundPreview) (string, error) {
+type telegramWorkConfirmation struct {
+	Complete string
+	Titles   []string
+}
+
+func (r telegramReceiver) workConfirmationContents(ctx context.Context, request core.TelegramOperationRequest, preview WorkflowBoundPreview) (telegramWorkConfirmation, error) {
 	operations, ok := r.operations.(telegramWorkConfirmationService)
 	if !ok {
-		return "", core.ErrTelegramDocumentUnavailable
+		return telegramWorkConfirmation{}, core.ErrTelegramDocumentUnavailable
 	}
 
 	records, err := operations.ReadTelegramWorkConfirmation(ctx, request.Target, preview)
 	if err != nil {
-		return "", err
+		return telegramWorkConfirmation{}, err
 	}
 
-	var content strings.Builder
+	var (
+		content strings.Builder
+		titles  []string
+	)
+
 	content.WriteString("## Complete selected tickets and validation contracts\n")
 
 	for _, record := range records {
-		fmt.Fprintf(&content, "\n### %s\n\n%s\n\nExecution contract:\n\n```json\n%s\n```\n", record.Task.Key, record.Body, record.Domain["execution_contract"])
+		title := telegramWorkflowRecordTitle(record)
+		titles = append(titles, title+" ("+record.Task.Key+")")
+		fmt.Fprintf(&content, "\n### %s — %s\n\n%s\n\nExecution contract:\n\n```json\n%s\n```\n", record.Task.Key, title, record.Body, record.Domain["execution_contract"])
 	}
 
-	return content.String(), nil
+	return telegramWorkConfirmation{Complete: content.String(), Titles: titles}, nil
 }
 
 func telegramQuestionDocument(target core.TelegramOperationTarget, status WorkflowWorkStatus) (core.TelegramDocumentResponse, error) {
-	payload, err := json.MarshalIndent(status.Integration.Decision, "", "  ")
+	payload, err := json.MarshalIndent(status.Integration, "", "  ")
 	if err != nil {
 		return core.TelegramDocumentResponse{}, err
 	}

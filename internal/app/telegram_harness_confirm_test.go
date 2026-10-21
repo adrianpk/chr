@@ -49,6 +49,7 @@ func TestTelegramHarnessSelectionConfirm(t *testing.T) {
 	}
 
 	saved := telegramHarnessCheckSaved(t, operations, request.ID)
+	checkTelegramHarnessReplay(t, f, operations, action, saved)
 
 	if reply := f.send(t, "/answer "+action.Token+" cancel", 0); !strings.Contains(reply.Text, "unavailable") || webHarnessSnapshot(t, operations) != saved {
 		t.Fatal("consumed confirmation exchanged its choice", reply)
@@ -243,5 +244,20 @@ func TestTelegramHarnessSelectionEnvelope(t *testing.T) {
 				t.Fatal("altered confirmation retained configuration authority")
 			}
 		})
+	}
+}
+
+func checkTelegramHarnessReplay(t *testing.T, f *telegramConversationAppFixture, operations service, action core.TelegramAction, saved core.HarnessSelectionSnapshot) {
+	t.Helper()
+
+	notice := f.send(t, "/answer "+action.Token+" confirm", 0)
+	for _, part := range []string{"already confirmed", "Original defaults saved", "Worker: beta", "Generation: pi-writing"} {
+		if !strings.Contains(notice.Text, part) {
+			t.Fatal("replay omitted the original saved roles", part, notice)
+		}
+	}
+
+	if webHarnessSnapshot(t, operations) != saved {
+		t.Fatal("replay changed the saved defaults")
 	}
 }

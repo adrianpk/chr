@@ -56,7 +56,7 @@ func TestTelegramPresentationConfirmationBinding(t *testing.T) {
 // TestTelegramPresentationConfirmationRollback refuses an incomplete document
 // before committing any prompt, source acknowledgement or action authority.
 func TestTelegramPresentationConfirmationRollback(t *testing.T) {
-	for _, kind := range []string{"oversized", "wrong project"} {
+	for _, kind := range []string{"oversized", "wrong project", "quota"} {
 		t.Run(kind, func(t *testing.T) {
 			f := newTelegramConversationFixture(t)
 			f.apply(t, TelegramConversationStart, func(input *TelegramConversationInput) { input.Project = "alpha" })
@@ -86,11 +86,11 @@ func TestTelegramPresentationConfirmationRollback(t *testing.T) {
 func checkTelegramConfirmationRollback(t *testing.T, f *telegramConversationFixture, request TelegramOperationRequest, input TelegramConversationInput, kind string) {
 	t.Helper()
 
-	document := TelegramDocument{ProjectID: request.Target.ProjectID, Namespace: request.Target.Namespace, ProjectBindingDigest: request.Target.ProjectBindingDigest, SourceRef: "exports/scope.md", SourceHash: workflowHash([]byte("scope")), Filename: "scope.md", MediaType: "text/markdown", Payload: []byte("scope")}
-	if kind == "oversized" {
-		document.Payload = bytes.Repeat([]byte("x"), telegramDocumentLimit+1)
-	} else {
-		document.ProjectID = "another-project"
+	document := rejectedTelegramConfirmationDocument(t, f, request, kind)
+
+	var before int
+	if err := f.store.db.QueryRowContext(t.Context(), "SELECT COUNT(*) FROM telegram_document_snapshots").Scan(&before); err != nil {
+		t.Fatal(err)
 	}
 
 	_, err := f.store.OfferTelegramAction(t.Context(), TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"confirm"}, Delivery: &TelegramDocumentResponse{Message: TelegramMessageBlocks{InitialText: "Confirm?"}, Document: document}, ExpiresAt: time.Now().Add(time.Hour)}, time.Now())
@@ -112,7 +112,7 @@ func checkTelegramConfirmationRollback(t *testing.T, f *telegramConversationFixt
 		t.Fatal(err)
 	}
 
-	if actions != 0 || documents != 0 || state != "pending" {
+	if actions != 0 || documents != before || state != "pending" {
 		t.Fatal("document refusal partially acknowledged or authorized the action", actions, documents, state)
 	}
 }
@@ -155,4 +155,21 @@ func reopenTelegramConfirmation(t *testing.T, f *telegramConversationFixture, of
 	if err != nil || again.Token != before.Token || again.GuardDigest != before.GuardDigest || again.PresentationHash != before.PresentationHash {
 		t.Fatal("reopen or replay replaced the original image", again, err)
 	}
+}
+
+func rejectedTelegramConfirmationDocument(t *testing.T, f *telegramConversationFixture, request TelegramOperationRequest, kind string) TelegramDocument {
+	t.Helper()
+
+	document := TelegramDocument{ProjectID: request.Target.ProjectID, Namespace: request.Target.Namespace, ProjectBindingDigest: request.Target.ProjectBindingDigest, SourceRef: "exports/scope.md", SourceHash: workflowHash([]byte("scope")), Filename: "scope.md", MediaType: "text/markdown", Payload: []byte("scope")}
+
+	switch kind {
+	case "oversized":
+		document.Payload = bytes.Repeat([]byte("x"), telegramDocumentLimit+1)
+	case "wrong project":
+		document.ProjectID = "another-project"
+	default:
+		seedTelegramDocumentQuota(t, f.store, 32)
+	}
+
+	return document
 }

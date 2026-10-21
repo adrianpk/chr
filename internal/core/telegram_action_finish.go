@@ -9,6 +9,7 @@ import (
 
 // TelegramActionResult contains confirmed owner facts or an explicit blocked outcome.
 type TelegramActionResult struct {
+	Message           *TelegramMessageBlocks
 	Invocation        *TelegramInvocationBinding
 	InvocationPhase   string
 	State             string
@@ -133,7 +134,7 @@ func finishTelegramActionResult(ctx context.Context, tx *sql.Tx, retained Telegr
 		return err
 	}
 
-	if err := queueTelegramReferencedResponse(ctx, tx, retained.ResponseSource, result.Text, retained.Request.ID, result.ConfigDigest, now); err != nil {
+	if err := queueTelegramActionResultResponse(ctx, tx, retained, result, now); err != nil {
 		return err
 	}
 
@@ -162,4 +163,12 @@ func telegramActionResponseSource(ctx context.Context, tx *sql.Tx, claim Telegra
 
 func confirmedTelegramControlReceipt(claim TelegramActionClaim, result TelegramActionResult) bool {
 	return claim.Request.OperationID == "work.control" && claim.Answer.ID != "" && result.State == "confirmed" && result.ReceiptRef == workflowMutationReceiptPath(claim.Request.ID)
+}
+
+func queueTelegramActionResultResponse(ctx context.Context, tx *sql.Tx, retained TelegramActionClaim, result TelegramActionResult, now time.Time) error {
+	if result.Message != nil {
+		return queueTelegramPresentation(ctx, tx, retained.ResponseSource, *result.Message, result.ConfigDigest, now)
+	}
+
+	return queueTelegramReferencedResponse(ctx, tx, retained.ResponseSource, result.Text, retained.Request.ID, result.ConfigDigest, now)
 }

@@ -11,12 +11,15 @@ func queueTelegramActionView(op telegramConversationTransaction, request Telegra
 	if offer.Delivery == nil {
 		return queueTelegramReferencedResponse(op.ctx, op.tx, request.Source, legacy, request.ID, offer.Input.Config.Digest(), op.now)
 	}
+
 	document := offer.Delivery.Document
 	if document.ProjectID != request.Target.ProjectID || document.Namespace != request.Target.Namespace || document.ProjectBindingDigest != request.Target.ProjectBindingDigest {
 		return ErrTelegramDocumentUnavailable
 	}
+
 	response := *offer.Delivery
 	response.Message.SecondaryText = "Shortened view; complete scope attached. Reply with " + offer.Choices[0] + " or use /answer " + token + " <choice>."
+
 	return queueTelegramDocument(op.ctx, op.tx, request.Source, response, offer.Input.Config.Digest(), op.now)
 }
 

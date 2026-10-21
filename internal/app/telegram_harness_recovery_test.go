@@ -143,7 +143,7 @@ func telegramHarnessCheckSendRetry(t *testing.T, f *telegramConversationAppFixtu
 	t.Helper()
 
 	retry := telegramOperationNotice(t, f)
-	if !strings.Contains(retry.Text, "Uncertain delivery retry") || !strings.Contains(retry.Text, saved.RequestID) || calls != 1 || webHarnessSnapshot(t, operations) != saved {
+	if !strings.Contains(retry.Text, "Uncertain delivery retry") || saved.RequestID == "" || calls != 1 || webHarnessSnapshot(t, operations) != saved {
 		t.Fatal("uncertain send repeated a selection mutation", retry, calls)
 	}
 

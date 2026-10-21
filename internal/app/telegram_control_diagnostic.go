@@ -15,7 +15,7 @@ func (r telegramReceiver) staleActionDiagnostic(ctx context.Context, update core
 		text += "\nCurrent state:\n" + telegramWorkProgressText(status)
 	}
 
-	return r.store.QueueReadResponse(ctx, update, text, config.Digest(), time.Now())
+	return r.store.QueuePresentationResponse(ctx, update, *telegramOutcomeMessage("40", text), config.Digest(), time.Now())
 }
 
 func (r telegramReceiver) staleControlStatus(ctx context.Context, update core.TelegramReceivedUpdate, answer core.TelegramActionAnswer) (WorkflowWorkStatus, bool) {

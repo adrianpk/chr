@@ -66,7 +66,7 @@ func (r telegramReceiver) dispatchPreparedWorkAction(ctx context.Context, operat
 		phase = "prepared"
 	}
 
-	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{State: "confirmed", ReceiptRef: result.Result.ReceiptRef, Facts: facts, Text: telegramPreparedWorkResultText(result), ConfigDigest: config.Digest(), ConversationPhase: phase}, time.Now())
+	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{Message: telegramOutcomeMessage("26", telegramPreparedWorkResultText(result)), State: "confirmed", ReceiptRef: result.Result.ReceiptRef, Facts: facts, Text: telegramPreparedWorkResultText(result), ConfigDigest: config.Digest(), ConversationPhase: phase}, time.Now())
 }
 
 func (r telegramReceiver) finishPreparedWorkActionFailure(ctx context.Context, claim core.TelegramActionClaim, config core.TelegramReceiverConfig, failure error) error {
@@ -77,5 +77,5 @@ func (r telegramReceiver) finishPreparedWorkActionFailure(ctx context.Context, c
 		return err
 	}
 
-	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{State: "blocked", Facts: facts, Text: text, ConfigDigest: config.Digest()}, time.Now())
+	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{Message: telegramOutcomeMessage("27", text), State: "blocked", Facts: facts, Text: text, ConfigDigest: config.Digest()}, time.Now())
 }

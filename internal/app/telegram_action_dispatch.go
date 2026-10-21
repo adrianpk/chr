@@ -52,7 +52,7 @@ func (r telegramReceiver) respondActionClaim(ctx context.Context, update core.Te
 	case "expired", "superseded":
 		return r.staleActionDiagnostic(ctx, update, core.TelegramActionAnswer{Token: claim.Action.Token, Choice: claim.Choice}, config)
 	case "consumed":
-		return r.store.QueueReadResponse(ctx, update, telegramActionReplayText(claim.Request), config.Digest(), time.Now())
+		return r.store.QueuePresentationResponse(ctx, update, *telegramOutcomeMessage("40", telegramActionReplayText(claim.Request)), config.Digest(), time.Now())
 	default:
 		return r.dispatchTelegramAction(ctx, claim, config)
 	}
@@ -79,5 +79,5 @@ func (r telegramReceiver) dispatchTelegramAction(ctx context.Context, claim core
 }
 
 func (r telegramReceiver) actionDiagnostic(ctx context.Context, update core.TelegramReceivedUpdate, config core.TelegramReceiverConfig) error {
-	return r.store.QueueReadResponse(ctx, update, telegramActionUnavailableText, config.Digest(), time.Now())
+	return r.store.QueuePresentationResponse(ctx, update, *telegramOutcomeMessage("40", telegramActionUnavailableText), config.Digest(), time.Now())
 }

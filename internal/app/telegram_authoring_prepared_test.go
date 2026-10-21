@@ -147,7 +147,7 @@ func TestTelegramAuthoringPreparedIntent(t *testing.T) {
 			original := telegramAuthoringPreparedCheck(t, f, id, intent == "develop", 1)
 
 			notice = f.send(t, "/prepare-work "+id, 0)
-			if !strings.Contains(notice.Text, "Previously prepared") || calls.Load() != 1 {
+			if !strings.Contains(notice.Text, "already confirmed") || calls.Load() != 1 {
 				t.Fatal("unchanged scope was prepared again", notice, calls.Load())
 			}
 

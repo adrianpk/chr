@@ -9,6 +9,10 @@ import (
 
 func queueTelegramOperationResult(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, text, receipt, configDigest string, now time.Time) error {
 	if request.Delivery == nil {
+		if request.Message != nil {
+			return queueTelegramPresentation(ctx, tx, request.Source, *request.Message, configDigest, now)
+		}
+
 		return queueTelegramReferencedResponse(ctx, tx, request.Source, text, request.ID+" "+receipt, configDigest, now)
 	}
 

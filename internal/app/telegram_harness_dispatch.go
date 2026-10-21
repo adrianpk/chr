@@ -45,7 +45,7 @@ func (r telegramReceiver) respondHarness(ctx context.Context, user core.Telegram
 		return true, r.recordDiagnostic(ctx, update, config, "Harness choices could not be loaded. Inspect private profile setup locally.")
 	}
 
-	return true, r.recordDiagnostic(ctx, update, config, telegramHarnessText(status))
+	return true, r.store.QueuePresentationResponse(ctx, update, *telegramOutcomeMessage("38", telegramHarnessText(status)), config.Digest(), time.Now())
 }
 
 func telegramHarnessText(status telegramHarnessStatus) string {

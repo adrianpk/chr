@@ -16,7 +16,7 @@ func telegramPreparedWorkPreview(prepared PreparedAuthoringWork) string {
 	title, body := "the retained request", ""
 	if prepared.Mutation.Native != nil {
 		body = string(prepared.Mutation.Native.Record.Body)
-		title = telegramPreparedWorkTitle(prepared.Mutation.Native.Record)
+		title = telegramWorkflowRecordTitle(prepared.Mutation.Native.Record)
 	}
 
 	excerpt := core.TelegramDocumentExcerpt([]byte(body))
@@ -45,16 +45,19 @@ func (r telegramReceiver) finishPreparedWork(ctx context.Context, request core.T
 	}
 
 	text := telegramPreparedWorkResultText(result)
+	request.Message = telegramOutcomeMessage("26", text)
 
 	err = r.store.FinishTelegramAuthoring(ctx, request, core.TelegramAuthoringProgress{SessionRef: result.Scope.SessionRef}, result.Result.ReceiptRef, facts, text, config.Digest(), time.Now())
 	if errors.Is(err, core.ErrWorkflowConflict) {
+		request.Message = telegramOutcomeMessage("26", "Ticket preparation is confirmed; the advanced conversation is unchanged.\n"+text)
+
 		return r.store.FinishTelegramOperation(ctx, request, "confirmed", result.Result.ReceiptRef, facts, "Canonical work preparation is confirmed; the advanced conversation is unchanged.\n"+text, config.Digest(), time.Now())
 	}
 
 	return err
 }
 
-func telegramPreparedWorkTitle(record core.WorkflowRecord) string {
+func telegramWorkflowRecordTitle(record core.WorkflowRecord) string {
 	var title string
 	if err := json.Unmarshal(record.Metadata["title"], &title); err != nil || title == "" {
 		return "the retained request"

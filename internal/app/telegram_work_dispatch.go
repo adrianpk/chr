@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -127,7 +128,10 @@ func (r telegramReceiver) offerWorkAdmission(ctx context.Context, request core.T
 		return err
 	}
 
-	return r.offerConfirmationDocument(ctx, request, core.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"start"}, ExpiresAt: time.Now().Add(24 * time.Hour)}, "31", telegramWorkPreviewText(preview), complete)
+	text := telegramWorkPreviewText(preview)
+	text = strings.Replace(text, "\n\n", "\n\n"+strings.Join(complete.Titles[:min(3, len(complete.Titles))], "\n")+"\n", 1)
+
+	return r.offerConfirmationDocument(ctx, request, core.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"start"}, ExpiresAt: time.Now().Add(24 * time.Hour)}, "31", text, complete.Complete)
 }
 
 func (r telegramReceiver) validateWorkAdmissionAuthority(ctx context.Context, request core.TelegramOperationRequest) error {

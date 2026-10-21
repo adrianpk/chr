@@ -73,7 +73,7 @@ func (c *telegramDropSendAck) Do(request *http.Request) (*http.Response, error) 
 		return response, err
 	}
 
-	if strings.HasSuffix(request.URL.Path, "/sendMessage") && !c.dropped {
+	if (strings.HasSuffix(request.URL.Path, "/sendMessage") || strings.HasSuffix(request.URL.Path, "/sendDocument")) && !c.dropped {
 		if c.skip > 0 {
 			c.skip--
 

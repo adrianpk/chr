@@ -124,7 +124,7 @@ func (r telegramReceiver) reusePreparedWork(ctx context.Context, input core.Tele
 
 func (r telegramReceiver) reusePreparedWorkResult(ctx context.Context, input core.TelegramConversationInput, previous core.TelegramOperationRequest, prepared PreparedAuthoringWork) (bool, error) {
 	if previous.State == "confirmed" {
-		return true, r.recordDiagnostic(ctx, input.Update, input.Config, telegramPreparedWorkReplay(previous))
+		return true, r.store.QueuePresentationResponse(ctx, input.Update, *telegramOutcomeMessage("26", telegramPreparedWorkReplay(previous)), input.Config.Digest(), time.Now())
 	}
 
 	action, err := r.store.TelegramRequestAction(ctx, previous)
@@ -138,5 +138,5 @@ func (r telegramReceiver) reusePreparedWorkResult(ctx context.Context, input cor
 
 	text := "This exact scope is awaiting a decision. Use /answer " + action.Token + " develop.\n" + telegramPreparedWorkPreview(prepared)
 
-	return true, r.recordDiagnostic(ctx, input.Update, input.Config, text)
+	return true, r.store.QueuePresentationResponse(ctx, input.Update, *telegramOutcomeMessage("25", text), input.Config.Digest(), time.Now())
 }

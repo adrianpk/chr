@@ -14,8 +14,9 @@ import (
 // TelegramOperationRequest retains one complete transport binding before dispatch.
 // PreparedInput is the caller's serialized, frozen shared-owner input.
 type TelegramOperationRequest struct {
-	// Delivery is response-only data; it never participates in operation authority.
+	// Delivery and Message are response-only data, outside operation authority.
 	Delivery       *TelegramDocumentResponse `json:"-"`
+	Message        *TelegramMessageBlocks    `json:"-"`
 	ID             string
 	Source         TelegramReceivedUpdate
 	Ordinal        int

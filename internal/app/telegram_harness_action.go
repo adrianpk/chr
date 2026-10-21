@@ -136,7 +136,7 @@ func (r telegramReceiver) finishHarnessAction(ctx context.Context, claim core.Te
 		receipt = "harness-selection:" + claim.Request.ID
 	}
 
-	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{State: state, ReceiptRef: receipt, Facts: facts, Text: text, ConfigDigest: config.Digest()}, time.Now())
+	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{Message: telegramOutcomeMessage("39", text), State: state, ReceiptRef: receipt, Facts: facts, Text: text, ConfigDigest: config.Digest()}, time.Now())
 }
 
 func telegramHarnessSavedRole(profile string) string {

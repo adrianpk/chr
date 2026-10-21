@@ -40,5 +40,5 @@ func telegramControlExcerpt(value string) string {
 		return value
 	}
 
-	return string(runes[:256]) + "… [full text in canonical invocation status]"
+	return string(runes[:256]) + "… [shortened]"
 }

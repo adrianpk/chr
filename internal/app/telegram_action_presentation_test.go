@@ -28,6 +28,7 @@ func TestTelegramPresentationActionWork(t *testing.T) {
 
 	checkTelegramConfirmationUpload(t, f, record.Domain["execution_contract"], action.Token)
 	checkTelegramWorkRunCount(t, operations, 0)
+	checkTelegramConfirmationReplay(t, f, operations, action.Token, record.Task.Key, prompt.ID)
 }
 
 // TestTelegramPresentationControlPreview distinguishes accepting a pause request
@@ -49,6 +50,10 @@ func TestTelegramPresentationControlPreview(t *testing.T) {
 
 func checkTelegramConfirmationUpload(t *testing.T, f *telegramConversationAppFixture, contract []byte, token string) {
 	t.Helper()
+
+	if len(contract) == 0 {
+		t.Fatal("native confirmation fixture has no execution contract")
+	}
 
 	select {
 	case upload := <-f.documents:
@@ -77,5 +82,24 @@ func checkTelegramConfirmationKeyboard(t *testing.T, raw, token string) {
 
 	if len(keyboard.Rows) != 1 || len(keyboard.Rows[0]) != 1 || keyboard.Rows[0][0].Text != "Start work" || keyboard.Rows[0][0].Data != "tga:"+token+":start" {
 		t.Fatal("upload changed the original action binding", keyboard)
+	}
+}
+
+func checkTelegramConfirmationReplay(t *testing.T, f *telegramConversationAppFixture, operations service, token, key string, promptID int64) {
+	t.Helper()
+	f.send(t, "start", promptID)
+
+	before := checkTelegramWorkRunCount(t, operations, 1)
+
+	replay := f.send(t, "/answer "+token+" start", 0)
+	for _, part := range []string{"already confirmed", "Original admission:", key, "/status"} {
+		if !strings.Contains(replay.Text, part) {
+			t.Fatal("replay hid the original result", part, replay)
+		}
+	}
+
+	after := checkTelegramWorkRunCount(t, operations, 1)
+	if after.ID != before.ID || after.Revision != before.Revision {
+		t.Fatal("replayed confirmation changed native work")
 	}
 }

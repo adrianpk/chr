@@ -60,6 +60,10 @@ func telegramPreparedWorkReplay(request core.TelegramOperationRequest) string {
 }
 
 func telegramActionReplayText(request core.TelegramOperationRequest) string {
+	if request.OperationID == "authoring.work" {
+		return telegramPreparedWorkReplay(request)
+	}
+
 	text := "This action was already confirmed. Its original result is retained."
 
 	if strings.HasPrefix(request.OperationID, "records.") {
@@ -69,5 +73,37 @@ func telegramActionReplayText(request core.TelegramOperationRequest) string {
 		}
 	}
 
+	if details := telegramActionReplayDetails(request); details != "" {
+		text += "\n\n" + details
+	}
+
 	return text
+}
+
+func telegramActionReplayDetails(request core.TelegramOperationRequest) string {
+	switch request.OperationID {
+	case "work.admit":
+		var result telegramWorkAdmissionResult
+		if json.Unmarshal(request.Result, &result) == nil {
+			return fmt.Sprintf("Original admission: %s %s; %d tickets. Retained result state: %s. Use /status %s for current state.", result.Selector.Extent, result.Selector.Identity, result.Members, result.Status, result.Invocation.ID)
+		}
+	case "work.control":
+		var status WorkflowWorkStatus
+		if json.Unmarshal(request.Result, &status) == nil {
+			return fmt.Sprintf("Original control receipt retained for work %s. Retained result state: %s. Use /status %s for current state.", status.ID, status.Status, status.ID)
+		}
+	case core.TelegramHarnessSelectionOperation:
+		var facts struct {
+			Snapshot *core.HarnessSelectionSnapshot `json:"snapshot"`
+		}
+		if json.Unmarshal(request.Result, &facts) == nil && facts.Snapshot != nil {
+			return fmt.Sprintf("Original defaults saved for %s. Worker: %s. Generation: %s. Only new operations use these defaults.", facts.Snapshot.ProjectRef, telegramHarnessSavedRole(facts.Snapshot.Worker), telegramHarnessSavedRole(facts.Snapshot.Generation))
+		}
+	}
+
+	return ""
+}
+
+func telegramOutcomeMessage(family, text string) *core.TelegramMessageBlocks {
+	return &core.TelegramMessageBlocks{Family: family, InitialText: text}
 }

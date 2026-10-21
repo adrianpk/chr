@@ -44,7 +44,7 @@ func (r telegramReceiver) applyRecordAction(ctx context.Context, claim core.Tele
 		return err
 	}
 
-	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{State: "confirmed", ReceiptRef: result.ReceiptRef, Facts: facts, Text: telegramRecordResultText(result), ConfigDigest: config.Digest()}, time.Now())
+	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{Message: telegramOutcomeMessage("29", telegramRecordResultText(result)), State: "confirmed", ReceiptRef: result.ReceiptRef, Facts: facts, Text: telegramRecordResultText(result), ConfigDigest: config.Digest()}, time.Now())
 }
 
 func (r telegramReceiver) finishRecordActionFailure(ctx context.Context, claim core.TelegramActionClaim, failure error, config core.TelegramReceiverConfig) error {
@@ -58,7 +58,7 @@ func (r telegramReceiver) finishRecordActionFailure(ctx context.Context, claim c
 		return err
 	}
 
-	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{State: "blocked", Facts: facts, Text: text, ConfigDigest: config.Digest()}, time.Now())
+	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{Message: telegramOutcomeMessage("30", text), State: "blocked", Facts: facts, Text: text, ConfigDigest: config.Digest()}, time.Now())
 }
 
 func (r telegramReceiver) prepareRecordAction(ctx context.Context, claim core.TelegramActionClaim) (PreparedRecordMutation, error) {
