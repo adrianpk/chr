@@ -23,7 +23,7 @@ Planning scope: requested by the maintainer on 2026-10-21.
 Implementation and merge authorization: granted for this delivery set and
 Looper-owned Rebase + Fast-forward slice PR merges into dev.
 
-Active slice: Slice 2 of 5, Document excerpts and complete attachments.
+Active slice: Slice 3 of 5, Clear guarded confirmations and controls; blocked on prior canonical corrections.
 
 ## 1. Outcome and Strategy
 
@@ -58,6 +58,14 @@ at activation. Slices 1-2 can proceed against current dev. Before Slice 3,
 consume the corrections through their canonical integration or record the
 dependency as blocked. Do not copy them into this set or acquire the retained
 controller's work.
+
+Slice 3 activation check, 2026-10-21: PR #425 is merged into `dev` at
+`a5c6a7e068a8e5ec547d13d73d39afe1f0477335`. The prerequisite corrections
+remain on `test/slice-8-telegram-delivery` at
+`5bde31118db47c4fe52bff416555049a66d22911`, outside `dev` ancestry.
+The canonical forge has no open integration PR for them. Slice 3 is blocked
+until their canonical integration is verified. Its branch records only
+Slice 2 closure and this dependency; implementation has not started.
 
 The maintainer authorized the accepted package and Looper execution on
 2026-10-21. Commit and push these artifacts before starting the new controller.
@@ -197,6 +205,7 @@ is ops/default/report/telegram-message-presentation-cycle.md. It is not
 pre-created as successful evidence.
 
 The specification/model are accepted, the plan/tracker are approved and
-Slice 1 is delivered through PR #424 and Slice 2 is active. Execution starts only from the committed and pushed package.
+Slices 1 and 2 are delivered through PRs #424 and #425. Slice 3 is active
+and blocked on the prerequisite recorded in section 2. Execution starts only from the committed and pushed package.
 Record real implementation and acceptance results as they become available;
 approval does not establish delivery or client evidence.

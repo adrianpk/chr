@@ -1,6 +1,6 @@
 # Slice 2: Document Excerpts and Complete Attachments
 
-Status: reviewing
+Status: delivered
 Delivery set: Telegram Message Presentation
 Plan: [ops/default/plan/telegram-message-presentation.md](../../../plan/telegram-message-presentation.md)
 Tracker: [ops/default/tracker/telegram-message-presentation.md](../../../tracker/telegram-message-presentation.md)
@@ -30,6 +30,12 @@ while retaining the original operation, source version and delivery allowance.
   existing bounded attempt allowance.
 
 ## Implementation Notes
+
+PR [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425) was verified merged
+into `dev` by the controller through Rebase + Fast-forward on 2026-10-21 at
+`a5c6a7e068a8e5ec547d13d73d39afe1f0477335`. The canonical forge,
+`origin/dev` and Acta merge event `01M5F7BJEQ8PBP7DDJ3H0A0YDP` agree.
+
 
 The task commits are `0c50fa368801` for T2.1, `bb6a5575d69d` for T2.2,
 `c48039eb4af5` for T2.3 and `7e2b7d21e136` for T2.4. Full identities are
@@ -87,22 +93,25 @@ complete original file of another format.
 
 ## Validation
 
-Successful development checks:
+Looper evidence `NQQQ4DVYVPESUBCN7TURIYUTUC` records these five checks
+passed in order on the exact clean, pushed and merged candidate
+`a5c6a7e068a8e5ec547d13d73d39afe1f0477335`:
 
+- `make verify`
 - `go test ./internal/core ./internal/app -run '^TestTelegramPresentation(Document|Delivery|Migration)' -count=1 -timeout=3m`
-- `go test ./internal/core ./internal/app -run '^(TestTelegramPresentation(Document|Delivery)|TestTelegramAuthoringBridge|TestTelegramAuthoringExplain|TestTelegramOperationLiveRecords)' -count=1 -timeout=3m`
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/core ./internal/app` — zero issues.
+- `go test -race ./internal/core ./internal/app -run '^TestTelegramPresentation(Document|Delivery|Migration)' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/app -run '^(TestTelegramPresentation(Text|Format|Conversation)|TestTelegramHelp|TestTelegramAuthoringBridge|TestTelegramAuthoringExplain|TestTelegramOperation(LiveRecords|RequestRecovery)|TestTelegramReceiver(Outbox|Revocation)|TestMaintenanceDBStatusReports)' -count=1 -timeout=3m`
 - `git diff --check`
 
-The normal focused run, including the real 64 MiB quota fixture, reported
-0.608 seconds for core and 0.477 seconds for app, excluding compilation.
-The original three-minute package budget is unchanged.
+Strict lint reported zero issues; short tests, eight CI script regressions and
+the build passed. Focused normal core/app tests took 0.679/0.517 seconds;
+the focused race selection took 14.086/7.442 seconds. Both retained the
+three-minute package budget. The canonical PR check also passed after the
+PR-reference follow-up was pushed.
 
-Final PR-head evidence is recorded through `looper validate` after the
-PR-reference follow-up. Required order: `make verify`, the configured focused
-normal selection, the configured focused race selection, affected legacy
-regressions, then `git diff --check`. This local HTTP/SQLite evidence does not
-replace scheduled exhaustive validation or real Telegram client acceptance.
+These local HTTP/SQLite fixtures establish the document-delivery contracts.
+Scheduled exhaustive validation and real mobile/desktop attachment opening
+remain separate evidence obligations.
 
 ## Risks and Follow-ups
 

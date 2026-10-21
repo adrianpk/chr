@@ -1,6 +1,6 @@
 # Telegram Message Presentation Tracker
 
-Status: implementing
+Status: blocked
 
 Approved: maintainer, 2026-10-21; specification, model, slice map and Looper execution accepted.
 
@@ -16,7 +16,7 @@ Inventory: [48-family review](../report/telegram-message-review.md)
 
 Implementation and merge authorization: granted for this delivery set and
 Looper-owned Rebase + Fast-forward slice PR merges into dev.
-Active slice: Slice 2 of 5, Document excerpts and complete attachments.
+Active slice: Slice 3 of 5, Clear guarded confirmations and controls; blocked on prior canonical corrections.
 
 ## Canonical Slice Map
 
@@ -30,8 +30,8 @@ Active slice: Slice 2 of 5, Document excerpts and complete attachments.
 
 ## Tasks
 
-Slice 1 is delivered through PR #424. Slice 2 tasks are implemented and
-awaiting canonical PR integration. Later slices remain pending. The plan owns exact branch names, PR titles, report
+Slices 1 and 2 are delivered through PRs #424 and #425. Slice 3 is blocked
+on the approved activation prerequisite. Later slices remain pending. The plan owns exact branch names, PR titles, report
 paths and focused commands.
 
 | Task | State | Commit | Required outcome |
@@ -39,13 +39,13 @@ paths and focused commands.
 | T1.1 | delivered | `ffcbc9b4dabc8fbff111e46ef74ad1b55b172b2a` | Shared optional blocks and bounded rich/plain renderer |
 | T1.2 | delivered | `c5665e602b5f9b00203e0366216d7a2dbdd7f3ae` | Readable conversation/text families 01-20 |
 | T1.3 | delivered | `eb7096813576290130d4f4edd583195a62ea443a` | Renderer, transport and conversation regressions |
-| T2.1 | implemented | `0c50fa368801ef245c1e59a28e5386bc7df58f81` | Durable receiver snapshots, migrations and quota |
-| T2.2 | implemented | `bb6a5575d69dbaa4d804e82c73adcb6dae561ca2` | Document upload, caption, acknowledgement and fallback |
-| T2.3 | implemented | `c48039eb4af550ee760e35af0c0dc8c9de648de6` | Primary artifact/export families 21-24 and 28 |
-| T2.4 | implemented | `7e2b7d21e1368ffe1eea6bbf83ad70fe3520f6b6` | Exact bytes, bounds, rollback and recovery evidence |
-| T3.1 | pending | pending | Human guarded previews and controls |
-| T3.2 | pending | pending | Original operation, document and action bindings |
-| T3.3 | pending | pending | Stale scope, ambiguity and replay regressions |
+| T2.1 | delivered | `0c50fa368801ef245c1e59a28e5386bc7df58f81` | Durable receiver snapshots, migrations and quota |
+| T2.2 | delivered | `bb6a5575d69dbaa4d804e82c73adcb6dae561ca2` | Document upload, caption, acknowledgement and fallback |
+| T2.3 | delivered | `c48039eb4af550ee760e35af0c0dc8c9de648de6` | Primary artifact/export families 21-24 and 28 |
+| T2.4 | delivered | `7e2b7d21e1368ffe1eea6bbf83ad70fe3520f6b6` | Exact bytes, bounds, rollback and recovery evidence |
+| T3.1 | blocked | pending | Human guarded previews and controls |
+| T3.2 | blocked | pending | Original operation, document and action bindings |
+| T3.3 | blocked | pending | Stale scope, ambiguity and replay regressions |
 | T4.1 | pending | pending | Progress, waits, failures and partial/final results |
 | T4.2 | pending | pending | Notification sender and event snapshot integration |
 | T4.3 | pending | pending | Both-path faults, legacy records and truthful outcomes |
@@ -118,8 +118,8 @@ regression and client result as each row is delivered.
 | TMP-01 | T1.1, T4.1 | pending |
 | TMP-02 | T4.2, T4.3 | pending |
 | TMP-03 | T1.1, T1.3, T4.3 | pending |
-| TMP-04 | T2.3 | Slice 2 fixtures verified; integration pending |
-| TMP-05 | T2.1, T2.2, T2.4 | Slice 2 fixtures verified; integration pending |
+| TMP-04 | T2.3 | Slice 2 fixtures verified and integrated through PR #425 |
+| TMP-05 | T2.1, T2.2, T2.4 | Slice 2 fixtures verified and integrated through PR #425 |
 | TMP-06 | T1.2, T3.1 | pending |
 | TMP-07 | T3.2, T3.3 | pending |
 | TMP-08 | T2.4, T3.3, T4.3 | Slice 2 snapshot/recovery fixtures verified; later owners pending |
@@ -133,8 +133,9 @@ regression and client result as each row is delivered.
 - Planning artifacts: accepted; local links, whitespace, family/task coverage and acceptance mappings checked.
 - Specification/model promotion and implementation approval: completed on 2026-10-21.
 - Slice 1: delivered through [#424](https://forge.adrianpk.com/adrianpk/chr/pulls/424) at `a2bb0974eac21b1fe33cac78e21f4c1845871e96`.
-- Slice 2: T2.1-T2.4 implemented; report reviewing; [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425) open against dev.
-- Slices 3-5: pending.
+- Slice 2: delivered through [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425) at `a5c6a7e068a8e5ec547d13d73d39afe1f0477335`.
+- Slice 3: activated and blocked; T3.1-T3.3 have not started.
+- Slices 4-5: pending.
 - Mobile/desktop and user-operated journey evidence: pending.
 - Exact final candidate and scheduled nightly: pending.
 
@@ -154,6 +155,27 @@ records all five ordered checks passed on the exact merged candidate.
 
 [Slice 2 report](../report/slices/telegram-message-presentation/slice-2-document-delivery.md)
 records immutable snapshots, upload/producer behavior, quota admission,
-retention, migration and fault fixtures. Final ordered checks, including the
-required focused race pass, must be recorded by Looper on the clean PR head
-following its PR-reference commit.
+retention, migration and fault fixtures. Looper evidence
+`NQQQ4DVYVPESUBCN7TURIYUTUC` records all five ordered checks passed,
+including focused race coverage, on the exact merged candidate
+`a5c6a7e068a8e5ec547d13d73d39afe1f0477335`.
+
+## Slice 3 Activation Blocker
+
+Checked on 2026-10-21 against the canonical forge and `origin/dev` at
+`a5c6a7e068a8e5ec547d13d73d39afe1f0477335`. The approved plan's section 2
+requires canonical integration of the earlier preparation/admission and
+executor-handoff corrections before Slice 3 implementation. They remain on
+`test/slice-8-telegram-delivery` at
+`5bde31118db47c4fe52bff416555049a66d22911`.
+
+`git merge-base --is-ancestor 5bde31118db47c4fe52bff416555049a66d22911 dev`
+returned exit 1. The canonical branch still points to that commit, and the
+forge returned no open PRs. The retained earlier tracker still records its
+Slice 8 as blocked. No canonical integration receipt resolves this dependency.
+
+The [Slice 3 report](../report/slices/telegram-message-presentation/slice-3-action-presentation.md)
+remains drafting. The dedicated Slice 3 branch contains only Slice 2 closure
+and activation evidence. Do not copy the corrections, take over the earlier
+controller or change its QA services. Resume T3.1 after canonical integration
+is verified; no Slice 3 implementation or validation is claimed.
