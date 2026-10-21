@@ -133,7 +133,7 @@ regression and client result as each row is delivered.
 - Planning artifacts: accepted; local links, whitespace, family/task coverage and acceptance mappings checked.
 - Specification/model promotion and implementation approval: completed on 2026-10-21.
 - Slice 1: delivered through [#424](https://forge.adrianpk.com/adrianpk/chr/pulls/424) at `a2bb0974eac21b1fe33cac78e21f4c1845871e96`.
-- Slice 2: T2.1-T2.4 implemented; report reviewing; canonical PR pending.
+- Slice 2: T2.1-T2.4 implemented; report reviewing; [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425) open against dev.
 - Slices 3-5: pending.
 - Mobile/desktop and user-operated journey evidence: pending.
 - Exact final candidate and scheduled nightly: pending.

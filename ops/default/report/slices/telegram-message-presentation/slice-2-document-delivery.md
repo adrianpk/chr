@@ -5,7 +5,7 @@ Delivery set: Telegram Message Presentation
 Plan: [ops/default/plan/telegram-message-presentation.md](../../../plan/telegram-message-presentation.md)
 Tracker: [ops/default/tracker/telegram-message-presentation.md](../../../tracker/telegram-message-presentation.md)
 Branch: `feat/slice-2-telegram-document-delivery`
-PR: pending
+PR: [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425)
 
 ## Purpose
 
