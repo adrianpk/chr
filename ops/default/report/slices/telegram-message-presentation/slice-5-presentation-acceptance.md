@@ -281,6 +281,24 @@ explicit reply when a newer work message exists. The focused development result
 is core/app 0.226/13.790 seconds. Clean-candidate checks and real-client retry
 remain separate acceptance obligations.
 
+Clean candidate `29fc714b0687e149397ec4f6dea69fb638e5fcce` passed:
+
+- `make verify` — zero lint issues; short Go tests, eight CI helper tests and build passed.
+- `go test ./internal/core ./internal/app -run '^Test(TelegramWorkStatus(Reply|Guards)|TelegramPresentationJourney|TelegramControl(Conversation|Natural|Lifecycle|ReplyArrival|AuthoringLane|Authority|Stale|LaneFence|Reference|ContextGuard)|TelegramAuthoringIntent(RootChange|Invalid))$' -count=1 -timeout=3m` — core/app passed in 0.385/15.223 seconds.
+- `go test -race ./internal/core ./internal/app -run '^TestTelegram(WorkStatus(Reply|Guards)|ControlContextGuard|PresentationJourney)$' -count=1 -timeout=3m` — core/app passed in 8.114/21.787 seconds.
+- `git diff --check` — passed.
+
+Earlier control checks still expected the pre-presentation paused/cancelled text;
+their wording was corrected while retaining native revision, stop-intent and
+stale-action assertions. Failed candidate evidence remains separate. The clean
+executable is pushed and active in QA with fresh polling and empty queues.
+An atomic executable replacement and restart preserved the transient unit's
+environment, transport cycle, publisher profile and prior invocation hashes.
+The failed real client interpretation remains unchanged; it was not replayed
+or replaced. A read of retained state confirmed that the latest acknowledged
+work reference identifies the completed journey. Actual model/client retry
+and remaining mobile/desktop acceptance are still pending.
+
 ## Risks and Follow-ups
 
 Remaining real mobile/desktop coverage is still open. The delivered standalone
