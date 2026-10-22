@@ -230,7 +230,7 @@ The existing progress-state and actual HTTP/SQLite preparation tests first
 reproduced these defects. After correction,
 `go test ./internal/core ./internal/app -run '^Test(TelegramPresentation(DocumentExcerpt|ProgressStates)|TelegramAuthoringPreparedDecision)$' -count=1 -timeout=3m`
 passed in core/app in 0.005/0.767 seconds. Clean-candidate development and broader
-affected regressions remain the activation gate for this repair.
+affected regressions were then run against the final repair candidate.
 
 The retained QA receiver also exhausted its polling transport retries after a
 network failure. A fresh connection doctor passed. One supported local polling
@@ -238,11 +238,31 @@ retry cycle and explicit service activation restored ready health with no queued
 updates or deliveries. Prior stopped invocations and the completed real journey
 were verified byte-identical; no work or model allowance was reset.
 
+Clean candidate `ce16bea12d4acf0d129d83de643d17333607a957` passed:
+
+- `make verify` — zero lint issues; short Go tests, eight CI helper tests and build passed.
+- `go test ./internal/core ./internal/app -run '^Test(TelegramPresentation(Document|Progress|Journey|ActionWork|Confirmation)|TelegramAuthoringPrepared|TelegramWork(Automatic|Evidence|HumanResult|DeliveryFailure))' -count=1 -timeout=3m` — core/app passed in 2.262/28.040 seconds.
+- `git diff --check` — passed.
+
+The unchanged prepared inputs, complete attachments, action replay, native
+receipt and single-publication checks remain enforced. Earlier strict-lint and
+old-wording assertion failures are retained with their actual candidates rather
+than reused as passing evidence. No storage or concurrency owner changed.
+
+The exact clean executable is pushed and active in isolated QA. Fresh polling,
+ready health and empty queues were verified after activation. Updating the
+executable required recreating the transient unit after stopping it unloaded
+its definition. The polling retry cycle, publisher profile, prior invocation
+hashes, completed journey and one-publication count remain unchanged. The
+delivered-notice count also remained unchanged; activation generated no new
+input or duplicate result. Private evidence retains validation, backups and
+activation identity. Actual review of the repaired messages remains pending.
+
 ## Risks and Follow-ups
 
 Remaining real mobile/desktop coverage is still open. The delivered standalone
 ticket notification exposed misleading zero-unit integration wording; the
-caption/result repairs above still require activation and actual client review.
+caption/result repairs above are active in QA and still require actual client review.
 T5.2 cannot close from the recovered native journey alone. The existing
 scheduled nightly must certify the exact integrated final candidate; keep
 `awaiting_nightly` until that evidence exists.
