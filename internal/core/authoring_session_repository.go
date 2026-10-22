@@ -320,6 +320,11 @@ func ParseAuthoringSession(content string) (AuthoringSession, error) {
 		return AuthoringSession{}, err
 	}
 
+	session.Guided, err = parseGuidedUseCase(metadata.Metadata["guided_state"])
+	if err != nil {
+		return AuthoringSession{}, err
+	}
+
 	session.Inputs = parseAuthoringArtifactSection(content, "Inputs")
 	session.Outputs = parseAuthoringArtifactSection(content, "Outputs")
 	session.Provenance = parseAuthoringProvenanceSection(content)
@@ -364,6 +369,10 @@ func renderAuthoringSessionFrontmatter(output *bytes.Buffer, session AuthoringSe
 			key, value string
 			quoted     bool
 		}{key: "revision", value: strconv.FormatInt(session.Revision, 10)})
+	}
+
+	if err := renderGuidedState(output, session.Guided); err != nil {
+		return err
 	}
 
 	for _, field := range fields {

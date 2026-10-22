@@ -111,6 +111,7 @@ const (
 
 // AuthoringSession describes a package boundary value.
 type AuthoringSession struct {
+	Guided      *GuidedUseCaseState
 	ID          string
 	Namespace   string
 	Revision    int64
@@ -359,6 +360,10 @@ func validateAuthoringSessionTimes(session AuthoringSession) error {
 }
 
 func validateManagedAuthoringRevision(session AuthoringSession) error {
+	if err := validateGuidedUseCase(session); err != nil {
+		return err
+	}
+
 	if session.Revision < 0 || (session.Revision > 0 && !IsValidOpsNamespace(session.Namespace)) {
 		return fmt.Errorf("invalid managed authoring revision or namespace")
 	}

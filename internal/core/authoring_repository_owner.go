@@ -26,6 +26,10 @@ func (r *fileAuthoringSessionRepository) UpdateSession(ctx context.Context, sess
 			return err
 		}
 
+		if current.Guided != nil || session.Guided != nil {
+			return ErrWorkflowConflict
+		}
+
 		if current.Revision > 0 {
 			if session.Revision != current.Revision || session.Namespace != current.Namespace {
 				return ErrWorkflowConflict
@@ -79,6 +83,10 @@ func (r *fileAuthoringSessionRepository) AppendTranscriptEvents(ctx context.Cont
 		session, err := r.getGuardedSession(ctx, id)
 		if err != nil {
 			return err
+		}
+
+		if session.Guided != nil {
+			return ErrWorkflowConflict
 		}
 
 		if err := r.appendTranscriptEvents(ctx, id, events); err != nil {

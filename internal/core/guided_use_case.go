@@ -1,0 +1,167 @@
+package core
+
+import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"strings"
+)
+
+// GuidedUseCaseState extends a canonical authoring session without adopting manual sessions.
+type GuidedUseCaseState struct {
+	SchemaVersion       int                      `json:"schema_version"`
+	Actor               string                   `json:"actor"`
+	ProgressionIntent   bool                     `json:"progression_intent"`
+	CaseSlug            string                   `json:"case_slug,omitempty"`
+	CaseName            string                   `json:"case_name,omitempty"`
+	Stage               string                   `json:"stage"`
+	Status              string                   `json:"status"`
+	Capture             string                   `json:"capture,omitempty"`
+	PendingOperation    *GuidedUseCaseOperation  `json:"pending_operation,omitempty"`
+	CompletedOperations []GuidedUseCaseOperation `json:"completed_operations,omitempty"`
+	Checkpoints         []GuidedStageCheckpoint  `json:"checkpoints,omitempty"`
+}
+
+// GuidedUseCaseOperation binds retries to their original arguments and revision.
+type GuidedUseCaseOperation struct {
+	ID      string `json:"id"`
+	Action  string `json:"action"`
+	Digest  string `json:"digest"`
+	Content string `json:"content,omitempty"`
+}
+
+// GuidedStageCheckpoint retains immutable input bytes independently of a code target.
+type GuidedStageCheckpoint struct {
+	OperationID string                    `json:"operation_id"`
+	Stage       string                    `json:"stage"`
+	Repository  string                    `json:"repository"`
+	Commit      string                    `json:"commit"`
+	Ref         string                    `json:"ref"`
+	Artifacts   []GuidedCommittedArtifact `json:"artifacts"`
+	Sources     []GuidedCommittedArtifact `json:"sources,omitempty"`
+}
+
+// GuidedCommittedArtifact binds a repository-relative path to its committed content.
+type GuidedCommittedArtifact struct {
+	Path string `json:"path"`
+	Hash string `json:"hash"`
+}
+
+// GuidedUseCaseScope prevents a callback from addressing another project or namespace.
+type GuidedUseCaseScope struct {
+	RunID     string
+	ProjectID string
+	Namespace string
+}
+
+// GuidedUseCaseStart records the actor's intent to proceed through development.
+type GuidedUseCaseStart struct {
+	GuidedUseCaseScope
+	Actor             string
+	ProgressionIntent bool
+}
+
+// GuidedUseCaseCommand is a revision-bound mutation of the retained journey.
+type GuidedUseCaseCommand struct {
+	GuidedUseCaseScope
+	OperationID      string
+	ExpectedRevision int64
+	Action           string
+	Content          string
+}
+
+func validateGuidedUseCase(session AuthoringSession) error {
+	state := session.Guided
+	if state == nil {
+		return nil
+	}
+
+	if !validGuidedIntent(session) {
+		return errors.New("invalid guided use-case schema, scope or progression intent")
+	}
+
+	if !boundedGuidedState(state) {
+		return errors.New("guided use-case state exceeds its bounds")
+	}
+
+	if !guidedStageValid(state.Stage) || !guidedStatusValid(state.Status) {
+		return errors.New("invalid guided use-case stage or status")
+	}
+
+	if state.Stage != "name" && (state.CaseSlug == "" || state.CaseName == "") {
+		return errors.New("guided use case requires a canonical name")
+	}
+
+	return nil
+}
+
+func guidedStageValid(value string) bool {
+	switch value {
+	case "name", "dump", "quiz", "specification", "preparation", "execution", "results":
+		return true
+	default:
+		return false
+	}
+}
+
+func guidedStatusValid(value string) bool {
+	switch value {
+	case "waiting_input", "running", "blocked", "paused", "completed", "cancelled", "failed":
+		return true
+	default:
+		return false
+	}
+}
+
+func parseGuidedUseCase(value string) (*GuidedUseCaseState, error) {
+	if value == "" {
+		return nil, nil
+	}
+
+	var state GuidedUseCaseState
+	if err := decodeAuthoringState([]byte(unquoteMetadataString(value)), &state); err != nil {
+		return nil, fmt.Errorf("parse guided state: %w", err)
+	}
+
+	return &state, nil
+}
+
+func guidedOperation(command GuidedUseCaseCommand) (GuidedUseCaseOperation, error) {
+	if err := validateAuthoringSessionID(command.OperationID); err != nil {
+		return GuidedUseCaseOperation{}, err
+	}
+
+	if len(command.Content) > 65536 || command.ExpectedRevision < 1 {
+		return GuidedUseCaseOperation{}, errors.New("guided command requires bounded content and a positive revision")
+	}
+
+	encoded, err := json.Marshal(command)
+
+	return GuidedUseCaseOperation{ID: command.OperationID, Action: command.Action, Digest: workflowHash(encoded), Content: command.Content}, err
+}
+
+func renderGuidedState(output *bytes.Buffer, state *GuidedUseCaseState) error {
+	if state == nil {
+		return nil
+	}
+
+	encoded, err := json.Marshal(state)
+	if err != nil {
+		return err
+	}
+
+	_, err = fmt.Fprintf(output, "guided_state: %s\n", yamlString(string(encoded)))
+
+	return err
+}
+
+func validGuidedIntent(session AuthoringSession) bool {
+	state := session.Guided
+
+	return state.SchemaVersion == 1 && session.Revision > 0 && IsValidOpsNamespace(session.Namespace) && strings.TrimSpace(state.Actor) != "" && len(state.Actor) <= 128 && state.ProgressionIntent
+}
+
+func boundedGuidedState(state *GuidedUseCaseState) bool {
+	return len(state.Capture) <= 65536 && len(state.CompletedOperations) <= 256 && len(state.Checkpoints) <= 8
+}
