@@ -1,13 +1,13 @@
 # Guided Use-Case Workflow Tracker
 
-Status: In progress; Slice 1 reviewing
+Status: In progress; Slice 2 active
 Date: 2026-10-22
 Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 1, Guided capture and Git checkpoints; T1.1-T1.3 implemented; PR #430 reviewing, awaiting controller validation and integration.
-Progress: 0 of 6 slices delivered; 3 of 18 tasks implemented. Slice 1 is in PR #430 and awaits controller validation and integration.
+Active slice: Slice 2, Guided quiz and approved specification; T2.1 is pending.
+Progress: 1 of 6 slices delivered; 3 of 18 tasks completed. Slice 2 is active.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
 Spec: [Approved workflow](../spec/stable/guided-use-case-workflow.md)
@@ -32,9 +32,9 @@ These are planned identities. Reports, branches and pull requests do not exist m
 
 | Task | Required outcome | State | Commit | Validation |
 | --- | --- | --- | --- | --- |
-| T1.1 | Retained guided run, scope/intent, revisions and compatible authoring-store extension. | implemented | `d142d186c0c3775df57841b32e27021594576ffa` | Focused capture/checkpoint regressions passed; see Slice 1 report and canonical PR for exact-HEAD controller evidence. |
-| T1.2 | Scoped Git checkpoints, immutable input reads, commit retention and lost-ack recovery. | implemented | `e9ef91a70a2c13b247edeba1748eee0906974b1e` | Focused capture/checkpoint regressions passed; see Slice 1 report and canonical PR for exact-HEAD controller evidence. |
-| T1.3 | Web start/name/dump capture, explicit completion, readiness and resume. | implemented | `ad6db48d366beb9a7a4d04ea252a47175e6ff68b` | Focused capture/checkpoint regressions passed; see Slice 1 report and canonical PR for exact-HEAD controller evidence. |
+| T1.1 | Retained guided run, scope/intent, revisions and compatible authoring-store extension. | done | `d142d186c0c3775df57841b32e27021594576ffa` | Focused capture/checkpoint regressions passed; see Slice 1 report and canonical PR for exact-HEAD controller evidence. |
+| T1.2 | Scoped Git checkpoints, immutable input reads, commit retention and lost-ack recovery. | done | `e9ef91a70a2c13b247edeba1748eee0906974b1e` | Focused capture/checkpoint regressions passed; see Slice 1 report and canonical PR for exact-HEAD controller evidence. |
+| T1.3 | Web start/name/dump capture, explicit completion, readiness and resume. | done | `ad6db48d366beb9a7a4d04ea252a47175e6ff68b` | Focused capture/checkpoint regressions passed; see Slice 1 report and canonical PR for exact-HEAD controller evidence. |
 | T2.1 | Committed-input quiz generation, bound answers, sufficient completion and sealing. | pending | pending | pending |
 | T2.2 | Exact generated-specification approval, provenance, checkpoint and recovery. | pending | pending | pending |
 | T2.3 | Web clarification/specification progression and complete artifact inspection. | pending | pending | pending |
@@ -55,7 +55,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 
 | Slice | State | PR | Integrated commit | Report evidence |
 | --- | --- | --- | --- | --- |
-| 1 | reviewing | #430 | pending | [Slice 1 report](../report/slices/guided-use-case-workflow/slice-1-capture-checkpoints.md) |
+| 1 | delivered | #430 | `245cb6f306aabb5e7e9877491aa2ea26174299e6` | [Slice 1 report](../report/slices/guided-use-case-workflow/slice-1-capture-checkpoints.md) |
 | 2 | pending | pending | pending | pending |
 | 3 | pending | pending | pending | pending |
 | 4 | pending | pending | pending | pending |
@@ -105,7 +105,7 @@ Delivery-set gate: `make verify`, bounded normal guided-workflow regressions, fo
 | Evidence | Candidate | Outcome |
 | --- | --- | --- |
 | Initial Slice 1 gate | `c12f62a9a1ba0f6879b2a295e0e7bb2b0a54b8cd` | failed: static Web navigation returned 503; focused correction passed and the final controller gate is regenerated. |
-| Slice development gates | PR #430 head (controller evidence) | Task regressions and scoped strict lint passed; final PR-head evidence is owned by the controller. |
+| Slice 1 development gate | `245cb6f306aabb5e7e9877491aa2ea26174299e6` | All four configured checks passed through Looper; PR #430 merged by the controller at that exact commit. |
 | Web browser journey | pending | not run |
 | Telegram actual-client journey | pending | not observed |
 | TUI interaction and cross-adapter parity | pending | not run |

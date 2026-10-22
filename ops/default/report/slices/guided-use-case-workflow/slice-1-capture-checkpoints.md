@@ -1,11 +1,12 @@
 # Slice 1: Guided capture and Git checkpoints
 
-Status: reviewing
+Status: delivered
 Delivery set: guided-use-case-workflow
 Plan: [Approved delivery plan](../../../plan/guided-use-case-workflow.md)
 Tracker: [Tasks and acceptance](../../../tracker/guided-use-case-workflow.md)
 Branch: `feat/slice-1-guided-capture-checkpoints`
 PR: `#430`
+Integrated commit: `245cb6f306aabb5e7e9877491aa2ea26174299e6`
 
 ## Purpose
 
@@ -53,7 +54,7 @@ Task regressions passed:
 3. `go test ./internal/core ./internal/app ./internal/webui -run '^TestGuidedUseCase(Capture|Checkpoint)' -count=1 -timeout=3m`
 4. `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/core/... ./internal/app/... ./internal/webui/...` completed with zero remaining issues.
 
-Final PR-head acceptance uses the controller's retained exact-clean-HEAD evidence for this ordered command list:
+The following ordered checks passed through Looper on exact clean HEAD `245cb6f306aabb5e7e9877491aa2ea26174299e6`. Canonical PR #430 merged into `dev` at that same commit, verified against Forgejo and the controller checkpoint:
 
 1. `make verify`
 2. `go test ./internal/core ./internal/app ./internal/webui -run '^TestGuidedUseCase(Capture|Checkpoint)' -count=1 -timeout=3m`
