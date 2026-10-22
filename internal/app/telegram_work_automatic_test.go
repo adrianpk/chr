@@ -67,7 +67,7 @@ func checkTelegramWorkAutomaticPolicy(t *testing.T, provider *telegramWorkAutoma
 	}
 
 	text := telegramWorkProgressText(status)
-	if !strings.Contains(text, "Integration confirmed for") || !strings.Contains(text, "confirmed tickets: 1") {
+	if !strings.Contains(text, "Integration confirmed") || !strings.Contains(text, "confirmed tickets: 1") || strings.Contains(text, "0 unit(s)") {
 		t.Fatal("terminal projection lost confirmed evidence", text)
 	}
 }
