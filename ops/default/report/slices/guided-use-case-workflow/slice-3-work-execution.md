@@ -5,7 +5,7 @@ Delivery set: guided-use-case-workflow
 Plan: `ops/default/plan/guided-use-case-workflow.md`
 Tracker: `ops/default/tracker/guided-use-case-workflow.md`
 Branch: `feat/slice-3-guided-work-execution`
-PR: pending
+PR: `#432`
 
 ## Purpose
 
