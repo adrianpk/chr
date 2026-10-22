@@ -10,6 +10,8 @@ import (
 
 // GuidedUseCaseState extends a canonical authoring session without adopting manual sessions.
 type GuidedUseCaseState struct {
+	Quiz                *GuidedQuizState         `json:"quiz,omitempty"`
+	Blocker             string                   `json:"blocker,omitempty"`
 	CaseHash            string                   `json:"case_hash,omitempty"`
 	PendingCheckpoint   *GuidedStageCheckpoint   `json:"pending_checkpoint,omitempty"`
 	SchemaVersion       int                      `json:"schema_version"`
@@ -27,11 +29,14 @@ type GuidedUseCaseState struct {
 
 // GuidedUseCaseOperation binds retries to their original arguments and revision.
 type GuidedUseCaseOperation struct {
-	ExpectedRevision int64  `json:"expected_revision,omitempty"`
-	ID               string `json:"id"`
-	Action           string `json:"action"`
-	Digest           string `json:"digest"`
-	Content          string `json:"content,omitempty"`
+	QuizRequest      *QuizActionRequest `json:"quiz_request,omitempty"`
+	QuestionID       string             `json:"question_id,omitempty"`
+	InputDigest      string             `json:"input_digest,omitempty"`
+	ExpectedRevision int64              `json:"expected_revision,omitempty"`
+	ID               string             `json:"id"`
+	Action           string             `json:"action"`
+	Digest           string             `json:"digest"`
+	Content          string             `json:"content,omitempty"`
 }
 
 // GuidedStageCheckpoint retains immutable input bytes independently of a code target.
@@ -70,6 +75,8 @@ type GuidedUseCaseStart struct {
 
 // GuidedUseCaseCommand is a revision-bound mutation of the retained journey.
 type GuidedUseCaseCommand struct {
+	QuestionID  string `json:",omitempty"`
+	InputDigest string `json:",omitempty"`
 	GuidedUseCaseScope
 	OperationID      string
 	ExpectedRevision int64
@@ -144,7 +151,7 @@ func guidedOperation(command GuidedUseCaseCommand) (GuidedUseCaseOperation, erro
 
 	encoded, err := json.Marshal(command)
 
-	return GuidedUseCaseOperation{ID: command.OperationID, Action: command.Action, ExpectedRevision: command.ExpectedRevision, Digest: workflowHash(encoded), Content: command.Content}, err
+	return GuidedUseCaseOperation{ID: command.OperationID, Action: command.Action, QuestionID: command.QuestionID, InputDigest: command.InputDigest, ExpectedRevision: command.ExpectedRevision, Digest: workflowHash(encoded), Content: command.Content}, err
 }
 
 func renderGuidedState(output *bytes.Buffer, state *GuidedUseCaseState) error {
@@ -170,4 +177,12 @@ func validGuidedIntent(session AuthoringSession) bool {
 
 func boundedGuidedState(state *GuidedUseCaseState) bool {
 	return len(state.Capture) <= 65536 && len(state.CompletedOperations) <= 256 && len(state.Checkpoints) <= 8
+}
+
+// GuidedQuizState retains the canonical quiz owner binding and its committed input digest.
+type GuidedQuizState struct {
+	SessionID   string `json:"session_id"`
+	Revision    string `json:"revision"`
+	QuestionID  string `json:"question_id,omitempty"`
+	InputDigest string `json:"input_digest"`
 }

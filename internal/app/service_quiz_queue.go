@@ -43,7 +43,7 @@ func (s service) nextQuizQuestion(state core.QuizRuntimeState, entries []core.Qu
 	}
 
 	if !response.Question.Required {
-		return s.finishQuiz(state), nil
+		return s.completeGeneratedQuiz(state)
 	}
 
 	if err := validateNextQuizQuestion(state, entries, response.Question); err != nil {
@@ -186,4 +186,18 @@ func retainUnansweredFastQuestions(state core.QuizRuntimeState, entries []core.Q
 	state.FastQueue = queue
 
 	return state
+}
+
+func (s service) completeGeneratedQuiz(state core.QuizRuntimeState) (core.QuizRuntimeState, error) {
+	if s.guidedContext == nil {
+		return s.finishQuiz(state), nil
+	}
+
+	if state.AnswersRecorded == 0 {
+		return state, fmt.Errorf("guided quiz generated no answered clarification")
+	}
+
+	state.ClarificationComplete = true
+
+	return s.finishQuiz(state), nil
 }

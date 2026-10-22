@@ -72,6 +72,10 @@ func QuizArtifactLayout(projectDir string, scope QuizScope) (QuizArtifactPaths, 
 		return QuizArtifactPaths{}, err
 	}
 
+	if scope.Namespace != "" {
+		return scopedQuizArtifactLayout(projectDir, scope)
+	}
+
 	scopeID, err := quizScopeID(scope)
 	if err != nil {
 		return QuizArtifactPaths{}, err
@@ -431,4 +435,44 @@ func quizRawText(value string) string {
 	}
 
 	return strings.Join(lines, "\n")
+}
+
+func scopedQuizArtifactLayout(projectDir string, scope QuizScope) (QuizArtifactPaths, error) {
+	id, err := quizScopeID(scope)
+	if err != nil {
+		return QuizArtifactPaths{}, err
+	}
+
+	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: scope.Namespace})
+	if err != nil {
+		return QuizArtifactPaths{}, err
+	}
+
+	paths := QuizArtifactPaths{ScopeID: id}
+	for _, target := range []struct {
+		name               string
+		relative, absolute *string
+	}{
+		{id + "-quiz-raw", &paths.RawRelativePath, &paths.RawPath},
+		{id + "-quiz", &paths.CuratedRelativePath, &paths.CuratedPath},
+	} {
+		dir, err := layout.ArtifactDirectory("quiz", "00000-"+opsArtifactSlugOrDefault(target.name))
+		if err != nil {
+			return paths, err
+		}
+
+		*target.absolute = filepath.Join(dir, OpsArtifactBodyFile())
+
+		relative, err := filepath.Rel(projectDir, *target.absolute)
+		if err != nil {
+			return paths, err
+		}
+
+		*target.relative = filepath.ToSlash(relative)
+	}
+
+	paths.RuntimeRelativePath = filepath.ToSlash(filepath.Join(DirectoryName, scope.Namespace, QuizRuntimeDirectory, id+".json"))
+	paths.RuntimePath = filepath.Join(projectDir, filepath.FromSlash(paths.RuntimeRelativePath))
+
+	return paths, nil
 }

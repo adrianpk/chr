@@ -20,6 +20,7 @@ const (
 
 // QuizScope describes a package boundary value.
 type QuizScope struct {
+	Namespace string `json:",omitempty"`
 	ProjectID string
 	CaseSlug  string
 }
@@ -76,6 +77,7 @@ const (
 
 // QuizRuntimeState describes a package boundary value.
 type QuizRuntimeState struct {
+	ClarificationComplete bool `json:",omitempty"`
 	SchemaVersion         int
 	SessionID             string
 	Revision              string `json:"-"`
@@ -194,6 +196,10 @@ func ValidateQuizRuntimeState(state QuizRuntimeState) error {
 
 // ValidateQuizScope validates the corresponding package boundary value.
 func ValidateQuizScope(scope QuizScope) error {
+	if scope.Namespace != "" && !IsValidOpsNamespace(scope.Namespace) {
+		return fmt.Errorf("invalid quiz namespace")
+	}
+
 	if strings.TrimSpace(scope.ProjectID) == "" {
 		return fmt.Errorf("quiz scope project id is required")
 	}

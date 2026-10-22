@@ -13,6 +13,8 @@ import (
 )
 
 type service struct {
+	afterGuidedQuiz        func() error
+	guidedContext          *guidedGenerationContext
 	ctx                    context.Context
 	env                    core.UserEnvironment
 	assetsFS               fs.FS

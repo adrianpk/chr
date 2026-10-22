@@ -181,6 +181,10 @@ func (s service) newQuizModelRequest(state core.QuizRuntimeState) (core.QuizMode
 }
 
 func (s service) newQuizModelRequestWithEntries(state core.QuizRuntimeState, entries []core.QuizEntry) (core.QuizModelRequest, error) {
+	if s.guidedContext != nil {
+		return s.guidedQuizModelRequest(state, entries)
+	}
+
 	scope := core.QuizScope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,
