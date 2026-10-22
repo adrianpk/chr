@@ -258,6 +258,29 @@ delivered-notice count also remained unchanged; activation generated no new
 input or duplicate result. Private evidence retains validation, backups and
 activation identity. Actual review of the repaired messages remains pending.
 
+The next real status question exposed missing execution references in intent
+context: preparation focus was selected despite having no native binding.
+The bounded context now identifies observed invocation bindings and the most
+recent acknowledged work message. An explicit replied work message takes
+precedence. Both references are peer-bound and filtered through currently
+allowed projects; they grant no control authority.
+
+Read-only status resolution accepts acknowledged progress, terminal and bound
+status messages after capture closes. Status responses retain that reference
+atomically with source acknowledgement. Native work replies bypass capture
+dispatch before ordinary interpretation. Capture and mutating-control reply
+guards remain unchanged. An unbound status proposal gets an inspection question
+rather than a control diagnostic.
+
+The composed HTTP/model/SQLite/Git journey first reproduced the missing context,
+then the finished-reply capture failure. It now covers a plain status question,
+a terminal reply and a reply to a status response without changing canonical
+work or repeating publication. SQLite tests also reject foreign peers,
+unacknowledged messages, scope conflicts and changed roots, and preserve an
+explicit reply when a newer work message exists. The focused development result
+is core/app 0.226/13.790 seconds. Clean-candidate checks and real-client retry
+remain separate acceptance obligations.
+
 ## Risks and Follow-ups
 
 Remaining real mobile/desktop coverage is still open. The delivered standalone

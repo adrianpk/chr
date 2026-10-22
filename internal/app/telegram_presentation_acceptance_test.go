@@ -3,6 +3,7 @@ package app
 import (
 	"bytes"
 	"encoding/json"
+	"maps"
 	"reflect"
 	"strings"
 	"testing"
@@ -69,12 +70,14 @@ func TestTelegramPresentationJourney(t *testing.T) {
 	stop()
 	checkTelegramJourneyReceipt(t, f, operations, provider, run.ID, key)
 
-	checkTelegramPresentationJourneyDrain(t, f)
+	finishedMessage := checkTelegramPresentationJourneyDrain(t, f)
 
 	status := f.send(t, "/status "+run.ID, 0)
 	if !strings.Contains(status.Text, "Integration confirmed by retained native receipts") || !strings.Contains(status.Text, "confirmed tickets: 1") || strings.Contains(status.Text, "0 unit(s)") || len(utf16.Encode([]rune(status.Text))) > 1800 {
 		t.Fatal("final status lost canonical truth or its bound", status)
 	}
+
+	checkTelegramJourneyNaturalStatus(t, f, operations, finishedMessage)
 
 	f.updates <- admission
 
@@ -106,6 +109,10 @@ func telegramPresentationJourneyFixture(t *testing.T) (*telegramConversationAppF
 			}
 
 			return ConversationIntent{OperationID: "work", Arguments: ConversationIntentArguments{Action: "ticket", Text: strings.TrimPrefix(input.Message, "Work on ticket "), Conversation: conversation}}
+		}
+
+		if input.Message == "Show me the status of that work." {
+			return telegramJourneyStatusIntent(input)
 		}
 
 		return telegramAuthoringBridgeCapture(input)
@@ -181,17 +188,75 @@ func TestTelegramPresentationCoverageEmptyRecords(t *testing.T) {
 	checkTelegramNoWork(t, f.receiver.env)
 }
 
-func checkTelegramPresentationJourneyDrain(t *testing.T, f *telegramConversationAppFixture) {
+func checkTelegramPresentationJourneyDrain(t *testing.T, f *telegramConversationAppFixture) int64 {
 	t.Helper()
 
 	if err := f.receiver.drainDeliveries(t.Context()); err != nil {
 		t.Fatal(err)
 	}
 
+	var finished int64
+
 	for len(f.notices) > 0 {
 		notice := <-f.notices
 		if !utf8.ValidString(notice.Text) || len(utf16.Encode([]rune(notice.Text))) > 1800 {
 			t.Fatal("progress projection exceeded its bound", notice)
 		}
+
+		if strings.Contains(notice.Text, "Work has finished.") {
+			finished = notice.ID
+		}
+	}
+
+	return finished
+}
+
+// A status proposal needs the acknowledged work reference and its native
+// binding; preparation focus alone cannot identify the completed execution.
+func telegramJourneyStatusIntent(input ConversationIntentContext) ConversationIntent {
+	var wire struct {
+		Recent   string                              `json:"last_work_conversation"`
+		Replied  string                              `json:"replied_work_conversation"`
+		Sessions []struct{ ID, InvocationID string } `json:"sessions"`
+	}
+
+	payload, err := json.Marshal(input)
+	if err != nil || json.Unmarshal(payload, &wire) != nil {
+		return telegramIntentClarification("The current execution context is unavailable.")
+	}
+
+	if wire.Replied != "" {
+		wire.Recent = wire.Replied
+	}
+
+	for _, session := range wire.Sessions {
+		if session.ID == wire.Recent && session.InvocationID != "" {
+			return ConversationIntent{OperationID: "control", Arguments: ConversationIntentArguments{Action: "status", Conversation: session.ID}}
+		}
+	}
+
+	return telegramIntentClarification("The recent work message has no visible execution binding.")
+}
+
+func checkTelegramJourneyNaturalStatus(t *testing.T, f *telegramConversationAppFixture, operations service, finished int64) {
+	t.Helper()
+
+	if finished == 0 {
+		t.Fatal("no acknowledged terminal message available for a status reply")
+	}
+
+	before := workflowCLIImage(t, operations.projectContext.ProjectDir)
+	message := f.send(t, "Show me the status of that work.", 0)
+
+	for _, reply := range []int64{finished, message.ID} {
+		if !strings.Contains(message.Text, "confirmed tickets: 1") {
+			t.Fatal("natural status lost the completed execution", message.Text)
+		}
+
+		message = f.send(t, "Show me the status of that work.", reply)
+	}
+
+	if !strings.Contains(message.Text, "Integration confirmed by retained native receipts") || !maps.Equal(before, workflowCLIImage(t, operations.projectContext.ProjectDir)) {
+		t.Fatal("status reply failed or changed canonical work", message.Text)
 	}
 }

@@ -9,10 +9,12 @@ import (
 
 // TelegramIntentSnapshot binds interpretation to one peer's observed context.
 type TelegramIntentSnapshot struct {
-	Selected string
-	Focused  string
-	Sessions []TelegramConversation
-	Digest   string
+	Selected                string
+	Focused                 string
+	LastWorkConversation    string
+	RepliedWorkConversation string
+	Sessions                []TelegramConversation
+	Digest                  string
 }
 
 // TelegramIntentContext reads selection and sessions in one transaction. Its
@@ -52,6 +54,18 @@ func (op telegramConversationTransaction) intentSnapshot() (TelegramIntentSnapsh
 	snapshot.Sessions, err = readTelegramConversations(op.ctx, op.tx, op.input.Update.Peer)
 	if err != nil {
 		return snapshot, err
+	}
+
+	snapshot.LastWorkConversation, err = readTelegramWorkMessageConversation(op.ctx, op.tx, op.input.Update.Peer, 0)
+	if err != nil {
+		return snapshot, err
+	}
+
+	if op.input.Update.ReplyToMessageID > 0 {
+		snapshot.RepliedWorkConversation, err = readTelegramWorkMessageConversation(op.ctx, op.tx, op.input.Update.Peer, op.input.Update.ReplyToMessageID)
+		if err != nil {
+			return snapshot, err
+		}
 	}
 
 	encoded, err := json.Marshal(snapshot)

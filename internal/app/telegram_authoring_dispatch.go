@@ -41,6 +41,10 @@ func (r telegramReceiver) respondAuthoringReply(ctx context.Context, user core.T
 		return false, nil
 	}
 
+	if work, err := r.store.IsTelegramWorkReply(ctx, update); work || err != nil {
+		return false, err
+	}
+
 	projects, err := r.operations.ListRegisteredProjects(user.ProjectIDs)
 	if err != nil {
 		return true, err

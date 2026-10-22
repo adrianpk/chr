@@ -189,7 +189,8 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 ### Changed
 
 - Telegram messages show human project/work context, the current state and a
-  useful next step. Generated documents and explanations pair short literal
+  useful next step. Status questions can refer to recent work or reply to its
+  completion message. Generated documents and explanations pair short literal
   excerpts with complete attachments. Confirmations include their complete
   scope, and buttons distinguish preparing a ticket, starting work and applying
   a control. Retries preserve the original scope, document and saved result.

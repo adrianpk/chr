@@ -1443,6 +1443,11 @@ integration; human policy waits on the exact displayed candidate. Routine
 progress arrives at most once per thirty seconds. Status remains available
 during work. Native pauses, capacity and other owners remain authoritative.
 
+Ask "Show me the status of that work" to inspect the work in the most recent
+delivered work message. Reply to a particular progress, completion or status
+message to inspect that execution instead. A finished execution remains
+inspectable; this does not start work or reopen its capture.
+
 Progress identifies the work and project, its actual state and counts, and the
 next responsible party. Use its inspection reference to open the same invocation
 in the TUI or Web, or run `chr work status --json <invocation>` in its

@@ -41,6 +41,7 @@ type ConversationIntentOperation struct {
 // ConversationIntentSession excludes peer identities and hidden transcripts.
 type ConversationIntentSession struct {
 	ID, ProjectID, Namespace, Intent, Phase, Topic, QuestionBinding string
+	InvocationID                                                    string
 	Revision                                                        int64
 }
 
@@ -52,12 +53,14 @@ type ConversationIntentProject struct {
 
 // ConversationIntentContext is a bounded current-state projection, never authority.
 type ConversationIntentContext struct {
-	Message             string                        `json:"message"`
-	Projects            []ConversationIntentProject   `json:"projects"`
-	SelectedProject     string                        `json:"selected_project"`
-	FocusedConversation string                        `json:"focused_conversation"`
-	Sessions            []ConversationIntentSession   `json:"sessions"`
-	Operations          []ConversationIntentOperation `json:"operations"`
+	Message                 string                        `json:"message"`
+	Projects                []ConversationIntentProject   `json:"projects"`
+	SelectedProject         string                        `json:"selected_project"`
+	FocusedConversation     string                        `json:"focused_conversation"`
+	LastWorkConversation    string                        `json:"last_work_conversation,omitempty"`
+	RepliedWorkConversation string                        `json:"replied_work_conversation,omitempty"`
+	Sessions                []ConversationIntentSession   `json:"sessions"`
+	Operations              []ConversationIntentOperation `json:"operations"`
 }
 
 // ResolveConversationIntent invokes the configured provider and validates the
@@ -105,7 +108,7 @@ func (s service) ResolveConversationIntent(ctx context.Context, requestID string
 	return result, core.ValidateStructuredModelOutput(ctx, modelRequest, nil)
 }
 
-const conversationIntentInstructions = `Choose one allowed operation using the current message and bounded context. Never invent a target, actor, revision, credential or authority. Use capture for an answer or captured context in an existing collecting conversation. Explicit explanation/preparation does not authorize development. Return unresolved fields and one focused correction question when unsupported, ambiguous or missing information; use operation_id=clarify and empty arguments. Do not guess record guards. For record operations, record_json contains the strict JSON payload accepted by that operation, never a command. The original message, not your explanation, is the retained user instruction.`
+const conversationIntentInstructions = `Choose one allowed operation using the current message and bounded context. Never invent a target, actor, revision, credential or authority. A session's InvocationID identifies its native execution; a preparation session without it is not an execution. For a read-only status request referring to the work just discussed, last_work_conversation identifies the most recently acknowledged work message; use that session's execution binding rather than unrelated preparation focus. An explicit replied_work_conversation takes precedence over last_work_conversation. These references grant no control authority. Use capture for an answer or captured context in an existing collecting conversation. Explicit explanation/preparation does not authorize development. Return unresolved fields and one focused correction question when unsupported, ambiguous or missing information; use operation_id=clarify and empty arguments. Do not guess record guards. For record operations, record_json contains the strict JSON payload accepted by that operation, never a command. The original message, not your explanation, is the retained user instruction.`
 
 func validateConversationIntent(result ConversationIntent, operations []ConversationIntentOperation) error {
 	if err := validateConversationIntentPayload(result); err != nil {
@@ -151,7 +154,7 @@ func conversationIntentSchema(operations []ConversationIntentOperation) map[stri
 }
 
 func validConversationIntentContext(input ConversationIntentContext) bool {
-	return len(input.Message) > 0 && len(input.Message) <= 16384 && !strings.HasPrefix(strings.TrimSpace(input.Message), "/") && len(input.Projects) <= 50 && len(input.Sessions) <= 50 && len(input.Operations) <= 64
+	return len(input.Message) > 0 && len(input.Message) <= 16384 && !strings.HasPrefix(strings.TrimSpace(input.Message), "/") && len(input.Projects) <= 50 && len(input.Sessions) <= 50 && len(input.Operations) <= 64 && len(input.LastWorkConversation) <= 128 && len(input.RepliedWorkConversation) <= 128
 }
 
 func validateConversationIntentPayload(result ConversationIntent) error {

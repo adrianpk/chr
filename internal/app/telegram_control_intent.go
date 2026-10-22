@@ -31,7 +31,7 @@ func (r telegramReceiver) intentControlTarget(ctx context.Context, input core.Te
 
 	command.Input.Config, command.Input.Projects = input.Config, input.Projects
 	command.Input.ContextDigest = input.ContextDigest
-	target, err := r.store.ResolveTelegramOperationTarget(ctx, command.Input, time.Now())
+	target, err := r.resolveControlTarget(ctx, command)
 
 	return target, true, err
 }

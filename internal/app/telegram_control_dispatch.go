@@ -70,6 +70,10 @@ func (r telegramReceiver) dispatchControl(ctx context.Context, user core.Telegra
 
 	id, err := r.controlInvocation(ctx, command, target)
 	if err != nil {
+		if command.Action == "status" {
+			return r.recordDiagnostic(ctx, command.Input.Update, command.Input.Config, "Which execution do you want to inspect? Reply to its progress or completion message; a preparation conversation has no execution yet.")
+		}
+
 		return r.recordDiagnostic(ctx, command.Input.Update, command.Input.Config, "Choose the exact execution or a conversation bound to it; conflicting targets cannot control work.")
 	}
 
@@ -117,7 +121,7 @@ func (r telegramReceiver) controlInvocation(ctx context.Context, command telegra
 
 func (r telegramReceiver) resolveControlTarget(ctx context.Context, command telegramControlCommand) (core.TelegramOperationTarget, error) {
 	if command.Action == "status" {
-		return r.store.ResolveTelegramOperationTarget(ctx, command.Input, time.Now())
+		return r.store.ResolveTelegramWorkStatusTarget(ctx, command.Input, time.Now())
 	}
 
 	return r.store.ResolveTelegramControlTarget(ctx, command.Input, time.Now())
@@ -147,5 +151,5 @@ func (r telegramReceiver) respondNativeStatus(ctx context.Context, operations te
 		return err
 	}
 
-	return r.store.QueuePresentationResponse(ctx, input.Update, telegramWorkProgressMessage(status, telegramWorkProjectName(input.Projects, status.ProjectID)), input.Config.Digest(), time.Now())
+	return r.store.QueueTelegramWorkStatus(ctx, input, target, id, telegramWorkProgressMessage(status, telegramWorkProjectName(input.Projects, status.ProjectID)), time.Now())
 }

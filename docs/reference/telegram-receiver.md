@@ -262,6 +262,14 @@ native request key observes its original admission before current source guards.
 Admission alone establishes neither host validation nor integration. See
 [Workflow Selection](workflow-selection.md) for native selection bounds.
 
+An ordinary-language status question can refer to the most recently delivered
+work message. Replying to a progress, completion or conversation-bound status
+message selects that message's execution, including after it finishes. The
+interpreter receives the observed execution binding separately from preparation
+focus. These references permit inspection; they do not reopen capture or grant
+control authority. Conflicting peers, projects, namespaces and changed roots
+remain rejected.
+
 While the foreground receiver runs, it reattaches confirmed invocations without
 another message. A separate host permits at most sixteen concurrent calls and
 requests one shared native checkpoint per activation. Intake remains available
