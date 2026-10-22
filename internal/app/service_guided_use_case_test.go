@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -21,9 +22,7 @@ func TestGuidedUseCaseCaptureWeb(t *testing.T) {
 		t.Skip("real Git checkpoint fixture")
 	}
 
-	provider := webCaseCreateProvider(t)
-
-	initializeGuidedWebGit(t, provider.projectContext.ProjectDir)
+	provider, _ := guidedWebFixture(t)
 
 	config := provider.config
 	config.Provider = provider
@@ -69,7 +68,12 @@ func TestGuidedUseCaseCaptureWeb(t *testing.T) {
 func webGuidedInput(t *testing.T, handler http.Handler, session core.AuthoringSession, action, content string, status int) {
 	t.Helper()
 
-	form := url.Values{"action": {"guided.input"}, "surface": {"guided"}, "confirm": {"true"}, "id": {session.ID}, "namespace": {session.Namespace}, "revision": {strconv.FormatInt(session.Revision, 10)}, "request_id": {action + "-" + strconv.FormatInt(session.Revision, 10)}, "step": {action}, "content": {content}}
+	form := url.Values{"question_id": {""}, "input_digest": {""}, "action": {"guided.input"}, "surface": {"guided"}, "confirm": {"true"}, "id": {session.ID}, "namespace": {session.Namespace}, "revision": {strconv.FormatInt(session.Revision, 10)}, "request_id": {action + "-" + strconv.FormatInt(session.Revision, 10)}, "step": {action}, "content": {content}}
+
+	if session.Guided.Quiz != nil {
+		form.Set("question_id", session.Guided.Quiz.QuestionID)
+		form.Set("input_digest", session.Guided.Quiz.InputDigest)
+	}
 
 	response := guidedCaptureHTTP(t, handler, http.MethodPost, "/guided/actions", form)
 	if response.Code != status {
@@ -106,7 +110,7 @@ func assertWebGuidedCheckpoint(t *testing.T, provider webViewProvider, handler h
 	}
 
 	page := guidedCaptureHTTP(t, handler, http.MethodGet, guidedUseCaseURL(id, "default"), nil)
-	for _, text := range []string{"First requirement.", "Second requirement.", checkpoint.Commit, "Clarification is not available yet", "Execution has not started"} {
+	for _, text := range []string{"First requirement.", "Second requirement.", checkpoint.Commit, "Answer and continue", "Execution has not started"} {
 		if page.Code != http.StatusOK || !strings.Contains(page.Body.String(), text) {
 			t.Fatalf("reloaded page missing %q: %d %s", text, page.Code, page.Body.String())
 		}
@@ -178,4 +182,25 @@ func guidedCaptureHTTP(t *testing.T, handler http.Handler, method, path string, 
 	handler.ServeHTTP(response, request)
 
 	return response
+}
+
+func guidedWebFixture(t *testing.T) (webViewProvider, *fakeServiceQuizModel) {
+	t.Helper()
+
+	if testing.Short() {
+		t.Skip("real Git guided Web fixture")
+	}
+
+	provider := webCaseCreateProvider(t)
+	initializeGuidedWebGit(t, provider.projectContext.ProjectDir)
+
+	operations := newTestService(t, provider.projectContext.ProjectDir)
+	now := operations.utcNow()
+	completion := serviceQuizModelResponse("complete", "complete", now)
+	completion.Question.Required = false
+	model := &fakeServiceQuizModel{responses: []core.QuizModelResponse{serviceQuizModelResponse("first", "question-1", now), completion}}
+	operations.quizModel = model
+	provider.serviceFactory = func(ctx context.Context) service { copy := operations; copy.ctx = ctx; return copy }
+
+	return provider, model
 }

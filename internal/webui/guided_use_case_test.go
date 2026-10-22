@@ -83,3 +83,54 @@ func TestGuidedUseCaseCaptureUnavailable(t *testing.T) {
 		t.Fatal("unavailable commands exposed", response.Code, body)
 	}
 }
+
+// TestGuidedUseCaseQuizView binds the sole current input and retains the original pending reply on retry.
+func TestGuidedUseCaseQuizView(t *testing.T) {
+	for _, test := range []struct {
+		name         string
+		view         GuidedUseCaseView
+		want, absent string
+	}{
+		{"question", GuidedUseCaseView{RunID: "run", Stage: "quiz", Question: "What is the intended result?", QuestionID: "question-current", InputDigest: "original-inputs"}, `name="question_id" value="question-current"`, "Retry progression"},
+		{"pending", GuidedUseCaseView{RunID: "run", Stage: "quiz", Question: "Superseded question", PendingAction: "answer", PendingContent: "<script>retained</script>", QuestionID: "question-original", InputDigest: "original-inputs"}, `name="question_id" value="question-original"`, "Superseded question"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			handler, err := NewHandler(HandlerOptions{Provider: guidedCaptureProvider{view: test.view}})
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			response := httptest.NewRecorder()
+			handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/guided", nil))
+
+			body := response.Body.String()
+			if response.Code != http.StatusOK || !strings.Contains(body, test.want) || strings.Contains(body, test.absent) || strings.Contains(body, "<script>") {
+				t.Fatal("incorrect current question or retry form", body)
+			}
+		})
+	}
+}
+
+// TestGuidedUseCaseSpecView exposes the complete approved document without a routine approval prompt.
+func TestGuidedUseCaseSpecView(t *testing.T) {
+	view := GuidedUseCaseView{RunID: "run", Stage: "preparation", Blocker: "Work preparation is not available yet.", Artifacts: []GuidedUseCaseArtifact{{Stage: "specification", Commit: "immutable-commit", Reference: "ops/default/spec/original/artifact.md", Content: "Complete original approved specification <script>escaped</script>"}}}
+
+	handler, err := NewHandler(HandlerOptions{Provider: guidedCaptureProvider{view: view}})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/guided", nil))
+
+	body := response.Body.String()
+	for _, text := range []string{"Inspect committed specification", "Complete original approved specification", "immutable-commit", "Execution has not started."} {
+		if response.Code != http.StatusOK || !strings.Contains(body, text) {
+			t.Fatal("missing approved source", text)
+		}
+	}
+
+	if strings.Contains(body, "<script>escaped") || strings.Contains(body, "Approve specification") || strings.Contains(body, `action="/guided/actions"`) {
+		t.Fatal("unexpected approval form or unsafe original content")
+	}
+}

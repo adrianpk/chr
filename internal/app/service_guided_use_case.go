@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
 )
@@ -15,6 +16,8 @@ type GuidedUseCaseInspection struct {
 	Policy        []string
 	Problems      []string
 	CommittedDump string
+	Question      string
+	Artifacts     []GuidedUseCaseArtifact
 }
 
 func (s service) guidedUseCaseScope(id, namespace string) (core.GuidedUseCaseScope, error) {
@@ -36,7 +39,7 @@ func (s service) StartGuidedUseCase(ctx context.Context, id, namespace, actor st
 	return core.StartGuidedUseCase(ctx, s.projectContext.ProjectDir, core.GuidedUseCaseStart{GuidedUseCaseScope: scope, Actor: actor, ProgressionIntent: true})
 }
 
-// ChangeGuidedUseCase delegates capture commands to their canonical owner.
+// ChangeGuidedUseCase applies current input and advances through available authoring stages.
 func (s service) ChangeGuidedUseCase(ctx context.Context, command core.GuidedUseCaseCommand) (core.AuthoringSession, error) {
 	scope, err := s.guidedUseCaseScope(command.RunID, command.Namespace)
 	if err != nil {
@@ -44,11 +47,13 @@ func (s service) ChangeGuidedUseCase(ctx context.Context, command core.GuidedUse
 	}
 
 	command.GuidedUseCaseScope = scope
-	if command.Action == "finish" {
-		return core.FinishGuidedUseCaseDump(ctx, s.projectContext.ProjectDir, command)
+
+	session, err := s.applyGuidedCommand(ctx, command)
+	if err != nil {
+		return session, err
 	}
 
-	return core.MutateGuidedUseCase(ctx, s.projectContext.ProjectDir, command)
+	return s.advanceGuidedUseCase(ctx, session)
 }
 
 // InspectGuidedUseCase reads state, immutable input and local setup without dispatch.
@@ -73,16 +78,11 @@ func (s service) InspectGuidedUseCase(ctx context.Context, id, namespace string)
 	}
 
 	result.Session = &session
-	if len(session.Guided.Checkpoints) > 0 {
-		checkpoint := session.Guided.Checkpoints[0]
-
-		content, err := core.ReadGuidedCommittedArtifact(ctx, s.projectContext.ProjectDir, checkpoint, checkpoint.Artifacts[0].Path)
-		if err != nil {
-			return result, err
-		}
-
-		result.CommittedDump = string(content)
+	if err := s.inspectGuidedArtifacts(ctx, &result); err != nil {
+		return result, err
 	}
+
+	s.inspectGuidedQuestion(ctx, &result)
 
 	return result, nil
 }
@@ -120,5 +120,60 @@ func (s service) inspectGuidedReadiness(ctx context.Context, result *GuidedUseCa
 		if !selection.Readiness.Ready() {
 			result.Problems = append(result.Problems, string(role)+" setup is incomplete.")
 		}
+	}
+}
+
+// GuidedUseCaseArtifact is a complete original document read from its retained commit.
+type GuidedUseCaseArtifact struct{ Stage, Reference, Commit, Content string }
+
+func (s service) inspectGuidedArtifacts(ctx context.Context, result *GuidedUseCaseInspection) error {
+	for _, checkpoint := range result.Session.Guided.Checkpoints {
+		for _, artifact := range checkpoint.Artifacts {
+			if !strings.HasSuffix(artifact.Path, "/artifact.md") {
+				continue
+			}
+
+			content, err := core.ReadGuidedCommittedArtifact(ctx, s.projectContext.ProjectDir, checkpoint, artifact.Path)
+			if err != nil {
+				return err
+			}
+
+			if checkpoint.Stage == "dump" && result.CommittedDump == "" {
+				result.CommittedDump = string(content)
+
+				continue
+			}
+
+			result.Artifacts = append(result.Artifacts, GuidedUseCaseArtifact{Stage: checkpoint.Stage, Reference: artifact.Path, Commit: checkpoint.Commit, Content: string(content)})
+		}
+	}
+
+	return nil
+}
+
+func (s service) inspectGuidedQuestion(ctx context.Context, result *GuidedUseCaseInspection) {
+	session := result.Session
+
+	state := session.Guided
+	if state.Stage != "quiz" || state.PendingOperation != nil || state.Quiz == nil {
+		return
+	}
+
+	observed, err := s.quizRepository().Observe(ctx, core.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: state.CaseSlug})
+	if err != nil {
+		result.Problems = append(result.Problems, "Clarification could not be read. Correct its stored inputs before retrying.")
+
+		return
+	}
+
+	if observed.State.SessionID != state.Quiz.SessionID || observed.Revision != state.Quiz.Revision {
+		result.Problems = append(result.Problems, "Clarification changed outside this run. Its original binding requires recovery.")
+
+		return
+	}
+
+	question := observed.State.ActiveQuestion
+	if question != nil && question.ID == state.Quiz.QuestionID {
+		result.Question = question.Prompt
 	}
 }

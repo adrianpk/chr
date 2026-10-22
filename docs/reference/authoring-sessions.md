@@ -719,3 +719,38 @@ and authority; no work admission or integration policy is inferred from success.
 the exact authorized peer and project binding. Reply invalidation and focus do
 not replace that source. An operator remapping clears its usable development
 reference; an unavailable source requires a new explicit instruction.
+
+## Guided Use-Case Clarification and Approval
+
+The Web **Guided use cases** journey retains explicit development intent with
+its initiating actor in the canonical authoring session. After naming a new
+case and finishing its nonempty dump, the shared operation service starts
+clarification automatically. Each page asks only the current question. Answers
+bind the project, namespace, run revision, question and committed dump digest;
+stale or foreign answers cannot replace the current input.
+
+Quiz generation reads the committed case name and dump documents. Completion
+requires valid provider generation, at least one meaningful answer, and the
+canonical quiz owner's sufficient-clarification result. Exhausting a question
+budget or receiving an empty result does not establish sufficient clarification.
+The completed quiz and its runtime evidence are sealed in a retained Git
+checkpoint before specification generation.
+
+Specification generation reads the committed dump and answered quiz, including
+their full original documents. The canonical specification mutation owner saves
+a draft, then approves that exact generated revision under `guided-default/v1`
+using the retained progression intent. Approval records the initiating actor,
+run, policy, generated revision, content hash and committed input digest in the
+specification metadata. A later edit cannot acquire that generated revision's
+automatic approval. Standalone specification mutations keep their existing
+explicit lifecycle behavior.
+
+The approved specification and metadata receive their own checkpoint, retaining
+the dump and quiz dependency bindings. Artifact commits remain distinct from a
+future code execution base. Later working-copy edits do not change generation
+inputs or the complete documents available under **Inspect committed**. Reading,
+rendering and reconnecting do not generate or approve artifacts. A failed write
+retains its original operation and revision; **Retry progression** reconciles
+that operation before continuing, including an already saved draft, approval or
+stage commit. The current Web flow stops at unavailable work preparation after
+the approved specification checkpoint and does not start execution.

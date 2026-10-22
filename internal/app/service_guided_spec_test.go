@@ -186,3 +186,13 @@ func singleGuidedSpec(t *testing.T, root string) string {
 
 	return filepath.ToSlash(relative)
 }
+
+// TestGuidedUseCaseSpecStage rejects out-of-order generation without reserving a pending effect.
+func TestGuidedUseCaseSpecStage(t *testing.T) {
+	operations, session, model := guidedQuizFixture(t, "default")
+
+	rejected, err := operations.GenerateGuidedSpec(t.Context(), guidedQuizCommand(session, "premature-spec", "spec", ""))
+	if !errors.Is(err, core.ErrWorkflowConflict) || rejected.Revision != session.Revision || rejected.Guided.PendingOperation != nil || len(model.requests) != 0 {
+		t.Fatal("out-of-order command poisoned the current stage")
+	}
+}

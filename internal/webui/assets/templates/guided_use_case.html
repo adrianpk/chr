@@ -5,33 +5,62 @@
   {{if .Guided.RunID}}
     <h2>{{.Guided.Name}}</h2>
     <p>Current stage: {{.Guided.Stage}} · {{.Guided.Status}}</p>
-    {{if eq .Guided.Stage "name"}}
+    {{if .Guided.Blocker}}<p role="status">{{.Guided.Blocker}}</p>{{end}}
+    {{if .Guided.PendingAction}}
+      <p>The previous operation is retained. Retry it to reconcile its original result.</p>
+      <form method="post" action="/guided/actions">
+        {{template "guided_fields.html" .}}
+        <input type="hidden" name="step" value="{{.Guided.PendingAction}}">
+        <input type="hidden" name="content" value="{{.Guided.PendingContent}}">
+        <button class="button button--primary" type="submit">Retry progression</button>
+      </form>
+    {{else if eq .Guided.Stage "name"}}
       <form method="post" action="/guided/actions">
         {{template "guided_fields.html" .}}
         <input type="hidden" name="step" value="name">
-        <label>Use-case name <input name="content" maxlength="512" required value="{{.Guided.PendingContent}}"{{if .Guided.PendingAction}} readonly{{end}}></label>
+        <label>Use-case name <input name="content" maxlength="512" required></label>
         <button class="button button--primary" type="submit">Save name</button>
       </form>
     {{else if eq .Guided.Stage "dump"}}
       <p>Provide everything known about this use case. Add input until the capture is complete.</p>
       <pre>{{.Guided.Capture}}</pre>
-      {{if not .Guided.PendingAction}}
       <form method="post" action="/guided/actions">
         {{template "guided_fields.html" .}}
         <input type="hidden" name="step" value="append">
         <label>Additional context <textarea name="content" maxlength="65536" required></textarea></label>
         <button class="button" type="submit">Add input</button>
       </form>
-      {{end}}
       <form method="post" action="/guided/actions">
         {{template "guided_fields.html" .}}
         <input type="hidden" name="step" value="finish">
-        <button class="button button--primary" type="submit">{{if .Guided.PendingAction}}Retry finishing capture{{else}}Finish capture{{end}}</button>
+        <button class="button button--primary" type="submit">Finish capture</button>
       </form>
-    {{else}}
-      <p>The dump is committed. Clarification is not available yet. Execution has not started.</p>
-      <p>Saved version: <code>{{.Guided.Commit}}</code></p>
+    {{else if .Guided.Question}}
+      <form method="post" action="/guided/actions">
+        {{template "guided_fields.html" .}}
+        <input type="hidden" name="step" value="answer">
+        <label>{{.Guided.Question}} <textarea name="content" maxlength="65536" required></textarea></label>
+        <button class="button button--primary" type="submit">Answer and continue</button>
+      </form>
+    {{else if .Guided.RetryAction}}
+      <form method="post" action="/guided/actions">
+        {{template "guided_fields.html" .}}
+        <input type="hidden" name="step" value="{{.Guided.RetryAction}}">
+        <button class="button button--primary" type="submit">Retry progression</button>
+      </form>
+    {{end}}
+    {{if and (ne .Guided.Stage "name") (ne .Guided.Stage "dump")}}
+      <p>Execution has not started.</p>
+    {{end}}
+    {{if .Guided.CommittedDump}}
+      <p>Saved dump version: <code>{{.Guided.Commit}}</code></p>
       <details><summary>Inspect committed dump</summary><pre>{{.Guided.CommittedDump}}</pre></details>
+    {{end}}
+    {{range .Guided.Artifacts}}
+      <details><summary>Inspect committed {{.Stage}}</summary>
+        <p>{{.Reference}} · Saved version: <code>{{.Commit}}</code></p>
+        <pre>{{.Content}}</pre>
+      </details>
     {{end}}
     <p><a href="/guided?namespace={{.Guided.Namespace}}">All guided use cases</a></p>
   {{else}}
@@ -65,4 +94,6 @@
 <input type="hidden" name="namespace" value="{{.Guided.Namespace}}">
 <input type="hidden" name="revision" value="{{.Guided.Revision}}">
 <input type="hidden" name="request_id" value="{{.Guided.RequestID}}">
+<input type="hidden" name="question_id" value="{{.Guided.QuestionID}}">
+<input type="hidden" name="input_digest" value="{{.Guided.InputDigest}}">
 {{end}}

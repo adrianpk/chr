@@ -15,7 +15,7 @@ import (
 func (p webViewProvider) GuidedUseCaseView(ctx context.Context, id, namespace string) (webui.GuidedUseCaseView, error) {
 	result, err := p.service(ctx).InspectGuidedUseCase(ctx, id, namespace)
 
-	view := webui.GuidedUseCaseView{Enabled: true, Namespace: result.Namespace, RequestID: rand.Text(), Policy: result.Policy, Problems: result.Problems, CommittedDump: result.CommittedDump}
+	view := webui.GuidedUseCaseView{Enabled: true, Namespace: result.Namespace, RequestID: rand.Text(), Policy: result.Policy, Problems: result.Problems, CommittedDump: result.CommittedDump, Question: result.Question}
 	if err != nil {
 		return view, err
 	}
@@ -33,14 +33,15 @@ func (p webViewProvider) GuidedUseCaseView(ctx context.Context, id, namespace st
 	view.RunID, view.Name, view.Stage, view.Status = session.ID, session.Topic, state.Stage, state.Status
 	view.Revision = strconv.FormatInt(session.Revision, 10)
 
-	view.Capture = state.Capture
-	if len(state.Checkpoints) > 0 {
-		view.Commit = state.Checkpoints[0].Commit
+	view.Capture, view.Blocker = state.Capture, state.Blocker
+	for _, artifact := range result.Artifacts {
+		view.Artifacts = append(view.Artifacts, webui.GuidedUseCaseArtifact{Stage: artifact.Stage, Reference: artifact.Reference, Commit: artifact.Commit, Content: artifact.Content})
 	}
 
-	if pending := state.PendingOperation; pending != nil {
-		view.PendingAction, view.PendingContent = pending.Action, pending.Content
-		view.RequestID, view.Revision = pending.ID, strconv.FormatInt(pending.ExpectedRevision, 10)
+	guidedWebInputBinding(&view, state)
+
+	if len(state.Checkpoints) > 0 {
+		view.Commit = state.Checkpoints[0].Commit
 	}
 
 	return view, nil
@@ -66,7 +67,7 @@ func (p webViewProvider) writeGuidedUseCase(operations service, request webui.Wr
 		if err == nil {
 			session, err = operations.ChangeGuidedUseCase(operations.ctx, core.GuidedUseCaseCommand{
 				GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: request.ID, Namespace: namespace}, ExpectedRevision: revision,
-				OperationID: request.Fields["request_id"], Action: request.Fields["step"], Content: request.Fields["content"],
+				OperationID: request.Fields["request_id"], Action: request.Fields["step"], Content: request.Fields["content"], QuestionID: request.Fields["question_id"], InputDigest: request.Fields["input_digest"],
 			})
 		}
 	}
@@ -76,6 +77,10 @@ func (p webViewProvider) writeGuidedUseCase(operations service, request webui.Wr
 	}
 
 	if err != nil {
+		if session.Guided != nil && session.Guided.PendingOperation != nil {
+			return webui.WriteActionResponse{Status: webui.WriteStatusOK, Summary: "Use case retained; progression needs recovery.", RedirectURL: guidedUseCaseURL(session.ID, session.Namespace)}, nil
+		}
+
 		return webValidationWrite(err), nil
 	}
 
@@ -84,4 +89,24 @@ func (p webViewProvider) writeGuidedUseCase(operations service, request webui.Wr
 
 func guidedUseCaseURL(id, namespace string) string {
 	return "/guided?" + url.Values{"id": {id}, "namespace": {namespace}}.Encode()
+}
+
+func guidedWebInputBinding(view *webui.GuidedUseCaseView, state *core.GuidedUseCaseState) {
+	if state.Quiz != nil {
+		view.QuestionID, view.InputDigest = state.Quiz.QuestionID, state.Quiz.InputDigest
+	}
+
+	if state.Stage == "quiz" && view.Question == "" {
+		view.RetryAction = "quiz"
+	}
+
+	if state.Stage == "specification" {
+		view.RetryAction = "spec"
+	}
+
+	if pending := state.PendingOperation; pending != nil {
+		view.PendingAction, view.PendingContent = pending.Action, pending.Content
+		view.QuestionID, view.InputDigest = pending.QuestionID, pending.InputDigest
+		view.RequestID, view.Revision = pending.ID, strconv.FormatInt(pending.ExpectedRevision, 10)
+	}
 }

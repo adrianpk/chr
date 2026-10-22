@@ -15,13 +15,18 @@ type GuidedUseCaseLink struct{ Name, URL string }
 
 // GuidedUseCaseView presents current capture, setup and an inspectable committed input.
 type GuidedUseCaseView struct {
-	Enabled                                       bool
-	RunID, Namespace, Name, Revision, RequestID   string
-	Stage, Status, Capture, Commit, CommittedDump string
-	PendingAction, PendingContent                 string
-	Policy, Problems                              []string
-	Runs                                          []GuidedUseCaseLink
+	Enabled                                                 bool
+	RunID, Namespace, Name, Revision, RequestID             string
+	Stage, Status, Capture, Commit, CommittedDump           string
+	PendingAction, PendingContent                           string
+	Question, QuestionID, InputDigest, RetryAction, Blocker string
+	Artifacts                                               []GuidedUseCaseArtifact
+	Policy, Problems                                        []string
+	Runs                                                    []GuidedUseCaseLink
 }
+
+// GuidedUseCaseArtifact exposes one complete committed authoring document.
+type GuidedUseCaseArtifact struct{ Stage, Reference, Commit, Content string }
 
 func (h handler) guidedUseCase(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
