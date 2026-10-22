@@ -312,6 +312,10 @@ func (s *WorkflowStore) startNewWorkflow(ctx context.Context, request WorkflowSt
 		}
 	}
 
+	if err := s.checkGuidedWorkflowTarget(ctx, request); err != nil {
+		return WorkflowStartResult{}, err
+	}
+
 	limits, err := s.workflowRepositoryCapacity(ctx, runs)
 	if err != nil {
 		return WorkflowStartResult{}, err

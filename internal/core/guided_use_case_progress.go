@@ -64,6 +64,11 @@ func (r *fileAuthoringSessionRepository) applyGuidedStep(ctx context.Context, se
 		session.Guided.Status = "blocked"
 		session.Guided.Blocker = "Progression needs recovery or corrected setup. Retry the retained operation."
 
+		var prerequisite *GuidedPrerequisiteError
+		if errors.As(err, &prerequisite) {
+			session.Guided.Blocker = prerequisite.Action
+		}
+
 		return errors.Join(err, RetainGuidedUseCaseProgress(ctx, r.projectDir, session))
 	}
 
@@ -87,6 +92,14 @@ func guardGuidedStepInput(session AuthoringSession, operation GuidedUseCaseOpera
 		return nil
 	case "prepare":
 		return guardGuidedPreparationInput(session)
+	case "admit":
+		if session.Guided.Stage != "preparation" {
+			return ErrWorkflowConflict
+		}
+
+		_, err := guidedStageCheckpoint(session, "preparation")
+
+		return err
 	case "spec":
 		if session.Guided.Stage != "specification" {
 			return ErrWorkflowConflict

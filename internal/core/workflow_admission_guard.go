@@ -9,6 +9,7 @@ type WorkflowAdmissionCheck func(context.Context) error
 // WorkflowAdmissionGuard retains exactly what a caller displayed before admission.
 // It is part of the request identity; replay observes the original invocation.
 type WorkflowAdmissionGuard struct {
+	Guided          *GuidedWorkflowAdmission `json:"guided,omitempty"`
 	ReadyTicket     *WorkflowTicketAdmission `json:"ready_ticket,omitempty"`
 	ExecutionPolicy WorkflowExecutionPolicy  `json:"execution_policy"`
 	SnapshotHash    string                   `json:"snapshot_hash"`
@@ -45,6 +46,10 @@ func validateWorkflowAdmissionPolicy(guard *WorkflowAdmissionGuard) error {
 }
 
 func (s *WorkflowStore) checkWorkflowAdmissionGuard(ctx context.Context, request WorkflowStartRequest) error {
+	if err := s.checkGuidedWorkflowAdmission(ctx, request); err != nil {
+		return err
+	}
+
 	if request.Admission != nil {
 		policy, err := s.workflowReviewPolicy(workflowInvocationFile{WorkflowInvocation: WorkflowInvocation{ReviewRestriction: request.ReviewRestriction}})
 		if err != nil {

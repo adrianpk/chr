@@ -19,6 +19,8 @@ type GuidedPreparedPlan struct {
 
 // GuidedWorkState links the canonical plan, materialization and native invocation owners.
 type GuidedWorkState struct {
+	Admission            *WorkflowStartRequest           `json:"admission,omitempty"`
+	Invocation           *GuidedInvocationReference      `json:"invocation,omitempty"`
 	PublicationOperation PlanPublicationOperation        `json:"publication_operation"`
 	Publication          *PlanPublicationResult          `json:"publication,omitempty"`
 	Materialization      *GuidedMaterializationReference `json:"materialization,omitempty"`
