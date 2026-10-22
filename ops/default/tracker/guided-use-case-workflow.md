@@ -6,8 +6,8 @@ Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 1, Guided capture and Git checkpoints; T1.1-T1.3 implemented, PR preparation and controller validation in progress.
-Progress: 0 of 6 slices delivered; 3 of 18 tasks implemented. Slice 1 awaits canonical PR validation and controller integration.
+Active slice: Slice 1, Guided capture and Git checkpoints; T1.1-T1.3 implemented; PR #430 reviewing, awaiting controller validation and integration.
+Progress: 0 of 6 slices delivered; 3 of 18 tasks implemented. Slice 1 is in PR #430 and awaits controller validation and integration.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
 Spec: [Approved workflow](../spec/stable/guided-use-case-workflow.md)
@@ -55,7 +55,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 
 | Slice | State | PR | Integrated commit | Report evidence |
 | --- | --- | --- | --- | --- |
-| 1 | reviewing | pending | pending | [Slice 1 report](../report/slices/guided-use-case-workflow/slice-1-capture-checkpoints.md) |
+| 1 | reviewing | #430 | pending | [Slice 1 report](../report/slices/guided-use-case-workflow/slice-1-capture-checkpoints.md) |
 | 2 | pending | pending | pending | pending |
 | 3 | pending | pending | pending | pending |
 | 4 | pending | pending | pending | pending |
@@ -104,7 +104,7 @@ Delivery-set gate: `make verify`, bounded normal guided-workflow regressions, fo
 
 | Evidence | Candidate | Outcome |
 | --- | --- | --- |
-| Slice development gates | Slice 1 canonical PR head | Task regressions and scoped strict lint passed; final PR-head evidence is owned by the controller. |
+| Slice development gates | PR #430 head (controller evidence) | Task regressions and scoped strict lint passed; final PR-head evidence is owned by the controller. |
 | Web browser journey | pending | not run |
 | Telegram actual-client journey | pending | not observed |
 | TUI interaction and cross-adapter parity | pending | not run |

@@ -5,7 +5,7 @@ Delivery set: guided-use-case-workflow
 Plan: [Approved delivery plan](../../../plan/guided-use-case-workflow.md)
 Tracker: [Tasks and acceptance](../../../tracker/guided-use-case-workflow.md)
 Branch: `feat/slice-1-guided-capture-checkpoints`
-PR: pending
+PR: `#430`
 
 ## Purpose
 
