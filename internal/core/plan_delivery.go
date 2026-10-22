@@ -45,7 +45,7 @@ func ObservePlanWorkflow(ctx context.Context, projectDir string, scope QuizScope
 		return GeneratedWorkflowPlan{}, fmt.Errorf("generate a revision-bound plan before creating its tickets")
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir})
+	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: scope.Namespace})
 	if err != nil {
 		return GeneratedWorkflowPlan{}, err
 	}

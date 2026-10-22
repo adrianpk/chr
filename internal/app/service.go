@@ -13,6 +13,7 @@ import (
 )
 
 type service struct {
+	afterGuidedPreparation func(string) error
 	afterGuidedSpec        func(string) error
 	afterGuidedQuiz        func() error
 	guidedContext          *guidedGenerationContext

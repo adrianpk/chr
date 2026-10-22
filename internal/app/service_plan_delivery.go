@@ -20,6 +20,7 @@ type PlanDeliveryResult struct {
 // A saved plan survives a later failure; repeating the operation resumes its
 // retained generation and native materialization instead of allocating twice.
 func (s service) GeneratePlanDelivery(ctx context.Context, request PlanGenerateRequest) (PlanDeliveryResult, error) {
+	s.workflowNamespace = request.Scope.Namespace
 	if err := s.validatePlanDeliveryScope(ctx, request.Scope); err != nil {
 		return PlanDeliveryResult{}, err
 	}
@@ -105,7 +106,7 @@ func (s service) planDeliveryInput(ctx context.Context, request PlanGenerateRequ
 		return input, core.OpsLayout{}, err
 	}
 
-	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir})
+	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: scope.Namespace})
 	if err != nil {
 		return input, layout, err
 	}

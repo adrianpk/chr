@@ -10,6 +10,7 @@ import (
 
 // GuidedUseCaseState extends a canonical authoring session without adopting manual sessions.
 type GuidedUseCaseState struct {
+	Work                *GuidedWorkState             `json:"work,omitempty"`
 	SpecDraft           *GuidedSpecDraftReference    `json:"spec_draft,omitempty"`
 	SpecApproval        *GuidedSpecApprovalReference `json:"spec_approval,omitempty"`
 	Quiz                *GuidedQuizState             `json:"quiz,omitempty"`
@@ -31,15 +32,17 @@ type GuidedUseCaseState struct {
 
 // GuidedUseCaseOperation binds retries to their original arguments and revision.
 type GuidedUseCaseOperation struct {
-	PreparedSpec     *GuidedPreparedSpec `json:"prepared_spec,omitempty"`
-	QuizRequest      *QuizActionRequest  `json:"quiz_request,omitempty"`
-	QuestionID       string              `json:"question_id,omitempty"`
-	InputDigest      string              `json:"input_digest,omitempty"`
-	ExpectedRevision int64               `json:"expected_revision,omitempty"`
-	ID               string              `json:"id"`
-	Action           string              `json:"action"`
-	Digest           string              `json:"digest"`
-	Content          string              `json:"content,omitempty"`
+	PreparedPlan     *GuidedPreparedPlan    `json:"prepared_plan,omitempty"`
+	PreparedWorkflow *GeneratedWorkflowPlan `json:"prepared_workflow,omitempty"`
+	PreparedSpec     *GuidedPreparedSpec    `json:"prepared_spec,omitempty"`
+	QuizRequest      *QuizActionRequest     `json:"quiz_request,omitempty"`
+	QuestionID       string                 `json:"question_id,omitempty"`
+	InputDigest      string                 `json:"input_digest,omitempty"`
+	ExpectedRevision int64                  `json:"expected_revision,omitempty"`
+	ID               string                 `json:"id"`
+	Action           string                 `json:"action"`
+	Digest           string                 `json:"digest"`
+	Content          string                 `json:"content,omitempty"`
 }
 
 // GuidedStageCheckpoint retains immutable input bytes independently of a code target.

@@ -64,7 +64,7 @@ func GeneratedPlanLayout(projectDir string, scope QuizScope) (GeneratedPlanPaths
 		return GeneratedPlanPaths{}, err
 	}
 
-	relativePath, path, err := NamedOpsArtifactBody(projectDir, "plan", scopeID+"-plan")
+	relativePath, path, err := scopedPlanArtifactBody(projectDir, scope.Namespace, scopeID+"-plan")
 	if err != nil {
 		return GeneratedPlanPaths{}, err
 	}
@@ -95,7 +95,7 @@ func ArchivedPlanLayout(projectDir string, scope QuizScope, archivedAt time.Time
 	archivedAt = archivedAt.UTC()
 	timestamp := archivedAt.Format("20060102-150405") + fmt.Sprintf("%09d", archivedAt.Nanosecond())
 
-	relativePath, path, err := NamedOpsArtifactBody(projectDir, "plan", scopeID+"-plan-"+timestamp)
+	relativePath, path, err := scopedPlanArtifactBody(projectDir, scope.Namespace, scopeID+"-plan-"+timestamp)
 	if err != nil {
 		return ArchivedPlanPaths{}, err
 	}
@@ -157,13 +157,7 @@ func archiveGeneratedPlan(ctx context.Context, projectDir string, scope QuizScop
 		return ArchivedPlanPaths{}, false, err
 	}
 
-	scopeID, err := quizScopeID(scope)
-	if err != nil {
-		return ArchivedPlanPaths{}, false, err
-	}
-
-	timestamp := archivedAt.UTC().Format("20060102-150405") + fmt.Sprintf("%09d", archivedAt.UTC().Nanosecond())
-	if err := EnsureNamedOpsArtifactMetadata(projectDir, "plan", scopeID+"-plan-"+timestamp); err != nil {
+	if err := EnsureOpsArtifactBodyMetadata(projectDir, archivePaths.RelativePath); err != nil {
 		return ArchivedPlanPaths{}, false, err
 	}
 
@@ -272,4 +266,25 @@ func ValidateGeneratedPlanModelContent(plan GeneratedPlan) error {
 // HasContent executes the corresponding package operation.
 func (p GeneratedPlan) HasContent() bool {
 	return strings.TrimSpace(p.Title) != "" || strings.TrimSpace(p.Body) != ""
+}
+
+func scopedPlanArtifactBody(projectDir, namespace, name string) (string, string, error) {
+	if namespace == "" {
+		return NamedOpsArtifactBody(projectDir, "plan", name)
+	}
+
+	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: namespace})
+	if err != nil {
+		return "", "", err
+	}
+
+	dir, err := layout.ArtifactDirectory("plan", "00000-"+opsArtifactSlugOrDefault(name))
+	if err != nil {
+		return "", "", err
+	}
+
+	path := filepath.Join(dir, OpsArtifactBodyFile())
+	relative, err := filepath.Rel(projectDir, path)
+
+	return filepath.ToSlash(relative), path, err
 }

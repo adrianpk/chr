@@ -85,6 +85,8 @@ func guardGuidedStepInput(session AuthoringSession, operation GuidedUseCaseOpera
 		}
 
 		return nil
+	case "prepare":
+		return guardGuidedPreparationInput(session)
 	case "spec":
 		if session.Guided.Stage != "specification" {
 			return ErrWorkflowConflict
@@ -261,4 +263,16 @@ func guidedQuizSealReferences(ctx context.Context, root string, session Authorin
 	}
 
 	return quizImageReferences(paths), nil
+}
+
+func guardGuidedPreparationInput(session AuthoringSession) error {
+	if session.Guided.Stage != "preparation" {
+		return ErrWorkflowConflict
+	}
+
+	if _, err := guidedStageCheckpoint(session, "preparation"); err == nil {
+		return ErrWorkflowConflict
+	}
+
+	return nil
 }

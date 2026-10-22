@@ -40,6 +40,10 @@ func guidedRepositoryIdentity(ctx context.Context, reader workflowIntegrationRea
 }
 
 func (r *fileAuthoringSessionRepository) observeGuidedCheckpoint(ctx context.Context, id string, operation GuidedUseCaseOperation, stage string, paths []string) (GuidedStageCheckpoint, error) {
+	if len(paths) == 0 || len(paths) > 1024 {
+		return GuidedStageCheckpoint{}, errors.New("guided checkpoint requires 1..1024 owned files")
+	}
+
 	reader := guidedGitReader(r.projectDir)
 
 	repository, err := guidedRepositoryIdentity(ctx, reader)
@@ -54,10 +58,17 @@ func (r *fileAuthoringSessionRepository) observeGuidedCheckpoint(ctx context.Con
 
 	checkpoint := GuidedStageCheckpoint{OperationID: operation.ID, Stage: stage, Repository: repository, BaseCommit: base, Ref: guidedCheckpointRef(id, operation.Digest)}
 
+	size := 0
+
 	for _, path := range paths {
 		content, err := r.authoringRead(filepath.FromSlash(path))
 		if err != nil {
 			return checkpoint, err
+		}
+
+		size += len(content)
+		if size > 8*WorkflowFileLimit {
+			return checkpoint, errors.New("guided checkpoint exceeds 8 MiB")
 		}
 
 		checkpoint.Artifacts = append(checkpoint.Artifacts, GuidedCommittedArtifact{Path: path, Hash: workflowHash(content)})
