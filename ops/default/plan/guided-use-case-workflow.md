@@ -5,7 +5,7 @@ Date: 2026-10-22
 Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
-Merge authority: maintainer-controlled PR merges into `dev`; automatic controller merges are not delegated.
+Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
 Active slice: Slice 1, Guided capture and Git checkpoints; first task T1.1 is pending.
 
 Spec: [Guided workflow](../spec/stable/guided-use-case-workflow.md)
@@ -21,7 +21,7 @@ Slice strategy: behavior-first.
 
 Reason: each increment includes its required domain, persistence, shared service, adapter and regression work. The first four slices progressively deliver and verify Web behavior; Telegram and TUI then consume the same application workflow. Separate skeleton, intentionally failing test or duplicate per-interface orchestration slices are unnecessary.
 
-The set has six ordered slices and 18 tasks. Each slice uses one branch and one PR targeting `dev`. The branches, PR titles and reports below are planned identities, not existing implementation or evidence. No controller or implementation branch is started by this planning package.
+The set has six ordered slices and 18 tasks. Each slice uses one branch and one PR targeting `dev`. The branches, PR titles and reports below are planned identities; actual execution and delivery evidence belong to the tracker and Looper checkpoint.
 
 ## Existing prerequisites and design boundaries
 
@@ -153,6 +153,6 @@ The combined selection excludes the separate browser test. Retain the targeted b
 
 The tracker owns task state, actual commits, PRs, validations and acceptance evidence. Reports are created when their slices are implemented, not as empty evidence during planning. One conventional implementation commit per task is expected where practical.
 
-The maintainer approved this slice map/tracker and implementation on 2026-10-22. Execution follows the recorded slice branches and maintainer-controlled PR merges into `dev`. The requested Looper view selects the intended execution tool; its automatic merge behavior requires a separate explicit delegation before startup. `main` promotion, mirrors and release publication remain separate actions.
+The maintainer approved this slice map/tracker, implementation and Looper startup on 2026-10-22, then explicitly delegated Rebase + Fast-forward merges for all six recorded slice PRs into `dev` after their required checks. Looper owns the execution and merge loop for this delivery set. This delegation does not include additional slices, final-gate repair grants, `main` promotion, mirrors or release publication.
 
 After implementation, record the final end-to-end outcome in `ops/default/report/cycles/guided-use-case-workflow.md`, including observed Web/Telegram/TUI scope, input checkpoint identities, actual native receipts, validation candidate and remaining external prerequisites. This future path is not current acceptance evidence.

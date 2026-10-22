@@ -5,10 +5,10 @@ Date: 2026-10-22
 Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
-Merge authority: maintainer-controlled PR merges into `dev`; automatic controller merges are not delegated.
+Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
 Active slice: Slice 1, Guided capture and Git checkpoints; first task T1.1 is pending.
 Progress: 0 of 6 slices delivered; 0 of 18 tasks started.
-Controller: not started.
+Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
 Spec: [Approved workflow](../spec/stable/guided-use-case-workflow.md)
 Model: [State and checkpoint ownership](../spec/stable/guided-use-case-workflow-model.md)
@@ -88,7 +88,7 @@ Criterion numbers correspond to the approved specification. The plan defines the
 ## Prerequisites and checkpoints
 
 1. Approved specification/model: committed at the baseline above; available for planning.
-2. Slice-map and implementation approval: granted on 2026-10-22. The requested Looper run is being prepared; its automatic merges require separate delegation before startup. No implementation or delegated merge is recorded.
+2. Slice-map, implementation and Looper startup: approved on 2026-10-22. The maintainer separately delegated Rebase + Fast-forward merges for the six recorded slice PRs into `dev` after their required checks. No additional delivery scope or final-gate repair grant is included.
 3. Shared operation/native owners: present at the planning baseline; runtime readiness is checked per guided run using effective project policy.
 4. Initial storage and Git mechanism: bounded T1.1/T1.2 design work, including compatibility, checkpoint reachability, artifact-versus-code-base identity and preservation of unrelated index/worktree changes.
 5. Web checkpoint: Slices 1-4 must be delivered and the Web journey verified before Slice 5 begins. Telegram must consume that implementation before TUI integration in Slice 6.
