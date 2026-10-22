@@ -1,11 +1,12 @@
 # Guided Use-Case Workflow Tracker
 
-Status: Planned; ready for review
+Status: Approved; ready for implementation
 Date: 2026-10-22
 Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
-Implementation and merge authorization: pending review of the plan and tracker.
-Active slice: none; first planned unit is Slice 1, T1.1.
+Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
+Merge authority: maintainer-controlled PR merges into `dev`; automatic controller merges are not delegated.
+Active slice: Slice 1, Guided capture and Git checkpoints; first task T1.1 is pending.
 Progress: 0 of 6 slices delivered; 0 of 18 tasks started.
 Controller: not started.
 
@@ -87,7 +88,7 @@ Criterion numbers correspond to the approved specification. The plan defines the
 ## Prerequisites and checkpoints
 
 1. Approved specification/model: committed at the baseline above; available for planning.
-2. Slice-map and implementation approval: pending. No implementation, controller startup or delegated merge is recorded.
+2. Slice-map and implementation approval: granted on 2026-10-22. The requested Looper run is being prepared; its automatic merges require separate delegation before startup. No implementation or delegated merge is recorded.
 3. Shared operation/native owners: present at the planning baseline; runtime readiness is checked per guided run using effective project policy.
 4. Initial storage and Git mechanism: bounded T1.1/T1.2 design work, including compatibility, checkpoint reachability, artifact-versus-code-base identity and preservation of unrelated index/worktree changes.
 5. Web checkpoint: Slices 1-4 must be delivered and the Web journey verified before Slice 5 begins. Telegram must consume that implementation before TUI integration in Slice 6.

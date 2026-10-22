@@ -1,11 +1,12 @@
 # Guided Use-Case Workflow Delivery
 
-Status: Proposed
+Status: Approved
 Date: 2026-10-22
 Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
-Implementation and merge authorization: pending review of this plan and tracker.
-Active slice: none; first planned unit is Slice 1, T1.1.
+Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
+Merge authority: maintainer-controlled PR merges into `dev`; automatic controller merges are not delegated.
+Active slice: Slice 1, Guided capture and Git checkpoints; first task T1.1 is pending.
 
 Spec: [Guided workflow](../spec/stable/guided-use-case-workflow.md)
 Model: [Retained state and ownership](../spec/stable/guided-use-case-workflow-model.md)
@@ -152,6 +153,6 @@ The combined selection excludes the separate browser test. Retain the targeted b
 
 The tracker owns task state, actual commits, PRs, validations and acceptance evidence. Reports are created when their slices are implemented, not as empty evidence during planning. One conventional implementation commit per task is expected where practical.
 
-Before starting Slice 1, approve this exact slice map/tracker and implementation authority, then commit any approval-state update. Execution follows the recorded slice branches and maintainer-controlled PR merges into `dev`. Controller startup, delegated merge authority, `main` promotion, mirrors and release publication are separate actions.
+The maintainer approved this slice map/tracker and implementation on 2026-10-22. Execution follows the recorded slice branches and maintainer-controlled PR merges into `dev`. The requested Looper view selects the intended execution tool; its automatic merge behavior requires a separate explicit delegation before startup. `main` promotion, mirrors and release publication remain separate actions.
 
 After implementation, record the final end-to-end outcome in `ops/default/report/cycles/guided-use-case-workflow.md`, including observed Web/Telegram/TUI scope, input checkpoint identities, actual native receipts, validation candidate and remaining external prerequisites. This future path is not current acceptance evidence.
