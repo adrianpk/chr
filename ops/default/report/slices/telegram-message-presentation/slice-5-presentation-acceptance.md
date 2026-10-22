@@ -296,14 +296,23 @@ An atomic executable replacement and restart preserved the transient unit's
 environment, transport cycle, publisher profile and prior invocation hashes.
 The failed real client interpretation remains unchanged; it was not replayed
 or replaced. A read of retained state confirmed that the latest acknowledged
-work reference identifies the completed journey. Actual model/client retry
-and remaining mobile/desktop acceptance are still pending.
+work reference identifies the completed journey.
+
+The subsequent real Telegram retry passed: a new natural-language status query
+identified invocation `00005-workflow-invocation` and returned its finished
+result, one validated task, one confirmed ticket, zero remaining tickets and
+the integrated pull request. The user supplied the actual client response. It
+confirmed integration from retained native receipts and requested no further
+action. This verifies plain status targeting and the terminal ticket counters
+on the active QA candidate; it does not close the remaining client matrix or
+establish a fresh unattended work execution.
 
 ## Risks and Follow-ups
 
 Remaining real mobile/desktop coverage is still open. The delivered standalone
 ticket notification exposed misleading zero-unit integration wording; the
-caption/result repairs above are active in QA and still require actual client review.
+caption/result repairs above are active in QA. The real status retry verified
+terminal ticket counters; remaining caption and client coverage is still open.
 T5.2 cannot close from the recovered native journey alone. The existing
 scheduled nightly must certify the exact integrated final candidate; keep
 `awaiting_nightly` until that evidence exists.

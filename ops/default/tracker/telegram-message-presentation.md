@@ -51,7 +51,7 @@ The plan owns exact branch names, PR titles, report paths and focused commands.
 | T4.2 | delivered | `04fddeb15cf6184f4c263a55bdb222fcd74a6b1e` | Notification sender and event snapshot integration |
 | T4.3 | delivered | `01d9be1341e5c207c1748a22ced4a5aac8eafe1d` | Both-path faults, legacy records and truthful outcomes |
 | T5.1 | implemented | `ec0ea0f4c959188cee4477bc45888406f739a3a1` | Complete producer and variant coverage |
-| T5.2 | in progress | `ce16bea12d4a` | Original document and native receipt verified; caption/result repairs active in QA; mobile/desktop acceptance open |
+| T5.2 | in progress | `29fc714b0687` | Original document, native receipt and real natural-language terminal status verified; remaining mobile/desktop acceptance open |
 | T5.3 | in progress | pending | User documentation, cycle evidence and exact nightly |
 
 ## Message-Family Coverage
