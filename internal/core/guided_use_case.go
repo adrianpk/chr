@@ -10,6 +10,8 @@ import (
 
 // GuidedUseCaseState extends a canonical authoring session without adopting manual sessions.
 type GuidedUseCaseState struct {
+	CaseHash            string                   `json:"case_hash,omitempty"`
+	PendingCheckpoint   *GuidedStageCheckpoint   `json:"pending_checkpoint,omitempty"`
 	SchemaVersion       int                      `json:"schema_version"`
 	Actor               string                   `json:"actor"`
 	ProgressionIntent   bool                     `json:"progression_intent"`
@@ -25,14 +27,16 @@ type GuidedUseCaseState struct {
 
 // GuidedUseCaseOperation binds retries to their original arguments and revision.
 type GuidedUseCaseOperation struct {
-	ID      string `json:"id"`
-	Action  string `json:"action"`
-	Digest  string `json:"digest"`
-	Content string `json:"content,omitempty"`
+	ExpectedRevision int64  `json:"expected_revision,omitempty"`
+	ID               string `json:"id"`
+	Action           string `json:"action"`
+	Digest           string `json:"digest"`
+	Content          string `json:"content,omitempty"`
 }
 
 // GuidedStageCheckpoint retains immutable input bytes independently of a code target.
 type GuidedStageCheckpoint struct {
+	BaseCommit  string                    `json:"base_commit"`
 	OperationID string                    `json:"operation_id"`
 	Stage       string                    `json:"stage"`
 	Repository  string                    `json:"repository"`
@@ -44,8 +48,10 @@ type GuidedStageCheckpoint struct {
 
 // GuidedCommittedArtifact binds a repository-relative path to its committed content.
 type GuidedCommittedArtifact struct {
-	Path string `json:"path"`
-	Hash string `json:"hash"`
+	Repository string `json:"repository,omitempty"`
+	Commit     string `json:"commit,omitempty"`
+	Path       string `json:"path"`
+	Hash       string `json:"hash"`
 }
 
 // GuidedUseCaseScope prevents a callback from addressing another project or namespace.
@@ -138,7 +144,7 @@ func guidedOperation(command GuidedUseCaseCommand) (GuidedUseCaseOperation, erro
 
 	encoded, err := json.Marshal(command)
 
-	return GuidedUseCaseOperation{ID: command.OperationID, Action: command.Action, Digest: workflowHash(encoded), Content: command.Content}, err
+	return GuidedUseCaseOperation{ID: command.OperationID, Action: command.Action, ExpectedRevision: command.ExpectedRevision, Digest: workflowHash(encoded), Content: command.Content}, err
 }
 
 func renderGuidedState(output *bytes.Buffer, state *GuidedUseCaseState) error {

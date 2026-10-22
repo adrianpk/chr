@@ -39,8 +39,9 @@ type AuthoringSessionPaths struct {
 }
 
 type fileAuthoringSessionRepository struct {
-	projectDir           string
-	afterMutationReplace func(int) error
+	projectDir            string
+	afterMutationReplace  func(int) error
+	afterGuidedCheckpoint func() error
 }
 
 // NewAuthoringSessionRepository constructs the corresponding package service or value.

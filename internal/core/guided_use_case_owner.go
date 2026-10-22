@@ -266,6 +266,7 @@ func (r *fileAuthoringSessionRepository) nameGuidedUseCase(ctx context.Context, 
 	}
 
 	session.Guided.CaseSlug, session.Guided.CaseName = result.Metadata.Slug, result.Metadata.Name
+	session.Guided.CaseHash = result.Metadata.SourceHash
 	session.Guided.Stage, session.Topic = "dump", result.Metadata.Name
 
 	return nil
