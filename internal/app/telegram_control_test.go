@@ -139,7 +139,7 @@ func TestTelegramControlStale(t *testing.T) {
 	}
 
 	notice := f.send(t, "/answer "+token+" pause", 0)
-	if !strings.Contains(notice.Text, "unavailable or stale") || !strings.Contains(notice.Text, "state: cancelled") {
+	if !strings.Contains(notice.Text, "unavailable or stale") || !strings.Contains(notice.Text, "Work was canceled") {
 		t.Fatal("stale control hid current native state", notice)
 	}
 
@@ -165,7 +165,7 @@ func TestTelegramControlConversation(t *testing.T) {
 	}
 
 	notice := f.send(t, "/status "+ref.Invocation.ID, 0)
-	if !strings.Contains(notice.Text, ref.Invocation.ID) || !strings.Contains(notice.Text, "state: paused") {
+	if !strings.Contains(notice.Text, ref.Invocation.ID) || !strings.Contains(notice.Text, "Work is paused") {
 		t.Fatal("native status lost the exact binding", notice)
 	}
 
