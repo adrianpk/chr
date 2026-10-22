@@ -6,8 +6,8 @@ Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 3, Automatic work preparation and execution; T3.1 is complete and T3.2 is pending.
-Progress: 2 of 6 slices delivered; 7 of 18 tasks completed. Slice 3 is active; admission and Web execution remain pending.
+Active slice: Slice 3, Automatic work preparation and execution; T3.1 and T3.2 are complete and T3.3 is pending.
+Progress: 2 of 6 slices delivered; 8 of 18 tasks completed. Slice 3 is active; Web preparation/execution wiring remains pending.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
 Spec: [Approved workflow](../spec/stable/guided-use-case-workflow.md)
@@ -39,7 +39,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | T2.2 | Exact generated-specification approval, provenance, checkpoint and recovery. | done | `5d67648370079e7a373d0def7664015259d94905` | Focused specification regressions passed; exact approval, lost draft/approval acknowledgements, retained seal and manual mutation compatibility. |
 | T2.3 | Web clarification/specification progression and complete artifact inspection. | done | `5ca7c06550c4e44ec6a2fd3ae10ab93309e9a18b` | Focused capture/quiz/specification HTTP and view regressions passed, including race mode and committed-original inspection. |
 | T3.1 | Committed-source planning, native materialization, contracts/tracker and work checkpoint. | done | `cf45d5255edd6834df83ce7c82a3ed7f3425fd88` | Focused preparation, native journal recovery and standalone plan regressions passed; focused preparation race checks and strict scoped lint passed. |
-| T3.2 | Exact policy-bound native preview/admission and automatic start with retained limits. | pending | pending | pending |
+| T3.2 | Exact policy-bound native preview/admission and automatic start with retained limits. | done | `a740689accce48f067b66db400a6b6f37698da41` | Focused preparation/admission, native manual-work and Telegram admission regressions passed; focused admission race checks and strict scoped lint passed. |
 | T3.3 | Web preparation/execution state and real prerequisite/manual-operation regressions. | pending | pending | pending |
 | T4.1 | Host recovery, client independence, stale-action safety and native pause/resume/cancel. | pending | pending | pending |
 | T4.2 | Later-idea retention and truthful waiting/results from native delivery receipts. | pending | pending | pending |
@@ -69,15 +69,15 @@ Criterion numbers correspond to the approved specification. The plan defines the
 | Criterion | Owning tasks | State and evidence |
 | --- | --- | --- |
 | GUC-01 | T1.3, T2.1, T2.3, T5.1, T6.1 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
-| GUC-02 | T2.2, T3.1, T3.2 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
+| GUC-02 | T2.2, T3.1, T3.2 | partial: committed preparation, exact policy-bound admission and managed native activation passed; Web progression wiring remains in T3.3. |
 | GUC-03 | T2.2 | implemented: exact generated revision/hash approval with initiating actor, run and policy; focused mutation and recovery regressions passed. |
-| GUC-04 | T3.1, T3.2 | partial: T3.1 retains exact plan revision, materialization receipt and initial native membership; admission remains pending in T3.2. |
+| GUC-04 | T3.1, T3.2 | implemented: sealed native membership and contracts bound to the canonical preview; older/later unrelated tickets excluded and later-ticket adoption disabled for the invocation. |
 | GUC-05 | T1.1, T2.2, T3.3 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
 | GUC-06 | T1.1, T4.1, T5.1, T6.2, T6.3 | partial: Slice 1 capture/checkpoint regressions passed; remaining owning tasks are pending. |
 | GUC-07 | T2.3, T4.2, T5.2, T6.2 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
 | GUC-08 | T1.3, T2.1 | implemented: nonempty capture and valid, sufficient clarification are required; focused invalid/empty/budget/foreign completion regressions passed. |
 | GUC-09 | T2.2, T3.1, T4.1 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
-| GUC-10 | T3.2, T4.1, T4.3 | pending |
+| GUC-10 | T3.2, T4.1, T4.3 | partial: lost admission and actual-start acknowledgements reconcile one invocation and consumed attempt; remaining recovery/publication variants belong to Slice 4. |
 | GUC-11 | T4.1, T5.3, T6.2 | pending |
 | GUC-12 | T3.3, T4.1, T6.2 | pending |
 | GUC-13 | T1.2, T2.3, T3.1, T4.3 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
@@ -110,7 +110,27 @@ Slice 3 T3.1 task checks passed on the implemented preparation content:
 The first lost-Git-acknowledgement fixture missed the managed Git argument
 prefix and failed to reach its fault. The corrected fixture passed, including
 recovery after later native working-copy edits. These task checks do not
-establish the final Slice 3 PR gate; T3.2 and T3.3 remain pending.
+establish the final Slice 3 PR gate; Web completion remains in T3.3.
+
+Slice 3 T3.2 task checks passed for implementation commit
+`a740689accce48f067b66db400a6b6f37698da41`:
+
+- `go test ./internal/core ./internal/app -run '^Test(GuidedUseCase(Preparation|Admission)|ServiceWorkNative|TelegramWorkAdmission)' -count=1 -timeout=3m` — passed (core 0.689s, app 49.879s).
+- `go test -race ./internal/core ./internal/app -run '^TestGuidedUseCaseAdmission' -count=1 -timeout=3m` — passed (core 1.031s, app 41.298s).
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/core/... ./internal/app/...` — zero issues.
+- `git diff --check`
+
+The first host fixture lacked a coordinator marker on its canonical target.
+Guided admission now rejects that prerequisite before allocating native work;
+the corrected fixture commits only its coordinator registration before pushing
+the code target. A separate proof fixture initially omitted its required
+checkpoint artifact; adding the original artifact binding made its positive
+case valid. Corrected regressions pass, including one actual worker attempt,
+request-context cancellation, duplicate activation and a lost start response
+after reaching native human review. Delivery remains unconfirmed at that wait.
+The managed host is implemented through shared native continuation; wiring its
+lifetime and native status into Web remains T3.3. Final PR-head validation has
+not run.
 
 Delivery-set gate: `make verify`, bounded normal guided-workflow regressions, focused race coverage for changed ownership, then `git diff --check`, on the exact final integrated `dev` candidate. The scheduled nightly retains exhaustive certification ownership.
 
