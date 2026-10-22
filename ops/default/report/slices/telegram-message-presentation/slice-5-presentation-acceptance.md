@@ -309,6 +309,22 @@ establish a fresh unattended work execution.
 
 ## Risks and Follow-ups
 
+Readiness was rechecked on 2026-10-22 without changing the receiver. The running
+executable reports clean source `29fc714b0687e149397ec4f6dea69fb638e5fcce` and
+SHA-256 `3cc62f6f09f29f0eee70bb59f368251a668081b456cd7e4af3eef99fbfdeb7fe`.
+Status reports ready health, fresh polling, zero pending updates and zero pending
+deliveries. Later commits through `13a908914ed69f82e9ea29d6ad79373af061f988`
+change only acceptance records. Canonical remote inspection confirms that the
+branch remains separate from `dev` and that no Slice 5 PR is open.
+
+The [cycle matrix](../../telegram-message-presentation-cycle.md) now records
+the already observed original document, operator-assisted native journey and
+plain status retry instead of treating every client/journey row as untested.
+It also identifies the missing desktop/mobile build identities, mobile document
+opening and remaining visual cases. These are the acceptance prerequisite for
+PR submission; fixture passes cannot fill those rows. Current clean-HEAD local
+validation is retained separately in the existing Looper evidence owner.
+
 Remaining real mobile/desktop coverage is still open. The delivered standalone
 ticket notification exposed misleading zero-unit integration wording; the
 caption/result repairs above are active in QA. The real status retry verified

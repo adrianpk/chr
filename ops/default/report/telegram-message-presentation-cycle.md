@@ -54,18 +54,33 @@ certification.
 
 | Requirement | Actual evidence | State |
 | --- | --- | --- |
-| Fixed candidate receiver/source and executable hash | Candidate readiness is recorded separately against its clean source; retained live receiver remains workflow-owned | pending |
+| Fixed candidate receiver/source and executable hash | Running executable reports clean source `29fc714b0687e149397ec4f6dea69fb638e5fcce`; SHA-256 `3cc62f6f09f29f0eee70bb59f368251a668081b456cd7e4af3eef99fbfdeb7fe`. Local status on 2026-10-22 reports ready, fresh polling and zero pending updates/deliveries | verified |
 | Mobile client/build and readable spacing, literal text, emoji and long names | No observations supplied | pending |
-| Desktop client/build and readable spacing, literal text, emoji and long names | No observations supplied | pending |
-| Complete document opening and content match on both clients | No observations supplied | pending |
+| Desktop client/build and readable spacing, literal text, emoji and long names | Original attachment and a later natural-language status response were observed; client/build identity and the remaining visual cases are not recorded | partial |
+| Complete document opening and content match on both clients | Actual desktop retry delivered all 937 original specification bytes, including metadata and provenance; mobile opening remains unobserved | partial |
 | Clear scope/effect labels and exact confirmation | Local HTTP/native fixtures exist; no client observation supplied | pending |
-| Multiple conversations, fallback, errors and partial/final results | Local HTTP/SQLite fixtures exist; no real-client observations supplied | pending |
-| User-operated natural-language journey and canonical integration receipt | No candidate-bound live journey completed for this delivery set | pending |
+| Multiple conversations, fallback, errors and partial/final results | Real failures, recovery and terminal results are retained in the slice report; remaining visual, multiple-conversation and fallback cases are not client-certified | partial |
+| User-operated natural-language journey and canonical integration receipt | Genuine user-started work completed with one validated task, one confirmed ticket, zero remaining tickets and a verified native receipt; canonical QA PR #142 integrated the requested README paragraph | verified, operator-assisted |
+| Natural-language status on the current fixed receiver | Actual user retry identified the completed invocation and reported the confirmed integration without requesting another action | verified |
 
-The retained QA receiver uses its earlier workflow-owned executable. Replacing
-or restarting it is a separate activation decision under the approved plan.
-Existing QA requests and invocations remain with their current owner; fixture
-messages do not substitute for genuine user input or visual inspection.
+The [slice report](slices/telegram-message-presentation/slice-5-presentation-acceptance.md)
+retains the candidate-specific fixes, failed attempts and actual client results.
+The completed journey reused its original worker and published once after
+explicit operator-assisted recovery; it does not establish fresh unattended
+execution. A send receipt or readable status response does not certify the
+remaining client layouts.
+
+The receiver remains on the fixed QA executable above. Later branch commits
+through `13a908914ed69f82e9ea29d6ad79373af061f988` change only the tracker and
+slice report. No restart, new inbound message, work continuation or publication
+was needed for this readiness inspection. Existing stopped and completed
+invocations retain their original owners and limits.
+
+For each remaining client check, record the application/build, tested receiver
+revision, observed message or attachment and actual result. Inspect the same
+newly requested original specification on desktop and mobile before progressing
+to confirmation labels, multiple conversations and failure/fallback cases. Keep
+the existing completed work as evidence; do not rerun it to fill a visual row.
 
 ## Scheduled Certification
 
@@ -79,7 +94,10 @@ or an older nightly cannot close it.
 
 ## Remaining Acceptance
 
-Complete T5.2 with authorized candidate activation, actual mobile/desktop build
-identities and observations, opened complete attachments, genuine conversation
-input and the matching native receipt. Record the final integrated candidate
-and scheduled outcome before closing the specification, tracker or this cycle.
+Complete T5.2 with the missing mobile/desktop build identities and visual
+observations, including attachment opening and the remaining interaction cases.
+The fixed candidate activation, original-document retry, operator-assisted
+native integration and real plain status retry are already evidenced. Finish
+client acceptance before submitting the Slice 5 PR, then record the final
+integrated candidate and scheduled outcome before closing the specification,
+tracker or this cycle.

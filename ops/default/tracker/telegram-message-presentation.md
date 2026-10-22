@@ -137,8 +137,9 @@ Real client observations remain a separate acceptance obligation.
 - Slice 2: delivered through [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425) at `a5c6a7e068a8e5ec547d13d73d39afe1f0477335`.
 - Slice 3: delivered through [PR #427](https://forge.adrianpk.com/adrianpk/chr/pulls/427) at `a4d0a865e8bb32a3caac65395a28839b573ed369`.
 - Slice 4: delivered through [PR #428](https://forge.adrianpk.com/adrianpk/chr/pulls/428) at `ae8d8d1b79ba6efddd75fdd287f235b6556babab`.
-- Slice 5: active; T5.1 committed with passing normal/race fixture checks; client activation/observations and final certification remain open.
-- Mobile/desktop and user-operated journey evidence: pending.
+- Slice 5: active; T5.1 committed with passing normal/race fixture checks; fixed QA activation, original attachment, native integration and plain status retry verified; remaining client observations and final certification remain open.
+- User-operated journey: confirmed with operator-assisted recovery; no fresh unattended execution is claimed.
+- Mobile/desktop: original attachment and terminal status observed on desktop; client/build identities, mobile opening and the remaining visual matrix are pending.
 - Exact final candidate and scheduled nightly: pending.
 
 The existing conversational workflow and its active QA evidence retain their
@@ -241,3 +242,17 @@ later caption/result repairs require their own clean-candidate checks and client
 review. No Slice 5 PR has been submitted.
 The named proof covers that candidate only. Acceptance and PR-reference commits
 require fresh validation before `pr_ready`.
+
+## Current Acceptance Checkpoint
+
+On 2026-10-22, live inspection confirmed the receiver still runs clean source
+`29fc714b0687e149397ec4f6dea69fb638e5fcce`, with ready health, fresh polling and
+zero pending updates or deliveries. No receiver restart or work retry was used.
+Canonical `dev` is still `ae8d8d1b79ba6efddd75fdd287f235b6556babab`; the Slice 5
+branch remains separate and no slice PR is open.
+
+The [cycle evidence matrix](../report/telegram-message-presentation-cycle.md)
+now distinguishes confirmed original-document, native receipt and status proof
+from missing client/build identities and visual observations. T5.2 and T5.3
+remain open. Obtain the remaining genuine client evidence before PR submission;
+the existing scheduled nightly remains the final certification owner.
