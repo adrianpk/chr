@@ -104,6 +104,7 @@ Delivery-set gate: `make verify`, bounded normal guided-workflow regressions, fo
 
 | Evidence | Candidate | Outcome |
 | --- | --- | --- |
+| Initial Slice 1 gate | `c12f62a9a1ba0f6879b2a295e0e7bb2b0a54b8cd` | failed: static Web navigation returned 503; focused correction passed and the final controller gate is regenerated. |
 | Slice development gates | PR #430 head (controller evidence) | Task regressions and scoped strict lint passed; final PR-head evidence is owned by the controller. |
 | Web browser journey | pending | not run |
 | Telegram actual-client journey | pending | not observed |

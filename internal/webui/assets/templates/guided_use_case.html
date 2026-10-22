@@ -1,4 +1,5 @@
 {{define "guided_use_case_content.html"}}
+{{if .Guided.Enabled}}
 <section class="detail-block" aria-label="Guided use case">
   <p>Project: {{.Shell.ProjectName}} · Namespace: {{.Guided.Namespace}}</p>
   {{if .Guided.RunID}}
@@ -51,6 +52,9 @@
   {{range .Guided.Policy}}<p>{{.}}</p>{{end}}
   {{range .Guided.Problems}}<p role="status">{{.}}</p>{{end}}
 </section>
+{{else}}
+<p>Guided use cases are unavailable for this project.</p>
+{{end}}
 {{end}}
 
 {{define "guided_fields.html"}}

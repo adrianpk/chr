@@ -1,7 +1,9 @@
 package core
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -198,5 +200,20 @@ func TestGuidedUseCaseCaptureRecovery(t *testing.T) {
 				t.Fatalf("recovery duplicated or lost input: %v", err)
 			}
 		})
+	}
+}
+
+// TestGuidedUseCaseCaptureLegacyJSON preserves checksum input for old manual receipts.
+func TestGuidedUseCaseCaptureLegacyJSON(t *testing.T) {
+	legacy := []byte(`{"ID":"legacy","Namespace":"","Revision":0,"ProjectID":"project","Status":"draft","Mode":"assisted","Target":"dump","Topic":"Legacy","Inputs":null,"Outputs":null,"Provenance":null,"CreatedAt":"2026-10-22T00:00:00Z","StartedAt":null,"FinishedAt":null,"UpdatedAt":"2026-10-22T00:00:00Z","Description":""}`)
+
+	var session AuthoringSession
+	if err := json.Unmarshal(legacy, &session); err != nil {
+		t.Fatal(err)
+	}
+
+	encoded, err := json.Marshal(session)
+	if err != nil || !bytes.Equal(legacy, encoded) {
+		t.Fatalf("legacy receipt checksum input changed: %v\n%s", err, encoded)
 	}
 }

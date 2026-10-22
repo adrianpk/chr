@@ -21,7 +21,7 @@ Let a user start a new use case through Web, retain its name and multiple captur
 
 ## Implementation Notes
 
-The optional `guided_state` JSON field extends the existing session frontmatter with schema version 1. Existing sessions keep their encoding and manual semantics. The shared authoring exclusion, revision guards and mutation journal own the state and transcript; generic session/transcript writes cannot replace guided state.
+The optional `guided_state` JSON field extends the existing session frontmatter with schema version 1. Existing sessions keep their encoding and manual semantics. The optional Go JSON field is omitted for manual sessions, preserving the bytes hashed by existing receipts and source observations. The shared authoring exclusion, revision guards and mutation journal own the state and transcript; generic session/transcript writes cannot replace guided state.
 
 The case and dump owners retain stable operation bindings before effects. Stage checkpoint intent records artifact hashes and the original parent commit before Git writes. Commits use the existing managed Git process boundary, an isolated temporary index, and `refs/chr/guided/<run-hash>/<operation-digest>`. Updating that ref retains the commit independently of the caller's branch. Recovery checks the original ref and committed hashes before sealing the stage, including when Git succeeded but its response was lost.
 
@@ -59,6 +59,10 @@ Final PR-head acceptance uses the controller's retained exact-clean-HEAD evidenc
 2. `go test ./internal/core ./internal/app ./internal/webui -run '^TestGuidedUseCase(Capture|Checkpoint)' -count=1 -timeout=3m`
 3. `go test -race ./internal/core ./internal/app ./internal/webui -run '^TestGuidedUseCase(Capture|Checkpoint)' -count=1 -timeout=3m`
 4. `git diff --check`
+
+The initial `make verify` on `c12f62a9a1ba0f6879b2a295e0e7bb2b0a54b8cd` failed `TestWebLANNavigation`: the new navigation link returned 503 when no guided operation provider was installed. The page now renders an unavailable state without command forms. A separate failing-first regression confirmed that adding an untagged nil guided field changed old manual-session JSON checksum input; omitting that field restores byte-for-byte compatibility.
+
+The correction passed `go test ./internal/core ./internal/app ./internal/webui -run '^(TestGuidedUseCaseCapture(LegacyJSON|Unavailable)|TestWebLANNavigation)$' -count=1 -timeout=3m`. The final ordered controller checks are regenerated after this correction; the earlier failed candidate's diagnostics remain retained by the controller.
 
 The Git and HTTP tests use real temporary repositories and filesystem owners. Real Git fixtures are selected without short mode; rendering/HTTP evidence does not establish browser or live-client acceptance.
 

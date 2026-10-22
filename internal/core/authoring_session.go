@@ -111,7 +111,7 @@ const (
 
 // AuthoringSession describes a package boundary value.
 type AuthoringSession struct {
-	Guided      *GuidedUseCaseState
+	Guided      *GuidedUseCaseState `json:",omitempty"`
 	ID          string
 	Namespace   string
 	Revision    int64

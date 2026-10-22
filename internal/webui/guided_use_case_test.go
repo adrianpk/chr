@@ -14,6 +14,8 @@ type guidedCaptureProvider struct {
 }
 
 func (p guidedCaptureProvider) GuidedUseCaseView(context.Context, string, string) (GuidedUseCaseView, error) {
+	p.view.Enabled = true
+
 	return p.view, nil
 }
 
@@ -63,5 +65,21 @@ func TestGuidedUseCaseCaptureBounds(t *testing.T) {
 		if response.Code != http.StatusBadRequest {
 			t.Fatalf("unbounded or duplicate form accepted: %d", response.Code)
 		}
+	}
+}
+
+// TestGuidedUseCaseCaptureUnavailable keeps static navigation useful without commands.
+func TestGuidedUseCaseCaptureUnavailable(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/guided", nil))
+
+	body := response.Body.String()
+	if response.Code != http.StatusOK || !strings.Contains(body, "Guided use cases are unavailable") || strings.Contains(body, `action="/guided/actions"`) {
+		t.Fatal("unavailable commands exposed", response.Code, body)
 	}
 }

@@ -15,7 +15,7 @@ import (
 func (p webViewProvider) GuidedUseCaseView(ctx context.Context, id, namespace string) (webui.GuidedUseCaseView, error) {
 	result, err := p.service(ctx).InspectGuidedUseCase(ctx, id, namespace)
 
-	view := webui.GuidedUseCaseView{Namespace: result.Namespace, RequestID: rand.Text(), Policy: result.Policy, Problems: result.Problems, CommittedDump: result.CommittedDump}
+	view := webui.GuidedUseCaseView{Enabled: true, Namespace: result.Namespace, RequestID: rand.Text(), Policy: result.Policy, Problems: result.Problems, CommittedDump: result.CommittedDump}
 	if err != nil {
 		return view, err
 	}

@@ -15,6 +15,7 @@ type GuidedUseCaseLink struct{ Name, URL string }
 
 // GuidedUseCaseView presents current capture, setup and an inspectable committed input.
 type GuidedUseCaseView struct {
+	Enabled                                       bool
 	RunID, Namespace, Name, Revision, RequestID   string
 	Stage, Status, Capture, Commit, CommittedDump string
 	PendingAction, PendingContent                 string
@@ -38,14 +39,7 @@ func (h handler) guidedUseCase(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	provider, ok := h.provider.(GuidedUseCaseProvider)
-	if !ok {
-		http.Error(w, "guided use cases unavailable", http.StatusServiceUnavailable)
-
-		return
-	}
-
-	view, err := provider.GuidedUseCaseView(r.Context(), query.Get("id"), query.Get("namespace"))
+	view, err := h.readGuidedUseCase(r.Context(), query.Get("id"), query.Get("namespace"))
 	if err != nil {
 		http.Error(w, "load guided use case: "+err.Error(), http.StatusBadRequest)
 
@@ -87,4 +81,13 @@ func (h handler) guidedUseCaseAction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.writeAction(w, r)
+}
+
+func (h handler) readGuidedUseCase(ctx context.Context, id, namespace string) (GuidedUseCaseView, error) {
+	provider, ok := h.provider.(GuidedUseCaseProvider)
+	if !ok {
+		return GuidedUseCaseView{}, nil
+	}
+
+	return provider.GuidedUseCaseView(ctx, id, namespace)
 }
