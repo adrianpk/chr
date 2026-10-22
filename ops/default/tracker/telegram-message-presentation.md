@@ -53,7 +53,7 @@ The plan owns exact branch names, PR titles, report paths and focused commands.
 | T4.3 | delivered | `01d9be1341e5c207c1748a22ced4a5aac8eafe1d` | Both-path faults, legacy records and truthful outcomes |
 | T5.1 | implemented | `ec0ea0f4c959188cee4477bc45888406f739a3a1` | Complete producer and variant coverage |
 | T5.2 | implemented | `29fc714b0687` | Actual mobile response and downloaded original verified; native receipt and plain status confirmed; duplicate desktop document check removed by maintainer refinement |
-| T5.3 | in progress | pending | User documentation, cycle evidence and exact nightly |
+| T5.3 | in progress | `658f39ae34747bd85c6ff2b8b777306da87e0f73` | User documentation and cycle evidence prepared; exact scheduled certification remains open |
 
 ## Message-Family Coverage
 
@@ -117,12 +117,12 @@ Real client observations remain a separate acceptance obligation.
 
 | Criterion | Owner tasks | State |
 | --- | --- | --- |
-| TMP-01 | T1.1, T4.1 | Shared bounded renderer and progress fixture evidence verified; real client acceptance pending |
-| TMP-02 | T4.2, T4.3 | Both delivery owners verified through real HTTP and SQLite; real client acceptance pending |
+| TMP-01 | T1.1, T4.1 | Shared bounded renderer and progress fixture evidence verified; accepted client scope and limits recorded in the cycle matrix |
+| TMP-02 | T4.2, T4.3 | Both delivery owners verified through real HTTP and SQLite; accepted client scope and limits recorded in the cycle matrix |
 | TMP-03 | T1.1, T1.3, T4.3 | Long Unicode, original complete exports and bounded fallback fixtures verified |
-| TMP-04 | T2.3 | Slice 2 fixtures verified and integrated; client acceptance pending |
-| TMP-05 | T2.1, T2.2, T2.4 | Slice 2 fixtures verified and integrated; client acceptance pending |
-| TMP-06 | T1.2, T3.1 | Slice 3 fixtures verified and integrated; client acceptance pending |
+| TMP-04 | T2.3 | Slice 2 fixtures verified and integrated; actual original-document result accepted with recorded client limits |
+| TMP-05 | T2.1, T2.2, T2.4 | Slice 2 fixtures verified and integrated; actual original-document result accepted with recorded client limits |
+| TMP-06 | T1.2, T3.1 | Slice 3 fixtures verified and integrated; accepted client scope and limits recorded in the cycle matrix |
 | TMP-07 | T3.2, T3.3 | Guard, original-result and exact-scope fixtures verified and integrated |
 | TMP-08 | T2.4, T3.3, T4.3 | Slice 2 integrated; Slice 3 guard/recovery fixtures verified; Slice 4 both-owner recovery fixtures verified |
 | TMP-09 | T2.4, T3.3, T4.3 | Slice 2 integrated; Slice 3 fail-closed scope/quota fixtures verified; Slice 4 shared quota/target/failure fixtures verified |
@@ -196,7 +196,8 @@ exact candidate. Acta merge event `01M5FVP9ZEWAC07X8DM2ZDSEB6` agrees.
 
 The dedicated Slice 5 branch starts from that integrated candidate. Its
 [canonical report](../report/slices/telegram-message-presentation/slice-5-presentation-acceptance.md)
-is drafting. T5.1 reconciles producers and meaningful regressions; T5.2 requires
+is reviewing in [PR #429](https://forge.adrianpk.com/adrianpk/chr/pulls/429).
+T5.1 reconciles producers and meaningful regressions; T5.2 requires
 actual mobile/desktop observations and a user-operated journey on a fixed
 candidate. T5.3 updates existing product documentation and records the scheduled
 nightly outcome without dispatching the exhaustive gate.
@@ -219,9 +220,10 @@ Existing User Guide, transport and notification references now describe actual
 help groups, literal previews, complete attachments, exact confirmation scope,
 recovery and native-result truth. Unreleased notes are consolidated by the user
 outcome. The [cycle report](../report/telegram-message-presentation-cycle.md)
-retains `awaiting_user_acceptance` and `awaiting_nightly`.
+records accepted client coverage and its limits, with `awaiting_nightly` retained.
 
-T5.2 remains open. The validated presentation candidate was activated in the
+T5.2 is implemented under the 2026-10-22 maintainer refinement. The validated
+presentation candidate was activated in the
 retained isolated QA receiver without changing stored conversations, pending
 confirmation or native invocation ownership. The first user-operated desktop
 request to show a specification attached a generated explanation instead.
@@ -231,7 +233,8 @@ their existing behavior. Regression evidence covers exact full bytes beyond
 the model excerpt, changed source/root rejection and frozen delivery after
 SQLite reopen. The desktop retry verified all original specification bytes, and
 the real user-started journey completed with a canonical native receipt after
-operator-assisted recovery. Remaining mobile/desktop acceptance is still open.
+operator-assisted recovery. The cycle matrix records the accepted client scope
+and the unobserved layouts and versions.
 
 The full configured five-command sequence in the Slice 5 report passed on clean,
 pushed candidate `658f39ae34747bd85c6ff2b8b777306da87e0f73`, recorded by Looper
@@ -240,7 +243,7 @@ receipt `5I4WQ32LVGGE7LXENUNTHC3G7T` and Acta validation event
 PR payload were staged. The desktop defect and its correction do not inherit
 that receipt. The original-document retry and native receipt are now verified;
 later caption/result repairs require their own clean-candidate checks and client
-review. No Slice 5 PR has been submitted.
+review. PR #429 now carries the final accepted scope and recorded evidence.
 The named proof covers that candidate only. Acceptance and PR-reference commits
 require fresh validation before `pr_ready`.
 
@@ -254,9 +257,10 @@ branch remains separate and no slice PR is open.
 
 The [cycle evidence matrix](../report/telegram-message-presentation-cycle.md)
 now distinguishes confirmed original-document, native receipt and status proof
-from missing client/build identities and visual observations. T5.2 and T5.3
-remain open. Obtain the remaining genuine client evidence before PR submission;
-the existing scheduled nightly remains the final certification owner.
+from missing client/build identities and visual observations. At that checkpoint,
+T5.2 and T5.3 remained open; the mobile acceptance and scope refinement below
+resolve the client prerequisite. The existing scheduled nightly remains the
+final certification owner.
 
 ## Mobile Document Acceptance
 
@@ -275,3 +279,13 @@ T5.2 is implemented under that refined scope. Continue the existing Slice 5
 PR/validation/integration workflow without resetting the controller, QA
 invocations, work limits or frozen local checks. Keep awaiting_nightly until
 the final integrated candidate receives its scheduled result.
+
+## Slice 5 Review
+
+Canonical [PR #429](https://forge.adrianpk.com/adrianpk/chr/pulls/429) targets
+`dev` with the exact approved title and the full immutable report-introduction
+commit. The report retains accepted mobile document, native receipt and status
+evidence alongside the client coverage limits. Final exact-HEAD validation uses
+the frozen command prefix, focused native/recovery/status regressions and
+`git diff --check` last. Integration remains controller-owned; scheduled
+certification remains `awaiting_nightly`.

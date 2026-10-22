@@ -31,7 +31,7 @@ allowance. Completed domain results survive presentation or delivery failures.
 | Slice 2 | [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425) | `a5c6a7e068a8e5ec547d13d73d39afe1f0477335` |
 | Slice 3 | [#427](https://forge.adrianpk.com/adrianpk/chr/pulls/427) | `a4d0a865e8bb32a3caac65395a28839b573ed369` |
 | Slice 4 | [#428](https://forge.adrianpk.com/adrianpk/chr/pulls/428) | `ae8d8d1b79ba6efddd75fdd287f235b6556babab` |
-| Slice 5 | pending | pending |
+| Slice 5 | [#429](https://forge.adrianpk.com/adrianpk/chr/pulls/429) | pending integration |
 
 The tracker owns all 48 initial families and their rare/dynamic branches.
 Reconciliation binds 90 exact existing regression roots, adds actual capture/
@@ -46,7 +46,7 @@ Slice reports retain their exact commands and local evidence. Slice 4 Looper
 receipt `4T2N7JVJ73C4VBTAPKQZIRVNZN` passed all five ordered checks on its
 integrated candidate. Slice 5's
 [acceptance report](slices/telegram-message-presentation/slice-5-presentation-acceptance.md)
-records its development checks, actual client evidence when available and final
+records its development checks, accepted actual client evidence and final
 controller-recorded clean-HEAD validation. Pending checks are not successful
 certification.
 
@@ -71,9 +71,9 @@ execution. A send receipt or readable status response does not certify the
 remaining client layouts.
 
 The receiver remains on the fixed QA executable above. Later branch commits
-through `13a908914ed69f82e9ea29d6ad79373af061f988` change only the tracker and
-slice report. No restart, new inbound message, work continuation or publication
-was needed for this readiness inspection. Existing stopped and completed
+record acceptance scope and delivery evidence without changing that executable.
+No restart, new inbound message, work continuation or publication was needed
+for this readiness inspection. Existing stopped and completed
 invocations retain their original owners and limits.
 
 The 2026-10-22 [maintainer refinement](../spec/stable/telegram-message-presentation.md#5-coverage-and-acceptance)

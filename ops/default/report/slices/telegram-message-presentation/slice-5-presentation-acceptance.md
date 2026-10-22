@@ -5,7 +5,7 @@ Delivery set: Telegram Message Presentation
 Plan: [ops/default/plan/telegram-message-presentation.md](../../../plan/telegram-message-presentation.md)
 Tracker: [ops/default/tracker/telegram-message-presentation.md](../../../tracker/telegram-message-presentation.md)
 Branch: `test/slice-5-telegram-presentation-acceptance`
-PR: pending
+PR: [#429](https://forge.adrianpk.com/adrianpk/chr/pulls/429)
 
 ## Purpose
 
@@ -44,8 +44,8 @@ recorded below.
 T5.3 product guidance is prepared: the existing User Guide, Telegram transport
 and notification references describe the actual help groups, attachment bounds,
 complete confirmation scope, retry behavior and native evidence. Unreleased
-notes describe one user outcome. The cycle report keeps client acceptance and
-exact-candidate scheduled certification open.
+notes describe one user outcome. The cycle report records the accepted client
+scope and its limits, with exact-candidate scheduled certification still open.
 
 ## Implementation Notes
 
@@ -107,8 +107,8 @@ paths and local documentation links resolve. Initial fixture expectations were
 corrected to use the existing syntax/empty-owner messages, the unique prepared
 conversation and fresh status after queued progress. Native receipt and work
 count assertions remain intact. All passes retain the three-minute package
-budget. Real client observations and final PR-reference clean-HEAD validation
-remain pending.
+budget. Later real client observations are recorded below. The controller
+records final PR-reference validation against its exact clean HEAD.
 
 Looper receipt `5I4WQ32LVGGE7LXENUNTHC3G7T` passed the complete configured
 ordered command list on clean, pushed candidate
@@ -122,8 +122,8 @@ ordered command list on clean, pushed candidate
 
 The staged executable records that exact clean source and SHA-256
 `b5c32a29a11593f3e2f1d088c4a89beb39707ce501b6153b592706d6c2466c04`.
-The canonical PR payload is prepared with report-introduction commit
-`8260c0d484521883db7c01f38e44991118e963e1`; it has not been submitted.
+The canonical PR uses report-introduction commit
+`8260c0d484521883db7c01f38e44991118e963e1`.
 This receipt belongs to the named candidate and cannot certify later report,
 acceptance or PR-reference commits.
 
@@ -335,8 +335,19 @@ receipt, single publication and execution limits unchanged.
 
 Looper receipt `UR5P2V7ZBTEZUVWSD6TVHNJ6NY` passed all five frozen commands on
 clean pushed candidate `0ea4463a02c0cfa144bee0d26ecc5e5106713538`. This acceptance
-record changes documentation only and requires fresh exact-HEAD validation
-before the existing controller integrates the Slice 5 PR.
+record changes documentation only. The PR-reference commit requires its own
+exact-HEAD validation before the existing controller integrates PR #429.
+
+Final local validation retains the frozen four-command prefix above, then runs
+these bounded acceptance-repair regressions before `git diff --check`:
+
+- `go test ./internal/core ./internal/app -run '^Test(NativeHost(Publication|Denials|PreparationRetry)|NativePublisherProfiles|Workflow(IntegrationCredentials|PreparationRetryAuthority)|ServiceNativeProvider|WorkContinuePreparation|TelegramWorkStatus(Reply|Guards))$' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^Test(NativeHost(Publication|Denials|PreparationRetry)|NativePublisherProfiles|Workflow(IntegrationCredentials|PreparationRetryAuthority)|ServiceNativeProvider|WorkContinuePreparation|TelegramWorkStatus(Reply|Guards))$' -count=1 -timeout=3m`
+
+These roots cover configured provider wiring, native publication and receipt
+observation, profile denials, credential propagation, revision-bound recovery
+and acknowledged status context. The frozen presentation selections retain
+document-read and composed-journey coverage. No exhaustive gate is added.
 
 ## Risks and Follow-ups
 
@@ -345,8 +356,8 @@ executable reports clean source `29fc714b0687e149397ec4f6dea69fb638e5fcce` and
 SHA-256 `3cc62f6f09f29f0eee70bb59f368251a668081b456cd7e4af3eef99fbfdeb7fe`.
 Status reports ready health, fresh polling, zero pending updates and zero pending
 deliveries. Later commits through `13a908914ed69f82e9ea29d6ad79373af061f988`
-change only acceptance records. Canonical remote inspection confirms that the
-branch remains separate from `dev` and that no Slice 5 PR is open.
+change only acceptance records. Canonical PR #429 targets `dev`; its branch
+awaits controller-owned integration.
 
 The [cycle matrix](../../telegram-message-presentation-cycle.md) distinguishes
 the observed mobile document, operator-assisted native journey and plain status
