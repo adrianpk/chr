@@ -1,6 +1,6 @@
 # Telegram Message Presentation Delivery
 
-Status: awaiting_gate
+Status: Completed
 
 Approved: maintainer, 2026-10-21; specification, model, slice map and Looper execution accepted.
 
@@ -23,8 +23,8 @@ Planning scope: requested by the maintainer on 2026-10-21.
 Implementation and merge authorization: granted for this delivery set and
 Looper-owned Rebase + Fast-forward slice PR merges into dev.
 
-Active slice: none. Slice 5 of 5 is delivered; controller-owned final validation
-and exact-candidate scheduled certification remain open.
+Active slice: none. Slice 5 of 5 is delivered and the configured controller gate
+passed. Exact-candidate scheduled certification remains `awaiting_nightly`.
 
 ## 1. Outcome and Strategy
 
@@ -219,8 +219,14 @@ pre-created as successful evidence.
 The specification/model are accepted and all five slices are delivered through
 PRs #424, #425, #427, #428 and #429. Slice 5 integrated into `dev` at
 `af999d9c73e4ee9d302c9296c89e29bcb1e1d10a`; no numbered slice remains active.
-The controller owns `make verify` on the clean pushed gate-preparation commit.
-The required toolchain, pinned linter cache and CI helpers are available; this
-gate requires no live fixture. Retain `awaiting_nightly` until the exact final
-candidate has its scheduled result. Neither slice integration nor prerequisite
-readiness establishes that certification.
+The controller passed `make verify` on immutable candidate
+`c8d4d8cbd32e5e1bd23f53e01d6950072f6574d6`, receipt
+`J5I336QDAIYLVOP7RD7F4EIEL4`, on 2026-10-22. All five reports are delivered.
+Documentation closure differs from that tested candidate only within the
+configured closure paths; the gate receipt remains bound to its tested hash.
+
+`Completed` records the controller delivery and configured local gate. Scheduled
+exhaustive certification remains `awaiting_nightly` until its exact candidate
+receives a green scheduled result. Neither local closure nor the passing short
+gate establishes that separate certification. The retained QA receiver and
+native invocations remain with their existing owner.

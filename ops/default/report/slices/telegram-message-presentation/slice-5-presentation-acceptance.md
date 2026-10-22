@@ -358,9 +358,13 @@ candidate. Acta merge event `01M5J9BCR8BVWE0ZHVDH09V329` confirms the
 controller-owned Rebase + Fast-forward integration. Slice 5 of 5 is delivered.
 
 The subsequent gate-preparation changes are documentation only. The controller
-owns the full `make verify` run on their clean pushed commit; the merged slice's
-receipt is not reassigned to that later candidate. Exact scheduled exhaustive
-certification remains `awaiting_nightly`.
+passed `make verify` on immutable candidate
+`c8d4d8cbd32e5e1bd23f53e01d6950072f6574d6`, receipt
+`J5I336QDAIYLVOP7RD7F4EIEL4`. Strict lint, short Go tests, eight CI helper
+tests and the build passed. The slice and gate receipts retain their separate
+tested hashes. Controller closure changes only configured documentation paths
+after that candidate. Exact scheduled exhaustive certification remains
+`awaiting_nightly`.
 
 ## Risks and Follow-ups
 

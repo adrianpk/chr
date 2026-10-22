@@ -1,6 +1,6 @@
 # Telegram Message Presentation Delivery Report
 
-Status: awaiting_gate
+Status: Completed
 Client acceptance: accepted with recorded coverage limits
 Scheduled certification: awaiting_nightly
 Plan: [Approved delivery](../plan/telegram-message-presentation.md)
@@ -53,8 +53,15 @@ certification.
 Slice 5 receipt `4JWXLVN42SZHAF2L3LILCY4UMJ` passed its seven ordered local
 commands on the exact merged candidate above. Acta merge event
 `01M5J9BCR8BVWE0ZHVDH09V329` verifies integration. The subsequent preparation
-commit changes delivery records only and receives its own controller-owned
+commit changes delivery records only and passed its own controller-owned
 full-gate run; prior evidence is not relabeled.
+
+The controller passed `make verify` on immutable candidate
+`c8d4d8cbd32e5e1bd23f53e01d6950072f6574d6`, receipt
+`J5I336QDAIYLVOP7RD7F4EIEL4`, finishing at 2026-10-22T17:13:00Z. Strict lint,
+short Go tests, eight CI helper tests and the build passed. Documentation
+closure changes only the configured allowed paths relative to that tested
+candidate. This passing local gate does not establish a scheduled result.
 
 ## Client and Journey Evidence
 
@@ -105,9 +112,11 @@ or an older nightly cannot close it.
 T5.2 has the actual mobile original-document result, independently verified
 downloaded bytes, retained native integration and plain status retry. Its
 coverage limits are explicit above. Slice 5 is delivered and integrated.
-The controller's full gate and the exact scheduled exhaustive result remain
-open. Retain `awaiting_nightly` until that exact candidate is green; neither
-client acceptance nor a local gate replaces scheduled certification.
+The controller's configured full gate passed and the delivery records are
+closed. The exact scheduled exhaustive result remains open. Retain
+`awaiting_nightly` until that exact candidate is green; neither client acceptance
+nor a local gate replaces scheduled certification. `Completed` describes this
+controller delivery, not complete cross-client UI or exhaustive certification.
 
 ## Gate Preparation
 
@@ -117,6 +126,8 @@ scripts and writable build destination are present. This gate requires no live
 fixture; tests own their temporary fixtures. The retained QA receiver and its
 native invocations remain under their existing owner.
 
-Preparation checks documentation and whitespace, leaves `dev` clean and pushed,
-and hands the exact candidate to the controller. It does not execute the full
-gate, dispatch the nightly or claim either result in advance.
+Preparation checked documentation and whitespace and handed a clean pushed
+candidate to the controller. The controller subsequently passed the exact gate
+recorded above. Closure checks documentation and whitespace without repeating
+that gate or dispatching the nightly. No owned long-running fixture needs to be
+stopped; retained QA and native invocations keep their existing owners.

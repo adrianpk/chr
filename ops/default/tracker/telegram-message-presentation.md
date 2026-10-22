@@ -1,6 +1,6 @@
 # Telegram Message Presentation Tracker
 
-Status: awaiting_gate
+Status: Completed
 
 Approved: maintainer, 2026-10-21; specification, model, slice map and Looper execution accepted.
 
@@ -16,8 +16,8 @@ Inventory: [48-family review](../report/telegram-message-review.md)
 
 Implementation and merge authorization: granted for this delivery set and
 Looper-owned Rebase + Fast-forward slice PR merges into dev.
-Active slice: none. Slice 5 of 5 is delivered; controller-owned final validation
-and exact-candidate scheduled certification remain open.
+Active slice: none. Slice 5 of 5 is delivered and the configured controller gate
+passed. Exact-candidate scheduled certification remains `awaiting_nightly`.
 
 ## Canonical Slice Map
 
@@ -33,8 +33,9 @@ and exact-candidate scheduled certification remain open.
 
 Slices 1-5 are delivered through PRs #424, #425, #427, #428 and #429. T5.1 and
 T5.2 retain their fixture and accepted client evidence with recorded coverage
-limits. T5.3 documentation is delivered; its exact scheduled outcome remains
-a cycle-closure prerequisite. Controller-owned final validation is next.
+limits. T5.3 documentation is delivered and the configured controller gate
+passed. Its exact scheduled outcome remains pending; `Completed` does not
+represent exhaustive certification.
 The plan owns exact branch names, PR titles, report paths and focused commands.
 
 | Task | State | Commit | Required outcome |
@@ -54,7 +55,7 @@ The plan owns exact branch names, PR titles, report paths and focused commands.
 | T4.3 | delivered | `01d9be1341e5c207c1748a22ced4a5aac8eafe1d` | Both-path faults, legacy records and truthful outcomes |
 | T5.1 | delivered | `ec0ea0f4c959188cee4477bc45888406f739a3a1` | Complete producer and variant coverage |
 | T5.2 | delivered | `29fc714b0687` | Actual mobile response and downloaded original verified; native receipt and plain status confirmed; duplicate desktop document check removed by maintainer refinement |
-| T5.3 | delivered; certification pending | `658f39ae34747bd85c6ff2b8b777306da87e0f73` | User documentation and cycle evidence delivered; exact scheduled outcome remains a cycle-closure prerequisite |
+| T5.3 | delivered; certification pending | `658f39ae34747bd85c6ff2b8b777306da87e0f73` | User documentation, cycle evidence and controller gate recorded; exact scheduled outcome remains awaiting_nightly |
 
 ## Message-Family Coverage
 
@@ -139,10 +140,11 @@ Real client observations remain a separate acceptance obligation.
 - Slice 2: delivered through [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425) at `a5c6a7e068a8e5ec547d13d73d39afe1f0477335`.
 - Slice 3: delivered through [PR #427](https://forge.adrianpk.com/adrianpk/chr/pulls/427) at `a4d0a865e8bb32a3caac65395a28839b573ed369`.
 - Slice 4: delivered through [PR #428](https://forge.adrianpk.com/adrianpk/chr/pulls/428) at `ae8d8d1b79ba6efddd75fdd287f235b6556babab`.
-- Slice 5: delivered through [PR #429](https://forge.adrianpk.com/adrianpk/chr/pulls/429) at `af999d9c73e4ee9d302c9296c89e29bcb1e1d10a`; all seven ordered local checks passed on that exact merged candidate. Controller final validation and scheduled certification remain open.
+- Slice 5: delivered through [PR #429](https://forge.adrianpk.com/adrianpk/chr/pulls/429) at `af999d9c73e4ee9d302c9296c89e29bcb1e1d10a`; all seven ordered local checks passed on that exact merged candidate. Controller final validation passed on the subsequent documentation preparation candidate; scheduled certification remains open.
 - User-operated journey: confirmed with operator-assisted recovery; no fresh unattended execution is claimed.
 - Client scope: actual mobile Telegram original document and byte-identical downloaded copy confirmed. Duplicate desktop inspection is not required by the 2026-10-22 maintainer refinement; separate layouts and client versions remain unobserved.
-- Exact final candidate and scheduled nightly: pending.
+- Controller full-gate candidate: `c8d4d8cbd32e5e1bd23f53e01d6950072f6574d6`, `make verify` passed under receipt `J5I336QDAIYLVOP7RD7F4EIEL4`.
+- Scheduled exhaustive certification: `awaiting_nightly`; no exact scheduled result is claimed.
 
 The existing conversational workflow and its active QA evidence retain their
 own controller, tracker and invocation states. This set uses a separate Looper
@@ -298,8 +300,20 @@ available; the pinned linter module is cached, CI helpers are present and the
 build destination is writable. This short gate creates its own temporary
 fixtures and requires no live service or external forge fixture.
 
-The controller will run the gate on the clean pushed preparation commit.
-Preparation does not rerun it or dispatch the scheduled nightly. Existing
-retained QA and native invocations keep their owners and limits. Scheduled
-certification remains `awaiting_nightly`; the exact outcome is still required
-before cycle closure.
+The controller ran the gate on the clean pushed preparation commit and passed
+it under the exact receipt below. Preparation and closure do not rerun it or
+dispatch the scheduled nightly. Existing retained QA and native invocations
+keep their owners and limits. Scheduled certification remains
+`awaiting_nightly`; its exact outcome is still required before exhaustive
+certification can be marked complete.
+
+## Controller Closure
+
+`make verify` passed on immutable candidate
+`c8d4d8cbd32e5e1bd23f53e01d6950072f6574d6`, receipt
+`J5I336QDAIYLVOP7RD7F4EIEL4`. Strict lint, short Go tests, eight CI helper
+tests and the build passed. The evidence remains attached to that candidate.
+Only configured documentation closure paths differ afterward; no runtime or
+validation requirement changes. All five slice reports are delivered and the
+plan/tracker controller delivery is completed. Scheduled certification and the
+recorded client coverage limits remain explicit.
