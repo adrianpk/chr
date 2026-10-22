@@ -51,7 +51,7 @@ The plan owns exact branch names, PR titles, report paths and focused commands.
 | T4.2 | delivered | `04fddeb15cf6184f4c263a55bdb222fcd74a6b1e` | Notification sender and event snapshot integration |
 | T4.3 | delivered | `01d9be1341e5c207c1748a22ced4a5aac8eafe1d` | Both-path faults, legacy records and truthful outcomes |
 | T5.1 | implemented | `ec0ea0f4c959188cee4477bc45888406f739a3a1` | Complete producer and variant coverage |
-| T5.2 | in progress | pending | First desktop observation found document-selection defect; repair and real-client retry pending |
+| T5.2 | in progress | pending | Original document and native receipt verified; remaining caption/result repairs and mobile/desktop acceptance open |
 | T5.3 | in progress | pending | User documentation, cycle evidence and exact nightly |
 
 ## Message-Family Coverage
@@ -227,14 +227,17 @@ The maintainer authorized the bounded correction: document-read intent selects
 the original canonical artifact, while ordinary explanation requests retain
 their existing behavior. Regression evidence covers exact full bytes beyond
 the model excerpt, changed source/root rejection and frozen delivery after
-SQLite reopen. Mobile/desktop acceptance and the native journey remain open.
+SQLite reopen. The desktop retry verified all original specification bytes, and
+the real user-started journey completed with a canonical native receipt after
+operator-assisted recovery. Remaining mobile/desktop acceptance is still open.
 
 The full configured five-command sequence in the Slice 5 report passed on clean,
 pushed candidate `658f39ae34747bd85c6ff2b8b777306da87e0f73`, recorded by Looper
 receipt `5I4WQ32LVGGE7LXENUNTHC3G7T` and Acta validation event
 `01M5FXC5GBT86M8QP7WDEWV65B`. Its matching executable and exact-title canonical
 PR payload were staged. The desktop defect and its correction do not inherit
-that receipt. A real-client retry and the user-operated native receipt remain
-pending; no Slice 5 PR has been submitted.
+that receipt. The original-document retry and native receipt are now verified;
+later caption/result repairs require their own clean-candidate checks and client
+review. No Slice 5 PR has been submitted.
 The named proof covers that candidate only. Acceptance and PR-reference commits
 require fresh validation before `pr_ready`.

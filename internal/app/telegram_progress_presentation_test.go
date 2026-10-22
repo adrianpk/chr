@@ -20,7 +20,8 @@ func TestTelegramPresentationProgressStates(t *testing.T) {
 		{name: "validated", state: "waiting_review", want: "No confirmed integration receipt"},
 		{name: "completed without receipt", state: "completed", want: "No confirmed integration receipt"},
 		{name: "receipt without hash", state: "completed", receipt: "receipt/native", want: "No confirmed integration receipt"},
-		{name: "partial integration", state: "running", receipt: "receipt/native", hash: "native-hash", want: "Integration confirmed for 1 unit(s)", confirmed: 1, units: 1},
+		{name: "partial integration", state: "running", receipt: "receipt/native", hash: "native-hash", want: "Integration confirmed by retained native receipts", confirmed: 1, units: 1},
+		{name: "standalone ticket", state: "completed", receipt: "receipt/native", hash: "native-hash", want: "Integration confirmed by retained native receipts", confirmed: 1},
 		{name: "integration wait", state: "waiting_integration", want: "waiting for integration"},
 		{name: "admission", state: "pending", want: "execution has not started"},
 		{name: "capacity", state: "waiting_capacity", want: "waiting for execution capacity"},
@@ -40,6 +41,10 @@ func TestTelegramPresentationProgressStates(t *testing.T) {
 
 			if len(utf16.Encode([]rune(text))) > 1800 || !utf8.ValidString(text) || strings.Contains(text, status.CandidateHash) || strings.Contains(text, status.ApprovalHash) {
 				t.Fatal("unbounded or audit-heavy progress", text)
+			}
+
+			if strings.Contains(text, "integrated units: 0") || strings.Contains(text, "0 unit(s)") {
+				t.Fatal("ticket progress included an irrelevant zero-unit integration count", text)
 			}
 		})
 	}

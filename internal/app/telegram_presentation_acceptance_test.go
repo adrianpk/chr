@@ -72,7 +72,7 @@ func TestTelegramPresentationJourney(t *testing.T) {
 	checkTelegramPresentationJourneyDrain(t, f)
 
 	status := f.send(t, "/status "+run.ID, 0)
-	if !strings.Contains(status.Text, "Integration confirmed for ") || !strings.Contains(status.Text, "confirmed tickets: 1") || len(utf16.Encode([]rune(status.Text))) > 1800 {
+	if !strings.Contains(status.Text, "Integration confirmed by retained native receipts") || !strings.Contains(status.Text, "confirmed tickets: 1") || strings.Contains(status.Text, "0 unit(s)") || len(utf16.Encode([]rune(status.Text))) > 1800 {
 		t.Fatal("final status lost canonical truth or its bound", status)
 	}
 

@@ -15,13 +15,19 @@ func telegramPreparedWorkPreview(prepared PreparedAuthoringWork) string {
 
 	title, body := "the retained request", ""
 	if prepared.Mutation.Native != nil {
-		body = string(prepared.Mutation.Native.Record.Body)
-		title = telegramWorkflowRecordTitle(prepared.Mutation.Native.Record)
+		record := prepared.Mutation.Native.Record
+		body = string(record.Body)
+		title = telegramWorkflowRecordTitle(record)
+
+		var contract core.GeneratedWorkflowTask
+		if err := json.Unmarshal(record.Domain["execution_contract"], &contract); err == nil && contract.Body != "" {
+			body = contract.Body
+		}
 	}
 
 	excerpt := core.TelegramDocumentExcerpt([]byte(body))
 
-	return fmt.Sprintf("Prepare ticket %s in %s?\n\n%s\n\nOriginal request: %s\nConfirming authorizes this exact scope and creates the ticket in the backlog. Execution does not start.", title, scope.ProjectID, excerpt, core.TelegramDocumentExcerpt([]byte(scope.Instruction)))
+	return fmt.Sprintf("Prepare ticket: %s\n\n%s\n\nOriginal request: %s\nConfirming authorizes this exact scope and creates the ticket in the backlog. Execution does not start.", title, excerpt, core.TelegramDocumentExcerpt([]byte(scope.Instruction)))
 }
 
 func telegramPreparedWorkFacts(result AuthoringWorkResult) (json.RawMessage, error) {
@@ -31,7 +37,7 @@ func telegramPreparedWorkFacts(result AuthoringWorkResult) (json.RawMessage, err
 }
 
 func telegramPreparedWorkResultText(result AuthoringWorkResult) string {
-	return fmt.Sprintf("Ticket prepared in backlog: %s — %s.\n\nExecution has not started. Use /work ticket %s to review its exact start confirmation.\nCanonical record: %s", result.Result.Record.Identity, result.Result.Record.Title, result.Result.Record.Identity, result.Result.Record.Reference)
+	return fmt.Sprintf("Ticket prepared in backlog: %s — %s.\n\nExecution has not started. Use /work ticket %s to review its exact start confirmation.", result.Result.Record.Identity, result.Result.Record.Title, result.Result.Record.Identity)
 }
 
 func (r telegramReceiver) finishPreparedWork(ctx context.Context, request core.TelegramOperationRequest, result AuthoringWorkResult, config core.TelegramReceiverConfig) error {
@@ -59,9 +65,14 @@ func (r telegramReceiver) finishPreparedWork(ctx context.Context, request core.T
 
 func telegramWorkflowRecordTitle(record core.WorkflowRecord) string {
 	var title string
-	if err := json.Unmarshal(record.Metadata["title"], &title); err != nil || title == "" {
-		return "the retained request"
+	if err := json.Unmarshal(record.Metadata["title"], &title); err == nil && title != "" {
+		return title
 	}
 
-	return title
+	var contract core.GeneratedWorkflowTask
+	if err := json.Unmarshal(record.Domain["execution_contract"], &contract); err == nil && contract.Title != "" {
+		return contract.Title
+	}
+
+	return "the retained request"
 }

@@ -216,11 +216,33 @@ limits and the deadline were unchanged. Prior paused/cancelled invocations were
 verified byte-identical. Private client evidence retains the exact run, receipt,
 remote observations, content hashes and activation records.
 
+The next client repair removes nested ticket/source metadata from the short
+caption by reading the original description from the immutable execution
+contract, preserving the complete proposed ticket and operation in the attachment.
+Preparation uses the title in the retained execution contract when no metadata
+title exists, omits the internal project ID
+from its heading and removes the storage path from the prepared-ticket result.
+Progress confirms the retained receipt without announcing zero integrated units
+for standalone tickets; validated and confirmed ticket counts remain distinct.
+No prepared input, choice key, receipt or execution limit changes.
+
+The existing progress-state and actual HTTP/SQLite preparation tests first
+reproduced these defects. After correction,
+`go test ./internal/core ./internal/app -run '^Test(TelegramPresentation(DocumentExcerpt|ProgressStates)|TelegramAuthoringPreparedDecision)$' -count=1 -timeout=3m`
+passed in core/app in 0.005/0.767 seconds. Clean-candidate development and broader
+affected regressions remain the activation gate for this repair.
+
+The retained QA receiver also exhausted its polling transport retries after a
+network failure. A fresh connection doctor passed. One supported local polling
+retry cycle and explicit service activation restored ready health with no queued
+updates or deliveries. Prior stopped invocations and the completed real journey
+were verified byte-identical; no work or model allowance was reset.
+
 ## Risks and Follow-ups
 
 Remaining real mobile/desktop coverage is still open. The delivered standalone
-ticket notification also exposes misleading zero-unit integration wording;
-YAML frontmatter, opaque identifiers and long record paths remain tracked client
-findings. T5.2 cannot close from the recovered native journey alone. The existing
+ticket notification exposed misleading zero-unit integration wording; the
+caption/result repairs above still require activation and actual client review.
+T5.2 cannot close from the recovered native journey alone. The existing
 scheduled nightly must certify the exact integrated final candidate; keep
 `awaiting_nightly` until that evidence exists.

@@ -44,7 +44,10 @@ func telegramWorkProgressMessage(status WorkflowWorkStatus, projectName string) 
 		title += " in " + telegramWorkLabel(projectName)
 	}
 
-	content := fmt.Sprintf("Validated tasks: %d/%d; confirmed tickets: %d; integrated units: %d; remaining tickets: %d.", status.ValidatedTasks, status.Total, status.ConfirmedTickets, status.IntegratedUnits, status.Remaining)
+	content := fmt.Sprintf("Validated tasks: %d/%d; confirmed tickets: %d; remaining tickets: %d.", status.ValidatedTasks, status.Total, status.ConfirmedTickets, status.Remaining)
+	if status.IntegratedUnits > 0 {
+		content += fmt.Sprintf("\nIntegrated units: %d.", status.IntegratedUnits)
+	}
 	if status.Blocker != nil {
 		content += "\nBlocker: " + telegramControlExcerpt(status.Blocker.Reason)
 	}
@@ -55,7 +58,7 @@ func telegramWorkProgressMessage(status WorkflowWorkStatus, projectName string) 
 
 	secondary := "No confirmed integration receipt. Validation or an open pull request alone does not confirm integration."
 	if status.DeliveryRef != "" && status.DeliveryHash != "" {
-		secondary = fmt.Sprintf("Integration confirmed for %d unit(s) by retained native receipts.", status.IntegratedUnits)
+		secondary = "Integration confirmed by retained native receipts."
 	}
 
 	secondary += "\n" + telegramWorkNextAction(status)

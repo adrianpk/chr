@@ -25,7 +25,7 @@ func (r telegramReceiver) offerConfirmationDocument(ctx context.Context, request
 
 	if family == "25" {
 		message.ContentKind = "markdown"
-		message.Content = core.TelegramDocumentExcerpt([]byte(strings.TrimPrefix(complete, "## Complete proposed ticket\n\n")))
+		message.Content = core.TelegramDocumentExcerpt([]byte(message.Content))
 		message.InitialText += "\nCreates a backlog ticket; execution does not start."
 	}
 

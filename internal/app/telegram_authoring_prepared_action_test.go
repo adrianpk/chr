@@ -80,6 +80,14 @@ func TestTelegramAuthoringPreparedDecision(t *testing.T) {
 		t.Run(mode, func(t *testing.T) {
 			f, id, _ := telegramAuthoringPreparedFixture(t, "Develop bounded retries.")
 			action, prompt := telegramAuthoringPreparedOffer(t, f, id)
+			if !strings.Contains(prompt.Text, "Prepare ticket: Develop bounded retries.") {
+				t.Fatal("ticket preview omitted its human title", prompt.Text)
+			}
+			for _, audit := range []string{"source_request_id:", "title:", "created_at:", "in example-project?"} {
+				if strings.Contains(prompt.Text, audit) {
+					t.Fatal("ticket preview exposed source metadata or an opaque project identity", audit, prompt.Text)
+				}
+			}
 
 			_, records := telegramAuthoringPreparedStore(t, f)
 			if len(records) != 0 {
@@ -92,6 +100,12 @@ func TestTelegramAuthoringPreparedDecision(t *testing.T) {
 			}
 
 			original := telegramAuthoringPreparedCheck(t, f, id, true, 1)
+			if !strings.Contains(notice.Text, "Develop bounded retries.") {
+				t.Fatal("ticket result omitted its human title", notice.Text)
+			}
+			if strings.Contains(notice.Text, original.Result.Record.Reference) {
+				t.Fatal("ticket result exposed a canonical storage path", notice.Text)
+			}
 			telegramAuthoringPreparedReplay(t, f, id, action, original)
 		})
 	}
