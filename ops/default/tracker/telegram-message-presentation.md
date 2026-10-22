@@ -31,8 +31,9 @@ Active slice: Slice 5 of 5, Complete coverage and real client acceptance.
 ## Tasks
 
 Slices 1-4 are delivered through PRs #424, #425, #427 and #428. Slice 5 is active;
-T5.1 is implemented, T5.2 needs real client evidence and T5.3 has documentation
-prepared with final candidate/nightly evidence still open.
+T5.1 and T5.2 are implemented with recorded client coverage limits. T5.3 has
+documentation prepared; final integration and exact-candidate scheduled
+certification remain open.
 The plan owns exact branch names, PR titles, report paths and focused commands.
 
 | Task | State | Commit | Required outcome |
@@ -51,7 +52,7 @@ The plan owns exact branch names, PR titles, report paths and focused commands.
 | T4.2 | delivered | `04fddeb15cf6184f4c263a55bdb222fcd74a6b1e` | Notification sender and event snapshot integration |
 | T4.3 | delivered | `01d9be1341e5c207c1748a22ced4a5aac8eafe1d` | Both-path faults, legacy records and truthful outcomes |
 | T5.1 | implemented | `ec0ea0f4c959188cee4477bc45888406f739a3a1` | Complete producer and variant coverage |
-| T5.2 | in progress | `29fc714b0687` | Original document, native receipt and real natural-language terminal status verified; remaining mobile/desktop acceptance open |
+| T5.2 | implemented | `29fc714b0687` | Actual mobile response and downloaded original verified; native receipt and plain status confirmed; duplicate desktop document check removed by maintainer refinement |
 | T5.3 | in progress | pending | User documentation, cycle evidence and exact nightly |
 
 ## Message-Family Coverage
@@ -127,7 +128,7 @@ Real client observations remain a separate acceptance obligation.
 | TMP-09 | T2.4, T3.3, T4.3 | Slice 2 integrated; Slice 3 fail-closed scope/quota fixtures verified; Slice 4 shared quota/target/failure fixtures verified |
 | TMP-10 | T2.1, T2.4, T3.3, T4.2 | Receiver/action and physical pre-28 notification migrations verified; NULL/version-zero legacy payload semantics preserved; partial new mappings refused before IO |
 | TMP-11 | T5.1 | All 48 families reconciled; 90 exact roots selected by passing bounded normal commands; actual client observations remain separate |
-| TMP-12 | T5.2, T5.3 | pending |
+| TMP-12 | T5.2, T5.3 | Actual mobile document, byte-identical downloaded copy, operator-assisted native receipt and real plain status confirmed; unobserved client layouts/versions recorded; exact scheduled certification pending |
 
 ## Completion State
 
@@ -137,9 +138,9 @@ Real client observations remain a separate acceptance obligation.
 - Slice 2: delivered through [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425) at `a5c6a7e068a8e5ec547d13d73d39afe1f0477335`.
 - Slice 3: delivered through [PR #427](https://forge.adrianpk.com/adrianpk/chr/pulls/427) at `a4d0a865e8bb32a3caac65395a28839b573ed369`.
 - Slice 4: delivered through [PR #428](https://forge.adrianpk.com/adrianpk/chr/pulls/428) at `ae8d8d1b79ba6efddd75fdd287f235b6556babab`.
-- Slice 5: active; T5.1 committed with passing normal/race fixture checks; fixed QA activation, original attachment, native integration and plain status retry verified; remaining client observations and final certification remain open.
+- Slice 5: ready for review and exact-HEAD local validation; fixed QA activation, mobile original attachment, native integration and plain status retry verified; integration and scheduled certification remain open.
 - User-operated journey: confirmed with operator-assisted recovery; no fresh unattended execution is claimed.
-- Mobile/desktop: original attachment and terminal status observed on desktop; client/build identities, mobile opening and the remaining visual matrix are pending.
+- Client scope: actual mobile Telegram original document and byte-identical downloaded copy confirmed. Duplicate desktop inspection is not required by the 2026-10-22 maintainer refinement; separate layouts and client versions remain unobserved.
 - Exact final candidate and scheduled nightly: pending.
 
 The existing conversational workflow and its active QA evidence retain their
@@ -243,7 +244,7 @@ review. No Slice 5 PR has been submitted.
 The named proof covers that candidate only. Acceptance and PR-reference commits
 require fresh validation before `pr_ready`.
 
-## Current Acceptance Checkpoint
+## Readiness Checkpoint Before Mobile Retry
 
 On 2026-10-22, live inspection confirmed the receiver still runs clean source
 `29fc714b0687e149397ec4f6dea69fb638e5fcce`, with ready health, fresh polling and
@@ -256,3 +257,21 @@ now distinguishes confirmed original-document, native receipt and status proof
 from missing client/build identities and visual observations. T5.2 and T5.3
 remain open. Obtain the remaining genuine client evidence before PR submission;
 the existing scheduled nightly remains the final certification owner.
+
+## Mobile Document Acceptance
+
+The genuine 2026-10-22 request delivered spec.md with its original 937 bytes.
+The maintainer supplied the actual caption and identified mobile Telegram as
+the source. The downloaded copy was independently read and matched the source
+SHA-256 `4d9a7a241c23dd7fe346656652c9aee3e80c0004cbae338143c9618a892d6447`.
+The file's storage location did not establish a desktop download; that earlier
+classification is corrected. Acta correction `01M5J7YD51QVDHVTCFWPM6ZVCT`
+retains the evidence and the client-identity correction.
+
+The maintainer rejected a duplicate desktop inspection of this same document.
+The specification and plan record that refinement, while the cycle matrix keeps
+unobserved layouts and versions distinct from fixture and actual-client proof.
+T5.2 is implemented under that refined scope. Continue the existing Slice 5
+PR/validation/integration workflow without resetting the controller, QA
+invocations, work limits or frozen local checks. Keep awaiting_nightly until
+the final integrated candidate receives its scheduled result.

@@ -155,7 +155,7 @@ changes.
 | Task | Required outcome |
 | --- | --- |
 | T5.1 | Reconcile the actual producer inventory, all 48 matrix rows and rare/dynamic branches. Record explicit keep/omit outcomes, existing regression reuse and any additional family before closing coverage. |
-| T5.2 | With authorized QA activation, inspect real mobile and desktop messages and attachment opening. Complete one user-operated natural-language journey with a fixed candidate receiver, truthful execution states and a canonical integration receipt. |
+| T5.2 | With authorized QA activation, inspect actual Telegram responses and verify the complete original attachment. Retain the user-operated journey, exact receiver candidates, truthful execution states and canonical integration receipt. Record observed client coverage and its limits. |
 | T5.3 | Update the existing User Guide, transport reference, reader-facing changelog and cycle report. Record exact candidate, actual evidence, remaining limitations and scheduled nightly outcome before closure. |
 
 Acceptance: TMP-11, TMP-12 and final audit of TMP-01 through TMP-10.
@@ -165,6 +165,15 @@ Focused selector: ^TestTelegramPresentation(Coverage|Journey)
 Actual client evidence is additional to fixture results. Do not invent inbound
 messages, screenshots or approvals to fill the matrix. Existing live QA and
 active native invocations remain owned by their current workflow.
+
+Maintainer refinement, 2026-10-22: accept the actual mobile Telegram response
+and the independently verified 937-byte original specification. Repeating that
+document check in the same account on desktop is not a closure prerequisite.
+Keep desktop layout and unspecified client versions recorded as unobserved;
+do not turn artifact equality into a claim of identical client rendering.
+The retained journey remains explicitly operator-assisted, and fault variants
+retain their existing HTTP/SQLite evidence. Preserve the existing invocation,
+receipt, publication count and execution limits during closure.
 
 ## 5. Validation and Delivery Gate
 
@@ -197,8 +206,10 @@ candidate is green.
 
 Every family row needs its real disposition, source owner and regression
 reference. Every acceptance criterion needs concrete evidence. Renderer tests
-cannot stand in for mobile/desktop inspection, and worker exit or a send receipt
-cannot stand in for integration.
+cannot stand in for actual Telegram interaction, and worker exit or a send
+receipt cannot stand in for integration. Apply the recorded maintainer
+refinement to the original-document check while retaining unobserved client
+layout limits.
 
 Each slice produces its own report after implementation. The final cycle report
 is ops/default/report/telegram-message-presentation-cycle.md. It is not

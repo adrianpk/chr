@@ -1,7 +1,7 @@
 # Telegram Message Presentation Delivery Report
 
 Status: implementing
-Client acceptance: awaiting_user_acceptance
+Client acceptance: accepted with recorded coverage limits
 Scheduled certification: awaiting_nightly
 Plan: [Approved delivery](../plan/telegram-message-presentation.md)
 Tracker: [Family and acceptance evidence](../tracker/telegram-message-presentation.md)
@@ -55,11 +55,11 @@ certification.
 | Requirement | Actual evidence | State |
 | --- | --- | --- |
 | Fixed candidate receiver/source and executable hash | Running executable reports clean source `29fc714b0687e149397ec4f6dea69fb638e5fcce`; SHA-256 `3cc62f6f09f29f0eee70bb59f368251a668081b456cd7e4af3eef99fbfdeb7fe`. Local status on 2026-10-22 reports ready, fresh polling and zero pending updates/deliveries | verified |
-| Mobile client/build and readable spacing, literal text, emoji and long names | No observations supplied | pending |
-| Desktop client/build and readable spacing, literal text, emoji and long names | Original attachment and a later natural-language status response were observed; client/build identity and the remaining visual cases are not recorded | partial |
-| Complete document opening and content match on both clients | Actual desktop retry delivered all 937 original specification bytes, including metadata and provenance; mobile opening remains unobserved | partial |
-| Clear scope/effect labels and exact confirmation | Local HTTP/native fixtures exist; no client observation supplied | pending |
-| Multiple conversations, fallback, errors and partial/final results | Real failures, recovery and terminal results are retained in the slice report; remaining visual, multiple-conversation and fallback cases are not client-certified | partial |
+| Observed Telegram client and response | Maintainer identifies mobile Telegram as the source and supplied the actual original-document caption/excerpt; application/build was not supplied. Long/dynamic variants retain their named fixture evidence | observed; build unknown |
+| Separate desktop document inspection | Maintainer rejected duplicating the same account's original-document check on another client on 2026-10-22. Separate desktop layout and reader behavior were not inspected | not a closure prerequisite |
+| Complete original document and content match | New real request delivered spec.md at 2026-10-22T16:29:57Z. The maintainer's downloaded copy contains all 937 bytes and SHA-256 4d9a7a241c23dd7fe346656652c9aee3e80c0004cbae338143c9618a892d6447, identical to the canonical source | verified |
+| Clear scope/effect labels and exact confirmation | Existing composed HTTP/SQLite/native fixtures prove full scope, sealed keyboard, original choices, replay and fail-closed guards. These are fixture results, not additional visual observations | fixture verified |
+| Multiple conversations, fallback, errors and partial/final results | Real target clarification, document retry and terminal status were observed. Existing HTTP/SQLite fixtures retain fallback, upload failure and stale-target evidence; their client layouts were not separately inspected | observed and fixture verified |
 | User-operated natural-language journey and canonical integration receipt | Genuine user-started work completed with one validated task, one confirmed ticket, zero remaining tickets and a verified native receipt; canonical QA PR #142 integrated the requested README paragraph | verified, operator-assisted |
 | Natural-language status on the current fixed receiver | Actual user retry identified the completed invocation and reported the confirmed integration without requesting another action | verified |
 
@@ -76,11 +76,12 @@ slice report. No restart, new inbound message, work continuation or publication
 was needed for this readiness inspection. Existing stopped and completed
 invocations retain their original owners and limits.
 
-For each remaining client check, record the application/build, tested receiver
-revision, observed message or attachment and actual result. Inspect the same
-newly requested original specification on desktop and mobile before progressing
-to confirmation labels, multiple conversations and failure/fallback cases. Keep
-the existing completed work as evidence; do not rerun it to fill a visual row.
+The 2026-10-22 [maintainer refinement](../spec/stable/telegram-message-presentation.md#5-coverage-and-acceptance)
+accepts the actual mobile response and byte-verified original document without
+a duplicate desktop check. The stored copy's location does not identify its
+Telegram client. Client versions, separate desktop rendering and mobile reader
+layout remain unrecorded limitations; no cross-client layout equivalence is
+claimed. Keep the existing completed work and its operator-assisted provenance.
 
 ## Scheduled Certification
 
@@ -94,10 +95,9 @@ or an older nightly cannot close it.
 
 ## Remaining Acceptance
 
-Complete T5.2 with the missing mobile/desktop build identities and visual
-observations, including attachment opening and the remaining interaction cases.
-The fixed candidate activation, original-document retry, operator-assisted
-native integration and real plain status retry are already evidenced. Finish
-client acceptance before submitting the Slice 5 PR, then record the final
-integrated candidate and scheduled outcome before closing the specification,
-tracker or this cycle.
+T5.2 has the actual mobile original-document result, independently verified
+downloaded bytes, retained native integration and plain status retry. Its
+coverage limits are explicit above. Submit and integrate Slice 5 through the
+existing controller with exact-HEAD local validation, then record the final
+integrated candidate. Scheduled exhaustive certification remains awaiting_nightly
+until that exact candidate is green; client acceptance does not replace it.

@@ -1,6 +1,6 @@
 # Slice 5: Complete Coverage and Real Client Acceptance
 
-Status: drafting
+Status: reviewing
 Delivery set: Telegram Message Presentation
 Plan: [ops/default/plan/telegram-message-presentation.md](../../../plan/telegram-message-presentation.md)
 Tracker: [ops/default/tracker/telegram-message-presentation.md](../../../tracker/telegram-message-presentation.md)
@@ -30,7 +30,8 @@ T5.1 is implemented:
   reopens SQLite and reaches a canonical native receipt on a real temporary Git
   target. Replaying confirmation creates no additional publication.
 
-T5.2 is in progress. The first real desktop request to show a specification
+T5.2 is implemented with the client coverage limits recorded below. The first
+real desktop request to show a specification
 delivered an explanation export rather than the original file. The authorized
 repair distinguishes document-read intent from explanation, reads the selected
 canonical dump/spec/plan without generation, and freezes its full original
@@ -38,7 +39,8 @@ bytes for delivery. Missing documents and changed sources remain failures.
 The desktop retry subsequently delivered all 937 bytes of the original
 specification. The real user-started native journey subsequently completed with
 a verified delivery receipt and the ticket marked done. Its operator-assisted
-recovery and remaining mobile/desktop coverage are recorded below.
+recovery, mobile document proof and remaining client coverage limits are
+recorded below.
 T5.3 product guidance is prepared: the existing User Guide, Telegram transport
 and notification references describe the actual help groups, attachment bounds,
 complete confirmation scope, retry behavior and native evidence. Unreleased
@@ -307,6 +309,35 @@ action. This verifies plain status targeting and the terminal ticket counters
 on the active QA candidate; it does not close the remaining client matrix or
 establish a fresh unattended work execution.
 
+## Client Acceptance Refinement
+
+On 2026-10-22 the real natural-language request first arrived without a reply
+binding and correctly asked which conversation owned the specification. A
+genuine follow-up identified the README change and delivered the original
+spec.md with a bounded direct excerpt. The maintainer supplied the actual
+response and identified mobile Telegram as its source.
+
+The retained delivered payload and the maintainer's downloaded copy both contain
+all 937 original bytes and SHA-256
+`4d9a7a241c23dd7fe346656652c9aee3e80c0004cbae338143c9618a892d6447`.
+Independent file inspection confirmed exact source equality, including front
+matter and provenance. The initial classification as a desktop download was
+incorrect: where the file was stored did not identify the Telegram client.
+Acta correction `01M5J7YD51QVDHVTCFWPM6ZVCT` records the mobile origin.
+
+The maintainer rejected duplicating that same account's document check on
+desktop. The specification, plan and cycle matrix now record the refined
+acceptance scope. Original-document delivery is accepted; client/build versions,
+separate desktop rendering and mobile reader layout remain unobserved limits.
+Neither the mobile result nor fixture passes certify those unobserved layouts.
+The prior native journey remains operator-assisted, with its original worker,
+receipt, single publication and execution limits unchanged.
+
+Looper receipt `UR5P2V7ZBTEZUVWSD6TVHNJ6NY` passed all five frozen commands on
+clean pushed candidate `0ea4463a02c0cfa144bee0d26ecc5e5106713538`. This acceptance
+record changes documentation only and requires fresh exact-HEAD validation
+before the existing controller integrates the Slice 5 PR.
+
 ## Risks and Follow-ups
 
 Readiness was rechecked on 2026-10-22 without changing the receiver. The running
@@ -317,18 +348,11 @@ deliveries. Later commits through `13a908914ed69f82e9ea29d6ad79373af061f988`
 change only acceptance records. Canonical remote inspection confirms that the
 branch remains separate from `dev` and that no Slice 5 PR is open.
 
-The [cycle matrix](../../telegram-message-presentation-cycle.md) now records
-the already observed original document, operator-assisted native journey and
-plain status retry instead of treating every client/journey row as untested.
-It also identifies the missing desktop/mobile build identities, mobile document
-opening and remaining visual cases. These are the acceptance prerequisite for
-PR submission; fixture passes cannot fill those rows. Current clean-HEAD local
-validation is retained separately in the existing Looper evidence owner.
-
-Remaining real mobile/desktop coverage is still open. The delivered standalone
-ticket notification exposed misleading zero-unit integration wording; the
-caption/result repairs above are active in QA. The real status retry verified
-terminal ticket counters; remaining caption and client coverage is still open.
-T5.2 cannot close from the recovered native journey alone. The existing
-scheduled nightly must certify the exact integrated final candidate; keep
-`awaiting_nightly` until that evidence exists.
+The [cycle matrix](../../telegram-message-presentation-cycle.md) distinguishes
+the observed mobile document, operator-assisted native journey and plain status
+retry from unobserved client layouts and versions. The standalone-ticket
+caption/result repairs remain active in QA and the real status retry verified
+terminal ticket counters. These observations establish the recorded acceptance
+scope, not a fresh unattended run or complete cross-client UI certification.
+The existing scheduled nightly must still certify the exact integrated final
+candidate; keep `awaiting_nightly` until that evidence exists.

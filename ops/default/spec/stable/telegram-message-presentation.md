@@ -164,12 +164,20 @@ closing coverage.
 | TMP-09 | Missing/oversized documents, full storage and failed delivery are explicit; required-document confirmations fail closed. |
 | TMP-10 | Existing queued messages and notification records survive additive migration with their original meaning. |
 | TMP-11 | All 48 families and their applicable rare/dynamic branches have recorded outcomes and meaningful regression evidence. |
-| TMP-12 | Real mobile/desktop inspection and a complete user-operated journey confirm readability and truthful delivery states. |
+| TMP-12 | Real Telegram interaction, a complete original attachment and a user-operated journey confirm readable document delivery and truthful execution states. |
 
-Visual acceptance includes opening attachments, paragraph spacing, literal
-Markdown, long names, emoji, keyboard labels, multiple conversations, fallback,
-errors and partial/final results. Record client/build identities and real
-observations. HTTP fixtures do not prove client layout.
+Acceptance combines actual client observations with the existing fixture
+coverage of paragraph spacing, literal Markdown, long names, emoji, keyboard
+labels, multiple conversations, fallback, errors and partial/final results.
+Record which outcomes were observed and which were established by fixtures;
+HTTP fixtures do not prove client layout. Record client/build identity when
+available and retain unknown values explicitly.
+
+Maintainer refinement, 2026-10-22: the verified complete document received
+through mobile Telegram satisfies the original-attachment check. Do not require
+another download or inspection of the same account's document on desktop to
+repeat that check. Separate desktop layout and reader behavior are unobserved
+limitations, not successful client certification.
 
 This specification improves the presentation of existing operations. Workflow
 gaps that require a new domain transition or automatic artifact orchestration
@@ -180,8 +188,10 @@ must be identified separately rather than hidden by reassuring copy.
 The maintainer accepted flexible composition, short document views, complete
 attachments, the numeric bounds and the model/plan on 2026-10-21. Implementation
 and canonical slice PR integration into dev are delegated to Looper for this
-delivery set. Actual mobile/desktop observations and the user-operated journey
-remain acceptance requirements; they cannot be replaced with fixture evidence.
+delivery set. Actual Telegram interaction, complete-document evidence and the
+user-operated journey remain acceptance requirements; fixture evidence cannot
+replace them. The 2026-10-22 refinement above removes duplicate desktop
+document inspection from the closure prerequisites.
 
 ## References
 
