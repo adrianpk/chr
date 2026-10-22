@@ -109,10 +109,7 @@ func NewHandler(opts HandlerOptions) (http.Handler, error) {
 		mux.HandleFunc("/"+family+"/detail/fragment", handler.artifactDetailFragment(family))
 	}
 
-	mux.HandleFunc("/actions", handler.writeAction)
-	mux.HandleFunc("/workflows", handler.workflows)
-	mux.HandleFunc("/workflows/fragment", handler.workflows)
-	mux.HandleFunc("/workflows/actions", handler.workflowAction)
+	handler.registerGuidedWorkflowRoutes(mux)
 	mux.HandleFunc("/bootstrap", handler.projectFragment)
 	mux.HandleFunc("/healthz", healthz)
 	mux.HandleFunc("/logout", handler.logout)
@@ -858,4 +855,13 @@ func navLinkActive(active, href string) bool {
 	default:
 		return false
 	}
+}
+
+func (h handler) registerGuidedWorkflowRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("/guided", h.guidedUseCase)
+	mux.HandleFunc("/guided/actions", h.guidedUseCaseAction)
+	mux.HandleFunc("/actions", h.writeAction)
+	mux.HandleFunc("/workflows", h.workflows)
+	mux.HandleFunc("/workflows/fragment", h.workflows)
+	mux.HandleFunc("/workflows/actions", h.workflowAction)
 }

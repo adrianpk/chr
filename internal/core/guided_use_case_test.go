@@ -173,21 +173,26 @@ func TestGuidedUseCaseCaptureRecovery(t *testing.T) {
 		t.Run(fmt.Sprintf("replace-%d", phase), func(t *testing.T) {
 			root, session := guidedCaptureFixture(t)
 			command := GuidedUseCaseCommand{GuidedUseCaseScope: GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, OperationID: "append", ExpectedRevision: session.Revision, Action: "append", Content: "Retained requirement."}
+
 			operation, err := guidedOperation(command)
 			if err != nil {
 				t.Fatal(err)
 			}
+
 			interrupted := errors.New("lost owner acknowledgement")
 			r := &fileAuthoringSessionRepository{projectDir: root, afterMutationReplace: func(index int) error {
 				if index == phase {
 					return interrupted
 				}
+
 				return nil
 			}}
+
 			err = WithAuthoringMutation(t.Context(), root, func(ctx context.Context) error { return r.applyGuidedInput(ctx, &session, command, operation) })
 			if !errors.Is(err, interrupted) {
 				t.Fatalf("fault not reached: %v", err)
 			}
+
 			recovered, err := MutateGuidedUseCase(t.Context(), root, command)
 			if err != nil || recovered.Guided.Capture != "Retained requirement.\n\n" {
 				t.Fatalf("recovery duplicated or lost input: %v", err)

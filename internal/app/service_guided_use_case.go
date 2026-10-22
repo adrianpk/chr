@@ -1,0 +1,124 @@
+package app
+
+import (
+	"context"
+	"fmt"
+
+	"forge.adrianpk.com/chr/internal/core"
+)
+
+// GuidedUseCaseInspection contains retained state and prospective local readiness.
+type GuidedUseCaseInspection struct {
+	Namespace     string
+	Session       *core.AuthoringSession
+	Runs          []core.AuthoringSession
+	Policy        []string
+	Problems      []string
+	CommittedDump string
+}
+
+func (s service) guidedUseCaseScope(id, namespace string) (core.GuidedUseCaseScope, error) {
+	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: namespace})
+	if err != nil {
+		return core.GuidedUseCaseScope{}, err
+	}
+
+	return core.GuidedUseCaseScope{RunID: id, ProjectID: s.projectContext.ProjectID, Namespace: layout.Namespace()}, nil
+}
+
+// StartGuidedUseCase retains explicit progression intent in the selected scope.
+func (s service) StartGuidedUseCase(ctx context.Context, id, namespace, actor string) (core.AuthoringSession, error) {
+	scope, err := s.guidedUseCaseScope(id, namespace)
+	if err != nil {
+		return core.AuthoringSession{}, err
+	}
+
+	return core.StartGuidedUseCase(ctx, s.projectContext.ProjectDir, core.GuidedUseCaseStart{GuidedUseCaseScope: scope, Actor: actor, ProgressionIntent: true})
+}
+
+// ChangeGuidedUseCase delegates capture commands to their canonical owner.
+func (s service) ChangeGuidedUseCase(ctx context.Context, command core.GuidedUseCaseCommand) (core.AuthoringSession, error) {
+	scope, err := s.guidedUseCaseScope(command.RunID, command.Namespace)
+	if err != nil {
+		return core.AuthoringSession{}, err
+	}
+
+	command.GuidedUseCaseScope = scope
+	if command.Action == "finish" {
+		return core.FinishGuidedUseCaseDump(ctx, s.projectContext.ProjectDir, command)
+	}
+
+	return core.MutateGuidedUseCase(ctx, s.projectContext.ProjectDir, command)
+}
+
+// InspectGuidedUseCase reads state, immutable input and local setup without dispatch.
+func (s service) InspectGuidedUseCase(ctx context.Context, id, namespace string) (GuidedUseCaseInspection, error) {
+	scope, err := s.guidedUseCaseScope(id, namespace)
+	if err != nil {
+		return GuidedUseCaseInspection{}, err
+	}
+
+	result := GuidedUseCaseInspection{Namespace: scope.Namespace}
+	s.inspectGuidedReadiness(ctx, &result)
+
+	if id == "" {
+		result.Runs, err = core.ListGuidedUseCases(ctx, s.projectContext.ProjectDir, scope.ProjectID, scope.Namespace)
+
+		return result, err
+	}
+
+	session, err := core.ReadGuidedUseCase(ctx, s.projectContext.ProjectDir, scope)
+	if err != nil {
+		return result, err
+	}
+
+	result.Session = &session
+	if len(session.Guided.Checkpoints) > 0 {
+		checkpoint := session.Guided.Checkpoints[0]
+
+		content, err := core.ReadGuidedCommittedArtifact(ctx, s.projectContext.ProjectDir, checkpoint, checkpoint.Artifacts[0].Path)
+		if err != nil {
+			return result, err
+		}
+
+		result.CommittedDump = string(content)
+	}
+
+	return result, nil
+}
+
+func (s service) inspectGuidedReadiness(ctx context.Context, result *GuidedUseCaseInspection) {
+	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	if err != nil {
+		result.Problems = append(result.Problems, err.Error())
+
+		return
+	}
+
+	result.Policy = []string{
+		"Execution target: " + config.Work.BranchPolicy.IntegrationBranch,
+		"Review policy: " + string(config.Review.Mode),
+		"Publication policy: " + config.Work.Integration.PublicationProfile,
+		fmt.Sprintf("Limits: %d worker attempts, %d integration attempts, %d seconds per worker", config.Work.MaxWorkerAttempts, config.Work.MaxIntegrationAttempts, config.Work.WorkerTimeoutSeconds),
+	}
+	if config.Workflow.Version != 1 {
+		result.Problems = append(result.Problems, "Native workflow execution is not configured.")
+	}
+
+	if err := core.CheckGuidedCheckpointReadiness(ctx, s.projectContext.ProjectDir); err != nil {
+		result.Problems = append(result.Problems, err.Error())
+	}
+
+	for _, role := range []core.HarnessRole{core.HarnessGeneration, core.HarnessWorker} {
+		selection, err := s.ResolveHarnessSelection(ctx, role, string(core.QuizModelActionNextQuestion))
+		if err != nil {
+			result.Problems = append(result.Problems, string(role)+" setup: "+err.Error())
+
+			continue
+		}
+
+		if !selection.Readiness.Ready() {
+			result.Problems = append(result.Problems, string(role)+" setup is incomplete.")
+		}
+	}
+}

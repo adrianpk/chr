@@ -1,0 +1,90 @@
+package webui
+
+import (
+	"context"
+	"net/http"
+)
+
+// GuidedUseCaseProvider projects a retained journey through shared commands.
+type GuidedUseCaseProvider interface {
+	GuidedUseCaseView(context.Context, string, string) (GuidedUseCaseView, error)
+}
+
+// GuidedUseCaseLink names a resumable journey without exposing its internal identity.
+type GuidedUseCaseLink struct{ Name, URL string }
+
+// GuidedUseCaseView presents current capture, setup and an inspectable committed input.
+type GuidedUseCaseView struct {
+	RunID, Namespace, Name, Revision, RequestID   string
+	Stage, Status, Capture, Commit, CommittedDump string
+	PendingAction, PendingContent                 string
+	Policy, Problems                              []string
+	Runs                                          []GuidedUseCaseLink
+}
+
+func (h handler) guidedUseCase(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	query := r.URL.Query()
+	for key, values := range query {
+		if len(values) != 1 || len(values[0]) > 128 {
+			http.Error(w, "invalid guided parameter: "+key, http.StatusBadRequest)
+
+			return
+		}
+	}
+
+	provider, ok := h.provider.(GuidedUseCaseProvider)
+	if !ok {
+		http.Error(w, "guided use cases unavailable", http.StatusServiceUnavailable)
+
+		return
+	}
+
+	view, err := provider.GuidedUseCaseView(r.Context(), query.Get("id"), query.Get("namespace"))
+	if err != nil {
+		http.Error(w, "load guided use case: "+err.Error(), http.StatusBadRequest)
+
+		return
+	}
+
+	data := PageData{Shell: h.shellData("guided"), View: "guided", Title: "Guided use cases", Guided: view}
+	if err := h.renderer.Page(w, "shell.html", data); err != nil {
+		http.Error(w, "render guided use case", http.StatusInternalServerError)
+	}
+}
+
+func (h handler) guidedUseCaseAction(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	r.Body = http.MaxBytesReader(w, r.Body, 72<<10)
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "guided form bounds exceeded", http.StatusBadRequest)
+
+		return
+	}
+
+	for _, values := range r.PostForm {
+		if len(values) != 1 {
+			http.Error(w, "duplicate guided parameter", http.StatusBadRequest)
+
+			return
+		}
+	}
+
+	if r.PostFormValue("surface") != "guided" || (r.PostFormValue("action") != "guided.start" && r.PostFormValue("action") != "guided.input") {
+		http.Error(w, "unsupported guided action", http.StatusBadRequest)
+
+		return
+	}
+
+	h.writeAction(w, r)
+}

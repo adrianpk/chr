@@ -87,6 +87,8 @@
             {{template "catalog_content.html" .}}
           {{else if eq .View "artifact_detail"}}
             {{template "artifact_detail_content.html" .}}
+          {{else if eq .View "guided"}}
+            {{template "guided_use_case_content.html" .}}
           {{else if eq .View "workflows"}}
             {{template "workflow_content.html" .}}
           {{else if eq .View "harnesses"}}

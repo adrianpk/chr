@@ -37,6 +37,7 @@ func (p webViewProvider) WriteAction(ctx context.Context, request webui.WriteAct
 	}
 
 	operations := p.service(ctx)
+
 	if response, handled, err := p.writeDocumentAction(operations, request); handled || err != nil {
 		return response, err
 	}
@@ -99,6 +100,14 @@ func (p webViewProvider) writeDocumentAction(operations service, request webui.W
 
 func (p webViewProvider) writeGenerationAction(ctx context.Context, operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error) {
 	switch request.Action {
+	case "guided.start", "guided.input":
+		if request.Surface != "guided" {
+			return webBlockedWrite("Use the guided form."), true, nil
+		}
+
+		response, err := p.writeGuidedUseCase(operations, request)
+
+		return response, true, err
 	case webActionSpecGenerate:
 		response, err := p.writeSpecGenerate(ctx, operations, request)
 

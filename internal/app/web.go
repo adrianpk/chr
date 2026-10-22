@@ -360,6 +360,7 @@ func newWebServeMux(config resolvedWebServeConfig) (http.Handler, error) {
 			RequireToken:   string(config.Web.RequireToken),
 			RefreshSeconds: config.Web.RefreshIntervalSeconds,
 			Navigation: []ui.NavLink{
+				{Label: "Guided use cases", Href: "/guided"},
 				{Label: "Cases", Href: "/cases"},
 				{Label: "Dumps", Href: "/dumps"},
 				{Label: "Quizzes", Href: "/quizzes"},

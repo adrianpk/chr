@@ -19,6 +19,7 @@ type staticDataProvider struct {
 
 // PageData contains one rendered page and the shared shell state.
 type PageData struct {
+	Guided     GuidedUseCaseView
 	Shell      ShellData
 	View       string
 	Title      string
