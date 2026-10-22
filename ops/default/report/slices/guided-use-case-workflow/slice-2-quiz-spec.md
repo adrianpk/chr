@@ -1,11 +1,12 @@
 # Slice 2: Guided Quiz and Approved Specification
 
-Status: reviewing
+Status: delivered
 Delivery set: guided-use-case-workflow
 Plan: `ops/default/plan/guided-use-case-workflow.md`
 Tracker: `ops/default/tracker/guided-use-case-workflow.md`
 Branch: `feat/slice-2-guided-quiz-spec`
 PR: `#431`
+Integrated commit: `2246651001dd6002f783fd86d0dcc13f5bef02e6`
 
 ## Purpose
 
@@ -91,8 +92,13 @@ adapter; it now uses the same deterministic provider boundary and passes.
 
 The [canonical PR](https://forge.adrianpk.com/adrianpk/chr/pulls/431) lists the successful required commands for its final clean
 HEAD; Looper retains the exact candidate and ordered validation evidence.
-The repository development gate and configured quiz/specification normal and
-race selections are required before handoff. Browser interaction belongs to
+The controller verified all required checks on the exact integrated commit
+`2246651001dd6002f783fd86d0dcc13f5bef02e6`:
+
+- `make verify` — passed.
+- `go test ./internal/core ./internal/app ./internal/webui -run '^TestGuidedUseCase(Quiz|Spec)' -count=1 -timeout=3m` — passed.
+- `go test -race ./internal/core ./internal/app ./internal/webui -run '^TestGuidedUseCase(Quiz|Spec)' -count=1 -timeout=3m` — passed.
+- `git diff --check` — passed. Browser interaction belongs to
 the later Web acceptance checkpoint and is not established by these HTTP tests.
 
 ## Risks and Follow-ups
