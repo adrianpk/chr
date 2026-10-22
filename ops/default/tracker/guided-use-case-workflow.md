@@ -6,8 +6,8 @@ Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 2, Guided quiz and approved specification; T2.1 is pending.
-Progress: 1 of 6 slices delivered; 3 of 18 tasks completed. Slice 2 is active.
+Active slice: Slice 2, Guided quiz and approved specification; implementation complete, preparing canonical PR.
+Progress: 1 of 6 slices delivered; 6 of 18 tasks completed. Slice 2 is reviewing before integration.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
 Spec: [Approved workflow](../spec/stable/guided-use-case-workflow.md)
@@ -35,9 +35,9 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | T1.1 | Retained guided run, scope/intent, revisions and compatible authoring-store extension. | done | `d142d186c0c3775df57841b32e27021594576ffa` | Focused capture/checkpoint regressions passed; see Slice 1 report and canonical PR for exact-HEAD controller evidence. |
 | T1.2 | Scoped Git checkpoints, immutable input reads, commit retention and lost-ack recovery. | done | `e9ef91a70a2c13b247edeba1748eee0906974b1e` | Focused capture/checkpoint regressions passed; see Slice 1 report and canonical PR for exact-HEAD controller evidence. |
 | T1.3 | Web start/name/dump capture, explicit completion, readiness and resume. | done | `ad6db48d366beb9a7a4d04ea252a47175e6ff68b` | Focused capture/checkpoint regressions passed; see Slice 1 report and canonical PR for exact-HEAD controller evidence. |
-| T2.1 | Committed-input quiz generation, bound answers, sufficient completion and sealing. | pending | pending | pending |
-| T2.2 | Exact generated-specification approval, provenance, checkpoint and recovery. | pending | pending | pending |
-| T2.3 | Web clarification/specification progression and complete artifact inspection. | pending | pending | pending |
+| T2.1 | Committed-input quiz generation, bound answers, sufficient completion and sealing. | done | `a255f0be01f0a55916f95b965613eccc38e04131` | Focused quiz regressions and race checks passed; committed inputs, duplicate/stale replies, sufficiency and owner recovery. |
+| T2.2 | Exact generated-specification approval, provenance, checkpoint and recovery. | done | `5d67648370079e7a373d0def7664015259d94905` | Focused specification regressions passed; exact approval, lost draft/approval acknowledgements, retained seal and manual mutation compatibility. |
+| T2.3 | Web clarification/specification progression and complete artifact inspection. | done | `5ca7c06550c4e44ec6a2fd3ae10ab93309e9a18b` | Focused capture/quiz/specification HTTP and view regressions passed, including race mode and committed-original inspection. |
 | T3.1 | Committed-source planning, native materialization, contracts/tracker and work checkpoint. | pending | pending | pending |
 | T3.2 | Exact policy-bound native preview/admission and automatic start with retained limits. | pending | pending | pending |
 | T3.3 | Web preparation/execution state and real prerequisite/manual-operation regressions. | pending | pending | pending |
@@ -56,7 +56,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | Slice | State | PR | Integrated commit | Report evidence |
 | --- | --- | --- | --- | --- |
 | 1 | delivered | #430 | `245cb6f306aabb5e7e9877491aa2ea26174299e6` | [Slice 1 report](../report/slices/guided-use-case-workflow/slice-1-capture-checkpoints.md) |
-| 2 | pending | pending | pending | pending |
+| 2 | reviewing | pending | pending | [Slice 2 report](../report/slices/guided-use-case-workflow/slice-2-quiz-spec.md) |
 | 3 | pending | pending | pending | pending |
 | 4 | pending | pending | pending | pending |
 | 5 | pending | pending | pending | pending |
@@ -68,19 +68,19 @@ Criterion numbers correspond to the approved specification. The plan defines the
 
 | Criterion | Owning tasks | State and evidence |
 | --- | --- | --- |
-| GUC-01 | T1.3, T2.1, T2.3, T5.1, T6.1 | partial: Slice 1 capture/checkpoint regressions passed; remaining owning tasks are pending. |
-| GUC-02 | T2.2, T3.1, T3.2 | pending |
-| GUC-03 | T2.2 | pending |
+| GUC-01 | T1.3, T2.1, T2.3, T5.1, T6.1 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
+| GUC-02 | T2.2, T3.1, T3.2 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
+| GUC-03 | T2.2 | implemented: exact generated revision/hash approval with initiating actor, run and policy; focused mutation and recovery regressions passed. |
 | GUC-04 | T3.1, T3.2 | pending |
-| GUC-05 | T1.1, T2.2, T3.3 | partial: Slice 1 capture/checkpoint regressions passed; remaining owning tasks are pending. |
+| GUC-05 | T1.1, T2.2, T3.3 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
 | GUC-06 | T1.1, T4.1, T5.1, T6.2, T6.3 | partial: Slice 1 capture/checkpoint regressions passed; remaining owning tasks are pending. |
-| GUC-07 | T2.3, T4.2, T5.2, T6.2 | pending |
-| GUC-08 | T1.3, T2.1 | partial: Slice 1 capture/checkpoint regressions passed; remaining owning tasks are pending. |
-| GUC-09 | T2.2, T3.1, T4.1 | pending |
+| GUC-07 | T2.3, T4.2, T5.2, T6.2 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
+| GUC-08 | T1.3, T2.1 | implemented: nonempty capture and valid, sufficient clarification are required; focused invalid/empty/budget/foreign completion regressions passed. |
+| GUC-09 | T2.2, T3.1, T4.1 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
 | GUC-10 | T3.2, T4.1, T4.3 | pending |
 | GUC-11 | T4.1, T5.3, T6.2 | pending |
 | GUC-12 | T3.3, T4.1, T6.2 | pending |
-| GUC-13 | T1.2, T2.3, T3.1, T4.3 | partial: Slice 1 capture/checkpoint regressions passed; remaining owning tasks are pending. |
+| GUC-13 | T1.2, T2.3, T3.1, T4.3 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
 | GUC-14 | T4.2, T4.3, T5.2, T6.2, T6.3 | pending |
 | GUC-15 | T4.2, T5.2, T6.2 | pending |
 | GUC-16 | T1.2, T3.1, T4.3 | partial: Slice 1 capture/checkpoint regressions passed; remaining owning tasks are pending. |
@@ -106,6 +106,7 @@ Delivery-set gate: `make verify`, bounded normal guided-workflow regressions, fo
 | --- | --- | --- |
 | Initial Slice 1 gate | `c12f62a9a1ba0f6879b2a295e0e7bb2b0a54b8cd` | failed: static Web navigation returned 503; focused correction passed and the final controller gate is regenerated. |
 | Slice 1 development gate | `245cb6f306aabb5e7e9877491aa2ea26174299e6` | All four configured checks passed through Looper; PR #430 merged by the controller at that exact commit. |
+| Slice 2 task checks | `5ca7c06550c4e44ec6a2fd3ae10ab93309e9a18b` | Focused capture/quiz/specification integration and race checks passed. Canonical PR and Looper retain the exact final-head gate evidence. |
 | Web browser journey | pending | not run |
 | Telegram actual-client journey | pending | not observed |
 | TUI interaction and cross-adapter parity | pending | not run |
