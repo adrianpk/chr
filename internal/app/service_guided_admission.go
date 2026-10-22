@@ -115,10 +115,17 @@ func (s service) retainGuidedInvocation(ctx context.Context, session *core.Autho
 	}
 
 	request := *session.Guided.Work.Admission
-	request.ResolveHarness = s.prepareWorkflowHarness
+	request.ResolveHarness = s.prepareGuidedWorkflowHarness
 
-	started, err := store.StartWorkflowGuarded(ctx, request, s.boundAdmissionCheck(request.Selection, nil))
+	started, err := store.StartWorkflowGuarded(ctx, request, s.boundAdmissionCheck(request.Selection, func(ctx context.Context) error {
+		return s.checkGuidedWorkPrerequisites(ctx, request.Selection)
+	}))
 	if err != nil {
+		var prerequisite *core.GuidedPrerequisiteError
+		if errors.As(err, &prerequisite) {
+			return err
+		}
+
 		return &core.GuidedPrerequisiteError{Action: "Reconcile the retained admission with native policy, target and worker setup before retrying.", Cause: err}
 	}
 

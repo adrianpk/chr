@@ -21,11 +21,15 @@ type webViewProvider struct {
 }
 
 func (p webViewProvider) service(ctx context.Context) service {
+	operations := newService(ctx, p.env, p.projectContext, p.assetsFS)
 	if p.serviceFactory != nil {
-		return p.serviceFactory(ctx)
+		operations = p.serviceFactory(ctx)
+	}
+	if p.config.guidedHost != nil {
+		operations.guidedWorkHost = p.config.guidedHost
 	}
 
-	return newService(ctx, p.env, p.projectContext, p.assetsFS)
+	return operations
 }
 
 func (p webViewProvider) ProjectView(context.Context) (webui.ProjectView, error) {

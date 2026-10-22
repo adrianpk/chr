@@ -18,13 +18,17 @@ func (s service) applyGuidedCommand(ctx context.Context, command core.GuidedUseC
 		return s.ConductGuidedQuiz(ctx, command)
 	case "spec":
 		return s.GenerateGuidedSpec(ctx, command)
+	case "prepare":
+		return s.PrepareGuidedWork(ctx, command)
+	case "admit":
+		return s.AdmitGuidedWork(ctx, command)
 	default:
 		return core.MutateGuidedUseCase(ctx, s.projectContext.ProjectDir, command)
 	}
 }
 
 func (s service) advanceGuidedUseCase(ctx context.Context, session core.AuthoringSession) (core.AuthoringSession, error) {
-	for range 3 {
+	for range 6 {
 		command, ready := guidedProgressCommand(session)
 		if !ready {
 			return session, nil
@@ -43,6 +47,10 @@ func (s service) advanceGuidedUseCase(ctx context.Context, session core.Authorin
 
 func guidedProgressCommand(session core.AuthoringSession) (core.GuidedUseCaseCommand, bool) {
 	command := core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, ExpectedRevision: session.Revision}
+	if !guidedDispatchAllowed(session.Guided.Status) {
+		return command, false
+	}
+
 	if pending := session.Guided.PendingOperation; pending != nil {
 		command.OperationID, command.ExpectedRevision = pending.ID, pending.ExpectedRevision
 		command.Action, command.Content = pending.Action, pending.Content
@@ -51,16 +59,10 @@ func guidedProgressCommand(session core.AuthoringSession) (core.GuidedUseCaseCom
 		return command, true
 	}
 
-	switch session.Guided.Stage {
-	case "quiz":
-		if session.Guided.Quiz != nil {
-			return command, false
-		}
+	var ready bool
 
-		command.Action = "quiz"
-	case "specification":
-		command.Action = "spec"
-	default:
+	command.Action, ready = guidedAutomaticAction(session)
+	if !ready {
 		return command, false
 	}
 
@@ -68,4 +70,29 @@ func guidedProgressCommand(session core.AuthoringSession) (core.GuidedUseCaseCom
 	command.OperationID = "auto-" + command.Action + "-" + hex.EncodeToString(digest[:])
 
 	return command, true
+}
+
+func guidedDispatchAllowed(status string) bool {
+	return status != "paused" && status != "cancelled" && status != "completed" && status != "failed"
+}
+
+func guidedAutomaticAction(session core.AuthoringSession) (string, bool) {
+	switch session.Guided.Stage {
+	case "quiz":
+		if session.Guided.Quiz != nil {
+			return "", false
+		}
+
+		return "quiz", true
+	case "specification":
+		return "spec", true
+	case "preparation":
+		if _, err := core.GuidedPreparationCheckpoint(session); err == nil {
+			return "admit", true
+		}
+
+		return "prepare", true
+	default:
+		return "", false
+	}
 }

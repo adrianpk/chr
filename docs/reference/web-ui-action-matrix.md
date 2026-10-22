@@ -33,6 +33,8 @@ Status values:
 | Domain | Web action | CLI command | TUI action | Status | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Harness defaults | `harnesses.change` at `/project/harnesses` | none | Project `h`, Enter | `matched` | Named profile selection and clear use the shared configuration owner, exact project/revision/request identity and existing login/origin guards. |
+| Guided development | `guided.start`, `guided.input` at `/guided/actions` | shared application operations | shared application operations | `web_subset` | A new guided run retains development intent. After explicit capture completion and sufficient answers it approves the exact generated specification, prepares and seals native work, and admits/activates only that materialized set under native policy. Retried operations reconcile original identities. Standalone authoring remains independent. |
+| Guided progress | GET `/guided` | native workflow status | native workflow status | `web_subset` | Read-only committed document and native progress queries distinguish validated tasks, confirmed delivery, remaining work, admitted limits and review waits. Rendering never activates execution. |
 | Case create | `case.create` | `chr metadata case set` | Cases New | `matched` | Uses the shared metadata service to generate an available slug and atomically save the new case. The case becomes available in dump scope choices. |
 | Case metadata | `case.update` | `chr metadata case set` | Cases save | `matched` | Uses stale revision checks and writes project-local case metadata. |
 | Dump create | `dump.create` | `chr dump new` | Dumps create | `matched` | One New form selects Project-wide or an existing case. Retained capture identities make retries safe; general captures extend the shared dump while case captures remain independent. |
@@ -60,8 +62,9 @@ Status values:
 - Stale writes return reload and discard choices instead of overwriting newer
   project state.
 - Administrative commands, project registry management, maintenance,
-  notification setup, assisted authoring, proving workflows, and full ticket
-  execution remain CLI/TUI-only in this rollout.
+  notification setup, proving workflows, and general native-work administration
+  remain CLI/TUI-only in this rollout. Guided automatic execution uses the
+  bounded path above.
 
 ## Plan Document Reads
 

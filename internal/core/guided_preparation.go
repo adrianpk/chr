@@ -156,7 +156,7 @@ func SealGuidedPreparation(ctx context.Context, root string, session *AuthoringS
 		return err
 	}
 
-	session.Guided.Status, session.Guided.Blocker = "blocked", "Native admission is not available yet."
+	session.Guided.Status, session.Guided.Blocker = "blocked", "Prepared work is sealed. Continue the retained run to admit and start it."
 
 	return nil
 }

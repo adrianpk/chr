@@ -113,7 +113,7 @@ func TestGuidedUseCaseQuizView(t *testing.T) {
 
 // TestGuidedUseCaseSpecView exposes the complete approved document without a routine approval prompt.
 func TestGuidedUseCaseSpecView(t *testing.T) {
-	view := GuidedUseCaseView{RunID: "run", Stage: "preparation", Blocker: "Work preparation is not available yet.", Artifacts: []GuidedUseCaseArtifact{{Stage: "specification", Commit: "immutable-commit", Reference: "ops/default/spec/original/artifact.md", Content: "Complete original approved specification <script>escaped</script>"}}}
+	view := GuidedUseCaseView{RunID: "run", Stage: "preparation", Blocker: "Configure native workflow version 1 before retrying work preparation.", Artifacts: []GuidedUseCaseArtifact{{Stage: "specification", Commit: "immutable-commit", Reference: "ops/default/spec/original/artifact.md", Content: "Complete original approved specification <script>escaped</script>"}}}
 
 	handler, err := NewHandler(HandlerOptions{Provider: guidedCaptureProvider{view: view}})
 	if err != nil {

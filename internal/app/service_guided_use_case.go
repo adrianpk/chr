@@ -10,6 +10,7 @@ import (
 
 // GuidedUseCaseInspection contains retained state and prospective local readiness.
 type GuidedUseCaseInspection struct {
+	Work          *WorkflowWorkStatus
 	Namespace     string
 	Session       *core.AuthoringSession
 	Runs          []core.AuthoringSession
@@ -83,6 +84,7 @@ func (s service) InspectGuidedUseCase(ctx context.Context, id, namespace string)
 	}
 
 	s.inspectGuidedQuestion(ctx, &result)
+	s.inspectGuidedWork(ctx, &result)
 
 	return result, nil
 }

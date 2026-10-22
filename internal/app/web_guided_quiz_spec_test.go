@@ -74,7 +74,7 @@ func assertGuidedWebOriginals(t *testing.T, provider webViewProvider, handler ht
 	replaceGuidedWebDocuments(t, provider.projectContext.ProjectDir, completed)
 
 	page := guidedCaptureHTTP(t, handler, http.MethodGet, guidedUseCaseURL(completed.ID, completed.Namespace), nil)
-	for _, text := range []string{"Deliver a bounded workflow.", "Retain the exact agreed behavior.", "Inspect committed quiz", "Inspect committed specification", "Work preparation is not available yet.", "Execution has not started."} {
+	for _, text := range []string{"Deliver a bounded workflow.", "Retain the exact agreed behavior.", "Inspect committed quiz", "Inspect committed specification", "Configure native workflow version 1 before retrying work preparation.", "Execution has not started."} {
 		if page.Code != http.StatusOK || !strings.Contains(page.Body.String(), text) {
 			t.Fatalf("original document missing %q", text)
 		}

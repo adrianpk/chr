@@ -140,7 +140,7 @@ func SealGuidedSpec(ctx context.Context, root string, session *AuthoringSession)
 	}
 
 	session.Guided.Stage, session.Guided.Status = "preparation", "blocked"
-	session.Guided.Blocker = "Work preparation is not available yet."
+	session.Guided.Blocker = "Specification is approved. Continue the retained run to prepare its native work."
 
 	return nil
 }

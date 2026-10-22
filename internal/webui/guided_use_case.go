@@ -15,6 +15,7 @@ type GuidedUseCaseLink struct{ Name, URL string }
 
 // GuidedUseCaseView presents current capture, setup and an inspectable committed input.
 type GuidedUseCaseView struct {
+	Work                                                    *GuidedUseCaseWork
 	Enabled                                                 bool
 	RunID, Namespace, Name, Revision, RequestID             string
 	Stage, Status, Capture, Commit, CommittedDump           string
@@ -23,6 +24,13 @@ type GuidedUseCaseView struct {
 	Artifacts                                               []GuidedUseCaseArtifact
 	Policy, Problems                                        []string
 	Runs                                                    []GuidedUseCaseLink
+}
+
+// GuidedUseCaseWork projects actual native progress without driving execution.
+type GuidedUseCaseWork struct {
+	MaxWorkerAttempts, WorkerTimeoutSeconds                      int
+	Status, Action, PullRequestURL                               string
+	Total, Validated, Confirmed, Integrated, Remaining, Attempts int
 }
 
 // GuidedUseCaseArtifact exposes one complete committed authoring document.

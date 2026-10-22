@@ -49,7 +49,15 @@
         <button class="button button--primary" type="submit">Retry progression</button>
       </form>
     {{end}}
-    {{if and (ne .Guided.Stage "name") (ne .Guided.Stage "dump")}}
+    {{if .Guided.Work}}
+      <section aria-label="Native work progress">
+        <p>Native work state: {{.Guided.Work.Status}}</p>
+        <p>Tasks: {{.Guided.Work.Total}} · Validated: {{.Guided.Work.Validated}} · Confirmed delivery: {{.Guided.Work.Confirmed}} · Integrated units: {{.Guided.Work.Integrated}} · Remaining: {{.Guided.Work.Remaining}} · Attempts: {{.Guided.Work.Attempts}}</p>
+        <p>Admitted worker limits: {{.Guided.Work.MaxWorkerAttempts}} attempts per task, {{.Guided.Work.WorkerTimeoutSeconds}} seconds per attempt.</p>
+        {{if .Guided.Work.Action}}<p role="status">{{.Guided.Work.Action}}</p>{{end}}
+        {{if .Guided.Work.PullRequestURL}}<p><a href="{{.Guided.Work.PullRequestURL}}">Inspect native pull request</a></p>{{end}}
+      </section>
+    {{else if and (ne .Guided.Stage "name") (ne .Guided.Stage "dump")}}
       <p>Execution has not started.</p>
     {{end}}
     {{if .Guided.CommittedDump}}

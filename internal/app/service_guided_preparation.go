@@ -42,7 +42,7 @@ func (s service) prepareGuidedWork(ctx context.Context, session *core.AuthoringS
 	}
 
 	if config.Workflow.Version != 1 {
-		return errors.New("native workflow version 1 is required for guided work preparation")
+		return &core.GuidedPrerequisiteError{Action: "Configure native workflow version 1 before retrying work preparation."}
 	}
 
 	if err := s.reserveGuidedPlan(ctx, session); err != nil {
@@ -164,7 +164,7 @@ func (s service) materializeGuidedWork(ctx context.Context, session *core.Author
 	if operation.PreparedWorkflow == nil {
 		input, err := s.generateGuidedContracts(ctx, *session)
 		if err != nil {
-			return err
+			return &core.GuidedPrerequisiteError{Action: "Correct native contract generation or provider setup, then retry the retained preparation.", Cause: err}
 		}
 
 		operation.PreparedWorkflow = &input

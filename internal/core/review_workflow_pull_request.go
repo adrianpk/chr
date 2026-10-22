@@ -26,6 +26,24 @@ type workflowRemotePRBranch struct {
 	} `json:"repo"`
 }
 
+// CheckWorkflowRepositoryProvider checks local provider prerequisites without
+// reading or creating a pull request. Remote authentication remains untested.
+func (adapter RemoteReviewAdapter) CheckWorkflowRepositoryProvider(ctx context.Context, repository string) error {
+	reference, config, err := adapter.resolveWorkflowRepository(repository)
+	if err != nil {
+		return err
+	}
+
+	diagnostic := ReviewProviderDiagnostic{}
+	diagnostic.addProviderChecks(ctx, OSReviewProviderDiagnosticRunner{}, reference, config, true)
+
+	if reviewProviderDiagnosticStatus(diagnostic.Checks) != ReviewProviderDiagnosticStatusReady {
+		return fmt.Errorf("workflow repository provider setup is incomplete")
+	}
+
+	return nil
+}
+
 // FindWorkflowPullRequests observes all states and rejects incomplete pagination.
 func (adapter RemoteReviewAdapter) FindWorkflowPullRequests(ctx context.Context, query WorkflowPullRequestQuery) ([]WorkflowPullRequestSnapshot, error) {
 	reference, config, err := adapter.resolveWorkflowRepository(query.Repository)

@@ -752,5 +752,43 @@ inputs or the complete documents available under **Inspect committed**. Reading,
 rendering and reconnecting do not generate or approve artifacts. A failed write
 retains its original operation and revision; **Retry progression** reconciles
 that operation before continuing, including an already saved draft, approval or
-stage commit. The current Web flow stops at unavailable work preparation after
-the approved specification checkpoint and does not start execution.
+stage commit.
+
+## Guided Work Preparation and Execution
+
+After the specification checkpoint, guided progression generates the plan from
+the committed approved specification, dump and answered quiz. It publishes the
+canonical plan and order, materializes its exact native set, task contracts and
+tracker, then seals the initial prepared work in another retained Git commit.
+An independent plan already associated with the case is preserved and blocks
+guided preparation instead of being adopted. Partial writes reconcile the
+original plan publication and materialization receipts before any retry.
+
+The initiating development intent authorizes admission under `guided-work/v1`.
+It binds the actor, run, preparation checkpoint digest, materialization receipt,
+exact native preview, execution target and effective review/execution policy.
+The native admission owner checks the sealed task identities, revisions and
+contracts under exclusion. Older, later and unrelated work cannot enter that
+invocation; later-ticket adoption is disabled for it. Changed configuration or
+contracts require reconciliation of the retained admission rather than a fresh
+authorization. Lost admission acknowledgements reconcile the original native
+request before rechecking mutable prerequisites.
+
+The managed Web server activates that invocation through shared native
+continuation, independently of the submitting HTTP request. Original worker,
+validation and integration budgets, claims, stop intentions and review waits
+remain authoritative. A missing managed host, unavailable worker or provider,
+missing certified publisher for an explicitly selected native publication
+profile, or unregistered canonical target blocks progression with a corrective
+action. Local readiness does not certify remote authentication or publication.
+
+Web inspection reads native state without activation. It displays validated
+tasks, confirmed delivery, integrated units, remaining work, consumed attempts,
+admitted worker limits and any review action. A validated worker or open pull
+request alone does not establish delivery. The complete preparation documents
+remain available from their original checkpoint.
+
+Automatic development applies to guided runs only. Standalone specification,
+plan, ticket and work operations retain their existing approval, authoring and
+explicit-start behavior. Managed host restart recovery, guided execution
+controls and final result presentation are separate delivery work.

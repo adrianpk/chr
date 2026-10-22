@@ -189,6 +189,7 @@ func applyWebLANAccess(config core.WebConfig, enabled, explicitHost bool) (core.
 }
 
 type resolvedWebServeConfig struct {
+	guidedHost     guidedWorkActivator
 	Login          *webui.LoginCredentials
 	ProjectDir     string
 	Web            core.WebConfig
@@ -276,6 +277,10 @@ func printWebServeStart(stdout io.Writer, config resolvedWebServeConfig) error {
 }
 
 func serveWeb(ctx context.Context, config resolvedWebServeConfig) error {
+	host := newGuidedWorkHost(ctx)
+	defer host.close()
+	config.guidedHost = host
+
 	handler, err := newWebServeMux(config)
 	if err != nil {
 		return err
@@ -332,6 +337,10 @@ func newWebServeMux(config resolvedWebServeConfig) (http.Handler, error) {
 			projectContext: projectContext,
 			config:         config,
 		}
+	}
+	if view, ok := provider.(webViewProvider); ok && config.guidedHost != nil {
+		view.config.guidedHost = config.guidedHost
+		provider = view
 	}
 
 	accessConfig := config.Web

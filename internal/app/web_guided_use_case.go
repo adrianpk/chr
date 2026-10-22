@@ -39,6 +39,7 @@ func (p webViewProvider) GuidedUseCaseView(ctx context.Context, id, namespace st
 	}
 
 	guidedWebInputBinding(&view, state)
+	guidedWebWork(&view, result.Work)
 
 	if len(state.Checkpoints) > 0 {
 		view.Commit = state.Checkpoints[0].Commit
@@ -72,7 +73,8 @@ func (p webViewProvider) writeGuidedUseCase(operations service, request webui.Wr
 		}
 	}
 
-	if errors.Is(err, core.ErrWorkflowConflict) {
+	var prerequisite *core.GuidedPrerequisiteError
+	if errors.Is(err, core.ErrWorkflowConflict) && !errors.As(err, &prerequisite) {
 		return webui.WriteActionResponse{Status: webui.WriteStatusStale, Summary: "The use case changed. Reload to continue.", ReloadURL: guidedUseCaseURL(request.ID, namespace)}, nil
 	}
 
@@ -102,6 +104,16 @@ func guidedWebInputBinding(view *webui.GuidedUseCaseView, state *core.GuidedUseC
 
 	if state.Stage == "specification" {
 		view.RetryAction = "spec"
+	}
+
+	if state.Stage == "preparation" {
+		view.RetryAction = "prepare"
+
+		for _, checkpoint := range state.Checkpoints {
+			if checkpoint.Stage == "preparation" {
+				view.RetryAction = "admit"
+			}
+		}
 	}
 
 	if pending := state.PendingOperation; pending != nil {
