@@ -1,6 +1,6 @@
 # Telegram Message Presentation Delivery
 
-Status: implementing
+Status: awaiting_gate
 
 Approved: maintainer, 2026-10-21; specification, model, slice map and Looper execution accepted.
 
@@ -23,7 +23,8 @@ Planning scope: requested by the maintainer on 2026-10-21.
 Implementation and merge authorization: granted for this delivery set and
 Looper-owned Rebase + Fast-forward slice PR merges into dev.
 
-Active slice: Slice 5 of 5, Complete coverage and real client acceptance.
+Active slice: none. Slice 5 of 5 is delivered; controller-owned final validation
+and exact-candidate scheduled certification remain open.
 
 ## 1. Outcome and Strategy
 
@@ -215,7 +216,11 @@ Each slice produces its own report after implementation. The final cycle report
 is ops/default/report/telegram-message-presentation-cycle.md. It is not
 pre-created as successful evidence.
 
-The specification/model are accepted, the plan/tracker are approved and
-Slices 1-4 are delivered through PRs #424, #425, #427 and #428. Slice 5 is active after verified PR #428 integration.
-Record real implementation and acceptance results as they become available;
-approval does not establish delivery or client evidence.
+The specification/model are accepted and all five slices are delivered through
+PRs #424, #425, #427, #428 and #429. Slice 5 integrated into `dev` at
+`af999d9c73e4ee9d302c9296c89e29bcb1e1d10a`; no numbered slice remains active.
+The controller owns `make verify` on the clean pushed gate-preparation commit.
+The required toolchain, pinned linter cache and CI helpers are available; this
+gate requires no live fixture. Retain `awaiting_nightly` until the exact final
+candidate has its scheduled result. Neither slice integration nor prerequisite
+readiness establishes that certification.

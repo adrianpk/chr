@@ -1,6 +1,6 @@
 # Slice 5: Complete Coverage and Real Client Acceptance
 
-Status: reviewing
+Status: delivered
 Delivery set: Telegram Message Presentation
 Plan: [ops/default/plan/telegram-message-presentation.md](../../../plan/telegram-message-presentation.md)
 Tracker: [ops/default/tracker/telegram-message-presentation.md](../../../tracker/telegram-message-presentation.md)
@@ -15,7 +15,7 @@ journey and record actual client acceptance alongside updated product guidance.
 ## Delivered Behavior
 
 Slice 4 integration is verified and its report/tracker entries are closed.
-T5.1 is implemented:
+T5.1 is delivered:
 
 - All 48 initial families now record actual source owners, rare/dynamic branches
   and 90 exact regression roots. Producer and sender inspection found no
@@ -30,7 +30,7 @@ T5.1 is implemented:
   reopens SQLite and reaches a canonical native receipt on a real temporary Git
   target. Replaying confirmation creates no additional publication.
 
-T5.2 is implemented with the client coverage limits recorded below. The first
+T5.2 is delivered with the client coverage limits recorded below. The first
 real desktop request to show a specification
 delivered an explanation export rather than the original file. The authorized
 repair distinguishes document-read intent from explanation, reads the selected
@@ -41,7 +41,7 @@ specification. The real user-started native journey subsequently completed with
 a verified delivery receipt and the ticket marked done. Its operator-assisted
 recovery, mobile document proof and remaining client coverage limits are
 recorded below.
-T5.3 product guidance is prepared: the existing User Guide, Telegram transport
+T5.3 product guidance is delivered: the existing User Guide, Telegram transport
 and notification references describe the actual help groups, attachment bounds,
 complete confirmation scope, retry behavior and native evidence. Unreleased
 notes describe one user outcome. The cycle report records the accepted client
@@ -338,8 +338,8 @@ clean pushed candidate `0ea4463a02c0cfa144bee0d26ecc5e5106713538`. This acceptan
 record changes documentation only. The PR-reference commit requires its own
 exact-HEAD validation before the existing controller integrates PR #429.
 
-Final local validation retains the frozen four-command prefix above, then runs
-these bounded acceptance-repair regressions before `git diff --check`:
+Final local validation passed the frozen four-command prefix above, then these
+bounded acceptance-repair regressions and `git diff --check` last:
 
 - `go test ./internal/core ./internal/app -run '^Test(NativeHost(Publication|Denials|PreparationRetry)|NativePublisherProfiles|Workflow(IntegrationCredentials|PreparationRetryAuthority)|ServiceNativeProvider|WorkContinuePreparation|TelegramWorkStatus(Reply|Guards))$' -count=1 -timeout=3m`
 - `go test -race ./internal/core ./internal/app -run '^Test(NativeHost(Publication|Denials|PreparationRetry)|NativePublisherProfiles|Workflow(IntegrationCredentials|PreparationRetryAuthority)|ServiceNativeProvider|WorkContinuePreparation|TelegramWorkStatus(Reply|Guards))$' -count=1 -timeout=3m`
@@ -349,6 +349,19 @@ observation, profile denials, credential propagation, revision-bound recovery
 and acknowledged status context. The frozen presentation selections retain
 document-read and composed-journey coverage. No exhaustive gate is added.
 
+## Integration
+
+Canonical PR #429 merged into `dev` at
+`af999d9c73e4ee9d302c9296c89e29bcb1e1d10a`. Looper receipt
+`4JWXLVN42SZHAF2L3LILCY4UMJ` passed all seven ordered commands on that exact
+candidate. Acta merge event `01M5J9BCR8BVWE0ZHVDH09V329` confirms the
+controller-owned Rebase + Fast-forward integration. Slice 5 of 5 is delivered.
+
+The subsequent gate-preparation changes are documentation only. The controller
+owns the full `make verify` run on their clean pushed commit; the merged slice's
+receipt is not reassigned to that later candidate. Exact scheduled exhaustive
+certification remains `awaiting_nightly`.
+
 ## Risks and Follow-ups
 
 Readiness was rechecked on 2026-10-22 without changing the receiver. The running
@@ -356,8 +369,8 @@ executable reports clean source `29fc714b0687e149397ec4f6dea69fb638e5fcce` and
 SHA-256 `3cc62f6f09f29f0eee70bb59f368251a668081b456cd7e4af3eef99fbfdeb7fe`.
 Status reports ready health, fresh polling, zero pending updates and zero pending
 deliveries. Later commits through `13a908914ed69f82e9ea29d6ad79373af061f988`
-change only acceptance records. Canonical PR #429 targets `dev`; its branch
-awaits controller-owned integration.
+change only acceptance records. Canonical PR #429 is integrated into `dev` at
+the exact candidate recorded above.
 
 The [cycle matrix](../../telegram-message-presentation-cycle.md) distinguishes
 the observed mobile document, operator-assisted native journey and plain status

@@ -1,6 +1,6 @@
 # Telegram Message Presentation Delivery Report
 
-Status: implementing
+Status: awaiting_gate
 Client acceptance: accepted with recorded coverage limits
 Scheduled certification: awaiting_nightly
 Plan: [Approved delivery](../plan/telegram-message-presentation.md)
@@ -31,7 +31,7 @@ allowance. Completed domain results survive presentation or delivery failures.
 | Slice 2 | [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425) | `a5c6a7e068a8e5ec547d13d73d39afe1f0477335` |
 | Slice 3 | [#427](https://forge.adrianpk.com/adrianpk/chr/pulls/427) | `a4d0a865e8bb32a3caac65395a28839b573ed369` |
 | Slice 4 | [#428](https://forge.adrianpk.com/adrianpk/chr/pulls/428) | `ae8d8d1b79ba6efddd75fdd287f235b6556babab` |
-| Slice 5 | [#429](https://forge.adrianpk.com/adrianpk/chr/pulls/429) | pending integration |
+| Slice 5 | [#429](https://forge.adrianpk.com/adrianpk/chr/pulls/429) | `af999d9c73e4ee9d302c9296c89e29bcb1e1d10a` |
 
 The tracker owns all 48 initial families and their rare/dynamic branches.
 Reconciliation binds 90 exact existing regression roots, adds actual capture/
@@ -49,6 +49,12 @@ integrated candidate. Slice 5's
 records its development checks, accepted actual client evidence and final
 controller-recorded clean-HEAD validation. Pending checks are not successful
 certification.
+
+Slice 5 receipt `4JWXLVN42SZHAF2L3LILCY4UMJ` passed its seven ordered local
+commands on the exact merged candidate above. Acta merge event
+`01M5J9BCR8BVWE0ZHVDH09V329` verifies integration. The subsequent preparation
+commit changes delivery records only and receives its own controller-owned
+full-gate run; prior evidence is not relabeled.
 
 ## Client and Journey Evidence
 
@@ -87,8 +93,9 @@ claimed. Keep the existing completed work and its operator-assisted provenance.
 
 Status: awaiting_nightly.
 
-The exact final integrated candidate has not been selected or certified. The
-existing Forgejo schedule owns the exhaustive result and its exact tested hash.
+All five slices are integrated. The exact final scheduled candidate has not
+been certified. The existing Forgejo schedule owns the exhaustive result and
+its exact tested hash.
 No dispatch or local exhaustive run is performed for this report. Retain this
 state until that exact candidate has a green scheduled result; a focused pass
 or an older nightly cannot close it.
@@ -97,7 +104,19 @@ or an older nightly cannot close it.
 
 T5.2 has the actual mobile original-document result, independently verified
 downloaded bytes, retained native integration and plain status retry. Its
-coverage limits are explicit above. Submit and integrate Slice 5 through the
-existing controller with exact-HEAD local validation, then record the final
-integrated candidate. Scheduled exhaustive certification remains awaiting_nightly
-until that exact candidate is green; client acceptance does not replace it.
+coverage limits are explicit above. Slice 5 is delivered and integrated.
+The controller's full gate and the exact scheduled exhaustive result remain
+open. Retain `awaiting_nightly` until that exact candidate is green; neither
+client acceptance nor a local gate replaces scheduled certification.
+
+## Gate Preparation
+
+The frozen gate is `make verify`: strict lint, short Go tests, CI helper
+regressions and build. The required executables, pinned linter cache, helper
+scripts and writable build destination are present. This gate requires no live
+fixture; tests own their temporary fixtures. The retained QA receiver and its
+native invocations remain under their existing owner.
+
+Preparation checks documentation and whitespace, leaves `dev` clean and pushed,
+and hands the exact candidate to the controller. It does not execute the full
+gate, dispatch the nightly or claim either result in advance.

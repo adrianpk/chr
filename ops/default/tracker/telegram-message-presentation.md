@@ -1,6 +1,6 @@
 # Telegram Message Presentation Tracker
 
-Status: implementing
+Status: awaiting_gate
 
 Approved: maintainer, 2026-10-21; specification, model, slice map and Looper execution accepted.
 
@@ -16,7 +16,8 @@ Inventory: [48-family review](../report/telegram-message-review.md)
 
 Implementation and merge authorization: granted for this delivery set and
 Looper-owned Rebase + Fast-forward slice PR merges into dev.
-Active slice: Slice 5 of 5, Complete coverage and real client acceptance.
+Active slice: none. Slice 5 of 5 is delivered; controller-owned final validation
+and exact-candidate scheduled certification remain open.
 
 ## Canonical Slice Map
 
@@ -30,10 +31,10 @@ Active slice: Slice 5 of 5, Complete coverage and real client acceptance.
 
 ## Tasks
 
-Slices 1-4 are delivered through PRs #424, #425, #427 and #428. Slice 5 is active;
-T5.1 and T5.2 are implemented with recorded client coverage limits. T5.3 has
-documentation prepared; final integration and exact-candidate scheduled
-certification remain open.
+Slices 1-5 are delivered through PRs #424, #425, #427, #428 and #429. T5.1 and
+T5.2 retain their fixture and accepted client evidence with recorded coverage
+limits. T5.3 documentation is delivered; its exact scheduled outcome remains
+a cycle-closure prerequisite. Controller-owned final validation is next.
 The plan owns exact branch names, PR titles, report paths and focused commands.
 
 | Task | State | Commit | Required outcome |
@@ -51,9 +52,9 @@ The plan owns exact branch names, PR titles, report paths and focused commands.
 | T4.1 | delivered | `708afec21584e546624848391a287a59fb5da5d4` | Progress, waits, failures and partial/final results |
 | T4.2 | delivered | `04fddeb15cf6184f4c263a55bdb222fcd74a6b1e` | Notification sender and event snapshot integration |
 | T4.3 | delivered | `01d9be1341e5c207c1748a22ced4a5aac8eafe1d` | Both-path faults, legacy records and truthful outcomes |
-| T5.1 | implemented | `ec0ea0f4c959188cee4477bc45888406f739a3a1` | Complete producer and variant coverage |
-| T5.2 | implemented | `29fc714b0687` | Actual mobile response and downloaded original verified; native receipt and plain status confirmed; duplicate desktop document check removed by maintainer refinement |
-| T5.3 | in progress | `658f39ae34747bd85c6ff2b8b777306da87e0f73` | User documentation and cycle evidence prepared; exact scheduled certification remains open |
+| T5.1 | delivered | `ec0ea0f4c959188cee4477bc45888406f739a3a1` | Complete producer and variant coverage |
+| T5.2 | delivered | `29fc714b0687` | Actual mobile response and downloaded original verified; native receipt and plain status confirmed; duplicate desktop document check removed by maintainer refinement |
+| T5.3 | delivered; certification pending | `658f39ae34747bd85c6ff2b8b777306da87e0f73` | User documentation and cycle evidence delivered; exact scheduled outcome remains a cycle-closure prerequisite |
 
 ## Message-Family Coverage
 
@@ -138,7 +139,7 @@ Real client observations remain a separate acceptance obligation.
 - Slice 2: delivered through [#425](https://forge.adrianpk.com/adrianpk/chr/pulls/425) at `a5c6a7e068a8e5ec547d13d73d39afe1f0477335`.
 - Slice 3: delivered through [PR #427](https://forge.adrianpk.com/adrianpk/chr/pulls/427) at `a4d0a865e8bb32a3caac65395a28839b573ed369`.
 - Slice 4: delivered through [PR #428](https://forge.adrianpk.com/adrianpk/chr/pulls/428) at `ae8d8d1b79ba6efddd75fdd287f235b6556babab`.
-- Slice 5: ready for review and exact-HEAD local validation; fixed QA activation, mobile original attachment, native integration and plain status retry verified; integration and scheduled certification remain open.
+- Slice 5: delivered through [PR #429](https://forge.adrianpk.com/adrianpk/chr/pulls/429) at `af999d9c73e4ee9d302c9296c89e29bcb1e1d10a`; all seven ordered local checks passed on that exact merged candidate. Controller final validation and scheduled certification remain open.
 - User-operated journey: confirmed with operator-assisted recovery; no fresh unattended execution is claimed.
 - Client scope: actual mobile Telegram original document and byte-identical downloaded copy confirmed. Duplicate desktop inspection is not required by the 2026-10-22 maintainer refinement; separate layouts and client versions remain unobserved.
 - Exact final candidate and scheduled nightly: pending.
@@ -282,10 +283,23 @@ the final integrated candidate receives its scheduled result.
 
 ## Slice 5 Review
 
-Canonical [PR #429](https://forge.adrianpk.com/adrianpk/chr/pulls/429) targets
-`dev` with the exact approved title and the full immutable report-introduction
-commit. The report retains accepted mobile document, native receipt and status
-evidence alongside the client coverage limits. Final exact-HEAD validation uses
-the frozen command prefix, focused native/recovery/status regressions and
-`git diff --check` last. Integration remains controller-owned; scheduled
-certification remains `awaiting_nightly`.
+Canonical [PR #429](https://forge.adrianpk.com/adrianpk/chr/pulls/429) merged into
+`dev` at `af999d9c73e4ee9d302c9296c89e29bcb1e1d10a`. Looper receipt
+`4JWXLVN42SZHAF2L3LILCY4UMJ` records all seven ordered checks passed on that
+exact candidate; Acta merge event `01M5J9BCR8BVWE0ZHVDH09V329` agrees.
+The report retains accepted mobile document, native receipt and status evidence
+alongside the client coverage limits.
+
+## Full-Gate Preparation
+
+All five slice reports are delivered and no numbered slice remains active.
+The frozen full gate remains `make verify`. Go, Python, Git and Make are
+available; the pinned linter module is cached, CI helpers are present and the
+build destination is writable. This short gate creates its own temporary
+fixtures and requires no live service or external forge fixture.
+
+The controller will run the gate on the clean pushed preparation commit.
+Preparation does not rerun it or dispatch the scheduled nightly. Existing
+retained QA and native invocations keep their owners and limits. Scheduled
+certification remains `awaiting_nightly`; the exact outcome is still required
+before cycle closure.
