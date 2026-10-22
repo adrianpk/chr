@@ -6,8 +6,8 @@ Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 3, Automatic work preparation and execution; T3.1 is pending.
-Progress: 2 of 6 slices delivered; 6 of 18 tasks completed. Slice 3 is active.
+Active slice: Slice 3, Automatic work preparation and execution; T3.1 is complete and T3.2 is pending.
+Progress: 2 of 6 slices delivered; 7 of 18 tasks completed. Slice 3 is active; admission and Web execution remain pending.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
 Spec: [Approved workflow](../spec/stable/guided-use-case-workflow.md)
@@ -38,7 +38,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | T2.1 | Committed-input quiz generation, bound answers, sufficient completion and sealing. | done | `a255f0be01f0a55916f95b965613eccc38e04131` | Focused quiz regressions and race checks passed; committed inputs, duplicate/stale replies, sufficiency and owner recovery. |
 | T2.2 | Exact generated-specification approval, provenance, checkpoint and recovery. | done | `5d67648370079e7a373d0def7664015259d94905` | Focused specification regressions passed; exact approval, lost draft/approval acknowledgements, retained seal and manual mutation compatibility. |
 | T2.3 | Web clarification/specification progression and complete artifact inspection. | done | `5ca7c06550c4e44ec6a2fd3ae10ab93309e9a18b` | Focused capture/quiz/specification HTTP and view regressions passed, including race mode and committed-original inspection. |
-| T3.1 | Committed-source planning, native materialization, contracts/tracker and work checkpoint. | pending | pending | pending |
+| T3.1 | Committed-source planning, native materialization, contracts/tracker and work checkpoint. | done | `cf45d5255edd6834df83ce7c82a3ed7f3425fd88` | Focused preparation, native journal recovery and standalone plan regressions passed; focused preparation race checks and strict scoped lint passed. |
 | T3.2 | Exact policy-bound native preview/admission and automatic start with retained limits. | pending | pending | pending |
 | T3.3 | Web preparation/execution state and real prerequisite/manual-operation regressions. | pending | pending | pending |
 | T4.1 | Host recovery, client independence, stale-action safety and native pause/resume/cancel. | pending | pending | pending |
@@ -57,7 +57,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | --- | --- | --- | --- | --- |
 | 1 | delivered | #430 | `245cb6f306aabb5e7e9877491aa2ea26174299e6` | [Slice 1 report](../report/slices/guided-use-case-workflow/slice-1-capture-checkpoints.md) |
 | 2 | delivered | #431 | `2246651001dd6002f783fd86d0dcc13f5bef02e6` | [Slice 2 report](../report/slices/guided-use-case-workflow/slice-2-quiz-spec.md) |
-| 3 | pending | pending | pending | pending |
+| 3 | in progress | pending | pending | pending |
 | 4 | pending | pending | pending | pending |
 | 5 | pending | pending | pending | pending |
 | 6 | pending | pending | pending | pending |
@@ -71,7 +71,7 @@ Criterion numbers correspond to the approved specification. The plan defines the
 | GUC-01 | T1.3, T2.1, T2.3, T5.1, T6.1 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
 | GUC-02 | T2.2, T3.1, T3.2 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
 | GUC-03 | T2.2 | implemented: exact generated revision/hash approval with initiating actor, run and policy; focused mutation and recovery regressions passed. |
-| GUC-04 | T3.1, T3.2 | pending |
+| GUC-04 | T3.1, T3.2 | partial: T3.1 retains exact plan revision, materialization receipt and initial native membership; admission remains pending in T3.2. |
 | GUC-05 | T1.1, T2.2, T3.3 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
 | GUC-06 | T1.1, T4.1, T5.1, T6.2, T6.3 | partial: Slice 1 capture/checkpoint regressions passed; remaining owning tasks are pending. |
 | GUC-07 | T2.3, T4.2, T5.2, T6.2 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
@@ -99,6 +99,18 @@ Criterion numbers correspond to the approved specification. The plan defines the
 Planning validation: links, approved source references, canonical slice-map equality, task/criterion coverage, privacy, terminology and staged whitespace are required before the planning commit.
 
 Implementation validation: use the plan's focused selectors and the repository development gate. Proposed selectors must gain actual test coverage; zero matches or skipped required fixtures are not evidence. Record exact commands, candidates and outcomes in the task and slice report after running them.
+
+Slice 3 T3.1 task checks passed on the implemented preparation content:
+
+- `go test ./internal/core ./internal/app -run '^Test(GuidedUseCasePreparation|WorkflowMaterializationRecovery|PlanPublicationRecovery|WebPlanDelivery|ServicePlanOrderPublication)' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^TestGuidedUseCasePreparation' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/core/... ./internal/app/...` — zero issues.
+- `git diff --check`
+
+The first lost-Git-acknowledgement fixture missed the managed Git argument
+prefix and failed to reach its fault. The corrected fixture passed, including
+recovery after later native working-copy edits. These task checks do not
+establish the final Slice 3 PR gate; T3.2 and T3.3 remain pending.
 
 Delivery-set gate: `make verify`, bounded normal guided-workflow regressions, focused race coverage for changed ownership, then `git diff --check`, on the exact final integrated `dev` candidate. The scheduled nightly retains exhaustive certification ownership.
 
