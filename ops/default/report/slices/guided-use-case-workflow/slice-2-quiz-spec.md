@@ -5,7 +5,7 @@ Delivery set: guided-use-case-workflow
 Plan: `ops/default/plan/guided-use-case-workflow.md`
 Tracker: `ops/default/tracker/guided-use-case-workflow.md`
 Branch: `feat/slice-2-guided-quiz-spec`
-PR: pending
+PR: `#431`
 
 ## Purpose
 
@@ -89,7 +89,7 @@ filesystem stores. The older capture fixture initially failed its obsolete
 unavailable-clarification assertion after reaching the configured generation
 adapter; it now uses the same deterministic provider boundary and passes.
 
-The canonical PR lists the successful required commands for its final clean
+The [canonical PR](https://forge.adrianpk.com/adrianpk/chr/pulls/431) lists the successful required commands for its final clean
 HEAD; Looper retains the exact candidate and ordered validation evidence.
 The repository development gate and configured quiz/specification normal and
 race selections are required before handoff. Browser interaction belongs to

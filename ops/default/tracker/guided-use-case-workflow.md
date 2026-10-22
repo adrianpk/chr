@@ -6,7 +6,7 @@ Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 2, Guided quiz and approved specification; implementation complete, preparing canonical PR.
+Active slice: Slice 2, Guided quiz and approved specification; implementation complete; canonical PR #431 awaits controller integration.
 Progress: 1 of 6 slices delivered; 6 of 18 tasks completed. Slice 2 is reviewing before integration.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
@@ -56,7 +56,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | Slice | State | PR | Integrated commit | Report evidence |
 | --- | --- | --- | --- | --- |
 | 1 | delivered | #430 | `245cb6f306aabb5e7e9877491aa2ea26174299e6` | [Slice 1 report](../report/slices/guided-use-case-workflow/slice-1-capture-checkpoints.md) |
-| 2 | reviewing | pending | pending | [Slice 2 report](../report/slices/guided-use-case-workflow/slice-2-quiz-spec.md) |
+| 2 | reviewing | #431 | pending | [Slice 2 report](../report/slices/guided-use-case-workflow/slice-2-quiz-spec.md) |
 | 3 | pending | pending | pending | pending |
 | 4 | pending | pending | pending | pending |
 | 5 | pending | pending | pending | pending |
