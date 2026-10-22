@@ -6,7 +6,7 @@ Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 3, Automatic work preparation and execution; T3.1 and T3.2 are complete and T3.3 is pending.
+Active slice: Slice 3, Automatic work preparation and execution; implementation complete, canonical PR and final-head validation pending.
 
 Spec: [Guided workflow](../spec/stable/guided-use-case-workflow.md)
 Model: [Retained state and ownership](../spec/stable/guided-use-case-workflow-model.md)
