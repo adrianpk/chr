@@ -1,11 +1,12 @@
 # Slice 3: Automatic Work Preparation and Execution
 
-Status: reviewing
+Status: delivered
 Delivery set: guided-use-case-workflow
 Plan: `ops/default/plan/guided-use-case-workflow.md`
 Tracker: `ops/default/tracker/guided-use-case-workflow.md`
 Branch: `feat/slice-3-guided-work-execution`
 PR: `#432`
+Integrated commit: `dfcfae6e787742d976f99d40f292a7e047f5252a`
 
 ## Purpose
 
@@ -103,8 +104,9 @@ Corrected fixtures pass; the tracker retains their context. These are local
 real Git/filesystem/HTTP and owned-worker results with deterministic model and
 forge boundary providers, not live authentication or publication certification.
 
-The canonical PR and controller retain final clean-HEAD evidence after the PR
-reference follow-up commit. Required commands, in order:
+The canonical PR and controller retain successful clean-HEAD evidence for
+`dfcfae6e787742d976f99d40f292a7e047f5252a` after the PR-reference follow-up.
+PR #432 merged at that same commit. All four commands passed, in order:
 
 - `make verify`
 - `go test ./internal/core ./internal/app ./internal/webui -run '^TestGuidedUseCase(Preparation|Admission)' -count=1 -timeout=3m`
