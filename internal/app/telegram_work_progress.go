@@ -48,6 +48,7 @@ func telegramWorkProgressMessage(status WorkflowWorkStatus, projectName string) 
 	if status.IntegratedUnits > 0 {
 		content += fmt.Sprintf("\nIntegrated units: %d.", status.IntegratedUnits)
 	}
+
 	if status.Blocker != nil {
 		content += "\nBlocker: " + telegramControlExcerpt(status.Blocker.Reason)
 	}

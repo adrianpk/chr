@@ -14,6 +14,7 @@ func telegramPreparedWorkPreview(prepared PreparedAuthoringWork) string {
 	scope := prepared.Scope
 
 	title, body := "the retained request", ""
+
 	if prepared.Mutation.Native != nil {
 		record := prepared.Mutation.Native.Record
 		body = string(record.Body)

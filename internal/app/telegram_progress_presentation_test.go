@@ -39,13 +39,19 @@ func TestTelegramPresentationProgressStates(t *testing.T) {
 				}
 			}
 
-			if len(utf16.Encode([]rune(text))) > 1800 || !utf8.ValidString(text) || strings.Contains(text, status.CandidateHash) || strings.Contains(text, status.ApprovalHash) {
-				t.Fatal("unbounded or audit-heavy progress", text)
-			}
-
-			if strings.Contains(text, "integrated units: 0") || strings.Contains(text, "0 unit(s)") {
-				t.Fatal("ticket progress included an irrelevant zero-unit integration count", text)
-			}
+			checkTelegramProgressPresentation(t, text, status)
 		})
+	}
+}
+
+func checkTelegramProgressPresentation(t *testing.T, text string, status WorkflowWorkStatus) {
+	t.Helper()
+
+	if len(utf16.Encode([]rune(text))) > 1800 || !utf8.ValidString(text) || strings.Contains(text, status.CandidateHash) || strings.Contains(text, status.ApprovalHash) {
+		t.Fatal("unbounded or audit-heavy progress", text)
+	}
+
+	if strings.Contains(text, "integrated units: 0") || strings.Contains(text, "0 unit(s)") {
+		t.Fatal("ticket progress included an irrelevant zero-unit integration count", text)
 	}
 }
