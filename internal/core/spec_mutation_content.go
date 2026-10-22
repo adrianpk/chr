@@ -39,7 +39,11 @@ func specDocumentChanges(document SpecDocument, request SpecMutationRequest) ([]
 	content := []byte("---\n" + strings.Join(front, "\n") + "\n---\n" + body + document.provenance)
 	document.metadata["title"], document.metadata["status"] = request.Title, status
 	document.metadata["project_id"], document.metadata["case_slug"] = request.ProjectID, request.CaseSlug
+
 	document.metadata["updated_at"] = now
+	if request.GuidedApproval != nil {
+		document.metadata["guided_approval"] = request.GuidedApproval
+	}
 
 	metadata, err := json.MarshalIndent(document.metadata, "", "  ")
 	if err != nil {
@@ -111,6 +115,19 @@ func specDocumentFront(document SpecDocument, request SpecMutationRequest, statu
 		{"updated_at", now},
 	} {
 		front = replaceProjectMetadataField(front, field.key, field.value)
+	}
+
+	if approval := request.GuidedApproval; approval != nil {
+		for _, field := range []struct{ key, value string }{
+			{"approved_by", approval.Actor},
+			{"guided_run", approval.RunID},
+			{"guided_approval_policy", approval.Policy},
+			{"guided_generated_revision", approval.GeneratedRevision},
+			{"guided_content_hash", approval.ContentHash},
+			{"guided_input_digest", approval.InputDigest},
+		} {
+			front = replaceProjectMetadataField(front, field.key, yamlString(field.value))
+		}
 	}
 
 	fields, err := projectDocumentFields(document.front)

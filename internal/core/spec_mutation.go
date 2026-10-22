@@ -13,6 +13,7 @@ import (
 // SpecMutationRequest creates an independent document or saves the exact
 // observed identity. Empty Status on save preserves its native lifecycle.
 type SpecMutationRequest struct {
+	GuidedApproval                                              *GuidedSpecApproval `json:",omitempty"`
 	OperationID, Action, Namespace, Reference, ExpectedRevision string
 	ProjectID, CaseSlug, Title, Body, Status                    string
 }
@@ -142,7 +143,7 @@ func (r *fileAuthoringSessionRepository) specSaveTarget(ctx context.Context, req
 		return document, ErrWorkflowConflict
 	}
 
-	return document, nil
+	return document, r.guardGuidedSpecApproval(ctx, request, document)
 }
 
 func (r *fileAuthoringSessionRepository) newSpecDocument(request SpecMutationRequest, digest string) (SpecDocument, error) {
@@ -182,6 +183,10 @@ func validateSpecMutationContent(request SpecMutationRequest) error {
 }
 
 func validateSpecCreate(request SpecMutationRequest) error {
+	if request.GuidedApproval != nil {
+		return errors.New("guided approval requires its generated draft revision")
+	}
+
 	if !IsValidOpsNamespace(request.Namespace) || request.Reference != "" || request.ExpectedRevision != "" {
 		return errors.New("spec creation requires a namespace and new document identity")
 	}

@@ -48,7 +48,7 @@ func ApplyGuidedUseCaseStep(ctx context.Context, root string, command GuidedUseC
 
 func (r *fileAuthoringSessionRepository) applyGuidedStep(ctx context.Context, session *AuthoringSession, operation GuidedUseCaseOperation, apply GuidedUseCaseStep) error {
 	if session.Guided.PendingOperation == nil {
-		if err := guardGuidedQuizInput(*session, operation); err != nil {
+		if err := guardGuidedStepInput(*session, operation); err != nil {
 			return err
 		}
 
@@ -77,11 +77,28 @@ func (r *fileAuthoringSessionRepository) applyGuidedStep(ctx context.Context, se
 	return RetainGuidedUseCaseProgress(ctx, r.projectDir, session)
 }
 
-func guardGuidedQuizInput(session AuthoringSession, operation GuidedUseCaseOperation) error {
-	if operation.Action != "answer" {
-		return nil
-	}
+func guardGuidedStepInput(session AuthoringSession, operation GuidedUseCaseOperation) error {
+	switch operation.Action {
+	case "quiz":
+		if session.Guided.Stage != "quiz" {
+			return ErrWorkflowConflict
+		}
 
+		return nil
+	case "spec":
+		if session.Guided.Stage != "specification" {
+			return ErrWorkflowConflict
+		}
+
+		return nil
+	case "answer":
+		return guardGuidedQuizInput(session, operation)
+	default:
+		return ErrWorkflowConflict
+	}
+}
+
+func guardGuidedQuizInput(session AuthoringSession, operation GuidedUseCaseOperation) error {
 	if strings.TrimSpace(operation.Content) == "" {
 		return errors.New("quiz answer is required")
 	}
@@ -190,6 +207,7 @@ func sealGuidedStage(ctx context.Context, root string, session *AuthoringSession
 			return err
 		}
 
+		checkpoint.Sources = append(checkpoint.Sources, source.Sources...)
 		for _, artifact := range source.Artifacts {
 			artifact.Repository, artifact.Commit = source.Repository, source.Commit
 			checkpoint.Sources = append(checkpoint.Sources, artifact)

@@ -13,6 +13,7 @@ import (
 )
 
 type service struct {
+	afterGuidedSpec        func(string) error
 	afterGuidedQuiz        func() error
 	guidedContext          *guidedGenerationContext
 	ctx                    context.Context
