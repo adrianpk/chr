@@ -17,6 +17,10 @@ func (op telegramConversationTransaction) applyCapture() (string, *TelegramConve
 		return "", nil, err
 	}
 
+	if c.GuidedRunID != "" {
+		return "", nil, telegramConversationDiagnostic("This is a guided use case. Continue through its current guided prompt; manual capture commands do not change it.")
+	}
+
 	if op.input.Action == TelegramConversationShow {
 		return c.Capture, c, nil
 	}
@@ -29,6 +33,10 @@ func (op telegramConversationTransaction) applyCapture() (string, *TelegramConve
 		return "", nil, telegramConversationDiagnostic("This capture is finished. Start a new session to collect more text.")
 	}
 
+	return op.applyCaptureAction(c)
+}
+
+func (op telegramConversationTransaction) applyCaptureAction(c *TelegramConversation) (string, *TelegramConversation, error) {
 	switch op.input.Action {
 	case TelegramConversationCapture:
 		return op.appendCapture(c)

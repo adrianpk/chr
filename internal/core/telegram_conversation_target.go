@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const telegramConversationColumns = `id,bot_id,chat_id,topic_id,user_id,project_id,project_binding_digest,namespace,intent,phase,topic,capture,question_binding,COALESCE(authoring_session_ref,''),COALESCE(authorization_ref,''),revision,COALESCE(invocation_id,''),COALESCE(last_observed_revision,0)`
+const telegramConversationColumns = `id,bot_id,chat_id,topic_id,user_id,project_id,project_binding_digest,namespace,intent,phase,topic,capture,question_binding,COALESCE(authoring_session_ref,''),COALESCE(authorization_ref,''),revision,COALESCE(invocation_id,''),COALESCE(last_observed_revision,0),COALESCE(guided_run_id,'')`
 
 type telegramConversationReader interface {
 	QueryContext(context.Context, string, ...any) (*sql.Rows, error)
@@ -47,7 +47,7 @@ func readTelegramConversations(ctx context.Context, reader telegramConversationR
 func scanTelegramConversation(row interface{ Scan(...any) error }) (TelegramConversation, error) {
 	var c TelegramConversation
 
-	err := row.Scan(&c.ID, &c.Peer.BotID, &c.Peer.ChatID, &c.Peer.TopicID, &c.Peer.UserID, &c.ProjectID, &c.ProjectBindingDigest, &c.Namespace, &c.Intent, &c.Phase, &c.Topic, &c.Capture, &c.QuestionBinding, &c.AuthoringSessionRef, &c.AuthorizationRef, &c.Revision, &c.InvocationID, &c.LastObservedRevision)
+	err := row.Scan(&c.ID, &c.Peer.BotID, &c.Peer.ChatID, &c.Peer.TopicID, &c.Peer.UserID, &c.ProjectID, &c.ProjectBindingDigest, &c.Namespace, &c.Intent, &c.Phase, &c.Topic, &c.Capture, &c.QuestionBinding, &c.AuthoringSessionRef, &c.AuthorizationRef, &c.Revision, &c.InvocationID, &c.LastObservedRevision, &c.GuidedRunID)
 
 	return c, err
 }
@@ -249,5 +249,5 @@ func (op telegramConversationTransaction) targetEligible(c TelegramConversation)
 }
 
 func telegramAuthoringEligible(c TelegramConversation) bool {
-	return telegramCaptureEligible(c) || c.Phase == "preparing" || c.Phase == "prepared" || c.Phase == "awaiting_confirmation"
+	return c.GuidedRunID == "" && (telegramCaptureEligible(c) || c.Phase == "preparing" || c.Phase == "prepared" || c.Phase == "awaiting_confirmation")
 }

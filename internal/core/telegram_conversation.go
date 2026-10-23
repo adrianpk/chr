@@ -46,6 +46,7 @@ type TelegramConversationInput struct {
 
 // TelegramConversation freezes routing; it does not grant execution authority.
 type TelegramConversation struct {
+	GuidedRunID          string
 	ID                   string
 	Peer                 TelegramPeerIdentity
 	ProjectID            string

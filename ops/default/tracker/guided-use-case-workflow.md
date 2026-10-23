@@ -6,8 +6,8 @@ Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 5, Guided Telegram journey; T5.1 is next after the verified Web checkpoint.
-Progress: 4 of 6 slices delivered; 12 of 18 tasks completed. The Web checkpoint is closed; guided Telegram implementation is next.
+Active slice: Slice 5, Guided Telegram journey; T5.1 routing and canonical capture binding are in progress.
+Progress: 4 of 6 slices delivered; 12 of 18 tasks completed. The Web checkpoint is closed; guided Telegram routing and canonical capture binding are in progress.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
 Spec: [Approved workflow](../spec/stable/guided-use-case-workflow.md)
@@ -44,7 +44,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | T4.1 | Host recovery, client independence, stale-action safety and native pause/resume/cancel. | done | `0ea3ff90e3d4bc5e35b36b7ad188cde3c8cb0274` | Focused recovery/control, native stop/closing and Web regressions passed in normal and race modes; scoped strict lint passed. See the Slice 4 report. |
 | T4.2 | Later-idea retention and truthful waiting/results from native delivery receipts. | done | `c6fd84c0197842011a2ae6cdcececaf739894c56` | Focused idea/result normal and race checks and scoped strict lint passed; native delivery/closing receipts, corruption and read-only inspection covered. |
 | T4.3 | Complete Web journey/fault/browser evidence and user-facing documentation. | done | `0fa7cec16dc3e6b02f3db1d593e3cf4c0081da69` | HTTP journey, actual lost Git commit responses, focused race, owned Chromium journey and scoped strict lint passed. User Guide and changelog updated. |
-| T5.1 | Natural-language Telegram start and shared current-step routing. | pending | pending | pending |
+| T5.1 | Natural-language Telegram start and shared current-step routing. | in progress | pending | Initial routing/capture, replay, stale/foreign binding and manual migration tests pass; buttons and complete current-step routing remain pending. |
 | T5.2 | Concise Telegram progress/artifacts/controls/results and cross-interface continuation. | pending | pending | pending |
 | T5.3 | Telegram transport/journey regressions, declared client evidence and documentation. | pending | pending | pending |
 | T6.1 | Shared-service TUI journey input, navigation, artifacts and resume. | pending | pending | pending |
@@ -59,7 +59,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | 2 | delivered | #431 | `2246651001dd6002f783fd86d0dcc13f5bef02e6` | [Slice 2 report](../report/slices/guided-use-case-workflow/slice-2-quiz-spec.md) |
 | 3 | delivered | #432 | `dfcfae6e787742d976f99d40f292a7e047f5252a` | [Slice 3 report](../report/slices/guided-use-case-workflow/slice-3-work-execution.md) |
 | 4 | delivered | [#433](https://forge.adrianpk.com/adrianpk/chr/pulls/433) | `f87649d876723335043041d52b298646bdf9ef18` | [Slice 4 report](../report/slices/guided-use-case-workflow/slice-4-web-recovery.md) |
-| 5 | in progress | pending | pending | pending |
+| 5 | in progress | pending | pending | [Slice 5 draft report](../report/slices/guided-use-case-workflow/slice-5-telegram.md) |
 | 6 | pending | pending | pending | pending |
 
 ## Acceptance evidence

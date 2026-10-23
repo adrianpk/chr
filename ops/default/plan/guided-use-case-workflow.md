@@ -6,7 +6,7 @@ Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 5, Guided Telegram journey; T5.1 is next after the verified Web checkpoint.
+Active slice: Slice 5, Guided Telegram journey; T5.1 routing and canonical capture binding are in progress.
 
 Spec: [Guided workflow](../spec/stable/guided-use-case-workflow.md)
 Model: [Retained state and ownership](../spec/stable/guided-use-case-workflow-model.md)
