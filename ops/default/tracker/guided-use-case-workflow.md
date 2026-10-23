@@ -44,7 +44,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | T4.1 | Host recovery, client independence, stale-action safety and native pause/resume/cancel. | done | `0ea3ff90e3d4bc5e35b36b7ad188cde3c8cb0274` | Focused recovery/control, native stop/closing and Web regressions passed in normal and race modes; scoped strict lint passed. See the Slice 4 report. |
 | T4.2 | Later-idea retention and truthful waiting/results from native delivery receipts. | done | `c6fd84c0197842011a2ae6cdcececaf739894c56` | Focused idea/result normal and race checks and scoped strict lint passed; native delivery/closing receipts, corruption and read-only inspection covered. |
 | T4.3 | Complete Web journey/fault/browser evidence and user-facing documentation. | done | `0fa7cec16dc3e6b02f3db1d593e3cf4c0081da69` | HTTP journey, actual lost Git commit responses, focused race, owned Chromium journey and scoped strict lint passed. User Guide and changelog updated. |
-| T5.1 | Natural-language Telegram start and shared current-step routing. | in progress | pending | Initial routing/capture, replay, stale/foreign binding and manual migration tests pass; buttons and complete current-step routing remain pending. |
+| T5.1 | Natural-language Telegram start and shared current-step routing. | in progress | `77b7f637587a63026ce914368939e7f0ed7158e7` (initial routing/capture) | Initial routing/capture, replay, stale/foreign binding and manual migration tests pass; buttons and complete current-step routing remain pending. |
 | T5.2 | Concise Telegram progress/artifacts/controls/results and cross-interface continuation. | pending | pending | pending |
 | T5.3 | Telegram transport/journey regressions, declared client evidence and documentation. | pending | pending | pending |
 | T6.1 | Shared-service TUI journey input, navigation, artifacts and resume. | pending | pending | pending |
@@ -205,6 +205,13 @@ servers and browsers finish through their cleanup.
 The final required ordered commands are executed through Looper on the clean
 PR-reference HEAD. Their exact candidate-bound evidence belongs to the canonical
 PR Validation and the controller checks ledger.
+
+Slice 5 T5.1 initial routing/capture is committed in `77b7f637587a63026ce914368939e7f0ed7158e7`.
+Focused guided and affected manual conversation/authoring tests passed normally
+and with race instrumentation; scoped strict lint passed. The [Slice 5 draft
+report](../report/slices/guided-use-case-workflow/slice-5-telegram.md) records exact
+commands, measured cost and the remaining current-step/presentation work. No
+Slice 5 PR or complete journey is claimed.
 
 Delivery-set gate: `make verify`, bounded normal guided-workflow regressions, focused race coverage for changed ownership, then `git diff --check`, on the exact final integrated `dev` candidate. The scheduled nightly retains exhaustive certification ownership.
 

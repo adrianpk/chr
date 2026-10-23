@@ -6,6 +6,7 @@ Plan: `ops/default/plan/guided-use-case-workflow.md`
 Tracker: `ops/default/tracker/guided-use-case-workflow.md`
 Branch: `feat/slice-5-guided-telegram`
 PR: pending
+Initial routing/capture commit: `77b7f637587a63026ce914368939e7f0ed7158e7`
 
 ## Purpose
 
