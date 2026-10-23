@@ -1,13 +1,13 @@
 # Guided Use-Case Workflow Tracker
 
-Status: In progress; Slice 4 active
+Status: In progress; Slice 5 active
 Date: 2026-10-22
 Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 4, Web recovery, controls and results; all three tasks are complete, canonical PR #433 awaits controller validation and integration.
-Progress: 3 of 6 slices delivered; 12 of 18 tasks completed. Slice 4 implementation and focused Web acceptance are complete; canonical PR integration remains pending.
+Active slice: Slice 5, Guided Telegram journey; T5.1 is next after the verified Web checkpoint.
+Progress: 4 of 6 slices delivered; 12 of 18 tasks completed. The Web checkpoint is closed; guided Telegram implementation is next.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
 Spec: [Approved workflow](../spec/stable/guided-use-case-workflow.md)
@@ -58,8 +58,8 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | 1 | delivered | #430 | `245cb6f306aabb5e7e9877491aa2ea26174299e6` | [Slice 1 report](../report/slices/guided-use-case-workflow/slice-1-capture-checkpoints.md) |
 | 2 | delivered | #431 | `2246651001dd6002f783fd86d0dcc13f5bef02e6` | [Slice 2 report](../report/slices/guided-use-case-workflow/slice-2-quiz-spec.md) |
 | 3 | delivered | #432 | `dfcfae6e787742d976f99d40f292a7e047f5252a` | [Slice 3 report](../report/slices/guided-use-case-workflow/slice-3-work-execution.md) |
-| 4 | reviewing | [#433](https://forge.adrianpk.com/adrianpk/chr/pulls/433) | pending | [Slice 4 report](../report/slices/guided-use-case-workflow/slice-4-web-recovery.md) |
-| 5 | pending | pending | pending | pending |
+| 4 | delivered | [#433](https://forge.adrianpk.com/adrianpk/chr/pulls/433) | `f87649d876723335043041d52b298646bdf9ef18` | [Slice 4 report](../report/slices/guided-use-case-workflow/slice-4-web-recovery.md) |
+| 5 | in progress | pending | pending | pending |
 | 6 | pending | pending | pending | pending |
 
 ## Acceptance evidence
@@ -81,8 +81,8 @@ Criterion numbers correspond to the approved specification. The plan defines the
 | GUC-11 | T4.1, T5.3, T6.2 | partial: request cancellation, real dead child owners, graceful host interruption and durable operator stops passed local normal/race checks; remaining adapter acceptance is pending. |
 | GUC-12 | T3.3, T4.1, T6.2 | partial: Web controls delegate to native revision-bound receipts and distinguish stop intent from quiescence; original policy, spent attempts and human review remain enforced. TUI controls remain pending. |
 | GUC-13 | T1.2, T2.3, T3.1, T4.3 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
-| GUC-14 | T4.2, T4.3, T5.2, T6.2, T6.3 | pending |
-| GUC-15 | T4.2, T5.2, T6.2 | pending |
+| GUC-14 | T4.2, T4.3, T5.2, T6.2, T6.3 | partial: Web/native receipt-backed results, corruption rejection and code locations passed; Telegram/TUI presentation and parity remain pending. |
+| GUC-15 | T4.2, T5.2, T6.2 | partial: separate ideas, replay, journal recovery and paused retention passed; Telegram/TUI mapping remains pending. |
 | GUC-16 | T1.2, T3.1, T4.3 | partial: Slice 1 capture/checkpoint regressions passed; remaining owning tasks are pending. |
 
 ## Prerequisites and checkpoints
@@ -215,6 +215,7 @@ Delivery-set gate: `make verify`, bounded normal guided-workflow regressions, fo
 | Slice 2 task checks | `5ca7c06550c4e44ec6a2fd3ae10ab93309e9a18b` | Focused capture/quiz/specification integration and race checks passed. Canonical PR and Looper retain the exact final-head gate evidence. |
 | Slice 2 development gate | `2246651001dd6002f783fd86d0dcc13f5bef02e6` | All four configured checks passed through Looper; PR #431 merged by the controller at that exact commit. |
 | Slice 3 development gate | `dfcfae6e787742d976f99d40f292a7e047f5252a` | All four configured checks passed through Looper; PR #432 merged by the controller at that exact commit. |
+| Slice 4 development gate | `f87649d876723335043041d52b298646bdf9ef18` | All four configured commands passed through Looper; PR #433 merged by the controller at that exact commit. Report/tracker closure verified on dev. |
 | Initial Slice 4 gate | `70608f4ced207bcaad5d0eae32dde7909d9aed95` | `make verify` failed because missing development intent returned the stopped-state error. Validate admission authority before the lifecycle guard; retain both authority and explicit-stop regressions. Final evidence is regenerated for the corrected PR head. |
 | Web browser journey | `0fa7cec16dc3e6b02f3db1d593e3cf4c0081da69` | Actual owned Chromium journey passed at desktop and narrow widths against temporary Git and deterministic providers. |
 | Telegram actual-client journey | pending | not observed |

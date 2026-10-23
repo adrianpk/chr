@@ -1,11 +1,13 @@
 # Slice 4: Web Recovery, Controls and Results
 
-Status: reviewing
+Status: delivered
 Delivery set: guided-use-case-workflow
 Plan: `ops/default/plan/guided-use-case-workflow.md`
 Tracker: `ops/default/tracker/guided-use-case-workflow.md`
 Branch: `feat/slice-4-guided-web-recovery`
 PR: `#433`
+
+Merged: `f87649d876723335043041d52b298646bdf9ef18` into `dev` through canonical PR #433; controller merge and Acta activity verified.
 
 ## Purpose
 
@@ -156,7 +158,9 @@ Focused correction check passed:
 The canonical PR and Looper checks ledger carry final clean-HEAD evidence in
 this required order: `make verify`, the configured normal recovery/control/
 ideas/result/WebJourney selection, its race selection, and `git diff --check`.
-The final batch runs after the PR-reference follow-up commit and push.
+All four configured commands passed through Looper on the final clean head
+`f87649d876723335043041d52b298646bdf9ef18`, after the PR-reference follow-up
+and correction were pushed. The canonical merge preserves that exact candidate.
 
 ## Risks and Follow-ups
 
