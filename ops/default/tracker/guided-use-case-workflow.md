@@ -6,7 +6,7 @@ Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 6, Guided TUI journey; implementation and focused acceptance are complete. Canonical PR preparation and exact-head validation are active; integration and the final integrated gate remain controller-owned.
+Active slice: Slice 6, Guided TUI journey; implementation and focused acceptance are complete. Canonical PR #435 is reviewing. Exact-head checks are recorded through Looper; integration and the final integrated gate remain controller-owned.
 Progress: 5 of 6 slices delivered; 17 of 18 tasks completed; T6.3 implementation/acceptance is reviewing while the controller integration gate remains pending. PR #434 is merged and its Telegram checkpoint is closed. All TUI behavior and delivery-set documentation are implemented.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
@@ -60,7 +60,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | 3 | delivered | #432 | `dfcfae6e787742d976f99d40f292a7e047f5252a` | [Slice 3 report](../report/slices/guided-use-case-workflow/slice-3-work-execution.md) |
 | 4 | delivered | [#433](https://forge.adrianpk.com/adrianpk/chr/pulls/433) | `f87649d876723335043041d52b298646bdf9ef18` | [Slice 4 report](../report/slices/guided-use-case-workflow/slice-4-web-recovery.md) |
 | 5 | delivered | [#434](https://forge.adrianpk.com/adrianpk/chr/pulls/434) | `8d99359cec120bbcdb4583ad5e842aef21547657` | [Slice 5 report](../report/slices/guided-use-case-workflow/slice-5-telegram.md) |
-| 6 | in progress | pending | pending | [Slice 6 report](../report/slices/guided-use-case-workflow/slice-6-tui.md) |
+| 6 | reviewing | [#435](https://forge.adrianpk.com/adrianpk/chr/pulls/435) | pending | [Slice 6 report](../report/slices/guided-use-case-workflow/slice-6-tui.md) |
 
 ## Acceptance evidence
 
@@ -284,4 +284,4 @@ T6.1 is complete in `5e15bddd36e03d7adbb02ad3856d1ae3a22d4519`. The Slice 6 repo
 
 T6.2 is complete in `da313792a409f1e19145a9c33137b0b854600d0d`. The Slice 6 report records exact focused normal/race commands, receipt-backed results, original prepared documents and cross-adapter stale/scope guards. T6.3 terminal acceptance and delivery-set documentation are active.
 
-T6.3 implementation/acceptance is complete in `f5c51e8a5ea9754f996bf4967f9581da8ff1fbb7`: actual owned Linux terminal processes, same-run parity, criterion reconciliation and documentation. A private output buffer corrects the initial race probe, and a metadata follow-up removes the staged trailing whitespace. Final PR-reference checks and the integrated controller gate remain pending.
+T6.3 implementation/acceptance is complete in `f5c51e8a5ea9754f996bf4967f9581da8ff1fbb7`: actual owned Linux terminal processes, same-run parity, criterion reconciliation and documentation. A private output buffer corrects the initial race probe, and a metadata follow-up removes the staged trailing whitespace. Canonical PR #435 retains the final ordered checks on its clean PR-reference head; the integrated controller gate remains pending.

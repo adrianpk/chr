@@ -5,7 +5,7 @@ Delivery set: guided-use-case-workflow
 Plan: `ops/default/plan/guided-use-case-workflow.md`
 Tracker: `ops/default/tracker/guided-use-case-workflow.md`
 Branch: `feat/slice-6-guided-tui`
-PR: pending
+PR: [#435](https://forge.adrianpk.com/adrianpk/chr/pulls/435)
 Acceptance/documentation commit: `f5c51e8a5ea9754f996bf4967f9581da8ff1fbb7`
 Controls/results commit: `da313792a409f1e19145a9c33137b0b854600d0d`
 Input/navigation commit: `5e15bddd36e03d7adbb02ad3856d1ae3a22d4519`
@@ -159,11 +159,11 @@ The tracker reconciles every approved acceptance
 criterion. The User Guide, TUI/application references and Unreleased capability
 now describe the completed terminal journey.
 
-Final configured exact-HEAD checks are reserved for the complete clean
-PR-reference candidate through Looper.
+Final configured checks run through Looper on the complete clean PR-reference
+HEAD. The canonical PR Validation and controller ledger retain the exact ordered
+commands, candidate and successful outcomes; earlier task checks are separate.
 
 ## Risks and Follow-ups
 
-Final PR-reference checks and canonical PR preparation remain pending.
 Final integrated-candidate gate and documentation closure remain controller-owned.
 User-operated Telegram client and live-provider acceptance have not been observed.

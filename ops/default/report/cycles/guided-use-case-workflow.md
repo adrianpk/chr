@@ -17,7 +17,7 @@ membership, actor, policy and finite attempts survive interface changes and
 recovery. Later ideas remain separate pending review.
 
 Slices 1-5 are integrated through canonical PRs #430-#434. Slice 6 implements the
-terminal adapter and final acceptance mapping on its approved branch; its PR,
+terminal adapter and final acceptance mapping on its approved branch; [PR #435](https://forge.adrianpk.com/adrianpk/chr/pulls/435),
 exact-head checks and subsequent controller integration are recorded in the
 tracker and Slice 6 report. No final integrated gate is claimed at this stage.
 
