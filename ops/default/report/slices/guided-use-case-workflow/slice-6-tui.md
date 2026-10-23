@@ -6,6 +6,7 @@ Plan: `ops/default/plan/guided-use-case-workflow.md`
 Tracker: `ops/default/tracker/guided-use-case-workflow.md`
 Branch: `feat/slice-6-guided-tui`
 PR: pending
+Input/navigation commit: `5e15bddd36e03d7adbb02ad3856d1ae3a22d4519`
 
 ## Purpose
 

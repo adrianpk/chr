@@ -6,8 +6,8 @@ Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 6, Guided TUI journey; T6.1 shared-service input, navigation and originals are in progress.
-Progress: 5 of 6 slices delivered; 15 of 18 tasks completed. PR #434 is merged and its Telegram checkpoint is closed. Guided TUI implementation is active.
+Active slice: Slice 6, Guided TUI journey; T6.1 is complete, and T6.2 native controls/results and cross-adapter continuation are in progress.
+Progress: 5 of 6 slices delivered; 16 of 18 tasks completed. PR #434 is merged and its Telegram checkpoint is closed. Guided TUI input/navigation/originals are implemented; native controls/results and parity are active.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
 Spec: [Approved workflow](../spec/stable/guided-use-case-workflow.md)
@@ -47,8 +47,8 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | T5.1 | Natural-language Telegram start and shared current-step routing. | done | `77b7f637587a63026ce914368939e7f0ed7158e7`, `5b032e9f6c7ce34b0e0222ca6162ca63fbcc6e53` | Named scope selection, current clarification, sealed buttons, duplicate callbacks, lost owner acknowledgement and preserved inputs pass focused normal/race checks; strict scoped lint passes. |
 | T5.2 | Concise Telegram progress/artifacts/controls/results and cross-interface continuation. | done | `5de6795a8cadcf78fb0dda91a3f67830eebaeb72` | Shared managed host, bounded recovery, native waits/controls, coalesced views, original attachments, verified completion and exact Web-run continuation pass focused normal/race checks; strict lint passes. |
 | T5.3 | Telegram transport/journey regressions, declared client evidence and documentation. | done | `05f2576a944a8c4e7d98346d9f36c92ee533e306` | Lost acknowledgements after newer controls, SQLite reopen, stale Web inputs, foreign replies/buttons and original upload retries pass focused normal/race checks; strict lint passes. User Guide, receiver reference and changelog updated. Actual user-operated client acceptance was not performed. |
-| T6.1 | Shared-service TUI journey input, navigation, artifacts and resume. | in progress | pending | pending |
-| T6.2 | TUI controls/progress/results and cross-adapter revision/authority parity. | pending | pending | pending |
+| T6.1 | Shared-service TUI journey input, navigation, artifacts and resume. | done | `5e15bddd36e03d7adbb02ad3856d1ae3a22d4519` | Actual model keys reach canonical capture/clarification/approval; original reads survive working-copy edits. Stale drafts and replay/sequence fences pass normal/race checks; strict lint passes. |
+| T6.2 | TUI controls/progress/results and cross-adapter revision/authority parity. | in progress | pending | pending |
 | T6.3 | TUI/parity acceptance, documentation, cycle report and exact-candidate closure gate. | pending | pending | pending |
 
 ## Slice delivery
@@ -60,7 +60,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | 3 | delivered | #432 | `dfcfae6e787742d976f99d40f292a7e047f5252a` | [Slice 3 report](../report/slices/guided-use-case-workflow/slice-3-work-execution.md) |
 | 4 | delivered | [#433](https://forge.adrianpk.com/adrianpk/chr/pulls/433) | `f87649d876723335043041d52b298646bdf9ef18` | [Slice 4 report](../report/slices/guided-use-case-workflow/slice-4-web-recovery.md) |
 | 5 | delivered | [#434](https://forge.adrianpk.com/adrianpk/chr/pulls/434) | `8d99359cec120bbcdb4583ad5e842aef21547657` | [Slice 5 report](../report/slices/guided-use-case-workflow/slice-5-telegram.md) |
-| 6 | in progress | pending | pending | Report is created with the first implemented TUI task. |
+| 6 | in progress | pending | pending | [Slice 6 draft report](../report/slices/guided-use-case-workflow/slice-6-tui.md) |
 
 ## Acceptance evidence
 
@@ -279,3 +279,5 @@ Delivery-set gate: `make verify`, bounded normal guided-workflow regressions, fo
 Planning artifacts do not establish implementation or delivery. Advance a task only with its actual commit and validation evidence; close a slice only after its canonical PR is merged and the integrated state is verified. Preserve native receipts and original limits during any recovery.
 
 Review later ideas after the current guided development finishes. They never become extra work in this delivery set or in a user's active invocation merely because they were retained.
+
+T6.1 is complete in `5e15bddd36e03d7adbb02ad3856d1ae3a22d4519`. The Slice 6 report retains focused normal/race and strict lint evidence for named terminal navigation, frozen current-step input, committed originals and explicit managed-host startup. T6.2 controls/results and T6.3 acceptance remain pending.
