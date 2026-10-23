@@ -6,7 +6,7 @@ Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 4, Web recovery, controls and results; all three tasks are complete and the canonical PR is being prepared.
+Active slice: Slice 4, Web recovery, controls and results; all three tasks are complete, canonical PR #433 awaits controller validation and integration.
 Progress: 3 of 6 slices delivered; 12 of 18 tasks completed. Slice 4 implementation and focused Web acceptance are complete; canonical PR integration remains pending.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
@@ -58,7 +58,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | 1 | delivered | #430 | `245cb6f306aabb5e7e9877491aa2ea26174299e6` | [Slice 1 report](../report/slices/guided-use-case-workflow/slice-1-capture-checkpoints.md) |
 | 2 | delivered | #431 | `2246651001dd6002f783fd86d0dcc13f5bef02e6` | [Slice 2 report](../report/slices/guided-use-case-workflow/slice-2-quiz-spec.md) |
 | 3 | delivered | #432 | `dfcfae6e787742d976f99d40f292a7e047f5252a` | [Slice 3 report](../report/slices/guided-use-case-workflow/slice-3-work-execution.md) |
-| 4 | reviewing | pending | pending | [Slice 4 report](../report/slices/guided-use-case-workflow/slice-4-web-recovery.md) |
+| 4 | reviewing | [#433](https://forge.adrianpk.com/adrianpk/chr/pulls/433) | pending | [Slice 4 report](../report/slices/guided-use-case-workflow/slice-4-web-recovery.md) |
 | 5 | pending | pending | pending | pending |
 | 6 | pending | pending | pending | pending |
 

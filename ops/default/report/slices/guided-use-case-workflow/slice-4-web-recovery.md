@@ -5,7 +5,7 @@ Delivery set: guided-use-case-workflow
 Plan: `ops/default/plan/guided-use-case-workflow.md`
 Tracker: `ops/default/tracker/guided-use-case-workflow.md`
 Branch: `feat/slice-4-guided-web-recovery`
-PR: pending
+PR: `#433`
 
 ## Purpose
 
