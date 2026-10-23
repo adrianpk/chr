@@ -10,6 +10,8 @@ import (
 // TestGuidedUseCaseTelegramSourceGuards rejects another allowed peer's button
 // and replies/buttons made stale by an independent Web-side canonical mutation.
 func TestGuidedUseCaseTelegramSourceGuards(t *testing.T) {
+	t.Parallel()
+
 	for _, name := range []string{"foreign button", "foreign reply", "stale reply", "stale button"} {
 		t.Run(name, func(t *testing.T) { checkGuidedTelegramSourceGuard(t, name) })
 	}

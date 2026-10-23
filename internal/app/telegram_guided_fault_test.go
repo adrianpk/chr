@@ -37,6 +37,8 @@ func (s telegramGuidedAppendAck) ApplyTelegramGuided(ctx context.Context, target
 // TestGuidedUseCaseTelegramOvertakenAck confirms an original canonical effect
 // after a newer inspection and pause without replacing their current reply fence.
 func TestGuidedUseCaseTelegramOvertakenAck(t *testing.T) {
+	t.Parallel()
+
 	f, operations := guidedTelegramFixture(t)
 	start := f.send(t, "Develop a new use case", 0)
 	f.send(t, "Acknowledgement recovery", start.ID)
@@ -79,6 +81,8 @@ func TestGuidedUseCaseTelegramOvertakenAck(t *testing.T) {
 // TestGuidedUseCaseTelegramOvertakenButton preserves a later resume when the
 // original pause button's owner acknowledgement is recovered after restart.
 func TestGuidedUseCaseTelegramOvertakenButton(t *testing.T) {
+	t.Parallel()
+
 	f, operations := guidedTelegramFixture(t)
 	start := f.send(t, "Develop a new use case", 0)
 	name := f.send(t, "Button recovery", start.ID)

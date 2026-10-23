@@ -201,6 +201,19 @@ Startup-fix checks passed:
 - `go test ./internal/app -run '^TestGuidedUseCaseTUITerminal$' -count=1 -timeout=1m` — passed after extracting catalog readiness, app 14.362s.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/app/...` — zero issues; catalog opening stays within the existing function bound.
 
+On `8aac9ce35eef7bcd47af1066b76c8fe282f92659`, the first four configured
+checks passed. The combined race batch again reached three minutes, with the two
+parallel native journeys still progressing after 159 seconds of serial fixtures.
+The remaining isolated Telegram, native-control and prerequisite fixtures now
+also run in parallel, making 24 selected fixtures independent of the serial
+environment-mutating checkpoint tests. This changes scheduling only: all real
+repositories, SQLite stores, ports, commands, timeouts and assertions remain.
+
+The expanded isolated fixture selection passed:
+
+- `go test -race ./internal/app -run '^TestGuidedUseCase(Admission|Control|Telegram|TUI|Parity)' -count=1 -timeout=3m` — passed, app 70.942s.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/app/...` — zero issues.
+
 Final configured checks run through Looper on the complete clean PR-reference
 HEAD. The canonical PR Validation and controller ledger retain the exact ordered
 commands, candidate and successful outcomes; earlier task checks are separate.

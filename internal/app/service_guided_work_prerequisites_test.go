@@ -11,6 +11,8 @@ import (
 
 // TestGuidedUseCaseAdmissionPrerequisites blocks real setup failures before native admission or host dispatch.
 func TestGuidedUseCaseAdmissionPrerequisites(t *testing.T) {
+	t.Parallel()
+
 	cases := []struct{ name, action string }{{"host", "Start a managed workflow host, then retry this retained operation."}, {"worker", "available worker harness"}, {"provider", "canonical review provider"}, {"publisher", "private certified publisher"}, {"contract", "native"}}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -60,6 +62,8 @@ func breakGuidedPrerequisite(t *testing.T, operations *service, prepared core.Au
 
 // TestGuidedUseCaseAdmissionPolicy preserves a displayed policy after configuration changes instead of silently refreshing authorization.
 func TestGuidedUseCaseAdmissionPolicy(t *testing.T) {
+	t.Parallel()
+
 	operations, prepared, host := guidedAdmissionFixture(t)
 	path := core.UserPath(operations.projectContext.ProjectDir, "config.yml")
 

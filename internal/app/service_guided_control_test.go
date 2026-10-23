@@ -26,6 +26,8 @@ func guidedNativeControl(t *testing.T, operations service, session core.Authorin
 // TestGuidedUseCaseControlNative separates accepted stop intent from quiescence
 // and resumes the same invocation with its already consumed attempt intact.
 func TestGuidedUseCaseControlNative(t *testing.T) {
+	t.Parallel()
+
 	for _, action := range []string{"pause", "cancel"} {
 		t.Run(action, func(t *testing.T) { testGuidedNativeStop(t, action) })
 	}
@@ -98,6 +100,8 @@ func assertGuidedResumedAttempts(t *testing.T, operations service, before core.W
 // TestGuidedUseCaseControlLostAck reconciles the native receipt before current
 // revision checks, while stale fresh controls leave native and guided state intact.
 func TestGuidedUseCaseControlLostAck(t *testing.T) {
+	t.Parallel()
+
 	operations, started := guidedAdmittedFixture(t)
 	rejected := rejectStaleGuidedControl(t, operations, started)
 
@@ -131,6 +135,8 @@ func TestGuidedUseCaseControlLostAck(t *testing.T) {
 // TestGuidedUseCaseControlAdmission stops an uncertain admission by finding its
 // exact existing request, and never creates work merely to pause a retained stage.
 func TestGuidedUseCaseControlAdmission(t *testing.T) {
+	t.Parallel()
+
 	for _, admitted := range []bool{false, true} {
 		name := "not-admitted"
 		if admitted {

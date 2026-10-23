@@ -29,6 +29,8 @@ func (transport *telegramGuidedUploadAck) Do(request *http.Request) (*http.Respo
 // TestGuidedUseCaseTelegramUploadRecovery loses a real multipart upload's reply,
 // reopens SQLite and resends its original snapshot with the consumed attempt kept.
 func TestGuidedUseCaseTelegramUploadRecovery(t *testing.T) {
+	t.Parallel()
+
 	f, operations := guidedTelegramFixture(t)
 	start := f.send(t, "Develop a new use case", 0)
 	name := f.send(t, "Original upload", start.ID)

@@ -49,6 +49,8 @@ func guidedTelegramFixture(t *testing.T) (*telegramConversationAppFixture, servi
 // TestGuidedUseCaseTelegramCapture routes ordinary messages through the same
 // canonical run and proves that replay and stale peer replies cannot append twice.
 func TestGuidedUseCaseTelegramCapture(t *testing.T) {
+	t.Parallel()
+
 	f, operations := guidedTelegramFixture(t)
 
 	start := f.send(t, "Develop a new use case", 0)
@@ -118,6 +120,8 @@ func guidedTelegramProject(t *testing.T, operations service, id string) string {
 // TestGuidedUseCaseTelegramStartIntent excludes incidental or negated model text
 // from the deterministic development instruction accepted by the guided bridge.
 func TestGuidedUseCaseTelegramStartIntent(t *testing.T) {
+	t.Parallel()
+
 	cases := []struct {
 		text string
 		want bool
@@ -140,6 +144,8 @@ func TestGuidedUseCaseTelegramStartIntent(t *testing.T) {
 // TestGuidedUseCaseTelegramClarification follows current prompts through exact
 // default approval; a later idea and pause cannot rewrite the committed scope.
 func TestGuidedUseCaseTelegramClarification(t *testing.T) {
+	t.Parallel()
+
 	f, operations := guidedTelegramFixture(t)
 	model := guidedTelegramModel(t, &operations)
 	f.receiver.operations = operations
@@ -213,6 +219,8 @@ func readGuidedTelegramSession(t *testing.T, operations service, c core.Telegram
 // TestGuidedUseCaseTelegramButtons consumes one retained choice through the
 // existing action owner and binds its result prompt to the new guided revision.
 func TestGuidedUseCaseTelegramButtons(t *testing.T) {
+	t.Parallel()
+
 	f, operations := guidedTelegramFixture(t)
 	start := f.send(t, "Develop a new use case", 0)
 	name := f.send(t, "Bounded audit", start.ID)
@@ -328,6 +336,8 @@ func queueGuidedTelegramCallback(t *testing.T, f *telegramConversationAppFixture
 // TestGuidedUseCaseTelegramNames switches the existing peer focus by a unique
 // visible name; duplicate names cannot choose an arbitrary canonical run.
 func TestGuidedUseCaseTelegramNames(t *testing.T) {
+	t.Parallel()
+
 	f, operations := guidedTelegramFixture(t)
 	first := f.send(t, "Develop a new use case in example-project", 0)
 	f.send(t, "First audit", first.ID)
@@ -383,6 +393,8 @@ func (s *telegramGuidedLostAck) ApplyTelegramGuided(ctx context.Context, target 
 // TestGuidedUseCaseTelegramLostAck drops the application result after a real
 // canonical pause, then replays the retained callback without another mutation.
 func TestGuidedUseCaseTelegramLostAck(t *testing.T) {
+	t.Parallel()
+
 	f, operations := guidedTelegramFixture(t)
 	start := f.send(t, "Develop a new use case", 0)
 	name := f.send(t, "Pause recovery", start.ID)
@@ -420,6 +432,8 @@ func TestGuidedUseCaseTelegramLostAck(t *testing.T) {
 // TestGuidedUseCaseTelegramProjectChoice requests a name only when the current
 // allowed registry actually has multiple candidates and retains the chosen root.
 func TestGuidedUseCaseTelegramProjectChoice(t *testing.T) {
+	t.Parallel()
+
 	f, _ := guidedTelegramFixture(t)
 
 	config, err := core.LoadTelegramReceiverConfig(f.receiver.env)
