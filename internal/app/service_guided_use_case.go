@@ -48,6 +48,13 @@ func (s service) ChangeGuidedUseCase(ctx context.Context, command core.GuidedUse
 	}
 
 	command.GuidedUseCaseScope = scope
+	if guidedControlAction(command.Action) {
+		return s.changeGuidedControl(ctx, command)
+	}
+
+	if host, ok := s.guidedWorkHost.(guidedProgressActivator); ok {
+		return s.changeGuidedOnHost(ctx, command, host)
+	}
 
 	session, err := s.applyGuidedCommand(ctx, command)
 	if err != nil {

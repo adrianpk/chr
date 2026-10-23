@@ -9,7 +9,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -280,10 +279,15 @@ func serveWeb(ctx context.Context, config resolvedWebServeConfig) error {
 	host := newGuidedWorkHost(ctx)
 	defer host.close()
 	config.guidedHost = host
+	config.ProjectContext = webServeProjectContext(config)
+	config.Provider = webServeProvider(config)
 
 	handler, err := newWebServeMux(config)
 	if err != nil {
 		return err
+	}
+	if provider, ok := config.Provider.(webViewProvider); ok {
+		host.start(provider.service)
 	}
 
 	server := &http.Server{
@@ -321,27 +325,8 @@ func serveWeb(ctx context.Context, config resolvedWebServeConfig) error {
 }
 
 func newWebServeMux(config resolvedWebServeConfig) (http.Handler, error) {
-	projectContext := config.ProjectContext
-	if projectContext.ProjectID == "" {
-		projectContext.ProjectID = projectID(config.ProjectDir)
-	}
-	if projectContext.ProjectName == "" {
-		projectContext.ProjectName = filepath.Base(config.ProjectDir)
-	}
-
-	provider := config.Provider
-	if provider == nil && config.Env != nil && config.AssetsFS != nil {
-		provider = webViewProvider{
-			env:            config.Env,
-			assetsFS:       config.AssetsFS,
-			projectContext: projectContext,
-			config:         config,
-		}
-	}
-	if view, ok := provider.(webViewProvider); ok && config.guidedHost != nil {
-		view.config.guidedHost = config.guidedHost
-		provider = view
-	}
+	projectContext := webServeProjectContext(config)
+	provider := webServeProvider(config)
 
 	accessConfig := config.Web
 	if config.Login != nil {

@@ -158,11 +158,15 @@ func captureGuidedWebInput(t *testing.T, provider webViewProvider, handler http.
 	current = readWebGuidedSession(t, operations, current.ID)
 	webGuidedInput(t, handler, current, "finish", "", http.StatusSeeOther)
 
+	if host, ok := operations.guidedWorkHost.(*guidedWorkHost); ok {
+		host.wait.Wait()
+	}
+
 	return readWebGuidedSession(t, operations, current.ID)
 }
 
 func guidedWebCommandForm(command core.GuidedUseCaseCommand) url.Values {
-	return url.Values{"action": {"guided.input"}, "surface": {"guided"}, "confirm": {"true"}, "id": {command.RunID}, "namespace": {command.Namespace}, "request_id": {command.OperationID}, "revision": {strconv.FormatInt(command.ExpectedRevision, 10)}, "step": {command.Action}, "content": {command.Content}, "question_id": {command.QuestionID}, "input_digest": {command.InputDigest}}
+	return url.Values{"action": {"guided.input"}, "surface": {"guided"}, "confirm": {"true"}, "id": {command.RunID}, "namespace": {command.Namespace}, "request_id": {command.OperationID}, "revision": {strconv.FormatInt(command.ExpectedRevision, 10)}, "native_revision": {strconv.FormatUint(command.NativeRevision, 10)}, "step": {command.Action}, "content": {command.Content}, "question_id": {command.QuestionID}, "input_digest": {command.InputDigest}}
 }
 
 func replaceGuidedWebDocuments(t *testing.T, root string, session core.AuthoringSession) {

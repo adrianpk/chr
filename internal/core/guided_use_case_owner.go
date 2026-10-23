@@ -185,6 +185,14 @@ func guardGuidedCommand(session AuthoringSession, command GuidedUseCaseCommand, 
 		}
 	}
 
+	if !GuidedDispatchAllowed(session) {
+		return false, ErrGuidedUseCaseStopped
+	}
+
+	if guidedControlOwnsID(session.Guided.Control, operation.ID) {
+		return false, ErrWorkflowConflict
+	}
+
 	if pending := session.Guided.PendingOperation; pending != nil {
 		return false, guidedDigestConflict(*pending, operation)
 	}

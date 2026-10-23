@@ -129,6 +129,10 @@ func (s *WorkflowStore) checkGuidedWorkflowTarget(ctx context.Context, request W
 }
 
 func guardGuidedAdmissionProof(session AuthoringSession, project, namespace string, request WorkflowStartRequest) error {
+	if !GuidedDispatchAllowed(session) {
+		return ErrGuidedUseCaseStopped
+	}
+
 	if err := guardGuidedAdmissionState(session, project, namespace); err != nil {
 		return err
 	}

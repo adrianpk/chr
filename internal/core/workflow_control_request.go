@@ -17,6 +17,7 @@ type WorkflowControlIntegrationGuard struct {
 // WorkflowControlMutationRequest binds one attributable control to its
 // displayed invocation and any required candidate, budget or question images.
 type WorkflowControlMutationRequest struct {
+	Guided           *GuidedWorkflowControlProof `json:"guided,omitempty"`
 	Binding          WorkflowMutationBinding
 	Integration      *WorkflowControlIntegrationGuard
 	Grant            *WorkflowIntegrationGrant
@@ -43,6 +44,10 @@ type WorkflowControlResult struct {
 }
 
 func freezeWorkflowControlMutation(request WorkflowControlMutationRequest) (WorkflowControlMutationRequest, string, error) {
+	if err := validateGuidedControlProof(request); err != nil {
+		return request, "", err
+	}
+
 	if err := request.Binding.Validate(); err != nil {
 		return request, "", err
 	}

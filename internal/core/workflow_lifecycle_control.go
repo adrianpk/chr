@@ -66,6 +66,10 @@ func (s *WorkflowStore) acceptWorkflowLifecycleControl(ctx context.Context, requ
 		return workflowLifecycleAcceptance{receipt: prior, replay: found}, err
 	}
 
+	if err := owner.checkGuidedWorkflowControl(ctx, run.WorkflowInvocation, request); err != nil {
+		return workflowLifecycleAcceptance{}, err
+	}
+
 	if err := workflowCheckAuthorization(ctx, check); err != nil {
 		return workflowLifecycleAcceptance{}, err
 	}

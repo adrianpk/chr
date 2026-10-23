@@ -139,12 +139,27 @@ func (s *WorkflowStore) resumeGuardedWorkflow(ctx context.Context, run workflowI
 	}
 
 	run.StopIntent, run.ResumeStatus = "", ""
+	restoreWorkflowInterruptedContinuation(&run)
 
 	if err := s.commitWorkflowControlResume(ctx, &run, changes, control); err != nil {
 		return WorkflowInvocation{}, err
 	}
 
 	return run.WorkflowInvocation, nil
+}
+
+func restoreWorkflowInterruptedContinuation(run *workflowInvocationFile) {
+	if run.Outcome != "interrupted" {
+		return
+	}
+	// Interrupted set closure retains its own retry marker. A resumed task or
+	// validation must reach its original owner rather than the closing branch.
+	next := workflowNextClosingSet(run.WorkflowInvocation)
+	if next != "" && workflowClosingRunFrontier(*run, next) {
+		return
+	}
+
+	run.Outcome = "resumed"
 }
 
 func (s *WorkflowStore) stopWorkflow(ctx context.Context, run *workflowInvocationFile, intent string, control *workflowControlCommit) error {

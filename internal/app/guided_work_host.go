@@ -21,17 +21,20 @@ type guidedWorkActivator interface {
 // lifetime. Its in-memory map excludes duplicate dispatch; native claims remain
 // the cross-process authority and retain all budgets and stop intentions.
 type guidedWorkHost struct {
-	ctx    context.Context
-	cancel context.CancelFunc
-	mu     sync.Mutex
-	active map[string]bool
-	wait   sync.WaitGroup
+	ctx      context.Context
+	cancel   context.CancelFunc
+	mu       sync.Mutex
+	active   map[string]bool
+	progress map[string]bool
+	attempts map[string]string
+	wait     sync.WaitGroup
+	scanWait sync.WaitGroup
 }
 
 func newGuidedWorkHost(ctx context.Context) *guidedWorkHost {
 	ctx, cancel := context.WithCancel(ctx)
 
-	return &guidedWorkHost{ctx: ctx, cancel: cancel, active: make(map[string]bool)}
+	return &guidedWorkHost{ctx: ctx, cancel: cancel, active: make(map[string]bool), progress: make(map[string]bool), attempts: make(map[string]string)}
 }
 
 func (host *guidedWorkHost) ready() error {
@@ -66,8 +69,11 @@ func (host *guidedWorkHost) activate(operations service, id string) error {
 		defer host.wait.Done()
 		defer host.release(key)
 
-		if err := host.run(operations, id); guidedHostFailure(err) && host.ctx.Err() == nil {
-			host.reportFailure(operations, id)
+		failure := host.run(operations, id)
+		host.acknowledgeStop(host.ctx, operations, id)
+
+		if guidedHostFailure(failure) && host.ctx.Err() == nil {
+			host.reportFailure(host.ctx, operations, id)
 		}
 	}()
 
@@ -75,7 +81,7 @@ func (host *guidedWorkHost) activate(operations service, id string) error {
 }
 
 func guidedHostFailure(err error) bool {
-	return err != nil && !errors.Is(err, core.ErrWorkflowOwned) && !errors.Is(err, core.ErrWorkflowCapacity) && !errors.Is(err, core.ErrWorkflowConflict)
+	return err != nil && !errors.Is(err, core.ErrWorkflowOwned) && !errors.Is(err, core.ErrWorkflowCapacity) && !errors.Is(err, core.ErrWorkflowConflict) && !errors.Is(err, core.ErrGuidedUseCaseStopped) && !errors.Is(err, core.ErrWorkflowStop)
 }
 
 func (host *guidedWorkHost) release(key string) {
@@ -98,7 +104,9 @@ func (host *guidedWorkHost) run(operations service, id string) error {
 			return errors.Join(err, core.ErrWorkflowConflict)
 		}
 
-		progress, err := operations.ResumeRetainedWork(host.ctx, id, run.Revision)
+		check := func(ctx context.Context) error { return operations.checkGuidedActivation(ctx, run) }
+
+		progress, err := operations.ResumeRetainedWorkGuarded(host.ctx, id, run.Revision, check)
 		if err != nil || progress.Steps == 0 || !retainedWorkRunnable(progress.Status) {
 			return err
 		}
@@ -107,8 +115,8 @@ func (host *guidedWorkHost) run(operations service, id string) error {
 	return errors.New("guided host checkpoint scheduling bound reached")
 }
 
-func (host *guidedWorkHost) reportFailure(operations service, id string) {
-	ctx, cancel := context.WithTimeout(host.ctx, 10*time.Second)
+func (host *guidedWorkHost) reportFailure(ctx context.Context, operations service, id string) {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	run, err := operations.ReadWorkflow(ctx, id)
@@ -126,5 +134,6 @@ func (host *guidedWorkHost) close() {
 	host.mu.Lock()
 	host.cancel()
 	host.mu.Unlock()
+	host.scanWait.Wait()
 	host.wait.Wait()
 }

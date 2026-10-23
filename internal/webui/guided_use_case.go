@@ -15,6 +15,9 @@ type GuidedUseCaseLink struct{ Name, URL string }
 
 // GuidedUseCaseView presents current capture, setup and an inspectable committed input.
 type GuidedUseCaseView struct {
+	Controls                                                []GuidedUseCaseControl
+	Suspended                                               bool
+	ControlStatus                                           string
 	Work                                                    *GuidedUseCaseWork
 	Enabled                                                 bool
 	RunID, Namespace, Name, Revision, RequestID             string
@@ -24,6 +27,12 @@ type GuidedUseCaseView struct {
 	Artifacts                                               []GuidedUseCaseArtifact
 	Policy, Problems                                        []string
 	Runs                                                    []GuidedUseCaseLink
+}
+
+// GuidedUseCaseControl binds a lifecycle action to both displayed owner revisions.
+type GuidedUseCaseControl struct {
+	Action, Label, RequestID, Revision, NativeRevision string
+	Content, QuestionID, InputDigest                   string
 }
 
 // GuidedUseCaseWork projects actual native progress without driving execution.

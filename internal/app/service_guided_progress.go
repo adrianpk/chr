@@ -47,14 +47,14 @@ func (s service) advanceGuidedUseCase(ctx context.Context, session core.Authorin
 
 func guidedProgressCommand(session core.AuthoringSession) (core.GuidedUseCaseCommand, bool) {
 	command := core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, ExpectedRevision: session.Revision}
-	if !guidedDispatchAllowed(session.Guided.Status) {
+	if !core.GuidedDispatchAllowed(session) {
 		return command, false
 	}
 
 	if pending := session.Guided.PendingOperation; pending != nil {
 		command.OperationID, command.ExpectedRevision = pending.ID, pending.ExpectedRevision
 		command.Action, command.Content = pending.Action, pending.Content
-		command.QuestionID, command.InputDigest = pending.QuestionID, pending.InputDigest
+		command.QuestionID, command.InputDigest, command.NativeRevision = pending.QuestionID, pending.InputDigest, pending.NativeRevision
 
 		return command, true
 	}
@@ -70,10 +70,6 @@ func guidedProgressCommand(session core.AuthoringSession) (core.GuidedUseCaseCom
 	command.OperationID = "auto-" + command.Action + "-" + hex.EncodeToString(digest[:])
 
 	return command, true
-}
-
-func guidedDispatchAllowed(status string) bool {
-	return status != "paused" && status != "cancelled" && status != "completed" && status != "failed"
 }
 
 func guidedAutomaticAction(session core.AuthoringSession) (string, bool) {

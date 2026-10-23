@@ -40,6 +40,7 @@ func (p webViewProvider) GuidedUseCaseView(ctx context.Context, id, namespace st
 
 	guidedWebInputBinding(&view, state)
 	guidedWebWork(&view, result.Work)
+	guidedWebControls(&view, *session, result.Work)
 
 	if len(state.Checkpoints) > 0 {
 		view.Commit = state.Checkpoints[0].Commit
@@ -62,14 +63,11 @@ func (p webViewProvider) writeGuidedUseCase(operations service, request webui.Wr
 	if request.Action == "guided.start" {
 		session, err = operations.StartGuidedUseCase(operations.ctx, request.Fields["request_id"], namespace, "local")
 	} else {
-		var revision int64
+		var command core.GuidedUseCaseCommand
 
-		revision, err = strconv.ParseInt(request.Revision, 10, 64)
+		command, err = guidedWebCommand(request)
 		if err == nil {
-			session, err = operations.ChangeGuidedUseCase(operations.ctx, core.GuidedUseCaseCommand{
-				GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: request.ID, Namespace: namespace}, ExpectedRevision: revision,
-				OperationID: request.Fields["request_id"], Action: request.Fields["step"], Content: request.Fields["content"], QuestionID: request.Fields["question_id"], InputDigest: request.Fields["input_digest"],
-			})
+			session, err = operations.ChangeGuidedUseCase(operations.ctx, command)
 		}
 	}
 
@@ -79,7 +77,7 @@ func (p webViewProvider) writeGuidedUseCase(operations service, request webui.Wr
 	}
 
 	if err != nil {
-		if session.Guided != nil && session.Guided.PendingOperation != nil {
+		if guidedWebPending(session) {
 			return webui.WriteActionResponse{Status: webui.WriteStatusOK, Summary: "Use case retained; progression needs recovery.", RedirectURL: guidedUseCaseURL(session.ID, session.Namespace)}, nil
 		}
 

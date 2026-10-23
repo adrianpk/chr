@@ -13,6 +13,7 @@ import (
 )
 
 type service struct {
+	afterGuidedControl     func() error
 	afterGuidedAdmission   func(string) error
 	guidedWorkHost         guidedWorkActivator
 	afterGuidedPreparation func(string) error

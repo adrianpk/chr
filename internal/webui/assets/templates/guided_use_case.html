@@ -6,6 +6,7 @@
     <h2>{{.Guided.Name}}</h2>
     <p>Current stage: {{.Guided.Stage}} · {{.Guided.Status}}</p>
     {{if .Guided.Blocker}}<p role="status">{{.Guided.Blocker}}</p>{{end}}
+    {{if not .Guided.Suspended}}
     {{if .Guided.PendingAction}}
       <p>The previous operation is retained. Retry it to reconcile its original result.</p>
       <form method="post" action="/guided/actions">
@@ -47,6 +48,25 @@
         {{template "guided_fields.html" .}}
         <input type="hidden" name="step" value="{{.Guided.RetryAction}}">
         <button class="button button--primary" type="submit">Retry progression</button>
+      </form>
+    {{end}}
+    {{end}}
+    {{if .Guided.ControlStatus}}<p role="status">{{.Guided.ControlStatus}}</p>{{end}}
+    {{range .Guided.Controls}}
+      <form method="post" action="/guided/actions">
+        <input type="hidden" name="surface" value="guided">
+        <input type="hidden" name="action" value="guided.input">
+        <input type="hidden" name="confirm" value="true">
+        <input type="hidden" name="id" value="{{$.Guided.RunID}}">
+        <input type="hidden" name="namespace" value="{{$.Guided.Namespace}}">
+        <input type="hidden" name="revision" value="{{.Revision}}">
+        <input type="hidden" name="native_revision" value="{{.NativeRevision}}">
+        <input type="hidden" name="request_id" value="{{.RequestID}}">
+        <input type="hidden" name="step" value="{{.Action}}">
+        <input type="hidden" name="content" value="{{.Content}}">
+        <input type="hidden" name="question_id" value="{{.QuestionID}}">
+        <input type="hidden" name="input_digest" value="{{.InputDigest}}">
+        <button class="button" type="submit">{{.Label}}</button>
       </form>
     {{end}}
     {{if .Guided.Work}}

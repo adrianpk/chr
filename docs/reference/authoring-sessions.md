@@ -790,5 +790,42 @@ remain available from their original checkpoint.
 
 Automatic development applies to guided runs only. Standalone specification,
 plan, ticket and work operations retain their existing approval, authoring and
-explicit-start behavior. Managed host restart recovery, guided execution
-controls and final result presentation are separate delivery work.
+explicit-start behavior. Deferred ideas and final result presentation remain
+separate delivery work.
+
+## Guided Host Recovery and Controls
+
+The managed Web host retains provider-bound input before scheduling generation
+on its own lifetime context. Closing the submitting client does not cancel an
+accepted operation. Startup and bounded inventory sweeps recover the authoring
+journal and reconcile original pending control and stage requests across
+namespaces. A failed provider request is attempted once per host activation;
+an explicit retry or host restart can reconcile its original identity. Queries,
+rendering and polls do not perform recovery or dispatch.
+
+Native continuation checks the retained guided authority before every
+checkpoint. Dead owners use native process recovery. Graceful host interruption
+resumes the same quiescent native invocation with its consumed attempts and
+original finite policy. Native resume clears a task interruption marker without
+discarding an interrupted set-closure retry. Operator stop intent and native
+review, integration and prerequisite waits remain authoritative.
+
+**Pause use case**, **Resume use case** and **Cancel use case** use
+`guided.input` with the corresponding `step`. Each fresh control binds the
+current authoring revision and, when an invocation is known, its displayed
+`native_revision`. These guards are separate from an older pending stage's
+original revision. Stale or foreign controls cannot mutate either owner.
+
+Optional `control` state in `guided_state` retains the stop intent, interrupted
+status, pending control, original native request/receipt and acknowledged native
+revision. Its history is bounded to 128 completed controls. A pending stage is
+preserved separately. Native control requests carry optional guided provenance;
+requests without that provenance retain their previous serialization.
+
+Accepted stop intent prevents further guided dispatch immediately. The page
+reports a requested stop until the native owner confirms quiescence; native
+acceptance alone does not establish a paused or cancelled worker. Uncertain
+results retain the original request for receipt recovery before current
+prerequisites are checked. Only a verified native rejection without an accepted
+receipt permits a fresh control. A stop during uncertain admission can bind an
+existing exact admission request, but never admits work just to stop it.
