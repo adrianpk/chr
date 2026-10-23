@@ -102,3 +102,22 @@ func changeGuidedAdmissionProof(session *AuthoringSession, request *WorkflowStar
 		request.Policy.IncludeLaterTickets = true
 	}
 }
+
+// TestGuidedUseCaseControlAdmissionAuthority distinguishes an authorized but
+// stopped run from missing progression authority, without dispatching either.
+func TestGuidedUseCaseControlAdmissionAuthority(t *testing.T) {
+	for _, status := range []string{"paused", "cancelled", "completed", "failed", "stop_intent"} {
+		t.Run(status, func(t *testing.T) {
+			session, request := guidedAdmissionProofFixture(t)
+			if status == "stop_intent" {
+				session.Guided.Control = &GuidedControlState{StopIntent: "pause"}
+			} else {
+				session.Guided.Status = status
+			}
+
+			if err := guardGuidedAdmissionProof(session, "project", "default", request); !errors.Is(err, ErrGuidedUseCaseStopped) {
+				t.Fatal("authorized stopped admission lost its lifecycle guard", err)
+			}
+		})
+	}
+}

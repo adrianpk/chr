@@ -143,6 +143,16 @@ native approval, observing complete results and pending ideas at desktop and
 narrow widths. The browser check ran, rather than skipping. Its provider and Git
 fixtures are local and temporary. Owned resources finish through test cleanup.
 
+Initial final validation at `70608f4ced207bcaad5d0eae32dde7909d9aed95` failed
+`make verify` in `TestGuidedUseCaseAdmissionAuthority/intent`: missing authority
+was misclassified as a stopped run. The admission owner now validates canonical
+intent/scope before its lifecycle guard. The existing authority test and a new
+explicit-stop regression pass without weakening either guard. The failed
+controller diagnostics remain retained; the corrected head gets a fresh batch.
+Focused correction check passed:
+
+- `go test ./internal/core -run '^TestGuidedUseCase(AdmissionAuthority|ControlAdmissionAuthority)$' -count=1`
+
 The canonical PR and Looper checks ledger carry final clean-HEAD evidence in
 this required order: `make verify`, the configured normal recovery/control/
 ideas/result/WebJourney selection, its race selection, and `git diff --check`.
