@@ -29,6 +29,7 @@ type TelegramAction struct {
 
 // TelegramActionOffer contains current authority and one bounded, expiring prompt.
 type TelegramActionOffer struct {
+	Message           *TelegramMessageBlocks
 	Delivery          *TelegramDocumentResponse
 	Input             TelegramConversationInput
 	RequestID         string
@@ -155,5 +156,5 @@ func telegramActionTargetConflict(err error) bool {
 }
 
 func telegramActionOfferHasView(offer TelegramActionOffer) bool {
-	return offer.Text != "" || offer.Delivery != nil
+	return offer.Text != "" || offer.Delivery != nil || offer.Message != nil
 }

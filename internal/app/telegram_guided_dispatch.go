@@ -10,10 +10,24 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
+// An explicit new-project instruction can answer the project-choice diagnostic,
+// which intentionally carries no authority-bearing conversation or action reply.
+func (r telegramReceiver) respondGuidedStart(ctx context.Context, user core.TelegramAllowedUser, config core.TelegramReceiverConfig, update core.TelegramReceivedUpdate) (bool, error) {
+	if update.Kind != "message" || !telegramGuidedStart(update.Text) {
+		return false, nil
+	}
+
+	return r.respondGuided(ctx, user, config, update)
+}
+
 func (r telegramReceiver) respondGuided(ctx context.Context, user core.TelegramAllowedUser, config core.TelegramReceiverConfig, update core.TelegramReceivedUpdate) (bool, error) {
 	request, found, err := r.store.TelegramOperation(ctx, update, 0)
 	if err != nil {
 		return true, err
+	}
+
+	if found && request.OperationID == "guided.step" {
+		return true, r.offerGuidedControls(ctx, request, config)
 	}
 
 	if found && request.OperationID == "guided.continue" {
@@ -33,16 +47,13 @@ func (r telegramReceiver) respondGuided(ctx context.Context, user core.TelegramA
 }
 
 func (r telegramReceiver) routeTelegramGuided(ctx context.Context, operations telegramGuidedService, user core.TelegramAllowedUser, config core.TelegramReceiverConfig, update core.TelegramReceivedUpdate) (bool, error) {
-	input := core.TelegramConversationInput{Update: update, Config: config, Text: "New guided use case"}
-
-	projects, err := r.operations.ListRegisteredProjects(user.ProjectIDs)
-	input.Projects = projects
-
+	input, start, err := r.resolveTelegramGuidedInput(ctx, user, config, update)
 	if err != nil {
-		return true, err
+		return true, r.guidedDiagnostic(ctx, update, config, err)
 	}
 
-	start := telegramGuidedStart(update.Text)
+	projects := input.Projects
+
 	if !start {
 		present, err := r.hasGuidedConversation(ctx, update.Peer)
 		if err != nil || !present {
@@ -56,7 +67,15 @@ func (r telegramReceiver) routeTelegramGuided(ctx context.Context, operations te
 	}
 
 	if err != nil {
+		if start {
+			err = telegramGuidedStartFailure(err, projects)
+		}
+
 		return true, r.guidedDiagnostic(ctx, update, config, err)
+	}
+
+	if request.OperationID == "guided.step" {
+		return true, r.offerGuidedControls(ctx, request, config)
 	}
 
 	return true, r.continueTelegramGuided(ctx, request, config)
@@ -93,14 +112,14 @@ func (r telegramReceiver) reserveTelegramGuided(ctx context.Context, operations 
 		return core.TelegramOperationRequest{}, err
 	}
 
-	owner := telegramGuidedInput{Actor: user.OperatorID, Start: start, Command: core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: c.ID, ProjectID: target.ProjectID, Namespace: target.Namespace}}}
-	if !start {
-		owner, err = telegramGuidedCommand(c, input.Update, user.OperatorID)
-		if err != nil {
-			return core.TelegramOperationRequest{}, err
-		}
+	owner, err := telegramGuidedOwner(c, input, start, user.OperatorID)
+	if err != nil {
+		return core.TelegramOperationRequest{}, err
+	}
 
-		if _, err := operations.InspectTelegramGuided(ctx, target, owner.Command.RunID); err != nil {
+	if !start {
+		owner, err = prepareTelegramGuidedInput(ctx, operations, target, owner)
+		if err != nil {
 			return core.TelegramOperationRequest{}, err
 		}
 	}
@@ -115,11 +134,22 @@ func (r telegramReceiver) reserveTelegramGuided(ctx context.Context, operations 
 		return core.TelegramOperationRequest{}, err
 	}
 
-	return r.store.ReservePreparedTelegramOperation(ctx, core.TelegramOperationRequest{Source: input.Update, Operator: user.OperatorID, Target: target, OperationID: "guided.continue", Arguments: args}, data, time.Now())
+	operation := "guided.continue"
+	if owner.Offer {
+		operation = "guided.step"
+	}
+
+	return r.store.ReservePreparedTelegramOperation(ctx, core.TelegramOperationRequest{Source: input.Update, Operator: user.OperatorID, Target: target, OperationID: operation, Arguments: args}, data, time.Now())
 }
 
 func (r telegramReceiver) guidedDiagnostic(ctx context.Context, update core.TelegramReceivedUpdate, config core.TelegramReceiverConfig, failure error) error {
 	text := "The guided use case changed or is waiting for its current owner. Reopen its current prompt; saved input is unchanged."
+
+	var routing telegramGuidedRoutingFailure
+	if errors.As(failure, &routing) {
+		text = string(routing)
+	}
+
 	if safe, ok := core.TelegramConversationFailure(failure); ok {
 		text = safe
 	}

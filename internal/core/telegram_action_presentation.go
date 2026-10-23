@@ -8,6 +8,10 @@ import (
 )
 
 func queueTelegramActionView(op telegramConversationTransaction, request TelegramOperationRequest, offer TelegramActionOffer, token, legacy string) error {
+	if offer.Message != nil {
+		return queueTelegramPresentation(op.ctx, op.tx, request.Source, *offer.Message, offer.Input.Config.Digest(), op.now)
+	}
+
 	if offer.Delivery == nil {
 		return queueTelegramReferencedResponse(op.ctx, op.tx, request.Source, legacy, request.ID, offer.Input.Config.Digest(), op.now)
 	}
@@ -151,7 +155,7 @@ func (s *TelegramReceiverStore) ValidateTelegramActionDelivery(ctx context.Conte
 }
 
 func sealTelegramOfferedAction(op telegramConversationTransaction, request TelegramOperationRequest, offer TelegramActionOffer, token string) error {
-	if offer.Delivery == nil {
+	if offer.Delivery == nil && offer.Message == nil {
 		return nil
 	}
 

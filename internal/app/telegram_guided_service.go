@@ -12,7 +12,12 @@ type telegramGuidedService interface {
 }
 
 type telegramGuidedInput struct {
+	Name    string                    `json:"name,omitempty"`
+	Choices []string                  `json:"choices,omitempty"`
 	Actor   string                    `json:"actor"`
+	Inspect bool                      `json:"inspect,omitempty"`
+	Retry   bool                      `json:"retry,omitempty"`
+	Offer   bool                      `json:"offer,omitempty"`
 	Start   bool                      `json:"start,omitempty"`
 	Command core.GuidedUseCaseCommand `json:"command"`
 }
@@ -48,6 +53,15 @@ func (s service) ApplyTelegramGuided(ctx context.Context, target core.TelegramOp
 	scoped, err := s.telegramGuidedProject(ctx, target)
 	if err != nil {
 		return core.AuthoringSession{}, err
+	}
+
+	if input.Inspect {
+		observed, err := scoped.InspectGuidedUseCase(ctx, command.RunID, command.Namespace)
+		if err != nil {
+			return core.AuthoringSession{}, err
+		}
+
+		return *observed.Session, nil
 	}
 
 	if input.Start {

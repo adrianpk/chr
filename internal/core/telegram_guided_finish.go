@@ -85,3 +85,22 @@ func validateTelegramGuidedProgress(progress TelegramGuidedProgress, facts json.
 
 	return nil
 }
+
+func projectTelegramGuidedAction(ctx context.Context, tx *sql.Tx, retained TelegramActionClaim, result TelegramActionResult, now time.Time) (TelegramActionClaim, error) {
+	if result.Guided == nil {
+		return retained, nil
+	}
+
+	if result.State != "confirmed" || retained.Request.OperationID != "guided.step" {
+		return retained, ErrWorkflowConflict
+	}
+
+	if err := validateTelegramGuidedProgress(*result.Guided, result.Facts); err != nil {
+		return retained, err
+	}
+
+	updated, err := updateTelegramGuidedBinding(ctx, tx, retained.Request, *result.Guided, now)
+	retained.Request.Target.ConversationRevision = updated.Revision
+
+	return retained, err
+}

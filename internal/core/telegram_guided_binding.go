@@ -26,6 +26,11 @@ func (s *TelegramReceiverStore) ReserveTelegramGuidedConversation(ctx context.Co
 		}
 
 		op := telegramConversationTransaction{ctx: ctx, tx: tx, input: input, now: now}
+		// An explicit new-project instruction does not adopt a quoted conversation.
+		if input.Project != "" {
+			op.input.Update.ReplyToMessageID = 0
+		}
+
 		if err := op.ensurePeer(); err != nil {
 			return err
 		}
@@ -100,6 +105,12 @@ func (s *TelegramReceiverStore) ResolveTelegramGuidedTarget(ctx context.Context,
 
 		if err := op.validateTarget(selected); err != nil {
 			return err
+		}
+
+		if input.Conversation != "" {
+			if _, _, err := op.focus(); err != nil {
+				return err
+			}
 		}
 
 		conversation = *selected

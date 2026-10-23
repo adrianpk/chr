@@ -9,6 +9,7 @@ import (
 
 // TelegramActionResult contains confirmed owner facts or an explicit blocked outcome.
 type TelegramActionResult struct {
+	Guided            *TelegramGuidedProgress
 	Message           *TelegramMessageBlocks
 	Invocation        *TelegramInvocationBinding
 	InvocationPhase   string
@@ -134,14 +135,35 @@ func finishTelegramActionResult(ctx context.Context, tx *sql.Tx, retained Telegr
 		return err
 	}
 
+	return finishTelegramActionResponse(ctx, tx, retained, result, now)
+}
+
+func finishTelegramActionResponse(ctx context.Context, tx *sql.Tx, retained TelegramActionClaim, result TelegramActionResult, now time.Time) error {
+	var err error
+
+	retained, err = projectTelegramGuidedAction(ctx, tx, retained, result, now)
+	if err != nil {
+		return err
+	}
+
 	if err := queueTelegramActionResultResponse(ctx, tx, retained, result, now); err != nil {
 		return err
 	}
 
 	response := retained.Request
-	response.Source = retained.ResponseSource
 
-	return bindTelegramOperationResponse(ctx, tx, response)
+	response.Source = retained.ResponseSource
+	if err := bindTelegramOperationResponse(ctx, tx, response); err != nil {
+		return err
+	}
+
+	if result.Guided != nil {
+		_, err := tx.ExecContext(ctx, `UPDATE telegram_outbox SET question_binding=? WHERE request_id=? AND action_token IS NULL`, result.Guided.Binding, retained.Request.ID)
+
+		return err
+	}
+
+	return nil
 }
 
 func telegramActionResponseSource(ctx context.Context, tx *sql.Tx, claim TelegramActionClaim, result TelegramActionResult) (TelegramReceivedUpdate, bool, error) {

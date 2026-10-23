@@ -64,6 +64,9 @@ type TelegramConversation struct {
 	Revision             int64
 }
 
+// ErrTelegramProjectSelectionAmbiguous identifies an unresolved current project choice.
+var ErrTelegramProjectSelectionAmbiguous error = telegramConversationDiagnostic("Project selection is ambiguous. Use /projects then /project <project>.")
+
 type telegramConversationDiagnostic string
 
 func (e telegramConversationDiagnostic) Error() string { return string(e) }
@@ -266,7 +269,7 @@ func (op telegramConversationTransaction) defaultProject() (Project, error) {
 		return projects[0], nil
 	}
 
-	return Project{}, telegramConversationDiagnostic("Project selection is ambiguous. Use /projects then /project <project>.")
+	return Project{}, ErrTelegramProjectSelectionAmbiguous
 }
 
 func (op telegramConversationTransaction) peerSelection() (string, string, error) {

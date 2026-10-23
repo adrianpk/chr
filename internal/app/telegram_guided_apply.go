@@ -4,13 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
 )
 
 func (r telegramReceiver) continueTelegramGuided(ctx context.Context, request core.TelegramOperationRequest, config core.TelegramReceiverConfig) error {
-	if request.State == "confirmed" || request.State == "blocked" {
+	switch request.State {
+	case "confirmed", "blocked":
 		return nil
 	}
 
@@ -21,7 +23,7 @@ func (r telegramReceiver) continueTelegramGuided(ctx context.Context, request co
 
 	current, err := r.validateAuthoringAuthority(ctx, request, request.State == "applying")
 	if err != nil {
-		return r.finishAuthoringFailure(ctx, request, config, err)
+		return r.finishGuidedFailure(ctx, request, config, err)
 	}
 
 	owner, err := telegramRetainedGuidedInput(request)
@@ -30,37 +32,73 @@ func (r telegramReceiver) continueTelegramGuided(ctx context.Context, request co
 	}
 
 	if err := r.validateGuidedRunBinding(ctx, request, current, owner.Command.RunID); err != nil {
-		return r.finishAuthoringFailure(ctx, request, current, err)
+		return r.finishGuidedFailure(ctx, request, current, err)
 	}
 
 	if err := r.store.BeginTelegramOperation(ctx, request, time.Now()); err != nil {
 		return err
 	}
 
-	session, err := operations.ApplyTelegramGuided(ctx, request.Target, owner)
+	session, err := applyTelegramGuided(ctx, operations, request.Target, owner)
 	if errors.Is(err, core.ErrWorkflowConflict) {
-		return r.finishAuthoringFailure(ctx, request, current, err)
+		return r.finishGuidedFailure(ctx, request, current, err)
 	}
 
 	if err != nil {
 		return err
 	}
 
-	return r.finishTelegramGuided(ctx, request, session, current)
+	observed, err := operations.InspectTelegramGuided(ctx, request.Target, session.ID)
+	if err != nil {
+		return err
+	}
+
+	return r.finishTelegramGuided(ctx, request, observed, current)
 }
 
-func (r telegramReceiver) finishTelegramGuided(ctx context.Context, request core.TelegramOperationRequest, session core.AuthoringSession, current core.TelegramReceiverConfig) error {
-	progress, err := telegramGuidedProgress(session, core.DirectoryName+"/authoring/sessions/"+session.ID+"/session.md")
+func (r telegramReceiver) finishTelegramGuided(ctx context.Context, request core.TelegramOperationRequest, observed GuidedUseCaseInspection, current core.TelegramReceiverConfig) error {
+	progress, facts, err := telegramGuidedResult(observed)
 	if err != nil {
 		return err
 	}
 
+	text := telegramGuidedPrompt(observed)
+	request.Message = telegramOutcomeMessage("43", text)
+
+	return r.store.FinishTelegramGuided(ctx, request, progress, facts, text, current.Digest(), time.Now())
+}
+
+func telegramGuidedResult(observed GuidedUseCaseInspection) (core.TelegramGuidedProgress, json.RawMessage, error) {
+	progress, err := telegramGuidedProgress(observed)
+	if err != nil {
+		return progress, nil, err
+	}
+
+	session := observed.Session
 	facts, err := json.Marshal(map[string]any{"session": session.ID, "revision": session.Revision, "stage": session.Guided.Stage})
+
+	return progress, facts, err
+}
+
+func (r telegramReceiver) finishGuidedFailure(ctx context.Context, request core.TelegramOperationRequest, config core.TelegramReceiverConfig, failure error) error {
+	text := telegramGuidedFailure(failure)
+
+	facts, err := json.Marshal(map[string]string{"state": "blocked", "message": text})
 	if err != nil {
 		return err
 	}
 
-	return r.store.FinishTelegramGuided(ctx, request, progress, facts, telegramGuidedPrompt(session), current.Digest(), time.Now())
+	request.Message = telegramOutcomeMessage("43", text)
+
+	return r.store.FinishTelegramOperation(ctx, request, "blocked", "", facts, text, config.Digest(), time.Now())
+}
+
+func telegramGuidedFailure(failure error) string {
+	if safe, ok := core.TelegramConversationFailure(failure); ok {
+		return safe
+	}
+
+	return "The use case changed or its current step needs recovery. Saved inputs and work are retained. Send Show current step to read the current prompt."
 }
 
 func telegramRetainedGuidedInput(request core.TelegramOperationRequest) (telegramGuidedInput, error) {
@@ -94,17 +132,22 @@ func telegramGuidedSourceMatches(owner telegramGuidedInput, request core.Telegra
 		return telegramGuidedStart(request.Source.Text) && owner.Command.RunID == request.Target.ConversationID
 	}
 
+	if owner.Retry {
+		text := strings.ToLower(strings.TrimSpace(request.Source.Text))
+
+		return (text == "retry" || text == "continue") && owner.Command.OperationID != "" && !owner.Start && !owner.Inspect && !owner.Offer
+	}
+
 	return owner.Command.OperationID == request.ID
 }
 
-func telegramGuidedPrompt(session core.AuthoringSession) string {
-	text := "Guided use case: " + session.Topic + "\nStage: " + session.Guided.Stage + " · " + session.Guided.Status
-	switch session.Guided.Stage {
-	case "name":
-		return text + "\n\nWhat is the use-case name? Reply here."
-	case "dump":
-		return text + "\n\nAdd everything known about this use case. Reply Finish capture when the context is complete."
-	default:
-		return text + "\n\nSaved input is retained. The shared workflow owns the next step."
+func applyTelegramGuided(ctx context.Context, operations telegramGuidedService, target core.TelegramOperationTarget, input telegramGuidedInput) (core.AuthoringSession, error) {
+	session, err := operations.ApplyTelegramGuided(ctx, target, input)
+	// A missing prerequisite is a retained stage outcome, not a failed input.
+	var prerequisite *core.GuidedPrerequisiteError
+	if errors.As(err, &prerequisite) && session.Guided != nil {
+		return session, nil
 	}
+
+	return session, err
 }

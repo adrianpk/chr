@@ -13,8 +13,9 @@ import (
 )
 
 type telegramConversationNotice struct {
-	ID   int64
-	Text string
+	ID       int64
+	Text     string
+	Keyboard json.RawMessage
 }
 type telegramConversationAppFixture struct {
 	receiver  telegramReceiver
@@ -48,7 +49,8 @@ func newTelegramConversationAppFixture(t *testing.T) *telegramConversationAppFix
 		}
 
 		var body struct {
-			Text string `json:"text"`
+			Text     string          `json:"text"`
+			Keyboard json.RawMessage `json:"reply_markup"`
 		}
 
 		document := strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data")
@@ -62,7 +64,7 @@ func newTelegramConversationAppFixture(t *testing.T) *telegramConversationAppFix
 		}
 
 		id := messageID.Add(1)
-		f.notices <- telegramConversationNotice{id, body.Text}
+		f.notices <- telegramConversationNotice{ID: id, Text: body.Text, Keyboard: body.Keyboard}
 
 		result := map[string]any{"message_id": id}
 		if document {
