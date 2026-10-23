@@ -267,6 +267,7 @@ Delivery-set gate: `make verify`, bounded normal guided-workflow regressions, fo
 | Slice 4 development gate | `f87649d876723335043041d52b298646bdf9ef18` | All four configured commands passed through Looper; PR #433 merged by the controller at that exact commit. Report/tracker closure verified on dev. |
 | Initial Slice 4 gate | `70608f4ced207bcaad5d0eae32dde7909d9aed95` | `make verify` failed because missing development intent returned the stopped-state error. Validate admission authority before the lifecycle guard; retain both authority and explicit-stop regressions. Final evidence is regenerated for the corrected PR head. |
 | Web browser journey | `0fa7cec16dc3e6b02f3db1d593e3cf4c0081da69` | Actual owned Chromium journey passed at desktop and narrow widths against temporary Git and deterministic providers. |
+| Initial Slice 5 gate | `cacfc51480ecfa818b74d8af2d3eabad6df6c89c` | `make verify` failed on two stale maintenance CLI migration-count assertions. The correction requires migration 29 and its exact name; focused maintenance status tests pass. All configured checks are regenerated on the corrected clean head. |
 | Telegram actual-client journey | pending | not observed |
 | TUI interaction and cross-adapter parity | pending | not run |
 | Final delivery-set gate | pending | not run |

@@ -202,6 +202,14 @@ Initial routing/capture also passed the broader normal and race selection
 `go test [-race] ./internal/core ./internal/app -run '^Test(GuidedUseCaseTelegram|TelegramConversation|TelegramAuthoring)' -count=1 -timeout=3m`
 with each form executed separately. That race selection cost core 119.881s and
 app 100.355s. Subsequent checks stay focused unless another manual owner changes.
+The initial Looper gate on `cacfc51480ecfa818b74d8af2d3eabad6df6c89c`
+failed `make verify`: two maintenance CLI tests still expected 28 migrations,
+while the guided association correctly adds migration 29. The tests now require
+29 pending/applied migrations and the exact guided migration name. The focused
+command `go test ./internal/app -run '^TestMaintenanceDBStatusReports(PendingMigrationsWhenDatabaseIsMissing|AppliedMigrations)$' -count=1 -timeout=3m`
+passes. Looper retains the failed candidate diagnostics; all final commands are
+regenerated after this correction.
+
 The required final ordered commands are:
 
 - `make verify`
