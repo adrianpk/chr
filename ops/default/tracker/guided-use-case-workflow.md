@@ -6,8 +6,8 @@ Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 5, Guided Telegram journey; T5.1 and T5.2 are complete, and T5.3 transport faults/documentation are in progress.
-Progress: 4 of 6 slices delivered; 14 of 18 tasks completed. Guided Telegram routing, shared lifecycle, originals/results and Web continuation are implemented. Remaining transport faults, guidance and exact-HEAD PR checks are active.
+Active slice: Slice 5, Guided Telegram journey; T5.1-T5.3 are complete, and canonical PR preparation and exact-HEAD validation are active.
+Progress: 4 of 6 slices delivered; 15 of 18 tasks completed. Guided Telegram routing, shared lifecycle, originals/results, Web continuation, transport faults and guidance are implemented. Slice 5 PR preparation and exact-HEAD checks are active.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
 Spec: [Approved workflow](../spec/stable/guided-use-case-workflow.md)
@@ -46,7 +46,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | T4.3 | Complete Web journey/fault/browser evidence and user-facing documentation. | done | `0fa7cec16dc3e6b02f3db1d593e3cf4c0081da69` | HTTP journey, actual lost Git commit responses, focused race, owned Chromium journey and scoped strict lint passed. User Guide and changelog updated. |
 | T5.1 | Natural-language Telegram start and shared current-step routing. | done | `77b7f637587a63026ce914368939e7f0ed7158e7`, `5b032e9f6c7ce34b0e0222ca6162ca63fbcc6e53` | Named scope selection, current clarification, sealed buttons, duplicate callbacks, lost owner acknowledgement and preserved inputs pass focused normal/race checks; strict scoped lint passes. |
 | T5.2 | Concise Telegram progress/artifacts/controls/results and cross-interface continuation. | done | `5de6795a8cadcf78fb0dda91a3f67830eebaeb72` | Shared managed host, bounded recovery, native waits/controls, coalesced views, original attachments, verified completion and exact Web-run continuation pass focused normal/race checks; strict lint passes. |
-| T5.3 | Telegram transport/journey regressions, declared client evidence and documentation. | in progress | pending | Shared lifecycle and native journey fixtures pass; remaining source/concurrency/transport faults, guidance and changelog are pending. |
+| T5.3 | Telegram transport/journey regressions, declared client evidence and documentation. | done | `05f2576a944a8c4e7d98346d9f36c92ee533e306` | Lost acknowledgements after newer controls, SQLite reopen, stale Web inputs, foreign replies/buttons and original upload retries pass focused normal/race checks; strict lint passes. User Guide, receiver reference and changelog updated. Actual user-operated client acceptance was not performed. |
 | T6.1 | Shared-service TUI journey input, navigation, artifacts and resume. | pending | pending | pending |
 | T6.2 | TUI controls/progress/results and cross-adapter revision/authority parity. | pending | pending | pending |
 | T6.3 | TUI/parity acceptance, documentation, cycle report and exact-candidate closure gate. | pending | pending | pending |
@@ -59,7 +59,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | 2 | delivered | #431 | `2246651001dd6002f783fd86d0dcc13f5bef02e6` | [Slice 2 report](../report/slices/guided-use-case-workflow/slice-2-quiz-spec.md) |
 | 3 | delivered | #432 | `dfcfae6e787742d976f99d40f292a7e047f5252a` | [Slice 3 report](../report/slices/guided-use-case-workflow/slice-3-work-execution.md) |
 | 4 | delivered | [#433](https://forge.adrianpk.com/adrianpk/chr/pulls/433) | `f87649d876723335043041d52b298646bdf9ef18` | [Slice 4 report](../report/slices/guided-use-case-workflow/slice-4-web-recovery.md) |
-| 5 | in progress | pending | pending | [Slice 5 draft report](../report/slices/guided-use-case-workflow/slice-5-telegram.md) |
+| 5 | reviewing | pending | pending | [Slice 5 report](../report/slices/guided-use-case-workflow/slice-5-telegram.md) |
 | 6 | pending | pending | pending | pending |
 
 ## Acceptance evidence
@@ -78,7 +78,7 @@ Criterion numbers correspond to the approved specification. The plan defines the
 | GUC-08 | T1.3, T2.1 | implemented: nonempty capture and valid, sufficient clarification are required; focused invalid/empty/budget/foreign completion regressions passed. |
 | GUC-09 | T2.2, T3.1, T4.1 | implemented: original authoring/publication/materialization operations reconcile before further progression; host startup recovers a retained quiz owner receipt without regeneration. |
 | GUC-10 | T3.2, T4.1, T4.3 | partial: lost admission/start/control responses and host startup retain the original invocation and consumed attempts; complete publication-response variants remain with T4.3. |
-| GUC-11 | T4.1, T5.3, T6.2 | partial: request cancellation, real dead child owners, graceful host interruption and durable operator stops passed local normal/race checks; remaining adapter acceptance is pending. |
+| GUC-11 | T4.1, T5.3, T6.2 | partial: request cancellation, real dead child owners, graceful host interruption and durable operator stops passed local normal/race checks. Telegram retains original effects and snapshots across lost acknowledgements and SQLite reopen; TUI acceptance remains pending. |
 | GUC-12 | T3.3, T4.1, T6.2 | partial: Web controls delegate to native revision-bound receipts and distinguish stop intent from quiescence; original policy, spent attempts and human review remain enforced. TUI controls remain pending. |
 | GUC-13 | T1.2, T2.3, T3.1, T4.3 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
 | GUC-14 | T4.2, T4.3, T5.2, T6.2, T6.3 | partial: Web/Telegram native receipt-backed results, closing evidence, validation exports and actual code locations pass; TUI and final parity remain pending. |
@@ -231,6 +231,29 @@ an actual lost canonical publication response before showing verified completion
 Result exports retain validation/closing evidence and later ideas. Focused normal,
 race and strict lint checks pass. T5.3 owns remaining transport fault coverage,
 Telegram guidance/changelog and final PR preparation; no client acceptance is claimed.
+
+T5.3 is complete in `05f2576a944a8c4e7d98346d9f36c92ee533e306`. Fault fixtures reproduced
+an original append acknowledgement failing after a newer pause and an accepted
+button being superseded after a newer resume. Recovery now confirms the original
+request without changing the latest display or granting it reply authority. The
+accepted button retains its original choice, operation, actor, peer and root;
+pending stale buttons still fail. SQLite reopen preserves both original effects.
+Stale replies/buttons after independent Web input and foreign peer input cannot
+mutate the run. A real multipart upload with a lost response retains its original
+bytes and consumed attempt across reopen and succeeds through a definite resend.
+The User Guide, receiver reference and Unreleased capability describe this journey.
+No user-operated Telegram client observation is claimed.
+
+Task checks passed:
+
+- `go test ./internal/core ./internal/app -run '^Test(GuidedUseCaseTelegram(Overtaken|SourceGuards|UploadRecovery|LostAck|Buttons)|TelegramOperationAction|TelegramControlReceipt)' -count=1 -timeout=3m` — core 1.571s, app 4.786s.
+- `go test -race ./internal/core ./internal/app -run '^Test(GuidedUseCaseTelegram(Overtaken|SourceGuards|UploadRecovery|LostAck|Buttons)|TelegramOperationAction|TelegramControlReceipt)' -count=1 -timeout=3m` — core 38.663s, app 42.015s.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/core/... ./internal/app/...` — zero issues.
+- `git diff --check` — passed before the task commit.
+
+Final slice checks use the configured ordered commands through Looper on the
+clean PR-reference HEAD. The canonical PR Validation and controller ledger retain
+the exact candidate and outcomes.
 
 Delivery-set gate: `make verify`, bounded normal guided-workflow regressions, focused race coverage for changed ownership, then `git diff --check`, on the exact final integrated `dev` candidate. The scheduled nightly retains exhaustive certification ownership.
 

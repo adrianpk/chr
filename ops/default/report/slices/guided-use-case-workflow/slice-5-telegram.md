@@ -1,6 +1,6 @@
 # Slice 5: Guided Telegram Journey
 
-Status: drafting
+Status: reviewing
 Delivery set: guided-use-case-workflow
 Plan: `ops/default/plan/guided-use-case-workflow.md`
 Tracker: `ops/default/tracker/guided-use-case-workflow.md`
@@ -9,13 +9,14 @@ PR: pending
 Initial routing/capture commit: `77b7f637587a63026ce914368939e7f0ed7158e7`
 Current-step routing commit: `5b032e9f6c7ce34b0e0222ca6162ca63fbcc6e53`
 Shared lifecycle/presentation commit: `5de6795a8cadcf78fb0dda91a3f67830eebaeb72`
+Transport fault/guidance commit: `05f2576a944a8c4e7d98346d9f36c92ee533e306`
 
 ## Purpose
 
 Map Telegram onto the same retained guided use case delivered by the Web
-checkpoint. T5.1 and T5.2 are complete. T5.3 transport faults and documentation
-remain active; the slice stays drafting until those and the final exact-HEAD
-checks are complete.
+checkpoint. The receiver starts, resumes, controls and inspects the canonical
+journey with current prompts, committed originals and verified native results.
+T5.1-T5.3 are complete; this report accompanies the Slice 5 PR.
 
 Plan: [Approved slice map](../../../plan/guided-use-case-workflow.md).
 Tracker: [Tasks and evidence](../../../tracker/guided-use-case-workflow.md).
@@ -43,7 +44,6 @@ Tracker: [Tasks and evidence](../../../tracker/guided-use-case-workflow.md).
 - Replaced prompts, foreign peers and changed registered roots cannot replace
   the original binding or canonical input. The additive nullable association
   leaves existing manual rows and authoring eligibility unchanged.
-
 - The production receiver reuses the shared managed host for retained authoring
   progression and exact native work. Association discovery is paged and bounded;
   current peer, operator, registered root and canonical run checks remain effective
@@ -62,6 +62,15 @@ Tracker: [Tasks and evidence](../../../tracker/guided-use-case-workflow.md).
   with actual repository/branch/commit locations. Show results exports complete
   verified delivery, validation, closing and pending-idea evidence. Terminal
   associations remain inspectable without becoming new execution authority.
+
+- Lost owner acknowledgements reconcile the original effect after newer controls
+  and SQLite reopen. A historical acknowledgement cannot replace the current
+  display or grant a new reply binding. Foreign inputs and stale Web-side
+  revisions remain rejected.
+- An uncertain original upload keeps its full snapshot, destination and consumed
+  send attempt across reopen; a definite retry finishes delivery without
+  repeating the project operation. User Guide, receiver reference and changelog
+  describe the available journey and its control boundaries.
 
 ## Implementation Notes
 
@@ -95,6 +104,14 @@ native revisions or receipts. The existing outbox and document admission helpers
 retain the exact frozen image, quota, hash, destination, retry and cleanup rules.
 No new workflow store or execution engine is introduced.
 
+An accepted guided button replays its retained answer and original operation
+rather than being superseded solely because its display moved on. Current
+presentation, actor, peer and registered-root checks still apply. The shared
+owner keeps its original canonical revisions and effect identity. If result
+projection loses the display CAS, a separately guarded receipt-only finish
+confirms the original request and leaves the newer prompt unchanged. Pending
+choices retain their ordinary expiry and revision checks.
+
 ## Contracts Added or Changed
 
 - Optional `telegram_conversations.guided_run_id` associates a canonical guided
@@ -118,6 +135,21 @@ No new workflow store or execution engine is introduced.
   additive association preserving existing manual rows.
 
 ## Validation
+
+T5.3 focused task checks passed:
+
+- `go test ./internal/core ./internal/app -run '^Test(GuidedUseCaseTelegram(Overtaken|SourceGuards|UploadRecovery|LostAck|Buttons)|TelegramOperationAction|TelegramControlReceipt)' -count=1 -timeout=3m` — core 1.571s, app 4.786s.
+- `go test -race ./internal/core ./internal/app -run '^Test(GuidedUseCaseTelegram(Overtaken|SourceGuards|UploadRecovery|LostAck|Buttons)|TelegramOperationAction|TelegramControlReceipt)' -count=1 -timeout=3m` — core 38.663s, app 42.015s.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/core/... ./internal/app/...` — zero issues.
+- `git diff --check` — passed before the task commit.
+
+The lost-append and lost-button fixtures first reproduced failed reconciliation
+and superseded accepted input after newer controls. Receipt-only acknowledgement
+and accepted-choice recovery correct those failures while keeping the new display
+and original canonical revision. Real HTTP peer/stale-input checks and multipart
+upload response loss cover the adapter boundaries. SQLite reopen retains original
+operation and snapshot identities. Strict complexity failures were resolved by
+cohesive helper extraction without suppressions.
 
 T5.1 focused task checks passed:
 
@@ -170,16 +202,15 @@ Initial routing/capture also passed the broader normal and race selection
 `go test [-race] ./internal/core ./internal/app -run '^Test(GuidedUseCaseTelegram|TelegramConversation|TelegramAuthoring)' -count=1 -timeout=3m`
 with each form executed separately. That race selection cost core 119.881s and
 app 100.355s. Subsequent checks stay focused unless another manual owner changes.
-The final configured ordered commands remain pending until the complete clean
-PR-reference HEAD; Looper will retain that exact evidence.
+The final configured commands are `make verify`, the focused normal guided
+Telegram selection, its race form and `git diff --check`, in that order. Looper
+retains their exact clean PR-reference HEAD evidence; the canonical PR Validation
+section lists the successful commands.
 
 ## Risks and Follow-ups
 
-T5.3 still owns the remaining stale/foreign source, concurrent control, transport
-loss/restart regressions, Telegram guidance and changelog, followed by the final
-exact-HEAD PR checks. Include an urgent control finishing between an ordinary
-guided effect and its receiver acknowledgement, preserving the original operation
-and latest display fence. Authoring controls serialize at the shared mutation boundary
-and retain provider deadlines; native stop intent remains distinct from quiescence.
-No separately authorized user-operated Telegram client observation has been
-performed for this slice.
+Authoring controls serialize at the shared mutation boundary and retain provider
+deadlines; native stop intent remains distinct from quiescence. No separately
+authorized user-operated Telegram client observation was performed for this slice.
+Local HTTP, SQLite, Git and native-work fixtures establish only their stated
+transport and shared-owner boundaries.
