@@ -96,7 +96,6 @@
         {{end}}
         {{range .Guided.Result.Validation}}
           <details><summary>{{.Label}} validation: {{.Outcome}}</summary>
-            <p>{{.Reference}}</p>
             {{if .Waiver}}<p>Validation waiver: {{.Waiver}}</p>{{end}}
             {{range .Commands}}<p><code>{{.Command}}</code> · Exit code: {{.ExitCode}}</p>{{end}}
           </details>

@@ -354,6 +354,50 @@ networking or a tunnel. See [Run the local Web
 UI](../run-local-web-ui.md) and [Expose the local Web UI
 deliberately](../expose-local-web-ui.md).
 
+## Develop a Guided Use Case in the Web UI
+
+Open **Guided use cases** and choose **Develop a new use case** in the intended
+namespace. This starts a retained development request. Configure the project's
+Git target, generation and worker harnesses, native workflow and delivery policy
+first; the page identifies missing setup and the action needed to continue.
+
+1. Enter the use-case name. Add the requirements, constraints and other known
+   context, then choose **Finish capture** when the input is complete.
+2. Answer the clarification questions. chr waits for meaningful required answers;
+   it keeps asking when the saved context is insufficient.
+3. When clarification is sufficient, chr generates and approves that exact
+   specification under the retained development request. It prepares the plan,
+   tracker and task tickets, then starts only that prepared scope under the
+   project's native review and delivery policy.
+4. Refresh the run to inspect progress and complete any reported operator action.
+   Human review waits for approval of the exact native candidate. Validation,
+   an open PR and confirmed delivery have separate counts.
+5. Read **Results** for confirmed repository, branch, commit and PR locations,
+   validation outcomes, set-closing evidence and remaining work. Completion
+   requires delivery receipts and all required closing evidence.
+
+Each completed authoring stage has a saved Git version. Expand **Inspect
+committed dump**, **Inspect committed specification** or another saved stage to
+read its complete input. Later working-copy edits do not replace the version
+used for this run. Standalone Quizzes, Specs and Plans keep their separate
+manual authoring workflow.
+
+Return through **All guided use cases** to reopen a named run. Closing the tab
+or losing a connection does not discard accepted input. The managed Web host
+reconciles retained work after restart. When **Retry progression** appears,
+retry the original operation; unresolved publication is observed before another
+attempt can be considered. Reopening or refreshing a page only reads state.
+
+Use **Pause**, **Resume** or **Cancel** on the run. A requested stop and actual
+native quiescence are distinct; wait for the displayed owner acknowledgement.
+Resume keeps the original prepared work and remaining attempt budget. Reload a
+stale form before sending a new action.
+
+Enter new requirements under **Ideas for later review** after the first saved
+stage. chr acknowledges and retains them separately, including during a pause.
+They remain visible with results and pending separate review; they do not expand
+the current specification, admitted tickets or execution budget.
+
 ## Complete a Web Workflow
 
 1. Capture project context in Dumps. Choose a named case for details that belong

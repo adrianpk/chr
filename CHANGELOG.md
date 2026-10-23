@@ -12,6 +12,14 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
+- Develop a use case through one resumable Web journey: name it, capture context
+  and answer clarification questions, then let chr approve the generated
+  specification, prepare its tickets and start the exact agreed work under
+  project policy. Saved Git versions preserve the inputs through later edits
+  and restarts. Pause, resume and cancel retain native controls and attempt
+  limits; new ideas wait for separate review. Results distinguish validation
+  and open PRs from confirmed delivery and show the delivered code locations.
+
 - Create use cases directly from the Web Cases page. Enter a name, description
   and context; the new case is immediately available when capturing a dump.
 
