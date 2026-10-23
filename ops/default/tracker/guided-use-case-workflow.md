@@ -6,8 +6,8 @@ Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 6, Guided TUI journey; T6.1 is complete, and T6.2 native controls/results and cross-adapter continuation are in progress.
-Progress: 5 of 6 slices delivered; 16 of 18 tasks completed. PR #434 is merged and its Telegram checkpoint is closed. Guided TUI input/navigation/originals are implemented; native controls/results and parity are active.
+Active slice: Slice 6, Guided TUI journey; T6.1 and T6.2 are complete. T6.3 terminal acceptance, criterion reconciliation and documentation are in progress.
+Progress: 5 of 6 slices delivered; 17 of 18 tasks completed. PR #434 is merged and its Telegram checkpoint is closed. Guided TUI input, controls, originals, results and shared-run parity are implemented; independent terminal acceptance and documentation are active.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
 Spec: [Approved workflow](../spec/stable/guided-use-case-workflow.md)
@@ -48,8 +48,8 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | T5.2 | Concise Telegram progress/artifacts/controls/results and cross-interface continuation. | done | `5de6795a8cadcf78fb0dda91a3f67830eebaeb72` | Shared managed host, bounded recovery, native waits/controls, coalesced views, original attachments, verified completion and exact Web-run continuation pass focused normal/race checks; strict lint passes. |
 | T5.3 | Telegram transport/journey regressions, declared client evidence and documentation. | done | `05f2576a944a8c4e7d98346d9f36c92ee533e306` | Lost acknowledgements after newer controls, SQLite reopen, stale Web inputs, foreign replies/buttons and original upload retries pass focused normal/race checks; strict lint passes. User Guide, receiver reference and changelog updated. Actual user-operated client acceptance was not performed. |
 | T6.1 | Shared-service TUI journey input, navigation, artifacts and resume. | done | `5e15bddd36e03d7adbb02ad3856d1ae3a22d4519` | Actual model keys reach canonical capture/clarification/approval; original reads survive working-copy edits. Stale drafts and replay/sequence fences pass normal/race checks; strict lint passes. |
-| T6.2 | TUI controls/progress/results and cross-adapter revision/authority parity. | in progress | pending | pending |
-| T6.3 | TUI/parity acceptance, documentation, cycle report and exact-candidate closure gate. | pending | pending | pending |
+| T6.2 | TUI controls/progress/results and cross-adapter revision/authority parity. | done | `da313792a409f1e19145a9c33137b0b854600d0d` | Shared native controls, exact approval routing, later ideas, receipt-backed results and Web/Telegram/TUI continuation pass focused normal/race checks; strict lint passes. |
+| T6.3 | TUI/parity acceptance, documentation, cycle report and exact-candidate closure gate. | in progress | pending | Final integrated gate and closure remain controller-owned. |
 
 ## Slice delivery
 
@@ -281,3 +281,5 @@ Planning artifacts do not establish implementation or delivery. Advance a task o
 Review later ideas after the current guided development finishes. They never become extra work in this delivery set or in a user's active invocation merely because they were retained.
 
 T6.1 is complete in `5e15bddd36e03d7adbb02ad3856d1ae3a22d4519`. The Slice 6 report retains focused normal/race and strict lint evidence for named terminal navigation, frozen current-step input, committed originals and explicit managed-host startup. T6.2 controls/results and T6.3 acceptance remain pending.
+
+T6.2 is complete in `da313792a409f1e19145a9c33137b0b854600d0d`. The Slice 6 report records exact focused normal/race commands, receipt-backed results, original prepared documents and cross-adapter stale/scope guards. T6.3 terminal acceptance and delivery-set documentation are active.
