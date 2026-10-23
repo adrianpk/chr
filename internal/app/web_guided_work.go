@@ -11,7 +11,7 @@ func guidedWebWork(view *webui.GuidedUseCaseView, status *WorkflowWorkStatus) {
 		return
 	}
 
-	work := &webui.GuidedUseCaseWork{Status: strings.ReplaceAll(status.Status, "_", " "), Total: status.Total, Validated: status.ValidatedTasks, Confirmed: status.ConfirmedTickets, Integrated: status.IntegratedUnits, Remaining: status.Remaining, Attempts: status.TotalAttempts}
+	work := &webui.GuidedUseCaseWork{Status: status.Status, Total: status.Total, Validated: status.ValidatedTasks, Confirmed: status.ConfirmedTickets, Integrated: status.IntegratedUnits, Remaining: status.Remaining, Attempts: status.TotalAttempts}
 
 	work.MaxWorkerAttempts, work.WorkerTimeoutSeconds = status.FrozenPolicy.MaxWorkerAttempts, status.FrozenPolicy.WorkerTimeoutSeconds
 	if status.PullRequest != nil {

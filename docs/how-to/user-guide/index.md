@@ -382,8 +382,12 @@ Reopening a page only reads state; it does not retry work.
 
 Return to **Cases** to reopen a named workflow. Closing the tab or losing a
 connection does not discard accepted input. **Retry this step** reuses an
-unfinished operation. **Pause**, **Resume** and **Cancel** retain the original
-work, controls and remaining execution allowance.
+unfinished operation. Workflow actions appear inside the progress or recovery
+panel. **Pause** is available during execution, with **Resume** on a paused
+workflow; input forms do not add a separate pause button. **Cancel workflow**
+asks for confirmation and ends the workflow while keeping saved documents and
+completed changes. The guided Quiz's **Cancel** uses the same confirmation.
+Cancellation does not delete documents or undo delivered work.
 Configure Git delivery and the generation and worker harnesses before starting
 development; project configuration is separate from the guided input screens.
 

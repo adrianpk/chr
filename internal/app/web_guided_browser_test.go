@@ -41,6 +41,8 @@ func TestGuidedUseCaseWebBrowser(t *testing.T) {
 	reopenGuidedBrowser(t, browser, server.URL)
 	assertGuidedBrowserText(t, browser, "0 delivered")
 	assertGuidedBrowserText(t, browser, "The work needs review")
+	assertGuidedControlPanel(t, browser)
+	assertGuidedCancelDeclined(t, browser, `[data-workflow-cancel] button`)
 	guidedBrowserSubmit(t, browser, "pause", "")
 	assertGuidedBrowserText(t, browser, "Paused")
 	guidedBrowserSubmit(t, browser, "resume", "")
@@ -86,6 +88,7 @@ func captureGuidedBrowserInput(t *testing.T, browser *webWorkflowBrowser, server
 	assertGuidedBrowserTab(t, browser, "/quizzes")
 	assertGuidedBrowserNavigation(t, browser)
 	assertGuidedQuizLayout(t, browser)
+	assertGuidedCancelDeclined(t, browser, `[value="quiz.cancel"]`)
 	assertSharedQuizAppearance(t, browser, serverURL)
 
 	return runURL

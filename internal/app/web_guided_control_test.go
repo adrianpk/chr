@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
-	"strconv"
 	"strings"
 	"testing"
 
@@ -97,10 +96,13 @@ func pauseGuidedWebStage(t *testing.T, provider webViewProvider, handler http.Ha
 
 	page := guidedCaptureHTTP(t, handler, http.MethodGet, guidedUseCaseURL(pending.ID, pending.Namespace), nil)
 
-	pause := guidedWebControlForm(t, page.Body.String(), "pause")
-	if pause.Get("revision") != strconv.FormatInt(pending.Revision, 10) || pause.Get("revision") == strconv.FormatInt(answer.ExpectedRevision, 10) {
-		t.Fatal("control reused the pending stage revision")
+	if strings.Contains(page.Body.String(), `name="step" value="pause"`) {
+		t.Fatal("authoring recovery offered a redundant pause")
 	}
+
+	// A persisted pause from another adapter must remain resumable in the Web UI.
+	pause := guidedWebCommandForm(core.GuidedUseCaseCommand{GuidedUseCaseScope: answer.GuidedUseCaseScope, OperationID: "external-pause", ExpectedRevision: pending.Revision, Action: "pause"})
+	pause.Set("native_revision", "0")
 
 	response := guidedCaptureHTTP(t, handler, http.MethodPost, "/guided/actions", pause)
 

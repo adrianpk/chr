@@ -130,8 +130,10 @@
     const panel = surface();
     if (!form || !panel) return;
     const action = event.submitter && event.submitter.value || form.elements.action.value;
-    if (['quiz.skip', 'quiz.cancel', 'quiz.done'].includes(action) && dirty(panel)) {
-      if (!window.confirm('Discard this unsent answer and ' + action.slice(5) + '?')) {
+    const cancelsWorkflow = action === 'quiz.cancel' && Boolean(form.elements.guided_run);
+    if (cancelsWorkflow || ['quiz.skip', 'quiz.cancel', 'quiz.done'].includes(action) && dirty(panel)) {
+      const message = cancelsWorkflow ? 'Cancel this workflow? Saved documents and completed changes will be kept.' + (dirty(panel) ? ' Your unsent answer will be discarded.' : '') : 'Discard this unsent answer and ' + action.slice(5) + '?';
+      if (!window.confirm(message)) {
         event.preventDefault(); event.stopImmediatePropagation(); return;
       }
       discard(panel);

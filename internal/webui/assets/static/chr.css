@@ -1540,8 +1540,6 @@ code {
 
 /* The case workflow composes the existing Case, Dump and Quiz surfaces. */
 .case-workflow { width: min(100%, 1040px); margin-inline: auto; display: grid; gap: 24px; }
-.workflow-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-.workflow-controls form { margin: 0; }
 .workflow-feedback:empty { display: none; }
 .workflow-feedback { margin: 0; color: var(--muted); font-size: 14px; }
 .workflow-documents { border-top: 1px solid var(--line); padding-top: 20px; }
@@ -1557,7 +1555,6 @@ code {
 
 .case-workflow--name { width: min(100%, 720px); margin: 28px auto; }
 .case-workflow--name .case-edit-panel { width: 100%; }
-.case-workflow .workflow-controls { margin-top: 20px; }
 .case-workflow .detail-actions { flex-wrap: wrap; }
 .case-workflow:has(.board-grid) { width: 100%; }
 
@@ -1565,3 +1562,14 @@ code {
 
 .case-workflow--quiz { width: min(100%, 1120px); display: block; }
 .quiz-heading { min-height: 40px; }
+
+/* Lifecycle actions share the existing editor footer inside their status panel. */
+.workflow-page > .page-header { width: 100%; max-width: 1040px; margin-inline: auto; }
+.workflow-page:has(.board-grid) > .page-header { max-width: none; }
+.workflow-progress { padding: 0; overflow: hidden; }
+.workflow-progress__body { padding: 24px; }
+.workflow-progress__body > p { margin: 0; }
+.workflow-progress__body > p + p { margin-top: 12px; }
+@media (max-width: 600px) {
+  .workflow-progress__body { padding: 18px; }
+}

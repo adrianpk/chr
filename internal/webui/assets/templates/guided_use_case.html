@@ -5,7 +5,6 @@
     {{template "case_create_panel.html" .}}
   {{else}}
     {{if and (eq .Guided.Surface "quizzes") (not .Detail.Quiz)}}{{template "quiz_heading.html" .}}{{end}}
-    {{if .Guided.Message}}<p role="status">{{.Guided.Message}}</p>{{end}}
     {{if eq .Guided.Surface "board"}}
       {{if .Guided.Work}}{{template "guided_progress.html" .}}{{end}}
       {{if and .Guided.Result (or .Guided.Result.Complete (eq .Guided.Status "cancelled"))}}{{template "guided_result.html" .}}{{end}}
@@ -14,8 +13,9 @@
       {{if .Detail.Content}}{{template "artifact_document.html" .Detail.Content}}{{else}}<p class="empty-state">Not available yet.</p>{{end}}
       <a class="button" href="{{.Guided.CurrentURL}}">Continue</a>
     {{else if .Guided.Suspended}}
+      {{template "guided_status.html" .}}
     {{else if .Guided.Processing}}
-      {{if eq .Guided.Surface "quizzes"}}<div class="quiz-panel" aria-busy="true"><div class="quiz-question" aria-label="Preparing question"><span class="quiz-question-placeholder" aria-hidden="true"></span></div></div>{{end}}
+      {{if eq .Guided.Surface "quizzes"}}<p role="status">{{.Guided.Message}}</p><div class="quiz-panel" aria-busy="true"><div class="quiz-question" aria-label="Preparing question"><span class="quiz-question-placeholder" aria-hidden="true"></span></div></div>{{else}}{{template "guided_status.html" .}}{{end}}
     {{else if .Guided.PendingAction}}
       {{template "guided_retry.html" .}}
     {{else if eq .Guided.Surface "dumps"}}
@@ -26,15 +26,27 @@
       {{if .Detail.Content}}{{template "artifact_document.html" .Detail.Content}}{{end}}
       {{if .Guided.RetryAction}}{{template "guided_retry.html" .}}{{end}}
     {{end}}
-    {{if and .Guided.ShowControls (not .Detail.Quiz) (or (ne .Guided.Surface "quizzes") .Guided.Suspended)}}{{template "guided_controls.html" .}}{{end}}
   {{end}}
   <p class="workflow-feedback" data-workflow-feedback role="status" aria-live="polite"></p>
 </div>
 {{else}}<p>Workflows are unavailable for this project.</p>{{end}}
 {{end}}
 
+{{define "guided_status.html"}}
+<section class="workflow-progress" aria-label="Workflow status">
+  <div class="workflow-progress__body"><p role="status">{{.Guided.Message}}</p></div>
+  {{template "guided_actions.html" .}}
+</section>
+{{end}}
+
 {{define "guided_retry.html"}}
-<p role="status">{{if .Guided.Blocker}}This step needs attention. Your progress is saved.{{else}}This step did not finish. Your progress is saved.{{end}}</p>
+<section class="workflow-progress" aria-label="Workflow recovery">
+  <div class="workflow-progress__body"><p role="status">{{if .Guided.Blocker}}This step needs attention. Your progress is saved.{{else}}This step did not finish. Your progress is saved.{{end}}</p></div>
+  {{template "guided_actions.html" .}}
+</section>
+{{end}}
+
+{{define "guided_retry_form.html"}}
 <form method="post" action="/guided/actions" data-workflow-form>
   {{template "guided_fields.html" .}}
   <input type="hidden" name="step" value="{{if .Guided.PendingAction}}{{.Guided.PendingAction}}{{else}}{{.Guided.RetryAction}}{{end}}">
@@ -45,9 +57,12 @@
 
 {{define "guided_progress.html"}}
 <section class="workflow-progress" aria-label="Development progress">
-  <p>{{.Guided.Work.Validated}} of {{.Guided.Work.Total}} tasks validated · {{.Guided.Work.Confirmed}} delivered · {{.Guided.Work.Remaining}} remaining</p>
-  {{if .Guided.Work.Action}}<p role="status">{{if .Guided.Work.PullRequestURL}}The work needs review before it can continue.{{else}}The work needs attention before it can continue.{{end}}</p>{{end}}
-  {{if .Guided.Work.PullRequestURL}}<a class="button" href="{{.Guided.Work.PullRequestURL}}">Review changes</a>{{end}}
+  <div class="workflow-progress__body">
+    {{if .Guided.Message}}<p role="status">{{.Guided.Message}}</p>{{end}}
+    <p>{{.Guided.Work.Validated}} of {{.Guided.Work.Total}} tasks validated · {{.Guided.Work.Confirmed}} delivered · {{.Guided.Work.Remaining}} remaining</p>
+    {{if .Guided.Work.Action}}<p role="status">{{if .Guided.Work.PullRequestURL}}The work needs review before it can continue.{{else}}The work needs attention before it can continue.{{end}}</p>{{end}}
+  </div>
+  {{template "guided_actions.html" .}}
 </section>
 {{end}}
 
@@ -59,10 +74,12 @@
 </section>
 {{end}}
 
-{{define "guided_controls.html"}}
-<div class="workflow-controls" aria-label="Workflow controls">
+{{define "guided_actions.html"}}
+{{if or .Guided.ShowControls .Guided.ShowRetry .Guided.ShowReview}}
+<footer class="ticket-editor-footer">
+  <div class="detail-actions" aria-label="Workflow actions">
     {{range .Guided.Controls}}
-      <form method="post" action="/guided/actions">
+      <form method="post" action="/guided/actions"{{if eq .Action "cancel"}} data-workflow-cancel{{end}}>
         <input type="hidden" name="surface" value="guided">
         <input type="hidden" name="action" value="guided.input">
         <input type="hidden" name="confirm" value="true">
@@ -75,12 +92,16 @@
         <input type="hidden" name="content" value="{{.Content}}">
         <input type="hidden" name="question_id" value="{{.QuestionID}}">
         <input type="hidden" name="input_digest" value="{{.InputDigest}}">
-        <button class="button{{if eq .Action "resume"}} button--primary{{end}}" type="submit">{{.Label}}</button>
+        <button class="button{{if .Primary}} button--primary{{end}}" type="submit">{{if eq .Label "Cancel"}}Cancel workflow{{else}}{{.Label}}{{end}}</button>
       </form>
     {{end}}
-
-</div>
+    {{if .Guided.ShowRetry}}{{template "guided_retry_form.html" .}}{{end}}
+    {{if .Guided.ShowReview}}<a class="button button--primary" href="{{.Guided.Work.PullRequestURL}}">Review changes</a>{{end}}
+  </div>
+</footer>
 {{end}}
+{{end}}
+
 {{define "guided_fields.html"}}
 <input type="hidden" name="surface" value="guided">
 <input type="hidden" name="action" value="guided.input">

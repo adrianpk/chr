@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"sort"
 	"strings"
 )
 
@@ -44,9 +45,8 @@ func (h handler) guidedPageData(r *http.Request, view GuidedUseCaseView) PageDat
 	view.Surface = guidedSurface(r.URL.Path, view.Stage)
 	view.Starting = view.Surface == "cases" && (view.Stage == "name" || view.RunID == "") && !view.Suspended
 	view.Following = "/"+view.Surface == GuidedUseCasePath(view.Stage)
-	view.ShowControls = !view.Starting && (view.Suspended || view.Processing || view.Stage != "dump")
 	view.ReadOnly = !view.Following
-	view.Message = guidedMessage(view)
+	guidedPageActions(&view)
 
 	data := PageData{Shell: h.shellData(view.Surface), View: "guided", Title: view.Name, Guided: view}
 	if view.Starting {
@@ -112,7 +112,11 @@ func guidedMessage(view GuidedUseCaseView) string {
 	}
 
 	if view.Suspended {
-		return "Paused."
+		if view.Status == "paused" {
+			return "Paused."
+		}
+
+		return "Stopping…"
 	}
 
 	if !view.Processing {
@@ -212,4 +216,74 @@ func guidedQuizView(view GuidedUseCaseView) *QuizAnswerView {
 	}
 
 	return nil
+}
+
+// Input forms already own their actions. Lifecycle controls belong to the current
+// automatic step; a pause has no useful effect while authoring awaits input.
+func guidedVisibleControls(view GuidedUseCaseView) []GuidedUseCaseControl {
+	if !guidedControlSurface(view) {
+		return nil
+	}
+
+	controls := []GuidedUseCaseControl{}
+
+	for _, control := range view.Controls {
+		if control.Action == "pause" && control.Label == "Pause" && !guidedCanPause(view) {
+			continue
+		}
+
+		control.Primary = control.Action == "resume" || strings.HasPrefix(control.Label, "Retry ")
+		controls = append(controls, control)
+	}
+
+	sort.SliceStable(controls, func(i, j int) bool { return guidedControlBefore(controls[i], controls[j]) })
+
+	return controls
+}
+
+func guidedCanPause(view GuidedUseCaseView) bool {
+	if view.Stage != "execution" || view.Work == nil {
+		return false
+	}
+
+	switch view.Work.Status {
+	case "pending", "running", "waiting_review", "waiting_integration":
+		return true
+	default:
+		return false
+	}
+}
+
+func guidedPageActions(view *GuidedUseCaseView) {
+	view.Message = guidedMessage(*view)
+	view.Controls = guidedVisibleControls(*view)
+	view.ShowControls = len(view.Controls) > 0
+	view.ShowReview = view.Following && view.Work != nil && view.Work.Status == "waiting_review" && view.Work.PullRequestURL != ""
+	view.ShowRetry = view.Following && !view.Suspended && !view.Processing && (view.PendingAction != "" || view.RetryAction != "")
+}
+
+func guidedWaitingForInput(view GuidedUseCaseView) bool {
+	if view.Suspended || view.Processing {
+		return false
+	}
+
+	return view.Surface == "dumps" || view.Surface == "quizzes" && view.Quiz != nil && view.Quiz.CanAnswer
+}
+
+func guidedControlBefore(left, right GuidedUseCaseControl) bool {
+	if left.Primary != right.Primary {
+		return !left.Primary
+	}
+
+	return left.Action == "cancel" && right.Action != "cancel"
+}
+
+func guidedControlSurface(view GuidedUseCaseView) bool {
+	if view.Starting || view.ReadOnly || guidedWaitingForInput(view) {
+		return false
+	}
+
+	// Document generation holds the authoring mutation until its result is
+	// retained. It cannot currently acknowledge an immediate lifecycle stop.
+	return !view.Processing || view.Suspended || view.Work != nil
 }

@@ -7,6 +7,7 @@
   const feedback = workflow.querySelector('[data-workflow-feedback]');
   workflow.addEventListener('submit', function (event) {
     if (event.target.matches('[data-quiz-form]')) return;
+    if (event.target.matches('[data-workflow-cancel]') && !window.confirm('Cancel this workflow? Saved documents and completed changes will be kept.')) { event.preventDefault(); return; }
     if (submitting) { event.preventDefault(); return; }
     submitting = true;
     if (feedback) feedback.textContent = 'Saving…';

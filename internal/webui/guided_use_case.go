@@ -26,7 +26,7 @@ type GuidedUseCaseView struct {
 	QuizID                                                                    string
 	Processing                                                                bool
 	CaseSlug, Observation, StateURL, StateToken, Surface, CurrentURL, Message string
-	Starting, Following, ShowControls, ReadOnly                               bool
+	Starting, Following, ShowControls, ShowRetry, ShowReview, ReadOnly        bool
 	Result                                                                    *GuidedUseCaseResult
 	Ideas                                                                     []GuidedUseCaseIdea
 	IdeaRequestID, IdeaRevision                                               string
@@ -47,6 +47,7 @@ type GuidedUseCaseView struct {
 
 // GuidedUseCaseControl binds a lifecycle action to both displayed owner revisions.
 type GuidedUseCaseControl struct {
+	Primary                                            bool
 	Action, Label, RequestID, Revision, NativeRevision string
 	Content, QuestionID, InputDigest                   string
 }

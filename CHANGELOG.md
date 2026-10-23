@@ -27,7 +27,9 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   Accepted answers update the question and history without unsaved-change
   warnings; failed submissions retain their drafts for retry. The input screens
   keep internal identifiers and delivery settings out of the way. Original saved
-  documents remain available on request.
+  documents remain available on request. Workflow actions stay with their progress
+  or recovery panel; Pause appears during execution, and cancellation confirms
+  that saved documents and completed changes are kept.
   In Telegram, start with **Develop a new use case**, answer the current prompt
   and switch to an existing Web run by its name. Concise progress and complete
   original attachments retain the same inputs and work across reconnects.
