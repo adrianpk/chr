@@ -361,8 +361,8 @@ Opening the form does not start a retained workflow; submitting the name does.
 The main menu follows the current step: Dumps, Quizzes, Specs, Plans and Board.
 The use case stays selected throughout the existing screens.
 
-1. Write what you know in the **Dump** and choose **Save dump**. Add more input
-   when needed, then choose **Continue to quiz**.
+1. Write what you know in the **Dump** and choose **Continue to quiz**. This
+   saves the complete input and moves to clarification in one action.
 2. Answer the current **Quiz** question and choose **Answer and continue**.
    The next question appears automatically. Unsent answers remain in place
    when the underlying workflow changes.

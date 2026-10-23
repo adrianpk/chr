@@ -17,7 +17,6 @@
     {{else if .Guided.PendingAction}}
       {{template "guided_retry.html" .}}
     {{else if eq .Guided.Surface "dumps"}}
-      {{if .Guided.Capture}}<details class="workflow-capture" open><summary>Saved dump</summary>{{template "artifact_document.html" .Guided.Capture}}</details>{{end}}
       {{template "dump_edit_forms.html" .}}
     {{else if .Detail.Quiz}}
       {{template "quiz_answer_content.html" .}}

@@ -467,15 +467,14 @@
 {{define "dump_edit_forms.html"}}
 <form class="action-form" {{if .Guided.RunID}}data-workflow-form method="post" action="/guided/actions"{{else}}data-dump-editor method="post" action="/actions" hx-post="/actions" hx-target="#dump-save-result" hx-swap="innerHTML" hx-disabled-elt="find textarea, find button[type='submit']" onsubmit="return confirm('Save this dump content?')"{{end}}>
   {{if .Guided.RunID}}
-    {{template "guided_fields.html" .}}<input type="hidden" name="step" value="append">
+    {{template "guided_fields.html" .}}<input type="hidden" name="step" value="finish">
   {{else}}
     <input type="hidden" name="action" value="dump.save"><input type="hidden" name="request_id" value="{{.Detail.SaveRequestID}}"><input type="hidden" name="family" value="dumps"><input type="hidden" name="id" value="{{.Detail.ID}}"><input type="hidden" name="revision" value="{{.Detail.Revision}}"><input type="hidden" name="confirm" value="true"><input type="hidden" name="surface" value="{{if .DumpModal}}modal{{else}}editor{{end}}">
   {{end}}
-  <label><span>{{if .Guided.RunID}}Dump{{else}}Body{{end}}</span><textarea name="content" rows="12" maxlength="65536" required placeholder="Describe the change, what matters and any constraints…">{{if not .Guided.RunID}}{{.Detail.Content}}{{end}}</textarea></label>
-  <div class="detail-actions"><button class="button{{if not .Guided.RunID}} button--primary{{end}}" type="submit">{{if .Guided.RunID}}Save dump{{else}}Save{{end}}</button>{{if .Guided.RunID}}<button class="button button--primary" type="submit" form="workflow-finish"{{if not .Guided.Capture}} disabled{{end}}>Continue to quiz</button>{{end}}</div>
+  <label><span>{{if .Guided.RunID}}Dump{{else}}Body{{end}}</span><textarea name="content" rows="12" maxlength="65536" required placeholder="Describe the change, what matters and any constraints…">{{if .Guided.RunID}}{{.Guided.Capture}}{{else}}{{.Detail.Content}}{{end}}</textarea></label>
+  <div class="detail-actions"><button class="button button--primary" type="submit">{{if .Guided.RunID}}Continue to quiz{{else}}Save{{end}}</button></div>
   <div id="dump-save-result" role="status" aria-live="polite"></div>
 </form>
-{{if .Guided.RunID}}<form id="workflow-finish" method="post" action="/guided/actions" data-workflow-form>{{template "guided_fields.html" .}}<input type="hidden" name="step" value="finish"></form>{{end}}
 {{end}}
 
 {{define "artifact_document.html"}}<article class="plan-document" aria-label="Document"><pre class="artifact-content">{{.}}</pre></article>{{end}}

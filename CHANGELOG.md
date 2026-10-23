@@ -21,7 +21,8 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   and open PRs from confirmed delivery and show the delivered code locations.
   In the Web UI, choose **Wizard** in Cases and enter the name. The main menu
   follows Dumps, Quizzes, Specs, Plans and Board with the use case already
-  selected. Questions update automatically;
+  selected. Continue to quiz saves the Dump and advances directly; manual
+  editors retain their independent Save action. Questions update automatically;
   the input screens keep internal identifiers and delivery settings out of the
   way. Original saved documents remain available on request.
   In Telegram, start with **Develop a new use case**, answer the current prompt

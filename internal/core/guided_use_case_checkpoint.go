@@ -44,8 +44,12 @@ func (r *fileAuthoringSessionRepository) finishGuidedUseCaseDump(ctx context.Con
 }
 
 func (r *fileAuthoringSessionRepository) completeGuidedCapture(ctx context.Context, session AuthoringSession, command GuidedUseCaseCommand, operation GuidedUseCaseOperation) (AuthoringSession, error) {
-	if command.Action != "finish" || command.Content != "" || session.Guided.Stage != "dump" {
+	if command.Action != "finish" || session.Guided.Stage != "dump" {
 		return session, ErrWorkflowConflict
+	}
+
+	if session.Guided.PendingOperation == nil && command.Content != "" {
+		session.Guided.Capture = command.Content
 	}
 
 	if strings.TrimSpace(session.Guided.Capture) == "" {

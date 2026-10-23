@@ -79,7 +79,18 @@ func assertGuidedCheckpointInput(t *testing.T, root string, session AuthoringSes
 
 // TestGuidedUseCaseCheckpointRecovery retains the original commit after a lost response.
 func TestGuidedUseCaseCheckpointRecovery(t *testing.T) {
-	root, command := guidedCheckpointFixture(t)
+	for _, test := range []struct{ name, content string }{{"saved", ""}, {"inline", "Final onboarding input."}} {
+		t.Run(test.name, func(t *testing.T) {
+			root, command := guidedCheckpointFixture(t)
+			command.Content = test.content
+			assertGuidedCheckpointRecovery(t, root, command)
+		})
+	}
+}
+
+func assertGuidedCheckpointRecovery(t *testing.T, root string, command GuidedUseCaseCommand) {
+	t.Helper()
+
 	lost := errors.New("lost Git acknowledgement")
 	r := &fileAuthoringSessionRepository{projectDir: root, afterGuidedCheckpoint: func() error { return lost }}
 

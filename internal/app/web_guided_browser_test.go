@@ -83,8 +83,7 @@ func captureGuidedBrowserInput(t *testing.T, browser *webWorkflowBrowser, server
 		t.Fatal("workflow lost its functional use-case reference", got)
 	}
 
-	guidedBrowserSubmit(t, browser, "append", "Deliver a bounded workflow from the original context.")
-	browser.clickNavigation(t, `button[form="workflow-finish"]`)
+	guidedBrowserSubmit(t, browser, "finish", "Deliver a bounded workflow from the original context.")
 	host.wait.Wait()
 	browser.wait(t, `.quiz-response textarea`)
 	assertGuidedBrowserTab(t, browser, "/quizzes")

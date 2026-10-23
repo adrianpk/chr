@@ -20,14 +20,6 @@
   } catch (_) { /* The shared quiz surface reports unavailable draft storage. */ }
 
   workflow.addEventListener('submit', function (event) {
-    if (event.target.id === 'workflow-finish') {
-      const draft = workflow.querySelector('textarea[name=content]');
-      if (draft && draft.value.trim()) {
-        event.preventDefault();
-        if (feedback) feedback.textContent = 'Save this dump before continuing to the quiz.';
-        draft.focus(); return;
-      }
-    }
     if (submitting) { event.preventDefault(); return; }
     submitting = true;
     if (quiz) {
