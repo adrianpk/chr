@@ -6,8 +6,8 @@ Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 5, Guided Telegram journey; T5.1 routing and canonical capture binding are in progress.
-Progress: 4 of 6 slices delivered; 12 of 18 tasks completed. The Web checkpoint is closed; guided Telegram routing and canonical capture binding are in progress.
+Active slice: Slice 5, Guided Telegram journey; T5.1 is complete and T5.2 lifecycle/presentation integration is in progress.
+Progress: 4 of 6 slices delivered; 13 of 18 tasks completed. Current-step Telegram routing is complete; managed lifecycle, original-document/result delivery and cross-interface continuation remain active.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
 Spec: [Approved workflow](../spec/stable/guided-use-case-workflow.md)
@@ -44,8 +44,8 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | T4.1 | Host recovery, client independence, stale-action safety and native pause/resume/cancel. | done | `0ea3ff90e3d4bc5e35b36b7ad188cde3c8cb0274` | Focused recovery/control, native stop/closing and Web regressions passed in normal and race modes; scoped strict lint passed. See the Slice 4 report. |
 | T4.2 | Later-idea retention and truthful waiting/results from native delivery receipts. | done | `c6fd84c0197842011a2ae6cdcececaf739894c56` | Focused idea/result normal and race checks and scoped strict lint passed; native delivery/closing receipts, corruption and read-only inspection covered. |
 | T4.3 | Complete Web journey/fault/browser evidence and user-facing documentation. | done | `0fa7cec16dc3e6b02f3db1d593e3cf4c0081da69` | HTTP journey, actual lost Git commit responses, focused race, owned Chromium journey and scoped strict lint passed. User Guide and changelog updated. |
-| T5.1 | Natural-language Telegram start and shared current-step routing. | in progress | `77b7f637587a63026ce914368939e7f0ed7158e7` (initial routing/capture) | Initial routing/capture, replay, stale/foreign binding and manual migration tests pass; buttons and complete current-step routing remain pending. |
-| T5.2 | Concise Telegram progress/artifacts/controls/results and cross-interface continuation. | pending | pending | pending |
+| T5.1 | Natural-language Telegram start and shared current-step routing. | done | `77b7f637587a63026ce914368939e7f0ed7158e7`, `5b032e9f6c7ce34b0e0222ca6162ca63fbcc6e53` | Named scope selection, current clarification, sealed buttons, duplicate callbacks, lost owner acknowledgement and preserved inputs pass focused normal/race checks; strict scoped lint passes. |
+| T5.2 | Concise Telegram progress/artifacts/controls/results and cross-interface continuation. | in progress | `5b032e9f6c7ce34b0e0222ca6162ca63fbcc6e53` (initial input/control presentation) | Initial current-step, prerequisite, later-idea and control mapping is present. Managed host/urgent lanes, coalesced notifications, originals/results and Web continuation remain pending. |
 | T5.3 | Telegram transport/journey regressions, declared client evidence and documentation. | pending | pending | pending |
 | T6.1 | Shared-service TUI journey input, navigation, artifacts and resume. | pending | pending | pending |
 | T6.2 | TUI controls/progress/results and cross-adapter revision/authority parity. | pending | pending | pending |
@@ -210,8 +210,16 @@ Slice 5 T5.1 initial routing/capture is committed in `77b7f637587a63026ce9143689
 Focused guided and affected manual conversation/authoring tests passed normally
 and with race instrumentation; scoped strict lint passed. The [Slice 5 draft
 report](../report/slices/guided-use-case-workflow/slice-5-telegram.md) records exact
-commands, measured cost and the remaining current-step/presentation work. No
-Slice 5 PR or complete journey is claimed.
+commands, measured cost and the remaining presentation work.
+
+T5.1 current-step routing is complete in `5b032e9f6c7ce34b0e0222ca6162ca63fbcc6e53`. The receiver
+uses current canonical questions and revision guards, retains original retry input,
+selects a peer's existing run by unique visible name and asks for a project name
+only when the allowed registry is ambiguous. Existing sealed actions support
+Finish capture and available pause/resume/cancel controls. Duplicate callbacks and
+lost canonical pause acknowledgements preserve the original effect. Affected
+conversation/action regressions, focused guided race checks and strict scoped lint
+pass. T5.2 is active; no Slice 5 PR or complete managed journey is claimed.
 
 Delivery-set gate: `make verify`, bounded normal guided-workflow regressions, focused race coverage for changed ownership, then `git diff --check`, on the exact final integrated `dev` candidate. The scheduled nightly retains exhaustive certification ownership.
 
