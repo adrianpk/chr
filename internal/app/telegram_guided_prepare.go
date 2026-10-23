@@ -33,41 +33,13 @@ func prepareTelegramGuidedInput(ctx context.Context, operations telegramGuidedSe
 			input.Command.NativeRevision = observed.Work.Revision
 		}
 
-		input.Choices = telegramGuidedControlChoices(observed)
+		input.Choices = guidedControlChoices(observed)
 		if len(input.Choices) == 0 {
 			return input, core.ErrWorkflowConflict
 		}
 	}
 
 	return input, nil
-}
-
-func telegramGuidedControlChoices(observed GuidedUseCaseInspection) []string {
-	session := *observed.Session
-
-	state := session.Guided
-	if guidedWebControlTerminal(state.Status, observed.Work) {
-		return nil
-	}
-
-	if _, ready := guidedControlCommand(session); ready {
-		return nil
-	}
-
-	if state.Control != nil && state.Control.StopIntent != "" {
-		if state.Status == "paused" {
-			return []string{"resume", "cancel"}
-		}
-
-		return []string{"cancel"}
-	}
-
-	choices := []string{"pause", "cancel"}
-	if state.Stage == "dump" && state.PendingOperation == nil {
-		choices = append([]string{"finish"}, choices...)
-	}
-
-	return choices
 }
 
 func telegramGuidedOwner(c core.TelegramConversation, input core.TelegramConversationInput, start bool, actor string) (telegramGuidedInput, error) {

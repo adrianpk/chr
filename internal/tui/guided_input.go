@@ -2,6 +2,7 @@ package tui
 
 import (
 	"crypto/rand"
+	"slices"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textarea"
@@ -83,7 +84,7 @@ func (m Model) guidedActionKey(key string) (tea.Model, tea.Cmd) {
 
 		return m, command
 	default:
-		command := m.guidedDocumentKey(key)
+		command := m.guidedExtraKey(key)
 
 		return m, command
 	}
@@ -171,7 +172,7 @@ func (m Model) updateGuidedInputKey(message tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) submitGuidedStep(action string) tea.Cmd {
-	if m.guided.View.Session == nil {
+	if m.guided.View.Session == nil || !slices.Contains(m.guided.View.Controls, action) {
 		return nil
 	}
 
@@ -182,7 +183,7 @@ func (m *Model) submitGuidedStep(action string) tea.Cmd {
 }
 
 func (m *Model) guidedDocumentKey(key string) tea.Cmd {
-	kind := map[string]string{"1": "dump", "2": "quiz", "3": "specification", "4": "plan", "5": "tracker"}[key]
+	kind := map[string]string{"1": "dump", "2": "quiz", "3": "specification", "4": "plan", "5": "tracker", "v": "results"}[key]
 	if kind == "" || m.guided.View.Session == nil {
 		return nil
 	}

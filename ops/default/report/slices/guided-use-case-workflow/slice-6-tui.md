@@ -11,9 +11,9 @@ Input/navigation commit: `5e15bddd36e03d7adbb02ad3856d1ae3a22d4519`
 ## Purpose
 
 Expose the existing retained guided workflow through terminal interaction.
-T6.1 input, navigation and original-document inspection are implemented. T6.2
-controls, native progress/results and cross-adapter continuation remain active
-before T6.3 acceptance and final PR preparation.
+Input, navigation, native controls, truthful results and shared-run continuation
+are implemented. T6.3 terminal interaction acceptance, documentation and final PR
+preparation remain active.
 
 Plan: [Approved slice map](../../../plan/guided-use-case-workflow.md).
 Tracker: [Tasks and evidence](../../../tracker/guided-use-case-workflow.md).
@@ -38,6 +38,16 @@ Tracker: [Tasks and evidence](../../../tracker/guided-use-case-workflow.md).
   host. Terminal refresh and render paths remain queries. Leaving the guided
   screen keeps the host available; process shutdown closes its owned host.
 
+- Pause/resume/cancel carry the displayed native revision to the shared owner.
+  Stop requests distinguish dispatch prevention from acknowledged quiescence;
+  resume retains the original invocation, policy and consumed attempts.
+- Native approval opens the existing exact-candidate inspection and confirmation
+  flow. Required human review remains visible. Continuing an uncertain operation
+  resubmits its retained binding rather than allocating another operation.
+- Separate later ideas retain attribution without extending admitted work.
+  Verified results and their complete export include delivery, validation and
+  closing receipts with real repository, branch, commit and PR locations.
+
 ## Implementation Notes
 
 `internal/tui` owns terminal state, editing, scrolling, sequence fences and
@@ -51,6 +61,12 @@ input clears its editor; a rejection preserves its complete text. Polling keeps
 an open committed original available instead of replacing it with the normal
 step view. Lifecycle recovery belongs to startup through `guidedWorkHost.start`,
 not to model update, render or inspection.
+
+The shared presentation helpers preserve existing Web/Telegram control and
+completion semantics while mapping them into TUI views. Native completion alone
+cannot become terminal delivery: missing, partial or invalid receipts remain
+unconfirmed. Managed shutdown cancels child request contexts before joining owned
+host jobs.
 
 ## Contracts Added or Changed
 
@@ -89,12 +105,28 @@ exercise actual shared operations, temporary Git repositories and canonical
 stores with deterministic content-provider responses. They do not establish an
 independently observed terminal process or live-provider acceptance.
 
+T6.2 task checks passed:
+
+- `go test -race ./internal/app ./internal/tui -run '^TestGuidedUseCase(TUI|Parity|Telegram(Journey|ResultGuard))' -count=1 -timeout=3m` — passed, app 49.555s, TUI 1.035s.
+
+- `go test ./internal/app ./internal/tui -run '^TestGuidedUseCase(TUI|Parity|Telegram(Journey|ResultGuard|Clarification|Buttons)|Control)' -count=1 -timeout=3m` — passed, app 30.944s, TUI 0.010s.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/app/... ./internal/tui/...` — zero issues after extracting bounded projection/routing helpers; no suppressions.
+- `git diff --check` — passed before the task commit.
+
+The parity fixture starts with one prepared Web run, attaches Telegram, pauses
+through terminal model keys, resumes through Telegram and retains a later idea
+through terminal input. Stale revision, foreign project and namespace commands
+cannot change the shared stop state. Native review, exact membership, actor,
+policy and one consumed worker attempt survive interface changes. The same
+fixture completes actual temporary Git publication with a lost response and
+reconciles original evidence before all three interfaces report completion.
+Prepared plan/tracker originals remain bound after later working-copy edits.
+
 Final configured exact-HEAD checks are reserved for the complete clean
 PR-reference candidate through Looper.
 
 ## Risks and Follow-ups
 
-T6.2 still owns native controls, truthful work/result projection, later ideas and
-cross-adapter conflicts. T6.3 owns interaction/parity acceptance, User Guide,
-reference/changelog updates and the cycle report. Final integrated-candidate
+T6.3 owns independent terminal runtime acceptance, User Guide,
+reference/changelog updates, criterion reconciliation and the cycle report. Final integrated-candidate
 gate and documentation closure remain controller-owned.

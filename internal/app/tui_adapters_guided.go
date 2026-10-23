@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -29,6 +30,16 @@ func (e tuiGuidedExecutor) ExecuteGuided(request tui.GuidedRequest) (tui.GuidedV
 	}
 
 	view := tuiGuidedView(observed)
+	if request.Action == "document" && request.Document == "results" {
+		if observed.Session == nil {
+			return view, core.ErrWorkflowConflict
+		}
+
+		payload, err := json.MarshalIndent(guidedResultSnapshot(observed), "", "  ")
+		view.Document = &tui.GuidedDocument{Kind: "results export", Content: string(payload)}
+
+		return view, err
+	}
 
 	if request.Action == "document" {
 		original, err := e.operations.ReadGuidedUseCaseOriginal(ctx, request.Command.RunID, request.Command.Namespace, request.Document)
@@ -71,6 +82,8 @@ func tuiGuidedView(observed GuidedUseCaseInspection) tui.GuidedView {
 	}
 
 	state := observed.Session.Guided
+	projectTUIGuidedStatus(&view, observed)
+
 	if state.Blocker != "" {
 		view.Problems = append(view.Problems, state.Blocker)
 	}

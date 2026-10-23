@@ -34,7 +34,7 @@ func guidedWebControls(view *webui.GuidedUseCaseView, session core.AuthoringSess
 		return
 	}
 
-	if guidedWebControlTerminal(session.Guided.Status, work) {
+	if guidedControlTerminal(session.Guided.Status, work) {
 		return
 	}
 
@@ -63,10 +63,6 @@ func guidedControlLabel(action string) string {
 	default:
 		return "Cancel use case"
 	}
-}
-
-func guidedWebControlTerminal(status string, work *WorkflowWorkStatus) bool {
-	return status == "cancelled" || status == "completed" || status == "failed" || work != nil && work.Status == "completed"
 }
 
 func guidedWebControlActions(view *webui.GuidedUseCaseView, state *core.GuidedUseCaseState) []string {

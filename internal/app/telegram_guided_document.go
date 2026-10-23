@@ -45,13 +45,7 @@ func telegramGuidedQuestionDocument(target core.TelegramOperationTarget, observe
 }
 
 func telegramGuidedResultDocument(target core.TelegramOperationTarget, observed GuidedUseCaseInspection) (*core.TelegramDocumentResponse, error) {
-	snapshot := telegramGuidedResultExport{Name: observed.Session.Topic, Stage: observed.Session.Guided.Stage, Status: observed.Session.Guided.Status, Problem: observed.ResultProblem, Ideas: observed.Ideas}
-	if observed.Result != nil {
-		snapshot.Complete = observed.Result.Complete
-		snapshot.Deliveries = observed.Result.Receipts
-		snapshot.Validations = observed.Result.Validations
-		snapshot.Closures = observed.Result.Closures
-	}
+	snapshot := guidedResultSnapshot(observed)
 
 	payload, err := json.MarshalIndent(snapshot, "", "  ")
 	if err != nil {
@@ -64,11 +58,4 @@ func telegramGuidedResultDocument(target core.TelegramOperationTarget, observed 
 	return &core.TelegramDocumentResponse{Message: message, Document: telegramDocumentForTarget(target, "exports/guided-results/"+observed.Session.ID+".json", recordDigest(payload), filename, "application/json", payload)}, nil
 }
 
-type telegramGuidedResultExport struct {
-	Name, Stage, Status, Problem string
-	Complete                     bool
-	Deliveries                   []core.WorkflowResultReceipt
-	Validations                  []core.WorkflowResultValidation
-	Closures                     []core.WorkflowResultClosure
-	Ideas                        []core.GuidedLaterIdea
-}
+type telegramGuidedResultExport = guidedResultExport

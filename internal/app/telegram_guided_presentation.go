@@ -104,16 +104,5 @@ func telegramGuidedWorkPrompt(work *WorkflowWorkStatus) string {
 }
 
 func telegramGuidedVisibleStatus(observed GuidedUseCaseInspection) string {
-	if observed.ResultProblem != "" {
-		return "blocked"
-	}
-
-	complete := observed.Result != nil && observed.Result.Complete
-
-	terminal := observed.Session.Guided.Status == "completed" || observed.Work != nil && observed.Work.Status == "completed"
-	if terminal && !complete {
-		return "blocked"
-	}
-
-	return observed.Session.Guided.Status
+	return guidedVisibleStatus(observed)
 }

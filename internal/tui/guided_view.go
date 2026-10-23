@@ -24,7 +24,7 @@ func (m Model) guidedLines() []string {
 			lines = append(lines, prefix+run.Topic+" · "+run.Guided.Stage+" · "+run.Guided.Status)
 		}
 	} else {
-		lines = append(lines, "Use case: "+view.Session.Topic, "Stage: "+view.Session.Guided.Stage+" · "+view.Session.Guided.Status, view.Prompt)
+		lines = append(lines, "Use case: "+view.Session.Topic, "Stage: "+view.Session.Guided.Stage+" · "+view.Status, view.Prompt)
 		lines = append(lines, view.Progress...)
 	}
 
@@ -33,7 +33,12 @@ func (m Model) guidedLines() []string {
 	}
 
 	if document := view.Document; document != nil {
-		lines = append(lines, "Original "+document.Kind, "Commit: "+document.Commit, "Source: "+document.Reference, document.Content)
+		lines = append(lines, "Inspect "+document.Kind)
+		if document.Commit != "" {
+			lines = append(lines, "Original commit: "+document.Commit, "Source: "+document.Reference)
+		}
+
+		lines = append(lines, document.Content)
 	}
 
 	return lines
@@ -85,5 +90,5 @@ func (m Model) guidedHint() string {
 		return "n Develop a new use case · Enter opens selected run · up/down selects · Esc returns"
 	}
 
-	return "e current input · f Finish capture · 1-5 originals · up/down scroll · r refresh · b runs · Esc returns"
+	return m.guidedControlHint() + "e input · i later idea · v results · 1-5 originals · scroll up/down · r refresh · d discard draft · b runs · Esc returns"
 }

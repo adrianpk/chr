@@ -29,6 +29,12 @@ type GuidedDocument struct {
 // GuidedView contains shared observations and the next available human input.
 type GuidedView struct {
 	Project, Namespace, Prompt, InputAction string
+	Status                                  string
+	NativeRevision                          uint64
+	Controls                                []string
+	Retry                                   *GuidedRequest
+	Native                                  *WorkflowView
+	CanRetainIdea, CanApprove               bool
 	Session                                 *core.AuthoringSession
 	Runs                                    []core.AuthoringSession
 	Policy, Problems, Progress              []string
@@ -89,14 +95,14 @@ func (m *Model) completeGuided(message guidedFinishedMsg) {
 		return
 	}
 
-	if message.Request.Action == "inspect" && sameGuidedTerminalRun(m.guided.View, message.View) {
+	if retainGuidedOriginal(message.Request, m.guided.View, message.View) {
 		message.View.Document = m.guided.View.Document
 	}
 
 	m.guided.View = message.View
 
 	m.guided.Pending, m.guided.Problem = nil, ""
-	if message.Request.Action == "input" {
+	if message.Request.Command.OperationID == m.guided.Bound.Command.OperationID && message.Request.Action == "input" {
 		m.guided.Editing = false
 		m.guided.Input = textarea.Model{}
 	}
@@ -106,12 +112,18 @@ func (m *Model) completeGuided(message guidedFinishedMsg) {
 	}
 }
 
+func retainGuidedOriginal(request GuidedRequest, before, after GuidedView) bool {
+	return request.Action == "inspect" && sameGuidedTerminalRun(before, after) && before.Document != nil && before.Document.Commit != ""
+}
+
 func sameGuidedTerminalRun(before, after GuidedView) bool {
 	return before.Session != nil && after.Session != nil && before.Session.ID == after.Session.ID && before.Session.ProjectID == after.Session.ProjectID && before.Session.Namespace == after.Session.Namespace
 }
 
 func (m Model) guidedRequest(action string) GuidedRequest {
 	command := core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{ProjectID: m.projectID, Namespace: m.guided.View.Namespace}}
+
+	command.NativeRevision = m.guided.View.NativeRevision
 	if session := m.guided.View.Session; session != nil {
 		command.RunID, command.ExpectedRevision = session.ID, session.Revision
 		if quiz := session.Guided.Quiz; quiz != nil {

@@ -68,6 +68,7 @@ func TestGuidedUseCaseTUIStaleInput(t *testing.T) {
 // earlier read after the guided screen has closed and reopened.
 func TestGuidedUseCaseTUIReplay(t *testing.T) {
 	m := guidedTerminalFixture()
+	m.guided.View.Controls = []string{"finish"}
 
 	var requests []GuidedRequest
 
