@@ -13,7 +13,7 @@ func (r telegramReceiver) checkActionLane(claim core.TelegramActionClaim) error 
 		return nil
 	}
 
-	lane, err := core.TelegramActionProcessingLane(claim.Request)
+	lane, err := core.TelegramActionChoiceProcessingLane(claim.Request, claim.Choice)
 	if err != nil {
 		return err
 	}

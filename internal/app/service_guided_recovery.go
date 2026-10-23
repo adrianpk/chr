@@ -57,6 +57,12 @@ func (s service) changeGuidedOnHost(ctx context.Context, command core.GuidedUseC
 // RecoverGuidedUseCase reconciles pending control and stage operations before
 // continuing the same scope. It is a lifecycle operation, never a query effect.
 func (s service) RecoverGuidedUseCase(ctx context.Context, scope core.GuidedUseCaseScope) (core.AuthoringSession, error) {
+	if s.guidedHostCheck != nil {
+		if err := s.guidedHostCheck(ctx); err != nil {
+			return core.AuthoringSession{}, err
+		}
+	}
+
 	session, err := core.ReadGuidedUseCase(ctx, s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return session, err

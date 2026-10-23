@@ -42,11 +42,17 @@ func queueTelegramDocument(ctx context.Context, tx *sql.Tx, update TelegramRecei
 		return err
 	}
 
+	return bindTelegramDocumentImage(ctx, tx, deliveryID, update.Peer, response, configDigest, now)
+}
+
+// The caller owns the outbox row and has validated the complete source image.
+func bindTelegramDocumentImage(ctx context.Context, tx *sql.Tx, deliveryID string, peer TelegramPeerIdentity, response TelegramDocumentResponse, configDigest string, now time.Time) error {
 	id := "tgdoc-" + workflowHash([]byte(deliveryID))[:32]
-	if err := retainTelegramDocument(ctx, tx, id, deliveryID, update.Peer, configDigest, response.Document, now); err != nil {
+	if err := retainTelegramDocument(ctx, tx, id, deliveryID, peer, configDigest, response.Document, now); err != nil {
 		return err
 	}
 
+	presentation := RenderTelegramDocument(response.Message)
 	presentation.DocumentID, presentation.DocumentHash = id, workflowHash(response.Document.Payload)
 
 	payload, err := json.Marshal(presentation)
@@ -54,12 +60,12 @@ func queueTelegramDocument(ctx context.Context, tx *sql.Tx, update TelegramRecei
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx, "UPDATE telegram_outbox SET presentation=?,presentation_hash=?,document_id=? WHERE id=?", string(payload), workflowHash(payload), id, deliveryID)
+	_, err = tx.ExecContext(ctx, `UPDATE telegram_outbox SET text=?,presentation=?,presentation_hash=?,document_id=? WHERE id=?`, presentation.PlainFallback, string(payload), workflowHash(payload), id, deliveryID)
 	if err != nil {
 		return err
 	}
 
-	return checkTelegramIntakeCapacity(ctx, tx, update.Peer.BotID)
+	return checkTelegramIntakeCapacity(ctx, tx, peer.BotID)
 }
 
 func retainTelegramDocument(ctx context.Context, tx *sql.Tx, id, owner string, peer TelegramPeerIdentity, configDigest string, document TelegramDocument, now time.Time) error {

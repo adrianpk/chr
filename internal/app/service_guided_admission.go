@@ -30,7 +30,7 @@ func (s service) AdmitGuidedWork(ctx context.Context, command core.GuidedUseCase
 
 func (s service) admitGuidedWork(ctx context.Context, session *core.AuthoringSession) error {
 	if s.guidedWorkHost == nil {
-		return &core.GuidedPrerequisiteError{Action: "Start a managed Web host, then retry this retained operation."}
+		return &core.GuidedPrerequisiteError{Action: "Start a managed workflow host, then retry this retained operation."}
 	}
 
 	if err := s.guidedWorkHost.ready(); err != nil {

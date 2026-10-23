@@ -101,3 +101,22 @@ func (r *fileAuthoringSessionRepository) appendGuidedHostRun(ctx context.Context
 
 	return nil
 }
+
+// RecoverGuidedHostRun reconciles the authoring journal before reading one exact
+// association. Only a managed lifecycle calls this mutating recovery operation.
+func RecoverGuidedHostRun(ctx context.Context, root string, scope GuidedUseCaseScope) (session AuthoringSession, err error) {
+	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
+		repository := &fileAuthoringSessionRepository{projectDir: root}
+
+		var readErr error
+
+		session, readErr = repository.getGuardedSession(ctx, scope.RunID)
+		if readErr != nil {
+			return readErr
+		}
+
+		return guardGuidedScope(session, scope)
+	})
+
+	return session, err
+}

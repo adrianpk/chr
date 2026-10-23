@@ -113,7 +113,7 @@ func (op telegramConversationTransaction) replyTarget() (*TelegramConversation, 
 }
 
 func telegramCaptureEligible(c TelegramConversation) bool {
-	return c.Phase == "collecting" || c.Phase == "clarifying"
+	return c.GuidedRunID != "" || c.Phase == "collecting" || c.Phase == "clarifying"
 }
 
 func (op telegramConversationTransaction) target() (*TelegramConversation, error) {

@@ -75,7 +75,7 @@ func validateTelegramGuidedProgress(progress TelegramGuidedProgress, facts json.
 		return ErrWorkflowConflict
 	}
 
-	if progress.Phase != "collecting" && progress.Phase != "completed" && progress.Phase != "canceled" {
+	if progress.Phase != "collecting" && progress.Phase != "completed" && progress.Phase != "canceled" && progress.Phase != "failed" {
 		return ErrWorkflowConflict
 	}
 

@@ -9,6 +9,7 @@ import (
 
 // TelegramActionResult contains confirmed owner facts or an explicit blocked outcome.
 type TelegramActionResult struct {
+	Delivery          *TelegramDocumentResponse
 	Guided            *TelegramGuidedProgress
 	Message           *TelegramMessageBlocks
 	Invocation        *TelegramInvocationBinding
@@ -188,6 +189,14 @@ func confirmedTelegramControlReceipt(claim TelegramActionClaim, result TelegramA
 }
 
 func queueTelegramActionResultResponse(ctx context.Context, tx *sql.Tx, retained TelegramActionClaim, result TelegramActionResult, now time.Time) error {
+	if result.Delivery != nil {
+		response := retained.Request
+		response.Source = retained.ResponseSource
+		response.Delivery = result.Delivery
+
+		return queueTelegramOperationResult(ctx, tx, response, result.Text, result.ReceiptRef, result.ConfigDigest, now)
+	}
+
 	if result.Message != nil {
 		return queueTelegramPresentation(ctx, tx, retained.ResponseSource, *result.Message, result.ConfigDigest, now)
 	}

@@ -14,6 +14,7 @@ type GuidedUseCaseInspection struct {
 	Result        *core.WorkflowResultInspection
 	ResultProblem string
 	Work          *WorkflowWorkStatus
+	ProjectName   string
 	Namespace     string
 	Session       *core.AuthoringSession
 	Runs          []core.AuthoringSession
@@ -78,7 +79,7 @@ func (s service) InspectGuidedUseCase(ctx context.Context, id, namespace string)
 		return GuidedUseCaseInspection{}, err
 	}
 
-	result := GuidedUseCaseInspection{Namespace: scope.Namespace}
+	result := GuidedUseCaseInspection{Namespace: scope.Namespace, ProjectName: s.projectContext.ProjectName}
 	s.inspectGuidedReadiness(ctx, &result)
 
 	if id == "" {

@@ -169,7 +169,8 @@ func TestGuidedUseCaseTelegramClarification(t *testing.T) {
 		t.Fatal("generated specification was not approved once")
 	}
 
-	assertGuidedTelegramIdeaPause(t, f, operations, model, before, response.ID)
+	assertGuidedTelegramOriginals(t, f, operations, before)
+	assertGuidedTelegramIdeaPause(t, f, operations, model, before, 0)
 }
 
 func assertGuidedTelegramIdeaPause(t *testing.T, f *telegramConversationAppFixture, operations service, model *fakeServiceQuizModel, before core.AuthoringSession, reply int64) {

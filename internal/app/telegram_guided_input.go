@@ -8,6 +8,7 @@ import (
 )
 
 type telegramGuidedBinding struct {
+	ViewDigest     string `json:"view_digest,omitempty"`
 	Revision       int64  `json:"revision"`
 	NativeRevision uint64 `json:"native_revision,omitempty"`
 	Stage          string `json:"stage"`
@@ -47,7 +48,8 @@ func telegramGuidedCommand(c core.TelegramConversation, update core.TelegramRece
 	command := core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: c.GuidedRunID, ProjectID: c.ProjectID, Namespace: c.Namespace}, ExpectedRevision: binding.Revision, NativeRevision: binding.NativeRevision, OperationID: core.TelegramOperationID(update, 0), Content: update.Text, QuestionID: binding.QuestionID, InputDigest: binding.InputDigest}
 	input := telegramGuidedInput{Actor: actor, Command: command}
 	text := strings.ToLower(strings.TrimSpace(update.Text))
-	input.Inspect = text == "show current step" || text == "show use case"
+	input.Document = telegramGuidedDocumentKind(text)
+	input.Inspect = text == "show current step" || text == "show use case" || input.Document != ""
 	input.Retry = text == "retry" || text == "continue"
 
 	input.Offer = text == "show controls"
@@ -104,7 +106,7 @@ func telegramGuidedStageAction(binding telegramGuidedBinding, text string) (stri
 func telegramGuidedProgress(observed GuidedUseCaseInspection) (core.TelegramGuidedProgress, error) {
 	session := *observed.Session
 
-	binding := telegramGuidedBinding{Revision: session.Revision, Stage: session.Guided.Stage}
+	binding := telegramGuidedBinding{Revision: session.Revision, Stage: session.Guided.Stage, ViewDigest: recordDigest([]byte(telegramGuidedPrompt(observed)))}
 	if session.Guided.Quiz != nil {
 		binding.QuestionID, binding.InputDigest = session.Guided.Quiz.QuestionID, session.Guided.Quiz.InputDigest
 	}
@@ -115,5 +117,26 @@ func telegramGuidedProgress(observed GuidedUseCaseInspection) (core.TelegramGuid
 
 	data, err := json.Marshal(binding)
 
-	return core.TelegramGuidedProgress{SessionRef: core.DirectoryName + "/authoring/sessions/" + session.ID + "/session.md", Topic: session.Topic, Binding: string(data), Phase: "collecting"}, err
+	return core.TelegramGuidedProgress{SessionRef: core.DirectoryName + "/authoring/sessions/" + session.ID + "/session.md", Topic: session.Topic, Binding: string(data), Phase: telegramGuidedTransportPhase(observed)}, err
+}
+
+func telegramGuidedDocumentKind(text string) string {
+	kinds := map[string]string{"show dump": "dump", "show quiz": "quiz", "show specification": "specification", "show plan": "plan", "show tracker": "tracker", "show results": "results"}
+
+	return kinds[text]
+}
+
+func telegramGuidedTransportPhase(observed GuidedUseCaseInspection) string {
+	if observed.Result != nil && observed.Result.Complete {
+		return "completed"
+	}
+
+	switch observed.Session.Guided.Status {
+	case "cancelled":
+		return "canceled"
+	case "failed":
+		return "failed"
+	default:
+		return "collecting"
+	}
 }

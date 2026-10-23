@@ -14,6 +14,26 @@ var ErrTelegramNotGuided = errors.New("conversation is not a guided binding")
 // ReserveTelegramGuidedConversation retains only routing to a canonical session.
 // It does not acknowledge the update, create authoring state or grant dispatch.
 func (s *TelegramReceiverStore) ReserveTelegramGuidedConversation(ctx context.Context, input TelegramConversationInput, now time.Time) (conversation TelegramConversation, target TelegramOperationTarget, err error) {
+	return s.reserveTelegramGuidedAssociation(ctx, input, "", now)
+}
+
+// BindTelegramGuidedConversation associates an existing guided run by its verified
+// scope. It creates no progression intent and cannot adopt a manual session.
+func (s *TelegramReceiverStore) BindTelegramGuidedConversation(ctx context.Context, input TelegramConversationInput, session AuthoringSession, now time.Time) (TelegramConversation, TelegramOperationTarget, error) {
+	if session.Guided == nil || validateGuidedUseCase(session) != nil || input.Project != session.ProjectID || input.Namespace != session.Namespace {
+		return TelegramConversation{}, TelegramOperationTarget{}, ErrWorkflowConflict
+	}
+
+	if err := validateAuthoringSessionID(session.ID); err != nil {
+		return TelegramConversation{}, TelegramOperationTarget{}, err
+	}
+
+	input.Text = session.Topic
+
+	return s.reserveTelegramGuidedAssociation(ctx, input, session.ID, now)
+}
+
+func (s *TelegramReceiverStore) reserveTelegramGuidedAssociation(ctx context.Context, input TelegramConversationInput, runID string, now time.Time) (conversation TelegramConversation, target TelegramOperationTarget, err error) {
 	if _, allowed := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType); !allowed {
 		return conversation, target, ErrWorkflowConflict
 	}
@@ -35,7 +55,7 @@ func (s *TelegramReceiverStore) ReserveTelegramGuidedConversation(ctx context.Co
 			return err
 		}
 
-		conversation, err = op.reserveGuidedConversation()
+		conversation, err = op.reserveGuidedConversation(runID)
 		if err != nil {
 			return err
 		}
@@ -48,13 +68,13 @@ func (s *TelegramReceiverStore) ReserveTelegramGuidedConversation(ctx context.Co
 	return conversation, target, err
 }
 
-func (op telegramConversationTransaction) reserveGuidedConversation() (TelegramConversation, error) {
+func (op telegramConversationTransaction) reserveGuidedConversation(runID string) (TelegramConversation, error) {
 	id := telegramConversationID(op.input.Update)
 	p := op.input.Update.Peer
 
 	c, err := scanTelegramConversation(op.tx.QueryRowContext(op.ctx, `SELECT `+telegramConversationColumns+` FROM telegram_conversations WHERE id=? AND bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, id, p.BotID, p.ChatID, p.TopicID, p.UserID))
 	if err == nil {
-		if c.GuidedRunID == "" || c.Topic != op.input.Text {
+		if c.GuidedRunID == "" || c.Topic != op.input.Text || runID != "" && c.GuidedRunID != runID {
 			return c, ErrWorkflowConflict
 		}
 
@@ -70,10 +90,14 @@ func (op telegramConversationTransaction) reserveGuidedConversation() (TelegramC
 		return c, err
 	}
 
-	created.GuidedRunID = created.ID
-	created.AuthoringSessionRef = filepath.ToSlash(filepath.Join(DirectoryName, "authoring", "sessions", created.ID, "session.md"))
+	created.GuidedRunID = runID
+	if created.GuidedRunID == "" {
+		created.GuidedRunID = created.ID
+	}
 
-	_, err = op.tx.ExecContext(op.ctx, `UPDATE telegram_conversations SET authoring_session_ref=?,guided_run_id=? WHERE id=?`, created.AuthoringSessionRef, created.ID, created.ID)
+	created.AuthoringSessionRef = filepath.ToSlash(filepath.Join(DirectoryName, "authoring", "sessions", created.GuidedRunID, "session.md"))
+
+	_, err = op.tx.ExecContext(op.ctx, `UPDATE telegram_conversations SET authoring_session_ref=?,guided_run_id=? WHERE id=?`, created.AuthoringSessionRef, created.GuidedRunID, created.ID)
 	if err != nil {
 		return c, err
 	}

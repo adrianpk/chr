@@ -57,6 +57,8 @@ func (r telegramReceiver) applyGuidedAction(ctx context.Context, claim core.Tele
 
 	input.Offer, input.Command.Action = false, claim.Choice
 
+	operations = r.boundTelegramGuidedService(operations, claim.Request, input.Command.RunID)
+
 	session, err := applyTelegramGuided(ctx, operations, claim.Request.Target, input)
 	if errors.Is(err, core.ErrWorkflowConflict) {
 		return r.finishGuidedActionFailure(ctx, claim, current, err)
@@ -82,7 +84,12 @@ func (r telegramReceiver) finishGuidedAction(ctx context.Context, claim core.Tel
 
 	text := telegramGuidedPrompt(observed)
 
-	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{State: "confirmed", Guided: &progress, ReceiptRef: progress.SessionRef, Facts: facts, Text: text, Message: telegramOutcomeMessage("43", text), ConfigDigest: config.Digest()}, time.Now())
+	delivery, err := r.guidedDocument(ctx, claim.Request, observed, "")
+	if err != nil {
+		return err
+	}
+
+	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{State: "confirmed", Delivery: delivery, Guided: &progress, ReceiptRef: progress.SessionRef, Facts: facts, Text: text, Message: telegramOutcomeMessage("43", text), ConfigDigest: config.Digest()}, time.Now())
 }
 
 func (r telegramReceiver) finishGuidedActionFailure(ctx context.Context, claim core.TelegramActionClaim, config core.TelegramReceiverConfig, failure error) error {

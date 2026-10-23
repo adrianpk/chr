@@ -167,6 +167,10 @@ func (operations service) checkGuidedActivation(ctx context.Context, run core.Wo
 		return core.ErrGuidedUseCaseStopped
 	}
 
+	if operations.guidedHostCheck != nil {
+		return operations.guidedHostCheck(ctx)
+	}
+
 	return nil
 }
 

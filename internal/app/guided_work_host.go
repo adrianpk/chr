@@ -39,7 +39,7 @@ func newGuidedWorkHost(ctx context.Context) *guidedWorkHost {
 
 func (host *guidedWorkHost) ready() error {
 	if host.ctx.Err() != nil {
-		return &core.GuidedPrerequisiteError{Action: "Start a managed Web host, then retry this retained operation.", Cause: host.ctx.Err()}
+		return &core.GuidedPrerequisiteError{Action: "Start a managed workflow host, then retry this retained operation.", Cause: host.ctx.Err()}
 	}
 
 	return nil

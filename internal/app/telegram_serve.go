@@ -97,7 +97,14 @@ func serveTelegramReceiver(ctx context.Context, env core.UserEnvironment, assets
 func (r telegramReceiver) run(ctx context.Context) error {
 	r.slots = newTelegramActivationSlots()
 
-	hosts := []func(context.Context) error{r.runIntake, newTelegramWorkHost(r).run, newTelegramApplicationHost(r).run, r.runDeliveries}
+	shared := newGuidedWorkHost(ctx)
+	if operations, ok := r.operations.(service); ok {
+		operations.guidedWorkHost = shared
+		r.operations = operations
+	}
+
+	guided := &telegramGuidedHost{receiver: r, shared: shared}
+	hosts := []func(context.Context) error{r.runIntake, newTelegramWorkHost(r).run, newTelegramApplicationHost(r).run, r.runDeliveries, guided.run}
 
 	return runTelegramReceiverHosts(ctx, hosts, 30*time.Second)
 }

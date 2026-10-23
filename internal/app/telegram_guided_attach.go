@@ -1,0 +1,52 @@
+package app
+
+import (
+	"context"
+	"strings"
+	"time"
+
+	"forge.adrianpk.com/chr/internal/core"
+)
+
+func (r telegramReceiver) attachTelegramGuidedName(ctx context.Context, input core.TelegramConversationInput, title, projectName string) (string, error) {
+	operations, ok := r.operations.(telegramGuidedService)
+	if !ok {
+		return "", ErrRecordUnsupported
+	}
+
+	if projectName != "" {
+		project, err := telegramGuidedProjectName(input.Projects, projectName)
+		if err != nil {
+			return "", err
+		}
+
+		input.Project = project
+	}
+
+	target, err := r.store.ResolveTelegramOperationTarget(ctx, input, time.Now())
+	if err != nil {
+		return "", telegramGuidedStartFailure(err, input.Projects)
+	}
+
+	observed, err := operations.InspectTelegramGuided(ctx, target, "")
+	if err != nil {
+		return "", err
+	}
+
+	var matches []core.AuthoringSession
+
+	for _, session := range observed.Runs {
+		if strings.EqualFold(session.Topic, title) {
+			matches = append(matches, session)
+		}
+	}
+
+	if len(matches) != 1 {
+		return "", telegramGuidedRoutingFailure("The guided use-case name is unavailable or ambiguous in the selected project. Use a unique guided name, optionally followed by in project and its registered project name. Saved work is unchanged.")
+	}
+
+	input.Project, input.Namespace = target.ProjectID, target.Namespace
+	conversation, _, err := r.store.BindTelegramGuidedConversation(ctx, input, matches[0], time.Now())
+
+	return conversation.ID, err
+}

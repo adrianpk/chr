@@ -16,6 +16,7 @@ type service struct {
 	afterGuidedControl     func() error
 	afterGuidedAdmission   func(string) error
 	guidedWorkHost         guidedWorkActivator
+	guidedHostCheck        core.WorkflowAdmissionCheck
 	afterGuidedPreparation func(string) error
 	afterGuidedSpec        func(string) error
 	afterGuidedQuiz        func() error

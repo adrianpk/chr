@@ -8,18 +8,20 @@ import (
 
 type telegramGuidedService interface {
 	InspectTelegramGuided(context.Context, core.TelegramOperationTarget, string) (GuidedUseCaseInspection, error)
+	ReadTelegramGuidedOriginal(context.Context, core.TelegramOperationTarget, string, string) (GuidedUseCaseArtifact, error)
 	ApplyTelegramGuided(context.Context, core.TelegramOperationTarget, telegramGuidedInput) (core.AuthoringSession, error)
 }
 
 type telegramGuidedInput struct {
-	Name    string                    `json:"name,omitempty"`
-	Choices []string                  `json:"choices,omitempty"`
-	Actor   string                    `json:"actor"`
-	Inspect bool                      `json:"inspect,omitempty"`
-	Retry   bool                      `json:"retry,omitempty"`
-	Offer   bool                      `json:"offer,omitempty"`
-	Start   bool                      `json:"start,omitempty"`
-	Command core.GuidedUseCaseCommand `json:"command"`
+	Document string                    `json:"document,omitempty"`
+	Name     string                    `json:"name,omitempty"`
+	Choices  []string                  `json:"choices,omitempty"`
+	Actor    string                    `json:"actor"`
+	Inspect  bool                      `json:"inspect,omitempty"`
+	Retry    bool                      `json:"retry,omitempty"`
+	Offer    bool                      `json:"offer,omitempty"`
+	Start    bool                      `json:"start,omitempty"`
+	Command  core.GuidedUseCaseCommand `json:"command"`
 }
 
 func (s service) telegramGuidedProject(ctx context.Context, target core.TelegramOperationTarget) (service, error) {
@@ -69,4 +71,14 @@ func (s service) ApplyTelegramGuided(ctx context.Context, target core.TelegramOp
 	}
 
 	return scoped.ChangeGuidedUseCase(ctx, command)
+}
+
+// ReadTelegramGuidedOriginal checks the registered scope before reading sealed bytes.
+func (s service) ReadTelegramGuidedOriginal(ctx context.Context, target core.TelegramOperationTarget, id, kind string) (GuidedUseCaseArtifact, error) {
+	scoped, err := s.telegramGuidedProject(ctx, target)
+	if err != nil {
+		return GuidedUseCaseArtifact{}, err
+	}
+
+	return scoped.ReadGuidedUseCaseOriginal(ctx, id, target.Namespace, kind)
 }

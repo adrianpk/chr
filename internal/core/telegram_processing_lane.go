@@ -50,12 +50,21 @@ func telegramInputLane(ctx context.Context, tx *sql.Tx, update TelegramReceivedU
 		return telegramUnboundReplyLane(ctx, tx, update)
 	}
 
-	return telegramActionInputLane(ctx, tx, update.Peer, token)
+	return telegramActionInputLane(ctx, tx, update, token)
 }
 
 // TelegramExplicitControlLane classifies deterministic control syntax. This
 // scheduling hint grants no target, actor, execution or mutation authority.
 func TelegramExplicitControlLane(update TelegramReceivedUpdate) (TelegramProcessingLane, bool) {
+	if update.Kind == "message" {
+		switch strings.ToLower(strings.TrimSpace(update.Text)) {
+		case "pause use case", "cancel use case", "show current step", "show use case":
+			return TelegramProcessingUrgent, true
+		case "resume use case", "show controls":
+			return TelegramProcessingDecision, true
+		}
+	}
+
 	words := strings.Fields(update.Text)
 	if update.Kind != "message" || len(words) == 0 {
 		return TelegramProcessingOrdinary, false
@@ -73,19 +82,21 @@ func TelegramExplicitControlLane(update TelegramReceivedUpdate) (TelegramProcess
 	}
 }
 
-func telegramActionInputLane(ctx context.Context, tx *sql.Tx, p TelegramPeerIdentity, token string) (TelegramProcessingLane, bool, error) {
+func telegramActionInputLane(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, token string) (TelegramProcessingLane, bool, error) {
 	var operation, arguments string
+
+	p := update.Peer
 
 	err := tx.QueryRowContext(ctx, `SELECT r.operation_id,r.arguments FROM telegram_actions a JOIN telegram_requests r ON r.id=a.request_id WHERE a.token=? AND a.bot_id=? AND a.chat_id=? AND a.topic_id=? AND a.user_id=?`, token, p.BotID, p.ChatID, p.TopicID, p.UserID).Scan(&operation, &arguments)
 	if errors.Is(err, sql.ErrNoRows) {
 		return TelegramProcessingDecision, true, nil
 	}
 
-	if err != nil || operation != "work.control" {
+	if err != nil || operation != "work.control" && operation != "guided.step" {
 		return TelegramProcessingOrdinary, false, err
 	}
 
-	lane, err := TelegramActionProcessingLane(TelegramOperationRequest{OperationID: operation, Arguments: json.RawMessage(arguments)})
+	lane, err := TelegramActionChoiceProcessingLane(TelegramOperationRequest{OperationID: operation, Arguments: json.RawMessage(arguments)}, telegramInputActionChoice(update))
 
 	return lane, true, err
 }
@@ -192,4 +203,30 @@ func readTelegramPendingRows(rows *sql.Rows, botID int64) ([]TelegramReceivedUpd
 	}
 
 	return result, rows.Err()
+}
+
+// TelegramActionChoiceProcessingLane is a scheduling hint for an already sealed
+// choice. The action owner still validates every peer, choice and mutation guard.
+func TelegramActionChoiceProcessingLane(request TelegramOperationRequest, choice string) (TelegramProcessingLane, error) {
+	if request.OperationID == "guided.step" {
+		return telegramControlLane(choice), nil
+	}
+
+	return TelegramActionProcessingLane(request)
+}
+
+func telegramInputActionChoice(update TelegramReceivedUpdate) string {
+	if update.Kind == "callback_query" {
+		parts := strings.Split(update.Text, ":")
+		if len(parts) == 3 {
+			return parts[2]
+		}
+	}
+
+	words := strings.Fields(update.Text)
+	if len(words) == 3 && words[0] == TelegramActionAnswerCommand {
+		return words[2]
+	}
+
+	return strings.TrimSpace(update.Text)
 }

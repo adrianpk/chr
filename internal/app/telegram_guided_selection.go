@@ -68,6 +68,10 @@ func (r telegramReceiver) selectTelegramGuidedName(ctx context.Context, input co
 		matches = append(matches, c.ID)
 	}
 
+	if len(matches) == 0 {
+		return r.attachTelegramGuidedName(ctx, input, title, projectName)
+	}
+
 	if len(matches) != 1 {
 		return "", telegramGuidedRoutingFailure("The use-case name is unavailable or ambiguous here. Use a unique name, optionally followed by in project and its registered project name. Saved inputs are unchanged.")
 	}

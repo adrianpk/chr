@@ -11,21 +11,49 @@ func telegramGuidedPrompt(observed GuidedUseCaseInspection) string {
 	session := observed.Session
 	state := session.Guided
 
-	text := "Guided use case: " + session.Topic + "\nStage: " + state.Stage + " · " + state.Status
+	status := telegramGuidedVisibleStatus(observed)
+
+	text := "Guided use case: " + session.Topic + "\nStage: " + state.Stage + " · " + status
+	if state.Stage == "name" {
+		text += telegramGuidedStartContext(observed)
+	}
+
 	if state.Blocker != "" {
 		text += "\n" + state.Blocker
 	}
 
-	if !core.GuidedDispatchAllowed(*session) {
-		return text + "\n\nSaved inputs and work limits are retained. Send Show controls for the available controls, or Show current step to refresh."
+	if core.GuidedDispatchAllowed(*session) {
+		text += telegramGuidedInputPrompt(observed)
+	} else {
+		text += "\n\nSaved inputs and work limits are retained."
 	}
 
-	text += telegramGuidedInputPrompt(observed)
+	if state.Stage == "results" || observed.Result != nil || observed.ResultProblem != "" {
+		text += "\n" + telegramGuidedResultSummary(observed)
+	}
+
 	if len(state.Checkpoints) > 0 {
-		text += "\nSend Idea: followed by a later request to save it separately for review after completion."
+		text += "\nSend Show dump, Show quiz, Show specification, Show plan or Show tracker to inspect a sealed original.\nSend Idea: followed by a later request to save it separately for review after completion."
 	}
 
-	return text + "\nSend Show controls for available actions, or Show current step to refresh."
+	if len(observed.Ideas) > 0 {
+		text += fmt.Sprintf("\nSaved later ideas: %d pending review.", len(observed.Ideas))
+	}
+
+	return text + "\nSend Show controls for available actions, Show results for evidence and later ideas, or Show current step to refresh."
+}
+
+func telegramGuidedStartContext(observed GuidedUseCaseInspection) string {
+	text := "\nProject: " + observed.ProjectName + " · " + observed.Namespace
+	for _, policy := range observed.Policy {
+		text += "\n" + policy
+	}
+
+	for _, problem := range observed.Problems[:min(2, len(observed.Problems))] {
+		text += "\nPrerequisite: " + problem
+	}
+
+	return text
 }
 
 func telegramGuidedInputPrompt(observed GuidedUseCaseInspection) string {
@@ -50,7 +78,7 @@ func telegramGuidedInputPrompt(observed GuidedUseCaseInspection) string {
 	case "execution":
 		return telegramGuidedWorkPrompt(observed.Work)
 	default:
-		return "\n\nInspect the confirmed result before requesting further work."
+		return "\n\nInspect the retained result evidence before requesting further work."
 	}
 }
 
@@ -73,4 +101,19 @@ func telegramGuidedWorkPrompt(work *WorkflowWorkStatus) string {
 	}
 
 	return text
+}
+
+func telegramGuidedVisibleStatus(observed GuidedUseCaseInspection) string {
+	if observed.ResultProblem != "" {
+		return "blocked"
+	}
+
+	complete := observed.Result != nil && observed.Result.Complete
+
+	terminal := observed.Session.Guided.Status == "completed" || observed.Work != nil && observed.Work.Status == "completed"
+	if terminal && !complete {
+		return "blocked"
+	}
+
+	return observed.Session.Guided.Status
 }

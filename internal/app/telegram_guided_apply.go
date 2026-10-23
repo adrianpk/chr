@@ -39,6 +39,8 @@ func (r telegramReceiver) continueTelegramGuided(ctx context.Context, request co
 		return err
 	}
 
+	operations = r.boundTelegramGuidedService(operations, request, owner.Command.RunID)
+
 	session, err := applyTelegramGuided(ctx, operations, request.Target, owner)
 	if errors.Is(err, core.ErrWorkflowConflict) {
 		return r.finishGuidedFailure(ctx, request, current, err)
@@ -53,10 +55,10 @@ func (r telegramReceiver) continueTelegramGuided(ctx context.Context, request co
 		return err
 	}
 
-	return r.finishTelegramGuided(ctx, request, observed, current)
+	return r.finishTelegramGuided(ctx, request, observed, current, owner.Document)
 }
 
-func (r telegramReceiver) finishTelegramGuided(ctx context.Context, request core.TelegramOperationRequest, observed GuidedUseCaseInspection, current core.TelegramReceiverConfig) error {
+func (r telegramReceiver) finishTelegramGuided(ctx context.Context, request core.TelegramOperationRequest, observed GuidedUseCaseInspection, current core.TelegramReceiverConfig, kind string) error {
 	progress, facts, err := telegramGuidedResult(observed)
 	if err != nil {
 		return err
@@ -64,6 +66,15 @@ func (r telegramReceiver) finishTelegramGuided(ctx context.Context, request core
 
 	text := telegramGuidedPrompt(observed)
 	request.Message = telegramOutcomeMessage("43", text)
+
+	request.Delivery, err = r.guidedDocument(ctx, request, observed, kind)
+	if errors.Is(err, core.ErrWorkflowConflict) {
+		return r.finishGuidedFailure(ctx, request, current, telegramGuidedRoutingFailure("That original has not been sealed for this run. Send Show current step to continue; saved inputs are unchanged."))
+	}
+
+	if err != nil {
+		return err
+	}
 
 	return r.store.FinishTelegramGuided(ctx, request, progress, facts, text, current.Digest(), time.Now())
 }
@@ -94,6 +105,11 @@ func (r telegramReceiver) finishGuidedFailure(ctx context.Context, request core.
 }
 
 func telegramGuidedFailure(failure error) string {
+	var routing telegramGuidedRoutingFailure
+	if errors.As(failure, &routing) {
+		return string(routing)
+	}
+
 	if safe, ok := core.TelegramConversationFailure(failure); ok {
 		return safe
 	}
