@@ -5,35 +5,10 @@
   let submitting = false;
   let observing = false;
   const feedback = workflow.querySelector('[data-workflow-feedback]');
-  const quiz = workflow.querySelector('#quiz-surface');
-  const submittedKey = quiz && 'chr-workflow-answer:' + quiz.dataset.quizSession;
-  try {
-    const previous = submittedKey && sessionStorage.getItem(submittedKey);
-    if (previous && quiz.dataset.quizQuestion && previous !== quiz.dataset.quizQuestion) {
-      const key = 'chr-quiz-drafts:' + quiz.dataset.quizContext + ':' + quiz.dataset.quizSession;
-      const drafts = JSON.parse(sessionStorage.getItem(key) || '{}');
-      delete drafts[previous];
-      sessionStorage.setItem(key, JSON.stringify(drafts));
-      sessionStorage.removeItem(submittedKey);
-      // The shared quiz restores the remaining drafts on DOMContentLoaded.
-    }
-  } catch (_) { /* The shared quiz surface reports unavailable draft storage. */ }
-
   workflow.addEventListener('submit', function (event) {
-    if (event.target.matches('[data-quiz-form]')) {
-      if (quiz && event.submitter && event.submitter.value === 'quiz.answer') {
-        try { sessionStorage.setItem(submittedKey, quiz.dataset.quizQuestion); } catch (_) {}
-      }
-      return;
-    }
+    if (event.target.matches('[data-quiz-form]')) return;
     if (submitting) { event.preventDefault(); return; }
     submitting = true;
-    if (quiz) {
-      quiz.dataset.workflowSubmitting = 'true';
-      if (event.target.elements.step && event.target.elements.step.value === 'answer') {
-        try { sessionStorage.setItem(submittedKey, quiz.dataset.quizQuestion); } catch (_) {}
-      }
-    }
     if (feedback) feedback.textContent = 'Saving…';
     workflow.setAttribute('aria-busy', 'true');
   });

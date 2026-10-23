@@ -24,9 +24,10 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   selected. Continue to quiz saves the Dump and advances directly; manual
   editors retain their independent Save action. The Quiz uses the same layout,
   Deep/Fast selector, history and action buttons as a standalone session.
-  Questions update automatically;
-  the input screens keep internal identifiers and delivery settings out of the
-  way. Original saved documents remain available on request.
+  Accepted answers update the question and history without unsaved-change
+  warnings; failed submissions retain their drafts for retry. The input screens
+  keep internal identifiers and delivery settings out of the way. Original saved
+  documents remain available on request.
   In Telegram, start with **Develop a new use case**, answer the current prompt
   and switch to an existing Web run by its name. Concise progress and complete
   original attachments retain the same inputs and work across reconnects.

@@ -1,7 +1,6 @@
 package app
 
 import (
-	"net/http/httptest"
 	"net/url"
 	"os"
 	"strconv"
@@ -27,20 +26,18 @@ func TestGuidedUseCaseWebBrowser(t *testing.T) {
 	operations := provider.service(t.Context())
 	guidedBrowserSecondQuestion(t, operations)
 
-	server := httptest.NewServer(guidedWebHandler(t, provider))
+	ids := make(chan string, 4)
+
+	server := guidedQuizBrowserServer(t, provider, ids)
 	defer server.Close()
 
 	browser := newWebWorkflowBrowser(t, path)
+	observeGuidedQuizUnload(t, browser)
 	webBoardBrowserViewport(t, browser, 1440, 1000)
 
 	runURL := captureGuidedBrowserInput(t, browser, server.URL, host)
-	webBrowserCapture(t, browser, os.Getenv("CHR_WEB_GUIDED_SCREENSHOTS"), "quiz-desktop")
-	guidedBrowserSubmit(t, browser, "answer", "Keep the exact bounded behavior and review policy.")
-	host.wait.Wait()
-	browser.wait(t, `[data-quiz-question="question-2"]`)
-	webBrowserCapture(t, browser, os.Getenv("CHR_WEB_GUIDED_SCREENSHOTS"), "quiz-second-question")
-	guidedBrowserSubmit(t, browser, "answer", "Preserve the existing interfaces and review the delivered change.")
-	host.wait.Wait()
+	answerGuidedBrowserQuiz(t, browser, host, ids)
+	assertGuidedQuizHistory(t, browser, operations, readWebGuidedSession(t, operations, guidedBrowserRunID(t, provider, runURL)))
 	reopenGuidedBrowser(t, browser, server.URL)
 	assertGuidedBrowserText(t, browser, "0 delivered")
 	assertGuidedBrowserText(t, browser, "The work needs review")
@@ -249,4 +246,19 @@ func guidedBrowserQuizSubmit(t *testing.T, browser *webWorkflowBrowser, action, 
 	before := browser.evaluate(t, `document.querySelector('.case-workflow').dataset.workflowState`)
 	browser.clickNavigation(t, `button[name="action"][value="quiz.`+action+`"]`)
 	browser.wait(t, `.case-workflow:not([data-workflow-state="`+before+`"])`)
+}
+
+func answerGuidedBrowserQuiz(t *testing.T, browser *webWorkflowBrowser, host *guidedWorkHost, ids <-chan string) {
+	t.Helper()
+
+	webBrowserCapture(t, browser, os.Getenv("CHR_WEB_GUIDED_SCREENSHOTS"), "quiz-desktop")
+
+	first := assertGuidedQuizFailedAnswer(t, browser, ids)
+	guidedBrowserSubmit(t, browser, "answer", "Keep the exact bounded behavior and review policy.")
+	host.wait.Wait()
+	browser.wait(t, `[data-quiz-question="question-2"]`)
+	assertGuidedQuizAcceptedAnswer(t, browser, first, <-ids)
+	webBrowserCapture(t, browser, os.Getenv("CHR_WEB_GUIDED_SCREENSHOTS"), "quiz-second-question")
+	guidedBrowserSubmit(t, browser, "answer", "Preserve the existing interfaces and review the delivered change.")
+	host.wait.Wait()
 }

@@ -33,7 +33,7 @@
   }
   function dirty(panel) {
     const input = panel.querySelector('#quiz-answer');
-    return input && input.value.length > 0 && !panel.dataset.workflowSubmitting;
+    return input && input.value.length > 0;
   }
   function restoreMode(panel) {
     panel.querySelectorAll('#quiz-mode input').forEach(function (input) {
@@ -161,6 +161,19 @@
     if (!panel) return;
     panel.querySelector('.quiz-progress').textContent = '';
     panel.querySelector('.quiz-panel').removeAttribute('aria-busy');
+  });
+  document.addEventListener('htmx:beforeOnLoad', function (event) {
+    const form = event.detail.elt.closest('[data-quiz-form]');
+    const panel = surface();
+    const xhr = event.detail.xhr;
+    if (!form || !panel || xhr.status < 200 || xhr.status >= 300 || !xhr.getResponseHeader('HX-Redirect')) return;
+    const sent = event.detail.requestConfig.parameters;
+    if (sent.action !== 'quiz.answer' || sent.session_id !== panel.dataset.quizSession || sent.question_id !== panel.dataset.quizQuestion || sent.request_id !== form.elements.request_id.value) return;
+    const input = panel.querySelector('#quiz-answer');
+    if (!input || input.value !== sent.answer) return;
+    // A successful redirect acknowledges this exact retained submission. Clear
+    // its draft before htmx navigates; failed requests keep both draft and guard.
+    discard(panel);
   });
   document.addEventListener('click', function (event) {
     const link = event.target.closest('a[href]');
