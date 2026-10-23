@@ -5,7 +5,7 @@ Delivery set: guided-use-case-workflow
 Plan: `ops/default/plan/guided-use-case-workflow.md`
 Tracker: `ops/default/tracker/guided-use-case-workflow.md`
 Branch: `feat/slice-5-guided-telegram`
-PR: pending
+PR: `#434`
 Initial routing/capture commit: `77b7f637587a63026ce914368939e7f0ed7158e7`
 Current-step routing commit: `5b032e9f6c7ce34b0e0222ca6162ca63fbcc6e53`
 Shared lifecycle/presentation commit: `5de6795a8cadcf78fb0dda91a3f67830eebaeb72`
@@ -202,10 +202,16 @@ Initial routing/capture also passed the broader normal and race selection
 `go test [-race] ./internal/core ./internal/app -run '^Test(GuidedUseCaseTelegram|TelegramConversation|TelegramAuthoring)' -count=1 -timeout=3m`
 with each form executed separately. That race selection cost core 119.881s and
 app 100.355s. Subsequent checks stay focused unless another manual owner changes.
-The final configured commands are `make verify`, the focused normal guided
-Telegram selection, its race form and `git diff --check`, in that order. Looper
-retains their exact clean PR-reference HEAD evidence; the canonical PR Validation
-section lists the successful commands.
+The required final ordered commands are:
+
+- `make verify`
+- `go test ./internal/core ./internal/app -run '^TestGuidedUseCaseTelegram' -count=1 -timeout=3m`
+- `go test -race ./internal/core ./internal/app -run '^TestGuidedUseCaseTelegram' -count=1 -timeout=3m`
+- `git diff --check`
+
+Looper retains their exact clean PR-reference HEAD evidence; the canonical
+[PR #434](https://forge.adrianpk.com/adrianpk/chr/pulls/434) Validation section
+lists the successful commands.
 
 ## Risks and Follow-ups
 

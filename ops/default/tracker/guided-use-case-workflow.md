@@ -6,8 +6,8 @@ Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 5, Guided Telegram journey; T5.1-T5.3 are complete, and canonical PR preparation and exact-HEAD validation are active.
-Progress: 4 of 6 slices delivered; 15 of 18 tasks completed. Guided Telegram routing, shared lifecycle, originals/results, Web continuation, transport faults and guidance are implemented. Slice 5 PR preparation and exact-HEAD checks are active.
+Active slice: Slice 5, Guided Telegram journey; T5.1-T5.3 are complete, and canonical PR #434 is reviewing.
+Progress: 4 of 6 slices delivered; 15 of 18 tasks completed. Guided Telegram routing, shared lifecycle, originals/results, Web continuation, transport faults and guidance are implemented. Slice 5 PR #434 is reviewing; exact-HEAD checks use the controller ledger.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
 Spec: [Approved workflow](../spec/stable/guided-use-case-workflow.md)
@@ -59,7 +59,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | 2 | delivered | #431 | `2246651001dd6002f783fd86d0dcc13f5bef02e6` | [Slice 2 report](../report/slices/guided-use-case-workflow/slice-2-quiz-spec.md) |
 | 3 | delivered | #432 | `dfcfae6e787742d976f99d40f292a7e047f5252a` | [Slice 3 report](../report/slices/guided-use-case-workflow/slice-3-work-execution.md) |
 | 4 | delivered | [#433](https://forge.adrianpk.com/adrianpk/chr/pulls/433) | `f87649d876723335043041d52b298646bdf9ef18` | [Slice 4 report](../report/slices/guided-use-case-workflow/slice-4-web-recovery.md) |
-| 5 | reviewing | pending | pending | [Slice 5 report](../report/slices/guided-use-case-workflow/slice-5-telegram.md) |
+| 5 | reviewing | [#434](https://forge.adrianpk.com/adrianpk/chr/pulls/434) | pending | [Slice 5 report](../report/slices/guided-use-case-workflow/slice-5-telegram.md) |
 | 6 | pending | pending | pending | pending |
 
 ## Acceptance evidence
