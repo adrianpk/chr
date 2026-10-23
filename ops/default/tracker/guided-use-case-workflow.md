@@ -6,8 +6,8 @@ Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 5, Guided Telegram journey; T5.1 is complete and T5.2 lifecycle/presentation integration is in progress.
-Progress: 4 of 6 slices delivered; 13 of 18 tasks completed. Current-step Telegram routing is complete; managed lifecycle, original-document/result delivery and cross-interface continuation remain active.
+Active slice: Slice 5, Guided Telegram journey; T5.1 and T5.2 are complete, and T5.3 transport faults/documentation are in progress.
+Progress: 4 of 6 slices delivered; 14 of 18 tasks completed. Guided Telegram routing, shared lifecycle, originals/results and Web continuation are implemented. Remaining transport faults, guidance and exact-HEAD PR checks are active.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
 Spec: [Approved workflow](../spec/stable/guided-use-case-workflow.md)
@@ -45,8 +45,8 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | T4.2 | Later-idea retention and truthful waiting/results from native delivery receipts. | done | `c6fd84c0197842011a2ae6cdcececaf739894c56` | Focused idea/result normal and race checks and scoped strict lint passed; native delivery/closing receipts, corruption and read-only inspection covered. |
 | T4.3 | Complete Web journey/fault/browser evidence and user-facing documentation. | done | `0fa7cec16dc3e6b02f3db1d593e3cf4c0081da69` | HTTP journey, actual lost Git commit responses, focused race, owned Chromium journey and scoped strict lint passed. User Guide and changelog updated. |
 | T5.1 | Natural-language Telegram start and shared current-step routing. | done | `77b7f637587a63026ce914368939e7f0ed7158e7`, `5b032e9f6c7ce34b0e0222ca6162ca63fbcc6e53` | Named scope selection, current clarification, sealed buttons, duplicate callbacks, lost owner acknowledgement and preserved inputs pass focused normal/race checks; strict scoped lint passes. |
-| T5.2 | Concise Telegram progress/artifacts/controls/results and cross-interface continuation. | in progress | `5b032e9f6c7ce34b0e0222ca6162ca63fbcc6e53` (initial input/control presentation) | Initial current-step, prerequisite, later-idea and control mapping is present. Managed host/urgent lanes, coalesced notifications, originals/results and Web continuation remain pending. |
-| T5.3 | Telegram transport/journey regressions, declared client evidence and documentation. | pending | pending | pending |
+| T5.2 | Concise Telegram progress/artifacts/controls/results and cross-interface continuation. | done | `5de6795a8cadcf78fb0dda91a3f67830eebaeb72` | Shared managed host, bounded recovery, native waits/controls, coalesced views, original attachments, verified completion and exact Web-run continuation pass focused normal/race checks; strict lint passes. |
+| T5.3 | Telegram transport/journey regressions, declared client evidence and documentation. | in progress | pending | Shared lifecycle and native journey fixtures pass; remaining source/concurrency/transport faults, guidance and changelog are pending. |
 | T6.1 | Shared-service TUI journey input, navigation, artifacts and resume. | pending | pending | pending |
 | T6.2 | TUI controls/progress/results and cross-adapter revision/authority parity. | pending | pending | pending |
 | T6.3 | TUI/parity acceptance, documentation, cycle report and exact-candidate closure gate. | pending | pending | pending |
@@ -68,21 +68,21 @@ Criterion numbers correspond to the approved specification. The plan defines the
 
 | Criterion | Owning tasks | State and evidence |
 | --- | --- | --- |
-| GUC-01 | T1.3, T2.1, T2.3, T5.1, T6.1 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
+| GUC-01 | T1.3, T2.1, T2.3, T5.1, T6.1 | partial: Web and Telegram canonical capture/quiz/specification journeys pass; TUI remains pending. |
 | GUC-02 | T2.2, T3.1, T3.2 | implemented: an eligible HTTP answer automatically approves, prepares, seals and activates exactly its native set; a real worker reaches the native review boundary without another start prompt. |
 | GUC-03 | T2.2 | implemented: exact generated revision/hash approval with initiating actor, run and policy; focused mutation and recovery regressions passed. |
 | GUC-04 | T3.1, T3.2 | implemented: sealed native membership and contracts bound to the canonical preview; older/later unrelated tickets excluded and later-ticket adoption disabled for the invocation. |
 | GUC-05 | T1.1, T2.2, T3.3 | implemented: manual authoring/approval and standalone Web plan publication regressions pass; standalone plan generation does not activate a worker. |
-| GUC-06 | T1.1, T4.1, T5.1, T6.2, T6.3 | partial: shared run/revision and concurrent control regressions passed; Telegram/TUI integration and parity remain pending. |
-| GUC-07 | T2.3, T4.2, T5.2, T6.2 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
+| GUC-06 | T1.1, T4.1, T5.1, T6.2, T6.3 | partial: Web/Telegram inspect and continue the same run, original actor and native invocation; TUI integration and final parity remain pending. |
+| GUC-07 | T2.3, T4.2, T5.2, T6.2 | partial: Web originals and Telegram committed dump/quiz/specification/plan/tracker attachments pass after working-copy replacement; full long questions and concise progress pass. TUI remains pending. |
 | GUC-08 | T1.3, T2.1 | implemented: nonempty capture and valid, sufficient clarification are required; focused invalid/empty/budget/foreign completion regressions passed. |
 | GUC-09 | T2.2, T3.1, T4.1 | implemented: original authoring/publication/materialization operations reconcile before further progression; host startup recovers a retained quiz owner receipt without regeneration. |
 | GUC-10 | T3.2, T4.1, T4.3 | partial: lost admission/start/control responses and host startup retain the original invocation and consumed attempts; complete publication-response variants remain with T4.3. |
 | GUC-11 | T4.1, T5.3, T6.2 | partial: request cancellation, real dead child owners, graceful host interruption and durable operator stops passed local normal/race checks; remaining adapter acceptance is pending. |
 | GUC-12 | T3.3, T4.1, T6.2 | partial: Web controls delegate to native revision-bound receipts and distinguish stop intent from quiescence; original policy, spent attempts and human review remain enforced. TUI controls remain pending. |
 | GUC-13 | T1.2, T2.3, T3.1, T4.3 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
-| GUC-14 | T4.2, T4.3, T5.2, T6.2, T6.3 | partial: Web/native receipt-backed results, corruption rejection and code locations passed; Telegram/TUI presentation and parity remain pending. |
-| GUC-15 | T4.2, T5.2, T6.2 | partial: separate ideas, replay, journal recovery and paused retention passed; Telegram/TUI mapping remains pending. |
+| GUC-14 | T4.2, T4.3, T5.2, T6.2, T6.3 | partial: Web/Telegram native receipt-backed results, closing evidence, validation exports and actual code locations pass; TUI and final parity remain pending. |
+| GUC-15 | T4.2, T5.2, T6.2 | partial: Web/Telegram retain attributable later ideas separately and surface them with results without extending native membership or limits; TUI remains pending. |
 | GUC-16 | T1.2, T3.1, T4.3 | partial: Slice 1 capture/checkpoint regressions passed; remaining owning tasks are pending. |
 
 ## Prerequisites and checkpoints
@@ -219,7 +219,18 @@ only when the allowed registry is ambiguous. Existing sealed actions support
 Finish capture and available pause/resume/cancel controls. Duplicate callbacks and
 lost canonical pause acknowledgements preserve the original effect. Affected
 conversation/action regressions, focused guided race checks and strict scoped lint
-pass. T5.2 is active; no Slice 5 PR or complete managed journey is claimed.
+pass. This routing checkpoint left managed lifecycle integration for T5.2.
+
+T5.2 is complete in `5de6795a8cadcf78fb0dda91a3f67830eebaeb72`. The production receiver reuses
+the shared managed host; bounded association recovery and current peer/root/run
+checks preserve original authority. Human views coalesce and cannot overtake an
+unacknowledged receiver operation. Long questions and committed originals use the
+existing document snapshots. The local Web/Telegram journey preserves native
+review, pause/resume, actor, finite attempts and the same invocation, then reconciles
+an actual lost canonical publication response before showing verified completion.
+Result exports retain validation/closing evidence and later ideas. Focused normal,
+race and strict lint checks pass. T5.3 owns remaining transport fault coverage,
+Telegram guidance/changelog and final PR preparation; no client acceptance is claimed.
 
 Delivery-set gate: `make verify`, bounded normal guided-workflow regressions, focused race coverage for changed ownership, then `git diff --check`, on the exact final integrated `dev` candidate. The scheduled nightly retains exhaustive certification ownership.
 
