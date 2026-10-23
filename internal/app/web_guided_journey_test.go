@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os/exec"
 	"reflect"
 	"strings"
@@ -187,8 +188,13 @@ func assertGuidedJourneyResult(t *testing.T, handler http.Handler, session core.
 		t.Fatal("journey did not reconcile one publication to native results", session.Guided.Stage)
 	}
 
+	original := guidedCaptureHTTP(t, handler, http.MethodGet, "/dumps?"+url.Values{"case": {session.Guided.CaseSlug}, "namespace": {session.Namespace}}.Encode(), nil)
+	if original.Code != http.StatusOK || !strings.Contains(original.Body.String(), "Deliver a bounded workflow.") {
+		t.Fatal("original dump missing from its normal screen")
+	}
+
 	page := guidedCaptureHTTP(t, handler, http.MethodGet, guidedUseCaseURL(session.ID, session.Namespace), nil)
-	for _, text := range []string{"All admitted work has confirmed delivery", "0 remaining", "1 delivered", "View delivered changes", "Exit code: 0", "Deliver a bounded workflow."} {
+	for _, text := range []string{"All admitted work has confirmed delivery", "0 remaining", "1 delivered", "View delivered changes", "Exit code: 0"} {
 		if page.Code != http.StatusOK || !strings.Contains(page.Body.String(), text) {
 			t.Fatal("journey result omitted evidence", text, page.Body.String())
 		}

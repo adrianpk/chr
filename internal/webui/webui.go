@@ -162,6 +162,11 @@ func (h handler) projectFragment(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h handler) board(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Query().Get("case") != "" {
+		h.guidedUseCase(w, r)
+
+		return
+	}
 	data, err := h.boardPageData(r)
 	if err != nil {
 		http.Error(w, "load board", http.StatusInternalServerError)
@@ -261,6 +266,11 @@ func (h handler) dashFragment(w http.ResponseWriter, r *http.Request) {
 
 func (h handler) catalog(family string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("case") != "" || family == "cases" && r.URL.Query().Get("new") == "workflow" {
+			h.guidedUseCase(w, r)
+
+			return
+		}
 		data, err := h.catalogPageData(r, family)
 		if err != nil {
 			http.Error(w, "load catalog", http.StatusInternalServerError)
@@ -703,7 +713,7 @@ func (h handler) boardPageData(r *http.Request) (PageData, error) {
 			return PageData{}, fmt.Errorf("invalid Board page offset")
 		}
 	}
-	board, err := h.provider.BoardView(r.Context(), BoardRequest{Offset: offset})
+	board, err := h.provider.BoardView(r.Context(), BoardRequest{Offset: offset, Namespace: r.URL.Query().Get("namespace"), CaseSlug: r.URL.Query().Get("case")})
 	if err != nil {
 		return PageData{}, err
 	}

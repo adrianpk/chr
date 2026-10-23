@@ -43,7 +43,11 @@ func (p webViewProvider) ProjectView(context.Context) (webui.ProjectView, error)
 }
 
 func (p webViewProvider) BoardView(ctx context.Context, request webui.BoardRequest) (webui.BoardView, error) {
-	board, err := p.service(ctx).ReadTicketBoard(request.Offset)
+	operations := p.service(ctx)
+	if request.Namespace != "" {
+		operations.workflowNamespace = request.Namespace
+	}
+	board, err := operations.readTicketBoardPage(request.Offset, request.CaseSlug)
 	if err != nil {
 		return webui.BoardView{}, err
 	}

@@ -356,9 +356,10 @@ deliberately](../expose-local-web-ui.md).
 
 ## Develop a Use Case in the Web UI
 
-Open **Cases** and choose **Start workflow**. Enter the use-case name; there is
-no separate namespace prompt. The use case stays selected as you move through
-the existing Dump, Quiz and document views.
+Open **Cases** and choose **Wizard**. Enter the name and choose **Create**.
+Opening the form does not start a retained workflow; submitting the name does.
+The main menu follows the current step: Dumps, Quizzes, Specs, Plans and Board.
+The use case stays selected throughout the existing screens.
 
 1. Write what you know in the **Dump** and choose **Save dump**. Add more input
    when needed, then choose **Continue to quiz**.
@@ -372,14 +373,15 @@ the existing Dump, Quiz and document views.
    required. Task validation and confirmed delivery have separate counts.
 5. Open **Results** to see confirmed changes and their validation outcomes.
 
-Expand a document under **Documents** to read the original saved Dump, Quiz,
-Spec or Plan. Later working-copy edits do not replace the inputs already used
-for development. Reopening a page only reads state; it does not retry work.
+Use the main menu to read an earlier saved Dump, Quiz, Spec or Plan. These
+original inputs are read-only; later working-copy edits do not replace the
+versions already used for development. Select the current step to continue.
+Reopening a page only reads state; it does not retry work.
 
 Return to **Cases** to reopen a named workflow. Closing the tab or losing a
 connection does not discard accepted input. **Retry this step** reuses an
-unfinished operation. **Pause use case**, **Resume use case** and **Cancel use
-case** retain the original work, controls and remaining execution allowance.
+unfinished operation. **Pause**, **Resume** and **Cancel** retain the original
+work, controls and remaining execution allowance.
 Configure Git delivery and the generation and worker harnesses before starting
 development; project configuration is separate from the guided input screens.
 

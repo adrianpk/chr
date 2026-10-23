@@ -61,7 +61,7 @@
         }
         return;
       }
-      location.reload();
+      location.assign(state.url || location.href);
     } catch (_) {
       if (feedback) { feedback.textContent = 'Updates are temporarily unavailable. Your progress is saved.'; feedback.dataset.unavailable = 'true'; }
     } finally {

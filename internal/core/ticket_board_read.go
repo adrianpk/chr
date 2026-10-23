@@ -7,12 +7,14 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 )
 
 // TicketBoardReadOptions selects authority and one bounded page of the Board.
 type TicketBoardReadOptions struct {
+	CaseSlug       string
 	Layout         OpsLayout
 	ProjectID      string
 	NativeWorkflow bool
@@ -56,6 +58,10 @@ func (s *WorkflowStore) readTicketBoard(ctx context.Context, opts TicketBoardRea
 	tickets, err := s.readBoardTickets(ctx, opts.NativeWorkflow)
 	if err != nil {
 		return Board{}, err
+	}
+
+	if opts.CaseSlug != "" {
+		tickets = slices.DeleteFunc(tickets, func(ticket IndexedTicket) bool { return ticket.UseCase != opts.CaseSlug })
 	}
 
 	return ticketBoardPage(s.projectID, tickets, opts.Offset, opts.Limit), nil

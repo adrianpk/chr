@@ -41,25 +41,23 @@ func TestGuidedUseCaseWebBrowser(t *testing.T) {
 	webBrowserCapture(t, browser, os.Getenv("CHR_WEB_GUIDED_SCREENSHOTS"), "quiz-second-question")
 	guidedBrowserSubmit(t, browser, "answer", "Preserve the existing interfaces and review the delivered change.")
 	host.wait.Wait()
-	browser.navigate(t, runURL)
+	reopenGuidedBrowser(t, browser, server.URL)
 	assertGuidedBrowserText(t, browser, "0 delivered")
 	assertGuidedBrowserText(t, browser, "The work needs review")
 	guidedBrowserSubmit(t, browser, "pause", "")
 	assertGuidedBrowserText(t, browser, "Paused")
 	guidedBrowserSubmit(t, browser, "resume", "")
 	host.wait.Wait()
-	browser.navigate(t, runURL)
+	reopenGuidedBrowser(t, browser, server.URL)
 	approveGuidedBrowserWork(t, browser, server.URL, provider, runURL)
 
-	id := guidedBrowserRunID(t, runURL)
+	id := guidedBrowserRunID(t, provider, runURL)
 	session := readWebGuidedSession(t, operations, id)
 	publishGuidedWebResult(t, operations, host, publication, session.Guided.Work.Invocation.ID)
 	webBoardBrowserViewport(t, browser, 390, 844)
-	browser.navigate(t, runURL)
+	reopenGuidedBrowser(t, browser, server.URL)
 
-	for _, text := range []string{"All admitted work has confirmed delivery", "0 remaining", "View delivered changes", "dev"} {
-		assertGuidedBrowserText(t, browser, text)
-	}
+	assertGuidedBrowserResult(t, browser)
 
 	webBrowserCapture(t, browser, os.Getenv("CHR_WEB_GUIDED_SCREENSHOTS"), "results-mobile")
 	browser.click(t, `details:has(summary) summary`)
@@ -72,10 +70,14 @@ func TestGuidedUseCaseWebBrowser(t *testing.T) {
 func captureGuidedBrowserInput(t *testing.T, browser *webWorkflowBrowser, serverURL string, host *guidedWorkHost) string {
 	t.Helper()
 	browser.navigate(t, serverURL+"/cases")
-	browser.clickNavigation(t, `form:has(input[value="guided.start"]) button`)
+	browser.clickNavigation(t, `a[href*="new=workflow"]`)
+	webBrowserCapture(t, browser, os.Getenv("CHR_WEB_GUIDED_SCREENSHOTS"), "name-desktop")
+	assertGuidedBrowserName(t, browser)
+
+	guidedBrowserSubmit(t, browser, "name", "Browser guided delivery")
 
 	runURL := browser.evaluate(t, "location.href")
-	guidedBrowserSubmit(t, browser, "name", "Browser guided delivery")
+	assertGuidedBrowserTab(t, browser, "/dumps")
 
 	if got := browser.evaluate(t, `String(new URL(location.href).searchParams.has("case"))`); got != "true" {
 		t.Fatal("workflow lost its functional use-case reference", got)
@@ -85,6 +87,8 @@ func captureGuidedBrowserInput(t *testing.T, browser *webWorkflowBrowser, server
 	browser.clickNavigation(t, `button[form="workflow-finish"]`)
 	host.wait.Wait()
 	browser.wait(t, `.quiz-response textarea`)
+	assertGuidedBrowserTab(t, browser, "/quizzes")
+	assertGuidedBrowserNavigation(t, browser)
 
 	return runURL
 }
@@ -112,21 +116,26 @@ func assertGuidedBrowserText(t *testing.T, browser *webWorkflowBrowser, text str
 	}
 }
 
-func guidedBrowserRunID(t *testing.T, location string) string {
+func guidedBrowserRunID(t *testing.T, provider webViewProvider, location string) string {
 	t.Helper()
 
 	parsed, err := url.Parse(location)
-	if err != nil || parsed.Query().Get("id") == "" {
-		t.Fatal("browser did not retain the journey URL", err)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	return parsed.Query().Get("id")
+	view, err := provider.CaseWorkflowView(t.Context(), parsed.Query().Get("case"), parsed.Query().Get("namespace"))
+	if err != nil || view.RunID == "" {
+		t.Fatal("browser did not retain its use-case context", err)
+	}
+
+	return view.RunID
 }
 
 func approveGuidedBrowserWork(t *testing.T, browser *webWorkflowBrowser, serverURL string, provider webViewProvider, runURL string) {
 	t.Helper()
 
-	session := readWebGuidedSession(t, provider.service(t.Context()), guidedBrowserRunID(t, runURL))
+	session := readWebGuidedSession(t, provider.service(t.Context()), guidedBrowserRunID(t, provider, runURL))
 	browser.navigate(t, serverURL+"/workflows?id="+session.Guided.Work.Invocation.ID)
 	browser.click(t, `[data-workflow-action="approve"]`)
 	browser.wait(t, `[data-write-status]`)
@@ -145,4 +154,69 @@ func guidedBrowserSecondQuestion(t *testing.T, operations service) {
 	}
 
 	model.quiz.responses = []core.QuizModelResponse{model.quiz.responses[0], serviceQuizModelResponse("second", "question-2", operations.utcNow()), model.quiz.responses[1]}
+}
+
+func assertGuidedBrowserName(t *testing.T, browser *webWorkflowBrowser) {
+	t.Helper()
+
+	visible := browser.evaluate(t, "document.body.innerText")
+	for _, extra := range []string{"New use case", "Name your use case", "What do you want", "← Cases", "Pause", "Cancel", "Development"} {
+		if strings.Contains(visible, extra) {
+			t.Fatal("redundant initial screen copy", extra)
+		}
+	}
+
+	if count := browser.evaluate(t, `String(document.querySelectorAll('nav').length)`); count != "1" {
+		t.Fatal("duplicated navigation", count)
+	}
+}
+
+func assertGuidedBrowserTab(t *testing.T, browser *webWorkflowBrowser, path string) {
+	t.Helper()
+
+	if got := browser.evaluate(t, "location.pathname"); got != path {
+		t.Fatal("workflow did not use the product screen", path, got)
+	}
+
+	if got := browser.evaluate(t, `document.querySelector('nav[aria-label="Primary"] .app-nav__link--active')?.textContent.trim().toLowerCase() || ''`); got != strings.TrimPrefix(path, "/") {
+		t.Fatal("primary navigation did not show the current screen")
+	}
+}
+
+func reopenGuidedBrowser(t *testing.T, browser *webWorkflowBrowser, serverURL string) {
+	t.Helper()
+	browser.navigate(t, serverURL+"/cases")
+	browser.clickNavigation(t, `a.button[href*="case="]`)
+	browser.wait(t, `.case-workflow`)
+}
+
+func assertGuidedBrowserNavigation(t *testing.T, browser *webWorkflowBrowser) {
+	t.Helper()
+	browser.clickNavigation(t, `nav a[href^="/dumps?"]`)
+	assertGuidedBrowserTab(t, browser, "/dumps")
+	assertGuidedBrowserText(t, browser, "Deliver a bounded workflow")
+
+	if got := browser.evaluate(t, `String(document.querySelectorAll('.case-workflow textarea').length)`); got != "0" {
+		t.Fatal("committed dump became editable")
+	}
+
+	browser.clickNavigation(t, `nav a[href^="/quizzes?"]`)
+	browser.wait(t, `.quiz-response textarea`)
+	assertGuidedBrowserTab(t, browser, "/quizzes")
+}
+
+func assertGuidedBrowserResult(t *testing.T, browser *webWorkflowBrowser) {
+	t.Helper()
+
+	for _, text := range []string{"All admitted work has confirmed delivery", "0 remaining", "View delivered changes", "dev"} {
+		assertGuidedBrowserText(t, browser, text)
+	}
+
+	if visible := browser.evaluate(t, "document.body.innerText"); strings.Contains(visible, "Paused.") {
+		t.Fatal("completed work was shown as paused")
+	}
+
+	if count := browser.evaluate(t, `String(document.querySelectorAll('.board-grid .ticket-card').length)`); count != "1" {
+		t.Fatal("Board did not retain the selected use case", count)
+	}
 }

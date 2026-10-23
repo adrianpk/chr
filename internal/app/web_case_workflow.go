@@ -47,5 +47,5 @@ func guidedSessionURL(session core.AuthoringSession) string {
 		return guidedUseCaseURL(session.ID, session.Namespace)
 	}
 
-	return "/cases/workflow?" + url.Values{"case": {session.Guided.CaseSlug}, "namespace": {session.Namespace}}.Encode()
+	return webui.GuidedUseCasePath(session.Guided.Stage) + "?" + url.Values{"case": {session.Guided.CaseSlug}, "namespace": {session.Namespace}}.Encode()
 }

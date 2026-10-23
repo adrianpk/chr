@@ -3,6 +3,8 @@ package webui
 import (
 	"context"
 	"net/http"
+	"net/url"
+	"strings"
 )
 
 // GuidedUseCaseProvider projects a retained journey through shared commands.
@@ -20,25 +22,25 @@ type GuidedUseCaseLink struct{ Name, URL, CaseSlug string }
 
 // GuidedUseCaseView presents current capture, setup and an inspectable committed input.
 type GuidedUseCaseView struct {
-	Processing                                                    bool
-	CaseSlug, Observation, StateURL, StateToken, StageLabel, Hint string
-	Steps                                                         []GuidedUseCaseStep
-	Result                                                        *GuidedUseCaseResult
-	Ideas                                                         []GuidedUseCaseIdea
-	IdeaRequestID, IdeaRevision                                   string
-	CanRetainIdea                                                 bool
-	Controls                                                      []GuidedUseCaseControl
-	Suspended                                                     bool
-	ControlStatus                                                 string
-	Work                                                          *GuidedUseCaseWork
-	Enabled                                                       bool
-	RunID, Namespace, Name, Revision, RequestID                   string
-	Stage, Status, Capture, Commit, CommittedDump                 string
-	PendingAction, PendingContent                                 string
-	Question, QuestionID, InputDigest, RetryAction, Blocker       string
-	Artifacts                                                     []GuidedUseCaseArtifact
-	Policy, Problems                                              []string
-	Runs                                                          []GuidedUseCaseLink
+	Processing                                                                bool
+	CaseSlug, Observation, StateURL, StateToken, Surface, CurrentURL, Message string
+	Starting, Following, ShowControls, ReadOnly                               bool
+	Result                                                                    *GuidedUseCaseResult
+	Ideas                                                                     []GuidedUseCaseIdea
+	IdeaRequestID, IdeaRevision                                               string
+	CanRetainIdea                                                             bool
+	Controls                                                                  []GuidedUseCaseControl
+	Suspended                                                                 bool
+	ControlStatus                                                             string
+	Work                                                                      *GuidedUseCaseWork
+	Enabled                                                                   bool
+	RunID, Namespace, Name, Revision, RequestID                               string
+	Stage, Status, Capture, Commit, CommittedDump                             string
+	PendingAction, PendingContent                                             string
+	Question, QuestionID, InputDigest, RetryAction, Blocker                   string
+	Artifacts                                                                 []GuidedUseCaseArtifact
+	Policy, Problems                                                          []string
+	Runs                                                                      []GuidedUseCaseLink
 }
 
 // GuidedUseCaseControl binds a lifecycle action to both displayed owner revisions.
@@ -113,7 +115,19 @@ func (h handler) guidedUseCase(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := h.guidedPageData(view)
+	data := h.guidedPageData(r, view)
+	if data.Guided.Surface == "board" {
+		board, err := h.boardPageData(r)
+		if err != nil {
+			http.Error(w, "load board", http.StatusInternalServerError)
+
+			return
+		}
+
+		data.Board = board.Board
+		guidedBoardLinks(&data)
+	}
+
 	if err := h.renderer.Page(w, "shell.html", data); err != nil {
 		http.Error(w, "render guided use case", http.StatusInternalServerError)
 	}
@@ -157,4 +171,20 @@ func (h handler) readGuidedUseCase(ctx context.Context, id, namespace string) (G
 	}
 
 	return provider.GuidedUseCaseView(ctx, id, namespace)
+}
+
+func guidedBoardLinks(data *PageData) {
+	query := url.Values{"case": {data.Guided.CaseSlug}, "namespace": {data.Guided.Namespace}}
+	for _, link := range []*string{&data.Board.NextURL, &data.Board.PreviousURL} {
+		if *link == "" {
+			continue
+		}
+
+		separator := "?"
+		if strings.Contains(*link, "?") {
+			separator = "&"
+		}
+
+		*link += separator + query.Encode()
+	}
 }

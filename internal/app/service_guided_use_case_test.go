@@ -33,7 +33,7 @@ func TestGuidedUseCaseCaptureWeb(t *testing.T) {
 	}
 
 	page := guidedCaptureHTTP(t, handler, http.MethodGet, "/guided", nil)
-	if page.Code != http.StatusOK || !strings.Contains(page.Body.String(), "Start workflow") || strings.Contains(page.Body.String(), "Project policy") {
+	if page.Code != http.StatusOK || !strings.Contains(page.Body.String(), `name="content"`) || strings.Contains(page.Body.String(), "Project policy") {
 		t.Fatal("start or readiness missing", page.Code, page.Body.String())
 	}
 
@@ -112,8 +112,8 @@ func assertWebGuidedCheckpoint(t *testing.T, provider webViewProvider, handler h
 		t.Fatal(err)
 	}
 
-	page := guidedCaptureHTTP(t, handler, http.MethodGet, guidedUseCaseURL(id, "default"), nil)
-	for _, text := range []string{"First requirement.", "Second requirement.", "Answer and continue"} {
+	page := guidedCaptureHTTP(t, handler, http.MethodGet, "/dumps?"+url.Values{"case": {result.Session.Guided.CaseSlug}, "namespace": {"default"}}.Encode(), nil)
+	for _, text := range []string{"First requirement.", "Second requirement."} {
 		if page.Code != http.StatusOK || !strings.Contains(page.Body.String(), text) {
 			t.Fatalf("reloaded page missing %q: %d %s", text, page.Code, page.Body.String())
 		}

@@ -8,6 +8,10 @@ import (
 	"testing"
 )
 
+func (p guidedCaptureProvider) CaseWorkflowView(ctx context.Context, _, namespace string) (GuidedUseCaseView, error) {
+	return p.GuidedUseCaseView(ctx, "", namespace)
+}
+
 type guidedCaptureProvider struct {
 	staticDataProvider
 	view GuidedUseCaseView
@@ -27,10 +31,10 @@ func TestGuidedUseCaseCaptureView(t *testing.T) {
 		want   string
 		absent string
 	}{
-		{"start", GuidedUseCaseView{Namespace: "default", RequestID: "start"}, "Start workflow", "Continue to quiz"},
-		{"name", GuidedUseCaseView{RunID: "run", Stage: "name"}, "Name your use case", "Continue to quiz"},
+		{"start", GuidedUseCaseView{Namespace: "default", RequestID: "start"}, `name="content"`, "Continue to quiz"},
+		{"name", GuidedUseCaseView{RunID: "run", Stage: "name"}, `name="content"`, "Continue to quiz"},
 		{"dump", GuidedUseCaseView{RunID: "run", Stage: "dump", Capture: "<script>bad()</script>"}, "Continue to quiz", "<script>bad()"},
-		{"sealed", GuidedUseCaseView{RunID: "run", Stage: "quiz", Commit: "commit", CommittedDump: "Original capture"}, "Dump", "Continue to quiz"},
+		{"sealed", GuidedUseCaseView{RunID: "run", Stage: "quiz", Commit: "commit", CommittedDump: "Original capture"}, "Original capture", "Continue to quiz"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			handler, err := NewHandler(HandlerOptions{Provider: guidedCaptureProvider{view: test.view}})
@@ -39,7 +43,13 @@ func TestGuidedUseCaseCaptureView(t *testing.T) {
 			}
 
 			response := httptest.NewRecorder()
-			handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/guided", nil))
+
+			location := "/guided"
+			if test.name == "sealed" {
+				location = "/dumps?case=saved"
+			}
+
+			handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, location, nil))
 
 			if response.Code != http.StatusOK || !strings.Contains(response.Body.String(), test.want) || strings.Contains(response.Body.String(), test.absent) {
 				t.Fatal("incorrect current-stage form", response.Code, response.Body.String())
@@ -121,10 +131,10 @@ func TestGuidedUseCaseSpecView(t *testing.T) {
 	}
 
 	response := httptest.NewRecorder()
-	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/guided", nil))
+	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/specs?case=checkout", nil))
 
 	body := response.Body.String()
-	for _, text := range []string{"Spec", "Complete original approved specification"} {
+	for _, text := range []string{"Complete original approved specification"} {
 		if response.Code != http.StatusOK || !strings.Contains(body, text) {
 			t.Fatal("missing approved source", text)
 		}

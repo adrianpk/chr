@@ -102,7 +102,9 @@ type ProjectView struct {
 
 // BoardRequest selects one bounded page of canonical Board tickets.
 type BoardRequest struct {
-	Offset int
+	CaseSlug  string
+	Namespace string
+	Offset    int
 }
 
 // BoardView is the read-only board projection rendered by the Web UI.

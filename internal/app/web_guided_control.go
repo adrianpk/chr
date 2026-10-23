@@ -57,11 +57,11 @@ func guidedWebControl(command core.GuidedUseCaseCommand, label string) webui.Gui
 func guidedControlLabel(action string) string {
 	switch action {
 	case "pause":
-		return "Pause use case"
+		return "Pause"
 	case "resume":
-		return "Resume use case"
+		return "Resume"
 	default:
-		return "Cancel use case"
+		return "Cancel"
 	}
 }
 

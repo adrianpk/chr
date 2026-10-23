@@ -8,15 +8,28 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
-// GuidedUseCaseStep names a user task in the shared case workflow.
-type GuidedUseCaseStep struct {
-	Label   string
-	Current bool
+// GuidedUseCasePath selects the existing product screen for the retained step.
+func GuidedUseCasePath(stage string) string {
+	switch stage {
+	case "dump":
+		return "/dumps"
+	case "quiz":
+		return "/quizzes"
+	case "specification":
+		return "/specs"
+	case "preparation":
+		return "/plans"
+	case "execution", "results":
+		return "/board"
+	default:
+		return "/cases"
+	}
 }
 
-func (h handler) guidedPageData(view GuidedUseCaseView) PageData {
+func (h handler) guidedPageData(r *http.Request, view GuidedUseCaseView) PageData {
 	view.StateToken = guidedStateToken(view)
 
 	query := url.Values{"namespace": {view.Namespace}}
@@ -27,50 +40,93 @@ func (h handler) guidedPageData(view GuidedUseCaseView) PageData {
 	}
 
 	view.StateURL = "/cases/workflow/state?" + query.Encode()
+	view.CurrentURL = GuidedUseCasePath(view.Stage) + "?" + query.Encode()
+	view.Surface = guidedSurface(r.URL.Path, view.Stage)
+	view.Starting = view.Surface == "cases" && (view.Stage == "name" || view.RunID == "") && !view.Suspended
+	view.Following = "/"+view.Surface == GuidedUseCasePath(view.Stage)
+	view.ShowControls = !view.Starting && (view.Suspended || view.Processing || view.Stage != "dump")
+	view.ReadOnly = !view.Following
+	view.Message = guidedMessage(view)
 
-	view.StageLabel, view.Hint = guidedStageCopy(view)
-	for _, step := range []struct{ stage, label string }{{"name", "Name"}, {"dump", "Dump"}, {"quiz", "Quiz"}, {"specification", "Spec"}, {"preparation", "Plan"}, {"execution", "Development"}} {
-		view.Steps = append(view.Steps, GuidedUseCaseStep{Label: step.label, Current: step.stage == view.Stage})
+	data := PageData{Shell: h.shellData(view.Surface), View: "guided", Title: view.Name, Guided: view}
+	if view.Starting {
+		data.Title = "Cases"
 	}
 
-	data := PageData{Shell: h.shellData("cases"), View: "guided", Title: "New workflow", Guided: view}
-	if view.Name != "" {
-		data.Title = view.Name
-	}
+	guidedNavigation(&data)
 
-	if view.Question != "" && !view.Suspended && !view.Processing && view.PendingAction == "" {
-		data.Detail = ArtifactDetailView{Title: view.Name, Quiz: &QuizAnswerView{Question: view.Question, QuestionID: view.QuestionID, SessionID: view.RunID, DraftContext: view.Namespace, CanAnswer: true, Open: true, Started: true}}
-	}
+	data.Detail = ArtifactDetailView{Family: view.Surface, Title: view.Name}
+	data.Detail.Quiz = guidedQuizView(view)
+
+	data.Detail.Content = guidedDocument(view)
 
 	return data
 }
 
-func guidedStageCopy(view GuidedUseCaseView) (string, string) {
+func guidedSurface(path, stage string) string {
+	switch path {
+	case "/cases", "/dumps", "/quizzes", "/specs", "/plans", "/board":
+		return strings.TrimPrefix(path, "/")
+	default:
+		return strings.TrimPrefix(GuidedUseCasePath(stage), "/")
+	}
+}
+
+func guidedNavigation(data *PageData) {
+	if data.Guided.CaseSlug == "" {
+		return
+	}
+
+	query := url.Values{"case": {data.Guided.CaseSlug}, "namespace": {data.Guided.Namespace}}
+	for i, link := range data.Shell.Navigation {
+		switch link.Href {
+		case "/dumps", "/quizzes", "/specs", "/plans", "/board":
+			data.Shell.Navigation[i].Href += "?" + query.Encode()
+		}
+	}
+}
+
+func guidedDocument(view GuidedUseCaseView) string {
+	kinds := map[string]string{"dumps": "dump", "quizzes": "quiz", "specs": "specification", "plans": "plan"}
+	for _, artifact := range view.Artifacts {
+		if artifact.Stage == kinds[view.Surface] {
+			return artifact.Content
+		}
+	}
+
+	if view.Surface == "dumps" {
+		return view.CommittedDump
+	}
+
+	return ""
+}
+
+func guidedMessage(view GuidedUseCaseView) string {
 	if view.Status == "completed" {
-		return "Completed", "The results are ready to review."
+		return ""
 	}
 
 	if view.Status == "cancelled" {
-		return "Cancelled", "This use case has stopped. Its saved work remains available."
+		return "Cancelled."
 	}
 
 	if view.Suspended {
-		return "Paused", "Your progress is saved. Resume when you are ready."
+		return "Paused."
+	}
+
+	if !view.Processing {
+		return ""
 	}
 
 	switch view.Stage {
-	case "name":
-		return "Name your use case", "What do you want to build or change?"
-	case "dump":
-		return "Dump", "Write everything you know about this use case. You can add more before continuing."
 	case "quiz":
-		return guidedQuizCopy(view)
+		return "Preparing the next question…"
 	case "specification":
-		return "Preparing the specification", "Your context and answers define the agreed change."
+		return "Preparing the spec…"
 	case "preparation":
-		return "Preparing the plan", "The agreed specification is being broken into tickets."
+		return "Preparing the plan…"
 	default:
-		return "Development", "Follow the work and review its results here."
+		return "Working…"
 	}
 }
 
@@ -116,9 +172,16 @@ func (h handler) guidedUseCaseState(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
 	w.Header().Set("Content-Type", "application/json")
 
+	query := url.Values{"case": {view.CaseSlug}, "namespace": {view.Namespace}}
+	if view.CaseSlug == "" {
+		query.Del("case")
+		query.Set("id", view.RunID)
+	}
+
 	if err := json.NewEncoder(w).Encode(struct {
 		State string `json:"state"`
-	}{guidedStateToken(view)}); err != nil {
+		URL   string `json:"url"`
+	}{guidedStateToken(view), GuidedUseCasePath(view.Stage) + "?" + query.Encode()}); err != nil {
 		slog.DebugContext(r.Context(), "Workflow observation response interrupted")
 	}
 }
@@ -142,10 +205,10 @@ func (h handler) readCaseWorkflow(r *http.Request) (GuidedUseCaseView, error) {
 	return provider.CaseWorkflowView(r.Context(), query.Get("case"), query.Get("namespace"))
 }
 
-func guidedQuizCopy(view GuidedUseCaseView) (string, string) {
-	if view.Question != "" && !view.Processing && view.PendingAction == "" {
-		return "Quiz", "Answer each question to clarify the use case."
+func guidedQuizView(view GuidedUseCaseView) *QuizAnswerView {
+	if view.Surface == "quizzes" && view.Following && view.Question != "" && !view.Suspended && !view.Processing && view.PendingAction == "" {
+		return &QuizAnswerView{Question: view.Question, QuestionID: view.QuestionID, SessionID: view.RunID, DraftContext: view.Namespace, CanAnswer: true, Open: true, Started: true}
 	}
 
-	return "Preparing the quiz", "The next question will appear here automatically."
+	return nil
 }

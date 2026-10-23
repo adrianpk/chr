@@ -51,7 +51,7 @@
         <button class="top-chrome-handle" type="button" aria-label="Show navigation" aria-expanded="true"></button>
       </div>
       <main class="app-main{{if eq .View "catalog"}} catalog-page{{end}}{{if and (eq .View "catalog") (eq .Catalog.Family "quizzes")}} quiz-catalog-page{{end}}{{if and (eq .View "artifact_detail") .Detail.Quiz}} quiz-answer-page{{end}}">
-        {{if not (or (and (eq .View "catalog") (eq .Catalog.Family "quizzes")) (and (eq .View "artifact_detail") .Detail.Quiz))}}
+        {{if not (or (and (eq .View "catalog") (eq .Catalog.Family "quizzes")) (and (eq .View "artifact_detail") .Detail.Quiz) (and (eq .View "guided") .Guided.Starting))}}
         <header class="page-header">
           <div>
             <h1>{{.Title}}</h1>
@@ -61,7 +61,7 @@
           {{end}}
           {{if eq .View "catalog"}}
             {{if eq .Catalog.Family "cases"}}
-              <div class="page-header-actions"><button class="button" type="button" data-modal-template="case-create-modal">New</button>{{if .Guided.Enabled}}<form method="post" action="/guided/actions"><input type="hidden" name="surface" value="guided"><input type="hidden" name="action" value="guided.start"><input type="hidden" name="confirm" value="true"><input type="hidden" name="namespace" value="{{.Guided.Namespace}}"><input type="hidden" name="request_id" value="{{.Guided.RequestID}}"><button class="button button--primary" type="submit">Start workflow</button></form>{{end}}</div>
+              <div class="page-header-actions"><button class="button" type="button" data-modal-template="case-create-modal">New</button>{{if .Guided.Enabled}}<a class="button button--primary" href="/cases?new=workflow&amp;namespace={{.Guided.Namespace}}">Wizard</a>{{end}}</div>
             {{end}}
             {{if and (eq .Catalog.Family "plans") .Catalog.PlanChoices}}
               <button class="button button--primary" type="button" data-modal-template="plan-generate-modal">Generate Plan</button>
@@ -240,43 +240,37 @@
 {{end}}
 
 {{define "case_create_form.html"}}
-<template id="case-create-modal">
-  <div class="modal-backdrop" data-modal-backdrop>
-    <section class="case-edit-panel case-edit-panel--modal" role="dialog" aria-modal="true" aria-labelledby="case-create-title">
-      <button class="icon-button case-edit-panel__close" type="button" data-modal-close aria-label="Close new case">×</button>
-      <header class="case-edit-panel__header"><h2 id="case-create-title">New Case</h2></header>
-      <form class="case-edit-form" data-case-create method="post" action="/actions" hx-post="/actions" hx-target="#case-create-result" hx-swap="innerHTML" hx-sync="this:drop" hx-disabled-elt="find button[type='submit']">
-        <input type="hidden" name="action" value="case.create">
-        <input type="hidden" name="family" value="cases">
-        <input type="hidden" name="confirm" value="true">
-        <input type="hidden" name="surface" value="modal">
-        {{template "case_name_field.html" .}}
-        <label class="readonly-field readonly-field--multi">
-          <span>Description</span>
-          <textarea name="description" rows="4" maxlength="65536"></textarea>
-        </label>
-        <label class="readonly-field readonly-field--multi">
-          <span>Context</span>
-          <textarea name="context" rows="6" maxlength="65536"></textarea>
-        </label>
-        <div id="case-create-result" role="status" aria-live="polite"></div>
-        <div class="case-edit-form__actions"><button class="button" type="submit">Create</button></div>
-      </form>
-    </section>
-  </div>
-</template>
+<template id="case-create-modal"><div class="modal-backdrop" data-modal-backdrop>{{template "case_create_panel.html" .}}</div></template>
+{{end}}
+
+{{define "case_create_panel.html"}}
+<section class="case-edit-panel{{if not .Guided.Starting}} case-edit-panel--modal{{end}}"{{if not .Guided.Starting}} role="dialog" aria-modal="true" aria-labelledby="case-create-title"{{end}}>
+  {{if not .Guided.Starting}}
+  <button class="icon-button case-edit-panel__close" type="button" data-modal-close aria-label="Close new case">×</button>
+  <header class="case-edit-panel__header"><h2 id="case-create-title">New Case</h2></header>
+  {{end}}
+  <form class="case-edit-form" {{if .Guided.Starting}}data-workflow-form method="post" action="/guided/actions"{{else}}data-case-create method="post" action="/actions" hx-post="/actions" hx-target="#case-create-result" hx-swap="innerHTML" hx-sync="this:drop" hx-disabled-elt="find button[type='submit']"{{end}}>
+    {{if .Guided.Starting}}
+      {{if .Guided.RunID}}{{template "guided_fields.html" .}}{{else}}
+      <input type="hidden" name="surface" value="guided"><input type="hidden" name="action" value="guided.start"><input type="hidden" name="confirm" value="true"><input type="hidden" name="request_id" value="{{.Guided.RequestID}}"><input type="hidden" name="namespace" value="{{.Guided.Namespace}}">
+      {{end}}
+      <input type="hidden" name="step" value="name">
+    {{else}}
+      <input type="hidden" name="action" value="case.create"><input type="hidden" name="family" value="cases"><input type="hidden" name="confirm" value="true"><input type="hidden" name="surface" value="modal">
+    {{end}}
+    {{template "case_name_field.html" .}}
+    {{if not .Guided.Starting}}
+    <label class="readonly-field readonly-field--multi"><span>Description</span><textarea name="description" rows="4" maxlength="65536"></textarea></label>
+    <label class="readonly-field readonly-field--multi"><span>Context</span><textarea name="context" rows="6" maxlength="65536"></textarea></label>
+    {{end}}
+    <div id="case-create-result" role="status" aria-live="polite"></div>
+    <div class="case-edit-form__actions"><button class="button{{if .Guided.Starting}} button--primary{{end}}" type="submit">Create</button></div>
+  </form>
+</section>
 {{end}}
 
 {{define "case_name_field.html"}}
-<label class="readonly-field"><span>Name</span><input name="{{if .Guided.RunID}}content{{else}}name{{end}}" maxlength="512" placeholder="What are we building?" required autofocus></label>
-{{end}}
-
-{{define "case_name_form.html"}}
-<form class="case-edit-form" method="post" action="/guided/actions" data-workflow-form>
-{{template "guided_fields.html" .}}<input type="hidden" name="step" value="name">
-{{template "case_name_field.html" .}}
-<div class="case-edit-form__actions"><button class="button button--primary" type="submit">Continue</button></div>
-</form>
+<label class="readonly-field"><span>Name</span><input name="{{if .Guided.Starting}}content{{else}}name{{end}}" maxlength="512" required autofocus></label>
 {{end}}
 
 {{define "case_table.html"}}

@@ -1,52 +1,33 @@
 {{define "guided_use_case_content.html"}}
 {{if .Guided.Enabled}}
-<div class="case-workflow" data-workflow-state="{{.Guided.StateToken}}" data-workflow-url="{{.Guided.StateURL}}" data-workflow-watch="{{and .Guided.RunID (not .Guided.Suspended)}}">
-  <a class="workflow-back" href="/cases?namespace={{.Guided.Namespace}}">← Cases</a>
-  {{if .Guided.RunID}}
-    <ol class="workflow-steps" aria-label="Workflow progress">{{range .Guided.Steps}}<li{{if .Current}} aria-current="step"{{end}}>{{.Label}}</li>{{end}}</ol>
-    <section class="workflow-stage" aria-labelledby="workflow-stage-title">
-      <header class="workflow-stage-heading"><h2 id="workflow-stage-title">{{.Guided.StageLabel}}</h2><p>{{.Guided.Hint}}</p></header>
-      {{if .Guided.Suspended}}
-        {{template "guided_controls.html" .}}
-      {{else if .Guided.Processing}}
-        <p class="workflow-loading" role="status">Working…</p>
-      {{else if .Guided.PendingAction}}
-        {{template "guided_retry.html" .}}
-      {{else if eq .Guided.Stage "name"}}
-        {{template "case_name_form.html" .}}
-      {{else if eq .Guided.Stage "dump"}}
-        {{if .Guided.Capture}}<details class="workflow-capture" open><summary>Saved dump</summary>{{template "artifact_document.html" .Guided.Capture}}</details>{{end}}
-        {{template "dump_edit_forms.html" .}}
-      {{else if .Guided.Question}}
-        {{template "quiz_answer_content.html" .}}
-      {{else if .Guided.RetryAction}}
-        {{template "guided_retry.html" .}}
-      {{end}}
-      {{if and (not .Guided.Suspended) .Guided.Controls}}{{template "guided_controls.html" .}}{{end}}
-      <p class="workflow-feedback" data-workflow-feedback role="status" aria-live="polite"></p>
-    </section>
-    {{if .Guided.Work}}{{template "guided_progress.html" .}}{{end}}
-    {{if and .Guided.Result (or .Guided.Result.Complete (eq .Guided.Status "cancelled"))}}{{template "guided_result.html" .}}{{end}}
-    {{if .Guided.Artifacts}}
-      <section class="workflow-documents" aria-label="Saved documents"><h3>Documents</h3>
-      {{range .Guided.Artifacts}}<details><summary>{{if eq .Stage "dump"}}Dump{{else if eq .Stage "quiz"}}Quiz{{else if eq .Stage "specification"}}Spec{{else if eq .Stage "tracker"}}Tracker{{else}}Plan{{end}}</summary>{{template "artifact_document.html" .Content}}</details>{{end}}
-      </section>
-    {{else if .Guided.CommittedDump}}
-      <section class="workflow-documents" aria-label="Saved documents"><details><summary>Dump</summary>{{template "artifact_document.html" .Guided.CommittedDump}}</details></section>
-    {{end}}
-
+<div class="case-workflow{{if .Guided.Starting}} case-workflow--name{{end}}" data-workflow-state="{{.Guided.StateToken}}" data-workflow-url="{{.Guided.StateURL}}" data-workflow-watch="{{and .Guided.RunID .Guided.Following (not .Guided.Suspended)}}">
+  {{if .Guided.Starting}}
+    {{template "case_create_panel.html" .}}
   {{else}}
-    <section class="case-edit-panel workflow-start">
-      <h2>From an idea to working code</h2>
-      <p>Name the change, write its dump and answer the questions. chr then prepares the specification, plan and tickets, and starts development.</p>
-      <form method="post" action="/guided/actions" data-workflow-form>
-        <input type="hidden" name="surface" value="guided"><input type="hidden" name="action" value="guided.start"><input type="hidden" name="confirm" value="true">
-        <input type="hidden" name="request_id" value="{{.Guided.RequestID}}"><input type="hidden" name="namespace" value="{{.Guided.Namespace}}">
-        <button class="button button--primary" type="submit">Start workflow</button>
-      </form>
-    </section>
-    {{template "case_workflows.html" .}}
+    {{if .Guided.Message}}<p role="status">{{.Guided.Message}}</p>{{end}}
+    {{if eq .Guided.Surface "board"}}
+      {{if .Guided.Work}}{{template "guided_progress.html" .}}{{end}}
+      {{if and .Guided.Result (or .Guided.Result.Complete (eq .Guided.Status "cancelled"))}}{{template "guided_result.html" .}}{{end}}
+      {{template "board_content.html" .}}
+    {{else if .Guided.ReadOnly}}
+      {{if .Detail.Content}}{{template "artifact_document.html" .Detail.Content}}{{else}}<p class="empty-state">Not available yet.</p>{{end}}
+      <a class="button" href="{{.Guided.CurrentURL}}">Continue</a>
+    {{else if .Guided.Suspended}}
+    {{else if .Guided.Processing}}
+    {{else if .Guided.PendingAction}}
+      {{template "guided_retry.html" .}}
+    {{else if eq .Guided.Surface "dumps"}}
+      {{if .Guided.Capture}}<details class="workflow-capture" open><summary>Saved dump</summary>{{template "artifact_document.html" .Guided.Capture}}</details>{{end}}
+      {{template "dump_edit_forms.html" .}}
+    {{else if .Detail.Quiz}}
+      {{template "quiz_answer_content.html" .}}
+    {{else}}
+      {{if .Detail.Content}}{{template "artifact_document.html" .Detail.Content}}{{end}}
+      {{if .Guided.RetryAction}}{{template "guided_retry.html" .}}{{end}}
+    {{end}}
+    {{if .Guided.ShowControls}}{{template "guided_controls.html" .}}{{end}}
   {{end}}
+  <p class="workflow-feedback" data-workflow-feedback role="status" aria-live="polite"></p>
 </div>
 {{else}}<p>Workflows are unavailable for this project.</p>{{end}}
 {{end}}
@@ -63,7 +44,6 @@
 
 {{define "guided_progress.html"}}
 <section class="workflow-progress" aria-label="Development progress">
-  <h3>Development</h3>
   <p>{{.Guided.Work.Validated}} of {{.Guided.Work.Total}} tasks validated · {{.Guided.Work.Confirmed}} delivered · {{.Guided.Work.Remaining}} remaining</p>
   {{if .Guided.Work.Action}}<p role="status">{{if .Guided.Work.PullRequestURL}}The work needs review before it can continue.{{else}}The work needs attention before it can continue.{{end}}</p>{{end}}
   {{if .Guided.Work.PullRequestURL}}<a class="button" href="{{.Guided.Work.PullRequestURL}}">Review changes</a>{{end}}
@@ -76,11 +56,6 @@
   {{range .Guided.Result.Deliveries}}<p><a href="{{.PullRequest}}">View delivered changes</a> · {{.Branch}}</p>{{end}}
   {{range .Guided.Result.Validation}}<details><summary>{{.Label}} · {{.Outcome}}</summary>{{if .Waiver}}<p>{{.Waiver}}</p>{{end}}{{range .Commands}}<p><code>{{.Command}}</code> · Exit code: {{.ExitCode}}</p>{{end}}</details>{{end}}
 </section>
-{{end}}
-
-{{define "case_workflows.html"}}
-{{if .Guided.Runs}}<section class="case-workflows" aria-label="Ongoing workflows"><h2>In progress</h2>
-<div class="document-grid">{{range .Guided.Runs}}<a class="document-card workflow-card" href="{{.URL}}"><h3>{{.Name}}</h3><span>Continue workflow →</span></a>{{end}}</div></section>{{end}}
 {{end}}
 
 {{define "guided_controls.html"}}

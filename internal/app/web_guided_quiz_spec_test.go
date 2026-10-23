@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"errors"
+	"html"
 	"net/http"
 	"net/url"
 	"os"
@@ -73,15 +74,21 @@ func assertGuidedWebOriginals(t *testing.T, provider webViewProvider, handler ht
 	t.Helper()
 	replaceGuidedWebDocuments(t, provider.projectContext.ProjectDir, completed)
 
-	page := guidedCaptureHTTP(t, handler, http.MethodGet, guidedUseCaseURL(completed.ID, completed.Namespace), nil)
-	for _, text := range []string{"Deliver a bounded workflow.", "Retain the exact agreed behavior.", "Quiz", "Spec", "Preparing the plan"} {
-		if page.Code != http.StatusOK || !strings.Contains(page.Body.String(), text) {
-			t.Fatalf("original document missing %q", text)
+	routes := map[string]string{"dump": "dumps", "quiz": "quizzes", "specification": "specs"}
+	for kind, family := range routes {
+		original, err := provider.service(t.Context()).ReadGuidedUseCaseOriginal(t.Context(), completed.ID, completed.Namespace, kind)
+		if err != nil {
+			t.Fatal(err)
 		}
-	}
 
-	if strings.Contains(page.Body.String(), "Later replacement") || strings.Contains(page.Body.String(), "Approve specification") {
-		t.Fatal("inspection replaced the original or dispatched a routine confirmation")
+		page := guidedCaptureHTTP(t, handler, http.MethodGet, "/"+family+"?"+url.Values{"case": {completed.Guided.CaseSlug}, "namespace": {completed.Namespace}}.Encode(), nil)
+		if page.Code != http.StatusOK || !strings.Contains(page.Body.String(), html.EscapeString(original.Content)) {
+			t.Fatal("original document missing from its screen", kind, page.Code)
+		}
+
+		if strings.Contains(page.Body.String(), "Later replacement") || strings.Contains(page.Body.String(), "Approve specification") {
+			t.Fatal("inspection replaced the original or dispatched a routine confirmation")
+		}
 	}
 }
 
