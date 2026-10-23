@@ -104,6 +104,7 @@ type Options struct {
 	CaseExecutor         CaseMetadataExecutor
 	SourceExecutor       SourceOpenExecutor
 	HarnessExecutor      HarnessSelectionExecutor
+	GuidedExecutor       GuidedExecutor
 }
 
 // Model is the Bubble Tea model for the chr TUI.
@@ -190,6 +191,9 @@ type Model struct {
 	harnessSelection         harnessSelectionState
 	harnessSequence          uint64
 	statusMessage            string
+	guidedExecutor           GuidedExecutor
+	guided                   guidedState
+	guidedSequence           uint64
 }
 
 type layoutDrag int
@@ -278,6 +282,7 @@ func NewModel(opts Options) Model {
 		caseExecutor:             opts.CaseExecutor,
 		sourceExecutor:           opts.SourceExecutor,
 		harnessExecutor:          opts.HarnessExecutor,
+		guidedExecutor:           opts.GuidedExecutor,
 	}
 }
 
@@ -323,6 +328,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) updateSystemMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
+	if finished, ok := msg.(guidedFinishedMsg); ok {
+		m.completeGuided(finished)
+
+		return m, nil, true
+	}
+
 	if updated, cmd, ok := m.updateAgentWorkRefreshMessage(msg); ok {
 		return updated, cmd, true
 	}
@@ -387,6 +398,10 @@ func (m Model) updateActionFinishedMessage(msg tea.Msg) (tea.Model, tea.Cmd, boo
 
 // View renders the current terminal screen.
 func (m Model) View() string {
+	if m.guided.Active && m.width == 0 {
+		return m.renderGuidedWorkspace(80, 40)
+	}
+
 	if m.width > 0 && m.height > 0 {
 		return m.renderShell()
 	}
@@ -438,8 +453,8 @@ func (m Model) SelectedView() View {
 }
 
 func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	if m.harnessSelection.Active {
-		return m.updateHarnessKey(msg)
+	if updated, command, handled := m.updateGuidedOrHarnessKey(msg); handled {
+		return updated, command
 	}
 
 	if updated, cmd, handled := m.updateActiveModeKey(msg); handled {
@@ -568,6 +583,10 @@ func (m *Model) handleGlobalKey(msg tea.KeyMsg) (tea.Cmd, bool) {
 }
 
 func (m Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
+	if m.guided.Active {
+		return m, nil
+	}
+
 	if m.harnessSelection.Active {
 		return m, nil
 	}
@@ -1388,7 +1407,7 @@ func (m Model) renderKeys() string {
 	case m.SelectedView() == ViewProject:
 		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects field, enter edits, s saves, r refreshes, q quits"
 	case m.SelectedView() == ViewCases:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects focused pane, enter opens or edits, s saves, r refreshes, q quits"
+		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects focused pane, enter opens or edits, g guided use cases, s saves, r refreshes, q quits"
 	case m.SelectedView() == ViewDumps:
 		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects or scrolls, enter edits, alt+e external, c creates, r refreshes, q quits"
 	case m.SelectedView() == ViewQuizzes:

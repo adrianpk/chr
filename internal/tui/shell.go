@@ -76,13 +76,22 @@ func (m Model) renderShell() string {
 func (m Model) renderShellTopbar(width int) string {
 	project := m.projectDisplayName()
 	left := fmt.Sprintf(" %s ", project)
+
 	right := fmt.Sprintf(" %s ", string(m.SelectedView()))
+	if m.guided.Active {
+		right = " Guided use cases "
+	}
+
 	spacer := strings.Repeat(" ", maxInt(width-lipgloss.Width(left)-lipgloss.Width(right), 1))
 
 	return shellTopbarStyle.Render(fitPlainLine(left+spacer+right, width))
 }
 
 func (m Model) renderWorkspace(width, height int) string {
+	if m.guided.Active {
+		return m.renderGuidedWorkspace(width, height)
+	}
+
 	if m.harnessSelection.Active {
 		return m.renderHarnessWorkspace(width, height)
 	}
@@ -1198,6 +1207,10 @@ func (m Model) renderShellStatus(width int) string {
 }
 
 func (m Model) renderShellFooter(width int) string {
+	if m.guided.Active {
+		return strings.Join(wrapPlainText(m.guidedHint(), width), "\n")
+	}
+
 	return m.renderShellButtons(shellFooterButtons(), width)
 }
 

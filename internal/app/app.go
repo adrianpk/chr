@@ -124,7 +124,7 @@ func runDefaultTUIAction(stdin io.Reader, stdout io.Writer, deps appDependencies
 			return err
 		}
 
-		return tui.Run(ctx, options)
+		return runManagedTUI(ctx, options, newService(ctx, env, projectContext, deps.assetsFS))
 	}
 }
 
@@ -149,7 +149,7 @@ func runTUICommandAction(stdin io.Reader, stdout io.Writer, deps appDependencies
 			return err
 		}
 
-		return tui.Run(ctx, options)
+		return runManagedTUI(ctx, options, newService(ctx, env, projectContext, deps.assetsFS))
 	}
 }
 
@@ -353,6 +353,7 @@ func newTUIOptions(data tuiOptionsData) tui.Options {
 		CaseExecutor:         newTUICaseMetadataExecutor(data.operations),
 		SourceExecutor:       newTUISourceOpenExecutor(data.operations),
 		HarnessExecutor:      newTUIHarnessSelectionExecutor(data.operations),
+		GuidedExecutor:       tuiGuidedExecutor{operations: data.operations},
 	}
 }
 

@@ -86,6 +86,12 @@ func (m *Model) completeAgentWorkRefresh(msg agentWorkRefreshFinishedMsg) tea.Cm
 }
 
 func (m Model) handleAgentWorkRefreshTick() (tea.Model, tea.Cmd) {
+	if m.guided.Active {
+		command := m.refreshGuided()
+
+		return m, tea.Batch(agentWorkRefreshTickCmd(), command)
+	}
+
 	if m.SelectedView() != ViewDash || m.agentWorkRefreshExecutor == nil {
 		return m, agentWorkRefreshTickCmd()
 	}

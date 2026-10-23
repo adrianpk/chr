@@ -23,6 +23,7 @@ const (
 	CommandActionPlanPlan           CommandAction = "plan_plan"
 	CommandActionPlanTicket         CommandAction = "plan_ticket"
 	CommandActionPlanWork           CommandAction = "plan_work"
+	CommandActionGuided             CommandAction = "guided"
 )
 
 // Command describes one command palette entry.
@@ -97,6 +98,7 @@ func DefaultCommandRegistry() []Command {
 		{ID: "work-run-all-ready", Title: "Run all ready tickets", Description: "Run all ready_for_dev tickets through the agent loop after confirmation.", Action: CommandActionPlanWork, Work: WorkActionRunAllReady},
 		{ID: "work-repair-readiness", Title: "Apply safe readiness repair", Description: "Run safe work readiness repair after confirmation.", Action: CommandActionPlanWork, Work: WorkActionRepairReadiness},
 		{ID: "work-request-stop", Title: "Request agent stop", Description: "Request daemon stop after confirmation.", Action: CommandActionPlanWork, Work: WorkActionRequestStop},
+		{ID: "guided-use-cases", Title: "Guided use cases", Description: "Develop a new use case or continue a named guided run.", Action: CommandActionGuided},
 	}
 
 	commands = append(commands, nativeWorkflowCommands()...)
@@ -152,7 +154,9 @@ func (m Model) updateCommandPaletteKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case tea.KeyEsc:
 		m.closeCommandPalette()
 	case tea.KeyEnter:
-		m.executeSelectedCommand()
+		command := m.executeSelectedCommand()
+
+		return m, command
 	case tea.KeyBackspace:
 		m.commandPalette.Filter = strings.TrimSuffix(m.commandPalette.Filter, lastRune(m.commandPalette.Filter))
 		m.boundSelectedCommand()
@@ -225,23 +229,26 @@ func (m *Model) boundSelectedCommand() {
 	}
 }
 
-func (m *Model) executeSelectedCommand() {
+func (m *Model) executeSelectedCommand() tea.Cmd {
 	commands := m.filteredCommands()
 	if len(commands) == 0 {
 		m.statusMessage = "No command selected."
 		m.closeCommandPalette()
 
-		return
+		return nil
 	}
 
 	command := commands[m.commandPalette.Selected]
 	m.closeCommandPalette()
-	m.executeCommand(command)
+
+	return m.executeCommand(command)
 }
 
 //nolint:cyclop // Central command dispatch keeps palette behavior easy to audit.
-func (m *Model) executeCommand(command Command) {
+func (m *Model) executeCommand(command Command) tea.Cmd {
 	switch command.Action {
+	case CommandActionGuided:
+		return m.openGuided()
 	case CommandActionNavigate, CommandActionHelp:
 		m.selectView(command.View)
 
@@ -265,6 +272,8 @@ func (m *Model) executeCommand(command Command) {
 	case CommandActionPlanWork:
 		m.planWorkAction(command.Work)
 	}
+
+	return nil
 }
 
 func (m *Model) selectView(view View) {

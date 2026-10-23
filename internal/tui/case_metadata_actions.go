@@ -40,6 +40,12 @@ func (m Model) updateCasesKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
+	if msg.String() == "g" {
+		command := m.openGuided()
+
+		return m, command
+	}
+
 	if m.handleCaseSelectionKey(msg) {
 		return m, nil
 	}
