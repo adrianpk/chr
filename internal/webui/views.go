@@ -310,6 +310,7 @@ type QuizScopeChoice struct {
 
 // ArtifactCardView is one catalog item card.
 type ArtifactCardView struct {
+	WorkflowURL  string
 	Family       string
 	ID           string
 	Title        string

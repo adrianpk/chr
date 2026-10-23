@@ -105,7 +105,7 @@ func guidedWebWorkCountsMatch(work *webui.GuidedUseCaseWork) bool {
 func assertGuidedWorkPage(t *testing.T, body string, session core.AuthoringSession) {
 	t.Helper()
 
-	for _, text := range []string{"Native work state: waiting review", "Validated: 1", "Confirmed delivery: 0", "Remaining: 1", "Review and approve the native work", "Inspect committed preparation", "Admitted worker limits: 3 attempts per task"} {
+	for _, text := range []string{"1 of 1 tasks validated", "0 delivered", "1 remaining", "The work needs review", "Plan"} {
 		if !strings.Contains(body, text) {
 			t.Fatalf("missing owner-backed progress %q", text)
 		}

@@ -86,6 +86,6 @@
 {{define "plan_detail_content.html"}}
 <div class="detail-actions"><a class="button" href="/plans">Back to Plans</a></div>
 {{if .Detail.Missing}}<p class="empty-state">Plan not found.</p>{{else}}
-<article class="plan-document" aria-label="Plan document"><pre class="artifact-content">{{.Detail.Content}}</pre></article>
+{{template "artifact_document.html" .Detail.Content}}
 {{end}}
 {{end}}

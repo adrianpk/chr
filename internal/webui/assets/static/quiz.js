@@ -33,7 +33,7 @@
   }
   function dirty(panel) {
     const input = panel.querySelector('#quiz-answer');
-    return input && input.value.length > 0;
+    return input && input.value.length > 0 && !panel.dataset.workflowSubmitting;
   }
   function restoreMode(panel) {
     panel.querySelectorAll('#quiz-mode input').forEach(function (input) {

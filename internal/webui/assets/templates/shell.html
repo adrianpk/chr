@@ -11,6 +11,7 @@
     <script src="/assets/chr.js" defer></script>
     <script src="/assets/dash.js" defer></script>
     <script src="/assets/quiz.js" defer></script>
+    <script src="/assets/workflow.js" defer></script>
     <script src="/assets/spec.js" defer></script>
     <script src="/assets/plan.js" defer></script>
   </head>
@@ -60,7 +61,7 @@
           {{end}}
           {{if eq .View "catalog"}}
             {{if eq .Catalog.Family "cases"}}
-              <button class="button" type="button" data-modal-template="case-create-modal">New</button>
+              <div class="page-header-actions"><button class="button" type="button" data-modal-template="case-create-modal">New</button>{{if .Guided.Enabled}}<form method="post" action="/guided/actions"><input type="hidden" name="surface" value="guided"><input type="hidden" name="action" value="guided.start"><input type="hidden" name="confirm" value="true"><input type="hidden" name="namespace" value="{{.Guided.Namespace}}"><input type="hidden" name="request_id" value="{{.Guided.RequestID}}"><button class="button button--primary" type="submit">Start workflow</button></form>{{end}}</div>
             {{end}}
             {{if and (eq .Catalog.Family "plans") .Catalog.PlanChoices}}
               <button class="button button--primary" type="button" data-modal-template="plan-generate-modal">Generate Plan</button>
@@ -249,10 +250,7 @@
         <input type="hidden" name="family" value="cases">
         <input type="hidden" name="confirm" value="true">
         <input type="hidden" name="surface" value="modal">
-        <label class="readonly-field">
-          <span>Name</span>
-          <input name="name" maxlength="512" required>
-        </label>
+        {{template "case_name_field.html" .}}
         <label class="readonly-field readonly-field--multi">
           <span>Description</span>
           <textarea name="description" rows="4" maxlength="65536"></textarea>
@@ -269,6 +267,18 @@
 </template>
 {{end}}
 
+{{define "case_name_field.html"}}
+<label class="readonly-field"><span>Name</span><input name="{{if .Guided.RunID}}content{{else}}name{{end}}" maxlength="512" placeholder="What are we building?" required autofocus></label>
+{{end}}
+
+{{define "case_name_form.html"}}
+<form class="case-edit-form" method="post" action="/guided/actions" data-workflow-form>
+{{template "guided_fields.html" .}}<input type="hidden" name="step" value="name">
+{{template "case_name_field.html" .}}
+<div class="case-edit-form__actions"><button class="button button--primary" type="submit">Continue</button></div>
+</form>
+{{end}}
+
 {{define "case_table.html"}}
 <div class="case-table">
   <table>
@@ -276,7 +286,6 @@
       <tr>
         <th>Name</th>
         <th>Description</th>
-        <th>Slug</th>
         <th><span class="sr-only">Action</span></th>
       </tr>
     </thead>
@@ -285,8 +294,7 @@
       <tr>
         <td><a href="{{.DetailURL}}">{{.Title}}</a></td>
         <td>{{.Preview}}</td>
-        <td><code>{{.Scope}}</code></td>
-        <td><a class="button" href="{{.DetailURL}}" hx-get="/cases/detail/fragment?id={{.ID}}" hx-target="#modal-root" hx-swap="innerHTML">Edit</a></td>
+        <td><div class="detail-actions"><a class="button" href="{{.DetailURL}}" hx-get="/cases/detail/fragment?id={{.ID}}" hx-target="#modal-root" hx-swap="innerHTML">Edit</a>{{if .WorkflowURL}}<a class="button" href="{{.WorkflowURL}}">Open workflow</a>{{end}}</div></td>
       </tr>
       {{end}}
     </tbody>
@@ -463,22 +471,20 @@
 {{end}}
 
 {{define "dump_edit_forms.html"}}
-<form class="action-form" data-dump-editor method="post" action="/actions" hx-post="/actions" hx-target="#dump-save-result" hx-swap="innerHTML" hx-disabled-elt="find textarea, find button[type='submit']" onsubmit="return confirm('Save this dump content?')">
-  <input type="hidden" name="action" value="dump.save">
-  <input type="hidden" name="request_id" value="{{.Detail.SaveRequestID}}">
-  <input type="hidden" name="family" value="dumps">
-  <input type="hidden" name="id" value="{{.Detail.ID}}">
-  <input type="hidden" name="revision" value="{{.Detail.Revision}}">
-  <input type="hidden" name="confirm" value="true">
-  <input type="hidden" name="surface" value="{{if .DumpModal}}modal{{else}}editor{{end}}">
-  <label>
-    <span>Body</span>
-    <textarea name="content" rows="12" required>{{.Detail.Content}}</textarea>
-  </label>
-  <button class="button button--primary" type="submit">Save</button>
+<form class="action-form" {{if .Guided.RunID}}data-workflow-form method="post" action="/guided/actions"{{else}}data-dump-editor method="post" action="/actions" hx-post="/actions" hx-target="#dump-save-result" hx-swap="innerHTML" hx-disabled-elt="find textarea, find button[type='submit']" onsubmit="return confirm('Save this dump content?')"{{end}}>
+  {{if .Guided.RunID}}
+    {{template "guided_fields.html" .}}<input type="hidden" name="step" value="append">
+  {{else}}
+    <input type="hidden" name="action" value="dump.save"><input type="hidden" name="request_id" value="{{.Detail.SaveRequestID}}"><input type="hidden" name="family" value="dumps"><input type="hidden" name="id" value="{{.Detail.ID}}"><input type="hidden" name="revision" value="{{.Detail.Revision}}"><input type="hidden" name="confirm" value="true"><input type="hidden" name="surface" value="{{if .DumpModal}}modal{{else}}editor{{end}}">
+  {{end}}
+  <label><span>{{if .Guided.RunID}}Dump{{else}}Body{{end}}</span><textarea name="content" rows="12" maxlength="65536" required placeholder="Describe the change, what matters and any constraints…">{{if not .Guided.RunID}}{{.Detail.Content}}{{end}}</textarea></label>
+  <div class="detail-actions"><button class="button{{if not .Guided.RunID}} button--primary{{end}}" type="submit">{{if .Guided.RunID}}Save dump{{else}}Save{{end}}</button>{{if .Guided.RunID}}<button class="button button--primary" type="submit" form="workflow-finish"{{if not .Guided.Capture}} disabled{{end}}>Continue to quiz</button>{{end}}</div>
   <div id="dump-save-result" role="status" aria-live="polite"></div>
 </form>
+{{if .Guided.RunID}}<form id="workflow-finish" method="post" action="/guided/actions" data-workflow-form>{{template "guided_fields.html" .}}<input type="hidden" name="step" value="finish"></form>{{end}}
 {{end}}
+
+{{define "artifact_document.html"}}<article class="plan-document" aria-label="Document"><pre class="artifact-content">{{.}}</pre></article>{{end}}
 
 {{define "dump_save_result.html"}}
 <div class="write-result write-result--{{.Write.Status}}" data-write-status="{{.Write.Status}}">

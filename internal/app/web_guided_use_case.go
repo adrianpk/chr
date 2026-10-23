@@ -21,7 +21,7 @@ func (p webViewProvider) GuidedUseCaseView(ctx context.Context, id, namespace st
 	}
 
 	for _, session := range result.Runs {
-		view.Runs = append(view.Runs, webui.GuidedUseCaseLink{Name: session.Topic, URL: guidedUseCaseURL(session.ID, session.Namespace)})
+		view.Runs = append(view.Runs, webui.GuidedUseCaseLink{Name: session.Topic, URL: guidedSessionURL(session), CaseSlug: session.Guided.CaseSlug})
 	}
 
 	if result.Session == nil {
@@ -31,12 +31,18 @@ func (p webViewProvider) GuidedUseCaseView(ctx context.Context, id, namespace st
 	session := result.Session
 	state := session.Guided
 	view.RunID, view.Name, view.Stage, view.Status = session.ID, session.Topic, state.Stage, state.Status
+	view.CaseSlug = state.CaseSlug
 	view.Revision = strconv.FormatInt(session.Revision, 10)
+	view.Observation = view.Revision
+
+	if host, ok := p.config.guidedHost.(*guidedWorkHost); ok {
+		host.mu.Lock()
+		view.Processing = host.progress[guidedProgressKey(p.service(ctx), core.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace})]
+		host.mu.Unlock()
+	}
 
 	view.Capture, view.Blocker = state.Capture, state.Blocker
-	for _, artifact := range result.Artifacts {
-		view.Artifacts = append(view.Artifacts, webui.GuidedUseCaseArtifact{Stage: artifact.Stage, Reference: artifact.Reference, Commit: artifact.Commit, Content: artifact.Content})
-	}
+	view.Artifacts = guidedWebDocuments(result)
 
 	guidedWebInputBinding(&view, state)
 	guidedWebWork(&view, result.Work)
@@ -80,7 +86,7 @@ func (p webViewProvider) writeGuidedUseCase(operations service, request webui.Wr
 
 	if err != nil {
 		if guidedWebPending(session) {
-			return webui.WriteActionResponse{Status: webui.WriteStatusOK, Summary: "Use case retained; progression needs recovery.", RedirectURL: guidedUseCaseURL(session.ID, session.Namespace)}, nil
+			return webui.WriteActionResponse{Status: webui.WriteStatusOK, Summary: "Use case retained; progression needs recovery.", RedirectURL: guidedSessionURL(session)}, nil
 		}
 
 		return webValidationWrite(err), nil
@@ -91,11 +97,11 @@ func (p webViewProvider) writeGuidedUseCase(operations service, request webui.Wr
 		summary = "Idea saved for review after completion; the agreed scope is unchanged."
 	}
 
-	return webui.WriteActionResponse{Status: webui.WriteStatusOK, Summary: summary, RedirectURL: guidedUseCaseURL(session.ID, session.Namespace)}, nil
+	return webui.WriteActionResponse{Status: webui.WriteStatusOK, Summary: summary, RedirectURL: guidedSessionURL(session)}, nil
 }
 
 func guidedUseCaseURL(id, namespace string) string {
-	return "/guided?" + url.Values{"id": {id}, "namespace": {namespace}}.Encode()
+	return "/cases/workflow?" + url.Values{"id": {id}, "namespace": {namespace}}.Encode()
 }
 
 func guidedWebInputBinding(view *webui.GuidedUseCaseView, state *core.GuidedUseCaseState) {

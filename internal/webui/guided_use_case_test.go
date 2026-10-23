@@ -27,10 +27,10 @@ func TestGuidedUseCaseCaptureView(t *testing.T) {
 		want   string
 		absent string
 	}{
-		{"start", GuidedUseCaseView{Namespace: "default", RequestID: "start"}, "Develop a new use case", "Finish capture"},
-		{"name", GuidedUseCaseView{RunID: "run", Stage: "name"}, "Use-case name", "Finish capture"},
-		{"dump", GuidedUseCaseView{RunID: "run", Stage: "dump", Capture: "<script>bad()</script>"}, "Finish capture", "<script>bad()"},
-		{"sealed", GuidedUseCaseView{RunID: "run", Stage: "quiz", Commit: "commit", CommittedDump: "Original capture"}, "Inspect committed dump", "Finish capture"},
+		{"start", GuidedUseCaseView{Namespace: "default", RequestID: "start"}, "Start workflow", "Continue to quiz"},
+		{"name", GuidedUseCaseView{RunID: "run", Stage: "name"}, "Name your use case", "Continue to quiz"},
+		{"dump", GuidedUseCaseView{RunID: "run", Stage: "dump", Capture: "<script>bad()</script>"}, "Continue to quiz", "<script>bad()"},
+		{"sealed", GuidedUseCaseView{RunID: "run", Stage: "quiz", Commit: "commit", CommittedDump: "Original capture"}, "Dump", "Continue to quiz"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			handler, err := NewHandler(HandlerOptions{Provider: guidedCaptureProvider{view: test.view}})
@@ -79,7 +79,7 @@ func TestGuidedUseCaseCaptureUnavailable(t *testing.T) {
 	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/guided", nil))
 
 	body := response.Body.String()
-	if response.Code != http.StatusOK || !strings.Contains(body, "Guided use cases are unavailable") || strings.Contains(body, `action="/guided/actions"`) {
+	if response.Code != http.StatusOK || !strings.Contains(body, "Workflows are unavailable") || strings.Contains(body, `action="/guided/actions"`) {
 		t.Fatal("unavailable commands exposed", response.Code, body)
 	}
 }
@@ -91,7 +91,7 @@ func TestGuidedUseCaseQuizView(t *testing.T) {
 		view         GuidedUseCaseView
 		want, absent string
 	}{
-		{"question", GuidedUseCaseView{RunID: "run", Stage: "quiz", Question: "What is the intended result?", QuestionID: "question-current", InputDigest: "original-inputs"}, `name="question_id" value="question-current"`, "Retry progression"},
+		{"question", GuidedUseCaseView{RunID: "run", Stage: "quiz", Question: "What is the intended result?", QuestionID: "question-current", InputDigest: "original-inputs"}, `name="question_id" value="question-current"`, "Retry this step"},
 		{"pending", GuidedUseCaseView{RunID: "run", Stage: "quiz", Question: "Superseded question", PendingAction: "answer", PendingContent: "<script>retained</script>", QuestionID: "question-original", InputDigest: "original-inputs"}, `name="question_id" value="question-original"`, "Superseded question"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -124,13 +124,13 @@ func TestGuidedUseCaseSpecView(t *testing.T) {
 	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/guided", nil))
 
 	body := response.Body.String()
-	for _, text := range []string{"Inspect committed specification", "Complete original approved specification", "immutable-commit", "Execution has not started."} {
+	for _, text := range []string{"Spec", "Complete original approved specification"} {
 		if response.Code != http.StatusOK || !strings.Contains(body, text) {
 			t.Fatal("missing approved source", text)
 		}
 	}
 
-	if strings.Contains(body, "<script>escaped") || strings.Contains(body, "Approve specification") || strings.Contains(body, `action="/guided/actions"`) {
+	if strings.Contains(body, "immutable-commit") || strings.Contains(body, "ops/default/spec/original") || strings.Contains(body, "<script>escaped") || strings.Contains(body, "Approve specification") || strings.Contains(body, `action="/guided/actions"`) {
 		t.Fatal("unexpected approval form or unsafe original content")
 	}
 }

@@ -1,57 +1,90 @@
 {{define "guided_use_case_content.html"}}
 {{if .Guided.Enabled}}
-<section class="detail-block" aria-label="Guided use case">
-  <p>Project: {{.Shell.ProjectName}} · Namespace: {{.Guided.Namespace}}</p>
+<div class="case-workflow" data-workflow-state="{{.Guided.StateToken}}" data-workflow-url="{{.Guided.StateURL}}" data-workflow-watch="{{and .Guided.RunID (not .Guided.Suspended)}}">
+  <a class="workflow-back" href="/cases?namespace={{.Guided.Namespace}}">← Cases</a>
   {{if .Guided.RunID}}
-    <h2>{{.Guided.Name}}</h2>
-    <p>Current stage: {{.Guided.Stage}} · {{.Guided.Status}}</p>
-    {{if .Guided.Blocker}}<p role="status">{{.Guided.Blocker}}</p>{{end}}
-    {{if not .Guided.Suspended}}
-    {{if .Guided.PendingAction}}
-      <p>The previous operation is retained. Retry it to reconcile its original result.</p>
-      <form method="post" action="/guided/actions">
-        {{template "guided_fields.html" .}}
-        <input type="hidden" name="step" value="{{.Guided.PendingAction}}">
-        <input type="hidden" name="content" value="{{.Guided.PendingContent}}">
-        <button class="button button--primary" type="submit">Retry progression</button>
-      </form>
-    {{else if eq .Guided.Stage "name"}}
-      <form method="post" action="/guided/actions">
-        {{template "guided_fields.html" .}}
-        <input type="hidden" name="step" value="name">
-        <label>Use-case name <input name="content" maxlength="512" required></label>
-        <button class="button button--primary" type="submit">Save name</button>
-      </form>
-    {{else if eq .Guided.Stage "dump"}}
-      <p>Provide everything known about this use case. Add input until the capture is complete.</p>
-      <pre>{{.Guided.Capture}}</pre>
-      <form method="post" action="/guided/actions">
-        {{template "guided_fields.html" .}}
-        <input type="hidden" name="step" value="append">
-        <label>Additional context <textarea name="content" maxlength="65536" required></textarea></label>
-        <button class="button" type="submit">Add input</button>
-      </form>
-      <form method="post" action="/guided/actions">
-        {{template "guided_fields.html" .}}
-        <input type="hidden" name="step" value="finish">
-        <button class="button button--primary" type="submit">Finish capture</button>
-      </form>
-    {{else if .Guided.Question}}
-      <form method="post" action="/guided/actions">
-        {{template "guided_fields.html" .}}
-        <input type="hidden" name="step" value="answer">
-        <label>{{.Guided.Question}} <textarea name="content" maxlength="65536" required></textarea></label>
-        <button class="button button--primary" type="submit">Answer and continue</button>
-      </form>
-    {{else if .Guided.RetryAction}}
-      <form method="post" action="/guided/actions">
-        {{template "guided_fields.html" .}}
-        <input type="hidden" name="step" value="{{.Guided.RetryAction}}">
-        <button class="button button--primary" type="submit">Retry progression</button>
-      </form>
+    <ol class="workflow-steps" aria-label="Workflow progress">{{range .Guided.Steps}}<li{{if .Current}} aria-current="step"{{end}}>{{.Label}}</li>{{end}}</ol>
+    <section class="workflow-stage" aria-labelledby="workflow-stage-title">
+      <header class="workflow-stage-heading"><h2 id="workflow-stage-title">{{.Guided.StageLabel}}</h2><p>{{.Guided.Hint}}</p></header>
+      {{if .Guided.Suspended}}
+        {{template "guided_controls.html" .}}
+      {{else if .Guided.Processing}}
+        <p class="workflow-loading" role="status">Working…</p>
+      {{else if .Guided.PendingAction}}
+        {{template "guided_retry.html" .}}
+      {{else if eq .Guided.Stage "name"}}
+        {{template "case_name_form.html" .}}
+      {{else if eq .Guided.Stage "dump"}}
+        {{if .Guided.Capture}}<details class="workflow-capture" open><summary>Saved dump</summary>{{template "artifact_document.html" .Guided.Capture}}</details>{{end}}
+        {{template "dump_edit_forms.html" .}}
+      {{else if .Guided.Question}}
+        {{template "quiz_answer_content.html" .}}
+      {{else if .Guided.RetryAction}}
+        {{template "guided_retry.html" .}}
+      {{end}}
+      {{if and (not .Guided.Suspended) .Guided.Controls}}{{template "guided_controls.html" .}}{{end}}
+      <p class="workflow-feedback" data-workflow-feedback role="status" aria-live="polite"></p>
+    </section>
+    {{if .Guided.Work}}{{template "guided_progress.html" .}}{{end}}
+    {{if and .Guided.Result (or .Guided.Result.Complete (eq .Guided.Status "cancelled"))}}{{template "guided_result.html" .}}{{end}}
+    {{if .Guided.Artifacts}}
+      <section class="workflow-documents" aria-label="Saved documents"><h3>Documents</h3>
+      {{range .Guided.Artifacts}}<details><summary>{{if eq .Stage "dump"}}Dump{{else if eq .Stage "quiz"}}Quiz{{else if eq .Stage "specification"}}Spec{{else if eq .Stage "tracker"}}Tracker{{else}}Plan{{end}}</summary>{{template "artifact_document.html" .Content}}</details>{{end}}
+      </section>
+    {{else if .Guided.CommittedDump}}
+      <section class="workflow-documents" aria-label="Saved documents"><details><summary>Dump</summary>{{template "artifact_document.html" .Guided.CommittedDump}}</details></section>
     {{end}}
-    {{end}}
-    {{if .Guided.ControlStatus}}<p role="status">{{.Guided.ControlStatus}}</p>{{end}}
+
+  {{else}}
+    <section class="case-edit-panel workflow-start">
+      <h2>From an idea to working code</h2>
+      <p>Name the change, write its dump and answer the questions. chr then prepares the specification, plan and tickets, and starts development.</p>
+      <form method="post" action="/guided/actions" data-workflow-form>
+        <input type="hidden" name="surface" value="guided"><input type="hidden" name="action" value="guided.start"><input type="hidden" name="confirm" value="true">
+        <input type="hidden" name="request_id" value="{{.Guided.RequestID}}"><input type="hidden" name="namespace" value="{{.Guided.Namespace}}">
+        <button class="button button--primary" type="submit">Start workflow</button>
+      </form>
+    </section>
+    {{template "case_workflows.html" .}}
+  {{end}}
+</div>
+{{else}}<p>Workflows are unavailable for this project.</p>{{end}}
+{{end}}
+
+{{define "guided_retry.html"}}
+<p role="status">{{if .Guided.Blocker}}This step needs attention. Your progress is saved.{{else}}This step did not finish. Your progress is saved.{{end}}</p>
+<form method="post" action="/guided/actions" data-workflow-form>
+  {{template "guided_fields.html" .}}
+  <input type="hidden" name="step" value="{{if .Guided.PendingAction}}{{.Guided.PendingAction}}{{else}}{{.Guided.RetryAction}}{{end}}">
+  <input type="hidden" name="content" value="{{.Guided.PendingContent}}">
+  <button class="button button--primary" type="submit">Retry this step</button>
+</form>
+{{end}}
+
+{{define "guided_progress.html"}}
+<section class="workflow-progress" aria-label="Development progress">
+  <h3>Development</h3>
+  <p>{{.Guided.Work.Validated}} of {{.Guided.Work.Total}} tasks validated · {{.Guided.Work.Confirmed}} delivered · {{.Guided.Work.Remaining}} remaining</p>
+  {{if .Guided.Work.Action}}<p role="status">{{if .Guided.Work.PullRequestURL}}The work needs review before it can continue.{{else}}The work needs attention before it can continue.{{end}}</p>{{end}}
+  {{if .Guided.Work.PullRequestURL}}<a class="button" href="{{.Guided.Work.PullRequestURL}}">Review changes</a>{{end}}
+</section>
+{{end}}
+
+{{define "guided_result.html"}}
+<section class="workflow-result" aria-label="Use-case results"><h3>Results</h3>
+  <p role="status">{{.Guided.Result.Summary}}</p>
+  {{range .Guided.Result.Deliveries}}<p><a href="{{.PullRequest}}">View delivered changes</a> · {{.Branch}}</p>{{end}}
+  {{range .Guided.Result.Validation}}<details><summary>{{.Label}} · {{.Outcome}}</summary>{{if .Waiver}}<p>{{.Waiver}}</p>{{end}}{{range .Commands}}<p><code>{{.Command}}</code> · Exit code: {{.ExitCode}}</p>{{end}}</details>{{end}}
+</section>
+{{end}}
+
+{{define "case_workflows.html"}}
+{{if .Guided.Runs}}<section class="case-workflows" aria-label="Ongoing workflows"><h2>In progress</h2>
+<div class="document-grid">{{range .Guided.Runs}}<a class="document-card workflow-card" href="{{.URL}}"><h3>{{.Name}}</h3><span>Continue workflow →</span></a>{{end}}</div></section>{{end}}
+{{end}}
+
+{{define "guided_controls.html"}}
+<div class="workflow-controls" aria-label="Workflow controls">
     {{range .Guided.Controls}}
       <form method="post" action="/guided/actions">
         <input type="hidden" name="surface" value="guided">
@@ -66,98 +99,12 @@
         <input type="hidden" name="content" value="{{.Content}}">
         <input type="hidden" name="question_id" value="{{.QuestionID}}">
         <input type="hidden" name="input_digest" value="{{.InputDigest}}">
-        <button class="button" type="submit">{{.Label}}</button>
+        <button class="button{{if eq .Action "resume"}} button--primary{{end}}" type="submit">{{.Label}}</button>
       </form>
     {{end}}
-    {{if .Guided.Work}}
-      <section aria-label="Native work progress">
-        <p>Native work state: {{.Guided.Work.Status}}</p>
-        <p>Tasks: {{.Guided.Work.Total}} · Validated: {{.Guided.Work.Validated}} · Confirmed delivery: {{.Guided.Work.Confirmed}} · Integrated units: {{.Guided.Work.Integrated}} · Remaining: {{.Guided.Work.Remaining}} · Attempts: {{.Guided.Work.Attempts}}</p>
-        <p>Admitted worker limits: {{.Guided.Work.MaxWorkerAttempts}} attempts per task, {{.Guided.Work.WorkerTimeoutSeconds}} seconds per attempt.</p>
-        {{if .Guided.Work.Publication}}<p>Publication: {{.Guided.Work.Publication}} · Integration: {{.Guided.Work.IntegrationPhase}}</p>{{end}}
-        {{if .Guided.Work.Action}}<p role="status">{{.Guided.Work.Action}}</p>{{end}}
-        {{if .Guided.Work.PullRequestURL}}<p><a href="{{.Guided.Work.PullRequestURL}}">Inspect native pull request</a></p>{{end}}
-      </section>
-    {{else if and (ne .Guided.Stage "name") (ne .Guided.Stage "dump")}}
-      <p>Execution has not started.</p>
-    {{end}}
-    {{if .Guided.Result}}
-      <section aria-label="Use-case results">
-        <h3>Results</h3>
-        <p role="status">{{.Guided.Result.Summary}}</p>
-        <p>Confirmed set closures: {{.Guided.Result.ClosingCount}}</p>
-        {{range .Guided.Result.Deliveries}}
-          <article>
-            <p>Code repository: <a href="{{.Repository}}">{{.Repository}}</a> · Target branch: {{.Branch}}</p>
-            <p>Confirmed integration: {{.Method}} · Commit: <code>{{.Commit}}</code></p>
-            <p><a href="{{.PullRequest}}">Inspect delivered changes</a></p>
-            <details><summary>Delivery receipt</summary><p>{{.Reference}} · {{.Hash}}</p></details>
-          </article>
-        {{end}}
-        {{range .Guided.Result.Validation}}
-          <details><summary>{{.Label}} validation: {{.Outcome}}</summary>
-            {{if .Waiver}}<p>Validation waiver: {{.Waiver}}</p>{{end}}
-            {{range .Commands}}<p><code>{{.Command}}</code> · Exit code: {{.ExitCode}}</p>{{end}}
-          </details>
-        {{end}}
-      </section>
-    {{end}}
-    {{if .Guided.CanRetainIdea}}
-      <section aria-label="Later ideas">
-        <h3>Ideas for later review</h3>
-        <p>New ideas are saved separately. They do not change the agreed version or admitted work.</p>
-        <form method="post" action="/guided/actions">
-          <input type="hidden" name="surface" value="guided">
-          <input type="hidden" name="action" value="guided.input">
-          <input type="hidden" name="confirm" value="true">
-          <input type="hidden" name="id" value="{{.Guided.RunID}}">
-          <input type="hidden" name="namespace" value="{{.Guided.Namespace}}">
-          <input type="hidden" name="revision" value="{{.Guided.IdeaRevision}}">
-          <input type="hidden" name="request_id" value="{{.Guided.IdeaRequestID}}">
-          <input type="hidden" name="step" value="idea">
-          <label>New idea <textarea name="content" maxlength="8192" required></textarea></label>
-          <button class="button" type="submit">Save idea for later review</button>
-        </form>
-        {{range .Guided.Ideas}}
-          <article><p>Pending review · {{.Actor}} · {{.CreatedAt}}</p><pre>{{.Content}}</pre></article>
-        {{end}}
-        {{if .Guided.Ideas}}<p role="status">Saved ideas remain pending review for separately authorized work.</p>{{end}}
-      </section>
-    {{end}}
-    {{if .Guided.CommittedDump}}
-      <p>Saved dump version: <code>{{.Guided.Commit}}</code></p>
-      <details><summary>Inspect committed dump</summary><pre>{{.Guided.CommittedDump}}</pre></details>
-    {{end}}
-    {{range .Guided.Artifacts}}
-      <details><summary>Inspect committed {{.Stage}}</summary>
-        <p>{{.Reference}} · Saved version: <code>{{.Commit}}</code></p>
-        <pre>{{.Content}}</pre>
-      </details>
-    {{end}}
-    <p><a href="/guided?namespace={{.Guided.Namespace}}">All guided use cases</a></p>
-  {{else}}
-    <p>Start a new use case and capture its requirements. This journey proceeds through clarification, specification approval and development automatically when those stages are available and project policy permits.</p>
-    <form method="post" action="/guided/actions">
-      <input type="hidden" name="surface" value="guided">
-      <input type="hidden" name="action" value="guided.start">
-      <input type="hidden" name="confirm" value="true">
-      <input type="hidden" name="request_id" value="{{.Guided.RequestID}}">
-      <label>Namespace <input name="namespace" value="{{.Guided.Namespace}}" maxlength="128" required></label>
-      <button class="button button--primary" type="submit">Develop a new use case</button>
-    </form>
-    {{range .Guided.Runs}}<p><a href="{{.URL}}">Continue {{.Name}}</a></p>{{end}}
-  {{end}}
-</section>
-<section class="detail-block" aria-label="Effective project policy">
-  <h2>Project policy</h2>
-  {{range .Guided.Policy}}<p>{{.}}</p>{{end}}
-  {{range .Guided.Problems}}<p role="status">{{.}}</p>{{end}}
-</section>
-{{else}}
-<p>Guided use cases are unavailable for this project.</p>
-{{end}}
-{{end}}
 
+</div>
+{{end}}
 {{define "guided_fields.html"}}
 <input type="hidden" name="surface" value="guided">
 <input type="hidden" name="action" value="guided.input">

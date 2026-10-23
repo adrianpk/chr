@@ -10,27 +10,35 @@ type GuidedUseCaseProvider interface {
 	GuidedUseCaseView(context.Context, string, string) (GuidedUseCaseView, error)
 }
 
+// CaseWorkflowProvider resolves a functional use case through its existing owner.
+type CaseWorkflowProvider interface {
+	CaseWorkflowView(context.Context, string, string) (GuidedUseCaseView, error)
+}
+
 // GuidedUseCaseLink names a resumable journey without exposing its internal identity.
-type GuidedUseCaseLink struct{ Name, URL string }
+type GuidedUseCaseLink struct{ Name, URL, CaseSlug string }
 
 // GuidedUseCaseView presents current capture, setup and an inspectable committed input.
 type GuidedUseCaseView struct {
-	Result                                                  *GuidedUseCaseResult
-	Ideas                                                   []GuidedUseCaseIdea
-	IdeaRequestID, IdeaRevision                             string
-	CanRetainIdea                                           bool
-	Controls                                                []GuidedUseCaseControl
-	Suspended                                               bool
-	ControlStatus                                           string
-	Work                                                    *GuidedUseCaseWork
-	Enabled                                                 bool
-	RunID, Namespace, Name, Revision, RequestID             string
-	Stage, Status, Capture, Commit, CommittedDump           string
-	PendingAction, PendingContent                           string
-	Question, QuestionID, InputDigest, RetryAction, Blocker string
-	Artifacts                                               []GuidedUseCaseArtifact
-	Policy, Problems                                        []string
-	Runs                                                    []GuidedUseCaseLink
+	Processing                                                    bool
+	CaseSlug, Observation, StateURL, StateToken, StageLabel, Hint string
+	Steps                                                         []GuidedUseCaseStep
+	Result                                                        *GuidedUseCaseResult
+	Ideas                                                         []GuidedUseCaseIdea
+	IdeaRequestID, IdeaRevision                                   string
+	CanRetainIdea                                                 bool
+	Controls                                                      []GuidedUseCaseControl
+	Suspended                                                     bool
+	ControlStatus                                                 string
+	Work                                                          *GuidedUseCaseWork
+	Enabled                                                       bool
+	RunID, Namespace, Name, Revision, RequestID                   string
+	Stage, Status, Capture, Commit, CommittedDump                 string
+	PendingAction, PendingContent                                 string
+	Question, QuestionID, InputDigest, RetryAction, Blocker       string
+	Artifacts                                                     []GuidedUseCaseArtifact
+	Policy, Problems                                              []string
+	Runs                                                          []GuidedUseCaseLink
 }
 
 // GuidedUseCaseControl binds a lifecycle action to both displayed owner revisions.
@@ -86,21 +94,26 @@ func (h handler) guidedUseCase(w http.ResponseWriter, r *http.Request) {
 
 	query := r.URL.Query()
 	for key, values := range query {
-		if len(values) != 1 || len(values[0]) > 128 {
+		limit := 128
+		if key == "case" {
+			limit = 1024
+		}
+
+		if len(values) != 1 || len(values[0]) > limit {
 			http.Error(w, "invalid guided parameter: "+key, http.StatusBadRequest)
 
 			return
 		}
 	}
 
-	view, err := h.readGuidedUseCase(r.Context(), query.Get("id"), query.Get("namespace"))
+	view, err := h.readCaseWorkflow(r)
 	if err != nil {
 		http.Error(w, "load guided use case: "+err.Error(), http.StatusBadRequest)
 
 		return
 	}
 
-	data := PageData{Shell: h.shellData("guided"), View: "guided", Title: "Guided use cases", Guided: view}
+	data := h.guidedPageData(view)
 	if err := h.renderer.Page(w, "shell.html", data); err != nil {
 		http.Error(w, "render guided use case", http.StatusInternalServerError)
 	}

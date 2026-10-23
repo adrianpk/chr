@@ -765,7 +765,23 @@ func (h handler) catalogPageData(r *http.Request, family string) (PageData, erro
 		return PageData{}, err
 	}
 
+	guided := GuidedUseCaseView{}
+	if family == "cases" {
+		guided, err = h.readGuidedUseCase(r.Context(), "", r.URL.Query().Get("namespace"))
+		if err != nil {
+			return PageData{}, err
+		}
+		workflows := make(map[string]string, len(guided.Runs))
+		for _, run := range guided.Runs {
+			workflows[run.CaseSlug] = run.URL
+		}
+		for i := range catalog.Items {
+			catalog.Items[i].WorkflowURL = workflows[catalog.Items[i].Scope]
+		}
+	}
+
 	return PageData{
+		Guided:     guided,
 		Shell:      h.shellData(family),
 		View:       "catalog",
 		Title:      catalog.Title,
@@ -858,6 +874,8 @@ func navLinkActive(active, href string) bool {
 }
 
 func (h handler) registerGuidedWorkflowRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("/cases/workflow", h.guidedUseCase)
+	mux.HandleFunc("/cases/workflow/state", h.guidedUseCaseState)
 	mux.HandleFunc("/guided", h.guidedUseCase)
 	mux.HandleFunc("/guided/actions", h.guidedUseCaseAction)
 	mux.HandleFunc("/actions", h.writeAction)

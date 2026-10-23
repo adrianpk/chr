@@ -20,7 +20,7 @@ func TestGuidedUseCaseControlWeb(t *testing.T) {
 	paused, pause := pauseGuidedWebStage(t, provider, handler)
 	page := guidedCaptureHTTP(t, handler, http.MethodGet, guidedUseCaseURL(paused.ID, paused.Namespace), nil)
 
-	if strings.Contains(page.Body.String(), "Retry progression") || strings.Contains(page.Body.String(), "Answer and continue") || len(model.requests) != 1 {
+	if strings.Contains(page.Body.String(), "Retry this step") || strings.Contains(page.Body.String(), "Answer and continue") || len(model.requests) != 1 {
 		t.Fatal("paused view exposed dispatch or inspection invoked the provider")
 	}
 

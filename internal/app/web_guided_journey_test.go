@@ -188,7 +188,7 @@ func assertGuidedJourneyResult(t *testing.T, handler http.Handler, session core.
 	}
 
 	page := guidedCaptureHTTP(t, handler, http.MethodGet, guidedUseCaseURL(session.ID, session.Namespace), nil)
-	for _, text := range []string{"All admitted work has confirmed delivery", "Remaining: 0", "Confirmed delivery: 1", "Target branch: dev", "Confirmed set closures: 1", "audit export", "Pending review", "Exit code: 0", "Deliver a bounded workflow."} {
+	for _, text := range []string{"All admitted work has confirmed delivery", "0 remaining", "1 delivered", "View delivered changes", "Exit code: 0", "Deliver a bounded workflow."} {
 		if page.Code != http.StatusOK || !strings.Contains(page.Body.String(), text) {
 			t.Fatal("journey result omitted evidence", text, page.Body.String())
 		}

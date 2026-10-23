@@ -33,7 +33,7 @@ func TestGuidedUseCaseCaptureWeb(t *testing.T) {
 	}
 
 	page := guidedCaptureHTTP(t, handler, http.MethodGet, "/guided", nil)
-	if page.Code != http.StatusOK || !strings.Contains(page.Body.String(), "Develop a new use case") || !strings.Contains(page.Body.String(), "Project policy") {
+	if page.Code != http.StatusOK || !strings.Contains(page.Body.String(), "Start workflow") || strings.Contains(page.Body.String(), "Project policy") {
 		t.Fatal("start or readiness missing", page.Code, page.Body.String())
 	}
 
@@ -51,6 +51,9 @@ func TestGuidedUseCaseCaptureWeb(t *testing.T) {
 	webGuidedInput(t, handler, session, "name", "Useful delivery", http.StatusSeeOther)
 
 	session = readWebGuidedSession(t, operations, session.ID)
+
+	assertCaseWorkflowReference(t, provider, handler, session)
+
 	webGuidedInput(t, handler, session, "finish", "", http.StatusBadRequest)
 
 	stale := session
@@ -110,7 +113,7 @@ func assertWebGuidedCheckpoint(t *testing.T, provider webViewProvider, handler h
 	}
 
 	page := guidedCaptureHTTP(t, handler, http.MethodGet, guidedUseCaseURL(id, "default"), nil)
-	for _, text := range []string{"First requirement.", "Second requirement.", checkpoint.Commit, "Answer and continue", "Execution has not started"} {
+	for _, text := range []string{"First requirement.", "Second requirement.", "Answer and continue"} {
 		if page.Code != http.StatusOK || !strings.Contains(page.Body.String(), text) {
 			t.Fatalf("reloaded page missing %q: %d %s", text, page.Code, page.Body.String())
 		}
@@ -203,4 +206,23 @@ func guidedWebFixture(t *testing.T) (webViewProvider, *fakeServiceQuizModel) {
 	provider.serviceFactory = func(ctx context.Context) service { copy := operations; copy.ctx = ctx; return copy }
 
 	return provider, model
+}
+
+// assertCaseWorkflowReference checks scoped lookup without passing artifact payloads.
+func assertCaseWorkflowReference(t *testing.T, provider webViewProvider, handler http.Handler, session core.AuthoringSession) {
+	t.Helper()
+
+	selected, err := provider.CaseWorkflowView(t.Context(), session.Guided.CaseSlug, session.Namespace)
+	if err != nil || selected.RunID != session.ID || selected.Revision != strconv.FormatInt(session.Revision, 10) {
+		t.Fatal("functional use case did not resolve its retained workflow", err)
+	}
+
+	if _, err := provider.CaseWorkflowView(t.Context(), session.Guided.CaseSlug, "other"); err == nil {
+		t.Fatal("use-case lookup crossed storage scope")
+	}
+
+	page := guidedCaptureHTTP(t, handler, http.MethodGet, guidedSessionURL(session), nil)
+	if page.Code != http.StatusOK || !strings.Contains(page.Body.String(), "Useful delivery") {
+		t.Fatal("functional use-case navigation failed")
+	}
 }
