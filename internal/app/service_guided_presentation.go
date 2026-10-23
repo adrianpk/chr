@@ -59,7 +59,7 @@ type guidedResultExport struct {
 }
 
 func guidedResultSnapshot(observed GuidedUseCaseInspection) guidedResultExport {
-	snapshot := guidedResultExport{Name: observed.Session.Topic, Stage: observed.Session.Guided.Stage, Status: observed.Session.Guided.Status, Problem: observed.ResultProblem, Ideas: observed.Ideas}
+	snapshot := guidedResultExport{Name: observed.Session.Topic, Stage: observed.Session.Guided.Stage, Status: guidedVisibleStatus(observed), Problem: observed.ResultProblem, Ideas: observed.Ideas}
 	if observed.Result != nil {
 		snapshot.Complete = observed.Result.Complete
 		snapshot.Deliveries = observed.Result.Receipts

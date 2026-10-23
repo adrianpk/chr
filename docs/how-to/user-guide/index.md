@@ -435,6 +435,48 @@ the editor. Use the existing approved amendment operation for contract changes.
 Active claims and verified delivery receipts retain their own editing restrictions.
 Unbound titles and other permitted metadata remain editable.
 
+## Develop a Guided Use Case in the TUI
+
+Open `chr` in the intended project. Press `F2`, then `g`, or choose **Guided use
+cases** from the `:` command palette. Check the displayed project, namespace,
+target, policy and limits. Resolve any reported prerequisite before expecting
+execution to start.
+
+1. Press `n` to develop a new use case. This requests automatic development under
+   project policy. Press `e`, enter its name and press Enter. Use `e` again to
+   add known context; repeat as needed, then press `f` to finish capture.
+2. Answer each displayed clarification with `e` and Enter. Ctrl+J inserts a line
+   inside the editor. Once the answers are sufficient, chr approves the exact
+   generated specification, prepares its work and starts the admitted scope.
+3. Read the current stage, required action and native progress. If native review
+   requires approval, press `a` to open the existing native inspection flow.
+   Press Enter to load its read-only details, inspect the exact candidate, then
+   confirm only that displayed approval. Esc cancels that confirmation.
+4. Use available `p`, `u` and `x` controls to pause, resume or cancel. Pausing
+   stops further dispatch and requests the native stop; a pending stop does not
+   itself confirm worker quiescence. Resume retains the original attempts and
+   scope. Cancel keeps saved artifacts and already delivered changes.
+5. Press `v` to inspect the complete result export. Confirmed results identify
+   the repository, target, commit and PR with validation and closing evidence.
+   Waiting for review, a passing worker or an open PR alone remains unconfirmed.
+
+Use `1` through `5` to inspect the original committed dump, quiz, specification,
+plan and tracker. Scroll with arrows or Page Up/Page Down. These reads retain
+the agreed input even after later working-copy edits. Press `i` to save a later
+idea separately for review after this run; it does not extend or pause the work.
+
+Press `b` to return to the named run list and Enter to reopen the selected run.
+Another interface can continue that same run. If its revision changes while you
+edit, a rejected save keeps your full draft. Esc leaves the editor; `r` reads
+current state, `d` discards the local draft, and `e` binds a fresh input. Use `y`
+only to retry the original failed request, or `c` when the screen offers recovery
+of an already retained operation.
+
+Esc leaves the guided screen while the local host remains available. Ctrl+C
+quits the TUI and joins its owned host. Reopening restores the retained run;
+process shutdown does not request canonical cancellation or reset work limits.
+See the [TUI reference](../../reference/tui.md#guided-use-cases) for key details.
+
 ## Navigate the TUI
 
 Use the function-key tabs:

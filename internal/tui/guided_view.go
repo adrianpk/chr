@@ -21,7 +21,7 @@ func (m Model) guidedLines() []string {
 				prefix = "> "
 			}
 
-			lines = append(lines, prefix+run.Topic+" · "+run.Guided.Stage+" · "+run.Guided.Status)
+			lines = append(lines, prefix+run.Topic+" · "+run.Guided.Stage+" · "+guidedCatalogStatus(run.Guided.Status))
 		}
 	} else {
 		lines = append(lines, "Use case: "+view.Session.Topic, "Stage: "+view.Session.Guided.Stage+" · "+view.Status, view.Prompt)
@@ -91,4 +91,13 @@ func (m Model) guidedHint() string {
 	}
 
 	return m.guidedControlHint() + "e input · i later idea · v results · 1-5 originals · scroll up/down · r refresh · d discard draft · b runs · Esc returns"
+}
+
+// Catalog state alone does not verify the native delivery receipts.
+func guidedCatalogStatus(status string) string {
+	if status == "completed" {
+		return "inspect results"
+	}
+
+	return status
 }

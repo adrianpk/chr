@@ -112,8 +112,8 @@ func assertGuidedTUIExport(t *testing.T, executor tuiGuidedExecutor, session cor
 		t.Fatal("terminal confused native work with confirmed delivery")
 	}
 
-	if complete && (len(result.Deliveries) == 0 || len(result.Closures) == 0 || len(result.Validations) == 0 || len(result.Ideas) != 1) {
-		t.Fatal("complete export lacks original receipt, closing, validation or idea evidence")
+	if complete {
+		assertGuidedTUIEvidence(t, session, result)
 	}
 }
 

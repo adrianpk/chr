@@ -12,7 +12,7 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
-- Develop a use case through one resumable Web or Telegram journey: name it, capture context
+- Develop a use case through one resumable Web, Telegram or TUI journey: name it, capture context
   and answer clarification questions, then let chr approve the generated
   specification, prepare its tickets and start the exact agreed work under
   project policy. Saved Git versions preserve the inputs through later edits
@@ -22,6 +22,9 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   In Telegram, start with **Develop a new use case**, answer the current prompt
   and switch to an existing Web run by its name. Concise progress and complete
   original attachments retain the same inputs and work across reconnects.
+  In the TUI, open Guided use cases from Cases or the command palette, edit the
+  current step and reopen named runs. Scroll complete original documents, apply
+  native controls and inspect verified results for the same retained work.
 
 - Create use cases directly from the Web Cases page. Enter a name, description
   and context; the new case is immediately available when capturing a dump.

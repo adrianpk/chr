@@ -27,7 +27,7 @@ func TestGuidedUseCaseTUIResultGuard(t *testing.T) {
 				want = "completed"
 			}
 
-			if view := tuiGuidedView(observed); view.Status != want {
+			if view := tuiGuidedView(observed); view.Status != want || guidedResultSnapshot(observed).Status != want {
 				t.Fatal("completion escaped the verified result boundary", view.Status)
 			}
 		})

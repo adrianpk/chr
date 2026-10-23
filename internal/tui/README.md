@@ -21,8 +21,12 @@ by `internal/app` tests and TUI assembly.
 ## Behavior
 
 The model renders workspace context, tickets, dumps, quizzes, specs, plans,
-agent work, and observability state. Actions are planned in the UI, confirmed by
-the user, then delegated to executor interfaces.
+agent work, and observability state. Manual work actions retain their inspection
+and confirmation flow. The guided screen sends current-step input, controls and
+original-document queries to the shared application owner; that owner progresses
+within the initiating development intent and native policy. The adapter owns
+only drafts, frozen request bindings, scrolling and asynchronous response fences.
+It does not persist or orchestrate an independent guided workflow.
 
 ## Validation
 

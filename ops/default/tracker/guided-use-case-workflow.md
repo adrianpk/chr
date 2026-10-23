@@ -64,26 +64,26 @@ These are planned identities. Reports, branches and pull requests do not exist m
 
 ## Acceptance evidence
 
-Criterion numbers correspond to the approved specification. The plan defines the complete ownership mapping; all evidence below remains pending until implementation and verification.
+Criterion numbers correspond to the approved specification. The plan defines the complete ownership mapping; the following evidence distinguishes implemented local acceptance from external client and integrated-gate observations.
 
 | Criterion | Owning tasks | State and evidence |
 | --- | --- | --- |
-| GUC-01 | T1.3, T2.1, T2.3, T5.1, T6.1 | partial: Web and Telegram canonical capture/quiz/specification journeys pass; TUI remains pending. |
+| GUC-01 | T1.3, T2.1, T2.3, T5.1, T6.1 | implemented: Web/Telegram fixtures and actual TUI model/PTY keys reach canonical name, capture, clarification and exact generated approval; T6.1/T6.3 evidence is in the Slice 6 report. |
 | GUC-02 | T2.2, T3.1, T3.2 | implemented: an eligible HTTP answer automatically approves, prepares, seals and activates exactly its native set; a real worker reaches the native review boundary without another start prompt. |
 | GUC-03 | T2.2 | implemented: exact generated revision/hash approval with initiating actor, run and policy; focused mutation and recovery regressions passed. |
 | GUC-04 | T3.1, T3.2 | implemented: sealed native membership and contracts bound to the canonical preview; older/later unrelated tickets excluded and later-ticket adoption disabled for the invocation. |
 | GUC-05 | T1.1, T2.2, T3.3 | implemented: manual authoring/approval and standalone Web plan publication regressions pass; standalone plan generation does not activate a worker. |
-| GUC-06 | T1.1, T4.1, T5.1, T6.2, T6.3 | partial: Web/Telegram inspect and continue the same run, original actor and native invocation; TUI integration and final parity remain pending. |
-| GUC-07 | T2.3, T4.2, T5.2, T6.2 | partial: Web originals and Telegram committed dump/quiz/specification/plan/tracker attachments pass after working-copy replacement; full long questions and concise progress pass. TUI remains pending. |
+| GUC-06 | T1.1, T4.1, T5.1, T6.2, T6.3 | implemented: TestGuidedUseCaseParityNative continues one Web run through TUI pause, Telegram resume and TUI idea capture; original actor, invocation, scope and attempts remain identical. Stale revision and foreign project/namespace commands reject. |
+| GUC-07 | T2.3, T4.2, T5.2, T6.2 | implemented: concise progress, complete long questions and committed originals are inspectable in all three adapters. TUI original scrolling preserves line breaks; plan/tracker reads survive later replacements, and the catalog requests verified result inspection. |
 | GUC-08 | T1.3, T2.1 | implemented: nonempty capture and valid, sufficient clarification are required; focused invalid/empty/budget/foreign completion regressions passed. |
 | GUC-09 | T2.2, T3.1, T4.1 | implemented: original authoring/publication/materialization operations reconcile before further progression; host startup recovers a retained quiz owner receipt without regeneration. |
-| GUC-10 | T3.2, T4.1, T4.3 | partial: lost admission/start/control responses and host startup retain the original invocation and consumed attempts; complete publication-response variants remain with T4.3. |
-| GUC-11 | T4.1, T5.3, T6.2 | partial: request cancellation, real dead child owners, graceful host interruption and durable operator stops passed local normal/race checks. Telegram retains original effects and snapshots across lost acknowledgements and SQLite reopen; TUI acceptance remains pending. |
-| GUC-12 | T3.3, T4.1, T6.2 | partial: Web controls delegate to native revision-bound receipts and distinguish stop intent from quiescence; original policy, spent attempts and human review remain enforced. TUI controls remain pending. |
-| GUC-13 | T1.2, T2.3, T3.1, T4.3 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
-| GUC-14 | T4.2, T4.3, T5.2, T6.2, T6.3 | partial: Web/Telegram native receipt-backed results, closing evidence, validation exports and actual code locations pass; TUI and final parity remain pending. |
-| GUC-15 | T4.2, T5.2, T6.2 | partial: Web/Telegram retain attributable later ideas separately and surface them with results without extending native membership or limits; TUI remains pending. |
-| GUC-16 | T1.2, T3.1, T4.3 | partial: Slice 1 capture/checkpoint regressions passed; remaining owning tasks are pending. |
+| GUC-10 | T3.2, T4.1, T4.3 | implemented: lost admission/start/control responses preserve the original invocation. T4.3 and T6.2 parity reconcile actual applied Git publication with a lost response, with no replacement submission. |
+| GUC-11 | T4.1, T5.3, T6.2 | implemented locally: dead child/process and graceful host recovery preserve original pending effects and consumed limits. Telegram SQLite reopen and actual TUI PTY shutdown/restart retain the same run; a paused run stays paused. |
+| GUC-12 | T3.3, T4.1, T6.2 | implemented: Web/Telegram/TUI controls use shared native revision guards; stop intent and quiescence remain separate. Original finite limits, real prerequisites and exact native human-review confirmation remain effective. |
+| GUC-13 | T1.2, T2.3, T3.1, T4.3 | implemented: dump, answered quiz, approved specification and prepared plan/tickets retain full commit/path/hash bindings; generation, approval, admission and original reads survive later working-copy edits. See Slice 2, 3, 4 and 6 reports. |
+| GUC-14 | T4.2, T4.3, T5.2, T6.2, T6.3 | implemented locally: all adapters expose only verified delivery/validation/closing evidence with actual code locations. Missing, partial and corrupt receipts cannot become completion; TestGuidedUseCaseParityNative confirms shared final results after real fixture Git publication. |
+| GUC-15 | T4.2, T5.2, T6.2 | implemented: all adapters retain later ideas separately with attribution and show them with results. Parity/idea tests preserve native membership, invocation, attempt limits and stop state; ideas never start successor work. |
+| GUC-16 | T1.2, T3.1, T4.3 | implemented: actual Git ref updates with lost acknowledgements reconcile original dump/quiz/specification/preparation checkpoints. Unrelated index/worktree changes and later native edits are preserved; TestGuidedUseCaseCheckpointRecovery and PreparationCommit cover those boundaries. |
 
 ## Prerequisites and checkpoints
 
@@ -280,6 +280,6 @@ Planning artifacts do not establish implementation or delivery. Advance a task o
 
 Review later ideas after the current guided development finishes. They never become extra work in this delivery set or in a user's active invocation merely because they were retained.
 
-T6.1 is complete in `5e15bddd36e03d7adbb02ad3856d1ae3a22d4519`. The Slice 6 report retains focused normal/race and strict lint evidence for named terminal navigation, frozen current-step input, committed originals and explicit managed-host startup. T6.2 controls/results and T6.3 acceptance remain pending.
+T6.1 is complete in `5e15bddd36e03d7adbb02ad3856d1ae3a22d4519`. The Slice 6 report retains focused normal/race and strict lint evidence for named terminal navigation, frozen current-step input, committed originals and explicit managed-host startup. T6.2 controls/results and T6.3 acceptance outcomes follow below.
 
 T6.2 is complete in `da313792a409f1e19145a9c33137b0b854600d0d`. The Slice 6 report records exact focused normal/race commands, receipt-backed results, original prepared documents and cross-adapter stale/scope guards. T6.3 terminal acceptance and delivery-set documentation are active.

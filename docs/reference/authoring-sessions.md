@@ -722,10 +722,10 @@ reference; an unavailable source requires a new explicit instruction.
 
 ## Guided Use-Case Clarification and Approval
 
-The Web **Guided use cases** journey retains explicit development intent with
+The Web, Telegram and TUI guided journey retains explicit development intent with
 its initiating actor in the canonical authoring session. After naming a new
 case and finishing its nonempty dump, the shared operation service starts
-clarification automatically. Each page asks only the current question. Answers
+clarification automatically. Each interface asks only the current question. Answers
 bind the project, namespace, run revision, question and committed dump digest;
 stale or foreign answers cannot replace the current input.
 

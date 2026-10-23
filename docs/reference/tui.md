@@ -47,6 +47,53 @@ operation and the TUI for interactive inspection, editing, and confirmation.
 The footer tabs are clickable. Mouse dragging near pane dividers resizes the
 layout.
 
+## Guided Use Cases
+
+From Cases (`F2`), `g` opens the guided catalog. The **Guided use cases** command
+palette entry opens the same modal screen. The selected project and resolved
+namespace stay bound to all requests. Catalog entries use recognizable names;
+Enter inspects the selected retained run without starting or advancing it.
+
+| Key | Guided behavior |
+| --- | --- |
+| `n` | Start a new retained development request under the displayed project policy. |
+| `e` / `enter` | Edit the current required input; Enter in the editor saves its complete text. |
+| `ctrl+j` | Insert a newline while editing. |
+| `f` | Explicitly finish nonempty capture when offered. |
+| `p` / `u` / `x` | Apply an available pause, resume or cancel through shared/native control owners. |
+| `a` | Inspect required native approval through the existing preview/confirmation flow. |
+| `i` | Edit a separately retained later idea after an input checkpoint exists. |
+| `1` / `2` / `3` / `4` / `5` | Read the complete committed dump, quiz, specification, plan or tracker. |
+| `v` | Read the current verified result export, including deferred ideas. |
+| arrows / `pgup` / `pgdown` | Select catalog rows or scroll complete run/document content. |
+| `r` | Read current canonical state without advancing the workflow. |
+| `y` | Retry the exact original failed request after leaving the editor. |
+| `c` | Reconcile the displayed retained operation when available. |
+| `d` | Discard the local draft and its old binding; canonical input stays saved. |
+| `b` | Return to the named run catalog. |
+| `esc` | Leave the editor or guided screen. |
+| `ctrl+c` | Quit the TUI and join its owned managed host. |
+
+The editor retains its original run revision, question/input binding and operation
+through asynchronous refresh. Rejected saves preserve the full draft. Read the
+current state and explicitly open a new editor before submitting a revised
+answer; a newer observation cannot silently rebind an old answer. Obsolete
+responses from a previously closed screen cannot replace a reopened screen.
+
+Startup attaches the shared bounded recovery/execution host. Inspection, rendering
+and periodic refresh remain read-only. Leaving the modal does not cancel its run;
+process exit stops owned jobs, preserving the canonical stage and original limits
+for later recovery. A paused run stays paused after reopening.
+
+Progress distinguishes native validation, confirmed delivery, remaining work,
+review waits, blockers and pending native stop acknowledgement. Result completion
+requires verified delivery and closing evidence for all admitted work. The export
+contains curated delivery/validation/closing receipts and later ideas; raw native
+state cannot substitute for those proofs. Committed documents carry their full
+commit and repository-relative source, and remain stable through refresh. The
+current result export is refreshed from canonical evidence rather than retained
+as an immutable stage input.
+
 ## Command Palette
 
 Open with `:`.
@@ -63,6 +110,7 @@ Available command families:
 
 - Navigation to every TUI view.
 - Workspace refresh.
+- Guided use-case capture, clarification, execution controls and results.
 - Selected source path inspection.
 - Default ticket creation.
 - Dump creation, edit, and refresh.

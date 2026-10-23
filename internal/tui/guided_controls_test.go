@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"strings"
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -71,5 +72,18 @@ func TestGuidedUseCaseTUIRetainedStep(t *testing.T) {
 
 	if received != original {
 		t.Fatal("canonical retry refreshed its original command")
+	}
+}
+
+// Catalog inspection cannot label unverified terminal state as delivered work.
+func TestGuidedUseCaseTUICatalogResult(t *testing.T) {
+	m := guidedTerminalFixture()
+	retained := *m.guided.View.Session
+	retained.Guided.Status = "completed"
+	m.guided.View.Session = nil
+
+	m.guided.View.Runs = []core.AuthoringSession{retained}
+	if !strings.Contains(m.View(), "inspect results") || strings.Contains(m.View(), "completed") {
+		t.Fatal("catalog claimed completion without inspecting receipts")
 	}
 }

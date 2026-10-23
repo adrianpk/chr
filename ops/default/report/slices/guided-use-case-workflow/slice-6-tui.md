@@ -1,6 +1,6 @@
 # Slice 6: Guided TUI Journey
 
-Status: drafting
+Status: reviewing
 Delivery set: guided-use-case-workflow
 Plan: `ops/default/plan/guided-use-case-workflow.md`
 Tracker: `ops/default/tracker/guided-use-case-workflow.md`
@@ -13,8 +13,8 @@ Input/navigation commit: `5e15bddd36e03d7adbb02ad3856d1ae3a22d4519`
 
 Expose the existing retained guided workflow through terminal interaction.
 Input, navigation, native controls, truthful results and shared-run continuation
-are implemented. T6.3 terminal interaction acceptance, documentation and final PR
-preparation remain active.
+are implemented. Independent terminal interaction acceptance and criterion
+reconciliation are recorded; final PR-reference validation remains pending.
 
 Plan: [Approved slice map](../../../plan/guided-use-case-workflow.md).
 Tracker: [Tasks and evidence](../../../tracker/guided-use-case-workflow.md).
@@ -86,6 +86,10 @@ host jobs.
   inspection/original reads.
 - `internal/app/tui_guided_host.go`: explicit startup integration with the shared
   managed workflow host.
+- `internal/app/tui_guided_terminal_linux_test.go`: owned production event-loop
+  process and retained pause/reopen acceptance.
+- `internal/app/tui_guided_parity_test.go`: exact cross-adapter native continuation
+  and receipt-backed results with immutable prepared originals.
 - `internal/app/tui_guided_test.go`: terminal model keys through real canonical
   and Git owners, generated approval, committed originals and reopen.
 
@@ -123,11 +127,40 @@ fixture completes actual temporary Git publication with a lost response and
 reconciles original evidence before all three interfaces report completion.
 Prepared plan/tracker originals remain bound after later working-copy edits.
 
+T6.3 task checks passed:
+
+- `go test -race ./internal/app ./internal/tui -run '^TestGuidedUseCase(TUITerminal|TUICatalogResult|TUIResultGuard|TelegramResultGuard|Parity)' -count=1 -timeout=3m` — passed after correcting the fixture lock, app 38.620s, TUI 1.029s.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/app/... ./internal/tui/...` — zero issues.
+- `git diff --check` — passed before the task commit.
+
+- `go test ./internal/app ./internal/tui -run '^TestGuidedUseCase(TUITerminal|TUICatalogResult|TUIResultGuard|TelegramResultGuard|Parity)' -v -count=1 -timeout=3m` — passed, app 24.729s, TUI 0.007s; PTY parent executed, 14.32s.
+- `go test ./internal/app -run '^TestGuidedUseCaseTUITerminal$' -count=1 -timeout=1m` — passed, 14.320s.
+
+The Linux PTY child assembles production adapters and `runManagedTUI`, then uses
+actual terminal input/output through Bubble Tea. Its graceful exit joins owned
+host work. A second child reopens the same paused run without changing its
+revision or later idea. Early fixture runs sent keys before a save/editor
+finished; consuming the corresponding rendered output corrected synchronization.
+The first race probe found that an embedded bytes buffer promoted `ReadFrom`,
+allowing `io.Copy` to bypass the fixture output lock. A private buffer field keeps
+all writes behind the same lock. The corrected race result is recorded below.
+These are automated local terminal observations with deterministic generation,
+not human or live-provider acceptance. Required parent fixtures execute; child
+entry tests skip only when not launched by their owning parent.
+
+The [cycle report](../../cycles/guided-use-case-workflow.md) records concrete input
+checkpoint and native delivery/validation/closing receipt identities from the
+successful parity fixture. Catalog entries request result inspection instead of trusting raw terminal state;
+result exports use the same verified status as the visible detail.
+The tracker reconciles every approved acceptance
+criterion. The User Guide, TUI/application references and Unreleased capability
+now describe the completed terminal journey.
+
 Final configured exact-HEAD checks are reserved for the complete clean
 PR-reference candidate through Looper.
 
 ## Risks and Follow-ups
 
-T6.3 owns independent terminal runtime acceptance, User Guide,
-reference/changelog updates, criterion reconciliation and the cycle report. Final integrated-candidate
-gate and documentation closure remain controller-owned.
+Final PR-reference checks and canonical PR preparation remain pending.
+Final integrated-candidate gate and documentation closure remain controller-owned.
+User-operated Telegram client and live-provider acceptance have not been observed.
