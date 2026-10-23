@@ -6,6 +6,7 @@ Plan: `ops/default/plan/guided-use-case-workflow.md`
 Tracker: `ops/default/tracker/guided-use-case-workflow.md`
 Branch: `feat/slice-6-guided-tui`
 PR: pending
+Acceptance/documentation commit: `f5c51e8a5ea9754f996bf4967f9581da8ff1fbb7`
 Controls/results commit: `da313792a409f1e19145a9c33137b0b854600d0d`
 Input/navigation commit: `5e15bddd36e03d7adbb02ad3856d1ae3a22d4519`
 
@@ -131,7 +132,9 @@ T6.3 task checks passed:
 
 - `go test -race ./internal/app ./internal/tui -run '^TestGuidedUseCase(TUITerminal|TUICatalogResult|TUIResultGuard|TelegramResultGuard|Parity)' -count=1 -timeout=3m` — passed after correcting the fixture lock, app 38.620s, TUI 1.029s.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/app/... ./internal/tui/...` — zero issues.
-- `git diff --check` — passed before the task commit.
+- `git diff --check` — passed after the metadata follow-up removed a trailing
+  space in the cycle report. Its initial staged whitespace check failed; the
+  task commit had continued, and this follow-up corrects the recorded outcome.
 
 - `go test ./internal/app ./internal/tui -run '^TestGuidedUseCase(TUITerminal|TUICatalogResult|TUIResultGuard|TelegramResultGuard|Parity)' -v -count=1 -timeout=3m` — passed, app 24.729s, TUI 0.007s; PTY parent executed, 14.32s.
 - `go test ./internal/app -run '^TestGuidedUseCaseTUITerminal$' -count=1 -timeout=1m` — passed, 14.320s.

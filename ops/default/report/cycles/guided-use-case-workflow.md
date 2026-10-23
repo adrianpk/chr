@@ -1,5 +1,6 @@
 # Guided Use-Case Workflow Cycle Report
 
+Acceptance source commit: `f5c51e8a5ea9754f996bf4967f9581da8ff1fbb7`
 Status: reviewing; implementation acceptance recorded, final integration pending
 Delivery set: guided-use-case-workflow
 Plan: [Approved slice map](../../plan/guided-use-case-workflow.md)
@@ -75,4 +76,4 @@ replace it.
 
 The controller owns Slice 6 integration, the unchanged final integrated `dev`
 gate and approved documentation closure. Scheduled exhaustive certification and
-any live external-forge/provider acceptance remain separate. 
+any live external-forge/provider acceptance remain separate.

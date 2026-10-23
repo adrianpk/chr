@@ -6,8 +6,8 @@ Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 6, Guided TUI journey; T6.1 and T6.2 are complete. T6.3 terminal acceptance, criterion reconciliation and documentation are in progress.
-Progress: 5 of 6 slices delivered; 17 of 18 tasks completed. PR #434 is merged and its Telegram checkpoint is closed. Guided TUI input, controls, originals, results and shared-run parity are implemented; independent terminal acceptance and documentation are active.
+Active slice: Slice 6, Guided TUI journey; implementation and focused acceptance are complete. Canonical PR preparation and exact-head validation are active; integration and the final integrated gate remain controller-owned.
+Progress: 5 of 6 slices delivered; 17 of 18 tasks completed; T6.3 implementation/acceptance is reviewing while the controller integration gate remains pending. PR #434 is merged and its Telegram checkpoint is closed. All TUI behavior and delivery-set documentation are implemented.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
 Spec: [Approved workflow](../spec/stable/guided-use-case-workflow.md)
@@ -49,7 +49,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | T5.3 | Telegram transport/journey regressions, declared client evidence and documentation. | done | `05f2576a944a8c4e7d98346d9f36c92ee533e306` | Lost acknowledgements after newer controls, SQLite reopen, stale Web inputs, foreign replies/buttons and original upload retries pass focused normal/race checks; strict lint passes. User Guide, receiver reference and changelog updated. Actual user-operated client acceptance was not performed. |
 | T6.1 | Shared-service TUI journey input, navigation, artifacts and resume. | done | `5e15bddd36e03d7adbb02ad3856d1ae3a22d4519` | Actual model keys reach canonical capture/clarification/approval; original reads survive working-copy edits. Stale drafts and replay/sequence fences pass normal/race checks; strict lint passes. |
 | T6.2 | TUI controls/progress/results and cross-adapter revision/authority parity. | done | `da313792a409f1e19145a9c33137b0b854600d0d` | Shared native controls, exact approval routing, later ideas, receipt-backed results and Web/Telegram/TUI continuation pass focused normal/race checks; strict lint passes. |
-| T6.3 | TUI/parity acceptance, documentation, cycle report and exact-candidate closure gate. | in progress | pending | Final integrated gate and closure remain controller-owned. |
+| T6.3 | TUI/parity acceptance, documentation, cycle report and exact-candidate closure gate. | reviewing | `f5c51e8a5ea9754f996bf4967f9581da8ff1fbb7` | Actual PTY journey/reopen, result guards and parity pass normal/race checks; strict lint passes. Documentation and cycle report complete. Final integrated gate and closure remain controller-owned. |
 
 ## Slice delivery
 
@@ -60,7 +60,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | 3 | delivered | #432 | `dfcfae6e787742d976f99d40f292a7e047f5252a` | [Slice 3 report](../report/slices/guided-use-case-workflow/slice-3-work-execution.md) |
 | 4 | delivered | [#433](https://forge.adrianpk.com/adrianpk/chr/pulls/433) | `f87649d876723335043041d52b298646bdf9ef18` | [Slice 4 report](../report/slices/guided-use-case-workflow/slice-4-web-recovery.md) |
 | 5 | delivered | [#434](https://forge.adrianpk.com/adrianpk/chr/pulls/434) | `8d99359cec120bbcdb4583ad5e842aef21547657` | [Slice 5 report](../report/slices/guided-use-case-workflow/slice-5-telegram.md) |
-| 6 | in progress | pending | pending | [Slice 6 draft report](../report/slices/guided-use-case-workflow/slice-6-tui.md) |
+| 6 | in progress | pending | pending | [Slice 6 report](../report/slices/guided-use-case-workflow/slice-6-tui.md) |
 
 ## Acceptance evidence
 
@@ -270,7 +270,7 @@ Delivery-set gate: `make verify`, bounded normal guided-workflow regressions, fo
 | Slice 5 development gate | `8d99359cec120bbcdb4583ad5e842aef21547657` | All four configured commands passed through Looper; PR #434 merged by the controller at that exact commit. Report/tracker closure verified on dev. |
 | Initial Slice 5 gate | `cacfc51480ecfa818b74d8af2d3eabad6df6c89c` | `make verify` failed on two stale maintenance CLI migration-count assertions. The correction requires migration 29 and its exact name; focused maintenance status tests pass. All configured checks are regenerated on the corrected clean head. |
 | Telegram actual-client journey | pending | not observed |
-| TUI interaction and cross-adapter parity | pending | not run |
+| TUI interaction and cross-adapter parity | `f5c51e8a5ea9754f996bf4967f9581da8ff1fbb7` | Owned PTY journey and same-run Web/Telegram/TUI native continuation passed normal/race task checks. Concrete fixture checkpoints and native receipts are in the cycle report. |
 | Final delivery-set gate | pending | not run |
 | Scheduled exhaustive certification | pending | not observed |
 
@@ -283,3 +283,5 @@ Review later ideas after the current guided development finishes. They never bec
 T6.1 is complete in `5e15bddd36e03d7adbb02ad3856d1ae3a22d4519`. The Slice 6 report retains focused normal/race and strict lint evidence for named terminal navigation, frozen current-step input, committed originals and explicit managed-host startup. T6.2 controls/results and T6.3 acceptance outcomes follow below.
 
 T6.2 is complete in `da313792a409f1e19145a9c33137b0b854600d0d`. The Slice 6 report records exact focused normal/race commands, receipt-backed results, original prepared documents and cross-adapter stale/scope guards. T6.3 terminal acceptance and delivery-set documentation are active.
+
+T6.3 implementation/acceptance is complete in `f5c51e8a5ea9754f996bf4967f9581da8ff1fbb7`: actual owned Linux terminal processes, same-run parity, criterion reconciliation and documentation. A private output buffer corrects the initial race probe, and a metadata follow-up removes the staged trailing whitespace. Final PR-reference checks and the integrated controller gate remain pending.
