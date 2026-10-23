@@ -227,10 +227,13 @@ Final configured slice checks passed through Looper on clean HEAD
 - `git diff --check` — passed.
 
 Forgejo and Acta confirm PR #435 merged into dev at that same commit. The
-report and slice tracker are closed on dev. The full gate after documentation
-closure remains pending with the controller; earlier task checks are separate.
+report and slice tracker are closed on dev. The controller's configured full
+gate, `make verify`, subsequently passed at the exact integrated candidate
+`13efd236f20a67f4fc328aaaaffc2c188b2be325`. Its ledger and log retain that result;
+earlier task and slice checks remain bound to their own candidates. Final
+closure changes only configured documentation paths and receives separate
+diff/whitespace validation.
 
 ## Risks and Follow-ups
 
-Final integrated-candidate gate and documentation closure remain controller-owned.
 User-operated Telegram client and live-provider acceptance have not been observed.

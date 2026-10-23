@@ -1,12 +1,12 @@
 # Guided Use-Case Workflow Delivery
 
-Status: Approved
+Status: Completed
 Date: 2026-10-22
 Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: None; all six recorded slices are delivered on dev. The final integrated gate and delivery-set closure remain controller-owned.
+Active slice: None; all six recorded slices are delivered on dev and all 18 tasks are complete. The controller's final gate passed at `13efd236f20a67f4fc328aaaaffc2c188b2be325`.
 
 Spec: [Guided workflow](../spec/stable/guided-use-case-workflow.md)
 Model: [Retained state and ownership](../spec/stable/guided-use-case-workflow-model.md)
@@ -155,4 +155,4 @@ The tracker owns task state, actual commits, PRs, validations and acceptance evi
 
 The maintainer approved this slice map/tracker, implementation and Looper startup on 2026-10-22, then explicitly delegated Rebase + Fast-forward merges for all six recorded slice PRs into `dev` after their required checks. Looper owns the execution and merge loop for this delivery set. This delegation does not include additional slices, final-gate repair grants, `main` promotion, mirrors or release publication.
 
-After implementation, record the final end-to-end outcome in `ops/default/report/cycles/guided-use-case-workflow.md`, including observed Web/Telegram/TUI scope, input checkpoint identities, actual native receipts, validation candidate and remaining external prerequisites. This future path is not current acceptance evidence.
+The [completed cycle report](../report/cycles/guided-use-case-workflow.md) records the observed Web/Telegram/TUI scope, input checkpoint identities, actual native receipts and remaining external prerequisites. The configured controller full gate, `make verify`, passed at the exact integrated candidate `13efd236f20a67f4fc328aaaaffc2c188b2be325`. The bounded normal/race commands above passed separately at the final Slice 6 candidate `4b622cc433e828b8451350d439f5b488e26b5911`; the tracker preserves each command's actual candidate. Final closure changes only configured documentation paths.
