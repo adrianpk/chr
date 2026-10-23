@@ -76,7 +76,12 @@ func (r telegramReceiver) finishTelegramGuided(ctx context.Context, request core
 		return err
 	}
 
-	return r.store.FinishTelegramGuided(ctx, request, progress, facts, text, current.Digest(), time.Now())
+	err = r.store.FinishTelegramGuided(ctx, request, progress, facts, text, current.Digest(), time.Now())
+	if errors.Is(err, core.ErrWorkflowConflict) {
+		return r.finishOvertakenGuided(ctx, request, progress, facts, current)
+	}
+
+	return err
 }
 
 func telegramGuidedResult(observed GuidedUseCaseInspection) (core.TelegramGuidedProgress, json.RawMessage, error) {

@@ -67,6 +67,10 @@ func claimTelegramAction(op telegramConversationTransaction, claim *TelegramActi
 		return claimTelegramControlReceipt(op, claim)
 	}
 
+	if telegramGuidedActionRecovering(claim) {
+		return claimTelegramGuidedRecovery(op, claim)
+	}
+
 	if claim.Action.State == "expired" || claim.Action.State == "superseded" {
 		return nil
 	}

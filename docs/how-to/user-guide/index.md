@@ -1397,6 +1397,50 @@ ticket-native work controls or grant approval. Invoke admission, continuation,
 pause/cancel and reconciliation through the CLI, TUI, Web or daemon controls;
 inspect their retained evidence to establish progress.
 
+## Develop a Guided Use Case Through Telegram
+
+Configure and run the [dedicated receiver](#prepare-work-through-telegram), then
+send **Develop a new use case**. When several projects are available, use
+**Develop a new use case in Example project**, replacing the visible project
+name with your intended registered project. chr asks for a use-case name, then
+accepts context in several messages. Send **Finish capture** when it is complete.
+
+Answer each current clarification question. chr saves Git versions of the inputs,
+approves the generated specification and prepares and starts the exact agreed
+work under project policy. Missing setup and native review waits appear in the
+current step. A successful worker or an open PR alone is not confirmed delivery.
+
+Use these messages with the selected use case:
+
+| Message | Outcome |
+| --- | --- |
+| Show current step | Read the latest prompt or real wait without advancing work. |
+| Show controls | Offer buttons for the currently available capture or lifecycle actions. |
+| Pause use case / Resume use case / Cancel use case | Apply the shared control without replacing the run or refilling its limits. |
+| Retry or Continue | Recover the retained operation at an available checkpoint. |
+| Idea: add an export later | Save a later idea separately from the agreed scope. |
+| Show dump / Show quiz / Show specification / Show plan / Show tracker | Attach the complete saved original for that stage. |
+| Show results | Export verified delivery, validation, closing and pending-idea evidence. |
+
+Reply to the current prompt when several conversations are open. Replaced
+prompts and another person's buttons cannot change your input. After a stale
+reply, send **Show current step** and answer its latest prompt. Long questions
+arrive as complete attachments with a short caption. Original stage documents
+retain their committed bytes even after their working files change.
+
+Send **Show use case Bounded audit** to reopen a uniquely named run, including a
+run created in the Web UI. Add **in Example project** when project selection is
+ambiguous. Duplicate names require a more precise selection; chr never chooses
+an arbitrary run. Switching interfaces retains the original run, actor, scope,
+native invocation and consumed attempts.
+
+The receiver continues retained work while it runs. Restart preserves saved
+input and operations; it does not reset work allowances. Authoring controls
+serialize at the shared checkpoint, so a provider call can finish before a pause
+is applied. Native stop intent and confirmed worker quiescence remain distinct.
+An uncertain Telegram send can repeat its original message or attachment without
+repeating a confirmed project mutation.
+
 ## Prepare Work Through Telegram
 
 Configure the dedicated receiver with a local operator and registered project,

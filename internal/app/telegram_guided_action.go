@@ -89,7 +89,14 @@ func (r telegramReceiver) finishGuidedAction(ctx context.Context, claim core.Tel
 		return err
 	}
 
-	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{State: "confirmed", Delivery: delivery, Guided: &progress, ReceiptRef: progress.SessionRef, Facts: facts, Text: text, Message: telegramOutcomeMessage("43", text), ConfigDigest: config.Digest()}, time.Now())
+	result := core.TelegramActionResult{State: "confirmed", Delivery: delivery, Guided: &progress, ReceiptRef: progress.SessionRef, Facts: facts, Text: text, Message: telegramOutcomeMessage("43", text), ConfigDigest: config.Digest()}
+
+	err = r.store.FinishTelegramAction(ctx, claim, result, time.Now())
+	if errors.Is(err, core.ErrWorkflowConflict) {
+		return r.finishOvertakenGuidedAction(ctx, claim, result)
+	}
+
+	return err
 }
 
 func (r telegramReceiver) finishGuidedActionFailure(ctx context.Context, claim core.TelegramActionClaim, config core.TelegramReceiverConfig, failure error) error {

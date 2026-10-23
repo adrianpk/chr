@@ -1,11 +1,44 @@
 # Telegram Receiver
 
 The dedicated receiver supports authenticated project reads, retained text
-conversations, configured-provider explanations and canonical artifact/native
-ticket preparation. `/help` is generated from the available command registries.
+conversations, guided use-case development, configured-provider explanations and
+canonical artifact/native ticket preparation. `/help` is generated from the available command registries.
 Unknown slash commands return help without consulting a model. Bound actions
 accept buttons, replies and `/answer` through the same retained decision owner.
-Preparation creates no work invocation and executes no saved intake handoff.
+Manual preparation creates no work invocation and executes no saved intake handoff.
+
+## Guided use cases
+
+**Develop a new use case** explicitly starts the shared guided journey. The
+receiver asks for a name and context, accepts **Finish capture** and presents
+current clarification questions. Project names resolve genuine ambiguity;
+normal progression needs no slash command or transport identifier. The shared
+owner seals inputs in Git, approves its generated specification and prepares and
+starts exact native work under the configured project policy.
+
+**Show current step** reads without progression. **Show controls** offers sealed
+buttons; **Pause use case**, **Resume use case** and **Cancel use case** delegate
+to the same canonical controls. **Retry** and **Continue** preserve the pending
+operation identity and finite budgets. **Idea:** retains separate later input.
+**Show use case** followed by a unique name, optionally **in** a project name,
+selects an existing guided run, including one created through Web. Duplicate
+names, stale replies and foreign peers cannot select or mutate an arbitrary run.
+
+**Show dump**, **Show quiz**, **Show specification**, **Show plan** and **Show
+tracker** attach complete committed originals. Long current questions attach
+their full text. **Show results** exports verified native delivery, validation
+and closing evidence with later ideas. Completion requires the native receipts
+and closing evidence; worker success or Telegram delivery alone is insufficient.
+
+The receiver's managed lifecycle recovers the original authoring and native
+owners with current peer/operator/project/root checks. It coalesces unchanged
+human views and preserves source, operation and snapshot identity across
+restart. An acknowledgement that arrives after a newer display confirms only
+its original request; it does not replace that display or grant a new reply
+binding. Authoring controls serialize at the shared mutation checkpoint and
+retain provider deadlines. Native stopping remains distinct from quiescence.
+Manual preparation and explicit native previews retain their existing controls.
+See the [guided Telegram journey](../how-to/user-guide/index.md#develop-a-guided-use-case-through-telegram).
 
 ## Command help
 
