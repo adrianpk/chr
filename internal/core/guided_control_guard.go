@@ -74,6 +74,10 @@ func guardFreshGuidedControl(session AuthoringSession, operation GuidedUseCaseOp
 }
 
 func guardGuidedControlIdentity(state *GuidedUseCaseState, id string) error {
+	if guidedIdeaOwnsID(state, id) {
+		return ErrWorkflowConflict
+	}
+
 	if state.PendingOperation != nil && state.PendingOperation.ID == id {
 		return ErrWorkflowConflict
 	}

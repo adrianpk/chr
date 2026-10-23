@@ -30,5 +30,18 @@ func guidedWebWork(view *webui.GuidedUseCaseView, status *WorkflowWorkStatus) {
 		work.Action = "Required integration action: " + status.Integration.Blocker.RequiredAction
 	}
 
+	guidedWebIntegration(work, status.Integration)
+
 	view.Work = work
+}
+
+func guidedWebIntegration(work *webui.GuidedUseCaseWork, integration *WorkflowIntegrationStatus) {
+	if integration == nil {
+		return
+	}
+
+	work.Publication, work.IntegrationPhase = integration.Publication, strings.ReplaceAll(integration.Phase, "_", " ")
+	if integration.Decision != nil && integration.Decision.State == "waiting" {
+		work.Action = "Answer the retained native integration decision before work can continue."
+	}
 }

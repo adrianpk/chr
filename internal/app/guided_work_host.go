@@ -71,6 +71,7 @@ func (host *guidedWorkHost) activate(operations service, id string) error {
 
 		failure := host.run(operations, id)
 		host.acknowledgeStop(host.ctx, operations, id)
+		host.reconcileResult(host.ctx, operations, id)
 
 		if guidedHostFailure(failure) && host.ctx.Err() == nil {
 			host.reportFailure(host.ctx, operations, id)

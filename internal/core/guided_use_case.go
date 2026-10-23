@@ -10,6 +10,8 @@ import (
 
 // GuidedUseCaseState extends a canonical authoring session without adopting manual sessions.
 type GuidedUseCaseState struct {
+	LaterIdeas          []GuidedIdeaReference        `json:"later_ideas,omitempty"`
+	Result              *GuidedResultReference       `json:"result,omitempty"`
 	Control             *GuidedControlState          `json:"control,omitempty"`
 	Work                *GuidedWorkState             `json:"work,omitempty"`
 	SpecDraft           *GuidedSpecDraftReference    `json:"spec_draft,omitempty"`
@@ -185,7 +187,7 @@ func validGuidedIntent(session AuthoringSession) bool {
 }
 
 func boundedGuidedState(state *GuidedUseCaseState) bool {
-	return len(state.Capture) <= 65536 && len(state.CompletedOperations) <= 256 && len(state.Checkpoints) <= 8 && boundedGuidedControls(state.Control)
+	return len(state.Capture) <= 65536 && len(state.CompletedOperations) <= 256 && len(state.Checkpoints) <= 8 && len(state.LaterIdeas) <= 64 && boundedGuidedControls(state.Control)
 }
 
 // GuidedQuizState retains the canonical quiz owner binding and its committed input digest.

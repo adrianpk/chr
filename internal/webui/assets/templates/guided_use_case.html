@@ -74,11 +74,56 @@
         <p>Native work state: {{.Guided.Work.Status}}</p>
         <p>Tasks: {{.Guided.Work.Total}} · Validated: {{.Guided.Work.Validated}} · Confirmed delivery: {{.Guided.Work.Confirmed}} · Integrated units: {{.Guided.Work.Integrated}} · Remaining: {{.Guided.Work.Remaining}} · Attempts: {{.Guided.Work.Attempts}}</p>
         <p>Admitted worker limits: {{.Guided.Work.MaxWorkerAttempts}} attempts per task, {{.Guided.Work.WorkerTimeoutSeconds}} seconds per attempt.</p>
+        {{if .Guided.Work.Publication}}<p>Publication: {{.Guided.Work.Publication}} · Integration: {{.Guided.Work.IntegrationPhase}}</p>{{end}}
         {{if .Guided.Work.Action}}<p role="status">{{.Guided.Work.Action}}</p>{{end}}
         {{if .Guided.Work.PullRequestURL}}<p><a href="{{.Guided.Work.PullRequestURL}}">Inspect native pull request</a></p>{{end}}
       </section>
     {{else if and (ne .Guided.Stage "name") (ne .Guided.Stage "dump")}}
       <p>Execution has not started.</p>
+    {{end}}
+    {{if .Guided.Result}}
+      <section aria-label="Use-case results">
+        <h3>Results</h3>
+        <p role="status">{{.Guided.Result.Summary}}</p>
+        <p>Confirmed set closures: {{.Guided.Result.ClosingCount}}</p>
+        {{range .Guided.Result.Deliveries}}
+          <article>
+            <p>Code repository: <a href="{{.Repository}}">{{.Repository}}</a> · Target branch: {{.Branch}}</p>
+            <p>Confirmed integration: {{.Method}} · Commit: <code>{{.Commit}}</code></p>
+            <p><a href="{{.PullRequest}}">Inspect delivered changes</a></p>
+            <details><summary>Delivery receipt</summary><p>{{.Reference}} · {{.Hash}}</p></details>
+          </article>
+        {{end}}
+        {{range .Guided.Result.Validation}}
+          <details><summary>{{.Label}} validation: {{.Outcome}}</summary>
+            <p>{{.Reference}}</p>
+            {{if .Waiver}}<p>Validation waiver: {{.Waiver}}</p>{{end}}
+            {{range .Commands}}<p><code>{{.Command}}</code> · Exit code: {{.ExitCode}}</p>{{end}}
+          </details>
+        {{end}}
+      </section>
+    {{end}}
+    {{if .Guided.CanRetainIdea}}
+      <section aria-label="Later ideas">
+        <h3>Ideas for later review</h3>
+        <p>New ideas are saved separately. They do not change the agreed version or admitted work.</p>
+        <form method="post" action="/guided/actions">
+          <input type="hidden" name="surface" value="guided">
+          <input type="hidden" name="action" value="guided.input">
+          <input type="hidden" name="confirm" value="true">
+          <input type="hidden" name="id" value="{{.Guided.RunID}}">
+          <input type="hidden" name="namespace" value="{{.Guided.Namespace}}">
+          <input type="hidden" name="revision" value="{{.Guided.IdeaRevision}}">
+          <input type="hidden" name="request_id" value="{{.Guided.IdeaRequestID}}">
+          <input type="hidden" name="step" value="idea">
+          <label>New idea <textarea name="content" maxlength="8192" required></textarea></label>
+          <button class="button" type="submit">Save idea for later review</button>
+        </form>
+        {{range .Guided.Ideas}}
+          <article><p>Pending review · {{.Actor}} · {{.CreatedAt}}</p><pre>{{.Content}}</pre></article>
+        {{end}}
+        {{if .Guided.Ideas}}<p role="status">Saved ideas remain pending review for separately authorized work.</p>{{end}}
+      </section>
     {{end}}
     {{if .Guided.CommittedDump}}
       <p>Saved dump version: <code>{{.Guided.Commit}}</code></p>

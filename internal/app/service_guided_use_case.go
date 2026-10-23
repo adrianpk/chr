@@ -10,6 +10,9 @@ import (
 
 // GuidedUseCaseInspection contains retained state and prospective local readiness.
 type GuidedUseCaseInspection struct {
+	Ideas         []core.GuidedLaterIdea
+	Result        *core.WorkflowResultInspection
+	ResultProblem string
 	Work          *WorkflowWorkStatus
 	Namespace     string
 	Session       *core.AuthoringSession
@@ -48,6 +51,10 @@ func (s service) ChangeGuidedUseCase(ctx context.Context, command core.GuidedUse
 	}
 
 	command.GuidedUseCaseScope = scope
+	if command.Action == "idea" {
+		return core.RetainGuidedIdea(ctx, s.projectContext.ProjectDir, command)
+	}
+
 	if guidedControlAction(command.Action) {
 		return s.changeGuidedControl(ctx, command)
 	}
@@ -92,8 +99,11 @@ func (s service) InspectGuidedUseCase(ctx context.Context, id, namespace string)
 
 	s.inspectGuidedQuestion(ctx, &result)
 	s.inspectGuidedWork(ctx, &result)
+	s.inspectGuidedResult(ctx, &result)
 
-	return result, nil
+	result.Ideas, err = core.ReadGuidedIdeas(ctx, s.projectContext.ProjectDir, session)
+
+	return result, err
 }
 
 func (s service) inspectGuidedReadiness(ctx context.Context, result *GuidedUseCaseInspection) {

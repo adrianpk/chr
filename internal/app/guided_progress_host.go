@@ -134,6 +134,12 @@ func (host *guidedWorkHost) activateRetained(operations service, session core.Au
 	}
 
 	status, err := operations.WorkflowStatus(host.ctx, run.ID, WorkflowStatusRequest{Limit: 8})
+	if err == nil && status.Status == "completed" {
+		_, err = core.ReconcileGuidedResult(host.ctx, operations.projectContext.ProjectDir, core.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace})
+
+		return err
+	}
+
 	if err != nil || !retainedWorkRunnable(status) {
 		return err
 	}

@@ -104,7 +104,7 @@ func (r *fileAuthoringSessionRepository) guidedFileChange(path string, content [
 	return change, nil
 }
 
-func (r *fileAuthoringSessionRepository) saveGuidedSession(session AuthoringSession, create bool) error {
+func (r *fileAuthoringSessionRepository) saveGuidedSession(session AuthoringSession, create bool, extra ...workflowFileChange) error {
 	paths, err := r.authoringSessionPaths(session.ID)
 	if err != nil {
 		return err
@@ -125,7 +125,7 @@ func (r *fileAuthoringSessionRepository) saveGuidedSession(session AuthoringSess
 		return err
 	}
 	// Replace the session last so its revision cannot advertise missing input.
-	changes := []workflowFileChange{transcript, sessionChange}
+	changes := append(extra, transcript, sessionChange)
 
 	if create {
 		artifact, err := r.guidedFileChange(paths.ArtifactsPath, []byte("# Artifacts\n\n"), true)
@@ -190,6 +190,10 @@ func guardGuidedCommand(session AuthoringSession, command GuidedUseCaseCommand, 
 	}
 
 	if guidedControlOwnsID(session.Guided.Control, operation.ID) {
+		return false, ErrWorkflowConflict
+	}
+
+	if guidedIdeaOwnsID(session.Guided, operation.ID) {
 		return false, ErrWorkflowConflict
 	}
 

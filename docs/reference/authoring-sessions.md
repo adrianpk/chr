@@ -829,3 +829,34 @@ results retain the original request for receipt recovery before current
 prerequisites are checked. Only a verified native rejection without an accepted
 receipt permits a fresh control. A stop during uncertain admission can bind an
 existing exact admission request, but never admits work just to stop it.
+
+## Guided Deferred Ideas and Results
+
+After the first committed stage, `guided.input` with `step=idea` saves a
+non-empty request of at most 8192 bytes with the current authoring revision and
+an independent operation identity. Each run retains at most 64 ideas. Entries
+carry the original actor, timestamp, content and a hashed reference in optional
+`later_ideas` state. The authoring journal commits the entry and its reference
+together. Duplicate requests reconcile their original entry; stale requests and
+identities belonging to a stage or control are rejected.
+
+Ideas remain pending separate review, including during a pause and after
+completion or cancellation. They do not alter committed documents, pending stage
+input, operator stops, materialized membership, native admission or its budgets.
+The Web page acknowledges the separate retention and displays these requests
+alongside results.
+
+Result inspection verifies the exact original native admission and frozen
+membership, delivery proofs and receipts, set-closing receipts and task results.
+It reads task names from immutable worker inputs and validation commands from
+host evidence, without returning worker output or credentials. Missing or
+changed evidence blocks a completion claim. Inspection is bounded and read-only;
+it does not recover journals, call providers or retry publication.
+
+Only managed lifecycle reconciliation can finalize the authoring session. It
+requires native completion, all admitted members confirmed, all required set
+closures, and no pending stage/control or operator stop. Optional `result` state
+retains references to the native evidence. Worker success, task validation and an
+open PR remain distinct from delivery. Results show confirmed repository,
+branch, commit and PR locations, validation outcomes, required actions and
+remaining work; cancellation preserves already confirmed delivery.

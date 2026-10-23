@@ -41,6 +41,8 @@ func (p webViewProvider) GuidedUseCaseView(ctx context.Context, id, namespace st
 	guidedWebInputBinding(&view, state)
 	guidedWebWork(&view, result.Work)
 	guidedWebControls(&view, *session, result.Work)
+	guidedWebIdeas(&view, result)
+	guidedWebResult(&view, result)
 
 	if len(state.Checkpoints) > 0 {
 		view.Commit = state.Checkpoints[0].Commit
@@ -84,7 +86,12 @@ func (p webViewProvider) writeGuidedUseCase(operations service, request webui.Wr
 		return webValidationWrite(err), nil
 	}
 
-	return webui.WriteActionResponse{Status: webui.WriteStatusOK, Summary: "Use case saved.", RedirectURL: guidedUseCaseURL(session.ID, session.Namespace)}, nil
+	summary := "Use case saved."
+	if request.Fields["step"] == "idea" {
+		summary = "Idea saved for review after completion; the agreed scope is unchanged."
+	}
+
+	return webui.WriteActionResponse{Status: webui.WriteStatusOK, Summary: summary, RedirectURL: guidedUseCaseURL(session.ID, session.Namespace)}, nil
 }
 
 func guidedUseCaseURL(id, namespace string) string {

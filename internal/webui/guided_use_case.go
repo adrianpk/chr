@@ -15,6 +15,10 @@ type GuidedUseCaseLink struct{ Name, URL string }
 
 // GuidedUseCaseView presents current capture, setup and an inspectable committed input.
 type GuidedUseCaseView struct {
+	Result                                                  *GuidedUseCaseResult
+	Ideas                                                   []GuidedUseCaseIdea
+	IdeaRequestID, IdeaRevision                             string
+	CanRetainIdea                                           bool
 	Controls                                                []GuidedUseCaseControl
 	Suspended                                               bool
 	ControlStatus                                           string
@@ -37,9 +41,37 @@ type GuidedUseCaseControl struct {
 
 // GuidedUseCaseWork projects actual native progress without driving execution.
 type GuidedUseCaseWork struct {
+	Publication, IntegrationPhase                                string
 	MaxWorkerAttempts, WorkerTimeoutSeconds                      int
 	Status, Action, PullRequestURL                               string
 	Total, Validated, Confirmed, Integrated, Remaining, Attempts int
+}
+
+// GuidedUseCaseIdea presents an attributable request pending separate review.
+type GuidedUseCaseIdea struct{ Content, Actor, CreatedAt string }
+
+// GuidedUseCaseResult presents only verified owner evidence and code locations.
+type GuidedUseCaseResult struct {
+	Complete     bool
+	Summary      string
+	Deliveries   []GuidedUseCaseDelivery
+	Validation   []GuidedUseCaseValidation
+	ClosingCount int
+}
+
+// GuidedUseCaseDelivery identifies confirmed code and its retained receipt.
+type GuidedUseCaseDelivery struct{ Repository, Branch, Commit, PullRequest, Method, Reference, Hash string }
+
+// GuidedUseCaseValidation projects host-observed validation without worker output.
+type GuidedUseCaseValidation struct {
+	Label, Outcome, Reference, Waiver string
+	Commands                          []GuidedUseCaseValidationCommand
+}
+
+// GuidedUseCaseValidationCommand retains the actual argv display and exit code.
+type GuidedUseCaseValidationCommand struct {
+	Command  string
+	ExitCode int
 }
 
 // GuidedUseCaseArtifact exposes one complete committed authoring document.
