@@ -1,11 +1,12 @@
 # Slice 6: Guided TUI Journey
 
-Status: reviewing
+Status: delivered
 Delivery set: guided-use-case-workflow
 Plan: `ops/default/plan/guided-use-case-workflow.md`
 Tracker: `ops/default/tracker/guided-use-case-workflow.md`
 Branch: `feat/slice-6-guided-tui`
 PR: [#435](https://forge.adrianpk.com/adrianpk/chr/pulls/435)
+Integrated commit: `4b622cc433e828b8451350d439f5b488e26b5911`
 Acceptance/documentation commit: `f5c51e8a5ea9754f996bf4967f9581da8ff1fbb7`
 Controls/results commit: `da313792a409f1e19145a9c33137b0b854600d0d`
 Input/navigation commit: `5e15bddd36e03d7adbb02ad3856d1ae3a22d4519`
@@ -15,7 +16,8 @@ Input/navigation commit: `5e15bddd36e03d7adbb02ad3856d1ae3a22d4519`
 Expose the existing retained guided workflow through terminal interaction.
 Input, navigation, native controls, truthful results and shared-run continuation
 are implemented. Independent terminal interaction acceptance and criterion
-reconciliation are recorded; final PR-reference validation remains pending.
+reconciliation are recorded. All six configured PR-reference checks passed,
+and the canonical PR is merged at the exact validated commit.
 
 Plan: [Approved slice map](../../../plan/guided-use-case-workflow.md).
 Tracker: [Tasks and evidence](../../../tracker/guided-use-case-workflow.md).
@@ -214,9 +216,19 @@ The expanded isolated fixture selection passed:
 - `go test -race ./internal/app -run '^TestGuidedUseCase(Admission|Control|Telegram|TUI|Parity)' -count=1 -timeout=3m` — passed, app 70.942s.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/app/...` — zero issues.
 
-Final configured checks run through Looper on the complete clean PR-reference
-HEAD. The canonical PR Validation and controller ledger retain the exact ordered
-commands, candidate and successful outcomes; earlier task checks are separate.
+Final configured slice checks passed through Looper on clean HEAD
+`4b622cc433e828b8451350d439f5b488e26b5911` in this exact order:
+
+- `make verify` — passed.
+- `go test ./internal/core ./internal/app ./internal/tui -run '^TestGuidedUseCase(TUI|Parity)' -count=1 -timeout=3m` — passed.
+- `go test -race ./internal/core ./internal/app ./internal/tui -run '^TestGuidedUseCase(TUI|Parity)' -count=1 -timeout=3m` — passed.
+- `go test ./internal/core ./internal/app ./internal/webui ./internal/tui -run '^TestGuidedUseCase(Capture|Checkpoint|Quiz|Spec|Preparation|Admission|Recovery|Control|Ideas|Result|WebJourney|Telegram|TUI|Parity)' -count=1 -timeout=3m` — passed.
+- `go test -race ./internal/core ./internal/app ./internal/tui -run '^TestGuidedUseCase(Capture|Checkpoint|Quiz|Spec|Preparation|Admission|Recovery|Control|Ideas|Telegram|TUI|Parity)' -count=1 -timeout=3m` — passed.
+- `git diff --check` — passed.
+
+Forgejo and Acta confirm PR #435 merged into dev at that same commit. The
+report and slice tracker are closed on dev. The full gate after documentation
+closure remains pending with the controller; earlier task checks are separate.
 
 ## Risks and Follow-ups
 

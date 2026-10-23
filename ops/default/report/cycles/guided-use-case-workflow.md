@@ -1,7 +1,7 @@
 # Guided Use-Case Workflow Cycle Report
 
 Acceptance source commit: `f5c51e8a5ea9754f996bf4967f9581da8ff1fbb7`
-Status: reviewing; implementation acceptance recorded, final integration pending
+Status: implementation integrated; controller full gate pending
 Delivery set: guided-use-case-workflow
 Plan: [Approved slice map](../../plan/guided-use-case-workflow.md)
 Tracker: [Task and criterion evidence](../../tracker/guided-use-case-workflow.md)
@@ -16,10 +16,11 @@ Adapters call shared commands and queries; original input checkpoints, native
 membership, actor, policy and finite attempts survive interface changes and
 recovery. Later ideas remain separate pending review.
 
-Slices 1-5 are integrated through canonical PRs #430-#434. Slice 6 implements the
-terminal adapter and final acceptance mapping on its approved branch; [PR #435](https://forge.adrianpk.com/adrianpk/chr/pulls/435),
-exact-head checks and subsequent controller integration are recorded in the
-tracker and Slice 6 report. No final integrated gate is claimed at this stage.
+All six slices are integrated through canonical PRs #430-#435. The final slice
+merged at `4b622cc433e828b8451350d439f5b488e26b5911` after all six configured ordered
+checks passed. Forgejo, the controller checkpoint and Acta confirm that exact
+integration. The tracker and Slice 6 report retain its evidence. The full gate
+on the documentation-closure candidate remains pending with the controller.
 
 ## Observed Acceptance
 
@@ -67,13 +68,16 @@ substitute for these proofs.
 
 ## Validation and Completion Boundary
 
-T6.3 task checks and source candidate are recorded in the Slice 6 report. The
-final PR-reference HEAD requires the exact configured ordered checks through
-Looper: development gate, focused terminal/parity normal and race checks, bounded
+T6.3 task checks and source candidate are recorded in the Slice 6 report. All six
+configured Slice 6 checks passed on `4b622cc433e828b8451350d439f5b488e26b5911`:
+development gate, focused terminal/parity normal and race checks, bounded
 cross-slice guided normal/race regressions, then whitespace validation. Evidence
-belongs to that exact clean HEAD and command list; earlier task checks do not
-replace it.
+belongs to that exact clean HEAD and command list.
 
-The controller owns Slice 6 integration, the unchanged final integrated `dev`
-gate and approved documentation closure. Scheduled exhaustive certification and
-any live external-forge/provider acceptance remain separate.
+The worker verified the local Go, Python, Git and make prerequisites and required
+repository scripts for the configured full gate, `make verify`. Short tests own
+their temporary fixtures; no retained external service is required. The worker
+has not run the full gate during preparation. After the documentation closure is
+pushed, the controller owns the unchanged full gate on its exact clean dev
+candidate and the final approved documentation closure. Scheduled exhaustive
+certification and live external-forge/provider acceptance remain separate.

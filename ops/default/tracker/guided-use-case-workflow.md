@@ -1,13 +1,13 @@
 # Guided Use-Case Workflow Tracker
 
-Status: In progress; Slice 6 active
+Status: In progress; implementation integrated, final gate pending
 Date: 2026-10-22
 Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 6, Guided TUI journey; implementation and focused acceptance are complete. Canonical PR #435 is reviewing. Exact-head checks are recorded through Looper; integration and the final integrated gate remain controller-owned.
-Progress: 5 of 6 slices delivered; 17 of 18 tasks completed; T6.3 implementation/acceptance is reviewing while the controller integration gate remains pending. PR #434 is merged and its Telegram checkpoint is closed. All TUI behavior and delivery-set documentation are implemented.
+Active slice: None; all six recorded slices are delivered on dev. The final integrated gate and delivery-set closure remain controller-owned.
+Progress: 6 of 6 slices delivered; 17 of 18 tasks completed. T6.3 implementation and acceptance are integrated through PR #435; its final integrated gate and delivery-set closure remain pending.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
 Spec: [Approved workflow](../spec/stable/guided-use-case-workflow.md)
@@ -49,7 +49,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | T5.3 | Telegram transport/journey regressions, declared client evidence and documentation. | done | `05f2576a944a8c4e7d98346d9f36c92ee533e306` | Lost acknowledgements after newer controls, SQLite reopen, stale Web inputs, foreign replies/buttons and original upload retries pass focused normal/race checks; strict lint passes. User Guide, receiver reference and changelog updated. Actual user-operated client acceptance was not performed. |
 | T6.1 | Shared-service TUI journey input, navigation, artifacts and resume. | done | `5e15bddd36e03d7adbb02ad3856d1ae3a22d4519` | Actual model keys reach canonical capture/clarification/approval; original reads survive working-copy edits. Stale drafts and replay/sequence fences pass normal/race checks; strict lint passes. |
 | T6.2 | TUI controls/progress/results and cross-adapter revision/authority parity. | done | `da313792a409f1e19145a9c33137b0b854600d0d` | Shared native controls, exact approval routing, later ideas, receipt-backed results and Web/Telegram/TUI continuation pass focused normal/race checks; strict lint passes. |
-| T6.3 | TUI/parity acceptance, documentation, cycle report and exact-candidate closure gate. | reviewing | `f5c51e8a5ea9754f996bf4967f9581da8ff1fbb7` | Actual PTY journey/reopen, result guards and parity pass normal/race checks; strict lint passes. Documentation and cycle report complete. Final integrated gate and closure remain controller-owned. |
+| T6.3 | TUI/parity acceptance, documentation, cycle report and exact-candidate closure gate. | gate pending | `f5c51e8a5ea9754f996bf4967f9581da8ff1fbb7` | Actual PTY journey/reopen, result guards and parity pass normal/race checks; strict lint passes. Documentation and cycle report complete; PR #435 merged at `4b622cc433e828b8451350d439f5b488e26b5911` after all six configured checks passed. Final integrated gate and closure remain controller-owned. |
 
 ## Slice delivery
 
@@ -60,7 +60,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | 3 | delivered | #432 | `dfcfae6e787742d976f99d40f292a7e047f5252a` | [Slice 3 report](../report/slices/guided-use-case-workflow/slice-3-work-execution.md) |
 | 4 | delivered | [#433](https://forge.adrianpk.com/adrianpk/chr/pulls/433) | `f87649d876723335043041d52b298646bdf9ef18` | [Slice 4 report](../report/slices/guided-use-case-workflow/slice-4-web-recovery.md) |
 | 5 | delivered | [#434](https://forge.adrianpk.com/adrianpk/chr/pulls/434) | `8d99359cec120bbcdb4583ad5e842aef21547657` | [Slice 5 report](../report/slices/guided-use-case-workflow/slice-5-telegram.md) |
-| 6 | reviewing | [#435](https://forge.adrianpk.com/adrianpk/chr/pulls/435) | pending | [Slice 6 report](../report/slices/guided-use-case-workflow/slice-6-tui.md) |
+| 6 | delivered | [#435](https://forge.adrianpk.com/adrianpk/chr/pulls/435) | `4b622cc433e828b8451350d439f5b488e26b5911` | [Slice 6 report](../report/slices/guided-use-case-workflow/slice-6-tui.md) |
 
 ## Acceptance evidence
 
@@ -273,6 +273,7 @@ Delivery-set gate: `make verify`, bounded normal guided-workflow regressions, fo
 | Slice 6 combined-race timeout | `c5b4445be9c406e8ee3994fa271094190a3cce16` | First four configured checks passed. Combined race reached its fixed three-minute limit while advancing through independent fixtures; no race was reported before timeout. Eight isolated acceptance fixtures now execute in parallel; commands, timeout and assertions remain unchanged. Final checks are regenerated. |
 | Slice 6 terminal startup synchronization | `9355a7738ab1cce8731a7aba13b3c4e5b195666f` | Development and focused normal/race passed. Cross-slice normal exposed a fixture reading the loading screen as ready; it now waits for loaded policy before the new-run action and gracefully joins its owned child before cancellation. Final checks are regenerated. |
 | Slice 6 race scheduling | `8aac9ce35eef7bcd47af1066b76c8fe282f92659` | First four configured checks passed. Combined race reached three minutes with two native journeys still progressing after the serial fixtures. Parallel scheduling now covers 24 isolated admission, control, Telegram and TUI fixtures; all commands, timeouts, real IO and assertions remain unchanged. |
+| Slice 6 development gate | `4b622cc433e828b8451350d439f5b488e26b5911` | All six configured ordered checks passed through Looper. PR #435 merged by the controller at that exact commit; report/tracker closure verified on dev. |
 | Telegram actual-client journey | pending | not observed |
 | TUI interaction and cross-adapter parity | `f5c51e8a5ea9754f996bf4967f9581da8ff1fbb7` | Owned PTY journey and same-run Web/Telegram/TUI native continuation passed normal/race task checks. Concrete fixture checkpoints and native receipts are in the cycle report. |
 | Final delivery-set gate | pending | not run |
@@ -286,6 +287,12 @@ Review later ideas after the current guided development finishes. They never bec
 
 T6.1 is complete in `5e15bddd36e03d7adbb02ad3856d1ae3a22d4519`. The Slice 6 report retains focused normal/race and strict lint evidence for named terminal navigation, frozen current-step input, committed originals and explicit managed-host startup. T6.2 controls/results and T6.3 acceptance outcomes follow below.
 
-T6.2 is complete in `da313792a409f1e19145a9c33137b0b854600d0d`. The Slice 6 report records exact focused normal/race commands, receipt-backed results, original prepared documents and cross-adapter stale/scope guards. T6.3 terminal acceptance and delivery-set documentation are active.
+T6.2 is complete in `da313792a409f1e19145a9c33137b0b854600d0d`. The Slice 6 report records exact focused normal/race commands, receipt-backed results, original prepared documents and cross-adapter stale/scope guards. T6.3 implementation/acceptance and delivery-set documentation are integrated; the final controller gate remains pending.
 
 T6.3 implementation/acceptance is complete in `f5c51e8a5ea9754f996bf4967f9581da8ff1fbb7`: actual owned Linux terminal processes, same-run parity, criterion reconciliation and documentation. A private output buffer corrects the initial race probe, and a metadata follow-up removes the staged trailing whitespace. Canonical PR #435 retains the final ordered checks on its clean PR-reference head; the integrated controller gate remains pending.
+
+## Full-gate preparation
+
+All six canonical merges are verified against Forgejo and the controller checkpoint. The configured full gate is `make verify`. Its local prerequisites are available: Go 1.27.1 (module minimum 1.25.1), Python 3.14.7, Git 2.55.0, make, executable lint scripts and the cached pinned linter module v2.14.0. Short tests create their own temporary fixtures; this gate requires no retained external service. No fixture service was started or stopped for this preparation.
+
+The worker has not run the full gate in this phase. The controller must run it on the exact clean dev commit after this documentation closure is pushed. Slice 6 evidence at `4b622cc433e828b8451350d439f5b488e26b5911` remains evidence for that commit and its six-command list; it is not reused for a later documentation candidate. T6.3 and delivery-set closure await the controller result.
