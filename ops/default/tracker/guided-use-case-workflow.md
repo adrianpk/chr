@@ -1,13 +1,13 @@
 # Guided Use-Case Workflow Tracker
 
-Status: In progress; Slice 5 active
+Status: In progress; Slice 6 active
 Date: 2026-10-22
 Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 5, Guided Telegram journey; T5.1-T5.3 are complete, and canonical PR #434 is reviewing.
-Progress: 4 of 6 slices delivered; 15 of 18 tasks completed. Guided Telegram routing, shared lifecycle, originals/results, Web continuation, transport faults and guidance are implemented. Slice 5 PR #434 is reviewing; exact-HEAD checks use the controller ledger.
+Active slice: Slice 6, Guided TUI journey; T6.1 shared-service input, navigation and originals are in progress.
+Progress: 5 of 6 slices delivered; 15 of 18 tasks completed. PR #434 is merged and its Telegram checkpoint is closed. Guided TUI implementation is active.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
 Spec: [Approved workflow](../spec/stable/guided-use-case-workflow.md)
@@ -47,7 +47,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | T5.1 | Natural-language Telegram start and shared current-step routing. | done | `77b7f637587a63026ce914368939e7f0ed7158e7`, `5b032e9f6c7ce34b0e0222ca6162ca63fbcc6e53` | Named scope selection, current clarification, sealed buttons, duplicate callbacks, lost owner acknowledgement and preserved inputs pass focused normal/race checks; strict scoped lint passes. |
 | T5.2 | Concise Telegram progress/artifacts/controls/results and cross-interface continuation. | done | `5de6795a8cadcf78fb0dda91a3f67830eebaeb72` | Shared managed host, bounded recovery, native waits/controls, coalesced views, original attachments, verified completion and exact Web-run continuation pass focused normal/race checks; strict lint passes. |
 | T5.3 | Telegram transport/journey regressions, declared client evidence and documentation. | done | `05f2576a944a8c4e7d98346d9f36c92ee533e306` | Lost acknowledgements after newer controls, SQLite reopen, stale Web inputs, foreign replies/buttons and original upload retries pass focused normal/race checks; strict lint passes. User Guide, receiver reference and changelog updated. Actual user-operated client acceptance was not performed. |
-| T6.1 | Shared-service TUI journey input, navigation, artifacts and resume. | pending | pending | pending |
+| T6.1 | Shared-service TUI journey input, navigation, artifacts and resume. | in progress | pending | pending |
 | T6.2 | TUI controls/progress/results and cross-adapter revision/authority parity. | pending | pending | pending |
 | T6.3 | TUI/parity acceptance, documentation, cycle report and exact-candidate closure gate. | pending | pending | pending |
 
@@ -59,8 +59,8 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | 2 | delivered | #431 | `2246651001dd6002f783fd86d0dcc13f5bef02e6` | [Slice 2 report](../report/slices/guided-use-case-workflow/slice-2-quiz-spec.md) |
 | 3 | delivered | #432 | `dfcfae6e787742d976f99d40f292a7e047f5252a` | [Slice 3 report](../report/slices/guided-use-case-workflow/slice-3-work-execution.md) |
 | 4 | delivered | [#433](https://forge.adrianpk.com/adrianpk/chr/pulls/433) | `f87649d876723335043041d52b298646bdf9ef18` | [Slice 4 report](../report/slices/guided-use-case-workflow/slice-4-web-recovery.md) |
-| 5 | reviewing | [#434](https://forge.adrianpk.com/adrianpk/chr/pulls/434) | pending | [Slice 5 report](../report/slices/guided-use-case-workflow/slice-5-telegram.md) |
-| 6 | pending | pending | pending | pending |
+| 5 | delivered | [#434](https://forge.adrianpk.com/adrianpk/chr/pulls/434) | `8d99359cec120bbcdb4583ad5e842aef21547657` | [Slice 5 report](../report/slices/guided-use-case-workflow/slice-5-telegram.md) |
+| 6 | in progress | pending | pending | Report is created with the first implemented TUI task. |
 
 ## Acceptance evidence
 
@@ -267,6 +267,7 @@ Delivery-set gate: `make verify`, bounded normal guided-workflow regressions, fo
 | Slice 4 development gate | `f87649d876723335043041d52b298646bdf9ef18` | All four configured commands passed through Looper; PR #433 merged by the controller at that exact commit. Report/tracker closure verified on dev. |
 | Initial Slice 4 gate | `70608f4ced207bcaad5d0eae32dde7909d9aed95` | `make verify` failed because missing development intent returned the stopped-state error. Validate admission authority before the lifecycle guard; retain both authority and explicit-stop regressions. Final evidence is regenerated for the corrected PR head. |
 | Web browser journey | `0fa7cec16dc3e6b02f3db1d593e3cf4c0081da69` | Actual owned Chromium journey passed at desktop and narrow widths against temporary Git and deterministic providers. |
+| Slice 5 development gate | `8d99359cec120bbcdb4583ad5e842aef21547657` | All four configured commands passed through Looper; PR #434 merged by the controller at that exact commit. Report/tracker closure verified on dev. |
 | Initial Slice 5 gate | `cacfc51480ecfa818b74d8af2d3eabad6df6c89c` | `make verify` failed on two stale maintenance CLI migration-count assertions. The correction requires migration 29 and its exact name; focused maintenance status tests pass. All configured checks are regenerated on the corrected clean head. |
 | Telegram actual-client journey | pending | not observed |
 | TUI interaction and cross-adapter parity | pending | not run |

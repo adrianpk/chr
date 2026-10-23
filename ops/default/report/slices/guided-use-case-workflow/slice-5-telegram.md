@@ -1,11 +1,12 @@
 # Slice 5: Guided Telegram Journey
 
-Status: reviewing
+Status: delivered
 Delivery set: guided-use-case-workflow
 Plan: `ops/default/plan/guided-use-case-workflow.md`
 Tracker: `ops/default/tracker/guided-use-case-workflow.md`
 Branch: `feat/slice-5-guided-telegram`
 PR: `#434`
+Integrated commit: `8d99359cec120bbcdb4583ad5e842aef21547657`
 Initial routing/capture commit: `77b7f637587a63026ce914368939e7f0ed7158e7`
 Current-step routing commit: `5b032e9f6c7ce34b0e0222ca6162ca63fbcc6e53`
 Shared lifecycle/presentation commit: `5de6795a8cadcf78fb0dda91a3f67830eebaeb72`
@@ -16,7 +17,7 @@ Transport fault/guidance commit: `05f2576a944a8c4e7d98346d9f36c92ee533e306`
 Map Telegram onto the same retained guided use case delivered by the Web
 checkpoint. The receiver starts, resumes, controls and inspects the canonical
 journey with current prompts, committed originals and verified native results.
-T5.1-T5.3 are complete; this report accompanies the Slice 5 PR.
+T5.1-T5.3 are complete. PR #434 merged into dev at the exact validated commit above; the Telegram checkpoint is closed.
 
 Plan: [Approved slice map](../../../plan/guided-use-case-workflow.md).
 Tracker: [Tasks and evidence](../../../tracker/guided-use-case-workflow.md).
@@ -210,7 +211,7 @@ command `go test ./internal/app -run '^TestMaintenanceDBStatusReports(PendingMig
 passes. Looper retains the failed candidate diagnostics; all final commands are
 regenerated after this correction.
 
-The required final ordered commands are:
+All four final ordered commands passed through Looper on the integrated commit:
 
 - `make verify`
 - `go test ./internal/core ./internal/app -run '^TestGuidedUseCaseTelegram' -count=1 -timeout=3m`
