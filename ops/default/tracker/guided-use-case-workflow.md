@@ -6,8 +6,8 @@ Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 4, Web recovery, controls and results; T4.1 is pending.
-Progress: 3 of 6 slices delivered; 9 of 18 tasks completed. Slice 4 is active; recovery, controls, deferred ideas and final results remain pending.
+Active slice: Slice 4, Web recovery, controls and results; T4.1 is complete and T4.2 is next.
+Progress: 3 of 6 slices delivered; 10 of 18 tasks completed. Slice 4 recovery and controls are implemented; deferred ideas, final results and complete Web acceptance remain pending.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
 Spec: [Approved workflow](../spec/stable/guided-use-case-workflow.md)
@@ -41,7 +41,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | T3.1 | Committed-source planning, native materialization, contracts/tracker and work checkpoint. | done | `cf45d5255edd6834df83ce7c82a3ed7f3425fd88` | Focused preparation, native journal recovery and standalone plan regressions passed; focused preparation race checks and strict scoped lint passed. |
 | T3.2 | Exact policy-bound native preview/admission and automatic start with retained limits. | done | `a740689accce48f067b66db400a6b6f37698da41` | Focused preparation/admission, native manual-work and Telegram admission regressions passed; focused admission race checks and strict scoped lint passed. |
 | T3.3 | Web preparation/execution state and real prerequisite/manual-operation regressions. | done | `4eaf8bd2db4126d8d08596daa795fec52acb50a9` | Focused HTTP/native progress, missing prerequisites, changed-policy and manual plan regressions passed; focused race checks and strict scoped lint passed. |
-| T4.1 | Host recovery, client independence, stale-action safety and native pause/resume/cancel. | pending | pending | pending |
+| T4.1 | Host recovery, client independence, stale-action safety and native pause/resume/cancel. | done | `0ea3ff90e3d4bc5e35b36b7ad188cde3c8cb0274` | Focused recovery/control, native stop/closing and Web regressions passed in normal and race modes; scoped strict lint passed. See the Slice 4 report. |
 | T4.2 | Later-idea retention and truthful waiting/results from native delivery receipts. | pending | pending | pending |
 | T4.3 | Complete Web journey/fault/browser evidence and user-facing documentation. | pending | pending | pending |
 | T5.1 | Natural-language Telegram start and shared current-step routing. | pending | pending | pending |
@@ -58,7 +58,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | 1 | delivered | #430 | `245cb6f306aabb5e7e9877491aa2ea26174299e6` | [Slice 1 report](../report/slices/guided-use-case-workflow/slice-1-capture-checkpoints.md) |
 | 2 | delivered | #431 | `2246651001dd6002f783fd86d0dcc13f5bef02e6` | [Slice 2 report](../report/slices/guided-use-case-workflow/slice-2-quiz-spec.md) |
 | 3 | delivered | #432 | `dfcfae6e787742d976f99d40f292a7e047f5252a` | [Slice 3 report](../report/slices/guided-use-case-workflow/slice-3-work-execution.md) |
-| 4 | in progress | pending | pending | pending |
+| 4 | in progress | pending | pending | [Slice 4 draft report](../report/slices/guided-use-case-workflow/slice-4-web-recovery.md) |
 | 5 | pending | pending | pending | pending |
 | 6 | pending | pending | pending | pending |
 
@@ -73,13 +73,13 @@ Criterion numbers correspond to the approved specification. The plan defines the
 | GUC-03 | T2.2 | implemented: exact generated revision/hash approval with initiating actor, run and policy; focused mutation and recovery regressions passed. |
 | GUC-04 | T3.1, T3.2 | implemented: sealed native membership and contracts bound to the canonical preview; older/later unrelated tickets excluded and later-ticket adoption disabled for the invocation. |
 | GUC-05 | T1.1, T2.2, T3.3 | implemented: manual authoring/approval and standalone Web plan publication regressions pass; standalone plan generation does not activate a worker. |
-| GUC-06 | T1.1, T4.1, T5.1, T6.2, T6.3 | partial: Slice 1 capture/checkpoint regressions passed; remaining owning tasks are pending. |
+| GUC-06 | T1.1, T4.1, T5.1, T6.2, T6.3 | partial: shared run/revision and concurrent control regressions passed; Telegram/TUI integration and parity remain pending. |
 | GUC-07 | T2.3, T4.2, T5.2, T6.2 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
 | GUC-08 | T1.3, T2.1 | implemented: nonempty capture and valid, sufficient clarification are required; focused invalid/empty/budget/foreign completion regressions passed. |
-| GUC-09 | T2.2, T3.1, T4.1 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
-| GUC-10 | T3.2, T4.1, T4.3 | partial: lost admission and actual-start acknowledgements reconcile one invocation and consumed attempt; remaining recovery/publication variants belong to Slice 4. |
-| GUC-11 | T4.1, T5.3, T6.2 | pending |
-| GUC-12 | T3.3, T4.1, T6.2 | partial: missing host/worker/provider/publisher prerequisites and changed policy block admission; Web reads actual native review waits and retained limits. Remaining control work belongs to later owning tasks. |
+| GUC-09 | T2.2, T3.1, T4.1 | implemented: original authoring/publication/materialization operations reconcile before further progression; host startup recovers a retained quiz owner receipt without regeneration. |
+| GUC-10 | T3.2, T4.1, T4.3 | partial: lost admission/start/control responses and host startup retain the original invocation and consumed attempts; complete publication-response variants remain with T4.3. |
+| GUC-11 | T4.1, T5.3, T6.2 | partial: request cancellation, real dead child owners, graceful host interruption and durable operator stops passed local normal/race checks; remaining adapter acceptance is pending. |
+| GUC-12 | T3.3, T4.1, T6.2 | partial: Web controls delegate to native revision-bound receipts and distinguish stop intent from quiescence; original policy, spent attempts and human review remain enforced. TUI controls remain pending. |
 | GUC-13 | T1.2, T2.3, T3.1, T4.3 | partial: Slice 2 quiz/specification and HTTP evidence passed; later owning tasks remain pending. |
 | GUC-14 | T4.2, T4.3, T5.2, T6.2, T6.3 | pending |
 | GUC-15 | T4.2, T5.2, T6.2 | pending |
@@ -148,6 +148,25 @@ one exact task; duplicate submission and repeated GETs do not repeat work.
 Native human review still reports zero confirmed deliveries. All owned local
 host fixtures finish and join through their cleanup. Final controller checks
 remain bound to the PR head after its reference follow-up commit.
+
+Slice 4 T4.1 task checks passed for implementation commit
+`0ea3ff90e3d4bc5e35b36b7ad188cde3c8cb0274`:
+
+- `go test ./internal/core ./internal/app ./internal/webui -run '^Test(GuidedUseCase(Recovery|Control|Admission(Web|Host|StartedAck)|QuizWeb|SpecWeb)|Workflow(Stop|ClosingRecovery|ClosingStop|ControlCAS))' -count=1 -timeout=3m` — passed (core 13.670s, app 34.983s; Web rendering exercised through app HTTP fixtures).
+- `go test -race ./internal/core ./internal/app ./internal/webui -run '^Test(GuidedUseCase(Recovery|Control|Admission(Web|Host|StartedAck)|QuizWeb|SpecWeb)|Workflow(Stop|ClosingRecovery|ClosingStop|ControlCAS))' -count=1 -timeout=3m` — passed (core 28.059s, app 85.131s).
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/core/... ./internal/app/... ./internal/webui/...` — zero issues.
+- `git diff --check`
+
+Real child-process crashes, graceful worker interruption, uncertain native
+control/admission results, concurrent controls and rendered Web revision guards
+are covered. The graceful shutdown fixture exposed a retained native
+`interrupted` marker that prevented a resumed task from continuing; native
+resume now clears that task/validation marker while preserving set-closure
+recovery. Corrected fixtures distinguish native stop intent from quiescence,
+immutable admission from mutable member images, and the existing HTTP 400 stale
+response from a hypothetical HTTP 409. All focused checks pass. Owned host and
+worker fixtures finish through their cleanup. T4.2/T4.3 and the final exact-head
+controller gate remain pending; no Slice 4 PR has been opened.
 
 Delivery-set gate: `make verify`, bounded normal guided-workflow regressions, focused race coverage for changed ownership, then `git diff --check`, on the exact final integrated `dev` candidate. The scheduled nightly retains exhaustive certification ownership.
 
