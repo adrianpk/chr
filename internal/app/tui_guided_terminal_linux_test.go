@@ -27,9 +27,7 @@ func TestGuidedUseCaseTUITerminal(t *testing.T) {
 
 	operations, _ := guidedTUIFixture(t)
 	terminal := startGuidedTerminal(t, operations)
-	terminal.keys(t, "\x1bOQ")
-	terminal.keys(t, "g")
-	terminal.see(t, "Develop a new use case")
+	terminal.catalog(t)
 	terminal.keys(t, "n")
 	terminal.see(t, "What is the use-case name?")
 	terminal.input(t, "Terminal process audit")
@@ -59,8 +57,7 @@ func TestGuidedUseCaseTUITerminal(t *testing.T) {
 
 	paused := onlyGuidedTUIRun(t, operations)
 	reopened := startGuidedTerminal(t, operations)
-	reopened.keys(t, "\x1bOQ")
-	reopened.keys(t, "g")
+	reopened.catalog(t)
 	reopened.see(t, "Terminal process audit")
 	reopened.keys(t, "\r")
 	reopened.see(t, "Dispatch stopped: pause")
@@ -132,7 +129,7 @@ func startGuidedTerminal(t *testing.T, operations service) *guidedTerminal {
 		t.Fatal(err)
 	}
 
-	ctx, cancel := context.WithTimeout(t.Context(), 45*time.Second)
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(t.Context()), 45*time.Second)
 	command := exec.CommandContext(ctx, program, "-test.run=^TestGuidedUseCaseTUIProcess$", "-test.timeout=40s")
 
 	command.Env = append(os.Environ(), "TERM=xterm-256color", "CHR_GUIDED_TUI_PROJECT="+operations.projectContext.ProjectDir, "CHR_GUIDED_TUI_ID="+operations.projectContext.ProjectID, "CHR_GUIDED_TUI_ROOT="+filepath.Dir(filepath.Dir(operations.env.ConfigDir())))
@@ -198,6 +195,15 @@ func (p *guidedTerminal) keys(t *testing.T, value string) {
 	if _, err := io.WriteString(p.master, value); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func (p *guidedTerminal) catalog(t *testing.T) {
+	t.Helper()
+
+	p.keys(t, "\x1bOQ")
+	p.keys(t, "g")
+	p.see(t, "Develop a new use case")
+	p.see(t, "Execution target:")
 }
 
 func (p *guidedTerminal) input(t *testing.T, value string) {

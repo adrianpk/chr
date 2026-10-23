@@ -186,6 +186,21 @@ The isolated parallel group passed:
 - `go test -race ./internal/app -run '^TestGuidedUseCase(Admission(Exact|LostAck|Host|StartedAck)|TelegramJourney|TUI(Journey|Terminal)|Parity)' -count=1 -timeout=3m` — passed, app 34.017s.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/app/...` — zero issues.
 
+The parallel candidate `9355a7738ab1cce8731a7aba13b3c4e5b195666f`
+passed the development and focused normal/race commands. Its cross-slice normal
+run exposed a terminal-fixture startup race: the initial loading screen already
+contained the new-run label, so the fixture sent its action before inspection
+finished. Waiting for loaded policy fixes the synchronization. The owned child
+also has its own bounded cancellation context so failed-parent cleanup can send
+Ctrl+C and join the host before cancelling the child. No product assertion or
+configured command is removed.
+
+Startup-fix checks passed:
+
+- `go test -race ./internal/app -run '^TestGuidedUseCase(Admission(Exact|LostAck|Host|StartedAck)|TelegramJourney|TUI(Journey|Terminal)|Parity)' -count=2 -timeout=3m` — passed twice through the parallel group, app 64.167s.
+- `go test ./internal/app -run '^TestGuidedUseCaseTUITerminal$' -count=1 -timeout=1m` — passed after extracting catalog readiness, app 14.362s.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/app/...` — zero issues; catalog opening stays within the existing function bound.
+
 Final configured checks run through Looper on the complete clean PR-reference
 HEAD. The canonical PR Validation and controller ledger retain the exact ordered
 commands, candidate and successful outcomes; earlier task checks are separate.
