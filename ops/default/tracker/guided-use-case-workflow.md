@@ -6,8 +6,8 @@ Delivery set: guided-use-case-workflow
 Planning authorization: maintainer, 2026-10-22.
 Approved: maintainer, 2026-10-22; slice map, tracker and implementation accepted.
 Merge authority: maintainer, 2026-10-22; Looper may merge the six recorded slice PRs into `dev` with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 4, Web recovery, controls and results; T4.1 is complete and T4.2 is next.
-Progress: 3 of 6 slices delivered; 10 of 18 tasks completed. Slice 4 recovery and controls are implemented; deferred ideas, final results and complete Web acceptance remain pending.
+Active slice: Slice 4, Web recovery, controls and results; all three tasks are complete and the canonical PR is being prepared.
+Progress: 3 of 6 slices delivered; 12 of 18 tasks completed. Slice 4 implementation and focused Web acceptance are complete; canonical PR integration remains pending.
 Controller: Looper; startup authorized, live state belongs to its checkpoint.
 
 Spec: [Approved workflow](../spec/stable/guided-use-case-workflow.md)
@@ -42,8 +42,8 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | T3.2 | Exact policy-bound native preview/admission and automatic start with retained limits. | done | `a740689accce48f067b66db400a6b6f37698da41` | Focused preparation/admission, native manual-work and Telegram admission regressions passed; focused admission race checks and strict scoped lint passed. |
 | T3.3 | Web preparation/execution state and real prerequisite/manual-operation regressions. | done | `4eaf8bd2db4126d8d08596daa795fec52acb50a9` | Focused HTTP/native progress, missing prerequisites, changed-policy and manual plan regressions passed; focused race checks and strict scoped lint passed. |
 | T4.1 | Host recovery, client independence, stale-action safety and native pause/resume/cancel. | done | `0ea3ff90e3d4bc5e35b36b7ad188cde3c8cb0274` | Focused recovery/control, native stop/closing and Web regressions passed in normal and race modes; scoped strict lint passed. See the Slice 4 report. |
-| T4.2 | Later-idea retention and truthful waiting/results from native delivery receipts. | pending | pending | pending |
-| T4.3 | Complete Web journey/fault/browser evidence and user-facing documentation. | pending | pending | pending |
+| T4.2 | Later-idea retention and truthful waiting/results from native delivery receipts. | done | `c6fd84c0197842011a2ae6cdcececaf739894c56` | Focused idea/result normal and race checks and scoped strict lint passed; native delivery/closing receipts, corruption and read-only inspection covered. |
+| T4.3 | Complete Web journey/fault/browser evidence and user-facing documentation. | done | `0fa7cec16dc3e6b02f3db1d593e3cf4c0081da69` | HTTP journey, actual lost Git commit responses, focused race, owned Chromium journey and scoped strict lint passed. User Guide and changelog updated. |
 | T5.1 | Natural-language Telegram start and shared current-step routing. | pending | pending | pending |
 | T5.2 | Concise Telegram progress/artifacts/controls/results and cross-interface continuation. | pending | pending | pending |
 | T5.3 | Telegram transport/journey regressions, declared client evidence and documentation. | pending | pending | pending |
@@ -58,7 +58,7 @@ These are planned identities. Reports, branches and pull requests do not exist m
 | 1 | delivered | #430 | `245cb6f306aabb5e7e9877491aa2ea26174299e6` | [Slice 1 report](../report/slices/guided-use-case-workflow/slice-1-capture-checkpoints.md) |
 | 2 | delivered | #431 | `2246651001dd6002f783fd86d0dcc13f5bef02e6` | [Slice 2 report](../report/slices/guided-use-case-workflow/slice-2-quiz-spec.md) |
 | 3 | delivered | #432 | `dfcfae6e787742d976f99d40f292a7e047f5252a` | [Slice 3 report](../report/slices/guided-use-case-workflow/slice-3-work-execution.md) |
-| 4 | in progress | pending | pending | [Slice 4 draft report](../report/slices/guided-use-case-workflow/slice-4-web-recovery.md) |
+| 4 | reviewing | pending | pending | [Slice 4 report](../report/slices/guided-use-case-workflow/slice-4-web-recovery.md) |
 | 5 | pending | pending | pending | pending |
 | 6 | pending | pending | pending | pending |
 
@@ -165,8 +165,46 @@ resume now clears that task/validation marker while preserving set-closure
 recovery. Corrected fixtures distinguish native stop intent from quiescence,
 immutable admission from mutable member images, and the existing HTTP 400 stale
 response from a hypothetical HTTP 409. All focused checks pass. Owned host and
-worker fixtures finish through their cleanup. T4.2/T4.3 and the final exact-head
-controller gate remain pending; no Slice 4 PR has been opened.
+worker fixtures finish through their cleanup. Subsequent T4.2/T4.3 evidence follows;
+the final exact-head controller gate belongs to the PR-reference head.
+
+Slice 4 T4.2 is implemented in `c6fd84c0197842011a2ae6cdcececaf739894c56`.
+Focused checks passed:
+
+- `go test ./internal/core ./internal/app ./internal/webui -run '^TestGuidedUseCase(Ideas|Result)' -count=1 -timeout=3m` — passed (core 0.241s, app 11.708s).
+- `go test -race ./internal/core ./internal/app ./internal/webui -run '^TestGuidedUseCase(Ideas|Result)' -count=1 -timeout=3m` — passed (core 1.536s, app 37.456s).
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/core/... ./internal/app/... ./internal/webui/...` — zero issues.
+
+Separate ideas preserve sealed inputs and stop state; duplicate/stale/foreign
+requests and interrupted journals are covered. Real native Git delivery and set
+closure are required for final results. Changed receipt bytes prevent a completion
+claim; inspection does not mutate authoring or native owners.
+
+Slice 4 T4.3 is implemented in `0fa7cec16dc3e6b02f3db1d593e3cf4c0081da69`. Focused checks passed:
+
+- `go test ./internal/core ./internal/app -run '^TestGuidedUseCase(CheckpointRecovery|PreparationCommit|WebJourney)$' -count=1 -timeout=3m` — passed (core 0.095s, app 13.966s).
+- `go test -race ./internal/app -run '^TestGuidedUseCaseWebJourney$' -count=1 -timeout=3m` — passed (app 16.675s).
+- `CHR_WEB_BROWSER=/usr/sbin/chromium go test ./internal/app -run '^TestGuidedUseCaseWebBrowser$' -count=1 -timeout=5m` — passed, not skipped (app 14.683s).
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/core/... ./internal/app/... ./internal/webui/...` — zero issues.
+
+HTTP fixtures cover the complete retained journey after later working-copy edits,
+one lost admission response and one applied Git publication with a lost response.
+Only observation confirms that original publication; no second submission is made.
+The initial retry test incorrectly allocated a new operation and was corrected to
+submit the rendered original binding. Result validation stopped exposing internal
+invocation paths in the normal view, preserving the earlier Web presentation guard.
+Lost real Git ref-update acknowledgement regressions retain their original commits.
+
+Separately, actual owned Chromium submitted rendered start, name, capture, answer,
+pause/resume, later-idea and exact native-approval forms. It observed receipt-backed
+completion and deferred ideas at desktop (1440x1000) and narrow (390x844) widths.
+These observations use temporary local Git and deterministic provider fixtures;
+no live external-forge browser acceptance is claimed. Owned host jobs, workers,
+servers and browsers finish through their cleanup.
+
+The final required ordered commands are executed through Looper on the clean
+PR-reference HEAD. Their exact candidate-bound evidence belongs to the canonical
+PR Validation and the controller checks ledger.
 
 Delivery-set gate: `make verify`, bounded normal guided-workflow regressions, focused race coverage for changed ownership, then `git diff --check`, on the exact final integrated `dev` candidate. The scheduled nightly retains exhaustive certification ownership.
 
@@ -177,7 +215,7 @@ Delivery-set gate: `make verify`, bounded normal guided-workflow regressions, fo
 | Slice 2 task checks | `5ca7c06550c4e44ec6a2fd3ae10ab93309e9a18b` | Focused capture/quiz/specification integration and race checks passed. Canonical PR and Looper retain the exact final-head gate evidence. |
 | Slice 2 development gate | `2246651001dd6002f783fd86d0dcc13f5bef02e6` | All four configured checks passed through Looper; PR #431 merged by the controller at that exact commit. |
 | Slice 3 development gate | `dfcfae6e787742d976f99d40f292a7e047f5252a` | All four configured checks passed through Looper; PR #432 merged by the controller at that exact commit. |
-| Web browser journey | pending | not run |
+| Web browser journey | `0fa7cec16dc3e6b02f3db1d593e3cf4c0081da69` | Actual owned Chromium journey passed at desktop and narrow widths against temporary Git and deterministic providers. |
 | Telegram actual-client journey | pending | not observed |
 | TUI interaction and cross-adapter parity | pending | not run |
 | Final delivery-set gate | pending | not run |
