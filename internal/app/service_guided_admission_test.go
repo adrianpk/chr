@@ -77,6 +77,8 @@ func guidedAdmissionFixture(t *testing.T) (service, core.AuthoringSession, *guid
 
 // TestGuidedUseCaseAdmissionExact excludes older and later unrelated tickets and freezes original finite policy.
 func TestGuidedUseCaseAdmissionExact(t *testing.T) {
+	t.Parallel()
+
 	operations, prepared, host := guidedAdmissionFixture(t)
 	addGuidedUnrelatedTicket(t, operations, prepared, "PRJ-90")
 
@@ -170,6 +172,8 @@ func addGuidedUnrelatedTicket(t *testing.T, operations service, session core.Aut
 
 // TestGuidedUseCaseAdmissionLostAck reconciles native admission and start before any new request or budget allocation.
 func TestGuidedUseCaseAdmissionLostAck(t *testing.T) {
+	t.Parallel()
+
 	for _, phase := range []string{"admission", "start"} {
 		t.Run(phase, func(t *testing.T) {
 			testGuidedAdmissionLostAck(t, phase)
@@ -219,6 +223,8 @@ func testGuidedAdmissionLostAck(t *testing.T, phase string) {
 
 // TestGuidedUseCaseAdmissionHost uses a managed lifetime to execute one real worker and stop at native human review.
 func TestGuidedUseCaseAdmissionHost(t *testing.T) {
+	t.Parallel()
+
 	operations, prepared, _ := guidedAdmissionFixture(t)
 	host := newGuidedWorkHost(t.Context())
 	t.Cleanup(host.close)
@@ -255,6 +261,8 @@ func TestGuidedUseCaseAdmissionHost(t *testing.T) {
 
 // TestGuidedUseCaseAdmissionStartedAck recovers a lost start response after the actual worker consumed its attempt.
 func TestGuidedUseCaseAdmissionStartedAck(t *testing.T) {
+	t.Parallel()
+
 	operations, prepared, _ := guidedAdmissionFixture(t)
 	host := newGuidedWorkHost(t.Context())
 	t.Cleanup(host.close)

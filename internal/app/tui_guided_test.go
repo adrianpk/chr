@@ -23,6 +23,8 @@ func guidedTUIFixture(t *testing.T) (service, tui.Model) {
 // TestGuidedUseCaseTUIJourney sends actual terminal model keys through the shared
 // service, SQLite/filesystem and Git owners to clarification and default approval.
 func TestGuidedUseCaseTUIJourney(t *testing.T) {
+	t.Parallel()
+
 	operations, model := guidedTUIFixture(t)
 	openGuidedTUI(t, &model)
 	runGuidedTUIKey(t, &model, "n", true)

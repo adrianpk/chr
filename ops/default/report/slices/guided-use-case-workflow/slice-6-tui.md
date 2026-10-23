@@ -171,6 +171,21 @@ corrected clean head.
 
 - `go test ./internal/app -run '^TestGuidedUseCaseAdmissionPrerequisites$' -count=1 -timeout=3m` — passed after the assertion correction, app 3.717s.
 
+The next configured batch on `c5b4445be9c406e8ee3994fa271094190a3cce16`
+passed the development, TUI/parity normal/race and complete cross-slice normal
+checks. Its combined race selection reached the fixed three-minute package
+limit while progressing through Telegram source guards; no race was reported
+before timeout. Eight admission/journey/terminal acceptance fixtures now use
+parallel test execution, with separate temporary repositories, user roots,
+SQLite stores, ports and owned children. Environment-mutating checkpoint tests
+remain serial; Go's parallel barrier prevents overlap with them. The frozen
+commands, timeout, real IO and assertions remain unchanged.
+
+The isolated parallel group passed:
+
+- `go test -race ./internal/app -run '^TestGuidedUseCase(Admission(Exact|LostAck|Host|StartedAck)|TelegramJourney|TUI(Journey|Terminal)|Parity)' -count=1 -timeout=3m` — passed, app 34.017s.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix ./internal/app/...` — zero issues.
+
 Final configured checks run through Looper on the complete clean PR-reference
 HEAD. The canonical PR Validation and controller ledger retain the exact ordered
 commands, candidate and successful outcomes; earlier task checks are separate.

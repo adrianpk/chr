@@ -16,6 +16,8 @@ import (
 // TestGuidedUseCaseParityNative continues one Web run through actual Telegram
 // and terminal inputs, preserving native review/limits and verified delivery.
 func TestGuidedUseCaseParityNative(t *testing.T) {
+	t.Parallel()
+
 	f, operations, provider, host, publication := guidedTelegramSharedFixture(t)
 	original := readWebGuidedSession(t, operations, "guided-quiz")
 	f.send(t, "Show use case Guided clarification in project Shared project", 0)

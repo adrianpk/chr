@@ -49,6 +49,8 @@ func guidedTelegramSharedFixture(t *testing.T) (*telegramConversationAppFixture,
 // host execute exact work, preserves its native review wait, and projects only
 // receipt-backed completion after lost publication acknowledgement recovery.
 func TestGuidedUseCaseTelegramJourney(t *testing.T) {
+	t.Parallel()
+
 	f, operations, provider, host, publication := guidedTelegramSharedFixture(t)
 	original := readWebGuidedSession(t, operations, "guided-quiz")
 	prompt := f.send(t, "Show use case Guided clarification in project Shared project", 0)

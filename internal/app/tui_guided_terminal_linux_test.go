@@ -23,6 +23,8 @@ import (
 // TestGuidedUseCaseTUITerminal drives the production Bubble Tea loop in an owned
 // PTY child, then restarts it over the same retained store without advancing work.
 func TestGuidedUseCaseTUITerminal(t *testing.T) {
+	t.Parallel()
+
 	operations, _ := guidedTUIFixture(t)
 	terminal := startGuidedTerminal(t, operations)
 	terminal.keys(t, "\x1bOQ")
