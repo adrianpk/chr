@@ -11,7 +11,7 @@ import (
 
 // TestGuidedUseCaseAdmissionPrerequisites blocks real setup failures before native admission or host dispatch.
 func TestGuidedUseCaseAdmissionPrerequisites(t *testing.T) {
-	cases := []struct{ name, action string }{{"host", "Start a managed Web host"}, {"worker", "available worker harness"}, {"provider", "canonical review provider"}, {"publisher", "private certified publisher"}, {"contract", "native"}}
+	cases := []struct{ name, action string }{{"host", "Start a managed workflow host, then retry this retained operation."}, {"worker", "available worker harness"}, {"provider", "canonical review provider"}, {"publisher", "private certified publisher"}, {"contract", "native"}}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			operations, prepared, host := guidedAdmissionFixture(t)

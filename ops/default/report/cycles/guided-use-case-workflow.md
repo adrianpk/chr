@@ -46,7 +46,7 @@ Re-running a fixture can generate different IDs without changing its contract.
 | --- | --- | --- |
 | Dump | `7c06978f0e0900f01d20bfc07c4558984021888a` | `ops/default/dump/00000-guided-clarification/artifact.md` |
 | Quiz | `6375e8b21107ee5ccc37332bd08c74820c712a72` | `ops/default/quiz/00000-guided-clarification-quiz/artifact.md` |
-| Approved specification | `33ce9d98e199007f99a8de03d9d559a62b5c21ae` | `ops/default/spec/00000-spec-9c289f64295e4915dd35ee9e0e44f7f7/artifact.md` |
+| Approved specification | `33ce9d98e199007f99a8de03d9d559a62b5c21ae` | `ops/default/spec/00000-spec-e3a401f28fb96b55b14fe491e4aba5d2/artifact.md` |
 | Preparation | `9b7481c746e7260c339cd4885cf37a0b51f1d4ca` | `ops/default/plan/00000-guided-clarification-plan/artifact.md` and `ops/default/tracker/00000-guided-clarification-tracking/artifact.md` |
 
 The native candidate `00003-workflow-invocation-attempt-2` retained submission

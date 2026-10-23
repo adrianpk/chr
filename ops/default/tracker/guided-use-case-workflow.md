@@ -269,6 +269,7 @@ Delivery-set gate: `make verify`, bounded normal guided-workflow regressions, fo
 | Web browser journey | `0fa7cec16dc3e6b02f3db1d593e3cf4c0081da69` | Actual owned Chromium journey passed at desktop and narrow widths against temporary Git and deterministic providers. |
 | Slice 5 development gate | `8d99359cec120bbcdb4583ad5e842aef21547657` | All four configured commands passed through Looper; PR #434 merged by the controller at that exact commit. Report/tracker closure verified on dev. |
 | Initial Slice 5 gate | `cacfc51480ecfa818b74d8af2d3eabad6df6c89c` | `make verify` failed on two stale maintenance CLI migration-count assertions. The correction requires migration 29 and its exact name; focused maintenance status tests pass. All configured checks are regenerated on the corrected clean head. |
+| Initial Slice 6 gate | `52e48b65a842ac5567b0721b24514551ef4941a0` | Development and focused TUI/parity normal/race checks passed. Cross-slice normal checks failed on the stale Web-only host prerequisite assertion; its exact workflow-host action is corrected while admission/dispatch guards remain. Final checks are regenerated on the corrected clean head. |
 | Telegram actual-client journey | pending | not observed |
 | TUI interaction and cross-adapter parity | `f5c51e8a5ea9754f996bf4967f9581da8ff1fbb7` | Owned PTY journey and same-run Web/Telegram/TUI native continuation passed normal/race task checks. Concrete fixture checkpoints and native receipts are in the cycle report. |
 | Final delivery-set gate | pending | not run |

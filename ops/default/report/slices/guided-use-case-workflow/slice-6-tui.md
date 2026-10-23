@@ -159,6 +159,18 @@ The tracker reconciles every approved acceptance
 criterion. The User Guide, TUI/application references and Unreleased capability
 now describe the completed terminal journey.
 
+The first configured batch on `52e48b65a842ac5567b0721b24514551ef4941a0`
+passed `make verify` and both TUI/parity selections. The cross-slice normal
+selection failed on the older `AdmissionPrerequisites/host` assertion expecting
+a Web-only host. The shared prerequisite correctly requires a managed workflow
+host, including TUI. The corrected assertion requires that exact corrective
+action and preserves all existing guards against native admission and dispatch.
+A report consistency check also corrected the generated specification path to
+match its recorded fixture checkpoint. Final evidence is regenerated for the
+corrected clean head.
+
+- `go test ./internal/app -run '^TestGuidedUseCaseAdmissionPrerequisites$' -count=1 -timeout=3m` — passed after the assertion correction, app 3.717s.
+
 Final configured checks run through Looper on the complete clean PR-reference
 HEAD. The canonical PR Validation and controller ledger retain the exact ordered
 commands, candidate and successful outcomes; earlier task checks are separate.
