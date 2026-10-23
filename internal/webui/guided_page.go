@@ -56,6 +56,7 @@ func (h handler) guidedPageData(r *http.Request, view GuidedUseCaseView) PageDat
 	guidedNavigation(&data)
 
 	data.Detail = ArtifactDetailView{Family: view.Surface, Title: view.Name}
+	data.Detail.ID = view.QuizID
 	data.Detail.Quiz = guidedQuizView(view)
 
 	data.Detail.Content = guidedDocument(view)
@@ -206,8 +207,8 @@ func (h handler) readCaseWorkflow(r *http.Request) (GuidedUseCaseView, error) {
 }
 
 func guidedQuizView(view GuidedUseCaseView) *QuizAnswerView {
-	if view.Surface == "quizzes" && view.Following && view.Question != "" && !view.Suspended && !view.Processing && view.PendingAction == "" {
-		return &QuizAnswerView{Question: view.Question, QuestionID: view.QuestionID, SessionID: view.RunID, DraftContext: view.Namespace, CanAnswer: true, Open: true, Started: true}
+	if view.Surface == "quizzes" && view.Following && !view.Suspended && !view.Processing && view.PendingAction == "" {
+		return view.Quiz
 	}
 
 	return nil

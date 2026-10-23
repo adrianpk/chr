@@ -88,12 +88,20 @@ func captureGuidedBrowserInput(t *testing.T, browser *webWorkflowBrowser, server
 	browser.wait(t, `.quiz-response textarea`)
 	assertGuidedBrowserTab(t, browser, "/quizzes")
 	assertGuidedBrowserNavigation(t, browser)
+	assertGuidedQuizLayout(t, browser)
+	assertSharedQuizAppearance(t, browser, serverURL)
 
 	return runURL
 }
 
 func guidedBrowserSubmit(t *testing.T, browser *webWorkflowBrowser, step, content string) {
 	t.Helper()
+
+	if step == "answer" {
+		guidedBrowserQuizSubmit(t, browser, step, content)
+
+		return
+	}
 
 	selector := `form:has(input[name="step"][value="` + step + `"])`
 	browser.wait(t, selector)
@@ -103,7 +111,8 @@ func guidedBrowserSubmit(t *testing.T, browser *webWorkflowBrowser, step, conten
 	}
 
 	before := browser.evaluate(t, `document.querySelector('.case-workflow').dataset.workflowState`)
-	browser.clickNavigation(t, selector+" button[type=submit]")
+	button := selector + " button[type=submit]"
+	browser.clickNavigation(t, button)
 	browser.wait(t, `.case-workflow:not([data-workflow-state="`+before+`"])`)
 }
 
@@ -218,4 +227,26 @@ func assertGuidedBrowserResult(t *testing.T, browser *webWorkflowBrowser) {
 	if count := browser.evaluate(t, `String(document.querySelectorAll('.board-grid .ticket-card').length)`); count != "1" {
 		t.Fatal("Board did not retain the selected use case", count)
 	}
+}
+
+func assertGuidedQuizLayout(t *testing.T, browser *webWorkflowBrowser) {
+	t.Helper()
+
+	result := browser.evaluate(t, `(()=>{const heading=document.querySelector('.quiz-heading h1').getBoundingClientRect();const panel=document.querySelector('.quiz-panel').getBoundingClientRect();return String(Math.abs(heading.left-panel.left)<1 && document.querySelectorAll('main h1').length===1 && !document.querySelector('main > .page-header') && document.querySelectorAll('.quiz-mode-toggle input').length===2 && document.querySelectorAll('.quiz-actions button').length===4 && !document.querySelector('.workflow-controls'));})()`)
+	if result != "true" {
+		t.Fatal("wizard changed the shared quiz layout", result)
+	}
+}
+
+func guidedBrowserQuizSubmit(t *testing.T, browser *webWorkflowBrowser, action, content string) {
+	t.Helper()
+	browser.wait(t, ".quiz-response textarea")
+
+	if content != "" {
+		browser.evaluate(t, `(()=>{document.querySelector('#quiz-answer').value=`+strconv.Quote(content)+`;return 'set';})()`)
+	}
+
+	before := browser.evaluate(t, `document.querySelector('.case-workflow').dataset.workflowState`)
+	browser.clickNavigation(t, `button[name="action"][value="quiz.`+action+`"]`)
+	browser.wait(t, `.case-workflow:not([data-workflow-state="`+before+`"])`)
 }

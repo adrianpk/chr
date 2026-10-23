@@ -363,9 +363,11 @@ The use case stays selected throughout the existing screens.
 
 1. Write what you know in the **Dump** and choose **Continue to quiz**. This
    saves the complete input and moves to clarification in one action.
-2. Answer the current **Quiz** question and choose **Answer and continue**.
-   The next question appears automatically. Unsent answers remain in place
-   when the underlying workflow changes.
+2. Answer the current **Quiz** question and choose **Answer**.
+   The screen shares the standalone Quiz's Deep/Fast selector, answer field,
+   history and Skip, Answer, Cancel and Done controls. Done advances only when
+   saved answers provide sufficient clarification. The next question appears
+   automatically; unsent answers remain in place when the workflow changes.
 3. When clarification is sufficient, chr generates and approves that exact
    **Spec**, prepares the **Plan** and tickets, then starts only that agreed
    work under the project's review and delivery policy.

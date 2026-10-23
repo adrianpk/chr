@@ -1557,9 +1557,11 @@ code {
 
 .case-workflow--name { width: min(100%, 720px); margin: 28px auto; }
 .case-workflow--name .case-edit-panel { width: 100%; }
-.case-workflow .quiz-response textarea { height: clamp(180px, 25vh, 280px); min-height: 180px; }
 .case-workflow .workflow-controls { margin-top: 20px; }
 .case-workflow .detail-actions { flex-wrap: wrap; }
 .case-workflow:has(.board-grid) { width: 100%; }
 
 .case-workflow .quiz-answering { width: 100%; max-width: none; margin: 0; }
+
+.case-workflow--quiz { width: min(100%, 1120px); display: block; }
+.quiz-heading { min-height: 40px; }

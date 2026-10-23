@@ -27,7 +27,7 @@ func TestGuidedUseCaseQuizWeb(t *testing.T) {
 
 	for range 2 {
 		page := guidedCaptureHTTP(t, handler, http.MethodGet, guidedUseCaseURL(current.ID, current.Namespace), nil)
-		if page.Code != http.StatusOK || !strings.Contains(page.Body.String(), "Answer and continue") {
+		if page.Code != http.StatusOK || !strings.Contains(page.Body.String(), `name="action" value="quiz.answer"`) {
 			t.Fatal("current question missing")
 		}
 	}

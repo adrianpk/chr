@@ -14,7 +14,7 @@ type guidedGenerationContext struct{ session core.AuthoringSession }
 
 // ConductGuidedQuiz applies a scoped quiz start, recovery or current answer.
 func (s service) ConductGuidedQuiz(ctx context.Context, command core.GuidedUseCaseCommand) (core.AuthoringSession, error) {
-	if command.Action != "quiz" && command.Action != "answer" {
+	if !guidedQuizAction(command.Action) {
 		return core.AuthoringSession{}, errors.New("unsupported guided quiz command")
 	}
 
@@ -77,9 +77,13 @@ func (s service) conductGuidedQuiz(ctx context.Context, session *core.AuthoringS
 
 func (s service) finishGuidedQuizResult(ctx context.Context, session *core.AuthoringSession, state core.QuizRuntimeState, digest string) error {
 	session.Guided.Quiz = &core.GuidedQuizState{SessionID: state.SessionID, Revision: state.Revision, InputDigest: digest}
-	session.Guided.Status = "blocked"
+	session.Guided.Status = "waiting_input"
 
 	session.Guided.Blocker = "Question generation needs corrected setup or more context. Retry clarification."
+	if state.ContinuationPending {
+		session.Guided.Status = "blocked"
+	}
+
 	if state.ActiveQuestion != nil {
 		session.Guided.Quiz.QuestionID = state.ActiveQuestion.ID
 		session.Guided.Status = "waiting_input"
@@ -113,16 +117,14 @@ func (s service) prepareGuidedQuizAction(ctx context.Context, session core.Autho
 		return core.QuizActionRequest{}, core.ErrWorkflowConflict
 	}
 
-	if operation.Action == "answer" {
-		action = "answer"
-	}
-
 	binding := core.QuizActionBinding{SessionID: observed.State.SessionID, ExpectedRevision: observed.Revision, OperationID: "guided-" + operation.Digest}
 	if observed.State.ActiveQuestion != nil {
 		binding.QuestionID = observed.State.ActiveQuestion.ID
 	}
 
-	return core.QuizActionRequest{Scope: scope, Binding: binding, Action: action, Answer: strings.TrimSpace(operation.Content), Mode: core.QuizModeDeep}, nil
+	action, mode := guidedQuizNativeInput(operation, action, observed.State.Mode)
+
+	return core.QuizActionRequest{Scope: scope, Binding: binding, Action: action, Answer: strings.TrimSpace(operation.Content), Mode: mode}, nil
 }
 
 func guidedDumpCheckpoint(session core.AuthoringSession) (core.GuidedStageCheckpoint, error) {
@@ -162,8 +164,8 @@ func (s service) guidedQuizModelRequest(state core.QuizRuntimeState, entries []c
 	}
 
 	return core.QuizModelRequest{
-		ID: fmt.Sprintf("guided-%s-%d", session.ID, state.QuestionsAsked+1), Action: core.QuizModelActionNextQuestion, Strategy: quizModelStrategy(core.QuizModeDeep),
-		Scope: core.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}, Mode: core.QuizModeDeep,
+		ID: fmt.Sprintf("guided-%s-%d", session.ID, state.QuestionsAsked+1), Action: core.QuizModelActionNextQuestion, Strategy: quizModelStrategy(state.Mode),
+		Scope: core.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}, Mode: state.Mode,
 		RuntimeState: state, Payload: payload, ContextSections: append(coreSections, sections...),
 		OutputContract: core.QuizModelOutputContract{RequiredFields: payload.OutputContract.RequiredFields}, CreatedAt: s.utcNow(),
 	}, nil
@@ -194,4 +196,31 @@ func (s service) guidedCommittedSections(session core.AuthoringSession, stage st
 	}
 
 	return sections, nil
+}
+
+func guidedQuizAction(action string) bool {
+	switch action {
+	case "quiz", "answer", "quiz-mode", "quiz-skip", "quiz-done":
+		return true
+	default:
+		return false
+	}
+}
+
+func guidedQuizNativeInput(operation *core.GuidedUseCaseOperation, action string, mode core.QuizMode) (string, core.QuizMode) {
+	switch operation.Action {
+	case "answer":
+		action = "answer"
+	case "quiz-mode", "quiz-skip", "quiz-done":
+		action = strings.TrimPrefix(operation.Action, "quiz-")
+	}
+
+	switch action {
+	case "start":
+		mode = core.QuizModeDeep
+	case "mode":
+		mode = core.QuizMode(operation.Content)
+	}
+
+	return action, mode
 }

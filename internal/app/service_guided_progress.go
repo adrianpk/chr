@@ -14,7 +14,7 @@ func (s service) applyGuidedCommand(ctx context.Context, command core.GuidedUseC
 	switch command.Action {
 	case "finish":
 		return core.FinishGuidedUseCaseDump(ctx, s.projectContext.ProjectDir, command)
-	case "quiz", "answer":
+	case "quiz", "answer", "quiz-mode", "quiz-skip", "quiz-done":
 		return s.ConductGuidedQuiz(ctx, command)
 	case "spec":
 		return s.GenerateGuidedSpec(ctx, command)

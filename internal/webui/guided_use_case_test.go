@@ -101,7 +101,7 @@ func TestGuidedUseCaseQuizView(t *testing.T) {
 		view         GuidedUseCaseView
 		want, absent string
 	}{
-		{"question", GuidedUseCaseView{RunID: "run", Stage: "quiz", Question: "What is the intended result?", QuestionID: "question-current", InputDigest: "original-inputs"}, `name="question_id" value="question-current"`, "Retry this step"},
+		{"question", GuidedUseCaseView{RunID: "run", Stage: "quiz", Quiz: &QuizAnswerView{Question: "What is the intended result?", QuestionID: "question-current", CanAnswer: true, Open: true, Started: true, Mode: "deep"}, QuestionID: "question-current", InputDigest: "original-inputs"}, `name="question_id" value="question-current"`, "Retry this step"},
 		{"pending", GuidedUseCaseView{RunID: "run", Stage: "quiz", Question: "Superseded question", PendingAction: "answer", PendingContent: "<script>retained</script>", QuestionID: "question-original", InputDigest: "original-inputs"}, `name="question_id" value="question-original"`, "Superseded question"},
 	} {
 		t.Run(test.name, func(t *testing.T) {

@@ -106,7 +106,7 @@ func guardGuidedStepInput(session AuthoringSession, operation GuidedUseCaseOpera
 		}
 
 		return nil
-	case "answer":
+	case "answer", "quiz-mode", "quiz-skip", "quiz-done":
 		return guardGuidedQuizInput(session, operation)
 	default:
 		return ErrWorkflowConflict
@@ -114,12 +114,12 @@ func guardGuidedStepInput(session AuthoringSession, operation GuidedUseCaseOpera
 }
 
 func guardGuidedQuizInput(session AuthoringSession, operation GuidedUseCaseOperation) error {
-	if strings.TrimSpace(operation.Content) == "" {
-		return errors.New("quiz answer is required")
+	if err := guardGuidedQuizContent(operation); err != nil {
+		return err
 	}
 
 	quiz := session.Guided.Quiz
-	if session.Guided.Stage != "quiz" || quiz == nil || quiz.QuestionID == "" {
+	if session.Guided.Stage != "quiz" || quiz == nil || (operation.Action == "answer" || operation.Action == "quiz-skip") && quiz.QuestionID == "" {
 		return ErrWorkflowConflict
 	}
 
@@ -201,7 +201,7 @@ func guardGuidedQuizCompletion(session AuthoringSession, observed QuizObservatio
 		return ErrWorkflowConflict
 	}
 
-	if state.Status != QuizRuntimeStatusDone || !state.ClarificationComplete || state.AnswersRecorded < 1 || state.AnswersRecorded != state.QuestionsAsked || state.SkipsRecorded != 0 || state.ActiveQuestion != nil {
+	if state.Status != QuizRuntimeStatusDone || !state.ClarificationComplete || state.AnswersRecorded < 1 || state.AnswersRecorded+state.SkipsRecorded != state.QuestionsAsked || state.ActiveQuestion != nil {
 		return errors.New("quiz clarification is incomplete")
 	}
 
@@ -285,6 +285,18 @@ func guardGuidedPreparationInput(session AuthoringSession) error {
 
 	if _, err := guidedStageCheckpoint(session, "preparation"); err == nil {
 		return ErrWorkflowConflict
+	}
+
+	return nil
+}
+
+func guardGuidedQuizContent(operation GuidedUseCaseOperation) error {
+	if operation.Action == "answer" && strings.TrimSpace(operation.Content) == "" {
+		return errors.New("quiz answer is required")
+	}
+
+	if operation.Action == "quiz-mode" && !QuizMode(operation.Content).Valid() {
+		return errors.New("quiz mode is invalid")
 	}
 
 	return nil

@@ -22,6 +22,8 @@ type GuidedUseCaseLink struct{ Name, URL, CaseSlug string }
 
 // GuidedUseCaseView presents current capture, setup and an inspectable committed input.
 type GuidedUseCaseView struct {
+	Quiz                                                                      *QuizAnswerView
+	QuizID                                                                    string
 	Processing                                                                bool
 	CaseSlug, Observation, StateURL, StateToken, Surface, CurrentURL, Message string
 	Starting, Following, ShowControls, ReadOnly                               bool

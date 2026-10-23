@@ -18,7 +18,7 @@ func (h handler) quizActionResult(w http.ResponseWriter, r *http.Request, reques
 		return true
 	}
 
-	if result.RedirectURL == "/quizzes" || !htmx.IsRequest(r) {
+	if request.Fields["guided_run"] != "" || result.RedirectURL == "/quizzes" || !htmx.IsRequest(r) {
 		h.redirectAfterWrite(w, r, result.RedirectURL)
 
 		return true

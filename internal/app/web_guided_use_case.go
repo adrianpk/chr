@@ -32,6 +32,8 @@ func (p webViewProvider) GuidedUseCaseView(ctx context.Context, id, namespace st
 	state := session.Guided
 	view.RunID, view.Name, view.Stage, view.Status = session.ID, session.Topic, state.Stage, state.Status
 	view.CaseSlug = state.CaseSlug
+	projectGuidedWebQuiz(&view, result)
+
 	view.Revision = strconv.FormatInt(session.Revision, 10)
 	view.Observation = view.Revision
 

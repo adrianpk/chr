@@ -20,6 +20,12 @@
   } catch (_) { /* The shared quiz surface reports unavailable draft storage. */ }
 
   workflow.addEventListener('submit', function (event) {
+    if (event.target.matches('[data-quiz-form]')) {
+      if (quiz && event.submitter && event.submitter.value === 'quiz.answer') {
+        try { sessionStorage.setItem(submittedKey, quiz.dataset.quizQuestion); } catch (_) {}
+      }
+      return;
+    }
     if (submitting) { event.preventDefault(); return; }
     submitting = true;
     if (quiz) {

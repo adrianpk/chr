@@ -1,9 +1,10 @@
 {{define "guided_use_case_content.html"}}
 {{if .Guided.Enabled}}
-<div class="case-workflow{{if .Guided.Starting}} case-workflow--name{{end}}" data-workflow-state="{{.Guided.StateToken}}" data-workflow-url="{{.Guided.StateURL}}" data-workflow-watch="{{and .Guided.RunID .Guided.Following (not .Guided.Suspended)}}">
+<div class="case-workflow{{if .Guided.Starting}} case-workflow--name{{end}}{{if eq .Guided.Surface "quizzes"}} case-workflow--quiz{{end}}" data-workflow-state="{{.Guided.StateToken}}" data-workflow-url="{{.Guided.StateURL}}" data-workflow-watch="{{and .Guided.RunID .Guided.Following (not .Guided.Suspended)}}">
   {{if .Guided.Starting}}
     {{template "case_create_panel.html" .}}
   {{else}}
+    {{if and (eq .Guided.Surface "quizzes") (not .Detail.Quiz)}}{{template "quiz_heading.html" .}}{{end}}
     {{if .Guided.Message}}<p role="status">{{.Guided.Message}}</p>{{end}}
     {{if eq .Guided.Surface "board"}}
       {{if .Guided.Work}}{{template "guided_progress.html" .}}{{end}}
@@ -14,6 +15,7 @@
       <a class="button" href="{{.Guided.CurrentURL}}">Continue</a>
     {{else if .Guided.Suspended}}
     {{else if .Guided.Processing}}
+      {{if eq .Guided.Surface "quizzes"}}<div class="quiz-panel" aria-busy="true"><div class="quiz-question" aria-label="Preparing question"><span class="quiz-question-placeholder" aria-hidden="true"></span></div></div>{{end}}
     {{else if .Guided.PendingAction}}
       {{template "guided_retry.html" .}}
     {{else if eq .Guided.Surface "dumps"}}
@@ -24,7 +26,7 @@
       {{if .Detail.Content}}{{template "artifact_document.html" .Detail.Content}}{{end}}
       {{if .Guided.RetryAction}}{{template "guided_retry.html" .}}{{end}}
     {{end}}
-    {{if .Guided.ShowControls}}{{template "guided_controls.html" .}}{{end}}
+    {{if and .Guided.ShowControls (not .Detail.Quiz) (or (ne .Guided.Surface "quizzes") .Guided.Suspended)}}{{template "guided_controls.html" .}}{{end}}
   {{end}}
   <p class="workflow-feedback" data-workflow-feedback role="status" aria-live="polite"></p>
 </div>

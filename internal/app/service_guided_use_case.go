@@ -10,6 +10,7 @@ import (
 
 // GuidedUseCaseInspection contains retained state and prospective local readiness.
 type GuidedUseCaseInspection struct {
+	Quiz          *core.QuizObservation
 	Ideas         []core.GuidedLaterIdea
 	Result        *core.WorkflowResultInspection
 	ResultProblem string
@@ -191,6 +192,8 @@ func (s service) inspectGuidedQuestion(ctx context.Context, result *GuidedUseCas
 
 		return
 	}
+
+	result.Quiz = &observed
 
 	question := observed.State.ActiveQuestion
 	if question != nil && question.ID == state.Quiz.QuestionID {

@@ -13,6 +13,8 @@ import (
 func TestCaseWorkflowPresentation(t *testing.T) {
 	view := GuidedUseCaseView{RunID: "opaque-run", Namespace: "private-storage", Stage: "quiz", Name: "Improve checkout", Question: "What must checkout preserve?", QuestionID: "opaque-question", InputDigest: "opaque-input", Commit: "opaque-commit", Policy: []string{"trusted_auto_merge"}, CanRetainIdea: true}
 
+	view.Quiz = &QuizAnswerView{Question: view.Question, QuestionID: view.QuestionID, CanAnswer: true, Open: true, Started: true, Mode: "deep"}
+
 	handler, err := NewHandler(HandlerOptions{Provider: guidedCaptureProvider{view: view}})
 	if err != nil {
 		t.Fatal(err)

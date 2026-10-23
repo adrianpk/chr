@@ -22,7 +22,9 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   In the Web UI, choose **Wizard** in Cases and enter the name. The main menu
   follows Dumps, Quizzes, Specs, Plans and Board with the use case already
   selected. Continue to quiz saves the Dump and advances directly; manual
-  editors retain their independent Save action. Questions update automatically;
+  editors retain their independent Save action. The Quiz uses the same layout,
+  Deep/Fast selector, history and action buttons as a standalone session.
+  Questions update automatically;
   the input screens keep internal identifiers and delivery settings out of the
   way. Original saved documents remain available on request.
   In Telegram, start with **Develop a new use case**, answer the current prompt

@@ -16,7 +16,7 @@ func guidedControlAction(action string) bool {
 
 func guidedProviderAction(action string) bool {
 	switch action {
-	case "quiz", "answer", "spec", "prepare", "admit":
+	case "quiz", "answer", "quiz-mode", "quiz-skip", "quiz-done", "spec", "prepare", "admit":
 		return true
 	default:
 		return false

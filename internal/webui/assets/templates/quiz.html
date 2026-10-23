@@ -1,32 +1,18 @@
 {{define "quiz_answer_content.html"}}
-<section id="quiz-surface" class="quiz-answering" data-quiz-guided="{{if .Guided.RunID}}true{{end}}" data-quiz-context="{{.Detail.Quiz.DraftContext}}" data-quiz-current-mode="{{.Detail.Quiz.Mode}}" data-quiz-session="{{.Detail.Quiz.SessionID}}" data-quiz-question="{{.Detail.Quiz.QuestionID}}" data-quiz-scope="{{.Detail.ID}}" data-quiz-auto-start="{{and .Detail.Quiz.CanStart (not .Detail.Quiz.Started)}}"{{with .Write.Quiz}} data-ack-action="{{.Action}}" data-ack-session="{{.SessionID}}" data-ack-question="{{.QuestionID}}"{{end}}>
-  {{if not .Guided.RunID}}<header class="quiz-heading">
-    <h1>{{.Detail.Title}}</h1>
-    <form id="quiz-mode-form" class="quiz-mode" data-quiz-form data-quiz-mode="{{and .Detail.Quiz.Started (not .Detail.Quiz.CanStart)}}" method="post" action="/actions" hx-post="/actions" hx-target="#quiz-result" hx-swap="innerHTML" hx-disabled-elt="#quiz-surface button, #quiz-mode, #quiz-answer" hx-sync="#quiz-surface:drop">
-      {{template "quiz_binding.html" .}}
-      <input type="hidden" name="action" value="{{if .Detail.Quiz.CanStart}}quiz.start{{else}}quiz.mode{{end}}">
-      <fieldset id="quiz-mode" class="quiz-mode-toggle" {{if and .Detail.Quiz.Started (not .Detail.Quiz.Open) (not .Detail.Quiz.CanStart)}}disabled{{end}}>
-        <legend class="sr-only">Question mode</legend>
-        <input class="sr-only" type="radio" id="quiz-mode-deep" name="mode" value="deep" {{if eq .Detail.Quiz.Mode "deep"}}checked{{end}}>
-        <label for="quiz-mode-deep">Deep</label>
-        <input class="sr-only" type="radio" id="quiz-mode-fast" name="mode" value="fast" {{if eq .Detail.Quiz.Mode "fast"}}checked{{end}}>
-        <label for="quiz-mode-fast">Fast</label>
-      </fieldset>
-    </form>
-  </header>{{end}}
+<section id="quiz-surface" class="quiz-answering" data-quiz-context="{{.Detail.Quiz.DraftContext}}" data-quiz-current-mode="{{.Detail.Quiz.Mode}}" data-quiz-session="{{.Detail.Quiz.SessionID}}" data-quiz-question="{{.Detail.Quiz.QuestionID}}" data-quiz-scope="{{.Detail.ID}}" data-quiz-auto-start="{{and .Detail.Quiz.CanStart (not .Detail.Quiz.Started)}}"{{with .Write.Quiz}} data-ack-action="{{.Action}}" data-ack-session="{{.SessionID}}" data-ack-question="{{.QuestionID}}"{{end}}>
+  {{template "quiz_heading.html" .}}
   <p class="quiz-progress" role="status" aria-live="polite"></p>
   <div id="quiz-result" role="status" aria-live="polite">{{template "quiz_action_result.html" .}}</div>
   {{if and .Detail.Quiz.CanStart (not .Detail.Quiz.Started)}}<button class="button quiz-retry" type="submit" form="quiz-mode-form" data-quiz-retry-start hidden>Retry loading question</button>{{end}}
   {{with .Detail.Quiz.Error}}<p class="quiz-error" role="alert">{{.}}</p>{{end}}
   <div class="quiz-panel">
     <div class="quiz-question" aria-label="{{if and .Detail.Quiz.CanStart (not .Detail.Quiz.Started)}}Preparing question{{else}}Current question{{end}}">{{if and .Detail.Quiz.CanStart (not .Detail.Quiz.Started)}}<span class="quiz-question-placeholder" aria-hidden="true"></span>{{else}}<p>{{if .Detail.Quiz.CanAnswer}}{{.Detail.Quiz.Question}}{{else if .Detail.Quiz.CanStart}}This session is complete. Start a new session to explore more questions.{{else if .Detail.Quiz.CanResume}}Resume the quiz to continue with the next question.{{else if .Detail.Quiz.Open}}There are no more questions. Choose Done to finish.{{else}}This session is closed. Your recorded answers remain below.{{end}}</p>{{end}}</div>
-  <form class="quiz-response" {{if .Guided.RunID}}data-workflow-form method="post" action="/guided/actions"{{else}}data-quiz-form method="post" action="/actions" hx-post="/actions" hx-target="#quiz-result" hx-swap="innerHTML" hx-disabled-elt="#quiz-surface button, #quiz-mode, #quiz-answer" hx-sync="#quiz-surface:drop"{{end}}>
-    {{if .Guided.RunID}}{{template "guided_fields.html" .}}<input type="hidden" name="step" value="answer">{{else}}{{template "quiz_binding.html" .}}{{end}}
+  <form class="quiz-response" data-quiz-form method="post" action="/actions" hx-post="/actions" hx-target="#quiz-result" hx-swap="innerHTML" hx-disabled-elt="#quiz-surface button, #quiz-mode, #quiz-answer" hx-sync="#quiz-surface:drop">
+    {{template "quiz_binding.html" .}}
     <label class="sr-only" for="quiz-answer">Your answer</label>
-    <textarea id="quiz-answer" name="{{if .Guided.RunID}}content{{else}}answer{{end}}" rows="12" maxlength="65536" placeholder="Answer…" {{if not .Detail.Quiz.CanAnswer}}disabled{{end}}></textarea>
+    <textarea id="quiz-answer" name="answer" rows="12" maxlength="65536" placeholder="Answer…" {{if not .Detail.Quiz.CanAnswer}}disabled{{end}}></textarea>
     <div class="quiz-actions">
-      {{if .Guided.RunID}}<button class="button button--primary" type="submit">Answer and continue</button>
-      {{else if and .Detail.Quiz.CanStart (not .Detail.Quiz.Started)}}
+      {{if and .Detail.Quiz.CanStart (not .Detail.Quiz.Started)}}
       <button class="button" type="button" disabled>Skip</button>
       <button class="button" type="button" disabled>Answer</button>
       <a class="button" href="/quizzes">Cancel</a>
@@ -67,6 +53,12 @@
 <input type="hidden" name="question_id" value="{{.Detail.Quiz.QuestionID}}">
 <input type="hidden" name="revision" value="{{.Detail.Quiz.Revision}}">
 <input type="hidden" name="request_id" value="{{.Detail.Quiz.OperationID}}">
+{{if .Guided.RunID}}
+<input type="hidden" name="guided_run" value="{{.Guided.RunID}}">
+<input type="hidden" name="guided_revision" value="{{.Guided.Observation}}">
+<input type="hidden" name="namespace" value="{{.Guided.Namespace}}">
+<input type="hidden" name="input_digest" value="{{.Guided.InputDigest}}">
+{{end}}
 {{end}}
 
 {{define "quiz_action_result.html"}}
@@ -74,4 +66,21 @@
 {{range .Write.Validation}}<p>{{.}}</p>{{end}}
 {{with .Write.BlockedReason}}<p>{{.}}</p>{{end}}
 {{with .Write.ReloadURL}}<a class="button" data-quiz-reload href="{{.}}">Reload current question</a>{{end}}
+{{end}}
+
+{{define "quiz_heading.html"}}
+  <header class="quiz-heading">
+    <h1>{{.Detail.Title}}</h1>
+    {{if .Detail.Quiz}}<form id="quiz-mode-form" class="quiz-mode" data-quiz-form data-quiz-mode="{{and .Detail.Quiz.Started (not .Detail.Quiz.CanStart)}}" method="post" action="/actions" hx-post="/actions" hx-target="#quiz-result" hx-swap="innerHTML" hx-disabled-elt="#quiz-surface button, #quiz-mode, #quiz-answer" hx-sync="#quiz-surface:drop">
+      {{template "quiz_binding.html" .}}
+      <input type="hidden" name="action" value="{{if .Detail.Quiz.CanStart}}quiz.start{{else}}quiz.mode{{end}}">
+      <fieldset id="quiz-mode" class="quiz-mode-toggle" {{if and .Detail.Quiz.Started (not .Detail.Quiz.Open) (not .Detail.Quiz.CanStart)}}disabled{{end}}>
+        <legend class="sr-only">Question mode</legend>
+        <input class="sr-only" type="radio" id="quiz-mode-deep" name="mode" value="deep" {{if eq .Detail.Quiz.Mode "deep"}}checked{{end}}>
+        <label for="quiz-mode-deep">Deep</label>
+        <input class="sr-only" type="radio" id="quiz-mode-fast" name="mode" value="fast" {{if eq .Detail.Quiz.Mode "fast"}}checked{{end}}>
+        <label for="quiz-mode-fast">Fast</label>
+      </fieldset>
+    </form>{{end}}
+  </header>
 {{end}}

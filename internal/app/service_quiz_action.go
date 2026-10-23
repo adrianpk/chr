@@ -52,8 +52,6 @@ func (s service) quizActionBinding(scope core.QuizScope, binding core.QuizAction
 func (s service) prepareQuizAction(request core.QuizActionRequest, observed core.QuizObservation) (core.QuizTransition, error) {
 	observed.State.GenerationOperationID = quizGenerationOperationID(request, observed.State)
 
-	state := observed.State
-
 	switch request.Action {
 	case "start":
 		return s.prepareQuizStart(request, observed)
@@ -62,24 +60,14 @@ func (s service) prepareQuizAction(request core.QuizActionRequest, observed core
 	case "mode":
 		return s.prepareQuizMode(request.Mode, observed)
 	case "resume":
+		state := observed.State
 		if state.ActiveQuestion == nil && state.Status != core.QuizRuntimeStatusDone {
 			state = s.continueQuiz(state, observed.Entries)
 		}
 
 		return core.QuizTransition{State: state, Message: "Quiz resumed."}, nil
 	case "done", "cancel":
-		state.Status = core.QuizRuntimeStatusDone
-
-		message := "Quiz completed."
-		if request.Action == "cancel" {
-			state.Status, message = core.QuizRuntimeStatusCancelled, "Quiz cancelled."
-		}
-
-		state.ActiveQuestion, state.Candidates = nil, nil
-		state.ContinuationPending, state.ContinuationError = false, ""
-		state.UpdatedAt = s.utcNow()
-
-		return core.QuizTransition{State: state, Message: message}, nil
+		return s.prepareQuizClose(request.Action, observed)
 	default:
 		return core.QuizTransition{}, fmt.Errorf("unsupported quiz action")
 	}
@@ -202,4 +190,24 @@ func (s service) prepareQuizMode(mode core.QuizMode, observed core.QuizObservati
 	state.UpdatedAt = s.utcNow()
 
 	return core.QuizTransition{State: state, Message: "Quiz mode switched."}, nil
+}
+
+func (s service) prepareQuizClose(action string, observed core.QuizObservation) (core.QuizTransition, error) {
+	state := observed.State
+	if action == "done" && s.guidedContext != nil {
+		return s.prepareGuidedQuizDone(observed)
+	}
+
+	state.Status = core.QuizRuntimeStatusDone
+
+	message := "Quiz completed."
+	if action == "cancel" {
+		state.Status, message = core.QuizRuntimeStatusCancelled, "Quiz cancelled."
+	}
+
+	state.ActiveQuestion, state.Candidates = nil, nil
+	state.ContinuationPending, state.ContinuationError = false, ""
+	state.UpdatedAt = s.utcNow()
+
+	return core.QuizTransition{State: state, Message: message}, nil
 }

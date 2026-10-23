@@ -9,12 +9,15 @@ import (
 
 // TestGuidedUseCaseQuizSufficiency requires an answered, owner-confirmed complete quiz.
 func TestGuidedUseCaseQuizSufficiency(t *testing.T) {
-	for _, variant := range []string{"complete", "empty", "budget", "skipped", "foreign"} {
+	for _, variant := range []string{"complete", "complete-with-skip", "unconfirmed-skip", "empty", "budget", "skipped", "foreign"} {
 		t.Run(variant, func(t *testing.T) {
 			state := QuizRuntimeState{SessionID: "quiz", Status: QuizRuntimeStatusDone, ClarificationComplete: true, QuestionsAsked: 1, AnswersRecorded: 1}
 			session := AuthoringSession{Guided: &GuidedUseCaseState{Quiz: &GuidedQuizState{SessionID: "quiz", Revision: "revision"}}}
 
 			switch variant {
+			case "complete-with-skip", "unconfirmed-skip":
+				state.QuestionsAsked, state.SkipsRecorded = 2, 1
+				state.ClarificationComplete = variant == "complete-with-skip"
 			case "empty":
 				state.AnswersRecorded = 0
 			case "budget":
@@ -26,7 +29,7 @@ func TestGuidedUseCaseQuizSufficiency(t *testing.T) {
 			}
 
 			err := guardGuidedQuizCompletion(session, QuizObservation{State: state, Revision: "revision"})
-			if (err == nil) != (variant == "complete") {
+			if (err == nil) != (variant == "complete" || variant == "complete-with-skip") {
 				t.Fatalf("unexpected sufficiency: %v", err)
 			}
 		})

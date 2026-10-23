@@ -99,6 +99,10 @@ func webQuizHistory(entries []core.QuizEntry) []webui.QuizAnswerHistoryView {
 }
 
 func (p webViewProvider) writeQuizAction(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
+	if request.Fields["guided_run"] != "" {
+		return p.writeGuidedQuizAction(operations, request)
+	}
+
 	scope, err := webQuizActionScope(operations, request)
 	if err != nil {
 		return webQuizWriteFailure(request.ID, err), nil
