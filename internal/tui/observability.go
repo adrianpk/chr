@@ -78,29 +78,22 @@ type RuntimeCheckView struct {
 }
 
 // NewObservabilityView selects the latest observability records for the TUI.
-func NewObservabilityView(
-	projectDir string,
-	daemon core.DaemonState,
-	executions []core.ExecutionRecord,
-	loops []core.LoopRunRecord,
-	runtime core.RuntimeValidationResult,
-	events []core.AgentEvent,
-) ObservabilityView {
+func NewObservabilityView(projectDir string, records ObservabilityRecords) ObservabilityView {
 	return ObservabilityView{
-		DaemonStatus:             string(daemon.Status),
-		DaemonPID:                daemon.PID,
-		DaemonUpdatedAt:          renderTime(daemon.UpdatedAt),
-		DaemonHeartbeat:          renderOptionalTime(daemon.HeartbeatAt),
-		DaemonFailure:            daemon.FailureReason,
-		LatestExecution:          newExecutionView(projectDir, latestExecution(executions)),
-		LatestLoop:               newLoopRunView(latestLoopRun(loops)),
-		LatestEvent:              latestAgentEventView(projectDir, events),
-		RecentEvents:             newAgentEventViews(projectDir, events),
-		RuntimeImage:             runtime.Plan.Image,
-		RuntimeDockerfile:        relativeRuntimePath(projectDir, runtime.Plan.DockerfilePath),
-		RuntimeArtifactDir:       relativeRuntimePath(projectDir, runtime.Plan.ArtifactDir),
-		RuntimeValidationCommand: runtime.Plan.ValidationCommand,
-		RuntimeChecks:            newRuntimeCheckViews(projectDir, runtime.Checks),
+		DaemonStatus:             string(records.Daemon.Status),
+		DaemonPID:                records.Daemon.PID,
+		DaemonUpdatedAt:          renderTime(records.Daemon.UpdatedAt),
+		DaemonHeartbeat:          renderOptionalTime(records.Daemon.HeartbeatAt),
+		DaemonFailure:            records.Daemon.FailureReason,
+		LatestExecution:          newExecutionView(projectDir, latestExecution(records.Executions)),
+		LatestLoop:               newLoopRunView(latestLoopRun(records.Loops)),
+		LatestEvent:              latestAgentEventView(projectDir, records.Events),
+		RecentEvents:             newAgentEventViews(projectDir, records.Events),
+		RuntimeImage:             records.Runtime.Plan.Image,
+		RuntimeDockerfile:        relativeRuntimePath(projectDir, records.Runtime.Plan.DockerfilePath),
+		RuntimeArtifactDir:       relativeRuntimePath(projectDir, records.Runtime.Plan.ArtifactDir),
+		RuntimeValidationCommand: records.Runtime.Plan.ValidationCommand,
+		RuntimeChecks:            newRuntimeCheckViews(projectDir, records.Runtime.Checks),
 	}
 }
 
@@ -382,4 +375,13 @@ func emptyAsUnknown(value string) string {
 	}
 
 	return value
+}
+
+// ObservabilityRecords contains the loaded daemon, execution, loop and runtime observations.
+type ObservabilityRecords struct {
+	Daemon     core.DaemonState
+	Executions []core.ExecutionRecord
+	Loops      []core.LoopRunRecord
+	Runtime    core.RuntimeValidationResult
+	Events     []core.AgentEvent
 }

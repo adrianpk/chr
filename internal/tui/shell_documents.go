@@ -18,7 +18,8 @@ func (m *Model) renderDocumentWorkspace(width, height int, title string, documen
 		return fitBlock(m.renderDetailPanel("Preview", strings.Split(detail, "\n")[1:], width, height, true), width, height)
 	}
 
-	leftWidth, rightWidth := m.splitWidths(width)
+	horizontal := m.splitWidths(width)
+	leftWidth, rightWidth := horizontal.Left, horizontal.Right
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
@@ -30,7 +31,8 @@ func (m *Model) renderDocumentWorkspace(width, height int, title string, documen
 
 func (m *Model) renderDumpWorkspace(width, height int) string {
 	list := m.renderDumpFocusList(height - 2)
-	detailTitle, detailLines := m.renderDumpDetailPanel(maxInt(width-4, 1), height-2)
+	dumpPanel := m.renderDumpDetailPanel(maxInt(width-4, 1), height-2)
+	detailTitle, detailLines := dumpPanel.Title, dumpPanel.Lines
 
 	switch m.maximizedPane {
 	case 0:
@@ -39,8 +41,10 @@ func (m *Model) renderDumpWorkspace(width, height int) string {
 		return fitBlock(m.renderDetailPanel(detailTitle, detailLines, width, height, true), width, height)
 	}
 
-	leftWidth, rightWidth := m.splitWidths(width)
-	detailTitle, detailLines = m.renderDumpDetailPanel(maxInt(rightWidth-4, 1), height-2)
+	horizontal := m.splitWidths(width)
+	leftWidth, rightWidth := horizontal.Left, horizontal.Right
+	splitPanel := m.renderDumpDetailPanel(maxInt(rightWidth-4, 1), height-2)
+	detailTitle, detailLines = splitPanel.Title, splitPanel.Lines
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
@@ -48,11 +52,6 @@ func (m *Model) renderDumpWorkspace(width, height int) string {
 		panelVerticalGap(height),
 		m.renderDetailPanel(detailTitle, detailLines, rightWidth, height, m.selectedPane == 1),
 	), width, height)
-}
-
-//nolint:unused // Kept for document-family workspaces planned after shell consolidation.
-func (m *Model) renderDocumentFamilyWorkspace(width, height int, title string, families map[string]bool) string {
-	return m.renderDocumentWorkspace(width, height, title, m.documentsByFamily(families))
 }
 
 func (m *Model) renderQuizWorkspace(width, height int) string {
@@ -67,7 +66,8 @@ func (m *Model) renderQuizWorkspace(width, height int) string {
 		return fitBlock(m.renderDetailPanel(detailTitle, detail, width, height, true), width, height)
 	}
 
-	leftWidth, rightWidth := m.splitWidths(width)
+	horizontal := m.splitWidths(width)
+	leftWidth, rightWidth := horizontal.Left, horizontal.Right
 	detail = m.renderSelectedQuizDetailLines(maxInt(rightWidth-4, 1))
 
 	return fitBlock(lipgloss.JoinHorizontal(
@@ -106,7 +106,8 @@ func (m *Model) renderAuthoringWorkspace(width, height int) string {
 		return fitBlock(m.renderDetailPanel("Session", strings.Split(detail, "\n")[1:], width, height, true), width, height)
 	}
 
-	leftWidth, rightWidth := m.splitWidths(width)
+	horizontal := m.splitWidths(width)
+	leftWidth, rightWidth := horizontal.Left, horizontal.Right
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
@@ -127,7 +128,8 @@ func (m *Model) renderOperationsWorkspace(width, height int) string {
 		return fitBlock(m.renderDetailPanel("Runtime", runtime[1:], width, height, true), width, height)
 	}
 
-	leftWidth, rightWidth := m.splitWidths(width)
+	horizontal := m.splitWidths(width)
+	leftWidth, rightWidth := horizontal.Left, horizontal.Right
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,

@@ -93,7 +93,9 @@ func (m *Model) selectDumpPaneAt(x, width int) {
 		return
 	}
 
-	leftWidth, _ := m.splitWidths(width)
+	horizontal := m.splitWidths(width)
+
+	leftWidth := horizontal.Left
 	if x <= leftWidth {
 		m.selectedPane = 0
 
@@ -140,12 +142,16 @@ func (m *Model) layoutDragAt(x, y, width, height int) (layoutDrag, bool) {
 		return layoutDragNone, false
 	}
 
-	bodyTop, bodyHeight := m.shellBodyGeometry(width, height)
+	bodyGeometry := m.shellBodyGeometry(width, height)
+
+	bodyTop, bodyHeight := bodyGeometry.Top, bodyGeometry.Height
 	if y < bodyTop || y >= bodyTop+bodyHeight {
 		return layoutDragNone, false
 	}
 
-	leftWidth, _ := m.splitWidths(width)
+	horizontal := m.splitWidths(width)
+
+	leftWidth := horizontal.Left
 	if nearInt(x, leftWidth, 4) {
 		return layoutDragVertical, true
 	}
@@ -154,7 +160,9 @@ func (m *Model) layoutDragAt(x, y, width, height int) (layoutDrag, bool) {
 		return layoutDragNone, false
 	}
 
-	topHeight, _ := m.splitHeights(bodyHeight)
+	vertical := m.splitHeights(bodyHeight)
+
+	topHeight := vertical.Top
 	if nearInt(y-bodyTop, topHeight, 1) {
 		return layoutDragHorizontal, true
 	}
@@ -165,7 +173,8 @@ func (m *Model) layoutDragAt(x, y, width, height int) (layoutDrag, bool) {
 func (m *Model) applyLayoutDrag(event tea.MouseEvent) {
 	width := maxInt(m.width, 60)
 	height := maxInt(m.height, minShellHeight)
-	bodyTop, bodyHeight := m.shellBodyGeometry(width, height)
+	bodyGeometry := m.shellBodyGeometry(width, height)
+	bodyTop, bodyHeight := bodyGeometry.Top, bodyGeometry.Height
 
 	switch m.layoutDrag {
 	case layoutDragVertical:
@@ -175,7 +184,7 @@ func (m *Model) applyLayoutDrag(event tea.MouseEvent) {
 	}
 }
 
-func (m *Model) shellBodyGeometry(width, height int) (int, int) {
+func (m *Model) shellBodyGeometry(width, height int) shellBody {
 	topbar := m.renderShellTopbar(width)
 	footer := m.renderShellFooter(width)
 	status := m.renderShellStatus(width)
@@ -187,7 +196,7 @@ func (m *Model) shellBodyGeometry(width, height int) (int, int) {
 		bodyHeight = 1
 	}
 
-	return bodyTop, bodyHeight
+	return shellBody{Top: bodyTop, Height: bodyHeight}
 }
 
 func (m *Model) hasStackedRightPanels() bool {
@@ -263,4 +272,9 @@ func (m *Model) paneCount() int {
 	default:
 		return 1
 	}
+}
+
+type shellBody struct {
+	Top    int
+	Height int
 }

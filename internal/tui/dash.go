@@ -101,8 +101,10 @@ func (m *Model) renderDashWorkspace(width, height int) string {
 		return fitBlock(m.renderDetailPanel("Recent", recentLines, width, height, true), width, height)
 	}
 
-	leftWidth, rightWidth := m.splitWidths(width)
-	rightTopHeight, rightBottomHeight := m.splitHeights(height)
+	horizontal := m.splitWidths(width)
+	leftWidth, rightWidth := horizontal.Left, horizontal.Right
+	vertical := m.splitHeights(height)
+	rightTopHeight, rightBottomHeight := vertical.Top, vertical.Bottom
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,

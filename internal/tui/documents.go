@@ -54,31 +54,23 @@ func LoadDocumentViews(ctx context.Context, projectDir string) ([]DocumentView, 
 }
 
 func loadDocumentRoot(ctx context.Context, projectDir, family, rootPath string) ([]DocumentView, error) {
-	documents := []DocumentView{}
+	scanner := documentScanner{projectDir: projectDir, family: family, documents: []DocumentView{}}
 
 	err := filepath.WalkDir(rootPath, func(path string, entry os.DirEntry, walkErr error) error {
-		return appendDocumentView(ctx, projectDir, family, path, entry, walkErr, &documents)
+		return scanner.append(ctx, path, entry, walkErr)
 	})
 	if errors.Is(err, os.ErrNotExist) {
-		return documents, nil
+		return scanner.documents, nil
 	}
 
 	if err != nil {
 		return nil, fmt.Errorf("load %s documents: %w", family, err)
 	}
 
-	return documents, nil
+	return scanner.documents, nil
 }
 
-func appendDocumentView(
-	ctx context.Context,
-	projectDir string,
-	family string,
-	path string,
-	entry os.DirEntry,
-	walkErr error,
-	documents *[]DocumentView,
-) error {
+func (scanner *documentScanner) append(ctx context.Context, path string, entry os.DirEntry, walkErr error) error {
 	if walkErr != nil {
 		return walkErr
 	}
@@ -92,20 +84,20 @@ func appendDocumentView(
 		return nil
 	}
 
-	if strings.HasPrefix(filepath.ToSlash(path), filepath.ToSlash(filepath.Join(projectDir, core.OpsDirectoryName))+"/") && !core.IsOpsArtifactBodyPath(projectDir, path) {
+	if strings.HasPrefix(filepath.ToSlash(path), filepath.ToSlash(filepath.Join(scanner.projectDir, core.OpsDirectoryName))+"/") && !core.IsOpsArtifactBodyPath(scanner.projectDir, path) {
 		return nil
 	}
 
-	if isArchivedGeneratedDocumentPath(projectDir, path) {
+	if isArchivedGeneratedDocumentPath(scanner.projectDir, path) {
 		return nil
 	}
 
-	document, err := documentViewFromPath(projectDir, family, path)
+	document, err := documentViewFromPath(scanner.projectDir, scanner.family, path)
 	if err != nil {
 		return err
 	}
 
-	*documents = append(*documents, document)
+	scanner.documents = append(scanner.documents, document)
 
 	return nil
 }
@@ -133,36 +125,6 @@ func (m *Model) renderDocuments() string {
 
 	output.WriteString("\n")
 	output.WriteString(m.renderSelectedDocumentDetail())
-
-	return strings.TrimRight(output.String(), "\n")
-}
-
-//nolint:unused // Kept for legacy/non-shell document family renderers.
-func (m *Model) renderDocumentsByFamily(title string, families map[string]bool) string {
-	documents := m.documentsByFamily(families)
-	if len(documents) == 0 {
-		return title + "\n  No documents found."
-	}
-
-	var output strings.Builder
-
-	output.WriteString(title)
-	output.WriteString("\n")
-	output.WriteString("  Type       Status      Title\n")
-
-	for _, document := range documents {
-		prefix := "  "
-		if document.Index == m.selectedDocument {
-			prefix = "> "
-		}
-
-		output.WriteString(prefix)
-		output.WriteString(renderDocumentRow(document))
-		output.WriteString("\n")
-	}
-
-	output.WriteString("\n")
-	output.WriteString(m.renderSelectedDocumentDetailFor(documents))
 
 	return strings.TrimRight(output.String(), "\n")
 }
@@ -210,11 +172,6 @@ func (m *Model) renderSelectedDocumentDetailFor(documents []DocumentView) string
 	output.WriteString(indentText(document.Preview, "    "))
 
 	return strings.TrimRight(output.String(), "\n")
-}
-
-//nolint:unused // Kept for legacy/non-shell document view paths.
-func (m *Model) selectedDocumentView() (DocumentView, bool) {
-	return m.selectedDocumentViewFor(m.documents)
 }
 
 func (m *Model) selectedDocumentViewFor(documents []DocumentView) (DocumentView, bool) {
@@ -339,7 +296,8 @@ func documentViewFromPath(projectDir, family, path string) (DocumentView, error)
 		return DocumentView{}, fmt.Errorf("relativize document path: %w", err)
 	}
 
-	title, status, preview := summarizeMarkdownDocument(string(content), filepath.Base(path))
+	summary := summarizeMarkdownDocument(string(content), filepath.Base(path))
+	title, status, preview := summary.Title, summary.Status, summary.Preview
 
 	return DocumentView{
 		Family:       family,
@@ -351,7 +309,7 @@ func documentViewFromPath(projectDir, family, path string) (DocumentView, error)
 	}, nil
 }
 
-func summarizeMarkdownDocument(content, fallbackName string) (string, string, string) {
+func summarizeMarkdownDocument(content, fallbackName string) documentSummary {
 	title := strings.TrimSuffix(fallbackName, filepath.Ext(fallbackName))
 	status := ""
 	previewLines := []string{}
@@ -389,7 +347,7 @@ func summarizeMarkdownDocument(content, fallbackName string) (string, string, st
 		previewLines = append(previewLines, "No preview available.")
 	}
 
-	return title, status, strings.Join(previewLines, "\n")
+	return documentSummary{Title: title, Status: status, Preview: strings.Join(previewLines, "\n")}
 }
 
 func documentStatusLine(line string) (string, bool) {
@@ -422,4 +380,15 @@ func renderTime(value time.Time) string {
 	}
 
 	return value.UTC().Format(time.RFC3339)
+}
+
+type documentScanner struct {
+	projectDir, family string
+	documents          []DocumentView
+}
+
+type documentSummary struct {
+	Title   string
+	Status  string
+	Preview string
 }

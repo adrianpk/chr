@@ -11,7 +11,8 @@ import (
 )
 
 func (m *Model) renderProjectWorkspace(width, height int) string {
-	leftWidth, rightWidth := m.splitWidths(width)
+	horizontal := m.splitWidths(width)
+	leftWidth, rightWidth := horizontal.Left, horizontal.Right
 	project := m.renderProjectContextLines(maxInt(leftWidth-4, 1))
 	artifacts := m.renderProjectArtifactLines()
 	location := m.renderProjectLocationLines()
@@ -25,7 +26,8 @@ func (m *Model) renderProjectWorkspace(width, height int) string {
 		return fitBlock(renderPanel("Artifacts", artifacts, width, height, true), width, height)
 	}
 
-	rightTopHeight, rightBottomHeight := m.splitHeights(height)
+	vertical := m.splitHeights(height)
+	rightTopHeight, rightBottomHeight := vertical.Top, vertical.Bottom
 	right := lipgloss.JoinVertical(
 		lipgloss.Left,
 		renderPanel("Location", location, rightWidth, rightTopHeight, m.selectedPane == 1),

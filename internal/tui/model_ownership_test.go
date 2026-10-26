@@ -2,6 +2,7 @@ package tui
 
 import (
 	"testing"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -48,5 +49,62 @@ func TestModelOwnership(t *testing.T) {
 	updated, _ := model.Update(message)
 	if updated != model || model.workflow.ID != "changed" {
 		t.Fatal("refresh completion replaced the model or its current selection")
+	}
+}
+
+// Background IO returns a message while all model mutations remain on the event
+// loop. Rendering and navigation can continue before the message is applied.
+func TestModelAsyncRefresh(t *testing.T) {
+	started := make(chan AgentWorkRefreshRequest, 1)
+	release := make(chan struct{})
+
+	defer func() {
+		select {
+		case <-release:
+		default:
+			close(release)
+		}
+	}()
+
+	model := NewModel(Options{AgentWorkExecutor: modelRefreshExecutor(func(request AgentWorkRefreshRequest) (AgentWorkRefreshResult, error) {
+		started <- request
+
+		<-release
+
+		return AgentWorkRefreshResult{Observability: ObservabilityView{DaemonStatus: "completed refresh"}}, nil
+	})})
+	command := model.startAgentWorkRefresh()
+
+	messages := make(chan tea.Msg, 1)
+	go func() { messages <- command() }()
+
+	select {
+	case <-started:
+	case <-time.After(5 * time.Second):
+		t.Fatal("background refresh did not start")
+	}
+
+	for i := range 20 {
+		model.Update(tea.WindowSizeMsg{Width: 80 + i, Height: 30})
+		model.Update(tea.KeyMsg{Type: tea.KeyTab})
+
+		_ = model.View()
+	}
+
+	if model.observability.DaemonStatus != "" {
+		t.Fatal("background IO mutated the model without a message")
+	}
+
+	close(release)
+
+	select {
+	case message := <-messages:
+		model.Update(message)
+	case <-time.After(5 * time.Second):
+		t.Fatal("background refresh did not finish")
+	}
+
+	if model.observability.DaemonStatus != "completed refresh" {
+		t.Fatal("event loop did not apply the completed observation")
 	}
 }

@@ -75,12 +75,16 @@ func TestTabMovesPaneFocusWithoutChangingView(t *testing.T) {
 func TestPanelSplitsDefaultToEqualAspectRatio(t *testing.T) {
 	model := NewModel(Options{})
 
-	leftWidth, rightWidth := model.splitWidths(101)
+	horizontal := model.splitWidths(101)
+
+	leftWidth, rightWidth := horizontal.Left, horizontal.Right
 	if leftWidth != 50 || rightWidth != 50 {
 		t.Fatalf("splitWidths(101) = %d, %d, want 50, 50", leftWidth, rightWidth)
 	}
 
-	topHeight, bottomHeight := model.splitHeights(41)
+	vertical := model.splitHeights(41)
+
+	topHeight, bottomHeight := vertical.Top, vertical.Bottom
 	if topHeight != 20 || bottomHeight != 21 {
 		t.Fatalf("splitHeights(41) = %d, %d, want 20, 21", topHeight, bottomHeight)
 	}
@@ -3618,20 +3622,13 @@ func TestNewObservabilityViewSelectsLatestRecords(t *testing.T) {
 	older := time.Date(2026, 5, 22, 10, 0, 0, 0, time.UTC)
 	newer := older.Add(time.Hour)
 
-	view := NewObservabilityView(
-		projectDir,
-		core.NewStoppedDaemonState(newer),
-		[]core.ExecutionRecord{
-			{ID: "exec-old", Status: core.ExecutionStatusSucceeded, UpdatedAt: older},
-			{ID: "exec-new", Status: core.ExecutionStatusFailed, UpdatedAt: newer},
-		},
-		[]core.LoopRunRecord{
-			{ID: "loop-old", Status: core.LoopRunStatusSucceeded, UpdatedAt: older},
-			{ID: "loop-new", Status: core.LoopRunStatusFailed, UpdatedAt: newer},
-		},
-		testObservabilityRuntimeResult(projectDir),
-		testObservabilityAgentEvents(projectDir, newer),
-	)
+	view := NewObservabilityView(projectDir, ObservabilityRecords{Daemon: core.NewStoppedDaemonState(newer), Executions: []core.ExecutionRecord{
+		{ID: "exec-old", Status: core.ExecutionStatusSucceeded, UpdatedAt: older},
+		{ID: "exec-new", Status: core.ExecutionStatusFailed, UpdatedAt: newer},
+	}, Loops: []core.LoopRunRecord{
+		{ID: "loop-old", Status: core.LoopRunStatusSucceeded, UpdatedAt: older},
+		{ID: "loop-new", Status: core.LoopRunStatusFailed, UpdatedAt: newer},
+	}, Runtime: testObservabilityRuntimeResult(projectDir), Events: testObservabilityAgentEvents(projectDir, newer)})
 
 	if view.LatestExecution.ID != "exec-new" {
 		t.Fatalf("LatestExecution.ID = %q, want exec-new", view.LatestExecution.ID)

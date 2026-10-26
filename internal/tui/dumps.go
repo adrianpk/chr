@@ -49,12 +49,12 @@ func (m *Model) renderDumpFocusList(limit int) []string {
 	return lines
 }
 
-func (m *Model) renderDumpDetailPanel(width, height int) (string, []string) {
+func (m *Model) renderDumpDetailPanel(width, height int) dumpDetailPanel {
 	if m.dumpEdit.Active {
-		return "Edit", m.renderSelectedDumpDetailLines(width, height)
+		return dumpDetailPanel{Title: "Edit", Lines: m.renderSelectedDumpDetailLines(width, height)}
 	}
 
-	return "Dump", m.renderSelectedDumpDetailLines(width, height)
+	return dumpDetailPanel{Title: "Dump", Lines: m.renderSelectedDumpDetailLines(width, height)}
 }
 
 func (m *Model) renderSelectedDumpDetail() string {
@@ -296,4 +296,9 @@ func dumpUseCaseTitle(dump DumpView) string {
 	}
 
 	return dumpScopeLabel(dump.Scope)
+}
+
+type dumpDetailPanel struct {
+	Title string
+	Lines []string
 }

@@ -19,8 +19,10 @@ func (m *Model) renderCasesWorkspace(width, height int) string {
 		return fitBlock(renderPanel("Artifacts", m.renderCaseArtifactLines(), width, height, true), width, height)
 	}
 
-	leftWidth, rightWidth := m.splitWidths(width)
-	rightEditableHeight, rightArtifactsHeight := m.splitHeights(height)
+	horizontal := m.splitWidths(width)
+	leftWidth, rightWidth := horizontal.Left, horizontal.Right
+	vertical := m.splitHeights(height)
+	rightEditableHeight, rightArtifactsHeight := vertical.Top, vertical.Bottom
 	right := lipgloss.JoinVertical(
 		lipgloss.Left,
 		renderPanel("Case", m.renderCaseDocumentLines(maxInt(rightWidth-4, 1)), rightWidth, rightEditableHeight, m.selectedPane == 1),

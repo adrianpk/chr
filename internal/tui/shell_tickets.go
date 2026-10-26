@@ -26,7 +26,8 @@ func (m *Model) renderTicketWorkspace(width, height int) string {
 		return fitBlock(m.renderDetailPanel("Detail", detailLines, width, height, true), width, height)
 	}
 
-	leftWidth, rightWidth := m.splitWidths(width)
+	horizontal := m.splitWidths(width)
+	leftWidth, rightWidth := horizontal.Left, horizontal.Right
 	list := m.renderTicketFocusList(maxInt(leftWidth-4, 1), height-2)
 
 	return fitBlock(lipgloss.JoinHorizontal(
@@ -274,34 +275,26 @@ func (m *Model) renderBoardAttentionFocusList(limit int) []string {
 }
 
 func renderCompactTicketHeaderLine(width int) string {
-	return renderCompactTicketColumns(" ", "Key", "Sts", "Pri", "Title", width, true)
+	return renderCompactTicketColumns(compactTicketRow{Prefix: " ", Key: "Key", Status: "Sts", Priority: "Pri", Title: "Title", Header: true}, width)
 }
 
 func renderCompactTicketFocusLine(prefix string, ticket TicketView, width int) string {
-	return renderCompactTicketColumns(
-		prefix,
-		ticket.Key,
-		compactTicketStatusLabel(ticket.Status),
-		compactTicketPriorityLabel(ticket.Priority),
-		ticket.Title,
-		width,
-		false,
-	)
+	return renderCompactTicketColumns(compactTicketRow{Prefix: prefix, Key: ticket.Key, Status: compactTicketStatusLabel(ticket.Status), Priority: compactTicketPriorityLabel(ticket.Priority), Title: ticket.Title, Header: false}, width)
 }
 
-func renderCompactTicketColumns(prefix, key, status, priority, title string, width int, header bool) string {
+func renderCompactTicketColumns(row compactTicketRow, width int) string {
 	line := strings.Builder{}
-	line.WriteString(compactTicketCell(prefix, 1, false))
+	line.WriteString(compactTicketCell(row.Prefix, 1, false))
 	line.WriteString(" ")
-	line.WriteString(compactTicketCell(key, 7, header))
+	line.WriteString(compactTicketCell(row.Key, 7, row.Header))
 	line.WriteString("  ")
-	line.WriteString(compactTicketCell(status, 5, header))
+	line.WriteString(compactTicketCell(row.Status, 5, row.Header))
 	line.WriteString("  ")
-	line.WriteString(compactTicketCell(priority, 4, header))
+	line.WriteString(compactTicketCell(row.Priority, 4, row.Header))
 	line.WriteString("  ")
 
 	titleWidth := maxInt(width-lipgloss.Width(line.String()), 1)
-	line.WriteString(truncatePlainLine(title, titleWidth))
+	line.WriteString(truncatePlainLine(row.Title, titleWidth))
 
 	return fitPlainLine(line.String(), width)
 }
@@ -430,4 +423,9 @@ func appendLimitedLines(lines, additions []string, limit int) []string {
 	}
 
 	return lines
+}
+
+type compactTicketRow struct {
+	Prefix, Key, Status, Priority, Title string
+	Header                               bool
 }

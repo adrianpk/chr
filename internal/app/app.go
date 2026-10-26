@@ -392,7 +392,7 @@ func loadTUIObservability(
 
 	events := loadTUIAgentEvents(ctx, projectContext.ProjectDir, config.Runtime, executions, loops)
 
-	view := tui.NewObservabilityView(projectContext.ProjectDir, daemonState, executions, loops, runtime, events)
+	view := tui.NewObservabilityView(projectContext.ProjectDir, tui.ObservabilityRecords{Daemon: daemonState, Executions: executions, Loops: loops, Runtime: runtime, Events: events})
 
 	view.Authority = core.WorkAuthority(config.Work)
 	if view.Authority == core.WorkStateAuthorityTickets {

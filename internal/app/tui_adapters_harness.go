@@ -34,15 +34,16 @@ func (e tuiHarnessSelectionExecutor) inspectHarnessSelections(ctx context.Contex
 		view.Profiles = append(view.Profiles, tui.HarnessProfileView{Name: p.Name, Harness: p.Harness, Provider: p.ModelProvider, Model: p.Model, Worker: p.Worker, Generation: p.Generation})
 	}
 
-	view.Retained, view.More, view.RetainedProblem = e.retainedHarnessBindings(ctx)
+	retained := e.retainedHarnessBindings(ctx)
+	view.Retained, view.More, view.RetainedProblem = retained.Bindings, retained.More, retained.Problem
 
 	return view, nil
 }
 
-func (e tuiHarnessSelectionExecutor) retainedHarnessBindings(ctx context.Context) ([]tui.HarnessRetainedView, bool, string) {
+func (e tuiHarnessSelectionExecutor) retainedHarnessBindings(ctx context.Context) retainedHarnessView {
 	page, err := e.operations.WorkflowStatusPage(ctx, 0, 4)
 	if err != nil {
-		return nil, false, "Retained work could not be loaded; use workflow status in the command palette."
+		return retainedHarnessView{Problem: "Retained work could not be loaded; use workflow status in the command palette."}
 	}
 
 	var bindings []tui.HarnessRetainedView
@@ -50,7 +51,7 @@ func (e tuiHarnessSelectionExecutor) retainedHarnessBindings(ctx context.Context
 		bindings = append(bindings, tui.HarnessRetainedView{ID: run.ID, Status: run.Status, Binding: run.HarnessBinding})
 	}
 
-	return bindings, page.NextOffset >= 0, ""
+	return retainedHarnessView{Bindings: bindings, More: page.NextOffset >= 0}
 }
 
 func (e tuiHarnessSelectionExecutor) SaveHarnessSelections(request tui.HarnessSelectionRequest) (tui.HarnessSelectionView, error) {
@@ -71,4 +72,10 @@ func (e tuiHarnessSelectionExecutor) SaveHarnessSelections(request tui.HarnessSe
 	}
 
 	return e.inspectHarnessSelections(ctx)
+}
+
+type retainedHarnessView struct {
+	Bindings []tui.HarnessRetainedView
+	More     bool
+	Problem  string
 }

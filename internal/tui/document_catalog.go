@@ -145,7 +145,8 @@ func (m *Model) renderDocumentCatalogWorkspace(width, height int, catalog docume
 		return fitBlock(m.renderDetailPanel(strings.TrimSuffix(catalog.title, "s"), detail, width, height, true), width, height)
 	}
 
-	leftWidth, rightWidth := m.splitWidths(width)
+	horizontal := m.splitWidths(width)
+	leftWidth, rightWidth := horizontal.Left, horizontal.Right
 	detail = catalog.detailLines(maxInt(rightWidth-4, 1))
 
 	return fitBlock(lipgloss.JoinHorizontal(

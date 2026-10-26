@@ -284,3 +284,26 @@ established in Slice 3. Those are reused directly rather than regrouped again.
 The existing frozen work-status images still prove original public JSON bytes,
 omission/default semantics and field order; no service result imports TUI/Web
 presentation types.
+
+
+The final ten owned signature violations are converted in the Slice 5 signatures
+ledger. Document scanning owns its project/family and accumulated views, with
+context passed into each WalkDir callback. Observability construction receives
+loaded daemon/execution/loop/runtime/event records, and compact ticket rendering
+receives one display row with its original header alignment. No other large
+value is changed to a pointer merely because of the general hugeParam signal.
+
+Named geometry returns distinguish left/right pane widths, top/bottom heights
+and the shell body offset/height. Dump panels retain their title/content pairing.
+Markdown summaries retain title/status/preview defaults. Retained harness reads
+keep pagination and nonfatal diagnostics separate from absence, and ticket write
+projections retain both the correct PageData and partial-template selection.
+The global manifest now has 425 entries and the same one external exception.
+
+Three definition-only compatibility helpers (renderDocumentsByFamily,
+selectedDocumentView and renderDocumentFamilyWorkspace) and their unused
+suppressions are removed after checking all production/test references. Active
+legacy document navigation/rendering and documentsByFamily remain live. The
+asynchronous refresh regression mutates/renders the event-loop owner while IO is
+blocked, then applies the returned message on that owner; focused race validation
+covers this test with the existing guided, harness and workflow ownership checks.

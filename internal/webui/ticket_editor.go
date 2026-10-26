@@ -36,7 +36,9 @@ func (h handler) ticketWrite(w http.ResponseWriter, r *http.Request, comment boo
 		result.Operation.ID = request.ID
 	}
 
-	data, fragment, err := h.ticketWriteData(r, request, result, comment)
+	writtenTicket, err := h.ticketWriteData(r, request, result, comment)
+	data, fragment := writtenTicket.Page, writtenTicket.Template
+
 	if err != nil {
 		http.Error(w, "reload ticket comments", http.StatusInternalServerError)
 
@@ -54,21 +56,21 @@ func (h handler) ticketWrite(w http.ResponseWriter, r *http.Request, comment boo
 	}
 }
 
-func (h handler) ticketWriteData(r *http.Request, request WriteActionRequest, result WriteActionResponse, comment bool) (PageData, string, error) {
+func (h handler) ticketWriteData(r *http.Request, request WriteActionRequest, result WriteActionResponse, comment bool) (ticketWriteView, error) {
 	if !comment || result.Status != WriteStatusOK {
-		return PageData{Write: result}, "ticket_write_result.html", nil
+		return ticketWriteView{Page: PageData{Write: result}, Template: "ticket_write_result.html"}, nil
 	}
 
 	data, err := h.ticketDetailPageData(ticketDetailRequest(r, request.ID))
 	if err != nil {
-		return PageData{}, "", err
+		return ticketWriteView{Page: PageData{}, Template: ""}, err
 	}
 
 	data.Ticket.PreviousRevision = request.Revision
 	data.Ticket.Revision = result.TicketRevision
 	data.Write = result
 
-	return data, "ticket_discussion.html", nil
+	return ticketWriteView{Page: data, Template: "ticket_discussion.html"}, nil
 }
 
 func ticketEditorAction(action string, comment bool) bool {
@@ -82,4 +84,9 @@ func ticketEditorAction(action string, comment bool) bool {
 	default:
 		return false
 	}
+}
+
+type ticketWriteView struct {
+	Page     PageData
+	Template string
 }

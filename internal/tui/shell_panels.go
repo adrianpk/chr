@@ -154,20 +154,20 @@ func truncatePlainLine(line string, width int) string {
 	return string(runes[:width-1]) + "…"
 }
 
-func (m *Model) splitWidths(width int) (int, int) {
+func (m *Model) splitWidths(width int) horizontalPanelSplit {
 	available := maxInt(width-panelVerticalGapSize, 1)
 	left := available * m.verticalSplitPercent / 100
 	right := available - left
 
-	return left, right
+	return horizontalPanelSplit{Left: left, Right: right}
 }
 
-func (m *Model) splitHeights(height int) (int, int) {
+func (m *Model) splitHeights(height int) verticalPanelSplit {
 	available := maxInt(height, 1)
 	top := maxInt(available*m.horizontalSplitPercent/100, 1)
 	bottom := maxInt(available-top, 1)
 
-	return top, bottom
+	return verticalPanelSplit{Top: top, Bottom: bottom}
 }
 
 func distributedWidths(width, count int) []int {
@@ -238,4 +238,14 @@ func minInt(left, right int) int {
 	}
 
 	return right
+}
+
+type horizontalPanelSplit struct {
+	Left  int
+	Right int
+}
+
+type verticalPanelSplit struct {
+	Top    int
+	Bottom int
 }
