@@ -11,7 +11,7 @@ import (
 
 // TestCaseWorkflowPresentation keeps transport guards hidden while reusing the quiz.
 func TestCaseWorkflowPresentation(t *testing.T) {
-	view := GuidedUseCaseView{RunID: "opaque-run", Namespace: "private-storage", Stage: "quiz", Name: "Improve checkout", Question: "What must checkout preserve?", QuestionID: "opaque-question", InputDigest: "opaque-input", Commit: "opaque-commit", Policy: []string{"trusted_auto_merge"}, CanRetainIdea: true}
+	view := GuidedUseCaseView{GuidedRunView: GuidedRunView{RunID: "opaque-run", Namespace: "private-storage", Stage: "quiz", Name: "Improve checkout", Commit: "opaque-commit"}, GuidedStepView: GuidedStepView{Question: "What must checkout preserve?", QuestionID: "opaque-question", InputDigest: "opaque-input"}, GuidedDiagnosticsView: GuidedDiagnosticsView{Policy: []string{"trusted_auto_merge"}}, GuidedIdeasView: GuidedIdeasView{CanRetainIdea: true}}
 
 	view.Quiz = &QuizAnswerView{Question: view.Question, QuestionID: view.QuestionID, CanAnswer: true, Open: true, Started: true, Mode: "deep"}
 
@@ -41,7 +41,7 @@ func TestCaseWorkflowPresentation(t *testing.T) {
 
 // TestCaseWorkflowObservation ignores fresh request tokens and rejects ambiguous reads.
 func TestCaseWorkflowObservation(t *testing.T) {
-	view := GuidedUseCaseView{RunID: "run", Stage: "quiz", Observation: "2", RequestID: "first"}
+	view := GuidedUseCaseView{GuidedRunView: GuidedRunView{RunID: "run", Stage: "quiz", RequestID: "first"}, GuidedPageView: GuidedPageView{Observation: "2"}}
 	first := guidedStateToken(view)
 
 	view.RequestID = "second"

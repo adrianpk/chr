@@ -22,27 +22,18 @@ type GuidedUseCaseLink struct{ Name, URL, CaseSlug string }
 
 // GuidedUseCaseView presents current capture, setup and an inspectable committed input.
 type GuidedUseCaseView struct {
-	Quiz                                                                      *QuizAnswerView
-	QuizID                                                                    string
-	Processing                                                                bool
-	CaseSlug, Observation, StateURL, StateToken, Surface, CurrentURL, Message string
-	Starting, Following, ShowControls, ShowRetry, ShowReview, ReadOnly        bool
-	Result                                                                    *GuidedUseCaseResult
-	Ideas                                                                     []GuidedUseCaseIdea
-	IdeaRequestID, IdeaRevision                                               string
-	CanRetainIdea                                                             bool
-	Controls                                                                  []GuidedUseCaseControl
-	Suspended                                                                 bool
-	ControlStatus                                                             string
-	Work                                                                      *GuidedUseCaseWork
-	Enabled                                                                   bool
-	RunID, Namespace, Name, Revision, RequestID                               string
-	Stage, Status, Capture, Commit, CommittedDump                             string
-	PendingAction, PendingContent                                             string
-	Question, QuestionID, InputDigest, RetryAction, Blocker                   string
-	Artifacts                                                                 []GuidedUseCaseArtifact
-	Policy, Problems                                                          []string
-	Runs                                                                      []GuidedUseCaseLink
+	GuidedQuestionView
+	GuidedPageView
+	Result *GuidedUseCaseResult
+	GuidedIdeasView
+	GuidedLifecycleView
+	Work    *GuidedUseCaseWork
+	Enabled bool
+	GuidedRunView
+	GuidedStepView
+	Artifacts []GuidedUseCaseArtifact
+	GuidedDiagnosticsView
+	Runs []GuidedUseCaseLink
 }
 
 // GuidedUseCaseControl binds a lifecycle action to both displayed owner revisions.

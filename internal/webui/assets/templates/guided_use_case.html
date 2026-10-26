@@ -6,25 +6,25 @@
   {{else}}
     {{if and (eq .Guided.Surface "quizzes") (not .Detail.Quiz)}}{{template "quiz_heading.html" .}}{{end}}
     {{if eq .Guided.Surface "board"}}
-      {{if .Guided.Work}}{{template "guided_progress.html" .}}{{end}}
-      {{if and .Guided.Result (or .Guided.Result.Complete (eq .Guided.Status "cancelled"))}}{{template "guided_result.html" .}}{{end}}
+      {{if .Guided.Work}}{{template "guided_progress.html" .Guided.ProgressSection}}{{end}}
+      {{if and .Guided.Result (or .Guided.Result.Complete (eq .Guided.Status "cancelled"))}}{{template "guided_result.html" .Guided.Result}}{{end}}
       {{template "board_content.html" .}}
     {{else if .Guided.ReadOnly}}
       {{if .Detail.Content}}{{template "artifact_document.html" .Detail.Content}}{{else}}<p class="empty-state">Not available yet.</p>{{end}}
       <a class="button" href="{{.Guided.CurrentURL}}">Continue</a>
     {{else if .Guided.Suspended}}
-      {{template "guided_status.html" .}}
+      {{template "guided_status.html" .Guided.StatusSection}}
     {{else if .Guided.Processing}}
-      {{if eq .Guided.Surface "quizzes"}}<p role="status">{{.Guided.Message}}</p><div class="quiz-panel" aria-busy="true"><div class="quiz-question" aria-label="Preparing question"><span class="quiz-question-placeholder" aria-hidden="true"></span></div></div>{{else}}{{template "guided_status.html" .}}{{end}}
+      {{if eq .Guided.Surface "quizzes"}}<p role="status">{{.Guided.Message}}</p><div class="quiz-panel" aria-busy="true"><div class="quiz-question" aria-label="Preparing question"><span class="quiz-question-placeholder" aria-hidden="true"></span></div></div>{{else}}{{template "guided_status.html" .Guided.StatusSection}}{{end}}
     {{else if .Guided.PendingAction}}
-      {{template "guided_retry.html" .}}
+      {{template "guided_retry.html" .Guided.RecoverySection}}
     {{else if eq .Guided.Surface "dumps"}}
       {{template "dump_edit_forms.html" .}}
     {{else if .Detail.Quiz}}
       {{template "quiz_answer_content.html" .}}
     {{else}}
       {{if .Detail.Content}}{{template "artifact_document.html" .Detail.Content}}{{end}}
-      {{if .Guided.RetryAction}}{{template "guided_retry.html" .}}{{end}}
+      {{if .Guided.RetryAction}}{{template "guided_retry.html" .Guided.RecoverySection}}{{end}}
     {{end}}
   {{end}}
   <p class="workflow-feedback" data-workflow-feedback role="status" aria-live="polite"></p>
@@ -34,23 +34,23 @@
 
 {{define "guided_status.html"}}
 <section class="workflow-progress" aria-label="Workflow status">
-  <div class="workflow-progress__body"><p role="status">{{.Guided.Message}}</p></div>
-  {{template "guided_actions.html" .}}
+  <div class="workflow-progress__body"><p role="status">{{.Message}}</p></div>
+  {{template "guided_actions.html" .Actions}}
 </section>
 {{end}}
 
 {{define "guided_retry.html"}}
 <section class="workflow-progress" aria-label="Workflow recovery">
-  <div class="workflow-progress__body"><p role="status">{{if .Guided.Blocker}}This step needs attention. Your progress is saved.{{else}}This step did not finish. Your progress is saved.{{end}}</p></div>
-  {{template "guided_actions.html" .}}
+  <div class="workflow-progress__body"><p role="status">{{if .Blocked}}This step needs attention. Your progress is saved.{{else}}This step did not finish. Your progress is saved.{{end}}</p></div>
+  {{template "guided_actions.html" .Actions}}
 </section>
 {{end}}
 
 {{define "guided_retry_form.html"}}
 <form method="post" action="/guided/actions" data-workflow-form>
-  {{template "guided_fields.html" .}}
-  <input type="hidden" name="step" value="{{if .Guided.PendingAction}}{{.Guided.PendingAction}}{{else}}{{.Guided.RetryAction}}{{end}}">
-  <input type="hidden" name="content" value="{{.Guided.PendingContent}}">
+  {{template "guided_fields.html" .Fields}}
+  <input type="hidden" name="step" value="{{.Step}}">
+  <input type="hidden" name="content" value="{{.Content}}">
   <button class="button button--primary" type="submit">Retry this step</button>
 </form>
 {{end}}
@@ -58,33 +58,33 @@
 {{define "guided_progress.html"}}
 <section class="workflow-progress" aria-label="Development progress">
   <div class="workflow-progress__body">
-    {{if .Guided.Message}}<p role="status">{{.Guided.Message}}</p>{{end}}
-    <p>{{.Guided.Work.Validated}} of {{.Guided.Work.Total}} tasks validated · {{.Guided.Work.Confirmed}} delivered · {{.Guided.Work.Remaining}} remaining</p>
-    {{if .Guided.Work.Action}}<p role="status">{{if .Guided.Work.PullRequestURL}}The work needs review before it can continue.{{else}}The work needs attention before it can continue.{{end}}</p>{{end}}
+    {{if .Message}}<p role="status">{{.Message}}</p>{{end}}
+    <p>{{.Work.Validated}} of {{.Work.Total}} tasks validated · {{.Work.Confirmed}} delivered · {{.Work.Remaining}} remaining</p>
+    {{if .Work.Action}}<p role="status">{{if .Work.PullRequestURL}}The work needs review before it can continue.{{else}}The work needs attention before it can continue.{{end}}</p>{{end}}
   </div>
-  {{template "guided_actions.html" .}}
+  {{template "guided_actions.html" .Actions}}
 </section>
 {{end}}
 
 {{define "guided_result.html"}}
 <section class="workflow-result" aria-label="Use-case results"><h3>Results</h3>
-  <p role="status">{{.Guided.Result.Summary}}</p>
-  {{range .Guided.Result.Deliveries}}<p><a href="{{.PullRequest}}">View delivered changes</a> · {{.Branch}}</p>{{end}}
-  {{range .Guided.Result.Validation}}<details><summary>{{.Label}} · {{.Outcome}}</summary>{{if .Waiver}}<p>{{.Waiver}}</p>{{end}}{{range .Commands}}<p><code>{{.Command}}</code> · Exit code: {{.ExitCode}}</p>{{end}}</details>{{end}}
+  <p role="status">{{.Summary}}</p>
+  {{range .Deliveries}}<p><a href="{{.PullRequest}}">View delivered changes</a> · {{.Branch}}</p>{{end}}
+  {{range .Validation}}<details><summary>{{.Label}} · {{.Outcome}}</summary>{{if .Waiver}}<p>{{.Waiver}}</p>{{end}}{{range .Commands}}<p><code>{{.Command}}</code> · Exit code: {{.ExitCode}}</p>{{end}}</details>{{end}}
 </section>
 {{end}}
 
 {{define "guided_actions.html"}}
-{{if or .Guided.ShowControls .Guided.ShowRetry .Guided.ShowReview}}
+{{if .Visible}}
 <footer class="ticket-editor-footer">
   <div class="detail-actions" aria-label="Workflow actions">
-    {{range .Guided.Controls}}
+    {{range .Controls}}
       <form method="post" action="/guided/actions"{{if eq .Action "cancel"}} data-workflow-cancel{{end}}>
         <input type="hidden" name="surface" value="guided">
         <input type="hidden" name="action" value="guided.input">
         <input type="hidden" name="confirm" value="true">
-        <input type="hidden" name="id" value="{{$.Guided.RunID}}">
-        <input type="hidden" name="namespace" value="{{$.Guided.Namespace}}">
+        <input type="hidden" name="id" value="{{$.RunID}}">
+        <input type="hidden" name="namespace" value="{{$.Namespace}}">
         <input type="hidden" name="revision" value="{{.Revision}}">
         <input type="hidden" name="native_revision" value="{{.NativeRevision}}">
         <input type="hidden" name="request_id" value="{{.RequestID}}">
@@ -95,8 +95,8 @@
         <button class="button{{if .Primary}} button--primary{{end}}" type="submit">{{if eq .Label "Cancel"}}Cancel workflow{{else}}{{.Label}}{{end}}</button>
       </form>
     {{end}}
-    {{if .Guided.ShowRetry}}{{template "guided_retry_form.html" .}}{{end}}
-    {{if .Guided.ShowReview}}<a class="button button--primary" href="{{.Guided.Work.PullRequestURL}}">Review changes</a>{{end}}
+    {{if .Retry}}{{template "guided_retry_form.html" .Retry}}{{end}}
+    {{if .Review}}<a class="button button--primary" href="{{.ReviewURL}}">Review changes</a>{{end}}
   </div>
 </footer>
 {{end}}
@@ -106,10 +106,10 @@
 <input type="hidden" name="surface" value="guided">
 <input type="hidden" name="action" value="guided.input">
 <input type="hidden" name="confirm" value="true">
-<input type="hidden" name="id" value="{{.Guided.RunID}}">
-<input type="hidden" name="namespace" value="{{.Guided.Namespace}}">
-<input type="hidden" name="revision" value="{{.Guided.Revision}}">
-<input type="hidden" name="request_id" value="{{.Guided.RequestID}}">
-<input type="hidden" name="question_id" value="{{.Guided.QuestionID}}">
-<input type="hidden" name="input_digest" value="{{.Guided.InputDigest}}">
+<input type="hidden" name="id" value="{{.RunID}}">
+<input type="hidden" name="namespace" value="{{.Namespace}}">
+<input type="hidden" name="revision" value="{{.Revision}}">
+<input type="hidden" name="request_id" value="{{.RequestID}}">
+<input type="hidden" name="question_id" value="{{.QuestionID}}">
+<input type="hidden" name="input_digest" value="{{.InputDigest}}">
 {{end}}

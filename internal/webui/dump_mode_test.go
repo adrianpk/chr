@@ -16,7 +16,7 @@ func (p dumpModeProvider) ArtifactDetailView(context.Context, ArtifactDetailRequ
 
 // TestDumpModeActions keeps the wizard forward-only and the manual editor independent.
 func TestDumpModeActions(t *testing.T) {
-	provider := dumpModeProvider{guidedCaptureProvider{view: GuidedUseCaseView{RunID: "run", CaseSlug: "onboarding", Stage: "dump"}}}
+	provider := dumpModeProvider{guidedCaptureProvider{view: GuidedUseCaseView{GuidedRunView: GuidedRunView{RunID: "run", Stage: "dump"}, GuidedPageView: GuidedPageView{CaseSlug: "onboarding"}}}}
 
 	handler, err := NewHandler(HandlerOptions{Provider: provider})
 	if err != nil {

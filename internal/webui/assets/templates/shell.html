@@ -251,7 +251,7 @@
   {{end}}
   <form class="case-edit-form" {{if .Guided.Starting}}data-workflow-form method="post" action="/guided/actions"{{else}}data-case-create method="post" action="/actions" hx-post="/actions" hx-target="#case-create-result" hx-swap="innerHTML" hx-sync="this:drop" hx-disabled-elt="find button[type='submit']"{{end}}>
     {{if .Guided.Starting}}
-      {{if .Guided.RunID}}{{template "guided_fields.html" .}}{{else}}
+      {{if .Guided.RunID}}{{template "guided_fields.html" .Guided.FormFields}}{{else}}
       <input type="hidden" name="surface" value="guided"><input type="hidden" name="action" value="guided.start"><input type="hidden" name="confirm" value="true"><input type="hidden" name="request_id" value="{{.Guided.RequestID}}"><input type="hidden" name="namespace" value="{{.Guided.Namespace}}">
       {{end}}
       <input type="hidden" name="step" value="name">
@@ -467,7 +467,7 @@
 {{define "dump_edit_forms.html"}}
 <form class="action-form" {{if .Guided.RunID}}data-workflow-form method="post" action="/guided/actions"{{else}}data-dump-editor method="post" action="/actions" hx-post="/actions" hx-target="#dump-save-result" hx-swap="innerHTML" hx-disabled-elt="find textarea, find button[type='submit']" onsubmit="return confirm('Save this dump content?')"{{end}}>
   {{if .Guided.RunID}}
-    {{template "guided_fields.html" .}}<input type="hidden" name="step" value="finish">
+    {{template "guided_fields.html" .Guided.FormFields}}<input type="hidden" name="step" value="finish">
   {{else}}
     <input type="hidden" name="action" value="dump.save"><input type="hidden" name="request_id" value="{{.Detail.SaveRequestID}}"><input type="hidden" name="family" value="dumps"><input type="hidden" name="id" value="{{.Detail.ID}}"><input type="hidden" name="revision" value="{{.Detail.Revision}}"><input type="hidden" name="confirm" value="true"><input type="hidden" name="surface" value="{{if .DumpModal}}modal{{else}}editor{{end}}">
   {{end}}

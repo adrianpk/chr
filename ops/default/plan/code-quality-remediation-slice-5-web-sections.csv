@@ -1,0 +1,8 @@
+template,input_type,contract
+guided_fields.html,GuidedFormFields,Displayed owner/request/question guards
+guided_retry_form.html,GuidedRetryForm,Original failed step/content and frozen form fields
+guided_actions.html,GuidedActionsSection,"Visibility, revision-bound controls, original retry and review URL"
+guided_status.html,GuidedStatusSection,Message and contextual actions
+guided_retry.html,GuidedRecoverySection,Observed blocked state and contextual actions
+guided_progress.html,GuidedProgressSection,Observed work counters/message and contextual actions
+guided_result.html,GuidedUseCaseResult,"Verified summary, deliveries and validation"

@@ -31,10 +31,10 @@ func TestGuidedUseCaseCaptureView(t *testing.T) {
 		want   string
 		absent string
 	}{
-		{"start", GuidedUseCaseView{Namespace: "default", RequestID: "start"}, `name="content"`, "Continue to quiz"},
-		{"name", GuidedUseCaseView{RunID: "run", Stage: "name"}, `name="content"`, "Continue to quiz"},
-		{"dump", GuidedUseCaseView{RunID: "run", Stage: "dump", Capture: "<script>bad()</script>"}, "Continue to quiz", "<script>bad()"},
-		{"sealed", GuidedUseCaseView{RunID: "run", Stage: "quiz", Commit: "commit", CommittedDump: "Original capture"}, "Original capture", "Continue to quiz"},
+		{"start", GuidedUseCaseView{GuidedRunView: GuidedRunView{Namespace: "default", RequestID: "start"}}, `name="content"`, "Continue to quiz"},
+		{"name", GuidedUseCaseView{GuidedRunView: GuidedRunView{RunID: "run", Stage: "name"}}, `name="content"`, "Continue to quiz"},
+		{"dump", GuidedUseCaseView{GuidedRunView: GuidedRunView{RunID: "run", Stage: "dump", Capture: "<script>bad()</script>"}}, "Continue to quiz", "<script>bad()"},
+		{"sealed", GuidedUseCaseView{GuidedRunView: GuidedRunView{RunID: "run", Stage: "quiz", Commit: "commit", CommittedDump: "Original capture"}}, "Original capture", "Continue to quiz"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			handler, err := NewHandler(HandlerOptions{Provider: guidedCaptureProvider{view: test.view}})
@@ -101,8 +101,8 @@ func TestGuidedUseCaseQuizView(t *testing.T) {
 		view         GuidedUseCaseView
 		want, absent string
 	}{
-		{"question", GuidedUseCaseView{RunID: "run", Stage: "quiz", Quiz: &QuizAnswerView{Question: "What is the intended result?", QuestionID: "question-current", CanAnswer: true, Open: true, Started: true, Mode: "deep"}, QuestionID: "question-current", InputDigest: "original-inputs"}, `name="question_id" value="question-current"`, "Retry this step"},
-		{"pending", GuidedUseCaseView{RunID: "run", Stage: "quiz", Question: "Superseded question", PendingAction: "answer", PendingContent: "<script>retained</script>", QuestionID: "question-original", InputDigest: "original-inputs"}, `name="question_id" value="question-original"`, "Superseded question"},
+		{"question", GuidedUseCaseView{GuidedRunView: GuidedRunView{RunID: "run", Stage: "quiz"}, GuidedQuestionView: GuidedQuestionView{Quiz: &QuizAnswerView{Question: "What is the intended result?", QuestionID: "question-current", CanAnswer: true, Open: true, Started: true, Mode: "deep"}}, GuidedStepView: GuidedStepView{QuestionID: "question-current", InputDigest: "original-inputs"}}, `name="question_id" value="question-current"`, "Retry this step"},
+		{"pending", GuidedUseCaseView{GuidedRunView: GuidedRunView{RunID: "run", Stage: "quiz"}, GuidedStepView: GuidedStepView{Question: "Superseded question", PendingAction: "answer", PendingContent: "<script>retained</script>", QuestionID: "question-original", InputDigest: "original-inputs"}}, `name="question_id" value="question-original"`, "Superseded question"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			handler, err := NewHandler(HandlerOptions{Provider: guidedCaptureProvider{view: test.view}})
@@ -123,7 +123,7 @@ func TestGuidedUseCaseQuizView(t *testing.T) {
 
 // TestGuidedUseCaseSpecView exposes the complete approved document without a routine approval prompt.
 func TestGuidedUseCaseSpecView(t *testing.T) {
-	view := GuidedUseCaseView{RunID: "run", Stage: "preparation", Blocker: "Configure native workflow version 1 before retrying work preparation.", Artifacts: []GuidedUseCaseArtifact{{Stage: "specification", Commit: "immutable-commit", Reference: "ops/default/spec/original/artifact.md", Content: "Complete original approved specification <script>escaped</script>"}}}
+	view := GuidedUseCaseView{GuidedRunView: GuidedRunView{RunID: "run", Stage: "preparation"}, GuidedStepView: GuidedStepView{Blocker: "Configure native workflow version 1 before retrying work preparation."}, Artifacts: []GuidedUseCaseArtifact{{Stage: "specification", Commit: "immutable-commit", Reference: "ops/default/spec/original/artifact.md", Content: "Complete original approved specification <script>escaped</script>"}}}
 
 	handler, err := NewHandler(HandlerOptions{Provider: guidedCaptureProvider{view: view}})
 	if err != nil {

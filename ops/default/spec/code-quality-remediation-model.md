@@ -259,3 +259,28 @@ suppressions are removed. All operation failures still return zero adapter
 results and retain their original error identities and log fields. Real guided
 TUI journey/parity tests use and assert the single pointer owner without copying
 it back into a value fixture.
+
+
+## Slice 5 guided Web sections
+
+GuidedUseCaseView has 47 original fields. Seven contiguous question, page, ideas,
+lifecycle, run, step and diagnostic groups preserve every original name, Go type,
+tag and encoding order. Result, work, artifacts, enablement and resumable links
+retain their existing section types/fields. The guided-fields ledger accounts
+for every field; frozen zero, non-nil empty and distinct populated JSON images
+and a direct field manifest prove exact compatibility before and after grouping.
+
+Leaf templates now receive only their form bindings, retry form, contextual
+actions, status, recovery, progress or result section. The page compositor keeps
+its existing Detail/Board/quiz/dump inputs. Each control retains its own revision,
+native revision, request, question and input digest; a retry uses the original
+pending action/content and the same displayed owner identity. Visibility flags,
+HTML classes, routes and form field spellings remain unchanged. The section
+methods do not invoke operations or advance work.
+
+WorkflowWorkStatus already uses the cohesive adapter-neutral bindings,
+lifecycle, selection, outcome, scope, counts, control, delivery and page values
+established in Slice 3. Those are reused directly rather than regrouped again.
+The existing frozen work-status images still prove original public JSON bytes,
+omission/default semantics and field order; no service result imports TUI/Web
+presentation types.

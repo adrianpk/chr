@@ -1,0 +1,237 @@
+[
+  {
+    "Name": "Quiz",
+    "Type": "*webui.QuizAnswerView",
+    "Tag": ""
+  },
+  {
+    "Name": "QuizID",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "Processing",
+    "Type": "bool",
+    "Tag": ""
+  },
+  {
+    "Name": "CaseSlug",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "Observation",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "StateURL",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "StateToken",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "Surface",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "CurrentURL",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "Message",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "Starting",
+    "Type": "bool",
+    "Tag": ""
+  },
+  {
+    "Name": "Following",
+    "Type": "bool",
+    "Tag": ""
+  },
+  {
+    "Name": "ShowControls",
+    "Type": "bool",
+    "Tag": ""
+  },
+  {
+    "Name": "ShowRetry",
+    "Type": "bool",
+    "Tag": ""
+  },
+  {
+    "Name": "ShowReview",
+    "Type": "bool",
+    "Tag": ""
+  },
+  {
+    "Name": "ReadOnly",
+    "Type": "bool",
+    "Tag": ""
+  },
+  {
+    "Name": "Result",
+    "Type": "*webui.GuidedUseCaseResult",
+    "Tag": ""
+  },
+  {
+    "Name": "Ideas",
+    "Type": "[]webui.GuidedUseCaseIdea",
+    "Tag": ""
+  },
+  {
+    "Name": "IdeaRequestID",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "IdeaRevision",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "CanRetainIdea",
+    "Type": "bool",
+    "Tag": ""
+  },
+  {
+    "Name": "Controls",
+    "Type": "[]webui.GuidedUseCaseControl",
+    "Tag": ""
+  },
+  {
+    "Name": "Suspended",
+    "Type": "bool",
+    "Tag": ""
+  },
+  {
+    "Name": "ControlStatus",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "Work",
+    "Type": "*webui.GuidedUseCaseWork",
+    "Tag": ""
+  },
+  {
+    "Name": "Enabled",
+    "Type": "bool",
+    "Tag": ""
+  },
+  {
+    "Name": "RunID",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "Namespace",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "Name",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "Revision",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "RequestID",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "Stage",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "Status",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "Capture",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "Commit",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "CommittedDump",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "PendingAction",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "PendingContent",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "Question",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "QuestionID",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "InputDigest",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "RetryAction",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "Blocker",
+    "Type": "string",
+    "Tag": ""
+  },
+  {
+    "Name": "Artifacts",
+    "Type": "[]webui.GuidedUseCaseArtifact",
+    "Tag": ""
+  },
+  {
+    "Name": "Policy",
+    "Type": "[]string",
+    "Tag": ""
+  },
+  {
+    "Name": "Problems",
+    "Type": "[]string",
+    "Tag": ""
+  },
+  {
+    "Name": "Runs",
+    "Type": "[]webui.GuidedUseCaseLink",
+    "Tag": ""
+  }
+]

@@ -17,15 +17,15 @@ func TestCaseWorkflowActions(t *testing.T) {
 		view       GuidedUseCaseView
 		want       []string
 	}{
-		{"dump input", "/dumps", GuidedUseCaseView{Stage: "dump"}, nil},
-		{"quiz input", "/quizzes", GuidedUseCaseView{Stage: "quiz", Quiz: &QuizAnswerView{Open: true, Started: true, CanAnswer: true}}, nil},
-		{"quiz processing", "/quizzes", GuidedUseCaseView{Stage: "quiz", Processing: true}, nil},
-		{"spec processing", "/specs", GuidedUseCaseView{Stage: "specification", Processing: true}, nil},
-		{"plan recovery", "/plans", GuidedUseCaseView{Stage: "preparation", PendingAction: "admit", Status: "blocked"}, []string{"cancel", "admit"}},
-		{"prior document", "/dumps", GuidedUseCaseView{Stage: "preparation", PendingAction: "admit", Status: "blocked"}, nil},
-		{"paused authoring", "/quizzes", GuidedUseCaseView{Stage: "quiz", Suspended: true, Status: "paused"}, []string{"cancel", "resume"}},
-		{"execution", "/board", GuidedUseCaseView{Stage: "execution", Work: &GuidedUseCaseWork{Status: "running"}}, []string{"pause", "cancel"}},
-		{"blocked execution", "/board", GuidedUseCaseView{Stage: "execution", Work: &GuidedUseCaseWork{Status: "blocked"}}, []string{"cancel"}},
+		{"dump input", "/dumps", GuidedUseCaseView{GuidedRunView: GuidedRunView{Stage: "dump"}}, nil},
+		{"quiz input", "/quizzes", GuidedUseCaseView{GuidedRunView: GuidedRunView{Stage: "quiz"}, GuidedQuestionView: GuidedQuestionView{Quiz: &QuizAnswerView{Open: true, Started: true, CanAnswer: true}}}, nil},
+		{"quiz processing", "/quizzes", GuidedUseCaseView{GuidedRunView: GuidedRunView{Stage: "quiz"}, GuidedQuestionView: GuidedQuestionView{Processing: true}}, nil},
+		{"spec processing", "/specs", GuidedUseCaseView{GuidedRunView: GuidedRunView{Stage: "specification"}, GuidedQuestionView: GuidedQuestionView{Processing: true}}, nil},
+		{"plan recovery", "/plans", GuidedUseCaseView{GuidedRunView: GuidedRunView{Stage: "preparation", Status: "blocked"}, GuidedStepView: GuidedStepView{PendingAction: "admit"}}, []string{"cancel", "admit"}},
+		{"prior document", "/dumps", GuidedUseCaseView{GuidedRunView: GuidedRunView{Stage: "preparation", Status: "blocked"}, GuidedStepView: GuidedStepView{PendingAction: "admit"}}, nil},
+		{"paused authoring", "/quizzes", GuidedUseCaseView{GuidedRunView: GuidedRunView{Stage: "quiz", Status: "paused"}, GuidedLifecycleView: GuidedLifecycleView{Suspended: true}}, []string{"cancel", "resume"}},
+		{"execution", "/board", GuidedUseCaseView{GuidedRunView: GuidedRunView{Stage: "execution"}, Work: &GuidedUseCaseWork{Status: "running"}}, []string{"pause", "cancel"}},
+		{"blocked execution", "/board", GuidedUseCaseView{GuidedRunView: GuidedRunView{Stage: "execution"}, Work: &GuidedUseCaseWork{Status: "blocked"}}, []string{"cancel"}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			view := test.view
