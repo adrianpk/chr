@@ -23,34 +23,34 @@ func readWorkflowConfigValues(data []byte) (map[string]string, error) {
 		line := scanner.Text()
 		previous := strings.Split(section, ".")[0]
 
-		key, value, next, ok := parseWorkspaceConfigLine(line, section)
-		if err := guardWorkflowConfigIndent(line, previous, key, ok); err != nil {
+		parsed := parseWorkspaceConfigLine(line, section)
+		if err := guardWorkflowConfigIndent(line, previous, parsed.Key, parsed.Parsed); err != nil {
 			return nil, err
 		}
 
-		section = next
-		if err := guardWorkflowNativeSection(line, section, ok, sections); err != nil {
+		section = parsed.Section
+		if err := guardWorkflowNativeSection(line, section, parsed.Parsed, sections); err != nil {
 			return nil, err
 		}
 
-		if err := guardWorkflowConfigLine(line, section, key, ok, sections); err != nil {
+		if err := guardWorkflowConfigLine(line, section, parsed.Key, parsed.Parsed, sections); err != nil {
 			return nil, err
 		}
 
-		if !ok || !workflowConfigSection(section) {
+		if !parsed.Parsed || !workflowConfigSection(section) {
 			continue
 		}
 
-		qualified := section + "." + key
+		qualified := section + "." + parsed.Key
 		if _, present := values[qualified]; present {
 			return nil, fmt.Errorf("duplicate workspace config key: %s", qualified)
 		}
 
-		if err := guardWorkflowConfigValue(qualified, value); err != nil {
+		if err := guardWorkflowConfigValue(qualified, parsed.Value); err != nil {
 			return nil, err
 		}
 
-		values[qualified] = workflowConfigScalarImage(qualified, line, value)
+		values[qualified] = workflowConfigScalarImage(qualified, line, parsed.Value)
 	}
 
 	return values, scanner.Err()

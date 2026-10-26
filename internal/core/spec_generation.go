@@ -45,15 +45,15 @@ func GeneratedSpecLayout(projectDir string, scope QuizScope) (GeneratedSpecPaths
 		return GeneratedSpecPaths{}, err
 	}
 
-	relativePath, path, err := NamedOpsArtifactBody(projectDir, "spec", scopeID+"-spec")
+	body, err := NamedOpsArtifactBody(projectDir, "spec", scopeID+"-spec")
 	if err != nil {
 		return GeneratedSpecPaths{}, err
 	}
 
 	return GeneratedSpecPaths{
 		ScopeID:      scopeID,
-		RelativePath: relativePath,
-		Path:         path,
+		RelativePath: body.RelativePath,
+		Path:         body.Path,
 	}, nil
 }
 

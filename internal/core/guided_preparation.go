@@ -152,7 +152,7 @@ func SealGuidedPreparation(ctx context.Context, root string, session *AuthoringS
 		}
 	}
 
-	if err := sealGuidedStage(ctx, root, session, "preparation", paths, source); err != nil {
+	if err := sealGuidedStage(ctx, root, session, guidedStageSeal{Stage: "preparation", Paths: paths, Source: source}); err != nil {
 		return err
 	}
 

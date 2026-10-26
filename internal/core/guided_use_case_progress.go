@@ -183,7 +183,7 @@ func SealGuidedQuiz(ctx context.Context, root string, session *AuthoringSession)
 		return err
 	}
 
-	if err := sealGuidedStage(ctx, root, session, "quiz", references, session.Guided.Checkpoints[0]); err != nil {
+	if err := sealGuidedStage(ctx, root, session, guidedStageSeal{Stage: "quiz", Paths: references, Source: session.Guided.Checkpoints[0]}); err != nil {
 		return err
 	}
 
@@ -208,7 +208,13 @@ func guardGuidedQuizCompletion(session AuthoringSession, observed QuizObservatio
 	return nil
 }
 
-func sealGuidedStage(ctx context.Context, root string, session *AuthoringSession, stage string, paths []string, source GuidedStageCheckpoint) error {
+type guidedStageSeal struct {
+	Stage  string
+	Paths  []string
+	Source GuidedStageCheckpoint
+}
+
+func sealGuidedStage(ctx context.Context, root string, session *AuthoringSession, seal guidedStageSeal) error {
 	r := &fileAuthoringSessionRepository{projectDir: root}
 
 	operation := session.Guided.PendingOperation
@@ -217,14 +223,14 @@ func sealGuidedStage(ctx context.Context, root string, session *AuthoringSession
 	}
 
 	if session.Guided.PendingCheckpoint == nil {
-		checkpoint, err := r.observeGuidedCheckpoint(ctx, session.ID, *operation, stage, paths)
+		checkpoint, err := r.observeGuidedCheckpoint(ctx, session.ID, *operation, seal.Stage, seal.Paths)
 		if err != nil {
 			return err
 		}
 
-		checkpoint.Sources = append(checkpoint.Sources, source.Sources...)
-		for _, artifact := range source.Artifacts {
-			artifact.Repository, artifact.Commit = source.Repository, source.Commit
+		checkpoint.Sources = append(checkpoint.Sources, seal.Source.Sources...)
+		for _, artifact := range seal.Source.Artifacts {
+			artifact.Repository, artifact.Commit = seal.Source.Repository, seal.Source.Commit
 			checkpoint.Sources = append(checkpoint.Sources, artifact)
 		}
 
@@ -235,7 +241,7 @@ func sealGuidedStage(ctx context.Context, root string, session *AuthoringSession
 	}
 
 	pending := session.Guided.PendingCheckpoint
-	if pending.OperationID != operation.ID || pending.Stage != stage || pending.Ref != guidedCheckpointRef(session.ID, operation.Digest) {
+	if pending.OperationID != operation.ID || pending.Stage != seal.Stage || pending.Ref != guidedCheckpointRef(session.ID, operation.Digest) {
 		return ErrWorkflowConflict
 	}
 

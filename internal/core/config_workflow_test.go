@@ -52,7 +52,8 @@ func workflowTestConfigValueImage(body, root, key, value string) string {
 
 	heading, section := -1, ""
 	for i, line := range lines {
-		parsed, _, next, scalar := parseWorkspaceConfigLine(line, section)
+		parsedLine := parseWorkspaceConfigLine(line, section)
+		parsed, next, scalar := parsedLine.Key, parsedLine.Section, parsedLine.Parsed
 
 		section = next
 		if scalar && section == root && parsed == key {

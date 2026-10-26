@@ -178,7 +178,7 @@ func ReadSQLiteMigrations(assetsFS fs.FS) ([]Migration, error) {
 }
 
 func readMigration(assetsFS fs.FS, name string) (Migration, error) {
-	version, migrationName, err := parseMigrationName(name)
+	identity, err := parseMigrationName(name)
 	if err != nil {
 		return Migration{}, err
 	}
@@ -190,58 +190,66 @@ func readMigration(assetsFS fs.FS, name string) (Migration, error) {
 		return Migration{}, fmt.Errorf("read migration %s: %w", name, err)
 	}
 
-	upSQL, downSQL, err := splitMigrationSQL(string(content))
+	statements, err := splitMigrationSQL(string(content))
 	if err != nil {
 		return Migration{}, fmt.Errorf("parse migration %s: %w", name, err)
 	}
 
 	return Migration{
-		Version: version,
-		Name:    migrationName,
-		UpSQL:   upSQL,
-		DownSQL: downSQL,
+		Version: identity.Version,
+		Name:    identity.Name,
+		UpSQL:   statements.Up,
+		DownSQL: statements.Down,
 	}, nil
 }
 
-func parseMigrationName(filename string) (string, string, error) {
+type migrationIdentity struct {
+	Version, Name string
+}
+
+type migrationStatements struct {
+	Up, Down string
+}
+
+func parseMigrationName(filename string) (migrationIdentity, error) {
 	filename = strings.TrimSuffix(filename, filepath.Ext(filename))
 
 	version, name, ok := strings.Cut(filename, "-")
 	if !ok || version == "" || name == "" {
-		return "", "", fmt.Errorf("invalid migration filename: %s", filename)
+		return migrationIdentity{}, fmt.Errorf("invalid migration filename: %s", filename)
 	}
 
-	return version, name, nil
+	return migrationIdentity{Version: version, Name: name}, nil
 }
 
-func splitMigrationSQL(content string) (string, string, error) {
+func splitMigrationSQL(content string) (migrationStatements, error) {
 	upStart := strings.Index(content, migrateUpMarker)
 	downStart := strings.Index(content, migrateDownMarker)
 
 	if upStart < 0 {
-		return "", "", errors.New("missing up section")
+		return migrationStatements{}, errors.New("missing up section")
 	}
 
 	if downStart < 0 {
-		return "", "", errors.New("missing down section")
+		return migrationStatements{}, errors.New("missing down section")
 	}
 
 	if downStart < upStart {
-		return "", "", errors.New("down section appears before up section")
+		return migrationStatements{}, errors.New("down section appears before up section")
 	}
 
 	upSQL := strings.TrimSpace(content[upStart+len(migrateUpMarker) : downStart])
 	downSQL := strings.TrimSpace(content[downStart+len(migrateDownMarker):])
 
 	if upSQL == "" {
-		return "", "", errors.New("empty up section")
+		return migrationStatements{}, errors.New("empty up section")
 	}
 
 	if downSQL == "" {
-		return "", "", errors.New("empty down section")
+		return migrationStatements{}, errors.New("empty down section")
 	}
 
-	return upSQL, downSQL, nil
+	return migrationStatements{Up: upSQL, Down: downSQL}, nil
 }
 
 func migrationApplied(ctx context.Context, db *sql.DB, version string) (bool, error) {

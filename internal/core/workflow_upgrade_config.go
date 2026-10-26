@@ -119,8 +119,8 @@ func setWorkflowUpgradeValue(data []byte, section, key, value string) []byte {
 
 func replaceWorkflowUpgradeValue(lines []string, start, end int, key, replacement string) []string {
 	for i := start + 1; i < end; i++ {
-		observed, _, _, ok := parseWorkspaceConfigLine(lines[i], "")
-		if ok && observed == key {
+		observed := parseWorkspaceConfigLine(lines[i], "")
+		if observed.Parsed && observed.Key == key {
 			lines[i] = replacement
 
 			return lines

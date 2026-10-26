@@ -186,12 +186,12 @@ func ParseProvingObjective(content string) (ProvingObjective, error) {
 
 // RunProvingSandbox executes the corresponding package operation.
 func RunProvingSandbox(ctx context.Context, opts ProvingSandboxRunOptions) (ProvingSandboxRunResult, error) {
-	projectDir, objective, err := loadProvingObjectiveForProject(opts.ProjectDir, opts.ObjectivePath)
+	source, err := loadProvingObjectiveForProject(opts.ProjectDir, opts.ObjectivePath)
 	if err != nil {
 		return ProvingSandboxRunResult{}, err
 	}
 
-	return RunProvingSandboxForObjective(ctx, opts, projectDir, objective)
+	return RunProvingSandboxForObjective(ctx, opts, source.ProjectDir, source.Objective)
 }
 
 // RunProvingSandboxForObjective executes the corresponding package operation.
@@ -231,12 +231,12 @@ func RunProvingSandboxForObjective(
 
 // RunProvingValidation executes the corresponding package operation.
 func RunProvingValidation(ctx context.Context, projectDir, objectivePath string) (ProvingValidationResult, error) {
-	projectDir, objective, err := loadProvingObjectiveForProject(projectDir, objectivePath)
+	source, err := loadProvingObjectiveForProject(projectDir, objectivePath)
 	if err != nil {
 		return ProvingValidationResult{}, err
 	}
 
-	return RunProvingValidationForObjective(ctx, projectDir, objective)
+	return RunProvingValidationForObjective(ctx, source.ProjectDir, source.Objective)
 }
 
 // RunProvingValidationForObjective executes the corresponding package operation.
@@ -290,53 +290,46 @@ func RunProvingValidationForObjective(
 
 // RunProvingRalphLoop executes the corresponding package operation.
 func RunProvingRalphLoop(ctx context.Context, opts ProvingRalphLoopOptions) (ProvingRalphLoopResult, error) {
-	projectDir, objective, err := loadProvingObjectiveForProject(opts.ProjectDir, opts.ObjectivePath)
+	source, err := loadProvingObjectiveForProject(opts.ProjectDir, opts.ObjectivePath)
 	if err != nil {
 		return ProvingRalphLoopResult{}, err
 	}
 
-	maxAttempts, err := provingRalphLoopMaxAttempts(opts, objective)
+	maxAttempts, err := provingRalphLoopMaxAttempts(opts, source.Objective)
 	if err != nil {
 		return ProvingRalphLoopResult{}, err
 	}
 
 	validationRunner := provingRalphLoopValidationRunner(opts)
-	result := newProvingRalphLoopResult(projectDir, objective)
+	result := newProvingRalphLoopResult(source.ProjectDir, source.Objective)
 	seenFailures := map[string]bool{}
 
 	var previousValidation *ProvingValidationResult
 
 	for attemptNumber := 1; attemptNumber <= maxAttempts; attemptNumber++ {
-		attemptObjective := provingAttemptObjective(objective, attemptNumber, previousValidation)
-		attempt, validation, status, stopReason := runProvingRalphLoopAttempt(
-			ctx,
-			opts,
-			projectDir,
-			attemptNumber,
-			attemptObjective,
-			validationRunner,
-		)
-		result.Attempts = append(result.Attempts, attempt)
+		attemptObjective := provingAttemptObjective(source.Objective, attemptNumber, previousValidation)
+		outcome := runProvingRalphLoopAttempt(ctx, opts, provingAttemptInput{ProjectDir: source.ProjectDir, Number: attemptNumber, Objective: attemptObjective}, validationRunner)
+		result.Attempts = append(result.Attempts, outcome.Attempt)
 
-		if stopReason != "" {
-			result.Status = status
-			result.StopReason = stopReason
+		if outcome.StopReason != "" {
+			result.Status = outcome.Status
+			result.StopReason = outcome.StopReason
 
 			break
 		}
 
-		if seenFailures[attempt.FailureSignature] {
+		if seenFailures[outcome.Attempt.FailureSignature] {
 			result.Status = ProvingRalphLoopStatusFailed
 			result.StopReason = ProvingRalphLoopStopRepeatedFailure
 
 			break
 		}
 
-		seenFailures[attempt.FailureSignature] = true
-		previousValidation = validation
+		seenFailures[outcome.Attempt.FailureSignature] = true
+		previousValidation = outcome.Validation
 	}
 
-	err = writeProvingRalphLoopSummary(projectDir, result)
+	err = writeProvingRalphLoopSummary(source.ProjectDir, result)
 	if err != nil {
 		return ProvingRalphLoopResult{}, err
 	}
@@ -376,35 +369,41 @@ func newProvingRalphLoopResult(projectDir string, objective ProvingObjective) Pr
 	}
 }
 
-func runProvingRalphLoopAttempt(
-	ctx context.Context,
-	opts ProvingRalphLoopOptions,
-	projectDir string,
-	attemptNumber int,
-	attemptObjective ProvingObjective,
-	validationRunner ProvingValidationRunner,
-) (ProvingRalphLoopAttempt, *ProvingValidationResult, string, string) {
-	attempt := provingRalphLoopAttempt(attemptNumber, attemptObjective)
+type provingAttemptInput struct {
+	ProjectDir string
+	Number     int
+	Objective  ProvingObjective
+}
+
+type provingAttemptOutcome struct {
+	Attempt    ProvingRalphLoopAttempt
+	Validation *ProvingValidationResult
+	Status     string
+	StopReason string
+}
+
+func runProvingRalphLoopAttempt(ctx context.Context, opts ProvingRalphLoopOptions, input provingAttemptInput, validationRunner ProvingValidationRunner) provingAttemptOutcome {
+	attempt := provingRalphLoopAttempt(input.Number, input.Objective)
 
 	sandbox, sandboxErr := RunProvingSandboxForObjective(ctx, ProvingSandboxRunOptions{
 		Worker:     opts.Worker,
-		ProjectDir: projectDir,
+		ProjectDir: input.ProjectDir,
 		DryRun:     false,
 		Executor:   opts.Executor,
 		Stdout:     opts.Stdout,
 		Stderr:     opts.Stderr,
-	}, projectDir, attemptObjective)
+	}, input.ProjectDir, input.Objective)
 	if sandboxErr != nil {
 		attempt.Error = sandboxErr.Error()
 
-		return attempt, nil, ProvingRalphLoopStatusBlocked, ProvingRalphLoopStopAgentFailed
+		return provingAttemptOutcome{Attempt: attempt, Status: ProvingRalphLoopStatusBlocked, StopReason: ProvingRalphLoopStopAgentFailed}
 	}
 
-	validation, validationErr := validationRunner(ctx, projectDir, attemptObjective)
+	validation, validationErr := validationRunner(ctx, input.ProjectDir, input.Objective)
 	if validationErr != nil {
 		attempt.Error = validationErr.Error()
 
-		return attempt, nil, ProvingRalphLoopStatusBlocked, ProvingRalphLoopStopValidationFailed
+		return provingAttemptOutcome{Attempt: attempt, Status: ProvingRalphLoopStatusBlocked, StopReason: ProvingRalphLoopStopValidationFailed}
 	}
 
 	attempt.ContextPath = sandbox.Plan.WorkerContextPath
@@ -415,10 +414,10 @@ func runProvingRalphLoopAttempt(
 	attempt.FailureSignature = ProvingValidationFailureSignature(validation)
 
 	if validation.Passed {
-		return attempt, &validation, ProvingRalphLoopStatusPassed, ProvingRalphLoopStopValidationPassed
+		return provingAttemptOutcome{Attempt: attempt, Validation: &validation, Status: ProvingRalphLoopStatusPassed, StopReason: ProvingRalphLoopStopValidationPassed}
 	}
 
-	return attempt, &validation, "", ""
+	return provingAttemptOutcome{Attempt: attempt, Validation: &validation}
 }
 
 // ProvingValidationCommands executes the corresponding package operation.
@@ -703,12 +702,12 @@ func ProvingValidationFailureSignature(result ProvingValidationResult) string {
 
 // PlanProvingSandboxRun executes the corresponding package operation.
 func PlanProvingSandboxRun(projectDir, objectivePath string, worker harness.Worker) (ProvingSandboxRunResult, error) {
-	projectDir, objective, err := loadProvingObjectiveForProject(projectDir, objectivePath)
+	source, err := loadProvingObjectiveForProject(projectDir, objectivePath)
 	if err != nil {
 		return ProvingSandboxRunResult{}, err
 	}
 
-	return PlanProvingSandboxRunForObjective(projectDir, objective, worker)
+	return PlanProvingSandboxRunForObjective(source.ProjectDir, source.Objective, worker)
 }
 
 // PlanProvingSandboxRunForObjective executes the corresponding package operation.
@@ -766,18 +765,23 @@ func planProvingRuntime(projectDir string, objective ProvingObjective, mounts []
 	return ProvingSandboxRunResult{Objective: objective, Plan: plan, TicketPath: ticketPath}, nil
 }
 
-func loadProvingObjectiveForProject(projectDir, objectivePath string) (string, ProvingObjective, error) {
+type provingObjectiveSource struct {
+	ProjectDir string
+	Objective  ProvingObjective
+}
+
+func loadProvingObjectiveForProject(projectDir, objectivePath string) (provingObjectiveSource, error) {
 	projectDir, err := resolveProjectDir(projectDir)
 	if err != nil {
-		return "", ProvingObjective{}, err
+		return provingObjectiveSource{}, err
 	}
 
 	objective, err := LoadProvingObjective(resolveProjectPath(projectDir, objectivePath))
 	if err != nil {
-		return "", ProvingObjective{}, err
+		return provingObjectiveSource{}, err
 	}
 
-	return projectDir, objective, nil
+	return provingObjectiveSource{ProjectDir: projectDir, Objective: objective}, nil
 }
 
 func ensureProvingOpsArtifact(projectDir string, objective ProvingObjective) (OpsArtifact, error) {

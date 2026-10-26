@@ -137,7 +137,9 @@ func authoringArtifactPath(opts AuthoringArtifactLayoutOptions) (string, string,
 	fileName := authoringArtifactFileName(opts.SessionID, name)
 	artifactType := authoringArtifactType(opts.Kind)
 
-	return NamedOpsArtifactBody(opts.ProjectDir, artifactType, strings.TrimSuffix(fileName, ".md"))
+	body, err := NamedOpsArtifactBody(opts.ProjectDir, artifactType, strings.TrimSuffix(fileName, ".md"))
+
+	return body.RelativePath, body.Path, err
 }
 
 func authoringArtifactType(kind AuthoringArtifactKind) string {

@@ -81,12 +81,12 @@ func QuizArtifactLayout(projectDir string, scope QuizScope) (QuizArtifactPaths, 
 		return QuizArtifactPaths{}, err
 	}
 
-	rawRelativePath, rawPath, err := NamedOpsArtifactBody(projectDir, "quiz", scopeID+"-quiz-raw")
+	raw, err := NamedOpsArtifactBody(projectDir, "quiz", scopeID+"-quiz-raw")
 	if err != nil {
 		return QuizArtifactPaths{}, err
 	}
 
-	curatedRelativePath, curatedPath, err := NamedOpsArtifactBody(projectDir, "quiz", scopeID+"-quiz")
+	curated, err := NamedOpsArtifactBody(projectDir, "quiz", scopeID+"-quiz")
 	if err != nil {
 		return QuizArtifactPaths{}, err
 	}
@@ -95,10 +95,10 @@ func QuizArtifactLayout(projectDir string, scope QuizScope) (QuizArtifactPaths, 
 
 	return QuizArtifactPaths{
 		ScopeID:             scopeID,
-		RawRelativePath:     rawRelativePath,
-		RawPath:             rawPath,
-		CuratedRelativePath: curatedRelativePath,
-		CuratedPath:         curatedPath,
+		RawRelativePath:     raw.RelativePath,
+		RawPath:             raw.Path,
+		CuratedRelativePath: curated.RelativePath,
+		CuratedPath:         curated.Path,
 		RuntimeRelativePath: runtimeRelativePath,
 		RuntimePath:         filepath.Join(projectDir, filepath.FromSlash(runtimeRelativePath)),
 	}, nil

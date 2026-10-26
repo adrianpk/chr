@@ -6,7 +6,7 @@ Delivery set: code-quality-remediation
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 2, Shared boundary values and residual core helpers; predecessor PR #438 verified integrated; approved and ready.
+Active slice: Slice 2, Shared boundary values and residual core helpers; in progress on its approved branch; predecessor PR #438 verified integrated.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b`
 
 Plan: [Single-cycle plan](../plan/code-quality-remediation.md)
@@ -57,7 +57,7 @@ The maintainer approved implementation, conventional commit/push and startup of 
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T2.1 | For root-level helpers outside the later capability slices, replace unrelated positional outputs with named results and repeated cohesive arguments with operation inputs. Review the config, context, migration, workspace, report and proving detections assigned by the inventory. | pending | — | not run |
+| T2.1 | For root-level helpers outside the later capability slices, replace unrelated positional outputs with named results and repeated cohesive arguments with operation inputs. Review the config, context, migration, workspace, report and proving detections assigned by the inventory. | implemented | task commit: refactor(core): name parser and proving operation values | focused config/init/proving/context/guided checks; production policy scan |
 | T2.2 | Preserve absence, applied, changed, cached and partial outcomes separately. Use a named result with a found or changed field when absence is normal; use errors.Is-compatible errors where absence is already an error. Preserve all caller branches and error wrapping. | pending | — | not run |
 | T2.3 | Resolve the real shared values, path/hash primitives and boundary ports needed by package extraction. Reuse existing owners; introduce a focused owner only when the actual dependency graph requires it. No generic common, util or options package, and no stored context.Context. | pending | — | not run |
 | T2.4 | Review oversized proving.go and shared parsers/schema files. Split distinct responsibilities, preserve cohesive parsers or schema literals with a recorded reason, and simplify justified control-flag helpers. Assign every remaining root production file a final owner in the dependency ledger. | pending | — | not run |

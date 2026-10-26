@@ -135,7 +135,7 @@ func SealGuidedSpec(ctx context.Context, root string, session *AuthoringSession)
 	}
 
 	paths := []string{approval.Reference, filepath.ToSlash(filepath.Join(filepath.Dir(approval.Reference), "metadata.json"))}
-	if err := sealGuidedStage(ctx, root, session, "specification", paths, source); err != nil {
+	if err := sealGuidedStage(ctx, root, session, guidedStageSeal{Stage: "specification", Paths: paths, Source: source}); err != nil {
 		return err
 	}
 

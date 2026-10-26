@@ -444,14 +444,14 @@ func applyWorkspaceConfig(data []byte, config *WorkspaceConfig) error {
 	section := ""
 
 	for scanner.Scan() {
-		key, value, updatedSection, ok := parseWorkspaceConfigLine(scanner.Text(), section)
-		section = updatedSection
+		line := parseWorkspaceConfigLine(scanner.Text(), section)
+		section = line.Section
 
-		if !ok {
+		if !line.Parsed {
 			continue
 		}
 
-		applyWorkspaceConfigValue(config, section, key, value)
+		applyWorkspaceConfigValue(config, section, line.Key, line.Value)
 	}
 
 	err := scanner.Err()
@@ -497,21 +497,26 @@ func setWorkspaceConfigRootValue(config *WorkspaceConfig, section, key, value st
 	return true
 }
 
-func parseWorkspaceConfigLine(rawLine, section string) (string, string, string, bool) {
+type workspaceConfigLine struct {
+	Key, Value, Section string
+	Parsed              bool
+}
+
+func parseWorkspaceConfigLine(rawLine, section string) workspaceConfigLine {
 	line := strings.TrimSpace(rawLine)
 	if line == "" || strings.HasPrefix(line, "#") {
-		return "", "", section, false
+		return workspaceConfigLine{Section: section}
 	}
 
 	indent := len(rawLine) - len(strings.TrimLeft(rawLine, " "))
 	section = workspaceConfigSiblingSection(section, indent)
 
 	if indent == 0 && strings.HasSuffix(line, ":") {
-		return "", "", strings.TrimSuffix(line, ":"), false
+		return workspaceConfigLine{Section: strings.TrimSuffix(line, ":")}
 	}
 
 	if indent > 0 && strings.HasSuffix(line, ":") && !strings.Contains(section, ".") {
-		return "", "", section + "." + strings.TrimSuffix(line, ":"), false
+		return workspaceConfigLine{Section: section + "." + strings.TrimSuffix(line, ":")}
 	}
 
 	if indent == 0 {
@@ -520,10 +525,10 @@ func parseWorkspaceConfigLine(rawLine, section string) (string, string, string, 
 
 	key, value, ok := strings.Cut(line, ":")
 	if !ok {
-		return "", "", section, false
+		return workspaceConfigLine{Section: section}
 	}
 
-	return strings.TrimSpace(key), configStringValue(value), section, true
+	return workspaceConfigLine{Key: strings.TrimSpace(key), Value: configStringValue(value), Section: section, Parsed: true}
 }
 
 func workspaceConfigSiblingSection(section string, indent int) string {

@@ -45,15 +45,15 @@ func QuizDraftSpecLayout(projectDir string, scope QuizScope) (QuizDraftSpecPaths
 		return QuizDraftSpecPaths{}, err
 	}
 
-	relativePath, path, err := NamedOpsArtifactBody(projectDir, "spec", scopeID+"-quiz-spec")
+	body, err := NamedOpsArtifactBody(projectDir, "spec", scopeID+"-quiz-spec")
 	if err != nil {
 		return QuizDraftSpecPaths{}, err
 	}
 
 	return QuizDraftSpecPaths{
 		ScopeID:      scopeID,
-		RelativePath: relativePath,
-		Path:         path,
+		RelativePath: body.RelativePath,
+		Path:         body.Path,
 	}, nil
 }
 

@@ -193,15 +193,15 @@ func AcceptanceFeatureLayout(projectDir string, scope QuizScope) (AcceptanceFeat
 		return AcceptanceFeaturePaths{}, err
 	}
 
-	relativePath, path, err := NamedOpsArtifactBody(projectDir, "spec", scopeID+"-acceptance-feature")
+	body, err := NamedOpsArtifactBody(projectDir, "spec", scopeID+"-acceptance-feature")
 	if err != nil {
 		return AcceptanceFeaturePaths{}, err
 	}
 
 	return AcceptanceFeaturePaths{
 		ScopeID:      scopeID,
-		RelativePath: relativePath,
-		Path:         path,
+		RelativePath: body.RelativePath,
+		Path:         body.Path,
 	}, nil
 }
 
@@ -217,15 +217,15 @@ func AcceptanceFeatureRoundLayout(projectDir string, scope QuizScope) (Acceptanc
 		return AcceptanceFeatureRoundPaths{}, err
 	}
 
-	relativePath, path, err := NamedOpsArtifactBody(projectDir, "spec", scopeID+"-acceptance-feature-round")
+	body, err := NamedOpsArtifactBody(projectDir, "spec", scopeID+"-acceptance-feature-round")
 	if err != nil {
 		return AcceptanceFeatureRoundPaths{}, err
 	}
 
 	return AcceptanceFeatureRoundPaths{
 		ScopeID:      scopeID,
-		RelativePath: relativePath,
-		Path:         path,
+		RelativePath: body.RelativePath,
+		Path:         body.Path,
 	}, nil
 }
 

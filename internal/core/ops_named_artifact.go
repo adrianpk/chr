@@ -6,28 +6,34 @@ import (
 	"time"
 )
 
+// NamedOpsArtifactPath binds absolute and project-relative paths to the same body.
+type NamedOpsArtifactPath struct {
+	RelativePath string
+	Path         string
+}
+
 // NamedOpsArtifactBody resolves a deterministic Markdown artifact body path.
-func NamedOpsArtifactBody(projectDir, artifactType, name string) (string, string, error) {
+func NamedOpsArtifactBody(projectDir, artifactType, name string) (NamedOpsArtifactPath, error) {
 	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir})
 	if err != nil {
-		return "", "", err
+		return NamedOpsArtifactPath{}, err
 	}
 
 	id := "00000-" + opsArtifactSlugOrDefault(name)
 
 	artifactDir, err := layout.ArtifactDirectory(artifactType, id)
 	if err != nil {
-		return "", "", err
+		return NamedOpsArtifactPath{}, err
 	}
 
 	bodyPath := filepath.Join(artifactDir, OpsArtifactBodyFile())
 
 	relativePath, err := filepath.Rel(projectDir, bodyPath)
 	if err != nil {
-		return "", "", err
+		return NamedOpsArtifactPath{}, err
 	}
 
-	return filepath.ToSlash(relativePath), bodyPath, nil
+	return NamedOpsArtifactPath{RelativePath: filepath.ToSlash(relativePath), Path: bodyPath}, nil
 }
 
 // EnsureOpsArtifactBodyMetadata ensures metadata for a canonical ops artifact body.

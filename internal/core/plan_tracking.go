@@ -58,15 +58,15 @@ func GeneratedPlanTrackingLayout(projectDir string, scope QuizScope) (GeneratedP
 		return GeneratedPlanTrackingPaths{}, err
 	}
 
-	relativePath, path, err := NamedOpsArtifactBody(projectDir, "tracker", scopeID+"-tracking")
+	body, err := NamedOpsArtifactBody(projectDir, "tracker", scopeID+"-tracking")
 	if err != nil {
 		return GeneratedPlanTrackingPaths{}, err
 	}
 
 	return GeneratedPlanTrackingPaths{
 		ScopeID:      scopeID,
-		RelativePath: relativePath,
-		Path:         path,
+		RelativePath: body.RelativePath,
+		Path:         body.Path,
 	}, nil
 }
 

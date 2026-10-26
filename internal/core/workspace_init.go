@@ -130,7 +130,7 @@ func (w *workspace) Init(ctx context.Context, opts InitOptions) (InitResult, err
 		profile = DefaultProfile
 	}
 
-	err = w.initWorkspaceFiles(ctx, absProjectDir, profile, newProject, opts.DryRun, &result)
+	err = w.initWorkspaceFiles(ctx, workspaceFileInitialization{ProjectDir: absProjectDir, Profile: profile, NewProject: newProject, DryRun: opts.DryRun}, &result)
 	if err != nil {
 		return InitResult{}, err
 	}
@@ -186,8 +186,15 @@ func initDirectories(ctx context.Context, projectDir string, dryRun bool, result
 	return nil
 }
 
-func (w *workspace) initWorkspaceFiles(ctx context.Context, projectDir, profile string, newProject, dryRun bool, result *InitResult) error {
-	files, err := w.profileFiles(profile, workspaceFile)
+type workspaceFileInitialization struct {
+	ProjectDir string
+	Profile    string
+	NewProject bool
+	DryRun     bool
+}
+
+func (w *workspace) initWorkspaceFiles(ctx context.Context, input workspaceFileInitialization, result *InitResult) error {
+	files, err := w.profileFiles(input.Profile, workspaceFile)
 	if err != nil {
 		return err
 	}
@@ -199,9 +206,9 @@ func (w *workspace) initWorkspaceFiles(ctx context.Context, projectDir, profile 
 		}
 
 		rel := filepath.Join(DirectoryName, UserDirectoryName, filepath.FromSlash(file.path))
-		target := filepath.Join(projectDir, rel)
+		target := filepath.Join(input.ProjectDir, rel)
 		// Absence is an existing policy choice, not permission to enable version one.
-		if file.path == "config.yml" && !newProject {
+		if file.path == "config.yml" && !input.NewProject {
 			_, err = os.Stat(target)
 			if errors.Is(err, os.ErrNotExist) {
 				result.Preserved = append(result.Preserved, filepath.ToSlash(rel))
@@ -210,7 +217,7 @@ func (w *workspace) initWorkspaceFiles(ctx context.Context, projectDir, profile 
 			}
 		}
 
-		created, err := createFile(target, file.content, dryRun)
+		created, err := createFile(target, file.content, input.DryRun)
 		if err != nil {
 			return err
 		}

@@ -270,7 +270,9 @@ func (p GeneratedPlan) HasContent() bool {
 
 func scopedPlanArtifactBody(projectDir, namespace, name string) (string, string, error) {
 	if namespace == "" {
-		return NamedOpsArtifactBody(projectDir, "plan", name)
+		body, err := NamedOpsArtifactBody(projectDir, "plan", name)
+
+		return body.RelativePath, body.Path, err
 	}
 
 	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: namespace})

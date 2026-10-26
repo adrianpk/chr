@@ -94,7 +94,7 @@ func AssembleWorkspaceContext(request WorkspaceContextRequest) (WorkspaceContext
 	}
 
 	for _, node := range workspaceContextDocumentNodes(request) {
-		document, source, loadErr := loadWorkspaceContextNode(
+		loaded, loadErr := loadWorkspaceContextNode(
 			projectDir,
 			workspaceContextDocumentID(node),
 			node,
@@ -104,11 +104,11 @@ func AssembleWorkspaceContext(request WorkspaceContextRequest) (WorkspaceContext
 			return WorkspaceContextAssembly{}, loadErr
 		}
 
-		if document.ID != "" {
-			assembly.Documents = append(assembly.Documents, document)
+		if loaded.Document.ID != "" {
+			assembly.Documents = append(assembly.Documents, loaded.Document)
 		}
 
-		assembly.Sources = append(assembly.Sources, source)
+		assembly.Sources = append(assembly.Sources, loaded.Source)
 	}
 
 	return assembly, nil
@@ -157,7 +157,7 @@ func loadWorkspaceContextProject(
 		return nil
 	}
 
-	document, source, err := loadWorkspaceContextNode(
+	loaded, err := loadWorkspaceContextNode(
 		request.ProjectDir,
 		"workspace:project",
 		*request.Graph.Project,
@@ -167,8 +167,8 @@ func loadWorkspaceContextProject(
 		return err
 	}
 
-	assembly.Project = document
-	assembly.Sources = append(assembly.Sources, source)
+	assembly.Project = loaded.Document
+	assembly.Sources = append(assembly.Sources, loaded.Source)
 
 	return nil
 }
@@ -194,7 +194,7 @@ func loadWorkspaceContextCase(
 		return false, nil
 	}
 
-	document, source, err := loadWorkspaceContextNode(
+	loaded, err := loadWorkspaceContextNode(
 		request.ProjectDir,
 		"workspace:case:"+caseNode.Slug,
 		caseNode,
@@ -204,8 +204,8 @@ func loadWorkspaceContextCase(
 		return false, err
 	}
 
-	assembly.Case = document
-	assembly.Sources = append(assembly.Sources, source)
+	assembly.Case = loaded.Document
+	assembly.Sources = append(assembly.Sources, loaded.Source)
 
 	return true, nil
 }
@@ -269,25 +269,30 @@ func workspaceContextCaseNode(graph WorkspaceGraph, slug string) (WorkspaceNode,
 	return WorkspaceNode{}, false
 }
 
+type workspaceContextSource struct {
+	Document ContextDocument
+	Source   ContextSourceInventoryEntry
+}
+
 func loadWorkspaceContextNode(
 	projectDir string,
 	id string,
 	node WorkspaceNode,
 	required bool,
-) (ContextDocument, ContextSourceInventoryEntry, error) {
+) (workspaceContextSource, error) {
 	path := node.Path
 	if path == "" && node.RelativePath != "" {
 		path = filepath.Join(projectDir, filepath.FromSlash(node.RelativePath))
 	}
 
 	if path == "" {
-		return ContextDocument{}, missingWorkspaceContextSource(
+		return workspaceContextSource{Source: missingWorkspaceContextSource(
 			id,
 			node.RelativePath,
 			workspaceContextSourceDescription(node),
 			"node path is empty",
 			required,
-		), nil
+		)}, nil
 	}
 
 	if !filepath.IsAbs(path) {
@@ -296,25 +301,25 @@ func loadWorkspaceContextNode(
 
 	path = filepath.Clean(path)
 	if !pathIsInsideProject(projectDir, path) {
-		return ContextDocument{}, ContextSourceInventoryEntry{}, fmt.Errorf("workspace context document is outside project: %s", path)
+		return workspaceContextSource{}, fmt.Errorf("workspace context document is outside project: %s", path)
 	}
 
 	document, err := readContextDocument(projectDir, id, path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return ContextDocument{}, missingWorkspaceContextSource(
+			return workspaceContextSource{Source: missingWorkspaceContextSource(
 				id,
 				workspaceContextNodeRelativePath(projectDir, node, path),
 				workspaceContextSourceDescription(node),
 				"file was not found",
 				required,
-			), nil
+			)}, nil
 		}
 
-		return ContextDocument{}, ContextSourceInventoryEntry{}, err
+		return workspaceContextSource{}, err
 	}
 
-	return document, ContextSourceInventoryEntry{
+	return workspaceContextSource{Document: document, Source: ContextSourceInventoryEntry{
 		ID:          id,
 		Kind:        ContextSourceKindDocument,
 		Class:       ContextSourceClassFresh,
@@ -322,7 +327,7 @@ func loadWorkspaceContextNode(
 		Description: workspaceContextSourceDescription(node),
 		Required:    required,
 		Included:    true,
-	}, nil
+	}}, nil
 }
 
 func missingWorkspaceContextSource(
