@@ -90,115 +90,59 @@ func (e tuiSpecActionExecutor) ExecuteSpecAction(
 	return result, nil
 }
 
-//nolint:cyclop,funlen,wsl_v5 // Adapter dispatch keeps action-specific service calls in one place.
-func (e tuiPlanActionExecutor) ExecutePlanAction(
-	request tui.PlanActionRequest,
-) (tui.PlanActionResult, error) {
-	e.operations.appendPlanGenerationLog("tui_plan_action_started", map[string]string{
-		"action":    string(request.Action),
-		"case_slug": request.Scope.CaseSlug,
-	})
+func (e tuiPlanActionExecutor) ExecutePlanAction(request tui.PlanActionRequest) (result tui.PlanActionResult, err error) {
+	e.operations.appendPlanGenerationLog("tui_plan_action_started", map[string]string{"action": string(request.Action), "case_slug": request.Scope.CaseSlug})
 
-	message := ""
-	var tickets []core.IndexedTicket
+	defer func() {
+		if err != nil {
+			e.operations.appendPlanGenerationLog("tui_plan_action_failed", map[string]string{"action": string(request.Action), "case_slug": request.Scope.CaseSlug, "error": err.Error()})
+		}
+	}()
 
+	result, err = e.runPlanAction(request)
+	if err != nil {
+		return tui.PlanActionResult{}, err
+	}
+
+	result.Documents, err = tui.LoadDocumentViews(e.operations.ctx, e.operations.projectContext.ProjectDir)
+	if err != nil {
+		return tui.PlanActionResult{}, err
+	}
+
+	result.Plans, err = loadTUIPlans(e.operations)
+	if err != nil {
+		return tui.PlanActionResult{}, err
+	}
+
+	if result.Message == "" {
+		result.Message = "Plans refreshed."
+	}
+
+	result.Scope = request.Scope
+	e.operations.appendPlanGenerationLog("tui_plan_action_finished", map[string]string{"action": string(request.Action), "case_slug": request.Scope.CaseSlug, "plan_count": fmt.Sprintf("%d", len(result.Plans))})
+
+	return result, nil
+}
+
+func (e tuiPlanActionExecutor) runPlanAction(request tui.PlanActionRequest) (tui.PlanActionResult, error) {
 	switch request.Action {
 	case tui.PlanActionGenerate:
-		result, err := e.operations.GeneratePlan(e.operations.ctx, PlanGenerateRequest{
-			Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug},
-		})
-		if err != nil {
-			e.operations.appendPlanGenerationLog("tui_plan_action_failed", map[string]string{
-				"action":    string(request.Action),
-				"case_slug": request.Scope.CaseSlug,
-				"error":     err.Error(),
-			})
+		result, err := e.operations.GeneratePlan(e.operations.ctx, PlanGenerateRequest{Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug}})
 
-			return tui.PlanActionResult{}, err
-		}
-
-		message = result.Message
+		return tui.PlanActionResult{Message: result.Message}, err
 	case tui.PlanActionRegenerate:
-		result, err := e.operations.RegeneratePlan(e.operations.ctx, PlanRegenerateRequest{
-			Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug},
-		})
-		if err != nil {
-			e.operations.appendPlanGenerationLog("tui_plan_action_failed", map[string]string{
-				"action":    string(request.Action),
-				"case_slug": request.Scope.CaseSlug,
-				"error":     err.Error(),
-			})
+		result, err := e.operations.RegeneratePlan(e.operations.ctx, PlanRegenerateRequest{Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug}})
 
-			return tui.PlanActionResult{}, err
-		}
-
-		message = result.Message
+		return tui.PlanActionResult{Message: result.Message}, err
 	case tui.PlanActionMaterializeTracking:
-		result, err := e.operations.MaterializePlanTracking(e.operations.ctx, PlanTrackingRequest{
-			Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug},
-		})
-		if err != nil {
-			e.operations.appendPlanGenerationLog("tui_plan_action_failed", map[string]string{
-				"action":    string(request.Action),
-				"case_slug": request.Scope.CaseSlug,
-				"error":     err.Error(),
-			})
+		result, err := e.operations.MaterializePlanTracking(e.operations.ctx, PlanTrackingRequest{Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug}})
 
-			return tui.PlanActionResult{}, err
-		}
-
-		message = result.Message
-		tickets = result.Tickets
+		return tui.PlanActionResult{Message: result.Message, Tickets: result.Tickets}, err
 	case tui.PlanActionRefresh:
+		return tui.PlanActionResult{}, nil
 	default:
-		e.operations.appendPlanGenerationLog("tui_plan_action_failed", map[string]string{
-			"action":    string(request.Action),
-			"case_slug": request.Scope.CaseSlug,
-			"error":     "unknown plan action",
-		})
-
 		return tui.PlanActionResult{}, errors.New("unknown plan action")
 	}
-
-	documents, err := tui.LoadDocumentViews(e.operations.ctx, e.operations.projectContext.ProjectDir)
-	if err != nil {
-		e.operations.appendPlanGenerationLog("tui_plan_action_failed", map[string]string{
-			"action":    string(request.Action),
-			"case_slug": request.Scope.CaseSlug,
-			"error":     err.Error(),
-		})
-
-		return tui.PlanActionResult{}, err
-	}
-
-	plans, err := loadTUIPlans(e.operations)
-	if err != nil {
-		e.operations.appendPlanGenerationLog("tui_plan_action_failed", map[string]string{
-			"action":    string(request.Action),
-			"case_slug": request.Scope.CaseSlug,
-			"error":     err.Error(),
-		})
-
-		return tui.PlanActionResult{}, err
-	}
-
-	if message == "" {
-		message = "Plans refreshed."
-	}
-
-	e.operations.appendPlanGenerationLog("tui_plan_action_finished", map[string]string{
-		"action":     string(request.Action),
-		"case_slug":  request.Scope.CaseSlug,
-		"plan_count": fmt.Sprintf("%d", len(plans)),
-	})
-
-	return tui.PlanActionResult{
-		Message:   message,
-		Documents: documents,
-		Plans:     plans,
-		Tickets:   tickets,
-		Scope:     request.Scope,
-	}, nil
 }
 
 func newTUITicketActionExecutor(

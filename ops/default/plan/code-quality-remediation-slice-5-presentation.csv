@@ -1,0 +1,5 @@
+finding,baseline,owner,resolution,validation
+D01,internal/tui/plans.go:42-102; internal/tui/specs.go:42-102,internal/tui/document_catalog.go,Shared catalog/detail/focus rendering; per-kind actions and status mapping retained,32 frozen complete catalog frames; existing model/action regressions
+D11,internal/tui/shell.go:636-678,internal/tui/document_catalog.go,Actual ranges are Spec/Plan panel layouts; shared sizing/focus/maximization; ticket-column label corrected by source evidence,32 frozen complete catalog frames; pane/focus tests
+R10 dispatch and hints,internal/tui/model.go active mode and key hints,internal/tui/key_modes.go; internal/tui/view_keys.go,Ordered modal data and per-view handlers/hints; three cyclop suppressions removed,Existing modal/keyboard tests; frozen full frames
+R10 plan adapter,internal/app/tui_adapters_spec_plan_ticket.go::tuiPlanActionExecutor.ExecutePlanAction,same adapter,Shared error logging and projection reload; distinct generation/regeneration/tracking requests retained; three suppressions removed,Real TUI plan and guided TUI journey/parity checks

@@ -24,8 +24,8 @@ func TestGuidedUseCaseParityNative(t *testing.T) {
 
 	operations.guidedWorkHost = host
 	executor, model := guidedTUIModel(operations)
-	openGuidedTUI(t, &model)
-	runGuidedTUIKey(t, &model, "enter", true)
+	openGuidedTUI(t, model)
+	runGuidedTUIKey(t, model, "enter", true)
 
 	if current := readWebGuidedSession(t, operations, original.ID); current.Revision != original.Revision {
 		t.Fatal("terminal navigation advanced the shared run")
@@ -34,7 +34,7 @@ func TestGuidedUseCaseParityNative(t *testing.T) {
 	lifecycle := &telegramGuidedHost{receiver: f.receiver, shared: host}
 	pumpGuidedTelegram(t, lifecycle)
 	host.wait.Wait()
-	runGuidedTUIKey(t, &model, "r", true)
+	runGuidedTUIKey(t, model, "r", true)
 
 	if !strings.Contains(model.View(), "Native review requires approval") {
 		t.Fatal("terminal hid the real native wait", model.View())
@@ -43,7 +43,7 @@ func TestGuidedUseCaseParityNative(t *testing.T) {
 	started := readWebGuidedSession(t, operations, original.ID)
 	native := assertGuidedNativeAdmission(t, operations, started)
 	assertGuidedTUIExport(t, executor, started, false)
-	runGuidedTUIKey(t, &model, "p", true)
+	runGuidedTUIKey(t, model, "p", true)
 	host.wait.Wait()
 
 	paused := readWebGuidedSession(t, operations, original.ID)
@@ -55,10 +55,10 @@ func TestGuidedUseCaseParityNative(t *testing.T) {
 	f.send(t, "Show current step", 0)
 	f.send(t, "Resume use case", 0)
 	host.wait.Wait()
-	runGuidedTUIKey(t, &model, "r", true)
-	runGuidedTUIKey(t, &model, "i", false)
-	runGuidedTUIKey(t, &model, "Keep an export for a later review.", false)
-	runGuidedTUIKey(t, &model, "enter", true)
+	runGuidedTUIKey(t, model, "r", true)
+	runGuidedTUIKey(t, model, "i", false)
+	runGuidedTUIKey(t, model, "Keep an export for a later review.", false)
+	runGuidedTUIKey(t, model, "enter", true)
 
 	current := readWebGuidedSession(t, operations, original.ID)
 

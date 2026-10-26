@@ -238,3 +238,24 @@ model assembly, event dispatch, layout input, navigation, ticket data/Markdown,
 board selection and per-view shell rendering. The largest is 434 lines. All
 declarations, comments and bodies are unchanged during that move; four exact
 signature-debt identities follow their new files without a new allowance.
+
+
+The D01 Spec/Plan catalog detail/list rule now has one presentation owner in
+`document_catalog.go`. Per-kind adapters retain their title/scope/status mapping,
+action hints and busy messages. Spec generation and feature actions remain
+separate from plan generation, regeneration and guarded tracking materialization.
+The actual D11 baseline ranges (shell.go:636-678) are the Spec/Plan workspace
+layouts, despite the source inventory's ticket-column label. They now share
+panel sizing, focus and maximization through that same catalog view. Compact
+ticket columns already had a common renderer; their wide input remains assigned
+to T5.5. Frozen complete frames verify both kinds and every retained pane mode.
+
+Main view dispatch, ordered modal guards and interaction key hints are data,
+with the original precedence retained separately where dispatch and hint order
+differ. The three corresponding cyclop suppressions are removed. The plan TUI
+adapter shares success/failure logging and projection reload while its smaller
+switch keeps the three distinct service request types; its cyclop/funlen/wsl
+suppressions are removed. All operation failures still return zero adapter
+results and retain their original error identities and log fields. Real guided
+TUI journey/parity tests use and assert the single pointer owner without copying
+it back into a value fixture.

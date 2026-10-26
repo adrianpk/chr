@@ -141,83 +141,40 @@ func (m *Model) renderLegacySelectedView(selectedView View) string {
 	return fmt.Sprintf("%s\n  %s", selectedView, placeholder)
 }
 
-//nolint:cyclop // Key helper text is centralized by selected view.
 func (m *Model) renderKeys() string {
 	if keys, ok := m.activeInteractionKeys(); ok {
 		return keys
 	}
 
-	switch {
-	case m.SelectedView() == ViewBoard:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, left/right changes Board column, alt+a toggles attention, alt+e edits source, up/down selects or scrolls, / filters, q quits"
-	case m.ticketKeysActive():
-		return "Keys: F1-F9 or click changes tab, tab changes pane, alt+e edits source, up/down selects or scrolls, / filters, q quits"
-	case m.documentKeysActive():
-		return "Keys: F1-F9 or click changes tab, tab changes pane, alt+e edits source, up/down selects or scrolls, q quits"
-	case m.SelectedView() == ViewProject:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects field, enter edits, s saves, r refreshes, q quits"
-	case m.SelectedView() == ViewCases:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects focused pane, enter opens or edits, g guided use cases, s saves, r refreshes, q quits"
-	case m.SelectedView() == ViewDumps:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects or scrolls, enter edits, alt+e external, c creates, r refreshes, q quits"
-	case m.SelectedView() == ViewQuizzes:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, alt+e edits source, up/down selects or scrolls, s starts, enter answers, r refreshes, q quits"
-	case m.SelectedView() == ViewSpecs:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, alt+e edits source, up/down selects or scrolls, g generates spec, r refreshes, q quits"
-	case m.SelectedView() == ViewPlans:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, alt+e edits source, up/down selects or scrolls, g generates missing plan, G regenerates, r refreshes, q quits"
-	case m.SelectedView() == ViewDash:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, a runs all ready tickets, enter starts selected ticket, x repairs readiness, s requests stop, q quits"
-	case m.SelectedView() == ViewAuthoring:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, alt+e edits source, up/down selects or scrolls, q quits"
-	default:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, q quits"
+	if keys, ok := viewKeyHints[m.SelectedView()]; ok {
+		return keys
 	}
+
+	return "Keys: F1-F9 or click changes tab, tab changes pane, q quits"
 }
 
-func (m *Model) ticketKeysActive() bool {
-	return m.SelectedView() == ViewBoard || m.SelectedView() == ViewTickets
-}
-
-func (m *Model) documentKeysActive() bool {
-	switch m.SelectedView() {
-	case ViewDocuments:
-		return true
-	default:
-		return false
-	}
-}
-
-//nolint:cyclop // Active interaction key hints mirror modal precedence.
 func (m *Model) activeInteractionKeys() (string, bool) {
-	switch {
-	case m.artifactAction.Pending:
-		return "Keys: enter confirms action, esc cancels action", true
-	case m.dumpAction.Pending:
-		return "Keys: enter confirms dump action, esc cancels dump action", true
-	case m.ticketAction.Pending:
-		return "Keys: enter confirms ticket action, esc cancels ticket action", true
-	case m.specAction.Pending:
-		return "Keys: enter confirms spec action, esc cancels spec action", true
-	case m.specBusy:
-		return "Keys: waiting for spec action to finish", true
-	case m.planAction.Pending:
-		return "Keys: enter confirms plan action, esc cancels plan action", true
-	case m.planBusy:
-		return "Keys: waiting for plan action to finish", true
-	case m.workAction.Pending:
-		return "Keys: enter confirms work action, esc cancels work action", true
-	case m.commandPalette.Open:
-		return "Keys: up/down selects command, enter runs command, esc closes palette", true
-	case m.quizBusy:
-		return "Keys: waiting for quiz action to finish", true
-	case m.quizAnswer.Active:
-		return "Keys: enter submits answer, shift+enter inserts line, alt+s skips, alt+d done, esc cancels answer", true
-	case m.filterEntryMode:
-		return "Keys: enter applies filter, esc cancels filter, ctrl+c quits", true
-	default:
-		return "", false
+	hints := []interactionKeyHint{
+		{Active: m.artifactAction.Pending, Text: "Keys: enter confirms action, esc cancels action"},
+		{Active: m.dumpAction.Pending, Text: "Keys: enter confirms dump action, esc cancels dump action"},
+		{Active: m.ticketAction.Pending, Text: "Keys: enter confirms ticket action, esc cancels ticket action"},
+		{Active: m.specAction.Pending, Text: "Keys: enter confirms spec action, esc cancels spec action"},
+		{Active: m.specBusy, Text: "Keys: waiting for spec action to finish"},
+		{Active: m.planAction.Pending, Text: "Keys: enter confirms plan action, esc cancels plan action"},
+		{Active: m.planBusy, Text: "Keys: waiting for plan action to finish"},
+		{Active: m.workAction.Pending, Text: "Keys: enter confirms work action, esc cancels work action"},
+		{Active: m.commandPalette.Open, Text: "Keys: up/down selects command, enter runs command, esc closes palette"},
+		{Active: m.quizBusy, Text: "Keys: waiting for quiz action to finish"},
+		{Active: m.quizAnswer.Active, Text: "Keys: enter submits answer, shift+enter inserts line, alt+s skips, alt+d done, esc cancels answer"},
+		{Active: m.filterEntryMode, Text: "Keys: enter applies filter, esc cancels filter, ctrl+c quits"},
 	}
+	for _, hint := range hints {
+		if hint.Active {
+			return hint.Text, true
+		}
+	}
+
+	return "", false
 }
 
 func (m *Model) renderStatusMessage() string {

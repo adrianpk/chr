@@ -86,102 +86,41 @@ func (m *Model) updateKey(msg tea.KeyMsg) tea.Cmd {
 		return cmd
 	}
 
-	if m.SelectedView() == ViewProject {
-		return m.updateProjectKey(msg)
-	}
-
-	if m.SelectedView() == ViewCases {
-		return m.updateCasesKey(msg)
-	}
-
-	if m.SelectedView() == ViewDumps {
-		return m.updateDumpsKey(msg)
-	}
-
-	if m.SelectedView() == ViewQuizzes {
-		return m.updateQuizzesKey(msg)
-	}
-
-	if m.SelectedView() == ViewSpecs {
-		return m.updateSpecsKey(msg)
-	}
-
-	if m.SelectedView() == ViewPlans {
-		return m.updatePlansKey(msg)
+	if handler, ok := viewKeyHandlers[m.SelectedView()]; ok {
+		return handler(m, msg)
 	}
 
 	return m.updateNavigationKey(msg)
 }
 
-//nolint:cyclop // Active mode dispatch is centralized to preserve modal ordering.
 func (m *Model) updateActiveModeKey(msg tea.KeyMsg) updateOutcome {
-	switch {
-	case m.artifactAction.Pending:
-		cmd := m.updateArtifactActionKey(msg)
-
-		return updateOutcome{Command: cmd, Handled: true}
-	case m.dumpAction.Pending:
-		cmd := m.updateDumpActionKey(msg)
-
-		return updateOutcome{Command: cmd, Handled: true}
-	case m.dumpEdit.Active:
-		cmd := m.updateDumpEditKey(msg)
-
-		return updateOutcome{Command: cmd, Handled: true}
-	case m.ticketAction.Pending:
-		cmd := m.updateTicketActionKey(msg)
-
-		return updateOutcome{Command: cmd, Handled: true}
-	case m.specAction.Pending:
-		cmd := m.updateSpecActionKey(msg)
-
-		return updateOutcome{Command: cmd, Handled: true}
-	case m.specBusy:
-		return updateOutcome{Command: nil, Handled: true}
-	case m.planAction.Pending:
-		cmd := m.updatePlanActionKey(msg)
-
-		return updateOutcome{Command: cmd, Handled: true}
-	case m.planBusy:
-		m.statusMessage = "Plan action already running."
-
-		return updateOutcome{Command: nil, Handled: true}
-	case m.workBusy:
-		m.statusMessage = "Work action already running."
-
-		return updateOutcome{Command: nil, Handled: true}
-	case m.workAction.Pending:
-		cmd := m.updateWorkActionKey(msg)
-
-		return updateOutcome{Command: cmd, Handled: true}
-	case m.commandPalette.Open:
-		cmd := m.updateCommandPaletteKey(msg)
-
-		return updateOutcome{Command: cmd, Handled: true}
-	case m.filterEntryMode:
-		cmd := m.updateFilterKey(msg)
-
-		return updateOutcome{Command: cmd, Handled: true}
-	default:
-		return m.updateActiveQuizModeKey(msg)
+	modes := []keyMode{
+		{Active: m.artifactAction.Pending, Handle: (*Model).updateArtifactActionKey},
+		{Active: m.dumpAction.Pending, Handle: (*Model).updateDumpActionKey},
+		{Active: m.dumpEdit.Active, Handle: (*Model).updateDumpEditKey},
+		{Active: m.ticketAction.Pending, Handle: (*Model).updateTicketActionKey},
+		{Active: m.specAction.Pending, Handle: (*Model).updateSpecActionKey},
+		{Active: m.specBusy},
+		{Active: m.planAction.Pending, Handle: (*Model).updatePlanActionKey},
+		{Active: m.planBusy, Message: "Plan action already running."},
+		{Active: m.workBusy, Message: "Work action already running."},
+		{Active: m.workAction.Pending, Handle: (*Model).updateWorkActionKey},
+		{Active: m.commandPalette.Open, Handle: (*Model).updateCommandPaletteKey},
+		{Active: m.filterEntryMode, Handle: (*Model).updateFilterKey},
 	}
+	if outcome := m.updateModeKey(msg, modes); outcome.Handled {
+		return outcome
+	}
+
+	return m.updateActiveQuizModeKey(msg)
 }
 
 func (m *Model) updateActiveQuizModeKey(msg tea.KeyMsg) updateOutcome {
-	switch {
-	case m.quizAction.Pending:
-		cmd := m.updateQuizActionKey(msg)
-
-		return updateOutcome{Command: cmd, Handled: true}
-	case m.quizBusy:
-		return updateOutcome{Command: nil, Handled: true}
-	case m.quizAnswer.Active:
-		cmd := m.updateQuizAnswerKey(msg)
-
-		return updateOutcome{Command: cmd, Handled: true}
-	default:
-		return updateOutcome{Command: nil, Handled: false}
-	}
+	return m.updateModeKey(msg, []keyMode{
+		{Active: m.quizAction.Pending, Handle: (*Model).updateQuizActionKey},
+		{Active: m.quizBusy},
+		{Active: m.quizAnswer.Active, Handle: (*Model).updateQuizAnswerKey},
+	})
 }
 
 func (m *Model) handleGlobalKey(msg tea.KeyMsg) (tea.Cmd, bool) {

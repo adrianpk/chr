@@ -79,47 +79,11 @@ func (m *Model) renderQuizWorkspace(width, height int) string {
 }
 
 func (m *Model) renderSpecWorkspace(width, height int) string {
-	list := m.renderSpecFocusList(height - 2)
-	detail := m.renderSelectedSpecDetailLines(maxInt(width-4, 1))
-
-	switch m.maximizedPane {
-	case 0:
-		return fitBlock(renderPanel("Specs", list, width, height, true), width, height)
-	case 1:
-		return fitBlock(m.renderDetailPanel("Spec", detail, width, height, true), width, height)
-	}
-
-	leftWidth, rightWidth := m.splitWidths(width)
-	detail = m.renderSelectedSpecDetailLines(maxInt(rightWidth-4, 1))
-
-	return fitBlock(lipgloss.JoinHorizontal(
-		lipgloss.Top,
-		renderPanel("Specs", list, leftWidth, height, m.selectedPane == 0),
-		panelVerticalGap(height),
-		m.renderDetailPanel("Spec", detail, rightWidth, height, m.selectedPane == 1),
-	), width, height)
+	return m.renderDocumentCatalogWorkspace(width, height, m.documentCatalog(ViewSpecs))
 }
 
 func (m *Model) renderPlanWorkspace(width, height int) string {
-	list := m.renderPlanFocusList(height - 2)
-	detail := m.renderSelectedPlanDetailLines(maxInt(width-4, 1))
-
-	switch m.maximizedPane {
-	case 0:
-		return fitBlock(renderPanel("Plans", list, width, height, true), width, height)
-	case 1:
-		return fitBlock(m.renderDetailPanel("Plan", detail, width, height, true), width, height)
-	}
-
-	leftWidth, rightWidth := m.splitWidths(width)
-	detail = m.renderSelectedPlanDetailLines(maxInt(rightWidth-4, 1))
-
-	return fitBlock(lipgloss.JoinHorizontal(
-		lipgloss.Top,
-		renderPanel("Plans", list, leftWidth, height, m.selectedPane == 0),
-		panelVerticalGap(height),
-		m.renderDetailPanel("Plan", detail, rightWidth, height, m.selectedPane == 1),
-	), width, height)
+	return m.renderDocumentCatalogWorkspace(width, height, m.documentCatalog(ViewPlans))
 }
 
 func (m *Model) quizDetailPanelTitle() string {

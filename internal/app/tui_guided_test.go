@@ -10,7 +10,7 @@ import (
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
-func guidedTUIFixture(t *testing.T) (service, tui.Model) {
+func guidedTUIFixture(t *testing.T) (service, *tui.Model) {
 	t.Helper()
 
 	provider, _ := guidedWebFixture(t)
@@ -26,22 +26,22 @@ func TestGuidedUseCaseTUIJourney(t *testing.T) {
 	t.Parallel()
 
 	operations, model := guidedTUIFixture(t)
-	openGuidedTUI(t, &model)
-	runGuidedTUIKey(t, &model, "n", true)
+	openGuidedTUI(t, model)
+	runGuidedTUIKey(t, model, "n", true)
 
 	if !strings.Contains(model.View(), "use-case name") {
 		t.Fatal("new journey did not request its name")
 	}
 
-	enterGuidedTUIInput(t, &model, "Terminal audit")
-	enterGuidedTUIInput(t, &model, "Retain complete evidence and finite limits.")
-	runGuidedTUIKey(t, &model, "f", true)
+	enterGuidedTUIInput(t, model, "Terminal audit")
+	enterGuidedTUIInput(t, model, "Retain complete evidence and finite limits.")
+	runGuidedTUIKey(t, model, "f", true)
 
 	if !strings.Contains(model.View(), "What should the workflow preserve") {
 		t.Fatal("current clarification missing", model.View())
 	}
 
-	enterGuidedTUIInput(t, &model, "Preserve the original agreed scope.")
+	enterGuidedTUIInput(t, model, "Preserve the original agreed scope.")
 
 	session := onlyGuidedTUIRun(t, operations)
 	if session.Guided.SpecApproval == nil || session.Guided.Stage != "preparation" || len(session.Guided.Checkpoints) != 3 {
@@ -51,13 +51,13 @@ func TestGuidedUseCaseTUIJourney(t *testing.T) {
 	assertGuidedTUIOriginals(t, operations, session)
 
 	_, reopened := guidedTUIModel(operations)
-	openGuidedTUI(t, &reopened)
+	openGuidedTUI(t, reopened)
 
 	if !strings.Contains(reopened.View(), "Terminal audit") || strings.Contains(reopened.View(), session.ID) {
 		t.Fatal("retained navigation lost its visible name or exposed a transport ID")
 	}
 
-	runGuidedTUIKey(t, &reopened, "enter", true)
+	runGuidedTUIKey(t, reopened, "enter", true)
 
 	after := onlyGuidedTUIRun(t, operations)
 	if after.ID != session.ID || after.Revision != session.Revision {
@@ -65,7 +65,7 @@ func TestGuidedUseCaseTUIJourney(t *testing.T) {
 	}
 }
 
-func guidedTUIModel(operations service) (tuiGuidedExecutor, tui.Model) {
+func guidedTUIModel(operations service) (tuiGuidedExecutor, *tui.Model) {
 	executor := tuiGuidedExecutor{operations: operations}
 
 	return executor, tui.NewModel(tui.Options{ProjectID: operations.projectContext.ProjectID, GuidedExecutor: executor})
@@ -107,17 +107,22 @@ func runGuidedTUIKey(t *testing.T, model *tui.Model, key string, execute bool) {
 
 	updated, command := model.Update(message)
 
-	*model = guidedTUIUpdatedModel(t, updated)
+	if guidedTUIUpdatedModel(t, updated) != model {
+		t.Fatal("event loop replaced the terminal owner")
+	}
+
 	if execute && command != nil {
 		updated, _ = model.Update(command())
-		*model = guidedTUIUpdatedModel(t, updated)
+		if guidedTUIUpdatedModel(t, updated) != model {
+			t.Fatal("event loop replaced the terminal owner")
+		}
 	}
 }
 
-func guidedTUIUpdatedModel(t *testing.T, model tea.Model) tui.Model {
+func guidedTUIUpdatedModel(t *testing.T, model tea.Model) *tui.Model {
 	t.Helper()
 
-	value, ok := model.(tui.Model)
+	value, ok := model.(*tui.Model)
 	if !ok {
 		t.Fatal("unexpected terminal model")
 	}
