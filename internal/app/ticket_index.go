@@ -14,22 +14,22 @@ func (factory commandFactory) openTicketIndexForCommand(
 	ctx context.Context,
 	cmd *cli.Command,
 	env core.UserEnvironment,
-) (commandProjectContext, core.TicketIndex, error) {
+) (commandTicketIndex, error) {
 	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
 	})
 	if err != nil {
-		return commandProjectContext{}, nil, err
+		return commandTicketIndex{Project: commandProjectContext{}, Index: nil}, err
 	}
 
 	index, err := core.NewTicketIndex(ctx, env, factory.deps.assetsFS)
 	if err != nil {
-		return commandProjectContext{}, nil, err
+		return commandTicketIndex{Project: commandProjectContext{}, Index: nil}, err
 	}
 
-	return projectContext, index, nil
+	return commandTicketIndex{Project: projectContext, Index: index}, nil
 }
 
 func refreshProjectTicketIndex(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext) error {
@@ -49,4 +49,9 @@ func refreshProjectTicketIndex(ctx context.Context, index core.TicketIndex, proj
 	}
 
 	return nil
+}
+
+type commandTicketIndex struct {
+	Project commandProjectContext
+	Index   core.TicketIndex
 }

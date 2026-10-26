@@ -2,16 +2,6 @@
   "max_parameters": 7,
   "debt": [
     {
-      "id": "internal/app/agent_work_events.go::emitReviewStartedAgentEvent",
-      "signature": "func(ctx context.Context, sink core.AgentEventSink, record core.LoopRunRecord, execution core.ExecutionRecord, ticket core.IndexedTicket, mode core.IntegrationCycleMode)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/app.go::loadTUIWorkspaceState",
-      "signature": "func(ctx context.Context, projectContext commandProjectContext) (core.WorkspaceGraph, core.WorkspaceIndex, []core.WorkspaceSemanticDigestState, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/app/author_assisted_cli.go::assistedEventCounts",
       "signature": "func(events []core.AssistedTranscriptEvent) (int, int, int)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
@@ -22,59 +12,9 @@
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/app/daemon.go::runDaemonForegroundLoop",
-      "signature": "func(ctx context.Context, stdout io.Writer, env core.UserEnvironment, assetsFS fs.FS, decision core.DaemonStartGuardDecision, maxIterations int) error",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/daemon.go::runDaemonForegroundIterations",
-      "signature": "func(ctx context.Context, stdout io.Writer, env core.UserEnvironment, assetsFS fs.FS, stateRepository core.DaemonStateRepository, maxIterations int) (result daemonForegroundLoopResult, err error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/app/daemon_workflow.go::watchDaemonHeartbeat",
       "signature": "func(ctx context.Context, repository core.DaemonStateRepository) (context.Context, func() error)",
       "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/gate.go::buildGateDevMainReport",
-      "signature": "func(createdAt time.Time, evidence core.GateGitEvidence, validation core.GateValidationResult, classification core.GateEvidenceClassification, config core.GateDevMainConfig, artifacts core.GateReportArtifacts) core.GateReport",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/gate.go::writeGateFailedEvidenceReport",
-      "signature": "func(ctx context.Context, createdAt time.Time, baseRef string, headRef string, artifacts core.GateReportArtifacts, cause error) error",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/gate.go::writeGateFailedValidationRunReport",
-      "signature": "func(ctx context.Context, createdAt time.Time, evidence core.GateGitEvidence, validation core.GateValidationResult, artifacts core.GateReportArtifacts, cause error) error",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/notification_emit.go::loopRunNotificationType",
-      "signature": "func(status core.LoopRunStatus) (core.NotificationEventType, core.NotificationSeverity)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/notify.go::commandFactory.loadNotifyProjectConfig",
-      "signature": "func(ctx context.Context, cmd *cli.Command) (core.UserEnvironment, commandProjectContext, core.WorkspaceConfig, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 4 explicitly retained this identity through typed command injection; result/remaining input work keeps its original slice owner."
-    },
-    {
-      "id": "internal/app/notify.go::runNotifyTelegramTestDispatch",
-      "signature": "func(ctx context.Context, stdout io.Writer, env core.UserEnvironment, projectContext commandProjectContext, telegram core.TelegramNotificationConfig, assetsFS fs.FS) error",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_conversation_generation.go::service.bindIntentGeneration",
-      "signature": "func(ctx context.Context, requestID string, input ConversationIntentContext) (service, context.Context, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_dump_curation_openai.go::dumpCurationOpenAIResponseText",
-      "signature": "func(content []byte) (string, string, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/service_guided_plan_context.go::service.guidedPlanSources",
@@ -215,41 +155,6 @@
       "id": "internal/app/service_spec.go::summarizeWorkspaceMarkdownDocument",
       "signature": "func(content, fallbackName string) (string, string, string)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_work.go::service.prepareAgentWorkTicket",
-      "signature": "func(ticketKey string) (core.IndexedTicket, ticketStartPreflight, func(), error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_work_cycle.go::service.runAgentWorkIntegrationCycles",
-      "signature": "func(opts AgentWorkSelectionOptions) (ticketLoopExecutionResult, []core.IndexedTicket, int, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_work_cycle.go::service.runAgentWorkIntegrationCycle",
-      "signature": "func(selection agentWorkLoopSelection, state agentWorkIntegrationCycleState, loopSink core.AgentEventSink) (agentWorkIntegrationCycleState, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_ticket_review_cycle.go::service.repairAgentWorkCycleTicket",
-      "signature": "func(state *agentWorkIntegrationCycleState, opts agentWorkPostDevelopmentOptions, ticket core.IndexedTicket) (core.IndexedTicket, core.ExecutionRecord, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 4 moved this exact declaration to its central ticket operation owner; remaining signature work stays assigned."
-    },
-    {
-      "id": "internal/app/service_ticket_review_cycle.go::service.reviewAgentWorkCycleTicket",
-      "signature": "func(opts agentWorkPostDevelopmentOptions) (core.IndexedTicket, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 4 moved this exact declaration to its central ticket operation owner; remaining signature work stays assigned."
-    },
-    {
-      "id": "internal/app/service_work_cycle.go::service.failAgentWorkIntegrationCycles",
-      "signature": "func(repository core.LoopRunRepository, state agentWorkIntegrationCycleState, eventSink core.AgentEventSink, initialEligibleCount int, cause error) (ticketLoopExecutionResult, []core.IndexedTicket, int, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_work_cycle.go::service.finishAgentWorkIntegrationCycles",
-      "signature": "func(repository core.LoopRunRepository, state agentWorkIntegrationCycleState, loopSink core.AgentEventSink, initialEligibleCount int) (ticketLoopExecutionResult, []core.IndexedTicket, int, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/service_work_observation_legacy.go::service.observeLegacyContext",
@@ -472,69 +377,9 @@
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/app/service_ticket_loop.go::selectTicketLoopTickets",
-      "signature": "func(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, queryOptions core.TicketLoopQueryOptions, runOptions ticketLoopRunOptions) ([]core.IndexedTicket, int, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 4 moved this exact declaration to its central ticket operation owner; remaining signature work stays assigned."
-    },
-    {
-      "id": "internal/app/service_ticket_loop.go::service.executeLoopTicket",
-      "signature": "func(ctx context.Context, ticket core.IndexedTicket, events ticketExecutionEvents) (core.ExecutionRecord, core.ResultApplication, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 4 moved this exact declaration to its central ticket operation owner; remaining signature work stays assigned."
-    },
-    {
-      "id": "internal/app/service_ticket_result.go::ticketExecutionReportEvidenceChecklist",
-      "signature": "func(path string) (*core.EvidenceStrategyChecklist, string, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 4 moved this exact declaration to its central ticket operation owner; remaining signature work stays assigned."
-    },
-    {
-      "id": "internal/app/service_ticket_result.go::ticketExecutionReportEvidenceChecklistContent",
-      "signature": "func(content string) (*core.EvidenceStrategyChecklist, string)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 4 moved this exact declaration to its central ticket operation owner; remaining signature work stays assigned."
-    },
-    {
-      "id": "internal/app/service_ticket_workspace.go::prepareTicketStartWorktree",
-      "signature": "func(ctx context.Context, projectDir string, ticket core.IndexedTicket, config core.WorkspaceConfig, selection core.TicketBranchSelection, planOptions core.WorktreePlanOptions) (ticketStartWorkspace, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 4 moved this exact declaration to its central ticket operation owner; remaining signature work stays assigned."
-    },
-    {
-      "id": "internal/app/service_ticket_merge.go::ticketMergeCommandTickets",
-      "signature": "func(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, key string) (core.IndexedTicket, []core.IndexedTicket, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 4 moved this exact declaration to its central ticket operation owner; remaining signature work stays assigned."
-    },
-    {
-      "id": "internal/app/ticket_index.go::commandFactory.openTicketIndexForCommand",
-      "signature": "func(ctx context.Context, cmd *cli.Command, env core.UserEnvironment) (commandProjectContext, core.TicketIndex, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 4 explicitly retained this identity through typed command injection; result/remaining input work keeps its original slice owner."
-    },
-    {
       "id": "internal/app/tui_adapters_harness.go::tuiHarnessSelectionExecutor.retainedHarnessBindings",
       "signature": "func(ctx context.Context) ([]tui.HarnessRetainedView, bool, string)",
       "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/web_actions.go::webViewProvider.writeDocumentAction",
-      "signature": "func(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/web_actions.go::webViewProvider.writeGenerationAction",
-      "signature": "func(ctx context.Context, operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/web_actions.go::webViewProvider.writeWorkAction",
-      "signature": "func(ctx context.Context, operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/web_ticket.go::webViewProvider.writeTicketAction",
-      "signature": "func(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/work.go::workDoctorTicketContext",
-      "signature": "func(cmd *cli.Command, operations service) (string, string, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/core/acceptance_feature.go::WriteAcceptanceFeature",

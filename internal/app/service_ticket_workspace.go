@@ -47,7 +47,7 @@ func prepareTicketStartWorkspace(ctx context.Context, projectContext commandProj
 		return previewTicketStartWorktree(ticket, planOptions)
 	}
 
-	return prepareTicketStartWorktree(ctx, projectContext.ProjectDir, ticket, config, selection, planOptions)
+	return prepareTicketStartWorktree(ctx, ticket, selection, planOptions)
 }
 
 func previewTicketStartWorktree(ticket core.IndexedTicket, planOptions core.WorktreePlanOptions) (ticketStartWorkspace, error) {
@@ -59,7 +59,7 @@ func previewTicketStartWorktree(ticket core.IndexedTicket, planOptions core.Work
 	return ticketStartWorkspaceFromPlan(ticket, plan)
 }
 
-func prepareTicketStartWorktree(ctx context.Context, projectDir string, ticket core.IndexedTicket, config core.WorkspaceConfig, selection core.TicketBranchSelection, planOptions core.WorktreePlanOptions) (ticketStartWorkspace, error) {
+func prepareTicketStartWorktree(ctx context.Context, ticket core.IndexedTicket, selection core.TicketBranchSelection, planOptions core.WorktreePlanOptions) (ticketStartWorkspace, error) {
 	result, err := newTicketStartWorktreePreparer().Prepare(ctx, planOptions)
 	if err != nil {
 		return ticketStartWorkspace{}, err

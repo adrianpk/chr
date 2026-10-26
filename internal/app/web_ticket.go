@@ -9,14 +9,14 @@ import (
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
-func (p webViewProvider) writeTicketAction(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error) {
+func (p webViewProvider) writeTicketAction(operations service, request webui.WriteActionRequest) (webWriteDispatch, error) {
 	switch request.Action {
 	case webActionTicketCreate, webActionTicketUpdate, webActionTicketMove, webActionTicketComment:
 		response := writeWebTicket(operations, request)
 
-		return response, true, nil
+		return webWriteDispatch{Response: response, Handled: true}, nil
 	default:
-		return webui.WriteActionResponse{}, false, nil
+		return webWriteDispatch{Response: webui.WriteActionResponse{}, Handled: false}, nil
 	}
 }
 

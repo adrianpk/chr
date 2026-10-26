@@ -183,7 +183,9 @@ func (factory commandFactory) workDoctorAction(ctx context.Context, cmd *cli.Com
 		return err
 	}
 
-	ticketKey, ticketBranch, err := workDoctorTicketContext(cmd, operations)
+	doctorTicket, err := workDoctorTicketContext(cmd, operations)
+	ticketKey, ticketBranch := doctorTicket.Key, doctorTicket.Branch
+
 	if err != nil {
 		return err
 	}
@@ -217,24 +219,24 @@ func (factory commandFactory) workDoctorAction(ctx context.Context, cmd *cli.Com
 	return printWorkReadinessReport(factory.io.Stdout, projectContext, report)
 }
 
-func workDoctorTicketContext(cmd *cli.Command, operations service) (string, string, error) {
+func workDoctorTicketContext(cmd *cli.Command, operations service) (workDoctorTicket, error) {
 	ticketKey := strings.TrimSpace(cmd.String("ticket"))
 
 	ticketBranch := strings.TrimSpace(cmd.String("ticket-branch"))
 	if ticketKey == "" {
-		return "", ticketBranch, nil
+		return workDoctorTicket{Key: "", Branch: ticketBranch}, nil
 	}
 
 	if ticketBranch != "" {
-		return ticketKey, ticketBranch, nil
+		return workDoctorTicket{Key: ticketKey, Branch: ticketBranch}, nil
 	}
 
 	ticket, err := operations.ticketByKey(ticketKey)
 	if err != nil {
-		return "", "", err
+		return workDoctorTicket{Key: "", Branch: ""}, err
 	}
 
-	return ticketKey, ticket.Branch, nil
+	return workDoctorTicket{Key: ticketKey, Branch: ticket.Branch}, nil
 }
 
 func (factory commandFactory) workTicketAction(ctx context.Context, cmd *cli.Command) error {
@@ -764,4 +766,9 @@ func agentWorkAuthorityLines(result AgentWorkResult) []string {
 	}
 
 	return lines
+}
+
+type workDoctorTicket struct {
+	Key    string
+	Branch string
 }

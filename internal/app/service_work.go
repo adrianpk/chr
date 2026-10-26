@@ -72,10 +72,13 @@ func (s service) StartAgentWorkTicket(ticketKey string) (AgentWorkResult, error)
 }
 
 func (s service) startLegacyAgentWorkTicket(ticketKey string) (AgentWorkResult, error) {
-	ticket, preflight, release, err := s.prepareAgentWorkTicket(ticketKey)
+	preparedTicket, err := s.prepareAgentWorkTicket(ticketKey)
+	ticket, preflight, release := preparedTicket.Ticket, preparedTicket.Preflight, preparedTicket.Release
+
 	if err != nil {
 		return AgentWorkResult{}, err
 	}
+
 	defer release()
 
 	if !core.RuntimeValidationPassed(preflight.Runtime.Checks) {
@@ -124,28 +127,28 @@ func (s service) startLegacyAgentWorkTicket(ticketKey string) (AgentWorkResult, 
 	}, nil
 }
 
-func (s service) prepareAgentWorkTicket(ticketKey string) (core.IndexedTicket, ticketStartPreflight, func(), error) {
+func (s service) prepareAgentWorkTicket(ticketKey string) (preparedAgentWorkTicket, error) {
 	ticket, err := s.legacyAgentWorkTicket(ticketKey)
 	if err != nil {
-		return core.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
+		return preparedAgentWorkTicket{Ticket: core.IndexedTicket{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, err
 	}
 
 	lock, err := acquireAgentOperationLock(s.ctx, s.projectContext, core.AgentOperationDevelopment)
 	if err != nil {
-		return core.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
+		return preparedAgentWorkTicket{Ticket: core.IndexedTicket{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, err
 	}
 
 	preflight, err := s.prepareTicketStart(s.ctx, ticket, ticketStartPreflightOptions{PrepareWorktree: true})
 	if err != nil {
 		releaseErr := lock.Release()
 		if releaseErr != nil {
-			return core.IndexedTicket{}, ticketStartPreflight{}, noopRelease, releaseErr
+			return preparedAgentWorkTicket{Ticket: core.IndexedTicket{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, releaseErr
 		}
 
-		return core.IndexedTicket{}, ticketStartPreflight{}, noopRelease, core.NewExecutionFailure(core.ExecutionFailurePreflight, err)
+		return preparedAgentWorkTicket{Ticket: core.IndexedTicket{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, core.NewExecutionFailure(core.ExecutionFailurePreflight, err)
 	}
 
-	return ticket, preflight, releaseAgentOperationLock(lock), nil
+	return preparedAgentWorkTicket{Ticket: ticket, Preflight: preflight, Release: releaseAgentOperationLock(lock)}, nil
 }
 
 func (s service) StartReadyAgentWorkLoop() (AgentWorkResult, error) {
@@ -225,7 +228,9 @@ func (s service) startAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWorkRe
 
 	defer releaseAgentOperationLock(lock)()
 
-	result, selectedQueue, eligibleCount, err := s.runAgentWorkIntegrationCycles(opts)
+	integrationResult, err := s.runAgentWorkIntegrationCycles(opts)
+	result, selectedQueue, eligibleCount := integrationResult.Execution, integrationResult.SelectedQueue, integrationResult.EligibleCount
+
 	if err != nil {
 		return AgentWorkResult{}, err
 	}
@@ -347,4 +352,10 @@ func (s service) legacyAgentWorkTicket(ticketKey string) (core.IndexedTicket, er
 	}
 
 	return ticket, nil
+}
+
+type preparedAgentWorkTicket struct {
+	Ticket    core.IndexedTicket
+	Preflight ticketStartPreflight
+	Release   func()
 }

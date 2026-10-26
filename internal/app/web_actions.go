@@ -38,117 +38,117 @@ func (p webViewProvider) WriteAction(ctx context.Context, request webui.WriteAct
 
 	operations := p.service(ctx)
 
-	if response, handled, err := p.writeDocumentAction(operations, request); handled || err != nil {
-		return response, err
+	if dispatch, err := p.writeDocumentAction(operations, request); dispatch.Handled || err != nil {
+		return dispatch.Response, err
 	}
 
-	if response, handled, err := p.writeGenerationAction(ctx, operations, request); handled || err != nil {
-		return response, err
+	if dispatch, err := p.writeGenerationAction(ctx, operations, request); dispatch.Handled || err != nil {
+		return dispatch.Response, err
 	}
 
-	if response, handled, err := p.writeTicketAction(operations, request); handled || err != nil {
-		return response, err
+	if dispatch, err := p.writeTicketAction(operations, request); dispatch.Handled || err != nil {
+		return dispatch.Response, err
 	}
 
-	if response, handled, err := p.writeWorkAction(ctx, operations, request); handled || err != nil {
-		return response, err
+	if dispatch, err := p.writeWorkAction(ctx, operations, request); dispatch.Handled || err != nil {
+		return dispatch.Response, err
 	}
 
 	return webBlockedWrite("Unsupported web action: " + request.Action), nil
 }
 
-func (p webViewProvider) writeDocumentAction(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error) {
+func (p webViewProvider) writeDocumentAction(operations service, request webui.WriteActionRequest) (webWriteDispatch, error) {
 	if request.Surface == "spec" {
 		response, err := p.writeSpecAction(operations, request)
 
-		return response, true, err
+		return webWriteDispatch{Response: response, Handled: true}, err
 	}
 
 	if request.Surface == "quiz" {
 		response, err := p.writeQuizAction(operations, request)
 
-		return response, true, err
+		return webWriteDispatch{Response: response, Handled: true}, err
 	}
 
 	switch request.Action {
 	case webui.HarnessSelectionAction:
-		return p.writeHarnessSelection(operations.ctx, operations, request), true, nil
+		return webWriteDispatch{Response: p.writeHarnessSelection(operations.ctx, operations, request), Handled: true}, nil
 	case webActionCaseCreate:
 		response, err := p.writeCaseCreate(operations, request)
 
-		return response, true, err
+		return webWriteDispatch{Response: response, Handled: true}, err
 	case webActionCaseUpdate:
 		response, err := p.writeCaseUpdate(operations, request)
 
-		return response, true, err
+		return webWriteDispatch{Response: response, Handled: true}, err
 	case webActionDumpCreate:
 		response, err := p.writeDumpCreate(operations, request)
 
-		return response, true, err
+		return webWriteDispatch{Response: response, Handled: true}, err
 	case webActionDumpSave:
 		response, err := p.writeDumpSave(operations, request)
 
-		return response, true, err
+		return webWriteDispatch{Response: response, Handled: true}, err
 	case webActionDumpAppend:
 		response, err := p.writeDumpAppend(operations, request)
 
-		return response, true, err
+		return webWriteDispatch{Response: response, Handled: true}, err
 	default:
-		return webui.WriteActionResponse{}, false, nil
+		return webWriteDispatch{Response: webui.WriteActionResponse{}, Handled: false}, nil
 	}
 }
 
-func (p webViewProvider) writeGenerationAction(ctx context.Context, operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error) {
+func (p webViewProvider) writeGenerationAction(ctx context.Context, operations service, request webui.WriteActionRequest) (webWriteDispatch, error) {
 	switch request.Action {
 	case "guided.start", "guided.input":
 		if request.Surface != "guided" {
-			return webBlockedWrite("Use the guided form."), true, nil
+			return webWriteDispatch{Response: webBlockedWrite("Use the guided form."), Handled: true}, nil
 		}
 
 		response, err := p.writeGuidedUseCase(operations, request)
 
-		return response, true, err
+		return webWriteDispatch{Response: response, Handled: true}, err
 	case webActionSpecGenerate:
 		response, err := p.writeSpecGenerate(ctx, operations, request)
 
-		return response, true, err
+		return webWriteDispatch{Response: response, Handled: true}, err
 	case webActionPlanGenerate:
 		response, err := p.writePlanGenerate(ctx, operations, request)
 
-		return response, true, err
+		return webWriteDispatch{Response: response, Handled: true}, err
 	case webActionPlanRegenerate:
 		response, err := p.writePlanRegenerate(ctx, operations, request)
 
-		return response, true, err
+		return webWriteDispatch{Response: response, Handled: true}, err
 	case webActionQuizStart:
 		response, err := p.writeQuizStart(operations, request)
 
-		return response, true, err
+		return webWriteDispatch{Response: response, Handled: true}, err
 	case webActionQuizResume:
 		response, err := p.writeQuizResume(operations, request)
 
-		return response, true, err
+		return webWriteDispatch{Response: response, Handled: true}, err
 	default:
-		return webui.WriteActionResponse{}, false, nil
+		return webWriteDispatch{Response: webui.WriteActionResponse{}, Handled: false}, nil
 	}
 }
 
-func (p webViewProvider) writeWorkAction(ctx context.Context, operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error) {
+func (p webViewProvider) writeWorkAction(ctx context.Context, operations service, request webui.WriteActionRequest) (webWriteDispatch, error) {
 	switch request.Action {
 	case webActionWorkPreview:
 		response, err := p.writeWorkPreview(operations)
 
-		return response, true, err
+		return webWriteDispatch{Response: response, Handled: true}, err
 	case webActionWorkDaemonStop:
 		response, err := p.writeWorkDaemonStop(operations)
 
-		return response, true, err
+		return webWriteDispatch{Response: response, Handled: true}, err
 	default:
 		if strings.HasPrefix(request.Action, "workflow.") {
-			return p.writeWorkflowAction(ctx, operations, request), true, nil
+			return webWriteDispatch{Response: p.writeWorkflowAction(ctx, operations, request), Handled: true}, nil
 		}
 
-		return webui.WriteActionResponse{}, false, nil
+		return webWriteDispatch{Response: webui.WriteActionResponse{}, Handled: false}, nil
 	}
 }
 
@@ -511,4 +511,9 @@ func compactChangedFiles(paths ...string) []string {
 	}
 
 	return files
+}
+
+type webWriteDispatch struct {
+	Response webui.WriteActionResponse
+	Handled  bool
 }

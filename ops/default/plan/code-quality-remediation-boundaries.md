@@ -118,3 +118,22 @@ consumer, owning removal task and validation before introduction. All bridges
 expire by T15.4; permanent aliases or pass-through facades do not satisfy the
 package split. Baseline debt reassociation requires explicit identity and
 signature changes in the manifest, plus the original inventory reference.
+
+## Command and ticket operation ownership in Slice 4
+
+The typed commandFactory owns process IO and embedded assets for all 134
+constructors. Commands parse flags/arguments and render outputs. The existing
+central service owns shared ticket preflight, selection, execution, application,
+legacy loop, review and merge operations in service_ticket files. Those stages
+use explicit operation contexts and domain/core values rather than TUI/Web
+presentation types. Manual, agentic and trusted review retain distinct governing
+approval rules, and native/legacy authority guards remain at admission.
+
+The mechanical move ledger preserves 292 complete declarations before semantic
+extraction. The operation ledger identifies subsequent ownership changes; the
+69-row final disposition ledger records every assigned signature occurrence.
+No package edge, exported migration facade or generic service layer is added.
+The existing daemonWorkflowRunner owns iteration resources, and adapter-specific
+Web dispatch results remain in the Web adapter. Gate report metadata and
+notification event identity are cohesive values at their current owners, ready
+for their recorded Slice 6 capability moves.

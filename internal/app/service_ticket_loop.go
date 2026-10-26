@@ -22,21 +22,21 @@ type ticketLoopRunOptions struct {
 	MaxIterations int
 }
 
-func selectTicketLoopTickets(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, queryOptions core.TicketLoopQueryOptions, runOptions ticketLoopRunOptions) ([]core.IndexedTicket, int, error) {
+func selectTicketLoopTickets(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, queryOptions core.TicketLoopQueryOptions, runOptions ticketLoopRunOptions) (ticketLoopSelection, error) {
 	tickets, err := core.NewTicketLoopQuery(index).EligibleTickets(ctx, queryOptions)
 	if err != nil {
-		return nil, 0, err
+		return ticketLoopSelection{Tickets: nil, EligibleCount: 0}, err
 	}
 
 	tickets, err = applyTicketLoopPreflight(ctx, index, projectContext, tickets)
 	if err != nil {
-		return nil, 0, err
+		return ticketLoopSelection{Tickets: nil, EligibleCount: 0}, err
 	}
 
 	eligibleTickets := deduplicateTicketLoopTickets(tickets)
 	tickets = ticketsForTicketLoopRun(eligibleTickets, runOptions)
 
-	return tickets, len(eligibleTickets), nil
+	return ticketLoopSelection{Tickets: tickets, EligibleCount: len(eligibleTickets)}, nil
 }
 
 func applyTicketLoopPreflight(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, tickets []core.IndexedTicket) ([]core.IndexedTicket, error) {
@@ -174,7 +174,9 @@ func (s service) runTicketLoopExecution(ctx context.Context, selection ticketLoo
 	for _, ticket := range selection.Tickets {
 		emitTicketSelectedAgentEvent(ctx, loop.Events, loop.Record, ticket)
 
-		execution, application, err := s.executeLoopTicket(ctx, ticket, ticketExecutionEvents{LoopID: loop.Record.ID, Sink: loop.Events})
+		ticketOutcome, err := s.executeLoopTicket(ctx, ticket, ticketExecutionEvents{LoopID: loop.Record.ID, Sink: loop.Events})
+		execution, application := ticketOutcome.Record, ticketOutcome.Application
+
 		if err != nil {
 			return s.failTicketLoopExecution(ctx, loop, err)
 		}
@@ -239,30 +241,30 @@ func (s service) finishTicketLoopExecution(ctx context.Context, loop ticketLoop)
 	return loop.Result, nil
 }
 
-func (s service) executeLoopTicket(ctx context.Context, ticket core.IndexedTicket, events ticketExecutionEvents) (core.ExecutionRecord, core.ResultApplication, error) {
+func (s service) executeLoopTicket(ctx context.Context, ticket core.IndexedTicket, events ticketExecutionEvents) (ticketExecutionOutcome, error) {
 	preflight, err := s.prepareTicketStart(ctx, ticket, ticketStartPreflightOptions{PrepareWorktree: true})
 	if err != nil {
-		return core.ExecutionRecord{}, core.ResultApplication{}, err
+		return ticketExecutionOutcome{Record: core.ExecutionRecord{}, Application: core.ResultApplication{}}, err
 	}
 
 	events.Sink = core.NewAgentEventFanoutSink(events.Sink, agentWorkExecutionEventSink(preflight.Record))
 
 	record, err := s.runTicketStartExecution(ctx, ticketExecutionInput{Record: preflight.Record, Runtime: preflight.Runtime, Events: events})
 	if err != nil {
-		return record, core.ResultApplication{}, err
+		return ticketExecutionOutcome{Record: record, Application: core.ResultApplication{}}, err
 	}
 
 	plan, err := buildTicketApplyResultPlanForRecord(ctx, s.projectContext, record)
 	if err != nil {
-		return record, core.ResultApplication{}, err
+		return ticketExecutionOutcome{Record: record, Application: core.ResultApplication{}}, err
 	}
 
 	err = s.applyTicketResult(ctx, plan, events)
 	if err != nil {
-		return record, core.ResultApplication{}, err
+		return ticketExecutionOutcome{Record: record, Application: core.ResultApplication{}}, err
 	}
 
-	return record, plan.Application, nil
+	return ticketExecutionOutcome{Record: record, Application: plan.Application}, nil
 }
 
 func newRunningLoopRunRecord(projectID string, eligibleCount int) core.LoopRunRecord {
@@ -361,7 +363,9 @@ func (s service) runLegacyTicketLoop(ctx context.Context, request ticketLoopRequ
 		return ticketLoopOperationResult{}, fmt.Errorf("max-iterations must be greater than or equal to zero")
 	}
 
-	tickets, count, err := selectTicketLoopTickets(ctx, index, s.projectContext, request.Query, request.Run)
+	loopSelection, err := selectTicketLoopTickets(ctx, index, s.projectContext, request.Query, request.Run)
+	tickets, count := loopSelection.Tickets, loopSelection.EligibleCount
+
 	if err != nil {
 		return ticketLoopOperationResult{}, err
 	}
@@ -380,4 +384,9 @@ func (s service) runLegacyTicketLoop(ctx context.Context, request ticketLoopRequ
 	outcome.Execution, err = s.runTicketLoopExecution(ctx, outcome.Selection)
 
 	return outcome, err
+}
+
+type ticketExecutionOutcome struct {
+	Record      core.ExecutionRecord
+	Application core.ResultApplication
 }

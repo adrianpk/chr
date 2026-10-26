@@ -45,28 +45,6 @@ func conversationGenerationProjectAllowed(id string, input ConversationIntentCon
 	return false
 }
 
-func (s service) bindIntentGeneration(ctx context.Context, requestID string, input ConversationIntentContext) (service, context.Context, error) {
-	scoped, err := s.conversationGenerationScope(ctx, input)
-	if err != nil {
-		return s, ctx, err
-	}
-
-	s, ctx, err = scoped.bindGeneration(ctx, "intent-"+requestID, "conversation")
-	if err != nil {
-		return s, ctx, err
-	}
-
-	if location, bound := core.HarnessGenerationLocationFromContext(ctx); bound {
-		if err := s.validateIntentGenerationProject(ctx, location, input); err != nil {
-			return s, ctx, err
-		}
-
-		s.projectContext.ProjectDir = location.ExecutionDir
-	}
-
-	return s, ctx, nil
-}
-
 func (s service) validateIntentGenerationProject(ctx context.Context, location core.HarnessGenerationLocation, input ConversationIntentContext) error {
 	if !conversationGenerationProjectAllowed(location.ProjectRef, input) {
 		return core.ErrWorkflowConflict
@@ -87,4 +65,19 @@ func (s service) validateIntentGenerationProject(ctx context.Context, location c
 	}
 
 	return nil
+}
+
+func (s service) intentGenerationProject(ctx context.Context, input ConversationIntentContext) (service, error) {
+	location, bound := core.HarnessGenerationLocationFromContext(ctx)
+	if !bound {
+		return s, nil
+	}
+
+	if err := s.validateIntentGenerationProject(ctx, location, input); err != nil {
+		return s, err
+	}
+
+	s.projectContext.ProjectDir = location.ExecutionDir
+
+	return s, nil
 }

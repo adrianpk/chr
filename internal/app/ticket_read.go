@@ -49,7 +49,9 @@ func (factory commandFactory) runTicketShow(ctx context.Context, cmd *cli.Comman
 		return err
 	}
 
-	projectContext, index, err := factory.openTicketIndexForCommand(ctx, cmd, env)
+	ticketIndex, err := factory.openTicketIndexForCommand(ctx, cmd, env)
+	projectContext, index := ticketIndex.Project, ticketIndex.Index
+
 	if err != nil {
 		return err
 	}

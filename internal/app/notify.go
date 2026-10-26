@@ -120,7 +120,9 @@ func (factory commandFactory) runNotifyStatus(ctx context.Context, cmd *cli.Comm
 		return fmt.Errorf("notify status does not accept positional arguments")
 	}
 
-	_, projectContext, config, err := factory.loadNotifyProjectConfig(ctx, cmd)
+	notifyProject, err := factory.loadNotifyProjectConfig(ctx, cmd)
+	projectContext, config := notifyProject.Project, notifyProject.Config
+
 	if err != nil {
 		return err
 	}
@@ -217,7 +219,9 @@ func (factory commandFactory) runNotifyTelegramTest(ctx context.Context, cmd *cl
 		return fmt.Errorf("notify telegram test does not accept positional arguments")
 	}
 
-	env, projectContext, config, err := factory.loadNotifyProjectConfig(ctx, cmd)
+	notifyProject, err := factory.loadNotifyProjectConfig(ctx, cmd)
+	env, projectContext, config := notifyProject.Environment, notifyProject.Project, notifyProject.Config
+
 	if err != nil {
 		return err
 	}
@@ -228,7 +232,7 @@ func (factory commandFactory) runNotifyTelegramTest(ctx context.Context, cmd *cl
 	}
 
 	if !cmd.Bool("dry-run") {
-		return runNotifyTelegramTestDispatch(ctx, factory.io.Stdout, env, projectContext, config.Notifications.Telegram, factory.deps.assetsFS)
+		return factory.runNotifyTelegramTestDispatch(ctx, env, projectContext, config.Notifications.Telegram)
 	}
 
 	return printNotifyTelegramTestPlan(factory.io.Stdout, projectContext, config.Notifications.Telegram)
@@ -237,10 +241,10 @@ func (factory commandFactory) runNotifyTelegramTest(ctx context.Context, cmd *cl
 func (factory commandFactory) loadNotifyProjectConfig(
 	ctx context.Context,
 	cmd *cli.Command,
-) (core.UserEnvironment, commandProjectContext, core.WorkspaceConfig, error) {
+) (notifyProjectConfig, error) {
 	env, err := newUserEnvironmentFromCommand(cmd)
 	if err != nil {
-		return nil, commandProjectContext{}, core.WorkspaceConfig{}, err
+		return notifyProjectConfig{Environment: nil, Project: commandProjectContext{}, Config: core.WorkspaceConfig{}}, err
 	}
 
 	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
@@ -249,15 +253,15 @@ func (factory commandFactory) loadNotifyProjectConfig(
 		AllowCurrentDirectory: true,
 	})
 	if err != nil {
-		return nil, commandProjectContext{}, core.WorkspaceConfig{}, err
+		return notifyProjectConfig{Environment: nil, Project: commandProjectContext{}, Config: core.WorkspaceConfig{}}, err
 	}
 
 	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
 	if err != nil {
-		return nil, commandProjectContext{}, core.WorkspaceConfig{}, err
+		return notifyProjectConfig{Environment: nil, Project: commandProjectContext{}, Config: core.WorkspaceConfig{}}, err
 	}
 
-	return env, projectContext, config, nil
+	return notifyProjectConfig{Environment: env, Project: projectContext, Config: config}, nil
 }
 
 func printNotifyStatus(stdout io.Writer, projectContext commandProjectContext, config core.WorkspaceConfig) error {
@@ -304,14 +308,7 @@ func printNotifyTelegramTestPlan(
 	})
 }
 
-func runNotifyTelegramTestDispatch(
-	ctx context.Context,
-	stdout io.Writer,
-	env core.UserEnvironment,
-	projectContext commandProjectContext,
-	telegram core.TelegramNotificationConfig,
-	assetsFS fs.FS,
-) error {
+func (factory commandFactory) runNotifyTelegramTestDispatch(ctx context.Context, env core.UserEnvironment, projectContext commandProjectContext, telegram core.TelegramNotificationConfig) error {
 	now := time.Now().UTC()
 	event := notifyTelegramTestEvent(projectContext, now)
 	record := core.NotificationAuditRecord{
@@ -319,7 +316,7 @@ func runNotifyTelegramTestDispatch(
 		Channel: "telegram",
 	}
 
-	repository, err := core.NewNotificationEventRepository(ctx, env, assetsFS)
+	repository, err := core.NewNotificationEventRepository(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -339,7 +336,7 @@ func runNotifyTelegramTestDispatch(
 		return err
 	}
 
-	return printNotifyTelegramTestSent(stdout, projectContext, record, result)
+	return printNotifyTelegramTestSent(factory.io.Stdout, projectContext, record, result)
 }
 
 func notifyTelegramTestEvent(projectContext commandProjectContext, now time.Time) core.NotificationEvent {
@@ -384,4 +381,10 @@ func printNotifyLines(stdout io.Writer, lines []string) error {
 	}
 
 	return nil
+}
+
+type notifyProjectConfig struct {
+	Environment core.UserEnvironment
+	Project     commandProjectContext
+	Config      core.WorkspaceConfig
 }

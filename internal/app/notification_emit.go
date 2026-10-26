@@ -69,7 +69,9 @@ func loopRunNotificationEvent(
 		return core.NotificationEvent{}, false
 	}
 
-	eventType, severity := loopRunNotificationType(record.Status)
+	notificationKind := loopRunNotificationType(record.Status)
+
+	eventType, severity := notificationKind.Type, notificationKind.Severity
 	if eventType == "" {
 		return core.NotificationEvent{}, false
 	}
@@ -93,16 +95,16 @@ func loopRunNotificationEvent(
 	}, true
 }
 
-func loopRunNotificationType(status core.LoopRunStatus) (core.NotificationEventType, core.NotificationSeverity) {
+func loopRunNotificationType(status core.LoopRunStatus) loopNotificationKind {
 	switch status {
 	case core.LoopRunStatusSucceeded:
-		return core.NotificationEventLoopFinished, core.NotificationSeverityInfo
+		return loopNotificationKind{Type: core.NotificationEventLoopFinished, Severity: core.NotificationSeverityInfo}
 	case core.LoopRunStatusBlocked:
-		return core.NotificationEventLoopBlocked, core.NotificationSeverityWarning
+		return loopNotificationKind{Type: core.NotificationEventLoopBlocked, Severity: core.NotificationSeverityWarning}
 	case core.LoopRunStatusFailed:
-		return core.NotificationEventLoopFailed, core.NotificationSeverityError
+		return loopNotificationKind{Type: core.NotificationEventLoopFailed, Severity: core.NotificationSeverityError}
 	default:
-		return "", ""
+		return loopNotificationKind{Type: "", Severity: ""}
 	}
 }
 
@@ -231,4 +233,9 @@ func workflowNotificationEventID(projectID, kind string, createdAt time.Time) st
 	sum := sha256.Sum256([]byte(projectID + "\x00notification\x00" + kind + "\x00" + createdAt.Format(time.RFC3339Nano)))
 
 	return "notify-" + hex.EncodeToString(sum[:8])
+}
+
+type loopNotificationKind struct {
+	Type     core.NotificationEventType
+	Severity core.NotificationSeverity
 }

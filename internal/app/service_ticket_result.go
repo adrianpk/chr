@@ -266,7 +266,9 @@ func addTicketExecutionReportEvidenceOptions(opts *core.ExecutionReportOptions, 
 		return nil
 	}
 
-	checklist, checklistError, err := ticketExecutionReportEvidenceChecklist(plan.Application.TicketPath)
+	checklistResult, err := ticketExecutionReportEvidenceChecklist(plan.Application.TicketPath)
+	checklist, checklistError := checklistResult.Checklist, checklistResult.Diagnostic
+
 	if err != nil {
 		return err
 	}
@@ -278,22 +280,28 @@ func addTicketExecutionReportEvidenceOptions(opts *core.ExecutionReportOptions, 
 	return nil
 }
 
-func ticketExecutionReportEvidenceChecklist(path string) (*core.EvidenceStrategyChecklist, string, error) {
+func ticketExecutionReportEvidenceChecklist(path string) (ticketEvidenceChecklist, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {
-		return nil, "", fmt.Errorf("read evidence strategy ticket: %w", err)
+		return ticketEvidenceChecklist{Checklist: nil, Diagnostic: ""}, fmt.Errorf("read evidence strategy ticket: %w", err)
 	}
 
-	checklist, checklistError := ticketExecutionReportEvidenceChecklistContent(string(content))
+	checklistResult := ticketExecutionReportEvidenceChecklistContent(string(content))
+	checklist, checklistError := checklistResult.Checklist, checklistResult.Diagnostic
 
-	return checklist, checklistError, nil
+	return ticketEvidenceChecklist{Checklist: checklist, Diagnostic: checklistError}, nil
 }
 
-func ticketExecutionReportEvidenceChecklistContent(content string) (*core.EvidenceStrategyChecklist, string) {
+func ticketExecutionReportEvidenceChecklistContent(content string) ticketEvidenceChecklist {
 	checklist, err := core.ParseEvidenceStrategyChecklist(content)
 	if err != nil {
-		return nil, err.Error()
+		return ticketEvidenceChecklist{Checklist: nil, Diagnostic: err.Error()}
 	}
 
-	return &checklist, ""
+	return ticketEvidenceChecklist{Checklist: &checklist, Diagnostic: ""}
+}
+
+type ticketEvidenceChecklist struct {
+	Checklist  *core.EvidenceStrategyChecklist
+	Diagnostic string
 }

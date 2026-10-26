@@ -91,7 +91,7 @@ func (factory commandFactory) runDaemonStart(ctx context.Context, cmd *cli.Comma
 		return printDaemonStartPlan(factory.io.Stdout, env, decision)
 	}
 
-	return runDaemonForegroundLoop(ctx, factory.io.Stdout, env, factory.deps.assetsFS, decision, maxIterations)
+	return factory.runDaemonForegroundLoop(ctx, env, decision, maxIterations)
 }
 
 func (factory commandFactory) runDaemonStatus(ctx context.Context, cmd *cli.Command) error {
@@ -208,19 +208,12 @@ type daemonForegroundLoopResult struct {
 	WorkflowSteps     int
 }
 
-func runDaemonForegroundLoop(
-	ctx context.Context,
-	stdout io.Writer,
-	env core.UserEnvironment,
-	assetsFS fs.FS,
-	decision core.DaemonStartGuardDecision,
-	maxIterations int,
-) error {
+func (factory commandFactory) runDaemonForegroundLoop(ctx context.Context, env core.UserEnvironment, decision core.DaemonStartGuardDecision, maxIterations int) error {
 	if !decision.Allowed {
 		return fmt.Errorf("daemon start blocked: %s", decision.Reason)
 	}
 
-	stateRepository, err := core.NewDaemonStateRepository(ctx, env, assetsFS)
+	stateRepository, err := core.NewDaemonStateRepository(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -245,7 +238,9 @@ func runDaemonForegroundLoop(
 		return err
 	}
 
-	result, err := runDaemonForegroundIterations(ctx, stdout, env, assetsFS, stateRepository, maxIterations)
+	runner := daemonWorkflowRunner{stdout: factory.io.Stdout, env: env, assets: factory.deps.assetsFS, repository: stateRepository}
+
+	result, err := runner.foregroundIterations(ctx, maxIterations)
 	if err != nil {
 		failDaemonForegroundState(ctx, stateRepository, err)
 
@@ -259,18 +254,11 @@ func runDaemonForegroundLoop(
 		return err
 	}
 
-	return printDaemonForegroundLoopResult(stdout, result)
+	return printDaemonForegroundLoopResult(factory.io.Stdout, result)
 }
 
-func runDaemonForegroundIterations(
-	ctx context.Context,
-	stdout io.Writer,
-	env core.UserEnvironment,
-	assetsFS fs.FS,
-	stateRepository core.DaemonStateRepository,
-	maxIterations int,
-) (result daemonForegroundLoopResult, err error) {
-	registry, err := core.NewProjectRegistry(ctx, env, assetsFS)
+func (runner daemonWorkflowRunner) foregroundIterations(ctx context.Context, maxIterations int) (result daemonForegroundLoopResult, err error) {
+	registry, err := core.NewProjectRegistry(ctx, runner.env, runner.assets)
 	if err != nil {
 		return daemonForegroundLoopResult{}, err
 	}
@@ -280,7 +268,7 @@ func runDaemonForegroundIterations(
 		_ = registry.Close()
 	}()
 
-	index, err := core.NewTicketIndex(ctx, env, assetsFS)
+	index, err := core.NewTicketIndex(ctx, runner.env, runner.assets)
 	if err != nil {
 		return daemonForegroundLoopResult{}, err
 	}
@@ -290,10 +278,8 @@ func runDaemonForegroundIterations(
 		_ = index.Close()
 	}()
 
-	ctx, finish := watchDaemonHeartbeat(ctx, stateRepository)
+	ctx, finish := watchDaemonHeartbeat(ctx, runner.repository)
 	defer func() { err = errors.Join(err, finish()) }()
-
-	runner := daemonWorkflowRunner{stdout: stdout, env: env, assets: assetsFS, repository: stateRepository}
 
 	for range maxIterations {
 		if err := runner.iteration(ctx, registry, index, &result); err != nil {

@@ -13,23 +13,25 @@ var newAgenticReviewRunner = func() core.AgenticReviewRunner {
 	return core.HarnessAgenticReviewRunner{Runner: codex.Runner{}}
 }
 
-func (s service) repairAgentWorkCycleTicket(state *agentWorkIntegrationCycleState, opts agentWorkPostDevelopmentOptions, ticket core.IndexedTicket) (core.IndexedTicket, core.ExecutionRecord, bool, error) {
+func (s service) repairAgentWorkCycleTicket(state *agentWorkIntegrationCycleState, opts agentWorkPostDevelopmentOptions, ticket core.IndexedTicket) (agentWorkRepairResult, error) {
 	if !agentWorkCycleRunsRepair(opts.Policy, ticket) {
-		return ticket, opts.Execution, true, nil
+		return agentWorkRepairResult{Ticket: ticket, Execution: opts.Execution, Stop: true}, nil
 	}
 
 	if !core.TicketReviewRepairAllowed(ticket, core.DefaultTicketReviewRepairLimit) {
-		return ticket, opts.Execution, true, nil
+		return agentWorkRepairResult{Ticket: ticket, Execution: opts.Execution, Stop: true}, nil
 	}
 
 	emitRepairStartedAgentEvent(s.ctx, opts.LoopSink, state.Record, ticket)
 
-	execution, application, err := s.executeLoopTicket(s.ctx, ticket, ticketExecutionEvents{
+	ticketOutcome, err := s.executeLoopTicket(s.ctx, ticket, ticketExecutionEvents{
 		LoopID: state.Record.ID,
 		Sink:   opts.LoopSink,
 	})
+
+	execution, application := ticketOutcome.Record, ticketOutcome.Application
 	if err != nil {
-		return ticket, execution, false, err
+		return agentWorkRepairResult{Ticket: ticket, Execution: execution, Stop: false}, err
 	}
 
 	state.Result.Executions = append(state.Result.Executions, execution)
@@ -38,10 +40,10 @@ func (s service) repairAgentWorkCycleTicket(state *agentWorkIntegrationCycleStat
 	if application.TicketStatus == core.TicketResultStatusBlocked {
 		emitRepairFinishedAgentEvent(s.ctx, opts.LoopSink, state.Record, execution, ticket)
 
-		return ticket, execution, true, nil
+		return agentWorkRepairResult{Ticket: ticket, Execution: execution, Stop: true}, nil
 	}
 
-	reviewedTicket, stop, err := s.reviewAgentWorkCycleTicket(agentWorkPostDevelopmentOptions{
+	reviewResult, err := s.reviewAgentWorkCycleTicket(agentWorkPostDevelopmentOptions{
 		Ticket:       ticket,
 		Policy:       opts.Policy,
 		Record:       state.Record,
@@ -51,16 +53,18 @@ func (s service) repairAgentWorkCycleTicket(state *agentWorkIntegrationCycleStat
 		ReviewConfig: opts.ReviewConfig,
 		LoopSink:     opts.LoopSink,
 	})
+
+	reviewedTicket, stop := reviewResult.Ticket, reviewResult.Stop
 	if err != nil {
-		return core.IndexedTicket{}, execution, false, err
+		return agentWorkRepairResult{Ticket: core.IndexedTicket{}, Execution: execution, Stop: false}, err
 	}
 
 	emitRepairFinishedAgentEvent(s.ctx, opts.LoopSink, state.Record, execution, reviewedTicket)
 
-	return reviewedTicket, execution, stop, nil
+	return agentWorkRepairResult{Ticket: reviewedTicket, Execution: execution, Stop: stop}, nil
 }
 
-func (s service) reviewAgentWorkCycleTicket(opts agentWorkPostDevelopmentOptions) (core.IndexedTicket, bool, error) {
+func (s service) reviewAgentWorkCycleTicket(opts agentWorkPostDevelopmentOptions) (agentWorkReviewResult, error) {
 	cycleTicket := opts.Ticket
 	runsAgenticReview := agentWorkCycleRunsAgenticReview(opts.Policy, opts.Application)
 	runsTrustedReview := agentWorkCycleRunsTrustedAutoMergeReview(opts.Policy, opts.Application)
@@ -68,19 +72,19 @@ func (s service) reviewAgentWorkCycleTicket(opts agentWorkPostDevelopmentOptions
 	var err error
 
 	if runsAgenticReview {
-		emitReviewStartedAgentEvent(s.ctx, opts.LoopSink, opts.Record, opts.Execution, opts.Ticket, opts.Policy.Mode)
+		emitReviewStartedAgentEvent(s.ctx, opts.LoopSink, reviewStartedEvent{Record: opts.Record, Execution: opts.Execution, Ticket: opts.Ticket, Mode: opts.Policy.Mode})
 
 		cycleTicket, err = s.runAgenticReviewCycle(opts.Ticket, opts.Execution, opts.Application, opts.ReviewConfig)
 	}
 
 	if runsTrustedReview {
-		emitReviewStartedAgentEvent(s.ctx, opts.LoopSink, opts.Record, opts.Execution, opts.Ticket, opts.Policy.Mode)
+		emitReviewStartedAgentEvent(s.ctx, opts.LoopSink, reviewStartedEvent{Record: opts.Record, Execution: opts.Execution, Ticket: opts.Ticket, Mode: opts.Policy.Mode})
 
 		cycleTicket, err = s.runTrustedAutoMergeReviewCycle(opts.Ticket, opts.Execution, opts.Application)
 	}
 
 	if err != nil {
-		return core.IndexedTicket{}, false, err
+		return agentWorkReviewResult{Ticket: core.IndexedTicket{}, Stop: false}, err
 	}
 
 	if runsAgenticReview || runsTrustedReview {
@@ -89,7 +93,7 @@ func (s service) reviewAgentWorkCycleTicket(opts agentWorkPostDevelopmentOptions
 
 	stop := agentWorkCycleStopsBeforeMerge(opts.Policy) || !agentWorkCycleTicketReadyForMerge(opts.Policy, cycleTicket)
 
-	return cycleTicket, stop, nil
+	return agentWorkReviewResult{Ticket: cycleTicket, Stop: stop}, nil
 }
 
 func (s service) runAgenticReviewCycle(selected core.IndexedTicket, execution core.ExecutionRecord, application core.ResultApplication, config core.ReviewWorkflowConfig) (core.IndexedTicket, error) {
@@ -270,4 +274,15 @@ func agenticReviewProjectDir(projectContext commandProjectContext, execution cor
 	}
 
 	return projectContext.ProjectDir
+}
+
+type agentWorkRepairResult struct {
+	Ticket    core.IndexedTicket
+	Execution core.ExecutionRecord
+	Stop      bool
+}
+
+type agentWorkReviewResult struct {
+	Ticket core.IndexedTicket
+	Stop   bool
 }

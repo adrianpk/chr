@@ -71,9 +71,17 @@ func (s service) ResolveConversationIntent(ctx context.Context, requestID string
 		return result, errors.New("invalid conversation intent context")
 	}
 
-	var err error
+	scoped, err := s.conversationGenerationScope(ctx, input)
+	if err != nil {
+		return result, err
+	}
 
-	s, ctx, err = s.bindIntentGeneration(ctx, requestID, input)
+	s, ctx, err = scoped.bindGeneration(ctx, "intent-"+requestID, "conversation")
+	if err != nil {
+		return result, err
+	}
+
+	s, err = s.intentGenerationProject(ctx, input)
 	if err != nil {
 		return result, err
 	}

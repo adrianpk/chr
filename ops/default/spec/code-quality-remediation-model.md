@@ -171,3 +171,28 @@ forwarder is retained for the removed ticket preflight wrapper or CLI
 merge-configuration tuple.
 
 Command resolution uses `commandFactory.projectService` as the single CLI-to-service constructor. Its service already contains the resolved project; returning that project separately duplicated ownership. The unused `service.dumpDirectory` accessor is removed; dump tests continue to exercise the live listing/content path. Telegram-private error names remain assigned to Slice 7.
+
+The [Slice 4 row dispositions](../plan/code-quality-remediation-slice-4-dispositions.csv)
+account for all 69 assigned A/B/C rows: 47 fixed occurrences and 22 retained
+cohesive five-input contracts. Every current declaration is at most five
+parameters and has at most two results, with error/bool second when present.
+No assigned declaration remains in temporary signature debt. Exact transitions
+for the final 31 fixes are in the adjacent slice-4-signatures ledger; the global
+manifest now has 472 entries with the ceiling still seven and one external
+exception.
+
+Named ticket results retain the execution record on application/report failure,
+partial integration state and selected queue, original eligible count, refreshed
+ticket, stop decision and preparation release callback. Failed preparations
+still release their lock; successful callers retain deferred release ownership.
+Web dispatch retains handled separately from response/error. Evidence parsing
+retains nonfatal diagnostics separately from file-read failures. Provider text
+results retain response IDs on failed responses. Notification type and severity
+remain paired; unknown status keeps an empty kind.
+
+Daemon iterations use the existing daemonWorkflowRunner, which owns output,
+environment, assets and state repository; the operation context and iteration
+bound stay explicit. Gate report source groups creation time and report paths,
+while refs, evidence, validation and governing configuration remain separate.
+Conversation intent derives its bound context in the operation caller and
+validates the bound execution project without a context-bearing result object.

@@ -234,7 +234,9 @@ func loadTUIMetadataData(data *tuiOptionsData) error {
 }
 
 func loadTUIIndexData(data *tuiOptionsData) error {
-	workspaceGraph, workspaceIndex, semanticDigestStates, err := loadTUIWorkspaceState(data.ctx, data.projectContext)
+	workspaceState, err := loadTUIWorkspaceState(data.ctx, data.projectContext)
+	workspaceGraph, workspaceIndex, semanticDigestStates := workspaceState.Graph, workspaceState.Index, workspaceState.SemanticDigests
+
 	if err != nil {
 		return err
 	}
@@ -249,22 +251,22 @@ func loadTUIIndexData(data *tuiOptionsData) error {
 func loadTUIWorkspaceState(
 	ctx context.Context,
 	projectContext commandProjectContext,
-) (core.WorkspaceGraph, core.WorkspaceIndex, []core.WorkspaceSemanticDigestState, error) {
+) (tuiWorkspaceState, error) {
 	result, err := core.NewWorkspaceGraphBuilder(projectContext.ProjectDir).BuildCachedIndex(ctx)
 	if err != nil {
-		return core.WorkspaceGraph{}, core.WorkspaceIndex{}, nil, err
+		return tuiWorkspaceState{Graph: core.WorkspaceGraph{}, Index: core.WorkspaceIndex{}, SemanticDigests: nil}, err
 	}
 
 	cache, err := core.ReadWorkspaceSemanticDigestCache(
 		core.WorkspaceSemanticDigestCachePath(projectContext.ProjectDir),
 	)
 	if err != nil {
-		return core.WorkspaceGraph{}, core.WorkspaceIndex{}, nil, err
+		return tuiWorkspaceState{Graph: core.WorkspaceGraph{}, Index: core.WorkspaceIndex{}, SemanticDigests: nil}, err
 	}
 
 	states := core.WorkspaceSemanticDigestStates(result.Index, cache, "", "")
 
-	return result.Graph, result.Index, states, nil
+	return tuiWorkspaceState{Graph: result.Graph, Index: result.Index, SemanticDigests: states}, nil
 }
 
 type tuiOptionsData struct {
@@ -582,4 +584,10 @@ func loadTUILoopRuns(
 	}
 
 	return records, nil
+}
+
+type tuiWorkspaceState struct {
+	Graph           core.WorkspaceGraph
+	Index           core.WorkspaceIndex
+	SemanticDigests []core.WorkspaceSemanticDigestState
 }

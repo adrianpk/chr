@@ -354,7 +354,8 @@ func (p openAIDumpCurationProvider) executeOpenAIRequest(
 		return result, fmt.Errorf("OpenAI dump curation returned HTTP %d: %s", response.StatusCode, strings.TrimSpace(string(responseBody)))
 	}
 
-	output, responseID, err := dumpCurationOpenAIResponseText(responseBody)
+	curationResponse, err := dumpCurationOpenAIResponseText(responseBody)
+	output, responseID := curationResponse.Text, curationResponse.ResponseID
 	result.Output = []byte(output)
 	result.ResponseID = responseID
 
@@ -365,20 +366,20 @@ func (p openAIDumpCurationProvider) executeOpenAIRequest(
 	return result, nil
 }
 
-func dumpCurationOpenAIResponseText(content []byte) (string, string, error) {
+func dumpCurationOpenAIResponseText(content []byte) (dumpCurationResponseText, error) {
 	var envelope dumpCurationOpenAIEnvelope
 
 	err := json.Unmarshal(content, &envelope)
 	if err != nil {
-		return "", "", fmt.Errorf("decode OpenAI dump curation response: %w", err)
+		return dumpCurationResponseText{Text: "", ResponseID: ""}, fmt.Errorf("decode OpenAI dump curation response: %w", err)
 	}
 
 	if envelope.Error != nil {
-		return "", envelope.ID, fmt.Errorf("OpenAI dump curation error: %s", envelope.Error.Message)
+		return dumpCurationResponseText{Text: "", ResponseID: envelope.ID}, fmt.Errorf("OpenAI dump curation error: %s", envelope.Error.Message)
 	}
 
 	if strings.TrimSpace(envelope.OutputText) != "" {
-		return envelope.OutputText, envelope.ID, nil
+		return dumpCurationResponseText{Text: envelope.OutputText, ResponseID: envelope.ID}, nil
 	}
 
 	var output strings.Builder
@@ -397,10 +398,10 @@ func dumpCurationOpenAIResponseText(content []byte) (string, string, error) {
 
 	text := strings.TrimSpace(output.String())
 	if text == "" {
-		return "", envelope.ID, fmt.Errorf("OpenAI dump curation returned no output text")
+		return dumpCurationResponseText{Text: "", ResponseID: envelope.ID}, fmt.Errorf("OpenAI dump curation returned no output text")
 	}
 
-	return text, envelope.ID, nil
+	return dumpCurationResponseText{Text: text, ResponseID: envelope.ID}, nil
 }
 
 func decodeDumpCurationPayload(content []byte) (DumpCurationResult, error) {
@@ -597,4 +598,9 @@ func firstNonEmptyDumpCurationString(values ...string) string {
 	}
 
 	return ""
+}
+
+type dumpCurationResponseText struct {
+	Text       string
+	ResponseID string
 }

@@ -195,15 +195,15 @@ func emitCycleRehydratedAgentEvent(ctx context.Context, sink core.AgentEventSink
 	})
 }
 
-func emitReviewStartedAgentEvent(ctx context.Context, sink core.AgentEventSink, record core.LoopRunRecord, execution core.ExecutionRecord, ticket core.IndexedTicket, mode core.IntegrationCycleMode) {
+func emitReviewStartedAgentEvent(ctx context.Context, sink core.AgentEventSink, review reviewStartedEvent) {
 	emitAgentWorkEvent(ctx, sink, core.AgentEvent{
-		ProjectID:   record.ProjectID,
-		LoopID:      record.ID,
-		ExecutionID: execution.ID,
-		TicketKey:   ticket.Key,
+		ProjectID:   review.Record.ProjectID,
+		LoopID:      review.Record.ID,
+		ExecutionID: review.Execution.ID,
+		TicketKey:   review.Ticket.Key,
 		Phase:       core.AgentEventPhaseReviewStarted,
-		Message:     fmt.Sprintf("%s review started: %s", ticket.Key, mode),
-		Refs:        agentWorkReviewRefs(ticket),
+		Message:     fmt.Sprintf("%s review started: %s", review.Ticket.Key, review.Mode),
+		Refs:        agentWorkReviewRefs(review.Ticket),
 	})
 }
 
@@ -408,4 +408,11 @@ func nonEmptyAgentWorkEventValue(value, fallback string) string {
 	}
 
 	return fallback
+}
+
+type reviewStartedEvent struct {
+	Record    core.LoopRunRecord
+	Execution core.ExecutionRecord
+	Ticket    core.IndexedTicket
+	Mode      core.IntegrationCycleMode
 }

@@ -21,7 +21,9 @@ func ticketEvidenceReadiness(ctx context.Context, request ticketEvidenceRequest)
 		return core.EvidenceReadinessResult{}, fmt.Errorf("load evidence strategy config: %w", err)
 	}
 
-	checklist, checklistError, err := ticketExecutionReportEvidenceChecklist(request.TicketPath)
+	checklistResult, err := ticketExecutionReportEvidenceChecklist(request.TicketPath)
+	checklist, checklistError := checklistResult.Checklist, checklistResult.Diagnostic
+
 	if err != nil {
 		return core.EvidenceReadinessResult{}, err
 	}

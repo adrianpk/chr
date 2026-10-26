@@ -29,7 +29,9 @@ func (s service) mergeTicket(ctx context.Context, request ticketMergeInput) (cor
 		return core.TicketMergeCommandResult{}, err
 	}
 
-	ticket, tickets, err := ticketMergeCommandTickets(ctx, index, s.projectContext, request.Key)
+	mergeSelection, err := ticketMergeCommandTickets(ctx, index, s.projectContext, request.Key)
+	ticket, tickets := mergeSelection.Ticket, mergeSelection.Tickets
+
 	if err != nil {
 		return core.TicketMergeCommandResult{}, err
 	}
@@ -67,18 +69,18 @@ func (s service) mergeTicket(ctx context.Context, request ticketMergeInput) (cor
 	return result, nil
 }
 
-func ticketMergeCommandTickets(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, key string) (core.IndexedTicket, []core.IndexedTicket, error) {
+func ticketMergeCommandTickets(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, key string) (ticketMergeSelection, error) {
 	tickets, err := index.ListProjectTickets(ctx, projectContext.ProjectID)
 	if err != nil {
-		return core.IndexedTicket{}, nil, err
+		return ticketMergeSelection{Ticket: core.IndexedTicket{}, Tickets: nil}, err
 	}
 
 	ticket, err := index.GetProjectTicketByKey(ctx, projectContext.ProjectID, key)
 	if err != nil {
-		return core.IndexedTicket{}, nil, err
+		return ticketMergeSelection{Ticket: core.IndexedTicket{}, Tickets: nil}, err
 	}
 
-	return ticket, tickets, nil
+	return ticketMergeSelection{Ticket: ticket, Tickets: tickets}, nil
 }
 
 func refreshTicketIndexAfterMerge(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, dryRun bool) error {
@@ -110,4 +112,9 @@ func ticketMergeBase(policy core.WorkBranchPolicy, supplied *string) string {
 	}
 
 	return policy.IntegrationBranch
+}
+
+type ticketMergeSelection struct {
+	Ticket  core.IndexedTicket
+	Tickets []core.IndexedTicket
 }
