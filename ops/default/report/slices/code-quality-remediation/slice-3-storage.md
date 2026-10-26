@@ -5,7 +5,7 @@ Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
 Branch: `refactor/slice-3-quality-storage`
-PR: pending
+PR: `#440`
 
 ## Purpose
 
