@@ -1,0 +1,178 @@
+{
+  "conversation": {
+    "GuidedRunID": "distinct guided",
+    "ID": "quality-conversation",
+    "Peer": {
+      "BotID": 12345,
+      "ChatID": 100001,
+      "TopicID": 0,
+      "UserID": 100001
+    },
+    "ProjectID": "conversation-project",
+    "ProjectBindingDigest": "conversation-binding",
+    "Namespace": "default",
+    "Intent": "prepare",
+    "Phase": "clarifying",
+    "Topic": "distinct topic",
+    "Capture": "distinct capture",
+    "QuestionBinding": "distinct question",
+    "AuthoringSessionRef": "distinct authoring",
+    "AuthorizationRef": "distinct authorization",
+    "InvocationID": "distinct invocation",
+    "LastObservedRevision": 9,
+    "Revision": 7
+  },
+  "execution": {
+    "ID": "exec-1",
+    "ProjectID": "project-1",
+    "TicketKey": "CHR-1",
+    "TicketPath": "/tmp/project/.chr/default/tickets/CHR-1.md",
+    "Status": "pending",
+    "Runtime": {
+      "Image": "chr-agent-runtime:local",
+      "DockerfilePath": "/tmp/project/.chr/default/runtime/agent/Dockerfile",
+      "ContainerWorkdir": "/workspace",
+      "ValidationCommand": "make verify"
+    },
+    "Workspace": {
+      "Mode": "worktree",
+      "ProjectCheckoutDir": "/tmp/project",
+      "ExecutionWorkspaceDir": "/tmp/project/.chr/default/worktrees/CHR-1",
+      "BaseRef": "origin/dev",
+      "BaseSHA": "abc123",
+      "TicketBranch": "chr/CHR-1"
+    },
+    "Artifacts": {
+      "ArtifactID": "00001-parser-validation",
+      "RunDir": "/tmp/project/.chr/default/runtime/runs/exec-1",
+      "ResultPath": "/tmp/project/.chr/default/runtime/runs/exec-1/result.json",
+      "LogPath": "/tmp/project/.chr/default/runtime/runs/exec-1/runtime.log",
+      "ValidationPath": "/synthetic/validation.log"
+    },
+    "FailureReason": "distinct execution failure",
+    "CreatedAt": "2026-10-26T11:12:13Z",
+    "StartedAt": null,
+    "FinishedAt": null,
+    "UpdatedAt": "2026-10-26T11:13:13Z"
+  },
+  "notification": {
+    "Event": {
+      "ID": "notification-1",
+      "ProjectID": "project-1",
+      "Type": "ticket_blocked",
+      "Severity": "warning",
+      "Status": "pending",
+      "Source": "ticket_execution",
+      "References": {
+        "TicketKey": "CHR-1",
+        "ExecutionID": "exec-1",
+        "LoopRunID": "distinct-loop",
+        "DaemonPID": 54321
+      },
+      "Payload": {
+        "Summary": "Ticket CHR-1 is blocked",
+        "Detail": "Validation failed after repeated attempts."
+      },
+      "FailureReason": "distinct notification failure",
+      "CreatedAt": "2026-10-26T11:16:13Z",
+      "DeliveredAt": null,
+      "UpdatedAt": "2026-10-26T11:17:13Z"
+    },
+    "Channel": "telegram"
+  },
+  "remote": {
+    "Request": {
+      "ID": "quality-remote",
+      "Sender": {
+        "Channel": "telegram",
+        "ExternalID": "sender-1",
+        "DisplayName": ""
+      },
+      "ProjectSelector": "",
+      "Intent": "loop_start",
+      "TicketKey": "",
+      "Comment": "distinct remote comment",
+      "Loop": {
+        "Statuses": [
+          "ready"
+        ],
+        "Priorities": [
+          "high"
+        ],
+        "Severities": [
+          "major"
+        ],
+        "ProjectAreas": [
+          "area-value"
+        ],
+        "Tags": [],
+        "Types": [
+          "feature"
+        ],
+        "UseCases": null,
+        "MaxIterations": 1
+      },
+      "RawText": "loop start --status ready --max-iterations 1",
+      "ReceivedAt": "2026-10-26T11:14:13Z",
+      "CreatedAt": "2026-10-26T11:15:13Z"
+    },
+    "Status": "accepted",
+    "HandoffCommand": "chr ticket loop --status ready --max-iterations 1",
+    "RejectionReason": "distinct rejection"
+  },
+  "ticket": {
+    "NativeWorkflow": false,
+    "AttentionReasons": null,
+    "ProjectID": "value-002",
+    "Namespace": "value-003",
+    "Path": "value-004",
+    "RelativePath": "value-005",
+    "Key": "value-006",
+    "Title": "value-007",
+    "Assignee": "",
+    "Synopsis": "value-009",
+    "Status": "value-010",
+    "BoardColumn": "value-011",
+    "Priority": "value-012",
+    "Severity": "value-013",
+    "Type": "value-014",
+    "Tags": [
+      "one",
+      "two"
+    ],
+    "UseCase": "value-016",
+    "ProjectArea": "value-017",
+    "SourceKind": "value-018",
+    "SourceRef": "value-019",
+    "Slice": "value-020",
+    "Branch": "value-021",
+    "ReviewRefs": [
+      {
+        "Type": "value-022",
+        "Provider": "value-023",
+        "URL": "value-024",
+        "ID": "value-025",
+        "Status": "value-026"
+      }
+    ],
+    "ReviewState": "value-027",
+    "ReviewRound": 29,
+    "ReviewResult": "value-029",
+    "ReviewCommentsURL": "value-030",
+    "BlockingFindings": [
+      "value-031"
+    ],
+    "MergeState": "value-032",
+    "MergeResult": "value-033",
+    "MergeActor": "value-034",
+    "MergeCommit": "value-035",
+    "MergedAt": "2026-01-02T02:04:36Z",
+    "MergeBlocker": "value-037",
+    "CreatedAt": "2026-01-02T02:04:38Z",
+    "UpdatedAt": "2026-01-02T02:04:39Z",
+    "FileMTime": "2026-01-02T02:04:40Z",
+    "FileSize": 42,
+    "ContentHash": "value-042",
+    "IndexedAt": "2026-01-02T02:04:43Z"
+  }
+}

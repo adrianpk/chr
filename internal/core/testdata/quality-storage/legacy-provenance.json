@@ -1,0 +1,29 @@
+{
+  "producer_commit": "d2c7676bca1271270ba2ec175b618264f872a50f",
+  "sql_baseline": "de3691d3b0155f850006f242ee2d99062a995ce0",
+  "sha256": "1ae8629a83d66ddb9670b097ce4126153e0b7f6d1e9968e48a9ad7112e750cfa",
+  "tables": {
+    "execution_records": 1,
+    "remote_command_records": 1,
+    "notification_events": 1,
+    "indexed_tickets": 1,
+    "telegram_conversations": 1,
+    "telegram_document_snapshots": 1,
+    "telegram_notification_documents": 1,
+    "telegram_updates": 1
+  },
+  "foreign_key_check": [
+    [
+      "execution_records",
+      1,
+      "projects",
+      0
+    ],
+    [
+      "indexed_tickets",
+      1,
+      "projects",
+      0
+    ]
+  ]
+}

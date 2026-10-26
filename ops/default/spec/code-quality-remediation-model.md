@@ -87,3 +87,15 @@ positions in the original declaration, retain all original leaf tags and use
 native value embedding. No serialization method is promoted onto the outer
 invocation file. All keyed constructors were updated with the same expressions;
 existing promoted reads and scan targets retain their original leaves.
+
+The [wide SQL inventory](../plan/code-quality-remediation-sql-rows.csv) covers
+every production SQL call above 16 fields, including expanded argument/scan
+helpers. Eight tables are affected; 11 calls bind or scan directly, and three
+expanded boundaries cover notification creation and ticket upsert/read.
+
+The frozen [legacy SQLite fixture](../../../internal/core/testdata/quality-storage/legacy.sqlite)
+was written before changing those SQL mappings. Its adjacent provenance records
+the producer, SHA-256, eight table counts and clean foreign-key check. Expected
+records retain distinct same-type fields, fixed timestamps, NULL optionals, and
+empty versus nil remote loop lists. Validation copies and opens this database;
+it never regenerates the fixture.
