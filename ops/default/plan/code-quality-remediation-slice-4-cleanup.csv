@@ -1,0 +1,6 @@
+original_id,disposition,evidence
+internal/app/metadata_cli.go::commandFactory.serviceFromCommand,replaced,commandFactory.projectService returns only the bound service and error
+internal/app/work.go::commandFactory.workServiceFromCommand,removed,identical implementation consolidated into commandFactory.projectService
+internal/app/service_dump.go::service.dumpDirectory,removed,no production callers; live dump listing and content checks retained
+internal/app/telegram.go::newTelegramServeCommand,unused arguments removed,typed factory captures output and assets in T4.1
+internal/app/telegram.go::private Telegram error names,owned by Slice 7,transport error types retained for the recorded owner

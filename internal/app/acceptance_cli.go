@@ -44,7 +44,7 @@ func (factory commandFactory) runAcceptanceFeatureGenerate(ctx context.Context, 
 		return fmt.Errorf("acceptance feature generate does not accept positional arguments")
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}

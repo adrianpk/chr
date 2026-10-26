@@ -7,7 +7,7 @@ import (
 )
 
 func (factory commandFactory) buildTicketStartPreflight(ctx context.Context, cmd *cli.Command) (ticketStartPreflight, error) {
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return ticketStartPreflight{}, err
 	}

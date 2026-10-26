@@ -80,7 +80,7 @@ func (factory commandFactory) runMetadataProjectSet(ctx context.Context, cmd *cl
 		return fmt.Errorf("metadata project set does not accept positional arguments")
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func (factory commandFactory) runMetadataCaseSet(ctx context.Context, cmd *cli.C
 		return err
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -155,10 +155,10 @@ func optionalStringFlag(cmd *cli.Command, name string) *string {
 	return &value
 }
 
-func (factory commandFactory) serviceFromCommand(ctx context.Context, cmd *cli.Command) (service, commandProjectContext, error) {
+func (factory commandFactory) projectService(ctx context.Context, cmd *cli.Command) (service, error) {
 	env, err := newUserEnvironmentFromCommand(cmd)
 	if err != nil {
-		return service{}, commandProjectContext{}, err
+		return service{}, err
 	}
 
 	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
@@ -167,8 +167,8 @@ func (factory commandFactory) serviceFromCommand(ctx context.Context, cmd *cli.C
 		AllowCurrentDirectory: true,
 	})
 	if err != nil {
-		return service{}, commandProjectContext{}, err
+		return service{}, err
 	}
 
-	return newService(ctx, env, projectContext, factory.deps.assetsFS), projectContext, nil
+	return newService(ctx, env, projectContext, factory.deps.assetsFS), nil
 }

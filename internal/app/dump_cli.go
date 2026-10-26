@@ -109,7 +109,7 @@ func (factory commandFactory) runDumpList(ctx context.Context, cmd *cli.Command)
 		return fmt.Errorf("dump list does not accept positional arguments")
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -135,7 +135,7 @@ func (factory commandFactory) runDumpNew(ctx context.Context, cmd *cli.Command) 
 		return fmt.Errorf("dump new does not accept positional arguments")
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -164,7 +164,7 @@ func (factory commandFactory) runDumpShow(ctx context.Context, cmd *cli.Command)
 		return fmt.Errorf("dump show requires exactly one path argument")
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -194,7 +194,7 @@ func (factory commandFactory) runDumpSave(ctx context.Context, cmd *cli.Command)
 		return fmt.Errorf("dump save requires exactly one path argument")
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -227,7 +227,7 @@ func (factory commandFactory) runDumpAppend(ctx context.Context, cmd *cli.Comman
 		return fmt.Errorf("dump append requires exactly one path argument")
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -260,7 +260,7 @@ func (factory commandFactory) runDumpOpen(ctx context.Context, cmd *cli.Command)
 		return fmt.Errorf("dump open requires exactly one path argument")
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}

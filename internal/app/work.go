@@ -171,7 +171,9 @@ func (factory commandFactory) workDoctorAction(ctx context.Context, cmd *cli.Com
 		return fmt.Errorf("work doctor does not accept positional arguments")
 	}
 
-	operations, projectContext, err := factory.workServiceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
+	projectContext := operations.projectContext
+
 	if err != nil {
 		return err
 	}
@@ -240,7 +242,7 @@ func (factory commandFactory) workTicketAction(ctx context.Context, cmd *cli.Com
 		return err
 	}
 
-	operations, _, err := factory.workServiceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -281,7 +283,9 @@ func (factory commandFactory) workRunAllAction(ctx context.Context, cmd *cli.Com
 		return fmt.Errorf("work run-all does not accept positional arguments")
 	}
 
-	operations, projectContext, err := factory.workServiceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
+	projectContext := operations.projectContext
+
 	if err != nil {
 		return err
 	}
@@ -309,7 +313,9 @@ func (factory commandFactory) workEventsAction(ctx context.Context, cmd *cli.Com
 		return fmt.Errorf("work events requires exactly one event stream path argument")
 	}
 
-	_, projectContext, err := factory.workServiceFromCommand(ctx, cmd)
+	resolvedCommandService, err := factory.projectService(ctx, cmd)
+	projectContext := resolvedCommandService.projectContext
+
 	if err != nil {
 		return err
 	}
@@ -331,7 +337,9 @@ func (factory commandFactory) workLogsAction(ctx context.Context, cmd *cli.Comma
 		return fmt.Errorf("work logs requires exactly one execution id argument")
 	}
 
-	operations, projectContext, err := factory.workServiceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
+	projectContext := operations.projectContext
+
 	if err != nil {
 		return err
 	}
@@ -365,27 +373,6 @@ func resolveWorkEventStreamPath(projectDir, path string) string {
 	}
 
 	return filepath.Join(projectDir, filepath.FromSlash(path))
-}
-
-func (factory commandFactory) workServiceFromCommand(
-	ctx context.Context,
-	cmd *cli.Command,
-) (service, commandProjectContext, error) {
-	env, err := newUserEnvironmentFromCommand(cmd)
-	if err != nil {
-		return service{}, commandProjectContext{}, err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
-		ExplicitDir:           cmd.String("dir"),
-		UseExplicitDir:        cmd.IsSet("dir"),
-		AllowCurrentDirectory: true,
-	})
-	if err != nil {
-		return service{}, commandProjectContext{}, err
-	}
-
-	return newService(ctx, env, projectContext, factory.deps.assetsFS), projectContext, nil
 }
 
 func agentWorkSelectionOptionsFromCommand(cmd *cli.Command) AgentWorkSelectionOptions {

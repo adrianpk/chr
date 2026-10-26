@@ -22,7 +22,7 @@ func (factory commandFactory) workConfigCommand() *cli.Command {
 			return fmt.Errorf("work config does not accept positional arguments")
 		}
 
-		operations, _, err := factory.workServiceFromCommand(ctx, cmd)
+		operations, err := factory.projectService(ctx, cmd)
 		if err != nil {
 			return err
 		}

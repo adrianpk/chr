@@ -100,7 +100,7 @@ func (factory commandFactory) runSpecList(ctx context.Context, cmd *cli.Command)
 		return fmt.Errorf("spec list does not accept positional arguments")
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -126,7 +126,7 @@ func (factory commandFactory) runSpecGenerate(ctx context.Context, cmd *cli.Comm
 		return fmt.Errorf("spec generate does not accept positional arguments")
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -150,7 +150,7 @@ func (factory commandFactory) runPlanList(ctx context.Context, cmd *cli.Command)
 		return fmt.Errorf("plan list does not accept positional arguments")
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -176,7 +176,7 @@ func (factory commandFactory) runPlanGenerate(ctx context.Context, cmd *cli.Comm
 		return fmt.Errorf("plan generate does not accept positional arguments")
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -200,7 +200,7 @@ func (factory commandFactory) runPlanRegenerate(ctx context.Context, cmd *cli.Co
 		return fmt.Errorf("plan regenerate does not accept positional arguments")
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -224,7 +224,7 @@ func (factory commandFactory) runPlanTrackingCreate(ctx context.Context, cmd *cl
 		return fmt.Errorf("plan tracking create does not accept positional arguments")
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}

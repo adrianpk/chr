@@ -263,10 +263,6 @@ func assertServiceDumpListResult(t *testing.T, operations service, result DumpLi
 	if caseDump.SourcePath != "ops/default/dump/00000-blog-context-raw/artifact.md" {
 		t.Fatalf("case dump source path = %q, want raw sibling path", caseDump.SourcePath)
 	}
-
-	if operations.dumpDirectory() != filepath.Join(operations.projectContext.ProjectDir, "ops", "default", "dump") {
-		t.Fatalf("dumpDirectory = %q, want ops/default/dump", operations.dumpDirectory())
-	}
 }
 
 func TestServiceCreateDumpWritesProjectAndCaseScopedDumps(t *testing.T) {

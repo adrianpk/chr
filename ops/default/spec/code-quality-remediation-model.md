@@ -169,3 +169,5 @@ and [signature transitions](../plan/code-quality-remediation-slice-4-operations-
 record the concrete moves and typed input replacements. No compatibility
 forwarder is retained for the removed ticket preflight wrapper or CLI
 merge-configuration tuple.
+
+Command resolution uses `commandFactory.projectService` as the single CLI-to-service constructor. Its service already contains the resolved project; returning that project separately duplicated ownership. The unused `service.dumpDirectory` accessor is removed; dump tests continue to exercise the live listing/content path. Telegram-private error names remain assigned to Slice 7.

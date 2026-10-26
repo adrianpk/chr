@@ -133,7 +133,7 @@ func (factory commandFactory) runQuizList(ctx context.Context, cmd *cli.Command)
 		return fmt.Errorf("quiz list does not accept positional arguments")
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -171,7 +171,7 @@ func (factory commandFactory) runQuizStart(ctx context.Context, cmd *cli.Command
 		return fmt.Errorf("quiz mode is invalid: %s", mode)
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -189,7 +189,7 @@ func (factory commandFactory) runQuizResume(ctx context.Context, cmd *cli.Comman
 		return fmt.Errorf("quiz resume does not accept positional arguments")
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -207,7 +207,7 @@ func (factory commandFactory) runQuizAnswer(ctx context.Context, cmd *cli.Comman
 		return fmt.Errorf("quiz answer does not accept positional arguments")
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -225,7 +225,7 @@ func (factory commandFactory) runQuizSkip(ctx context.Context, cmd *cli.Command)
 		return fmt.Errorf("quiz skip does not accept positional arguments")
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -243,7 +243,7 @@ func (factory commandFactory) runQuizComplete(ctx context.Context, cmd *cli.Comm
 		return fmt.Errorf("quiz complete does not accept positional arguments")
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -261,7 +261,7 @@ func (factory commandFactory) runQuizCancel(ctx context.Context, cmd *cli.Comman
 		return fmt.Errorf("quiz cancel does not accept positional arguments")
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -284,7 +284,7 @@ func (factory commandFactory) runQuizMode(ctx context.Context, cmd *cli.Command)
 		return fmt.Errorf("quiz mode is invalid: %s", mode)
 	}
 
-	operations, _, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}

@@ -42,7 +42,9 @@ func (factory commandFactory) runTicketMerge(ctx context.Context, cmd *cli.Comma
 		return fmt.Errorf("ticket merge requires exactly one ticket key argument")
 	}
 
-	operations, project, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
+	project := operations.projectContext
+
 	if err != nil {
 		return err
 	}

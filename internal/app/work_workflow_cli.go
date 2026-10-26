@@ -28,7 +28,7 @@ func (factory commandFactory) workExtentCommand(name, extent string) *cli.Comman
 			return err
 		}
 
-		operations, _, err := factory.workServiceFromCommand(ctx, cmd)
+		operations, err := factory.projectService(ctx, cmd)
 		if err != nil {
 			return err
 		}
@@ -167,7 +167,7 @@ func (factory commandFactory) workControlCommand(action string) *cli.Command {
 			return err
 		}
 
-		operations, _, err := factory.workServiceFromCommand(ctx, cmd)
+		operations, err := factory.projectService(ctx, cmd)
 		if err != nil {
 			return err
 		}

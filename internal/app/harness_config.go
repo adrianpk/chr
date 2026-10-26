@@ -29,7 +29,7 @@ func (factory commandFactory) harnessStatusCommand() *cli.Command {
 			return fmt.Errorf("harness status does not accept positional arguments")
 		}
 
-		operations, _, err := factory.workServiceFromCommand(ctx, cmd)
+		operations, err := factory.projectService(ctx, cmd)
 		if err != nil {
 			return err
 		}
@@ -67,7 +67,9 @@ func (factory commandFactory) harnessChangeCommand(clearChoice bool) *cli.Comman
 			return err
 		}
 
-		operations, project, err := factory.workServiceFromCommand(ctx, cmd)
+		operations, err := factory.projectService(ctx, cmd)
+		project := operations.projectContext
+
 		if err != nil {
 			return err
 		}

@@ -10,7 +10,9 @@ import (
 )
 
 func (factory commandFactory) runTicketStartAuthority(ctx context.Context, cmd *cli.Command) (bool, error) {
-	operations, project, err := factory.workServiceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
+	project := operations.projectContext
+
 	if err != nil {
 		return false, err
 	}

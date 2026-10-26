@@ -69,7 +69,9 @@ func (factory commandFactory) runTicketLoop(ctx context.Context, cmd *cli.Comman
 		return fmt.Errorf("ticket loop does not accept positional arguments")
 	}
 
-	operations, project, err := factory.serviceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
+	project := operations.projectContext
+
 	if err != nil {
 		return err
 	}

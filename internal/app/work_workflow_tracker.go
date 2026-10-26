@@ -33,7 +33,7 @@ func (factory commandFactory) workTrackerAction(ctx context.Context, cmd *cli.Co
 		return fmt.Errorf("work tracker %s requires exactly one adopted slice-set ID", cmd.Name)
 	}
 
-	operations, _, err := factory.workServiceFromCommand(ctx, cmd)
+	operations, err := factory.projectService(ctx, cmd)
 	if err != nil {
 		return err
 	}

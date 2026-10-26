@@ -120,10 +120,6 @@ func (s service) OpenDump(request DumpOpenRequest) (DumpOperationResult, error) 
 	}, nil
 }
 
-func (s service) dumpDirectory() string {
-	return core.DefaultOpsArtifactRoot(s.projectContext.ProjectDir, "dump")
-}
-
 func (s service) resolveDumpPath(relativePath string) (string, error) {
 	observed, err := core.ResolveProjectDumpReference(s.ctx, s.projectContext.ProjectDir, relativePath)
 	if err != nil {
