@@ -7,7 +7,7 @@ Planning authorization: maintainer request, 2026-10-26.
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 2, Shared boundary values and residual core helpers; in progress on its approved branch; predecessor PR #438 verified integrated.
+Active slice: Slice 2, Shared boundary values and residual core helpers; implemented and preparing canonical PR; predecessor PR #438 verified integrated.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b` on dev.
 
 Spec: [Remediation requirements](../spec/code-quality-remediation.md)
@@ -80,7 +80,7 @@ Focused selection: Checker fixtures; existing CI-script regressions; current pro
 ### Slice 2: Shared boundary values and residual core helpers
 
 Findings: R1, R2, R3, R4, R10.
-Ticket: [TKT-20261026084822](../ticket/in_progress/20261026084822-quality-values.md).
+Ticket: [TKT-20261026084822](../ticket/reviewing/20261026084822-quality-values.md).
 
 1. **T2.1:** For root-level helpers outside the later capability slices, replace unrelated positional outputs with named results and repeated cohesive arguments with operation inputs. Review the config, context, migration, workspace, report and proving detections assigned by the inventory.
 2. **T2.2:** Preserve absence, applied, changed, cached and partial outcomes separately. Use a named result with a found or changed field when absence is normal; use errors.Is-compatible errors where absence is already an error. Preserve all caller branches and error wrapping.
@@ -405,7 +405,7 @@ Cost: runtime gates were not rerun for this planning task. Budget each slice for
 | Number | Ticket | Slice | Initial state |
 | --- | --- | --- | --- |
 | 1 | [TKT-20261026084821](../ticket/solved/20261026084821-quality-policy.md) | Inventory and enforceable quality policy | ready; predecessor applies |
-| 2 | [TKT-20261026084822](../ticket/in_progress/20261026084822-quality-values.md) | Shared boundary values and residual core helpers | ready; predecessor applies |
+| 2 | [TKT-20261026084822](../ticket/reviewing/20261026084822-quality-values.md) | Shared boundary values and residual core helpers | ready; predecessor applies |
 | 3 | [TKT-20261026084823](../ticket/ready/20261026084823-quality-storage.md) | Stable records and positional SQL | ready; predecessor applies |
 | 4 | [TKT-20261026084824](../ticket/ready/20261026084824-quality-commands.md) | Typed commands and central application operations | ready; predecessor applies |
 | 5 | [TKT-20261026084825](../ticket/ready/20261026084825-quality-views.md) | TUI model ownership and Web view sections | ready; predecessor applies |
