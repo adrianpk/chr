@@ -25,7 +25,7 @@ func TestDumpEditBinding(t *testing.T) {
 		}
 	}
 
-	updated, _ := model.updateDumpEditKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'x'}})
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'x'}})
 
 	edited, ok := updated.(*Model)
 	if !ok {

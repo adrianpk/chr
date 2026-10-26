@@ -80,7 +80,7 @@ func (m *Model) renderPlanAction() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m *Model) updatePlansKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updatePlansKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.String() {
 	case "g":
 		cmd := m.startPlanAction(PlanActionRequest{
@@ -88,58 +88,58 @@ func (m *Model) updatePlansKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			Scope:  m.selectedPlanScope(),
 		})
 
-		return m, cmd
+		return cmd
 	case "G":
 		if m.planBusy {
 			m.statusMessage = "Plan action already running."
 
-			return m, nil
+			return nil
 		}
 
 		m.planPlanAction(PlanActionRegenerate)
 
-		return m, nil
+		return nil
 	case "alt+t":
 		if m.planBusy {
 			m.statusMessage = "Plan action already running."
 
-			return m, nil
+			return nil
 		}
 
 		if !m.selectedPlanCanMaterializeTracking() {
 			m.statusMessage = "Plan tracking requires an existing plan."
 
-			return m, nil
+			return nil
 		}
 
 		m.planPlanAction(PlanActionMaterializeTracking)
 
-		return m, nil
+		return nil
 	case "r":
 		cmd := m.startPlanAction(PlanActionRequest{
 			Action: PlanActionRefresh,
 			Scope:  m.selectedPlanScope(),
 		})
 
-		return m, cmd
+		return cmd
 	case "esc":
 		m.selectPrimaryPane()
 	default:
 		return m.updateNavigationKey(msg)
 	}
 
-	return m, nil
+	return nil
 }
 
-func (m *Model) updatePlanActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updatePlanActionKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.Type {
 	case tea.KeyEsc:
 		m.cancelPlanAction()
 	case tea.KeyEnter:
-		return m, m.confirmPlanAction()
+		return m.confirmPlanAction()
 	}
 
-	return m, nil
+	return nil
 }
 
 func (m *Model) planPlanAction(action PlanActionID) {

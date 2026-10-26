@@ -85,28 +85,28 @@ func (m *Model) renderDumpAction() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m *Model) updateDumpActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateDumpActionKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.Type {
 	case tea.KeyEsc:
 		m.cancelDumpAction()
 	case tea.KeyEnter:
-		return m, m.confirmDumpAction()
+		return m.confirmDumpAction()
 	}
 
-	return m, nil
+	return nil
 }
 
-func (m *Model) updateDumpEditKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateDumpEditKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.Type {
 	case tea.KeyEsc:
 		m.dumpEdit = DumpEditState{}
 		m.statusMessage = ""
 
-		return m, nil
+		return nil
 	case tea.KeyCtrlS:
 		m.saveDumpEdit()
 
-		return m, nil
+		return nil
 	}
 
 	previous := m.dumpEdit.Input.Value()
@@ -118,7 +118,7 @@ func (m *Model) updateDumpEditKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 	m.dumpEdit.Input = input
 
-	return m, cmd
+	return cmd
 }
 
 func (m *Model) planDumpAction(action DumpActionID) {

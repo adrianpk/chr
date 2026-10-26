@@ -87,41 +87,41 @@ func (m *Model) completeAgentWorkRefresh(msg agentWorkRefreshFinishedMsg) tea.Cm
 	return agentWorkRefreshTickCmd()
 }
 
-func (m *Model) handleAgentWorkRefreshTick() (tea.Model, tea.Cmd) {
+func (m *Model) handleAgentWorkRefreshTick() tea.Cmd {
 	if m.guided.Active {
 		command := m.refreshGuided()
 
-		return m, tea.Batch(agentWorkRefreshTickCmd(), command)
+		return tea.Batch(agentWorkRefreshTickCmd(), command)
 	}
 
 	if m.SelectedView() != ViewDash || m.agentWorkRefreshExecutor == nil {
-		return m, agentWorkRefreshTickCmd()
+		return agentWorkRefreshTickCmd()
 	}
 
 	if m.workAction.Pending {
-		return m, agentWorkRefreshTickCmd()
+		return agentWorkRefreshTickCmd()
 	}
 
 	if m.agentWorkRefreshInFlight {
-		return m, agentWorkRefreshTickCmd()
+		return agentWorkRefreshTickCmd()
 	}
 
 	m.agentWorkRefreshInFlight = true
 
-	return m, m.startAgentWorkRefresh()
+	return m.startAgentWorkRefresh()
 }
 
-func (m *Model) updateAgentWorkRefreshMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
+func (m *Model) updateAgentWorkRefreshMessage(msg tea.Msg) updateOutcome {
 	switch typedMsg := msg.(type) {
 	case agentWorkRefreshTickMsg:
-		updated, cmd := m.handleAgentWorkRefreshTick()
+		cmd := m.handleAgentWorkRefreshTick()
 
-		return updated, cmd, true
+		return updateOutcome{Command: cmd, Handled: true}
 	case agentWorkRefreshFinishedMsg:
 		cmd := m.completeAgentWorkRefresh(typedMsg)
 
-		return m, cmd, true
+		return updateOutcome{Command: cmd, Handled: true}
 	default:
-		return m, nil, false
+		return updateOutcome{Command: nil, Handled: false}
 	}
 }

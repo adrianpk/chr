@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 
+	tea "github.com/charmbracelet/bubbletea"
+
 	"forge.adrianpk.com/chr/internal/core"
 )
 
@@ -25,7 +27,7 @@ func TestGuidedUseCaseTUIControls(t *testing.T) {
 
 		return m.guided.View, nil
 	})
-	updated, command := m.guidedActionKey("p")
+	updated, command := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'p'}})
 
 	m = guidedTestModel(t, updated)
 	if command == nil {

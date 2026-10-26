@@ -92,7 +92,7 @@ func (m *Model) renderQuizAction() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m *Model) updateQuizActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateQuizActionKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.Type {
 	case tea.KeyEsc:
 		m.cancelQuizAction()
@@ -100,10 +100,10 @@ func (m *Model) updateQuizActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.confirmQuizAction()
 	}
 
-	return m, nil
+	return nil
 }
 
-func (m *Model) updateQuizAnswerKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateQuizAnswerKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.String() {
 	case "esc":
 		m.quizAnswer = QuizAnswerState{}
@@ -111,14 +111,14 @@ func (m *Model) updateQuizAnswerKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.maximizedPane = -1
 		m.selectPrimaryPane()
 
-		return m, nil
+		return nil
 	case "enter":
 		return m.saveQuizAnswer()
 	case "shift+enter", "ctrl+j":
 		input, cmd := m.quizAnswer.Input.Update(tea.KeyMsg{Type: tea.KeyEnter})
 		m.quizAnswer.Input = input
 
-		return m, cmd
+		return cmd
 	case "alt+s":
 		scope := m.quizAnswer.Scope
 		binding := m.quizAnswer.Binding
@@ -130,7 +130,7 @@ func (m *Model) updateQuizAnswerKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			Scope:   scope,
 		})
 
-		return m, cmd
+		return cmd
 	case "alt+d":
 		scope := m.quizAnswer.Scope
 		binding := m.quizAnswer.Binding
@@ -142,13 +142,13 @@ func (m *Model) updateQuizAnswerKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			Scope:   scope,
 		})
 
-		return m, cmd
+		return cmd
 	}
 
 	input, cmd := m.quizAnswer.Input.Update(msg)
 	m.quizAnswer.Input = input
 
-	return m, cmd
+	return cmd
 }
 
 func (m *Model) planQuizAction(action QuizActionID) {
@@ -167,16 +167,16 @@ func (m *Model) cancelQuizAction() {
 	m.statusMessage = "Action cancelled."
 }
 
-func (m *Model) confirmQuizAction() (tea.Model, tea.Cmd) {
+func (m *Model) confirmQuizAction() tea.Cmd {
 	request := m.quizAction.Request
 	m.quizAction = QuizActionState{}
 
 	cmd := m.startQuizAction(request)
 
-	return m, cmd
+	return cmd
 }
 
-func (m *Model) saveQuizAnswer() (tea.Model, tea.Cmd) {
+func (m *Model) saveQuizAnswer() tea.Cmd {
 	answer := m.quizAnswer.Input.Value()
 	scope := m.quizAnswer.Scope
 	binding := m.quizAnswer.Binding
@@ -189,7 +189,7 @@ func (m *Model) saveQuizAnswer() (tea.Model, tea.Cmd) {
 		Answer:  answer,
 	})
 
-	return m, cmd
+	return cmd
 }
 
 func (m *Model) executeQuizActionCommand(request QuizActionRequest) tea.Cmd {

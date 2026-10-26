@@ -84,7 +84,7 @@ func TestGuidedUseCaseTUIReplay(t *testing.T) {
 	m.completeGuided(guidedTestFinished(t, command()))
 
 	original := *m.guided.Pending
-	updated, retry := m.guidedActionKey("y")
+	updated, retry := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'y'}})
 
 	m = guidedTestModel(t, updated)
 	if retry == nil {

@@ -149,14 +149,14 @@ func (m *Model) renderCommandPalette() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m *Model) updateCommandPaletteKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateCommandPaletteKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.Type {
 	case tea.KeyEsc:
 		m.closeCommandPalette()
 	case tea.KeyEnter:
 		command := m.executeSelectedCommand()
 
-		return m, command
+		return command
 	case tea.KeyBackspace:
 		m.commandPalette.Filter = strings.TrimSuffix(m.commandPalette.Filter, lastRune(m.commandPalette.Filter))
 		m.boundSelectedCommand()
@@ -168,18 +168,18 @@ func (m *Model) updateCommandPaletteKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.updateCommandPaletteRunes(msg)
 	}
 
-	return m, nil
+	return nil
 }
 
-func (m *Model) updateCommandPaletteRunes(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateCommandPaletteRunes(msg tea.KeyMsg) tea.Cmd {
 	if msg.Type != tea.KeyRunes {
-		return m, nil
+		return nil
 	}
 
 	m.commandPalette.Filter += msg.String()
 	m.commandPalette.Selected = 0
 
-	return m, nil
+	return nil
 }
 
 func (m *Model) openCommandPalette() {

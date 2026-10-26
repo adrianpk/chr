@@ -34,20 +34,20 @@ type ProjectEditState struct {
 	Input  textinput.Model
 }
 
-func (m *Model) updateProjectKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateProjectKey(msg tea.KeyMsg) tea.Cmd {
 	if m.projectEdit.Active {
 		cmd := m.updateProjectEditKey(msg)
 
-		return m, cmd
+		return cmd
 	}
 
 	if m.handleProjectFieldKey(msg.String()) {
-		return m, nil
+		return nil
 	}
 
 	switch msg.String() {
 	case "h":
-		return m, m.openHarnessPicker()
+		return m.openHarnessPicker()
 	case "ctrl+s", "s":
 		m.saveProjectMetadata()
 	case "r":
@@ -56,7 +56,7 @@ func (m *Model) updateProjectKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.updateNavigationKey(msg)
 	}
 
-	return m, nil
+	return nil
 }
 
 func (m *Model) handleProjectFieldKey(key string) bool {

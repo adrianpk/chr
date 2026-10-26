@@ -300,15 +300,15 @@ func workActionDetailsComplete(details workActionDetails) bool {
 		details.ExecutionID != ""
 }
 
-func (m *Model) updateWorkActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateWorkActionKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.Type {
 	case tea.KeyEsc:
 		m.cancelWorkAction()
 	case tea.KeyEnter:
-		return m, m.confirmWorkAction()
+		return m.confirmWorkAction()
 	}
 
-	return m, nil
+	return nil
 }
 
 func (m *Model) planWorkAction(action WorkActionID) {

@@ -101,31 +101,31 @@ func (m *Model) completeHarnessRead(msg harnessSelectionLoadedMsg) {
 	state.Scroll, state.Message = 0, ""
 }
 
-func (m *Model) updateHarnessKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateHarnessKey(msg tea.KeyMsg) tea.Cmd {
 	if m.harnessSelection.Saving {
-		return m, nil
+		return nil
 	}
 
 	if msg.Type == tea.KeyEsc {
 		m.harnessSelection = harnessSelectionState{}
 
-		return m, nil
+		return nil
 	}
 
 	if m.harnessSelection.Busy {
-		return m, nil
+		return nil
 	}
 
 	switch msg.String() {
 	case "r":
-		return m, m.reloadHarnessPicker()
+		return m.reloadHarnessPicker()
 	case "enter", "ctrl+s":
-		return m, m.saveHarnessPicker()
+		return m.saveHarnessPicker()
 	default:
 		m.updateHarnessChoiceKey(msg.String())
 	}
 
-	return m, nil
+	return nil
 }
 
 func (m *Model) updateHarnessChoiceKey(key string) {

@@ -1,6 +1,10 @@
 package tui
 
-import "forge.adrianpk.com/chr/internal/core"
+import (
+	tea "github.com/charmbracelet/bubbletea"
+
+	"forge.adrianpk.com/chr/internal/core"
+)
 
 type projectState struct {
 	projectDir           string
@@ -136,4 +140,9 @@ type guidedModelState struct {
 	guidedExecutor GuidedExecutor
 	guided         guidedState
 	guidedSequence uint64
+}
+
+type updateOutcome struct {
+	Command tea.Cmd
+	Handled bool
 }

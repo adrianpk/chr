@@ -169,25 +169,25 @@ func (m *Model) dumpActionHint() string {
 	return "enter edit  alt+e external  c create  r refresh"
 }
 
-func (m *Model) updateDumpsKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateDumpsKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.String() {
 	case "c":
 		m.planDumpAction(DumpActionCreate)
 	case "enter":
 		m.planDumpAction(DumpActionEdit)
 
-		return m, m.confirmDumpAction()
+		return m.confirmDumpAction()
 	case "r":
 		m.planDumpAction(DumpActionRefresh)
 
-		return m, m.confirmDumpAction()
+		return m.confirmDumpAction()
 	case "esc":
 		m.selectPrimaryPane()
 	default:
 		return m.updateNavigationKey(msg)
 	}
 
-	return m, nil
+	return nil
 }
 
 func (m *Model) selectedDumpView() (DumpView, bool) {

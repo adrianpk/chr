@@ -73,7 +73,7 @@ func (m *Model) renderSpecAction() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m *Model) updateSpecsKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateSpecsKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.String() {
 	case "g":
 		cmd := m.startSpecAction(SpecActionRequest{
@@ -81,39 +81,39 @@ func (m *Model) updateSpecsKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			Scope:  m.selectedSpecScope(),
 		})
 
-		return m, cmd
+		return cmd
 	case "f":
 		cmd := m.startSpecAction(SpecActionRequest{
 			Action: SpecActionGenerateFeature,
 			Scope:  m.selectedSpecScope(),
 		})
 
-		return m, cmd
+		return cmd
 	case "r":
 		cmd := m.startSpecAction(SpecActionRequest{
 			Action: SpecActionRefresh,
 			Scope:  m.selectedSpecScope(),
 		})
 
-		return m, cmd
+		return cmd
 	case "esc":
 		m.selectPrimaryPane()
 	default:
 		return m.updateNavigationKey(msg)
 	}
 
-	return m, nil
+	return nil
 }
 
-func (m *Model) updateSpecActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateSpecActionKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.Type {
 	case tea.KeyEsc:
 		m.cancelSpecAction()
 	case tea.KeyEnter:
-		return m, m.confirmSpecAction()
+		return m.confirmSpecAction()
 	}
 
-	return m, nil
+	return nil
 }
 
 func (m *Model) planSpecAction(action SpecActionID) {

@@ -27,31 +27,31 @@ type CaseMetadataResult struct {
 	Cases   []core.CaseMetadata
 }
 
-func (m *Model) updateCasesKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateCasesKey(msg tea.KeyMsg) tea.Cmd {
 	if m.caseEdit.Active {
 		cmd := m.updateCaseEditKey(msg)
 
-		return m, cmd
+		return cmd
 	}
 
 	if m.caseFilterEditing {
 		m.updateCaseFilterKey(msg)
 
-		return m, nil
+		return nil
 	}
 
 	if msg.String() == "g" {
 		command := m.openGuided()
 
-		return m, command
+		return command
 	}
 
 	if m.handleCaseSelectionKey(msg) {
-		return m, nil
+		return nil
 	}
 
 	if m.handleCaseActionKey(msg) {
-		return m, nil
+		return nil
 	}
 
 	return m.updateNavigationKey(msg)

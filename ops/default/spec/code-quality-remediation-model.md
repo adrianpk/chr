@@ -221,3 +221,12 @@ mutable Model pointer; completion messages are applied only on the event loop.
 Existing sequence/revision guards, busy flags and cancelled/stale acknowledgments
 retain their original authority. Tests use the pointer contract explicitly and
 still exercise modal precedence, edits, retained bindings and stale replies.
+
+
+Internal update stages mutate that same pointer and return tea.Cmd or
+updateOutcome{Command, Handled}. The only Model result tuple left is the
+installed Bubble Tea Update interface. All 37 converted internal helper
+signatures have exact before/after entries in the slice-5-updates ledger; no
+adapter or internal interface exemption is added. Modal dispatch precedence,
+command scheduling and every handled/unhandled branch retain their ordering.
+The production closure scan finds no command reading Model state after dispatch.

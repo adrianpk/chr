@@ -124,7 +124,7 @@ func (m *Model) renderTicketAction() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m *Model) updateTicketActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateTicketActionKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.Type {
 	case tea.KeyEsc:
 		m.cancelTicketAction()
@@ -132,7 +132,7 @@ func (m *Model) updateTicketActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.confirmTicketAction()
 	}
 
-	return m, nil
+	return nil
 }
 
 func (m *Model) planTicketAction(action TicketActionID, status string) {

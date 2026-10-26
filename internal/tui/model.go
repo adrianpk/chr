@@ -282,32 +282,32 @@ func (m *Model) Init() tea.Cmd {
 	return agentWorkRefreshTickCmd()
 }
 
-// Update applies a Bubble Tea message to the model.
+// Update applies a Bubble Tea message to the event-loop owner.
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if updated, cmd, ok := m.updateSystemMessage(msg); ok {
-		return updated, cmd
+	if outcome := m.updateSystemMessage(msg); outcome.Handled {
+		return m, outcome.Command
 	}
 
 	if typedMsg, ok := msg.(tea.KeyMsg); ok {
-		return m.updateKey(typedMsg)
+		return m, m.updateKey(typedMsg)
 	}
 
 	return m, nil
 }
 
-func (m *Model) updateSystemMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
+func (m *Model) updateSystemMessage(msg tea.Msg) updateOutcome {
 	if finished, ok := msg.(guidedFinishedMsg); ok {
 		m.completeGuided(finished)
 
-		return m, nil, true
+		return updateOutcome{Command: nil, Handled: true}
 	}
 
-	if updated, cmd, ok := m.updateAgentWorkRefreshMessage(msg); ok {
-		return updated, cmd, true
+	if outcome := m.updateAgentWorkRefreshMessage(msg); outcome.Handled {
+		return outcome
 	}
 
-	if updated, cmd, ok := m.updateActionFinishedMessage(msg); ok {
-		return updated, cmd, true
+	if outcome := m.updateActionFinishedMessage(msg); outcome.Handled {
+		return outcome
 	}
 
 	switch typedMsg := msg.(type) {
@@ -315,52 +315,52 @@ func (m *Model) updateSystemMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 		m.width = typedMsg.Width
 		m.height = typedMsg.Height
 
-		return m, nil, true
+		return updateOutcome{Command: nil, Handled: true}
 	case tea.MouseMsg:
-		updated, cmd := m.updateMouse(typedMsg)
+		cmd := m.updateMouse(typedMsg)
 
-		return updated, cmd, true
+		return updateOutcome{Command: cmd, Handled: true}
 	case dumpEditorFinishedMsg:
 		m.completeDumpEdit(typedMsg)
 
-		return m, nil, true
+		return updateOutcome{Command: nil, Handled: true}
 	case sourceEditorFinishedMsg:
 		m.completeSourceEdit(typedMsg)
 
-		return m, nil, true
+		return updateOutcome{Command: nil, Handled: true}
 	default:
-		return m, nil, false
+		return updateOutcome{Command: nil, Handled: false}
 	}
 }
 
-func (m *Model) updateActionFinishedMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
+func (m *Model) updateActionFinishedMessage(msg tea.Msg) updateOutcome {
 	switch typedMsg := msg.(type) {
 	case harnessSelectionSavedMsg:
 		m.completeHarnessSave(typedMsg)
 
-		return m, nil, true
+		return updateOutcome{Command: nil, Handled: true}
 	case harnessSelectionLoadedMsg:
 		m.completeHarnessRead(typedMsg)
 
-		return m, nil, true
+		return updateOutcome{Command: nil, Handled: true}
 	case quizActionFinishedMsg:
 		m.completeQuizAction(typedMsg)
 
-		return m, nil, true
+		return updateOutcome{Command: nil, Handled: true}
 	case specActionFinishedMsg:
 		m.completeSpecAction(typedMsg)
 
-		return m, nil, true
+		return updateOutcome{Command: nil, Handled: true}
 	case planActionFinishedMsg:
 		m.completePlanAction(typedMsg)
 
-		return m, nil, true
+		return updateOutcome{Command: nil, Handled: true}
 	case workActionFinishedMsg:
 		m.completeWorkAction(typedMsg)
 
-		return m, nil, true
+		return updateOutcome{Command: nil, Handled: true}
 	default:
-		return m, nil, false
+		return updateOutcome{Command: nil, Handled: false}
 	}
 }
 
@@ -420,17 +420,17 @@ func (m *Model) SelectedView() View {
 	return m.views[m.selected]
 }
 
-func (m *Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	if updated, command, handled := m.updateGuidedOrHarnessKey(msg); handled {
-		return updated, command
+func (m *Model) updateKey(msg tea.KeyMsg) tea.Cmd {
+	if outcome := m.updateGuidedOrHarnessKey(msg); outcome.Handled {
+		return outcome.Command
 	}
 
-	if updated, cmd, handled := m.updateActiveModeKey(msg); handled {
-		return updated, cmd
+	if outcome := m.updateActiveModeKey(msg); outcome.Handled {
+		return outcome.Command
 	}
 
 	if cmd, handled := m.handleGlobalKey(msg); handled {
-		return m, cmd
+		return cmd
 	}
 
 	if m.SelectedView() == ViewProject {
@@ -461,73 +461,73 @@ func (m *Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 //nolint:cyclop // Active mode dispatch is centralized to preserve modal ordering.
-func (m *Model) updateActiveModeKey(msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
+func (m *Model) updateActiveModeKey(msg tea.KeyMsg) updateOutcome {
 	switch {
 	case m.artifactAction.Pending:
-		updated, cmd := m.updateArtifactActionKey(msg)
+		cmd := m.updateArtifactActionKey(msg)
 
-		return updated, cmd, true
+		return updateOutcome{Command: cmd, Handled: true}
 	case m.dumpAction.Pending:
-		updated, cmd := m.updateDumpActionKey(msg)
+		cmd := m.updateDumpActionKey(msg)
 
-		return updated, cmd, true
+		return updateOutcome{Command: cmd, Handled: true}
 	case m.dumpEdit.Active:
-		updated, cmd := m.updateDumpEditKey(msg)
+		cmd := m.updateDumpEditKey(msg)
 
-		return updated, cmd, true
+		return updateOutcome{Command: cmd, Handled: true}
 	case m.ticketAction.Pending:
-		updated, cmd := m.updateTicketActionKey(msg)
+		cmd := m.updateTicketActionKey(msg)
 
-		return updated, cmd, true
+		return updateOutcome{Command: cmd, Handled: true}
 	case m.specAction.Pending:
-		updated, cmd := m.updateSpecActionKey(msg)
+		cmd := m.updateSpecActionKey(msg)
 
-		return updated, cmd, true
+		return updateOutcome{Command: cmd, Handled: true}
 	case m.specBusy:
-		return m, nil, true
+		return updateOutcome{Command: nil, Handled: true}
 	case m.planAction.Pending:
-		updated, cmd := m.updatePlanActionKey(msg)
+		cmd := m.updatePlanActionKey(msg)
 
-		return updated, cmd, true
+		return updateOutcome{Command: cmd, Handled: true}
 	case m.planBusy:
 		m.statusMessage = "Plan action already running."
 
-		return m, nil, true
+		return updateOutcome{Command: nil, Handled: true}
 	case m.workBusy:
 		m.statusMessage = "Work action already running."
 
-		return m, nil, true
+		return updateOutcome{Command: nil, Handled: true}
 	case m.workAction.Pending:
-		updated, cmd := m.updateWorkActionKey(msg)
+		cmd := m.updateWorkActionKey(msg)
 
-		return updated, cmd, true
+		return updateOutcome{Command: cmd, Handled: true}
 	case m.commandPalette.Open:
-		updated, cmd := m.updateCommandPaletteKey(msg)
+		cmd := m.updateCommandPaletteKey(msg)
 
-		return updated, cmd, true
+		return updateOutcome{Command: cmd, Handled: true}
 	case m.filterEntryMode:
-		updated, cmd := m.updateFilterKey(msg)
+		cmd := m.updateFilterKey(msg)
 
-		return updated, cmd, true
+		return updateOutcome{Command: cmd, Handled: true}
 	default:
 		return m.updateActiveQuizModeKey(msg)
 	}
 }
 
-func (m *Model) updateActiveQuizModeKey(msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
+func (m *Model) updateActiveQuizModeKey(msg tea.KeyMsg) updateOutcome {
 	switch {
 	case m.quizAction.Pending:
-		updated, cmd := m.updateQuizActionKey(msg)
+		cmd := m.updateQuizActionKey(msg)
 
-		return updated, cmd, true
+		return updateOutcome{Command: cmd, Handled: true}
 	case m.quizBusy:
-		return m, nil, true
+		return updateOutcome{Command: nil, Handled: true}
 	case m.quizAnswer.Active:
-		updated, cmd := m.updateQuizAnswerKey(msg)
+		cmd := m.updateQuizAnswerKey(msg)
 
-		return updated, cmd, true
+		return updateOutcome{Command: cmd, Handled: true}
 	default:
-		return m, nil, false
+		return updateOutcome{Command: nil, Handled: false}
 	}
 }
 
@@ -550,13 +550,13 @@ func (m *Model) handleGlobalKey(msg tea.KeyMsg) (tea.Cmd, bool) {
 	}
 }
 
-func (m *Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateMouse(msg tea.MouseMsg) tea.Cmd {
 	if m.guided.Active {
-		return m, nil
+		return nil
 	}
 
 	if m.harnessSelection.Active {
-		return m, nil
+		return nil
 	}
 
 	event := tea.MouseEvent(msg)
@@ -564,7 +564,7 @@ func (m *Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 	if event.Action == tea.MouseActionRelease {
 		m.layoutDrag = layoutDragNone
 
-		return m, nil
+		return nil
 	}
 
 	if event.Action == tea.MouseActionMotion {
@@ -572,17 +572,17 @@ func (m *Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 	}
 
 	if event.Action != tea.MouseActionPress || event.Button != tea.MouseButtonLeft {
-		return m, nil
+		return nil
 	}
 
 	return m.updateMousePress(event)
 }
 
-func (m *Model) updateMousePress(event tea.MouseEvent) (tea.Model, tea.Cmd) {
+func (m *Model) updateMousePress(event tea.MouseEvent) tea.Cmd {
 	if m.workBusy {
 		m.statusMessage = "Work action already running."
 
-		return m, nil
+		return nil
 	}
 
 	width := maxInt(m.width, 60)
@@ -592,7 +592,7 @@ func (m *Model) updateMousePress(event tea.MouseEvent) (tea.Model, tea.Cmd) {
 		m.layoutDrag = drag
 		m.applyLayoutDrag(event)
 
-		return m, nil
+		return nil
 	}
 
 	button, ok := shellFooterButtonAt(event.X, event.Y, width, height)
@@ -601,20 +601,20 @@ func (m *Model) updateMousePress(event tea.MouseEvent) (tea.Model, tea.Cmd) {
 			m.selectDumpPaneAt(event.X, width)
 		}
 
-		return m, nil
+		return nil
 	}
 
 	if button.View != "" {
 		m.selectView(button.View)
 
-		return m, nil
+		return nil
 	}
 
 	if button.Key == "F10" {
-		return m, tea.Quit
+		return tea.Quit
 	}
 
-	return m, nil
+	return nil
 }
 
 func (m *Model) selectDumpPaneAt(x, width int) {
@@ -634,15 +634,15 @@ func (m *Model) selectDumpPaneAt(x, width int) {
 	m.selectedPane = 1
 }
 
-func (m *Model) updateMouseMotion(event tea.MouseEvent) (tea.Model, tea.Cmd) {
+func (m *Model) updateMouseMotion(event tea.MouseEvent) tea.Cmd {
 	if m.layoutDrag != layoutDragNone {
 		m.applyLayoutDrag(event)
 
-		return m, nil
+		return nil
 	}
 
 	if event.Button != tea.MouseButtonLeft {
-		return m, nil
+		return nil
 	}
 
 	width := maxInt(m.width, 60)
@@ -653,24 +653,24 @@ func (m *Model) updateMouseMotion(event tea.MouseEvent) (tea.Model, tea.Cmd) {
 		m.applyLayoutDrag(event)
 	}
 
-	return m, nil
+	return nil
 }
 
-func (m *Model) updateNavigationKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateNavigationKey(msg tea.KeyMsg) tea.Cmd {
 	key := msg.String()
 
 	if view, ok := functionKeyView(msg); ok {
 		m.selectView(view)
 
-		return m, nil
+		return nil
 	}
 
 	if cmd, ok := m.handleNavigationCommandKey(key); ok {
-		return m, cmd
+		return cmd
 	}
 
 	if m.handleNavigationPageKey(msg.Type) {
-		return m, nil
+		return nil
 	}
 
 	return m.handleNavigationActionKey(key)
@@ -689,19 +689,19 @@ func (m *Model) handleNavigationPageKey(keyType tea.KeyType) bool {
 	return true
 }
 
-func (m *Model) handleNavigationActionKey(key string) (tea.Model, tea.Cmd) {
+func (m *Model) handleNavigationActionKey(key string) tea.Cmd {
 	if m.handleDashActionKey(key) {
-		return m, nil
+		return nil
 	}
 
 	if m.handleDetailScrollKey(key) {
-		return m, nil
+		return nil
 	}
 
 	switch key {
 	case "e":
 		if m.selectedPane == 1 {
-			return m, m.openSelectedSource()
+			return m.openSelectedSource()
 		}
 	case "up", "k":
 		m.selectPreviousRecord()
@@ -715,7 +715,7 @@ func (m *Model) handleNavigationActionKey(key string) (tea.Model, tea.Cmd) {
 		m.filterEntryMode = true
 	}
 
-	return m, nil
+	return nil
 }
 
 func (m *Model) handleDetailScrollKey(key string) bool {
@@ -1540,7 +1540,7 @@ func (m *Model) filteredTickets() []TicketView {
 	return filtered
 }
 
-func (m *Model) updateFilterKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateFilterKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.Type {
 	case tea.KeyEsc:
 		m.filterEntryMode = false
@@ -1555,7 +1555,7 @@ func (m *Model) updateFilterKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	return m, nil
+	return nil
 }
 
 func (m *Model) selectFirstFilteredTicket() {

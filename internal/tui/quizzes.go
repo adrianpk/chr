@@ -242,25 +242,25 @@ func (m *Model) selectedQuizScope() QuizScope {
 	return quiz.Scope
 }
 
-func (m *Model) updateQuizzesKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateQuizzesKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.String() {
 	case "s":
 		cmd := m.startQuizAction(QuizActionRequest{Action: QuizActionStart, Scope: m.selectedQuizScope()})
 
-		return m, cmd
+		return cmd
 	case "enter":
 		m.planQuizAction(QuizActionAnswer)
 	case "r":
 		cmd := m.startQuizAction(QuizActionRequest{Action: QuizActionRefresh, Scope: m.selectedQuizScope()})
 
-		return m, cmd
+		return cmd
 	case "esc":
 		m.selectPrimaryPane()
 	default:
 		return m.updateNavigationKey(msg)
 	}
 
-	return m, nil
+	return nil
 }
 
 func (m *Model) newQuizActionState(action QuizActionID) QuizActionState {

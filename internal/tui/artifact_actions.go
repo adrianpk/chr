@@ -130,7 +130,7 @@ func (m *Model) renderArtifactActionCaseSuggestionLines() []string {
 	return lines
 }
 
-func (m *Model) updateArtifactActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateArtifactActionKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.Type {
 	case tea.KeyEsc:
 		m.cancelArtifactAction()
@@ -138,7 +138,7 @@ func (m *Model) updateArtifactActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.confirmArtifactAction()
 	}
 
-	return m, nil
+	return nil
 }
 
 func (m *Model) planArtifactAction(action ArtifactActionID) {

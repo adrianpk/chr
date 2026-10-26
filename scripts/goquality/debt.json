@@ -2132,36 +2132,6 @@
       "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/tui/agent_work_refresh.go::Model.handleAgentWorkRefreshTick",
-      "signature": "func() (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/agent_work_refresh.go::Model.updateAgentWorkRefreshMessage",
-      "signature": "func(msg tea.Msg) (tea.Model, tea.Cmd, bool)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/artifact_actions.go::Model.updateArtifactActionKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/case_metadata_actions.go::Model.updateCasesKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/command_palette.go::Model.updateCommandPaletteKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/command_palette.go::Model.updateCommandPaletteRunes",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/tui/documents.go::appendDocumentView",
       "signature": "func(ctx context.Context, projectDir string, family string, path string, entry os.DirEntry, walkErr error, documents *[]DocumentView) error",
       "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
@@ -2172,98 +2142,8 @@
       "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/tui/dump_actions.go::Model.updateDumpActionKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/dump_actions.go::Model.updateDumpEditKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/tui/dumps.go::Model.renderDumpDetailPanel",
       "signature": "func(width, height int) (string, []string)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/dumps.go::Model.updateDumpsKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/guided_input.go::Model.updateGuidedOrHarnessKey",
-      "signature": "func(message tea.KeyMsg) (tea.Model, tea.Cmd, bool)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/guided_input.go::Model.updateGuidedKey",
-      "signature": "func(message tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/guided_input.go::Model.guidedActionKey",
-      "signature": "func(key string) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/guided_input.go::Model.updateGuidedInputKey",
-      "signature": "func(message tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/harness_selection.go::Model.updateHarnessKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/model.go::Model.updateSystemMessage",
-      "signature": "func(msg tea.Msg) (tea.Model, tea.Cmd, bool)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/model.go::Model.updateActionFinishedMessage",
-      "signature": "func(msg tea.Msg) (tea.Model, tea.Cmd, bool)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/model.go::Model.updateKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/model.go::Model.updateActiveModeKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd, bool)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/model.go::Model.updateActiveQuizModeKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd, bool)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/model.go::Model.updateMouse",
-      "signature": "func(msg tea.MouseMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/model.go::Model.updateMousePress",
-      "signature": "func(event tea.MouseEvent) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/model.go::Model.updateMouseMotion",
-      "signature": "func(event tea.MouseEvent) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/model.go::Model.updateNavigationKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/model.go::Model.handleNavigationActionKey",
-      "signature": "func(key string) (tea.Model, tea.Cmd)",
       "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -2272,53 +2152,8 @@
       "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/tui/model.go::Model.updateFilterKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/tui/observability.go::NewObservabilityView",
       "signature": "func(projectDir string, daemon core.DaemonState, executions []core.ExecutionRecord, loops []core.LoopRunRecord, runtime core.RuntimeValidationResult, events []core.AgentEvent) ObservabilityView",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/plan_actions.go::Model.updatePlansKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/plan_actions.go::Model.updatePlanActionKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/project_metadata_actions.go::Model.updateProjectKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/quiz_actions.go::Model.updateQuizActionKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/quiz_actions.go::Model.updateQuizAnswerKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/quiz_actions.go::Model.confirmQuizAction",
-      "signature": "func() (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/quiz_actions.go::Model.saveQuizAnswer",
-      "signature": "func() (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/quizzes.go::Model.updateQuizzesKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
       "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -2334,26 +2169,6 @@
     {
       "id": "internal/tui/shell.go::Model.splitHeights",
       "signature": "func(height int) (int, int)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/spec_actions.go::Model.updateSpecsKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/spec_actions.go::Model.updateSpecActionKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/ticket_actions.go::Model.updateTicketActionKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/tui/work_actions.go::Model.updateWorkActionKey",
-      "signature": "func(msg tea.KeyMsg) (tea.Model, tea.Cmd)",
       "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {

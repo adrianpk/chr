@@ -9,25 +9,25 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (m *Model) updateGuidedOrHarnessKey(message tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
+func (m *Model) updateGuidedOrHarnessKey(message tea.KeyMsg) updateOutcome {
 	if m.guided.Active {
-		updated, command := m.updateGuidedKey(message)
+		command := m.updateGuidedKey(message)
 
-		return updated, command, true
+		return updateOutcome{Command: command, Handled: true}
 	}
 
 	if m.harnessSelection.Active {
-		updated, command := m.updateHarnessKey(message)
+		command := m.updateHarnessKey(message)
 
-		return updated, command, true
+		return updateOutcome{Command: command, Handled: true}
 	}
 
-	return m, nil, false
+	return updateOutcome{Command: nil, Handled: false}
 }
 
-func (m *Model) updateGuidedKey(message tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateGuidedKey(message tea.KeyMsg) tea.Cmd {
 	if message.String() == "ctrl+c" {
-		return m, tea.Quit
+		return tea.Quit
 	}
 
 	if m.guided.Editing {
@@ -37,30 +37,30 @@ func (m *Model) updateGuidedKey(message tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if message.String() == "esc" {
 		m.guided.Active = false
 
-		return m, nil
+		return nil
 	}
 
 	if m.guided.Busy {
-		return m, nil
+		return nil
 	}
 
 	if m.moveGuidedSelection(message.String()) {
-		return m, nil
+		return nil
 	}
 
 	return m.guidedActionKey(message.String())
 }
 
-func (m *Model) guidedActionKey(key string) (tea.Model, tea.Cmd) {
+func (m *Model) guidedActionKey(key string) tea.Cmd {
 	switch key {
 	case "n":
 		command := m.startGuidedRun()
 
-		return m, command
+		return command
 	case "r":
 		command := m.startGuidedRequest(m.guidedRequest("inspect"))
 
-		return m, command
+		return command
 	case "b":
 		request := m.guidedRequest("inspect")
 		request.Command.RunID = ""
@@ -68,28 +68,28 @@ func (m *Model) guidedActionKey(key string) (tea.Model, tea.Cmd) {
 
 		command := m.startGuidedRequest(request)
 
-		return m, command
+		return command
 	case "y":
 		if m.guided.Pending != nil {
 			command := m.startGuidedRequest(*m.guided.Pending)
 
-			return m, command
+			return command
 		}
 	case "enter", "e":
 		command := m.openGuidedInput()
 
-		return m, command
+		return command
 	case "f":
 		command := m.submitGuidedStep("finish")
 
-		return m, command
+		return command
 	default:
 		command := m.guidedExtraKey(key)
 
-		return m, command
+		return command
 	}
 
-	return m, nil
+	return nil
 }
 
 func (m *Model) moveGuidedSelection(key string) bool {
@@ -147,19 +147,19 @@ func (m *Model) editGuidedInput(action string) tea.Cmd {
 	return m.guided.Input.Focus()
 }
 
-func (m *Model) updateGuidedInputKey(message tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateGuidedInputKey(message tea.KeyMsg) tea.Cmd {
 	switch message.String() {
 	case "esc":
 		m.guided.Editing = false
 
-		return m, nil
+		return nil
 	case "enter":
 		request := m.guided.Bound
 		request.Command.Content = m.guided.Input.Value()
 
 		command := m.startGuidedRequest(request)
 
-		return m, command
+		return command
 	case "ctrl+j", "shift+enter":
 		message = tea.KeyMsg{Type: tea.KeyEnter}
 	}
@@ -168,7 +168,7 @@ func (m *Model) updateGuidedInputKey(message tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 	m.guided.Input, command = m.guided.Input.Update(message)
 
-	return m, command
+	return command
 }
 
 func (m *Model) submitGuidedStep(action string) tea.Cmd {
