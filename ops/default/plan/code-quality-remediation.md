@@ -7,7 +7,7 @@ Planning authorization: maintainer request, 2026-10-26.
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 1, Inventory and enforceable quality policy; in progress on its approved branch.
+Active slice: Slice 1, Inventory and enforceable quality policy; implemented and preparing canonical PR; dev integration pending.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b` on dev.
 
 Spec: [Remediation requirements](../spec/code-quality-remediation.md)
@@ -64,7 +64,7 @@ The maintainer approved the complete proposal and requested its conventional com
 ### Slice 1: Inventory and enforceable quality policy
 
 Findings: R1, R2, R3, R6, R10.
-Ticket: [TKT-20261026084821](../ticket/in_progress/20261026084821-quality-policy.md).
+Ticket: [TKT-20261026084821](../ticket/reviewing/20261026084821-quality-policy.md).
 
 1. **T1.1:** Reconcile every row of inventories A, B and C with its actual declaration and callers. Inventory all 14 large files, 11 duplicate pairs, seven dead symbols, eight error names, 23 unexplained errcheck suppressions, control flags and compatibility paths. Record false positives with evidence; do not equate metrics with defects.
 2. **T1.2:** Propose and implement, only after tool approval, one small standard-library Go AST check alongside the existing signature-style check. Inspect production declarations, grouped and named parameters/results, function literals and interfaces without counting receivers as parameters. Require explicit outcomes for named aliases, variadics, build constraints and generated files; do not silently skip them.
@@ -404,7 +404,7 @@ Cost: runtime gates were not rerun for this planning task. Budget each slice for
 
 | Number | Ticket | Slice | Initial state |
 | --- | --- | --- | --- |
-| 1 | [TKT-20261026084821](../ticket/in_progress/20261026084821-quality-policy.md) | Inventory and enforceable quality policy | ready; predecessor applies |
+| 1 | [TKT-20261026084821](../ticket/reviewing/20261026084821-quality-policy.md) | Inventory and enforceable quality policy | ready; predecessor applies |
 | 2 | [TKT-20261026084822](../ticket/ready/20261026084822-quality-values.md) | Shared boundary values and residual core helpers | ready; predecessor applies |
 | 3 | [TKT-20261026084823](../ticket/ready/20261026084823-quality-storage.md) | Stable records and positional SQL | ready; predecessor applies |
 | 4 | [TKT-20261026084824](../ticket/ready/20261026084824-quality-commands.md) | Typed commands and central application operations | ready; predecessor applies |
