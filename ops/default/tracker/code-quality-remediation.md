@@ -6,7 +6,7 @@ Delivery set: code-quality-remediation
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 3, Stable records and positional SQL; predecessor PR #439 verified integrated; approved and ready.
+Active slice: Slice 3, Stable records and positional SQL; in progress on its approved branch; predecessor PR #439 verified integrated.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b`
 
 Plan: [Single-cycle plan](../plan/code-quality-remediation.md)
@@ -68,7 +68,7 @@ The maintainer approved implementation, conventional commit/push and startup of 
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T3.1 | Freeze compatibility fixtures for WorkflowInvocation, WorkflowMergerInput, IndexedTicket and WorkflowWorkStatus before grouping fields. Record all field names, tags, omit rules, timestamps, state values and canonical hashing paths in the model companion. | pending | — | not run |
+| T3.1 | Freeze compatibility fixtures for WorkflowInvocation, WorkflowMergerInput, IndexedTicket and WorkflowWorkStatus before grouping fields. Record all field names, tags, omit rules, timestamps, state values and canonical hashing paths in the model companion. | implemented | task commit: test(storage): freeze durable and public record serialization | TestQualityRecordWire on unmodified records; zero, empty and populated byte fixtures plus field manifests |
 | T3.2 | Group cohesive identity, Git, timing and outcome fields while preserving existing encoded bytes wherever bytes feed hashes or retained evidence. Keep a dedicated flat serialization shape when embedding changes order or omission. Update construction, scanning and mapping code together. | pending | — | not run |
 | T3.3 | Inventory every production SQL bind or scan above 16 fields, not just the three examples. Introduce one row mapping and one explicit ordered column definition per affected table, with nearby values and scan targets. Keep SQL identifiers static and user data bound. | pending | — | not run |
 | T3.4 | Start with execution_repository.go, remote_command_record_repository.go and telegram_document_outbox.go. Share only small statement-construction code that is actually identical; retain table-specific updates, filters, conditional writes and transaction ownership. | pending | — | not run |

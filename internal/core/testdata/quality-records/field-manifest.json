@@ -1,0 +1,948 @@
+{
+  "indexed-ticket": [
+    {
+      "anonymous": false,
+      "name": "NativeWorkflow",
+      "order": 0,
+      "tag": "",
+      "type": "bool"
+    },
+    {
+      "anonymous": false,
+      "name": "AttentionReasons",
+      "order": 1,
+      "tag": "",
+      "type": "[]string"
+    },
+    {
+      "anonymous": false,
+      "name": "ProjectID",
+      "order": 2,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Namespace",
+      "order": 3,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Path",
+      "order": 4,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "RelativePath",
+      "order": 5,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Key",
+      "order": 6,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Title",
+      "order": 7,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Assignee",
+      "order": 8,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Synopsis",
+      "order": 9,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Status",
+      "order": 10,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "BoardColumn",
+      "order": 11,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Priority",
+      "order": 12,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Severity",
+      "order": 13,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Type",
+      "order": 14,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Tags",
+      "order": 15,
+      "tag": "",
+      "type": "[]string"
+    },
+    {
+      "anonymous": false,
+      "name": "UseCase",
+      "order": 16,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "ProjectArea",
+      "order": 17,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "SourceKind",
+      "order": 18,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "SourceRef",
+      "order": 19,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Slice",
+      "order": 20,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Branch",
+      "order": 21,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "ReviewRefs",
+      "order": 22,
+      "tag": "",
+      "type": "[]core.TicketReviewRef"
+    },
+    {
+      "anonymous": false,
+      "name": "ReviewState",
+      "order": 23,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "ReviewRound",
+      "order": 24,
+      "tag": "",
+      "type": "int"
+    },
+    {
+      "anonymous": false,
+      "name": "ReviewResult",
+      "order": 25,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "ReviewCommentsURL",
+      "order": 26,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "BlockingFindings",
+      "order": 27,
+      "tag": "",
+      "type": "[]string"
+    },
+    {
+      "anonymous": false,
+      "name": "MergeState",
+      "order": 28,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "MergeResult",
+      "order": 29,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "MergeActor",
+      "order": 30,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "MergeCommit",
+      "order": 31,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "MergedAt",
+      "order": 32,
+      "tag": "",
+      "type": "*time.Time"
+    },
+    {
+      "anonymous": false,
+      "name": "MergeBlocker",
+      "order": 33,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "CreatedAt",
+      "order": 34,
+      "tag": "",
+      "type": "*time.Time"
+    },
+    {
+      "anonymous": false,
+      "name": "UpdatedAt",
+      "order": 35,
+      "tag": "",
+      "type": "*time.Time"
+    },
+    {
+      "anonymous": false,
+      "name": "FileMTime",
+      "order": 36,
+      "tag": "",
+      "type": "time.Time"
+    },
+    {
+      "anonymous": false,
+      "name": "FileSize",
+      "order": 37,
+      "tag": "",
+      "type": "int64"
+    },
+    {
+      "anonymous": false,
+      "name": "ContentHash",
+      "order": 38,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "IndexedAt",
+      "order": 39,
+      "tag": "",
+      "type": "time.Time"
+    }
+  ],
+  "invocation": [
+    {
+      "anonymous": false,
+      "name": "HarnessBinding",
+      "order": 0,
+      "tag": "json:\"harness_binding,omitempty\"",
+      "type": "*core.HarnessBinding"
+    },
+    {
+      "anonymous": false,
+      "name": "Admission",
+      "order": 1,
+      "tag": "json:\"admission_guard,omitempty\"",
+      "type": "*core.WorkflowAdmissionGuard"
+    },
+    {
+      "anonymous": false,
+      "name": "IntegrationBudget",
+      "order": 2,
+      "tag": "json:\"integration_budget,omitempty\"",
+      "type": "*core.WorkflowIntegrationBudgetBinding"
+    },
+    {
+      "anonymous": false,
+      "name": "Integration",
+      "order": 3,
+      "tag": "json:\"integration_binding,omitempty\"",
+      "type": "*core.WorkflowIntegrationBinding"
+    },
+    {
+      "anonymous": false,
+      "name": "IntegrationEntries",
+      "order": 4,
+      "tag": "json:\"integration_entries,omitempty\"",
+      "type": "[]core.WorkflowIntegrationBinding"
+    },
+    {
+      "anonymous": false,
+      "name": "DependencyTargets",
+      "order": 5,
+      "tag": "json:\"dependency_targets,omitempty\"",
+      "type": "[]core.WorkflowDependencyTarget"
+    },
+    {
+      "anonymous": false,
+      "name": "LooseQueue",
+      "order": 6,
+      "tag": "json:\"loose_queue,omitempty\"",
+      "type": "*core.WorkflowLooseQueue"
+    },
+    {
+      "anonymous": false,
+      "name": "Closures",
+      "order": 7,
+      "tag": "json:\"set_closures,omitempty\"",
+      "type": "[]core.WorkflowInvocationClosure"
+    },
+    {
+      "anonymous": false,
+      "name": "ClosingSet",
+      "order": 8,
+      "tag": "json:\"closing_set,omitempty\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "ExecutionTarget",
+      "order": 9,
+      "tag": "json:\"execution_target,omitempty\"",
+      "type": "*core.WorkflowPreviewTarget"
+    },
+    {
+      "anonymous": false,
+      "name": "ConfirmedCursor",
+      "order": 10,
+      "tag": "json:\"confirmed_cursor,omitempty\"",
+      "type": "int"
+    },
+    {
+      "anonymous": false,
+      "name": "Deliveries",
+      "order": 11,
+      "tag": "json:\"integrated_units,omitempty\"",
+      "type": "[]core.WorkflowUnitDelivery"
+    },
+    {
+      "anonymous": false,
+      "name": "Continuation",
+      "order": 12,
+      "tag": "json:\"continuation_checkpoint,omitempty\"",
+      "type": "*core.WorkflowContinuationCheckpoint"
+    },
+    {
+      "anonymous": true,
+      "name": "WorkflowIdentity",
+      "order": 13,
+      "tag": "",
+      "type": "core.WorkflowIdentity"
+    },
+    {
+      "anonymous": false,
+      "name": "Schema",
+      "order": 14,
+      "tag": "json:\"schema\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "RequestKey",
+      "order": 15,
+      "tag": "json:\"request_key\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "RequestHash",
+      "order": 16,
+      "tag": "json:\"request_hash\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Authority",
+      "order": 17,
+      "tag": "json:\"authority\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Selection",
+      "order": 18,
+      "tag": "json:\"selection\"",
+      "type": "core.WorkflowPreviewRequest"
+    },
+    {
+      "anonymous": false,
+      "name": "Policy",
+      "order": 19,
+      "tag": "json:\"policy\"",
+      "type": "core.WorkflowExecutionPolicy"
+    },
+    {
+      "anonymous": false,
+      "name": "SetOrderRule",
+      "order": 20,
+      "tag": "json:\"set_order_rule\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Members",
+      "order": 21,
+      "tag": "json:\"members\"",
+      "type": "[]core.WorkflowMember"
+    },
+    {
+      "anonymous": false,
+      "name": "SetImages",
+      "order": 22,
+      "tag": "json:\"set_images\"",
+      "type": "[]core.WorkflowInputImage"
+    },
+    {
+      "anonymous": false,
+      "name": "Excluded",
+      "order": 23,
+      "tag": "json:\"excluded\"",
+      "type": "map[string]int"
+    },
+    {
+      "anonymous": false,
+      "name": "Cursor",
+      "order": 24,
+      "tag": "json:\"cursor\"",
+      "type": "int"
+    },
+    {
+      "anonymous": false,
+      "name": "Status",
+      "order": 25,
+      "tag": "json:\"status\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Outcome",
+      "order": 26,
+      "tag": "json:\"outcome\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Attempts",
+      "order": 27,
+      "tag": "json:\"attempts\"",
+      "type": "[]core.WorkflowAttempt"
+    },
+    {
+      "anonymous": false,
+      "name": "Blocker",
+      "order": 28,
+      "tag": "json:\"blocker,omitempty\"",
+      "type": "*core.WorkflowBlocker"
+    },
+    {
+      "anonymous": false,
+      "name": "Lane",
+      "order": 29,
+      "tag": "json:\"lane,omitempty\"",
+      "type": "*core.WorkflowLane"
+    },
+    {
+      "anonymous": false,
+      "name": "StopIntent",
+      "order": 30,
+      "tag": "json:\"stop_intent\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "ResumeStatus",
+      "order": 31,
+      "tag": "json:\"resume_status\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "CapacityResumeStatus",
+      "order": 32,
+      "tag": "json:\"capacity_resume_status,omitempty\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "CandidateRef",
+      "order": 33,
+      "tag": "json:\"candidate_ref\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "CandidateHash",
+      "order": 34,
+      "tag": "json:\"candidate_hash\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "PullRequest",
+      "order": 35,
+      "tag": "json:\"pull_request_binding,omitempty\"",
+      "type": "*core.WorkflowPullRequestBinding"
+    },
+    {
+      "anonymous": false,
+      "name": "DeliveryProofRef",
+      "order": 36,
+      "tag": "json:\"delivery_proof_ref\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "DeliveryProofHash",
+      "order": 37,
+      "tag": "json:\"delivery_proof_hash\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "DeliveryRef",
+      "order": 38,
+      "tag": "json:\"delivery_ref\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "DeliveryHash",
+      "order": 39,
+      "tag": "json:\"delivery_hash\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "ReviewRestriction",
+      "order": 40,
+      "tag": "json:\"review_restriction,omitempty\"",
+      "type": "core.ReviewWorkflowMode"
+    },
+    {
+      "anonymous": false,
+      "name": "Review",
+      "order": 41,
+      "tag": "json:\"review_binding,omitempty\"",
+      "type": "*core.WorkflowReviewBinding"
+    },
+    {
+      "anonymous": false,
+      "name": "ReviewCount",
+      "order": 42,
+      "tag": "json:\"review_count,omitempty\"",
+      "type": "int"
+    },
+    {
+      "anonymous": false,
+      "name": "ReviewRepairs",
+      "order": 43,
+      "tag": "json:\"review_repairs,omitempty\"",
+      "type": "[]core.WorkflowReviewRepairBudget"
+    },
+    {
+      "anonymous": false,
+      "name": "Preparation",
+      "order": 44,
+      "tag": "json:\"preparation_binding,omitempty\"",
+      "type": "*core.WorkflowPreparationBinding"
+    },
+    {
+      "anonymous": false,
+      "name": "CandidateRepair",
+      "order": 45,
+      "tag": "json:\"candidate_repair,omitempty\"",
+      "type": "*core.WorkflowCandidateRepairBinding"
+    },
+    {
+      "anonymous": false,
+      "name": "PreparationCount",
+      "order": 46,
+      "tag": "json:\"preparation_count,omitempty\"",
+      "type": "int"
+    },
+    {
+      "anonymous": false,
+      "name": "Submission",
+      "order": 47,
+      "tag": "json:\"submission_binding,omitempty\"",
+      "type": "*core.WorkflowSubmissionBinding"
+    }
+  ],
+  "invocation-file": [
+    {
+      "anonymous": false,
+      "name": "HarnessCommand",
+      "order": 0,
+      "tag": "json:\"harness_command,omitempty\"",
+      "type": "[]string"
+    },
+    {
+      "anonymous": true,
+      "name": "WorkflowInvocation",
+      "order": 1,
+      "tag": "",
+      "type": "core.WorkflowInvocation"
+    },
+    {
+      "anonymous": false,
+      "name": "OwnerRoot",
+      "order": 2,
+      "tag": "json:\"owner_root\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Owners",
+      "order": 3,
+      "tag": "json:\"owner_token_hashes\"",
+      "type": "map[string]string"
+    },
+    {
+      "anonymous": false,
+      "name": "RequestKeys",
+      "order": 4,
+      "tag": "json:\"request_keys\"",
+      "type": "[]string"
+    },
+    {
+      "anonymous": false,
+      "name": "sourceHash",
+      "order": 5,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "fields",
+      "order": 6,
+      "tag": "",
+      "type": "map[string]jsontext.Value"
+    }
+  ],
+  "merger-input": [
+    {
+      "anonymous": false,
+      "name": "OperatorDecisionRef",
+      "order": 0,
+      "tag": "json:\"operator_decision_ref,omitempty\"",
+      "type": "*core.WorkflowEvidenceRef"
+    },
+    {
+      "anonymous": false,
+      "name": "OperatorAnswers",
+      "order": 1,
+      "tag": "json:\"operator_answers,omitempty\"",
+      "type": "[]core.WorkflowIntegrationAnswer"
+    },
+    {
+      "anonymous": false,
+      "name": "ProtocolVersion",
+      "order": 2,
+      "tag": "json:\"protocol_version\"",
+      "type": "int"
+    },
+    {
+      "anonymous": false,
+      "name": "ID",
+      "order": 3,
+      "tag": "json:\"id\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "InvocationID",
+      "order": 4,
+      "tag": "json:\"invocation_id\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "EntryID",
+      "order": 5,
+      "tag": "json:\"entry_id\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Unit",
+      "order": 6,
+      "tag": "json:\"unit\"",
+      "type": "core.WorkflowRef"
+    },
+    {
+      "anonymous": false,
+      "name": "CandidateRevision",
+      "order": 7,
+      "tag": "json:\"candidate_revision\"",
+      "type": "uint64"
+    },
+    {
+      "anonymous": false,
+      "name": "CandidateHash",
+      "order": 8,
+      "tag": "json:\"candidate_hash\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "ClaimGeneration",
+      "order": 9,
+      "tag": "json:\"claim_generation\"",
+      "type": "uint64"
+    },
+    {
+      "anonymous": false,
+      "name": "InputHash",
+      "order": 10,
+      "tag": "json:\"input_hash\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "ScopeHash",
+      "order": 11,
+      "tag": "json:\"scope_hash\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Reason",
+      "order": 12,
+      "tag": "json:\"reason\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Repository",
+      "order": 13,
+      "tag": "json:\"repository\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "SourceRef",
+      "order": 14,
+      "tag": "json:\"source_ref\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "TargetRef",
+      "order": 15,
+      "tag": "json:\"target_ref\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Source",
+      "order": 16,
+      "tag": "json:\"source\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Base",
+      "order": 17,
+      "tag": "json:\"base\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Method",
+      "order": 18,
+      "tag": "json:\"method\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "OwnedWorkspaceID",
+      "order": 19,
+      "tag": "json:\"owned_workspace_id\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "SourceManifestRef",
+      "order": 20,
+      "tag": "json:\"source_manifest_ref\"",
+      "type": "core.WorkflowEvidenceRef"
+    },
+    {
+      "anonymous": false,
+      "name": "IntentRefs",
+      "order": 21,
+      "tag": "json:\"intent_refs\"",
+      "type": "[]core.WorkflowEvidenceRef"
+    },
+    {
+      "anonymous": false,
+      "name": "TargetChangeRefs",
+      "order": 22,
+      "tag": "json:\"target_change_refs\"",
+      "type": "[]core.WorkflowEvidenceRef"
+    },
+    {
+      "anonymous": false,
+      "name": "FindingRefs",
+      "order": 23,
+      "tag": "json:\"finding_refs\"",
+      "type": "[]core.WorkflowEvidenceRef"
+    },
+    {
+      "anonymous": false,
+      "name": "Requirements",
+      "order": 24,
+      "tag": "json:\"requirements\"",
+      "type": "[]core.WorkflowMergerRequirement"
+    },
+    {
+      "anonymous": false,
+      "name": "Conflicts",
+      "order": 25,
+      "tag": "json:\"conflicts\"",
+      "type": "[]core.WorkflowMergerConflict"
+    },
+    {
+      "anonymous": false,
+      "name": "HistoryCheckpoint",
+      "order": 26,
+      "tag": "json:\"history_checkpoint,omitempty\"",
+      "type": "*core.WorkflowMergerCheckpoint"
+    },
+    {
+      "anonymous": false,
+      "name": "RepairCheckpointRef",
+      "order": 27,
+      "tag": "json:\"repair_checkpoint_ref,omitempty\"",
+      "type": "*core.WorkflowEvidenceRef"
+    },
+    {
+      "anonymous": false,
+      "name": "AllowedPaths",
+      "order": 28,
+      "tag": "json:\"allowed_paths\"",
+      "type": "[]string"
+    },
+    {
+      "anonymous": false,
+      "name": "ProtectedPaths",
+      "order": 29,
+      "tag": "json:\"protected_paths\"",
+      "type": "[]string"
+    },
+    {
+      "anonymous": false,
+      "name": "ValidationContractRef",
+      "order": 30,
+      "tag": "json:\"validation_contract_ref\"",
+      "type": "core.WorkflowEvidenceRef"
+    },
+    {
+      "anonymous": false,
+      "name": "ValidationCommands",
+      "order": 31,
+      "tag": "json:\"validation_commands\"",
+      "type": "[][]string"
+    },
+    {
+      "anonymous": false,
+      "name": "CapacityReservationID",
+      "order": 32,
+      "tag": "json:\"capacity_reservation_id\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "BudgetReservationID",
+      "order": 33,
+      "tag": "json:\"budget_reservation_id\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "RemainingAttempts",
+      "order": 34,
+      "tag": "json:\"remaining_attempts\"",
+      "type": "int"
+    },
+    {
+      "anonymous": false,
+      "name": "WorkerTimeoutSeconds",
+      "order": 35,
+      "tag": "json:\"worker_timeout_seconds\"",
+      "type": "int"
+    },
+    {
+      "anonymous": false,
+      "name": "AdmittedAt",
+      "order": 36,
+      "tag": "json:\"admitted_at\"",
+      "type": "time.Time"
+    },
+    {
+      "anonymous": false,
+      "name": "Deadline",
+      "order": 37,
+      "tag": "json:\"deadline\"",
+      "type": "time.Time"
+    },
+    {
+      "anonymous": false,
+      "name": "TokenAllowance",
+      "order": 38,
+      "tag": "json:\"token_allowance,omitempty\"",
+      "type": "*core.WorkflowTokenAllowance"
+    }
+  ]
+}

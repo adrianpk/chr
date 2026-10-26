@@ -1,0 +1,263 @@
+{
+  "work-status": [
+    {
+      "anonymous": false,
+      "name": "WorkTitle",
+      "order": 0,
+      "tag": "json:\"work_title,omitempty\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "HarnessBinding",
+      "order": 1,
+      "tag": "json:\"harness_binding,omitempty\"",
+      "type": "*core.HarnessBinding"
+    },
+    {
+      "anonymous": false,
+      "name": "ControlReceipt",
+      "order": 2,
+      "tag": "json:\"control_receipt,omitempty\"",
+      "type": "*core.WorkflowControlResult"
+    },
+    {
+      "anonymous": false,
+      "name": "Integration",
+      "order": 3,
+      "tag": "json:\"integration,omitempty\"",
+      "type": "*app.WorkflowIntegrationStatus"
+    },
+    {
+      "anonymous": false,
+      "name": "FrozenPolicy",
+      "order": 4,
+      "tag": "json:\"execution_policy\"",
+      "type": "core.WorkflowExecutionPolicy"
+    },
+    {
+      "anonymous": false,
+      "name": "Continuation",
+      "order": 5,
+      "tag": "json:\"continuation,omitempty\"",
+      "type": "*core.WorkflowContinuationCheckpoint"
+    },
+    {
+      "anonymous": false,
+      "name": "NextActionOwner",
+      "order": 6,
+      "tag": "json:\"next_action_owner\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "CapacityResumeStatus",
+      "order": 7,
+      "tag": "json:\"capacity_resume_status,omitempty\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "SelectedTicket",
+      "order": 8,
+      "tag": "json:\"selected_ticket,omitempty\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "SelectedSlice",
+      "order": 9,
+      "tag": "json:\"selected_slice,omitempty\"",
+      "type": "string"
+    },
+    {
+      "anonymous": true,
+      "name": "WorkflowIdentity",
+      "order": 10,
+      "tag": "",
+      "type": "core.WorkflowIdentity"
+    },
+    {
+      "anonymous": false,
+      "name": "Selector",
+      "order": 11,
+      "tag": "json:\"selector\"",
+      "type": "core.WorkflowSelector"
+    },
+    {
+      "anonymous": false,
+      "name": "Authority",
+      "order": 12,
+      "tag": "json:\"authority\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Status",
+      "order": 13,
+      "tag": "json:\"status\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Outcome",
+      "order": 14,
+      "tag": "json:\"outcome\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Target",
+      "order": 15,
+      "tag": "json:\"target\"",
+      "type": "core.WorkflowPreviewTarget"
+    },
+    {
+      "anonymous": false,
+      "name": "Policy",
+      "order": 16,
+      "tag": "json:\"publication_policy\"",
+      "type": "core.WorkflowReviewPolicy"
+    },
+    {
+      "anonymous": false,
+      "name": "SetOrderRule",
+      "order": 17,
+      "tag": "json:\"set_order_rule\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Excluded",
+      "order": 18,
+      "tag": "json:\"excluded\"",
+      "type": "map[string]int"
+    },
+    {
+      "anonymous": false,
+      "name": "Total",
+      "order": 19,
+      "tag": "json:\"total_members\"",
+      "type": "int"
+    },
+    {
+      "anonymous": false,
+      "name": "ValidatedTasks",
+      "order": 20,
+      "tag": "json:\"validated_tasks\"",
+      "type": "int"
+    },
+    {
+      "anonymous": false,
+      "name": "ConfirmedTickets",
+      "order": 21,
+      "tag": "json:\"confirmed_tickets\"",
+      "type": "int"
+    },
+    {
+      "anonymous": false,
+      "name": "IntegratedUnits",
+      "order": 22,
+      "tag": "json:\"integrated_units\"",
+      "type": "int"
+    },
+    {
+      "anonymous": false,
+      "name": "Remaining",
+      "order": 23,
+      "tag": "json:\"remaining_tickets\"",
+      "type": "int"
+    },
+    {
+      "anonymous": false,
+      "name": "StopIntent",
+      "order": 24,
+      "tag": "json:\"stop_intent\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Blocker",
+      "order": 25,
+      "tag": "json:\"blocker,omitempty\"",
+      "type": "*core.WorkflowBlocker"
+    },
+    {
+      "anonymous": false,
+      "name": "CandidateRef",
+      "order": 26,
+      "tag": "json:\"candidate_ref,omitempty\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "CandidateHash",
+      "order": 27,
+      "tag": "json:\"candidate_hash,omitempty\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "ApprovalHash",
+      "order": 28,
+      "tag": "json:\"approval_hash,omitempty\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "ReviewState",
+      "order": 29,
+      "tag": "json:\"review_state,omitempty\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "PullRequest",
+      "order": 30,
+      "tag": "json:\"pull_request,omitempty\"",
+      "type": "*core.WorkflowPullRequestBinding"
+    },
+    {
+      "anonymous": false,
+      "name": "DeliveryRef",
+      "order": 31,
+      "tag": "json:\"delivery_ref,omitempty\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "DeliveryHash",
+      "order": 32,
+      "tag": "json:\"delivery_hash,omitempty\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Members",
+      "order": 33,
+      "tag": "json:\"members\"",
+      "type": "[]core.WorkflowPreviewMember"
+    },
+    {
+      "anonymous": false,
+      "name": "Evidence",
+      "order": 34,
+      "tag": "json:\"recent_evidence\"",
+      "type": "[]app.WorkflowWorkEvidence"
+    },
+    {
+      "anonymous": false,
+      "name": "TotalAttempts",
+      "order": 35,
+      "tag": "json:\"total_attempts\"",
+      "type": "int"
+    },
+    {
+      "anonymous": false,
+      "name": "NextOffset",
+      "order": 36,
+      "tag": "json:\"next_offset\"",
+      "type": "int"
+    }
+  ]
+}
