@@ -2,12 +2,8 @@ package app
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"io"
-	"io/fs"
-	"time"
 
 	"github.com/urfave/cli/v3"
 
@@ -68,116 +64,34 @@ func ticketLoopFlags() []cli.Flag {
 	)
 }
 
-type ticketLoopExecutionResult struct {
-	AuthorityExcluded int
-	Record            core.LoopRunRecord
-	Executions        []core.ExecutionRecord
-	Applications      []core.ResultApplication
-	Merges            []core.TicketMergeCommandResult
-}
-
-type ticketLoopRunOptions struct {
-	MaxIterations int
-}
-
 func (factory commandFactory) runTicketLoop(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("ticket loop does not accept positional arguments")
 	}
 
-	env, err := newUserEnvironmentFromCommand(cmd)
+	operations, project, err := factory.serviceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
 
-	projectContext, index, err := factory.openTicketIndexForCommand(ctx, cmd, env)
-	if err != nil {
-		return err
-	}
+	request := ticketLoopRequest{Query: ticketLoopQueryOptionsFromCommand(cmd, project.ProjectID), Run: ticketLoopRunOptions{MaxIterations: cmd.Int("max-iterations")}, DryRun: cmd.Bool("dry-run")}
 
-	defer func() {
-		//nolint:errcheck // Command result already comes from the main operation.
-		_ = index.Close()
-	}()
-
-	err = refreshProjectTicketIndex(ctx, index, projectContext)
-	if err != nil {
-		return err
-	}
-
-	queryOptions := ticketLoopQueryOptionsFromCommand(cmd, projectContext.ProjectID)
-
-	runOptions, err := ticketLoopRunOptionsFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	tickets, eligibleCount, err := selectTicketLoopTickets(ctx, index, projectContext, queryOptions, runOptions)
-	if err != nil {
-		return err
-	}
-
-	if !cmd.Bool("dry-run") {
-		lock, err := acquireAgentOperationLock(ctx, projectContext, core.AgentOperationDevelopment)
+	outcome, err := operations.runLegacyTicketLoop(ctx, request)
+	if request.DryRun {
 		if err != nil {
 			return err
 		}
 
-		defer releaseAgentOperationLock(lock)()
-
-		return runAndPrintTicketLoopExecution(ctx, factory.io.Stdout, env, projectContext, tickets, eligibleCount, factory.deps.assetsFS)
+		return printTicketLoopPlan(factory.io.Stdout, project, request.Query, outcome.Selection.Tickets, true)
 	}
 
-	return printTicketLoopPlan(factory.io.Stdout, projectContext, queryOptions, tickets, cmd.Bool("dry-run"))
-}
-
-func selectTicketLoopTickets(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, queryOptions core.TicketLoopQueryOptions, runOptions ticketLoopRunOptions) ([]core.IndexedTicket, int, error) {
-	tickets, err := core.NewTicketLoopQuery(index).EligibleTickets(ctx, queryOptions)
-	if err != nil {
-		return nil, 0, err
+	if outcome.Execution.Record.ID != "" {
+		if printErr := printTicketLoopExecution(factory.io.Stdout, outcome.Execution); printErr != nil {
+			return printErr
+		}
 	}
 
-	tickets, err = applyTicketLoopPreflight(ctx, index, projectContext, tickets)
-	if err != nil {
-		return nil, 0, err
-	}
-
-	eligibleTickets := deduplicateTicketLoopTickets(tickets)
-	tickets = ticketsForTicketLoopRun(eligibleTickets, runOptions)
-
-	return tickets, len(eligibleTickets), nil
-}
-
-func applyTicketLoopPreflight(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, tickets []core.IndexedTicket) ([]core.IndexedTicket, error) {
-	allTickets, err := index.ListProjectTickets(ctx, projectContext.ProjectID)
-	if err != nil {
-		return nil, err
-	}
-
-	workConfig, err := workSelectionWorkConfig(projectContext.ProjectDir)
-	if err != nil {
-		return nil, err
-	}
-
-	preflight, err := core.RunWorkSelectionPreflight(ctx, core.WorkSelectionPreflightOptions{
-		ProjectDir:   projectContext.ProjectDir,
-		Tickets:      allTickets,
-		BranchPolicy: workConfig.BranchPolicy,
-		Workspace:    workConfig.Workspace,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if !preflight.Allowed {
-		return nil, formatWorkSelectionPreflightError(preflight)
-	}
-
-	if len(preflight.SelectedTickets) > 0 && hasReviewRepairTicket(preflight.SelectedTickets) {
-		return preflight.SelectedTickets, nil
-	}
-
-	return tickets, nil
+	return err
 }
 
 func ticketLoopQueryOptionsFromCommand(cmd *cli.Command, projectID string) core.TicketLoopQueryOptions {
@@ -194,114 +108,6 @@ func ticketLoopQueryOptionsFromCommand(cmd *cli.Command, projectID string) core.
 		},
 		Order: core.TicketLoopOrder(cmd.String("order")),
 	}
-}
-
-func ticketLoopRunOptionsFromCommand(cmd *cli.Command) (ticketLoopRunOptions, error) {
-	opts := ticketLoopRunOptions{
-		MaxIterations: cmd.Int("max-iterations"),
-	}
-	if opts.MaxIterations < 0 {
-		return ticketLoopRunOptions{}, fmt.Errorf("max-iterations must be greater than or equal to zero")
-	}
-
-	return opts, nil
-}
-
-func ticketsForTicketLoopRun(tickets []core.IndexedTicket, opts ticketLoopRunOptions) []core.IndexedTicket {
-	if opts.MaxIterations == 0 || len(tickets) <= opts.MaxIterations {
-		return tickets
-	}
-
-	return tickets[:opts.MaxIterations]
-}
-
-func deduplicateTicketLoopTickets(tickets []core.IndexedTicket) []core.IndexedTicket {
-	selected := make([]core.IndexedTicket, 0, len(tickets))
-	seen := map[string]struct{}{}
-
-	for _, ticket := range tickets {
-		_, ok := seen[ticket.Key]
-		if ok {
-			continue
-		}
-
-		seen[ticket.Key] = struct{}{}
-		selected = append(selected, ticket)
-	}
-
-	return selected
-}
-
-func enforceWorkSelectionPreflight(ctx context.Context, projectContext commandProjectContext, tickets []core.IndexedTicket, selectedTicketKey string) error {
-	workConfig, err := workSelectionWorkConfig(projectContext.ProjectDir)
-	if err != nil {
-		return err
-	}
-
-	preflight, err := core.RunWorkSelectionPreflight(ctx, core.WorkSelectionPreflightOptions{
-		ProjectDir:        projectContext.ProjectDir,
-		Tickets:           tickets,
-		SelectedTicketKey: selectedTicketKey,
-		BranchPolicy:      workConfig.BranchPolicy,
-		Workspace:         workConfig.Workspace,
-	})
-	if err != nil {
-		return err
-	}
-
-	if !preflight.Allowed {
-		return formatWorkSelectionPreflightError(preflight)
-	}
-
-	return nil
-}
-
-func formatWorkSelectionPreflightError(preflight core.WorkSelectionPreflightResult) error {
-	if len(preflight.BlockReasons) == 0 {
-		return fmt.Errorf("work selection preflight blocked")
-	}
-
-	reason := preflight.BlockReasons[0]
-	if reason.TicketKey != "" {
-		return fmt.Errorf("work selection preflight blocked: %s ticket=%s detail=%s", reason.Code, reason.TicketKey, reason.Detail)
-	}
-
-	return fmt.Errorf("work selection preflight blocked: %s detail=%s", reason.Code, reason.Detail)
-}
-
-func hasReviewRepairTicket(tickets []core.IndexedTicket) bool {
-	for _, ticket := range tickets {
-		readyForDev := ticket.Status == core.TicketStatusReadyForDev
-		changesRequested := ticket.ReviewState == "changes_requested" || ticket.ReviewResult == "needs_changes"
-
-		if readyForDev && changesRequested {
-			return true
-		}
-	}
-
-	return false
-}
-
-func runAndPrintTicketLoopExecution(
-	ctx context.Context,
-	stdout io.Writer,
-	env core.UserEnvironment,
-	projectContext commandProjectContext,
-	tickets []core.IndexedTicket,
-	eligibleCount int,
-	assetsFS fs.FS,
-) error {
-	result, err := runTicketLoopExecution(ctx, env, projectContext, tickets, eligibleCount, assetsFS)
-	if result.Record.ID == "" {
-		return err
-	}
-
-	printErr := printTicketLoopExecution(stdout, result)
-	if printErr != nil {
-		return printErr
-	}
-
-	return err
 }
 
 func printTicketLoopPlan(
@@ -350,236 +156,6 @@ func printTicketLoopPlan(
 	}
 
 	return nil
-}
-
-func runTicketLoopExecution(
-	ctx context.Context,
-	env core.UserEnvironment,
-	projectContext commandProjectContext,
-	tickets []core.IndexedTicket,
-	eligibleCount int,
-	assetsFS fs.FS,
-) (ticketLoopExecutionResult, error) {
-	repository, err := core.NewLoopRunRepository(ctx, env, assetsFS)
-	if err != nil {
-		return ticketLoopExecutionResult{}, err
-	}
-
-	defer func() {
-		//nolint:errcheck // Command result already comes from the main operation.
-		_ = repository.Close()
-	}()
-
-	record := newRunningLoopRunRecord(projectContext.ProjectID, eligibleCount)
-
-	record, err = allocateLoopRunArtifact(projectContext.ProjectDir, record)
-	if err != nil {
-		return ticketLoopExecutionResult{}, err
-	}
-
-	err = repository.CreateLoopRun(ctx, record)
-	if err != nil {
-		return ticketLoopExecutionResult{}, err
-	}
-
-	loopSink := agentWorkLoopEventSink(projectContext.ProjectDir, record)
-	emitLoopStartedAgentEvent(ctx, loopSink, record)
-
-	result := ticketLoopExecutionResult{Record: record}
-
-	for _, ticket := range tickets {
-		emitTicketSelectedAgentEvent(ctx, loopSink, record, ticket)
-
-		execution, application, err := executeLoopTicket(ctx, env, projectContext, ticket, ticketExecutionEvents{
-			LoopID: record.ID,
-			Sink:   loopSink,
-		}, assetsFS)
-		if err != nil {
-			return failTicketLoopExecution(ctx, env, repository, projectContext, result, record, loopSink, err, assetsFS)
-		}
-
-		result.Executions = append(result.Executions, execution)
-		result.Applications = append(result.Applications, application)
-
-		record.ProcessedCount++
-		if application.TicketStatus == core.TicketResultStatusBlocked {
-			record.BlockedCount++
-
-			break
-		}
-	}
-
-	return finishTicketLoopExecution(ctx, env, repository, projectContext, result, record, loopSink, assetsFS)
-}
-
-func failTicketLoopExecution(
-	ctx context.Context,
-	env core.UserEnvironment,
-	repository core.LoopRunRepository,
-	projectContext commandProjectContext,
-	result ticketLoopExecutionResult,
-	record core.LoopRunRecord,
-	eventSink core.AgentEventSink,
-	cause error,
-	assetsFS fs.FS,
-) (ticketLoopExecutionResult, error) {
-	record.FailedCount++
-	record = failLoopRunRecord(record, cause)
-
-	err := repository.UpdateLoopRun(ctx, record)
-	if err != nil {
-		return ticketLoopExecutionResult{}, err
-	}
-
-	result.Record = record
-	emitLoopFailedAgentEvents(ctx, eventSink, record, cause)
-
-	if record.ArtifactID != "" {
-		if err := core.RefreshOpsArtifactMetadata(record.ArtifactDir, string(record.Status), time.Now().UTC()); err != nil {
-			return ticketLoopExecutionResult{}, err
-		}
-	}
-
-	err = emitLoopRunNotification(ctx, env, projectContext, record, assetsFS)
-	if err != nil {
-		return ticketLoopExecutionResult{}, err
-	}
-
-	return result, cause
-}
-
-func finishTicketLoopExecution(
-	ctx context.Context,
-	env core.UserEnvironment,
-	repository core.LoopRunRepository,
-	projectContext commandProjectContext,
-	result ticketLoopExecutionResult,
-	record core.LoopRunRecord,
-	eventSink core.AgentEventSink,
-	assetsFS fs.FS,
-) (ticketLoopExecutionResult, error) {
-	record = finishLoopRunRecord(record)
-
-	err := repository.UpdateLoopRun(ctx, record)
-	if err != nil {
-		return ticketLoopExecutionResult{}, err
-	}
-
-	result.Record = record
-	emitLoopFinishedAgentEvent(ctx, eventSink, record)
-
-	if record.ArtifactID != "" {
-		if err := core.RefreshOpsArtifactMetadata(record.ArtifactDir, string(record.Status), time.Now().UTC()); err != nil {
-			return ticketLoopExecutionResult{}, err
-		}
-	}
-
-	err = emitLoopRunNotification(ctx, env, projectContext, record, assetsFS)
-	if err != nil {
-		return ticketLoopExecutionResult{}, err
-	}
-
-	return result, nil
-}
-
-func executeLoopTicket(
-	ctx context.Context,
-	env core.UserEnvironment,
-	projectContext commandProjectContext,
-	ticket core.IndexedTicket,
-	events ticketExecutionEvents,
-	assetsFS fs.FS,
-) (core.ExecutionRecord, core.ResultApplication, error) {
-	preflight, err := buildTicketStartPreflightForTicket(ctx, env, projectContext, ticket, assetsFS)
-	if err != nil {
-		return core.ExecutionRecord{}, core.ResultApplication{}, err
-	}
-
-	events.Sink = core.NewAgentEventFanoutSink(events.Sink, agentWorkExecutionEventSink(preflight.Record))
-
-	record, err := runTicketStartExecution(ctx, env, preflight.Record, preflight.Runtime, events, assetsFS)
-	if err != nil {
-		return record, core.ResultApplication{}, err
-	}
-
-	plan, err := buildTicketApplyResultPlanForRecord(ctx, projectContext, record)
-	if err != nil {
-		return record, core.ResultApplication{}, err
-	}
-
-	err = applyTicketResult(ctx, env, plan, events, assetsFS)
-	if err != nil {
-		return record, core.ResultApplication{}, err
-	}
-
-	return record, plan.Application, nil
-}
-
-func newRunningLoopRunRecord(projectID string, eligibleCount int) core.LoopRunRecord {
-	now := time.Now().UTC()
-
-	return core.LoopRunRecord{
-		ID:            loopRunID(projectID, now),
-		ProjectID:     projectID,
-		Status:        core.LoopRunStatusRunning,
-		EligibleCount: eligibleCount,
-		CreatedAt:     now,
-		StartedAt:     &now,
-		UpdatedAt:     now,
-	}
-}
-
-func allocateLoopRunArtifact(projectDir string, record core.LoopRunRecord) (core.LoopRunRecord, error) {
-	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: projectDir})
-	if err != nil {
-		return core.LoopRunRecord{}, err
-	}
-
-	artifact, err := core.CreateOpsArtifact(core.CreateOpsArtifactOptions{
-		Layout:      layout,
-		Type:        "run",
-		Title:       "Agent work loop",
-		Producer:    "chr",
-		ExternalIDs: []string{record.ID},
-	})
-	if err != nil {
-		return core.LoopRunRecord{}, err
-	}
-
-	record.ArtifactID = artifact.ID
-	record.ArtifactDir = artifact.Dir
-
-	return record, nil
-}
-
-func finishLoopRunRecord(record core.LoopRunRecord) core.LoopRunRecord {
-	finishedAt := time.Now().UTC()
-
-	record.Status = core.LoopRunStatusSucceeded
-	if record.BlockedCount > 0 {
-		record.Status = core.LoopRunStatusBlocked
-	}
-
-	record.FinishedAt = &finishedAt
-	record.UpdatedAt = finishedAt
-
-	return record
-}
-
-func failLoopRunRecord(record core.LoopRunRecord, cause error) core.LoopRunRecord {
-	finishedAt := time.Now().UTC()
-	record.Status = core.LoopRunStatusFailed
-	record.FinishedAt = &finishedAt
-	record.UpdatedAt = finishedAt
-	record.FailureReason = cause.Error()
-
-	return record
-}
-
-func loopRunID(projectID string, createdAt time.Time) string {
-	sum := sha256.Sum256([]byte(projectID + "\x00loop\x00" + createdAt.Format(time.RFC3339Nano)))
-
-	return "loop-" + hex.EncodeToString(sum[:8])
 }
 
 func printTicketLoopExecution(stdout io.Writer, result ticketLoopExecutionResult) error {

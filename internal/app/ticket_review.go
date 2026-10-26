@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"time"
 
 	"github.com/urfave/cli/v3"
 
@@ -127,84 +126,17 @@ func (factory commandFactory) runTicketReview(ctx context.Context, cmd *cli.Comm
 		return fmt.Errorf("ticket review requires exactly one ticket key argument")
 	}
 
-	env, err := newUserEnvironmentFromCommand(cmd)
+	operations, project, err := factory.serviceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
 
-	projectContext, index, err := factory.openTicketIndexForCommand(ctx, cmd, env)
+	result, err := operations.reviewTicket(ctx, ticketReviewInput{Key: cmd.Args().First(), Result: cmd.String("result"), Findings: cmd.StringSlice("finding"), DryRun: cmd.Bool("dry-run")})
 	if err != nil {
 		return err
 	}
 
-	defer func() {
-		//nolint:errcheck // Command result already comes from the main operation.
-		_ = index.Close()
-	}()
-
-	err = refreshProjectTicketIndex(ctx, index, projectContext)
-	if err != nil {
-		return err
-	}
-
-	ticket, err := index.GetProjectTicketByKey(ctx, projectContext.ProjectID, cmd.Args().First())
-	if err != nil {
-		return err
-	}
-
-	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
-	if err != nil {
-		return err
-	}
-
-	adapter := core.NewRemoteReviewAdapter(config.Review.Providers, reviewRemoteCommandRunner)
-
-	release, err := acquireTicketReviewLock(ctx, projectContext, cmd.Bool("dry-run"))
-	if err != nil {
-		return err
-	}
-	defer release()
-
-	result, err := core.RunTicketReviewCommand(ctx, core.TicketReviewCommandOptions{
-		Ticket:     ticket,
-		Config:     config,
-		Result:     cmd.String("result"),
-		Findings:   cmd.StringSlice("finding"),
-		Adapter:    adapter,
-		DryRun:     cmd.Bool("dry-run"),
-		ReviewedAt: time.Now().UTC(),
-	})
-	if err != nil {
-		return err
-	}
-
-	err = refreshTicketIndexAfterReview(ctx, index, projectContext, cmd.Bool("dry-run"))
-	if err != nil {
-		return err
-	}
-
-	return printTicketReviewResult(factory.io.Stdout, projectContext, result)
-}
-
-func refreshTicketIndexAfterReview(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, dryRun bool) error {
-	if dryRun {
-		return nil
-	}
-
-	return refreshProjectTicketIndex(ctx, index, projectContext)
-}
-
-func acquireTicketReviewLock(ctx context.Context, projectContext commandProjectContext, dryRun bool) (func(), error) {
-	if dryRun {
-		return noopRelease, nil
-	}
-
-	lock, err := acquireAgentOperationLock(ctx, projectContext, core.AgentOperationReview)
-	if err != nil {
-		return noopRelease, err
-	}
-
-	return releaseAgentOperationLock(lock), nil
+	return printTicketReviewResult(factory.io.Stdout, project, result)
 }
 
 func printTicketReviewResult(

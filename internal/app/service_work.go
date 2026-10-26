@@ -89,7 +89,7 @@ func (s service) startLegacyAgentWorkTicket(ticketKey string) (AgentWorkResult, 
 		Sink: agentWorkExecutionEventSink(preflight.Record),
 	}
 
-	record, err := runTicketStartExecution(s.ctx, s.env, preflight.Record, preflight.Runtime, events, s.assetsFS)
+	record, err := s.runTicketStartExecution(s.ctx, ticketExecutionInput{Record: preflight.Record, Runtime: preflight.Runtime, Events: events})
 	if err != nil {
 		return AgentWorkResult{}, err
 	}
@@ -99,7 +99,7 @@ func (s service) startLegacyAgentWorkTicket(ticketKey string) (AgentWorkResult, 
 		return AgentWorkResult{}, err
 	}
 
-	err = applyTicketResult(s.ctx, s.env, plan, events, s.assetsFS)
+	err = s.applyTicketResult(s.ctx, plan, events)
 	if err != nil {
 		return AgentWorkResult{}, err
 	}
@@ -135,7 +135,7 @@ func (s service) prepareAgentWorkTicket(ticketKey string) (core.IndexedTicket, t
 		return core.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
 	}
 
-	preflight, err := buildTicketStartPreflightForTicket(s.ctx, s.env, s.projectContext, ticket, s.assetsFS)
+	preflight, err := s.prepareTicketStart(s.ctx, ticket, ticketStartPreflightOptions{PrepareWorktree: true})
 	if err != nil {
 		releaseErr := lock.Release()
 		if releaseErr != nil {

@@ -74,9 +74,9 @@ func runAndPrintTicketStartExecution(
 	stdout io.Writer,
 	preflight ticketStartPreflight,
 ) (core.ExecutionRecord, error) {
-	record, err := runTicketStartExecution(ctx, preflight.Env, preflight.Record, preflight.Runtime, ticketExecutionEvents{
+	record, err := newService(ctx, preflight.Env, preflight.ProjectContext, preflight.AssetsFS).runTicketStartExecution(ctx, ticketExecutionInput{Record: preflight.Record, Runtime: preflight.Runtime, Events: ticketExecutionEvents{
 		Sink: agentWorkExecutionEventSink(preflight.Record),
-	}, preflight.AssetsFS)
+	}})
 	if err == nil {
 		return record, nil
 	}

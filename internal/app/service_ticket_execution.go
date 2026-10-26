@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"io/fs"
 	"strings"
 	"time"
 
@@ -44,15 +43,8 @@ func ticketStartArtifactTitle(ticket core.IndexedTicket) string {
 	return ticket.Key + " " + ticket.Title
 }
 
-func runTicketStartExecution(
-	ctx context.Context,
-	env core.UserEnvironment,
-	record core.ExecutionRecord,
-	result core.RuntimeValidationResult,
-	events ticketExecutionEvents,
-	assetsFS fs.FS,
-) (core.ExecutionRecord, error) {
-	repository, err := core.NewExecutionRepository(ctx, env, assetsFS)
+func (s service) runTicketStartExecution(ctx context.Context, input ticketExecutionInput) (core.ExecutionRecord, error) {
+	repository, err := core.NewExecutionRepository(ctx, s.env, s.assetsFS)
 	if err != nil {
 		return core.ExecutionRecord{}, err
 	}
@@ -62,37 +54,37 @@ func runTicketStartExecution(
 		_ = repository.Close()
 	}()
 
-	err = repository.CreateExecution(ctx, record)
+	err = repository.CreateExecution(ctx, input.Record)
 	if err != nil {
 		return core.ExecutionRecord{}, err
 	}
 
-	emitBranchPreparedAgentEvent(ctx, events, record)
-	emitExecutionCreatedAgentEvent(ctx, events, record)
+	emitBranchPreparedAgentEvent(ctx, input.Events, input.Record)
+	emitExecutionCreatedAgentEvent(ctx, input.Events, input.Record)
 
-	err = core.MaterializeWorkerContextForExecution(ctx, record, result.Plan)
+	err = core.MaterializeWorkerContextForExecution(ctx, input.Record, input.Runtime.Plan)
 	if err != nil {
 		return core.ExecutionRecord{}, core.NewExecutionFailure(core.ExecutionFailurePreflight, err)
 	}
 
 	invocation, err := core.NewHarnessInvocation(core.HarnessInvocationOptions{
 		Worker:      codex.Runner{},
-		ExecutionID: record.ID,
-		TicketKey:   record.TicketKey,
-		TicketPath:  record.TicketPath,
-		Plan:        result.Plan,
+		ExecutionID: input.Record.ID,
+		TicketKey:   input.Record.TicketKey,
+		TicketPath:  input.Record.TicketPath,
+		Plan:        input.Runtime.Plan,
 	})
 	if err != nil {
 		return core.ExecutionRecord{}, err
 	}
 
 	runner := core.NewExecutionRunner(repository, newTicketStartHarnessExecutor())
-	runner.EventSink = events.Sink
+	runner.EventSink = input.Events.Sink
 
 	executed, runErr := runner.Run(ctx, core.RunExecutionOptions{
-		Record:     record,
+		Record:     input.Record,
 		Invocation: invocation,
-		LoopID:     events.LoopID,
+		LoopID:     input.Events.LoopID,
 	})
 	if err := refreshExecutedTicketArtifactMetadata(executed, runErr); err != nil {
 		return executed, err

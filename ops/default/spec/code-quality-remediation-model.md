@@ -147,3 +147,25 @@ areas and work selection/review/merge/cycle stages. All remain in internal/app;
 no new service type or package changes ownership at this mechanical step.
 Exact temporary debt identities follow their declarations, including later
 authoring-owned tuples. Semantic ticket-operation changes follow separately.
+
+Ticket selection, preflight, workspace/execution mechanics, result application,
+legacy loop execution and manual review/merge now belong to service_ticket
+files on the existing central service. All stage contexts remain call arguments.
+One ticketLoop value retains the run repository, record, events and partial
+result. Legacy loop requests return selection and execution separately so a
+failed allocated run still produces its original CLI evidence before returning
+the error. CLI handlers parse requests and render the service result.
+
+CLI, TUI, Web and Telegram work callers share the same preflight, execution and
+result stages through their existing service operations. Manual review, agentic
+review and trusted review keep distinct approvals and outcomes. Manual and
+automatic merge retain their own lock and refresh scopes while using the same
+core merge authority. Native and unadopted legacy selection guards, worktree
+preparation, finite iteration limits, configured merge strategies and nullable
+explicit base overrides retain their original meanings.
+
+The [operation ownership ledger](../plan/code-quality-remediation-slice-4-operations.csv)
+and [signature transitions](../plan/code-quality-remediation-slice-4-operations-debt.csv)
+record the concrete moves and typed input replacements. No compatibility
+forwarder is retained for the removed ticket preflight wrapper or CLI
+merge-configuration tuple.

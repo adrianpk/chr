@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"strings"
-	"time"
 
 	"github.com/urfave/cli/v3"
 
@@ -44,118 +42,17 @@ func (factory commandFactory) runTicketMerge(ctx context.Context, cmd *cli.Comma
 		return fmt.Errorf("ticket merge requires exactly one ticket key argument")
 	}
 
-	env, err := newUserEnvironmentFromCommand(cmd)
+	operations, project, err := factory.serviceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
 
-	projectContext, index, err := factory.openTicketIndexForCommand(ctx, cmd, env)
+	result, err := operations.mergeTicket(ctx, ticketMergeInput{Key: cmd.Args().First(), Base: optionalStringFlag(cmd, "base"), Strategy: cmd.String("strategy"), DryRun: cmd.Bool("dry-run")})
 	if err != nil {
 		return err
 	}
 
-	defer func() {
-		//nolint:errcheck // Command result already comes from the main operation.
-		_ = index.Close()
-	}()
-
-	if err := refreshProjectTicketIndex(ctx, index, projectContext); err != nil {
-		return err
-	}
-
-	ticket, tickets, err := ticketMergeCommandTickets(ctx, index, projectContext, cmd.Args().First())
-	if err != nil {
-		return err
-	}
-
-	config, expectedBase, err := ticketMergeCommandConfig(projectContext.ProjectDir, cmd)
-	if err != nil {
-		return err
-	}
-
-	release, err := acquireTicketMergeLock(ctx, projectContext, cmd.Bool("dry-run"))
-	if err != nil {
-		return err
-	}
-	defer release()
-
-	result, err := core.RunTicketMergeCommand(ctx, core.TicketMergeCommandOptions{
-		Ticket:        ticket,
-		Tickets:       tickets,
-		Remote:        core.NewRemoteReviewAdapter(config.Review.Providers, reviewRemoteCommandRunner),
-		ExpectedBase:  expectedBase,
-		MergeStrategy: cmd.String("strategy"),
-		ProjectDir:    projectContext.ProjectDir,
-		BranchPolicy:  config.Work.BranchPolicy,
-		Workspace:     config.Work.Workspace,
-		DryRun:        cmd.Bool("dry-run"),
-		MergedAt:      time.Now().UTC(),
-	})
-	if err != nil {
-		return err
-	}
-
-	if err := refreshTicketIndexAfterMerge(ctx, index, projectContext, cmd.Bool("dry-run")); err != nil {
-		return err
-	}
-
-	return printTicketMergeResult(factory.io.Stdout, projectContext, result)
-}
-
-func ticketMergeCommandConfig(projectDir string, cmd *cli.Command) (core.WorkspaceConfig, string, error) {
-	config, err := core.LoadWorkspaceConfig(projectDir)
-	if err != nil {
-		return core.WorkspaceConfig{}, "", err
-	}
-
-	if err := core.ValidateWorkConfig(config.Work); err != nil {
-		return core.WorkspaceConfig{}, "", err
-	}
-
-	return config, ticketMergeExpectedBase(cmd, config.Work.BranchPolicy), nil
-}
-
-func ticketMergeExpectedBase(cmd *cli.Command, policy core.WorkBranchPolicy) string {
-	if base := strings.TrimSpace(cmd.String("base")); cmd.IsSet("base") && base != "" {
-		return base
-	}
-
-	return policy.IntegrationBranch
-}
-
-func ticketMergeCommandTickets(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, key string) (core.IndexedTicket, []core.IndexedTicket, error) {
-	tickets, err := index.ListProjectTickets(ctx, projectContext.ProjectID)
-	if err != nil {
-		return core.IndexedTicket{}, nil, err
-	}
-
-	ticket, err := index.GetProjectTicketByKey(ctx, projectContext.ProjectID, key)
-	if err != nil {
-		return core.IndexedTicket{}, nil, err
-	}
-
-	return ticket, tickets, nil
-}
-
-func refreshTicketIndexAfterMerge(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, dryRun bool) error {
-	if dryRun {
-		return nil
-	}
-
-	return refreshProjectTicketIndex(ctx, index, projectContext)
-}
-
-func acquireTicketMergeLock(ctx context.Context, projectContext commandProjectContext, dryRun bool) (func(), error) {
-	if dryRun {
-		return noopRelease, nil
-	}
-
-	lock, err := acquireAgentOperationLock(ctx, projectContext, core.AgentOperationMerge)
-	if err != nil {
-		return noopRelease, err
-	}
-
-	return releaseAgentOperationLock(lock), nil
+	return printTicketMergeResult(factory.io.Stdout, project, result)
 }
 
 func printTicketMergeResult(stdout io.Writer, projectContext commandProjectContext, result core.TicketMergeCommandResult) error {

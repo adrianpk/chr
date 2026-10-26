@@ -24,10 +24,10 @@ func (s service) repairAgentWorkCycleTicket(state *agentWorkIntegrationCycleStat
 
 	emitRepairStartedAgentEvent(s.ctx, opts.LoopSink, state.Record, ticket)
 
-	execution, application, err := executeLoopTicket(s.ctx, s.env, s.projectContext, ticket, ticketExecutionEvents{
+	execution, application, err := s.executeLoopTicket(s.ctx, ticket, ticketExecutionEvents{
 		LoopID: state.Record.ID,
 		Sink:   opts.LoopSink,
-	}, s.assetsFS)
+	})
 	if err != nil {
 		return ticket, execution, false, err
 	}
