@@ -1,6 +1,6 @@
 # Slice 4: Typed commands and central application operations
 
-Status: reviewing
+Status: delivered
 Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
@@ -104,3 +104,9 @@ that record and the PR Validation section own final candidate results.
 ## Risks and Follow-ups
 
 None recorded.
+
+Integration: PR #441 was verified merged into dev at `6b287a79bbe8b545a4d36633d24ceccea01469d0`. The controller retained successful exact-candidate checks in this order:
+
+- `make verify`
+- `go test ./internal/app -run '^Test(CommandFactoryBinding|RootCommand|Ticket|AgentWork|Work|Gate|Daemon|Notify|PiGenerationConversation|PiGenerationDump|WebServeWriteAction|ServiceDump)' -count=1 -timeout=3m`
+- `git diff --check`
