@@ -157,7 +157,7 @@ func renderAgentEventTime(value time.Time) string {
 	return value.Local().Format("15:04:05")
 }
 
-func (m Model) renderAgent() string {
+func (m *Model) renderAgent() string {
 	var output strings.Builder
 
 	output.WriteString("Agent\n")
@@ -175,7 +175,7 @@ func (m Model) renderAgent() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m Model) renderRuntime() string {
+func (m *Model) renderRuntime() string {
 	var output strings.Builder
 
 	output.WriteString("Runtime\n")
@@ -204,7 +204,7 @@ func (m Model) renderRuntime() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m Model) renderWorkspaceIndexHealth() string {
+func (m *Model) renderWorkspaceIndexHealth() string {
 	health := m.workspaceIndex.HealthWithSemanticDigestStates(m.semanticDigestStates)
 
 	var output strings.Builder

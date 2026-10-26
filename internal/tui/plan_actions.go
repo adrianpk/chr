@@ -54,7 +54,7 @@ type planActionFinishedMsg struct {
 	Err     error
 }
 
-func (m Model) renderPlanAction() string {
+func (m *Model) renderPlanAction() string {
 	if m.planBusy {
 		return strings.TrimRight("\n\nPlan Action Running\n  "+m.statusMessage+"\n\n  Please wait for this action to finish.", "\n")
 	}
@@ -80,7 +80,7 @@ func (m Model) renderPlanAction() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m Model) updatePlansKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updatePlansKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "g":
 		cmd := m.startPlanAction(PlanActionRequest{
@@ -131,7 +131,7 @@ func (m Model) updatePlansKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) updatePlanActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updatePlanActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.Type {
 	case tea.KeyEsc:
 		m.cancelPlanAction()
@@ -149,7 +149,7 @@ func (m *Model) planPlanAction(action PlanActionID) {
 	m.statusMessage = "Confirm plan action with Enter, or cancel with Esc."
 }
 
-func (m Model) newPlanActionState(action PlanActionID) PlanActionState {
+func (m *Model) newPlanActionState(action PlanActionID) PlanActionState {
 	scope := m.selectedPlanScope()
 
 	return PlanActionState{
@@ -179,7 +179,7 @@ func (m *Model) confirmPlanAction() tea.Cmd {
 	return m.startPlanAction(request)
 }
 
-func (m Model) executePlanActionCommand(request PlanActionRequest) tea.Cmd {
+func (m *Model) executePlanActionCommand(request PlanActionRequest) tea.Cmd {
 	executor := m.planExecutor
 
 	return func() tea.Msg {

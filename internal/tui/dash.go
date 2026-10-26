@@ -10,7 +10,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func (m Model) renderDash() string {
+func (m *Model) renderDash() string {
 	var output strings.Builder
 
 	output.WriteString("Dash\n")
@@ -71,7 +71,7 @@ func (m Model) renderDash() string {
 	return output.String()
 }
 
-func (m Model) renderDashWorkspace(width, height int) string {
+func (m *Model) renderDashWorkspace(width, height int) string {
 	queueLines := append([]string{
 		fmt.Sprintf("Ready queue: %d", len(m.readyAgentWorkTickets())),
 		"Priority: " + displayDashPriorityFilter(m.agentWorkPriorityFilter),
@@ -116,7 +116,7 @@ func (m Model) renderDashWorkspace(width, height int) string {
 	), width, height)
 }
 
-func (m Model) renderDashReadinessLines(limit int) []string {
+func (m *Model) renderDashReadinessLines(limit int) []string {
 	view := m.workReadiness
 	lines := []string{"Status: " + displayWorkReadinessStatus(view.Status)}
 
@@ -199,7 +199,7 @@ func appendDashReadinessRepairGuidance(lines []string, view WorkReadinessView) [
 	return lines
 }
 
-func (m Model) renderDashActionLines() []string {
+func (m *Model) renderDashActionLines() []string {
 	lines := []string{
 		"a Run all ready tickets",
 		"enter Start selected ticket",
@@ -248,7 +248,7 @@ func renderAppliedReadinessRepairLine(repair WorkReadinessAppliedRepairView) str
 	return line
 }
 
-func (m Model) readyAgentWorkTickets() []TicketView {
+func (m *Model) readyAgentWorkTickets() []TicketView {
 	tickets := []TicketView{}
 	for _, ticket := range m.tickets {
 		if m.matchesReadyAgentWorkFilter(ticket) {
@@ -261,7 +261,7 @@ func (m Model) readyAgentWorkTickets() []TicketView {
 	return tickets
 }
 
-func (m Model) matchesReadyAgentWorkFilter(ticket TicketView) bool {
+func (m *Model) matchesReadyAgentWorkFilter(ticket TicketView) bool {
 	if ticket.Status != "ready_for_dev" {
 		return false
 	}
@@ -269,7 +269,7 @@ func (m Model) matchesReadyAgentWorkFilter(ticket TicketView) bool {
 	return m.agentWorkPriorityFilter == "" || ticket.Priority == m.agentWorkPriorityFilter
 }
 
-func (m Model) renderAgentWorkQueueLines(limit int) []string {
+func (m *Model) renderAgentWorkQueueLines(limit int) []string {
 	queue := m.readyAgentWorkTickets()
 	if len(queue) == 0 {
 		return []string{"No ready tickets queued."}
@@ -434,7 +434,7 @@ func compareInt(left, right int) int {
 	}
 }
 
-func (m Model) renderAgentWorkCurrentLines() []string {
+func (m *Model) renderAgentWorkCurrentLines() []string {
 	loop := m.observability.LatestLoop
 	execution := m.observability.LatestExecution
 
@@ -474,7 +474,7 @@ func (m Model) renderAgentWorkCurrentLines() []string {
 	return lines
 }
 
-func (m Model) renderAgentWorkRecentLines() []string {
+func (m *Model) renderAgentWorkRecentLines() []string {
 	lines := []string{}
 
 	if m.observability.LatestExecution.ID != "" {

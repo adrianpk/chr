@@ -128,7 +128,7 @@ func (m *Model) scrollDetailPage(direction int) {
 	m.scrollDetail(pageSize)
 }
 
-func (m Model) detailPaneCanScroll() bool {
+func (m *Model) detailPaneCanScroll() bool {
 	switch m.SelectedView() {
 	case ViewBoard, ViewTickets, ViewDocuments, ViewDumps, ViewQuizzes, ViewSpecs, ViewPlans, ViewAuthoring, ViewAgent, ViewRuntime:
 		return true

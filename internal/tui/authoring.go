@@ -50,7 +50,7 @@ func NewAuthoringSessionViews(sessions []core.AuthoringSession) []AuthoringSessi
 	return views
 }
 
-func (m Model) renderAuthoring() string {
+func (m *Model) renderAuthoring() string {
 	if len(m.authoringSessions) == 0 {
 		return "Authoring\n  No authoring sessions were found."
 	}
@@ -86,7 +86,7 @@ func renderAuthoringSessionRow(session AuthoringSessionView) string {
 	)
 }
 
-func (m Model) renderSelectedAuthoringSessionDetail() string {
+func (m *Model) renderSelectedAuthoringSessionDetail() string {
 	session, ok := m.selectedAuthoringSessionView()
 	if !ok {
 		return "Selected Authoring Session\n  No session selected."
@@ -110,7 +110,7 @@ func (m Model) renderSelectedAuthoringSessionDetail() string {
 	return output.String()
 }
 
-func (m Model) selectedAuthoringSessionView() (AuthoringSessionView, bool) {
+func (m *Model) selectedAuthoringSessionView() (AuthoringSessionView, bool) {
 	for _, session := range m.authoringSessions {
 		if session.Index == m.selectedAuthoringSession {
 			return session, true

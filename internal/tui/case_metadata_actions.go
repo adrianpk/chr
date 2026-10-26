@@ -27,7 +27,7 @@ type CaseMetadataResult struct {
 	Cases   []core.CaseMetadata
 }
 
-func (m Model) updateCasesKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateCasesKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if m.caseEdit.Active {
 		cmd := m.updateCaseEditKey(msg)
 

@@ -78,7 +78,7 @@ func (m *Model) planNativeWorkAction(action WorkActionID) bool {
 	return true
 }
 
-func (m Model) nativeWorkAlias(action WorkActionID) WorkActionID {
+func (m *Model) nativeWorkAlias(action WorkActionID) WorkActionID {
 	if m.observability.Authority != core.WorkStateAuthorityTickets {
 		return action
 	}
@@ -265,7 +265,7 @@ func (m *Model) completeNativeWorkAction(message workActionFinishedMsg) {
 	m.statusMessage = message.Result.Message
 }
 
-func (m Model) nativeWorkflowLines() []string {
+func (m *Model) nativeWorkflowLines() []string {
 	if m.workflow.ID != "" {
 		return m.workflow.Lines
 	}
@@ -277,7 +277,7 @@ func (m Model) nativeWorkflowLines() []string {
 	return nil
 }
 
-func (m Model) renderNativeWorkflow() string {
+func (m *Model) renderNativeWorkflow() string {
 	lines := m.nativeWorkflowLines()
 	if len(lines) == 0 {
 		return ""

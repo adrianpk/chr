@@ -105,7 +105,7 @@ func NewTicketActionState(action TicketActionID, ticket TicketView, status strin
 	}
 }
 
-func (m Model) renderTicketAction() string {
+func (m *Model) renderTicketAction() string {
 	if !m.ticketAction.Pending {
 		return ""
 	}
@@ -124,7 +124,7 @@ func (m Model) renderTicketAction() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m Model) updateTicketActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateTicketActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.Type {
 	case tea.KeyEsc:
 		m.cancelTicketAction()

@@ -196,3 +196,28 @@ bound stay explicit. Gate report source groups creation time and report paths,
 while refs, evidence, validation and governing configuration remain separate.
 Conversation intent derives its bound context in the operation caller and
 validates the bound execution project without a context-bearing result object.
+
+
+## Slice 5 model ownership
+
+The populated benchmark fixture measures the installed Bubble Tea event-loop
+interface before and after receiver changes, using idle, focus and resize
+messages plus sized and unsized board rendering. The baseline production
+revision is ad40e8b089b7; the benchmark fixture is introduced in the T5.1 task
+commit. Three samples per case are retained in the slice-5-benchmarks ledger.
+This measures the stated paths rather than all large-value warnings.
+
+NewModel returns *Model, and only that pointer implements tea.Model. The event
+loop retains one mutable owner across updates; read helpers also use pointer
+receivers to avoid repeated whole-model copies. All 85 original fields and their
+types are assigned to 17 explicit navigation, layout, interaction, background and
+per-view state owners in the model-fields ledger. Existing field semantics and
+initial values are retained.
+
+Commands capture their immutable requests and executor interfaces before they
+leave the event loop. The one refresh closure that previously captured the
+value receiver now captures its executor directly. No command closes over the
+mutable Model pointer; completion messages are applied only on the event loop.
+Existing sequence/revision guards, busy flags and cancelled/stale acknowledgments
+retain their original authority. Tests use the pointer contract explicitly and
+still exercise modal precedence, edits, retained bindings and stale replies.

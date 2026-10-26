@@ -44,7 +44,7 @@ func TestTUIHarnessSelectionSave(t *testing.T) {
 	}
 }
 
-func harnessSaveInFlightKeys(t *testing.T, model Model) Model {
+func harnessSaveInFlightKeys(t *testing.T, model *Model) *Model {
 	t.Helper()
 
 	for _, key := range []tea.KeyType{tea.KeyEnter, tea.KeyEsc, tea.KeyRight} {

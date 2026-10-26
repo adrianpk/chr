@@ -49,7 +49,7 @@ type shellButton struct {
 	View  View
 }
 
-func (m Model) renderShell() string {
+func (m *Model) renderShell() string {
 	width := maxInt(m.width, 60)
 	height := maxInt(m.height, minShellHeight)
 	topbar := m.renderShellTopbar(width)
@@ -73,7 +73,7 @@ func (m Model) renderShell() string {
 	return normalizeBlock(strings.Join(sections, "\n"), width, height)
 }
 
-func (m Model) renderShellTopbar(width int) string {
+func (m *Model) renderShellTopbar(width int) string {
 	project := m.projectDisplayName()
 	left := fmt.Sprintf(" %s ", project)
 
@@ -87,7 +87,7 @@ func (m Model) renderShellTopbar(width int) string {
 	return shellTopbarStyle.Render(fitPlainLine(left+spacer+right, width))
 }
 
-func (m Model) renderWorkspace(width, height int) string {
+func (m *Model) renderWorkspace(width, height int) string {
 	if m.guided.Active {
 		return m.renderGuidedWorkspace(width, height)
 	}
@@ -108,7 +108,7 @@ func (m Model) renderWorkspace(width, height int) string {
 	return m.renderLegacyWorkspace(width, height)
 }
 
-func (m Model) renderProductWorkspace(width, height int) (string, bool) {
+func (m *Model) renderProductWorkspace(width, height int) (string, bool) {
 	switch m.SelectedView() {
 	case ViewProject, ViewDashboard:
 		return m.renderProjectWorkspace(width, height), true
@@ -131,7 +131,7 @@ func (m Model) renderProductWorkspace(width, height int) (string, bool) {
 	}
 }
 
-func (m Model) renderLegacyWorkspace(width, height int) string {
+func (m *Model) renderLegacyWorkspace(width, height int) string {
 	switch m.SelectedView() {
 	case ViewDocuments:
 		return m.renderDocumentWorkspace(width, height, "Documents", m.documents)
@@ -144,7 +144,7 @@ func (m Model) renderLegacyWorkspace(width, height int) string {
 	}
 }
 
-func (m Model) renderProjectWorkspace(width, height int) string {
+func (m *Model) renderProjectWorkspace(width, height int) string {
 	leftWidth, rightWidth := m.splitWidths(width)
 	project := m.renderProjectContextLines(maxInt(leftWidth-4, 1))
 	artifacts := m.renderProjectArtifactLines()
@@ -174,7 +174,7 @@ func (m Model) renderProjectWorkspace(width, height int) string {
 	), width, height)
 }
 
-func (m Model) renderProjectContextLines(width int) []string {
+func (m *Model) renderProjectContextLines(width int) []string {
 	name := m.projectDisplayName()
 
 	lines := []string{
@@ -204,7 +204,7 @@ func (m Model) renderProjectContextLines(width int) []string {
 	return lines
 }
 
-func (m Model) renderProjectFieldLine(field int, label, value string, width int) string {
+func (m *Model) renderProjectFieldLine(field int, label, value string, width int) string {
 	prefix := "  "
 	if m.selectedPane == 0 && field == m.selectedProjectField {
 		prefix = "> "
@@ -221,7 +221,7 @@ func (m Model) renderProjectFieldLine(field int, label, value string, width int)
 	return prefix + label + ": " + strings.TrimSpace(value)
 }
 
-func (m Model) renderProjectFieldBody(field int, value string, width int) []string {
+func (m *Model) renderProjectFieldBody(field int, value string, width int) []string {
 	if m.projectEdit.Active && field == m.projectEdit.Field {
 		if field == projectFieldName {
 			return nil
@@ -238,14 +238,14 @@ func (m Model) renderProjectFieldBody(field int, value string, width int) []stri
 	return wrapPlainText(value, maxInt(width-2, 1))
 }
 
-func (m Model) renderProjectInput(width int) string {
+func (m *Model) renderProjectInput(width int) string {
 	input := m.projectEdit.Input
 	input.Width = width
 
 	return input.View()
 }
 
-func (m Model) renderProjectArtifactLines() []string {
+func (m *Model) renderProjectArtifactLines() []string {
 	return []string{
 		fmt.Sprintf("Board tickets     %d", workspaceGraphProjectDocumentCount(m.workspaceGraph, core.WorkspaceNodeTicket)),
 		fmt.Sprintf("Dumps             %d", workspaceGraphProjectDocumentCount(m.workspaceGraph, core.WorkspaceNodeDump)),
@@ -256,7 +256,7 @@ func (m Model) renderProjectArtifactLines() []string {
 	}
 }
 
-func (m Model) renderProjectLocationLines() []string {
+func (m *Model) renderProjectLocationLines() []string {
 	return []string{
 		"Path",
 		"  " + emptyValue(m.projectDir),
@@ -266,7 +266,7 @@ func (m Model) renderProjectLocationLines() []string {
 	}
 }
 
-func (m Model) renderCasesWorkspace(width, height int) string {
+func (m *Model) renderCasesWorkspace(width, height int) string {
 	switch m.maximizedPane {
 	case 0:
 		return fitBlock(renderPanel("Cases", m.renderCaseListLines(maxInt(width-4, 1), height-2), width, height, true), width, height)
@@ -292,7 +292,7 @@ func (m Model) renderCasesWorkspace(width, height int) string {
 	), width, height)
 }
 
-func (m Model) renderCaseDocumentLines(width int) []string {
+func (m *Model) renderCaseDocumentLines(width int) []string {
 	lines := m.renderCaseDetailLines(width)
 
 	lines = append(lines, "")
@@ -301,7 +301,7 @@ func (m Model) renderCaseDocumentLines(width int) []string {
 	return lines
 }
 
-func (m Model) renderCaseListLines(width, limit int) []string {
+func (m *Model) renderCaseListLines(width, limit int) []string {
 	filter := strings.TrimSpace(m.caseFilter)
 
 	filterPrefix := "Filter"
@@ -348,7 +348,7 @@ func (m Model) renderCaseListLines(width, limit int) []string {
 	return lines
 }
 
-func (m Model) renderUnresolvedCaseReferenceLines(width, limit int) []string {
+func (m *Model) renderUnresolvedCaseReferenceLines(width, limit int) []string {
 	if limit <= 0 {
 		return nil
 	}
@@ -379,7 +379,7 @@ func (m Model) renderUnresolvedCaseReferenceLines(width, limit int) []string {
 	return lines
 }
 
-func (m Model) renderCaseDetailLines(width int) []string {
+func (m *Model) renderCaseDetailLines(width int) []string {
 	metadata, ok := m.selectedCaseMetadata()
 	if !ok {
 		return []string{"No case selected.", "", "Press n to create a case."}
@@ -402,7 +402,7 @@ func (m Model) renderCaseDetailLines(width int) []string {
 	return lines
 }
 
-func (m Model) renderCaseContextLines(width int) []string {
+func (m *Model) renderCaseContextLines(width int) []string {
 	metadata, ok := m.selectedCaseMetadata()
 	if !ok {
 		return []string{"No case selected."}
@@ -417,7 +417,7 @@ func (m Model) renderCaseContextLines(width int) []string {
 	return lines
 }
 
-func (m Model) renderCaseFieldLine(field int, label, value string, width int) string {
+func (m *Model) renderCaseFieldLine(field int, label, value string, width int) string {
 	prefix := "  "
 	if m.selectedPane == 1 && field == m.selectedCaseField {
 		prefix = "> "
@@ -439,7 +439,7 @@ func (m Model) renderCaseFieldLine(field int, label, value string, width int) st
 	return prefix + label + ": " + value
 }
 
-func (m Model) renderCaseFieldBody(field int, value string, width int) []string {
+func (m *Model) renderCaseFieldBody(field int, value string, width int) []string {
 	if m.caseEdit.Active && field == m.caseEdit.Field {
 		if field == caseFieldName {
 			return nil
@@ -456,14 +456,14 @@ func (m Model) renderCaseFieldBody(field int, value string, width int) []string 
 	return wrapPlainText(value, maxInt(width-2, 1))
 }
 
-func (m Model) renderCaseInput(width int) string {
+func (m *Model) renderCaseInput(width int) string {
 	input := m.caseEdit.Input
 	input.Width = width
 
 	return input.View()
 }
 
-func (m Model) renderCaseArtifactLines() []string {
+func (m *Model) renderCaseArtifactLines() []string {
 	metadata, ok := m.selectedCaseMetadata()
 	if !ok {
 		return []string{"No case selected."}
@@ -482,7 +482,7 @@ func (m Model) renderCaseArtifactLines() []string {
 	}
 }
 
-func (m Model) selectedCaseMetadata() (core.CaseMetadata, bool) {
+func (m *Model) selectedCaseMetadata() (core.CaseMetadata, bool) {
 	if len(m.cases) == 0 || m.selectedCase < 0 || m.selectedCase >= len(m.cases) {
 		return core.CaseMetadata{}, false
 	}
@@ -490,7 +490,7 @@ func (m Model) selectedCaseMetadata() (core.CaseMetadata, bool) {
 	return m.cases[m.selectedCase], true
 }
 
-func (m Model) filteredCases() []core.CaseMetadata {
+func (m *Model) filteredCases() []core.CaseMetadata {
 	filter := strings.ToLower(strings.TrimSpace(m.caseFilter))
 	if filter == "" {
 		return append([]core.CaseMetadata(nil), m.cases...)
@@ -511,7 +511,7 @@ func (m Model) filteredCases() []core.CaseMetadata {
 	return cases
 }
 
-func (m Model) caseMetadataFromSuggestions(
+func (m *Model) caseMetadataFromSuggestions(
 	suggestions []core.WorkspaceCaseSuggestion,
 ) []core.CaseMetadata {
 	bySlug := make(map[string]core.CaseMetadata, len(m.cases))
@@ -534,7 +534,7 @@ func (m Model) caseMetadataFromSuggestions(
 	return cases
 }
 
-func (m Model) renderTicketWorkspace(width, height int) string {
+func (m *Model) renderTicketWorkspace(width, height int) string {
 	detail := m.renderSelectedTicketDetail()
 	detailLines := strings.Split(detail, "\n")[1:]
 
@@ -562,7 +562,7 @@ func (m Model) renderTicketWorkspace(width, height int) string {
 	), width, height)
 }
 
-func (m Model) renderDocumentWorkspace(width, height int, title string, documents []DocumentView) string {
+func (m *Model) renderDocumentWorkspace(width, height int, title string, documents []DocumentView) string {
 	list := m.renderDocumentFocusList(documents, height-2)
 	detail := m.renderSelectedDocumentDetailFor(documents)
 
@@ -583,7 +583,7 @@ func (m Model) renderDocumentWorkspace(width, height int, title string, document
 	), width, height)
 }
 
-func (m Model) renderDumpWorkspace(width, height int) string {
+func (m *Model) renderDumpWorkspace(width, height int) string {
 	list := m.renderDumpFocusList(height - 2)
 	detailTitle, detailLines := m.renderDumpDetailPanel(maxInt(width-4, 1), height-2)
 
@@ -606,11 +606,11 @@ func (m Model) renderDumpWorkspace(width, height int) string {
 }
 
 //nolint:unused // Kept for document-family workspaces planned after shell consolidation.
-func (m Model) renderDocumentFamilyWorkspace(width, height int, title string, families map[string]bool) string {
+func (m *Model) renderDocumentFamilyWorkspace(width, height int, title string, families map[string]bool) string {
 	return m.renderDocumentWorkspace(width, height, title, m.documentsByFamily(families))
 }
 
-func (m Model) renderQuizWorkspace(width, height int) string {
+func (m *Model) renderQuizWorkspace(width, height int) string {
 	list := m.renderQuizFocusList(height - 2)
 	detailTitle := m.quizDetailPanelTitle()
 	detail := m.renderSelectedQuizDetailLines(maxInt(width-4, 1))
@@ -633,7 +633,7 @@ func (m Model) renderQuizWorkspace(width, height int) string {
 	), width, height)
 }
 
-func (m Model) renderSpecWorkspace(width, height int) string {
+func (m *Model) renderSpecWorkspace(width, height int) string {
 	list := m.renderSpecFocusList(height - 2)
 	detail := m.renderSelectedSpecDetailLines(maxInt(width-4, 1))
 
@@ -655,7 +655,7 @@ func (m Model) renderSpecWorkspace(width, height int) string {
 	), width, height)
 }
 
-func (m Model) renderPlanWorkspace(width, height int) string {
+func (m *Model) renderPlanWorkspace(width, height int) string {
 	list := m.renderPlanFocusList(height - 2)
 	detail := m.renderSelectedPlanDetailLines(maxInt(width-4, 1))
 
@@ -677,7 +677,7 @@ func (m Model) renderPlanWorkspace(width, height int) string {
 	), width, height)
 }
 
-func (m Model) quizDetailPanelTitle() string {
+func (m *Model) quizDetailPanelTitle() string {
 	quiz, ok := m.selectedQuizView()
 	if ok && m.quizAnswer.Active && quizScopeLabel(m.quizAnswer.Scope) == quizScopeLabel(quiz.Scope) {
 		return "Answer"
@@ -686,7 +686,7 @@ func (m Model) quizDetailPanelTitle() string {
 	return "Quiz"
 }
 
-func (m Model) renderAuthoringWorkspace(width, height int) string {
+func (m *Model) renderAuthoringWorkspace(width, height int) string {
 	list := m.renderAuthoringFocusList(height - 2)
 	detail := m.renderSelectedAuthoringSessionDetail()
 
@@ -707,7 +707,7 @@ func (m Model) renderAuthoringWorkspace(width, height int) string {
 	), width, height)
 }
 
-func (m Model) renderOperationsWorkspace(width, height int) string {
+func (m *Model) renderOperationsWorkspace(width, height int) string {
 	agent := strings.Split(m.renderAgent(), "\n")
 	runtime := strings.Split(m.renderRuntime()+"\n\n"+m.renderWorkspaceIndexHealth(), "\n")
 
@@ -728,7 +728,7 @@ func (m Model) renderOperationsWorkspace(width, height int) string {
 	), width, height)
 }
 
-func (m Model) renderOverlayWorkspace(width, height int, overlay string) string {
+func (m *Model) renderOverlayWorkspace(width, height int, overlay string) string {
 	content := []string{
 		shellTitleStyle.Render("Active interaction"),
 		"",
@@ -738,7 +738,7 @@ func (m Model) renderOverlayWorkspace(width, height int, overlay string) string 
 	return renderPanel("Action", content, width, height, true)
 }
 
-func (m Model) renderTicketFocusList(width, limit int) []string {
+func (m *Model) renderTicketFocusList(width, limit int) []string {
 	lines := m.renderBoardFocusHeaderLines(limit)
 
 	tickets := m.filteredTickets()
@@ -763,7 +763,7 @@ func (m Model) renderTicketFocusList(width, limit int) []string {
 	return lines
 }
 
-func (m Model) renderMaximizedBoardWorkspace(width, height int) string {
+func (m *Model) renderMaximizedBoardWorkspace(width, height int) string {
 	if m.boardAttentionActive() {
 		return fitBlock(renderPanel("Attention", m.renderBoardAttentionFocusList(height-2), width, height, true), width, height)
 	}
@@ -791,7 +791,7 @@ func (m Model) renderMaximizedBoardWorkspace(width, height int) string {
 	return fitBlock(lipgloss.JoinVertical(lipgloss.Left, renderedRows...), width, height)
 }
 
-func (m Model) renderMaximizedBoardRow(columns []string, width, height int) string {
+func (m *Model) renderMaximizedBoardRow(columns []string, width, height int) string {
 	gapWidth := panelVerticalGapSize * maxInt(len(columns)-1, 0)
 	columnWidth := maxInt((width-gapWidth)/maxInt(len(columns), 1), 1)
 	panels := make([]string, 0, len(columns)*2-1)
@@ -811,7 +811,7 @@ func (m Model) renderMaximizedBoardRow(columns []string, width, height int) stri
 	return lipgloss.JoinHorizontal(lipgloss.Top, panels...)
 }
 
-func (m Model) renderMaximizedBoardColumnLines(tickets []TicketView, width, limit int) []string {
+func (m *Model) renderMaximizedBoardColumnLines(tickets []TicketView, width, limit int) []string {
 	if len(tickets) == 0 {
 		return []string{"No tickets."}
 	}
@@ -835,7 +835,7 @@ func (m Model) renderMaximizedBoardColumnLines(tickets []TicketView, width, limi
 	return lines
 }
 
-func (m Model) maximizedBoardTicketPrefix(ticket TicketView) string {
+func (m *Model) maximizedBoardTicketPrefix(ticket TicketView) string {
 	switch {
 	case len(ticket.AttentionReasons) > 0:
 		return "!"
@@ -858,7 +858,7 @@ func appendBoardCardLines(lines, card []string, limit int) []string {
 	return lines
 }
 
-func (m Model) maximizedBoardColumnStart(tickets []TicketView, width, limit int) int {
+func (m *Model) maximizedBoardColumnStart(tickets []TicketView, width, limit int) int {
 	selectedPosition := m.selectedTicketPosition(tickets)
 	if selectedPosition <= 0 {
 		return 0
@@ -951,7 +951,7 @@ func boardMaximizedRows(columnCount, columnsPerRow int) int {
 	return maxInt((columnCount+columnsPerRow-1)/columnsPerRow, 1)
 }
 
-func (m Model) renderBoardAttentionFocusList(limit int) []string {
+func (m *Model) renderBoardAttentionFocusList(limit int) []string {
 	tickets := m.attentionTickets()
 	if len(tickets) == 0 {
 		return []string{"No attention tickets."}
@@ -1099,7 +1099,7 @@ func humanizeCompactToken(value string) string {
 	return strings.Join(words, " ")
 }
 
-func (m Model) renderBoardFocusHeaderLines(limit int) []string {
+func (m *Model) renderBoardFocusHeaderLines(limit int) []string {
 	if m.SelectedView() != ViewBoard {
 		return []string{}
 	}
@@ -1133,7 +1133,7 @@ func appendLimitedLines(lines, additions []string, limit int) []string {
 	return lines
 }
 
-func (m Model) renderDocumentFocusList(documents []DocumentView, limit int) []string {
+func (m *Model) renderDocumentFocusList(documents []DocumentView, limit int) []string {
 	if len(documents) == 0 {
 		return []string{"No documents found."}
 	}
@@ -1155,7 +1155,7 @@ func (m Model) renderDocumentFocusList(documents []DocumentView, limit int) []st
 	return lines
 }
 
-func (m Model) renderAuthoringFocusList(limit int) []string {
+func (m *Model) renderAuthoringFocusList(limit int) []string {
 	if len(m.authoringSessions) == 0 {
 		return []string{"No authoring sessions found."}
 	}
@@ -1177,7 +1177,7 @@ func (m Model) renderAuthoringFocusList(limit int) []string {
 	return lines
 }
 
-func (m Model) renderShellOverlay() string {
+func (m *Model) renderShellOverlay() string {
 	var overlays []string
 
 	for _, overlay := range []string{
@@ -1198,7 +1198,7 @@ func (m Model) renderShellOverlay() string {
 	return strings.Join(overlays, "\n\n")
 }
 
-func (m Model) renderShellStatus(width int) string {
+func (m *Model) renderShellStatus(width int) string {
 	if m.statusMessage == "" {
 		return ""
 	}
@@ -1206,7 +1206,7 @@ func (m Model) renderShellStatus(width int) string {
 	return shellStatusStyle.Render(fitPlainLine(" "+m.statusMessage, width))
 }
 
-func (m Model) renderShellFooter(width int) string {
+func (m *Model) renderShellFooter(width int) string {
 	if m.guided.Active {
 		return strings.Join(wrapPlainText(m.guidedHint(), width), "\n")
 	}
@@ -1229,7 +1229,7 @@ func shellFooterButtons() []shellButton {
 	}
 }
 
-func (m Model) renderShellButtons(buttons []shellButton, width int) string {
+func (m *Model) renderShellButtons(buttons []shellButton, width int) string {
 	widths := distributedWidths(width, len(buttons))
 	cells := make([]string, 0, len(buttons))
 
@@ -1279,7 +1279,7 @@ func projectDisplayName(projectDir string) string {
 	return name
 }
 
-func (m Model) projectDisplayName() string {
+func (m *Model) projectDisplayName() string {
 	if strings.TrimSpace(m.projectMetadata.Name) != "" {
 		return m.projectMetadata.Name
 	}
@@ -1355,7 +1355,7 @@ func renderPanel(title string, lines []string, width, height int, focused bool) 
 	return style.Width(maxInt(width-2, 1)).Height(contentHeight).Render(fitBlock(strings.Join(content, "\n"), maxInt(width-4, 1), contentHeight))
 }
 
-func (m Model) renderDetailPanel(title string, lines []string, width, height int, focused bool) string {
+func (m *Model) renderDetailPanel(title string, lines []string, width, height int, focused bool) string {
 	lines = scrollLines(lines, m.detailScroll, maxInt(height-3, 1))
 
 	return renderPanel(title, lines, width, height, focused)
@@ -1471,7 +1471,7 @@ func truncatePlainLine(line string, width int) string {
 	return string(runes[:width-1]) + "…"
 }
 
-func (m Model) splitWidths(width int) (int, int) {
+func (m *Model) splitWidths(width int) (int, int) {
 	available := maxInt(width-panelVerticalGapSize, 1)
 	left := available * m.verticalSplitPercent / 100
 	right := available - left
@@ -1479,7 +1479,7 @@ func (m Model) splitWidths(width int) (int, int) {
 	return left, right
 }
 
-func (m Model) splitHeights(height int) (int, int) {
+func (m *Model) splitHeights(height int) (int, int) {
 	available := maxInt(height, 1)
 	top := maxInt(available*m.horizontalSplitPercent/100, 1)
 	bottom := maxInt(available-top, 1)

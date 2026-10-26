@@ -109,91 +109,23 @@ type Options struct {
 
 // Model is the Bubble Tea model for the chr TUI.
 type Model struct {
-	projectDir               string
-	projectID                string
-	projectMetadata          core.ProjectMetadata
-	selectedProjectField     int
-	projectEdit              ProjectEditState
-	projectDirty             bool
-	cases                    []core.CaseMetadata
-	selectedCase             int
-	selectedCaseField        int
-	caseEdit                 ProjectEditState
-	caseDirty                bool
-	caseFilter               string
-	caseFilterEditing        bool
-	views                    []View
-	selected                 int
-	selectedPane             int
-	maximizedPane            int
-	verticalSplitPercent     int
-	horizontalSplitPercent   int
-	layoutDrag               layoutDrag
-	width                    int
-	height                   int
-	tickets                  []TicketView
-	selectedTicket           int
-	agentWorkPriorityFilter  string
-	agentWorkOrder           core.TicketLoopOrder
-	boardColumn              string
-	previousBoardColumn      string
-	ticketFilter             string
-	filterEntryMode          bool
-	documents                []DocumentView
-	selectedDocument         int
-	dumps                    []DumpView
-	selectedDump             int
-	dumpEdit                 DumpEditState
-	quizzes                  []QuizView
-	selectedQuiz             int
-	quizAction               QuizActionState
-	quizAnswer               QuizAnswerState
-	quizBusy                 bool
-	specs                    []SpecView
-	selectedSpec             int
-	plans                    []PlanView
-	selectedPlan             int
-	authoringSessions        []AuthoringSessionView
-	selectedAuthoringSession int
-	observability            ObservabilityView
-	workReadiness            WorkReadinessView
-	workspaceGraph           core.WorkspaceGraph
-	workspaceIndex           core.WorkspaceIndex
-	semanticDigestStates     []core.WorkspaceSemanticDigestState
-	commandPalette           CommandPaletteState
-	artifactAction           ArtifactActionState
-	actionExecutor           ArtifactActionExecutor
-	dumpAction               DumpActionState
-	dumpExecutor             DumpActionExecutor
-	quizExecutor             QuizActionExecutor
-	specAction               SpecActionState
-	specBusy                 bool
-	specExecutor             SpecActionExecutor
-	planAction               PlanActionState
-	planBusy                 bool
-	planExecutor             PlanActionExecutor
-	ticketAction             TicketActionState
-	ticketExecutor           TicketActionExecutor
-	workflow                 WorkflowView
-	workflowPage             WorkflowPageView
-	workflowExecutionBusy    bool
-	workAction               WorkActionState
-	workBusy                 bool
-	workExecutor             WorkActionExecutor
-	agentWorkRefreshExecutor AgentWorkRefreshExecutor
-	agentWorkRefreshInFlight bool
-	workspaceExecutor        WorkspaceRefreshExecutor
-	projectExecutor          ProjectMetadataExecutor
-	caseExecutor             CaseMetadataExecutor
-	sourceExecutor           SourceOpenExecutor
-	detailScroll             int
-	harnessExecutor          HarnessSelectionExecutor
-	harnessSelection         harnessSelectionState
-	harnessSequence          uint64
-	statusMessage            string
-	guidedExecutor           GuidedExecutor
-	guided                   guidedState
-	guidedSequence           uint64
+	projectState
+	caseState
+	navigationState
+	layoutState
+	ticketState
+	documentState
+	dumpState
+	quizState
+	specState
+	planState
+	authoringState
+	workspaceState
+	interactionState
+	workState
+	backgroundWorkState
+	harnessState
+	guidedModelState
 }
 
 type layoutDrag int
@@ -214,7 +146,7 @@ const (
 // NewModel initializes a terminal UI model from loaded workspace state.
 //
 //nolint:funlen // Model construction keeps option mapping in one place.
-func NewModel(opts Options) Model {
+func NewModel(opts Options) *Model {
 	workspaceIndex := opts.WorkspaceIndex
 	if len(workspaceIndex.NodesByID) == 0 {
 		workspaceIndex = core.NewWorkspaceIndexFromGraph(opts.WorkspaceGraph)
@@ -244,45 +176,79 @@ func NewModel(opts Options) Model {
 	tickets := NewTicketViews(opts.Tickets)
 	boardColumn := defaultBoardColumn(tickets)
 
-	return Model{
-		projectDir:               opts.ProjectDir,
-		projectID:                opts.ProjectID,
-		projectMetadata:          projectMetadata,
-		cases:                    casesFromWorkspaceIndex(workspaceIndex, opts.WorkspaceGraph, opts.Cases),
-		views:                    append([]View(nil), defaultViews...),
-		maximizedPane:            -1,
-		verticalSplitPercent:     defaultPanelSplitPercent,
-		horizontalSplitPercent:   defaultPanelSplitPercent,
-		tickets:                  tickets,
-		agentWorkOrder:           core.TicketLoopOrderCreatedAt,
-		boardColumn:              boardColumn,
-		previousBoardColumn:      boardColumn,
-		documents:                append([]DocumentView(nil), opts.Documents...),
-		dumps:                    normalizeDumpViews(opts.Dumps),
-		quizzes:                  normalizeQuizViews(opts.Quizzes),
-		specs:                    normalizeSpecViews(opts.Specs),
-		plans:                    normalizePlanViews(opts.Plans),
-		authoringSessions:        NewAuthoringSessionViews(opts.AuthoringSessions),
-		observability:            opts.Observability,
-		workReadiness:            opts.WorkReadiness,
-		workspaceGraph:           opts.WorkspaceGraph,
-		workspaceIndex:           workspaceIndex,
-		semanticDigestStates:     append([]core.WorkspaceSemanticDigestState(nil), opts.SemanticDigestStates...),
-		commandPalette:           NewCommandPaletteState(DefaultCommandRegistry()),
-		actionExecutor:           opts.ActionExecutor,
-		dumpExecutor:             opts.DumpExecutor,
-		quizExecutor:             opts.QuizExecutor,
-		specExecutor:             opts.SpecExecutor,
-		planExecutor:             opts.PlanExecutor,
-		ticketExecutor:           opts.TicketExecutor,
-		workExecutor:             opts.WorkExecutor,
-		agentWorkRefreshExecutor: opts.AgentWorkExecutor,
-		workspaceExecutor:        opts.WorkspaceExecutor,
-		projectExecutor:          opts.ProjectExecutor,
-		caseExecutor:             opts.CaseExecutor,
-		sourceExecutor:           opts.SourceExecutor,
-		harnessExecutor:          opts.HarnessExecutor,
-		guidedExecutor:           opts.GuidedExecutor,
+	return &Model{
+		projectState: projectState{
+			projectDir:      opts.ProjectDir,
+			projectID:       opts.ProjectID,
+			projectMetadata: projectMetadata,
+			projectExecutor: opts.ProjectExecutor,
+		},
+		caseState: caseState{
+			cases:        casesFromWorkspaceIndex(workspaceIndex, opts.WorkspaceGraph, opts.Cases),
+			caseExecutor: opts.CaseExecutor,
+		},
+		navigationState: navigationState{
+			views: append([]View(nil), defaultViews...),
+		},
+		layoutState: layoutState{
+			maximizedPane:          -1,
+			verticalSplitPercent:   defaultPanelSplitPercent,
+			horizontalSplitPercent: defaultPanelSplitPercent,
+		},
+		ticketState: ticketState{
+			tickets:             tickets,
+			boardColumn:         boardColumn,
+			previousBoardColumn: boardColumn,
+			ticketExecutor:      opts.TicketExecutor,
+		},
+		documentState: documentState{
+			documents: append([]DocumentView(nil), opts.Documents...),
+		},
+		dumpState: dumpState{
+			dumps:        normalizeDumpViews(opts.Dumps),
+			dumpExecutor: opts.DumpExecutor,
+		},
+		quizState: quizState{
+			quizzes:      normalizeQuizViews(opts.Quizzes),
+			quizExecutor: opts.QuizExecutor,
+		},
+		specState: specState{
+			specs:        normalizeSpecViews(opts.Specs),
+			specExecutor: opts.SpecExecutor,
+		},
+		planState: planState{
+			plans:        normalizePlanViews(opts.Plans),
+			planExecutor: opts.PlanExecutor,
+		},
+		authoringState: authoringState{
+			authoringSessions: NewAuthoringSessionViews(opts.AuthoringSessions),
+		},
+		workspaceState: workspaceState{
+			workspaceGraph:       opts.WorkspaceGraph,
+			workspaceIndex:       workspaceIndex,
+			semanticDigestStates: append([]core.WorkspaceSemanticDigestState(nil), opts.SemanticDigestStates...),
+			workspaceExecutor:    opts.WorkspaceExecutor,
+		},
+		interactionState: interactionState{
+			commandPalette: NewCommandPaletteState(DefaultCommandRegistry()),
+			actionExecutor: opts.ActionExecutor,
+			sourceExecutor: opts.SourceExecutor,
+		},
+		workState: workState{
+			observability:  opts.Observability,
+			workReadiness:  opts.WorkReadiness,
+			agentWorkOrder: core.TicketLoopOrderCreatedAt,
+			workExecutor:   opts.WorkExecutor,
+		},
+		backgroundWorkState: backgroundWorkState{
+			agentWorkRefreshExecutor: opts.AgentWorkExecutor,
+		},
+		harnessState: harnessState{
+			harnessExecutor: opts.HarnessExecutor,
+		},
+		guidedModelState: guidedModelState{
+			guidedExecutor: opts.GuidedExecutor,
+		},
 	}
 }
 
@@ -309,13 +275,15 @@ func Run(ctx context.Context, opts Options) error {
 	return nil
 }
 
+var _ tea.Model = (*Model)(nil)
+
 // Init satisfies tea.Model and returns the initial command.
-func (m Model) Init() tea.Cmd {
+func (m *Model) Init() tea.Cmd {
 	return agentWorkRefreshTickCmd()
 }
 
 // Update applies a Bubble Tea message to the model.
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if updated, cmd, ok := m.updateSystemMessage(msg); ok {
 		return updated, cmd
 	}
@@ -327,7 +295,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) updateSystemMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
+func (m *Model) updateSystemMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 	if finished, ok := msg.(guidedFinishedMsg); ok {
 		m.completeGuided(finished)
 
@@ -365,7 +333,7 @@ func (m Model) updateSystemMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 	}
 }
 
-func (m Model) updateActionFinishedMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
+func (m *Model) updateActionFinishedMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 	switch typedMsg := msg.(type) {
 	case harnessSelectionSavedMsg:
 		m.completeHarnessSave(typedMsg)
@@ -397,7 +365,7 @@ func (m Model) updateActionFinishedMessage(msg tea.Msg) (tea.Model, tea.Cmd, boo
 }
 
 // View renders the current terminal screen.
-func (m Model) View() string {
+func (m *Model) View() string {
 	if m.guided.Active && m.width == 0 {
 		return m.renderGuidedWorkspace(80, 40)
 	}
@@ -448,11 +416,11 @@ func (m Model) View() string {
 }
 
 // SelectedView returns the active TUI view.
-func (m Model) SelectedView() View {
+func (m *Model) SelectedView() View {
 	return m.views[m.selected]
 }
 
-func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if updated, command, handled := m.updateGuidedOrHarnessKey(msg); handled {
 		return updated, command
 	}
@@ -493,7 +461,7 @@ func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 //nolint:cyclop // Active mode dispatch is centralized to preserve modal ordering.
-func (m Model) updateActiveModeKey(msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
+func (m *Model) updateActiveModeKey(msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
 	switch {
 	case m.artifactAction.Pending:
 		updated, cmd := m.updateArtifactActionKey(msg)
@@ -546,7 +514,7 @@ func (m Model) updateActiveModeKey(msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
 	}
 }
 
-func (m Model) updateActiveQuizModeKey(msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
+func (m *Model) updateActiveQuizModeKey(msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
 	switch {
 	case m.quizAction.Pending:
 		updated, cmd := m.updateQuizActionKey(msg)
@@ -582,7 +550,7 @@ func (m *Model) handleGlobalKey(msg tea.KeyMsg) (tea.Cmd, bool) {
 	}
 }
 
-func (m Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 	if m.guided.Active {
 		return m, nil
 	}
@@ -610,7 +578,7 @@ func (m Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 	return m.updateMousePress(event)
 }
 
-func (m Model) updateMousePress(event tea.MouseEvent) (tea.Model, tea.Cmd) {
+func (m *Model) updateMousePress(event tea.MouseEvent) (tea.Model, tea.Cmd) {
 	if m.workBusy {
 		m.statusMessage = "Work action already running."
 
@@ -666,7 +634,7 @@ func (m *Model) selectDumpPaneAt(x, width int) {
 	m.selectedPane = 1
 }
 
-func (m Model) updateMouseMotion(event tea.MouseEvent) (tea.Model, tea.Cmd) {
+func (m *Model) updateMouseMotion(event tea.MouseEvent) (tea.Model, tea.Cmd) {
 	if m.layoutDrag != layoutDragNone {
 		m.applyLayoutDrag(event)
 
@@ -688,7 +656,7 @@ func (m Model) updateMouseMotion(event tea.MouseEvent) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) updateNavigationKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateNavigationKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	key := msg.String()
 
 	if view, ok := functionKeyView(msg); ok {
@@ -721,7 +689,7 @@ func (m *Model) handleNavigationPageKey(keyType tea.KeyType) bool {
 	return true
 }
 
-func (m Model) handleNavigationActionKey(key string) (tea.Model, tea.Cmd) {
+func (m *Model) handleNavigationActionKey(key string) (tea.Model, tea.Cmd) {
 	if m.handleDashActionKey(key) {
 		return m, nil
 	}
@@ -844,7 +812,7 @@ func (m *Model) toggleMaximizedPane() {
 	m.maximizedPane = m.selectedPane
 }
 
-func (m Model) layoutDragAt(x, y, width, height int) (layoutDrag, bool) {
+func (m *Model) layoutDragAt(x, y, width, height int) (layoutDrag, bool) {
 	if m.maximizedPane >= 0 {
 		return layoutDragNone, false
 	}
@@ -884,7 +852,7 @@ func (m *Model) applyLayoutDrag(event tea.MouseEvent) {
 	}
 }
 
-func (m Model) shellBodyGeometry(width, height int) (int, int) {
+func (m *Model) shellBodyGeometry(width, height int) (int, int) {
 	topbar := m.renderShellTopbar(width)
 	footer := m.renderShellFooter(width)
 	status := m.renderShellStatus(width)
@@ -899,7 +867,7 @@ func (m Model) shellBodyGeometry(width, height int) (int, int) {
 	return bodyTop, bodyHeight
 }
 
-func (m Model) hasStackedRightPanels() bool {
+func (m *Model) hasStackedRightPanels() bool {
 	switch m.SelectedView() {
 	case ViewProject, ViewDashboard, ViewCases:
 		return true
@@ -1055,7 +1023,7 @@ func (m *Model) selectPrimaryPane() {
 	m.detailScroll = 0
 }
 
-func (m Model) paneCount() int {
+func (m *Model) paneCount() int {
 	switch m.SelectedView() {
 	case ViewProject, ViewCases, ViewDash:
 		return 3
@@ -1072,7 +1040,7 @@ func (m Model) paneCount() int {
 	}
 }
 
-func (m Model) renderSelectedView() string {
+func (m *Model) renderSelectedView() string {
 	selectedView := m.SelectedView()
 
 	if view, ok := m.renderProductSelectedView(selectedView); ok {
@@ -1082,7 +1050,7 @@ func (m Model) renderSelectedView() string {
 	return m.renderLegacySelectedView(selectedView)
 }
 
-func (m Model) renderProductSelectedView(selectedView View) (string, bool) {
+func (m *Model) renderProductSelectedView(selectedView View) (string, bool) {
 	if selectedView == ViewProject {
 		description := strings.TrimSpace(m.projectMetadata.Description)
 		if description == "" {
@@ -1124,7 +1092,7 @@ func (m Model) renderProductSelectedView(selectedView View) (string, bool) {
 	return "", false
 }
 
-func (m Model) renderLegacySelectedView(selectedView View) string {
+func (m *Model) renderLegacySelectedView(selectedView View) string {
 	if selectedView == ViewBoard {
 		return m.renderTicketBoard()
 	}
@@ -1157,7 +1125,7 @@ func (m Model) renderLegacySelectedView(selectedView View) string {
 	return fmt.Sprintf("%s\n  %s", selectedView, placeholder)
 }
 
-func (m Model) renderTicketBoard() string {
+func (m *Model) renderTicketBoard() string {
 	filteredTickets := m.filteredTickets()
 
 	var output strings.Builder
@@ -1196,7 +1164,7 @@ func (m Model) renderTicketBoard() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m Model) renderBoardHeaderColumnLine() string {
+func (m *Model) renderBoardHeaderColumnLine() string {
 	if m.boardAttentionActive() {
 		return fmt.Sprintf(
 			"  Attention (%d)\n",
@@ -1212,7 +1180,7 @@ func (m Model) renderBoardHeaderColumnLine() string {
 	)
 }
 
-func (m Model) renderTicketList() string {
+func (m *Model) renderTicketList() string {
 	filteredTickets := m.filteredTickets()
 	if len(filteredTickets) == 0 {
 		return "Tickets\n  No tickets match the current view."
@@ -1262,7 +1230,7 @@ func renderTicketRow(ticket TicketView) string {
 	)
 }
 
-func (m Model) renderSelectedTicketDetail() string {
+func (m *Model) renderSelectedTicketDetail() string {
 	ticket, ok := m.selectedTicketView()
 	if !ok {
 		return "Selected Ticket\n  No ticket selected."
@@ -1392,7 +1360,7 @@ func renderTicketBodySection(output *strings.Builder, lines []string) {
 }
 
 //nolint:cyclop // Key helper text is centralized by selected view.
-func (m Model) renderKeys() string {
+func (m *Model) renderKeys() string {
 	if keys, ok := m.activeInteractionKeys(); ok {
 		return keys
 	}
@@ -1425,11 +1393,11 @@ func (m Model) renderKeys() string {
 	}
 }
 
-func (m Model) ticketKeysActive() bool {
+func (m *Model) ticketKeysActive() bool {
 	return m.SelectedView() == ViewBoard || m.SelectedView() == ViewTickets
 }
 
-func (m Model) documentKeysActive() bool {
+func (m *Model) documentKeysActive() bool {
 	switch m.SelectedView() {
 	case ViewDocuments:
 		return true
@@ -1439,7 +1407,7 @@ func (m Model) documentKeysActive() bool {
 }
 
 //nolint:cyclop // Active interaction key hints mirror modal precedence.
-func (m Model) activeInteractionKeys() (string, bool) {
+func (m *Model) activeInteractionKeys() (string, bool) {
 	switch {
 	case m.artifactAction.Pending:
 		return "Keys: enter confirms action, esc cancels action", true
@@ -1470,7 +1438,7 @@ func (m Model) activeInteractionKeys() (string, bool) {
 	}
 }
 
-func (m Model) renderStatusMessage() string {
+func (m *Model) renderStatusMessage() string {
 	if m.statusMessage == "" {
 		return ""
 	}
@@ -1478,7 +1446,7 @@ func (m Model) renderStatusMessage() string {
 	return "\n\nStatus\n  " + m.statusMessage
 }
 
-func (m Model) selectedTicketView() (TicketView, bool) {
+func (m *Model) selectedTicketView() (TicketView, bool) {
 	if len(m.tickets) == 0 {
 		return TicketView{}, false
 	}
@@ -1532,11 +1500,11 @@ func (m *Model) selectNextTicket() {
 	m.selectedTicket = filteredTickets[position+1].Index
 }
 
-func (m Model) ticketSelectionActive() bool {
+func (m *Model) ticketSelectionActive() bool {
 	return m.SelectedView() == ViewBoard || m.SelectedView() == ViewTickets
 }
 
-func (m Model) selectedTicketPosition(tickets []TicketView) int {
+func (m *Model) selectedTicketPosition(tickets []TicketView) int {
 	for index, ticket := range tickets {
 		if ticket.Index == m.selectedTicket {
 			return index
@@ -1546,7 +1514,7 @@ func (m Model) selectedTicketPosition(tickets []TicketView) int {
 	return 0
 }
 
-func (m Model) filteredTickets() []TicketView {
+func (m *Model) filteredTickets() []TicketView {
 	tickets := m.tickets
 	if m.SelectedView() == ViewBoard {
 		if m.boardAttentionActive() {
@@ -1572,7 +1540,7 @@ func (m Model) filteredTickets() []TicketView {
 	return filtered
 }
 
-func (m Model) updateFilterKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateFilterKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.Type {
 	case tea.KeyEsc:
 		m.filterEntryMode = false
@@ -1601,7 +1569,7 @@ func (m *Model) selectFirstFilteredTicket() {
 	m.selectedTicket = tickets[0].Index
 }
 
-func (m Model) activeBoardColumn() string {
+func (m *Model) activeBoardColumn() string {
 	if m.boardAttentionActive() {
 		return m.previousNormalBoardColumn()
 	}
@@ -1613,7 +1581,7 @@ func (m Model) activeBoardColumn() string {
 	return core.TicketStatusBacklog
 }
 
-func (m Model) activeBoardColumnPosition() int {
+func (m *Model) activeBoardColumnPosition() int {
 	for index, column := range core.NormalBoardColumns {
 		if column == m.activeBoardColumn() {
 			return index
@@ -1623,11 +1591,11 @@ func (m Model) activeBoardColumnPosition() int {
 	return 0
 }
 
-func (m Model) activeBoardColumnTickets() []TicketView {
+func (m *Model) activeBoardColumnTickets() []TicketView {
 	return m.ticketsForBoardColumn(m.activeBoardColumn())
 }
 
-func (m Model) ticketsForBoardColumn(column string) []TicketView {
+func (m *Model) ticketsForBoardColumn(column string) []TicketView {
 	tickets := []TicketView{}
 
 	for _, ticket := range m.tickets {
@@ -1639,7 +1607,7 @@ func (m Model) ticketsForBoardColumn(column string) []TicketView {
 	return tickets
 }
 
-func (m Model) attentionTickets() []TicketView {
+func (m *Model) attentionTickets() []TicketView {
 	tickets := []TicketView{}
 
 	for _, ticket := range m.tickets {
@@ -1651,7 +1619,7 @@ func (m Model) attentionTickets() []TicketView {
 	return tickets
 }
 
-func (m Model) boardAttentionActive() bool {
+func (m *Model) boardAttentionActive() bool {
 	return m.SelectedView() == ViewBoard && m.boardColumn == boardAttentionColumn
 }
 
@@ -1670,7 +1638,7 @@ func (m *Model) toggleBoardAttention() {
 	m.selectFirstFilteredTicket()
 }
 
-func (m Model) previousNormalBoardColumn() string {
+func (m *Model) previousNormalBoardColumn() string {
 	if core.IsNormalBoardTicketStatus(m.previousBoardColumn) {
 		return m.previousBoardColumn
 	}
@@ -1714,7 +1682,7 @@ func (m *Model) selectNextBoardColumn() {
 	m.selectBoardColumn(core.NormalBoardColumns[position])
 }
 
-func (m Model) boardColumnNavigationActive() bool {
+func (m *Model) boardColumnNavigationActive() bool {
 	return m.SelectedView() == ViewBoard && m.selectedPane == 0
 }
 

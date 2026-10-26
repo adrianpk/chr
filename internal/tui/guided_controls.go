@@ -40,7 +40,7 @@ func (m *Model) inspectGuidedApproval() {
 	m.planWorkAction(WorkActionWorkflowApprove)
 }
 
-func (m Model) guidedControlHint() string {
+func (m *Model) guidedControlHint() string {
 	text := ""
 
 	labels := map[string]string{"finish": "f Finish capture", "pause": "p Pause", "resume": "u Resume", "cancel": "x Cancel"}

@@ -101,7 +101,7 @@ func (m *Model) completeHarnessRead(msg harnessSelectionLoadedMsg) {
 	state.Scroll, state.Message = 0, ""
 }
 
-func (m Model) updateHarnessKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateHarnessKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if m.harnessSelection.Saving {
 		return m, nil
 	}
@@ -176,7 +176,7 @@ func (m *Model) cycleHarnessProfile(direction int) {
 	*selected = harnessKeepProfile
 }
 
-func (m Model) renderHarnessWorkspace(width, height int) string {
+func (m *Model) renderHarnessWorkspace(width, height int) string {
 	keys := []string{"Tab: role · arrows: profile · c: clear", "Enter: save · r: reload/discard · Esc: cancel · PgUp/Dn"}
 	content := m.harnessSelectionLines(maxInt(width-4, 1))
 	lines := append(keys, scrollLines(content, m.harnessSelection.Scroll, maxInt(height-3-len(keys), 1))...)
@@ -184,7 +184,7 @@ func (m Model) renderHarnessWorkspace(width, height int) string {
 	return renderPanel("Harness defaults", lines, width, height, true)
 }
 
-func (m Model) harnessSelectionLines(width int) []string {
+func (m *Model) harnessSelectionLines(width int) []string {
 	state := m.harnessSelection
 
 	lines := harnessWrap("New operations only. Running, paused and resumed work keeps its binding.", width)
@@ -243,7 +243,7 @@ func harnessRoleLines(name string, selection core.HarnessSelection, generation b
 	return lines
 }
 
-func (m Model) harnessChoiceLine(role, choice string, focused bool) string {
+func (m *Model) harnessChoiceLine(role, choice string, focused bool) string {
 	label := "Unavailable: " + choice
 	if choice == harnessKeepProfile {
 		label = "Keep current default"
@@ -300,7 +300,7 @@ func harnessWrap(text string, width int) []string {
 	return strings.Split(lipgloss.NewStyle().Width(maxInt(width, 1)).Render(text), "\n")
 }
 
-func (m Model) harnessVisibleRows() int {
+func (m *Model) harnessVisibleRows() int {
 	width := maxInt(m.width, 60)
 	height := maxInt(m.height, minShellHeight)
 	height -= lineCount(m.renderShellTopbar(width)) + lineCount(m.renderShellFooter(width)) + lineCount(m.renderShellStatus(width))

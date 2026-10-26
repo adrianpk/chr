@@ -84,7 +84,7 @@ func NewArtifactActionState(action ArtifactActionID) ArtifactActionState {
 	}
 }
 
-func (m Model) renderArtifactAction() string {
+func (m *Model) renderArtifactAction() string {
 	if !m.artifactAction.Pending {
 		return ""
 	}
@@ -111,7 +111,7 @@ func (m Model) renderArtifactAction() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m Model) renderArtifactActionCaseSuggestionLines() []string {
+func (m *Model) renderArtifactActionCaseSuggestionLines() []string {
 	suggestions := m.workspaceIndex.ListCases()
 	if len(suggestions) == 0 {
 		return nil
@@ -130,7 +130,7 @@ func (m Model) renderArtifactActionCaseSuggestionLines() []string {
 	return lines
 }
 
-func (m Model) updateArtifactActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateArtifactActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.Type {
 	case tea.KeyEsc:
 		m.cancelArtifactAction()

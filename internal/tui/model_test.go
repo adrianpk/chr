@@ -42,10 +42,10 @@ func TestTabMovesPaneFocusWithoutChangingView(t *testing.T) {
 	model := NewModel(Options{})
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyTab})
-	navigated, ok := updated.(Model)
+	navigated, ok := updated.(*Model)
 
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if navigated.SelectedView() != ViewProject {
@@ -57,10 +57,10 @@ func TestTabMovesPaneFocusWithoutChangingView(t *testing.T) {
 	}
 
 	updated, _ = navigated.Update(tea.KeyMsg{Type: tea.KeyShiftTab})
-	navigated, ok = updated.(Model)
+	navigated, ok = updated.(*Model)
 
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if navigated.SelectedView() != ViewProject {
@@ -250,10 +250,10 @@ func TestModelNavigatesWithFunctionKeys(t *testing.T) {
 
 	for _, testCase := range cases {
 		updated, _ := model.Update(tea.KeyMsg{Type: testCase.key})
-		navigated, ok := updated.(Model)
+		navigated, ok := updated.(*Model)
 
 		if !ok {
-			t.Fatalf("Update returned %T, want Model", updated)
+			t.Fatalf("Update returned %T, want *Model", updated)
 		}
 
 		if navigated.SelectedView() != testCase.want {
@@ -276,19 +276,19 @@ func TestModelEditsAndSavesProjectMetadata(t *testing.T) {
 	})
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("e")})
-	editing, ok := updated.(Model)
+	editing, ok := updated.(*Model)
 
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	editing.projectEdit.Input.SetValue("New")
 
 	updated, _ = editing.Update(tea.KeyMsg{Type: tea.KeyEnter})
-	changed, ok := updated.(Model)
+	changed, ok := updated.(*Model)
 
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if !changed.projectDirty {
@@ -296,10 +296,10 @@ func TestModelEditsAndSavesProjectMetadata(t *testing.T) {
 	}
 
 	updated, _ = changed.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("s")})
-	saved, ok := updated.(Model)
+	saved, ok := updated.(*Model)
 
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if executor.saved.Name != "New" {
@@ -372,17 +372,17 @@ func TestModelProjectEditAcceptsSpaces(t *testing.T) {
 	model.projectEdit.Input.CursorEnd()
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeySpace})
-	editing, ok := updated.(Model)
+	editing, ok := updated.(*Model)
 
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	updated, _ = editing.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("description")})
-	editing, ok = updated.(Model)
+	editing, ok = updated.(*Model)
 
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if editing.projectEdit.Input.Value() != "New description" {
@@ -403,17 +403,17 @@ func TestModelProjectEditInsertsAtCursor(t *testing.T) {
 	model.projectEdit.Input.SetCursor(3)
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeySpace})
-	editing, ok := updated.(Model)
+	editing, ok := updated.(*Model)
 
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	updated, _ = editing.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("technical")})
-	editing, ok = updated.(Model)
+	editing, ok = updated.(*Model)
 
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if editing.projectEdit.Input.Value() != "New technical description" {
@@ -942,9 +942,9 @@ func TestModelOpensAndFiltersCommandPalette(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{':'}})
 
-	palette, ok := updated.(Model)
+	palette, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if !palette.commandPalette.Open {
@@ -953,9 +953,9 @@ func TestModelOpensAndFiltersCommandPalette(t *testing.T) {
 
 	updated, _ = palette.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("dash")})
 
-	palette, ok = updated.(Model)
+	palette, ok = updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	commands := palette.filteredCommands()
@@ -987,9 +987,9 @@ func TestModelExecutesNavigationCommand(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
-	navigated, ok := updated.(Model)
+	navigated, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if navigated.commandPalette.Open {
@@ -1017,9 +1017,9 @@ func TestModelReportsSelectedSourcePathCommand(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
-	navigated, ok := updated.(Model)
+	navigated, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if navigated.statusMessage != "Selected source path: .chr/default/specs/tui.md" {
@@ -1045,9 +1045,9 @@ func TestModelPlansArtifactActionCommand(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
-	planned, ok := updated.(Model)
+	planned, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if planned.commandPalette.Open {
@@ -1288,9 +1288,9 @@ func TestModelPlansCreateDumpCommandWithCaseScope(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
-	planned, ok := updated.(Model)
+	planned, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if !planned.dumpAction.Pending {
@@ -1334,9 +1334,9 @@ func TestModelConfirmsDumpAction(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
-	confirmed, ok := updated.(Model)
+	confirmed, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if executor.request.Action != DumpActionCreate {
@@ -1389,9 +1389,9 @@ func TestModelPlansEditDumpCommand(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
-	planned, ok := updated.(Model)
+	planned, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if !planned.dumpAction.Pending {
@@ -1469,9 +1469,9 @@ func TestModelConfirmsAppendDumpAction(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
-	confirmed, ok := updated.(Model)
+	confirmed, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if executor.request.Action != DumpActionAppend {
@@ -1502,9 +1502,9 @@ func TestModelConfirmsEditDumpActionStartsInternalEditor(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
-	confirmed, ok := updated.(Model)
+	confirmed, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if executor.request.Action != DumpActionEdit {
@@ -1543,9 +1543,9 @@ func TestModelSavesInternalDumpEdit(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyCtrlS})
 
-	saved, ok := updated.(Model)
+	saved, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if executor.request.Action != DumpActionSave {
@@ -1601,9 +1601,9 @@ func TestModelCancelsInternalDumpEdit(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEsc})
 
-	cancelled, ok := updated.(Model)
+	cancelled, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if cancelled.dumpEdit.Active {
@@ -1638,9 +1638,9 @@ func TestModelAltELaunchesExternalDumpEditor(t *testing.T) {
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'e'}, Alt: true})
 
-	confirmed, ok := updated.(Model)
+	confirmed, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if cmd == nil {
@@ -1680,9 +1680,9 @@ func TestModelAltEOpensSelectedTicketSource(t *testing.T) {
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'e'}, Alt: true})
 
-	confirmed, ok := updated.(Model)
+	confirmed, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if cmd == nil {
@@ -1781,9 +1781,9 @@ func TestModelPageDownScrollsTicketDetailWithoutFocus(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyPgDown})
 
-	scrolled, ok := updated.(Model)
+	scrolled, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if scrolled.detailScroll != 15 {
@@ -1827,9 +1827,9 @@ func TestModelPageDownChangesVisibleTicketDetail(t *testing.T) {
 	before := model.View()
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyPgDown})
 
-	scrolled, ok := updated.(Model)
+	scrolled, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("updated model = %T, want Model", updated)
+		t.Fatalf("updated model = %T, want *Model", updated)
 	}
 
 	after := scrolled.View()
@@ -1870,9 +1870,9 @@ func TestModelScrollsFocusedTicketDetail(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyDown})
 
-	scrolled, ok := updated.(Model)
+	scrolled, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if scrolled.detailScroll != 1 {
@@ -1890,9 +1890,9 @@ func TestModelReportsExternalEditorFailureContext(t *testing.T) {
 		workingDir: "/workspace/.chr/default/dumps",
 	})
 
-	failed, ok := updated.(Model)
+	failed, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	for _, want := range []string{
@@ -1927,9 +1927,9 @@ func TestModelRefreshesDumpsAfterEditorFinishes(t *testing.T) {
 
 	updated, _ := model.Update(dumpEditorFinishedMsg{path: ".chr/default/dumps/second.md"})
 
-	refreshed, ok := updated.(Model)
+	refreshed, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if executor.request.Action != DumpActionRefresh {
@@ -1952,9 +1952,9 @@ func TestModelCancelsArtifactAction(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEsc})
 
-	cancelled, ok := updated.(Model)
+	cancelled, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if cancelled.artifactAction.Pending {
@@ -1993,9 +1993,9 @@ func TestModelConfirmsArtifactAction(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
-	confirmed, ok := updated.(Model)
+	confirmed, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if executor.action != ArtifactActionCreateTicket {
@@ -2020,9 +2020,9 @@ func TestModelReportsArtifactActionError(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
-	failed, ok := updated.(Model)
+	failed, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if failed.artifactAction.Pending {
@@ -2045,9 +2045,9 @@ func TestModelPlansTicketActionCommand(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
-	planned, ok := updated.(Model)
+	planned, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if planned.commandPalette.Open {
@@ -2096,9 +2096,9 @@ func TestModelCancelsTicketAction(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEsc})
 
-	cancelled, ok := updated.(Model)
+	cancelled, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if cancelled.ticketAction.Pending {
@@ -2135,9 +2135,9 @@ func TestModelConfirmsTicketAction(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
-	confirmed, ok := updated.(Model)
+	confirmed, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if executor.request.Action != TicketActionMoveStatus {
@@ -2179,9 +2179,9 @@ func TestModelReportsTicketActionError(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
-	failed, ok := updated.(Model)
+	failed, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if failed.ticketAction.Pending {
@@ -2204,9 +2204,9 @@ func TestModelPlansWorkActionCommand(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
-	planned, ok := updated.(Model)
+	planned, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if planned.commandPalette.Open {
@@ -2322,9 +2322,9 @@ func TestModelDashRunAllKeyPlansWorkAction(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("a")})
 
-	planned, ok := updated.(Model)
+	planned, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if !planned.workAction.Pending {
@@ -2399,9 +2399,9 @@ func TestModelDashCyclesAgentWorkFilters(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("p")})
 
-	filtered, ok := updated.(Model)
+	filtered, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	view := filtered.View()
@@ -2428,9 +2428,9 @@ func TestModelDashRunAllUsesAgentWorkFilters(t *testing.T) {
 	orderChanged, _ := priorityChanged.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("o")})
 	planned, _ := orderChanged.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("a")})
 
-	modelWithAction, ok := planned.(Model)
+	modelWithAction, ok := planned.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", planned)
+		t.Fatalf("Update returned %T, want *Model", planned)
 	}
 
 	request := modelWithAction.workAction.Request
@@ -2642,9 +2642,9 @@ func TestModelCancelsWorkAction(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEsc})
 
-	cancelled, ok := updated.(Model)
+	cancelled, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if cancelled.workAction.Pending {
@@ -2905,9 +2905,9 @@ func TestModelReportsWorkActionError(t *testing.T) {
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
-	busy, ok := updated.(Model)
+	busy, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	updated, _ = busy.Update(cmd())
@@ -3107,10 +3107,10 @@ func TestModelSelectsTickets(t *testing.T) {
 	model.selected = 6
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyDown})
-	navigated, ok := updated.(Model)
+	navigated, ok := updated.(*Model)
 
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	ticket, ok := navigated.selectedTicketView()
@@ -3133,10 +3133,10 @@ func TestModelNavigatesBoardColumns(t *testing.T) {
 	model.selected = 6
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRight})
-	navigated, ok := updated.(Model)
+	navigated, ok := updated.(*Model)
 
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if navigated.activeBoardColumn() != core.TicketStatusReadyForDev {
@@ -3704,10 +3704,10 @@ func TestModelSelectsDocuments(t *testing.T) {
 	model.selected = 4
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyDown})
-	navigated, ok := updated.(Model)
+	navigated, ok := updated.(*Model)
 
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	document, ok := navigated.selectedSpecView()
@@ -3834,9 +3834,9 @@ func TestModelSelectsDumpsIndependentlyFromDocuments(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyDown})
 
-	navigated, ok := updated.(Model)
+	navigated, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	dump, ok := navigated.selectedDumpView()
@@ -3988,9 +3988,9 @@ func TestModelSelectsQuizzesIndependentlyFromDocuments(t *testing.T) {
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyDown})
 
-	navigated, ok := updated.(Model)
+	navigated, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	quiz, ok := navigated.selectedQuizView()
@@ -4753,7 +4753,7 @@ func TestModelSpecListUsesUseCaseTitleWhenSpecExists(t *testing.T) {
 	}
 }
 
-func assertQuizAnswerHelperVisible(t *testing.T, model Model) {
+func assertQuizAnswerHelperVisible(t *testing.T, model *Model) {
 	t.Helper()
 
 	view := model.View()
@@ -4978,10 +4978,10 @@ func TestModelRecordsWindowSize(t *testing.T) {
 	model := NewModel(Options{})
 
 	updated, _ := model.Update(tea.WindowSizeMsg{Width: 120, Height: 40})
-	resized, ok := updated.(Model)
+	resized, ok := updated.(*Model)
 
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	if resized.width != 120 {
@@ -5004,9 +5004,9 @@ func TestModelViewUsesWindowRealEstate(t *testing.T) {
 
 	updated, _ := model.Update(tea.WindowSizeMsg{Width: 80, Height: 20})
 
-	resized, ok := updated.(Model)
+	resized, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	view := resized.View()
@@ -5053,12 +5053,12 @@ func writeTicketViewFile(t *testing.T, projectDir, name, body string) string {
 	return path
 }
 
-func requireUpdatedModel(t *testing.T, updated tea.Model) Model {
+func requireUpdatedModel(t *testing.T, updated tea.Model) *Model {
 	t.Helper()
 
-	model, ok := updated.(Model)
+	model, ok := updated.(*Model)
 	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
 	return model
@@ -5250,7 +5250,7 @@ func (e *fakeAgentWorkRefreshExecutor) RefreshAgentWork(AgentWorkRefreshRequest)
 	return e.result, e.err
 }
 
-func assertConfirmedArtifactState(t *testing.T, model Model) {
+func assertConfirmedArtifactState(t *testing.T, model *Model) {
 	t.Helper()
 
 	if len(model.tickets) != 1 || model.tickets[0].Key != "CHR-1" {

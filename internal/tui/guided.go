@@ -120,7 +120,7 @@ func sameGuidedTerminalRun(before, after GuidedView) bool {
 	return before.Session != nil && after.Session != nil && before.Session.ID == after.Session.ID && before.Session.ProjectID == after.Session.ProjectID && before.Session.Namespace == after.Session.Namespace
 }
 
-func (m Model) guidedRequest(action string) GuidedRequest {
+func (m *Model) guidedRequest(action string) GuidedRequest {
 	command := core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{ProjectID: m.projectID, Namespace: m.guided.View.Namespace}}
 
 	command.NativeRevision = m.guided.View.NativeRevision

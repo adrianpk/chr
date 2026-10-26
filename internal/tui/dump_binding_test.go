@@ -27,7 +27,7 @@ func TestDumpEditBinding(t *testing.T) {
 
 	updated, _ := model.updateDumpEditKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'x'}})
 
-	edited, ok := updated.(Model)
+	edited, ok := updated.(*Model)
 	if !ok {
 		t.Fatalf("unexpected model %T", updated)
 	}

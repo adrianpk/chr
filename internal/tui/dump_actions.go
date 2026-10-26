@@ -66,7 +66,7 @@ type DumpEditState struct {
 	Input                 textarea.Model
 }
 
-func (m Model) renderDumpAction() string {
+func (m *Model) renderDumpAction() string {
 	if !m.dumpAction.Pending {
 		return ""
 	}
@@ -85,7 +85,7 @@ func (m Model) renderDumpAction() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m Model) updateDumpActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateDumpActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.Type {
 	case tea.KeyEsc:
 		m.cancelDumpAction()
@@ -96,7 +96,7 @@ func (m Model) updateDumpActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) updateDumpEditKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateDumpEditKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.Type {
 	case tea.KeyEsc:
 		m.dumpEdit = DumpEditState{}
@@ -223,7 +223,7 @@ func (m *Model) applyDumpActionResult(result DumpActionResult) {
 	m.statusMessage = result.Message
 }
 
-func (m Model) dumpSelectionPath(path string) string {
+func (m *Model) dumpSelectionPath(path string) string {
 	path = strings.TrimSpace(path)
 	if path != "" {
 		return path
@@ -285,7 +285,7 @@ func externalEditorErrorMessage(msg dumpEditorFinishedMsg) string {
 	return strings.Join(parts, " ")
 }
 
-func (m Model) defaultDumpScope() DumpScope {
+func (m *Model) defaultDumpScope() DumpScope {
 	if m.SelectedView() != ViewCases {
 		return DumpScope{}
 	}
@@ -298,7 +298,7 @@ func (m Model) defaultDumpScope() DumpScope {
 	return DumpScope{CaseSlug: selectedCase.Slug}
 }
 
-func (m Model) defaultDumpTitle() string {
+func (m *Model) defaultDumpTitle() string {
 	scope := m.defaultDumpScope()
 	if strings.TrimSpace(scope.CaseSlug) == "" {
 		return "Project dump"
@@ -307,7 +307,7 @@ func (m Model) defaultDumpTitle() string {
 	return scope.CaseSlug + " dump"
 }
 
-func (m Model) newDumpActionState(action DumpActionID) DumpActionState {
+func (m *Model) newDumpActionState(action DumpActionID) DumpActionState {
 	switch action {
 	case DumpActionCreate:
 		return m.newCreateDumpActionState(action)
@@ -324,7 +324,7 @@ func (m Model) newDumpActionState(action DumpActionID) DumpActionState {
 	}
 }
 
-func (m Model) newCreateDumpActionState(action DumpActionID) DumpActionState {
+func (m *Model) newCreateDumpActionState(action DumpActionID) DumpActionState {
 	request := DumpActionRequest{
 		Action: action, OperationID: rand.Text(),
 		Title:   m.defaultDumpTitle(),
@@ -343,7 +343,7 @@ func (m Model) newCreateDumpActionState(action DumpActionID) DumpActionState {
 	}
 }
 
-func (m Model) newSelectedDumpActionState(action DumpActionID, title string) DumpActionState {
+func (m *Model) newSelectedDumpActionState(action DumpActionID, title string) DumpActionState {
 	dump, ok := m.selectedDumpView()
 	if !ok {
 		if action == DumpActionRefresh {

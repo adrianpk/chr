@@ -16,7 +16,7 @@ func (execute guidedTestExecutor) ExecuteGuided(request GuidedRequest) (GuidedVi
 	return execute(request)
 }
 
-func guidedTerminalFixture() Model {
+func guidedTerminalFixture() *Model {
 	m := NewModel(Options{ProjectID: "project"})
 	session := &core.AuthoringSession{ID: "guided-one", ProjectID: "project", Namespace: "default", Revision: 2, Topic: "Bounded audit", Guided: &core.GuidedUseCaseState{Stage: "quiz", Status: "waiting_input", Quiz: &core.GuidedQuizState{QuestionID: "first", InputDigest: "original"}}}
 	m.guided = guidedState{Active: true, View: GuidedView{Session: session, Project: "Example", Namespace: "default", InputAction: "answer", Prompt: "What should remain bounded?"}}
@@ -122,10 +122,10 @@ func TestGuidedUseCaseTUIOriginalScroll(t *testing.T) {
 	}
 }
 
-func guidedTestModel(t *testing.T, model tea.Model) Model {
+func guidedTestModel(t *testing.T, model tea.Model) *Model {
 	t.Helper()
 
-	value, ok := model.(Model)
+	value, ok := model.(*Model)
 	if !ok {
 		t.Fatal("unexpected terminal model")
 	}

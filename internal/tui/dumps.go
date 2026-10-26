@@ -27,7 +27,7 @@ type DumpView struct {
 	Preview      string
 }
 
-func (m Model) renderDumpFocusList(limit int) []string {
+func (m *Model) renderDumpFocusList(limit int) []string {
 	if len(m.dumps) == 0 {
 		return []string{"No dumps found."}
 	}
@@ -49,7 +49,7 @@ func (m Model) renderDumpFocusList(limit int) []string {
 	return lines
 }
 
-func (m Model) renderDumpDetailPanel(width, height int) (string, []string) {
+func (m *Model) renderDumpDetailPanel(width, height int) (string, []string) {
 	if m.dumpEdit.Active {
 		return "Edit", m.renderSelectedDumpDetailLines(width, height)
 	}
@@ -57,13 +57,13 @@ func (m Model) renderDumpDetailPanel(width, height int) (string, []string) {
 	return "Dump", m.renderSelectedDumpDetailLines(width, height)
 }
 
-func (m Model) renderSelectedDumpDetail() string {
+func (m *Model) renderSelectedDumpDetail() string {
 	lines := append([]string{"Dump"}, m.renderSelectedDumpDetailLines(72, 16)...)
 
 	return strings.Join(lines, "\n")
 }
 
-func (m Model) renderSelectedDumpDetailLines(width, height int) []string {
+func (m *Model) renderSelectedDumpDetailLines(width, height int) []string {
 	dump, ok := m.selectedDumpView()
 	if !ok {
 		return []string{"No dump selected."}
@@ -105,7 +105,7 @@ func renderContentReadLines(content string, width int) []string {
 	return lines
 }
 
-func (m Model) renderSelectedDumpEditLines(_ []string, width, height int) []string {
+func (m *Model) renderSelectedDumpEditLines(_ []string, width, height int) []string {
 	lines := []string{shellMutedStyle.Render(m.dumpActionHint())}
 
 	editorHeight := maxInt(height-len(lines)-1, 3)
@@ -123,7 +123,7 @@ func indentLines(lines []string, prefix string) []string {
 	return indented
 }
 
-func (m Model) renderDumpEditInput(width, height int) string {
+func (m *Model) renderDumpEditInput(width, height int) string {
 	input := m.dumpEdit.Input
 	input.SetWidth(maxInt(width, 1))
 	input.SetHeight(maxInt(height, 3))
@@ -131,7 +131,7 @@ func (m Model) renderDumpEditInput(width, height int) string {
 	return input.View()
 }
 
-func (m Model) renderDumps() string {
+func (m *Model) renderDumps() string {
 	if len(m.dumps) == 0 {
 		return "Dumps\n  No dumps found.\n\n  " + m.dumpActionHint()
 	}
@@ -157,7 +157,7 @@ func (m Model) renderDumps() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m Model) dumpActionHint() string {
+func (m *Model) dumpActionHint() string {
 	if m.dumpEdit.Active {
 		return "ctrl+s save  esc cancel  alt+e external"
 	}
@@ -169,7 +169,7 @@ func (m Model) dumpActionHint() string {
 	return "enter edit  alt+e external  c create  r refresh"
 }
 
-func (m Model) updateDumpsKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateDumpsKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "c":
 		m.planDumpAction(DumpActionCreate)
@@ -190,7 +190,7 @@ func (m Model) updateDumpsKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) selectedDumpView() (DumpView, bool) {
+func (m *Model) selectedDumpView() (DumpView, bool) {
 	for _, dump := range m.dumps {
 		if dump.Index == m.selectedDump {
 			return dump, true
@@ -234,7 +234,7 @@ func (m *Model) selectNextDump() {
 	m.selectedDump = m.dumps[position+1].Index
 }
 
-func (m Model) selectedDumpPosition() int {
+func (m *Model) selectedDumpPosition() int {
 	for index, dump := range m.dumps {
 		if dump.Index == m.selectedDump {
 			return index

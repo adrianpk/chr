@@ -116,7 +116,7 @@ func DefaultCommandRegistry() []Command {
 	return commands
 }
 
-func (m Model) renderCommandPalette() string {
+func (m *Model) renderCommandPalette() string {
 	if !m.commandPalette.Open {
 		return ""
 	}
@@ -149,7 +149,7 @@ func (m Model) renderCommandPalette() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m Model) updateCommandPaletteKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateCommandPaletteKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.Type {
 	case tea.KeyEsc:
 		m.closeCommandPalette()
@@ -171,7 +171,7 @@ func (m Model) updateCommandPaletteKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) updateCommandPaletteRunes(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateCommandPaletteRunes(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if msg.Type != tea.KeyRunes {
 		return m, nil
 	}
@@ -290,7 +290,7 @@ func (m *Model) selectView(view View) {
 }
 
 //nolint:wsl_v5 // Filtering keeps predicate and append adjacent.
-func (m Model) filteredCommands() []Command {
+func (m *Model) filteredCommands() []Command {
 	filter := strings.ToLower(strings.TrimSpace(m.commandPalette.Filter))
 	if filter == "" {
 		commands := []Command{}
@@ -318,7 +318,7 @@ func (m Model) filteredCommands() []Command {
 	return commands
 }
 
-func (m Model) commandAvailableInCurrentView(command Command) bool {
+func (m *Model) commandAvailableInCurrentView(command Command) bool {
 	if command.Action == CommandActionPlanSpec {
 		return m.SelectedView() == ViewSpecs
 	}
@@ -341,7 +341,7 @@ func (c Command) Matches(filter string) bool {
 		strings.Contains(strings.ToLower(c.Description), filter)
 }
 
-func (m Model) selectedSourcePathMessage() string {
+func (m *Model) selectedSourcePathMessage() string {
 	path := m.selectedSourcePath()
 	if path == "" {
 		return "No selected source path is available."
@@ -351,7 +351,7 @@ func (m Model) selectedSourcePathMessage() string {
 }
 
 //nolint:cyclop // Source resolution is intentionally centralized by view.
-func (m Model) selectedSourcePath() string {
+func (m *Model) selectedSourcePath() string {
 	switch m.SelectedView() {
 	case ViewBoard, ViewTickets:
 		ticket, ok := m.selectedTicketView()
@@ -387,7 +387,7 @@ func (m Model) selectedSourcePath() string {
 	return ""
 }
 
-func (m Model) selectedQuizSourcePath() string {
+func (m *Model) selectedQuizSourcePath() string {
 	quiz, ok := m.selectedQuizView()
 	if !ok {
 		return ""
@@ -400,7 +400,7 @@ func (m Model) selectedQuizSourcePath() string {
 	return quiz.RawPath
 }
 
-func (m Model) selectedDocumentSourcePath() string {
+func (m *Model) selectedDocumentSourcePath() string {
 	document, ok := m.selectedDocumentViewFor(m.currentDocumentViews())
 	if !ok {
 		return ""

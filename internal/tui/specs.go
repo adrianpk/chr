@@ -17,7 +17,7 @@ type SpecView struct {
 	Content      string
 }
 
-func (m Model) renderSpecFocusList(limit int) []string {
+func (m *Model) renderSpecFocusList(limit int) []string {
 	if len(m.specs) == 0 {
 		return []string{"No use cases found."}
 	}
@@ -39,7 +39,7 @@ func (m Model) renderSpecFocusList(limit int) []string {
 	return lines
 }
 
-func (m Model) renderSelectedSpecDetailLines(width int) []string {
+func (m *Model) renderSelectedSpecDetailLines(width int) []string {
 	spec, ok := m.selectedSpecView()
 	if !ok {
 		return []string{"No use case selected."}
@@ -73,7 +73,7 @@ func (m Model) renderSelectedSpecDetailLines(width int) []string {
 	return lines
 }
 
-func (m Model) renderSpecs() string {
+func (m *Model) renderSpecs() string {
 	if len(m.specs) == 0 {
 		return "Specs\n  No use cases found.\n\n  " + m.specActionHint()
 	}
@@ -101,11 +101,11 @@ func (m Model) renderSpecs() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m Model) specActionHint() string {
+func (m *Model) specActionHint() string {
 	return "g generate spec  f generate feature  r refresh"
 }
 
-func (m Model) selectedSpecView() (SpecView, bool) {
+func (m *Model) selectedSpecView() (SpecView, bool) {
 	for _, spec := range m.specs {
 		if spec.Index == m.selectedSpec {
 			return spec, true
@@ -149,7 +149,7 @@ func (m *Model) selectNextSpec() {
 	m.selectedSpec = m.specs[position+1].Index
 }
 
-func (m Model) selectedSpecPosition() int {
+func (m *Model) selectedSpecPosition() int {
 	for index, spec := range m.specs {
 		if spec.Index == m.selectedSpec {
 			return index
@@ -177,7 +177,7 @@ func (m *Model) selectSpecByScope(scope QuizScope) {
 	m.selectedSpec = 0
 }
 
-func (m Model) selectedSpecScope() QuizScope {
+func (m *Model) selectedSpecScope() QuizScope {
 	spec, ok := m.selectedSpecView()
 	if !ok {
 		return QuizScope{}

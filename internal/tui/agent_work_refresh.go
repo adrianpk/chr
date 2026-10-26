@@ -42,7 +42,7 @@ func agentWorkRefreshTickCmd() tea.Cmd {
 	})
 }
 
-func (m Model) startAgentWorkRefresh() tea.Cmd {
+func (m *Model) startAgentWorkRefresh() tea.Cmd {
 	if m.agentWorkRefreshExecutor == nil {
 		return nil
 	}
@@ -52,8 +52,10 @@ func (m Model) startAgentWorkRefresh() tea.Cmd {
 		request.WorkflowID = m.observability.WorkflowPage.Items[0].ID
 	}
 
+	executor := m.agentWorkRefreshExecutor
+
 	return func() tea.Msg {
-		result, err := m.agentWorkRefreshExecutor.RefreshAgentWork(request)
+		result, err := executor.RefreshAgentWork(request)
 
 		return agentWorkRefreshFinishedMsg{result: result, err: err}
 	}
@@ -85,7 +87,7 @@ func (m *Model) completeAgentWorkRefresh(msg agentWorkRefreshFinishedMsg) tea.Cm
 	return agentWorkRefreshTickCmd()
 }
 
-func (m Model) handleAgentWorkRefreshTick() (tea.Model, tea.Cmd) {
+func (m *Model) handleAgentWorkRefreshTick() (tea.Model, tea.Cmd) {
 	if m.guided.Active {
 		command := m.refreshGuided()
 
@@ -109,7 +111,7 @@ func (m Model) handleAgentWorkRefreshTick() (tea.Model, tea.Cmd) {
 	return m, m.startAgentWorkRefresh()
 }
 
-func (m Model) updateAgentWorkRefreshMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
+func (m *Model) updateAgentWorkRefreshMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 	switch typedMsg := msg.(type) {
 	case agentWorkRefreshTickMsg:
 		updated, cmd := m.handleAgentWorkRefreshTick()

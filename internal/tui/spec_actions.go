@@ -54,7 +54,7 @@ type specActionFinishedMsg struct {
 	Err     error
 }
 
-func (m Model) renderSpecAction() string {
+func (m *Model) renderSpecAction() string {
 	if !m.specAction.Pending {
 		return ""
 	}
@@ -73,7 +73,7 @@ func (m Model) renderSpecAction() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m Model) updateSpecsKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateSpecsKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "g":
 		cmd := m.startSpecAction(SpecActionRequest{
@@ -105,7 +105,7 @@ func (m Model) updateSpecsKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) updateSpecActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateSpecActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.Type {
 	case tea.KeyEsc:
 		m.cancelSpecAction()
@@ -121,7 +121,7 @@ func (m *Model) planSpecAction(action SpecActionID) {
 	m.statusMessage = ""
 }
 
-func (m Model) newSpecActionState(action SpecActionID) SpecActionState {
+func (m *Model) newSpecActionState(action SpecActionID) SpecActionState {
 	scope := m.selectedSpecScope()
 
 	return SpecActionState{
@@ -150,7 +150,7 @@ func (m *Model) confirmSpecAction() tea.Cmd {
 	return m.startSpecAction(request)
 }
 
-func (m Model) executeSpecActionCommand(request SpecActionRequest) tea.Cmd {
+func (m *Model) executeSpecActionCommand(request SpecActionRequest) tea.Cmd {
 	executor := m.specExecutor
 
 	return func() tea.Msg {

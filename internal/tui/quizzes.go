@@ -37,7 +37,7 @@ type QuizView struct {
 	CuratedPreview        string
 }
 
-func (m Model) renderQuizFocusList(limit int) []string {
+func (m *Model) renderQuizFocusList(limit int) []string {
 	if len(m.quizzes) == 0 {
 		return []string{"No quiz use cases found."}
 	}
@@ -59,7 +59,7 @@ func (m Model) renderQuizFocusList(limit int) []string {
 	return lines
 }
 
-func (m Model) renderSelectedQuizDetailLines(width int) []string {
+func (m *Model) renderSelectedQuizDetailLines(width int) []string {
 	quiz, ok := m.selectedQuizView()
 	if !ok {
 		return []string{"No quiz selected."}
@@ -94,7 +94,7 @@ func (m Model) renderSelectedQuizDetailLines(width int) []string {
 	return lines
 }
 
-func (m Model) renderSelectedQuizAnswerLines(quiz QuizView, width int) []string {
+func (m *Model) renderSelectedQuizAnswerLines(quiz QuizView, width int) []string {
 	lines := []string{shellMutedStyle.Render(m.quizActionHint(quiz)), ""}
 	lines = append(lines, wrapPlainText(quiz.ActiveQuestionSummary, maxInt(width, 1))...)
 	lines = append(lines, strings.Split(m.renderQuizAnswerInput(maxInt(width, 1), 6), "\n")...)
@@ -102,7 +102,7 @@ func (m Model) renderSelectedQuizAnswerLines(quiz QuizView, width int) []string 
 	return lines
 }
 
-func (m Model) renderQuizzes() string {
+func (m *Model) renderQuizzes() string {
 	if len(m.quizzes) == 0 {
 		return "Quizzes\n  No quiz use cases found."
 	}
@@ -151,7 +151,7 @@ func quizHumanStatus(quiz QuizView) string {
 	}
 }
 
-func (m Model) quizActionHint(quiz QuizView) string {
+func (m *Model) quizActionHint(quiz QuizView) string {
 	if m.quizBusy {
 		return "Working"
 	}
@@ -171,7 +171,7 @@ func (m Model) quizActionHint(quiz QuizView) string {
 	return "s start  r refresh"
 }
 
-func (m Model) selectedQuizView() (QuizView, bool) {
+func (m *Model) selectedQuizView() (QuizView, bool) {
 	for _, quiz := range m.quizzes {
 		if quiz.Index == m.selectedQuiz {
 			return quiz, true
@@ -233,7 +233,7 @@ func (m *Model) selectQuizByScope(scope QuizScope) {
 	m.selectedQuiz = 0
 }
 
-func (m Model) selectedQuizScope() QuizScope {
+func (m *Model) selectedQuizScope() QuizScope {
 	quiz, ok := m.selectedQuizView()
 	if !ok {
 		return QuizScope{}
@@ -242,7 +242,7 @@ func (m Model) selectedQuizScope() QuizScope {
 	return quiz.Scope
 }
 
-func (m Model) updateQuizzesKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateQuizzesKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "s":
 		cmd := m.startQuizAction(QuizActionRequest{Action: QuizActionStart, Scope: m.selectedQuizScope()})
@@ -263,7 +263,7 @@ func (m Model) updateQuizzesKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) newQuizActionState(action QuizActionID) QuizActionState {
+func (m *Model) newQuizActionState(action QuizActionID) QuizActionState {
 	scope := m.selectedQuizScope()
 	title := quizActionTitle(action)
 
@@ -291,7 +291,7 @@ func (m Model) newQuizActionState(action QuizActionID) QuizActionState {
 	}
 }
 
-func (m Model) selectedQuizPosition() int {
+func (m *Model) selectedQuizPosition() int {
 	for index, quiz := range m.quizzes {
 		if quiz.Index == m.selectedQuiz {
 			return index

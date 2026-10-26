@@ -55,7 +55,7 @@ func BenchmarkModelView(b *testing.B) {
 	}
 }
 
-func benchmarkBoardModel() Model {
+func benchmarkBoardModel() *Model {
 	tickets := make([]core.IndexedTicket, 128)
 	for i := range tickets {
 		tickets[i].Key = fmt.Sprintf("TKT-%04d", i)

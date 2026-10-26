@@ -17,7 +17,7 @@ type PlanView struct {
 	Content      string
 }
 
-func (m Model) renderPlanFocusList(limit int) []string {
+func (m *Model) renderPlanFocusList(limit int) []string {
 	if len(m.plans) == 0 {
 		return []string{"No use cases found."}
 	}
@@ -39,7 +39,7 @@ func (m Model) renderPlanFocusList(limit int) []string {
 	return lines
 }
 
-func (m Model) renderSelectedPlanDetailLines(width int) []string {
+func (m *Model) renderSelectedPlanDetailLines(width int) []string {
 	plan, ok := m.selectedPlanView()
 	if !ok {
 		return []string{"No use case selected."}
@@ -73,7 +73,7 @@ func (m Model) renderSelectedPlanDetailLines(width int) []string {
 	return lines
 }
 
-func (m Model) renderPlans() string {
+func (m *Model) renderPlans() string {
 	if len(m.plans) == 0 {
 		return "Plans\n  No use cases found.\n\n  " + m.planActionHint()
 	}
@@ -101,7 +101,7 @@ func (m Model) renderPlans() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m Model) planActionHint() string {
+func (m *Model) planActionHint() string {
 	if m.selectedPlanCanMaterializeTracking() {
 		return "g generate missing  G regenerate  alt+t tracking  r refresh"
 	}
@@ -109,7 +109,7 @@ func (m Model) planActionHint() string {
 	return "g generate missing  G regenerate  r refresh"
 }
 
-func (m Model) selectedPlanCanMaterializeTracking() bool {
+func (m *Model) selectedPlanCanMaterializeTracking() bool {
 	plan, ok := m.selectedPlanView()
 	if !ok {
 		return false
@@ -120,7 +120,7 @@ func (m Model) selectedPlanCanMaterializeTracking() bool {
 		plan.Status != "missing"
 }
 
-func (m Model) selectedPlanView() (PlanView, bool) {
+func (m *Model) selectedPlanView() (PlanView, bool) {
 	for _, plan := range m.plans {
 		if plan.Index == m.selectedPlan {
 			return plan, true
@@ -164,7 +164,7 @@ func (m *Model) selectNextPlan() {
 	m.selectedPlan = m.plans[position+1].Index
 }
 
-func (m Model) selectedPlanPosition() int {
+func (m *Model) selectedPlanPosition() int {
 	for index, plan := range m.plans {
 		if plan.Index == m.selectedPlan {
 			return index
@@ -192,7 +192,7 @@ func (m *Model) selectPlanByScope(scope QuizScope) {
 	m.selectedPlan = 0
 }
 
-func (m Model) selectedPlanScope() QuizScope {
+func (m *Model) selectedPlanScope() QuizScope {
 	plan, ok := m.selectedPlanView()
 	if !ok {
 		return QuizScope{}
@@ -201,7 +201,7 @@ func (m Model) selectedPlanScope() QuizScope {
 	return plan.Scope
 }
 
-func (m Model) planExistsForScope(scope QuizScope) bool {
+func (m *Model) planExistsForScope(scope QuizScope) bool {
 	for _, plan := range m.plans {
 		if plan.Scope.CaseSlug != scope.CaseSlug {
 			continue

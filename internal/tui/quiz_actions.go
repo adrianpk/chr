@@ -73,7 +73,7 @@ type quizActionFinishedMsg struct {
 	Err     error
 }
 
-func (m Model) renderQuizAction() string {
+func (m *Model) renderQuizAction() string {
 	if !m.quizAction.Pending {
 		return ""
 	}
@@ -92,7 +92,7 @@ func (m Model) renderQuizAction() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m Model) updateQuizActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateQuizActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.Type {
 	case tea.KeyEsc:
 		m.cancelQuizAction()
@@ -103,7 +103,7 @@ func (m Model) updateQuizActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) updateQuizAnswerKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateQuizAnswerKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "esc":
 		m.quizAnswer = QuizAnswerState{}
@@ -173,7 +173,7 @@ func (m *Model) confirmQuizAction() (tea.Model, tea.Cmd) {
 
 	cmd := m.startQuizAction(request)
 
-	return *m, cmd
+	return m, cmd
 }
 
 func (m *Model) saveQuizAnswer() (tea.Model, tea.Cmd) {
@@ -189,10 +189,10 @@ func (m *Model) saveQuizAnswer() (tea.Model, tea.Cmd) {
 		Answer:  answer,
 	})
 
-	return *m, cmd
+	return m, cmd
 }
 
-func (m Model) executeQuizActionCommand(request QuizActionRequest) tea.Cmd {
+func (m *Model) executeQuizActionCommand(request QuizActionRequest) tea.Cmd {
 	executor := m.quizExecutor
 
 	return func() tea.Msg {
@@ -297,7 +297,7 @@ func (m *Model) startQuizAnswerIfActive() {
 	m.startQuizAnswer()
 }
 
-func (m Model) renderQuizAnswerInput(width, height int) string {
+func (m *Model) renderQuizAnswerInput(width, height int) string {
 	input := m.quizAnswer.Input
 	input.SetWidth(maxInt(width, 1))
 	input.SetHeight(maxInt(height, 3))

@@ -34,7 +34,7 @@ type ProjectEditState struct {
 	Input  textinput.Model
 }
 
-func (m Model) updateProjectKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateProjectKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if m.projectEdit.Active {
 		cmd := m.updateProjectEditKey(msg)
 

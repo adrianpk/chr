@@ -7,7 +7,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func (m Model) guidedLines() []string {
+func (m *Model) guidedLines() []string {
 	view := m.guided.View
 
 	lines := []string{"Project: " + view.Project + " · " + view.Namespace}
@@ -44,7 +44,7 @@ func (m Model) guidedLines() []string {
 	return lines
 }
 
-func (m Model) renderGuidedWorkspace(width, height int) string {
+func (m *Model) renderGuidedWorkspace(width, height int) string {
 	var lines []string
 	for _, line := range m.guidedLines() {
 		lines = append(lines, strings.Split(lipgloss.NewStyle().Width(max(width-4, 1)).Render(line), "\n")...)
@@ -81,7 +81,7 @@ func (m Model) renderGuidedWorkspace(width, height int) string {
 	return renderPanel("Guided use cases", lines, width, height, true)
 }
 
-func (m Model) guidedHint() string {
+func (m *Model) guidedHint() string {
 	if m.guided.Editing {
 		return "Enter saves · Ctrl+J adds a line · Esc leaves input · Ctrl+C quits"
 	}

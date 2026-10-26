@@ -110,7 +110,7 @@ func appendDocumentView(
 	return nil
 }
 
-func (m Model) renderDocuments() string {
+func (m *Model) renderDocuments() string {
 	if len(m.documents) == 0 {
 		return "Documents\n  No project documents were found."
 	}
@@ -138,7 +138,7 @@ func (m Model) renderDocuments() string {
 }
 
 //nolint:unused // Kept for legacy/non-shell document family renderers.
-func (m Model) renderDocumentsByFamily(title string, families map[string]bool) string {
+func (m *Model) renderDocumentsByFamily(title string, families map[string]bool) string {
 	documents := m.documentsByFamily(families)
 	if len(documents) == 0 {
 		return title + "\n  No documents found."
@@ -167,7 +167,7 @@ func (m Model) renderDocumentsByFamily(title string, families map[string]bool) s
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m Model) documentsByFamily(families map[string]bool) []DocumentView {
+func (m *Model) documentsByFamily(families map[string]bool) []DocumentView {
 	documents := []DocumentView{}
 
 	for _, document := range m.documents {
@@ -188,11 +188,11 @@ func renderDocumentRow(document DocumentView) string {
 	)
 }
 
-func (m Model) renderSelectedDocumentDetail() string {
+func (m *Model) renderSelectedDocumentDetail() string {
 	return m.renderSelectedDocumentDetailFor(m.documents)
 }
 
-func (m Model) renderSelectedDocumentDetailFor(documents []DocumentView) string {
+func (m *Model) renderSelectedDocumentDetailFor(documents []DocumentView) string {
 	document, ok := m.selectedDocumentViewFor(documents)
 	if !ok {
 		return "Selected Document\n  No document selected."
@@ -213,11 +213,11 @@ func (m Model) renderSelectedDocumentDetailFor(documents []DocumentView) string 
 }
 
 //nolint:unused // Kept for legacy/non-shell document view paths.
-func (m Model) selectedDocumentView() (DocumentView, bool) {
+func (m *Model) selectedDocumentView() (DocumentView, bool) {
 	return m.selectedDocumentViewFor(m.documents)
 }
 
-func (m Model) selectedDocumentViewFor(documents []DocumentView) (DocumentView, bool) {
+func (m *Model) selectedDocumentViewFor(documents []DocumentView) (DocumentView, bool) {
 	for _, document := range documents {
 		if document.Index == m.selectedDocument {
 			return document, true
@@ -263,7 +263,7 @@ func (m *Model) selectNextDocument() {
 	m.selectedDocument = documents[position+1].Index
 }
 
-func (m Model) currentDocumentViews() []DocumentView {
+func (m *Model) currentDocumentViews() []DocumentView {
 	switch m.SelectedView() {
 	case ViewDumps:
 		return m.documentsByFamily(map[string]bool{"dump": true})
@@ -276,7 +276,7 @@ func (m Model) currentDocumentViews() []DocumentView {
 	}
 }
 
-func (m Model) selectedDocumentPosition(documents []DocumentView) int {
+func (m *Model) selectedDocumentPosition(documents []DocumentView) int {
 	for index, document := range documents {
 		if document.Index == m.selectedDocument {
 			return index

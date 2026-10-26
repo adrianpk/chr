@@ -122,7 +122,7 @@ func newSimpleWorkActionState(action WorkActionID, title string, details []strin
 	}
 }
 
-func (m Model) renderWorkAction() string {
+func (m *Model) renderWorkAction() string {
 	if m.workBusy {
 		return m.renderRunningWorkAction()
 	}
@@ -148,7 +148,7 @@ func (m Model) renderWorkAction() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
-func (m Model) renderRunningWorkAction() string {
+func (m *Model) renderRunningWorkAction() string {
 	var output strings.Builder
 
 	output.WriteString("\n\nWork Action Running\n")
@@ -300,7 +300,7 @@ func workActionDetailsComplete(details workActionDetails) bool {
 		details.ExecutionID != ""
 }
 
-func (m Model) updateWorkActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateWorkActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.Type {
 	case tea.KeyEsc:
 		m.cancelWorkAction()
@@ -361,7 +361,7 @@ func (m *Model) confirmWorkAction() tea.Cmd {
 	return m.startWorkAction(request)
 }
 
-func (m Model) executeWorkActionCommand(request WorkActionRequest) tea.Cmd {
+func (m *Model) executeWorkActionCommand(request WorkActionRequest) tea.Cmd {
 	executor := m.workExecutor
 
 	return func() tea.Msg {
@@ -466,7 +466,7 @@ func workActionRequiresReadiness(action WorkActionID) bool {
 	}
 }
 
-func (m Model) blockedWorkReadinessStatus() string {
+func (m *Model) blockedWorkReadinessStatus() string {
 	if m.workReadiness.safeRepairAvailable() {
 		return "Work readiness blocked. Press x to apply safe repair."
 	}

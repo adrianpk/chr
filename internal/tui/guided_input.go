@@ -9,7 +9,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (m Model) updateGuidedOrHarnessKey(message tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
+func (m *Model) updateGuidedOrHarnessKey(message tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
 	if m.guided.Active {
 		updated, command := m.updateGuidedKey(message)
 
@@ -25,7 +25,7 @@ func (m Model) updateGuidedOrHarnessKey(message tea.KeyMsg) (tea.Model, tea.Cmd,
 	return m, nil, false
 }
 
-func (m Model) updateGuidedKey(message tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateGuidedKey(message tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if message.String() == "ctrl+c" {
 		return m, tea.Quit
 	}
@@ -51,7 +51,7 @@ func (m Model) updateGuidedKey(message tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m.guidedActionKey(message.String())
 }
 
-func (m Model) guidedActionKey(key string) (tea.Model, tea.Cmd) {
+func (m *Model) guidedActionKey(key string) (tea.Model, tea.Cmd) {
 	switch key {
 	case "n":
 		command := m.startGuidedRun()
@@ -147,7 +147,7 @@ func (m *Model) editGuidedInput(action string) tea.Cmd {
 	return m.guided.Input.Focus()
 }
 
-func (m Model) updateGuidedInputKey(message tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) updateGuidedInputKey(message tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch message.String() {
 	case "esc":
 		m.guided.Editing = false
