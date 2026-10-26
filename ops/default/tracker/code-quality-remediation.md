@@ -6,7 +6,7 @@ Delivery set: code-quality-remediation
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 1, Inventory and enforceable quality policy; implemented and preparing canonical PR; dev integration pending.
+Active slice: Slice 1, Inventory and enforceable quality policy; reviewing in canonical PR #438; dev integration pending.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b`
 
 Plan: [Single-cycle plan](../plan/code-quality-remediation.md)
@@ -51,7 +51,7 @@ The maintainer approved implementation, conventional commit/push and startup of 
 | T1.3 | Capture an exact temporary debt manifest keyed by declaration identity and offending signature. Reject new or worsened violations, including moved or renamed declarations that do not retain explicit identity. Keep existing defect-oriented lint checks unfiltered; never apply a global new-from-merge-base filter. | implemented | 192edb3fe1ad5b107e058c30b2ca74f46f948380 | go run ./scripts/goquality |
 | T1.4 | Use a maximum of seven parameters initially, then six after Slice 11 and five at closure. Existing violations above the active ceiling may appear only as explicit, shrinking debt. Track all nonconforming result shapes and a separate exact external-interface exception list; do not exempt locally owned interfaces. | implemented | 8e787a9961db4ee9eb51b4984066dd9374ca291d | make check-go-style; ceiling 7; 532 exact debt entries; one external exception |
 | T1.5 | Exercise the checker with compact table-driven fixtures, including same-branch execution on dev, unchanged debt, new declarations, named results, aliases and stale exemptions. Establish the package dependency and naming ledger used by later moves; resolve shared-value ownership before a move can form an import cycle. | implemented | 7cf213f4ed4e10290feb4efdcfb8e477b291f46c | go test ./scripts/goquality; focused strict lint; production scan |
-| T1.6 | Validate this slice, update its ticket/tracker, produce its report, and verify integration into dev. | reviewing | task commit: docs(slice-1): report bounded quality guardrails | Focused checks passed; final clean-HEAD controller validation and dev integration are separate evidence |
+| T1.6 | Validate this slice, update its ticket/tracker, produce its report, and verify integration into dev. | reviewing | 72c769c47790e2f502309e2646f7769b97419bba | Focused checks passed; final clean-HEAD controller validation and dev integration are separate evidence |
 
 ### Slice 2: Shared boundary values and residual core helpers
 
@@ -223,7 +223,7 @@ The maintainer approved implementation, conventional commit/push and startup of 
 
 | Number | State | Ticket | PR | Integrated commit | Report |
 | --- | --- | --- | --- | --- | --- |
-| 1 | reviewing | TKT-20261026084821 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-1-policy.md` |
+| 1 | reviewing | TKT-20261026084821 | #438 | — | `ops/default/report/slices/code-quality-remediation/slice-1-policy.md` |
 | 2 | pending | TKT-20261026084822 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-2-values.md` |
 | 3 | pending | TKT-20261026084823 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-3-storage.md` |
 | 4 | pending | TKT-20261026084824 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-4-commands.md` |
