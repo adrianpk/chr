@@ -256,9 +256,7 @@ func (m *Model) filteredCases() []core.CaseMetadata {
 	return cases
 }
 
-func (m *Model) caseMetadataFromSuggestions(
-	suggestions []core.WorkspaceCaseSuggestion,
-) []core.CaseMetadata {
+func (m *Model) caseMetadataFromSuggestions(suggestions []core.WorkspaceCaseSuggestion) []core.CaseMetadata {
 	bySlug := make(map[string]core.CaseMetadata, len(m.cases))
 	for _, metadata := range m.cases {
 		bySlug[metadata.Slug] = metadata

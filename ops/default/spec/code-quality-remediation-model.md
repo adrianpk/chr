@@ -322,3 +322,26 @@ two retained cohesive five-input panel renderers, and the one exact imposed
 Bubble Tea Update interface. No assigned declaration remains in temporary debt.
 The global ceiling remains seven with 425 exact debt entries and one external
 exception; enforcing later slices is still the recorded policy.
+
+
+## Slice 5 measured boundary
+
+The same 128-ticket fixture and three 200ms samples per case compare baseline
+production ad40e8b089b7 (benchmark fixture introduced in c016b6c2a5a0) with clean
+production 739cdf1b3e1b. Model remains 49,832 bytes; the measured improvement comes
+from retaining its pointer rather than shrinking unrelated value records.
+Median Update allocation bytes change from 229,376 to zero for idle, 345,162 to
+1,096 for pane focus, and 172,032 to zero for resize. Allocation counts change
+from 4/15/3 to 0/9/0 respectively. Median times change from 51,532/88,149/41,288 ns
+to 14.61/847.7/13.98 ns for these isolated event-loop paths.
+
+Median plain/shell View time changes from 225,533/692,490 ns to 122,040/497,802 ns.
+Their allocation counts remain 703/1,404 and bytes remain approximately
+435/550 KB. Rendering allocations are not claimed fixed. These measurements
+cover the named paths on the same machine; they do not justify blanket pointer
+changes for the remaining general hugeParam or range-copy signals. The raw
+sample ledger names the production revisions and retains all 30 observations.
+
+After the mechanical proofs, one moved case helper's signature header is put on
+a single line to satisfy the repository's signature-format rule. Its types and
+body are unchanged. The historical move hashes retain their original scope.
