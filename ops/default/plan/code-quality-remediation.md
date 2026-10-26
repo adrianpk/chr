@@ -7,7 +7,7 @@ Planning authorization: maintainer request, 2026-10-26.
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 3, Stable records and positional SQL; in progress on its approved branch; predecessor PR #439 verified integrated.
+Active slice: Slice 3, Stable records and positional SQL; implementation complete, preparing its canonical PR and exact-head controller validation; predecessor PR #439 verified integrated.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b` on dev.
 
 Spec: [Remediation requirements](../spec/code-quality-remediation.md)
@@ -96,7 +96,7 @@ Focused selection: Focused config/context/proving/workspace tests; compile affec
 ### Slice 3: Stable records and positional SQL
 
 Findings: R1, R2, R5, R9, R10.
-Ticket: [TKT-20261026084823](../ticket/in_progress/20261026084823-quality-storage.md).
+Ticket: [TKT-20261026084823](../ticket/reviewing/20261026084823-quality-storage.md).
 
 1. **T3.1:** Freeze compatibility fixtures for WorkflowInvocation, WorkflowMergerInput, IndexedTicket and WorkflowWorkStatus before grouping fields. Record all field names, tags, omit rules, timestamps, state values and canonical hashing paths in the model companion.
 2. **T3.2:** Group cohesive identity, Git, timing and outcome fields while preserving existing encoded bytes wherever bytes feed hashes or retained evidence. Keep a dedicated flat serialization shape when embedding changes order or omission. Update construction, scanning and mapping code together.
@@ -406,7 +406,7 @@ Cost: runtime gates were not rerun for this planning task. Budget each slice for
 | --- | --- | --- | --- |
 | 1 | [TKT-20261026084821](../ticket/solved/20261026084821-quality-policy.md) | Inventory and enforceable quality policy | ready; predecessor applies |
 | 2 | [TKT-20261026084822](../ticket/solved/20261026084822-quality-values.md) | Shared boundary values and residual core helpers | ready; predecessor applies |
-| 3 | [TKT-20261026084823](../ticket/in_progress/20261026084823-quality-storage.md) | Stable records and positional SQL | ready; predecessor applies |
+| 3 | [TKT-20261026084823](../ticket/reviewing/20261026084823-quality-storage.md) | Stable records and positional SQL | ready; predecessor applies |
 | 4 | [TKT-20261026084824](../ticket/ready/20261026084824-quality-commands.md) | Typed commands and central application operations | ready; predecessor applies |
 | 5 | [TKT-20261026084825](../ticket/ready/20261026084825-quality-views.md) | TUI model ownership and Web view sections | ready; predecessor applies |
 | 6 | [TKT-20261026084826](../ticket/ready/20261026084826-quality-leaves.md) | Gate, notifications and project packages | ready; predecessor applies |
