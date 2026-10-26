@@ -137,3 +137,13 @@ result shapes keep exact explicit identities until their assigned conversion.
 A real command regression supplies invalid legacy root metadata and verifies
 that bound migration assets determine the action's behavior. CLI names, flags,
 output streams, action contexts and dependency ownership remain explicit.
+
+The [mechanical move ledger](../plan/code-quality-remediation-slice-4-moves.csv)
+records all 292 declarations split from ticket.go, author.go, maintenance.go
+and service_work.go. The SHA-256 for every declaration is unchanged by this
+move, including comments and bodies. The 29 resulting files separate command
+branches, preflight/workspace/execution mechanics, authoring modes, maintenance
+areas and work selection/review/merge/cycle stages. All remain in internal/app;
+no new service type or package changes ownership at this mechanical step.
+Exact temporary debt identities follow their declarations, including later
+authoring-owned tuples. Semantic ticket-operation changes follow separately.
