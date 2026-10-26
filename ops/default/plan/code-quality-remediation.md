@@ -128,7 +128,7 @@ Focused selection: CLI command-construction and ticket loop/start/review/merge r
 ### Slice 5: TUI model ownership and Web view sections
 
 Findings: R1, R2, R4, R5, R6, R10.
-Ticket: [TKT-20261026084825](../ticket/in_progress/20261026084825-quality-views.md).
+Ticket: [TKT-20261026084825](../ticket/reviewing/20261026084825-quality-views.md).
 
 1. **T5.1:** Measure the existing Model Update and View paths with a small benchmark before changing receivers. Make *Model the Bubble Tea model and group navigation, interaction, layout, background work and per-view state by owner.
 2. **T5.2:** Convert internal update helpers into pointer-receiver methods returning tea.Cmd or a named outcome. Retain only externally imposed interface signatures, initially Model.Update. Inspect captured commands, message ordering, cancellation, snapshots and test assumptions for aliasing or concurrent mutation.
@@ -408,7 +408,7 @@ Cost: runtime gates were not rerun for this planning task. Budget each slice for
 | 2 | [TKT-20261026084822](../ticket/solved/20261026084822-quality-values.md) | Shared boundary values and residual core helpers | ready; predecessor applies |
 | 3 | [TKT-20261026084823](../ticket/solved/20261026084823-quality-storage.md) | Stable records and positional SQL | ready; predecessor applies |
 | 4 | [TKT-20261026084824](../ticket/solved/20261026084824-quality-commands.md) | Typed commands and central application operations | ready; predecessor applies |
-| 5 | [TKT-20261026084825](../ticket/in_progress/20261026084825-quality-views.md) | TUI model ownership and Web view sections | ready; predecessor applies |
+| 5 | [TKT-20261026084825](../ticket/reviewing/20261026084825-quality-views.md) | TUI model ownership and Web view sections | ready; predecessor applies |
 | 6 | [TKT-20261026084826](../ticket/ready/20261026084826-quality-leaves.md) | Gate, notifications and project packages | ready; predecessor applies |
 | 7 | [TKT-20261026084827](../ticket/ready/20261026084827-quality-telegram.md) | Telegram transport, receiver and retained delivery | ready; predecessor applies |
 | 8 | [TKT-20261026084828](../ticket/ready/20261026084828-quality-quiz.md) | Quiz domain and model adapter | ready; predecessor applies |
