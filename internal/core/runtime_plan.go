@@ -157,15 +157,6 @@ func fillWorkWorkspaceConfigDefaults(config WorkWorkspaceConfig) WorkWorkspaceCo
 	return config
 }
 
-func resolveProjectPath(projectDir, configuredPath string) string {
-	path := filepath.Clean(filepath.FromSlash(configuredPath))
-	if filepath.IsAbs(path) {
-		return path
-	}
-
-	return filepath.Join(projectDir, path)
-}
-
 func runtimeExecutionWorkspaceDir(projectDir string, mode WorkWorkspaceMode, configuredPath string) string {
 	if mode != WorkWorkspaceModeWorktree || strings.TrimSpace(configuredPath) == "" {
 		return projectDir

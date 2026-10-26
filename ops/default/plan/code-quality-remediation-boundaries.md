@@ -51,6 +51,23 @@ in the same compiling unit. The approved owner handles unresolved shared-value
 cohesion before moving; exporting private internals or adding a generic common,
 util or options package is not an acceptable cycle repair.
 
+## Shared declarations resolved in Slice 2
+
+| Declaration owner | Actual consumers and dependency decision |
+| --- | --- |
+| core/content_hash.go | Existing workflowHash SHA-256 implementation; workflow, guided checkpoints, authoring and configuration use the same bytes and encoding. It has no storage/coordinator dependency. The existing name and calls remain intact; there is no forwarding facade. |
+| core/project_paths.go | resolveProjectPath and pathIsInsideProject; runtime, context and workspace consumers retain absolute/relative containment behavior. This owner depends only on filepath and strings. |
+| core/project_files.go | Existing writeFileAtomically; project/artifact consumers retain their own permission, locking and transaction decisions. This helper keeps its existing temporary-file behavior and is not substituted for guarded workflow writes. |
+| core/config.go, config_workflow.go and capability config files | WorkspaceConfig and its configuration values stay in the existing configuration owner. Configuration parsing must not import the future workflow coordinator. Shared workflow state may be a dependency only when it has no dependency back to configuration or stages. |
+| core/user_environment.go | Existing UserEnvironment boundary is reused; operation contexts remain explicit. No new global service, generic options object or stored context is introduced. |
+| core/ops_layout.go and ops_named_artifact.go | Existing operational layout and new NamedOpsArtifactPath own absolute/project-relative body paths. Authoring callers keep their distinct validation, approval and publication operations. |
+
+These are concrete declarations, not a request to export unrelated private
+helpers. Before a consumer moves, its package receives only the values and
+consumer-owned operations it actually needs. A stage cannot import its
+coordinator to reach these helpers. Current core has no new import edge and
+the extracted functions are unchanged, so no new package cycle is introduced.
+
 ## Domain names
 
 | Term | Governing meaning and constraint |

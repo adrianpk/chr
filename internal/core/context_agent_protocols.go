@@ -203,15 +203,6 @@ func cleanAbsTargetPath(projectDir, targetPath string) (string, error) {
 	return filepath.Clean(targetPath), nil
 }
 
-func pathIsInsideProject(projectDir, targetPath string) bool {
-	rel, err := filepath.Rel(projectDir, targetPath)
-	if err != nil {
-		return false
-	}
-
-	return rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator))
-}
-
 func targetDirectory(targetPath string) string {
 	info, err := os.Stat(targetPath)
 	if err == nil && info.IsDir() {

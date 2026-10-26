@@ -1,8 +1,6 @@
 package core
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -15,12 +13,6 @@ type workflowFileChange struct {
 	Path   string `json:"path"`
 	Before string `json:"before"`
 	After  []byte `json:"after"`
-}
-
-func workflowHash(data []byte) string {
-	hash := sha256.Sum256(data)
-
-	return hex.EncodeToString(hash[:])
 }
 
 func readWorkflowFile(path string) ([]byte, error) {
