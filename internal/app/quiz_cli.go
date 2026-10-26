@@ -10,93 +10,93 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func newQuizCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) quizCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "quiz",
 		Usage: "Manage runtime quizzes",
 		Commands: []*cli.Command{
-			newQuizAnswerCommand(stdout),
-			newQuizCancelCommand(stdout),
-			newQuizCompleteCommand(stdout),
-			newQuizListCommand(stdout),
-			newQuizModeCommand(stdout),
-			newQuizResumeCommand(stdout),
-			newQuizSkipCommand(stdout),
-			newQuizStartCommand(stdout),
+			factory.quizAnswerCommand(),
+			factory.quizCancelCommand(),
+			factory.quizCompleteCommand(),
+			factory.quizListCommand(),
+			factory.quizModeCommand(),
+			factory.quizResumeCommand(),
+			factory.quizSkipCommand(),
+			factory.quizStartCommand(),
 		},
 	}
 }
 
-func newQuizListCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) quizListCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "list",
 		Usage:  "List runtime quizzes",
 		Flags:  ticketProjectFlags(),
-		Action: quizListAction(stdout),
+		Action: factory.runQuizList,
 	}
 }
 
-func newQuizStartCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) quizStartCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "start",
 		Usage:  "Start a runtime quiz",
 		Flags:  quizStartFlags(),
-		Action: quizStartAction(stdout),
+		Action: factory.runQuizStart,
 	}
 }
 
-func newQuizResumeCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) quizResumeCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "resume",
 		Usage:  "Resume a runtime quiz",
 		Flags:  workspaceScopeFlags(),
-		Action: quizResumeAction(stdout),
+		Action: factory.runQuizResume,
 	}
 }
 
-func newQuizAnswerCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) quizAnswerCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "answer",
 		Usage:  "Answer the active runtime quiz question",
 		Flags:  quizAnswerFlags(),
-		Action: quizAnswerAction(stdout),
+		Action: factory.runQuizAnswer,
 	}
 }
 
-func newQuizSkipCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) quizSkipCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "skip",
 		Usage:  "Skip the active runtime quiz question",
 		Flags:  workspaceScopeFlags(),
-		Action: quizSkipAction(stdout),
+		Action: factory.runQuizSkip,
 	}
 }
 
-func newQuizCompleteCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) quizCompleteCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "complete",
 		Usage:  "Complete a runtime quiz",
 		Flags:  workspaceScopeFlags(),
-		Action: quizCompleteAction(stdout),
+		Action: factory.runQuizComplete,
 	}
 }
 
-func newQuizCancelCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) quizCancelCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "cancel",
 		Usage:  "Cancel a runtime quiz",
 		Flags:  workspaceScopeFlags(),
-		Action: quizCancelAction(stdout),
+		Action: factory.runQuizCancel,
 	}
 }
 
-func newQuizModeCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) quizModeCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "mode",
 		Usage:     "Switch runtime quiz mode",
 		ArgsUsage: "<deep|fast>",
 		Flags:     workspaceScopeFlags(),
-		Action:    quizModeAction(stdout),
+		Action:    factory.runQuizMode,
 	}
 }
 
@@ -128,60 +128,12 @@ func quizAnswerFlags() []cli.Flag {
 	)
 }
 
-func quizListAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runQuizList(ctx, cmd, stdout)
-	}
-}
-
-func quizStartAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runQuizStart(ctx, cmd, stdout)
-	}
-}
-
-func quizResumeAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runQuizResume(ctx, cmd, stdout)
-	}
-}
-
-func quizAnswerAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runQuizAnswer(ctx, cmd, stdout)
-	}
-}
-
-func quizSkipAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runQuizSkip(ctx, cmd, stdout)
-	}
-}
-
-func quizCompleteAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runQuizComplete(ctx, cmd, stdout)
-	}
-}
-
-func quizCancelAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runQuizCancel(ctx, cmd, stdout)
-	}
-}
-
-func quizModeAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runQuizMode(ctx, cmd, stdout)
-	}
-}
-
-func runQuizList(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runQuizList(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("quiz list does not accept positional arguments")
 	}
 
-	operations, _, err := serviceFromCommand(ctx, cmd)
+	operations, _, err := factory.serviceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -192,8 +144,7 @@ func runQuizList(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 	}
 
 	for _, state := range result.States {
-		_, err = fmt.Fprintf(
-			stdout,
+		_, err = fmt.Fprintf(factory.io.Stdout,
 			"%s\t%s\t%s\t%s\t%d/%d\n",
 			state.ID,
 			state.CaseSlug,
@@ -210,7 +161,7 @@ func runQuizList(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 	return nil
 }
 
-func runQuizStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runQuizStart(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("quiz start does not accept positional arguments")
 	}
@@ -220,7 +171,7 @@ func runQuizStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) error
 		return fmt.Errorf("quiz mode is invalid: %s", mode)
 	}
 
-	operations, _, err := serviceFromCommand(ctx, cmd)
+	operations, _, err := factory.serviceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -230,15 +181,15 @@ func runQuizStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) error
 		return err
 	}
 
-	return printQuizOperationResult(stdout, result)
+	return printQuizOperationResult(factory.io.Stdout, result)
 }
 
-func runQuizResume(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runQuizResume(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("quiz resume does not accept positional arguments")
 	}
 
-	operations, _, err := serviceFromCommand(ctx, cmd)
+	operations, _, err := factory.serviceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -248,15 +199,15 @@ func runQuizResume(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	return printQuizOperationResult(stdout, result)
+	return printQuizOperationResult(factory.io.Stdout, result)
 }
 
-func runQuizAnswer(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runQuizAnswer(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("quiz answer does not accept positional arguments")
 	}
 
-	operations, _, err := serviceFromCommand(ctx, cmd)
+	operations, _, err := factory.serviceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -266,15 +217,15 @@ func runQuizAnswer(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	return printQuizOperationResult(stdout, result)
+	return printQuizOperationResult(factory.io.Stdout, result)
 }
 
-func runQuizSkip(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runQuizSkip(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("quiz skip does not accept positional arguments")
 	}
 
-	operations, _, err := serviceFromCommand(ctx, cmd)
+	operations, _, err := factory.serviceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -284,15 +235,15 @@ func runQuizSkip(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 		return err
 	}
 
-	return printQuizOperationResult(stdout, result)
+	return printQuizOperationResult(factory.io.Stdout, result)
 }
 
-func runQuizComplete(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runQuizComplete(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("quiz complete does not accept positional arguments")
 	}
 
-	operations, _, err := serviceFromCommand(ctx, cmd)
+	operations, _, err := factory.serviceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -302,15 +253,15 @@ func runQuizComplete(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	return printQuizOperationResult(stdout, result)
+	return printQuizOperationResult(factory.io.Stdout, result)
 }
 
-func runQuizCancel(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runQuizCancel(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("quiz cancel does not accept positional arguments")
 	}
 
-	operations, _, err := serviceFromCommand(ctx, cmd)
+	operations, _, err := factory.serviceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -320,10 +271,10 @@ func runQuizCancel(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	return printQuizOperationResult(stdout, result)
+	return printQuizOperationResult(factory.io.Stdout, result)
 }
 
-func runQuizMode(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runQuizMode(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 1 {
 		return fmt.Errorf("quiz mode requires exactly one mode argument")
 	}
@@ -333,7 +284,7 @@ func runQuizMode(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 		return fmt.Errorf("quiz mode is invalid: %s", mode)
 	}
 
-	operations, _, err := serviceFromCommand(ctx, cmd)
+	operations, _, err := factory.serviceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -343,7 +294,7 @@ func runQuizMode(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 		return err
 	}
 
-	return printQuizOperationResult(stdout, result)
+	return printQuizOperationResult(factory.io.Stdout, result)
 }
 
 func workspaceScopeFromCommand(cmd *cli.Command) core.QuizScope {

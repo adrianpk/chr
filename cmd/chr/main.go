@@ -14,7 +14,7 @@ import (
 var assetsFS embed.FS
 
 func main() {
-	err := app.Run(context.Background(), os.Args[1:], os.Stdin, os.Stdout, os.Stderr, assetsFS)
+	err := app.Run(context.Background(), os.Args[1:], app.IO{Stdin: os.Stdin, Stdout: os.Stdout, Stderr: os.Stderr}, assetsFS)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(app.ExitCode(err))

@@ -9,13 +9,8 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func runTicketStartAuthority(ctx context.Context, cmd *cli.Command, stdout io.Writer) (bool, error) {
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return false, err
-	}
-
-	operations, project, err := workServiceFromCommand(ctx, cmd, deps)
+func (factory commandFactory) runTicketStartAuthority(ctx context.Context, cmd *cli.Command) (bool, error) {
+	operations, project, err := factory.workServiceFromCommand(ctx, cmd)
 	if err != nil {
 		return false, err
 	}
@@ -30,11 +25,11 @@ func runTicketStartAuthority(ctx context.Context, cmd *cli.Command, stdout io.Wr
 			return false, err
 		}
 
-		return false, printAgentWorkLines(stdout, []string{"authority: tracker_compat", "scope: unadopted_legacy"})
+		return false, printAgentWorkLines(factory.io.Stdout, []string{"authority: tracker_compat", "scope: unadopted_legacy"})
 	}
 
 	if cmd.Bool("dry-run") {
-		return true, printNativeTicketStartPreview(operations, config, cmd.Args().First(), stdout)
+		return true, printNativeTicketStartPreview(operations, config, cmd.Args().First(), factory.io.Stdout)
 	}
 
 	result, err := operations.StartAgentWorkTicket(cmd.Args().First())
@@ -42,7 +37,7 @@ func runTicketStartAuthority(ctx context.Context, cmd *cli.Command, stdout io.Wr
 		return true, err
 	}
 
-	return true, printAgentWorkTicket(stdout, result)
+	return true, printAgentWorkTicket(factory.io.Stdout, result)
 }
 
 func printNativeTicketStartPreview(operations service, config core.WorkspaceConfig, key string, stdout io.Writer) error {

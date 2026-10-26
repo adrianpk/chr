@@ -14,20 +14,20 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func newDaemonCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) daemonCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "daemon",
 		Usage: "Coordinate long-running local work",
 		Commands: []*cli.Command{
-			newDaemonStartCommand(stdout),
-			newDaemonStatusCommand(stdout),
-			newDaemonStopCommand(stdout),
-			newDaemonWorkflowCommand(stdout, deps),
+			factory.daemonStartCommand(),
+			factory.daemonStatusCommand(),
+			factory.daemonStopCommand(),
+			factory.daemonWorkflowCommand(),
 		},
 	}
 }
 
-func newDaemonStartCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) daemonStartCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "start",
 		Usage: "Start daemon coordination",
@@ -42,20 +42,20 @@ func newDaemonStartCommand(stdout io.Writer) *cli.Command {
 				Value: 1,
 			},
 		),
-		Action: daemonStartAction(stdout),
+		Action: factory.runDaemonStart,
 	}
 }
 
-func newDaemonStatusCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) daemonStatusCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "status",
 		Usage:  "Report daemon coordination status",
 		Flags:  projectRegistryFlags(),
-		Action: daemonStatusAction(stdout),
+		Action: factory.runDaemonStatus,
 	}
 }
 
-func newDaemonStopCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) daemonStopCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "stop",
 		Usage: "Stop daemon coordination",
@@ -63,29 +63,11 @@ func newDaemonStopCommand(stdout io.Writer) *cli.Command {
 			Name:  "dry-run",
 			Usage: "print the daemon stop plan without writing state",
 		}),
-		Action: daemonStopAction(stdout),
+		Action: factory.runDaemonStop,
 	}
 }
 
-func daemonStartAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runDaemonStart(ctx, cmd, stdout)
-	}
-}
-
-func daemonStatusAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runDaemonStatus(ctx, cmd, stdout)
-	}
-}
-
-func daemonStopAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runDaemonStop(ctx, cmd, stdout)
-	}
-}
-
-func runDaemonStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runDaemonStart(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("daemon start does not accept positional arguments")
 	}
@@ -95,29 +77,24 @@ func runDaemonStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
 	maxIterations := cmd.Int("max-iterations")
 	if maxIterations <= 0 {
 		return fmt.Errorf("max-iterations must be greater than zero")
 	}
 
-	decision, err := daemonStartGuardDecision(ctx, env, deps.assetsFS)
+	decision, err := daemonStartGuardDecision(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
 
 	if cmd.Bool("dry-run") {
-		return printDaemonStartPlan(stdout, env, decision)
+		return printDaemonStartPlan(factory.io.Stdout, env, decision)
 	}
 
-	return runDaemonForegroundLoop(ctx, stdout, env, deps.assetsFS, decision, maxIterations)
+	return runDaemonForegroundLoop(ctx, factory.io.Stdout, env, factory.deps.assetsFS, decision, maxIterations)
 }
 
-func runDaemonStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runDaemonStatus(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("daemon status does not accept positional arguments")
 	}
@@ -127,12 +104,7 @@ func runDaemonStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	repository, err := core.NewDaemonStateRepository(ctx, env, deps.assetsFS)
+	repository, err := core.NewDaemonStateRepository(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -144,7 +116,7 @@ func runDaemonStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 
 	state, err := repository.GetDaemonState(ctx)
 	if errors.Is(err, core.ErrDaemonStateNotFound) {
-		return printDaemonStoppedStatus(stdout, env)
+		return printDaemonStoppedStatus(factory.io.Stdout, env)
 	}
 
 	if err != nil {
@@ -156,7 +128,7 @@ func runDaemonStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	return printDaemonStateStatus(stdout, env, state)
+	return printDaemonStateStatus(factory.io.Stdout, env, state)
 }
 
 func printDaemonStoppedStatus(stdout io.Writer, env core.UserEnvironment) error {
@@ -195,7 +167,7 @@ func formatDaemonStatusTime(value *time.Time) string {
 	return value.Format(time.RFC3339)
 }
 
-func runDaemonStop(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runDaemonStop(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("daemon stop does not accept positional arguments")
 	}
@@ -205,16 +177,11 @@ func runDaemonStop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
 	if !cmd.Bool("dry-run") {
-		return requestDaemonStop(ctx, stdout, env, deps.assetsFS)
+		return requestDaemonStop(ctx, factory.io.Stdout, env, factory.deps.assetsFS)
 	}
 
-	return printDaemonPlan(stdout, "stop", env)
+	return printDaemonPlan(factory.io.Stdout, "stop", env)
 }
 
 func printDaemonPlan(stdout io.Writer, action string, env core.UserEnvironment) error {

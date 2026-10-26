@@ -25,7 +25,7 @@ type telegramReceiver struct {
 	processingLane *core.TelegramProcessingLane
 }
 
-func newTelegramServeCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) telegramServeCommand() *cli.Command {
 	return &cli.Command{
 		Name: "serve", Usage: "Run the foreground receiver with retained conversations and guarded operations",
 		Flags: projectRegistryFlags(),
@@ -38,7 +38,7 @@ func newTelegramServeCommand(stdout io.Writer, deps appDependencies) *cli.Comman
 			ctx, cancel := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 			defer cancel()
 
-			return telegramCommandFailure(serveTelegramReceiver(ctx, env, deps.assetsFS, core.NewTelegramReceiverAPI()))
+			return telegramCommandFailure(serveTelegramReceiver(ctx, env, factory.deps.assetsFS, core.NewTelegramReceiverAPI()))
 		},
 	}
 }

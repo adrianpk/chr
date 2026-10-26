@@ -18,80 +18,62 @@ type appDependencies struct {
 	assetsFS fs.FS
 }
 
-const appDependenciesMetadataKey = "app.dependencies"
-
-func appDependenciesFromCommand(cmd *cli.Command) (appDependencies, error) {
-	value, ok := cmd.Root().Metadata[appDependenciesMetadataKey]
-	if !ok {
-		return appDependencies{}, errors.New("application dependencies are not configured")
-	}
-
-	deps, ok := value.(appDependencies)
-	if !ok {
-		return appDependencies{}, errors.New("application dependencies have an invalid type")
-	}
-
-	return deps, nil
-}
-
 // Run executes the chr application with explicit process IO and embedded
 // command assets.
-func Run(ctx context.Context, args []string, stdin io.Reader, stdout, stderr io.Writer, commandAssetsFS fs.FS) error {
-	deps := appDependencies{assetsFS: commandAssetsFS}
-	cmd := newRootCommand(stdin, stdout, stderr, deps)
+func Run(ctx context.Context, args []string, processIO IO, commandAssetsFS fs.FS) error {
+	factory := commandFactory{io: processIO, deps: appDependencies{assetsFS: commandAssetsFS}}
+	cmd := factory.rootCommand()
 
 	osArgs := append([]string{"chr"}, args...)
 
 	return cmd.Run(ctx, osArgs)
 }
 
-func newRootCommand(stdin io.Reader, stdout, stderr io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) rootCommand() *cli.Command {
 	return &cli.Command{
-		Name:      "chr",
-		Usage:     "Coordinate agent development workflows from the current project",
-		Reader:    stdin,
-		Writer:    stdout,
-		ErrWriter: stderr,
-		Metadata: map[string]any{
-			appDependenciesMetadataKey: deps,
-		},
+		Name:                  "chr",
+		Usage:                 "Coordinate agent development workflows from the current project",
+		Reader:                factory.io.Stdin,
+		Writer:                factory.io.Stdout,
+		ErrWriter:             factory.io.Stderr,
 		EnableShellCompletion: true,
-		Action:                runDefaultTUIAction(stdin, stdout, deps),
+		Action:                factory.runDefaultTUIAction,
 		Commands: []*cli.Command{
-			newPiWorkerCommand(stdin, stdout), newPiBridgeCommand(stdin, stdout),
-			newAcceptanceCommand(stdout, deps),
-			newAuthorCommand(stdout, deps),
-			newDaemonCommand(stdout, deps),
-			newDumpCommand(stdout, deps),
-			newGateCommand(stdout, deps),
-			newHarnessCommand(stdout, deps),
-			newIndexCommand(stdout, deps),
-			newInitCommand(stdout, deps),
-			newMaintenanceCommand(stdout, deps),
-			newMetadataCommand(stdout, deps),
-			newNotifyCommand(stdout, deps),
-			newPlanCommand(stdout, deps),
-			newProjectCommand(stdout, deps),
-			newProvingCommand(stdout, deps),
-			newQuizCommand(stdout, deps),
-			newReportCommand(stdout, deps),
-			newSpecCommand(stdout, deps),
-			newRuntimeCommand(stdout, deps),
-			newTicketCommand(stdout, deps),
-			newTelegramCommand(stdin, stdout, deps),
-			newTUICommand(stdin, stdout, deps),
-			newWebCommand(stdin, stdout, deps),
-			newWorkCommand(stdout, deps),
+			factory.piWorkerCommand(),
+			factory.piBridgeCommand(),
+			factory.acceptanceCommand(),
+			factory.authorCommand(),
+			factory.daemonCommand(),
+			factory.dumpCommand(),
+			factory.gateCommand(),
+			factory.harnessCommand(),
+			factory.indexCommand(),
+			factory.initCommand(),
+			factory.maintenanceCommand(),
+			factory.metadataCommand(),
+			factory.notifyCommand(),
+			factory.planCommand(),
+			factory.projectCommand(),
+			factory.provingCommand(),
+			factory.quizCommand(),
+			factory.reportCommand(),
+			factory.specCommand(),
+			factory.runtimeCommand(),
+			factory.ticketCommand(),
+			factory.telegramCommand(),
+			factory.tuiCommand(),
+			factory.webCommand(),
+			factory.workCommand(),
 		},
 	}
 }
 
-func newTUICommand(stdin io.Reader, stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) tuiCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "tui",
 		Usage:  "Open the local chr operational console",
 		Flags:  tuiFlags(),
-		Action: runTUICommandAction(stdin, stdout, deps),
+		Action: factory.runTUICommandAction,
 	}
 }
 
@@ -105,70 +87,59 @@ func tuiFlags() []cli.Flag {
 	)
 }
 
-func runDefaultTUIAction(stdin io.Reader, stdout io.Writer, deps appDependencies) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		env, err := newUserEnvironment("")
-		if err != nil {
-			return err
-		}
-
-		projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
-			AllowCurrentDirectory: true,
-		})
-		if err != nil {
-			return err
-		}
-
-		options, err := loadTUIOptions(ctx, env, projectContext, stdin, stdout, deps)
-		if err != nil {
-			return err
-		}
-
-		return runManagedTUI(ctx, options, newService(ctx, env, projectContext, deps.assetsFS))
+func (factory commandFactory) runDefaultTUIAction(ctx context.Context, cmd *cli.Command) error {
+	env, err := newUserEnvironment("")
+	if err != nil {
+		return err
 	}
+
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	options, err := factory.loadTUIOptions(ctx, env, projectContext)
+	if err != nil {
+		return err
+	}
+
+	return runManagedTUI(ctx, options, newService(ctx, env, projectContext, factory.deps.assetsFS))
 }
 
-func runTUICommandAction(stdin io.Reader, stdout io.Writer, deps appDependencies) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		env, err := newUserEnvironmentFromCommand(cmd)
-		if err != nil {
-			return err
-		}
-
-		projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
-			ExplicitDir:           cmd.String("dir"),
-			UseExplicitDir:        cmd.IsSet("dir"),
-			AllowCurrentDirectory: true,
-		})
-		if err != nil {
-			return err
-		}
-
-		options, err := loadTUIOptions(ctx, env, projectContext, stdin, stdout, deps)
-		if err != nil {
-			return err
-		}
-
-		return runManagedTUI(ctx, options, newService(ctx, env, projectContext, deps.assetsFS))
+func (factory commandFactory) runTUICommandAction(ctx context.Context, cmd *cli.Command) error {
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
 	}
+
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	options, err := factory.loadTUIOptions(ctx, env, projectContext)
+	if err != nil {
+		return err
+	}
+
+	return runManagedTUI(ctx, options, newService(ctx, env, projectContext, factory.deps.assetsFS))
 }
 
-func loadTUIOptions(
-	ctx context.Context,
-	env core.UserEnvironment,
-	projectContext commandProjectContext,
-	stdin io.Reader,
-	stdout io.Writer,
-	deps appDependencies,
-) (tui.Options, error) {
+func (factory commandFactory) loadTUIOptions(ctx context.Context, env core.UserEnvironment, projectContext commandProjectContext) (tui.Options, error) {
 	data := tuiOptionsData{
 		ctx:            ctx,
 		env:            env,
 		projectContext: projectContext,
-		stdin:          stdin,
-		stdout:         stdout,
-		assetsFS:       deps.assetsFS,
-		operations:     newService(ctx, env, projectContext, deps.assetsFS),
+		stdin:          factory.io.Stdin,
+		stdout:         factory.io.Stdout,
+		assetsFS:       factory.deps.assetsFS,
+		operations:     newService(ctx, env, projectContext, factory.deps.assetsFS),
 	}
 
 	if err := loadTUIContentData(&data); err != nil {

@@ -12,13 +12,15 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func newHarnessCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) harnessCommand() *cli.Command {
 	return &cli.Command{Name: "harness", Usage: "Inspect or change named harness profiles for new project operations", Commands: []*cli.Command{
-		newHarnessStatusCommand(stdout, deps), newHarnessChangeCommand(stdout, deps, false), newHarnessChangeCommand(stdout, deps, true),
+		factory.harnessStatusCommand(),
+		factory.harnessChangeCommand(false),
+		factory.harnessChangeCommand(true),
 	}}
 }
 
-func newHarnessStatusCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) harnessStatusCommand() *cli.Command {
 	flags := append(workProjectFlags(), &cli.BoolFlag{Name: "json", Usage: "print current selections and prepared choices as JSON"},
 		&cli.StringFlag{Name: "action", Value: "spec_generation", Usage: "generation action whose legacy default is displayed"})
 
@@ -27,7 +29,7 @@ func newHarnessStatusCommand(stdout io.Writer, deps appDependencies) *cli.Comman
 			return fmt.Errorf("harness status does not accept positional arguments")
 		}
 
-		operations, _, err := workServiceFromCommand(ctx, cmd, deps)
+		operations, _, err := factory.workServiceFromCommand(ctx, cmd)
 		if err != nil {
 			return err
 		}
@@ -38,14 +40,14 @@ func newHarnessStatusCommand(stdout io.Writer, deps appDependencies) *cli.Comman
 		}
 
 		if cmd.Bool("json") {
-			return json.NewEncoder(stdout).Encode(result)
+			return json.NewEncoder(factory.io.Stdout).Encode(result)
 		}
 
-		return renderHarnessSelectionStatus(stdout, result)
+		return renderHarnessSelectionStatus(factory.io.Stdout, result)
 	}}
 }
 
-func newHarnessChangeCommand(stdout io.Writer, deps appDependencies, clearChoice bool) *cli.Command {
+func (factory commandFactory) harnessChangeCommand(clearChoice bool) *cli.Command {
 	name, usage := "select", "Select prepared profiles for one or both roles"
 
 	flags := append(workProjectFlags(), &cli.StringFlag{Name: "config-revision", Required: true, Usage: "complete observed configuration revision"},
@@ -65,7 +67,7 @@ func newHarnessChangeCommand(stdout io.Writer, deps appDependencies, clearChoice
 			return err
 		}
 
-		operations, project, err := workServiceFromCommand(ctx, cmd, deps)
+		operations, project, err := factory.workServiceFromCommand(ctx, cmd)
 		if err != nil {
 			return err
 		}
@@ -83,10 +85,11 @@ func newHarnessChangeCommand(stdout io.Writer, deps appDependencies, clearChoice
 		}
 
 		if cmd.Bool("json") {
-			return json.NewEncoder(stdout).Encode(result)
+			return json.NewEncoder(factory.io.Stdout).Encode(result)
 		}
 
-		_, err = fmt.Fprintf(stdout, "Worker: %s\nGeneration: %s\nConfiguration revision: %s\nApplies to new operations.\n", harnessChoiceLabel(result.Worker), harnessChoiceLabel(result.Generation), result.Revision)
+		_, err = fmt.Fprintf(factory.io.Stdout,
+			"Worker: %s\nGeneration: %s\nConfiguration revision: %s\nApplies to new operations.\n", harnessChoiceLabel(result.Worker), harnessChoiceLabel(result.Generation), result.Revision)
 
 		return err
 	}}

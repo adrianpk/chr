@@ -103,7 +103,7 @@ func workflowCLIInjectedControl(t *testing.T, operations service, action string,
 
 	var output bytes.Buffer
 
-	command := newWorkControlCommand(&output, testAppDependencies(), action)
+	command := (commandFactory{deps: testAppDependencies(), io: IO{Stdout: &output}}).workControlCommand(action)
 	command.Action = func(ctx context.Context, cmd *cli.Command) error {
 		return (workWorkflowCLI{stdout: &output}).control(ctx, cmd, operations, action)
 	}

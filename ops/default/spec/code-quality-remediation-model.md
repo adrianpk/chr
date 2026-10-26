@@ -120,3 +120,20 @@ upsert prove rollback preserves the captured table and durable owner images.
 The completed legacy fixture passes SQLite foreign_key_check and opens through
 the existing migrator without changing those rows. All new fixtures are local
 and test-owned.
+
+## Slice 4 typed command boundary
+
+The process entrypoint groups its three streams in app.IO and constructs one
+commandFactory. All 134 command constructors inherit those streams and typed
+assets through the same value; actions use method bindings rather than root
+Metadata lookup. The [constructor inventory](../plan/code-quality-remediation-command-constructors.csv)
+records the complete tree. Seventy-four forwarding action factories are removed.
+
+The [wiring transitions](../plan/code-quality-remediation-slice-4-wiring.csv)
+preserve the original identity of each affected signature allowance. Two
+authoring input violations resolve incidentally when command IO is captured;
+the remaining authoring work retains its approved owner. Existing unresolved
+result shapes keep exact explicit identities until their assigned conversion.
+A real command regression supplies invalid legacy root metadata and verifies
+that bound migration assets determine the action's behavior. CLI names, flags,
+output streams, action contexts and dependency ownership remain explicit.

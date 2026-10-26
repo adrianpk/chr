@@ -3,81 +3,80 @@ package app
 import (
 	"context"
 	"fmt"
-	"io"
 
 	"github.com/urfave/cli/v3"
 )
 
-func newDumpCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) dumpCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "dump",
 		Usage: "Manage workspace dumps",
 		Commands: []*cli.Command{
-			newDumpAppendCommand(stdout),
-			newDumpListCommand(stdout),
-			newDumpNewCommand(stdout),
-			newDumpOpenCommand(stdout),
-			newDumpSaveCommand(stdout),
-			newDumpShowCommand(stdout),
+			factory.dumpAppendCommand(),
+			factory.dumpListCommand(),
+			factory.dumpNewCommand(),
+			factory.dumpOpenCommand(),
+			factory.dumpSaveCommand(),
+			factory.dumpShowCommand(),
 		},
 	}
 }
 
-func newDumpListCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) dumpListCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "list",
 		Usage:  "List dumps for the resolved project",
 		Flags:  ticketProjectFlags(),
-		Action: dumpListAction(stdout),
+		Action: factory.runDumpList,
 	}
 }
 
-func newDumpNewCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) dumpNewCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "new",
 		Usage:  "Create a dump",
 		Flags:  dumpWriteFlags(),
-		Action: dumpNewAction(stdout),
+		Action: factory.runDumpNew,
 	}
 }
 
-func newDumpShowCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) dumpShowCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "show",
 		Usage:     "Show dump content",
 		ArgsUsage: "<project-relative-path>",
 		Flags:     append(ticketProjectFlags(), &cli.BoolFlag{Name: "revision", Usage: "print the observed document revision"}),
-		Action:    dumpShowAction(stdout),
+		Action:    factory.runDumpShow,
 	}
 }
 
-func newDumpSaveCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) dumpSaveCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "save",
 		Usage:     "Replace dump content",
 		ArgsUsage: "<project-relative-path>",
 		Flags:     dumpContentFlags(),
-		Action:    dumpSaveAction(stdout),
+		Action:    factory.runDumpSave,
 	}
 }
 
-func newDumpAppendCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) dumpAppendCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "append",
 		Usage:     "Append content to a dump",
 		ArgsUsage: "<project-relative-path>",
 		Flags:     dumpContentFlags(),
-		Action:    dumpAppendAction(stdout),
+		Action:    factory.runDumpAppend,
 	}
 }
 
-func newDumpOpenCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) dumpOpenCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "open",
 		Usage:     "Print the editor command for a dump",
 		ArgsUsage: "<project-relative-path>",
 		Flags:     ticketProjectFlags(),
-		Action:    dumpOpenAction(stdout),
+		Action:    factory.runDumpOpen,
 	}
 }
 
@@ -105,48 +104,12 @@ func dumpWriteFlags() []cli.Flag {
 	)
 }
 
-func dumpListAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runDumpList(ctx, cmd, stdout)
-	}
-}
-
-func dumpNewAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runDumpNew(ctx, cmd, stdout)
-	}
-}
-
-func dumpShowAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runDumpShow(ctx, cmd, stdout)
-	}
-}
-
-func dumpSaveAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runDumpSave(ctx, cmd, stdout)
-	}
-}
-
-func dumpAppendAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runDumpAppend(ctx, cmd, stdout)
-	}
-}
-
-func dumpOpenAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runDumpOpen(ctx, cmd, stdout)
-	}
-}
-
-func runDumpList(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runDumpList(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("dump list does not accept positional arguments")
 	}
 
-	operations, _, err := serviceFromCommand(ctx, cmd)
+	operations, _, err := factory.serviceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -157,7 +120,8 @@ func runDumpList(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 	}
 
 	for _, dump := range result.Dumps {
-		_, err = fmt.Fprintf(stdout, "%s\t%s\t%s\t%s\n", dump.RelativePath, dump.Scope.CaseSlug, dump.Status, dump.Title)
+		_, err = fmt.Fprintf(factory.io.Stdout,
+			"%s\t%s\t%s\t%s\n", dump.RelativePath, dump.Scope.CaseSlug, dump.Status, dump.Title)
 		if err != nil {
 			return fmt.Errorf("write dump list result: %w", err)
 		}
@@ -166,12 +130,12 @@ func runDumpList(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 	return nil
 }
 
-func runDumpNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runDumpNew(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("dump new does not accept positional arguments")
 	}
 
-	operations, _, err := serviceFromCommand(ctx, cmd)
+	operations, _, err := factory.serviceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -186,7 +150,8 @@ func runDumpNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
 		return err
 	}
 
-	_, err = fmt.Fprintln(stdout, result.Message)
+	_, err = fmt.Fprintln(factory.io.Stdout,
+		result.Message)
 	if err != nil {
 		return fmt.Errorf("write dump new result: %w", err)
 	}
@@ -194,12 +159,12 @@ func runDumpNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
 	return nil
 }
 
-func runDumpShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runDumpShow(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 1 {
 		return fmt.Errorf("dump show requires exactly one path argument")
 	}
 
-	operations, _, err := serviceFromCommand(ctx, cmd)
+	operations, _, err := factory.serviceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -210,9 +175,11 @@ func runDumpShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 	}
 
 	if cmd.Bool("revision") {
-		_, err = fmt.Fprintln(stdout, result.Revision)
+		_, err = fmt.Fprintln(factory.io.Stdout,
+			result.Revision)
 	} else {
-		_, err = fmt.Fprint(stdout, result.Content)
+		_, err = fmt.Fprint(factory.io.Stdout,
+			result.Content)
 	}
 
 	if err != nil {
@@ -222,12 +189,12 @@ func runDumpShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 	return nil
 }
 
-func runDumpSave(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runDumpSave(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 1 {
 		return fmt.Errorf("dump save requires exactly one path argument")
 	}
 
-	operations, _, err := serviceFromCommand(ctx, cmd)
+	operations, _, err := factory.serviceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -246,7 +213,8 @@ func runDumpSave(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 		return err
 	}
 
-	_, err = fmt.Fprintln(stdout, result.Message)
+	_, err = fmt.Fprintln(factory.io.Stdout,
+		result.Message)
 	if err != nil {
 		return fmt.Errorf("write dump save result: %w", err)
 	}
@@ -254,12 +222,12 @@ func runDumpSave(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 	return nil
 }
 
-func runDumpAppend(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runDumpAppend(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 1 {
 		return fmt.Errorf("dump append requires exactly one path argument")
 	}
 
-	operations, _, err := serviceFromCommand(ctx, cmd)
+	operations, _, err := factory.serviceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -278,7 +246,8 @@ func runDumpAppend(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	_, err = fmt.Fprintln(stdout, result.Message)
+	_, err = fmt.Fprintln(factory.io.Stdout,
+		result.Message)
 	if err != nil {
 		return fmt.Errorf("write dump append result: %w", err)
 	}
@@ -286,12 +255,12 @@ func runDumpAppend(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 	return nil
 }
 
-func runDumpOpen(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runDumpOpen(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 1 {
 		return fmt.Errorf("dump open requires exactly one path argument")
 	}
 
-	operations, _, err := serviceFromCommand(ctx, cmd)
+	operations, _, err := factory.serviceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -305,7 +274,8 @@ func runDumpOpen(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 		return fmt.Errorf("dump editor command is missing")
 	}
 
-	_, err = fmt.Fprintf(stdout, "editor: %s %v\n", result.EditorCommand.Program, result.EditorCommand.Args)
+	_, err = fmt.Fprintf(factory.io.Stdout,
+		"editor: %s %v\n", result.EditorCommand.Program, result.EditorCommand.Args)
 	if err != nil {
 		return fmt.Errorf("write dump open result: %w", err)
 	}

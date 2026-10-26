@@ -10,23 +10,23 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func newReportCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) reportCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "report",
 		Usage: "Inspect project reports",
 		Commands: []*cli.Command{
-			newReportListCommand(stdout),
-			newReportShowCommand(stdout),
+			factory.reportListCommand(),
+			factory.reportShowCommand(),
 		},
 	}
 }
 
-func newReportListCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) reportListCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "list",
 		Usage:  "List reports for the resolved project",
 		Flags:  reportListFlags(),
-		Action: reportListAction(stdout),
+		Action: factory.runReportList,
 	}
 }
 
@@ -55,13 +55,13 @@ func reportListFlags() []cli.Flag {
 	)
 }
 
-func newReportShowCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) reportShowCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "show",
 		Usage:     "Show one project report",
 		ArgsUsage: "[report-id]",
 		Flags:     reportShowFlags(),
-		Action:    reportShowAction(stdout),
+		Action:    factory.runReportShow,
 	}
 }
 
@@ -74,19 +74,7 @@ func reportShowFlags() []cli.Flag {
 	)
 }
 
-func reportListAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runReportList(ctx, cmd, stdout)
-	}
-}
-
-func reportShowAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runReportShow(ctx, cmd, stdout)
-	}
-}
-
-func runReportList(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runReportList(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("report list does not accept positional arguments")
 	}
@@ -96,12 +84,7 @@ func runReportList(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -120,10 +103,10 @@ func runReportList(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	return printReportList(stdout, reports)
+	return printReportList(factory.io.Stdout, reports)
 }
 
-func runReportShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runReportShow(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() > 1 {
 		return fmt.Errorf("report show accepts at most one positional argument")
 	}
@@ -133,12 +116,7 @@ func runReportShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -158,10 +136,11 @@ func runReportShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 	}
 
 	if cmd.Bool("metadata") {
-		return printReportList(stdout, []core.ReportListEntry{result.Entry})
+		return printReportList(factory.io.Stdout, []core.ReportListEntry{result.Entry})
 	}
 
-	_, err = fmt.Fprint(stdout, result.Body)
+	_, err = fmt.Fprint(factory.io.Stdout,
+		result.Body)
 	if err != nil {
 		return fmt.Errorf("write report body: %w", err)
 	}

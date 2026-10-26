@@ -26,7 +26,7 @@ import (
 )
 
 func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
-	return Run(ctx, args, strings.NewReader(""), stdout, stderr, testAssetsFS())
+	return Run(ctx, args, IO{Stdin: strings.NewReader(""), Stdout: stdout, Stderr: stderr}, testAssetsFS())
 }
 
 func testAssetsFS() fs.FS {
@@ -45,14 +45,17 @@ func testAppDependencies() appDependencies {
 }
 
 func TestRootCommandDefaultsToTUIAction(t *testing.T) {
-	cmd := newRootCommand(strings.NewReader(""), &bytes.Buffer{}, &bytes.Buffer{}, testAppDependencies())
+	cmd := (commandFactory{deps: testAppDependencies(), io: IO{Stdin: strings.NewReader(""), Stdout: &bytes.Buffer{}, Stderr: &bytes.Buffer{}}}).rootCommand()
 	if cmd.Action == nil {
 		t.Fatal("root command Action is nil")
 	}
 }
 
 func TestRootCommandIncludesTUICommand(t *testing.T) {
-	cmd := newRootCommand(strings.NewReader(""), &bytes.Buffer{}, &bytes.Buffer{}, testAppDependencies())
+	cmd := (commandFactory{deps: testAppDependencies(), io: IO{
+		Stderr: &bytes.Buffer{},
+		Stdin:  strings.NewReader(""), Stdout: &bytes.Buffer{},
+	}}).rootCommand()
 
 	for _, name := range []string{"acceptance", "dump", "metadata", "plan", "quiz", "spec", "tui", "web", "work"} {
 		if rootCommandIncludesCommand(cmd, name) {
@@ -74,7 +77,7 @@ func rootCommandIncludesCommand(cmd *cli.Command, name string) bool {
 }
 
 func TestRootCommandRegistersParitySubcommands(t *testing.T) {
-	cmd := newRootCommand(strings.NewReader(""), &bytes.Buffer{}, &bytes.Buffer{}, testAppDependencies())
+	cmd := (commandFactory{deps: testAppDependencies(), io: IO{Stdin: strings.NewReader(""), Stdout: &bytes.Buffer{}, Stderr: &bytes.Buffer{}}}).rootCommand()
 
 	for _, path := range [][]string{
 		{"metadata", "project", "set"},
@@ -5477,8 +5480,7 @@ func writeIndexedTicketFile(t *testing.T, devRoot, projectDir string) string {
 
 	indexTicket(t, devRoot, projectDir, core.IndexedTicket{
 		IndexedTicketIdentity: core.IndexedTicketIdentity{
-			Key: "CHR-1",
-
+			Key:          "CHR-1",
 			RelativePath: filepath.Join(".chr", "default", "tickets", "CHR-1-Do-something.md"),
 			Path:         ticketPath,
 		}, IndexedTicketSummary: core.IndexedTicketSummary{Title: "Do something"}, IndexedTicketClassification: core.IndexedTicketClassification{Status: "open"},
@@ -6317,8 +6319,7 @@ func TestIndexRebuildIndexesTicketFiles(t *testing.T) {
 	})
 	indexTicket(t, devRoot, projectDir, core.IndexedTicket{
 		IndexedTicketIdentity: core.IndexedTicketIdentity{
-			Key: "CHR-9",
-
+			Key:          "CHR-9",
 			RelativePath: "CHR-9-Old.md",
 			Path:         filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-9-Old.md"),
 		}, IndexedTicketSummary: core.IndexedTicketSummary{Title: "Old"}, IndexedTicketClassification: core.IndexedTicketClassification{Status: "open"},

@@ -10,8 +10,8 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func newInitCommand(stdout io.Writer, deps appDependencies) *cli.Command {
-	workspaceInitializer := core.NewWorkspace(deps.assetsFS)
+func (factory commandFactory) initCommand() *cli.Command {
+	workspaceInitializer := core.NewWorkspace(factory.deps.assetsFS)
 
 	return &cli.Command{
 		Name:  "init",
@@ -46,7 +46,7 @@ func newInitCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 				return err
 			}
 
-			return printInitResult(stdout, result)
+			return printInitResult(factory.io.Stdout, result)
 		},
 	}
 }

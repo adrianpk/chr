@@ -11,30 +11,30 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func newRuntimeCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) runtimeCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "runtime",
 		Usage: "Manage project runtime assets",
 		Commands: []*cli.Command{
-			newRuntimeInitCommand(stdout),
-			newRuntimeValidateCommand(stdout),
+			factory.runtimeInitCommand(),
+			factory.runtimeValidateCommand(),
 		},
 	}
 }
 
-func newProvingCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) provingCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "proving",
 		Usage: "Run temporary MVP proving-ground workflows",
 		Commands: []*cli.Command{
-			newProvingRunCommand(stdout),
-			newProvingRalphCommand(stdout),
-			newProvingValidateCommand(stdout),
+			factory.provingRunCommand(),
+			factory.provingRalphCommand(),
+			factory.provingValidateCommand(),
 		},
 	}
 }
 
-func newProvingRunCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) provingRunCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "run",
 		Usage: "Run one direct proving objective in the agent sandbox",
@@ -53,11 +53,11 @@ func newProvingRunCommand(stdout io.Writer) *cli.Command {
 				Usage: "print the proving sandbox plan without running Docker",
 			},
 		},
-		Action: provingRunAction(stdout),
+		Action: factory.runProvingRun,
 	}
 }
 
-func newProvingRalphCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) provingRalphCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "ralph",
 		Usage: "Run a bounded proving-ground Ralph Loop for one objective",
@@ -76,11 +76,11 @@ func newProvingRalphCommand(stdout io.Writer) *cli.Command {
 				Usage: "maximum Ralph Loop attempts",
 			},
 		},
-		Action: provingRalphAction(stdout),
+		Action: factory.runProvingRalph,
 	}
 }
 
-func newProvingValidateCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) provingValidateCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "validate",
 		Usage: "Run validation commands for one proving objective",
@@ -95,11 +95,11 @@ func newProvingValidateCommand(stdout io.Writer) *cli.Command {
 				Usage: "project-relative proving objective path",
 			},
 		},
-		Action: provingValidateAction(stdout),
+		Action: factory.runProvingValidate,
 	}
 }
 
-func newRuntimeInitCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) runtimeInitCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "init",
 		Usage: "Install missing runtime defaults in the resolved project",
@@ -113,11 +113,11 @@ func newRuntimeInitCommand(stdout io.Writer) *cli.Command {
 				Usage: "print planned changes without writing files",
 			},
 		),
-		Action: runtimeInitAction(stdout),
+		Action: factory.runRuntimeInit,
 	}
 }
 
-func newRuntimeValidateCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) runtimeValidateCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "validate",
 		Usage: "Validate the resolved project's runtime boundary",
@@ -131,41 +131,11 @@ func newRuntimeValidateCommand(stdout io.Writer) *cli.Command {
 				Usage: "print the validation plan without running Docker",
 			},
 		),
-		Action: runtimeValidateAction(stdout),
+		Action: factory.runRuntimeValidate,
 	}
 }
 
-func runtimeInitAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runRuntimeInit(ctx, cmd, stdout)
-	}
-}
-
-func provingRunAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runProvingRun(ctx, cmd, stdout)
-	}
-}
-
-func provingRalphAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runProvingRalph(ctx, cmd, stdout)
-	}
-}
-
-func provingValidateAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runProvingValidate(ctx, cmd, stdout)
-	}
-}
-
-func runtimeValidateAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runRuntimeValidate(ctx, cmd, stdout)
-	}
-}
-
-func runRuntimeInit(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runRuntimeInit(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("runtime init does not accept positional arguments")
 	}
@@ -175,12 +145,7 @@ func runRuntimeInit(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -189,7 +154,7 @@ func runRuntimeInit(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	result, err := core.NewRuntimeAssets(deps.assetsFS).Init(ctx, core.RuntimeInitOptions{
+	result, err := core.NewRuntimeAssets(factory.deps.assetsFS).Init(ctx, core.RuntimeInitOptions{
 		ProjectDir: projectContext.ProjectDir,
 		DryRun:     cmd.Bool("dry-run"),
 	})
@@ -197,10 +162,10 @@ func runRuntimeInit(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	return printRuntimeInitResult(stdout, result)
+	return printRuntimeInitResult(factory.io.Stdout, result)
 }
 
-func runRuntimeValidate(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runRuntimeValidate(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("runtime validate does not accept positional arguments")
 	}
@@ -210,12 +175,7 @@ func runRuntimeValidate(ctx context.Context, cmd *cli.Command, stdout io.Writer)
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -237,7 +197,7 @@ func runRuntimeValidate(ctx context.Context, cmd *cli.Command, stdout io.Writer)
 		return err
 	}
 
-	err = printRuntimeValidateResult(stdout, result, cmd.Bool("dry-run"))
+	err = printRuntimeValidateResult(factory.io.Stdout, result, cmd.Bool("dry-run"))
 	if err != nil {
 		return err
 	}
@@ -249,7 +209,7 @@ func runRuntimeValidate(ctx context.Context, cmd *cli.Command, stdout io.Writer)
 	return nil
 }
 
-func runProvingRun(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runProvingRun(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("proving run does not accept positional arguments")
 	}
@@ -269,10 +229,10 @@ func runProvingRun(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	return printProvingRunResult(stdout, result)
+	return printProvingRunResult(factory.io.Stdout, result)
 }
 
-func runProvingRalph(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runProvingRalph(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("proving ralph does not accept positional arguments")
 	}
@@ -292,7 +252,7 @@ func runProvingRalph(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	err = printProvingRalphResult(stdout, result)
+	err = printProvingRalphResult(factory.io.Stdout, result)
 	if err != nil {
 		return err
 	}
@@ -304,7 +264,7 @@ func runProvingRalph(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 	return nil
 }
 
-func runProvingValidate(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runProvingValidate(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("proving validate does not accept positional arguments")
 	}
@@ -319,7 +279,7 @@ func runProvingValidate(ctx context.Context, cmd *cli.Command, stdout io.Writer)
 		return err
 	}
 
-	err = printProvingValidationResult(stdout, result)
+	err = printProvingValidationResult(factory.io.Stdout, result)
 	if err != nil {
 		return err
 	}

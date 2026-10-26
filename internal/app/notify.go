@@ -16,18 +16,18 @@ import (
 
 var notifyTelegramSender = core.NewTelegramSender(http.DefaultClient)
 
-func newNotifyCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) notifyCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "notify",
 		Usage: "Inspect and test notification setup",
 		Commands: []*cli.Command{
-			newNotifyStatusCommand(stdout),
-			newNotifyTelegramCommand(stdout),
+			factory.notifyStatusCommand(),
+			factory.notifyTelegramCommand(),
 		},
 	}
 }
 
-func newNotifyStatusCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) notifyStatusCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "status",
 		Usage: "Report notification configuration status",
@@ -35,22 +35,22 @@ func newNotifyStatusCommand(stdout io.Writer) *cli.Command {
 			Name:  "dir",
 			Usage: "project directory override",
 		}),
-		Action: notifyStatusAction(stdout),
+		Action: factory.runNotifyStatus,
 	}
 }
 
-func newNotifyTelegramCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) notifyTelegramCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "telegram",
 		Usage: "Inspect and test Telegram notification setup",
 		Commands: []*cli.Command{
-			newNotifyTelegramPollCommand(stdout),
-			newNotifyTelegramTestCommand(stdout),
+			factory.notifyTelegramPollCommand(),
+			factory.notifyTelegramTestCommand(),
 		},
 	}
 }
 
-func newNotifyTelegramPollCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) notifyTelegramPollCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "poll",
 		Usage: "Parse Telegram updates into remote command handoff records",
@@ -64,11 +64,11 @@ func newNotifyTelegramPollCommand(stdout io.Writer) *cli.Command {
 				Usage: "print parsed command records without persisting them",
 			},
 		),
-		Action: notifyTelegramPollAction(stdout),
+		Action: factory.runNotifyTelegramPoll,
 	}
 }
 
-func newNotifyTelegramTestCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) notifyTelegramTestCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "test",
 		Usage: "Render a Telegram notification setup test",
@@ -82,29 +82,11 @@ func newNotifyTelegramTestCommand(stdout io.Writer) *cli.Command {
 				Usage: "print the Telegram test payload without sending it",
 			},
 		),
-		Action: notifyTelegramTestAction(stdout),
+		Action: factory.runNotifyTelegramTest,
 	}
 }
 
-func notifyStatusAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runNotifyStatus(ctx, cmd, stdout)
-	}
-}
-
-func notifyTelegramTestAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runNotifyTelegramTest(ctx, cmd, stdout)
-	}
-}
-
-func notifyTelegramPollAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runNotifyTelegramPoll(ctx, cmd, stdout)
-	}
-}
-
-func runNotifyTelegramPoll(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runNotifyTelegramPoll(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("notify telegram poll does not accept positional arguments")
 	}
@@ -124,31 +106,26 @@ func runNotifyTelegramPoll(ctx context.Context, cmd *cli.Command, stdout io.Writ
 	}
 
 	if !cmd.Bool("dry-run") {
-		deps, err := appDependenciesFromCommand(cmd)
-		if err != nil {
-			return err
-		}
-
-		err = persistRemoteCommandRecords(ctx, env, records, deps.assetsFS)
+		err = persistRemoteCommandRecords(ctx, env, records, factory.deps.assetsFS)
 		if err != nil {
 			return err
 		}
 	}
 
-	return printNotifyTelegramPollResult(stdout, records, cmd.Bool("dry-run"))
+	return printNotifyTelegramPollResult(factory.io.Stdout, records, cmd.Bool("dry-run"))
 }
 
-func runNotifyStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runNotifyStatus(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("notify status does not accept positional arguments")
 	}
 
-	_, projectContext, config, err := loadNotifyProjectConfig(ctx, cmd)
+	_, projectContext, config, err := factory.loadNotifyProjectConfig(ctx, cmd)
 	if err != nil {
 		return err
 	}
 
-	return printNotifyStatus(stdout, projectContext, config)
+	return printNotifyStatus(factory.io.Stdout, projectContext, config)
 }
 
 func loadNotifyTelegramPollFixture(path string) ([]core.RemoteCommandRecord, error) {
@@ -235,12 +212,12 @@ func printNotifyTelegramPollResult(
 	return printNotifyLines(stdout, lines)
 }
 
-func runNotifyTelegramTest(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runNotifyTelegramTest(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("notify telegram test does not accept positional arguments")
 	}
 
-	env, projectContext, config, err := loadNotifyProjectConfig(ctx, cmd)
+	env, projectContext, config, err := factory.loadNotifyProjectConfig(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -251,18 +228,13 @@ func runNotifyTelegramTest(ctx context.Context, cmd *cli.Command, stdout io.Writ
 	}
 
 	if !cmd.Bool("dry-run") {
-		deps, err := appDependenciesFromCommand(cmd)
-		if err != nil {
-			return err
-		}
-
-		return runNotifyTelegramTestDispatch(ctx, stdout, env, projectContext, config.Notifications.Telegram, deps.assetsFS)
+		return runNotifyTelegramTestDispatch(ctx, factory.io.Stdout, env, projectContext, config.Notifications.Telegram, factory.deps.assetsFS)
 	}
 
-	return printNotifyTelegramTestPlan(stdout, projectContext, config.Notifications.Telegram)
+	return printNotifyTelegramTestPlan(factory.io.Stdout, projectContext, config.Notifications.Telegram)
 }
 
-func loadNotifyProjectConfig(
+func (factory commandFactory) loadNotifyProjectConfig(
 	ctx context.Context,
 	cmd *cli.Command,
 ) (core.UserEnvironment, commandProjectContext, core.WorkspaceConfig, error) {
@@ -271,12 +243,7 @@ func loadNotifyProjectConfig(
 		return nil, commandProjectContext{}, core.WorkspaceConfig{}, err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return nil, commandProjectContext{}, core.WorkspaceConfig{}, err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,

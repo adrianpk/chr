@@ -3,7 +3,6 @@ package app
 import (
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,7 +13,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func installTelegramUserService(cmd *cli.Command, env core.UserEnvironment, stdout io.Writer) error {
+func (factory commandFactory) installTelegramUserService(cmd *cli.Command, env core.UserEnvironment) error {
 	executable, err := os.Executable()
 	if err != nil {
 		return errors.New("telegram service executable is unavailable")
@@ -30,7 +29,8 @@ func installTelegramUserService(cmd *cli.Command, env core.UserEnvironment, stdo
 		return err
 	}
 
-	_, err = fmt.Fprintf(stdout, "service: installed\nservice_path: %s\nservice_activation: unchanged\n", path)
+	_, err = fmt.Fprintf(factory.io.Stdout,
+		"service: installed\nservice_path: %s\nservice_activation: unchanged\n", path)
 
 	return err
 }

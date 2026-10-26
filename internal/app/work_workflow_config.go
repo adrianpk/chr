@@ -11,7 +11,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func newWorkConfigCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) workConfigCommand() *cli.Command {
 	flags := append(workProjectFlags(),
 		&cli.BoolFlag{Name: "json", Usage: "print effective workflow values and sources as JSON"},
 		&cli.StringFlag{Name: "review-restriction", Usage: "observe the human_review invocation restriction"},
@@ -22,7 +22,7 @@ func newWorkConfigCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 			return fmt.Errorf("work config does not accept positional arguments")
 		}
 
-		operations, _, err := workServiceFromCommand(ctx, cmd, deps)
+		operations, _, err := factory.workServiceFromCommand(ctx, cmd)
 		if err != nil {
 			return err
 		}
@@ -33,10 +33,10 @@ func newWorkConfigCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 		}
 
 		if cmd.Bool("json") {
-			return json.NewEncoder(stdout).Encode(result)
+			return json.NewEncoder(factory.io.Stdout).Encode(result)
 		}
 
-		return renderWorkWorkflowConfig(stdout, result)
+		return renderWorkWorkflowConfig(factory.io.Stdout, result)
 	}}
 }
 

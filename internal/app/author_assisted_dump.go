@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"errors"
-	"io"
 	"path/filepath"
 	"strings"
 	"time"
@@ -15,7 +14,7 @@ import (
 
 // Reuse a prepared curation or its confirmed dump receipt before attempting a
 // new curation. A changed input conflicts instead of replacing the source.
-func tryAuthorAssistedDump(ctx context.Context, cmd *cli.Command, state authorAssistedState, modelSummary string, now time.Time, stdout io.Writer) (bool, error) {
+func (factory commandFactory) tryAuthorAssistedDump(ctx context.Context, cmd *cli.Command, state authorAssistedState, modelSummary string, now time.Time) (bool, error) {
 	if core.AuthoringArtifactKind(cmd.String("target-kind")) != core.AuthoringArtifactKindDump {
 		return false, nil
 	}
@@ -39,5 +38,5 @@ func tryAuthorAssistedDump(ctx context.Context, cmd *cli.Command, state authorAs
 		return true, err
 	}
 
-	return true, printAuthorAssistedFinalized(stdout, core.AssistedAnswerCurationResult{ArtifactPath: sourcePath}, synthesis)
+	return true, printAuthorAssistedFinalized(factory.io.Stdout, core.AssistedAnswerCurationResult{ArtifactPath: sourcePath}, synthesis)
 }

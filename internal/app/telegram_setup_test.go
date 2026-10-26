@@ -52,7 +52,7 @@ func TestTelegramReceiverDoctor(t *testing.T) {
 
 	var output bytes.Buffer
 
-	cmd := newRootCommand(strings.NewReader(""), &output, &output, testAppDependencies())
+	cmd := (commandFactory{deps: testAppDependencies(), io: IO{Stdin: strings.NewReader(""), Stdout: &output, Stderr: &output}}).rootCommand()
 	// The development root is the ancestor above config/chr.
 	root := filepath.Dir(filepath.Dir(receiver.env.ConfigDir()))
 	if err := cmd.Run(t.Context(), []string{"chr", "telegram", "doctor", "--dev-root", root}); err != nil {

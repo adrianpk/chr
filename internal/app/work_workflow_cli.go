@@ -17,7 +17,7 @@ type workWorkflowCLI struct {
 	stdout io.Writer
 }
 
-func newWorkExtentCommand(stdout io.Writer, deps appDependencies, name, extent string) *cli.Command {
+func (factory commandFactory) workExtentCommand(name, extent string) *cli.Command {
 	argsUsage := "<identity>"
 	if extent == "loose" {
 		argsUsage = " "
@@ -28,12 +28,12 @@ func newWorkExtentCommand(stdout io.Writer, deps appDependencies, name, extent s
 			return err
 		}
 
-		operations, _, err := workServiceFromCommand(ctx, cmd, deps)
+		operations, _, err := factory.workServiceFromCommand(ctx, cmd)
 		if err != nil {
 			return err
 		}
 
-		return (workWorkflowCLI{stdout: stdout}).extent(ctx, cmd, operations, extent)
+		return (workWorkflowCLI{stdout: factory.io.Stdout}).extent(ctx, cmd, operations, extent)
 	}}
 }
 
@@ -161,18 +161,18 @@ func workWorkflowHashInput(kind, hash string) error {
 	return nil
 }
 
-func newWorkControlCommand(stdout io.Writer, deps appDependencies, action string) *cli.Command {
+func (factory commandFactory) workControlCommand(action string) *cli.Command {
 	return &cli.Command{Name: action, Usage: "Observe or " + action + " one retained workflow invocation", ArgsUsage: "<execution-id>", DisableSliceFlagSeparator: true, Flags: workWorkflowControlFlags(action), Action: func(ctx context.Context, cmd *cli.Command) error {
 		if err := workWorkflowControlInput(cmd, action); err != nil {
 			return err
 		}
 
-		operations, _, err := workServiceFromCommand(ctx, cmd, deps)
+		operations, _, err := factory.workServiceFromCommand(ctx, cmd)
 		if err != nil {
 			return err
 		}
 
-		return (workWorkflowCLI{stdout: stdout}).control(ctx, cmd, operations, action)
+		return (workWorkflowCLI{stdout: factory.io.Stdout}).control(ctx, cmd, operations, action)
 	}}
 }
 

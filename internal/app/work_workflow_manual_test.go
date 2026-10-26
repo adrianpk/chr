@@ -136,7 +136,7 @@ func TestWorkflowCLIStart(t *testing.T) {
 
 	var output bytes.Buffer
 
-	command := newWorkTicketCommand(&output, testAppDependencies())
+	command := (commandFactory{deps: testAppDependencies(), io: IO{Stdout: &output}}).workTicketCommand()
 	command.Action = func(ctx context.Context, cmd *cli.Command) error {
 		return (workWorkflowCLI{stdout: &output}).extent(ctx, cmd, operations, "ticket")
 	}

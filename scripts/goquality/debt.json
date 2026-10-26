@@ -7,33 +7,13 @@
       "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/app/app.go::Run",
-      "signature": "func(ctx context.Context, args []string, stdin io.Reader, stdout, stderr io.Writer, commandAssetsFS fs.FS) error",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/app.go::loadTUIOptions",
-      "signature": "func(ctx context.Context, env core.UserEnvironment, projectContext commandProjectContext, stdin io.Reader, stdout io.Writer, deps appDependencies) (tui.Options, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/app/app.go::loadTUIWorkspaceState",
       "signature": "func(ctx context.Context, projectContext commandProjectContext) (core.WorkspaceGraph, core.WorkspaceIndex, []core.WorkspaceSemanticDigestState, error)",
       "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/app/author.go::runAuthorContextualQuizNew",
-      "signature": "func(ctx context.Context, cmd *cli.Command, stdout io.Writer, projectContext commandProjectContext, session core.AuthoringSession, now time.Time) error",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/app/author.go::assistedEventCounts",
       "signature": "func(events []core.AssistedTranscriptEvent) (int, int, int)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/author_assisted_dump.go::tryAuthorAssistedDump",
-      "signature": "func(ctx context.Context, cmd *cli.Command, state authorAssistedState, modelSummary string, now time.Time, stdout io.Writer) (bool, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -72,9 +52,9 @@
       "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/app/metadata_cli.go::serviceFromCommand",
+      "id": "internal/app/metadata_cli.go::commandFactory.serviceFromCommand",
       "signature": "func(ctx context.Context, cmd *cli.Command) (service, commandProjectContext, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 4 explicitly retained this identity through typed command injection; result/remaining input work keeps its original slice owner."
     },
     {
       "id": "internal/app/notification_emit.go::loopRunNotificationType",
@@ -82,9 +62,9 @@
       "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/app/notify.go::loadNotifyProjectConfig",
+      "id": "internal/app/notify.go::commandFactory.loadNotifyProjectConfig",
       "signature": "func(ctx context.Context, cmd *cli.Command) (core.UserEnvironment, commandProjectContext, core.WorkspaceConfig, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 4 explicitly retained this identity through typed command injection; result/remaining input work keeps its original slice owner."
     },
     {
       "id": "internal/app/notify.go::runNotifyTelegramTestDispatch",
@@ -458,7 +438,7 @@
     },
     {
       "id": "internal/app/telegram_lifecycle.go::startTelegramReceiverHosts",
-      "signature": "func(ctx context.Context, hosts []func(context.Context) error) (<-chan error, <-chan struct{})",
+      "signature": "func(ctx context.Context, hosts []func(context.Context) error) (\u003c-chan error, \u003c-chan struct{})",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -567,9 +547,9 @@
       "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/app/ticket.go::openTicketIndexForCommand",
+      "id": "internal/app/ticket.go::commandFactory.openTicketIndexForCommand",
       "signature": "func(ctx context.Context, cmd *cli.Command, env core.UserEnvironment) (commandProjectContext, core.TicketIndex, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 4 explicitly retained this identity through typed command injection; result/remaining input work keeps its original slice owner."
     },
     {
       "id": "internal/app/tui_adapters_harness.go::tuiHarnessSelectionExecutor.retainedHarnessBindings",
@@ -602,9 +582,9 @@
       "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/app/work.go::workServiceFromCommand",
-      "signature": "func(ctx context.Context, cmd *cli.Command, deps appDependencies) (service, commandProjectContext, error)",
-      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "id": "internal/app/work.go::commandFactory.workServiceFromCommand",
+      "signature": "func(ctx context.Context, cmd *cli.Command) (service, commandProjectContext, error)",
+      "reason": "Existing production debt; assigned to Slice 4 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 4 explicitly retained this identity through typed command injection; result/remaining input work keeps its original slice owner."
     },
     {
       "id": "internal/core/acceptance_feature.go::WriteAcceptanceFeature",

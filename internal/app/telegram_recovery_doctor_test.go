@@ -57,9 +57,9 @@ func checkTelegramRecoveryDoctor(t *testing.T, test telegramRecoveryDoctorCase) 
 
 	root := filepath.Dir(filepath.Dir(receiver.env.ConfigDir()))
 
-	command := newRootCommand(strings.NewReader(""), &output, &output, testAppDependencies())
+	command := (commandFactory{deps: testAppDependencies(), io: IO{Stdin: strings.NewReader(""), Stdout: &output, Stderr: &output}}).rootCommand()
 	command.Command("telegram").Command("doctor").Action = func(ctx context.Context, cmd *cli.Command) error {
-		return runTelegramDoctor(ctx, cmd, &output, core.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
+		return (commandFactory{deps: testAppDependencies(), io: IO{Stdout: &output}}).runTelegramDoctor(ctx, cmd, core.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
 	}
 
 	err := command.Run(t.Context(), []string{"chr", "telegram", "doctor", "--dev-root", root, "--check-connection"})

@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
-	"io/fs"
 	"path/filepath"
 	"time"
 
@@ -14,20 +12,20 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func newProjectCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) projectCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "project",
 		Usage: "Manage registered projects",
 		Commands: []*cli.Command{
-			newProjectAddCommand(stdout, deps),
-			newProjectCurrentCommand(stdout, deps),
-			newProjectListCommand(stdout, deps),
-			newProjectSelectCommand(stdout, deps),
+			factory.projectAddCommand(),
+			factory.projectCurrentCommand(),
+			factory.projectListCommand(),
+			factory.projectSelectCommand(),
 		},
 	}
 }
 
-func newProjectAddCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) projectAddCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "add",
 		Usage: "Register a local project",
@@ -35,17 +33,11 @@ func newProjectAddCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 			Name:  "name",
 			Usage: "registered project name",
 		}),
-		Action: projectAddAction(stdout, deps),
+		Action: factory.runProjectAdd,
 	}
 }
 
-func projectAddAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runProjectAdd(ctx, cmd, stdout, deps.assetsFS)
-	}
-}
-
-func runProjectAdd(ctx context.Context, cmd *cli.Command, stdout io.Writer, assetsFS fs.FS) error {
+func (factory commandFactory) runProjectAdd(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 1 {
 		return fmt.Errorf("project add requires exactly one project directory argument")
 	}
@@ -65,7 +57,7 @@ func runProjectAdd(ctx context.Context, cmd *cli.Command, stdout io.Writer, asse
 		return err
 	}
 
-	registry, err := core.NewProjectRegistry(ctx, env, assetsFS)
+	registry, err := core.NewProjectRegistry(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -93,7 +85,8 @@ func runProjectAdd(ctx context.Context, cmd *cli.Command, stdout io.Writer, asse
 		return err
 	}
 
-	_, err = fmt.Fprintf(stdout, "project: %s %s\n", project.Name, project.Path)
+	_, err = fmt.Fprintf(factory.io.Stdout,
+		"project: %s %s\n", project.Name, project.Path)
 	if err != nil {
 		return fmt.Errorf("write project add result: %w", err)
 	}
@@ -101,22 +94,16 @@ func runProjectAdd(ctx context.Context, cmd *cli.Command, stdout io.Writer, asse
 	return nil
 }
 
-func newProjectListCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) projectListCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "list",
 		Usage:  "List registered projects",
 		Flags:  projectRegistryFlags(),
-		Action: projectListAction(stdout, deps),
+		Action: factory.runProjectList,
 	}
 }
 
-func projectListAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runProjectList(ctx, cmd, stdout, deps.assetsFS)
-	}
-}
-
-func runProjectList(ctx context.Context, cmd *cli.Command, stdout io.Writer, assetsFS fs.FS) error {
+func (factory commandFactory) runProjectList(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("project list does not accept positional arguments")
 	}
@@ -126,7 +113,7 @@ func runProjectList(ctx context.Context, cmd *cli.Command, stdout io.Writer, ass
 		return err
 	}
 
-	registry, err := core.NewProjectRegistry(ctx, env, assetsFS)
+	registry, err := core.NewProjectRegistry(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -142,7 +129,8 @@ func runProjectList(ctx context.Context, cmd *cli.Command, stdout io.Writer, ass
 	}
 
 	for _, project := range projects {
-		_, err = fmt.Fprintf(stdout, "%s\t%s\t%t\t%s\n", project.Name, project.Path, project.Enabled, project.ID)
+		_, err = fmt.Fprintf(factory.io.Stdout,
+			"%s\t%s\t%t\t%s\n", project.Name, project.Path, project.Enabled, project.ID)
 		if err != nil {
 			return fmt.Errorf("write project list result: %w", err)
 		}
@@ -151,22 +139,16 @@ func runProjectList(ctx context.Context, cmd *cli.Command, stdout io.Writer, ass
 	return nil
 }
 
-func newProjectCurrentCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) projectCurrentCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "current",
 		Usage:  "Print the active project",
 		Flags:  projectRegistryFlags(),
-		Action: projectCurrentAction(stdout, deps),
+		Action: factory.runProjectCurrent,
 	}
 }
 
-func projectCurrentAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runProjectCurrent(ctx, cmd, stdout, deps.assetsFS)
-	}
-}
-
-func runProjectCurrent(ctx context.Context, cmd *cli.Command, stdout io.Writer, assetsFS fs.FS) error {
+func (factory commandFactory) runProjectCurrent(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("project current does not accept positional arguments")
 	}
@@ -181,7 +163,7 @@ func runProjectCurrent(ctx context.Context, cmd *cli.Command, stdout io.Writer, 
 		return err
 	}
 
-	registry, err := core.NewProjectRegistry(ctx, env, assetsFS)
+	registry, err := core.NewProjectRegistry(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -196,7 +178,8 @@ func runProjectCurrent(ctx context.Context, cmd *cli.Command, stdout io.Writer, 
 		return err
 	}
 
-	_, err = fmt.Fprintf(stdout, "project: %s %s\n", project.Name, project.Path)
+	_, err = fmt.Fprintf(factory.io.Stdout,
+		"project: %s %s\n", project.Name, project.Path)
 	if err != nil {
 		return fmt.Errorf("write project current result: %w", err)
 	}
@@ -204,22 +187,16 @@ func runProjectCurrent(ctx context.Context, cmd *cli.Command, stdout io.Writer, 
 	return nil
 }
 
-func newProjectSelectCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) projectSelectCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "select",
 		Usage:  "Select the active project",
 		Flags:  projectRegistryFlags(),
-		Action: projectSelectAction(stdout, deps),
+		Action: factory.runProjectSelect,
 	}
 }
 
-func projectSelectAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runProjectSelect(ctx, cmd, stdout, deps.assetsFS)
-	}
-}
-
-func runProjectSelect(ctx context.Context, cmd *cli.Command, stdout io.Writer, assetsFS fs.FS) error {
+func (factory commandFactory) runProjectSelect(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 1 {
 		return fmt.Errorf("project select requires exactly one project name or path argument")
 	}
@@ -229,7 +206,7 @@ func runProjectSelect(ctx context.Context, cmd *cli.Command, stdout io.Writer, a
 		return err
 	}
 
-	registry, err := core.NewProjectRegistry(ctx, env, assetsFS)
+	registry, err := core.NewProjectRegistry(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -265,7 +242,8 @@ func runProjectSelect(ctx context.Context, cmd *cli.Command, stdout io.Writer, a
 		return err
 	}
 
-	_, err = fmt.Fprintf(stdout, "project: %s %s\n", project.Name, project.Path)
+	_, err = fmt.Fprintf(factory.io.Stdout,
+		"project: %s %s\n", project.Name, project.Path)
 	if err != nil {
 		return fmt.Errorf("write project select result: %w", err)
 	}

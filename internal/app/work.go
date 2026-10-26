@@ -15,81 +15,81 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func newWorkCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) workCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "work",
 		Usage: "Run agent work for tickets",
 		Commands: []*cli.Command{
-			newWorkConfigCommand(stdout, deps),
-			newWorkUpgradeCommand(stdout, deps),
-			newWorkTrackerCommand(stdout, deps),
-			newWorkDoctorCommand(stdout, deps),
-			newWorkEventsCommand(stdout, deps),
-			newWorkLogsCommand(stdout, deps),
-			newWorkTicketCommand(stdout, deps),
-			newWorkRunAllCommand(stdout, deps),
-			newWorkExtentCommand(stdout, deps, "slice", "slice"),
-			newWorkExtentCommand(stdout, deps, "slice-set", "slice_set"),
-			newWorkExtentCommand(stdout, deps, "use-case", "use_case"),
-			newWorkExtentCommand(stdout, deps, "loose", "loose"),
-			newWorkControlCommand(stdout, deps, "status"),
-			newWorkControlCommand(stdout, deps, "continue"),
-			newWorkControlCommand(stdout, deps, "pause"),
-			newWorkControlCommand(stdout, deps, "cancel"),
-			newWorkControlCommand(stdout, deps, "resume"),
-			newWorkControlCommand(stdout, deps, "approve"),
-			newWorkControlCommand(stdout, deps, "grant"),
-			newWorkControlCommand(stdout, deps, "answer-decision"),
-			newWorkControlCommand(stdout, deps, "reconcile"),
+			factory.workConfigCommand(),
+			factory.workUpgradeCommand(),
+			factory.workTrackerCommand(),
+			factory.workDoctorCommand(),
+			factory.workEventsCommand(),
+			factory.workLogsCommand(),
+			factory.workTicketCommand(),
+			factory.workRunAllCommand(),
+			factory.workExtentCommand("slice", "slice"),
+			factory.workExtentCommand("slice-set", "slice_set"),
+			factory.workExtentCommand("use-case", "use_case"),
+			factory.workExtentCommand("loose", "loose"),
+			factory.workControlCommand("status"),
+			factory.workControlCommand("continue"),
+			factory.workControlCommand("pause"),
+			factory.workControlCommand("cancel"),
+			factory.workControlCommand("resume"),
+			factory.workControlCommand("approve"),
+			factory.workControlCommand("grant"),
+			factory.workControlCommand("answer-decision"),
+			factory.workControlCommand("reconcile"),
 		},
 	}
 }
 
-func newWorkDoctorCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) workDoctorCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "doctor",
 		Usage:  "Inspect work readiness without starting agent work",
 		Flags:  workDoctorFlags(),
-		Action: workDoctorAction(stdout, deps),
+		Action: factory.workDoctorAction,
 	}
 }
 
-func newWorkEventsCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) workEventsCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "events",
 		Usage:     "Summarize one agent event stream",
 		ArgsUsage: "<event-stream-path>",
 		Flags:     workProjectFlags(),
-		Action:    workEventsAction(stdout, deps),
+		Action:    factory.workEventsAction,
 	}
 }
 
-func newWorkLogsCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) workLogsCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "logs",
 		Usage:     "Locate runtime logs for one execution",
 		ArgsUsage: "<execution-id>",
 		Flags:     workProjectFlags(),
-		Action:    workLogsAction(stdout, deps),
+		Action:    factory.workLogsAction,
 	}
 }
 
-func newWorkTicketCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) workTicketCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "ticket",
 		Usage:     "Run agent work for one ticket",
 		ArgsUsage: "<ticket-key>",
 		Flags:     workWorkflowExtentFlags(false),
-		Action:    workTicketAction(stdout, deps),
+		Action:    factory.workTicketAction,
 	}
 }
 
-func newWorkRunAllCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) workRunAllCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "run-all",
 		Usage:  "Run agent work for all ready tickets",
 		Flags:  workRunAllFlags(),
-		Action: workRunAllAction(stdout, deps),
+		Action: factory.workRunAllAction,
 	}
 }
 
@@ -166,43 +166,28 @@ func workRunAllFlags() []cli.Flag {
 	)
 }
 
-func workDoctorAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		if cmd.NArg() != 0 {
-			return fmt.Errorf("work doctor does not accept positional arguments")
-		}
+func (factory commandFactory) workDoctorAction(ctx context.Context, cmd *cli.Command) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("work doctor does not accept positional arguments")
+	}
 
-		operations, projectContext, err := workServiceFromCommand(ctx, cmd, deps)
-		if err != nil {
-			return err
-		}
+	operations, projectContext, err := factory.workServiceFromCommand(ctx, cmd)
+	if err != nil {
+		return err
+	}
 
-		workConfig, err := workSelectionWorkConfig(projectContext.ProjectDir)
-		if err != nil {
-			return err
-		}
+	workConfig, err := workSelectionWorkConfig(projectContext.ProjectDir)
+	if err != nil {
+		return err
+	}
 
-		ticketKey, ticketBranch, err := workDoctorTicketContext(cmd, operations)
-		if err != nil {
-			return err
-		}
+	ticketKey, ticketBranch, err := workDoctorTicketContext(cmd, operations)
+	if err != nil {
+		return err
+	}
 
-		if cmd.Bool("fix-safe") {
-			result, err := core.RepairWorkReadiness(ctx, core.WorkReadinessRepairOptions{
-				ProjectDir:   projectContext.ProjectDir,
-				Policy:       workConfig.BranchPolicy,
-				Workspace:    workConfig.Workspace,
-				TicketKey:    ticketKey,
-				TicketBranch: ticketBranch,
-			})
-			if err != nil {
-				return err
-			}
-
-			return printWorkRepairResult(stdout, projectContext, result)
-		}
-
-		report, err := core.CheckWorkReadiness(ctx, core.WorkReadinessOptions{
+	if cmd.Bool("fix-safe") {
+		result, err := core.RepairWorkReadiness(ctx, core.WorkReadinessRepairOptions{
 			ProjectDir:   projectContext.ProjectDir,
 			Policy:       workConfig.BranchPolicy,
 			Workspace:    workConfig.Workspace,
@@ -213,8 +198,21 @@ func workDoctorAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
 			return err
 		}
 
-		return printWorkReadinessReport(stdout, projectContext, report)
+		return printWorkRepairResult(factory.io.Stdout, projectContext, result)
 	}
+
+	report, err := core.CheckWorkReadiness(ctx, core.WorkReadinessOptions{
+		ProjectDir:   projectContext.ProjectDir,
+		Policy:       workConfig.BranchPolicy,
+		Workspace:    workConfig.Workspace,
+		TicketKey:    ticketKey,
+		TicketBranch: ticketBranch,
+	})
+	if err != nil {
+		return err
+	}
+
+	return printWorkReadinessReport(factory.io.Stdout, projectContext, report)
 }
 
 func workDoctorTicketContext(cmd *cli.Command, operations service) (string, string, error) {
@@ -237,37 +235,35 @@ func workDoctorTicketContext(cmd *cli.Command, operations service) (string, stri
 	return ticketKey, ticket.Branch, nil
 }
 
-func workTicketAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		if err := workWorkflowArguments(cmd, false); err != nil {
-			return err
-		}
-
-		operations, _, err := workServiceFromCommand(ctx, cmd, deps)
-		if err != nil {
-			return err
-		}
-
-		config, err := agentWorkLoopWorkspaceConfig(operations.projectContext.ProjectDir)
-		if err != nil {
-			return err
-		}
-
-		if core.WorkAuthority(config.Work) == core.WorkStateAuthorityTickets {
-			return (workWorkflowCLI{stdout: stdout}).extent(ctx, cmd, operations, "ticket")
-		}
-
-		if usesWorkflowTicketFlags(cmd) {
-			return fmt.Errorf("workflow ticket controls require tickets authority; current authority is tracker_compat")
-		}
-
-		result, err := operations.StartAgentWorkTicket(cmd.Args().Get(0))
-		if err != nil {
-			return err
-		}
-
-		return printAgentWorkTicket(stdout, result)
+func (factory commandFactory) workTicketAction(ctx context.Context, cmd *cli.Command) error {
+	if err := workWorkflowArguments(cmd, false); err != nil {
+		return err
 	}
+
+	operations, _, err := factory.workServiceFromCommand(ctx, cmd)
+	if err != nil {
+		return err
+	}
+
+	config, err := agentWorkLoopWorkspaceConfig(operations.projectContext.ProjectDir)
+	if err != nil {
+		return err
+	}
+
+	if core.WorkAuthority(config.Work) == core.WorkStateAuthorityTickets {
+		return (workWorkflowCLI{stdout: factory.io.Stdout}).extent(ctx, cmd, operations, "ticket")
+	}
+
+	if usesWorkflowTicketFlags(cmd) {
+		return fmt.Errorf("workflow ticket controls require tickets authority; current authority is tracker_compat")
+	}
+
+	result, err := operations.StartAgentWorkTicket(cmd.Args().Get(0))
+	if err != nil {
+		return err
+	}
+
+	return printAgentWorkTicket(factory.io.Stdout, result)
 }
 
 func usesWorkflowTicketFlags(cmd *cli.Command) bool {
@@ -280,92 +276,86 @@ func usesWorkflowTicketFlags(cmd *cli.Command) bool {
 	return false
 }
 
-func workRunAllAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		if cmd.NArg() != 0 {
-			return fmt.Errorf("work run-all does not accept positional arguments")
-		}
-
-		operations, projectContext, err := workServiceFromCommand(ctx, cmd, deps)
-		if err != nil {
-			return err
-		}
-
-		selection := agentWorkSelectionOptionsFromCommand(cmd)
-		if cmd.Bool("dry-run") {
-			result, err := operations.PreviewAgentWorkLoop(selection)
-			if err != nil {
-				return err
-			}
-
-			return printAgentWorkRunAllPreview(stdout, projectContext, selection, result)
-		}
-
-		result, err := operations.StartAgentWorkLoop(selection)
-		if err != nil {
-			return err
-		}
-
-		return printAgentWorkRunAllExecution(stdout, result)
+func (factory commandFactory) workRunAllAction(ctx context.Context, cmd *cli.Command) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("work run-all does not accept positional arguments")
 	}
+
+	operations, projectContext, err := factory.workServiceFromCommand(ctx, cmd)
+	if err != nil {
+		return err
+	}
+
+	selection := agentWorkSelectionOptionsFromCommand(cmd)
+	if cmd.Bool("dry-run") {
+		result, err := operations.PreviewAgentWorkLoop(selection)
+		if err != nil {
+			return err
+		}
+
+		return printAgentWorkRunAllPreview(factory.io.Stdout, projectContext, selection, result)
+	}
+
+	result, err := operations.StartAgentWorkLoop(selection)
+	if err != nil {
+		return err
+	}
+
+	return printAgentWorkRunAllExecution(factory.io.Stdout, result)
 }
 
-func workEventsAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		if cmd.NArg() != 1 {
-			return fmt.Errorf("work events requires exactly one event stream path argument")
-		}
-
-		_, projectContext, err := workServiceFromCommand(ctx, cmd, deps)
-		if err != nil {
-			return err
-		}
-
-		path := resolveWorkEventStreamPath(projectContext.ProjectDir, cmd.Args().First())
-
-		stream, err := core.ReadAgentEventStream(ctx, path)
-		if err != nil {
-			return err
-		}
-
-		summary := core.SummarizeAgentEventStream(stream)
-
-		return printWorkEventStreamSummary(stdout, projectContext.ProjectDir, summary)
+func (factory commandFactory) workEventsAction(ctx context.Context, cmd *cli.Command) error {
+	if cmd.NArg() != 1 {
+		return fmt.Errorf("work events requires exactly one event stream path argument")
 	}
+
+	_, projectContext, err := factory.workServiceFromCommand(ctx, cmd)
+	if err != nil {
+		return err
+	}
+
+	path := resolveWorkEventStreamPath(projectContext.ProjectDir, cmd.Args().First())
+
+	stream, err := core.ReadAgentEventStream(ctx, path)
+	if err != nil {
+		return err
+	}
+
+	summary := core.SummarizeAgentEventStream(stream)
+
+	return printWorkEventStreamSummary(factory.io.Stdout, projectContext.ProjectDir, summary)
 }
 
-func workLogsAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		if cmd.NArg() != 1 {
-			return fmt.Errorf("work logs requires exactly one execution id argument")
-		}
-
-		operations, projectContext, err := workServiceFromCommand(ctx, cmd, deps)
-		if err != nil {
-			return err
-		}
-
-		repository, err := core.NewExecutionRepository(ctx, operations.env, deps.assetsFS)
-		if err != nil {
-			return err
-		}
-
-		defer func() {
-			//nolint:errcheck // Lookup result is already complete at this point.
-			_ = repository.Close()
-		}()
-
-		record, err := repository.GetExecution(ctx, cmd.Args().First())
-		if err != nil {
-			return err
-		}
-
-		if record.ProjectID != projectContext.ProjectID {
-			return fmt.Errorf("%w: %s", core.ErrExecutionNotFound, cmd.Args().First())
-		}
-
-		return printWorkExecutionLogs(stdout, projectContext.ProjectDir, record)
+func (factory commandFactory) workLogsAction(ctx context.Context, cmd *cli.Command) error {
+	if cmd.NArg() != 1 {
+		return fmt.Errorf("work logs requires exactly one execution id argument")
 	}
+
+	operations, projectContext, err := factory.workServiceFromCommand(ctx, cmd)
+	if err != nil {
+		return err
+	}
+
+	repository, err := core.NewExecutionRepository(ctx, operations.env, factory.deps.assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Lookup result is already complete at this point.
+		_ = repository.Close()
+	}()
+
+	record, err := repository.GetExecution(ctx, cmd.Args().First())
+	if err != nil {
+		return err
+	}
+
+	if record.ProjectID != projectContext.ProjectID {
+		return fmt.Errorf("%w: %s", core.ErrExecutionNotFound, cmd.Args().First())
+	}
+
+	return printWorkExecutionLogs(factory.io.Stdout, projectContext.ProjectDir, record)
 }
 
 func resolveWorkEventStreamPath(projectDir, path string) string {
@@ -377,17 +367,16 @@ func resolveWorkEventStreamPath(projectDir, path string) string {
 	return filepath.Join(projectDir, filepath.FromSlash(path))
 }
 
-func workServiceFromCommand(
+func (factory commandFactory) workServiceFromCommand(
 	ctx context.Context,
 	cmd *cli.Command,
-	deps appDependencies,
 ) (service, commandProjectContext, error) {
 	env, err := newUserEnvironmentFromCommand(cmd)
 	if err != nil {
 		return service{}, commandProjectContext{}, err
 	}
 
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -396,7 +385,7 @@ func workServiceFromCommand(
 		return service{}, commandProjectContext{}, err
 	}
 
-	return newService(ctx, env, projectContext, deps.assetsFS), projectContext, nil
+	return newService(ctx, env, projectContext, factory.deps.assetsFS), projectContext, nil
 }
 
 func agentWorkSelectionOptionsFromCommand(cmd *cli.Command) AgentWorkSelectionOptions {

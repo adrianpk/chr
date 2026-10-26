@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 
 	"github.com/charmbracelet/x/term"
@@ -13,21 +12,21 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func newTelegramCommand(stdin io.Reader, stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) telegramCommand() *cli.Command {
 	return &cli.Command{
 		Name: "telegram", Usage: "Configure and run the dedicated text receiver",
 		Description: "Receive authorized text and buttons for retained project conversations and native work. Poll/model/delivery cycles retain five attempts across restart; pending input and delivery each stop at 1,024. No webhook takeover, arbitrary shell commands or implicit service activation.",
 		Commands: []*cli.Command{
-			newTelegramSetupCommand(stdin, stdout),
-			newTelegramDoctorCommand(stdout),
-			newTelegramServeCommand(stdout, deps),
-			newTelegramRetryCommand(stdout, deps),
-			{Name: "status", Usage: "Inspect retained health, retry cycles and queues without migration or network access", Flags: projectRegistryFlags(), Action: telegramStatusAction(stdout)},
+			factory.telegramSetupCommand(),
+			factory.telegramDoctorCommand(),
+			factory.telegramServeCommand(),
+			factory.telegramRetryCommand(),
+			{Name: "status", Usage: "Inspect retained health, retry cycles and queues without migration or network access", Flags: projectRegistryFlags(), Action: factory.telegramStatusAction},
 		},
 	}
 }
 
-func newTelegramSetupCommand(stdin io.Reader, stdout io.Writer) *cli.Command {
+func (factory commandFactory) telegramSetupCommand() *cli.Command {
 	return &cli.Command{
 		Name: "setup", Usage: "Configure private receiver bindings without starting the receiver",
 		Flags: append(projectRegistryFlags(),
@@ -42,12 +41,12 @@ func newTelegramSetupCommand(stdin io.Reader, stdout io.Writer) *cli.Command {
 			&cli.BoolFlag{Name: "replace", Usage: "Explicitly replace differing receiver configuration or credentials"},
 		),
 		Action: func(_ context.Context, cmd *cli.Command) error {
-			return runTelegramSetup(cmd, stdin, stdout)
+			return factory.runTelegramSetup(cmd)
 		},
 	}
 }
 
-func runTelegramSetup(cmd *cli.Command, stdin io.Reader, stdout io.Writer) (err error) {
+func (factory commandFactory) runTelegramSetup(cmd *cli.Command) (err error) {
 	if cmd.NArg() != 0 {
 		return errors.New("telegram setup does not accept positional arguments")
 	}
@@ -72,7 +71,7 @@ func runTelegramSetup(cmd *cli.Command, stdin io.Reader, stdout io.Writer) (err 
 		return err
 	}
 
-	if err := storeTelegramSetupToken(cmd, env, config, stdin, stdout); err != nil {
+	if err := factory.storeTelegramSetupToken(cmd, env, config); err != nil {
 		return err
 	}
 
@@ -80,10 +79,10 @@ func runTelegramSetup(cmd *cli.Command, stdin io.Reader, stdout io.Writer) (err 
 		return err
 	}
 
-	return finishTelegramSetup(cmd, env, stdout)
+	return factory.finishTelegramSetup(cmd, env)
 }
 
-func finishTelegramSetup(cmd *cli.Command, env core.UserEnvironment, stdout io.Writer) (err error) {
+func (factory commandFactory) finishTelegramSetup(cmd *cli.Command, env core.UserEnvironment) (err error) {
 	if cmd.Bool("replace") {
 		if err := core.ResetTelegramReceiverIdentity(env); err != nil {
 			return err
@@ -91,12 +90,13 @@ func finishTelegramSetup(cmd *cli.Command, env core.UserEnvironment, stdout io.W
 	}
 
 	if cmd.Bool("install-service") {
-		if err := installTelegramUserService(cmd, env, stdout); err != nil {
+		if err := factory.installTelegramUserService(cmd, env); err != nil {
 			return err
 		}
 	}
 
-	_, err = fmt.Fprintln(stdout, "telegram_setup: configured")
+	_, err = fmt.Fprintln(factory.io.Stdout,
+		"telegram_setup: configured")
 
 	return err
 }
@@ -124,19 +124,20 @@ func telegramSetupConfig(cmd *cli.Command) core.TelegramReceiverConfig {
 	}
 }
 
-func storeTelegramSetupToken(cmd *cli.Command, env core.UserEnvironment, config core.TelegramReceiverConfig, stdin io.Reader, stdout io.Writer) error {
+func (factory commandFactory) storeTelegramSetupToken(cmd *cli.Command, env core.UserEnvironment, config core.TelegramReceiverConfig) error {
 	if cmd.IsSet("bot-token-env") {
 		_, err := core.TelegramReceiverToken(env, config)
 
 		return err
 	}
 
-	file, ok := stdin.(*os.File)
+	file, ok := factory.io.Stdin.(*os.File)
 	if !ok || !term.IsTerminal(file.Fd()) {
 		return errors.New("masked token entry requires a terminal; use --bot-token-env for noninteractive setup")
 	}
 
-	if _, err := fmt.Fprint(stdout, "Bot token: "); err != nil {
+	if _, err := fmt.Fprint(factory.io.Stdout,
+		"Bot token: "); err != nil {
 		return err
 	}
 
@@ -147,7 +148,7 @@ func storeTelegramSetupToken(cmd *cli.Command, env core.UserEnvironment, config 
 
 	defer clear(token)
 
-	if _, err := fmt.Fprintln(stdout); err != nil {
+	if _, err := fmt.Fprintln(factory.io.Stdout); err != nil {
 		return err
 	}
 

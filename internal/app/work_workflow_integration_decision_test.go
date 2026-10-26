@@ -42,7 +42,7 @@ func workflowIntegrationCLIAnswer(t *testing.T, operations service, shown Workfl
 
 	var output bytes.Buffer
 
-	command := newDaemonWorkflowCommand(&output, testAppDependencies())
+	command := (commandFactory{deps: testAppDependencies(), io: IO{Stdout: &output}}).daemonWorkflowCommand()
 	for _, child := range command.Commands {
 		if child.Name == "answer-decision" {
 			child.Action = func(ctx context.Context, cmd *cli.Command) error {

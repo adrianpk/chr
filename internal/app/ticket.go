@@ -23,162 +23,162 @@ var (
 	reviewRemoteCommandRunner      core.ReviewRemoteCommandRunner      = core.OSReviewRemoteCommandRunner{}
 )
 
-func newTicketCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) ticketCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "ticket",
 		Usage: "Manage workspace tickets",
 		Commands: []*cli.Command{
-			newTicketApplyResultCommand(stdout),
-			newTicketBoardCommand(stdout),
-			newTicketCommentCommand(stdout),
-			newTicketListCommand(stdout),
-			newTicketLoopCommand(stdout),
-			newTicketMergeCommand(stdout),
-			newTicketNewCommand(stdout),
-			newTicketReviewCommand(stdout),
-			newTicketReviewModeCommand(stdout),
-			newTicketReviewRefCommand(stdout),
-			newTicketShowCommand(stdout),
-			newTicketStartCommand(stdout),
-			newTicketStatusCommand(stdout),
+			factory.ticketApplyResultCommand(),
+			factory.ticketBoardCommand(),
+			factory.ticketCommentCommand(),
+			factory.ticketListCommand(),
+			factory.ticketLoopCommand(),
+			factory.ticketMergeCommand(),
+			factory.ticketNewCommand(),
+			factory.ticketReviewCommand(),
+			factory.ticketReviewModeCommand(),
+			factory.ticketReviewRefCommand(),
+			factory.ticketShowCommand(),
+			factory.ticketStartCommand(),
+			factory.ticketStatusCommand(),
 		},
 	}
 }
 
-func newTicketBoardCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) ticketBoardCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "board",
 		Usage:  "Inspect Board columns for the resolved project",
 		Flags:  ticketProjectFlags(),
-		Action: ticketBoardAction(stdout),
+		Action: factory.runTicketBoard,
 	}
 }
 
-func newTicketNewCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) ticketNewCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "new",
 		Usage:  "Create a ticket in the current workspace",
 		Flags:  ticketNewFlags(),
-		Action: ticketNewAction(stdout),
+		Action: factory.runTicketNew,
 	}
 }
 
-func newTicketReviewRefCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) ticketReviewRefCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "review-ref",
 		Usage:  "Attach branch and pull request review metadata to one ticket",
 		Flags:  ticketReviewRefFlags(),
-		Action: ticketReviewRefAction(stdout),
+		Action: factory.runTicketReviewRef,
 	}
 }
 
-func newTicketReviewCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) ticketReviewCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "review",
 		Usage:  "Apply an inspection-only ticket review result",
 		Flags:  ticketReviewFlags(),
-		Action: ticketReviewAction(stdout),
+		Action: factory.runTicketReview,
 	}
 }
 
-func newTicketMergeCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) ticketMergeCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "merge",
 		Usage:  "Merge a reviewed ticket pull request",
 		Flags:  ticketMergeFlags(),
-		Action: ticketMergeAction(stdout),
+		Action: factory.runTicketMerge,
 	}
 }
 
-func newTicketReviewModeCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) ticketReviewModeCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "review-mode",
 		Usage: "Inspect ticket review workflow mode",
 		Commands: []*cli.Command{
-			newTicketReviewModeDiagnosticsCommand(stdout),
-			newTicketReviewModeStatusCommand(stdout),
+			factory.ticketReviewModeDiagnosticsCommand(),
+			factory.ticketReviewModeStatusCommand(),
 		},
 	}
 }
 
-func newTicketReviewModeDiagnosticsCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) ticketReviewModeDiagnosticsCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "diagnostics",
 		Usage:  "Verify ticket review provider access",
 		Flags:  ticketReviewModeDiagnosticsFlags(),
-		Action: ticketReviewModeDiagnosticsAction(stdout),
+		Action: factory.runTicketReviewModeDiagnostics,
 	}
 }
 
-func newTicketReviewModeStatusCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) ticketReviewModeStatusCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "status",
 		Usage:  "Print active ticket review workflow mode",
 		Flags:  ticketReviewModeStatusFlags(),
-		Action: ticketReviewModeStatusAction(stdout),
+		Action: factory.runTicketReviewModeStatus,
 	}
 }
 
-func newTicketListCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) ticketListCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "list",
 		Usage:  "List tickets for the resolved project",
 		Flags:  ticketProjectFlags(),
-		Action: ticketListAction(stdout),
+		Action: factory.runTicketList,
 	}
 }
 
-func newTicketLoopCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) ticketLoopCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "loop",
 		Usage:  "Preview a foreground loop over eligible tickets",
 		Flags:  ticketLoopFlags(),
-		Action: ticketLoopAction(stdout),
+		Action: factory.runTicketLoop,
 	}
 }
 
-func newTicketShowCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) ticketShowCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "show",
 		Usage:  "Show one ticket by key",
 		Flags:  ticketProjectFlags(),
-		Action: ticketShowAction(stdout),
+		Action: factory.runTicketShow,
 	}
 }
 
-func newTicketCommentCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) ticketCommentCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "comment",
 		Usage:  "Append a comment to one ticket",
 		Flags:  ticketCommentFlags(),
-		Action: ticketCommentAction(stdout),
+		Action: factory.runTicketComment,
 	}
 }
 
-func newTicketApplyResultCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) ticketApplyResultCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "apply-result",
 		Usage:  "Apply one completed execution result to its ticket",
 		Flags:  ticketApplyResultFlags(),
-		Action: ticketApplyResultAction(stdout),
+		Action: factory.runTicketApplyResult,
 	}
 }
 
-func newTicketStatusCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) ticketStatusCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "status",
 		Usage:  "Update one ticket status",
 		Flags:  ticketProjectFlags(),
-		Action: ticketStatusAction(stdout),
+		Action: factory.runTicketStatus,
 	}
 }
 
-func newTicketStartCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) ticketStartCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "start",
 		Usage:  "Prepare one ticket execution",
 		Flags:  ticketStartFlags(),
-		Action: ticketStartAction(stdout),
+		Action: factory.runTicketStart,
 	}
 }
 
@@ -387,84 +387,6 @@ func ticketNewFlags() []cli.Flag {
 	)
 }
 
-func ticketListAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runTicketList(ctx, cmd, stdout)
-	}
-}
-
-func ticketBoardAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runTicketBoard(ctx, cmd, stdout)
-	}
-}
-
-func ticketShowAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runTicketShow(ctx, cmd, stdout)
-	}
-}
-
-func ticketCommentAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runTicketComment(ctx, cmd, stdout)
-	}
-}
-
-func ticketReviewRefAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runTicketReviewRef(ctx, cmd, stdout)
-	}
-}
-
-func ticketReviewAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runTicketReview(ctx, cmd, stdout)
-	}
-}
-
-func ticketMergeAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runTicketMerge(ctx, cmd, stdout)
-	}
-}
-
-func ticketReviewModeStatusAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runTicketReviewModeStatus(ctx, cmd, stdout)
-	}
-}
-
-func ticketReviewModeDiagnosticsAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runTicketReviewModeDiagnostics(ctx, cmd, stdout)
-	}
-}
-
-func ticketStatusAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runTicketStatus(ctx, cmd, stdout)
-	}
-}
-
-func ticketStartAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runTicketStart(ctx, cmd, stdout)
-	}
-}
-
-func ticketLoopAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runTicketLoop(ctx, cmd, stdout)
-	}
-}
-
-func ticketApplyResultAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runTicketApplyResult(ctx, cmd, stdout)
-	}
-}
-
 type ticketStartPreflight struct {
 	AssetsFS       fs.FS
 	Env            core.UserEnvironment
@@ -532,7 +454,7 @@ var newTicketStartWorktreePreparer = func() ticketStartWorktreePreparer {
 	return service
 }
 
-func runTicketStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runTicketStatus(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 2 {
 		return fmt.Errorf("ticket status requires exactly one ticket key and one status argument")
 	}
@@ -542,12 +464,7 @@ func runTicketStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -558,7 +475,7 @@ func runTicketStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 
 	status := cmd.Args().Get(1)
 
-	result, err := newService(ctx, env, projectContext, deps.assetsFS).MoveTicketStatus(cmd.Args().Get(0), status)
+	result, err := newService(ctx, env, projectContext, factory.deps.assetsFS).MoveTicketStatus(cmd.Args().Get(0), status)
 	if err != nil {
 		return err
 	}
@@ -568,7 +485,8 @@ func runTicketStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	_, err = fmt.Fprintf(stdout, "ticket: %s %s\n", updated.Key, status)
+	_, err = fmt.Fprintf(factory.io.Stdout,
+		"ticket: %s %s\n", updated.Key, status)
 	if err != nil {
 		return fmt.Errorf("write ticket status result: %w", err)
 	}
@@ -586,16 +504,16 @@ func ticketOperationResultTicket(result TicketOperationResult, key string) (core
 	return core.IndexedTicket{}, fmt.Errorf("ticket not found after operation: %s", key)
 }
 
-func runTicketStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runTicketStart(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 1 {
 		return fmt.Errorf("ticket start requires exactly one ticket key argument")
 	}
 
-	if handled, err := runTicketStartAuthority(ctx, cmd, stdout); handled || err != nil {
+	if handled, err := factory.runTicketStartAuthority(ctx, cmd); handled || err != nil {
 		return err
 	}
 
-	preflight, err := buildTicketStartPreflight(ctx, cmd)
+	preflight, err := factory.buildTicketStartPreflight(ctx, cmd)
 	if err != nil {
 		return core.NewExecutionFailure(core.ExecutionFailurePreflight, err)
 	}
@@ -607,7 +525,7 @@ func runTicketStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 			fmt.Errorf("runtime validation failed"),
 		).Error()
 
-		err = printTicketStartResult(stdout, preflight.Ticket, preflight.Record, preflight.Runtime, cmd.Bool("dry-run"))
+		err = printTicketStartResult(factory.io.Stdout, preflight.Ticket, preflight.Record, preflight.Runtime, cmd.Bool("dry-run"))
 		if err != nil {
 			return err
 		}
@@ -616,7 +534,7 @@ func runTicketStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 	}
 
 	if !cmd.Bool("dry-run") {
-		record, err := runOwnedTicketStart(ctx, stdout, preflight)
+		record, err := runOwnedTicketStart(ctx, factory.io.Stdout, preflight)
 		if err != nil {
 			return err
 		}
@@ -624,10 +542,10 @@ func runTicketStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		preflight.Record = record
 	}
 
-	return printTicketStartResult(stdout, preflight.Ticket, preflight.Record, preflight.Runtime, cmd.Bool("dry-run"))
+	return printTicketStartResult(factory.io.Stdout, preflight.Ticket, preflight.Record, preflight.Runtime, cmd.Bool("dry-run"))
 }
 
-func runTicketLoop(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runTicketLoop(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("ticket loop does not accept positional arguments")
 	}
@@ -637,7 +555,7 @@ func runTicketLoop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	projectContext, index, err := openTicketIndexForCommand(ctx, cmd, env)
+	projectContext, index, err := factory.openTicketIndexForCommand(ctx, cmd, env)
 	if err != nil {
 		return err
 	}
@@ -665,11 +583,6 @@ func runTicketLoop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 	}
 
 	if !cmd.Bool("dry-run") {
-		deps, err := appDependenciesFromCommand(cmd)
-		if err != nil {
-			return err
-		}
-
 		lock, err := acquireAgentOperationLock(ctx, projectContext, core.AgentOperationDevelopment)
 		if err != nil {
 			return err
@@ -677,10 +590,10 @@ func runTicketLoop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 
 		defer releaseAgentOperationLock(lock)()
 
-		return runAndPrintTicketLoopExecution(ctx, stdout, env, projectContext, tickets, eligibleCount, deps.assetsFS)
+		return runAndPrintTicketLoopExecution(ctx, factory.io.Stdout, env, projectContext, tickets, eligibleCount, factory.deps.assetsFS)
 	}
 
-	return printTicketLoopPlan(stdout, projectContext, queryOptions, tickets, cmd.Bool("dry-run"))
+	return printTicketLoopPlan(factory.io.Stdout, projectContext, queryOptions, tickets, cmd.Bool("dry-run"))
 }
 
 func selectTicketLoopTickets(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, queryOptions core.TicketLoopQueryOptions, runOptions ticketLoopRunOptions) ([]core.IndexedTicket, int, error) {
@@ -1184,7 +1097,7 @@ func printTicketLoopExecution(stdout io.Writer, result ticketLoopExecutionResult
 	return nil
 }
 
-func runTicketApplyResult(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runTicketApplyResult(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 1 {
 		return fmt.Errorf("ticket apply-result requires exactly one execution id argument")
 	}
@@ -1194,37 +1107,27 @@ func runTicketApplyResult(ctx context.Context, cmd *cli.Command, stdout io.Write
 		return err
 	}
 
-	plan, err := buildTicketApplyResultPlan(ctx, cmd, env)
+	plan, err := factory.buildTicketApplyResultPlan(ctx, cmd, env)
 	if err != nil {
 		return err
 	}
 
 	if !cmd.Bool("dry-run") {
-		deps, err := appDependenciesFromCommand(cmd)
-		if err != nil {
-			return err
-		}
-
-		err = applyTicketResult(ctx, env, plan, ticketExecutionEvents{}, deps.assetsFS)
+		err = applyTicketResult(ctx, env, plan, ticketExecutionEvents{}, factory.deps.assetsFS)
 		if err != nil {
 			return err
 		}
 	}
 
-	return printTicketApplyResult(stdout, plan, cmd.Bool("dry-run"))
+	return printTicketApplyResult(factory.io.Stdout, plan, cmd.Bool("dry-run"))
 }
 
-func buildTicketApplyResultPlan(
+func (factory commandFactory) buildTicketApplyResultPlan(
 	ctx context.Context,
 	cmd *cli.Command,
 	env core.UserEnvironment,
 ) (ticketApplyResultPlan, error) {
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return ticketApplyResultPlan{}, err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -1233,7 +1136,7 @@ func buildTicketApplyResultPlan(
 		return ticketApplyResultPlan{}, err
 	}
 
-	repository, err := core.NewExecutionRepository(ctx, env, deps.assetsFS)
+	repository, err := core.NewExecutionRepository(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return ticketApplyResultPlan{}, err
 	}
@@ -1572,23 +1475,18 @@ func runAndPrintTicketStartExecution(
 	return record, err
 }
 
-func buildTicketStartPreflight(ctx context.Context, cmd *cli.Command) (ticketStartPreflight, error) {
+func (factory commandFactory) buildTicketStartPreflight(ctx context.Context, cmd *cli.Command) (ticketStartPreflight, error) {
 	env, err := newUserEnvironmentFromCommand(cmd)
 	if err != nil {
 		return ticketStartPreflight{}, err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
+	selection, err := selectTicketStartTicket(ctx, cmd, env, factory.deps.assetsFS)
 	if err != nil {
 		return ticketStartPreflight{}, err
 	}
 
-	selection, err := selectTicketStartTicket(ctx, cmd, env, deps.assetsFS)
-	if err != nil {
-		return ticketStartPreflight{}, err
-	}
-
-	return buildTicketStartPreflightForTicketWithOptions(ctx, env, selection.ProjectContext, selection.Ticket, deps.assetsFS, ticketStartPreflightOptions{
+	return buildTicketStartPreflightForTicketWithOptions(ctx, env, selection.ProjectContext, selection.Ticket, factory.deps.assetsFS, ticketStartPreflightOptions{
 		PrepareWorktree: !cmd.Bool("dry-run"),
 	})
 }
@@ -2015,7 +1913,7 @@ func printTicketStartDiagnostics(stdout io.Writer, record core.ExecutionRecord) 
 	return nil
 }
 
-func runTicketComment(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runTicketComment(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 2 {
 		return fmt.Errorf("ticket comment requires exactly one ticket key and one comment argument")
 	}
@@ -2025,12 +1923,7 @@ func runTicketComment(ctx context.Context, cmd *cli.Command, stdout io.Writer) e
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -2039,7 +1932,7 @@ func runTicketComment(ctx context.Context, cmd *cli.Command, stdout io.Writer) e
 		return err
 	}
 
-	result, err := newService(ctx, env, projectContext, deps.assetsFS).AddTicketComment(TicketCommentRequest{
+	result, err := newService(ctx, env, projectContext, factory.deps.assetsFS).AddTicketComment(TicketCommentRequest{
 		Key:    cmd.Args().Get(0),
 		Author: cmd.String("author"),
 		Body:   cmd.Args().Get(1),
@@ -2053,7 +1946,8 @@ func runTicketComment(ctx context.Context, cmd *cli.Command, stdout io.Writer) e
 		return err
 	}
 
-	_, err = fmt.Fprintf(stdout, "ticket: %s\n", updated.Path)
+	_, err = fmt.Fprintf(factory.io.Stdout,
+		"ticket: %s\n", updated.Path)
 	if err != nil {
 		return fmt.Errorf("write ticket comment result: %w", err)
 	}
@@ -2061,7 +1955,7 @@ func runTicketComment(ctx context.Context, cmd *cli.Command, stdout io.Writer) e
 	return nil
 }
 
-func runTicketReviewRef(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runTicketReviewRef(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 1 {
 		return fmt.Errorf("ticket review-ref requires exactly one ticket key argument")
 	}
@@ -2071,12 +1965,7 @@ func runTicketReviewRef(ctx context.Context, cmd *cli.Command, stdout io.Writer)
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -2090,7 +1979,7 @@ func runTicketReviewRef(ctx context.Context, cmd *cli.Command, stdout io.Writer)
 		return err
 	}
 
-	result, err := newService(ctx, env, projectContext, deps.assetsFS).AttachTicketReviewReference(request)
+	result, err := newService(ctx, env, projectContext, factory.deps.assetsFS).AttachTicketReviewReference(request)
 	if err != nil {
 		return err
 	}
@@ -2100,7 +1989,8 @@ func runTicketReviewRef(ctx context.Context, cmd *cli.Command, stdout io.Writer)
 		return err
 	}
 
-	_, err = fmt.Fprintf(stdout, "ticket: %s review_ref\n", updated.Key)
+	_, err = fmt.Fprintf(factory.io.Stdout,
+		"ticket: %s review_ref\n", updated.Key)
 	if err != nil {
 		return fmt.Errorf("write ticket review-ref result: %w", err)
 	}
@@ -2108,7 +1998,7 @@ func runTicketReviewRef(ctx context.Context, cmd *cli.Command, stdout io.Writer)
 	return nil
 }
 
-func runTicketReview(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runTicketReview(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 1 {
 		return fmt.Errorf("ticket review requires exactly one ticket key argument")
 	}
@@ -2118,7 +2008,7 @@ func runTicketReview(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	projectContext, index, err := openTicketIndexForCommand(ctx, cmd, env)
+	projectContext, index, err := factory.openTicketIndexForCommand(ctx, cmd, env)
 	if err != nil {
 		return err
 	}
@@ -2169,10 +2059,10 @@ func runTicketReview(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	return printTicketReviewResult(stdout, projectContext, result)
+	return printTicketReviewResult(factory.io.Stdout, projectContext, result)
 }
 
-func runTicketMerge(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runTicketMerge(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 1 {
 		return fmt.Errorf("ticket merge requires exactly one ticket key argument")
 	}
@@ -2182,7 +2072,7 @@ func runTicketMerge(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	projectContext, index, err := openTicketIndexForCommand(ctx, cmd, env)
+	projectContext, index, err := factory.openTicketIndexForCommand(ctx, cmd, env)
 	if err != nil {
 		return err
 	}
@@ -2232,7 +2122,7 @@ func runTicketMerge(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	return printTicketMergeResult(stdout, projectContext, result)
+	return printTicketMergeResult(factory.io.Stdout, projectContext, result)
 }
 
 func ticketMergeCommandConfig(projectDir string, cmd *cli.Command) (core.WorkspaceConfig, string, error) {
@@ -2386,7 +2276,7 @@ func printTicketMergeResult(stdout io.Writer, projectContext commandProjectConte
 	return nil
 }
 
-func runTicketReviewModeStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runTicketReviewModeStatus(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("ticket review-mode status does not accept positional arguments")
 	}
@@ -2396,12 +2286,7 @@ func runTicketReviewModeStatus(ctx context.Context, cmd *cli.Command, stdout io.
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -2415,10 +2300,10 @@ func runTicketReviewModeStatus(ctx context.Context, cmd *cli.Command, stdout io.
 		return err
 	}
 
-	return printTicketReviewModeStatus(stdout, projectContext, config.Review, cmd.Bool("dry-run"))
+	return printTicketReviewModeStatus(factory.io.Stdout, projectContext, config.Review, cmd.Bool("dry-run"))
 }
 
-func runTicketReviewModeDiagnostics(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runTicketReviewModeDiagnostics(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("ticket review-mode diagnostics does not accept positional arguments")
 	}
@@ -2428,12 +2313,7 @@ func runTicketReviewModeDiagnostics(ctx context.Context, cmd *cli.Command, stdou
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -2454,7 +2334,7 @@ func runTicketReviewModeDiagnostics(ctx context.Context, cmd *cli.Command, stdou
 		Runner: reviewProviderDiagnosticRunner,
 	})
 
-	return printTicketReviewModeDiagnostics(stdout, projectContext, diagnostic, cmd.Bool("dry-run"))
+	return printTicketReviewModeDiagnostics(factory.io.Stdout, projectContext, diagnostic, cmd.Bool("dry-run"))
 }
 
 func printTicketReviewModeDiagnostics(
@@ -2565,7 +2445,7 @@ func ticketReviewReferenceRequestFromCommand(cmd *cli.Command) (TicketReviewRefe
 	return request, nil
 }
 
-func runTicketShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runTicketShow(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 1 {
 		return fmt.Errorf("ticket show requires exactly one ticket key argument")
 	}
@@ -2575,7 +2455,7 @@ func runTicketShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	projectContext, index, err := openTicketIndexForCommand(ctx, cmd, env)
+	projectContext, index, err := factory.openTicketIndexForCommand(ctx, cmd, env)
 	if err != nil {
 		return err
 	}
@@ -2595,7 +2475,7 @@ func runTicketShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	return printTicketShow(stdout, ticket, ticketEvidenceSummary(ticket))
+	return printTicketShow(factory.io.Stdout, ticket, ticketEvidenceSummary(ticket))
 }
 
 func printTicketShow(stdout io.Writer, ticket core.IndexedTicket, evidence core.EvidenceStrategySummary) error {
@@ -2628,7 +2508,7 @@ func printTicketShow(stdout io.Writer, ticket core.IndexedTicket, evidence core.
 	return nil
 }
 
-func runTicketList(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runTicketList(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("ticket list does not accept positional arguments")
 	}
@@ -2638,12 +2518,7 @@ func runTicketList(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -2652,7 +2527,7 @@ func runTicketList(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	index, err := core.NewTicketIndex(ctx, env, deps.assetsFS)
+	index, err := core.NewTicketIndex(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -2672,10 +2547,10 @@ func runTicketList(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	return printTicketList(stdout, tickets)
+	return printTicketList(factory.io.Stdout, tickets)
 }
 
-func runTicketBoard(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runTicketBoard(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("ticket board does not accept positional arguments")
 	}
@@ -2685,12 +2560,7 @@ func runTicketBoard(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -2699,12 +2569,12 @@ func runTicketBoard(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	board, err := newService(ctx, env, projectContext, deps.assetsFS).Board()
+	board, err := newService(ctx, env, projectContext, factory.deps.assetsFS).Board()
 	if err != nil {
 		return err
 	}
 
-	return printTicketBoard(stdout, board)
+	return printTicketBoard(factory.io.Stdout, board)
 }
 
 func printTicketBoard(stdout io.Writer, board core.Board) error {
@@ -2844,17 +2714,12 @@ func ticketEvidenceVisible(evidence core.EvidenceStrategySummary) bool {
 	return evidence.Status != "" && evidence.Status != core.EvidenceStrategySummaryStatusMissing
 }
 
-func openTicketIndexForCommand(
+func (factory commandFactory) openTicketIndexForCommand(
 	ctx context.Context,
 	cmd *cli.Command,
 	env core.UserEnvironment,
 ) (commandProjectContext, core.TicketIndex, error) {
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return commandProjectContext{}, nil, err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -2863,7 +2728,7 @@ func openTicketIndexForCommand(
 		return commandProjectContext{}, nil, err
 	}
 
-	index, err := core.NewTicketIndex(ctx, env, deps.assetsFS)
+	index, err := core.NewTicketIndex(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return commandProjectContext{}, nil, err
 	}
@@ -2890,13 +2755,7 @@ func refreshProjectTicketIndex(ctx context.Context, index core.TicketIndex, proj
 	return nil
 }
 
-func ticketNewAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runTicketNew(ctx, cmd, stdout)
-	}
-}
-
-func runTicketNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runTicketNew(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 1 {
 		return fmt.Errorf("ticket new requires exactly one title argument")
 	}
@@ -2906,12 +2765,7 @@ func runTicketNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -2920,7 +2774,7 @@ func runTicketNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error
 		return err
 	}
 
-	result, err := newService(ctx, env, projectContext, deps.assetsFS).CreateTicket(CreateTicketRequest{
+	result, err := newService(ctx, env, projectContext, factory.deps.assetsFS).CreateTicket(CreateTicketRequest{
 		Title:       cmd.Args().First(),
 		Synopsis:    cmd.String("synopsis"),
 		Priority:    cmd.String("priority"),
@@ -2934,7 +2788,8 @@ func runTicketNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error
 		return err
 	}
 
-	_, err = fmt.Fprintf(stdout, "ticket: %s\n", result.Path)
+	_, err = fmt.Fprintf(factory.io.Stdout,
+		"ticket: %s\n", result.Path)
 	if err != nil {
 		return fmt.Errorf("write ticket result: %w", err)
 	}

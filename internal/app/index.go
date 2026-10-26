@@ -11,48 +11,36 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func newIndexCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) indexCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "index",
 		Usage: "Manage derived project indexes",
 		Commands: []*cli.Command{
-			newIndexRebuildCommand(stdout),
-			newIndexStatusCommand(stdout),
+			factory.indexRebuildCommand(),
+			factory.indexStatusCommand(),
 		},
 	}
 }
 
-func newIndexRebuildCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) indexRebuildCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "rebuild",
 		Usage:  "Rebuild the resolved project's ticket index",
 		Flags:  ticketProjectFlags(),
-		Action: indexRebuildAction(stdout),
+		Action: factory.runIndexRebuild,
 	}
 }
 
-func newIndexStatusCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) indexStatusCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "status",
 		Usage:  "Report the resolved project's ticket index status",
 		Flags:  ticketProjectFlags(),
-		Action: indexStatusAction(stdout),
+		Action: factory.runIndexStatus,
 	}
 }
 
-func indexRebuildAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runIndexRebuild(ctx, cmd, stdout)
-	}
-}
-
-func indexStatusAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runIndexStatus(ctx, cmd, stdout)
-	}
-}
-
-func runIndexRebuild(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runIndexRebuild(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("index rebuild does not accept positional arguments")
 	}
@@ -62,12 +50,7 @@ func runIndexRebuild(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -76,7 +59,7 @@ func runIndexRebuild(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	index, err := core.NewTicketIndex(ctx, env, deps.assetsFS)
+	index, err := core.NewTicketIndex(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -95,7 +78,7 @@ func runIndexRebuild(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	return printIndexRebuildResult(stdout, result)
+	return printIndexRebuildResult(factory.io.Stdout, result)
 }
 
 func printIndexRebuildResult(stdout io.Writer, result core.RebuildProjectTicketsResult) error {
@@ -119,7 +102,7 @@ func printIndexRebuildResult(stdout io.Writer, result core.RebuildProjectTickets
 	return nil
 }
 
-func runIndexStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runIndexStatus(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("index status does not accept positional arguments")
 	}
@@ -129,12 +112,7 @@ func runIndexStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -143,7 +121,7 @@ func runIndexStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	index, err := core.NewTicketIndex(ctx, env, deps.assetsFS)
+	index, err := core.NewTicketIndex(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -162,7 +140,7 @@ func runIndexStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	err = printIndexStatusResult(stdout, status)
+	err = printIndexStatusResult(factory.io.Stdout, status)
 	if err != nil {
 		return err
 	}

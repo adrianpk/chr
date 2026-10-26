@@ -16,15 +16,15 @@ import (
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
-func newAuthorCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) authorCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "author",
 		Usage: "Manage Markdown-first authoring sessions",
 		Commands: []*cli.Command{
-			newAuthorAssistedCommand(stdout),
-			newAuthorPromoteCommand(stdout),
-			newAuthorQuizCommand(stdout),
-			newAuthorSessionCommand(stdout),
+			factory.authorAssistedCommand(),
+			factory.authorPromoteCommand(),
+			factory.authorQuizCommand(),
+			factory.authorSessionCommand(),
 		},
 	}
 }
@@ -33,139 +33,139 @@ var newAuthoringQuizQuestionProvider = func() core.AuthoringQuizQuestionProvider
 	return core.HarnessAuthoringQuizQuestionProvider{Program: codex.Program, Runner: codex.Runner{}}
 }
 
-func newAuthorAssistedCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) authorAssistedCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "assisted",
 		Usage: "Run assisted authoring sessions",
 		Commands: []*cli.Command{
-			newAuthorAssistedAnswerCommand(stdout),
-			newAuthorAssistedFinalizeCommand(stdout),
-			newAuthorAssistedResumeCommand(stdout),
-			newAuthorAssistedStartCommand(stdout),
-			newAuthorAssistedStatusCommand(stdout),
+			factory.authorAssistedAnswerCommand(),
+			factory.authorAssistedFinalizeCommand(),
+			factory.authorAssistedResumeCommand(),
+			factory.authorAssistedStartCommand(),
+			factory.authorAssistedStatusCommand(),
 		},
 	}
 }
 
-func newAuthorPromoteCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) authorPromoteCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "promote",
 		Usage: "Promote authoring artifacts",
 		Commands: []*cli.Command{
-			newAuthorPromoteQuizToDraftCommand(stdout),
+			factory.authorPromoteQuizToDraftCommand(),
 		},
 	}
 }
 
-func newAuthorSessionCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) authorSessionCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "session",
 		Usage: "Manage authoring sessions",
 		Commands: []*cli.Command{
-			newAuthorSessionListCommand(stdout),
-			newAuthorSessionNewCommand(stdout),
-			newAuthorSessionShowCommand(stdout),
+			factory.authorSessionListCommand(),
+			factory.authorSessionNewCommand(),
+			factory.authorSessionShowCommand(),
 		},
 	}
 }
 
-func newAuthorQuizCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) authorQuizCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "quiz",
 		Usage: "Generate authoring quizzes",
 		Commands: []*cli.Command{
-			newAuthorQuizNewCommand(stdout),
+			factory.authorQuizNewCommand(),
 		},
 	}
 }
 
-func newAuthorSessionNewCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) authorSessionNewCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "new",
 		Usage:  "Create an authoring session",
 		Flags:  authorSessionFlags(),
-		Action: authorSessionNewAction(stdout),
+		Action: factory.runAuthorSessionNew,
 	}
 }
 
-func newAuthorSessionListCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) authorSessionListCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "list",
 		Usage:  "List authoring sessions",
 		Flags:  authorProjectFlags(),
-		Action: authorSessionListAction(stdout),
+		Action: factory.runAuthorSessionList,
 	}
 }
 
-func newAuthorSessionShowCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) authorSessionShowCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "show",
 		Usage:  "Show one authoring session",
 		Flags:  authorProjectFlags(),
-		Action: authorSessionShowAction(stdout),
+		Action: factory.runAuthorSessionShow,
 	}
 }
 
-func newAuthorQuizNewCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) authorQuizNewCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "new",
 		Usage:  "Create an authoring quiz",
 		Flags:  authorQuizNewFlags(),
-		Action: authorQuizNewAction(stdout),
+		Action: factory.runAuthorQuizNew,
 	}
 }
 
-func newAuthorPromoteQuizToDraftCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) authorPromoteQuizToDraftCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "quiz-to-draft",
 		Usage:  "Promote a quiz artifact into an editable draft",
 		Flags:  authorPromoteQuizToDraftFlags(),
-		Action: authorPromoteQuizToDraftAction(stdout),
+		Action: factory.runAuthorPromoteQuizToDraft,
 	}
 }
 
-func newAuthorAssistedStartCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) authorAssistedStartCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "start",
 		Usage:  "Start an assisted authoring session",
 		Flags:  authorAssistedStartFlags(),
-		Action: authorAssistedStartAction(stdout),
+		Action: factory.runAuthorAssistedStart,
 	}
 }
 
-func newAuthorAssistedResumeCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) authorAssistedResumeCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "resume",
 		Usage:  "Ask the next assisted authoring question",
 		Flags:  authorAssistedResumeFlags(),
-		Action: authorAssistedResumeAction(stdout),
+		Action: factory.runAuthorAssistedResume,
 	}
 }
 
-func newAuthorAssistedAnswerCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) authorAssistedAnswerCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "answer",
 		Usage:  "Submit an assisted authoring answer",
 		Flags:  authorAssistedAnswerFlags(),
-		Action: authorAssistedAnswerAction(stdout),
+		Action: factory.runAuthorAssistedAnswer,
 	}
 }
 
-func newAuthorAssistedStatusCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) authorAssistedStatusCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "status",
 		Usage:  "Show assisted authoring status",
 		Flags:  authorAssistedSessionFlags(),
-		Action: authorAssistedStatusAction(stdout),
+		Action: factory.runAuthorAssistedStatus,
 	}
 }
 
-func newAuthorAssistedFinalizeCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) authorAssistedFinalizeCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "finalize",
 		Usage:  "Finalize assisted authoring into an artifact",
 		Flags:  authorAssistedFinalizeFlags(),
-		Action: authorAssistedFinalizeAction(stdout),
+		Action: factory.runAuthorAssistedFinalize,
 	}
 }
 
@@ -350,67 +350,7 @@ func authorPromoteQuizToDraftFlags() []cli.Flag {
 	)
 }
 
-func authorSessionNewAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runAuthorSessionNew(ctx, cmd, stdout)
-	}
-}
-
-func authorSessionListAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runAuthorSessionList(ctx, cmd, stdout)
-	}
-}
-
-func authorSessionShowAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runAuthorSessionShow(ctx, cmd, stdout)
-	}
-}
-
-func authorQuizNewAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runAuthorQuizNew(ctx, cmd, stdout)
-	}
-}
-
-func authorPromoteQuizToDraftAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runAuthorPromoteQuizToDraft(ctx, cmd, stdout)
-	}
-}
-
-func authorAssistedStartAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runAuthorAssistedStart(ctx, cmd, stdout)
-	}
-}
-
-func authorAssistedResumeAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runAuthorAssistedResume(ctx, cmd, stdout)
-	}
-}
-
-func authorAssistedAnswerAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runAuthorAssistedAnswer(ctx, cmd, stdout)
-	}
-}
-
-func authorAssistedStatusAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runAuthorAssistedStatus(ctx, cmd, stdout)
-	}
-}
-
-func authorAssistedFinalizeAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runAuthorAssistedFinalize(ctx, cmd, stdout)
-	}
-}
-
-func runAuthorSessionNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runAuthorSessionNew(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("author session new does not accept positional arguments")
 	}
@@ -420,12 +360,7 @@ func runAuthorSessionNew(ctx context.Context, cmd *cli.Command, stdout io.Writer
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -439,20 +374,20 @@ func runAuthorSessionNew(ctx context.Context, cmd *cli.Command, stdout io.Writer
 		return err
 	}
 
-	result, err := newService(ctx, env, projectContext, deps.assetsFS).CreateAuthoringSession(session)
+	result, err := newService(ctx, env, projectContext, factory.deps.assetsFS).CreateAuthoringSession(session)
 	if err != nil {
 		return err
 	}
 
-	return printAuthorSessionCreated(stdout, result.Session, result.Paths, projectContext.ProjectDir)
+	return printAuthorSessionCreated(factory.io.Stdout, result.Session, result.Paths, projectContext.ProjectDir)
 }
 
-func runAuthorSessionList(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runAuthorSessionList(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("author session list does not accept positional arguments")
 	}
 
-	projectContext, err := authorProjectContext(ctx, cmd)
+	projectContext, err := factory.authorProjectContext(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -462,14 +397,14 @@ func runAuthorSessionList(ctx context.Context, cmd *cli.Command, stdout io.Write
 		return err
 	}
 
-	_, err = fmt.Fprintln(stdout, "id\tstatus\ttarget\tupdated_at\ttopic")
+	_, err = fmt.Fprintln(factory.io.Stdout,
+		"id\tstatus\ttarget\tupdated_at\ttopic")
 	if err != nil {
 		return fmt.Errorf("write author session list header: %w", err)
 	}
 
 	for _, session := range sessions {
-		_, err = fmt.Fprintf(
-			stdout,
+		_, err = fmt.Fprintf(factory.io.Stdout,
 			"%s\t%s\t%s\t%s\t%s\n",
 			session.ID,
 			session.Status,
@@ -485,12 +420,12 @@ func runAuthorSessionList(ctx context.Context, cmd *cli.Command, stdout io.Write
 	return nil
 }
 
-func runAuthorSessionShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runAuthorSessionShow(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 1 {
 		return fmt.Errorf("author session show requires exactly one session id argument")
 	}
 
-	projectContext, err := authorProjectContext(ctx, cmd)
+	projectContext, err := factory.authorProjectContext(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -502,15 +437,15 @@ func runAuthorSessionShow(ctx context.Context, cmd *cli.Command, stdout io.Write
 		return err
 	}
 
-	return printAuthorSession(stdout, session)
+	return printAuthorSession(factory.io.Stdout, session)
 }
 
-func runAuthorQuizNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runAuthorQuizNew(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("author quiz new does not accept positional arguments")
 	}
 
-	projectContext, err := authorProjectContext(ctx, cmd)
+	projectContext, err := factory.authorProjectContext(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -522,13 +457,12 @@ func runAuthorQuizNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) e
 		return err
 	}
 
-	return runAuthorContextualQuizNew(ctx, cmd, stdout, projectContext, session, now)
+	return factory.runAuthorContextualQuizNew(ctx, cmd, projectContext, session, now)
 }
 
-func runAuthorContextualQuizNew(
+func (factory commandFactory) runAuthorContextualQuizNew(
 	ctx context.Context,
 	cmd *cli.Command,
-	stdout io.Writer,
 	projectContext commandProjectContext,
 	session core.AuthoringSession,
 	now time.Time,
@@ -554,7 +488,7 @@ func runAuthorContextualQuizNew(
 	}
 
 	if cmd.Bool("dry-run") {
-		return printAuthorContextualQuizPlan(stdout, plan, true, projectContext.ProjectDir)
+		return printAuthorContextualQuizPlan(factory.io.Stdout, plan, true, projectContext.ProjectDir)
 	}
 
 	err = core.WriteContextualQuizContext(ctx, plan)
@@ -567,15 +501,15 @@ func runAuthorContextualQuizNew(
 		return err
 	}
 
-	return printAuthorContextualQuizPlan(stdout, plan, false, projectContext.ProjectDir)
+	return printAuthorContextualQuizPlan(factory.io.Stdout, plan, false, projectContext.ProjectDir)
 }
 
-func runAuthorPromoteQuizToDraft(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runAuthorPromoteQuizToDraft(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("author promote quiz-to-draft does not accept positional arguments")
 	}
 
-	projectContext, err := authorProjectContext(ctx, cmd)
+	projectContext, err := factory.authorProjectContext(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -613,7 +547,7 @@ func runAuthorPromoteQuizToDraft(ctx context.Context, cmd *cli.Command, stdout i
 	}
 
 	if cmd.Bool("dry-run") {
-		return printAuthorPromotionPlan(stdout, plan, true)
+		return printAuthorPromotionPlan(factory.io.Stdout, plan, true)
 	}
 
 	err = core.WriteQuizToDraftPromotionContext(ctx, plan)
@@ -626,15 +560,15 @@ func runAuthorPromoteQuizToDraft(ctx context.Context, cmd *cli.Command, stdout i
 		return err
 	}
 
-	return printAuthorPromotionPlan(stdout, plan, false)
+	return printAuthorPromotionPlan(factory.io.Stdout, plan, false)
 }
 
-func runAuthorAssistedStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runAuthorAssistedStart(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("author assisted start does not accept positional arguments")
 	}
 
-	projectContext, err := authorProjectContext(ctx, cmd)
+	projectContext, err := factory.authorProjectContext(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -651,20 +585,21 @@ func runAuthorAssistedStart(ctx context.Context, cmd *cli.Command, stdout io.Wri
 		return err
 	}
 
-	err = printAuthorSessionCreated(stdout, session, paths, projectContext.ProjectDir)
+	err = printAuthorSessionCreated(factory.io.Stdout, session, paths, projectContext.ProjectDir)
 	if err != nil {
 		return err
 	}
 
-	return writeAuthorLines(stdout, []string{"assisted: started"})
+	return writeAuthorLines(factory.io.Stdout,
+		[]string{"assisted: started"})
 }
 
-func runAuthorAssistedResume(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runAuthorAssistedResume(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("author assisted resume does not accept positional arguments")
 	}
 
-	state, err := loadAuthorAssistedState(ctx, cmd)
+	state, err := factory.loadAuthorAssistedState(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -698,15 +633,15 @@ func runAuthorAssistedResume(ctx context.Context, cmd *cli.Command, stdout io.Wr
 		return err
 	}
 
-	return printAuthorAssistedQuestion(stdout, result)
+	return printAuthorAssistedQuestion(factory.io.Stdout, result)
 }
 
-func runAuthorAssistedAnswer(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runAuthorAssistedAnswer(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("author assisted answer does not accept positional arguments")
 	}
 
-	state, err := loadAuthorAssistedState(ctx, cmd)
+	state, err := factory.loadAuthorAssistedState(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -726,28 +661,28 @@ func runAuthorAssistedAnswer(ctx context.Context, cmd *cli.Command, stdout io.Wr
 		return err
 	}
 
-	return printAuthorAssistedAnswer(stdout, result)
+	return printAuthorAssistedAnswer(factory.io.Stdout, result)
 }
 
-func runAuthorAssistedStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runAuthorAssistedStatus(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("author assisted status does not accept positional arguments")
 	}
 
-	state, err := loadAuthorAssistedState(ctx, cmd)
+	state, err := factory.loadAuthorAssistedState(ctx, cmd)
 	if err != nil {
 		return err
 	}
 
-	return printAuthorAssistedStatus(stdout, state.Session, state.Events)
+	return printAuthorAssistedStatus(factory.io.Stdout, state.Session, state.Events)
 }
 
-func runAuthorAssistedFinalize(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runAuthorAssistedFinalize(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("author assisted finalize does not accept positional arguments")
 	}
 
-	state, err := loadAuthorAssistedState(ctx, cmd)
+	state, err := factory.loadAuthorAssistedState(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -759,7 +694,7 @@ func runAuthorAssistedFinalize(ctx context.Context, cmd *cli.Command, stdout io.
 
 	now := time.Now().UTC()
 
-	if handled, err := tryAuthorAssistedDump(ctx, cmd, state, summaryText, now, stdout); handled {
+	if handled, err := factory.tryAuthorAssistedDump(ctx, cmd, state, summaryText, now); handled {
 		return err
 	}
 
@@ -793,7 +728,7 @@ func runAuthorAssistedFinalize(ctx context.Context, cmd *cli.Command, stdout io.
 		return err
 	}
 
-	return printAuthorAssistedFinalized(stdout, curation, synthesis)
+	return printAuthorAssistedFinalized(factory.io.Stdout, curation, synthesis)
 }
 
 type authorAssistedState struct {
@@ -805,8 +740,8 @@ type authorAssistedState struct {
 	Repository     core.AuthoringSessionRepository
 }
 
-func loadAuthorAssistedState(ctx context.Context, cmd *cli.Command) (authorAssistedState, error) {
-	projectContext, err := authorProjectContext(ctx, cmd)
+func (factory commandFactory) loadAuthorAssistedState(ctx context.Context, cmd *cli.Command) (authorAssistedState, error) {
+	projectContext, err := factory.authorProjectContext(ctx, cmd)
 	if err != nil {
 		return authorAssistedState{}, err
 	}
@@ -850,18 +785,13 @@ func loadAuthorAssistedState(ctx context.Context, cmd *cli.Command) (authorAssis
 	}, nil
 }
 
-func authorProjectContext(ctx context.Context, cmd *cli.Command) (commandProjectContext, error) {
+func (factory commandFactory) authorProjectContext(ctx context.Context, cmd *cli.Command) (commandProjectContext, error) {
 	env, err := newUserEnvironmentFromCommand(cmd)
 	if err != nil {
 		return commandProjectContext{}, err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return commandProjectContext{}, err
-	}
-
-	return newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	return newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,

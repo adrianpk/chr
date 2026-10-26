@@ -14,7 +14,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func newWorkUpgradeCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) workUpgradeCommand() *cli.Command {
 	flags := append(workProjectFlags(),
 		&cli.StringFlag{Name: "config-revision", Required: true, Usage: "unchanged revision observed by work config"},
 		&cli.StringFlag{Name: "state-authority", Required: true, Usage: "explicit tickets or tracker_compat authority"},
@@ -24,11 +24,11 @@ func newWorkUpgradeCommand(stdout io.Writer, deps appDependencies) *cli.Command 
 	)
 
 	return &cli.Command{Name: "upgrade", Usage: "Explicitly upgrade one quiescent legacy project to workflow version one", Flags: flags, Action: func(ctx context.Context, cmd *cli.Command) error {
-		return workUpgradeAction(ctx, cmd, stdout, deps)
+		return factory.workUpgradeAction(ctx, cmd)
 	}}
 }
 
-func workUpgradeAction(ctx context.Context, cmd *cli.Command, stdout io.Writer, deps appDependencies) error {
+func (factory commandFactory) workUpgradeAction(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("work upgrade does not accept positional arguments")
 	}
@@ -38,7 +38,7 @@ func workUpgradeAction(ctx context.Context, cmd *cli.Command, stdout io.Writer, 
 		return err
 	}
 
-	operations, _, err := workServiceFromCommand(ctx, cmd, deps)
+	operations, _, err := factory.workServiceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -51,10 +51,11 @@ func workUpgradeAction(ctx context.Context, cmd *cli.Command, stdout io.Writer, 
 	}
 
 	if cmd.Bool("json") {
-		return json.NewEncoder(stdout).Encode(result)
+		return json.NewEncoder(factory.io.Stdout).Encode(result)
 	}
 
-	_, err = fmt.Fprintf(stdout, "Workflow version one enabled. Prior policy: %s\nConfiguration revision: %s\n", result.Snapshot, result.Current.Revision)
+	_, err = fmt.Fprintf(factory.io.Stdout,
+		"Workflow version one enabled. Prior policy: %s\nConfiguration revision: %s\n", result.Snapshot, result.Current.Revision)
 
 	return err
 }

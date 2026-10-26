@@ -16,31 +16,31 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func telegramStatusAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		env, err := newUserEnvironmentFromCommand(cmd)
-		if err != nil {
-			return err
-		}
-
-		config, err := core.LoadTelegramReceiverConfig(env)
-		if err != nil {
-			return errors.New("telegram configuration is unavailable or invalid; run telegram setup")
-		}
-
-		_, tokenErr := core.TelegramReceiverToken(env, config)
-
-		_, err = fmt.Fprintf(stdout, "telegram: configured\ntoken_available: %t\npoll_timeout_seconds: %d\nallowed_users: %d\nconfig: %s\n", tokenErr == nil, config.PollTimeoutSeconds, len(config.AllowedUsers), filepath.Join(env.ConfigDir(), "telegram.yml"))
-		if err != nil {
-			return err
-		}
-
-		if _, err := fmt.Fprintf(stdout, "installed_build: %s\n", telegramInstalledBuild()); err != nil {
-			return err
-		}
-
-		return printTelegramLocalState(ctx, env, stdout)
+func (factory commandFactory) telegramStatusAction(ctx context.Context, cmd *cli.Command) error {
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
 	}
+
+	config, err := core.LoadTelegramReceiverConfig(env)
+	if err != nil {
+		return errors.New("telegram configuration is unavailable or invalid; run telegram setup")
+	}
+
+	_, tokenErr := core.TelegramReceiverToken(env, config)
+
+	_, err = fmt.Fprintf(factory.io.Stdout,
+		"telegram: configured\ntoken_available: %t\npoll_timeout_seconds: %d\nallowed_users: %d\nconfig: %s\n", tokenErr == nil, config.PollTimeoutSeconds, len(config.AllowedUsers), filepath.Join(env.ConfigDir(), "telegram.yml"))
+	if err != nil {
+		return err
+	}
+
+	if _, err := fmt.Fprintf(factory.io.Stdout,
+		"installed_build: %s\n", telegramInstalledBuild()); err != nil {
+		return err
+	}
+
+	return printTelegramLocalState(ctx, env, factory.io.Stdout)
 }
 
 func printTelegramLocalState(ctx context.Context, env core.UserEnvironment, stdout io.Writer) error {

@@ -15,17 +15,17 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func newTelegramDoctorCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) telegramDoctorCommand() *cli.Command {
 	return &cli.Command{
 		Name: "doctor", Usage: "Check local project/provider readiness; optional getMe/webhook checks send no message",
 		Flags: append(projectRegistryFlags(), &cli.BoolFlag{Name: "check-connection"}),
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			return runTelegramDoctor(ctx, cmd, stdout, core.NewTelegramReceiverAPI())
+			return factory.runTelegramDoctor(ctx, cmd, core.NewTelegramReceiverAPI())
 		},
 	}
 }
 
-func runTelegramDoctor(ctx context.Context, cmd *cli.Command, stdout io.Writer, api core.TelegramReceiverAPI) (err error) {
+func (factory commandFactory) runTelegramDoctor(ctx context.Context, cmd *cli.Command, api core.TelegramReceiverAPI) (err error) {
 	env, err := newUserEnvironmentFromCommand(cmd)
 	if err != nil {
 		return err
@@ -41,27 +41,23 @@ func runTelegramDoctor(ctx context.Context, cmd *cli.Command, stdout io.Writer, 
 		return errors.New("telegram token reference is unavailable or invalid; correct private configuration")
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
+	if err := printTelegramProviderReadiness(factory.io.Stdout); err != nil {
 		return err
 	}
 
-	if err := printTelegramProviderReadiness(stdout); err != nil {
-		return err
-	}
-
-	operations := newService(ctx, env, commandProjectContext{}, deps.assetsFS)
-	if err := printTelegramProjectReadiness(stdout, operations, config); err != nil {
+	operations := newService(ctx, env, commandProjectContext{}, factory.deps.assetsFS)
+	if err := printTelegramProjectReadiness(factory.io.Stdout, operations, config); err != nil {
 		return err
 	}
 
 	if !cmd.Bool("check-connection") {
-		_, err := fmt.Fprintln(stdout, "telegram_doctor: local_configuration_ready\nconnection: unchecked")
+		_, err := fmt.Fprintln(factory.io.Stdout,
+			"telegram_doctor: local_configuration_ready\nconnection: unchecked")
 
 		return err
 	}
 
-	return telegramDoctorFailure(checkTelegramConnection(ctx, env, token, api, stdout))
+	return telegramDoctorFailure(checkTelegramConnection(ctx, env, token, api, factory.io.Stdout))
 }
 
 func checkTelegramConnection(ctx context.Context, env core.UserEnvironment, token string, api core.TelegramReceiverAPI, stdout io.Writer) (err error) {

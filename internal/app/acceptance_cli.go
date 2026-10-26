@@ -10,47 +10,41 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func newAcceptanceCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) acceptanceCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "acceptance",
 		Usage: "Manage acceptance artifacts",
 		Commands: []*cli.Command{
-			newAcceptanceFeatureCommand(stdout),
+			factory.acceptanceFeatureCommand(),
 		},
 	}
 }
 
-func newAcceptanceFeatureCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) acceptanceFeatureCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "feature",
 		Usage: "Manage acceptance feature artifacts",
 		Commands: []*cli.Command{
-			newAcceptanceFeatureGenerateCommand(stdout),
+			factory.acceptanceFeatureGenerateCommand(),
 		},
 	}
 }
 
-func newAcceptanceFeatureGenerateCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) acceptanceFeatureGenerateCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "generate",
 		Usage:  "Generate an acceptance feature",
 		Flags:  workspaceScopeFlags(),
-		Action: acceptanceFeatureGenerateAction(stdout),
+		Action: factory.runAcceptanceFeatureGenerate,
 	}
 }
 
-func acceptanceFeatureGenerateAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runAcceptanceFeatureGenerate(ctx, cmd, stdout)
-	}
-}
-
-func runAcceptanceFeatureGenerate(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runAcceptanceFeatureGenerate(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("acceptance feature generate does not accept positional arguments")
 	}
 
-	operations, _, err := serviceFromCommand(ctx, cmd)
+	operations, _, err := factory.serviceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -62,7 +56,8 @@ func runAcceptanceFeatureGenerate(ctx context.Context, cmd *cli.Command, stdout 
 		return err
 	}
 
-	return writeAcceptanceFeatureGenerateResult(stdout, result)
+	return writeAcceptanceFeatureGenerateResult(factory.io.Stdout,
+		result)
 }
 
 func writeAcceptanceFeatureGenerateResult(stdout io.Writer, result AcceptanceFeatureOperationResult) error {

@@ -20,23 +20,23 @@ import (
 	"forge.adrianpk.com/chr/internal/webui/ui"
 )
 
-func newWebCommand(stdin io.Reader, stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) webCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "web",
 		Usage: "Run the local Web UI",
 		Commands: []*cli.Command{
-			newWebServeCommand(stdout, deps),
-			newWebLoginCommand(stdin, stdout),
+			factory.webServeCommand(),
+			factory.webLoginCommand(),
 		},
 	}
 }
 
-func newWebServeCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) webServeCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "serve",
 		Usage:  "Serve the local Web UI for the resolved project",
 		Flags:  webServeFlags(),
-		Action: webServeAction(stdout, deps),
+		Action: factory.runWebServe,
 	}
 }
 
@@ -79,19 +79,13 @@ func webServeFlags() []cli.Flag {
 	)
 }
 
-func webServeAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runWebServe(ctx, cmd, stdout, deps)
-	}
-}
-
-func runWebServe(ctx context.Context, cmd *cli.Command, stdout io.Writer, deps appDependencies) error {
+func (factory commandFactory) runWebServe(ctx context.Context, cmd *cli.Command) error {
 	env, err := newUserEnvironmentFromCommand(cmd)
 	if err != nil {
 		return err
 	}
 
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -116,8 +110,8 @@ func runWebServe(ctx context.Context, cmd *cli.Command, stdout io.Writer, deps a
 		URL:            webURL(webConfig.Host, webConfig.Port),
 		Env:            env,
 		ProjectContext: projectContext,
-		AssetsFS:       deps.assetsFS,
-		LogRequests:    stdout,
+		AssetsFS:       factory.deps.assetsFS,
+		LogRequests:    factory.io.Stdout,
 	}
 
 	resolved.Login, err = loadWebLogin(env, cmd.Bool("require-login"))
@@ -129,10 +123,10 @@ func runWebServe(ctx context.Context, cmd *cli.Command, stdout io.Writer, deps a
 	}
 
 	if cmd.Bool("dry-run") {
-		return printWebServeDryRun(stdout, resolved)
+		return printWebServeDryRun(factory.io.Stdout, resolved)
 	}
 
-	if err := printWebServeStart(stdout, resolved); err != nil {
+	if err := printWebServeStart(factory.io.Stdout, resolved); err != nil {
 		return err
 	}
 

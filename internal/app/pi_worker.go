@@ -19,7 +19,7 @@ import (
 	"forge.adrianpk.com/chr/internal/harness/pi"
 )
 
-func newPiWorkerCommand(stdin io.Reader, stdout io.Writer) *cli.Command {
+func (factory commandFactory) piWorkerCommand() *cli.Command {
 	return &cli.Command{Name: "_pi-worker", Hidden: true, Flags: []cli.Flag{&cli.StringFlag{Name: "runtime", Required: true}}, Action: func(ctx context.Context, cmd *cli.Command) error {
 		if runtime.GOOS != "linux" || cmd.NArg() != 0 || len(cmd.String("runtime")) > 16_384 {
 			return errors.New("pi workers require the prepared Linux chr bridge")
@@ -34,7 +34,7 @@ func newPiWorkerCommand(stdin io.Reader, stdout io.Writer) *cli.Command {
 			return errors.New("invalid retained Pi worker runtime")
 		}
 
-		return runPiWorker(ctx, stdin, stdout, options)
+		return runPiWorker(ctx, factory.io.Stdin, factory.io.Stdout, options)
 	}}
 }
 
@@ -118,7 +118,7 @@ func piWorkerPrompt(data []byte, options pi.WorkerRuntimeOptions) (string, error
 	return string(clean), err
 }
 
-func newPiBridgeCommand(stdin io.Reader, stdout io.Writer) *cli.Command {
+func (factory commandFactory) piBridgeCommand() *cli.Command {
 	return &cli.Command{Name: "_pi-bridge", Hidden: true, Flags: []cli.Flag{
 		&cli.StringFlag{Name: "provider", Required: true}, &cli.StringFlag{Name: "model", Required: true}, &cli.StringFlag{Name: "thinking"},
 		&cli.StringFlag{Name: "credential-file", Required: true}, &cli.StringFlag{Name: "model-file"}, &cli.StringFlag{Name: "slot", Required: true}, &cli.StringFlag{Name: "guard", Required: true},
@@ -131,15 +131,15 @@ func newPiBridgeCommand(stdin io.Reader, stdout io.Writer) *cli.Command {
 			return errors.New("pi RPC worker bridge must execute inside Docker")
 		}
 
-		return runPiBridge(ctx, stdin, stdout, cmd)
+		return factory.runPiBridge(ctx, cmd)
 	}}
 }
 
-func runPiBridge(ctx context.Context, stdin io.Reader, stdout io.Writer, cmd *cli.Command) (err error) {
+func (factory commandFactory) runPiBridge(ctx context.Context, cmd *cli.Command) (err error) {
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	prompt, ctx, cancel, err := pi.ReadWorkerInput(ctx, stdin)
+	prompt, ctx, cancel, err := pi.ReadWorkerInput(ctx, factory.io.Stdin)
 	if err != nil {
 		return err
 	}
@@ -166,7 +166,8 @@ func runPiBridge(ctx context.Context, stdin io.Reader, stdout io.Writer, cmd *cl
 		return err
 	}
 
-	_, err = stdout.Write(result.Output)
+	_, err = factory.io.Stdout.
+		Write(result.Output)
 
 	return err
 }

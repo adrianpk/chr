@@ -12,7 +12,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func newWorkTrackerCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) workTrackerCommand() *cli.Command {
 	command := &cli.Command{Name: "tracker", Usage: "Export, inspect or repair a derived workflow view"}
 	for _, action := range []string{"export", "status", "repair"} {
 		flags := append(workProjectFlags(), &cli.BoolFlag{Name: "json", Usage: "print projection provenance and staleness"})
@@ -21,19 +21,19 @@ func newWorkTrackerCommand(stdout io.Writer, deps appDependencies) *cli.Command 
 		}
 
 		command.Commands = append(command.Commands, &cli.Command{Name: action, ArgsUsage: "<slice-set-id>", Flags: flags, Action: func(ctx context.Context, cmd *cli.Command) error {
-			return workTrackerAction(ctx, cmd, stdout, deps)
+			return factory.workTrackerAction(ctx, cmd)
 		}})
 	}
 
 	return command
 }
 
-func workTrackerAction(ctx context.Context, cmd *cli.Command, stdout io.Writer, deps appDependencies) error {
+func (factory commandFactory) workTrackerAction(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 1 {
 		return fmt.Errorf("work tracker %s requires exactly one adopted slice-set ID", cmd.Name)
 	}
 
-	operations, _, err := workServiceFromCommand(ctx, cmd, deps)
+	operations, _, err := factory.workServiceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func workTrackerAction(ctx context.Context, cmd *cli.Command, stdout io.Writer, 
 		return err
 	}
 
-	return errors.Join(err, printWorkflowTracker(stdout, result, cmd.Bool("json")))
+	return errors.Join(err, printWorkflowTracker(factory.io.Stdout, result, cmd.Bool("json")))
 }
 
 func printWorkflowTracker(stdout io.Writer, result core.WorkflowTrackerStatus, asJSON bool) error {

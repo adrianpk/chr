@@ -1,7 +1,7 @@
 ---
 id: TKT-20261026084824
 title: "Quality slice 4: Typed commands and central application operations"
-status: ready
+status: in_progress
 kind: cleanup
 severity: unclassified
 priority: normal
@@ -10,6 +10,8 @@ tags: code-quality, remediation, slice-4
 source: review
 reported_at: 2026-10-26T08:48:24Z
 commits: []
+started_at: 2026-10-26T10:38:54Z
+branch: refactor/slice-4-quality-commands
 ready_at: 2026-10-26T08:57:09Z
 ---
 

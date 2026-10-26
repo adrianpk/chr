@@ -15,10 +15,10 @@ import (
 
 const daemonWorkflowActivationLimit = 16
 
-func newDaemonWorkflowCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) daemonWorkflowCommand() *cli.Command {
 	command := &cli.Command{Name: "workflow", Usage: "Control one retained workflow through shared work operations"}
 	for _, action := range []string{"status", "continue", "pause", "cancel", "resume", "approve", "grant", "answer-decision", "reconcile"} {
-		command.Commands = append(command.Commands, newWorkControlCommand(stdout, deps, action))
+		command.Commands = append(command.Commands, factory.workControlCommand(action))
 	}
 
 	return command

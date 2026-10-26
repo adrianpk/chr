@@ -16,19 +16,21 @@ import (
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
-func newWebLoginCommand(stdin io.Reader, stdout io.Writer) *cli.Command {
+func (factory commandFactory) webLoginCommand() *cli.Command {
 	return &cli.Command{
 		Name: "login", Usage: "Configure the private single-user Web UI account",
-		Commands: []*cli.Command{{
-			Name: "setup", Usage: "Save a password verifier using masked terminal entry",
-			Flags: append(projectRegistryFlags(),
-				&cli.StringFlag{Name: "username", Usage: "single Web UI account name", Required: true},
-				&cli.BoolFlag{Name: "replace", Usage: "replace the existing account; restart Web servers afterward"},
-			),
-			Action: func(_ context.Context, cmd *cli.Command) error {
-				return setupWebLogin(cmd, stdin, stdout)
+		Commands: []*cli.Command{
+			{
+				Name: "setup", Usage: "Save a password verifier using masked terminal entry",
+				Flags: append(projectRegistryFlags(),
+					&cli.StringFlag{Name: "username", Usage: "single Web UI account name", Required: true},
+					&cli.BoolFlag{Name: "replace", Usage: "replace the existing account; restart Web servers afterward"},
+				),
+				Action: func(_ context.Context, cmd *cli.Command) error {
+					return factory.setupWebLogin(cmd)
+				},
 			},
-		}},
+		},
 	}
 }
 
@@ -45,7 +47,7 @@ func loadWebLogin(env core.UserEnvironment, required bool) (*webui.LoginCredenti
 	return credentials, err
 }
 
-func setupWebLogin(cmd *cli.Command, stdin io.Reader, stdout io.Writer) error {
+func (factory commandFactory) setupWebLogin(cmd *cli.Command) error {
 	env, err := newUserEnvironmentFromCommand(cmd)
 	if err != nil {
 		return err
@@ -56,7 +58,7 @@ func setupWebLogin(cmd *cli.Command, stdin io.Reader, stdout io.Writer) error {
 		return errors.New("web login account already exists or cannot be inspected; use --replace to change it")
 	}
 
-	password, err := readWebLoginPassword(stdin, stdout)
+	password, err := readWebLoginPassword(factory.io.Stdin, factory.io.Stdout)
 	if err != nil {
 		return err
 	}
@@ -71,7 +73,8 @@ func setupWebLogin(cmd *cli.Command, stdin io.Reader, stdout io.Writer) error {
 		return err
 	}
 
-	_, err = fmt.Fprintln(stdout, "Web login configured. Restart Web servers to load the account and invalidate existing sessions.")
+	_, err = fmt.Fprintln(factory.io.Stdout,
+		"Web login configured. Restart Web servers to load the account and invalidate existing sessions.")
 
 	return err
 }

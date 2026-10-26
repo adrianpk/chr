@@ -11,45 +11,45 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func newGateCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) gateCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "gate",
 		Usage: "Run project promotion gates",
 		Commands: []*cli.Command{
-			newGateDevMainCommand(stdout, deps),
-			newGateWoodpeckerCommand(stdout, deps),
+			factory.gateDevMainCommand(),
+			factory.gateWoodpeckerCommand(),
 		},
 	}
 }
 
-func newGateDevMainCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) gateDevMainCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "dev-main",
 		Usage: "Collect dev to main promotion evidence",
 		Flags: gateDevMainFlags(),
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			return runGateDevMain(ctx, cmd, stdout)
+			return factory.runGateDevMain(ctx, cmd)
 		},
 	}
 }
 
-func newGateWoodpeckerCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) gateWoodpeckerCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "woodpecker",
 		Usage: "Configure Woodpecker gate integration",
 		Commands: []*cli.Command{
-			newGateWoodpeckerInitCommand(stdout, deps),
+			factory.gateWoodpeckerInitCommand(),
 		},
 	}
 }
 
-func newGateWoodpeckerInitCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) gateWoodpeckerInitCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "init",
 		Usage: "Create or print a Woodpecker dev-main gate config",
 		Flags: gateWoodpeckerInitFlags(),
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			return runGateWoodpeckerInit(ctx, cmd, stdout)
+			return factory.runGateWoodpeckerInit(ctx, cmd)
 		},
 	}
 }
@@ -92,7 +92,7 @@ func gateWoodpeckerInitFlags() []cli.Flag {
 	)
 }
 
-func runGateDevMain(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runGateDevMain(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("gate dev-main does not accept positional arguments")
 	}
@@ -102,12 +102,7 @@ func runGateDevMain(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -116,10 +111,10 @@ func runGateDevMain(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	return runGateDevMainForProject(ctx, stdout, projectContext.ProjectDir, cmd.String("base"), cmd.String("head"))
+	return runGateDevMainForProject(ctx, factory.io.Stdout, projectContext.ProjectDir, cmd.String("base"), cmd.String("head"))
 }
 
-func runGateWoodpeckerInit(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runGateWoodpeckerInit(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("gate woodpecker init does not accept positional arguments")
 	}
@@ -129,12 +124,7 @@ func runGateWoodpeckerInit(ctx context.Context, cmd *cli.Command, stdout io.Writ
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -152,7 +142,7 @@ func runGateWoodpeckerInit(ctx context.Context, cmd *cli.Command, stdout io.Writ
 		return err
 	}
 
-	return printGateWoodpeckerInitResult(stdout, result)
+	return printGateWoodpeckerInitResult(factory.io.Stdout, result)
 }
 
 func printGateWoodpeckerInitResult(stdout io.Writer, result core.GateWoodpeckerInitResult) error {

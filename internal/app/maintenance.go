@@ -12,89 +12,89 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func newMaintenanceCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+func (factory commandFactory) maintenanceCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "maintenance",
 		Usage: "Inspect and recover local chr state",
 		Commands: []*cli.Command{
-			newMaintenanceBundleCommand(stdout),
-			newMaintenanceDBCommand(stdout),
-			newMaintenanceExecutionCommand(stdout),
-			newMaintenanceRegistryCommand(stdout),
+			factory.maintenanceBundleCommand(),
+			factory.maintenanceDBCommand(),
+			factory.maintenanceExecutionCommand(),
+			factory.maintenanceRegistryCommand(),
 		},
 	}
 }
 
-func newMaintenanceBundleCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) maintenanceBundleCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "bundle",
 		Usage:  "Write a local diagnostic bundle for the resolved project",
 		Flags:  maintenanceProjectFlags(),
-		Action: maintenanceBundleAction(stdout),
+		Action: factory.runMaintenanceBundle,
 	}
 }
 
-func newMaintenanceDBCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) maintenanceDBCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "db",
 		Usage: "Inspect local database state",
 		Commands: []*cli.Command{
-			newMaintenanceDBStatusCommand(stdout),
+			factory.maintenanceDBStatusCommand(),
 		},
 	}
 }
 
-func newMaintenanceDBStatusCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) maintenanceDBStatusCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "status",
 		Usage:  "Report local database migration status",
 		Flags:  projectRegistryFlags(),
-		Action: maintenanceDBStatusAction(stdout),
+		Action: factory.runMaintenanceDBStatus,
 	}
 }
 
-func newMaintenanceExecutionCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) maintenanceExecutionCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "execution",
 		Usage: "Inspect execution records and artifacts",
 		Commands: []*cli.Command{
-			newMaintenanceExecutionArtifactsCommand(stdout),
-			newMaintenanceExecutionCleanupPreviewCommand(stdout),
+			factory.maintenanceExecutionArtifactsCommand(),
+			factory.maintenanceExecutionCleanupPreviewCommand(),
 		},
 	}
 }
 
-func newMaintenanceExecutionArtifactsCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) maintenanceExecutionArtifactsCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "artifacts",
 		Usage:  "Report execution artifact drift for the resolved project",
 		Flags:  maintenanceProjectFlags(),
-		Action: maintenanceExecutionArtifactsAction(stdout),
+		Action: factory.runMaintenanceExecutionArtifacts,
 	}
 }
 
-func newMaintenanceExecutionCleanupPreviewCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) maintenanceExecutionCleanupPreviewCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "cleanup-preview",
 		Usage:  "Preview unreferenced runtime artifact directories",
 		Flags:  maintenanceProjectFlags(),
-		Action: maintenanceExecutionCleanupPreviewAction(stdout),
+		Action: factory.runMaintenanceExecutionCleanupPreview,
 	}
 }
 
-func newMaintenanceRegistryCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) maintenanceRegistryCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "registry",
 		Usage: "Inspect project registry state",
 		Commands: []*cli.Command{
-			newMaintenanceRegistryDisableCommand(stdout),
-			newMaintenanceRegistryStatusCommand(stdout),
-			newMaintenanceRegistrySetPathCommand(stdout),
+			factory.maintenanceRegistryDisableCommand(),
+			factory.maintenanceRegistryStatusCommand(),
+			factory.maintenanceRegistrySetPathCommand(),
 		},
 	}
 }
 
-func newMaintenanceRegistryDisableCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) maintenanceRegistryDisableCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "disable",
 		Usage:     "Disable a registered project",
@@ -103,20 +103,20 @@ func newMaintenanceRegistryDisableCommand(stdout io.Writer) *cli.Command {
 			Name:  "dry-run",
 			Usage: "print planned repair without updating the registry",
 		}),
-		Action: maintenanceRegistryDisableAction(stdout),
+		Action: factory.runMaintenanceRegistryDisable,
 	}
 }
 
-func newMaintenanceRegistryStatusCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) maintenanceRegistryStatusCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "status",
 		Usage:  "Report project registry diagnostics",
 		Flags:  projectRegistryFlags(),
-		Action: maintenanceRegistryStatusAction(stdout),
+		Action: factory.runMaintenanceRegistryStatus,
 	}
 }
 
-func newMaintenanceRegistrySetPathCommand(stdout io.Writer) *cli.Command {
+func (factory commandFactory) maintenanceRegistrySetPathCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "set-path",
 		Usage:     "Update a registered project path",
@@ -125,7 +125,7 @@ func newMaintenanceRegistrySetPathCommand(stdout io.Writer) *cli.Command {
 			Name:  "dry-run",
 			Usage: "print planned repair without updating the registry",
 		}),
-		Action: maintenanceRegistrySetPathAction(stdout),
+		Action: factory.runMaintenanceRegistrySetPath,
 	}
 }
 
@@ -139,49 +139,7 @@ func maintenanceProjectFlags() []cli.Flag {
 	)
 }
 
-func maintenanceBundleAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runMaintenanceBundle(ctx, cmd, stdout)
-	}
-}
-
-func maintenanceDBStatusAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runMaintenanceDBStatus(ctx, cmd, stdout)
-	}
-}
-
-func maintenanceExecutionArtifactsAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runMaintenanceExecutionArtifacts(ctx, cmd, stdout)
-	}
-}
-
-func maintenanceExecutionCleanupPreviewAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runMaintenanceExecutionCleanupPreview(ctx, cmd, stdout)
-	}
-}
-
-func maintenanceRegistryStatusAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runMaintenanceRegistryStatus(ctx, cmd, stdout)
-	}
-}
-
-func maintenanceRegistryDisableAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runMaintenanceRegistryDisable(ctx, cmd, stdout)
-	}
-}
-
-func maintenanceRegistrySetPathAction(stdout io.Writer) cli.ActionFunc {
-	return func(ctx context.Context, cmd *cli.Command) error {
-		return runMaintenanceRegistrySetPath(ctx, cmd, stdout)
-	}
-}
-
-func runMaintenanceBundle(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runMaintenanceBundle(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("maintenance bundle does not accept positional arguments")
 	}
@@ -191,12 +149,7 @@ func runMaintenanceBundle(ctx context.Context, cmd *cli.Command, stdout io.Write
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:    cmd.String("dir"),
 		UseExplicitDir: true,
 	})
@@ -204,7 +157,7 @@ func runMaintenanceBundle(ctx context.Context, cmd *cli.Command, stdout io.Write
 		return err
 	}
 
-	bundle, err := collectDiagnosticBundle(ctx, env, projectContext, deps.assetsFS)
+	bundle, err := collectDiagnosticBundle(ctx, env, projectContext, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -214,7 +167,8 @@ func runMaintenanceBundle(ctx context.Context, cmd *cli.Command, stdout io.Write
 		return err
 	}
 
-	_, err = fmt.Fprintf(stdout, "bundle_path: %s\n", path)
+	_, err = fmt.Fprintf(factory.io.Stdout,
+		"bundle_path: %s\n", path)
 	if err != nil {
 		return fmt.Errorf("write diagnostic bundle result: %w", err)
 	}
@@ -222,7 +176,7 @@ func runMaintenanceBundle(ctx context.Context, cmd *cli.Command, stdout io.Write
 	return nil
 }
 
-func runMaintenanceDBStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runMaintenanceDBStatus(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("maintenance db status does not accept positional arguments")
 	}
@@ -232,17 +186,12 @@ func runMaintenanceDBStatus(ctx context.Context, cmd *cli.Command, stdout io.Wri
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
+	status, err := core.NewMigrationStatusChecker(factory.deps.assetsFS).Check(ctx, env)
 	if err != nil {
 		return err
 	}
 
-	status, err := core.NewMigrationStatusChecker(deps.assetsFS).Check(ctx, env)
-	if err != nil {
-		return err
-	}
-
-	return printMigrationStatus(stdout, status)
+	return printMigrationStatus(factory.io.Stdout, status)
 }
 
 func collectDiagnosticBundle(
@@ -330,7 +279,7 @@ func collectDiagnosticBundleRegistry(
 	return diagnostics, nil
 }
 
-func runMaintenanceExecutionArtifacts(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runMaintenanceExecutionArtifacts(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("maintenance execution artifacts does not accept positional arguments")
 	}
@@ -340,12 +289,7 @@ func runMaintenanceExecutionArtifacts(ctx context.Context, cmd *cli.Command, std
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:    cmd.String("dir"),
 		UseExplicitDir: true,
 	})
@@ -353,7 +297,7 @@ func runMaintenanceExecutionArtifacts(ctx context.Context, cmd *cli.Command, std
 		return err
 	}
 
-	repository, err := core.NewExecutionRepository(ctx, env, deps.assetsFS)
+	repository, err := core.NewExecutionRepository(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -371,10 +315,10 @@ func runMaintenanceExecutionArtifacts(ctx context.Context, cmd *cli.Command, std
 		return err
 	}
 
-	return printExecutionArtifactDriftDiagnostics(stdout, diagnostics)
+	return printExecutionArtifactDriftDiagnostics(factory.io.Stdout, diagnostics)
 }
 
-func runMaintenanceExecutionCleanupPreview(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runMaintenanceExecutionCleanupPreview(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("maintenance execution cleanup-preview does not accept positional arguments")
 	}
@@ -384,12 +328,7 @@ func runMaintenanceExecutionCleanupPreview(ctx context.Context, cmd *cli.Command
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:    cmd.String("dir"),
 		UseExplicitDir: true,
 	})
@@ -397,7 +336,7 @@ func runMaintenanceExecutionCleanupPreview(ctx context.Context, cmd *cli.Command
 		return err
 	}
 
-	repository, err := core.NewExecutionRepository(ctx, env, deps.assetsFS)
+	repository, err := core.NewExecutionRepository(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -416,10 +355,10 @@ func runMaintenanceExecutionCleanupPreview(ctx context.Context, cmd *cli.Command
 		return err
 	}
 
-	return printRuntimeArtifactCleanupPreview(stdout, preview)
+	return printRuntimeArtifactCleanupPreview(factory.io.Stdout, preview)
 }
 
-func runMaintenanceRegistryStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runMaintenanceRegistryStatus(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("maintenance registry status does not accept positional arguments")
 	}
@@ -429,12 +368,7 @@ func runMaintenanceRegistryStatus(ctx context.Context, cmd *cli.Command, stdout 
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	registry, err := core.NewProjectRegistry(ctx, env, deps.assetsFS)
+	registry, err := core.NewProjectRegistry(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -452,10 +386,10 @@ func runMaintenanceRegistryStatus(ctx context.Context, cmd *cli.Command, stdout 
 		return err
 	}
 
-	return printProjectRegistryDiagnostics(stdout, diagnostics)
+	return printProjectRegistryDiagnostics(factory.io.Stdout, diagnostics)
 }
 
-func runMaintenanceRegistryDisable(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runMaintenanceRegistryDisable(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 1 {
 		return fmt.Errorf("maintenance registry disable requires exactly one project name")
 	}
@@ -465,12 +399,7 @@ func runMaintenanceRegistryDisable(ctx context.Context, cmd *cli.Command, stdout
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	registry, err := core.NewProjectRegistry(ctx, env, deps.assetsFS)
+	registry, err := core.NewProjectRegistry(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -488,7 +417,7 @@ func runMaintenanceRegistryDisable(ctx context.Context, cmd *cli.Command, stdout
 	}
 
 	if cmd.Bool("dry-run") {
-		return printProjectRegistryDisable(stdout, project, true)
+		return printProjectRegistryDisable(factory.io.Stdout, project, true)
 	}
 
 	project, err = registry.DisableProject(ctx, projectName)
@@ -496,10 +425,10 @@ func runMaintenanceRegistryDisable(ctx context.Context, cmd *cli.Command, stdout
 		return err
 	}
 
-	return printProjectRegistryDisable(stdout, project, false)
+	return printProjectRegistryDisable(factory.io.Stdout, project, false)
 }
 
-func runMaintenanceRegistrySetPath(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+func (factory commandFactory) runMaintenanceRegistrySetPath(ctx context.Context, cmd *cli.Command) error {
 	if cmd.NArg() != 2 {
 		return fmt.Errorf("maintenance registry set-path requires project name and project directory")
 	}
@@ -519,12 +448,7 @@ func runMaintenanceRegistrySetPath(ctx context.Context, cmd *cli.Command, stdout
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	registry, err := core.NewProjectRegistry(ctx, env, deps.assetsFS)
+	registry, err := core.NewProjectRegistry(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -545,7 +469,7 @@ func runMaintenanceRegistrySetPath(ctx context.Context, cmd *cli.Command, stdout
 	project.Path = projectDir
 
 	if cmd.Bool("dry-run") {
-		return printProjectRegistrySetPath(stdout, project, previousPath, true)
+		return printProjectRegistrySetPath(factory.io.Stdout, project, previousPath, true)
 	}
 
 	project, err = registry.UpdateProjectPath(ctx, projectName, projectDir)
@@ -553,7 +477,7 @@ func runMaintenanceRegistrySetPath(ctx context.Context, cmd *cli.Command, stdout
 		return err
 	}
 
-	return printProjectRegistrySetPath(stdout, project, previousPath, false)
+	return printProjectRegistrySetPath(factory.io.Stdout, project, previousPath, false)
 }
 
 func printMigrationStatus(stdout io.Writer, status core.MigrationStatus) error {
