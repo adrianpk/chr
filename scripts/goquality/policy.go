@@ -19,6 +19,11 @@ type policy struct {
 	Debt          []allowance `json:"debt"`
 }
 
+type allowanceIndex struct {
+	values   map[string]allowance
+	failures []string
+}
+
 func invalidResults(results []string) bool {
 	return len(results) > 2 || len(results) == 2 && results[1] != "error" && results[1] != "bool"
 }
@@ -33,21 +38,21 @@ func checkPolicy(scan sourceScan, rules policy, exceptions []allowance) []string
 		failures = append(failures, "parameter ceiling must be five, six or seven")
 	}
 
-	debt, debtErrors := indexAllowances(rules.Debt, false)
-	exempt, exceptionErrors := indexAllowances(exceptions, true)
+	debt := indexAllowances(rules.Debt, false)
+	exempt := indexAllowances(exceptions, true)
 
-	failures = append(failures, debtErrors...)
+	failures = append(failures, debt.failures...)
 
-	failures = append(failures, exceptionErrors...)
+	failures = append(failures, exempt.failures...)
 	for _, value := range scan.Declarations {
-		failures = append(failures, checkDeclaration(value, rules.MaxParameters, debt, exempt)...)
+		failures = append(failures, checkDeclaration(value, rules.MaxParameters, debt.values, exempt.values)...)
 	}
 
-	for id := range debt {
+	for id := range debt.values {
 		failures = append(failures, "stale debt: "+id)
 	}
 
-	for id := range exempt {
+	for id := range exempt.values {
 		failures = append(failures, "stale external exception: "+id)
 	}
 
@@ -56,7 +61,7 @@ func checkPolicy(scan sourceScan, rules policy, exceptions []allowance) []string
 	return failures
 }
 
-func indexAllowances(values []allowance, external bool) (map[string]allowance, []string) {
+func indexAllowances(values []allowance, external bool) allowanceIndex {
 	indexed := make(map[string]allowance, len(values))
 
 	var failures []string
@@ -73,7 +78,7 @@ func indexAllowances(values []allowance, external bool) (map[string]allowance, [
 		indexed[value.ID] = value
 	}
 
-	return indexed, failures
+	return allowanceIndex{values: indexed, failures: failures}
 }
 
 func checkDeclaration(value declaration, maximum int, debt, exempt map[string]allowance) []string {

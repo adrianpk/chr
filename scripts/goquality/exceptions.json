@@ -1,0 +1,8 @@
+[
+  {
+    "id": "internal/tui/model.go::Model.Update",
+    "signature": "func(msg tea.Msg) (tea.Model, tea.Cmd)",
+    "reason": "Implements the installed Bubble Tea Model.Update method; internal update helpers are not exempt.",
+    "contract": "github.com/charmbracelet/bubbletea v1.3.10, tea.Model.Update(Msg) (Model, Cmd); internal/tui/model.go declares the receiver implementing this contract."
+  }
+]
