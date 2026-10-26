@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -44,8 +45,8 @@ func RunProvingSandbox(ctx context.Context, opts ProvingSandboxRunOptions) (Prov
 }
 
 // RunProvingSandboxForObjective executes the corresponding package operation.
-func RunProvingSandboxForObjective(ctx context.Context, opts ProvingSandboxRunOptions, projectDir string, objective ProvingObjective) (ProvingSandboxRunResult, error) {
-	result, err := PlanProvingSandboxRunForObjective(projectDir, objective, opts.Worker)
+func RunProvingSandboxForObjective(ctx context.Context, opts ProvingSandboxRunOptions, projectDir string, objective ProvingObjective) (result ProvingSandboxRunResult, err error) {
+	result, err = PlanProvingSandboxRunForObjective(projectDir, objective, opts.Worker)
 	if err != nil {
 		return ProvingSandboxRunResult{}, err
 	}
@@ -61,8 +62,7 @@ func RunProvingSandboxForObjective(ctx context.Context, opts ProvingSandboxRunOp
 	}
 
 	defer func() {
-		//nolint:errcheck // Main command result is already determined by execution.
-		_ = logFile.Close()
+		err = errors.Join(err, logFile.Close())
 	}()
 
 	err = runProvingSandboxCommands(ctx, result, opts, logFile)
