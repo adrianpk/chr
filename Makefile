@@ -41,16 +41,19 @@ test-coverage:
 
 lint:
 	@scripts/check-go-func-signatures.sh
+	@$(GO) run ./scripts/goquality
 	@scripts/check-package-readmes.sh
 	@$(GOLANGCI_LINT) run ./...
 
 lint-strict:
 	@scripts/check-go-func-signatures.sh
+	@$(GO) run ./scripts/goquality
 	@scripts/check-package-readmes.sh
 	@$(GOLANGCI_LINT) run --timeout=5m ./...
 
 check-go-style:
 	@scripts/check-go-func-signatures.sh
+	@$(GO) run ./scripts/goquality
 
 check-package-readmes:
 	@scripts/check-package-readmes.sh
