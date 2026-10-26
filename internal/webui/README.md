@@ -19,3 +19,10 @@ and owns interactive setup and server startup.
 - must not parse project artifacts directly;
 - must not mutate project state directly;
 - must not be imported by `internal/core`, persistence, or TUI packages.
+
+
+Handler assembly and routing stay in webui.go. Page, artifact and write handlers
+have separate files; page_data.go owns read-only page composition, while access
+control and request logging have their own owners. Guided leaf templates receive
+narrow form, action, status, recovery, progress and result sections from the
+existing guided page projection. No projection invokes an application operation.

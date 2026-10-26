@@ -307,3 +307,18 @@ legacy document navigation/rendering and documentsByFamily remain live. The
 asynchronous refresh regression mutates/renders the event-loop owner while IO is
 blocked, then applies the returned message on that owner; focused race validation
 covers this test with the existing guided, harness and workflow ownership checks.
+
+
+The 895-line Web entrypoint file is split by assembly, page handlers, artifact
+handlers, write handling, page composition, access control and request logging.
+All 53 complete declaration texts are preserved across seven files, largest
+209 lines; the web-moves ledger retains exact hashes. HTTP route registration,
+origin/token checks, login ownership, bounded form parsing, redirects, fragments
+and logging remain under their original contracts. Existing full Web package
+checks and strict lint pass after the move.
+
+All 50 assigned baseline rows have final dispositions: 47 fixed occurrences,
+two retained cohesive five-input panel renderers, and the one exact imposed
+Bubble Tea Update interface. No assigned declaration remains in temporary debt.
+The global ceiling remains seven with 425 exact debt entries and one external
+exception; enforcing later slices is still the recorded policy.
