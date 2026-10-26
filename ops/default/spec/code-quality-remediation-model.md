@@ -109,3 +109,14 @@ literal, and both document tables share only their identical quota predicate.
 Updates retain their exact SET/WHERE contracts; ID-last arguments derive from
 the same row values. Existing enum/time/JSON decoding and NULL conversion remain
 unchanged. No schema or migration changes accompany these mappings.
+
+The real-SQLite compatibility tests compare complete stored table images against
+the old writers, preventing symmetric bind/scan swaps from hiding a regression.
+They cover insert and update/upsert paths, nil/empty JSON lists, nullable times,
+COALESCE defaults and omitted admission defaults. Distinct peer identifiers and
+independent source/content hashes exercise same-type ordering separately.
+Injected failures after document insertion, notification insertion and ticket
+upsert prove rollback preserves the captured table and durable owner images.
+The completed legacy fixture passes SQLite foreign_key_check and opens through
+the existing migrator without changing those rows. All new fixtures are local
+and test-owned.

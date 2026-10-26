@@ -107,33 +107,9 @@ func (r *sqliteExecutionRepository) UpdateExecution(ctx context.Context, record 
 		return err
 	}
 
-	result, err := r.db.ExecContext(ctx, updateExecutionSQL(),
-		record.ProjectID,
-		record.TicketKey,
-		record.TicketPath,
-		string(record.Status),
-		record.Runtime.Image,
-		record.Runtime.DockerfilePath,
-		record.Runtime.ContainerWorkdir,
-		record.Runtime.ValidationCommand,
-		string(record.Workspace.Mode),
-		record.Workspace.ProjectCheckoutDir,
-		record.Workspace.ExecutionWorkspaceDir,
-		record.Workspace.BaseRef,
-		record.Workspace.BaseSHA,
-		record.Workspace.TicketBranch,
-		record.Artifacts.ArtifactID,
-		record.Artifacts.RunDir,
-		record.Artifacts.ResultPath,
-		record.Artifacts.LogPath,
-		record.Artifacts.ValidationPath,
-		record.FailureReason,
-		formatProjectTime(record.CreatedAt),
-		formatOptionalExecutionTime(record.StartedAt),
-		formatOptionalExecutionTime(record.FinishedAt),
-		formatProjectTime(record.UpdatedAt),
-		record.ID,
-	)
+	values := (executionRow{record: record}).values()
+
+	result, err := r.db.ExecContext(ctx, updateExecutionSQL(), append(values[1:], values[0])...)
 	if err != nil {
 		return fmt.Errorf("update execution: %w", err)
 	}

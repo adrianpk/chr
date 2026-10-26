@@ -19,54 +19,71 @@ type qualityLegacyRecords struct {
 
 func openQualityLegacyDB(t *testing.T) *sql.DB {
 	t.Helper()
+
 	data, err := os.ReadFile("testdata/quality-storage/legacy.sqlite")
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	path := filepath.Join(t.TempDir(), "legacy.sqlite")
-	if err := os.WriteFile(path, data, 0600); err != nil {
+	if err := os.WriteFile(path, data, 0o600); err != nil {
 		t.Fatal(err)
 	}
+
 	db, err := sql.Open("sqlite", path)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	t.Cleanup(func() {
 		if err := db.Close(); err != nil {
 			t.Error(err)
 		}
 	})
 	db.SetMaxOpenConns(1)
+
 	if err := configureSQLiteDatabase(t.Context(), db); err != nil {
 		t.Fatal(err)
 	}
+
+	qualityStorageExec(t, db, "PRAGMA foreign_keys=ON")
+
 	return db
 }
 
 func readQualityLegacyRecords(t *testing.T, db *sql.DB, want qualityLegacyRecords) qualityLegacyRecords {
 	t.Helper()
-	var got qualityLegacyRecords
-	var err error
+
+	var (
+		got qualityLegacyRecords
+		err error
+	)
+
 	got.Execution, err = (&sqliteExecutionRepository{db: db}).GetExecution(t.Context(), want.Execution.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	got.Remote, err = (&sqliteRemoteCommandRecordRepository{db: db}).GetRemoteCommandRecord(t.Context(), want.Remote.Request.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	got.Notification, err = (&sqliteNotificationEventRepository{db: db}).GetNotificationEvent(t.Context(), want.Notification.Event.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	got.Ticket, err = (&sqliteTicketIndex{db: db}).GetProjectTicketByKey(t.Context(), want.Ticket.ProjectID, want.Ticket.Key)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	got.Conversation, err = scanTelegramConversation(db.QueryRowContext(t.Context(), "SELECT "+telegramConversationColumns+" FROM telegram_conversations WHERE id=?", want.Conversation.ID))
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	return got
 }
 
@@ -77,11 +94,28 @@ func TestQualityStorageLegacy(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	var want qualityLegacyRecords
 	if err := json.Unmarshal(data, &want); err != nil {
 		t.Fatal(err)
 	}
+
 	db := openQualityLegacyDB(t)
+
+	before := qualityOwnerImages(t, db)
+	if err := NewMigrator(os.DirFS("../../cmd/chr")).Migrate(t.Context(), db); err != nil {
+		t.Fatal(err)
+	}
+
+	if after := qualityOwnerImages(t, db); !reflect.DeepEqual(after, before) {
+		t.Fatal("opening the old database changed retained rows")
+	}
+
+	var violations int
+	if err := db.QueryRowContext(t.Context(), "SELECT COUNT(*) FROM pragma_foreign_key_check").Scan(&violations); err != nil || violations != 0 {
+		t.Fatalf("legacy fixture foreign keys: %d, %v", violations, err)
+	}
+
 	got := readQualityLegacyRecords(t, db, want)
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("legacy records changed:\ngot %#v\nwant %#v", got, want)
