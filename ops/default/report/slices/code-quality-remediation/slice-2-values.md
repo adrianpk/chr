@@ -1,6 +1,6 @@
 # Slice 2: Shared boundary values and residual core helpers
 
-Status: reviewing
+Status: delivered
 Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
@@ -95,3 +95,9 @@ The root-owner ledger is a concrete handoff for the already approved later
 slices, not evidence that their package moves are complete. Mixed store/stage
 files still require their recorded transaction and recovery checks before a
 move. No Slice 2 signature debt remains.
+
+Integration: PR #439 was verified merged into dev at `de3691d3b0155f850006f242ee2d99062a995ce0`. Final candidate checks passed in controller order:
+
+- `make verify` — passed.
+- `go test ./internal/core -run '^Test(WorkflowConfig|LoadWorkspaceConfig|Init|WorkspaceGraphBuilder|WorkspaceContext|ReportLister|GuidedUseCase|ReadSQLiteMigrations|Migrator|ProvingLogFailure|RunProving|PlanProving|ParseProving|RenderProving)' -count=1 -timeout=3m` — passed.
+- `git diff --check` — passed.

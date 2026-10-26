@@ -6,7 +6,7 @@ Delivery set: code-quality-remediation
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 2, Shared boundary values and residual core helpers; reviewing in canonical PR #439; predecessor PR #438 verified integrated.
+Active slice: Slice 3, Stable records and positional SQL; predecessor PR #439 verified integrated; approved and ready.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b`
 
 Plan: [Single-cycle plan](../plan/code-quality-remediation.md)
@@ -17,7 +17,7 @@ Source: [Quality review](../report/code-quality-review-2026-10-26/report.md)
 
 ## Authority and state
 
-The maintainer approved implementation, conventional commit/push and startup of one Looper run on 2026-10-26. Merge delegation covers the exact 16 slice PRs into dev after their required checks. Slice 1 is delivered through verified PR #438. This tracker owns task/commit/validation evidence; slice tickets mirror verified delivery state. Existing completed/blocked sets and unrelated tickets are not modified.
+The maintainer approved implementation, conventional commit/push and startup of one Looper run on 2026-10-26. Merge delegation covers the exact 16 slice PRs into dev after their required checks. Slices 1 and 2 are delivered through verified PRs #438 and #439. This tracker owns task/commit/validation evidence; slice tickets mirror verified delivery state. Existing completed/blocked sets and unrelated tickets are not modified.
 
 ## Canonical slice map
 
@@ -57,12 +57,12 @@ The maintainer approved implementation, conventional commit/push and startup of 
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T2.1 | For root-level helpers outside the later capability slices, replace unrelated positional outputs with named results and repeated cohesive arguments with operation inputs. Review the config, context, migration, workspace, report and proving detections assigned by the inventory. | implemented | e7b109ce268f9ceace9c981d64b09274fc883104 | focused config/init/proving/context/guided checks; production policy scan |
-| T2.2 | Preserve absence, applied, changed, cached and partial outcomes separately. Use a named result with a found or changed field when absence is normal; use errors.Is-compatible errors where absence is already an error. Preserve all caller branches and error wrapping. | implemented | d326ac2c8e3b3bc5199d6e0227c7d26d3daeeb96 | focused config/admission/guided/cache/report/init regressions; policy scan |
-| T2.3 | Resolve the real shared values, path/hash primitives and boundary ports needed by package extraction. Reuse existing owners; introduce a focused owner only when the actual dependency graph requires it. No generic common, util or options package, and no stored context.Context. | implemented | c7c885e14a02e7ba48314844e8f2ff9d7233dd1b | focused config/workspace/guided/proving regressions; unchanged function bodies and import direction |
-| T2.4 | Review oversized proving.go and shared parsers/schema files. Split distinct responsibilities, preserve cohesive parsers or schema literals with a recorded reason, and simplify justified control-flag helpers. Assign every remaining root production file a final owner in the dependency ledger. | implemented | 21256878c7fe9f02c7f03eb7948c0901085e83b6 | 49 exact declaration bodies/types preserved; focused proving/workspace/config regressions; 678 file owners and 24 row dispositions |
-| T2.5 | Fix owned dead/test-only helpers, error names and unexplained suppressions encountered here. Preserve meaningful cleanup errors; suppress only an explicitly justified, owned best-effort close. | implemented | 38f215efce75a1470284c38fc5e590506891fefb | TestProvingLogFailure failed before the fix and passed afterward; existing proving regressions passed |
-| T2.6 | Validate this slice, update its ticket/tracker, produce its report, and verify integration into dev. | reviewing | 4275d727615ce66861ebf4a114f494e9d6252369 | focused checks passed; final exact-HEAD controller checks and dev integration remain separately recorded |
+| T2.1 | For root-level helpers outside the later capability slices, replace unrelated positional outputs with named results and repeated cohesive arguments with operation inputs. Review the config, context, migration, workspace, report and proving detections assigned by the inventory. | delivered | e7b109ce268f9ceace9c981d64b09274fc883104 | focused config/init/proving/context/guided checks; production policy scan |
+| T2.2 | Preserve absence, applied, changed, cached and partial outcomes separately. Use a named result with a found or changed field when absence is normal; use errors.Is-compatible errors where absence is already an error. Preserve all caller branches and error wrapping. | delivered | d326ac2c8e3b3bc5199d6e0227c7d26d3daeeb96 | focused config/admission/guided/cache/report/init regressions; policy scan |
+| T2.3 | Resolve the real shared values, path/hash primitives and boundary ports needed by package extraction. Reuse existing owners; introduce a focused owner only when the actual dependency graph requires it. No generic common, util or options package, and no stored context.Context. | delivered | c7c885e14a02e7ba48314844e8f2ff9d7233dd1b | focused config/workspace/guided/proving regressions; unchanged function bodies and import direction |
+| T2.4 | Review oversized proving.go and shared parsers/schema files. Split distinct responsibilities, preserve cohesive parsers or schema literals with a recorded reason, and simplify justified control-flag helpers. Assign every remaining root production file a final owner in the dependency ledger. | delivered | 21256878c7fe9f02c7f03eb7948c0901085e83b6 | 49 exact declaration bodies/types preserved; focused proving/workspace/config regressions; 678 file owners and 24 row dispositions |
+| T2.5 | Fix owned dead/test-only helpers, error names and unexplained suppressions encountered here. Preserve meaningful cleanup errors; suppress only an explicitly justified, owned best-effort close. | delivered | 38f215efce75a1470284c38fc5e590506891fefb | TestProvingLogFailure failed before the fix and passed afterward; existing proving regressions passed |
+| T2.6 | Validate this slice, update its ticket/tracker, produce its report, and verify integration into dev. | delivered | 4275d727615ce66861ebf4a114f494e9d6252369 | make verify, focused core regressions and git diff --check passed on de3691d3b0155f850006f242ee2d99062a995ce0; PR #439 integrated |
 
 ### Slice 3: Stable records and positional SQL
 
@@ -224,7 +224,7 @@ The maintainer approved implementation, conventional commit/push and startup of 
 | Number | State | Ticket | PR | Integrated commit | Report |
 | --- | --- | --- | --- | --- | --- |
 | 1 | delivered | TKT-20261026084821 | #438 | 0d609b0c590c7e23a184513393fa64ab8d394b67 | `ops/default/report/slices/code-quality-remediation/slice-1-policy.md` |
-| 2 | reviewing | TKT-20261026084822 | #439 | — | `ops/default/report/slices/code-quality-remediation/slice-2-values.md` |
+| 2 | delivered | TKT-20261026084822 | #439 | de3691d3b0155f850006f242ee2d99062a995ce0 | `ops/default/report/slices/code-quality-remediation/slice-2-values.md` |
 | 3 | pending | TKT-20261026084823 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-3-storage.md` |
 | 4 | pending | TKT-20261026084824 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-4-commands.md` |
 | 5 | pending | TKT-20261026084825 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-5-views.md` |
