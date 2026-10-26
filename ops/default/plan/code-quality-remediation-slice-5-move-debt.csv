@@ -1,0 +1,5 @@
+original_id,current_id,signature
+internal/tui/model.go::Model.shellBodyGeometry,internal/tui/layout_input.go::Model.shellBodyGeometry,"func(width, height int) (int, int)"
+internal/tui/shell.go::renderCompactTicketColumns,internal/tui/shell_tickets.go::renderCompactTicketColumns,"func(prefix, key, status, priority, title string, width int, header bool) string"
+internal/tui/shell.go::Model.splitWidths,internal/tui/shell_panels.go::Model.splitWidths,"func(width int) (int, int)"
+internal/tui/shell.go::Model.splitHeights,internal/tui/shell_panels.go::Model.splitHeights,"func(height int) (int, int)"

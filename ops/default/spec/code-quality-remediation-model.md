@@ -230,3 +230,11 @@ signatures have exact before/after entries in the slice-5-updates ledger; no
 adapter or internal interface exemption is added. Modal dispatch precedence,
 command scheduling and every handled/unhandled branch retain their ordering.
 The production closure scan finds no command reading Model state after dispatch.
+
+
+The Slice 5 mechanical move ledger records all 193 declarations from model.go
+and shell.go, with exact text hashes. Sixteen responsibility-owned files separate
+model assembly, event dispatch, layout input, navigation, ticket data/Markdown,
+board selection and per-view shell rendering. The largest is 434 lines. All
+declarations, comments and bodies are unchanged during that move; four exact
+signature-debt identities follow their new files without a new allowance.

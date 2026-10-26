@@ -2147,9 +2147,9 @@
       "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/tui/model.go::Model.shellBodyGeometry",
+      "id": "internal/tui/layout_input.go::Model.shellBodyGeometry",
       "signature": "func(width, height int) (int, int)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 5 explicitly retains the same signature during mechanical view-owner relocation."
     },
     {
       "id": "internal/tui/observability.go::NewObservabilityView",
@@ -2157,19 +2157,19 @@
       "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/tui/shell.go::renderCompactTicketColumns",
+      "id": "internal/tui/shell_tickets.go::renderCompactTicketColumns",
       "signature": "func(prefix, key, status, priority, title string, width int, header bool) string",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 5 explicitly retains the same signature during mechanical view-owner relocation."
     },
     {
-      "id": "internal/tui/shell.go::Model.splitWidths",
+      "id": "internal/tui/shell_panels.go::Model.splitWidths",
       "signature": "func(width int) (int, int)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 5 explicitly retains the same signature during mechanical view-owner relocation."
     },
     {
-      "id": "internal/tui/shell.go::Model.splitHeights",
+      "id": "internal/tui/shell_panels.go::Model.splitHeights",
       "signature": "func(height int) (int, int)",
-      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing production debt; assigned to Slice 5 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 5 explicitly retains the same signature during mechanical view-owner relocation."
     },
     {
       "id": "internal/webui/ticket_editor.go::handler.ticketWriteData",
