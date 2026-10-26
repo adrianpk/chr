@@ -102,16 +102,16 @@ func walkReportListEntries(ctx context.Context, projectDir, root string, filter 
 			return nil
 		}
 
-		report, ok, err := reportListEntryFromPath(projectDir, path)
+		lookup, err := reportListEntryFromPath(projectDir, path)
 		if err != nil {
 			return err
 		}
 
-		if !ok || !reportMatchesFilter(report, filter) {
+		if !lookup.Found || !reportMatchesFilter(lookup.Entry, filter) {
 			return nil
 		}
 
-		entries = append(entries, report)
+		entries = append(entries, lookup.Entry)
 
 		return nil
 	})
@@ -122,7 +122,12 @@ func walkReportListEntries(ctx context.Context, projectDir, root string, filter 
 	return entries, nil
 }
 
-func reportListEntryFromPath(projectDir, path string) (ReportListEntry, bool, error) {
+type reportListLookup struct {
+	Entry ReportListEntry
+	Found bool
+}
+
+func reportListEntryFromPath(projectDir, path string) (reportListLookup, error) {
 	filename := filepath.Base(path)
 
 	var kind ReportKind
@@ -133,17 +138,17 @@ func reportListEntryFromPath(projectDir, path string) (ReportListEntry, bool, er
 	case "loop-report.md":
 		kind = ReportKindLoop
 	default:
-		return ReportListEntry{}, false, nil
+		return reportListLookup{}, nil
 	}
 
 	metadata, err := readReportListMetadata(path)
 	if err != nil {
-		return ReportListEntry{}, false, err
+		return reportListLookup{}, err
 	}
 
 	relativePath, err := filepath.Rel(projectDir, path)
 	if err != nil {
-		return ReportListEntry{}, false, fmt.Errorf("relativize report path: %w", err)
+		return reportListLookup{}, fmt.Errorf("relativize report path: %w", err)
 	}
 
 	report := ReportListEntry{
@@ -157,7 +162,7 @@ func reportListEntryFromPath(projectDir, path string) (ReportListEntry, bool, er
 		ResultPath:   reportListAbsoluteMetadataPath(projectDir, metadata["result"]),
 	}
 
-	return report, true, nil
+	return reportListLookup{Entry: report, Found: true}, nil
 }
 
 func reportListAbsoluteMetadataPath(projectDir, path string) string {

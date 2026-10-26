@@ -6,10 +6,15 @@ import (
 	"slices"
 )
 
-func (s *WorkflowStore) retainedWorkflowExecutionPolicy(ctx context.Context, key string, policy WorkflowExecutionPolicy, later *bool) (WorkflowExecutionPolicy, bool, error) {
+type retainedExecutionPolicy struct {
+	Policy WorkflowExecutionPolicy
+	Found  bool
+}
+
+func (s *WorkflowStore) retainedWorkflowExecutionPolicy(ctx context.Context, key string, policy WorkflowExecutionPolicy, later *bool) (retainedExecutionPolicy, error) {
 	runs, err := s.repositoryWorkflowInvocations(ctx)
 	if err != nil {
-		return policy, false, err
+		return retainedExecutionPolicy{Policy: policy}, err
 	}
 
 	for _, run := range runs {
@@ -18,17 +23,17 @@ func (s *WorkflowStore) retainedWorkflowExecutionPolicy(ctx context.Context, key
 		}
 
 		if workflowRequestedRetainedPolicy(policy, run.Policy, later) != run.Policy {
-			return policy, false, fmt.Errorf("%w: request key names a different frozen policy", ErrWorkflowConflict)
+			return retainedExecutionPolicy{Policy: policy}, fmt.Errorf("%w: request key names a different frozen policy", ErrWorkflowConflict)
 		}
 
-		return run.Policy, true, nil
+		return retainedExecutionPolicy{Policy: run.Policy, Found: true}, nil
 	}
 
 	if policy.ConfigRevision != "" {
-		return policy, false, fmt.Errorf("%w: a frozen policy must match its retained request", ErrWorkflowConflict)
+		return retainedExecutionPolicy{Policy: policy}, fmt.Errorf("%w: a frozen policy must match its retained request", ErrWorkflowConflict)
 	}
 
-	return policy, false, nil
+	return retainedExecutionPolicy{Policy: policy}, nil
 }
 
 func (s *WorkflowStore) resolveWorkflowExecutionPolicy(ctx context.Context, key string, policy WorkflowExecutionPolicy, later *bool) (WorkflowExecutionPolicy, error) {
@@ -40,9 +45,9 @@ func (s *WorkflowStore) resolveWorkflowExecutionPolicy(ctx context.Context, key 
 	// Retained admission, including pre-version records, keeps its exact policy.
 	// Current execution defaults cannot refill budgets. Publication reads policy
 	// again, and a caller cannot forge a frozen snapshot for another request.
-	retained, found, err := s.retainedWorkflowExecutionPolicy(ctx, key, policy, later)
-	if err != nil || found {
-		return retained, err
+	retained, err := s.retainedWorkflowExecutionPolicy(ctx, key, policy, later)
+	if err != nil || retained.Found {
+		return retained.Policy, err
 	}
 
 	return configuredWorkflowExecutionPolicy(config, policy, later)

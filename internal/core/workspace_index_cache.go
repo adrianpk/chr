@@ -55,9 +55,9 @@ func (b WorkspaceGraphBuilder) BuildCachedIndex(ctx context.Context) (CachedWork
 	current := NewWorkspaceIndexFromGraph(graph)
 	cachePath := WorkspaceIndexCachePath(b.projectDir)
 
-	cached, cacheHit, err := readWorkspaceIndexCache(cachePath)
+	cached, err := readWorkspaceIndexCache(cachePath)
 	if errors.Is(err, errInvalidWorkspaceIndexCache) {
-		cacheHit = false
+		cached.Hit = false
 		err = nil
 	}
 
@@ -68,10 +68,10 @@ func (b WorkspaceGraphBuilder) BuildCachedIndex(ctx context.Context) (CachedWork
 	status := WorkspaceIndexCacheMiss
 	index := current
 
-	if cacheHit {
-		if workspaceIndexCacheValid(cached, current) {
+	if cached.Hit {
+		if workspaceIndexCacheValid(cached.Index, current) {
 			status = WorkspaceIndexCacheHit
-			index = cached
+			index = cached.Index
 		} else {
 			status = WorkspaceIndexCacheStale
 		}
@@ -99,27 +99,32 @@ func WorkspaceIndexCachePath(projectDir string) string {
 	return UserPath(projectDir, "tmp", "cache", "workspace-index", "structural-index.json")
 }
 
-func readWorkspaceIndexCache(path string) (WorkspaceIndex, bool, error) {
+type workspaceIndexCacheLookup struct {
+	Index WorkspaceIndex
+	Hit   bool
+}
+
+func readWorkspaceIndexCache(path string) (workspaceIndexCacheLookup, error) {
 	content, err := os.ReadFile(path)
 	if errors.Is(err, os.ErrNotExist) {
-		return WorkspaceIndex{}, false, nil
+		return workspaceIndexCacheLookup{}, nil
 	}
 
 	if err != nil {
-		return WorkspaceIndex{}, false, fmt.Errorf("read workspace index cache: %w", err)
+		return workspaceIndexCacheLookup{}, fmt.Errorf("read workspace index cache: %w", err)
 	}
 
 	var cache workspaceIndexCacheFile
 
 	if json.Unmarshal(content, &cache) != nil {
-		return WorkspaceIndex{}, false, errInvalidWorkspaceIndexCache
+		return workspaceIndexCacheLookup{}, errInvalidWorkspaceIndexCache
 	}
 
 	if cache.SchemaVersion != workspaceIndexCacheSchemaVersion {
-		return WorkspaceIndex{}, false, nil
+		return workspaceIndexCacheLookup{}, nil
 	}
 
-	return cache.Index, true, nil
+	return workspaceIndexCacheLookup{Index: cache.Index, Hit: true}, nil
 }
 
 func writeWorkspaceIndexCache(path string, index WorkspaceIndex) error {

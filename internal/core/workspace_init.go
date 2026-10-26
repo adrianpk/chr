@@ -287,40 +287,45 @@ func (w *workspace) profileFileWalker(profileDir string, kind profileFileKind, f
 			return nil
 		}
 
-		file, include, err := w.profileFile(profileDir, path, kind)
+		result, err := w.profileFile(profileDir, path, kind)
 		if err != nil {
 			return err
 		}
 
-		if include {
-			*files = append(*files, file)
+		if result.Included {
+			*files = append(*files, result.File)
 		}
 
 		return nil
 	}
 }
 
-func (w *workspace) profileFile(profileDir, path string, kind profileFileKind) (entry, bool, error) {
+type profileFileResult struct {
+	File     entry
+	Included bool
+}
+
+func (w *workspace) profileFile(profileDir, path string, kind profileFileKind) (profileFileResult, error) {
 	rel, err := filepath.Rel(profileDir, path)
 	if err != nil {
-		return entry{}, false, fmt.Errorf("resolve embedded workspace profile path %s: %w", path, err)
+		return profileFileResult{}, fmt.Errorf("resolve embedded workspace profile path %s: %w", path, err)
 	}
 
 	if !includeProfileFile(rel, kind) {
-		return entry{}, false, nil
+		return profileFileResult{}, nil
 	}
 
 	content, err := fs.ReadFile(w.assetsFS, path)
 	if err != nil {
-		return entry{}, false, fmt.Errorf("read embedded workspace profile file %s: %w", path, err)
+		return profileFileResult{}, fmt.Errorf("read embedded workspace profile file %s: %w", path, err)
 	}
 
 	outputPath, err := outputProfilePath(rel, kind)
 	if err != nil {
-		return entry{}, false, fmt.Errorf("resolve embedded root profile path %s: %w", path, err)
+		return profileFileResult{}, fmt.Errorf("resolve embedded root profile path %s: %w", path, err)
 	}
 
-	return entry{path: outputPath, content: string(content)}, true, nil
+	return profileFileResult{File: entry{path: outputPath, content: string(content)}, Included: true}, nil
 }
 
 func outputProfilePath(path string, kind profileFileKind) (string, error) {

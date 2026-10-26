@@ -41,11 +41,12 @@ func BindGuidedControlInvocation(ctx context.Context, root string, session *Auth
 		return ErrWorkflowConflict
 	}
 
-	run, found, err := findGuidedControlInvocation(ctx, root, *session)
-	if err != nil || !found {
+	lookup, err := findGuidedControlInvocation(ctx, root, *session)
+	if err != nil || !lookup.Found {
 		return err
 	}
 
+	run := lookup.Invocation
 	state.Work.Invocation = &GuidedInvocationReference{ID: run.ID, RequestKey: run.RequestKey, Revision: run.Revision}
 	operation := *state.Control.PendingOperation
 	operation.NativeRevision = run.Revision
@@ -54,7 +55,12 @@ func BindGuidedControlInvocation(ctx context.Context, root string, session *Auth
 	return RetainGuidedUseCaseProgress(ctx, root, session)
 }
 
-func (s *WorkflowStore) lookupGuidedAdmission(ctx context.Context, session AuthoringSession) (result WorkflowInvocation, found bool, err error) {
+type guidedAdmissionLookup struct {
+	Invocation WorkflowInvocation
+	Found      bool
+}
+
+func (s *WorkflowStore) lookupGuidedAdmission(ctx context.Context, session AuthoringSession) (result guidedAdmissionLookup, err error) {
 	err = s.withLock(ctx, func() error {
 		runs, err := s.repositoryWorkflowInvocations(ctx)
 		if err != nil {
@@ -71,7 +77,7 @@ func (s *WorkflowStore) lookupGuidedAdmission(ctx context.Context, session Autho
 				return ErrWorkflowConflict
 			}
 
-			result, found = run.WorkflowInvocation, true
+			result = guidedAdmissionLookup{Invocation: run.WorkflowInvocation, Found: true}
 
 			return nil
 		}
@@ -79,13 +85,13 @@ func (s *WorkflowStore) lookupGuidedAdmission(ctx context.Context, session Autho
 		return nil
 	})
 
-	return result, found, err
+	return result, err
 }
 
-func findGuidedControlInvocation(ctx context.Context, root string, session AuthoringSession) (WorkflowInvocation, bool, error) {
+func findGuidedControlInvocation(ctx context.Context, root string, session AuthoringSession) (guidedAdmissionLookup, error) {
 	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: root, Namespace: session.Namespace})
 	if err != nil {
-		return WorkflowInvocation{}, false, err
+		return guidedAdmissionLookup{}, err
 	}
 
 	return NewWorkflowStore(layout, session.ProjectID).lookupGuidedAdmission(ctx, session)
