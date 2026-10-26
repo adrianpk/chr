@@ -56,12 +56,7 @@ func (factory commandFactory) runMaintenanceBundle(ctx context.Context, cmd *cli
 	return nil
 }
 
-func collectDiagnosticBundle(
-	ctx context.Context,
-	env core.UserEnvironment,
-	projectContext commandProjectContext,
-	assetsFS fs.FS,
-) (core.DiagnosticBundle, error) {
+func collectDiagnosticBundle(ctx context.Context, env core.UserEnvironment, projectContext commandProjectContext, assetsFS fs.FS) (core.DiagnosticBundle, error) {
 	migrationStatus, err := core.NewMigrationStatusChecker(assetsFS).Check(ctx, env)
 	if err != nil {
 		return core.DiagnosticBundle{}, err
@@ -115,11 +110,7 @@ func collectDiagnosticBundle(
 	}, nil
 }
 
-func collectDiagnosticBundleRegistry(
-	ctx context.Context,
-	env core.UserEnvironment,
-	assetsFS fs.FS,
-) ([]core.ProjectRegistryDiagnostic, error) {
+func collectDiagnosticBundleRegistry(ctx context.Context, env core.UserEnvironment, assetsFS fs.FS) ([]core.ProjectRegistryDiagnostic, error) {
 	registry, err := core.NewProjectRegistry(ctx, env, assetsFS)
 	if err != nil {
 		return nil, err

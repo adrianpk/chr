@@ -19,11 +19,7 @@ type ticketApplyResultPlan struct {
 	ReportPath     string
 }
 
-func buildTicketApplyResultPlanForRecord(
-	ctx context.Context,
-	projectContext commandProjectContext,
-	record core.ExecutionRecord,
-) (ticketApplyResultPlan, error) {
+func buildTicketApplyResultPlanForRecord(ctx context.Context, projectContext commandProjectContext, record core.ExecutionRecord) (ticketApplyResultPlan, error) {
 	if record.ProjectID != projectContext.ProjectID {
 		return ticketApplyResultPlan{}, fmt.Errorf("execution project mismatch: %s", record.ProjectID)
 	}
@@ -172,13 +168,7 @@ func refreshTicketArtifactMetadata(record core.ExecutionRecord) error {
 	return core.RefreshOpsArtifactMetadata(record.Artifacts.RunDir, string(record.Status), time.Now().UTC())
 }
 
-func refreshAppliedTicketIndex(
-	ctx context.Context,
-	env core.UserEnvironment,
-	plan ticketApplyResultPlan,
-	appliedAt time.Time,
-	assetsFS fs.FS,
-) error {
+func refreshAppliedTicketIndex(ctx context.Context, env core.UserEnvironment, plan ticketApplyResultPlan, appliedAt time.Time, assetsFS fs.FS) error {
 	if plan.Record.Workspace.Mode == core.WorkWorkspaceModeWorktree {
 		return nil
 	}

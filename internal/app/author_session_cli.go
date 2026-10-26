@@ -166,11 +166,7 @@ func (factory commandFactory) runAuthorSessionShow(ctx context.Context, cmd *cli
 	return printAuthorSession(factory.io.Stdout, session)
 }
 
-func authoringSessionFromCommand(
-	cmd *cli.Command,
-	projectContext commandProjectContext,
-	now time.Time,
-) (core.AuthoringSession, error) {
+func authoringSessionFromCommand(cmd *cli.Command, projectContext commandProjectContext, now time.Time) (core.AuthoringSession, error) {
 	topic := strings.TrimSpace(cmd.String("topic"))
 	if topic == "" {
 		return core.AuthoringSession{}, fmt.Errorf("authoring topic is required")
@@ -200,11 +196,7 @@ func authoringSessionID(now time.Time) string {
 	return "author-" + now.UTC().Format("20060102-150405")
 }
 
-func resolveAuthoringSession(
-	ctx context.Context,
-	repository core.AuthoringSessionRepository,
-	handle string,
-) (core.AuthoringSession, error) {
+func resolveAuthoringSession(ctx context.Context, repository core.AuthoringSessionRepository, handle string) (core.AuthoringSession, error) {
 	handle = strings.TrimSpace(handle)
 	if handle == "" {
 		return core.AuthoringSession{}, fmt.Errorf("authoring session is required")
@@ -287,12 +279,7 @@ func authoringHandleSlug(value string) string {
 	return strings.Trim(builder.String(), "-")
 }
 
-func printAuthorSessionCreated(
-	stdout io.Writer,
-	session core.AuthoringSession,
-	paths core.AuthoringSessionPaths,
-	projectDir string,
-) error {
+func printAuthorSessionCreated(stdout io.Writer, session core.AuthoringSession, paths core.AuthoringSessionPaths, projectDir string) error {
 	lines := []string{
 		"session: created " + session.ID,
 		"target: " + string(session.Target),

@@ -53,11 +53,7 @@ func (factory commandFactory) runTicketApplyResult(ctx context.Context, cmd *cli
 	return printTicketApplyResult(factory.io.Stdout, plan, cmd.Bool("dry-run"))
 }
 
-func (factory commandFactory) buildTicketApplyResultPlan(
-	ctx context.Context,
-	cmd *cli.Command,
-	env core.UserEnvironment,
-) (ticketApplyResultPlan, error) {
+func (factory commandFactory) buildTicketApplyResultPlan(ctx context.Context, cmd *cli.Command, env core.UserEnvironment) (ticketApplyResultPlan, error) {
 	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),

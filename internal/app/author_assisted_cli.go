@@ -394,11 +394,7 @@ func (factory commandFactory) loadAuthorAssistedState(ctx context.Context, cmd *
 	}, nil
 }
 
-func assistedSessionFromCommand(
-	cmd *cli.Command,
-	projectContext commandProjectContext,
-	now time.Time,
-) (core.AuthoringSession, error) {
+func assistedSessionFromCommand(cmd *cli.Command, projectContext commandProjectContext, now time.Time) (core.AuthoringSession, error) {
 	topic := strings.TrimSpace(cmd.String("topic"))
 	if topic == "" {
 		return core.AuthoringSession{}, fmt.Errorf("authoring topic is required")
@@ -436,11 +432,7 @@ func assistedConfigFromCommand(cmd *cli.Command, session core.AuthoringSession) 
 	}
 }
 
-func authorAssistedCurationResponse(
-	session core.AuthoringSession,
-	summary string,
-	now time.Time,
-) core.AssistedModelResponse {
+func authorAssistedCurationResponse(session core.AuthoringSession, summary string, now time.Time) core.AssistedModelResponse {
 	return core.AssistedModelResponse{
 		ID:        "curation-response-" + session.ID,
 		RequestID: "curation-" + session.ID,
@@ -491,11 +483,7 @@ func printAuthorAssistedAnswer(stdout io.Writer, result core.AssistedQuizAnswerR
 	return writeAuthorLines(stdout, lines)
 }
 
-func printAuthorAssistedStatus(
-	stdout io.Writer,
-	session core.AuthoringSession,
-	events []core.AssistedTranscriptEvent,
-) error {
+func printAuthorAssistedStatus(stdout io.Writer, session core.AuthoringSession, events []core.AssistedTranscriptEvent) error {
 	questions, answers, results := assistedEventCounts(events)
 
 	return writeAuthorLines(stdout, []string{
@@ -509,11 +497,7 @@ func printAuthorAssistedStatus(
 	})
 }
 
-func printAuthorAssistedFinalized(
-	stdout io.Writer,
-	curation core.AssistedAnswerCurationResult,
-	synthesis core.AssistedArtifactSynthesisResult,
-) error {
+func printAuthorAssistedFinalized(stdout io.Writer, curation core.AssistedAnswerCurationResult, synthesis core.AssistedArtifactSynthesisResult) error {
 	return writeAuthorLines(stdout, []string{
 		"assisted: finalized",
 		"session: " + synthesis.Session.ID,

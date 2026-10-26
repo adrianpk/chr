@@ -122,12 +122,7 @@ func (factory commandFactory) runTicketReviewModeDiagnostics(ctx context.Context
 	return printTicketReviewModeDiagnostics(factory.io.Stdout, projectContext, diagnostic, cmd.Bool("dry-run"))
 }
 
-func printTicketReviewModeDiagnostics(
-	stdout io.Writer,
-	projectContext commandProjectContext,
-	diagnostic core.ReviewProviderDiagnostic,
-	dryRun bool,
-) error {
+func printTicketReviewModeDiagnostics(stdout io.Writer, projectContext commandProjectContext, diagnostic core.ReviewProviderDiagnostic, dryRun bool) error {
 	reference := diagnostic.Reference
 	lines := []string{
 		"review_provider_diagnostics: status",
@@ -159,12 +154,7 @@ func printTicketReviewModeDiagnostics(
 	return printTicketReviewModeStatusLines(stdout, lines)
 }
 
-func printTicketReviewModeStatus(
-	stdout io.Writer,
-	projectContext commandProjectContext,
-	config core.ReviewWorkflowConfig,
-	dryRun bool,
-) error {
+func printTicketReviewModeStatus(stdout io.Writer, projectContext commandProjectContext, config core.ReviewWorkflowConfig, dryRun bool) error {
 	status := "ready"
 
 	err := core.ValidateReviewWorkflowConfig(config)

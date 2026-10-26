@@ -118,10 +118,7 @@ func (factory commandFactory) runMaintenanceExecutionCleanupPreview(ctx context.
 	return printRuntimeArtifactCleanupPreview(factory.io.Stdout, preview)
 }
 
-func printExecutionArtifactDriftDiagnostics(
-	stdout io.Writer,
-	diagnostics []core.ExecutionArtifactDriftDiagnostic,
-) error {
+func printExecutionArtifactDriftDiagnostics(stdout io.Writer, diagnostics []core.ExecutionArtifactDriftDiagnostic) error {
 	drifted := 0
 	missingArtifacts := 0
 
@@ -160,10 +157,7 @@ func printExecutionArtifactDriftDiagnostics(
 	return nil
 }
 
-func printRuntimeArtifactCleanupPreview(
-	stdout io.Writer,
-	preview core.RuntimeArtifactCleanupPreview,
-) error {
+func printRuntimeArtifactCleanupPreview(stdout io.Writer, preview core.RuntimeArtifactCleanupPreview) error {
 	lines := []string{
 		fmt.Sprintf("artifact_dir: %s", preview.ArtifactDir),
 		fmt.Sprintf("referenced_run_dirs: %d", len(preview.ReferencedRunDirs)),
@@ -188,10 +182,7 @@ func printRuntimeArtifactCleanupPreview(
 	return nil
 }
 
-func printExecutionArtifactDriftDiagnostic(
-	stdout io.Writer,
-	diagnostic core.ExecutionArtifactDriftDiagnostic,
-) error {
+func printExecutionArtifactDriftDiagnostic(stdout io.Writer, diagnostic core.ExecutionArtifactDriftDiagnostic) error {
 	_, err := fmt.Fprintf(
 		stdout,
 		"execution: %s ticket: %s status: %s artifact_status: %s\n",

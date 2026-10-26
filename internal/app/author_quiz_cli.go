@@ -82,13 +82,7 @@ func (factory commandFactory) runAuthorQuizNew(ctx context.Context, cmd *cli.Com
 	return factory.runAuthorContextualQuizNew(ctx, cmd, projectContext, session, now)
 }
 
-func (factory commandFactory) runAuthorContextualQuizNew(
-	ctx context.Context,
-	cmd *cli.Command,
-	projectContext commandProjectContext,
-	session core.AuthoringSession,
-	now time.Time,
-) error {
+func (factory commandFactory) runAuthorContextualQuizNew(ctx context.Context, cmd *cli.Command, projectContext commandProjectContext, session core.AuthoringSession, now time.Time) error {
 	provider, callCtx, err := contextualQuizGenerationProvider(ctx, cmd, projectContext, session.ID)
 	if err != nil {
 		return err
@@ -126,11 +120,7 @@ func (factory commandFactory) runAuthorContextualQuizNew(
 	return printAuthorContextualQuizPlan(factory.io.Stdout, plan, false, projectContext.ProjectDir)
 }
 
-func quizSessionFromCommand(
-	cmd *cli.Command,
-	projectContext commandProjectContext,
-	now time.Time,
-) (core.AuthoringSession, error) {
+func quizSessionFromCommand(cmd *cli.Command, projectContext commandProjectContext, now time.Time) (core.AuthoringSession, error) {
 	topic := strings.TrimSpace(cmd.String("topic"))
 	if topic == "" {
 		return core.AuthoringSession{}, fmt.Errorf("quiz topic is required")
@@ -159,12 +149,7 @@ func contextualQuizProviderFromCommand() core.AuthoringQuizQuestionProvider {
 	return newAuthoringQuizQuestionProvider()
 }
 
-func printAuthorContextualQuizPlan(
-	stdout io.Writer,
-	plan core.ContextualQuizGenerationPlan,
-	dryRun bool,
-	projectDir string,
-) error {
+func printAuthorContextualQuizPlan(stdout io.Writer, plan core.ContextualQuizGenerationPlan, dryRun bool, projectDir string) error {
 	status := "created"
 	if dryRun {
 		status = "planned"

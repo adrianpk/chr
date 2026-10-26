@@ -112,13 +112,7 @@ func ticketLoopQueryOptionsFromCommand(cmd *cli.Command, projectID string) core.
 	}
 }
 
-func printTicketLoopPlan(
-	stdout io.Writer,
-	projectContext commandProjectContext,
-	opts core.TicketLoopQueryOptions,
-	tickets []core.IndexedTicket,
-	dryRun bool,
-) error {
+func printTicketLoopPlan(stdout io.Writer, projectContext commandProjectContext, opts core.TicketLoopQueryOptions, tickets []core.IndexedTicket, dryRun bool) error {
 	order := opts.Order
 	if order == "" {
 		order = core.TicketLoopOrderCreatedAt

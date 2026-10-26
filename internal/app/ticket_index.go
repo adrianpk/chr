@@ -10,11 +10,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func (factory commandFactory) openTicketIndexForCommand(
-	ctx context.Context,
-	cmd *cli.Command,
-	env core.UserEnvironment,
-) (commandTicketIndex, error) {
+func (factory commandFactory) openTicketIndexForCommand(ctx context.Context, cmd *cli.Command, env core.UserEnvironment) (commandTicketIndex, error) {
 	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),

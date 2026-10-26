@@ -238,10 +238,7 @@ func (factory commandFactory) runNotifyTelegramTest(ctx context.Context, cmd *cl
 	return printNotifyTelegramTestPlan(factory.io.Stdout, projectContext, config.Notifications.Telegram)
 }
 
-func (factory commandFactory) loadNotifyProjectConfig(
-	ctx context.Context,
-	cmd *cli.Command,
-) (notifyProjectConfig, error) {
+func (factory commandFactory) loadNotifyProjectConfig(ctx context.Context, cmd *cli.Command) (notifyProjectConfig, error) {
 	env, err := newUserEnvironmentFromCommand(cmd)
 	if err != nil {
 		return notifyProjectConfig{Environment: nil, Project: commandProjectContext{}, Config: core.WorkspaceConfig{}}, err

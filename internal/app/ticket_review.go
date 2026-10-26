@@ -141,11 +141,7 @@ func (factory commandFactory) runTicketReview(ctx context.Context, cmd *cli.Comm
 	return printTicketReviewResult(factory.io.Stdout, project, result)
 }
 
-func printTicketReviewResult(
-	stdout io.Writer,
-	projectContext commandProjectContext,
-	result core.TicketReviewCommandResult,
-) error {
+func printTicketReviewResult(stdout io.Writer, projectContext commandProjectContext, result core.TicketReviewCommandResult) error {
 	lines := []string{
 		"ticket_review: result",
 		"project_id: " + projectContext.ProjectID,

@@ -91,6 +91,11 @@ publication authority and provider contracts keep their original owners.
   match the committed constructor ledger. Every assigned current signature is
   within five parameters and two results with error/bool second when applicable.
 
+The first final-candidate `make verify` attempt stopped at the signature-format
+check on moved multiline headers. All 28 added headers were normalized without
+changing parameter/result types or bodies; the controller retains that failure
+log and regenerates evidence for the corrected commit.
+
 Final clean-head validation runs through the controller after the PR-reference
 commit: make verify, the explicit non-short focused command above, then git diff
 --check. The controller retains exact HEAD, ordered commands, outcomes and timings;

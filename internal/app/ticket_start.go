@@ -69,11 +69,7 @@ func (factory commandFactory) runTicketStart(ctx context.Context, cmd *cli.Comma
 	return printTicketStartResult(factory.io.Stdout, preflight.Ticket, preflight.Record, preflight.Runtime, cmd.Bool("dry-run"))
 }
 
-func runAndPrintTicketStartExecution(
-	ctx context.Context,
-	stdout io.Writer,
-	preflight ticketStartPreflight,
-) (core.ExecutionRecord, error) {
+func runAndPrintTicketStartExecution(ctx context.Context, stdout io.Writer, preflight ticketStartPreflight) (core.ExecutionRecord, error) {
 	record, err := newService(ctx, preflight.Env, preflight.ProjectContext, preflight.AssetsFS).runTicketStartExecution(ctx, ticketExecutionInput{Record: preflight.Record, Runtime: preflight.Runtime, Events: ticketExecutionEvents{
 		Sink: agentWorkExecutionEventSink(preflight.Record),
 	}})
@@ -89,13 +85,7 @@ func runAndPrintTicketStartExecution(
 	return record, err
 }
 
-func printTicketStartResult(
-	stdout io.Writer,
-	ticket core.IndexedTicket,
-	record core.ExecutionRecord,
-	result core.RuntimeValidationResult,
-	dryRun bool,
-) error {
+func printTicketStartResult(stdout io.Writer, ticket core.IndexedTicket, record core.ExecutionRecord, result core.RuntimeValidationResult, dryRun bool) error {
 	lines := []string{
 		fmt.Sprintf("execution: %s", record.ID),
 		fmt.Sprintf("ticket: %s", ticket.Key),

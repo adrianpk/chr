@@ -180,10 +180,7 @@ func (factory commandFactory) runMaintenanceRegistrySetPath(ctx context.Context,
 	return printProjectRegistrySetPath(factory.io.Stdout, project, previousPath, false)
 }
 
-func printProjectRegistryDiagnostics(
-	stdout io.Writer,
-	diagnostics []core.ProjectRegistryDiagnostic,
-) error {
+func printProjectRegistryDiagnostics(stdout io.Writer, diagnostics []core.ProjectRegistryDiagnostic) error {
 	_, err := fmt.Fprintf(stdout, "projects: %d\n", len(diagnostics))
 	if err != nil {
 		return fmt.Errorf("write project registry diagnostics: %w", err)
@@ -224,12 +221,7 @@ func printProjectRegistryDisable(stdout io.Writer, project core.Project, dryRun 
 	return nil
 }
 
-func printProjectRegistrySetPath(
-	stdout io.Writer,
-	project core.Project,
-	previousPath string,
-	dryRun bool,
-) error {
+func printProjectRegistrySetPath(stdout io.Writer, project core.Project, previousPath string, dryRun bool) error {
 	action := "updated_path"
 	if dryRun {
 		action = "would_update_path"
