@@ -84,6 +84,33 @@ use plain nouns; package qualification replaces redundant prefixes only after
 the mechanical move. The state and package maps above are dependency
 constraints, not permission to rename an ambiguous domain concept.
 
+## Root production-file dispositions
+
+[The exact file ledger](code-quality-remediation-core-owners.csv) enumerates all
+678 current non-test files directly under internal/core, their declared symbols,
+existing signature owners, final responsibility and migration/retention task.
+It provides a finite per-file handoff, including exact declarations. Multiple owners
+on a workflow file require separating store-owned atomic operations from stage
+policy in T12.1-T15.4; they do not allow moving locking into independent callers.
+Signature conversion and package-move ownership can differ and are recorded
+separately. This ledger is not evidence that the later moves are complete.
+
+The previous proving.go is split into proving_objective.go,
+proving_sandbox.go, proving_validation.go and proving_loop.go. Shared parsing
+and exit-status interpretation live in frontmatter.go and process_result.go.
+The moved function bodies and public contracts remain unchanged. Config parsing
+stays cohesive in its existing owner; the shared frontmatter parser is small
+and contains no approval or publication policy. Other reported large files and
+schema literals keep their recorded Slice 8/9/11 owners.
+
+[Slice 2 dispositions](code-quality-remediation-slice-2-dispositions.csv)
+accounts for every assigned A/B/C row. All 15 distinct violating declarations
+have named replacements; all eight legal five-parameter watch items have
+specific cohesion reasons. Flags that represent parser outcome, required-source
+diagnostics, paging or dry-run keep their existing meanings and finite bounds.
+The initialization operation groups its own creation inputs; no generic bag
+or unused root-file creation flag is introduced.
+
 ## Temporary bridges
 
 None introduced in Slice 1. Any necessary bridge must identify its declaration,
