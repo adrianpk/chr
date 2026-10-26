@@ -1,12 +1,12 @@
 # Code Quality Remediation Tracker
 
-Status: planned
+Status: in_progress
 Date: 2026-10-26
 Delivery set: code-quality-remediation
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 1, Inventory and enforceable quality policy; approved and ready; execution has not started.
+Active slice: Slice 1, Inventory and enforceable quality policy; in progress on its approved branch.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b`
 
 Plan: [Single-cycle plan](../plan/code-quality-remediation.md)
@@ -46,7 +46,7 @@ The maintainer approved implementation, conventional commit/push and startup of 
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T1.1 | Reconcile every row of inventories A, B and C with its actual declaration and callers. Inventory all 14 large files, 11 duplicate pairs, seven dead symbols, eight error names, 23 unexplained errcheck suppressions, control flags and compatibility paths. Record false positives with evidence; do not equate metrics with defects. | pending | — | not run |
+| T1.1 | Reconcile every row of inventories A, B and C with its actual declaration and callers. Inventory all 14 large files, 11 duplicate pairs, seven dead symbols, eight error names, 23 unexplained errcheck suppressions, control flags and compatibility paths. Record false positives with evidence; do not equate metrics with defects. | implemented | task commit: docs(quality): reconcile baseline declarations and review candidates | 771 exact declaration/location matches; source call candidates recorded |
 | T1.2 | Propose and implement, only after tool approval, one small standard-library Go AST check alongside the existing signature-style check. Inspect production declarations, grouped and named parameters/results, function literals and interfaces without counting receivers as parameters. Require explicit outcomes for named aliases, variadics, build constraints and generated files; do not silently skip them. | pending | — | not run |
 | T1.3 | Capture an exact temporary debt manifest keyed by declaration identity and offending signature. Reject new or worsened violations, including moved or renamed declarations that do not retain explicit identity. Keep existing defect-oriented lint checks unfiltered; never apply a global new-from-merge-base filter. | pending | — | not run |
 | T1.4 | Use a maximum of seven parameters initially, then six after Slice 11 and five at closure. Existing violations above the active ceiling may appear only as explicit, shrinking debt. Track all nonconforming result shapes and a separate exact external-interface exception list; do not exempt locally owned interfaces. | pending | — | not run |

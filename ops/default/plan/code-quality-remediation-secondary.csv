@@ -1,0 +1,455 @@
+category,path,line,evidence
+bool-signature-review,internal/app/author.go,1288,"func printAuthorPromotionPlan(stdout io.Writer, plan core.QuizToDraftPromotionPlan, dryRun bool) error {"
+large-file,internal/app/author.go,1,1342 lines
+bool-signature-review,internal/app/guided_progress_host.go,32,"func (host *guidedWorkHost) scheduleProgress(operations service, scope core.GuidedUseCaseScope, explicit bool) error {"
+bool-signature-review,internal/app/guided_progress_host.go,52,"func (host *guidedWorkHost) dispatchProgress(operations service, scope core.GuidedUseCaseScope, fingerprint string, explicit bool) error {"
+compatibility-reference,internal/app/harness_config.go,23,"&cli.StringFlag{Name: ""action"", Value: ""spec_generation"", Usage: ""generation action whose legacy default is displayed""})"
+bool-signature-review,internal/app/harness_config.go,48,"func newHarnessChangeCommand(stdout io.Writer, deps appDependencies, clearChoice bool) *cli.Command {"
+compatibility-reference,internal/app/harness_config.go,55,"name, usage = ""clear"", ""Clear explicit role selections and restore their legacy defaults"""
+bool-signature-review,internal/app/harness_config.go,95,"func harnessChangeFromCommand(cmd *cli.Command, clearChoice bool) (core.HarnessSelectionChangeRequest, error) {"
+bool-signature-review,internal/app/harness_config.go,124,"func harnessRoleChoiceFromCommand(cmd *cli.Command, name string, clearChoice bool) (string, error) {"
+compatibility-reference,internal/app/harness_config.go,143,"return ""legacy"""
+compatibility-reference,internal/app/harness_config.go,172,"_, err := fmt.Fprintln(stdout, ""Selections apply to new operations; legacy generation defaults depend on the displayed action."")"
+bool-signature-review,internal/app/maintenance.go,768,"func printProjectRegistryDisable(stdout io.Writer, project core.Project, dryRun bool) error {"
+large-file,internal/app/maintenance.go,1,807 lines
+bool-signature-review,internal/app/pi_worker_preparation.go,16,"func piWorkerBridgePreparation(program string) (chr, prepared bool) {"
+compatibility-reference,internal/app/service_conversation_generation.go,27,// legacy provider. The same artifact owner survives later selection changes.
+compatibility-reference,internal/app/service_dump_owner.go,27,"if !errors.Is(err, errLegacyGenerationUnavailable) {"
+compatibility-reference,internal/app/service_harness_generation.go,16,"var errLegacyGenerationUnavailable = errors.New(""legacy generation executable is unavailable"")"
+compatibility-reference,internal/app/service_harness_generation.go,62,"return prepareLegacyAPIGeneration(config, purpose, model)"
+compatibility-reference,internal/app/service_harness_generation.go,72,"return prepareLegacyAPIGeneration(config, purpose, (core.OpenAIQuizModelAdapter{}).ResolvedModel())"
+compatibility-reference,internal/app/service_harness_generation.go,76,"if selection.Source == ""legacy"" {"
+compatibility-reference,internal/app/service_harness_generation.go,77,"return core.HarnessGenerationBinding{}, core.HarnessGenerationLaunch{}, errLegacyGenerationUnavailable"
+compatibility-reference,internal/app/service_harness_generation.go,111,"func prepareLegacyAPIGeneration(config core.WorkspaceConfig, purpose, model string) (core.HarnessGenerationBinding, core.HarnessGenerationLaunch, error) {"
+compatibility-reference,internal/app/service_harness_generation.go,113,"Role: core.HarnessGeneration, Action: purpose, Backend: ""openai"", Source: ""legacy"", ModelProvider: ""openai"", Model: model,"
+compatibility-reference,internal/app/service_harness_selection.go,231,"Role: role, Action: action, Source: ""legacy"", Backend: backend,"
+compatibility-reference,internal/app/service_harness_selection.go,258,"resolved.View.Source = ""legacy"""
+compatibility-reference,internal/app/service_harness_selection.go,285,"return """", errors.New(""unsupported legacy generation backend; select a configured harness profile"")"
+large-file,internal/app/service_plan.go,1,912 lines
+compatibility-reference,internal/app/service_plan_workflow.go,13,// workflow state. Ordinary legacy plan reads and defaults do not adopt it.
+compatibility-reference,internal/app/service_plan_workflow.go,61,// AdoptWorkflowPlan observes legacy runtime state and adopts only the explicit
+compatibility-reference,internal/app/service_plan_workflow.go,94,"return fmt.Errorf(""legacy execution observation bound exceeded"")"
+compatibility-reference,internal/app/service_plan_workflow.go,99,"return fmt.Errorf(""legacy task %s has unfinished execution ownership"", key)"
+large-file,internal/app/service_quiz.go,1,942 lines
+compatibility-reference,internal/app/service_quiz_action.go,37,// Legacy command callers observe before acquiring the writer. Concurrent
+compatibility-reference,internal/app/service_quiz_queue.go,158,"return strings.HasPrefix(entry.ID, state.SessionID+""-entry-"") || strings.HasPrefix(state.SessionID, ""legacy-"")"
+compatibility-reference,internal/app/service_ticket_board.go,9,// ReadTicketBoard uses the selected authority without rebuilding the legacy index.
+compatibility-reference,internal/app/service_work.go,107,"result, err := s.startLegacyAgentWorkTicket(ticketKey)"
+compatibility-reference,internal/app/service_work.go,112,"func (s service) startLegacyAgentWorkTicket(ticketKey string) (AgentWorkResult, error) {"
+compatibility-reference,internal/app/service_work.go,249,"Message:       fmt.Sprintf(""Authority tracker_compat; scope unadopted legacy tickets; %d adopted tickets excluded. Ready queue contains %d eligible tickets."", selection.ExcludedAdopted, selection.EligibleCount),"
+compatibility-reference,internal/app/service_work.go,837,"tickets, excluded, err := core.FilterLegacyWorkTickets(s.ctx, tickets)"
+compatibility-reference,internal/app/service_work.go,865,"allTickets, _, err = core.FilterLegacyWorkTickets(s.ctx, allTickets)"
+compatibility-reference,internal/app/service_work.go,1010,if err := s.checkLegacyAgentWorkKey(ticketKey); err != nil {
+compatibility-reference,internal/app/service_work.go,1024,if err := core.CheckLegacyWorkTicket(ticket.Path); err != nil {
+compatibility-reference,internal/app/service_work.go,1033,"tickets, _, err = core.FilterLegacyWorkTickets(s.ctx, tickets)"
+large-file,internal/app/service_work.go,1,1052 lines
+compatibility-reference,internal/app/service_work_authority.go,18,"result.Scope = ""unadopted_legacy"""
+compatibility-reference,internal/app/service_work_authority.go,20,"result.Message = fmt.Sprintf(""Authority tracker_compat; scope unadopted legacy tickets; %d adopted tickets excluded. %s"", result.Excluded[""ticket_native""], result.Message)"
+compatibility-reference,internal/app/service_work_authority.go,25,func (s service) checkLegacyAgentWorkKey(key string) error {
+compatibility-reference,internal/app/service_work_authority.go,31,"return store.CheckLegacyWorkKey(s.ctx, key)"
+compatibility-reference,internal/app/service_work_observation.go,75,"err = s.observeLegacyWork(ctx, config, &result)"
+compatibility-reference,internal/app/service_work_observation_legacy.go,12,"func (s service) observeLegacyWork(ctx context.Context, config core.WorkspaceConfig, result *WorkObservation) error {"
+compatibility-reference,internal/app/service_work_observation_legacy.go,13,// The same canonical/legacy document owner used by selection reads avoids a
+compatibility-reference,internal/app/service_work_observation_legacy.go,20,"queue, err := core.ReadLegacyWorkQueue(ctx, layout, s.projectContext.ProjectID)"
+compatibility-reference,internal/app/service_work_observation_legacy.go,25,"if err = s.observeLegacyQueue(ctx, config, queue, result); err != nil {"
+compatibility-reference,internal/app/service_work_observation_legacy.go,29,"retained, err := core.ReadLegacyWork(ctx, s.env, s.projectContext.ProjectID)"
+compatibility-reference,internal/app/service_work_observation_legacy.go,43,"if err = s.observeLegacyContext(ctx, result, &current, core.ExecutionAgentEventStreamPath(execution), execution.ID, """", &streams); err != nil {"
+compatibility-reference,internal/app/service_work_observation_legacy.go,50,"if err = s.observeLegacyContext(ctx, result, &current, core.LoopRunEventStreamPath(loop), """", loop.ID, &streams); err != nil {"
+compatibility-reference,internal/app/service_work_observation_legacy.go,58,"func (s service) observeLegacyQueue(ctx context.Context, config core.WorkspaceConfig, queue core.LegacyWorkQueue, result *WorkObservation) error {"
+compatibility-reference,internal/app/service_work_observation_legacy.go,80,"func (s service) observeLegacyContext(ctx context.Context, result *WorkObservation, current *WorkContext, path, executionID, loopID string, streams *int) error {"
+compatibility-reference,internal/app/service_work_observation_legacy.go,81,"if err := s.observeLegacyActivity(ctx, result, current, path, executionID, loopID, streams); err != nil {"
+compatibility-reference,internal/app/service_work_observation_legacy.go,98,"func (s service) observeLegacyActivity(ctx context.Context, result *WorkObservation, current *WorkContext, path, executionID, loopID string, streams *int) error {"
+compatibility-reference,internal/app/service_work_observation_legacy.go,119,"if err = appendObservedLegacyEvent(result, current, event); err != nil {"
+compatibility-reference,internal/app/service_work_observation_legacy.go,139,"func appendObservedLegacyEvent(result *WorkObservation, current *WorkContext, event core.AgentEvent) error {"
+compatibility-reference,internal/app/service_workflow_upgrade.go,11,// UpgradeWorkflowConfiguration owns legacy runtime observation for the explicit
+bool-signature-review,internal/app/telegram.go,104,"func guardTelegramSetupReplacement(env core.UserEnvironment, config core.TelegramReceiverConfig, replace bool) error {"
+bool-signature-review,internal/app/telegram_authoring_apply.go,50,"func (r telegramReceiver) validateAuthoringAuthority(ctx context.Context, request core.TelegramOperationRequest, reconcile bool) (core.TelegramReceiverConfig, error) {"
+error-name,internal/app/telegram_control_action.go,87,func (e *telegramControlReceiptPending) Error() string { return e.failure.Error() }
+compatibility-reference,internal/app/telegram_control_dispatch.go,38,"legacy, err := r.controlCancelConversation(ctx, &command)"
+compatibility-reference,internal/app/telegram_control_dispatch.go,39,if err != nil || legacy {
+compatibility-reference,internal/app/telegram_control_dispatch.go,40,"return !legacy, err"
+error-name,internal/app/telegram_failure.go,14,func (e *telegramServiceFailure) Error() string {
+bool-signature-review,internal/app/telegram_guided_dispatch.go,99,"func (r telegramReceiver) reserveTelegramGuided(ctx context.Context, operations telegramGuidedService, user core.TelegramAllowedUser, input core.TelegramConversationInput, start bool) (core.TelegramOperationRequest, error) {"
+bool-signature-review,internal/app/telegram_guided_prepare.go,45,"func telegramGuidedOwner(c core.TelegramConversation, input core.TelegramConversationInput, start bool, actor string) (telegramGuidedInput, error) {"
+error-name,internal/app/telegram_guided_selection.go,13,func (e telegramGuidedRoutingFailure) Error() string { return string(e) }
+compatibility-reference,internal/app/telegram_harness_action.go,144,"return ""legacy dispatch"""
+bool-signature-review,internal/app/telegram_harness_command.go,46,"func telegramHarnessAssignmentValid(found bool, value string) bool {"
+compatibility-reference,internal/app/telegram_harness_dispatch.go,71,"label := ""Legacy worker (original settings)"""
+compatibility-reference,internal/app/telegram_harness_dispatch.go,84,"text.WriteString(""\n"" + telegramHarnessUsage + ""\n'-' restores legacy dispatch; omitted roles stay unchanged. Private credentials and runtime setup remain local."")"
+bool-signature-review,internal/app/telegram_harness_dispatch.go,89,"func telegramHarnessRole(role string, selection core.HarnessSelection, generation bool) string {"
+compatibility-reference,internal/app/telegram_harness_dispatch.go,92,"label = ""Legacy dispatch · Codex CLI default"""
+compatibility-reference,internal/app/telegram_harness_dispatch.go,94,"label = ""Legacy dispatch · varies by operation"""
+bool-signature-review,internal/app/telegram_harness_prepare.go,84,"func telegramHarnessChosenLabel(status HarnessSelectionStatus, profile *string, generation bool) (string, error) {"
+compatibility-reference,internal/app/telegram_harness_prepare.go,90,"return ""restore legacy dispatch"", nil"
+error-name,internal/app/telegram_lifecycle.go,14,func (*telegramShutdownFailure) Error() string {
+compatibility-reference,internal/app/telegram_notification_dispatch.go,48,"return dispatchLegacyTelegramNotification(ctx, repository, record, project)"
+compatibility-reference,internal/app/telegram_notification_dispatch.go,103,"func dispatchLegacyTelegramNotification(ctx context.Context, repository core.NotificationEventRepository, record core.NotificationAuditRecord, project commandProjectContext) (core.TelegramSendResult, error) {"
+bool-signature-review,internal/app/telegram_record_apply.go,16,"func (r telegramReceiver) validateRecordTargetAuthority(ctx context.Context, request core.TelegramOperationRequest, receiptOnly bool) error {"
+bool-signature-review,internal/app/telegram_service.go,77,"func telegramUnitQuote(value string, command bool) string {"
+bool-signature-review,internal/app/telegram_service.go,86,"func saveTelegramUserService(path string, data []byte, replace bool) (err error) {"
+bool-signature-review,internal/app/telegram_service.go,122,"func guardTelegramUserService(path string, data []byte, replace bool) (bool, error) {"
+bool-signature-review,internal/app/ticket.go,1533,"func printTicketApplyResult(stdout io.Writer, plan ticketApplyResultPlan, dryRun bool) error {"
+compatibility-reference,internal/app/ticket.go,1609,if err := core.CheckLegacyWorkTicket(ticket.Path); err != nil {
+compatibility-reference,internal/app/ticket.go,1613,"return buildLegacyTicketStartPreflight(ctx, env, projectContext, ticket, assetsFS, opts)"
+compatibility-reference,internal/app/ticket.go,1616,"func buildLegacyTicketStartPreflight(ctx context.Context, env core.UserEnvironment, projectContext commandProjectContext, ticket core.IndexedTicket, assetsFS fs.FS, opts ticketStartPreflightOptions) (ticketStartPreflight, error) {"
+bool-signature-review,internal/app/ticket.go,2273,"func refreshTicketIndexAfterReview(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, dryRun bool) error {"
+bool-signature-review,internal/app/ticket.go,2281,"func refreshTicketIndexAfterMerge(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, dryRun bool) error {"
+bool-signature-review,internal/app/ticket.go,2289,"func acquireTicketReviewLock(ctx context.Context, projectContext commandProjectContext, dryRun bool) (func(), error) {"
+bool-signature-review,internal/app/ticket.go,2302,"func acquireTicketMergeLock(ctx context.Context, projectContext commandProjectContext, dryRun bool) (func(), error) {"
+bool-signature-review,internal/app/ticket.go,2827,func ticketEvidenceItemState(checked bool) string {
+compatibility-reference,internal/app/ticket.go,2953,if err := core.CheckLegacyWorkTicket(preflight.Ticket.Path); err != nil {
+compatibility-reference,internal/app/ticket.go,2957,"if err := newService(ctx, preflight.Env, preflight.ProjectContext, preflight.AssetsFS).checkLegacyAgentWorkKey(preflight.Ticket.Key); err != nil {"
+large-file,internal/app/ticket.go,1,2962 lines
+compatibility-reference,internal/app/ticket_start_authority.go,29,if err := operations.checkLegacyAgentWorkKey(cmd.Args().First()); err != nil {
+compatibility-reference,internal/app/ticket_start_authority.go,33,"return false, printAgentWorkLines(stdout, []string{""authority: tracker_compat"", ""scope: unadopted_legacy""})"
+bool-signature-review,internal/app/web.go,170,"func applyWebLANAccess(config core.WebConfig, enabled, explicitHost bool) (core.WebConfig, error) {"
+bool-signature-review,internal/app/web.go,234,"func printWebExposureWarnings(stdout io.Writer, config core.WebConfig, loginEnabled bool) error {"
+bool-signature-review,internal/app/web_artifacts.go,453,func webContentState(available bool) string {
+compatibility-reference,internal/app/web_harness.go,48,"label := ""Legacy worker (original invocation settings)"""
+bool-signature-review,internal/app/web_harness.go,59,"func webHarnessRole(selection core.HarnessSelection, profile string, generation bool) webui.HarnessRoleView {"
+compatibility-reference,internal/app/web_harness.go,64,"view.Current = ""Legacy dispatch · Codex CLI default"""
+compatibility-reference,internal/app/web_harness.go,66,"view.Current = ""Legacy dispatch · varies by operation"""
+bool-signature-review,internal/app/web_login.go,35,"func loadWebLogin(env core.UserEnvironment, required bool) (*webui.LoginCredentials, error) {"
+bool-signature-review,internal/app/web_quiz.go,183,"func webQuizCanResume(state core.QuizRuntimeState, exists bool) bool {"
+compatibility-reference,internal/app/work.go,762,"scope := ""unadopted_legacy"""
+bool-signature-review,internal/app/work_workflow_cli.go,40,func workWorkflowExtentFlags(loose bool) []cli.Flag {
+bool-signature-review,internal/app/work_workflow_cli.go,61,"func workWorkflowArguments(cmd *cli.Command, loose bool) error {"
+bool-signature-review,internal/app/work_workflow_cli.go,112,"func workWorkflowExtentInput(cmd *cli.Command, loose bool) error {"
+bool-signature-review,internal/app/work_workflow_integration_input.go,65,"func workflowIntegrationRevision(value string, allowZero bool) (uint64, error) {"
+bool-signature-review,internal/app/work_workflow_tracker.go,55,"func printWorkflowTracker(stdout io.Writer, result core.WorkflowTrackerStatus, asJSON bool) error {"
+compatibility-reference,internal/app/work_workflow_upgrade.go,22,"&cli.StringFlag{Name: ""adopt-file"", Usage: ""JSON envelope selecting one approved legacy plan and its exact task map""},"
+compatibility-reference,internal/app/work_workflow_upgrade.go,26,"return &cli.Command{Name: ""upgrade"", Usage: ""Explicitly upgrade one quiescent legacy project to workflow version one"", Flags: flags, Action: func(ctx context.Context, cmd *cli.Command) error {"
+large-file,internal/core/acceptance_feature.go,1,802 lines
+error-name,internal/core/assisted_model.go,120,func (e AssistedModelFailure) Error() string {
+bool-signature-review,internal/core/authoring_artifact_layout.go,187,"func authoringArtifactCollision(path string, allowReplace bool) (AuthoringArtifactCollision, error) {"
+bool-signature-review,internal/core/authoring_prepare.go,172,"func AuthoringContinuationArtifact(namespace, sessionID string, kind AuthoringArtifactKind, capture bool) AuthoringArtifactRef {"
+bool-signature-review,internal/core/authoring_writer_owner.go,26,"func ArchiveGeneratedPlan(ctx context.Context, projectDir string, scope QuizScope, at time.Time) (result ArchivedPlanPaths, found bool, err error) {"
+compatibility-reference,internal/core/board_query.go,161,if ticket.Status == TicketStatusBlockedLegacy {
+compatibility-reference,internal/core/config_workflow.go,8,// WorkflowConfig selects prospective defaults without reinterpreting legacy data.
+compatibility-reference,internal/core/config_workflow.go,60,"return config, fmt.Errorf(""workflow.version must be 1; absence selects legacy defaults"")"
+compatibility-reference,internal/core/config_workflow_execution.go,125,// Legacy zero already means the finite default. Retain that original
+bool-signature-review,internal/core/config_workflow_parse.go,81,"func guardWorkflowConfigIndent(raw, previous, key string, parsed bool) error {"
+bool-signature-review,internal/core/config_workflow_parse.go,97,"func guardWorkflowConfigLine(raw, section, key string, parsed bool, sections map[string]bool) error {"
+bool-signature-review,internal/core/config_workflow_parse.go,117,"func guardWorkflowConfigRoot(line, root, key string, parsed bool, sections map[string]bool) error {"
+bool-signature-review,internal/core/config_workflow_parse.go,133,"func guardWorkflowConfigScalar(raw, section, root string, indent int, parsed bool) error {"
+bool-signature-review,internal/core/config_workflow_parse.go,145,"func guardWorkflowNativeSection(raw, section string, parsed bool, sections map[string]bool) error {"
+bool-signature-review,internal/core/config_workflow_parse.go,159,"func guardWorkflowNativeScalar(raw string, indent int, parsed bool) error {"
+bool-signature-review,internal/core/context_gograph.go,186,"func unavailableGoGraphContext(projectDir, command string, precise bool) GoGraphContext {"
+bool-signature-review,internal/core/context_gograph.go,291,"func goGraphSources(included bool, reason string) []ContextSourceInventoryEntry {"
+bool-signature-review,internal/core/context_project_documents.go,318,func markdownBool(value bool) string {
+bool-signature-review,internal/core/context_tree_search.go,317,"func shouldSkipContextPath(path string, isDir bool) bool {"
+bool-signature-review,internal/core/evidence_policy.go,169,"func evidenceGherkinReason(config EvidenceStrategyConfig, featurePaths []string, applies bool) string {"
+error-name,internal/core/execution_failure.go,42,func (e ExecutionFailure) Error() string {
+compatibility-reference,internal/core/execution_repository.go,34,// RequireProjectQuiescent observes at most one unfinished legacy owner without
+compatibility-reference,internal/core/execution_repository.go,45,"return fmt.Errorf(""observe legacy project ownership: %w"", err)"
+compatibility-reference,internal/core/execution_repository.go,48,"return fmt.Errorf(""unfinished legacy execution %s blocks project upgrade"", id)"
+bool-signature-review,internal/core/guided_control.go,125,"func completeGuidedControl(session *AuthoringSession, operation GuidedUseCaseOperation, rejected bool) {"
+bool-signature-review,internal/core/guided_control_admission.go,57,"func (s *WorkflowStore) lookupGuidedAdmission(ctx context.Context, session AuthoringSession) (result WorkflowInvocation, found bool, err error) {"
+bool-signature-review,internal/core/guided_use_case_owner.go,86,"func (r *fileAuthoringSessionRepository) guidedFileChange(path string, content []byte, create bool) (workflowFileChange, error) {"
+bool-signature-review,internal/core/guided_use_case_owner.go,107,"func (r *fileAuthoringSessionRepository) saveGuidedSession(session AuthoringSession, create bool, extra ...workflowFileChange) error {"
+compatibility-reference,internal/core/harness_binding.go,121,"if !workflowConfigChoice(b.Source, []string{""project"", ""legacy""}) || !harnessSelectionDigest(b.SelectionRevision) || !harnessSelectionDigest(b.ProfileRevision) {"
+compatibility-reference,internal/core/harness_binding.go,129,"if b.Source == ""legacy"" && b.Profile != """" {"
+compatibility-reference,internal/core/harness_binding.go,130,"return errors.New(""legacy harness binding cannot claim a selected profile"")"
+compatibility-reference,internal/core/harness_generation_binding.go,85,"if s.Source == ""legacy"" && s.Profile == """" {"
+compatibility-reference,internal/core/harness_generation_binding.go,89,"return errors.New(""generation binding requires an explicit profile or legacy provenance"")"
+compatibility-reference,internal/core/harness_generation_binding.go,111,"if s.Harness != """" || s.Source != ""legacy"" || s.ModelProvider != ""openai"" || binding.ExecutableRef != (HarnessExecutableRef{}) {"
+compatibility-reference,internal/core/harness_profile.go,57,// An absent file is valid for installations that use only legacy dispatch.
+compatibility-reference,internal/core/legacy_work_observation.go,12,// LegacyWorkObservation retains a bounded page of legacy work records.
+compatibility-reference,internal/core/legacy_work_observation.go,13,type LegacyWorkObservation struct {
+compatibility-reference,internal/core/legacy_work_observation.go,18,// ReadLegacyWork opens existing state in SQLite read-only mode. An absent
+compatibility-reference,internal/core/legacy_work_observation.go,20,"func ReadLegacyWork(ctx context.Context, env UserEnvironment, projectID string) (result LegacyWorkObservation, err error) {"
+compatibility-reference,internal/core/legacy_work_observation.go,79,// LegacyWorkQueue separates shared eligible order from display metadata.
+compatibility-reference,internal/core/legacy_work_observation.go,80,type LegacyWorkQueue struct {
+compatibility-reference,internal/core/legacy_work_observation.go,85,// ReadLegacyWorkQueue reads authoritative files without refreshing SQL.
+compatibility-reference,internal/core/legacy_work_observation.go,86,"func ReadLegacyWorkQueue(ctx context.Context, layout OpsLayout, projectID string) (result LegacyWorkQueue, err error) {"
+compatibility-reference,internal/core/legacy_work_observation.go,92,"tickets, excluded, err := FilterLegacyWorkTickets(ctx, result.Tickets)"
+bool-signature-review,internal/core/notification_telegram_delivery.go,11,"func (r *sqliteNotificationEventRepository) ReserveTelegramNotification(ctx context.Context, id string, target TelegramNotificationTarget, plain bool) (bool, error) {"
+bool-signature-review,internal/core/notification_telegram_delivery.go,29,"func (r *sqliteNotificationEventRepository) FinishTelegramNotification(ctx context.Context, id string, target TelegramNotificationTarget, ack TelegramDocumentAcknowledgement, code string, uncertain bool, now time.Time) error {"
+compatibility-reference,internal/core/notification_telegram_read.go,32,// or resetting transport state. A NULL manifest is an untouched legacy event.
+compatibility-reference,internal/core/notification_telegram_read.go,49,if !m.isLegacy() {
+compatibility-reference,internal/core/notification_telegram_read.go,84,if presentation.Version == 0 && m.isLegacy() {
+compatibility-reference,internal/core/notification_telegram_read.go,99,func (m telegramNotificationManifest) isLegacy() bool {
+bool-signature-review,internal/core/plan_delivery_resume.go,12,"func (s *WorkflowStore) ResumePlanDelivery(ctx context.Context, input GeneratedWorkflowPlan) (result WorkflowMaterializationResult, found bool, err error) {"
+bool-signature-review,internal/core/plan_publication_receipt.go,37,"func LookupPlanPublication(ctx context.Context, projectDir string, operation PlanPublicationOperation) (result PlanPublicationResult, found bool, err error) {"
+compatibility-reference,internal/core/plan_revision_read.go,13,// A legacy or absent plan returns an empty binding without migration.
+bool-signature-review,internal/core/project_metadata.go,92,"func (s ProjectMetadataService) save(metadata ProjectMetadata, bindDump bool) (ProjectMetadata, error) {"
+bool-signature-review,internal/core/project_registry.go,330,func boolToInt(value bool) int {
+large-file,internal/core/proving.go,1,968 lines
+compatibility-reference,internal/core/quiz_legacy_write.go,5,// AppendRawCapture retains the legacy explicit repository operation under the
+compatibility-reference,internal/core/quiz_legacy_write.go,44,// SaveRuntimeState retains the legacy import boundary under shared exclusion.
+large-file,internal/core/quiz_model_payload.go,1,1217 lines
+compatibility-reference,internal/core/quiz_observation.go,151,// Legacy reads retain their bytes and historical parser interpretation.
+compatibility-reference,internal/core/quiz_observation.go,153,"state.SessionID = ""legacy-"" + observed.images[0].Before"
+compatibility-reference,internal/core/quiz_observation.go,155,"state.FastBatchID, state.FastQueue = ""legacy-buffer"", state.Candidates"
+compatibility-reference,internal/core/quiz_openai_model.go,377,// ResolvedModel exposes the non-secret legacy model identity for admission.
+compatibility-reference,internal/core/quiz_openai_model.go,1017,"Ticket-native materialization requires explicit approved GeneratedWorkflowPlan input with aggregate slice contracts, individual outcome/scope/acceptance/validation contracts and a stable materialization request ID. Ordinary plan reads do not adopt legacy state."
+large-file,internal/core/quiz_openai_model.go,1,1626 lines
+bool-signature-review,internal/core/remote_command.go,377,"func validateRemoteTextField(value, name string, optional bool) error {"
+compatibility-reference,internal/core/review_workflow_native_capability.go,15,// The legacy merge API remains source-only and is never enabled by this profile.
+bool-signature-review,internal/core/review_workflow_pull_request.go,280,"func workflowRemoteAPIArgs(repository string, reference ReviewProviderReference, method, endpoint string, input bool) []string {"
+bool-signature-review,internal/core/runtime_init.go,87,"func recordRuntimePath(result *RuntimeInitResult, rel string, created bool) {"
+bool-signature-review,internal/core/structured_model.go,43,func NewConfiguredStructuredModel(openAI bool) *ConfiguredStructuredModel {
+bool-signature-review,internal/core/structured_model.go,49,"func (p *ConfiguredStructuredModel) WithGenerationSelection(openAI bool, model string, runner harness.AgentRunner) *ConfiguredStructuredModel {"
+compatibility-reference,internal/core/telegram_action_presentation.go,10,"func queueTelegramActionView(op telegramConversationTransaction, request TelegramOperationRequest, offer TelegramActionOffer, token, legacy string) error {"
+compatibility-reference,internal/core/telegram_action_presentation.go,16,"return queueTelegramReferencedResponse(op.ctx, op.tx, request.Source, legacy, request.ID, offer.Input.Config.Digest(), op.now)"
+error-name,internal/core/telegram_conversation.go,72,func (e telegramConversationDiagnostic) Error() string { return string(e) }
+bool-signature-review,internal/core/telegram_intake_reserve.go,11,"func rejectTelegramIntakeOverflow(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, control bool, now time.Time) error {"
+bool-signature-review,internal/core/telegram_operation_target.go,82,"func (s *TelegramReceiverStore) validateTelegramOperationTarget(ctx context.Context, input TelegramConversationInput, target TelegramOperationTarget, historical bool) error {"
+compatibility-reference,internal/core/telegram_receiver_action_http.go,24,// SendMarkdown sends one bounded legacy-Markdown help body without retrying.
+bool-signature-review,internal/core/telegram_receiver_config.go,168,"func SaveTelegramReceiverConfig(env UserEnvironment, config TelegramReceiverConfig, replace bool) error {"
+bool-signature-review,internal/core/telegram_receiver_token.go,45,"func SaveTelegramReceiverToken(env UserEnvironment, config TelegramReceiverConfig, token string, replace bool) error {"
+compatibility-reference,internal/core/ticket.go,12,const DefaultTicketStatus = TicketStatusOpenLegacy
+compatibility-reference,internal/core/ticket_board_document.go,63,"// contract solved means implemented, whereas legacy runtime solved awaits merge."
+compatibility-reference,internal/core/ticket_board_read.go,25,// ReadTicketBoard observes canonical documents and supported legacy tickets.
+bool-signature-review,internal/core/ticket_board_read.go,70,"func (s *WorkflowStore) readBoardTickets(ctx context.Context, native bool) ([]IndexedTicket, error) {"
+compatibility-reference,internal/core/ticket_comment.go,41,"content, err := readLegacyTicketFile(opts.Path)"
+compatibility-reference,internal/core/ticket_comment.go,60,"err = writeLegacyTicketFile(ctx, opts.Path, content, []byte(updated))"
+bool-signature-review,internal/core/ticket_document.go,54,"func (s *WorkflowStore) readTicketDocument(ctx context.Context, native bool, key string) (TicketDocument, error) {"
+compatibility-reference,internal/core/ticket_edit.go,50,"err = writeLegacyTicketFile(ctx, document.Ticket.Path, document.content, []byte(content))"
+compatibility-reference,internal/core/ticket_evidence_strategy_checklist.go,39,"content, err := readLegacyTicketFile(opts.Path)"
+compatibility-reference,internal/core/ticket_evidence_strategy_checklist.go,59,"err = writeLegacyTicketFile(ctx, opts.Path, content, []byte(updatedContent))"
+bool-signature-review,internal/core/ticket_merge_command.go,122,"func ticketMergeCommandResult(ticketKey string, preflight TicketMergePreflightResult, dryRun bool) TicketMergeCommandResult {"
+compatibility-reference,internal/core/ticket_merge_command.go,157,"content, err := readLegacyTicketFile(path)"
+compatibility-reference,internal/core/ticket_merge_command.go,193,"err = writeLegacyTicketFile(ctx, path, content, []byte(updated))"
+compatibility-reference,internal/core/ticket_metadata.go,44,"content, err := readLegacyTicketFile(opts.Path)"
+compatibility-reference,internal/core/ticket_metadata.go,63,"if err := writeLegacyTicketFile(ctx, opts.Path, content, []byte(updated)); err != nil {"
+compatibility-reference,internal/core/ticket_review_command.go,206,"content, err := readLegacyTicketFile(path)"
+compatibility-reference,internal/core/ticket_review_command.go,236,"err = writeLegacyTicketFile(ctx, path, content, []byte(updated))"
+compatibility-reference,internal/core/ticket_review_metadata.go,44,"content, err := readLegacyTicketFile(opts.Path)"
+compatibility-reference,internal/core/ticket_review_metadata.go,54,"err = writeLegacyTicketFile(ctx, opts.Path, content, []byte(updated))"
+compatibility-reference,internal/core/ticket_status.go,36,// TicketStatusOpenLegacy defines a package boundary constant.
+compatibility-reference,internal/core/ticket_status.go,37,"TicketStatusOpenLegacy = ""open"""
+compatibility-reference,internal/core/ticket_status.go,38,// TicketStatusReadyLegacy defines a package boundary constant.
+compatibility-reference,internal/core/ticket_status.go,39,"TicketStatusReadyLegacy = ""ready"""
+compatibility-reference,internal/core/ticket_status.go,40,// TicketStatusReviewingLegacy defines a package boundary constant.
+compatibility-reference,internal/core/ticket_status.go,41,"TicketStatusReviewingLegacy = ""reviewing"""
+compatibility-reference,internal/core/ticket_status.go,42,// TicketStatusBlockedLegacy defines a package boundary constant.
+compatibility-reference,internal/core/ticket_status.go,43,"TicketStatusBlockedLegacy = ""blocked"""
+compatibility-reference,internal/core/ticket_status.go,44,// TicketStatusSolvedLegacy defines a package boundary constant.
+compatibility-reference,internal/core/ticket_status.go,45,"TicketStatusSolvedLegacy = ""solved"""
+compatibility-reference,internal/core/ticket_status.go,46,// TicketStatusMergedLegacy defines a package boundary constant.
+compatibility-reference,internal/core/ticket_status.go,47,"TicketStatusMergedLegacy = ""merged"""
+compatibility-reference,internal/core/ticket_status.go,48,// TicketStatusClosedLegacy defines a package boundary constant.
+compatibility-reference,internal/core/ticket_status.go,49,"TicketStatusClosedLegacy = ""closed"""
+compatibility-reference,internal/core/ticket_status.go,62,"TicketStatusOpenLegacy:      TicketStatusBacklog,"
+compatibility-reference,internal/core/ticket_status.go,63,"TicketStatusReadyLegacy:     TicketStatusReadyForDev,"
+compatibility-reference,internal/core/ticket_status.go,64,"TicketStatusReviewingLegacy: TicketStatusReadyForReview,"
+compatibility-reference,internal/core/ticket_status.go,65,"TicketStatusSolvedLegacy:    TicketStatusReadyForMerge,"
+compatibility-reference,internal/core/ticket_status.go,66,"TicketStatusMergedLegacy:    TicketStatusDone,"
+compatibility-reference,internal/core/ticket_status.go,67,"TicketStatusClosedLegacy:    TicketStatusDone,"
+compatibility-reference,internal/core/ticket_status.go,89,"content, err := readLegacyTicketFile(opts.Path)"
+compatibility-reference,internal/core/ticket_status.go,112,"err = writeLegacyTicketFile(ctx, opts.Path, content, []byte(updated))"
+compatibility-reference,internal/core/ticket_status.go,188,return status == TicketStatusBlockedLegacy
+compatibility-reference,internal/core/work_authority.go,14,// WorkAuthority preserves legacy defaults until versioned activation is delivered.
+large-file,internal/core/work_readiness_service.go,1,1348 lines
+compatibility-reference,internal/core/workflow_adoption.go,13,// WorkflowAdoptionTask selects one observed legacy ticket for one approved task.
+compatibility-reference,internal/core/workflow_adoption.go,21,// exact task selection. CheckQuiescent must also check legacy runtime evidence.
+compatibility-reference,internal/core/workflow_adoption.go,46,"return result, fmt.Errorf(""legacy ownership observation is required"")"
+compatibility-reference,internal/core/workflow_adoption.go,130,"set, err := s.prepareLegacyWorkflowPlan(opts)"
+compatibility-reference,internal/core/workflow_adoption.go,137,"selected, keys, err := s.prepareLegacyWorkflowTasks(plan, opts.Tasks)"
+compatibility-reference,internal/core/workflow_adoption.go,142,"if err := s.checkLegacyWorkflowKeys(ctx, selected); err != nil {"
+compatibility-reference,internal/core/workflow_adoption.go,158,"result.Tasks, err = s.bindLegacyWorkflowTasks(result.Tasks, selected)"
+compatibility-reference,internal/core/workflow_adoption_lock.go,22,"return nil, fmt.Errorf(""legacy worktree ownership scan bound exceeded"")"
+compatibility-reference,internal/core/workflow_adoption_lock.go,91,"return fmt.Errorf(""legacy operation lock requires reconciliation"")"
+compatibility-reference,internal/core/workflow_adoption_records.go,15,"func (s *WorkflowStore) prepareLegacyWorkflowPlan(opts WorkflowPlanAdoptionOptions) (WorkflowRecord, error) {"
+compatibility-reference,internal/core/workflow_adoption_records.go,16,if err := validateLegacyWorkflowPlanPath(opts); err != nil {
+compatibility-reference,internal/core/workflow_adoption_records.go,31,"return record, fmt.Errorf(""foreign legacy plan identity"")"
+compatibility-reference,internal/core/workflow_adoption_records.go,52,"if err := validateLegacyWorkflowPlanState(record.Metadata, body, opts.Plan.UseCase); err != nil {"
+compatibility-reference,internal/core/workflow_adoption_records.go,59,"func (s *WorkflowStore) prepareLegacyWorkflowTasks(plan GeneratedWorkflowPlan, selections []WorkflowAdoptionTask) ([]WorkflowRecord, []string, error) {"
+compatibility-reference,internal/core/workflow_adoption_records.go,65,"return nil, nil, fmt.Errorf(""ambiguous legacy task selection"")"
+compatibility-reference,internal/core/workflow_adoption_records.go,78,"return nil, nil, fmt.Errorf(""missing selected legacy task: %s"", task.ID)"
+compatibility-reference,internal/core/workflow_adoption_records.go,81,"record, err := s.prepareLegacyWorkflowTicket(selection, task.Body, plan.UseCase)"
+compatibility-reference,internal/core/workflow_adoption_records.go,92,"return nil, nil, fmt.Errorf(""legacy selection contains tasks outside the approved plan"")"
+compatibility-reference,internal/core/workflow_adoption_records.go,98,"func (s *WorkflowStore) prepareLegacyWorkflowTicket(selection WorkflowAdoptionTask, body, useCase string) (WorkflowRecord, error) {"
+compatibility-reference,internal/core/workflow_adoption_records.go,123,"if err := s.checkLegacyWorkflowTicket(fields, original, body, useCase); err != nil {"
+compatibility-reference,internal/core/workflow_adoption_records.go,141,"func (s *WorkflowStore) checkLegacyWorkflowTicket(fields map[string]json.RawMessage, body []byte, approvedBody, useCase string) error {"
+compatibility-reference,internal/core/workflow_adoption_records.go,148,"if err := s.checkLegacyWorkflowScope(fields, useCase); err != nil {"
+compatibility-reference,internal/core/workflow_adoption_records.go,158,"return fmt.Errorf(""legacy task status requires explicit evidence reconciliation: %s"", status)"
+compatibility-reference,internal/core/workflow_adoption_records.go,162,"return fmt.Errorf(""legacy body differs from the approved task input"")"
+compatibility-reference,internal/core/workflow_adoption_records.go,168,"func (s *WorkflowStore) bindLegacyWorkflowTasks(templates, selected []WorkflowRecord) ([]WorkflowRecord, error) {"
+compatibility-reference,internal/core/workflow_adoption_records.go,188,"func (s *WorkflowStore) checkLegacyWorkflowKeys(ctx context.Context, selected []WorkflowRecord) error {"
+compatibility-reference,internal/core/workflow_adoption_records.go,192,"return fmt.Errorf(""ambiguous selected legacy key"")"
+compatibility-reference,internal/core/workflow_adoption_records.go,215,"return fmt.Errorf(""legacy adoption scan bound exceeded"")"
+compatibility-reference,internal/core/workflow_adoption_records.go,218,"return s.checkLegacyWorkflowKey(path, owners)"
+compatibility-reference,internal/core/workflow_adoption_records.go,222,"func (s *WorkflowStore) checkLegacyWorkflowKey(path string, owners map[string]string) error {"
+compatibility-reference,internal/core/workflow_adoption_records.go,255,"return fmt.Errorf(""ambiguous legacy ticket representation: %s"", key)"
+compatibility-reference,internal/core/workflow_adoption_records.go,261,func validateLegacyWorkflowPlanPath(opts WorkflowPlanAdoptionOptions) error {
+compatibility-reference,internal/core/workflow_adoption_records.go,269,"func (s *WorkflowStore) checkLegacyWorkflowScope(fields map[string]json.RawMessage, useCase string) error {"
+compatibility-reference,internal/core/workflow_adoption_records.go,274,"return fmt.Errorf(""foreign legacy ticket scope"")"
+compatibility-reference,internal/core/workflow_adoption_records.go,279,"return validateLegacyWorkflowUseCase(fields, useCase)"
+compatibility-reference,internal/core/workflow_adoption_records.go,286,"func validateLegacyWorkflowUseCase(fields map[string]json.RawMessage, expected string) error {"
+compatibility-reference,internal/core/workflow_adoption_records.go,295,"return fmt.Errorf(""foreign legacy use-case association"")"
+compatibility-reference,internal/core/workflow_adoption_records.go,303,"func validateLegacyWorkflowPlanState(metadata map[string]json.RawMessage, body []byte, useCase string) error {"
+compatibility-reference,internal/core/workflow_adoption_records.go,311,"return fmt.Errorf(""legacy plan status requires explicit evidence reconciliation"")"
+compatibility-reference,internal/core/workflow_adoption_records.go,314,"if err := validateLegacyWorkflowUseCase(metadata, useCase); err != nil {"
+compatibility-reference,internal/core/workflow_adoption_records.go,332,"return validateLegacyWorkflowUseCase(fields, useCase)"
+compatibility-reference,internal/core/workflow_capacity_recovery.go,10,// descriptor must block fencing even after lease expiry. Its shared legacy
+bool-signature-review,internal/core/workflow_claim.go,312,"func (s *WorkflowStore) checkWorkflowCredential(ctx context.Context, claim *WorkflowClaim, lease bool) (workflowInvocationFile, WorkflowRecord, error) {"
+bool-signature-review,internal/core/workflow_claim.go,401,"func workflowCredentialValid(run workflowInvocationFile, claim *WorkflowClaim, attempt WorkflowAttempt, lease bool) bool {"
+compatibility-reference,internal/core/workflow_claim_lock.go,91,// until their own legacy release or fenced native recovery removes them.
+compatibility-reference,internal/core/workflow_claim_lock.go,130,// The inherited common-directory reservation also excludes legacy starts
+compatibility-reference,internal/core/workflow_claim_lock.go,203,// Legacy standalone workspaces retain their file lock without a Git pool.
+compatibility-reference,internal/core/workflow_claim_lock.go,215,"return acquireLegacyWorkflowCapacity(ctx, projectDir)"
+bare-errcheck,internal/core/workflow_closing_command.go,37,defer func() { _ = gate.Close(); _ = permit.Close() }() //nolint:errcheck
+bool-signature-review,internal/core/workflow_closing_persist.go,53,"func (s *WorkflowStore) checkWorkflowClosingClaim(ctx context.Context, claim *workflowClosingClaim, lease bool) error {"
+compatibility-reference,internal/core/workflow_closing_proof.go,94,"return s.observeWorkflowClosingLegacySlice(ctx, input, receipt, retained, ports)"
+compatibility-reference,internal/core/workflow_closing_proof.go,97,"func (s *WorkflowStore) observeWorkflowClosingLegacySlice(ctx context.Context, input WorkflowClosingInput, receipt WorkflowRecord, retained WorkflowSliceDeliveryProof, ports WorkflowFrontierPorts) (WorkflowIntegrationProof, error) {"
+bool-signature-review,internal/core/workflow_closing_validate.go,61,"func validateWorkflowClosingOutcome(state workflowClosingAttempt, historical bool) error {"
+bool-signature-review,internal/core/workflow_closing_validate.go,168,"func workflowClosingRunningOutcome(state workflowClosingAttempt, historical bool) bool {"
+bool-signature-review,internal/core/workflow_coordinator.go,51,"func (s *WorkflowStore) workflowLocalCoordinator(ctx context.Context, register bool) (workflowCoordinator, error) {"
+bool-signature-review,internal/core/workflow_entry.go,12,"func (s *WorkflowStore) FindWorkflowEntry(ctx context.Context, request WorkflowStartRequest) (result WorkflowInvocation, found bool, err error) {"
+compatibility-reference,internal/core/workflow_entry.go,50,// CheckLegacyWorkKey refuses an adopted key before legacy cache/runtime setup.
+compatibility-reference,internal/core/workflow_entry.go,51,// This preliminary read is followed by CheckLegacyWorkTicket under the legacy
+compatibility-reference,internal/core/workflow_entry.go,53,"func (s *WorkflowStore) CheckLegacyWorkKey(ctx context.Context, key string) error {"
+bool-signature-review,internal/core/workflow_entry.go,68,"func (s *WorkflowStore) matchWorkflowEntry(runs []workflowInvocationFile, request WorkflowStartRequest) (result WorkflowInvocation, found bool, err error) {"
+bare-errcheck,internal/core/workflow_execution_command.go,65,defer func() { _ = gate.Close(); _ = permit.Close() }() //nolint:errcheck
+bool-signature-review,internal/core/workflow_execution_result.go,11,"func (s *WorkflowStore) finishWorkflowTask(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, result *WorkflowTaskResult, interrupted bool) error {"
+bool-signature-review,internal/core/workflow_execution_result.go,96,"func workflowExecutionStopped(run workflowInvocationFile, interrupted bool) bool {"
+compatibility-reference,internal/core/workflow_finalization.go,38,"return s.finalizeWorkflowLegacySlice(ctx, run, provider, git)"
+compatibility-reference,internal/core/workflow_finalization.go,41,"func (s *WorkflowStore) finalizeWorkflowLegacySlice(ctx context.Context, run workflowInvocationFile, provider WorkflowPullRequestProvider, git WorkflowIntegrationGit) (WorkflowRecord, error) {"
+compatibility-reference,internal/core/workflow_finalization_receipt.go,101,"return workflowLegacyReceiptMatchesProof(*receipt, proof, ref)"
+compatibility-reference,internal/core/workflow_finalization_receipt.go,104,"func workflowLegacyReceiptMatchesProof(receipt WorkflowReceipt, proof WorkflowSliceDeliveryProof, ref string) bool {"
+bool-signature-review,internal/core/workflow_git_http.go,85,"func (session *workflowReceivePackHTTP) readHTTPAdvertisement() (unauthorized bool, err error) {"
+bool-signature-review,internal/core/workflow_git_protocol.go,75,"func (advertisement workflowAdvertisement) add(packet []byte, first bool) error {"
+compatibility-reference,internal/core/workflow_integration_budget_legacy.go,12,"func (s *WorkflowStore) workflowIntegrationLegacySubmissions(ctx context.Context, run workflowInvocationFile) ([]WorkflowIntegrationCounter, error) {"
+compatibility-reference,internal/core/workflow_integration_budget_legacy.go,33,"return readWorkflowIntegrationLegacyCounters(filepath.Dir(path), entries, run)"
+compatibility-reference,internal/core/workflow_integration_budget_legacy.go,36,"func readWorkflowIntegrationLegacyCounters(dir string, entries []os.DirEntry, run workflowInvocationFile) ([]WorkflowIntegrationCounter, error) {"
+compatibility-reference,internal/core/workflow_integration_budget_legacy.go,57,"if err := appendWorkflowIntegrationLegacyCounter(&counters, journal); err != nil {"
+compatibility-reference,internal/core/workflow_integration_budget_legacy.go,65,"func appendWorkflowIntegrationLegacyCounter(counters *[]WorkflowIntegrationCounter, journal workflowSubmissionJournal) error {"
+compatibility-reference,internal/core/workflow_integration_budget_legacy.go,87,"func checkWorkflowIntegrationLegacySubmissions(budget WorkflowIntegrationBudget, counters []WorkflowIntegrationCounter) error {"
+compatibility-reference,internal/core/workflow_integration_budget_legacy.go,91,"return workflowIntegrationConflict(""legacy submission usage differs from admission snapshot"")"
+compatibility-reference,internal/core/workflow_integration_budget_store.go,102,"counters, err := s.workflowIntegrationLegacySubmissions(ctx, run)"
+compatibility-reference,internal/core/workflow_integration_budget_store.go,222,"counters, err := s.workflowIntegrationLegacySubmissions(ctx, run)"
+compatibility-reference,internal/core/workflow_integration_budget_store.go,224,"err = checkWorkflowIntegrationLegacySubmissions(budget, counters)"
+compatibility-reference,internal/core/workflow_integration_grant.go,64,"budget.UnitCounters, err = s.workflowIntegrationLegacySubmissions(ctx, run)"
+compatibility-reference,internal/core/workflow_integration_persist.go,79,"return proof, checkWorkflowLegacyDeliveryProof(run, proof)"
+compatibility-reference,internal/core/workflow_integration_persist.go,82,"func checkWorkflowLegacyDeliveryProof(run workflowInvocationFile, proof WorkflowSliceDeliveryProof) error {"
+compatibility-reference,internal/core/workflow_integration_records_validate.go,50,"counters, err := s.workflowIntegrationLegacySubmissions(ctx, run)"
+compatibility-reference,internal/core/workflow_integration_records_validate.go,55,"if err := checkWorkflowIntegrationLegacySubmissions(budget, counters); err != nil {"
+compatibility-reference,internal/core/workflow_integration_schedule_capacity.go,142,"legacy, retained, err := s.workflowLegacyPreparedCount(snapshot.Runs, run, repository, target)"
+compatibility-reference,internal/core/workflow_integration_schedule_capacity.go,144,"return count + legacy, retained, err"
+compatibility-reference,internal/core/workflow_integration_schedule_capacity.go,151,"func (s *WorkflowStore) workflowLegacyPreparedCount(runs []workflowInvocationFile, run workflowInvocationFile, repository, target string) (int, bool, error) {"
+bool-signature-review,internal/core/workflow_integration_status.go,139,"func observeWorkflowIntegrationSlot(path string) (held bool, err error) {"
+compatibility-reference,internal/core/workflow_legacy_capacity.go,9,"func acquireLegacyWorkflowCapacity(ctx context.Context, projectDir string) (reservation *os.File, err error) {"
+compatibility-reference,internal/core/workflow_legacy_capacity.go,26,if err := store.checkLegacyWorkflowCoordinator(ctx); err != nil {
+compatibility-reference,internal/core/workflow_legacy_capacity.go,38,func (s *WorkflowStore) checkLegacyWorkflowCoordinator(ctx context.Context) error {
+compatibility-reference,internal/core/workflow_legacy_write.go,15,// ErrWorkflowAuthority prevents legacy execution of an adopted task or projection.
+compatibility-reference,internal/core/workflow_legacy_write.go,18,// CheckLegacyWorkTicket refuses adopted Markdown and JSON-backed ticket views
+compatibility-reference,internal/core/workflow_legacy_write.go,19,// before a legacy worker starts. The operation lock also fences concurrent adoption.
+compatibility-reference,internal/core/workflow_legacy_write.go,20,func CheckLegacyWorkTicket(path string) error {
+compatibility-reference,internal/core/workflow_legacy_write.go,21,"if _, err := readLegacyTicketFile(path); err != nil {"
+compatibility-reference,internal/core/workflow_legacy_write.go,50,// FilterLegacyWorkTickets partitions a derived queue by its actual source images.
+compatibility-reference,internal/core/workflow_legacy_write.go,51,// It never treats an adopted projection as legacy execution authority.
+compatibility-reference,internal/core/workflow_legacy_write.go,52,"func FilterLegacyWorkTickets(ctx context.Context, tickets []IndexedTicket) ([]IndexedTicket, int, error) {"
+compatibility-reference,internal/core/workflow_legacy_write.go,54,"return nil, 0, fmt.Errorf(""legacy authority selection bound exceeded"")"
+compatibility-reference,internal/core/workflow_legacy_write.go,64,err := CheckLegacyWorkTicket(ticket.Path)
+compatibility-reference,internal/core/workflow_legacy_write.go,81,// Legacy writers remain available for unadopted tickets. Adopted records must
+compatibility-reference,internal/core/workflow_legacy_write.go,83,"func readLegacyTicketFile(path string) ([]byte, error) {"
+compatibility-reference,internal/core/workflow_legacy_write.go,97,// An optimistic legacy reader may race explicit adoption. Take the same lock
+compatibility-reference,internal/core/workflow_legacy_write.go,99,"func writeLegacyTicketFile(ctx context.Context, path string, observed, replacement []byte) error {"
+compatibility-reference,internal/core/workflow_legacy_write.go,106,if err := CheckLegacyWorkTicket(path); err != nil {
+compatibility-reference,internal/core/workflow_legacy_write.go,110,"current, err := readLegacyTicketFile(path)"
+compatibility-reference,internal/core/workflow_legacy_write.go,122,"// WorkflowStore requires Git coordination, so non-Git legacy tickets"
+compatibility-reference,internal/core/workflow_legacy_write.go,124,"return withLegacyTicketLock(ctx, path, action)"
+compatibility-reference,internal/core/workflow_legacy_write.go,142,"func withLegacyTicketLock(ctx context.Context, path string, action func() error) (err error) {"
+bool-signature-review,internal/core/workflow_manual_input.go,9,"func (s *WorkflowStore) loadWorkflowManualTask(ctx context.Context, claim *WorkflowClaim, execute bool) (prepared workflowPreparedTask, err error) {"
+bool-signature-review,internal/core/workflow_manual_input.go,33,"func (s *WorkflowStore) loadWorkflowManualInput(run workflowInvocationFile, record WorkflowRecord, execute bool) (workflowPreparedTask, error) {"
+bool-signature-review,internal/core/workflow_manual_reuse.go,8,"func (s *WorkflowStore) reuseWorkflowManualResult(ctx context.Context, claim *WorkflowClaim, candidate WorkflowManualCandidate) (result WorkflowTaskResult, found bool, err error) {"
+bool-signature-review,internal/core/workflow_merger_acceptance_tree.go,79,"func (reader workflowIntegrationReader) checkMergerObservedPaths(ctx context.Context, input WorkflowMergerInput, proposal WorkflowMergerResult, before, after string, exact bool) error {"
+bare-errcheck,internal/core/workflow_merger_driver.go,32,defer func() { _ = stdout.file.Close(); _ = stderr.file.Close() }() //nolint:errcheck
+bare-errcheck,internal/core/workflow_merger_driver.go,38,defer func() { _ = gate.Close(); _ = permit.Close() }() //nolint:errcheck
+bare-errcheck,internal/core/workflow_merger_driver.go,54,defer func() { _ = stdin.Close() }() //nolint:errcheck
+bare-errcheck,internal/core/workflow_merger_driver.go,57,defer func() { _ = reader.Close(); _ = writer.Close() }() //nolint:errcheck
+bare-errcheck,internal/core/workflow_merger_driver.go,72,_ = writer.Close() //nolint:errcheck
+bare-errcheck,internal/core/workflow_merger_driver.go,81,_ = reader.Close() //nolint:errcheck
+bare-errcheck,internal/core/workflow_merger_execution.go,92,defer func() { _ = root.Close() }() //nolint:errcheck
+bare-errcheck,internal/core/workflow_merger_harness.go,96,defer func() { _ = file.Close() }() //nolint:errcheck
+bool-signature-review,internal/core/workflow_merger_repair_merge.go,36,"func parseWorkflowMergerTree(data string, conflicted bool) (workflowMergerTree, error) {"
+bare-errcheck,internal/core/workflow_merger_tool_files.go,25,defer func() { _ = file.Close() }() //nolint:errcheck
+bool-signature-review,internal/core/workflow_mutation_reserve.go,8,"func (s *WorkflowStore) ReserveRecordMutation(ctx context.Context, request WorkflowMutationRequest) (result WorkflowMutationResult, found bool, err error) {"
+bool-signature-review,internal/core/workflow_native_observation.go,54,"func (s *WorkflowStore) observeWorkflowNativeSubmission(ctx context.Context, guard WorkflowIntegrationBudgetGuard, observer WorkflowNativePublicationObserver, git WorkflowIntegrationGit, poll bool) (submission WorkflowSubmission, observation WorkflowNativePublicationObservation, next WorkflowIntegrationBudgetGuard, err error) {"
+bool-signature-review,internal/core/workflow_preparation_identity.go,150,"func workflowPreparationCommitterMatches(entry WorkflowIntegrationAttribution, p WorkflowIntegrationPreparation, replay bool) bool {"
+bool-signature-review,internal/core/workflow_preparation_identity.go,154,"func checkWorkflowPreparationSigning(proof WorkflowIntegrationProof, required bool, profile string) error {"
+bool-signature-review,internal/core/workflow_preparation_result.go,82,"func (s *WorkflowStore) finishWorkflowIntegrationValidation(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, candidate *WorkflowIntegrationCandidate, provider WorkflowPublicationGuardProvider, validationErr error, interrupted bool) error {"
+bool-signature-review,internal/core/workflow_preparation_result.go,134,"func (s *WorkflowStore) retainWorkflowPreparationFailureRepair(ctx context.Context, run workflowInvocationFile, candidate WorkflowIntegrationCandidate, provider WorkflowPublicationGuardProvider, actionable, targetMoved bool) error {"
+compatibility-reference,internal/core/workflow_publication.go,44,"return s.advanceWorkflowLegacyIntegration(ctx, id, ports)"
+compatibility-reference,internal/core/workflow_publication.go,47,"func (s *WorkflowStore) advanceWorkflowLegacyIntegration(ctx context.Context, id string, ports WorkflowPublicationPorts) (WorkflowIntegrationProgress, error) {"
+bool-signature-review,internal/core/workflow_publication.go,97,"func (s *WorkflowStore) observeWorkflowPublicationCheckpoint(ctx context.Context, id string, ports WorkflowPublicationPorts) (receipt *WorkflowRecord, delivered bool, err error) {"
+bool-signature-review,internal/core/workflow_publication_native.go,5,"func (s *WorkflowStore) workflowNativeContinuationProfile(ctx context.Context, id string) (native bool, err error) {"
+bool-signature-review,internal/core/workflow_publication_native.go,138,"func (s *WorkflowStore) observeWorkflowNativeIntegration(ctx context.Context, guard WorkflowIntegrationBudgetGuard, ports WorkflowPublicationPorts, poll bool) error {"
+compatibility-reference,internal/core/workflow_publication_provider.go,11,// than reuse the legacy unguarded Merge operation or change the selected method.
+compatibility-reference,internal/core/workflow_publication_provider.go,32,// not call legacy Merge or substitute another method for an exact prepared result.
+bool-signature-review,internal/core/workflow_publication_reconcile.go,10,"func workflowRetainDeliveryStatus(run *workflowInvocationFile, outcome string, complete bool) {"
+compatibility-reference,internal/core/workflow_pull_request_validate.go,88,"legacy := workflowPullRequestObservationPath(id, binding.ObservationCount)"
+compatibility-reference,internal/core/workflow_pull_request_validate.go,91,"if binding.ObservationCount < 1 || binding.ObservationCount > WorkflowPageLimit || !slices.Contains([]string{legacy, scoped}, binding.ObservationRef) || len(binding.ObservationHash) != 64 {"
+bool-signature-review,internal/core/workflow_review_persist.go,105,"func (s *WorkflowStore) workflowReviewDomainChanges(run *workflowInvocationFile, observation workflowSliceObservation, authorized bool) ([]workflowFileChange, error) {"
+bool-signature-review,internal/core/workflow_review_result.go,10,"func (s *WorkflowStore) finishWorkflowReview(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, provider WorkflowPullRequestProvider, decision WorkflowReviewDecision, executionErr error, interrupted bool) (result WorkflowReviewBinding, err error) {"
+bool-signature-review,internal/core/workflow_selection.go,242,"func workflowSelectionExclusion(selector WorkflowSelector, record WorkflowRecord, prepared bool) string {"
+bool-signature-review,internal/core/workflow_selection.go,310,"func workflowPreviewExclusion(request WorkflowPreviewRequest, ticket IndexedTicket, record WorkflowRecord, prepared bool) string {"
+bool-signature-review,internal/core/workflow_selection_read.go,17,"func (s *WorkflowStore) readWorkflowSelectionSources(ctx context.Context, unprepared bool) (workflowSelection, error) {"
+bool-signature-review,internal/core/workflow_selection_read.go,226,"func (s *WorkflowStore) appendWorkflowUnprepared(ctx context.Context, selection *workflowSelection, paths map[string]bool, enabled bool) error {"
+bool-signature-review,internal/core/workflow_slice_result.go,10,"func (s *WorkflowStore) finishWorkflowSliceValidation(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, candidate *WorkflowSliceCandidate, interrupted bool) error {"
+bool-signature-review,internal/core/workflow_submission_native.go,92,"func (s *WorkflowStore) BeginWorkflowNativeSubmission(ctx context.Context, guard WorkflowIntegrationBudgetGuard, provider WorkflowPublicationGuardProvider) (submission WorkflowSubmission, dispatch bool, err error) {"
+compatibility-reference,internal/core/workflow_submission_native_validate.go,11,"return validateWorkflowLegacySubmissionSchema(submission, schema)"
+compatibility-reference,internal/core/workflow_submission_native_validate.go,37,"func validateWorkflowLegacySubmissionSchema(submission WorkflowSubmission, schema string) error {"
+compatibility-reference,internal/core/workflow_submission_observe.go,50,"if !workflowLegacySubmissionPRIdentityMatches(submission, pr) {"
+compatibility-reference,internal/core/workflow_submission_observe.go,144,"func workflowLegacySubmissionPRIdentityMatches(submission WorkflowSubmission, pr WorkflowPullRequestSnapshot) bool {"
+bool-signature-review,internal/core/workflow_submission_prepare.go,12,"func (s *WorkflowStore) beginWorkflowSubmission(ctx context.Context, id string, provider WorkflowPublicationProvider, git WorkflowIntegrationGit) (submission WorkflowSubmission, submit bool, err error) {"
+compatibility-reference,internal/core/workflow_submission_prepare.go,50,"guard, err := s.checkWorkflowLegacyPublicationGuard(ctx, run, provider)"
+compatibility-reference,internal/core/workflow_submission_prepare.go,207,"func (s *WorkflowStore) checkWorkflowLegacyPublicationGuard(ctx context.Context, run *workflowInvocationFile, provider WorkflowPublicationGuardProvider) (WorkflowPublicationGuard, error) {"
+compatibility-reference,internal/core/workflow_tracker_sources.go,130,// A legacy set can use a different retained path. Preserve its original
+compatibility-reference,internal/core/workflow_upgrade.go,11,// one approved legacy plan. Omitting ReviewMode preserves its effective policy.
+compatibility-reference,internal/core/workflow_upgrade.go,81,"return fmt.Errorf(""legacy project ownership observation is required"")"
+compatibility-reference,internal/core/workflow_upgrade.go,86,"return fmt.Errorf(""selected adoption requires ticket authority and legacy task ownership observation"")"
+bool-signature-review,internal/core/workflow_upgrade_config.go,42,"func checkWorkflowUpgradeFile(info os.FileInfo, leaf bool) error {"
+compatibility-reference,internal/core/workflow_upgrade_journal.go,87,"return workflowUpgradeJournal{}, nil, fmt.Errorf(""workflow upgrade requires the unchanged legacy configuration"")"
+compatibility-reference,internal/core/workflow_validation.go,104,"""blocked"":       {TicketStatusBlockedLegacy},"
+bool-signature-review,internal/core/workflow_work_observation.go,113,"func appendWorkflowObservedQueue(observation *WorkflowWorkObservation, preview WorkflowPreview, first bool) {"
+compatibility-reference,internal/core/workspace_config_lock.go,11,"// Configuration mutations share this owner lock, including legacy upgrades."
+compatibility-reference,internal/core/workspace_graph.go,486,return workspaceKindForLegacyDirectory(parts[0])
+compatibility-reference,internal/core/workspace_graph.go,508,func workspaceKindForLegacyDirectory(directory string) WorkspaceNodeKind {
+bool-signature-review,internal/core/workspace_init.go,168,"func initDirectories(ctx context.Context, projectDir string, dryRun bool, result *InitResult) error {"
+bool-signature-review,internal/core/workspace_init.go,189,"func (w *workspace) initWorkspaceFiles(ctx context.Context, projectDir, profile string, newProject, dryRun bool, result *InitResult) error {"
+bool-signature-review,internal/core/workspace_init.go,224,"func (w *workspace) initRootFiles(ctx context.Context, projectDir, profile string, dryRun bool, result *InitResult) error {"
+bool-signature-review,internal/core/workspace_init.go,350,"func recordPath(result *InitResult, rel string, created bool) {"
+bool-signature-review,internal/core/workspace_init.go,361,"func ensureDir(path string, dryRun bool) (bool, error) {"
+bool-signature-review,internal/core/workspace_init.go,387,"func createFile(path, content string, dryRun bool) (bool, error) {"
+compatibility-reference,internal/harness/codex/generation.go,19,// Program is the legacy Codex executable name.
+compatibility-reference,internal/harness/codex/runtime.go,16,// CredentialMounts resolves existing legacy credential files during setup.
+compatibility-reference,internal/harness/contracts.go,64,// FrozenSelection prevents an adapter from rebinding empty legacy defaults.
+bool-signature-review,internal/harness/pi/events.go,273,"func addUsage(total int64, observed *int64, known bool) (int64, bool) {"
+error-name,internal/harness/pi/worker_bridge.go,149,func (*providerFailure) Error() string { return ErrProvider.Error() }
+compatibility-reference,internal/tui/documents.go,140,//nolint:unused // Kept for legacy/non-shell document family renderers.
+compatibility-reference,internal/tui/documents.go,215,//nolint:unused // Kept for legacy/non-shell document view paths.
+compatibility-reference,internal/tui/harness_selection.go,206,"label := ""Legacy worker (original settings)"""
+bool-signature-review,internal/tui/harness_selection.go,225,"func harnessRoleLines(name string, selection core.HarnessSelection, generation bool, width int) []string {"
+compatibility-reference,internal/tui/harness_selection.go,228,"label = ""Legacy dispatch · Codex CLI default"""
+compatibility-reference,internal/tui/harness_selection.go,230,"label = ""Legacy dispatch · varies by operation"""
+bool-signature-review,internal/tui/harness_selection.go,246,"func (m Model) harnessChoiceLine(role, choice string, focused bool) string {"
+compatibility-reference,internal/tui/harness_selection.go,253,"label = ""Restore legacy dispatch"""
+compatibility-reference,internal/tui/model.go,30,// Legacy view identifiers are kept for existing commands and non-shell
+compatibility-reference,internal/tui/model.go,1082,return m.renderLegacySelectedView(selectedView)
+compatibility-reference,internal/tui/model.go,1127,func (m Model) renderLegacySelectedView(selectedView View) string {
+bool-signature-review,internal/tui/model.go,1324,func checkedStateLabel(checked bool) string {
+large-file,internal/tui/model.go,1,1940 lines
+bool-signature-review,internal/tui/observability.go,334,func renderRuntimeCheckStatus(ok bool) string {
+compatibility-reference,internal/tui/shell.go,108,"return m.renderLegacyWorkspace(width, height)"
+compatibility-reference,internal/tui/shell.go,134,"func (m Model) renderLegacyWorkspace(width, height int) string {"
+bool-signature-review,internal/tui/shell.go,993,"func renderCompactTicketColumns(prefix, key, status, priority, title string, width int, header bool) string {"
+bool-signature-review,internal/tui/shell.go,1010,"func compactTicketCell(value string, width int, center bool) string {"
+compatibility-reference,internal/tui/shell.go,1035,"core.TicketStatusOpenLegacy:      ""OPN"","
+compatibility-reference,internal/tui/shell.go,1036,"core.TicketStatusReadyLegacy:     ""RDY"","
+compatibility-reference,internal/tui/shell.go,1037,"core.TicketStatusReviewingLegacy: ""REV"","
+compatibility-reference,internal/tui/shell.go,1038,"core.TicketStatusBlockedLegacy:   ""BLK"","
+compatibility-reference,internal/tui/shell.go,1039,"core.TicketStatusSolvedLegacy:    ""SLV"","
+compatibility-reference,internal/tui/shell.go,1040,"core.TicketStatusMergedLegacy:    ""DONE"","
+compatibility-reference,internal/tui/shell.go,1041,"core.TicketStatusClosedLegacy:    ""CLS"","
+bool-signature-review,internal/tui/shell.go,1345,"func renderPanel(title string, lines []string, width, height int, focused bool) string {"
+bool-signature-review,internal/tui/shell.go,1358,"func (m Model) renderDetailPanel(title string, lines []string, width, height int, focused bool) string {"
+large-file,internal/tui/shell.go,1,1558 lines
+bool-signature-review,internal/webui/login_credentials.go,120,"func SaveLoginCredentials(path string, credentials LoginCredentials, replace bool) (err error) {"
+compatibility-reference,internal/webui/login_http.go,120,// Credentials in legacy query URLs never enter a login form or redirect.
+bool-signature-review,internal/webui/ticket_editor.go,13,"func (h handler) ticketWrite(w http.ResponseWriter, r *http.Request, comment bool) {"
+bool-signature-review,internal/webui/ticket_editor.go,57,"func (h handler) ticketWriteData(r *http.Request, request WriteActionRequest, result WriteActionResponse, comment bool) (PageData, string, error) {"
+bool-signature-review,internal/webui/ticket_editor.go,74,"func ticketEditorAction(action string, comment bool) bool {"
+large-file,internal/webui/webui.go,1,895 lines

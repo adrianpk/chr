@@ -1,0 +1,82 @@
+[
+  {
+    "category": "C",
+    "id": "internal/app/service_harness_generation.go::service.bindHarnessGeneration/function/1",
+    "location": "internal/app/service_harness_generation.go:50",
+    "signature": "func(ctx context.Context, config core.WorkspaceConfig) (core.HarnessGenerationBinding, core.HarnessGenerationLaunch, error)",
+    "parameters": 2,
+    "results": [
+      "core.HarnessGenerationBinding",
+      "core.HarnessGenerationLaunch",
+      "error"
+    ],
+    "generated": false,
+    "owning_slice": 10
+  },
+  {
+    "category": "B",
+    "id": "internal/app/telegram_control_service.go::telegramControlService.ApplyTelegramControl",
+    "location": "internal/app/telegram_control_service.go:12",
+    "signature": "func(context.Context, core.TelegramOperationTarget, core.WorkflowMutationBinding, WorkflowControlRequest, core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error)",
+    "parameters": 5,
+    "results": [
+      "WorkflowWorkStatus",
+      "error"
+    ],
+    "generated": false,
+    "owning_slice": 7
+  },
+  {
+    "category": "B",
+    "id": "internal/app/telegram_work_service.go::telegramWorkContinuationService.ResumeTelegramWork",
+    "location": "internal/app/telegram_work_service.go:16",
+    "signature": "func(context.Context, core.TelegramOperationTarget, WorkflowRetainedReference, WorkflowBoundPreview, core.WorkflowAdmissionCheck) (RetainedWorkProgress, error)",
+    "parameters": 5,
+    "results": [
+      "RetainedWorkProgress",
+      "error"
+    ],
+    "generated": false,
+    "owning_slice": 7
+  },
+  {
+    "category": "C",
+    "id": "internal/core/harness_generation_operation.go::HarnessGenerationResolver",
+    "location": "internal/core/harness_generation_operation.go:45",
+    "signature": "func(context.Context, WorkspaceConfig) (HarnessGenerationBinding, HarnessGenerationLaunch, error)",
+    "parameters": 2,
+    "results": [
+      "HarnessGenerationBinding",
+      "HarnessGenerationLaunch",
+      "error"
+    ],
+    "generated": false,
+    "owning_slice": 10
+  },
+  {
+    "category": "A",
+    "id": "internal/core/notification_event_repository.go::NotificationEventRepository.FinishTelegramNotification",
+    "location": "internal/core/notification_event_repository.go:30",
+    "signature": "func(context.Context, string, TelegramNotificationTarget, TelegramDocumentAcknowledgement, string, bool, time.Time) error",
+    "parameters": 7,
+    "results": [
+      "error"
+    ],
+    "generated": false,
+    "owning_slice": 6
+  },
+  {
+    "category": "C",
+    "id": "internal/core/workflow_harness_admission.go::WorkflowHarnessResolver",
+    "location": "internal/core/workflow_harness_admission.go:10",
+    "signature": "func(context.Context, WorkspaceConfig) (*HarnessBinding, []string, error)",
+    "parameters": 2,
+    "results": [
+      "*HarnessBinding",
+      "[]string",
+      "error"
+    ],
+    "generated": false,
+    "owning_slice": 12
+  }
+]
