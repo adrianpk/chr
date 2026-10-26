@@ -6,7 +6,7 @@ Delivery set: code-quality-remediation
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 1, Inventory and enforceable quality policy; reviewing in canonical PR #438; dev integration pending.
+Active slice: Slice 2, Shared boundary values and residual core helpers; predecessor PR #438 verified integrated; approved and ready.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b`
 
 Plan: [Single-cycle plan](../plan/code-quality-remediation.md)
@@ -17,7 +17,7 @@ Source: [Quality review](../report/code-quality-review-2026-10-26/report.md)
 
 ## Authority and state
 
-The maintainer approved implementation, conventional commit/push and startup of one Looper run on 2026-10-26. Merge delegation covers the exact 16 slice PRs into dev after their required checks. No slice has been delivered yet. This tracker owns task/commit/validation evidence; slice tickets mirror verified delivery state. Existing completed/blocked sets and unrelated tickets are not modified.
+The maintainer approved implementation, conventional commit/push and startup of one Looper run on 2026-10-26. Merge delegation covers the exact 16 slice PRs into dev after their required checks. Slice 1 is delivered through verified PR #438. This tracker owns task/commit/validation evidence; slice tickets mirror verified delivery state. Existing completed/blocked sets and unrelated tickets are not modified.
 
 ## Canonical slice map
 
@@ -46,12 +46,12 @@ The maintainer approved implementation, conventional commit/push and startup of 
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T1.1 | Reconcile every row of inventories A, B and C with its actual declaration and callers. Inventory all 14 large files, 11 duplicate pairs, seven dead symbols, eight error names, 23 unexplained errcheck suppressions, control flags and compatibility paths. Record false positives with evidence; do not equate metrics with defects. | implemented | bd6112b180b1445b139a2c43db34da2144075364 | 771 exact declaration/location matches; source call candidates recorded |
-| T1.2 | Propose and implement, only after tool approval, one small standard-library Go AST check alongside the existing signature-style check. Inspect production declarations, grouped and named parameters/results, function literals and interfaces without counting receivers as parameters. Require explicit outcomes for named aliases, variadics, build constraints and generated files; do not silently skip them. | implemented | 4d3a12f563035688fc6c10635bec1674cd826e08 | go test ./scripts/goquality; focused strict lint |
-| T1.3 | Capture an exact temporary debt manifest keyed by declaration identity and offending signature. Reject new or worsened violations, including moved or renamed declarations that do not retain explicit identity. Keep existing defect-oriented lint checks unfiltered; never apply a global new-from-merge-base filter. | implemented | 192edb3fe1ad5b107e058c30b2ca74f46f948380 | go run ./scripts/goquality |
-| T1.4 | Use a maximum of seven parameters initially, then six after Slice 11 and five at closure. Existing violations above the active ceiling may appear only as explicit, shrinking debt. Track all nonconforming result shapes and a separate exact external-interface exception list; do not exempt locally owned interfaces. | implemented | 8e787a9961db4ee9eb51b4984066dd9374ca291d | make check-go-style; ceiling 7; 532 exact debt entries; one external exception |
-| T1.5 | Exercise the checker with compact table-driven fixtures, including same-branch execution on dev, unchanged debt, new declarations, named results, aliases and stale exemptions. Establish the package dependency and naming ledger used by later moves; resolve shared-value ownership before a move can form an import cycle. | implemented | 7cf213f4ed4e10290feb4efdcfb8e477b291f46c | go test ./scripts/goquality; focused strict lint; production scan |
-| T1.6 | Validate this slice, update its ticket/tracker, produce its report, and verify integration into dev. | reviewing | 72c769c47790e2f502309e2646f7769b97419bba | Focused checks passed; final clean-HEAD controller validation and dev integration are separate evidence |
+| T1.1 | Reconcile every row of inventories A, B and C with its actual declaration and callers. Inventory all 14 large files, 11 duplicate pairs, seven dead symbols, eight error names, 23 unexplained errcheck suppressions, control flags and compatibility paths. Record false positives with evidence; do not equate metrics with defects. | delivered | bd6112b180b1445b139a2c43db34da2144075364 | 771 exact declaration/location matches; source call candidates recorded |
+| T1.2 | Propose and implement, only after tool approval, one small standard-library Go AST check alongside the existing signature-style check. Inspect production declarations, grouped and named parameters/results, function literals and interfaces without counting receivers as parameters. Require explicit outcomes for named aliases, variadics, build constraints and generated files; do not silently skip them. | delivered | 4d3a12f563035688fc6c10635bec1674cd826e08 | go test ./scripts/goquality; focused strict lint |
+| T1.3 | Capture an exact temporary debt manifest keyed by declaration identity and offending signature. Reject new or worsened violations, including moved or renamed declarations that do not retain explicit identity. Keep existing defect-oriented lint checks unfiltered; never apply a global new-from-merge-base filter. | delivered | 192edb3fe1ad5b107e058c30b2ca74f46f948380 | go run ./scripts/goquality |
+| T1.4 | Use a maximum of seven parameters initially, then six after Slice 11 and five at closure. Existing violations above the active ceiling may appear only as explicit, shrinking debt. Track all nonconforming result shapes and a separate exact external-interface exception list; do not exempt locally owned interfaces. | delivered | 8e787a9961db4ee9eb51b4984066dd9374ca291d | make check-go-style; ceiling 7; 532 exact debt entries; one external exception |
+| T1.5 | Exercise the checker with compact table-driven fixtures, including same-branch execution on dev, unchanged debt, new declarations, named results, aliases and stale exemptions. Establish the package dependency and naming ledger used by later moves; resolve shared-value ownership before a move can form an import cycle. | delivered | 7cf213f4ed4e10290feb4efdcfb8e477b291f46c | go test ./scripts/goquality; focused strict lint; production scan |
+| T1.6 | Validate this slice, update its ticket/tracker, produce its report, and verify integration into dev. | delivered | 72c769c47790e2f502309e2646f7769b97419bba | make verify; git diff --check passed on 0d609b0c590c7e23a184513393fa64ab8d394b67; PR #438 integrated |
 
 ### Slice 2: Shared boundary values and residual core helpers
 
@@ -223,7 +223,7 @@ The maintainer approved implementation, conventional commit/push and startup of 
 
 | Number | State | Ticket | PR | Integrated commit | Report |
 | --- | --- | --- | --- | --- | --- |
-| 1 | reviewing | TKT-20261026084821 | #438 | — | `ops/default/report/slices/code-quality-remediation/slice-1-policy.md` |
+| 1 | delivered | TKT-20261026084821 | #438 | 0d609b0c590c7e23a184513393fa64ab8d394b67 | `ops/default/report/slices/code-quality-remediation/slice-1-policy.md` |
 | 2 | pending | TKT-20261026084822 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-2-values.md` |
 | 3 | pending | TKT-20261026084823 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-3-storage.md` |
 | 4 | pending | TKT-20261026084824 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-4-commands.md` |
