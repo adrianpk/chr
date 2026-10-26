@@ -67,7 +67,7 @@ func (s service) PreviewWorkExtent(ctx context.Context, request core.WorkflowPre
 }
 
 func (s service) previewWorkTarget(config core.WorkspaceConfig, identity core.WorkflowPreviewTarget) (core.WorkflowPreviewTarget, error) {
-	run := core.WorkflowInvocation{Selection: core.WorkflowPreviewRequest{Target: identity}}
+	run := core.WorkflowInvocation{WorkflowInvocationInput: core.WorkflowInvocationInput{Selection: core.WorkflowPreviewRequest{Target: identity}}}
 
 	reader, ok := s.workflowIntegrationObserver(run).(core.WorkflowTargetReader)
 	if !ok {

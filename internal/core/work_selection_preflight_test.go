@@ -42,8 +42,8 @@ func TestAgentOperationLockBlocksConcurrentOperation(t *testing.T) {
 
 func TestWorkSelectionPreflightPrioritizesReviewRepair(t *testing.T) {
 	tickets := []IndexedTicket{
-		{Key: "CHR-2", Status: TicketStatusReadyForDev, ReviewState: "", ReviewResult: ""},
-		{Key: "CHR-1", Status: TicketStatusReadyForDev, ReviewState: "changes_requested", ReviewResult: "needs_changes"},
+		{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}, IndexedTicketReview: IndexedTicketReview{ReviewState: "", ReviewResult: ""}},
+		{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}, IndexedTicketReview: IndexedTicketReview{ReviewState: "changes_requested", ReviewResult: "needs_changes"}},
 	}
 
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
@@ -65,8 +65,8 @@ func TestWorkSelectionPreflightPrioritizesReviewRepair(t *testing.T) {
 
 func TestWorkSelectionPreflightBlocksLaterTicketWhenRepairPending(t *testing.T) {
 	tickets := []IndexedTicket{
-		{Key: "CHR-1", Status: TicketStatusReadyForDev, ReviewState: "changes_requested"},
-		{Key: "CHR-2", Status: TicketStatusReadyForDev},
+		{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}, IndexedTicketReview: IndexedTicketReview{ReviewState: "changes_requested"}},
+		{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}},
 	}
 
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
@@ -90,7 +90,7 @@ func TestWorkSelectionPreflightBlocksLaterTicketWhenRepairPending(t *testing.T) 
 func TestWorkSelectionPreflightBlocksWrongIntegrationBranch(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir:          t.TempDir(),
-		Tickets:             []IndexedTicket{{Key: "CHR-1", Status: TicketStatusReadyForDev}},
+		Tickets:             []IndexedTicket{{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}}},
 		RequireBranchPolicy: true,
 		Git: fakeWorkSelectionGit{
 			branch:      "feat/slice-7-serialized-work-preflight",
@@ -114,7 +114,7 @@ func TestWorkSelectionPreflightBlocksWrongIntegrationBranch(t *testing.T) {
 func TestWorkSelectionPreflightBlocksIntegrationBranchBehindRemote(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir:          t.TempDir(),
-		Tickets:             []IndexedTicket{{Key: "CHR-1", Status: TicketStatusReadyForDev}},
+		Tickets:             []IndexedTicket{{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}}},
 		RequireBranchPolicy: true,
 		Git: fakeWorkSelectionGit{
 			branch:      "dev",
@@ -138,7 +138,7 @@ func TestWorkSelectionPreflightBlocksIntegrationBranchBehindRemote(t *testing.T)
 func TestWorkSelectionPreflightAllowsConfiguredIntegrationBranch(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
-		Tickets:    []IndexedTicket{{Key: "CHR-1", Status: TicketStatusReadyForDev}},
+		Tickets:    []IndexedTicket{{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}}},
 		BranchPolicy: WorkBranchPolicy{
 			Mode:                  WorkBranchPolicyModeIntegrationBranch,
 			IntegrationBranch:     "develop",
@@ -164,7 +164,7 @@ func TestWorkSelectionPreflightAllowsConfiguredIntegrationBranch(t *testing.T) {
 func TestWorkSelectionPreflightBlocksConfiguredIntegrationBranchBehindRemote(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
-		Tickets:    []IndexedTicket{{Key: "CHR-1", Status: TicketStatusReadyForDev}},
+		Tickets:    []IndexedTicket{{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}}},
 		BranchPolicy: WorkBranchPolicy{
 			Mode:                  WorkBranchPolicyModeIntegrationBranch,
 			IntegrationBranch:     "develop",
@@ -194,7 +194,7 @@ func TestWorkSelectionPreflightBlocksConfiguredIntegrationBranchBehindRemote(t *
 func TestWorkSelectionPreflightCurrentBranchModeAllowsAnyCleanBranch(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
-		Tickets:    []IndexedTicket{{Key: "CHR-1", Status: TicketStatusReadyForDev}},
+		Tickets:    []IndexedTicket{{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}}},
 		BranchPolicy: WorkBranchPolicy{
 			Mode:                 WorkBranchPolicyModeCurrentBranch,
 			RequireCleanWorktree: true,
@@ -217,7 +217,7 @@ func TestWorkSelectionPreflightCurrentBranchModeAllowsAnyCleanBranch(t *testing.
 func TestWorkSelectionPreflightCurrentBranchModeRequiresCleanWorktree(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
-		Tickets:    []IndexedTicket{{Key: "CHR-1", Status: TicketStatusReadyForDev}},
+		Tickets:    []IndexedTicket{{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}}},
 		BranchPolicy: WorkBranchPolicy{
 			Mode:                 WorkBranchPolicyModeCurrentBranch,
 			RequireCleanWorktree: true,
@@ -243,7 +243,7 @@ func TestWorkSelectionPreflightCurrentBranchModeRequiresCleanWorktree(t *testing
 func TestWorkSelectionPreflightWorktreeModeAllowsDirtyUserCheckout(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
-		Tickets:    []IndexedTicket{{Key: "CHR-1", Status: TicketStatusReadyForDev}},
+		Tickets:    []IndexedTicket{{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}}},
 		BranchPolicy: WorkBranchPolicy{
 			Mode:                  WorkBranchPolicyModeIntegrationBranch,
 			IntegrationBranch:     "dev",
@@ -275,7 +275,7 @@ func TestWorkSelectionPreflightWorktreeModeAllowsDirtyUserCheckout(t *testing.T)
 func TestWorkSelectionPreflightNoGitEnforcementSkipsGitChecks(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
-		Tickets:    []IndexedTicket{{Key: "CHR-1", Status: TicketStatusReadyForDev}},
+		Tickets:    []IndexedTicket{{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}}},
 		BranchPolicy: WorkBranchPolicy{
 			Mode: WorkBranchPolicyModeNoGitEnforcement,
 		},
@@ -294,8 +294,8 @@ func TestWorkSelectionPreflightNoGitEnforcementKeepsReviewRepairOrdering(t *test
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
 		Tickets: []IndexedTicket{
-			{Key: "CHR-1", Status: TicketStatusReadyForDev, ReviewState: "changes_requested"},
-			{Key: "CHR-2", Status: TicketStatusReadyForDev},
+			{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}, IndexedTicketReview: IndexedTicketReview{ReviewState: "changes_requested"}},
+			{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}},
 		},
 		SelectedTicketKey: "CHR-2",
 		BranchPolicy: WorkBranchPolicy{

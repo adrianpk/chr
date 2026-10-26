@@ -52,11 +52,11 @@ func TestLoadTreeSearchContextDerivesTermsAndSearchesFiles(t *testing.T) {
 	ctx, err := LoadTreeSearchContext(TreeSearchContextOptions{
 		ProjectDir: dir,
 		Ticket: IndexedTicket{
-			Key:         "TODO-2",
-			Title:       "Complete task",
-			UseCase:     "todo list",
-			ProjectArea: "todo",
-			Tags:        []string{"backend"},
+			IndexedTicketIdentity: IndexedTicketIdentity{Key: "TODO-2"}, IndexedTicketSummary: IndexedTicketSummary{Title: "Complete task"}, IndexedTicketClassification: IndexedTicketClassification{
+				UseCase:     "todo list",
+				ProjectArea: "todo",
+				Tags:        []string{"backend"},
+			},
 		},
 		ValidationCommand: "go test ./...",
 		MaxSearchHits:     10,

@@ -175,7 +175,7 @@ func workflowUnpreparedTicket(content []byte) (IndexedTicket, error) {
 		return IndexedTicket{}, err
 	}
 
-	return IndexedTicket{Key: unquoteMetadataString(metadata["key"]), Status: unquoteMetadataString(metadata["status"]), UseCase: unquoteMetadataString(metadata["use_case"]), Priority: unquoteMetadataString(metadata["priority"]), Severity: unquoteMetadataString(metadata["severity"]), Type: unquoteMetadataString(metadata["type"]), ProjectArea: unquoteMetadataString(metadata["project_area"]), Tags: parseMetadataStringList(metadata["tags"]), CreatedAt: created, ContentHash: workflowHash(content)}, nil
+	return IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Key: unquoteMetadataString(metadata["key"])}, IndexedTicketClassification: IndexedTicketClassification{Status: unquoteMetadataString(metadata["status"]), UseCase: unquoteMetadataString(metadata["use_case"]), Priority: unquoteMetadataString(metadata["priority"]), Severity: unquoteMetadataString(metadata["severity"]), Type: unquoteMetadataString(metadata["type"]), ProjectArea: unquoteMetadataString(metadata["project_area"]), Tags: parseMetadataStringList(metadata["tags"])}, IndexedTicketTimes: IndexedTicketTimes{CreatedAt: created}, IndexedTicketProjection: IndexedTicketProjection{ContentHash: workflowHash(content)}}, nil
 }
 
 func (s *WorkflowStore) hashWorkflowEvidence(ctx context.Context, selection *workflowSelection) error {

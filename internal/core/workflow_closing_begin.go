@@ -77,7 +77,7 @@ func workflowClosingReservation(set WorkflowRecord) workflowInvocationFile {
 		count = len(set.Set.Closing.Attempts)
 	}
 
-	return workflowInvocationFile{WorkflowInvocation: WorkflowInvocation{WorkflowIdentity: WorkflowIdentity{ID: workflowClosingOwnerID(set)}, Attempts: make([]WorkflowAttempt, count)}}
+	return workflowInvocationFile{WorkflowInvocation: WorkflowInvocation{WorkflowIdentity: WorkflowIdentity{ID: workflowClosingOwnerID(set)}, WorkflowInvocationExecution: WorkflowInvocationExecution{Attempts: make([]WorkflowAttempt, count)}}}
 }
 
 func (s *WorkflowStore) prepareWorkflowClosing(ctx context.Context, set WorkflowRecord, request WorkflowSetClosureRequest, ports WorkflowFrontierPorts, worker *WorkflowClaim) (*workflowClosingClaim, error) {

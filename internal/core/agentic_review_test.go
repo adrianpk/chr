@@ -111,10 +111,11 @@ func testAgenticReviewContext(projectDir, ticketPath string, now time.Time) Agen
 
 func testAgenticReviewIndexedTicket(ticketPath string) IndexedTicket {
 	return IndexedTicket{
-		Key:    "CHR-1",
-		Title:  "Implement feature",
-		Status: TicketStatusReadyForReview,
-		Path:   ticketPath,
+		IndexedTicketIdentity: IndexedTicketIdentity{
+			Key: "CHR-1",
+
+			Path: ticketPath,
+		}, IndexedTicketSummary: IndexedTicketSummary{Title: "Implement feature"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForReview},
 	}
 }
 
@@ -165,10 +166,10 @@ func TestApplyAgenticReviewResultPassRequiresMergeHandoff(t *testing.T) {
 
 	_, err := ApplyAgenticReviewResult(context.Background(), ApplyAgenticReviewResultOptions{
 		Ticket: IndexedTicket{
-			Key:    "CHR-1",
-			Path:   ticketPath,
-			Status: TicketStatusReadyForReview,
-			Branch: "feat/chr-1",
+			IndexedTicketIdentity: IndexedTicketIdentity{
+				Key:  "CHR-1",
+				Path: ticketPath,
+			}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForReview}, IndexedTicketSource: IndexedTicketSource{Branch: "feat/chr-1"},
 		},
 		Artifact: agenticReviewArtifactForTest(AgenticReviewResult{
 			Decision: IntegrationReviewDecisionPass,
@@ -198,11 +199,10 @@ func TestApplyAgenticReviewResultPassMovesTicketToReadyForMerge(t *testing.T) {
 
 	_, err := ApplyAgenticReviewResult(context.Background(), ApplyAgenticReviewResultOptions{
 		Ticket: IndexedTicket{
-			Key:        "CHR-1",
-			Path:       ticketPath,
-			Status:     TicketStatusReadyForReview,
-			Branch:     "feat/chr-1",
-			ReviewRefs: []TicketReviewRef{ref},
+			IndexedTicketIdentity: IndexedTicketIdentity{
+				Key:  "CHR-1",
+				Path: ticketPath,
+			}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForReview}, IndexedTicketSource: IndexedTicketSource{Branch: "feat/chr-1"}, IndexedTicketReview: IndexedTicketReview{ReviewRefs: []TicketReviewRef{ref}},
 		},
 		Artifact: agenticReviewArtifactForTest(AgenticReviewResult{
 			Decision: IntegrationReviewDecisionPass,
@@ -236,10 +236,10 @@ func TestApplyAgenticReviewResultNeedsChangesMovesTicketToReadyForDev(t *testing
 
 	_, err := ApplyAgenticReviewResult(context.Background(), ApplyAgenticReviewResultOptions{
 		Ticket: IndexedTicket{
-			Key:    "CHR-1",
-			Path:   ticketPath,
-			Status: TicketStatusReadyForReview,
-			Branch: "feat/chr-1",
+			IndexedTicketIdentity: IndexedTicketIdentity{
+				Key:  "CHR-1",
+				Path: ticketPath,
+			}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForReview}, IndexedTicketSource: IndexedTicketSource{Branch: "feat/chr-1"},
 		},
 		Artifact: agenticReviewArtifactForTest(AgenticReviewResult{
 			Decision: IntegrationReviewDecisionNeedsChanges,

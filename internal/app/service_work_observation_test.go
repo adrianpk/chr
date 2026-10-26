@@ -33,16 +33,16 @@ func TestWorkObservationNative(t *testing.T) {
 // event cannot overwrite it. Completed results survive without phase events.
 func TestWorkObservationContexts(t *testing.T) {
 	at := time.Now().UTC()
-	tickets := map[string]core.IndexedTicket{"PRJ-1": {Key: "PRJ-1", Title: "First"}, "PRJ-2": {Key: "PRJ-2", Title: "Second"}}
+	tickets := map[string]core.IndexedTicket{"PRJ-1": {IndexedTicketIdentity: core.IndexedTicketIdentity{Key: "PRJ-1"}, IndexedTicketSummary: core.IndexedTicketSummary{Title: "First"}}, "PRJ-2": {IndexedTicketIdentity: core.IndexedTicketIdentity{Key: "PRJ-2"}, IndexedTicketSummary: core.IndexedTicketSummary{Title: "Second"}}}
 	records := map[string]core.WorkflowRecord{"PRJ-1": {Task: &core.WorkflowTask{Phase: "validating", AttemptID: "one"}}, "PRJ-2": {Task: &core.WorkflowTask{Phase: "working", AttemptID: "two"}}}
 	result := WorkObservation{}
 
 	for _, item := range []struct{ id, key, attempt string }{{"first", "PRJ-1", "one"}, {"second", "PRJ-2", "two"}} {
-		run := core.WorkflowInvocation{WorkflowIdentity: core.WorkflowIdentity{ID: item.id, UpdatedAt: at}, Status: "running", Attempts: []core.WorkflowAttempt{{ID: item.attempt, TaskKey: item.key, Outcome: "running", StartedAt: at, Processes: []core.WorkflowProcess{{State: "running", Command: []string{"go", "test"}}}}}}
+		run := core.WorkflowInvocation{WorkflowIdentity: core.WorkflowIdentity{ID: item.id, UpdatedAt: at}, WorkflowInvocationExecution: core.WorkflowInvocationExecution{Status: "running", Attempts: []core.WorkflowAttempt{{ID: item.attempt, TaskKey: item.key, Outcome: "running", StartedAt: at, Processes: []core.WorkflowProcess{{State: "running", Command: []string{"go", "test"}}}}}}}
 		appendNativeWork(&result, run, tickets, records)
 	}
 
-	completed := core.WorkflowInvocation{WorkflowIdentity: core.WorkflowIdentity{ID: "complete", UpdatedAt: at}, Status: "completed", Outcome: "task_validated", Cursor: 1, Members: []core.WorkflowMember{{Admission: core.WorkflowPreviewMember{Key: "PRJ-1"}}}}
+	completed := core.WorkflowInvocation{WorkflowIdentity: core.WorkflowIdentity{ID: "complete", UpdatedAt: at}, WorkflowInvocationExecution: core.WorkflowInvocationExecution{Status: "completed", Outcome: "task_validated", Cursor: 1}, WorkflowInvocationInput: core.WorkflowInvocationInput{Members: []core.WorkflowMember{{Admission: core.WorkflowPreviewMember{Key: "PRJ-1"}}}}}
 	appendNativeWork(&result, completed, tickets, records)
 
 	if len(result.Current) != 2 || result.Current[0].Phase != "validating" || result.Current[0].Message != "Running go" || result.Current[1].Phase != "working" || len(result.Results) != 1 || result.Results[0].Confirmed != 0 || result.Results[0].Phase != "task_validated" {
@@ -59,7 +59,7 @@ func TestWorkObservationLifecycle(t *testing.T) {
 	}{{"blocked", "blocked", false}, {"stopped", "paused", false}, {"cancelled", "cancelled", true}} {
 		t.Run(item.name, func(t *testing.T) {
 			result := WorkObservation{}
-			run := core.WorkflowInvocation{WorkflowIdentity: core.WorkflowIdentity{ID: item.name, UpdatedAt: time.Now().UTC()}, Status: item.status}
+			run := core.WorkflowInvocation{WorkflowIdentity: core.WorkflowIdentity{ID: item.name, UpdatedAt: time.Now().UTC()}, WorkflowInvocationExecution: core.WorkflowInvocationExecution{Status: item.status}}
 			appendNativeWork(&result, run, nil, nil)
 
 			contexts := result.Current

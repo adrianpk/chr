@@ -233,13 +233,14 @@ func writeMergeCommandTicket(t *testing.T) (IndexedTicket, string) {
 	}
 
 	indexed := IndexedTicket{
-		Key:          ticket.Key,
-		Path:         path,
-		Status:       ticket.Status,
-		Branch:       ticket.Branch,
-		ReviewState:  ticket.ReviewState,
-		ReviewResult: ticket.ReviewResult,
-		ReviewRefs:   ticket.ReviewRefs,
+		IndexedTicketIdentity: IndexedTicketIdentity{
+			Key:  ticket.Key,
+			Path: path,
+		}, IndexedTicketClassification: IndexedTicketClassification{Status: ticket.Status}, IndexedTicketSource: IndexedTicketSource{Branch: ticket.Branch}, IndexedTicketReview: IndexedTicketReview{
+			ReviewState:  ticket.ReviewState,
+			ReviewResult: ticket.ReviewResult,
+			ReviewRefs:   ticket.ReviewRefs,
+		},
 	}
 
 	return indexed, path

@@ -42,7 +42,7 @@ func (s service) nativeAgentWorkTarget(config core.WorkspaceConfig) (core.Workfl
 }
 
 func (s service) observeNativeAgentWorkTarget(config core.WorkspaceConfig, identity core.WorkflowPreviewTarget) (core.WorkflowPreviewTarget, error) {
-	run := core.WorkflowInvocation{Selection: core.WorkflowPreviewRequest{Target: identity}}
+	run := core.WorkflowInvocation{WorkflowInvocationInput: core.WorkflowInvocationInput{Selection: core.WorkflowPreviewRequest{Target: identity}}}
 
 	observer, ok := s.workflowIntegrationObserver(run).(core.WorkflowTargetGit)
 	if !ok {

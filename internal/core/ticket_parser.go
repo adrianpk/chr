@@ -209,42 +209,39 @@ func indexedTicketFromMetadata(
 	}
 
 	ticket := IndexedTicket{
-		ProjectID:         opts.ProjectID,
-		Path:              opts.Path,
-		RelativePath:      relativePath,
-		Key:               unquoteMetadataString(metadata["key"]),
-		Title:             unquoteMetadataString(metadata["title"]),
-		Assignee:          unquoteMetadataString(metadata["assignee"]),
-		Synopsis:          unquoteMetadataString(metadata["synopsis"]),
-		Status:            unquoteMetadataString(metadata["status"]),
-		Priority:          unquoteMetadataString(metadata["priority"]),
-		Severity:          unquoteMetadataString(metadata["severity"]),
-		Type:              unquoteMetadataString(metadata["type"]),
-		Tags:              parseMetadataStringList(metadata["tags"]),
-		UseCase:           unquoteMetadataString(metadata["use_case"]),
-		ProjectArea:       unquoteMetadataString(metadata["project_area"]),
-		SourceKind:        unquoteMetadataString(metadata["source_kind"]),
-		SourceRef:         unquoteMetadataString(metadata["source_ref"]),
-		Slice:             unquoteMetadataString(metadata["slice"]),
-		Branch:            unquoteMetadataString(metadata["branch"]),
-		ReviewRefs:        frontmatter.ReviewRefs,
-		ReviewState:       unquoteMetadataString(metadata["review_state"]),
-		ReviewRound:       reviewRound,
-		ReviewResult:      unquoteMetadataString(metadata["review_result"]),
-		ReviewCommentsURL: unquoteMetadataString(metadata["review_comments_url"]),
-		BlockingFindings:  parseMetadataStringList(metadata["blocking_findings"]),
-		MergeState:        unquoteMetadataString(metadata["merge_state"]),
-		MergeResult:       unquoteMetadataString(metadata["merge_result"]),
-		MergeActor:        unquoteMetadataString(metadata["merge_actor"]),
-		MergeCommit:       unquoteMetadataString(metadata["merge_commit"]),
-		MergedAt:          mergedAt,
-		MergeBlocker:      unquoteMetadataString(metadata["merge_blocker"]),
-		CreatedAt:         createdAt,
-		UpdatedAt:         updatedAt,
-		FileMTime:         info.ModTime().UTC(),
-		FileSize:          info.Size(),
-		ContentHash:       contentHash(content),
-		IndexedAt:         opts.IndexedAt.UTC(),
+		IndexedTicketIdentity: IndexedTicketIdentity{
+			ProjectID:    opts.ProjectID,
+			Path:         opts.Path,
+			RelativePath: relativePath,
+			Key:          unquoteMetadataString(metadata["key"]),
+		}, IndexedTicketSummary: indexedTicketSummaryFromMetadata(metadata), IndexedTicketClassification: indexedTicketClassificationFromMetadata(metadata), IndexedTicketSource: IndexedTicketSource{
+			SourceKind: unquoteMetadataString(metadata["source_kind"]),
+			SourceRef:  unquoteMetadataString(metadata["source_ref"]),
+			Slice:      unquoteMetadataString(metadata["slice"]),
+			Branch:     unquoteMetadataString(metadata["branch"]),
+		}, IndexedTicketReview: IndexedTicketReview{
+			ReviewRefs:        frontmatter.ReviewRefs,
+			ReviewState:       unquoteMetadataString(metadata["review_state"]),
+			ReviewRound:       reviewRound,
+			ReviewResult:      unquoteMetadataString(metadata["review_result"]),
+			ReviewCommentsURL: unquoteMetadataString(metadata["review_comments_url"]),
+			BlockingFindings:  parseMetadataStringList(metadata["blocking_findings"]),
+		}, IndexedTicketMerge: IndexedTicketMerge{
+			MergeState:   unquoteMetadataString(metadata["merge_state"]),
+			MergeResult:  unquoteMetadataString(metadata["merge_result"]),
+			MergeActor:   unquoteMetadataString(metadata["merge_actor"]),
+			MergeCommit:  unquoteMetadataString(metadata["merge_commit"]),
+			MergedAt:     mergedAt,
+			MergeBlocker: unquoteMetadataString(metadata["merge_blocker"]),
+		}, IndexedTicketTimes: IndexedTicketTimes{
+			CreatedAt: createdAt,
+			UpdatedAt: updatedAt,
+		}, IndexedTicketProjection: IndexedTicketProjection{
+			FileMTime:   info.ModTime().UTC(),
+			FileSize:    info.Size(),
+			ContentHash: contentHash(content),
+			IndexedAt:   opts.IndexedAt.UTC(),
+		},
 	}
 
 	ticket.BoardColumn, _ = BoardTicketStatusFor(ticket.Status)
@@ -369,4 +366,24 @@ func contentHash(content []byte) string {
 	sum := sha256.Sum256(content)
 
 	return hex.EncodeToString(sum[:])
+}
+
+func indexedTicketSummaryFromMetadata(metadata map[string]string) IndexedTicketSummary {
+	return IndexedTicketSummary{
+		Title:    unquoteMetadataString(metadata["title"]),
+		Assignee: unquoteMetadataString(metadata["assignee"]),
+		Synopsis: unquoteMetadataString(metadata["synopsis"]),
+	}
+}
+
+func indexedTicketClassificationFromMetadata(metadata map[string]string) IndexedTicketClassification {
+	return IndexedTicketClassification{
+		Status:      unquoteMetadataString(metadata["status"]),
+		Priority:    unquoteMetadataString(metadata["priority"]),
+		Severity:    unquoteMetadataString(metadata["severity"]),
+		Type:        unquoteMetadataString(metadata["type"]),
+		Tags:        parseMetadataStringList(metadata["tags"]),
+		UseCase:     unquoteMetadataString(metadata["use_case"]),
+		ProjectArea: unquoteMetadataString(metadata["project_area"]),
+	}
 }

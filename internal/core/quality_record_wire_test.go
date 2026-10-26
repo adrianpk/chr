@@ -27,6 +27,7 @@ func TestQualityRecordWire(t *testing.T) {
 
 func assertRecordWire(t *testing.T, name, mode string, factory func() any) {
 	t.Helper()
+
 	data, err := os.ReadFile("testdata/quality-records/" + name + "-" + mode + ".json")
 	if err != nil {
 		t.Fatal(err)

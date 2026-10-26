@@ -28,43 +28,88 @@ type WorkflowWorkEvidence struct {
 
 // WorkflowWorkStatus distinguishes host task validation from confirmed delivery.
 type WorkflowWorkStatus struct {
-	WorkTitle            string                               `json:"work_title,omitempty"`
-	HarnessBinding       *core.HarnessBinding                 `json:"harness_binding,omitempty"`
-	ControlReceipt       *core.WorkflowControlResult          `json:"control_receipt,omitempty"`
-	Integration          *WorkflowIntegrationStatus           `json:"integration,omitempty"`
+	WorkTitle string `json:"work_title,omitempty"`
+	WorkflowWorkBindings
+	Integration *WorkflowIntegrationStatus `json:"integration,omitempty"`
+	WorkflowWorkLifecycle
+	core.WorkflowIdentity
+	WorkflowWorkSelection
+	WorkflowWorkOutcome
+	WorkflowWorkScope
+	WorkflowWorkCounts
+	WorkflowWorkControl
+	WorkflowWorkDelivery
+	WorkflowWorkPage
+}
+
+// WorkflowWorkBindings groups the retained bindings fields without changing their wire order.
+type WorkflowWorkBindings struct {
+	HarnessBinding *core.HarnessBinding        `json:"harness_binding,omitempty"`
+	ControlReceipt *core.WorkflowControlResult `json:"control_receipt,omitempty"`
+}
+
+// WorkflowWorkLifecycle groups the retained lifecycle fields without changing their wire order.
+type WorkflowWorkLifecycle struct {
 	FrozenPolicy         core.WorkflowExecutionPolicy         `json:"execution_policy"`
 	Continuation         *core.WorkflowContinuationCheckpoint `json:"continuation,omitempty"`
 	NextActionOwner      string                               `json:"next_action_owner"`
 	CapacityResumeStatus string                               `json:"capacity_resume_status,omitempty"`
 	SelectedTicket       string                               `json:"selected_ticket,omitempty"`
 	SelectedSlice        string                               `json:"selected_slice,omitempty"`
-	core.WorkflowIdentity
-	Selector         core.WorkflowSelector            `json:"selector"`
-	Authority        string                           `json:"authority"`
-	Status           string                           `json:"status"`
-	Outcome          string                           `json:"outcome"`
-	Target           core.WorkflowPreviewTarget       `json:"target"`
-	Policy           core.WorkflowReviewPolicy        `json:"publication_policy"`
-	SetOrderRule     string                           `json:"set_order_rule"`
-	Excluded         map[string]int                   `json:"excluded"`
-	Total            int                              `json:"total_members"`
-	ValidatedTasks   int                              `json:"validated_tasks"`
-	ConfirmedTickets int                              `json:"confirmed_tickets"`
-	IntegratedUnits  int                              `json:"integrated_units"`
-	Remaining        int                              `json:"remaining_tickets"`
-	StopIntent       string                           `json:"stop_intent"`
-	Blocker          *core.WorkflowBlocker            `json:"blocker,omitempty"`
-	CandidateRef     string                           `json:"candidate_ref,omitempty"`
-	CandidateHash    string                           `json:"candidate_hash,omitempty"`
-	ApprovalHash     string                           `json:"approval_hash,omitempty"`
-	ReviewState      string                           `json:"review_state,omitempty"`
-	PullRequest      *core.WorkflowPullRequestBinding `json:"pull_request,omitempty"`
-	DeliveryRef      string                           `json:"delivery_ref,omitempty"`
-	DeliveryHash     string                           `json:"delivery_hash,omitempty"`
-	Members          []core.WorkflowPreviewMember     `json:"members"`
-	Evidence         []WorkflowWorkEvidence           `json:"recent_evidence"`
-	TotalAttempts    int                              `json:"total_attempts"`
-	NextOffset       int                              `json:"next_offset"`
+}
+
+// WorkflowWorkSelection groups the retained selection fields without changing their wire order.
+type WorkflowWorkSelection struct {
+	Selector  core.WorkflowSelector `json:"selector"`
+	Authority string                `json:"authority"`
+}
+
+// WorkflowWorkOutcome groups the retained outcome fields without changing their wire order.
+type WorkflowWorkOutcome struct {
+	Status  string `json:"status"`
+	Outcome string `json:"outcome"`
+}
+
+// WorkflowWorkScope groups the retained scope fields without changing their wire order.
+type WorkflowWorkScope struct {
+	Target       core.WorkflowPreviewTarget `json:"target"`
+	Policy       core.WorkflowReviewPolicy  `json:"publication_policy"`
+	SetOrderRule string                     `json:"set_order_rule"`
+	Excluded     map[string]int             `json:"excluded"`
+}
+
+// WorkflowWorkCounts groups the retained counts fields without changing their wire order.
+type WorkflowWorkCounts struct {
+	Total            int `json:"total_members"`
+	ValidatedTasks   int `json:"validated_tasks"`
+	ConfirmedTickets int `json:"confirmed_tickets"`
+	IntegratedUnits  int `json:"integrated_units"`
+	Remaining        int `json:"remaining_tickets"`
+}
+
+// WorkflowWorkControl groups the retained control fields without changing their wire order.
+type WorkflowWorkControl struct {
+	StopIntent string                `json:"stop_intent"`
+	Blocker    *core.WorkflowBlocker `json:"blocker,omitempty"`
+}
+
+// WorkflowWorkDelivery groups the retained delivery fields without changing their wire order.
+type WorkflowWorkDelivery struct {
+	CandidateRef  string                           `json:"candidate_ref,omitempty"`
+	CandidateHash string                           `json:"candidate_hash,omitempty"`
+	ApprovalHash  string                           `json:"approval_hash,omitempty"`
+	ReviewState   string                           `json:"review_state,omitempty"`
+	PullRequest   *core.WorkflowPullRequestBinding `json:"pull_request,omitempty"`
+	DeliveryRef   string                           `json:"delivery_ref,omitempty"`
+	DeliveryHash  string                           `json:"delivery_hash,omitempty"`
+}
+
+// WorkflowWorkPage groups the retained page fields without changing their wire order.
+type WorkflowWorkPage struct {
+	Members       []core.WorkflowPreviewMember `json:"members"`
+	Evidence      []WorkflowWorkEvidence       `json:"recent_evidence"`
+	TotalAttempts int                          `json:"total_attempts"`
+	NextOffset    int                          `json:"next_offset"`
 }
 
 // WorkflowStatus is read-only, including when a transition needs reconciliation.
@@ -93,7 +138,7 @@ func (s service) WorkflowStatus(ctx context.Context, id string, request Workflow
 func workflowWorkStatus(inspection core.WorkflowInspection, request WorkflowStatusRequest) WorkflowWorkStatus {
 	run := inspection.Invocation
 
-	result := WorkflowWorkStatus{WorkflowIdentity: run.WorkflowIdentity, Selector: run.Selection.Selector, Authority: run.Authority, Status: run.Status, Outcome: run.Outcome, Target: run.Selection.Target, Policy: inspection.Policy, SetOrderRule: run.SetOrderRule, Excluded: maps.Clone(run.Excluded), Total: len(run.Members), ValidatedTasks: run.Cursor, ConfirmedTickets: run.ConfirmedCursor, IntegratedUnits: len(run.Deliveries), Remaining: len(run.Members) - run.ConfirmedCursor, StopIntent: run.StopIntent, Blocker: run.Blocker, CandidateRef: run.CandidateRef, CandidateHash: run.CandidateHash, PullRequest: run.PullRequest, DeliveryRef: run.DeliveryRef, DeliveryHash: run.DeliveryHash, Members: []core.WorkflowPreviewMember{}, Evidence: []WorkflowWorkEvidence{}, TotalAttempts: len(run.Attempts), NextOffset: -1}
+	result := WorkflowWorkStatus{WorkflowIdentity: run.WorkflowIdentity, WorkflowWorkSelection: WorkflowWorkSelection{Selector: run.Selection.Selector, Authority: run.Authority}, WorkflowWorkOutcome: WorkflowWorkOutcome{Status: run.Status, Outcome: run.Outcome}, WorkflowWorkScope: WorkflowWorkScope{Target: run.Selection.Target, Policy: inspection.Policy, SetOrderRule: run.SetOrderRule, Excluded: maps.Clone(run.Excluded)}, WorkflowWorkCounts: WorkflowWorkCounts{Total: len(run.Members), ValidatedTasks: run.Cursor, ConfirmedTickets: run.ConfirmedCursor, IntegratedUnits: len(run.Deliveries), Remaining: len(run.Members) - run.ConfirmedCursor}, WorkflowWorkControl: WorkflowWorkControl{StopIntent: run.StopIntent, Blocker: run.Blocker}, WorkflowWorkDelivery: WorkflowWorkDelivery{CandidateRef: run.CandidateRef, CandidateHash: run.CandidateHash, PullRequest: run.PullRequest, DeliveryRef: run.DeliveryRef, DeliveryHash: run.DeliveryHash}, WorkflowWorkPage: WorkflowWorkPage{Members: []core.WorkflowPreviewMember{}, Evidence: []WorkflowWorkEvidence{}, TotalAttempts: len(run.Attempts), NextOffset: -1}}
 
 	for _, record := range inspection.Tasks {
 		if record.Task != nil && run.Selection.Selector.Extent == "ticket" && record.Task.Key == run.Selection.Selector.Identity {

@@ -19,7 +19,7 @@ func (s service) CloseWorkflowSet(ctx context.Context, request core.WorkflowSetC
 		return core.WorkflowSetClosureResult{}, err
 	}
 
-	observer := s.workflowIntegrationObserver(core.WorkflowInvocation{Selection: core.WorkflowPreviewRequest{Target: core.WorkflowPreviewTarget{Repository: request.Repository}}})
+	observer := s.workflowIntegrationObserver(core.WorkflowInvocation{WorkflowInvocationInput: core.WorkflowInvocationInput{Selection: core.WorkflowPreviewRequest{Target: core.WorkflowPreviewTarget{Repository: request.Repository}}}})
 
 	target, ok := observer.(core.WorkflowTargetGit)
 	if !ok {

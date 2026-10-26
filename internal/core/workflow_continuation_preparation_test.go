@@ -21,7 +21,7 @@ func TestWorkflowPreparationRetryAuthority(t *testing.T) {
 		{"legacy", func(run *WorkflowInvocation, _ *WorkflowContinuationRequest) { run.Integration = nil }, false},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			run := WorkflowInvocation{Status: "blocked", Outcome: "integration_preparation_failed", Integration: &WorkflowIntegrationBinding{}, Preparation: &WorkflowPreparationBinding{State: "stale"}, Attempts: []WorkflowAttempt{{Purpose: workflowIntegrationValidationPurpose, Outcome: "interrupted"}}}
+			run := WorkflowInvocation{WorkflowInvocationExecution: WorkflowInvocationExecution{Status: "blocked", Outcome: "integration_preparation_failed", Attempts: []WorkflowAttempt{{Purpose: workflowIntegrationValidationPurpose, Outcome: "interrupted"}}}, WorkflowInvocationIntegration: WorkflowInvocationIntegration{Integration: &WorkflowIntegrationBinding{}}, WorkflowInvocationPreparation: WorkflowInvocationPreparation{Preparation: &WorkflowPreparationBinding{State: "stale"}}}
 			request := WorkflowContinuationRequest{ExpectedRevision: 1}
 			test.change(&run, &request)
 

@@ -15,17 +15,19 @@ func nativeMergerInput(t *testing.T) (*WorkflowStore, WorkflowMergerInput, time.
 	store := workflowTestStore(t)
 	now := time.Now().UTC()
 	input := WorkflowMergerInput{
-		ProtocolVersion: 1, ID: "merger-attempt-1", InvocationID: "native-run-1",
-		EntryID: workflowHash([]byte("entry")), Unit: WorkflowRef{Kind: "slice", ID: "slice-1"},
-		CandidateRevision: 2, CandidateHash: workflowHash([]byte("candidate")), ClaimGeneration: 3,
-		ScopeHash: workflowHash([]byte("scope")), Reason: "preparation_conflict",
-		Repository: "https://forge.example.test/testing/native", SourceRef: "refs/heads/chr/work/source", TargetRef: "refs/heads/dev",
-		Source: strings.Repeat("1", 40), Base: strings.Repeat("2", 40), Method: "merge",
-		OwnedWorkspaceID: workflowHash([]byte("owned-checkout")),
-		AllowedPaths:     []string{"src", "docs"}, ProtectedPaths: []string{"src/validation.go", "Makefile"},
-		ValidationCommands:    [][]string{{"go", "test", "./..."}},
-		CapacityReservationID: "worker-slot-1", BudgetReservationID: "merger-call-1",
-		RemainingAttempts: 3, WorkerTimeoutSeconds: 120, AdmittedAt: now, Deadline: now.Add(time.Minute),
+		WorkflowMergerIdentity: WorkflowMergerIdentity{
+			ProtocolVersion: 1, ID: "merger-attempt-1", InvocationID: "native-run-1",
+			EntryID: workflowHash([]byte("entry")), Unit: WorkflowRef{Kind: "slice", ID: "slice-1"},
+			CandidateRevision: 2, CandidateHash: workflowHash([]byte("candidate")), ClaimGeneration: 3,
+			ScopeHash: workflowHash([]byte("scope")), Reason: "preparation_conflict",
+		}, WorkflowMergerGit: WorkflowMergerGit{
+			Repository: "https://forge.example.test/testing/native", SourceRef: "refs/heads/chr/work/source", TargetRef: "refs/heads/dev",
+			Source: strings.Repeat("1", 40), Base: strings.Repeat("2", 40), Method: "merge",
+			OwnedWorkspaceID: workflowHash([]byte("owned-checkout")),
+		}, WorkflowMergerScope: WorkflowMergerScope{AllowedPaths: []string{"src", "docs"}, ProtectedPaths: []string{"src/validation.go", "Makefile"}}, WorkflowMergerValidation: WorkflowMergerValidation{ValidationCommands: [][]string{{"go", "test", "./..."}}}, WorkflowMergerLimits: WorkflowMergerLimits{
+			CapacityReservationID: "worker-slot-1", BudgetReservationID: "merger-call-1",
+			RemainingAttempts: 3, WorkerTimeoutSeconds: 120, AdmittedAt: now, Deadline: now.Add(time.Minute),
+		},
 	}
 	manifest := WorkflowNativeSourceManifest{Schema: "chr-native-source/v1", Repository: input.Repository, SourceRef: input.SourceRef, OriginalSource: input.Source, Commits: []string{input.Source}}
 	input.SourceManifestRef = retainNativeRecordEvidence(t, store, input.InvocationID, "merger-source", manifest)

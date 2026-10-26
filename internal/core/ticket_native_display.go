@@ -26,9 +26,14 @@ func workflowPlainTicketDisplay(record WorkflowRecord) (IndexedTicket, error) {
 	}
 
 	return IndexedTicket{
-		Title: display.Title, Synopsis: display.Synopsis, Priority: display.Priority,
-		Assignee: display.Assignee,
-		Severity: display.Severity, Type: display.Type, Tags: display.Tags,
-		Branch: display.Branch, ProjectArea: display.ProjectArea, SourceKind: display.SourceKind, SourceRef: display.SourceRef,
+		IndexedTicketSummary: IndexedTicketSummary{
+			Title: display.Title, Synopsis: display.Synopsis,
+			Assignee: display.Assignee,
+		}, IndexedTicketClassification: IndexedTicketClassification{
+			Priority: display.Priority,
+
+			Severity: display.Severity, Type: display.Type, Tags: display.Tags,
+			ProjectArea: display.ProjectArea,
+		}, IndexedTicketSource: IndexedTicketSource{Branch: display.Branch, SourceKind: display.SourceKind, SourceRef: display.SourceRef},
 	}, nil
 }

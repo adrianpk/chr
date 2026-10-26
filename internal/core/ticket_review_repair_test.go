@@ -9,39 +9,39 @@ func TestTicketReviewRepairCountUsesReviewRound(t *testing.T) {
 		want   int
 	}{
 		{
-			name: "not repair",
-			ticket: IndexedTicket{
-				Status:      TicketStatusReadyForDev,
-				ReviewRound: 3,
-			},
-			want: 0,
+			name:   "not repair",
+			ticket: IndexedTicket{IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}, IndexedTicketReview: IndexedTicketReview{ReviewRound: 3}},
+			want:   0,
 		},
 		{
 			name: "initial changes request",
 			ticket: IndexedTicket{
-				Status:       TicketStatusReadyForDev,
-				ReviewState:  "changes_requested",
-				ReviewResult: "needs_changes",
-				ReviewRound:  1,
+				IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}, IndexedTicketReview: IndexedTicketReview{
+					ReviewState:  "changes_requested",
+					ReviewResult: "needs_changes",
+					ReviewRound:  1,
+				},
 			},
 			want: 0,
 		},
 		{
 			name: "one repair consumed",
 			ticket: IndexedTicket{
-				Status:       TicketStatusReadyForDev,
-				ReviewState:  "changes_requested",
-				ReviewResult: "needs_changes",
-				ReviewRound:  2,
+				IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}, IndexedTicketReview: IndexedTicketReview{
+					ReviewState:  "changes_requested",
+					ReviewResult: "needs_changes",
+					ReviewRound:  2,
+				},
 			},
 			want: 1,
 		},
 		{
 			name: "zero review round is defensive",
 			ticket: IndexedTicket{
-				Status:       TicketStatusReadyForDev,
-				ReviewState:  "changes_requested",
-				ReviewResult: "needs_changes",
+				IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}, IndexedTicketReview: IndexedTicketReview{
+					ReviewState:  "changes_requested",
+					ReviewResult: "needs_changes",
+				},
 			},
 			want: 0,
 		},
@@ -58,10 +58,11 @@ func TestTicketReviewRepairCountUsesReviewRound(t *testing.T) {
 
 func TestTicketReviewRepairAllowedUsesLimit(t *testing.T) {
 	ticket := IndexedTicket{
-		Status:       TicketStatusReadyForDev,
-		ReviewState:  "changes_requested",
-		ReviewResult: "needs_changes",
-		ReviewRound:  1,
+		IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}, IndexedTicketReview: IndexedTicketReview{
+			ReviewState:  "changes_requested",
+			ReviewResult: "needs_changes",
+			ReviewRound:  1,
+		},
 	}
 
 	if !TicketReviewRepairAllowed(ticket, DefaultTicketReviewRepairLimit) {

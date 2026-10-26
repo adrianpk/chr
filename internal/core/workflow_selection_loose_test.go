@@ -110,7 +110,7 @@ func TestWorkflowSelectionLooseFilters(t *testing.T) {
 func TestWorkflowSelectionNativeTies(t *testing.T) {
 	known := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 	later := known.Add(time.Hour)
-	tickets := []IndexedTicket{{Key: "PRJ-10", Priority: "high", Severity: "normal", CreatedAt: &known}, {Key: "PRJ-2", Priority: "high", Severity: "normal", CreatedAt: &known}, {Key: "PRJ-1", Priority: "high", Severity: "critical", CreatedAt: &later}, {Key: "PRJ-3", Priority: "high", Severity: "normal"}, {Key: "PRJ-4"}}
+	tickets := []IndexedTicket{{IndexedTicketIdentity: IndexedTicketIdentity{Key: "PRJ-10"}, IndexedTicketClassification: IndexedTicketClassification{Priority: "high", Severity: "normal"}, IndexedTicketTimes: IndexedTicketTimes{CreatedAt: &known}}, {IndexedTicketIdentity: IndexedTicketIdentity{Key: "PRJ-2"}, IndexedTicketClassification: IndexedTicketClassification{Priority: "high", Severity: "normal"}, IndexedTicketTimes: IndexedTicketTimes{CreatedAt: &known}}, {IndexedTicketIdentity: IndexedTicketIdentity{Key: "PRJ-1"}, IndexedTicketClassification: IndexedTicketClassification{Priority: "high", Severity: "critical"}, IndexedTicketTimes: IndexedTicketTimes{CreatedAt: &later}}, {IndexedTicketIdentity: IndexedTicketIdentity{Key: "PRJ-3"}, IndexedTicketClassification: IndexedTicketClassification{Priority: "high", Severity: "normal"}}, {IndexedTicketIdentity: IndexedTicketIdentity{Key: "PRJ-4"}}}
 	slices.SortFunc(tickets, TicketLoopOrderPrioritySeverity.compare)
 
 	expected := []string{"PRJ-1", "PRJ-2", "PRJ-10", "PRJ-3", "PRJ-4"}

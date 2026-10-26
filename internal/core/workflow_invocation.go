@@ -81,54 +81,104 @@ type WorkflowAttempt struct {
 
 // WorkflowInvocation is the public durable checkpoint, not an execution token.
 type WorkflowInvocation struct {
-	HarnessBinding     *HarnessBinding                   `json:"harness_binding,omitempty"`
-	Admission          *WorkflowAdmissionGuard           `json:"admission_guard,omitempty"`
+	WorkflowInvocationAdmission
+	WorkflowInvocationIntegration
+	WorkflowInvocationScope
+	WorkflowInvocationProgress
+	WorkflowIdentity
+	WorkflowInvocationInput
+	WorkflowInvocationExecution
+	WorkflowInvocationCandidate
+	WorkflowInvocationDelivery
+	WorkflowInvocationReview
+	WorkflowInvocationPreparation
+	Submission *WorkflowSubmissionBinding `json:"submission_binding,omitempty"`
+}
+
+// WorkflowInvocationAdmission groups the retained admission fields without changing their wire order.
+type WorkflowInvocationAdmission struct {
+	HarnessBinding *HarnessBinding         `json:"harness_binding,omitempty"`
+	Admission      *WorkflowAdmissionGuard `json:"admission_guard,omitempty"`
+}
+
+// WorkflowInvocationIntegration groups the retained integration fields without changing their wire order.
+type WorkflowInvocationIntegration struct {
 	IntegrationBudget  *WorkflowIntegrationBudgetBinding `json:"integration_budget,omitempty"`
 	Integration        *WorkflowIntegrationBinding       `json:"integration_binding,omitempty"`
 	IntegrationEntries []WorkflowIntegrationBinding      `json:"integration_entries,omitempty"`
-	DependencyTargets  []WorkflowDependencyTarget        `json:"dependency_targets,omitempty"`
-	LooseQueue         *WorkflowLooseQueue               `json:"loose_queue,omitempty"`
-	Closures           []WorkflowInvocationClosure       `json:"set_closures,omitempty"`
-	ClosingSet         string                            `json:"closing_set,omitempty"`
-	ExecutionTarget    *WorkflowPreviewTarget            `json:"execution_target,omitempty"`
-	ConfirmedCursor    int                               `json:"confirmed_cursor,omitempty"`
-	Deliveries         []WorkflowUnitDelivery            `json:"integrated_units,omitempty"`
-	Continuation       *WorkflowContinuationCheckpoint   `json:"continuation_checkpoint,omitempty"`
-	WorkflowIdentity
-	Schema               string                          `json:"schema"`
-	RequestKey           string                          `json:"request_key"`
-	RequestHash          string                          `json:"request_hash"`
-	Authority            string                          `json:"authority"`
-	Selection            WorkflowPreviewRequest          `json:"selection"`
-	Policy               WorkflowExecutionPolicy         `json:"policy"`
-	SetOrderRule         string                          `json:"set_order_rule"`
-	Members              []WorkflowMember                `json:"members"`
-	SetImages            []WorkflowInputImage            `json:"set_images"`
-	Excluded             map[string]int                  `json:"excluded"`
-	Cursor               int                             `json:"cursor"`
-	Status               string                          `json:"status"`
-	Outcome              string                          `json:"outcome"`
-	Attempts             []WorkflowAttempt               `json:"attempts"`
-	Blocker              *WorkflowBlocker                `json:"blocker,omitempty"`
-	Lane                 *WorkflowLane                   `json:"lane,omitempty"`
-	StopIntent           string                          `json:"stop_intent"`
-	ResumeStatus         string                          `json:"resume_status"`
-	CapacityResumeStatus string                          `json:"capacity_resume_status,omitempty"`
-	CandidateRef         string                          `json:"candidate_ref"`
-	CandidateHash        string                          `json:"candidate_hash"`
-	PullRequest          *WorkflowPullRequestBinding     `json:"pull_request_binding,omitempty"`
-	DeliveryProofRef     string                          `json:"delivery_proof_ref"`
-	DeliveryProofHash    string                          `json:"delivery_proof_hash"`
-	DeliveryRef          string                          `json:"delivery_ref"`
-	DeliveryHash         string                          `json:"delivery_hash"`
-	ReviewRestriction    ReviewWorkflowMode              `json:"review_restriction,omitempty"`
-	Review               *WorkflowReviewBinding          `json:"review_binding,omitempty"`
-	ReviewCount          int                             `json:"review_count,omitempty"`
-	ReviewRepairs        []WorkflowReviewRepairBudget    `json:"review_repairs,omitempty"`
-	Preparation          *WorkflowPreparationBinding     `json:"preparation_binding,omitempty"`
-	CandidateRepair      *WorkflowCandidateRepairBinding `json:"candidate_repair,omitempty"`
-	PreparationCount     int                             `json:"preparation_count,omitempty"`
-	Submission           *WorkflowSubmissionBinding      `json:"submission_binding,omitempty"`
+}
+
+// WorkflowInvocationScope groups the retained scope fields without changing their wire order.
+type WorkflowInvocationScope struct {
+	DependencyTargets []WorkflowDependencyTarget  `json:"dependency_targets,omitempty"`
+	LooseQueue        *WorkflowLooseQueue         `json:"loose_queue,omitempty"`
+	Closures          []WorkflowInvocationClosure `json:"set_closures,omitempty"`
+	ClosingSet        string                      `json:"closing_set,omitempty"`
+	ExecutionTarget   *WorkflowPreviewTarget      `json:"execution_target,omitempty"`
+}
+
+// WorkflowInvocationProgress groups the retained progress fields without changing their wire order.
+type WorkflowInvocationProgress struct {
+	ConfirmedCursor int                             `json:"confirmed_cursor,omitempty"`
+	Deliveries      []WorkflowUnitDelivery          `json:"integrated_units,omitempty"`
+	Continuation    *WorkflowContinuationCheckpoint `json:"continuation_checkpoint,omitempty"`
+}
+
+// WorkflowInvocationInput groups the retained input fields without changing their wire order.
+type WorkflowInvocationInput struct {
+	Schema       string                  `json:"schema"`
+	RequestKey   string                  `json:"request_key"`
+	RequestHash  string                  `json:"request_hash"`
+	Authority    string                  `json:"authority"`
+	Selection    WorkflowPreviewRequest  `json:"selection"`
+	Policy       WorkflowExecutionPolicy `json:"policy"`
+	SetOrderRule string                  `json:"set_order_rule"`
+	Members      []WorkflowMember        `json:"members"`
+	SetImages    []WorkflowInputImage    `json:"set_images"`
+	Excluded     map[string]int          `json:"excluded"`
+}
+
+// WorkflowInvocationExecution groups the retained execution fields without changing their wire order.
+type WorkflowInvocationExecution struct {
+	Cursor               int               `json:"cursor"`
+	Status               string            `json:"status"`
+	Outcome              string            `json:"outcome"`
+	Attempts             []WorkflowAttempt `json:"attempts"`
+	Blocker              *WorkflowBlocker  `json:"blocker,omitempty"`
+	Lane                 *WorkflowLane     `json:"lane,omitempty"`
+	StopIntent           string            `json:"stop_intent"`
+	ResumeStatus         string            `json:"resume_status"`
+	CapacityResumeStatus string            `json:"capacity_resume_status,omitempty"`
+}
+
+// WorkflowInvocationCandidate groups the retained candidate fields without changing their wire order.
+type WorkflowInvocationCandidate struct {
+	CandidateRef  string `json:"candidate_ref"`
+	CandidateHash string `json:"candidate_hash"`
+}
+
+// WorkflowInvocationDelivery groups the retained delivery fields without changing their wire order.
+type WorkflowInvocationDelivery struct {
+	PullRequest       *WorkflowPullRequestBinding `json:"pull_request_binding,omitempty"`
+	DeliveryProofRef  string                      `json:"delivery_proof_ref"`
+	DeliveryProofHash string                      `json:"delivery_proof_hash"`
+	DeliveryRef       string                      `json:"delivery_ref"`
+	DeliveryHash      string                      `json:"delivery_hash"`
+}
+
+// WorkflowInvocationReview groups the retained review fields without changing their wire order.
+type WorkflowInvocationReview struct {
+	ReviewRestriction ReviewWorkflowMode           `json:"review_restriction,omitempty"`
+	Review            *WorkflowReviewBinding       `json:"review_binding,omitempty"`
+	ReviewCount       int                          `json:"review_count,omitempty"`
+	ReviewRepairs     []WorkflowReviewRepairBudget `json:"review_repairs,omitempty"`
+}
+
+// WorkflowInvocationPreparation groups the retained preparation fields without changing their wire order.
+type WorkflowInvocationPreparation struct {
+	Preparation      *WorkflowPreparationBinding     `json:"preparation_binding,omitempty"`
+	CandidateRepair  *WorkflowCandidateRepairBinding `json:"candidate_repair,omitempty"`
+	PreparationCount int                             `json:"preparation_count,omitempty"`
 }
 
 type workflowInvocationFile struct {
@@ -442,7 +492,7 @@ func (s *WorkflowStore) createWorkflowInvocation(ctx context.Context, request Wo
 }
 
 func newWorkflowInvocation(root string, identity WorkflowIdentity, request WorkflowStartRequest, hash string, preview WorkflowPreview) workflowInvocationFile {
-	invocation := WorkflowInvocation{WorkflowIdentity: identity, Schema: "chr-invocation/v1", RequestKey: request.RequestKey, RequestHash: hash, Authority: "tickets", Selection: request.Selection, Policy: request.Policy, SetOrderRule: preview.SetOrderRule, Excluded: preview.Excluded, Status: "pending"}
+	invocation := WorkflowInvocation{WorkflowIdentity: identity, WorkflowInvocationInput: WorkflowInvocationInput{Schema: "chr-invocation/v1", RequestKey: request.RequestKey, RequestHash: hash, Authority: "tickets", Selection: request.Selection, Policy: request.Policy, SetOrderRule: preview.SetOrderRule, Excluded: preview.Excluded}, WorkflowInvocationExecution: WorkflowInvocationExecution{Status: "pending"}}
 
 	invocation.HarnessBinding = cloneHarnessBinding(request.HarnessBinding)
 	if invocation.HarnessBinding != nil {

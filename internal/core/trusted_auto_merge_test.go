@@ -29,11 +29,10 @@ func TestApplyTrustedAutoMergeReviewMovesTicketToReadyForMerge(t *testing.T) {
 
 	result, err := ApplyTrustedAutoMergeReview(context.Background(), ApplyTrustedAutoMergeReviewOptions{
 		Ticket: IndexedTicket{
-			Key:        "CHR-1",
-			Path:       path,
-			Status:     TicketResultStatusReviewing,
-			Branch:     "feat/chr-1",
-			ReviewRefs: []TicketReviewRef{ref},
+			IndexedTicketIdentity: IndexedTicketIdentity{
+				Key:  "CHR-1",
+				Path: path,
+			}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketResultStatusReviewing}, IndexedTicketSource: IndexedTicketSource{Branch: "feat/chr-1"}, IndexedTicketReview: IndexedTicketReview{ReviewRefs: []TicketReviewRef{ref}},
 		},
 		ReviewedAt: testTrustedAutoMergeTime(),
 	})
@@ -70,10 +69,10 @@ func TestApplyTrustedAutoMergeReviewRequiresPullRequestRef(t *testing.T) {
 
 	_, err := ApplyTrustedAutoMergeReview(context.Background(), ApplyTrustedAutoMergeReviewOptions{
 		Ticket: IndexedTicket{
-			Key:    "CHR-1",
-			Path:   path,
-			Status: TicketResultStatusReviewing,
-			Branch: "feat/chr-1",
+			IndexedTicketIdentity: IndexedTicketIdentity{
+				Key:  "CHR-1",
+				Path: path,
+			}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketResultStatusReviewing}, IndexedTicketSource: IndexedTicketSource{Branch: "feat/chr-1"},
 		},
 		ReviewedAt: testTrustedAutoMergeTime(),
 	})

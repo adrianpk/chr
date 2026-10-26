@@ -30,7 +30,7 @@ func TestTelegramPresentationProgressStates(t *testing.T) {
 	}
 	for _, item := range cases {
 		t.Run(item.name, func(t *testing.T) {
-			status := WorkflowWorkStatus{WorkflowIdentity: core.WorkflowIdentity{ID: "run-original", Revision: 3}, WorkTitle: strings.Repeat("README `title` 😀 ", 100), Status: item.state, StopIntent: item.stop, Outcome: item.outcome, ValidatedTasks: 1, Total: 2, ConfirmedTickets: item.confirmed, IntegratedUnits: item.units, Remaining: 2 - item.confirmed, DeliveryRef: item.receipt, DeliveryHash: item.hash, NextActionOwner: "operator", CandidateHash: "private-candidate-hash", ApprovalHash: "private-review-hash"}
+			status := WorkflowWorkStatus{WorkflowIdentity: core.WorkflowIdentity{ID: "run-original", Revision: 3}, WorkTitle: strings.Repeat("README `title` 😀 ", 100), WorkflowWorkOutcome: WorkflowWorkOutcome{Status: item.state, Outcome: item.outcome}, WorkflowWorkControl: WorkflowWorkControl{StopIntent: item.stop}, WorkflowWorkCounts: WorkflowWorkCounts{ValidatedTasks: 1, Total: 2, ConfirmedTickets: item.confirmed, IntegratedUnits: item.units, Remaining: 2 - item.confirmed}, WorkflowWorkDelivery: WorkflowWorkDelivery{DeliveryRef: item.receipt, DeliveryHash: item.hash, CandidateHash: "private-candidate-hash", ApprovalHash: "private-review-hash"}, WorkflowWorkLifecycle: WorkflowWorkLifecycle{NextActionOwner: "operator"}}
 
 			text := core.RenderTelegramMessage(telegramWorkProgressMessage(status, "Example project")).PlainFallback
 			for _, value := range []string{item.want, "Validated tasks: 1/2", fmt.Sprintf("confirmed tickets: %d", item.confirmed), "Example project", "chr work status --json run-original"} {

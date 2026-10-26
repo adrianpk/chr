@@ -5476,11 +5476,12 @@ func writeIndexedTicketFile(t *testing.T, devRoot, projectDir string) string {
 	}
 
 	indexTicket(t, devRoot, projectDir, core.IndexedTicket{
-		Key:          "CHR-1",
-		Title:        "Do something",
-		Status:       "open",
-		RelativePath: filepath.Join(".chr", "default", "tickets", "CHR-1-Do-something.md"),
-		Path:         ticketPath,
+		IndexedTicketIdentity: core.IndexedTicketIdentity{
+			Key: "CHR-1",
+
+			RelativePath: filepath.Join(".chr", "default", "tickets", "CHR-1-Do-something.md"),
+			Path:         ticketPath,
+		}, IndexedTicketSummary: core.IndexedTicketSummary{Title: "Do something"}, IndexedTicketClassification: core.IndexedTicketClassification{Status: "open"},
 	})
 
 	return ticketPath
@@ -6315,11 +6316,12 @@ func TestIndexRebuildIndexesTicketFiles(t *testing.T) {
 		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	})
 	indexTicket(t, devRoot, projectDir, core.IndexedTicket{
-		Key:          "CHR-9",
-		Title:        "Old",
-		Status:       "open",
-		RelativePath: "CHR-9-Old.md",
-		Path:         filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-9-Old.md"),
+		IndexedTicketIdentity: core.IndexedTicketIdentity{
+			Key: "CHR-9",
+
+			RelativePath: "CHR-9-Old.md",
+			Path:         filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-9-Old.md"),
+		}, IndexedTicketSummary: core.IndexedTicketSummary{Title: "Old"}, IndexedTicketClassification: core.IndexedTicketClassification{Status: "open"},
 	})
 
 	var stdout bytes.Buffer

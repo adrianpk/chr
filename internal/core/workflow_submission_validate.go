@@ -32,7 +32,7 @@ func validateWorkflowSubmissionJournal(journal workflowSubmissionJournal) error 
 		return ErrWorkflowConflict
 	}
 
-	run := workflowInvocationFile{OwnerRoot: journal.OwnerRoot, WorkflowInvocation: WorkflowInvocation{WorkflowIdentity: WorkflowIdentity{ID: journal.InvocationID, Namespace: journal.Namespace}, Lane: &WorkflowLane{Unit: journal.Unit}}}
+	run := workflowInvocationFile{OwnerRoot: journal.OwnerRoot, WorkflowInvocation: WorkflowInvocation{WorkflowIdentity: WorkflowIdentity{ID: journal.InvocationID, Namespace: journal.Namespace}, WorkflowInvocationExecution: WorkflowInvocationExecution{Lane: &WorkflowLane{Unit: journal.Unit}}}}
 	if journal.Key != workflowSubmissionJournalKey(run) {
 		return ErrWorkflowConflict
 	}

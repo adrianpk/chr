@@ -105,7 +105,7 @@ func nativeWorkPreviewLines(bound WorkflowBoundPreview) []string {
 	}
 
 	lines = appendWorkflowExclusions(lines, view.Preview.Excluded)
-	status := WorkflowWorkStatus{Members: view.Preview.Members[:min(8, len(view.Preview.Members))], NextOffset: -1}
+	status := WorkflowWorkStatus{WorkflowWorkPage: WorkflowWorkPage{Members: view.Preview.Members[:min(8, len(view.Preview.Members))], NextOffset: -1}}
 
 	lines = appendWorkflowMemberLines(lines, status)
 	if view.Preview.Total > len(status.Members) {

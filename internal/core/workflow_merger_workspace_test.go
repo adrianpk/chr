@@ -17,7 +17,7 @@ func TestNativeMergerWorkspace(t *testing.T) {
 
 			store := NewWorkflowStore(layout, "merger-workspace-fixture")
 			seed, _ := workflowSelectionCommit(t, store)
-			input := WorkflowMergerInput{InvocationID: "fixture", EntryID: "entry", ID: "format-" + format}
+			input := WorkflowMergerInput{WorkflowMergerIdentity: WorkflowMergerIdentity{InvocationID: "fixture", EntryID: "entry", ID: "format-" + format}}
 			input.OwnedWorkspaceID = workflowMergerWorkspaceID(input)
 			before := workflowIntegrationCommand(t, dir, "status", "--porcelain")
 

@@ -34,10 +34,7 @@ func TestBoardQueryReturnsNormalColumnsAndCounts(t *testing.T) {
 
 func TestBoardQueryMapsLegacyStatusesToBoardColumns(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertBoardQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:    "CHR-1",
-		Status: TicketStatusReadyLegacy,
-	})
+	upsertBoardQueryTicketWithMetadata(t, index, IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyLegacy}})
 
 	board, err := NewBoardQuery(index).ProjectBoard(context.Background(), BoardQueryOptions{
 		ProjectID: "project-1",
@@ -85,11 +82,7 @@ func TestBoardQuerySeparatesAttentionTickets(t *testing.T) {
 
 func TestBoardQueryFlagsReviewStateAttention(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertBoardQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:         "CHR-1",
-		Status:      TicketStatusReadyForDev,
-		ReviewState: "changes_requested",
-	})
+	upsertBoardQueryTicketWithMetadata(t, index, IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}, IndexedTicketReview: IndexedTicketReview{ReviewState: "changes_requested"}})
 
 	board, err := NewBoardQuery(index).ProjectBoard(context.Background(), BoardQueryOptions{
 		ProjectID: "project-1",
@@ -145,10 +138,7 @@ func assertBoardColumn(t *testing.T, board Board, columnID, title string, wantKe
 func upsertBoardQueryTicket(t *testing.T, index TicketIndex, key, status string) {
 	t.Helper()
 
-	upsertBoardQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:    key,
-		Status: status,
-	})
+	upsertBoardQueryTicketWithMetadata(t, index, IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Key: key}, IndexedTicketClassification: IndexedTicketClassification{Status: status}})
 }
 
 func upsertBoardQueryTicketWithMetadata(t *testing.T, index TicketIndex, metadata IndexedTicket) {

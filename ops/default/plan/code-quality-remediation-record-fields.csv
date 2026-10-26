@@ -1,0 +1,165 @@
+record,original_field,grouped_field,original_declaration
+WorkflowInvocation,HarnessBinding,WorkflowInvocationAdmission.HarnessBinding,"HarnessBinding     *HarnessBinding                   `json:""harness_binding,omitempty""`"
+WorkflowInvocation,Admission,WorkflowInvocationAdmission.Admission,"Admission          *WorkflowAdmissionGuard           `json:""admission_guard,omitempty""`"
+WorkflowInvocation,IntegrationBudget,WorkflowInvocationIntegration.IntegrationBudget,"IntegrationBudget  *WorkflowIntegrationBudgetBinding `json:""integration_budget,omitempty""`"
+WorkflowInvocation,Integration,WorkflowInvocationIntegration.Integration,"Integration        *WorkflowIntegrationBinding       `json:""integration_binding,omitempty""`"
+WorkflowInvocation,IntegrationEntries,WorkflowInvocationIntegration.IntegrationEntries,"IntegrationEntries []WorkflowIntegrationBinding      `json:""integration_entries,omitempty""`"
+WorkflowInvocation,DependencyTargets,WorkflowInvocationScope.DependencyTargets,"DependencyTargets  []WorkflowDependencyTarget        `json:""dependency_targets,omitempty""`"
+WorkflowInvocation,LooseQueue,WorkflowInvocationScope.LooseQueue,"LooseQueue         *WorkflowLooseQueue               `json:""loose_queue,omitempty""`"
+WorkflowInvocation,Closures,WorkflowInvocationScope.Closures,"Closures           []WorkflowInvocationClosure       `json:""set_closures,omitempty""`"
+WorkflowInvocation,ClosingSet,WorkflowInvocationScope.ClosingSet,"ClosingSet         string                            `json:""closing_set,omitempty""`"
+WorkflowInvocation,ExecutionTarget,WorkflowInvocationScope.ExecutionTarget,"ExecutionTarget    *WorkflowPreviewTarget            `json:""execution_target,omitempty""`"
+WorkflowInvocation,ConfirmedCursor,WorkflowInvocationProgress.ConfirmedCursor,"ConfirmedCursor    int                               `json:""confirmed_cursor,omitempty""`"
+WorkflowInvocation,Deliveries,WorkflowInvocationProgress.Deliveries,"Deliveries         []WorkflowUnitDelivery            `json:""integrated_units,omitempty""`"
+WorkflowInvocation,Continuation,WorkflowInvocationProgress.Continuation,"Continuation       *WorkflowContinuationCheckpoint   `json:""continuation_checkpoint,omitempty""`"
+WorkflowInvocation,WorkflowIdentity,WorkflowIdentity,WorkflowIdentity
+WorkflowInvocation,Schema,WorkflowInvocationInput.Schema,"Schema               string                          `json:""schema""`"
+WorkflowInvocation,RequestKey,WorkflowInvocationInput.RequestKey,"RequestKey           string                          `json:""request_key""`"
+WorkflowInvocation,RequestHash,WorkflowInvocationInput.RequestHash,"RequestHash          string                          `json:""request_hash""`"
+WorkflowInvocation,Authority,WorkflowInvocationInput.Authority,"Authority            string                          `json:""authority""`"
+WorkflowInvocation,Selection,WorkflowInvocationInput.Selection,"Selection            WorkflowPreviewRequest          `json:""selection""`"
+WorkflowInvocation,Policy,WorkflowInvocationInput.Policy,"Policy               WorkflowExecutionPolicy         `json:""policy""`"
+WorkflowInvocation,SetOrderRule,WorkflowInvocationInput.SetOrderRule,"SetOrderRule         string                          `json:""set_order_rule""`"
+WorkflowInvocation,Members,WorkflowInvocationInput.Members,"Members              []WorkflowMember                `json:""members""`"
+WorkflowInvocation,SetImages,WorkflowInvocationInput.SetImages,"SetImages            []WorkflowInputImage            `json:""set_images""`"
+WorkflowInvocation,Excluded,WorkflowInvocationInput.Excluded,"Excluded             map[string]int                  `json:""excluded""`"
+WorkflowInvocation,Cursor,WorkflowInvocationExecution.Cursor,"Cursor               int                             `json:""cursor""`"
+WorkflowInvocation,Status,WorkflowInvocationExecution.Status,"Status               string                          `json:""status""`"
+WorkflowInvocation,Outcome,WorkflowInvocationExecution.Outcome,"Outcome              string                          `json:""outcome""`"
+WorkflowInvocation,Attempts,WorkflowInvocationExecution.Attempts,"Attempts             []WorkflowAttempt               `json:""attempts""`"
+WorkflowInvocation,Blocker,WorkflowInvocationExecution.Blocker,"Blocker              *WorkflowBlocker                `json:""blocker,omitempty""`"
+WorkflowInvocation,Lane,WorkflowInvocationExecution.Lane,"Lane                 *WorkflowLane                   `json:""lane,omitempty""`"
+WorkflowInvocation,StopIntent,WorkflowInvocationExecution.StopIntent,"StopIntent           string                          `json:""stop_intent""`"
+WorkflowInvocation,ResumeStatus,WorkflowInvocationExecution.ResumeStatus,"ResumeStatus         string                          `json:""resume_status""`"
+WorkflowInvocation,CapacityResumeStatus,WorkflowInvocationExecution.CapacityResumeStatus,"CapacityResumeStatus string                          `json:""capacity_resume_status,omitempty""`"
+WorkflowInvocation,CandidateRef,WorkflowInvocationCandidate.CandidateRef,"CandidateRef         string                          `json:""candidate_ref""`"
+WorkflowInvocation,CandidateHash,WorkflowInvocationCandidate.CandidateHash,"CandidateHash        string                          `json:""candidate_hash""`"
+WorkflowInvocation,PullRequest,WorkflowInvocationDelivery.PullRequest,"PullRequest          *WorkflowPullRequestBinding     `json:""pull_request_binding,omitempty""`"
+WorkflowInvocation,DeliveryProofRef,WorkflowInvocationDelivery.DeliveryProofRef,"DeliveryProofRef     string                          `json:""delivery_proof_ref""`"
+WorkflowInvocation,DeliveryProofHash,WorkflowInvocationDelivery.DeliveryProofHash,"DeliveryProofHash    string                          `json:""delivery_proof_hash""`"
+WorkflowInvocation,DeliveryRef,WorkflowInvocationDelivery.DeliveryRef,"DeliveryRef          string                          `json:""delivery_ref""`"
+WorkflowInvocation,DeliveryHash,WorkflowInvocationDelivery.DeliveryHash,"DeliveryHash         string                          `json:""delivery_hash""`"
+WorkflowInvocation,ReviewRestriction,WorkflowInvocationReview.ReviewRestriction,"ReviewRestriction    ReviewWorkflowMode              `json:""review_restriction,omitempty""`"
+WorkflowInvocation,Review,WorkflowInvocationReview.Review,"Review               *WorkflowReviewBinding          `json:""review_binding,omitempty""`"
+WorkflowInvocation,ReviewCount,WorkflowInvocationReview.ReviewCount,"ReviewCount          int                             `json:""review_count,omitempty""`"
+WorkflowInvocation,ReviewRepairs,WorkflowInvocationReview.ReviewRepairs,"ReviewRepairs        []WorkflowReviewRepairBudget    `json:""review_repairs,omitempty""`"
+WorkflowInvocation,Preparation,WorkflowInvocationPreparation.Preparation,"Preparation          *WorkflowPreparationBinding     `json:""preparation_binding,omitempty""`"
+WorkflowInvocation,CandidateRepair,WorkflowInvocationPreparation.CandidateRepair,"CandidateRepair      *WorkflowCandidateRepairBinding `json:""candidate_repair,omitempty""`"
+WorkflowInvocation,PreparationCount,WorkflowInvocationPreparation.PreparationCount,"PreparationCount     int                             `json:""preparation_count,omitempty""`"
+WorkflowInvocation,Submission,Submission,"Submission           *WorkflowSubmissionBinding      `json:""submission_binding,omitempty""`"
+WorkflowMergerInput,OperatorDecisionRef,WorkflowMergerOperator.OperatorDecisionRef,"OperatorDecisionRef   *WorkflowEvidenceRef        `json:""operator_decision_ref,omitempty""`"
+WorkflowMergerInput,OperatorAnswers,WorkflowMergerOperator.OperatorAnswers,"OperatorAnswers       []WorkflowIntegrationAnswer `json:""operator_answers,omitempty""`"
+WorkflowMergerInput,ProtocolVersion,WorkflowMergerIdentity.ProtocolVersion,"ProtocolVersion       int                         `json:""protocol_version""`"
+WorkflowMergerInput,ID,WorkflowMergerIdentity.ID,"ID                    string                      `json:""id""`"
+WorkflowMergerInput,InvocationID,WorkflowMergerIdentity.InvocationID,"InvocationID          string                      `json:""invocation_id""`"
+WorkflowMergerInput,EntryID,WorkflowMergerIdentity.EntryID,"EntryID               string                      `json:""entry_id""`"
+WorkflowMergerInput,Unit,WorkflowMergerIdentity.Unit,"Unit                  WorkflowRef                 `json:""unit""`"
+WorkflowMergerInput,CandidateRevision,WorkflowMergerIdentity.CandidateRevision,"CandidateRevision     uint64                      `json:""candidate_revision""`"
+WorkflowMergerInput,CandidateHash,WorkflowMergerIdentity.CandidateHash,"CandidateHash         string                      `json:""candidate_hash""`"
+WorkflowMergerInput,ClaimGeneration,WorkflowMergerIdentity.ClaimGeneration,"ClaimGeneration       uint64                      `json:""claim_generation""`"
+WorkflowMergerInput,InputHash,WorkflowMergerIdentity.InputHash,"InputHash             string                      `json:""input_hash""`"
+WorkflowMergerInput,ScopeHash,WorkflowMergerIdentity.ScopeHash,"ScopeHash             string                      `json:""scope_hash""`"
+WorkflowMergerInput,Reason,WorkflowMergerIdentity.Reason,"Reason                string                      `json:""reason""`"
+WorkflowMergerInput,Repository,WorkflowMergerGit.Repository,"Repository            string                      `json:""repository""`"
+WorkflowMergerInput,SourceRef,WorkflowMergerGit.SourceRef,"SourceRef             string                      `json:""source_ref""`"
+WorkflowMergerInput,TargetRef,WorkflowMergerGit.TargetRef,"TargetRef             string                      `json:""target_ref""`"
+WorkflowMergerInput,Source,WorkflowMergerGit.Source,"Source                string                      `json:""source""`"
+WorkflowMergerInput,Base,WorkflowMergerGit.Base,"Base                  string                      `json:""base""`"
+WorkflowMergerInput,Method,WorkflowMergerGit.Method,"Method                string                      `json:""method""`"
+WorkflowMergerInput,OwnedWorkspaceID,WorkflowMergerGit.OwnedWorkspaceID,"OwnedWorkspaceID      string                      `json:""owned_workspace_id""`"
+WorkflowMergerInput,SourceManifestRef,WorkflowMergerContext.SourceManifestRef,"SourceManifestRef     WorkflowEvidenceRef         `json:""source_manifest_ref""`"
+WorkflowMergerInput,IntentRefs,WorkflowMergerContext.IntentRefs,"IntentRefs            []WorkflowEvidenceRef       `json:""intent_refs""`"
+WorkflowMergerInput,TargetChangeRefs,WorkflowMergerContext.TargetChangeRefs,"TargetChangeRefs      []WorkflowEvidenceRef       `json:""target_change_refs""`"
+WorkflowMergerInput,FindingRefs,WorkflowMergerContext.FindingRefs,"FindingRefs           []WorkflowEvidenceRef       `json:""finding_refs""`"
+WorkflowMergerInput,Requirements,WorkflowMergerContext.Requirements,"Requirements          []WorkflowMergerRequirement `json:""requirements""`"
+WorkflowMergerInput,Conflicts,WorkflowMergerContext.Conflicts,"Conflicts             []WorkflowMergerConflict    `json:""conflicts""`"
+WorkflowMergerInput,HistoryCheckpoint,WorkflowMergerContext.HistoryCheckpoint,"HistoryCheckpoint     *WorkflowMergerCheckpoint   `json:""history_checkpoint,omitempty""`"
+WorkflowMergerInput,RepairCheckpointRef,WorkflowMergerContext.RepairCheckpointRef,"RepairCheckpointRef   *WorkflowEvidenceRef        `json:""repair_checkpoint_ref,omitempty""`"
+WorkflowMergerInput,AllowedPaths,WorkflowMergerScope.AllowedPaths,"AllowedPaths          []string                    `json:""allowed_paths""`"
+WorkflowMergerInput,ProtectedPaths,WorkflowMergerScope.ProtectedPaths,"ProtectedPaths        []string                    `json:""protected_paths""`"
+WorkflowMergerInput,ValidationContractRef,WorkflowMergerValidation.ValidationContractRef,"ValidationContractRef WorkflowEvidenceRef         `json:""validation_contract_ref""`"
+WorkflowMergerInput,ValidationCommands,WorkflowMergerValidation.ValidationCommands,"ValidationCommands    [][]string                  `json:""validation_commands""`"
+WorkflowMergerInput,CapacityReservationID,WorkflowMergerLimits.CapacityReservationID,"CapacityReservationID string                      `json:""capacity_reservation_id""`"
+WorkflowMergerInput,BudgetReservationID,WorkflowMergerLimits.BudgetReservationID,"BudgetReservationID   string                      `json:""budget_reservation_id""`"
+WorkflowMergerInput,RemainingAttempts,WorkflowMergerLimits.RemainingAttempts,"RemainingAttempts     int                         `json:""remaining_attempts""`"
+WorkflowMergerInput,WorkerTimeoutSeconds,WorkflowMergerLimits.WorkerTimeoutSeconds,"WorkerTimeoutSeconds  int                         `json:""worker_timeout_seconds""`"
+WorkflowMergerInput,AdmittedAt,WorkflowMergerLimits.AdmittedAt,"AdmittedAt            time.Time                   `json:""admitted_at""`"
+WorkflowMergerInput,Deadline,WorkflowMergerLimits.Deadline,"Deadline              time.Time                   `json:""deadline""`"
+WorkflowMergerInput,TokenAllowance,WorkflowMergerLimits.TokenAllowance,"TokenAllowance        *WorkflowTokenAllowance     `json:""token_allowance,omitempty""`"
+IndexedTicket,NativeWorkflow,IndexedTicketAttention.NativeWorkflow,NativeWorkflow    bool
+IndexedTicket,AttentionReasons,IndexedTicketAttention.AttentionReasons,AttentionReasons  []string
+IndexedTicket,ProjectID,IndexedTicketIdentity.ProjectID,ProjectID         string
+IndexedTicket,Namespace,IndexedTicketIdentity.Namespace,Namespace         string
+IndexedTicket,Path,IndexedTicketIdentity.Path,Path              string
+IndexedTicket,RelativePath,IndexedTicketIdentity.RelativePath,RelativePath      string
+IndexedTicket,Key,IndexedTicketIdentity.Key,Key               string
+IndexedTicket,Title,IndexedTicketSummary.Title,Title             string
+IndexedTicket,Assignee,IndexedTicketSummary.Assignee,Assignee          string
+IndexedTicket,Synopsis,IndexedTicketSummary.Synopsis,Synopsis          string
+IndexedTicket,Status,IndexedTicketClassification.Status,Status            string
+IndexedTicket,BoardColumn,IndexedTicketClassification.BoardColumn,BoardColumn       string
+IndexedTicket,Priority,IndexedTicketClassification.Priority,Priority          string
+IndexedTicket,Severity,IndexedTicketClassification.Severity,Severity          string
+IndexedTicket,Type,IndexedTicketClassification.Type,Type              string
+IndexedTicket,Tags,IndexedTicketClassification.Tags,Tags              []string
+IndexedTicket,UseCase,IndexedTicketClassification.UseCase,UseCase           string
+IndexedTicket,ProjectArea,IndexedTicketClassification.ProjectArea,ProjectArea       string
+IndexedTicket,SourceKind,IndexedTicketSource.SourceKind,SourceKind        string
+IndexedTicket,SourceRef,IndexedTicketSource.SourceRef,SourceRef         string
+IndexedTicket,Slice,IndexedTicketSource.Slice,Slice             string
+IndexedTicket,Branch,IndexedTicketSource.Branch,Branch            string
+IndexedTicket,ReviewRefs,IndexedTicketReview.ReviewRefs,ReviewRefs        []TicketReviewRef
+IndexedTicket,ReviewState,IndexedTicketReview.ReviewState,ReviewState       string
+IndexedTicket,ReviewRound,IndexedTicketReview.ReviewRound,ReviewRound       int
+IndexedTicket,ReviewResult,IndexedTicketReview.ReviewResult,ReviewResult      string
+IndexedTicket,ReviewCommentsURL,IndexedTicketReview.ReviewCommentsURL,ReviewCommentsURL string
+IndexedTicket,BlockingFindings,IndexedTicketReview.BlockingFindings,BlockingFindings  []string
+IndexedTicket,MergeState,IndexedTicketMerge.MergeState,MergeState        string
+IndexedTicket,MergeResult,IndexedTicketMerge.MergeResult,MergeResult       string
+IndexedTicket,MergeActor,IndexedTicketMerge.MergeActor,MergeActor        string
+IndexedTicket,MergeCommit,IndexedTicketMerge.MergeCommit,MergeCommit       string
+IndexedTicket,MergedAt,IndexedTicketMerge.MergedAt,MergedAt          *time.Time
+IndexedTicket,MergeBlocker,IndexedTicketMerge.MergeBlocker,MergeBlocker      string
+IndexedTicket,CreatedAt,IndexedTicketTimes.CreatedAt,CreatedAt         *time.Time
+IndexedTicket,UpdatedAt,IndexedTicketTimes.UpdatedAt,UpdatedAt         *time.Time
+IndexedTicket,FileMTime,IndexedTicketProjection.FileMTime,FileMTime         time.Time
+IndexedTicket,FileSize,IndexedTicketProjection.FileSize,FileSize          int64
+IndexedTicket,ContentHash,IndexedTicketProjection.ContentHash,ContentHash       string
+IndexedTicket,IndexedAt,IndexedTicketProjection.IndexedAt,IndexedAt         time.Time
+WorkflowWorkStatus,WorkTitle,WorkTitle,"WorkTitle            string                               `json:""work_title,omitempty""`"
+WorkflowWorkStatus,HarnessBinding,WorkflowWorkBindings.HarnessBinding,"HarnessBinding       *core.HarnessBinding                 `json:""harness_binding,omitempty""`"
+WorkflowWorkStatus,ControlReceipt,WorkflowWorkBindings.ControlReceipt,"ControlReceipt       *core.WorkflowControlResult          `json:""control_receipt,omitempty""`"
+WorkflowWorkStatus,Integration,Integration,"Integration          *WorkflowIntegrationStatus           `json:""integration,omitempty""`"
+WorkflowWorkStatus,FrozenPolicy,WorkflowWorkLifecycle.FrozenPolicy,"FrozenPolicy         core.WorkflowExecutionPolicy         `json:""execution_policy""`"
+WorkflowWorkStatus,Continuation,WorkflowWorkLifecycle.Continuation,"Continuation         *core.WorkflowContinuationCheckpoint `json:""continuation,omitempty""`"
+WorkflowWorkStatus,NextActionOwner,WorkflowWorkLifecycle.NextActionOwner,"NextActionOwner      string                               `json:""next_action_owner""`"
+WorkflowWorkStatus,CapacityResumeStatus,WorkflowWorkLifecycle.CapacityResumeStatus,"CapacityResumeStatus string                               `json:""capacity_resume_status,omitempty""`"
+WorkflowWorkStatus,SelectedTicket,WorkflowWorkLifecycle.SelectedTicket,"SelectedTicket       string                               `json:""selected_ticket,omitempty""`"
+WorkflowWorkStatus,SelectedSlice,WorkflowWorkLifecycle.SelectedSlice,"SelectedSlice        string                               `json:""selected_slice,omitempty""`"
+WorkflowWorkStatus,WorkflowIdentity,WorkflowIdentity,core.WorkflowIdentity
+WorkflowWorkStatus,Selector,WorkflowWorkSelection.Selector,"Selector         core.WorkflowSelector            `json:""selector""`"
+WorkflowWorkStatus,Authority,WorkflowWorkSelection.Authority,"Authority        string                           `json:""authority""`"
+WorkflowWorkStatus,Status,WorkflowWorkOutcome.Status,"Status           string                           `json:""status""`"
+WorkflowWorkStatus,Outcome,WorkflowWorkOutcome.Outcome,"Outcome          string                           `json:""outcome""`"
+WorkflowWorkStatus,Target,WorkflowWorkScope.Target,"Target           core.WorkflowPreviewTarget       `json:""target""`"
+WorkflowWorkStatus,Policy,WorkflowWorkScope.Policy,"Policy           core.WorkflowReviewPolicy        `json:""publication_policy""`"
+WorkflowWorkStatus,SetOrderRule,WorkflowWorkScope.SetOrderRule,"SetOrderRule     string                           `json:""set_order_rule""`"
+WorkflowWorkStatus,Excluded,WorkflowWorkScope.Excluded,"Excluded         map[string]int                   `json:""excluded""`"
+WorkflowWorkStatus,Total,WorkflowWorkCounts.Total,"Total            int                              `json:""total_members""`"
+WorkflowWorkStatus,ValidatedTasks,WorkflowWorkCounts.ValidatedTasks,"ValidatedTasks   int                              `json:""validated_tasks""`"
+WorkflowWorkStatus,ConfirmedTickets,WorkflowWorkCounts.ConfirmedTickets,"ConfirmedTickets int                              `json:""confirmed_tickets""`"
+WorkflowWorkStatus,IntegratedUnits,WorkflowWorkCounts.IntegratedUnits,"IntegratedUnits  int                              `json:""integrated_units""`"
+WorkflowWorkStatus,Remaining,WorkflowWorkCounts.Remaining,"Remaining        int                              `json:""remaining_tickets""`"
+WorkflowWorkStatus,StopIntent,WorkflowWorkControl.StopIntent,"StopIntent       string                           `json:""stop_intent""`"
+WorkflowWorkStatus,Blocker,WorkflowWorkControl.Blocker,"Blocker          *core.WorkflowBlocker            `json:""blocker,omitempty""`"
+WorkflowWorkStatus,CandidateRef,WorkflowWorkDelivery.CandidateRef,"CandidateRef     string                           `json:""candidate_ref,omitempty""`"
+WorkflowWorkStatus,CandidateHash,WorkflowWorkDelivery.CandidateHash,"CandidateHash    string                           `json:""candidate_hash,omitempty""`"
+WorkflowWorkStatus,ApprovalHash,WorkflowWorkDelivery.ApprovalHash,"ApprovalHash     string                           `json:""approval_hash,omitempty""`"
+WorkflowWorkStatus,ReviewState,WorkflowWorkDelivery.ReviewState,"ReviewState      string                           `json:""review_state,omitempty""`"
+WorkflowWorkStatus,PullRequest,WorkflowWorkDelivery.PullRequest,"PullRequest      *core.WorkflowPullRequestBinding `json:""pull_request,omitempty""`"
+WorkflowWorkStatus,DeliveryRef,WorkflowWorkDelivery.DeliveryRef,"DeliveryRef      string                           `json:""delivery_ref,omitempty""`"
+WorkflowWorkStatus,DeliveryHash,WorkflowWorkDelivery.DeliveryHash,"DeliveryHash     string                           `json:""delivery_hash,omitempty""`"
+WorkflowWorkStatus,Members,WorkflowWorkPage.Members,"Members          []core.WorkflowPreviewMember     `json:""members""`"
+WorkflowWorkStatus,Evidence,WorkflowWorkPage.Evidence,"Evidence         []WorkflowWorkEvidence           `json:""recent_evidence""`"
+WorkflowWorkStatus,TotalAttempts,WorkflowWorkPage.TotalAttempts,"TotalAttempts    int                              `json:""total_attempts""`"
+WorkflowWorkStatus,NextOffset,WorkflowWorkPage.NextOffset,"NextOffset       int                              `json:""next_offset""`"

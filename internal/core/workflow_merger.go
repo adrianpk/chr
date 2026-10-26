@@ -35,45 +35,80 @@ type WorkflowMergerCheckpoint struct {
 // WorkflowMergerInput is an immutable, credential-free contract for one role
 // call. The opaque workspace identity is resolved by the host, never the agent.
 type WorkflowMergerInput struct {
-	OperatorDecisionRef   *WorkflowEvidenceRef        `json:"operator_decision_ref,omitempty"`
-	OperatorAnswers       []WorkflowIntegrationAnswer `json:"operator_answers,omitempty"`
-	ProtocolVersion       int                         `json:"protocol_version"`
-	ID                    string                      `json:"id"`
-	InvocationID          string                      `json:"invocation_id"`
-	EntryID               string                      `json:"entry_id"`
-	Unit                  WorkflowRef                 `json:"unit"`
-	CandidateRevision     uint64                      `json:"candidate_revision"`
-	CandidateHash         string                      `json:"candidate_hash"`
-	ClaimGeneration       uint64                      `json:"claim_generation"`
-	InputHash             string                      `json:"input_hash"`
-	ScopeHash             string                      `json:"scope_hash"`
-	Reason                string                      `json:"reason"`
-	Repository            string                      `json:"repository"`
-	SourceRef             string                      `json:"source_ref"`
-	TargetRef             string                      `json:"target_ref"`
-	Source                string                      `json:"source"`
-	Base                  string                      `json:"base"`
-	Method                string                      `json:"method"`
-	OwnedWorkspaceID      string                      `json:"owned_workspace_id"`
-	SourceManifestRef     WorkflowEvidenceRef         `json:"source_manifest_ref"`
-	IntentRefs            []WorkflowEvidenceRef       `json:"intent_refs"`
-	TargetChangeRefs      []WorkflowEvidenceRef       `json:"target_change_refs"`
-	FindingRefs           []WorkflowEvidenceRef       `json:"finding_refs"`
-	Requirements          []WorkflowMergerRequirement `json:"requirements"`
-	Conflicts             []WorkflowMergerConflict    `json:"conflicts"`
-	HistoryCheckpoint     *WorkflowMergerCheckpoint   `json:"history_checkpoint,omitempty"`
-	RepairCheckpointRef   *WorkflowEvidenceRef        `json:"repair_checkpoint_ref,omitempty"`
-	AllowedPaths          []string                    `json:"allowed_paths"`
-	ProtectedPaths        []string                    `json:"protected_paths"`
-	ValidationContractRef WorkflowEvidenceRef         `json:"validation_contract_ref"`
-	ValidationCommands    [][]string                  `json:"validation_commands"`
-	CapacityReservationID string                      `json:"capacity_reservation_id"`
-	BudgetReservationID   string                      `json:"budget_reservation_id"`
-	RemainingAttempts     int                         `json:"remaining_attempts"`
-	WorkerTimeoutSeconds  int                         `json:"worker_timeout_seconds"`
-	AdmittedAt            time.Time                   `json:"admitted_at"`
-	Deadline              time.Time                   `json:"deadline"`
-	TokenAllowance        *WorkflowTokenAllowance     `json:"token_allowance,omitempty"`
+	WorkflowMergerOperator
+	WorkflowMergerIdentity
+	WorkflowMergerGit
+	WorkflowMergerContext
+	WorkflowMergerScope
+	WorkflowMergerValidation
+	WorkflowMergerLimits
+}
+
+// WorkflowMergerOperator groups the retained operator fields without changing their wire order.
+type WorkflowMergerOperator struct {
+	OperatorDecisionRef *WorkflowEvidenceRef        `json:"operator_decision_ref,omitempty"`
+	OperatorAnswers     []WorkflowIntegrationAnswer `json:"operator_answers,omitempty"`
+}
+
+// WorkflowMergerIdentity groups the retained identity fields without changing their wire order.
+type WorkflowMergerIdentity struct {
+	ProtocolVersion   int         `json:"protocol_version"`
+	ID                string      `json:"id"`
+	InvocationID      string      `json:"invocation_id"`
+	EntryID           string      `json:"entry_id"`
+	Unit              WorkflowRef `json:"unit"`
+	CandidateRevision uint64      `json:"candidate_revision"`
+	CandidateHash     string      `json:"candidate_hash"`
+	ClaimGeneration   uint64      `json:"claim_generation"`
+	InputHash         string      `json:"input_hash"`
+	ScopeHash         string      `json:"scope_hash"`
+	Reason            string      `json:"reason"`
+}
+
+// WorkflowMergerGit groups the retained git fields without changing their wire order.
+type WorkflowMergerGit struct {
+	Repository       string `json:"repository"`
+	SourceRef        string `json:"source_ref"`
+	TargetRef        string `json:"target_ref"`
+	Source           string `json:"source"`
+	Base             string `json:"base"`
+	Method           string `json:"method"`
+	OwnedWorkspaceID string `json:"owned_workspace_id"`
+}
+
+// WorkflowMergerContext groups the retained context fields without changing their wire order.
+type WorkflowMergerContext struct {
+	SourceManifestRef   WorkflowEvidenceRef         `json:"source_manifest_ref"`
+	IntentRefs          []WorkflowEvidenceRef       `json:"intent_refs"`
+	TargetChangeRefs    []WorkflowEvidenceRef       `json:"target_change_refs"`
+	FindingRefs         []WorkflowEvidenceRef       `json:"finding_refs"`
+	Requirements        []WorkflowMergerRequirement `json:"requirements"`
+	Conflicts           []WorkflowMergerConflict    `json:"conflicts"`
+	HistoryCheckpoint   *WorkflowMergerCheckpoint   `json:"history_checkpoint,omitempty"`
+	RepairCheckpointRef *WorkflowEvidenceRef        `json:"repair_checkpoint_ref,omitempty"`
+}
+
+// WorkflowMergerScope groups the retained scope fields without changing their wire order.
+type WorkflowMergerScope struct {
+	AllowedPaths   []string `json:"allowed_paths"`
+	ProtectedPaths []string `json:"protected_paths"`
+}
+
+// WorkflowMergerValidation groups the retained validation fields without changing their wire order.
+type WorkflowMergerValidation struct {
+	ValidationContractRef WorkflowEvidenceRef `json:"validation_contract_ref"`
+	ValidationCommands    [][]string          `json:"validation_commands"`
+}
+
+// WorkflowMergerLimits groups the retained limits fields without changing their wire order.
+type WorkflowMergerLimits struct {
+	CapacityReservationID string                  `json:"capacity_reservation_id"`
+	BudgetReservationID   string                  `json:"budget_reservation_id"`
+	RemainingAttempts     int                     `json:"remaining_attempts"`
+	WorkerTimeoutSeconds  int                     `json:"worker_timeout_seconds"`
+	AdmittedAt            time.Time               `json:"admitted_at"`
+	Deadline              time.Time               `json:"deadline"`
+	TokenAllowance        *WorkflowTokenAllowance `json:"token_allowance,omitempty"`
 }
 
 // WorkflowMergerResolution explains one conflict and the requirements retained.

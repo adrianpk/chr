@@ -139,11 +139,11 @@ func assertEvidenceGuidance(t *testing.T, guidance EvidenceStrategyGuidance, kin
 
 func testEvidencePolicyTicket(edit func(*IndexedTicket)) IndexedTicket {
 	ticket := IndexedTicket{
-		Key:      "CHR-1",
-		Title:    "Do work",
-		Type:     "task",
-		Priority: "normal",
-		Severity: "normal",
+		IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: IndexedTicketSummary{Title: "Do work"}, IndexedTicketClassification: IndexedTicketClassification{
+			Type:     "task",
+			Priority: "normal",
+			Severity: "normal",
+		},
 	}
 	edit(&ticket)
 

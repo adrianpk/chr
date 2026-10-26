@@ -150,13 +150,12 @@ func validateReadyForMergeTransitionMetadata(frontmatter ticketFrontmatter) erro
 	}
 
 	ticket := IndexedTicket{
-		Key:          unquoteMetadataString(frontmatter.Metadata["key"]),
-		Status:       TicketStatusReadyForMerge,
-		Branch:       unquoteMetadataString(frontmatter.Metadata["branch"]),
-		ReviewRefs:   frontmatter.ReviewRefs,
-		ReviewState:  unquoteMetadataString(frontmatter.Metadata["review_state"]),
-		ReviewResult: unquoteMetadataString(frontmatter.Metadata["review_result"]),
-		ReviewRound:  reviewRound,
+		IndexedTicketIdentity: IndexedTicketIdentity{Key: unquoteMetadataString(frontmatter.Metadata["key"])}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForMerge}, IndexedTicketSource: IndexedTicketSource{Branch: unquoteMetadataString(frontmatter.Metadata["branch"])}, IndexedTicketReview: IndexedTicketReview{
+			ReviewRefs:   frontmatter.ReviewRefs,
+			ReviewState:  unquoteMetadataString(frontmatter.Metadata["review_state"]),
+			ReviewResult: unquoteMetadataString(frontmatter.Metadata["review_result"]),
+			ReviewRound:  reviewRound,
+		},
 	}
 
 	_, err = ValidateTicketMergeHandoff(ticket)

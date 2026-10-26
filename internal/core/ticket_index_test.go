@@ -186,29 +186,36 @@ func testIndexedTicket(key string, tags []string) IndexedTicket {
 	updatedAt := time.Date(2026, 5, 18, 13, 30, 0, 0, time.UTC)
 
 	return IndexedTicket{
-		ProjectID:    "project-1",
-		Path:         "/tmp/chr/.chr/default/tickets/" + key + ".md",
-		RelativePath: key + ".md",
-		Key:          key,
-		Title:        "Do something",
-		Synopsis:     "Implement indexed ticket enrichment.",
-		Status:       TicketStatusReadyForDev,
-		BoardColumn:  TicketStatusReadyForDev,
-		Priority:     "high",
-		Severity:     "critical",
-		Type:         "feature",
-		Tags:         tags,
-		UseCase:      "onboarding",
-		ProjectArea:  "frontend",
-		SourceKind:   "plan_tracking",
-		SourceRef:    ".chr/default/plans/onboarding-plan.md",
-		Slice:        "Slice 4",
-		CreatedAt:    timePtr(createdAt),
-		UpdatedAt:    timePtr(updatedAt),
-		FileMTime:    time.Date(2026, 5, 18, 14, 0, 0, 0, time.UTC),
-		FileSize:     123,
-		ContentHash:  "hash",
-		IndexedAt:    time.Date(2026, 5, 18, 15, 0, 0, 0, time.UTC),
+		IndexedTicketIdentity: IndexedTicketIdentity{
+			ProjectID:    "project-1",
+			Path:         "/tmp/chr/.chr/default/tickets/" + key + ".md",
+			RelativePath: key + ".md",
+			Key:          key,
+		}, IndexedTicketSummary: IndexedTicketSummary{
+			Title:    "Do something",
+			Synopsis: "Implement indexed ticket enrichment.",
+		}, IndexedTicketClassification: IndexedTicketClassification{
+			Status:      TicketStatusReadyForDev,
+			BoardColumn: TicketStatusReadyForDev,
+			Priority:    "high",
+			Severity:    "critical",
+			Type:        "feature",
+			Tags:        tags,
+			UseCase:     "onboarding",
+			ProjectArea: "frontend",
+		}, IndexedTicketSource: IndexedTicketSource{
+			SourceKind: "plan_tracking",
+			SourceRef:  ".chr/default/plans/onboarding-plan.md",
+			Slice:      "Slice 4",
+		}, IndexedTicketTimes: IndexedTicketTimes{
+			CreatedAt: timePtr(createdAt),
+			UpdatedAt: timePtr(updatedAt),
+		}, IndexedTicketProjection: IndexedTicketProjection{
+			FileMTime:   time.Date(2026, 5, 18, 14, 0, 0, 0, time.UTC),
+			FileSize:    123,
+			ContentHash: "hash",
+			IndexedAt:   time.Date(2026, 5, 18, 15, 0, 0, 0, time.UTC),
+		},
 	}
 }
 

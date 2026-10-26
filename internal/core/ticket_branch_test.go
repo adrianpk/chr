@@ -3,11 +3,7 @@ package core
 import "testing"
 
 func TestSelectTicketBranchUsesExistingMetadata(t *testing.T) {
-	selection, err := SelectTicketBranch(IndexedTicket{
-		Key:    "CHR-1",
-		Title:  "Build CLI game",
-		Branch: "feat/slice-1-cli-game",
-	})
+	selection, err := SelectTicketBranch(IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: IndexedTicketSummary{Title: "Build CLI game"}, IndexedTicketSource: IndexedTicketSource{Branch: "feat/slice-1-cli-game"}})
 	if err != nil {
 		t.Fatalf("SelectTicketBranch returned error: %v", err)
 	}
@@ -22,10 +18,7 @@ func TestSelectTicketBranchUsesExistingMetadata(t *testing.T) {
 }
 
 func TestSelectTicketBranchDerivesStableBranch(t *testing.T) {
-	selection, err := SelectTicketBranch(IndexedTicket{
-		Key:   "CHR-42",
-		Title: "Add CLI tic-tac-toe!",
-	})
+	selection, err := SelectTicketBranch(IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-42"}, IndexedTicketSummary: IndexedTicketSummary{Title: "Add CLI tic-tac-toe!"}})
 	if err != nil {
 		t.Fatalf("SelectTicketBranch returned error: %v", err)
 	}
@@ -40,7 +33,7 @@ func TestSelectTicketBranchDerivesStableBranch(t *testing.T) {
 }
 
 func TestSelectTicketBranchRejectsMissingKey(t *testing.T) {
-	_, err := SelectTicketBranch(IndexedTicket{Title: "Missing key"})
+	_, err := SelectTicketBranch(IndexedTicket{IndexedTicketSummary: IndexedTicketSummary{Title: "Missing key"}})
 	if err == nil {
 		t.Fatal("SelectTicketBranch returned nil error")
 	}

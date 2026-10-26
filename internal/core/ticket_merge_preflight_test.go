@@ -122,7 +122,7 @@ func TestRunTicketMergePreflightBlocksSerialRepair(t *testing.T) {
 		Ticket: ticket,
 		Tickets: []IndexedTicket{
 			ticket,
-			{Key: "CHR-1", Status: TicketStatusReadyForDev, ReviewState: "changes_requested"},
+			{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}, IndexedTicketReview: IndexedTicketReview{ReviewState: "changes_requested"}},
 		},
 		Remote: fakeTicketMergePreflightRemote{},
 	})
@@ -150,24 +150,25 @@ func testMergePreflightTicket() IndexedTicket {
 	now := time.Date(2026, 6, 2, 12, 0, 0, 0, time.UTC)
 
 	return IndexedTicket{
-		ProjectID:    "project-1",
-		Path:         "/tmp/project/.chr/default/tickets/CHR-2-Test.md",
-		RelativePath: "CHR-2-Test.md",
-		Key:          "CHR-2",
-		Title:        "Test ticket",
-		Status:       TicketStatusReadyForMerge,
-		Branch:       "feat/slice-2-merger-preflight",
-		ReviewState:  TicketReviewCommandResultPass,
-		ReviewResult: TicketReviewCommandResultPass,
-		ReviewRefs: []TicketReviewRef{{
-			Type:     "pull_request",
-			Provider: "forgejo",
-			URL:      "https://forge.example.com/owner/repo/pulls/284",
-			ID:       "284",
-			Status:   "open",
-		}},
-		CreatedAt: &now,
-		UpdatedAt: &now,
+		IndexedTicketIdentity: IndexedTicketIdentity{
+			ProjectID:    "project-1",
+			Path:         "/tmp/project/.chr/default/tickets/CHR-2-Test.md",
+			RelativePath: "CHR-2-Test.md",
+			Key:          "CHR-2",
+		}, IndexedTicketSummary: IndexedTicketSummary{Title: "Test ticket"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForMerge}, IndexedTicketSource: IndexedTicketSource{Branch: "feat/slice-2-merger-preflight"}, IndexedTicketReview: IndexedTicketReview{
+			ReviewState:  TicketReviewCommandResultPass,
+			ReviewResult: TicketReviewCommandResultPass,
+			ReviewRefs: []TicketReviewRef{{
+				Type:     "pull_request",
+				Provider: "forgejo",
+				URL:      "https://forge.example.com/owner/repo/pulls/284",
+				ID:       "284",
+				Status:   "open",
+			}},
+		}, IndexedTicketTimes: IndexedTicketTimes{
+			CreatedAt: &now,
+			UpdatedAt: &now,
+		},
 	}
 }
 
