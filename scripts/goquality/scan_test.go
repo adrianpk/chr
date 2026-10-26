@@ -21,6 +21,8 @@ func TestScanShapes(t *testing.T) {
 		{"interface", "type T interface { f(a, b int) (int, string, error) }", 2, 3},
 		{"function type", "type f func(a, b int) (int, bool)", 2, 2},
 		{"literal", "var f = func(a, b int) bool { return false }", 2, 1},
+		{"variable callback", "var f func(a, b int) (int, string, error)", 2, 3},
+		{"embedded interface", "type T interface { interface { f(a int) (int, string, error) } }", 1, 3},
 	}
 	for _, item := range cases {
 		t.Run(item.name, func(t *testing.T) {
@@ -46,14 +48,7 @@ func scanFixture(t *testing.T, files map[string]string) sourceScan {
 	}
 
 	for name, source := range files {
-		path := filepath.Join(root, name)
-		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-			t.Fatal(err)
-		}
-
-		if err := os.WriteFile(path, []byte(source), 0o600); err != nil {
-			t.Fatal(err)
-		}
+		writeFixture(t, root, name, source)
 	}
 
 	scan, err := scanSources(root)
@@ -62,4 +57,17 @@ func scanFixture(t *testing.T, files map[string]string) sourceScan {
 	}
 
 	return scan
+}
+
+func writeFixture(t *testing.T, root, name, source string) {
+	t.Helper()
+
+	path := filepath.Join(root, name)
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(path, []byte(source), 0o600); err != nil {
+		t.Fatal(err)
+	}
 }

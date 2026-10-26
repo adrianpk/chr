@@ -27,6 +27,7 @@ type sourceScan struct {
 	Declarations []declaration       `json:"declarations"`
 	Calls        map[string][]string `json:"calls"`
 	aliases      map[string]ast.Expr
+	defined      map[string]bool
 	files        *token.FileSet
 	path         string
 	packagePath  string
@@ -71,7 +72,7 @@ func ownedSource(path string) bool {
 }
 
 func scanSources(root string) (sourceScan, error) {
-	scan := sourceScan{files: token.NewFileSet(), aliases: map[string]ast.Expr{}, Calls: map[string][]string{}}
+	scan := sourceScan{files: token.NewFileSet(), aliases: map[string]ast.Expr{}, defined: map[string]bool{}, Calls: map[string][]string{}}
 
 	paths, err := productionFiles(root)
 	if err != nil {
@@ -97,14 +98,28 @@ func scanSources(root string) (sourceScan, error) {
 }
 
 func (scan *sourceScan) collectAliases(path string, file *ast.File) {
-	ast.Inspect(file, func(node ast.Node) bool {
-		spec, ok := node.(*ast.TypeSpec)
-		if ok && spec.Assign.IsValid() {
-			scan.aliases[filepath.Dir(path)+"/"+spec.Name.Name] = spec.Type
+	for _, declaration := range file.Decls {
+		group, ok := declaration.(*ast.GenDecl)
+		if ok {
+			scan.collectPackageTypes(filepath.Dir(path), group)
+		}
+	}
+}
+
+func (scan *sourceScan) collectPackageTypes(packagePath string, group *ast.GenDecl) {
+	for _, candidate := range group.Specs {
+		spec, ok := candidate.(*ast.TypeSpec)
+		if !ok {
+			continue
 		}
 
-		return true
-	})
+		key := packagePath + "/" + spec.Name.Name
+		if spec.Assign.IsValid() {
+			scan.aliases[key] = spec.Type
+		} else {
+			scan.defined[key] = true
+		}
+	}
 }
 
 func (scan *sourceScan) scanFile(path string, file *ast.File) {
@@ -180,6 +195,10 @@ func (scan *sourceScan) scanSpec(spec ast.Spec) {
 	case *ast.TypeSpec:
 		scan.scanType(value)
 	case *ast.ValueSpec:
+		if value.Type != nil {
+			scan.scanNested(value.Names[0].Name+"/type", value.Type)
+		}
+
 		for index, expression := range value.Values {
 			name := value.Names[0].Name
 			if index < len(value.Names) {
@@ -207,6 +226,8 @@ func (scan *sourceScan) scanType(value *ast.TypeSpec) {
 					scan.addSignature(value.Name.Name+"."+name.Name, function)
 					scan.scanFunctionTypes(value.Name.Name+"."+name.Name, function)
 				}
+			} else {
+				scan.scanNested(value.Name.Name+"/embedded", field.Type)
 			}
 		}
 
@@ -287,16 +308,18 @@ func (scan *sourceScan) resultType(expression ast.Expr, seen map[string]bool) st
 		return render(expression)
 	}
 
-	key := scan.packagePath + "/" + identifier.Name
+	binding := scan.aliasBinding(identifier)
+	if binding.defined && (identifier.Name == "bool" || identifier.Name == "error") {
+		return "defined " + identifier.Name
+	}
 
-	alias, exists := scan.aliases[key]
-	if !exists || seen[key] {
+	if binding.expression == nil || seen[binding.key] {
 		return identifier.Name
 	}
 
-	seen[key] = true
+	seen[binding.key] = true
 
-	return scan.resultType(alias, seen)
+	return scan.resultType(binding.expression, seen)
 }
 
 func render(node ast.Node) string {
