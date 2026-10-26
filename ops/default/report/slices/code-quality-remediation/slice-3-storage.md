@@ -1,6 +1,6 @@
 # Slice 3: Stable records and positional SQL
 
-Status: reviewing
+Status: delivered
 Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
@@ -100,3 +100,9 @@ candidate results.
 ## Risks and Follow-ups
 
 None recorded.
+
+Integration: PR #440 was verified merged into dev at `fec20d73396156cf8f389fb11e68de8ca0cadcf1`. Final candidate checks passed in controller order:
+
+- `make verify` — passed.
+- `go test ./internal/core ./internal/app -run '^Test(QualityRecordWire|QualityStorage|WorkflowMerger|WorkflowInvocation|TicketIndex|ExecutionRepository|RemoteCommandRecordRepository|NotificationEventRepository|TelegramPresentation|TelegramReceiverBatch|TelegramReceiverMigration|TelegramConversation)' -count=1 -timeout=3m` — passed.
+- `git diff --check` — passed.
