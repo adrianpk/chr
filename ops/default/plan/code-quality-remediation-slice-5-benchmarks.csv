@@ -1,0 +1,16 @@
+phase,scenario,sample,ns_per_op,bytes_per_op,allocs_per_op,model_bytes
+before,Update/idle,1,47125,229379,4,49832
+before,Update/idle,2,54428,229376,4,49832
+before,Update/idle,3,51532,229376,4,49832
+before,Update/focus,1,85033,345162,15,49832
+before,Update/focus,2,88149,345161,15,49832
+before,Update/focus,3,99219,345162,15,49832
+before,Update/resize,1,41288,172032,3,49832
+before,Update/resize,2,42136,172032,3,49832
+before,Update/resize,3,38173,172032,3,49832
+before,View/shell=false,1,235489,435290,703,
+before,View/shell=false,2,192966,435284,703,
+before,View/shell=false,3,225533,435290,703,
+before,View/shell=true,1,692490,551454,1404,
+before,View/shell=true,2,803160,551601,1404,
+before,View/shell=true,3,639688,549483,1404,

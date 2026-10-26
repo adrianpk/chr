@@ -6,7 +6,7 @@ Delivery set: code-quality-remediation
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 5, TUI model ownership and Web view sections; ready after verified integration of PR #441.
+Active slice: Slice 5, TUI model ownership and Web view sections; in progress on its approved branch after verified integration of PR #441.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b`
 
 Plan: [Single-cycle plan](../plan/code-quality-remediation.md)
@@ -90,7 +90,7 @@ The maintainer approved implementation, conventional commit/push and startup of 
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T5.1 | Measure the existing Model Update and View paths with a small benchmark before changing receivers. Make *Model the Bubble Tea model and group navigation, interaction, layout, background work and per-view state by owner. | pending | — | not run |
+| T5.1 | Measure the existing Model Update and View paths with a small benchmark before changing receivers. Make *Model the Bubble Tea model and group navigation, interaction, layout, background work and per-view state by owner. | in_progress | benchmark task commit | baseline Update/View benchmark passed before receiver changes; 49,832-byte model and 172-345 KB allocated per sampled Update |
 | T5.2 | Convert internal update helpers into pointer-receiver methods returning tea.Cmd or a named outcome. Retain only externally imposed interface signatures, initially Model.Update. Inspect captured commands, message ordering, cancellation, snapshots and test assumptions for aliasing or concurrent mutation. | pending | — | not run |
 | T5.3 | Split model.go and shell.go by view responsibility; express action dispatch and key hints as data where this is clearer. Resolve duplicate pairs D01 and D11 and the TUI plan-action adapter switch while preserving focus, empty states and mode-specific actions. | pending | — | not run |
 | T5.4 | Split GuidedUseCaseView by existing page sections and WorkflowWorkStatus by cohesive projection components. Keep application service results adapter-neutral, preserve public JSON via the model contract, and keep the current Web forms and visual language. | pending | — | not run |
