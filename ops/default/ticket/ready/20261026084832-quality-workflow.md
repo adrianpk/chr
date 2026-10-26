@@ -1,0 +1,58 @@
+---
+id: TKT-20261026084832
+title: "Quality slice 12: Workflow state, store and coordinator package"
+status: ready
+kind: cleanup
+severity: unclassified
+priority: normal
+scope: domain
+tags: code-quality, remediation, slice-12
+source: review
+reported_at: 2026-10-26T08:48:32Z
+commits: []
+ready_at: 2026-10-26T08:57:09Z
+---
+
+# Quality Slice 12: Workflow state, store and coordinator package
+
+Delivery set: code-quality-remediation
+Plan: [Single-cycle plan](../../plan/code-quality-remediation.md)
+Tracker: [Task evidence](../../tracker/code-quality-remediation.md)
+Spec: [Requirements](../../spec/code-quality-remediation.md)
+Model: [Compatibility](../../spec/code-quality-remediation-model.md)
+Source: [Review findings](../../report/code-quality-review-2026-10-26/report.md)
+
+## Problem and evidence
+
+This review unit owns R1, R2, R3, R5, R6, R10 as scoped in the plan, including every assigned declaration in [the baseline inventory](../../plan/code-quality-remediation-inventory.csv). Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b`. It is part of one 16-slice delivery set, not a separate runtime work invocation.
+
+## Work
+
+1. **T12.1:** Freeze an explicit map of all current WorkflowStore methods: durable read/mutation/transaction, coordinator, integration, merge, forge/review or closeout. Retain one persistence/locking authority and identify every transaction and recovery boundary.
+2. **T12.2:** Move the workflow family and its actual callers to internal/core/workflow as a compiling mechanical relocation. Put shared workflow values under internal/core/workflow/state only where stages must share them without importing their coordinator. Never split methods of a nonlocal Go type across packages.
+3. **T12.3:** Separate storage and mutation from workflow policy. Define consumer-owned, cohesive stage ports implemented by the store/coordinator; move logic to stage-owned methods/functions in subsequent slices. Keep lock acquisition, journaling and atomic multi-record writes at their current owner.
+4. **T12.4:** Replace the assigned store/coordinator tuple results and repeated inputs with named results and typed modes/states. Deduplicate receipt writing D08 only after confirming operation receipt semantics match.
+5. **T12.5:** Switch app, authoring, ticket and adapters to the new workflow boundary. Any temporary compile-time type bridge must be enumerated with an owning removal task by Slice 15; no new exported internals solely to bypass package privacy.
+6. **T12.6:** Run the required focused checks and make verify; record results, update the ticket/tracker, produce this slice report, and verify its dev integration before marking it delivered.
+
+## Acceptance criteria
+
+1. Workflow files have a real package owner and compatible state encodings; stage interfaces do not depend on the coordinator; one store owns transactions and recovery.
+2. Every assigned baseline entry has a precise fixed or retained-contract disposition, linked to task commit and actual validation.
+3. Existing authoring/execution/approval/recovery and durable/wire/hash contracts are preserved as required by the specification and model.
+4. The slice compiles and passes its focused selection, make verify and git diff --check; its report and tracker identify the actual evidence boundary.
+
+## Dependencies and delivery
+
+Predecessor: verified integration of Slice 11 into dev.
+Planned branch: `refactor/slice-12-quality-workflow`.
+Expected PR title: `refactor(slice-12): establish workflow state and persistence boundaries`.
+Expected report: `ops/default/report/slices/code-quality-remediation/slice-12-workflow.md`.
+
+The tracker owns task execution; this ticket mirrors verified slice state. The maintainer approved this delivery set on 2026-10-26; this ticket is ready subject to its recorded predecessor. Use the normal in_progress/reviewing/solved transitions and record real commits and PR only when they exist. No independent ticket branch or extra PR is added beside the slice PR.
+
+## Validation selection
+
+Existing WorkflowRoundTrip, mutation/receipt/idempotency/materialization and process recovery regressions on owned filesystem/Git; make verify.
+
+All commands above are planned. None ran as implementation validation during this planning task.
