@@ -9,9 +9,10 @@ scope: domain
 tags: code-quality, remediation, slice-4
 source: review
 reported_at: 2026-10-26T08:48:24Z
-commits: [c6da9e52f81ab6a2260dfbaa3e374c6dce3e6bfa, 398dbf67a8aa92ac0bd45a9c6aac313fec6b3d88, 1f0c7c7c2f8237bef5653c975623a55d4b77b36a, f40d62d4775628abf58d527d93e11e8fae557a7e, 42db97f8af41b95f61120415afdc16931891b47c]
+commits: [03f576b9f7e35fa8f2f6c43f617bfd0c64c4b20b, c6da9e52f81ab6a2260dfbaa3e374c6dce3e6bfa, 398dbf67a8aa92ac0bd45a9c6aac313fec6b3d88, 1f0c7c7c2f8237bef5653c975623a55d4b77b36a, f40d62d4775628abf58d527d93e11e8fae557a7e, 42db97f8af41b95f61120415afdc16931891b47c]
 started_at: 2026-10-26T10:38:54Z
 branch: refactor/slice-4-quality-commands
+pr: https://forge.adrianpk.com/adrianpk/chr/pulls/441
 reviewing_at: 2026-10-26T11:35:18Z
 ready_at: 2026-10-26T08:57:09Z
 ---
@@ -60,4 +61,4 @@ CLI command-construction and ticket loop/start/review/merge regressions with rea
 
 All commands above are planned. None ran as implementation validation during this planning task.
 
-Implementation: all five implementation tasks are committed; [Slice 4 report](../../report/slices/code-quality-remediation/slice-4-commands.md) and tracker hold contract and check evidence. Canonical PR reference and final exact-HEAD controller validation follow before handoff.
+Implementation: all five implementation tasks are committed; [Slice 4 report](../../report/slices/code-quality-remediation/slice-4-commands.md) and tracker hold contract and check evidence. Canonical PR: [#441](https://forge.adrianpk.com/adrianpk/chr/pulls/441). Final validation uses the clean PR-reference HEAD through the controller before handoff.
