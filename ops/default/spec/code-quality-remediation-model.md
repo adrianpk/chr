@@ -99,3 +99,13 @@ the producer, SHA-256, eight table counts and clean foreign-key check. Expected
 records retain distinct same-type fields, fixed timestamps, NULL optionals, and
 empty versus nil remote loop lists. Validation copies and opens this database;
 it never regenerates the fixture.
+
+All eight affected tables now have one named row holder and one static ordered
+column definition. Execution, remote command, notification event and ticket
+rows pair values and scan targets; the conversation row preserves its existing
+COALESCE projection. Inbox and document rows retain table-specific write-only
+admission shapes. The receiver document owner_kind remains the static receiver
+literal, and both document tables share only their identical quota predicate.
+Updates retain their exact SET/WHERE contracts; ID-last arguments derive from
+the same row values. Existing enum/time/JSON decoding and NULL conversion remain
+unchanged. No schema or migration changes accompany these mappings.

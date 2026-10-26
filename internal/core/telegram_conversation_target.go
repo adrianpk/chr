@@ -8,8 +8,6 @@ import (
 	"strings"
 )
 
-const telegramConversationColumns = `id,bot_id,chat_id,topic_id,user_id,project_id,project_binding_digest,namespace,intent,phase,topic,capture,question_binding,COALESCE(authoring_session_ref,''),COALESCE(authorization_ref,''),revision,COALESCE(invocation_id,''),COALESCE(last_observed_revision,0),COALESCE(guided_run_id,'')`
-
 type telegramConversationReader interface {
 	QueryContext(context.Context, string, ...any) (*sql.Rows, error)
 	QueryRowContext(context.Context, string, ...any) *sql.Row
@@ -44,12 +42,12 @@ func readTelegramConversations(ctx context.Context, reader telegramConversationR
 	return result, rows.Err()
 }
 
-func scanTelegramConversation(row interface{ Scan(...any) error }) (TelegramConversation, error) {
-	var c TelegramConversation
+func scanTelegramConversation(scanner interface{ Scan(...any) error }) (TelegramConversation, error) {
+	var row telegramConversationRow
 
-	err := row.Scan(&c.ID, &c.Peer.BotID, &c.Peer.ChatID, &c.Peer.TopicID, &c.Peer.UserID, &c.ProjectID, &c.ProjectBindingDigest, &c.Namespace, &c.Intent, &c.Phase, &c.Topic, &c.Capture, &c.QuestionBinding, &c.AuthoringSessionRef, &c.AuthorizationRef, &c.Revision, &c.InvocationID, &c.LastObservedRevision, &c.GuidedRunID)
+	err := scanner.Scan(row.scanTargets()...)
 
-	return c, err
+	return row.conversation, err
 }
 
 func (op telegramConversationTransaction) conversation(id string) (*TelegramConversation, error) {

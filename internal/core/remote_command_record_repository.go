@@ -84,32 +84,7 @@ func (r *sqliteRemoteCommandRecordRepository) CreateRemoteCommandRecord(
 		return err
 	}
 
-	request := record.Request
-
-	_, err = r.db.ExecContext(ctx, insertRemoteCommandRecordSQL(),
-		request.ID,
-		string(record.Status),
-		request.Sender.Channel,
-		request.Sender.ExternalID,
-		request.Sender.DisplayName,
-		request.ProjectSelector,
-		string(request.Intent),
-		request.TicketKey,
-		request.Comment,
-		mustEncodeRemoteCommandValues(request.Loop.Statuses),
-		mustEncodeRemoteCommandValues(request.Loop.Priorities),
-		mustEncodeRemoteCommandValues(request.Loop.Severities),
-		mustEncodeRemoteCommandValues(request.Loop.ProjectAreas),
-		mustEncodeRemoteCommandValues(request.Loop.Tags),
-		mustEncodeRemoteCommandValues(request.Loop.Types),
-		mustEncodeRemoteCommandValues(request.Loop.UseCases),
-		request.Loop.MaxIterations,
-		request.RawText,
-		record.HandoffCommand,
-		record.RejectionReason,
-		formatProjectTime(request.ReceivedAt),
-		formatProjectTime(request.CreatedAt),
-	)
+	_, err = r.db.ExecContext(ctx, insertRemoteCommandRecordSQL(), (remoteCommandRow{record: record}).values()...)
 	if err != nil {
 		return fmt.Errorf("create remote command record: %w", err)
 	}
@@ -184,41 +159,12 @@ type remoteCommandRecordScanner interface {
 }
 
 func scanRemoteCommandRecord(scanner remoteCommandRecordScanner) (RemoteCommandRecord, error) {
-	var record RemoteCommandRecord
-
-	var status, intent, receivedAt, createdAt string
-
-	var loop remoteCommandLoopColumns
-
-	err := scanner.Scan(
-		&record.Request.ID,
-		&status,
-		&record.Request.Sender.Channel,
-		&record.Request.Sender.ExternalID,
-		&record.Request.Sender.DisplayName,
-		&record.Request.ProjectSelector,
-		&intent,
-		&record.Request.TicketKey,
-		&record.Request.Comment,
-		&loop.Statuses,
-		&loop.Priorities,
-		&loop.Severities,
-		&loop.ProjectAreas,
-		&loop.Tags,
-		&loop.Types,
-		&loop.UseCases,
-		&record.Request.Loop.MaxIterations,
-		&record.Request.RawText,
-		&record.HandoffCommand,
-		&record.RejectionReason,
-		&receivedAt,
-		&createdAt,
-	)
-	if err != nil {
+	var row remoteCommandRow
+	if err := scanner.Scan(row.scanTargets()...); err != nil {
 		return RemoteCommandRecord{}, fmt.Errorf("scan remote command record: %w", err)
 	}
 
-	return finishScannedRemoteCommandRecord(record, status, intent, receivedAt, createdAt, loop)
+	return finishScannedRemoteCommandRecord(row.record, row.status, row.intent, row.receivedAt, row.createdAt, row.loop)
 }
 
 type remoteCommandLoopColumns struct {
@@ -306,26 +252,6 @@ func decodeRemoteCommandLoop(
 	}
 
 	return loop, nil
-}
-
-func insertRemoteCommandRecordSQL() string {
-	return `INSERT INTO remote_command_records (
-    id, status, channel, sender_external_id, sender_display_name,
-    project_selector, intent, ticket_key, comment, loop_statuses,
-    loop_priorities, loop_severities, loop_project_areas, loop_tags,
-    loop_types, loop_use_cases, loop_max_iterations, raw_text,
-    handoff_command, rejection_reason, received_at, created_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-}
-
-func selectRemoteCommandRecordSQL() string {
-	return `SELECT
-    id, status, channel, sender_external_id, sender_display_name,
-    project_selector, intent, ticket_key, comment, loop_statuses,
-    loop_priorities, loop_severities, loop_project_areas, loop_tags,
-    loop_types, loop_use_cases, loop_max_iterations, raw_text,
-    handoff_command, rejection_reason, received_at, created_at
-FROM remote_command_records`
 }
 
 func mustEncodeRemoteCommandValues(values []string) string {

@@ -17,7 +17,7 @@ func (r *sqliteNotificationEventRepository) CreateTelegramNotification(ctx conte
 	}
 
 	return r.notificationTransaction(ctx, func(tx *sql.Tx) error {
-		if _, err := tx.ExecContext(ctx, insertNotificationEventSQL(), notificationEventArguments(input.Record)...); err != nil {
+		if _, err := tx.ExecContext(ctx, insertNotificationEventSQL(), (notificationEventRow{record: input.Record}).values()...); err != nil {
 			return err
 		}
 
@@ -97,10 +97,9 @@ func validateTelegramNotificationDocument(document *TelegramDocument, target Tel
 }
 
 func retainTelegramNotificationDocument(ctx context.Context, tx *sql.Tx, input TelegramNotificationInput, id string) error {
-	d, target := input.Document, input.Target
+	row := telegramNotificationDocumentRow{id: id, owner: input.Record.Event.ID, target: input.Target, document: *input.Document, createdAt: input.Record.Event.CreatedAt}
 
-	result, err := tx.ExecContext(ctx, `INSERT INTO telegram_notification_documents(id,owner_id,destination,config_digest,project_id,namespace,project_binding_digest,source_ref,source_hash,content_hash,filename,media_type,byte_count,payload,created_at)
- SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,?,? WHERE (SELECT COALESCE(SUM(length(payload)),0) FROM telegram_document_snapshots)+(SELECT COALESCE(SUM(length(payload)),0) FROM telegram_notification_documents)+?<=?`, id, input.Record.Event.ID, target.Destination, target.ConfigDigest, d.ProjectID, d.Namespace, d.ProjectBindingDigest, d.SourceRef, d.SourceHash, workflowHash(d.Payload), d.Filename, d.MediaType, len(d.Payload), d.Payload, formatProjectTime(input.Record.Event.CreatedAt), len(d.Payload), telegramDocumentQuota)
+	result, err := tx.ExecContext(ctx, insertTelegramNotificationDocumentSQL, row.values()...)
 	if err != nil {
 		return err
 	}

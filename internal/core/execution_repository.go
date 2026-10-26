@@ -92,33 +92,7 @@ func (r *sqliteExecutionRepository) CreateExecution(ctx context.Context, record 
 		return err
 	}
 
-	_, err = r.db.ExecContext(ctx, insertExecutionSQL(),
-		record.ID,
-		record.ProjectID,
-		record.TicketKey,
-		record.TicketPath,
-		string(record.Status),
-		record.Runtime.Image,
-		record.Runtime.DockerfilePath,
-		record.Runtime.ContainerWorkdir,
-		record.Runtime.ValidationCommand,
-		string(record.Workspace.Mode),
-		record.Workspace.ProjectCheckoutDir,
-		record.Workspace.ExecutionWorkspaceDir,
-		record.Workspace.BaseRef,
-		record.Workspace.BaseSHA,
-		record.Workspace.TicketBranch,
-		record.Artifacts.ArtifactID,
-		record.Artifacts.RunDir,
-		record.Artifacts.ResultPath,
-		record.Artifacts.LogPath,
-		record.Artifacts.ValidationPath,
-		record.FailureReason,
-		formatProjectTime(record.CreatedAt),
-		formatOptionalExecutionTime(record.StartedAt),
-		formatOptionalExecutionTime(record.FinishedAt),
-		formatProjectTime(record.UpdatedAt),
-	)
+	_, err = r.db.ExecContext(ctx, insertExecutionSQL(), (executionRow{record: record}).values()...)
 	if err != nil {
 		return fmt.Errorf("create execution: %w", err)
 	}
@@ -289,58 +263,12 @@ type executionRecordTimes struct {
 }
 
 func scanExecution(scanner executionScanner) (ExecutionRecord, error) {
-	var record ExecutionRecord
-
-	var status, workspaceMode string
-
-	var createdAt, updatedAt string
-
-	var startedAt, finishedAt sql.NullString
-
-	err := scanner.Scan(
-		&record.ID,
-		&record.ProjectID,
-		&record.TicketKey,
-		&record.TicketPath,
-		&status,
-		&record.Runtime.Image,
-		&record.Runtime.DockerfilePath,
-		&record.Runtime.ContainerWorkdir,
-		&record.Runtime.ValidationCommand,
-		&workspaceMode,
-		&record.Workspace.ProjectCheckoutDir,
-		&record.Workspace.ExecutionWorkspaceDir,
-		&record.Workspace.BaseRef,
-		&record.Workspace.BaseSHA,
-		&record.Workspace.TicketBranch,
-		&record.Artifacts.ArtifactID,
-		&record.Artifacts.RunDir,
-		&record.Artifacts.ResultPath,
-		&record.Artifacts.LogPath,
-		&record.Artifacts.ValidationPath,
-		&record.FailureReason,
-		&createdAt,
-		&startedAt,
-		&finishedAt,
-		&updatedAt,
-	)
-	if err != nil {
+	var row executionRow
+	if err := scanner.Scan(row.scanTargets()...); err != nil {
 		return ExecutionRecord{}, fmt.Errorf("scan execution: %w", err)
 	}
 
-	times, err := parseExecutionRecordTimes(createdAt, updatedAt, startedAt, finishedAt)
-	if err != nil {
-		return ExecutionRecord{}, err
-	}
-
-	record.Status = ExecutionStatus(status)
-	record.Workspace.Mode = WorkWorkspaceMode(workspaceMode)
-	record.CreatedAt = times.CreatedAt
-	record.UpdatedAt = times.UpdatedAt
-	record.StartedAt = times.StartedAt
-	record.FinishedAt = times.FinishedAt
-
-	return record, nil
+	return row.decoded()
 }
 
 func parseExecutionRecordTimes(createdAt, updatedAt string, startedAt, finishedAt sql.NullString) (executionRecordTimes, error) {
@@ -372,18 +300,6 @@ func parseExecutionRecordTimes(createdAt, updatedAt string, startedAt, finishedA
 	}, nil
 }
 
-func insertExecutionSQL() string {
-	return `INSERT INTO execution_records (
-    id, project_id, ticket_key, ticket_path, status,
-    runtime_image, runtime_dockerfile_path, runtime_container_workdir,
-    runtime_validation_command, workspace_mode, workspace_project_checkout_dir,
-    workspace_execution_dir, workspace_base_ref, workspace_base_sha,
-    workspace_ticket_branch, artifact_id, artifact_run_dir, artifact_result_path,
-    artifact_log_path, artifact_validation_path, failure_reason,
-    created_at, started_at, finished_at, updated_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-}
-
 func updateExecutionSQL() string {
 	return `UPDATE execution_records
 SET project_id = ?, ticket_key = ?, ticket_path = ?, status = ?,
@@ -394,17 +310,6 @@ SET project_id = ?, ticket_key = ?, ticket_path = ?, status = ?,
     artifact_log_path = ?, artifact_validation_path = ?, failure_reason = ?,
     created_at = ?, started_at = ?, finished_at = ?, updated_at = ?
 WHERE id = ?`
-}
-
-func selectExecutionSQL() string {
-	return `SELECT id, project_id, ticket_key, ticket_path, status,
-    runtime_image, runtime_dockerfile_path, runtime_container_workdir,
-    runtime_validation_command, workspace_mode, workspace_project_checkout_dir,
-    workspace_execution_dir, workspace_base_ref, workspace_base_sha,
-    workspace_ticket_branch, artifact_id, artifact_run_dir, artifact_result_path,
-    artifact_log_path, artifact_validation_path, failure_reason,
-    created_at, started_at, finished_at, updated_at
-FROM execution_records`
 }
 
 func formatOptionalExecutionTime(value *time.Time) any {

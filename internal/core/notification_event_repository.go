@@ -94,7 +94,7 @@ func (r *sqliteNotificationEventRepository) CreateNotificationEvent(
 		return err
 	}
 
-	_, err = r.db.ExecContext(ctx, insertNotificationEventSQL(), notificationEventArguments(record)...)
+	_, err = r.db.ExecContext(ctx, insertNotificationEventSQL(), (notificationEventRow{record: record}).values()...)
 	if err != nil {
 		return fmt.Errorf("create notification event: %w", err)
 	}
@@ -114,25 +114,9 @@ func (r *sqliteNotificationEventRepository) UpdateNotificationEvent(
 
 	event := record.Event
 
-	result, err := r.db.ExecContext(ctx, updateNotificationEventSQL(),
-		event.ProjectID,
-		string(event.Type),
-		string(event.Severity),
-		string(event.Status),
-		string(event.Source),
-		record.Channel,
-		event.References.TicketKey,
-		event.References.ExecutionID,
-		event.References.LoopRunID,
-		event.References.DaemonPID,
-		event.Payload.Summary,
-		event.Payload.Detail,
-		event.FailureReason,
-		formatProjectTime(event.CreatedAt),
-		formatOptionalNotificationTime(event.DeliveredAt),
-		formatProjectTime(event.UpdatedAt),
-		event.ID,
-	)
+	values := (notificationEventRow{record: record}).values()
+
+	result, err := r.db.ExecContext(ctx, updateNotificationEventSQL(), append(values[1:], values[0])...)
 	if err != nil {
 		return fmt.Errorf("update notification event: %w", err)
 	}
@@ -226,68 +210,36 @@ type notificationAuditScanner interface {
 }
 
 func scanNotificationAuditRecord(scanner notificationAuditScanner) (NotificationAuditRecord, error) {
-	var record NotificationAuditRecord
-
-	var eventType, severity, status, source string
-
-	var createdAt, updatedAt string
-
-	var deliveredAt sql.NullString
-
-	err := scanner.Scan(
-		&record.Event.ID,
-		&record.Event.ProjectID,
-		&eventType,
-		&severity,
-		&status,
-		&source,
-		&record.Channel,
-		&record.Event.References.TicketKey,
-		&record.Event.References.ExecutionID,
-		&record.Event.References.LoopRunID,
-		&record.Event.References.DaemonPID,
-		&record.Event.Payload.Summary,
-		&record.Event.Payload.Detail,
-		&record.Event.FailureReason,
-		&createdAt,
-		&deliveredAt,
-		&updatedAt,
-	)
-	if err != nil {
+	var row notificationEventRow
+	if err := scanner.Scan(row.scanTargets()...); err != nil {
 		return NotificationAuditRecord{}, fmt.Errorf("scan notification event: %w", err)
 	}
 
-	parsedCreatedAt, err := parseProjectTime(createdAt)
+	record := row.record
+
+	parsedCreatedAt, err := parseProjectTime(row.createdAt)
 	if err != nil {
 		return NotificationAuditRecord{}, err
 	}
 
-	parsedUpdatedAt, err := parseProjectTime(updatedAt)
+	parsedUpdatedAt, err := parseProjectTime(row.updatedAt)
 	if err != nil {
 		return NotificationAuditRecord{}, err
 	}
 
-	record.Event.Type = NotificationEventType(eventType)
-	record.Event.Severity = NotificationSeverity(severity)
-	record.Event.Status = NotificationStatus(status)
-	record.Event.Source = NotificationSource(source)
+	record.Event.Type = NotificationEventType(row.eventType)
+	record.Event.Severity = NotificationSeverity(row.severity)
+	record.Event.Status = NotificationStatus(row.status)
+	record.Event.Source = NotificationSource(row.source)
 	record.Event.CreatedAt = parsedCreatedAt
 	record.Event.UpdatedAt = parsedUpdatedAt
 
-	record.Event.DeliveredAt, err = parseOptionalNotificationTime(deliveredAt)
+	record.Event.DeliveredAt, err = parseOptionalNotificationTime(row.deliveredAt)
 	if err != nil {
 		return NotificationAuditRecord{}, err
 	}
 
 	return record, nil
-}
-
-func insertNotificationEventSQL() string {
-	return `INSERT INTO notification_events (
-    id, project_id, type, severity, status, source, channel, ticket_key,
-    execution_id, loop_run_id, daemon_pid, summary, detail, failure_reason,
-    created_at, delivered_at, updated_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 }
 
 func updateNotificationEventSQL() string {
@@ -297,13 +249,6 @@ SET project_id = ?, type = ?, severity = ?, status = ?, source = ?,
     daemon_pid = ?, summary = ?, detail = ?, failure_reason = ?,
     created_at = ?, delivered_at = ?, updated_at = ?
 WHERE id = ?`
-}
-
-func selectNotificationEventSQL() string {
-	return `SELECT id, project_id, type, severity, status, source, channel,
-    ticket_key, execution_id, loop_run_id, daemon_pid, summary, detail,
-    failure_reason, created_at, delivered_at, updated_at
-FROM notification_events`
 }
 
 func formatOptionalNotificationTime(value *time.Time) any {
@@ -325,10 +270,4 @@ func parseOptionalNotificationTime(value sql.NullString) (*time.Time, error) {
 	}
 
 	return &parsed, nil
-}
-
-func notificationEventArguments(record NotificationAuditRecord) []any {
-	event := record.Event
-
-	return []any{event.ID, event.ProjectID, string(event.Type), string(event.Severity), string(event.Status), string(event.Source), record.Channel, event.References.TicketKey, event.References.ExecutionID, event.References.LoopRunID, event.References.DaemonPID, event.Payload.Summary, event.Payload.Detail, event.FailureReason, formatProjectTime(event.CreatedAt), formatOptionalNotificationTime(event.DeliveredAt), formatProjectTime(event.UpdatedAt)}
 }

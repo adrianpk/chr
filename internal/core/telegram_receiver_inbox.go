@@ -102,10 +102,9 @@ func retainTelegramUpdate(ctx context.Context, tx *sql.Tx, botID, epoch int64, u
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx, `INSERT INTO telegram_updates(bot_id,update_id,cursor_epoch,payload_digest,update_kind,
-chat_id,topic_id,user_id,message_id,chat_type,received_at,payload,state,reason_code,updated_at,reply_to_message_id,processing_lane,control_input) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-		botID, update.UpdateID, epoch, update.Digest, update.Kind, update.Peer.ChatID, update.Peer.TopicID, update.Peer.UserID,
-		update.MessageID, update.ChatType, formatProjectTime(now), update.Text, state, update.Reason, formatProjectTime(now), update.ReplyToMessageID, lane, control)
+	row := telegramUpdateRow{botID: botID, epoch: epoch, update: update, state: state, lane: lane, control: control, receivedAt: now}
+
+	_, err = tx.ExecContext(ctx, insertTelegramUpdateSQL, row.values()...)
 	if err != nil {
 		return err
 	}
