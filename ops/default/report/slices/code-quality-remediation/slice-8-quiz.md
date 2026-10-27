@@ -93,6 +93,10 @@ and opted-in trace payloads.
 - Pinned strict lint passed at the owning task checkpoints.
 - `git diff --check` — passed for task commits.
 
+The first controller `make verify` on `d3e7dd850007fbc1d4e10d40a4b002bbc078cdd2`
+stopped at the missing slug package README check. The package contract is now
+present; the focused package README check passes.
+
 Final clean-head validation uses make verify, focused non-short model/provider/
 service/retained-state checks, a focused capacity/deadline/recovery race selection,
 then git diff --check. The controller ledger and PR Validation own the exact
