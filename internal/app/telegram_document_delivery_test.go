@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"bytes"
 	"encoding/json"
@@ -179,7 +181,7 @@ func TestTelegramPresentationDeliveryRevocation(t *testing.T) {
 	receiver, config := telegramAppTestReceiver(t, core.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
 	queueTelegramDocumentFixture(t, receiver, config)
 
-	registry, err := core.NewProjectRegistry(t.Context(), receiver.env, testAssetsFS())
+	registry, err := projectcore.NewProjectRegistry(t.Context(), receiver.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}

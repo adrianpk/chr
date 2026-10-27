@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"crypto/sha256"
@@ -67,13 +69,13 @@ func telegramAppTestReceiver(t *testing.T, api core.TelegramReceiverAPI) (telegr
 func addTelegramAppTestProjects(t *testing.T, env core.UserEnvironment) {
 	t.Helper()
 
-	registry, err := core.NewProjectRegistry(t.Context(), env, testAssetsFS())
+	registry, err := projectcore.NewProjectRegistry(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	for _, id := range []string{"example-project", "disabled-project", "private-project"} {
-		project := core.Project{ID: id, Name: id, Path: t.TempDir(), Enabled: id != "disabled-project", RegisteredAt: time.Now()}
+		project := projectcore.Project{ID: id, Name: id, Path: t.TempDir(), Enabled: id != "disabled-project", RegisteredAt: time.Now()}
 		if err := registry.AddProject(t.Context(), project); err != nil {
 			t.Fatal(err)
 		}

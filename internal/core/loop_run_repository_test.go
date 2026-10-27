@@ -1,5 +1,7 @@
 package core
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"database/sql"
@@ -123,12 +125,12 @@ func newTestLoopRunRepository(t *testing.T) LoopRunRepository {
 
 	db.SetMaxOpenConns(1)
 
-	registry, err := NewProjectRegistryFromDB(context.Background(), db, testMigrationFS())
+	registry, err := projectcore.NewProjectRegistryFromDB(context.Background(), db, testMigrationFS())
 	if err != nil {
 		t.Fatalf("NewProjectRegistryFromDB returned error: %v", err)
 	}
 
-	addTestProject(t, registry, Project{
+	addTestProject(t, registry, projectcore.Project{
 		ID:           "project-1",
 		Name:         "chr",
 		Path:         "/tmp/chr",

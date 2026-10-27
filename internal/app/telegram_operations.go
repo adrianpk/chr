@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"fmt"
 	"strings"
@@ -30,7 +32,7 @@ func telegramReadRegistry() []telegramOperationDescriptor {
 }
 
 type telegramReadService interface {
-	ListRegisteredProjects(ids []string) ([]core.Project, error)
+	ListRegisteredProjects(ids []string) ([]projectcore.Project, error)
 	InspectTelegramReceiver(botID int64) (core.TelegramReceiverState, error)
 }
 

@@ -1,5 +1,7 @@
 package core
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"fmt"
@@ -17,7 +19,7 @@ type DiagnosticBundle struct {
 	ProjectDir             string
 	ProjectID              string
 	MigrationStatus        database.MigrationStatus
-	RegistryDiagnostics    []ProjectRegistryDiagnostic
+	RegistryDiagnostics    []projectcore.ProjectRegistryDiagnostic
 	ExecutionArtifactDrift []ExecutionArtifactDriftDiagnostic
 	RuntimeCleanupPreview  RuntimeArtifactCleanupPreview
 	Reports                []ReportListEntry
@@ -93,7 +95,7 @@ func writeDiagnosticBundleDatabase(output *strings.Builder, status database.Migr
 	output.WriteString("\n")
 }
 
-func writeDiagnosticBundleRegistry(output *strings.Builder, diagnostics []ProjectRegistryDiagnostic) {
+func writeDiagnosticBundleRegistry(output *strings.Builder, diagnostics []projectcore.ProjectRegistryDiagnostic) {
 	output.WriteString("## Project Registry\n\n")
 
 	for _, diagnostic := range diagnostics {

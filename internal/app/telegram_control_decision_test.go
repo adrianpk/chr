@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"fmt"
 	"strings"
@@ -24,12 +26,12 @@ func telegramControlDecisionFixture(t *testing.T, action string) (*telegramConve
 
 	f := newTelegramConversationAppFixture(t)
 
-	registry, err := core.NewProjectRegistry(t.Context(), f.receiver.env, testAssetsFS())
+	registry, err := projectcore.NewProjectRegistry(t.Context(), f.receiver.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	project := core.Project{ID: operations.projectContext.ProjectID, Name: "Control project", Path: operations.projectContext.ProjectDir, Enabled: true, RegisteredAt: time.Now()}
+	project := projectcore.Project{ID: operations.projectContext.ProjectID, Name: "Control project", Path: operations.projectContext.ProjectDir, Enabled: true, RegisteredAt: time.Now()}
 	if err := registry.AddProject(t.Context(), project); err != nil {
 		t.Fatal(err)
 	}

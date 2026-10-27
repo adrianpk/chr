@@ -1,5 +1,7 @@
 package core
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"errors"
 	"testing"
@@ -100,7 +102,7 @@ func TestTelegramWorkStatusGuards(t *testing.T) {
 		{"project conflict", func(i *TelegramConversationInput) { i.Project = "beta" }},
 		{"namespace conflict", func(i *TelegramConversationInput) { i.Namespace = "elsewhere" }},
 		{"changed root", func(i *TelegramConversationInput) {
-			i.Projects = append([]Project(nil), i.Projects...)
+			i.Projects = append([]projectcore.Project(nil), i.Projects...)
 			i.Projects[0].Path = t.TempDir()
 		}},
 	} {

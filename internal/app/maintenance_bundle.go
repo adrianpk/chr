@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"fmt"
@@ -111,8 +113,8 @@ func collectDiagnosticBundle(ctx context.Context, env core.UserEnvironment, proj
 	}, nil
 }
 
-func collectDiagnosticBundleRegistry(ctx context.Context, env core.UserEnvironment, assetsFS fs.FS) ([]core.ProjectRegistryDiagnostic, error) {
-	registry, err := core.NewProjectRegistry(ctx, env, assetsFS)
+func collectDiagnosticBundleRegistry(ctx context.Context, env core.UserEnvironment, assetsFS fs.FS) ([]projectcore.ProjectRegistryDiagnostic, error) {
+	registry, err := projectcore.NewProjectRegistry(ctx, env, assetsFS)
 	if err != nil {
 		return nil, err
 	}
@@ -122,9 +124,9 @@ func collectDiagnosticBundleRegistry(ctx context.Context, env core.UserEnvironme
 		_ = registry.Close()
 	}()
 
-	diagnostics, err := core.NewProjectRegistryDiagnosticsService(
+	diagnostics, err := projectcore.NewProjectRegistryDiagnosticsService(
 		registry,
-		core.NewActiveProjectStore(env),
+		projectcore.NewActiveProjectStore(env),
 		core.DirectoryName,
 	).ListDiagnostics(ctx)
 	if err != nil {

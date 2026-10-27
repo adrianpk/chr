@@ -868,8 +868,8 @@
     },
     {
       "id": "internal/core/telegram_conversation.go::telegramConversationTransaction.insertConversation",
-      "signature": "func(project Project, binding, namespace string) (string, *TelegramConversation, error)",
-      "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "signature": "func(project projectcore.Project, binding, namespace string) (string, *TelegramConversation, error)",
+      "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger."
     },
     {
       "id": "internal/core/telegram_conversation_capture.go::telegramConversationTransaction.applyCapture",

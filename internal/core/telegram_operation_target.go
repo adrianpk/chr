@@ -1,5 +1,7 @@
 package core
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"database/sql"
@@ -18,7 +20,7 @@ type TelegramOperationTarget struct {
 
 // ValidateTelegramProjectTarget checks the resolved registry root immediately
 // before an adapter enters a project-scoped owner or configured provider.
-func ValidateTelegramProjectTarget(project Project, target TelegramOperationTarget) error {
+func ValidateTelegramProjectTarget(project projectcore.Project, target TelegramOperationTarget) error {
 	if project.ID != target.ProjectID || !project.Enabled {
 		return ErrWorkflowConflict
 	}

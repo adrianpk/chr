@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"testing"
@@ -49,7 +51,7 @@ func telegramWorkChangeActor(t *testing.T, f *telegramConversationAppFixture, ch
 		return
 	}
 
-	registry, err := core.NewProjectRegistry(t.Context(), f.receiver.env, testAssetsFS())
+	registry, err := projectcore.NewProjectRegistry(t.Context(), f.receiver.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}

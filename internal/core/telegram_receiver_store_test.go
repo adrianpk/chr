@@ -1,5 +1,7 @@
 package core
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"fmt"
 	"os"
@@ -195,12 +197,12 @@ func TestTelegramReceiverPollBudget(t *testing.T) {
 func TestTelegramReceiverMigration(t *testing.T) {
 	env := telegramReceiverTestEnv(t)
 
-	registry, err := NewProjectRegistry(t.Context(), env, testMigrationFS())
+	registry, err := projectcore.NewProjectRegistry(t.Context(), env, testMigrationFS())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	project := Project{ID: "example-project", Name: "Example", Path: t.TempDir(), Enabled: true, RegisteredAt: time.Now()}
+	project := projectcore.Project{ID: "example-project", Name: "Example", Path: t.TempDir(), Enabled: true, RegisteredAt: time.Now()}
 	if err := registry.AddProject(t.Context(), project); err != nil {
 		t.Fatal(err)
 	}
@@ -263,7 +265,7 @@ func checkTelegramReopenedOutbox(t *testing.T, env UserEnvironment, delivery Tel
 	checkTelegramDeliveryCompletion(t, store, deliveries[0], now.Add(time.Minute))
 }
 
-func checkTelegramRegistryMigration(t *testing.T, store *TelegramReceiverStore, env UserEnvironment, project Project) {
+func checkTelegramRegistryMigration(t *testing.T, store *TelegramReceiverStore, env UserEnvironment, project projectcore.Project) {
 	t.Helper()
 
 	var name string

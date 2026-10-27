@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"os"
 	"os/exec"
@@ -9,8 +11,8 @@ import (
 )
 
 // ListRegisteredProjects is a bounded, read-only registry operation for explicit IDs.
-func (s service) ListRegisteredProjects(ids []string) ([]core.Project, error) {
-	return core.ReadRegisteredProjects(s.ctx, s.env, ids)
+func (s service) ListRegisteredProjects(ids []string) ([]projectcore.Project, error) {
+	return projectcore.ReadRegisteredProjects(s.ctx, s.env, ids)
 }
 
 // InspectTelegramReceiver exposes transport health to local and remote readers.
@@ -24,7 +26,7 @@ type projectReadiness struct {
 	ModelExecutablePresent bool
 }
 
-func (s service) InspectProjectReadiness(project core.Project) projectReadiness {
+func (s service) InspectProjectReadiness(project projectcore.Project) projectReadiness {
 	result := projectReadiness{ModelCredentialPresent: strings.TrimSpace(os.Getenv("OPENAI_API_KEY")) != ""}
 
 	command := os.Getenv("CHR_CODEX_COMMAND")

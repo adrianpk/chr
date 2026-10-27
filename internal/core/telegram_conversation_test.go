@@ -1,5 +1,7 @@
 package core
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"fmt"
 	"strings"
@@ -24,7 +26,7 @@ func newTelegramConversationFixture(t *testing.T) *telegramConversationFixture {
 	env := telegramReceiverTestEnv(t)
 
 	return &telegramConversationFixture{env: env, store: openTelegramReceiverTestStore(t, env), input: TelegramConversationInput{
-		Config: config, Projects: []Project{{ID: "alpha", Name: "Alpha Project", Path: t.TempDir(), Enabled: true}, {ID: "beta", Name: "Beta Project", Path: t.TempDir(), Enabled: true}}, Intent: "prepare", Text: "Topic",
+		Config: config, Projects: []projectcore.Project{{ID: "alpha", Name: "Alpha Project", Path: t.TempDir(), Enabled: true}, {ID: "beta", Name: "Beta Project", Path: t.TempDir(), Enabled: true}}, Intent: "prepare", Text: "Topic",
 	}, next: 1}
 }
 

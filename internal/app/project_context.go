@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"errors"
@@ -40,12 +42,12 @@ func (r commandProjectContextResolver) Resolve(
 		return resolveProjectDirectory(opts.ExplicitDir)
 	}
 
-	activeProject, err := core.NewActiveProjectStore(r.env).LoadActiveProject()
+	activeProject, err := projectcore.NewActiveProjectStore(r.env).LoadActiveProject()
 	if err == nil {
 		return r.resolveActiveProject(ctx, activeProject)
 	}
 
-	if !errors.Is(err, core.ErrActiveProjectNotSelected) {
+	if !errors.Is(err, projectcore.ErrActiveProjectNotSelected) {
 		return commandProjectContext{}, err
 	}
 
@@ -58,9 +60,9 @@ func (r commandProjectContextResolver) Resolve(
 
 func (r commandProjectContextResolver) resolveActiveProject(
 	ctx context.Context,
-	activeProject core.ActiveProject,
+	activeProject projectcore.ActiveProject,
 ) (commandProjectContext, error) {
-	registry, err := core.NewProjectRegistry(ctx, r.env, r.assetsFS)
+	registry, err := projectcore.NewProjectRegistry(ctx, r.env, r.assetsFS)
 	if err != nil {
 		return commandProjectContext{}, err
 	}
@@ -100,7 +102,7 @@ func resolveProjectDirectory(projectDir string) (commandProjectContext, error) {
 	}, nil
 }
 
-func resolveRegisteredProjectDirectory(project core.Project) (commandProjectContext, error) {
+func resolveRegisteredProjectDirectory(project projectcore.Project) (commandProjectContext, error) {
 	if project.Path == "" {
 		return commandProjectContext{}, fmt.Errorf("registered project path is required: %s", project.Name)
 	}

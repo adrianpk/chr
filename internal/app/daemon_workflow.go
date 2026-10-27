@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"errors"
@@ -121,7 +123,7 @@ func (runner daemonWorkflowRunner) workflow(ctx context.Context, operations serv
 	return progress.Attempted, err
 }
 
-func (runner daemonWorkflowRunner) iteration(ctx context.Context, registry core.ProjectRegistry, index core.TicketIndex, result *daemonForegroundLoopResult) error {
+func (runner daemonWorkflowRunner) iteration(ctx context.Context, registry projectcore.ProjectRegistry, index core.TicketIndex, result *daemonForegroundLoopResult) error {
 	if err := runner.repository.UpdateDaemonHeartbeat(ctx, time.Now().UTC()); err != nil {
 		return err
 	}

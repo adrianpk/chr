@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"fmt"
 	"strings"
@@ -103,7 +105,7 @@ func telegramWorkLabel(value string) string {
 	return value
 }
 
-func telegramWorkProjectName(projects []core.Project, id string) string {
+func telegramWorkProjectName(projects []projectcore.Project, id string) string {
 	for _, project := range projects {
 		if project.ID == id {
 			return project.Name

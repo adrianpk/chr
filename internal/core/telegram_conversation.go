@@ -1,5 +1,7 @@
 package core
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"crypto/sha256"
@@ -36,7 +38,7 @@ const (
 type TelegramConversationInput struct {
 	Update        TelegramReceivedUpdate
 	Config        TelegramReceiverConfig
-	Projects      []Project
+	Projects      []projectcore.Project
 	Action        TelegramConversationAction
 	Project       string
 	Conversation  string
@@ -174,10 +176,10 @@ func (op telegramConversationTransaction) bindResponse(conversation *TelegramCon
 	return err
 }
 
-func (op telegramConversationTransaction) allowedProjects() []Project {
+func (op telegramConversationTransaction) allowedProjects() []projectcore.Project {
 	user, _ := op.input.Config.AuthorizedUser(op.input.Update.Peer.ChatID, op.input.Update.Peer.TopicID, op.input.Update.Peer.UserID, op.input.Update.ChatType)
 
-	var projects []Project
+	var projects []projectcore.Project
 
 	for _, project := range op.input.Projects {
 		if project.Enabled && slices.Contains(user.ProjectIDs, project.ID) {
@@ -188,14 +190,14 @@ func (op telegramConversationTransaction) allowedProjects() []Project {
 	return projects
 }
 
-func exactTelegramProject(projects []Project, target string) (Project, error) {
+func exactTelegramProject(projects []projectcore.Project, target string) (projectcore.Project, error) {
 	for _, project := range projects {
 		if project.ID == target {
 			return project, nil
 		}
 	}
 
-	var matches []Project
+	var matches []projectcore.Project
 
 	for _, project := range projects {
 		if project.Name == target {
@@ -204,13 +206,13 @@ func exactTelegramProject(projects []Project, target string) (Project, error) {
 	}
 
 	if len(matches) != 1 {
-		return Project{}, telegramConversationDiagnostic("That project is unavailable or its name is ambiguous. Send /projects, then select an exact ID or unique name with /project <project>.")
+		return projectcore.Project{}, telegramConversationDiagnostic("That project is unavailable or its name is ambiguous. Send /projects, then select an exact ID or unique name with /project <project>.")
 	}
 
 	return matches[0], nil
 }
 
-func telegramProjectBinding(project Project) (string, error) {
+func telegramProjectBinding(project projectcore.Project) (string, error) {
 	root, err := filepath.Abs(project.Path)
 	if err != nil {
 		return "", err
@@ -228,16 +230,16 @@ func telegramProjectBinding(project Project) (string, error) {
 	return hex.EncodeToString(sum[:]), nil
 }
 
-func (op telegramConversationTransaction) resolveProject(bound *TelegramConversation) (Project, error) {
+func (op telegramConversationTransaction) resolveProject(bound *TelegramConversation) (projectcore.Project, error) {
 	target := op.input.Project
 	if target != "" {
 		project, err := exactTelegramProject(op.allowedProjects(), target)
 		if err != nil {
-			return Project{}, err
+			return projectcore.Project{}, err
 		}
 
 		if bound != nil && bound.ProjectID != project.ID {
-			return Project{}, telegramConversationDiagnostic("The explicit project conflicts with this conversation. Saved details are unchanged. Use /sessions to choose a matching target.")
+			return projectcore.Project{}, telegramConversationDiagnostic("The explicit project conflicts with this conversation. Saved details are unchanged. Use /sessions to choose a matching target.")
 		}
 
 		return project, nil
@@ -249,7 +251,7 @@ func (op telegramConversationTransaction) resolveProject(bound *TelegramConversa
 
 	selected, _, err := op.peerSelection()
 	if err != nil {
-		return Project{}, err
+		return projectcore.Project{}, err
 	}
 
 	if selected != "" {
@@ -259,7 +261,7 @@ func (op telegramConversationTransaction) resolveProject(bound *TelegramConversa
 	return op.defaultProject()
 }
 
-func (op telegramConversationTransaction) defaultProject() (Project, error) {
+func (op telegramConversationTransaction) defaultProject() (projectcore.Project, error) {
 	projects := op.allowedProjects()
 	for _, project := range projects {
 		if project.ID == op.input.Config.DefaultProjectID {
@@ -271,7 +273,7 @@ func (op telegramConversationTransaction) defaultProject() (Project, error) {
 		return projects[0], nil
 	}
 
-	return Project{}, ErrTelegramProjectSelectionAmbiguous
+	return projectcore.Project{}, ErrTelegramProjectSelectionAmbiguous
 }
 
 func (op telegramConversationTransaction) peerSelection() (string, string, error) {
@@ -350,7 +352,7 @@ func (op telegramConversationTransaction) checkAllocation() error {
 	return nil
 }
 
-func (op telegramConversationTransaction) insertConversation(project Project, binding, namespace string) (string, *TelegramConversation, error) {
+func (op telegramConversationTransaction) insertConversation(project projectcore.Project, binding, namespace string) (string, *TelegramConversation, error) {
 	if !slices.Contains([]string{"explain", "prepare", "develop"}, op.input.Intent) || len(op.input.Text) > 512 || strings.TrimSpace(op.input.Text) == "" {
 		return "", nil, telegramConversationDiagnostic("Start with a nonempty topic of at most 512 UTF-8 bytes. This conversation was not created.")
 	}

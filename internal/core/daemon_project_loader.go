@@ -1,5 +1,7 @@
 package core
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"fmt"
@@ -21,13 +23,13 @@ const (
 
 // DaemonProject describes a package boundary value.
 type DaemonProject struct {
-	Project Project
+	Project projectcore.Project
 	Status  DaemonProjectStatus
 	Reason  string
 }
 
 // LoadDaemonProjects loads the corresponding package data.
-func LoadDaemonProjects(ctx context.Context, registry ProjectRegistry) ([]DaemonProject, error) {
+func LoadDaemonProjects(ctx context.Context, registry projectcore.ProjectRegistry) ([]DaemonProject, error) {
 	projects, err := registry.ListProjects(ctx)
 	if err != nil {
 		return nil, err
@@ -45,7 +47,7 @@ func LoadDaemonProjects(ctx context.Context, registry ProjectRegistry) ([]Daemon
 	return loaded, nil
 }
 
-func classifyDaemonProject(project Project) DaemonProject {
+func classifyDaemonProject(project projectcore.Project) DaemonProject {
 	if project.Path == "" {
 		return DaemonProject{
 			Project: project,
@@ -70,7 +72,7 @@ func classifyDaemonProject(project Project) DaemonProject {
 	return classifyDaemonProjectWorkspace(project)
 }
 
-func classifyDaemonProjectStatError(project Project, err error) DaemonProject {
+func classifyDaemonProjectStatError(project projectcore.Project, err error) DaemonProject {
 	if os.IsNotExist(err) {
 		return DaemonProject{
 			Project: project,
@@ -86,7 +88,7 @@ func classifyDaemonProjectStatError(project Project, err error) DaemonProject {
 	}
 }
 
-func classifyDaemonProjectWorkspace(project Project) DaemonProject {
+func classifyDaemonProjectWorkspace(project projectcore.Project) DaemonProject {
 	workspacePath := filepath.Join(project.Path, DirectoryName)
 
 	info, err := os.Stat(workspacePath)
@@ -108,7 +110,7 @@ func classifyDaemonProjectWorkspace(project Project) DaemonProject {
 	}
 }
 
-func classifyDaemonProjectWorkspaceError(project Project, err error) DaemonProject {
+func classifyDaemonProjectWorkspaceError(project projectcore.Project, err error) DaemonProject {
 	if os.IsNotExist(err) {
 		return DaemonProject{
 			Project: project,

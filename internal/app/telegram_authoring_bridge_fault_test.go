@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"errors"
@@ -186,7 +188,7 @@ func telegramAuthoringChangeAuthority(t *testing.T, f *telegramConversationAppFi
 		return
 	}
 
-	registry, err := core.NewProjectRegistry(t.Context(), f.receiver.env, testAssetsFS())
+	registry, err := projectcore.NewProjectRegistry(t.Context(), f.receiver.env, testAssetsFS())
 	if err != nil {
 		t.Error(err)
 

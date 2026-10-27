@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"encoding/json"
@@ -190,7 +192,7 @@ func (s telegramMoveRecordRoot) PrepareTelegramRecord(ctx context.Context, targe
 		return prepared, err
 	}
 
-	registry, err := core.NewProjectRegistry(ctx, s.env, s.assetsFS)
+	registry, err := projectcore.NewProjectRegistry(ctx, s.env, s.assetsFS)
 	if err != nil {
 		return prepared, err
 	}

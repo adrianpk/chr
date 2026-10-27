@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"errors"
@@ -258,7 +260,7 @@ func (factory commandFactory) runDaemonForegroundLoop(ctx context.Context, env c
 }
 
 func (runner daemonWorkflowRunner) foregroundIterations(ctx context.Context, maxIterations int) (result daemonForegroundLoopResult, err error) {
-	registry, err := core.NewProjectRegistry(ctx, runner.env, runner.assets)
+	registry, err := projectcore.NewProjectRegistry(ctx, runner.env, runner.assets)
 	if err != nil {
 		return daemonForegroundLoopResult{}, err
 	}

@@ -1,5 +1,7 @@
 package core
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"os"
@@ -13,7 +15,7 @@ func telegramControlRegistryFixture(t *testing.T) (UserEnvironment, *TelegramRec
 	env := telegramReceiverTestEnv(t)
 	store := openTelegramReceiverTestStore(t, env)
 
-	registry, err := NewProjectRegistry(t.Context(), env, os.DirFS("../../cmd/chr"))
+	registry, err := projectcore.NewProjectRegistry(t.Context(), env, os.DirFS("../../cmd/chr"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,7 +26,7 @@ func telegramControlRegistryFixture(t *testing.T) (UserEnvironment, *TelegramRec
 		}
 	}()
 
-	if err := registry.AddProject(t.Context(), Project{ID: "registered", Name: "Registered project", Path: t.TempDir(), Enabled: true, RegisteredAt: time.Now()}); err != nil {
+	if err := registry.AddProject(t.Context(), projectcore.Project{ID: "registered", Name: "Registered project", Path: t.TempDir(), Enabled: true, RegisteredAt: time.Now()}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -115,9 +117,9 @@ func TestTelegramControlRegistryWait(t *testing.T) {
 }
 
 func telegramControlReadProject(ctx context.Context, env UserEnvironment) error {
-	projects, err := ReadRegisteredProjects(ctx, env, []string{"registered"})
+	projects, err := projectcore.ReadRegisteredProjects(ctx, env, []string{"registered"})
 	if err == nil && len(projects) != 1 {
-		return ErrProjectNotFound
+		return projectcore.ErrProjectNotFound
 	}
 
 	return err

@@ -1,5 +1,7 @@
 package core
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"os"
@@ -13,14 +15,14 @@ func TestLoadDaemonProjectsReturnsEnabledProjectsWithReadyStatus(t *testing.T) {
 	projectDir := newDaemonLoaderWorkspace(t)
 	registeredAt := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
 
-	addTestProject(t, registry, Project{
+	addTestProject(t, registry, projectcore.Project{
 		ID:           "project-1",
 		Name:         "ready",
 		Path:         projectDir,
 		Enabled:      true,
 		RegisteredAt: registeredAt,
 	})
-	addTestProject(t, registry, Project{
+	addTestProject(t, registry, projectcore.Project{
 		ID:           "project-2",
 		Name:         "disabled",
 		Path:         newDaemonLoaderWorkspace(t),
@@ -45,7 +47,7 @@ func TestLoadDaemonProjectsReturnsEnabledProjectsWithReadyStatus(t *testing.T) {
 func TestLoadDaemonProjectsClassifiesMissingPath(t *testing.T) {
 	registry := newTestProjectRegistry(t)
 
-	addTestProject(t, registry, Project{
+	addTestProject(t, registry, projectcore.Project{
 		ID:           "project-1",
 		Name:         "missing",
 		Path:         filepath.Join(t.TempDir(), "missing"),
@@ -70,7 +72,7 @@ func TestLoadDaemonProjectsClassifiesNonDirectoryPath(t *testing.T) {
 		t.Fatalf("write project file: %v", err)
 	}
 
-	addTestProject(t, registry, Project{
+	addTestProject(t, registry, projectcore.Project{
 		ID:           "project-1",
 		Name:         "invalid",
 		Path:         path,
@@ -89,7 +91,7 @@ func TestLoadDaemonProjectsClassifiesNonDirectoryPath(t *testing.T) {
 func TestLoadDaemonProjectsClassifiesMissingWorkspace(t *testing.T) {
 	registry := newTestProjectRegistry(t)
 
-	addTestProject(t, registry, Project{
+	addTestProject(t, registry, projectcore.Project{
 		ID:           "project-1",
 		Name:         "invalid",
 		Path:         t.TempDir(),

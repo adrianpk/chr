@@ -1,5 +1,7 @@
 package core
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"database/sql"
@@ -17,7 +19,7 @@ func TestProjectRegistryAddsListsAndGetsProjects(t *testing.T) {
 	registeredAt := time.Date(2026, 5, 18, 12, 30, 0, 0, time.UTC)
 	lastIndexedAt := time.Date(2026, 5, 18, 13, 30, 0, 0, time.UTC)
 
-	err := registry.AddProject(context.Background(), Project{
+	err := registry.AddProject(context.Background(), projectcore.Project{
 		ID:            "project-1",
 		Name:          "chr",
 		Path:          "/workspaces/chr",
@@ -38,7 +40,7 @@ func TestProjectRegistryAddsListsAndGetsProjects(t *testing.T) {
 		t.Fatalf("len(projects) = %d, want 1", len(projects))
 	}
 
-	assertProject(t, projects[0], Project{
+	assertProject(t, projects[0], projectcore.Project{
 		ID:            "project-1",
 		Name:          "chr",
 		Path:          "/workspaces/chr",
@@ -73,14 +75,14 @@ func TestProjectRegistryListsProjectsByName(t *testing.T) {
 	registry := newTestProjectRegistry(t)
 	registeredAt := time.Date(2026, 5, 18, 12, 30, 0, 0, time.UTC)
 
-	addTestProject(t, registry, Project{
+	addTestProject(t, registry, projectcore.Project{
 		ID:           "project-2",
 		Name:         "zeta",
 		Path:         "/tmp/zeta",
 		Enabled:      true,
 		RegisteredAt: registeredAt,
 	})
-	addTestProject(t, registry, Project{
+	addTestProject(t, registry, projectcore.Project{
 		ID:           "project-1",
 		Name:         "alpha",
 		Path:         "/tmp/alpha",
@@ -100,7 +102,7 @@ func TestProjectRegistryListsProjectsByName(t *testing.T) {
 
 func TestProjectRegistryRejectsDuplicateName(t *testing.T) {
 	registry := newTestProjectRegistry(t)
-	project := Project{
+	project := projectcore.Project{
 		ID:           "project-1",
 		Name:         "chr",
 		Path:         "/tmp/chr",
@@ -123,7 +125,7 @@ func TestProjectRegistryReturnsNotFoundError(t *testing.T) {
 	registry := newTestProjectRegistry(t)
 
 	_, err := registry.GetProjectByName(context.Background(), "missing")
-	if !errors.Is(err, ErrProjectNotFound) {
+	if !errors.Is(err, projectcore.ErrProjectNotFound) {
 		t.Fatalf("GetProjectByName error = %v, want ErrProjectNotFound", err)
 	}
 }
@@ -189,7 +191,7 @@ func TestNewProjectRegistryUsesUserEnvironmentDataDir(t *testing.T) {
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	registry, err := NewProjectRegistry(context.Background(), env, testMigrationFS())
+	registry, err := projectcore.NewProjectRegistry(context.Background(), env, testMigrationFS())
 	if err != nil {
 		t.Fatalf("NewProjectRegistry returned error: %v", err)
 	}
@@ -204,7 +206,7 @@ func TestNewProjectRegistryUsesUserEnvironmentDataDir(t *testing.T) {
 	assertPathExists(t, filepath.Join(root, "data", "chr", "core.db"))
 }
 
-func newTestProjectRegistry(t *testing.T) ProjectRegistry {
+func newTestProjectRegistry(t *testing.T) projectcore.ProjectRegistry {
 	t.Helper()
 
 	db, err := sql.Open("sqlite", ":memory:")
@@ -214,7 +216,7 @@ func newTestProjectRegistry(t *testing.T) ProjectRegistry {
 
 	db.SetMaxOpenConns(1)
 
-	registry, err := NewProjectRegistryFromDB(context.Background(), db, testMigrationFS())
+	registry, err := projectcore.NewProjectRegistryFromDB(context.Background(), db, testMigrationFS())
 	if err != nil {
 		closeErr := db.Close()
 		if closeErr != nil {
@@ -234,7 +236,7 @@ func newTestProjectRegistry(t *testing.T) ProjectRegistry {
 	return registry
 }
 
-func addTestProject(t *testing.T, registry ProjectRegistry, project Project) {
+func addTestProject(t *testing.T, registry projectcore.ProjectRegistry, project projectcore.Project) {
 	t.Helper()
 
 	err := registry.AddProject(context.Background(), project)
@@ -243,8 +245,8 @@ func addTestProject(t *testing.T, registry ProjectRegistry, project Project) {
 	}
 }
 
-func testRegistryProject(id, name, path string) Project {
-	return Project{
+func testRegistryProject(id, name, path string) projectcore.Project {
+	return projectcore.Project{
 		ID:           id,
 		Name:         name,
 		Path:         path,
@@ -262,7 +264,7 @@ func assertPathExists(t *testing.T, path string) {
 	}
 }
 
-func assertProject(t *testing.T, got, want Project) {
+func assertProject(t *testing.T, got, want projectcore.Project) {
 	t.Helper()
 
 	if got.ID != want.ID {

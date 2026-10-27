@@ -1,5 +1,7 @@
 package core
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"os"
@@ -21,14 +23,14 @@ func TestRenderDiagnosticBundleOmitsSecretsAndIncludesDiagnostics(t *testing.T) 
 			Available:         []database.Migration{{Version: "1", Name: "create_projects"}},
 			Applied:           []database.AppliedMigration{{Version: "1", Name: "create_projects"}},
 		},
-		RegistryDiagnostics: []ProjectRegistryDiagnostic{{
-			Project: Project{
+		RegistryDiagnostics: []projectcore.ProjectRegistryDiagnostic{{
+			Project: projectcore.Project{
 				Name:    "example",
 				Path:    "/tmp/project",
 				Enabled: true,
 			},
 			Active: true,
-			Status: ProjectRegistryDiagnosticOK,
+			Status: projectcore.ProjectRegistryDiagnosticOK,
 		}},
 		RuntimeCleanupPreview: RuntimeArtifactCleanupPreview{
 			ArtifactDir: "/tmp/project/.chr/default/runtime/runs",

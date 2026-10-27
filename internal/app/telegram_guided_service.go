@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 
@@ -30,7 +32,7 @@ func (s service) telegramGuidedProject(ctx context.Context, target core.Telegram
 		return scoped, err
 	}
 
-	project := core.Project{ID: scoped.projectContext.ProjectID, Path: scoped.projectContext.ProjectDir, Enabled: true}
+	project := projectcore.Project{ID: scoped.projectContext.ProjectID, Path: scoped.projectContext.ProjectDir, Enabled: true}
 
 	return scoped, core.ValidateTelegramProjectTarget(project, target)
 }

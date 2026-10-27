@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"time"
@@ -25,7 +27,7 @@ func (s service) telegramHarnessProject(ctx context.Context, target core.Telegra
 		return scoped, err
 	}
 
-	project := core.Project{ID: scoped.projectContext.ProjectID, Path: scoped.projectContext.ProjectDir, Enabled: true}
+	project := projectcore.Project{ID: scoped.projectContext.ProjectID, Path: scoped.projectContext.ProjectDir, Enabled: true}
 
 	return scoped, core.ValidateTelegramProjectTarget(project, target)
 }

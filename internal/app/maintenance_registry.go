@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"fmt"
@@ -68,7 +70,7 @@ func (factory commandFactory) runMaintenanceRegistryStatus(ctx context.Context, 
 		return err
 	}
 
-	registry, err := core.NewProjectRegistry(ctx, env, factory.deps.assetsFS)
+	registry, err := projectcore.NewProjectRegistry(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -78,9 +80,9 @@ func (factory commandFactory) runMaintenanceRegistryStatus(ctx context.Context, 
 		_ = registry.Close()
 	}()
 
-	diagnostics, err := core.NewProjectRegistryDiagnosticsService(
+	diagnostics, err := projectcore.NewProjectRegistryDiagnosticsService(
 		registry,
-		core.NewActiveProjectStore(env),
+		projectcore.NewActiveProjectStore(env),
 		core.DirectoryName,
 	).ListDiagnostics(ctx)
 	if err != nil {
@@ -100,7 +102,7 @@ func (factory commandFactory) runMaintenanceRegistryDisable(ctx context.Context,
 		return err
 	}
 
-	registry, err := core.NewProjectRegistry(ctx, env, factory.deps.assetsFS)
+	registry, err := projectcore.NewProjectRegistry(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -149,7 +151,7 @@ func (factory commandFactory) runMaintenanceRegistrySetPath(ctx context.Context,
 		return err
 	}
 
-	registry, err := core.NewProjectRegistry(ctx, env, factory.deps.assetsFS)
+	registry, err := projectcore.NewProjectRegistry(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -181,7 +183,7 @@ func (factory commandFactory) runMaintenanceRegistrySetPath(ctx context.Context,
 	return printProjectRegistrySetPath(factory.io.Stdout, project, previousPath, false)
 }
 
-func printProjectRegistryDiagnostics(stdout io.Writer, diagnostics []core.ProjectRegistryDiagnostic) error {
+func printProjectRegistryDiagnostics(stdout io.Writer, diagnostics []projectcore.ProjectRegistryDiagnostic) error {
 	_, err := fmt.Fprintf(stdout, "projects: %d\n", len(diagnostics))
 	if err != nil {
 		return fmt.Errorf("write project registry diagnostics: %w", err)
@@ -208,7 +210,7 @@ func printProjectRegistryDiagnostics(stdout io.Writer, diagnostics []core.Projec
 	return nil
 }
 
-func printProjectRegistryDisable(stdout io.Writer, project core.Project, dryRun bool) error {
+func printProjectRegistryDisable(stdout io.Writer, project projectcore.Project, dryRun bool) error {
 	action := "disabled"
 	if dryRun {
 		action = "would_disable"
@@ -222,7 +224,7 @@ func printProjectRegistryDisable(stdout io.Writer, project core.Project, dryRun 
 	return nil
 }
 
-func printProjectRegistrySetPath(stdout io.Writer, project core.Project, previousPath string, dryRun bool) error {
+func printProjectRegistrySetPath(stdout io.Writer, project projectcore.Project, previousPath string, dryRun bool) error {
 	action := "updated_path"
 	if dryRun {
 		action = "would_update_path"

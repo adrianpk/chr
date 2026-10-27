@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"errors"
@@ -12,7 +14,7 @@ type telegramGuidedRoutingFailure string
 
 func (e telegramGuidedRoutingFailure) Error() string { return string(e) }
 
-func telegramGuidedProjectName(projects []core.Project, name string) (string, error) {
+func telegramGuidedProjectName(projects []projectcore.Project, name string) (string, error) {
 	var matches []string
 
 	for _, project := range projects {
@@ -79,7 +81,7 @@ func (r telegramReceiver) selectTelegramGuidedName(ctx context.Context, input co
 	return matches[0], nil
 }
 
-func telegramGuidedStartFailure(failure error, projects []core.Project) error {
+func telegramGuidedStartFailure(failure error, projects []projectcore.Project) error {
 	if !errors.Is(failure, core.ErrTelegramProjectSelectionAmbiguous) {
 		return failure
 	}

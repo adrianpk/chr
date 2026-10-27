@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"os"
@@ -16,12 +18,12 @@ func telegramHarnessWorkerFixture(t *testing.T) (*telegramConversationAppFixture
 	operations, record, request := serviceWorkflowTicketFixture(t)
 	f := newTelegramConversationAppFixture(t)
 
-	registry, err := core.NewProjectRegistry(t.Context(), f.receiver.env, testAssetsFS())
+	registry, err := projectcore.NewProjectRegistry(t.Context(), f.receiver.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	updateErr := registry.AddProject(t.Context(), core.Project{ID: operations.projectContext.ProjectID, Name: "Worker fixture", Path: operations.projectContext.ProjectDir, Enabled: true, RegisteredAt: time.Now()})
+	updateErr := registry.AddProject(t.Context(), projectcore.Project{ID: operations.projectContext.ProjectID, Name: "Worker fixture", Path: operations.projectContext.ProjectDir, Enabled: true, RegisteredAt: time.Now()})
 
 	closeErr := registry.Close()
 	if updateErr != nil || closeErr != nil {

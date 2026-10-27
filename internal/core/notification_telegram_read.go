@@ -1,5 +1,7 @@
 package core
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"database/sql"
@@ -9,7 +11,7 @@ import (
 
 // ResolveTelegramNotificationTarget uses the same canonical project-root binding
 // as receiver views. The caller retains its existing notification authorization.
-func ResolveTelegramNotificationTarget(project Project, namespace, destination, digest string) (TelegramNotificationTarget, error) {
+func ResolveTelegramNotificationTarget(project projectcore.Project, namespace, destination, digest string) (TelegramNotificationTarget, error) {
 	binding, err := telegramProjectBinding(project)
 	if err != nil {
 		return TelegramNotificationTarget{}, err

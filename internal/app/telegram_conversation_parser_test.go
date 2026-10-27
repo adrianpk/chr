@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"strings"
 	"testing"
@@ -42,7 +44,7 @@ func TestTelegramConversationCommands(t *testing.T) {
 
 type telegramConversationNoReads struct{}
 
-func (telegramConversationNoReads) ListRegisteredProjects([]string) ([]core.Project, error) {
+func (telegramConversationNoReads) ListRegisteredProjects([]string) ([]projectcore.Project, error) {
 	panic("unexpected registry read")
 }
 

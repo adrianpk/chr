@@ -316,7 +316,7 @@ ORDER BY tag`,
 	return tags, nil
 }
 
-func scanIndexedTicket(scanner projectScanner) (IndexedTicket, error) {
+func scanIndexedTicket(scanner indexedTicketScanner) (IndexedTicket, error) {
 	var ticket IndexedTicket
 
 	fields := indexedTicketRow{ticket: &ticket}
@@ -449,3 +449,6 @@ func indexedTicketNamespace(ticket IndexedTicket) string {
 
 	return ticket.Namespace
 }
+
+// The indexed-ticket row reader consumes only the SQL scan operation.
+type indexedTicketScanner interface{ Scan(dest ...any) error }

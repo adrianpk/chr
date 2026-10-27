@@ -1,5 +1,7 @@
 package core
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"os"
 	"path/filepath"
@@ -56,7 +58,7 @@ func assertGuidedTelegramPeer(t *testing.T, f *telegramConversationFixture, inpu
 	}
 
 	moved := input
-	moved.Projects = append([]Project(nil), input.Projects...)
+	moved.Projects = append([]projectcore.Project(nil), input.Projects...)
 
 	moved.Projects[0].Path = t.TempDir()
 	if _, _, err := f.store.ReserveTelegramGuidedConversation(t.Context(), moved, time.Now()); err == nil {

@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"encoding/json"
 	"fmt"
@@ -26,7 +28,7 @@ func telegramNotificationTarget(project commandProjectContext, config core.Teleg
 		return core.TelegramNotificationTarget{}, err
 	}
 
-	return core.ResolveTelegramNotificationTarget(core.Project{ID: project.ProjectID, Path: project.ProjectDir, Enabled: true}, core.DefaultOpsNamespace, config.ChatID, recordDigest(payload))
+	return core.ResolveTelegramNotificationTarget(projectcore.Project{ID: project.ProjectID, Path: project.ProjectDir, Enabled: true}, core.DefaultOpsNamespace, config.ChatID, recordDigest(payload))
 }
 
 func telegramNotificationInput(record core.NotificationAuditRecord, project commandProjectContext, config core.TelegramNotificationConfig) (core.TelegramNotificationInput, error) {

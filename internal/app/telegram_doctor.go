@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"errors"
@@ -187,9 +189,9 @@ func telegramDoctorProjectIDs(config core.TelegramReceiverConfig) []string {
 	return ids
 }
 
-func printTelegramMissingProjects(stdout io.Writer, ids []string, projects []core.Project) error {
+func printTelegramMissingProjects(stdout io.Writer, ids []string, projects []projectcore.Project) error {
 	for _, id := range ids {
-		if !slices.ContainsFunc(projects, func(project core.Project) bool { return project.ID == id }) {
+		if !slices.ContainsFunc(projects, func(project projectcore.Project) bool { return project.ID == id }) {
 			if _, err := fmt.Fprintf(stdout, "project: %s registered=false\n", id); err != nil {
 				return err
 			}

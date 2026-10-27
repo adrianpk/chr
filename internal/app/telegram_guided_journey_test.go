@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"strings"
 	"testing"
@@ -15,12 +17,12 @@ func guidedTelegramSharedFixture(t *testing.T) (*telegramConversationAppFixture,
 	provider, host, publication := guidedWebJourneyFixture(t, false)
 	operations := provider.service(t.Context())
 
-	registry, err := core.NewProjectRegistry(t.Context(), f.receiver.env, testAssetsFS())
+	registry, err := projectcore.NewProjectRegistry(t.Context(), f.receiver.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	project := core.Project{ID: operations.projectContext.ProjectID, Name: "Shared project", Path: operations.projectContext.ProjectDir, Enabled: true, RegisteredAt: time.Now()}
+	project := projectcore.Project{ID: operations.projectContext.ProjectID, Name: "Shared project", Path: operations.projectContext.ProjectDir, Enabled: true, RegisteredAt: time.Now()}
 	if err := registry.AddProject(t.Context(), project); err != nil {
 		t.Fatal(err)
 	}

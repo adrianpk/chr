@@ -1,5 +1,7 @@
 package app
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"errors"
 	"testing"
@@ -51,7 +53,7 @@ func generationBindingConversationCase(t *testing.T, fixture func(*testing.T, st
 func registerGenerationProjects(t *testing.T, operations service) string {
 	t.Helper()
 
-	registry, err := core.NewProjectRegistry(t.Context(), operations.env, testAssetsFS())
+	registry, err := projectcore.NewProjectRegistry(t.Context(), operations.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +65,7 @@ func registerGenerationProjects(t *testing.T, operations service) string {
 	})
 
 	second := t.TempDir()
-	for _, project := range []core.Project{
+	for _, project := range []projectcore.Project{
 		{ID: "fixture", Name: "First", Path: operations.projectContext.ProjectDir, Enabled: true, RegisteredAt: time.Now().UTC()},
 		{ID: "second", Name: "Second", Path: second, Enabled: true, RegisteredAt: time.Now().UTC()},
 	} {

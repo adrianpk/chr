@@ -1,5 +1,7 @@
 package core
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"bytes"
 	"os"
@@ -13,7 +15,7 @@ func telegramNotificationTestInput(t *testing.T) TelegramNotificationInput {
 	record := testNotificationAuditRecord(time.Now().UTC())
 	record.Channel = "telegram"
 
-	target, err := ResolveTelegramNotificationTarget(Project{ID: record.Event.ProjectID, Path: t.TempDir(), Enabled: true}, DefaultOpsNamespace, "@example_channel", workflowHash([]byte("configured sender")))
+	target, err := ResolveTelegramNotificationTarget(projectcore.Project{ID: record.Event.ProjectID, Path: t.TempDir(), Enabled: true}, DefaultOpsNamespace, "@example_channel", workflowHash([]byte("configured sender")))
 	if err != nil {
 		t.Fatal(err)
 	}

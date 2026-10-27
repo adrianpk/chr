@@ -1,5 +1,7 @@
 package core
 
+import projectcore "forge.adrianpk.com/chr/internal/core/project"
+
 import (
 	"context"
 	"database/sql"
@@ -20,12 +22,12 @@ func workflowTestIndex(t *testing.T, path string) WorkflowIndex {
 
 	db.SetMaxOpenConns(1)
 
-	registry, err := NewProjectRegistryFromDB(context.Background(), db, testMigrationFS())
+	registry, err := projectcore.NewProjectRegistryFromDB(context.Background(), db, testMigrationFS())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	addTestProject(t, registry, Project{ID: "project-1", Name: "example", Path: "/tmp/example", Enabled: true, RegisteredAt: time.Now().UTC()})
+	addTestProject(t, registry, projectcore.Project{ID: "project-1", Name: "example", Path: "/tmp/example", Enabled: true, RegisteredAt: time.Now().UTC()})
 
 	index, err := NewTicketIndexFromDB(context.Background(), db, testMigrationFS())
 	if err != nil {
