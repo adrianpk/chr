@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-9
 source: review
 reported_at: 2026-10-26T08:48:29Z
-commits: [e63688b43071, a2e76eec801e, 2f9e9717c027, 0e1d949a3fca, f7df89655484, dbdb1ac183be, 1d108d03c5c2, d577def590fa, ae88f240639d, e2d01335ce70, 129fb1b9d256, 678d9e6abaf4, bba7d53e5f34, 712e812ac131, 571c431a25d8, d647834c037d, 701bbd85d763, 65353580359a, 34d663404459, 0adb83936123, ea96e86c861a, d8b7a9921cb5, eac5ca5dd8e1, 115897594fc5, 969eba2252d7, 051c19eac8fb, bf04bf96c5d6, 7d8acfadb0ff, 1671d3ea3af1, 89898ddd5bd8, fcd5f288a097, 2527d57f8339, 8490f7aeb303, 4e8ed9c2792b, b263991b7f52, 769e2047686c, 23b7fe8d1a9b, 5c533bfdb8cf, 64376e9f69c1, ce0f625d1ca1, 59c5e103482c, 63a843aa48a6]
+commits: [e63688b43071, a2e76eec801e, 2f9e9717c027, 0e1d949a3fca, f7df89655484, dbdb1ac183be, 1d108d03c5c2, d577def590fa, ae88f240639d, e2d01335ce70, 129fb1b9d256, 678d9e6abaf4, bba7d53e5f34, 712e812ac131, 571c431a25d8, d647834c037d, 701bbd85d763, 65353580359a, 34d663404459, 0adb83936123, ea96e86c861a, d8b7a9921cb5, eac5ca5dd8e1, 115897594fc5, 969eba2252d7, 051c19eac8fb, bf04bf96c5d6, 7d8acfadb0ff, 1671d3ea3af1, 89898ddd5bd8, fcd5f288a097, 2527d57f8339, 8490f7aeb303, 4e8ed9c2792b, b263991b7f52, 769e2047686c, 23b7fe8d1a9b, 5c533bfdb8cf, 64376e9f69c1, ce0f625d1ca1, 59c5e103482c, 63a843aa48a6, ff99e09f4347, bb954ba8a84b, 80dd1afed160, 00497b20b93d, a654e9300f3b, 3278be43b287, ffcce459864c, 2af8e9523cbb, fad092e249e3, 23b2d04b1e7f]
 branch: refactor/slice-9-quality-authoring
 started_at: 2026-10-27T13:06:46Z
 ready_at: 2026-10-26T08:57:09Z
@@ -57,27 +57,18 @@ The tracker owns task execution; this ticket mirrors verified slice state. The m
 
 Existing generation/source-revision/authoring publication recovery and guided preparation tests with real filesystem/Git; make verify.
 
-T9.1 through T9.5 remain active. All six duplicate comparisons and shared
-model-request mechanics are recorded; plan and acceptance responsibilities are
-split. Nine pure native control/evidence values now have a shared state owner,
-with original guided/session/request bytes frozen before relocation. Retained
-admission/selection and harness identity values also have shared owners.
-StartInput separates the durable request from host-only callbacks and commands;
-guided/native admission and recovery preserve the frozen wire bytes. The move
-ledger retains 273 declaration/extraction/transition preimages.
-The session value graph, enum methods and original session/guided validation
-belong to core/authoring. Shared default-user paths belong to workspace. Three
-read-only native observation ports retain the original store, scope/authority
-guards, quiescence, expected absence and verified result references/time.
-The exact legacy frontmatter codec, native plan binding values, projection/path
-and metadata primitives and bounded Git transport have shared owners. Native
-admission/preview/materialization/result proof operations are separate from
-authoring transitions and read sessions under the original active owner claim.
-Native plan resume, preparation, credentials and signing remain with their owner.
-Seven context/host dependency files remain before the complete repository move.
-All 89 assigned signature occurrences have exact dispositions: 60 tuple fixes,
-three parameter fixes (two already delivered by Slice 4) and 26 cohesive
-five-parameter retentions. Focused real-boundary checks and pinned strict lint
-pass; exact debt is 237 with ceiling seven and one external exception. The
-complete repository move and remaining context/host boundaries remain unfinished. The
-report is drafting; no PR is open and final controller validation is pending.
+T9.1 through T9.5 are implemented. The complete existing authoring aggregate,
+artifact behavior and corresponding tests have their actual owner, with native
+workspace/harness and workflow proof responsibilities retained outside it. Six
+native runtime/execution context files retain complete existing validation and
+consume shared document/source values. All six duplicate comparisons and common
+model mechanics are recorded; plan/acceptance responsibilities are split.
+
+The move ledger has 1243 preimages. All 89 assigned signatures have exact current
+dispositions: 60 tuple fixes, three parameter fixes (two from Slice 4) and 26
+cohesive five-input contracts. Frozen records, journal/receipt/source/hash and
+native authority behavior remain. Focused real-boundary checks and strict lint
+pass; exact debt is 237 with ceiling seven and one external exception.
+
+T9.6 is preparing the canonical PR and its exact clean-head controller validation.
+Integration is pending.
