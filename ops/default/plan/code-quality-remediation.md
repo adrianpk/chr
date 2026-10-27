@@ -192,7 +192,7 @@ Focused selection: Existing quiz/parser/provider request fixtures and sufficienc
 ### Slice 9: Authoring, document generation and guided preparation
 
 Findings: R1, R2, R3, R4, R6, R10.
-Ticket: [TKT-20261026084829](../ticket/in_progress/20261026084829-quality-authoring.md).
+Ticket: [TKT-20261026084829](../ticket/reviewing/20261026084829-quality-authoring.md).
 
 1. **T9.1:** Move authoring session and dump/spec/plan artifact behavior into owned internal/core/authoring boundaries; move plan/catalog behavior into its own capability only where the dependency ledger demonstrates a distinct responsibility. Keep guided inputs and committed-source provenance intact.
 2. **T9.2:** Read the governing spec/plan for both sides of D02, D04, D05, D07, D09 and D10. Extract catalog, generation, guided-preflight, authoring-step and dump-update logic only where both copies implement the same rule; record intentional semantic differences with precise evidence.
@@ -412,7 +412,7 @@ Cost: runtime gates were not rerun for this planning task. Budget each slice for
 | 6 | [TKT-20261026084826](../ticket/solved/20261026084826-quality-leaves.md) | Gate, notifications and project packages | ready; predecessor applies |
 | 7 | [TKT-20261026084827](../ticket/solved/20261026084827-quality-telegram.md) | Telegram transport, receiver and retained delivery | ready; predecessor applies |
 | 8 | [TKT-20261026084828](../ticket/solved/20261026084828-quality-quiz.md) | Quiz domain and model adapter | ready; predecessor applies |
-| 9 | [TKT-20261026084829](../ticket/in_progress/20261026084829-quality-authoring.md) | Authoring, document generation and guided preparation | ready; predecessor applies |
+| 9 | [TKT-20261026084829](../ticket/reviewing/20261026084829-quality-authoring.md) | Authoring, document generation and guided preparation | reviewing; PR #446 |
 | 10 | [TKT-20261026084830](../ticket/ready/20261026084830-quality-harness.md) | Harness contracts and runtime lifecycle | ready; predecessor applies |
 | 11 | [TKT-20261026084831](../ticket/ready/20261026084831-quality-tickets.md) | Ticket, readiness and execution boundaries | ready; predecessor applies |
 | 12 | [TKT-20261026084832](../ticket/ready/20261026084832-quality-workflow.md) | Workflow state, store and coordinator package | ready; predecessor applies |

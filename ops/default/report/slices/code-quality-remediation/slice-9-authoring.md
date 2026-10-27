@@ -5,7 +5,7 @@ Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
 Branch: `refactor/slice-9-quality-authoring`
-PR: pending
+PR: `#446`
 
 ## Purpose
 
@@ -63,6 +63,8 @@ receipt identity remain unchanged. Legacy required headers, optional Markdown
 slicing and context/tracker escaping keep their different rules.
 
 ## Implementation Notes
+
+[Canonical PR #446](https://forge.adrianpk.com/adrianpk/chr/pulls/446) targets dev.
 
 The move ledger retains 1,243 declaration preimages with current names/files and
 stages, including 923 declarations from the complete ownership move. Mechanical

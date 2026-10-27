@@ -1,7 +1,7 @@
 ---
 id: TKT-20261026084829
 title: "Quality slice 9: Authoring, document generation and guided preparation"
-status: in_progress
+status: reviewing
 kind: cleanup
 severity: unclassified
 priority: normal
@@ -11,6 +11,7 @@ source: review
 reported_at: 2026-10-26T08:48:29Z
 commits: [e63688b43071, a2e76eec801e, 2f9e9717c027, 0e1d949a3fca, f7df89655484, dbdb1ac183be, 1d108d03c5c2, d577def590fa, ae88f240639d, e2d01335ce70, 129fb1b9d256, 678d9e6abaf4, bba7d53e5f34, 712e812ac131, 571c431a25d8, d647834c037d, 701bbd85d763, 65353580359a, 34d663404459, 0adb83936123, ea96e86c861a, d8b7a9921cb5, eac5ca5dd8e1, 115897594fc5, 969eba2252d7, 051c19eac8fb, bf04bf96c5d6, 7d8acfadb0ff, 1671d3ea3af1, 89898ddd5bd8, fcd5f288a097, 2527d57f8339, 8490f7aeb303, 4e8ed9c2792b, b263991b7f52, 769e2047686c, 23b7fe8d1a9b, 5c533bfdb8cf, 64376e9f69c1, ce0f625d1ca1, 59c5e103482c, 63a843aa48a6, ff99e09f4347, bb954ba8a84b, 80dd1afed160, 00497b20b93d, a654e9300f3b, 3278be43b287, ffcce459864c, 2af8e9523cbb, fad092e249e3, 23b2d04b1e7f]
 branch: refactor/slice-9-quality-authoring
+pr: "#446"
 started_at: 2026-10-27T13:06:46Z
 ready_at: 2026-10-26T08:57:09Z
 ---
@@ -70,5 +71,6 @@ cohesive five-input contracts. Frozen records, journal/receipt/source/hash and
 native authority behavior remain. Focused real-boundary checks and strict lint
 pass; exact debt is 237 with ceiling seven and one external exception.
 
-T9.6 is preparing the canonical PR and its exact clean-head controller validation.
+T9.6 is reviewing under [canonical PR #446](https://forge.adrianpk.com/adrianpk/chr/pulls/446).
+The controller ledger binds ordered final validation to the exact clean PR head.
 Integration is pending.
