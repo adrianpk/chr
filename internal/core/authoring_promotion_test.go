@@ -146,6 +146,7 @@ func mustPlanContextualQuiz(
 	t.Helper()
 
 	plan, err := PlanContextualQuizGeneration(context.Background(), ContextualQuizGenerationOptions{
+		Context:      WorkspaceAuthoringQuizContext{},
 		ProjectDir:   projectDir,
 		Session:      session,
 		Now:          now,

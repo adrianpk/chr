@@ -86,6 +86,7 @@ func (factory commandFactory) runAuthorQuizNew(ctx context.Context, cmd *cli.Com
 func (factory commandFactory) runAuthorContextualQuizNew(ctx context.Context, cmd *cli.Command, projectContext commandProjectContext, session authoringcore.Session, now time.Time) error {
 	return withContextualQuizGeneration(ctx, cmd, projectContext, session.ID, func(ctx context.Context, provider core.AuthoringQuizQuestionProvider) error {
 		plan, err := core.PlanContextualQuizGeneration(ctx, core.ContextualQuizGenerationOptions{
+			Context:       core.WorkspaceAuthoringQuizContext{},
 			ProjectDir:    projectContext.ProjectDir,
 			Session:       session,
 			Now:           now,

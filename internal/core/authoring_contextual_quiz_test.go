@@ -24,6 +24,7 @@ func TestPlanContextualQuizGenerationUsesProviderAndProjectContext(t *testing.T)
 	writeContextualQuizProjectFixture(t, projectDir)
 
 	plan, err := PlanContextualQuizGeneration(context.Background(), ContextualQuizGenerationOptions{
+		Context:       WorkspaceAuthoringQuizContext{},
 		ProjectDir:    projectDir,
 		Session:       session,
 		Now:           now,
@@ -142,6 +143,7 @@ func TestPlanContextualQuizGenerationRejectsMissingProvider(t *testing.T) {
 	session := validContextualQuizSession(now)
 
 	_, err := PlanContextualQuizGeneration(context.Background(), ContextualQuizGenerationOptions{
+		Context:    WorkspaceAuthoringQuizContext{},
 		ProjectDir: t.TempDir(),
 		Session:    session,
 		Now:        now,
@@ -252,6 +254,7 @@ func TestWriteContextualQuizWritesArtifact(t *testing.T) {
 	}
 
 	plan, err := PlanContextualQuizGeneration(context.Background(), ContextualQuizGenerationOptions{
+		Context:    WorkspaceAuthoringQuizContext{},
 		ProjectDir: projectDir,
 		Session:    session,
 		Now:        now,

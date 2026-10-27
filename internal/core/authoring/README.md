@@ -39,3 +39,10 @@ and source inventory rendering belong here. Native runtime/execution context
 assembly stays with the original RuntimePlan, indexed ticket/parser and complete
 execution/result validation owners. That retained IO consumes these shared
 values directly; it is not authoring session or document publication behavior.
+
+QuizContextProvider supplies the original workspace/index observations explicitly.
+The contextual quiz caller loads it at the original point after layout selection
+and before model invocation. Request construction then uses the observed sections
+without IO. The concrete workspace context and harness adapters retain graph
+projection, host binding/runner, output validation and trace behavior outside the
+authoring decisions. Existing real adapter fixtures retain their assertions.

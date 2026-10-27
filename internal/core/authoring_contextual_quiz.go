@@ -5,9 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 	"time"
 
@@ -15,7 +13,6 @@ import (
 	modelcore "forge.adrianpk.com/chr/internal/core/model"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
-	"forge.adrianpk.com/chr/internal/harness"
 )
 
 const (
@@ -35,6 +32,7 @@ type ContextualQuizGenerationOptions struct {
 	DryRun        bool
 	QuestionCount int
 	Provider      AuthoringQuizQuestionProvider
+	Context       QuizContextProvider
 }
 
 // ContextualQuizGenerationPlan describes a package boundary value.
@@ -109,12 +107,6 @@ type FakeAuthoringQuizQuestionProvider struct {
 	Err      error
 }
 
-// HarnessAuthoringQuizQuestionProvider describes a package boundary value.
-type HarnessAuthoringQuizQuestionProvider struct {
-	Program string
-	Runner  harness.AgentRunner
-}
-
 // PlanContextualQuizGeneration executes the corresponding package operation.
 func PlanContextualQuizGeneration(
 	ctx context.Context,
@@ -130,10 +122,12 @@ func PlanContextualQuizGeneration(
 		return ContextualQuizGenerationPlan{}, err
 	}
 
-	request, err := NewAuthoringQuizGenerationRequest(ctx, opts.ProjectDir, opts.Session, opts.QuestionCount, opts.Now)
+	sections, err := opts.Context.Load(ctx, opts.ProjectDir, opts.Session)
 	if err != nil {
 		return ContextualQuizGenerationPlan{}, err
 	}
+
+	request := NewAuthoringQuizGenerationRequest(opts.ProjectDir, opts.Session, opts.QuestionCount, opts.Now, sections)
 
 	result, err := opts.Provider.GenerateAuthoringQuizQuestions(ctx, request)
 	if err != nil {
@@ -169,19 +163,8 @@ func writeContextualQuiz(plan ContextualQuizGenerationPlan) error {
 	return writeAuthoringArtifactStep(plan.Layout, plan.Content, "contextual quiz")
 }
 
-// NewAuthoringQuizGenerationRequest constructs the corresponding package service or value.
-func NewAuthoringQuizGenerationRequest(
-	ctx context.Context,
-	projectDir string,
-	session authoringcore.Session,
-	questionCount int,
-	now time.Time,
-) (AuthoringQuizGenerationRequest, error) {
-	sections, err := LoadAuthoringQuizContextSections(ctx, projectDir, session)
-	if err != nil {
-		return AuthoringQuizGenerationRequest{}, err
-	}
-
+// NewAuthoringQuizGenerationRequest constructs the original request from observed context.
+func NewAuthoringQuizGenerationRequest(projectDir string, session authoringcore.Session, questionCount int, now time.Time, sections []AuthoringQuizContextSection) AuthoringQuizGenerationRequest {
 	return AuthoringQuizGenerationRequest{
 		ID:              "quiz-request-" + session.ID,
 		Action:          AuthoringQuizActionGeneration,
@@ -202,43 +185,7 @@ func NewAuthoringQuizGenerationRequest(
 			},
 		},
 		CreatedAt: now.UTC(),
-	}, nil
-}
-
-// LoadAuthoringQuizContextSections loads the corresponding package data.
-func LoadAuthoringQuizContextSections(
-	ctx context.Context,
-	projectDir string,
-	session authoringcore.Session,
-) ([]AuthoringQuizContextSection, error) {
-	projectDir, err := cleanAbsProjectDir(projectDir)
-	if err != nil {
-		return nil, err
 	}
-
-	sections := []AuthoringQuizContextSection{
-		{
-			Name:      "project",
-			Layer:     "project",
-			Authority: "project_directory",
-			Content:   "project_dir: " + projectDir + "\nproject_name: " + filepath.Base(projectDir),
-		},
-		{
-			Name:      "session",
-			Layer:     "authoring",
-			Authority: "authoring_session",
-			Content:   authoringQuizSessionContext(session),
-		},
-	}
-
-	sections = append(sections, authoringQuizOptionalFileSection(projectDir, "agent_protocol", "protocols", "AGENTS.md"))
-	sections = append(sections, authoringQuizWorkspaceGraphSection(ctx, projectDir))
-	sections = append(sections, authoringQuizPathInventorySection(projectDir, "workspace_artifacts", "workspace", workspacecore.DirectoryName))
-	sections = append(sections, authoringQuizPathInventorySection(projectDir, "docs", "docs", "docs"))
-	sections = append(sections, authoringQuizTreeSection(projectDir))
-	sections = append(sections, authoringQuizGoInventorySection(projectDir))
-
-	return sections, nil
 }
 
 // RenderContextualQuizMarkdown renders the corresponding package data.
@@ -321,68 +268,6 @@ func (p *FakeAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(
 	}
 
 	return p.Result, nil
-}
-
-// GenerateAuthoringQuizQuestions generates the requested artifact.
-func (p HarnessAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx context.Context, request AuthoringQuizGenerationRequest) (AuthoringQuizGenerationResult, error) {
-	err := ValidateAuthoringQuizGenerationRequest(request)
-	if err != nil {
-		return AuthoringQuizGenerationResult{}, err
-	}
-
-	program := strings.TrimSpace(p.Program)
-	if _, _, bound := HarnessGenerationSelection(ctx); bound {
-		program = ""
-	}
-
-	payload, err := json.MarshalIndent(request, "", "  ")
-	if err != nil {
-		return AuthoringQuizGenerationResult{}, fmt.Errorf("marshal authoring quiz request: %w", err)
-	}
-
-	prompt := authoringQuizHarnessPrompt(string(payload))
-
-	run, err := RunAgent(ctx, p.Runner, harness.AgentRunRequest{
-		ID:                 request.ID,
-		Purpose:            request.Action,
-		ProjectDir:         request.ProjectDir,
-		Prompt:             prompt,
-		OutputName:         "output.json",
-		Program:            program,
-		ReadOnlyFiles:      true,
-		DeferResponseTrace: true,
-	})
-	if err != nil {
-		return AuthoringQuizGenerationResult{}, fmt.Errorf("invoke authoring quiz provider: %w", err)
-	}
-
-	result, err := ParseAuthoringQuizGenerationResult(run.Output)
-	result.Provider = run.Provider
-	result.Strategy = AuthoringQuizGenerationStrategyDeep
-
-	result.RawText = string(run.Output)
-	if err == nil {
-		err = ValidateAuthoringQuizGenerationResult(result)
-	}
-
-	err = ValidateHarnessGenerationOutput(ctx, harness.AgentRunRequest{ID: request.ID, Purpose: request.Action, ProjectDir: request.ProjectDir}, err)
-	if err != nil {
-		recordAgentRunResponseEvent(ctx, harness.AgentRunRequest{
-			ID:         request.ID,
-			Purpose:    request.Action,
-			ProjectDir: request.ProjectDir,
-		}, run, "parse_error", err)
-
-		return AuthoringQuizGenerationResult{}, err
-	}
-
-	recordAgentRunResponseEvent(ctx, harness.AgentRunRequest{
-		ID:         request.ID,
-		Purpose:    request.Action,
-		ProjectDir: request.ProjectDir,
-	}, run, "ready", nil)
-
-	return result, nil
 }
 
 // ValidateAuthoringQuizGenerationRequest validates the corresponding package boundary value.
@@ -486,6 +371,10 @@ func validateContextualQuizGenerationOptions(opts ContextualQuizGenerationOption
 		return fmt.Errorf("contextual quiz generation time is required")
 	}
 
+	if opts.Context == nil {
+		return fmt.Errorf("authoring quiz context provider is required")
+	}
+
 	return nil
 }
 
@@ -561,157 +450,6 @@ func authoringQuizSourceArtifact(session authoringcore.Session) authoringcore.Ar
 	}
 }
 
-func authoringQuizSessionContext(session authoringcore.Session) string {
-	lines := []string{
-		"session_id: " + session.ID,
-		"target: " + string(session.Target),
-		"topic: " + session.Topic,
-		"description: " + session.Description,
-	}
-
-	return strings.Join(lines, "\n")
-}
-
-func authoringQuizOptionalFileSection(projectDir, name, layer, relPath string) AuthoringQuizContextSection {
-	fullPath := filepath.Join(projectDir, filepath.FromSlash(relPath))
-
-	content, err := os.ReadFile(fullPath)
-	if err != nil {
-		content = []byte("missing: " + relPath)
-	}
-
-	return AuthoringQuizContextSection{
-		Name:      name,
-		Layer:     layer,
-		Authority: relPath,
-		Content:   string(content),
-	}
-}
-
-func authoringQuizWorkspaceGraphSection(ctx context.Context, projectDir string) AuthoringQuizContextSection {
-	graph, err := NewWorkspaceGraphBuilder(projectDir).Build(ctx)
-	if err != nil {
-		return AuthoringQuizContextSection{
-			Name:      "workspace_graph_context",
-			Layer:     "workspace",
-			Authority: "WorkspaceGraph",
-			Content:   "workspace graph context unavailable: " + err.Error(),
-		}
-	}
-
-	assembly, err := AssembleWorkspaceContext(NewProjectWideWorkspaceContextRequest(projectDir, graph))
-	if err != nil {
-		return AuthoringQuizContextSection{
-			Name:      "workspace_graph_context",
-			Layer:     "workspace",
-			Authority: "WorkspaceGraph",
-			Content:   "workspace graph context unavailable: " + err.Error(),
-		}
-	}
-
-	return AuthoringQuizContextSection{
-		Name:      "workspace_graph_context",
-		Layer:     "workspace",
-		Authority: "WorkspaceGraph",
-		Content:   RenderWorkspaceContextAssembly(assembly),
-	}
-}
-
-func authoringQuizPathInventorySection(projectDir, name, layer, relPath string) AuthoringQuizContextSection {
-	root := filepath.Join(projectDir, filepath.FromSlash(relPath))
-	paths := authoringQuizRelativePaths(projectDir, root, authoringQuizMarkdownPath)
-
-	return AuthoringQuizContextSection{
-		Name:      name,
-		Layer:     layer,
-		Authority: relPath,
-		Content:   strings.Join(paths, "\n"),
-	}
-}
-
-func authoringQuizTreeSection(projectDir string) AuthoringQuizContextSection {
-	paths := authoringQuizRelativePaths(projectDir, projectDir, authoringQuizTreePath)
-
-	return AuthoringQuizContextSection{
-		Name:      "tree",
-		Layer:     "tree",
-		Authority: "project_tree",
-		Content:   strings.Join(paths, "\n"),
-	}
-}
-
-func authoringQuizGoInventorySection(projectDir string) AuthoringQuizContextSection {
-	paths := authoringQuizRelativePaths(projectDir, projectDir, authoringQuizGoPath)
-
-	return AuthoringQuizContextSection{
-		Name:      "go_inventory",
-		Layer:     "code",
-		Authority: "go_files",
-		Content:   strings.Join(paths, "\n"),
-	}
-}
-
-func authoringQuizRelativePaths(projectDir, root string, include func(string) bool) []string {
-	paths := []string{}
-
-	walkErr := filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if entry.IsDir() && authoringQuizSkipDir(entry.Name()) {
-			return filepath.SkipDir
-		}
-
-		if entry.IsDir() || !include(path) {
-			return nil
-		}
-
-		relPath, relErr := filepath.Rel(projectDir, path)
-		if relErr != nil {
-			return relErr
-		}
-
-		paths = append(paths, filepath.ToSlash(relPath))
-		if len(paths) >= 200 {
-			return filepath.SkipAll
-		}
-
-		return nil
-	})
-	if walkErr != nil {
-		return []string{}
-	}
-
-	sort.Strings(paths)
-
-	return paths
-}
-
-func authoringQuizMarkdownPath(path string) bool {
-	return strings.EqualFold(filepath.Ext(path), ".md")
-}
-
-func authoringQuizGoPath(path string) bool {
-	return strings.EqualFold(filepath.Ext(path), ".go") ||
-		strings.EqualFold(filepath.Base(path), "go.mod")
-}
-
-func authoringQuizTreePath(path string) bool {
-	name := filepath.Base(path)
-
-	return name != "" && !strings.HasPrefix(name, ".")
-}
-
-func authoringQuizSkipDir(name string) bool {
-	switch name {
-	case ".git", "vendor", "node_modules", "runs":
-		return true
-	default:
-		return false
-	}
-}
-
 func normalizedAuthoringQuizQuestionCount(count int) int {
 	if count <= 0 {
 		return 8
@@ -742,27 +480,8 @@ func authoringQuizContainsSensitivePrompt(value string) bool {
 	return false
 }
 
-func authoringQuizHarnessPrompt(payload string) string {
-	return strings.TrimSpace(`
-You generate context-aware authoring quiz questions for chr.
-
-Use the provided structured request and context sections.
-Ask concrete, project-specific questions that help produce the requested target artifact.
-Do not ask generic questionnaire questions.
-For spec targets, cover problem, actors, workflows, acceptance criteria,
-constraints, non-goals, validation evidence, impacted code/docs, and open risks
-when the project context supports those areas.
-Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
-Return strict JSON only. Do not include Markdown or prose outside JSON.
-
-The JSON response must have exactly one top-level key: "questions".
-Each question object must contain:
-- id
-- question
-- tags
-- follow_up_depth
-- completion_recommended
-
-Request:
-`) + "\n\n" + payload + "\n"
+// QuizContextProvider supplies the existing native workspace/index observations.
+// Authoring retains request shape, generation validation and artifact decisions.
+type QuizContextProvider interface {
+	Load(context.Context, string, authoringcore.Session) ([]AuthoringQuizContextSection, error)
 }
