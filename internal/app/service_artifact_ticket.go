@@ -71,13 +71,13 @@ func (s service) CreateTicket(request CreateTicketRequest) (CreateTicketResult, 
 		return CreateTicketResult{}, err
 	}
 
-	repository := core.NewTicketRepository(
+	repository := ticketcore.NewTicketRepository(
 		s.projectContext.ProjectDir,
 		func(context.Context, string) (int, error) { return nextNumber, nil },
-		core.WithTicketRepositoryKeyPrefix(config.TicketKeyPrefix),
+		ticketcore.WithTicketRepositoryKeyPrefix(config.TicketKeyPrefix),
 	)
 
-	result, err := repository.CreateTicket(s.ctx, core.CreateTicketOptions{
+	result, err := repository.CreateTicket(s.ctx, ticketcore.CreateTicketOptions{
 		Title:       request.Title,
 		Synopsis:    request.Synopsis,
 		Status:      request.Status,

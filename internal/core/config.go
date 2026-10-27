@@ -13,6 +13,7 @@ import (
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -280,7 +281,7 @@ func DefaultWorkBranchPolicy() WorkBranchPolicy {
 // LoadWorkspaceConfig loads the corresponding package data.
 func defaultWorkspaceConfig() WorkspaceConfig {
 	return WorkspaceConfig{
-		TicketKeyPrefix: DefaultTicketKeyPrefix,
+		TicketKeyPrefix: ticketcore.DefaultTicketKeyPrefix,
 		Runtime:         harnessruntime.DefaultConfig(),
 		Notifications:   notifycore.DefaultConfig(),
 		Review:          DefaultReviewWorkflowConfig(),

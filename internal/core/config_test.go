@@ -8,6 +8,7 @@ import (
 
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -20,8 +21,8 @@ func TestLoadWorkspaceConfigUsesDefaultsWhenMissing(t *testing.T) {
 		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
 	}
 
-	if config.TicketKeyPrefix != DefaultTicketKeyPrefix {
-		t.Fatalf("TicketKeyPrefix = %q, want %q", config.TicketKeyPrefix, DefaultTicketKeyPrefix)
+	if config.TicketKeyPrefix != ticketcore.DefaultTicketKeyPrefix {
+		t.Fatalf("TicketKeyPrefix = %q, want %q", config.TicketKeyPrefix, ticketcore.DefaultTicketKeyPrefix)
 	}
 
 	assertDefaultRuntimeConfig(t, config.Runtime)
