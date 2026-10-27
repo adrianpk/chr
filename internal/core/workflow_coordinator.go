@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 const workflowCoordinatorPath = "coordinator.json"
@@ -58,7 +59,7 @@ func (s *WorkflowStore) workflowLocalCoordinator(ctx context.Context, register b
 
 	path := filepath.Join(common, "chr-workflow-coordinator.json")
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if errors.Is(err, os.ErrNotExist) && register {
 		return s.registerWorkflowCoordinator(ctx, common, path)
 	}
@@ -118,7 +119,7 @@ func (s *WorkflowStore) registerWorkflowCoordinator(ctx context.Context, common,
 		return workflowCoordinator{}, err
 	}
 
-	return registration.workflowCoordinator, atomicWorkflowFile(path, data)
+	return registration.workflowCoordinator, opsfile.WriteAtomic(path, data)
 }
 
 func (s *WorkflowStore) workflowCoordinatorMarkers(ctx context.Context) ([]workflowCoordinator, error) {
@@ -148,7 +149,7 @@ func (s *WorkflowStore) workflowCoordinatorMarkers(ctx context.Context) ([]workf
 }
 
 func readWorkflowCoordinator(path string) (workflowCoordinator, error) {
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil {
 		return workflowCoordinator{}, err
 	}

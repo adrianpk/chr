@@ -17,7 +17,7 @@ import (
 // pending mutation. Torn snapshots fail closed and can be explicitly reloaded.
 type observedQuizImages struct {
 	quizcore.Observation
-	images []workflowFileChange
+	images []workflowstate.FileChange
 }
 
 func (r *fileQuizArtifactRepository) Observe(ctx context.Context, scope quizcore.Scope) (quizcore.Observation, error) {
@@ -75,8 +75,8 @@ func quizImageReferences(paths QuizArtifactPaths) []string {
 	}
 }
 
-func (r *fileAuthoringSessionRepository) quizImage(reference string) (workflowFileChange, error) {
-	image := workflowFileChange{Path: filepath.FromSlash(reference)}
+func (r *fileAuthoringSessionRepository) quizImage(reference string) (workflowstate.FileChange, error) {
+	image := workflowstate.FileChange{Path: filepath.FromSlash(reference)}
 
 	data, err := r.authoringRead(image.Path)
 	if errors.Is(err, os.ErrNotExist) {
@@ -106,7 +106,7 @@ func (r *fileAuthoringSessionRepository) checkQuizRead() error {
 	return err
 }
 
-func (r *fileAuthoringSessionRepository) checkQuizImages(images []workflowFileChange) error {
+func (r *fileAuthoringSessionRepository) checkQuizImages(images []workflowstate.FileChange) error {
 	for _, image := range images {
 		current, err := r.quizImage(image.Path)
 		if err != nil {
@@ -121,7 +121,7 @@ func (r *fileAuthoringSessionRepository) checkQuizImages(images []workflowFileCh
 	return r.checkQuizRead()
 }
 
-func (r *fileAuthoringSessionRepository) quizRevision(scope quizcore.Scope, images []workflowFileChange) (string, error) {
+func (r *fileAuthoringSessionRepository) quizRevision(scope quizcore.Scope, images []workflowstate.FileChange) (string, error) {
 	root, err := filepath.Abs(r.projectDir)
 	if err != nil {
 		return "", err

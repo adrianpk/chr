@@ -61,7 +61,7 @@ func (s *WorkflowStore) retainWorkflowContinuation(ctx context.Context, observed
 	return result, err
 }
 
-func (s *WorkflowStore) commitWorkflowContinuation(run *workflowInvocationFile, steps int, reason string, extra ...workflowFileChange) error {
+func (s *WorkflowStore) commitWorkflowContinuation(run *workflowInvocationFile, steps int, reason string, extra ...workflowstate.FileChange) error {
 	previous := run.Continuation
 	if len(extra) == 0 && steps == 0 && previous != nil && previous.SourceRevision+1 == run.Revision && previous.Reason == reason {
 		return nil
@@ -86,7 +86,7 @@ func (s *WorkflowStore) commitWorkflowContinuation(run *workflowInvocationFile, 
 	checkpoint.EvidenceHash = contenthash.Sum(data)
 	run.Continuation = &checkpoint
 
-	return s.commitWorkflowPullRequestFiles(run, extra, workflowFileChange{Path: checkpoint.EvidenceRef, After: data})
+	return s.commitWorkflowPullRequestFiles(run, extra, workflowstate.FileChange{Path: checkpoint.EvidenceRef, After: data})
 }
 
 func workflowContinuationCheckpointPath(id string, sequence int) string {

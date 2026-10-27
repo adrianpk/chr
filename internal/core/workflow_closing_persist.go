@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) commitWorkflowClosingStart(ctx context.Context, claim *workflowClosingClaim) error {
@@ -16,10 +17,10 @@ func (s *WorkflowStore) commitWorkflowClosingStart(ctx context.Context, claim *w
 	claim.set.Set.Closing.Attempts = append(claim.set.Set.Closing.Attempts, WorkflowClosingEvidence{})
 	claim.set.Set.Status = "closing"
 
-	return s.commitWorkflowClosingState(ctx, claim, workflowFileChange{Path: claim.state.Input.Ref, After: claim.data})
+	return s.commitWorkflowClosingState(ctx, claim, workflowstate.FileChange{Path: claim.state.Input.Ref, After: claim.data})
 }
 
-func (s *WorkflowStore) commitWorkflowClosingState(ctx context.Context, claim *workflowClosingClaim, extra ...workflowFileChange) error {
+func (s *WorkflowStore) commitWorkflowClosingState(ctx context.Context, claim *workflowClosingClaim, extra ...workflowstate.FileChange) error {
 	previous := WorkflowInputImage{Path: claim.set.Path, Revision: claim.set.Revision, SourceHash: claim.set.SourceHash}
 	index := claim.state.Generation - 1
 	binding := &claim.set.Set.Closing.Attempts[index]
@@ -30,7 +31,7 @@ func (s *WorkflowStore) commitWorkflowClosingState(ctx context.Context, claim *w
 	}
 
 	data = append(data, '\n')
-	stateFile := workflowFileChange{Path: workflowClosingFile(claim.set.ID, claim.state.Generation, "state.json"), Before: binding.Hash, After: data}
+	stateFile := workflowstate.FileChange{Path: workflowClosingFile(claim.set.ID, claim.state.Generation, "state.json"), Before: binding.Hash, After: data}
 	*binding = WorkflowClosingEvidence{Ref: stateFile.Path, Hash: contenthash.Sum(data)}
 	claim.set.Revision++
 	claim.set.UpdatedAt = time.Now().UTC()

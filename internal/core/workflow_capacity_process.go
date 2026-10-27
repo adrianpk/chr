@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -59,7 +60,7 @@ func workflowCapacityProcess(path string) (WorkflowProcess, bool, error) {
 }
 
 func observeWorkflowCapacityProcess(path string) (WorkflowProcess, bool, error) {
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil {
 		return WorkflowProcess{}, false, err
 	}

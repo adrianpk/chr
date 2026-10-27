@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"slices"
 
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -117,7 +118,7 @@ func (s *WorkflowStore) checkWorkflowSetAmendmentEvidence(set WorkflowRecord) er
 			return err
 		}
 
-		if _, err := readWorkflowFile(path); err != nil {
+		if _, err := opsfile.Read(path); err != nil {
 			return err
 		}
 	}

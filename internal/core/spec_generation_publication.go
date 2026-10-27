@@ -36,7 +36,7 @@ func observeSpecTarget(ctx context.Context, projectDir, reference string) (SpecD
 			return document, errors.Join(workflowstate.ErrConflict, err)
 		}
 
-		document.images = append(document.images, workflowFileChange{Path: path})
+		document.images = append(document.images, workflowstate.FileChange{Path: path})
 	}
 
 	root, err := filepath.Abs(projectDir)

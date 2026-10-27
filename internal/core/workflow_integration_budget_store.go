@@ -133,18 +133,18 @@ func (s *WorkflowStore) extendWorkflowIntegrationBudget(run workflowInvocationFi
 	return budget, nil
 }
 
-func (s *WorkflowStore) workflowIntegrationBudgetChange(ctx context.Context, run *workflowInvocationFile, budget *WorkflowIntegrationBudget) (workflowFileChange, error) {
+func (s *WorkflowStore) workflowIntegrationBudgetChange(ctx context.Context, run *workflowInvocationFile, budget *WorkflowIntegrationBudget) (workflowstate.FileChange, error) {
 	if budget.Revision == math.MaxUint64 {
-		return workflowFileChange{}, workflowstate.ErrConflict
+		return workflowstate.FileChange{}, workflowstate.ErrConflict
 	}
 
 	usage, err := s.workflowIntegrationUsage(ctx, *run)
 	if err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
 	if err := checkWorkflowIntegrationUsage(budget.Usage, usage); err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
 	budget.Usage = usage
@@ -152,16 +152,16 @@ func (s *WorkflowStore) workflowIntegrationBudgetChange(ctx context.Context, run
 
 	budget.TokensSettled, budget.TokensReserved, err = workflowIntegrationTokenTotals(budget.Reservations)
 	if err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
 	if err := validateWorkflowIntegrationBudget(*budget); err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
 	data, err := json.MarshalIndent(budget, "", "  ")
 	if err != nil || len(data) >= workflowstate.FileLimit {
-		return workflowFileChange{}, workflowstate.ErrConflict
+		return workflowstate.FileChange{}, workflowstate.ErrConflict
 	}
 
 	path, before := workflowIntegrationBudgetPath(run.ID), ""
@@ -169,13 +169,13 @@ func (s *WorkflowStore) workflowIntegrationBudgetChange(ctx context.Context, run
 		before = run.IntegrationBudget.Ref.Hash
 	}
 
-	file := workflowFileChange{Path: path, Before: before, After: append(data, '\n')}
+	file := workflowstate.FileChange{Path: path, Before: before, After: append(data, '\n')}
 	run.IntegrationBudget = &WorkflowIntegrationBudgetBinding{Revision: budget.Revision, Ref: WorkflowEvidenceRef{Path: path, Hash: contenthash.Sum(file.After)}}
 
 	return file, nil
 }
 
-func (s *WorkflowStore) commitWorkflowIntegrationBudget(ctx context.Context, run *workflowInvocationFile, budget *WorkflowIntegrationBudget, extra ...workflowFileChange) error {
+func (s *WorkflowStore) commitWorkflowIntegrationBudget(ctx context.Context, run *workflowInvocationFile, budget *WorkflowIntegrationBudget, extra ...workflowstate.FileChange) error {
 	file, err := s.workflowIntegrationBudgetChange(ctx, run, budget)
 	if err != nil {
 		return err
@@ -189,7 +189,7 @@ func (s *WorkflowStore) commitWorkflowIntegrationBudget(ctx context.Context, run
 		return err
 	}
 
-	return s.commitFiles(append([]workflowFileChange{file, invocation}, extra...))
+	return s.commitFiles(append([]workflowstate.FileChange{file, invocation}, extra...))
 }
 
 func (s *WorkflowStore) currentWorkflowIntegrationBudget(ctx context.Context, run workflowInvocationFile, guard WorkflowIntegrationBudgetGuard) (WorkflowIntegrationEntry, WorkflowIntegrationBudget, error) {

@@ -11,7 +11,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r *fileAuthoringSessionRepository) prepareAuthoringContinuation(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, draft AuthoringDraft) ([]workflowFileChange, error) {
+func (r *fileAuthoringSessionRepository) prepareAuthoringContinuation(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, draft AuthoringDraft) ([]workflowstate.FileChange, error) {
 	request := binding.Request
 	session := snapshot.Session
 	session.Revision++
@@ -43,16 +43,16 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringContinuation(ctx contex
 		return nil, err
 	}
 
-	changes := []workflowFileChange{{Path: relative.SessionPath, Before: snapshot.SessionHash, After: []byte(content)}, {Path: relative.TranscriptPath, Before: snapshot.TranscriptHash, After: transcript}}
+	changes := []workflowstate.FileChange{{Path: relative.SessionPath, Before: snapshot.SessionHash, After: []byte(content)}, {Path: relative.TranscriptPath, Before: snapshot.TranscriptHash, After: transcript}}
 
 	return append(changes, artifacts...), nil
 }
 
-func (r *fileAuthoringSessionRepository) prepareAuthoringContent(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *AuthoringSession, draft AuthoringDraft) ([]workflowFileChange, []AssistedTranscriptEvent, error) {
+func (r *fileAuthoringSessionRepository) prepareAuthoringContent(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *AuthoringSession, draft AuthoringDraft) ([]workflowstate.FileChange, []AssistedTranscriptEvent, error) {
 	request := binding.Request
 
 	var (
-		changes []workflowFileChange
+		changes []workflowstate.FileChange
 		events  []AssistedTranscriptEvent
 	)
 
@@ -187,7 +187,7 @@ func AuthoringContinuationArtifact(namespace, sessionID string, kind AuthoringAr
 	return AuthoringArtifactRef{ID: id, Kind: kind, Role: role, Path: filepath.ToSlash(filepath.Join(opscore.DirectoryName, namespace, authoringArtifactType(kind), id, opscore.ArtifactBodyFile())), Description: "Shared authoring " + suffix + " artifact."}
 }
 
-func (r *fileAuthoringSessionRepository) prepareAuthoringOutput(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *AuthoringSession, body string) ([]workflowFileChange, error) {
+func (r *fileAuthoringSessionRepository) prepareAuthoringOutput(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *AuthoringSession, body string) ([]workflowstate.FileChange, error) {
 	ref, changes, err := r.prepareAuthoringOutputChanges(ctx, binding, snapshot, session, body)
 	if err != nil {
 		return nil, err
@@ -218,7 +218,7 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringOutput(ctx context.Cont
 	return changes, nil
 }
 
-func (r *fileAuthoringSessionRepository) prepareAuthoringOutputChanges(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *AuthoringSession, body string) (AuthoringArtifactRef, []workflowFileChange, error) {
+func (r *fileAuthoringSessionRepository) prepareAuthoringOutputChanges(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *AuthoringSession, body string) (AuthoringArtifactRef, []workflowstate.FileChange, error) {
 	if binding.Request.Target == AuthoringArtifactKindDump {
 		return r.prepareAuthoringDump(ctx, binding, snapshot, *session, body)
 	}

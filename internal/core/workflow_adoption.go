@@ -164,14 +164,14 @@ func (s *WorkflowStore) preparePlanAdoption(ctx context.Context, opts WorkflowPl
 	return result, err
 }
 
-func (s *WorkflowStore) planAdoptionFiles(result WorkflowMaterializationResult, plan generationcore.GeneratedWorkflowPlan) ([]workflowFileChange, error) {
+func (s *WorkflowStore) planAdoptionFiles(result WorkflowMaterializationResult, plan generationcore.GeneratedWorkflowPlan) ([]workflowstate.FileChange, error) {
 	receipt, err := materializationReceiptFile(plan, result)
 	if err != nil {
 		return nil, err
 	}
 
 	result.Set.Metadata["materialization_receipt_hash"] = json.RawMessage(fmt.Sprintf("%q", contenthash.Sum(receipt.After)))
-	files := []workflowFileChange{}
+	files := []workflowstate.FileChange{}
 
 	for _, record := range append([]WorkflowRecord{result.Set}, result.Tasks...) {
 		encoded, err := s.encodeChanges(record)

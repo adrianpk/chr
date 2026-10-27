@@ -7,6 +7,7 @@ import (
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowSetAmendmentReceipt struct {
@@ -57,7 +58,7 @@ func (s *WorkflowStore) finishWorkflowAmendment(ctx context.Context, builder *wo
 	builder.files = append(builder.files, orderFiles...)
 	set.Revision++
 	set.UpdatedAt = receipt.RecordedAt
-	builder.files = append(builder.files, workflowFileChange{Path: builder.result.ReceiptRef, After: data}, workflowFileChange{Path: set.Set.PlanRef, After: body})
+	builder.files = append(builder.files, workflowstate.FileChange{Path: builder.result.ReceiptRef, After: data}, workflowstate.FileChange{Path: set.Set.PlanRef, After: body})
 
 	return s.workflowAmendmentRecordFiles(ctx, builder)
 }
@@ -98,7 +99,7 @@ func (s *WorkflowStore) workflowAmendmentRecordFiles(ctx context.Context, builde
 	return nil
 }
 
-func (s *WorkflowStore) workflowAmendmentInvocationFiles(ctx context.Context, runs []workflowInvocationFile, old, next WorkflowRecord, files []workflowFileChange) ([]workflowFileChange, error) {
+func (s *WorkflowStore) workflowAmendmentInvocationFiles(ctx context.Context, runs []workflowInvocationFile, old, next WorkflowRecord, files []workflowstate.FileChange) ([]workflowstate.FileChange, error) {
 	for _, run := range runs {
 		if run.Namespace != old.Namespace || workflowInvocationTerminal(run.Status) || run.OwnerRoot != s.layout.Root() {
 			continue

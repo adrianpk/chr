@@ -110,7 +110,7 @@ func (r *fileAuthoringSessionRepository) completedPlanOperation(plan generationc
 	return found, err
 }
 
-func (r *fileAuthoringSessionRepository) planPublicationReceiptChange(paths GeneratedPlanPaths, plan generationcore.GeneratedPlan, changes []workflowFileChange) ([]workflowFileChange, error) {
+func (r *fileAuthoringSessionRepository) planPublicationReceiptChange(paths GeneratedPlanPaths, plan generationcore.GeneratedPlan, changes []workflowstate.FileChange) ([]workflowstate.FileChange, error) {
 	if plan.Operation == nil {
 		return nil, nil
 	}
@@ -146,7 +146,7 @@ func (r *fileAuthoringSessionRepository) planPublicationReceiptChange(paths Gene
 	receipt.Checksum = contenthash.Sum(encoded)
 	encoded, err = json.Marshal(receipt)
 
-	return []workflowFileChange{{Path: authoringReceiptRef(plan.Operation.ID), After: encoded}}, err
+	return []workflowstate.FileChange{{Path: authoringReceiptRef(plan.Operation.ID), After: encoded}}, err
 }
 
 func validatePlanPublicationReceipt(receipt planPublicationReceipt, operationID, digest string) error {

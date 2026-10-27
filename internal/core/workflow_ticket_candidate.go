@@ -141,7 +141,7 @@ func (s *WorkflowStore) commitWorkflowTicketCandidate(run *workflowInvocationFil
 	run.CandidateRef, run.CandidateHash = workflowTicketCandidatePath(run.ID, candidate.ID), contenthash.Sum(data)
 	run.Outcome = "ticket_candidate_ready"
 
-	return s.commitWorkflowPullRequestFiles(run, nil, workflowFileChange{Path: run.CandidateRef, After: data})
+	return s.commitWorkflowPullRequestFiles(run, nil, workflowstate.FileChange{Path: run.CandidateRef, After: data})
 }
 
 func (s *WorkflowStore) checkWorkflowTicketCandidate(ctx context.Context, run workflowInvocationFile, observation workflowSliceObservation, candidate WorkflowSliceCandidate) error {

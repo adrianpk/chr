@@ -206,7 +206,7 @@ func (r *fileAuthoringSessionRepository) commitAuthoringContinuation(ctx context
 	return result, r.recoverAuthoringMutation()
 }
 
-func authoringImageMap(changes []workflowFileChange) map[string][]byte {
+func authoringImageMap(changes []workflowstate.FileChange) map[string][]byte {
 	result := map[string][]byte{}
 	for _, change := range changes {
 		result[change.Path] = change.After
@@ -215,18 +215,18 @@ func authoringImageMap(changes []workflowFileChange) map[string][]byte {
 	return result
 }
 
-func authoringReceiptChange(binding authoringRequestBinding, result AuthoringContinuationResult) (workflowFileChange, error) {
+func authoringReceiptChange(binding authoringRequestBinding, result AuthoringContinuationResult) (workflowstate.FileChange, error) {
 	receipt := authoringMutationReceipt{Schema: "chr-authoring-receipt/v1", Digest: binding.Digest, Result: result}
 
 	encoded, err := json.Marshal(receipt)
 	if err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
 	receipt.Checksum = contenthash.Sum(encoded)
 	encoded, err = json.Marshal(receipt)
 
-	return workflowFileChange{Path: authoringReceiptRef(binding.Request.Binding.RequestID), After: encoded}, err
+	return workflowstate.FileChange{Path: authoringReceiptRef(binding.Request.Binding.RequestID), After: encoded}, err
 }
 
 func authoringProviderFailure(err error) string {
@@ -287,7 +287,7 @@ func validateGeneratedAuthoring(ctx context.Context, draft AuthoringDraft, snaps
 	return ctx.Err()
 }
 
-func (r *fileAuthoringSessionRepository) writeAuthoringContinuationJournal(target AuthoringArtifactKind, changes []workflowFileChange) error {
+func (r *fileAuthoringSessionRepository) writeAuthoringContinuationJournal(target AuthoringArtifactKind, changes []workflowstate.FileChange) error {
 	if target == AuthoringArtifactKindDump {
 		return r.writeAuthoringJournalVersion(projectDumpJournalSchema, changes)
 	}

@@ -3,6 +3,8 @@ package core
 import (
 	"path/filepath"
 	"testing"
+
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 // TestWorkflowReviewRevocation re-resolves project policy and the current target,
@@ -34,7 +36,7 @@ func TestWorkflowReviewRevocation(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := readWorkflowFile(filepath.Join(store.layout.Root(), old.ResultRef)); err != nil {
+	if _, err := opsfile.Read(filepath.Join(store.layout.Root(), old.ResultRef)); err != nil {
 		t.Fatal("revocation discarded immutable historical decision")
 	}
 }

@@ -37,18 +37,18 @@ func (r *fileAuthoringSessionRepository) quizActionDigest(request quizcore.Actio
 	return contenthash.Sum(append([]byte(root+"\x00quiz\x00"+paths.RawRelativePath+"\x00"), encoded...)), nil
 }
 
-func quizReceiptChange(digest string, result quizcore.ActionResult) (workflowFileChange, error) {
+func quizReceiptChange(digest string, result quizcore.ActionResult) (workflowstate.FileChange, error) {
 	receipt := quizActionReceipt{Schema: "chr-quiz-action/v1", Digest: digest, Result: result, Revision: result.State.Revision}
 
 	encoded, err := json.Marshal(receipt)
 	if err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
 	receipt.Checksum = contenthash.Sum(encoded)
 	encoded, err = json.Marshal(receipt)
 
-	return workflowFileChange{Path: authoringReceiptRef(result.OperationID), After: encoded}, err
+	return workflowstate.FileChange{Path: authoringReceiptRef(result.OperationID), After: encoded}, err
 }
 
 func (r *fileAuthoringSessionRepository) quizReceipt(operationID, digest string) (quizReceiptLookup, error) {

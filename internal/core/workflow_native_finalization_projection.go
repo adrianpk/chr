@@ -36,7 +36,7 @@ func (s *WorkflowStore) workflowNativeReceiptProjection(run *workflowInvocationF
 	return workflowNativeProjection{entry: entry, files: files, changed: true}, nil
 }
 
-func (s *WorkflowStore) projectWorkflowNativeReceipt(run *workflowInvocationFile, entry *WorkflowIntegrationEntry, last WorkflowSubmission) ([]workflowFileChange, error) {
+func (s *WorkflowStore) projectWorkflowNativeReceipt(run *workflowInvocationFile, entry *WorkflowIntegrationEntry, last WorkflowSubmission) ([]workflowstate.FileChange, error) {
 	if last.State != "confirmed" {
 		return nil, nil
 	}
@@ -70,7 +70,7 @@ func (s *WorkflowStore) projectWorkflowNativeReceipt(run *workflowInvocationFile
 		return nil, err
 	}
 
-	return []workflowFileChange{{Path: run.DeliveryProofRef, After: data}}, nil
+	return []workflowstate.FileChange{{Path: run.DeliveryProofRef, After: data}}, nil
 }
 
 func (s *WorkflowStore) workflowNativeDeliveryProof(run workflowInvocationFile, record WorkflowRecord) (WorkflowSliceDeliveryProof, error) {

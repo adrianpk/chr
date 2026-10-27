@@ -9,13 +9,14 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type caseMutationJournal struct {
-	Schema   string               `json:"schema"`
-	Changes  []workflowFileChange `json:"changes"`
-	Checksum string               `json:"checksum"`
+	Schema   string                     `json:"schema"`
+	Changes  []workflowstate.FileChange `json:"changes"`
+	Checksum string                     `json:"checksum"`
 }
 
 func (s CaseMetadataService) commitCaseMutation(request CaseMutationRequest, digest string) (CaseMutationResult, error) {
@@ -41,7 +42,7 @@ func (s CaseMetadataService) commitCaseMutation(request CaseMutationRequest, dig
 		return result, err
 	}
 
-	journal := caseMutationJournal{Schema: "chr-case-journal/v1", Changes: []workflowFileChange{{Path: metadata.SourcePath, Before: request.Metadata.SourceHash, After: content}, {Path: result.ReceiptRef, After: encoded}}}
+	journal := caseMutationJournal{Schema: "chr-case-journal/v1", Changes: []workflowstate.FileChange{{Path: metadata.SourcePath, Before: request.Metadata.SourceHash, After: content}, {Path: result.ReceiptRef, After: encoded}}}
 	if err := s.writeCaseMutationJournal(journal); err != nil {
 		return result, err
 	}
@@ -92,7 +93,7 @@ func (s CaseMetadataService) writeCaseMutationJournal(journal caseMutationJourna
 		return err
 	}
 
-	return atomicWorkflowFile(path, encoded)
+	return opsfile.WriteAtomic(path, encoded)
 }
 
 func (s CaseMetadataService) recoverCaseMutation() error {
@@ -101,7 +102,7 @@ func (s CaseMetadataService) recoverCaseMutation() error {
 		return err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil
 	}
@@ -133,7 +134,7 @@ func (s CaseMetadataService) recoverCaseMutation() error {
 		return err
 	}
 
-	return syncWorkflowDirectory(filepath.Dir(path))
+	return opsfile.SyncDirectory(filepath.Dir(path))
 }
 
 func (s CaseMetadataService) checkCaseJournal(journal caseMutationJournal) error {
@@ -162,13 +163,13 @@ func (s CaseMetadataService) checkCaseJournal(journal caseMutationJournal) error
 	return nil
 }
 
-func (s CaseMetadataService) caseJournalImage(change workflowFileChange) (bool, error) {
+func (s CaseMetadataService) caseJournalImage(change workflowstate.FileChange) (bool, error) {
 	path, err := s.caseMutationPath(change.Path)
 	if err != nil {
 		return false, err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if errors.Is(err, os.ErrNotExist) && change.Before == "" {
 		return false, nil
 	}
@@ -194,7 +195,7 @@ func (s CaseMetadataService) readCaseMutationReceipt(request CaseMutationRequest
 		return CaseMutationResult{}, false, err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return CaseMutationResult{}, false, nil
 	}
@@ -256,7 +257,7 @@ func (s CaseMetadataService) guardNewCaseMutation(metadata CaseMetadata) error {
 		return err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if !metadata.Exists && errors.Is(err, os.ErrNotExist) {
 		return nil
 	}
@@ -305,7 +306,7 @@ func validateCaseMutationObservation(metadata CaseMetadata) error {
 	return nil
 }
 
-func (s CaseMetadataService) applyCaseJournalImage(change workflowFileChange, index int) error {
+func (s CaseMetadataService) applyCaseJournalImage(change workflowstate.FileChange, index int) error {
 	applied, err := s.caseJournalImage(change)
 	if err != nil {
 		return err
@@ -320,7 +321,7 @@ func (s CaseMetadataService) applyCaseJournalImage(change workflowFileChange, in
 		return err
 	}
 
-	if err := atomicWorkflowFile(target, change.After); err != nil {
+	if err := opsfile.WriteAtomic(target, change.After); err != nil {
 		return err
 	}
 

@@ -12,6 +12,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -64,7 +65,7 @@ func (p *workflowParallelPublicationProvider) SubmitWorkflowIntegration(ctx cont
 		return response, errors.Join(err, encodeErr)
 	}
 
-	return response, errors.Join(err, atomicWorkflowFile(p.observationPath(), data))
+	return response, errors.Join(err, opsfile.WriteAtomic(p.observationPath(), data))
 }
 
 func workflowParallelPublicationFixture(t *testing.T, conflict bool) [2]workflowParallelPublicationLane {

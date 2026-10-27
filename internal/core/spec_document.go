@@ -19,7 +19,7 @@ type SpecDocument struct {
 	Reference, Revision, Title, Body, Status, ProjectID, CaseSlug string
 	front, provenance                                             string
 	heading                                                       bool
-	images                                                        []workflowFileChange
+	images                                                        []workflowstate.FileChange
 	metadata                                                      map[string]any
 }
 
@@ -66,7 +66,7 @@ func ReadSpecDocument(ctx context.Context, projectDir, reference string) (SpecDo
 			return document, err
 		}
 
-		document.images = append(document.images, workflowFileChange{Path: path, Before: contenthash.Sum(data), After: data})
+		document.images = append(document.images, workflowstate.FileChange{Path: path, Before: contenthash.Sum(data), After: data})
 	}
 
 	if err := decodeSpecDocument(&document); err != nil {

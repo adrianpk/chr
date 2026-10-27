@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -60,7 +61,7 @@ func (s *WorkflowStore) workflowResultValidation(attempt WorkflowAttempt) (Workf
 		return WorkflowResultValidation{}, 0, err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil || contenthash.Sum(data) != attempt.ResultHash {
 		return WorkflowResultValidation{}, 0, errorsOrConflict(err)
 	}
@@ -96,7 +97,7 @@ func (s *WorkflowStore) workflowResultTask(attempt WorkflowAttempt) (WorkflowTas
 		return WorkflowTaskInput{}, 0, err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil || contenthash.Sum(data) != attempt.InputHash {
 		return WorkflowTaskInput{}, 0, errorsOrConflict(err)
 	}

@@ -14,7 +14,7 @@ are omitted here; tests do not define production ownership.
 | --- | --- |
 | app | core, core/authoring/generation, core/authoring/state, core/database, core/gate, core/model, core/notify, core/ops, core/ops/namespace, core/project, core/quiz, core/quiz/model, core/quiz/openai, core/telegram, core/telegram/message, core/workflow/state, core/workspace, harness, harness/codex, harness/pi, tui, webui, webui/ui |
 | cmd/chr | app |
-| core | core/authoring/generation, core/authoring/state, core/configvalue, core/contenthash, core/database, core/gate, core/model, core/notify, core/ops, core/ops/namespace, core/ops/slug, core/project, core/quiz, core/quiz/model, core/quiz/openai, core/workflow/state, core/workspace, harness, harness/process |
+| core | core/authoring/generation, core/authoring/state, core/configvalue, core/contenthash, core/database, core/gate, core/model, core/notify, core/ops, core/ops/file, core/ops/namespace, core/ops/slug, core/project, core/quiz, core/quiz/model, core/quiz/openai, core/workflow/state, core/workspace, harness, harness/process |
 | core/authoring/generation | core/quiz, core/workflow/state |
 | core/authoring/state | none |
 | core/configvalue | none |
@@ -24,6 +24,7 @@ are omitted here; tests do not define production ownership.
 | core/model | none |
 | core/notify | core/contenthash, core/database, core/ops/namespace, core/project, core/telegram/message, core/workflow/state |
 | core/ops | core/ops/namespace, core/project |
+| core/ops/file | core/workflow/state |
 | core/ops/namespace | none |
 | core/ops/slug | none |
 | core/project | core/database |
@@ -106,7 +107,7 @@ constraints, not permission to rename an ambiguous domain concept.
 ## Root production-file dispositions
 
 [The exact file ledger](code-quality-remediation-core-owners.csv) enumerates all
-758 current non-test files under internal/core, their declared symbols,
+762 current non-test files under internal/core, their declared symbols,
 existing signature owners, final responsibility and migration/retention task.
 It provides a finite per-file handoff, including exact declarations. Multiple owners
 on a workflow file require separating store-owned atomic operations from stage
@@ -632,3 +633,15 @@ introduced. Lexical containment is not a symlink-security check. The adjacent
 transaction permission, locking, failure handling and journals stay with their
 original operation owners. This resolves concrete edges in the authoring source
 scan without introducing a generic helper package.
+
+### Shared operational file and journal-image primitives
+
+T9.1 extracts the original bounded read, synced atomic replacement, directory
+sync and cancellable advisory lock acquisition into core/ops/file. Its only
+internal dependency is workflow/state for the same default bound. The retained
+FileChange value moves to workflow/state with identical field order and tags.
+Fourteen exact debt signatures qualify that same type; no allowance grows.
+Private images remain private in their owning journal; reads, lock lifetime,
+path permission, mutation sets, recovery and multi-file commits retain their
+original authority. The shared primitive does not import or coordinate workflow
+or authoring policy. The original 10 ms cancellation-aware lock retry remains.

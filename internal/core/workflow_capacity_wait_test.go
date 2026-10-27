@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 // TestWorkflowCapacityContinuation retains a distinct wait checkpoint without
@@ -98,7 +100,7 @@ func TestWorkflowCapacityRetainedLock(t *testing.T) {
 	path := filepath.Join(store.layout.Root(), "lock", "agent-operation.lock")
 
 	data := []byte(`{"operation":"development","owner":"legacy-retained","pid":1}`)
-	if err := atomicWorkflowFile(path, data); err != nil {
+	if err := opsfile.WriteAtomic(path, data); err != nil {
 		t.Fatal(err)
 	}
 

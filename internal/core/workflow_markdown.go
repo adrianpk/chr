@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -54,7 +55,7 @@ func workflowMarkdownFields(front string) (map[string]json.RawMessage, error) {
 }
 
 func (s *WorkflowStore) readMarkdown(relative, path string) (WorkflowRecord, error) {
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil {
 		return WorkflowRecord{}, err
 	}
@@ -186,7 +187,7 @@ func (s *WorkflowStore) prepareAdoption(relative string, task WorkflowTask, obse
 		return WorkflowRecord{}, err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil {
 		return WorkflowRecord{}, err
 	}

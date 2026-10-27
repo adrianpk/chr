@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -125,7 +126,7 @@ func (s *WorkflowStore) appendUnpreparedTicket(selection *workflowSelection, pat
 		return err
 	}
 
-	content, err := readWorkflowFile(path)
+	content, err := opsfile.Read(path)
 	if err != nil {
 		return err
 	}
@@ -214,7 +215,7 @@ func (s *WorkflowStore) workflowEvidenceHash(relative string) (string, error) {
 		return "", err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if errors.Is(err, fs.ErrNotExist) {
 		return "missing", nil
 	}

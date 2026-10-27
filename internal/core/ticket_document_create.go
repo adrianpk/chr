@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 // CreateTicketDocument allocates through the existing canonical envelope owner.
@@ -28,7 +29,7 @@ func CreateTicketDocument(ctx context.Context, opts TicketBoardReadOptions, key 
 		return TicketDocument{}, err
 	}
 
-	if err := atomicWorkflowFile(filepath.Join(artifact.Dir, opscore.ArtifactBodyFile()), []byte(content)); err != nil {
+	if err := opsfile.WriteAtomic(filepath.Join(artifact.Dir, opscore.ArtifactBodyFile()), []byte(content)); err != nil {
 		return TicketDocument{}, err
 	}
 

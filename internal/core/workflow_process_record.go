@@ -9,6 +9,7 @@ import (
 	"slices"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -89,12 +90,12 @@ func (s *WorkflowStore) finishWorkflowProcess(ctx context.Context, claim *Workfl
 }
 
 func (s *WorkflowStore) hashWorkflowProcessOutput(process *WorkflowProcess) error {
-	stdout, err := readWorkflowFile(filepath.Join(s.layout.Root(), process.StdoutRef))
+	stdout, err := opsfile.Read(filepath.Join(s.layout.Root(), process.StdoutRef))
 	if err != nil {
 		return err
 	}
 
-	stderr, err := readWorkflowFile(filepath.Join(s.layout.Root(), process.StderrRef))
+	stderr, err := opsfile.Read(filepath.Join(s.layout.Root(), process.StderrRef))
 	if err != nil {
 		return err
 	}

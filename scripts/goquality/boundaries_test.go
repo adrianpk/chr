@@ -12,6 +12,8 @@ func TestLeafDependencies(t *testing.T) {
 		name, path, source string
 		blocked            bool
 	}{
+		{"file coordinator", "internal/core/ops/file/io.go", "package file\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
+		{"file bounds", "internal/core/ops/file/io.go", "package file\nimport _ \"" + coreImportPath + "workflow/state\"\n", false},
 		{"artifact coordinator", "internal/core/ops/artifact.go", "package ops\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
 		{"artifact project", "internal/core/ops/layout.go", "package ops\nimport _ \"" + coreImportPath + "project\"\n", false},
 		{"quiz domain coordinator", "internal/core/quiz/runtime.go", "package quiz\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},

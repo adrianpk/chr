@@ -12,7 +12,7 @@ import (
 
 // The continuation builds dump images, never a nested publication. Its existing
 // session/transcript/receipt journal owns the entire resulting change set.
-func (r *fileAuthoringSessionRepository) prepareAuthoringDump(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session AuthoringSession, body string) (AuthoringArtifactRef, []workflowFileChange, error) {
+func (r *fileAuthoringSessionRepository) prepareAuthoringDump(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session AuthoringSession, body string) (AuthoringArtifactRef, []workflowstate.FileChange, error) {
 	observed, err := r.observeAuthoringDump(ctx, snapshot)
 	if err != nil {
 		return AuthoringArtifactRef{}, nil, err
@@ -157,7 +157,7 @@ func authoringDumpPreparation(snapshot AuthoringSnapshot, session AuthoringSessi
 	}, nil
 }
 
-func withoutAuthoringRawChanges(changes []workflowFileChange, raw string) []workflowFileChange {
+func withoutAuthoringRawChanges(changes []workflowstate.FileChange, raw string) []workflowstate.FileChange {
 	retained := changes[:0]
 	for _, change := range changes {
 		if change.Path != filepath.FromSlash(raw) && change.Path != filepath.Join(filepath.Dir(raw), "metadata.json") {

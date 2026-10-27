@@ -119,33 +119,33 @@ func (s *WorkflowStore) settleWorkflowAgentCall(ctx context.Context, claim *Work
 			return err
 		}
 
-		return claim.store.commitWorkflowPullRequestFiles(&run, []workflowFileChange{budgetFile}, proofFile)
+		return claim.store.commitWorkflowPullRequestFiles(&run, []workflowstate.FileChange{budgetFile}, proofFile)
 	})
 }
 
-func (s *WorkflowStore) workflowAgentSettlement(ctx context.Context, reservation *WorkflowIntegrationReservation, input WorkflowTaskInput, response WorkflowAgentResponse, executionErr error) (workflowFileChange, error) {
+func (s *WorkflowStore) workflowAgentSettlement(ctx context.Context, reservation *WorkflowIntegrationReservation, input WorkflowTaskInput, response WorkflowAgentResponse, executionErr error) (workflowstate.FileChange, error) {
 	reservation.State = "unknown"
 
 	if !workflowAgentUsageKnown(executionErr) {
-		return workflowFileChange{}, nil
+		return workflowstate.FileChange{}, nil
 	}
 
 	if err := s.checkWorkflowAgentInput(ctx, input); err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
 	proof := WorkflowTokenSettlement{SchemaVersion: 1, ReservationID: reservation.ID, AttemptID: reservation.AttemptID, CapabilityRevision: reservation.Allowance.CapabilityRevision, WholeCall: true, Input: *response.Input, Output: *response.Output}
 
 	data, err := json.Marshal(proof)
 	if err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
 	path := "run/" + input.InvocationID + "/evidence/agent-usage-" + input.AttemptID + ".json"
 	reservation.State, reservation.ReportedInput, reservation.ReportedOutput = "settled", proof.Input, proof.Output
 	reservation.SettlementProof = &WorkflowEvidenceRef{Path: path, Hash: contenthash.Sum(data)}
 
-	return workflowFileChange{Path: path, After: data}, validateWorkflowIntegrationReservation(*reservation)
+	return workflowstate.FileChange{Path: path, After: data}, validateWorkflowIntegrationReservation(*reservation)
 }
 
 func workflowAgentUsageKnown(err error) bool { return err == nil }

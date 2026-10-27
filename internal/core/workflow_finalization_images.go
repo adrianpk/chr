@@ -50,11 +50,11 @@ func (s *WorkflowStore) commitWorkflowSliceFinalization(ctx context.Context, run
 
 	workflowRetainDeliveryStatus(run, outcome, run.Cursor == len(run.Members) && (run.Selection.Selector.Extent == "slice" || run.Selection.Selector.Extent == "ticket"))
 
-	return s.commitWorkflowPullRequestFiles(run, append(files, changes...), workflowFileChange{})
+	return s.commitWorkflowPullRequestFiles(run, append(files, changes...), workflowstate.FileChange{})
 }
 
-func (s *WorkflowStore) workflowFinalizationTaskImages(run *workflowInvocationFile, snapshot *WorkflowSnapshot, tasks []WorkflowRecord, receipt WorkflowRecord) ([]workflowFileChange, error) {
-	files := []workflowFileChange{}
+func (s *WorkflowStore) workflowFinalizationTaskImages(run *workflowInvocationFile, snapshot *WorkflowSnapshot, tasks []WorkflowRecord, receipt WorkflowRecord) ([]workflowstate.FileChange, error) {
+	files := []workflowstate.FileChange{}
 
 	for _, record := range tasks {
 		record.Task.Phase, record.Task.Status, record.Task.DeliveryRef = "integrated", TicketStatusDone, receipt.Path
@@ -77,7 +77,7 @@ func workflowTaskDelivery(branch string, receipt WorkflowReceipt) *WorkflowTaskD
 	return &WorkflowTaskDelivery{PullRequest: receipt.PullRequest, Branch: branch, Method: receipt.Method, ResultCommit: receipt.ResultCommit, ConfirmedAt: receipt.ConfirmedAt}
 }
 
-func (s *WorkflowStore) workflowFinalizationSetImages(run *workflowInvocationFile, snapshot *WorkflowSnapshot, set WorkflowRecord) ([]workflowFileChange, error) {
+func (s *WorkflowStore) workflowFinalizationSetImages(run *workflowInvocationFile, snapshot *WorkflowSnapshot, set WorkflowRecord) ([]workflowstate.FileChange, error) {
 	if set.Set == nil {
 		return nil, nil
 	}

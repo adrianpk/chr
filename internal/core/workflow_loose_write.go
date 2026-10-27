@@ -12,7 +12,7 @@ import (
 
 // Only a revision-guarded write can advance an inactive loose member's expected
 // image. Raw edits and execution/description changes still require reconciliation.
-func (s *WorkflowStore) workflowLooseWriteChanges(ctx context.Context, next WorkflowRecord, expected uint64, files []workflowFileChange) ([]workflowFileChange, error) {
+func (s *WorkflowStore) workflowLooseWriteChanges(ctx context.Context, next WorkflowRecord, expected uint64, files []workflowstate.FileChange) ([]workflowstate.FileChange, error) {
 	if expected == 0 || next.Task == nil {
 		return files, nil
 	}

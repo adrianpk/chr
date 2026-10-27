@@ -47,7 +47,7 @@ func (r *fileAuthoringSessionRepository) commitDumpMutation(ctx context.Context,
 	return result, r.recoverAuthoringMutation()
 }
 
-func (r *fileAuthoringSessionRepository) dumpMutationChanges(binding dumpMutationBinding, target dumpMutationTarget) ([]workflowFileChange, ProjectDumpMutationResult, error) {
+func (r *fileAuthoringSessionRepository) dumpMutationChanges(binding dumpMutationBinding, target dumpMutationTarget) ([]workflowstate.FileChange, ProjectDumpMutationResult, error) {
 	result := ProjectDumpMutationResult{OperationID: binding.Request.OperationID, Destination: target.Destination}
 
 	body, metadata, history, err := r.dumpMutationBefore(target)
@@ -65,8 +65,8 @@ func (r *fileAuthoringSessionRepository) dumpMutationChanges(binding dumpMutatio
 		return nil, result, err
 	}
 
-	changes := append(history, workflowFileChange{Path: filepath.FromSlash(target.Destination), Before: target.Artifact.SourceHash, After: content},
-		workflowFileChange{Path: filepath.Join(filepath.Dir(target.Destination), "metadata.json"), Before: target.Artifact.MetadataHash, After: updated})
+	changes := append(history, workflowstate.FileChange{Path: filepath.FromSlash(target.Destination), Before: target.Artifact.SourceHash, After: content},
+		workflowstate.FileChange{Path: filepath.Join(filepath.Dir(target.Destination), "metadata.json"), Before: target.Artifact.MetadataHash, After: updated})
 	result.SourceHash, result.MetadataHash = contenthash.Sum(content), contenthash.Sum(updated)
 
 	components, err := r.dumpCaptureChanges(binding, target)
@@ -79,13 +79,13 @@ func (r *fileAuthoringSessionRepository) dumpMutationChanges(binding dumpMutatio
 	if target.Project.Name != "" && target.Project.ProjectDumpRef != target.Destination {
 		project := target.Project
 		project.ProjectDumpRef = target.Destination
-		changes = append(changes, workflowFileChange{Path: filepath.Join(workspacecore.DirectoryName, UserDirectoryName, "project.md"), Before: project.SourceHash, After: []byte(RenderProjectMetadata(project))})
+		changes = append(changes, workflowstate.FileChange{Path: filepath.Join(workspacecore.DirectoryName, UserDirectoryName, "project.md"), Before: project.SourceHash, After: []byte(RenderProjectMetadata(project))})
 	}
 
 	return changes, result, nil
 }
 
-func (r *fileAuthoringSessionRepository) dumpMutationBefore(target dumpMutationTarget) ([]byte, []byte, []workflowFileChange, error) {
+func (r *fileAuthoringSessionRepository) dumpMutationBefore(target dumpMutationTarget) ([]byte, []byte, []workflowstate.FileChange, error) {
 	if target.Artifact.Reference == "" {
 		return nil, nil, nil, nil
 	}
@@ -97,7 +97,7 @@ func (r *fileAuthoringSessionRepository) dumpMutationBefore(target dumpMutationT
 		return nil, nil, nil, err
 	}
 
-	var changes []workflowFileChange
+	var changes []workflowstate.FileChange
 
 	for _, image := range []struct {
 		name    string
@@ -114,7 +114,7 @@ func (r *fileAuthoringSessionRepository) dumpMutationBefore(target dumpMutationT
 	return body, metadata, changes, nil
 }
 
-func (r *fileAuthoringSessionRepository) dumpCaptureChanges(binding dumpMutationBinding, target dumpMutationTarget) ([]workflowFileChange, error) {
+func (r *fileAuthoringSessionRepository) dumpCaptureChanges(binding dumpMutationBinding, target dumpMutationTarget) ([]workflowstate.FileChange, error) {
 	if binding.Prepared == nil {
 		return nil, nil
 	}
@@ -133,7 +133,7 @@ func (r *fileAuthoringSessionRepository) dumpCaptureChanges(binding dumpMutation
 		return nil, err
 	}
 
-	return []workflowFileChange{
+	return []workflowstate.FileChange{
 		{Path: filepath.FromSlash(target.RawReference), After: []byte(binding.Prepared.RawContent)},
 		{Path: filepath.Join(filepath.Dir(target.RawReference), "metadata.json"), After: append(encoded, '\n')},
 	}, nil

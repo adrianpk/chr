@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	slugcore "forge.adrianpk.com/chr/internal/core/ops/slug"
 )
 
@@ -205,7 +206,7 @@ func (r *fileTicketRepository) ticketNumber(path string) (int, bool, error) {
 		return number, true, nil
 	}
 
-	content, err := readWorkflowFile(path)
+	content, err := opsfile.Read(path)
 	if err != nil {
 		return 0, false, fmt.Errorf("read ticket metadata: %w", err)
 	}

@@ -204,24 +204,24 @@ func (s *WorkflowStore) nextWorkflowIntegrationSequence(ctx context.Context, run
 	return maximum + 1, nil
 }
 
-func workflowIntegrationEntryChange(entry WorkflowIntegrationEntry, before string) (workflowFileChange, error) {
+func workflowIntegrationEntryChange(entry WorkflowIntegrationEntry, before string) (workflowstate.FileChange, error) {
 	if err := validateWorkflowIntegrationEntry(entry); err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
 	data, err := json.MarshalIndent(entry, "", "  ")
 	if err != nil || len(data) >= workflowstate.FileLimit {
-		return workflowFileChange{}, fmt.Errorf("integration entry exceeds file bounds: %w", errorsOrConflict(err))
+		return workflowstate.FileChange{}, fmt.Errorf("integration entry exceeds file bounds: %w", errorsOrConflict(err))
 	}
 
-	return workflowFileChange{Path: workflowIntegrationEntryPath(entry.InvocationID, entry.ID), Before: before, After: append(data, '\n')}, nil
+	return workflowstate.FileChange{Path: workflowIntegrationEntryPath(entry.InvocationID, entry.ID), Before: before, After: append(data, '\n')}, nil
 }
 
 func (s *WorkflowStore) commitWorkflowIntegrationEntry(run *workflowInvocationFile, entry WorkflowIntegrationEntry, before string) error {
 	return s.commitWorkflowIntegrationEntryFiles(run, entry, before, nil)
 }
 
-func (s *WorkflowStore) commitWorkflowIntegrationEntryFiles(run *workflowInvocationFile, entry WorkflowIntegrationEntry, before string, files []workflowFileChange) error {
+func (s *WorkflowStore) commitWorkflowIntegrationEntryFiles(run *workflowInvocationFile, entry WorkflowIntegrationEntry, before string, files []workflowstate.FileChange) error {
 	if run.Revision == math.MaxUint64 {
 		return workflowIntegrationConflict("invocation revision exhausted")
 	}
@@ -284,7 +284,7 @@ func (s *WorkflowStore) commitWorkflowIntegrationAdmission(ctx context.Context, 
 		return err
 	}
 
-	return s.commitFiles([]workflowFileChange{budgetFile, file, invocation})
+	return s.commitFiles([]workflowstate.FileChange{budgetFile, file, invocation})
 }
 
 func retainWorkflowIntegrationActiveUnit(entry WorkflowIntegrationEntry, activeUnits map[string]bool) error {

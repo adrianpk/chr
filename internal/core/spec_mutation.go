@@ -172,7 +172,7 @@ func (r *fileAuthoringSessionRepository) newSpecDocument(request SpecMutationReq
 	}
 
 	document.metadata = opscore.NewArtifactMetadata(opscore.ArtifactOptions{Layout: layout, Type: "spec", Title: request.Title, Producer: "chr"}, id, time.Now().UTC())
-	document.images = []workflowFileChange{{Path: document.Reference}, {Path: filepath.Join(filepath.Dir(document.Reference), "metadata.json")}}
+	document.images = []workflowstate.FileChange{{Path: document.Reference}, {Path: filepath.Join(filepath.Dir(document.Reference), "metadata.json")}}
 
 	return document, nil
 }

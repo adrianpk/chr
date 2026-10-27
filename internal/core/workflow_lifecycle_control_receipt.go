@@ -35,7 +35,7 @@ func (s *WorkflowStore) retainWorkflowClosingControlNoop(ctx context.Context, co
 	return s.retainWorkflowControlNoop(ctx, run, control)
 }
 
-func (s *WorkflowStore) workflowClosingControlFiles(ctx context.Context, claim *workflowClosingClaim, control *workflowControlCommit) ([]workflowFileChange, error) {
+func (s *WorkflowStore) workflowClosingControlFiles(ctx context.Context, claim *workflowClosingClaim, control *workflowControlCommit) ([]workflowstate.FileChange, error) {
 	if control == nil {
 		return nil, nil
 	}
@@ -63,7 +63,7 @@ func (s *WorkflowStore) workflowClosingControlFiles(ctx context.Context, claim *
 	return append(files, change), err
 }
 
-func (s *WorkflowStore) commitWorkflowControlResume(ctx context.Context, run *workflowInvocationFile, changes []workflowFileChange, control *workflowControlCommit) error {
+func (s *WorkflowStore) commitWorkflowControlResume(ctx context.Context, run *workflowInvocationFile, changes []workflowstate.FileChange, control *workflowControlCommit) error {
 	files, err := control.files(ctx, run.Revision+1)
 	if err != nil {
 		return err

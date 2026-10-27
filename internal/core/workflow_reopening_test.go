@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowReopening preserves prior closure bytes and cancelled invocation
@@ -94,7 +96,7 @@ func workflowRetainPriorClosure(t *testing.T, store *WorkflowStore, set Workflow
 			return err
 		}
 
-		return store.commitFiles(append(files, workflowFileChange{Path: ref, After: []byte("{\"schema\":\"prior-closure-fixture\"}\n")}))
+		return store.commitFiles(append(files, workflowstate.FileChange{Path: ref, After: []byte("{\"schema\":\"prior-closure-fixture\"}\n")}))
 	}); err != nil {
 		t.Fatal(err)
 	}

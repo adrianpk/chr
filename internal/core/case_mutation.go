@@ -12,6 +12,7 @@ import (
 	"syscall"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -129,7 +130,7 @@ func (s CaseMetadataService) withMutationLock(ctx context.Context, action func()
 	}
 	defer func() { err = errors.Join(err, file.Close()) }()
 
-	if err := acquireWorkflowLock(ctx, file); err != nil {
+	if err := opsfile.Lock(ctx, file); err != nil {
 		return err
 	}
 	defer func() { err = errors.Join(err, syscall.Flock(int(file.Fd()), syscall.LOCK_UN)) }()
@@ -184,7 +185,7 @@ func (s CaseMetadataService) reserveCaseMutation(request CaseMutationRequest, di
 		return err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err == nil {
 		if string(data) != string(encoded) {
 			return fmt.Errorf("%w: case mutation payload changed", workflowstate.ErrConflict)
@@ -201,7 +202,7 @@ func (s CaseMetadataService) reserveCaseMutation(request CaseMutationRequest, di
 		return err
 	}
 
-	return atomicWorkflowFile(path, encoded)
+	return opsfile.WriteAtomic(path, encoded)
 }
 
 func (s CaseMetadataService) caseMutationCapacity() error {

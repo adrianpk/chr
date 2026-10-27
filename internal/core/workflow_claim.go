@@ -238,7 +238,7 @@ func (s *WorkflowStore) beginWorkflowAttempt(run *workflowInvocationFile, record
 	return nil
 }
 
-func (s *WorkflowStore) commitWorkflowClaim(run workflowInvocationFile, record WorkflowRecord, extra ...workflowFileChange) error {
+func (s *WorkflowStore) commitWorkflowClaim(run workflowInvocationFile, record WorkflowRecord, extra ...workflowstate.FileChange) error {
 	files, err := s.workflowClaimRecordChanges(&run, &record)
 	if err != nil {
 		return err
@@ -257,7 +257,7 @@ func (s *WorkflowStore) commitWorkflowClaim(run workflowInvocationFile, record W
 	return s.commitFiles(append(files, state))
 }
 
-func (s *WorkflowStore) workflowClaimRecordChanges(run *workflowInvocationFile, record *WorkflowRecord) ([]workflowFileChange, error) {
+func (s *WorkflowStore) workflowClaimRecordChanges(run *workflowInvocationFile, record *WorkflowRecord) ([]workflowstate.FileChange, error) {
 	record.Revision++
 	record.UpdatedAt = time.Now().UTC()
 
@@ -286,7 +286,7 @@ func (s *WorkflowStore) workflowClaimRecordChanges(run *workflowInvocationFile, 
 	return files, nil
 }
 
-func workflowClaimRecordHash(record WorkflowRecord, files []workflowFileChange) string {
+func workflowClaimRecordHash(record WorkflowRecord, files []workflowstate.FileChange) string {
 	hash := contenthash.Sum(files[0].After)
 	if len(files) > 1 {
 		hash += ":" + contenthash.Sum(record.Body)

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 // TestWorkflowStop retains live intent, synced output and a fenced task checkpoint.
@@ -54,7 +55,7 @@ func checkWorkflowStopEvidence(t *testing.T, store *WorkflowStore, taskPath stri
 
 	attempt := retained.Attempts[0]
 
-	data, err := readWorkflowFile(filepath.Join(store.layout.Root(), attempt.CheckpointRef))
+	data, err := opsfile.Read(filepath.Join(store.layout.Root(), attempt.CheckpointRef))
 	if err != nil || contenthash.Sum(data) != attempt.CheckpointHash {
 		t.Fatal("stop lost checkpoint evidence")
 	}

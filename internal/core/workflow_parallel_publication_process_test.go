@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 type workflowParallelPublisherSpec struct {
@@ -67,7 +68,7 @@ func workflowParallelPublisherBarrier(t *testing.T, ctx context.Context, store *
 		t.Fatal("provider IO preceded durable target intent", err)
 	}
 
-	if err := atomicWorkflowFile(spec.Entered, []byte(submission.ID)); err != nil {
+	if err := opsfile.WriteAtomic(spec.Entered, []byte(submission.ID)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -84,7 +85,7 @@ func writeWorkflowParallelPublisherResult(t *testing.T, path string, result work
 		t.Fatal(err)
 	}
 
-	if err := atomicWorkflowFile(path, data); err != nil {
+	if err := opsfile.WriteAtomic(path, data); err != nil {
 		t.Fatal(err)
 	}
 }

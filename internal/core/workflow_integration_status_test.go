@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 // TestNativeQueueCapacity observes real claim locks and unexpired process
@@ -61,7 +63,7 @@ func TestNativeQueueDeadProcess(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := atomicWorkflowFile(path, data); err != nil {
+	if err := opsfile.WriteAtomic(path, data); err != nil {
 		t.Fatal(err)
 	}
 

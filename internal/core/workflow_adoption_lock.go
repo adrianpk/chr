@@ -12,6 +12,7 @@ import (
 	"time"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -80,7 +81,7 @@ func releaseWorkflowAdoptionLocks(locks []*AgentOperationLock) error {
 }
 
 func reclaimWorkflowAdoptionLock(path string) error {
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil
 	}
@@ -106,5 +107,5 @@ func reclaimWorkflowAdoptionLock(path string) error {
 		return err
 	}
 
-	return syncWorkflowDirectory(filepath.Dir(path))
+	return opsfile.SyncDirectory(filepath.Dir(path))
 }

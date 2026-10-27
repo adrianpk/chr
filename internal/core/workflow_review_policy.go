@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"slices"
+
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 func (s *WorkflowStore) workflowReviewPolicy(run workflowInvocationFile) (WorkflowReviewPolicy, error) {
@@ -12,7 +14,7 @@ func (s *WorkflowStore) workflowReviewPolicy(run workflowInvocationFile) (Workfl
 		return WorkflowReviewPolicy{}, err
 	}
 
-	data, err := readWorkflowFile(UserPath(s.layout.ProjectDir(), "config.yml"))
+	data, err := opsfile.Read(UserPath(s.layout.ProjectDir(), "config.yml"))
 	if errors.Is(err, os.ErrNotExist) {
 		data, err = nil, nil
 	}

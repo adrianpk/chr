@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowPrerequisiteError struct {
@@ -44,7 +46,7 @@ type WorkflowResumePorts struct {
 	TargetBranch       string
 }
 
-func (s *WorkflowStore) resumeWorkflowPrerequisite(ctx context.Context, run *workflowInvocationFile, ports []WorkflowResumePorts) ([]workflowFileChange, error) {
+func (s *WorkflowStore) resumeWorkflowPrerequisite(ctx context.Context, run *workflowInvocationFile, ports []WorkflowResumePorts) ([]workflowstate.FileChange, error) {
 	if !workflowPrerequisitePaused(*run) {
 		return nil, nil
 	}
@@ -64,7 +66,7 @@ func (s *WorkflowStore) resumeWorkflowPrerequisite(ctx context.Context, run *wor
 	return s.resumeWorkflowDependencyTarget(ctx, run, ports[0])
 }
 
-func (s *WorkflowStore) commitWorkflowResume(run *workflowInvocationFile, changes []workflowFileChange) error {
+func (s *WorkflowStore) commitWorkflowResume(run *workflowInvocationFile, changes []workflowstate.FileChange) error {
 	run.Revision++
 	run.UpdatedAt = time.Now().UTC()
 

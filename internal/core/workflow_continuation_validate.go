@@ -5,6 +5,7 @@ import (
 	"slices"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -60,7 +61,7 @@ func (s *WorkflowStore) checkWorkflowContinuationCheckpoint(run workflowInvocati
 		return err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil || contenthash.Sum(data) != checkpoint.EvidenceHash {
 		return workflowstate.ErrConflict
 	}

@@ -13,6 +13,7 @@ import (
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -61,7 +62,7 @@ func WithAuthoringMutation(ctx context.Context, projectDir string, action func(c
 	}
 	defer func() { err = errors.Join(err, file.Close()) }()
 
-	if err := acquireWorkflowLock(ctx, file); err != nil {
+	if err := opsfile.Lock(ctx, file); err != nil {
 		return err
 	}
 
@@ -140,7 +141,7 @@ func (r *fileAuthoringSessionRepository) authoringRead(relative string) ([]byte,
 		return nil, err
 	}
 
-	return readWorkflowFile(path)
+	return opsfile.Read(path)
 }
 
 func authoringRelativePaths(projectDir string, paths AuthoringSessionPaths) (AuthoringSessionPaths, error) {

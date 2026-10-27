@@ -11,6 +11,7 @@ import (
 	"time"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 // This owned host subprocess resumes and retries a serialized v2 invocation
@@ -92,7 +93,7 @@ func TestHarnessBindingOldReaderProcess(t *testing.T) {
 		return
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil {
 		t.Fatal(err)
 	}

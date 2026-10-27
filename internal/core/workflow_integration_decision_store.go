@@ -98,21 +98,21 @@ func (s *WorkflowStore) checkWorkflowDecisionAdmission(ctx context.Context, run 
 	return validateWorkflowMergerDecisions(request.Decisions, request.Input)
 }
 
-func workflowDecisionFile(entry *WorkflowIntegrationEntry, record WorkflowIntegrationDecisions) (workflowFileChange, error) {
+func workflowDecisionFile(entry *WorkflowIntegrationEntry, record WorkflowIntegrationDecisions) (workflowstate.FileChange, error) {
 	if err := validateWorkflowDecisionRecord(record); err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
 	data, err := json.Marshal(record)
 	if err != nil || len(data) >= workflowstate.FileLimit {
-		return workflowFileChange{}, workflowstate.ErrConflict
+		return workflowstate.FileChange{}, workflowstate.ErrConflict
 	}
 
 	hash := contenthash.Sum(data)
 	path := "run/" + record.Input.InvocationID + "/extension/chr/integration/" + entry.ID + "/decisions/" + hash + ".json"
 	entry.DecisionRef = &WorkflowEvidenceRef{Path: path, Hash: hash}
 
-	return workflowFileChange{Path: path, After: data}, nil
+	return workflowstate.FileChange{Path: path, After: data}, nil
 }
 
 func blockWorkflowDecisionEntry(entry *WorkflowIntegrationEntry, run *workflowInvocationFile) {
@@ -123,7 +123,7 @@ func blockWorkflowDecisionEntry(entry *WorkflowIntegrationEntry, run *workflowIn
 	run.Status, run.Outcome = "waiting_integration", "merger_waiting_decision"
 }
 
-func (s *WorkflowStore) commitWorkflowDecisionRecord(run *workflowInvocationFile, entry WorkflowIntegrationEntry, file workflowFileChange, extra ...workflowFileChange) error {
+func (s *WorkflowStore) commitWorkflowDecisionRecord(run *workflowInvocationFile, entry WorkflowIntegrationEntry, file workflowstate.FileChange, extra ...workflowstate.FileChange) error {
 	entryFile, err := workflowIntegrationEntryChange(entry, run.Integration.EntryRef.Hash)
 	if err != nil {
 		return err
@@ -131,10 +131,10 @@ func (s *WorkflowStore) commitWorkflowDecisionRecord(run *workflowInvocationFile
 
 	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: entryFile.Path, Hash: contenthash.Sum(entryFile.After)}})
 
-	return s.commitWorkflowPullRequestFiles(run, append([]workflowFileChange{entryFile}, extra...), file)
+	return s.commitWorkflowPullRequestFiles(run, append([]workflowstate.FileChange{entryFile}, extra...), file)
 }
 
-func (s *WorkflowStore) workflowMergerDecisionFiles(ctx context.Context, run *workflowInvocationFile, result WorkflowMergerAttempt) ([]workflowFileChange, error) {
+func (s *WorkflowStore) workflowMergerDecisionFiles(ctx context.Context, run *workflowInvocationFile, result WorkflowMergerAttempt) ([]workflowstate.FileChange, error) {
 	if result.Proposal == nil || result.Proposal.Outcome != "needs_decision" || run.StopIntent != "" {
 		return nil, nil
 	}
@@ -168,7 +168,7 @@ func (s *WorkflowStore) workflowMergerDecisionFiles(ctx context.Context, run *wo
 
 	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: entryFile.Path, Hash: contenthash.Sum(entryFile.After)}})
 
-	return []workflowFileChange{file, entryFile}, nil
+	return []workflowstate.FileChange{file, entryFile}, nil
 }
 
 func checkWorkflowMergerDecisionBinding(entry WorkflowIntegrationEntry, input WorkflowMergerInput) error {

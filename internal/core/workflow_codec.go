@@ -9,10 +9,11 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 func readWorkflowEnvelope(path string) (WorkflowRecord, error) {
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil {
 		return WorkflowRecord{}, err
 	}
@@ -68,7 +69,7 @@ func (s *WorkflowStore) readRecord(relative string) (WorkflowRecord, error) {
 	}
 
 	if filepath.Base(path) == "metadata.json" {
-		r.Body, err = readWorkflowFile(filepath.Join(filepath.Dir(path), "artifact.md"))
+		r.Body, err = opsfile.Read(filepath.Join(filepath.Dir(path), "artifact.md"))
 		if err != nil {
 			return WorkflowRecord{}, err
 		}

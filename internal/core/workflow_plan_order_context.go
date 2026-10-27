@@ -81,7 +81,7 @@ func (s *WorkflowStore) repairRequiredOrderImages(snapshot WorkflowSnapshot, sou
 		return err
 	}
 
-	changes := []workflowFileChange{}
+	changes := []workflowstate.FileChange{}
 
 	for _, image := range images {
 		change, err := s.orderImageChange(image.ref, image.body, image.hash, opts.ReplaceHash)

@@ -13,6 +13,7 @@ import (
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -109,7 +110,7 @@ func (s *WorkflowStore) prepareLegacyWorkflowTicket(selection WorkflowAdoptionTa
 		return WorkflowRecord{}, err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil {
 		return WorkflowRecord{}, err
 	}
@@ -224,7 +225,7 @@ func (s *WorkflowStore) checkLegacyWorkflowKeys(ctx context.Context, selected []
 }
 
 func (s *WorkflowStore) checkLegacyWorkflowKey(path string, owners map[string]string) error {
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil {
 		return err
 	}

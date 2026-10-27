@@ -8,6 +8,7 @@ import (
 	"reflect"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -21,7 +22,7 @@ func (s *WorkflowStore) workflowClosingRead(relative string) ([]byte, error) {
 		return nil, err
 	}
 
-	return readWorkflowFile(path)
+	return opsfile.Read(path)
 }
 
 func (s *WorkflowStore) workflowClosingEvidenceHashes(hashes map[string]string, refs []string) error {

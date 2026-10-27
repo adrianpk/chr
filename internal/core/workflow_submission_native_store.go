@@ -122,7 +122,7 @@ func (s *WorkflowStore) projectWorkflowNativeSubmission(run *workflowInvocationF
 // the same commit as publication-pointer repair.
 type workflowNativeProjection struct {
 	entry   WorkflowIntegrationEntry
-	files   []workflowFileChange
+	files   []workflowstate.FileChange
 	changed bool
 }
 

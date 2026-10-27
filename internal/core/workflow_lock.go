@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
-	"time"
 
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -44,7 +44,7 @@ func (s *WorkflowStore) withRepositoryLock(ctx context.Context, prepare, action 
 
 	defer func() { err = errors.Join(err, file.Close()) }()
 
-	if err := acquireWorkflowLock(ctx, file); err != nil {
+	if err := opsfile.Lock(ctx, file); err != nil {
 		return err
 	}
 
@@ -55,29 +55,6 @@ func (s *WorkflowStore) withRepositoryLock(ctx context.Context, prepare, action 
 	}
 
 	return action()
-}
-
-func acquireWorkflowLock(ctx context.Context, file *os.File) error {
-	for {
-		if err := ctx.Err(); err != nil {
-			return err
-		}
-
-		err := syscall.Flock(int(file.Fd()), syscall.LOCK_EX|syscall.LOCK_NB)
-		if err == nil {
-			return nil
-		}
-
-		if !errors.Is(err, syscall.EWOULDBLOCK) {
-			return err
-		}
-
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-time.After(10 * time.Millisecond):
-		}
-	}
 }
 
 func (s *WorkflowStore) requireNoWorkflowTransition() error {

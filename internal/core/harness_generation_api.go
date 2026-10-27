@@ -5,6 +5,7 @@ import (
 	"errors"
 	"path/filepath"
 
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -52,12 +53,12 @@ func RunAPIGeneration(ctx context.Context, request harness.AgentRunRequest, invo
 }
 
 func writeAPIGenerationInputs(request harness.AgentRunRequest) error {
-	if err := atomicBoundedWorkflowFile(filepath.Join(request.RunDir, "prompt.md"), []byte(request.Prompt), harness.MaxInput); err != nil {
+	if err := opsfile.WriteAtomicBounded(filepath.Join(request.RunDir, "prompt.md"), []byte(request.Prompt), harness.MaxInput); err != nil {
 		return err
 	}
 
 	if len(request.OutputSchema) != 0 {
-		return atomicBoundedWorkflowFile(filepath.Join(request.RunDir, "output-schema.json"), request.OutputSchema, harness.MaxStructuredOutput)
+		return opsfile.WriteAtomicBounded(filepath.Join(request.RunDir, "output-schema.json"), request.OutputSchema, harness.MaxStructuredOutput)
 	}
 
 	return nil

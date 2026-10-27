@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -34,7 +35,7 @@ func readHarnessSelectionConfig(project string) ([]byte, error) {
 		return nil, err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, nil
 	}
@@ -61,7 +62,7 @@ func readHarnessSelectionFile(project, relative string) ([]byte, error) {
 		return nil, err
 	}
 
-	return readBoundedWorkflowFile(path, harnessSelectionReceiptLimit)
+	return opsfile.ReadBounded(path, harnessSelectionReceiptLimit)
 }
 
 func harnessSelectionReceiptPath(id string) string {
@@ -90,7 +91,7 @@ func writeHarnessSelectionFile(project, relative string, journal harnessSelectio
 		return err
 	}
 
-	return atomicBoundedWorkflowFile(path, data, harnessSelectionReceiptLimit)
+	return opsfile.WriteAtomicBounded(path, data, harnessSelectionReceiptLimit)
 }
 
 func harnessSelectionJournalHash(journal harnessSelectionJournal) (string, error) {
@@ -230,7 +231,7 @@ func publishRetainedHarnessSelectionImage(project string, current []byte, journa
 		return err
 	}
 
-	return atomicWorkflowFile(path, image)
+	return opsfile.WriteAtomic(path, image)
 }
 
 func finishHarnessSelectionReceipt(project string, journal harnessSelectionJournal) error {
@@ -247,7 +248,7 @@ func finishHarnessSelectionReceipt(project string, journal harnessSelectionJourn
 		return err
 	}
 
-	return syncWorkflowDirectory(filepath.Dir(path))
+	return opsfile.SyncDirectory(filepath.Dir(path))
 }
 
 func retainHarnessSelectionReceipt(project string, journal harnessSelectionJournal) error {

@@ -11,7 +11,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r *fileAuthoringSessionRepository) authoringArtifactChanges(binding authoringRequestBinding, snapshot AuthoringSnapshot, ref AuthoringArtifactRef, body string) ([]workflowFileChange, error) {
+func (r *fileAuthoringSessionRepository) authoringArtifactChanges(binding authoringRequestBinding, snapshot AuthoringSnapshot, ref AuthoringArtifactRef, body string) ([]workflowstate.FileChange, error) {
 	if !validAuthoringArtifactRef(binding.Request.Namespace, ref) {
 		return nil, workflowstate.ErrConflict
 	}
@@ -32,7 +32,7 @@ func (r *fileAuthoringSessionRepository) authoringArtifactChanges(binding author
 		return nil, err
 	}
 
-	changes := []workflowFileChange{{Path: filepath.FromSlash(ref.Path), After: []byte(body)}, {Path: filepath.Join(filepath.Dir(ref.Path), "metadata.json"), After: metadata}}
+	changes := []workflowstate.FileChange{{Path: filepath.FromSlash(ref.Path), After: []byte(body)}, {Path: filepath.Join(filepath.Dir(ref.Path), "metadata.json"), After: metadata}}
 	if observation != nil {
 		changes[0].Before, changes[1].Before = observation.SourceHash, observation.MetadataHash
 	}

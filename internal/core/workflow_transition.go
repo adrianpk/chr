@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -20,10 +21,10 @@ type WorkflowChange struct {
 }
 
 type workflowJournal struct {
-	AllocationGuard string               `json:"allocation_guard,omitempty"`
-	Schema          string               `json:"workflow_schema"`
-	ID              string               `json:"id"`
-	Changes         []workflowFileChange `json:"changes"`
+	AllocationGuard string                     `json:"allocation_guard,omitempty"`
+	Schema          string                     `json:"workflow_schema"`
+	ID              string                     `json:"id"`
+	Changes         []workflowstate.FileChange `json:"changes"`
 }
 
 // Transition validates a complete namespace update before journaling its images.
@@ -51,8 +52,8 @@ func (s *WorkflowStore) Transition(ctx context.Context, changes []WorkflowChange
 	})
 }
 
-func (s *WorkflowStore) prepareTransition(snapshot *WorkflowSnapshot, changes []WorkflowChange) ([]workflowFileChange, error) {
-	files := []workflowFileChange{}
+func (s *WorkflowStore) prepareTransition(snapshot *WorkflowSnapshot, changes []WorkflowChange) ([]workflowstate.FileChange, error) {
+	files := []workflowstate.FileChange{}
 	seen := map[string]bool{}
 
 	for _, change := range changes {
@@ -84,11 +85,11 @@ func (s *WorkflowStore) prepareTransition(snapshot *WorkflowSnapshot, changes []
 	return files, nil
 }
 
-func (s *WorkflowStore) commitFiles(changes []workflowFileChange) error {
+func (s *WorkflowStore) commitFiles(changes []workflowstate.FileChange) error {
 	return s.commitAllocatedFiles(changes, "")
 }
 
-func (s *WorkflowStore) commitAllocatedFiles(changes []workflowFileChange, guard string) error {
+func (s *WorkflowStore) commitAllocatedFiles(changes []workflowstate.FileChange, guard string) error {
 	data, err := json.Marshal(changes)
 	if err != nil {
 		return err
@@ -114,7 +115,7 @@ func (s *WorkflowStore) commitAllocatedFiles(changes []workflowFileChange, guard
 		return err
 	}
 
-	if err := atomicWorkflowFile(path, encoded); err != nil {
+	if err := opsfile.WriteAtomic(path, encoded); err != nil {
 		return err
 	}
 
@@ -133,7 +134,7 @@ func (s *WorkflowStore) recoverTransition() error {
 		return err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil
 	}
@@ -175,13 +176,13 @@ func (s *WorkflowStore) checkJournalImages(journal workflowJournal) error {
 	return nil
 }
 
-func (s *WorkflowStore) journalImage(change workflowFileChange) (bool, error) {
+func (s *WorkflowStore) journalImage(change workflowstate.FileChange) (bool, error) {
 	path, err := s.safePath(change.Path)
 	if err != nil {
 		return false, err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if errors.Is(err, os.ErrNotExist) && change.Before == "" {
 		return false, nil
 	}
@@ -239,7 +240,7 @@ func (s *WorkflowStore) replayJournal(journal workflowJournal) error {
 		return err
 	}
 
-	return syncWorkflowDirectory(s.layout.Root() + "/lock")
+	return opsfile.SyncDirectory(s.layout.Root() + "/lock")
 }
 
 func (s *WorkflowStore) confirmJournalImages(journal workflowJournal) error {
@@ -257,13 +258,13 @@ func (s *WorkflowStore) confirmJournalImages(journal workflowJournal) error {
 	return nil
 }
 
-func (s *WorkflowStore) applyJournalImage(change workflowFileChange, index int) error {
+func (s *WorkflowStore) applyJournalImage(change workflowstate.FileChange, index int) error {
 	path, err := s.safePath(change.Path)
 	if err != nil {
 		return err
 	}
 
-	if err := atomicWorkflowFile(path, change.After); err != nil {
+	if err := opsfile.WriteAtomic(path, change.After); err != nil {
 		return err
 	}
 

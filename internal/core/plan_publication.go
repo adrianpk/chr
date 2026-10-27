@@ -18,7 +18,7 @@ import (
 
 type planTargetObservation struct {
 	revision string
-	images   []workflowFileChange
+	images   []workflowstate.FileChange
 	metadata map[string]any
 }
 
@@ -119,7 +119,7 @@ func (r *fileAuthoringSessionRepository) publishGeneratedPlan(ctx context.Contex
 	return r.recoverAuthoringMutation()
 }
 
-func generatedPlanChanges(projectDir string, paths GeneratedPlanPaths, target planTargetObservation, plan generationcore.GeneratedPlan) ([]workflowFileChange, error) {
+func generatedPlanChanges(projectDir string, paths GeneratedPlanPaths, target planTargetObservation, plan generationcore.GeneratedPlan) ([]workflowstate.FileChange, error) {
 	metadata := target.metadata
 	if metadata == nil {
 		var err error
@@ -148,7 +148,7 @@ func generatedPlanChanges(projectDir string, paths GeneratedPlanPaths, target pl
 		return nil, err
 	}
 
-	changes := append([]workflowFileChange(nil), target.images...)
+	changes := append([]workflowstate.FileChange(nil), target.images...)
 
 	changes[0].After, changes[1].After = body, append(encoded, '\n')
 	if target.images[0].After != nil && !plan.ArchiveAt.IsZero() {
@@ -174,7 +174,7 @@ func generatedPlanMetadata(projectDir, reference, title string, plan generationc
 	return opscore.NewArtifactMetadata(opscore.ArtifactOptions{Layout: layout, Type: "plan", Title: title, Producer: "chr"}, parts[3], plan.CreatedAt), nil
 }
 
-func generatedPlanArchiveChanges(projectDir string, current GeneratedPlanPaths, target planTargetObservation, plan generationcore.GeneratedPlan) ([]workflowFileChange, error) {
+func generatedPlanArchiveChanges(projectDir string, current GeneratedPlanPaths, target planTargetObservation, plan generationcore.GeneratedPlan) ([]workflowstate.FileChange, error) {
 	archive, err := ArchivedPlanLayout(projectDir, plan.Scope, plan.ArchiveAt)
 	if err != nil {
 		return nil, err
@@ -207,7 +207,7 @@ func generatedPlanArchiveChanges(projectDir string, current GeneratedPlanPaths, 
 		return nil, err
 	}
 
-	return []workflowFileChange{
+	return []workflowstate.FileChange{
 		{Path: archive.RelativePath, After: []byte(RenderArchivedPlan(string(target.images[0].After), current.RelativePath, plan.ArchiveAt))},
 		{Path: filepath.ToSlash(filepath.Join(filepath.Dir(archive.RelativePath), "metadata.json")), After: append(encoded, '\n')},
 	}, nil

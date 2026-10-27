@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 func (s *WorkflowStore) acquireWorkflowWorkerSlot(ctx context.Context) (slot, guard *os.File, err error) {
@@ -75,7 +77,7 @@ func reserveWorkflowWorkerSlot(ctx context.Context, common string, workers int) 
 	}
 	defer func() { err = errors.Join(err, lock.Close()) }()
 
-	if err := acquireWorkflowLock(ctx, lock); err != nil {
+	if err := opsfile.Lock(ctx, lock); err != nil {
 		return nil, err
 	}
 

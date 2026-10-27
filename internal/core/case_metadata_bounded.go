@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -57,7 +58,7 @@ func (s CaseMetadataService) loadBoundedCase(path string) (CaseMetadata, error) 
 		return CaseMetadata{}, err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil {
 		return CaseMetadata{}, err
 	}

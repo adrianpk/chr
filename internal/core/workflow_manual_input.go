@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -62,7 +63,7 @@ func (s *WorkflowStore) readWorkflowManualInput(attempt WorkflowAttempt) (workfl
 		return workflowPreparedTask{}, workflowstate.ErrConflict
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil {
 		return workflowPreparedTask{}, err
 	}

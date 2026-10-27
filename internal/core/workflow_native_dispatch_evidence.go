@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -114,7 +115,7 @@ func (s *WorkflowStore) writeWorkflowNativeDispatchEvidence(submission WorkflowS
 		return ref, err
 	}
 
-	return ref, atomicWorkflowFile(path, data)
+	return ref, opsfile.WriteAtomic(path, data)
 }
 
 func (s *WorkflowStore) updateWorkflowNativeDispatch(ctx context.Context, expected WorkflowSubmission, change func(*WorkflowStore, *WorkflowNativeSubmission) error) (submission WorkflowSubmission, err error) {

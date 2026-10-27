@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -30,7 +31,7 @@ func registerWorkflowProcessCapacity(ctx context.Context, claim *WorkflowClaim, 
 		return err
 	}
 
-	return atomicWorkflowFile(filepath.Join(common, "chr-workflow-processes", name), data)
+	return opsfile.WriteAtomic(filepath.Join(common, "chr-workflow-processes", name), data)
 }
 
 func workflowCapacityProcessName(process WorkflowProcess) (string, error) {

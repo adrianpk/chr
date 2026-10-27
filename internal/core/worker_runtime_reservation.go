@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"syscall"
 	"time"
+
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 // WorkerRuntimeReservation extends an admitted slot to an independently owned
@@ -38,7 +40,7 @@ func DelegateWorkerRuntimeReservation(ctx context.Context, directory string) (Wo
 	}
 	defer func() { _ = lock.Close() }() //nolint:errcheck // Closing releases only this coordinator descriptor.
 
-	if err := acquireWorkflowLock(ctx, lock); err != nil {
+	if err := opsfile.Lock(ctx, lock); err != nil {
 		return WorkerRuntimeReservation{}, err
 	}
 

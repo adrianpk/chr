@@ -13,7 +13,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *WorkflowStore) materializedOrderChanges(result *WorkflowMaterializationResult, plan generationcore.GeneratedWorkflowPlan) ([]workflowFileChange, error) {
+func (s *WorkflowStore) materializedOrderChanges(result *WorkflowMaterializationResult, plan generationcore.GeneratedWorkflowPlan) ([]workflowstate.FileChange, error) {
 	if plan.PlanRevision == nil {
 		return nil, nil
 	}
@@ -58,7 +58,7 @@ func workflowBoundTrackerStatus(s *WorkflowStore, set WorkflowRecord, binding ge
 	return WorkflowTrackerStatus{Schema: "chr-tracker/v2", ProjectID: s.projectID, Namespace: s.layout.Namespace(), SetID: set.ID, Path: "tracker/" + set.ID + ".md", PlanRevision: &binding, SourceHash: sourceHash, OutputHash: binding.TrackerHash, ObservedHash: binding.TrackerHash, GeneratedAt: time.Now().UTC(), Status: "current", Sources: []WorkflowTrackerSource{{ID: set.ID, Path: set.Path, Hash: sourceHash}, {Path: binding.BodyRef, Hash: binding.BodyHash}}}
 }
 
-func (s *WorkflowStore) retainedBoundOrderChanges(previous, next generationcore.PlanRevisionBinding, order, tracker []byte) ([]workflowFileChange, error) {
+func (s *WorkflowStore) retainedBoundOrderChanges(previous, next generationcore.PlanRevisionBinding, order, tracker []byte) ([]workflowstate.FileChange, error) {
 	data, err := json.Marshal(next)
 	if err != nil {
 		return nil, err
@@ -81,7 +81,7 @@ func (s *WorkflowStore) retainedBoundOrderChanges(previous, next generationcore.
 		body          []byte
 	}{{next.OrderRef, previous.OrderHash, order}, {next.TrackerRef, previous.TrackerHash, tracker}, {bindingRef, contenthash.Sum(currentData), data}}
 
-	changes := make([]workflowFileChange, 0, len(images))
+	changes := make([]workflowstate.FileChange, 0, len(images))
 	for _, image := range images {
 		change, err := s.orderImageChange(image.ref, image.body, image.expected, "")
 		if err != nil {
@@ -94,7 +94,7 @@ func (s *WorkflowStore) retainedBoundOrderChanges(previous, next generationcore.
 	return changes, nil
 }
 
-func (s *WorkflowStore) boundTrackerChanges(status WorkflowTrackerStatus, tracker []byte) ([]workflowFileChange, error) {
+func (s *WorkflowStore) boundTrackerChanges(status WorkflowTrackerStatus, tracker []byte) ([]workflowstate.FileChange, error) {
 	prior, err := s.workflowTrackerPrevious(status.SetID)
 	if err != nil {
 		return nil, err
@@ -127,10 +127,10 @@ func (s *WorkflowStore) boundTrackerChanges(status WorkflowTrackerStatus, tracke
 		return nil, err
 	}
 
-	return []workflowFileChange{output, metadata, retained}, nil
+	return []workflowstate.FileChange{output, metadata, retained}, nil
 }
 
-func (s *WorkflowStore) orderImageChange(reference string, body []byte, expected, replace string) (workflowFileChange, error) {
+func (s *WorkflowStore) orderImageChange(reference string, body []byte, expected, replace string) (workflowstate.FileChange, error) {
 	change, err := s.observedOrderImage(reference, body)
 	if err != nil {
 		return change, err
@@ -143,8 +143,8 @@ func (s *WorkflowStore) orderImageChange(reference string, body []byte, expected
 	return change, nil
 }
 
-func (s *WorkflowStore) observedOrderImage(reference string, body []byte) (workflowFileChange, error) {
-	change := workflowFileChange{Path: reference, After: body}
+func (s *WorkflowStore) observedOrderImage(reference string, body []byte) (workflowstate.FileChange, error) {
+	change := workflowstate.FileChange{Path: reference, After: body}
 
 	current, err := s.readWorkflowTrackerFile(reference)
 	if errors.Is(err, os.ErrNotExist) {
@@ -160,40 +160,40 @@ func (s *WorkflowStore) observedOrderImage(reference string, body []byte) (workf
 	return change, nil
 }
 
-func (s *WorkflowStore) currentPlanOrderMetadata(binding generationcore.PlanRevisionBinding) (map[string]any, workflowFileChange, bool, error) {
+func (s *WorkflowStore) currentPlanOrderMetadata(binding generationcore.PlanRevisionBinding) (map[string]any, workflowstate.FileChange, bool, error) {
 	reference := filepath.ToSlash(filepath.Join(filepath.Dir(binding.Reference), "metadata.json"))
 
 	data, err := s.readWorkflowTrackerFile(reference)
 	if err != nil {
-		return nil, workflowFileChange{}, false, err
+		return nil, workflowstate.FileChange{}, false, err
 	}
 
 	var metadata map[string]any
 	if err := json.Unmarshal(data, &metadata); err != nil {
-		return nil, workflowFileChange{}, false, err
+		return nil, workflowstate.FileChange{}, false, err
 	}
 
 	if err := validatePlanTargetMetadata(metadata, filepath.ToSlash(filepath.Join(s.layout.RelativeRoot(), binding.Reference))); err != nil {
-		return nil, workflowFileChange{}, false, err
+		return nil, workflowstate.FileChange{}, false, err
 	}
 
 	encoded, err := json.Marshal(metadata["plan_binding"])
 	if err != nil {
-		return nil, workflowFileChange{}, false, err
+		return nil, workflowstate.FileChange{}, false, err
 	}
 
 	var current generationcore.PlanRevisionBinding
 	if err := json.Unmarshal(encoded, &current); err != nil {
-		return nil, workflowFileChange{}, false, err
+		return nil, workflowstate.FileChange{}, false, err
 	}
 
 	same := current.Reference == binding.Reference && current.Revision == binding.Revision && current.BodyHash == binding.BodyHash
 
 	if same && current != binding {
-		return nil, workflowFileChange{}, false, workflowstate.ErrConflict
+		return nil, workflowstate.FileChange{}, false, workflowstate.ErrConflict
 	}
 
-	return metadata, workflowFileChange{Path: reference, Before: contenthash.Sum(data)}, same, nil
+	return metadata, workflowstate.FileChange{Path: reference, Before: contenthash.Sum(data)}, same, nil
 }
 
 func (s *WorkflowStore) checkCurrentOrderOutput(binding generationcore.PlanRevisionBinding) error {
@@ -223,7 +223,7 @@ func (s *WorkflowStore) checkCurrentOrderOutput(binding generationcore.PlanRevis
 	return nil
 }
 
-func (s *WorkflowStore) boundCurrentPlanChanges(previous, next generationcore.PlanRevisionBinding, tracker []byte) ([]workflowFileChange, error) {
+func (s *WorkflowStore) boundCurrentPlanChanges(previous, next generationcore.PlanRevisionBinding, tracker []byte) ([]workflowstate.FileChange, error) {
 	metadata, planImage, same, err := s.currentPlanOrderMetadata(previous)
 	if err != nil {
 		return nil, err
@@ -246,7 +246,7 @@ func (s *WorkflowStore) boundCurrentPlanChanges(previous, next generationcore.Pl
 		return nil, err
 	}
 
-	changes := []workflowFileChange{planImage}
+	changes := []workflowstate.FileChange{planImage}
 	if !same {
 		return changes, nil
 	}
@@ -256,7 +256,7 @@ func (s *WorkflowStore) boundCurrentPlanChanges(previous, next generationcore.Pl
 	return append(changes, trackerChanges...), err
 }
 
-func (s *WorkflowStore) boundCurrentTrackerChanges(previous, next generationcore.PlanRevisionBinding, tracker []byte) ([]workflowFileChange, error) {
+func (s *WorkflowStore) boundCurrentTrackerChanges(previous, next generationcore.PlanRevisionBinding, tracker []byte) ([]workflowstate.FileChange, error) {
 	output, err := s.orderImageChange(next.CurrentTrackerRef, tracker, previous.TrackerHash, "")
 	if err != nil {
 		return nil, err
@@ -289,7 +289,7 @@ func (s *WorkflowStore) boundCurrentTrackerChanges(previous, next generationcore
 		return nil, err
 	}
 
-	return []workflowFileChange{output, {Path: metadataRef, Before: contenthash.Sum(current), After: encoded}}, nil
+	return []workflowstate.FileChange{output, {Path: metadataRef, Before: contenthash.Sum(current), After: encoded}}, nil
 }
 
 func (s *WorkflowStore) registerBoundProjection(metadata map[string]any, binding generationcore.PlanRevisionBinding) error {

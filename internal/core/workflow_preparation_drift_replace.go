@@ -40,7 +40,7 @@ func (s *WorkflowStore) replaceWorkflowNativePreparation(ctx context.Context, ru
 
 	run.Outcome = "integration_inputs_changed"
 
-	if err := s.commitWorkflowPullRequestFiles(run, []workflowFileChange{budgetFile, queueFile}, workflowFileChange{}); err != nil {
+	if err := s.commitWorkflowPullRequestFiles(run, []workflowstate.FileChange{budgetFile, queueFile}, workflowstate.FileChange{}); err != nil {
 		return err
 	}
 

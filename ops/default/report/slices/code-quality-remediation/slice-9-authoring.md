@@ -33,11 +33,21 @@ become an imported coordinator dependency of authoring.
 
 Four ops production files and their two focused test files move with 41 original
 declaration hashes retained in the move ledger. The two shared project path and
-replacement files add three original declarations, for 44 recorded move entries. The current dependency map and
+replacement files add three original declarations, for 44 recorded move entries. Bounded file IO, advisory lock acquisition and the
+retained FileChange value add seven extracted declarations, for 51 total entries. The current dependency map and
 file-owner inventory include this prerequisite. Module import checks prevent
 ops from importing authoring, root core or workflow policy.
 
 ## Contracts Added or Changed
+
+Core/ops/file owns the original bounded reads, synced atomic writes, directory
+sync and cancellable advisory lock acquisition. Core/workflow/state owns the
+same path/before-hash/after-bytes FileChange value. Private journal images and
+complete mutation sets remain private at their current operation owner. Paths,
+JSON tags and field order, size limits, error text, modes, temporary names,
+retry interval and cleanup behavior remain intact. No lock scope, transaction,
+receipt, recovery or commit decision moves into the primitive package.
+
 
 Operational envelope creation, metadata construction, slug selection, allocation
 lock creation and number observation have direct shared consumers. They preserve
@@ -54,15 +64,15 @@ replacement is kept distinct from bounded, synced workflow file writes; all
 caller-owned locks, durable journals and cleanup behavior retain their owners.
 
 Callers use ops.Layout, ArtifactOptions, ResolveLayout and artifact operations
-without repeated package prefixes. Two debt signatures qualify their unchanged
-layout type through its new owner;
-their parameter and result meanings are unchanged. Debt remains 301 with ceiling
+without repeated package prefixes. Sixteen debt declarations qualify their unchanged layout or journal-image types
+through their shared owners; parameter and result meanings are unchanged. Debt remains 301 with ceiling
 seven and the same one external-interface exception.
 
 ## Files of Interest
 
 - `internal/core/ops/` owns layout, paths, shared envelopes and allocation primitives.
 - `internal/core/project/paths.go` and `files.go` own the existing shared project primitives.
+- `internal/core/ops/file/` and `internal/core/workflow/state/file_change.go` own shared IO and image contracts.
 - [Move evidence](../../../plan/code-quality-remediation-slice-9-moves.csv).
 - [Signature reassociations](../../../plan/code-quality-remediation-slice-9-signatures.csv).
 - [Current owners](../../../plan/code-quality-remediation-core-owners.csv) and
@@ -84,6 +94,12 @@ seven and the same one external-interface exception.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/project ./internal/core ./internal/app`
   — passed with zero issues after project primitive ownership.
 - `git diff --check` — passed at the task checkpoints.
+
+- `go test ./internal/core/ops/file ./internal/core/workflow/state ./scripts/goquality ./internal/core ./internal/app -run '^Test(LeafDependencies|Authoring|DumpMutation|SpecMutation|QuizAction|ProjectDump|WorkflowRoundTrip|WorkflowMaterialization|WorkflowRecoveryProcess)' -count=1 -timeout=3m`
+  — passed after shared IO and journal image extraction; the app package compiled with no matching tests.
+
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ops/file ./internal/core/workflow/state ./internal/core ./internal/app ./scripts/goquality`
+  — passed with zero issues after IO and journal image extraction.
 
 The first compile identified shared allocator calls and a legacy layout literal;
 those consumers now use the owned ops contracts. The first style scan identified

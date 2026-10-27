@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) finishWorkflowClosing(ctx context.Context, claim *workflowClosingClaim, receipt WorkflowClosingReceipt, failure error, ports WorkflowFrontierPorts) (WorkflowSetClosureResult, error) {
@@ -39,7 +40,7 @@ func (s *WorkflowStore) finishWorkflowClosing(ctx context.Context, claim *workfl
 		claim.set.Set.Status, claim.set.Set.ClosureRef = "completed", claim.state.Result.Ref
 	}
 
-	if err := s.commitWorkflowClosingState(ctx, claim, workflowFileChange{Path: claim.state.Result.Ref, After: data}); err != nil {
+	if err := s.commitWorkflowClosingState(ctx, claim, workflowstate.FileChange{Path: claim.state.Result.Ref, After: data}); err != nil {
 		return WorkflowSetClosureResult{}, errors.Join(failure, err)
 	}
 

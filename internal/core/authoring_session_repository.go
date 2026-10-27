@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -150,7 +151,7 @@ func (r *fileAuthoringSessionRepository) getSession(ctx context.Context, id stri
 
 	paths := AuthoringSessionLayout(r.projectDir, id)
 
-	content, err := readWorkflowFile(paths.SessionPath)
+	content, err := opsfile.Read(paths.SessionPath)
 	if errors.Is(err, os.ErrNotExist) {
 		return AuthoringSession{}, fmt.Errorf("%w: %s", ErrAuthoringSessionNotFound, id)
 	}
@@ -267,7 +268,7 @@ func (r *fileAuthoringSessionRepository) listTranscriptEvents(ctx context.Contex
 		return nil, err
 	}
 
-	content, err := readWorkflowFile(paths.TranscriptPath)
+	content, err := opsfile.Read(paths.TranscriptPath)
 	if errors.Is(err, os.ErrNotExist) {
 		return []AssistedTranscriptEvent{}, nil
 	}
@@ -697,7 +698,7 @@ func (r *fileAuthoringSessionRepository) appendListedAuthoringSession(ctx contex
 		return err
 	}
 
-	content, err := readWorkflowFile(path)
+	content, err := opsfile.Read(path)
 	if err != nil {
 		return fmt.Errorf("read authoring session: %w", err)
 	}

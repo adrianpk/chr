@@ -1,5 +1,7 @@
 package core
 
+import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+
 type projectDumpRead struct {
 	Artifact ProjectDumpArtifact
 	Bytes    int
@@ -7,7 +9,7 @@ type projectDumpRead struct {
 type (
 	projectDumpFileImages struct{ Body, Metadata []byte }
 	projectDumpChanges    struct {
-		Changes []workflowFileChange
+		Changes []workflowstate.FileChange
 		Result  ProjectDumpMutationResult
 	}
 )

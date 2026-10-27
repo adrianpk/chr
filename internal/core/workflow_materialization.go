@@ -10,6 +10,7 @@ import (
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -80,7 +81,7 @@ func (s *WorkflowStore) materializePlan(ctx context.Context, opts WorkflowMateri
 	return s.materializeNewPlan(ctx, opts, snapshot, body, coordinator)
 }
 
-func (s *WorkflowStore) materializeNewPlan(ctx context.Context, opts WorkflowMaterializationOptions, snapshot WorkflowSnapshot, body []byte, coordinator []workflowFileChange) (result WorkflowMaterializationResult, err error) {
+func (s *WorkflowStore) materializeNewPlan(ctx context.Context, opts WorkflowMaterializationOptions, snapshot WorkflowSnapshot, body []byte, coordinator []workflowstate.FileChange) (result WorkflowMaterializationResult, err error) {
 	guard, err := s.acquireWorkflowAllocation()
 	if err != nil {
 		return result, err
@@ -122,7 +123,7 @@ func (s *WorkflowStore) readApprovedPlan(plan generationcore.GeneratedWorkflowPl
 		return nil, err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil {
 		return nil, err
 	}
@@ -134,14 +135,14 @@ func (s *WorkflowStore) readApprovedPlan(plan generationcore.GeneratedWorkflowPl
 	return data, nil
 }
 
-func (s *WorkflowStore) materializationFiles(result WorkflowMaterializationResult, plan generationcore.GeneratedWorkflowPlan) ([]workflowFileChange, error) {
+func (s *WorkflowStore) materializationFiles(result WorkflowMaterializationResult, plan generationcore.GeneratedWorkflowPlan) ([]workflowstate.FileChange, error) {
 	receipt, err := materializationReceiptFile(plan, result)
 	if err != nil {
 		return nil, err
 	}
 
 	result.Set.Metadata["materialization_receipt_hash"] = json.RawMessage(fmt.Sprintf("%q", contenthash.Sum(receipt.After)))
-	files := []workflowFileChange{}
+	files := []workflowstate.FileChange{}
 
 	for _, record := range append([]WorkflowRecord{result.Set}, result.Tasks...) {
 		encoded, err := s.encodeChanges(record)
@@ -170,8 +171,8 @@ func (s *WorkflowStore) materializationFiles(result WorkflowMaterializationResul
 	return files, nil
 }
 
-func (s *WorkflowStore) materializationContractFiles(result WorkflowMaterializationResult, plan generationcore.GeneratedWorkflowPlan) ([]workflowFileChange, error) {
-	files := []workflowFileChange{}
+func (s *WorkflowStore) materializationContractFiles(result WorkflowMaterializationResult, plan generationcore.GeneratedWorkflowPlan) ([]workflowstate.FileChange, error) {
+	files := []workflowstate.FileChange{}
 
 	for _, slice := range plan.Slices {
 		data, err := json.Marshal(struct {
@@ -183,7 +184,7 @@ func (s *WorkflowStore) materializationContractFiles(result WorkflowMaterializat
 		}
 
 		path := filepath.ToSlash(filepath.Join("plan", result.Set.ID, "extension", "chr", "slice-"+slice.ID+".json"))
-		files = append(files, workflowFileChange{Path: path, After: data})
+		files = append(files, workflowstate.FileChange{Path: path, After: data})
 	}
 
 	next := 0
@@ -198,7 +199,7 @@ func (s *WorkflowStore) materializationContractFiles(result WorkflowMaterializat
 			}
 
 			path := filepath.ToSlash(filepath.Join("plan", result.Set.ID, "extension", "chr", fmt.Sprintf("task-%d.json", next)))
-			files = append(files, workflowFileChange{Path: path, After: data})
+			files = append(files, workflowstate.FileChange{Path: path, After: data})
 		}
 	}
 

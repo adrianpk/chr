@@ -98,7 +98,7 @@ func (s *WorkflowStore) persistWorkflowMergerFinish(ctx context.Context, run *wo
 	return s.commitWorkflowPullRequestFiles(run, files, resultFile)
 }
 
-func workflowMergerFinishedRun(run *workflowInvocationFile, claim *WorkflowClaim, result WorkflowMergerAttempt, data []byte) workflowFileChange {
+func workflowMergerFinishedRun(run *workflowInvocationFile, claim *WorkflowClaim, result WorkflowMergerAttempt, data []byte) workflowstate.FileChange {
 	current := &run.Attempts[len(run.Attempts)-1]
 	current.Outcome, current.FinishedAt = "checkpointed", time.Now().UTC()
 	current.ResultRef, current.ResultHash = workflowAttemptFile(run.ID, claim.AttemptID, "result.json"), contenthash.Sum(data)
@@ -120,7 +120,7 @@ func workflowMergerFinishedRun(run *workflowInvocationFile, claim *WorkflowClaim
 		run.ResumeStatus = "waiting_integration"
 	}
 
-	return workflowFileChange{Path: current.ResultRef, After: data}
+	return workflowstate.FileChange{Path: current.ResultRef, After: data}
 }
 
 func rejectWorkflowMergerAcceptance(attempt *WorkflowMergerAttempt) {
@@ -146,7 +146,7 @@ func boundWorkflowMergerAttempt(attempt *WorkflowMergerAttempt) error {
 	return workflowstate.ErrConflict
 }
 
-func appendWorkflowMergerSettlement(files []workflowFileChange, settlement workflowFileChange) []workflowFileChange {
+func appendWorkflowMergerSettlement(files []workflowstate.FileChange, settlement workflowstate.FileChange) []workflowstate.FileChange {
 	if settlement.Path != "" {
 		return append(files, settlement)
 	}

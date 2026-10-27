@@ -11,6 +11,7 @@ import (
 
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -113,7 +114,7 @@ func (r *fileAuthoringSessionRepository) saveAuthoringRequest(binding authoringR
 		return err
 	}
 
-	return atomicWorkflowFile(path, encoded)
+	return opsfile.WriteAtomic(path, encoded)
 }
 
 func (r *fileAuthoringSessionRepository) authoringRequestCapacity() error {

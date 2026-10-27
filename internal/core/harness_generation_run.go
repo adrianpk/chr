@@ -9,6 +9,7 @@ import (
 
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	"forge.adrianpk.com/chr/internal/harness"
 	"forge.adrianpk.com/chr/internal/harness/process"
 )
@@ -140,7 +141,7 @@ func retainNormalizedHarnessOutput(request harness.AgentRunRequest, output []byt
 		name = "output.md"
 	}
 
-	if err := atomicBoundedWorkflowFile(filepath.Join(request.RunDir, name), output, limit); err != nil {
+	if err := opsfile.WriteAtomicBounded(filepath.Join(request.RunDir, name), output, limit); err != nil {
 		return err
 	}
 

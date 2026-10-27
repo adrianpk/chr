@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -15,7 +16,7 @@ func (s *WorkflowStore) checkWorkflowAmendmentEvidence(set WorkflowRecord, bindi
 		return err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil {
 		return err
 	}

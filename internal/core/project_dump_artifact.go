@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -61,7 +62,7 @@ func (r *fileAuthoringSessionRepository) readBoundedAuthoringDocument(relative s
 		return nil, fmt.Errorf("authoring document is not a regular file")
 	}
 
-	return readBoundedWorkflowFile(path, limit)
+	return opsfile.ReadBounded(path, limit)
 }
 
 func decodeProjectDumpMetadata(reference string, data []byte) (map[string]string, error) {

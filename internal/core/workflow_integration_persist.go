@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -50,7 +51,7 @@ func (s *WorkflowStore) persistWorkflowDeliveryProof(run *workflowInvocationFile
 	run.DeliveryProofRef, run.DeliveryProofHash = workflowDeliveryProofPath(*run), contenthash.Sum(data)
 	workflowRetainDeliveryStatus(run, "slice_delivery_verified", false)
 
-	change := workflowFileChange{Path: run.DeliveryProofRef, After: data}
+	change := workflowstate.FileChange{Path: run.DeliveryProofRef, After: data}
 
 	return proof, s.commitWorkflowPullRequestFiles(run, nil, change)
 }
@@ -66,7 +67,7 @@ func (s *WorkflowStore) readWorkflowDeliveryProof(run workflowInvocationFile) (W
 		return proof, err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil || contenthash.Sum(data) != run.DeliveryProofHash {
 		return proof, workflowstate.ErrConflict
 	}

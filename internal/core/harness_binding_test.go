@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness"
 )
@@ -100,7 +101,7 @@ func checkHarnessBindingInputs(t *testing.T, store *WorkflowStore, run WorkflowI
 	t.Helper()
 
 	for _, attempt := range run.Attempts {
-		data, err := readWorkflowFile(filepath.Join(store.layout.Root(), attempt.InputRef))
+		data, err := opsfile.Read(filepath.Join(store.layout.Root(), attempt.InputRef))
 		if err != nil || contenthash.Sum(data) != attempt.InputHash {
 			t.Fatal("worker input digest changed", err)
 		}

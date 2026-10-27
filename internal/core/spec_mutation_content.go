@@ -12,7 +12,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func specDocumentChanges(document SpecDocument, request SpecMutationRequest) ([]workflowFileChange, error) {
+func specDocumentChanges(document SpecDocument, request SpecMutationRequest) ([]workflowstate.FileChange, error) {
 	status := request.Status
 	if status == "" {
 		status = document.Status
@@ -54,24 +54,24 @@ func specDocumentChanges(document SpecDocument, request SpecMutationRequest) ([]
 		return nil, err
 	}
 
-	changes := append([]workflowFileChange(nil), document.images...)
+	changes := append([]workflowstate.FileChange(nil), document.images...)
 	changes[0].After, changes[1].After = content, append(metadata, '\n')
 
 	return changes, nil
 }
 
-func specReceiptChange(digest string, result SpecMutationResult) (workflowFileChange, error) {
+func specReceiptChange(digest string, result SpecMutationResult) (workflowstate.FileChange, error) {
 	receipt := specMutationReceipt{Schema: "chr-spec-receipt/v1", Digest: digest, Result: result}
 
 	encoded, err := json.Marshal(receipt)
 	if err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
 	receipt.Checksum = contenthash.Sum(encoded)
 	encoded, err = json.Marshal(receipt)
 
-	return workflowFileChange{Path: authoringReceiptRef(result.OperationID), After: encoded}, err
+	return workflowstate.FileChange{Path: authoringReceiptRef(result.OperationID), After: encoded}, err
 }
 
 func (r *fileAuthoringSessionRepository) specReceipt(operationID, digest string) (SpecMutationResult, bool, error) {

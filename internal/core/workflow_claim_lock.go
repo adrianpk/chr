@@ -12,6 +12,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -100,7 +101,7 @@ func (s *WorkflowStore) guardWorkflowOperationLocks(ctx context.Context) error {
 	}
 
 	for _, layout := range layouts {
-		_, err := readWorkflowFile(filepath.Join(layout.Root(), "lock", "agent-operation.lock"))
+		_, err := opsfile.Read(filepath.Join(layout.Root(), "lock", "agent-operation.lock"))
 		if errors.Is(err, os.ErrNotExist) {
 			continue
 		}
@@ -184,7 +185,7 @@ func (claim *WorkflowClaim) releaseReservation() error {
 
 func guardedAgentOperationRelease(lock *AgentOperationLock) error {
 	if lock.guard != "" {
-		data, err := readWorkflowFile(lock.path)
+		data, err := opsfile.Read(lock.path)
 		if err != nil {
 			return err
 		}

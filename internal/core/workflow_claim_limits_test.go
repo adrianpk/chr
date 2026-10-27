@@ -181,7 +181,7 @@ func markWorkflowInvocationCancelled(t *testing.T, store *WorkflowStore, id stri
 			return err
 		}
 
-		return store.commitFiles([]workflowFileChange{change})
+		return store.commitFiles([]workflowstate.FileChange{change})
 	}); err != nil {
 		t.Fatal(err)
 	}

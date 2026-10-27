@@ -18,18 +18,18 @@ type assistedDumpMutationReceipt struct {
 	Mutation                 ProjectDumpMutationResult
 }
 
-func assistedDumpReceiptChange(digest string, result AssistedArtifactSynthesisResult) (workflowFileChange, error) {
+func assistedDumpReceiptChange(digest string, result AssistedArtifactSynthesisResult) (workflowstate.FileChange, error) {
 	receipt := assistedDumpMutationReceipt{Schema: "chr-assisted-dump-receipt/v1", Digest: digest, Session: result.Session, Reference: result.Layout.Ref, Mutation: *result.Mutation}
 
 	encoded, err := json.Marshal(receipt)
 	if err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
 	receipt.Checksum = contenthash.Sum(encoded)
 	encoded, err = json.Marshal(receipt)
 
-	return workflowFileChange{Path: authoringReceiptRef(receipt.Mutation.OperationID), After: encoded}, err
+	return workflowstate.FileChange{Path: authoringReceiptRef(receipt.Mutation.OperationID), After: encoded}, err
 }
 
 func (r *fileAuthoringSessionRepository) assistedDumpReceipt(operationID, digest string) (AssistedArtifactSynthesisResult, bool, error) {

@@ -147,7 +147,7 @@ func nativeQueueRemoveBudget(t *testing.T, store *WorkflowStore, id string) work
 		t.Fatal(err)
 	}
 
-	if err := store.commitFiles([]workflowFileChange{change}); err != nil {
+	if err := store.commitFiles([]workflowstate.FileChange{change}); err != nil {
 		t.Fatal(err)
 	}
 

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -125,7 +126,7 @@ func (s ProjectMetadataService) save(metadata ProjectMetadata, bindDump bool) (P
 		return ProjectMetadata{}, fmt.Errorf("project metadata exceeds the file limit")
 	}
 
-	err = atomicWorkflowFile(path, []byte(content))
+	err = opsfile.WriteAtomic(path, []byte(content))
 	if err != nil {
 		return ProjectMetadata{}, fmt.Errorf("write project metadata: %w", err)
 	}

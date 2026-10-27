@@ -31,7 +31,7 @@ func (s *WorkflowStore) commitWorkflowFrontier(run *workflowInvocationFile, targ
 		run.Status, run.Outcome = "waiting_integration", "set_closure_required"
 	}
 
-	return s.commitWorkflowPullRequestFiles(run, nil, workflowFileChange{Path: delivery.EvidenceRef, After: data})
+	return s.commitWorkflowPullRequestFiles(run, nil, workflowstate.FileChange{Path: delivery.EvidenceRef, After: data})
 }
 
 func workflowUnitDelivery(run workflowInvocationFile, target WorkflowPreviewTarget, proof WorkflowIntegrationProof) WorkflowUnitDelivery {

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 func retainNativeRecordEvidence(t *testing.T, store *WorkflowStore, id, name string, value any) WorkflowEvidenceRef {
@@ -25,7 +26,7 @@ func retainNativeRecordEvidence(t *testing.T, store *WorkflowStore, id, name str
 		t.Fatal(err)
 	}
 
-	if err := atomicWorkflowFile(path, data); err != nil {
+	if err := opsfile.WriteAtomic(path, data); err != nil {
 		t.Fatal(err)
 	}
 

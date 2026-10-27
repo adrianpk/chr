@@ -13,6 +13,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -118,7 +119,7 @@ func (s *WorkflowStore) readMutationReceipt(request WorkflowMutationRequest, dig
 		return WorkflowMutationResult{}, false, err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return WorkflowMutationResult{}, false, nil
 	}
@@ -168,18 +169,18 @@ func validateWorkflowMutationResult(receipt workflowMutationReceipt, request Wor
 	return result.Record.Validate()
 }
 
-func (s *WorkflowStore) mutationReceiptChange(request WorkflowMutationRequest, result WorkflowMutationResult) (workflowFileChange, error) {
+func (s *WorkflowStore) mutationReceiptChange(request WorkflowMutationRequest, result WorkflowMutationResult) (workflowstate.FileChange, error) {
 	receipt := workflowMutationReceipt{State: "confirmed", Operation: workflowMutationOperation(request), ExpectedRevision: request.ExpectedRevision, BeforeSourceHash: request.Record.SourceHash, Schema: "chr-record-mutation/v1", ProjectID: s.projectID, Namespace: s.layout.Namespace(), Operator: request.Binding.Operator, Result: result}
 
 	data, err := json.Marshal(receipt)
 	if err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
 	receipt.Checksum = contenthash.Sum(data)
 	data, err = json.Marshal(receipt)
 
-	return workflowFileChange{Path: result.ReceiptRef, After: data}, err
+	return workflowstate.FileChange{Path: result.ReceiptRef, After: data}, err
 }
 
 func (s *WorkflowStore) applyNewMutation(ctx context.Context, request WorkflowMutationRequest, digest string) (result WorkflowMutationResult, err error) {
@@ -262,7 +263,7 @@ func (s *WorkflowStore) releaseUnusedMutationAllocation(guard string) error {
 	return s.releaseWorkflowAllocation(guard)
 }
 
-func (s *WorkflowStore) prepareMutation(ctx context.Context, request WorkflowMutationRequest) (WorkflowRecord, []workflowFileChange, error) {
+func (s *WorkflowStore) prepareMutation(ctx context.Context, request WorkflowMutationRequest) (WorkflowRecord, []workflowstate.FileChange, error) {
 	record, err := s.prepareMutationRecord(request)
 	if err != nil {
 		return record, nil, err
@@ -314,7 +315,7 @@ func mergeMutationMetadata(base, extra map[string]json.RawMessage) map[string]js
 	return base
 }
 
-func guardMutationCreation(files []workflowFileChange, expected uint64) error {
+func guardMutationCreation(files []workflowstate.FileChange, expected uint64) error {
 	if expected != 0 {
 		return nil
 	}

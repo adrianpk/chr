@@ -16,7 +16,7 @@ import (
 
 // Registration is journaled with the first explicit native authoring operation.
 // Existing unbound authority cannot be silently registered by a work start.
-func (s *WorkflowStore) workflowCoordinatorFiles(ctx context.Context) ([]workflowFileChange, error) {
+func (s *WorkflowStore) workflowCoordinatorFiles(ctx context.Context) ([]workflowstate.FileChange, error) {
 	owner, err := s.workflowLocalCoordinator(ctx, true)
 	if err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func (s *WorkflowStore) workflowCoordinatorFiles(ctx context.Context) ([]workflo
 
 	data, err := json.Marshal(owner)
 
-	return []workflowFileChange{{Path: workflowCoordinatorPath, After: data}}, err
+	return []workflowstate.FileChange{{Path: workflowCoordinatorPath, After: data}}, err
 }
 
 func (s *WorkflowStore) checkWorkflowCoordinatorTarget(ctx context.Context, target WorkflowPreviewTarget) error {

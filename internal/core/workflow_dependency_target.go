@@ -28,7 +28,7 @@ type WorkflowDependencyTarget struct {
 	EvidenceHash string                `json:"evidence_hash,omitempty"`
 }
 
-func (s *WorkflowStore) resumeWorkflowDependencyTarget(ctx context.Context, run *workflowInvocationFile, ports WorkflowResumePorts) ([]workflowFileChange, error) {
+func (s *WorkflowStore) resumeWorkflowDependencyTarget(ctx context.Context, run *workflowInvocationFile, ports WorkflowResumePorts) ([]workflowstate.FileChange, error) {
 	if !workflowDependencyTargetReady(*run, ports) {
 		return nil, ErrWorkflowObservationRequired
 	}
@@ -63,7 +63,7 @@ func (s *WorkflowStore) resumeWorkflowDependencyTarget(ctx context.Context, run 
 	next.Blocker = nil
 	*run = next
 
-	return []workflowFileChange{{Path: proof.EvidenceRef, After: data}}, nil
+	return []workflowstate.FileChange{{Path: proof.EvidenceRef, After: data}}, nil
 }
 
 func workflowDependencyTargetReady(run workflowInvocationFile, ports WorkflowResumePorts) bool {

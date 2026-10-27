@@ -169,7 +169,7 @@ func nativeEntryUnsupported(t *testing.T, store *WorkflowStore, path string) {
 		t.Fatal(err)
 	}
 
-	if err := store.commitFiles([]workflowFileChange{{Path: run.Integration.EntryRef.Path, Before: contenthash.Sum(mustReadNativeEntry(t, path)), After: data}, change}); err != nil {
+	if err := store.commitFiles([]workflowstate.FileChange{{Path: run.Integration.EntryRef.Path, Before: contenthash.Sum(mustReadNativeEntry(t, path)), After: data}, change}); err != nil {
 		t.Fatal(err)
 	}
 }

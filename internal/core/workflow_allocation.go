@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -37,7 +38,7 @@ func (s *WorkflowStore) acquireWorkflowAllocation() (string, error) {
 		return "", err
 	}
 
-	if err := atomicWorkflowFile(path, data); err != nil {
+	if err := opsfile.WriteAtomic(path, data); err != nil {
 		return "", err
 	}
 
@@ -45,7 +46,7 @@ func (s *WorkflowStore) acquireWorkflowAllocation() (string, error) {
 }
 
 func (s *WorkflowStore) reclaimWorkflowAllocation(path string) error {
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil
 	}
@@ -73,7 +74,7 @@ func (s *WorkflowStore) releaseWorkflowAllocation(guard string) error {
 
 	path := filepath.Join(s.layout.Root(), "lock", "id.lock")
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil
 	}
@@ -90,5 +91,5 @@ func (s *WorkflowStore) releaseWorkflowAllocation(guard string) error {
 		return err
 	}
 
-	return syncWorkflowDirectory(filepath.Dir(path))
+	return opsfile.SyncDirectory(filepath.Dir(path))
 }

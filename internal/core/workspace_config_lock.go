@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"syscall"
+
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 // Configuration mutations share this owner lock, including legacy upgrades.
@@ -26,7 +28,7 @@ func withWorkspaceConfigLock(ctx context.Context, project string, action func() 
 	}
 	defer func() { err = errors.Join(err, file.Close()) }()
 
-	if err := acquireWorkflowLock(ctx, file); err != nil {
+	if err := opsfile.Lock(ctx, file); err != nil {
 		return err
 	}
 	defer func() { err = errors.Join(err, syscall.Flock(int(file.Fd()), syscall.LOCK_UN)) }()

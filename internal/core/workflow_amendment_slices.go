@@ -90,7 +90,7 @@ func workflowNewAmendmentSlice(builder *workflowAmendmentBuild, input generation
 	}
 
 	descriptor.ContractRef = builder.root + "/slice-" + input.ID + ".json"
-	builder.files = append(builder.files, workflowFileChange{Path: descriptor.ContractRef, After: data})
+	builder.files = append(builder.files, workflowstate.FileChange{Path: descriptor.ContractRef, After: data})
 
 	return nil
 }

@@ -7,9 +7,9 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *WorkflowStore) workflowAgentBudgetCreation(ctx context.Context, run *workflowInvocationFile) (workflowFileChange, error) {
+func (s *WorkflowStore) workflowAgentBudgetCreation(ctx context.Context, run *workflowInvocationFile) (workflowstate.FileChange, error) {
 	if run.Policy.AgentTokenBudget == 0 {
-		return workflowFileChange{}, nil
+		return workflowstate.FileChange{}, nil
 	}
 
 	limit := run.Policy.AgentTokenBudget
@@ -126,20 +126,20 @@ func workflowAgentReservation(budget *WorkflowIntegrationBudget, input WorkflowT
 	return &budget.Reservations[index], nil
 }
 
-func (s *WorkflowStore) encodeWorkflowAgentInput(ctx context.Context, run *workflowInvocationFile, input WorkflowTaskInput, harness *WorkflowAgentHarness) (workflowPreparedTask, workflowFileChange, workflowFileChange, error) {
+func (s *WorkflowStore) encodeWorkflowAgentInput(ctx context.Context, run *workflowInvocationFile, input WorkflowTaskInput, harness *WorkflowAgentHarness) (workflowPreparedTask, workflowstate.FileChange, workflowstate.FileChange, error) {
 	budget, err := s.reserveWorkflowAgentInput(ctx, run, &input, harness)
 	if err != nil {
-		return workflowPreparedTask{}, workflowFileChange{}, workflowFileChange{}, err
+		return workflowPreparedTask{}, workflowstate.FileChange{}, workflowstate.FileChange{}, err
 	}
 
 	prepared, file, err := encodeWorkflowTaskInput(run, input)
 	if err != nil || budget == nil {
-		return prepared, file, workflowFileChange{}, err
+		return prepared, file, workflowstate.FileChange{}, err
 	}
 
 	reservation, err := workflowAgentReservation(budget, input)
 	if err != nil {
-		return prepared, file, workflowFileChange{}, err
+		return prepared, file, workflowstate.FileChange{}, err
 	}
 
 	reservation.AttemptInput = &WorkflowEvidenceRef{Path: prepared.inputRef, Hash: prepared.inputHash}
@@ -148,7 +148,7 @@ func (s *WorkflowStore) encodeWorkflowAgentInput(ctx context.Context, run *workf
 	return prepared, file, budgetFile, err
 }
 
-func appendWorkflowAgentBudgetFile(files []workflowFileChange, file workflowFileChange) []workflowFileChange {
+func appendWorkflowAgentBudgetFile(files []workflowstate.FileChange, file workflowstate.FileChange) []workflowstate.FileChange {
 	if file.Path == "" {
 		return files
 	}
@@ -156,7 +156,7 @@ func appendWorkflowAgentBudgetFile(files []workflowFileChange, file workflowFile
 	return append(files, file)
 }
 
-func (s *WorkflowStore) workflowAgentCreationFiles(ctx context.Context, envelope WorkflowRecord, run *workflowInvocationFile) ([]workflowFileChange, error) {
+func (s *WorkflowStore) workflowAgentCreationFiles(ctx context.Context, envelope WorkflowRecord, run *workflowInvocationFile) ([]workflowstate.FileChange, error) {
 	file, err := s.workflowAgentBudgetCreation(ctx, run)
 	if err != nil {
 		return nil, err

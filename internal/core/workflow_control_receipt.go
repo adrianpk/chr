@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -39,7 +40,7 @@ type workflowControlCommit struct {
 	check   WorkflowAdmissionCheck
 }
 
-func (commit *workflowControlCommit) files(ctx context.Context, revision uint64) ([]workflowFileChange, error) {
+func (commit *workflowControlCommit) files(ctx context.Context, revision uint64) ([]workflowstate.FileChange, error) {
 	if commit == nil {
 		return nil, nil
 	}
@@ -59,7 +60,7 @@ func (commit *workflowControlCommit) files(ctx context.Context, revision uint64)
 	receipt.Checksum = contenthash.Sum(data)
 	data, err = json.Marshal(receipt)
 
-	return []workflowFileChange{{Path: receipt.Result.ReceiptRef, After: data}}, err
+	return []workflowstate.FileChange{{Path: receipt.Result.ReceiptRef, After: data}}, err
 }
 
 func (s *WorkflowStore) readWorkflowControlReceipt(request WorkflowControlMutationRequest, digest string) (WorkflowControlResult, bool, error) {
@@ -68,7 +69,7 @@ func (s *WorkflowStore) readWorkflowControlReceipt(request WorkflowControlMutati
 		return WorkflowControlResult{}, false, err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return WorkflowControlResult{}, false, nil
 	}
@@ -114,7 +115,7 @@ func (s *WorkflowStore) reserveWorkflowControlBinding(request WorkflowControlMut
 		return err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err == nil {
 		var prior workflowControlReservation
 		if err := json.Unmarshal(data, &prior); err != nil {
@@ -141,7 +142,7 @@ func (s *WorkflowStore) reserveWorkflowControlBinding(request WorkflowControlMut
 		return err
 	}
 
-	return atomicWorkflowFile(path, encoded)
+	return opsfile.WriteAtomic(path, encoded)
 }
 
 func (s *WorkflowStore) retainWorkflowControlNoop(ctx context.Context, run workflowInvocationFile, control *workflowControlCommit) error {
@@ -154,7 +155,7 @@ func (s *WorkflowStore) retainWorkflowControlNoop(ctx context.Context, run workf
 		return err
 	}
 
-	return s.commitWorkflowPullRequestFiles(&run, files, workflowFileChange{})
+	return s.commitWorkflowPullRequestFiles(&run, files, workflowstate.FileChange{})
 }
 
 func (s *WorkflowStore) completeWorkflowControlRetry(ctx context.Context, run workflowInvocationFile, control *workflowControlCommit, failure error) error {

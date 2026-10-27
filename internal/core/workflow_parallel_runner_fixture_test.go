@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 type workflowParallelRunnerSpec struct {
@@ -72,7 +73,7 @@ func TestWorkflowParallelRunner(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := atomicWorkflowFile(spec.Result, encoded); err != nil {
+	if err := opsfile.WriteAtomic(spec.Result, encoded); err != nil {
 		t.Fatal(err)
 	}
 }

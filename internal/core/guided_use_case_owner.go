@@ -86,13 +86,13 @@ func guardGuidedScope(session AuthoringSession, scope GuidedUseCaseScope) error 
 	return nil
 }
 
-func (r *fileAuthoringSessionRepository) guidedFileChange(path string, content []byte, create bool) (workflowFileChange, error) {
+func (r *fileAuthoringSessionRepository) guidedFileChange(path string, content []byte, create bool) (workflowstate.FileChange, error) {
 	relative, err := filepath.Rel(r.projectDir, path)
 	if err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
-	change := workflowFileChange{Path: relative, After: content}
+	change := workflowstate.FileChange{Path: relative, After: content}
 	if create {
 		return change, nil
 	}
@@ -107,7 +107,7 @@ func (r *fileAuthoringSessionRepository) guidedFileChange(path string, content [
 	return change, nil
 }
 
-func (r *fileAuthoringSessionRepository) saveGuidedSession(session AuthoringSession, create bool, extra ...workflowFileChange) error {
+func (r *fileAuthoringSessionRepository) saveGuidedSession(session AuthoringSession, create bool, extra ...workflowstate.FileChange) error {
 	paths, err := r.authoringSessionPaths(session.ID)
 	if err != nil {
 		return err
@@ -136,7 +136,7 @@ func (r *fileAuthoringSessionRepository) saveGuidedSession(session AuthoringSess
 			return err
 		}
 
-		changes = append([]workflowFileChange{artifact}, changes...)
+		changes = append([]workflowstate.FileChange{artifact}, changes...)
 	}
 
 	if err := r.writeAuthoringJournal(changes); err != nil {

@@ -12,6 +12,7 @@ import (
 	"syscall"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -30,7 +31,7 @@ func CheckLegacyWorkTicket(path string) error {
 		return nil
 	}
 
-	data, err := readWorkflowFile(filepath.Join(filepath.Dir(path), "metadata.json"))
+	data, err := opsfile.Read(filepath.Join(filepath.Dir(path), "metadata.json"))
 	if errors.Is(err, os.ErrNotExist) {
 		return nil
 	}
@@ -120,7 +121,7 @@ func writeLegacyTicketFile(ctx context.Context, path string, observed, replaceme
 			return workflowstate.ErrConflict
 		}
 
-		return atomicWorkflowFile(path, replacement)
+		return opsfile.WriteAtomic(path, replacement)
 	}
 	if root == "" {
 		// WorkflowStore requires Git coordination, so non-Git legacy tickets
@@ -144,7 +145,7 @@ func withLegacyTicketLock(ctx context.Context, path string, action func() error)
 
 	defer func() { err = errors.Join(err, file.Close()) }()
 
-	if err := acquireWorkflowLock(ctx, file); err != nil {
+	if err := opsfile.Lock(ctx, file); err != nil {
 		return err
 	}
 

@@ -96,10 +96,10 @@ func seedWorkflowClosingBudget(t *testing.T, store *WorkflowStore, path, id stri
 	}
 }
 
-func workflowClosingBudgetImages(t *testing.T, set *WorkflowRecord, state workflowClosingAttempt, input []byte) []workflowFileChange {
+func workflowClosingBudgetImages(t *testing.T, set *WorkflowRecord, state workflowClosingAttempt, input []byte) []workflowstate.FileChange {
 	t.Helper()
 
-	files := []workflowFileChange{}
+	files := []workflowstate.FileChange{}
 
 	for generation := 2; generation <= workflowstate.PageLimit; generation++ {
 		state.Generation = generation
@@ -113,7 +113,7 @@ func workflowClosingBudgetImages(t *testing.T, set *WorkflowRecord, state workfl
 		data = append(data, '\n')
 		ref := workflowClosingFile(set.ID, generation, "state.json")
 		set.Set.Closing.Attempts = append(set.Set.Closing.Attempts, WorkflowClosingEvidence{Ref: ref, Hash: contenthash.Sum(data)})
-		files = append(files, workflowFileChange{Path: ref, After: data}, workflowFileChange{Path: state.Input.Ref, After: input})
+		files = append(files, workflowstate.FileChange{Path: ref, After: data}, workflowstate.FileChange{Path: state.Input.Ref, After: input})
 	}
 
 	return files

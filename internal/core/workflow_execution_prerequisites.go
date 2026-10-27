@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -70,7 +71,7 @@ func (s *WorkflowStore) checkWorkflowPreparedInput(prepared workflowPreparedTask
 		return err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil || contenthash.Sum(data) != prepared.inputHash {
 		return fmt.Errorf("%w: frozen worker input changed", workflowstate.ErrConflict)
 	}
@@ -92,7 +93,7 @@ func (s *WorkflowStore) checkWorkflowPrerequisiteEvidence(hashes map[string]stri
 			return err
 		}
 
-		data, err := readWorkflowFile(path)
+		data, err := opsfile.Read(path)
 		if err != nil || contenthash.Sum(data) != hash {
 			return fmt.Errorf("%w: frozen prerequisite evidence changed", workflowstate.ErrConflict)
 		}

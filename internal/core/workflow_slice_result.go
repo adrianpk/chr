@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -66,7 +67,7 @@ func (s *WorkflowStore) commitWorkflowSliceCandidate(run workflowInvocationFile,
 		attempt.Outcome, run.Status, run.ResumeStatus = "failed", "paused", "waiting_integration"
 	}
 
-	return s.commitWorkflowClaim(run, record, workflowFileChange{Path: ref, After: data})
+	return s.commitWorkflowClaim(run, record, workflowstate.FileChange{Path: ref, After: data})
 }
 
 // ReadWorkflowSliceCandidate rechecks retained host proof and the actual lane.
@@ -96,7 +97,7 @@ func (s *WorkflowStore) readWorkflowSliceCandidate(ctx context.Context, run work
 		return WorkflowSliceCandidate{}, workflowstate.ErrConflict
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil || contenthash.Sum(data) != run.CandidateHash {
 		return WorkflowSliceCandidate{}, workflowstate.ErrConflict
 	}

@@ -11,6 +11,7 @@ import (
 	"sync"
 	"testing"
 
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -126,7 +127,7 @@ func (p *workflowSubmissionProviderFixture) publish(ctx context.Context, submiss
 		return err
 	}
 
-	return atomicWorkflowFile(filepath.Join(p.remote, "workflow-provider-pr.json"), data)
+	return opsfile.WriteAtomic(filepath.Join(p.remote, "workflow-provider-pr.json"), data)
 }
 
 func (p *workflowSubmissionProviderFixture) ObserveWorkflowSubmission(_ context.Context, submission WorkflowSubmission) (WorkflowSubmissionObservation, error) {

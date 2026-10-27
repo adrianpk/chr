@@ -137,7 +137,7 @@ func workflowSliceRepairReady(run WorkflowInvocation) bool {
 }
 
 func (s *WorkflowStore) commitWorkflowSliceRepair(run *workflowInvocationFile, observation workflowSliceObservation, index int) error {
-	files := []workflowFileChange{}
+	files := []workflowstate.FileChange{}
 
 	for i, record := range observation.tasks {
 		if i < index {
@@ -176,7 +176,7 @@ func (s *WorkflowStore) commitWorkflowSliceRepair(run *workflowInvocationFile, o
 	return s.commitFiles(append(files, state))
 }
 
-func (s *WorkflowStore) workflowRepairSetChanges(run *workflowInvocationFile, set WorkflowRecord) ([]workflowFileChange, error) {
+func (s *WorkflowStore) workflowRepairSetChanges(run *workflowInvocationFile, set WorkflowRecord) ([]workflowstate.FileChange, error) {
 	if set.Set == nil {
 		return nil, nil
 	}

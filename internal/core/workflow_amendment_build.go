@@ -17,12 +17,12 @@ type workflowAmendmentBuild struct {
 	old    WorkflowRecord
 	tasks  map[string]WorkflowRecord
 	keys   map[string]string
-	files  []workflowFileChange
+	files  []workflowstate.FileChange
 	number int
 	root   string
 }
 
-func (s *WorkflowStore) buildWorkflowAmendment(ctx context.Context, set WorkflowRecord, request WorkflowSetAmendmentRequest, body []byte) (WorkflowMaterializationResult, []workflowFileChange, error) {
+func (s *WorkflowStore) buildWorkflowAmendment(ctx context.Context, set WorkflowRecord, request WorkflowSetAmendmentRequest, body []byte) (WorkflowMaterializationResult, []workflowstate.FileChange, error) {
 	builder, err := s.workflowAmendmentBuilder(ctx, set)
 	if err != nil {
 		return builder.result, nil, err

@@ -142,7 +142,7 @@ func (s *WorkflowStore) persistWorkflowMergerCheckpoint(record WorkflowMergerChe
 	data = append(data, '\n')
 	ref := WorkflowEvidenceRef{Path: filepath.ToSlash(filepath.Join("run", record.InvocationID, "extension", "chr", "merger", "checkpoints", contenthash.Sum(data)+".json")), Hash: contenthash.Sum(data)}
 
-	return ref, s.commitFiles([]workflowFileChange{{Path: ref.Path, After: data}})
+	return ref, s.commitFiles([]workflowstate.FileChange{{Path: ref.Path, After: data}})
 }
 
 func freezeWorkflowMergerCheckpoint(state WorkflowMergerRepairState) (WorkflowMergerRepairState, error) {

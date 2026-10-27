@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -96,7 +97,7 @@ func (s *WorkflowStore) checkWorkflowDependencyTargets(ctx context.Context, run 
 			return err
 		}
 
-		data, err := readWorkflowFile(path)
+		data, err := opsfile.Read(path)
 		if err != nil || contenthash.Sum(data) != proof.EvidenceHash {
 			return workflowstate.ErrConflict
 		}

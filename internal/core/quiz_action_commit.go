@@ -121,8 +121,8 @@ func (r *fileAuthoringSessionRepository) commitQuizTransition(ctx context.Contex
 	return result, r.recoverAuthoringMutation()
 }
 
-func (r *fileAuthoringSessionRepository) quizTransitionChanges(before observedQuizImages, next quizcore.Transition, scope quizcore.Scope) ([]workflowFileChange, error) {
-	changes := append([]workflowFileChange(nil), before.images...)
+func (r *fileAuthoringSessionRepository) quizTransitionChanges(before observedQuizImages, next quizcore.Transition, scope quizcore.Scope) ([]workflowstate.FileChange, error) {
+	changes := append([]workflowstate.FileChange(nil), before.images...)
 
 	encoded, err := json.MarshalIndent(next.State, "", "  ")
 	if err != nil {
@@ -159,7 +159,7 @@ func (r *fileAuthoringSessionRepository) quizTransitionChanges(before observedQu
 	return changes, nil
 }
 
-func (r *fileAuthoringSessionRepository) quizMetadata(image workflowFileChange, now time.Time) ([]byte, error) {
+func (r *fileAuthoringSessionRepository) quizMetadata(image workflowstate.FileChange, now time.Time) ([]byte, error) {
 	metadata, err := r.quizMetadataBefore(image, now)
 	if err != nil {
 		return nil, err
@@ -170,7 +170,7 @@ func (r *fileAuthoringSessionRepository) quizMetadata(image workflowFileChange, 
 	return json.MarshalIndent(metadata, "", "  ")
 }
 
-func (r *fileAuthoringSessionRepository) quizMetadataBefore(image workflowFileChange, now time.Time) (map[string]any, error) {
+func (r *fileAuthoringSessionRepository) quizMetadataBefore(image workflowstate.FileChange, now time.Time) (map[string]any, error) {
 	if image.After == nil {
 		return r.newQuizMetadata(image.Path, now)
 	}

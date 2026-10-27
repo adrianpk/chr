@@ -52,7 +52,7 @@ func (s *WorkflowStore) retainWorkflowCandidateRepair(ctx context.Context, run *
 
 	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: queue.Path, Hash: contenthash.Sum(queue.After)}})
 
-	return s.commitWorkflowPullRequestFiles(run, []workflowFileChange{queue}, file)
+	return s.commitWorkflowPullRequestFiles(run, []workflowstate.FileChange{queue}, file)
 }
 
 func (s *WorkflowStore) checkWorkflowCandidateRepairTransition(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry, request WorkflowIntegrationTransition) error {

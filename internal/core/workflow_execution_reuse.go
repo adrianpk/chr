@@ -7,6 +7,7 @@ import (
 	"slices"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -135,7 +136,7 @@ func (s *WorkflowStore) workflowRetainedResultMatches(ctx context.Context, run w
 		return false
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil || contenthash.Sum(data) != attempt.ResultHash {
 		return false
 	}
@@ -154,7 +155,7 @@ func (s *WorkflowStore) workflowRetainedInputMatches(attempt WorkflowAttempt, re
 		return false
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil || contenthash.Sum(data) != attempt.InputHash {
 		return false
 	}

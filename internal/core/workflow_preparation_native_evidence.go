@@ -62,7 +62,7 @@ func workflowNativePreparationRecord(candidate WorkflowIntegrationCandidate) Wor
 	}
 }
 
-func workflowNativePreparationEvidence(candidate *WorkflowIntegrationCandidate, b *WorkflowNativeRecordBinding) ([]workflowFileChange, error) {
+func workflowNativePreparationEvidence(candidate *WorkflowIntegrationCandidate, b *WorkflowNativeRecordBinding) ([]workflowstate.FileChange, error) {
 	proof := candidate.Input.Git
 	if proof.Provenance == nil || len(proof.Provenance.Source) == 0 {
 		return nil, fmt.Errorf("%w: native validation requires the original source manifest", workflowstate.ErrConflict)
@@ -84,7 +84,7 @@ func workflowNativePreparationEvidence(candidate *WorkflowIntegrationCandidate, 
 		{&b.CapabilityRef, candidate.Input.Native.Capability},
 		{&b.ValidationRefs[0], candidate.Validation},
 	}
-	files := make([]workflowFileChange, 0, len(values))
+	files := make([]workflowstate.FileChange, 0, len(values))
 
 	for _, value := range values {
 		file, ref, err := workflowNativePreparationEvidenceFile(b.InvocationID, value.value)
@@ -100,26 +100,26 @@ func workflowNativePreparationEvidence(candidate *WorkflowIntegrationCandidate, 
 	return files, nil
 }
 
-func workflowNativePreparationEvidenceFile(id string, value any) (workflowFileChange, WorkflowEvidenceRef, error) {
+func workflowNativePreparationEvidenceFile(id string, value any) (workflowstate.FileChange, WorkflowEvidenceRef, error) {
 	data, err := json.Marshal(value)
 	if err != nil || len(data) >= workflowstate.FileLimit {
-		return workflowFileChange{}, WorkflowEvidenceRef{}, workflowstate.ErrConflict
+		return workflowstate.FileChange{}, WorkflowEvidenceRef{}, workflowstate.ErrConflict
 	}
 
 	hash := contenthash.Sum(data)
 	ref := WorkflowEvidenceRef{Path: filepath.ToSlash(filepath.Join("run", id, "extension", "chr", "preparation", "evidence", hash+".json")), Hash: hash}
 
-	return workflowFileChange{Path: ref.Path, After: data}, ref, nil
+	return workflowstate.FileChange{Path: ref.Path, After: data}, ref, nil
 }
 
-func (s *WorkflowStore) workflowNativePreparedEntryChange(run *workflowInvocationFile, candidate WorkflowIntegrationCandidate) (workflowFileChange, error) {
+func (s *WorkflowStore) workflowNativePreparedEntryChange(run *workflowInvocationFile, candidate WorkflowIntegrationCandidate) (workflowstate.FileChange, error) {
 	if err := s.checkWorkflowNativePreparationFence(*run, candidate.Input.Native); err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
 	entry, err := s.readWorkflowIntegrationEntry(*run, *run.Integration)
 	if err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
 	request := WorkflowIntegrationTransition{EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration, State: "reviewing", CandidateRef: &WorkflowEvidenceRef{Path: run.Preparation.ResultRef, Hash: run.Preparation.ResultHash}}
@@ -128,7 +128,7 @@ func (s *WorkflowStore) workflowNativePreparedEntryChange(run *workflowInvocatio
 	}
 
 	if err := guardWorkflowIntegrationTransition(entry, request); err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
 	updateWorkflowIntegrationEntry(&entry, request)

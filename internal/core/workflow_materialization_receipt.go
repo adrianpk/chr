@@ -7,6 +7,7 @@ import (
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -36,10 +37,10 @@ func workflowMaterializationHash(plan generationcore.GeneratedWorkflowPlan) (str
 	return contenthash.Sum(data), err
 }
 
-func materializationReceiptFile(plan generationcore.GeneratedWorkflowPlan, result WorkflowMaterializationResult) (workflowFileChange, error) {
+func materializationReceiptFile(plan generationcore.GeneratedWorkflowPlan, result WorkflowMaterializationResult) (workflowstate.FileChange, error) {
 	hash, err := workflowMaterializationHash(plan)
 	if err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
 	receipt := workflowMaterializationReceipt{Schema: workflowMaterializationSchema, RequestID: plan.MaterializationID, InputHash: hash, SetID: result.Set.ID, SetPath: result.Set.Path, Slices: result.Set.Set.Slices}
@@ -50,7 +51,7 @@ func materializationReceiptFile(plan generationcore.GeneratedWorkflowPlan, resul
 
 	data, err := json.Marshal(receipt)
 
-	return workflowFileChange{Path: filepath.ToSlash(filepath.Join("plan", result.Set.ID, "evidence", "materialization.json")), After: data}, err
+	return workflowstate.FileChange{Path: filepath.ToSlash(filepath.Join("plan", result.Set.ID, "evidence", "materialization.json")), After: data}, err
 }
 
 func (s *WorkflowStore) resumeMaterialization(snapshot WorkflowSnapshot, plan generationcore.GeneratedWorkflowPlan) (WorkflowMaterializationResult, bool, error) {
@@ -101,7 +102,7 @@ func (s *WorkflowStore) readMaterializationReceipt(set WorkflowRecord, plan gene
 		return WorkflowMaterializationResult{}, err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil {
 		return WorkflowMaterializationResult{}, err
 	}
@@ -184,7 +185,7 @@ func (s *WorkflowStore) checkMaterializationSlices(set WorkflowRecord, receipt w
 			return err
 		}
 
-		data, err := readWorkflowFile(path)
+		data, err := opsfile.Read(path)
 		if err != nil {
 			return err
 		}

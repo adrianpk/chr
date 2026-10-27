@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -73,7 +74,7 @@ func TestWorkflowRecoveryForeignLock(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := atomicWorkflowFile(path, replacement); err != nil {
+	if err := opsfile.WriteAtomic(path, replacement); err != nil {
 		t.Fatal(err)
 	}
 

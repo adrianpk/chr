@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -69,7 +70,7 @@ func workflowSubmissionPath(ctx context.Context, projectDir, key string) (string
 }
 
 func readWorkflowSubmissionFile(path string) (journal workflowSubmissionJournal, err error) {
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil {
 		return journal, err
 	}
@@ -124,7 +125,7 @@ func (s *WorkflowStore) writeWorkflowSubmissionJournal(ctx context.Context, jour
 	}
 
 	encoded = append(encoded, '\n')
-	if err := atomicWorkflowFile(path, encoded); err != nil {
+	if err := opsfile.WriteAtomic(path, encoded); err != nil {
 		return err
 	}
 
@@ -138,7 +139,7 @@ func (s *WorkflowStore) writeWorkflowSubmissionJournal(ctx context.Context, jour
 }
 
 func checkWorkflowSubmissionImage(path, expected string) error {
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if errors.Is(err, os.ErrNotExist) && expected == "" {
 		return nil
 	}

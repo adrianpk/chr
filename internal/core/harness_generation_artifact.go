@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness"
 )
@@ -148,5 +149,5 @@ func writeHarnessGenerationFile(path string, record any) error {
 		return err
 	}
 
-	return atomicBoundedWorkflowFile(path, data, harnessGenerationRecordLimit)
+	return opsfile.WriteAtomicBounded(path, data, harnessGenerationRecordLimit)
 }

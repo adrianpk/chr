@@ -14,6 +14,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 const (
@@ -143,7 +144,7 @@ func acquireAgentOperationFile(lockPath, operation, owner string, createdAt time
 		return nil, err
 	}
 
-	data, err := readWorkflowFile(lockPath)
+	data, err := opsfile.Read(lockPath)
 	if err != nil {
 		return nil, err
 	}

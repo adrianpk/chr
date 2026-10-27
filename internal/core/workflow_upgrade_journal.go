@@ -10,6 +10,7 @@ import (
 	"slices"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -355,7 +356,7 @@ func (s *WorkflowStore) finishWorkflowUpgrade(journal workflowUpgradeJournal, im
 		return workflowstate.ErrConflict
 	}
 
-	if err := atomicWorkflowFile(path, image); err != nil {
+	if err := opsfile.WriteAtomic(path, image); err != nil {
 		return err
 	}
 
@@ -376,7 +377,7 @@ func (s *WorkflowStore) removeWorkflowUpgradePending() error {
 		return err
 	}
 
-	return syncWorkflowDirectory(filepath.Dir(pending))
+	return opsfile.SyncDirectory(filepath.Dir(pending))
 }
 
 func (s *WorkflowStore) readWorkflowUpgradeFile(relative string) ([]byte, error) {
@@ -385,7 +386,7 @@ func (s *WorkflowStore) readWorkflowUpgradeFile(relative string) ([]byte, error)
 		return nil, err
 	}
 
-	return readWorkflowFile(path)
+	return opsfile.Read(path)
 }
 
 func (s *WorkflowStore) writeWorkflowUpgradeFile(relative string, value workflowUpgradeJournal) error {
@@ -399,7 +400,7 @@ func (s *WorkflowStore) writeWorkflowUpgradeFile(relative string, value workflow
 		return err
 	}
 
-	if err := atomicWorkflowFile(path, data); err != nil {
+	if err := opsfile.WriteAtomic(path, data); err != nil {
 		return err
 	}
 

@@ -535,14 +535,14 @@ func (s *WorkflowStore) attachWorkflowInvocation(run workflowInvocationFile, key
 		return run, err
 	}
 
-	if err := owner.commitFiles([]workflowFileChange{change}); err != nil {
+	if err := owner.commitFiles([]workflowstate.FileChange{change}); err != nil {
 		return run, err
 	}
 
 	return owner.readWorkflowInvocation(run.ID)
 }
 
-func workflowInvocationCreationFiles(envelope WorkflowRecord, run workflowInvocationFile) ([]workflowFileChange, error) {
+func workflowInvocationCreationFiles(envelope WorkflowRecord, run workflowInvocationFile) ([]workflowstate.FileChange, error) {
 	fields, err := mergeWorkflowFields(envelope.Metadata, envelope.WorkflowIdentity)
 	if err != nil {
 		return nil, err
@@ -558,21 +558,21 @@ func workflowInvocationCreationFiles(envelope WorkflowRecord, run workflowInvoca
 		return nil, err
 	}
 
-	return []workflowFileChange{{Path: envelope.Path, After: append(metadata, '\n')}, {Path: filepath.ToSlash(filepath.Join(filepath.Dir(envelope.Path), "artifact.md")), After: []byte("# Workflow invocation\n")}, state}, nil
+	return []workflowstate.FileChange{{Path: envelope.Path, After: append(metadata, '\n')}, {Path: filepath.ToSlash(filepath.Join(filepath.Dir(envelope.Path), "artifact.md")), After: []byte("# Workflow invocation\n")}, state}, nil
 }
 
 func workflowInvocationPath(id string) string {
 	return filepath.ToSlash(filepath.Join("run", id, "extension", "chr", "workflow.json"))
 }
 
-func workflowInvocationChange(run workflowInvocationFile) (workflowFileChange, error) {
+func workflowInvocationChange(run workflowInvocationFile) (workflowstate.FileChange, error) {
 	if err := validateWorkflowInvocation(run); err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
 	fields, err := workflowJSONFields(run)
 	if err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
 	for key, raw := range run.fields {
@@ -583,5 +583,5 @@ func workflowInvocationChange(run workflowInvocationFile) (workflowFileChange, e
 
 	data, err := json.MarshalIndent(fields, "", "  ")
 
-	return workflowFileChange{Path: workflowInvocationPath(run.ID), Before: run.sourceHash, After: append(data, '\n')}, err
+	return workflowstate.FileChange{Path: workflowInvocationPath(run.ID), Before: run.sourceHash, After: append(data, '\n')}, err
 }

@@ -115,7 +115,7 @@ func assistedDumpDigest(opts AssistedArtifactSynthesisOptions) (string, error) {
 	return contenthash.Sum(encoded), nil
 }
 
-func (r *fileAuthoringSessionRepository) prepareAssistedDump(ctx context.Context, operation assistedDumpOperation) (AssistedArtifactSynthesisResult, []workflowFileChange, error) {
+func (r *fileAuthoringSessionRepository) prepareAssistedDump(ctx context.Context, operation assistedDumpOperation) (AssistedArtifactSynthesisResult, []workflowstate.FileChange, error) {
 	var result AssistedArtifactSynthesisResult
 
 	opts := operation.options
@@ -187,7 +187,7 @@ func (r *fileAuthoringSessionRepository) assistedDumpPreparation(ctx context.Con
 	return binding, target, validateDumpPreparation(binding, prepared)
 }
 
-func assistedDumpResult(opts AssistedArtifactSynthesisOptions, mutation ProjectDumpMutationResult, sessionImage workflowFileChange, changes []workflowFileChange) (AssistedArtifactSynthesisResult, workflowFileChange, error) {
+func assistedDumpResult(opts AssistedArtifactSynthesisOptions, mutation ProjectDumpMutationResult, sessionImage workflowstate.FileChange, changes []workflowstate.FileChange) (AssistedArtifactSynthesisResult, workflowstate.FileChange, error) {
 	ref := authoringDumpRef(mutation.Destination)
 
 	session := opts.Session
@@ -232,11 +232,11 @@ func assistedSessionHasOutput(session AuthoringSession, reference string) bool {
 	return false
 }
 
-func (r *fileAuthoringSessionRepository) assistedDumpCommittedImages(result AssistedArtifactSynthesisResult, changes []workflowFileChange) ([]workflowFileChange, error) {
+func (r *fileAuthoringSessionRepository) assistedDumpCommittedImages(result AssistedArtifactSynthesisResult, changes []workflowstate.FileChange) ([]workflowstate.FileChange, error) {
 	artifact := ProjectDumpArtifact{Reference: result.Mutation.Destination, SourceHash: result.Mutation.SourceHash, MetadataHash: result.Mutation.MetadataHash}
 	images := authoringImageMap(changes)
 
-	var history []workflowFileChange
+	var history []workflowstate.FileChange
 
 	for _, name := range []string{"artifact.md", "metadata.json"} {
 		path := filepath.Join(filepath.Dir(artifact.Reference), name)

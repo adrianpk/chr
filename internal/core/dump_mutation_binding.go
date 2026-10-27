@@ -10,6 +10,7 @@ import (
 
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -124,7 +125,7 @@ func (r *fileAuthoringSessionRepository) saveDumpMutationBinding(binding dumpMut
 		return err
 	}
 
-	return atomicBoundedWorkflowFile(path, encoded, dumpMutationBindingLimit)
+	return opsfile.WriteAtomicBounded(path, encoded, dumpMutationBindingLimit)
 }
 
 func (r *fileAuthoringSessionRepository) prepareDumpCapture(ctx context.Context, binding dumpMutationBinding, prepare DumpCapturePreparer) (dumpMutationBinding, error) {

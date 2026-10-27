@@ -56,7 +56,7 @@ func (s *WorkflowStore) commitWorkflowMergerStart(ctx context.Context, run *work
 		return err
 	}
 
-	return s.commitWorkflowPullRequestFiles(run, []workflowFileChange{file}, workflowFileChange{})
+	return s.commitWorkflowPullRequestFiles(run, []workflowstate.FileChange{file}, workflowstate.FileChange{})
 }
 
 func (s *WorkflowStore) commitWorkflowMergerProcedureStart(run *workflowInvocationFile, prepared workflowPreparedTask, reservation WorkflowIntegrationReservation) error {
@@ -104,5 +104,5 @@ func (s *WorkflowStore) commitWorkflowAgentStart(ctx context.Context, run *workf
 		return err
 	}
 
-	return s.commitWorkflowPullRequestFiles(run, []workflowFileChange{file}, workflowFileChange{})
+	return s.commitWorkflowPullRequestFiles(run, []workflowstate.FileChange{file}, workflowstate.FileChange{})
 }

@@ -10,3 +10,7 @@ identity spelling. MutationReceiptPath derives the existing content-addressed
 receipt reference; the workflow store still owns containment, IO, locks,
 transactions and receipt verification. These pure values depend only on
 core/contenthash and the standard library. Root callers use this owner directly.
+
+FileChange owns the existing path, before hash and replacement bytes shared by
+authoring and workflow journals. It keeps the original JSON keys and field order;
+there is no IO, path permission, transaction or replay decision in this value.

@@ -6,10 +6,11 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 func readBoardDocument(projectDir, path string) (IndexedTicket, error) {
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil {
 		return IndexedTicket{}, err
 	}

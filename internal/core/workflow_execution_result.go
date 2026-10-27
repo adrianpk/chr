@@ -45,7 +45,7 @@ func (s *WorkflowStore) finishWorkflowTask(ctx context.Context, claim *WorkflowC
 		data = append(data, '\n')
 		run.Attempts[len(run.Attempts)-1].ResultHash = contenthash.Sum(data)
 
-		if err := claim.store.commitWorkflowClaim(run, record, workflowFileChange{Path: ref, After: data}); err != nil {
+		if err := claim.store.commitWorkflowClaim(run, record, workflowstate.FileChange{Path: ref, After: data}); err != nil {
 			return err
 		}
 

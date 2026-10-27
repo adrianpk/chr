@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -39,7 +40,7 @@ func (s *WorkflowStore) readWorkflowTrackerFile(relative string) ([]byte, error)
 		return nil, fmt.Errorf("tracker source/output must be a regular file")
 	}
 
-	return readWorkflowFile(path)
+	return opsfile.Read(path)
 }
 
 func (s *WorkflowStore) workflowTrackerOutput(setID string) (string, error) {
@@ -128,7 +129,7 @@ func (s *WorkflowStore) persistWorkflowTracker(result WorkflowTrackerStatus) err
 		return err
 	}
 
-	return atomicWorkflowFile(path, data)
+	return opsfile.WriteAtomic(path, data)
 }
 
 func (s *WorkflowStore) writeWorkflowTracker(result WorkflowTrackerStatus, output []byte) (WorkflowTrackerStatus, error) {
@@ -199,7 +200,7 @@ func (s *WorkflowStore) workflowTrackerReplace(relative string, output []byte, s
 		return err
 	}
 
-	if err := atomicWorkflowFile(path, output); err != nil {
+	if err := opsfile.WriteAtomic(path, output); err != nil {
 		return err
 	}
 
@@ -247,7 +248,7 @@ func (s *WorkflowStore) workflowTrackerRegistrations() ([]string, error) {
 
 // Projection failures cannot change the result of a committed domain transition.
 // Read-only status independently verifies bytes if the stale marker cannot persist.
-func (s *WorkflowStore) markWorkflowTrackersStale(changes []workflowFileChange) {
+func (s *WorkflowStore) markWorkflowTrackersStale(changes []workflowstate.FileChange) {
 	ids, err := s.workflowTrackerRegistrations()
 	if err != nil {
 		return

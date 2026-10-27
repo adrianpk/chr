@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -168,7 +169,7 @@ func (s *WorkflowStore) recoverWorkflowAttempt(ctx context.Context, run workflow
 }
 
 func recoveredWorkflowLock(path, invocationID string, attempt WorkflowAttempt) (*AgentOperationLock, error) {
-	data, readErr := readWorkflowFile(path)
+	data, readErr := opsfile.Read(path)
 	if errors.Is(readErr, os.ErrNotExist) {
 		return nil, nil
 	}

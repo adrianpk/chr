@@ -125,7 +125,7 @@ func (s *WorkflowStore) saveWorkflowTaskInput(ctx context.Context, run workflowI
 		return workflowPreparedTask{}, err
 	}
 
-	files := []workflowFileChange{file, state}
+	files := []workflowstate.FileChange{file, state}
 	if budgetFile.Path != "" {
 		files = append(files, budgetFile)
 	}
@@ -137,19 +137,19 @@ func (s *WorkflowStore) saveWorkflowTaskInput(ctx context.Context, run workflowI
 	return prepared, nil
 }
 
-func encodeWorkflowTaskInput(run *workflowInvocationFile, input WorkflowTaskInput) (workflowPreparedTask, workflowFileChange, error) {
+func encodeWorkflowTaskInput(run *workflowInvocationFile, input WorkflowTaskInput) (workflowPreparedTask, workflowstate.FileChange, error) {
 	var err error
 
 	input.ValidationTimeoutSeconds = run.Policy.ValidationTimeoutSeconds
 
 	input.ScopeHash, err = workflowExecutionScopeHash(*run)
 	if err != nil {
-		return workflowPreparedTask{}, workflowFileChange{}, err
+		return workflowPreparedTask{}, workflowstate.FileChange{}, err
 	}
 
 	data, err := json.MarshalIndent(input, "", "  ")
 	if err != nil || len(data) >= workflowstate.FileLimit {
-		return workflowPreparedTask{}, workflowFileChange{}, fmt.Errorf("workflow input exceeds file bounds: %w", errorsOrConflict(err))
+		return workflowPreparedTask{}, workflowstate.FileChange{}, fmt.Errorf("workflow input exceeds file bounds: %w", errorsOrConflict(err))
 	}
 
 	data = append(data, '\n')
@@ -158,14 +158,14 @@ func encodeWorkflowTaskInput(run *workflowInvocationFile, input WorkflowTaskInpu
 	lane := input.Lane
 	attempt.Lane, attempt.InputRef, attempt.InputHash = &lane, ref, contenthash.Sum(data)
 
-	return workflowPreparedTask{input: input, inputRef: ref, inputHash: attempt.InputHash, data: data, leaseUntil: attempt.LeaseUntil}, workflowFileChange{Path: ref, After: data}, nil
+	return workflowPreparedTask{input: input, inputRef: ref, inputHash: attempt.InputHash, data: data, leaseUntil: attempt.LeaseUntil}, workflowstate.FileChange{Path: ref, After: data}, nil
 }
 
 func workflowAttemptFile(invocationID, attemptID, name string) string {
 	return filepath.ToSlash(filepath.Join("run", invocationID, "extension", "chr", "attempts", attemptID, name))
 }
 
-func (s *WorkflowStore) commitWorkflowState(run *workflowInvocationFile, extra ...workflowFileChange) error {
+func (s *WorkflowStore) commitWorkflowState(run *workflowInvocationFile, extra ...workflowstate.FileChange) error {
 	run.Revision++
 	run.UpdatedAt = time.Now().UTC()
 

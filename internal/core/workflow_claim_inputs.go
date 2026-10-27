@@ -181,7 +181,7 @@ func (s *WorkflowStore) checkWorkflowTarget(ctx context.Context, target Workflow
 	return s.checkWorkflowCoordinatorTarget(ctx, target)
 }
 
-func guardWorkflowClaimImages(record WorkflowRecord, files []workflowFileChange) error {
+func guardWorkflowClaimImages(record WorkflowRecord, files []workflowstate.FileChange) error {
 	observed := strings.Split(record.SourceHash, ":")
 	if len(files) != len(observed) {
 		return workflowstate.ErrConflict

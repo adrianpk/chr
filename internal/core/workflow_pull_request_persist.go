@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -20,32 +21,32 @@ type workflowPullRequestObservation struct {
 	ObservedAt  time.Time                     `json:"observed_at"`
 }
 
-func (s *WorkflowStore) workflowPullRequestObservation(run *workflowInvocationFile, snapshots []WorkflowPullRequestSnapshot) (workflowFileChange, error) {
+func (s *WorkflowStore) workflowPullRequestObservation(run *workflowInvocationFile, snapshots []WorkflowPullRequestSnapshot) (workflowstate.FileChange, error) {
 	binding := run.PullRequest
 
 	if len(snapshots) > workflowstate.RecordLimit {
-		return workflowFileChange{}, fmt.Errorf("workflow PR observation bound exceeded")
+		return workflowstate.FileChange{}, fmt.Errorf("workflow PR observation bound exceeded")
 	}
 
 	observation := workflowPullRequestObservation{Schema: "chr-slice-pr-observation/v1", BindingID: binding.ID, CandidateID: binding.CandidateID, Reason: binding.Reason, Snapshots: snapshots, ObservedAt: time.Now().UTC()}
 	if binding.ObservationRef != "" {
 		previous, err := s.readWorkflowPullRequestObservation(*binding)
 		if err != nil {
-			return workflowFileChange{}, err
+			return workflowstate.FileChange{}, err
 		}
 
 		if previous.CandidateID == observation.CandidateID && previous.Reason == observation.Reason && slices.Equal(previous.Snapshots, observation.Snapshots) {
-			return workflowFileChange{}, nil
+			return workflowstate.FileChange{}, nil
 		}
 	}
 
 	if binding.ObservationCount >= workflowstate.PageLimit {
-		return workflowFileChange{}, fmt.Errorf("workflow PR observation history bound exceeded")
+		return workflowstate.FileChange{}, fmt.Errorf("workflow PR observation history bound exceeded")
 	}
 
 	data, err := json.MarshalIndent(observation, "", "  ")
 	if err != nil || len(data) >= workflowstate.FileLimit {
-		return workflowFileChange{}, fmt.Errorf("workflow PR observation exceeds file bounds")
+		return workflowstate.FileChange{}, fmt.Errorf("workflow PR observation exceeds file bounds")
 	}
 
 	data = append(data, '\n')
@@ -53,7 +54,7 @@ func (s *WorkflowStore) workflowPullRequestObservation(run *workflowInvocationFi
 	binding.ObservationRef = workflowUnitPullRequestObservationPath(run.ID, binding.ID, binding.ObservationCount)
 	binding.ObservationHash = contenthash.Sum(data)
 
-	return workflowFileChange{Path: binding.ObservationRef, After: data}, nil
+	return workflowstate.FileChange{Path: binding.ObservationRef, After: data}, nil
 }
 
 func workflowPullRequestObservationPath(id string, count int) string {
@@ -70,7 +71,7 @@ func (s *WorkflowStore) readWorkflowPullRequestObservation(binding WorkflowPullR
 		return workflowPullRequestObservation{}, err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil || contenthash.Sum(data) != binding.ObservationHash {
 		return workflowPullRequestObservation{}, workflowstate.ErrConflict
 	}
@@ -87,7 +88,7 @@ func (s *WorkflowStore) readWorkflowPullRequestObservation(binding WorkflowPullR
 	return observation, nil
 }
 
-func (s *WorkflowStore) workflowPullRequestDomainChanges(run *workflowInvocationFile, observation workflowSliceObservation) ([]workflowFileChange, error) {
+func (s *WorkflowStore) workflowPullRequestDomainChanges(run *workflowInvocationFile, observation workflowSliceObservation) ([]workflowstate.FileChange, error) {
 	files, err := s.workflowPullRequestTaskChanges(run, observation.tasks)
 	if err != nil {
 		return nil, err
@@ -98,8 +99,8 @@ func (s *WorkflowStore) workflowPullRequestDomainChanges(run *workflowInvocation
 	return append(files, changes...), err
 }
 
-func (s *WorkflowStore) workflowPullRequestTaskChanges(run *workflowInvocationFile, tasks []WorkflowRecord) ([]workflowFileChange, error) {
-	files := []workflowFileChange{}
+func (s *WorkflowStore) workflowPullRequestTaskChanges(run *workflowInvocationFile, tasks []WorkflowRecord) ([]workflowstate.FileChange, error) {
+	files := []workflowstate.FileChange{}
 
 	for _, record := range tasks {
 		if record.Task.Phase == "waiting_slice" && slices.Contains([]string{TicketStatusReadyForReview, TicketStatusReadyForMerge}, record.Task.Status) {
@@ -119,7 +120,7 @@ func (s *WorkflowStore) workflowPullRequestTaskChanges(run *workflowInvocationFi
 	return files, nil
 }
 
-func (s *WorkflowStore) workflowPullRequestSetChanges(run *workflowInvocationFile, set WorkflowRecord) ([]workflowFileChange, error) {
+func (s *WorkflowStore) workflowPullRequestSetChanges(run *workflowInvocationFile, set WorkflowRecord) ([]workflowstate.FileChange, error) {
 	if set.Set == nil {
 		return nil, nil
 	}
@@ -141,7 +142,7 @@ func (s *WorkflowStore) workflowPullRequestSetChanges(run *workflowInvocationFil
 	return s.workflowSetRecordChanges(run, &set)
 }
 
-func (s *WorkflowStore) workflowSetRecordChanges(run *workflowInvocationFile, record *WorkflowRecord) ([]workflowFileChange, error) {
+func (s *WorkflowStore) workflowSetRecordChanges(run *workflowInvocationFile, record *WorkflowRecord) ([]workflowstate.FileChange, error) {
 	record.Revision++
 	record.UpdatedAt = time.Now().UTC()
 
@@ -164,7 +165,7 @@ func (s *WorkflowStore) workflowSetRecordChanges(run *workflowInvocationFile, re
 	return files, record.Validate()
 }
 
-func (s *WorkflowStore) commitWorkflowPullRequestFiles(run *workflowInvocationFile, files []workflowFileChange, observation workflowFileChange) error {
+func (s *WorkflowStore) commitWorkflowPullRequestFiles(run *workflowInvocationFile, files []workflowstate.FileChange, observation workflowstate.FileChange) error {
 	run.Revision++
 	run.UpdatedAt = time.Now().UTC()
 

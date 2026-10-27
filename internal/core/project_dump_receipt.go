@@ -27,18 +27,18 @@ func projectDumpReconciliationDigest(projectDir string, request ProjectDumpRecon
 	return contenthash.Sum(append([]byte(projectDir+"\x00reconcile\x00"), encoded...)), nil
 }
 
-func projectDumpReceiptChange(digest string, result ProjectDumpMutationResult) (workflowFileChange, error) {
+func projectDumpReceiptChange(digest string, result ProjectDumpMutationResult) (workflowstate.FileChange, error) {
 	receipt := projectDumpMutationReceipt{Schema: "chr-project-dump-receipt/v1", Digest: digest, Result: result}
 
 	encoded, err := json.Marshal(receipt)
 	if err != nil {
-		return workflowFileChange{}, err
+		return workflowstate.FileChange{}, err
 	}
 
 	receipt.Checksum = contenthash.Sum(encoded)
 	encoded, err = json.Marshal(receipt)
 
-	return workflowFileChange{Path: authoringReceiptRef(result.OperationID), After: encoded}, err
+	return workflowstate.FileChange{Path: authoringReceiptRef(result.OperationID), After: encoded}, err
 }
 
 func (r *fileAuthoringSessionRepository) projectDumpReceipt(operationID, digest string) (projectDumpReceiptLookup, error) {

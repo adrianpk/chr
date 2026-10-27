@@ -10,21 +10,22 @@ import (
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type authoringMutationJournal struct {
 	Schema   string
-	Changes  []workflowFileChange
+	Changes  []workflowstate.FileChange
 	Checksum string
 }
 
-func (r *fileAuthoringSessionRepository) writeAuthoringJournal(changes []workflowFileChange) error {
+func (r *fileAuthoringSessionRepository) writeAuthoringJournal(changes []workflowstate.FileChange) error {
 	return r.writeAuthoringJournalVersion("chr-authoring-journal/v1", changes)
 }
 
-func (r *fileAuthoringSessionRepository) writeAuthoringJournalVersion(schema string, changes []workflowFileChange) error {
+func (r *fileAuthoringSessionRepository) writeAuthoringJournalVersion(schema string, changes []workflowstate.FileChange) error {
 	journal := authoringMutationJournal{Schema: schema, Changes: changes}
 
 	encoded, err := json.Marshal(journal)
@@ -48,7 +49,7 @@ func (r *fileAuthoringSessionRepository) writeAuthoringJournalVersion(schema str
 		return err
 	}
 
-	return atomicBoundedWorkflowFile(path, encoded, authoringJournalLimit(schema))
+	return opsfile.WriteAtomicBounded(path, encoded, authoringJournalLimit(schema))
 }
 
 func (r *fileAuthoringSessionRepository) recoverAuthoringMutation() error {
@@ -57,7 +58,7 @@ func (r *fileAuthoringSessionRepository) recoverAuthoringMutation() error {
 		return err
 	}
 
-	data, err := readBoundedWorkflowFile(path, projectDumpJournalBytes)
+	data, err := opsfile.ReadBounded(path, projectDumpJournalBytes)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil
 	}
@@ -87,7 +88,7 @@ func (r *fileAuthoringSessionRepository) recoverAuthoringMutation() error {
 		return err
 	}
 
-	return syncWorkflowDirectory(filepath.Dir(path))
+	return opsfile.SyncDirectory(filepath.Dir(path))
 }
 
 func (r *fileAuthoringSessionRepository) checkAuthoringJournal(journal authoringMutationJournal) error {
@@ -119,7 +120,7 @@ func validAuthoringJournalPath(path string) bool {
 	return validAuthoringOpsJournalPath(normalized)
 }
 
-func (r *fileAuthoringSessionRepository) authoringJournalImage(change workflowFileChange) (bool, error) {
+func (r *fileAuthoringSessionRepository) authoringJournalImage(change workflowstate.FileChange) (bool, error) {
 	data, err := r.authoringRead(change.Path)
 	if errors.Is(err, os.ErrNotExist) && change.Before == "" {
 		return false, nil
@@ -140,7 +141,7 @@ func (r *fileAuthoringSessionRepository) authoringJournalImage(change workflowFi
 	return false, nil
 }
 
-func (r *fileAuthoringSessionRepository) applyAuthoringImage(change workflowFileChange, index int) error {
+func (r *fileAuthoringSessionRepository) applyAuthoringImage(change workflowstate.FileChange, index int) error {
 	applied, err := r.authoringJournalImage(change)
 	if err != nil || applied {
 		return err
@@ -155,7 +156,7 @@ func (r *fileAuthoringSessionRepository) applyAuthoringImage(change workflowFile
 		return err
 	}
 
-	if err := atomicWorkflowFile(path, change.After); err != nil {
+	if err := opsfile.WriteAtomic(path, change.After); err != nil {
 		return err
 	}
 

@@ -99,7 +99,7 @@ func (s *WorkflowStore) commitWorkflowIntegrationMigration(ctx context.Context, 
 		return err
 	}
 
-	return s.commitFiles([]workflowFileChange{file, invocation})
+	return s.commitFiles([]workflowstate.FileChange{file, invocation})
 }
 
 func workflowIntegrationMigrationHasEvidence(entry WorkflowIntegrationEntry) bool {

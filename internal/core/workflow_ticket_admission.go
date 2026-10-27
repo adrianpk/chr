@@ -69,7 +69,7 @@ func workflowTicketAdmission(record WorkflowRecord) (*WorkflowTicketAdmission, e
 	return &WorkflowTicketAdmission{Key: record.Task.Key, Revision: record.Revision, ContractHash: record.Task.ContractHash, Validation: contract.Validation}, nil
 }
 
-func (s *WorkflowStore) workflowTicketAdmissionFiles(run *workflowInvocationFile) ([]workflowFileChange, error) {
+func (s *WorkflowStore) workflowTicketAdmissionFiles(run *workflowInvocationFile) ([]workflowstate.FileChange, error) {
 	if run.Admission == nil || run.Admission.ReadyTicket == nil {
 		return nil, nil
 	}

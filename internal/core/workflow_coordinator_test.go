@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 // TestWorkflowCoordinatorClone rejects copied authority before an invocation
@@ -137,7 +138,7 @@ func changeWorkflowCoordinatorTarget(t *testing.T, store *WorkflowStore, foreign
 			t.Fatal(err)
 		}
 
-		if err := atomicWorkflowFile(path, data); err != nil {
+		if err := opsfile.WriteAtomic(path, data); err != nil {
 			t.Fatal(err)
 		}
 
@@ -147,7 +148,7 @@ func changeWorkflowCoordinatorTarget(t *testing.T, store *WorkflowStore, foreign
 	workflowSelectionGit(t, store, "-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "-qm", "Changed coordinator")
 
 	commit := workflowSelectionGit(t, store, "rev-parse", "HEAD")
-	if err := atomicWorkflowFile(markerPath, original); err != nil {
+	if err := opsfile.WriteAtomic(markerPath, original); err != nil {
 		t.Fatal(err)
 	}
 

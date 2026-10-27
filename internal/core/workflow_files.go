@@ -3,47 +3,14 @@ package core
 import (
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
-
-type workflowFileChange struct {
-	Path   string `json:"path"`
-	Before string `json:"before"`
-	After  []byte `json:"after"`
-}
-
-func readWorkflowFile(path string) ([]byte, error) {
-	return readBoundedWorkflowFile(path, workflowstate.FileLimit)
-}
-
-func readBoundedWorkflowFile(path string, limit int) ([]byte, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-
-	defer func() {
-		//nolint:errcheck // Read-only descriptor close cannot change stored state.
-		_ = file.Close()
-	}()
-
-	data, err := io.ReadAll(io.LimitReader(file, int64(limit)+1))
-	if err != nil {
-		return nil, err
-	}
-
-	if len(data) > limit {
-		return nil, fmt.Errorf("workflow file exceeds %d bytes: %s", limit, filepath.Base(path))
-	}
-
-	return data, nil
-}
 
 func (s *WorkflowStore) safePath(relative string) (string, error) {
 	if !filepath.IsLocal(relative) || filepath.Clean(relative) != relative {
@@ -65,67 +32,15 @@ func (s *WorkflowStore) safePath(relative string) (string, error) {
 	return path, nil
 }
 
-func atomicWorkflowFile(path string, content []byte) (err error) {
-	return atomicBoundedWorkflowFile(path, content, workflowstate.FileLimit)
-}
-
-func atomicBoundedWorkflowFile(path string, content []byte, limit int) (err error) {
-	if len(content) > limit {
-		return fmt.Errorf("workflow file exceeds %d bytes", limit)
-	}
-
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-		return err
-	}
-
-	file, err := os.CreateTemp(filepath.Dir(path), ".workflow-*")
-	if err != nil {
-		return err
-	}
-
-	defer func() {
-		if removeErr := os.Remove(file.Name()); removeErr != nil && !errors.Is(removeErr, os.ErrNotExist) {
-			err = errors.Join(err, removeErr)
-		}
-	}()
-
-	if _, err := file.Write(content); err != nil {
-		return errors.Join(err, file.Close())
-	}
-
-	if err := file.Sync(); err != nil {
-		return errors.Join(err, file.Close())
-	}
-
-	if err := file.Close(); err != nil {
-		return err
-	}
-
-	if err := os.Rename(file.Name(), path); err != nil {
-		return err
-	}
-
-	return syncWorkflowDirectory(filepath.Dir(path))
-}
-
-func syncWorkflowDirectory(path string) error {
-	dir, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-
-	return errors.Join(dir.Sync(), dir.Close())
-}
-
-func (s *WorkflowStore) encodeChanges(r WorkflowRecord) ([]workflowFileChange, error) {
+func (s *WorkflowStore) encodeChanges(r WorkflowRecord) ([]workflowstate.FileChange, error) {
 	content, err := encodeWorkflowRecord(r)
 	if err != nil {
 		return nil, err
 	}
 
-	changes := []workflowFileChange{{Path: r.Path, After: content}}
+	changes := []workflowstate.FileChange{{Path: r.Path, After: content}}
 	if strings.HasSuffix(r.Path, "/metadata.json") {
-		changes = append(changes, workflowFileChange{Path: filepath.ToSlash(filepath.Join(filepath.Dir(r.Path), "artifact.md")), After: r.Body})
+		changes = append(changes, workflowstate.FileChange{Path: filepath.ToSlash(filepath.Join(filepath.Dir(r.Path), "artifact.md")), After: r.Body})
 	}
 
 	for i := range changes {
@@ -134,7 +49,7 @@ func (s *WorkflowStore) encodeChanges(r WorkflowRecord) ([]workflowFileChange, e
 			return nil, err
 		}
 
-		before, err := readWorkflowFile(path)
+		before, err := opsfile.Read(path)
 		if err != nil && !errors.Is(err, os.ErrNotExist) {
 			return nil, err
 		}

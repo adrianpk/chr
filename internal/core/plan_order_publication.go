@@ -18,7 +18,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func preparePlanOrderChanges(projectDir string, paths GeneratedPlanPaths, target planTargetObservation, metadata map[string]any, plan generationcore.GeneratedPlan, body []byte) ([]workflowFileChange, error) {
+func preparePlanOrderChanges(projectDir string, paths GeneratedPlanPaths, target planTargetObservation, metadata map[string]any, plan generationcore.GeneratedPlan, body []byte) ([]workflowstate.FileChange, error) {
 	if !plan.RequireOrderMap && len(plan.Order) == 0 {
 		if metadata["plan_binding"] != nil {
 			return nil, fmt.Errorf("replacement requires its revision-bound order map")
@@ -87,8 +87,8 @@ func newPlanRevision(paths GeneratedPlanPaths, metadata map[string]any, plan gen
 	return binding, document, nil
 }
 
-func (r *fileAuthoringSessionRepository) planRetainedImages(namespace string, binding generationcore.PlanRevisionBinding, body, order, tracker []byte) ([]workflowFileChange, error) {
-	var changes []workflowFileChange
+func (r *fileAuthoringSessionRepository) planRetainedImages(namespace string, binding generationcore.PlanRevisionBinding, body, order, tracker []byte) ([]workflowstate.FileChange, error) {
+	var changes []workflowstate.FileChange
 
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: r.projectDir, Namespace: namespace})
 	if err != nil {
@@ -112,20 +112,20 @@ func (r *fileAuthoringSessionRepository) planRetainedImages(namespace string, bi
 			return nil, errors.Join(workflowstate.ErrConflict, err)
 		}
 
-		changes = append(changes, workflowFileChange{Path: path, After: images[i]})
+		changes = append(changes, workflowstate.FileChange{Path: path, After: images[i]})
 	}
 
 	return changes, nil
 }
 
-func (r *fileAuthoringSessionRepository) planCurrentTrackerChanges(namespace string, target planTargetObservation, binding generationcore.PlanRevisionBinding, plan generationcore.GeneratedPlan, tracker []byte) ([]workflowFileChange, error) {
+func (r *fileAuthoringSessionRepository) planCurrentTrackerChanges(namespace string, target planTargetObservation, binding generationcore.PlanRevisionBinding, plan generationcore.GeneratedPlan, tracker []byte) ([]workflowstate.FileChange, error) {
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: r.projectDir, Namespace: namespace})
 	if err != nil {
 		return nil, err
 	}
 
 	reference := filepath.ToSlash(filepath.Join(layout.RelativeRoot(), binding.CurrentTrackerRef))
-	images := []workflowFileChange{}
+	images := []workflowstate.FileChange{}
 
 	for _, path := range []string{reference, filepath.ToSlash(filepath.Join(filepath.Dir(reference), "metadata.json"))} {
 		image, err := r.quizImage(path)
@@ -161,7 +161,7 @@ func (r *fileAuthoringSessionRepository) planCurrentTrackerChanges(namespace str
 	return images, nil
 }
 
-func checkPreviousPlanTracker(target planTargetObservation, image workflowFileChange, replace string) error {
+func checkPreviousPlanTracker(target planTargetObservation, image workflowstate.FileChange, replace string) error {
 	if image.After == nil {
 		return nil
 	}
@@ -208,7 +208,7 @@ func validPlanTrackerJournalPath(reference string) bool {
 	return len(parts) == 5 && parts[0] == "ops" && opsnamespace.Valid(parts[1]) && parts[2] == "tracker" && opscore.HasArtifactNumberPrefix(parts[3]) && (parts[4] == "artifact.md" || parts[4] == "metadata.json")
 }
 
-func appendPlanRevisionManifest(paths GeneratedPlanPaths, metadata map[string]any, changes []workflowFileChange) error {
+func appendPlanRevisionManifest(paths GeneratedPlanPaths, metadata map[string]any, changes []workflowstate.FileChange) error {
 	files, err := planManifestFiles(metadata["files"])
 	if err != nil {
 		return err

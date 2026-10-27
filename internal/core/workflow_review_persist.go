@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -43,10 +44,10 @@ func (s *WorkflowStore) persistWorkflowReviewInput(run *workflowInvocationFile, 
 		return err
 	}
 
-	return s.commitWorkflowPullRequestFiles(run, files, workflowFileChange{Path: ref, After: data})
+	return s.commitWorkflowPullRequestFiles(run, files, workflowstate.FileChange{Path: ref, After: data})
 }
 
-func (s *WorkflowStore) persistWorkflowReviewDecision(run *workflowInvocationFile, observation workflowSliceObservation, decision WorkflowReviewDecision, state string, extra ...workflowFileChange) error {
+func (s *WorkflowStore) persistWorkflowReviewDecision(run *workflowInvocationFile, observation workflowSliceObservation, decision WorkflowReviewDecision, state string, extra ...workflowstate.FileChange) error {
 	if run.Review.DecisionCount >= 2 {
 		return fmt.Errorf("workflow review decision history budget exhausted")
 	}
@@ -86,10 +87,10 @@ func (s *WorkflowStore) persistWorkflowReviewDecision(run *workflowInvocationFil
 	files = append(files, workflowReviewAttemptResult(run, data)...)
 	files = append(files, extra...)
 
-	return s.commitWorkflowPullRequestFiles(run, files, workflowFileChange{Path: ref, After: data})
+	return s.commitWorkflowPullRequestFiles(run, files, workflowstate.FileChange{Path: ref, After: data})
 }
 
-func workflowReviewAttemptResult(run *workflowInvocationFile, data []byte) []workflowFileChange {
+func workflowReviewAttemptResult(run *workflowInvocationFile, data []byte) []workflowstate.FileChange {
 	if len(run.Attempts) == 0 {
 		return nil
 	}
@@ -102,16 +103,16 @@ func workflowReviewAttemptResult(run *workflowInvocationFile, data []byte) []wor
 	attempt.ResultRef = workflowAttemptFile(run.ID, attempt.ID, "result.json")
 	attempt.ResultHash = contenthash.Sum(data)
 
-	return []workflowFileChange{{Path: attempt.ResultRef, After: data}}
+	return []workflowstate.FileChange{{Path: attempt.ResultRef, After: data}}
 }
 
-func (s *WorkflowStore) workflowReviewDomainChanges(run *workflowInvocationFile, observation workflowSliceObservation, authorized bool) ([]workflowFileChange, error) {
+func (s *WorkflowStore) workflowReviewDomainChanges(run *workflowInvocationFile, observation workflowSliceObservation, authorized bool) ([]workflowstate.FileChange, error) {
 	status, phase := TicketStatusReadyForReview, "reviewing"
 	if authorized {
 		status, phase = TicketStatusReadyForMerge, "ready_for_merge"
 	}
 
-	files := []workflowFileChange{}
+	files := []workflowstate.FileChange{}
 
 	for _, record := range observation.tasks {
 		if record.Task.Status == status && record.Task.AttemptID == "" {
@@ -185,7 +186,7 @@ func (s *WorkflowStore) readWorkflowReviewImage(ref, hash string) ([]byte, error
 		return nil, err
 	}
 
-	data, err := readWorkflowFile(path)
+	data, err := opsfile.Read(path)
 	if err != nil || contenthash.Sum(data) != hash {
 		return nil, workflowstate.ErrConflict
 	}

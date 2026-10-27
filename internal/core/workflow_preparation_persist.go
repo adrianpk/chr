@@ -181,7 +181,7 @@ func (s *WorkflowStore) persistWorkflowPreparation(run *workflowInvocationFile, 
 		return err
 	}
 
-	files = append(files, workflowFileChange{Path: attempt.ResultRef, After: data})
+	files = append(files, workflowstate.FileChange{Path: attempt.ResultRef, After: data})
 
 	if candidate.Native != nil {
 		file, err := s.workflowNativePreparedEntryChange(run, candidate)
@@ -192,7 +192,7 @@ func (s *WorkflowStore) persistWorkflowPreparation(run *workflowInvocationFile, 
 		files = append(files, file)
 	}
 
-	return s.commitWorkflowPullRequestFiles(run, files, workflowFileChange{Path: ref, After: data})
+	return s.commitWorkflowPullRequestFiles(run, files, workflowstate.FileChange{Path: ref, After: data})
 }
 
 func validateWorkflowPreparationGate(input WorkflowTaskInput, result WorkflowTaskResult) error {

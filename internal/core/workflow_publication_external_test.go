@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -71,7 +72,7 @@ func workflowPublicationExternalResult(t *testing.T, f workflowPreparationFixtur
 		t.Fatal(err)
 	}
 
-	if err := atomicWorkflowFile(filepath.Join(f.remote, "workflow-provider-pr.json"), data); err != nil {
+	if err := opsfile.WriteAtomic(filepath.Join(f.remote, "workflow-provider-pr.json"), data); err != nil {
 		t.Fatal(err)
 	}
 

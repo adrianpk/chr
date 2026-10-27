@@ -213,7 +213,7 @@ func nativeQueueDamage(t *testing.T, store *WorkflowStore, id, damage string) {
 		t.Fatal(err)
 	}
 
-	change := workflowFileChange{Path: run.IntegrationBudget.Ref.Path, Before: run.IntegrationBudget.Ref.Hash, After: data}
+	change := workflowstate.FileChange{Path: run.IntegrationBudget.Ref.Path, Before: run.IntegrationBudget.Ref.Hash, After: data}
 	run.IntegrationBudget.Ref.Hash = contenthash.Sum(data)
 
 	invocation, err := workflowInvocationChange(run)
@@ -221,7 +221,7 @@ func nativeQueueDamage(t *testing.T, store *WorkflowStore, id, damage string) {
 		t.Fatal(err)
 	}
 
-	if err := store.commitFiles([]workflowFileChange{change, invocation}); err != nil {
+	if err := store.commitFiles([]workflowstate.FileChange{change, invocation}); err != nil {
 		t.Fatal(err)
 	}
 }
