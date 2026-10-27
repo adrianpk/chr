@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strings"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -146,12 +147,12 @@ func (s *WorkflowStore) checkWorkflowSetImages(run workflowInvocationFile) error
 }
 
 func validateWorkflowClaimContract(record WorkflowRecord) error {
-	contract := GeneratedWorkflowTask{}
+	contract := generationcore.GeneratedWorkflowTask{}
 	if err := json.Unmarshal(record.Domain["execution_contract"], &contract); err != nil {
 		return fmt.Errorf("task requires a complete execution contract: %w", err)
 	}
 
-	if err := validateWorkflowPlanTask(contract); err != nil {
+	if err := generationcore.ValidateWorkflowPlanTask(contract); err != nil {
 		return err
 	}
 

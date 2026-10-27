@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -18,7 +19,7 @@ func TestArchiveGeneratedPlanCopiesCanonicalPlanWithArchiveMetadata(t *testing.T
 	createdAt := time.Date(2026, 5, 25, 10, 0, 0, 0, time.UTC)
 	archivedAt := time.Date(2026, 5, 25, 11, 12, 13, 14, time.UTC)
 
-	_, err := WriteGeneratedPlan(context.Background(), projectDir, GeneratedPlan{
+	_, err := WriteGeneratedPlan(context.Background(), projectDir, generationcore.GeneratedPlan{
 		Scope:            scope,
 		Title:            "Blog Plan",
 		Body:             "Implementation slices.",

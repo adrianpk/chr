@@ -10,13 +10,15 @@ import (
 	"reflect"
 	"testing"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowApprovedAmendment(t *testing.T, store *WorkflowStore, set WorkflowRecord) WorkflowSetAmendmentRequest {
 	t.Helper()
 
-	plan := GeneratedWorkflowPlan{Title: "Approved changed delivery", PlanRef: "plan/approved-change.md", PlanHash: contenthash.Sum([]byte("approved amendment\n")), UseCase: set.Set.UseCase, UseCaseOrder: set.Set.UseCaseOrder, ClosingValidation: set.Set.ClosingValidation}
+	plan := generationcore.GeneratedWorkflowPlan{Title: "Approved changed delivery", PlanRef: "plan/approved-change.md", PlanHash: contenthash.Sum([]byte("approved amendment\n")), UseCase: set.Set.UseCase, UseCaseOrder: set.Set.UseCaseOrder, ClosingValidation: set.Set.ClosingValidation}
 	if err := json.Unmarshal(set.Metadata["materialization_id"], &plan.MaterializationID); err != nil {
 		t.Fatal(err)
 	}
@@ -34,10 +36,10 @@ func workflowApprovedAmendment(t *testing.T, store *WorkflowStore, set WorkflowR
 		t.Fatal(err)
 	}
 
-	return WorkflowSetAmendmentRequest{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Plan: orderedWorkflowPlan(plan), ReserveTicketKey: func(context.Context) (string, error) { return "PRJ-7", nil }}
+	return WorkflowSetAmendmentRequest{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Plan: generationcore.OrderedWorkflowPlan(plan), ReserveTicketKey: func(context.Context) (string, error) { return "PRJ-7", nil }}
 }
 
-func workflowApprovedSlice(t *testing.T, store *WorkflowStore, descriptor WorkflowSlice, snapshot WorkflowSnapshot) GeneratedWorkflowSlice {
+func workflowApprovedSlice(t *testing.T, store *WorkflowStore, descriptor WorkflowSlice, snapshot WorkflowSnapshot) generationcore.GeneratedWorkflowSlice {
 	t.Helper()
 
 	contract, err := store.readWorkflowSliceContract(descriptor)
@@ -45,13 +47,13 @@ func workflowApprovedSlice(t *testing.T, store *WorkflowStore, descriptor Workfl
 		t.Fatal(err)
 	}
 
-	slice := GeneratedWorkflowSlice{ID: descriptor.ID, Label: fmt.Sprintf("Slice %d", descriptor.Order), Order: descriptor.Order, Title: descriptor.Title, Contract: contract.Contract, Validation: contract.Validation, DependsOn: descriptor.DependsOn}
+	slice := generationcore.GeneratedWorkflowSlice{ID: descriptor.ID, Label: fmt.Sprintf("Slice %d", descriptor.Order), Order: descriptor.Order, Title: descriptor.Title, Contract: contract.Contract, Validation: contract.Validation, DependsOn: descriptor.DependsOn}
 	for _, record := range snapshot.Records {
 		if record.Task == nil || record.Task.SliceID != descriptor.ID {
 			continue
 		}
 
-		var task GeneratedWorkflowTask
+		var task generationcore.GeneratedWorkflowTask
 		if err := json.Unmarshal(record.Domain["execution_contract"], &task); err != nil {
 			t.Fatal(err)
 		}
@@ -62,19 +64,19 @@ func workflowApprovedSlice(t *testing.T, store *WorkflowStore, descriptor Workfl
 	return slice
 }
 
-func workflowAppendPlanTask(plan *GeneratedWorkflowPlan) {
+func workflowAppendPlanTask(plan *generationcore.GeneratedWorkflowPlan) {
 	slice := &plan.Slices[len(plan.Slices)-1]
 	task := slice.Tasks[len(slice.Tasks)-1]
 	task.ID, task.Label, task.Order, task.DependsOn = "task-later", "Later task", task.Order+1, nil
 	slice.Tasks = append(slice.Tasks, task)
 }
 
-func workflowAppendPlanSlice(plan *GeneratedWorkflowPlan) {
+func workflowAppendPlanSlice(plan *generationcore.GeneratedWorkflowPlan) {
 	slice := plan.Slices[len(plan.Slices)-1]
 	slice.ID, slice.Label, slice.Order, slice.DependsOn = "slice-later", "Later slice", slice.Order+1, nil
 	task := slice.Tasks[0]
 	task.ID, task.Label, task.Order, task.DependsOn = "task-later", "Later task", 1, nil
-	slice.Tasks = []GeneratedWorkflowTask{task}
+	slice.Tasks = []generationcore.GeneratedWorkflowTask{task}
 	plan.Slices = append(plan.Slices, slice)
 }
 
@@ -150,12 +152,12 @@ func checkWorkflowAmendmentIdentity(t *testing.T, initial, current WorkflowInvoc
 // TestWorkflowAmendmentGate preserves the exact approved replacement contract:
 // removed commands and reasons cannot reappear from retained JSON fields.
 func TestWorkflowAmendmentGate(t *testing.T) {
-	required := WorkflowValidation{Required: true, Commands: [][]string{{"go", "test", "./..."}}, TimeoutSeconds: 60}
-	waived := WorkflowValidation{WaiverReason: "Approved explicit closure waiver"}
+	required := workflowstate.Validation{Required: true, Commands: [][]string{{"go", "test", "./..."}}, TimeoutSeconds: 60}
+	waived := workflowstate.Validation{WaiverReason: "Approved explicit closure waiver"}
 
 	cases := []struct {
 		name          string
-		initial, next WorkflowValidation
+		initial, next workflowstate.Validation
 	}{
 		{"waive", required, waived},
 		{"require", waived, required},

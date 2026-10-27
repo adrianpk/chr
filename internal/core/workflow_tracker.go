@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -23,22 +24,22 @@ type WorkflowTrackerSource struct {
 
 // WorkflowTrackerStatus describes versioned order/progress views, never execution authority.
 type WorkflowTrackerStatus struct {
-	PlanRevision *PlanRevisionBinding    `json:"plan_revision,omitempty"`
-	Schema       string                  `json:"schema"`
-	ProjectID    string                  `json:"project_id"`
-	Namespace    string                  `json:"namespace"`
-	SetID        string                  `json:"slice_set_id"`
-	Path         string                  `json:"path"`
-	Sources      []WorkflowTrackerSource `json:"sources"`
-	SourceHash   string                  `json:"source_hash"`
-	OutputHash   string                  `json:"output_hash"`
-	PendingHash  string                  `json:"pending_output_hash,omitempty"`
-	ObservedHash string                  `json:"observed_output_hash,omitempty"`
-	GeneratedAt  time.Time               `json:"generated_at"`
-	Status       string                  `json:"status"`
-	Reason       string                  `json:"reason,omitempty"`
-	Detail       string                  `json:"detail,omitempty"`
-	Checksum     string                  `json:"checksum"`
+	PlanRevision *generationcore.PlanRevisionBinding `json:"plan_revision,omitempty"`
+	Schema       string                              `json:"schema"`
+	ProjectID    string                              `json:"project_id"`
+	Namespace    string                              `json:"namespace"`
+	SetID        string                              `json:"slice_set_id"`
+	Path         string                              `json:"path"`
+	Sources      []WorkflowTrackerSource             `json:"sources"`
+	SourceHash   string                              `json:"source_hash"`
+	OutputHash   string                              `json:"output_hash"`
+	PendingHash  string                              `json:"pending_output_hash,omitempty"`
+	ObservedHash string                              `json:"observed_output_hash,omitempty"`
+	GeneratedAt  time.Time                           `json:"generated_at"`
+	Status       string                              `json:"status"`
+	Reason       string                              `json:"reason,omitempty"`
+	Detail       string                              `json:"detail,omitempty"`
+	Checksum     string                              `json:"checksum"`
 }
 
 // WorkflowTrackerOptions grants replacement only for exactly observed output bytes.

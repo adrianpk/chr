@@ -12,9 +12,10 @@ are omitted here; tests do not define production ownership.
 
 | Consumer | Existing dependencies |
 | --- | --- |
-| app | core, core/authoring/state, core/database, core/gate, core/model, core/notify, core/ops/namespace, core/project, core/quiz, core/telegram, core/telegram/message, core/workflow/state, core/workspace, harness, harness/codex, harness/pi, tui, webui, webui/ui |
+| app | core, core/authoring/generation, core/authoring/state, core/database, core/gate, core/model, core/notify, core/ops/namespace, core/project, core/quiz, core/telegram, core/telegram/message, core/workflow/state, core/workspace, harness, harness/codex, harness/pi, tui, webui, webui/ui |
 | cmd/chr | app |
-| core | core/authoring/state, core/configvalue, core/contenthash, core/database, core/gate, core/model, core/notify, core/ops/namespace, core/project, core/quiz, core/workflow/state, core/workspace, harness, harness/process |
+| core | core/authoring/generation, core/authoring/state, core/configvalue, core/contenthash, core/database, core/gate, core/model, core/notify, core/ops/namespace, core/project, core/quiz, core/workflow/state, core/workspace, harness, harness/process |
+| core/authoring/generation | core/quiz, core/workflow/state |
 | core/authoring/state | none |
 | core/configvalue | none |
 | core/contenthash | none |
@@ -101,7 +102,7 @@ constraints, not permission to rename an ambiguous domain concept.
 ## Root production-file dispositions
 
 [The exact file ledger](code-quality-remediation-core-owners.csv) enumerates all
-717 current non-test files under internal/core, their declared symbols,
+730 current non-test files under internal/core, their declared symbols,
 existing signature owners, final responsibility and migration/retention task.
 It provides a finite per-file handoff, including exact declarations. Multiple owners
 on a workflow file require separating store-owned atomic operations from stage
@@ -534,3 +535,19 @@ are unchanged. This prerequisite does not move workflow policy or transactions.
 The raw-turn parser returns a named metadata/body value. Missing body still
 produces an empty string and the same parsed metadata; the legacy and retained
 entry paths continue through the original parser regressions.
+
+## Slice 8 model dependency prerequisite
+
+`core/authoring/generation` owns the staged spec/acceptance/plan/outline/slice/
+tracking values and pure validators used by both model decoding and authoring.
+GeneratedWorkflowPlan is materialization input with retained plan identities; it
+does not allocate keys or run workflow stages. Existing publication guards remain
+fields of the same records. IO, journals, approval and stage policy stay in their
+existing owners. These extracted contracts import only quiz scope and workflow
+value validation, never the root coordinator.
+
+`core/workflow/state.Ref` is a scoped ticket/slice reference. Validation is an
+ordered argv gate or explicit waiver, with its original command and deadline
+bounds. `core/authoring/state.Decode` retains unknown-field and trailing-data
+rejection. `core/model.ExtractJSONObject` retains the existing model-output
+object extraction rule. Each helper has one owner and direct consumers.

@@ -50,7 +50,7 @@ type WorkflowIntegrationQueueQuery struct {
 	TargetRef    string
 	Namespace    string
 	InvocationID string
-	Unit         WorkflowRef
+	Unit         workflowstate.Ref
 	States       []string
 	EligibleOnly bool
 	Offset       int
@@ -181,7 +181,7 @@ type WorkflowSubmissionQuery struct {
 	CandidateHash string
 	InvocationID  string
 	Namespace     string
-	Unit          WorkflowRef
+	Unit          workflowstate.Ref
 	Limit         int
 }
 

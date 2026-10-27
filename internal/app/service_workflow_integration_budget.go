@@ -1,6 +1,9 @@
 package app
 
-import "forge.adrianpk.com/chr/internal/core"
+import (
+	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // WorkflowIntegrationBudgetStatus preserves ceilings and consumed accounting
 // while excluding reservation inputs, claim generations and harness identities.
@@ -17,7 +20,7 @@ type WorkflowIntegrationBudgetStatus struct {
 	Remaining       core.WorkflowIntegrationLimits `json:"remaining"`
 }
 
-func workflowIntegrationBudgetStatus(observed *core.WorkflowIntegrationInspection, unit core.WorkflowRef) WorkflowIntegrationBudgetStatus {
+func workflowIntegrationBudgetStatus(observed *core.WorkflowIntegrationInspection, unit workflowstate.Ref) WorkflowIntegrationBudgetStatus {
 	budget, usage := observed.Budget, observed.Usage
 	consumed := core.WorkflowIntegrationLimits{Worker: int64(usage.WorkerCount), Review: int64(usage.ReviewCount), Closing: int64(len(usage.ClosingAttempts))}
 

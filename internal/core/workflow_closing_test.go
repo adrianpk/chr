@@ -52,7 +52,7 @@ func workflowClosingExtentFixture(t *testing.T, extent string, policy WorkflowEx
 	return fixture, ports
 }
 
-func workflowClosingContract(t *testing.T, fixture workflowIntegrationFixture, gate WorkflowValidation) WorkflowRecord {
+func workflowClosingContract(t *testing.T, fixture workflowIntegrationFixture, gate workflowstate.Validation) WorkflowRecord {
 	t.Helper()
 
 	set, err := fixture.store.Read(t.Context(), fixture.hierarchy.Set.Path)
@@ -76,7 +76,7 @@ func workflowClosingContract(t *testing.T, fixture workflowIntegrationFixture, g
 func TestWorkflowClosingRetry(t *testing.T) {
 	fixture, ports := workflowClosingFixture(t)
 	counter := filepath.Join(t.TempDir(), "attempts")
-	gate := WorkflowValidation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"sh", "-c", "n=0; [ ! -f \"$1\" ] || read -r n <\"$1\"; n=$((n+1)); printf '%s\\n' \"$n\" >\"$1\"; [ \"$n\" -gt 1 ]", "closing-gate", counter}}}
+	gate := workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"sh", "-c", "n=0; [ ! -f \"$1\" ] || read -r n <\"$1\"; n=$((n+1)); printf '%s\\n' \"$n\" >\"$1\"; [ \"$n\" -gt 1 ]", "closing-gate", counter}}}
 	set := workflowClosingContract(t, fixture, gate)
 	before := workflowClosingTaskBytes(t, fixture)
 	run := workflowTestRead(t, fixture.store, fixture.run.ID)
@@ -160,9 +160,9 @@ func testWorkflowClosingEmpty(t *testing.T, required bool) {
 	plan.MaterializationID, plan.Title, plan.UseCase, plan.UseCaseOrder = "empty-set", "Empty set", "", 0
 	plan.Slices = nil
 
-	plan.ClosingValidation = WorkflowValidation{WaiverReason: "Approved explicit empty-set closure"}
+	plan.ClosingValidation = workflowstate.Validation{WaiverReason: "Approved explicit empty-set closure"}
 	if required {
-		plan.ClosingValidation = WorkflowValidation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"git", "rev-parse", "HEAD"}}}
+		plan.ClosingValidation = workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"git", "rev-parse", "HEAD"}}}
 	}
 
 	set, err := fixture.store.Create(t.Context(), "Empty set", WorkflowRecord{Kind: "plan", Set: &WorkflowSet{Schema: WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: plan.ClosingValidation}})
@@ -212,7 +212,7 @@ func TestWorkflowClosingActualMembers(t *testing.T) {
 	request := workflowApprovedAmendment(t, fixture.store, set)
 	workflowAppendPlanSlice(&request.Plan)
 
-	request.Plan.ClosingValidation = WorkflowValidation{WaiverReason: "Approved closing waiver"}
+	request.Plan.ClosingValidation = workflowstate.Validation{WaiverReason: "Approved closing waiver"}
 	if _, err := fixture.store.AmendWorkflowSet(t.Context(), request); err != nil {
 		t.Fatal(err)
 	}

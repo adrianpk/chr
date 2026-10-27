@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -227,14 +228,14 @@ func workflowOrderPlanFixture(t *testing.T) (*WorkflowStore, WorkflowMaterializa
 	store, opts := workflowMaterializationFixture(t)
 	for i := range opts.Plan.Slices {
 		for j := range opts.Plan.Slices[i].Tasks {
-			opts.Plan.Slices[i].Tasks[j].Validation = WorkflowValidation{Required: true, Commands: [][]string{workflowTaskCommand(t, "gate")}, TimeoutSeconds: 30}
+			opts.Plan.Slices[i].Tasks[j].Validation = workflowstate.Validation{Required: true, Commands: [][]string{workflowTaskCommand(t, "gate")}, TimeoutSeconds: 30}
 		}
 	}
 
 	generated := orderedPlanCandidate()
 	generated.Scope = quizcore.Scope{ProjectID: store.projectID}
 
-	generated.Order = plannedWorkflowOrder(opts.Plan)
+	generated.Order = generationcore.PlannedWorkflowOrder(opts.Plan)
 	if _, err := WriteGeneratedPlan(t.Context(), store.layout.ProjectDir(), generated); err != nil {
 		t.Fatal(err)
 	}

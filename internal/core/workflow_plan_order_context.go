@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -15,10 +16,10 @@ import (
 // WorkflowOrderMapInput supplies declared order only. Live task inputs and
 // prerequisite images remain the authority for current processing state.
 type WorkflowOrderMapInput struct {
-	Binding    PlanRevisionBinding `json:"binding"`
-	Reference  string              `json:"reference"`
-	SourceHash string              `json:"source_hash"`
-	Content    string              `json:"content"`
+	Binding    generationcore.PlanRevisionBinding `json:"binding"`
+	Reference  string                             `json:"reference"`
+	SourceHash string                             `json:"source_hash"`
+	Content    string                             `json:"content"`
 }
 
 func (s *WorkflowStore) requiredWorkflowOrderMap(ctx context.Context, record WorkflowRecord) (*WorkflowOrderMapInput, error) {
@@ -221,6 +222,6 @@ func workflowTaskOrderChanged(old, next WorkflowRecord) bool {
 	return changed || string(old.Metadata["title"]) != string(next.Metadata["title"]) || string(old.Domain["plan_task_id"]) != string(next.Domain["plan_task_id"])
 }
 
-func matchingOrderRegistration(status WorkflowTrackerStatus, binding PlanRevisionBinding) bool {
+func matchingOrderRegistration(status WorkflowTrackerStatus, binding generationcore.PlanRevisionBinding) bool {
 	return status.Schema == "chr-tracker/v2" && status.PlanRevision != nil && *status.PlanRevision == binding
 }

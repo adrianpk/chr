@@ -9,7 +9,7 @@ import (
 
 // WorkflowBlocker identifies one prerequisite without adding it to the extent.
 type WorkflowBlocker struct {
-	Dependency      WorkflowRef
+	Dependency      workflowstate.Ref
 	Reason          string
 	NextActionOwner string
 }
@@ -18,11 +18,11 @@ type workflowDependencies struct {
 	selection     workflowSelection
 	tasks         map[string][]WorkflowRecord
 	orderedSlices map[string][]WorkflowSlice
-	refs          map[WorkflowRef][]WorkflowRef
+	refs          map[workflowstate.Ref][]workflowstate.Ref
 }
 
 func newWorkflowDependencies(selection workflowSelection) (workflowDependencies, error) {
-	dependencies := workflowDependencies{selection: selection, tasks: map[string][]WorkflowRecord{}, orderedSlices: map[string][]WorkflowSlice{}, refs: map[WorkflowRef][]WorkflowRef{}}
+	dependencies := workflowDependencies{selection: selection, tasks: map[string][]WorkflowRecord{}, orderedSlices: map[string][]WorkflowSlice{}, refs: map[workflowstate.Ref][]workflowstate.Ref{}}
 	for _, record := range selection.records {
 		if record.Task.SliceID != "" {
 			dependencies.tasks[record.Task.SliceID] = append(dependencies.tasks[record.Task.SliceID], record)
@@ -50,34 +50,34 @@ func newWorkflowDependencies(selection workflowSelection) (workflowDependencies,
 func (dependencies *workflowDependencies) buildGraph() {
 	for _, ordered := range dependencies.orderedSlices {
 		for i, descriptor := range ordered {
-			ref := WorkflowRef{Kind: "slice", ID: descriptor.ID}
+			ref := workflowstate.Ref{Kind: "slice", ID: descriptor.ID}
 
 			deps := slices.Clone(descriptor.DependsOn)
 			if i > 0 {
-				deps = append(deps, WorkflowRef{Kind: "slice", ID: ordered[i-1].ID})
+				deps = append(deps, workflowstate.Ref{Kind: "slice", ID: ordered[i-1].ID})
 			}
 
 			dependencies.refs[ref] = deps
 			for _, task := range dependencies.tasks[descriptor.ID] {
-				dependencies.refs[ref] = append(dependencies.refs[ref], WorkflowRef{Kind: "ticket", ID: task.Task.Key})
+				dependencies.refs[ref] = append(dependencies.refs[ref], workflowstate.Ref{Kind: "ticket", ID: task.Task.Key})
 			}
 		}
 	}
 
 	for _, record := range dependencies.selection.records {
-		ref := WorkflowRef{Kind: "ticket", ID: record.Task.Key}
+		ref := workflowstate.Ref{Kind: "ticket", ID: record.Task.Key}
 		dependencies.refs[ref] = dependencies.taskPrerequisites(record)
 	}
 }
 
-func (dependencies workflowDependencies) taskPrerequisites(record WorkflowRecord) []WorkflowRef {
+func (dependencies workflowDependencies) taskPrerequisites(record WorkflowRecord) []workflowstate.Ref {
 	task := record.Task
 	refs := slices.Clone(task.DependsOn)
 
 	tasks := dependencies.tasks[task.SliceID]
 	for _, sibling := range tasks {
 		if sibling.Task.Order < task.Order {
-			refs = append(refs, WorkflowRef{Kind: "ticket", ID: sibling.Task.Key})
+			refs = append(refs, workflowstate.Ref{Kind: "ticket", ID: sibling.Task.Key})
 		}
 	}
 
@@ -88,11 +88,11 @@ func (dependencies workflowDependencies) taskPrerequisites(record WorkflowRecord
 
 		refs = append(refs, descriptor.DependsOn...)
 		for _, earlier := range dependencies.orderedSlices[task.SetID][:i] {
-			refs = append(refs, WorkflowRef{Kind: "slice", ID: earlier.ID})
+			refs = append(refs, workflowstate.Ref{Kind: "slice", ID: earlier.ID})
 		}
 	}
 
-	unique := []WorkflowRef{}
+	unique := []workflowstate.Ref{}
 	for _, ref := range refs {
 		if !slices.Contains(unique, ref) {
 			unique = append(unique, ref)
@@ -106,7 +106,7 @@ func (dependencies workflowDependencies) validateMembers(members []WorkflowPrevi
 	for _, member := range members {
 		task := dependencies.selection.records[member.Key].Task
 
-		refs := dependencies.refs[WorkflowRef{Kind: "ticket", ID: member.Key}]
+		refs := dependencies.refs[workflowstate.Ref{Kind: "ticket", ID: member.Key}]
 		if len(refs) > workflowstate.PageLimit {
 			return fmt.Errorf("task prerequisite observation bound exceeded: %s", member.Key)
 		}

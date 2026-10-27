@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -41,7 +42,7 @@ func changeWorkflowLooseInput(t *testing.T, store *WorkflowStore, record Workflo
 	case "title":
 		record.Body = []byte(strings.ReplaceAll(string(record.Body), "title: Independent task", "title: Another requirement"))
 	case "contract":
-		var contract GeneratedWorkflowTask
+		var contract generationcore.GeneratedWorkflowTask
 		if err := json.Unmarshal(record.Domain["execution_contract"], &contract); err != nil {
 			t.Fatal(err)
 		}

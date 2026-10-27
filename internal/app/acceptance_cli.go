@@ -7,7 +7,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 )
 
 func (factory commandFactory) acceptanceCommand() *cli.Command {
@@ -66,7 +66,7 @@ func writeAcceptanceFeatureGenerateResult(stdout io.Writer, result AcceptanceFea
 		return fmt.Errorf("write acceptance feature generate result: %w", err)
 	}
 
-	if result.Status == core.AcceptanceFeatureStatusGenerated {
+	if result.Status == generationcore.AcceptanceFeatureStatusGenerated {
 		_, err = fmt.Fprintf(stdout, "feature: %s\n", result.Feature)
 		if err != nil {
 			return fmt.Errorf("write acceptance feature generate result: %w", err)

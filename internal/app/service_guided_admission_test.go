@@ -19,7 +19,7 @@ func (model *guidedAdmissionModel) InvokeQuizModel(ctx context.Context, request 
 	}
 
 	plan := response.PlanTracking.Workflow
-	gate := core.WorkflowValidation{Required: true, Commands: [][]string{{"git", "show", "HEAD:result.txt"}}, TimeoutSeconds: 10}
+	gate := workflowstate.Validation{Required: true, Commands: [][]string{{"git", "show", "HEAD:result.txt"}}, TimeoutSeconds: 10}
 
 	plan.ClosingValidation = gate
 	for i := range plan.Slices {

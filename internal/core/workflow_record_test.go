@@ -3,6 +3,8 @@ package core
 import (
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowTestTask(id string) WorkflowRecord {
@@ -18,7 +20,7 @@ func workflowTestTask(id string) WorkflowRecord {
 func workflowTestSet() WorkflowRecord {
 	r := workflowTestTask("set-1")
 	r.Kind, r.Path, r.Task = "plan", "plan/set-1/metadata.json", nil
-	r.Set = &WorkflowSet{Schema: WorkflowSchema, Status: "ready", PlanRef: "artifact.md", PlanHash: "plan-1", ClosingValidation: WorkflowValidation{Required: true, Commands: [][]string{{"go", "test", "./..."}}, TimeoutSeconds: 60}, Slices: []WorkflowSlice{{ID: "slice-1", Order: 1, Title: "First", Phase: "pending", ContractRef: "artifact.md#first", ContractHash: "slice-contract", TaskInputHash: "inputs-1"}}}
+	r.Set = &WorkflowSet{Schema: WorkflowSchema, Status: "ready", PlanRef: "artifact.md", PlanHash: "plan-1", ClosingValidation: workflowstate.Validation{Required: true, Commands: [][]string{{"go", "test", "./..."}}, TimeoutSeconds: 60}, Slices: []WorkflowSlice{{ID: "slice-1", Order: 1, Title: "First", Phase: "pending", ContractRef: "artifact.md#first", ContractHash: "slice-contract", TaskInputHash: "inputs-1"}}}
 
 	return r
 }
@@ -65,8 +67,8 @@ func TestWorkflowHierarchy(t *testing.T) {
 		{"foreign owner", func(s *WorkflowSnapshot) { s.Records[2].Task.SetID = "foreign" }},
 		{"unresolved slice", func(s *WorkflowSnapshot) { s.Records[2].Task.SliceID = "foreign" }},
 		{"cycle", func(s *WorkflowSnapshot) {
-			s.Records[1].Task.DependsOn = []WorkflowRef{{Kind: "ticket", ID: "task-2"}}
-			s.Records[2].Task.DependsOn = []WorkflowRef{{Kind: "ticket", ID: "task-1"}}
+			s.Records[1].Task.DependsOn = []workflowstate.Ref{{Kind: "ticket", ID: "task-2"}}
+			s.Records[2].Task.DependsOn = []workflowstate.Ref{{Kind: "ticket", ID: "task-1"}}
 		}},
 	}
 	for _, tc := range cases {

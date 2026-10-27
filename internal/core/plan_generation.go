@@ -10,35 +10,12 @@ import (
 	"strings"
 	"time"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // PlanDirectory defines a package boundary constant.
 const PlanDirectory = "plans"
-
-// PlanSourceBinding retains source identities and revisions without copying
-// source bodies into the plan's metadata.
-type PlanSourceBinding struct{ Kind, Reference, Revision string }
-
-// GeneratedPlan holds staged model output and caller-owned publication guards.
-type GeneratedPlan struct {
-	Operation             *PlanPublicationOperation `json:"-"`
-	RequireOrderMap       bool                      `json:"-"`
-	TrackerReplaceHash    string                    `json:"-"`
-	Order                 []PlanOrderSlice          `json:"order,omitempty"`
-	CreateOnly            bool                      `json:"-"`
-	ExpectedRevision      string                    `json:"-"`
-	SourceObservationHash string                    `json:"-"`
-	SourceInputs          []PlanSourceBinding       `json:"-"`
-	ArchiveAt             time.Time                 `json:"-"`
-	Scope                 quizcore.Scope
-	Title                 string
-	Body                  string
-	SourcePaths           []string
-	SourceRequestID       string
-	SourceResponseID      string
-	CreatedAt             time.Time
-}
 
 // GeneratedPlanPaths describes a package boundary value.
 type GeneratedPlanPaths struct {
@@ -110,13 +87,13 @@ func ArchivedPlanLayout(projectDir string, scope quizcore.Scope, archivedAt time
 }
 
 // WriteGeneratedPlan executes the corresponding package operation.
-func writeGeneratedPlan(ctx context.Context, projectDir string, plan GeneratedPlan) (GeneratedPlanPaths, error) {
+func writeGeneratedPlan(ctx context.Context, projectDir string, plan generationcore.GeneratedPlan) (GeneratedPlanPaths, error) {
 	err := ctx.Err()
 	if err != nil {
 		return GeneratedPlanPaths{}, err
 	}
 
-	err = ValidateGeneratedPlan(plan)
+	err = generationcore.ValidateGeneratedPlan(plan)
 	if err != nil {
 		return GeneratedPlanPaths{}, err
 	}
@@ -201,7 +178,7 @@ func RenderArchivedPlan(content, sourceRelativePath string, archivedAt time.Time
 }
 
 // RenderGeneratedPlan renders the corresponding package data.
-func RenderGeneratedPlan(plan GeneratedPlan) string {
+func RenderGeneratedPlan(plan generationcore.GeneratedPlan) string {
 	var output bytes.Buffer
 
 	output.WriteString("---\n")
@@ -222,52 +199,6 @@ func RenderGeneratedPlan(plan GeneratedPlan) string {
 	}
 
 	return output.String()
-}
-
-// ValidateGeneratedPlan validates the corresponding package boundary value.
-func ValidateGeneratedPlan(plan GeneratedPlan) error {
-	if strings.TrimSpace(plan.Title) == "" {
-		return fmt.Errorf("generated plan title is required")
-	}
-
-	if strings.TrimSpace(plan.Body) == "" {
-		return fmt.Errorf("generated plan body is required")
-	}
-
-	err := quizcore.ValidateScope(plan.Scope)
-	if err != nil {
-		return err
-	}
-
-	if plan.Operation != nil || plan.RequireOrderMap || len(plan.Order) > 0 {
-		if err := ValidatePlannedOrder(plan.Order); err != nil {
-			return err
-		}
-	}
-
-	if plan.CreatedAt.IsZero() {
-		return fmt.Errorf("generated plan created time is required")
-	}
-
-	return nil
-}
-
-// ValidateGeneratedPlanModelContent validates the corresponding package boundary value.
-func ValidateGeneratedPlanModelContent(plan GeneratedPlan) error {
-	if strings.TrimSpace(plan.Title) == "" {
-		return fmt.Errorf("generated plan title is required")
-	}
-
-	if strings.TrimSpace(plan.Body) == "" {
-		return fmt.Errorf("generated plan body is required")
-	}
-
-	return quizcore.ValidateScope(plan.Scope)
-}
-
-// HasContent executes the corresponding package operation.
-func (p GeneratedPlan) HasContent() bool {
-	return strings.TrimSpace(p.Title) != "" || strings.TrimSpace(p.Body) != ""
 }
 
 func scopedPlanArtifactBody(projectDir, namespace, name string) (string, string, error) {

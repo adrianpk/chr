@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -21,7 +22,7 @@ type WorkflowSetAmendmentRequest struct {
 	SetPath            string
 	ExpectedRevision   uint64
 	ExpectedSourceHash string
-	Plan               GeneratedWorkflowPlan
+	Plan               generationcore.GeneratedWorkflowPlan
 	Reopen             bool
 	ReserveTicketKey   func(context.Context) (string, error) `json:"-"`
 }
@@ -30,7 +31,7 @@ type WorkflowSetAmendmentRequest struct {
 // It cannot remove, reorder or rewrite retained task contracts or delivered
 // slices. No live worker, active lane or unresolved publication may own the set.
 func (s *WorkflowStore) AmendWorkflowSet(ctx context.Context, request WorkflowSetAmendmentRequest) (result WorkflowMaterializationResult, err error) {
-	if err := ValidateGeneratedWorkflowPlan(request.Plan); err != nil {
+	if err := generationcore.ValidateGeneratedWorkflowPlan(request.Plan); err != nil {
 		return result, err
 	}
 

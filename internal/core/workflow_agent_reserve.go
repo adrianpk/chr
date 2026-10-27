@@ -69,7 +69,7 @@ func (s *WorkflowStore) reserveWorkflowAgentInput(ctx context.Context, run *work
 	return &budget, nil
 }
 
-func (s *WorkflowStore) workflowAgentBudget(ctx context.Context, run workflowInvocationFile, unit WorkflowRef) (WorkflowIntegrationBudget, error) {
+func (s *WorkflowStore) workflowAgentBudget(ctx context.Context, run workflowInvocationFile, unit workflowstate.Ref) (WorkflowIntegrationBudget, error) {
 	budget, err := s.workflowIntegrationBudgetAdmission(ctx, run, WorkflowIntegrationEntry{Unit: unit}, nil)
 	if err != nil {
 		return budget, err

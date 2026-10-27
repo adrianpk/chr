@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -516,16 +517,16 @@ func quizModelPromptIntentFromJSON(value string) map[string]any {
 func quizAcceptanceReadinessFromContext(
 	state quizcore.RuntimeState,
 	sections []core.QuizModelContextSection,
-) core.AcceptanceReadiness {
+) generationcore.AcceptanceReadiness {
 	content := strings.ToLower(quizContextText(sections))
 	reasons := []string{"The quiz context was inspected for acceptance-test readiness."}
 
 	if quizContextLooksNonAcceptanceTestable(content) {
-		return core.AcceptanceReadiness{
-			Decision:         core.AcceptanceReadinessNotApplicable,
+		return generationcore.AcceptanceReadiness{
+			Decision:         generationcore.AcceptanceReadinessNotApplicable,
 			Confidence:       0.7,
 			Reasons:          append(reasons, "The context appears internal, architectural, documentation-only, or refactor-oriented."),
-			InferredElements: map[core.AcceptanceReadinessSlot][]string{},
+			InferredElements: map[generationcore.AcceptanceReadinessSlot][]string{},
 		}
 	}
 
@@ -533,8 +534,8 @@ func quizAcceptanceReadinessFromContext(
 	missing := quizAcceptanceMissingSlots(inferred)
 
 	if len(missing) == 0 {
-		return core.AcceptanceReadiness{
-			Decision:           core.AcceptanceReadinessGenerate,
+		return generationcore.AcceptanceReadiness{
+			Decision:           generationcore.AcceptanceReadinessGenerate,
 			Confidence:         0.72,
 			Reasons:            append(reasons, "The context includes actor, trigger, initial state, outcome, and success-path signals."),
 			InferredElements:   inferred,
@@ -542,8 +543,8 @@ func quizAcceptanceReadinessFromContext(
 		}
 	}
 
-	return core.AcceptanceReadiness{
-		Decision:         core.AcceptanceReadinessNeedsMoreInfo,
+	return generationcore.AcceptanceReadiness{
+		Decision:         generationcore.AcceptanceReadinessNeedsMoreInfo,
 		Confidence:       0.64,
 		Reasons:          append(reasons, "The context has some acceptance-test signals, but key scenario elements are missing."),
 		Missing:          missing,
@@ -579,49 +580,49 @@ func quizContextLooksNonAcceptanceTestable(content string) bool {
 	return false
 }
 
-func quizAcceptanceInferredElements(content string) map[core.AcceptanceReadinessSlot][]string {
-	inferred := map[core.AcceptanceReadinessSlot][]string{}
+func quizAcceptanceInferredElements(content string) map[generationcore.AcceptanceReadinessSlot][]string {
+	inferred := map[generationcore.AcceptanceReadinessSlot][]string{}
 
 	if quizContainsAny(content, "user", "operator", "cli", "api client", "worker", "scheduler", "reviewer") {
-		inferred[core.AcceptanceReadinessSlotActor] = []string{"An actor is referenced by the source context."}
+		inferred[generationcore.AcceptanceReadinessSlotActor] = []string{"An actor is referenced by the source context."}
 	}
 
 	if quizContainsAny(content, "command", "request", "event", "runs", "starts", "trigger", "action") {
-		inferred[core.AcceptanceReadinessSlotTrigger] = []string{"A trigger is referenced by the source context."}
+		inferred[generationcore.AcceptanceReadinessSlotTrigger] = []string{"A trigger is referenced by the source context."}
 	}
 
 	if quizContainsAny(content, "given", "existing", "configured", "before", "state", "project", "ticket", "file") {
-		inferred[core.AcceptanceReadinessSlotInitialState] = []string{"An initial state is referenced by the source context."}
+		inferred[generationcore.AcceptanceReadinessSlotInitialState] = []string{"An initial state is referenced by the source context."}
 	}
 
 	if quizContainsAny(content, "output", "report", "status", "response", "error", "file", "written", "created") {
-		inferred[core.AcceptanceReadinessSlotObservableOutcome] = []string{"An observable outcome is referenced by the source context."}
+		inferred[generationcore.AcceptanceReadinessSlotObservableOutcome] = []string{"An observable outcome is referenced by the source context."}
 	}
 
 	if quizContainsAny(content, "success", "succeeds", "passes", "accepted", "valid", "expected") {
-		inferred[core.AcceptanceReadinessSlotSuccessPath] = []string{"A success path is referenced by the source context."}
+		inferred[generationcore.AcceptanceReadinessSlotSuccessPath] = []string{"A success path is referenced by the source context."}
 	}
 
 	if quizContainsAny(content, "failure", "fails", "invalid", "reject", "error", "missing") {
-		inferred[core.AcceptanceReadinessSlotFailurePath] = []string{"A failure path is referenced by the source context."}
+		inferred[generationcore.AcceptanceReadinessSlotFailurePath] = []string{"A failure path is referenced by the source context."}
 	}
 
 	if quizContainsAny(content, "out of scope", "non-goal", "boundary", "must not", "do not") {
-		inferred[core.AcceptanceReadinessSlotBoundaries] = []string{"A boundary is referenced by the source context."}
+		inferred[generationcore.AcceptanceReadinessSlotBoundaries] = []string{"A boundary is referenced by the source context."}
 	}
 
 	return inferred
 }
 
-func quizAcceptanceMissingSlots(inferred map[core.AcceptanceReadinessSlot][]string) []core.AcceptanceReadinessSlot {
-	required := []core.AcceptanceReadinessSlot{
-		core.AcceptanceReadinessSlotActor,
-		core.AcceptanceReadinessSlotTrigger,
-		core.AcceptanceReadinessSlotInitialState,
-		core.AcceptanceReadinessSlotObservableOutcome,
-		core.AcceptanceReadinessSlotSuccessPath,
+func quizAcceptanceMissingSlots(inferred map[generationcore.AcceptanceReadinessSlot][]string) []generationcore.AcceptanceReadinessSlot {
+	required := []generationcore.AcceptanceReadinessSlot{
+		generationcore.AcceptanceReadinessSlotActor,
+		generationcore.AcceptanceReadinessSlotTrigger,
+		generationcore.AcceptanceReadinessSlotInitialState,
+		generationcore.AcceptanceReadinessSlotObservableOutcome,
+		generationcore.AcceptanceReadinessSlotSuccessPath,
 	}
-	missing := []core.AcceptanceReadinessSlot{}
+	missing := []generationcore.AcceptanceReadinessSlot{}
 
 	for _, slot := range required {
 		if len(inferred[slot]) == 0 {

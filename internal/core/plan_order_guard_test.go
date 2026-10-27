@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
@@ -14,15 +15,19 @@ import (
 func TestPlanOrderRejectsInvalid(t *testing.T) {
 	cases := []struct {
 		name   string
-		change func(*GeneratedPlan)
+		change func(*generationcore.GeneratedPlan)
 	}{
-		{"missing map", func(plan *GeneratedPlan) { plan.Order = nil }},
-		{"allocated key", func(plan *GeneratedPlan) { plan.Order[0].Tasks[0].TicketKey = "CHR-1" }},
-		{"allocated reference", func(plan *GeneratedPlan) { plan.Order[0].Tasks[0].TicketRef = "ticket/00001-task/artifact.md" }},
-		{"duplicate slice", func(plan *GeneratedPlan) { plan.Order = append(plan.Order, plan.Order[0]) }},
-		{"duplicate task", func(plan *GeneratedPlan) { plan.Order[0].Tasks = append(plan.Order[0].Tasks, plan.Order[0].Tasks[0]) }},
-		{"invalid ID", func(plan *GeneratedPlan) { plan.Order[0].ID = "Slice 1" }},
-		{"missing order", func(plan *GeneratedPlan) { plan.Order[0].Tasks[0].Order = 0 }},
+		{"missing map", func(plan *generationcore.GeneratedPlan) { plan.Order = nil }},
+		{"allocated key", func(plan *generationcore.GeneratedPlan) { plan.Order[0].Tasks[0].TicketKey = "CHR-1" }},
+		{"allocated reference", func(plan *generationcore.GeneratedPlan) {
+			plan.Order[0].Tasks[0].TicketRef = "ticket/00001-task/artifact.md"
+		}},
+		{"duplicate slice", func(plan *generationcore.GeneratedPlan) { plan.Order = append(plan.Order, plan.Order[0]) }},
+		{"duplicate task", func(plan *generationcore.GeneratedPlan) {
+			plan.Order[0].Tasks = append(plan.Order[0].Tasks, plan.Order[0].Tasks[0])
+		}},
+		{"invalid ID", func(plan *generationcore.GeneratedPlan) { plan.Order[0].ID = "Slice 1" }},
+		{"missing order", func(plan *generationcore.GeneratedPlan) { plan.Order[0].Tasks[0].Order = 0 }},
 	}
 	for _, item := range cases {
 		t.Run(item.name, func(t *testing.T) {

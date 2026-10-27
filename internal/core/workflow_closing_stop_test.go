@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowClosingStop proves a set gate retains coarse capacity while a
@@ -23,7 +25,7 @@ func testWorkflowClosingStop(t *testing.T, intent string) {
 
 	marker := filepath.Join(t.TempDir(), "running")
 
-	gate := WorkflowValidation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"sh", "-c", "printf 'started\\n' >\"$1\"; sleep 20 & wait", "closing-gate", marker}}}
+	gate := workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"sh", "-c", "printf 'started\\n' >\"$1\"; sleep 20 & wait", "closing-gate", marker}}}
 	if intent == "deadline" {
 		gate.TimeoutSeconds = 2
 	}

@@ -7,12 +7,13 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // MaterializeWorkflowPlan explicitly opts approved input into ticket-owned
 // workflow state. Ordinary legacy plan reads and defaults do not adopt it.
-func (s service) MaterializeWorkflowPlan(ctx context.Context, plan core.GeneratedWorkflowPlan) (core.WorkflowMaterializationResult, error) {
+func (s service) MaterializeWorkflowPlan(ctx context.Context, plan generationcore.GeneratedWorkflowPlan) (core.WorkflowMaterializationResult, error) {
 	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: s.workflowNamespace})
 	if err != nil {
 		return core.WorkflowMaterializationResult{}, err

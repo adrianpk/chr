@@ -38,11 +38,11 @@ type workflowProofReader struct {
 }
 
 type workflowProofKey struct {
-	ref     WorkflowRef
+	ref     workflowstate.Ref
 	sliceID string
 }
 
-func (reader *workflowProofReader) prerequisiteReason(ctx context.Context, task WorkflowRecord, ref WorkflowRef) string {
+func (reader *workflowProofReader) prerequisiteReason(ctx context.Context, task WorkflowRecord, ref workflowstate.Ref) string {
 	key := workflowProofKey{ref: ref, sliceID: task.Task.SliceID}
 	if reason, found := reader.observations[key]; found {
 		return reason
@@ -115,7 +115,7 @@ func (reader *workflowProofReader) readEvidence(relative string) ([]byte, error)
 	return data, err
 }
 
-func (reader *workflowProofReader) integrationProofReason(ctx context.Context, ref WorkflowRef) string {
+func (reader *workflowProofReader) integrationProofReason(ctx context.Context, ref workflowstate.Ref) string {
 	delivery := reader.deliveryRef(ref)
 	if delivery == "" {
 		return "integration_evidence_required"
@@ -145,16 +145,16 @@ func (reader *workflowProofReader) validReceiptTarget(ctx context.Context, recei
 	return reader.commitHasTree(ctx, receipt.ResultCommit, receipt.VerifiedTree) && reader.isAncestor(ctx, receipt.ResultCommit, receipt.ObservedTarget) && reader.isAncestor(ctx, receipt.ObservedTarget, reader.request.Target.Commit)
 }
 
-func (reader *workflowProofReader) integrationUnit(ref WorkflowRef) WorkflowRef {
+func (reader *workflowProofReader) integrationUnit(ref workflowstate.Ref) workflowstate.Ref {
 	task := reader.selection.records[ref.ID].Task
 	if ref.Kind == "ticket" && task != nil && task.SliceID != "" {
-		return WorkflowRef{Kind: "slice", ID: task.SliceID}
+		return workflowstate.Ref{Kind: "slice", ID: task.SliceID}
 	}
 
 	return ref
 }
 
-func (reader *workflowProofReader) deliveryRef(ref WorkflowRef) string {
+func (reader *workflowProofReader) deliveryRef(ref workflowstate.Ref) string {
 	if ref.Kind == "slice" {
 		return reader.selection.slices[ref.ID].DeliveryRef
 	}
@@ -239,7 +239,7 @@ func (s *WorkflowStore) observePrerequisites(ctx context.Context, selection work
 
 		member.Readiness = workflowTaskReadiness(record.Task)
 
-		for _, ref := range dependencies.refs[WorkflowRef{Kind: "ticket", ID: member.Key}] {
+		for _, ref := range dependencies.refs[workflowstate.Ref{Kind: "ticket", ID: member.Key}] {
 			reason := reader.prerequisiteReason(ctx, record, ref)
 			if reason == "" {
 				continue

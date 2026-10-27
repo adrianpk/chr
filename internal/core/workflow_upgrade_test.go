@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
@@ -103,7 +104,7 @@ func TestWorkflowUpgradePreserves(t *testing.T) {
 	body := "# Project settings\nnotifications:\n  telegram_chat_id: private-channel\nwork:\n  workspace_mode: project\n  max_worker_attempts: 7\nreview:\n  mode: agentic_review\n  forgejo_token_env: PRIVATE_TOKEN\n"
 	store, opts := workflowUpgradeFixture(t, body)
 	opts.StateAuthority = WorkStateAuthorityTrackerCompat
-	history := workflowLegacyTicketFixture(t, store, GeneratedWorkflowTask{ID: "old", Title: "History", Outcome: "Done"}, 101)
+	history := workflowLegacyTicketFixture(t, store, generationcore.GeneratedWorkflowTask{ID: "old", Title: "History", Outcome: "Done"}, 101)
 
 	result, err := store.UpgradeWorkflowConfiguration(t.Context(), opts)
 	if err != nil || result.Adopted != nil || workflowUpgradeValue(result.Current, "work.workspace_mode") != "project" || workflowUpgradeValue(result.Current, "work.max_worker_attempts") != "7" {
@@ -143,7 +144,7 @@ func TestWorkflowUpgradeAdoption(t *testing.T) {
 	}
 
 	opts := WorkflowUpgradeOptions{ExpectedRevision: prior.Revision, StateAuthority: WorkStateAuthorityTickets, Adoption: &selection, CheckQuiescent: func(context.Context) error { return nil }}
-	history := workflowLegacyTicketFixture(t, store, GeneratedWorkflowTask{ID: "old", Title: "Historical", Outcome: "Preserved"}, 101)
+	history := workflowLegacyTicketFixture(t, store, generationcore.GeneratedWorkflowTask{ID: "old", Title: "Historical", Outcome: "Preserved"}, 101)
 
 	result, err := store.UpgradeWorkflowConfiguration(t.Context(), opts)
 	if err != nil || result.Adopted == nil {

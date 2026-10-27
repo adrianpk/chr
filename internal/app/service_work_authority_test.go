@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -62,7 +63,7 @@ func (p *serviceWorkEntryProvider) ReadWorkflowPullRequest(ctx context.Context, 
 	return p.pr, err
 }
 
-func serviceWorkNativeFixture(t *testing.T, plans ...core.GeneratedWorkflowPlan) (service, core.WorkflowRecord, core.WorkflowStartRequest, *serviceWorkEntryProvider) {
+func serviceWorkNativeFixture(t *testing.T, plans ...generationcore.GeneratedWorkflowPlan) (service, core.WorkflowRecord, core.WorkflowStartRequest, *serviceWorkEntryProvider) {
 	t.Helper()
 
 	operations, record, request := serviceWorkflowTicketFixture(t, plans...)

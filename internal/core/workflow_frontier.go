@@ -14,7 +14,7 @@ import (
 type WorkflowUnitDelivery struct {
 	Schema            string                      `json:"schema"`
 	InvocationID      string                      `json:"invocation_id"`
-	Unit              WorkflowRef                 `json:"unit"`
+	Unit              workflowstate.Ref           `json:"unit"`
 	SetID             string                      `json:"set_id,omitempty"`
 	Cursor            int                         `json:"cursor"`
 	Target            WorkflowPreviewTarget       `json:"target"`

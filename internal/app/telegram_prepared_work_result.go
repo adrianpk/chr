@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -23,7 +24,7 @@ func telegramPreparedWorkPreview(prepared PreparedAuthoringWork) string {
 		body = string(record.Body)
 		title = telegramWorkflowRecordTitle(record)
 
-		var contract core.GeneratedWorkflowTask
+		var contract generationcore.GeneratedWorkflowTask
 		if err := json.Unmarshal(record.Domain["execution_contract"], &contract); err == nil && contract.Body != "" {
 			body = contract.Body
 		}
@@ -73,7 +74,7 @@ func telegramWorkflowRecordTitle(record core.WorkflowRecord) string {
 		return title
 	}
 
-	var contract core.GeneratedWorkflowTask
+	var contract generationcore.GeneratedWorkflowTask
 	if err := json.Unmarshal(record.Domain["execution_contract"], &contract); err == nil && contract.Title != "" {
 		return contract.Title
 	}

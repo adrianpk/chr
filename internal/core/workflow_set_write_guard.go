@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -44,11 +45,11 @@ func guardBoundWorkflowSetOrder(old, next WorkflowSet) error {
 	return nil
 }
 
-func boundWorkflowSliceOrder(set WorkflowSet) []PlanOrderSlice {
-	result := make([]PlanOrderSlice, 0, len(set.Slices))
+func boundWorkflowSliceOrder(set WorkflowSet) []generationcore.PlanOrderSlice {
+	result := make([]generationcore.PlanOrderSlice, 0, len(set.Slices))
 	for _, slice := range set.Slices {
-		result = append(result, PlanOrderSlice{ID: slice.ID, Order: slice.Order, Title: slice.Title})
+		result = append(result, generationcore.PlanOrderSlice{ID: slice.ID, Order: slice.Order, Title: slice.Title})
 	}
 
-	return orderedPlanSlices(result)
+	return generationcore.OrderedPlanSlices(result)
 }

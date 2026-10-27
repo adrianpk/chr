@@ -3,6 +3,8 @@ package core
 import (
 	"encoding/json"
 	"testing"
+
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 )
 
 // Native contract generation uses both provider transports' shared decoder and
@@ -60,15 +62,15 @@ func checkPlanDeliveryModel(t *testing.T, changed bool) {
 // slice-1. Retries preserve scoped IDs without mutating the model response.
 func TestPlanDeliveryOrderScope(t *testing.T) {
 	plan := orderedPlanCandidate()
-	first := ScopePlanDeliveryOrder(plan.Order, PlanPublicationOperation{ID: "first", Scope: plan.Scope, TicketDelivery: true})
-	retry := ScopePlanDeliveryOrder(plan.Order, PlanPublicationOperation{ID: "first", Scope: plan.Scope, TicketDelivery: true})
-	second := ScopePlanDeliveryOrder(plan.Order, PlanPublicationOperation{ID: "second", Scope: plan.Scope, TicketDelivery: true})
+	first := ScopePlanDeliveryOrder(plan.Order, generationcore.PlanPublicationOperation{ID: "first", Scope: plan.Scope, TicketDelivery: true})
+	retry := ScopePlanDeliveryOrder(plan.Order, generationcore.PlanPublicationOperation{ID: "first", Scope: plan.Scope, TicketDelivery: true})
+	second := ScopePlanDeliveryOrder(plan.Order, generationcore.PlanPublicationOperation{ID: "second", Scope: plan.Scope, TicketDelivery: true})
 
 	if first[0].ID != retry[0].ID || first[0].ID == second[0].ID || plan.Order[0].ID != "slice-1" || first[0].Tasks[0].ID == second[0].Tasks[0].ID {
 		t.Fatal("unstable or colliding scoped identities", first, retry, second)
 	}
 
-	if err := ValidatePlannedOrder(first); err != nil {
+	if err := generationcore.ValidatePlannedOrder(first); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -59,7 +60,7 @@ func TestPiGenerationFastQuiz(t *testing.T) {
 
 // Existing feature validation rejects bad Pi output before replacing a valid feature.
 func TestPiGenerationAcceptance(t *testing.T) {
-	output, err := json.Marshal(map[string]string{"status": core.AcceptanceFeatureStatusGenerated, "body": validBlogAcceptanceFeatureBody()})
+	output, err := json.Marshal(map[string]string{"status": generationcore.AcceptanceFeatureStatusGenerated, "body": validBlogAcceptanceFeatureBody()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,7 +72,7 @@ func TestPiGenerationAcceptance(t *testing.T) {
 	request := AcceptanceFeatureGenerateRequest{OperationID: "pi-feature", Scope: quizcore.Scope{CaseSlug: "blog"}}
 
 	result, err := operations.GenerateAcceptanceFeature(t.Context(), request)
-	if err != nil || result.Status != core.AcceptanceFeatureStatusGenerated {
+	if err != nil || result.Status != generationcore.AcceptanceFeatureStatusGenerated {
 		t.Fatal("Pi feature generation failed", err)
 	}
 
@@ -87,7 +88,7 @@ func TestPiGenerationAcceptance(t *testing.T) {
 	request.OperationID = "pi-feature-invalid"
 
 	invalid, rejected := operations.GenerateAcceptanceFeature(t.Context(), request)
-	if rejected == nil && invalid.Status == core.AcceptanceFeatureStatusGenerated {
+	if rejected == nil && invalid.Status == generationcore.AcceptanceFeatureStatusGenerated {
 		t.Fatal("invalid Pi feature was accepted")
 	}
 

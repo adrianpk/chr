@@ -16,7 +16,7 @@ func (s WorkflowSnapshot) Validate() error {
 	ids := map[string]bool{}
 	sets := map[string]WorkflowRecord{}
 	sliceOwners := map[string]string{}
-	graph := map[WorkflowRef][]WorkflowRef{}
+	graph := map[workflowstate.Ref][]workflowstate.Ref{}
 
 	for _, r := range s.Records {
 		if err := r.Validate(); err != nil {
@@ -53,7 +53,7 @@ func (s WorkflowSnapshot) Validate() error {
 	return validateWorkflowGraph(graph)
 }
 
-func addWorkflowSlices(r WorkflowRecord, owners map[string]string, graph map[WorkflowRef][]WorkflowRef) error {
+func addWorkflowSlices(r WorkflowRecord, owners map[string]string, graph map[workflowstate.Ref][]workflowstate.Ref) error {
 	ordered := append([]WorkflowSlice(nil), r.Set.Slices...)
 	sort.Slice(ordered, func(i, j int) bool { return ordered[i].Order < ordered[j].Order })
 
@@ -63,18 +63,18 @@ func addWorkflowSlices(r WorkflowRecord, owners map[string]string, graph map[Wor
 		}
 
 		owners[slice.ID] = r.ID
-		ref := WorkflowRef{Kind: "slice", ID: slice.ID}
-		graph[ref] = append([]WorkflowRef(nil), slice.DependsOn...)
+		ref := workflowstate.Ref{Kind: "slice", ID: slice.ID}
+		graph[ref] = append([]workflowstate.Ref(nil), slice.DependsOn...)
 
 		if i > 0 {
-			graph[ref] = append(graph[ref], WorkflowRef{Kind: "slice", ID: ordered[i-1].ID})
+			graph[ref] = append(graph[ref], workflowstate.Ref{Kind: "slice", ID: ordered[i-1].ID})
 		}
 	}
 
 	return nil
 }
 
-func (s WorkflowSnapshot) validateTasks(sets map[string]WorkflowRecord, owners map[string]string, graph map[WorkflowRef][]WorkflowRef) error {
+func (s WorkflowSnapshot) validateTasks(sets map[string]WorkflowRecord, owners map[string]string, graph map[workflowstate.Ref][]workflowstate.Ref) error {
 	orders := map[string]map[int]bool{}
 
 	for _, r := range s.Records {
@@ -88,12 +88,12 @@ func (s WorkflowSnapshot) validateTasks(sets map[string]WorkflowRecord, owners m
 
 		task := r.Task
 
-		ref := WorkflowRef{Kind: "ticket", ID: task.Key}
+		ref := workflowstate.Ref{Kind: "ticket", ID: task.Key}
 		if _, exists := graph[ref]; exists {
 			return fmt.Errorf("duplicate scoped workflow ticket key: %s", task.Key)
 		}
 
-		graph[ref] = append([]WorkflowRef(nil), task.DependsOn...)
+		graph[ref] = append([]workflowstate.Ref(nil), task.DependsOn...)
 		if task.SetID == "" {
 			continue
 		}
@@ -158,12 +158,12 @@ func invalidWorkflowSetOrder(order int, seen map[int]bool) bool {
 	return seen[0] || seen[order]
 }
 
-func validateWorkflowGraph(graph map[WorkflowRef][]WorkflowRef) error {
-	state := map[WorkflowRef]int{}
+func validateWorkflowGraph(graph map[workflowstate.Ref][]workflowstate.Ref) error {
+	state := map[workflowstate.Ref]int{}
 
-	var visit func(WorkflowRef) error
+	var visit func(workflowstate.Ref) error
 
-	visit = func(ref WorkflowRef) error {
+	visit = func(ref workflowstate.Ref) error {
 		if state[ref] == 1 {
 			return fmt.Errorf("cyclic workflow dependency: %s", ref.ID)
 		}

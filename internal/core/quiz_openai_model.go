@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	modelcore "forge.adrianpk.com/chr/internal/core/model"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -483,7 +485,7 @@ func quizModelQuestionResponseFromOutput(
 		return quizModelFastQuestionResponseFromOutput(request, output)
 	}
 
-	payload, err := DecodeQuizModelQuestionPayload(extractJSONObject(output))
+	payload, err := DecodeQuizModelQuestionPayload(modelcore.ExtractJSONObject(output))
 	if err != nil {
 		return QuizModelResponse{}, err
 	}
@@ -503,7 +505,7 @@ func quizModelFastQuestionResponseFromOutput(
 	request QuizModelRequest,
 	output []byte,
 ) (QuizModelResponse, error) {
-	payload, err := DecodeQuizModelFastQuestionPayload(extractJSONObject(output))
+	payload, err := DecodeQuizModelFastQuestionPayload(modelcore.ExtractJSONObject(output))
 	if err != nil {
 		return QuizModelResponse{}, err
 	}
@@ -529,7 +531,7 @@ func quizModelDraftSpecResponseFromOutput(
 	request QuizModelRequest,
 	output []byte,
 ) (QuizModelResponse, error) {
-	payload, err := DecodeQuizModelDraftSpecPayload(extractJSONObject(output))
+	payload, err := DecodeQuizModelDraftSpecPayload(modelcore.ExtractJSONObject(output))
 	if err != nil {
 		return QuizModelResponse{}, err
 	}
@@ -539,7 +541,7 @@ func quizModelDraftSpecResponseFromOutput(
 		RequestID: request.ID,
 		Provider:  QuizModelProviderOpenAI,
 		Status:    QuizModelResponseReady,
-		DraftSpec: QuizDraftSpec{
+		DraftSpec: generationcore.QuizDraftSpec{
 			Scope:     request.Scope,
 			Title:     payload.Title,
 			Body:      payload.Body,
@@ -551,12 +553,12 @@ func quizModelDraftSpecResponseFromOutput(
 	}, nil
 }
 
-func quizModelFeatureGeneration(payload QuizModelDraftSpecPayload) AcceptanceFeatureGeneration {
-	return AcceptanceFeatureGeneration{}
+func quizModelFeatureGeneration(payload QuizModelDraftSpecPayload) generationcore.AcceptanceFeatureGeneration {
+	return generationcore.AcceptanceFeatureGeneration{}
 }
 
 func quizModelFeatureResponseFromOutput(request QuizModelRequest, output []byte) (QuizModelResponse, error) {
-	payload, err := DecodeQuizModelFeaturePayload(extractJSONObject(output))
+	payload, err := DecodeQuizModelFeaturePayload(modelcore.ExtractJSONObject(output))
 	if err != nil {
 		return QuizModelResponse{}, err
 	}
@@ -566,7 +568,7 @@ func quizModelFeatureResponseFromOutput(request QuizModelRequest, output []byte)
 		RequestID: request.ID,
 		Provider:  "openai",
 		Status:    QuizModelResponseReady,
-		Feature:   AcceptanceFeatureGeneration(payload),
+		Feature:   generationcore.AcceptanceFeatureGeneration(payload),
 		RawText:   strings.TrimSpace(string(output)),
 		CreatedAt: request.CreatedAt,
 	}, nil
@@ -576,7 +578,7 @@ func quizModelPlanResponseFromOutput(
 	request QuizModelRequest,
 	output []byte,
 ) (QuizModelResponse, error) {
-	payload, err := DecodeQuizModelPlanPayload(extractJSONObject(output))
+	payload, err := DecodeQuizModelPlanPayload(modelcore.ExtractJSONObject(output))
 	if err != nil {
 		return QuizModelResponse{}, err
 	}
@@ -586,7 +588,7 @@ func quizModelPlanResponseFromOutput(
 		RequestID: request.ID,
 		Provider:  QuizModelProviderOpenAI,
 		Status:    QuizModelResponseReady,
-		Plan: GeneratedPlan{
+		Plan: generationcore.GeneratedPlan{
 			Scope:     request.Scope,
 			Title:     payload.Title,
 			Body:      payload.Body,
@@ -602,7 +604,7 @@ func quizModelPlanOutlineResponseFromOutput(
 	request QuizModelRequest,
 	output []byte,
 ) (QuizModelResponse, error) {
-	payload, err := DecodeQuizModelPlanOutlinePayload(extractJSONObject(output))
+	payload, err := DecodeQuizModelPlanOutlinePayload(modelcore.ExtractJSONObject(output))
 	if err != nil {
 		return QuizModelResponse{}, err
 	}
@@ -625,7 +627,7 @@ func quizModelPlanSliceDetailResponseFromOutput(
 	request QuizModelRequest,
 	output []byte,
 ) (QuizModelResponse, error) {
-	payload, err := DecodeQuizModelPlanSliceDetailPayload(extractJSONObject(output))
+	payload, err := DecodeQuizModelPlanSliceDetailPayload(modelcore.ExtractJSONObject(output))
 	if err != nil {
 		return QuizModelResponse{}, err
 	}
@@ -652,14 +654,14 @@ func quizModelPlanTrackingResponseFromOutput(
 		return quizModelPlanDeliveryResponse(request, output)
 	}
 
-	payload, err := DecodeQuizModelPlanTrackingPayload(extractJSONObject(output))
+	payload, err := DecodeQuizModelPlanTrackingPayload(modelcore.ExtractJSONObject(output))
 	if err != nil {
 		return QuizModelResponse{}, err
 	}
 
-	tickets := make([]GeneratedPlanTrackingTicket, 0, len(payload.Tickets))
+	tickets := make([]generationcore.GeneratedPlanTrackingTicket, 0, len(payload.Tickets))
 	for _, ticket := range payload.Tickets {
-		tickets = append(tickets, GeneratedPlanTrackingTicket{
+		tickets = append(tickets, generationcore.GeneratedPlanTrackingTicket{
 			SliceID:      ticket.SliceID,
 			Title:        ticket.Title,
 			Synopsis:     ticket.Synopsis,
@@ -678,7 +680,7 @@ func quizModelPlanTrackingResponseFromOutput(
 		RequestID: request.ID,
 		Provider:  QuizModelProviderOpenAI,
 		Status:    QuizModelResponseReady,
-		PlanTracking: GeneratedPlanTracking{
+		PlanTracking: generationcore.GeneratedPlanTracking{
 			Scope:     request.Scope,
 			Title:     payload.Title,
 			Body:      payload.Body,
@@ -843,20 +845,20 @@ func quizModelRoutingState(
 }
 
 func quizModelAcceptanceReadinessPromptIntent(
-	readiness AcceptanceReadiness,
-) (AcceptanceReadinessPromptIntent, bool) {
-	if readiness.Decision != AcceptanceReadinessNeedsMoreInfo {
-		return AcceptanceReadinessPromptIntent{}, false
+	readiness generationcore.AcceptanceReadiness,
+) (generationcore.AcceptanceReadinessPromptIntent, bool) {
+	if readiness.Decision != generationcore.AcceptanceReadinessNeedsMoreInfo {
+		return generationcore.AcceptanceReadinessPromptIntent{}, false
 	}
 
 	for _, slot := range readiness.Missing {
-		intent, err := NewAcceptanceReadinessPromptIntent(slot)
+		intent, err := generationcore.NewAcceptanceReadinessPromptIntent(slot)
 		if err == nil {
 			return intent, true
 		}
 	}
 
-	return AcceptanceReadinessPromptIntent{}, false
+	return generationcore.AcceptanceReadinessPromptIntent{}, false
 }
 
 func quizModelMaxInt(left, right int) int {
@@ -1427,10 +1429,10 @@ func quizModelFeatureJSONSchema() map[string]any {
 			"status": map[string]any{
 				"type": "string",
 				"enum": []string{
-					AcceptanceFeatureStatusGenerated,
-					AcceptanceFeatureStatusNeedsMoreInfo,
-					AcceptanceFeatureStatusRejected,
-					AcceptanceFeatureStatusNotApplicable,
+					generationcore.AcceptanceFeatureStatusGenerated,
+					generationcore.AcceptanceFeatureStatusNeedsMoreInfo,
+					generationcore.AcceptanceFeatureStatusRejected,
+					generationcore.AcceptanceFeatureStatusNotApplicable,
 				},
 			},
 			"body": map[string]any{

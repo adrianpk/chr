@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	"forge.adrianpk.com/chr/internal/tui"
 )
@@ -524,7 +525,7 @@ case_slug: "blog"
 				RequestID: "filled-by-fake",
 				Provider:  "fake",
 				Status:    core.QuizModelResponseReady,
-				PlanTracking: core.GeneratedPlanTracking{
+				PlanTracking: generationcore.GeneratedPlanTracking{
 					Title:     "Invalid Tracking",
 					Body:      "Missing generated tickets.",
 					CreatedAt: time.Date(2026, 5, 25, 11, 12, 13, 14, time.UTC),
@@ -552,7 +553,7 @@ func TestServiceCreatePlanTrackingTicketsValidatesBatchBeforeWrites(t *testing.T
 	writeServiceQuizFixture(t, projectDir)
 
 	operations := newPlanTestService(t, projectDir)
-	payloads := []core.GeneratedPlanTrackingTicket{
+	payloads := []generationcore.GeneratedPlanTrackingTicket{
 		validPlanTrackingTicketPayload(),
 		{
 			SliceID:  "Slice 2",
@@ -591,7 +592,7 @@ func TestServiceCreatePlanTrackingTicketsRejectsGeneratedKeyAndPath(t *testing.T
 		quizcore.Scope{CaseSlug: "blog"},
 		"ops/default/plan/00000-blog-plan/artifact.md",
 		"ops/default/tracker/00000-blog-tracking/artifact.md",
-		[]core.GeneratedPlanTrackingTicket{payload},
+		[]generationcore.GeneratedPlanTrackingTicket{payload},
 	)
 	if err == nil || !strings.Contains(err.Error(), "generated ticket key must be empty") {
 		t.Fatalf("createPlanTrackingTickets error = %v, want generated key error", err)
@@ -600,8 +601,8 @@ func TestServiceCreatePlanTrackingTicketsRejectsGeneratedKeyAndPath(t *testing.T
 	assertServiceWorkspacePathMissing(t, projectDir, ".chr/default/tickets/blog")
 }
 
-func validPlanTrackingTicketPayload() core.GeneratedPlanTrackingTicket {
-	return core.GeneratedPlanTrackingTicket{
+func validPlanTrackingTicketPayload() generationcore.GeneratedPlanTrackingTicket {
+	return generationcore.GeneratedPlanTrackingTicket{
 		SliceID:  "Slice 1",
 		Title:    "Implement planning foundation",
 		Synopsis: "Build the planning foundation slice.",
@@ -1037,8 +1038,8 @@ func fixedServiceClock(now time.Time) func() time.Time {
 	}
 }
 
-func validServiceGeneratedPlanOutline(scope quizcore.Scope, createdAt time.Time) core.GeneratedPlanOutline {
-	return core.GeneratedPlanOutline{
+func validServiceGeneratedPlanOutline(scope quizcore.Scope, createdAt time.Time) generationcore.GeneratedPlanOutline {
+	return generationcore.GeneratedPlanOutline{
 		Scope:              scope,
 		Title:              "Staged Plan Generation",
 		Status:             "planned",
@@ -1047,7 +1048,7 @@ func validServiceGeneratedPlanOutline(scope quizcore.Scope, createdAt time.Time)
 		OpenQuestions:      []string{"Should staged generation be default?"},
 		Risks:              []string{"More model calls."},
 		ValidationStrategy: "Validate schema and request construction.",
-		Slices: []core.GeneratedPlanOutlineSlice{
+		Slices: []generationcore.GeneratedPlanOutlineSlice{
 			{
 				ID:                     "Slice 1",
 				ShortName:              "outline generation contract",

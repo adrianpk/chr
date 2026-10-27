@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -178,14 +179,14 @@ func TestTelegramJourneyContract(t *testing.T) {
 	}
 }
 
-func telegramJourneyChangeContract(record *WorkflowRecord, contract *GeneratedWorkflowTask, change string) {
+func telegramJourneyChangeContract(record *WorkflowRecord, contract *generationcore.GeneratedWorkflowTask, change string) {
 	switch change {
 	case "acceptance":
 		contract.Acceptance = nil
 	case "validation":
-		contract.Validation = WorkflowValidation{}
+		contract.Validation = workflowstate.Validation{}
 	case "dependency":
-		contract.DependsOn = []WorkflowRef{{Kind: "ticket", ID: "OTHER-1"}}
+		contract.DependsOn = []workflowstate.Ref{{Kind: "ticket", ID: "OTHER-1"}}
 	case "status":
 		record.Task.Status = TicketStatusReadyForDev
 	}

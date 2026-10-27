@@ -95,7 +95,7 @@ func testWorkflowSliceStop(t *testing.T, intent string) {
 	t.Helper()
 
 	marker := filepath.Join(t.TempDir(), "aggregate-started")
-	gate := WorkflowValidation{Required: true, Commands: [][]string{{"sh", "-c", "test -f \"$1\" && exit 0; printf started > \"$1\"; sleep 20", "gate", marker}}, TimeoutSeconds: 30}
+	gate := workflowstate.Validation{Required: true, Commands: [][]string{{"sh", "-c", "test -f \"$1\" && exit 0; printf started > \"$1\"; sleep 20", "gate", marker}}, TimeoutSeconds: 30}
 	store, hierarchy, request := workflowSliceFixture(t, gate)
 	run := workflowTestStart(t, store, request)
 	// Time aggregate readiness after the three source tasks reach the barrier.
@@ -155,7 +155,7 @@ func checkWorkflowSliceStopResume(t *testing.T, store *WorkflowStore, retained W
 // TestWorkflowSliceWaiver retains an explicit approved aggregate waiver without
 // substituting per-task validation or launching an unnecessary aggregate process.
 func TestWorkflowSliceWaiver(t *testing.T) {
-	store, hierarchy, request := workflowSliceFixture(t, WorkflowValidation{WaiverReason: "Aggregate accepted by task checks"})
+	store, hierarchy, request := workflowSliceFixture(t, workflowstate.Validation{WaiverReason: "Aggregate accepted by task checks"})
 	run := workflowTestStart(t, store, request)
 	candidate := workflowTestExecuteSlice(t, store, run.Invocation.ID, "worker")
 	retained := workflowTestValidatedSlice(t, store, hierarchy, run.Invocation.ID)
@@ -205,7 +205,7 @@ func TestWorkflowSlicePartial(t *testing.T) {
 // TestWorkflowSliceBudget preserves the finite aggregate retry budget while
 // retaining all task results; an exhausted retry cannot create another attempt.
 func TestWorkflowSliceBudget(t *testing.T) {
-	store, hierarchy, request := workflowSliceFixture(t, WorkflowValidation{Required: true, Commands: [][]string{{"false"}}, TimeoutSeconds: 30})
+	store, hierarchy, request := workflowSliceFixture(t, workflowstate.Validation{Required: true, Commands: [][]string{{"false"}}, TimeoutSeconds: 30})
 	request.Policy.MaxWorkerAttempts = 1
 
 	run := workflowTestStart(t, store, request)

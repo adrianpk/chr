@@ -8,15 +8,17 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowClosingEmptyOwner(t *testing.T) (workflowIntegrationFixture, WorkflowRecord, WorkflowInvocation) {
 	t.Helper()
 
-	return workflowClosingEmptyGate(t, WorkflowValidation{WaiverReason: "Approved recovery fixture waiver"})
+	return workflowClosingEmptyGate(t, workflowstate.Validation{WaiverReason: "Approved recovery fixture waiver"})
 }
 
-func workflowClosingEmptyGate(t *testing.T, gate WorkflowValidation) (workflowIntegrationFixture, WorkflowRecord, WorkflowInvocation) {
+func workflowClosingEmptyGate(t *testing.T, gate workflowstate.Validation) (workflowIntegrationFixture, WorkflowRecord, WorkflowInvocation) {
 	t.Helper()
 
 	fixture := workflowDeliveryFixture(t, "rebase")
@@ -181,7 +183,7 @@ func testWorkflowClosingPostObservation(t *testing.T, change string) {
 	t.Helper()
 
 	fixture, ports := workflowClosingFixture(t)
-	workflowClosingContract(t, fixture, WorkflowValidation{WaiverReason: "Approved boundary fixture waiver"})
+	workflowClosingContract(t, fixture, workflowstate.Validation{WaiverReason: "Approved boundary fixture waiver"})
 
 	claim := workflowClosingBeginTest(t, fixture, workflowTestRead(t, fixture.store, fixture.run.ID), ports)
 	hook := &workflowClosingTargetHook{WorkflowTargetGit: ports.Target, calls: 1, hook: func() {

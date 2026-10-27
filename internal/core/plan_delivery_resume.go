@@ -5,11 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ResumePlanDelivery verifies an existing materialization from its original
 // contracts and receipt without calling a provider or reallocating tickets.
-func (s *WorkflowStore) ResumePlanDelivery(ctx context.Context, input GeneratedWorkflowPlan) (result WorkflowMaterializationResult, found bool, err error) {
+func (s *WorkflowStore) ResumePlanDelivery(ctx context.Context, input generationcore.GeneratedWorkflowPlan) (result WorkflowMaterializationResult, found bool, err error) {
 	err = s.withRepositoryLock(ctx, func() error { return s.prepareWorkflowRead(ctx) }, func() error {
 		snapshot, readErr := s.readSnapshot(ctx)
 		if readErr != nil {
@@ -24,7 +28,7 @@ func (s *WorkflowStore) ResumePlanDelivery(ctx context.Context, input GeneratedW
 	return result, found, err
 }
 
-func (s *WorkflowStore) resumePlanDelivery(snapshot WorkflowSnapshot, input GeneratedWorkflowPlan) (WorkflowMaterializationResult, bool, error) {
+func (s *WorkflowStore) resumePlanDelivery(snapshot WorkflowSnapshot, input generationcore.GeneratedWorkflowPlan) (WorkflowMaterializationResult, bool, error) {
 	for _, record := range snapshot.Records {
 		if record.Set == nil || record.Metadata["materialization_id"] == nil {
 			continue
@@ -52,7 +56,7 @@ func (s *WorkflowStore) resumePlanDelivery(snapshot WorkflowSnapshot, input Gene
 	return WorkflowMaterializationResult{}, false, nil
 }
 
-func (s *WorkflowStore) readPlanDeliveryContracts(input GeneratedWorkflowPlan, set WorkflowRecord) (GeneratedWorkflowPlan, error) {
+func (s *WorkflowStore) readPlanDeliveryContracts(input generationcore.GeneratedWorkflowPlan, set WorkflowRecord) (generationcore.GeneratedWorkflowPlan, error) {
 	input.ClosingValidation = set.Set.ClosingValidation
 	input.UseCaseOrder = set.Set.UseCaseOrder
 	next := 0
@@ -68,9 +72,9 @@ func (s *WorkflowStore) readPlanDeliveryContracts(input GeneratedWorkflowPlan, s
 
 		var contract struct {
 			Contract   string
-			Validation WorkflowValidation
+			Validation workflowstate.Validation
 		}
-		if err := decodeAuthoringState(data, &contract); err != nil {
+		if err := authoringstate.Decode(data, &contract); err != nil {
 			return input, err
 		}
 
@@ -83,11 +87,11 @@ func (s *WorkflowStore) readPlanDeliveryContracts(input GeneratedWorkflowPlan, s
 				return input, err
 			}
 
-			if err := decodeAuthoringState(data, &slice.Tasks[j]); err != nil {
+			if err := authoringstate.Decode(data, &slice.Tasks[j]); err != nil {
 				return input, err
 			}
 		}
 	}
 
-	return input, ValidateGeneratedWorkflowPlan(input)
+	return input, generationcore.ValidateGeneratedWorkflowPlan(input)
 }

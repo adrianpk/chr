@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -63,8 +64,8 @@ func TestServiceGenerateSpecDoesNotWriteGeneratedFeature(t *testing.T) {
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
 		responses: []core.QuizModelResponse{
-			serviceQuizDraftSpecResponseWithFeature("response-spec", clock(), core.AcceptanceFeatureGeneration{
-				Status: core.AcceptanceFeatureStatusGenerated,
+			serviceQuizDraftSpecResponseWithFeature("response-spec", clock(), generationcore.AcceptanceFeatureGeneration{
+				Status: generationcore.AcceptanceFeatureStatusGenerated,
 				Body: `@spec:blog-spec @use-case:blog
 Feature: Blog publishing
 

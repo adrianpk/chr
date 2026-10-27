@@ -22,7 +22,7 @@ func (candidate WorkflowSliceCandidate) UnitInput() WorkflowSliceInput {
 	return candidate.Slice
 }
 
-func workflowMemberOwnsUnit(member WorkflowMember, unit WorkflowRef) bool {
+func workflowMemberOwnsUnit(member WorkflowMember, unit workflowstate.Ref) bool {
 	if unit.Kind == "ticket" {
 		return member.Admission.Key == unit.ID && member.Admission.SliceID == "" && member.Admission.SetID == ""
 	}
@@ -189,14 +189,14 @@ func workflowTicketCandidateMatchesRun(run workflowInvocationFile, observation w
 	return workflowTicketCandidateInputMatches(run.Lane.Unit, observation.tasks[0].Task.ContractHash, candidate)
 }
 
-func workflowTicketCandidateInputMatches(unit WorkflowRef, contractHash string, candidate WorkflowSliceCandidate) bool {
+func workflowTicketCandidateInputMatches(unit workflowstate.Ref, contractHash string, candidate WorkflowSliceCandidate) bool {
 	input := candidate.Ticket
 
 	return input.Unit == unit && input.SetID == "" && input.ContractRef == "" && input.ContractHash == contractHash && len(input.Tasks) == 1 && workflowCandidateHasNoSlice(candidate.Slice)
 }
 
 func workflowCandidateHasNoSlice(input WorkflowSliceInput) bool {
-	return input.Unit == (WorkflowRef{}) && len(input.Tasks) == 0 && input.SetID == "" && input.ContractHash == "" && input.ContractRef == ""
+	return input.Unit == (workflowstate.Ref{}) && len(input.Tasks) == 0 && input.SetID == "" && input.ContractHash == "" && input.ContractRef == ""
 }
 
 func (s *WorkflowStore) workflowTicketValidationInput(ctx context.Context, run workflowInvocationFile, observation workflowSliceObservation, input WorkflowTaskInput) (WorkflowTaskInput, error) {

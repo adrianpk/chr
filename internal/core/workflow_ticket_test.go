@@ -9,9 +9,10 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowTicketFixture(t *testing.T, extent string, gate WorkflowValidation) (*WorkflowStore, WorkflowRecord, WorkflowStartRequest) {
+func workflowTicketFixture(t *testing.T, extent string, gate workflowstate.Validation) (*WorkflowStore, WorkflowRecord, WorkflowStartRequest) {
 	t.Helper()
 
 	store := workflowTestStore(t)
@@ -73,7 +74,7 @@ func checkWorkflowTicketCandidate(t *testing.T, store *WorkflowStore, record Wor
 	t.Helper()
 
 	data, err := json.Marshal(candidate)
-	if err != nil || strings.Contains(string(data), "\"slice\"") || strings.Contains(string(data), "\"set_id\"") || candidate.Ticket == nil || candidate.Ticket.Unit != (WorkflowRef{Kind: "ticket", ID: record.Task.Key}) {
+	if err != nil || strings.Contains(string(data), "\"slice\"") || strings.Contains(string(data), "\"set_id\"") || candidate.Ticket == nil || candidate.Ticket.Unit != (workflowstate.Ref{Kind: "ticket", ID: record.Task.Key}) {
 		t.Fatal("candidate fabricated hierarchy", err)
 	}
 
@@ -254,6 +255,6 @@ func workflowTicketReviewConfig(t *testing.T, store *WorkflowStore, method strin
 	writeWorkflowTestConfigValue(t, store.layout.ProjectDir(), "work", "merge_strategy", method)
 }
 
-func workflowTicketReceiptMatches(record *WorkflowRecord, unit WorkflowRef, method string) bool {
+func workflowTicketReceiptMatches(record *WorkflowRecord, unit workflowstate.Ref, method string) bool {
 	return record != nil && record.Receipt != nil && record.Receipt.Unit == unit && record.Receipt.Method == method
 }

@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const (
@@ -26,7 +28,7 @@ type WorkflowReviewPolicy struct {
 type WorkflowReviewInput struct {
 	Schema          string                      `json:"schema"`
 	InvocationID    string                      `json:"invocation_id"`
-	Unit            WorkflowRef                 `json:"unit"`
+	Unit            workflowstate.Ref           `json:"unit"`
 	CandidateID     string                      `json:"candidate_id"`
 	CandidateRef    string                      `json:"candidate_ref"`
 	CandidateHash   string                      `json:"candidate_hash"`
@@ -50,21 +52,21 @@ type WorkflowReviewDecision struct {
 
 // WorkflowReviewBinding retains one current decision and immutable evidence.
 type WorkflowReviewBinding struct {
-	Round         int         `json:"round"`
-	Unit          WorkflowRef `json:"unit"`
-	State         string      `json:"state"`
-	InputRef      string      `json:"input_ref"`
-	InputHash     string      `json:"input_hash"`
-	ResultRef     string      `json:"result_ref"`
-	ResultHash    string      `json:"result_hash"`
-	DecisionCount int         `json:"decision_count"`
-	RepairTaskKey string      `json:"repair_task_key"`
+	Round         int               `json:"round"`
+	Unit          workflowstate.Ref `json:"unit"`
+	State         string            `json:"state"`
+	InputRef      string            `json:"input_ref"`
+	InputHash     string            `json:"input_hash"`
+	ResultRef     string            `json:"result_ref"`
+	ResultHash    string            `json:"result_hash"`
+	DecisionCount int               `json:"decision_count"`
+	RepairTaskKey string            `json:"repair_task_key"`
 }
 
 // WorkflowReviewRepairBudget survives candidate replacement and continuation.
 type WorkflowReviewRepairBudget struct {
-	Unit     WorkflowRef `json:"unit"`
-	Consumed int         `json:"consumed"`
+	Unit     workflowstate.Ref `json:"unit"`
+	Consumed int               `json:"consumed"`
 }
 
 // ReviewWorkflowSlice applies current policy. Human review retains a wait;

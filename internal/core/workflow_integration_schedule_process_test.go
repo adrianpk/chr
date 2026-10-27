@@ -7,6 +7,8 @@ import (
 	"reflect"
 	"strconv"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeProcessCapacity launches admitted tasks through the native selector.
@@ -24,7 +26,7 @@ func nativeProcessCapacity(t *testing.T, capacity int) {
 	stores, runs := workflowParallelRunnerLanes(t, capacity)
 	for i, store := range stores {
 		run := workflowTestRead(t, store, runs[i].ID)
-		nativeEntryAdmit(t, store, WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: WorkflowRef{Kind: "ticket", ID: run.Members[0].Admission.Key}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"})
+		nativeEntryAdmit(t, store, WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: workflowstate.Ref{Kind: "ticket", ID: run.Members[0].Admission.Key}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"})
 	}
 
 	if capacity == 1 {

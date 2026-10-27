@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -93,7 +94,7 @@ func (s service) reserveGuidedPlan(ctx context.Context, session *core.AuthoringS
 		return err
 	}
 
-	session.Guided.Work = &core.GuidedWorkState{PublicationOperation: core.PlanPublicationOperation{ID: "guided-plan-" + session.Guided.PendingOperation.Digest, Scope: scope, ExpectedRevision: revision, TicketDelivery: true}}
+	session.Guided.Work = &core.GuidedWorkState{PublicationOperation: generationcore.PlanPublicationOperation{ID: "guided-plan-" + session.Guided.PendingOperation.Digest, Scope: scope, ExpectedRevision: revision, TicketDelivery: true}}
 
 	return core.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session)
 }
@@ -126,7 +127,7 @@ func (s service) generateGuidedPlan(ctx context.Context, session core.AuthoringS
 		return core.GuidedPreparedPlan{}, err
 	}
 
-	if err := core.ValidateGeneratedPlan(plan); err != nil {
+	if err := generationcore.ValidateGeneratedPlan(plan); err != nil {
 		return core.GuidedPreparedPlan{}, err
 	}
 

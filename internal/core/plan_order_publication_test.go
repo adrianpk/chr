@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -53,15 +54,15 @@ func TestPlanOrderHistory(t *testing.T) {
 	}
 }
 
-func orderedPlanCandidate() GeneratedPlan {
+func orderedPlanCandidate() generationcore.GeneratedPlan {
 	plan := planPublicationCandidate()
 	plan.RequireOrderMap = true
-	plan.Order = []PlanOrderSlice{{ID: "slice-1", Order: 1, Title: "Foundation", Tasks: []PlanOrderTask{{ID: "task-t1.1", Order: 1, Title: "Implement foundation"}}}}
+	plan.Order = []generationcore.PlanOrderSlice{{ID: "slice-1", Order: 1, Title: "Foundation", Tasks: []generationcore.PlanOrderTask{{ID: "task-t1.1", Order: 1, Title: "Implement foundation"}}}}
 
 	return plan
 }
 
-func readTestPlanBinding(t *testing.T, project string, scope quizcore.Scope) PlanRevisionBinding {
+func readTestPlanBinding(t *testing.T, project string, scope quizcore.Scope) generationcore.PlanRevisionBinding {
 	t.Helper()
 
 	binding, err := ObservePlanRevision(t.Context(), project, scope)
@@ -83,7 +84,7 @@ func readTestPlanImage(t *testing.T, project, reference string) []byte {
 	return content
 }
 
-func verifyPlanManifest(t *testing.T, paths GeneratedPlanPaths, bindings ...PlanRevisionBinding) {
+func verifyPlanManifest(t *testing.T, paths GeneratedPlanPaths, bindings ...generationcore.PlanRevisionBinding) {
 	t.Helper()
 
 	encoded, err := os.ReadFile(filepath.Join(filepath.Dir(paths.Path), "metadata.json"))
@@ -178,7 +179,7 @@ func checkPlanOrderRecovery(t *testing.T, after int) {
 	project := t.TempDir()
 	plan := orderedPlanCandidate()
 	plan.CreateOnly = true
-	plan.Operation = &PlanPublicationOperation{ID: "recover-plan", Scope: plan.Scope}
+	plan.Operation = &generationcore.PlanPublicationOperation{ID: "recover-plan", Scope: plan.Scope}
 
 	paths, err := GeneratedPlanLayout(project, plan.Scope)
 	if err != nil {
@@ -212,7 +213,7 @@ func checkPlanOrderRecovery(t *testing.T, after int) {
 	}
 }
 
-func checkPlanOrderArchive(t *testing.T, project string, plan GeneratedPlan) {
+func checkPlanOrderArchive(t *testing.T, project string, plan generationcore.GeneratedPlan) {
 	t.Helper()
 
 	archive, err := ArchivedPlanLayout(project, plan.Scope, plan.ArchiveAt)
@@ -231,9 +232,9 @@ func checkPlanOrderArchive(t *testing.T, project string, plan GeneratedPlan) {
 	}
 
 	var metadata struct {
-		Files       []string            `json:"files"`
-		SourceFiles []string            `json:"source_files"`
-		Binding     PlanRevisionBinding `json:"plan_binding"`
+		Files       []string                           `json:"files"`
+		SourceFiles []string                           `json:"source_files"`
+		Binding     generationcore.PlanRevisionBinding `json:"plan_binding"`
 	}
 	if err := json.Unmarshal(metadataBytes, &metadata); err != nil {
 		t.Fatal(err)

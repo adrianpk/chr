@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -69,8 +70,8 @@ func TestValidateAcceptanceFeatureArtifactRequiresTraceabilityInputs(t *testing.
 }
 
 func TestValidateAcceptanceFeatureGenerationRequiresPromptsForNeedsMoreInfo(t *testing.T) {
-	_, err := ValidateAcceptanceFeatureGeneration(AcceptanceFeatureGeneration{
-		Status:          AcceptanceFeatureStatusNeedsMoreInfo,
+	_, err := generationcore.ValidateAcceptanceFeatureGeneration(generationcore.AcceptanceFeatureGeneration{
+		Status:          generationcore.AcceptanceFeatureStatusNeedsMoreInfo,
 		RejectionReason: "The failure behavior is missing.",
 	})
 	if err == nil {
@@ -344,9 +345,9 @@ func TestWriteAcceptanceFeatureRejectsInvalidArtifact(t *testing.T) {
 func TestMergeAcceptanceFeatureRoundAnswersPreservesExistingAnswers(t *testing.T) {
 	notes := AcceptanceFeatureRoundNotes{
 		Scope:           quizcore.Scope{ProjectID: "project-1", CaseSlug: "followups"},
-		Status:          AcceptanceFeatureStatusNeedsMoreInfo,
+		Status:          generationcore.AcceptanceFeatureStatusNeedsMoreInfo,
 		RejectionReason: "More queue behavior is needed.",
-		Prompts: []AcceptanceFeaturePrompt{
+		Prompts: []generationcore.AcceptanceFeaturePrompt{
 			{
 				ID:            "time_source_default",
 				Question:      "Confirm time source?",
@@ -395,9 +396,9 @@ func TestWriteAcceptanceFeatureRoundNotesWritesDefaultPrompts(t *testing.T) {
 	projectDir := t.TempDir()
 	notes := AcceptanceFeatureRoundNotes{
 		Scope:           quizcore.Scope{ProjectID: "project-1", CaseSlug: "article-authoring"},
-		Status:          AcceptanceFeatureStatusNeedsMoreInfo,
+		Status:          generationcore.AcceptanceFeatureStatusNeedsMoreInfo,
 		RejectionReason: "The failure behavior is not explicit.",
-		Prompts: []AcceptanceFeaturePrompt{
+		Prompts: []generationcore.AcceptanceFeaturePrompt{
 			{
 				ID:            "failure-behavior",
 				Question:      "What should happen when publishing fails?",

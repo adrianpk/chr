@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestServiceWorkflowClosing executes an explicit empty-set gate through the
@@ -19,7 +20,7 @@ func TestServiceWorkflowClosing(t *testing.T) {
 
 	plan := serviceWorkflowPlanFixture()
 
-	set, err := store.Create(t.Context(), "Empty service set", core.WorkflowRecord{Kind: "plan", Set: &core.WorkflowSet{Schema: core.WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: core.WorkflowValidation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"git", "rev-parse", "HEAD"}}}}})
+	set, err := store.Create(t.Context(), "Empty service set", core.WorkflowRecord{Kind: "plan", Set: &core.WorkflowSet{Schema: core.WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"git", "rev-parse", "HEAD"}}}}})
 	if err != nil {
 		t.Fatal(err)
 	}

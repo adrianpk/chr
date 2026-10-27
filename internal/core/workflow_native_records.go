@@ -27,7 +27,7 @@ type WorkflowNativeRecordBinding struct {
 	SchemaVersion      int                        `json:"schema_version"`
 	EntryID            string                     `json:"entry_id"`
 	InvocationID       string                     `json:"invocation_id"`
-	Unit               WorkflowRef                `json:"unit"`
+	Unit               workflowstate.Ref          `json:"unit"`
 	CanonicalPR        string                     `json:"canonical_pr"`
 	SourceRepository   string                     `json:"source_repository"`
 	SourceRef          string                     `json:"source_ref"`

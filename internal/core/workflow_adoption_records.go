@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -59,7 +60,7 @@ func (s *WorkflowStore) prepareLegacyWorkflowPlan(opts WorkflowPlanAdoptionOptio
 	return record, nil
 }
 
-func (s *WorkflowStore) prepareLegacyWorkflowTasks(plan GeneratedWorkflowPlan, selections []WorkflowAdoptionTask) ([]WorkflowRecord, []string, error) {
+func (s *WorkflowStore) prepareLegacyWorkflowTasks(plan generationcore.GeneratedWorkflowPlan, selections []WorkflowAdoptionTask) ([]WorkflowRecord, []string, error) {
 	byID := map[string]WorkflowAdoptionTask{}
 
 	paths := map[string]bool{}

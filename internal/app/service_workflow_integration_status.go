@@ -1,6 +1,9 @@
 package app
 
-import "forge.adrianpk.com/chr/internal/core"
+import (
+	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // WorkflowIntegrationRoleStatus reports actual role occupancy without leases.
 type WorkflowIntegrationRoleStatus struct {
@@ -25,7 +28,7 @@ type WorkflowIntegrationDecisionStatus struct {
 type WorkflowIntegrationStatus struct {
 	EntryID        string                             `json:"entry_id,omitempty"`
 	EntryRevision  uint64                             `json:"entry_revision"`
-	Unit           core.WorkflowRef                   `json:"unit"`
+	Unit           workflowstate.Ref                  `json:"unit"`
 	Repository     string                             `json:"repository,omitempty"`
 	TargetRef      string                             `json:"target_ref,omitempty"`
 	Phase          string                             `json:"phase"`

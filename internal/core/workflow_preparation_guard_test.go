@@ -48,7 +48,7 @@ func TestWorkflowPreparationGuard(t *testing.T) {
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
-			f := newWorkflowPreparationFixture(t, "rebase", WorkflowValidation{WaiverReason: "Guard fixture checks host proof"})
+			f := newWorkflowPreparationFixture(t, "rebase", workflowstate.Validation{WaiverReason: "Guard fixture checks host proof"})
 
 			c, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git)
 			if err != nil {
@@ -71,7 +71,7 @@ func TestWorkflowPreparationGuard(t *testing.T) {
 // TestWorkflowPreparationUnsupported proves that unsupported protection blocks
 // before preparation, without changing method, consuming a worker or publishing.
 func TestWorkflowPreparationUnsupported(t *testing.T) {
-	f := newWorkflowPreparationFixture(t, "squash", WorkflowValidation{WaiverReason: "Protection fixture"})
+	f := newWorkflowPreparationFixture(t, "squash", workflowstate.Validation{WaiverReason: "Protection fixture"})
 	f.provider.guarded = false
 
 	before := workflowTestRead(t, f.store, f.run.ID)
@@ -132,7 +132,7 @@ func (g workflowPreparationGitHook) PrepareWorkflowIntegration(ctx context.Conte
 // TestWorkflowPreparationIO rechecks provider and current policy after host Git
 // IO rather than authorizing against its preflight snapshot.
 func TestWorkflowPreparationIO(t *testing.T) {
-	f := newWorkflowPreparationFixture(t, "merge", WorkflowValidation{WaiverReason: "Preparation IO fixture"})
+	f := newWorkflowPreparationFixture(t, "merge", workflowstate.Validation{WaiverReason: "Preparation IO fixture"})
 
 	git := workflowPreparationGitHook{git: f.git, after: func() { f.provider.revision = "changed-after-Git" }}
 	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, git); !errors.Is(err, workflowstate.ErrConflict) {

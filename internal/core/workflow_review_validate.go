@@ -32,7 +32,7 @@ func validateWorkflowReviewBinding(run workflowInvocationFile) error {
 }
 
 func validateWorkflowReviewBudgets(budgets []WorkflowReviewRepairBudget) error {
-	seen := map[WorkflowRef]bool{}
+	seen := map[workflowstate.Ref]bool{}
 	for _, budget := range budgets {
 		if !slices.Contains([]string{"slice", "ticket"}, budget.Unit.Kind) || budget.Unit.ID == "" || seen[budget.Unit] || budget.Consumed < 1 || budget.Consumed > workflowReviewRepairLimit {
 			return workflowstate.ErrConflict

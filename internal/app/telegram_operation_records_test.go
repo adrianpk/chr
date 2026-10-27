@@ -95,7 +95,7 @@ func telegramCreateRecordSet(t *testing.T, operations service) RecordMutationRes
 	body := "# Existing plan\n\nApproved contract reference.\n"
 	writeServiceWorkspaceFile(t, filepath.Join(operations.projectContext.ProjectDir, "ops", "default", "plan", "source.md"), body)
 
-	validation := core.WorkflowValidation{Required: true, Commands: [][]string{{"go", "test", "./..."}}, TimeoutSeconds: 60}
+	validation := workflowstate.Validation{Required: true, Commands: [][]string{{"go", "test", "./..."}}, TimeoutSeconds: 60}
 
 	return telegramApplyRecord(t, operations, "create-set", RecordMutationRequest{Kind: RecordSliceSet, Action: "create", Title: telegramRecordText("Prepared set"), PlanRef: "plan/source.md", PlanHash: recordDigest([]byte(body)), Validation: &validation})
 }

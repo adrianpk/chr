@@ -5,16 +5,17 @@ import (
 	"encoding/json"
 	"reflect"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowTicketAdmission binds the explicit transition of one independent
 // backlog ticket to ready, together with its existing executable contract.
 type WorkflowTicketAdmission struct {
-	Key          string             `json:"key"`
-	Revision     uint64             `json:"revision"`
-	ContractHash string             `json:"contract_hash"`
-	Validation   WorkflowValidation `json:"validation"`
+	Key          string                   `json:"key"`
+	Revision     uint64                   `json:"revision"`
+	ContractHash string                   `json:"contract_hash"`
+	Validation   workflowstate.Validation `json:"validation"`
 }
 
 func validateWorkflowTicketAdmission(guard *WorkflowAdmissionGuard, selection WorkflowPreviewRequest) error {
@@ -27,7 +28,7 @@ func validateWorkflowTicketAdmission(guard *WorkflowAdmissionGuard, selection Wo
 		return workflowstate.ErrConflict
 	}
 
-	return validateWorkflowGate(ticket.Validation)
+	return workflowstate.ValidateGate(ticket.Validation)
 }
 
 // PreviewWorkflowTicketAdmission observes a proposed readiness transition. It
@@ -60,7 +61,7 @@ func workflowTicketAdmission(record WorkflowRecord) (*WorkflowTicketAdmission, e
 		return nil, err
 	}
 
-	var contract GeneratedWorkflowTask
+	var contract generationcore.GeneratedWorkflowTask
 	if err := json.Unmarshal(record.Domain["execution_contract"], &contract); err != nil {
 		return nil, err
 	}

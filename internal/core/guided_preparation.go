@@ -9,24 +9,25 @@ import (
 	"reflect"
 	"strings"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // GuidedPreparedPlan retains validated generation before revision-bound publication.
 type GuidedPreparedPlan struct {
-	Plan           GeneratedPlan `json:"plan"`
-	TargetRevision string        `json:"target_revision"`
-	InputDigest    string        `json:"input_digest"`
+	Plan           generationcore.GeneratedPlan `json:"plan"`
+	TargetRevision string                       `json:"target_revision"`
+	InputDigest    string                       `json:"input_digest"`
 }
 
 // GuidedWorkState links the canonical plan, materialization and native invocation owners.
 type GuidedWorkState struct {
-	Admission            *WorkflowStartRequest           `json:"admission,omitempty"`
-	Invocation           *GuidedInvocationReference      `json:"invocation,omitempty"`
-	PublicationOperation PlanPublicationOperation        `json:"publication_operation"`
-	Publication          *PlanPublicationResult          `json:"publication,omitempty"`
-	Materialization      *GuidedMaterializationReference `json:"materialization,omitempty"`
+	Admission            *WorkflowStartRequest                   `json:"admission,omitempty"`
+	Invocation           *GuidedInvocationReference              `json:"invocation,omitempty"`
+	PublicationOperation generationcore.PlanPublicationOperation `json:"publication_operation"`
+	Publication          *PlanPublicationResult                  `json:"publication,omitempty"`
+	Materialization      *GuidedMaterializationReference         `json:"materialization,omitempty"`
 }
 
 // GuidedWorkMember identifies one exact initial native task contract.
@@ -38,7 +39,7 @@ type GuidedWorkMember struct {
 // GuidedMaterializationReference links the original receipt and exact native membership.
 type GuidedMaterializationReference struct {
 	ID, ReceiptRef, SetID, SetPath string
-	PlanRevision                   PlanRevisionBinding
+	PlanRevision                   generationcore.PlanRevisionBinding
 	Members                        []GuidedWorkMember
 }
 
@@ -83,10 +84,10 @@ func PublishGuidedPlan(ctx context.Context, root string, scope GuidedUseCaseScop
 	return result, err
 }
 
-func guidedPublicationPlan(session AuthoringSession) (GeneratedPlan, error) {
+func guidedPublicationPlan(session AuthoringSession) (generationcore.GeneratedPlan, error) {
 	state := session.Guided
 	if err := guardGuidedPreparationState(state); err != nil {
-		return GeneratedPlan{}, err
+		return generationcore.GeneratedPlan{}, err
 	}
 
 	prepared := state.PendingOperation.PreparedPlan
@@ -115,11 +116,11 @@ func guidedPublicationPlan(session AuthoringSession) (GeneratedPlan, error) {
 		return plan, err
 	}
 
-	return plan, ValidateGeneratedPlan(plan)
+	return plan, generationcore.ValidateGeneratedPlan(plan)
 }
 
 // GuidedMaterializationBinding retains owner identities without copying native task state.
-func GuidedMaterializationBinding(result WorkflowMaterializationResult, input GeneratedWorkflowPlan) (GuidedMaterializationReference, error) {
+func GuidedMaterializationBinding(result WorkflowMaterializationResult, input generationcore.GeneratedWorkflowPlan) (GuidedMaterializationReference, error) {
 	if result.Set.Set == nil || result.Set.Set.PlanRevision == nil || result.Set.Set.UseCase != input.UseCase || len(result.Tasks) == 0 || len(result.Tasks) > workflowstate.PageLimit {
 		return GuidedMaterializationReference{}, workflowstate.ErrConflict
 	}
@@ -218,12 +219,12 @@ func workSliceContracts(session AuthoringSession) []string {
 }
 
 // ValidateGuidedContracts rejects provider changes to owner-controlled identities and order.
-func ValidateGuidedContracts(input, generated GeneratedWorkflowPlan) error {
-	if err := ValidateGuidedPlannedOrder(plannedWorkflowOrder(generated)); err != nil {
+func ValidateGuidedContracts(input, generated generationcore.GeneratedWorkflowPlan) error {
+	if err := ValidateGuidedPlannedOrder(generationcore.PlannedWorkflowOrder(generated)); err != nil {
 		return err
 	}
 
-	if err := ValidateGeneratedWorkflowPlan(generated); err != nil {
+	if err := generationcore.ValidateGeneratedWorkflowPlan(generated); err != nil {
 		return err
 	}
 
@@ -231,7 +232,7 @@ func ValidateGuidedContracts(input, generated GeneratedWorkflowPlan) error {
 		return err
 	}
 
-	if !reflect.DeepEqual(plannedWorkflowOrder(input), plannedWorkflowOrder(generated)) {
+	if !reflect.DeepEqual(generationcore.PlannedWorkflowOrder(input), generationcore.PlannedWorkflowOrder(generated)) {
 		return workflowstate.ErrConflict
 	}
 
@@ -263,8 +264,8 @@ func guardGuidedPlanScope(session AuthoringSession) error {
 	return nil
 }
 
-func guidedPlanSourceBindings(checkpoint GuidedStageCheckpoint) []PlanSourceBinding {
-	var inputs []PlanSourceBinding
+func guidedPlanSourceBindings(checkpoint GuidedStageCheckpoint) []generationcore.PlanSourceBinding {
+	var inputs []generationcore.PlanSourceBinding
 
 	for _, source := range append(append([]GuidedCommittedArtifact{}, checkpoint.Sources...), checkpoint.Artifacts...) {
 		commit := source.Commit
@@ -272,15 +273,15 @@ func guidedPlanSourceBindings(checkpoint GuidedStageCheckpoint) []PlanSourceBind
 			commit = checkpoint.Commit
 		}
 
-		inputs = append(inputs, PlanSourceBinding{Kind: "committed", Reference: source.Path, Revision: commit + ":" + source.Hash})
+		inputs = append(inputs, generationcore.PlanSourceBinding{Kind: "committed", Reference: source.Path, Revision: commit + ":" + source.Hash})
 	}
 
 	return inputs
 }
 
 // ValidateGuidedPlannedOrder keeps the complete execution selection within one bounded native page.
-func ValidateGuidedPlannedOrder(order []PlanOrderSlice) error {
-	if err := ValidatePlannedOrder(order); err != nil {
+func ValidateGuidedPlannedOrder(order []generationcore.PlanOrderSlice) error {
+	if err := generationcore.ValidatePlannedOrder(order); err != nil {
 		return err
 	}
 
@@ -296,12 +297,12 @@ func ValidateGuidedPlannedOrder(order []PlanOrderSlice) error {
 	return nil
 }
 
-func guardGuidedContractDependencies(plan GeneratedWorkflowPlan) error {
-	allowed := map[WorkflowRef]bool{}
+func guardGuidedContractDependencies(plan generationcore.GeneratedWorkflowPlan) error {
+	allowed := map[workflowstate.Ref]bool{}
 	for _, slice := range plan.Slices {
-		allowed[WorkflowRef{Kind: "slice", ID: slice.ID}] = true
+		allowed[workflowstate.Ref{Kind: "slice", ID: slice.ID}] = true
 		for _, task := range slice.Tasks {
-			allowed[WorkflowRef{Kind: "ticket", ID: task.ID}] = true
+			allowed[workflowstate.Ref{Kind: "ticket", ID: task.ID}] = true
 		}
 	}
 
@@ -320,7 +321,7 @@ func guardGuidedContractDependencies(plan GeneratedWorkflowPlan) error {
 	return nil
 }
 
-func guardGuidedDependencies(refs []WorkflowRef, allowed map[WorkflowRef]bool) error {
+func guardGuidedDependencies(refs []workflowstate.Ref, allowed map[workflowstate.Ref]bool) error {
 	for _, ref := range refs {
 		if !allowed[ref] {
 			return workflowstate.ErrConflict

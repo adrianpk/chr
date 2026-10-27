@@ -41,7 +41,7 @@ func TestWorkflowPublicationLateResponse(t *testing.T) {
 // The next read observes the newly reachable target without another worker or
 // submission; the stale observation never becomes an immutable delivery proof.
 func TestWorkflowPublicationDuringIO(t *testing.T) {
-	f := newWorkflowPreparationFixture(t, "squash", WorkflowValidation{WaiverReason: "Publication observation fixture"})
+	f := newWorkflowPreparationFixture(t, "squash", workflowstate.Validation{WaiverReason: "Publication observation fixture"})
 	p := &workflowSubmissionProviderFixture{workflowPreparationProviderFixture: f.provider, remote: f.remote}
 	workflowPublicationExternalResult(t, f, p, "squash")
 

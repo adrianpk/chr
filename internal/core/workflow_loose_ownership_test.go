@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 )
 
 // TestWorkflowLooseOwnership excludes ready grouped work discovered after
@@ -45,7 +47,7 @@ func TestWorkflowLooseOwnership(t *testing.T) {
 	}
 }
 
-func workflowLooseApprovedPlan(t *testing.T, store *WorkflowStore) GeneratedWorkflowPlan {
+func workflowLooseApprovedPlan(t *testing.T, store *WorkflowStore) generationcore.GeneratedWorkflowPlan {
 	t.Helper()
 
 	plan := workflowPlanFixture()

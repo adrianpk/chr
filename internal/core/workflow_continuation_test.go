@@ -14,7 +14,7 @@ func workflowContinuationFixture(t *testing.T) (*WorkflowStore, WorkflowStartReq
 
 	store, opts := workflowMaterializationFixture(t)
 
-	waiver := WorkflowValidation{WaiverReason: "Continuation fixture observes retained host proof"}
+	waiver := workflowstate.Validation{WaiverReason: "Continuation fixture observes retained host proof"}
 	for i := range opts.Plan.Slices {
 		opts.Plan.Slices[i].Validation = waiver
 		for j := range opts.Plan.Slices[i].Tasks {

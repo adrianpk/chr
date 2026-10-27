@@ -2,6 +2,8 @@ package core
 
 import (
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type nativeClosingFixture struct {
@@ -10,13 +12,13 @@ type nativeClosingFixture struct {
 	setPath string
 }
 
-func newNativeClosingFixture(t *testing.T, method string, gate WorkflowValidation) nativeClosingFixture {
+func newNativeClosingFixture(t *testing.T, method string, gate workflowstate.Validation) nativeClosingFixture {
 	t.Helper()
 
 	return newNativeClosingTransportFixture(t, method, gate, false)
 }
 
-func newNativeClosingTransportFixture(t *testing.T, method string, gate WorkflowValidation, lost bool) nativeClosingFixture {
+func newNativeClosingTransportFixture(t *testing.T, method string, gate workflowstate.Validation, lost bool) nativeClosingFixture {
 	t.Helper()
 
 	store, opts := workflowMaterializationFixture(t)
@@ -74,7 +76,7 @@ func TestNativeClosingGate(t *testing.T) {
 func nativeClosingGate(t *testing.T, method string) {
 	t.Helper()
 
-	f := newNativeClosingFixture(t, method, WorkflowValidation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"git", "rev-parse", "HEAD"}}})
+	f := newNativeClosingFixture(t, method, workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"git", "rev-parse", "HEAD"}}})
 	ports := finalizeNativeClosingFixture(t, f)
 	store, id := f.fixture.f.store, f.fixture.f.entry.InvocationID
 

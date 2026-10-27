@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	modelcore "forge.adrianpk.com/chr/internal/core/model"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 )
@@ -457,7 +458,7 @@ func ParseAuthoringQuizGenerationResult(output []byte) (AuthoringQuizGenerationR
 		} `json:"questions"`
 	}
 
-	err := json.Unmarshal(extractJSONObject(output), &payload)
+	err := json.Unmarshal(modelcore.ExtractJSONObject(output), &payload)
 	if err != nil {
 		return AuthoringQuizGenerationResult{}, fmt.Errorf("parse authoring quiz provider response: %w", err)
 	}
@@ -777,16 +778,4 @@ Each question object must contain:
 
 Request:
 `) + "\n\n" + payload + "\n"
-}
-
-func extractJSONObject(output []byte) []byte {
-	text := strings.TrimSpace(string(output))
-	start := strings.Index(text, "{")
-
-	end := strings.LastIndex(text, "}")
-	if start < 0 || end < start {
-		return output
-	}
-
-	return []byte(text[start : end+1])
 }

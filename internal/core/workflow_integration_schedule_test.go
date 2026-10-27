@@ -154,7 +154,7 @@ func TestNativeScheduleTasks(t *testing.T) {
 	store, hierarchy, request := workflowSliceFixture(t, workflowPreparationGate("true"))
 	request.Selection.Selector = workflowClaimSelector(hierarchy, "slice_set")
 	run := workflowTestStart(t, store, request).Invocation
-	admission := WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: WorkflowRef{Kind: "slice", ID: hierarchy.Set.Set.Slices[0].ID}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"}
+	admission := WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: workflowstate.Ref{Kind: "slice", ID: hierarchy.Set.Set.Slices[0].ID}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"}
 	nativeEntryAdmit(t, store, admission)
 
 	for _, record := range hierarchy.Tasks[:3] {
@@ -186,7 +186,7 @@ func checkNativeScheduleReceiptBarrier(t *testing.T, store *WorkflowStore, hiera
 		t.Fatal("scheduler crossed the receipt barrier", err)
 	}
 
-	next := WorkflowIntegrationAdmission{InvocationID: id, ExpectedRevision: before.Revision, Unit: WorkflowRef{Kind: "slice", ID: hierarchy.Set.Set.Slices[1].ID}, AdmissionKey: before.RequestKey, TargetRef: "refs/heads/dev"}
+	next := WorkflowIntegrationAdmission{InvocationID: id, ExpectedRevision: before.Revision, Unit: workflowstate.Ref{Kind: "slice", ID: hierarchy.Set.Set.Slices[1].ID}, AdmissionKey: before.RequestKey, TargetRef: "refs/heads/dev"}
 	if _, err := store.AdmitWorkflowIntegration(t.Context(), next); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("future slice became an admitted unit", err)
 	}
@@ -202,7 +202,7 @@ func TestNativeSchedulePrerequisite(t *testing.T) {
 	store, hierarchy, request := workflowClaimFixture(t)
 	request.Selection.Selector.Identity = hierarchy.Tasks[1].Task.Key
 	run := workflowTestStart(t, store, request).Invocation
-	admission := WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: WorkflowRef{Kind: "slice", ID: hierarchy.Set.Set.Slices[0].ID}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"}
+	admission := WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: workflowstate.Ref{Kind: "slice", ID: hierarchy.Set.Set.Slices[0].ID}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"}
 	nativeEntryAdmit(t, store, admission)
 
 	before := nativeQueueImages(t, store.layout.Root())

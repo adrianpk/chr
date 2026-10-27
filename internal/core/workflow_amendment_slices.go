@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"reflect"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func checkWorkflowAmendmentAddition(builder workflowAmendmentBuild, slice GeneratedWorkflowSlice, input GeneratedWorkflowTask) error {
+func checkWorkflowAmendmentAddition(builder workflowAmendmentBuild, slice generationcore.GeneratedWorkflowSlice, input generationcore.GeneratedWorkflowTask) error {
 	for _, descriptor := range builder.old.Set.Slices {
 		if descriptor.Phase != "pending" && slice.Order <= descriptor.Order {
 			return fmt.Errorf("%w: new work precedes an execution or integration frontier", workflowstate.ErrConflict)
@@ -28,7 +29,7 @@ func checkWorkflowAmendmentAddition(builder workflowAmendmentBuild, slice Genera
 	return nil
 }
 
-func (s *WorkflowStore) buildWorkflowAmendmentSlices(builder *workflowAmendmentBuild, plan GeneratedWorkflowPlan) error {
+func (s *WorkflowStore) buildWorkflowAmendmentSlices(builder *workflowAmendmentBuild, plan generationcore.GeneratedWorkflowPlan) error {
 	old := map[string]WorkflowSlice{}
 	for _, descriptor := range builder.old.Set.Slices {
 		old[descriptor.ID] = descriptor
@@ -55,7 +56,7 @@ func (s *WorkflowStore) buildWorkflowAmendmentSlices(builder *workflowAmendmentB
 	return nil
 }
 
-func buildWorkflowAmendedSlice(builder *workflowAmendmentBuild, old map[string]WorkflowSlice, input GeneratedWorkflowSlice) (WorkflowSlice, int, error) {
+func buildWorkflowAmendedSlice(builder *workflowAmendmentBuild, old map[string]WorkflowSlice, input generationcore.GeneratedWorkflowSlice) (WorkflowSlice, int, error) {
 	descriptor, err := materializationSlice(input, builder.result.Set, builder.result.Tasks, builder.keys)
 	if err != nil {
 		return descriptor, 0, err
@@ -82,7 +83,7 @@ func workflowAmendedSlice(previous, descriptor WorkflowSlice) (WorkflowSlice, er
 	return previous, nil
 }
 
-func workflowNewAmendmentSlice(builder *workflowAmendmentBuild, input GeneratedWorkflowSlice, descriptor *WorkflowSlice) error {
+func workflowNewAmendmentSlice(builder *workflowAmendmentBuild, input generationcore.GeneratedWorkflowSlice, descriptor *WorkflowSlice) error {
 	data, err := json.Marshal(workflowSliceContract{Contract: input.Contract, Validation: input.Validation})
 	if err != nil {
 		return err

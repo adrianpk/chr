@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -241,11 +242,11 @@ path writes a report file and returns an accepted status.
 		t.Fatal("AcceptanceReadiness = nil")
 	}
 
-	if readiness.Decision != core.AcceptanceReadinessGenerate {
+	if readiness.Decision != generationcore.AcceptanceReadinessGenerate {
 		t.Fatalf("decision = %q, want generate", readiness.Decision)
 	}
 
-	if len(readiness.InferredElements[core.AcceptanceReadinessSlotActor]) == 0 {
+	if len(readiness.InferredElements[generationcore.AcceptanceReadinessSlotActor]) == 0 {
 		t.Fatalf("inferred elements = %#v, want actor", readiness.InferredElements)
 	}
 
@@ -296,7 +297,7 @@ This is a documentation-only architecture cleanup for a package boundary.
 		t.Fatal("AcceptanceReadiness = nil")
 	}
 
-	if readiness.Decision != core.AcceptanceReadinessNotApplicable {
+	if readiness.Decision != generationcore.AcceptanceReadinessNotApplicable {
 		t.Fatalf("decision = %q, want not_applicable", readiness.Decision)
 	}
 }
@@ -333,15 +334,15 @@ The project has an existing file and should write an output report.
 		t.Fatal("AcceptanceReadiness = nil")
 	}
 
-	if readiness.Decision != core.AcceptanceReadinessNeedsMoreInfo {
+	if readiness.Decision != generationcore.AcceptanceReadinessNeedsMoreInfo {
 		t.Fatalf("decision = %q, want needs_more_info", readiness.Decision)
 	}
 
-	if !slices.Contains(readiness.Missing, core.AcceptanceReadinessSlotActor) {
+	if !slices.Contains(readiness.Missing, generationcore.AcceptanceReadinessSlotActor) {
 		t.Fatalf("missing = %#v, want actor", readiness.Missing)
 	}
 
-	if len(readiness.InferredElements[core.AcceptanceReadinessSlotObservableOutcome]) == 0 {
+	if len(readiness.InferredElements[generationcore.AcceptanceReadinessSlotObservableOutcome]) == 0 {
 		t.Fatalf("inferred elements = %#v, want observable outcome", readiness.InferredElements)
 	}
 }
@@ -382,14 +383,14 @@ success path accepts the request and writes a visible status response.
 		t.Fatal("AcceptanceReadiness = nil")
 	}
 
-	if readiness.Decision != core.AcceptanceReadinessGenerate {
+	if readiness.Decision != generationcore.AcceptanceReadinessGenerate {
 		t.Fatalf("decision = %q, want generate from accumulated context", readiness.Decision)
 	}
 
-	for _, slot := range []core.AcceptanceReadinessSlot{
-		core.AcceptanceReadinessSlotActor,
-		core.AcceptanceReadinessSlotTrigger,
-		core.AcceptanceReadinessSlotObservableOutcome,
+	for _, slot := range []generationcore.AcceptanceReadinessSlot{
+		generationcore.AcceptanceReadinessSlotActor,
+		generationcore.AcceptanceReadinessSlotTrigger,
+		generationcore.AcceptanceReadinessSlotObservableOutcome,
 	} {
 		if slices.Contains(readiness.Missing, slot) {
 			t.Fatalf("missing = %#v, should not reset %s after first question", readiness.Missing, slot)
@@ -992,8 +993,8 @@ func (m *fakeServiceQuizModel) InvokeQuizModel(
 		}
 
 		if request.Action == core.QuizModelActionGenerateAcceptanceFeature {
-			return serviceQuizAcceptanceFeatureResponse("response-fallback-feature", request.CreatedAt, core.AcceptanceFeatureGeneration{
-				Status:          core.AcceptanceFeatureStatusNotApplicable,
+			return serviceQuizAcceptanceFeatureResponse("response-fallback-feature", request.CreatedAt, generationcore.AcceptanceFeatureGeneration{
+				Status:          generationcore.AcceptanceFeatureStatusNotApplicable,
 				RejectionReason: "No acceptance feature context is available.",
 			}), nil
 		}
@@ -1075,7 +1076,7 @@ func serviceQuizDraftSpecResponse(responseID string, createdAt time.Time) core.Q
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
 		Status:    core.QuizModelResponseReady,
-		DraftSpec: core.QuizDraftSpec{
+		DraftSpec: generationcore.QuizDraftSpec{
 			Scope:          quizcore.Scope{ProjectID: "service-project"},
 			Title:          "Quiz Generated Spec",
 			Body:           "Generated behavior from dump and quiz context.",
@@ -1091,7 +1092,7 @@ func serviceQuizDraftSpecResponse(responseID string, createdAt time.Time) core.Q
 func serviceQuizDraftSpecResponseWithFeature(
 	responseID string,
 	createdAt time.Time,
-	feature core.AcceptanceFeatureGeneration,
+	feature generationcore.AcceptanceFeatureGeneration,
 ) core.QuizModelResponse {
 	response := serviceQuizDraftSpecResponse(responseID, createdAt)
 	response.DraftSpec.Feature = feature
@@ -1099,7 +1100,7 @@ func serviceQuizDraftSpecResponseWithFeature(
 	return response
 }
 
-func serviceQuizAcceptanceFeatureResponse(responseID string, createdAt time.Time, feature core.AcceptanceFeatureGeneration) core.QuizModelResponse {
+func serviceQuizAcceptanceFeatureResponse(responseID string, createdAt time.Time, feature generationcore.AcceptanceFeatureGeneration) core.QuizModelResponse {
 	return core.QuizModelResponse{
 		ID:        responseID,
 		RequestID: "filled-by-fake",
@@ -1124,11 +1125,11 @@ func serviceQuizPlanResponse(responseID string, createdAt time.Time) core.QuizMo
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
 		Status:    core.QuizModelResponseReady,
-		Plan: core.GeneratedPlan{
+		Plan: generationcore.GeneratedPlan{
 			Scope:     quizcore.Scope{ProjectID: "service-project"},
 			Title:     "Generated Implementation Plan",
 			Body:      "## High-level implementation strategy\n\nImplement the generated plan in one pass.\n",
-			Order:     []core.PlanOrderSlice{{ID: "slice-1", Order: 1, Title: "Foundation", Tasks: []core.PlanOrderTask{{ID: "task-t1.1", Order: 1, Title: "Implement foundation"}}}},
+			Order:     []generationcore.PlanOrderSlice{{ID: "slice-1", Order: 1, Title: "Foundation", Tasks: []generationcore.PlanOrderTask{{ID: "task-t1.1", Order: 1, Title: "Implement foundation"}}}},
 			CreatedAt: createdAt,
 		},
 		RawText:   "raw generated plan",
@@ -1142,7 +1143,7 @@ func serviceQuizPlanOutlineResponse(responseID string, createdAt time.Time) core
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
 		Status:    core.QuizModelResponseReady,
-		PlanOutline: core.GeneratedPlanOutline{
+		PlanOutline: generationcore.GeneratedPlanOutline{
 			Scope:              quizcore.Scope{ProjectID: "service-project"},
 			Title:              "Generated Implementation Plan",
 			Status:             "planned",
@@ -1151,7 +1152,7 @@ func serviceQuizPlanOutlineResponse(responseID string, createdAt time.Time) core
 			OpenQuestions:      []string{},
 			Risks:              []string{"Generated output needs review."},
 			ValidationStrategy: "Run focused and repository tests.",
-			Slices: []core.GeneratedPlanOutlineSlice{
+			Slices: []generationcore.GeneratedPlanOutlineSlice{
 				{
 					ID:                     "Slice 1",
 					ShortName:              "Foundation",
@@ -1165,7 +1166,7 @@ func serviceQuizPlanOutlineResponse(responseID string, createdAt time.Time) core
 					ImplementationBoundary: "Foundation behavior only.",
 				},
 			},
-			Dependencies: []core.GeneratedPlanOutlineDependency{},
+			Dependencies: []generationcore.GeneratedPlanOutlineDependency{},
 			CreatedAt:    createdAt,
 		},
 		RawText:   "raw generated plan outline",
@@ -1179,13 +1180,13 @@ func serviceQuizPlanSliceDetailResponse(responseID string, createdAt time.Time) 
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
 		Status:    core.QuizModelResponseReady,
-		SliceDetail: core.GeneratedPlanSliceDetail{
+		SliceDetail: generationcore.GeneratedPlanSliceDetail{
 			Scope:               quizcore.Scope{ProjectID: "service-project"},
 			SliceID:             "Slice 1",
 			ShortName:           "Foundation",
 			Objective:           "Implement the planning foundation.",
 			ImplementationNotes: []string{"Keep the first slice focused on the planning foundation."},
-			Tasks: []core.GeneratedPlanSliceTask{
+			Tasks: []generationcore.GeneratedPlanSliceTask{
 				{
 					ID:         "T1.1",
 					Summary:    "Implement the planning foundation.",
@@ -1193,7 +1194,7 @@ func serviceQuizPlanSliceDetailResponse(responseID string, createdAt time.Time) 
 				},
 			},
 			AcceptanceCriteria: []string{"Foundation behavior is covered by tests."},
-			TicketMetadata: core.GeneratedPlanSliceTicketMetadata{
+			TicketMetadata: generationcore.GeneratedPlanSliceTicketMetadata{
 				Title:    "Implement planning foundation",
 				Synopsis: "Build the planning foundation slice.",
 				Priority: "normal",
@@ -1201,7 +1202,7 @@ func serviceQuizPlanSliceDetailResponse(responseID string, createdAt time.Time) 
 				Type:     "task",
 				Tags:     []string{"plan"},
 			},
-			BranchMetadata: core.GeneratedPlanSliceBranchMetadata{
+			BranchMetadata: generationcore.GeneratedPlanSliceBranchMetadata{
 				BranchName: "feat/slice-1-foundation",
 			},
 			PRExpectations:         []string{"Open one PR against dev."},
@@ -1221,12 +1222,12 @@ func serviceQuizPlanTrackingResponse(responseID string, createdAt time.Time) cor
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
 		Status:    core.QuizModelResponseReady,
-		PlanTracking: core.GeneratedPlanTracking{
+		PlanTracking: generationcore.GeneratedPlanTracking{
 			Scope:     quizcore.Scope{ProjectID: "service-project"},
 			Title:     "Generated Plan Tracking",
 			Body:      "Track the generated plan slices through tickets.",
 			CreatedAt: createdAt,
-			Tickets: []core.GeneratedPlanTrackingTicket{
+			Tickets: []generationcore.GeneratedPlanTrackingTicket{
 				{
 					SliceID:  "Slice 1",
 					Title:    "Implement planning foundation",

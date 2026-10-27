@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) executeWorkflowClosing(ctx context.Context, claim *workflowClosingClaim) (WorkflowClosingReceipt, error) {
@@ -92,7 +94,7 @@ func workflowClosingPrepared(claim *workflowClosingClaim, directory string) work
 	return workflowPreparedTask{input: WorkflowTaskInput{Lane: WorkflowLane{Worktree: directory}}, inputRef: claim.state.Input.Ref, inputHash: claim.state.Input.Hash, data: claim.data, leaseUntil: claim.state.LeaseUntil}
 }
 
-func workflowClosingLeaseSeconds(validation WorkflowValidation) time.Duration {
+func workflowClosingLeaseSeconds(validation workflowstate.Validation) time.Duration {
 	if !validation.Required {
 		return time.Minute
 	}

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -15,34 +16,6 @@ const (
 	// AcceptanceFeatureDirectory defines a package boundary constant.
 	AcceptanceFeatureDirectory = "acceptance"
 )
-
-const (
-	// AcceptanceFeatureStatusGenerated defines a package boundary constant.
-	AcceptanceFeatureStatusGenerated = "generated"
-	// AcceptanceFeatureStatusNeedsMoreInfo defines a package boundary constant.
-	AcceptanceFeatureStatusNeedsMoreInfo = "needs_more_info"
-	// AcceptanceFeatureStatusRejected defines a package boundary constant.
-	AcceptanceFeatureStatusRejected = "rejected"
-	// AcceptanceFeatureStatusNotApplicable defines a package boundary constant.
-	AcceptanceFeatureStatusNotApplicable = "not_applicable"
-)
-
-// AcceptanceFeatureGeneration describes optional model-generated feature content.
-type AcceptanceFeatureGeneration struct {
-	Status               string
-	Body                 string
-	RejectionReason      string
-	ClarificationPrompts []AcceptanceFeaturePrompt
-}
-
-// AcceptanceFeaturePrompt describes one default-oriented feature clarification prompt.
-type AcceptanceFeaturePrompt struct {
-	ID            string `json:"id"`
-	Question      string `json:"question"`
-	DefaultAnswer string `json:"default_answer"`
-	Reason        string `json:"reason"`
-	Answer        string `json:"answer,omitempty"`
-}
 
 // AcceptanceFeatureArtifact describes a generated Gherkin feature artifact.
 type AcceptanceFeatureArtifact struct {
@@ -68,7 +41,7 @@ type AcceptanceFeatureRoundNotes struct {
 	Scope            quizcore.Scope
 	Status           string
 	RejectionReason  string
-	Prompts          []AcceptanceFeaturePrompt
+	Prompts          []generationcore.AcceptanceFeaturePrompt
 	SourceRequestID  string
 	SourceResponseID string
 	CreatedAt        time.Time
@@ -103,84 +76,6 @@ type acceptanceFeatureScenario struct {
 	when    bool
 	then    bool
 	hasStep bool
-}
-
-// HasContent reports whether generated feature content is present.
-func (g AcceptanceFeatureGeneration) HasContent() bool {
-	return strings.TrimSpace(g.Status) != "" ||
-		strings.TrimSpace(g.Body) != "" ||
-		strings.TrimSpace(g.RejectionReason) != ""
-}
-
-// ValidateAcceptanceFeatureGeneration validates the corresponding package boundary value.
-func ValidateAcceptanceFeatureGeneration(feature AcceptanceFeatureGeneration) (AcceptanceFeatureGeneration, error) {
-	normalized := AcceptanceFeatureGeneration{
-		Status:               strings.TrimSpace(feature.Status),
-		Body:                 strings.TrimSpace(feature.Body),
-		RejectionReason:      strings.TrimSpace(feature.RejectionReason),
-		ClarificationPrompts: normalizeAcceptanceFeaturePrompts(feature.ClarificationPrompts),
-	}
-
-	switch normalized.Status {
-	case AcceptanceFeatureStatusGenerated:
-		if normalized.Body == "" {
-			return AcceptanceFeatureGeneration{}, fmt.Errorf("acceptance feature generated status requires body")
-		}
-
-		normalized.ClarificationPrompts = nil
-	case AcceptanceFeatureStatusNeedsMoreInfo:
-		if normalized.RejectionReason == "" {
-			return AcceptanceFeatureGeneration{}, fmt.Errorf("acceptance feature needs_more_info status requires reason")
-		}
-
-		if len(normalized.ClarificationPrompts) == 0 {
-			return AcceptanceFeatureGeneration{}, fmt.Errorf("acceptance feature needs_more_info status requires clarification prompts")
-		}
-
-		normalized.Body = ""
-	case AcceptanceFeatureStatusRejected:
-		if normalized.RejectionReason == "" {
-			return AcceptanceFeatureGeneration{}, fmt.Errorf("acceptance feature rejected status requires reason")
-		}
-
-		normalized.Body = ""
-		normalized.ClarificationPrompts = nil
-	case AcceptanceFeatureStatusNotApplicable:
-		normalized.Body = ""
-		normalized.ClarificationPrompts = nil
-	default:
-		return AcceptanceFeatureGeneration{}, fmt.Errorf("acceptance feature status is invalid: %s", normalized.Status)
-	}
-
-	return normalized, nil
-}
-
-func normalizeAcceptanceFeaturePrompts(prompts []AcceptanceFeaturePrompt) []AcceptanceFeaturePrompt {
-	normalized := make([]AcceptanceFeaturePrompt, 0, len(prompts))
-	seen := map[string]bool{}
-
-	for _, prompt := range prompts {
-		cleaned := AcceptanceFeaturePrompt{
-			ID:            strings.TrimSpace(prompt.ID),
-			Question:      strings.TrimSpace(prompt.Question),
-			DefaultAnswer: strings.TrimSpace(prompt.DefaultAnswer),
-			Reason:        strings.TrimSpace(prompt.Reason),
-			Answer:        strings.TrimSpace(prompt.Answer),
-		}
-
-		if cleaned.ID == "" || cleaned.Question == "" || cleaned.DefaultAnswer == "" {
-			continue
-		}
-
-		if seen[cleaned.ID] {
-			continue
-		}
-
-		seen[cleaned.ID] = true
-		normalized = append(normalized, cleaned)
-	}
-
-	return normalized
 }
 
 // AcceptanceFeatureLayout executes the corresponding package operation.
@@ -373,7 +268,7 @@ func MergeAcceptanceFeatureRoundAnswers(notes AcceptanceFeatureRoundNotes, exist
 
 	merged := notes
 
-	merged.Prompts = make([]AcceptanceFeaturePrompt, len(notes.Prompts))
+	merged.Prompts = make([]generationcore.AcceptanceFeaturePrompt, len(notes.Prompts))
 	for index, prompt := range notes.Prompts {
 		merged.Prompts[index] = prompt
 		if strings.TrimSpace(prompt.Answer) != "" {
@@ -448,7 +343,7 @@ func ValidateAcceptanceFeatureRoundNotes(notes AcceptanceFeatureRoundNotes) erro
 		return err
 	}
 
-	if strings.TrimSpace(notes.Status) != AcceptanceFeatureStatusNeedsMoreInfo {
+	if strings.TrimSpace(notes.Status) != generationcore.AcceptanceFeatureStatusNeedsMoreInfo {
 		return fmt.Errorf("acceptance feature round status must be needs_more_info")
 	}
 
@@ -456,7 +351,7 @@ func ValidateAcceptanceFeatureRoundNotes(notes AcceptanceFeatureRoundNotes) erro
 		return fmt.Errorf("acceptance feature round rejection reason is required")
 	}
 
-	if len(normalizeAcceptanceFeaturePrompts(notes.Prompts)) == 0 {
+	if len(generationcore.NormalizeAcceptanceFeaturePrompts(notes.Prompts)) == 0 {
 		return fmt.Errorf("acceptance feature round prompts are required")
 	}
 

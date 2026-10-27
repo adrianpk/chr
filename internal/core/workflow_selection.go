@@ -60,7 +60,7 @@ type WorkflowPreview struct {
 	SnapshotHash string
 	NextOffset   int
 	SetOrderRule string
-	admitted     map[WorkflowRef]bool
+	admitted     map[workflowstate.Ref]bool
 }
 
 type workflowSelection struct {
@@ -268,12 +268,12 @@ func workflowPreviewMember(record WorkflowRecord) WorkflowPreviewMember {
 	return WorkflowPreviewMember{Key: task.Key, Path: record.Path, Revision: record.Revision, SourceHash: record.SourceHash, ContractHash: task.ContractHash, SetID: task.SetID, SliceID: task.SliceID, TaskOrder: task.Order, Status: task.Status, Phase: task.Phase}
 }
 
-func workflowAdmittedRefs(members []WorkflowPreviewMember, selector WorkflowSelector) map[WorkflowRef]bool {
-	admitted := map[WorkflowRef]bool{}
+func workflowAdmittedRefs(members []WorkflowPreviewMember, selector WorkflowSelector) map[workflowstate.Ref]bool {
+	admitted := map[workflowstate.Ref]bool{}
 	for _, member := range members {
-		admitted[WorkflowRef{Kind: "ticket", ID: member.Key}] = true
+		admitted[workflowstate.Ref{Kind: "ticket", ID: member.Key}] = true
 		if selector.Extent != "ticket" && member.SliceID != "" {
-			admitted[WorkflowRef{Kind: "slice", ID: member.SliceID}] = true
+			admitted[workflowstate.Ref{Kind: "slice", ID: member.SliceID}] = true
 		}
 	}
 

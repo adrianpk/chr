@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	modelcore "forge.adrianpk.com/chr/internal/core/model"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -208,8 +209,8 @@ func renderAuthoringGeneration(snapshot core.AuthoringSnapshot, request core.Aut
 
 		return core.RenderGeneratedSpec(spec), nil
 	case core.AuthoringArtifactKindPlan:
-		plan := core.GeneratedPlan{Scope: quizcore.Scope{ProjectID: request.ProjectID}, Title: snapshot.Session.Topic, Body: body, SourcePaths: paths, SourceRequestID: request.Binding.RequestID, SourceResponseID: request.Binding.RequestID + "-response", CreatedAt: time.Now().UTC()}
-		if err := core.ValidateGeneratedPlan(plan); err != nil {
+		plan := generationcore.GeneratedPlan{Scope: quizcore.Scope{ProjectID: request.ProjectID}, Title: snapshot.Session.Topic, Body: body, SourcePaths: paths, SourceRequestID: request.Binding.RequestID, SourceResponseID: request.Binding.RequestID + "-response", CreatedAt: time.Now().UTC()}
+		if err := generationcore.ValidateGeneratedPlan(plan); err != nil {
 			return "", err
 		}
 

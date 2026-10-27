@@ -259,7 +259,7 @@ func validWorkflowIntegrationActionBase(r WorkflowIntegrationReservation) bool {
 }
 
 func validateWorkflowIntegrationCounters(b WorkflowIntegrationBudget) error {
-	units := map[WorkflowRef]bool{}
+	units := map[workflowstate.Ref]bool{}
 	for _, counter := range b.UnitCounters {
 		if !validWorkflowIntegrationCounterUnit(counter.Unit) || units[counter.Unit] {
 			return workflowstate.ErrConflict
@@ -376,6 +376,6 @@ func validateWorkflowIntegrationUsage(usage WorkflowIntegrationUsage) error {
 	return nil
 }
 
-func validWorkflowIntegrationCounterUnit(unit WorkflowRef) bool {
+func validWorkflowIntegrationCounterUnit(unit workflowstate.Ref) bool {
 	return unit.ID != "" && slices.Contains([]string{"slice", "ticket"}, unit.Kind)
 }

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowIntegrationRole displays one actual owned serial agent without
@@ -24,7 +25,7 @@ func TestWorkflowIntegrationRole(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.AdmitWorkflowIntegration(t.Context(), core.WorkflowIntegrationAdmission{InvocationID: id, ExpectedRevision: run.Revision, Unit: core.WorkflowRef{Kind: "slice", ID: hierarchy.Tasks[0].Task.SliceID}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"}); err != nil {
+	if _, err := store.AdmitWorkflowIntegration(t.Context(), core.WorkflowIntegrationAdmission{InvocationID: id, ExpectedRevision: run.Revision, Unit: workflowstate.Ref{Kind: "slice", ID: hierarchy.Tasks[0].Task.SliceID}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"}); err != nil {
 		t.Fatal(err)
 	}
 

@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func serviceWorkflowDependencyFixture(t *testing.T) (service, core.WorkflowRecord, core.WorkflowStartRequest) {
@@ -32,12 +34,12 @@ func serviceWorkflowDependencyFixture(t *testing.T) (service, core.WorkflowRecor
 		t.Fatal(err)
 	}
 
-	var contract core.GeneratedWorkflowTask
+	var contract generationcore.GeneratedWorkflowTask
 	if err := json.Unmarshal(selected.Domain["execution_contract"], &contract); err != nil {
 		t.Fatal(err)
 	}
 
-	contract.DependsOn = []core.WorkflowRef{{Kind: "ticket", ID: outside.Task.Key}}
+	contract.DependsOn = []workflowstate.Ref{{Kind: "ticket", ID: outside.Task.Key}}
 
 	data, err := json.Marshal(contract)
 	if err != nil {
@@ -137,7 +139,7 @@ func serviceWorkflowDependencyReceipt(t *testing.T, operations service, outside 
 	now := time.Now().UTC()
 	identity := core.WorkflowIdentity{ID: "dependency-receipt", ProjectID: outside.ProjectID, Namespace: outside.Namespace, Revision: 1, CreatedAt: now, UpdatedAt: now}
 
-	receipt, err := store.CreateReceipt(t.Context(), core.WorkflowRecord{WorkflowIdentity: identity, Kind: "receipt", Path: "run/dependency/evidence/receipt.json", Receipt: &core.WorkflowReceipt{Schema: core.WorkflowSchema, Unit: core.WorkflowRef{Kind: "ticket", ID: outside.Task.Key}, CandidateID: "candidate", SubmissionID: "submission", Provider: "forgejo", Repository: repository, PullRequest: repository + "/pulls/1", Method: "rebase", SourceCommit: commit, BaseCommit: commit, PreparedTree: tree, HistoryProof: "host-verification", ResultCommit: commit, VerifiedTree: tree, ObservedTarget: commit, VerificationRef: "host-proof", ValidationRefs: []string{"host-validation"}, ConfirmedAt: now}})
+	receipt, err := store.CreateReceipt(t.Context(), core.WorkflowRecord{WorkflowIdentity: identity, Kind: "receipt", Path: "run/dependency/evidence/receipt.json", Receipt: &core.WorkflowReceipt{Schema: core.WorkflowSchema, Unit: workflowstate.Ref{Kind: "ticket", ID: outside.Task.Key}, CandidateID: "candidate", SubmissionID: "submission", Provider: "forgejo", Repository: repository, PullRequest: repository + "/pulls/1", Method: "rebase", SourceCommit: commit, BaseCommit: commit, PreparedTree: tree, HistoryProof: "host-verification", ResultCommit: commit, VerifiedTree: tree, ObservedTarget: commit, VerificationRef: "host-proof", ValidationRefs: []string{"host-validation"}, ConfirmedAt: now}})
 	if err != nil {
 		t.Fatal(err)
 	}

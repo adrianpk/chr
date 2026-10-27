@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 )
 
 // WorkflowUpgradeOptions explicitly selects a project policy and, optionally,
@@ -86,7 +88,7 @@ func validateWorkflowUpgradeOptions(opts WorkflowUpgradeOptions) error {
 			return fmt.Errorf("selected adoption requires ticket authority and legacy task ownership observation")
 		}
 
-		return ValidateGeneratedWorkflowPlan(opts.Adoption.Plan)
+		return generationcore.ValidateGeneratedWorkflowPlan(opts.Adoption.Plan)
 	}
 
 	return nil

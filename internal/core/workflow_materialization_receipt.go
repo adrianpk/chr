@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -29,13 +30,13 @@ type workflowMaterializationReceipt struct {
 	Slices    []WorkflowSlice                  `json:"slices"`
 }
 
-func workflowMaterializationHash(plan GeneratedWorkflowPlan) (string, error) {
-	data, err := json.Marshal(orderedWorkflowPlan(plan))
+func workflowMaterializationHash(plan generationcore.GeneratedWorkflowPlan) (string, error) {
+	data, err := json.Marshal(generationcore.OrderedWorkflowPlan(plan))
 
 	return contenthash.Sum(data), err
 }
 
-func materializationReceiptFile(plan GeneratedWorkflowPlan, result WorkflowMaterializationResult) (workflowFileChange, error) {
+func materializationReceiptFile(plan generationcore.GeneratedWorkflowPlan, result WorkflowMaterializationResult) (workflowFileChange, error) {
 	hash, err := workflowMaterializationHash(plan)
 	if err != nil {
 		return workflowFileChange{}, err
@@ -52,7 +53,7 @@ func materializationReceiptFile(plan GeneratedWorkflowPlan, result WorkflowMater
 	return workflowFileChange{Path: filepath.ToSlash(filepath.Join("plan", result.Set.ID, "evidence", "materialization.json")), After: data}, err
 }
 
-func (s *WorkflowStore) resumeMaterialization(snapshot WorkflowSnapshot, plan GeneratedWorkflowPlan) (WorkflowMaterializationResult, bool, error) {
+func (s *WorkflowStore) resumeMaterialization(snapshot WorkflowSnapshot, plan generationcore.GeneratedWorkflowPlan) (WorkflowMaterializationResult, bool, error) {
 	var set *WorkflowRecord
 
 	for i, record := range snapshot.Records {
@@ -87,7 +88,7 @@ func (s *WorkflowStore) resumeMaterialization(snapshot WorkflowSnapshot, plan Ge
 	return result, true, err
 }
 
-func (s *WorkflowStore) readMaterializationReceipt(set WorkflowRecord, plan GeneratedWorkflowPlan, snapshot WorkflowSnapshot) (WorkflowMaterializationResult, error) {
+func (s *WorkflowStore) readMaterializationReceipt(set WorkflowRecord, plan generationcore.GeneratedWorkflowPlan, snapshot WorkflowSnapshot) (WorkflowMaterializationResult, error) {
 	observed, err := s.readRecord(set.Path)
 	if err != nil {
 		return WorkflowMaterializationResult{}, err
@@ -196,6 +197,6 @@ func (s *WorkflowStore) checkMaterializationSlices(set WorkflowRecord, receipt w
 	return nil
 }
 
-func matchingMaterializationReceipt(receipt workflowMaterializationReceipt, set WorkflowRecord, plan GeneratedWorkflowPlan, hash string) bool {
+func matchingMaterializationReceipt(receipt workflowMaterializationReceipt, set WorkflowRecord, plan generationcore.GeneratedWorkflowPlan, hash string) bool {
 	return receipt.Schema == workflowMaterializationSchema && receipt.RequestID == plan.MaterializationID && receipt.InputHash == hash && receipt.SetID == set.ID && receipt.SetPath == set.Path
 }

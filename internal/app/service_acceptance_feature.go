@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -99,12 +100,12 @@ func (s service) generateAcceptanceFeature(ctx context.Context, scope quizcore.S
 		return AcceptanceFeatureOperationResult{}, err
 	}
 
-	feature, err := core.ValidateAcceptanceFeatureGeneration(response.Feature)
+	feature, err := generationcore.ValidateAcceptanceFeatureGeneration(response.Feature)
 	if err != nil {
 		return AcceptanceFeatureOperationResult{}, err
 	}
 
-	if feature.Status != core.AcceptanceFeatureStatusGenerated {
+	if feature.Status != generationcore.AcceptanceFeatureStatusGenerated {
 		return s.acceptanceFeatureNonGeneratedResult(ctx, scope, modelRequest, response, feature)
 	}
 
@@ -139,14 +140,14 @@ func (s service) generateAcceptanceFeature(ctx context.Context, scope quizcore.S
 	})
 
 	return AcceptanceFeatureOperationResult{
-		Message: acceptanceFeatureResultMessage(core.AcceptanceFeatureStatusGenerated),
-		Status:  core.AcceptanceFeatureStatusGenerated,
+		Message: acceptanceFeatureResultMessage(generationcore.AcceptanceFeatureStatusGenerated),
+		Status:  generationcore.AcceptanceFeatureStatusGenerated,
 		Feature: paths.RelativePath,
 		Check:   check,
 	}, nil
 }
 
-func (s service) acceptanceFeatureNonGeneratedResult(ctx context.Context, scope quizcore.Scope, request core.QuizModelRequest, response core.QuizModelResponse, feature core.AcceptanceFeatureGeneration) (AcceptanceFeatureOperationResult, error) {
+func (s service) acceptanceFeatureNonGeneratedResult(ctx context.Context, scope quizcore.Scope, request core.QuizModelRequest, response core.QuizModelResponse, feature generationcore.AcceptanceFeatureGeneration) (AcceptanceFeatureOperationResult, error) {
 	s.appendPlanGenerationLog("generate_acceptance_feature_status", map[string]string{
 		"case_slug": scope.CaseSlug,
 		"status":    feature.Status,
@@ -166,8 +167,8 @@ func (s service) acceptanceFeatureNonGeneratedResult(ctx context.Context, scope 
 	}, nil
 }
 
-func (s service) acceptanceFeatureRoundPath(ctx context.Context, scope quizcore.Scope, request core.QuizModelRequest, response core.QuizModelResponse, feature core.AcceptanceFeatureGeneration) (string, error) {
-	if feature.Status != core.AcceptanceFeatureStatusNeedsMoreInfo {
+func (s service) acceptanceFeatureRoundPath(ctx context.Context, scope quizcore.Scope, request core.QuizModelRequest, response core.QuizModelResponse, feature generationcore.AcceptanceFeatureGeneration) (string, error) {
+	if feature.Status != generationcore.AcceptanceFeatureStatusNeedsMoreInfo {
 		return "", nil
 	}
 
@@ -267,7 +268,7 @@ func (s service) appendAcceptanceFeatureRoundContextSection(sections []core.Quiz
 	return sections, nil
 }
 
-func (s service) writeAcceptanceFeatureRoundNotes(ctx context.Context, scope quizcore.Scope, request core.QuizModelRequest, response core.QuizModelResponse, feature core.AcceptanceFeatureGeneration) (core.AcceptanceFeatureRoundPaths, error) {
+func (s service) writeAcceptanceFeatureRoundNotes(ctx context.Context, scope quizcore.Scope, request core.QuizModelRequest, response core.QuizModelResponse, feature generationcore.AcceptanceFeatureGeneration) (core.AcceptanceFeatureRoundPaths, error) {
 	notes := core.AcceptanceFeatureRoundNotes{
 		Scope:            scope,
 		Status:           feature.Status,
@@ -343,8 +344,8 @@ func specNodeSlug(node core.WorkspaceNode) string {
 
 func rejectedAcceptanceFeatureResult(check core.AcceptanceFeatureCheckResult, err error) (AcceptanceFeatureOperationResult, error) {
 	return AcceptanceFeatureOperationResult{
-		Message:         acceptanceFeatureResultMessage(core.AcceptanceFeatureStatusRejected),
-		Status:          core.AcceptanceFeatureStatusRejected,
+		Message:         acceptanceFeatureResultMessage(generationcore.AcceptanceFeatureStatusRejected),
+		Status:          generationcore.AcceptanceFeatureStatusRejected,
 		RejectionReason: err.Error(),
 		Check:           check,
 	}, nil
@@ -352,13 +353,13 @@ func rejectedAcceptanceFeatureResult(check core.AcceptanceFeatureCheckResult, er
 
 func acceptanceFeatureResultMessage(status string) string {
 	switch status {
-	case core.AcceptanceFeatureStatusGenerated:
+	case generationcore.AcceptanceFeatureStatusGenerated:
 		return "Acceptance feature generated."
-	case core.AcceptanceFeatureStatusNeedsMoreInfo:
+	case generationcore.AcceptanceFeatureStatusNeedsMoreInfo:
 		return "Acceptance feature needs more information."
-	case core.AcceptanceFeatureStatusNotApplicable:
+	case generationcore.AcceptanceFeatureStatusNotApplicable:
 		return "Acceptance feature not applicable."
-	case core.AcceptanceFeatureStatusRejected:
+	case generationcore.AcceptanceFeatureStatusRejected:
 		return "Acceptance feature rejected."
 	default:
 		return "Acceptance feature generation completed."

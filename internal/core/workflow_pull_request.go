@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ErrWorkflowAwaitingObservation retains uncertain PR creation without retrying it.
@@ -60,7 +62,7 @@ type WorkflowSlicePullRequestRequest struct {
 type WorkflowPullRequestBinding struct {
 	Schema           string                     `json:"schema"`
 	ID               string                     `json:"id"`
-	Unit             WorkflowRef                `json:"unit"`
+	Unit             workflowstate.Ref          `json:"unit"`
 	Request          WorkflowPullRequestRequest `json:"request"`
 	TargetCommit     string                     `json:"target_commit"`
 	CandidateID      string                     `json:"candidate_id"`

@@ -137,7 +137,7 @@ func (s *WorkflowStore) workflowSliceInput(ctx context.Context, run workflowInvo
 
 type workflowSliceContract struct {
 	Contract   string
-	Validation WorkflowValidation
+	Validation workflowstate.Validation
 }
 
 func (s *WorkflowStore) readWorkflowSliceContract(descriptor WorkflowSlice) (workflowSliceContract, error) {
@@ -156,7 +156,7 @@ func (s *WorkflowStore) readWorkflowSliceContract(descriptor WorkflowSlice) (wor
 		return contract, err
 	}
 
-	return contract, validateWorkflowGate(contract.Validation)
+	return contract, workflowstate.ValidateGate(contract.Validation)
 }
 
 func (s *WorkflowStore) workflowSliceTaskProof(ctx context.Context, run workflowInvocationFile, record WorkflowRecord) (WorkflowSliceTaskProof, error) {

@@ -21,7 +21,7 @@ const harnessExecutableLimit = 512 << 20
 // FreezeHarnessExecutable resolves a host-selected program once and binds its
 // regular executable file and argv. It never launches the executable.
 func FreezeHarnessExecutable(command []string) (HarnessExecutableRef, []string, error) {
-	if err := validateWorkflowCommand(command); err != nil {
+	if err := workflowstate.ValidateCommand(command); err != nil {
 		return HarnessExecutableRef{}, nil, err
 	}
 
@@ -86,7 +86,7 @@ func openHarnessExecutable(program string) (*os.File, error) {
 }
 
 func checkHarnessCommandImage(binding HarnessBinding, command []string) error {
-	if err := validateWorkflowCommand(command); err != nil {
+	if err := workflowstate.ValidateCommand(command); err != nil {
 		return err
 	}
 

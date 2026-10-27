@@ -10,7 +10,9 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -50,7 +52,7 @@ func (j *webJourney) planAndBind(t *testing.T) {
 	}
 }
 
-func journeyApprovedPlan(t *testing.T, operations service, binding core.PlanRevisionBinding) core.GeneratedWorkflowPlan {
+func journeyApprovedPlan(t *testing.T, operations service, binding generationcore.PlanRevisionBinding) generationcore.GeneratedWorkflowPlan {
 	t.Helper()
 
 	data, err := os.ReadFile(filepath.Join(operations.projectContext.ProjectDir, "ops/default", binding.OrderRef))
@@ -58,7 +60,7 @@ func journeyApprovedPlan(t *testing.T, operations service, binding core.PlanRevi
 		t.Fatal(err)
 	}
 
-	var order core.PlanOrderDocument
+	var order generationcore.PlanOrderDocument
 	if err := json.Unmarshal(data, &order); err != nil {
 		t.Fatal(err)
 	}
@@ -68,9 +70,9 @@ func journeyApprovedPlan(t *testing.T, operations service, binding core.PlanRevi
 	}
 
 	slice, task := order.Slices[0], order.Slices[0].Tasks[0]
-	gate := core.WorkflowValidation{Required: true, Commands: [][]string{{"go", "test", "./..."}}, TimeoutSeconds: 60}
+	gate := workflowstate.Validation{Required: true, Commands: [][]string{{"go", "test", "./..."}}, TimeoutSeconds: 60}
 
-	return core.GeneratedWorkflowPlan{MaterializationID: "journey-approval", Title: "Journey delivery", PlanRef: binding.BodyRef, PlanHash: binding.BodyHash, PlanRevision: &binding, UseCase: "named-work", ClosingValidation: gate, Slices: []core.GeneratedWorkflowSlice{{ID: slice.ID, Order: slice.Order, Title: slice.Title, Label: "Slice 1", Contract: "Deliver the selected greeting", Validation: gate, Tasks: []core.GeneratedWorkflowTask{{ID: task.ID, Order: task.Order, Title: task.Title, Label: "T1.1", Body: "Print hello once", Outcome: "Greeting printed", Scope: "Selected greeting", Acceptance: []string{"stdout equals hello"}, Validation: gate, Priority: "normal", Severity: "normal", Type: "task"}}}}}
+	return generationcore.GeneratedWorkflowPlan{MaterializationID: "journey-approval", Title: "Journey delivery", PlanRef: binding.BodyRef, PlanHash: binding.BodyHash, PlanRevision: &binding, UseCase: "named-work", ClosingValidation: gate, Slices: []generationcore.GeneratedWorkflowSlice{{ID: slice.ID, Order: slice.Order, Title: slice.Title, Label: "Slice 1", Contract: "Deliver the selected greeting", Validation: gate, Tasks: []generationcore.GeneratedWorkflowTask{{ID: task.ID, Order: task.Order, Title: task.Title, Label: "T1.1", Body: "Print hello once", Outcome: "Greeting printed", Scope: "Selected greeting", Acceptance: []string{"stdout equals hello"}, Validation: gate, Priority: "normal", Severity: "normal", Type: "task"}}}}}
 }
 
 func (j *webJourney) boardAndObserve(t *testing.T) {

@@ -5,18 +5,19 @@ import (
 	"encoding/json"
 	"time"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 type workflowSetAmendmentReceipt struct {
-	Schema           string                `json:"schema"`
-	SetID            string                `json:"set_id"`
-	PreviousRevision uint64                `json:"previous_revision"`
-	PreviousHash     string                `json:"previous_hash"`
-	Plan             GeneratedWorkflowPlan `json:"approved_plan"`
-	ReopenedClosure  string                `json:"reopened_closure,omitempty"`
-	ClosureHash      string                `json:"closure_hash,omitempty"`
-	RecordedAt       time.Time             `json:"recorded_at"`
+	Schema           string                               `json:"schema"`
+	SetID            string                               `json:"set_id"`
+	PreviousRevision uint64                               `json:"previous_revision"`
+	PreviousHash     string                               `json:"previous_hash"`
+	Plan             generationcore.GeneratedWorkflowPlan `json:"approved_plan"`
+	ReopenedClosure  string                               `json:"reopened_closure,omitempty"`
+	ClosureHash      string                               `json:"closure_hash,omitempty"`
+	RecordedAt       time.Time                            `json:"recorded_at"`
 }
 
 func (s *WorkflowStore) finishWorkflowAmendment(ctx context.Context, builder *workflowAmendmentBuild, request WorkflowSetAmendmentRequest, body []byte) error {

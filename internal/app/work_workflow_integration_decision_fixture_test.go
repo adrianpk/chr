@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func serviceIntegrationDecisionReady(t *testing.T) (service, string) {
@@ -130,7 +131,7 @@ func serviceIntegrationDecisionEvidence(t *testing.T, operations service, id, na
 	return ref
 }
 
-func serviceIntegrationDecisionGate(t *testing.T, operations service, sliceID string) core.WorkflowValidation {
+func serviceIntegrationDecisionGate(t *testing.T, operations service, sliceID string) workflowstate.Validation {
 	t.Helper()
 
 	store, err := operations.workflowStore()
@@ -156,7 +157,7 @@ func serviceIntegrationDecisionGate(t *testing.T, operations service, sliceID st
 	}
 
 	var contract struct {
-		Validation core.WorkflowValidation `json:"validation"`
+		Validation workflowstate.Validation `json:"validation"`
 	}
 	if err := json.Unmarshal(data, &contract); err != nil {
 		t.Fatal(err)

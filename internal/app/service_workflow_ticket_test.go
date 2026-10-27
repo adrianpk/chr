@@ -8,9 +8,10 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 )
 
-func serviceWorkflowTicketFixture(t *testing.T, plans ...core.GeneratedWorkflowPlan) (service, core.WorkflowRecord, core.WorkflowStartRequest) {
+func serviceWorkflowTicketFixture(t *testing.T, plans ...generationcore.GeneratedWorkflowPlan) (service, core.WorkflowRecord, core.WorkflowStartRequest) {
 	t.Helper()
 
 	operations, hierarchy, target := serviceWorkflowTaskFixture(t, plans...)
@@ -18,7 +19,7 @@ func serviceWorkflowTicketFixture(t *testing.T, plans ...core.GeneratedWorkflowP
 	task := *grouped.Task
 	task.Key, task.SetID, task.SliceID, task.UseCase, task.Order = "PRJ-90", "", "", "", 0
 
-	var contract core.GeneratedWorkflowTask
+	var contract generationcore.GeneratedWorkflowTask
 	if err := json.Unmarshal(grouped.Domain["execution_contract"], &contract); err != nil {
 		t.Fatal(err)
 	}

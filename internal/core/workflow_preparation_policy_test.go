@@ -17,7 +17,7 @@ func nativePolicyQuery(t *testing.T, f workflowGitFixture) WorkflowPreparationQu
 
 	q := WorkflowPreparationQuery{WorkflowIntegrationQuery: f.request.Git.WorkflowIntegrationQuery, BaseCommit: f.request.Git.BaseCommit}
 	q.SourceDirectory = f.request.Directory
-	q.Lane = WorkflowLane{Unit: WorkflowRef{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/prepared", Worktree: filepath.Join(t.TempDir(), "prepared"), BaseCommit: q.BaseCommit, HeadCommit: q.BaseCommit}
+	q.Lane = WorkflowLane{Unit: workflowstate.Ref{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/prepared", Worktree: filepath.Join(t.TempDir(), "prepared"), BaseCommit: q.BaseCommit, HeadCommit: q.BaseCommit}
 
 	return q
 }

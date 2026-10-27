@@ -24,7 +24,7 @@ func TestWorkflowPublicationModes(t *testing.T) {
 func testWorkflowPublicationMode(t *testing.T, mode ReviewWorkflowMode) {
 	t.Helper()
 
-	f := newWorkflowPreparationFixture(t, "rebase", WorkflowValidation{WaiverReason: "Publication fixture observes actual Git"})
+	f := newWorkflowPreparationFixture(t, "rebase", workflowstate.Validation{WaiverReason: "Publication fixture observes actual Git"})
 	p := &workflowSubmissionProviderFixture{workflowPreparationProviderFixture: f.provider, remote: f.remote, sealed: map[string]bool{}, lost: true}
 	workflowReviewConfig(t, f.store, mode)
 

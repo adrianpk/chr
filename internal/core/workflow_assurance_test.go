@@ -187,7 +187,7 @@ func workflowAssuranceLooseFixture(t *testing.T) (*WorkflowStore, WorkflowStartR
 	store, first, request := workflowTicketFixture(t, "loose", workflowPreparationGate("ls PRJ-*.txt >/dev/null"))
 	workflowLooseClassify(t, store, first, "critical", TicketStatusReadyForDev)
 	workflowLooseCreate(t, store, first, "PRJ-91", "high", nil)
-	workflowLooseCreate(t, store, first, "PRJ-92", "normal", []WorkflowRef{{Kind: "ticket", ID: first.Task.Key}})
+	workflowLooseCreate(t, store, first, "PRJ-92", "normal", []workflowstate.Ref{{Kind: "ticket", ID: first.Task.Key}})
 
 	request.Selection.Order = TicketLoopOrderPriority
 	request.Policy.CheckpointStepLimit = 1

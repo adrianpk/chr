@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeClosingFanout refuses even a standalone set gate before every
@@ -17,7 +18,7 @@ import (
 // closure record can replace incomplete finalization.
 func TestNativeClosingFanout(t *testing.T) {
 	marker := filepath.Join(t.TempDir(), "gate")
-	f := newNativeClosingFixture(t, "rebase", WorkflowValidation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"touch", marker}}})
+	f := newNativeClosingFixture(t, "rebase", workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"touch", marker}}})
 	store := f.fixture.f.store
 
 	set, err := store.Read(t.Context(), f.setPath)
@@ -87,7 +88,7 @@ func checkNativeClosingRetry(t *testing.T, f nativeClosingFixture, before map[st
 // authorize a gate on a target that no longer contains their prepared result.
 func TestNativeClosingDivergence(t *testing.T) {
 	marker := filepath.Join(t.TempDir(), "gate")
-	f := newNativeClosingFixture(t, "merge", WorkflowValidation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"touch", marker}}})
+	f := newNativeClosingFixture(t, "merge", workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"touch", marker}}})
 	finalizeNativeClosingFixture(t, f)
 
 	before := nativeClosingPreservedFiles(t, f)
@@ -145,7 +146,7 @@ func nativeClosingCorrectiveSet(t *testing.T, store *WorkflowStore) WorkflowReco
 
 	plan := workflowPlanFixture()
 	counter := filepath.Join(t.TempDir(), "corrective-count")
-	gate := WorkflowValidation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"sh", "-c", "n=0; [ ! -f \"$1\" ] || read -r n <\"$1\"; n=$((n+1)); printf '%s\\n' \"$n\" >\"$1\"; [ \"$n\" -gt 1 ]", "corrective-gate", counter}}}
+	gate := workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"sh", "-c", "n=0; [ ! -f \"$1\" ] || read -r n <\"$1\"; n=$((n+1)); printf '%s\\n' \"$n\" >\"$1\"; [ \"$n\" -gt 1 ]", "corrective-gate", counter}}}
 
 	set, err := store.Create(t.Context(), "Corrective closing set", WorkflowRecord{Kind: "plan", Set: &WorkflowSet{Schema: WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: gate}})
 	if err != nil {

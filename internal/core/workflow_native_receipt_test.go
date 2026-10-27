@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeRecordReceipt(t *testing.T, store *WorkflowStore, candidate WorkflowIntegrationCandidate) WorkflowRecord {
@@ -134,7 +135,7 @@ func TestNativeReceiptLegacy(t *testing.T) {
 	r := workflowTestTask("legacy-receipt")
 	r.Kind, r.Task, r.Path = "receipt", nil, "run/legacy/evidence/delivery.json"
 	object := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-	r.Receipt = &WorkflowReceipt{Schema: WorkflowSchema, Unit: WorkflowRef{Kind: "ticket", ID: "legacy-task"}, CandidateID: "old-candidate", SubmissionID: "old-submission", Provider: "forgejo", Repository: "https://forge.example/team/project", PullRequest: "https://forge.example/team/project/pulls/1", Method: "rebase", SourceCommit: object, BaseCommit: object, PreparedTree: object, HistoryProof: "old-history", ResultCommit: object, VerifiedTree: object, ObservedTarget: object, VerificationRef: "old-proof", ValidationRefs: []string{"old-validation"}, ConfirmedAt: r.CreatedAt}
+	r.Receipt = &WorkflowReceipt{Schema: WorkflowSchema, Unit: workflowstate.Ref{Kind: "ticket", ID: "legacy-task"}, CandidateID: "old-candidate", SubmissionID: "old-submission", Provider: "forgejo", Repository: "https://forge.example/team/project", PullRequest: "https://forge.example/team/project/pulls/1", Method: "rebase", SourceCommit: object, BaseCommit: object, PreparedTree: object, HistoryProof: "old-history", ResultCommit: object, VerifiedTree: object, ObservedTarget: object, VerificationRef: "old-proof", ValidationRefs: []string{"old-validation"}, ConfirmedAt: r.CreatedAt}
 
 	created, err := store.CreateReceipt(t.Context(), r)
 	if err != nil {

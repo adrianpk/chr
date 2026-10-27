@@ -57,7 +57,7 @@ func validateWorkflowProcess(invocationID, attemptID string, index int, process 
 		return fmt.Errorf("invalid workflow command process identity or state")
 	}
 
-	if err := validateWorkflowCommand(process.Command); err != nil {
+	if err := workflowstate.ValidateCommand(process.Command); err != nil {
 		return err
 	}
 

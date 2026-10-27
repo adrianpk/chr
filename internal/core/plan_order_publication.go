@@ -10,12 +10,14 @@ import (
 	"strconv"
 	"strings"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func preparePlanOrderChanges(projectDir string, paths GeneratedPlanPaths, target planTargetObservation, metadata map[string]any, plan GeneratedPlan, body []byte) ([]workflowFileChange, error) {
+func preparePlanOrderChanges(projectDir string, paths GeneratedPlanPaths, target planTargetObservation, metadata map[string]any, plan generationcore.GeneratedPlan, body []byte) ([]workflowFileChange, error) {
 	if !plan.RequireOrderMap && len(plan.Order) == 0 {
 		if metadata["plan_binding"] != nil {
 			return nil, fmt.Errorf("replacement requires its revision-bound order map")
@@ -24,7 +26,7 @@ func preparePlanOrderChanges(projectDir string, paths GeneratedPlanPaths, target
 		return nil, nil
 	}
 
-	if err := ValidatePlannedOrder(plan.Order); err != nil {
+	if err := generationcore.ValidatePlannedOrder(plan.Order); err != nil {
 		return nil, err
 	}
 
@@ -62,13 +64,13 @@ func preparePlanOrderChanges(projectDir string, paths GeneratedPlanPaths, target
 	return append(changes, current...), nil
 }
 
-func newPlanRevision(paths GeneratedPlanPaths, metadata map[string]any, plan GeneratedPlan, body []byte) (PlanRevisionBinding, PlanOrderDocument, error) {
+func newPlanRevision(paths GeneratedPlanPaths, metadata map[string]any, plan generationcore.GeneratedPlan, body []byte) (generationcore.PlanRevisionBinding, generationcore.PlanOrderDocument, error) {
 	revision := uint64(1)
 
 	if value, ok := metadata["plan_revision"]; ok {
 		number, ok := value.(float64)
 		if !ok || number < 1 || number >= 4096 || number != float64(uint64(number)) {
-			return PlanRevisionBinding{}, PlanOrderDocument{}, fmt.Errorf("invalid plan revision")
+			return generationcore.PlanRevisionBinding{}, generationcore.PlanOrderDocument{}, fmt.Errorf("invalid plan revision")
 		}
 
 		revision = uint64(number) + 1
@@ -78,13 +80,13 @@ func newPlanRevision(paths GeneratedPlanPaths, metadata map[string]any, plan Gen
 	reference := strings.Join(parts[2:], "/")
 	hash := contenthash.Sum(body)
 	retained := filepath.ToSlash(filepath.Join(filepath.Dir(reference), "files", "plan-revisions", fmt.Sprintf("%d-%s", revision, hash)))
-	binding := PlanRevisionBinding{Reference: reference, Revision: revision, BodyHash: hash, BodyRef: retained + "/plan.md", OrderRef: retained + "/order.json", TrackerRef: retained + "/tracker.md", CurrentTrackerRef: "tracker/00000-" + paths.ScopeID + "-tracking/artifact.md"}
-	document := PlanOrderDocument{Schema: "chr-tracker/v2", ProjectID: plan.Scope.ProjectID, Namespace: parts[1], PlanRef: reference, PlanRevision: revision, PlanBodyHash: hash, SourceObservationHash: plan.SourceObservationHash, SourceInputs: plan.SourceInputs, Slices: orderedPlanSlices(plan.Order)}
+	binding := generationcore.PlanRevisionBinding{Reference: reference, Revision: revision, BodyHash: hash, BodyRef: retained + "/plan.md", OrderRef: retained + "/order.json", TrackerRef: retained + "/tracker.md", CurrentTrackerRef: "tracker/00000-" + paths.ScopeID + "-tracking/artifact.md"}
+	document := generationcore.PlanOrderDocument{Schema: "chr-tracker/v2", ProjectID: plan.Scope.ProjectID, Namespace: parts[1], PlanRef: reference, PlanRevision: revision, PlanBodyHash: hash, SourceObservationHash: plan.SourceObservationHash, SourceInputs: plan.SourceInputs, Slices: generationcore.OrderedPlanSlices(plan.Order)}
 
 	return binding, document, nil
 }
 
-func (r *fileAuthoringSessionRepository) planRetainedImages(namespace string, binding PlanRevisionBinding, body, order, tracker []byte) ([]workflowFileChange, error) {
+func (r *fileAuthoringSessionRepository) planRetainedImages(namespace string, binding generationcore.PlanRevisionBinding, body, order, tracker []byte) ([]workflowFileChange, error) {
 	var changes []workflowFileChange
 
 	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: r.projectDir, Namespace: namespace})
@@ -115,7 +117,7 @@ func (r *fileAuthoringSessionRepository) planRetainedImages(namespace string, bi
 	return changes, nil
 }
 
-func (r *fileAuthoringSessionRepository) planCurrentTrackerChanges(namespace string, target planTargetObservation, binding PlanRevisionBinding, plan GeneratedPlan, tracker []byte) ([]workflowFileChange, error) {
+func (r *fileAuthoringSessionRepository) planCurrentTrackerChanges(namespace string, target planTargetObservation, binding generationcore.PlanRevisionBinding, plan generationcore.GeneratedPlan, tracker []byte) ([]workflowFileChange, error) {
 	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: r.projectDir, Namespace: namespace})
 	if err != nil {
 		return nil, err
@@ -167,7 +169,7 @@ func checkPreviousPlanTracker(target planTargetObservation, image workflowFileCh
 		return nil
 	}
 
-	var previous PlanRevisionBinding
+	var previous generationcore.PlanRevisionBinding
 
 	encoded, err := json.Marshal(target.metadata["plan_binding"])
 	if err != nil {
@@ -226,14 +228,14 @@ func appendPlanRevisionManifest(paths GeneratedPlanPaths, metadata map[string]an
 	return nil
 }
 
-func planCurrentTrackerMetadata(layout OpsLayout, reference string, plan GeneratedPlan, previous []byte) (map[string]any, error) {
+func planCurrentTrackerMetadata(layout OpsLayout, reference string, plan generationcore.GeneratedPlan, previous []byte) (map[string]any, error) {
 	parts := strings.Split(reference, "/")
 	if previous == nil {
 		return newOpsArtifactMetadata(CreateOpsArtifactOptions{Layout: layout, Type: "tracker", Title: plan.Title + " tracking", Producer: "chr"}, parts[3], plan.CreatedAt), nil
 	}
 
 	var metadata map[string]any
-	if err := decodeAuthoringState(previous, &metadata); err != nil {
+	if err := authoringstate.Decode(previous, &metadata); err != nil {
 		return nil, err
 	}
 

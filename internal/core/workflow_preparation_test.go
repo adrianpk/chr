@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowPreparationProviderFixture struct {
@@ -28,13 +29,13 @@ type workflowPreparationFixture struct {
 	actor, remote, base string
 }
 
-func newWorkflowPreparationFixture(t *testing.T, method string, gate WorkflowValidation) workflowPreparationFixture {
+func newWorkflowPreparationFixture(t *testing.T, method string, gate workflowstate.Validation) workflowPreparationFixture {
 	t.Helper()
 
 	return workflowPreparationExtentFixture(t, method, "slice", gate)
 }
 
-func workflowPreparationExtentFixture(t *testing.T, method, extent string, gate WorkflowValidation) workflowPreparationFixture {
+func workflowPreparationExtentFixture(t *testing.T, method, extent string, gate workflowstate.Validation) workflowPreparationFixture {
 	t.Helper()
 
 	store, opts := workflowMaterializationFixture(t)
@@ -42,12 +43,12 @@ func workflowPreparationExtentFixture(t *testing.T, method, extent string, gate 
 	return workflowPreparationPlanFixture(t, method, extent, gate, store, opts)
 }
 
-func workflowPreparationPlanFixture(t *testing.T, method, extent string, gate WorkflowValidation, store *WorkflowStore, opts WorkflowMaterializationOptions) workflowPreparationFixture {
+func workflowPreparationPlanFixture(t *testing.T, method, extent string, gate workflowstate.Validation, store *WorkflowStore, opts WorkflowMaterializationOptions) workflowPreparationFixture {
 	t.Helper()
 
 	opts.Plan.Slices[0].Validation = gate
 	for i := range opts.Plan.Slices[0].Tasks {
-		opts.Plan.Slices[0].Tasks[i].Validation = WorkflowValidation{WaiverReason: "Preparation fixture validates the complete slice"}
+		opts.Plan.Slices[0].Tasks[i].Validation = workflowstate.Validation{WaiverReason: "Preparation fixture validates the complete slice"}
 	}
 
 	hierarchy, err := store.MaterializePlan(t.Context(), opts)
@@ -89,8 +90,8 @@ func workflowPreparationPlanFixture(t *testing.T, method, extent string, gate Wo
 	return workflowPreparationFixture{store, hierarchy, workflowTestRead(t, store, run.ID), provider, NewWorkflowPreparationGit(repo, remote), actor, remote, base}
 }
 
-func workflowPreparationGate(script string) WorkflowValidation {
-	return WorkflowValidation{Required: true, Commands: [][]string{{"sh", "-c", script}}, TimeoutSeconds: 30}
+func workflowPreparationGate(script string) workflowstate.Validation {
+	return workflowstate.Validation{Required: true, Commands: [][]string{{"sh", "-c", script}}, TimeoutSeconds: 30}
 }
 
 // TestWorkflowPreparationMethods validates actual combined trees and ordered

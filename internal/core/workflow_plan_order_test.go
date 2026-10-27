@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -90,12 +91,12 @@ func TestWorkflowPlanOrderHistory(t *testing.T) {
 	}
 }
 
-func regenerateWorkflowOrder(t *testing.T, store *WorkflowStore, plan GeneratedWorkflowPlan, body string) PlanRevisionBinding {
+func regenerateWorkflowOrder(t *testing.T, store *WorkflowStore, plan generationcore.GeneratedWorkflowPlan, body string) generationcore.PlanRevisionBinding {
 	t.Helper()
 
 	generated := orderedPlanCandidate()
 	generated.Scope = quizcore.Scope{ProjectID: store.projectID, CaseSlug: plan.UseCase}
-	generated.Order = plannedWorkflowOrder(plan)
+	generated.Order = generationcore.PlannedWorkflowOrder(plan)
 
 	generated.Body = body
 	if _, err := WriteGeneratedPlan(t.Context(), store.layout.ProjectDir(), generated); err != nil {

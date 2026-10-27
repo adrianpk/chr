@@ -3,23 +3,25 @@ package core
 import (
 	"fmt"
 	"strings"
+
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 )
 
 // AssembleGeneratedPlanBody executes the corresponding package operation.
 func AssembleGeneratedPlanBody(
-	outline GeneratedPlanOutline,
-	details []GeneratedPlanSliceDetail,
+	outline generationcore.GeneratedPlanOutline,
+	details []generationcore.GeneratedPlanSliceDetail,
 	requestIDs []string,
 	responseIDs []string,
 ) (string, error) {
-	if err := ValidateGeneratedPlanOutline(outline); err != nil {
+	if err := generationcore.ValidateGeneratedPlanOutline(outline); err != nil {
 		return "", err
 	}
 
-	detailsBySliceID := map[string]GeneratedPlanSliceDetail{}
+	detailsBySliceID := map[string]generationcore.GeneratedPlanSliceDetail{}
 
 	for _, detail := range details {
-		if err := ValidateGeneratedPlanSliceDetailAgainstOutline(detail, outline, detail.SliceID); err != nil {
+		if err := generationcore.ValidateGeneratedPlanSliceDetailAgainstOutline(detail, outline, detail.SliceID); err != nil {
 			return "", err
 		}
 
@@ -45,7 +47,7 @@ func AssembleGeneratedPlanBody(
 	return strings.TrimSpace(output.String()), nil
 }
 
-func writePlanOverview(output *strings.Builder, outline GeneratedPlanOutline) {
+func writePlanOverview(output *strings.Builder, outline generationcore.GeneratedPlanOutline) {
 	output.WriteString("## High-level implementation strategy\n\n")
 	output.WriteString(strings.TrimSpace(outline.Summary))
 	output.WriteString("\n\n")
@@ -59,8 +61,8 @@ func writePlanOverview(output *strings.Builder, outline GeneratedPlanOutline) {
 
 func writePlanSliceDecomposition(
 	output *strings.Builder,
-	outline GeneratedPlanOutline,
-	detailsBySliceID map[string]GeneratedPlanSliceDetail,
+	outline generationcore.GeneratedPlanOutline,
+	detailsBySliceID map[string]generationcore.GeneratedPlanSliceDetail,
 ) {
 	output.WriteString("## Slice decomposition\n\n")
 
@@ -80,7 +82,7 @@ func writePlanSliceDecomposition(
 	}
 }
 
-func writePlanOrdering(output *strings.Builder, outline GeneratedPlanOutline) {
+func writePlanOrdering(output *strings.Builder, outline generationcore.GeneratedPlanOutline) {
 	output.WriteString("## Slice ordering\n\n")
 
 	for index, slice := range outline.Slices {
@@ -90,7 +92,7 @@ func writePlanOrdering(output *strings.Builder, outline GeneratedPlanOutline) {
 	output.WriteString("\n")
 }
 
-func writePlanDependencyAnalysis(output *strings.Builder, outline GeneratedPlanOutline) {
+func writePlanDependencyAnalysis(output *strings.Builder, outline generationcore.GeneratedPlanOutline) {
 	output.WriteString("## Slice dependency analysis\n\n")
 
 	if len(outline.Dependencies) == 0 {
@@ -112,7 +114,7 @@ func writePlanDependencyAnalysis(output *strings.Builder, outline GeneratedPlanO
 	output.WriteString("\n")
 }
 
-func writePlanExecutionStrategy(output *strings.Builder, outline GeneratedPlanOutline) {
+func writePlanExecutionStrategy(output *strings.Builder, outline generationcore.GeneratedPlanOutline) {
 	output.WriteString("## Branch strategy\n\n")
 
 	for _, slice := range outline.Slices {
@@ -133,8 +135,8 @@ func writePlanExecutionStrategy(output *strings.Builder, outline GeneratedPlanOu
 
 func writePlanValidationCriteria(
 	output *strings.Builder,
-	outline GeneratedPlanOutline,
-	detailsBySliceID map[string]GeneratedPlanSliceDetail,
+	outline generationcore.GeneratedPlanOutline,
+	detailsBySliceID map[string]generationcore.GeneratedPlanSliceDetail,
 ) {
 	output.WriteString("## Completion validation criteria\n\n")
 	output.WriteString(strings.TrimSpace(outline.ValidationStrategy))
@@ -171,7 +173,7 @@ func writePlanStringList(output *strings.Builder, title string, values []string)
 	output.WriteString("\n")
 }
 
-func writePlanTasks(output *strings.Builder, tasks []GeneratedPlanSliceTask) {
+func writePlanTasks(output *strings.Builder, tasks []generationcore.GeneratedPlanSliceTask) {
 	output.WriteString("Tasks inside slice\n\n")
 
 	for _, task := range tasks {

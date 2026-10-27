@@ -10,12 +10,12 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowTaskUnit(record WorkflowRecord) WorkflowRef {
+func workflowTaskUnit(record WorkflowRecord) workflowstate.Ref {
 	if record.Task.SliceID != "" {
-		return WorkflowRef{Kind: "slice", ID: record.Task.SliceID}
+		return workflowstate.Ref{Kind: "slice", ID: record.Task.SliceID}
 	}
 
-	return WorkflowRef{Kind: "ticket", ID: record.Task.Key}
+	return workflowstate.Ref{Kind: "ticket", ID: record.Task.Key}
 }
 
 func (s *WorkflowStore) retainedWorkflowLane(ctx context.Context, run workflowInvocationFile, record WorkflowRecord) (*WorkflowLane, error) {
@@ -57,7 +57,7 @@ func (s *WorkflowStore) retainedWorkflowLane(ctx context.Context, run workflowIn
 	return &lane, nil
 }
 
-func workflowRunHasLane(run workflowInvocationFile, namespace string, unit WorkflowRef) bool {
+func workflowRunHasLane(run workflowInvocationFile, namespace string, unit workflowstate.Ref) bool {
 	return run.Namespace == namespace && run.Lane != nil && run.Lane.Unit == unit
 }
 

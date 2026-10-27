@@ -6,6 +6,8 @@ import (
 	"errors"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowPublicationExternal verifies actual externally rewritten results
@@ -98,7 +100,7 @@ func assertWorkflowPublicationStopped(t *testing.T, f workflowPreparationFixture
 // provider with no automatic mutation contract, even after cancellation. Missing
 // atomic support does not prevent read-only canonical verification.
 func TestWorkflowPublicationReadOnly(t *testing.T) {
-	f := newWorkflowPreparationFixture(t, "squash", WorkflowValidation{WaiverReason: "External publication fixture observes actual Git"})
+	f := newWorkflowPreparationFixture(t, "squash", workflowstate.Validation{WaiverReason: "External publication fixture observes actual Git"})
 	p := &workflowSubmissionProviderFixture{workflowPreparationProviderFixture: f.provider, remote: f.remote}
 	workflowPublicationExternalResult(t, f, p, "squash")
 

@@ -64,7 +64,7 @@ func TestNativeAgentLateCeiling(t *testing.T) {
 	store, record, run := workflowTicketValidated(t)
 	limit := int64(100)
 
-	_, err := store.AdmitWorkflowIntegration(t.Context(), WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: WorkflowRef{Kind: "ticket", ID: record.Task.Key}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev", TokenLimit: &limit})
+	_, err := store.AdmitWorkflowIntegration(t.Context(), WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: workflowstate.Ref{Kind: "ticket", ID: record.Task.Key}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev", TokenLimit: &limit})
 	if !errors.Is(err, ErrWorkflowIntegrationBudget) {
 		t.Fatal("finite admission forgot earlier unmetered usage", err)
 	}

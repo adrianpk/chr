@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -65,7 +66,7 @@ func (r *fileAuthoringSessionRepository) recoverAuthoringMutation() error {
 	}
 
 	var journal authoringMutationJournal
-	if err := decodeAuthoringState(data, &journal); err != nil {
+	if err := authoringstate.Decode(data, &journal); err != nil {
 		return err
 	}
 

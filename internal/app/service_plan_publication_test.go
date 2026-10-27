@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -139,7 +140,7 @@ func planPublicationFixture(t *testing.T, dump string) (service, quizcore.Scope,
 func seedPlanPublicationTarget(t *testing.T, operations service, scope quizcore.Scope) core.GeneratedPlanPaths {
 	t.Helper()
 
-	paths, err := core.WriteGeneratedPlan(t.Context(), operations.projectContext.ProjectDir, core.GeneratedPlan{Scope: scope, Title: "Retained plan", Body: "Keep this usable until a complete replacement is ready.", CreatedAt: operations.utcNow()})
+	paths, err := core.WriteGeneratedPlan(t.Context(), operations.projectContext.ProjectDir, generationcore.GeneratedPlan{Scope: scope, Title: "Retained plan", Body: "Keep this usable until a complete replacement is ready.", CreatedAt: operations.utcNow()})
 	if err != nil {
 		t.Fatal(err)
 	}

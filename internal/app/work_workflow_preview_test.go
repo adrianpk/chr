@@ -15,6 +15,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowCLIFixture(t *testing.T) (service, core.WorkflowMaterializationResult, string) {
@@ -29,7 +30,7 @@ func workflowCLIFixture(t *testing.T) (service, core.WorkflowMaterializationResu
 	operations.projectContext.ProjectID = projectID(project)
 	plan := serviceWorkflowPlanFixture()
 	plan.UseCase = "delivery"
-	plan.Slices[0].Tasks[0].Validation = core.WorkflowValidation{Required: true, Commands: [][]string{{"git", "show", "HEAD:result.txt"}}, TimeoutSeconds: 30}
+	plan.Slices[0].Tasks[0].Validation = workflowstate.Validation{Required: true, Commands: [][]string{{"git", "show", "HEAD:result.txt"}}, TimeoutSeconds: 30}
 
 	hierarchy, err := operations.MaterializeWorkflowPlan(t.Context(), plan)
 	if err != nil {

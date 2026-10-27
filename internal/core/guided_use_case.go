@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
@@ -39,18 +40,18 @@ type GuidedUseCaseState struct {
 
 // GuidedUseCaseOperation binds retries to their original arguments and revision.
 type GuidedUseCaseOperation struct {
-	NativeRevision   uint64                 `json:"native_revision,omitempty"`
-	PreparedPlan     *GuidedPreparedPlan    `json:"prepared_plan,omitempty"`
-	PreparedWorkflow *GeneratedWorkflowPlan `json:"prepared_workflow,omitempty"`
-	PreparedSpec     *GuidedPreparedSpec    `json:"prepared_spec,omitempty"`
-	QuizRequest      *QuizActionRequest     `json:"quiz_request,omitempty"`
-	QuestionID       string                 `json:"question_id,omitempty"`
-	InputDigest      string                 `json:"input_digest,omitempty"`
-	ExpectedRevision int64                  `json:"expected_revision,omitempty"`
-	ID               string                 `json:"id"`
-	Action           string                 `json:"action"`
-	Digest           string                 `json:"digest"`
-	Content          string                 `json:"content,omitempty"`
+	NativeRevision   uint64                                `json:"native_revision,omitempty"`
+	PreparedPlan     *GuidedPreparedPlan                   `json:"prepared_plan,omitempty"`
+	PreparedWorkflow *generationcore.GeneratedWorkflowPlan `json:"prepared_workflow,omitempty"`
+	PreparedSpec     *GuidedPreparedSpec                   `json:"prepared_spec,omitempty"`
+	QuizRequest      *QuizActionRequest                    `json:"quiz_request,omitempty"`
+	QuestionID       string                                `json:"question_id,omitempty"`
+	InputDigest      string                                `json:"input_digest,omitempty"`
+	ExpectedRevision int64                                 `json:"expected_revision,omitempty"`
+	ID               string                                `json:"id"`
+	Action           string                                `json:"action"`
+	Digest           string                                `json:"digest"`
+	Content          string                                `json:"content,omitempty"`
 }
 
 // GuidedStageCheckpoint retains immutable input bytes independently of a code target.
@@ -149,7 +150,7 @@ func parseGuidedUseCase(value string) (*GuidedUseCaseState, error) {
 	}
 
 	var state GuidedUseCaseState
-	if err := decodeAuthoringState([]byte(unquoteMetadataString(value)), &state); err != nil {
+	if err := authoringstate.Decode([]byte(unquoteMetadataString(value)), &state); err != nil {
 		return nil, fmt.Errorf("parse guided state: %w", err)
 	}
 

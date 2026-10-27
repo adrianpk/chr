@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeRolePeer(t *testing.T, store *WorkflowStore, namespace, key, target string) (*WorkflowStore, WorkflowIntegrationEntry) {
@@ -35,7 +36,7 @@ func nativeRolePeer(t *testing.T, store *WorkflowStore, namespace, key, target s
 
 	commit, _ := workflowSelectionCommit(t, peer)
 	run := workflowTestStart(t, peer, WorkflowStartRequest{RequestKey: namespace, Selection: WorkflowPreviewRequest{Selector: WorkflowSelector{Extent: "ticket", Identity: key}, Target: WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}).Invocation
-	entry := nativeEntryAdmit(t, peer, WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: WorkflowRef{Kind: "ticket", ID: record.Task.Key}, AdmissionKey: run.RequestKey, TargetRef: target})
+	entry := nativeEntryAdmit(t, peer, WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: workflowstate.Ref{Kind: "ticket", ID: record.Task.Key}, AdmissionKey: run.RequestKey, TargetRef: target})
 
 	return peer, entry
 }

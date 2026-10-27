@@ -7,7 +7,9 @@ import (
 	"path/filepath"
 	"testing"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowMaterializationFixture(t *testing.T) (*WorkflowStore, WorkflowMaterializationOptions) {
@@ -42,7 +44,7 @@ func workflowMaterializationFixture(t *testing.T) (*WorkflowStore, WorkflowMater
 // and two integration units, including resolution of a forward task reference.
 func TestWorkflowMaterialization(t *testing.T) {
 	store, opts := workflowMaterializationFixture(t)
-	opts.Plan.Slices[0].Tasks[0].DependsOn = []WorkflowRef{{Kind: "ticket", ID: "task-1-3"}}
+	opts.Plan.Slices[0].Tasks[0].DependsOn = []workflowstate.Ref{{Kind: "ticket", ID: "task-1-3"}}
 
 	result, err := store.MaterializePlan(t.Context(), opts)
 	if err != nil {
@@ -87,15 +89,15 @@ func checkMaterializedHierarchy(t *testing.T, store *WorkflowStore, result Workf
 func TestWorkflowMaterializationRejects(t *testing.T) {
 	cases := []struct {
 		name   string
-		mutate func(*GeneratedWorkflowPlan)
+		mutate func(*generationcore.GeneratedWorkflowPlan)
 	}{
-		{"changed source", func(p *GeneratedWorkflowPlan) { p.PlanHash = "changed" }},
-		{"unknown task", func(p *GeneratedWorkflowPlan) {
-			p.Slices[0].Tasks[0].DependsOn = []WorkflowRef{{Kind: "ticket", ID: "absent"}}
+		{"changed source", func(p *generationcore.GeneratedWorkflowPlan) { p.PlanHash = "changed" }},
+		{"unknown task", func(p *generationcore.GeneratedWorkflowPlan) {
+			p.Slices[0].Tasks[0].DependsOn = []workflowstate.Ref{{Kind: "ticket", ID: "absent"}}
 		}},
-		{"dependency cycle", func(p *GeneratedWorkflowPlan) {
-			p.Slices[0].Tasks[0].DependsOn = []WorkflowRef{{Kind: "slice", ID: p.Slices[1].ID}}
-			p.Slices[1].DependsOn = []WorkflowRef{{Kind: "ticket", ID: p.Slices[0].Tasks[0].ID}}
+		{"dependency cycle", func(p *generationcore.GeneratedWorkflowPlan) {
+			p.Slices[0].Tasks[0].DependsOn = []workflowstate.Ref{{Kind: "slice", ID: p.Slices[1].ID}}
+			p.Slices[1].DependsOn = []workflowstate.Ref{{Kind: "ticket", ID: p.Slices[0].Tasks[0].ID}}
 		}},
 	}
 	for _, tc := range cases {

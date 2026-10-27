@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestTelegramRecoveryValidation starts a real manual host-validation process
@@ -16,7 +18,7 @@ func TestTelegramRecoveryValidation(t *testing.T) {
 	f, operations, record := telegramWorkAdmissionFixture(t, "ticket")
 	marker, release := filepath.Join(t.TempDir(), "validation"), filepath.Join(t.TempDir(), "release")
 	permit := telegramControlSourceSignal(t, release)
-	validation := core.WorkflowValidation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"sh", "-c", `printf ready > "$1"; IFS= read -r permit < "$2"; [ "$permit" = release ] && git show HEAD:result.txt`, "validation", marker, release}}}
+	validation := workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"sh", "-c", `printf ready > "$1"; IFS= read -r permit < "$2"; [ "$permit" = release ] && git show HEAD:result.txt`, "validation", marker, release}}}
 
 	store, err := operations.workflowStore()
 	if err != nil {
@@ -71,10 +73,10 @@ func TestTelegramRecoveryValidation(t *testing.T) {
 	checkTelegramControlPool(t, operations, 1, 1)
 }
 
-func setTelegramRecoveryValidation(t *testing.T, store *core.WorkflowStore, record core.WorkflowRecord, validation core.WorkflowValidation) {
+func setTelegramRecoveryValidation(t *testing.T, store *core.WorkflowStore, record core.WorkflowRecord, validation workflowstate.Validation) {
 	t.Helper()
 
-	var contract core.GeneratedWorkflowTask
+	var contract generationcore.GeneratedWorkflowTask
 	if err := json.Unmarshal(record.Domain["execution_contract"], &contract); err != nil {
 		t.Fatal(err)
 	}

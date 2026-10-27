@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -249,7 +250,7 @@ func TestCurateQuizEntriesPreservesAcceptanceReadiness(t *testing.T) {
 
 func TestWriteQuizDraftSpecWritesSpecArtifactWithDraftStatus(t *testing.T) {
 	dir := t.TempDir()
-	spec := QuizDraftSpec{
+	spec := generationcore.QuizDraftSpec{
 		Scope:           quizcore.Scope{ProjectID: "project-1", CaseSlug: "article-authoring"},
 		Title:           "Article Authoring Spec",
 		Body:            "Generated behavior.",

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	"forge.adrianpk.com/chr/internal/tui"
 )
@@ -159,8 +160,8 @@ func TestTUISpecAdapterGeneratesAcceptanceFeature(t *testing.T) {
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
 		responses: []core.QuizModelResponse{
-			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), core.AcceptanceFeatureGeneration{
-				Status: core.AcceptanceFeatureStatusGenerated,
+			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), generationcore.AcceptanceFeatureGeneration{
+				Status: generationcore.AcceptanceFeatureStatusGenerated,
 				Body: `@spec:blog-spec @use-case:blog
 Feature: Blog publishing
 
@@ -191,7 +192,7 @@ Feature: Blog publishing
 		t.Fatalf("ExecuteSpecAction returned error: %v", err)
 	}
 
-	if result.AcceptanceFeatureStatus != core.AcceptanceFeatureStatusGenerated {
+	if result.AcceptanceFeatureStatus != generationcore.AcceptanceFeatureStatusGenerated {
 		t.Fatalf("AcceptanceFeatureStatus = %q, want generated", result.AcceptanceFeatureStatus)
 	}
 

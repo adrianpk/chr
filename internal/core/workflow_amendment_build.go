@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -26,7 +27,7 @@ func (s *WorkflowStore) buildWorkflowAmendment(ctx context.Context, set Workflow
 		return builder.result, nil, err
 	}
 
-	plan := orderedWorkflowPlan(request.Plan)
+	plan := generationcore.OrderedWorkflowPlan(request.Plan)
 	if err := s.buildWorkflowAmendmentTasks(ctx, &builder, plan, request.ReserveTicketKey); err != nil {
 		return builder.result, nil, err
 	}
@@ -80,7 +81,7 @@ func (s *WorkflowStore) workflowAmendmentBuilder(ctx context.Context, set Workfl
 	return builder, nil
 }
 
-func (s *WorkflowStore) buildWorkflowAmendmentTasks(ctx context.Context, builder *workflowAmendmentBuild, plan GeneratedWorkflowPlan, allocate func(context.Context) (string, error)) error {
+func (s *WorkflowStore) buildWorkflowAmendmentTasks(ctx context.Context, builder *workflowAmendmentBuild, plan generationcore.GeneratedWorkflowPlan, allocate func(context.Context) (string, error)) error {
 	seen := map[string]bool{}
 
 	for _, slice := range plan.Slices {
@@ -110,7 +111,7 @@ func (s *WorkflowStore) buildWorkflowAmendmentTasks(ctx context.Context, builder
 	return nil
 }
 
-func (s *WorkflowStore) buildWorkflowAmendedTask(ctx context.Context, builder *workflowAmendmentBuild, slice GeneratedWorkflowSlice, input GeneratedWorkflowTask, allocate func(context.Context) (string, error)) (WorkflowRecord, error) {
+func (s *WorkflowStore) buildWorkflowAmendedTask(ctx context.Context, builder *workflowAmendmentBuild, slice generationcore.GeneratedWorkflowSlice, input generationcore.GeneratedWorkflowTask, allocate func(context.Context) (string, error)) (WorkflowRecord, error) {
 	if task, exists := builder.tasks[input.ID]; exists {
 		return task, checkWorkflowAmendedTask(task, input, slice)
 	}
@@ -118,8 +119,8 @@ func (s *WorkflowStore) buildWorkflowAmendedTask(ctx context.Context, builder *w
 	return s.newWorkflowAmendmentTask(ctx, builder, slice, input, allocate)
 }
 
-func checkWorkflowAmendedTask(task WorkflowRecord, input GeneratedWorkflowTask, slice GeneratedWorkflowSlice) error {
-	var previous GeneratedWorkflowTask
+func checkWorkflowAmendedTask(task WorkflowRecord, input generationcore.GeneratedWorkflowTask, slice generationcore.GeneratedWorkflowSlice) error {
+	var previous generationcore.GeneratedWorkflowTask
 	if err := json.Unmarshal(task.Domain["execution_contract"], &previous); err != nil {
 		return err
 	}
@@ -134,7 +135,7 @@ func checkWorkflowAmendedTask(task WorkflowRecord, input GeneratedWorkflowTask, 
 	return nil
 }
 
-func (s *WorkflowStore) newWorkflowAmendmentTask(ctx context.Context, builder *workflowAmendmentBuild, slice GeneratedWorkflowSlice, input GeneratedWorkflowTask, allocate func(context.Context) (string, error)) (WorkflowRecord, error) {
+func (s *WorkflowStore) newWorkflowAmendmentTask(ctx context.Context, builder *workflowAmendmentBuild, slice generationcore.GeneratedWorkflowSlice, input generationcore.GeneratedWorkflowTask, allocate func(context.Context) (string, error)) (WorkflowRecord, error) {
 	if err := checkWorkflowAmendmentAddition(*builder, slice, input); err != nil {
 		return WorkflowRecord{}, err
 	}

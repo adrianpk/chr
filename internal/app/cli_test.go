@@ -22,6 +22,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/gate"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
@@ -1000,7 +1001,7 @@ func TestAcceptanceFeatureGenerateOutputGenerated(t *testing.T) {
 
 	err := writeAcceptanceFeatureGenerateResult(&stdout, AcceptanceFeatureOperationResult{
 		Message: "Acceptance feature generated.",
-		Status:  core.AcceptanceFeatureStatusGenerated,
+		Status:  generationcore.AcceptanceFeatureStatusGenerated,
 		Feature: "ops/default/spec/00000-blog-acceptance-feature/artifact.md",
 	})
 	if err != nil {
@@ -1024,7 +1025,7 @@ func TestAcceptanceFeatureGenerateOutputNeedsMoreInfo(t *testing.T) {
 
 	err := writeAcceptanceFeatureGenerateResult(&stdout, AcceptanceFeatureOperationResult{
 		Message:         "Acceptance feature needs more information.",
-		Status:          core.AcceptanceFeatureStatusNeedsMoreInfo,
+		Status:          generationcore.AcceptanceFeatureStatusNeedsMoreInfo,
 		RejectionReason: "Missing observable failure path.",
 	})
 	if err != nil {
@@ -1047,7 +1048,7 @@ func TestAcceptanceFeatureGenerateOutputNotApplicable(t *testing.T) {
 
 	err := writeAcceptanceFeatureGenerateResult(&stdout, AcceptanceFeatureOperationResult{
 		Message:         "Acceptance feature not applicable.",
-		Status:          core.AcceptanceFeatureStatusNotApplicable,
+		Status:          generationcore.AcceptanceFeatureStatusNotApplicable,
 		RejectionReason: "The topic is not observable behavior.",
 	})
 	if err != nil {

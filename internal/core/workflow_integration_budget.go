@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowIntegrationBudgetBinding seals the invocation-wide budget image.
@@ -24,11 +26,11 @@ type WorkflowIntegrationLimits struct {
 
 // WorkflowIntegrationCounter retains consumed actions, independently of candidates.
 type WorkflowIntegrationCounter struct {
-	Unit                WorkflowRef `json:"unit"`
-	Merger              int64       `json:"merger"`
-	Drift               int64       `json:"drift"`
-	Submission          int64       `json:"submission"`
-	ExistingSubmissions int64       `json:"existing_submissions"`
+	Unit                workflowstate.Ref `json:"unit"`
+	Merger              int64             `json:"merger"`
+	Drift               int64             `json:"drift"`
+	Submission          int64             `json:"submission"`
+	ExistingSubmissions int64             `json:"existing_submissions"`
 }
 
 // WorkflowIntegrationUsage preserves the existing owners' consumed history.
@@ -60,7 +62,7 @@ type WorkflowIntegrationReservation struct {
 	Kind            string                 `json:"kind"`
 	Role            string                 `json:"role"`
 	EntryID         string                 `json:"entry_id"`
-	Unit            WorkflowRef            `json:"unit"`
+	Unit            workflowstate.Ref      `json:"unit"`
 	ClaimGeneration uint64                 `json:"claim_generation"`
 	AttemptID       string                 `json:"attempt_id"`
 	BaseCommit      string                 `json:"base_commit,omitempty"`

@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -61,7 +62,7 @@ func (r *fileAuthoringSessionRepository) quizReceipt(operationID, digest string)
 		return receipt.Result, false, err
 	}
 
-	if err := decodeAuthoringState(encoded, &receipt); err != nil {
+	if err := authoringstate.Decode(encoded, &receipt); err != nil {
 		return receipt.Result, false, err
 	}
 

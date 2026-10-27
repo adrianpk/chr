@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowIntegrationScheduleQuery bounds selection from admitted native units.
@@ -15,7 +16,7 @@ type WorkflowIntegrationScheduleQuery struct {
 	TargetRef    string
 	Namespace    string
 	InvocationID string
-	Unit         WorkflowRef
+	Unit         workflowstate.Ref
 	Offset       int
 	Limit        int
 	SnapshotHash string

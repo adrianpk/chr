@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s service) authoringWorkContract(record core.WorkflowRecord, title string, request AuthoringWorkRequest, source core.AuthoringArtifactObservation) (core.WorkflowRecord, error) {
@@ -24,7 +26,7 @@ func (s service) authoringWorkContract(record core.WorkflowRecord, title string,
 
 	// Keep the observed description intact rather than asking the model to
 	// reinterpret its acceptance criteria or invent a validation command.
-	contract := core.GeneratedWorkflowTask{ID: record.Task.Key, Title: title, Body: source.Body, Outcome: request.Instruction, Scope: source.Ref.Path, Acceptance: []string{source.Body}, Validation: core.WorkflowValidation{Required: true, Commands: [][]string{{"sh", "-c", config.Runtime.ValidationCommand}}, TimeoutSeconds: timeout}}
+	contract := generationcore.GeneratedWorkflowTask{ID: record.Task.Key, Title: title, Body: source.Body, Outcome: request.Instruction, Scope: source.Ref.Path, Acceptance: []string{source.Body}, Validation: workflowstate.Validation{Required: true, Commands: [][]string{{"sh", "-c", config.Runtime.ValidationCommand}}, TimeoutSeconds: timeout}}
 
 	return core.PrepareIndependentWorkflowTask(record, contract)
 }

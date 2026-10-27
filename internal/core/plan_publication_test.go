@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -96,7 +97,7 @@ func TestPlanPublicationRecovery(t *testing.T) {
 	}
 }
 
-func checkRecoveredPlanPublication(t *testing.T, project string, paths GeneratedPlanPaths, plan GeneratedPlan) {
+func checkRecoveredPlanPublication(t *testing.T, project string, paths GeneratedPlanPaths, plan generationcore.GeneratedPlan) {
 	t.Helper()
 
 	content, err := os.ReadFile(paths.Path)
@@ -119,6 +120,6 @@ func checkRecoveredPlanPublication(t *testing.T, project string, paths Generated
 	}
 }
 
-func planPublicationCandidate() GeneratedPlan {
-	return GeneratedPlan{Scope: quizcore.Scope{ProjectID: "example", CaseSlug: "chosen"}, Title: "Original plan", Body: "Original bounded work.", SourceObservationHash: "observed", SourceInputs: []PlanSourceBinding{{Kind: "dump", Reference: "ops/default/dump/00000-context/artifact.md", Revision: "observed-source"}}, CreatedAt: time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC)}
+func planPublicationCandidate() generationcore.GeneratedPlan {
+	return generationcore.GeneratedPlan{Scope: quizcore.Scope{ProjectID: "example", CaseSlug: "chosen"}, Title: "Original plan", Body: "Original bounded work.", SourceObservationHash: "observed", SourceInputs: []generationcore.PlanSourceBinding{{Kind: "dump", Reference: "ops/default/dump/00000-context/artifact.md", Revision: "observed-source"}}, CreatedAt: time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC)}
 }

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -100,7 +101,7 @@ func (s service) materializeGeneratedPlan(ctx context.Context, request PlanGener
 	return s.MaterializeWorkflowPlan(ctx, plan)
 }
 
-func (s service) planDeliveryInput(ctx context.Context, request PlanGenerateRequest, generated PlanOperationResult) (core.GeneratedWorkflowPlan, core.OpsLayout, error) {
+func (s service) planDeliveryInput(ctx context.Context, request PlanGenerateRequest, generated PlanOperationResult) (generationcore.GeneratedWorkflowPlan, core.OpsLayout, error) {
 	scope := s.quizScope(request.Scope)
 
 	input, err := core.ObservePlanWorkflow(ctx, s.projectContext.ProjectDir, scope)
@@ -144,7 +145,7 @@ func (s service) checkDeliveryTarget(ctx context.Context, scope quizcore.Scope, 
 	return nil
 }
 
-func (s service) generatePlanTicketContracts(ctx context.Context, input core.GeneratedWorkflowPlan, plan PlanView) (core.GeneratedWorkflowPlan, error) {
+func (s service) generatePlanTicketContracts(ctx context.Context, input generationcore.GeneratedWorkflowPlan, plan PlanView) (generationcore.GeneratedWorkflowPlan, error) {
 	bound, ctx, err := s.bindGeneration(ctx, input.MaterializationID, string(core.QuizModelActionMaterializePlanTracking))
 	if err != nil {
 		return input, err

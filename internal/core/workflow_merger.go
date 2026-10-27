@@ -1,6 +1,10 @@
 package core
 
-import "time"
+import (
+	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // WorkflowMergerRequirement binds required source or target intent to evidence.
 type WorkflowMergerRequirement struct {
@@ -52,17 +56,17 @@ type WorkflowMergerOperator struct {
 
 // WorkflowMergerIdentity groups the retained identity fields without changing their wire order.
 type WorkflowMergerIdentity struct {
-	ProtocolVersion   int         `json:"protocol_version"`
-	ID                string      `json:"id"`
-	InvocationID      string      `json:"invocation_id"`
-	EntryID           string      `json:"entry_id"`
-	Unit              WorkflowRef `json:"unit"`
-	CandidateRevision uint64      `json:"candidate_revision"`
-	CandidateHash     string      `json:"candidate_hash"`
-	ClaimGeneration   uint64      `json:"claim_generation"`
-	InputHash         string      `json:"input_hash"`
-	ScopeHash         string      `json:"scope_hash"`
-	Reason            string      `json:"reason"`
+	ProtocolVersion   int               `json:"protocol_version"`
+	ID                string            `json:"id"`
+	InvocationID      string            `json:"invocation_id"`
+	EntryID           string            `json:"entry_id"`
+	Unit              workflowstate.Ref `json:"unit"`
+	CandidateRevision uint64            `json:"candidate_revision"`
+	CandidateHash     string            `json:"candidate_hash"`
+	ClaimGeneration   uint64            `json:"claim_generation"`
+	InputHash         string            `json:"input_hash"`
+	ScopeHash         string            `json:"scope_hash"`
+	Reason            string            `json:"reason"`
 }
 
 // WorkflowMergerGit groups the retained git fields without changing their wire order.

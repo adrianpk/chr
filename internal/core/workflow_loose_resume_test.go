@@ -58,7 +58,7 @@ func workflowLooseConfirmDependency(t *testing.T, f workflowIntegrationFixture, 
 
 	record := workflowLooseRecord(t, f.store, "PRJ-89")
 	tree := workflowIntegrationCommand(t, f.actor, "rev-parse", commit+"^{tree}")
-	receipt := selectionReceipt(t, f.store, WorkflowRef{Kind: "ticket", ID: record.Task.Key}, commit, tree)
+	receipt := selectionReceipt(t, f.store, workflowstate.Ref{Kind: "ticket", ID: record.Task.Key}, commit, tree)
 	record.Task.Phase, record.Task.Status, record.Task.DeliveryRef = "integrated", TicketStatusDone, receipt.Path
 
 	return workflowTestWrite(t, f.store, record)

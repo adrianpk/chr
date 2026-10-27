@@ -21,7 +21,7 @@ func nativeEntryFixture(t *testing.T) (*WorkflowStore, WorkflowIntegrationAdmiss
 	store, record, request := workflowTicketFixture(t, "ticket", workflowPreparationGate("true"))
 	run := workflowTestStart(t, store, request).Invocation
 
-	return store, WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: WorkflowRef{Kind: "ticket", ID: record.Task.Key}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"}
+	return store, WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: workflowstate.Ref{Kind: "ticket", ID: record.Task.Key}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"}
 }
 
 func nativeEntryAdmit(t *testing.T, store *WorkflowStore, request WorkflowIntegrationAdmission) WorkflowIntegrationEntry {
@@ -158,7 +158,7 @@ func TestNativeEntryAdmission(t *testing.T) {
 	store, hierarchy, request := workflowClaimFixture(t)
 	request.Selection.Selector = workflowClaimSelector(hierarchy, "slice_set")
 	run := workflowTestStart(t, store, request).Invocation
-	admission := WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: WorkflowRef{Kind: "slice", ID: hierarchy.Set.Set.Slices[0].ID}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"}
+	admission := WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: workflowstate.Ref{Kind: "slice", ID: hierarchy.Set.Set.Slices[0].ID}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"}
 	first := nativeEntryAdmit(t, store, admission)
 	before := workflowTestRead(t, store, run.ID)
 
@@ -253,7 +253,7 @@ func nativeEntryNextNamespace(t *testing.T, store *WorkflowStore) (*WorkflowStor
 	commit, _ := workflowSelectionCommit(t, peer)
 	run := workflowTestStart(t, peer, WorkflowStartRequest{RequestKey: "other-unit", Selection: WorkflowPreviewRequest{Selector: WorkflowSelector{Extent: "ticket", Identity: record.Task.Key}, Target: WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}).Invocation
 
-	return peer, WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: WorkflowRef{Kind: "ticket", ID: record.Task.Key}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"}
+	return peer, WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: workflowstate.Ref{Kind: "ticket", ID: record.Task.Key}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"}
 }
 
 // TestNativeEntrySequence shares one coordinator order across namespaces and

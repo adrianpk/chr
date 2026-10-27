@@ -8,6 +8,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeClosingPublicationPeer(t *testing.T, f nativeClosingFixture) nativeSubmissionFixture {
@@ -59,7 +61,7 @@ func nativeClosingPublicationPeer(t *testing.T, f nativeClosingFixture) nativeSu
 // its own receipts and member fanout are complete and the remote did not move.
 func TestNativeClosingPublication(t *testing.T) {
 	marker := filepath.Join(t.TempDir(), "gate")
-	f := newNativeClosingFixture(t, "rebase", WorkflowValidation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"touch", marker}}})
+	f := newNativeClosingFixture(t, "rebase", workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"touch", marker}}})
 	ports := finalizeNativeClosingFixture(t, f)
 	peer := nativeClosingPublicationPeer(t, f)
 	beginNativeSubmission(t, peer)
@@ -88,7 +90,7 @@ func TestNativeClosingPublication(t *testing.T) {
 func TestNativeClosingPublicationRace(t *testing.T) {
 	root := t.TempDir()
 	marker, release := filepath.Join(root, "started"), filepath.Join(root, "release")
-	gate := WorkflowValidation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"sh", "-c", "touch \"$1\"; while [ ! -f \"$2\" ]; do sleep 0.02; done", "closing-gate", marker, release}}}
+	gate := workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"sh", "-c", "touch \"$1\"; while [ ! -f \"$2\" ]; do sleep 0.02; done", "closing-gate", marker, release}}}
 	f := newNativeClosingFixture(t, "rebase", gate)
 	ports := finalizeNativeClosingFixture(t, f)
 	peer := nativeClosingPublicationPeer(t, f)

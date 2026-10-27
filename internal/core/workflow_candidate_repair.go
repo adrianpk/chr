@@ -10,7 +10,7 @@ import (
 // WorkflowCandidateRepairBinding retains actionable combined-result evidence.
 // It cannot authorize publication or rewind accepted source task execution.
 type WorkflowCandidateRepairBinding struct {
-	Unit            WorkflowRef         `json:"unit"`
+	Unit            workflowstate.Ref   `json:"unit"`
 	EntryID         string              `json:"entry_id"`
 	ClaimGeneration uint64              `json:"claim_generation"`
 	CandidateHash   string              `json:"candidate_hash"`

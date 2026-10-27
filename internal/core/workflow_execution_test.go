@@ -5,15 +5,17 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowExecutionFixture(t *testing.T, gate []string, timeout int) (*WorkflowStore, WorkflowMaterializationResult, WorkflowStartRequest) {
 	t.Helper()
 
-	return workflowExecutionGateFixture(t, WorkflowValidation{Required: true, Commands: [][]string{gate}, TimeoutSeconds: timeout})
+	return workflowExecutionGateFixture(t, workflowstate.Validation{Required: true, Commands: [][]string{gate}, TimeoutSeconds: timeout})
 }
 
-func workflowExecutionGateFixture(t *testing.T, gate WorkflowValidation) (*WorkflowStore, WorkflowMaterializationResult, WorkflowStartRequest) {
+func workflowExecutionGateFixture(t *testing.T, gate workflowstate.Validation) (*WorkflowStore, WorkflowMaterializationResult, WorkflowStartRequest) {
 	t.Helper()
 
 	store, opts := workflowMaterializationFixture(t)

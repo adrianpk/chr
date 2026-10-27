@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -330,7 +331,7 @@ func telegramAuthoringTestBinding(t *testing.T, repo *fileAuthoringSessionReposi
 	}
 
 	var binding authoringRequestBinding
-	if err := decodeAuthoringState(data, &binding); err != nil {
+	if err := authoringstate.Decode(data, &binding); err != nil {
 		t.Fatal(err)
 	}
 

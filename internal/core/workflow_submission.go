@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ErrWorkflowObservationRequired retains target exclusion until a submitted
@@ -21,7 +23,7 @@ type WorkflowSubmission struct {
 	Native           *WorkflowNativeSubmission      `json:"native,omitempty"`
 	ID               string                         `json:"id"`
 	InvocationID     string                         `json:"invocation_id"`
-	Unit             WorkflowRef                    `json:"unit"`
+	Unit             workflowstate.Ref              `json:"unit"`
 	Attempt          int                            `json:"attempt"`
 	CandidateID      string                         `json:"candidate_id"`
 	CandidateHash    string                         `json:"candidate_hash"`
@@ -41,14 +43,14 @@ type WorkflowSubmission struct {
 // WorkflowSubmissionBinding projects the repository journal into an invocation.
 // The common-directory journal remains authoritative after interrupted updates.
 type WorkflowSubmissionBinding struct {
-	JournalKey       string      `json:"journal_key"`
-	JournalHash      string      `json:"journal_hash"`
-	TargetKey        string      `json:"target_key"`
-	ID               string      `json:"id"`
-	Unit             WorkflowRef `json:"unit"`
-	Attempt          int         `json:"attempt"`
-	State            string      `json:"state"`
-	ExternalDelivery bool        `json:"external_delivery,omitempty"`
+	JournalKey       string            `json:"journal_key"`
+	JournalHash      string            `json:"journal_hash"`
+	TargetKey        string            `json:"target_key"`
+	ID               string            `json:"id"`
+	Unit             workflowstate.Ref `json:"unit"`
+	Attempt          int               `json:"attempt"`
+	State            string            `json:"state"`
+	ExternalDelivery bool              `json:"external_delivery,omitempty"`
 }
 
 // WorkflowSubmissionResponse records an untrusted command response for later

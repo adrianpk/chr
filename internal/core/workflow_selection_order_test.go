@@ -2,14 +2,16 @@ package core
 
 import (
 	"testing"
+
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 )
 
 func materializeSelectionSet(t *testing.T, store *WorkflowStore, opts WorkflowMaterializationOptions, suffix, useCase string, order int) WorkflowMaterializationResult {
 	t.Helper()
 
-	opts.Plan.Slices = append([]GeneratedWorkflowSlice(nil), opts.Plan.Slices...)
+	opts.Plan.Slices = append([]generationcore.GeneratedWorkflowSlice(nil), opts.Plan.Slices...)
 	for i := range opts.Plan.Slices {
-		opts.Plan.Slices[i].Tasks = append([]GeneratedWorkflowTask(nil), opts.Plan.Slices[i].Tasks...)
+		opts.Plan.Slices[i].Tasks = append([]generationcore.GeneratedWorkflowTask(nil), opts.Plan.Slices[i].Tasks...)
 	}
 
 	opts.Plan.MaterializationID = "generation-" + suffix

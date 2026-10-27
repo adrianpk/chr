@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowSelectionGit(t *testing.T, store *WorkflowStore, args ...string) string {
@@ -93,12 +95,12 @@ func TestWorkflowSelectionPrerequisites(t *testing.T) {
 func TestWorkflowSelectionInvalidDependencies(t *testing.T) {
 	cases := []struct {
 		name                string
-		refs                []WorkflowRef
+		refs                []workflowstate.Ref
 		failMaterialization bool
 	}{
-		{"forward", []WorkflowRef{{Kind: "ticket", ID: "task-1-3"}}, false},
-		{"missing", []WorkflowRef{{Kind: "ticket", ID: "missing"}}, true},
-		{"self", []WorkflowRef{{Kind: "ticket", ID: "task-1-1"}}, true},
+		{"forward", []workflowstate.Ref{{Kind: "ticket", ID: "task-1-3"}}, false},
+		{"missing", []workflowstate.Ref{{Kind: "ticket", ID: "missing"}}, true},
+		{"self", []workflowstate.Ref{{Kind: "ticket", ID: "task-1-1"}}, true},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -125,7 +127,7 @@ func TestWorkflowSelectionInvalidDependencies(t *testing.T) {
 	}
 }
 
-func selectionReceipt(t *testing.T, store *WorkflowStore, unit WorkflowRef, commit, tree string) WorkflowRecord {
+func selectionReceipt(t *testing.T, store *WorkflowStore, unit workflowstate.Ref, commit, tree string) WorkflowRecord {
 	t.Helper()
 
 	identity := WorkflowIdentity{ID: "receipt-1", ProjectID: store.projectID, Namespace: store.layout.Namespace(), Revision: 1, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()}
@@ -149,7 +151,7 @@ func TestWorkflowSelectionTargetProof(t *testing.T) {
 	}
 
 	commit, tree := workflowSelectionCommit(t, store)
-	receipt := selectionReceipt(t, store, WorkflowRef{Kind: "slice", ID: result.Set.Set.Slices[0].ID}, commit, tree)
+	receipt := selectionReceipt(t, store, workflowstate.Ref{Kind: "slice", ID: result.Set.Set.Slices[0].ID}, commit, tree)
 	set := result.Set
 	set.Set.Slices[0].Phase, set.Set.Slices[0].DeliveryRef = "integrated", receipt.Path
 	workflowTestWrite(t, store, set)

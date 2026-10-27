@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"reflect"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	modelcore "forge.adrianpk.com/chr/internal/core/model"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
@@ -19,14 +21,14 @@ const QuizModelStrategyPlanDelivery = "plan_delivery"
 
 // ScopePlanDeliveryOrder gives each generated revision namespace-unique native
 // identities while retaining model-supplied order, titles and human labels.
-func ScopePlanDeliveryOrder(slices []PlanOrderSlice, operation PlanPublicationOperation) []PlanOrderSlice {
+func ScopePlanDeliveryOrder(slices []generationcore.PlanOrderSlice, operation generationcore.PlanPublicationOperation) []generationcore.PlanOrderSlice {
 	if !operation.TicketDelivery {
 		return slices
 	}
 
 	identity := operation.ID + "\x00" + operation.Scope.ProjectID + "\x00" + operation.Scope.CaseSlug + "\x00" + operation.ExpectedRevision
 	prefix := "p" + contenthash.Sum([]byte(identity))[:16] + "-"
-	result := orderedPlanSlices(slices)
+	result := generationcore.OrderedPlanSlices(slices)
 
 	for i := range result {
 		result[i].ID = prefix + fmt.Sprintf("slice-%d", result[i].Order)
@@ -40,19 +42,19 @@ func ScopePlanDeliveryOrder(slices []PlanOrderSlice, operation PlanPublicationOp
 
 // ObservePlanWorkflow reads the immutable planned input even after tickets have
 // been bound, so a retry uses the same materialization identity and contracts.
-func ObservePlanWorkflow(ctx context.Context, projectDir string, scope quizcore.Scope) (GeneratedWorkflowPlan, error) {
+func ObservePlanWorkflow(ctx context.Context, projectDir string, scope quizcore.Scope) (generationcore.GeneratedWorkflowPlan, error) {
 	binding, err := ObservePlanRevision(ctx, projectDir, scope)
 	if err != nil {
-		return GeneratedWorkflowPlan{}, err
+		return generationcore.GeneratedWorkflowPlan{}, err
 	}
 
 	if binding.Reference == "" {
-		return GeneratedWorkflowPlan{}, fmt.Errorf("generate a revision-bound plan before creating its tickets")
+		return generationcore.GeneratedWorkflowPlan{}, fmt.Errorf("generate a revision-bound plan before creating its tickets")
 	}
 
 	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: scope.Namespace})
 	if err != nil {
-		return GeneratedWorkflowPlan{}, err
+		return generationcore.GeneratedWorkflowPlan{}, err
 	}
 
 	r := &fileAuthoringSessionRepository{projectDir: projectDir}
@@ -60,56 +62,56 @@ func ObservePlanWorkflow(ctx context.Context, projectDir string, scope quizcore.
 
 	data, err := r.authoringRead(root + "/planned-binding.json")
 	if err != nil {
-		return GeneratedWorkflowPlan{}, err
+		return generationcore.GeneratedWorkflowPlan{}, err
 	}
 
-	var planned PlanRevisionBinding
-	if err := decodeAuthoringState(data, &planned); err != nil {
-		return GeneratedWorkflowPlan{}, err
+	var planned generationcore.PlanRevisionBinding
+	if err := authoringstate.Decode(data, &planned); err != nil {
+		return generationcore.GeneratedWorkflowPlan{}, err
 	}
 
 	if !samePlannedWorkflowBinding(planned, binding) || !validPlanBindingPaths(layout.Namespace(), planned) {
-		return GeneratedWorkflowPlan{}, workflowstate.ErrConflict
+		return generationcore.GeneratedWorkflowPlan{}, workflowstate.ErrConflict
 	}
 
 	return r.plannedWorkflowInput(ctx, layout, planned)
 }
 
-func samePlannedWorkflowBinding(planned, current PlanRevisionBinding) bool {
+func samePlannedWorkflowBinding(planned, current generationcore.PlanRevisionBinding) bool {
 	return planned.Reference == current.Reference && planned.Revision == current.Revision && planned.BodyHash == current.BodyHash && planned.PlannedOrderHash == current.PlannedOrderHash
 }
 
-func (r *fileAuthoringSessionRepository) plannedWorkflowInput(ctx context.Context, layout OpsLayout, binding PlanRevisionBinding) (GeneratedWorkflowPlan, error) {
+func (r *fileAuthoringSessionRepository) plannedWorkflowInput(ctx context.Context, layout OpsLayout, binding generationcore.PlanRevisionBinding) (generationcore.GeneratedWorkflowPlan, error) {
 	reference := filepath.ToSlash(filepath.Join(layout.RelativeRoot(), binding.Reference))
 
 	document, err := ReadPlanDocument(ctx, r.projectDir, reference)
 	if err != nil {
-		return GeneratedWorkflowPlan{}, err
+		return generationcore.GeneratedWorkflowPlan{}, err
 	}
 
 	data, err := r.authoringRead(filepath.ToSlash(filepath.Join(layout.RelativeRoot(), filepath.Dir(binding.OrderRef), "planned-order.json")))
 	if err != nil {
-		return GeneratedWorkflowPlan{}, err
+		return generationcore.GeneratedWorkflowPlan{}, err
 	}
 
 	if contenthash.Sum(data) != binding.PlannedOrderHash {
-		return GeneratedWorkflowPlan{}, ErrWorkflowProjectionStale
+		return generationcore.GeneratedWorkflowPlan{}, ErrWorkflowProjectionStale
 	}
 
-	var order PlanOrderDocument
-	if err := decodeAuthoringState(data, &order); err != nil {
-		return GeneratedWorkflowPlan{}, err
+	var order generationcore.PlanOrderDocument
+	if err := authoringstate.Decode(data, &order); err != nil {
+		return generationcore.GeneratedWorkflowPlan{}, err
 	}
 
-	if err := ValidatePlannedOrder(order.Slices); err != nil {
-		return GeneratedWorkflowPlan{}, err
+	if err := generationcore.ValidatePlannedOrder(order.Slices); err != nil {
+		return generationcore.GeneratedWorkflowPlan{}, err
 	}
 
-	plan := GeneratedWorkflowPlan{MaterializationID: "delivery-" + binding.PlannedOrderHash, Title: document.Title, PlanRef: binding.BodyRef, PlanHash: binding.BodyHash, PlanRevision: &binding}
-	for _, slice := range orderedPlanSlices(order.Slices) {
-		item := GeneratedWorkflowSlice{ID: slice.ID, Order: slice.Order, Title: slice.Title, Label: fmt.Sprintf("Slice %d", slice.Order)}
+	plan := generationcore.GeneratedWorkflowPlan{MaterializationID: "delivery-" + binding.PlannedOrderHash, Title: document.Title, PlanRef: binding.BodyRef, PlanHash: binding.BodyHash, PlanRevision: &binding}
+	for _, slice := range generationcore.OrderedPlanSlices(order.Slices) {
+		item := generationcore.GeneratedWorkflowSlice{ID: slice.ID, Order: slice.Order, Title: slice.Title, Label: fmt.Sprintf("Slice %d", slice.Order)}
 		for _, task := range slice.Tasks {
-			item.Tasks = append(item.Tasks, GeneratedWorkflowTask{ID: task.ID, Order: task.Order, Title: task.Title, Label: fmt.Sprintf("T%d.%d", slice.Order, task.Order)})
+			item.Tasks = append(item.Tasks, generationcore.GeneratedWorkflowTask{ID: task.ID, Order: task.Order, Title: task.Title, Label: fmt.Sprintf("T%d.%d", slice.Order, task.Order)})
 		}
 
 		plan.Slices = append(plan.Slices, item)
@@ -119,13 +121,13 @@ func (r *fileAuthoringSessionRepository) plannedWorkflowInput(ctx context.Contex
 }
 
 func quizModelPlanDeliveryResponse(request QuizModelRequest, output []byte) (QuizModelResponse, error) {
-	var contracts GeneratedWorkflowPlan
+	var contracts generationcore.GeneratedWorkflowPlan
 
 	if len(output) > workflowstate.FileLimit {
 		return QuizModelResponse{}, modelcore.ErrOutput
 	}
 
-	if err := decodeAuthoringState(extractJSONObject(output), &contracts); err != nil {
+	if err := authoringstate.Decode(modelcore.ExtractJSONObject(output), &contracts); err != nil {
 		return QuizModelResponse{}, err
 	}
 
@@ -134,27 +136,27 @@ func quizModelPlanDeliveryResponse(request QuizModelRequest, output []byte) (Qui
 		return QuizModelResponse{}, err
 	}
 
-	if !reflect.DeepEqual(orderedPlanSlices(plannedWorkflowOrder(plan)), orderedPlanSlices(plannedWorkflowOrder(contracts))) {
+	if !reflect.DeepEqual(generationcore.OrderedPlanSlices(generationcore.PlannedWorkflowOrder(plan)), generationcore.OrderedPlanSlices(generationcore.PlannedWorkflowOrder(contracts))) {
 		return QuizModelResponse{}, fmt.Errorf("ticket contracts changed the plan's declared slices or tasks")
 	}
 
-	plan, contracts = orderedWorkflowPlan(plan), orderedWorkflowPlan(contracts)
+	plan, contracts = generationcore.OrderedWorkflowPlan(plan), generationcore.OrderedWorkflowPlan(contracts)
 	for i := range contracts.Slices {
 		contracts.Slices[i].Label = plan.Slices[i].Label
 	}
 
 	plan.Slices, plan.ClosingValidation = contracts.Slices, contracts.ClosingValidation
-	if err := ValidateGeneratedWorkflowPlan(plan); err != nil {
+	if err := generationcore.ValidateGeneratedWorkflowPlan(plan); err != nil {
 		return QuizModelResponse{}, err
 	}
 
-	return QuizModelResponse{ID: quizModelResponseID(request), RequestID: request.ID, Provider: QuizModelProviderOpenAI, Status: QuizModelResponseReady, PlanTracking: GeneratedPlanTracking{Workflow: &plan}, RawText: string(output), CreatedAt: request.CreatedAt.UTC()}, nil
+	return QuizModelResponse{ID: quizModelResponseID(request), RequestID: request.ID, Provider: QuizModelProviderOpenAI, Status: QuizModelResponseReady, PlanTracking: generationcore.GeneratedPlanTracking{Workflow: &plan}, RawText: string(output), CreatedAt: request.CreatedAt.UTC()}, nil
 }
 
-func planDeliveryRequestInput(request QuizModelRequest) (GeneratedWorkflowPlan, error) {
+func planDeliveryRequestInput(request QuizModelRequest) (generationcore.GeneratedWorkflowPlan, error) {
 	for _, section := range request.ContextSections {
 		if section.Name == "planned_workflow" {
-			var plan GeneratedWorkflowPlan
+			var plan generationcore.GeneratedWorkflowPlan
 
 			err := json.Unmarshal([]byte(section.Content), &plan)
 
@@ -162,5 +164,5 @@ func planDeliveryRequestInput(request QuizModelRequest) (GeneratedWorkflowPlan, 
 		}
 	}
 
-	return GeneratedWorkflowPlan{}, fmt.Errorf("retained workflow input is required")
+	return generationcore.GeneratedWorkflowPlan{}, fmt.Errorf("retained workflow input is required")
 }

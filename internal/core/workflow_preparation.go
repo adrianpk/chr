@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const workflowIntegrationValidationPurpose = "integration_validation"
@@ -71,12 +73,12 @@ type WorkflowIntegrationCandidate struct {
 
 // WorkflowPreparationBinding retains bounded preparation across candidate changes.
 type WorkflowPreparationBinding struct {
-	Round      int         `json:"round"`
-	Unit       WorkflowRef `json:"unit"`
-	State      string      `json:"state"`
-	SourceHash string      `json:"source_hash"`
-	ResultRef  string      `json:"result_ref"`
-	ResultHash string      `json:"result_hash"`
+	Round      int               `json:"round"`
+	Unit       workflowstate.Ref `json:"unit"`
+	State      string            `json:"state"`
+	SourceHash string            `json:"source_hash"`
+	ResultRef  string            `json:"result_ref"`
+	ResultHash string            `json:"result_hash"`
 }
 
 // WorkflowPublicationGuard contains the exact protected result a publisher may

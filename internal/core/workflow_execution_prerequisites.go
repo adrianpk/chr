@@ -19,7 +19,7 @@ func (s *WorkflowStore) workflowPrerequisiteImages(ctx context.Context, run work
 		return nil, nil, err
 	}
 
-	refs := dependencies.refs[WorkflowRef{Kind: "ticket", ID: record.Task.Key}]
+	refs := dependencies.refs[workflowstate.Ref{Kind: "ticket", ID: record.Task.Key}]
 	if len(refs) > workflowstate.PageLimit {
 		return nil, nil, fmt.Errorf("workflow prerequisite bounds exceeded")
 	}
@@ -48,7 +48,7 @@ func (s *WorkflowStore) workflowPrerequisiteImages(ctx context.Context, run work
 	return images, hashes, nil
 }
 
-func workflowPrerequisiteRecord(selection workflowSelection, ref WorkflowRef) WorkflowRecord {
+func workflowPrerequisiteRecord(selection workflowSelection, ref workflowstate.Ref) WorkflowRecord {
 	if ref.Kind == "ticket" {
 		return selection.records[ref.ID]
 	}

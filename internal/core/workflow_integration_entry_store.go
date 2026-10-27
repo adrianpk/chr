@@ -302,6 +302,6 @@ func retainWorkflowIntegrationActiveUnit(entry WorkflowIntegrationEntry, activeU
 	return nil
 }
 
-func workflowIntegrationRetainedUnit(run workflowInvocationFile, unit WorkflowRef) bool {
+func workflowIntegrationRetainedUnit(run workflowInvocationFile, unit workflowstate.Ref) bool {
 	return slices.ContainsFunc(run.Members, func(member WorkflowMember) bool { return workflowMemberOwnsUnit(member, unit) })
 }

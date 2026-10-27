@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type nativePreparationFixture struct {
@@ -45,13 +46,13 @@ func (p *nativePreparationProviderFixture) WorkflowPreparedNativeCapability(_ co
 	return sealWorkflowNativeCapability(capability)
 }
 
-func newNativePreparationFixture(t *testing.T, method string, gate WorkflowValidation) nativePreparationFixture {
+func newNativePreparationFixture(t *testing.T, method string, gate workflowstate.Validation) nativePreparationFixture {
 	t.Helper()
 
 	return nativePreparationExtentFixture(t, method, "slice", gate)
 }
 
-func nativePreparationExtentFixture(t *testing.T, method, extent string, gate WorkflowValidation) nativePreparationFixture {
+func nativePreparationExtentFixture(t *testing.T, method, extent string, gate workflowstate.Validation) nativePreparationFixture {
 	t.Helper()
 
 	f := workflowPreparationExtentFixture(t, method, extent, gate)

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -14,7 +15,7 @@ import (
 // WorkflowMaterializationOptions supplies approved input and the existing native
 // key allocator. The allocator is called only for a new materialization.
 type WorkflowMaterializationOptions struct {
-	Plan             GeneratedWorkflowPlan
+	Plan             generationcore.GeneratedWorkflowPlan
 	ReserveTicketKey func(context.Context) (string, error)
 }
 
@@ -32,7 +33,7 @@ func (s *WorkflowStore) MaterializePlan(ctx context.Context, opts WorkflowMateri
 		return result, err
 	}
 
-	if err := ValidateGeneratedWorkflowPlan(opts.Plan); err != nil {
+	if err := generationcore.ValidateGeneratedWorkflowPlan(opts.Plan); err != nil {
 		return result, err
 	}
 
@@ -114,7 +115,7 @@ func (s *WorkflowStore) materializeNewPlan(ctx context.Context, opts WorkflowMat
 	return s.readMaterializationReceipt(result.Set, opts.Plan, snapshot)
 }
 
-func (s *WorkflowStore) readApprovedPlan(plan GeneratedWorkflowPlan) ([]byte, error) {
+func (s *WorkflowStore) readApprovedPlan(plan generationcore.GeneratedWorkflowPlan) ([]byte, error) {
 	path, err := s.safePath(plan.PlanRef)
 	if err != nil {
 		return nil, err
@@ -132,7 +133,7 @@ func (s *WorkflowStore) readApprovedPlan(plan GeneratedWorkflowPlan) ([]byte, er
 	return data, nil
 }
 
-func (s *WorkflowStore) materializationFiles(result WorkflowMaterializationResult, plan GeneratedWorkflowPlan) ([]workflowFileChange, error) {
+func (s *WorkflowStore) materializationFiles(result WorkflowMaterializationResult, plan generationcore.GeneratedWorkflowPlan) ([]workflowFileChange, error) {
 	receipt, err := materializationReceiptFile(plan, result)
 	if err != nil {
 		return nil, err
@@ -168,13 +169,13 @@ func (s *WorkflowStore) materializationFiles(result WorkflowMaterializationResul
 	return files, nil
 }
 
-func (s *WorkflowStore) materializationContractFiles(result WorkflowMaterializationResult, plan GeneratedWorkflowPlan) ([]workflowFileChange, error) {
+func (s *WorkflowStore) materializationContractFiles(result WorkflowMaterializationResult, plan generationcore.GeneratedWorkflowPlan) ([]workflowFileChange, error) {
 	files := []workflowFileChange{}
 
 	for _, slice := range plan.Slices {
 		data, err := json.Marshal(struct {
 			Contract   string
-			Validation WorkflowValidation
+			Validation workflowstate.Validation
 		}{slice.Contract, slice.Validation})
 		if err != nil {
 			return nil, err
@@ -186,7 +187,7 @@ func (s *WorkflowStore) materializationContractFiles(result WorkflowMaterializat
 
 	next := 0
 
-	for _, slice := range orderedWorkflowPlan(plan).Slices {
+	for _, slice := range generationcore.OrderedWorkflowPlan(plan).Slices {
 		for _, task := range slice.Tasks {
 			next++
 

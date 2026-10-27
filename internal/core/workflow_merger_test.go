@@ -20,7 +20,7 @@ func nativeMergerInput(t *testing.T) (*WorkflowStore, WorkflowMergerInput, time.
 	input := WorkflowMergerInput{
 		WorkflowMergerIdentity: WorkflowMergerIdentity{
 			ProtocolVersion: 1, ID: "merger-attempt-1", InvocationID: "native-run-1",
-			EntryID: contenthash.Sum([]byte("entry")), Unit: WorkflowRef{Kind: "slice", ID: "slice-1"},
+			EntryID: contenthash.Sum([]byte("entry")), Unit: workflowstate.Ref{Kind: "slice", ID: "slice-1"},
 			CandidateRevision: 2, CandidateHash: contenthash.Sum([]byte("candidate")), ClaimGeneration: 3,
 			ScopeHash: contenthash.Sum([]byte("scope")), Reason: "preparation_conflict",
 		}, WorkflowMergerGit: WorkflowMergerGit{

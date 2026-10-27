@@ -10,6 +10,8 @@ import (
 	"strings"
 	"sync"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowSubmissionProviderFixture struct {
@@ -27,7 +29,7 @@ type workflowSubmissionProviderFixture struct {
 func newWorkflowSubmissionFixture(t *testing.T, method string) (workflowPreparationFixture, *workflowSubmissionProviderFixture) {
 	t.Helper()
 
-	f := newWorkflowPreparationFixture(t, method, WorkflowValidation{WaiverReason: "Submission fixture validates real Git publication"})
+	f := newWorkflowPreparationFixture(t, method, workflowstate.Validation{WaiverReason: "Submission fixture validates real Git publication"})
 
 	p := &workflowSubmissionProviderFixture{workflowPreparationProviderFixture: f.provider, remote: f.remote, sealed: map[string]bool{}}
 	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, p, f.git); err != nil {

@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"strconv"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowPreparationCrashProcess is the owned writer killed during real
@@ -113,7 +115,7 @@ func TestWorkflowPreparationJournal(t *testing.T) {
 func testWorkflowPreparationJournal(t *testing.T, stage string, index int) {
 	t.Helper()
 
-	f := newWorkflowPreparationFixture(t, "rebase", WorkflowValidation{WaiverReason: "Preparation crash fixture"})
+	f := newWorkflowPreparationFixture(t, "rebase", workflowstate.Validation{WaiverReason: "Preparation crash fixture"})
 	workflowPreparationCrash(t, f, stage, index)
 
 	restarted := NewWorkflowStore(f.store.layout, f.store.projectID)

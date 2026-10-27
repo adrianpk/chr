@@ -7,11 +7,12 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
-func telegramWorkFixture(t *testing.T, plans ...core.GeneratedWorkflowPlan) (*telegramConversationAppFixture, service, core.WorkflowRecord) {
+func telegramWorkFixture(t *testing.T, plans ...generationcore.GeneratedWorkflowPlan) (*telegramConversationAppFixture, service, core.WorkflowRecord) {
 	t.Helper()
 
 	operations, record, _, _ := serviceWorkNativeFixture(t, plans...)

@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestServiceWorkflowMaterialization exercises the operation service, native key
@@ -36,14 +38,14 @@ func TestServiceWorkflowMaterialization(t *testing.T) {
 	checkServiceWorkflowProjection(t, service, project)
 }
 
-func serviceWorkflowPlanFixture() core.GeneratedWorkflowPlan {
-	gate := core.WorkflowValidation{Required: true, Commands: [][]string{{"go", "test", "./..."}}, TimeoutSeconds: 60}
+func serviceWorkflowPlanFixture() generationcore.GeneratedWorkflowPlan {
+	gate := workflowstate.Validation{Required: true, Commands: [][]string{{"go", "test", "./..."}}, TimeoutSeconds: 60}
 
-	plan := core.GeneratedWorkflowPlan{MaterializationID: "generation-a", Title: "Delivery", PlanRef: "plan/approved.md", PlanHash: core.WorkflowContentHash([]byte("approved\n")), ClosingValidation: gate}
+	plan := generationcore.GeneratedWorkflowPlan{MaterializationID: "generation-a", Title: "Delivery", PlanRef: "plan/approved.md", PlanHash: core.WorkflowContentHash([]byte("approved\n")), ClosingValidation: gate}
 	for i := 1; i <= 2; i++ {
-		slice := core.GeneratedWorkflowSlice{ID: fmt.Sprintf("slice-%d", i), Label: fmt.Sprintf("Slice %d", i), Order: i, Title: "Integration", Contract: "Deliver one integration unit", Validation: gate}
+		slice := generationcore.GeneratedWorkflowSlice{ID: fmt.Sprintf("slice-%d", i), Label: fmt.Sprintf("Slice %d", i), Order: i, Title: "Integration", Contract: "Deliver one integration unit", Validation: gate}
 		for j := 1; j <= 3; j++ {
-			slice.Tasks = append(slice.Tasks, core.GeneratedWorkflowTask{ID: fmt.Sprintf("task-%d-%d", i, j), Label: fmt.Sprintf("T%d.%d", i, j), Order: j, Title: "Task", Body: "Original instructions", Outcome: "Deliver behavior", Scope: "Bounded task", Acceptance: []string{"Observed result"}, Validation: gate, Priority: "normal", Severity: "normal", Type: "task"})
+			slice.Tasks = append(slice.Tasks, generationcore.GeneratedWorkflowTask{ID: fmt.Sprintf("task-%d-%d", i, j), Label: fmt.Sprintf("T%d.%d", i, j), Order: j, Title: "Task", Body: "Original instructions", Outcome: "Deliver behavior", Scope: "Bounded task", Acceptance: []string{"Observed result"}, Validation: gate, Priority: "normal", Severity: "normal", Type: "task"})
 		}
 
 		plan.Slices = append(plan.Slices, slice)

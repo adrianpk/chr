@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowPublicationUnknown blocks preparation, review and repair until an
@@ -80,7 +82,7 @@ func TestWorkflowPublicationCorrupt(t *testing.T) {
 // TestWorkflowPublicationUnsupported retains a durable blocker for source-only
 // provider capability and proves neither a prepared gate nor mutation occurs.
 func TestWorkflowPublicationUnsupported(t *testing.T) {
-	f := newWorkflowPreparationFixture(t, "rebase", WorkflowValidation{WaiverReason: "Unsupported guard fixture"})
+	f := newWorkflowPreparationFixture(t, "rebase", workflowstate.Validation{WaiverReason: "Unsupported guard fixture"})
 	f.provider.guarded = false
 	p := &workflowSubmissionProviderFixture{workflowPreparationProviderFixture: f.provider, remote: f.remote}
 	before := workflowTestRead(t, f.store, f.run.ID)

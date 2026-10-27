@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"slices"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowIntegrationQuery binds host Git verification to canonical provider facts.
@@ -55,7 +57,7 @@ type WorkflowPreparedIntegrationGit interface {
 type WorkflowSliceDeliveryProof struct {
 	Schema           string                      `json:"schema"`
 	InvocationID     string                      `json:"invocation_id"`
-	Unit             WorkflowRef                 `json:"unit"`
+	Unit             workflowstate.Ref           `json:"unit"`
 	CandidateID      string                      `json:"candidate_id"`
 	CandidateRef     string                      `json:"candidate_ref"`
 	CandidateHash    string                      `json:"candidate_hash"`

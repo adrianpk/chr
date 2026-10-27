@@ -12,6 +12,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -99,7 +100,7 @@ func decodeWorkflowUpgradeSelection(data []byte) (*core.WorkflowPlanAdoptionOpti
 		return nil, fmt.Errorf("workflow adoption envelope must contain one JSON object")
 	}
 
-	if err := core.ValidateGeneratedWorkflowPlan(selection.Plan); err != nil {
+	if err := generationcore.ValidateGeneratedWorkflowPlan(selection.Plan); err != nil {
 		return nil, err
 	}
 

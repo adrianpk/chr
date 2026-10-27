@@ -6,7 +6,9 @@ import (
 	"reflect"
 	"testing"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowLooseBlockedFixture(t *testing.T) workflowIntegrationFixture {
@@ -29,12 +31,12 @@ func workflowLooseDependency(t *testing.T, store *WorkflowStore, key, dependency
 
 	record := workflowLooseRecord(t, store, key)
 
-	var contract GeneratedWorkflowTask
+	var contract generationcore.GeneratedWorkflowTask
 	if err := json.Unmarshal(record.Domain["execution_contract"], &contract); err != nil {
 		t.Fatal(err)
 	}
 
-	contract.DependsOn = []WorkflowRef{{Kind: "ticket", ID: dependency}}
+	contract.DependsOn = []workflowstate.Ref{{Kind: "ticket", ID: dependency}}
 
 	data, err := json.Marshal(contract)
 	if err != nil {

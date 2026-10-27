@@ -22,7 +22,7 @@ type workflowSubmissionJournal struct {
 	OwnerRoot    string               `json:"owner_root"`
 	Namespace    string               `json:"namespace"`
 	InvocationID string               `json:"invocation_id"`
-	Unit         WorkflowRef          `json:"unit"`
+	Unit         workflowstate.Ref    `json:"unit"`
 	TargetKey    string               `json:"target_key"`
 	Attempts     []WorkflowSubmission `json:"attempts"`
 	sourceHash   string

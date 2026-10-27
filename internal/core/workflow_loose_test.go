@@ -6,7 +6,9 @@ import (
 	"slices"
 	"testing"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowLooseQueueFixture(t *testing.T, includeLater bool) workflowIntegrationFixture {
@@ -22,7 +24,7 @@ func workflowLooseConfiguredQueue(t *testing.T, includeLater bool, setup func(*W
 
 		workflowLooseClassify(t, store, first, "critical", TicketStatusReadyForDev)
 		workflowLooseCreate(t, store, first, "PRJ-91", "high", nil)
-		workflowLooseCreate(t, store, first, "PRJ-92", "normal", []WorkflowRef{{Kind: "ticket", ID: first.Task.Key}})
+		workflowLooseCreate(t, store, first, "PRJ-92", "normal", []workflowstate.Ref{{Kind: "ticket", ID: first.Task.Key}})
 
 		if setup != nil {
 			setup(store, request)
@@ -40,10 +42,10 @@ func workflowLooseConfiguredQueue(t *testing.T, includeLater bool, setup func(*W
 	return workflowIntegrationFixture{store: f.store, run: workflowTestRead(t, f.store, f.run.ID), provider: f.provider.workflowPRProviderFixture, git: NewWorkflowIntegrationGit(f.provider.pr.Repository, f.remote), actor: f.actor, remote: f.remote, base: f.base, result: result, target: result}
 }
 
-func workflowLooseCreate(t *testing.T, store *WorkflowStore, original WorkflowRecord, key, priority string, dependencies []WorkflowRef) WorkflowRecord {
+func workflowLooseCreate(t *testing.T, store *WorkflowStore, original WorkflowRecord, key, priority string, dependencies []workflowstate.Ref) WorkflowRecord {
 	t.Helper()
 
-	var contract GeneratedWorkflowTask
+	var contract generationcore.GeneratedWorkflowTask
 	if err := json.Unmarshal(original.Domain["execution_contract"], &contract); err != nil {
 		t.Fatal(err)
 	}

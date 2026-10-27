@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
@@ -65,7 +66,7 @@ func workflowPlanAdoptionFixture(t *testing.T) (*WorkflowStore, WorkflowPlanAdop
 	return store, opts
 }
 
-func workflowLegacyTicketFixture(t *testing.T, store *WorkflowStore, task GeneratedWorkflowTask, number int) WorkflowAdoptionTask {
+func workflowLegacyTicketFixture(t *testing.T, store *WorkflowStore, task generationcore.GeneratedWorkflowTask, number int) WorkflowAdoptionTask {
 	t.Helper()
 
 	now := time.Date(2025, 1, 2, 3, 4, 5, 0, time.UTC)

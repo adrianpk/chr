@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Isolated object stores must retain the source's credential-helper context.
@@ -29,7 +31,7 @@ func TestWorkflowIntegrationCredentials(t *testing.T) {
 	t.Cleanup(server.Close)
 	workflowPreparationCredential(t, f, server.URL)
 
-	query := WorkflowPreparationQuery{WorkflowIntegrationQuery: f.request.Git.WorkflowIntegrationQuery, BaseCommit: f.request.Git.BaseCommit, Lane: WorkflowLane{Unit: WorkflowRef{Kind: "ticket", ID: "TST-1"}, Branch: "refs/heads/chr/workflow/credential-preparation", Worktree: filepath.Join(t.TempDir(), "prepared"), BaseCommit: f.request.Git.BaseCommit, HeadCommit: f.request.Git.BaseCommit}}
+	query := WorkflowPreparationQuery{WorkflowIntegrationQuery: f.request.Git.WorkflowIntegrationQuery, BaseCommit: f.request.Git.BaseCommit, Lane: WorkflowLane{Unit: workflowstate.Ref{Kind: "ticket", ID: "TST-1"}, Branch: "refs/heads/chr/workflow/credential-preparation", Worktree: filepath.Join(t.TempDir(), "prepared"), BaseCommit: f.request.Git.BaseCommit, HeadCommit: f.request.Git.BaseCommit}}
 	query.SourceDirectory, query.ResultCommit = f.request.Directory, ""
 	transport := server.URL + "/" + filepath.Base(f.remote)
 

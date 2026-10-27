@@ -136,7 +136,7 @@ func (s *WorkflowStore) workflowClosingSliceMembers(ctx context.Context, descrip
 		return err
 	}
 
-	if descriptor.TaskInputHash != WorkflowTaskInputHash(snapshot.Records, descriptor.ID) || receipt.Receipt.Unit != (WorkflowRef{Kind: "slice", ID: descriptor.ID}) || descriptor.PullRequest != receipt.Receipt.PullRequest {
+	if descriptor.TaskInputHash != WorkflowTaskInputHash(snapshot.Records, descriptor.ID) || receipt.Receipt.Unit != (workflowstate.Ref{Kind: "slice", ID: descriptor.ID}) || descriptor.PullRequest != receipt.Receipt.PullRequest {
 		return workflowstate.ErrConflict
 	}
 

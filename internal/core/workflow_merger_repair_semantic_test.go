@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeMergerCleanReplay(t *testing.T) (OSWorkflowPreparationGit, WorkflowMergerRepairState) {
@@ -13,7 +15,7 @@ func nativeMergerCleanReplay(t *testing.T) (OSWorkflowPreparationGit, WorkflowMe
 	f := nativeReplayFixture(t)
 	query := WorkflowPreparationQuery{WorkflowIntegrationQuery: f.request.Git.WorkflowIntegrationQuery, BaseCommit: f.request.Git.BaseCommit}
 	query.SourceDirectory = f.request.Directory
-	query.Lane = WorkflowLane{Unit: WorkflowRef{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/repair", Worktree: filepath.Join(t.TempDir(), "repair"), BaseCommit: query.BaseCommit, HeadCommit: query.BaseCommit}
+	query.Lane = WorkflowLane{Unit: workflowstate.Ref{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/repair", Worktree: filepath.Join(t.TempDir(), "repair"), BaseCommit: query.BaseCommit, HeadCommit: query.BaseCommit}
 	git := NewWorkflowPreparationGit(query.Repository, f.remote)
 	git.committerTime = time.Unix(1700000000, 0).UTC()
 

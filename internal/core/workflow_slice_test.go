@@ -5,16 +5,18 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowSliceFixture(t *testing.T, gate WorkflowValidation) (*WorkflowStore, WorkflowMaterializationResult, WorkflowStartRequest) {
+func workflowSliceFixture(t *testing.T, gate workflowstate.Validation) (*WorkflowStore, WorkflowMaterializationResult, WorkflowStartRequest) {
 	t.Helper()
 
 	store, opts := workflowMaterializationFixture(t)
 
 	opts.Plan.Slices[0].Validation = gate
 	for i := range opts.Plan.Slices[0].Tasks {
-		opts.Plan.Slices[0].Tasks[i].Validation = WorkflowValidation{Required: true, Commands: [][]string{workflowTaskCommand(t, "gate")}, TimeoutSeconds: 30}
+		opts.Plan.Slices[0].Tasks[i].Validation = workflowstate.Validation{Required: true, Commands: [][]string{workflowTaskCommand(t, "gate")}, TimeoutSeconds: 30}
 	}
 
 	hierarchy, err := store.MaterializePlan(t.Context(), opts)
@@ -28,10 +30,10 @@ func workflowSliceFixture(t *testing.T, gate WorkflowValidation) (*WorkflowStore
 	return store, hierarchy, request
 }
 
-func workflowSliceGate(t *testing.T, mode string) WorkflowValidation {
+func workflowSliceGate(t *testing.T, mode string) workflowstate.Validation {
 	t.Helper()
 
-	return WorkflowValidation{Required: true, Commands: [][]string{workflowTaskCommand(t, mode)}, TimeoutSeconds: 30}
+	return workflowstate.Validation{Required: true, Commands: [][]string{workflowTaskCommand(t, mode)}, TimeoutSeconds: 30}
 }
 
 func workflowTestExecuteSlice(t *testing.T, store *WorkflowStore, id, worker string) WorkflowSliceCandidate {
@@ -124,7 +126,7 @@ func TestWorkflowSlicePrefix(t *testing.T) {
 // retries only the aggregate command against the same clean commit and tree.
 func TestWorkflowSliceRetry(t *testing.T) {
 	marker := filepath.Join(t.TempDir(), "aggregate-ready")
-	gate := WorkflowValidation{Required: true, Commands: [][]string{{"sh", "-c", "test -f \"$1\"", "gate", marker}}, TimeoutSeconds: 30}
+	gate := workflowstate.Validation{Required: true, Commands: [][]string{{"sh", "-c", "test -f \"$1\"", "gate", marker}}, TimeoutSeconds: 30}
 	store, hierarchy, request := workflowSliceFixture(t, gate)
 	run := workflowTestStart(t, store, request)
 

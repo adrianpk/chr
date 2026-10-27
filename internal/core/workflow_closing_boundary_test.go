@@ -33,7 +33,7 @@ func TestWorkflowClosingChanges(t *testing.T) {
 	for _, change := range []string{"target", "member"} {
 		t.Run(change, func(t *testing.T) {
 			fixture, ports := workflowClosingFixture(t)
-			gate := WorkflowValidation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"git", "rev-parse", "HEAD"}}}
+			gate := workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"git", "rev-parse", "HEAD"}}}
 
 			if change == "target" {
 				ports.Target = &workflowClosingTargetHook{WorkflowTargetGit: ports.Target, hook: func() {
@@ -68,7 +68,7 @@ func TestWorkflowClosingUseCase(t *testing.T) {
 	for _, order := range []int{2, 1} {
 		plan := workflowPlanFixture()
 
-		set, err := fixture.store.Create(t.Context(), "Ordered empty set", WorkflowRecord{Kind: "plan", Set: &WorkflowSet{Schema: WorkflowSchema, Status: "ready", UseCase: "empty-case", UseCaseOrder: order, PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: WorkflowValidation{WaiverReason: "Approved ordered empty-set closure"}}})
+		set, err := fixture.store.Create(t.Context(), "Ordered empty set", WorkflowRecord{Kind: "plan", Set: &WorkflowSet{Schema: WorkflowSchema, Status: "ready", UseCase: "empty-case", UseCaseOrder: order, PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: workflowstate.Validation{WaiverReason: "Approved ordered empty-set closure"}}})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -93,7 +93,7 @@ func TestWorkflowClosingUseCase(t *testing.T) {
 // invocation while an explicit changed-plan amendment opens another set cycle.
 func TestWorkflowClosingReopen(t *testing.T) {
 	fixture, ports := workflowClosingFixture(t)
-	workflowClosingContract(t, fixture, WorkflowValidation{WaiverReason: "Approved closure waiver"})
+	workflowClosingContract(t, fixture, workflowstate.Validation{WaiverReason: "Approved closure waiver"})
 
 	closed, err := fixture.store.CloseWorkflowInvocationSet(t.Context(), fixture.run.ID, "dev", ports)
 	if err != nil {

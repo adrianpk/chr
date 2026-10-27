@@ -12,7 +12,9 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type planDeliveryTestModel struct {
@@ -31,7 +33,7 @@ func (m *planDeliveryTestModel) InvokeQuizModel(ctx context.Context, request cor
 		return core.QuizModelResponse{}, errors.New("provider temporarily unavailable")
 	}
 
-	var input core.GeneratedWorkflowPlan
+	var input generationcore.GeneratedWorkflowPlan
 
 	for _, section := range request.ContextSections {
 		if section.Name == "planned_workflow" {
@@ -41,7 +43,7 @@ func (m *planDeliveryTestModel) InvokeQuizModel(ctx context.Context, request cor
 		}
 	}
 
-	gate := core.WorkflowValidation{Required: true, Commands: [][]string{{"go", "test", "./..."}}, TimeoutSeconds: 60}
+	gate := workflowstate.Validation{Required: true, Commands: [][]string{{"go", "test", "./..."}}, TimeoutSeconds: 60}
 	input.ClosingValidation = gate
 
 	for i := range input.Slices {
@@ -54,7 +56,7 @@ func (m *planDeliveryTestModel) InvokeQuizModel(ctx context.Context, request cor
 		}
 	}
 
-	return core.QuizModelResponse{ID: "delivery-response", RequestID: request.ID, Provider: "fixture", Status: core.QuizModelResponseReady, PlanTracking: core.GeneratedPlanTracking{Workflow: &input}, CreatedAt: request.CreatedAt}, nil
+	return core.QuizModelResponse{ID: "delivery-response", RequestID: request.ID, Provider: "fixture", Status: core.QuizModelResponseReady, PlanTracking: generationcore.GeneratedPlanTracking{Workflow: &input}, CreatedAt: request.CreatedAt}, nil
 }
 
 func webPlanDeliveryFixture(t *testing.T) (webViewProvider, *planDeliveryTestModel) {

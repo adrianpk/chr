@@ -14,7 +14,7 @@ import (
 // WorkflowIntegrationBinding pins an invocation to one guarded queue image.
 type WorkflowIntegrationBinding struct {
 	EntryID  string              `json:"entry_id"`
-	Unit     WorkflowRef         `json:"unit"`
+	Unit     workflowstate.Ref   `json:"unit"`
 	Revision uint64              `json:"revision"`
 	EntryRef WorkflowEvidenceRef `json:"entry_ref"`
 }
@@ -32,7 +32,7 @@ type WorkflowIntegrationEntry struct {
 	WorkflowIdentity
 	SchemaVersion       int                         `json:"schema_version"`
 	InvocationID        string                      `json:"invocation_id"`
-	Unit                WorkflowRef                 `json:"unit"`
+	Unit                workflowstate.Ref           `json:"unit"`
 	CoordinatorID       string                      `json:"coordinator_id"`
 	Repository          string                      `json:"repository_id"`
 	TargetRef           string                      `json:"target_ref"`
@@ -57,7 +57,7 @@ type WorkflowIntegrationAdmission struct {
 	TokenLimit       *int64
 	InvocationID     string
 	ExpectedRevision uint64
-	Unit             WorkflowRef
+	Unit             workflowstate.Ref
 	AdmissionKey     string
 	TargetRef        string
 }
@@ -78,7 +78,7 @@ type WorkflowIntegrationTransition struct {
 	ClearStopIntent    bool
 }
 
-func workflowIntegrationEntryID(run workflowInvocationFile, unit WorkflowRef) string {
+func workflowIntegrationEntryID(run workflowInvocationFile, unit workflowstate.Ref) string {
 	return contenthash.Sum([]byte(run.ProjectID + "\x00" + run.Namespace + "\x00" + run.ID + "\x00" + unit.Kind + "\x00" + unit.ID))
 }
 
@@ -90,7 +90,7 @@ func workflowIntegrationBudgetPath(id string) string {
 	return filepath.ToSlash(filepath.Join("run", id, "extension", "chr", "integration", "budget.json"))
 }
 
-func workflowIntegrationScopeHash(run workflowInvocationFile, unit WorkflowRef) (string, error) {
+func workflowIntegrationScopeHash(run workflowInvocationFile, unit workflowstate.Ref) (string, error) {
 	members := []WorkflowPreviewMember{}
 
 	for _, member := range run.Members {
@@ -101,7 +101,7 @@ func workflowIntegrationScopeHash(run workflowInvocationFile, unit WorkflowRef) 
 
 	data, err := json.Marshal(struct {
 		RequestHash string
-		Unit        WorkflowRef
+		Unit        workflowstate.Ref
 		Members     []WorkflowPreviewMember
 	}{run.RequestHash, unit, members})
 

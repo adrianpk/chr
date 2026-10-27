@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math"
 	"slices"
-	"strings"
 
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -143,7 +142,7 @@ func validateWorkflowSet(s WorkflowSet) error {
 		return err
 	}
 
-	if err := validateWorkflowGate(s.ClosingValidation); err != nil {
+	if err := workflowstate.ValidateGate(s.ClosingValidation); err != nil {
 		return err
 	}
 
@@ -191,45 +190,6 @@ func validateWorkflowSlices(descriptors []WorkflowSlice) error {
 	return nil
 }
 
-func validateWorkflowGate(g WorkflowValidation) error {
-	if !g.Required {
-		if strings.TrimSpace(g.WaiverReason) == "" {
-			return fmt.Errorf("waived workflow gate requires a reason")
-		}
-
-		return nil
-	}
-
-	if len(g.Commands) == 0 || len(g.Commands) > 16 || g.TimeoutSeconds < 1 || g.TimeoutSeconds > 86400 {
-		return fmt.Errorf("workflow gate command/deadline bounds exceeded")
-	}
-
-	seen := map[string]bool{}
-
-	for _, argv := range g.Commands {
-		key := strings.Join(argv, "\x00")
-		if err := validateWorkflowCommand(argv); err != nil {
-			return err
-		}
-
-		if seen[key] {
-			return fmt.Errorf("duplicate workflow validation command")
-		}
-
-		seen[key] = true
-	}
-
-	return nil
-}
-
-func validateWorkflowCommand(argv []string) error {
-	if len(argv) == 0 || len(argv) > 64 || argv[0] == "" || len(strings.Join(argv, " ")) > 4096 || strings.Contains(strings.Join(argv, ""), "\x00") {
-		return fmt.Errorf("invalid workflow validation command")
-	}
-
-	return nil
-}
-
 func validateWorkflowSlice(s WorkflowSlice) error {
 	if s.ID == "" || s.Order < 1 || s.ContractRef == "" || s.ContractHash == "" || s.TaskInputHash == "" {
 		return fmt.Errorf("workflow slice identity/order/contract are required")
@@ -246,12 +206,12 @@ func validateWorkflowSlice(s WorkflowSlice) error {
 	return validateWorkflowDependencies(s.DependsOn)
 }
 
-func validateWorkflowDependencies(refs []WorkflowRef) error {
+func validateWorkflowDependencies(refs []workflowstate.Ref) error {
 	if len(refs) > workflowstate.PageLimit {
 		return fmt.Errorf("workflow dependency bound exceeded")
 	}
 
-	seen := map[WorkflowRef]bool{}
+	seen := map[workflowstate.Ref]bool{}
 	for _, ref := range refs {
 		if ref.ID == "" || !slices.Contains([]string{"ticket", "slice"}, ref.Kind) || seen[ref] {
 			return fmt.Errorf("invalid or duplicate workflow dependency")

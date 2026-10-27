@@ -120,7 +120,7 @@ func (s *WorkflowStore) workflowDependencyTargetReceipts(ctx context.Context, ru
 
 	key := run.Members[run.Cursor].Admission.Key
 
-	refs := dependencies.refs[WorkflowRef{Kind: "ticket", ID: key}]
+	refs := dependencies.refs[workflowstate.Ref{Kind: "ticket", ID: key}]
 	if len(refs) == 0 || len(refs) > workflowstate.PageLimit {
 		return nil, workflowstate.ErrConflict
 	}

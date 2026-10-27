@@ -12,7 +12,7 @@ import (
 
 // TestWorkflowTaskGateOrder stops an ordered shared-deadline gate at its first failure.
 func TestWorkflowTaskGateOrder(t *testing.T) {
-	gate := WorkflowValidation{Required: true, Commands: [][]string{workflowTaskCommand(t, "gate"), workflowTaskCommand(t, "fail"), {"git", "status", "--porcelain"}}, TimeoutSeconds: 30}
+	gate := workflowstate.Validation{Required: true, Commands: [][]string{workflowTaskCommand(t, "gate"), workflowTaskCommand(t, "fail"), {"git", "status", "--porcelain"}}, TimeoutSeconds: 30}
 	store, _, request := workflowExecutionGateFixture(t, gate)
 	run := workflowTestStart(t, store, request)
 	claim := workflowTestClaim(t, store, run.Invocation.ID)
@@ -25,7 +25,7 @@ func TestWorkflowTaskGateOrder(t *testing.T) {
 
 // TestWorkflowTaskWaiver retains the explicit contract reason without inventing checks.
 func TestWorkflowTaskWaiver(t *testing.T) {
-	gate := WorkflowValidation{Required: false, WaiverReason: "Host Git inspection is sufficient for the fixture"}
+	gate := workflowstate.Validation{Required: false, WaiverReason: "Host Git inspection is sufficient for the fixture"}
 	store, _, request := workflowExecutionGateFixture(t, gate)
 	run := workflowTestStart(t, store, request)
 

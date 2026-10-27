@@ -9,6 +9,7 @@ import (
 	"sort"
 	"time"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -23,7 +24,7 @@ type WorkflowAdoptionTask struct {
 // WorkflowPlanAdoptionOptions binds a selected canonical plan envelope and an
 // exact task selection. CheckQuiescent must also check legacy runtime evidence.
 type WorkflowPlanAdoptionOptions struct {
-	Plan           GeneratedWorkflowPlan
+	Plan           generationcore.GeneratedWorkflowPlan
 	PlanPath       string
 	SourceHash     string
 	Tasks          []WorkflowAdoptionTask
@@ -37,7 +38,7 @@ func (s *WorkflowStore) AdoptPlanWorkflow(ctx context.Context, opts WorkflowPlan
 		return result, err
 	}
 
-	if err := ValidateGeneratedWorkflowPlan(opts.Plan); err != nil {
+	if err := generationcore.ValidateGeneratedWorkflowPlan(opts.Plan); err != nil {
 		return result, err
 	}
 
@@ -135,7 +136,7 @@ func (s *WorkflowStore) preparePlanAdoption(ctx context.Context, opts WorkflowPl
 		return WorkflowMaterializationResult{}, err
 	}
 
-	plan := orderedWorkflowPlan(opts.Plan)
+	plan := generationcore.OrderedWorkflowPlan(opts.Plan)
 
 	selected, keys, err := s.prepareLegacyWorkflowTasks(plan, opts.Tasks)
 	if err != nil {
@@ -163,7 +164,7 @@ func (s *WorkflowStore) preparePlanAdoption(ctx context.Context, opts WorkflowPl
 	return result, err
 }
 
-func (s *WorkflowStore) planAdoptionFiles(result WorkflowMaterializationResult, plan GeneratedWorkflowPlan) ([]workflowFileChange, error) {
+func (s *WorkflowStore) planAdoptionFiles(result WorkflowMaterializationResult, plan generationcore.GeneratedWorkflowPlan) ([]workflowFileChange, error) {
 	receipt, err := materializationReceiptFile(plan, result)
 	if err != nil {
 		return nil, err

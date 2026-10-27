@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeCombinedPreparation(t *testing.T, f workflowGitFixture) (WorkflowIntegrationProof, WorkflowLane) {
@@ -14,7 +15,7 @@ func nativeCombinedPreparation(t *testing.T, f workflowGitFixture) (WorkflowInte
 
 	q := WorkflowPreparationQuery{WorkflowIntegrationQuery: f.request.Git.WorkflowIntegrationQuery, BaseCommit: f.request.Git.BaseCommit}
 	q.SourceDirectory = f.request.Directory
-	q.Lane = WorkflowLane{Unit: WorkflowRef{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/prepared", Worktree: filepath.Join(t.TempDir(), "combined"), BaseCommit: q.BaseCommit, HeadCommit: q.BaseCommit}
+	q.Lane = WorkflowLane{Unit: workflowstate.Ref{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/prepared", Worktree: filepath.Join(t.TempDir(), "combined"), BaseCommit: q.BaseCommit, HeadCommit: q.BaseCommit}
 	git := NewWorkflowPreparationGit(q.Repository, f.remote)
 
 	proof, err := git.PrepareWorkflowIntegration(t.Context(), q)

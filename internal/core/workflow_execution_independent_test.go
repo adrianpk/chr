@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
@@ -38,7 +39,7 @@ func TestWorkflowTaskIndependent(t *testing.T) {
 func workflowIndependentTask(t *testing.T, grouped WorkflowRecord) WorkflowRecord {
 	t.Helper()
 
-	var contract GeneratedWorkflowTask
+	var contract generationcore.GeneratedWorkflowTask
 	if err := json.Unmarshal(grouped.Domain["execution_contract"], &contract); err != nil {
 		t.Fatal(err)
 	}

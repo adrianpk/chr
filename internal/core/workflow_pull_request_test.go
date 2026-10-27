@@ -129,7 +129,7 @@ func workflowPRPlanFixture(t *testing.T, extent string, policy WorkflowExecution
 	t.Helper()
 
 	store, opts := planFixture(t)
-	waiver := WorkflowValidation{WaiverReason: "PR lifecycle fixture uses retained immutable host waiver"}
+	waiver := workflowstate.Validation{WaiverReason: "PR lifecycle fixture uses retained immutable host waiver"}
 
 	for i := range opts.Plan.Slices {
 		opts.Plan.Slices[i].Validation = waiver

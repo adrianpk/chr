@@ -192,5 +192,5 @@ func validateWorkflowInputWorker(mode string, worker []string) error {
 		return workflowstate.ErrConflict
 	}
 
-	return validateWorkflowCommand(worker)
+	return workflowstate.ValidateCommand(worker)
 }

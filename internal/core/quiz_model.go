@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -77,12 +78,12 @@ type QuizModelResponse struct {
 	Status       QuizModelResponseStatus
 	Question     quizcore.Question
 	Candidates   []quizcore.Candidate
-	DraftSpec    QuizDraftSpec
-	Feature      AcceptanceFeatureGeneration
-	Plan         GeneratedPlan
-	PlanOutline  GeneratedPlanOutline
-	SliceDetail  GeneratedPlanSliceDetail
-	PlanTracking GeneratedPlanTracking
+	DraftSpec    generationcore.QuizDraftSpec
+	Feature      generationcore.AcceptanceFeatureGeneration
+	Plan         generationcore.GeneratedPlan
+	PlanOutline  generationcore.GeneratedPlanOutline
+	SliceDetail  generationcore.GeneratedPlanSliceDetail
+	PlanTracking generationcore.GeneratedPlanTracking
 	RawText      string
 	CreatedAt    time.Time
 }
@@ -230,29 +231,29 @@ func (a QuizModelAction) Valid() bool {
 
 func validateQuizModelReadyResponse(response QuizModelResponse) error {
 	if response.DraftSpec.HasContent() {
-		return ValidateQuizDraftSpecModelContent(response.DraftSpec)
+		return generationcore.ValidateQuizDraftSpecModelContent(response.DraftSpec)
 	}
 
 	if response.Feature.HasContent() {
-		_, err := ValidateAcceptanceFeatureGeneration(response.Feature)
+		_, err := generationcore.ValidateAcceptanceFeatureGeneration(response.Feature)
 
 		return err
 	}
 
 	if response.Plan.HasContent() {
-		return ValidateGeneratedPlanModelContent(response.Plan)
+		return generationcore.ValidateGeneratedPlanModelContent(response.Plan)
 	}
 
 	if response.PlanOutline.HasContent() {
-		return ValidateGeneratedPlanOutline(response.PlanOutline)
+		return generationcore.ValidateGeneratedPlanOutline(response.PlanOutline)
 	}
 
 	if response.SliceDetail.HasContent() {
-		return ValidateGeneratedPlanSliceDetailContent(response.SliceDetail)
+		return generationcore.ValidateGeneratedPlanSliceDetailContent(response.SliceDetail)
 	}
 
 	if response.PlanTracking.HasContent() {
-		return ValidateGeneratedPlanTrackingModelContent(response.PlanTracking)
+		return generationcore.ValidateGeneratedPlanTrackingModelContent(response.PlanTracking)
 	}
 
 	return quizcore.ValidateQuestion(response.Question)

@@ -70,7 +70,7 @@ func checkWorkflowConfigDeadline(t *testing.T, extent string) {
 	t.Helper()
 
 	marker := filepath.Join(t.TempDir(), "later-command")
-	gate := WorkflowValidation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"sh", "-c", "sleep 4"}, {"touch", marker}}}
+	gate := workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"sh", "-c", "sleep 4"}, {"touch", marker}}}
 	store, request := workflowConfigDeadlineFixture(t, extent, gate)
 	writeWorkspaceConfig(t, store.layout.ProjectDir(), "work:\n  validation_timeout_seconds: 1\n")
 
@@ -87,7 +87,7 @@ func checkWorkflowConfigDeadline(t *testing.T, extent string) {
 	}
 }
 
-func workflowConfigDeadlineFixture(t *testing.T, extent string, gate WorkflowValidation) (*WorkflowStore, WorkflowStartRequest) {
+func workflowConfigDeadlineFixture(t *testing.T, extent string, gate workflowstate.Validation) (*WorkflowStore, WorkflowStartRequest) {
 	t.Helper()
 
 	if extent == "slice" {
@@ -95,7 +95,7 @@ func workflowConfigDeadlineFixture(t *testing.T, extent string, gate WorkflowVal
 
 		opts.Plan.Slices[0].Validation = gate
 		for i := range opts.Plan.Slices[0].Tasks {
-			opts.Plan.Slices[0].Tasks[i].Validation = WorkflowValidation{Required: true, Commands: [][]string{{"git", "diff", "--exit-code", "HEAD"}}, TimeoutSeconds: 30}
+			opts.Plan.Slices[0].Tasks[i].Validation = workflowstate.Validation{Required: true, Commands: [][]string{{"git", "diff", "--exit-code", "HEAD"}}, TimeoutSeconds: 30}
 		}
 
 		hierarchy, err := store.MaterializePlan(t.Context(), opts)
@@ -190,7 +190,7 @@ func checkWorkflowConfigRestriction(t *testing.T, project string) {
 // commands without rewriting the approved contract or confirming a failed gate.
 func TestWorkflowConfigClosing(t *testing.T) {
 	marker := filepath.Join(t.TempDir(), "later-closing-command")
-	gate := WorkflowValidation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"sh", "-c", "sleep 4"}, {"touch", marker}}}
+	gate := workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"sh", "-c", "sleep 4"}, {"touch", marker}}}
 	fixture := workflowDeliveryFixture(t, "rebase")
 	plan := workflowPlanFixture()
 

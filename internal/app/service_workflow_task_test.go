@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestServiceWorkflowTask executes an isolated worker through the shared service.
@@ -41,7 +43,7 @@ func TestServiceWorkflowTask(t *testing.T) {
 	}
 }
 
-func serviceWorkflowTaskFixture(t *testing.T, plans ...core.GeneratedWorkflowPlan) (service, core.WorkflowMaterializationResult, string) {
+func serviceWorkflowTaskFixture(t *testing.T, plans ...generationcore.GeneratedWorkflowPlan) (service, core.WorkflowMaterializationResult, string) {
 	t.Helper()
 
 	if testing.Short() {
@@ -63,7 +65,7 @@ func serviceWorkflowTaskFixture(t *testing.T, plans ...core.GeneratedWorkflowPla
 		plan = plans[0]
 	}
 
-	plan.Slices[0].Tasks[0].Validation = core.WorkflowValidation{Required: true, Commands: [][]string{{"git", "show", "HEAD:result.txt"}}, TimeoutSeconds: 30}
+	plan.Slices[0].Tasks[0].Validation = workflowstate.Validation{Required: true, Commands: [][]string{{"git", "show", "HEAD:result.txt"}}, TimeoutSeconds: 30}
 
 	hierarchy, err := operations.MaterializeWorkflowPlan(t.Context(), plan)
 	if err != nil {

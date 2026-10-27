@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"path/filepath"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -67,10 +69,10 @@ func (s *WorkflowStore) workflowOrderTrackerImage(snapshot WorkflowSnapshot, set
 	return result, output, nil
 }
 
-func (s *WorkflowStore) workflowOrderDocument(set WorkflowRecord, tasks []WorkflowRecord) (PlanOrderDocument, error) {
+func (s *WorkflowStore) workflowOrderDocument(set WorkflowRecord, tasks []WorkflowRecord) (generationcore.PlanOrderDocument, error) {
 	binding := set.Set.PlanRevision
 	if binding == nil || !validPlanBindingPaths(s.layout.Namespace(), *binding) || binding.BodyHash != set.Set.PlanHash {
-		return PlanOrderDocument{}, fmt.Errorf("order-only tracker requires its retained plan revision")
+		return generationcore.PlanOrderDocument{}, fmt.Errorf("order-only tracker requires its retained plan revision")
 	}
 
 	document, err := s.workflowPlannedOrder(*binding)
@@ -92,21 +94,21 @@ func (s *WorkflowStore) workflowOrderDocument(set WorkflowRecord, tasks []Workfl
 	return document, err
 }
 
-func (s *WorkflowStore) validateWorkflowOrderSource(document PlanOrderDocument, binding PlanRevisionBinding) error {
+func (s *WorkflowStore) validateWorkflowOrderSource(document generationcore.PlanOrderDocument, binding generationcore.PlanRevisionBinding) error {
 	if document.Schema != "chr-tracker/v2" || document.ProjectID != s.projectID || document.Namespace != s.layout.Namespace() || document.PlanRef != binding.Reference || document.PlanRevision != binding.Revision || document.PlanBodyHash != binding.BodyHash {
 		return workflowstate.ErrConflict
 	}
 
-	return ValidatePlannedOrder(document.Slices)
+	return generationcore.ValidatePlannedOrder(document.Slices)
 }
 
-func workflowNativeOrder(set WorkflowRecord, tasks []WorkflowRecord) ([]PlanOrderSlice, error) {
-	slices := make([]PlanOrderSlice, 0, len(set.Set.Slices))
+func workflowNativeOrder(set WorkflowRecord, tasks []WorkflowRecord) ([]generationcore.PlanOrderSlice, error) {
+	slices := make([]generationcore.PlanOrderSlice, 0, len(set.Set.Slices))
 
 	indexes := map[string]int{}
 	for _, descriptor := range set.Set.Slices {
 		indexes[descriptor.ID] = len(slices)
-		slices = append(slices, PlanOrderSlice{ID: descriptor.ID, Order: descriptor.Order, Title: descriptor.Title})
+		slices = append(slices, generationcore.PlanOrderSlice{ID: descriptor.ID, Order: descriptor.Order, Title: descriptor.Title})
 	}
 
 	for _, record := range tasks {
@@ -127,31 +129,31 @@ func workflowNativeOrder(set WorkflowRecord, tasks []WorkflowRecord) ([]PlanOrde
 		return nil, err
 	}
 
-	return orderedPlanSlices(slices), nil
+	return generationcore.OrderedPlanSlices(slices), nil
 }
 
-func workflowOrderTask(record WorkflowRecord) (PlanOrderTask, error) {
+func workflowOrderTask(record WorkflowRecord) (generationcore.PlanOrderTask, error) {
 	var id, title string
 	if err := json.Unmarshal(record.Domain["plan_task_id"], &id); err != nil {
-		return PlanOrderTask{}, err
+		return generationcore.PlanOrderTask{}, err
 	}
 
 	if err := json.Unmarshal(record.Metadata["title"], &title); err != nil {
-		return PlanOrderTask{}, err
+		return generationcore.PlanOrderTask{}, err
 	}
 
-	return PlanOrderTask{ID: id, Order: record.Task.Order, Title: title, TicketKey: record.Task.Key, TicketRef: workflowRecordBodyRef(record)}, nil
+	return generationcore.PlanOrderTask{ID: id, Order: record.Task.Order, Title: title, TicketKey: record.Task.Key, TicketRef: workflowRecordBodyRef(record)}, nil
 }
 
-func validateBoundWorkflowOrder(slices []PlanOrderSlice) error {
-	planned := orderedPlanSlices(slices)
+func validateBoundWorkflowOrder(slices []generationcore.PlanOrderSlice) error {
+	planned := generationcore.OrderedPlanSlices(slices)
 	for i := range planned {
 		for j := range planned[i].Tasks {
 			planned[i].Tasks[j].TicketKey, planned[i].Tasks[j].TicketRef = "", ""
 		}
 	}
 
-	return ValidatePlannedOrder(planned)
+	return generationcore.ValidatePlannedOrder(planned)
 }
 
 func workflowRecordBodyRef(record WorkflowRecord) string {
@@ -162,27 +164,27 @@ func workflowRecordBodyRef(record WorkflowRecord) string {
 	return record.Path
 }
 
-func (s *WorkflowStore) workflowPlannedOrder(binding PlanRevisionBinding) (PlanOrderDocument, error) {
+func (s *WorkflowStore) workflowPlannedOrder(binding generationcore.PlanRevisionBinding) (generationcore.PlanOrderDocument, error) {
 	body, err := s.readWorkflowTrackerFile(binding.BodyRef)
 	if err != nil {
-		return PlanOrderDocument{}, err
+		return generationcore.PlanOrderDocument{}, err
 	}
 
 	if contenthash.Sum(body) != binding.BodyHash {
-		return PlanOrderDocument{}, ErrWorkflowProjectionStale
+		return generationcore.PlanOrderDocument{}, ErrWorkflowProjectionStale
 	}
 
 	planned, err := s.readWorkflowTrackerFile(filepath.ToSlash(filepath.Join(filepath.Dir(binding.OrderRef), "planned-order.json")))
 	if err != nil {
-		return PlanOrderDocument{}, err
+		return generationcore.PlanOrderDocument{}, err
 	}
 
 	if contenthash.Sum(planned) != binding.PlannedOrderHash {
-		return PlanOrderDocument{}, ErrWorkflowProjectionStale
+		return generationcore.PlanOrderDocument{}, ErrWorkflowProjectionStale
 	}
 
-	var document PlanOrderDocument
-	if err := decodeAuthoringState(planned, &document); err != nil {
+	var document generationcore.PlanOrderDocument
+	if err := authoringstate.Decode(planned, &document); err != nil {
 		return document, err
 	}
 

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeTargetAliases binds actual admission, selection, worker capacity and
@@ -17,7 +18,7 @@ func TestNativeTargetAliases(t *testing.T) {
 	store, record, request := workflowTicketFixture(t, "ticket", workflowPreparationGate("true"))
 	request.Selection.Target.Repository = "https://FORGE.EXAMPLE:443/test/repo.git/"
 	run := workflowTestStart(t, store, request).Invocation
-	first := nativeEntryAdmit(t, store, WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: WorkflowRef{Kind: "ticket", ID: record.Task.Key}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"})
+	first := nativeEntryAdmit(t, store, WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: workflowstate.Ref{Kind: "ticket", ID: record.Task.Key}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"})
 
 	peer, second := nativeRolePeer(t, store, "peer", "PRJ-91", "refs/heads/dev")
 	if first.Repository != second.Repository {

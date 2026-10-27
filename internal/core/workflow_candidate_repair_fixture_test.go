@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeCandidateRepairFixture(t *testing.T, method, reason string) (nativePreparationFixture, WorkflowMergerRequest, WorkflowMergerHarness) {
@@ -40,7 +42,7 @@ func nativeCandidateRepairFixture(t *testing.T, method, reason string) (nativePr
 	return f, request, nativeMergerTestHarness(t, f.f.store, run.ID)
 }
 
-func nativeCandidateRepairInput(t *testing.T, f nativePreparationFixture, run WorkflowInvocation, candidate WorkflowIntegrationCandidate, gate WorkflowValidation) WorkflowMergerInput {
+func nativeCandidateRepairInput(t *testing.T, f nativePreparationFixture, run WorkflowInvocation, candidate WorkflowIntegrationCandidate, gate workflowstate.Validation) WorkflowMergerInput {
 	t.Helper()
 
 	repair, err := f.f.store.ReadWorkflowCandidateRepair(t.Context(), run.ID)
@@ -92,7 +94,7 @@ func nativeCandidateRepairCheckpoint(t *testing.T, f nativePreparationFixture, c
 	return state
 }
 
-func nativeCandidateRepairStart(t *testing.T, method, reason string) (nativePreparationFixture, WorkflowIntegrationCandidate, WorkflowValidation) {
+func nativeCandidateRepairStart(t *testing.T, method, reason string) (nativePreparationFixture, WorkflowIntegrationCandidate, workflowstate.Validation) {
 	t.Helper()
 
 	gate := workflowPreparationGate("test ! -f target.txt || grep -q 'source and target' result.txt")

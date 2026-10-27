@@ -6,6 +6,8 @@ import (
 	"slices"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeMergerRepairFixture(t *testing.T, method string) (workflowGitFixture, WorkflowPreparationQuery) {
@@ -37,7 +39,7 @@ func nativeMergerRepairFixture(t *testing.T, method string) (workflowGitFixture,
 
 	query := WorkflowPreparationQuery{WorkflowIntegrationQuery: f.request.Git.WorkflowIntegrationQuery, BaseCommit: f.request.Git.BaseCommit}
 	query.SourceDirectory = f.request.Directory
-	query.Lane = WorkflowLane{Unit: WorkflowRef{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/repair", Worktree: filepath.Join(t.TempDir(), "repair"), BaseCommit: query.BaseCommit, HeadCommit: query.BaseCommit}
+	query.Lane = WorkflowLane{Unit: workflowstate.Ref{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/repair", Worktree: filepath.Join(t.TempDir(), "repair"), BaseCommit: query.BaseCommit, HeadCommit: query.BaseCommit}
 
 	return f, query
 }

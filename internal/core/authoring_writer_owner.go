@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -18,7 +19,7 @@ func WriteGeneratedSpec(ctx context.Context, projectDir string, spec GeneratedSp
 }
 
 // WriteGeneratedPlan applies the existing writer under shared authoring exclusion.
-func WriteGeneratedPlan(ctx context.Context, projectDir string, plan GeneratedPlan) (result GeneratedPlanPaths, err error) {
+func WriteGeneratedPlan(ctx context.Context, projectDir string, plan generationcore.GeneratedPlan) (result GeneratedPlanPaths, err error) {
 	err = WithAuthoringMutation(ctx, projectDir, func(ctx context.Context) error { result, err = writeGeneratedPlan(ctx, projectDir, plan); return err })
 
 	return result, err
@@ -95,7 +96,7 @@ func WriteQuizToDraftPromotionContext(ctx context.Context, plan QuizToDraftPromo
 }
 
 // WriteQuizDraftSpec publishes quiz-generated specs under the shared owner.
-func WriteQuizDraftSpec(ctx context.Context, projectDir string, spec QuizDraftSpec) (result QuizDraftSpecPaths, err error) {
+func WriteQuizDraftSpec(ctx context.Context, projectDir string, spec generationcore.QuizDraftSpec) (result QuizDraftSpecPaths, err error) {
 	err = WithAuthoringMutation(ctx, projectDir, func(ctx context.Context) error { result, err = writeQuizDraftSpec(ctx, projectDir, spec); return err })
 
 	return result, err

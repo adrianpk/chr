@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -151,7 +152,7 @@ func (r *fileAuthoringSessionRepository) readGuidedIdea(id string, ref GuidedIde
 	}
 
 	var idea GuidedLaterIdea
-	if err := decodeAuthoringState(data, &idea); err != nil {
+	if err := authoringstate.Decode(data, &idea); err != nil {
 		return idea, err
 	}
 

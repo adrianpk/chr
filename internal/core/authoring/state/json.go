@@ -1,4 +1,4 @@
-package core
+package state
 
 import (
 	"bytes"
@@ -7,7 +7,8 @@ import (
 	"io"
 )
 
-func decodeAuthoringState(data []byte, target any) error {
+// Decode rejects unknown fields and trailing retained authoring data.
+func Decode(data []byte, target any) error {
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
 

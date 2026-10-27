@@ -112,7 +112,7 @@ func validateWorkflowIntegrationBindings(run workflowInvocationFile) error {
 		return workflowIntegrationConflict("history exceeds bounds")
 	}
 
-	seen := map[WorkflowRef]bool{}
+	seen := map[workflowstate.Ref]bool{}
 
 	current := run.Integration == nil
 	for _, binding := range run.IntegrationEntries {

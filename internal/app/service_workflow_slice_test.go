@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func serviceWorkflowSliceFixture(t *testing.T) (service, core.WorkflowMaterializationResult, string) {
@@ -27,9 +28,9 @@ func serviceWorkflowSliceFixture(t *testing.T) (service, core.WorkflowMaterializ
 	operations := newTestService(t, project)
 	plan := serviceWorkflowPlanFixture()
 
-	plan.Slices[0].Validation = core.WorkflowValidation{Required: true, Commands: [][]string{{"sh", "-c", "test \"$(wc -l < result.txt)\" -eq 3"}}, TimeoutSeconds: 30}
+	plan.Slices[0].Validation = workflowstate.Validation{Required: true, Commands: [][]string{{"sh", "-c", "test \"$(wc -l < result.txt)\" -eq 3"}}, TimeoutSeconds: 30}
 	for i := range plan.Slices[0].Tasks {
-		plan.Slices[0].Tasks[i].Validation = core.WorkflowValidation{Required: true, Commands: [][]string{{"git", "show", "HEAD:result.txt"}}, TimeoutSeconds: 30}
+		plan.Slices[0].Tasks[i].Validation = workflowstate.Validation{Required: true, Commands: [][]string{{"git", "show", "HEAD:result.txt"}}, TimeoutSeconds: 30}
 	}
 
 	hierarchy, err := operations.MaterializeWorkflowPlan(t.Context(), plan)

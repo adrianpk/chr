@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 )
 
 // Actual Pi workers with different credentials reach a shared endpoint barrier
@@ -103,7 +104,7 @@ func clonePiIsolationTicket(t *testing.T, operations service, original core.Work
 	task.Key = key
 	task.SetID, task.SliceID, task.UseCase, task.Order = "", "", "", 0
 
-	var contract core.GeneratedWorkflowTask
+	var contract generationcore.GeneratedWorkflowTask
 	if err := json.Unmarshal(original.Domain["execution_contract"], &contract); err != nil {
 		t.Fatal(err)
 	}

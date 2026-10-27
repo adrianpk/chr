@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"reflect"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -36,7 +38,7 @@ func (r *fileAuthoringSessionRepository) checkPlanWorkflowPending(reference stri
 	return nil
 }
 
-func (s *WorkflowStore) validateApprovedOrder(plan GeneratedWorkflowPlan, setID string) error {
+func (s *WorkflowStore) validateApprovedOrder(plan generationcore.GeneratedWorkflowPlan, setID string) error {
 	if plan.PlanRevision == nil {
 		return s.requirePlanRevisionBinding(plan.PlanRef)
 	}
@@ -58,7 +60,7 @@ func (s *WorkflowStore) validateApprovedOrder(plan GeneratedWorkflowPlan, setID 
 	return s.validateApprovalOrderImages(binding, setID)
 }
 
-func (s *WorkflowStore) validatePlannedApproval(plan GeneratedWorkflowPlan, binding PlanRevisionBinding) error {
+func (s *WorkflowStore) validatePlannedApproval(plan generationcore.GeneratedWorkflowPlan, binding generationcore.PlanRevisionBinding) error {
 	if !validPlanBindingPaths(s.layout.Namespace(), binding) || plan.PlanRef != binding.BodyRef || plan.PlanHash != binding.BodyHash {
 		return workflowstate.ErrConflict
 	}
@@ -72,14 +74,14 @@ func (s *WorkflowStore) validatePlannedApproval(plan GeneratedWorkflowPlan, bind
 		return err
 	}
 
-	if !reflect.DeepEqual(orderedPlanSlices(planned.Slices), orderedPlanSlices(plannedWorkflowOrder(plan))) {
+	if !reflect.DeepEqual(generationcore.OrderedPlanSlices(planned.Slices), generationcore.OrderedPlanSlices(generationcore.PlannedWorkflowOrder(plan))) {
 		return fmt.Errorf("%w: approved hierarchy differs from retained planned order", workflowstate.ErrConflict)
 	}
 
 	return nil
 }
 
-func (s *WorkflowStore) validateApprovalOrderImages(binding PlanRevisionBinding, setID string) error {
+func (s *WorkflowStore) validateApprovalOrderImages(binding generationcore.PlanRevisionBinding, setID string) error {
 	order, err := s.readWorkflowTrackerFile(binding.OrderRef)
 	if err != nil {
 		return err
@@ -94,8 +96,8 @@ func (s *WorkflowStore) validateApprovalOrderImages(binding PlanRevisionBinding,
 		return ErrWorkflowProjectionStale
 	}
 
-	var document PlanOrderDocument
-	if err := decodeAuthoringState(order, &document); err != nil {
+	var document generationcore.PlanOrderDocument
+	if err := authoringstate.Decode(order, &document); err != nil {
 		return err
 	}
 
@@ -133,34 +135,20 @@ func (s *WorkflowStore) requirePlanRevisionBinding(reference string) error {
 	return nil
 }
 
-func (s *WorkflowStore) readPlanOrderBinding(binding PlanRevisionBinding) (PlanRevisionBinding, error) {
-	var current PlanRevisionBinding
+func (s *WorkflowStore) readPlanOrderBinding(binding generationcore.PlanRevisionBinding) (generationcore.PlanRevisionBinding, error) {
+	var current generationcore.PlanRevisionBinding
 
 	data, err := s.readWorkflowTrackerFile(filepath.ToSlash(filepath.Join(filepath.Dir(binding.OrderRef), "binding.json")))
 	if err != nil {
 		return current, err
 	}
 
-	err = decodeAuthoringState(data, &current)
+	err = authoringstate.Decode(data, &current)
 
 	return current, err
 }
 
-func plannedWorkflowOrder(plan GeneratedWorkflowPlan) []PlanOrderSlice {
-	result := make([]PlanOrderSlice, 0, len(plan.Slices))
-	for _, slice := range plan.Slices {
-		item := PlanOrderSlice{ID: slice.ID, Order: slice.Order, Title: slice.Title}
-		for _, task := range slice.Tasks {
-			item.Tasks = append(item.Tasks, PlanOrderTask{ID: task.ID, Order: task.Order, Title: task.Title})
-		}
-
-		result = append(result, item)
-	}
-
-	return result
-}
-
-func (s *WorkflowStore) validateOrderScope(binding PlanRevisionBinding, useCase string) error {
+func (s *WorkflowStore) validateOrderScope(binding generationcore.PlanRevisionBinding, useCase string) error {
 	body, err := s.readWorkflowTrackerFile(binding.BodyRef)
 	if err != nil {
 		return err

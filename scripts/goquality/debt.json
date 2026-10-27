@@ -118,37 +118,37 @@
     },
     {
       "id": "internal/app/service_plan.go::service.generatePlanWithConfiguredBackend",
-      "signature": "func(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (core.GeneratedPlan, []string, []string, error)",
+      "signature": "func(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (generationcore.GeneratedPlan, []string, []string, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/service_plan.go::service.generateSinglePassPlan",
-      "signature": "func(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (core.GeneratedPlan, []string, []string, error)",
+      "signature": "func(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (generationcore.GeneratedPlan, []string, []string, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/service_plan.go::service.generateStagedPlan",
-      "signature": "func(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (core.GeneratedPlan, []string, []string, error)",
+      "signature": "func(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (generationcore.GeneratedPlan, []string, []string, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/service_plan.go::service.generatePlanOutline",
-      "signature": "func(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (core.GeneratedPlanOutline, []string, []string, []string, error)",
+      "signature": "func(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (generationcore.GeneratedPlanOutline, []string, []string, []string, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/service_plan.go::service.generatePlanSliceDetail",
-      "signature": "func(ctx context.Context, state quizcore.RuntimeState, sources core.PlanSourceObservation, outline core.GeneratedPlanOutline, targetSliceID string) (core.GeneratedPlanSliceDetail, string, string, error)",
+      "signature": "func(ctx context.Context, state quizcore.RuntimeState, sources core.PlanSourceObservation, outline generationcore.GeneratedPlanOutline, targetSliceID string) (generationcore.GeneratedPlanSliceDetail, string, string, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/service_plan_delivery.go::service.planDeliveryInput",
-      "signature": "func(ctx context.Context, request PlanGenerateRequest, generated PlanOperationResult) (core.GeneratedWorkflowPlan, core.OpsLayout, error)",
+      "signature": "func(ctx context.Context, request PlanGenerateRequest, generated PlanOperationResult) (generationcore.GeneratedWorkflowPlan, core.OpsLayout, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/service_plan_replay.go::service.replayPlanPublication",
-      "signature": "func(ctx context.Context, operation core.PlanPublicationOperation) (PlanOperationResult, bool, error)",
+      "signature": "func(ctx context.Context, operation generationcore.PlanPublicationOperation) (PlanOperationResult, bool, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -428,12 +428,12 @@
     },
     {
       "id": "internal/core/plan_delivery_resume.go::WorkflowStore.ResumePlanDelivery",
-      "signature": "func(ctx context.Context, input GeneratedWorkflowPlan) (result WorkflowMaterializationResult, found bool, err error)",
+      "signature": "func(ctx context.Context, input generationcore.GeneratedWorkflowPlan) (result WorkflowMaterializationResult, found bool, err error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/core/plan_delivery_resume.go::WorkflowStore.resumePlanDelivery",
-      "signature": "func(snapshot WorkflowSnapshot, input GeneratedWorkflowPlan) (WorkflowMaterializationResult, bool, error)",
+      "signature": "func(snapshot WorkflowSnapshot, input generationcore.GeneratedWorkflowPlan) (WorkflowMaterializationResult, bool, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -448,27 +448,27 @@
     },
     {
       "id": "internal/core/plan_order.go::planOrderBytes",
-      "signature": "func(document PlanOrderDocument) ([]byte, []byte, error)",
+      "signature": "func(document generationcore.PlanOrderDocument) ([]byte, []byte, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/core/plan_order_publication.go::preparePlanOrderChanges",
-      "signature": "func(projectDir string, paths GeneratedPlanPaths, target planTargetObservation, metadata map[string]any, plan GeneratedPlan, body []byte) ([]workflowFileChange, error)",
+      "signature": "func(projectDir string, paths GeneratedPlanPaths, target planTargetObservation, metadata map[string]any, plan generationcore.GeneratedPlan, body []byte) ([]workflowFileChange, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/core/plan_order_publication.go::newPlanRevision",
-      "signature": "func(paths GeneratedPlanPaths, metadata map[string]any, plan GeneratedPlan, body []byte) (PlanRevisionBinding, PlanOrderDocument, error)",
+      "signature": "func(paths GeneratedPlanPaths, metadata map[string]any, plan generationcore.GeneratedPlan, body []byte) (generationcore.PlanRevisionBinding, generationcore.PlanOrderDocument, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/core/plan_publication_receipt.go::LookupPlanPublication",
-      "signature": "func(ctx context.Context, projectDir string, operation PlanPublicationOperation) (result PlanPublicationResult, found bool, err error)",
+      "signature": "func(ctx context.Context, projectDir string, operation generationcore.PlanPublicationOperation) (result PlanPublicationResult, found bool, err error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/core/plan_publication_receipt.go::fileAuthoringSessionRepository.planReceipt",
-      "signature": "func(operation PlanPublicationOperation) (PlanPublicationResult, bool, error)",
+      "signature": "func(operation generationcore.PlanPublicationOperation) (PlanPublicationResult, bool, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -703,7 +703,7 @@
     },
     {
       "id": "internal/core/workflow_adoption_records.go::WorkflowStore.prepareLegacyWorkflowTasks",
-      "signature": "func(plan GeneratedWorkflowPlan, selections []WorkflowAdoptionTask) ([]WorkflowRecord, []string, error)",
+      "signature": "func(plan generationcore.GeneratedWorkflowPlan, selections []WorkflowAdoptionTask) ([]WorkflowRecord, []string, error)",
       "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -723,7 +723,7 @@
     },
     {
       "id": "internal/core/workflow_amendment_slices.go::buildWorkflowAmendedSlice",
-      "signature": "func(builder *workflowAmendmentBuild, old map[string]WorkflowSlice, input GeneratedWorkflowSlice) (WorkflowSlice, int, error)",
+      "signature": "func(builder *workflowAmendmentBuild, old map[string]WorkflowSlice, input generationcore.GeneratedWorkflowSlice) (WorkflowSlice, int, error)",
       "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -1023,22 +1023,22 @@
     },
     {
       "id": "internal/core/workflow_materialization_build.go::WorkflowStore.buildMaterializationForSet",
-      "signature": "func(ctx context.Context, opts WorkflowMaterializationOptions, plan GeneratedWorkflowPlan, body []byte, number int, now time.Time, set WorkflowRecord) (WorkflowMaterializationResult, error)",
+      "signature": "func(ctx context.Context, opts WorkflowMaterializationOptions, plan generationcore.GeneratedWorkflowPlan, body []byte, number int, now time.Time, set WorkflowRecord) (WorkflowMaterializationResult, error)",
       "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_materialization_build.go::WorkflowStore.buildMaterializationTasks",
-      "signature": "func(ctx context.Context, opts WorkflowMaterializationOptions, set WorkflowRecord, plan GeneratedWorkflowPlan, number int, now time.Time) ([]WorkflowRecord, map[string]string, error)",
+      "signature": "func(ctx context.Context, opts WorkflowMaterializationOptions, set WorkflowRecord, plan generationcore.GeneratedWorkflowPlan, number int, now time.Time) ([]WorkflowRecord, map[string]string, error)",
       "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_materialization_build.go::WorkflowStore.materializationTask",
-      "signature": "func(input GeneratedWorkflowTask, slice GeneratedWorkflowSlice, set WorkflowRecord, key string, number int, now time.Time) (WorkflowRecord, error)",
+      "signature": "func(input generationcore.GeneratedWorkflowTask, slice generationcore.GeneratedWorkflowSlice, set WorkflowRecord, key string, number int, now time.Time) (WorkflowRecord, error)",
       "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_materialization_receipt.go::WorkflowStore.resumeMaterialization",
-      "signature": "func(snapshot WorkflowSnapshot, plan GeneratedWorkflowPlan) (WorkflowMaterializationResult, bool, error)",
+      "signature": "func(snapshot WorkflowSnapshot, plan generationcore.GeneratedWorkflowPlan) (WorkflowMaterializationResult, bool, error)",
       "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -1213,7 +1213,7 @@
     },
     {
       "id": "internal/core/workflow_plan_order_publish.go::WorkflowStore.currentPlanOrderMetadata",
-      "signature": "func(binding PlanRevisionBinding) (map[string]any, workflowFileChange, bool, error)",
+      "signature": "func(binding generationcore.PlanRevisionBinding) (map[string]any, workflowFileChange, bool, error)",
       "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {

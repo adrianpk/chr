@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -58,7 +60,7 @@ func observePlanTarget(ctx context.Context, projectDir, reference string) (planT
 	}
 
 	if target.images[1].After != nil {
-		if err := decodeAuthoringState(target.images[1].After, &target.metadata); err != nil {
+		if err := authoringstate.Decode(target.images[1].After, &target.metadata); err != nil {
 			return target, err
 		}
 
@@ -77,7 +79,7 @@ func observePlanTarget(ctx context.Context, projectDir, reference string) (planT
 	return target, r.checkQuizImages(target.images)
 }
 
-func (r *fileAuthoringSessionRepository) publishGeneratedPlan(ctx context.Context, paths GeneratedPlanPaths, plan GeneratedPlan) error {
+func (r *fileAuthoringSessionRepository) publishGeneratedPlan(ctx context.Context, paths GeneratedPlanPaths, plan generationcore.GeneratedPlan) error {
 	projectDir := r.projectDir
 
 	if found, err := r.completedPlanOperation(plan); err != nil || found {
@@ -116,7 +118,7 @@ func (r *fileAuthoringSessionRepository) publishGeneratedPlan(ctx context.Contex
 	return r.recoverAuthoringMutation()
 }
 
-func generatedPlanChanges(projectDir string, paths GeneratedPlanPaths, target planTargetObservation, plan GeneratedPlan) ([]workflowFileChange, error) {
+func generatedPlanChanges(projectDir string, paths GeneratedPlanPaths, target planTargetObservation, plan generationcore.GeneratedPlan) ([]workflowFileChange, error) {
 	metadata := target.metadata
 	if metadata == nil {
 		var err error
@@ -160,7 +162,7 @@ func generatedPlanChanges(projectDir string, paths GeneratedPlanPaths, target pl
 	return append(companions, changes...), nil
 }
 
-func generatedPlanMetadata(projectDir, reference, title string, plan GeneratedPlan) (map[string]any, error) {
+func generatedPlanMetadata(projectDir, reference, title string, plan generationcore.GeneratedPlan) (map[string]any, error) {
 	parts := strings.Split(reference, "/")
 
 	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: parts[1]})
@@ -171,7 +173,7 @@ func generatedPlanMetadata(projectDir, reference, title string, plan GeneratedPl
 	return newOpsArtifactMetadata(CreateOpsArtifactOptions{Layout: layout, Type: "plan", Title: title, Producer: "chr"}, parts[3], plan.CreatedAt), nil
 }
 
-func generatedPlanArchiveChanges(projectDir string, current GeneratedPlanPaths, target planTargetObservation, plan GeneratedPlan) ([]workflowFileChange, error) {
+func generatedPlanArchiveChanges(projectDir string, current GeneratedPlanPaths, target planTargetObservation, plan generationcore.GeneratedPlan) ([]workflowFileChange, error) {
 	archive, err := ArchivedPlanLayout(projectDir, plan.Scope, plan.ArchiveAt)
 	if err != nil {
 		return nil, err
@@ -185,7 +187,7 @@ func generatedPlanArchiveChanges(projectDir string, current GeneratedPlanPaths, 
 	}
 
 	var metadata map[string]any
-	if err := decodeAuthoringState(target.images[1].After, &metadata); err != nil {
+	if err := authoringstate.Decode(target.images[1].After, &metadata); err != nil {
 		return nil, err
 	}
 
@@ -242,7 +244,7 @@ func validatePlanTargetScope(target planTargetObservation, scope quizcore.Scope)
 	return nil
 }
 
-func validatePlanPublicationTarget(target planTargetObservation, plan GeneratedPlan) error {
+func validatePlanPublicationTarget(target planTargetObservation, plan generationcore.GeneratedPlan) error {
 	if plan.CreateOnly && target.metadata != nil || plan.ExpectedRevision != "" && target.revision != plan.ExpectedRevision {
 		return workflowstate.ErrConflict
 	}

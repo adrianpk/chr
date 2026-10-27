@@ -171,7 +171,7 @@ func (s *WorkflowStore) checkWorkflowClosingResult(state workflowClosingAttempt)
 	return validateWorkflowClosingResults(input.Validation, receipt)
 }
 
-func validateWorkflowClosingResults(gate WorkflowValidation, receipt WorkflowClosingReceipt) error {
+func validateWorkflowClosingResults(gate workflowstate.Validation, receipt WorkflowClosingReceipt) error {
 	if len(receipt.Validation) > len(gate.Commands) || receipt.Outcome == "completed" && len(receipt.Validation) != len(gate.Commands) {
 		return workflowstate.ErrConflict
 	}

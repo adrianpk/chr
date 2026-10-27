@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"reflect"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -19,7 +20,7 @@ func (s *WorkflowStore) checkWorkflowMergerCommands(ctx context.Context, run wor
 		return err
 	}
 
-	var retained WorkflowValidation
+	var retained workflowstate.Validation
 	if err := s.readWorkflowNativeEvidence(run.ID, input.ValidationContractRef, &retained); err != nil {
 		return err
 	}
@@ -56,14 +57,14 @@ func checkWorkflowMergerBudget(budget WorkflowIntegrationBudget, input WorkflowM
 	return nil
 }
 
-func (s *WorkflowStore) workflowMergerValidationContract(run workflowInvocationFile, observation workflowSliceObservation) (WorkflowValidation, error) {
+func (s *WorkflowStore) workflowMergerValidationContract(run workflowInvocationFile, observation workflowSliceObservation) (workflowstate.Validation, error) {
 	if run.Lane.Unit.Kind == "slice" {
 		contract, err := s.readWorkflowSliceContract(observation.descriptor)
 
 		return contract.Validation, err
 	}
 
-	var contract GeneratedWorkflowTask
+	var contract generationcore.GeneratedWorkflowTask
 
 	err := json.Unmarshal(observation.tasks[0].Domain["execution_contract"], &contract)
 

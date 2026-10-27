@@ -5,9 +5,10 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 )
 
-func (s service) replayPlanPublication(ctx context.Context, operation core.PlanPublicationOperation) (PlanOperationResult, bool, error) {
+func (s service) replayPlanPublication(ctx context.Context, operation generationcore.PlanPublicationOperation) (PlanOperationResult, bool, error) {
 	if operation.ID == "" {
 		return PlanOperationResult{}, false, nil
 	}
@@ -30,7 +31,7 @@ func (s service) replayPlanPublication(ctx context.Context, operation core.PlanP
 	return PlanOperationResult{Message: "Plan generation already committed.", Plan: s.planViewFromPath(operation.Scope, reference, filepath.Join(s.projectContext.ProjectDir, filepath.FromSlash(reference)))}, true, nil
 }
 
-func (s service) retainedPlanTracking(plan PlanView, binding core.PlanRevisionBinding) (PlanTrackingResult, error) {
+func (s service) retainedPlanTracking(plan PlanView, binding generationcore.PlanRevisionBinding) (PlanTrackingResult, error) {
 	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: plan.Scope.Namespace})
 	if err != nil {
 		return PlanTrackingResult{}, err

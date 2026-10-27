@@ -92,7 +92,7 @@ func testWorkflowPreparationStop(t *testing.T, intent string) {
 // TestWorkflowPreparationConflict blocks a real conflicting combined tree and
 // enforces the preparation bound without a fallback method or another worker.
 func TestWorkflowPreparationConflict(t *testing.T) {
-	f := newWorkflowPreparationFixture(t, "squash", WorkflowValidation{WaiverReason: "Conflicting target fixture"})
+	f := newWorkflowPreparationFixture(t, "squash", workflowstate.Validation{WaiverReason: "Conflicting target fixture"})
 	f.base = workflowIntegrationCommit(t, f.actor, "result.txt", "Conflicting target content")
 	workflowIntegrationCommand(t, f.actor, "push", "origin", "dev")
 
@@ -130,7 +130,7 @@ func TestWorkflowPreparationConflict(t *testing.T) {
 // TestWorkflowPreparationApproval requires approval of the exact new combined
 // validation; a previously approved source-only hash cannot approve it.
 func TestWorkflowPreparationApproval(t *testing.T) {
-	f := newWorkflowPreparationFixture(t, "rebase", WorkflowValidation{WaiverReason: "Manual combined approval fixture"})
+	f := newWorkflowPreparationFixture(t, "rebase", workflowstate.Validation{WaiverReason: "Manual combined approval fixture"})
 	workflowReviewConfig(t, f.store, ReviewWorkflowModeHumanReview)
 
 	old, err := f.store.ReviewWorkflowSlice(t.Context(), f.run.ID, f.provider, nil)

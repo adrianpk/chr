@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -63,7 +64,7 @@ func (r *fileAuthoringSessionRepository) readDumpMutationBinding(request DumpMut
 		return binding, false, err
 	}
 
-	if err := decodeAuthoringState(data, &binding); err != nil {
+	if err := authoringstate.Decode(data, &binding); err != nil {
 		return binding, false, err
 	}
 

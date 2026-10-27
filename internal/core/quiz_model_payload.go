@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strings"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -40,12 +41,12 @@ var QuizModelQuestionRequiredFields = []string{
 
 // QuizModelPayload describes a package boundary value.
 type QuizModelPayload struct {
-	Project             QuizModelProjectPayload         `json:"project"`
-	Quiz                QuizModelQuizPayload            `json:"quiz"`
-	RecentEntries       []QuizModelEntryPayload         `json:"recent_entries"`
-	CurrentQuestion     QuizModelCurrentQuestionPayload `json:"current_question"`
-	AcceptanceReadiness *AcceptanceReadiness            `json:"acceptance_readiness,omitempty"`
-	OutputContract      QuizModelOutputContractPayload  `json:"output_contract"`
+	Project             QuizModelProjectPayload             `json:"project"`
+	Quiz                QuizModelQuizPayload                `json:"quiz"`
+	RecentEntries       []QuizModelEntryPayload             `json:"recent_entries"`
+	CurrentQuestion     QuizModelCurrentQuestionPayload     `json:"current_question"`
+	AcceptanceReadiness *generationcore.AcceptanceReadiness `json:"acceptance_readiness,omitempty"`
+	OutputContract      QuizModelOutputContractPayload      `json:"output_contract"`
 }
 
 // QuizModelProjectPayload describes a package boundary value.
@@ -107,18 +108,18 @@ type QuizModelDraftSpecPayload struct {
 
 // QuizModelFeaturePayload describes optional generated feature output.
 type QuizModelFeaturePayload struct {
-	Status               string                    `json:"status"`
-	Body                 string                    `json:"body,omitempty"`
-	RejectionReason      string                    `json:"rejection_reason,omitempty"`
-	ClarificationPrompts []AcceptanceFeaturePrompt `json:"clarification_prompts,omitempty"`
+	Status               string                                   `json:"status"`
+	Body                 string                                   `json:"body,omitempty"`
+	RejectionReason      string                                   `json:"rejection_reason,omitempty"`
+	ClarificationPrompts []generationcore.AcceptanceFeaturePrompt `json:"clarification_prompts,omitempty"`
 }
 
 // QuizModelPlanPayload describes a package boundary value.
 type QuizModelPlanPayload struct {
-	Order  []PlanOrderSlice `json:"order,omitempty"`
-	Title  string           `json:"title"`
-	Body   string           `json:"body"`
-	Status string           `json:"status"`
+	Order  []generationcore.PlanOrderSlice `json:"order,omitempty"`
+	Title  string                          `json:"title"`
+	Body   string                          `json:"body"`
+	Status string                          `json:"status"`
 }
 
 // QuizModelPlanOutlinePayload describes a package boundary value.
@@ -556,7 +557,7 @@ func ValidateQuizModelDraftSpecPayload(payload QuizModelDraftSpecPayload) (QuizM
 
 // ValidateQuizModelFeaturePayload validates the corresponding package boundary value.
 func ValidateQuizModelFeaturePayload(payload QuizModelFeaturePayload) (QuizModelFeaturePayload, error) {
-	feature, err := ValidateAcceptanceFeatureGeneration(AcceptanceFeatureGeneration(payload))
+	feature, err := generationcore.ValidateAcceptanceFeatureGeneration(generationcore.AcceptanceFeatureGeneration(payload))
 	if err != nil {
 		return QuizModelFeaturePayload{}, err
 	}
@@ -586,7 +587,7 @@ func ValidateQuizModelPlanPayload(payload QuizModelPlanPayload) (QuizModelPlanPa
 	}
 
 	if normalized.Order != nil {
-		if err := ValidatePlannedOrder(normalized.Order); err != nil {
+		if err := generationcore.ValidatePlannedOrder(normalized.Order); err != nil {
 			return QuizModelPlanPayload{}, err
 		}
 	}
@@ -599,7 +600,7 @@ func ValidateQuizModelPlanOutlinePayload(payload QuizModelPlanOutlinePayload) (Q
 	normalized := normalizeQuizModelPlanOutlinePayload(payload)
 	outline := generatedPlanOutlineFromPayload(quizcore.Scope{ProjectID: "payload-validation"}, normalized)
 
-	if err := ValidateGeneratedPlanOutline(outline); err != nil {
+	if err := generationcore.ValidateGeneratedPlanOutline(outline); err != nil {
 		return QuizModelPlanOutlinePayload{}, err
 	}
 
@@ -663,8 +664,8 @@ func normalizeQuizModelPlanOutlineDependencyPayload(
 func generatedPlanOutlineFromPayload(
 	scope quizcore.Scope,
 	payload QuizModelPlanOutlinePayload,
-) GeneratedPlanOutline {
-	outline := GeneratedPlanOutline{
+) generationcore.GeneratedPlanOutline {
+	outline := generationcore.GeneratedPlanOutline{
 		Scope:              scope,
 		Title:              payload.Title,
 		Status:             payload.Status,
@@ -673,16 +674,16 @@ func generatedPlanOutlineFromPayload(
 		OpenQuestions:      payload.OpenQuestions,
 		Risks:              payload.Risks,
 		ValidationStrategy: payload.ValidationStrategy,
-		Slices:             make([]GeneratedPlanOutlineSlice, 0, len(payload.Slices)),
-		Dependencies:       make([]GeneratedPlanOutlineDependency, 0, len(payload.Dependencies)),
+		Slices:             make([]generationcore.GeneratedPlanOutlineSlice, 0, len(payload.Slices)),
+		Dependencies:       make([]generationcore.GeneratedPlanOutlineDependency, 0, len(payload.Dependencies)),
 	}
 
 	for _, slice := range payload.Slices {
-		outline.Slices = append(outline.Slices, GeneratedPlanOutlineSlice(slice))
+		outline.Slices = append(outline.Slices, generationcore.GeneratedPlanOutlineSlice(slice))
 	}
 
 	for _, dependency := range payload.Dependencies {
-		outline.Dependencies = append(outline.Dependencies, GeneratedPlanOutlineDependency(dependency))
+		outline.Dependencies = append(outline.Dependencies, generationcore.GeneratedPlanOutlineDependency(dependency))
 	}
 
 	return outline
@@ -695,7 +696,7 @@ func ValidateQuizModelPlanSliceDetailPayload(
 	normalized := normalizeQuizModelPlanSliceDetailPayload(payload)
 	detail := generatedPlanSliceDetailFromPayload(quizcore.Scope{ProjectID: "payload-validation"}, normalized)
 
-	if err := ValidateGeneratedPlanSliceDetailContent(detail); err != nil {
+	if err := generationcore.ValidateGeneratedPlanSliceDetailContent(detail); err != nil {
 		return QuizModelPlanSliceDetailPayload{}, err
 	}
 
@@ -761,17 +762,17 @@ func normalizeQuizModelPlanSliceBranchMetadataPayload(
 func generatedPlanSliceDetailFromPayload(
 	scope quizcore.Scope,
 	payload QuizModelPlanSliceDetailPayload,
-) GeneratedPlanSliceDetail {
-	detail := GeneratedPlanSliceDetail{
+) generationcore.GeneratedPlanSliceDetail {
+	detail := generationcore.GeneratedPlanSliceDetail{
 		Scope:                  scope,
 		SliceID:                payload.SliceID,
 		ShortName:              payload.ShortName,
 		Objective:              payload.Objective,
 		ImplementationNotes:    payload.ImplementationNotes,
-		Tasks:                  make([]GeneratedPlanSliceTask, 0, len(payload.Tasks)),
+		Tasks:                  make([]generationcore.GeneratedPlanSliceTask, 0, len(payload.Tasks)),
 		AcceptanceCriteria:     payload.AcceptanceCriteria,
-		TicketMetadata:         GeneratedPlanSliceTicketMetadata(payload.TicketMetadata),
-		BranchMetadata:         GeneratedPlanSliceBranchMetadata(payload.BranchMetadata),
+		TicketMetadata:         generationcore.GeneratedPlanSliceTicketMetadata(payload.TicketMetadata),
+		BranchMetadata:         generationcore.GeneratedPlanSliceBranchMetadata(payload.BranchMetadata),
 		PRExpectations:         payload.PRExpectations,
 		ValidationExpectations: payload.ValidationExpectations,
 		Dependencies:           payload.Dependencies,
@@ -779,7 +780,7 @@ func generatedPlanSliceDetailFromPayload(
 	}
 
 	for _, task := range payload.Tasks {
-		detail.Tasks = append(detail.Tasks, GeneratedPlanSliceTask(task))
+		detail.Tasks = append(detail.Tasks, generationcore.GeneratedPlanSliceTask(task))
 	}
 
 	return detail
@@ -990,7 +991,7 @@ func quizModelBaseContextSections(payload QuizModelPayload) ([]QuizModelContextS
 	}, nil
 }
 
-func quizModelAppendAcceptanceReadinessSection(sections []QuizModelContextSection, readiness *AcceptanceReadiness) ([]QuizModelContextSection, error) {
+func quizModelAppendAcceptanceReadinessSection(sections []QuizModelContextSection, readiness *generationcore.AcceptanceReadiness) ([]QuizModelContextSection, error) {
 	if readiness == nil {
 		return sections, nil
 	}
@@ -1043,7 +1044,7 @@ func validateQuizModelPayloadHeader(payload QuizModelPayload) error {
 	}
 
 	if payload.AcceptanceReadiness != nil {
-		_, err := ValidateAcceptanceReadiness(*payload.AcceptanceReadiness)
+		_, err := generationcore.ValidateAcceptanceReadiness(*payload.AcceptanceReadiness)
 		if err != nil {
 			return fmt.Errorf("quiz model payload acceptance readiness: %w", err)
 		}

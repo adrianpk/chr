@@ -164,7 +164,7 @@ func (r *fileAuthoringSessionRepository) readAuthoringReceipt(request AuthoringC
 		return receipt.Result, false, err
 	}
 
-	if err := decodeAuthoringState(data, &receipt); err != nil {
+	if err := authoringstate.Decode(data, &receipt); err != nil {
 		return receipt.Result, false, err
 	}
 
@@ -177,7 +177,7 @@ func (r *fileAuthoringSessionRepository) readAuthoringReceipt(request AuthoringC
 
 func readExistingAuthoringBinding(data []byte, digest string) (authoringRequestBinding, error) {
 	var binding authoringRequestBinding
-	if err := decodeAuthoringState(data, &binding); err != nil {
+	if err := authoringstate.Decode(data, &binding); err != nil {
 		return binding, err
 	}
 

@@ -16,7 +16,7 @@ func nativeLimitFixture(t *testing.T, policy WorkflowExecutionPolicy) (*Workflow
 	store, record, request := workflowTicketFixture(t, "ticket", workflowPreparationGate("true"))
 	request.Policy = policy
 	run := workflowTestStart(t, store, request).Invocation
-	entry := nativeEntryAdmit(t, store, WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: WorkflowRef{Kind: "ticket", ID: record.Task.Key}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"})
+	entry := nativeEntryAdmit(t, store, WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: workflowstate.Ref{Kind: "ticket", ID: record.Task.Key}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"})
 
 	return store, entry
 }

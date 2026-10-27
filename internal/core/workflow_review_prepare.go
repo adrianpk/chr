@@ -108,7 +108,7 @@ func (s *WorkflowStore) prepareWorkflowReviewPolicy(ctx context.Context, run *wo
 
 		return nil, workflowPreparedTask{}, s.persistWorkflowReviewDecision(run, observation, decision, "authorized")
 	case ReviewWorkflowModeAgenticReview:
-		if err := validateWorkflowCommand(reviewer); err != nil {
+		if err := workflowstate.ValidateCommand(reviewer); err != nil {
 			return nil, workflowPreparedTask{}, fmt.Errorf("separate workflow review command required: %w", err)
 		}
 

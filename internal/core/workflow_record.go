@@ -3,6 +3,9 @@ package core
 import (
 	"encoding/json"
 	"time"
+
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowSchema identifies explicitly executable workflow records.
@@ -18,12 +21,6 @@ type WorkflowIdentity struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// WorkflowRef is a ticket-key or slice-ID reference in the containing scope.
-type WorkflowRef struct {
-	Kind string `json:"kind"`
-	ID   string `json:"id"`
-}
-
 // WorkflowTask extends a native ticket without replacing its display fields.
 type WorkflowTask struct {
 	Schema          string                `json:"workflow_schema"`
@@ -33,7 +30,7 @@ type WorkflowTask struct {
 	SetID           string                `json:"slice_set_id,omitempty"`
 	SliceID         string                `json:"slice_id,omitempty"`
 	Order           int                   `json:"task_order,omitempty"`
-	DependsOn       []WorkflowRef         `json:"depends_on,omitempty"`
+	DependsOn       []workflowstate.Ref   `json:"depends_on,omitempty"`
 	Phase           string                `json:"task_phase"`
 	ContractHash    string                `json:"execution_contract_hash"`
 	AttemptID       string                `json:"active_attempt_id,omitempty"`
@@ -53,52 +50,44 @@ type WorkflowTaskDelivery struct {
 	ConfirmedAt  time.Time `json:"confirmed_at"`
 }
 
-// WorkflowValidation is an ordered argv gate with one shared deadline.
-type WorkflowValidation struct {
-	Required       bool       `json:"required"`
-	Commands       [][]string `json:"commands,omitempty"`
-	TimeoutSeconds int        `json:"timeout_seconds"`
-	WaiverReason   string     `json:"waiver_reason,omitempty"`
-}
-
 // WorkflowSlice is a set-owned descriptor; tickets alone own task membership.
 type WorkflowSlice struct {
-	ID            string        `json:"id"`
-	Order         int           `json:"slice_order"`
-	Title         string        `json:"title"`
-	ContractRef   string        `json:"contract_ref"`
-	ContractHash  string        `json:"contract_hash"`
-	TaskInputHash string        `json:"task_input_hash"`
-	DependsOn     []WorkflowRef `json:"depends_on,omitempty"`
-	Phase         string        `json:"phase"`
-	Branch        string        `json:"branch,omitempty"`
-	CandidateRef  string        `json:"candidate_ref"`
-	PullRequest   string        `json:"pull_request,omitempty"`
-	DeliveryRef   string        `json:"delivery_ref,omitempty"`
+	ID            string              `json:"id"`
+	Order         int                 `json:"slice_order"`
+	Title         string              `json:"title"`
+	ContractRef   string              `json:"contract_ref"`
+	ContractHash  string              `json:"contract_hash"`
+	TaskInputHash string              `json:"task_input_hash"`
+	DependsOn     []workflowstate.Ref `json:"depends_on,omitempty"`
+	Phase         string              `json:"phase"`
+	Branch        string              `json:"branch,omitempty"`
+	CandidateRef  string              `json:"candidate_ref"`
+	PullRequest   string              `json:"pull_request,omitempty"`
+	DeliveryRef   string              `json:"delivery_ref,omitempty"`
 }
 
 // WorkflowSet owns ordered slices and its closing contract.
 type WorkflowSet struct {
-	PlanRevision      *PlanRevisionBinding    `json:"plan_revision,omitempty"`
-	Closing           *WorkflowClosingBinding `json:"closing,omitempty"`
-	Amendments        []WorkflowAmendmentRef  `json:"amendments,omitempty"`
-	Schema            string                  `json:"workflow_schema"`
-	UseCase           string                  `json:"use_case,omitempty"`
-	UseCaseOrder      int                     `json:"use_case_order,omitempty"`
-	Status            string                  `json:"status"`
-	PlanRef           string                  `json:"plan_ref"`
-	PlanHash          string                  `json:"plan_hash"`
-	Slices            []WorkflowSlice         `json:"slices"`
-	ClosingValidation WorkflowValidation      `json:"closing_validation"`
-	ClosureRef        string                  `json:"closure_ref,omitempty"`
-	ClosureHistory    []string                `json:"closure_history,omitempty"`
+	PlanRevision      *generationcore.PlanRevisionBinding `json:"plan_revision,omitempty"`
+	Closing           *WorkflowClosingBinding             `json:"closing,omitempty"`
+	Amendments        []WorkflowAmendmentRef              `json:"amendments,omitempty"`
+	Schema            string                              `json:"workflow_schema"`
+	UseCase           string                              `json:"use_case,omitempty"`
+	UseCaseOrder      int                                 `json:"use_case_order,omitempty"`
+	Status            string                              `json:"status"`
+	PlanRef           string                              `json:"plan_ref"`
+	PlanHash          string                              `json:"plan_hash"`
+	Slices            []WorkflowSlice                     `json:"slices"`
+	ClosingValidation workflowstate.Validation            `json:"closing_validation"`
+	ClosureRef        string                              `json:"closure_ref,omitempty"`
+	ClosureHistory    []string                            `json:"closure_history,omitempty"`
 }
 
 // WorkflowReceipt retains immutable integration facts, separate from projections.
 type WorkflowReceipt struct {
 	Native          *WorkflowNativeReceipt `json:"native,omitempty"`
 	Schema          string                 `json:"workflow_schema"`
-	Unit            WorkflowRef            `json:"unit"`
+	Unit            workflowstate.Ref      `json:"unit"`
 	CandidateID     string                 `json:"candidate_id"`
 	SubmissionID    string                 `json:"submission_id"`
 	Provider        string                 `json:"provider"`

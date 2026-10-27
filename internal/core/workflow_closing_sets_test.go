@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowClosingLaterSet(t *testing.T, fixture workflowIntegrationFixture) WorkflowMaterializationResult {
@@ -13,7 +15,7 @@ func workflowClosingLaterSet(t *testing.T, fixture workflowIntegrationFixture) W
 
 	plan := workflowPlanFixture()
 	plan.MaterializationID, plan.Title, plan.UseCase = "closing-later", "Later associated set", "ordered-case"
-	plan.ClosingValidation = WorkflowValidation{WaiverReason: "Approved later set closing waiver"}
+	plan.ClosingValidation = workflowstate.Validation{WaiverReason: "Approved later set closing waiver"}
 	plan.Slices = plan.Slices[:1]
 	plan.Slices[0].ID += "-later"
 
@@ -38,7 +40,7 @@ func workflowClosingLaterSet(t *testing.T, fixture workflowIntegrationFixture) W
 // first, and its lane uses the confirmed closing target without replaying work.
 func TestWorkflowClosingSetAdvance(t *testing.T) {
 	fixture, ports := workflowClosingExtentFixture(t, "use_case", WorkflowExecutionPolicy{IncludeLaterTickets: true})
-	workflowClosingContract(t, fixture, WorkflowValidation{WaiverReason: "Approved first set closing waiver"})
+	workflowClosingContract(t, fixture, workflowstate.Validation{WaiverReason: "Approved first set closing waiver"})
 
 	later := workflowClosingLaterSet(t, fixture)
 	if _, err := fixture.store.ReconcileWorkflowMembership(t.Context(), fixture.run.ID); err != nil {

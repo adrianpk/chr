@@ -9,23 +9,13 @@ import (
 	"strings"
 	"time"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func orderedWorkflowPlan(plan GeneratedWorkflowPlan) GeneratedWorkflowPlan {
-	plan.Slices = append([]GeneratedWorkflowSlice(nil), plan.Slices...)
-	sort.Slice(plan.Slices, func(i, j int) bool { return plan.Slices[i].Order < plan.Slices[j].Order })
-
-	for i := range plan.Slices {
-		plan.Slices[i].Tasks = append([]GeneratedWorkflowTask(nil), plan.Slices[i].Tasks...)
-		sort.Slice(plan.Slices[i].Tasks, func(a, b int) bool { return plan.Slices[i].Tasks[a].Order < plan.Slices[i].Tasks[b].Order })
-	}
-
-	return plan
-}
-
 func (s *WorkflowStore) buildMaterialization(ctx context.Context, opts WorkflowMaterializationOptions, body []byte, number int) (WorkflowMaterializationResult, error) {
-	plan := orderedWorkflowPlan(opts.Plan)
+	plan := generationcore.OrderedWorkflowPlan(opts.Plan)
 	now := time.Now().UTC()
 
 	set, err := s.materializationEnvelope("plan", plan.Title, number, now)
@@ -36,7 +26,7 @@ func (s *WorkflowStore) buildMaterialization(ctx context.Context, opts WorkflowM
 	return s.buildMaterializationForSet(ctx, opts, plan, body, number+1, now, set)
 }
 
-func (s *WorkflowStore) buildMaterializationForSet(ctx context.Context, opts WorkflowMaterializationOptions, plan GeneratedWorkflowPlan, body []byte, number int, now time.Time, set WorkflowRecord) (WorkflowMaterializationResult, error) {
+func (s *WorkflowStore) buildMaterializationForSet(ctx context.Context, opts WorkflowMaterializationOptions, plan generationcore.GeneratedWorkflowPlan, body []byte, number int, now time.Time, set WorkflowRecord) (WorkflowMaterializationResult, error) {
 	set.Metadata["materialization_id"] = json.RawMessage(fmt.Sprintf("%q", plan.MaterializationID))
 	set.Body = body
 	set.Set = &WorkflowSet{Schema: WorkflowSchema, UseCase: plan.UseCase, UseCaseOrder: plan.UseCaseOrder, Status: "ready", PlanRef: filepath.ToSlash(filepath.Join("plan", set.ID, "artifact.md")), PlanHash: plan.PlanHash, ClosingValidation: plan.ClosingValidation}
@@ -70,7 +60,7 @@ func (s *WorkflowStore) materializationEnvelope(kind, title string, number int, 
 	return WorkflowRecord{WorkflowIdentity: WorkflowIdentity{ID: id, ProjectID: s.projectID, Namespace: s.layout.Namespace(), Revision: 1, CreatedAt: now, UpdatedAt: now}, Kind: kind, Path: kind + "/" + id + "/metadata.json", Metadata: metadata}, nil
 }
 
-func (s *WorkflowStore) buildMaterializationTasks(ctx context.Context, opts WorkflowMaterializationOptions, set WorkflowRecord, plan GeneratedWorkflowPlan, number int, now time.Time) ([]WorkflowRecord, map[string]string, error) {
+func (s *WorkflowStore) buildMaterializationTasks(ctx context.Context, opts WorkflowMaterializationOptions, set WorkflowRecord, plan generationcore.GeneratedWorkflowPlan, number int, now time.Time) ([]WorkflowRecord, map[string]string, error) {
 	keys := map[string]string{}
 	tasks := []WorkflowRecord{}
 
@@ -101,7 +91,7 @@ func (s *WorkflowStore) buildMaterializationTasks(ctx context.Context, opts Work
 	return tasks, keys, nil
 }
 
-func (s *WorkflowStore) materializationTask(input GeneratedWorkflowTask, slice GeneratedWorkflowSlice, set WorkflowRecord, key string, number int, now time.Time) (WorkflowRecord, error) {
+func (s *WorkflowStore) materializationTask(input generationcore.GeneratedWorkflowTask, slice generationcore.GeneratedWorkflowSlice, set WorkflowRecord, key string, number int, now time.Time) (WorkflowRecord, error) {
 	record, err := s.materializationEnvelope("ticket", input.Title, number, now)
 	if err != nil {
 		return record, err
@@ -122,8 +112,8 @@ func (s *WorkflowStore) materializationTask(input GeneratedWorkflowTask, slice G
 	return record, err
 }
 
-func resolveMaterializationRefs(refs []WorkflowRef, keys map[string]string) []WorkflowRef {
-	resolved := append([]WorkflowRef(nil), refs...)
+func resolveMaterializationRefs(refs []workflowstate.Ref, keys map[string]string) []workflowstate.Ref {
+	resolved := append([]workflowstate.Ref(nil), refs...)
 	for i, ref := range resolved {
 		if ref.Kind == "ticket" && keys[ref.ID] != "" {
 			resolved[i].ID = keys[ref.ID]
@@ -133,12 +123,12 @@ func resolveMaterializationRefs(refs []WorkflowRef, keys map[string]string) []Wo
 	return resolved
 }
 
-func materializationSlice(input GeneratedWorkflowSlice, set WorkflowRecord, tasks []WorkflowRecord, keys map[string]string) (WorkflowSlice, error) {
+func materializationSlice(input generationcore.GeneratedWorkflowSlice, set WorkflowRecord, tasks []WorkflowRecord, keys map[string]string) (WorkflowSlice, error) {
 	// Membership is a digest of ordered ticket keys and contracts, never a second
 	// editable task list on the set descriptor.
 	contract, err := json.Marshal(struct {
 		Contract   string
-		Validation WorkflowValidation
+		Validation workflowstate.Validation
 	}{input.Contract, input.Validation})
 	if err != nil {
 		return WorkflowSlice{}, err

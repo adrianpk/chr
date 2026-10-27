@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -87,7 +88,7 @@ func TestInvokeQuizModelAcceptsDraftSpecResponse(t *testing.T) {
 			RequestID: request.ID,
 			Provider:  "fake",
 			Status:    QuizModelResponseReady,
-			DraftSpec: QuizDraftSpec{
+			DraftSpec: generationcore.QuizDraftSpec{
 				Scope:          quizcore.Scope{ProjectID: "project-1"},
 				Title:          "Generated Spec",
 				Body:           "Generated behavior.",
@@ -228,11 +229,11 @@ func TestQuizModelProviderPayloadIncludesNextQuestionContext(t *testing.T) {
 
 func TestQuizModelProviderPayloadCarriesAcceptanceReadiness(t *testing.T) {
 	request := validQuizModelRequest()
-	request.Payload.AcceptanceReadiness = &AcceptanceReadiness{
-		Decision:   AcceptanceReadinessNeedsMoreInfo,
+	request.Payload.AcceptanceReadiness = &generationcore.AcceptanceReadiness{
+		Decision:   generationcore.AcceptanceReadinessNeedsMoreInfo,
 		Confidence: 0.66,
 		Reasons:    []string{"Need actor details."},
-		Missing:    []AcceptanceReadinessSlot{AcceptanceReadinessSlotActor},
+		Missing:    []generationcore.AcceptanceReadinessSlot{generationcore.AcceptanceReadinessSlotActor},
 	}
 
 	payload := quizModelProviderPayload(request)
@@ -241,12 +242,12 @@ func TestQuizModelProviderPayloadCarriesAcceptanceReadiness(t *testing.T) {
 		t.Fatalf("next-question provider payload missing context_sections: %#v", payload)
 	}
 
-	readiness, ok := payload["acceptance_readiness"].(*AcceptanceReadiness)
+	readiness, ok := payload["acceptance_readiness"].(*generationcore.AcceptanceReadiness)
 	if !ok {
 		t.Fatalf("acceptance_readiness = %#v, want readiness payload", payload["acceptance_readiness"])
 	}
 
-	if readiness.Decision != AcceptanceReadinessNeedsMoreInfo {
+	if readiness.Decision != generationcore.AcceptanceReadinessNeedsMoreInfo {
 		t.Fatalf("decision = %q, want needs_more_info", readiness.Decision)
 	}
 }
@@ -765,7 +766,7 @@ func TestValidateGeneratedPlanSliceDetailRejectsRenamedSlice(t *testing.T) {
 	detail := validGeneratedPlanSliceDetail(quizRuntimeTestTime())
 	detail.ShortName = "renamed slice"
 
-	err := ValidateGeneratedPlanSliceDetailAgainstOutline(detail, outline, "Slice 1")
+	err := generationcore.ValidateGeneratedPlanSliceDetailAgainstOutline(detail, outline, "Slice 1")
 	if err == nil {
 		t.Fatal("ValidateGeneratedPlanSliceDetailAgainstOutline returned nil error")
 	}
@@ -971,11 +972,11 @@ func TestQuizModelRoutingStateCarriesTopicConductorSignals(t *testing.T) {
 
 func TestQuizModelRoutingStateCarriesAcceptanceReadinessPromptIntent(t *testing.T) {
 	request := validQuizModelRequest()
-	request.Payload.AcceptanceReadiness = &AcceptanceReadiness{
-		Decision:   AcceptanceReadinessNeedsMoreInfo,
+	request.Payload.AcceptanceReadiness = &generationcore.AcceptanceReadiness{
+		Decision:   generationcore.AcceptanceReadinessNeedsMoreInfo,
 		Confidence: 0.66,
 		Reasons:    []string{"Need actor details."},
-		Missing:    []AcceptanceReadinessSlot{AcceptanceReadinessSlotActor},
+		Missing:    []generationcore.AcceptanceReadinessSlot{generationcore.AcceptanceReadinessSlotActor},
 	}
 
 	state := quizModelRoutingState(request, QuizModelQuestionPayload{
@@ -985,21 +986,21 @@ func TestQuizModelRoutingStateCarriesAcceptanceReadinessPromptIntent(t *testing.
 		CompletionRecommended: false,
 	})
 
-	readiness, ok := state["acceptance_readiness"].(*AcceptanceReadiness)
+	readiness, ok := state["acceptance_readiness"].(*generationcore.AcceptanceReadiness)
 	if !ok {
 		t.Fatalf("acceptance_readiness = %#v, want readiness payload", state["acceptance_readiness"])
 	}
 
-	if readiness.Decision != AcceptanceReadinessNeedsMoreInfo {
+	if readiness.Decision != generationcore.AcceptanceReadinessNeedsMoreInfo {
 		t.Fatalf("decision = %q, want needs_more_info", readiness.Decision)
 	}
 
-	intent, ok := state["acceptance_prompt_intent"].(AcceptanceReadinessPromptIntent)
+	intent, ok := state["acceptance_prompt_intent"].(generationcore.AcceptanceReadinessPromptIntent)
 	if !ok {
 		t.Fatalf("acceptance_prompt_intent = %#v, want prompt intent", state["acceptance_prompt_intent"])
 	}
 
-	if intent.Slot != string(AcceptanceReadinessSlotActor) {
+	if intent.Slot != string(generationcore.AcceptanceReadinessSlotActor) {
 		t.Fatalf("slot = %q, want actor", intent.Slot)
 	}
 }
@@ -1381,7 +1382,7 @@ func TestValidateQuizModelResponseAcceptsDraftSpecBeforeServiceProvenance(t *tes
 		RequestID: "request-1",
 		Provider:  "fake",
 		Status:    QuizModelResponseReady,
-		DraftSpec: QuizDraftSpec{
+		DraftSpec: generationcore.QuizDraftSpec{
 			Scope:     quizcore.Scope{ProjectID: "project-1"},
 			Title:     "Draft Spec",
 			Body:      "Draft body.",
@@ -1445,8 +1446,8 @@ func validQuizModelRequest() QuizModelRequest {
 	}
 }
 
-func validGeneratedPlanOutline(createdAt time.Time) GeneratedPlanOutline {
-	return GeneratedPlanOutline{
+func validGeneratedPlanOutline(createdAt time.Time) generationcore.GeneratedPlanOutline {
+	return generationcore.GeneratedPlanOutline{
 		Scope:              quizcore.Scope{ProjectID: "project-1"},
 		Title:              "Staged Plan Generation",
 		Status:             "planned",
@@ -1455,7 +1456,7 @@ func validGeneratedPlanOutline(createdAt time.Time) GeneratedPlanOutline {
 		OpenQuestions:      []string{"Should staged generation be default?"},
 		Risks:              []string{"More model calls."},
 		ValidationStrategy: "Validate schema and request construction.",
-		Slices: []GeneratedPlanOutlineSlice{
+		Slices: []generationcore.GeneratedPlanOutlineSlice{
 			{
 				ID:                     "Slice 1",
 				ShortName:              "outline generation contract",
@@ -1472,14 +1473,14 @@ func validGeneratedPlanOutline(createdAt time.Time) GeneratedPlanOutline {
 	}
 }
 
-func validGeneratedPlanSliceDetail(createdAt time.Time) GeneratedPlanSliceDetail {
-	return GeneratedPlanSliceDetail{
+func validGeneratedPlanSliceDetail(createdAt time.Time) generationcore.GeneratedPlanSliceDetail {
+	return generationcore.GeneratedPlanSliceDetail{
 		Scope:               quizcore.Scope{ProjectID: "project-1"},
 		SliceID:             "Slice 1",
 		ShortName:           "outline generation contract",
 		Objective:           "Add outline contracts.",
 		ImplementationNotes: []string{"Keep this scoped to contracts."},
-		Tasks: []GeneratedPlanSliceTask{
+		Tasks: []generationcore.GeneratedPlanSliceTask{
 			{
 				ID:         "T1.1",
 				Summary:    "Add the model action.",
@@ -1487,7 +1488,7 @@ func validGeneratedPlanSliceDetail(createdAt time.Time) GeneratedPlanSliceDetail
 			},
 		},
 		AcceptanceCriteria: []string{"The action validates."},
-		TicketMetadata: GeneratedPlanSliceTicketMetadata{
+		TicketMetadata: generationcore.GeneratedPlanSliceTicketMetadata{
 			Title:    "Add outline contract",
 			Synopsis: "Adds outline generation contracts.",
 			Priority: "medium",
@@ -1495,7 +1496,7 @@ func validGeneratedPlanSliceDetail(createdAt time.Time) GeneratedPlanSliceDetail
 			Type:     "feature",
 			Tags:     []string{"planning"},
 		},
-		BranchMetadata: GeneratedPlanSliceBranchMetadata{
+		BranchMetadata: generationcore.GeneratedPlanSliceBranchMetadata{
 			BranchName: "feat/slice-1-outline-generation-contract",
 		},
 		PRExpectations:         []string{"Open one PR against dev."},

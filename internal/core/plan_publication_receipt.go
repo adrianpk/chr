@@ -7,29 +7,18 @@ import (
 	"os"
 	"path/filepath"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
-	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
-
-// PlanPublicationOperation binds retries to caller-owned intent, independently
-// of model output, timestamps, or the newly observed target after a commit.
-type PlanPublicationOperation struct {
-	TicketDelivery     bool `json:",omitempty"`
-	ID                 string
-	Scope              quizcore.Scope
-	ExpectedRevision   string
-	Replace            bool
-	TrackerReplaceHash string
-}
 
 // PlanPublicationResult identifies the retained revision from one committed
 // operation. Reference is project-relative; binding paths are namespace-relative.
 type PlanPublicationResult struct {
 	OperationID string
 	Reference   string
-	Binding     PlanRevisionBinding
+	Binding     generationcore.PlanRevisionBinding
 }
 
 type planPublicationReceipt struct {
@@ -39,7 +28,7 @@ type planPublicationReceipt struct {
 
 // LookupPlanPublication recovers any pending authoring transaction and returns
 // a committed retry without invoking a model or advancing the current revision.
-func LookupPlanPublication(ctx context.Context, projectDir string, operation PlanPublicationOperation) (result PlanPublicationResult, found bool, err error) {
+func LookupPlanPublication(ctx context.Context, projectDir string, operation generationcore.PlanPublicationOperation) (result PlanPublicationResult, found bool, err error) {
 	err = WithAuthoringMutation(ctx, projectDir, func(context.Context) error {
 		r := &fileAuthoringSessionRepository{projectDir: projectDir}
 		result, found, err = r.planReceipt(operation)
@@ -50,7 +39,7 @@ func LookupPlanPublication(ctx context.Context, projectDir string, operation Pla
 	return result, found, err
 }
 
-func (r *fileAuthoringSessionRepository) planOperationDigest(operation PlanPublicationOperation) (string, error) {
+func (r *fileAuthoringSessionRepository) planOperationDigest(operation generationcore.PlanPublicationOperation) (string, error) {
 	if err := authoringstate.ValidateSessionID(operation.ID); err != nil {
 		return "", err
 	}
@@ -70,7 +59,7 @@ func (r *fileAuthoringSessionRepository) planOperationDigest(operation PlanPubli
 	return contenthash.Sum(append([]byte(root+"\x00plan\x00"+paths.RelativePath+"\x00"), encoded...)), err
 }
 
-func (r *fileAuthoringSessionRepository) planReceipt(operation PlanPublicationOperation) (PlanPublicationResult, bool, error) {
+func (r *fileAuthoringSessionRepository) planReceipt(operation generationcore.PlanPublicationOperation) (PlanPublicationResult, bool, error) {
 	var receipt planPublicationReceipt
 
 	digest, err := r.planOperationDigest(operation)
@@ -87,7 +76,7 @@ func (r *fileAuthoringSessionRepository) planReceipt(operation PlanPublicationOp
 		return receipt.Result, false, err
 	}
 
-	if err := decodeAuthoringState(encoded, &receipt); err != nil {
+	if err := authoringstate.Decode(encoded, &receipt); err != nil {
 		return receipt.Result, false, err
 	}
 
@@ -102,7 +91,7 @@ func (r *fileAuthoringSessionRepository) planReceipt(operation PlanPublicationOp
 	return receipt.Result, true, nil
 }
 
-func (r *fileAuthoringSessionRepository) completedPlanOperation(plan GeneratedPlan) (bool, error) {
+func (r *fileAuthoringSessionRepository) completedPlanOperation(plan generationcore.GeneratedPlan) (bool, error) {
 	if plan.Operation == nil {
 		return false, nil
 	}
@@ -121,7 +110,7 @@ func (r *fileAuthoringSessionRepository) completedPlanOperation(plan GeneratedPl
 	return found, err
 }
 
-func (r *fileAuthoringSessionRepository) planPublicationReceiptChange(paths GeneratedPlanPaths, plan GeneratedPlan, changes []workflowFileChange) ([]workflowFileChange, error) {
+func (r *fileAuthoringSessionRepository) planPublicationReceiptChange(paths GeneratedPlanPaths, plan generationcore.GeneratedPlan, changes []workflowFileChange) ([]workflowFileChange, error) {
 	if plan.Operation == nil {
 		return nil, nil
 	}
@@ -136,7 +125,7 @@ func (r *fileAuthoringSessionRepository) planPublicationReceiptChange(paths Gene
 	}
 
 	var metadata struct {
-		Binding PlanRevisionBinding `json:"plan_binding"`
+		Binding generationcore.PlanRevisionBinding `json:"plan_binding"`
 	}
 
 	for _, change := range changes {

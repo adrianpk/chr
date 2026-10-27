@@ -17,7 +17,7 @@ type WorkflowMergerFence struct {
 	EntryID, CandidateHash, ScopeHash, OwnedWorkspaceID string
 	Repository, SourceRef, TargetRef                    string
 	Source, Base, Method                                string
-	Unit                                                WorkflowRef
+	Unit                                                workflowstate.Ref
 	CandidateRevision, ClaimGeneration                  uint64
 }
 

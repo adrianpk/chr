@@ -229,7 +229,7 @@ func TestNativeEntryAlias(t *testing.T) {
 	store, record, request := workflowTicketFixture(t, "ticket", workflowPreparationGate("true"))
 	request.Selection.Target.Repository = "https://FORGE.example/test/repo.git/"
 	run := workflowTestStart(t, store, request).Invocation
-	admission := WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: WorkflowRef{Kind: "ticket", ID: record.Task.Key}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"}
+	admission := WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: workflowstate.Ref{Kind: "ticket", ID: record.Task.Key}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"}
 
 	entry := nativeEntryAdmit(t, store, admission)
 	if entry.Repository != "https://forge.example/test/repo" || nativeEntryAdmit(t, store, admission).ID != entry.ID {

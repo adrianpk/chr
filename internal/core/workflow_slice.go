@@ -24,7 +24,7 @@ type WorkflowSliceTaskProof struct {
 // WorkflowSliceInput binds an integration contract and its task proofs.
 // Independent ticket inputs omit set and aggregate-contract references.
 type WorkflowSliceInput struct {
-	Unit         WorkflowRef              `json:"unit"`
+	Unit         workflowstate.Ref        `json:"unit"`
 	SetID        string                   `json:"set_id,omitempty"`
 	ContractRef  string                   `json:"contract_ref,omitempty"`
 	ContractHash string                   `json:"contract_hash"`
@@ -70,7 +70,7 @@ func (s *WorkflowStore) ExecuteWorkflowSlice(ctx context.Context, id string, wor
 }
 
 func (s *WorkflowStore) executeWorkflowSliceTask(ctx context.Context, id string, worker []string) error {
-	if err := validateWorkflowCommand(worker); err != nil {
+	if err := workflowstate.ValidateCommand(worker); err != nil {
 		return err
 	}
 

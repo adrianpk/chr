@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -55,7 +56,7 @@ type PlanRegenerateRequest struct {
 // artifacts.
 type PlanTrackingRequest struct {
 	OperationID string
-	Workflow    *core.GeneratedWorkflowPlan
+	Workflow    *generationcore.GeneratedWorkflowPlan
 	Scope       quizcore.Scope
 }
 
@@ -101,7 +102,7 @@ func (s service) ListPlans() (PlanListResult, error) {
 //nolint:wsl_v5 // Guard clauses read clearer in this service flow.
 func (s service) GeneratePlan(ctx context.Context, request PlanGenerateRequest) (PlanOperationResult, error) {
 	scope := s.quizScope(request.Scope)
-	operation := core.PlanPublicationOperation{ID: request.OperationID, Scope: scope, ExpectedRevision: request.ExpectedRevision, TrackerReplaceHash: request.TrackerReplaceHash, TicketDelivery: request.TicketDelivery}
+	operation := generationcore.PlanPublicationOperation{ID: request.OperationID, Scope: scope, ExpectedRevision: request.ExpectedRevision, TrackerReplaceHash: request.TrackerReplaceHash, TicketDelivery: request.TicketDelivery}
 	if result, found, err := s.replayPlanPublication(ctx, operation); found || err != nil {
 		return result, err
 	}
@@ -149,7 +150,7 @@ func (s service) existingGeneratedPlan(scope quizcore.Scope) (PlanView, bool, er
 	return s.planViewFromPath(scope, paths.RelativePath, paths.Path), true, nil
 }
 
-func (s service) prepareAndPublishPlan(ctx context.Context, operation core.PlanPublicationOperation) (PlanOperationResult, error) {
+func (s service) prepareAndPublishPlan(ctx context.Context, operation generationcore.PlanPublicationOperation) (PlanOperationResult, error) {
 	bound, ctx, err := s.bindGeneration(ctx, "plan-"+dumpRequestID(operation.ID), string(core.QuizModelActionGeneratePlan))
 	if err != nil {
 		return PlanOperationResult{}, err
@@ -182,14 +183,14 @@ func (s service) prepareAndPublishPlan(ctx context.Context, operation core.PlanP
 
 	plan.CreateOnly = !replace
 	for _, input := range sources.Inputs {
-		plan.SourceInputs = append(plan.SourceInputs, core.PlanSourceBinding{Kind: input.Kind, Reference: input.Reference, Revision: input.Revision})
+		plan.SourceInputs = append(plan.SourceInputs, generationcore.PlanSourceBinding{Kind: input.Kind, Reference: input.Reference, Revision: input.Revision})
 	}
 
 	if replace {
 		plan.ArchiveAt = s.utcNow()
 	}
 
-	if err := core.ValidateGeneratedPlan(plan); err != nil {
+	if err := generationcore.ValidateGeneratedPlan(plan); err != nil {
 		return PlanOperationResult{}, err
 	}
 
@@ -248,7 +249,7 @@ func (s service) planObservedRuntimeState(sources core.PlanSourceObservation) (q
 	return state, err
 }
 
-func (s service) publishObservedPlan(ctx context.Context, plan core.GeneratedPlan, sources core.PlanSourceObservation) (paths core.GeneratedPlanPaths, err error) {
+func (s service) publishObservedPlan(ctx context.Context, plan generationcore.GeneratedPlan, sources core.PlanSourceObservation) (paths core.GeneratedPlanPaths, err error) {
 	err = core.WithAuthoringMutation(ctx, s.projectContext.ProjectDir, func(ctx context.Context) error {
 		current, readErr := s.observePlanContext(ctx, sources.Scope)
 		if readErr != nil {
@@ -267,7 +268,7 @@ func (s service) publishObservedPlan(ctx context.Context, plan core.GeneratedPla
 	return paths, err
 }
 
-func (s service) generatePlanWithConfiguredBackend(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (core.GeneratedPlan, []string, []string, error) {
+func (s service) generatePlanWithConfiguredBackend(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (generationcore.GeneratedPlan, []string, []string, error) {
 	if s.singlePassPlan(ctx) {
 		return s.generateSinglePassPlan(ctx, scope, state, sources)
 	}
@@ -275,10 +276,10 @@ func (s service) generatePlanWithConfiguredBackend(ctx context.Context, scope qu
 	return s.generateStagedPlan(ctx, scope, state, sources)
 }
 
-func (s service) generateSinglePassPlan(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (core.GeneratedPlan, []string, []string, error) {
+func (s service) generateSinglePassPlan(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (generationcore.GeneratedPlan, []string, []string, error) {
 	modelRequest, err := s.newPlanGenerationModelRequest(state, sources)
 	if err != nil {
-		return core.GeneratedPlan{}, nil, nil, err
+		return generationcore.GeneratedPlan{}, nil, nil, err
 	}
 
 	s.appendPlanGenerationLog("generate_plan_single_pass_started", map[string]string{
@@ -289,7 +290,7 @@ func (s service) generateSinglePassPlan(ctx context.Context, scope quizcore.Scop
 
 	response, err := core.InvokeQuizModel(ctx, s.quizModel, modelRequest)
 	if err != nil {
-		return core.GeneratedPlan{}, nil, nil, err
+		return generationcore.GeneratedPlan{}, nil, nil, err
 	}
 
 	plan := response.Plan
@@ -307,17 +308,17 @@ func (s service) generateSinglePassPlan(ctx context.Context, scope quizcore.Scop
 	return plan, []string{modelRequest.ID}, []string{response.ID}, nil
 }
 
-func (s service) generateStagedPlan(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (core.GeneratedPlan, []string, []string, error) {
+func (s service) generateStagedPlan(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (generationcore.GeneratedPlan, []string, []string, error) {
 	outline, sourcePaths, requestIDs, responseIDs, err := s.generatePlanOutline(ctx, scope, state, sources)
 	if err != nil {
-		return core.GeneratedPlan{}, nil, nil, err
+		return generationcore.GeneratedPlan{}, nil, nil, err
 	}
 
-	details := make([]core.GeneratedPlanSliceDetail, 0, len(outline.Slices))
+	details := make([]generationcore.GeneratedPlanSliceDetail, 0, len(outline.Slices))
 	for _, slice := range outline.Slices {
 		detail, requestID, responseID, err := s.generatePlanSliceDetail(ctx, state, sources, outline, slice.ID)
 		if err != nil {
-			return core.GeneratedPlan{}, nil, nil, err
+			return generationcore.GeneratedPlan{}, nil, nil, err
 		}
 
 		details = append(details, detail)
@@ -327,10 +328,10 @@ func (s service) generateStagedPlan(ctx context.Context, scope quizcore.Scope, s
 
 	body, err := core.AssembleGeneratedPlanBody(outline, details, requestIDs, responseIDs)
 	if err != nil {
-		return core.GeneratedPlan{}, nil, nil, err
+		return generationcore.GeneratedPlan{}, nil, nil, err
 	}
 
-	plan := core.GeneratedPlan{
+	plan := generationcore.GeneratedPlan{
 		Scope:       scope,
 		Title:       outline.Title,
 		Body:        body,
@@ -342,10 +343,10 @@ func (s service) generateStagedPlan(ctx context.Context, scope quizcore.Scope, s
 	return plan, requestIDs, responseIDs, nil
 }
 
-func (s service) generatePlanOutline(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (core.GeneratedPlanOutline, []string, []string, []string, error) {
+func (s service) generatePlanOutline(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (generationcore.GeneratedPlanOutline, []string, []string, []string, error) {
 	modelRequest, err := s.newPlanOutlineGenerationModelRequest(state, sources)
 	if err != nil {
-		return core.GeneratedPlanOutline{}, nil, nil, nil, err
+		return generationcore.GeneratedPlanOutline{}, nil, nil, nil, err
 	}
 
 	s.appendPlanGenerationLog("generate_plan_outline_started", map[string]string{
@@ -356,7 +357,7 @@ func (s service) generatePlanOutline(ctx context.Context, scope quizcore.Scope, 
 
 	response, err := core.InvokeQuizModel(ctx, s.quizModel, modelRequest)
 	if err != nil {
-		return core.GeneratedPlanOutline{}, nil, nil, nil, err
+		return generationcore.GeneratedPlanOutline{}, nil, nil, nil, err
 	}
 
 	outline := response.PlanOutline
@@ -378,10 +379,10 @@ func (s service) generatePlanOutline(ctx context.Context, scope quizcore.Scope, 
 		nil
 }
 
-func (s service) generatePlanSliceDetail(ctx context.Context, state quizcore.RuntimeState, sources core.PlanSourceObservation, outline core.GeneratedPlanOutline, targetSliceID string) (core.GeneratedPlanSliceDetail, string, string, error) {
+func (s service) generatePlanSliceDetail(ctx context.Context, state quizcore.RuntimeState, sources core.PlanSourceObservation, outline generationcore.GeneratedPlanOutline, targetSliceID string) (generationcore.GeneratedPlanSliceDetail, string, string, error) {
 	modelRequest, err := s.newPlanSliceDetailGenerationModelRequest(state, sources, outline, targetSliceID)
 	if err != nil {
-		return core.GeneratedPlanSliceDetail{}, "", "", err
+		return generationcore.GeneratedPlanSliceDetail{}, "", "", err
 	}
 
 	s.appendPlanGenerationLog("generate_plan_slice_detail_started", map[string]string{
@@ -392,15 +393,15 @@ func (s service) generatePlanSliceDetail(ctx context.Context, state quizcore.Run
 
 	response, err := core.InvokeQuizModel(ctx, s.quizModel, modelRequest)
 	if err != nil {
-		return core.GeneratedPlanSliceDetail{}, "", "", err
+		return generationcore.GeneratedPlanSliceDetail{}, "", "", err
 	}
 
 	detail := response.SliceDetail
 	detail.Scope = outline.Scope
 	detail.CreatedAt = response.CreatedAt.UTC()
 
-	if err := core.ValidateGeneratedPlanSliceDetailAgainstOutline(detail, outline, targetSliceID); err != nil {
-		return core.GeneratedPlanSliceDetail{}, "", "", err
+	if err := generationcore.ValidateGeneratedPlanSliceDetailAgainstOutline(detail, outline, targetSliceID); err != nil {
+		return generationcore.GeneratedPlanSliceDetail{}, "", "", err
 	}
 
 	s.appendPlanGenerationLog("generate_plan_slice_detail_finished", map[string]string{
@@ -416,7 +417,7 @@ func (s service) generatePlanSliceDetail(ctx context.Context, state quizcore.Run
 //nolint:wsl_v5 // Keeps result capture adjacent to the guarded runtime call.
 func (s service) RegeneratePlan(ctx context.Context, request PlanRegenerateRequest) (PlanOperationResult, error) {
 	scope := s.quizScope(request.Scope)
-	operation := core.PlanPublicationOperation{ID: request.OperationID, Scope: scope, ExpectedRevision: request.ExpectedRevision, Replace: true, TrackerReplaceHash: request.TrackerReplaceHash}
+	operation := generationcore.PlanPublicationOperation{ID: request.OperationID, Scope: scope, ExpectedRevision: request.ExpectedRevision, Replace: true, TrackerReplaceHash: request.TrackerReplaceHash}
 	if result, found, err := s.replayPlanPublication(ctx, operation); found || err != nil {
 		return result, err
 	}
@@ -545,13 +546,13 @@ func (s service) createPlanTrackingTickets(
 	scope quizcore.Scope,
 	planPath string,
 	trackingPath string,
-	ticketPayloads []core.GeneratedPlanTrackingTicket,
-) ([]core.GeneratedPlanTrackingTicket, error) {
+	ticketPayloads []generationcore.GeneratedPlanTrackingTicket,
+) ([]generationcore.GeneratedPlanTrackingTicket, error) {
 	if err := validatePlanTrackingTicketPayloads(ticketPayloads); err != nil {
 		return nil, err
 	}
 
-	created := make([]core.GeneratedPlanTrackingTicket, 0, len(ticketPayloads))
+	created := make([]generationcore.GeneratedPlanTrackingTicket, 0, len(ticketPayloads))
 
 	for _, payload := range ticketPayloads {
 		result, err := s.CreateTicket(CreateTicketRequest{
@@ -581,7 +582,7 @@ func (s service) createPlanTrackingTickets(
 	return created, nil
 }
 
-func validatePlanTrackingTicketPayloads(ticketPayloads []core.GeneratedPlanTrackingTicket) error {
+func validatePlanTrackingTicketPayloads(ticketPayloads []generationcore.GeneratedPlanTrackingTicket) error {
 	if len(ticketPayloads) == 0 {
 		return fmt.Errorf("plan tracking ticket payloads are required")
 	}
@@ -595,7 +596,7 @@ func validatePlanTrackingTicketPayloads(ticketPayloads []core.GeneratedPlanTrack
 	return nil
 }
 
-func validatePlanTrackingTicketPayload(payload core.GeneratedPlanTrackingTicket) error {
+func validatePlanTrackingTicketPayload(payload generationcore.GeneratedPlanTrackingTicket) error {
 	switch {
 	case strings.TrimSpace(payload.Key) != "":
 		return fmt.Errorf("generated ticket key must be empty")
@@ -617,7 +618,7 @@ func validatePlanTrackingTicketPayload(payload core.GeneratedPlanTrackingTicket)
 }
 
 //nolint:wsl_v5 // Markdown body construction benefits from local grouping.
-func renderPlanTrackingTicketBody(planPath, trackingPath string, ticket core.GeneratedPlanTrackingTicket) string {
+func renderPlanTrackingTicketBody(planPath, trackingPath string, ticket generationcore.GeneratedPlanTrackingTicket) string {
 	var output strings.Builder
 
 	output.WriteString("# Description\n\n")
@@ -775,8 +776,8 @@ func (s service) newPlanGenerationModelRequest(state quizcore.RuntimeState, sour
 	)
 }
 
-func (s service) newPlanSliceDetailGenerationModelRequest(state quizcore.RuntimeState, sources core.PlanSourceObservation, outline core.GeneratedPlanOutline, targetSliceID string) (core.QuizModelRequest, error) {
-	if err := core.ValidateGeneratedPlanOutline(outline); err != nil {
+func (s service) newPlanSliceDetailGenerationModelRequest(state quizcore.RuntimeState, sources core.PlanSourceObservation, outline generationcore.GeneratedPlanOutline, targetSliceID string) (core.QuizModelRequest, error) {
+	if err := generationcore.ValidateGeneratedPlanOutline(outline); err != nil {
 		return core.QuizModelRequest{}, err
 	}
 
@@ -821,8 +822,8 @@ func (s service) newPlanningModelRequest(state quizcore.RuntimeState, sources co
 
 func appendPlanSliceDetailContextSections(
 	sections []core.QuizModelContextSection,
-	outline core.GeneratedPlanOutline,
-	targetSlice core.GeneratedPlanOutlineSlice,
+	outline generationcore.GeneratedPlanOutline,
+	targetSlice generationcore.GeneratedPlanOutlineSlice,
 ) ([]core.QuizModelContextSection, error) {
 	outlineContent, err := json.MarshalIndent(outline, "", "  ")
 	if err != nil {

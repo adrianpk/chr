@@ -5,6 +5,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestGuidedUseCasePreparationContracts rejects generated drift from the approved hierarchy and source.
@@ -27,9 +30,9 @@ func TestGuidedUseCasePreparationContracts(t *testing.T) {
 				task.ID, task.Order = "added-task", 4
 				generated.Slices[0].Tasks = append(generated.Slices[0].Tasks, task)
 			case "gate":
-				generated.Slices[0].Tasks[0].Validation = WorkflowValidation{}
+				generated.Slices[0].Tasks[0].Validation = workflowstate.Validation{}
 			case "foreign dependency":
-				generated.Slices[0].Tasks[0].DependsOn = []WorkflowRef{{Kind: "ticket", ID: "older-unrelated-ticket"}}
+				generated.Slices[0].Tasks[0].DependsOn = []workflowstate.Ref{{Kind: "ticket", ID: "older-unrelated-ticket"}}
 			}
 
 			err := ValidateGuidedContracts(input, generated)
@@ -42,18 +45,18 @@ func TestGuidedUseCasePreparationContracts(t *testing.T) {
 
 // TestGuidedUseCasePreparationBound refuses a plan that cannot fit its exact bounded admission.
 func TestGuidedUseCasePreparationBound(t *testing.T) {
-	var order []PlanOrderSlice
+	var order []generationcore.PlanOrderSlice
 
 	for i := 1; i <= 2; i++ {
-		slice := PlanOrderSlice{ID: fmt.Sprintf("slice-%d", i), Order: i, Title: "Bounded integration"}
+		slice := generationcore.PlanOrderSlice{ID: fmt.Sprintf("slice-%d", i), Order: i, Title: "Bounded integration"}
 		for j := 1; j <= 65; j++ {
-			slice.Tasks = append(slice.Tasks, PlanOrderTask{ID: fmt.Sprintf("task-%d-%d", i, j), Order: j, Title: "Task"})
+			slice.Tasks = append(slice.Tasks, generationcore.PlanOrderTask{ID: fmt.Sprintf("task-%d-%d", i, j), Order: j, Title: "Task"})
 		}
 
 		order = append(order, slice)
 	}
 
-	if err := ValidatePlannedOrder(order); err != nil {
+	if err := generationcore.ValidatePlannedOrder(order); err != nil {
 		t.Fatal("fixture is not a valid independent plan", err)
 	}
 

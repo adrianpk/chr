@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -16,7 +17,7 @@ func TestPlanPublicationRetry(t *testing.T) {
 	plan := orderedPlanCandidate()
 	plan.CreateOnly = true
 
-	plan.Operation = &PlanPublicationOperation{ID: "first-operation", Scope: plan.Scope}
+	plan.Operation = &generationcore.PlanPublicationOperation{ID: "first-operation", Scope: plan.Scope}
 	if _, err := WriteGeneratedPlan(t.Context(), project, plan); err != nil {
 		t.Fatal(err)
 	}
@@ -65,7 +66,7 @@ func TestPlanPublicationReceiptGuards(t *testing.T) {
 			plan := orderedPlanCandidate()
 			plan.CreateOnly = true
 
-			plan.Operation = &PlanPublicationOperation{ID: "guard-operation", Scope: plan.Scope}
+			plan.Operation = &generationcore.PlanPublicationOperation{ID: "guard-operation", Scope: plan.Scope}
 			if _, err := WriteGeneratedPlan(t.Context(), project, plan); err != nil {
 				t.Fatal(err)
 			}
@@ -128,7 +129,7 @@ func TestPlanPublicationConcurrentRetry(t *testing.T) {
 	}
 
 	plan.ExpectedRevision = revision
-	plan.Operation = &PlanPublicationOperation{ID: "concurrent-operation", Scope: plan.Scope, ExpectedRevision: revision}
+	plan.Operation = &generationcore.PlanPublicationOperation{ID: "concurrent-operation", Scope: plan.Scope, ExpectedRevision: revision}
 	results := make(chan error, 2)
 
 	for range 2 {

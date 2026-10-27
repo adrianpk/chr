@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -43,7 +44,7 @@ func (r *fileAuthoringSessionRepository) assistedDumpReceipt(operationID, digest
 		return AssistedArtifactSynthesisResult{}, false, err
 	}
 
-	if err := decodeAuthoringState(encoded, &receipt); err != nil {
+	if err := authoringstate.Decode(encoded, &receipt); err != nil {
 		return AssistedArtifactSynthesisResult{}, false, err
 	}
 

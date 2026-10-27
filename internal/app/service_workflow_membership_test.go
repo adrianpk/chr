@@ -9,6 +9,8 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestServiceWorkflowMembership uses native key allocation and the shared
@@ -52,7 +54,7 @@ func serviceWorkflowAmendmentRequest(t *testing.T, operations service, hierarchy
 		}
 
 		var contract struct {
-			Validation core.WorkflowValidation
+			Validation workflowstate.Validation
 		}
 		if err := json.Unmarshal(data, &contract); err != nil {
 			t.Fatal(err)
@@ -62,7 +64,7 @@ func serviceWorkflowAmendmentRequest(t *testing.T, operations service, hierarchy
 	}
 
 	for i, record := range hierarchy.Tasks {
-		var task core.GeneratedWorkflowTask
+		var task generationcore.GeneratedWorkflowTask
 		if err := json.Unmarshal(record.Domain["execution_contract"], &task); err != nil {
 			t.Fatal(err)
 		}
