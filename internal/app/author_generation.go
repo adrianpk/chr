@@ -8,15 +8,15 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func contextualQuizGenerationProvider(ctx context.Context, cmd *cli.Command, project commandProjectContext, sessionID string) (core.AuthoringQuizQuestionProvider, context.Context, error) {
+func withContextualQuizGeneration(ctx context.Context, cmd *cli.Command, project commandProjectContext, sessionID string, use func(context.Context, core.AuthoringQuizQuestionProvider) error) error {
 	provider := contextualQuizProviderFromCommand()
 	if _, native := provider.(core.HarnessAuthoringQuizQuestionProvider); !native {
-		return provider, ctx, nil
+		return use(ctx, provider)
 	}
 
 	env, err := newUserEnvironmentFromCommand(cmd)
 	if err != nil {
-		return provider, ctx, err
+		return err
 	}
 
 	operations := newService(ctx, env, project, nil)
@@ -27,5 +27,9 @@ func contextualQuizGenerationProvider(ctx context.Context, cmd *cli.Command, pro
 		provider = native
 	}
 
-	return provider, callCtx, err
+	if err != nil {
+		return err
+	}
+
+	return use(callCtx, provider)
 }

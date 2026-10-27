@@ -484,16 +484,16 @@ func printAuthorAssistedAnswer(stdout io.Writer, result core.AssistedQuizAnswerR
 }
 
 func printAuthorAssistedStatus(stdout io.Writer, session core.AuthoringSession, events []core.AssistedTranscriptEvent) error {
-	questions, answers, results := assistedEventCounts(events)
+	counts := assistedEventCounts(events)
 
 	return writeAuthorLines(stdout, []string{
 		"assisted: status",
 		"session: " + session.ID,
 		"target: " + string(session.Target),
 		"topic: " + session.Topic,
-		fmt.Sprintf("questions: %d", questions),
-		fmt.Sprintf("answers: %d", answers),
-		fmt.Sprintf("results: %d", results),
+		fmt.Sprintf("questions: %d", counts.Questions),
+		fmt.Sprintf("answers: %d", counts.Answers),
+		fmt.Sprintf("results: %d", counts.Results),
 	})
 }
 
@@ -506,7 +506,13 @@ func printAuthorAssistedFinalized(stdout io.Writer, curation core.AssistedAnswer
 	})
 }
 
-func assistedEventCounts(events []core.AssistedTranscriptEvent) (int, int, int) {
+type assistedTranscriptCounts struct {
+	Questions int
+	Answers   int
+	Results   int
+}
+
+func assistedEventCounts(events []core.AssistedTranscriptEvent) assistedTranscriptCounts {
 	questions := map[string]struct{}{}
 	answers := map[string]struct{}{}
 
@@ -524,5 +530,5 @@ func assistedEventCounts(events []core.AssistedTranscriptEvent) (int, int, int) 
 		}
 	}
 
-	return len(questions), len(answers), results
+	return assistedTranscriptCounts{Questions: len(questions), Answers: len(answers), Results: results}
 }

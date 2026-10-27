@@ -92,12 +92,12 @@ func (s service) planViewFromPath(scope quizcore.Scope, relativePath, path strin
 		content = []byte("Unable to read plan: " + err.Error())
 	}
 
-	title, status, _ := summarizeWorkspaceMarkdownDocument(string(content), filepath.Base(path))
+	summary := summarizeWorkspaceMarkdownDocument(string(content), filepath.Base(path))
 
 	return PlanView{
 		UseCaseTitle: specUseCaseFallbackTitle(scope),
-		Title:        title,
-		Status:       status,
+		Title:        summary.Title,
+		Status:       summary.Status,
 		Scope:        scope,
 		RelativePath: filepath.ToSlash(relativePath),
 		UpdatedAt:    fileModifiedAt(path),

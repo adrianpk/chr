@@ -226,12 +226,12 @@ func (s service) specViewFromPath(scope quizcore.Scope, relativePath, path strin
 		content = []byte("Unable to read spec: " + err.Error())
 	}
 
-	title, status, _ := summarizeWorkspaceMarkdownDocument(string(content), filepath.Base(path))
+	summary := summarizeWorkspaceMarkdownDocument(string(content), filepath.Base(path))
 
 	return SpecView{
 		UseCaseTitle: specUseCaseFallbackTitle(scope),
-		Title:        title,
-		Status:       status,
+		Title:        summary.Title,
+		Status:       summary.Status,
 		Scope:        scope,
 		RelativePath: filepath.ToSlash(relativePath),
 		UpdatedAt:    fileModifiedAt(path),
@@ -423,7 +423,13 @@ func specUseCaseFallbackTitle(scope quizcore.Scope) string {
 	return scope.CaseSlug
 }
 
-func summarizeWorkspaceMarkdownDocument(content, fallbackName string) (string, string, string) {
+type workspaceMarkdownSummary struct {
+	Title   string
+	Status  string
+	Preview string
+}
+
+func summarizeWorkspaceMarkdownDocument(content, fallbackName string) workspaceMarkdownSummary {
 	title := strings.TrimSuffix(fallbackName, filepath.Ext(fallbackName))
 	status := "unknown"
 	preview := ""
@@ -452,7 +458,7 @@ func summarizeWorkspaceMarkdownDocument(content, fallbackName string) (string, s
 		}
 	}
 
-	return title, status, preview
+	return workspaceMarkdownSummary{Title: title, Status: status, Preview: preview}
 }
 
 func fileModifiedAt(path string) time.Time {

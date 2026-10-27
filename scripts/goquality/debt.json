@@ -2,16 +2,6 @@
   "max_parameters": 7,
   "debt": [
     {
-      "id": "internal/app/author_assisted_cli.go::assistedEventCounts",
-      "signature": "func(events []core.AssistedTranscriptEvent) (int, int, int)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/author_generation.go::contextualQuizGenerationProvider",
-      "signature": "func(ctx context.Context, cmd *cli.Command, project commandProjectContext, sessionID string) (core.AuthoringQuizQuestionProvider, context.Context, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/app/daemon_workflow.go::watchDaemonHeartbeat",
       "signature": "func(ctx context.Context, repository core.DaemonStateRepository) (context.Context, func() error)",
       "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
@@ -80,11 +70,6 @@
       "id": "internal/app/service_harness_worker.go::service.selectedWorkerCommand",
       "signature": "func(ctx context.Context, resolved resolvedHarnessSelection) ([]string, string, string, error)",
       "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_spec.go::summarizeWorkspaceMarkdownDocument",
-      "signature": "func(content, fallbackName string) (string, string, string)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/service_work_observation_legacy.go::service.observeLegacyContext",

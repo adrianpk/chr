@@ -83,41 +83,36 @@ func (factory commandFactory) runAuthorQuizNew(ctx context.Context, cmd *cli.Com
 }
 
 func (factory commandFactory) runAuthorContextualQuizNew(ctx context.Context, cmd *cli.Command, projectContext commandProjectContext, session core.AuthoringSession, now time.Time) error {
-	provider, callCtx, err := contextualQuizGenerationProvider(ctx, cmd, projectContext, session.ID)
-	if err != nil {
-		return err
-	}
+	return withContextualQuizGeneration(ctx, cmd, projectContext, session.ID, func(ctx context.Context, provider core.AuthoringQuizQuestionProvider) error {
+		plan, err := core.PlanContextualQuizGeneration(ctx, core.ContextualQuizGenerationOptions{
+			ProjectDir:    projectContext.ProjectDir,
+			Session:       session,
+			Now:           now,
+			AllowReplace:  cmd.Bool("allow-replace"),
+			DryRun:        cmd.Bool("dry-run"),
+			QuestionCount: cmd.Int("question-count"),
+			Provider:      provider,
+		})
+		if err != nil {
+			return err
+		}
 
-	ctx = callCtx
+		if cmd.Bool("dry-run") {
+			return printAuthorContextualQuizPlan(factory.io.Stdout, plan, true, projectContext.ProjectDir)
+		}
 
-	plan, err := core.PlanContextualQuizGeneration(ctx, core.ContextualQuizGenerationOptions{
-		ProjectDir:    projectContext.ProjectDir,
-		Session:       session,
-		Now:           now,
-		AllowReplace:  cmd.Bool("allow-replace"),
-		DryRun:        cmd.Bool("dry-run"),
-		QuestionCount: cmd.Int("question-count"),
-		Provider:      provider,
+		err = core.WriteContextualQuizContext(ctx, plan)
+		if err != nil {
+			return err
+		}
+
+		_, err = core.NewAuthoringSessionRepository(projectContext.ProjectDir).CreateSession(ctx, plan.Session)
+		if err != nil {
+			return err
+		}
+
+		return printAuthorContextualQuizPlan(factory.io.Stdout, plan, false, projectContext.ProjectDir)
 	})
-	if err != nil {
-		return err
-	}
-
-	if cmd.Bool("dry-run") {
-		return printAuthorContextualQuizPlan(factory.io.Stdout, plan, true, projectContext.ProjectDir)
-	}
-
-	err = core.WriteContextualQuizContext(ctx, plan)
-	if err != nil {
-		return err
-	}
-
-	_, err = core.NewAuthoringSessionRepository(projectContext.ProjectDir).CreateSession(ctx, plan.Session)
-	if err != nil {
-		return err
-	}
-
-	return printAuthorContextualQuizPlan(factory.io.Stdout, plan, false, projectContext.ProjectDir)
 }
 
 func quizSessionFromCommand(cmd *cli.Command, projectContext commandProjectContext, now time.Time) (core.AuthoringSession, error) {
