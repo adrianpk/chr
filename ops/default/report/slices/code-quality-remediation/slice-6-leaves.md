@@ -5,7 +5,7 @@ Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
 Branch: `refactor/slice-6-quality-leaves`
-PR: pending
+PR: `#443`
 
 ## Purpose
 
