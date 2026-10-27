@@ -3134,7 +3134,7 @@ func installTestTelegramSender(t *testing.T) *testTelegramPayload {
 	t.Cleanup(server.Close)
 
 	previousSender := notifyTelegramSender
-	notifyTelegramSender = telegramcore.TelegramSender{
+	notifyTelegramSender = telegramcore.Sender{
 		Client:  server.Client(),
 		BaseURL: server.URL,
 	}

@@ -12,27 +12,27 @@ import (
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
-// ProjectTelegramGuided retains a changed human view and its next reply binding.
+// ProjectGuided retains a changed human view and its next reply binding.
 // It does not acknowledge input, recover owners, or advance canonical work.
-func (s *TelegramReceiverStore) ProjectTelegramGuided(ctx context.Context, ref TelegramGuidedReference, progress TelegramGuidedProgress, message tgmessage.Blocks, delivery *tgmessage.DocumentResponse, configDigest string, now time.Time) error {
-	if err := validateTelegramGuidedProgress(progress, json.RawMessage(`{}`)); err != nil {
+func (s *ReceiverStore) ProjectGuided(ctx context.Context, ref GuidedReference, progress GuidedProgress, message tgmessage.Blocks, delivery *tgmessage.DocumentResponse, configDigest string, now time.Time) error {
+	if err := validateGuidedProgress(progress, json.RawMessage(`{}`)); err != nil {
 		return err
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		current, ready, err := telegramGuidedProjectionReady(ctx, tx, ref, progress)
+		current, ready, err := guidedProjectionReady(ctx, tx, ref, progress)
 		if err != nil || !ready {
 			return err
 		}
 
 		ref.Request.Target.ConversationRevision = current.Revision
 
-		updated, err := updateTelegramGuidedBinding(ctx, tx, ref.Request, progress, now)
+		updated, err := updateGuidedBinding(ctx, tx, ref.Request, progress, now)
 		if err != nil {
 			return err
 		}
 
-		native := TelegramWorkReference{Request: ref.Request, ConversationRevision: updated.Revision}
+		native := WorkReference{Request: ref.Request, ConversationRevision: updated.Revision}
 		native.Request.Target.ConversationRevision = updated.Revision
 
 		kind := "progress"
@@ -42,8 +42,8 @@ func (s *TelegramReceiverStore) ProjectTelegramGuided(ctx context.Context, ref T
 			kind = "question"
 		}
 
-		observation := TelegramWorkObservation{Revision: uint64(updated.Revision), Phase: progress.Phase, Kind: kind, Text: tgmessage.Render(message).PlainFallback, Message: &message}
-		if err := queueTelegramWorkObservation(ctx, tx, native, observation, configDigest, now); err != nil {
+		observation := WorkObservation{Revision: uint64(updated.Revision), Phase: progress.Phase, Kind: kind, Text: tgmessage.Render(message).PlainFallback, Message: &message}
+		if err := queueWorkObservation(ctx, tx, native, observation, configDigest, now); err != nil {
 			return err
 		}
 
@@ -54,14 +54,14 @@ func (s *TelegramReceiverStore) ProjectTelegramGuided(ctx context.Context, ref T
 			return err
 		}
 
-		return bindTelegramGuidedNoticeDocument(ctx, tx, native.Request, key, message, delivery, configDigest, now)
+		return bindGuidedNoticeDocument(ctx, tx, native.Request, key, message, delivery, configDigest, now)
 	})
 }
 
-func telegramGuidedProjectionReady(ctx context.Context, tx *sql.Tx, ref TelegramGuidedReference, progress TelegramGuidedProgress) (TelegramConversation, bool, error) {
+func guidedProjectionReady(ctx context.Context, tx *sql.Tx, ref GuidedReference, progress GuidedProgress) (Conversation, bool, error) {
 	p := ref.Conversation.Peer
 
-	c, err := scanTelegramConversation(tx.QueryRowContext(ctx, `SELECT `+telegramConversationColumns+` FROM telegram_conversations WHERE id=? AND bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, ref.Conversation.ID, p.BotID, p.ChatID, p.TopicID, p.UserID))
+	c, err := scanConversation(tx.QueryRowContext(ctx, `SELECT `+conversationColumns+` FROM telegram_conversations WHERE id=? AND bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, ref.Conversation.ID, p.BotID, p.ChatID, p.TopicID, p.UserID))
 	if err != nil {
 		return c, false, err
 	}
@@ -70,7 +70,7 @@ func telegramGuidedProjectionReady(ctx context.Context, tx *sql.Tx, ref Telegram
 		return c, false, nil
 	}
 
-	if sameTelegramGuidedView(c.QuestionBinding, progress.Binding) {
+	if sameGuidedView(c.QuestionBinding, progress.Binding) {
 		return c, false, nil
 	}
 
@@ -81,7 +81,7 @@ func telegramGuidedProjectionReady(ctx context.Context, tx *sql.Tx, ref Telegram
 	return c, active == 0, err
 }
 
-func sameTelegramGuidedView(before, after string) bool {
+func sameGuidedView(before, after string) bool {
 	var prior, current struct {
 		ViewDigest string `json:"view_digest"`
 	}
@@ -92,7 +92,7 @@ func sameTelegramGuidedView(before, after string) bool {
 	return prior.ViewDigest != "" && prior.ViewDigest == current.ViewDigest
 }
 
-func bindTelegramGuidedNoticeDocument(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, key string, message tgmessage.Blocks, delivery *tgmessage.DocumentResponse, configDigest string, now time.Time) error {
+func bindGuidedNoticeDocument(ctx context.Context, tx *sql.Tx, request OperationRequest, key string, message tgmessage.Blocks, delivery *tgmessage.DocumentResponse, configDigest string, now time.Time) error {
 	if delivery == nil {
 		return nil
 	}
@@ -108,7 +108,7 @@ func bindTelegramGuidedNoticeDocument(ctx context.Context, tx *sql.Tx, request T
 	}
 
 	if err == nil {
-		err = bindTelegramDocumentImage(ctx, tx, id, request.Source.Peer, *delivery, configDigest, now)
+		err = bindDocumentImage(ctx, tx, id, request.Source.Peer, *delivery, configDigest, now)
 	}
 
 	if !errors.Is(err, tgmessage.ErrDocumentUnavailable) {

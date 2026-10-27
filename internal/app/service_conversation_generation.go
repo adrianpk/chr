@@ -21,7 +21,7 @@ func (s service) conversationGenerationScope(ctx context.Context, input Conversa
 			return s, workflowstate.ErrConflict
 		}
 
-		return s.telegramProjectService(ctx, telegramcore.TelegramOperationTarget{ProjectID: input.SelectedProject})
+		return s.telegramProjectService(ctx, telegramcore.OperationTarget{ProjectID: input.SelectedProject})
 	}
 
 	if s.projectContext.ProjectDir == "" {
@@ -56,7 +56,7 @@ func (s service) validateIntentGenerationProject(ctx context.Context, location c
 		return nil
 	}
 
-	current, err := s.telegramProjectService(ctx, telegramcore.TelegramOperationTarget{ProjectID: location.ProjectRef})
+	current, err := s.telegramProjectService(ctx, telegramcore.OperationTarget{ProjectID: location.ProjectRef})
 	if err != nil {
 		return err
 	}

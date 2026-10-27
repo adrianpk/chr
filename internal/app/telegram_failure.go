@@ -36,7 +36,7 @@ func telegramCommandFailure(err error) error {
 		return serviceFailure
 	}
 
-	var apiFailure *telegramcore.TelegramAPIError
+	var apiFailure *telegramcore.APIError
 	if errors.As(err, &apiFailure) {
 		return &telegramServiceFailure{code: telegramAPIFailureCode(apiFailure.Code), permanent: apiFailure.Permanent}
 	}

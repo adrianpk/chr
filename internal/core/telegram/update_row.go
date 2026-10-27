@@ -6,21 +6,21 @@ import (
 	"forge.adrianpk.com/chr/internal/core/database"
 )
 
-type telegramUpdateRow struct {
+type updateRow struct {
 	botID, epoch int64
-	update       TelegramReceivedUpdate
+	update       ReceivedUpdate
 	state        string
-	lane         TelegramProcessingLane
+	lane         ProcessingLane
 	control      bool
 	receivedAt   time.Time
 }
 
-const telegramUpdateColumns = `bot_id,update_id,cursor_epoch,payload_digest,update_kind,
+const updateColumns = `bot_id,update_id,cursor_epoch,payload_digest,update_kind,
 chat_id,topic_id,user_id,message_id,chat_type,received_at,payload,state,reason_code,updated_at,reply_to_message_id,processing_lane,control_input`
 
-const insertTelegramUpdateSQL = `INSERT INTO telegram_updates(` + telegramUpdateColumns + `) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+const insertUpdateSQL = `INSERT INTO telegram_updates(` + updateColumns + `) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
 
-func (row telegramUpdateRow) values() []any {
+func (row updateRow) values() []any {
 	update := row.update
 
 	return []any{

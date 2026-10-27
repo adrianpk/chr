@@ -10,19 +10,19 @@ import (
 // policy. Only retained lookup, recognition and current input population are shared.
 type telegramCommandRoute struct {
 	OperationID string
-	Continue    func(context.Context, telegramcore.TelegramOperationRequest, telegramcore.TelegramReceiverConfig) error
+	Continue    func(context.Context, telegramcore.OperationRequest, telegramcore.ReceiverConfig) error
 	Help        string
-	Parse       func(telegramcore.TelegramReceivedUpdate) (telegramParsedCommand, error)
+	Parse       func(telegramcore.ReceivedUpdate) (telegramParsedCommand, error)
 }
 
 type telegramParsedCommand struct {
 	Recognized bool
-	Input      *telegramcore.TelegramConversationInput
-	Dispatch   func(context.Context, telegramcore.TelegramAllowedUser) error
+	Input      *telegramcore.ConversationInput
+	Dispatch   func(context.Context, telegramcore.AllowedUser) error
 }
 
-func (r telegramReceiver) respondCommand(ctx context.Context, user telegramcore.TelegramAllowedUser, config telegramcore.TelegramReceiverConfig, update telegramcore.TelegramReceivedUpdate, route telegramCommandRoute) (bool, error) {
-	retained, found, err := r.store.TelegramOperation(ctx, update, 0)
+func (r telegramReceiver) respondCommand(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate, route telegramCommandRoute) (bool, error) {
+	retained, found, err := r.store.Operation(ctx, update, 0)
 	if err != nil {
 		return true, err
 	}

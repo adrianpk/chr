@@ -11,8 +11,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// TelegramOperationTarget freezes an authorized registry root and namespace.
-type TelegramOperationTarget struct {
+// OperationTarget freezes an authorized registry root and namespace.
+type OperationTarget struct {
 	ProjectID            string `json:"project_id"`
 	ProjectBindingDigest string `json:"project_binding_digest"`
 	Namespace            string `json:"namespace"`
@@ -20,14 +20,14 @@ type TelegramOperationTarget struct {
 	ConversationRevision int64  `json:"conversation_revision,omitempty"`
 }
 
-// ValidateTelegramProjectTarget checks the resolved registry root immediately
+// ValidateProjectTarget checks the resolved registry root immediately
 // before an adapter enters a project-scoped owner or configured provider.
-func ValidateTelegramProjectTarget(project projectcore.Project, target TelegramOperationTarget) error {
+func ValidateProjectTarget(project projectcore.Project, target OperationTarget) error {
 	if project.ID != target.ProjectID || !project.Enabled {
 		return workflowstate.ErrConflict
 	}
 
-	binding, err := telegramProjectBinding(project)
+	binding, err := projectBinding(project)
 	if err != nil {
 		return err
 	}
@@ -39,16 +39,16 @@ func ValidateTelegramProjectTarget(project projectcore.Project, target TelegramO
 	return nil
 }
 
-// ResolveTelegramOperationTarget uses the existing exact reply and project precedence.
+// ResolveOperationTarget uses the existing exact reply and project precedence.
 // The transaction ends before a caller reads or mutates a project owner.
-func (s *TelegramReceiverStore) ResolveTelegramOperationTarget(ctx context.Context, input TelegramConversationInput, now time.Time) (TelegramOperationTarget, error) {
-	var target TelegramOperationTarget
+func (s *ReceiverStore) ResolveOperationTarget(ctx context.Context, input ConversationInput, now time.Time) (OperationTarget, error) {
+	var target OperationTarget
 	if _, ok := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType); !ok {
 		return target, workflowstate.ErrConflict
 	}
 
 	err := s.transaction(ctx, func(tx *sql.Tx) error {
-		op := telegramConversationTransaction{ctx: ctx, tx: tx, input: input, now: now}
+		op := conversationTransaction{ctx: ctx, tx: tx, input: input, now: now}
 		if err := op.ensurePeer(); err != nil {
 			return err
 		}
@@ -66,37 +66,37 @@ func (s *TelegramReceiverStore) ResolveTelegramOperationTarget(ctx context.Conte
 	return target, err
 }
 
-// ValidateTelegramOperationTarget rechecks current actor, root and conversation bindings.
-func (s *TelegramReceiverStore) ValidateTelegramOperationTarget(ctx context.Context, input TelegramConversationInput, target TelegramOperationTarget) error {
-	return s.validateTelegramOperationTarget(ctx, input, target, false)
+// ValidateOperationTarget rechecks current actor, root and conversation bindings.
+func (s *ReceiverStore) ValidateOperationTarget(ctx context.Context, input ConversationInput, target OperationTarget) error {
+	return s.validateOperationTarget(ctx, input, target, false)
 }
 
-// ValidateTelegramControlReceiptTarget checks current actor, peer, registry root
+// ValidateControlReceiptTarget checks current actor, peer, registry root
 // and namespace while allowing the original conversation revision to be historical.
 // This check authorizes only reading an already committed native receipt.
-func (s *TelegramReceiverStore) ValidateTelegramControlReceiptTarget(ctx context.Context, input TelegramConversationInput, request TelegramOperationRequest) error {
+func (s *ReceiverStore) ValidateControlReceiptTarget(ctx context.Context, input ConversationInput, request OperationRequest) error {
 	user, ok := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType)
 	if !ok || user.OperatorID != request.Operator || input.Update.Peer != request.Source.Peer || request.OperationID != "work.control" || request.Target.ConversationID == "" {
 		return workflowstate.ErrConflict
 	}
 
-	return s.validateTelegramOperationTarget(ctx, input, request.Target, true)
+	return s.validateOperationTarget(ctx, input, request.Target, true)
 }
 
-func (s *TelegramReceiverStore) validateTelegramOperationTarget(ctx context.Context, input TelegramConversationInput, target TelegramOperationTarget, historical bool) error {
+func (s *ReceiverStore) validateOperationTarget(ctx context.Context, input ConversationInput, target OperationTarget, historical bool) error {
 	user, ok := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType)
 	if !ok || user.OperatorID == "" {
 		return workflowstate.ErrConflict
 	}
 
-	op := telegramConversationTransaction{ctx: ctx, input: input}
+	op := conversationTransaction{ctx: ctx, input: input}
 
-	project, err := exactTelegramProject(op.allowedProjects(), target.ProjectID)
+	project, err := exactProject(op.allowedProjects(), target.ProjectID)
 	if err != nil {
 		return err
 	}
 
-	binding, err := telegramProjectBinding(project)
+	binding, err := projectBinding(project)
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func (s *TelegramReceiverStore) validateTelegramOperationTarget(ctx context.Cont
 		return nil
 	}
 
-	conversation, err := scanTelegramConversation(s.db.QueryRowContext(ctx, `SELECT `+telegramConversationColumns+` FROM telegram_conversations WHERE id=? AND bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, target.ConversationID, input.Update.Peer.BotID, input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID))
+	conversation, err := scanConversation(s.db.QueryRowContext(ctx, `SELECT `+conversationColumns+` FROM telegram_conversations WHERE id=? AND bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, target.ConversationID, input.Update.Peer.BotID, input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID))
 	if errors.Is(err, sql.ErrNoRows) {
 		return workflowstate.ErrConflict
 	}
@@ -122,10 +122,10 @@ func (s *TelegramReceiverStore) validateTelegramOperationTarget(ctx context.Cont
 		target.ConversationRevision = conversation.Revision
 	}
 
-	return validateTelegramBoundConversation(conversation, target, binding)
+	return validateBoundConversation(conversation, target, binding)
 }
 
-func validateTelegramBoundConversation(conversation TelegramConversation, target TelegramOperationTarget, binding string) error {
+func validateBoundConversation(conversation Conversation, target OperationTarget, binding string) error {
 	if conversation.ProjectID != target.ProjectID || conversation.Namespace != target.Namespace || conversation.Revision != target.ConversationRevision || conversation.ProjectBindingDigest != binding {
 		return workflowstate.ErrConflict
 	}
@@ -133,27 +133,27 @@ func validateTelegramBoundConversation(conversation TelegramConversation, target
 	return nil
 }
 
-func (op telegramConversationTransaction) operationTarget(conversation *TelegramConversation) (TelegramOperationTarget, error) {
+func (op conversationTransaction) operationTarget(conversation *Conversation) (OperationTarget, error) {
 	project, err := op.resolveProject(conversation)
 	if err != nil {
-		return TelegramOperationTarget{}, err
+		return OperationTarget{}, err
 	}
 
-	binding, err := telegramProjectBinding(project)
+	binding, err := projectBinding(project)
 	if err != nil {
-		return TelegramOperationTarget{}, err
+		return OperationTarget{}, err
 	}
 
 	if _, err := projectcore.ResolveDirectory(project.Path); err != nil {
-		return TelegramOperationTarget{}, err
+		return OperationTarget{}, err
 	}
 
 	namespace, err := opsnamespace.Resolve(op.input.Namespace, nil)
 	if err != nil {
-		return TelegramOperationTarget{}, err
+		return OperationTarget{}, err
 	}
 
-	target := TelegramOperationTarget{ProjectID: project.ID, ProjectBindingDigest: binding, Namespace: namespace}
+	target := OperationTarget{ProjectID: project.ID, ProjectBindingDigest: binding, Namespace: namespace}
 	if conversation == nil {
 		return target, nil
 	}

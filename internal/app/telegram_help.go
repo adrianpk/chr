@@ -60,7 +60,7 @@ func renderTelegramHelp(entries []telegramHelpEntry, prefix string) telegramRead
 }
 
 func telegramHelpFits(text string) bool {
-	return text != "" && telegramcore.BoundTelegramReceiverText(text) == text && len(utf16.Encode([]rune(text))) <= 3200
+	return text != "" && telegramcore.BoundReceiverText(text) == text && len(utf16.Encode([]rune(text))) <= 3200
 }
 
 func compareTelegramHelp(left, right telegramHelpEntry) int {
@@ -125,7 +125,7 @@ func telegramBasicHelp() telegramReadReply {
 			continue
 		}
 
-		if entry.ID == "harness" || entry.ID == "prepare-work" || entry.ID == "explain" || entry.ID == telegramcore.TelegramActionAnswerCommand {
+		if entry.ID == "harness" || entry.ID == "prepare-work" || entry.ID == "explain" || entry.ID == telegramcore.ActionAnswerCommand {
 			continue
 		}
 

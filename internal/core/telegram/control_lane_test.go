@@ -6,16 +6,16 @@ import (
 	"time"
 )
 
-func telegramPendingControlLaneFixture(t *testing.T, operation, action string) (*telegramConversationFixture, TelegramAction) {
+func telegramPendingControlLaneFixture(t *testing.T, operation, action string) (*telegramConversationFixture, Action) {
 	t.Helper()
 
 	f := newTelegramConversationFixture(t)
-	f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "alpha" })
+	f.apply(t, ConversationStart, func(i *ConversationInput) { i.Project = "alpha" })
 
 	input := telegramOperationActionInput(t, f, "control preview")
 	input.Conversation = f.sessions(t)[0].ID
 
-	target, err := f.store.ResolveTelegramOperationTarget(t.Context(), input, time.Now())
+	target, err := f.store.ResolveOperationTarget(t.Context(), input, time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -25,14 +25,14 @@ func telegramPendingControlLaneFixture(t *testing.T, operation, action string) (
 		t.Fatal(err)
 	}
 
-	request, err := f.store.ReservePreparedTelegramOperation(t.Context(), TelegramOperationRequest{Source: input.Update, Operator: "maintainer", Target: target, OperationID: operation, Arguments: args}, json.RawMessage(`{}`), time.Now())
+	request, err := f.store.ReservePreparedOperation(t.Context(), OperationRequest{Source: input.Update, Operator: "maintainer", Target: target, OperationID: operation, Arguments: args}, json.RawMessage(`{}`), time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	offer := TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{action}, Text: "Confirm the observed operation.", ExpiresAt: time.Now().Add(24 * time.Hour)}
+	offer := ActionOffer{Input: input, RequestID: request.ID, Choices: []string{action}, Text: "Confirm the observed operation.", ExpiresAt: time.Now().Add(24 * time.Hour)}
 
-	a, err := f.store.OfferTelegramAction(t.Context(), offer, time.Now())
+	a, err := f.store.OfferAction(t.Context(), offer, time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,7 +40,7 @@ func telegramPendingControlLaneFixture(t *testing.T, operation, action string) (
 	return f, a
 }
 
-func telegramControlLaneFixture(t *testing.T, operation, action string) (*telegramConversationFixture, TelegramAction) {
+func telegramControlLaneFixture(t *testing.T, operation, action string) (*telegramConversationFixture, Action) {
 	t.Helper()
 
 	f, a := telegramPendingControlLaneFixture(t, operation, action)
@@ -69,18 +69,18 @@ func telegramControlLaneFixture(t *testing.T, operation, action string) (*telegr
 func TestTelegramControlLaneParity(t *testing.T) {
 	tests := []struct {
 		name, operation, action string
-		lane                    TelegramProcessingLane
+		lane                    ProcessingLane
 		control                 bool
 	}{
-		{"pause", "work.control", "pause", TelegramProcessingUrgent, true},
-		{"cancel", "work.control", "cancel", TelegramProcessingUrgent, true},
-		{"reconcile", "work.control", "reconcile", TelegramProcessingUrgent, true},
-		{"resume", "work.control", "resume", TelegramProcessingDecision, true},
-		{"approve", "work.control", "approve", TelegramProcessingDecision, true},
-		{"grant", "work.control", "grant", TelegramProcessingDecision, true},
-		{"decision", "work.control", "answer_decision", TelegramProcessingDecision, true},
-		{"continue", "work.control", "continue", TelegramProcessingOrdinary, true},
-		{"authoring", "authoring.quiz", "confirm", TelegramProcessingOrdinary, false},
+		{"pause", "work.control", "pause", ProcessingUrgent, true},
+		{"cancel", "work.control", "cancel", ProcessingUrgent, true},
+		{"reconcile", "work.control", "reconcile", ProcessingUrgent, true},
+		{"resume", "work.control", "resume", ProcessingDecision, true},
+		{"approve", "work.control", "approve", ProcessingDecision, true},
+		{"grant", "work.control", "grant", ProcessingDecision, true},
+		{"decision", "work.control", "answer_decision", ProcessingDecision, true},
+		{"continue", "work.control", "continue", ProcessingOrdinary, true},
+		{"authoring", "authoring.quiz", "confirm", ProcessingOrdinary, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -101,15 +101,15 @@ func TestTelegramControlLaneParity(t *testing.T) {
 	}
 }
 
-func checkTelegramControlInputLane(t *testing.T, store *TelegramReceiverStore, input TelegramReceivedUpdate, lane TelegramProcessingLane, control bool) {
+func checkTelegramControlInputLane(t *testing.T, store *ReceiverStore, input ReceivedUpdate, lane ProcessingLane, control bool) {
 	t.Helper()
 
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{input}, time.Now()); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{input}, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
 	var (
-		got      TelegramProcessingLane
+		got      ProcessingLane
 		reserved bool
 	)
 	if err := store.db.QueryRowContext(t.Context(), `SELECT processing_lane,control_input FROM telegram_updates WHERE update_id=?`, input.UpdateID).Scan(&got, &reserved); err != nil || got != lane || reserved != control {
@@ -122,7 +122,7 @@ func checkTelegramControlInputLane(t *testing.T, store *TelegramReceiverStore, i
 func TestTelegramControlDeliveryPriority(t *testing.T) {
 	store := openTelegramReceiverTestStore(t, telegramReceiverTestEnv(t))
 
-	updates := []TelegramReceivedUpdate{telegramRetainedTestUpdate(t, 1, "/help"), telegramRetainedTestUpdate(t, 2, "/status"), telegramRetainedTestUpdate(t, 3, "/approve workflow")}
+	updates := []ReceivedUpdate{telegramRetainedTestUpdate(t, 1, "/help"), telegramRetainedTestUpdate(t, 2, "/status"), telegramRetainedTestUpdate(t, 3, "/approve workflow")}
 	if err := store.RetainBatch(t.Context(), 12345, updates, time.Now()); err != nil {
 		t.Fatal(err)
 	}

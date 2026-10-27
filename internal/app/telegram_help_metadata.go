@@ -21,7 +21,7 @@ func telegramHelpMetadata() []telegramHelpEntry {
 
 	for _, command := range telegramConversationRegistry() {
 		category := "Conversations"
-		if command.Action == telegramcore.TelegramConversationSelect {
+		if command.Action == telegramcore.ConversationSelect {
 			category = "Projects"
 		}
 
@@ -37,7 +37,7 @@ func telegramHelpMetadata() []telegramHelpEntry {
 		telegramHelpEntry{"prepare-work", "Authoring", telegramPreparedWorkUsage()},
 		telegramHelpEntry{"work", "Execution", telegramWorkUsage()},
 		telegramHelpEntry{"harness", "Projects", telegramHarnessUsage},
-		telegramHelpEntry{telegramcore.TelegramActionAnswerCommand, "System controls", telegramcore.TelegramActionAnswerUsage},
+		telegramHelpEntry{telegramcore.ActionAnswerCommand, "System controls", telegramcore.ActionAnswerUsage},
 	)
 
 	return append(entries, telegramRecordControlMetadata()...)

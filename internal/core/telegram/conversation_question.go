@@ -9,9 +9,9 @@ import (
 	"time"
 )
 
-// TelegramConversationQuestion identifies one canonical authoring question or turn.
+// ConversationQuestion identifies one canonical authoring question or turn.
 // The authoring owner must supply the verified canonical binding, not quoted text.
-type TelegramConversationQuestion struct {
+type ConversationQuestion struct {
 	SessionRef    string `json:"session_ref"`
 	QuestionID    string `json:"question_id"`
 	TurnID        string `json:"turn_id,omitempty"`
@@ -19,7 +19,7 @@ type TelegramConversationQuestion struct {
 	ContentDigest string `json:"content_digest"`
 }
 
-func (q TelegramConversationQuestion) validate() error {
+func (q ConversationQuestion) validate() error {
 	if len(q.TurnID) > 128 {
 		return errors.New("invalid canonical turn binding")
 	}
@@ -32,9 +32,9 @@ func (q TelegramConversationQuestion) validate() error {
 	return nil
 }
 
-// BindTelegramConversationQuestion replaces only this session's prompt using its
+// BindConversationQuestion replaces only this session's prompt using its
 // observed revision. It neither calls an authoring provider nor answers a question.
-func (s *TelegramReceiverStore) BindTelegramConversationQuestion(ctx context.Context, input TelegramConversationInput, observed int64, question TelegramConversationQuestion, now time.Time) error {
+func (s *ReceiverStore) BindConversationQuestion(ctx context.Context, input ConversationInput, observed int64, question ConversationQuestion, now time.Time) error {
 	if err := question.validate(); err != nil {
 		return err
 	}
@@ -44,7 +44,7 @@ func (s *TelegramReceiverStore) BindTelegramConversationQuestion(ctx context.Con
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		op := telegramConversationTransaction{ctx: ctx, tx: tx, input: input, now: now}
+		op := conversationTransaction{ctx: ctx, tx: tx, input: input, now: now}
 		if err := op.ensurePeer(); err != nil {
 			return err
 		}
@@ -58,7 +58,7 @@ func (s *TelegramReceiverStore) BindTelegramConversationQuestion(ctx context.Con
 			return err
 		}
 
-		if c.Revision != observed || !telegramCaptureEligible(*c) {
+		if c.Revision != observed || !captureEligible(*c) {
 			return errors.New("stale or finished conversation question")
 		}
 

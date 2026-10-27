@@ -50,7 +50,7 @@ func TestTelegramPresentationDocumentSnapshot(t *testing.T) {
 	now := time.Now()
 
 	update := telegramRetainedTestUpdate(t, 1, "show document")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, now); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{update}, now); err != nil {
 		t.Fatal(err)
 	}
 
@@ -99,7 +99,7 @@ func TestTelegramPresentationDocumentSnapshot(t *testing.T) {
 	}
 }
 
-func checkTelegramDocumentBytes(t *testing.T, store *TelegramReceiverStore, delivery TelegramReceiverDelivery, want []byte) {
+func checkTelegramDocumentBytes(t *testing.T, store *ReceiverStore, delivery ReceiverDelivery, want []byte) {
 	t.Helper()
 
 	document, err := store.ReadDeliveryDocument(t.Context(), delivery)
@@ -118,7 +118,7 @@ func TestTelegramPresentationDocumentRollback(t *testing.T) {
 	update := telegramRetainedTestUpdate(t, 1, "oversized document")
 
 	now := time.Now()
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, now); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{update}, now); err != nil {
 		t.Fatal(err)
 	}
 

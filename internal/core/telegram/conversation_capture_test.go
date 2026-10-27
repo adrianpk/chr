@@ -21,10 +21,10 @@ func TestTelegramConversationCapture(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			f := newTelegramConversationFixture(t)
-			f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "alpha" })
+			f.apply(t, ConversationStart, func(i *ConversationInput) { i.Project = "alpha" })
 
 			for _, part := range test.parts {
-				f.apply(t, TelegramConversationCapture, func(i *TelegramConversationInput) { i.Text = part })
+				f.apply(t, ConversationCapture, func(i *ConversationInput) { i.Text = part })
 			}
 
 			c := f.sessions(t)[0]
@@ -45,17 +45,17 @@ func TestTelegramConversationCapture(t *testing.T) {
 func TestTelegramConversationReplay(t *testing.T) {
 	f := newTelegramConversationFixture(t)
 	env := f.env
-	f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "alpha" })
+	f.apply(t, ConversationStart, func(i *ConversationInput) { i.Project = "alpha" })
 
 	input := f.input
 	input.Update = telegramRetainedTestUpdate(t, 10, "one part")
 
-	input.Action, input.Text = TelegramConversationCapture, "one part"
-	if err := f.store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{input.Update}, time.Now()); err != nil {
+	input.Action, input.Text = ConversationCapture, "one part"
+	if err := f.store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{input.Update}, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := f.store.ApplyTelegramConversation(t.Context(), input, time.Now()); err != nil {
+	if err := f.store.ApplyConversation(t.Context(), input, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -64,7 +64,7 @@ func TestTelegramConversationReplay(t *testing.T) {
 	}
 
 	f.store = openTelegramReceiverTestStore(t, env)
-	if err := f.store.ApplyTelegramConversation(t.Context(), input, time.Now()); err != nil {
+	if err := f.store.ApplyConversation(t.Context(), input, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -88,12 +88,12 @@ SELECT 'filled-'||x,12345,100001,0,100001,'filled-'||x,config_digest,'result','f
 	input := f.input
 	input.Update = telegramRetainedTestUpdate(t, 11, "rolled back")
 
-	input.Action, input.Text = TelegramConversationCapture, "rolled back"
-	if err := f.store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{input.Update}, time.Now()); err != nil {
+	input.Action, input.Text = ConversationCapture, "rolled back"
+	if err := f.store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{input.Update}, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := f.store.ApplyTelegramConversation(t.Context(), input, time.Now()); err == nil {
+	if err := f.store.ApplyConversation(t.Context(), input, time.Now()); err == nil {
 		t.Fatal("capacity overflow committed")
 	}
 
@@ -109,26 +109,26 @@ SELECT 'filled-'||x,12345,100001,0,100001,'filled-'||x,config_digest,'result','f
 
 // TestTelegramConversationCompletion keeps done distinct from generation and discards only canceled capture.
 func TestTelegramConversationCompletion(t *testing.T) {
-	for _, action := range []TelegramConversationAction{TelegramConversationDone, TelegramConversationCancel} {
+	for _, action := range []ConversationAction{ConversationDone, ConversationCancel} {
 		t.Run(string(action), func(t *testing.T) {
 			f := newTelegramConversationFixture(t)
-			f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "alpha" })
-			f.apply(t, TelegramConversationCapture, func(i *TelegramConversationInput) { i.Text = "requirements" })
+			f.apply(t, ConversationStart, func(i *ConversationInput) { i.Project = "alpha" })
+			f.apply(t, ConversationCapture, func(i *ConversationInput) { i.Text = "requirements" })
 			f.apply(t, action, nil)
 
 			c := f.sessions(t)[0]
-			f.apply(t, TelegramConversationCapture, func(i *TelegramConversationInput) { i.Conversation = c.ID; i.Text = "late" })
+			f.apply(t, ConversationCapture, func(i *ConversationInput) { i.Conversation = c.ID; i.Text = "late" })
 
 			after := f.sessions(t)[0]
 			if c != after {
 				t.Fatal("finished capture changed", c, after)
 			}
 
-			if action == TelegramConversationCancel && (c.Phase != "canceled" || c.Capture != "") {
+			if action == ConversationCancel && (c.Phase != "canceled" || c.Capture != "") {
 				t.Fatal("cancellation retained capture", c)
 			}
 
-			if action == TelegramConversationDone && (c.Phase != "preparing" || c.Capture != "requirements") {
+			if action == ConversationDone && (c.Phase != "preparing" || c.Capture != "requirements") {
 				t.Fatal("done did not retain capture", c)
 			}
 		})
@@ -139,18 +139,18 @@ func TestTelegramConversationCompletion(t *testing.T) {
 func TestTelegramConversationRevocation(t *testing.T) {
 	tests := []struct {
 		name   string
-		revoke func(*TelegramConversationInput)
+		revoke func(*ConversationInput)
 	}{
-		{"removed project", func(i *TelegramConversationInput) { i.Projects = i.Projects[1:] }},
-		{"disabled project", func(i *TelegramConversationInput) { i.Projects[0].Enabled = false }},
-		{"project allowlist", func(i *TelegramConversationInput) { i.Config.AllowedUsers[0].ProjectIDs = []string{"beta"} }},
-		{"user allowlist", func(i *TelegramConversationInput) { i.Config.AllowedUsers = nil }},
+		{"removed project", func(i *ConversationInput) { i.Projects = i.Projects[1:] }},
+		{"disabled project", func(i *ConversationInput) { i.Projects[0].Enabled = false }},
+		{"project allowlist", func(i *ConversationInput) { i.Config.AllowedUsers[0].ProjectIDs = []string{"beta"} }},
+		{"user allowlist", func(i *ConversationInput) { i.Config.AllowedUsers = nil }},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			f := newTelegramConversationFixture(t)
-			f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "alpha" })
-			f.apply(t, TelegramConversationCapture, func(i *TelegramConversationInput) { i.Text = "denied"; test.revoke(i) })
+			f.apply(t, ConversationStart, func(i *ConversationInput) { i.Project = "alpha" })
+			f.apply(t, ConversationCapture, func(i *ConversationInput) { i.Text = "denied"; test.revoke(i) })
 
 			if f.sessions(t)[0].Capture != "" {
 				t.Fatal("revoked authority used")

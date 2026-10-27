@@ -11,18 +11,18 @@ import (
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
-type telegramConversationReader interface {
+type conversationReader interface {
 	QueryContext(context.Context, string, ...any) (*sql.Rows, error)
 	QueryRowContext(context.Context, string, ...any) *sql.Row
 }
 
 // Conversations reads only this exact peer's latest 50 retained sessions.
-func (s *TelegramReceiverStore) Conversations(ctx context.Context, peer TelegramPeerIdentity) ([]TelegramConversation, error) {
-	return readTelegramConversations(ctx, s.db, peer)
+func (s *ReceiverStore) Conversations(ctx context.Context, peer PeerIdentity) ([]Conversation, error) {
+	return readConversations(ctx, s.db, peer)
 }
 
-func readTelegramConversations(ctx context.Context, reader telegramConversationReader, peer TelegramPeerIdentity) ([]TelegramConversation, error) {
-	rows, err := reader.QueryContext(ctx, `SELECT `+telegramConversationColumns+` FROM telegram_conversations WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=? ORDER BY phase IN ('completed','canceled','failed'),updated_at DESC,id LIMIT 50`, peer.BotID, peer.ChatID, peer.TopicID, peer.UserID)
+func readConversations(ctx context.Context, reader conversationReader, peer PeerIdentity) ([]Conversation, error) {
+	rows, err := reader.QueryContext(ctx, `SELECT `+conversationColumns+` FROM telegram_conversations WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=? ORDER BY phase IN ('completed','canceled','failed'),updated_at DESC,id LIMIT 50`, peer.BotID, peer.ChatID, peer.TopicID, peer.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -31,10 +31,10 @@ func readTelegramConversations(ctx context.Context, reader telegramConversationR
 		_ = rows.Close()
 	}()
 
-	var result []TelegramConversation
+	var result []Conversation
 
 	for rows.Next() {
-		c, err := scanTelegramConversation(rows)
+		c, err := scanConversation(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -45,20 +45,20 @@ func readTelegramConversations(ctx context.Context, reader telegramConversationR
 	return result, rows.Err()
 }
 
-func scanTelegramConversation(scanner interface{ Scan(...any) error }) (TelegramConversation, error) {
-	var row telegramConversationRow
+func scanConversation(scanner interface{ Scan(...any) error }) (Conversation, error) {
+	var row conversationRow
 
 	err := scanner.Scan(row.scanTargets()...)
 
 	return row.conversation, err
 }
 
-func (op telegramConversationTransaction) conversation(id string) (*TelegramConversation, error) {
+func (op conversationTransaction) conversation(id string) (*Conversation, error) {
 	p := op.input.Update.Peer
 
-	c, err := scanTelegramConversation(op.tx.QueryRowContext(op.ctx, `SELECT `+telegramConversationColumns+` FROM telegram_conversations WHERE id=? AND bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, id, p.BotID, p.ChatID, p.TopicID, p.UserID))
+	c, err := scanConversation(op.tx.QueryRowContext(op.ctx, `SELECT `+conversationColumns+` FROM telegram_conversations WHERE id=? AND bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, id, p.BotID, p.ChatID, p.TopicID, p.UserID))
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, telegramConversationDiagnostic("That conversation is unavailable here. Send /sessions to choose one of your current conversations.")
+		return nil, conversationDiagnosticError("That conversation is unavailable here. Send /sessions to choose one of your current conversations.")
 	}
 
 	if err != nil {
@@ -68,7 +68,7 @@ func (op telegramConversationTransaction) conversation(id string) (*TelegramConv
 	return &c, nil
 }
 
-func (op telegramConversationTransaction) explicitTarget() (*TelegramConversation, error) {
+func (op conversationTransaction) explicitTarget() (*Conversation, error) {
 	if op.input.Update.ReplyToMessageID > 0 {
 		return op.replyTarget()
 	}
@@ -80,7 +80,7 @@ func (op telegramConversationTransaction) explicitTarget() (*TelegramConversatio
 	return nil, nil
 }
 
-func (op telegramConversationTransaction) replyTarget() (*TelegramConversation, error) {
+func (op conversationTransaction) replyTarget() (*Conversation, error) {
 	p := op.input.Update.Peer
 
 	var (
@@ -90,7 +90,7 @@ func (op telegramConversationTransaction) replyTarget() (*TelegramConversation, 
 
 	err := op.tx.QueryRowContext(op.ctx, `SELECT conversation_id,conversation_revision,question_binding FROM telegram_replies WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=? AND message_id=? AND purpose='capture' AND invalidated_at IS NULL`, p.BotID, p.ChatID, p.TopicID, p.UserID, op.input.Update.ReplyToMessageID).Scan(&id, &revision, &binding)
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, telegramConversationDiagnostic("That reply is unavailable or expired here. Saved details are unchanged. Use /sessions and an explicit current target.")
+		return nil, conversationDiagnosticError("That reply is unavailable or expired here. Saved details are unchanged. Use /sessions and an explicit current target.")
 	}
 
 	if err != nil {
@@ -102,22 +102,22 @@ func (op telegramConversationTransaction) replyTarget() (*TelegramConversation, 
 		return nil, err
 	}
 
-	if c.Revision != revision || c.QuestionBinding != binding || !telegramCaptureEligible(*c) {
-		return nil, telegramConversationDiagnostic("That prompt was replaced or finished. Saved details are unchanged. Use /sessions to choose an explicit current session.")
+	if c.Revision != revision || c.QuestionBinding != binding || !captureEligible(*c) {
+		return nil, conversationDiagnosticError("That prompt was replaced or finished. Saved details are unchanged. Use /sessions to choose an explicit current session.")
 	}
 
 	if op.input.Conversation != "" && op.input.Conversation != c.ID {
-		return nil, telegramConversationDiagnostic("The explicit conversation conflicts with the reply. Saved details are unchanged. Use /sessions to choose a matching target.")
+		return nil, conversationDiagnosticError("The explicit conversation conflicts with the reply. Saved details are unchanged. Use /sessions to choose a matching target.")
 	}
 
 	return c, nil
 }
 
-func telegramCaptureEligible(c TelegramConversation) bool {
+func captureEligible(c Conversation) bool {
 	return c.GuidedRunID != "" || c.Phase == "collecting" || c.Phase == "clarifying"
 }
 
-func (op telegramConversationTransaction) target() (*TelegramConversation, error) {
+func (op conversationTransaction) target() (*Conversation, error) {
 	c, err := op.explicitTarget()
 	if err != nil || c != nil {
 		return c, err
@@ -142,13 +142,13 @@ func (op telegramConversationTransaction) target() (*TelegramConversation, error
 	return op.soleEligible()
 }
 
-func (op telegramConversationTransaction) soleEligible() (*TelegramConversation, error) {
-	sessions, err := readTelegramConversations(op.ctx, op.tx, op.input.Update.Peer)
+func (op conversationTransaction) soleEligible() (*Conversation, error) {
+	sessions, err := readConversations(op.ctx, op.tx, op.input.Update.Peer)
 	if err != nil {
 		return nil, err
 	}
 
-	var eligible []TelegramConversation
+	var eligible []Conversation
 
 	for _, c := range sessions {
 		if op.targetEligible(c) {
@@ -157,56 +157,56 @@ func (op telegramConversationTransaction) soleEligible() (*TelegramConversation,
 	}
 
 	if len(eligible) != 1 {
-		return nil, telegramConversationDiagnostic("Select a session with /focus <conversation> or /reply <conversation> <text>. Use /sessions to list choices.")
+		return nil, conversationDiagnosticError("Select a session with /focus <conversation> or /reply <conversation> <text>. Use /sessions to list choices.")
 	}
 
 	return &eligible[0], nil
 }
 
-func (op telegramConversationTransaction) validateTarget(c *TelegramConversation) error {
+func (op conversationTransaction) validateTarget(c *Conversation) error {
 	project, err := op.resolveProject(c)
 	if err != nil {
 		return err
 	}
 
-	binding, err := telegramProjectBinding(project)
+	binding, err := projectBinding(project)
 	if err != nil {
 		return err
 	}
 
 	if c.ProjectBindingDigest != binding {
-		return telegramConversationDiagnostic("The project root changed. Resolve the registry binding explicitly by starting a new session; this session remains unchanged.")
+		return conversationDiagnosticError("The project root changed. Resolve the registry binding explicitly by starting a new session; this session remains unchanged.")
 	}
 
 	return nil
 }
 
-func (op telegramConversationTransaction) focus() (string, *TelegramConversation, error) {
+func (op conversationTransaction) focus() (string, *Conversation, error) {
 	c, err := op.explicitTarget()
 	if err != nil {
 		return "", nil, err
 	}
 
 	if c == nil {
-		return "", nil, telegramConversationDiagnostic("Use /focus <conversation> with an exact session ID.")
+		return "", nil, conversationDiagnosticError("Use /focus <conversation> with an exact session ID.")
 	}
 
 	if err := op.validateTarget(c); err != nil {
 		return "", nil, err
 	}
 
-	if !telegramCaptureEligible(*c) {
-		return "", nil, telegramConversationDiagnostic("This conversation is " + telegramConversationState(c.Phase) + ". Use /sessions to choose a conversation that can collect details.")
+	if !captureEligible(*c) {
+		return "", nil, conversationDiagnosticError("This conversation is " + conversationState(c.Phase) + ". Use /sessions to choose a conversation that can collect details.")
 	}
 
 	p := op.input.Update.Peer
 	_, err = op.tx.ExecContext(op.ctx, `UPDATE telegram_peers SET focused_conversation_id=?,revision=revision+1,updated_at=? WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, c.ID, database.FormatTime(op.now), p.BotID, p.ChatID, p.TopicID, p.UserID)
 
-	return "Your next details will go to " + telegramConversationLabel(c.Topic) + " in " + op.projectLabel(c.ProjectID) + ".", c, err
+	return "Your next details will go to " + conversationLabel(c.Topic) + " in " + op.projectLabel(c.ProjectID) + ".", c, err
 }
 
-func (op telegramConversationTransaction) list() (string, *TelegramConversation, error) {
-	sessions, err := readTelegramConversations(op.ctx, op.tx, op.input.Update.Peer)
+func (op conversationTransaction) list() (string, *Conversation, error) {
+	sessions, err := readConversations(op.ctx, op.tx, op.input.Update.Peer)
 	if err != nil {
 		return "", nil, err
 	}
@@ -237,18 +237,18 @@ func (op telegramConversationTransaction) list() (string, *TelegramConversation,
 	return text.String(), nil, nil
 }
 
-func (op telegramConversationTransaction) targetEligible(c TelegramConversation) bool {
-	if op.input.Action == TelegramConversationAuthor {
-		return telegramAuthoringEligible(c)
+func (op conversationTransaction) targetEligible(c Conversation) bool {
+	if op.input.Action == ConversationAuthor {
+		return authoringEligible(c)
 	}
 
-	if op.input.Action == TelegramConversationCancel {
-		return telegramCancelable(c)
+	if op.input.Action == ConversationCancel {
+		return cancelable(c)
 	}
 
-	return telegramCaptureEligible(c)
+	return captureEligible(c)
 }
 
-func telegramAuthoringEligible(c TelegramConversation) bool {
-	return c.GuidedRunID == "" && (telegramCaptureEligible(c) || c.Phase == "preparing" || c.Phase == "prepared" || c.Phase == "awaiting_confirmation")
+func authoringEligible(c Conversation) bool {
+	return c.GuidedRunID == "" && (captureEligible(c) || c.Phase == "preparing" || c.Phase == "prepared" || c.Phase == "awaiting_confirmation")
 }

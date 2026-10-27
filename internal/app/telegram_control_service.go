@@ -9,13 +9,13 @@ import (
 )
 
 type telegramControlService interface {
-	ReadTelegramControl(context.Context, telegramcore.TelegramOperationTarget, string) (WorkflowWorkStatus, error)
-	ReadTelegramControlReceipt(context.Context, telegramcore.TelegramOperationTarget, workflowstate.MutationBinding, WorkflowControlRequest) (WorkflowWorkStatus, bool, error)
-	ApplyTelegramControl(context.Context, telegramcore.TelegramOperationTarget, workflowstate.MutationBinding, WorkflowControlRequest, core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error)
+	ReadTelegramControl(context.Context, telegramcore.OperationTarget, string) (WorkflowWorkStatus, error)
+	ReadTelegramControlReceipt(context.Context, telegramcore.OperationTarget, workflowstate.MutationBinding, WorkflowControlRequest) (WorkflowWorkStatus, bool, error)
+	ApplyTelegramControl(context.Context, telegramcore.OperationTarget, workflowstate.MutationBinding, WorkflowControlRequest, core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error)
 }
 
 // ReadTelegramControlReceipt scopes receipt recovery to the original project.
-func (s service) ReadTelegramControlReceipt(ctx context.Context, target telegramcore.TelegramOperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest) (WorkflowWorkStatus, bool, error) {
+func (s service) ReadTelegramControlReceipt(ctx context.Context, target telegramcore.OperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest) (WorkflowWorkStatus, bool, error) {
 	scoped, err := s.telegramBoundProjectService(ctx, target)
 	if err != nil {
 		return WorkflowWorkStatus{}, false, err
@@ -28,7 +28,7 @@ func (s service) ReadTelegramControlReceipt(ctx context.Context, target telegram
 }
 
 // ReadTelegramControl observes the frozen project and namespace through native status.
-func (s service) ReadTelegramControl(ctx context.Context, target telegramcore.TelegramOperationTarget, id string) (WorkflowWorkStatus, error) {
+func (s service) ReadTelegramControl(ctx context.Context, target telegramcore.OperationTarget, id string) (WorkflowWorkStatus, error) {
 	scoped, err := s.telegramBoundProjectService(ctx, target)
 	if err != nil {
 		return WorkflowWorkStatus{}, err
@@ -41,7 +41,7 @@ func (s service) ReadTelegramControl(ctx context.Context, target telegramcore.Te
 
 // ApplyTelegramControl enters the same guarded operation as other adapters.
 // The configured actor is carried by the immutable caller request binding.
-func (s service) ApplyTelegramControl(ctx context.Context, target telegramcore.TelegramOperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest, check core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error) {
+func (s service) ApplyTelegramControl(ctx context.Context, target telegramcore.OperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest, check core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error) {
 	if err := binding.Validate(); err != nil {
 		return WorkflowWorkStatus{}, err
 	}

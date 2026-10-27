@@ -14,7 +14,7 @@ const telegramGuidedOvertakenAck = "Your original request is confirmed. The conv
 // A committed effect can outlive its original display fence. Confirm only its
 // retained request; never refresh the command, overwrite a newer prompt or grant
 // reply authority to this historical acknowledgement.
-func (r telegramReceiver) finishOvertakenGuided(ctx context.Context, request telegramcore.TelegramOperationRequest, progress telegramcore.TelegramGuidedProgress, facts json.RawMessage, config telegramcore.TelegramReceiverConfig) error {
+func (r telegramReceiver) finishOvertakenGuided(ctx context.Context, request telegramcore.OperationRequest, progress telegramcore.GuidedProgress, facts json.RawMessage, config telegramcore.ReceiverConfig) error {
 	if err := r.validateOvertakenGuided(ctx, request, progress.SessionRef); err != nil {
 		return err
 	}
@@ -24,10 +24,10 @@ func (r telegramReceiver) finishOvertakenGuided(ctx context.Context, request tel
 		request.Delivery.Message.SecondaryText = telegramGuidedOvertakenAck
 	}
 
-	return r.store.FinishTelegramOperation(ctx, request, "confirmed", progress.SessionRef, facts, telegramGuidedOvertakenAck, config.Digest(), time.Now())
+	return r.store.FinishOperation(ctx, request, "confirmed", progress.SessionRef, facts, telegramGuidedOvertakenAck, config.Digest(), time.Now())
 }
 
-func (r telegramReceiver) finishOvertakenGuidedAction(ctx context.Context, claim telegramcore.TelegramActionClaim, result telegramcore.TelegramActionResult) error {
+func (r telegramReceiver) finishOvertakenGuidedAction(ctx context.Context, claim telegramcore.ActionClaim, result telegramcore.ActionResult) error {
 	if err := r.validateOvertakenGuided(ctx, claim.Request, result.ReceiptRef); err != nil {
 		return err
 	}
@@ -39,10 +39,10 @@ func (r telegramReceiver) finishOvertakenGuidedAction(ctx context.Context, claim
 		result.Delivery.Message.SecondaryText = telegramGuidedOvertakenAck
 	}
 
-	return r.store.FinishTelegramAction(ctx, claim, result, time.Now())
+	return r.store.FinishAction(ctx, claim, result, time.Now())
 }
 
-func (r telegramReceiver) validateOvertakenGuided(ctx context.Context, request telegramcore.TelegramOperationRequest, sessionRef string) error {
+func (r telegramReceiver) validateOvertakenGuided(ctx context.Context, request telegramcore.OperationRequest, sessionRef string) error {
 	config, err := r.validateAuthoringAuthority(ctx, request, true)
 	if err != nil {
 		return err
@@ -57,7 +57,7 @@ func (r telegramReceiver) validateOvertakenGuided(ctx context.Context, request t
 		return err
 	}
 
-	current, found, err := r.store.TelegramConversationReference(ctx, request.Source.Peer, request.Target.ConversationID)
+	current, found, err := r.store.ConversationReference(ctx, request.Source.Peer, request.Target.ConversationID)
 	if err != nil {
 		return err
 	}

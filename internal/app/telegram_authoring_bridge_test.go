@@ -81,7 +81,7 @@ func telegramAuthoringBridgeSnapshot(t *testing.T, f *telegramConversationAppFix
 
 	operations := telegramOperationConcreteService(t, f.receiver)
 
-	snapshot, err := operations.ObserveTelegramAuthoring(t.Context(), telegramcore.TelegramOperationTarget{ProjectID: c.ProjectID, Namespace: c.Namespace}, id)
+	snapshot, err := operations.ObserveTelegramAuthoring(t.Context(), telegramcore.OperationTarget{ProjectID: c.ProjectID, Namespace: c.Namespace}, id)
 	if err != nil {
 		t.Fatal(err)
 	}

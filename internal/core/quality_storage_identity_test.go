@@ -43,7 +43,7 @@ func qualityReceiverIdentity(t *testing.T) {
 	update.MessageID = 404
 
 	update.ReplyToMessageID = 606
-	if err := store.RetainBatch(t.Context(), 12345, []telegramcore.TelegramReceivedUpdate{update}, qualityStorageNow()); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []telegramcore.ReceivedUpdate{update}, qualityStorageNow()); err != nil {
 		t.Fatal(err)
 	}
 

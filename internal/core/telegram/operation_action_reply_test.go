@@ -46,7 +46,7 @@ func TestTelegramOperationActionReplies(t *testing.T) {
 	input := telegramOperationActionInput(t, f, "confirm")
 	input.Update.ReplyToMessageID = messageID
 
-	reply, recognized, err := f.store.ResolveTelegramActionAnswer(t.Context(), input.Update)
+	reply, recognized, err := f.store.ResolveActionAnswer(t.Context(), input.Update)
 	if err != nil || !recognized || reply.Token != action.Token || reply.Choice != "confirm" {
 		t.Fatal("action reply unavailable", reply, recognized, err)
 	}
@@ -71,30 +71,30 @@ func TestTelegramOperationActionBounds(t *testing.T) {
 				offer.Text = strings.Repeat("x", 16385)
 			}
 
-			if _, err := f.store.OfferTelegramAction(t.Context(), offer, time.Now()); err == nil {
+			if _, err := f.store.OfferAction(t.Context(), offer, time.Now()); err == nil {
 				t.Fatal("action bound exceeded", kind)
 			}
 		})
 	}
 }
 
-func checkTelegramOperationCallbackAnswer(t *testing.T, f *telegramConversationFixture, input TelegramConversationInput, reply TelegramActionAnswer) {
+func checkTelegramOperationCallbackAnswer(t *testing.T, f *telegramConversationFixture, input ConversationInput, reply ActionAnswer) {
 	t.Helper()
 
-	callback, err := TelegramActionCallbackData(reply)
+	callback, err := ActionCallbackData(reply)
 	if err != nil || len(callback) > 64 {
 		t.Fatal("callback binding exceeds transport", callback, err)
 	}
 
 	input.Update.Kind, input.Update.Text = "callback_query", callback
 
-	answer, recognized, err := f.store.ResolveTelegramActionAnswer(t.Context(), input.Update)
+	answer, recognized, err := f.store.ResolveActionAnswer(t.Context(), input.Update)
 	if err != nil || !recognized || answer != reply {
 		t.Fatal("callback and reply diverged", answer, err)
 	}
 
 	input.Update.Peer.UserID++
-	if _, err := f.store.ClaimTelegramAction(t.Context(), input, answer, time.Now()); err == nil {
+	if _, err := f.store.ClaimAction(t.Context(), input, answer, time.Now()); err == nil {
 		t.Fatal("action crossed peer identity")
 	}
 }
@@ -107,11 +107,11 @@ func TestTelegramOperationActionRevocation(t *testing.T) {
 	update := telegramRetainedTestUpdate(t, f.next, "revoked input")
 
 	update.Kind, update.Reason, update.Text = "rejected", "unauthorized_peer", ""
-	if err := f.store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, time.Now()); err != nil {
+	if err := f.store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{update}, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
-	retained, err := readTelegramAction(t.Context(), f.store.db, action.Token, action.Peer)
+	retained, err := readAction(t.Context(), f.store.db, action.Token, action.Peer)
 	if err != nil || retained.State != "superseded" {
 		t.Fatal("revoked prompt remained actionable", retained, err)
 	}

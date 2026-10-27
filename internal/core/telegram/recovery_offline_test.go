@@ -13,11 +13,11 @@ import (
 func TestTelegramRecoveryOffline(t *testing.T) {
 	env := telegramReceiverTestEnv(t)
 
-	if err := BindTelegramReceiverIdentity(env, 12345); err != nil {
+	if err := BindReceiverIdentity(env, 12345); err != nil {
 		t.Fatal(err)
 	}
 
-	lock, err := AcquireTelegramConfigurationLock(env)
+	lock, err := AcquireConfigurationLock(env)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,8 +27,8 @@ func TestTelegramRecoveryOffline(t *testing.T) {
 		}
 	}()
 
-	request := TelegramTransportRetry{BotID: 12345, Poll: true, Actor: "local-uid-1000"}
-	if err := RetryLocalTelegramTransport(t.Context(), env, os.DirFS("../../../cmd/chr"), request, time.Now()); err == nil {
+	request := TransportRetry{BotID: 12345, Poll: true, Actor: "local-uid-1000"}
+	if err := RetryLocalTransport(t.Context(), env, os.DirFS("../../../cmd/chr"), request, time.Now()); err == nil {
 		t.Fatal("live receiver retry accepted")
 	}
 

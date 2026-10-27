@@ -17,11 +17,11 @@ type telegramHarnessStatus struct {
 }
 
 type telegramHarnessService interface {
-	InspectTelegramHarnessSelections(context.Context, telegramcore.TelegramOperationTarget) (telegramHarnessStatus, error)
-	ChangeTelegramHarnessSelections(context.Context, telegramcore.TelegramOperationTarget, core.HarnessSelectionChangeRequest, func(context.Context) error) (core.HarnessSelectionSnapshot, error)
+	InspectTelegramHarnessSelections(context.Context, telegramcore.OperationTarget) (telegramHarnessStatus, error)
+	ChangeTelegramHarnessSelections(context.Context, telegramcore.OperationTarget, core.HarnessSelectionChangeRequest, func(context.Context) error) (core.HarnessSelectionSnapshot, error)
 }
 
-func (s service) telegramHarnessProject(ctx context.Context, target telegramcore.TelegramOperationTarget) (service, error) {
+func (s service) telegramHarnessProject(ctx context.Context, target telegramcore.OperationTarget) (service, error) {
 	scoped, err := s.telegramProjectService(ctx, target)
 	if err != nil {
 		return scoped, err
@@ -29,12 +29,12 @@ func (s service) telegramHarnessProject(ctx context.Context, target telegramcore
 
 	project := projectcore.Project{ID: scoped.projectContext.ProjectID, Path: scoped.projectContext.ProjectDir, Enabled: true}
 
-	return scoped, telegramcore.ValidateTelegramProjectTarget(project, target)
+	return scoped, telegramcore.ValidateProjectTarget(project, target)
 }
 
 // InspectTelegramHarnessSelections resolves the frozen registry root and calls
 // the shared selection owner, keeping private profile resources out of replies.
-func (s service) InspectTelegramHarnessSelections(ctx context.Context, target telegramcore.TelegramOperationTarget) (telegramHarnessStatus, error) {
+func (s service) InspectTelegramHarnessSelections(ctx context.Context, target telegramcore.OperationTarget) (telegramHarnessStatus, error) {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
@@ -65,7 +65,7 @@ func (s service) telegramHarnessRetained(ctx context.Context) ([]WorkflowWorkSta
 
 // ChangeTelegramHarnessSelections resolves the registry root and delegates the
 // confirmed envelope to the shared atomic configuration owner.
-func (s service) ChangeTelegramHarnessSelections(ctx context.Context, target telegramcore.TelegramOperationTarget, change core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (core.HarnessSelectionSnapshot, error) {
+func (s service) ChangeTelegramHarnessSelections(ctx context.Context, target telegramcore.OperationTarget, change core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (core.HarnessSelectionSnapshot, error) {
 	scoped, err := s.telegramHarnessProject(ctx, target)
 	if err != nil {
 		return core.HarnessSelectionSnapshot{}, err

@@ -274,7 +274,7 @@ func TestTelegramAuthoringIntentRootChange(t *testing.T) {
 func TestTelegramAuthoringIntentRevocation(t *testing.T) {
 	f := newTelegramConversationAppFixture(t)
 	telegramAuthoringIntentHTTP(t, f, func(ConversationIntentContext) string {
-		config, err := telegramcore.LoadTelegramReceiverConfig(f.receiver.env)
+		config, err := telegramcore.LoadReceiverConfig(f.receiver.env)
 		if err != nil {
 			t.Error(err)
 
@@ -282,7 +282,7 @@ func TestTelegramAuthoringIntentRevocation(t *testing.T) {
 		}
 
 		config.AllowedUsers[0].TelegramUserID = 100002
-		if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+		if err := telegramcore.SaveReceiverConfig(f.receiver.env, config, true); err != nil {
 			t.Error(err)
 		}
 
@@ -353,7 +353,7 @@ func TestTelegramAuthoringIntentReplayScope(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	reopened, err := telegramcore.NewTelegramReceiverStore(t.Context(), f.receiver.env, testAssetsFS())
+	reopened, err := telegramcore.NewReceiverStore(t.Context(), f.receiver.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}

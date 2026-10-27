@@ -19,17 +19,17 @@ func TestGuidedUseCaseTelegramBinding(t *testing.T) {
 	input.Project, input.Text = "alpha", "New guided use case"
 
 	input.Update = telegramRetainedTestUpdate(t, 1, "Develop a new use case")
-	if err := f.store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{input.Update}, time.Now()); err != nil {
+	if err := f.store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{input.Update}, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
-	first, target, err := f.store.ReserveTelegramGuidedConversation(t.Context(), input, time.Now())
+	first, target, err := f.store.ReserveGuidedConversation(t.Context(), input, time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	second, again, err := f.store.ReserveTelegramGuidedConversation(t.Context(), input, time.Now())
-	if err != nil || first.ID != second.ID || target != again || telegramAuthoringEligible(first) {
+	second, again, err := f.store.ReserveGuidedConversation(t.Context(), input, time.Now())
+	if err != nil || first.ID != second.ID || target != again || authoringEligible(first) {
 		t.Fatal("routing replay replaced a binding or adopted manual authoring", err)
 	}
 
@@ -45,15 +45,15 @@ func TestGuidedUseCaseTelegramBinding(t *testing.T) {
 	assertGuidedTelegramPeer(t, f, input, first)
 }
 
-func assertGuidedTelegramPeer(t *testing.T, f *telegramConversationFixture, input TelegramConversationInput, c TelegramConversation) {
+func assertGuidedTelegramPeer(t *testing.T, f *telegramConversationFixture, input ConversationInput, c Conversation) {
 	t.Helper()
 
 	foreign := input
 	foreign.Update.Peer.UserID++
-	foreign.Config.AllowedUsers = append(foreign.Config.AllowedUsers, TelegramAllowedUser{TelegramUserID: foreign.Update.Peer.UserID, OperatorID: "other", ProjectIDs: []string{"alpha"}})
+	foreign.Config.AllowedUsers = append(foreign.Config.AllowedUsers, AllowedUser{TelegramUserID: foreign.Update.Peer.UserID, OperatorID: "other", ProjectIDs: []string{"alpha"}})
 
 	foreign.Conversation = c.ID
-	if _, _, err := f.store.ResolveTelegramGuidedTarget(t.Context(), foreign); err == nil {
+	if _, _, err := f.store.ResolveGuidedTarget(t.Context(), foreign); err == nil {
 		t.Fatal("foreign peer resolved a guided conversation")
 	}
 
@@ -61,7 +61,7 @@ func assertGuidedTelegramPeer(t *testing.T, f *telegramConversationFixture, inpu
 	moved.Projects = append([]projectcore.Project(nil), input.Projects...)
 
 	moved.Projects[0].Path = t.TempDir()
-	if _, _, err := f.store.ReserveTelegramGuidedConversation(t.Context(), moved, time.Now()); err == nil {
+	if _, _, err := f.store.ReserveGuidedConversation(t.Context(), moved, time.Now()); err == nil {
 		t.Fatal("replay accepted a replaced registered root")
 	}
 }
@@ -73,7 +73,7 @@ func TestGuidedUseCaseTelegramMigration(t *testing.T) {
 	assets := telegramRecoveryMigrationAssets(t)
 	delete(assets, "assets/migration/sqlite/20261023000029-add_telegram_guided_binding.sql")
 
-	old, err := NewTelegramReceiverStore(t.Context(), env, assets)
+	old, err := NewReceiverStore(t.Context(), env, assets)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -95,16 +95,16 @@ func TestGuidedUseCaseTelegramMigration(t *testing.T) {
 	assertGuidedTelegramManualMigration(t, current)
 }
 
-func assertGuidedTelegramManualMigration(t *testing.T, current *TelegramReceiverStore) {
+func assertGuidedTelegramManualMigration(t *testing.T, current *ReceiverStore) {
 	t.Helper()
 
-	rows, err := current.Conversations(t.Context(), TelegramPeerIdentity{BotID: 12345, ChatID: 100001, UserID: 100001})
+	rows, err := current.Conversations(t.Context(), PeerIdentity{BotID: 12345, ChatID: 100001, UserID: 100001})
 	if err != nil || len(rows) != 1 {
 		t.Fatal("migration lost manual conversation", err)
 	}
 
 	c := rows[0]
-	if c.GuidedRunID != "" || c.Topic != "Manual topic" || c.Capture != "Original context" || c.Revision != 7 || !telegramAuthoringEligible(c) {
+	if c.GuidedRunID != "" || c.Topic != "Manual topic" || c.Capture != "Original context" || c.Revision != 7 || !authoringEligible(c) {
 		t.Fatal("migration replaced or adopted manual state")
 	}
 }

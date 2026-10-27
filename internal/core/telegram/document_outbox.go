@@ -14,18 +14,18 @@ import (
 
 // QueueDocumentResponse atomically freezes a primary document with its source
 // acknowledgement. Replays cannot replace bytes or allocate another snapshot.
-func (s *TelegramReceiverStore) QueueDocumentResponse(ctx context.Context, update TelegramReceivedUpdate, response tgmessage.DocumentResponse, configDigest string, now time.Time) error {
+func (s *ReceiverStore) QueueDocumentResponse(ctx context.Context, update ReceivedUpdate, response tgmessage.DocumentResponse, configDigest string, now time.Time) error {
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		pending, err := telegramReadResponsePending(ctx, tx, update)
+		pending, err := readResponsePending(ctx, tx, update)
 		if err != nil || !pending {
 			return err
 		}
 
-		return queueTelegramDocument(ctx, tx, update, response, configDigest, now)
+		return queueDocument(ctx, tx, update, response, configDigest, now)
 	})
 }
 
-func queueTelegramDocument(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, response tgmessage.DocumentResponse, configDigest string, now time.Time) error {
+func queueDocument(ctx context.Context, tx *sql.Tx, update ReceivedUpdate, response tgmessage.DocumentResponse, configDigest string, now time.Time) error {
 	if err := tgmessage.ValidateDocument(response.Document); err != nil {
 		return err
 	}
@@ -35,7 +35,7 @@ func queueTelegramDocument(ctx context.Context, tx *sql.Tx, update TelegramRecei
 		return tgmessage.ErrDocumentUnavailable
 	}
 
-	if err := queueTelegramResponse(ctx, tx, update, presentation.PlainFallback, configDigest, now); err != nil {
+	if err := queueResponse(ctx, tx, update, presentation.PlainFallback, configDigest, now); err != nil {
 		return err
 	}
 
@@ -46,13 +46,13 @@ func queueTelegramDocument(ctx context.Context, tx *sql.Tx, update TelegramRecei
 		return err
 	}
 
-	return bindTelegramDocumentImage(ctx, tx, deliveryID, update.Peer, response, configDigest, now)
+	return bindDocumentImage(ctx, tx, deliveryID, update.Peer, response, configDigest, now)
 }
 
 // The caller owns the outbox row and has validated the complete source image.
-func bindTelegramDocumentImage(ctx context.Context, tx *sql.Tx, deliveryID string, peer TelegramPeerIdentity, response tgmessage.DocumentResponse, configDigest string, now time.Time) error {
+func bindDocumentImage(ctx context.Context, tx *sql.Tx, deliveryID string, peer PeerIdentity, response tgmessage.DocumentResponse, configDigest string, now time.Time) error {
 	id := "tgdoc-" + contenthash.Sum([]byte(deliveryID))[:32]
-	if err := retainTelegramDocument(ctx, tx, id, deliveryID, peer, configDigest, response.Document, now); err != nil {
+	if err := retainDocument(ctx, tx, id, deliveryID, peer, configDigest, response.Document, now); err != nil {
 		return err
 	}
 
@@ -69,15 +69,15 @@ func bindTelegramDocumentImage(ctx context.Context, tx *sql.Tx, deliveryID strin
 		return err
 	}
 
-	return checkTelegramIntakeCapacity(ctx, tx, peer.BotID)
+	return checkIntakeCapacity(ctx, tx, peer.BotID)
 }
 
-func retainTelegramDocument(ctx context.Context, tx *sql.Tx, id, owner string, peer TelegramPeerIdentity, configDigest string, document tgmessage.Document, now time.Time) error {
+func retainDocument(ctx context.Context, tx *sql.Tx, id, owner string, peer PeerIdentity, configDigest string, document tgmessage.Document, now time.Time) error {
 	// The outbox insertion already owns SQLite's write reservation. Quota check
 	// and admission therefore serialize with other admissions and cleanup.
-	row := telegramDocumentSnapshotRow{id: id, owner: owner, peer: peer, configDigest: configDigest, document: document, createdAt: now}
+	row := documentSnapshotRow{id: id, owner: owner, peer: peer, configDigest: configDigest, document: document, createdAt: now}
 
-	result, err := tx.ExecContext(ctx, insertTelegramDocumentSnapshotSQL, row.values()...)
+	result, err := tx.ExecContext(ctx, insertDocumentSnapshotSQL, row.values()...)
 	if err != nil {
 		return err
 	}
@@ -96,7 +96,7 @@ func retainTelegramDocument(ctx context.Context, tx *sql.Tx, id, owner string, p
 
 // ReadDeliveryDocument resolves bytes only through the exact original outbox,
 // destination, configuration and presentation hash, including during retry.
-func (s *TelegramReceiverStore) ReadDeliveryDocument(ctx context.Context, delivery TelegramReceiverDelivery) (tgmessage.Document, error) {
+func (s *ReceiverStore) ReadDeliveryDocument(ctx context.Context, delivery ReceiverDelivery) (tgmessage.Document, error) {
 	var (
 		document tgmessage.Document
 		hash     string
@@ -117,7 +117,7 @@ func (s *TelegramReceiverStore) ReadDeliveryDocument(ctx context.Context, delive
 	return document, tgmessage.ValidateDocument(document)
 }
 
-func purgeTelegramDocuments(ctx context.Context, tx *sql.Tx, botID int64, now time.Time) error {
+func purgeDocuments(ctx context.Context, tx *sql.Tx, botID int64, now time.Time) error {
 	_, err := tx.ExecContext(ctx, `UPDATE telegram_document_snapshots AS d SET payload=NULL,purged_at=? WHERE d.id IN (
  SELECT s.id FROM telegram_document_snapshots s WHERE s.bot_id=? AND s.payload IS NOT NULL AND s.terminal_at IS NOT NULL AND s.terminal_at<=?
  AND NOT EXISTS(SELECT 1 FROM telegram_outbox o WHERE o.document_id=s.id AND (o.state!='delivered' OR EXISTS(SELECT 1 FROM telegram_actions a WHERE a.token=o.action_token AND a.state IN ('pending','applying'))))

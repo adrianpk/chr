@@ -11,14 +11,14 @@ import (
 	"forge.adrianpk.com/chr/internal/core/database"
 )
 
-// TelegramReceiverStore extends the existing user database with transport receipts.
-type TelegramReceiverStore struct {
+// ReceiverStore extends the existing user database with transport receipts.
+type ReceiverStore struct {
 	db  *sql.DB
-	env TelegramStateDirectory
+	env StateDirectory
 }
 
-// TelegramReceiverState is local transport evidence, not workflow completion.
-type TelegramReceiverState struct {
+// ReceiverState is local transport evidence, not workflow completion.
+type ReceiverState struct {
 	BotID              int64
 	Epoch              int64
 	NextUpdateID       *int64
@@ -34,8 +34,8 @@ type TelegramReceiverState struct {
 	LastErrorCode      string
 }
 
-// NewTelegramReceiverStore applies additive migrations and rejects future schemas.
-func NewTelegramReceiverStore(ctx context.Context, env TelegramStoreDirectories, assets fs.FS) (*TelegramReceiverStore, error) {
+// NewReceiverStore applies additive migrations and rejects future schemas.
+func NewReceiverStore(ctx context.Context, env StoreDirectories, assets fs.FS) (*ReceiverStore, error) {
 	status, err := database.NewMigrationStatusChecker(assets).Check(ctx, env)
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func NewTelegramReceiverStore(ctx context.Context, env TelegramStoreDirectories,
 		return nil, errors.New("telegram receiver refuses an unknown database schema")
 	}
 
-	if err := createTelegramDatabase(env); err != nil {
+	if err := createDatabase(env); err != nil {
 		return nil, err
 	}
 
@@ -62,10 +62,10 @@ func NewTelegramReceiverStore(ctx context.Context, env TelegramStoreDirectories,
 		return nil, database.CloseOnError(db, err)
 	}
 
-	return &TelegramReceiverStore{db: db, env: env}, nil
+	return &ReceiverStore{db: db, env: env}, nil
 }
 
-func createTelegramDatabase(env database.DataDirectory) error {
+func createDatabase(env database.DataDirectory) error {
 	if err := os.MkdirAll(env.DataDir(), 0o700); err != nil {
 		return err
 	}
@@ -83,10 +83,10 @@ func createTelegramDatabase(env database.DataDirectory) error {
 }
 
 // Close releases only this store's connection.
-func (s *TelegramReceiverStore) Close() error { return s.db.Close() }
+func (s *ReceiverStore) Close() error { return s.db.Close() }
 
 // BindReceiver preserves an existing bot's cursor and retry budget.
-func (s *TelegramReceiverStore) BindReceiver(ctx context.Context, botID int64, config TelegramReceiverConfig, now time.Time) error {
+func (s *ReceiverStore) BindReceiver(ctx context.Context, botID int64, config ReceiverConfig, now time.Time) error {
 	if botID <= 0 {
 		return errors.New("invalid telegram bot identity")
 	}
@@ -105,12 +105,12 @@ ON CONFLICT(bot_id) DO UPDATE SET config_digest=excluded.config_digest, updated_
 		return err
 	}
 
-	return s.restoreTelegramInputLanes(ctx, botID)
+	return s.restoreInputLanes(ctx, botID)
 }
 
 // Receiver loads retained readiness and rejects newer encoded receiver records.
-func (s *TelegramReceiverStore) Receiver(ctx context.Context, botID int64) (TelegramReceiverState, error) {
-	state := TelegramReceiverState{BotID: botID}
+func (s *ReceiverStore) Receiver(ctx context.Context, botID int64) (ReceiverState, error) {
+	state := ReceiverState{BotID: botID}
 
 	var (
 		version                                       int
@@ -132,27 +132,27 @@ FROM telegram_receivers WHERE bot_id=?`, botID).Scan(&version, &state.Epoch, &ne
 		state.NextUpdateID = &next.Int64
 	}
 
-	state.RetryAt, err = parseTelegramOptionalTime(retryAt)
+	state.RetryAt, err = parseOptionalTime(retryAt)
 	if err != nil {
 		return state, err
 	}
 
-	state.LastPollAt, err = parseTelegramOptionalTime(lastPoll)
+	state.LastPollAt, err = parseOptionalTime(lastPoll)
 	if err != nil {
 		return state, err
 	}
 
-	state.RetryStartedAt, err = parseTelegramOptionalTime(retryStarted)
+	state.RetryStartedAt, err = parseOptionalTime(retryStarted)
 	if err != nil {
 		return state, err
 	}
 
-	state.RetentionGapAt, err = parseTelegramOptionalTime(retentionGap)
+	state.RetentionGapAt, err = parseOptionalTime(retentionGap)
 
 	return state, err
 }
 
-func parseTelegramOptionalTime(value sql.NullString) (time.Time, error) {
+func parseOptionalTime(value sql.NullString) (time.Time, error) {
 	if !value.Valid {
 		return time.Time{}, nil
 	}
@@ -160,7 +160,7 @@ func parseTelegramOptionalTime(value sql.NullString) (time.Time, error) {
 	return database.ParseTime(value.String)
 }
 
-func (s *TelegramReceiverStore) transaction(ctx context.Context, action func(*sql.Tx) error) error {
+func (s *ReceiverStore) transaction(ctx context.Context, action func(*sql.Tx) error) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -174,7 +174,7 @@ func (s *TelegramReceiverStore) transaction(ctx context.Context, action func(*sq
 }
 
 // ReservePoll checkpoints an attempt before IO; restart cannot reset exhaustion.
-func (s *TelegramReceiverStore) ReservePoll(ctx context.Context, botID int64, now time.Time) error {
+func (s *ReceiverStore) ReservePoll(ctx context.Context, botID int64, now time.Time) error {
 	result, err := s.db.ExecContext(ctx, `UPDATE telegram_receivers SET retry_attempt=retry_attempt+1,
 total_retry_attempts=total_retry_attempts+1,retry_at=?,updated_at=?
 WHERE bot_id=? AND schema_version=1 AND retry_attempt<5 AND health!='blocked' AND (retry_at IS NULL OR retry_at<=?)`,
@@ -183,10 +183,10 @@ WHERE bot_id=? AND schema_version=1 AND retry_attempt<5 AND health!='blocked' AN
 		return err
 	}
 
-	return telegramRequireChanged(result)
+	return requireChanged(result)
 }
 
-func telegramRequireChanged(result sql.Result) error {
+func requireChanged(result sql.Result) error {
 	count, err := result.RowsAffected()
 	if err != nil {
 		return err
@@ -200,13 +200,13 @@ func telegramRequireChanged(result sql.Result) error {
 }
 
 // PollFailed stores only sanitized classifications and the retained retry deadline.
-func (s *TelegramReceiverStore) PollFailed(ctx context.Context, botID int64, failure error, now time.Time) error {
+func (s *ReceiverStore) PollFailed(ctx context.Context, botID int64, failure error, now time.Time) error {
 	state, err := s.Receiver(ctx, botID)
 	if err != nil {
 		return err
 	}
 
-	code, permanent, delay := telegramFailureState(failure, state.RetryAttempt)
+	code, permanent, delay := failureState(failure, state.RetryAttempt)
 
 	health := "degraded"
 	if permanent {
@@ -219,10 +219,10 @@ func (s *TelegramReceiverStore) PollFailed(ctx context.Context, botID int64, fai
 	return err
 }
 
-func telegramFailureState(failure error, attempt int) (string, bool, time.Duration) {
+func failureState(failure error, attempt int) (string, bool, time.Duration) {
 	delay := time.Second << min(4, max(0, attempt-1))
 
-	var apiErr *TelegramAPIError
+	var apiErr *APIError
 	if errors.As(failure, &apiErr) {
 		return apiErr.Code, apiErr.Permanent, max(delay, apiErr.RetryAfter)
 	}

@@ -20,8 +20,8 @@ func TestTelegramPresentationProgressRetention(t *testing.T) {
 	message := tgmessage.Blocks{Family: "33", InitialText: "README work in Example project", Content: strings.Repeat("literal `*` 😀\n", 500), SecondaryText: "No confirmed integration receipt. Inspect: chr work status --json run-presentation"}
 	original := tgmessage.Render(message).PlainFallback
 
-	observation := TelegramWorkObservation{Revision: 1, Phase: "executing", Kind: "progress", Text: original, Message: &message}
-	if err := f.store.ProjectTelegramWork(t.Context(), ref, observation, f.input.Config.Digest(), now); err != nil {
+	observation := WorkObservation{Revision: 1, Phase: "executing", Kind: "progress", Text: original, Message: &message}
+	if err := f.store.ProjectWork(t.Context(), ref, observation, f.input.Config.Digest(), now); err != nil {
 		t.Fatal(err)
 	}
 
@@ -33,7 +33,7 @@ func TestTelegramPresentationProgressRetention(t *testing.T) {
 	checkTelegramProgressRecovery(t, f, ref, observation, first, now)
 }
 
-func checkTelegramProgressRecovery(t *testing.T, f *telegramConversationFixture, ref TelegramWorkReference, observation TelegramWorkObservation, first TelegramReceiverDelivery, now time.Time) {
+func checkTelegramProgressRecovery(t *testing.T, f *telegramConversationFixture, ref WorkReference, observation WorkObservation, first ReceiverDelivery, now time.Time) {
 	t.Helper()
 
 	original := first.Text
@@ -42,7 +42,7 @@ func checkTelegramProgressRecovery(t *testing.T, f *telegramConversationFixture,
 		t.Fatal(err)
 	}
 
-	if err := f.store.DeliveryFailed(t.Context(), first, &TelegramAPIError{Code: "transport_failure", Uncertain: true}, now); err != nil {
+	if err := f.store.DeliveryFailed(t.Context(), first, &APIError{Code: "transport_failure", Uncertain: true}, now); err != nil {
 		t.Fatal(err)
 	}
 
@@ -53,7 +53,7 @@ func checkTelegramProgressRecovery(t *testing.T, f *telegramConversationFixture,
 	f.store = openTelegramReceiverTestStore(t, f.env)
 	observation.Message.InitialText = "Changed mutable display"
 
-	if err := f.store.ProjectTelegramWork(t.Context(), ref, observation, f.input.Config.Digest(), now.Add(time.Minute)); err != nil {
+	if err := f.store.ProjectWork(t.Context(), ref, observation, f.input.Config.Digest(), now.Add(time.Minute)); err != nil {
 		t.Fatal(err)
 	}
 

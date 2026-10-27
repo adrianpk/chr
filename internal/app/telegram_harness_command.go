@@ -13,7 +13,7 @@ type telegramHarnessChoices struct {
 	Generation *string `json:"generation,omitempty"`
 }
 
-func parseTelegramHarness(update telegramcore.TelegramReceivedUpdate) (telegramHarnessChoices, bool, error) {
+func parseTelegramHarness(update telegramcore.ReceivedUpdate) (telegramHarnessChoices, bool, error) {
 	var choices telegramHarnessChoices
 
 	words := strings.Fields(update.Text)

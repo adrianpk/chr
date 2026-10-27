@@ -16,7 +16,7 @@ import (
 func TestRenderTelegramNotificationMessageUsesSummaryAndDetail(t *testing.T) {
 	event := validNotificationEvent()
 
-	message := telegramcore.RenderTelegramNotificationMessage(event)
+	message := telegramcore.RenderNotificationMessage(event)
 
 	if !strings.Contains(message.Text, event.Payload.Summary) {
 		t.Fatalf("message text = %q, want summary", message.Text)
@@ -50,12 +50,12 @@ func TestTelegramSenderSendsMessage(t *testing.T) {
 	}))
 	defer server.Close()
 
-	sender := telegramcore.TelegramSender{
+	sender := telegramcore.Sender{
 		Client:  server.Client(),
 		BaseURL: server.URL,
 	}
 
-	result, err := sender.SendMessage(context.Background(), "token-1", telegramcore.TelegramMessage{
+	result, err := sender.SendMessage(context.Background(), "token-1", telegramcore.Message{
 		ChatID: "123456",
 		Text:   "hello",
 	})
@@ -87,12 +87,12 @@ func TestTelegramSenderReturnsHTTPError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	sender := telegramcore.TelegramSender{
+	sender := telegramcore.Sender{
 		Client:  server.Client(),
 		BaseURL: server.URL,
 	}
 
-	result, err := sender.SendMessage(context.Background(), "token-1", telegramcore.TelegramMessage{
+	result, err := sender.SendMessage(context.Background(), "token-1", telegramcore.Message{
 		ChatID: "123456",
 		Text:   "hello",
 	})
@@ -106,17 +106,17 @@ func TestTelegramSenderReturnsHTTPError(t *testing.T) {
 }
 
 func TestTelegramSenderValidatesInputs(t *testing.T) {
-	sender := telegramcore.NewTelegramSender(nil)
+	sender := telegramcore.NewSender(nil)
 
 	for _, test := range []struct {
 		name    string
 		token   string
-		message telegramcore.TelegramMessage
+		message telegramcore.Message
 		wantErr string
 	}{
-		{name: "token", token: "", message: telegramcore.TelegramMessage{ChatID: "1", Text: "hello"}, wantErr: "telegram bot token is required"},
-		{name: "chat id", token: "token", message: telegramcore.TelegramMessage{Text: "hello"}, wantErr: "telegram chat id is required"},
-		{name: "text", token: "token", message: telegramcore.TelegramMessage{ChatID: "1"}, wantErr: "telegram message text is required"},
+		{name: "token", token: "", message: telegramcore.Message{ChatID: "1", Text: "hello"}, wantErr: "telegram bot token is required"},
+		{name: "chat id", token: "token", message: telegramcore.Message{Text: "hello"}, wantErr: "telegram chat id is required"},
+		{name: "text", token: "token", message: telegramcore.Message{ChatID: "1"}, wantErr: "telegram message text is required"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			_, err := sender.SendMessage(context.Background(), test.token, test.message)
@@ -147,7 +147,7 @@ func TestRenderTelegramNotificationMessageUsesSummaryOnly(t *testing.T) {
 		UpdatedAt: now,
 	}
 
-	message := telegramcore.RenderTelegramNotificationMessage(event)
+	message := telegramcore.RenderNotificationMessage(event)
 
 	if message.Text != "hello" {
 		t.Fatalf("Text = %q, want summary only", message.Text)

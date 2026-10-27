@@ -119,7 +119,7 @@ type telegramAdvanceAfterAuthoring struct {
 	advance func() error
 }
 
-func (s telegramAdvanceAfterAuthoring) ContinueTelegramAuthoring(ctx context.Context, target telegramcore.TelegramOperationTarget, request core.AuthoringContinuationRequest, guard core.AuthoringCommitGuard) (core.AuthoringContinuationResult, error) {
+func (s telegramAdvanceAfterAuthoring) ContinueTelegramAuthoring(ctx context.Context, target telegramcore.OperationTarget, request core.AuthoringContinuationRequest, guard core.AuthoringCommitGuard) (core.AuthoringContinuationResult, error) {
 	result, err := s.service.ContinueTelegramAuthoring(ctx, target, request, guard)
 	if err == nil {
 		err = s.advance()
@@ -141,9 +141,9 @@ func TestTelegramPresentationDocumentAdvancedConversation(t *testing.T) {
 	operations := telegramOperationConcreteService(t, f.receiver)
 	f.receiver.operations = telegramAdvanceAfterAuthoring{service: operations, advance: func() error {
 		input := telegramOperationRetainInput(t, f, "/cancel "+original.ID)
-		input.Action, input.Conversation = telegramcore.TelegramConversationCancel, original.ID
+		input.Action, input.Conversation = telegramcore.ConversationCancel, original.ID
 
-		return f.receiver.store.ApplyTelegramConversation(t.Context(), input, time.Now())
+		return f.receiver.store.ApplyConversation(t.Context(), input, time.Now())
 	}}
 
 	input := telegramOperationRetainInput(t, f, "/done "+original.ID)
@@ -155,7 +155,7 @@ func TestTelegramPresentationDocumentAdvancedConversation(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	request, found, err := f.receiver.store.TelegramOperation(t.Context(), input.Update, 0)
+	request, found, err := f.receiver.store.Operation(t.Context(), input.Update, 0)
 	if err != nil || !found || request.State != "confirmed" || request.ReceiptRef == "" {
 		t.Fatal("advanced conversation lost original receipt", request, err)
 	}
@@ -163,7 +163,7 @@ func TestTelegramPresentationDocumentAdvancedConversation(t *testing.T) {
 	checkTelegramAdvancedDocument(t, f, original)
 }
 
-func checkTelegramAdvancedDocument(t *testing.T, f *telegramConversationAppFixture, original telegramcore.TelegramConversation) {
+func checkTelegramAdvancedDocument(t *testing.T, f *telegramConversationAppFixture, original telegramcore.Conversation) {
 	t.Helper()
 
 	current := f.session(t, original.ID)

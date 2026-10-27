@@ -91,7 +91,7 @@ func readTelegramDocumentUpload(t *testing.T, r *http.Request) telegramDocumentU
 	return upload
 }
 
-func queueTelegramDocumentFixture(t *testing.T, receiver telegramReceiver, config telegramcore.TelegramReceiverConfig) tgmessage.DocumentResponse {
+func queueTelegramDocumentFixture(t *testing.T, receiver telegramReceiver, config telegramcore.ReceiverConfig) tgmessage.DocumentResponse {
 	t.Helper()
 	addTelegramAppTestProjects(t, receiver.env)
 
@@ -102,7 +102,7 @@ func queueTelegramDocumentFixture(t *testing.T, receiver telegramReceiver, confi
 		t.Fatal(err)
 	}
 
-	target, err := receiver.store.ResolveTelegramOperationTarget(t.Context(), telegramcore.TelegramConversationInput{Update: update, Config: config, Projects: projects}, time.Now())
+	target, err := receiver.store.ResolveOperationTarget(t.Context(), telegramcore.ConversationInput{Update: update, Config: config, Projects: projects}, time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,7 +134,7 @@ func TestTelegramPresentationDeliveryHTTP(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			uploads := make(chan telegramDocumentUpload, 3)
 			server := telegramDocumentHTTPFixture(t, uploads, test.status)
-			receiver, config := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
+			receiver, config := telegramAppTestReceiver(t, telegramcore.ReceiverAPI{Client: server.Client(), BaseURL: server.URL})
 
 			response := queueTelegramDocumentFixture(t, receiver, config)
 			if err := receiver.drainDeliveries(t.Context()); err != nil {
@@ -178,7 +178,7 @@ func checkTelegramDocumentUploads(t *testing.T, uploads <-chan telegramDocumentU
 func TestTelegramPresentationDeliveryRevocation(t *testing.T) {
 	uploads := make(chan telegramDocumentUpload, 1)
 	server := telegramDocumentHTTPFixture(t, uploads, 0)
-	receiver, config := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
+	receiver, config := telegramAppTestReceiver(t, telegramcore.ReceiverAPI{Client: server.Client(), BaseURL: server.URL})
 	queueTelegramDocumentFixture(t, receiver, config)
 
 	registry, err := projectcore.NewRegistry(t.Context(), receiver.env, testAssetsFS())

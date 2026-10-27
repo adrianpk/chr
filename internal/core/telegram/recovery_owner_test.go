@@ -32,7 +32,7 @@ func TestTelegramRecoveryModelOwner(t *testing.T) {
 	store := openTelegramReceiverTestStore(t, env)
 
 	update := telegramRetainedTestUpdate(t, 71, "retain this model request")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, time.Now()); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{update}, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -46,7 +46,7 @@ func TestTelegramRecoveryModelOwner(t *testing.T) {
 
 	store = openTelegramReceiverTestStore(t, env)
 
-	result, err := store.ResolveTelegramInterpretation(t.Context(), env, update, time.Now().Add(2*time.Minute), func(context.Context) (json.RawMessage, error) {
+	result, err := store.ResolveInterpretation(t.Context(), env, update, time.Now().Add(2*time.Minute), func(context.Context) (json.RawMessage, error) {
 		return json.RawMessage(`{"operation_id":"help"}`), nil
 	})
 	if err != nil || result.Attempts != 2 || len(result.Decision) == 0 {
@@ -130,17 +130,17 @@ func waitTelegramRecoveryModelReady(t *testing.T, stdout io.Reader) {
 	}
 }
 
-func checkTelegramRecoveryLiveModel(t *testing.T, store *TelegramReceiverStore, env telegramTestEnvironment, update TelegramReceivedUpdate) {
+func checkTelegramRecoveryLiveModel(t *testing.T, store *ReceiverStore, env telegramTestEnvironment, update ReceivedUpdate) {
 	t.Helper()
 
 	called := false
-	_, err := store.ResolveTelegramInterpretation(t.Context(), env, update, time.Now().Add(2*time.Minute), func(context.Context) (json.RawMessage, error) {
+	_, err := store.ResolveInterpretation(t.Context(), env, update, time.Now().Add(2*time.Minute), func(context.Context) (json.RawMessage, error) {
 		called = true
 
 		return nil, nil
 	})
 
-	var conflict *TelegramAPIError
+	var conflict *APIError
 	if !errors.As(err, &conflict) || conflict.Code != "local_receiver_conflict" || called {
 		t.Fatal("live process model claim was stolen", err, called)
 	}
@@ -158,7 +158,7 @@ func telegramRecoveryModelChild(t *testing.T, root string) {
 
 	store := openTelegramReceiverTestStore(t, env)
 	update := telegramRetainedTestUpdate(t, 71, "retain this model request")
-	_, err := store.ResolveTelegramInterpretation(t.Context(), env, update, time.Now(), func(context.Context) (json.RawMessage, error) {
+	_, err := store.ResolveInterpretation(t.Context(), env, update, time.Now(), func(context.Context) (json.RawMessage, error) {
 		if _, err := fmt.Fprintln(os.Stdout, "reserved"); err != nil {
 			return nil, err
 		}

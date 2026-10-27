@@ -9,7 +9,7 @@ import (
 
 const telegramActionUnavailableText = "This action is unavailable, expired or stale for this exact peer and prompt. Read the current state before requesting a new action."
 
-func (r telegramReceiver) staleActionDiagnostic(ctx context.Context, update telegramcore.TelegramReceivedUpdate, answer telegramcore.TelegramActionAnswer, config telegramcore.TelegramReceiverConfig) error {
+func (r telegramReceiver) staleActionDiagnostic(ctx context.Context, update telegramcore.ReceivedUpdate, answer telegramcore.ActionAnswer, config telegramcore.ReceiverConfig) error {
 	text := telegramActionUnavailableText
 	if status, ok := r.staleControlStatus(ctx, update, answer); ok {
 		text += "\nCurrent state:\n" + telegramWorkProgressText(status)
@@ -18,8 +18,8 @@ func (r telegramReceiver) staleActionDiagnostic(ctx context.Context, update tele
 	return r.store.QueuePresentationResponse(ctx, update, *telegramOutcomeMessage("40", text), config.Digest(), time.Now())
 }
 
-func (r telegramReceiver) staleControlStatus(ctx context.Context, update telegramcore.TelegramReceivedUpdate, answer telegramcore.TelegramActionAnswer) (WorkflowWorkStatus, bool) {
-	request, err := r.store.TelegramActionRequest(ctx, update.Peer, answer)
+func (r telegramReceiver) staleControlStatus(ctx context.Context, update telegramcore.ReceivedUpdate, answer telegramcore.ActionAnswer) (WorkflowWorkStatus, bool) {
+	request, err := r.store.ActionRequest(ctx, update.Peer, answer)
 	if err != nil || request.OperationID != "work.control" {
 		return WorkflowWorkStatus{}, false
 	}

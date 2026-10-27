@@ -72,7 +72,7 @@ func telegramRecoveryRetainedWork(t *testing.T, state string) (*telegramConversa
 		f, operations, id = telegramControlDecisionFixture(t, "approve")
 		telegramControlOffer(t, f, "/approve "+id)
 	} else {
-		var ref telegramcore.TelegramWorkReference
+		var ref telegramcore.WorkReference
 
 		f, operations, ref = telegramWorkAdmitted(t)
 

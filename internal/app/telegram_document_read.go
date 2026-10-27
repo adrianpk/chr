@@ -9,7 +9,7 @@ import (
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
-func (r telegramReceiver) finishOriginalDocument(ctx context.Context, operations telegramExplanationService, request telegramcore.TelegramOperationRequest, prepared PreparedAuthoringExplanation, config telegramcore.TelegramReceiverConfig) error {
+func (r telegramReceiver) finishOriginalDocument(ctx context.Context, operations telegramExplanationService, request telegramcore.OperationRequest, prepared PreparedAuthoringExplanation, config telegramcore.ReceiverConfig) error {
 	artifact, err := operations.ReadPreparedTelegramDocument(ctx, request.Target, prepared)
 	if err != nil {
 		return r.finishAuthoringFailure(ctx, request, config, err)
@@ -35,5 +35,5 @@ func (r telegramReceiver) finishOriginalDocument(ctx context.Context, operations
 	}
 	request.Delivery = &response
 
-	return r.store.FinishTelegramOperation(ctx, request, "confirmed", "authoring-document:"+request.ID, result, response.Message.InitialText, current.Digest(), time.Now())
+	return r.store.FinishOperation(ctx, request, "confirmed", "authoring-document:"+request.ID, result, response.Message.InitialText, current.Digest(), time.Now())
 }

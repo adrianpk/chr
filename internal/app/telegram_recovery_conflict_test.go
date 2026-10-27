@@ -30,7 +30,7 @@ func TestTelegramRecoveryRemote(t *testing.T) {
 	}))
 	defer server.Close()
 
-	receiver, _ := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
+	receiver, _ := telegramAppTestReceiver(t, telegramcore.ReceiverAPI{Client: server.Client(), BaseURL: server.URL})
 
 	_, err := receiver.step(t.Context())
 	if err != nil && strings.Contains(err.Error(), "private") {

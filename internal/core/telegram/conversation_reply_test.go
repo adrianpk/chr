@@ -23,15 +23,15 @@ func acknowledgeTelegramConversation(t *testing.T, f *telegramConversationFixtur
 	}
 }
 
-func bindTelegramTestQuestion(t *testing.T, f *telegramConversationFixture, c TelegramConversation, questionID string) {
+func bindTelegramTestQuestion(t *testing.T, f *telegramConversationFixture, c Conversation, questionID string) {
 	t.Helper()
 
 	input := f.input
 	input.Update = telegramRetainedTestUpdate(t, 999, "binding")
 	input.Conversation = c.ID
 
-	question := TelegramConversationQuestion{SessionRef: "canonical-session-" + c.ID, QuestionID: questionID, Revision: 1, ContentDigest: strings.Repeat("a", 64)}
-	if err := f.store.BindTelegramConversationQuestion(t.Context(), input, c.Revision, question, time.Now()); err != nil {
+	question := ConversationQuestion{SessionRef: "canonical-session-" + c.ID, QuestionID: questionID, Revision: 1, ContentDigest: strings.Repeat("a", 64)}
+	if err := f.store.BindConversationQuestion(t.Context(), input, c.Revision, question, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -39,15 +39,15 @@ func bindTelegramTestQuestion(t *testing.T, f *telegramConversationFixture, c Te
 // TestTelegramConversationReplies binds definite acknowledgements to exact revisions and sessions.
 func TestTelegramConversationReplies(t *testing.T) {
 	f := newTelegramConversationFixture(t)
-	f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "alpha" })
+	f.apply(t, ConversationStart, func(i *ConversationInput) { i.Project = "alpha" })
 
 	first := f.sessions(t)[0]
 	bindTelegramTestQuestion(t, f, first, "question-a")
-	f.apply(t, TelegramConversationShow, func(i *TelegramConversationInput) { i.Conversation = first.ID })
+	f.apply(t, ConversationShow, func(i *ConversationInput) { i.Conversation = first.ID })
 	acknowledgeTelegramConversation(t, f, 100)
-	f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "beta" })
+	f.apply(t, ConversationStart, func(i *ConversationInput) { i.Project = "beta" })
 
-	var second TelegramConversation
+	var second Conversation
 
 	for _, c := range f.sessions(t) {
 		if c.ID != first.ID {
@@ -56,14 +56,14 @@ func TestTelegramConversationReplies(t *testing.T) {
 	}
 
 	bindTelegramTestQuestion(t, f, second, "question-b")
-	f.apply(t, TelegramConversationCapture, func(i *TelegramConversationInput) { i.Update.ReplyToMessageID = 100; i.Text = "answer a" })
+	f.apply(t, ConversationCapture, func(i *ConversationInput) { i.Update.ReplyToMessageID = 100; i.Text = "answer a" })
 
 	a, b := f.session(t, first.ID), f.session(t, second.ID)
 	if a.Capture != "answer a" || b.QuestionBinding == "" || b.Capture != "" {
 		t.Fatal("reply crossed sessions", a, b)
 	}
 
-	f.apply(t, TelegramConversationCapture, func(i *TelegramConversationInput) {
+	f.apply(t, ConversationCapture, func(i *ConversationInput) {
 		i.Update.ReplyToMessageID = 100
 		i.Text = "stale"
 		i.Conversation = second.ID
@@ -73,12 +73,12 @@ func TestTelegramConversationReplies(t *testing.T) {
 		t.Fatal("stale reply fell back to another session")
 	}
 
-	f.apply(t, TelegramConversationShow, func(i *TelegramConversationInput) { i.Conversation = second.ID })
+	f.apply(t, ConversationShow, func(i *ConversationInput) { i.Conversation = second.ID })
 	acknowledgeTelegramConversation(t, f, 101)
 
 	second = f.session(t, second.ID)
 	bindTelegramTestQuestion(t, f, second, "replacement")
-	f.apply(t, TelegramConversationCapture, func(i *TelegramConversationInput) { i.Update.ReplyToMessageID = 101; i.Text = "old question" })
+	f.apply(t, ConversationCapture, func(i *ConversationInput) { i.Update.ReplyToMessageID = 101; i.Text = "old question" })
 
 	if !strings.Contains(f.lastResponse(t), "unavailable") {
 		t.Fatal("replaced question answered")
@@ -88,11 +88,11 @@ func TestTelegramConversationReplies(t *testing.T) {
 // TestTelegramConversationReplyGuards refuses cross-user/topic, mismatched and terminal prompts.
 func TestTelegramConversationReplyGuards(t *testing.T) {
 	f := newTelegramConversationFixture(t)
-	f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "alpha" })
+	f.apply(t, ConversationStart, func(i *ConversationInput) { i.Project = "alpha" })
 
 	c := f.sessions(t)[0]
 	acknowledgeTelegramConversation(t, f, 200)
-	f.apply(t, TelegramConversationCapture, func(i *TelegramConversationInput) {
+	f.apply(t, ConversationCapture, func(i *ConversationInput) {
 		i.Update.ReplyToMessageID = 200
 		i.Project = "beta"
 		i.Text = "mismatch"
@@ -102,7 +102,7 @@ func TestTelegramConversationReplyGuards(t *testing.T) {
 		t.Fatal("reply project mismatch accepted")
 	}
 
-	f.apply(t, TelegramConversationCapture, func(i *TelegramConversationInput) {
+	f.apply(t, ConversationCapture, func(i *ConversationInput) {
 		i.Update.ReplyToMessageID = 200
 		i.Conversation = "different"
 		i.Text = "mismatch"
@@ -112,8 +112,8 @@ func TestTelegramConversationReplyGuards(t *testing.T) {
 		t.Fatal("reply conversation mismatch accepted")
 	}
 
-	f.apply(t, TelegramConversationDone, func(i *TelegramConversationInput) { i.Conversation = c.ID })
-	f.apply(t, TelegramConversationCapture, func(i *TelegramConversationInput) { i.Update.ReplyToMessageID = 200; i.Text = "late" })
+	f.apply(t, ConversationDone, func(i *ConversationInput) { i.Conversation = c.ID })
+	f.apply(t, ConversationCapture, func(i *ConversationInput) { i.Update.ReplyToMessageID = 200; i.Text = "late" })
 
 	if f.sessions(t)[0].Capture != "" {
 		t.Fatal("terminal reply accepted")
@@ -124,24 +124,24 @@ func TestTelegramConversationReplyGuards(t *testing.T) {
 func TestTelegramConversationFocus(t *testing.T) {
 	f := newTelegramConversationFixture(t)
 	for range 2 {
-		f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "alpha" })
+		f.apply(t, ConversationStart, func(i *ConversationInput) { i.Project = "alpha" })
 	}
 
 	sessions := f.sessions(t)
-	f.apply(t, TelegramConversationCapture, func(i *TelegramConversationInput) { i.Text = "ambiguous" })
+	f.apply(t, ConversationCapture, func(i *ConversationInput) { i.Text = "ambiguous" })
 
 	if !strings.Contains(f.lastResponse(t), "Select a session") {
 		t.Fatal("ambiguous text guessed a session")
 	}
 
-	f.apply(t, TelegramConversationFocus, func(i *TelegramConversationInput) { i.Conversation = sessions[1].ID })
-	f.apply(t, TelegramConversationCapture, func(i *TelegramConversationInput) { i.Text = "focused" })
+	f.apply(t, ConversationFocus, func(i *ConversationInput) { i.Conversation = sessions[1].ID })
+	f.apply(t, ConversationCapture, func(i *ConversationInput) { i.Text = "focused" })
 
 	if f.session(t, sessions[1].ID).Capture != "focused" {
 		t.Fatal("focus not used")
 	}
 
-	f.apply(t, TelegramConversationCapture, func(i *TelegramConversationInput) { i.Conversation = sessions[0].ID; i.Text = "explicit" })
+	f.apply(t, ConversationCapture, func(i *ConversationInput) { i.Conversation = sessions[0].ID; i.Text = "explicit" })
 
 	if f.session(t, sessions[0].ID).Capture != "explicit" {
 		t.Fatal("explicit target lost precedence")

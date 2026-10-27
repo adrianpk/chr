@@ -8,15 +8,15 @@ import (
 	"forge.adrianpk.com/chr/internal/core/database"
 )
 
-func revokeRejectedTelegramActions(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, now time.Time) error {
+func revokeRejectedActions(ctx context.Context, tx *sql.Tx, update ReceivedUpdate, now time.Time) error {
 	if update.Kind != "rejected" || update.Reason != "unauthorized_peer" {
 		return nil
 	}
 
-	return revokeTelegramPeerActions(ctx, tx, update.Peer, now)
+	return revokePeerActions(ctx, tx, update.Peer, now)
 }
 
-func revokeTelegramPeerActions(ctx context.Context, tx *sql.Tx, peer TelegramPeerIdentity, now time.Time) error {
+func revokePeerActions(ctx context.Context, tx *sql.Tx, peer PeerIdentity, now time.Time) error {
 	_, err := tx.ExecContext(ctx, `UPDATE telegram_actions SET state='superseded',updated_at=? WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=? AND state IN ('pending','applying')`, database.FormatTime(now), peer.BotID, peer.ChatID, peer.TopicID, peer.UserID)
 	if err != nil {
 		return err

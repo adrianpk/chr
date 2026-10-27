@@ -9,26 +9,26 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// ResolveTelegramWorkTarget creates a source-stable conversation when /work has
+// ResolveWorkTarget creates a source-stable conversation when /work has
 // no explicit session. No canonical work is admitted by this local allocation.
-func (s *TelegramReceiverStore) ResolveTelegramWorkTarget(ctx context.Context, input TelegramConversationInput, now time.Time) (TelegramOperationTarget, error) {
-	return s.resolveTelegramActionTarget(ctx, input, "develop", "Native work selection", now)
+func (s *ReceiverStore) ResolveWorkTarget(ctx context.Context, input ConversationInput, now time.Time) (OperationTarget, error) {
+	return s.resolveActionTarget(ctx, input, "develop", "Native work selection", now)
 }
 
-// ResolveTelegramControlTarget gives a standalone control its own retry-stable
+// ResolveControlTarget gives a standalone control its own retry-stable
 // confirmation conversation. Allocation grants no native execution authority.
-func (s *TelegramReceiverStore) ResolveTelegramControlTarget(ctx context.Context, input TelegramConversationInput, now time.Time) (TelegramOperationTarget, error) {
-	return s.resolveTelegramActionTarget(ctx, input, "prepare", "Native workflow control", now)
+func (s *ReceiverStore) ResolveControlTarget(ctx context.Context, input ConversationInput, now time.Time) (OperationTarget, error) {
+	return s.resolveActionTarget(ctx, input, "prepare", "Native workflow control", now)
 }
 
-func (s *TelegramReceiverStore) resolveTelegramActionTarget(ctx context.Context, input TelegramConversationInput, intent, topic string, now time.Time) (TelegramOperationTarget, error) {
-	var target TelegramOperationTarget
+func (s *ReceiverStore) resolveActionTarget(ctx context.Context, input ConversationInput, intent, topic string, now time.Time) (OperationTarget, error) {
+	var target OperationTarget
 	if _, allowed := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType); !allowed {
 		return target, workflowstate.ErrConflict
 	}
 
 	err := s.transaction(ctx, func(tx *sql.Tx) error {
-		op := telegramConversationTransaction{ctx: ctx, tx: tx, input: input, now: now}
+		op := conversationTransaction{ctx: ctx, tx: tx, input: input, now: now}
 		if err := op.ensurePeer(); err != nil {
 			return err
 		}
@@ -46,13 +46,13 @@ func (s *TelegramReceiverStore) resolveTelegramActionTarget(ctx context.Context,
 	return target, err
 }
 
-func (op telegramConversationTransaction) sourceActionConversation(intent, topic string) (*TelegramConversation, error) {
+func (op conversationTransaction) sourceActionConversation(intent, topic string) (*Conversation, error) {
 	c, err := op.explicitTarget()
 	if err != nil || c != nil {
 		return c, err
 	}
 
-	id := telegramConversationID(op.input.Update)
+	id := conversationID(op.input.Update)
 
 	var exists string
 

@@ -23,13 +23,13 @@ func checkGuidedTelegramSourceGuard(t *testing.T, fault string) {
 
 	f, operations := guidedTelegramFixture(t)
 
-	config, err := telegramcore.LoadTelegramReceiverConfig(f.receiver.env)
+	config, err := telegramcore.LoadReceiverConfig(f.receiver.env)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	config.AllowedUsers = append(config.AllowedUsers, telegramcore.TelegramAllowedUser{TelegramUserID: 100002, OperatorID: "other", ProjectIDs: []string{"example-project"}})
-	if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+	config.AllowedUsers = append(config.AllowedUsers, telegramcore.AllowedUser{TelegramUserID: 100002, OperatorID: "other", ProjectIDs: []string{"example-project"}})
+	if err := telegramcore.SaveReceiverConfig(f.receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 

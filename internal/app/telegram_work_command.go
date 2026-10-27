@@ -8,7 +8,7 @@ import (
 )
 
 type telegramWorkCommand struct {
-	Input    telegramcore.TelegramConversationInput
+	Input    telegramcore.ConversationInput
 	Selector core.WorkflowSelector
 }
 
@@ -24,8 +24,8 @@ func telegramWorkUsage() string {
 	return "/" + telegramWorkRegistry()[0].ID + " [--project <id>] [--conversation <id>] [--namespace <name>] ticket|slice|slice-set|use-case <reference> or loose"
 }
 
-func parseTelegramWork(update telegramcore.TelegramReceivedUpdate) (telegramWorkCommand, bool, error) {
-	command := telegramWorkCommand{Input: telegramcore.TelegramConversationInput{Update: update}}
+func parseTelegramWork(update telegramcore.ReceivedUpdate) (telegramWorkCommand, bool, error) {
+	command := telegramWorkCommand{Input: telegramcore.ConversationInput{Update: update}}
 
 	name, body := telegramCommandWord(strings.TrimSpace(update.Text))
 	if update.Kind != "message" || name != "/"+telegramWorkRegistry()[0].ID {
@@ -59,10 +59,10 @@ func validateTelegramWorkSelector(selector core.WorkflowSelector) error {
 	return nil
 }
 
-func telegramIntentWork(update telegramcore.TelegramReceivedUpdate, intent ConversationIntent) (telegramWorkCommand, bool, error) {
+func telegramIntentWork(update telegramcore.ReceivedUpdate, intent ConversationIntent) (telegramWorkCommand, bool, error) {
 	a := intent.Arguments
 
-	command := telegramWorkCommand{Input: telegramcore.TelegramConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation, Namespace: a.Namespace}, Selector: core.WorkflowSelector{Extent: a.Action, Identity: a.Text}}
+	command := telegramWorkCommand{Input: telegramcore.ConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation, Namespace: a.Namespace}, Selector: core.WorkflowSelector{Extent: a.Action, Identity: a.Text}}
 	if intent.OperationID != telegramWorkRegistry()[0].ID {
 		return command, false, nil
 	}

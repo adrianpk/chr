@@ -6,7 +6,7 @@ import (
 	"errors"
 )
 
-func telegramOperationCapacity(ctx context.Context, tx *sql.Tx, botID int64) (int64, error) {
+func operationCapacity(ctx context.Context, tx *sql.Tx, botID int64) (int64, error) {
 	var total, pending, bytes int64
 
 	err := tx.QueryRowContext(ctx, `SELECT COUNT(*),COALESCE(SUM(state NOT IN ('confirmed','rejected')),0),COALESCE(SUM(length(CAST(arguments AS BLOB))+COALESCE(length(CAST(prepared_input AS BLOB)),0)+COALESCE(length(CAST(result AS BLOB)),0)+COALESCE(length(CAST(model_result AS BLOB)),0)),0) FROM telegram_requests WHERE bot_id=?`, botID).Scan(&total, &pending, &bytes)

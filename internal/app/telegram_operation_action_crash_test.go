@@ -21,7 +21,7 @@ func reopenTelegramOperationReceiver(t *testing.T, f *telegramConversationAppFix
 		t.Fatal(err)
 	}
 
-	store, err := telegramcore.NewTelegramReceiverStore(t.Context(), f.receiver.env, testAssetsFS())
+	store, err := telegramcore.NewReceiverStore(t.Context(), f.receiver.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,7 +64,7 @@ func TestTelegramOperationActionLostAcknowledgement(t *testing.T) {
 }
 
 type telegramDropSendAck struct {
-	client  telegramcore.TelegramHTTPClient
+	client  telegramcore.HTTPClient
 	dropped bool
 	skip    int
 }
@@ -95,7 +95,7 @@ type telegramCountRecordApply struct {
 	calls *int
 }
 
-func (s telegramCountRecordApply) ApplyTelegramRecord(ctx context.Context, target telegramcore.TelegramOperationTarget, prepared PreparedRecordMutation) (RecordMutationResult, error) {
+func (s telegramCountRecordApply) ApplyTelegramRecord(ctx context.Context, target telegramcore.OperationTarget, prepared PreparedRecordMutation) (RecordMutationResult, error) {
 	*s.calls++
 
 	return s.service.ApplyTelegramRecord(ctx, target, prepared)

@@ -10,7 +10,7 @@ import (
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
-func (r telegramReceiver) respondHarness(ctx context.Context, user telegramcore.TelegramAllowedUser, config telegramcore.TelegramReceiverConfig, update telegramcore.TelegramReceivedUpdate) (bool, error) {
+func (r telegramReceiver) respondHarness(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (bool, error) {
 	choices, recognized, err := parseTelegramHarness(update)
 	if !recognized {
 		return false, nil
@@ -30,9 +30,9 @@ func (r telegramReceiver) respondHarness(ctx context.Context, user telegramcore.
 		return true, err
 	}
 
-	input := telegramcore.TelegramConversationInput{Update: update, Config: config, Projects: projects}
+	input := telegramcore.ConversationInput{Update: update, Config: config, Projects: projects}
 
-	target, err := r.store.ResolveTelegramHarnessTarget(ctx, input, time.Now())
+	target, err := r.store.ResolveHarnessTarget(ctx, input, time.Now())
 	if err != nil {
 		return true, r.recordDiagnostic(ctx, update, config, "Select an authorized current project with /project, then send /harness as a new command.")
 	}
@@ -84,7 +84,7 @@ func telegramHarnessText(status telegramHarnessStatus) string {
 	text.WriteString(status.RetainedProblem)
 	text.WriteString("\n" + telegramHarnessUsage + "\n'-' restores legacy dispatch; omitted roles stay unchanged. Private credentials and runtime setup remain local.")
 
-	return telegramcore.BoundTelegramReceiverText(text.String())
+	return telegramcore.BoundReceiverText(text.String())
 }
 
 func telegramHarnessRole(role string, selection core.HarnessSelection, generation bool) string {

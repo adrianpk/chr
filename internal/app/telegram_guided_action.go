@@ -11,7 +11,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r telegramReceiver) offerGuidedControls(ctx context.Context, request telegramcore.TelegramOperationRequest, config telegramcore.TelegramReceiverConfig) error {
+func (r telegramReceiver) offerGuidedControls(ctx context.Context, request telegramcore.OperationRequest, config telegramcore.ReceiverConfig) error {
 	input, err := telegramRetainedGuidedInput(request)
 	if err != nil {
 		return err
@@ -33,15 +33,15 @@ func (r telegramReceiver) offerGuidedControls(ctx context.Context, request teleg
 		return err
 	}
 
-	_, err = r.store.OfferTelegramAction(ctx, telegramcore.TelegramActionOffer{
-		Input: telegramcore.TelegramConversationInput{Update: request.Source, Config: current, Projects: projects}, RequestID: request.ID, Choices: input.Choices,
+	_, err = r.store.OfferAction(ctx, telegramcore.ActionOffer{
+		Input: telegramcore.ConversationInput{Update: request.Source, Config: current, Projects: projects}, RequestID: request.ID, Choices: input.Choices,
 		Message: telegramOutcomeMessage("43", "Choose an action for "+input.Name+". Saved inputs and existing work limits are retained. Send Show current step to return to the input prompt."), ExpiresAt: time.Now().Add(30 * time.Minute),
 	}, time.Now())
 
 	return err
 }
 
-func (r telegramReceiver) applyGuidedAction(ctx context.Context, claim telegramcore.TelegramActionClaim, config telegramcore.TelegramReceiverConfig) error {
+func (r telegramReceiver) applyGuidedAction(ctx context.Context, claim telegramcore.ActionClaim, config telegramcore.ReceiverConfig) error {
 	operations, ok := r.operations.(telegramGuidedService)
 	if !ok {
 		return ErrRecordUnsupported
@@ -77,7 +77,7 @@ func (r telegramReceiver) applyGuidedAction(ctx context.Context, claim telegramc
 	return r.finishGuidedAction(ctx, claim, current, observed)
 }
 
-func (r telegramReceiver) finishGuidedAction(ctx context.Context, claim telegramcore.TelegramActionClaim, config telegramcore.TelegramReceiverConfig, observed GuidedUseCaseInspection) error {
+func (r telegramReceiver) finishGuidedAction(ctx context.Context, claim telegramcore.ActionClaim, config telegramcore.ReceiverConfig, observed GuidedUseCaseInspection) error {
 	progress, facts, err := telegramGuidedResult(observed)
 	if err != nil {
 		return err
@@ -90,9 +90,9 @@ func (r telegramReceiver) finishGuidedAction(ctx context.Context, claim telegram
 		return err
 	}
 
-	result := telegramcore.TelegramActionResult{State: "confirmed", Delivery: delivery, Guided: &progress, ReceiptRef: progress.SessionRef, Facts: facts, Text: text, Message: telegramOutcomeMessage("43", text), ConfigDigest: config.Digest()}
+	result := telegramcore.ActionResult{State: "confirmed", Delivery: delivery, Guided: &progress, ReceiptRef: progress.SessionRef, Facts: facts, Text: text, Message: telegramOutcomeMessage("43", text), ConfigDigest: config.Digest()}
 
-	err = r.store.FinishTelegramAction(ctx, claim, result, time.Now())
+	err = r.store.FinishAction(ctx, claim, result, time.Now())
 	if errors.Is(err, workflowstate.ErrConflict) {
 		return r.finishOvertakenGuidedAction(ctx, claim, result)
 	}
@@ -100,13 +100,13 @@ func (r telegramReceiver) finishGuidedAction(ctx context.Context, claim telegram
 	return err
 }
 
-func (r telegramReceiver) finishGuidedActionFailure(ctx context.Context, claim telegramcore.TelegramActionClaim, config telegramcore.TelegramReceiverConfig, failure error) error {
+func (r telegramReceiver) finishGuidedActionFailure(ctx context.Context, claim telegramcore.ActionClaim, config telegramcore.ReceiverConfig, failure error) error {
 	text := telegramGuidedFailure(failure)
 
-	return r.store.FinishTelegramAction(ctx, claim, telegramcore.TelegramActionResult{State: "blocked", Facts: []byte(`{"state":"blocked"}`), Text: text, Message: telegramOutcomeMessage("43", text), ConfigDigest: config.Digest()}, time.Now())
+	return r.store.FinishAction(ctx, claim, telegramcore.ActionResult{State: "blocked", Facts: []byte(`{"state":"blocked"}`), Text: text, Message: telegramOutcomeMessage("43", text), ConfigDigest: config.Digest()}, time.Now())
 }
 
-func (r telegramReceiver) prepareGuidedAction(ctx context.Context, claim telegramcore.TelegramActionClaim) (telegramGuidedInput, telegramcore.TelegramReceiverConfig, error) {
+func (r telegramReceiver) prepareGuidedAction(ctx context.Context, claim telegramcore.ActionClaim) (telegramGuidedInput, telegramcore.ReceiverConfig, error) {
 	var input telegramGuidedInput
 
 	current, err := r.validateAuthoringAuthority(ctx, claim.Request, claim.Request.State == "applying")
@@ -127,7 +127,7 @@ func (r telegramReceiver) prepareGuidedAction(ctx context.Context, claim telegra
 		return input, current, err
 	}
 
-	err = r.store.BeginTelegramOperation(ctx, claim.Request, time.Now())
+	err = r.store.BeginOperation(ctx, claim.Request, time.Now())
 
 	return input, current, err
 }

@@ -77,7 +77,7 @@ func checkTelegramLifecycleAckEffect(t *testing.T, operations service, id, actio
 	}
 }
 
-func checkTelegramLifecycleAckRecovery(t *testing.T, f *telegramConversationAppFixture, operations service, input telegramcore.TelegramConversationInput) {
+func checkTelegramLifecycleAckRecovery(t *testing.T, f *telegramConversationAppFixture, operations service, input telegramcore.ConversationInput) {
 	t.Helper()
 
 	images := workflowCLIImage(t, operations.projectContext.ProjectDir)
@@ -94,7 +94,7 @@ func checkTelegramLifecycleAckRecovery(t *testing.T, f *telegramConversationAppF
 		t.Fatal("recovery changed newer native state")
 	}
 
-	request, found, err := f.receiver.store.TelegramOperation(t.Context(), input.Update, 0)
+	request, found, err := f.receiver.store.Operation(t.Context(), input.Update, 0)
 	if err != nil || !found || request.State != "confirmed" || !strings.HasPrefix(request.ReceiptRef, "run/operation-receipts/") {
 		t.Fatal("original lifecycle receipt unavailable", request, err)
 	}
@@ -154,7 +154,7 @@ func checkTelegramLifecycleConsumed(t *testing.T, f *telegramConversationAppFixt
 		t.Fatal("duplicate lifecycle action changed work", action)
 	}
 
-	if refs, err := f.receiver.store.TelegramWorkReferences(t.Context(), f.receiver.botID, "", 16); err != nil || len(refs) != 1 {
+	if refs, err := f.receiver.store.WorkReferences(t.Context(), f.receiver.botID, "", 16); err != nil || len(refs) != 1 {
 		t.Fatal("controls changed original admission references", refs, err)
 	}
 }

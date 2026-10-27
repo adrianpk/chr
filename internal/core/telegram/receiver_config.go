@@ -12,26 +12,26 @@ import (
 	"slices"
 )
 
-// TelegramReceiverConfig is private user configuration, separate from notifications.
-type TelegramReceiverConfig struct {
-	Enabled            bool                  `json:"enabled"`
-	BotTokenEnv        string                `json:"bot_token_env"`
-	PollTimeoutSeconds int                   `json:"poll_timeout_seconds"`
-	DefaultProjectID   string                `json:"default_project_id"`
-	AllowedChatIDs     []int64               `json:"allowed_chat_ids"`
-	AllowedTopicIDs    []int64               `json:"allowed_topic_ids,omitempty"`
-	AllowedUsers       []TelegramAllowedUser `json:"allowed_users"`
+// ReceiverConfig is private user configuration, separate from notifications.
+type ReceiverConfig struct {
+	Enabled            bool          `json:"enabled"`
+	BotTokenEnv        string        `json:"bot_token_env"`
+	PollTimeoutSeconds int           `json:"poll_timeout_seconds"`
+	DefaultProjectID   string        `json:"default_project_id"`
+	AllowedChatIDs     []int64       `json:"allowed_chat_ids"`
+	AllowedTopicIDs    []int64       `json:"allowed_topic_ids,omitempty"`
+	AllowedUsers       []AllowedUser `json:"allowed_users"`
 }
 
-// TelegramAllowedUser binds an exact sender to local authority.
-type TelegramAllowedUser struct {
+// AllowedUser binds an exact sender to local authority.
+type AllowedUser struct {
 	TelegramUserID int64    `json:"telegram_user_id"`
 	OperatorID     string   `json:"operator_id"`
 	ProjectIDs     []string `json:"project_ids"`
 }
 
 // Validate rejects missing or ambiguous authority before any network access.
-func (c TelegramReceiverConfig) Validate() error {
+func (c ReceiverConfig) Validate() error {
 	if !c.Enabled || !regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]{0,127}$`).MatchString(c.BotTokenEnv) {
 		return errors.New("telegram must be enabled with a valid token environment reference")
 	}
@@ -40,42 +40,42 @@ func (c TelegramReceiverConfig) Validate() error {
 		return errors.New("telegram polling or user configuration is outside its bounds")
 	}
 
-	if err := validateTelegramUsers(c); err != nil {
+	if err := validateUsers(c); err != nil {
 		return err
 	}
 
-	return validateTelegramNumericAllowlist(c.AllowedChatIDs, c.AllowedTopicIDs)
+	return validateNumericAllowlist(c.AllowedChatIDs, c.AllowedTopicIDs)
 }
 
-func validateTelegramUsers(c TelegramReceiverConfig) error {
+func validateUsers(c ReceiverConfig) error {
 	seen := map[int64]bool{}
 	for _, user := range c.AllowedUsers {
-		if user.TelegramUserID <= 0 || seen[user.TelegramUserID] || !telegramConfigID(user.OperatorID) || !telegramProjectIDs(user.ProjectIDs) {
+		if user.TelegramUserID <= 0 || seen[user.TelegramUserID] || !configID(user.OperatorID) || !projectIDs(user.ProjectIDs) {
 			return errors.New("telegram users require unique numeric identities, an operator and explicit projects")
 		}
 
 		seen[user.TelegramUserID] = true
 	}
 
-	if c.DefaultProjectID != "" && !telegramConfigID(c.DefaultProjectID) {
+	if c.DefaultProjectID != "" && !configID(c.DefaultProjectID) {
 		return errors.New("invalid telegram default project")
 	}
 
 	return nil
 }
 
-func telegramConfigID(value string) bool {
+func configID(value string) bool {
 	return regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$`).MatchString(value)
 }
 
-func telegramProjectIDs(ids []string) bool {
+func projectIDs(ids []string) bool {
 	if len(ids) == 0 || len(ids) > 50 {
 		return false
 	}
 
 	seen := map[string]bool{}
 	for _, id := range ids {
-		if !telegramConfigID(id) || seen[id] {
+		if !configID(id) || seen[id] {
 			return false
 		}
 
@@ -85,7 +85,7 @@ func telegramProjectIDs(ids []string) bool {
 	return true
 }
 
-func validateTelegramNumericAllowlist(chats, topics []int64) error {
+func validateNumericAllowlist(chats, topics []int64) error {
 	if len(chats) > 100 || len(topics) > 100 {
 		return errors.New("telegram numeric allowlist exceeds 100 entries")
 	}
@@ -106,9 +106,9 @@ func validateTelegramNumericAllowlist(chats, topics []int64) error {
 }
 
 // AuthorizedUser checks the entire numeric peer before interpretation or lookup.
-func (c TelegramReceiverConfig) AuthorizedUser(chatID, topicID, userID int64, chatType string) (TelegramAllowedUser, bool) {
+func (c ReceiverConfig) AuthorizedUser(chatID, topicID, userID int64, chatType string) (AllowedUser, bool) {
 	if !c.authorizedPeer(chatID, topicID, userID, chatType) {
-		return TelegramAllowedUser{}, false
+		return AllowedUser{}, false
 	}
 
 	for _, user := range c.AllowedUsers {
@@ -117,10 +117,10 @@ func (c TelegramReceiverConfig) AuthorizedUser(chatID, topicID, userID int64, ch
 		}
 	}
 
-	return TelegramAllowedUser{}, false
+	return AllowedUser{}, false
 }
 
-func (c TelegramReceiverConfig) authorizedPeer(chatID, topicID, userID int64, chatType string) bool {
+func (c ReceiverConfig) authorizedPeer(chatID, topicID, userID int64, chatType string) bool {
 	if topicID < 0 || (topicID != 0 && !slices.Contains(c.AllowedTopicIDs, topicID)) {
 		return false
 	}
@@ -133,14 +133,14 @@ func (c TelegramReceiverConfig) authorizedPeer(chatID, topicID, userID int64, ch
 }
 
 // Digest identifies non-secret configuration for retained receiver diagnostics.
-func (c TelegramReceiverConfig) Digest() string {
-	data := telegramMustJSON(c)
+func (c ReceiverConfig) Digest() string {
+	data := mustJSON(c)
 	sum := sha256.Sum256(data)
 
 	return hex.EncodeToString(sum[:])
 }
 
-func telegramMustJSON(value any) []byte {
+func mustJSON(value any) []byte {
 	data, err := json.Marshal(value)
 	if err != nil {
 		panic(err) // Callers use only statically JSON-encodable internal values.
@@ -149,30 +149,30 @@ func telegramMustJSON(value any) []byte {
 	return data
 }
 
-// LoadTelegramReceiverConfig reads bounded, private YAML without changing files.
-func LoadTelegramReceiverConfig(env TelegramConfigDirectory) (TelegramReceiverConfig, error) {
-	data, err := readTelegramPrivateFile(filepath.Join(env.ConfigDir(), "telegram.yml"), 64*1024)
+// LoadReceiverConfig reads bounded, private YAML without changing files.
+func LoadReceiverConfig(env ConfigDirectory) (ReceiverConfig, error) {
+	data, err := readPrivateFile(filepath.Join(env.ConfigDir(), "telegram.yml"), 64*1024)
 	if err != nil {
-		return TelegramReceiverConfig{}, err
+		return ReceiverConfig{}, err
 	}
 
-	config, err := parseTelegramReceiverConfig(data)
+	config, err := parseReceiverConfig(data)
 	if err != nil {
-		return TelegramReceiverConfig{}, err
+		return ReceiverConfig{}, err
 	}
 
 	return config, config.Validate()
 }
 
-// SaveTelegramReceiverConfig preserves a differing configuration unless replacement is explicit.
-func SaveTelegramReceiverConfig(env TelegramConfigDirectory, config TelegramReceiverConfig, replace bool) error {
+// SaveReceiverConfig preserves a differing configuration unless replacement is explicit.
+func SaveReceiverConfig(env ConfigDirectory, config ReceiverConfig, replace bool) error {
 	if err := config.Validate(); err != nil {
 		return err
 	}
 
 	path := filepath.Join(env.ConfigDir(), "telegram.yml")
 
-	prior, err := LoadTelegramReceiverConfig(env)
+	prior, err := LoadReceiverConfig(env)
 	if err == nil && prior.Digest() == config.Digest() {
 		return nil
 	}
@@ -181,10 +181,10 @@ func SaveTelegramReceiverConfig(env TelegramConfigDirectory, config TelegramRece
 		return errors.New("telegram configuration exists; use --replace to change it")
 	}
 
-	return writeTelegramPrivateFile(path, renderTelegramReceiverConfig(config))
+	return writePrivateFile(path, renderReceiverConfig(config))
 }
 
-func readTelegramPrivateFile(path string, limit int64) ([]byte, error) {
+func readPrivateFile(path string, limit int64) ([]byte, error) {
 	info, err := os.Lstat(path)
 	if err != nil {
 		return nil, fmt.Errorf("inspect private telegram file: %w", err)
@@ -197,7 +197,7 @@ func readTelegramPrivateFile(path string, limit int64) ([]byte, error) {
 	return os.ReadFile(path)
 }
 
-func writeTelegramPrivateFile(path string, data []byte) (err error) {
+func writePrivateFile(path string, data []byte) (err error) {
 	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		return err
 	}
@@ -207,7 +207,7 @@ func writeTelegramPrivateFile(path string, data []byte) (err error) {
 		return err
 	}
 
-	defer func() { err = errors.Join(err, removeTelegramTemp(file.Name())) }()
+	defer func() { err = errors.Join(err, removeTemp(file.Name())) }()
 
 	if _, err := file.Write(data); err != nil {
 		return errors.Join(err, file.Close())
@@ -224,7 +224,7 @@ func writeTelegramPrivateFile(path string, data []byte) (err error) {
 	return os.Rename(file.Name(), path)
 }
 
-func removeTelegramTemp(path string) error {
+func removeTemp(path string) error {
 	err := os.Remove(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil

@@ -8,12 +8,12 @@ import (
 
 var errTelegramLaneChanged = errors.New("telegram input requires another application lane")
 
-func (r telegramReceiver) checkActionLane(claim telegramcore.TelegramActionClaim) error {
+func (r telegramReceiver) checkActionLane(claim telegramcore.ActionClaim) error {
 	if r.processingLane == nil {
 		return nil
 	}
 
-	lane, err := telegramcore.TelegramActionChoiceProcessingLane(claim.Request, claim.Choice)
+	lane, err := telegramcore.ActionChoiceProcessingLane(claim.Request, claim.Choice)
 	if err != nil {
 		return err
 	}
@@ -25,17 +25,17 @@ func (r telegramReceiver) checkActionLane(claim telegramcore.TelegramActionClaim
 	return nil
 }
 
-func (r telegramReceiver) checkCaptureReplyLane(update telegramcore.TelegramReceivedUpdate) error {
+func (r telegramReceiver) checkCaptureReplyLane(update telegramcore.ReceivedUpdate) error {
 	if update.ReplyToMessageID <= 0 || r.processingLane == nil {
 		return nil
 	}
 
-	lane, control := telegramcore.TelegramExplicitControlLane(update)
-	if control && lane != telegramcore.TelegramProcessingOrdinary {
+	lane, control := telegramcore.ExplicitControlLane(update)
+	if control && lane != telegramcore.ProcessingOrdinary {
 		return nil
 	}
 
-	if *r.processingLane != telegramcore.TelegramProcessingOrdinary {
+	if *r.processingLane != telegramcore.ProcessingOrdinary {
 		return errTelegramLaneChanged
 	}
 

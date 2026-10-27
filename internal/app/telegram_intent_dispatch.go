@@ -19,7 +19,7 @@ type telegramIntentService interface {
 	ResolveConversationIntent(context.Context, string, ConversationIntentContext) (ConversationIntent, error)
 }
 
-func (r telegramReceiver) respondIntent(ctx context.Context, user telegramcore.TelegramAllowedUser, config telegramcore.TelegramReceiverConfig, update telegramcore.TelegramReceivedUpdate) (bool, error) {
+func (r telegramReceiver) respondIntent(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (bool, error) {
 	if update.Kind != "message" || strings.HasPrefix(strings.TrimSpace(update.Text), "/") {
 		return false, nil
 	}
@@ -29,7 +29,7 @@ func (r telegramReceiver) respondIntent(ctx context.Context, user telegramcore.T
 		return true, r.recordDiagnostic(ctx, update, config, "Conversational interpretation is unavailable. Explicit commands remain available through /help.")
 	}
 
-	input := telegramcore.TelegramConversationInput{Update: update, Config: config}
+	input := telegramcore.ConversationInput{Update: update, Config: config}
 
 	projects, err := r.operations.ListRegisteredProjects(user.ProjectIDs)
 	if err != nil {
@@ -54,10 +54,10 @@ func (r telegramReceiver) respondIntent(ctx context.Context, user telegramcore.T
 	return true, r.applyIntentDecision(ctx, update, resolution.Decision)
 }
 
-func (r telegramReceiver) resolveIntent(ctx context.Context, operations telegramIntentService, input telegramcore.TelegramConversationInput) (telegramcore.TelegramInterpretation, error) {
+func (r telegramReceiver) resolveIntent(ctx context.Context, operations telegramIntentService, input telegramcore.ConversationInput) (telegramcore.Interpretation, error) {
 	update := input.Update
 
-	return r.store.ResolveTelegramInterpretation(ctx, r.env, update, time.Now(), func(callCtx context.Context) (json.RawMessage, error) {
+	return r.store.ResolveInterpretation(ctx, r.env, update, time.Now(), func(callCtx context.Context) (json.RawMessage, error) {
 		modelInput, digest, err := r.intentContext(callCtx, input)
 		if err != nil {
 			return nil, err
@@ -81,8 +81,8 @@ func (r telegramReceiver) resolveIntent(ctx context.Context, operations telegram
 	})
 }
 
-func (r telegramReceiver) applyIntentDecision(ctx context.Context, update telegramcore.TelegramReceivedUpdate, payload json.RawMessage) error {
-	input := telegramcore.TelegramConversationInput{Update: update}
+func (r telegramReceiver) applyIntentDecision(ctx context.Context, update telegramcore.ReceivedUpdate, payload json.RawMessage) error {
+	input := telegramcore.ConversationInput{Update: update}
 
 	var decision telegramIntentDecision
 	if err := decodeOperationJSON(string(payload), &decision); err != nil {
@@ -119,7 +119,7 @@ func (r telegramReceiver) applyIntentDecision(ctx context.Context, update telegr
 
 	if decision.Target != nil {
 		input.Namespace = decision.Target.Namespace
-		if err := r.store.ValidateTelegramOperationTarget(ctx, input, *decision.Target); err != nil {
+		if err := r.store.ValidateOperationTarget(ctx, input, *decision.Target); err != nil {
 			return r.intentCorrection(ctx, update, current)
 		}
 	}
@@ -127,10 +127,10 @@ func (r telegramReceiver) applyIntentDecision(ctx context.Context, update telegr
 	return r.dispatchIntent(ctx, currentUser, input, decision.Intent)
 }
 
-func (r telegramReceiver) intentContext(ctx context.Context, input telegramcore.TelegramConversationInput) (ConversationIntentContext, string, error) {
+func (r telegramReceiver) intentContext(ctx context.Context, input telegramcore.ConversationInput) (ConversationIntentContext, string, error) {
 	result := ConversationIntentContext{Message: input.Update.Text, Operations: telegramIntentRegistry()}
 
-	snapshot, err := r.store.TelegramIntentContext(ctx, input)
+	snapshot, err := r.store.IntentContext(ctx, input)
 	if err != nil {
 		return result, "", err
 	}
@@ -160,7 +160,7 @@ func (r telegramReceiver) intentContext(ctx context.Context, input telegramcore.
 	return result, snapshot.Digest, nil
 }
 
-func appendTelegramIntentSession(result *ConversationIntentContext, session telegramcore.TelegramConversation, snapshot telegramcore.TelegramIntentSnapshot) {
+func appendTelegramIntentSession(result *ConversationIntentContext, session telegramcore.Conversation, snapshot telegramcore.IntentSnapshot) {
 	result.Sessions = append(result.Sessions, ConversationIntentSession{ID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace, Intent: session.Intent, Phase: session.Phase, Topic: session.Topic, QuestionBinding: session.QuestionBinding, InvocationID: session.InvocationID, Revision: session.Revision})
 	if session.ID == snapshot.Focused {
 		result.FocusedConversation = session.ID
@@ -175,11 +175,11 @@ func appendTelegramIntentSession(result *ConversationIntentContext, session tele
 	}
 }
 
-func (r telegramReceiver) intentCorrection(ctx context.Context, update telegramcore.TelegramReceivedUpdate, config telegramcore.TelegramReceiverConfig) error {
+func (r telegramReceiver) intentCorrection(ctx context.Context, update telegramcore.ReceivedUpdate, config telegramcore.ReceiverConfig) error {
 	return r.recordDiagnostic(ctx, update, config, "Which current project or conversation should this request use? The prior target or arguments are no longer valid. Send /sessions to see your conversations.")
 }
 
-func (r telegramReceiver) dispatchIntent(ctx context.Context, user telegramcore.TelegramAllowedUser, input telegramcore.TelegramConversationInput, intent ConversationIntent) error {
+func (r telegramReceiver) dispatchIntent(ctx context.Context, user telegramcore.AllowedUser, input telegramcore.ConversationInput, intent ConversationIntent) error {
 	if intent.OperationID == "clarify" {
 		return r.recordDiagnostic(ctx, input.Update, input.Config, intent.Explanation)
 	}
@@ -199,7 +199,7 @@ func (r telegramReceiver) dispatchIntent(ctx context.Context, user telegramcore.
 			return err
 		}
 
-		return r.store.ApplyTelegramConversation(ctx, conversation, time.Now())
+		return r.store.ApplyConversation(ctx, conversation, time.Now())
 	}
 
 	record, recognized, err := telegramIntentRecord(input.Update, intent)
@@ -216,7 +216,7 @@ func (r telegramReceiver) dispatchIntent(ctx context.Context, user telegramcore.
 	return r.dispatchIntentRead(ctx, user, input, intent)
 }
 
-func (r telegramReceiver) dispatchIntentRead(ctx context.Context, user telegramcore.TelegramAllowedUser, input telegramcore.TelegramConversationInput, intent ConversationIntent) error {
+func (r telegramReceiver) dispatchIntentRead(ctx context.Context, user telegramcore.AllowedUser, input telegramcore.ConversationInput, intent ConversationIntent) error {
 	if intent.Arguments != (ConversationIntentArguments{}) {
 		return r.intentCorrection(ctx, input.Update, input.Config)
 	}
@@ -237,7 +237,7 @@ func (r telegramReceiver) dispatchIntentRead(ctx context.Context, user telegramc
 	return r.intentCorrection(ctx, input.Update, input.Config)
 }
 
-func (r telegramReceiver) dispatchIntentPreparation(ctx context.Context, user telegramcore.TelegramAllowedUser, input telegramcore.TelegramConversationInput, intent ConversationIntent) (bool, error) {
+func (r telegramReceiver) dispatchIntentPreparation(ctx context.Context, user telegramcore.AllowedUser, input telegramcore.ConversationInput, intent ConversationIntent) (bool, error) {
 	if handled, err := r.dispatchIntentNativeWork(ctx, user, input, intent); handled || err != nil {
 		return handled, err
 	}

@@ -15,33 +15,33 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// TelegramOperationModel retains a provider result independently of semantic
+// OperationModel retains a provider result independently of semantic
 // interpretation and subsequent source acknowledgement or message delivery.
-type TelegramOperationModel struct {
+type OperationModel struct {
 	Attempts  int
 	RetryAt   time.Time
 	ErrorCode string
 	Response  json.RawMessage
 }
 
-// ResolveTelegramOperationModel reserves at most five attempts for an immutable
+// ResolveOperationModel reserves at most five attempts for an immutable
 // prepared request. No database transaction spans the provider call. OS exclusion
 // prevents a second owner stealing the call after a wall-clock jump.
-func (s *TelegramReceiverStore) ResolveTelegramOperationModel(ctx context.Context, env TelegramStateDirectory, request TelegramOperationRequest, now time.Time, invoke func(context.Context) (json.RawMessage, error)) (result TelegramOperationModel, err error) {
-	if err := validateTelegramOperationModel(request, invoke); err != nil {
+func (s *ReceiverStore) ResolveOperationModel(ctx context.Context, env StateDirectory, request OperationRequest, now time.Time, invoke func(context.Context) (json.RawMessage, error)) (result OperationModel, err error) {
+	if err := validateOperationModel(request, invoke); err != nil {
 		return result, err
 	}
 
 	stripe := sha256.Sum256([]byte(request.ID))
 
-	lock, err := acquireTelegramModelClaim(env, request.Source.Peer.BotID, fmt.Sprintf("operation-model-%d-%d.lock", request.Source.Peer.BotID, stripe[0]%16))
+	lock, err := acquireModelClaim(env, request.Source.Peer.BotID, fmt.Sprintf("operation-model-%d-%d.lock", request.Source.Peer.BotID, stripe[0]%16))
 	if err != nil {
 		return result, err
 	}
 
 	defer func() { err = errors.Join(err, lock.Close()) }()
 
-	result, ready, err := s.reserveTelegramOperationModel(ctx, request, now)
+	result, ready, err := s.reserveOperationModel(ctx, request, now)
 	if err != nil || !ready {
 		return result, err
 	}
@@ -62,23 +62,23 @@ func (s *TelegramReceiverStore) ResolveTelegramOperationModel(ctx context.Contex
 	defer finishCancel()
 
 	if callErr != nil {
-		result.ErrorCode = telegramInterpretationFailure(callErr)
+		result.ErrorCode = interpretationFailure(callErr)
 		result.RetryAt = time.Now().UTC().Add(time.Second * time.Duration(1<<(result.Attempts-1)))
 	} else {
 		result.Response, result.RetryAt, result.ErrorCode = response, time.Time{}, ""
 	}
 
-	err = s.finishTelegramOperationModel(finishCtx, request, result)
+	err = s.finishOperationModel(finishCtx, request, result)
 
 	return result, err
 }
 
-func (s *TelegramReceiverStore) reserveTelegramOperationModel(ctx context.Context, request TelegramOperationRequest, now time.Time) (TelegramOperationModel, bool, error) {
-	var result TelegramOperationModel
+func (s *ReceiverStore) reserveOperationModel(ctx context.Context, request OperationRequest, now time.Time) (OperationModel, bool, error) {
+	var result OperationModel
 
 	ready := false
 	err := s.transaction(ctx, func(tx *sql.Tx) error {
-		pending, err := telegramReadResponsePending(ctx, tx, request.Source)
+		pending, err := readResponsePending(ctx, tx, request.Source)
 		if err != nil || !pending {
 			return errors.Join(err, workflowstate.ErrConflict)
 		}
@@ -115,7 +115,7 @@ func (s *TelegramReceiverStore) reserveTelegramOperationModel(ctx context.Contex
 	return result, ready, err
 }
 
-func (s *TelegramReceiverStore) finishTelegramOperationModel(ctx context.Context, request TelegramOperationRequest, model TelegramOperationModel) error {
+func (s *ReceiverStore) finishOperationModel(ctx context.Context, request OperationRequest, model OperationModel) error {
 	return s.transaction(ctx, func(tx *sql.Tx) error {
 		retry := ""
 		if !model.RetryAt.IsZero() {
@@ -127,20 +127,20 @@ func (s *TelegramReceiverStore) finishTelegramOperationModel(ctx context.Context
 			return err
 		}
 
-		if err := telegramRequireChanged(changed); err != nil {
+		if err := requireChanged(changed); err != nil {
 			return err
 		}
 
-		return checkTelegramIntakeCapacity(ctx, tx, request.Source.Peer.BotID)
+		return checkIntakeCapacity(ctx, tx, request.Source.Peer.BotID)
 	})
 }
 
-func validateTelegramOperationModel(request TelegramOperationRequest, invoke func(context.Context) (json.RawMessage, error)) error {
-	if invoke == nil || request.ID != TelegramOperationID(request.Source, request.Ordinal) || len(request.PreparedInput) == 0 {
+func validateOperationModel(request OperationRequest, invoke func(context.Context) (json.RawMessage, error)) error {
+	if invoke == nil || request.ID != OperationID(request.Source, request.Ordinal) || len(request.PreparedInput) == 0 {
 		return workflowstate.ErrConflict
 	}
 
-	normalized, err := normalizeTelegramOperation(request)
+	normalized, err := normalizeOperation(request)
 	if err != nil || normalized.ArgumentDigest != request.ArgumentDigest {
 		return errors.Join(err, workflowstate.ErrConflict)
 	}

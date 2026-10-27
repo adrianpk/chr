@@ -9,7 +9,7 @@ import (
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
-func telegramControlRegistryFixture(t *testing.T) (telegramTestEnvironment, *TelegramReceiverStore) {
+func telegramControlRegistryFixture(t *testing.T) (telegramTestEnvironment, *ReceiverStore) {
 	t.Helper()
 
 	env := telegramReceiverTestEnv(t)
@@ -33,7 +33,7 @@ func telegramControlRegistryFixture(t *testing.T) (telegramTestEnvironment, *Tel
 	return env, store
 }
 
-func telegramControlExclusiveWrite(t *testing.T, store *TelegramReceiverStore) func() {
+func telegramControlExclusiveWrite(t *testing.T, store *ReceiverStore) func() {
 	t.Helper()
 
 	conn, err := store.db.Conn(t.Context())

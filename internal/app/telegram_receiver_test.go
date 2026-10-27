@@ -18,7 +18,7 @@ import (
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
-func telegramAppTestReceiver(t *testing.T, api telegramcore.TelegramReceiverAPI) (telegramReceiver, telegramcore.TelegramReceiverConfig) {
+func telegramAppTestReceiver(t *testing.T, api telegramcore.ReceiverAPI) (telegramReceiver, telegramcore.ReceiverConfig) {
 	t.Helper()
 
 	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{DevMode: true, DevRoot: t.TempDir()})
@@ -26,23 +26,23 @@ func telegramAppTestReceiver(t *testing.T, api telegramcore.TelegramReceiverAPI)
 		t.Fatal(err)
 	}
 
-	config := telegramcore.TelegramReceiverConfig{
+	config := telegramcore.ReceiverConfig{
 		Enabled: true, BotTokenEnv: fmt.Sprintf("CHR_TEST_TELEGRAM_%x", sha256.Sum256([]byte(env.ConfigDir()))), PollTimeoutSeconds: 1,
-		AllowedUsers: []telegramcore.TelegramAllowedUser{{TelegramUserID: 100001, OperatorID: "maintainer", ProjectIDs: []string{"example-project", "disabled-project"}}},
+		AllowedUsers: []telegramcore.AllowedUser{{TelegramUserID: 100001, OperatorID: "maintainer", ProjectIDs: []string{"example-project", "disabled-project"}}},
 	}
 
 	token := "12345:example_test_token_123456789"
-	if err := telegramcore.SaveTelegramReceiverToken(env, config, token, false); err != nil {
+	if err := telegramcore.SaveReceiverToken(env, config, token, false); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := telegramcore.SaveTelegramReceiverConfig(env, config, false); err != nil {
+	if err := telegramcore.SaveReceiverConfig(env, config, false); err != nil {
 		t.Fatal(err)
 	}
 
 	seedTelegramAppSchema(t, env)
 
-	store, err := telegramcore.NewTelegramReceiverStore(t.Context(), env, testAssetsFS())
+	store, err := telegramcore.NewReceiverStore(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -93,7 +93,7 @@ func TestTelegramReceiverReadJourney(t *testing.T) {
 	server := telegramReadTestServer(t, sent)
 	defer server.Close()
 
-	receiver, _ := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
+	receiver, _ := telegramAppTestReceiver(t, telegramcore.ReceiverAPI{Client: server.Client(), BaseURL: server.URL})
 	addTelegramAppTestProjects(t, receiver.env)
 	seedTelegramSavedHandoff(t, receiver.env)
 
@@ -155,8 +155,8 @@ func checkTelegramNoWork(t *testing.T, env core.UserEnvironment) {
 func seedTelegramSavedHandoff(t *testing.T, env core.UserEnvironment) {
 	t.Helper()
 
-	update := telegramcore.TelegramUpdate{Message: telegramcore.TelegramUpdateMessage{
-		From: telegramcore.TelegramSenderUser{ID: 100001}, Chat: telegramcore.TelegramChat{ID: 100001},
+	update := telegramcore.Update{Message: telegramcore.UpdateMessage{
+		From: telegramcore.SenderUser{ID: 100001}, Chat: telegramcore.Chat{ID: 100001},
 		Text: "@example-project loop start --status ready --max-iterations 1",
 	}}
 
@@ -181,10 +181,10 @@ func seedTelegramSavedHandoff(t *testing.T, env core.UserEnvironment) {
 
 // TestTelegramReceiverRevocation blocks a retained read response after project authority changes.
 func TestTelegramReceiverRevocation(t *testing.T) {
-	receiver, config := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{})
+	receiver, config := telegramAppTestReceiver(t, telegramcore.ReceiverAPI{})
 
-	update := telegramcore.TelegramReceivedUpdate{UpdateID: 1, Digest: strings.Repeat("a", 64), Kind: "message", Peer: telegramcore.TelegramPeerIdentity{BotID: 12345, ChatID: 100001, UserID: 100001}, MessageID: 1, ChatType: "private", Text: "/projects"}
-	if err := receiver.store.RetainBatch(t.Context(), 12345, []telegramcore.TelegramReceivedUpdate{update}, time.Now()); err != nil {
+	update := telegramcore.ReceivedUpdate{UpdateID: 1, Digest: strings.Repeat("a", 64), Kind: "message", Peer: telegramcore.PeerIdentity{BotID: 12345, ChatID: 100001, UserID: 100001}, MessageID: 1, ChatType: "private", Text: "/projects"}
+	if err := receiver.store.RetainBatch(t.Context(), 12345, []telegramcore.ReceivedUpdate{update}, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -193,7 +193,7 @@ func TestTelegramReceiverRevocation(t *testing.T) {
 	}
 
 	config.AllowedUsers[0].ProjectIDs = []string{"other-project"}
-	if err := telegramcore.SaveTelegramReceiverConfig(receiver.env, config, true); err != nil {
+	if err := telegramcore.SaveReceiverConfig(receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -217,7 +217,7 @@ func TestTelegramReceiverShutdown(t *testing.T) {
 	defer server.Close()
 	defer close(release)
 
-	receiver, _ := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
+	receiver, _ := telegramAppTestReceiver(t, telegramcore.ReceiverAPI{Client: server.Client(), BaseURL: server.URL})
 
 	ctx, cancel := context.WithCancel(t.Context())
 	defer cancel()
@@ -250,7 +250,7 @@ func TestTelegramReceiverShutdown(t *testing.T) {
 func checkTelegramShutdownReleased(t *testing.T, env core.UserEnvironment) {
 	t.Helper()
 
-	lock, err := telegramcore.AcquireTelegramReceiverLock(env, 12345)
+	lock, err := telegramcore.AcquireReceiverLock(env, 12345)
 	if err != nil {
 		t.Fatal("shutdown retained bot ownership", err)
 	}

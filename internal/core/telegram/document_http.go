@@ -16,35 +16,35 @@ import (
 
 // SendDocument uploads frozen bytes and a bounded caption through the same
 // receiver HTTP boundary. The outbox alone owns fallback and attempt allowance.
-func (a TelegramReceiverAPI) SendDocument(ctx context.Context, token string, peer TelegramPeerIdentity, document tgmessage.Document, caption string, entities []tgmessage.Entity, actionToken string, choices []string, labels ...[]string) (tgmessage.Acknowledgement, error) {
+func (a ReceiverAPI) SendDocument(ctx context.Context, token string, peer PeerIdentity, document tgmessage.Document, caption string, entities []tgmessage.Entity, actionToken string, choices []string, labels ...[]string) (tgmessage.Acknowledgement, error) {
 	var acknowledgement tgmessage.Acknowledgement
 	if err := tgmessage.ValidateDocument(document); err != nil {
 		return acknowledgement, err
 	}
 
-	if !validTelegramReceiverText(caption) || tgmessage.VisibleUnits(caption) > 900 || peer.ChatID == 0 || peer.TopicID < 0 || len(entities) > 32 {
+	if !validReceiverText(caption) || tgmessage.VisibleUnits(caption) > 900 || peer.ChatID == 0 || peer.TopicID < 0 || len(entities) > 32 {
 		return acknowledgement, errors.New("invalid telegram document caption")
 	}
 
-	keyboard, err := telegramActionKeyboard(actionToken, choices, labels...)
+	keyboard, err := actionKeyboard(actionToken, choices, labels...)
 	if err != nil {
 		return acknowledgement, err
 	}
 
-	body, contentType, err := telegramDocumentMultipart(peer, document, caption, entities, keyboard)
+	body, contentType, err := documentMultipart(peer, document, caption, entities, keyboard)
 	if err != nil {
 		return acknowledgement, err
 	}
 
 	data, err := a.callBody(ctx, token, "sendDocument", bytes.NewReader(body), contentType, 10*time.Second)
 	if err != nil {
-		return acknowledgement, telegramDocumentSendFailure(err)
+		return acknowledgement, documentSendFailure(err)
 	}
 
-	return decodeTelegramDocumentAcknowledgement(data)
+	return decodeDocumentAcknowledgement(data)
 }
 
-func decodeTelegramDocumentAcknowledgement(data []byte) (tgmessage.Acknowledgement, error) {
+func decodeDocumentAcknowledgement(data []byte) (tgmessage.Acknowledgement, error) {
 	var (
 		acknowledgement tgmessage.Acknowledgement
 		message         struct {
@@ -55,17 +55,17 @@ func decodeTelegramDocumentAcknowledgement(data []byte) (tgmessage.Acknowledgeme
 		}
 	)
 	if err := json.Unmarshal(data, &message); err != nil || message.MessageID <= 0 || message.Document.FileID == "" || len(message.Document.FileID) > 256 {
-		return acknowledgement, &TelegramAPIError{Code: "invalid_document_response", Uncertain: true}
+		return acknowledgement, &APIError{Code: "invalid_document_response", Uncertain: true}
 	}
 
 	return tgmessage.Acknowledgement{MessageID: message.MessageID, FileID: message.Document.FileID}, nil
 }
 
-func telegramDocumentMultipart(peer TelegramPeerIdentity, document tgmessage.Document, caption string, entities []tgmessage.Entity, keyboard *telegramInlineKeyboard) ([]byte, string, error) {
-	return telegramDocumentMultipartDestination(strconv.FormatInt(peer.ChatID, 10), peer.TopicID, document, caption, entities, keyboard)
+func documentMultipart(peer PeerIdentity, document tgmessage.Document, caption string, entities []tgmessage.Entity, keyboard *inlineKeyboard) ([]byte, string, error) {
+	return documentMultipartDestination(strconv.FormatInt(peer.ChatID, 10), peer.TopicID, document, caption, entities, keyboard)
 }
 
-func telegramDocumentMultipartDestination(destination string, topic int64, document tgmessage.Document, caption string, entities []tgmessage.Entity, keyboard *telegramInlineKeyboard) ([]byte, string, error) {
+func documentMultipartDestination(destination string, topic int64, document tgmessage.Document, caption string, entities []tgmessage.Entity, keyboard *inlineKeyboard) ([]byte, string, error) {
 	var body bytes.Buffer
 
 	writer := multipart.NewWriter(&body)
@@ -75,7 +75,7 @@ func telegramDocumentMultipartDestination(destination string, topic int64, docum
 		fields["message_thread_id"] = strconv.FormatInt(topic, 10)
 	}
 
-	if err := telegramDocumentJSONFields(fields, entities, keyboard); err != nil {
+	if err := documentJSONFields(fields, entities, keyboard); err != nil {
 		return nil, "", err
 	}
 
@@ -105,7 +105,7 @@ func telegramDocumentMultipartDestination(destination string, topic int64, docum
 	return body.Bytes(), writer.FormDataContentType(), nil
 }
 
-func telegramDocumentJSONFields(fields map[string]string, entities []tgmessage.Entity, keyboard *telegramInlineKeyboard) error {
+func documentJSONFields(fields map[string]string, entities []tgmessage.Entity, keyboard *inlineKeyboard) error {
 	if len(entities) > 0 {
 		payload, err := json.Marshal(entities)
 		if err != nil {
@@ -127,10 +127,10 @@ func telegramDocumentJSONFields(fields map[string]string, entities []tgmessage.E
 	return nil
 }
 
-func telegramDocumentSendFailure(err error) error {
-	var apiErr *TelegramAPIError
+func documentSendFailure(err error) error {
+	var apiErr *APIError
 	if errors.As(err, &apiErr) && apiErr.Code == "invalid_response" {
-		return &TelegramAPIError{Code: "invalid_document_response", Uncertain: true}
+		return &APIError{Code: "invalid_document_response", Uncertain: true}
 	}
 
 	return err

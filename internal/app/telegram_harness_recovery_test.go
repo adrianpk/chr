@@ -19,7 +19,7 @@ type telegramHarnessApplyProbe struct {
 	lose  bool
 }
 
-func (s *telegramHarnessApplyProbe) ChangeTelegramHarnessSelections(ctx context.Context, target telegramcore.TelegramOperationTarget, request core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (core.HarnessSelectionSnapshot, error) {
+func (s *telegramHarnessApplyProbe) ChangeTelegramHarnessSelections(ctx context.Context, target telegramcore.OperationTarget, request core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (core.HarnessSelectionSnapshot, error) {
 	s.calls++
 
 	result, err := s.service.ChangeTelegramHarnessSelections(ctx, target, request, authorize)

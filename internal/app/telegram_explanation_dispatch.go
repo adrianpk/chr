@@ -11,15 +11,15 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r telegramReceiver) respondExplanation(ctx context.Context, user telegramcore.TelegramAllowedUser, config telegramcore.TelegramReceiverConfig, update telegramcore.TelegramReceivedUpdate) (bool, error) {
+func (r telegramReceiver) respondExplanation(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (bool, error) {
 	route := telegramCommandRoute{
 		OperationID: "authoring.explain", Continue: r.continueExplanation, Help: telegramExplanationHelp(),
-		Parse: func(update telegramcore.TelegramReceivedUpdate) (telegramParsedCommand, error) {
+		Parse: func(update telegramcore.ReceivedUpdate) (telegramParsedCommand, error) {
 			command, recognized, err := parseTelegramExplanation(update)
 
 			return telegramParsedCommand{
 				Recognized: recognized, Input: &command.Input,
-				Dispatch: func(ctx context.Context, user telegramcore.TelegramAllowedUser) error {
+				Dispatch: func(ctx context.Context, user telegramcore.AllowedUser) error {
 					return r.dispatchExplanation(ctx, user, command)
 				},
 			}, err
@@ -29,7 +29,7 @@ func (r telegramReceiver) respondExplanation(ctx context.Context, user telegramc
 	return r.respondCommand(ctx, user, config, update, route)
 }
 
-func (r telegramReceiver) dispatchExplanation(ctx context.Context, user telegramcore.TelegramAllowedUser, command telegramExplanationCommand) error {
+func (r telegramReceiver) dispatchExplanation(ctx context.Context, user telegramcore.AllowedUser, command telegramExplanationCommand) error {
 	operations, ok := r.operations.(telegramExplanationService)
 	if !ok {
 		return r.recordDiagnostic(ctx, command.Input.Update, command.Input.Config, "Shared explanation is unavailable. No authoring or work state changed.")
@@ -47,36 +47,36 @@ func (r telegramReceiver) dispatchExplanation(ctx context.Context, user telegram
 	return r.continueExplanation(ctx, request, command.Input.Config)
 }
 
-func (r telegramReceiver) reserveExplanation(ctx context.Context, operations telegramExplanationService, user telegramcore.TelegramAllowedUser, command telegramExplanationCommand) (telegramcore.TelegramOperationRequest, error) {
-	target, err := r.store.ResolveTelegramOperationTarget(ctx, command.Input, time.Now())
+func (r telegramReceiver) reserveExplanation(ctx context.Context, operations telegramExplanationService, user telegramcore.AllowedUser, command telegramExplanationCommand) (telegramcore.OperationRequest, error) {
+	target, err := r.store.ResolveOperationTarget(ctx, command.Input, time.Now())
 	if err != nil {
-		return telegramcore.TelegramOperationRequest{}, err
+		return telegramcore.OperationRequest{}, err
 	}
 
 	owner, err := r.explanationOwnerRequest(ctx, command, target)
 	if err != nil {
-		return telegramcore.TelegramOperationRequest{}, err
+		return telegramcore.OperationRequest{}, err
 	}
 
 	prepared, err := operations.PrepareTelegramExplanation(ctx, target, owner)
 	if err != nil {
-		return telegramcore.TelegramOperationRequest{}, err
+		return telegramcore.OperationRequest{}, err
 	}
 
 	input, err := json.Marshal(prepared)
 	if err != nil {
-		return telegramcore.TelegramOperationRequest{}, err
+		return telegramcore.OperationRequest{}, err
 	}
 
 	arguments, err := json.Marshal(telegramAuthoringArguments{PayloadHash: recordDigest(input)})
 	if err != nil {
-		return telegramcore.TelegramOperationRequest{}, err
+		return telegramcore.OperationRequest{}, err
 	}
 
-	return r.store.ReservePreparedTelegramOperation(ctx, telegramcore.TelegramOperationRequest{Source: command.Input.Update, Operator: user.OperatorID, Target: target, OperationID: "authoring.explain", Arguments: arguments}, input, time.Now())
+	return r.store.ReservePreparedOperation(ctx, telegramcore.OperationRequest{Source: command.Input.Update, Operator: user.OperatorID, Target: target, OperationID: "authoring.explain", Arguments: arguments}, input, time.Now())
 }
 
-func (r telegramReceiver) continueExplanation(ctx context.Context, request telegramcore.TelegramOperationRequest, config telegramcore.TelegramReceiverConfig) error {
+func (r telegramReceiver) continueExplanation(ctx context.Context, request telegramcore.OperationRequest, config telegramcore.ReceiverConfig) error {
 	switch request.State {
 	case "confirmed", "blocked", "rejected":
 		return nil
@@ -97,7 +97,7 @@ func (r telegramReceiver) continueExplanation(ctx context.Context, request teleg
 		return r.finishAuthoringFailure(ctx, request, current, err)
 	}
 
-	if err := r.store.BeginTelegramOperation(ctx, request, time.Now()); err != nil {
+	if err := r.store.BeginOperation(ctx, request, time.Now()); err != nil {
 		return err
 	}
 
@@ -105,7 +105,7 @@ func (r telegramReceiver) continueExplanation(ctx context.Context, request teleg
 		return r.finishOriginalDocument(ctx, operations, request, prepared, current)
 	}
 
-	model, err := r.store.ResolveTelegramOperationModel(ctx, r.env, request, time.Now(), func(ctx context.Context) (json.RawMessage, error) {
+	model, err := r.store.ResolveOperationModel(ctx, r.env, request, time.Now(), func(ctx context.Context) (json.RawMessage, error) {
 		result, err := operations.ExplainPreparedTelegram(ctx, request.Target, prepared)
 		if err != nil {
 			return nil, err
@@ -120,7 +120,7 @@ func (r telegramReceiver) continueExplanation(ctx context.Context, request teleg
 	return r.finishExplanationModel(ctx, request, model, current)
 }
 
-func (r telegramReceiver) finishExplanationModel(ctx context.Context, request telegramcore.TelegramOperationRequest, model telegramcore.TelegramOperationModel, config telegramcore.TelegramReceiverConfig) error {
+func (r telegramReceiver) finishExplanationModel(ctx context.Context, request telegramcore.OperationRequest, model telegramcore.OperationModel, config telegramcore.ReceiverConfig) error {
 	if ctx.Err() != nil {
 		return ctx.Err()
 	}
@@ -147,10 +147,10 @@ func (r telegramReceiver) finishExplanationModel(ctx context.Context, request te
 	request.Delivery = &response
 	text := response.Message.InitialText
 
-	return r.store.FinishTelegramOperation(ctx, request, "confirmed", "telegram-model:"+request.ID, model.Response, text, current.Digest(), time.Now())
+	return r.store.FinishOperation(ctx, request, "confirmed", "telegram-model:"+request.ID, model.Response, text, current.Digest(), time.Now())
 }
 
-func telegramRetainedExplanation(request telegramcore.TelegramOperationRequest) (PreparedAuthoringExplanation, error) {
+func telegramRetainedExplanation(request telegramcore.OperationRequest) (PreparedAuthoringExplanation, error) {
 	var prepared PreparedAuthoringExplanation
 	if err := decodeBoundedOperationJSON(string(request.PreparedInput), &prepared, 1048576); err != nil {
 		return prepared, err
@@ -168,13 +168,13 @@ func telegramRetainedExplanation(request telegramcore.TelegramOperationRequest) 
 	return prepared, nil
 }
 
-func (r telegramReceiver) explanationOwnerRequest(ctx context.Context, command telegramExplanationCommand, target telegramcore.TelegramOperationTarget) (AuthoringExplanationRequest, error) {
-	owner := AuthoringExplanationRequest{ID: telegramcore.TelegramOperationID(command.Input.Update, 0), Question: command.Question, DocumentKind: command.DocumentKind}
+func (r telegramReceiver) explanationOwnerRequest(ctx context.Context, command telegramExplanationCommand, target telegramcore.OperationTarget) (AuthoringExplanationRequest, error) {
+	owner := AuthoringExplanationRequest{ID: telegramcore.OperationID(command.Input.Update, 0), Question: command.Question, DocumentKind: command.DocumentKind}
 	if target.ConversationID == "" {
 		return owner, nil
 	}
 
-	conversation, err := r.store.ReadTelegramConversationBinding(ctx, command.Input, target)
+	conversation, err := r.store.ReadConversationBinding(ctx, command.Input, target)
 	if err != nil {
 		return owner, err
 	}

@@ -16,7 +16,7 @@ import (
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
-var notifyTelegramSender = telegramcore.NewTelegramSender(http.DefaultClient)
+var notifyTelegramSender = telegramcore.NewSender(http.DefaultClient)
 
 func (factory commandFactory) notifyCommand() *cli.Command {
 	return &cli.Command{
@@ -143,7 +143,7 @@ func loadNotifyTelegramPollFixture(path string) ([]core.RemoteCommandRecord, err
 		_ = file.Close()
 	}()
 
-	updates, err := telegramcore.DecodeTelegramUpdates(file)
+	updates, err := telegramcore.DecodeUpdates(file)
 	if err != nil {
 		return nil, err
 	}
@@ -359,7 +359,7 @@ func printNotifyTelegramTestSent(
 	stdout io.Writer,
 	projectContext commandProjectContext,
 	record notifycore.AuditRecord,
-	result telegramcore.TelegramSendResult,
+	result telegramcore.SendResult,
 ) error {
 	return printNotifyLines(stdout, []string{
 		"telegram_test: sent",

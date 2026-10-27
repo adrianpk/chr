@@ -14,10 +14,10 @@ import (
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
-// TelegramReceiverDelivery retains a response independently of its send outcome.
-type TelegramReceiverDelivery struct {
+// ReceiverDelivery retains a response independently of its send outcome.
+type ReceiverDelivery struct {
 	ID            string
-	Peer          TelegramPeerIdentity
+	Peer          PeerIdentity
 	Text          string
 	State         string
 	Attempts      int
@@ -33,35 +33,35 @@ type TelegramReceiverDelivery struct {
 
 // QueueReadResponse records a response and acknowledges its retained input atomically.
 // Replaying an already processed source never replaces or duplicates its response.
-func (s *TelegramReceiverStore) QueueReadResponse(ctx context.Context, update TelegramReceivedUpdate, text, configDigest string, now time.Time) error {
+func (s *ReceiverStore) QueueReadResponse(ctx context.Context, update ReceivedUpdate, text, configDigest string, now time.Time) error {
 	return s.QueueReferencedResponse(ctx, update, text, fmt.Sprintf("update:%d", update.UpdateID), configDigest, now)
 }
 
 // QueueReferencedResponse retains bounded output with a canonical or paged reference.
-func (s *TelegramReceiverStore) QueueReferencedResponse(ctx context.Context, update TelegramReceivedUpdate, text, reference, configDigest string, now time.Time) error {
+func (s *ReceiverStore) QueueReferencedResponse(ctx context.Context, update ReceivedUpdate, text, reference, configDigest string, now time.Time) error {
 	if text == "" || len(configDigest) != 64 {
 		return errors.New("telegram response exceeds its Unicode bounds")
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		pendingSource, err := telegramReadResponsePending(ctx, tx, update)
+		pendingSource, err := readResponsePending(ctx, tx, update)
 		if err != nil || !pendingSource {
 			return err
 		}
 
-		return queueTelegramReferencedResponse(ctx, tx, update, text, reference, configDigest, now)
+		return queueReferencedResponse(ctx, tx, update, text, reference, configDigest, now)
 	})
 }
 
-func queueTelegramResponse(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, text, configDigest string, now time.Time) error {
-	return queueTelegramReferencedResponse(ctx, tx, update, text, fmt.Sprintf("update:%d", update.UpdateID), configDigest, now)
+func queueResponse(ctx context.Context, tx *sql.Tx, update ReceivedUpdate, text, configDigest string, now time.Time) error {
+	return queueReferencedResponse(ctx, tx, update, text, fmt.Sprintf("update:%d", update.UpdateID), configDigest, now)
 }
 
-func queueTelegramReferencedResponse(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, text, reference, configDigest string, now time.Time) error {
-	return queueTelegramResponseParts(ctx, tx, update, tgmessage.ResponseParts(text, reference), configDigest, now)
+func queueReferencedResponse(ctx context.Context, tx *sql.Tx, update ReceivedUpdate, text, reference, configDigest string, now time.Time) error {
+	return queueResponseParts(ctx, tx, update, tgmessage.ResponseParts(text, reference), configDigest, now)
 }
 
-func queueTelegramResponseParts(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, parts []string, configDigest string, now time.Time) error {
+func queueResponseParts(ctx context.Context, tx *sql.Tx, update ReceivedUpdate, parts []string, configDigest string, now time.Time) error {
 	var pending int
 	if err := tx.QueryRowContext(ctx, "SELECT COUNT(*) FROM telegram_outbox WHERE bot_id=? AND state!='delivered'", update.Peer.BotID).Scan(&pending); err != nil {
 		return err
@@ -76,7 +76,7 @@ func queueTelegramResponseParts(ctx context.Context, tx *sql.Tx, update Telegram
 		return err
 	}
 
-	if err := telegramRequireChanged(result); err != nil {
+	if err := requireChanged(result); err != nil {
 		return err
 	}
 
@@ -92,10 +92,10 @@ VALUES(?,?,?,?,?,?,?,'result',?,?,?,'pending',?,?)`, id, update.Peer.BotID, upda
 		}
 	}
 
-	return checkTelegramIntakeCapacity(ctx, tx, update.Peer.BotID)
+	return checkIntakeCapacity(ctx, tx, update.Peer.BotID)
 }
 
-func telegramReadResponsePending(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate) (bool, error) {
+func readResponsePending(ctx context.Context, tx *sql.Tx, update ReceivedUpdate) (bool, error) {
 	if _, err := tx.ExecContext(ctx, "UPDATE telegram_updates SET updated_at=updated_at WHERE bot_id=? AND update_id=?", update.Peer.BotID, update.UpdateID); err != nil {
 		return false, err
 	}
@@ -106,7 +106,7 @@ func telegramReadResponsePending(ctx context.Context, tx *sql.Tx, update Telegra
 	}
 
 	if digest != update.Digest {
-		return false, errTelegramReceiverConflict
+		return false, errReceiverConflict
 	}
 
 	if state == "processed" {
@@ -121,9 +121,9 @@ func telegramReadResponsePending(ctx context.Context, tx *sql.Tx, update Telegra
 }
 
 // RejectPendingUpdate discards a queued body when current authority is revoked.
-func (s *TelegramReceiverStore) RejectPendingUpdate(ctx context.Context, update TelegramReceivedUpdate, now time.Time) error {
+func (s *ReceiverStore) RejectPendingUpdate(ctx context.Context, update ReceivedUpdate, now time.Time) error {
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		if err := revokeTelegramPeerActions(ctx, tx, update.Peer, now); err != nil {
+		if err := revokePeerActions(ctx, tx, update.Peer, now); err != nil {
 			return err
 		}
 
@@ -134,7 +134,7 @@ func (s *TelegramReceiverStore) RejectPendingUpdate(ctx context.Context, update 
 }
 
 // DueDeliveries is bounded; sending rows after a crash retain uncertainty and budgets.
-func (s *TelegramReceiverStore) DueDeliveries(ctx context.Context, botID int64, now time.Time) ([]TelegramReceiverDelivery, error) {
+func (s *ReceiverStore) DueDeliveries(ctx context.Context, botID int64, now time.Time) ([]ReceiverDelivery, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT o.id,o.chat_id,o.topic_id,o.user_id,o.text,o.state,o.attempts,o.config_digest,COALESCE(o.action_token,''),COALESCE((SELECT allowed_choices FROM telegram_actions WHERE token=o.action_token),'[]'),o.parse_mode,o.plain_text,(o.plain_fallback OR o.presentation_fallback),COALESCE(o.presentation,''),COALESCE(o.presentation_hash,''),COALESCE(o.document_id,'') FROM telegram_outbox o
 WHERE o.bot_id=? AND o.state IN ('pending','sending','uncertain') AND o.attempts<5 AND (o.retry_at IS NULL OR o.retry_at<=?)
 AND NOT EXISTS(SELECT 1 FROM telegram_outbox earlier WHERE earlier.bot_id=o.bot_id AND earlier.chat_id=o.chat_id AND earlier.topic_id=o.topic_id AND earlier.user_id=o.user_id AND earlier.event_key=o.event_key AND earlier.part_index<o.part_index AND earlier.state!='delivered')
@@ -148,10 +148,10 @@ ORDER BY CASE (SELECT u.processing_lane FROM telegram_updates u WHERE u.bot_id=o
 		_ = rows.Close()
 	}()
 
-	var result []TelegramReceiverDelivery
+	var result []ReceiverDelivery
 
 	for rows.Next() {
-		delivery := TelegramReceiverDelivery{Peer: TelegramPeerIdentity{BotID: botID}}
+		delivery := ReceiverDelivery{Peer: PeerIdentity{BotID: botID}}
 
 		var choices, presentation, presentationHash string
 		if err := rows.Scan(&delivery.ID, &delivery.Peer.ChatID, &delivery.Peer.TopicID, &delivery.Peer.UserID, &delivery.Text, &delivery.State, &delivery.Attempts, &delivery.ConfigDigest, &delivery.ActionToken, &choices, &delivery.ParseMode, &delivery.PlainText, &delivery.PlainFallback, &presentation, &presentationHash, &delivery.DocumentID); err != nil {
@@ -162,7 +162,7 @@ ORDER BY CASE (SELECT u.processing_lane FROM telegram_updates u WHERE u.bot_id=o
 			return nil, err
 		}
 
-		if err := decodeTelegramPresentationHash(presentation, presentationHash, &delivery); err != nil {
+		if err := decodePresentationHash(presentation, presentationHash, &delivery); err != nil {
 			return nil, err
 		}
 
@@ -173,7 +173,7 @@ ORDER BY CASE (SELECT u.processing_lane FROM telegram_updates u WHERE u.bot_id=o
 }
 
 // ReserveDelivery persists the attempt before sendMessage; a lost acknowledgement cannot reset it.
-func (s *TelegramReceiverStore) ReserveDelivery(ctx context.Context, id string, now time.Time) error {
+func (s *ReceiverStore) ReserveDelivery(ctx context.Context, id string, now time.Time) error {
 	reserved, err := s.TryReserveDelivery(ctx, id, now)
 	if err != nil {
 		return err
@@ -188,7 +188,7 @@ func (s *TelegramReceiverStore) ReserveDelivery(ctx context.Context, id string, 
 
 // TryReserveDelivery skips a stale read when routine progress was coalesced.
 // Successful reservation persists its attempt before the API call.
-func (s *TelegramReceiverStore) TryReserveDelivery(ctx context.Context, id string, now time.Time) (bool, error) {
+func (s *ReceiverStore) TryReserveDelivery(ctx context.Context, id string, now time.Time) (bool, error) {
 	result, err := s.db.ExecContext(ctx, `UPDATE telegram_outbox AS o SET state='sending',attempts=attempts+1,total_attempts=total_attempts+1,
 retry_at=?,updated_at=? WHERE id=? AND state IN ('pending','sending','uncertain') AND attempts<5 AND (retry_at IS NULL OR retry_at<=?)
 AND (o.kind!='progress' OR o.attempts>0 OR NOT EXISTS(SELECT 1 FROM telegram_outbox recent WHERE recent.conversation_id=o.conversation_id AND recent.kind='progress' AND recent.total_attempts>0 AND recent.event_key!=o.event_key AND recent.updated_at>?))`,
@@ -203,13 +203,13 @@ AND (o.kind!='progress' OR o.attempts>0 OR NOT EXISTS(SELECT 1 FROM telegram_out
 }
 
 // DeliverySent records definite API acknowledgement without applying any operation again.
-func (s *TelegramReceiverStore) DeliverySent(ctx context.Context, id string, messageID int64, now time.Time) error {
+func (s *ReceiverStore) DeliverySent(ctx context.Context, id string, messageID int64, now time.Time) error {
 	return s.deliverySent(ctx, id, messageID, "", now)
 }
 
 // DeliveryDocumentSent retains the original upload acknowledgement without
 // changing its immutable source image or allocating another operation.
-func (s *TelegramReceiverStore) DeliveryDocumentSent(ctx context.Context, id string, ack tgmessage.Acknowledgement, now time.Time) error {
+func (s *ReceiverStore) DeliveryDocumentSent(ctx context.Context, id string, ack tgmessage.Acknowledgement, now time.Time) error {
 	if ack.FileID == "" || len(ack.FileID) > 256 {
 		return errors.New("telegram document requires a definite file identity")
 	}
@@ -217,7 +217,7 @@ func (s *TelegramReceiverStore) DeliveryDocumentSent(ctx context.Context, id str
 	return s.deliverySent(ctx, id, ack.MessageID, ack.FileID, now)
 }
 
-func (s *TelegramReceiverStore) deliverySent(ctx context.Context, id string, messageID int64, fileID string, now time.Time) error {
+func (s *ReceiverStore) deliverySent(ctx context.Context, id string, messageID int64, fileID string, now time.Time) error {
 	if messageID <= 0 {
 		return errors.New("telegram delivery requires a definite message ID")
 	}
@@ -228,7 +228,7 @@ func (s *TelegramReceiverStore) deliverySent(ctx context.Context, id string, mes
 			return err
 		}
 
-		if err := telegramRequireChanged(result); err != nil {
+		if err := requireChanged(result); err != nil {
 			return err
 		}
 
@@ -236,20 +236,20 @@ func (s *TelegramReceiverStore) deliverySent(ctx context.Context, id string, mes
 			return err
 		}
 
-		if err := retainTelegramReply(ctx, tx, id, messageID, now); err != nil {
+		if err := retainReply(ctx, tx, id, messageID, now); err != nil {
 			return err
 		}
 
-		return refreshTelegramReplyLanes(ctx, tx, id, messageID)
+		return refreshReplyLanes(ctx, tx, id, messageID)
 	})
 }
 
 // DeliveryFailed retains uncertainty or blocks a permanent/exhausted failure.
-func (s *TelegramReceiverStore) DeliveryFailed(ctx context.Context, delivery TelegramReceiverDelivery, failure error, now time.Time) error {
-	code, permanent, delay := telegramFailureState(failure, delivery.Attempts+1)
+func (s *ReceiverStore) DeliveryFailed(ctx context.Context, delivery ReceiverDelivery, failure error, now time.Time) error {
+	code, permanent, delay := failureState(failure, delivery.Attempts+1)
 	state := "pending"
 
-	var apiErr *TelegramAPIError
+	var apiErr *APIError
 	if errors.As(failure, &apiErr) && apiErr.Uncertain {
 		state = "uncertain"
 	}
@@ -264,7 +264,7 @@ func (s *TelegramReceiverStore) DeliveryFailed(ctx context.Context, delivery Tel
 }
 
 // BlockDelivery prevents delivery to a revoked peer without creating another request.
-func (s *TelegramReceiverStore) BlockDelivery(ctx context.Context, id string, now time.Time) error {
+func (s *ReceiverStore) BlockDelivery(ctx context.Context, id string, now time.Time) error {
 	return s.transaction(ctx, func(tx *sql.Tx) error {
 		if _, err := tx.ExecContext(ctx, "UPDATE telegram_outbox SET state='blocked',last_error_code='authorization_revoked',updated_at=? WHERE id=? AND state!='delivered'", database.FormatTime(now), id); err != nil {
 			return err

@@ -78,7 +78,7 @@ func newTelegramConversationAppFixture(t *testing.T) *telegramConversationAppFix
 	}))
 	t.Cleanup(server.Close)
 
-	f.receiver, _ = telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
+	f.receiver, _ = telegramAppTestReceiver(t, telegramcore.ReceiverAPI{Client: server.Client(), BaseURL: server.URL})
 	addTelegramAppTestProjects(t, f.receiver.env)
 	seedTelegramSavedHandoff(t, f.receiver.env)
 
@@ -115,10 +115,10 @@ func (f *telegramConversationAppFixture) send(t *testing.T, text string, reply i
 	}
 }
 
-func (f *telegramConversationAppFixture) sessions(t *testing.T) []telegramcore.TelegramConversation {
+func (f *telegramConversationAppFixture) sessions(t *testing.T) []telegramcore.Conversation {
 	t.Helper()
 
-	sessions, err := f.receiver.store.Conversations(t.Context(), telegramcore.TelegramPeerIdentity{BotID: 12345, ChatID: 100001, UserID: 100001})
+	sessions, err := f.receiver.store.Conversations(t.Context(), telegramcore.PeerIdentity{BotID: 12345, ChatID: 100001, UserID: 100001})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -126,7 +126,7 @@ func (f *telegramConversationAppFixture) sessions(t *testing.T) []telegramcore.T
 	return sessions
 }
 
-func (f *telegramConversationAppFixture) session(t *testing.T, id string) telegramcore.TelegramConversation {
+func (f *telegramConversationAppFixture) session(t *testing.T, id string) telegramcore.Conversation {
 	t.Helper()
 
 	for _, c := range f.sessions(t) {
@@ -137,7 +137,7 @@ func (f *telegramConversationAppFixture) session(t *testing.T, id string) telegr
 
 	t.Fatal("session unavailable", id)
 
-	return telegramcore.TelegramConversation{}
+	return telegramcore.Conversation{}
 }
 
 // TestTelegramConversationJourney exercises real HTTP decoding, command dispatch, SQLite and reply delivery.
@@ -158,7 +158,7 @@ func TestTelegramConversationJourney(t *testing.T) {
 	f.send(t, "first part", firstPrompt.ID)
 	f.send(t, "/develop second topic", 0)
 
-	var second telegramcore.TelegramConversation
+	var second telegramcore.Conversation
 
 	for _, c := range f.sessions(t) {
 		if c.ID != first.ID {

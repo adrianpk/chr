@@ -13,7 +13,7 @@ func TestTelegramHelpOutbox(t *testing.T) {
 	now := time.Now().UTC()
 
 	update := telegramRetainedTestUpdate(t, 1, "/help")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, now); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{update}, now); err != nil {
 		t.Fatal(err)
 	}
 
@@ -39,7 +39,7 @@ func TestTelegramHelpOutbox(t *testing.T) {
 	checkTelegramHelpFallback(t, store, delivery.ID, now)
 }
 
-func checkTelegramHelpSnapshot(t *testing.T, store *TelegramReceiverStore, now time.Time) TelegramReceiverDelivery {
+func checkTelegramHelpSnapshot(t *testing.T, store *ReceiverStore, now time.Time) ReceiverDelivery {
 	t.Helper()
 
 	due, err := store.DueDeliveries(t.Context(), 12345, now)
@@ -55,23 +55,23 @@ func checkTelegramHelpSnapshot(t *testing.T, store *TelegramReceiverStore, now t
 	return delivery
 }
 
-func selectTelegramHelpFallback(t *testing.T, store *TelegramReceiverStore, id string, now time.Time) {
+func selectTelegramHelpFallback(t *testing.T, store *ReceiverStore, id string, now time.Time) {
 	t.Helper()
 
 	if err := store.ReserveDelivery(t.Context(), id, now); err != nil {
 		t.Fatal(err)
 	}
 
-	if selected, err := store.SelectTelegramPlainFallback(t.Context(), id, now); err != nil || !selected {
+	if selected, err := store.SelectPlainFallback(t.Context(), id, now); err != nil || !selected {
 		t.Fatal("definite rejection did not select fallback", selected, err)
 	}
 
-	if selected, err := store.SelectTelegramPlainFallback(t.Context(), id, now); err != nil || selected {
+	if selected, err := store.SelectPlainFallback(t.Context(), id, now); err != nil || selected {
 		t.Fatal("fallback was selected twice", selected, err)
 	}
 }
 
-func checkTelegramHelpFallback(t *testing.T, store *TelegramReceiverStore, id string, now time.Time) {
+func checkTelegramHelpFallback(t *testing.T, store *ReceiverStore, id string, now time.Time) {
 	t.Helper()
 
 	due, err := store.DueDeliveries(t.Context(), 12345, now)
@@ -90,7 +90,7 @@ func checkTelegramHelpFallback(t *testing.T, store *TelegramReceiverStore, id st
 	checkTelegramHelpAttempts(t, store, id)
 }
 
-func checkTelegramHelpAttempts(t *testing.T, store *TelegramReceiverStore, id string) {
+func checkTelegramHelpAttempts(t *testing.T, store *ReceiverStore, id string) {
 	t.Helper()
 
 	var attempts, lifetime, bindings int
@@ -109,7 +109,7 @@ func TestTelegramHelpOutboxBounds(t *testing.T) {
 	update := telegramRetainedTestUpdate(t, 1, "/help")
 
 	now := time.Now()
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, now); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{update}, now); err != nil {
 		t.Fatal(err)
 	}
 

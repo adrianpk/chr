@@ -6,42 +6,42 @@ import (
 	"io"
 )
 
-// TelegramUpdateEnvelope describes a package boundary value.
-type TelegramUpdateEnvelope struct {
-	OK     bool             `json:"ok"`
-	Result []TelegramUpdate `json:"result"`
+// UpdateEnvelope describes a package boundary value.
+type UpdateEnvelope struct {
+	OK     bool     `json:"ok"`
+	Result []Update `json:"result"`
 }
 
-// TelegramUpdate describes a package boundary value.
-type TelegramUpdate struct {
-	UpdateID int64                 `json:"update_id"`
-	Message  TelegramUpdateMessage `json:"message"`
+// Update describes a package boundary value.
+type Update struct {
+	UpdateID int64         `json:"update_id"`
+	Message  UpdateMessage `json:"message"`
 }
 
-// TelegramUpdateMessage describes a package boundary value.
-type TelegramUpdateMessage struct {
-	MessageID int64              `json:"message_id"`
-	From      TelegramSenderUser `json:"from"`
-	Chat      TelegramChat       `json:"chat"`
-	Date      int64              `json:"date"`
-	Text      string             `json:"text"`
+// UpdateMessage describes a package boundary value.
+type UpdateMessage struct {
+	MessageID int64      `json:"message_id"`
+	From      SenderUser `json:"from"`
+	Chat      Chat       `json:"chat"`
+	Date      int64      `json:"date"`
+	Text      string     `json:"text"`
 }
 
-// TelegramSenderUser describes a package boundary value.
-type TelegramSenderUser struct {
+// SenderUser describes a package boundary value.
+type SenderUser struct {
 	ID        int64  `json:"id"`
 	Username  string `json:"username"`
 	FirstName string `json:"first_name"`
 }
 
-// TelegramChat describes a package boundary value.
-type TelegramChat struct {
+// Chat describes a package boundary value.
+type Chat struct {
 	ID int64 `json:"id"`
 }
 
-// DecodeTelegramUpdates decodes the corresponding package payload.
-func DecodeTelegramUpdates(reader io.Reader) ([]TelegramUpdate, error) {
-	var envelope TelegramUpdateEnvelope
+// DecodeUpdates decodes the corresponding package payload.
+func DecodeUpdates(reader io.Reader) ([]Update, error) {
+	var envelope UpdateEnvelope
 
 	decoder := json.NewDecoder(reader)
 	decoder.DisallowUnknownFields()

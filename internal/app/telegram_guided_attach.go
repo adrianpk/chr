@@ -10,7 +10,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r telegramReceiver) attachTelegramGuidedName(ctx context.Context, input telegramcore.TelegramConversationInput, title, projectName string) (string, error) {
+func (r telegramReceiver) attachTelegramGuidedName(ctx context.Context, input telegramcore.ConversationInput, title, projectName string) (string, error) {
 	operations, ok := r.operations.(telegramGuidedService)
 	if !ok {
 		return "", ErrRecordUnsupported
@@ -25,7 +25,7 @@ func (r telegramReceiver) attachTelegramGuidedName(ctx context.Context, input te
 		input.Project = project
 	}
 
-	target, err := r.store.ResolveTelegramOperationTarget(ctx, input, time.Now())
+	target, err := r.store.ResolveOperationTarget(ctx, input, time.Now())
 	if err != nil {
 		return "", telegramGuidedStartFailure(err, input.Projects)
 	}
@@ -53,15 +53,15 @@ func (r telegramReceiver) attachTelegramGuidedName(ctx context.Context, input te
 	}
 
 	input.Project, input.Namespace = target.ProjectID, target.Namespace
-	conversation, _, err := r.store.BindTelegramGuidedConversation(ctx, input, association, time.Now())
+	conversation, _, err := r.store.BindGuidedConversation(ctx, input, association, time.Now())
 
 	return conversation.ID, err
 }
 
-func telegramGuidedAssociation(session core.AuthoringSession) (telegramcore.TelegramGuidedAssociation, error) {
+func telegramGuidedAssociation(session core.AuthoringSession) (telegramcore.GuidedAssociation, error) {
 	if session.Guided == nil || core.ValidateGuidedUseCase(session) != nil {
-		return telegramcore.TelegramGuidedAssociation{}, workflowstate.ErrConflict
+		return telegramcore.GuidedAssociation{}, workflowstate.ErrConflict
 	}
 
-	return telegramcore.TelegramGuidedAssociation{SessionID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace, Topic: session.Topic}, nil
+	return telegramcore.GuidedAssociation{SessionID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace, Topic: session.Topic}, nil
 }

@@ -103,7 +103,7 @@ func TestTelegramPresentationDocumentReadRecovery(t *testing.T) {
 	checkTelegramNoWork(t, f.receiver.env)
 }
 
-func queueTelegramOriginalDocumentRead(t *testing.T, f *telegramConversationAppFixture, request telegramcore.TelegramOperationRequest) (string, []byte) {
+func queueTelegramOriginalDocumentRead(t *testing.T, f *telegramConversationAppFixture, request telegramcore.OperationRequest) (string, []byte) {
 	t.Helper()
 
 	prepared, err := telegramRetainedExplanation(request)
@@ -146,7 +146,7 @@ func telegramOriginalDocumentFixture(t *testing.T) (*telegramConversationAppFixt
 	return f, conversation, calls.Load
 }
 
-func reserveTelegramOriginalDocument(t *testing.T, f *telegramConversationAppFixture, conversation, kind string) (telegramcore.TelegramOperationRequest, error) {
+func reserveTelegramOriginalDocument(t *testing.T, f *telegramConversationAppFixture, conversation, kind string) (telegramcore.OperationRequest, error) {
 	t.Helper()
 
 	input := telegramOperationRetainInput(t, f, "Show the "+kind+" document.")

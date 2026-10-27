@@ -10,10 +10,10 @@ import (
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
-func telegramConfirmationFixture(t *testing.T) (*telegramConversationFixture, TelegramActionOffer, TelegramAction) {
+func telegramConfirmationFixture(t *testing.T) (*telegramConversationFixture, ActionOffer, Action) {
 	t.Helper()
 
-	return telegramOperationActionFixture(t, func(request TelegramOperationRequest, offer *TelegramActionOffer) {
+	return telegramOperationActionFixture(t, func(request OperationRequest, offer *ActionOffer) {
 		payload := []byte("# Complete scope\n\nOne exact record and its validation.\n")
 		offer.Delivery = &tgmessage.DocumentResponse{
 			Message:  tgmessage.Blocks{Family: "29", InitialText: "Create this ticket?", Content: "One exact record."},
@@ -31,7 +31,7 @@ func TestTelegramPresentationConfirmationBinding(t *testing.T) {
 	}
 
 	delivery := telegramConfirmationDelivery(t, f, action)
-	if err := f.store.ValidateTelegramActionDelivery(t.Context(), delivery); err != nil {
+	if err := f.store.ValidateActionDelivery(t.Context(), delivery); err != nil {
 		t.Fatal(err)
 	}
 
@@ -48,7 +48,7 @@ func TestTelegramPresentationConfirmationBinding(t *testing.T) {
 
 	input := telegramOperationActionInput(t, f, "confirm")
 
-	claim, err := f.store.ClaimTelegramAction(t.Context(), input, TelegramActionAnswer{Token: action.Token, Choice: "confirm"}, time.Now())
+	claim, err := f.store.ClaimAction(t.Context(), input, ActionAnswer{Token: action.Token, Choice: "confirm"}, time.Now())
 	if err != nil || claim.Action.State != "applying" {
 		t.Fatal("valid original confirmation was refused", claim, err)
 	}
@@ -62,22 +62,22 @@ func TestTelegramPresentationConfirmationRollback(t *testing.T) {
 	for _, kind := range []string{"oversized", "wrong project", "quota"} {
 		t.Run(kind, func(t *testing.T) {
 			f := newTelegramConversationFixture(t)
-			f.apply(t, TelegramConversationStart, func(input *TelegramConversationInput) { input.Project = "alpha" })
+			f.apply(t, ConversationStart, func(input *ConversationInput) { input.Project = "alpha" })
 
 			input := telegramOperationActionInput(t, f, "prepare confirmation")
 			input.Conversation = f.sessions(t)[0].ID
 
-			target, err := f.store.ResolveTelegramOperationTarget(t.Context(), input, time.Now())
+			target, err := f.store.ResolveOperationTarget(t.Context(), input, time.Now())
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			request, err := f.store.ReserveTelegramOperation(t.Context(), TelegramOperationRequest{Source: input.Update, Operator: input.Config.AllowedUsers[0].OperatorID, Target: target, OperationID: "records.ticket.create", Arguments: json.RawMessage(`{"title":"One record"}`)}, time.Now())
+			request, err := f.store.ReserveOperation(t.Context(), OperationRequest{Source: input.Update, Operator: input.Config.AllowedUsers[0].OperatorID, Target: target, OperationID: "records.ticket.create", Arguments: json.RawMessage(`{"title":"One record"}`)}, time.Now())
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			if err := f.store.PrepareTelegramOperation(t.Context(), request, json.RawMessage(`{"reserved_id":"PRJ-1"}`), time.Now()); err != nil {
+			if err := f.store.PrepareOperation(t.Context(), request, json.RawMessage(`{"reserved_id":"PRJ-1"}`), time.Now()); err != nil {
 				t.Fatal(err)
 			}
 
@@ -86,7 +86,7 @@ func TestTelegramPresentationConfirmationRollback(t *testing.T) {
 	}
 }
 
-func checkTelegramConfirmationRollback(t *testing.T, f *telegramConversationFixture, request TelegramOperationRequest, input TelegramConversationInput, kind string) {
+func checkTelegramConfirmationRollback(t *testing.T, f *telegramConversationFixture, request OperationRequest, input ConversationInput, kind string) {
 	t.Helper()
 
 	document := rejectedTelegramConfirmationDocument(t, f, request, kind)
@@ -96,7 +96,7 @@ func checkTelegramConfirmationRollback(t *testing.T, f *telegramConversationFixt
 		t.Fatal(err)
 	}
 
-	_, err := f.store.OfferTelegramAction(t.Context(), TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"confirm"}, Delivery: &tgmessage.DocumentResponse{Message: tgmessage.Blocks{InitialText: "Confirm?"}, Document: document}, ExpiresAt: time.Now().Add(time.Hour)}, time.Now())
+	_, err := f.store.OfferAction(t.Context(), ActionOffer{Input: input, RequestID: request.ID, Choices: []string{"confirm"}, Delivery: &tgmessage.DocumentResponse{Message: tgmessage.Blocks{InitialText: "Confirm?"}, Document: document}, ExpiresAt: time.Now().Add(time.Hour)}, time.Now())
 	if err == nil {
 		t.Fatal("incomplete scope exposed a confirmation")
 	}
@@ -120,7 +120,7 @@ func checkTelegramConfirmationRollback(t *testing.T, f *telegramConversationFixt
 	}
 }
 
-func telegramConfirmationDelivery(t *testing.T, f *telegramConversationFixture, action TelegramAction) TelegramReceiverDelivery {
+func telegramConfirmationDelivery(t *testing.T, f *telegramConversationFixture, action Action) ReceiverDelivery {
 	t.Helper()
 
 	deliveries, err := f.store.DueDeliveries(t.Context(), 12345, time.Now())
@@ -128,7 +128,7 @@ func telegramConfirmationDelivery(t *testing.T, f *telegramConversationFixture, 
 		t.Fatal(err)
 	}
 
-	var delivery TelegramReceiverDelivery
+	var delivery ReceiverDelivery
 
 	for _, row := range deliveries {
 		if row.ActionToken == action.Token {
@@ -143,7 +143,7 @@ func telegramConfirmationDelivery(t *testing.T, f *telegramConversationFixture, 
 	return delivery
 }
 
-func reopenTelegramConfirmation(t *testing.T, f *telegramConversationFixture, offer TelegramActionOffer, action TelegramAction) {
+func reopenTelegramConfirmation(t *testing.T, f *telegramConversationFixture, offer ActionOffer, action Action) {
 	t.Helper()
 
 	before := action
@@ -154,13 +154,13 @@ func reopenTelegramConfirmation(t *testing.T, f *telegramConversationFixture, of
 
 	f.store = openTelegramReceiverTestStore(t, f.env)
 
-	again, err := f.store.OfferTelegramAction(t.Context(), offer, time.Now())
+	again, err := f.store.OfferAction(t.Context(), offer, time.Now())
 	if err != nil || again.Token != before.Token || again.GuardDigest != before.GuardDigest || again.PresentationHash != before.PresentationHash {
 		t.Fatal("reopen or replay replaced the original image", again, err)
 	}
 }
 
-func rejectedTelegramConfirmationDocument(t *testing.T, f *telegramConversationFixture, request TelegramOperationRequest, kind string) tgmessage.Document {
+func rejectedTelegramConfirmationDocument(t *testing.T, f *telegramConversationFixture, request OperationRequest, kind string) tgmessage.Document {
 	t.Helper()
 
 	document := tgmessage.Document{ProjectID: request.Target.ProjectID, Namespace: request.Target.Namespace, ProjectBindingDigest: request.Target.ProjectBindingDigest, SourceRef: "exports/scope.md", SourceHash: contenthash.Sum([]byte("scope")), Filename: "scope.md", MediaType: "text/markdown", Payload: []byte("scope")}

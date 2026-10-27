@@ -119,7 +119,7 @@ func TestTelegramPresentationFormatHTTP(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			payloads := make(chan telegramHelpHTTPBody, 3)
 			server := telegramHelpHTTPServer(t, payloads, test.status, test.failure)
-			receiver, config := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
+			receiver, config := telegramAppTestReceiver(t, telegramcore.ReceiverAPI{Client: server.Client(), BaseURL: server.URL})
 			update := retainTelegramHelpInput(t, receiver, 1, "/dump")
 
 			message := tgmessage.Blocks{InitialText: "Saved 😀", ContentKind: "markdown", Content: "# Title\n```literal```\\_*[", SecondaryText: "Details retained."}
@@ -190,7 +190,7 @@ func TestTelegramPresentationConversationQuestion(t *testing.T) {
 // Read-only project and health views omit operational identifiers and provide a
 // concrete recovery route when the user's registry has no accessible project.
 func TestTelegramPresentationConversationReads(t *testing.T) {
-	receiver, config := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{})
+	receiver, config := telegramAppTestReceiver(t, telegramcore.ReceiverAPI{})
 	for _, test := range []struct {
 		name      string
 		operation telegramReadOperation
@@ -200,7 +200,7 @@ func TestTelegramPresentationConversationReads(t *testing.T) {
 		{"health", telegramReadStatus, "Receiver:"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			reply, err := telegramReadOperationResponse(receiver.operations, config.AllowedUsers[0], telegramcore.TelegramReceivedUpdate{Peer: telegramcore.TelegramPeerIdentity{BotID: 12345}}, test.operation)
+			reply, err := telegramReadOperationResponse(receiver.operations, config.AllowedUsers[0], telegramcore.ReceivedUpdate{Peer: telegramcore.PeerIdentity{BotID: 12345}}, test.operation)
 			if err != nil || !strings.Contains(reply.Text, test.want) || strings.Contains(reply.Text, "Cursor epoch") || strings.Contains(reply.Text, "Bot:") {
 				t.Fatal("read view leaked routine identifiers or lost recovery guidance", reply, err)
 			}

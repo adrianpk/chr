@@ -19,7 +19,7 @@ func TestTelegramPresentationActionLabels(t *testing.T) {
 		t.Run(test.choice, func(t *testing.T) {
 			token := strings.Repeat("a", 32)
 
-			keyboard, err := telegramActionKeyboard(token, []string{test.choice})
+			keyboard, err := actionKeyboard(token, []string{test.choice})
 			if err != nil {
 				t.Fatal(err)
 			}

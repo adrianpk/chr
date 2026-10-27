@@ -8,19 +8,19 @@ import (
 	"strings"
 )
 
-// TelegramReceiverToken reads an environment reference, then the private file.
+// ReceiverToken reads an environment reference, then the private file.
 // It never includes the token or file content in an error.
-func TelegramReceiverToken(env TelegramConfigDirectory, config TelegramReceiverConfig) (string, error) {
+func ReceiverToken(env ConfigDirectory, config ReceiverConfig) (string, error) {
 	if token := os.Getenv(config.BotTokenEnv); token != "" {
-		return validateTelegramReceiverToken(token)
+		return validateReceiverToken(token)
 	}
 
-	data, err := readTelegramPrivateFile(filepath.Join(env.ConfigDir(), "telegram.env"), 64*1024)
+	data, err := readPrivateFile(filepath.Join(env.ConfigDir(), "telegram.env"), 64*1024)
 	if err != nil {
 		return "", errors.New("telegram token environment reference is unavailable")
 	}
 
-	values, err := parseTelegramEnvironment(data)
+	values, err := parseEnvironment(data)
 	if err != nil {
 		return "", err
 	}
@@ -30,10 +30,10 @@ func TelegramReceiverToken(env TelegramConfigDirectory, config TelegramReceiverC
 		return "", errors.New("telegram private token environment reference does not match")
 	}
 
-	return validateTelegramReceiverToken(token)
+	return validateReceiverToken(token)
 }
 
-func validateTelegramReceiverToken(token string) (string, error) {
+func validateReceiverToken(token string) (string, error) {
 	if !regexp.MustCompile(`^[0-9]{1,20}:[A-Za-z0-9_-]{20,256}$`).MatchString(token) {
 		return "", errors.New("telegram token is malformed")
 	}
@@ -41,20 +41,20 @@ func validateTelegramReceiverToken(token string) (string, error) {
 	return token, nil
 }
 
-// SaveTelegramReceiverToken stores a masked-input token without replacing another credential implicitly.
-func SaveTelegramReceiverToken(env TelegramConfigDirectory, config TelegramReceiverConfig, token string, replace bool) error {
-	if _, err := validateTelegramReceiverToken(token); err != nil {
+// SaveReceiverToken stores a masked-input token without replacing another credential implicitly.
+func SaveReceiverToken(env ConfigDirectory, config ReceiverConfig, token string, replace bool) error {
+	if _, err := validateReceiverToken(token); err != nil {
 		return err
 	}
 
 	path := filepath.Join(env.ConfigDir(), "telegram.env")
 
-	prior, err := readTelegramPrivateFile(path, 64*1024)
+	prior, err := readPrivateFile(path, 64*1024)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return errors.New("telegram credential file is unavailable")
 	}
 
-	values, err := parseTelegramEnvironment(prior)
+	values, err := parseEnvironment(prior)
 	if err != nil {
 		return err
 	}
@@ -69,15 +69,15 @@ func SaveTelegramReceiverToken(env TelegramConfigDirectory, config TelegramRecei
 		}
 	}
 
-	wanted, err := renderTelegramTokenEnvironment(prior, config.BotTokenEnv, token)
+	wanted, err := renderTokenEnvironment(prior, config.BotTokenEnv, token)
 	if err != nil {
 		return err
 	}
 
-	return writeTelegramPrivateFile(path, wanted)
+	return writePrivateFile(path, wanted)
 }
 
-func renderTelegramTokenEnvironment(prior []byte, name, token string) ([]byte, error) {
+func renderTokenEnvironment(prior []byte, name, token string) ([]byte, error) {
 	var lines []string
 
 	for _, line := range strings.Split(strings.TrimSuffix(string(prior), "\n"), "\n") {
@@ -97,7 +97,7 @@ func renderTelegramTokenEnvironment(prior []byte, name, token string) ([]byte, e
 	return []byte(wanted), nil
 }
 
-func parseTelegramEnvironment(data []byte) (map[string]string, error) {
+func parseEnvironment(data []byte) (map[string]string, error) {
 	values := map[string]string{}
 
 	for _, line := range strings.Split(string(data), "\n") {

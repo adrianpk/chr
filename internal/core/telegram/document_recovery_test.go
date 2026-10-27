@@ -15,7 +15,7 @@ import (
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
-func seedTelegramDocumentQuota(t *testing.T, store *TelegramReceiverStore, count int) {
+func seedTelegramDocumentQuota(t *testing.T, store *ReceiverStore, count int) {
 	t.Helper()
 
 	zero := make([]byte, tgmessage.DocumentLimit)
@@ -36,7 +36,7 @@ func TestTelegramPresentationDocumentQuota(t *testing.T) {
 	second := openTelegramReceiverTestStore(t, env)
 	seedTelegramDocumentQuota(t, first, 31)
 
-	updates := []TelegramReceivedUpdate{telegramRetainedTestUpdate(t, 1, "first"), telegramRetainedTestUpdate(t, 2, "second")}
+	updates := []ReceivedUpdate{telegramRetainedTestUpdate(t, 1, "first"), telegramRetainedTestUpdate(t, 2, "second")}
 	if err := first.RetainBatch(t.Context(), 12345, updates, time.Now()); err != nil {
 		t.Fatal(err)
 	}
@@ -47,8 +47,8 @@ func TestTelegramPresentationDocumentQuota(t *testing.T) {
 	response.Message.Content = tgmessage.DocumentExcerpt(response.Document.Payload)
 	ready, results := make(chan struct{}), make(chan error, 2)
 
-	for index, store := range []*TelegramReceiverStore{first, second} {
-		go func(index int, store *TelegramReceiverStore) {
+	for index, store := range []*ReceiverStore{first, second} {
+		go func(index int, store *ReceiverStore) {
 			<-ready
 
 			results <- store.QueueDocumentResponse(t.Context(), updates[index], response, telegramReceiverTestConfig().Digest(), time.Now())
@@ -76,7 +76,7 @@ func TestTelegramPresentationDocumentQuota(t *testing.T) {
 	checkTelegramDocumentReceipt(t, first)
 }
 
-func checkTelegramDocumentQuota(t *testing.T, store *TelegramReceiverStore) {
+func checkTelegramDocumentQuota(t *testing.T, store *ReceiverStore) {
 	t.Helper()
 
 	var usage int64
@@ -90,7 +90,7 @@ func checkTelegramDocumentQuota(t *testing.T, store *TelegramReceiverStore) {
 	}
 }
 
-func checkTelegramDocumentReceipt(t *testing.T, store *TelegramReceiverStore) {
+func checkTelegramDocumentReceipt(t *testing.T, store *ReceiverStore) {
 	t.Helper()
 
 	request := applyingTelegramDocumentTestRequest(t, store)
@@ -98,12 +98,12 @@ func checkTelegramDocumentReceipt(t *testing.T, store *TelegramReceiverStore) {
 
 	request.Delivery = &response
 	for range 2 {
-		if err := store.FinishTelegramOperation(t.Context(), request, "confirmed", "receipts/original.json", json.RawMessage(`{"saved":true}`), "Result saved.", telegramReceiverTestConfig().Digest(), time.Now()); err != nil {
+		if err := store.FinishOperation(t.Context(), request, "confirmed", "receipts/original.json", json.RawMessage(`{"saved":true}`), "Result saved.", telegramReceiverTestConfig().Digest(), time.Now()); err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	retained, found, err := store.TelegramOperation(t.Context(), request.Source, 0)
+	retained, found, err := store.Operation(t.Context(), request.Source, 0)
 	if err != nil || !found || retained.State != "confirmed" || retained.ReceiptRef != "receipts/original.json" {
 		t.Fatal("document failure lost the original effect receipt", retained, err)
 	}
@@ -122,7 +122,7 @@ func TestTelegramPresentationDeliveryRecovery(t *testing.T) {
 	now := time.Now()
 
 	update := telegramRetainedTestUpdate(t, 1, "document")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, now); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{update}, now); err != nil {
 		t.Fatal(err)
 	}
 
@@ -141,7 +141,7 @@ func TestTelegramPresentationDeliveryRecovery(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := store.DeliveryFailed(t.Context(), delivery, &TelegramAPIError{Code: "transport_failure", Uncertain: true}, now); err != nil {
+	if err := store.DeliveryFailed(t.Context(), delivery, &APIError{Code: "transport_failure", Uncertain: true}, now); err != nil {
 		t.Fatal(err)
 	}
 
@@ -153,7 +153,7 @@ func TestTelegramPresentationDeliveryRecovery(t *testing.T) {
 	checkTelegramDocumentRecovery(t, store, delivery.ID, response.Document.Payload, now.Add(time.Minute))
 }
 
-func checkTelegramDocumentRecovery(t *testing.T, store *TelegramReceiverStore, id string, payload []byte, now time.Time) {
+func checkTelegramDocumentRecovery(t *testing.T, store *ReceiverStore, id string, payload []byte, now time.Time) {
 	t.Helper()
 
 	due, err := store.DueDeliveries(t.Context(), 12345, now)
@@ -190,14 +190,14 @@ func TestTelegramPresentationDocumentRetention(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := f.store.transaction(t.Context(), func(tx *sql.Tx) error { return purgeTelegramDocuments(t.Context(), tx, 12345, now.Add(8*24*time.Hour)) }); err != nil {
+	if err := f.store.transaction(t.Context(), func(tx *sql.Tx) error { return purgeDocuments(t.Context(), tx, 12345, now.Add(8*24*time.Hour)) }); err != nil {
 		t.Fatal(err)
 	}
 
 	assertTelegramDocumentRetention(t, f.store, ids)
 }
 
-func assertTelegramDocumentRetention(t *testing.T, store *TelegramReceiverStore, ids []string) {
+func assertTelegramDocumentRetention(t *testing.T, store *ReceiverStore, ids []string) {
 	t.Helper()
 
 	for index, id := range ids {
@@ -239,24 +239,24 @@ func TestTelegramPresentationDocumentGuards(t *testing.T) {
 	}
 }
 
-func applyingTelegramDocumentTestRequest(t *testing.T, store *TelegramReceiverStore) TelegramOperationRequest {
+func applyingTelegramDocumentTestRequest(t *testing.T, store *ReceiverStore) OperationRequest {
 	t.Helper()
 
 	request := telegramOperationTestRequest(t, store, 3)
 
 	request.PreparedInput = json.RawMessage(`{"original":"owner input"}`)
-	if err := store.PrepareTelegramOperation(t.Context(), request, request.PreparedInput, time.Now()); err != nil {
+	if err := store.PrepareOperation(t.Context(), request, request.PreparedInput, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := store.BeginTelegramOperation(t.Context(), request, time.Now()); err != nil {
+	if err := store.BeginOperation(t.Context(), request, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
 	return request
 }
 
-func acknowledgeTelegramDocumentTest(t *testing.T, store *TelegramReceiverStore, id string, now time.Time) {
+func acknowledgeTelegramDocumentTest(t *testing.T, store *ReceiverStore, id string, now time.Time) {
 	t.Helper()
 
 	if err := store.DeliveryDocumentSent(t.Context(), id, tgmessage.Acknowledgement{MessageID: 77, FileID: "original-file"}, now); err != nil {
@@ -276,7 +276,7 @@ func queueRetentionTestDocument(t *testing.T, f *telegramConversationFixture, in
 	t.Helper()
 
 	update := telegramRetainedTestUpdate(t, int64(100+index), "document")
-	if err := f.store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, now); err != nil {
+	if err := f.store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{update}, now); err != nil {
 		t.Fatal(err)
 	}
 

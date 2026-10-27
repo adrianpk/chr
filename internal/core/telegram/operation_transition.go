@@ -11,10 +11,10 @@ import (
 	"forge.adrianpk.com/chr/internal/core/database"
 )
 
-// PrepareTelegramOperation checkpoints the exact owner input before application.
-func (s *TelegramReceiverStore) PrepareTelegramOperation(ctx context.Context, request TelegramOperationRequest, input json.RawMessage, now time.Time) error {
+// PrepareOperation checkpoints the exact owner input before application.
+func (s *ReceiverStore) PrepareOperation(ctx context.Context, request OperationRequest, input json.RawMessage, now time.Time) error {
 	if len(input) == 0 || len(input) > 1048576 || !json.Valid(input) {
-		return errTelegramReceiverConflict
+		return errReceiverConflict
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
@@ -23,63 +23,63 @@ func (s *TelegramReceiverStore) PrepareTelegramOperation(ctx context.Context, re
 			return err
 		}
 
-		if err := telegramRequireChanged(result); err != nil {
+		if err := requireChanged(result); err != nil {
 			return err
 		}
 
-		return checkTelegramIntakeCapacity(ctx, tx, request.Source.Peer.BotID)
+		return checkIntakeCapacity(ctx, tx, request.Source.Peer.BotID)
 	})
 }
 
-// BeginTelegramOperation persists application intent without spanning the owner call.
-func (s *TelegramReceiverStore) BeginTelegramOperation(ctx context.Context, request TelegramOperationRequest, now time.Time) error {
+// BeginOperation persists application intent without spanning the owner call.
+func (s *ReceiverStore) BeginOperation(ctx context.Context, request OperationRequest, now time.Time) error {
 	result, err := s.db.ExecContext(ctx, `UPDATE telegram_requests SET state='applying',updated_at=? WHERE id=? AND argument_digest=? AND state IN ('ready','applying') AND prepared_input=? AND domain_guard=?`, database.FormatTime(now), request.ID, request.ArgumentDigest, string(request.PreparedInput), contenthash.Sum(request.PreparedInput))
 	if err != nil {
 		return err
 	}
 
-	return telegramRequireChanged(result)
+	return requireChanged(result)
 }
 
-// FinishTelegramOperation records confirmed facts or an explicit failure with the
+// FinishOperation records confirmed facts or an explicit failure with the
 // source acknowledgement and outbox in one transaction. It never retries a domain effect.
-func (s *TelegramReceiverStore) FinishTelegramOperation(ctx context.Context, request TelegramOperationRequest, state, receipt string, facts json.RawMessage, text, configDigest string, now time.Time) error {
-	if !validTelegramOperationFinish(state, receipt, facts) {
-		return errTelegramReceiverConflict
+func (s *ReceiverStore) FinishOperation(ctx context.Context, request OperationRequest, state, receipt string, facts json.RawMessage, text, configDigest string, now time.Time) error {
+	if !validOperationFinish(state, receipt, facts) {
+		return errReceiverConflict
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		pending, err := telegramReadResponsePending(ctx, tx, request.Source)
+		pending, err := readResponsePending(ctx, tx, request.Source)
 		if err != nil || !pending {
 			return err
 		}
 
-		return finishTelegramOperation(ctx, tx, request, state, receipt, facts, text, configDigest, now)
+		return finishOperation(ctx, tx, request, state, receipt, facts, text, configDigest, now)
 	})
 }
 
-func finishTelegramOperation(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, state, receipt string, facts json.RawMessage, text, configDigest string, now time.Time) error {
+func finishOperation(ctx context.Context, tx *sql.Tx, request OperationRequest, state, receipt string, facts json.RawMessage, text, configDigest string, now time.Time) error {
 	result, err := tx.ExecContext(ctx, `UPDATE telegram_requests SET state=?,domain_receipt_ref=NULLIF(?,''),result=?,updated_at=? WHERE id=? AND argument_digest=? AND ((?='confirmed' AND state='applying') OR (?='rejected' AND state='prepared') OR (?='blocked' AND state IN ('prepared','ready','applying'))) `, state, receipt, string(facts), database.FormatTime(now), request.ID, request.ArgumentDigest, state, state, state)
 	if err != nil {
 		return err
 	}
 
-	if err := telegramRequireChanged(result); err != nil {
+	if err := requireChanged(result); err != nil {
 		return err
 	}
 
-	if err := finishTelegramHarnessConversation(ctx, tx, request, state, now); err != nil {
+	if err := finishHarnessConversation(ctx, tx, request, state, now); err != nil {
 		return err
 	}
 
-	if err := queueTelegramOperationResult(ctx, tx, request, text, receipt, configDigest, now); err != nil {
+	if err := queueOperationResult(ctx, tx, request, text, receipt, configDigest, now); err != nil {
 		return err
 	}
 
-	return bindTelegramOperationResponse(ctx, tx, request)
+	return bindOperationResponse(ctx, tx, request)
 }
 
-func validTelegramOperationFinish(state, receipt string, facts json.RawMessage) bool {
+func validOperationFinish(state, receipt string, facts json.RawMessage) bool {
 	if state != "confirmed" && state != "rejected" && state != "blocked" {
 		return false
 	}
@@ -91,7 +91,7 @@ func validTelegramOperationFinish(state, receipt string, facts json.RawMessage) 
 	return len(receipt) <= 4096 && len(facts) <= 65536 && json.Valid(facts)
 }
 
-func bindTelegramOperationResponse(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest) error {
+func bindOperationResponse(ctx context.Context, tx *sql.Tx, request OperationRequest) error {
 	_, err := tx.ExecContext(ctx, `UPDATE telegram_outbox SET request_id=?,conversation_id=NULLIF(?,''),conversation_revision=NULLIF(?,0) WHERE bot_id=? AND event_key=?`, request.ID, request.Target.ConversationID, request.Target.ConversationRevision, request.Source.Peer.BotID, "update:"+strconv.FormatInt(request.Source.UpdateID, 10))
 	if err != nil {
 		return err

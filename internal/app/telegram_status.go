@@ -23,12 +23,12 @@ func (factory commandFactory) telegramStatusAction(ctx context.Context, cmd *cli
 		return err
 	}
 
-	config, err := telegramcore.LoadTelegramReceiverConfig(env)
+	config, err := telegramcore.LoadReceiverConfig(env)
 	if err != nil {
 		return errors.New("telegram configuration is unavailable or invalid; run telegram setup")
 	}
 
-	_, tokenErr := telegramcore.TelegramReceiverToken(env, config)
+	_, tokenErr := telegramcore.ReceiverToken(env, config)
 
 	_, err = fmt.Fprintf(factory.io.Stdout,
 		"telegram: configured\ntoken_available: %t\npoll_timeout_seconds: %d\nallowed_users: %d\nconfig: %s\n", tokenErr == nil, config.PollTimeoutSeconds, len(config.AllowedUsers), filepath.Join(env.ConfigDir(), "telegram.yml"))
@@ -45,7 +45,7 @@ func (factory commandFactory) telegramStatusAction(ctx context.Context, cmd *cli
 }
 
 func printTelegramLocalState(ctx context.Context, env core.UserEnvironment, stdout io.Writer) error {
-	botID, err := telegramcore.TelegramBoundBotID(env)
+	botID, err := telegramcore.BoundBotID(env)
 	if errors.Is(err, os.ErrNotExist) {
 		_, err := fmt.Fprintln(stdout, "receiver: unbound")
 
@@ -56,7 +56,7 @@ func printTelegramLocalState(ctx context.Context, env core.UserEnvironment, stdo
 		return errors.New("telegram retained bot identity is invalid; run telegram doctor")
 	}
 
-	diagnostics, err := telegramcore.InspectTelegramReceiverDiagnostics(ctx, env, botID)
+	diagnostics, err := telegramcore.InspectReceiverDiagnostics(ctx, env, botID)
 	if err != nil {
 		return errors.New("telegram retained state is unavailable or requires migration; run telegram doctor")
 	}
@@ -118,7 +118,7 @@ func telegramDiagnosticTime(value time.Time) string {
 	return value.UTC().Format(time.RFC3339)
 }
 
-func printTelegramDiagnostics(stdout io.Writer, diagnostics telegramcore.TelegramReceiverDiagnostics) error {
+func printTelegramDiagnostics(stdout io.Writer, diagnostics telegramcore.ReceiverDiagnostics) error {
 	state := diagnostics.Receiver
 	if _, err := fmt.Fprintf(stdout, "retry_cycle: %d\nlifetime_poll_attempts: %d\nretry_actor: %s\nretry_started_at: %s\nretention_gap_at: %s\nremote_gap_possible: %t\nactive_conversations: %d\npending_updates: %d\npending_deliveries: %d\nexhausted_models: %d\ndelivery_detail_limit: 20\n", state.RetryCycle, state.TotalRetryAttempts, telegramDiagnosticAtom(state.RetryActor), telegramDiagnosticTime(state.RetryStartedAt), telegramDiagnosticTime(state.RetentionGapAt), !state.RetentionGapAt.IsZero(), diagnostics.ActiveConversations, diagnostics.PendingUpdates, diagnostics.PendingDeliveries, diagnostics.ExhaustedModels); err != nil {
 		return err

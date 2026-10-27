@@ -91,7 +91,7 @@ func telegramRecoveryServeChild(t *testing.T, root string) {
 	ctx, cancel := signal.NotifyContext(t.Context(), syscall.SIGTERM)
 	defer cancel()
 
-	api := telegramcore.TelegramReceiverAPI{Client: &http.Client{}, BaseURL: os.Getenv("CHR_TEST_RECOVERY_SERVE_API")}
+	api := telegramcore.ReceiverAPI{Client: &http.Client{}, BaseURL: os.Getenv("CHR_TEST_RECOVERY_SERVE_API")}
 	if err := serveTelegramReceiver(ctx, env, testAssetsFS(), api); err != nil {
 		t.Fatal(err)
 	}

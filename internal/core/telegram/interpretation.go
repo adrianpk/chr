@@ -13,29 +13,29 @@ import (
 	modelcore "forge.adrianpk.com/chr/internal/core/model"
 )
 
-// TelegramInterpretation retains resolution independently of application effects.
-type TelegramInterpretation struct {
+// Interpretation retains resolution independently of application effects.
+type Interpretation struct {
 	Attempts  int
 	RetryAt   time.Time
 	ErrorCode string
 	Decision  json.RawMessage
 }
 
-// ResolveTelegramInterpretation reserves an attempt before calling a provider.
+// ResolveInterpretation reserves an attempt before calling a provider.
 // OS exclusion outlives every database transaction and is released on process
 // death. A timestamp never steals an active caller's interpretation claim.
-func (s *TelegramReceiverStore) ResolveTelegramInterpretation(ctx context.Context, env TelegramStateDirectory, update TelegramReceivedUpdate, now time.Time, invoke func(context.Context) (json.RawMessage, error)) (result TelegramInterpretation, err error) {
-	if err := validateTelegramInterpretationInput(update, invoke); err != nil {
+func (s *ReceiverStore) ResolveInterpretation(ctx context.Context, env StateDirectory, update ReceivedUpdate, now time.Time, invoke func(context.Context) (json.RawMessage, error)) (result Interpretation, err error) {
+	if err := validateInterpretationInput(update, invoke); err != nil {
 		return result, err
 	}
 
-	lock, err := acquireTelegramModelClaim(env, update.Peer.BotID, fmt.Sprintf("interpretation-%d-%d.lock", update.Peer.BotID, update.UpdateID%16))
+	lock, err := acquireModelClaim(env, update.Peer.BotID, fmt.Sprintf("interpretation-%d-%d.lock", update.Peer.BotID, update.UpdateID%16))
 	if err != nil {
 		return result, err
 	}
 	defer func() { err = errors.Join(err, lock.Close()) }()
 
-	result, ready, err := s.reserveTelegramInterpretation(ctx, update, now)
+	result, ready, err := s.reserveInterpretation(ctx, update, now)
 	if err != nil || !ready {
 		return result, err
 	}
@@ -44,13 +44,13 @@ func (s *TelegramReceiverStore) ResolveTelegramInterpretation(ctx context.Contex
 	defer cancel()
 
 	decision, callErr := invoke(callCtx)
-	callErr = telegramInterpretationCallError(callCtx, decision, callErr)
+	callErr = interpretationCallError(callCtx, decision, callErr)
 	// The attempt is already durable if shutdown prevents the outcome write.
 	finishCtx, finishCancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer finishCancel()
 
 	if callErr != nil {
-		result.ErrorCode = telegramInterpretationFailure(callErr)
+		result.ErrorCode = interpretationFailure(callErr)
 		result.RetryAt = time.Now().UTC().Add(time.Second * time.Duration(1<<(result.Attempts-1)))
 		_, err = s.db.ExecContext(finishCtx, `UPDATE telegram_updates SET interpretation_retry_at=?,interpretation_error_code=? WHERE bot_id=? AND update_id=? AND payload_digest=? AND interpretation_attempt=?`, database.FormatTime(result.RetryAt), result.ErrorCode, update.Peer.BotID, update.UpdateID, update.Digest, result.Attempts)
 
@@ -66,13 +66,13 @@ func (s *TelegramReceiverStore) ResolveTelegramInterpretation(ctx context.Contex
 			return err
 		}
 
-		return checkTelegramIntakeCapacity(finishCtx, tx, update.Peer.BotID)
+		return checkIntakeCapacity(finishCtx, tx, update.Peer.BotID)
 	})
 
 	return result, err
 }
 
-func telegramInterpretationCallError(ctx context.Context, decision json.RawMessage, callErr error) error {
+func interpretationCallError(ctx context.Context, decision json.RawMessage, callErr error) error {
 	if ctx.Err() != nil {
 		return ctx.Err()
 	}
@@ -84,12 +84,12 @@ func telegramInterpretationCallError(ctx context.Context, decision json.RawMessa
 	return callErr
 }
 
-func (s *TelegramReceiverStore) reserveTelegramInterpretation(ctx context.Context, update TelegramReceivedUpdate, now time.Time) (TelegramInterpretation, bool, error) {
-	var result TelegramInterpretation
+func (s *ReceiverStore) reserveInterpretation(ctx context.Context, update ReceivedUpdate, now time.Time) (Interpretation, bool, error) {
+	var result Interpretation
 
 	ready := false
 	err := s.transaction(ctx, func(tx *sql.Tx) error {
-		pending, err := telegramReadResponsePending(ctx, tx, update)
+		pending, err := readResponsePending(ctx, tx, update)
 		if err != nil || !pending {
 			return err
 		}
@@ -124,7 +124,7 @@ func (s *TelegramReceiverStore) reserveTelegramInterpretation(ctx context.Contex
 	return result, ready, err
 }
 
-func telegramInterpretationFailure(err error) string {
+func interpretationFailure(err error) string {
 	switch {
 	case errors.Is(err, modelcore.ErrCapacity):
 		return "provider_capacity"
@@ -137,10 +137,10 @@ func telegramInterpretationFailure(err error) string {
 	}
 }
 
-func validateTelegramInterpretationInput(update TelegramReceivedUpdate, invoke func(context.Context) (json.RawMessage, error)) error {
+func validateInterpretationInput(update ReceivedUpdate, invoke func(context.Context) (json.RawMessage, error)) error {
 	if update.Kind != "message" || strings.HasPrefix(strings.TrimSpace(update.Text), "/") || invoke == nil {
-		return errTelegramReceiverConflict
+		return errReceiverConflict
 	}
 
-	return validateTelegramRetainedUpdate(update.Peer.BotID, update)
+	return validateRetainedUpdate(update.Peer.BotID, update)
 }

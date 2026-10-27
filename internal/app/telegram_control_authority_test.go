@@ -54,7 +54,7 @@ type telegramControlChangeAuthority struct {
 	change func()
 }
 
-func (s telegramControlChangeAuthority) ApplyTelegramControl(ctx context.Context, target telegramcore.TelegramOperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest, check core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error) {
+func (s telegramControlChangeAuthority) ApplyTelegramControl(ctx context.Context, target telegramcore.OperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest, check core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error) {
 	return s.service.ApplyTelegramControl(ctx, target, binding, request, func(ctx context.Context) error {
 		s.change()
 

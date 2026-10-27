@@ -11,7 +11,7 @@ import (
 
 type telegramApplicationCompletion struct {
 	updateID int64
-	lane     telegramcore.TelegramProcessingLane
+	lane     telegramcore.ProcessingLane
 	err      error
 }
 
@@ -58,7 +58,7 @@ func (h *telegramApplicationHost) run(ctx context.Context) (err error) {
 }
 
 func (h *telegramApplicationHost) pump(ctx context.Context) error {
-	for _, lane := range []telegramcore.TelegramProcessingLane{telegramcore.TelegramProcessingUrgent, telegramcore.TelegramProcessingDecision, telegramcore.TelegramProcessingOrdinary} {
+	for _, lane := range []telegramcore.ProcessingLane{telegramcore.ProcessingUrgent, telegramcore.ProcessingDecision, telegramcore.ProcessingOrdinary} {
 		updates, err := h.receiver.store.PendingApplicationInputs(ctx, h.receiver.botID, lane, time.Now())
 		if err != nil {
 			return err
@@ -99,7 +99,7 @@ func (h *telegramApplicationHost) complete(result telegramApplicationCompletion)
 		return nil
 	}
 
-	var apiErr *telegramcore.TelegramAPIError
+	var apiErr *telegramcore.APIError
 	if errors.As(result.err, &apiErr) && apiErr.Code == "local_receiver_conflict" {
 		return nil
 	}
@@ -108,7 +108,7 @@ func (h *telegramApplicationHost) complete(result telegramApplicationCompletion)
 }
 
 func telegramApplicationDeferred(err error) bool {
-	for _, expected := range []error{modelcore.ErrCapacity, telegramcore.ErrTelegramReplyPending, errTelegramLaneChanged, context.Canceled} {
+	for _, expected := range []error{modelcore.ErrCapacity, telegramcore.ErrReplyPending, errTelegramLaneChanged, context.Canceled} {
 		err = telegramHostFailure(err, expected)
 	}
 

@@ -13,83 +13,79 @@ import (
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 )
 
-// DefaultTelegramAPIBaseURL defines a package boundary constant.
-const DefaultTelegramAPIBaseURL = "https://api.telegram.org"
+// DefaultAPIBaseURL defines a package boundary constant.
+const DefaultAPIBaseURL = "https://api.telegram.org"
 
-// TelegramMessage describes a package boundary value.
-type TelegramMessage struct {
+// Message describes a package boundary value.
+type Message struct {
 	ChatID string
 	Text   string
 }
 
-// TelegramSendResult describes a package boundary value.
-type TelegramSendResult struct {
+// SendResult describes a package boundary value.
+type SendResult struct {
 	StatusCode int
 	Body       string
 }
 
-// TelegramHTTPClient defines a package boundary interface.
-type TelegramHTTPClient interface {
+// HTTPClient defines a package boundary interface.
+type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-// TelegramSender describes a package boundary value.
-type TelegramSender struct {
-	Client  TelegramHTTPClient
+// Sender describes a package boundary value.
+type Sender struct {
+	Client  HTTPClient
 	BaseURL string
 }
 
-// RenderTelegramNotificationMessage renders the corresponding package data.
-func RenderTelegramNotificationMessage(event notifycore.Event) TelegramMessage {
+// RenderNotificationMessage renders the corresponding package data.
+func RenderNotificationMessage(event notifycore.Event) Message {
 	text := event.Payload.Summary
 	if event.Payload.Detail != "" {
 		text = text + "\n\n" + event.Payload.Detail
 	}
 
-	return TelegramMessage{
+	return Message{
 		Text: text,
 	}
 }
 
-// NewTelegramSender constructs the corresponding package service or value.
-func NewTelegramSender(client TelegramHTTPClient) TelegramSender {
+// NewSender constructs the corresponding package service or value.
+func NewSender(client HTTPClient) Sender {
 	if client == nil {
 		client = http.DefaultClient
 	}
 
-	return TelegramSender{
+	return Sender{
 		Client:  client,
-		BaseURL: DefaultTelegramAPIBaseURL,
+		BaseURL: DefaultAPIBaseURL,
 	}
 }
 
 // SendMessage sends the requested message.
-func (s TelegramSender) SendMessage(
-	ctx context.Context,
-	token string,
-	message TelegramMessage,
-) (TelegramSendResult, error) {
+func (s Sender) SendMessage(ctx context.Context, token string, message Message) (SendResult, error) {
 	token = strings.TrimSpace(token)
 	if token == "" {
-		return TelegramSendResult{}, fmt.Errorf("telegram bot token is required")
+		return SendResult{}, fmt.Errorf("telegram bot token is required")
 	}
 
 	if strings.TrimSpace(message.ChatID) == "" {
-		return TelegramSendResult{}, fmt.Errorf("telegram chat id is required")
+		return SendResult{}, fmt.Errorf("telegram chat id is required")
 	}
 
 	if strings.TrimSpace(message.Text) == "" {
-		return TelegramSendResult{}, fmt.Errorf("telegram message text is required")
+		return SendResult{}, fmt.Errorf("telegram message text is required")
 	}
 
 	request, err := s.buildSendMessageRequest(ctx, token, message)
 	if err != nil {
-		return TelegramSendResult{}, err
+		return SendResult{}, err
 	}
 
 	response, err := s.Client.Do(request)
 	if err != nil {
-		return TelegramSendResult{}, fmt.Errorf("send telegram message: %w", err)
+		return SendResult{}, fmt.Errorf("send telegram message: %w", err)
 	}
 
 	defer func() {
@@ -99,10 +95,10 @@ func (s TelegramSender) SendMessage(
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return TelegramSendResult{}, fmt.Errorf("read telegram response: %w", err)
+		return SendResult{}, fmt.Errorf("read telegram response: %w", err)
 	}
 
-	result := TelegramSendResult{
+	result := SendResult{
 		StatusCode: response.StatusCode,
 		Body:       string(body),
 	}
@@ -114,14 +110,10 @@ func (s TelegramSender) SendMessage(
 	return result, nil
 }
 
-func (s TelegramSender) buildSendMessageRequest(
-	ctx context.Context,
-	token string,
-	message TelegramMessage,
-) (*http.Request, error) {
+func (s Sender) buildSendMessageRequest(ctx context.Context, token string, message Message) (*http.Request, error) {
 	baseURL := strings.TrimRight(s.BaseURL, "/")
 	if baseURL == "" {
-		baseURL = DefaultTelegramAPIBaseURL
+		baseURL = DefaultAPIBaseURL
 	}
 
 	endpoint, err := url.JoinPath(baseURL, "bot"+token, "sendMessage")

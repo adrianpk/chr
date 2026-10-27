@@ -12,7 +12,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func telegramWorkAdmitted(t *testing.T, extents ...string) (*telegramConversationAppFixture, service, telegramcore.TelegramWorkReference) {
+func telegramWorkAdmitted(t *testing.T, extents ...string) (*telegramConversationAppFixture, service, telegramcore.WorkReference) {
 	t.Helper()
 
 	extent := "ticket"
@@ -26,7 +26,7 @@ func telegramWorkAdmitted(t *testing.T, extents ...string) (*telegramConversatio
 	action, _ := telegramWorkOffer(t, f, "/work --namespace default "+selector.Extent+" "+selector.Identity)
 	f.send(t, "/answer "+action.Token+" start", 0)
 
-	refs, err := f.receiver.store.TelegramWorkReferences(t.Context(), f.receiver.botID, "", 16)
+	refs, err := f.receiver.store.WorkReferences(t.Context(), f.receiver.botID, "", 16)
 	if err != nil || len(refs) != 1 {
 		t.Fatal("confirmed admission was not retained", refs, err)
 	}
@@ -96,7 +96,7 @@ func checkTelegramWorkActivation(t *testing.T, extent string) {
 	checkTelegramWorkActivated(t, f, operations, ref, result)
 }
 
-func checkTelegramWorkActivated(t *testing.T, f *telegramConversationAppFixture, operations service, ref telegramcore.TelegramWorkReference, result telegramWorkCompletion) {
+func checkTelegramWorkActivated(t *testing.T, f *telegramConversationAppFixture, operations service, ref telegramcore.WorkReference, result telegramWorkCompletion) {
 	t.Helper()
 
 	run := checkTelegramWorkRunCount(t, operations, 1)
@@ -129,7 +129,7 @@ func TestTelegramWorkWaits(t *testing.T) {
 	}
 }
 
-func checkTelegramWorkWait(t *testing.T, f *telegramConversationAppFixture, operations service, ref telegramcore.TelegramWorkReference) {
+func checkTelegramWorkWait(t *testing.T, f *telegramConversationAppFixture, operations service, ref telegramcore.WorkReference) {
 	t.Helper()
 
 	before, err := operations.ReadWorkflow(t.Context(), ref.Invocation.ID)
@@ -184,7 +184,7 @@ type telegramWorkFinalAuthority struct {
 	change func()
 }
 
-func (s telegramWorkFinalAuthority) ResumeTelegramWork(ctx context.Context, target telegramcore.TelegramOperationTarget, reference WorkflowRetainedReference, preview WorkflowBoundPreview, check core.WorkflowAdmissionCheck) (RetainedWorkProgress, error) {
+func (s telegramWorkFinalAuthority) ResumeTelegramWork(ctx context.Context, target telegramcore.OperationTarget, reference WorkflowRetainedReference, preview WorkflowBoundPreview, check core.WorkflowAdmissionCheck) (RetainedWorkProgress, error) {
 	calls := 0
 	guard := func(ctx context.Context) error {
 		calls++

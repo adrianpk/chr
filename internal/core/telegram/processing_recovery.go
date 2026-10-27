@@ -7,29 +7,29 @@ import (
 
 // Existing pending sources gain the same classification as new intake. This
 // also resolves a reply whose definite delivery binding committed after intake.
-func (s *TelegramReceiverStore) restoreTelegramInputLanes(ctx context.Context, botID int64) error {
+func (s *ReceiverStore) restoreInputLanes(ctx context.Context, botID int64) error {
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		return restoreTelegramBotLanes(ctx, tx, botID)
+		return restoreBotLanes(ctx, tx, botID)
 	})
 }
 
-func restoreTelegramBotLanes(ctx context.Context, tx *sql.Tx, botID int64) error {
+func restoreBotLanes(ctx context.Context, tx *sql.Tx, botID int64) error {
 	rows, err := tx.QueryContext(ctx, `SELECT update_id,payload_digest,update_kind,chat_id,topic_id,user_id,message_id,chat_type,payload,reply_to_message_id FROM telegram_updates WHERE bot_id=? AND state IN ('pending','processing') ORDER BY update_id LIMIT 1024`, botID)
 	if err != nil {
 		return err
 	}
 
-	updates, err := readTelegramPendingRows(rows, botID)
+	updates, err := readPendingRows(rows, botID)
 	if err != nil {
 		return err
 	}
 
-	return restoreTelegramUpdateLanes(ctx, tx, updates)
+	return restoreUpdateLanes(ctx, tx, updates)
 }
 
-func restoreTelegramUpdateLanes(ctx context.Context, tx *sql.Tx, updates []TelegramReceivedUpdate) error {
+func restoreUpdateLanes(ctx context.Context, tx *sql.Tx, updates []ReceivedUpdate) error {
 	for _, update := range updates {
-		lane, control, err := telegramInputLane(ctx, tx, update)
+		lane, control, err := inputLane(ctx, tx, update)
 		if err != nil {
 			return err
 		}
@@ -42,7 +42,7 @@ func restoreTelegramUpdateLanes(ctx context.Context, tx *sql.Tx, updates []Teleg
 	return nil
 }
 
-func refreshTelegramReplyLanes(ctx context.Context, tx *sql.Tx, id string, messageID int64) error {
+func refreshReplyLanes(ctx context.Context, tx *sql.Tx, id string, messageID int64) error {
 	var botID int64
 	if err := tx.QueryRowContext(ctx, `SELECT bot_id FROM telegram_outbox WHERE id=?`, id).Scan(&botID); err != nil {
 		return err
@@ -53,10 +53,10 @@ func refreshTelegramReplyLanes(ctx context.Context, tx *sql.Tx, id string, messa
 		return err
 	}
 
-	updates, err := readTelegramPendingRows(rows, botID)
+	updates, err := readPendingRows(rows, botID)
 	if err != nil {
 		return err
 	}
 
-	return restoreTelegramUpdateLanes(ctx, tx, updates)
+	return restoreUpdateLanes(ctx, tx, updates)
 }

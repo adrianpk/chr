@@ -10,7 +10,7 @@ import (
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
-func telegramOperationOfferRecord(t *testing.T, f *telegramConversationAppFixture) (telegramcore.TelegramAction, telegramConversationNotice) {
+func telegramOperationOfferRecord(t *testing.T, f *telegramConversationAppFixture) (telegramcore.Action, telegramConversationNotice) {
 	t.Helper()
 
 	mutation := RecordMutationRequest{Kind: RecordTicket, Action: RecordCreate, Title: telegramRecordText("One confirmed task"), Synopsis: telegramRecordText("Exactly one result")}
@@ -18,7 +18,7 @@ func telegramOperationOfferRecord(t *testing.T, f *telegramConversationAppFixtur
 	return telegramOperationOfferMutation(t, f, mutation)
 }
 
-func telegramOperationOfferMutation(t *testing.T, f *telegramConversationAppFixture, mutation RecordMutationRequest) (telegramcore.TelegramAction, telegramConversationNotice) {
+func telegramOperationOfferMutation(t *testing.T, f *telegramConversationAppFixture, mutation RecordMutationRequest) (telegramcore.Action, telegramConversationNotice) {
 	t.Helper()
 
 	f.send(t, "/prepare record scope", 0)
@@ -27,7 +27,7 @@ func telegramOperationOfferMutation(t *testing.T, f *telegramConversationAppFixt
 	input := telegramOperationRetainInput(t, f, "Observed record mutation")
 	input.Conversation = f.sessions(t)[0].ID
 
-	target, err := f.receiver.store.ResolveTelegramOperationTarget(t.Context(), input, time.Now())
+	target, err := f.receiver.store.ResolveOperationTarget(t.Context(), input, time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,7 +37,7 @@ func telegramOperationOfferMutation(t *testing.T, f *telegramConversationAppFixt
 		t.Fatal(err)
 	}
 
-	request, err := f.receiver.store.ReserveTelegramOperation(t.Context(), telegramcore.TelegramOperationRequest{Source: input.Update, Operator: input.Config.AllowedUsers[0].OperatorID, Target: target, OperationID: fmt.Sprintf("records.%s.%s", mutation.Kind, mutation.Action), Arguments: arguments}, time.Now())
+	request, err := f.receiver.store.ReserveOperation(t.Context(), telegramcore.OperationRequest{Source: input.Update, Operator: input.Config.AllowedUsers[0].OperatorID, Target: target, OperationID: fmt.Sprintf("records.%s.%s", mutation.Kind, mutation.Action), Arguments: arguments}, time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,7 +46,7 @@ func telegramOperationOfferMutation(t *testing.T, f *telegramConversationAppFixt
 		t.Fatal(err)
 	}
 
-	action, err := f.receiver.store.OfferTelegramAction(t.Context(), telegramcore.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"confirm"}, Text: "Create the displayed pending ticket?", ExpiresAt: time.Now().Add(time.Hour)}, time.Now())
+	action, err := f.receiver.store.OfferAction(t.Context(), telegramcore.ActionOffer{Input: input, RequestID: request.ID, Choices: []string{"confirm"}, Text: "Create the displayed pending ticket?", ExpiresAt: time.Now().Add(time.Hour)}, time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,7 +58,7 @@ func telegramOperationOfferMutation(t *testing.T, f *telegramConversationAppFixt
 	return action, telegramOperationNotice(t, f)
 }
 
-func telegramOperationRetainInput(t *testing.T, f *telegramConversationAppFixture, text string) telegramcore.TelegramConversationInput {
+func telegramOperationRetainInput(t *testing.T, f *telegramConversationAppFixture, text string) telegramcore.ConversationInput {
 	t.Helper()
 
 	payload, err := json.Marshal([]any{map[string]any{"update_id": f.next, "message": map[string]any{"message_id": f.next, "from": map[string]any{"id": 100001}, "chat": map[string]any{"id": 100001, "type": "private"}, "text": text}}})
@@ -79,8 +79,8 @@ func telegramOperationRetainInput(t *testing.T, f *telegramConversationAppFixtur
 		t.Fatal(err)
 	}
 
-	update := telegramcore.AuthorizeTelegramReceiverUpdate(config, 12345, updates[0])
-	if err := f.receiver.store.RetainBatch(t.Context(), 12345, []telegramcore.TelegramReceivedUpdate{update}, time.Now()); err != nil {
+	update := telegramcore.AuthorizeReceiverUpdate(config, 12345, updates[0])
+	if err := f.receiver.store.RetainBatch(t.Context(), 12345, []telegramcore.ReceivedUpdate{update}, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -89,13 +89,13 @@ func telegramOperationRetainInput(t *testing.T, f *telegramConversationAppFixtur
 		t.Fatal(err)
 	}
 
-	return telegramcore.TelegramConversationInput{Update: update, Config: config, Projects: projects}
+	return telegramcore.ConversationInput{Update: update, Config: config, Projects: projects}
 }
 
-func queueTelegramOperationCallback(t *testing.T, f *telegramConversationAppFixture, action telegramcore.TelegramAction) {
+func queueTelegramOperationCallback(t *testing.T, f *telegramConversationAppFixture, action telegramcore.Action) {
 	t.Helper()
 
-	data, err := telegramcore.TelegramActionCallbackData(telegramcore.TelegramActionAnswer{Token: action.Token, Choice: "confirm"})
+	data, err := telegramcore.ActionCallbackData(telegramcore.ActionAnswer{Token: action.Token, Choice: "confirm"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -172,7 +172,7 @@ func TestTelegramOperationActionChangedRecord(t *testing.T) {
 	action, _ := telegramOperationOfferMutation(t, f, RecordMutationRequest{Kind: RecordUseCase, Action: RecordUpdate, Identity: before.Identity, ExpectedHash: before.SourceHash, Synopsis: telegramRecordText("Stale proposed update")})
 	operations := telegramOperationConcreteService(t, f.receiver)
 
-	scoped, err := operations.telegramProjectService(t.Context(), telegramcore.TelegramOperationTarget{ProjectID: "example-project", Namespace: "default"})
+	scoped, err := operations.telegramProjectService(t.Context(), telegramcore.OperationTarget{ProjectID: "example-project", Namespace: "default"})
 	if err != nil {
 		t.Fatal(err)
 	}

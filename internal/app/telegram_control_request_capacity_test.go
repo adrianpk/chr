@@ -48,15 +48,15 @@ func TestTelegramControlRequestCapacity(t *testing.T) {
 	}
 }
 
-func checkTelegramCapacityAction(t *testing.T, f *telegramConversationAppFixture, action telegramcore.TelegramAction) {
+func checkTelegramCapacityAction(t *testing.T, f *telegramConversationAppFixture, action telegramcore.Action) {
 	t.Helper()
 
-	request, err := f.receiver.store.TelegramActionRequest(t.Context(), action.Peer, telegramcore.TelegramActionAnswer{Token: action.Token, Choice: "confirm"})
+	request, err := f.receiver.store.ActionRequest(t.Context(), action.Peer, telegramcore.ActionAnswer{Token: action.Token, Choice: "confirm"})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	retained, err := f.receiver.store.TelegramRequestAction(t.Context(), request)
+	retained, err := f.receiver.store.RequestAction(t.Context(), request)
 	if err != nil || retained.State != "pending" || retained.AnswerRequestID != "" {
 		t.Fatal("capacity consumed an unaccepted action", retained, err)
 	}

@@ -53,7 +53,7 @@ func TestTelegramWorkCapacity(t *testing.T) {
 	}
 }
 
-func telegramWorkHoldCapacity(t *testing.T, operations service, ref telegramcore.TelegramWorkReference) {
+func telegramWorkHoldCapacity(t *testing.T, operations service, ref telegramcore.WorkReference) {
 	t.Helper()
 
 	store, err := operations.workflowStore()

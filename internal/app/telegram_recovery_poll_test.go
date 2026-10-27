@@ -22,7 +22,7 @@ func TestTelegramRecoveryPollEpoch(t *testing.T) {
 	server := telegramRecoveryEpochServer(t, polled)
 	defer server.Close()
 
-	receiver, _ := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
+	receiver, _ := telegramAppTestReceiver(t, telegramcore.ReceiverAPI{Client: server.Client(), BaseURL: server.URL})
 	receiver.slots = newTelegramActivationSlots()
 
 	expireTelegramRecoveryCursor(t, receiver)

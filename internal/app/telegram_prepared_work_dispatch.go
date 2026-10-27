@@ -10,8 +10,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r telegramReceiver) respondPreparedWork(ctx context.Context, user telegramcore.TelegramAllowedUser, config telegramcore.TelegramReceiverConfig, update telegramcore.TelegramReceivedUpdate) (bool, error) {
-	retained, found, err := r.store.TelegramOperation(ctx, update, 0)
+func (r telegramReceiver) respondPreparedWork(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (bool, error) {
+	retained, found, err := r.store.Operation(ctx, update, 0)
 	if err != nil {
 		return true, err
 	}
@@ -39,13 +39,13 @@ func (r telegramReceiver) respondPreparedWork(ctx context.Context, user telegram
 	return true, r.dispatchPreparedWork(ctx, user, input)
 }
 
-func (r telegramReceiver) dispatchPreparedWork(ctx context.Context, user telegramcore.TelegramAllowedUser, input telegramcore.TelegramConversationInput) error {
+func (r telegramReceiver) dispatchPreparedWork(ctx context.Context, user telegramcore.AllowedUser, input telegramcore.ConversationInput) error {
 	operations, ok := r.operations.(telegramAuthoringService)
 	if !ok {
 		return r.recordDiagnostic(ctx, input.Update, input.Config, "Shared authoring is unavailable. Retained context is unchanged.")
 	}
 
-	c, target, err := r.store.ResolveTelegramAuthoringTarget(ctx, input)
+	c, target, err := r.store.ResolveAuthoringTarget(ctx, input)
 	if err != nil {
 		return r.recordDiagnostic(ctx, input.Update, input.Config, telegramAuthoringFailure(err))
 	}
@@ -64,7 +64,7 @@ func (r telegramReceiver) dispatchPreparedWork(ctx context.Context, user telegra
 		return err
 	}
 
-	request, err := r.store.ReserveTelegramOperation(ctx, telegramcore.TelegramOperationRequest{Source: input.Update, Operator: user.OperatorID, Target: target, OperationID: "authoring.work", Arguments: arguments}, time.Now())
+	request, err := r.store.ReserveOperation(ctx, telegramcore.OperationRequest{Source: input.Update, Operator: user.OperatorID, Target: target, OperationID: "authoring.work", Arguments: arguments}, time.Now())
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func (r telegramReceiver) dispatchPreparedWork(ctx context.Context, user telegra
 	return r.continuePreparedWork(ctx, request, input.Config)
 }
 
-func (r telegramReceiver) preparedWorkInput(ctx context.Context, operations telegramAuthoringService, input telegramcore.TelegramConversationInput, c telegramcore.TelegramConversation, target telegramcore.TelegramOperationTarget, operator string) (AuthoringWorkRequest, error) {
+func (r telegramReceiver) preparedWorkInput(ctx context.Context, operations telegramAuthoringService, input telegramcore.ConversationInput, c telegramcore.Conversation, target telegramcore.OperationTarget, operator string) (AuthoringWorkRequest, error) {
 	var owner AuthoringWorkRequest
 
 	id, err := telegramAuthoringSessionID(c.AuthoringSessionRef)
@@ -91,16 +91,16 @@ func (r telegramReceiver) preparedWorkInput(ctx context.Context, operations tele
 
 	input.Conversation = c.ID
 
-	instruction, err := r.store.ReadTelegramConversationInstruction(ctx, input)
+	instruction, err := r.store.ReadConversationInstruction(ctx, input)
 	if err != nil {
 		return owner, err
 	}
 
-	return AuthoringWorkRequest{Binding: workflowstate.MutationBinding{RequestID: telegramcore.TelegramOperationID(input.Update, 0), Operator: operator}, SessionID: id, ExpectedRevision: snapshot.Session.Revision, ExpectedSourceHash: snapshot.SourceHash, Intent: authoringstate.Intent(c.Intent), Instruction: instruction.Text}, nil
+	return AuthoringWorkRequest{Binding: workflowstate.MutationBinding{RequestID: telegramcore.OperationID(input.Update, 0), Operator: operator}, SessionID: id, ExpectedRevision: snapshot.Session.Revision, ExpectedSourceHash: snapshot.SourceHash, Intent: authoringstate.Intent(c.Intent), Instruction: instruction.Text}, nil
 }
 
-func (r telegramReceiver) reusePreparedWork(ctx context.Context, input telegramcore.TelegramConversationInput, target telegramcore.TelegramOperationTarget, owner AuthoringWorkRequest) (bool, error) {
-	previous, found, err := r.store.LatestTelegramAuthoringWork(ctx, input, target)
+func (r telegramReceiver) reusePreparedWork(ctx context.Context, input telegramcore.ConversationInput, target telegramcore.OperationTarget, owner AuthoringWorkRequest) (bool, error) {
+	previous, found, err := r.store.LatestAuthoringWork(ctx, input, target)
 	if err != nil {
 		return true, err
 	}
@@ -124,12 +124,12 @@ func (r telegramReceiver) reusePreparedWork(ctx context.Context, input telegramc
 	return r.reusePreparedWorkResult(ctx, input, previous, prepared)
 }
 
-func (r telegramReceiver) reusePreparedWorkResult(ctx context.Context, input telegramcore.TelegramConversationInput, previous telegramcore.TelegramOperationRequest, prepared PreparedAuthoringWork) (bool, error) {
+func (r telegramReceiver) reusePreparedWorkResult(ctx context.Context, input telegramcore.ConversationInput, previous telegramcore.OperationRequest, prepared PreparedAuthoringWork) (bool, error) {
 	if previous.State == "confirmed" {
 		return true, r.store.QueuePresentationResponse(ctx, input.Update, *telegramOutcomeMessage("26", telegramPreparedWorkReplay(previous)), input.Config.Digest(), time.Now())
 	}
 
-	action, err := r.store.TelegramRequestAction(ctx, previous)
+	action, err := r.store.RequestAction(ctx, previous)
 	if err != nil {
 		return true, err
 	}

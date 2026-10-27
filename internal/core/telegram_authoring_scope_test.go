@@ -111,7 +111,7 @@ func TestTelegramAuthoringInstructionReference(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			f := newTelegramConversationFixture(t)
-			f.apply(t, telegramcore.TelegramConversationStart, func(input *telegramcore.TelegramConversationInput) {
+			f.apply(t, telegramcore.ConversationStart, func(input *telegramcore.ConversationInput) {
 				input.Project, input.Intent = "alpha", tt.intent
 				input.Update = telegramRetainedTestUpdate(t, input.Update.UpdateID, tt.text)
 			})
@@ -139,21 +139,21 @@ func TestTelegramAuthoringInstructionReference(t *testing.T) {
 	}
 }
 
-func telegramAuthoringCheckInstruction(t *testing.T, f *telegramConversationFixture, c telegramcore.TelegramConversation, original string) {
+func telegramAuthoringCheckInstruction(t *testing.T, f *telegramConversationFixture, c telegramcore.Conversation, original string) {
 	t.Helper()
 
 	input := f.input
 	input.Conversation, input.Project = c.ID, c.ProjectID
 	input.Update = telegramRetainedTestUpdate(t, 100, "Inspect original instruction")
 
-	retained, err := f.store.ReadTelegramConversationInstruction(t.Context(), input)
+	retained, err := f.store.ReadConversationInstruction(t.Context(), input)
 	if err != nil || retained.Text != original || retained.DevelopmentRef != c.AuthorizationRef {
 		t.Fatalf("original instruction changed: %+v err=%v", retained, err)
 	}
 
 	input.Config.AllowedUsers[0].OperatorID = "replacement-operator"
 
-	changed, err := f.store.ReadTelegramConversationInstruction(t.Context(), input)
+	changed, err := f.store.ReadConversationInstruction(t.Context(), input)
 	if err != nil || changed.Text != original || changed.DevelopmentRef != "" {
 		t.Fatalf("operator remapping reused authority: %+v err=%v", changed, err)
 	}

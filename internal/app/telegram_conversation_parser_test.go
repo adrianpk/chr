@@ -33,7 +33,7 @@ func TestTelegramConversationCommands(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			_, recognized, diagnostic := telegramConversationInput(telegramcore.TelegramReceivedUpdate{Kind: "message", Text: test.text})
+			_, recognized, diagnostic := telegramConversationInput(telegramcore.ReceivedUpdate{Kind: "message", Text: test.text})
 			if recognized != test.recognized || (diagnostic == "") != test.valid {
 				t.Fatal("incorrect grammar", recognized, diagnostic)
 			}
@@ -47,15 +47,15 @@ func (telegramConversationNoReads) ListRegisteredProjects([]string) ([]projectco
 	panic("unexpected registry read")
 }
 
-func (telegramConversationNoReads) InspectTelegramReceiver(int64) (telegramcore.TelegramReceiverState, error) {
+func (telegramConversationNoReads) InspectReceiver(int64) (telegramcore.ReceiverState, error) {
 	panic("unexpected receiver read")
 }
 
 // TestTelegramConversationUnknown returns registry help without invoking any service or model operation.
 func TestTelegramConversationUnknown(t *testing.T) {
-	receiver, config := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{})
+	receiver, config := telegramAppTestReceiver(t, telegramcore.ReceiverAPI{})
 	receiver.operations = telegramConversationNoReads{}
-	update := telegramcore.TelegramReceivedUpdate{UpdateID: 1, Digest: strings.Repeat("a", 64), Kind: "message", Peer: telegramcore.TelegramPeerIdentity{BotID: 12345, ChatID: 100001, UserID: 100001}, MessageID: 1, ChatType: "private", Text: "/invent"}
+	update := telegramcore.ReceivedUpdate{UpdateID: 1, Digest: strings.Repeat("a", 64), Kind: "message", Peer: telegramcore.PeerIdentity{BotID: 12345, ChatID: 100001, UserID: 100001}, MessageID: 1, ChatType: "private", Text: "/invent"}
 
 	text, err := telegramReadResponse(receiver.operations, config.AllowedUsers[0], update)
 	if err != nil || !strings.Contains(text.Text, "could not use that command") || !strings.Contains(text.Text, "/help") {

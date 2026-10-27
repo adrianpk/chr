@@ -24,7 +24,7 @@ import (
 type telegramConversationFixture struct {
 	env   UserEnvironment
 	store *telegramFixtureStore
-	input telegramcore.TelegramConversationInput
+	input telegramcore.ConversationInput
 	next  int64
 }
 
@@ -37,12 +37,12 @@ func newTelegramConversationFixture(t *testing.T) *telegramConversationFixture {
 
 	env := telegramReceiverTestEnv(t)
 
-	return &telegramConversationFixture{env: env, store: openTelegramReceiverTestStore(t, env), input: telegramcore.TelegramConversationInput{
+	return &telegramConversationFixture{env: env, store: openTelegramReceiverTestStore(t, env), input: telegramcore.ConversationInput{
 		Config: config, Projects: []projectcore.Project{{ID: "alpha", Name: "Alpha Project", Path: t.TempDir(), Enabled: true}, {ID: "beta", Name: "Beta Project", Path: t.TempDir(), Enabled: true}}, Intent: "prepare", Text: "Topic",
 	}, next: 1}
 }
 
-func (f *telegramConversationFixture) apply(t *testing.T, action telegramcore.TelegramConversationAction, change func(*telegramcore.TelegramConversationInput)) {
+func (f *telegramConversationFixture) apply(t *testing.T, action telegramcore.ConversationAction, change func(*telegramcore.ConversationInput)) {
 	t.Helper()
 
 	input := f.input
@@ -54,19 +54,19 @@ func (f *telegramConversationFixture) apply(t *testing.T, action telegramcore.Te
 		change(&input)
 	}
 
-	if err := f.store.RetainBatch(t.Context(), 12345, []telegramcore.TelegramReceivedUpdate{input.Update}, time.Now()); err != nil {
+	if err := f.store.RetainBatch(t.Context(), 12345, []telegramcore.ReceivedUpdate{input.Update}, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := f.store.ApplyTelegramConversation(t.Context(), input, time.Now()); err != nil {
+	if err := f.store.ApplyConversation(t.Context(), input, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func (f *telegramConversationFixture) sessions(t *testing.T) []telegramcore.TelegramConversation {
+func (f *telegramConversationFixture) sessions(t *testing.T) []telegramcore.Conversation {
 	t.Helper()
 
-	sessions, err := f.store.Conversations(t.Context(), telegramcore.TelegramPeerIdentity{BotID: 12345, ChatID: 100001, UserID: 100001})
+	sessions, err := f.store.Conversations(t.Context(), telegramcore.PeerIdentity{BotID: 12345, ChatID: 100001, UserID: 100001})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,10 +74,10 @@ func (f *telegramConversationFixture) sessions(t *testing.T) []telegramcore.Tele
 	return sessions
 }
 
-func telegramReceiverTestConfig() telegramcore.TelegramReceiverConfig {
-	return telegramcore.TelegramReceiverConfig{
+func telegramReceiverTestConfig() telegramcore.ReceiverConfig {
+	return telegramcore.ReceiverConfig{
 		Enabled: true, BotTokenEnv: "EXAMPLE_BOT_TOKEN", PollTimeoutSeconds: 30,
-		AllowedUsers: []telegramcore.TelegramAllowedUser{{TelegramUserID: 100001, OperatorID: "maintainer", ProjectIDs: []string{"example-project"}}},
+		AllowedUsers: []telegramcore.AllowedUser{{TelegramUserID: 100001, OperatorID: "maintainer", ProjectIDs: []string{"example-project"}}},
 	}
 }
 
@@ -161,12 +161,12 @@ func telegramRecoveryMigrationAssets(t *testing.T) fstest.MapFS {
 // telegramFixtureStore keeps SQL setup/inspection in the integration fixture;
 // production consumers receive only the receiver's public capabilities.
 type telegramFixtureStore struct {
-	*telegramcore.TelegramReceiverStore
+	*telegramcore.ReceiverStore
 	db *sql.DB
 }
 
-func newTelegramFixtureStore(ctx context.Context, env telegramcore.TelegramStoreDirectories, assets fs.FS) (*telegramFixtureStore, error) {
-	owner, err := telegramcore.NewTelegramReceiverStore(ctx, env, assets)
+func newTelegramFixtureStore(ctx context.Context, env telegramcore.StoreDirectories, assets fs.FS) (*telegramFixtureStore, error) {
+	owner, err := telegramcore.NewReceiverStore(ctx, env, assets)
 	if err != nil {
 		return nil, err
 	}
@@ -180,11 +180,11 @@ func newTelegramFixtureStore(ctx context.Context, env telegramcore.TelegramStore
 		return nil, errors.Join(err, db.Close(), owner.Close())
 	}
 
-	return &telegramFixtureStore{TelegramReceiverStore: owner, db: db}, nil
+	return &telegramFixtureStore{ReceiverStore: owner, db: db}, nil
 }
 
 func (s *telegramFixtureStore) Close() error {
-	return errors.Join(s.TelegramReceiverStore.Close(), s.db.Close())
+	return errors.Join(s.ReceiverStore.Close(), s.db.Close())
 }
 
 // The wire fixture feeds the public polling codec without recreating its rules.
@@ -198,15 +198,15 @@ func (w telegramFixtureWire) Do(request *http.Request) (*http.Response, error) {
 	return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(strings.NewReader(string(w)))}, nil
 }
 
-func telegramRetainedTestUpdate(t *testing.T, id int64, text string) telegramcore.TelegramReceivedUpdate {
+func telegramRetainedTestUpdate(t *testing.T, id int64, text string) telegramcore.ReceivedUpdate {
 	t.Helper()
 
 	wire := fmt.Sprintf(`{"ok":true,"result":[{"update_id":%d,"message":{"message_id":1,"from":{"id":100001},"chat":{"id":100001,"type":"private"},"text":%q}}]}`, id, text)
 
-	updates, err := (telegramcore.TelegramReceiverAPI{Client: telegramFixtureWire(wire), BaseURL: "https://telegram.invalid"}).Poll(t.Context(), "12345:example_test_token_123456789", nil, 1)
+	updates, err := (telegramcore.ReceiverAPI{Client: telegramFixtureWire(wire), BaseURL: "https://telegram.invalid"}).Poll(t.Context(), "12345:example_test_token_123456789", nil, 1)
 	if err != nil || len(updates) != 1 {
 		t.Fatal("fixture wire update unavailable", updates, err)
 	}
 
-	return telegramcore.AuthorizeTelegramReceiverUpdate(telegramReceiverTestConfig(), 12345, updates[0])
+	return telegramcore.AuthorizeReceiverUpdate(telegramReceiverTestConfig(), 12345, updates[0])
 }

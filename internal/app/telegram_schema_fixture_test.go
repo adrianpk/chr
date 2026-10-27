@@ -34,7 +34,7 @@ func newTelegramAppSchemaImage() (_ []byte, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
-	store, err := telegramcore.NewTelegramReceiverStore(ctx, env, testAssetsFS())
+	store, err := telegramcore.NewReceiverStore(ctx, env, testAssetsFS())
 	if err != nil {
 		return nil, err
 	}

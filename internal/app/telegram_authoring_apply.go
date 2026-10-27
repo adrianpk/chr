@@ -14,7 +14,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r telegramReceiver) continueTelegramAuthoring(ctx context.Context, request telegramcore.TelegramOperationRequest, config telegramcore.TelegramReceiverConfig) error {
+func (r telegramReceiver) continueTelegramAuthoring(ctx context.Context, request telegramcore.OperationRequest, config telegramcore.ReceiverConfig) error {
 	if request.State == "confirmed" || request.State == "rejected" || request.State == "blocked" {
 		return nil
 	}
@@ -34,7 +34,7 @@ func (r telegramReceiver) continueTelegramAuthoring(ctx context.Context, request
 		return r.finishAuthoringFailure(ctx, request, current, err)
 	}
 
-	if err := r.store.BeginTelegramOperation(ctx, request, time.Now()); err != nil {
+	if err := r.store.BeginOperation(ctx, request, time.Now()); err != nil {
 		return err
 	}
 
@@ -50,7 +50,7 @@ func (r telegramReceiver) continueTelegramAuthoring(ctx context.Context, request
 	return r.finishAuthoring(ctx, request, result, current)
 }
 
-func (r telegramReceiver) validateAuthoringAuthority(ctx context.Context, request telegramcore.TelegramOperationRequest, reconcile bool) (telegramcore.TelegramReceiverConfig, error) {
+func (r telegramReceiver) validateAuthoringAuthority(ctx context.Context, request telegramcore.OperationRequest, reconcile bool) (telegramcore.ReceiverConfig, error) {
 	config, err := r.currentConfig()
 	if err != nil {
 		return config, err
@@ -66,17 +66,17 @@ func (r telegramReceiver) validateAuthoringAuthority(ctx context.Context, reques
 		return config, err
 	}
 
-	input := telegramcore.TelegramConversationInput{Update: request.Source, Config: config, Projects: projects}
+	input := telegramcore.ConversationInput{Update: request.Source, Config: config, Projects: projects}
 	if reconcile {
-		_, err = r.store.ReadTelegramConversationBinding(ctx, input, request.Target)
+		_, err = r.store.ReadConversationBinding(ctx, input, request.Target)
 	} else {
-		err = r.store.ValidateTelegramOperationTarget(ctx, input, request.Target)
+		err = r.store.ValidateOperationTarget(ctx, input, request.Target)
 	}
 
 	return config, err
 }
 
-func telegramRetainedAuthoringInput(request telegramcore.TelegramOperationRequest) (core.AuthoringContinuationRequest, error) {
+func telegramRetainedAuthoringInput(request telegramcore.OperationRequest) (core.AuthoringContinuationRequest, error) {
 	var owner core.AuthoringContinuationRequest
 	if err := decodeBoundedOperationJSON(string(request.PreparedInput), &owner, 1048576); err != nil {
 		return owner, err
@@ -94,7 +94,7 @@ func telegramRetainedAuthoringInput(request telegramcore.TelegramOperationReques
 	return owner, nil
 }
 
-func (r telegramReceiver) authoringAttemptFailure(ctx context.Context, request telegramcore.TelegramOperationRequest, config telegramcore.TelegramReceiverConfig, failure error) error {
+func (r telegramReceiver) authoringAttemptFailure(ctx context.Context, request telegramcore.OperationRequest, config telegramcore.ReceiverConfig, failure error) error {
 	if ctx.Err() != nil {
 		return ctx.Err()
 	}
@@ -110,7 +110,7 @@ func (r telegramReceiver) authoringAttemptFailure(ctx context.Context, request t
 	return failure
 }
 
-func (r telegramReceiver) finishAuthoringFailure(ctx context.Context, request telegramcore.TelegramOperationRequest, config telegramcore.TelegramReceiverConfig, failure error) error {
+func (r telegramReceiver) finishAuthoringFailure(ctx context.Context, request telegramcore.OperationRequest, config telegramcore.ReceiverConfig, failure error) error {
 	text := telegramAuthoringFailure(failure)
 
 	facts, err := json.Marshal(map[string]string{"state": "blocked", "message": text})
@@ -118,11 +118,11 @@ func (r telegramReceiver) finishAuthoringFailure(ctx context.Context, request te
 		return err
 	}
 
-	return r.store.FinishTelegramOperation(ctx, request, "blocked", "", facts, text, config.Digest(), time.Now())
+	return r.store.FinishOperation(ctx, request, "blocked", "", facts, text, config.Digest(), time.Now())
 }
 
 func telegramAuthoringFailure(err error) string {
-	if errors.Is(err, telegramcore.ErrTelegramRequestCapacity) {
+	if errors.Is(err, telegramcore.ErrRequestCapacity) {
 		return telegramRequestCapacityText
 	}
 
@@ -130,7 +130,7 @@ func telegramAuthoringFailure(err error) string {
 		return "Authoring exhausted five retained provider attempts. Prior context and artifacts are preserved. Send a new corrected instruction; this request's budget cannot restart."
 	}
 
-	if text, ok := telegramcore.TelegramConversationFailure(err); ok {
+	if text, ok := telegramcore.ConversationFailure(err); ok {
 		return text
 	}
 
@@ -138,15 +138,15 @@ func telegramAuthoringFailure(err error) string {
 }
 
 type telegramAuthoringFacts struct {
-	RequestID  string                                     `json:"request_id"`
-	SessionRef string                                     `json:"session_ref"`
-	Revision   int64                                      `json:"revision"`
-	SourceHash string                                     `json:"source_hash"`
-	Outputs    []core.AuthoringArtifactRef                `json:"outputs"`
-	Question   *telegramcore.TelegramConversationQuestion `json:"question,omitempty"`
+	RequestID  string                             `json:"request_id"`
+	SessionRef string                             `json:"session_ref"`
+	Revision   int64                              `json:"revision"`
+	SourceHash string                             `json:"source_hash"`
+	Outputs    []core.AuthoringArtifactRef        `json:"outputs"`
+	Question   *telegramcore.ConversationQuestion `json:"question,omitempty"`
 }
 
-func (r telegramReceiver) finishAuthoring(ctx context.Context, request telegramcore.TelegramOperationRequest, result core.AuthoringContinuationResult, config telegramcore.TelegramReceiverConfig) error {
+func (r telegramReceiver) finishAuthoring(ctx context.Context, request telegramcore.OperationRequest, result core.AuthoringContinuationResult, config telegramcore.ReceiverConfig) error {
 	if result.RequestID != request.ID || result.ReceiptRef == "" {
 		return workflowstate.ErrConflict
 	}
@@ -167,9 +167,9 @@ func (r telegramReceiver) finishAuthoring(ctx context.Context, request telegramc
 		text = request.Delivery.Message.InitialText
 	}
 
-	progress := telegramcore.TelegramAuthoringProgress{SessionRef: result.SessionRef, Question: question}
+	progress := telegramcore.AuthoringProgress{SessionRef: result.SessionRef, Question: question}
 
-	err = r.store.FinishTelegramAuthoring(ctx, request, progress, result.ReceiptRef, facts, text, config.Digest(), time.Now())
+	err = r.store.FinishAuthoring(ctx, request, progress, result.ReceiptRef, facts, text, config.Digest(), time.Now())
 	if errors.Is(err, workflowstate.ErrConflict) {
 		text += "\n\nThis conversation has moved on; its current selection is preserved."
 
@@ -178,7 +178,7 @@ func (r telegramReceiver) finishAuthoring(ctx context.Context, request telegramc
 			request.Delivery.Message.SecondaryText = "Complete document attached. This conversation has moved on; its current selection is preserved."
 		}
 
-		return r.store.FinishTelegramOperation(ctx, request, "confirmed", result.ReceiptRef, facts, text, config.Digest(), time.Now())
+		return r.store.FinishOperation(ctx, request, "confirmed", result.ReceiptRef, facts, text, config.Digest(), time.Now())
 	}
 
 	return err

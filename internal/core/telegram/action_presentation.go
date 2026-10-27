@@ -10,13 +10,13 @@ import (
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
-func queueTelegramActionView(op telegramConversationTransaction, request TelegramOperationRequest, offer TelegramActionOffer, token, legacy string) error {
+func queueActionView(op conversationTransaction, request OperationRequest, offer ActionOffer, token, legacy string) error {
 	if offer.Message != nil {
-		return queueTelegramPresentation(op.ctx, op.tx, request.Source, *offer.Message, offer.Input.Config.Digest(), op.now)
+		return queuePresentation(op.ctx, op.tx, request.Source, *offer.Message, offer.Input.Config.Digest(), op.now)
 	}
 
 	if offer.Delivery == nil {
-		return queueTelegramReferencedResponse(op.ctx, op.tx, request.Source, legacy, request.ID, offer.Input.Config.Digest(), op.now)
+		return queueReferencedResponse(op.ctx, op.tx, request.Source, legacy, request.ID, offer.Input.Config.Digest(), op.now)
 	}
 
 	document := offer.Delivery.Document
@@ -27,10 +27,10 @@ func queueTelegramActionView(op telegramConversationTransaction, request Telegra
 	response := *offer.Delivery
 	response.Message.SecondaryText = "Shortened view; complete scope attached. Reply with " + offer.Choices[0] + " or use /answer " + token + " <choice>."
 
-	return queueTelegramDocument(op.ctx, op.tx, request.Source, response, offer.Input.Config.Digest(), op.now)
+	return queueDocument(op.ctx, op.tx, request.Source, response, offer.Input.Config.Digest(), op.now)
 }
 
-func sealTelegramActionPresentation(op telegramConversationTransaction, request TelegramOperationRequest, token string, choices []string) error {
+func sealActionPresentation(op conversationTransaction, request OperationRequest, token string, choices []string) error {
 	var data string
 	if err := op.tx.QueryRowContext(op.ctx, "SELECT presentation FROM telegram_outbox WHERE action_token=?", token).Scan(&data); err != nil {
 		return err
@@ -41,11 +41,11 @@ func sealTelegramActionPresentation(op telegramConversationTransaction, request 
 		return err
 	}
 
-	presentation.ActionRef, presentation.ScopeDigest = token, telegramActionGuard(request)
+	presentation.ActionRef, presentation.ScopeDigest = token, actionGuard(request)
 
 	presentation.ActionChoices = slices.Clone(choices)
 	for _, choice := range choices {
-		presentation.ActionLabels = append(presentation.ActionLabels, telegramActionLabel(choice))
+		presentation.ActionLabels = append(presentation.ActionLabels, actionLabel(choice))
 	}
 
 	payload, err := json.Marshal(presentation)
@@ -58,64 +58,64 @@ func sealTelegramActionPresentation(op telegramConversationTransaction, request 
 		return err
 	}
 
-	_, err = op.tx.ExecContext(op.ctx, "UPDATE telegram_actions SET guard_version=1,presentation_hash=?,guard_digest=? WHERE token=?", hash, telegramActionPresentationDigest(request, hash), token)
+	_, err = op.tx.ExecContext(op.ctx, "UPDATE telegram_actions SET guard_version=1,presentation_hash=?,guard_digest=? WHERE token=?", hash, actionPresentationDigest(request, hash), token)
 
 	return err
 }
 
-func telegramActionPresentationDigest(request TelegramOperationRequest, hash string) string {
-	return contenthash.Sum([]byte("telegram-action/v1:" + telegramActionGuard(request) + ":" + hash))
+func actionPresentationDigest(request OperationRequest, hash string) string {
+	return contenthash.Sum([]byte("telegram-action/v1:" + actionGuard(request) + ":" + hash))
 }
 
-func telegramActionDigestMatches(action TelegramAction, request TelegramOperationRequest) bool {
+func actionDigestMatches(action Action, request OperationRequest) bool {
 	switch action.GuardVersion {
 	case 0:
-		return action.GuardDigest == telegramActionGuard(request)
+		return action.GuardDigest == actionGuard(request)
 	case 1:
-		return len(action.PresentationHash) == 64 && action.GuardDigest == telegramActionPresentationDigest(request, action.PresentationHash)
+		return len(action.PresentationHash) == 64 && action.GuardDigest == actionPresentationDigest(request, action.PresentationHash)
 	default:
 		return false
 	}
 }
 
-func validateTelegramActionPresentation(ctx context.Context, reader telegramConversationReader, action TelegramAction, request TelegramOperationRequest, configDigest string) error {
+func validateActionPresentation(ctx context.Context, reader conversationReader, action Action, request OperationRequest, configDigest string) error {
 	if action.GuardVersion == 0 {
 		return nil
 	}
 
-	if action.GuardVersion != 1 || !telegramActionDigestMatches(action, request) {
-		return ErrTelegramActionUnavailable
+	if action.GuardVersion != 1 || !actionDigestMatches(action, request) {
+		return ErrActionUnavailable
 	}
 
-	delivery := TelegramReceiverDelivery{Peer: action.Peer}
+	delivery := ReceiverDelivery{Peer: action.Peer}
 
 	var payload, hash string
 	if err := reader.QueryRowContext(ctx, `SELECT id,text,config_digest,presentation,presentation_hash,COALESCE(document_id,'') FROM telegram_outbox WHERE action_token=? AND bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, action.Token, action.Peer.BotID, action.Peer.ChatID, action.Peer.TopicID, action.Peer.UserID).Scan(&delivery.ID, &delivery.Text, &delivery.ConfigDigest, &payload, &hash, &delivery.DocumentID); err != nil {
 		return err
 	}
 
-	if !telegramActionManifestValid(payload, hash, configDigest, &delivery, action, request) {
-		return ErrTelegramActionUnavailable
+	if !actionManifestValid(payload, hash, configDigest, &delivery, action, request) {
+		return ErrActionUnavailable
 	}
 
 	if delivery.DocumentID == "" {
 		return nil
 	}
 
-	return validateTelegramActionDocument(ctx, reader, delivery, request)
+	return validateActionDocument(ctx, reader, delivery, request)
 }
 
-func telegramActionManifestValid(payload, hash, configDigest string, delivery *TelegramReceiverDelivery, action TelegramAction, request TelegramOperationRequest) bool {
-	if delivery.ConfigDigest != configDigest || hash != action.PresentationHash || decodeTelegramPresentationHash(payload, hash, delivery) != nil || delivery.Presentation == nil {
+func actionManifestValid(payload, hash, configDigest string, delivery *ReceiverDelivery, action Action, request OperationRequest) bool {
+	if delivery.ConfigDigest != configDigest || hash != action.PresentationHash || decodePresentationHash(payload, hash, delivery) != nil || delivery.Presentation == nil {
 		return false
 	}
 
 	presentation := delivery.Presentation
 
-	return presentation.ActionRef == action.Token && presentation.ScopeDigest == telegramActionGuard(request) && slices.Equal(presentation.ActionChoices, action.Choices) && len(presentation.ActionLabels) == len(action.Choices)
+	return presentation.ActionRef == action.Token && presentation.ScopeDigest == actionGuard(request) && slices.Equal(presentation.ActionChoices, action.Choices) && len(presentation.ActionLabels) == len(action.Choices)
 }
 
-func validateTelegramActionDocument(ctx context.Context, reader telegramConversationReader, delivery TelegramReceiverDelivery, request TelegramOperationRequest) error {
+func validateActionDocument(ctx context.Context, reader conversationReader, delivery ReceiverDelivery, request OperationRequest) error {
 	var (
 		hash     string
 		document tgmessage.Document
@@ -127,40 +127,40 @@ func validateTelegramActionDocument(ctx context.Context, reader telegramConversa
 	}
 
 	if tgmessage.ValidateDocument(document) != nil || document.ProjectID != request.Target.ProjectID || document.Namespace != request.Target.Namespace || document.ProjectBindingDigest != request.Target.ProjectBindingDigest || hash != delivery.Presentation.DocumentHash || contenthash.Sum(document.Payload) != hash {
-		return ErrTelegramActionUnavailable
+		return ErrActionUnavailable
 	}
 
 	return nil
 }
 
-// ValidateTelegramActionDelivery refuses a changed or future action image before
+// ValidateActionDelivery refuses a changed or future action image before
 // sending its keyboard. It does not consume an answer or grant authority.
-func (s *TelegramReceiverStore) ValidateTelegramActionDelivery(ctx context.Context, delivery TelegramReceiverDelivery) error {
+func (s *ReceiverStore) ValidateActionDelivery(ctx context.Context, delivery ReceiverDelivery) error {
 	if delivery.ActionToken == "" {
 		return nil
 	}
 
-	action, err := readTelegramAction(ctx, s.db, delivery.ActionToken, delivery.Peer)
+	action, err := readAction(ctx, s.db, delivery.ActionToken, delivery.Peer)
 	if err != nil {
 		return err
 	}
 
 	if action.GuardVersion == 1 && !action.ExpiresAt.After(time.Now()) {
-		return ErrTelegramActionUnavailable
+		return ErrActionUnavailable
 	}
 
-	request, err := readTelegramOperationID(ctx, s.db, action.RequestID)
+	request, err := readOperationID(ctx, s.db, action.RequestID)
 	if err != nil {
 		return err
 	}
 
-	return validateTelegramActionPresentation(ctx, s.db, action, request, delivery.ConfigDigest)
+	return validateActionPresentation(ctx, s.db, action, request, delivery.ConfigDigest)
 }
 
-func sealTelegramOfferedAction(op telegramConversationTransaction, request TelegramOperationRequest, offer TelegramActionOffer, token string) error {
+func sealOfferedAction(op conversationTransaction, request OperationRequest, offer ActionOffer, token string) error {
 	if offer.Delivery == nil && offer.Message == nil {
 		return nil
 	}
 
-	return sealTelegramActionPresentation(op, request, token, offer.Choices)
+	return sealActionPresentation(op, request, token, offer.Choices)
 }

@@ -12,20 +12,20 @@ import (
 	"unicode/utf8"
 )
 
-// TelegramPeerIdentity is the complete transport peer, never a local authority grant.
-type TelegramPeerIdentity struct {
+// PeerIdentity is the complete transport peer, never a local authority grant.
+type PeerIdentity struct {
 	BotID   int64
 	ChatID  int64
 	TopicID int64
 	UserID  int64
 }
 
-// TelegramReceivedUpdate is normalized input; denied receipts retain no payload.
-type TelegramReceivedUpdate struct {
+// ReceivedUpdate is normalized input; denied receipts retain no payload.
+type ReceivedUpdate struct {
 	UpdateID         int64
 	Digest           string
 	Kind             string
-	Peer             TelegramPeerIdentity
+	Peer             PeerIdentity
 	MessageID        int64
 	ReplyToMessageID int64
 	Text             string
@@ -33,11 +33,11 @@ type TelegramReceivedUpdate struct {
 	Reason           string
 }
 
-type telegramReceiverMessage struct {
-	MessageID int64                `json:"message_id"`
-	ThreadID  int64                `json:"message_thread_id"`
-	Date      int64                `json:"date"`
-	From      telegramReceiverUser `json:"from"`
+type receiverMessage struct {
+	MessageID int64        `json:"message_id"`
+	ThreadID  int64        `json:"message_thread_id"`
+	Date      int64        `json:"date"`
+	From      receiverUser `json:"from"`
 	Chat      struct {
 		ID   int64  `json:"id"`
 		Type string `json:"type"`
@@ -53,26 +53,26 @@ type telegramReceiverMessage struct {
 	ViaBot           json.RawMessage `json:"via_bot"`
 }
 
-type telegramReceiverUser struct {
+type receiverUser struct {
 	ID    int64 `json:"id"`
 	IsBot bool  `json:"is_bot"`
 }
 
-type telegramReceiverCallback struct {
-	From    telegramReceiverUser     `json:"from"`
-	Message *telegramReceiverMessage `json:"message"`
-	Data    string                   `json:"data"`
+type receiverCallback struct {
+	From    receiverUser     `json:"from"`
+	Message *receiverMessage `json:"message"`
+	Data    string           `json:"data"`
 }
 
-func decodeTelegramReceiverUpdates(data []byte) ([]TelegramReceivedUpdate, error) {
+func decodeReceiverUpdates(data []byte) ([]ReceivedUpdate, error) {
 	var raw []json.RawMessage
 	if err := json.Unmarshal(data, &raw); err != nil || len(raw) > 100 {
-		return nil, telegramAPIInvalid()
+		return nil, aPIInvalid()
 	}
 
-	updates := make([]TelegramReceivedUpdate, 0, len(raw))
+	updates := make([]ReceivedUpdate, 0, len(raw))
 	for _, item := range raw {
-		update, err := decodeTelegramReceiverUpdate(item)
+		update, err := decodeReceiverUpdate(item)
 		if err != nil {
 			return nil, err
 		}
@@ -83,33 +83,33 @@ func decodeTelegramReceiverUpdates(data []byte) ([]TelegramReceivedUpdate, error
 	return updates, nil
 }
 
-func decodeTelegramReceiverUpdate(data []byte) (TelegramReceivedUpdate, error) {
+func decodeReceiverUpdate(data []byte) (ReceivedUpdate, error) {
 	var wire struct {
-		ID       *int64                    `json:"update_id"`
-		Message  *telegramReceiverMessage  `json:"message"`
-		Callback *telegramReceiverCallback `json:"callback_query"`
+		ID       *int64            `json:"update_id"`
+		Message  *receiverMessage  `json:"message"`
+		Callback *receiverCallback `json:"callback_query"`
 	}
-	if err := json.Unmarshal(data, &wire); err != nil || !validTelegramUpdateID(wire.ID) {
-		return TelegramReceivedUpdate{}, telegramAPIInvalid()
+	if err := json.Unmarshal(data, &wire); err != nil || !validUpdateID(wire.ID) {
+		return ReceivedUpdate{}, aPIInvalid()
 	}
 
-	update := TelegramReceivedUpdate{UpdateID: *wire.ID, Digest: telegramUpdateDigest(data), Kind: "ignored", Reason: "unsupported_update"}
+	update := ReceivedUpdate{UpdateID: *wire.ID, Digest: updateDigest(data), Kind: "ignored", Reason: "unsupported_update"}
 	if wire.Callback != nil && wire.Message == nil {
-		return normalizeTelegramReceiverCallback(update, *wire.Callback), nil
+		return normalizeReceiverCallback(update, *wire.Callback), nil
 	}
 
 	if wire.Message != nil && wire.Callback == nil {
-		return normalizeTelegramReceiverMessage(update, *wire.Message, "message"), nil
+		return normalizeReceiverMessage(update, *wire.Message, "message"), nil
 	}
 
 	return update, nil
 }
 
-func validTelegramUpdateID(id *int64) bool {
+func validUpdateID(id *int64) bool {
 	return id != nil && *id >= 0 && *id != math.MaxInt64
 }
 
-func normalizeTelegramReceiverCallback(update TelegramReceivedUpdate, callback telegramReceiverCallback) TelegramReceivedUpdate {
+func normalizeReceiverCallback(update ReceivedUpdate, callback receiverCallback) ReceivedUpdate {
 	if callback.Message == nil || callback.Message.Date == 0 || len(callback.Data) > 64 {
 		return update
 	}
@@ -118,14 +118,14 @@ func normalizeTelegramReceiverCallback(update TelegramReceivedUpdate, callback t
 	message.From = callback.From // Authenticate the clicker, never the bot's original message author.
 	message.Text = callback.Data
 
-	return normalizeTelegramReceiverMessage(update, message, "callback_query")
+	return normalizeReceiverMessage(update, message, "callback_query")
 }
 
-func normalizeTelegramReceiverMessage(update TelegramReceivedUpdate, message telegramReceiverMessage, kind string) TelegramReceivedUpdate {
+func normalizeReceiverMessage(update ReceivedUpdate, message receiverMessage, kind string) ReceivedUpdate {
 	update.Kind = "rejected"
 
 	update.Reason = "unsupported_identity_or_content"
-	if !validTelegramMessageSender(message) || forwardedTelegramMessage(message) {
+	if !validMessageSender(message) || forwardedMessage(message) {
 		return update
 	}
 
@@ -138,21 +138,21 @@ func normalizeTelegramReceiverMessage(update TelegramReceivedUpdate, message tel
 	}
 
 	update.Kind, update.Reason = kind, ""
-	update.Peer = TelegramPeerIdentity{ChatID: message.Chat.ID, TopicID: message.ThreadID, UserID: message.From.ID}
+	update.Peer = PeerIdentity{ChatID: message.Chat.ID, TopicID: message.ThreadID, UserID: message.From.ID}
 	update.MessageID, update.Text, update.ChatType = message.MessageID, message.Text, message.Chat.Type
 
 	return update
 }
 
-func validTelegramMessageSender(message telegramReceiverMessage) bool {
+func validMessageSender(message receiverMessage) bool {
 	return message.From.ID > 0 && !message.From.IsBot && message.MessageID > 0 && message.ThreadID >= 0 && len(message.SenderChat) == 0
 }
 
-func forwardedTelegramMessage(message telegramReceiverMessage) bool {
+func forwardedMessage(message receiverMessage) bool {
 	return len(message.ForwardOrigin) > 0 || len(message.ForwardFrom) > 0 || message.AutomaticForward || len(message.ViaBot) > 0
 }
 
-func telegramUpdateDigest(data []byte) string {
+func updateDigest(data []byte) string {
 	var normalized any
 	// UseNumber preserves exact signed-64-bit IDs in the normalized digest.
 	decoder := json.NewDecoder(bytes.NewReader(data))
@@ -172,8 +172,8 @@ func telegramUpdateDigest(data []byte) string {
 	return hex.EncodeToString(sum[:])
 }
 
-// AuthorizeTelegramReceiverUpdate discards denied bodies before persistence or dispatch.
-func AuthorizeTelegramReceiverUpdate(config TelegramReceiverConfig, botID int64, update TelegramReceivedUpdate) TelegramReceivedUpdate {
+// AuthorizeReceiverUpdate discards denied bodies before persistence or dispatch.
+func AuthorizeReceiverUpdate(config ReceiverConfig, botID int64, update ReceivedUpdate) ReceivedUpdate {
 	update.Peer.BotID = botID
 	if update.Kind == "ignored" || update.Kind == "rejected" {
 		return update
@@ -187,14 +187,14 @@ func AuthorizeTelegramReceiverUpdate(config TelegramReceiverConfig, botID int64,
 	return update
 }
 
-func validTelegramReceiverText(text string) bool {
+func validReceiverText(text string) bool {
 	return text != "" && utf8.ValidString(text) && utf8.RuneCountInString(text) <= 3900 && len(utf16.Encode([]rune(text))) <= 3900
 }
 
-// BoundTelegramReceiverText truncates read-only output at both Unicode boundaries.
-func BoundTelegramReceiverText(text string) string {
+// BoundReceiverText truncates read-only output at both Unicode boundaries.
+func BoundReceiverText(text string) string {
 	text = strings.ToValidUTF8(text, "�")
-	if validTelegramReceiverText(text) {
+	if validReceiverText(text) {
 		return text
 	}
 
@@ -213,4 +213,4 @@ func BoundTelegramReceiverText(text string) string {
 	return text[:end] + suffix
 }
 
-var errTelegramReceiverConflict = errors.New("telegram retained identity conflict")
+var errReceiverConflict = errors.New("telegram retained identity conflict")

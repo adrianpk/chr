@@ -18,7 +18,7 @@ type telegramControlLostAck struct {
 	lost atomic.Bool
 }
 
-func (s *telegramControlLostAck) ApplyTelegramControl(ctx context.Context, target telegramcore.TelegramOperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest, check core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error) {
+func (s *telegramControlLostAck) ApplyTelegramControl(ctx context.Context, target telegramcore.OperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest, check core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error) {
 	status, err := s.service.ApplyTelegramControl(ctx, target, binding, request, check)
 	if err == nil && s.lost.CompareAndSwap(false, true) {
 		return status, errors.Join(errTelegramLostRecordAck, workflowstate.ErrConflict)
@@ -27,7 +27,7 @@ func (s *telegramControlLostAck) ApplyTelegramControl(ctx context.Context, targe
 	return status, err
 }
 
-func telegramControlInterruptAck(t *testing.T, f *telegramConversationAppFixture, operations service, token, action string) telegramcore.TelegramConversationInput {
+func telegramControlInterruptAck(t *testing.T, f *telegramConversationAppFixture, operations service, token, action string) telegramcore.ConversationInput {
 	t.Helper()
 
 	f.receiver.operations = &telegramControlLostAck{service: operations}
@@ -40,7 +40,7 @@ func telegramControlInterruptAck(t *testing.T, f *telegramConversationAppFixture
 	return input
 }
 
-func telegramControlRecoverAck(t *testing.T, f *telegramConversationAppFixture, operations service, id string, input telegramcore.TelegramConversationInput) WorkflowWorkStatus {
+func telegramControlRecoverAck(t *testing.T, f *telegramConversationAppFixture, operations service, id string, input telegramcore.ConversationInput) WorkflowWorkStatus {
 	t.Helper()
 
 	if _, err := operations.StopWorkflow(t.Context(), id, "pause"); err != nil {
@@ -71,10 +71,10 @@ func telegramControlRecoverAck(t *testing.T, f *telegramConversationAppFixture, 
 	return status
 }
 
-func checkTelegramControlRecoveredReceipt(t *testing.T, f *telegramConversationAppFixture, update telegramcore.TelegramReceivedUpdate, id string) {
+func checkTelegramControlRecoveredReceipt(t *testing.T, f *telegramConversationAppFixture, update telegramcore.ReceivedUpdate, id string) {
 	t.Helper()
 
-	request, found, err := f.receiver.store.TelegramOperation(t.Context(), update, 0)
+	request, found, err := f.receiver.store.Operation(t.Context(), update, 0)
 	if err != nil || !found || request.State != "confirmed" || !strings.HasPrefix(request.ReceiptRef, "run/operation-receipts/") {
 		t.Fatal("original control receipt was not recovered", request, err)
 	}

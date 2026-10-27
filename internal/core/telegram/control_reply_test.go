@@ -13,12 +13,12 @@ import (
 func TestTelegramControlReplyBinding(t *testing.T) {
 	tests := []struct {
 		name, operation, action string
-		lane                    TelegramProcessingLane
+		lane                    ProcessingLane
 		control                 bool
 	}{
-		{"stop", "work.control", "pause", TelegramProcessingUrgent, true},
-		{"continuation", "work.control", "continue", TelegramProcessingOrdinary, true},
-		{"authoring", "authoring.quiz", "confirm", TelegramProcessingOrdinary, false},
+		{"stop", "work.control", "pause", ProcessingUrgent, true},
+		{"continuation", "work.control", "continue", ProcessingOrdinary, true},
+		{"authoring", "authoring.quiz", "confirm", ProcessingOrdinary, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -26,7 +26,7 @@ func TestTelegramControlReplyBinding(t *testing.T) {
 			delivery := telegramPendingActionDelivery(t, f.store, action.Token)
 			input := telegramRetainedTestUpdate(t, f.next, tt.action)
 			input.ReplyToMessageID = 777
-			checkTelegramControlInputLane(t, f.store, input, TelegramProcessingDecision, false)
+			checkTelegramControlInputLane(t, f.store, input, ProcessingDecision, false)
 			checkTelegramEarlyReply(t, f.store, input)
 
 			if err := f.store.DeliverySent(t.Context(), delivery.ID, 777, time.Now()); err != nil {
@@ -35,7 +35,7 @@ func TestTelegramControlReplyBinding(t *testing.T) {
 
 			checkTelegramControlInputLane(t, f.store, input, tt.lane, tt.control)
 
-			answer, recognized, err := f.store.ResolveTelegramActionAnswer(t.Context(), input)
+			answer, recognized, err := f.store.ResolveActionAnswer(t.Context(), input)
 			if err != nil || !recognized || answer.Token != action.Token || answer.Choice != tt.action {
 				t.Fatal("definite prompt acknowledgement did not release the exact answer", answer, err)
 			}
@@ -43,7 +43,7 @@ func TestTelegramControlReplyBinding(t *testing.T) {
 	}
 }
 
-func telegramPendingActionDelivery(t *testing.T, store *TelegramReceiverStore, token string) TelegramReceiverDelivery {
+func telegramPendingActionDelivery(t *testing.T, store *ReceiverStore, token string) ReceiverDelivery {
 	t.Helper()
 
 	deliveries, err := store.DueDeliveries(t.Context(), 12345, time.Now())
@@ -65,21 +65,21 @@ func telegramPendingActionDelivery(t *testing.T, store *TelegramReceiverStore, t
 
 	t.Fatal("action delivery unavailable")
 
-	return TelegramReceiverDelivery{}
+	return ReceiverDelivery{}
 }
 
-func checkTelegramEarlyReply(t *testing.T, store *TelegramReceiverStore, update TelegramReceivedUpdate) {
+func checkTelegramEarlyReply(t *testing.T, store *ReceiverStore, update ReceivedUpdate) {
 	t.Helper()
 
-	_, recognized, err := store.ResolveTelegramActionAnswer(t.Context(), update)
-	if !recognized || !errors.Is(err, ErrTelegramReplyPending) {
+	_, recognized, err := store.ResolveActionAnswer(t.Context(), update)
+	if !recognized || !errors.Is(err, ErrReplyPending) {
 		t.Fatal("early reply escaped its pending prompt", recognized, err)
 	}
 
 	update.Peer.UserID++
 
-	_, recognized, err = store.ResolveTelegramActionAnswer(t.Context(), update)
-	if !recognized || !errors.Is(err, ErrTelegramActionUnavailable) {
+	_, recognized, err = store.ResolveActionAnswer(t.Context(), update)
+	if !recognized || !errors.Is(err, ErrActionUnavailable) {
 		t.Fatal("another peer borrowed the sender's prompt", recognized, err)
 	}
 }
@@ -97,15 +97,15 @@ func TestTelegramControlReplyExhaustion(t *testing.T) {
 		delay   time.Duration
 		failure error
 	}{
-		{"active", time.Minute, ErrTelegramReplyPending},
-		{"exhausted", -time.Minute, ErrTelegramActionUnavailable},
+		{"active", time.Minute, ErrReplyPending},
+		{"exhausted", -time.Minute, ErrActionUnavailable},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			if _, err := f.store.db.ExecContext(t.Context(), `UPDATE telegram_outbox SET attempts=5,retry_at=? WHERE id=?`, database.FormatTime(time.Now().Add(test.delay)), delivery.ID); err != nil {
 				t.Fatal(err)
 			}
 
-			_, recognized, err := f.store.ResolveTelegramActionAnswer(t.Context(), update)
+			_, recognized, err := f.store.ResolveActionAnswer(t.Context(), update)
 			if !recognized || !errors.Is(err, test.failure) {
 				t.Fatal("send deadline lost its reply boundary", recognized, err)
 			}
@@ -119,7 +119,7 @@ func TestTelegramControlReplyPriority(t *testing.T) {
 	f, action := telegramPendingControlLaneFixture(t, "work.control", "resume")
 	telegramPendingActionDelivery(t, f.store, action.Token)
 
-	var batch []TelegramReceivedUpdate
+	var batch []ReceivedUpdate
 
 	for index := range 60 {
 		update := telegramRetainedTestUpdate(t, f.next+int64(index), "early reply")
@@ -135,7 +135,7 @@ func TestTelegramControlReplyPriority(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	inputs, err := f.store.PendingApplicationInputs(t.Context(), 12345, TelegramProcessingDecision, time.Now())
+	inputs, err := f.store.PendingApplicationInputs(t.Context(), 12345, ProcessingDecision, time.Now())
 	if err != nil || len(inputs) != 50 || inputs[0].UpdateID != decision.UpdateID {
 		t.Fatal("early reply waiters hid an authorized decision", inputs, err)
 	}

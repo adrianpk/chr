@@ -54,7 +54,7 @@ func TestTelegramRecoveryPayload(t *testing.T) {
 
 	for id := range int64(8) {
 		update := telegramRetainedTestUpdate(t, id, "/help")
-		if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, now); err != nil {
+		if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{update}, now); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -62,12 +62,12 @@ func TestTelegramRecoveryPayload(t *testing.T) {
 	seedTelegramRecoveryPayload(t, store, now)
 
 	boundary := telegramRetainedTestUpdate(t, 8, "/status")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{boundary}, now); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{boundary}, now); err != nil {
 		t.Fatal("exact logical boundary was refused", err)
 	}
 
 	overflow := telegramRetainedTestUpdate(t, 9, "/help")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{overflow}, now); err == nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{overflow}, now); err == nil {
 		t.Fatal("logical transport payload exceeded 64 MiB")
 	}
 
@@ -77,7 +77,7 @@ func TestTelegramRecoveryPayload(t *testing.T) {
 	}
 }
 
-func seedTelegramRecoveryPayload(t *testing.T, store *TelegramReceiverStore, now time.Time) {
+func seedTelegramRecoveryPayload(t *testing.T, store *ReceiverStore, now time.Time) {
 	t.Helper()
 
 	tx, err := store.db.BeginTx(t.Context(), nil)
@@ -110,35 +110,35 @@ func seedTelegramRecoveryPayload(t *testing.T, store *TelegramReceiverStore, now
 	}
 }
 
-func fillTelegramReceiptQuota(t *testing.T, store *TelegramReceiverStore, now time.Time) {
+func fillTelegramReceiptQuota(t *testing.T, store *ReceiverStore, now time.Time) {
 	t.Helper()
 
 	execTelegramRecoverySQL(t, store, `WITH RECURSIVE n(id) AS (SELECT 0 UNION ALL SELECT id+1 FROM n WHERE id<9999) INSERT INTO telegram_updates(bot_id,update_id,cursor_epoch,payload_digest,update_kind,chat_id,topic_id,user_id,message_id,chat_type,received_at,payload,state,reason_code,updated_at) SELECT 12345,id,1,?,'ignored',100001,0,100001,1,'private',?,'','ignored','unsupported',? FROM n`, strings.Repeat("a", 64), database.FormatTime(now), database.FormatTime(now))
 
 	pending := telegramRetainedTestUpdate(t, 10000, "/status")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{pending}, now); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{pending}, now); err != nil {
 		t.Fatal("receipt ceiling consumed the pending reserve", err)
 	}
 
 	overflow := telegramRetainedTestUpdate(t, 10001, "/status")
 
 	overflow.Kind, overflow.Text = "ignored", ""
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{overflow}, now); err == nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{overflow}, now); err == nil {
 		t.Fatal("receipt ceiling was exceeded")
 	}
 }
 
-func fillTelegramOutboxQuota(t *testing.T, store *TelegramReceiverStore, now time.Time) {
+func fillTelegramOutboxQuota(t *testing.T, store *ReceiverStore, now time.Time) {
 	t.Helper()
 
 	update := telegramRetainedTestUpdate(t, 10000, "/status")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, now); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{update}, now); err != nil {
 		t.Fatal(err)
 	}
 
 	execTelegramRecoverySQL(t, store, `WITH RECURSIVE n(id) AS (SELECT 1 UNION ALL SELECT id+1 FROM n WHERE id<1024) INSERT INTO telegram_outbox(id,bot_id,chat_id,topic_id,user_id,event_key,config_digest,kind,text,state,created_at,updated_at) SELECT 'quota-'||id,12345,100001,0,100001,'quota:'||id,?,'result','unresolved','blocked',?,? FROM n`, telegramReceiverTestConfig().Digest(), database.FormatTime(now.Add(-8*24*time.Hour)), database.FormatTime(now.Add(-8*24*time.Hour)))
 
-	if _, err := store.PrepareTelegramPoll(t.Context(), 12345, now); err != nil {
+	if _, err := store.PreparePoll(t.Context(), 12345, now); err != nil {
 		t.Fatal(err)
 	}
 

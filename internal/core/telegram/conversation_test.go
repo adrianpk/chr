@@ -12,8 +12,8 @@ import (
 
 type telegramConversationFixture struct {
 	env   telegramTestEnvironment
-	store *TelegramReceiverStore
-	input TelegramConversationInput
+	store *ReceiverStore
+	input ConversationInput
 	next  int64
 }
 
@@ -26,12 +26,12 @@ func newTelegramConversationFixture(t *testing.T) *telegramConversationFixture {
 
 	env := telegramReceiverTestEnv(t)
 
-	return &telegramConversationFixture{env: env, store: openTelegramReceiverTestStore(t, env), input: TelegramConversationInput{
+	return &telegramConversationFixture{env: env, store: openTelegramReceiverTestStore(t, env), input: ConversationInput{
 		Config: config, Projects: []projectcore.Project{{ID: "alpha", Name: "Alpha Project", Path: t.TempDir(), Enabled: true}, {ID: "beta", Name: "Beta Project", Path: t.TempDir(), Enabled: true}}, Intent: "prepare", Text: "Topic",
 	}, next: 1}
 }
 
-func (f *telegramConversationFixture) apply(t *testing.T, action TelegramConversationAction, change func(*TelegramConversationInput)) {
+func (f *telegramConversationFixture) apply(t *testing.T, action ConversationAction, change func(*ConversationInput)) {
 	t.Helper()
 
 	input := f.input
@@ -43,19 +43,19 @@ func (f *telegramConversationFixture) apply(t *testing.T, action TelegramConvers
 		change(&input)
 	}
 
-	if err := f.store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{input.Update}, time.Now()); err != nil {
+	if err := f.store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{input.Update}, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := f.store.ApplyTelegramConversation(t.Context(), input, time.Now()); err != nil {
+	if err := f.store.ApplyConversation(t.Context(), input, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func (f *telegramConversationFixture) sessions(t *testing.T) []TelegramConversation {
+func (f *telegramConversationFixture) sessions(t *testing.T) []Conversation {
 	t.Helper()
 
-	sessions, err := f.store.Conversations(t.Context(), TelegramPeerIdentity{BotID: 12345, ChatID: 100001, UserID: 100001})
+	sessions, err := f.store.Conversations(t.Context(), PeerIdentity{BotID: 12345, ChatID: 100001, UserID: 100001})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -95,7 +95,7 @@ func TestTelegramConversationProjects(t *testing.T) {
 			f := newTelegramConversationFixture(t)
 
 			if test.selected != "" {
-				f.apply(t, TelegramConversationSelect, func(i *TelegramConversationInput) { i.Project = test.selected })
+				f.apply(t, ConversationSelect, func(i *ConversationInput) { i.Project = test.selected })
 
 				if got := f.lastResponse(t); got != "Selected project: "+test.selectedName {
 					t.Fatal("selection did not show the registered name", got)
@@ -107,7 +107,7 @@ func TestTelegramConversationProjects(t *testing.T) {
 				f.input.Config.AllowedUsers[0].ProjectIDs = []string{"alpha"}
 			}
 
-			f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = test.explicit })
+			f.apply(t, ConversationStart, func(i *ConversationInput) { i.Project = test.explicit })
 
 			checkTelegramConversationProject(t, f, test.want)
 		})
@@ -119,16 +119,16 @@ func TestTelegramConversationBinding(t *testing.T) {
 	t.Setenv(opsnamespace.UserEnv, "first")
 
 	f := newTelegramConversationFixture(t)
-	f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "alpha"; i.Intent = "develop" })
+	f.apply(t, ConversationStart, func(i *ConversationInput) { i.Project = "alpha"; i.Intent = "develop" })
 
 	original := f.sessions(t)[0]
 	if original.Namespace != "first" || original.Intent != "develop" {
 		t.Fatal("initial binding incorrect", original)
 	}
 
-	f.apply(t, TelegramConversationSelect, func(i *TelegramConversationInput) { i.Project = "beta" })
+	f.apply(t, ConversationSelect, func(i *ConversationInput) { i.Project = "beta" })
 	t.Setenv(opsnamespace.UserEnv, "second")
-	f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Conversation = original.ID })
+	f.apply(t, ConversationStart, func(i *ConversationInput) { i.Conversation = original.ID })
 
 	sessions := f.sessions(t)
 	if len(sessions) != 2 {
@@ -145,14 +145,14 @@ func TestTelegramConversationBinding(t *testing.T) {
 		t.Fatal("selection mutated existing conversation", sessions)
 	}
 
-	f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Conversation = original.ID; i.Project = "beta" })
+	f.apply(t, ConversationStart, func(i *ConversationInput) { i.Conversation = original.ID; i.Project = "beta" })
 
 	if len(f.sessions(t)) != 2 || !strings.Contains(f.lastResponse(t), "conflicts") {
 		t.Fatal("project mismatch was retargeted")
 	}
 
 	f.input.Projects[0].Path = t.TempDir()
-	f.apply(t, TelegramConversationFocus, func(i *TelegramConversationInput) { i.Conversation = original.ID })
+	f.apply(t, ConversationFocus, func(i *ConversationInput) { i.Conversation = original.ID })
 
 	if !strings.Contains(f.lastResponse(t), "root changed") {
 		t.Fatal("changed root accepted")
@@ -168,8 +168,8 @@ func TestTelegramConversationIsolation(t *testing.T) {
 	other.TelegramUserID = 100002
 
 	f.input.Config.AllowedUsers = append(f.input.Config.AllowedUsers, other)
-	for _, peer := range []TelegramPeerIdentity{{12345, -100, 1, 100001}, {12345, -100, 1, 100002}, {12345, -100, 2, 100001}} {
-		f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) {
+	for _, peer := range []PeerIdentity{{12345, -100, 1, 100001}, {12345, -100, 1, 100002}, {12345, -100, 2, 100001}} {
+		f.apply(t, ConversationStart, func(i *ConversationInput) {
 			i.Project = "alpha"
 			i.Update.Peer = peer
 			i.Update.ChatType = "supergroup"
@@ -182,7 +182,7 @@ func TestTelegramConversationIsolation(t *testing.T) {
 	}
 
 	for range 9 {
-		f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "alpha" })
+		f.apply(t, ConversationStart, func(i *ConversationInput) { i.Project = "alpha" })
 	}
 
 	if len(f.sessions(t)) != 8 || !strings.Contains(f.lastResponse(t), "capacity") {
@@ -207,7 +207,7 @@ func checkTelegramConversationProject(t *testing.T, f *telegramConversationFixtu
 	}
 }
 
-func (f *telegramConversationFixture) session(t *testing.T, id string) TelegramConversation {
+func (f *telegramConversationFixture) session(t *testing.T, id string) Conversation {
 	t.Helper()
 
 	for _, c := range f.sessions(t) {
@@ -218,5 +218,5 @@ func (f *telegramConversationFixture) session(t *testing.T, id string) TelegramC
 
 	t.Fatal("session unavailable", id)
 
-	return TelegramConversation{}
+	return Conversation{}
 }

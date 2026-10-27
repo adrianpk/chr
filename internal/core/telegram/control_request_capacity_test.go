@@ -47,7 +47,7 @@ func checkTelegramRequestReserve(t *testing.T, total int, state string) {
 
 	f, action := telegramPendingControlLaneFixture(t, "work.control", "pause")
 
-	parent, err := f.store.TelegramActionRequest(t.Context(), action.Peer, TelegramActionAnswer{Token: action.Token, Choice: "pause"})
+	parent, err := f.store.ActionRequest(t.Context(), action.Peer, ActionAnswer{Token: action.Token, Choice: "pause"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,14 +73,14 @@ func checkTelegramRequestReserve(t *testing.T, total int, state string) {
 
 	input := telegramOperationActionInput(t, f, "pause")
 
-	_, err = f.store.ClaimTelegramAction(t.Context(), input, TelegramActionAnswer{Token: action.Token, Choice: "pause"}, time.Now())
-	if !errors.Is(err, ErrTelegramRequestCapacity) {
+	_, err = f.store.ClaimAction(t.Context(), input, ActionAnswer{Token: action.Token, Choice: "pause"}, time.Now())
+	if !errors.Is(err, ErrRequestCapacity) {
 		t.Fatal("hard request ceiling grew for an extra answer", err)
 	}
 
 	checkTelegramRequestCount(t, f.store.db, total+64)
 
-	replay, err := f.store.ReserveTelegramOperation(t.Context(), template, time.Now())
+	replay, err := f.store.ReserveOperation(t.Context(), template, time.Now())
 	if err != nil || replay.ID != template.ID {
 		t.Fatal("capacity blocked an existing binding", replay, err)
 	}
@@ -90,41 +90,41 @@ func checkTelegramRequestReserve(t *testing.T, total int, state string) {
 	}
 }
 
-func checkTelegramOrdinaryRequestFull(t *testing.T, f *telegramConversationFixture, template TelegramOperationRequest) {
+func checkTelegramOrdinaryRequestFull(t *testing.T, f *telegramConversationFixture, template OperationRequest) {
 	t.Helper()
 
 	input := telegramOperationActionInput(t, f, "ordinary reservation")
 	request := template
 
 	request.Source = input.Update
-	if _, err := f.store.ReserveTelegramOperation(t.Context(), request, time.Now()); !errors.Is(err, ErrTelegramRequestCapacity) {
+	if _, err := f.store.ReserveOperation(t.Context(), request, time.Now()); !errors.Is(err, ErrRequestCapacity) {
 		t.Fatal("ordinary requests consumed the control allowance", err)
 	}
 
-	if _, found, err := f.store.TelegramOperation(t.Context(), input.Update, 0); err != nil || found {
+	if _, found, err := f.store.Operation(t.Context(), input.Update, 0); err != nil || found {
 		t.Fatal("rejected reservation retained an accepted request", found, err)
 	}
 }
 
-func reserveTelegramControlPair(t *testing.T, f *telegramConversationFixture, target TelegramOperationTarget) {
+func reserveTelegramControlPair(t *testing.T, f *telegramConversationFixture, target OperationTarget) {
 	t.Helper()
 
 	input := telegramOperationActionInput(t, f, "control request")
 
-	request, err := f.store.ReservePreparedTelegramOperation(t.Context(), TelegramOperationRequest{Source: input.Update, Operator: "maintainer", Target: target, OperationID: "work.control", Arguments: json.RawMessage(`{"action":"pause"}`)}, json.RawMessage(`{}`), time.Now())
+	request, err := f.store.ReservePreparedOperation(t.Context(), OperationRequest{Source: input.Update, Operator: "maintainer", Target: target, OperationID: "work.control", Arguments: json.RawMessage(`{"action":"pause"}`)}, json.RawMessage(`{}`), time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	input.Projects, input.Config = f.input.Projects, f.input.Config
 
-	action, err := f.store.OfferTelegramAction(t.Context(), TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"pause"}, Text: "Control allowance", ExpiresAt: time.Now().Add(time.Hour)}, time.Now())
+	action, err := f.store.OfferAction(t.Context(), ActionOffer{Input: input, RequestID: request.ID, Choices: []string{"pause"}, Text: "Control allowance", ExpiresAt: time.Now().Add(time.Hour)}, time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	answer := telegramOperationActionInput(t, f, "pause")
-	if _, err := f.store.ClaimTelegramAction(t.Context(), answer, TelegramActionAnswer{Token: action.Token, Choice: "pause"}, time.Now()); err != nil {
+	if _, err := f.store.ClaimAction(t.Context(), answer, ActionAnswer{Token: action.Token, Choice: "pause"}, time.Now()); err != nil {
 		t.Fatal("reserved control answer unavailable", err)
 	}
 }

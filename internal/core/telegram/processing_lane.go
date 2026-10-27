@@ -11,103 +11,103 @@ import (
 	"forge.adrianpk.com/chr/internal/core/database"
 )
 
-// TelegramProcessingLane bounds adapter calls independently of native workers.
-type TelegramProcessingLane string
+// ProcessingLane bounds adapter calls independently of native workers.
+type ProcessingLane string
 
 // Processing lanes reserve four of the receiver's sixteen application calls.
 const (
-	TelegramProcessingOrdinary TelegramProcessingLane = "ordinary"
-	TelegramProcessingDecision TelegramProcessingLane = "decision"
-	TelegramProcessingUrgent   TelegramProcessingLane = "urgent"
+	ProcessingOrdinary ProcessingLane = "ordinary"
+	ProcessingDecision ProcessingLane = "decision"
+	ProcessingUrgent   ProcessingLane = "urgent"
 )
 
-func telegramControlLane(action string) TelegramProcessingLane {
+func controlLane(action string) ProcessingLane {
 	switch action {
 	case "status", "pause", "cancel", "reconcile":
-		return TelegramProcessingUrgent
+		return ProcessingUrgent
 	case "resume", "approve", "grant", "answer-decision", "answer_decision":
-		return TelegramProcessingDecision
+		return ProcessingDecision
 	default:
 		// A confirmed continuation can execute a worker, so it cannot consume
 		// the slots reserved for status, stop and decisions.
-		return TelegramProcessingOrdinary
+		return ProcessingOrdinary
 	}
 }
 
-func telegramInputLane(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate) (TelegramProcessingLane, bool, error) {
+func inputLane(ctx context.Context, tx *sql.Tx, update ReceivedUpdate) (ProcessingLane, bool, error) {
 	if update.Kind != "message" && update.Kind != "callback_query" {
-		return TelegramProcessingOrdinary, false, nil
+		return ProcessingOrdinary, false, nil
 	}
 
-	if lane, control := TelegramExplicitControlLane(update); control {
+	if lane, control := ExplicitControlLane(update); control {
 		return lane, true, nil
 	}
 
-	token, answer, err := telegramInputActionToken(ctx, tx, update)
+	token, answer, err := inputActionToken(ctx, tx, update)
 	if err != nil {
-		return TelegramProcessingOrdinary, false, err
+		return ProcessingOrdinary, false, err
 	}
 
 	if !answer {
-		return telegramUnboundReplyLane(ctx, tx, update)
+		return unboundReplyLane(ctx, tx, update)
 	}
 
-	return telegramActionInputLane(ctx, tx, update, token)
+	return actionInputLane(ctx, tx, update, token)
 }
 
-// TelegramExplicitControlLane classifies deterministic control syntax. This
+// ExplicitControlLane classifies deterministic control syntax. This
 // scheduling hint grants no target, actor, execution or mutation authority.
-func TelegramExplicitControlLane(update TelegramReceivedUpdate) (TelegramProcessingLane, bool) {
+func ExplicitControlLane(update ReceivedUpdate) (ProcessingLane, bool) {
 	if update.Kind == "message" {
 		switch strings.ToLower(strings.TrimSpace(update.Text)) {
 		case "pause use case", "cancel use case", "show current step", "show use case":
-			return TelegramProcessingUrgent, true
+			return ProcessingUrgent, true
 		case "resume use case", "show controls":
-			return TelegramProcessingDecision, true
+			return ProcessingDecision, true
 		}
 	}
 
 	words := strings.Fields(update.Text)
 	if update.Kind != "message" || len(words) == 0 {
-		return TelegramProcessingOrdinary, false
+		return ProcessingOrdinary, false
 	}
 
 	switch words[0] {
 	case "/status", "/pause", "/cancel", "/reconcile":
-		return TelegramProcessingUrgent, true
+		return ProcessingUrgent, true
 	case "/resume", "/approve", "/grant", "/answer-decision":
-		return TelegramProcessingDecision, true
+		return ProcessingDecision, true
 	case "/continue":
-		return TelegramProcessingOrdinary, true
+		return ProcessingOrdinary, true
 	default:
-		return TelegramProcessingOrdinary, false
+		return ProcessingOrdinary, false
 	}
 }
 
-func telegramActionInputLane(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, token string) (TelegramProcessingLane, bool, error) {
+func actionInputLane(ctx context.Context, tx *sql.Tx, update ReceivedUpdate, token string) (ProcessingLane, bool, error) {
 	var operation, arguments string
 
 	p := update.Peer
 
 	err := tx.QueryRowContext(ctx, `SELECT r.operation_id,r.arguments FROM telegram_actions a JOIN telegram_requests r ON r.id=a.request_id WHERE a.token=? AND a.bot_id=? AND a.chat_id=? AND a.topic_id=? AND a.user_id=?`, token, p.BotID, p.ChatID, p.TopicID, p.UserID).Scan(&operation, &arguments)
 	if errors.Is(err, sql.ErrNoRows) {
-		return TelegramProcessingDecision, true, nil
+		return ProcessingDecision, true, nil
 	}
 
 	if err != nil || operation != "work.control" && operation != "guided.step" {
-		return TelegramProcessingOrdinary, false, err
+		return ProcessingOrdinary, false, err
 	}
 
-	lane, err := TelegramActionChoiceProcessingLane(TelegramOperationRequest{OperationID: operation, Arguments: json.RawMessage(arguments)}, telegramInputActionChoice(update))
+	lane, err := ActionChoiceProcessingLane(OperationRequest{OperationID: operation, Arguments: json.RawMessage(arguments)}, inputActionChoice(update))
 
 	return lane, true, err
 }
 
-// TelegramActionProcessingLane derives execution class from the immutable
+// ActionProcessingLane derives execution class from the immutable
 // retained operation, including a reply whose binding appeared after intake.
-func TelegramActionProcessingLane(request TelegramOperationRequest) (TelegramProcessingLane, error) {
+func ActionProcessingLane(request OperationRequest) (ProcessingLane, error) {
 	if request.OperationID != "work.control" {
-		return TelegramProcessingOrdinary, nil
+		return ProcessingOrdinary, nil
 	}
 
 	var args struct {
@@ -117,25 +117,25 @@ func TelegramActionProcessingLane(request TelegramOperationRequest) (TelegramPro
 		return "", err
 	}
 
-	return telegramControlLane(args.Action), nil
+	return controlLane(args.Action), nil
 }
 
-func telegramUnboundReplyLane(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate) (TelegramProcessingLane, bool, error) {
+func unboundReplyLane(ctx context.Context, tx *sql.Tx, update ReceivedUpdate) (ProcessingLane, bool, error) {
 	if update.ReplyToMessageID <= 0 {
-		return TelegramProcessingOrdinary, false, nil
+		return ProcessingOrdinary, false, nil
 	}
 
-	state, err := resolveTelegramReplyBinding(ctx, tx, update)
-	if state == telegramReplyKnown {
-		return TelegramProcessingOrdinary, false, err
+	state, err := resolveReplyBinding(ctx, tx, update)
+	if state == replyKnown {
+		return ProcessingOrdinary, false, err
 	}
 
 	// Unknown replies only wait or produce diagnostics. They cannot execute a
 	// model and receive no reserved intake allowance before their binding exists.
-	return TelegramProcessingDecision, false, err
+	return ProcessingDecision, false, err
 }
 
-func telegramInputActionToken(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate) (string, bool, error) {
+func inputActionToken(ctx context.Context, tx *sql.Tx, update ReceivedUpdate) (string, bool, error) {
 	text := strings.TrimSpace(update.Text)
 	if update.Kind == "callback_query" && strings.HasPrefix(text, "tga:") {
 		parts := strings.Split(text, ":")
@@ -147,7 +147,7 @@ func telegramInputActionToken(ctx context.Context, tx *sql.Tx, update TelegramRe
 	}
 
 	words := strings.Fields(text)
-	if len(words) > 0 && words[0] == TelegramActionAnswerCommand {
+	if len(words) > 0 && words[0] == ActionAnswerCommand {
 		if len(words) == 3 {
 			return words[1], true, nil
 		}
@@ -173,7 +173,7 @@ func telegramInputActionToken(ctx context.Context, tx *sql.Tx, update TelegramRe
 
 // PendingApplicationInputs returns a bounded lane without overtaking an earlier
 // ordinary input for the same peer. Controls may bypass a blocked model call.
-func (s *TelegramReceiverStore) PendingApplicationInputs(ctx context.Context, botID int64, lane TelegramProcessingLane, now time.Time) ([]TelegramReceivedUpdate, error) {
+func (s *ReceiverStore) PendingApplicationInputs(ctx context.Context, botID int64, lane ProcessingLane, now time.Time) ([]ReceivedUpdate, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT u.update_id,u.payload_digest,u.update_kind,u.chat_id,u.topic_id,u.user_id,u.message_id,u.chat_type,u.payload,u.reply_to_message_id
 FROM telegram_updates u WHERE u.bot_id=? AND u.state='pending' AND u.processing_lane=?
 AND (u.interpretation IS NOT NULL OR u.interpretation_attempt>=5 OR u.interpretation_retry_at IS NULL OR u.interpretation_retry_at<=?)
@@ -184,19 +184,19 @@ ORDER BY CASE WHEN u.processing_lane='decision' THEN u.control_input ELSE 0 END 
 		return nil, err
 	}
 
-	return readTelegramPendingRows(rows, botID)
+	return readPendingRows(rows, botID)
 }
 
-func readTelegramPendingRows(rows *sql.Rows, botID int64) ([]TelegramReceivedUpdate, error) {
+func readPendingRows(rows *sql.Rows, botID int64) ([]ReceivedUpdate, error) {
 	defer func() {
 		//nolint:errcheck // rows.Err is checked after the bounded iteration.
 		_ = rows.Close()
 	}()
 
-	var result []TelegramReceivedUpdate
+	var result []ReceivedUpdate
 
 	for rows.Next() {
-		update := TelegramReceivedUpdate{Peer: TelegramPeerIdentity{BotID: botID}}
+		update := ReceivedUpdate{Peer: PeerIdentity{BotID: botID}}
 		if err := rows.Scan(&update.UpdateID, &update.Digest, &update.Kind, &update.Peer.ChatID, &update.Peer.TopicID, &update.Peer.UserID, &update.MessageID, &update.ChatType, &update.Text, &update.ReplyToMessageID); err != nil {
 			return nil, err
 		}
@@ -207,17 +207,17 @@ func readTelegramPendingRows(rows *sql.Rows, botID int64) ([]TelegramReceivedUpd
 	return result, rows.Err()
 }
 
-// TelegramActionChoiceProcessingLane is a scheduling hint for an already sealed
+// ActionChoiceProcessingLane is a scheduling hint for an already sealed
 // choice. The action owner still validates every peer, choice and mutation guard.
-func TelegramActionChoiceProcessingLane(request TelegramOperationRequest, choice string) (TelegramProcessingLane, error) {
+func ActionChoiceProcessingLane(request OperationRequest, choice string) (ProcessingLane, error) {
 	if request.OperationID == "guided.step" {
-		return telegramControlLane(choice), nil
+		return controlLane(choice), nil
 	}
 
-	return TelegramActionProcessingLane(request)
+	return ActionProcessingLane(request)
 }
 
-func telegramInputActionChoice(update TelegramReceivedUpdate) string {
+func inputActionChoice(update ReceivedUpdate) string {
 	if update.Kind == "callback_query" {
 		parts := strings.Split(update.Text, ":")
 		if len(parts) == 3 {
@@ -226,7 +226,7 @@ func telegramInputActionChoice(update TelegramReceivedUpdate) string {
 	}
 
 	words := strings.Fields(update.Text)
-	if len(words) == 3 && words[0] == TelegramActionAnswerCommand {
+	if len(words) == 3 && words[0] == ActionAnswerCommand {
 		return words[2]
 	}
 

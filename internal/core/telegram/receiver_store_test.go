@@ -9,10 +9,10 @@ import (
 	"forge.adrianpk.com/chr/internal/core/database"
 )
 
-func openTelegramReceiverTestStore(t *testing.T, env telegramTestEnvironment) *TelegramReceiverStore {
+func openTelegramReceiverTestStore(t *testing.T, env telegramTestEnvironment) *ReceiverStore {
 	t.Helper()
 
-	store, err := NewTelegramReceiverStore(t.Context(), env, os.DirFS("../../../cmd/chr"))
+	store, err := NewReceiverStore(t.Context(), env, os.DirFS("../../../cmd/chr"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -30,17 +30,17 @@ func openTelegramReceiverTestStore(t *testing.T, env telegramTestEnvironment) *T
 	return store
 }
 
-func telegramRetainedTestUpdate(t *testing.T, id int64, text string) TelegramReceivedUpdate {
+func telegramRetainedTestUpdate(t *testing.T, id int64, text string) ReceivedUpdate {
 	t.Helper()
 
 	data := fmt.Sprintf(`{"update_id":%d,"message":{"message_id":1,"from":{"id":100001},"chat":{"id":100001,"type":"private"},"text":%q}}`, id, text)
 
-	update, err := decodeTelegramReceiverUpdate([]byte(data))
+	update, err := decodeReceiverUpdate([]byte(data))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	return AuthorizeTelegramReceiverUpdate(telegramReceiverTestConfig(), 12345, update)
+	return AuthorizeReceiverUpdate(telegramReceiverTestConfig(), 12345, update)
 }
 
 // TestTelegramReceiverBatch proves sparse deduplication and all-or-nothing cursor changes after conflict.
@@ -50,14 +50,14 @@ func TestTelegramReceiverBatch(t *testing.T) {
 	first := telegramRetainedTestUpdate(t, 9, "/help")
 
 	second := telegramRetainedTestUpdate(t, 9000, "/status")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{first, second, first}, time.Now()); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{first, second, first}, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
 	conflict := telegramRetainedTestUpdate(t, 9, "/projects")
 
 	newer := telegramRetainedTestUpdate(t, 10000, "/help")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{newer, conflict}, time.Now()); err == nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{newer, conflict}, time.Now()); err == nil {
 		t.Fatal("changed source digest accepted")
 	}
 
@@ -76,7 +76,7 @@ func TestTelegramReceiverIntakeCapacity(t *testing.T) {
 	store := openTelegramReceiverTestStore(t, telegramReceiverTestEnv(t))
 
 	for batch := range 11 {
-		updates := make([]TelegramReceivedUpdate, 0, 100)
+		updates := make([]ReceivedUpdate, 0, 100)
 		for i := range 100 {
 			updates = append(updates, telegramRetainedTestUpdate(t, int64(batch*100+i), "/help"))
 		}
@@ -104,7 +104,7 @@ func TestTelegramReceiverOutbox(t *testing.T) {
 	now := time.Now().UTC().Truncate(time.Second)
 
 	update := telegramRetainedTestUpdate(t, 1, "/help")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, now); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{update}, now); err != nil {
 		t.Fatal(err)
 	}
 
@@ -124,7 +124,7 @@ func TestTelegramReceiverOutbox(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := store.DeliveryFailed(t.Context(), delivery, &TelegramAPIError{Code: "transport_failure", Uncertain: true}, now); err != nil {
+	if err := store.DeliveryFailed(t.Context(), delivery, &APIError{Code: "transport_failure", Uncertain: true}, now); err != nil {
 		t.Fatal(err)
 	}
 
@@ -135,7 +135,7 @@ func TestTelegramReceiverOutbox(t *testing.T) {
 	checkTelegramReopenedOutbox(t, env, delivery, now)
 }
 
-func checkTelegramDeliveryCompletion(t *testing.T, store *TelegramReceiverStore, delivery TelegramReceiverDelivery, now time.Time) {
+func checkTelegramDeliveryCompletion(t *testing.T, store *ReceiverStore, delivery ReceiverDelivery, now time.Time) {
 	t.Helper()
 
 	if err := store.ReserveDelivery(t.Context(), delivery.ID, now); err != nil {
@@ -169,7 +169,7 @@ func TestTelegramReceiverPollBudget(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if err := store.PollFailed(t.Context(), 12345, &TelegramAPIError{Code: "rate_limited", RetryAfter: 30 * time.Second}, when); err != nil {
+		if err := store.PollFailed(t.Context(), 12345, &APIError{Code: "rate_limited", RetryAfter: 30 * time.Second}, when); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -189,7 +189,7 @@ func TestTelegramReceiverPollBudget(t *testing.T) {
 	}
 }
 
-func checkTelegramReopenedBatch(t *testing.T, store *TelegramReceiverStore) {
+func checkTelegramReopenedBatch(t *testing.T, store *ReceiverStore) {
 	t.Helper()
 
 	state, err := store.Receiver(t.Context(), 12345)
@@ -203,7 +203,7 @@ func checkTelegramReopenedBatch(t *testing.T, store *TelegramReceiverStore) {
 	}
 }
 
-func checkTelegramReopenedOutbox(t *testing.T, env telegramTestEnvironment, delivery TelegramReceiverDelivery, now time.Time) {
+func checkTelegramReopenedOutbox(t *testing.T, env telegramTestEnvironment, delivery ReceiverDelivery, now time.Time) {
 	t.Helper()
 
 	store := openTelegramReceiverTestStore(t, env)
@@ -222,7 +222,7 @@ func TestTelegramReceiverOutboxCapacity(t *testing.T) {
 	now := time.Now()
 
 	update := telegramRetainedTestUpdate(t, 1, "/help")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, now); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{update}, now); err != nil {
 		t.Fatal(err)
 	}
 
@@ -248,7 +248,7 @@ SELECT 'existing-'||id,12345,100001,0,100001,'existing:'||id,?,'result','retaine
 func TestTelegramReceiverIdentity(t *testing.T) {
 	env := telegramReceiverTestEnv(t)
 
-	lock, err := AcquireTelegramConfigurationLock(env)
+	lock, err := AcquireConfigurationLock(env)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -259,11 +259,11 @@ func TestTelegramReceiverIdentity(t *testing.T) {
 		}
 	}()
 
-	if err := BindTelegramReceiverIdentity(env, 12345); err != nil {
+	if err := BindReceiverIdentity(env, 12345); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := BindTelegramReceiverIdentity(env, 54321); err == nil {
+	if err := BindReceiverIdentity(env, 54321); err == nil {
 		t.Fatal("bot identity was replaced without setup authority")
 	}
 

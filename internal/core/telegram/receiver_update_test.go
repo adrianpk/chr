@@ -31,12 +31,12 @@ func TestTelegramReceiverAuthorization(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			data := fmt.Sprintf(`{"update_id":1,"message":{"message_id":1,"from":%s,"chat":%s,"text":%q%s}}`, test.sender, test.chat, test.text, test.extra)
 
-			update, err := decodeTelegramReceiverUpdate([]byte(data))
+			update, err := decodeReceiverUpdate([]byte(data))
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			update = AuthorizeTelegramReceiverUpdate(config, 12345, update)
+			update = AuthorizeReceiverUpdate(config, 12345, update)
 			if (update.Kind == "message") != test.allowed || (!test.allowed && update.Text != "") {
 				t.Fatal("authorization or denied payload retention failed", update.Kind)
 			}
@@ -48,13 +48,13 @@ func TestTelegramReceiverAuthorization(t *testing.T) {
 func TestTelegramReceiverCallback(t *testing.T) {
 	data := []byte(`{"update_id":1,"callback_query":{"id":"example","from":{"id":100001},"data":"opaque:help","message":{"message_id":7,"date":1,"from":{"id":12345,"is_bot":true},"chat":{"id":100001,"type":"private"},"text":"old bot message"}}}`)
 
-	update, err := decodeTelegramReceiverUpdate(data)
+	update, err := decodeReceiverUpdate(data)
 	if err != nil || update.Kind != "callback_query" || update.Peer.UserID != 100001 || update.Text != "opaque:help" {
 		t.Fatal("callback sender was not retained", update, err)
 	}
 
 	for _, name := range []string{"edited_message", "channel_post", "inline_query"} {
-		update, err := decodeTelegramReceiverUpdate([]byte(fmt.Sprintf(`{"update_id":2,%q:{"text":"/work"}}`, name)))
+		update, err := decodeReceiverUpdate([]byte(fmt.Sprintf(`{"update_id":2,%q:{"text":"/work"}}`, name)))
 		if err != nil || update.Kind != "ignored" || update.Text != "" {
 			t.Fatal("unsupported update entered interpretation", name, err)
 		}
@@ -71,7 +71,7 @@ func TestTelegramReceiverOutputBounds(t *testing.T) {
 	}
 	for name, text := range cases {
 		t.Run(name, func(t *testing.T) {
-			if got := BoundTelegramReceiverText(text); !validTelegramReceiverText(got) {
+			if got := BoundReceiverText(text); !validReceiverText(got) {
 				t.Fatal("output exceeded Telegram text bounds")
 			}
 		})

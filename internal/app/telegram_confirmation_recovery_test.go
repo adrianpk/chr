@@ -21,7 +21,7 @@ func TestTelegramPresentationControlQuestions(t *testing.T) {
 		{ID: "question-two", Issue: "Which target should be used?", Options: []string{"target one", "target two"}, Authority: "maintainer"},
 	}
 	status := WorkflowWorkStatus{WorkflowIdentity: core.WorkflowIdentity{ID: "execution-one", ProjectID: "example-project", Namespace: "default"}, Integration: &WorkflowIntegrationStatus{EntryID: "integration-one", EntryRevision: 3, CandidateHash: strings.Repeat("c", 64), Decision: &WorkflowIntegrationDecisionStatus{ID: "decision-one", Revision: 2, Hash: strings.Repeat("d", 64), State: "waiting", Requests: questions}}}
-	target := telegramcore.TelegramOperationTarget{ProjectID: "example-project", Namespace: "default", ProjectBindingDigest: strings.Repeat("a", 64)}
+	target := telegramcore.OperationTarget{ProjectID: "example-project", Namespace: "default", ProjectBindingDigest: strings.Repeat("a", 64)}
 
 	response, err := telegramQuestionDocument(target, status)
 	if err != nil {
@@ -47,7 +47,7 @@ func TestTelegramPresentationControlQuestions(t *testing.T) {
 // Source reads, policy, persistence and admission continue to use the real service.
 type telegramPartialWorkPreview struct{ service }
 
-func (s telegramPartialWorkPreview) PreviewTelegramWork(ctx context.Context, target telegramcore.TelegramOperationTarget, selector core.WorkflowSelector) (WorkflowBoundPreview, error) {
+func (s telegramPartialWorkPreview) PreviewTelegramWork(ctx context.Context, target telegramcore.OperationTarget, selector core.WorkflowSelector) (WorkflowBoundPreview, error) {
 	preview, err := s.service.PreviewTelegramWork(ctx, target, selector)
 	if err == nil {
 		preview.View.Preview.Total = len(preview.View.Preview.Members) + 1

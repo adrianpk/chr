@@ -10,9 +10,9 @@ import (
 	"forge.adrianpk.com/chr/internal/core/database"
 )
 
-// TelegramBoundBotID reads the local verified binding without claiming receiver ownership.
-func TelegramBoundBotID(env TelegramStateDirectory) (int64, error) {
-	data, err := readTelegramPrivateFile(filepath.Join(env.StateDir(), "telegram", "bot-id"), 32)
+// BoundBotID reads the local verified binding without claiming receiver ownership.
+func BoundBotID(env StateDirectory) (int64, error) {
+	data, err := readPrivateFile(filepath.Join(env.StateDir(), "telegram", "bot-id"), 32)
 	if err != nil {
 		return 0, err
 	}
@@ -25,13 +25,13 @@ func TelegramBoundBotID(env TelegramStateDirectory) (int64, error) {
 	return id, nil
 }
 
-// InspectTelegramReceiver reads local status without migrations, network calls or state creation.
-func InspectTelegramReceiver(ctx context.Context, env database.DataDirectory, botID int64) (state TelegramReceiverState, err error) {
+// InspectReceiver reads local status without migrations, network calls or state creation.
+func InspectReceiver(ctx context.Context, env database.DataDirectory, botID int64) (state ReceiverState, err error) {
 	db, err := database.OpenReadOnly(ctx, env)
 	if err != nil {
 		return state, err
 	}
 	defer func() { err = errors.Join(err, db.Close()) }()
 
-	return (&TelegramReceiverStore{db: db}).Receiver(ctx, botID)
+	return (&ReceiverStore{db: db}).Receiver(ctx, botID)
 }

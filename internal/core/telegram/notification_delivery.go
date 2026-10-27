@@ -16,7 +16,7 @@ import (
 
 // SendPresentation shares the receiver's bounded HTTP boundary and multipart
 // uploader while retaining the notification sender and string destination.
-func (s TelegramSender) SendPresentation(ctx context.Context, token, destination string, delivery notifycore.TelegramDelivery) (tgmessage.Acknowledgement, error) {
+func (s Sender) SendPresentation(ctx context.Context, token, destination string, delivery notifycore.TelegramDelivery) (tgmessage.Acknowledgement, error) {
 	if strings.TrimSpace(token) == "" {
 		return tgmessage.Acknowledgement{}, fmt.Errorf("telegram bot token is required")
 	}
@@ -44,21 +44,21 @@ func (s TelegramSender) SendPresentation(ctx context.Context, token, destination
 	return api.sendNotificationText(ctx, token, destination, presentation.PlainFallback, entities)
 }
 
-func (api TelegramReceiverAPI) sendNotificationDocument(ctx context.Context, token, destination string, delivery notifycore.TelegramDelivery, entities []tgmessage.Entity) (tgmessage.Acknowledgement, error) {
-	body, contentType, err := telegramDocumentMultipartDestination(destination, 0, *delivery.Document, delivery.Presentation.PlainFallback, entities, nil)
+func (api ReceiverAPI) sendNotificationDocument(ctx context.Context, token, destination string, delivery notifycore.TelegramDelivery, entities []tgmessage.Entity) (tgmessage.Acknowledgement, error) {
+	body, contentType, err := documentMultipartDestination(destination, 0, *delivery.Document, delivery.Presentation.PlainFallback, entities, nil)
 	if err != nil {
 		return tgmessage.Acknowledgement{}, err
 	}
 
 	data, err := api.postBody(ctx, token, "sendDocument", bytes.NewReader(body), contentType, 10*time.Second)
 	if err != nil {
-		return tgmessage.Acknowledgement{}, telegramDocumentSendFailure(err)
+		return tgmessage.Acknowledgement{}, documentSendFailure(err)
 	}
 
-	return decodeTelegramDocumentAcknowledgement(data)
+	return decodeDocumentAcknowledgement(data)
 }
 
-func (api TelegramReceiverAPI) sendNotificationText(ctx context.Context, token, destination, text string, entities []tgmessage.Entity) (tgmessage.Acknowledgement, error) {
+func (api ReceiverAPI) sendNotificationText(ctx context.Context, token, destination, text string, entities []tgmessage.Entity) (tgmessage.Acknowledgement, error) {
 	payload := struct {
 		ChatID   string             `json:"chat_id"`
 		Text     string             `json:"text"`
@@ -72,21 +72,21 @@ func (api TelegramReceiverAPI) sendNotificationText(ctx context.Context, token, 
 
 	data, err := api.postBody(ctx, token, "sendMessage", bytes.NewReader(body), "application/json", 10*time.Second)
 	if err != nil {
-		return tgmessage.Acknowledgement{}, telegramDocumentSendFailure(err)
+		return tgmessage.Acknowledgement{}, documentSendFailure(err)
 	}
 
 	var result struct {
 		MessageID int64 `json:"message_id"`
 	}
 	if err := json.Unmarshal(data, &result); err != nil || result.MessageID <= 0 {
-		return tgmessage.Acknowledgement{}, &TelegramAPIError{Code: "invalid_response", Uncertain: true}
+		return tgmessage.Acknowledgement{}, &APIError{Code: "invalid_response", Uncertain: true}
 	}
 
 	return tgmessage.Acknowledgement{MessageID: result.MessageID}, nil
 }
 
-func (s TelegramSender) notificationAPI() TelegramReceiverAPI {
-	api := NewTelegramReceiverAPI()
+func (s Sender) notificationAPI() ReceiverAPI {
+	api := NewReceiverAPI()
 	if s.BaseURL != "" {
 		api.BaseURL = s.BaseURL
 	}
@@ -102,10 +102,10 @@ func (s TelegramSender) notificationAPI() TelegramReceiverAPI {
 	return api
 }
 
-// TelegramNotificationFailure retains a safe classification and uncertainty;
+// NotificationFailure retains a safe classification and uncertainty;
 // notification audit data never receives a transport error containing a token.
-func TelegramNotificationFailure(failure error) (string, bool) {
-	var api *TelegramAPIError
+func NotificationFailure(failure error) (string, bool) {
+	var api *APIError
 	if errors.As(failure, &api) {
 		return api.Code, api.Uncertain
 	}

@@ -15,7 +15,7 @@ import (
 func TestTelegramHelpLegacyMigration(t *testing.T) {
 	env := telegramReceiverTestEnv(t)
 
-	store, err := NewTelegramReceiverStore(t.Context(), env, telegramPreHelpAssets(t))
+	store, err := NewReceiverStore(t.Context(), env, telegramPreHelpAssets(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,7 +47,7 @@ func TestTelegramHelpLegacyMigration(t *testing.T) {
 	assertTelegramLegacyReply(t, due[0])
 }
 
-func assertTelegramLegacyReply(t *testing.T, delivery TelegramReceiverDelivery) {
+func assertTelegramLegacyReply(t *testing.T, delivery ReceiverDelivery) {
 	t.Helper()
 
 	if delivery.Text != "legacy plain help" || delivery.ParseMode != "" || delivery.PlainText != "" || delivery.PlainFallback {

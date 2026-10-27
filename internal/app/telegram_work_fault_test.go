@@ -19,7 +19,7 @@ type telegramWorkLostAck struct {
 	lost atomic.Bool
 }
 
-func (s *telegramWorkLostAck) StartTelegramWork(ctx context.Context, target telegramcore.TelegramOperationTarget, preview WorkflowBoundPreview, binding WorkflowBoundAdmission) (AgentWorkResult, error) {
+func (s *telegramWorkLostAck) StartTelegramWork(ctx context.Context, target telegramcore.OperationTarget, preview WorkflowBoundPreview, binding WorkflowBoundAdmission) (AgentWorkResult, error) {
 	result, err := s.service.StartTelegramWork(ctx, target, preview, binding)
 	if err == nil && s.lost.CompareAndSwap(false, true) {
 		return result, errTelegramLostRecordAck
@@ -53,7 +53,7 @@ func TestTelegramWorkLostAck(t *testing.T) {
 	checkTelegramWorkRecovery(t, f, operations, input.Update, before)
 }
 
-func checkTelegramWorkRecovery(t *testing.T, f *telegramConversationAppFixture, operations service, update telegramcore.TelegramReceivedUpdate, before core.WorkflowInvocation) {
+func checkTelegramWorkRecovery(t *testing.T, f *telegramConversationAppFixture, operations service, update telegramcore.ReceivedUpdate, before core.WorkflowInvocation) {
 	t.Helper()
 
 	after := checkTelegramWorkRunCount(t, operations, 1)
@@ -64,10 +64,10 @@ func checkTelegramWorkRecovery(t *testing.T, f *telegramConversationAppFixture, 
 	checkTelegramWorkRecoveryBinding(t, f, update, before)
 }
 
-func checkTelegramWorkRecoveryBinding(t *testing.T, f *telegramConversationAppFixture, update telegramcore.TelegramReceivedUpdate, before core.WorkflowInvocation) {
+func checkTelegramWorkRecoveryBinding(t *testing.T, f *telegramConversationAppFixture, update telegramcore.ReceivedUpdate, before core.WorkflowInvocation) {
 	t.Helper()
 
-	request, found, err := f.receiver.store.TelegramOperation(t.Context(), update, 0)
+	request, found, err := f.receiver.store.Operation(t.Context(), update, 0)
 	if err != nil || !found || request.State != "confirmed" || request.ReceiptRef != "workflow:"+before.ID {
 		t.Fatal("original answer was not confirmed", request, err)
 	}

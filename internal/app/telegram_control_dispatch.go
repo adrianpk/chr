@@ -11,8 +11,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r telegramReceiver) respondControl(ctx context.Context, user telegramcore.TelegramAllowedUser, config telegramcore.TelegramReceiverConfig, update telegramcore.TelegramReceivedUpdate) (bool, error) {
-	retained, found, err := r.store.TelegramOperation(ctx, update, 0)
+func (r telegramReceiver) respondControl(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (bool, error) {
+	retained, found, err := r.store.Operation(ctx, update, 0)
 	if err != nil {
 		return true, err
 	}
@@ -50,7 +50,7 @@ func (r telegramReceiver) controlCancelConversation(ctx context.Context, command
 		return false, nil
 	}
 
-	c, found, err := r.store.TelegramConversationReference(ctx, command.Input.Update.Peer, command.Invocation)
+	c, found, err := r.store.ConversationReference(ctx, command.Input.Update.Peer, command.Invocation)
 	if err != nil || !found {
 		return false, err
 	}
@@ -64,7 +64,7 @@ func (r telegramReceiver) controlCancelConversation(ctx context.Context, command
 	return false, nil
 }
 
-func (r telegramReceiver) dispatchControl(ctx context.Context, user telegramcore.TelegramAllowedUser, command telegramControlCommand) error {
+func (r telegramReceiver) dispatchControl(ctx context.Context, user telegramcore.AllowedUser, command telegramControlCommand) error {
 	target, err := r.resolveControlTarget(ctx, command)
 	if err != nil {
 		return r.recordDiagnostic(ctx, command.Input.Update, command.Input.Config, telegramIntentTargetFailure(err))
@@ -93,7 +93,7 @@ func (r telegramReceiver) dispatchControl(ctx context.Context, user telegramcore
 		return err
 	}
 
-	request, err := r.store.ReserveTelegramOperation(ctx, telegramcore.TelegramOperationRequest{Source: command.Input.Update, Operator: user.OperatorID, Target: target, OperationID: "work.control", Arguments: arguments}, time.Now())
+	request, err := r.store.ReserveOperation(ctx, telegramcore.OperationRequest{Source: command.Input.Update, Operator: user.OperatorID, Target: target, OperationID: "work.control", Arguments: arguments}, time.Now())
 	if err != nil {
 		return err
 	}
@@ -101,10 +101,10 @@ func (r telegramReceiver) dispatchControl(ctx context.Context, user telegramcore
 	return r.prepareControl(ctx, request, command.Input.Config)
 }
 
-func (r telegramReceiver) controlInvocation(ctx context.Context, command telegramControlCommand, target telegramcore.TelegramOperationTarget) (string, error) {
+func (r telegramReceiver) controlInvocation(ctx context.Context, command telegramControlCommand, target telegramcore.OperationTarget) (string, error) {
 	id := command.Invocation
 	if target.ConversationID != "" {
-		c, found, err := r.store.TelegramConversationReference(ctx, command.Input.Update.Peer, target.ConversationID)
+		c, found, err := r.store.ConversationReference(ctx, command.Input.Update.Peer, target.ConversationID)
 		if err != nil || !found || id != "" && c.InvocationID != "" && id != c.InvocationID {
 			return "", workflowstate.ErrConflict
 		}
@@ -121,15 +121,15 @@ func (r telegramReceiver) controlInvocation(ctx context.Context, command telegra
 	return id, nil
 }
 
-func (r telegramReceiver) resolveControlTarget(ctx context.Context, command telegramControlCommand) (telegramcore.TelegramOperationTarget, error) {
+func (r telegramReceiver) resolveControlTarget(ctx context.Context, command telegramControlCommand) (telegramcore.OperationTarget, error) {
 	if command.Action == "status" {
-		return r.store.ResolveTelegramWorkStatusTarget(ctx, command.Input, time.Now())
+		return r.store.ResolveWorkStatusTarget(ctx, command.Input, time.Now())
 	}
 
-	return r.store.ResolveTelegramControlTarget(ctx, command.Input, time.Now())
+	return r.store.ResolveControlTarget(ctx, command.Input, time.Now())
 }
 
-func (r telegramReceiver) respondNativeStatus(ctx context.Context, operations telegramControlService, target telegramcore.TelegramOperationTarget, id string, input telegramcore.TelegramConversationInput) error {
+func (r telegramReceiver) respondNativeStatus(ctx context.Context, operations telegramControlService, target telegramcore.OperationTarget, id string, input telegramcore.ConversationInput) error {
 	status, err := operations.ReadTelegramControl(ctx, target, id)
 	if err != nil {
 		return r.recordDiagnostic(ctx, input.Update, input.Config, "The exact native execution is unavailable in this project and namespace.")
@@ -153,5 +153,5 @@ func (r telegramReceiver) respondNativeStatus(ctx context.Context, operations te
 		return err
 	}
 
-	return r.store.QueueTelegramWorkStatus(ctx, input, target, id, telegramWorkProgressMessage(status, telegramWorkProjectName(input.Projects, status.ProjectID)), time.Now())
+	return r.store.QueueWorkStatus(ctx, input, target, id, telegramWorkProgressMessage(status, telegramWorkProjectName(input.Projects, status.ProjectID)), time.Now())
 }

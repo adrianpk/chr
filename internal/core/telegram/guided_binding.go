@@ -12,50 +12,50 @@ import (
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
-// ErrTelegramNotGuided lets a transport leave existing manual conversations alone.
-var ErrTelegramNotGuided = errors.New("conversation is not a guided binding")
+// ErrNotGuided lets a transport leave existing manual conversations alone.
+var ErrNotGuided = errors.New("conversation is not a guided binding")
 
-// TelegramGuidedAssociation projects a domain-validated canonical guided session.
+// GuidedAssociation projects a domain-validated canonical guided session.
 // It carries routing identity only; it grants no progression or dispatch.
-type TelegramGuidedAssociation struct {
+type GuidedAssociation struct {
 	SessionID, ProjectID, Namespace, Topic string
 }
 
-// ReserveTelegramGuidedConversation retains only routing to a canonical session.
+// ReserveGuidedConversation retains only routing to a canonical session.
 // It does not acknowledge the update, create authoring state or grant dispatch.
-func (s *TelegramReceiverStore) ReserveTelegramGuidedConversation(ctx context.Context, input TelegramConversationInput, now time.Time) (conversation TelegramConversation, target TelegramOperationTarget, err error) {
-	return s.reserveTelegramGuidedAssociation(ctx, input, "", now)
+func (s *ReceiverStore) ReserveGuidedConversation(ctx context.Context, input ConversationInput, now time.Time) (conversation Conversation, target OperationTarget, err error) {
+	return s.reserveGuidedAssociation(ctx, input, "", now)
 }
 
-// BindTelegramGuidedConversation associates an existing guided run by its verified
+// BindGuidedConversation associates an existing guided run by its verified
 // scope. It creates no progression intent and cannot adopt a manual session.
-func (s *TelegramReceiverStore) BindTelegramGuidedConversation(ctx context.Context, input TelegramConversationInput, association TelegramGuidedAssociation, now time.Time) (TelegramConversation, TelegramOperationTarget, error) {
+func (s *ReceiverStore) BindGuidedConversation(ctx context.Context, input ConversationInput, association GuidedAssociation, now time.Time) (Conversation, OperationTarget, error) {
 	if input.Project != association.ProjectID || input.Namespace != association.Namespace {
-		return TelegramConversation{}, TelegramOperationTarget{}, workflowstate.ErrConflict
+		return Conversation{}, OperationTarget{}, workflowstate.ErrConflict
 	}
 
 	if err := authoringstate.ValidateSessionID(association.SessionID); err != nil {
-		return TelegramConversation{}, TelegramOperationTarget{}, err
+		return Conversation{}, OperationTarget{}, err
 	}
 
 	input.Text = association.Topic
 
-	return s.reserveTelegramGuidedAssociation(ctx, input, association.SessionID, now)
+	return s.reserveGuidedAssociation(ctx, input, association.SessionID, now)
 }
 
-func (s *TelegramReceiverStore) reserveTelegramGuidedAssociation(ctx context.Context, input TelegramConversationInput, runID string, now time.Time) (conversation TelegramConversation, target TelegramOperationTarget, err error) {
+func (s *ReceiverStore) reserveGuidedAssociation(ctx context.Context, input ConversationInput, runID string, now time.Time) (conversation Conversation, target OperationTarget, err error) {
 	if _, allowed := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType); !allowed {
 		return conversation, target, workflowstate.ErrConflict
 	}
 
-	input.Intent, input.Action = "develop", TelegramConversationStart
+	input.Intent, input.Action = "develop", ConversationStart
 	err = s.transaction(ctx, func(tx *sql.Tx) error {
-		pending, err := telegramReadResponsePending(ctx, tx, input.Update)
+		pending, err := readResponsePending(ctx, tx, input.Update)
 		if err != nil || !pending {
 			return errors.Join(workflowstate.ErrConflict, err)
 		}
 
-		op := telegramConversationTransaction{ctx: ctx, tx: tx, input: input, now: now}
+		op := conversationTransaction{ctx: ctx, tx: tx, input: input, now: now}
 		// An explicit new-project instruction does not adopt a quoted conversation.
 		if input.Project != "" {
 			op.input.Update.ReplyToMessageID = 0
@@ -78,11 +78,11 @@ func (s *TelegramReceiverStore) reserveTelegramGuidedAssociation(ctx context.Con
 	return conversation, target, err
 }
 
-func (op telegramConversationTransaction) reserveGuidedConversation(runID string) (TelegramConversation, error) {
-	id := telegramConversationID(op.input.Update)
+func (op conversationTransaction) reserveGuidedConversation(runID string) (Conversation, error) {
+	id := conversationID(op.input.Update)
 	p := op.input.Update.Peer
 
-	c, err := scanTelegramConversation(op.tx.QueryRowContext(op.ctx, `SELECT `+telegramConversationColumns+` FROM telegram_conversations WHERE id=? AND bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, id, p.BotID, p.ChatID, p.TopicID, p.UserID))
+	c, err := scanConversation(op.tx.QueryRowContext(op.ctx, `SELECT `+conversationColumns+` FROM telegram_conversations WHERE id=? AND bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, id, p.BotID, p.ChatID, p.TopicID, p.UserID))
 	if err == nil {
 		if c.GuidedRunID == "" || c.Topic != op.input.Text || runID != "" && c.GuidedRunID != runID {
 			return c, workflowstate.ErrConflict
@@ -118,15 +118,15 @@ func (op telegramConversationTransaction) reserveGuidedConversation(runID string
 	return *created, err
 }
 
-// ResolveTelegramGuidedTarget uses existing exact reply/focus routing and guards.
-func (s *TelegramReceiverStore) ResolveTelegramGuidedTarget(ctx context.Context, input TelegramConversationInput) (conversation TelegramConversation, target TelegramOperationTarget, err error) {
+// ResolveGuidedTarget uses existing exact reply/focus routing and guards.
+func (s *ReceiverStore) ResolveGuidedTarget(ctx context.Context, input ConversationInput) (conversation Conversation, target OperationTarget, err error) {
 	if _, allowed := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType); !allowed {
 		return conversation, target, workflowstate.ErrConflict
 	}
 
-	input.Action = TelegramConversationCapture
+	input.Action = ConversationCapture
 	err = s.transaction(ctx, func(tx *sql.Tx) error {
-		op := telegramConversationTransaction{ctx: ctx, tx: tx, input: input, now: time.Now()}
+		op := conversationTransaction{ctx: ctx, tx: tx, input: input, now: time.Now()}
 
 		selected, err := op.target()
 		if err != nil {
@@ -134,7 +134,7 @@ func (s *TelegramReceiverStore) ResolveTelegramGuidedTarget(ctx context.Context,
 		}
 
 		if selected.GuidedRunID == "" {
-			return ErrTelegramNotGuided
+			return ErrNotGuided
 		}
 
 		if err := op.validateTarget(selected); err != nil {

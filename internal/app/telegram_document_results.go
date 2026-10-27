@@ -28,11 +28,11 @@ func telegramDocumentName(kind, topic string) string {
 	return kind + "-" + slug + ".md"
 }
 
-func telegramDocumentForTarget(target telegramcore.TelegramOperationTarget, ref, hash, filename, mediaType string, payload []byte) tgmessage.Document {
+func telegramDocumentForTarget(target telegramcore.OperationTarget, ref, hash, filename, mediaType string, payload []byte) tgmessage.Document {
 	return tgmessage.Document{ProjectID: target.ProjectID, Namespace: target.Namespace, ProjectBindingDigest: target.ProjectBindingDigest, SourceRef: ref, SourceHash: hash, Filename: filename, MediaType: mediaType, Payload: payload}
 }
 
-func (r telegramReceiver) authoringDocument(ctx context.Context, request telegramcore.TelegramOperationRequest, result core.AuthoringContinuationResult) (*tgmessage.DocumentResponse, error) {
+func (r telegramReceiver) authoringDocument(ctx context.Context, request telegramcore.OperationRequest, result core.AuthoringContinuationResult) (*tgmessage.DocumentResponse, error) {
 	if result.Question != nil {
 		return nil, nil
 	}
@@ -68,7 +68,7 @@ func (r telegramReceiver) authoringDocument(ctx context.Context, request telegra
 	return telegramPrimaryAuthoringDocument(request.Target, result, snapshot, owner.Target)
 }
 
-func telegramPrimaryAuthoringDocument(target telegramcore.TelegramOperationTarget, result core.AuthoringContinuationResult, snapshot core.AuthoringSnapshot, kind core.AuthoringArtifactKind) (*tgmessage.DocumentResponse, error) {
+func telegramPrimaryAuthoringDocument(target telegramcore.OperationTarget, result core.AuthoringContinuationResult, snapshot core.AuthoringSnapshot, kind core.AuthoringArtifactKind) (*tgmessage.DocumentResponse, error) {
 	for index := len(snapshot.Artifacts) - 1; index >= 0; index-- {
 		artifact := snapshot.Artifacts[index]
 		if artifact.Ref.Kind != kind || artifact.Body == "" {
@@ -91,7 +91,7 @@ func telegramPrimaryAuthoringDocument(target telegramcore.TelegramOperationTarge
 	return nil, workflowstate.ErrConflict
 }
 
-func telegramExplanationDocument(target telegramcore.TelegramOperationTarget, requestID string, result AuthoringExplanation, source []byte) tgmessage.DocumentResponse {
+func telegramExplanationDocument(target telegramcore.OperationTarget, requestID string, result AuthoringExplanation, source []byte) tgmessage.DocumentResponse {
 	text := result.Text
 	if len(result.SourceRefs) > 0 {
 		text += "\n\nCanonical sources:\n" + strings.Join(result.SourceRefs, "\n")
@@ -102,7 +102,7 @@ func telegramExplanationDocument(target telegramcore.TelegramOperationTarget, re
 	return tgmessage.DocumentResponse{Message: tgmessage.Blocks{Family: "24", InitialText: "Explanation ready.", ContentKind: "markdown", Content: tgmessage.DocumentExcerpt([]byte(result.Text)), SecondaryText: "Complete explanation attached."}, Document: telegramDocumentForTarget(target, "exports/explanation-"+requestID+".md", recordDigest(source), "explanation.md", "text/markdown", payload)}
 }
 
-func telegramRecordDocument(target telegramcore.TelegramOperationTarget, command telegramRecordCommand, page RecordPage) (tgmessage.DocumentResponse, error) {
+func telegramRecordDocument(target telegramcore.OperationTarget, command telegramRecordCommand, page RecordPage) (tgmessage.DocumentResponse, error) {
 	payload, err := json.MarshalIndent(page, "", "  ")
 	if err != nil {
 		return tgmessage.DocumentResponse{}, err

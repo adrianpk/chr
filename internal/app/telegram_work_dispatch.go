@@ -13,15 +13,15 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r telegramReceiver) respondWork(ctx context.Context, user telegramcore.TelegramAllowedUser, config telegramcore.TelegramReceiverConfig, update telegramcore.TelegramReceivedUpdate) (bool, error) {
+func (r telegramReceiver) respondWork(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (bool, error) {
 	route := telegramCommandRoute{
 		OperationID: "work.admit", Continue: r.prepareWorkAdmission, Help: telegramWorkHelp(),
-		Parse: func(update telegramcore.TelegramReceivedUpdate) (telegramParsedCommand, error) {
+		Parse: func(update telegramcore.ReceivedUpdate) (telegramParsedCommand, error) {
 			command, recognized, err := parseTelegramWork(update)
 
 			return telegramParsedCommand{
 				Recognized: recognized, Input: &command.Input,
-				Dispatch: func(ctx context.Context, user telegramcore.TelegramAllowedUser) error {
+				Dispatch: func(ctx context.Context, user telegramcore.AllowedUser) error {
 					return r.dispatchWork(ctx, user, command)
 				},
 			}, err
@@ -31,8 +31,8 @@ func (r telegramReceiver) respondWork(ctx context.Context, user telegramcore.Tel
 	return r.respondCommand(ctx, user, config, update, route)
 }
 
-func (r telegramReceiver) dispatchWork(ctx context.Context, user telegramcore.TelegramAllowedUser, command telegramWorkCommand) error {
-	target, err := r.store.ResolveTelegramWorkTarget(ctx, command.Input, time.Now())
+func (r telegramReceiver) dispatchWork(ctx context.Context, user telegramcore.AllowedUser, command telegramWorkCommand) error {
+	target, err := r.store.ResolveWorkTarget(ctx, command.Input, time.Now())
 	if err != nil {
 		return r.recordDiagnostic(ctx, command.Input.Update, command.Input.Config, telegramIntentTargetFailure(err))
 	}
@@ -42,7 +42,7 @@ func (r telegramReceiver) dispatchWork(ctx context.Context, user telegramcore.Te
 		return err
 	}
 
-	request, err := r.store.ReserveTelegramOperation(ctx, telegramcore.TelegramOperationRequest{Source: command.Input.Update, Operator: user.OperatorID, Target: target, OperationID: "work.admit", Arguments: arguments}, time.Now())
+	request, err := r.store.ReserveOperation(ctx, telegramcore.OperationRequest{Source: command.Input.Update, Operator: user.OperatorID, Target: target, OperationID: "work.admit", Arguments: arguments}, time.Now())
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func (r telegramReceiver) dispatchWork(ctx context.Context, user telegramcore.Te
 	return r.prepareWorkAdmission(ctx, request, command.Input.Config)
 }
 
-func (r telegramReceiver) prepareWorkAdmission(ctx context.Context, request telegramcore.TelegramOperationRequest, config telegramcore.TelegramReceiverConfig) error {
+func (r telegramReceiver) prepareWorkAdmission(ctx context.Context, request telegramcore.OperationRequest, config telegramcore.ReceiverConfig) error {
 	if telegramPreparedWorkFinished(request.State) {
 		return nil
 	}
@@ -77,7 +77,7 @@ func (r telegramReceiver) prepareWorkAdmission(ctx context.Context, request tele
 	return r.offerWorkAdmission(ctx, request)
 }
 
-func (r telegramReceiver) previewWorkAdmission(ctx context.Context, operations telegramWorkService, request telegramcore.TelegramOperationRequest) (json.RawMessage, error) {
+func (r telegramReceiver) previewWorkAdmission(ctx context.Context, operations telegramWorkService, request telegramcore.OperationRequest) (json.RawMessage, error) {
 	var selector core.WorkflowSelector
 	if err := decodeOperationJSON(string(request.Arguments), &selector); err != nil {
 		return nil, err
@@ -93,10 +93,10 @@ func (r telegramReceiver) previewWorkAdmission(ctx context.Context, operations t
 		return nil, err
 	}
 
-	return prepared, r.store.PrepareTelegramOperation(ctx, request, prepared, time.Now())
+	return prepared, r.store.PrepareOperation(ctx, request, prepared, time.Now())
 }
 
-func (r telegramReceiver) offerWorkAdmission(ctx context.Context, request telegramcore.TelegramOperationRequest) error {
+func (r telegramReceiver) offerWorkAdmission(ctx context.Context, request telegramcore.OperationRequest) error {
 	preview, err := telegramRetainedWorkPreview(request)
 	if err != nil {
 		return err
@@ -123,13 +123,13 @@ func (r telegramReceiver) offerWorkAdmission(ctx context.Context, request telegr
 	text := telegramWorkPreviewText(preview)
 	text = strings.Replace(text, "\n\n", "\n\n"+strings.Join(complete.Titles[:min(3, len(complete.Titles))], "\n")+"\n", 1)
 
-	return r.offerConfirmationDocument(ctx, request, telegramcore.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"start"}, ExpiresAt: time.Now().Add(24 * time.Hour)}, "31", text, complete.Complete)
+	return r.offerConfirmationDocument(ctx, request, telegramcore.ActionOffer{Input: input, RequestID: request.ID, Choices: []string{"start"}, ExpiresAt: time.Now().Add(24 * time.Hour)}, "31", text, complete.Complete)
 }
 
-func (r telegramReceiver) validateWorkAdmissionAuthority(ctx context.Context, request telegramcore.TelegramOperationRequest) error {
+func (r telegramReceiver) validateWorkAdmissionAuthority(ctx context.Context, request telegramcore.OperationRequest) error {
 	if err := r.validateRecordAuthority(ctx, request); err != nil {
 		return err
 	}
 
-	return r.store.ValidateTelegramWorkConversation(ctx, request)
+	return r.store.ValidateWorkConversation(ctx, request)
 }

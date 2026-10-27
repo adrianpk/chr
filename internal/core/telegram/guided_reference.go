@@ -8,15 +8,15 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// TelegramGuidedReference is a transport association, never execution authority.
-type TelegramGuidedReference struct {
-	Conversation TelegramConversation
-	Request      TelegramOperationRequest
+// GuidedReference is a transport association, never execution authority.
+type GuidedReference struct {
+	Conversation Conversation
+	Request      OperationRequest
 }
 
-// TelegramGuidedReferences inventories a bounded page with its latest confirmed
+// GuidedReferences inventories a bounded page with its latest confirmed
 // transport receipt. Canonical authoring and native files retain all work state.
-func (s *TelegramReceiverStore) TelegramGuidedReferences(ctx context.Context, botID int64, after string, limit int) ([]TelegramGuidedReference, error) {
+func (s *ReceiverStore) GuidedReferences(ctx context.Context, botID int64, after string, limit int) ([]GuidedReference, error) {
 	if botID <= 0 || len(after) > 128 || limit < 1 || limit > 16 {
 		return nil, workflowstate.ErrConflict
 	}
@@ -26,15 +26,15 @@ func (s *TelegramReceiverStore) TelegramGuidedReferences(ctx context.Context, bo
 		return nil, err
 	}
 
-	pairs, err := readTelegramGuidedPairs(rows)
+	pairs, err := readGuidedPairs(rows)
 	if err != nil {
 		return nil, err
 	}
 
-	var result []TelegramGuidedReference
+	var result []GuidedReference
 
 	for _, pair := range pairs {
-		ref, err := s.readTelegramGuidedReference(ctx, pair)
+		ref, err := s.readGuidedReference(ctx, pair)
 		if err != nil {
 			return nil, err
 		}
@@ -45,7 +45,7 @@ func (s *TelegramReceiverStore) TelegramGuidedReferences(ctx context.Context, bo
 	return result, nil
 }
 
-func readTelegramGuidedPairs(rows *sql.Rows) (pairs [][2]string, err error) {
+func readGuidedPairs(rows *sql.Rows) (pairs [][2]string, err error) {
 	defer func() { err = errors.Join(err, rows.Close()) }()
 
 	for rows.Next() {
@@ -65,18 +65,18 @@ func readTelegramGuidedPairs(rows *sql.Rows) (pairs [][2]string, err error) {
 	return pairs, rows.Err()
 }
 
-func (s *TelegramReceiverStore) readTelegramGuidedReference(ctx context.Context, pair [2]string) (TelegramGuidedReference, error) {
-	request, err := readTelegramOperationID(ctx, s.db, pair[1])
+func (s *ReceiverStore) readGuidedReference(ctx context.Context, pair [2]string) (GuidedReference, error) {
+	request, err := readOperationID(ctx, s.db, pair[1])
 	if err != nil {
-		return TelegramGuidedReference{}, err
+		return GuidedReference{}, err
 	}
 
-	c, found, err := s.TelegramConversationReference(ctx, request.Source.Peer, pair[0])
+	c, found, err := s.ConversationReference(ctx, request.Source.Peer, pair[0])
 	if err != nil || !found || request.Target.ConversationID != c.ID {
-		return TelegramGuidedReference{}, errors.Join(workflowstate.ErrConflict, err)
+		return GuidedReference{}, errors.Join(workflowstate.ErrConflict, err)
 	}
 
 	request.Target.ConversationRevision = c.Revision
 
-	return TelegramGuidedReference{Conversation: c, Request: request}, nil
+	return GuidedReference{Conversation: c, Request: request}, nil
 }

@@ -8,13 +8,13 @@ import (
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
-func (r telegramReceiver) respondAction(ctx context.Context, user telegramcore.TelegramAllowedUser, config telegramcore.TelegramReceiverConfig, update telegramcore.TelegramReceivedUpdate) (bool, error) {
-	answer, recognized, err := r.store.ResolveTelegramActionAnswer(ctx, update)
+func (r telegramReceiver) respondAction(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (bool, error) {
+	answer, recognized, err := r.store.ResolveActionAnswer(ctx, update)
 	if !recognized {
 		return false, r.checkCaptureReplyLane(update)
 	}
 
-	if errors.Is(err, telegramcore.ErrTelegramActionUnavailable) {
+	if errors.Is(err, telegramcore.ErrActionUnavailable) {
 		return true, r.staleActionDiagnostic(ctx, update, answer, config)
 	}
 
@@ -27,8 +27,8 @@ func (r telegramReceiver) respondAction(ctx context.Context, user telegramcore.T
 		return true, err
 	}
 
-	claim, err := r.store.ClaimTelegramAction(ctx, telegramcore.TelegramConversationInput{Update: update, Config: config, Projects: projects}, answer, time.Now())
-	if errors.Is(err, telegramcore.ErrTelegramActionUnavailable) {
+	claim, err := r.store.ClaimAction(ctx, telegramcore.ConversationInput{Update: update, Config: config, Projects: projects}, answer, time.Now())
+	if errors.Is(err, telegramcore.ErrActionUnavailable) {
 		return true, r.staleActionDiagnostic(ctx, update, answer, config)
 	}
 
@@ -39,7 +39,7 @@ func (r telegramReceiver) respondAction(ctx context.Context, user telegramcore.T
 	return true, r.respondActionClaim(ctx, update, claim, config)
 }
 
-func (r telegramReceiver) respondActionClaim(ctx context.Context, update telegramcore.TelegramReceivedUpdate, claim telegramcore.TelegramActionClaim, config telegramcore.TelegramReceiverConfig) error {
+func (r telegramReceiver) respondActionClaim(ctx context.Context, update telegramcore.ReceivedUpdate, claim telegramcore.ActionClaim, config telegramcore.ReceiverConfig) error {
 	if err := r.checkActionLane(claim); err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func (r telegramReceiver) respondActionClaim(ctx context.Context, update telegra
 
 	switch claim.Action.State {
 	case "expired", "superseded":
-		return r.staleActionDiagnostic(ctx, update, telegramcore.TelegramActionAnswer{Token: claim.Action.Token, Choice: claim.Choice}, config)
+		return r.staleActionDiagnostic(ctx, update, telegramcore.ActionAnswer{Token: claim.Action.Token, Choice: claim.Choice}, config)
 	case "consumed":
 		return r.store.QueuePresentationResponse(ctx, update, *telegramOutcomeMessage("40", telegramActionReplayText(claim.Request)), config.Digest(), time.Now())
 	default:
@@ -58,12 +58,12 @@ func (r telegramReceiver) respondActionClaim(ctx context.Context, update telegra
 	}
 }
 
-func (r telegramReceiver) dispatchTelegramAction(ctx context.Context, claim telegramcore.TelegramActionClaim, config telegramcore.TelegramReceiverConfig) error {
+func (r telegramReceiver) dispatchTelegramAction(ctx context.Context, claim telegramcore.ActionClaim, config telegramcore.ReceiverConfig) error {
 	if claim.Request.OperationID == "guided.step" {
 		return r.applyGuidedAction(ctx, claim, config)
 	}
 
-	if claim.Request.OperationID == telegramcore.TelegramHarnessSelectionOperation {
+	if claim.Request.OperationID == telegramcore.HarnessSelectionOperation {
 		return r.applyHarnessAction(ctx, claim, config)
 	}
 
@@ -82,6 +82,6 @@ func (r telegramReceiver) dispatchTelegramAction(ctx context.Context, claim tele
 	return r.applyRecordAction(ctx, claim, config)
 }
 
-func (r telegramReceiver) actionDiagnostic(ctx context.Context, update telegramcore.TelegramReceivedUpdate, config telegramcore.TelegramReceiverConfig) error {
+func (r telegramReceiver) actionDiagnostic(ctx context.Context, update telegramcore.ReceivedUpdate, config telegramcore.ReceiverConfig) error {
 	return r.store.QueuePresentationResponse(ctx, update, *telegramOutcomeMessage("40", telegramActionUnavailableText), config.Digest(), time.Now())
 }

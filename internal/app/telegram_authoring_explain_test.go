@@ -24,7 +24,7 @@ func TestTelegramAuthoringExplainRootBinding(t *testing.T) {
 
 	input := telegramOperationRetainInput(t, f, "/explain Describe retries.")
 
-	target, err := f.receiver.store.ResolveTelegramOperationTarget(t.Context(), input, time.Now())
+	target, err := f.receiver.store.ResolveOperationTarget(t.Context(), input, time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -115,15 +115,15 @@ func telegramAuthoringExplainReply(t *testing.T, input authoringModelInput) stri
 	return `{"explanation":"The configured retry ceiling is retained."}`
 }
 
-func telegramAuthoringExplainMessage(t *testing.T, f *telegramConversationAppFixture, mode string) (string, telegramcore.TelegramConversation) {
+func telegramAuthoringExplainMessage(t *testing.T, f *telegramConversationAppFixture, mode string) (string, telegramcore.Conversation) {
 	t.Helper()
 
 	if mode == "natural" {
-		return "Explain how retries are bounded.", telegramcore.TelegramConversation{}
+		return "Explain how retries are bounded.", telegramcore.Conversation{}
 	}
 
 	if mode != "session" {
-		return "/explain How are retries bounded?", telegramcore.TelegramConversation{}
+		return "/explain How are retries bounded?", telegramcore.Conversation{}
 	}
 
 	f.send(t, "/prepare retry ceiling", 0)
@@ -202,7 +202,7 @@ func TestTelegramAuthoringExplainRecovery(t *testing.T) {
 	telegramAuthoringBridgeNoWork(t, f)
 }
 
-func telegramAuthoringExplainReserve(t *testing.T, f *telegramConversationAppFixture) (telegramcore.TelegramOperationRequest, PreparedAuthoringExplanation) {
+func telegramAuthoringExplainReserve(t *testing.T, f *telegramConversationAppFixture) (telegramcore.OperationRequest, PreparedAuthoringExplanation) {
 	t.Helper()
 
 	input := telegramOperationRetainInput(t, f, "/explain How are retries bounded?")
@@ -253,16 +253,16 @@ func TestTelegramAuthoringExplainAuthority(t *testing.T) {
 	}
 }
 
-func telegramAuthoringExplainCache(t *testing.T, f *telegramConversationAppFixture, request telegramcore.TelegramOperationRequest, prepared PreparedAuthoringExplanation) {
+func telegramAuthoringExplainCache(t *testing.T, f *telegramConversationAppFixture, request telegramcore.OperationRequest, prepared PreparedAuthoringExplanation) {
 	t.Helper()
 
-	if err := f.receiver.store.BeginTelegramOperation(t.Context(), request, time.Now()); err != nil {
+	if err := f.receiver.store.BeginOperation(t.Context(), request, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
 	operations := telegramOperationConcreteService(t, f.receiver)
 
-	model, err := f.receiver.store.ResolveTelegramOperationModel(t.Context(), f.receiver.env, request, time.Now(), func(ctx context.Context) (json.RawMessage, error) {
+	model, err := f.receiver.store.ResolveOperationModel(t.Context(), f.receiver.env, request, time.Now(), func(ctx context.Context) (json.RawMessage, error) {
 		result, err := operations.ExplainPreparedTelegram(ctx, request.Target, prepared)
 		if err != nil {
 			return nil, err

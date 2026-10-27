@@ -52,7 +52,7 @@ func telegramRecordResultText(result RecordMutationResult) string {
 	return fmt.Sprintf("Record saved: %s %s — %s.\nState: %s.\nCanonical record: %s", record.Kind, record.Identity, record.Title, record.Phase, record.Reference)
 }
 
-func telegramPreparedWorkReplay(request telegramcore.TelegramOperationRequest) string {
+func telegramPreparedWorkReplay(request telegramcore.OperationRequest) string {
 	var result AuthoringWorkResult
 	if json.Unmarshal(request.Result, &result) != nil {
 		return "This ticket preparation was already confirmed. Inspect the original result before requesting another preparation."
@@ -61,7 +61,7 @@ func telegramPreparedWorkReplay(request telegramcore.TelegramOperationRequest) s
 	return "This ticket preparation was already confirmed.\n\n" + telegramPreparedWorkResultText(result)
 }
 
-func telegramActionReplayText(request telegramcore.TelegramOperationRequest) string {
+func telegramActionReplayText(request telegramcore.OperationRequest) string {
 	if request.OperationID == "authoring.work" {
 		return telegramPreparedWorkReplay(request)
 	}
@@ -82,7 +82,7 @@ func telegramActionReplayText(request telegramcore.TelegramOperationRequest) str
 	return text
 }
 
-func telegramActionReplayDetails(request telegramcore.TelegramOperationRequest) string {
+func telegramActionReplayDetails(request telegramcore.OperationRequest) string {
 	switch request.OperationID {
 	case "work.admit":
 		var result telegramWorkAdmissionResult
@@ -94,7 +94,7 @@ func telegramActionReplayDetails(request telegramcore.TelegramOperationRequest) 
 		if json.Unmarshal(request.Result, &status) == nil {
 			return fmt.Sprintf("Original control receipt retained for work %s. Retained result state: %s. Use /status %s for current state.", status.ID, status.Status, status.ID)
 		}
-	case telegramcore.TelegramHarnessSelectionOperation:
+	case telegramcore.HarnessSelectionOperation:
 		var facts struct {
 			Snapshot *core.HarnessSelectionSnapshot `json:"snapshot"`
 		}

@@ -59,7 +59,7 @@ func telegramAuthoringExplainExhaust(t *testing.T, f *telegramConversationAppFix
 		t.Fatal(updates, err)
 	}
 
-	request, found, err := f.receiver.store.TelegramOperation(t.Context(), updates[0], 0)
+	request, found, err := f.receiver.store.Operation(t.Context(), updates[0], 0)
 	if err != nil || !found {
 		t.Fatal(request, err)
 	}
@@ -71,7 +71,7 @@ func telegramAuthoringExplainExhaust(t *testing.T, f *telegramConversationAppFix
 
 	operations := telegramOperationConcreteService(t, f.receiver)
 	for attempt := 2; attempt <= 5; attempt++ {
-		model, err := f.receiver.store.ResolveTelegramOperationModel(t.Context(), f.receiver.env, request, time.Now().Add(time.Hour), func(ctx context.Context) (json.RawMessage, error) {
+		model, err := f.receiver.store.ResolveOperationModel(t.Context(), f.receiver.env, request, time.Now().Add(time.Hour), func(ctx context.Context) (json.RawMessage, error) {
 			result, err := operations.ExplainPreparedTelegram(ctx, request.Target, prepared)
 			if err != nil {
 				return nil, err

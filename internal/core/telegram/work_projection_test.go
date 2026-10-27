@@ -18,8 +18,8 @@ func TestTelegramWorkProjection(t *testing.T) {
 	project := func(revision uint64, text string, at time.Time) {
 		t.Helper()
 
-		observation := TelegramWorkObservation{Revision: revision, Phase: "executing", Kind: "progress", Text: text}
-		if err := f.store.ProjectTelegramWork(t.Context(), ref, observation, f.input.Config.Digest(), at); err != nil {
+		observation := WorkObservation{Revision: revision, Phase: "executing", Kind: "progress", Text: text}
+		if err := f.store.ProjectWork(t.Context(), ref, observation, f.input.Config.Digest(), at); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -57,7 +57,7 @@ func TestTelegramWorkProjection(t *testing.T) {
 	checkTelegramWorkTerminalProjection(t, f, ref, next.ID, now.Add(32*time.Second))
 }
 
-func telegramWorkReserveAtInterval(t *testing.T, f *telegramConversationFixture, next TelegramReceiverDelivery, now time.Time) {
+func telegramWorkReserveAtInterval(t *testing.T, f *telegramConversationFixture, next ReceiverDelivery, now time.Time) {
 	t.Helper()
 
 	if reserved, err := f.store.TryReserveDelivery(t.Context(), next.ID, now.Add(29*time.Second)); err != nil || reserved {
@@ -68,7 +68,7 @@ func telegramWorkReserveAtInterval(t *testing.T, f *telegramConversationFixture,
 		t.Fatal(err)
 	}
 
-	if err := f.store.DeliveryFailed(t.Context(), next, &TelegramAPIError{Code: "network", Uncertain: true}, now.Add(30*time.Second)); err != nil {
+	if err := f.store.DeliveryFailed(t.Context(), next, &APIError{Code: "network", Uncertain: true}, now.Add(30*time.Second)); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -92,7 +92,7 @@ func telegramWorkDeliverInitial(t *testing.T, f *telegramConversationFixture, no
 	}
 }
 
-func telegramWorkDueNotice(t *testing.T, f *telegramConversationFixture, now time.Time, text string) TelegramReceiverDelivery {
+func telegramWorkDueNotice(t *testing.T, f *telegramConversationFixture, now time.Time, text string) ReceiverDelivery {
 	t.Helper()
 
 	due, err := f.store.DueDeliveries(t.Context(), 12345, now)
@@ -103,12 +103,12 @@ func telegramWorkDueNotice(t *testing.T, f *telegramConversationFixture, now tim
 	return due[0]
 }
 
-func checkTelegramWorkTerminalProjection(t *testing.T, f *telegramConversationFixture, ref TelegramWorkReference, sendingID string, now time.Time) {
+func checkTelegramWorkTerminalProjection(t *testing.T, f *telegramConversationFixture, ref WorkReference, sendingID string, now time.Time) {
 	t.Helper()
 
-	observation := TelegramWorkObservation{Revision: 7, Phase: "completed", Kind: "result", Text: "native receipt confirmed"}
+	observation := WorkObservation{Revision: 7, Phase: "completed", Kind: "result", Text: "native receipt confirmed"}
 	for range 2 {
-		if err := f.store.ProjectTelegramWork(t.Context(), ref, observation, f.input.Config.Digest(), now); err != nil {
+		if err := f.store.ProjectWork(t.Context(), ref, observation, f.input.Config.Digest(), now); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -121,7 +121,7 @@ func checkTelegramWorkTerminalProjection(t *testing.T, f *telegramConversationFi
 		t.Fatal("projection replaced attempted output or duplicated terminal result", sending, terminal, pendingProgress)
 	}
 
-	if refs, err := f.store.TelegramWorkReferences(t.Context(), 12345, "", 16); err != nil || len(refs) != 0 {
+	if refs, err := f.store.WorkReferences(t.Context(), 12345, "", 16); err != nil || len(refs) != 0 {
 		t.Fatal("completed conversation still activates", refs, err)
 	}
 }
@@ -147,8 +147,8 @@ func TestTelegramWorkProjectionUnchanged(t *testing.T) {
 
 	message := tgmessage.Blocks{Family: "33", InitialText: "Waiting for review"}
 
-	observation := TelegramWorkObservation{Revision: 1, Phase: "waiting", Kind: "progress", Text: tgmessage.Render(message).PlainFallback, Message: &message}
-	if err := f.store.ProjectTelegramWork(t.Context(), ref, observation, f.input.Config.Digest(), now); err != nil {
+	observation := WorkObservation{Revision: 1, Phase: "waiting", Kind: "progress", Text: tgmessage.Render(message).PlainFallback, Message: &message}
+	if err := f.store.ProjectWork(t.Context(), ref, observation, f.input.Config.Digest(), now); err != nil {
 		t.Fatal(err)
 	}
 
@@ -162,7 +162,7 @@ func TestTelegramWorkProjectionUnchanged(t *testing.T) {
 	f.store = openTelegramReceiverTestStore(t, f.env)
 
 	observation.Revision = 2
-	if err := f.store.ProjectTelegramWork(t.Context(), ref, observation, f.input.Config.Digest(), now.Add(time.Minute)); err != nil {
+	if err := f.store.ProjectWork(t.Context(), ref, observation, f.input.Config.Digest(), now.Add(time.Minute)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -170,7 +170,7 @@ func TestTelegramWorkProjectionUnchanged(t *testing.T) {
 		t.Fatal("unchanged progress was repeated", count)
 	}
 
-	refs, err := f.store.TelegramWorkReferences(t.Context(), 12345, "", 16)
+	refs, err := f.store.WorkReferences(t.Context(), 12345, "", 16)
 	if err != nil || len(refs) != 1 || refs[0].Invocation.Revision != 2 {
 		t.Fatal("suppression lost the latest native revision", refs, err)
 	}
@@ -178,7 +178,7 @@ func TestTelegramWorkProjectionUnchanged(t *testing.T) {
 	message.InitialText = "Integration confirmed"
 
 	observation.Revision, observation.Text = 3, tgmessage.Render(message).PlainFallback
-	if err := f.store.ProjectTelegramWork(t.Context(), ref, observation, f.input.Config.Digest(), now.Add(2*time.Minute)); err != nil {
+	if err := f.store.ProjectWork(t.Context(), ref, observation, f.input.Config.Digest(), now.Add(2*time.Minute)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -210,12 +210,12 @@ func TestTelegramWorkProjectionFull(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	observation := TelegramWorkObservation{Revision: 2, Phase: "completed", Kind: "result", Text: "receipt confirmed"}
-	if err := f.store.ProjectTelegramWork(t.Context(), ref, observation, f.input.Config.Digest(), now); err == nil {
+	observation := WorkObservation{Revision: 2, Phase: "completed", Kind: "result", Text: "receipt confirmed"}
+	if err := f.store.ProjectWork(t.Context(), ref, observation, f.input.Config.Digest(), now); err == nil {
 		t.Fatal("terminal projection ignored exhausted outbox")
 	}
 
-	refs, err := f.store.TelegramWorkReferences(t.Context(), 12345, "", 16)
+	refs, err := f.store.WorkReferences(t.Context(), 12345, "", 16)
 	if err != nil || len(refs) != 1 || refs[0].Invocation.Revision != 1 {
 		t.Fatal("failed reservation lost recoverable native observation", refs, err)
 	}

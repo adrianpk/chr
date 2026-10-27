@@ -18,7 +18,7 @@ func TestTelegramReceiverHTTP(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { telegramReceiverHTTPHandler(t, w, r) }))
 	defer server.Close()
 
-	api := TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL}
+	api := ReceiverAPI{Client: server.Client(), BaseURL: server.URL}
 
 	token := "12345:example_test_token_123456789"
 	if bot, err := api.CheckConnection(t.Context(), token); err != nil || bot != 12345 {
@@ -32,7 +32,7 @@ func TestTelegramReceiverHTTP(t *testing.T) {
 		t.Fatal("intake failed", updates, err)
 	}
 
-	if id, err := api.Send(t.Context(), token, TelegramPeerIdentity{ChatID: -100, TopicID: 7}, "hello"); err != nil || id != 88 {
+	if id, err := api.Send(t.Context(), token, PeerIdentity{ChatID: -100, TopicID: 7}, "hello"); err != nil || id != 88 {
 		t.Fatal("delivery failed", id, err)
 	}
 }
@@ -49,7 +49,7 @@ func TestTelegramReceiverHTTPFailures(t *testing.T) {
 		{"rate limit", `{"ok":false,"error_code":429,"parameters":{"retry_after":20}}`, "rate_limited", 429, false},
 		{"server", `{"ok":false,"error_code":503}`, "request_failed", 503, false},
 		{"api failure", `{"ok":false,"error_code":400}`, "request_failed", 200, true},
-		{"oversized", strings.Repeat("x", telegramReceiverBodyLimit+1), "response_limit_or_read_failure", 200, false},
+		{"oversized", strings.Repeat("x", receiverBodyLimit+1), "response_limit_or_read_failure", 200, false},
 		{"trailing JSON", `{"ok":true,"result":[]} {}`, "invalid_response", 200, true},
 		{"missing ID", `{"ok":true,"result":[{"message":{}}]}`, "invalid_response", 200, true},
 	}
@@ -70,10 +70,10 @@ func checkTelegramHTTPFailure(t *testing.T, body string, status int, code string
 	}))
 	defer server.Close()
 
-	api := TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL}
+	api := ReceiverAPI{Client: server.Client(), BaseURL: server.URL}
 	_, err := api.Poll(t.Context(), "12345:example_test_token_123456789", nil, 1)
 
-	var apiErr *TelegramAPIError
+	var apiErr *APIError
 	if !errors.As(err, &apiErr) || apiErr.Code != code || apiErr.Permanent != permanent || strings.Contains(err.Error(), "private-token") {
 		t.Fatalf("unexpected safe API result: %v", err)
 	}
@@ -99,9 +99,9 @@ func TestTelegramReceiverWebhook(t *testing.T) {
 	}))
 	defer server.Close()
 
-	_, err := (TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL}).CheckConnection(t.Context(), "12345:example_test_token_123456789")
+	_, err := (ReceiverAPI{Client: server.Client(), BaseURL: server.URL}).CheckConnection(t.Context(), "12345:example_test_token_123456789")
 
-	var apiErr *TelegramAPIError
+	var apiErr *APIError
 	if !errors.As(err, &apiErr) || apiErr.Code != "webhook_conflict" {
 		t.Fatal("webhook was not refused", err)
 	}
@@ -112,7 +112,7 @@ func TestTelegramReceiverLockProcess(t *testing.T) {
 	if root := os.Getenv("CHR_TEST_TELEGRAM_LOCK_ROOT"); root != "" {
 		env := telegramTestEnvironment{root: root}
 
-		if lock, err := AcquireTelegramReceiverLock(env, 12345); err == nil {
+		if lock, err := AcquireReceiverLock(env, 12345); err == nil {
 			t.Fatal("second process acquired live bot lock", lock.Close())
 		}
 
@@ -123,7 +123,7 @@ func TestTelegramReceiverLockProcess(t *testing.T) {
 
 	env := telegramTestEnvironment{root: root}
 
-	lock, err := AcquireTelegramReceiverLock(env, 12345)
+	lock, err := AcquireReceiverLock(env, 12345)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,7 +141,7 @@ func TestTelegramReceiverLockProcess(t *testing.T) {
 		t.Fatal("cross-process lock failed", string(output), childErr)
 	}
 
-	reopened, err := AcquireTelegramReceiverLock(env, 12345)
+	reopened, err := AcquireReceiverLock(env, 12345)
 	if err != nil {
 		t.Fatal("released lock stayed owned", err)
 	}

@@ -39,7 +39,7 @@ func telegramHarnessWorkerFixture(t *testing.T) (*telegramConversationAppFixture
 	}
 
 	config.AllowedUsers[0].ProjectIDs = append(config.AllowedUsers[0].ProjectIDs, operations.projectContext.ProjectID)
-	if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+	if err := telegramcore.SaveReceiverConfig(f.receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 

@@ -11,40 +11,40 @@ import (
 	"forge.adrianpk.com/chr/internal/core/database"
 )
 
-// PrepareTelegramPoll performs bounded retention and starts one cursor epoch
+// PreparePoll performs bounded retention and starts one cursor epoch
 // after a remote retention gap. Local pending input and retry budgets survive.
-func (s *TelegramReceiverStore) PrepareTelegramPoll(ctx context.Context, botID int64, now time.Time) (TelegramReceiverState, error) {
+func (s *ReceiverStore) PreparePoll(ctx context.Context, botID int64, now time.Time) (ReceiverState, error) {
 	err := s.transaction(ctx, func(tx *sql.Tx) error {
 		if _, err := tx.ExecContext(ctx, `UPDATE telegram_receivers SET updated_at=updated_at WHERE bot_id=? AND schema_version=1`, botID); err != nil {
 			return err
 		}
 
-		if err := purgeTelegramDocuments(ctx, tx, botID, now); err != nil {
+		if err := purgeDocuments(ctx, tx, botID, now); err != nil {
 			return err
 		}
 
-		if err := compactTelegramConversations(ctx, tx, botID, now); err != nil {
+		if err := compactConversations(ctx, tx, botID, now); err != nil {
 			return err
 		}
 
-		if err := compactTelegramStandaloneRequests(ctx, tx, botID, now); err != nil {
+		if err := compactStandaloneRequests(ctx, tx, botID, now); err != nil {
 			return err
 		}
 
-		if err := retireTelegramSources(ctx, tx, botID, now); err != nil {
+		if err := retireSources(ctx, tx, botID, now); err != nil {
 			return err
 		}
 
-		return prepareTelegramEpoch(ctx, tx, botID, now)
+		return prepareEpoch(ctx, tx, botID, now)
 	})
 	if err != nil {
-		return TelegramReceiverState{}, err
+		return ReceiverState{}, err
 	}
 
 	return s.Receiver(ctx, botID)
 }
 
-func prepareTelegramEpoch(ctx context.Context, tx *sql.Tx, botID int64, now time.Time) error {
+func prepareEpoch(ctx context.Context, tx *sql.Tx, botID int64, now time.Time) error {
 	_, err := tx.ExecContext(ctx, `UPDATE telegram_receivers SET cursor_epoch=cursor_epoch+1,next_update_id=NULL,retention_gap_at=?,retention_gap_from_poll_at=last_poll_at,updated_at=? WHERE bot_id=? AND schema_version=1 AND last_poll_at<? AND (retention_gap_from_poll_at IS NULL OR retention_gap_from_poll_at!=last_poll_at)`, database.FormatTime(now), database.FormatTime(now), botID, database.FormatTime(now.Add(-24*time.Hour)))
 
 	return err
@@ -52,29 +52,29 @@ func prepareTelegramEpoch(ctx context.Context, tx *sql.Tx, botID int64, now time
 
 // A terminal source remains protected by any unresolved request, current
 // conversation, active prompt/capture, or unacknowledged outbound result.
-const telegramRetirableSource = `u.bot_id=? AND u.state IN ('processed','ignored','rejected') AND u.updated_at<=?
+const retirableSource = `u.bot_id=? AND u.state IN ('processed','ignored','rejected') AND u.updated_at<=?
 AND NOT EXISTS(SELECT 1 FROM telegram_requests r WHERE r.bot_id=u.bot_id AND r.update_id=u.update_id)
 AND NOT EXISTS(SELECT 1 FROM telegram_capture_parts p WHERE p.bot_id=u.bot_id AND p.update_id=u.update_id)
 AND NOT EXISTS(SELECT 1 FROM telegram_outbox o WHERE o.bot_id=u.bot_id AND o.event_key='update:'||u.update_id AND (o.state!='delivered' OR EXISTS(SELECT 1 FROM telegram_conversations c WHERE c.id=o.conversation_id AND (c.phase NOT IN ('completed','canceled','failed') OR EXISTS(SELECT 1 FROM telegram_peers p WHERE p.focused_conversation_id=c.id)))))`
 
-func retireTelegramSources(ctx context.Context, tx *sql.Tx, botID int64, now time.Time) error {
-	intervals, err := readTelegramRetired(ctx, tx, botID)
+func retireSources(ctx context.Context, tx *sql.Tx, botID int64, now time.Time) error {
+	intervals, err := readRetired(ctx, tx, botID)
 	if err != nil {
 		return err
 	}
 
-	rows, err := tx.QueryContext(ctx, `SELECT u.update_id FROM telegram_updates u WHERE `+telegramRetirableSource+` ORDER BY u.update_id LIMIT 100`, botID, database.FormatTime(now.Add(-7*24*time.Hour)))
+	rows, err := tx.QueryContext(ctx, `SELECT u.update_id FROM telegram_updates u WHERE `+retirableSource+` ORDER BY u.update_id LIMIT 100`, botID, database.FormatTime(now.Add(-7*24*time.Hour)))
 	if err != nil {
 		return err
 	}
 
-	ids, err := readTelegramRetirementIDs(rows)
+	ids, err := readRetirementIDs(rows)
 	if err != nil {
 		return err
 	}
 
 	for _, id := range ids {
-		candidate := addTelegramRetired(intervals, id)
+		candidate := addRetired(intervals, id)
 		if len(candidate) > 1024 {
 			continue
 		}
@@ -100,7 +100,7 @@ func retireTelegramSources(ctx context.Context, tx *sql.Tx, botID int64, now tim
 	return err
 }
 
-func readTelegramRetirementIDs(rows *sql.Rows) (ids []int64, err error) {
+func readRetirementIDs(rows *sql.Rows) (ids []int64, err error) {
 	defer func() { err = errors.Join(err, rows.Close()) }()
 
 	for rows.Next() {
@@ -119,25 +119,25 @@ func readTelegramRetirementIDs(rows *sql.Rows) (ids []int64, err error) {
 	return ids, rows.Err()
 }
 
-const telegramCompactableConversation = `c.bot_id=? AND c.phase IN ('completed','canceled','failed') AND c.updated_at<=? AND c.compacted_at IS NULL
+const compactableConversation = `c.bot_id=? AND c.phase IN ('completed','canceled','failed') AND c.updated_at<=? AND c.compacted_at IS NULL
 AND NOT EXISTS(SELECT 1 FROM telegram_peers p WHERE p.focused_conversation_id=c.id)
 AND NOT EXISTS(SELECT 1 FROM telegram_requests r WHERE r.conversation_id=c.id AND r.state NOT IN ('confirmed','rejected'))
 AND NOT EXISTS(SELECT 1 FROM telegram_actions a JOIN telegram_requests r ON r.id=a.request_id WHERE r.conversation_id=c.id AND a.state IN ('pending','applying'))
 AND NOT EXISTS(SELECT 1 FROM telegram_outbox o WHERE o.conversation_id=c.id AND o.state!='delivered')`
 
-func compactTelegramConversations(ctx context.Context, tx *sql.Tx, botID int64, now time.Time) error {
-	rows, err := tx.QueryContext(ctx, `SELECT c.id FROM telegram_conversations c WHERE `+telegramCompactableConversation+` ORDER BY c.updated_at,c.id LIMIT 20`, botID, database.FormatTime(now.Add(-7*24*time.Hour)))
+func compactConversations(ctx context.Context, tx *sql.Tx, botID int64, now time.Time) error {
+	rows, err := tx.QueryContext(ctx, `SELECT c.id FROM telegram_conversations c WHERE `+compactableConversation+` ORDER BY c.updated_at,c.id LIMIT 20`, botID, database.FormatTime(now.Add(-7*24*time.Hour)))
 	if err != nil {
 		return err
 	}
 
-	ids, err := readTelegramCompactionIDs(rows)
+	ids, err := readCompactionIDs(rows)
 	if err != nil {
 		return err
 	}
 
 	for _, id := range ids {
-		if err := compactTelegramConversation(ctx, tx, id, now); err != nil {
+		if err := compactConversation(ctx, tx, id, now); err != nil {
 			return err
 		}
 	}
@@ -145,7 +145,7 @@ func compactTelegramConversations(ctx context.Context, tx *sql.Tx, botID int64, 
 	return nil
 }
 
-func readTelegramCompactionIDs(rows *sql.Rows) (ids []string, err error) {
+func readCompactionIDs(rows *sql.Rows) (ids []string, err error) {
 	defer func() { err = errors.Join(err, rows.Close()) }()
 
 	for rows.Next() {
@@ -160,7 +160,7 @@ func readTelegramCompactionIDs(rows *sql.Rows) (ids []string, err error) {
 	return ids, rows.Err()
 }
 
-func compactTelegramConversation(ctx context.Context, tx *sql.Tx, id string, now time.Time) error {
+func compactConversation(ctx context.Context, tx *sql.Tx, id string, now time.Time) error {
 	queries := []string{
 		`DELETE FROM telegram_outbox WHERE conversation_id=? AND state='delivered'`,
 		`DELETE FROM telegram_replies WHERE conversation_id=?`,
@@ -184,7 +184,7 @@ func compactTelegramConversation(ctx context.Context, tx *sql.Tx, id string, now
 	return err
 }
 
-func compactTelegramStandaloneRequests(ctx context.Context, tx *sql.Tx, botID int64, now time.Time) error {
+func compactStandaloneRequests(ctx context.Context, tx *sql.Tx, botID int64, now time.Time) error {
 	rows, err := tx.QueryContext(ctx, `SELECT r.id FROM telegram_requests r JOIN telegram_updates u ON u.bot_id=r.bot_id AND u.update_id=r.update_id WHERE r.bot_id=? AND r.conversation_id IS NULL AND r.compacted_at IS NULL AND r.state IN ('confirmed','rejected') AND r.updated_at<=? AND u.state IN ('processed','ignored','rejected')
  AND NOT EXISTS(SELECT 1 FROM telegram_conversations c WHERE c.authorization_ref=r.id)
  AND NOT EXISTS(SELECT 1 FROM telegram_actions a WHERE a.request_id=r.id OR a.consumed_by_request=r.id)
@@ -193,7 +193,7 @@ func compactTelegramStandaloneRequests(ctx context.Context, tx *sql.Tx, botID in
 		return err
 	}
 
-	ids, err := readTelegramCompactionIDs(rows)
+	ids, err := readCompactionIDs(rows)
 	if err != nil {
 		return err
 	}

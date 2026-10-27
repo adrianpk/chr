@@ -461,3 +461,15 @@ The import policy enforces the actual Telegram dependencies and rejects root,
 workflow coordinator and adapter imports, including descendants. message retains
 its more restrictive pure-value policy. No nested outbox is needed because
 conversation/request/action/document admission share the existing transaction.
+
+
+### Telegram owner names
+
+Public and private Telegram declarations now use their package context directly,
+including ReceiverStore, ReceiverAPI, APIError, Conversation and OperationRequest.
+The local conversation diagnostic now has the Error suffix. Actual app/domain
+consumers and store methods use the owner names directly, with no forwarding
+aliases. This changes identifiers only; strings, JSON tags, SQL, frozen bytes and
+transition predicates are retained. Exact debt identities/signatures follow the
+rename ledger without broadening allowances. Pinned strict lint, policy and the
+focused receiver/legacy-storage/wire/invalid-scope regressions pass.

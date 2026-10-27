@@ -10,25 +10,25 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// TelegramIntentSnapshot binds interpretation to one peer's observed context.
-type TelegramIntentSnapshot struct {
+// IntentSnapshot binds interpretation to one peer's observed context.
+type IntentSnapshot struct {
 	Selected                string
 	Focused                 string
 	LastWorkConversation    string
 	RepliedWorkConversation string
-	Sessions                []TelegramConversation
+	Sessions                []Conversation
 	Digest                  string
 }
 
-// TelegramIntentContext reads selection and sessions in one transaction. Its
+// IntentContext reads selection and sessions in one transaction. Its
 // digest can guard target resolution after a provider call without holding a TX.
-func (s *TelegramReceiverStore) TelegramIntentContext(ctx context.Context, input TelegramConversationInput) (snapshot TelegramIntentSnapshot, err error) {
+func (s *ReceiverStore) IntentContext(ctx context.Context, input ConversationInput) (snapshot IntentSnapshot, err error) {
 	if _, ok := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType); !ok {
 		return snapshot, workflowstate.ErrConflict
 	}
 
 	err = s.transaction(ctx, func(tx *sql.Tx) error {
-		op := telegramConversationTransaction{ctx: ctx, tx: tx, input: input, now: time.Now()}
+		op := conversationTransaction{ctx: ctx, tx: tx, input: input, now: time.Now()}
 		if err := op.ensurePeer(); err != nil {
 			return err
 		}
@@ -43,9 +43,9 @@ func (s *TelegramReceiverStore) TelegramIntentContext(ctx context.Context, input
 	return snapshot, err
 }
 
-func (op telegramConversationTransaction) intentSnapshot() (TelegramIntentSnapshot, error) {
+func (op conversationTransaction) intentSnapshot() (IntentSnapshot, error) {
 	var (
-		snapshot TelegramIntentSnapshot
+		snapshot IntentSnapshot
 		err      error
 	)
 
@@ -54,18 +54,18 @@ func (op telegramConversationTransaction) intentSnapshot() (TelegramIntentSnapsh
 		return snapshot, err
 	}
 
-	snapshot.Sessions, err = readTelegramConversations(op.ctx, op.tx, op.input.Update.Peer)
+	snapshot.Sessions, err = readConversations(op.ctx, op.tx, op.input.Update.Peer)
 	if err != nil {
 		return snapshot, err
 	}
 
-	snapshot.LastWorkConversation, err = readTelegramWorkMessageConversation(op.ctx, op.tx, op.input.Update.Peer, 0)
+	snapshot.LastWorkConversation, err = readWorkMessageConversation(op.ctx, op.tx, op.input.Update.Peer, 0)
 	if err != nil {
 		return snapshot, err
 	}
 
 	if op.input.Update.ReplyToMessageID > 0 {
-		snapshot.RepliedWorkConversation, err = readTelegramWorkMessageConversation(op.ctx, op.tx, op.input.Update.Peer, op.input.Update.ReplyToMessageID)
+		snapshot.RepliedWorkConversation, err = readWorkMessageConversation(op.ctx, op.tx, op.input.Update.Peer, op.input.Update.ReplyToMessageID)
 		if err != nil {
 			return snapshot, err
 		}
@@ -81,16 +81,16 @@ func (op telegramConversationTransaction) intentSnapshot() (TelegramIntentSnapsh
 	return snapshot, nil
 }
 
-// ResolveTelegramConversationTarget freezes the same exact/focused/sole routing
+// ResolveConversationTarget freezes the same exact/focused/sole routing
 // used by capture operations, before an interpreted decision is retained.
-func (s *TelegramReceiverStore) ResolveTelegramConversationTarget(ctx context.Context, input TelegramConversationInput) (TelegramOperationTarget, error) {
-	var target TelegramOperationTarget
+func (s *ReceiverStore) ResolveConversationTarget(ctx context.Context, input ConversationInput) (OperationTarget, error) {
+	var target OperationTarget
 	if _, ok := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType); !ok {
 		return target, workflowstate.ErrConflict
 	}
 
 	err := s.transaction(ctx, func(tx *sql.Tx) error {
-		op := telegramConversationTransaction{ctx: ctx, tx: tx, input: input, now: time.Now()}
+		op := conversationTransaction{ctx: ctx, tx: tx, input: input, now: time.Now()}
 		if err := op.ensurePeer(); err != nil {
 			return err
 		}

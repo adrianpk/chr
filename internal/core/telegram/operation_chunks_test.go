@@ -18,7 +18,7 @@ func TestTelegramOperationUnicodeParts(t *testing.T) {
 		}
 
 		for _, part := range parts {
-			if !validTelegramReceiverText(part) || len(utf16.Encode([]rune(part))) > 1800 {
+			if !validReceiverText(part) || len(utf16.Encode([]rune(part))) > 1800 {
 				t.Fatal("Unicode delivery bound exceeded")
 			}
 		}
@@ -35,7 +35,7 @@ func TestTelegramOperationPartOrder(t *testing.T) {
 	update := telegramRetainedTestUpdate(t, 1, "/tickets show")
 
 	now := time.Now()
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, now); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{update}, now); err != nil {
 		t.Fatal(err)
 	}
 
@@ -69,7 +69,7 @@ func TestTelegramOperationPartOrder(t *testing.T) {
 	checkTelegramOperationPartSuccessor(t, store, deliveries[0].ID, now)
 }
 
-func checkTelegramOperationPartSuccessor(t *testing.T, store *TelegramReceiverStore, firstID string, now time.Time) {
+func checkTelegramOperationPartSuccessor(t *testing.T, store *ReceiverStore, firstID string, now time.Time) {
 	t.Helper()
 
 	next, err := store.DueDeliveries(t.Context(), 12345, now)

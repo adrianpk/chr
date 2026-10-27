@@ -39,7 +39,7 @@ func telegramWorkFixture(t *testing.T, plans ...core.GeneratedWorkflowPlan) (*te
 	}
 
 	config.AllowedUsers[0].ProjectIDs = []string{project.ID}
-	if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+	if err := telegramcore.SaveReceiverConfig(f.receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -106,7 +106,7 @@ func telegramWorkSelector(t *testing.T, operations service, independent core.Wor
 	return selector
 }
 
-func telegramWorkOffer(t *testing.T, f *telegramConversationAppFixture, command string) (telegramcore.TelegramAction, telegramConversationNotice) {
+func telegramWorkOffer(t *testing.T, f *telegramConversationAppFixture, command string) (telegramcore.Action, telegramConversationNotice) {
 	t.Helper()
 
 	prompt := f.send(t, command, 0)
@@ -126,7 +126,7 @@ func telegramWorkOffer(t *testing.T, f *telegramConversationAppFixture, command 
 		t.Fatal("preview source was not acknowledged", input, err)
 	}
 
-	return telegramcore.TelegramAction{Token: token}, prompt
+	return telegramcore.Action{Token: token}, prompt
 }
 
 // TestTelegramWorkExtents carries all five selectors through real HTTP, SQLite,
@@ -192,7 +192,7 @@ func TestTelegramWorkCommandBounds(t *testing.T) {
 		{"/work all", false},
 	} {
 		t.Run(test.text, func(t *testing.T) {
-			_, recognized, err := parseTelegramWork(telegramcore.TelegramReceivedUpdate{Kind: "message", Text: test.text})
+			_, recognized, err := parseTelegramWork(telegramcore.ReceivedUpdate{Kind: "message", Text: test.text})
 			if !recognized || (err == nil) != test.valid {
 				t.Fatal("unexpected command validation", recognized, err)
 			}
@@ -215,7 +215,7 @@ func TestTelegramWorkNatural(t *testing.T) {
 	}
 }
 
-func telegramWorkDecodeResult(t *testing.T, request telegramcore.TelegramOperationRequest) telegramWorkAdmissionResult {
+func telegramWorkDecodeResult(t *testing.T, request telegramcore.OperationRequest) telegramWorkAdmissionResult {
 	t.Helper()
 
 	var result telegramWorkAdmissionResult

@@ -14,18 +14,18 @@ func newTelegramActivationSlots() *telegramActivationSlots {
 	return &telegramActivationSlots{ordinary: make(chan struct{}, 12), decision: make(chan struct{}, 2), urgent: make(chan struct{}, 2)}
 }
 
-func (s *telegramActivationSlots) lane(lane telegramcore.TelegramProcessingLane) chan struct{} {
+func (s *telegramActivationSlots) lane(lane telegramcore.ProcessingLane) chan struct{} {
 	switch lane {
-	case telegramcore.TelegramProcessingUrgent:
+	case telegramcore.ProcessingUrgent:
 		return s.urgent
-	case telegramcore.TelegramProcessingDecision:
+	case telegramcore.ProcessingDecision:
 		return s.decision
 	default:
 		return s.ordinary
 	}
 }
 
-func (s *telegramActivationSlots) acquire(lane telegramcore.TelegramProcessingLane) bool {
+func (s *telegramActivationSlots) acquire(lane telegramcore.ProcessingLane) bool {
 	if s == nil {
 		return true
 	}
@@ -38,7 +38,7 @@ func (s *telegramActivationSlots) acquire(lane telegramcore.TelegramProcessingLa
 	}
 }
 
-func (s *telegramActivationSlots) release(lane telegramcore.TelegramProcessingLane) {
+func (s *telegramActivationSlots) release(lane telegramcore.ProcessingLane) {
 	if s != nil {
 		<-s.lane(lane)
 	}

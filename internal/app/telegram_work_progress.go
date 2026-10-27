@@ -9,7 +9,7 @@ import (
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
-func telegramWorkObservation(status WorkflowWorkStatus, projectName string) telegramcore.TelegramWorkObservation {
+func telegramWorkObservation(status WorkflowWorkStatus, projectName string) telegramcore.WorkObservation {
 	phase, kind := "executing", "progress"
 
 	switch status.Status {
@@ -29,7 +29,7 @@ func telegramWorkObservation(status WorkflowWorkStatus, projectName string) tele
 
 	message := telegramWorkProgressMessage(status, projectName)
 
-	return telegramcore.TelegramWorkObservation{Revision: status.Revision, Phase: phase, Kind: kind, Text: tgmessage.Render(message).PlainFallback, Message: &message}
+	return telegramcore.WorkObservation{Revision: status.Revision, Phase: phase, Kind: kind, Text: tgmessage.Render(message).PlainFallback, Message: &message}
 }
 
 func telegramWorkProgressText(status WorkflowWorkStatus) string {

@@ -44,8 +44,8 @@ func TestTelegramHarnessSelectionForeignActor(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	config.AllowedUsers = append(config.AllowedUsers, telegramcore.TelegramAllowedUser{TelegramUserID: 100002, OperatorID: "other-operator", ProjectIDs: []string{"example-project"}})
-	if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+	config.AllowedUsers = append(config.AllowedUsers, telegramcore.AllowedUser{TelegramUserID: 100002, OperatorID: "other-operator", ProjectIDs: []string{"example-project"}})
+	if err := telegramcore.SaveReceiverConfig(f.receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -69,7 +69,7 @@ type telegramHarnessAuthorityProbe struct {
 	change func()
 }
 
-func (s telegramHarnessAuthorityProbe) ChangeTelegramHarnessSelections(ctx context.Context, target telegramcore.TelegramOperationTarget, request core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (core.HarnessSelectionSnapshot, error) {
+func (s telegramHarnessAuthorityProbe) ChangeTelegramHarnessSelections(ctx context.Context, target telegramcore.OperationTarget, request core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (core.HarnessSelectionSnapshot, error) {
 	calls := 0
 
 	return s.service.ChangeTelegramHarnessSelections(ctx, target, request, func(ctx context.Context) error {

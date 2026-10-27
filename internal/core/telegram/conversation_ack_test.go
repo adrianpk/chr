@@ -11,7 +11,7 @@ import (
 // TestTelegramConversationRootAlias invalidates a changed registry path even when it resolves to the same physical root.
 func TestTelegramConversationRootAlias(t *testing.T) {
 	f := newTelegramConversationFixture(t)
-	f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "alpha" })
+	f.apply(t, ConversationStart, func(i *ConversationInput) { i.Project = "alpha" })
 
 	alias := filepath.Join(t.TempDir(), "alias")
 	if err := os.Symlink(f.input.Projects[0].Path, alias); err != nil {
@@ -19,7 +19,7 @@ func TestTelegramConversationRootAlias(t *testing.T) {
 	}
 
 	f.input.Projects[0].Path = alias
-	f.apply(t, TelegramConversationCapture, func(i *TelegramConversationInput) { i.Text = "changed binding" })
+	f.apply(t, ConversationCapture, func(i *ConversationInput) { i.Text = "changed binding" })
 
 	if !strings.Contains(f.lastResponse(t), "root changed") || f.sessions(t)[0].Capture != "" {
 		t.Fatal("registry alias change accepted")
@@ -29,7 +29,7 @@ func TestTelegramConversationRootAlias(t *testing.T) {
 // TestTelegramConversationAcknowledgement proves reply retention failure rolls back definite acknowledgement.
 func TestTelegramConversationAcknowledgement(t *testing.T) {
 	f := newTelegramConversationFixture(t)
-	f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "alpha" })
+	f.apply(t, ConversationStart, func(i *ConversationInput) { i.Project = "alpha" })
 
 	var id string
 	if err := f.store.db.QueryRowContext(t.Context(), `SELECT id FROM telegram_outbox`).Scan(&id); err != nil {
@@ -58,13 +58,13 @@ func TestTelegramConversationAcknowledgement(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	f.apply(t, TelegramConversationCapture, func(i *TelegramConversationInput) { i.Text = "new revision" })
+	f.apply(t, ConversationCapture, func(i *ConversationInput) { i.Text = "new revision" })
 
 	if err := f.store.DeliverySent(t.Context(), id, 800, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
-	f.apply(t, TelegramConversationCapture, func(i *TelegramConversationInput) { i.Text = "late answer"; i.Update.ReplyToMessageID = 800 })
+	f.apply(t, ConversationCapture, func(i *ConversationInput) { i.Text = "late answer"; i.Update.ReplyToMessageID = 800 })
 
 	if f.sessions(t)[0].Capture != "new revision" {
 		t.Fatal("late acknowledgement revived stale prompt")

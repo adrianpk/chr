@@ -11,17 +11,17 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// TelegramWorkReference points to a confirmed admission and its current local
+// WorkReference points to a confirmed admission and its current local
 // conversation fence. Canonical workflow files retain execution authority.
-type TelegramWorkReference struct {
-	Request              TelegramOperationRequest
-	Invocation           TelegramInvocationBinding
+type WorkReference struct {
+	Request              OperationRequest
+	Invocation           InvocationBinding
 	ConversationRevision int64
 }
 
-// TelegramWorkReferences pages at most sixteen bound conversations, without
+// WorkReferences pages at most sixteen bound conversations, without
 // admitting or claiming work. The caller cycles an empty page back to the start.
-func (s *TelegramReceiverStore) TelegramWorkReferences(ctx context.Context, botID int64, after string, limit int) (result []TelegramWorkReference, err error) {
+func (s *ReceiverStore) WorkReferences(ctx context.Context, botID int64, after string, limit int) (result []WorkReference, err error) {
 	if botID <= 0 || len(after) > 128 || limit < 1 || limit > 16 {
 		return nil, workflowstate.ErrConflict
 	}
@@ -31,13 +31,13 @@ func (s *TelegramReceiverStore) TelegramWorkReferences(ctx context.Context, botI
 		return nil, err
 	}
 
-	result, ids, err := scanTelegramWorkReferences(rows)
+	result, ids, err := scanWorkReferences(rows)
 	if err != nil {
 		return nil, err
 	}
 
 	for index, id := range ids {
-		result[index].Request, err = readTelegramOperationID(ctx, s.db, id)
+		result[index].Request, err = readOperationID(ctx, s.db, id)
 		if err != nil {
 			return nil, err
 		}
@@ -46,12 +46,12 @@ func (s *TelegramReceiverStore) TelegramWorkReferences(ctx context.Context, botI
 	return result, nil
 }
 
-func scanTelegramWorkReferences(rows *sql.Rows) (result []TelegramWorkReference, ids []string, err error) {
+func scanWorkReferences(rows *sql.Rows) (result []WorkReference, ids []string, err error) {
 	defer func() { err = errors.Join(err, rows.Close()) }()
 
 	for rows.Next() {
 		var (
-			ref TelegramWorkReference
+			ref WorkReference
 			id  string
 		)
 
@@ -65,9 +65,9 @@ func scanTelegramWorkReferences(rows *sql.Rows) (result []TelegramWorkReference,
 	return result, ids, rows.Err()
 }
 
-// ValidateTelegramWorkReference checks that the same confirmed admission still
+// ValidateWorkReference checks that the same confirmed admission still
 // binds this current conversation fence. Hosts separately check current authority.
-func (s *TelegramReceiverStore) ValidateTelegramWorkReference(ctx context.Context, ref TelegramWorkReference) error {
+func (s *ReceiverStore) ValidateWorkReference(ctx context.Context, ref WorkReference) error {
 	var count int
 
 	r, target := ref.Request, ref.Request.Target
@@ -84,9 +84,9 @@ func (s *TelegramReceiverStore) ValidateTelegramWorkReference(ctx context.Contex
 	return nil
 }
 
-// ObserveTelegramWork retains a monotonic read projection after an activation.
+// ObserveWork retains a monotonic read projection after an activation.
 // It does not change phase, authorization, native checkpoints or the original result.
-func (s *TelegramReceiverStore) ObserveTelegramWork(ctx context.Context, ref TelegramWorkReference, revision uint64, now time.Time) error {
+func (s *ReceiverStore) ObserveWork(ctx context.Context, ref WorkReference, revision uint64, now time.Time) error {
 	if revision == 0 || revision > math.MaxInt64 {
 		return workflowstate.ErrConflict
 	}

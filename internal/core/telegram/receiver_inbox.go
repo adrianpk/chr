@@ -12,7 +12,7 @@ import (
 )
 
 // RetainBatch commits every normalized receipt and the next sparse cursor together.
-func (s *TelegramReceiverStore) RetainBatch(ctx context.Context, botID int64, updates []TelegramReceivedUpdate, now time.Time) error {
+func (s *ReceiverStore) RetainBatch(ctx context.Context, botID int64, updates []ReceivedUpdate, now time.Time) error {
 	if len(updates) > 100 {
 		return errors.New("telegram batch exceeds 100 updates")
 	}
@@ -33,12 +33,12 @@ func (s *TelegramReceiverStore) RetainBatch(ctx context.Context, botID int64, up
 
 		var err error
 
-		next, err = retainTelegramBatchUpdates(ctx, tx, botID, epoch, next, updates, now)
+		next, err = retainBatchUpdates(ctx, tx, botID, epoch, next, updates, now)
 		if err != nil {
 			return err
 		}
 
-		if err := checkTelegramIntakeCapacity(ctx, tx, botID); err != nil {
+		if err := checkIntakeCapacity(ctx, tx, botID); err != nil {
 			return err
 		}
 
@@ -49,19 +49,19 @@ retry_attempt=0,retry_at=NULL,last_error_code='',updated_at=? WHERE bot_id=?`, n
 	})
 }
 
-func retainTelegramBatchUpdates(ctx context.Context, tx *sql.Tx, botID, epoch int64, next sql.NullInt64, updates []TelegramReceivedUpdate, now time.Time) (sql.NullInt64, error) {
-	intervals, err := readTelegramRetired(ctx, tx, botID)
+func retainBatchUpdates(ctx context.Context, tx *sql.Tx, botID, epoch int64, next sql.NullInt64, updates []ReceivedUpdate, now time.Time) (sql.NullInt64, error) {
+	intervals, err := readRetired(ctx, tx, botID)
 	if err != nil {
 		return next, err
 	}
 
 	for _, update := range updates {
-		if err := validateTelegramRetainedUpdate(botID, update); err != nil {
+		if err := validateRetainedUpdate(botID, update); err != nil {
 			return next, err
 		}
 
-		if !telegramUpdateRetired(intervals, update.UpdateID) {
-			if err := retainTelegramUpdate(ctx, tx, botID, epoch, update, now); err != nil {
+		if !updateRetired(intervals, update.UpdateID) {
+			if err := retainUpdate(ctx, tx, botID, epoch, update, now); err != nil {
 				return next, err
 			}
 		}
@@ -74,8 +74,8 @@ func retainTelegramBatchUpdates(ctx context.Context, tx *sql.Tx, botID, epoch in
 	return next, nil
 }
 
-func retainTelegramUpdate(ctx context.Context, tx *sql.Tx, botID, epoch int64, update TelegramReceivedUpdate, now time.Time) error {
-	if err := validateTelegramRetainedUpdate(botID, update); err != nil {
+func retainUpdate(ctx context.Context, tx *sql.Tx, botID, epoch int64, update ReceivedUpdate, now time.Time) error {
+	if err := validateRetainedUpdate(botID, update); err != nil {
 		return err
 	}
 
@@ -84,7 +84,7 @@ func retainTelegramUpdate(ctx context.Context, tx *sql.Tx, botID, epoch int64, u
 	err := tx.QueryRowContext(ctx, "SELECT payload_digest FROM telegram_updates WHERE bot_id=? AND update_id=?", botID, update.UpdateID).Scan(&prior)
 	if err == nil {
 		if prior != update.Digest {
-			return errTelegramReceiverConflict
+			return errReceiverConflict
 		}
 
 		return nil
@@ -99,27 +99,27 @@ func retainTelegramUpdate(ctx context.Context, tx *sql.Tx, botID, epoch int64, u
 		state = update.Kind
 	}
 
-	lane, control, err := telegramInputLane(ctx, tx, update)
+	lane, control, err := inputLane(ctx, tx, update)
 	if err != nil {
 		return err
 	}
 
-	row := telegramUpdateRow{botID: botID, epoch: epoch, update: update, state: state, lane: lane, control: control, receivedAt: now}
+	row := updateRow{botID: botID, epoch: epoch, update: update, state: state, lane: lane, control: control, receivedAt: now}
 
-	_, err = tx.ExecContext(ctx, insertTelegramUpdateSQL, row.values()...)
+	_, err = tx.ExecContext(ctx, insertUpdateSQL, row.values()...)
 	if err != nil {
 		return err
 	}
 
 	if state == "pending" {
-		return rejectTelegramIntakeOverflow(ctx, tx, update, control, now)
+		return rejectIntakeOverflow(ctx, tx, update, control, now)
 	}
 
-	return revokeRejectedTelegramActions(ctx, tx, update, now)
+	return revokeRejectedActions(ctx, tx, update, now)
 }
 
-func validateTelegramRetainedUpdate(botID int64, update TelegramReceivedUpdate) error {
-	if !validTelegramReceiptIdentity(botID, update) {
+func validateRetainedUpdate(botID int64, update ReceivedUpdate) error {
+	if !validReceiptIdentity(botID, update) {
 		return errors.New("invalid telegram receipt identity")
 	}
 
@@ -139,11 +139,11 @@ func validateTelegramRetainedUpdate(botID int64, update TelegramReceivedUpdate) 
 	return nil
 }
 
-func validTelegramReceiptIdentity(botID int64, update TelegramReceivedUpdate) bool {
+func validReceiptIdentity(botID int64, update ReceivedUpdate) bool {
 	return botID > 0 && update.Peer.BotID == botID && update.UpdateID >= 0 && update.UpdateID != math.MaxInt64 && regexp.MustCompile(`^[a-f0-9]{64}$`).MatchString(update.Digest)
 }
 
-func checkTelegramIntakeCapacity(ctx context.Context, tx *sql.Tx, botID int64) error {
+func checkIntakeCapacity(ctx context.Context, tx *sql.Tx, botID int64) error {
 	var pending, total, bytes int64
 	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*),COALESCE(SUM(state IN ('pending','processing')),0),COALESCE(SUM(length(CAST(payload AS BLOB))+COALESCE(length(CAST(interpretation AS BLOB)),0)),0)
 FROM telegram_updates WHERE bot_id=?`, botID).Scan(&total, &pending, &bytes); err != nil {
@@ -155,7 +155,7 @@ FROM telegram_updates WHERE bot_id=?`, botID).Scan(&total, &pending, &bytes); er
 		return err
 	}
 
-	retainedBytes, err := telegramOperationCapacity(ctx, tx, botID)
+	retainedBytes, err := operationCapacity(ctx, tx, botID)
 	if err != nil {
 		return err
 	}
@@ -168,12 +168,12 @@ FROM telegram_updates WHERE bot_id=?`, botID).Scan(&total, &pending, &bytes); er
 }
 
 // PendingUpdates returns at most 50 retained updates in source order.
-func (s *TelegramReceiverStore) PendingUpdates(ctx context.Context, botID int64) ([]TelegramReceivedUpdate, error) {
+func (s *ReceiverStore) PendingUpdates(ctx context.Context, botID int64) ([]ReceivedUpdate, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT update_id,payload_digest,update_kind,chat_id,topic_id,user_id,message_id,chat_type,payload,reply_to_message_id
 FROM telegram_updates WHERE bot_id=? AND state='pending' ORDER BY update_id LIMIT 50`, botID)
 	if err != nil {
 		return nil, err
 	}
 
-	return readTelegramPendingRows(rows, botID)
+	return readPendingRows(rows, botID)
 }

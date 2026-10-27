@@ -44,18 +44,18 @@ func checkTelegramRecoveryRetry(t *testing.T, kind string) {
 	checkTelegramRecoveryExhausted(t, store, request, now.Add(time.Hour))
 	checkTelegramRecoveryRetryLock(t, store, request)
 
-	if err := store.RetryTelegramTransport(t.Context(), request, now.Add(time.Hour)); err != nil {
+	if err := store.RetryTransport(t.Context(), request, now.Add(time.Hour)); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := store.RetryTelegramTransport(t.Context(), request, now.Add(time.Hour)); err == nil {
+	if err := store.RetryTransport(t.Context(), request, now.Add(time.Hour)); err == nil {
 		t.Fatal("duplicate local retry created another cycle")
 	}
 
 	checkTelegramRecoveryRetryResult(t, store, request, before)
 }
 
-func checkTelegramRecoveryRetryResult(t *testing.T, store *TelegramReceiverStore, request TelegramTransportRetry, before TelegramReceiverState) {
+func checkTelegramRecoveryRetryResult(t *testing.T, store *ReceiverStore, request TransportRetry, before ReceiverState) {
 	t.Helper()
 
 	after, err := store.Receiver(t.Context(), 12345)
@@ -71,17 +71,17 @@ func checkTelegramRecoveryRetryResult(t *testing.T, store *TelegramReceiverStore
 	}
 }
 
-func seedTelegramRecoveryRetry(t *testing.T, store *TelegramReceiverStore, kind string, now time.Time) TelegramTransportRetry {
+func seedTelegramRecoveryRetry(t *testing.T, store *ReceiverStore, kind string, now time.Time) TransportRetry {
 	t.Helper()
 
 	update := telegramRetainedTestUpdate(t, 1, "/status")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, now); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{update}, now); err != nil {
 		t.Fatal(err)
 	}
 
 	execTelegramRecoverySQL(t, store, `UPDATE telegram_updates SET interpretation_attempt=4,interpretation_error_code='provider_unavailable' WHERE bot_id=12345 AND update_id=1`)
 
-	request := TelegramTransportRetry{BotID: 12345, Poll: kind == "poll", Actor: "maintainer"}
+	request := TransportRetry{BotID: 12345, Poll: kind == "poll", Actor: "maintainer"}
 	if kind == "delivery" {
 		if err := store.QueueReadResponse(t.Context(), update, "original result", telegramReceiverTestConfig().Digest(), now); err != nil {
 			t.Fatal(err)
@@ -98,10 +98,10 @@ func seedTelegramRecoveryRetry(t *testing.T, store *TelegramReceiverStore, kind 
 	return request
 }
 
-func failTelegramRecoveryTransport(t *testing.T, store *TelegramReceiverStore, request TelegramTransportRetry, now time.Time) {
+func failTelegramRecoveryTransport(t *testing.T, store *ReceiverStore, request TransportRetry, now time.Time) {
 	t.Helper()
 
-	failure := &TelegramAPIError{Code: "rate_limited", RetryAfter: 3 * time.Minute}
+	failure := &APIError{Code: "rate_limited", RetryAfter: 3 * time.Minute}
 
 	if request.Poll {
 		if err := store.ReservePoll(t.Context(), 12345, now); err != nil {
@@ -129,7 +129,7 @@ func failTelegramRecoveryTransport(t *testing.T, store *TelegramReceiverStore, r
 	}
 }
 
-func checkTelegramRecoveryExhausted(t *testing.T, store *TelegramReceiverStore, request TelegramTransportRetry, now time.Time) {
+func checkTelegramRecoveryExhausted(t *testing.T, store *ReceiverStore, request TransportRetry, now time.Time) {
 	t.Helper()
 
 	if request.Poll {
@@ -146,15 +146,15 @@ func checkTelegramRecoveryExhausted(t *testing.T, store *TelegramReceiverStore, 
 	}
 }
 
-func checkTelegramRecoveryRetryLock(t *testing.T, store *TelegramReceiverStore, request TelegramTransportRetry) {
+func checkTelegramRecoveryRetryLock(t *testing.T, store *ReceiverStore, request TransportRetry) {
 	t.Helper()
 
-	lock, err := AcquireTelegramConfigurationLock(store.env)
+	lock, err := AcquireConfigurationLock(store.env)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	retryErr := store.RetryTelegramTransport(t.Context(), request, time.Now())
+	retryErr := store.RetryTransport(t.Context(), request, time.Now())
 	if err := lock.Close(); err != nil {
 		t.Fatal(err)
 	}
@@ -164,7 +164,7 @@ func checkTelegramRecoveryRetryLock(t *testing.T, store *TelegramReceiverStore, 
 	}
 }
 
-func checkTelegramRecoveryCycle(t *testing.T, store *TelegramReceiverStore, request TelegramTransportRetry) {
+func checkTelegramRecoveryCycle(t *testing.T, store *ReceiverStore, request TransportRetry) {
 	t.Helper()
 
 	var (
@@ -219,14 +219,14 @@ func checkTelegramRecoveryModels(t *testing.T, kind string) {
 
 		switch kind {
 		case "interpretation":
-			result, err := f.store.ResolveTelegramInterpretation(t.Context(), f.env, request.Source, now, invoke)
+			result, err := f.store.ResolveInterpretation(t.Context(), f.env, request.Source, now, invoke)
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			count, code = result.Attempts, result.ErrorCode
 		case "operation":
-			result, err := f.store.ResolveTelegramOperationModel(t.Context(), f.env, request, now, invoke)
+			result, err := f.store.ResolveOperationModel(t.Context(), f.env, request, now, invoke)
 			if err != nil {
 				t.Fatal(err)
 			}

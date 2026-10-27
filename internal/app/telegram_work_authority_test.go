@@ -13,7 +13,7 @@ type telegramWorkChangeAuthority struct {
 	change func()
 }
 
-func (s telegramWorkChangeAuthority) StartTelegramWork(ctx context.Context, target telegramcore.TelegramOperationTarget, preview WorkflowBoundPreview, binding WorkflowBoundAdmission) (AgentWorkResult, error) {
+func (s telegramWorkChangeAuthority) StartTelegramWork(ctx context.Context, target telegramcore.OperationTarget, preview WorkflowBoundPreview, binding WorkflowBoundAdmission) (AgentWorkResult, error) {
 	s.change()
 
 	return s.service.StartTelegramWork(ctx, target, preview, binding)
@@ -43,7 +43,7 @@ func telegramWorkChangeActor(t *testing.T, f *telegramConversationAppFixture, ch
 		}
 
 		config.AllowedUsers[0].OperatorID = "another-operator"
-		if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+		if err := telegramcore.SaveReceiverConfig(f.receiver.env, config, true); err != nil {
 			t.Fatal(err)
 		}
 

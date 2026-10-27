@@ -17,7 +17,7 @@ func TestTelegramPresentationMigrationDocuments(t *testing.T) {
 	delete(assets, "assets/migration/sqlite/20261021000027-add_telegram_action_presentation.sql")
 	delete(assets, "assets/migration/sqlite/20261021000026-add_telegram_document_snapshots.sql")
 
-	store, err := NewTelegramReceiverStore(t.Context(), env, assets)
+	store, err := NewReceiverStore(t.Context(), env, assets)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -29,7 +29,7 @@ func TestTelegramPresentationMigrationDocuments(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	updates := []TelegramReceivedUpdate{telegramRetainedTestUpdate(t, 1, "/help"), telegramRetainedTestUpdate(t, 2, "/status")}
+	updates := []ReceivedUpdate{telegramRetainedTestUpdate(t, 1, "/help"), telegramRetainedTestUpdate(t, 2, "/status")}
 	if err := store.RetainBatch(t.Context(), 12345, updates, now); err != nil {
 		t.Fatal(err)
 	}
@@ -58,7 +58,7 @@ func TestTelegramPresentationMigrationDocuments(t *testing.T) {
 	checkTelegramDocumentMigration(t, openTelegramReceiverTestStore(t, env), now)
 }
 
-func checkTelegramDocumentMigration(t *testing.T, store *TelegramReceiverStore, now time.Time) {
+func checkTelegramDocumentMigration(t *testing.T, store *ReceiverStore, now time.Time) {
 	t.Helper()
 
 	due, err := store.DueDeliveries(t.Context(), 12345, now)
@@ -75,7 +75,7 @@ func checkTelegramDocumentMigration(t *testing.T, store *TelegramReceiverStore, 
 	}
 }
 
-func checkTelegramDocumentMigrationRow(t *testing.T, delivery TelegramReceiverDelivery) {
+func checkTelegramDocumentMigrationRow(t *testing.T, delivery ReceiverDelivery) {
 	t.Helper()
 
 	if delivery.Text == "*Commands*" && delivery.ParseMode != "Markdown" {

@@ -29,7 +29,7 @@ func TestTelegramReceiverMigration(t *testing.T) {
 	assets := testMigrationFS()
 
 	assets["assets/migration/sqlite/20261016000016-add_telegram_receiver.sql"] = &fstest.MapFile{Data: []byte("-- +migrate Up\nCREATE TABLE telegram_receivers(bot_id INTEGER); invalid SQL;\n-- +migrate Down\nDROP TABLE telegram_receivers;")}
-	if store, err := telegramcore.NewTelegramReceiverStore(t.Context(), env, assets); err == nil {
+	if store, err := telegramcore.NewReceiverStore(t.Context(), env, assets); err == nil {
 		t.Fatal("failed migration accepted", store.Close())
 	}
 
@@ -69,7 +69,7 @@ func checkTelegramRegistryMigration(t *testing.T, store *telegramFixtureStore, e
 		t.Fatal(err)
 	}
 
-	if newer, err := telegramcore.NewTelegramReceiverStore(t.Context(), env, os.DirFS("../../cmd/chr")); err == nil || !strings.Contains(err.Error(), "unknown") {
+	if newer, err := telegramcore.NewReceiverStore(t.Context(), env, os.DirFS("../../cmd/chr")); err == nil || !strings.Contains(err.Error(), "unknown") {
 		if newer != nil {
 			t.Error(newer.Close())
 		}

@@ -25,7 +25,7 @@ func TestTelegramRecoveryCanceledTx(t *testing.T) {
 	}
 }
 
-func checkTelegramRecoveryCanceledTx(t *testing.T, store *TelegramReceiverStore, phase string, want error) {
+func checkTelegramRecoveryCanceledTx(t *testing.T, store *ReceiverStore, phase string, want error) {
 	t.Helper()
 
 	ctx, cancel := context.WithCancel(t.Context())

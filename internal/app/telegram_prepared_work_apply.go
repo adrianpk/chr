@@ -11,7 +11,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r telegramReceiver) continuePreparedWork(ctx context.Context, request telegramcore.TelegramOperationRequest, config telegramcore.TelegramReceiverConfig) error {
+func (r telegramReceiver) continuePreparedWork(ctx context.Context, request telegramcore.OperationRequest, config telegramcore.ReceiverConfig) error {
 	if telegramPreparedWorkFinished(request.State) {
 		return nil
 	}
@@ -35,7 +35,7 @@ func (r telegramReceiver) continuePreparedWork(ctx context.Context, request tele
 		return r.finishAuthoringFailure(ctx, request, current, err)
 	}
 
-	retained, found, err := r.store.TelegramOperation(ctx, request.Source, request.Ordinal)
+	retained, found, err := r.store.Operation(ctx, request.Source, request.Ordinal)
 	if err != nil {
 		return err
 	}
@@ -52,12 +52,12 @@ func (r telegramReceiver) continuePreparedWork(ctx context.Context, request tele
 	return r.applyPreparedWork(ctx, operations, request, prepared, current)
 }
 
-func (r telegramReceiver) applyPreparedWork(ctx context.Context, operations telegramPreparedWorkService, request telegramcore.TelegramOperationRequest, prepared PreparedAuthoringWork, config telegramcore.TelegramReceiverConfig) error {
+func (r telegramReceiver) applyPreparedWork(ctx context.Context, operations telegramPreparedWorkService, request telegramcore.OperationRequest, prepared PreparedAuthoringWork, config telegramcore.ReceiverConfig) error {
 	if err := r.validateInitialPreparedWorkGrant(ctx, request, prepared); err != nil {
 		return r.finishAuthoringFailure(ctx, request, config, err)
 	}
 
-	if err := r.store.BeginTelegramOperation(ctx, request, time.Now()); err != nil {
+	if err := r.store.BeginOperation(ctx, request, time.Now()); err != nil {
 		return err
 	}
 
@@ -77,7 +77,7 @@ func (r telegramReceiver) applyPreparedWork(ctx context.Context, operations tele
 	return r.finishPreparedWork(ctx, request, result, config)
 }
 
-func (r telegramReceiver) validateInitialPreparedWorkGrant(ctx context.Context, request telegramcore.TelegramOperationRequest, prepared PreparedAuthoringWork) error {
+func (r telegramReceiver) validateInitialPreparedWorkGrant(ctx context.Context, request telegramcore.OperationRequest, prepared PreparedAuthoringWork) error {
 	if err := core.ValidateAuthoringWorkAuthorization(prepared.Scope, prepared.Authorization); err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func (r telegramReceiver) validateInitialPreparedWorkGrant(ctx context.Context, 
 		return nil
 	}
 
-	initial, err := r.store.IsInitialTelegramAuthoringWork(ctx, request)
+	initial, err := r.store.IsInitialAuthoringWork(ctx, request)
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func (r telegramReceiver) validateInitialPreparedWorkGrant(ctx context.Context, 
 		return err
 	}
 
-	instruction, err := r.store.ReadTelegramConversationInstruction(ctx, input)
+	instruction, err := r.store.ReadConversationInstruction(ctx, input)
 	if err != nil {
 		return err
 	}
@@ -112,7 +112,7 @@ func (r telegramReceiver) validateInitialPreparedWorkGrant(ctx context.Context, 
 	return nil
 }
 
-func (r telegramReceiver) offerPreparedWorkScope(ctx context.Context, request telegramcore.TelegramOperationRequest, prepared PreparedAuthoringWork) error {
+func (r telegramReceiver) offerPreparedWorkScope(ctx context.Context, request telegramcore.OperationRequest, prepared PreparedAuthoringWork) error {
 	input, err := r.preparedWorkAuthorityInput(request)
 	if err != nil {
 		return err
@@ -123,7 +123,7 @@ func (r telegramReceiver) offerPreparedWorkScope(ctx context.Context, request te
 		complete = "## Complete proposed ticket\n\n" + string(prepared.Mutation.Native.Record.Body)
 	}
 
-	return r.offerConfirmationDocument(ctx, request, telegramcore.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"develop"}, ExpiresAt: time.Now().Add(time.Hour), ConversationPhase: "awaiting_confirmation"}, "25", telegramPreparedWorkPreview(prepared), complete)
+	return r.offerConfirmationDocument(ctx, request, telegramcore.ActionOffer{Input: input, RequestID: request.ID, Choices: []string{"develop"}, ExpiresAt: time.Now().Add(time.Hour), ConversationPhase: "awaiting_confirmation"}, "25", telegramPreparedWorkPreview(prepared), complete)
 }
 
 func telegramPreparedWorkFinished(state string) bool {

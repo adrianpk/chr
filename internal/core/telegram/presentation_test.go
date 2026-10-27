@@ -15,7 +15,7 @@ func TestTelegramPresentationFormatSnapshot(t *testing.T) {
 	now := time.Now()
 
 	update := telegramRetainedTestUpdate(t, 1, "show capture")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, now); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{update}, now); err != nil {
 		t.Fatal(err)
 	}
 
@@ -40,7 +40,7 @@ func TestTelegramPresentationFormatSnapshot(t *testing.T) {
 	checkTelegramPresentationFallback(t, store, due[0].ID, original.Content, now)
 }
 
-func checkTelegramPresentationFallback(t *testing.T, store *TelegramReceiverStore, id, original string, now time.Time) {
+func checkTelegramPresentationFallback(t *testing.T, store *ReceiverStore, id, original string, now time.Time) {
 	t.Helper()
 
 	selectTelegramHelpFallback(t, store, id, now)

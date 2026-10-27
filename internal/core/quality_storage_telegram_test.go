@@ -13,7 +13,7 @@ import (
 
 func qualityStorageNow() time.Time { return time.Date(2026, 10, 26, 11, 12, 13, 0, time.UTC) }
 
-func qualityReceiverInput(t *testing.T) telegramcore.TelegramReceivedUpdate {
+func qualityReceiverInput(t *testing.T) telegramcore.ReceivedUpdate {
 	t.Helper()
 
 	update := telegramRetainedTestUpdate(t, 31, "distinct document request")
@@ -54,7 +54,7 @@ func TestQualityStorageTelegram(t *testing.T) {
 		store := qualityReceiverStore(t, db)
 
 		update := qualityReceiverInput(t)
-		if err := store.RetainBatch(t.Context(), 12345, []telegramcore.TelegramReceivedUpdate{update}, qualityStorageNow()); err != nil {
+		if err := store.RetainBatch(t.Context(), 12345, []telegramcore.ReceivedUpdate{update}, qualityStorageNow()); err != nil {
 			t.Fatal(err)
 		}
 
@@ -117,7 +117,7 @@ func qualityDocumentFault(t *testing.T, db *sql.DB) func() error {
 	store := qualityReceiverStore(t, db)
 
 	update := telegramRetainedTestUpdate(t, 41, "rollback document")
-	if err := store.RetainBatch(t.Context(), 12345, []telegramcore.TelegramReceivedUpdate{update}, qualityStorageNow()); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []telegramcore.ReceivedUpdate{update}, qualityStorageNow()); err != nil {
 		t.Fatal(err)
 	}
 

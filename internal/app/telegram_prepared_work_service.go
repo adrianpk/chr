@@ -9,13 +9,13 @@ import (
 )
 
 type telegramPreparedWorkService interface {
-	PrepareTelegramAuthoringWork(context.Context, telegramcore.TelegramOperationTarget, AuthoringWorkRequest) (PreparedAuthoringWork, error)
-	ApplyTelegramAuthoringWork(context.Context, telegramcore.TelegramOperationTarget, PreparedAuthoringWork, core.AuthoringCommitGuard) (AuthoringWorkResult, error)
+	PrepareTelegramAuthoringWork(context.Context, telegramcore.OperationTarget, AuthoringWorkRequest) (PreparedAuthoringWork, error)
+	ApplyTelegramAuthoringWork(context.Context, telegramcore.OperationTarget, PreparedAuthoringWork, core.AuthoringCommitGuard) (AuthoringWorkResult, error)
 }
 
 // PrepareTelegramAuthoringWork resolves the current bound root before entering
 // the shared authoring and native-record preparation owners.
-func (s service) PrepareTelegramAuthoringWork(ctx context.Context, target telegramcore.TelegramOperationTarget, request AuthoringWorkRequest) (PreparedAuthoringWork, error) {
+func (s service) PrepareTelegramAuthoringWork(ctx context.Context, target telegramcore.OperationTarget, request AuthoringWorkRequest) (PreparedAuthoringWork, error) {
 	scoped, err := s.telegramBoundProjectService(ctx, target)
 	if err != nil {
 		return PreparedAuthoringWork{}, err
@@ -30,7 +30,7 @@ func (s service) PrepareTelegramAuthoringWork(ctx context.Context, target telegr
 }
 
 // ApplyTelegramAuthoringWork uses the shared guarded owner and cannot admit work.
-func (s service) ApplyTelegramAuthoringWork(ctx context.Context, target telegramcore.TelegramOperationTarget, prepared PreparedAuthoringWork, guard core.AuthoringCommitGuard) (AuthoringWorkResult, error) {
+func (s service) ApplyTelegramAuthoringWork(ctx context.Context, target telegramcore.OperationTarget, prepared PreparedAuthoringWork, guard core.AuthoringCommitGuard) (AuthoringWorkResult, error) {
 	if prepared.Scope.ProjectID != target.ProjectID || prepared.Scope.Namespace != target.Namespace {
 		return AuthoringWorkResult{}, workflowstate.ErrConflict
 	}

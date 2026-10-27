@@ -8,8 +8,8 @@ import (
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
-func (r telegramReceiver) respondAuthoring(ctx context.Context, user telegramcore.TelegramAllowedUser, config telegramcore.TelegramReceiverConfig, update telegramcore.TelegramReceivedUpdate) (bool, error) {
-	retained, found, err := r.store.TelegramOperation(ctx, update, 0)
+func (r telegramReceiver) respondAuthoring(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (bool, error) {
+	retained, found, err := r.store.Operation(ctx, update, 0)
 	if err != nil {
 		return true, err
 	}
@@ -37,12 +37,12 @@ func (r telegramReceiver) respondAuthoring(ctx context.Context, user telegramcor
 	return true, r.dispatchAuthoring(ctx, user, command)
 }
 
-func (r telegramReceiver) respondAuthoringReply(ctx context.Context, user telegramcore.TelegramAllowedUser, config telegramcore.TelegramReceiverConfig, update telegramcore.TelegramReceivedUpdate) (bool, error) {
+func (r telegramReceiver) respondAuthoringReply(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (bool, error) {
 	if update.Kind != "message" || update.ReplyToMessageID == 0 || strings.HasPrefix(strings.TrimSpace(update.Text), "/") {
 		return false, nil
 	}
 
-	if work, err := r.store.IsTelegramWorkReply(ctx, update); work || err != nil {
+	if work, err := r.store.IsWorkReply(ctx, update); work || err != nil {
 		return false, err
 	}
 
@@ -51,16 +51,16 @@ func (r telegramReceiver) respondAuthoringReply(ctx context.Context, user telegr
 		return true, err
 	}
 
-	return r.dispatchAuthoringConversation(ctx, user, telegramcore.TelegramConversationInput{Update: update, Config: config, Projects: projects, Action: telegramcore.TelegramConversationCapture, Text: update.Text})
+	return r.dispatchAuthoringConversation(ctx, user, telegramcore.ConversationInput{Update: update, Config: config, Projects: projects, Action: telegramcore.ConversationCapture, Text: update.Text})
 }
 
-func (r telegramReceiver) dispatchAuthoringConversation(ctx context.Context, user telegramcore.TelegramAllowedUser, input telegramcore.TelegramConversationInput) (bool, error) {
+func (r telegramReceiver) dispatchAuthoringConversation(ctx context.Context, user telegramcore.AllowedUser, input telegramcore.ConversationInput) (bool, error) {
 	command := telegramAuthoringCommand{Input: input}
 	switch input.Action {
-	case telegramcore.TelegramConversationDone:
+	case telegramcore.ConversationDone:
 		command.Action, command.Target = core.AuthoringContinuationGenerate, core.AuthoringArtifactKindDump
-	case telegramcore.TelegramConversationCapture:
-		c, _, err := r.store.ResolveTelegramAuthoringTarget(ctx, input)
+	case telegramcore.ConversationCapture:
+		c, _, err := r.store.ResolveAuthoringTarget(ctx, input)
 		if err != nil {
 			return true, r.recordDiagnostic(ctx, input.Update, input.Config, telegramAuthoringFailure(err))
 		}
@@ -77,7 +77,7 @@ func (r telegramReceiver) dispatchAuthoringConversation(ctx context.Context, use
 	return true, r.dispatchAuthoring(ctx, user, command)
 }
 
-func (r telegramReceiver) dispatchAuthoring(ctx context.Context, user telegramcore.TelegramAllowedUser, command telegramAuthoringCommand) error {
+func (r telegramReceiver) dispatchAuthoring(ctx context.Context, user telegramcore.AllowedUser, command telegramAuthoringCommand) error {
 	operations, ok := r.operations.(telegramAuthoringService)
 	if !ok {
 		return r.recordDiagnostic(ctx, command.Input.Update, command.Input.Config, "Shared authoring is unavailable. Retained context is unchanged.")

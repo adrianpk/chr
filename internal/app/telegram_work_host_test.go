@@ -111,7 +111,7 @@ func telegramWorkRunReceiver(t *testing.T, receiver telegramReceiver, release st
 	})
 }
 
-func checkTelegramWorkSharedOwner(t *testing.T, operations service, ref telegramcore.TelegramWorkReference) {
+func checkTelegramWorkSharedOwner(t *testing.T, operations service, ref telegramcore.WorkReference) {
 	t.Helper()
 
 	status, err := operations.WorkflowStatus(t.Context(), ref.Invocation.ID, WorkflowStatusRequest{Limit: 8})

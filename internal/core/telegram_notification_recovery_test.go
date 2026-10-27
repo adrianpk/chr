@@ -22,7 +22,7 @@ func TestTelegramPresentationFailureSharedQuota(t *testing.T) {
 	seedTelegramDocumentQuota(t, store, 31)
 
 	update := telegramRetainedTestUpdate(t, 1, "document")
-	if err := store.RetainBatch(t.Context(), 12345, []telegramcore.TelegramReceivedUpdate{update}, time.Now()); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []telegramcore.ReceivedUpdate{update}, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 

@@ -7,13 +7,13 @@ import (
 	"errors"
 )
 
-// ErrTelegramRequestCapacity rejects a new reservation before any owner effect.
+// ErrRequestCapacity rejects a new reservation before any owner effect.
 // The host can acknowledge its retained input with a durable capacity diagnostic.
-var ErrTelegramRequestCapacity = errors.New("telegram request capacity exhausted")
+var ErrRequestCapacity = errors.New("telegram request capacity exhausted")
 
 // Each of the 32 reserved control inputs can retain a prompt and its answer.
 // Their 64 request records remain within the existing 1,024/8,192 ceilings.
-func checkTelegramRequestAllowance(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest) error {
+func checkRequestAllowance(ctx context.Context, tx *sql.Tx, request OperationRequest) error {
 	var existing int
 	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM telegram_requests WHERE id=?`, request.ID).Scan(&existing); err != nil || existing != 0 {
 		return err
@@ -26,22 +26,22 @@ func checkTelegramRequestAllowance(ctx context.Context, tx *sql.Tx, request Tele
 	}
 
 	if total >= 8192 || pending >= 1024 {
-		return ErrTelegramRequestCapacity
+		return ErrRequestCapacity
 	}
 
 	if total < 8128 && pending < 960 {
 		return nil
 	}
 
-	control, err := telegramRequestControlAllowance(ctx, tx, request)
+	control, err := requestControlAllowance(ctx, tx, request)
 	if err != nil || control {
 		return err
 	}
 
-	return ErrTelegramRequestCapacity
+	return ErrRequestCapacity
 }
 
-func telegramRequestControlAllowance(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest) (bool, error) {
+func requestControlAllowance(ctx context.Context, tx *sql.Tx, request OperationRequest) (bool, error) {
 	if request.OperationID == "work.control" {
 		return true, nil
 	}

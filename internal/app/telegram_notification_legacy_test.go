@@ -34,14 +34,14 @@ func checkTelegramLegacyNotificationDispatch(t *testing.T, manifest string) {
 		setTelegramLegacyNotificationManifest(t, env, manifest)
 	}
 
-	want := telegramcore.RenderTelegramNotificationMessage(input.Record.Event).Text
+	want := telegramcore.RenderNotificationMessage(input.Record.Event).Text
 
 	var calls atomic.Int32
 
 	installTelegramNotificationSender(t, func(w http.ResponseWriter, r *http.Request) {
 		calls.Add(1)
 
-		var payload telegramcore.TelegramMessage
+		var payload telegramcore.Message
 		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 			t.Error(err)
 		}

@@ -7,7 +7,7 @@ import (
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
-func (r telegramReceiver) dispatchIntentControl(ctx context.Context, user telegramcore.TelegramAllowedUser, input telegramcore.TelegramConversationInput, intent ConversationIntent) (bool, error) {
+func (r telegramReceiver) dispatchIntentControl(ctx context.Context, user telegramcore.AllowedUser, input telegramcore.ConversationInput, intent ConversationIntent) (bool, error) {
 	command, recognized, err := telegramIntentControl(input.Update, intent)
 	if !recognized {
 		return false, nil
@@ -23,10 +23,10 @@ func (r telegramReceiver) dispatchIntentControl(ctx context.Context, user telegr
 	return true, r.dispatchControl(ctx, user, command)
 }
 
-func (r telegramReceiver) intentControlTarget(ctx context.Context, input telegramcore.TelegramConversationInput, intent ConversationIntent) (telegramcore.TelegramOperationTarget, bool, error) {
+func (r telegramReceiver) intentControlTarget(ctx context.Context, input telegramcore.ConversationInput, intent ConversationIntent) (telegramcore.OperationTarget, bool, error) {
 	command, recognized, err := telegramIntentControl(input.Update, intent)
 	if !recognized || err != nil {
-		return telegramcore.TelegramOperationTarget{}, recognized, err
+		return telegramcore.OperationTarget{}, recognized, err
 	}
 
 	command.Input.Config, command.Input.Projects = input.Config, input.Projects
@@ -36,7 +36,7 @@ func (r telegramReceiver) intentControlTarget(ctx context.Context, input telegra
 	return target, true, err
 }
 
-func (r telegramReceiver) dispatchIntentNativeWork(ctx context.Context, user telegramcore.TelegramAllowedUser, input telegramcore.TelegramConversationInput, intent ConversationIntent) (bool, error) {
+func (r telegramReceiver) dispatchIntentNativeWork(ctx context.Context, user telegramcore.AllowedUser, input telegramcore.ConversationInput, intent ConversationIntent) (bool, error) {
 	if handled, err := r.dispatchIntentControl(ctx, user, input, intent); handled || err != nil {
 		return handled, err
 	}
@@ -55,22 +55,22 @@ func (r telegramReceiver) dispatchIntentNativeWork(ctx context.Context, user tel
 	return false, nil
 }
 
-func (r telegramReceiver) intentNativeWorkTarget(ctx context.Context, input telegramcore.TelegramConversationInput, intent ConversationIntent) (telegramcore.TelegramOperationTarget, bool, error) {
+func (r telegramReceiver) intentNativeWorkTarget(ctx context.Context, input telegramcore.ConversationInput, intent ConversationIntent) (telegramcore.OperationTarget, bool, error) {
 	if target, needed, err := r.intentControlTarget(ctx, input, intent); needed || err != nil {
 		return target, needed, err
 	}
 
 	if work, recognized, err := telegramIntentWork(input.Update, intent); recognized {
 		if err != nil {
-			return telegramcore.TelegramOperationTarget{}, true, err
+			return telegramcore.OperationTarget{}, true, err
 		}
 
 		work.Input.Config, work.Input.Projects = input.Config, input.Projects
 		work.Input.ContextDigest = input.ContextDigest
-		target, err := r.store.ResolveTelegramOperationTarget(ctx, work.Input, time.Now())
+		target, err := r.store.ResolveOperationTarget(ctx, work.Input, time.Now())
 
 		return target, true, err
 	}
 
-	return telegramcore.TelegramOperationTarget{}, false, nil
+	return telegramcore.OperationTarget{}, false, nil
 }

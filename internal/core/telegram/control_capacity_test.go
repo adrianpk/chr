@@ -13,15 +13,15 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func fillTelegramOrdinaryIntake(t *testing.T, store *TelegramReceiverStore) {
+func fillTelegramOrdinaryIntake(t *testing.T, store *ReceiverStore) {
 	t.Helper()
 
 	first := telegramRetainedTestUpdate(t, 0, "/help")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{first}, time.Now()); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{first}, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
-	var backlog []TelegramReceivedUpdate
+	var backlog []ReceivedUpdate
 	for id := 1; id < 991; id++ {
 		backlog = append(backlog, telegramRetainedTestUpdate(t, int64(id), "/help"))
 	}
@@ -48,7 +48,7 @@ SELECT u.bot_id,json_extract(j.value,'$.UpdateID'),u.cursor_epoch,json_extract(j
 	}
 
 	last := telegramRetainedTestUpdate(t, 991, "/help")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{last}, time.Now()); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{last}, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -60,7 +60,7 @@ func TestTelegramControlReserve(t *testing.T) {
 	store := openTelegramReceiverTestStore(t, env)
 	fillTelegramOrdinaryIntake(t, store)
 
-	batch := []TelegramReceivedUpdate{telegramRetainedTestUpdate(t, 992, "prepare overflow")}
+	batch := []ReceivedUpdate{telegramRetainedTestUpdate(t, 992, "prepare overflow")}
 	for id := 993; id < 1026; id++ {
 		batch = append(batch, telegramRetainedTestUpdate(t, int64(id), "/status"))
 	}
@@ -78,7 +78,7 @@ func TestTelegramControlReserve(t *testing.T) {
 
 	checkTelegramReservedInputs(t, store)
 
-	ordinary, err := store.PendingApplicationInputs(t.Context(), 12345, TelegramProcessingOrdinary, time.Now())
+	ordinary, err := store.PendingApplicationInputs(t.Context(), 12345, ProcessingOrdinary, time.Now())
 	if err != nil || len(ordinary) != 1 || ordinary[0].UpdateID != 0 {
 		t.Fatal("ordinary peer order was not preserved", ordinary, err)
 	}
@@ -92,16 +92,16 @@ func TestTelegramControlReserve(t *testing.T) {
 	checkTelegramControlIntakeCounts(t, store)
 }
 
-func checkTelegramReservedInputs(t *testing.T, store *TelegramReceiverStore) {
+func checkTelegramReservedInputs(t *testing.T, store *ReceiverStore) {
 	t.Helper()
 
-	controls, err := store.PendingApplicationInputs(t.Context(), 12345, TelegramProcessingUrgent, time.Now())
+	controls, err := store.PendingApplicationInputs(t.Context(), 12345, ProcessingUrgent, time.Now())
 	if err != nil || len(controls) != 32 || controls[0].UpdateID != 993 || controls[31].UpdateID != 1024 {
 		t.Fatal("reserved inputs lost or exceeded", controls, err)
 	}
 }
 
-func checkTelegramControlIntakeCounts(t *testing.T, store *TelegramReceiverStore) {
+func checkTelegramControlIntakeCounts(t *testing.T, store *ReceiverStore) {
 	t.Helper()
 
 	var pending, rejected int
@@ -120,7 +120,7 @@ func TestTelegramControlStorageFailure(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	batch := []TelegramReceivedUpdate{telegramRetainedTestUpdate(t, 992, "/status"), telegramRetainedTestUpdate(t, 993, "overflow")}
+	batch := []ReceivedUpdate{telegramRetainedTestUpdate(t, 992, "/status"), telegramRetainedTestUpdate(t, 993, "overflow")}
 	if err := store.RetainBatch(t.Context(), 12345, batch, time.Now()); err == nil {
 		t.Fatal("failed persistence was accepted")
 	}
@@ -141,7 +141,7 @@ func TestTelegramControlStorageFailure(t *testing.T) {
 func TestTelegramControlModelCapacity(t *testing.T) {
 	f, request := telegramAuthoringModelFixture(t)
 
-	updates := []TelegramReceivedUpdate{telegramRetainedTestUpdate(t, 900, "first intent"), telegramRetainedTestUpdate(t, 901, "next intent")}
+	updates := []ReceivedUpdate{telegramRetainedTestUpdate(t, 900, "first intent"), telegramRetainedTestUpdate(t, 901, "next intent")}
 	if err := f.store.RetainBatch(t.Context(), 12345, updates, time.Now()); err != nil {
 		t.Fatal(err)
 	}
@@ -170,11 +170,11 @@ func TestTelegramControlModelCapacity(t *testing.T) {
 		return json.RawMessage(`{}`), nil
 	}
 	go func() {
-		_, err := f.store.ResolveTelegramInterpretation(t.Context(), f.env, updates[0], time.Now(), invoke)
+		_, err := f.store.ResolveInterpretation(t.Context(), f.env, updates[0], time.Now(), invoke)
 		finished <- err
 	}()
 	go func() {
-		_, err := f.store.ResolveTelegramOperationModel(t.Context(), f.env, request, time.Now(), invoke)
+		_, err := f.store.ResolveOperationModel(t.Context(), f.env, request, time.Now(), invoke)
 		finished <- err
 	}()
 
@@ -189,12 +189,12 @@ func TestTelegramControlModelCapacity(t *testing.T) {
 	checkTelegramControlModelWait(t, f, updates[1])
 }
 
-func checkTelegramControlModelWait(t *testing.T, f *telegramConversationFixture, update TelegramReceivedUpdate) {
+func checkTelegramControlModelWait(t *testing.T, f *telegramConversationFixture, update ReceivedUpdate) {
 	t.Helper()
 
 	other := openTelegramReceiverTestStore(t, f.env)
 
-	_, err := other.ResolveTelegramInterpretation(t.Context(), f.env, update, time.Now().Add(time.Hour), func(context.Context) (json.RawMessage, error) {
+	_, err := other.ResolveInterpretation(t.Context(), f.env, update, time.Now().Add(time.Hour), func(context.Context) (json.RawMessage, error) {
 		t.Error("third provider call entered")
 
 		return json.RawMessage(`{}`), nil
@@ -213,28 +213,28 @@ func checkTelegramControlModelWait(t *testing.T, f *telegramConversationFixture,
 // focus or capture revision introduced while the model was outside the DB lock.
 func TestTelegramControlContextGuard(t *testing.T) {
 	f := newTelegramConversationFixture(t)
-	f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "alpha" })
+	f.apply(t, ConversationStart, func(i *ConversationInput) { i.Project = "alpha" })
 
 	input := telegramOperationActionInput(t, f, "capture original context")
 
-	snapshot, err := f.store.TelegramIntentContext(t.Context(), input)
+	snapshot, err := f.store.IntentContext(t.Context(), input)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	input.ContextDigest = snapshot.Digest
-	if _, err := f.store.ResolveTelegramConversationTarget(t.Context(), input); err != nil {
+	if _, err := f.store.ResolveConversationTarget(t.Context(), input); err != nil {
 		t.Fatal(err)
 	}
 
-	f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "beta" })
+	f.apply(t, ConversationStart, func(i *ConversationInput) { i.Project = "beta" })
 
-	if _, err := f.store.ResolveTelegramConversationTarget(t.Context(), input); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := f.store.ResolveConversationTarget(t.Context(), input); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("model result followed changed context", err)
 	}
 }
 
-func checkTelegramCapacityMessages(t *testing.T, deliveries []TelegramReceiverDelivery) {
+func checkTelegramCapacityMessages(t *testing.T, deliveries []ReceiverDelivery) {
 	t.Helper()
 
 	for _, delivery := range deliveries {

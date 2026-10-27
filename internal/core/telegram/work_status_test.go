@@ -15,35 +15,35 @@ import (
 func TestTelegramWorkStatusReply(t *testing.T) {
 	f, input, expected := telegramWorkStatusFixture(t)
 
-	target, err := f.store.ResolveTelegramWorkStatusTarget(t.Context(), input, time.Now())
+	target, err := f.store.ResolveWorkStatusTarget(t.Context(), input, time.Now())
 	if err != nil || target != expected {
 		t.Fatal("completed status reply lost its exact target", target, err)
 	}
 
-	if _, err := f.store.ResolveTelegramOperationTarget(t.Context(), input, time.Now()); err == nil {
+	if _, err := f.store.ResolveOperationTarget(t.Context(), input, time.Now()); err == nil {
 		t.Fatal("status reply reopened capture")
 	}
 
-	if _, err := f.store.ResolveTelegramControlTarget(t.Context(), input, time.Now()); err == nil {
+	if _, err := f.store.ResolveControlTarget(t.Context(), input, time.Now()); err == nil {
 		t.Fatal("status reply authorized a control target")
 	}
 
 	checkTelegramWorkStatusQueue(t, f, input, target)
 }
 
-func checkTelegramWorkStatusQueue(t *testing.T, f *telegramConversationFixture, input TelegramConversationInput, target TelegramOperationTarget) {
+func checkTelegramWorkStatusQueue(t *testing.T, f *telegramConversationFixture, input ConversationInput, target OperationTarget) {
 	t.Helper()
 
 	before := f.sessions(t)
 	message := tgmessage.Blocks{Family: "33", InitialText: "Work has finished."}
 
-	if err := f.store.QueueTelegramWorkStatus(t.Context(), input, target, "run-status", message, time.Now()); err != nil {
+	if err := f.store.QueueWorkStatus(t.Context(), input, target, "run-status", message, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
 	acknowledgeTelegramStatusNotices(t, f, 77778)
 
-	snapshot, err := f.store.TelegramIntentContext(t.Context(), input)
+	snapshot, err := f.store.IntentContext(t.Context(), input)
 	if err != nil || snapshot.LastWorkConversation != target.ConversationID || snapshot.RepliedWorkConversation != target.ConversationID {
 		t.Fatal("acknowledged status was absent from intent context", snapshot, err)
 	}
@@ -75,13 +75,13 @@ func acknowledgeTelegramStatusNotices(t *testing.T, f *telegramConversationFixtu
 	}
 }
 
-func checkTelegramWorkReplyPrecedence(t *testing.T, f *telegramConversationFixture, input TelegramConversationInput, original TelegramOperationTarget) {
+func checkTelegramWorkReplyPrecedence(t *testing.T, f *telegramConversationFixture, input ConversationInput, original OperationTarget) {
 	t.Helper()
 
 	newer := telegramWorkReferenceFixture(t, f, "run-newer")
 	acknowledgeTelegramStatusNotices(t, f, 90000)
 
-	snapshot, err := f.store.TelegramIntentContext(t.Context(), input)
+	snapshot, err := f.store.IntentContext(t.Context(), input)
 	if err != nil || snapshot.LastWorkConversation != newer.Request.Target.ConversationID || snapshot.RepliedWorkConversation != original.ConversationID {
 		t.Fatal("a newer work message displaced the explicit reply reference", snapshot, err)
 	}
@@ -93,17 +93,17 @@ func TestTelegramWorkStatusGuards(t *testing.T) {
 	f, input, _ := telegramWorkStatusFixture(t)
 	for _, test := range []struct {
 		name   string
-		change func(*TelegramConversationInput)
+		change func(*ConversationInput)
 	}{
-		{"bot", func(i *TelegramConversationInput) { i.Update.Peer.BotID++ }},
-		{"chat", func(i *TelegramConversationInput) { i.Update.Peer.ChatID++ }},
-		{"topic", func(i *TelegramConversationInput) { i.Update.Peer.TopicID++ }},
-		{"user", func(i *TelegramConversationInput) { i.Update.Peer.UserID++ }},
-		{"unknown message", func(i *TelegramConversationInput) { i.Update.ReplyToMessageID++ }},
-		{"conversation conflict", func(i *TelegramConversationInput) { i.Conversation = "other-session" }},
-		{"project conflict", func(i *TelegramConversationInput) { i.Project = "beta" }},
-		{"namespace conflict", func(i *TelegramConversationInput) { i.Namespace = "elsewhere" }},
-		{"changed root", func(i *TelegramConversationInput) {
+		{"bot", func(i *ConversationInput) { i.Update.Peer.BotID++ }},
+		{"chat", func(i *ConversationInput) { i.Update.Peer.ChatID++ }},
+		{"topic", func(i *ConversationInput) { i.Update.Peer.TopicID++ }},
+		{"user", func(i *ConversationInput) { i.Update.Peer.UserID++ }},
+		{"unknown message", func(i *ConversationInput) { i.Update.ReplyToMessageID++ }},
+		{"conversation conflict", func(i *ConversationInput) { i.Conversation = "other-session" }},
+		{"project conflict", func(i *ConversationInput) { i.Project = "beta" }},
+		{"namespace conflict", func(i *ConversationInput) { i.Namespace = "elsewhere" }},
+		{"changed root", func(i *ConversationInput) {
 			i.Projects = append([]projectcore.Project(nil), i.Projects...)
 			i.Projects[0].Path = t.TempDir()
 		}},
@@ -112,14 +112,14 @@ func TestTelegramWorkStatusGuards(t *testing.T) {
 			changed := input
 			test.change(&changed)
 
-			if _, err := f.store.ResolveTelegramWorkStatusTarget(t.Context(), changed, time.Now()); err == nil {
+			if _, err := f.store.ResolveWorkStatusTarget(t.Context(), changed, time.Now()); err == nil {
 				t.Fatal("foreign, stale or unacknowledged work reference was accepted")
 			}
 		})
 	}
 }
 
-func telegramWorkStatusFixture(t *testing.T) (*telegramConversationFixture, TelegramConversationInput, TelegramOperationTarget) {
+func telegramWorkStatusFixture(t *testing.T) (*telegramConversationFixture, ConversationInput, OperationTarget) {
 	t.Helper()
 
 	f := newTelegramConversationFixture(t)
@@ -127,15 +127,15 @@ func telegramWorkStatusFixture(t *testing.T) (*telegramConversationFixture, Tele
 	now := time.Now()
 	telegramWorkDeliverInitial(t, f, now)
 
-	observation := TelegramWorkObservation{Revision: 2, Phase: "completed", Kind: "result", Text: "Work has finished."}
-	if err := f.store.ProjectTelegramWork(t.Context(), ref, observation, f.input.Config.Digest(), now); err != nil {
+	observation := WorkObservation{Revision: 2, Phase: "completed", Kind: "result", Text: "Work has finished."}
+	if err := f.store.ProjectWork(t.Context(), ref, observation, f.input.Config.Digest(), now); err != nil {
 		t.Fatal(err)
 	}
 
 	input := telegramOperationActionInput(t, f, "Show the work status.")
 	input.Update.ReplyToMessageID = 77777
 
-	if _, err := f.store.ResolveTelegramWorkStatusTarget(t.Context(), input, now); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := f.store.ResolveWorkStatusTarget(t.Context(), input, now); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("undelivered work message identified an execution", err)
 	}
 

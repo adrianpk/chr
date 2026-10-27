@@ -9,12 +9,12 @@ import (
 )
 
 type telegramRecordService interface {
-	ReadTelegramRecords(context.Context, telegramcore.TelegramOperationTarget, RecordQuery) (RecordPage, error)
-	PrepareTelegramRecord(context.Context, telegramcore.TelegramOperationTarget, workflowstate.MutationBinding, RecordMutationRequest) (PreparedRecordMutation, error)
-	ApplyTelegramRecord(context.Context, telegramcore.TelegramOperationTarget, PreparedRecordMutation) (RecordMutationResult, error)
+	ReadTelegramRecords(context.Context, telegramcore.OperationTarget, RecordQuery) (RecordPage, error)
+	PrepareTelegramRecord(context.Context, telegramcore.OperationTarget, workflowstate.MutationBinding, RecordMutationRequest) (PreparedRecordMutation, error)
+	ApplyTelegramRecord(context.Context, telegramcore.OperationTarget, PreparedRecordMutation) (RecordMutationResult, error)
 }
 
-func (s service) telegramProjectService(ctx context.Context, target telegramcore.TelegramOperationTarget) (service, error) {
+func (s service) telegramProjectService(ctx context.Context, target telegramcore.OperationTarget) (service, error) {
 	projects, err := s.ListRegisteredProjects([]string{target.ProjectID})
 	if err != nil {
 		return s, err
@@ -33,7 +33,7 @@ func (s service) telegramProjectService(ctx context.Context, target telegramcore
 }
 
 // ReadTelegramRecords resolves the frozen project through the shared registry.
-func (s service) ReadTelegramRecords(ctx context.Context, target telegramcore.TelegramOperationTarget, query RecordQuery) (RecordPage, error) {
+func (s service) ReadTelegramRecords(ctx context.Context, target telegramcore.OperationTarget, query RecordQuery) (RecordPage, error) {
 	scoped, err := s.telegramProjectService(ctx, target)
 	if err != nil {
 		return RecordPage{}, err
@@ -43,7 +43,7 @@ func (s service) ReadTelegramRecords(ctx context.Context, target telegramcore.Te
 }
 
 // PrepareTelegramRecord uses the central owner boundary after project resolution.
-func (s service) PrepareTelegramRecord(ctx context.Context, target telegramcore.TelegramOperationTarget, binding workflowstate.MutationBinding, request RecordMutationRequest) (PreparedRecordMutation, error) {
+func (s service) PrepareTelegramRecord(ctx context.Context, target telegramcore.OperationTarget, binding workflowstate.MutationBinding, request RecordMutationRequest) (PreparedRecordMutation, error) {
 	scoped, err := s.telegramProjectService(ctx, target)
 	if err != nil {
 		return PreparedRecordMutation{}, err
@@ -53,7 +53,7 @@ func (s service) PrepareTelegramRecord(ctx context.Context, target telegramcore.
 }
 
 // ApplyTelegramRecord applies only serialized input matching the frozen target.
-func (s service) ApplyTelegramRecord(ctx context.Context, target telegramcore.TelegramOperationTarget, prepared PreparedRecordMutation) (RecordMutationResult, error) {
+func (s service) ApplyTelegramRecord(ctx context.Context, target telegramcore.OperationTarget, prepared PreparedRecordMutation) (RecordMutationResult, error) {
 	if prepared.ProjectID != target.ProjectID || prepared.Namespace != target.Namespace {
 		return RecordMutationResult{}, workflowstate.ErrConflict
 	}

@@ -21,7 +21,7 @@ type telegramAuthoringLostAck struct {
 	lost *atomic.Bool
 }
 
-func (s telegramAuthoringLostAck) ContinueTelegramAuthoring(ctx context.Context, target telegramcore.TelegramOperationTarget, request core.AuthoringContinuationRequest, guard core.AuthoringCommitGuard) (core.AuthoringContinuationResult, error) {
+func (s telegramAuthoringLostAck) ContinueTelegramAuthoring(ctx context.Context, target telegramcore.OperationTarget, request core.AuthoringContinuationRequest, guard core.AuthoringCommitGuard) (core.AuthoringContinuationResult, error) {
 	result, err := s.service.ContinueTelegramAuthoring(ctx, target, request, guard)
 	if err == nil && s.lost.CompareAndSwap(false, true) {
 		return result, errTelegramAuthoringLostAck
@@ -115,7 +115,7 @@ func telegramAuthoringReopen(t *testing.T, f *telegramConversationAppFixture) {
 		t.Fatal(err)
 	}
 
-	store, err := telegramcore.NewTelegramReceiverStore(t.Context(), f.receiver.env, testAssetsFS())
+	store, err := telegramcore.NewReceiverStore(t.Context(), f.receiver.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -182,7 +182,7 @@ func telegramAuthoringChangeAuthority(t *testing.T, f *telegramConversationAppFi
 		}
 
 		config.AllowedUsers[0].OperatorID = "replacement-operator"
-		if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+		if err := telegramcore.SaveReceiverConfig(f.receiver.env, config, true); err != nil {
 			t.Error(err)
 		}
 

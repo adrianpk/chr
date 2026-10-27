@@ -37,7 +37,7 @@ func telegramAuthoringPreparedFixture(t *testing.T, start string) (*telegramConv
 	return f, c.ID, calls
 }
 
-func telegramAuthoringPreparedLatest(t *testing.T, f *telegramConversationAppFixture, id string) telegramcore.TelegramOperationRequest {
+func telegramAuthoringPreparedLatest(t *testing.T, f *telegramConversationAppFixture, id string) telegramcore.OperationRequest {
 	t.Helper()
 
 	c := f.session(t, id)
@@ -52,10 +52,10 @@ func telegramAuthoringPreparedLatest(t *testing.T, f *telegramConversationAppFix
 		t.Fatal(err)
 	}
 
-	input := telegramcore.TelegramConversationInput{Update: telegramcore.TelegramReceivedUpdate{Peer: c.Peer, Kind: "message", ChatType: "private"}, Config: config, Projects: projects, Conversation: id}
-	target := telegramcore.TelegramOperationTarget{ProjectID: c.ProjectID, ProjectBindingDigest: c.ProjectBindingDigest, Namespace: c.Namespace, ConversationID: c.ID, ConversationRevision: c.Revision}
+	input := telegramcore.ConversationInput{Update: telegramcore.ReceivedUpdate{Peer: c.Peer, Kind: "message", ChatType: "private"}, Config: config, Projects: projects, Conversation: id}
+	target := telegramcore.OperationTarget{ProjectID: c.ProjectID, ProjectBindingDigest: c.ProjectBindingDigest, Namespace: c.Namespace, ConversationID: c.ID, ConversationRevision: c.Revision}
 
-	request, found, err := f.receiver.store.LatestTelegramAuthoringWork(t.Context(), input, target)
+	request, found, err := f.receiver.store.LatestAuthoringWork(t.Context(), input, target)
 	if err != nil || !found {
 		t.Fatal(request, err)
 	}
@@ -68,7 +68,7 @@ func telegramAuthoringPreparedStore(t *testing.T, f *telegramConversationAppFixt
 
 	operations := telegramOperationConcreteService(t, f.receiver)
 
-	scoped, err := operations.telegramProjectService(t.Context(), telegramcore.TelegramOperationTarget{ProjectID: "example-project", Namespace: "original"})
+	scoped, err := operations.telegramProjectService(t.Context(), telegramcore.OperationTarget{ProjectID: "example-project", Namespace: "original"})
 	if err != nil {
 		t.Fatal(err)
 	}

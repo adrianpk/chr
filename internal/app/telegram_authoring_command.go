@@ -14,7 +14,7 @@ type telegramAuthoringDescriptor struct {
 }
 
 type telegramAuthoringCommand struct {
-	Input        telegramcore.TelegramConversationInput
+	Input        telegramcore.ConversationInput
 	Action       core.AuthoringContinuationAction
 	Target       core.AuthoringArtifactKind
 	Instructions string
@@ -29,8 +29,8 @@ func telegramAuthoringRegistry() []telegramAuthoringDescriptor {
 	}
 }
 
-func parseTelegramAuthoring(update telegramcore.TelegramReceivedUpdate) (telegramAuthoringCommand, bool, error) {
-	command := telegramAuthoringCommand{Input: telegramcore.TelegramConversationInput{Update: update}}
+func parseTelegramAuthoring(update telegramcore.ReceivedUpdate) (telegramAuthoringCommand, bool, error) {
+	command := telegramAuthoringCommand{Input: telegramcore.ConversationInput{Update: update}}
 	if update.Kind != "message" {
 		return command, false, nil
 	}
@@ -74,9 +74,9 @@ func validateTelegramAuthoringCommand(command telegramAuthoringCommand) error {
 	return nil
 }
 
-func telegramIntentAuthoring(update telegramcore.TelegramReceivedUpdate, intent ConversationIntent) (telegramAuthoringCommand, bool, error) {
+func telegramIntentAuthoring(update telegramcore.ReceivedUpdate, intent ConversationIntent) (telegramAuthoringCommand, bool, error) {
 	a := intent.Arguments
-	command := telegramAuthoringCommand{Input: telegramcore.TelegramConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation}}
+	command := telegramAuthoringCommand{Input: telegramcore.ConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation}}
 
 	for _, descriptor := range telegramAuthoringRegistry() {
 		if intent.OperationID != strings.TrimPrefix(descriptor.Name, "/") {
@@ -104,7 +104,7 @@ func telegramIntentAuthoring(update telegramcore.TelegramReceivedUpdate, intent 
 	return command, false, nil
 }
 
-func telegramAuthoringUsage(update telegramcore.TelegramReceivedUpdate) string {
+func telegramAuthoringUsage(update telegramcore.ReceivedUpdate) string {
 	name, _ := telegramCommandWord(strings.TrimSpace(update.Text))
 	for _, descriptor := range telegramAuthoringRegistry() {
 		if descriptor.Name == name {

@@ -9,20 +9,20 @@ import (
 )
 
 // Each admission retains its table's ownership shape and quota write reservation.
-type telegramDocumentSnapshotRow struct {
+type documentSnapshotRow struct {
 	id, owner    string
-	peer         TelegramPeerIdentity
+	peer         PeerIdentity
 	configDigest string
 	document     tgmessage.Document
 	createdAt    time.Time
 }
 
-const telegramDocumentSnapshotColumns = `id,owner_kind,owner_id,bot_id,chat_id,topic_id,user_id,config_digest,project_id,namespace,project_binding_digest,source_ref,source_hash,content_hash,filename,media_type,byte_count,payload,created_at`
+const documentSnapshotColumns = `id,owner_kind,owner_id,bot_id,chat_id,topic_id,user_id,config_digest,project_id,namespace,project_binding_digest,source_ref,source_hash,content_hash,filename,media_type,byte_count,payload,created_at`
 
-const insertTelegramDocumentSnapshotSQL = `INSERT INTO telegram_document_snapshots(` + telegramDocumentSnapshotColumns + `) SELECT ?,'receiver',?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?` + database.TelegramDocumentQuotaPredicate
+const insertDocumentSnapshotSQL = `INSERT INTO telegram_document_snapshots(` + documentSnapshotColumns + `) SELECT ?,'receiver',?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?` + database.TelegramDocumentQuotaPredicate
 
 // values omits owner_kind: the statement retains its fixed receiver literal.
-func (row telegramDocumentSnapshotRow) values() []any {
+func (row documentSnapshotRow) values() []any {
 	peer, document := row.peer, row.document
 
 	return []any{

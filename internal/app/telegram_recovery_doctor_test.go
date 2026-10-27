@@ -42,8 +42,8 @@ type telegramRecoveryDoctorCase struct {
 func checkTelegramRecoveryDoctor(t *testing.T, test telegramRecoveryDoctorCase) {
 	t.Helper()
 
-	receiver, _ := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{})
-	if err := telegramcore.BindTelegramReceiverIdentity(receiver.env, 12345); err != nil {
+	receiver, _ := telegramAppTestReceiver(t, telegramcore.ReceiverAPI{})
+	if err := telegramcore.BindReceiverIdentity(receiver.env, 12345); err != nil {
 		t.Fatal(err)
 	}
 
@@ -60,7 +60,7 @@ func checkTelegramRecoveryDoctor(t *testing.T, test telegramRecoveryDoctorCase) 
 
 	command := (commandFactory{deps: testAppDependencies(), io: IO{Stdin: strings.NewReader(""), Stdout: &output, Stderr: &output}}).rootCommand()
 	command.Command("telegram").Command("doctor").Action = func(ctx context.Context, cmd *cli.Command) error {
-		return (commandFactory{deps: testAppDependencies(), io: IO{Stdout: &output}}).runTelegramDoctor(ctx, cmd, telegramcore.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
+		return (commandFactory{deps: testAppDependencies(), io: IO{Stdout: &output}}).runTelegramDoctor(ctx, cmd, telegramcore.ReceiverAPI{Client: server.Client(), BaseURL: server.URL})
 	}
 
 	err := command.Run(t.Context(), []string{"chr", "telegram", "doctor", "--dev-root", root, "--check-connection"})
@@ -98,9 +98,9 @@ func TestTelegramRecoveryFailures(t *testing.T) {
 		want    string
 	}{
 		{"configuration", &telegramServiceFailure{code: "configuration_invalid", permanent: true}, 78, "configuration_invalid"},
-		{"credentials", &telegramcore.TelegramAPIError{Code: "credentials_or_access", Permanent: true}, 78, "credentials_or_access"},
-		{"ownership", &telegramcore.TelegramAPIError{Code: "receiver_conflict", Permanent: true}, 78, "receiver_conflict"},
-		{"network", &telegramcore.TelegramAPIError{Code: "transport_failure"}, 1, "transport_failure"},
+		{"credentials", &telegramcore.APIError{Code: "credentials_or_access", Permanent: true}, 78, "credentials_or_access"},
+		{"ownership", &telegramcore.APIError{Code: "receiver_conflict", Permanent: true}, 78, "receiver_conflict"},
+		{"network", &telegramcore.APIError{Code: "transport_failure"}, 1, "transport_failure"},
 		{"process", errors.New("secret process body"), 1, "local_process_failure"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -115,11 +115,11 @@ func TestTelegramRecoveryFailures(t *testing.T) {
 // TestTelegramRecoveryProviders reports the selected provider's local
 // prerequisite, including explicitly allowed projects absent from the registry.
 func TestTelegramRecoveryProviders(t *testing.T) {
-	receiver, config := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{})
+	receiver, config := telegramAppTestReceiver(t, telegramcore.ReceiverAPI{})
 	addTelegramAppTestProjects(t, receiver.env)
 
 	config.AllowedUsers[0].ProjectIDs = append(config.AllowedUsers[0].ProjectIDs, "missing-project")
-	if err := telegramcore.SaveTelegramReceiverConfig(receiver.env, config, true); err != nil {
+	if err := telegramcore.SaveReceiverConfig(receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -160,7 +160,7 @@ func checkTelegramRecoveryDoctorResult(t *testing.T, test telegramRecoveryDoctor
 		t.Fatal("doctor exposed remote secret")
 	}
 
-	id, err := telegramcore.TelegramBoundBotID(receiver.env)
+	id, err := telegramcore.BoundBotID(receiver.env)
 	if err != nil || id != 12345 {
 		t.Fatal("doctor rebound receiver", id, err)
 	}
@@ -169,7 +169,7 @@ func checkTelegramRecoveryDoctorResult(t *testing.T, test telegramRecoveryDoctor
 func holdTelegramRecoveryDoctorLock(t *testing.T, env core.UserEnvironment) {
 	t.Helper()
 
-	lock, err := telegramcore.AcquireTelegramConfigurationLock(env)
+	lock, err := telegramcore.AcquireConfigurationLock(env)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -14,11 +14,11 @@ import (
 )
 
 type qualityLegacyRecords struct {
-	Execution    ExecutionRecord                   `json:"execution"`
-	Remote       RemoteCommandRecord               `json:"remote"`
-	Notification notifycore.AuditRecord            `json:"notification"`
-	Ticket       IndexedTicket                     `json:"ticket"`
-	Conversation telegramcore.TelegramConversation `json:"conversation"`
+	Execution    ExecutionRecord           `json:"execution"`
+	Remote       RemoteCommandRecord       `json:"remote"`
+	Notification notifycore.AuditRecord    `json:"notification"`
+	Ticket       IndexedTicket             `json:"ticket"`
+	Conversation telegramcore.Conversation `json:"conversation"`
 }
 
 func openQualityLegacyDB(t *testing.T) *sql.DB {

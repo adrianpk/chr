@@ -18,8 +18,8 @@ type telegramHarnessPrepared struct {
 	ExpiresAt time.Time                          `json:"expires_at"`
 }
 
-func (r telegramReceiver) prepareHarnessChange(ctx context.Context, operations telegramHarnessService, user telegramcore.TelegramAllowedUser, input telegramcore.TelegramConversationInput, target telegramcore.TelegramOperationTarget, choices telegramHarnessChoices) error {
-	request, found, err := r.store.TelegramOperation(ctx, input.Update, 0)
+func (r telegramReceiver) prepareHarnessChange(ctx context.Context, operations telegramHarnessService, user telegramcore.AllowedUser, input telegramcore.ConversationInput, target telegramcore.OperationTarget, choices telegramHarnessChoices) error {
+	request, found, err := r.store.Operation(ctx, input.Update, 0)
 	if err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ func (r telegramReceiver) prepareHarnessChange(ctx context.Context, operations t
 		}
 	}
 
-	if request.OperationID != telegramcore.TelegramHarnessSelectionOperation {
+	if request.OperationID != telegramcore.HarnessSelectionOperation {
 		return workflowstate.ErrConflict
 	}
 
@@ -42,28 +42,28 @@ func (r telegramReceiver) prepareHarnessChange(ctx context.Context, operations t
 	return r.offerHarnessChange(ctx, request)
 }
 
-func (r telegramReceiver) reserveHarnessChange(ctx context.Context, operations telegramHarnessService, user telegramcore.TelegramAllowedUser, input telegramcore.TelegramConversationInput, target telegramcore.TelegramOperationTarget, choices telegramHarnessChoices) (telegramcore.TelegramOperationRequest, error) {
+func (r telegramReceiver) reserveHarnessChange(ctx context.Context, operations telegramHarnessService, user telegramcore.AllowedUser, input telegramcore.ConversationInput, target telegramcore.OperationTarget, choices telegramHarnessChoices) (telegramcore.OperationRequest, error) {
 	status, err := operations.InspectTelegramHarnessSelections(ctx, target)
 	if err != nil {
-		return telegramcore.TelegramOperationRequest{}, err
+		return telegramcore.OperationRequest{}, err
 	}
 
-	prepared, err := prepareTelegramHarnessChange(status.Selections, workflowstate.MutationBinding{RequestID: telegramcore.TelegramOperationID(input.Update, 0), Operator: user.OperatorID}, choices)
+	prepared, err := prepareTelegramHarnessChange(status.Selections, workflowstate.MutationBinding{RequestID: telegramcore.OperationID(input.Update, 0), Operator: user.OperatorID}, choices)
 	if err != nil {
-		return telegramcore.TelegramOperationRequest{}, err
+		return telegramcore.OperationRequest{}, err
 	}
 
 	arguments, err := json.Marshal(choices)
 	if err != nil {
-		return telegramcore.TelegramOperationRequest{}, err
+		return telegramcore.OperationRequest{}, err
 	}
 
 	data, err := json.Marshal(prepared)
 	if err != nil {
-		return telegramcore.TelegramOperationRequest{}, err
+		return telegramcore.OperationRequest{}, err
 	}
 
-	return r.store.ReserveTelegramHarnessOperation(ctx, input, telegramcore.TelegramOperationRequest{Source: input.Update, Operator: user.OperatorID, Target: target, OperationID: telegramcore.TelegramHarnessSelectionOperation, Arguments: arguments}, data, time.Now())
+	return r.store.ReserveHarnessOperation(ctx, input, telegramcore.OperationRequest{Source: input.Update, Operator: user.OperatorID, Target: target, OperationID: telegramcore.HarnessSelectionOperation, Arguments: arguments}, data, time.Now())
 }
 
 func prepareTelegramHarnessChange(status HarnessSelectionStatus, binding workflowstate.MutationBinding, choices telegramHarnessChoices) (telegramHarnessPrepared, error) {
@@ -80,7 +80,7 @@ func prepareTelegramHarnessChange(status HarnessSelectionStatus, binding workflo
 	change := core.HarnessSelectionChangeRequest{Binding: binding, ProjectRef: status.Snapshot.ProjectRef, ExpectedRevision: status.Snapshot.Revision, Worker: choices.Worker, Generation: choices.Generation}
 	preview := fmt.Sprintf("Change harness defaults for %s?\nWorker profile: %s\nGeneration profile: %s\nNew operations only. Running, paused and resumed work keeps its binding. No model call or private setup is performed.", change.ProjectRef, worker, generation)
 
-	return telegramHarnessPrepared{Change: change, Preview: telegramcore.BoundTelegramReceiverText(preview), ExpiresAt: time.Now().Add(10 * time.Minute)}, nil
+	return telegramHarnessPrepared{Change: change, Preview: telegramcore.BoundReceiverText(preview), ExpiresAt: time.Now().Add(10 * time.Minute)}, nil
 }
 
 func telegramHarnessChosenLabel(status HarnessSelectionStatus, profile *string, generation bool) (string, error) {
@@ -112,7 +112,7 @@ func telegramHarnessChosenLabel(status HarnessSelectionStatus, profile *string, 
 	return "", ErrRecordUnsupported
 }
 
-func (r telegramReceiver) offerHarnessChange(ctx context.Context, request telegramcore.TelegramOperationRequest) error {
+func (r telegramReceiver) offerHarnessChange(ctx context.Context, request telegramcore.OperationRequest) error {
 	prepared, err := retainedTelegramHarnessChange(request)
 	if err != nil {
 		return err
@@ -123,7 +123,7 @@ func (r telegramReceiver) offerHarnessChange(ctx context.Context, request telegr
 		return err
 	}
 
-	if err := r.store.ValidateTelegramHarnessTarget(ctx, input, request); err != nil {
+	if err := r.store.ValidateHarnessTarget(ctx, input, request); err != nil {
 		return r.finishHarnessPreparationFailure(ctx, request, input.Config, err)
 	}
 
@@ -131,20 +131,20 @@ func (r telegramReceiver) offerHarnessChange(ctx context.Context, request telegr
 		return r.finishHarnessPreparationFailure(ctx, request, input.Config, workflowstate.ErrConflict)
 	}
 
-	return r.offerConfirmationDocument(ctx, request, telegramcore.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"confirm", "cancel"}, ExpiresAt: prepared.ExpiresAt}, "39", prepared.Preview, "Only new operations use these defaults. Admitted work keeps its original binding.")
+	return r.offerConfirmationDocument(ctx, request, telegramcore.ActionOffer{Input: input, RequestID: request.ID, Choices: []string{"confirm", "cancel"}, ExpiresAt: prepared.ExpiresAt}, "39", prepared.Preview, "Only new operations use these defaults. Admitted work keeps its original binding.")
 }
 
-func (r telegramReceiver) finishHarnessPreparationFailure(ctx context.Context, request telegramcore.TelegramOperationRequest, config telegramcore.TelegramReceiverConfig, failure error) error {
+func (r telegramReceiver) finishHarnessPreparationFailure(ctx context.Context, request telegramcore.OperationRequest, config telegramcore.ReceiverConfig, failure error) error {
 	if !errors.Is(failure, workflowstate.ErrConflict) {
 		return failure
 	}
 
 	text := "The selected project or confirmation binding changed. Inspect /harness before issuing a new change."
 
-	return r.store.FinishTelegramOperation(ctx, request, "blocked", "", json.RawMessage(`{"state":"blocked"}`), text, config.Digest(), time.Now())
+	return r.store.FinishOperation(ctx, request, "blocked", "", json.RawMessage(`{"state":"blocked"}`), text, config.Digest(), time.Now())
 }
 
-func (r telegramReceiver) harnessAuthorityInput(request telegramcore.TelegramOperationRequest) (telegramcore.TelegramConversationInput, error) {
+func (r telegramReceiver) harnessAuthorityInput(request telegramcore.OperationRequest) (telegramcore.ConversationInput, error) {
 	input, err := r.preparedWorkAuthorityInput(request)
 	// Harness changes must use peer selection rather than an explicit session override.
 	input.Conversation = ""

@@ -14,7 +14,7 @@ import (
 
 var errTelegramRecordTarget = errors.New("telegram record target is unavailable")
 
-func (r telegramReceiver) respondRecord(ctx context.Context, user telegramcore.TelegramAllowedUser, config telegramcore.TelegramReceiverConfig, update telegramcore.TelegramReceivedUpdate) (bool, error) {
+func (r telegramReceiver) respondRecord(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (bool, error) {
 	command, recognized, parseErr := parseTelegramRecord(update)
 	if !recognized {
 		return false, nil
@@ -36,7 +36,7 @@ func (r telegramReceiver) respondRecord(ctx context.Context, user telegramcore.T
 	return true, r.dispatchRecord(ctx, user, command)
 }
 
-func (r telegramReceiver) dispatchRecord(ctx context.Context, user telegramcore.TelegramAllowedUser, command telegramRecordCommand) error {
+func (r telegramReceiver) dispatchRecord(ctx context.Context, user telegramcore.AllowedUser, command telegramRecordCommand) error {
 	operations, ok := r.operations.(telegramRecordService)
 	if !ok {
 		return r.recordDiagnostic(ctx, command.Input.Update, command.Input.Config, "Record operations are unavailable.")
@@ -52,7 +52,7 @@ func (r telegramReceiver) dispatchRecord(ctx context.Context, user telegramcore.
 func (r telegramReceiver) readRecord(ctx context.Context, operations telegramRecordService, command telegramRecordCommand) error {
 	update, config := command.Input.Update, command.Input.Config
 
-	target, err := r.store.ResolveTelegramOperationTarget(ctx, command.Input, time.Now())
+	target, err := r.store.ResolveOperationTarget(ctx, command.Input, time.Now())
 	if err != nil {
 		return r.recordDiagnostic(ctx, update, config, "The record target is unavailable or conflicts with its reply. Select an authorized current project/session explicitly.")
 	}
@@ -79,7 +79,7 @@ func (r telegramReceiver) readRecord(ctx context.Context, operations telegramRec
 	return err
 }
 
-func (r telegramReceiver) recordDiagnostic(ctx context.Context, update telegramcore.TelegramReceivedUpdate, config telegramcore.TelegramReceiverConfig, text string) error {
+func (r telegramReceiver) recordDiagnostic(ctx context.Context, update telegramcore.ReceivedUpdate, config telegramcore.ReceiverConfig, text string) error {
 	return r.store.QueueReadResponse(ctx, update, text, config.Digest(), time.Now())
 }
 
@@ -95,8 +95,8 @@ func telegramRecordFailure(err error) string {
 	return "The record owner is unavailable. Inspect local diagnostics; the retained request cannot be treated as successful."
 }
 
-func (r telegramReceiver) mutateRecord(ctx context.Context, operations telegramRecordService, user telegramcore.TelegramAllowedUser, command telegramRecordCommand) error {
-	request, found, err := r.store.TelegramOperation(ctx, command.Input.Update, 0)
+func (r telegramReceiver) mutateRecord(ctx context.Context, operations telegramRecordService, user telegramcore.AllowedUser, command telegramRecordCommand) error {
+	request, found, err := r.store.Operation(ctx, command.Input.Update, 0)
 	if err != nil {
 		return err
 	}
@@ -131,16 +131,16 @@ func (r telegramReceiver) mutateRecord(ctx context.Context, operations telegramR
 	return r.applyRecord(ctx, operations, request, command.Input.Config)
 }
 
-func (r telegramReceiver) reserveRecord(ctx context.Context, user telegramcore.TelegramAllowedUser, command telegramRecordCommand) (telegramcore.TelegramOperationRequest, error) {
-	target, err := r.store.ResolveTelegramOperationTarget(ctx, command.Input, time.Now())
+func (r telegramReceiver) reserveRecord(ctx context.Context, user telegramcore.AllowedUser, command telegramRecordCommand) (telegramcore.OperationRequest, error) {
+	target, err := r.store.ResolveOperationTarget(ctx, command.Input, time.Now())
 	if err != nil {
-		return telegramcore.TelegramOperationRequest{}, fmt.Errorf("%w: %w", errTelegramRecordTarget, err)
+		return telegramcore.OperationRequest{}, fmt.Errorf("%w: %w", errTelegramRecordTarget, err)
 	}
 
 	arguments, err := json.Marshal(command.Mutation)
 	if err != nil {
-		return telegramcore.TelegramOperationRequest{}, err
+		return telegramcore.OperationRequest{}, err
 	}
 
-	return r.store.ReserveTelegramOperation(ctx, telegramcore.TelegramOperationRequest{Source: command.Input.Update, Operator: user.OperatorID, Target: target, OperationID: fmt.Sprintf("records.%s.%s", command.Kind, command.Action), Arguments: arguments}, time.Now())
+	return r.store.ReserveOperation(ctx, telegramcore.OperationRequest{Source: command.Input.Update, Operator: user.OperatorID, Target: target, OperationID: fmt.Sprintf("records.%s.%s", command.Kind, command.Action), Arguments: arguments}, time.Now())
 }

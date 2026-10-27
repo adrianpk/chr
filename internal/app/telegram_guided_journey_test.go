@@ -31,13 +31,13 @@ func guidedTelegramSharedFixture(t *testing.T) (*telegramConversationAppFixture,
 		t.Fatal(err)
 	}
 
-	config, err := telegramcore.LoadTelegramReceiverConfig(f.receiver.env)
+	config, err := telegramcore.LoadReceiverConfig(f.receiver.env)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	config.AllowedUsers[0].ProjectIDs = append(config.AllowedUsers[0].ProjectIDs, project.ID)
-	if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+	if err := telegramcore.SaveReceiverConfig(f.receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 

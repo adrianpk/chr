@@ -21,7 +21,7 @@ func TestTelegramRecoverySparse(t *testing.T) {
 	}
 
 	pending := telegramRetainedTestUpdate(t, 30, "pending local work")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{pending}, old); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{pending}, old); err != nil {
 		t.Fatal(err)
 	}
 
@@ -35,7 +35,7 @@ func TestTelegramRecoverySparse(t *testing.T) {
 
 	store = openTelegramReceiverTestStore(t, env)
 
-	replay := []TelegramReceivedUpdate{telegramRetainedTestUpdate(t, 3, "changed retired payload"), telegramRetainedTestUpdate(t, 5, "new sparse input"), telegramRetainedTestUpdate(t, 9000, "/status")}
+	replay := []ReceivedUpdate{telegramRetainedTestUpdate(t, 3, "changed retired payload"), telegramRetainedTestUpdate(t, 5, "new sparse input"), telegramRetainedTestUpdate(t, 9000, "/status")}
 	if err := store.RetainBatch(t.Context(), 12345, replay, time.Now()); err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +48,7 @@ func TestTelegramRecoverySparse(t *testing.T) {
 	}
 }
 
-func checkTelegramRecoverySparseResult(t *testing.T, store *TelegramReceiverStore) {
+func checkTelegramRecoverySparseResult(t *testing.T, store *ReceiverStore) {
 	t.Helper()
 
 	updates, err := store.PendingUpdates(t.Context(), 12345)
@@ -66,20 +66,20 @@ func checkTelegramRecoverySparseResult(t *testing.T, store *TelegramReceiverStor
 	}
 }
 
-func checkTelegramRecoveryGap(t *testing.T, store *TelegramReceiverStore) {
+func checkTelegramRecoveryGap(t *testing.T, store *ReceiverStore) {
 	t.Helper()
 
-	state, err := store.PrepareTelegramPoll(t.Context(), 12345, time.Now())
+	state, err := store.PreparePoll(t.Context(), 12345, time.Now())
 	if err != nil || state.Epoch != 2 || state.NextUpdateID != nil || state.RetentionGapAt.IsZero() {
 		t.Fatal("retention gap was missed or repeatedly reset", state, err)
 	}
 }
 
-func seedTelegramRecoveryDelivered(t *testing.T, store *TelegramReceiverStore, id int64, now time.Time) {
+func seedTelegramRecoveryDelivered(t *testing.T, store *ReceiverStore, id int64, now time.Time) {
 	t.Helper()
 
 	update := telegramRetainedTestUpdate(t, id, "/status")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, now); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{update}, now); err != nil {
 		t.Fatal(err)
 	}
 
@@ -124,7 +124,7 @@ func TestTelegramRecoveryIntervals(t *testing.T) {
 	seedTelegramRecoveryDelivered(t, store, 2047, old)
 	seedTelegramRecoveryDelivered(t, store, 99999, old)
 
-	if _, err := store.PrepareTelegramPoll(t.Context(), 12345, time.Now()); err != nil {
+	if _, err := store.PreparePoll(t.Context(), 12345, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -159,7 +159,7 @@ func checkTelegramRecoveryCompaction(t *testing.T, guard string) {
 	execTelegramRecoverySQL(t, f.store, `UPDATE telegram_outbox SET state='delivered',updated_at=?`, old)
 	protectTelegramRecoveryCompaction(t, f, request, guard)
 
-	if _, err := f.store.PrepareTelegramPoll(t.Context(), 12345, time.Now()); err != nil {
+	if _, err := f.store.PreparePoll(t.Context(), 12345, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -179,7 +179,7 @@ func checkTelegramRecoveryCompaction(t *testing.T, guard string) {
 	}
 }
 
-func protectTelegramRecoveryCompaction(t *testing.T, f *telegramConversationFixture, request TelegramOperationRequest, guard string) {
+func protectTelegramRecoveryCompaction(t *testing.T, f *telegramConversationFixture, request OperationRequest, guard string) {
 	t.Helper()
 
 	switch guard {
@@ -194,7 +194,7 @@ func protectTelegramRecoveryCompaction(t *testing.T, f *telegramConversationFixt
 	}
 }
 
-func execTelegramRecoverySQL(t *testing.T, store *TelegramReceiverStore, query string, args ...any) {
+func execTelegramRecoverySQL(t *testing.T, store *ReceiverStore, query string, args ...any) {
 	t.Helper()
 
 	if _, err := store.db.ExecContext(t.Context(), query, args...); err != nil {
@@ -202,10 +202,10 @@ func execTelegramRecoverySQL(t *testing.T, store *TelegramReceiverStore, query s
 	}
 }
 
-func checkTelegramRecoveryNextGap(t *testing.T, store *TelegramReceiverStore) {
+func checkTelegramRecoveryNextGap(t *testing.T, store *ReceiverStore) {
 	t.Helper()
 
-	state, err := store.PrepareTelegramPoll(t.Context(), 12345, time.Now().Add(25*time.Hour))
+	state, err := store.PreparePoll(t.Context(), 12345, time.Now().Add(25*time.Hour))
 	if err != nil || state.Epoch != 3 || state.NextUpdateID != nil {
 		t.Fatal("a later outage could not establish one fresh epoch", state, err)
 	}

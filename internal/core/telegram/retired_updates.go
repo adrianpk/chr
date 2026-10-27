@@ -9,9 +9,9 @@ import (
 	"sort"
 )
 
-type telegramRetiredInterval [2]int64
+type retiredInterval [2]int64
 
-func readTelegramRetired(ctx context.Context, tx *sql.Tx, botID int64) ([]telegramRetiredInterval, error) {
+func readRetired(ctx context.Context, tx *sql.Tx, botID int64) ([]retiredInterval, error) {
 	var encoded string
 	if err := tx.QueryRowContext(ctx, `SELECT retired_update_ranges FROM telegram_receivers WHERE bot_id=? AND schema_version=1`, botID).Scan(&encoded); err != nil {
 		return nil, err
@@ -30,19 +30,19 @@ func readTelegramRetired(ctx context.Context, tx *sql.Tx, botID int64) ([]telegr
 		return nil, errors.New("telegram retired identity interval capacity exceeded")
 	}
 
-	result := make([]telegramRetiredInterval, 0, len(pairs))
+	result := make([]retiredInterval, 0, len(pairs))
 	for _, pair := range pairs {
-		if !validTelegramRetiredInterval(result, pair) {
+		if !validRetiredInterval(result, pair) {
 			return nil, errors.New("invalid telegram retired identity intervals")
 		}
 
-		result = append(result, telegramRetiredInterval{pair[0], pair[1]})
+		result = append(result, retiredInterval{pair[0], pair[1]})
 	}
 
 	return result, nil
 }
 
-func validTelegramRetiredInterval(prior []telegramRetiredInterval, pair []int64) bool {
+func validRetiredInterval(prior []retiredInterval, pair []int64) bool {
 	if len(pair) != 2 || pair[0] < 0 || pair[1] < pair[0] || pair[1] == math.MaxInt64 {
 		return false
 	}
@@ -50,17 +50,17 @@ func validTelegramRetiredInterval(prior []telegramRetiredInterval, pair []int64)
 	return len(prior) == 0 || pair[0] > prior[len(prior)-1][1]+1
 }
 
-func telegramUpdateRetired(intervals []telegramRetiredInterval, id int64) bool {
+func updateRetired(intervals []retiredInterval, id int64) bool {
 	index := sort.Search(len(intervals), func(i int) bool { return intervals[i][1] >= id })
 
 	return index < len(intervals) && intervals[index][0] <= id
 }
 
-func addTelegramRetired(intervals []telegramRetiredInterval, id int64) []telegramRetiredInterval {
-	sorted := append(append([]telegramRetiredInterval{}, intervals...), telegramRetiredInterval{id, id})
+func addRetired(intervals []retiredInterval, id int64) []retiredInterval {
+	sorted := append(append([]retiredInterval{}, intervals...), retiredInterval{id, id})
 	sort.Slice(sorted, func(i, j int) bool { return sorted[i][0] < sorted[j][0] })
 
-	result := make([]telegramRetiredInterval, 0, len(sorted))
+	result := make([]retiredInterval, 0, len(sorted))
 	for _, next := range sorted {
 		if len(result) > 0 && next[0] <= result[len(result)-1][1]+1 {
 			result[len(result)-1][1] = max(result[len(result)-1][1], next[1])

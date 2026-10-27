@@ -16,8 +16,8 @@ func (s service) ListRegisteredProjects(ids []string) ([]projectcore.Project, er
 }
 
 // InspectTelegramReceiver exposes transport health to local and remote readers.
-func (s service) InspectTelegramReceiver(botID int64) (telegramcore.TelegramReceiverState, error) {
-	return telegramcore.InspectTelegramReceiver(s.ctx, s.env, botID)
+func (s service) InspectReceiver(botID int64) (telegramcore.ReceiverState, error) {
+	return telegramcore.InspectReceiver(s.ctx, s.env, botID)
 }
 
 type projectReadiness struct {

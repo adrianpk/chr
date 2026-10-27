@@ -25,7 +25,7 @@ func installTelegramNotificationSender(t *testing.T, handler http.HandlerFunc) {
 	t.Cleanup(server.Close)
 
 	previous := notifyTelegramSender
-	notifyTelegramSender = telegramcore.TelegramSender{Client: server.Client(), BaseURL: server.URL}
+	notifyTelegramSender = telegramcore.Sender{Client: server.Client(), BaseURL: server.URL}
 
 	t.Cleanup(func() { notifyTelegramSender = previous })
 }

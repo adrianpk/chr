@@ -159,7 +159,7 @@ func TestTelegramControlConversation(t *testing.T) {
 	f.send(t, "/answer "+token+" pause", 0)
 	checkTelegramControlOutcome(t, "pause", checkTelegramWorkRunCount(t, operations, 1))
 
-	refs, err := f.receiver.store.TelegramWorkReferences(t.Context(), f.receiver.botID, "", 16)
+	refs, err := f.receiver.store.WorkReferences(t.Context(), f.receiver.botID, "", 16)
 	if err != nil || len(refs) != 1 || refs[0].Request.ID != ref.Request.ID {
 		t.Fatal("control replaced original native admission authority", refs, err)
 	}

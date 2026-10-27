@@ -27,7 +27,7 @@ func telegramWorkFailure(failure error) string {
 	return "Native work is unavailable. Inspect the project's workflow readiness; this request has no confirmed admission."
 }
 
-func (r telegramReceiver) finishWorkFailure(ctx context.Context, request telegramcore.TelegramOperationRequest, state string, failure error, config telegramcore.TelegramReceiverConfig) error {
+func (r telegramReceiver) finishWorkFailure(ctx context.Context, request telegramcore.OperationRequest, state string, failure error, config telegramcore.ReceiverConfig) error {
 	text := telegramWorkFailure(failure)
 
 	facts, err := json.Marshal(struct {
@@ -38,10 +38,10 @@ func (r telegramReceiver) finishWorkFailure(ctx context.Context, request telegra
 		return err
 	}
 
-	return r.store.FinishTelegramOperation(ctx, request, state, "", facts, text, config.Digest(), time.Now())
+	return r.store.FinishOperation(ctx, request, state, "", facts, text, config.Digest(), time.Now())
 }
 
-func (r telegramReceiver) finishWorkActionFailure(ctx context.Context, claim telegramcore.TelegramActionClaim, failure error, config telegramcore.TelegramReceiverConfig) error {
+func (r telegramReceiver) finishWorkActionFailure(ctx context.Context, claim telegramcore.ActionClaim, failure error, config telegramcore.ReceiverConfig) error {
 	text := telegramWorkFailure(failure)
 
 	facts, err := json.Marshal(struct {
@@ -52,5 +52,5 @@ func (r telegramReceiver) finishWorkActionFailure(ctx context.Context, claim tel
 		return err
 	}
 
-	return r.store.FinishTelegramAction(ctx, claim, telegramcore.TelegramActionResult{Message: telegramOutcomeMessage("32", text), State: "blocked", Facts: facts, Text: text, ConfigDigest: config.Digest()}, time.Now())
+	return r.store.FinishAction(ctx, claim, telegramcore.ActionResult{Message: telegramOutcomeMessage("32", text), State: "blocked", Facts: facts, Text: text, ConfigDigest: config.Digest()}, time.Now())
 }

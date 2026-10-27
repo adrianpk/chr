@@ -9,32 +9,32 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// TelegramGuidedProgress contains only verified display and owner references.
+// GuidedProgress contains only verified display and owner references.
 // Canonical stage, control, work and result state remain in the project owners.
-type TelegramGuidedProgress struct {
+type GuidedProgress struct {
 	SessionRef, Topic, Binding, Phase string
 }
 
-// FinishTelegramGuided atomically binds a confirmed application result, replies,
+// FinishGuided atomically binds a confirmed application result, replies,
 // source acknowledgement and delivery; transport failure never repeats the owner.
-func (s *TelegramReceiverStore) FinishTelegramGuided(ctx context.Context, request TelegramOperationRequest, progress TelegramGuidedProgress, facts json.RawMessage, text, configDigest string, now time.Time) error {
-	if err := validateTelegramGuidedProgress(progress, facts); err != nil {
+func (s *ReceiverStore) FinishGuided(ctx context.Context, request OperationRequest, progress GuidedProgress, facts json.RawMessage, text, configDigest string, now time.Time) error {
+	if err := validateGuidedProgress(progress, facts); err != nil {
 		return err
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		pending, err := telegramReadResponsePending(ctx, tx, request.Source)
+		pending, err := readResponsePending(ctx, tx, request.Source)
 		if err != nil || !pending {
 			return err
 		}
 
-		updated, err := updateTelegramGuidedBinding(ctx, tx, request, progress, now)
+		updated, err := updateGuidedBinding(ctx, tx, request, progress, now)
 		if err != nil {
 			return err
 		}
 
 		request.Target.ConversationRevision = updated.Revision
-		if err := finishTelegramOperation(ctx, tx, request, "confirmed", progress.SessionRef, facts, text, configDigest, now); err != nil {
+		if err := finishOperation(ctx, tx, request, "confirmed", progress.SessionRef, facts, text, configDigest, now); err != nil {
 			return err
 		}
 
@@ -44,15 +44,15 @@ func (s *TelegramReceiverStore) FinishTelegramGuided(ctx context.Context, reques
 	})
 }
 
-func updateTelegramGuidedBinding(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, progress TelegramGuidedProgress, now time.Time) (TelegramConversation, error) {
+func updateGuidedBinding(ctx context.Context, tx *sql.Tx, request OperationRequest, progress GuidedProgress, now time.Time) (Conversation, error) {
 	p := request.Source.Peer
 
-	c, err := scanTelegramConversation(tx.QueryRowContext(ctx, `SELECT `+telegramConversationColumns+` FROM telegram_conversations WHERE id=? AND bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, request.Target.ConversationID, p.BotID, p.ChatID, p.TopicID, p.UserID))
+	c, err := scanConversation(tx.QueryRowContext(ctx, `SELECT `+conversationColumns+` FROM telegram_conversations WHERE id=? AND bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, request.Target.ConversationID, p.BotID, p.ChatID, p.TopicID, p.UserID))
 	if err != nil {
 		return c, err
 	}
 
-	if err := validateTelegramBoundConversation(c, request.Target, request.Target.ProjectBindingDigest); err != nil {
+	if err := validateBoundConversation(c, request.Target, request.Target.ProjectBindingDigest); err != nil {
 		return c, err
 	}
 
@@ -62,7 +62,7 @@ func updateTelegramGuidedBinding(ctx context.Context, tx *sql.Tx, request Telegr
 
 	c.Phase, c.QuestionBinding = progress.Phase, progress.Binding
 
-	op := telegramConversationTransaction{ctx: ctx, tx: tx, now: now}
+	op := conversationTransaction{ctx: ctx, tx: tx, now: now}
 	if err := op.saveCapture(&c); err != nil {
 		return c, err
 	}
@@ -72,8 +72,8 @@ func updateTelegramGuidedBinding(ctx context.Context, tx *sql.Tx, request Telegr
 	return c, err
 }
 
-func validateTelegramGuidedProgress(progress TelegramGuidedProgress, facts json.RawMessage) error {
-	if validateTelegramAuthoringSessionRef(progress.SessionRef) != nil || len(progress.Topic) > 512 || len(progress.Binding) > 4096 || !json.Valid([]byte(progress.Binding)) {
+func validateGuidedProgress(progress GuidedProgress, facts json.RawMessage) error {
+	if validateAuthoringSessionRef(progress.SessionRef) != nil || len(progress.Topic) > 512 || len(progress.Binding) > 4096 || !json.Valid([]byte(progress.Binding)) {
 		return workflowstate.ErrConflict
 	}
 
@@ -81,14 +81,14 @@ func validateTelegramGuidedProgress(progress TelegramGuidedProgress, facts json.
 		return workflowstate.ErrConflict
 	}
 
-	if !validTelegramOperationFinish("confirmed", progress.SessionRef, facts) {
+	if !validOperationFinish("confirmed", progress.SessionRef, facts) {
 		return workflowstate.ErrConflict
 	}
 
 	return nil
 }
 
-func projectTelegramGuidedAction(ctx context.Context, tx *sql.Tx, retained TelegramActionClaim, result TelegramActionResult, now time.Time) (TelegramActionClaim, error) {
+func projectGuidedAction(ctx context.Context, tx *sql.Tx, retained ActionClaim, result ActionResult, now time.Time) (ActionClaim, error) {
 	if result.Guided == nil {
 		return retained, nil
 	}
@@ -97,11 +97,11 @@ func projectTelegramGuidedAction(ctx context.Context, tx *sql.Tx, retained Teleg
 		return retained, workflowstate.ErrConflict
 	}
 
-	if err := validateTelegramGuidedProgress(*result.Guided, result.Facts); err != nil {
+	if err := validateGuidedProgress(*result.Guided, result.Facts); err != nil {
 		return retained, err
 	}
 
-	updated, err := updateTelegramGuidedBinding(ctx, tx, retained.Request, *result.Guided, now)
+	updated, err := updateGuidedBinding(ctx, tx, retained.Request, *result.Guided, now)
 	retained.Request.Target.ConversationRevision = updated.Revision
 
 	return retained, err

@@ -148,7 +148,7 @@ func changeQualityOptionalTimes(records *qualityLegacyRecords, populated bool) {
 	}
 }
 
-func qualityConversationDefaults(t *testing.T, db *sql.DB, want telegramcore.TelegramConversation) {
+func qualityConversationDefaults(t *testing.T, db *sql.DB, want telegramcore.Conversation) {
 	t.Helper()
 	qualityStorageExec(t, db, "UPDATE telegram_conversations SET authoring_session_ref=NULL,authorization_ref=NULL,invocation_id=NULL,last_observed_revision=NULL,guided_run_id=NULL")
 

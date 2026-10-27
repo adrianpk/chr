@@ -8,16 +8,16 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// ResolveTelegramAuthoringTarget observes an eligible session and the exact
+// ResolveAuthoringTarget observes an eligible session and the exact
 // frozen target together, without acknowledging its source or invoking an owner.
-func (s *TelegramReceiverStore) ResolveTelegramAuthoringTarget(ctx context.Context, input TelegramConversationInput) (conversation TelegramConversation, target TelegramOperationTarget, err error) {
+func (s *ReceiverStore) ResolveAuthoringTarget(ctx context.Context, input ConversationInput) (conversation Conversation, target OperationTarget, err error) {
 	if _, ok := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType); !ok {
 		return conversation, target, workflowstate.ErrConflict
 	}
 
-	input.Action = TelegramConversationAuthor
+	input.Action = ConversationAuthor
 	err = s.transaction(ctx, func(tx *sql.Tx) error {
-		op := telegramConversationTransaction{ctx: ctx, tx: tx, input: input, now: time.Now()}
+		op := conversationTransaction{ctx: ctx, tx: tx, input: input, now: time.Now()}
 		if err := op.ensurePeer(); err != nil {
 			return err
 		}
@@ -27,7 +27,7 @@ func (s *TelegramReceiverStore) ResolveTelegramAuthoringTarget(ctx context.Conte
 			return err
 		}
 
-		if !telegramAuthoringEligible(*selected) {
+		if !authoringEligible(*selected) {
 			return workflowstate.ErrConflict
 		}
 
@@ -40,26 +40,26 @@ func (s *TelegramReceiverStore) ResolveTelegramAuthoringTarget(ctx context.Conte
 	return conversation, target, err
 }
 
-// ReadTelegramConversationBinding observes a retained request's exact peer/root
+// ReadConversationBinding observes a retained request's exact peer/root
 // binding even after the conversation advances. It grants no new write revision.
-func (s *TelegramReceiverStore) ReadTelegramConversationBinding(ctx context.Context, input TelegramConversationInput, target TelegramOperationTarget) (TelegramConversation, error) {
+func (s *ReceiverStore) ReadConversationBinding(ctx context.Context, input ConversationInput, target OperationTarget) (Conversation, error) {
 	if _, ok := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType); !ok {
-		return TelegramConversation{}, workflowstate.ErrConflict
+		return Conversation{}, workflowstate.ErrConflict
 	}
 
 	p := input.Update.Peer
 
-	c, err := scanTelegramConversation(s.db.QueryRowContext(ctx, `SELECT `+telegramConversationColumns+` FROM telegram_conversations WHERE id=? AND bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, target.ConversationID, p.BotID, p.ChatID, p.TopicID, p.UserID))
+	c, err := scanConversation(s.db.QueryRowContext(ctx, `SELECT `+conversationColumns+` FROM telegram_conversations WHERE id=? AND bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, target.ConversationID, p.BotID, p.ChatID, p.TopicID, p.UserID))
 	if err != nil {
 		return c, err
 	}
 
-	op := telegramConversationTransaction{ctx: ctx, input: input}
+	op := conversationTransaction{ctx: ctx, input: input}
 	if err := op.validateTarget(&c); err != nil {
 		return c, err
 	}
 
 	target.ConversationRevision = c.Revision
 
-	return c, validateTelegramBoundConversation(c, target, target.ProjectBindingDigest)
+	return c, validateBoundConversation(c, target, target.ProjectBindingDigest)
 }

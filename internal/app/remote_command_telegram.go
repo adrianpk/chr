@@ -9,7 +9,7 @@ import (
 )
 
 // RemoteCommandRequestFromTelegramUpdate executes the corresponding package operation.
-func remoteCommandRequestFromTelegramUpdate(update telegramcore.TelegramUpdate, now time.Time) (core.RemoteCommandRequest, error) {
+func remoteCommandRequestFromTelegramUpdate(update telegramcore.Update, now time.Time) (core.RemoteCommandRequest, error) {
 	sender := remoteCommandSenderFromTelegramUpdate(update)
 	receivedAt := telegramUpdateReceivedAt(update, now)
 
@@ -22,7 +22,7 @@ func remoteCommandRequestFromTelegramUpdate(update telegramcore.TelegramUpdate, 
 }
 
 // RemoteCommandRecordFromTelegramUpdate executes the corresponding package operation.
-func remoteCommandRecordFromTelegramUpdate(update telegramcore.TelegramUpdate, now time.Time) (core.RemoteCommandRecord, error) {
+func remoteCommandRecordFromTelegramUpdate(update telegramcore.Update, now time.Time) (core.RemoteCommandRecord, error) {
 	request, err := remoteCommandRequestFromTelegramUpdate(update, now)
 	if err == nil {
 		return core.NewAcceptedRemoteCommandRecord(request)
@@ -42,7 +42,7 @@ func remoteCommandRecordFromTelegramUpdate(update telegramcore.TelegramUpdate, n
 }
 
 // RemoteCommandSenderFromTelegramUpdate executes the corresponding package operation.
-func remoteCommandSenderFromTelegramUpdate(update telegramcore.TelegramUpdate) core.RemoteCommandSender {
+func remoteCommandSenderFromTelegramUpdate(update telegramcore.Update) core.RemoteCommandSender {
 	externalID := strconv.FormatInt(update.Message.From.ID, 10)
 	if update.Message.From.ID == 0 {
 		externalID = strconv.FormatInt(update.Message.Chat.ID, 10)
@@ -56,7 +56,7 @@ func remoteCommandSenderFromTelegramUpdate(update telegramcore.TelegramUpdate) c
 }
 
 // TelegramUpdateReceivedAt executes the corresponding package operation.
-func telegramUpdateReceivedAt(update telegramcore.TelegramUpdate, fallback time.Time) time.Time {
+func telegramUpdateReceivedAt(update telegramcore.Update, fallback time.Time) time.Time {
 	if update.Message.Date <= 0 {
 		return fallback
 	}
@@ -64,7 +64,7 @@ func telegramUpdateReceivedAt(update telegramcore.TelegramUpdate, fallback time.
 	return time.Unix(update.Message.Date, 0).UTC()
 }
 
-func telegramSenderDisplayName(sender telegramcore.TelegramSenderUser) string {
+func telegramSenderDisplayName(sender telegramcore.SenderUser) string {
 	if sender.Username != "" {
 		return sender.Username
 	}

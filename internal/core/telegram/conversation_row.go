@@ -1,13 +1,13 @@
 package telegram
 
-const telegramConversationColumns = `id,bot_id,chat_id,topic_id,user_id,project_id,project_binding_digest,namespace,intent,phase,topic,capture,question_binding,COALESCE(authoring_session_ref,''),COALESCE(authorization_ref,''),revision,COALESCE(invocation_id,''),COALESCE(last_observed_revision,0),COALESCE(guided_run_id,'')`
+const conversationColumns = `id,bot_id,chat_id,topic_id,user_id,project_id,project_binding_digest,namespace,intent,phase,topic,capture,question_binding,COALESCE(authoring_session_ref,''),COALESCE(authorization_ref,''),revision,COALESCE(invocation_id,''),COALESCE(last_observed_revision,0),COALESCE(guided_run_id,'')`
 
-// telegramConversationRow aligns the retained projection and its nullable-default scan targets.
-type telegramConversationRow struct {
-	conversation TelegramConversation
+// conversationRow aligns the retained projection and its nullable-default scan targets.
+type conversationRow struct {
+	conversation Conversation
 }
 
-func (row *telegramConversationRow) scanTargets() []any {
+func (row *conversationRow) scanTargets() []any {
 	return []any{
 		&row.conversation.ID,
 		&row.conversation.Peer.BotID,

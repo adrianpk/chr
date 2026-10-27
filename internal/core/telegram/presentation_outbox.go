@@ -14,18 +14,18 @@ import (
 
 // QueuePresentationResponse freezes one bounded message and acknowledges its
 // source atomically. Replayed sources cannot replace the original rendering.
-func (s *TelegramReceiverStore) QueuePresentationResponse(ctx context.Context, update TelegramReceivedUpdate, message tgmessage.Blocks, configDigest string, now time.Time) error {
+func (s *ReceiverStore) QueuePresentationResponse(ctx context.Context, update ReceivedUpdate, message tgmessage.Blocks, configDigest string, now time.Time) error {
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		pending, err := telegramReadResponsePending(ctx, tx, update)
+		pending, err := readResponsePending(ctx, tx, update)
 		if err != nil || !pending {
 			return err
 		}
 
-		return queueTelegramPresentation(ctx, tx, update, message, configDigest, now)
+		return queuePresentation(ctx, tx, update, message, configDigest, now)
 	})
 }
 
-func queueTelegramPresentation(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, message tgmessage.Blocks, configDigest string, now time.Time) error {
+func queuePresentation(ctx context.Context, tx *sql.Tx, update ReceivedUpdate, message tgmessage.Blocks, configDigest string, now time.Time) error {
 	presentation := tgmessage.Render(message)
 	if presentation.PlainFallback == "" || len(configDigest) != 64 {
 		return errors.New("invalid telegram presentation")
@@ -36,7 +36,7 @@ func queueTelegramPresentation(ctx context.Context, tx *sql.Tx, update TelegramR
 		return err
 	}
 
-	if err := queueTelegramResponse(ctx, tx, update, presentation.PlainFallback, configDigest, now); err != nil {
+	if err := queueResponse(ctx, tx, update, presentation.PlainFallback, configDigest, now); err != nil {
 		return err
 	}
 
@@ -45,10 +45,10 @@ func queueTelegramPresentation(ctx context.Context, tx *sql.Tx, update TelegramR
 		return err
 	}
 
-	return checkTelegramIntakeCapacity(ctx, tx, update.Peer.BotID)
+	return checkIntakeCapacity(ctx, tx, update.Peer.BotID)
 }
 
-func decodeTelegramPresentationHash(payload, hash string, delivery *TelegramReceiverDelivery) error {
+func decodePresentationHash(payload, hash string, delivery *ReceiverDelivery) error {
 	presentation, err := tgmessage.DecodeRetained(tgmessage.RetainedInput{Payload: payload, Hash: hash, Text: delivery.Text, DocumentID: delivery.DocumentID})
 	if err != nil {
 		return err

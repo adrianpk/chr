@@ -18,8 +18,8 @@ func telegramPreparedWorkUsage() string {
 	return "/" + telegramPreparedWorkRegistry()[0].ID + " [conversation]"
 }
 
-func parseTelegramPreparedWork(update telegramcore.TelegramReceivedUpdate) (telegramcore.TelegramConversationInput, bool, error) {
-	input := telegramcore.TelegramConversationInput{Update: update}
+func parseTelegramPreparedWork(update telegramcore.ReceivedUpdate) (telegramcore.ConversationInput, bool, error) {
+	input := telegramcore.ConversationInput{Update: update}
 
 	name, body := telegramCommandWord(strings.TrimSpace(update.Text))
 	if update.Kind != "message" || name != "/"+telegramPreparedWorkRegistry()[0].ID {
@@ -34,10 +34,10 @@ func parseTelegramPreparedWork(update telegramcore.TelegramReceivedUpdate) (tele
 	return input, true, nil
 }
 
-func telegramIntentPreparedWork(update telegramcore.TelegramReceivedUpdate, intent ConversationIntent) (telegramcore.TelegramConversationInput, bool, error) {
+func telegramIntentPreparedWork(update telegramcore.ReceivedUpdate, intent ConversationIntent) (telegramcore.ConversationInput, bool, error) {
 	a := intent.Arguments
 
-	input := telegramcore.TelegramConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation}
+	input := telegramcore.ConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation}
 	if intent.OperationID != telegramPreparedWorkRegistry()[0].ID {
 		return input, false, nil
 	}

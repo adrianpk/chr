@@ -45,7 +45,7 @@ func telegramControlDecisionFixture(t *testing.T, action string) (*telegramConve
 	}
 
 	config.AllowedUsers[0].ProjectIDs = []string{project.ID}
-	if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+	if err := telegramcore.SaveReceiverConfig(f.receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -135,7 +135,7 @@ func checkTelegramControlConsumed(t *testing.T, f *telegramConversationAppFixtur
 		t.Fatal("duplicate control changed native state", err)
 	}
 
-	if refs, err := f.receiver.store.TelegramWorkReferences(t.Context(), f.receiver.botID, "", 16); err != nil || len(refs) != 0 {
+	if refs, err := f.receiver.store.WorkReferences(t.Context(), f.receiver.botID, "", 16); err != nil || len(refs) != 0 {
 		t.Fatal("control-only conversation granted automatic execution", refs, err)
 	}
 }

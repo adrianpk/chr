@@ -12,7 +12,7 @@ import (
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
-func telegramHarnessOffer(t *testing.T, f *telegramConversationAppFixture, text string) (telegramcore.TelegramOperationRequest, telegramcore.TelegramAction, telegramConversationNotice) {
+func telegramHarnessOffer(t *testing.T, f *telegramConversationAppFixture, text string) (telegramcore.OperationRequest, telegramcore.Action, telegramConversationNotice) {
 	t.Helper()
 
 	input := telegramOperationRetainInput(t, f, text)
@@ -20,12 +20,12 @@ func telegramHarnessOffer(t *testing.T, f *telegramConversationAppFixture, text 
 		t.Fatal(err)
 	}
 
-	request, found, err := f.receiver.store.TelegramOperation(t.Context(), input.Update, 0)
+	request, found, err := f.receiver.store.Operation(t.Context(), input.Update, 0)
 	if err != nil || !found {
 		t.Fatal("selection request was not retained", err)
 	}
 
-	action, err := f.receiver.store.TelegramRequestAction(t.Context(), request)
+	action, err := f.receiver.store.RequestAction(t.Context(), request)
 	if err != nil {
 		t.Fatal("selection confirmation was not offered", err)
 	}
@@ -148,7 +148,7 @@ func telegramHarnessOtherProject(t *testing.T, f *telegramConversationAppFixture
 	}
 
 	config.AllowedUsers[0].ProjectIDs = append(config.AllowedUsers[0].ProjectIDs, "private-project")
-	if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+	if err := telegramcore.SaveReceiverConfig(f.receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -196,7 +196,7 @@ func telegramHarnessOtherActor(t *testing.T, f *telegramConversationAppFixture, 
 	}
 
 	config.AllowedUsers[0].OperatorID = "different-operator"
-	if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+	if err := telegramcore.SaveReceiverConfig(f.receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -210,7 +210,7 @@ func telegramHarnessRevokeProject(t *testing.T, f *telegramConversationAppFixtur
 	}
 
 	config.AllowedUsers[0].ProjectIDs = []string{"disabled-project"}
-	if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+	if err := telegramcore.SaveReceiverConfig(f.receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -230,13 +230,13 @@ func TestTelegramHarnessSelectionEnvelope(t *testing.T) {
 
 	for _, test := range []struct {
 		name   string
-		change func(*telegramcore.TelegramOperationRequest)
+		change func(*telegramcore.OperationRequest)
 	}{
-		{"model only", func(r *telegramcore.TelegramOperationRequest) { r.Source.Text = "Switch the worker to beta" }},
-		{"changed arguments", func(r *telegramcore.TelegramOperationRequest) { r.Arguments = json.RawMessage(`{"worker":"alpha"}`) }},
-		{"changed actor", func(r *telegramcore.TelegramOperationRequest) { r.Operator = "foreign" }},
-		{"changed request", func(r *telegramcore.TelegramOperationRequest) { r.ID = "foreign" }},
-		{"changed project", func(r *telegramcore.TelegramOperationRequest) { r.Target.ProjectID = "private-project" }},
+		{"model only", func(r *telegramcore.OperationRequest) { r.Source.Text = "Switch the worker to beta" }},
+		{"changed arguments", func(r *telegramcore.OperationRequest) { r.Arguments = json.RawMessage(`{"worker":"alpha"}`) }},
+		{"changed actor", func(r *telegramcore.OperationRequest) { r.Operator = "foreign" }},
+		{"changed request", func(r *telegramcore.OperationRequest) { r.ID = "foreign" }},
+		{"changed project", func(r *telegramcore.OperationRequest) { r.Target.ProjectID = "private-project" }},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			changed := request
@@ -249,7 +249,7 @@ func TestTelegramHarnessSelectionEnvelope(t *testing.T) {
 	}
 }
 
-func checkTelegramHarnessReplay(t *testing.T, f *telegramConversationAppFixture, operations service, action telegramcore.TelegramAction, saved core.HarnessSelectionSnapshot) {
+func checkTelegramHarnessReplay(t *testing.T, f *telegramConversationAppFixture, operations service, action telegramcore.Action, saved core.HarnessSelectionSnapshot) {
 	t.Helper()
 
 	notice := f.send(t, "/answer "+action.Token+" confirm", 0)

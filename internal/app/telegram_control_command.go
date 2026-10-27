@@ -8,7 +8,7 @@ import (
 )
 
 type telegramControlCommand struct {
-	Input      telegramcore.TelegramConversationInput
+	Input      telegramcore.ConversationInput
 	Action     string
 	Invocation string
 	Parameters *telegramControlParameters
@@ -45,8 +45,8 @@ func telegramControlHelp() string {
 	return strings.Join(lines, "\n")
 }
 
-func parseTelegramControl(update telegramcore.TelegramReceivedUpdate) (telegramControlCommand, bool, error) {
-	command := telegramControlCommand{Input: telegramcore.TelegramConversationInput{Update: update}}
+func parseTelegramControl(update telegramcore.ReceivedUpdate) (telegramControlCommand, bool, error) {
+	command := telegramControlCommand{Input: telegramcore.ConversationInput{Update: update}}
 	name, body := telegramCommandWord(strings.TrimSpace(update.Text))
 
 	command.Action = strings.ReplaceAll(strings.TrimPrefix(name, "/"), "-", "_")
@@ -88,10 +88,10 @@ func validateTelegramControlCommand(command telegramControlCommand) error {
 	return validateTelegramControlParameters(command.Action, command.Parameters)
 }
 
-func telegramIntentControl(update telegramcore.TelegramReceivedUpdate, intent ConversationIntent) (telegramControlCommand, bool, error) {
+func telegramIntentControl(update telegramcore.ReceivedUpdate, intent ConversationIntent) (telegramControlCommand, bool, error) {
 	a := intent.Arguments
 
-	command := telegramControlCommand{Input: telegramcore.TelegramConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation, Namespace: a.Namespace}, Action: a.Action, Invocation: a.Text}
+	command := telegramControlCommand{Input: telegramcore.ConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation, Namespace: a.Namespace}, Action: a.Action, Invocation: a.Text}
 	if intent.OperationID != "control" {
 		return command, false, nil
 	}

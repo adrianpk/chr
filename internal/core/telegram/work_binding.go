@@ -10,15 +10,15 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// TelegramInvocationBinding references canonical native work without credentials.
-type TelegramInvocationBinding struct {
+// InvocationBinding references canonical native work without credentials.
+type InvocationBinding struct {
 	ID       string `json:"id"`
 	Revision uint64 `json:"revision"`
 }
 
-// ValidateTelegramWorkConversation prevents admission replacing a bound run.
+// ValidateWorkConversation prevents admission replacing a bound run.
 // Current peer/operator/project authority must be checked separately by the host.
-func (s *TelegramReceiverStore) ValidateTelegramWorkConversation(ctx context.Context, request TelegramOperationRequest) error {
+func (s *ReceiverStore) ValidateWorkConversation(ctx context.Context, request OperationRequest) error {
 	if request.OperationID != "work.admit" {
 		return workflowstate.ErrConflict
 	}
@@ -43,19 +43,19 @@ func (s *TelegramReceiverStore) ValidateTelegramWorkConversation(ctx context.Con
 	return nil
 }
 
-func projectTelegramWorkBinding(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, result TelegramActionResult, now string) error {
+func projectWorkBinding(ctx context.Context, tx *sql.Tx, request OperationRequest, result ActionResult, now string) error {
 	if result.Invocation == nil {
 		return nil
 	}
 
 	if request.OperationID == "work.control" {
-		return projectTelegramControlBinding(ctx, tx, request, result, now)
+		return projectControlBinding(ctx, tx, request, result, now)
 	}
 
-	return projectTelegramAdmissionBinding(ctx, tx, request, result, now)
+	return projectAdmissionBinding(ctx, tx, request, result, now)
 }
 
-func projectTelegramAdmissionBinding(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, result TelegramActionResult, now string) error {
+func projectAdmissionBinding(ctx context.Context, tx *sql.Tx, request OperationRequest, result ActionResult, now string) error {
 	bound := result.Invocation
 	if result.InvocationPhase != "" {
 		return workflowstate.ErrConflict
@@ -76,11 +76,11 @@ func projectTelegramAdmissionBinding(ctx context.Context, tx *sql.Tx, request Te
 		return err
 	}
 
-	return telegramRequireChanged(changed)
+	return requireChanged(changed)
 }
 
-func projectTelegramControlBinding(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, result TelegramActionResult, now string) error {
-	if err := validateTelegramControlBinding(request, result); err != nil {
+func projectControlBinding(ctx context.Context, tx *sql.Tx, request OperationRequest, result ActionResult, now string) error {
+	if err := validateControlBinding(request, result); err != nil {
 		return err
 	}
 
@@ -102,10 +102,10 @@ func projectTelegramControlBinding(ctx context.Context, tx *sql.Tx, request Tele
 		return nil
 	}
 
-	return telegramRequireChanged(changed)
+	return requireChanged(changed)
 }
 
-func validateTelegramControlBinding(request TelegramOperationRequest, result TelegramActionResult) error {
+func validateControlBinding(request OperationRequest, result ActionResult) error {
 	bound := result.Invocation
 	if result.State != "confirmed" || !workflowstate.ValidRequestKey(bound.ID) || bound.Revision == 0 || bound.Revision > math.MaxInt64 {
 		return workflowstate.ErrConflict

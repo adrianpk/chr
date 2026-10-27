@@ -20,7 +20,7 @@ func TestTelegramRecoverySchema(t *testing.T) {
 	prior := telegramRecoveryMigrationAssets(t)
 	delete(prior, path)
 
-	old, err := NewTelegramReceiverStore(t.Context(), env, prior)
+	old, err := NewReceiverStore(t.Context(), env, prior)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,7 +38,7 @@ func TestTelegramRecoverySchema(t *testing.T) {
 	broken := telegramRecoveryMigrationAssets(t)
 
 	broken[path] = &fstest.MapFile{Data: []byte("-- +migrate Up\nALTER TABLE telegram_receivers ADD COLUMN retry_actor TEXT; invalid SQL;\n-- +migrate Down\nALTER TABLE telegram_receivers DROP COLUMN retry_actor;\n")}
-	if migrated, err := NewTelegramReceiverStore(t.Context(), env, broken); err == nil {
+	if migrated, err := NewReceiverStore(t.Context(), env, broken); err == nil {
 		t.Fatal("failed recovery migration was accepted", migrated.Close())
 	}
 
@@ -55,12 +55,12 @@ func TestTelegramRecoverySchema(t *testing.T) {
 	checkTelegramRecoveryUpgraded(t, store)
 	execTelegramRecoverySQL(t, store, `INSERT INTO schema_migrations VALUES('99999999999999','future','2026-01-01T00:00:00Z')`)
 
-	if newer, err := NewTelegramReceiverStore(t.Context(), env, assets); err == nil {
+	if newer, err := NewReceiverStore(t.Context(), env, assets); err == nil {
 		t.Fatal("future schema accepted", newer.Close())
 	}
 }
 
-func checkTelegramRecoveryUpgraded(t *testing.T, store *TelegramReceiverStore) {
+func checkTelegramRecoveryUpgraded(t *testing.T, store *ReceiverStore) {
 	t.Helper()
 
 	state, err := store.Receiver(t.Context(), 12345)
@@ -111,7 +111,7 @@ func TestTelegramRecoveryMalformed(t *testing.T) {
 			store := openTelegramReceiverTestStore(t, telegramReceiverTestEnv(t))
 			execTelegramRecoverySQL(t, store, `UPDATE telegram_receivers SET retired_update_ranges=?,next_update_id=41`, test.encoded)
 
-			if _, err := store.PrepareTelegramPoll(t.Context(), 12345, time.Now()); err == nil {
+			if _, err := store.PreparePoll(t.Context(), 12345, time.Now()); err == nil {
 				t.Fatal("malformed retired identity metadata was accepted")
 			}
 
@@ -130,12 +130,12 @@ func TestTelegramRecoveryPending(t *testing.T) {
 	old := database.FormatTime(time.Now().Add(-8 * 24 * time.Hour))
 	execTelegramRecoverySQL(t, store, `WITH RECURSIVE n(id) AS (SELECT 1 UNION ALL SELECT id+1 FROM n WHERE id<1024) INSERT INTO telegram_updates(bot_id,update_id,cursor_epoch,payload_digest,update_kind,chat_id,topic_id,user_id,message_id,chat_type,received_at,payload,state,reason_code,updated_at,processing_lane,control_input) SELECT 12345,id,1,?,'message',100001,0,100001,id,'private',?,'/status','pending','',?,CASE WHEN id>992 THEN 'urgent' ELSE 'ordinary' END,id>992 FROM n`, strings.Repeat("a", 64), old, old)
 
-	if _, err := store.PrepareTelegramPoll(t.Context(), 12345, time.Now()); err != nil {
+	if _, err := store.PreparePoll(t.Context(), 12345, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
 	update := telegramRetainedTestUpdate(t, 1025, "/pause run")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, time.Now()); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{update}, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 

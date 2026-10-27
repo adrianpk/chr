@@ -40,7 +40,7 @@ func telegramGuidedRunName(text string) (string, bool) {
 	return strings.TrimSpace(trimmed[len(prefix):]), true
 }
 
-func (r telegramReceiver) selectTelegramGuidedName(ctx context.Context, input telegramcore.TelegramConversationInput, name string) (string, error) {
+func (r telegramReceiver) selectTelegramGuidedName(ctx context.Context, input telegramcore.ConversationInput, name string) (string, error) {
 	sessions, err := r.store.Conversations(ctx, input.Update.Peer)
 	if err != nil {
 		return "", err
@@ -81,7 +81,7 @@ func (r telegramReceiver) selectTelegramGuidedName(ctx context.Context, input te
 }
 
 func telegramGuidedStartFailure(failure error, projects []projectcore.Project) error {
-	if !errors.Is(failure, telegramcore.ErrTelegramProjectSelectionAmbiguous) {
+	if !errors.Is(failure, telegramcore.ErrProjectSelectionAmbiguous) {
 		return failure
 	}
 
@@ -96,8 +96,8 @@ func telegramGuidedStartFailure(failure error, projects []projectcore.Project) e
 	return telegramGuidedRoutingFailure("Choose a project: " + strings.Join(names, ", ") + ". Say Develop a new use case in followed by its unique project name.")
 }
 
-func (r telegramReceiver) resolveTelegramGuidedInput(ctx context.Context, user telegramcore.TelegramAllowedUser, config telegramcore.TelegramReceiverConfig, update telegramcore.TelegramReceivedUpdate) (telegramcore.TelegramConversationInput, bool, error) {
-	input := telegramcore.TelegramConversationInput{Update: update, Config: config, Text: "New guided use case"}
+func (r telegramReceiver) resolveTelegramGuidedInput(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (telegramcore.ConversationInput, bool, error) {
+	input := telegramcore.ConversationInput{Update: update, Config: config, Text: "New guided use case"}
 	projects, err := r.operations.ListRegisteredProjects(user.ProjectIDs)
 
 	input.Projects = projects

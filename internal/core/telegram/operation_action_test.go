@@ -8,36 +8,36 @@ import (
 	"time"
 )
 
-func telegramOperationActionFixture(t *testing.T, options ...func(TelegramOperationRequest, *TelegramActionOffer)) (*telegramConversationFixture, TelegramActionOffer, TelegramAction) {
+func telegramOperationActionFixture(t *testing.T, options ...func(OperationRequest, *ActionOffer)) (*telegramConversationFixture, ActionOffer, Action) {
 	t.Helper()
 
 	f := newTelegramConversationFixture(t)
-	f.apply(t, TelegramConversationStart, func(input *TelegramConversationInput) { input.Project = "alpha" })
+	f.apply(t, ConversationStart, func(input *ConversationInput) { input.Project = "alpha" })
 
 	input := telegramOperationActionInput(t, f, "prepare operation")
 	input.Conversation = f.sessions(t)[0].ID
 
-	target, err := f.store.ResolveTelegramOperationTarget(t.Context(), input, time.Now())
+	target, err := f.store.ResolveOperationTarget(t.Context(), input, time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	request, err := f.store.ReserveTelegramOperation(t.Context(), TelegramOperationRequest{Source: input.Update, Operator: input.Config.AllowedUsers[0].OperatorID, Target: target, OperationID: "records.ticket.create", Arguments: json.RawMessage(`{"title":"One record"}`)}, time.Now())
+	request, err := f.store.ReserveOperation(t.Context(), OperationRequest{Source: input.Update, Operator: input.Config.AllowedUsers[0].OperatorID, Target: target, OperationID: "records.ticket.create", Arguments: json.RawMessage(`{"title":"One record"}`)}, time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := f.store.PrepareTelegramOperation(t.Context(), request, json.RawMessage(`{"reserved_id":"PRJ-1"}`), time.Now()); err != nil {
+	if err := f.store.PrepareOperation(t.Context(), request, json.RawMessage(`{"reserved_id":"PRJ-1"}`), time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
-	offer := TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"confirm", "cancel"}, Text: "Apply the observed record?", ExpiresAt: time.Now().Add(time.Hour)}
+	offer := ActionOffer{Input: input, RequestID: request.ID, Choices: []string{"confirm", "cancel"}, Text: "Apply the observed record?", ExpiresAt: time.Now().Add(time.Hour)}
 
 	for _, option := range options {
 		option(request, &offer)
 	}
 
-	action, err := f.store.OfferTelegramAction(t.Context(), offer, time.Now())
+	action, err := f.store.OfferAction(t.Context(), offer, time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,14 +45,14 @@ func telegramOperationActionFixture(t *testing.T, options ...func(TelegramOperat
 	return f, offer, action
 }
 
-func telegramOperationActionInput(t *testing.T, f *telegramConversationFixture, text string) TelegramConversationInput {
+func telegramOperationActionInput(t *testing.T, f *telegramConversationFixture, text string) ConversationInput {
 	t.Helper()
 
 	input := f.input
 	input.Update = telegramRetainedTestUpdate(t, f.next, text)
 
 	f.next++
-	if err := f.store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{input.Update}, time.Now()); err != nil {
+	if err := f.store.RetainBatch(t.Context(), 12345, []ReceivedUpdate{input.Update}, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -63,14 +63,14 @@ func telegramOperationActionInput(t *testing.T, f *telegramConversationFixture, 
 func TestTelegramOperationActionReplay(t *testing.T) {
 	f, offer, action := telegramOperationActionFixture(t)
 
-	again, err := f.store.OfferTelegramAction(t.Context(), offer, time.Now())
+	again, err := f.store.OfferAction(t.Context(), offer, time.Now())
 	if err != nil || again.Token != action.Token || !again.ExpiresAt.Equal(action.ExpiresAt) {
 		t.Fatal("action reoffer changed binding", again, err)
 	}
 
 	first := telegramOperationActionInput(t, f, "/answer "+action.Token+" confirm")
 
-	claim, err := f.store.ClaimTelegramAction(t.Context(), first, TelegramActionAnswer{Token: action.Token, Choice: "confirm"}, time.Now())
+	claim, err := f.store.ClaimAction(t.Context(), first, ActionAnswer{Token: action.Token, Choice: "confirm"}, time.Now())
 	if err != nil || claim.Action.State != "applying" {
 		t.Fatal("action claim failed", claim, err)
 	}
@@ -82,7 +82,7 @@ func TestTelegramOperationActionReplay(t *testing.T) {
 	f.store = openTelegramReceiverTestStore(t, f.env)
 	second := telegramOperationActionInput(t, f, "tga:"+action.Token+":confirm")
 
-	recovered, err := f.store.ClaimTelegramAction(t.Context(), second, TelegramActionAnswer{Token: action.Token, Choice: "confirm"}, time.Now())
+	recovered, err := f.store.ClaimAction(t.Context(), second, ActionAnswer{Token: action.Token, Choice: "confirm"}, time.Now())
 	if err != nil || recovered.Answer.ID != claim.Answer.ID || recovered.Answer.Source.UpdateID != first.Update.UpdateID {
 		t.Fatal("action created a second answer", recovered, err)
 	}
@@ -90,30 +90,30 @@ func TestTelegramOperationActionReplay(t *testing.T) {
 	checkTelegramOperationActionFinish(t, f, recovered)
 }
 
-func checkTelegramOperationActionFinish(t *testing.T, f *telegramConversationFixture, claim TelegramActionClaim) {
+func checkTelegramOperationActionFinish(t *testing.T, f *telegramConversationFixture, claim ActionClaim) {
 	t.Helper()
 
-	result := TelegramActionResult{State: "confirmed", ReceiptRef: "original/receipt.json", Facts: json.RawMessage(`{"identity":"PRJ-1"}`), Text: "Confirmed PRJ-1", ConfigDigest: f.input.Config.Digest()}
+	result := ActionResult{State: "confirmed", ReceiptRef: "original/receipt.json", Facts: json.RawMessage(`{"identity":"PRJ-1"}`), Text: "Confirmed PRJ-1", ConfigDigest: f.input.Config.Digest()}
 	for range 2 {
-		if err := f.store.FinishTelegramAction(t.Context(), claim, result, time.Now()); err != nil {
+		if err := f.store.FinishAction(t.Context(), claim, result, time.Now()); err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	action, err := readTelegramAction(t.Context(), f.store.db, claim.Action.Token, claim.Action.Peer)
+	action, err := readAction(t.Context(), f.store.db, claim.Action.Token, claim.Action.Peer)
 	if err != nil || action.State != "consumed" {
 		t.Fatal("confirmed result did not consume action", action, err)
 	}
 
 	for _, id := range []string{claim.Request.ID, claim.Answer.ID} {
-		request, err := readTelegramOperationID(t.Context(), f.store.db, id)
+		request, err := readOperationID(t.Context(), f.store.db, id)
 		if err != nil || request.State != "confirmed" || request.ReceiptRef != result.ReceiptRef {
 			t.Fatal("request result was not atomic", request, err)
 		}
 	}
 
 	input := telegramOperationActionInput(t, f, "changed choice")
-	if _, err := f.store.ClaimTelegramAction(t.Context(), input, TelegramActionAnswer{Token: action.Token, Choice: "cancel"}, time.Now()); err == nil {
+	if _, err := f.store.ClaimAction(t.Context(), input, ActionAnswer{Token: action.Token, Choice: "cancel"}, time.Now()); err == nil {
 		t.Fatal("consumed choice rebound")
 	}
 }
@@ -126,7 +126,7 @@ func TestTelegramOperationActionGuards(t *testing.T) {
 			input := telegramOperationActionInput(t, f, "answer")
 			now := changeTelegramOperationActionGuard(t, f, &input, kind)
 
-			claim, err := f.store.ClaimTelegramAction(t.Context(), input, TelegramActionAnswer{Token: action.Token, Choice: "confirm"}, now)
+			claim, err := f.store.ClaimAction(t.Context(), input, ActionAnswer{Token: action.Token, Choice: "confirm"}, now)
 			if err != nil || (claim.Action.State != "expired" && claim.Action.State != "superseded") || claim.Action.AnswerRequestID != "" {
 				t.Fatal("stale action created authority", claim, err)
 			}
@@ -139,7 +139,7 @@ func TestTelegramOperationActionGuards(t *testing.T) {
 	}
 }
 
-func changeTelegramOperationActionGuard(t *testing.T, f *telegramConversationFixture, input *TelegramConversationInput, kind string) time.Time {
+func changeTelegramOperationActionGuard(t *testing.T, f *telegramConversationFixture, input *ConversationInput, kind string) time.Time {
 	t.Helper()
 
 	now := time.Now()
@@ -172,7 +172,7 @@ func TestTelegramOperationActionConcurrency(t *testing.T) {
 	first := telegramOperationActionInput(t, f, "first answer")
 	second := telegramOperationActionInput(t, f, "duplicate callback")
 
-	other, err := NewTelegramReceiverStore(t.Context(), f.env, os.DirFS("../../../cmd/chr"))
+	other, err := NewReceiverStore(t.Context(), f.env, os.DirFS("../../../cmd/chr"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -184,16 +184,16 @@ func TestTelegramOperationActionConcurrency(t *testing.T) {
 	})
 
 	type outcome struct {
-		claim TelegramActionClaim
+		claim ActionClaim
 		err   error
 	}
 
 	results := make(chan outcome, 2)
 
-	for index, store := range []*TelegramReceiverStore{f.store, other} {
-		input := []TelegramConversationInput{first, second}[index]
+	for index, store := range []*ReceiverStore{f.store, other} {
+		input := []ConversationInput{first, second}[index]
 		go func() {
-			claim, err := store.ClaimTelegramAction(t.Context(), input, TelegramActionAnswer{Token: action.Token, Choice: "confirm"}, time.Now())
+			claim, err := store.ClaimAction(t.Context(), input, ActionAnswer{Token: action.Token, Choice: "confirm"}, time.Now())
 			results <- outcome{claim, err}
 		}()
 	}
@@ -209,7 +209,7 @@ func TestTelegramOperationActionRollback(t *testing.T) {
 	f, _, action := telegramOperationActionFixture(t)
 	input := telegramOperationActionInput(t, f, "answer")
 
-	claim, err := f.store.ClaimTelegramAction(t.Context(), input, TelegramActionAnswer{Token: action.Token, Choice: "confirm"}, time.Now())
+	claim, err := f.store.ClaimAction(t.Context(), input, ActionAnswer{Token: action.Token, Choice: "confirm"}, time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -219,8 +219,8 @@ func TestTelegramOperationActionRollback(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	result := TelegramActionResult{State: "confirmed", ReceiptRef: "original-receipt", Facts: json.RawMessage(`{}`), Text: "confirmed", ConfigDigest: f.input.Config.Digest()}
-	if err := f.store.FinishTelegramAction(t.Context(), claim, result, time.Now()); err == nil {
+	result := ActionResult{State: "confirmed", ReceiptRef: "original-receipt", Facts: json.RawMessage(`{}`), Text: "confirmed", ConfigDigest: f.input.Config.Digest()}
+	if err := f.store.FinishAction(t.Context(), claim, result, time.Now()); err == nil {
 		t.Fatal("full outbox consumed action")
 	}
 
@@ -230,7 +230,7 @@ func TestTelegramOperationActionRollback(t *testing.T) {
 
 	f.store = openTelegramReceiverTestStore(t, f.env)
 
-	retained, err := readTelegramAction(t.Context(), f.store.db, action.Token, action.Peer)
+	retained, err := readAction(t.Context(), f.store.db, action.Token, action.Peer)
 	if err != nil || retained.State != "applying" {
 		t.Fatal("failed acknowledgement lost action intent", retained, err)
 	}
@@ -238,11 +238,11 @@ func TestTelegramOperationActionRollback(t *testing.T) {
 	checkTelegramOperationActionPending(t, f, claim)
 }
 
-func checkTelegramOperationActionPending(t *testing.T, f *telegramConversationFixture, claim TelegramActionClaim) {
+func checkTelegramOperationActionPending(t *testing.T, f *telegramConversationFixture, claim ActionClaim) {
 	t.Helper()
 
 	for _, id := range []string{claim.Request.ID, claim.Answer.ID} {
-		request, err := readTelegramOperationID(t.Context(), f.store.db, id)
+		request, err := readOperationID(t.Context(), f.store.db, id)
 		if err != nil || request.State != "applying" || request.ReceiptRef != "" {
 			t.Fatal("failed acknowledgement changed request", request, err)
 		}

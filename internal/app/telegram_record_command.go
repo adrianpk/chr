@@ -7,7 +7,7 @@ import (
 )
 
 type telegramRecordCommand struct {
-	Input    telegramcore.TelegramConversationInput
+	Input    telegramcore.ConversationInput
 	Kind     RecordKind
 	Action   string
 	Query    RecordQuery
@@ -27,8 +27,8 @@ func telegramRecordUsage(command telegramRecordDescriptor) string {
 	return command.Name + " [--project <id>] [--conversation <id>] [--namespace <name>] list|show|create|update <json>"
 }
 
-func parseTelegramRecord(update telegramcore.TelegramReceivedUpdate) (telegramRecordCommand, bool, error) {
-	command := telegramRecordCommand{Input: telegramcore.TelegramConversationInput{Update: update}}
+func parseTelegramRecord(update telegramcore.ReceivedUpdate) (telegramRecordCommand, bool, error) {
+	command := telegramRecordCommand{Input: telegramcore.ConversationInput{Update: update}}
 	if update.Kind != "message" {
 		return command, false, nil
 	}
@@ -61,7 +61,7 @@ func parseTelegramRecord(update telegramcore.TelegramReceivedUpdate) (telegramRe
 	return command, true, err
 }
 
-func parseTelegramRecordScope(input *telegramcore.TelegramConversationInput, body string) (string, error) {
+func parseTelegramRecordScope(input *telegramcore.ConversationInput, body string) (string, error) {
 	seen := map[string]bool{}
 
 	for strings.HasPrefix(body, "--") {

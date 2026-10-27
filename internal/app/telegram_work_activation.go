@@ -12,19 +12,19 @@ import (
 )
 
 type telegramWorkCompletion struct {
-	Reference telegramcore.TelegramWorkReference
+	Reference telegramcore.WorkReference
 	Progress  RetainedWorkProgress
 	Failure   error
 }
 
-func (r telegramReceiver) activateWork(ctx context.Context, ref telegramcore.TelegramWorkReference) telegramWorkCompletion {
+func (r telegramReceiver) activateWork(ctx context.Context, ref telegramcore.WorkReference) telegramWorkCompletion {
 	result := telegramWorkCompletion{Reference: ref}
 	result.Progress, result.Failure = r.resumeWorkReference(ctx, ref)
 
 	return result
 }
 
-func (r telegramReceiver) resumeWorkReference(ctx context.Context, ref telegramcore.TelegramWorkReference) (RetainedWorkProgress, error) {
+func (r telegramReceiver) resumeWorkReference(ctx context.Context, ref telegramcore.WorkReference) (RetainedWorkProgress, error) {
 	operations, ok := r.operations.(telegramWorkContinuationService)
 	if !ok {
 		return RetainedWorkProgress{}, ErrRecordUnsupported
@@ -54,7 +54,7 @@ func (r telegramReceiver) resumeWorkReference(ctx context.Context, ref telegramc
 	return operations.ResumeTelegramWork(ctx, ref.Request.Target, bound, preview, check)
 }
 
-func (r telegramReceiver) validateWorkReference(ctx context.Context, ref telegramcore.TelegramWorkReference) error {
+func (r telegramReceiver) validateWorkReference(ctx context.Context, ref telegramcore.WorkReference) error {
 	request := ref.Request
 	request.Target.ConversationRevision = ref.ConversationRevision
 
@@ -62,7 +62,7 @@ func (r telegramReceiver) validateWorkReference(ctx context.Context, ref telegra
 		return err
 	}
 
-	return r.store.ValidateTelegramWorkReference(ctx, ref)
+	return r.store.ValidateWorkReference(ctx, ref)
 }
 
 func (r telegramReceiver) completeWorkActivation(ctx context.Context, result telegramWorkCompletion) error {
@@ -90,7 +90,7 @@ func (r telegramReceiver) completeWorkActivation(ctx context.Context, result tel
 	return r.projectWorkProgress(ctx, ref, status)
 }
 
-func (r telegramReceiver) projectWorkProgress(ctx context.Context, ref telegramcore.TelegramWorkReference, status WorkflowWorkStatus) error {
+func (r telegramReceiver) projectWorkProgress(ctx context.Context, ref telegramcore.WorkReference, status WorkflowWorkStatus) error {
 	if err := r.validateWorkReference(ctx, ref); err != nil {
 		if ctx.Err() != nil {
 			return ctx.Err()
@@ -113,7 +113,7 @@ func (r telegramReceiver) projectWorkProgress(ctx context.Context, ref telegramc
 		return err
 	}
 
-	return r.store.ProjectTelegramWork(ctx, ref, telegramWorkObservation(status, telegramWorkProjectName(projects, status.ProjectID)), config.Digest(), time.Now())
+	return r.store.ProjectWork(ctx, ref, telegramWorkObservation(status, telegramWorkProjectName(projects, status.ProjectID)), config.Digest(), time.Now())
 }
 
 func telegramWorkActivationCode(err error) string {

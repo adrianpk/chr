@@ -15,9 +15,9 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// TelegramWorkObservation is a read projection of a canonical native revision.
+// WorkObservation is a read projection of a canonical native revision.
 // It cannot grant authority or change native execution state.
-type TelegramWorkObservation struct {
+type WorkObservation struct {
 	Revision uint64
 	Phase    string
 	Kind     string
@@ -25,27 +25,27 @@ type TelegramWorkObservation struct {
 	Message  *tgmessage.Blocks
 }
 
-// ProjectTelegramWork reserves an observed notice and local phase atomically.
+// ProjectWork reserves an observed notice and local phase atomically.
 // Original admission results and all native state remain unchanged.
-func (s *TelegramReceiverStore) ProjectTelegramWork(ctx context.Context, ref TelegramWorkReference, observation TelegramWorkObservation, configDigest string, now time.Time) error {
+func (s *ReceiverStore) ProjectWork(ctx context.Context, ref WorkReference, observation WorkObservation, configDigest string, now time.Time) error {
 	if observation.Revision == 0 || observation.Revision > math.MaxInt64 || observation.Text == "" || len(observation.Text) > 16384 || len(configDigest) != 64 {
 		return workflowstate.ErrConflict
 	}
 
-	if !validTelegramWorkObservation(observation) {
+	if !validWorkObservation(observation) {
 		return workflowstate.ErrConflict
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		return projectTelegramWork(ctx, tx, ref, observation, configDigest, now)
+		return projectWork(ctx, tx, ref, observation, configDigest, now)
 	})
 }
 
-func projectTelegramWork(ctx context.Context, tx *sql.Tx, ref TelegramWorkReference, observation TelegramWorkObservation, configDigest string, now time.Time) error {
+func projectWork(ctx context.Context, tx *sql.Tx, ref WorkReference, observation WorkObservation, configDigest string, now time.Time) error {
 	target := ref.Request.Target
 	key := fmt.Sprintf("work:%s:%d", target.ConversationID, observation.Revision)
 
-	unchanged, err := sameTelegramWorkNotice(ctx, tx, ref, observation)
+	unchanged, err := sameWorkNotice(ctx, tx, ref, observation)
 	if err != nil {
 		return err
 	}
@@ -60,10 +60,10 @@ func projectTelegramWork(ctx context.Context, tx *sql.Tx, ref TelegramWorkRefere
 		return err
 	}
 
-	return queueTelegramWorkObservation(ctx, tx, ref, observation, configDigest, now)
+	return queueWorkObservation(ctx, tx, ref, observation, configDigest, now)
 }
 
-func sameTelegramWorkNotice(ctx context.Context, tx *sql.Tx, ref TelegramWorkReference, observation TelegramWorkObservation) (bool, error) {
+func sameWorkNotice(ctx context.Context, tx *sql.Tx, ref WorkReference, observation WorkObservation) (bool, error) {
 	if observation.Kind == "result" {
 		return false, nil
 	}
@@ -93,7 +93,7 @@ func sameTelegramWorkNotice(ctx context.Context, tx *sql.Tx, ref TelegramWorkRef
 	return kind == observation.Kind && phase == observation.Phase && text == observation.Text && presentationHash == hash, nil
 }
 
-func validTelegramWorkObservation(observation TelegramWorkObservation) bool {
+func validWorkObservation(observation WorkObservation) bool {
 	switch observation.Phase {
 	case "completed", "canceled", "failed":
 		return observation.Kind == "result"
@@ -104,7 +104,7 @@ func validTelegramWorkObservation(observation TelegramWorkObservation) bool {
 	}
 }
 
-func queueTelegramWorkObservation(ctx context.Context, tx *sql.Tx, ref TelegramWorkReference, observation TelegramWorkObservation, configDigest string, now time.Time) error {
+func queueWorkObservation(ctx context.Context, tx *sql.Tx, ref WorkReference, observation WorkObservation, configDigest string, now time.Time) error {
 	// Only never-attempted routine notices can coalesce. Questions, terminal
 	// results, sending rows and uncertain retries keep their exact identity.
 	if _, err := tx.ExecContext(ctx, `DELETE FROM telegram_outbox WHERE conversation_id=? AND kind='progress' AND state='pending' AND attempts=0 AND total_attempts=0`, ref.Request.Target.ConversationID); err != nil {
@@ -139,7 +139,7 @@ func queueTelegramWorkObservation(ctx context.Context, tx *sql.Tx, ref TelegramW
 	}
 
 	for index, part := range parts {
-		if err := insertTelegramWorkNotice(ctx, tx, ref, observation.Kind, key, part, configDigest, index+1, len(parts), now); err != nil {
+		if err := insertWorkNotice(ctx, tx, ref, observation.Kind, key, part, configDigest, index+1, len(parts), now); err != nil {
 			return err
 		}
 
@@ -150,10 +150,10 @@ func queueTelegramWorkObservation(ctx context.Context, tx *sql.Tx, ref TelegramW
 		}
 	}
 
-	return checkTelegramIntakeCapacity(ctx, tx, ref.Request.Source.Peer.BotID)
+	return checkIntakeCapacity(ctx, tx, ref.Request.Source.Peer.BotID)
 }
 
-func insertTelegramWorkNotice(ctx context.Context, tx *sql.Tx, ref TelegramWorkReference, kind, key, text, configDigest string, part, parts int, now time.Time) error {
+func insertWorkNotice(ctx context.Context, tx *sql.Tx, ref WorkReference, kind, key, text, configDigest string, part, parts int, now time.Time) error {
 	peer, target := ref.Request.Source.Peer, ref.Request.Target
 	id := "tgd-" + contenthash.Sum(fmt.Appendf(nil, "%d:%s:%d", peer.BotID, key, part))[:32]
 	_, err := tx.ExecContext(ctx, `INSERT INTO telegram_outbox(id,bot_id,chat_id,topic_id,user_id,conversation_id,conversation_revision,request_id,event_key,config_digest,kind,text,part_index,part_count,state,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,'pending',?,?)`, id, peer.BotID, peer.ChatID, peer.TopicID, peer.UserID, target.ConversationID, ref.ConversationRevision, ref.Request.ID, key, configDigest, kind, text, part, parts, database.FormatTime(now), database.FormatTime(now))

@@ -14,7 +14,7 @@ import (
 func TestTelegramPresentationConfirmationMigration(t *testing.T) {
 	f, _, action := telegramOperationActionFixture(t)
 
-	request, err := readTelegramOperationID(t.Context(), f.store.db, action.RequestID)
+	request, err := readOperationID(t.Context(), f.store.db, action.RequestID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,7 +44,7 @@ func TestTelegramPresentationConfirmationMigration(t *testing.T) {
 
 	input := telegramOperationActionInput(t, f, "confirm legacy action")
 
-	claim, err := f.store.ClaimTelegramAction(t.Context(), input, TelegramActionAnswer{Token: action.Token, Choice: "confirm"}, time.Now())
+	claim, err := f.store.ClaimAction(t.Context(), input, ActionAnswer{Token: action.Token, Choice: "confirm"}, time.Now())
 	if err != nil || claim.Action.State != "applying" {
 		t.Fatal("legacy guard no longer authorizes its original operation", claim, err)
 	}
@@ -52,10 +52,10 @@ func TestTelegramPresentationConfirmationMigration(t *testing.T) {
 	checkTelegramOperationActionFinish(t, f, claim)
 }
 
-func checkTelegramLegacyConfirmation(t *testing.T, f *telegramConversationFixture, original TelegramAction, request TelegramOperationRequest) {
+func checkTelegramLegacyConfirmation(t *testing.T, f *telegramConversationFixture, original Action, request OperationRequest) {
 	t.Helper()
 
-	action, err := readTelegramAction(t.Context(), f.store.db, original.Token, original.Peer)
+	action, err := readAction(t.Context(), f.store.db, original.Token, original.Peer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,7 +64,7 @@ func checkTelegramLegacyConfirmation(t *testing.T, f *telegramConversationFixtur
 		t.Fatal("migration rewrote legacy authority", action, original)
 	}
 
-	retained, err := readTelegramOperationID(t.Context(), f.store.db, original.RequestID)
+	retained, err := readOperationID(t.Context(), f.store.db, original.RequestID)
 	if err != nil || !bytes.Equal(retained.PreparedInput, request.PreparedInput) || retained.ArgumentDigest != request.ArgumentDigest {
 		t.Fatal("migration rewrote prepared input", retained, err)
 	}
@@ -75,7 +75,7 @@ func checkTelegramLegacyConfirmation(t *testing.T, f *telegramConversationFixtur
 	}
 }
 
-func telegramConfirmationLegacyDelivery(t *testing.T, f *telegramConversationFixture, action TelegramAction) TelegramReceiverDelivery {
+func telegramConfirmationLegacyDelivery(t *testing.T, f *telegramConversationFixture, action Action) ReceiverDelivery {
 	t.Helper()
 
 	rows, err := f.store.DueDeliveries(t.Context(), 12345, time.Now())
@@ -91,5 +91,5 @@ func telegramConfirmationLegacyDelivery(t *testing.T, f *telegramConversationFix
 
 	t.Fatal("migration lost the original queued prompt")
 
-	return TelegramReceiverDelivery{}
+	return ReceiverDelivery{}
 }

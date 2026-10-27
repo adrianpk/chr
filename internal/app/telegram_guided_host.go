@@ -12,7 +12,7 @@ import (
 )
 
 type telegramGuidedProjectService interface {
-	telegramGuidedProject(context.Context, telegramcore.TelegramOperationTarget) (service, error)
+	telegramGuidedProject(context.Context, telegramcore.OperationTarget) (service, error)
 }
 
 // The receiver inventories associations; the shared host owns all progression,
@@ -44,7 +44,7 @@ func (h *telegramGuidedHost) run(ctx context.Context) error {
 }
 
 func (h *telegramGuidedHost) pump(ctx context.Context) error {
-	refs, err := h.receiver.store.TelegramGuidedReferences(ctx, h.receiver.botID, h.after, 16)
+	refs, err := h.receiver.store.GuidedReferences(ctx, h.receiver.botID, h.after, 16)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func (h *telegramGuidedHost) pump(ctx context.Context) error {
 	return nil
 }
 
-func (h *telegramGuidedHost) recoverReference(ctx context.Context, ref telegramcore.TelegramGuidedReference) error {
+func (h *telegramGuidedHost) recoverReference(ctx context.Context, ref telegramcore.GuidedReference) error {
 	operations, ok := h.receiver.operations.(telegramGuidedProjectService)
 	if !ok {
 		return nil
@@ -111,10 +111,10 @@ func (h *telegramGuidedHost) recoverReference(ctx context.Context, ref telegramc
 		return err
 	}
 
-	return h.receiver.store.ProjectTelegramGuided(ctx, ref, progress, *telegramOutcomeMessage("43", telegramGuidedPrompt(observed)), delivery, config.Digest(), time.Now())
+	return h.receiver.store.ProjectGuided(ctx, ref, progress, *telegramOutcomeMessage("43", telegramGuidedPrompt(observed)), delivery, config.Digest(), time.Now())
 }
 
-func (r telegramReceiver) validateGuidedHostReference(ctx context.Context, ref telegramcore.TelegramGuidedReference) error {
+func (r telegramReceiver) validateGuidedHostReference(ctx context.Context, ref telegramcore.GuidedReference) error {
 	config, err := r.validateAuthoringAuthority(ctx, ref.Request, true)
 	if err != nil {
 		return err
@@ -123,7 +123,7 @@ func (r telegramReceiver) validateGuidedHostReference(ctx context.Context, ref t
 	return r.validateGuidedRunBinding(ctx, ref.Request, config, ref.Conversation.GuidedRunID)
 }
 
-func (r telegramReceiver) boundTelegramGuidedService(operations telegramGuidedService, request telegramcore.TelegramOperationRequest, id string) telegramGuidedService {
+func (r telegramReceiver) boundTelegramGuidedService(operations telegramGuidedService, request telegramcore.OperationRequest, id string) telegramGuidedService {
 	if scoped, ok := operations.(service); ok {
 		scoped.guidedHostCheck = func(ctx context.Context) error {
 			config, err := r.validateAuthoringAuthority(ctx, request, true)

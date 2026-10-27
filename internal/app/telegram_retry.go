@@ -27,16 +27,16 @@ func (factory commandFactory) telegramRetryCommand() *cli.Command {
 				return errors.New("telegram environment is unavailable")
 			}
 
-			botID, err := telegramcore.TelegramBoundBotID(env)
+			botID, err := telegramcore.BoundBotID(env)
 			if err != nil {
 				return errors.New("telegram bot is unbound or invalid; run telegram doctor")
 			}
 
 			actor := "local-uid-" + strconv.Itoa(os.Getuid())
 
-			request := telegramcore.TelegramTransportRetry{BotID: botID, Poll: cmd.Bool("poll"), DeliveryID: cmd.String("delivery"), Actor: actor}
-			if err := telegramcore.RetryLocalTelegramTransport(ctx, env, factory.deps.assetsFS, request, time.Now()); err != nil {
-				var failure *telegramcore.TelegramAPIError
+			request := telegramcore.TransportRetry{BotID: botID, Poll: cmd.Bool("poll"), DeliveryID: cmd.String("delivery"), Actor: actor}
+			if err := telegramcore.RetryLocalTransport(ctx, env, factory.deps.assetsFS, request, time.Now()); err != nil {
+				var failure *telegramcore.APIError
 				if errors.As(err, &failure) && failure.Code == "local_receiver_conflict" {
 					return errors.New("telegram retry: local_receiver_conflict; stop the receiver before retrying")
 				}

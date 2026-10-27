@@ -8,10 +8,10 @@ import (
 	"testing"
 )
 
-func telegramReceiverTestConfig() TelegramReceiverConfig {
-	return TelegramReceiverConfig{
+func telegramReceiverTestConfig() ReceiverConfig {
+	return ReceiverConfig{
 		Enabled: true, BotTokenEnv: "EXAMPLE_BOT_TOKEN", PollTimeoutSeconds: 30,
-		AllowedUsers: []TelegramAllowedUser{{TelegramUserID: 100001, OperatorID: "maintainer", ProjectIDs: []string{"example-project"}}},
+		AllowedUsers: []AllowedUser{{TelegramUserID: 100001, OperatorID: "maintainer", ProjectIDs: []string{"example-project"}}},
 	}
 }
 
@@ -31,7 +31,7 @@ func TestTelegramReceiverConfig(t *testing.T) {
 	env := telegramReceiverTestEnv(t)
 
 	config := telegramReceiverTestConfig()
-	if err := SaveTelegramReceiverConfig(env, config, false); err != nil {
+	if err := SaveReceiverConfig(env, config, false); err != nil {
 		t.Fatal(err)
 	}
 
@@ -43,7 +43,7 @@ func TestTelegramReceiverConfig(t *testing.T) {
 	}
 
 	config.AllowedUsers[0].OperatorID = "replacement"
-	if err := SaveTelegramReceiverConfig(env, config, false); err == nil {
+	if err := SaveReceiverConfig(env, config, false); err == nil {
 		t.Fatal("implicit replacement accepted")
 	}
 
@@ -52,11 +52,11 @@ func TestTelegramReceiverConfig(t *testing.T) {
 		t.Fatal("configuration changed after denied replacement", err)
 	}
 
-	if err := SaveTelegramReceiverConfig(env, config, true); err != nil {
+	if err := SaveReceiverConfig(env, config, true); err != nil {
 		t.Fatal(err)
 	}
 
-	loaded, err := LoadTelegramReceiverConfig(env)
+	loaded, err := LoadReceiverConfig(env)
 	if err != nil || loaded.Digest() != config.Digest() {
 		t.Fatal("round trip changed configuration", err)
 	}
@@ -67,7 +67,7 @@ func TestTelegramReceiverConfig(t *testing.T) {
 
 // TestTelegramReceiverConfigErrors rejects unsafe YAML and invalid numeric authority.
 func TestTelegramReceiverConfigErrors(t *testing.T) {
-	body := string(renderTelegramReceiverConfig(telegramReceiverTestConfig()))
+	body := string(renderReceiverConfig(telegramReceiverTestConfig()))
 
 	cases := map[string]string{
 		"unknown":     body + "  token: forbidden\n",
@@ -80,7 +80,7 @@ func TestTelegramReceiverConfigErrors(t *testing.T) {
 	}
 	for name, data := range cases {
 		t.Run(name, func(t *testing.T) {
-			config, err := parseTelegramReceiverConfig([]byte(data))
+			config, err := parseReceiverConfig([]byte(data))
 			if err == nil && config.Validate() == nil {
 				t.Fatal("unsafe configuration accepted")
 			}
@@ -94,23 +94,23 @@ func TestTelegramReceiverToken(t *testing.T) {
 	config := telegramReceiverTestConfig()
 
 	token := "12345:example_test_token_123456789"
-	if err := SaveTelegramReceiverToken(env, config, token, false); err != nil {
+	if err := SaveReceiverToken(env, config, token, false); err != nil {
 		t.Fatal(err)
 	}
 
-	got, err := TelegramReceiverToken(env, config)
+	got, err := ReceiverToken(env, config)
 	if err != nil || got != token {
 		t.Fatal("private token unavailable", err)
 	}
 
-	if err := SaveTelegramReceiverToken(env, config, token+"x", false); err == nil {
+	if err := SaveReceiverToken(env, config, token+"x", false); err == nil {
 		t.Fatal("credential replaced implicitly")
 	}
 
 	assertTelegramPrivateMode(t, filepath.Join(env.ConfigDir(), "telegram.env"), 0o600)
 	t.Setenv(config.BotTokenEnv, "malformed-secret")
 
-	if _, err := TelegramReceiverToken(env, config); err == nil || strings.Contains(err.Error(), "malformed-secret") {
+	if _, err := ReceiverToken(env, config); err == nil || strings.Contains(err.Error(), "malformed-secret") {
 		t.Fatal("malformed token accepted or exposed")
 	}
 }

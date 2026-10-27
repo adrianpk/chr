@@ -9,8 +9,8 @@ import (
 	"forge.adrianpk.com/chr/internal/core/database"
 )
 
-// TelegramDeliveryDiagnostic exposes bounded metadata, never message bodies.
-type TelegramDeliveryDiagnostic struct {
+// DeliveryDiagnostic exposes bounded metadata, never message bodies.
+type DeliveryDiagnostic struct {
 	ID             string
 	State          string
 	Attempts       int
@@ -22,26 +22,26 @@ type TelegramDeliveryDiagnostic struct {
 	RetryStartedAt time.Time
 }
 
-// TelegramReceiverDiagnostics distinguishes retained transport and model waits
+// ReceiverDiagnostics distinguishes retained transport and model waits
 // from domain completion. Delivery detail is limited to twenty unresolved rows.
-type TelegramReceiverDiagnostics struct {
-	Receiver            TelegramReceiverState
+type ReceiverDiagnostics struct {
+	Receiver            ReceiverState
 	ActiveConversations int
 	PendingUpdates      int
 	PendingDeliveries   int
 	ExhaustedModels     int
-	Deliveries          []TelegramDeliveryDiagnostic
+	Deliveries          []DeliveryDiagnostic
 }
 
-// InspectTelegramReceiverDiagnostics reads without migration or network IO.
-func InspectTelegramReceiverDiagnostics(ctx context.Context, env database.DataDirectory, botID int64) (result TelegramReceiverDiagnostics, err error) {
+// InspectReceiverDiagnostics reads without migration or network IO.
+func InspectReceiverDiagnostics(ctx context.Context, env database.DataDirectory, botID int64) (result ReceiverDiagnostics, err error) {
 	db, err := database.OpenReadOnly(ctx, env)
 	if err != nil {
 		return result, err
 	}
 	defer func() { err = errors.Join(err, db.Close()) }()
 
-	result.Receiver, err = (&TelegramReceiverStore{db: db}).Receiver(ctx, botID)
+	result.Receiver, err = (&ReceiverStore{db: db}).Receiver(ctx, botID)
 	if err != nil {
 		return result, err
 	}
@@ -55,12 +55,12 @@ func InspectTelegramReceiverDiagnostics(ctx context.Context, env database.DataDi
 		return result, err
 	}
 
-	result.Deliveries, err = readTelegramDeliveryDiagnostics(ctx, db, botID)
+	result.Deliveries, err = readDeliveryDiagnostics(ctx, db, botID)
 
 	return result, err
 }
 
-func readTelegramDeliveryDiagnostics(ctx context.Context, db *sql.DB, botID int64) (result []TelegramDeliveryDiagnostic, err error) {
+func readDeliveryDiagnostics(ctx context.Context, db *sql.DB, botID int64) (result []DeliveryDiagnostic, err error) {
 	rows, err := db.QueryContext(ctx, `SELECT id,state,attempts,retry_cycle,total_attempts,COALESCE(retry_at,''),last_error_code,retry_actor,COALESCE(retry_started_at,'') FROM telegram_outbox WHERE bot_id=? AND state!='delivered' ORDER BY CASE WHEN state='blocked' OR attempts=5 THEN 0 ELSE 1 END,created_at,id LIMIT 20`, botID)
 	if err != nil {
 		return result, err
@@ -69,7 +69,7 @@ func readTelegramDeliveryDiagnostics(ctx context.Context, db *sql.DB, botID int6
 
 	for rows.Next() {
 		var (
-			item             TelegramDeliveryDiagnostic
+			item             DeliveryDiagnostic
 			retryAt, started string
 		)
 		if err := rows.Scan(&item.ID, &item.State, &item.Attempts, &item.Cycle, &item.TotalAttempts, &retryAt, &item.ErrorCode, &item.RetryActor, &started); err != nil {

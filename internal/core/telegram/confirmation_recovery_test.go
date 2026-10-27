@@ -22,7 +22,7 @@ func TestTelegramPresentationConfirmationGuards(t *testing.T) {
 	}
 }
 
-func changeTelegramConfirmation(t *testing.T, f *telegramConversationFixture, action TelegramAction, kind string) {
+func changeTelegramConfirmation(t *testing.T, f *telegramConversationFixture, action Action, kind string) {
 	t.Helper()
 
 	switch kind {
@@ -47,7 +47,7 @@ func changeTelegramConfirmation(t *testing.T, f *telegramConversationFixture, ac
 	}
 }
 
-func changeTelegramConfirmationVersion(t *testing.T, f *telegramConversationFixture, action TelegramAction) {
+func changeTelegramConfirmationVersion(t *testing.T, f *telegramConversationFixture, action Action) {
 	t.Helper()
 
 	var payload string
@@ -67,7 +67,7 @@ func changeTelegramConfirmationVersion(t *testing.T, f *telegramConversationFixt
 		t.Fatal(err)
 	}
 
-	request, err := readTelegramOperationID(t.Context(), f.store.db, action.RequestID)
+	request, err := readOperationID(t.Context(), f.store.db, action.RequestID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,7 +75,7 @@ func changeTelegramConfirmationVersion(t *testing.T, f *telegramConversationFixt
 	// accidentally stopping at the ordinary byte-integrity check.
 	hash := contenthash.Sum(data)
 	execTelegramRecoverySQL(t, f.store, "UPDATE telegram_outbox SET presentation=?,presentation_hash=? WHERE action_token=?", string(data), hash, action.Token)
-	execTelegramRecoverySQL(t, f.store, "UPDATE telegram_actions SET presentation_hash=?,guard_digest=? WHERE token=?", hash, telegramActionPresentationDigest(request, hash), action.Token)
+	execTelegramRecoverySQL(t, f.store, "UPDATE telegram_actions SET presentation_hash=?,guard_digest=? WHERE token=?", hash, actionPresentationDigest(request, hash), action.Token)
 }
 
 // TestTelegramPresentationConfirmationConcurrent races independent SQLite
@@ -83,21 +83,21 @@ func changeTelegramConfirmationVersion(t *testing.T, f *telegramConversationFixt
 func TestTelegramPresentationConfirmationConcurrent(t *testing.T) {
 	f, _, action := telegramConfirmationFixture(t)
 	second := openTelegramReceiverTestStore(t, f.env)
-	inputs := []TelegramConversationInput{telegramOperationActionInput(t, f, "first answer"), telegramOperationActionInput(t, f, "duplicate answer")}
+	inputs := []ConversationInput{telegramOperationActionInput(t, f, "first answer"), telegramOperationActionInput(t, f, "duplicate answer")}
 
 	type result struct {
-		claim TelegramActionClaim
+		claim ActionClaim
 		err   error
 	}
 
 	results := make(chan result, 2)
 	ready := make(chan struct{})
 
-	for index, store := range []*TelegramReceiverStore{f.store, second} {
+	for index, store := range []*ReceiverStore{f.store, second} {
 		go func() {
 			<-ready
 
-			claim, err := store.ClaimTelegramAction(t.Context(), inputs[index], TelegramActionAnswer{Token: action.Token, Choice: "confirm"}, time.Now())
+			claim, err := store.ClaimAction(t.Context(), inputs[index], ActionAnswer{Token: action.Token, Choice: "confirm"}, time.Now())
 			results <- result{claim: claim, err: err}
 		}()
 	}
@@ -128,14 +128,14 @@ func checkTelegramConfirmationGuard(t *testing.T, kind string) {
 	delivery := telegramConfirmationDelivery(t, f, action)
 	changeTelegramConfirmation(t, f, action, kind)
 
-	if err := f.store.ValidateTelegramActionDelivery(t.Context(), delivery); err == nil {
+	if err := f.store.ValidateActionDelivery(t.Context(), delivery); err == nil {
 		t.Fatal("changed confirmation could be transmitted")
 	}
 
 	input := telegramOperationActionInput(t, f, "confirm")
 
-	claim, err := f.store.ClaimTelegramAction(t.Context(), input, TelegramActionAnswer{Token: action.Token, Choice: "confirm"}, time.Now())
-	if err != nil && !errors.Is(err, ErrTelegramActionUnavailable) && !errors.Is(err, errTelegramReceiverConflict) {
+	claim, err := f.store.ClaimAction(t.Context(), input, ActionAnswer{Token: action.Token, Choice: "confirm"}, time.Now())
+	if err != nil && !errors.Is(err, ErrActionUnavailable) && !errors.Is(err, errReceiverConflict) {
 		t.Fatal(err)
 	}
 

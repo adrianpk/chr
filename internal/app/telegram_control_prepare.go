@@ -21,7 +21,7 @@ type telegramControlPreview struct {
 	Status  WorkflowWorkStatus     `json:"status"`
 }
 
-func (r telegramReceiver) prepareControl(ctx context.Context, request telegramcore.TelegramOperationRequest, config telegramcore.TelegramReceiverConfig) error {
+func (r telegramReceiver) prepareControl(ctx context.Context, request telegramcore.OperationRequest, config telegramcore.ReceiverConfig) error {
 	if telegramPreparedWorkFinished(request.State) {
 		return nil
 	}
@@ -47,7 +47,7 @@ func (r telegramReceiver) prepareControl(ctx context.Context, request telegramco
 	return r.offerControl(ctx, request)
 }
 
-func (r telegramReceiver) previewControl(ctx context.Context, operations telegramControlService, request telegramcore.TelegramOperationRequest) (json.RawMessage, error) {
+func (r telegramReceiver) previewControl(ctx context.Context, operations telegramControlService, request telegramcore.OperationRequest) (json.RawMessage, error) {
 	var arguments telegramControlArguments
 	if err := decodeOperationJSON(string(request.Arguments), &arguments); err != nil {
 		return nil, err
@@ -70,10 +70,10 @@ func (r telegramReceiver) previewControl(ctx context.Context, operations telegra
 		return nil, err
 	}
 
-	return input, r.store.PrepareTelegramOperation(ctx, request, input, time.Now())
+	return input, r.store.PrepareOperation(ctx, request, input, time.Now())
 }
 
-func telegramRetainedControl(request telegramcore.TelegramOperationRequest) (telegramControlPreview, error) {
+func telegramRetainedControl(request telegramcore.OperationRequest) (telegramControlPreview, error) {
 	var (
 		preview   telegramControlPreview
 		arguments telegramControlArguments
@@ -100,11 +100,11 @@ func telegramRetainedControl(request telegramcore.TelegramOperationRequest) (tel
 	return preview, nil
 }
 
-func telegramControlStatusMatches(status WorkflowWorkStatus, id string, target telegramcore.TelegramOperationTarget) bool {
+func telegramControlStatusMatches(status WorkflowWorkStatus, id string, target telegramcore.OperationTarget) bool {
 	return status.ID == id && status.ProjectID == target.ProjectID && status.Namespace == target.Namespace
 }
 
-func (r telegramReceiver) offerControl(ctx context.Context, request telegramcore.TelegramOperationRequest) error {
+func (r telegramReceiver) offerControl(ctx context.Context, request telegramcore.OperationRequest) error {
 	preview, err := telegramRetainedControl(request)
 	if err != nil {
 		return err
@@ -117,9 +117,9 @@ func (r telegramReceiver) offerControl(ctx context.Context, request telegramcore
 
 	text := telegramControlPreviewText(preview)
 
-	return r.offerConfirmationDocument(ctx, request, telegramcore.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{preview.Request.Action}, ExpiresAt: time.Now().Add(24 * time.Hour)}, "35", text, "The complete retained control, decision options, grant and candidate binding follow.")
+	return r.offerConfirmationDocument(ctx, request, telegramcore.ActionOffer{Input: input, RequestID: request.ID, Choices: []string{preview.Request.Action}, ExpiresAt: time.Now().Add(24 * time.Hour)}, "35", text, "The complete retained control, decision options, grant and candidate binding follow.")
 }
 
-func (r telegramReceiver) finishControlPreparation(ctx context.Context, request telegramcore.TelegramOperationRequest, config telegramcore.TelegramReceiverConfig) error {
-	return r.store.FinishTelegramOperation(ctx, request, "blocked", "", json.RawMessage(`{"state":"blocked"}`), "The exact native control is unavailable for this peer, project or revision. Read current state before requesting a new control.", config.Digest(), time.Now())
+func (r telegramReceiver) finishControlPreparation(ctx context.Context, request telegramcore.OperationRequest, config telegramcore.ReceiverConfig) error {
+	return r.store.FinishOperation(ctx, request, "blocked", "", json.RawMessage(`{"state":"blocked"}`), "The exact native control is unavailable for this peer, project or revision. Read current state before requesting a new control.", config.Digest(), time.Now())
 }

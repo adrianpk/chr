@@ -9,20 +9,20 @@ import (
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
-func queueTelegramOperationResult(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, text, receipt, configDigest string, now time.Time) error {
+func queueOperationResult(ctx context.Context, tx *sql.Tx, request OperationRequest, text, receipt, configDigest string, now time.Time) error {
 	if request.Delivery == nil {
 		if request.Message != nil {
-			return queueTelegramPresentation(ctx, tx, request.Source, *request.Message, configDigest, now)
+			return queuePresentation(ctx, tx, request.Source, *request.Message, configDigest, now)
 		}
 
-		return queueTelegramReferencedResponse(ctx, tx, request.Source, text, request.ID+" "+receipt, configDigest, now)
+		return queueReferencedResponse(ctx, tx, request.Source, text, request.ID+" "+receipt, configDigest, now)
 	}
 
 	if _, err := tx.ExecContext(ctx, "SAVEPOINT telegram_document_result"); err != nil {
 		return err
 	}
 
-	err := queueTelegramDocument(ctx, tx, request.Source, *request.Delivery, configDigest, now)
+	err := queueDocument(ctx, tx, request.Source, *request.Delivery, configDigest, now)
 	if err == nil {
 		_, err = tx.ExecContext(ctx, "RELEASE telegram_document_result")
 
@@ -42,5 +42,5 @@ func queueTelegramOperationResult(ctx context.Context, tx *sql.Tx, request Teleg
 		return err
 	}
 
-	return queueTelegramPresentation(ctx, tx, request.Source, tgmessage.Blocks{InitialText: text, SecondaryText: "The complete document could not be attached: its image is invalid or document storage is full. The result is saved. Use local project commands to inspect it."}, configDigest, now)
+	return queuePresentation(ctx, tx, request.Source, tgmessage.Blocks{InitialText: text, SecondaryText: "The complete document could not be attached: its image is invalid or document storage is full. The result is saved. Use local project commands to inspect it."}, configDigest, now)
 }

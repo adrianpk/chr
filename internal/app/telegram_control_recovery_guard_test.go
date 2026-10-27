@@ -66,7 +66,7 @@ func TestTelegramControlReceiptAuthority(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			request, found, err := f.receiver.store.TelegramOperation(t.Context(), input.Update, 0)
+			request, found, err := f.receiver.store.Operation(t.Context(), input.Update, 0)
 			if err != nil || !found || request.State == "confirmed" || request.ReceiptRef != "" {
 				t.Fatal("changed authority recovered private native facts", request, err)
 			}
@@ -83,7 +83,7 @@ type telegramControlReplaceAfterApply struct {
 	replace func()
 }
 
-func (s telegramControlReplaceAfterApply) ApplyTelegramControl(ctx context.Context, target telegramcore.TelegramOperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest, check core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error) {
+func (s telegramControlReplaceAfterApply) ApplyTelegramControl(ctx context.Context, target telegramcore.OperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest, check core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error) {
 	status, err := s.service.ApplyTelegramControl(ctx, target, binding, request, check)
 	if err == nil {
 		s.replace()
@@ -100,7 +100,7 @@ func TestTelegramControlReceiptProjection(t *testing.T) {
 	f, operations, ref := telegramWorkAdmitted(t)
 	token := telegramControlOffer(t, f, "/pause "+ref.Invocation.ID)
 
-	var replacement telegramcore.TelegramConversation
+	var replacement telegramcore.Conversation
 
 	f.receiver.operations = telegramControlReplaceAfterApply{service: operations, replace: func() {
 		staleTelegramControlPrompt(t, f, token, "replaced")

@@ -16,7 +16,7 @@ func TestTelegramPresentationFormatMigration(t *testing.T) {
 	delete(assets, "assets/migration/sqlite/20261021000027-add_telegram_action_presentation.sql")
 	delete(assets, "assets/migration/sqlite/20261021000025-add_telegram_text_presentation.sql")
 
-	store, err := NewTelegramReceiverStore(t.Context(), env, assets)
+	store, err := NewReceiverStore(t.Context(), env, assets)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,7 +49,7 @@ func TestTelegramPresentationFormatMigration(t *testing.T) {
 	checkTelegramPresentationLegacy(t, openTelegramReceiverTestStore(t, env), now)
 }
 
-func checkTelegramPresentationLegacy(t *testing.T, store *TelegramReceiverStore, now time.Time) {
+func checkTelegramPresentationLegacy(t *testing.T, store *ReceiverStore, now time.Time) {
 	t.Helper()
 
 	due, err := store.DueDeliveries(t.Context(), 12345, now)

@@ -31,18 +31,18 @@ func checkTelegramCapturePresentation(t *testing.T, item telegramCapturePresenta
 	t.Helper()
 
 	f := newTelegramConversationFixture(t)
-	f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "alpha" })
+	f.apply(t, ConversationStart, func(i *ConversationInput) { i.Project = "alpha" })
 
 	for range item.parts {
-		f.apply(t, TelegramConversationCapture, func(i *TelegramConversationInput) { i.Text = "retained detail" })
+		f.apply(t, ConversationCapture, func(i *ConversationInput) { i.Text = "retained detail" })
 	}
 
 	if item.finish {
-		f.apply(t, TelegramConversationDone, nil)
+		f.apply(t, ConversationDone, nil)
 	}
 
 	before := f.sessions(t)[0]
-	f.apply(t, TelegramConversationCapture, func(i *TelegramConversationInput) { i.Text = item.text; i.Conversation = before.ID })
+	f.apply(t, ConversationCapture, func(i *ConversationInput) { i.Text = item.text; i.Conversation = before.ID })
 
 	after := f.sessions(t)[0]
 	if item.accepted {

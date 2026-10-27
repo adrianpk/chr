@@ -11,34 +11,34 @@ import (
 	"time"
 )
 
-const telegramReceiverBodyLimit = 1 << 20
+const receiverBodyLimit = 1 << 20
 
-// TelegramAPIError contains only a safe classification and bounded retry delay.
-type TelegramAPIError struct {
+// APIError contains only a safe classification and bounded retry delay.
+type APIError struct {
 	Code       string
 	RetryAfter time.Duration
 	Permanent  bool
 	Uncertain  bool
 }
 
-func (e *TelegramAPIError) Error() string { return "telegram API: " + e.Code }
+func (e *APIError) Error() string { return "telegram API: " + e.Code }
 
-// TelegramReceiverAPI owns the dedicated receiver's bounded HTTP boundary.
+// ReceiverAPI owns the dedicated receiver's bounded HTTP boundary.
 // The existing notification sender retains its separate compatibility contract.
-type TelegramReceiverAPI struct {
-	Client  TelegramHTTPClient
+type ReceiverAPI struct {
+	Client  HTTPClient
 	BaseURL string
 }
 
-// NewTelegramReceiverAPI uses a client that refuses redirects carrying credentials.
-func NewTelegramReceiverAPI() TelegramReceiverAPI {
-	return TelegramReceiverAPI{
-		BaseURL: DefaultTelegramAPIBaseURL,
+// NewReceiverAPI uses a client that refuses redirects carrying credentials.
+func NewReceiverAPI() ReceiverAPI {
+	return ReceiverAPI{
+		BaseURL: DefaultAPIBaseURL,
 		Client:  &http.Client{CheckRedirect: func(_ *http.Request, _ []*http.Request) error { return http.ErrUseLastResponse }},
 	}
 }
 
-type telegramReceiverEnvelope struct {
+type receiverEnvelope struct {
 	OK          bool            `json:"ok"`
 	Result      json.RawMessage `json:"result"`
 	ErrorCode   int             `json:"error_code"`
@@ -49,7 +49,7 @@ type telegramReceiverEnvelope struct {
 }
 
 // CheckConnection verifies credentials and webhook absence without sending messages.
-func (a TelegramReceiverAPI) CheckConnection(ctx context.Context, token string) (int64, error) {
+func (a ReceiverAPI) CheckConnection(ctx context.Context, token string) (int64, error) {
 	data, err := a.call(ctx, token, "getMe", struct{}{}, 10*time.Second)
 	if err != nil {
 		return 0, err
@@ -60,7 +60,7 @@ func (a TelegramReceiverAPI) CheckConnection(ctx context.Context, token string) 
 		IsBot bool  `json:"is_bot"`
 	}
 	if err := json.Unmarshal(data, &bot); err != nil || bot.ID <= 0 || !bot.IsBot {
-		return 0, telegramAPIInvalid()
+		return 0, aPIInvalid()
 	}
 
 	data, err = a.call(ctx, token, "getWebhookInfo", struct{}{}, 10*time.Second)
@@ -72,18 +72,18 @@ func (a TelegramReceiverAPI) CheckConnection(ctx context.Context, token string) 
 		URL *string `json:"url"`
 	}
 	if err := json.Unmarshal(data, &webhook); err != nil || webhook.URL == nil {
-		return 0, telegramAPIInvalid()
+		return 0, aPIInvalid()
 	}
 
 	if *webhook.URL != "" {
-		return 0, &TelegramAPIError{Code: "webhook_conflict", Permanent: true}
+		return 0, &APIError{Code: "webhook_conflict", Permanent: true}
 	}
 
 	return bot.ID, nil
 }
 
 // Poll never uses a negative offset or changes webhook configuration.
-func (a TelegramReceiverAPI) Poll(ctx context.Context, token string, next *int64, timeout int) ([]TelegramReceivedUpdate, error) {
+func (a ReceiverAPI) Poll(ctx context.Context, token string, next *int64, timeout int) ([]ReceivedUpdate, error) {
 	if timeout < 1 || timeout > 50 || (next != nil && *next < 0) {
 		return nil, errors.New("invalid telegram poll bounds")
 	}
@@ -100,15 +100,15 @@ func (a TelegramReceiverAPI) Poll(ctx context.Context, token string, next *int64
 		return nil, err
 	}
 
-	return decodeTelegramReceiverUpdates(data)
+	return decodeReceiverUpdates(data)
 }
 
 // Send sends one bounded plain-text delivery to its original chat and topic.
-func (a TelegramReceiverAPI) Send(ctx context.Context, token string, peer TelegramPeerIdentity, text string) (int64, error) {
+func (a ReceiverAPI) Send(ctx context.Context, token string, peer PeerIdentity, text string) (int64, error) {
 	return a.SendAction(ctx, token, peer, text, "", nil)
 }
 
-func (a TelegramReceiverAPI) call(ctx context.Context, token, method string, payload any, timeout time.Duration) (json.RawMessage, error) {
+func (a ReceiverAPI) call(ctx context.Context, token, method string, payload any, timeout time.Duration) (json.RawMessage, error) {
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, errors.New("cannot encode telegram request")
@@ -117,15 +117,15 @@ func (a TelegramReceiverAPI) call(ctx context.Context, token, method string, pay
 	return a.callBody(ctx, token, method, bytes.NewReader(body), "application/json", timeout)
 }
 
-func (a TelegramReceiverAPI) callBody(ctx context.Context, token, method string, body io.Reader, contentType string, timeout time.Duration) (json.RawMessage, error) {
-	if _, err := validateTelegramReceiverToken(token); err != nil {
+func (a ReceiverAPI) callBody(ctx context.Context, token, method string, body io.Reader, contentType string, timeout time.Duration) (json.RawMessage, error) {
+	if _, err := validateReceiverToken(token); err != nil {
 		return nil, err
 	}
 
 	return a.postBody(ctx, token, method, body, contentType, timeout)
 }
 
-func (a TelegramReceiverAPI) postBody(ctx context.Context, token, method string, body io.Reader, contentType string, timeout time.Duration) (json.RawMessage, error) {
+func (a ReceiverAPI) postBody(ctx context.Context, token, method string, body io.Reader, contentType string, timeout time.Duration) (json.RawMessage, error) {
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
@@ -138,7 +138,7 @@ func (a TelegramReceiverAPI) postBody(ctx context.Context, token, method string,
 
 	response, err := a.Client.Do(request)
 	if err != nil {
-		return nil, &TelegramAPIError{Code: "transport_failure", Uncertain: method == "sendMessage" || method == "sendDocument"}
+		return nil, &APIError{Code: "transport_failure", Uncertain: method == "sendMessage" || method == "sendDocument"}
 	}
 
 	defer func() {
@@ -146,32 +146,32 @@ func (a TelegramReceiverAPI) postBody(ctx context.Context, token, method string,
 		_ = response.Body.Close()
 	}()
 
-	return decodeTelegramReceiverResponse(response)
+	return decodeReceiverResponse(response)
 }
 
-func decodeTelegramReceiverResponse(response *http.Response) (json.RawMessage, error) {
-	body, err := io.ReadAll(io.LimitReader(response.Body, telegramReceiverBodyLimit+1))
-	if err != nil || len(body) > telegramReceiverBodyLimit {
-		return nil, &TelegramAPIError{Code: "response_limit_or_read_failure", Uncertain: true}
+func decodeReceiverResponse(response *http.Response) (json.RawMessage, error) {
+	body, err := io.ReadAll(io.LimitReader(response.Body, receiverBodyLimit+1))
+	if err != nil || len(body) > receiverBodyLimit {
+		return nil, &APIError{Code: "response_limit_or_read_failure", Uncertain: true}
 	}
 
-	var envelope telegramReceiverEnvelope
+	var envelope receiverEnvelope
 	if err := json.Unmarshal(body, &envelope); err != nil {
-		return nil, telegramAPIInvalid()
+		return nil, aPIInvalid()
 	}
 
 	if response.StatusCode < 200 || response.StatusCode >= 300 || !envelope.OK {
-		return nil, classifyTelegramAPIError(response.StatusCode, envelope)
+		return nil, classifyAPIError(response.StatusCode, envelope)
 	}
 
 	if len(envelope.Result) == 0 || bytes.Equal(envelope.Result, []byte("null")) {
-		return nil, telegramAPIInvalid()
+		return nil, aPIInvalid()
 	}
 
 	return envelope.Result, nil
 }
 
-func classifyTelegramAPIError(status int, envelope telegramReceiverEnvelope) error {
+func classifyAPIError(status int, envelope receiverEnvelope) error {
 	code := envelope.ErrorCode
 	if code == 0 {
 		code = status
@@ -179,39 +179,39 @@ func classifyTelegramAPIError(status int, envelope telegramReceiverEnvelope) err
 
 	switch code {
 	case 400:
-		return classifyTelegramBadRequest(status, envelope)
+		return classifyBadRequest(status, envelope)
 	case 401, 403:
-		return &TelegramAPIError{Code: "credentials_or_access", Permanent: true}
+		return &APIError{Code: "credentials_or_access", Permanent: true}
 	case 409:
-		return &TelegramAPIError{Code: "receiver_conflict", Permanent: true}
+		return &APIError{Code: "receiver_conflict", Permanent: true}
 	case 429:
 		if envelope.Parameters.RetryAfter > 86400 {
-			return &TelegramAPIError{Code: "retry_delay_exceeds_limit", Permanent: true}
+			return &APIError{Code: "retry_delay_exceeds_limit", Permanent: true}
 		}
 
 		delay := max(1, min(envelope.Parameters.RetryAfter, 86400))
 
-		return &TelegramAPIError{Code: "rate_limited", RetryAfter: time.Duration(delay) * time.Second}
+		return &APIError{Code: "rate_limited", RetryAfter: time.Duration(delay) * time.Second}
 	default:
-		return &TelegramAPIError{Code: "request_failed", Permanent: code < 500, Uncertain: code >= 500}
+		return &APIError{Code: "request_failed", Permanent: code < 500, Uncertain: code >= 500}
 	}
 }
 
-func telegramAPIInvalid() error {
-	return &TelegramAPIError{Code: "invalid_response", Permanent: true}
+func aPIInvalid() error {
+	return &APIError{Code: "invalid_response", Permanent: true}
 }
 
 // Only the bounded API envelope is inspected; raw descriptions never reach logs.
-func telegramEntityRejected(description string) bool {
+func entityRejected(description string) bool {
 	description = strings.ToLower(description)
 
 	return strings.Contains(description, "can't parse entities") || strings.Contains(description, "cannot parse entities")
 }
 
-func classifyTelegramBadRequest(status int, envelope telegramReceiverEnvelope) error {
-	if (status == http.StatusBadRequest || status >= 200 && status < 300) && !envelope.OK && telegramEntityRejected(envelope.Description) {
-		return &TelegramAPIError{Code: "format_rejected", Permanent: true}
+func classifyBadRequest(status int, envelope receiverEnvelope) error {
+	if (status == http.StatusBadRequest || status >= 200 && status < 300) && !envelope.OK && entityRejected(envelope.Description) {
+		return &APIError{Code: "format_rejected", Permanent: true}
 	}
 
-	return &TelegramAPIError{Code: "request_failed", Permanent: true}
+	return &APIError{Code: "request_failed", Permanent: true}
 }

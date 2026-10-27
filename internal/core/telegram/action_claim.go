@@ -10,27 +10,27 @@ import (
 	"forge.adrianpk.com/chr/internal/core/database"
 )
 
-// ClaimTelegramAction creates the first answer and claims its prompt in one transaction.
+// ClaimAction creates the first answer and claims its prompt in one transaction.
 // Applying prompts return the same retained answer for callback/text replay.
-func (s *TelegramReceiverStore) ClaimTelegramAction(ctx context.Context, input TelegramConversationInput, answer TelegramActionAnswer, now time.Time) (TelegramActionClaim, error) {
-	var claim TelegramActionClaim
-	if !validTelegramActionAnswer(answer) {
-		return claim, ErrTelegramActionUnavailable
+func (s *ReceiverStore) ClaimAction(ctx context.Context, input ConversationInput, answer ActionAnswer, now time.Time) (ActionClaim, error) {
+	var claim ActionClaim
+	if !validActionAnswer(answer) {
+		return claim, ErrActionUnavailable
 	}
 
 	err := s.transaction(ctx, func(tx *sql.Tx) error {
-		pending, err := telegramReadResponsePending(ctx, tx, input.Update)
+		pending, err := readResponsePending(ctx, tx, input.Update)
 		if err != nil {
 			return err
 		}
 
 		if !pending {
-			return ErrTelegramActionUnavailable
+			return ErrActionUnavailable
 		}
 
-		action, err := readTelegramAction(ctx, tx, answer.Token, input.Update.Peer)
-		if telegramActionUnavailable(err) {
-			return ErrTelegramActionUnavailable
+		action, err := readAction(ctx, tx, answer.Token, input.Update.Peer)
+		if actionUnavailable(err) {
+			return ErrActionUnavailable
 		}
 
 		if err != nil {
@@ -38,67 +38,67 @@ func (s *TelegramReceiverStore) ClaimTelegramAction(ctx context.Context, input T
 		}
 
 		if !slices.Contains(action.Choices, answer.Choice) {
-			return ErrTelegramActionUnavailable
+			return ErrActionUnavailable
 		}
 
-		request, err := readTelegramOperationID(ctx, tx, action.RequestID)
+		request, err := readOperationID(ctx, tx, action.RequestID)
 		if err != nil {
 			return err
 		}
 
-		claim = TelegramActionClaim{Action: action, Request: request, Choice: answer.Choice, ResponseSource: input.Update}
-		op := telegramConversationTransaction{ctx: ctx, tx: tx, input: input, now: now}
+		claim = ActionClaim{Action: action, Request: request, Choice: answer.Choice, ResponseSource: input.Update}
+		op := conversationTransaction{ctx: ctx, tx: tx, input: input, now: now}
 
-		return claimTelegramAction(op, &claim)
+		return claimAction(op, &claim)
 	})
 
 	return claim, err
 }
 
-func claimTelegramAction(op telegramConversationTransaction, claim *TelegramActionClaim) error {
+func claimAction(op conversationTransaction, claim *ActionClaim) error {
 	user, ok := op.input.Config.AuthorizedUser(op.input.Update.Peer.ChatID, op.input.Update.Peer.TopicID, op.input.Update.Peer.UserID, op.input.Update.ChatType)
 	if !ok || user.OperatorID != claim.Request.Operator {
-		return supersedeTelegramAction(op, claim, "superseded")
+		return supersedeAction(op, claim, "superseded")
 	}
 
 	if claim.Action.State == "consumed" {
-		return readTelegramActionClaimAnswer(op, claim)
+		return readActionClaimAnswer(op, claim)
 	}
 
 	if claim.Request.OperationID == "work.control" && claim.Action.AnswerRequestID != "" {
-		return claimTelegramControlReceipt(op, claim)
+		return claimControlReceipt(op, claim)
 	}
 
-	if telegramGuidedActionRecovering(claim) {
-		return claimTelegramGuidedRecovery(op, claim)
+	if guidedActionRecovering(claim) {
+		return claimGuidedRecovery(op, claim)
 	}
 
 	if claim.Action.State == "expired" || claim.Action.State == "superseded" {
 		return nil
 	}
 
-	return claimPendingTelegramAction(op, claim)
+	return claimPendingAction(op, claim)
 }
 
-func claimPendingTelegramAction(op telegramConversationTransaction, claim *TelegramActionClaim) error {
-	state, err := guardTelegramActionClaim(op, claim)
+func claimPendingAction(op conversationTransaction, claim *ActionClaim) error {
+	state, err := guardActionClaim(op, claim)
 	if err != nil {
 		return err
 	}
 
 	if state != "" {
-		return supersedeTelegramAction(op, claim, state)
+		return supersedeAction(op, claim, state)
 	}
 
 	if claim.Action.State == "applying" {
-		return readTelegramActionClaimAnswer(op, claim)
+		return readActionClaimAnswer(op, claim)
 	}
 
-	return createTelegramActionAnswer(op, claim)
+	return createActionAnswer(op, claim)
 }
 
-func claimTelegramControlReceipt(op telegramConversationTransaction, claim *TelegramActionClaim) error {
-	if err := readTelegramActionClaimAnswer(op, claim); err != nil {
+func claimControlReceipt(op conversationTransaction, claim *ActionClaim) error {
+	if err := readActionClaimAnswer(op, claim); err != nil {
 		return err
 	}
 
@@ -108,18 +108,18 @@ func claimTelegramControlReceipt(op telegramConversationTransaction, claim *Tele
 		return nil
 	}
 
-	state, err := guardTelegramActionClaim(op, claim)
+	state, err := guardActionClaim(op, claim)
 	if err != nil || state == "" {
 		return err
 	}
 
 	claim.ReceiptOnly = true
 
-	return supersedeTelegramAction(op, claim, state)
+	return supersedeAction(op, claim, state)
 }
 
-func readTelegramActionClaimAnswer(op telegramConversationTransaction, claim *TelegramActionClaim) error {
-	answer, err := readTelegramOperationID(op.ctx, op.tx, claim.Action.AnswerRequestID)
+func readActionClaimAnswer(op conversationTransaction, claim *ActionClaim) error {
+	answer, err := readOperationID(op.ctx, op.tx, claim.Action.AnswerRequestID)
 	if err != nil {
 		return err
 	}
@@ -134,7 +134,7 @@ func readTelegramActionClaimAnswer(op telegramConversationTransaction, claim *Te
 	}
 
 	if binding.Token != claim.Action.Token || binding.Choice != claim.Choice || binding.RequestID != claim.Request.ID {
-		return ErrTelegramActionUnavailable
+		return ErrActionUnavailable
 	}
 
 	claim.Answer = answer
@@ -142,7 +142,7 @@ func readTelegramActionClaimAnswer(op telegramConversationTransaction, claim *Te
 	return nil
 }
 
-func createTelegramActionAnswer(op telegramConversationTransaction, claim *TelegramActionClaim) error {
+func createActionAnswer(op conversationTransaction, claim *ActionClaim) error {
 	arguments, err := json.Marshal(struct {
 		Token     string `json:"token"`
 		Choice    string `json:"choice"`
@@ -152,25 +152,25 @@ func createTelegramActionAnswer(op telegramConversationTransaction, claim *Teleg
 		return err
 	}
 
-	answer, err := normalizeTelegramOperation(TelegramOperationRequest{Source: op.input.Update, Operator: claim.Request.Operator, Target: claim.Request.Target, OperationID: "actions.answer", Arguments: arguments})
+	answer, err := normalizeOperation(OperationRequest{Source: op.input.Update, Operator: claim.Request.Operator, Target: claim.Request.Target, OperationID: "actions.answer", Arguments: arguments})
 	if err != nil {
 		return err
 	}
 
-	if err := insertTelegramOperation(op.ctx, op.tx, answer, op.now); err != nil {
+	if err := insertOperation(op.ctx, op.tx, answer, op.now); err != nil {
 		return err
 	}
 
-	retained, err := readTelegramOperationID(op.ctx, op.tx, answer.ID)
+	retained, err := readOperationID(op.ctx, op.tx, answer.ID)
 	if err != nil {
 		return err
 	}
 
 	if retained.ArgumentDigest != answer.ArgumentDigest {
-		return errTelegramReceiverConflict
+		return errReceiverConflict
 	}
 
-	if err := beginTelegramActionClaim(op, claim, answer); err != nil {
+	if err := beginActionClaim(op, claim, answer); err != nil {
 		return err
 	}
 
@@ -178,16 +178,16 @@ func createTelegramActionAnswer(op telegramConversationTransaction, claim *Teleg
 	claim.Answer, claim.Action.AnswerRequestID, claim.Action.State = answer, answer.ID, "applying"
 	claim.Request.State = "applying"
 
-	return checkTelegramIntakeCapacity(op.ctx, op.tx, answer.Source.Peer.BotID)
+	return checkIntakeCapacity(op.ctx, op.tx, answer.Source.Peer.BotID)
 }
 
-func beginTelegramActionClaim(op telegramConversationTransaction, claim *TelegramActionClaim, answer TelegramOperationRequest) error {
+func beginActionClaim(op conversationTransaction, claim *ActionClaim, answer OperationRequest) error {
 	result, err := op.tx.ExecContext(op.ctx, `UPDATE telegram_actions SET state='applying',consumed_by_request=?,updated_at=? WHERE token=? AND state='pending'`, answer.ID, database.FormatTime(op.now), claim.Action.Token)
 	if err != nil {
 		return err
 	}
 
-	if err := telegramRequireChanged(result); err != nil {
+	if err := requireChanged(result); err != nil {
 		return err
 	}
 
@@ -202,13 +202,13 @@ func beginTelegramActionClaim(op telegramConversationTransaction, claim *Telegra
 	}
 
 	if changed != 2 {
-		return errTelegramReceiverConflict
+		return errReceiverConflict
 	}
 
 	return nil
 }
 
-func supersedeTelegramAction(op telegramConversationTransaction, claim *TelegramActionClaim, state string) error {
+func supersedeAction(op conversationTransaction, claim *ActionClaim, state string) error {
 	_, err := op.tx.ExecContext(op.ctx, `UPDATE telegram_actions SET state=?,updated_at=? WHERE token=? AND state IN ('pending','applying')`, state, database.FormatTime(op.now), claim.Action.Token)
 	if err != nil {
 		return err
@@ -221,28 +221,28 @@ func supersedeTelegramAction(op telegramConversationTransaction, claim *Telegram
 		return err
 	}
 
-	return finishTelegramHarnessConversation(op.ctx, op.tx, claim.Request, "blocked", op.now)
+	return finishHarnessConversation(op.ctx, op.tx, claim.Request, "blocked", op.now)
 }
 
-func guardTelegramActionClaim(op telegramConversationTransaction, claim *TelegramActionClaim) (string, error) {
+func guardActionClaim(op conversationTransaction, claim *ActionClaim) (string, error) {
 	if !claim.Action.ExpiresAt.After(op.now) {
 		return "expired", nil
 	}
 
-	if !telegramActionDigestMatches(claim.Action, claim.Request) || claim.Action.ConversationRevision != claim.Request.Target.ConversationRevision {
+	if !actionDigestMatches(claim.Action, claim.Request) || claim.Action.ConversationRevision != claim.Request.Target.ConversationRevision {
 		return "superseded", nil
 	}
 
-	if err := validateTelegramActionPresentation(op.ctx, op.tx, claim.Action, claim.Request, op.input.Config.Digest()); err != nil {
-		if telegramActionUnavailable(err) {
+	if err := validateActionPresentation(op.ctx, op.tx, claim.Action, claim.Request, op.input.Config.Digest()); err != nil {
+		if actionUnavailable(err) {
 			return "superseded", nil
 		}
 
 		return "", err
 	}
 
-	if err := validateTelegramActionTarget(op, claim.Request); err != nil {
-		if !telegramActionTargetConflict(err) {
+	if err := validateActionTarget(op, claim.Request); err != nil {
+		if !actionTargetConflict(err) {
 			return "", err
 		}
 

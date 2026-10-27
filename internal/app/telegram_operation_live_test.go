@@ -95,7 +95,7 @@ type telegramLostRecordAck struct {
 
 var errTelegramLostRecordAck = errors.New("injected lost owner acknowledgement")
 
-func (s telegramLostRecordAck) ApplyTelegramRecord(ctx context.Context, target telegramcore.TelegramOperationTarget, prepared PreparedRecordMutation) (RecordMutationResult, error) {
+func (s telegramLostRecordAck) ApplyTelegramRecord(ctx context.Context, target telegramcore.OperationTarget, prepared PreparedRecordMutation) (RecordMutationResult, error) {
 	result, err := s.service.ApplyTelegramRecord(ctx, target, prepared)
 	if err == nil && !*s.lost {
 		*s.lost = true
@@ -123,7 +123,7 @@ func TestTelegramOperationLostAcknowledgement(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	store, err := telegramcore.NewTelegramReceiverStore(t.Context(), f.receiver.env, testAssetsFS())
+	store, err := telegramcore.NewReceiverStore(t.Context(), f.receiver.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -149,7 +149,7 @@ func checkTelegramOperationRecoveredRecord(t *testing.T, f *telegramConversation
 	t.Helper()
 
 	operations := telegramOperationConcreteService(t, f.receiver)
-	target := telegramcore.TelegramOperationTarget{ProjectID: "example-project", Namespace: "default"}
+	target := telegramcore.OperationTarget{ProjectID: "example-project", Namespace: "default"}
 
 	page, err := operations.ReadTelegramRecords(t.Context(), target, RecordQuery{Kind: RecordTicket})
 	if err != nil || len(page.Records) != 1 || page.Records[0].Identity != "PRJ-1" {
@@ -187,7 +187,7 @@ type telegramMoveRecordRoot struct {
 	replacement string
 }
 
-func (s telegramMoveRecordRoot) PrepareTelegramRecord(ctx context.Context, target telegramcore.TelegramOperationTarget, binding workflowstate.MutationBinding, request RecordMutationRequest) (PreparedRecordMutation, error) {
+func (s telegramMoveRecordRoot) PrepareTelegramRecord(ctx context.Context, target telegramcore.OperationTarget, binding workflowstate.MutationBinding, request RecordMutationRequest) (PreparedRecordMutation, error) {
 	prepared, err := s.service.PrepareTelegramRecord(ctx, target, binding, request)
 	if err != nil {
 		return prepared, err
@@ -224,7 +224,7 @@ func TestTelegramOperationChangedRoot(t *testing.T) {
 
 	f.receiver.operations = operations
 
-	page, err := operations.ReadTelegramRecords(t.Context(), telegramcore.TelegramOperationTarget{ProjectID: "example-project", Namespace: "default"}, RecordQuery{Kind: RecordTicket})
+	page, err := operations.ReadTelegramRecords(t.Context(), telegramcore.OperationTarget{ProjectID: "example-project", Namespace: "default"}, RecordQuery{Kind: RecordTicket})
 	if err != nil || len(page.Records) != 0 {
 		t.Fatal("replacement root received a mutation", page, err)
 	}

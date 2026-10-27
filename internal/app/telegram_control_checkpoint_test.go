@@ -50,7 +50,7 @@ func checkTelegramControlCheckpoint(t *testing.T, action string) {
 	}
 }
 
-func telegramControlStartWorker(t *testing.T, operations service, run telegramcore.TelegramInvocationBinding) <-chan error {
+func telegramControlStartWorker(t *testing.T, operations service, run telegramcore.InvocationBinding) <-chan error {
 	t.Helper()
 
 	ctx, cancel := context.WithCancel(t.Context())

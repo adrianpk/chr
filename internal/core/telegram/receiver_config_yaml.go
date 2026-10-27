@@ -10,9 +10,9 @@ import (
 
 // The receiver accepts this small configuration grammar, not executable YAML
 // tags, aliases or implicit conversions. Unknown and repeated fields fail closed.
-func parseTelegramReceiverConfig(data []byte) (TelegramReceiverConfig, error) {
-	config := TelegramReceiverConfig{PollTimeoutSeconds: 30}
-	parser := telegramConfigParser{config: &config, seen: map[string]bool{}}
+func parseReceiverConfig(data []byte) (ReceiverConfig, error) {
+	config := ReceiverConfig{PollTimeoutSeconds: 30}
+	parser := configParser{config: &config, seen: map[string]bool{}}
 
 	for _, line := range strings.Split(string(data), "\n") {
 		if strings.TrimSpace(line) == "" || strings.HasPrefix(strings.TrimSpace(line), "#") {
@@ -20,26 +20,26 @@ func parseTelegramReceiverConfig(data []byte) (TelegramReceiverConfig, error) {
 		}
 
 		if err := parser.line(line); err != nil {
-			return TelegramReceiverConfig{}, errors.New("invalid telegram YAML configuration")
+			return ReceiverConfig{}, errors.New("invalid telegram YAML configuration")
 		}
 	}
 
 	if !parser.seen["telegram"] {
-		return TelegramReceiverConfig{}, errors.New("telegram configuration section is required")
+		return ReceiverConfig{}, errors.New("telegram configuration section is required")
 	}
 
 	return config, nil
 }
 
-type telegramConfigParser struct {
-	config     *TelegramReceiverConfig
+type configParser struct {
+	config     *ReceiverConfig
 	seen       map[string]bool
 	userFields map[string]bool
 	projects   bool
 	userList   bool
 }
 
-func (p *telegramConfigParser) line(line string) error {
+func (p *configParser) line(line string) error {
 	if line == "telegram:" && !p.seen["telegram"] {
 		p.seen["telegram"] = true
 
@@ -62,7 +62,7 @@ func (p *telegramConfigParser) line(line string) error {
 	return p.userLine(indent, strings.TrimSpace(line))
 }
 
-func (p *telegramConfigParser) field(line string) error {
+func (p *configParser) field(line string) error {
 	key, value, err := p.fieldHeader(line)
 	if err != nil {
 		return err
@@ -72,17 +72,17 @@ func (p *telegramConfigParser) field(line string) error {
 	case "enabled":
 		p.config.Enabled, err = strconv.ParseBool(value)
 	case "bot_token_env":
-		p.config.BotTokenEnv, err = telegramYAMLScalar(value)
+		p.config.BotTokenEnv, err = yAMLScalar(value)
 	case "poll_timeout_seconds":
 		p.config.PollTimeoutSeconds, err = strconv.Atoi(value)
 	case "default_project_id":
-		p.config.DefaultProjectID, err = telegramYAMLScalar(value)
+		p.config.DefaultProjectID, err = yAMLScalar(value)
 	case "allowed_chat_ids":
 		err = json.Unmarshal([]byte(value), &p.config.AllowedChatIDs)
 	case "allowed_topic_ids":
 		err = json.Unmarshal([]byte(value), &p.config.AllowedTopicIDs)
 	case "allowed_users":
-		err = telegramUserListHeader(value)
+		err = userListHeader(value)
 	default:
 		err = errors.New("unknown field")
 	}
@@ -90,7 +90,7 @@ func (p *telegramConfigParser) field(line string) error {
 	return err
 }
 
-func telegramUserListHeader(value string) error {
+func userListHeader(value string) error {
 	if value != "" {
 		return errors.New("expected user list")
 	}
@@ -98,7 +98,7 @@ func telegramUserListHeader(value string) error {
 	return nil
 }
 
-func (p *telegramConfigParser) fieldHeader(line string) (string, string, error) {
+func (p *configParser) fieldHeader(line string) (string, string, error) {
 	key, value, ok := strings.Cut(line, ":")
 	if !ok || p.seen[key] {
 		return "", "", errors.New("duplicate or malformed field")
@@ -111,14 +111,14 @@ func (p *telegramConfigParser) fieldHeader(line string) (string, string, error) 
 	return key, strings.TrimSpace(value), nil
 }
 
-func (p *telegramConfigParser) userLine(indent int, line string) error {
+func (p *configParser) userLine(indent int, line string) error {
 	if indent == 4 && strings.HasPrefix(line, "- telegram_user_id:") {
 		id, err := strconv.ParseInt(strings.TrimSpace(strings.TrimPrefix(line, "- telegram_user_id:")), 10, 64)
 		if err != nil || len(p.config.AllowedUsers) >= 100 {
 			return errors.New("invalid user ID or capacity")
 		}
 
-		p.config.AllowedUsers = append(p.config.AllowedUsers, TelegramAllowedUser{TelegramUserID: id})
+		p.config.AllowedUsers = append(p.config.AllowedUsers, AllowedUser{TelegramUserID: id})
 		p.userFields = map[string]bool{}
 		p.projects = false
 
@@ -131,7 +131,7 @@ func (p *telegramConfigParser) userLine(indent int, line string) error {
 
 	user := &p.config.AllowedUsers[len(p.config.AllowedUsers)-1]
 	if indent == 8 && p.projects && strings.HasPrefix(line, "- ") {
-		id, err := telegramYAMLScalar(strings.TrimPrefix(line, "- "))
+		id, err := yAMLScalar(strings.TrimPrefix(line, "- "))
 		user.ProjectIDs = append(user.ProjectIDs, id)
 
 		return err
@@ -140,7 +140,7 @@ func (p *telegramConfigParser) userLine(indent int, line string) error {
 	return p.userField(user, indent, line)
 }
 
-func (p *telegramConfigParser) userField(user *TelegramAllowedUser, indent int, line string) error {
+func (p *configParser) userField(user *AllowedUser, indent int, line string) error {
 	key, value, ok := strings.Cut(line, ":")
 	if !ok || indent != 6 || p.userFields[key] {
 		return errors.New("invalid user field")
@@ -154,7 +154,7 @@ func (p *telegramConfigParser) userField(user *TelegramAllowedUser, indent int, 
 	case "operator_id":
 		var err error
 
-		user.OperatorID, err = telegramYAMLScalar(value)
+		user.OperatorID, err = yAMLScalar(value)
 
 		return err
 	case "project_ids":
@@ -169,21 +169,21 @@ func (p *telegramConfigParser) userField(user *TelegramAllowedUser, indent int, 
 	}
 }
 
-func telegramYAMLScalar(value string) (string, error) {
+func yAMLScalar(value string) (string, error) {
 	if strings.HasPrefix(value, `"`) {
 		return strconv.Unquote(value)
 	}
 
-	if value == "" || !telegramConfigID(value) {
+	if value == "" || !configID(value) {
 		return "", errors.New("invalid scalar")
 	}
 
 	return value, nil
 }
 
-func renderTelegramReceiverConfig(config TelegramReceiverConfig) []byte {
-	chats := telegramMustJSON(config.AllowedChatIDs)
-	topics := telegramMustJSON(config.AllowedTopicIDs)
+func renderReceiverConfig(config ReceiverConfig) []byte {
+	chats := mustJSON(config.AllowedChatIDs)
+	topics := mustJSON(config.AllowedTopicIDs)
 
 	var body strings.Builder
 
