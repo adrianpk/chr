@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
@@ -22,7 +23,7 @@ var newTicketStartHarnessExecutor = func() core.HarnessExecutor {
 	return core.OSHarnessExecutor{}
 }
 
-func newPendingExecutionRecord(projectID string, ticket core.IndexedTicket) core.ExecutionRecord {
+func newPendingExecutionRecord(projectID string, ticket ticketcore.IndexedTicket) core.ExecutionRecord {
 	now := time.Now().UTC()
 
 	return core.ExecutionRecord{
@@ -36,7 +37,7 @@ func newPendingExecutionRecord(projectID string, ticket core.IndexedTicket) core
 	}
 }
 
-func ticketStartArtifactTitle(ticket core.IndexedTicket) string {
+func ticketStartArtifactTitle(ticket ticketcore.IndexedTicket) string {
 	if strings.TrimSpace(ticket.Title) == "" {
 		return ticket.Key
 	}

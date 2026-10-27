@@ -14,6 +14,7 @@ import (
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -32,7 +33,7 @@ type ProjectDocumentContextOptions struct {
 type ProjectDocumentContext struct {
 	ProjectDir        string
 	WorkspaceDir      string
-	Ticket            IndexedTicket
+	Ticket            ticketcore.IndexedTicket
 	TicketDocument    authoringcore.ContextDocument
 	ReferencedDocs    []authoringcore.ContextDocument
 	ValidationCommand string
@@ -45,7 +46,7 @@ type projectDocumentPaths struct {
 }
 
 type contextTicketLoad struct {
-	Ticket   IndexedTicket
+	Ticket   ticketcore.IndexedTicket
 	Document authoringcore.ContextDocument
 }
 
@@ -148,7 +149,7 @@ func loadContextTicket(
 		indexedAt = time.Now().UTC()
 	}
 
-	ticket, err := NewTicketParser().ParseTicket(context.Background(), ParseTicketOptions{
+	ticket, err := ticketcore.NewTicketParser().ParseTicket(context.Background(), ticketcore.ParseTicketOptions{
 		ProjectID:  opts.ProjectID,
 		ProjectDir: projectDir,
 		Path:       ticketPath,

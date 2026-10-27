@@ -6,28 +6,29 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type agentWorkLoopSelection struct {
 	ExcludedAdopted int
-	Tickets         []core.IndexedTicket
+	Tickets         []ticketcore.IndexedTicket
 	EligibleCount   int
 	ReviewConfig    core.ReviewWorkflowConfig
 	WorkConfig      core.WorkConfig
 }
 
-func parseProjectTicketsFromDir(ctx context.Context, projectID, projectDir string, indexedAt time.Time) ([]core.IndexedTicket, error) {
+func parseProjectTicketsFromDir(ctx context.Context, projectID, projectDir string, indexedAt time.Time) ([]ticketcore.IndexedTicket, error) {
 	files, err := core.NewTicketFileDiscoverer().DiscoverTicketFiles(ctx, core.DiscoverTicketFilesOptions{ProjectDir: projectDir})
 	if err != nil {
 		return nil, err
 	}
 
-	parser := core.NewTicketParser()
+	parser := ticketcore.NewTicketParser()
 
-	tickets := make([]core.IndexedTicket, 0, len(files))
+	tickets := make([]ticketcore.IndexedTicket, 0, len(files))
 	for _, file := range files {
-		ticket, err := parser.ParseTicket(ctx, core.ParseTicketOptions{
+		ticket, err := parser.ParseTicket(ctx, ticketcore.ParseTicketOptions{
 			ProjectID:  projectID,
 			ProjectDir: projectDir,
 			Path:       file.Path,
@@ -96,7 +97,7 @@ func (s service) agentWorkLoopSelection(opts AgentWorkSelectionOptions) (agentWo
 	}, nil
 }
 
-func (s service) applyAgentWorkSelectionPreflight(index core.TicketIndex, tickets []core.IndexedTicket, workConfig core.WorkConfig) ([]core.IndexedTicket, error) {
+func (s service) applyAgentWorkSelectionPreflight(index core.TicketIndex, tickets []ticketcore.IndexedTicket, workConfig core.WorkConfig) ([]ticketcore.IndexedTicket, error) {
 	allTickets, err := index.ListProjectTickets(s.ctx, s.projectContext.ProjectID)
 	if err != nil {
 		return nil, err
@@ -155,7 +156,7 @@ func validateAgentWorkSelectionOptions(opts AgentWorkSelectionOptions) error {
 
 func defaultAgentWorkSelectionOptions(maxIterations int) AgentWorkSelectionOptions {
 	return AgentWorkSelectionOptions{
-		Statuses:      []string{core.TicketStatusReadyForDev},
+		Statuses:      []string{ticketcore.TicketStatusReadyForDev},
 		Order:         workflowstate.TicketOrderCreatedAt,
 		MaxIterations: maxIterations,
 	}
@@ -163,7 +164,7 @@ func defaultAgentWorkSelectionOptions(maxIterations int) AgentWorkSelectionOptio
 
 func agentWorkStatuses(statuses []string) []string {
 	if len(statuses) == 0 {
-		return []string{core.TicketStatusReadyForDev}
+		return []string{ticketcore.TicketStatusReadyForDev}
 	}
 
 	return statuses

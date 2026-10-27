@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strings"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -78,7 +79,7 @@ func validateWorkflowLooseInputBounds(request workflowstate.PreviewRequest) erro
 	return nil
 }
 
-func workflowLooseExclusion(request workflowstate.PreviewRequest, ticket IndexedTicket) string {
+func workflowLooseExclusion(request workflowstate.PreviewRequest, ticket ticketcore.IndexedTicket) string {
 	if !slices.Contains(request.Statuses, ticket.Status) {
 		return "status_mismatch"
 	}
@@ -115,7 +116,7 @@ func workflowMeetsMinimum(value, minimum string) bool {
 }
 
 func (selection workflowSelection) orderLooseMembers(members []WorkflowPreviewMember, order workflowstate.TicketOrder) {
-	tickets := map[string]IndexedTicket{}
+	tickets := map[string]ticketcore.IndexedTicket{}
 	for _, ticket := range selection.tickets {
 		ticket.Priority, ticket.Severity = workflowRank(ticket.Priority), workflowRank(ticket.Severity)
 		tickets[ticket.Key] = ticket
@@ -128,7 +129,7 @@ func (selection workflowSelection) orderLooseMembers(members []WorkflowPreviewMe
 
 func validateWorkflowMinimumRanks(request workflowstate.PreviewRequest) error {
 	for _, rank := range []string{request.MinPriority, request.MinSeverity} {
-		if rank != "" && (!isValidTicketPriority(rank) || rank == "unclassified") {
+		if rank != "" && (!ticketcore.IsValidTicketPriority(rank) || rank == "unclassified") {
 			return fmt.Errorf("minimum rank must be critical, high, normal or low")
 		}
 	}

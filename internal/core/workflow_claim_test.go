@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -170,7 +171,7 @@ func TestWorkflowClaimEdits(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	record.Task.AttemptID, record.Task.Phase, record.Task.Status = "", "pending", TicketStatusReadyForDev
+	record.Task.AttemptID, record.Task.Phase, record.Task.Status = "", "pending", ticketcore.TicketStatusReadyForDev
 	if _, err := store.Write(t.Context(), record, record.Revision); !errors.Is(err, ErrWorkflowOwned) {
 		t.Fatalf("status edit bypassed owner: %v", err)
 	}

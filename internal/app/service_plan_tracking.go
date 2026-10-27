@@ -13,6 +13,7 @@ import (
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 // PlanTrackingRequest selects the plan scope used to materialize tracking
@@ -29,7 +30,7 @@ type PlanTrackingResult struct {
 	Message      string
 	Plan         PlanView
 	TrackingPath string
-	Tickets      []core.IndexedTicket
+	Tickets      []ticketcore.IndexedTicket
 }
 
 func (s service) MaterializePlanTracking(ctx context.Context, request PlanTrackingRequest) (PlanTrackingResult, error) {
@@ -148,7 +149,7 @@ func (s service) createPlanTrackingTickets(scope quizcore.Scope, planPath, track
 		result, err := s.CreateTicket(CreateTicketRequest{
 			Title:       payload.Title,
 			Synopsis:    payload.Synopsis,
-			Status:      core.TicketStatusReadyForDev,
+			Status:      ticketcore.TicketStatusReadyForDev,
 			Priority:    payload.Priority,
 			Severity:    payload.Severity,
 			Type:        payload.Type,

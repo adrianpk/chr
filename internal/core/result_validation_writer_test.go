@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func TestTicketResultValidationWriterWritesEvidence(t *testing.T) {
@@ -73,7 +75,7 @@ func writeResultValidationTicket(t *testing.T, validationHistory string) string 
 	t.Helper()
 
 	path := filepath.Join(t.TempDir(), "ticket.md")
-	ticket := Ticket{
+	ticket := ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "reviewing",
@@ -81,7 +83,7 @@ func writeResultValidationTicket(t *testing.T, validationHistory string) string 
 		UpdatedAt: time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC),
 	}
 
-	content, err := NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

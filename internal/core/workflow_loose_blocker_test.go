@@ -8,6 +8,7 @@ import (
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -17,7 +18,7 @@ func workflowLooseBlockedFixture(t *testing.T) workflowIntegrationFixture {
 	f := workflowLooseConfiguredQueue(t, false, func(store *WorkflowStore, _ *WorkflowStartRequest) {
 		first := workflowLooseRecord(t, store, "PRJ-90")
 		outside := workflowLooseCreate(t, store, first, "PRJ-89", "low", nil)
-		workflowLooseClassify(t, store, outside, "low", TicketStatusBacklog)
+		workflowLooseClassify(t, store, outside, "low", ticketcore.TicketStatusBacklog)
 		workflowLooseDependency(t, store, "PRJ-91", "PRJ-89")
 	})
 	workflowFinalizeFrontier(t, f)
@@ -63,7 +64,7 @@ func TestWorkflowLooseBlocker(t *testing.T) {
 		t.Fatal("dependency refusal did not retain an invocation stop")
 	}
 
-	workflowLooseClassify(t, f.store, workflowLooseRecord(t, f.store, "PRJ-92"), "critical", TicketStatusReadyForDev)
+	workflowLooseClassify(t, f.store, workflowLooseRecord(t, f.store, "PRJ-92"), "critical", ticketcore.TicketStatusReadyForDev)
 
 	retained, err := f.store.ReconcileWorkflowMembership(t.Context(), before.ID)
 	if err != nil || retained.Members[1].Admission.Key != "PRJ-91" || !reflect.DeepEqual(retained.LooseQueue.Admitted, before.LooseQueue.Admitted) {

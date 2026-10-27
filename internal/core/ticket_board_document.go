@@ -8,22 +8,23 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func readBoardDocument(projectDir, path string) (IndexedTicket, error) {
+func readBoardDocument(projectDir, path string) (ticketcore.IndexedTicket, error) {
 	data, err := opsfile.Read(path)
 	if err != nil {
-		return IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	relative, err := filepath.Rel(projectDir, path)
 	if err != nil {
-		return IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
-	ticket := IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Path: path, RelativePath: filepath.ToSlash(relative), Key: filepath.ToSlash(relative)}, IndexedTicketSummary: IndexedTicketSummary{Title: filepath.Base(path)}, IndexedTicketProjection: IndexedTicketProjection{ContentHash: contenthash.Sum(data)}}
+	ticket := ticketcore.IndexedTicket{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Path: path, RelativePath: filepath.ToSlash(relative), Key: filepath.ToSlash(relative)}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: filepath.Base(path)}, IndexedTicketProjection: ticketcore.IndexedTicketProjection{ContentHash: contenthash.Sum(data)}}
 
 	front, err := ticketmetadata.Parse(string(data))
 	if err != nil {
@@ -40,7 +41,7 @@ func readBoardDocument(projectDir, path string) (IndexedTicket, error) {
 	return ticket, nil
 }
 
-func boardTicketMetadata(ticket IndexedTicket, metadata map[string]string) IndexedTicket {
+func boardTicketMetadata(ticket ticketcore.IndexedTicket, metadata map[string]string) ticketcore.IndexedTicket {
 	value := func(name string) string { return opsmetadata.Unquote(metadata[name]) }
 	if value("key") != "" {
 		ticket.Key = value("key")
@@ -63,14 +64,14 @@ func boardTicketMetadata(ticket IndexedTicket, metadata map[string]string) Index
 	ticket.SourceKind, ticket.SourceRef, ticket.Branch = value("source_kind"), value("source_ref"), value("branch")
 	ticket.ReviewState, ticket.ReviewResult = value("review_state"), value("review_result")
 	ticket.Tags = opsmetadata.ParseList(metadata["tags"])
-	ticket.BoardColumn, _ = BoardTicketStatusFor(ticket.Status)
+	ticket.BoardColumn, _ = ticketcore.BoardTicketStatusFor(ticket.Status)
 
 	// Repository tickets have their own status-directory vocabulary. In that
 	// contract solved means implemented, whereas legacy runtime solved awaits merge.
 	if value("key") == "" && strings.HasPrefix(value("id"), "TKT-") {
 		ticket.Type, ticket.ProjectArea, ticket.SourceKind = value("kind"), value("scope"), value("source")
 		if ticket.Status == "solved" || ticket.Status == "closed" {
-			ticket.BoardColumn = TicketStatusDone
+			ticket.BoardColumn = ticketcore.TicketStatusDone
 		}
 
 		if filepath.Base(filepath.Dir(ticket.Path)) != ticket.Status {

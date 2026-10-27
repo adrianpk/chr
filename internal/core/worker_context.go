@@ -10,6 +10,7 @@ import (
 	"time"
 
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 )
@@ -471,7 +472,7 @@ func loadWorkerEvidence(ctx context.Context, projectDir, ticketPath string) (*Wo
 
 	observed := parseWorkerEvidenceChecklist(string(content))
 
-	ticket, err := NewTicketParser().ParseTicket(ctx, ParseTicketOptions{
+	ticket, err := ticketcore.NewTicketParser().ParseTicket(ctx, ticketcore.ParseTicketOptions{
 		ProjectDir: projectDir,
 		Path:       ticketPath,
 		IndexedAt:  time.Now().UTC(),
@@ -508,7 +509,7 @@ func parseWorkerEvidenceChecklist(content string) workerChecklistObservation {
 }
 
 func workerRepairHandoff(ctx context.Context, projectDir, ticketPath string) (*WorkerRepairHandoff, error) {
-	ticket, err := NewTicketParser().ParseTicket(ctx, ParseTicketOptions{
+	ticket, err := ticketcore.NewTicketParser().ParseTicket(ctx, ticketcore.ParseTicketOptions{
 		ProjectDir: projectDir,
 		Path:       ticketPath,
 		IndexedAt:  time.Now().UTC(),

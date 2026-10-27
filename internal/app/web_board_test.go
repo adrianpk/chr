@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/webui"
@@ -159,7 +159,7 @@ func TestWebBoardFailure(t *testing.T) {
 func writeWebBoardCanonicalTicket(t *testing.T, project string) {
 	t.Helper()
 
-	content, err := core.NewTicketRenderer().RenderTicket(core.Ticket{Key: "CHR-2", Title: "Canonical ticket", Synopsis: "Retained in ops.", Status: core.TicketStatusReadyForDev, Type: "task"})
+	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticketcore.Ticket{Key: "CHR-2", Title: "Canonical ticket", Synopsis: "Retained in ops.", Status: ticketcore.TicketStatusReadyForDev, Type: "task"})
 	if err != nil {
 		t.Fatal(err)
 	}

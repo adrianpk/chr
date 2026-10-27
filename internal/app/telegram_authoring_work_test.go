@@ -14,6 +14,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -119,7 +120,7 @@ func telegramAuthoringWorkCheckRecord(t *testing.T, operations service, result A
 	}
 
 	record := snapshot.Records[0]
-	if record.Task.Status != core.TicketStatusBacklog || record.Task.Phase != "pending" || !strings.Contains(string(record.Body), "configured retry ceiling") || result.Scope.Namespace != "original" || result.Result.ReceiptRef == "" {
+	if record.Task.Status != ticketcore.TicketStatusBacklog || record.Task.Phase != "pending" || !strings.Contains(string(record.Body), "configured retry ceiling") || result.Scope.Namespace != "original" || result.Result.ReceiptRef == "" {
 		t.Fatalf("not a retained proposed description: %+v", result)
 	}
 

@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -32,7 +33,7 @@ type IntegrationCyclePolicy struct {
 // IntegrationCyclePlan describes the next ticket integration cycle without side effects.
 type IntegrationCyclePlan struct {
 	ProjectID string
-	Ticket    IndexedTicket
+	Ticket    ticketcore.IndexedTicket
 	Policy    IntegrationCyclePolicy
 	Phase     IntegrationCyclePhase
 	Status    IntegrationCycleStatus
@@ -42,7 +43,7 @@ type IntegrationCyclePlan struct {
 // IntegrationCyclePlanOptions describes input for planning one selected ticket cycle.
 type IntegrationCyclePlanOptions struct {
 	ProjectID    string
-	Ticket       IndexedTicket
+	Ticket       ticketcore.IndexedTicket
 	ReviewConfig ReviewWorkflowConfig
 }
 

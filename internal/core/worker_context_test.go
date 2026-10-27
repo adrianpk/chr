@@ -9,6 +9,7 @@ import (
 	"time"
 
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -84,10 +85,10 @@ func TestMaterializeWorkerContextForExecutionUsesContainerPaths(t *testing.T) {
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md"),
 	}
-	writeWorkerContextTicket(t, record.TicketPath, Ticket{
+	writeWorkerContextTicket(t, record.TicketPath, ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Ready work",
-		Status:    TicketStatusReadyForDev,
+		Status:    ticketcore.TicketStatusReadyForDev,
 		Priority:  "normal",
 		Severity:  "normal",
 		Type:      "feature",
@@ -160,10 +161,10 @@ func TestMaterializeWorkerContextForExecutionIncludesRepairHandoff(t *testing.T)
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md"),
 	}
-	writeWorkerContextTicket(t, record.TicketPath, Ticket{
+	writeWorkerContextTicket(t, record.TicketPath, ticketcore.Ticket{
 		Key:               "CHR-1",
 		Title:             "Repair work",
-		Status:            TicketStatusReadyForDev,
+		Status:            ticketcore.TicketStatusReadyForDev,
 		Priority:          "normal",
 		Severity:          "normal",
 		Type:              "feature",
@@ -224,10 +225,10 @@ func TestMaterializeWorkerContextForExecutionIncludesEvidenceStrategy(t *testing
 		t.Fatalf("RenderEvidenceStrategyChecklist returned error: %v", err)
 	}
 
-	writeWorkerContextTicket(t, record.TicketPath, Ticket{
+	writeWorkerContextTicket(t, record.TicketPath, ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Behavior work",
-		Status:    TicketStatusReadyForDev,
+		Status:    ticketcore.TicketStatusReadyForDev,
 		Priority:  "normal",
 		Severity:  "normal",
 		Type:      "feature",
@@ -273,10 +274,10 @@ func TestMaterializeWorkerContextForExecutionIncludesGherkinPolicyGuidance(t *te
 		TicketPath: filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md"),
 	}
 	writeEvidencePolicyFeature(t, projectDir, ".chr/default/acceptance/checkout.feature")
-	writeWorkerContextTicket(t, record.TicketPath, Ticket{
+	writeWorkerContextTicket(t, record.TicketPath, ticketcore.Ticket{
 		Key:         "CHR-1",
 		Title:       "Add CLI checkout command",
-		Status:      TicketStatusReadyForDev,
+		Status:      ticketcore.TicketStatusReadyForDev,
 		Priority:    "normal",
 		Severity:    "normal",
 		Type:        "feature",
@@ -427,10 +428,10 @@ func TestMaterializeWorkerContextForExecutionBlocksRepairWithoutReviewComments(t
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md"),
 	}
-	writeWorkerContextTicket(t, record.TicketPath, Ticket{
+	writeWorkerContextTicket(t, record.TicketPath, ticketcore.Ticket{
 		Key:          "CHR-1",
 		Title:        "Repair work",
-		Status:       TicketStatusReadyForDev,
+		Status:       ticketcore.TicketStatusReadyForDev,
 		Priority:     "normal",
 		Severity:     "normal",
 		Type:         "feature",
@@ -547,10 +548,10 @@ func testWorkerContextWorktreeRecord(t *testing.T, executionWorkspaceDir string)
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(executionWorkspaceDir, ".chr", "default", "tickets", "CHR-1.md"),
 	}
-	writeWorkerContextTicket(t, record.TicketPath, Ticket{
+	writeWorkerContextTicket(t, record.TicketPath, ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Ready work",
-		Status:    TicketStatusReadyForDev,
+		Status:    ticketcore.TicketStatusReadyForDev,
 		Priority:  "normal",
 		Severity:  "normal",
 		Type:      "feature",
@@ -561,10 +562,10 @@ func testWorkerContextWorktreeRecord(t *testing.T, executionWorkspaceDir string)
 	return record
 }
 
-func writeWorkerContextTicket(t *testing.T, path string, ticket Ticket) {
+func writeWorkerContextTicket(t *testing.T, path string, ticket ticketcore.Ticket) {
 	t.Helper()
 
-	content, err := NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

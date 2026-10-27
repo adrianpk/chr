@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -198,7 +199,7 @@ func checkWorkflowTrackerProgress(t *testing.T, store *WorkflowStore, hierarchy 
 	before := workflowTestRead(t, store, id)
 
 	task, err := store.Read(t.Context(), hierarchy.Tasks[0].Path)
-	if err != nil || task.Task.Phase != "validated" || task.Task.Status == TicketStatusDone {
+	if err != nil || task.Task.Phase != "validated" || task.Task.Status == ticketcore.TicketStatusDone {
 		t.Fatal("tracker error rolled back or integrated task progress", err)
 	}
 

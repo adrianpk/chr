@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -103,11 +104,11 @@ func (s *WorkflowStore) workflowPullRequestTaskChanges(run *workflowInvocationFi
 	files := []workflowstate.FileChange{}
 
 	for _, record := range tasks {
-		if record.Task.Phase == "waiting_slice" && slices.Contains([]string{TicketStatusReadyForReview, TicketStatusReadyForMerge}, record.Task.Status) {
+		if record.Task.Phase == "waiting_slice" && slices.Contains([]string{ticketcore.TicketStatusReadyForReview, ticketcore.TicketStatusReadyForMerge}, record.Task.Status) {
 			continue
 		}
 
-		record.Task.Phase, record.Task.Status = "waiting_slice", TicketStatusReadyForReview
+		record.Task.Phase, record.Task.Status = "waiting_slice", ticketcore.TicketStatusReadyForReview
 
 		changes, err := s.workflowClaimRecordChanges(run, &record)
 		if err != nil {

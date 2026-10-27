@@ -7,6 +7,7 @@ import (
 	"slices"
 
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -99,12 +100,12 @@ func validateWorkflowTask(t WorkflowTask) error {
 
 func validateWorkflowTaskPhase(t WorkflowTask) error {
 	allowed := map[string][]string{
-		"pending":       {TicketStatusBacklog, TicketStatusReadyForDev},
-		"running":       {TicketStatusInProgress},
-		"validated":     {TicketStatusInProgress},
-		"waiting_slice": {TicketStatusInProgress, TicketStatusReadyForReview, TicketStatusReadyForMerge},
-		"blocked":       {TicketStatusBlockedLegacy},
-		"integrated":    {TicketStatusDone},
+		"pending":       {ticketcore.TicketStatusBacklog, ticketcore.TicketStatusReadyForDev},
+		"running":       {ticketcore.TicketStatusInProgress},
+		"validated":     {ticketcore.TicketStatusInProgress},
+		"waiting_slice": {ticketcore.TicketStatusInProgress, ticketcore.TicketStatusReadyForReview, ticketcore.TicketStatusReadyForMerge},
+		"blocked":       {ticketcore.TicketStatusBlockedLegacy},
+		"integrated":    {ticketcore.TicketStatusDone},
 	}
 	if !slices.Contains(allowed[t.Phase], t.Status) {
 		return fmt.Errorf("invalid workflow task phase/status: %s/%s", t.Phase, t.Status)

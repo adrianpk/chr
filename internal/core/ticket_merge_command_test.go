@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
@@ -18,7 +19,7 @@ func TestRunTicketMergeCommandDryRunDoesNotMutateTicket(t *testing.T) {
 
 	result, err := RunTicketMergeCommand(t.Context(), TicketMergeCommandOptions{
 		Ticket:        ticket,
-		Tickets:       []IndexedTicket{ticket},
+		Tickets:       []ticketcore.IndexedTicket{ticket},
 		Remote:        fakeTicketMergeCommandRemote{snapshot: mergeCommandSnapshot()},
 		MergeStrategy: TicketMergeStrategyRebase,
 		DryRun:        true,
@@ -28,7 +29,7 @@ func TestRunTicketMergeCommandDryRunDoesNotMutateTicket(t *testing.T) {
 		t.Fatalf("RunTicketMergeCommand returned error: %v", err)
 	}
 
-	if !result.Preflight.Allowed || result.Status != TicketStatusReadyForMerge {
+	if !result.Preflight.Allowed || result.Status != ticketcore.TicketStatusReadyForMerge {
 		t.Fatalf("result = %#v, want allowed dry-run ready_for_merge", result)
 	}
 
@@ -50,7 +51,7 @@ func TestRunTicketMergeCommandAppliesSuccessfulMerge(t *testing.T) {
 
 	result, err := RunTicketMergeCommand(t.Context(), TicketMergeCommandOptions{
 		Ticket:        ticket,
-		Tickets:       []IndexedTicket{ticket},
+		Tickets:       []ticketcore.IndexedTicket{ticket},
 		Remote:        remote,
 		MergeStrategy: TicketMergeStrategyRebase,
 		MergedAt:      testMergeCommandTime(),
@@ -59,7 +60,7 @@ func TestRunTicketMergeCommandAppliesSuccessfulMerge(t *testing.T) {
 		t.Fatalf("RunTicketMergeCommand returned error: %v", err)
 	}
 
-	if result.Status != TicketStatusDone || result.MergeState != TicketMergeStateMerged {
+	if result.Status != ticketcore.TicketStatusDone || result.MergeState != TicketMergeStateMerged {
 		t.Fatalf("result = %#v, want done merged", result)
 	}
 
@@ -97,7 +98,7 @@ func TestRunTicketMergeCommandCleansWorktreeAfterSuccessfulMerge(t *testing.T) {
 
 	result, err := RunTicketMergeCommand(t.Context(), TicketMergeCommandOptions{
 		Ticket:        ticket,
-		Tickets:       []IndexedTicket{ticket},
+		Tickets:       []ticketcore.IndexedTicket{ticket},
 		Remote:        remote,
 		MergeStrategy: TicketMergeStrategyRebase,
 		ProjectDir:    projectDir,
@@ -126,7 +127,7 @@ func TestRunTicketMergeCommandRecordsProviderFailure(t *testing.T) {
 
 	result, err := RunTicketMergeCommand(t.Context(), TicketMergeCommandOptions{
 		Ticket:        ticket,
-		Tickets:       []IndexedTicket{ticket},
+		Tickets:       []ticketcore.IndexedTicket{ticket},
 		Remote:        fakeTicketMergeCommandRemote{snapshot: mergeCommandSnapshot(), mergeErr: errors.New("provider failed")},
 		MergeStrategy: TicketMergeStrategyRebase,
 		MergedAt:      testMergeCommandTime(),
@@ -157,7 +158,7 @@ func TestRunTicketMergeCommandRecordsBlockedPreflight(t *testing.T) {
 
 	result, err := RunTicketMergeCommand(t.Context(), TicketMergeCommandOptions{
 		Ticket:        ticket,
-		Tickets:       []IndexedTicket{ticket},
+		Tickets:       []ticketcore.IndexedTicket{ticket},
 		Remote:        fakeTicketMergeCommandRemote{snapshot: blockedMergeCommandSnapshot()},
 		MergeStrategy: TicketMergeStrategyRebase,
 		MergedAt:      testMergeCommandTime(),
@@ -202,14 +203,14 @@ func (remote fakeTicketMergeCommandRemote) Merge(context.Context, MergeRequest) 
 	return remote.merge, nil
 }
 
-func writeMergeCommandTicket(t *testing.T) (IndexedTicket, string) {
+func writeMergeCommandTicket(t *testing.T) (ticketcore.IndexedTicket, string) {
 	t.Helper()
 
 	now := testMergeCommandTime()
-	ticket := Ticket{
+	ticket := ticketcore.Ticket{
 		Key:          "CHR-3",
 		Title:        "Merge reviewed ticket",
-		Status:       TicketStatusReadyForMerge,
+		Status:       ticketcore.TicketStatusReadyForMerge,
 		Branch:       "feat/slice-3-merge-execution-command",
 		ReviewState:  TicketReviewCommandResultPass,
 		ReviewResult: TicketReviewCommandResultPass,
@@ -224,7 +225,7 @@ func writeMergeCommandTicket(t *testing.T) (IndexedTicket, string) {
 		UpdatedAt: now,
 	}
 
-	content, err := NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}
@@ -234,11 +235,11 @@ func writeMergeCommandTicket(t *testing.T) (IndexedTicket, string) {
 		t.Fatalf("write ticket: %v", err)
 	}
 
-	indexed := IndexedTicket{
-		IndexedTicketIdentity: IndexedTicketIdentity{
+	indexed := ticketcore.IndexedTicket{
+		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
 			Key:  ticket.Key,
 			Path: path,
-		}, IndexedTicketClassification: IndexedTicketClassification{Status: ticket.Status}, IndexedTicketSource: IndexedTicketSource{Branch: ticket.Branch}, IndexedTicketReview: IndexedTicketReview{
+		}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticket.Status}, IndexedTicketSource: ticketcore.IndexedTicketSource{Branch: ticket.Branch}, IndexedTicketReview: ticketcore.IndexedTicketReview{
 			ReviewState:  ticket.ReviewState,
 			ReviewResult: ticket.ReviewResult,
 			ReviewRefs:   ticket.ReviewRefs,
@@ -277,7 +278,7 @@ func testMergeCommandTime() time.Time {
 	return time.Date(2026, 6, 2, 12, 0, 0, 0, time.UTC)
 }
 
-func testMergeCommandWorktreePlan(t *testing.T, projectDir string, ticket IndexedTicket) WorktreePlan {
+func testMergeCommandWorktreePlan(t *testing.T, projectDir string, ticket ticketcore.IndexedTicket) WorktreePlan {
 	t.Helper()
 
 	plan, err := NewWorktreePlan(WorktreePlanOptions{

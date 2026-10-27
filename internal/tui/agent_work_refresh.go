@@ -5,7 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 const agentWorkRefreshInterval = 2 * time.Second
@@ -24,7 +24,7 @@ type AgentWorkRefreshRequest struct {
 // AgentWorkRefreshResult contains refreshed agent work rows for the dashboard.
 type AgentWorkRefreshResult struct {
 	Workflow      *WorkflowView
-	Tickets       []core.IndexedTicket
+	Tickets       []ticketcore.IndexedTicket
 	Observability ObservabilityView
 	Readiness     WorkReadinessView
 }

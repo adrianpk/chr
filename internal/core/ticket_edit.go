@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -157,7 +158,7 @@ func editableTicketContent(document TicketDocument) (string, error) {
 
 	record := document.native
 
-	return NewTicketRenderer().RenderTicket(Ticket{
+	return ticketcore.NewTicketRenderer().RenderTicket(ticketcore.Ticket{
 		Key: record.Task.Key, Title: document.Ticket.Title, Synopsis: boardDescription(record.Body),
 		Status: record.Task.Status, UseCase: record.Task.UseCase,
 		Priority: document.Ticket.Priority, Severity: document.Ticket.Severity, Type: document.Ticket.Type,

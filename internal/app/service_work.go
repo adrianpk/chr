@@ -8,13 +8,14 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkOperationResult is the TUI-facing result for agent work operations.
 type WorkOperationResult struct {
 	Message string
-	Tickets []core.IndexedTicket
+	Tickets []ticketcore.IndexedTicket
 }
 
 // AgentWorkResult summarizes runnable agent work for the dashboard.
@@ -24,12 +25,12 @@ type AgentWorkResult struct {
 	Excluded      map[string]int
 	Workflow      *core.WorkflowInvocation
 	Message       string
-	Tickets       []core.IndexedTicket
+	Tickets       []ticketcore.IndexedTicket
 	Execution     *core.ExecutionRecord
 	LoopRun       *core.LoopRunRecord
 	Executions    []core.ExecutionRecord
 	Merges        []core.TicketMergeCommandResult
-	SelectedQueue []core.IndexedTicket
+	SelectedQueue []ticketcore.IndexedTicket
 	EligibleCount int
 }
 
@@ -133,22 +134,22 @@ func (s service) startLegacyAgentWorkTicket(ticketKey string) (AgentWorkResult, 
 func (s service) prepareAgentWorkTicket(ticketKey string) (preparedAgentWorkTicket, error) {
 	ticket, err := s.legacyAgentWorkTicket(ticketKey)
 	if err != nil {
-		return preparedAgentWorkTicket{Ticket: core.IndexedTicket{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, err
+		return preparedAgentWorkTicket{Ticket: ticketcore.IndexedTicket{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, err
 	}
 
 	lock, err := acquireAgentOperationLock(s.ctx, s.projectContext, core.AgentOperationDevelopment)
 	if err != nil {
-		return preparedAgentWorkTicket{Ticket: core.IndexedTicket{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, err
+		return preparedAgentWorkTicket{Ticket: ticketcore.IndexedTicket{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, err
 	}
 
 	preflight, err := s.prepareTicketStart(s.ctx, ticket, ticketStartPreflightOptions{PrepareWorktree: true})
 	if err != nil {
 		releaseErr := lock.Release()
 		if releaseErr != nil {
-			return preparedAgentWorkTicket{Ticket: core.IndexedTicket{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, releaseErr
+			return preparedAgentWorkTicket{Ticket: ticketcore.IndexedTicket{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, releaseErr
 		}
 
-		return preparedAgentWorkTicket{Ticket: core.IndexedTicket{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, core.NewExecutionFailure(core.ExecutionFailurePreflight, err)
+		return preparedAgentWorkTicket{Ticket: ticketcore.IndexedTicket{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, core.NewExecutionFailure(core.ExecutionFailurePreflight, err)
 	}
 
 	return preparedAgentWorkTicket{Ticket: ticket, Preflight: preflight, Release: releaseAgentOperationLock(lock)}, nil
@@ -320,45 +321,45 @@ func (s service) ensureAgentWorkRuntime() error {
 	return nil
 }
 
-func (s service) legacyAgentWorkTicket(ticketKey string) (core.IndexedTicket, error) {
+func (s service) legacyAgentWorkTicket(ticketKey string) (ticketcore.IndexedTicket, error) {
 	if err := s.checkLegacyAgentWorkKey(ticketKey); err != nil {
-		return core.IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	err := s.ensureAgentWorkRuntime()
 	if err != nil {
-		return core.IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	ticket, err := s.ticketByKey(ticketKey)
 	if err != nil {
-		return core.IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	if err := core.CheckLegacyWorkTicket(ticket.Path); err != nil {
-		return core.IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	tickets, err := s.listProjectTickets()
 	if err != nil {
-		return core.IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	tickets, _, err = core.FilterLegacyWorkTickets(s.ctx, tickets)
 	if err != nil {
-		return core.IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	err = enforceWorkSelectionPreflight(s.ctx, s.projectContext, tickets, ticket.Key)
 	if err != nil {
-		return core.IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	return ticket, nil
 }
 
 type preparedAgentWorkTicket struct {
-	Ticket    core.IndexedTicket
+	Ticket    ticketcore.IndexedTicket
 	Preflight ticketStartPreflight
 	Release   func()
 }

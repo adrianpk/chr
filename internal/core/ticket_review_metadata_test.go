@@ -8,14 +8,15 @@ import (
 	"testing"
 	"time"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 func TestTicketReviewMetadataUpdaterAddsBranchAndReviewRef(t *testing.T) {
-	path := writeReviewMetadataTicket(t, Ticket{
+	path := writeReviewMetadataTicket(t, ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Do something",
-		Status:    TicketStatusInProgress,
+		Status:    ticketcore.TicketStatusInProgress,
 		CreatedAt: testReviewMetadataTime(12),
 		UpdatedAt: testReviewMetadataTime(12),
 	})
@@ -54,10 +55,10 @@ func TestTicketReviewMetadataUpdaterAddsBranchAndReviewRef(t *testing.T) {
 }
 
 func TestTicketReviewMetadataUpdaterReplacesExistingReviewRef(t *testing.T) {
-	path := writeReviewMetadataTicket(t, Ticket{
+	path := writeReviewMetadataTicket(t, ticketcore.Ticket{
 		Key:    "CHR-1",
 		Title:  "Do something",
-		Status: TicketStatusInProgress,
+		Status: ticketcore.TicketStatusInProgress,
 		ReviewRefs: []ticketmetadata.ReviewRef{
 			{
 				Type:     "pull_request",
@@ -97,17 +98,17 @@ func TestTicketReviewMetadataUpdaterReplacesExistingReviewRef(t *testing.T) {
 }
 
 func TestTicketStatusUpdaterRequiresReviewMetadataForReadyForReview(t *testing.T) {
-	path := writeReviewMetadataTicket(t, Ticket{
+	path := writeReviewMetadataTicket(t, ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Do something",
-		Status:    TicketStatusInProgress,
+		Status:    ticketcore.TicketStatusInProgress,
 		CreatedAt: testReviewMetadataTime(12),
 		UpdatedAt: testReviewMetadataTime(12),
 	})
 
 	err := NewTicketStatusUpdater().UpdateStatus(context.Background(), UpdateTicketStatusOptions{
 		Path:      path,
-		Status:    TicketStatusReadyForReview,
+		Status:    ticketcore.TicketStatusReadyForReview,
 		UpdatedAt: testReviewMetadataTime(13),
 	})
 	if err == nil {
@@ -120,10 +121,10 @@ func TestTicketStatusUpdaterRequiresReviewMetadataForReadyForReview(t *testing.T
 }
 
 func TestTicketStatusUpdaterAcceptsReadyForReviewWithReviewMetadata(t *testing.T) {
-	path := writeReviewMetadataTicket(t, Ticket{
+	path := writeReviewMetadataTicket(t, ticketcore.Ticket{
 		Key:    "CHR-1",
 		Title:  "Do something",
-		Status: TicketStatusInProgress,
+		Status: ticketcore.TicketStatusInProgress,
 		Branch: "feat/slice-2-pr-reference-workflow",
 		ReviewRefs: []ticketmetadata.ReviewRef{
 			{
@@ -140,7 +141,7 @@ func TestTicketStatusUpdaterAcceptsReadyForReviewWithReviewMetadata(t *testing.T
 
 	err := NewTicketStatusUpdater().UpdateStatus(context.Background(), UpdateTicketStatusOptions{
 		Path:      path,
-		Status:    TicketStatusReadyForReview,
+		Status:    ticketcore.TicketStatusReadyForReview,
 		UpdatedAt: testReviewMetadataTime(13),
 	})
 	if err != nil {
@@ -154,10 +155,10 @@ func TestTicketStatusUpdaterAcceptsReadyForReviewWithReviewMetadata(t *testing.T
 }
 
 func TestTicketStatusUpdaterRequiresPassedReviewForReadyForMerge(t *testing.T) {
-	path := writeReviewMetadataTicket(t, Ticket{
+	path := writeReviewMetadataTicket(t, ticketcore.Ticket{
 		Key:         "CHR-1",
 		Title:       "Do something",
-		Status:      TicketStatusReadyForReview,
+		Status:      ticketcore.TicketStatusReadyForReview,
 		Branch:      "feat/slice-1-merger-handoff-contract",
 		ReviewState: "changes_requested",
 		ReviewRefs: []ticketmetadata.ReviewRef{
@@ -175,7 +176,7 @@ func TestTicketStatusUpdaterRequiresPassedReviewForReadyForMerge(t *testing.T) {
 
 	err := NewTicketStatusUpdater().UpdateStatus(context.Background(), UpdateTicketStatusOptions{
 		Path:      path,
-		Status:    TicketStatusReadyForMerge,
+		Status:    ticketcore.TicketStatusReadyForMerge,
 		UpdatedAt: testReviewMetadataTime(13),
 	})
 	if err == nil {
@@ -188,10 +189,10 @@ func TestTicketStatusUpdaterRequiresPassedReviewForReadyForMerge(t *testing.T) {
 }
 
 func TestTicketStatusUpdaterAcceptsReadyForMergeWithPassedReview(t *testing.T) {
-	path := writeReviewMetadataTicket(t, Ticket{
+	path := writeReviewMetadataTicket(t, ticketcore.Ticket{
 		Key:          "CHR-1",
 		Title:        "Do something",
-		Status:       TicketStatusReadyForReview,
+		Status:       ticketcore.TicketStatusReadyForReview,
 		Branch:       "feat/slice-1-merger-handoff-contract",
 		ReviewState:  TicketReviewCommandResultPass,
 		ReviewResult: TicketReviewCommandResultPass,
@@ -210,7 +211,7 @@ func TestTicketStatusUpdaterAcceptsReadyForMergeWithPassedReview(t *testing.T) {
 
 	err := NewTicketStatusUpdater().UpdateStatus(context.Background(), UpdateTicketStatusOptions{
 		Path:      path,
-		Status:    TicketStatusReadyForMerge,
+		Status:    ticketcore.TicketStatusReadyForMerge,
 		UpdatedAt: testReviewMetadataTime(13),
 	})
 	if err != nil {
@@ -223,10 +224,10 @@ func TestTicketStatusUpdaterAcceptsReadyForMergeWithPassedReview(t *testing.T) {
 	}
 }
 
-func writeReviewMetadataTicket(t *testing.T, ticket Ticket) string {
+func writeReviewMetadataTicket(t *testing.T, ticket ticketcore.Ticket) string {
 	t.Helper()
 
-	content, err := NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

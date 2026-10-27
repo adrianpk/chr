@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func (factory commandFactory) ticketStartCommand() *cli.Command {
@@ -86,7 +87,7 @@ func runAndPrintTicketStartExecution(ctx context.Context, stdout io.Writer, pref
 	return record, err
 }
 
-func printTicketStartResult(stdout io.Writer, ticket core.IndexedTicket, record core.ExecutionRecord, result harnessruntime.ValidationResult, dryRun bool) error {
+func printTicketStartResult(stdout io.Writer, ticket ticketcore.IndexedTicket, record core.ExecutionRecord, result harnessruntime.ValidationResult, dryRun bool) error {
 	lines := []string{
 		fmt.Sprintf("execution: %s", record.ID),
 		fmt.Sprintf("ticket: %s", ticket.Key),

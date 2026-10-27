@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -17,7 +17,7 @@ func TestWebTicketEditor(t *testing.T) {
 
 			response, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 				Action: webActionTicketCreate, Confirm: true,
-				Fields: map[string]string{"title": "Created ticket", "description": "Full new description.\n\nRetained second paragraph.", "use_case": "named-work", "priority": "high", "type": "bug", "owner": "Maintainer", "assignee": "Developer", "status": core.TicketStatusReadyForDev},
+				Fields: map[string]string{"title": "Created ticket", "description": "Full new description.\n\nRetained second paragraph.", "use_case": "named-work", "priority": "high", "type": "bug", "owner": "Maintainer", "assignee": "Developer", "status": ticketcore.TicketStatusReadyForDev},
 			})
 			if err != nil || response.Status != webui.WriteStatusOK {
 				t.Fatal("create failed", response, err)
@@ -54,14 +54,14 @@ func checkWebTicketMoves(t *testing.T, provider webViewProvider, original webui.
 
 	response, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 		Action: webActionTicketMove, ID: original.Key, Revision: original.Revision, Confirm: true,
-		Fields: map[string]string{"status": core.TicketStatusBacklog},
+		Fields: map[string]string{"status": ticketcore.TicketStatusBacklog},
 	})
 	if err != nil || response.Status != webui.WriteStatusOK {
 		t.Fatal("allowed move rejected", response, err)
 	}
 
 	current, err := provider.TicketDetailView(t.Context(), webui.TicketDetailRequest{Key: original.Key})
-	if err != nil || current.Status != core.TicketStatusBacklog || current.Description != original.Description || current.UseCase != "named-work" {
+	if err != nil || current.Status != ticketcore.TicketStatusBacklog || current.Description != original.Description || current.UseCase != "named-work" {
 		t.Fatal("move changed fields or case membership", current.Fields, err)
 	}
 
@@ -79,7 +79,7 @@ func checkWebTicketRejections(t *testing.T, provider webViewProvider, original, 
 		action, revision, status string
 		fields                   map[string]string
 	}{
-		{webActionTicketMove, current.Revision, webui.WriteStatusValidation, map[string]string{"status": core.TicketStatusDone}},
+		{webActionTicketMove, current.Revision, webui.WriteStatusValidation, map[string]string{"status": ticketcore.TicketStatusDone}},
 		{webActionTicketUpdate, original.Revision, webui.WriteStatusStale, map[string]string{"title": "Stale title"}},
 	} {
 		response, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{Action: test.action, ID: original.Key, Revision: test.revision, Confirm: true, Fields: test.fields})

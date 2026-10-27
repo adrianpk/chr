@@ -6,8 +6,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 // ArtifactActionID identifies an artifact action awaiting TUI confirmation.
@@ -28,7 +28,7 @@ type ArtifactActionExecutor interface {
 // ArtifactActionResult contains refreshed artifact-facing state after an action.
 type ArtifactActionResult struct {
 	Message           string
-	Tickets           []core.IndexedTicket
+	Tickets           []ticketcore.IndexedTicket
 	Documents         []DocumentView
 	AuthoringSessions []authoringcore.Session
 }

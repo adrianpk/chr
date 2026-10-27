@@ -1,4 +1,4 @@
-package core
+package ticket
 
 import (
 	"bytes"
@@ -140,7 +140,7 @@ func renderTicketSourceFrontmatter(output *bytes.Buffer, ticket Ticket) error {
 }
 
 func renderTicketReviewFrontmatter(output *bytes.Buffer, ticket Ticket) error {
-	if err := writeTicketReviewRefsField(output, ticket.ReviewRefs); err != nil {
+	if err := WriteTicketReviewRefsField(output, ticket.ReviewRefs); err != nil {
 		return err
 	}
 
@@ -220,7 +220,8 @@ func writeTicketReviewRoundField(output *bytes.Buffer, value int) error {
 	return writeTicketEncodedField(output, "review_round", strconv.Itoa(value))
 }
 
-func writeTicketReviewRefsField(output *bytes.Buffer, refs []ticketmetadata.ReviewRef) error {
+// WriteTicketReviewRefsField preserves the shared ticket metadata contract.
+func WriteTicketReviewRefsField(output *bytes.Buffer, refs []ticketmetadata.ReviewRef) error {
 	if len(refs) == 0 {
 		return writeTicketEncodedField(output, "review_refs", "[]")
 	}

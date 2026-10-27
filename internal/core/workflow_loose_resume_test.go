@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"testing"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -59,7 +60,7 @@ func workflowLooseConfirmDependency(t *testing.T, f workflowIntegrationFixture, 
 	record := workflowLooseRecord(t, f.store, "PRJ-89")
 	tree := workflowIntegrationCommand(t, f.actor, "rev-parse", commit+"^{tree}")
 	receipt := selectionReceipt(t, f.store, workflowstate.Ref{Kind: "ticket", ID: record.Task.Key}, commit, tree)
-	record.Task.Phase, record.Task.Status, record.Task.DeliveryRef = "integrated", TicketStatusDone, receipt.Path
+	record.Task.Phase, record.Task.Status, record.Task.DeliveryRef = "integrated", ticketcore.TicketStatusDone, receipt.Path
 
 	return workflowTestWrite(t, f.store, record)
 }

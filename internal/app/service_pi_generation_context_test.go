@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -106,7 +107,7 @@ func piGenerationReviewCase(t *testing.T, valid bool) {
 	operations, driver := piGenerationFixture(t, output)
 	worktree := t.TempDir()
 	ticket := testLoopTicketWithPullRequestRef("CHR-1", "Prepared review")
-	ticket.Status = core.TicketStatusReadyForReview
+	ticket.Status = ticketcore.TicketStatusReadyForReview
 	path := writeTicketMarkdownOnly(t, worktree, "CHR-1-Review.md", ticket)
 
 	indexed, err := parseAgenticReviewTicket(t.Context(), operations.projectContext.ProjectID, worktree, path, time.Now().UTC())
@@ -121,7 +122,7 @@ func piGenerationReviewCase(t *testing.T, valid bool) {
 	}
 
 	result, err := operations.runAgenticReviewCycle(t.Context(), indexed, execution, core.ResultApplication{TicketPath: path}, core.ReviewWorkflowConfig{})
-	if (err == nil) != valid || valid && result.Status != core.TicketStatusReadyForDev {
+	if (err == nil) != valid || valid && result.Status != ticketcore.TicketStatusReadyForDev {
 		t.Fatal("unexpected Pi review validation", err)
 	}
 

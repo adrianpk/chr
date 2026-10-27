@@ -14,6 +14,7 @@ import (
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -161,7 +162,7 @@ func (s *WorkflowStore) checkLegacyWorkflowTicket(fields map[string]json.RawMess
 		return err
 	}
 
-	if status != TicketStatusReadyForDev && status != TicketStatusBacklog {
+	if status != ticketcore.TicketStatusReadyForDev && status != ticketcore.TicketStatusBacklog {
 		return fmt.Errorf("legacy task status requires explicit evidence reconciliation: %s", status)
 	}
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
@@ -34,13 +35,13 @@ type TicketMergeHandoff struct {
 }
 
 // ValidateTicketMergeHandoff validates the corresponding package boundary value.
-func ValidateTicketMergeHandoff(ticket IndexedTicket) (TicketMergeHandoff, error) {
+func ValidateTicketMergeHandoff(ticket ticketcore.IndexedTicket) (TicketMergeHandoff, error) {
 	if strings.TrimSpace(ticket.Key) == "" {
 		return TicketMergeHandoff{}, fmt.Errorf("ticket key is required")
 	}
 
-	if ticket.Status != TicketStatusReadyForMerge {
-		return TicketMergeHandoff{}, fmt.Errorf("ticket merge handoff requires status %s: %s", TicketStatusReadyForMerge, ticket.Status)
+	if ticket.Status != ticketcore.TicketStatusReadyForMerge {
+		return TicketMergeHandoff{}, fmt.Errorf("ticket merge handoff requires status %s: %s", ticketcore.TicketStatusReadyForMerge, ticket.Status)
 	}
 
 	if ticket.ReviewResult != TicketReviewCommandResultPass || ticket.ReviewState != TicketReviewCommandResultPass {

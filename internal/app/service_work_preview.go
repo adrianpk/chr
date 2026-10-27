@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -43,7 +44,7 @@ func (s service) previewNativeAgentWorkSelection(config core.WorkspaceConfig, se
 	}
 
 	tickets, err := store.WorkflowTickets(s.ctx)
-	queue := []core.IndexedTicket{}
+	queue := []ticketcore.IndexedTicket{}
 
 	if len(preview.Members) > 0 {
 		for _, ticket := range tickets {

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -39,7 +40,7 @@ func (s *WorkflowStore) FindWorkflowEntry(ctx context.Context, request WorkflowS
 
 // WorkflowTickets provides a bounded filesystem-owned display view. It neither
 // refreshes SQLite nor grants execution authority to unadopted ticket rows.
-func (s *WorkflowStore) WorkflowTickets(ctx context.Context) (tickets []IndexedTicket, err error) {
+func (s *WorkflowStore) WorkflowTickets(ctx context.Context) (tickets []ticketcore.IndexedTicket, err error) {
 	err = s.withLock(ctx, func() error {
 		selection, readErr := s.readWorkflowSelection(ctx)
 		tickets = selection.tickets

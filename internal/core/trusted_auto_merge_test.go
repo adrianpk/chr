@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
@@ -19,7 +20,7 @@ func TestApplyTrustedAutoMergeReviewMovesTicketToReadyForMerge(t *testing.T) {
 		ID:       "300",
 		Status:   "open",
 	}
-	path := writeTrustedAutoMergeTicket(t, Ticket{
+	path := writeTrustedAutoMergeTicket(t, ticketcore.Ticket{
 		Key:        "CHR-1",
 		Title:      "Trusted ticket",
 		Status:     TicketResultStatusReviewing,
@@ -30,11 +31,11 @@ func TestApplyTrustedAutoMergeReviewMovesTicketToReadyForMerge(t *testing.T) {
 	})
 
 	result, err := ApplyTrustedAutoMergeReview(context.Background(), ApplyTrustedAutoMergeReviewOptions{
-		Ticket: IndexedTicket{
-			IndexedTicketIdentity: IndexedTicketIdentity{
+		Ticket: ticketcore.IndexedTicket{
+			IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
 				Key:  "CHR-1",
 				Path: path,
-			}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketResultStatusReviewing}, IndexedTicketSource: IndexedTicketSource{Branch: "feat/chr-1"}, IndexedTicketReview: IndexedTicketReview{ReviewRefs: []ticketmetadata.ReviewRef{ref}},
+			}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: TicketResultStatusReviewing}, IndexedTicketSource: ticketcore.IndexedTicketSource{Branch: "feat/chr-1"}, IndexedTicketReview: ticketcore.IndexedTicketReview{ReviewRefs: []ticketmetadata.ReviewRef{ref}},
 		},
 		ReviewedAt: testTrustedAutoMergeTime(),
 	})
@@ -42,7 +43,7 @@ func TestApplyTrustedAutoMergeReviewMovesTicketToReadyForMerge(t *testing.T) {
 		t.Fatalf("ApplyTrustedAutoMergeReview returned error: %v", err)
 	}
 
-	if result.Status != TicketStatusReadyForMerge || result.ReviewResult != TicketReviewCommandResultPass {
+	if result.Status != ticketcore.TicketStatusReadyForMerge || result.ReviewResult != TicketReviewCommandResultPass {
 		t.Fatalf("result = %#v, want trusted pass ready_for_merge", result)
 	}
 
@@ -60,7 +61,7 @@ func TestApplyTrustedAutoMergeReviewMovesTicketToReadyForMerge(t *testing.T) {
 }
 
 func TestApplyTrustedAutoMergeReviewRequiresPullRequestRef(t *testing.T) {
-	path := writeTrustedAutoMergeTicket(t, Ticket{
+	path := writeTrustedAutoMergeTicket(t, ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Trusted ticket",
 		Status:    TicketResultStatusReviewing,
@@ -70,11 +71,11 @@ func TestApplyTrustedAutoMergeReviewRequiresPullRequestRef(t *testing.T) {
 	})
 
 	_, err := ApplyTrustedAutoMergeReview(context.Background(), ApplyTrustedAutoMergeReviewOptions{
-		Ticket: IndexedTicket{
-			IndexedTicketIdentity: IndexedTicketIdentity{
+		Ticket: ticketcore.IndexedTicket{
+			IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
 				Key:  "CHR-1",
 				Path: path,
-			}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketResultStatusReviewing}, IndexedTicketSource: IndexedTicketSource{Branch: "feat/chr-1"},
+			}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: TicketResultStatusReviewing}, IndexedTicketSource: ticketcore.IndexedTicketSource{Branch: "feat/chr-1"},
 		},
 		ReviewedAt: testTrustedAutoMergeTime(),
 	})
@@ -83,10 +84,10 @@ func TestApplyTrustedAutoMergeReviewRequiresPullRequestRef(t *testing.T) {
 	}
 }
 
-func writeTrustedAutoMergeTicket(t *testing.T, ticket Ticket) string {
+func writeTrustedAutoMergeTicket(t *testing.T, ticket ticketcore.Ticket) string {
 	t.Helper()
 
-	content, err := NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

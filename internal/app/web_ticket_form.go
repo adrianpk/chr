@@ -4,8 +4,8 @@ import (
 	"slices"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -55,7 +55,7 @@ func webTicketField(view webui.TicketDetailView, field webui.TicketFieldView) we
 	field.Value, field.ReadOnly = view.Fields[field.Name], view.ReadOnly[field.Name]
 
 	field.Options = webTicketFieldOptions(view, field.Name)
-	if field.Name == "resolution" && !slices.Contains([]string{"solved", "closed", core.TicketStatusDone}, view.Status) {
+	if field.Name == "resolution" && !slices.Contains([]string{"solved", "closed", ticketcore.TicketStatusDone}, view.Status) {
 		field.ReadOnly = "Available when the ticket is resolved."
 	}
 
@@ -111,16 +111,16 @@ func webRepositoryFieldOptions(values map[string][]string) {
 
 func webTicketStatusOptions(view webui.TicketDetailView) []webui.TicketOptionView {
 	options := []webui.TicketOptionView{
-		{Value: core.TicketStatusBacklog, Label: "Backlog"}, {Value: core.TicketStatusReadyForDev, Label: "Ready For Dev"},
+		{Value: ticketcore.TicketStatusBacklog, Label: "Backlog"}, {Value: ticketcore.TicketStatusReadyForDev, Label: "Ready For Dev"},
 	}
 	if view.New || view.NativeWorkflow && view.Phase == "pending" {
 		return options
 	}
 
 	return append(options,
-		webui.TicketOptionView{Value: core.TicketStatusInProgress, Label: "In Progress"},
-		webui.TicketOptionView{Value: core.TicketStatusReadyForReview, Label: "Ready For Review"},
-		webui.TicketOptionView{Value: core.TicketStatusReadyForMerge, Label: "Ready For Merge"},
-		webui.TicketOptionView{Value: core.TicketStatusDone, Label: "Done"},
+		webui.TicketOptionView{Value: ticketcore.TicketStatusInProgress, Label: "In Progress"},
+		webui.TicketOptionView{Value: ticketcore.TicketStatusReadyForReview, Label: "Ready For Review"},
+		webui.TicketOptionView{Value: ticketcore.TicketStatusReadyForMerge, Label: "Ready For Merge"},
+		webui.TicketOptionView{Value: ticketcore.TicketStatusDone, Label: "Done"},
 	)
 }

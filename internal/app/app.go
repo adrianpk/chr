@@ -14,6 +14,7 @@ import (
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -279,7 +280,7 @@ type tuiOptionsData struct {
 	stdin                io.Reader
 	stdout               io.Writer
 	assetsFS             fs.FS
-	tickets              []core.IndexedTicket
+	tickets              []ticketcore.IndexedTicket
 	documents            []tui.DocumentView
 	dumps                []tui.DumpView
 	quizzes              []tui.QuizView
@@ -338,7 +339,7 @@ func loadTUITickets(
 	env core.UserEnvironment,
 	projectContext commandProjectContext,
 	assetsFS fs.FS,
-) ([]core.IndexedTicket, error) {
+) ([]ticketcore.IndexedTicket, error) {
 	board, err := newService(ctx, env, projectContext, assetsFS).Board()
 	if err != nil {
 		return nil, err

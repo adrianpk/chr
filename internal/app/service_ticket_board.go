@@ -6,6 +6,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 // ReadTicketBoard uses the selected authority without rebuilding the legacy index.
@@ -70,7 +71,7 @@ func (s service) SaveTicketDocument(request core.TicketEditRequest) (core.Ticket
 }
 
 func (s service) validateTicketEditorReview(request core.TicketEditRequest) error {
-	if request.Fields["status"] != core.TicketStatusReadyForReview {
+	if request.Fields["status"] != ticketcore.TicketStatusReadyForReview {
 		return nil
 	}
 
@@ -79,7 +80,7 @@ func (s service) validateTicketEditorReview(request core.TicketEditRequest) erro
 		return err
 	}
 
-	return s.validateReadyForReviewEvidence(document.Ticket, core.TicketStatusReadyForReview)
+	return s.validateReadyForReviewEvidence(document.Ticket, ticketcore.TicketStatusReadyForReview)
 }
 
 func (s service) validateTicketScopeChange(request core.TicketEditRequest) error {

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -54,7 +55,7 @@ func (s *WorkflowStore) checkpointWorkflowAttempt(run workflowInvocationFile, re
 	case workflowSliceValidationPurpose:
 		run.ResumeStatus = "waiting_integration"
 	default:
-		record.Task.Phase, record.Task.Status = "pending", TicketStatusReadyForDev
+		record.Task.Phase, record.Task.Status = "pending", ticketcore.TicketStatusReadyForDev
 		run.ResumeStatus = "pending"
 	}
 

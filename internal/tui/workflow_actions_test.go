@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -87,7 +88,7 @@ func TestModelWorkflowStopAvailable(t *testing.T) {
 // TestModelWorkflowSelection keeps legacy selection behavior and routes native
 // ticket and case choices through read-only preview before execution.
 func TestModelWorkflowSelection(t *testing.T) {
-	model := NewModel(Options{Observability: ObservabilityView{Authority: core.WorkStateAuthorityTickets}, Tickets: []core.IndexedTicket{{IndexedTicketIdentity: core.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: core.IndexedTicketClassification{Status: core.TicketStatusReadyForDev}}}, Cases: []authoringcore.CaseMetadata{{Slug: "delivery"}}})
+	model := NewModel(Options{Observability: ObservabilityView{Authority: core.WorkStateAuthorityTickets}, Tickets: []ticketcore.IndexedTicket{{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}}}, Cases: []authoringcore.CaseMetadata{{Slug: "delivery"}}})
 	model.selectView(ViewTickets)
 	model.planWorkAction(WorkActionStartTicket)
 

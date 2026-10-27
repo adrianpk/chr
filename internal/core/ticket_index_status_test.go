@@ -4,12 +4,14 @@ import (
 	"context"
 	"path/filepath"
 	"testing"
+
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func TestTicketIndexStatusCheckerReportsCleanIndex(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
-	writeRebuildTestTicket(t, projectDir, "CHR-1-Good.md", Ticket{
+	writeRebuildTestTicket(t, projectDir, "CHR-1-Good.md", ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Good",
 		Status:    "open",
@@ -26,7 +28,7 @@ func TestTicketIndexStatusCheckerReportsCleanIndex(t *testing.T) {
 func TestTicketIndexStatusCheckerReportsMissingTicket(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
-	writeRebuildTestTicket(t, projectDir, "CHR-1-Good.md", Ticket{
+	writeRebuildTestTicket(t, projectDir, "CHR-1-Good.md", ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Good",
 		Status:    "open",
@@ -46,7 +48,7 @@ func TestTicketIndexStatusCheckerReportsMissingTicket(t *testing.T) {
 func TestTicketIndexStatusCheckerReportsStaleTicket(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
-	writeRebuildTestTicket(t, projectDir, "CHR-1-Good.md", Ticket{
+	writeRebuildTestTicket(t, projectDir, "CHR-1-Good.md", ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Good",
 		Status:    "open",
@@ -54,7 +56,7 @@ func TestTicketIndexStatusCheckerReportsStaleTicket(t *testing.T) {
 		UpdatedAt: rebuildTestUpdatedAt(),
 	})
 	rebuildProjectTicketsForStatusTest(t, index, projectDir)
-	writeRebuildTestTicket(t, projectDir, "CHR-1-Good.md", Ticket{
+	writeRebuildTestTicket(t, projectDir, "CHR-1-Good.md", ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Changed",
 		Status:    "open",
@@ -80,7 +82,7 @@ func TestTicketIndexStatusCheckerReportsOrphanedTicket(t *testing.T) {
 		t.Fatalf("UpsertTicket returned error: %v", err)
 	}
 
-	writeRebuildTestTicket(t, projectDir, "CHR-2-Good.md", Ticket{
+	writeRebuildTestTicket(t, projectDir, "CHR-2-Good.md", ticketcore.Ticket{
 		Key:       "CHR-2",
 		Title:     "Good",
 		Status:    "open",

@@ -16,6 +16,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/database"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 // ErrTicketNotFound identifies a package boundary error.
@@ -23,9 +24,9 @@ var ErrTicketNotFound = errors.New("ticket not found")
 
 // TicketIndex defines a package boundary interface.
 type TicketIndex interface {
-	UpsertTicket(ctx context.Context, ticket IndexedTicket) error
-	ListProjectTickets(ctx context.Context, projectID string) ([]IndexedTicket, error)
-	GetProjectTicketByKey(ctx context.Context, projectID, key string) (IndexedTicket, error)
+	UpsertTicket(ctx context.Context, ticket ticketcore.IndexedTicket) error
+	ListProjectTickets(ctx context.Context, projectID string) ([]ticketcore.IndexedTicket, error)
+	GetProjectTicketByKey(ctx context.Context, projectID, key string) (ticketcore.IndexedTicket, error)
 	DeleteProjectTickets(ctx context.Context, projectID string) error
 	Close() error
 }
@@ -72,7 +73,7 @@ func NewTicketIndexFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (Tick
 }
 
 // UpsertTicket executes the corresponding package operation.
-func (i *sqliteTicketIndex) UpsertTicket(ctx context.Context, ticket IndexedTicket) error {
+func (i *sqliteTicketIndex) UpsertTicket(ctx context.Context, ticket ticketcore.IndexedTicket) error {
 	err := validateIndexedTicket(ticket)
 	if err != nil {
 		return err
@@ -106,7 +107,7 @@ func (i *sqliteTicketIndex) UpsertTicket(ctx context.Context, ticket IndexedTick
 }
 
 // ListProjectTickets lists the requested data.
-func (i *sqliteTicketIndex) ListProjectTickets(ctx context.Context, projectID string) ([]IndexedTicket, error) {
+func (i *sqliteTicketIndex) ListProjectTickets(ctx context.Context, projectID string) ([]ticketcore.IndexedTicket, error) {
 	rows, err := i.db.QueryContext(
 		ctx,
 		`SELECT `+indexedTicketColumns+` FROM indexed_tickets
@@ -118,7 +119,7 @@ ORDER BY key`,
 		return nil, fmt.Errorf("list indexed tickets: %w", err)
 	}
 
-	tickets := []IndexedTicket{}
+	tickets := []ticketcore.IndexedTicket{}
 
 	for rows.Next() {
 		ticket, err := scanIndexedTicket(rows)
@@ -152,7 +153,7 @@ ORDER BY key`,
 }
 
 // GetProjectTicketByKey executes the corresponding package operation.
-func (i *sqliteTicketIndex) GetProjectTicketByKey(ctx context.Context, projectID, key string) (IndexedTicket, error) {
+func (i *sqliteTicketIndex) GetProjectTicketByKey(ctx context.Context, projectID, key string) (ticketcore.IndexedTicket, error) {
 	row := i.db.QueryRowContext(
 		ctx,
 		`SELECT `+indexedTicketColumns+` FROM indexed_tickets
@@ -163,16 +164,16 @@ WHERE project_id = ? AND key = ?`,
 
 	ticket, err := scanIndexedTicket(row)
 	if errors.Is(err, sql.ErrNoRows) {
-		return IndexedTicket{}, ErrTicketNotFound
+		return ticketcore.IndexedTicket{}, ErrTicketNotFound
 	}
 
 	if err != nil {
-		return IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	tags, err := i.ticketTags(ctx, ticket.ProjectID, ticket.Path)
 	if err != nil {
-		return IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	ticket.Tags = tags
@@ -241,7 +242,7 @@ ON CONFLICT(project_id, path) DO UPDATE SET
     content_hash = excluded.content_hash,
     indexed_at = excluded.indexed_at`
 
-func upsertIndexedTicket(ctx context.Context, tx *sql.Tx, ticket IndexedTicket) error {
+func upsertIndexedTicket(ctx context.Context, tx *sql.Tx, ticket ticketcore.IndexedTicket) error {
 	_, err := tx.ExecContext(ctx, upsertIndexedTicketSQL, (&indexedTicketRow{ticket: &ticket}).values()...)
 	if err != nil {
 		return fmt.Errorf("upsert indexed ticket: %w", err)
@@ -250,7 +251,7 @@ func upsertIndexedTicket(ctx context.Context, tx *sql.Tx, ticket IndexedTicket) 
 	return nil
 }
 
-func replaceIndexedTicketTags(ctx context.Context, tx *sql.Tx, ticket IndexedTicket) error {
+func replaceIndexedTicketTags(ctx context.Context, tx *sql.Tx, ticket ticketcore.IndexedTicket) error {
 	_, err := tx.ExecContext(
 		ctx,
 		"DELETE FROM indexed_ticket_tags WHERE project_id = ? AND ticket_path = ?",
@@ -317,19 +318,19 @@ ORDER BY tag`,
 	return tags, nil
 }
 
-func scanIndexedTicket(scanner indexedTicketScanner) (IndexedTicket, error) {
-	var ticket IndexedTicket
+func scanIndexedTicket(scanner indexedTicketScanner) (ticketcore.IndexedTicket, error) {
+	var ticket ticketcore.IndexedTicket
 
 	fields := indexedTicketRow{ticket: &ticket}
 
 	err := scanner.Scan(fields.scanTargets()...)
 	if err != nil {
-		return IndexedTicket{}, fmt.Errorf("scan indexed ticket: %w", err)
+		return ticketcore.IndexedTicket{}, fmt.Errorf("scan indexed ticket: %w", err)
 	}
 
 	err = fields.assignReviewMetadata()
 	if err != nil {
-		return IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	err = assignIndexedTicketTimes(
@@ -341,7 +342,7 @@ func scanIndexedTicket(scanner indexedTicketScanner) (IndexedTicket, error) {
 		fields.indexedAt,
 	)
 	if err != nil {
-		return IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	return ticket, nil
@@ -365,7 +366,7 @@ func defaultJSONList(value string) string {
 }
 
 func assignIndexedTicketTimes(
-	ticket *IndexedTicket,
+	ticket *ticketcore.IndexedTicket,
 	createdAt sql.NullString,
 	updatedAt sql.NullString,
 	mergedAt sql.NullString,
@@ -415,7 +416,7 @@ func assignIndexedTicketTimes(
 	return nil
 }
 
-func validateIndexedTicket(ticket IndexedTicket) error {
+func validateIndexedTicket(ticket ticketcore.IndexedTicket) error {
 	if ticket.ProjectID == "" {
 		return fmt.Errorf("indexed ticket project id is required")
 	}
@@ -443,7 +444,7 @@ func timePtr(value time.Time) *time.Time {
 	return &value
 }
 
-func indexedTicketNamespace(ticket IndexedTicket) string {
+func indexedTicketNamespace(ticket ticketcore.IndexedTicket) string {
 	if ticket.Namespace == "" {
 		return opsnamespace.Default
 	}

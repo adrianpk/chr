@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func (s service) observeLegacyWork(ctx context.Context, config core.WorkspaceConfig, result *WorkObservation) error {
@@ -32,7 +33,7 @@ func (s service) observeLegacyWork(ctx context.Context, config core.WorkspaceCon
 		return err
 	}
 
-	tickets := map[string]core.IndexedTicket{}
+	tickets := map[string]ticketcore.IndexedTicket{}
 	for _, ticket := range queue.Tickets {
 		tickets[ticket.Key] = ticket
 	}

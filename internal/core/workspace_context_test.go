@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func TestAssembleWorkspaceContextLoadsCaseRootedDocuments(t *testing.T) {
@@ -276,7 +277,7 @@ Raw case quiz body.
 func writeWorkspaceContextCaseTicketFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeWorkspaceContextFile(t, filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1-board.md"), renderProjectDocumentTestTicket(t, Ticket{
+	writeWorkspaceContextFile(t, filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1-board.md"), renderProjectDocumentTestTicket(t, ticketcore.Ticket{
 		Key:      "CHR-1",
 		Title:    "Board Ticket",
 		Status:   "ready",

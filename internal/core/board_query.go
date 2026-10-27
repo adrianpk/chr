@@ -5,16 +5,18 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 // NormalBoardColumns defines a package boundary variable.
 var NormalBoardColumns = []string{
-	TicketStatusBacklog,
-	TicketStatusReadyForDev,
-	TicketStatusInProgress,
-	TicketStatusReadyForReview,
-	TicketStatusReadyForMerge,
-	TicketStatusDone,
+	ticketcore.TicketStatusBacklog,
+	ticketcore.TicketStatusReadyForDev,
+	ticketcore.TicketStatusInProgress,
+	ticketcore.TicketStatusReadyForReview,
+	ticketcore.TicketStatusReadyForMerge,
+	ticketcore.TicketStatusDone,
 }
 
 // BoardQuery describes a package boundary value.
@@ -36,7 +38,7 @@ type Board struct {
 	ProjectID       string
 	Columns         []BoardColumn
 	Attention       []BoardAttentionTicket
-	Tickets         []IndexedTicket
+	Tickets         []ticketcore.IndexedTicket
 	TotalCount      int
 	NormalCount     int
 	AttentionCount  int
@@ -48,12 +50,12 @@ type BoardColumn struct {
 	ID      string
 	Title   string
 	Count   int
-	Tickets []IndexedTicket
+	Tickets []ticketcore.IndexedTicket
 }
 
 // BoardAttentionTicket describes a package boundary value.
 type BoardAttentionTicket struct {
-	Ticket  IndexedTicket
+	Ticket  ticketcore.IndexedTicket
 	Reasons []string
 }
 
@@ -80,7 +82,7 @@ func (q BoardQuery) ProjectBoard(ctx context.Context, opts BoardQueryOptions) (B
 	return buildBoard(opts.ProjectID, tickets), nil
 }
 
-func buildBoard(projectID string, tickets []IndexedTicket) Board {
+func buildBoard(projectID string, tickets []ticketcore.IndexedTicket) Board {
 	columns := newBoardColumns()
 	attention := make([]BoardAttentionTicket, 0)
 
@@ -102,33 +104,33 @@ func buildBoard(projectID string, tickets []IndexedTicket) Board {
 	return boardFromColumns(projectID, columns, attention)
 }
 
-func newBoardColumns() map[string][]IndexedTicket {
-	columns := make(map[string][]IndexedTicket, len(NormalBoardColumns))
+func newBoardColumns() map[string][]ticketcore.IndexedTicket {
+	columns := make(map[string][]ticketcore.IndexedTicket, len(NormalBoardColumns))
 	for _, columnID := range NormalBoardColumns {
-		columns[columnID] = []IndexedTicket{}
+		columns[columnID] = []ticketcore.IndexedTicket{}
 	}
 
 	return columns
 }
 
-func boardColumnForTicket(ticket IndexedTicket) (string, bool) {
-	if IsNormalBoardTicketStatus(ticket.BoardColumn) {
+func boardColumnForTicket(ticket ticketcore.IndexedTicket) (string, bool) {
+	if ticketcore.IsNormalBoardTicketStatus(ticket.BoardColumn) {
 		return ticket.BoardColumn, true
 	}
 
-	return BoardTicketStatusFor(ticket.Status)
+	return ticketcore.BoardTicketStatusFor(ticket.Status)
 }
 
 func boardFromColumns(
 	projectID string,
-	columns map[string][]IndexedTicket,
+	columns map[string][]ticketcore.IndexedTicket,
 	attention []BoardAttentionTicket,
 ) Board {
 	board := Board{
 		ProjectID:       projectID,
 		Columns:         make([]BoardColumn, 0, len(NormalBoardColumns)),
 		Attention:       sortedBoardAttentionTickets(attention),
-		Tickets:         make([]IndexedTicket, 0),
+		Tickets:         make([]ticketcore.IndexedTicket, 0),
 		TotalCount:      len(attention),
 		AttentionCount:  len(attention),
 		NormalColumnIDs: append([]string(nil), NormalBoardColumns...),
@@ -155,10 +157,10 @@ func boardFromColumns(
 }
 
 // BoardAttentionReasons executes the corresponding package operation.
-func BoardAttentionReasons(ticket IndexedTicket) []string {
+func BoardAttentionReasons(ticket ticketcore.IndexedTicket) []string {
 	reasons := append([]string(nil), ticket.AttentionReasons...)
 
-	if ticket.Status == TicketStatusBlockedLegacy {
+	if ticket.Status == ticketcore.TicketStatusBlockedLegacy {
 		reasons = append(reasons, "status is blocked")
 	}
 
@@ -178,8 +180,8 @@ func BoardAttentionReasons(ticket IndexedTicket) []string {
 	return reasons
 }
 
-func sortedBoardTickets(tickets []IndexedTicket) []IndexedTicket {
-	sorted := append([]IndexedTicket(nil), tickets...)
+func sortedBoardTickets(tickets []ticketcore.IndexedTicket) []ticketcore.IndexedTicket {
+	sorted := append([]ticketcore.IndexedTicket(nil), tickets...)
 	slices.SortFunc(sorted, compareIndexedTicketsByKey)
 
 	return sorted

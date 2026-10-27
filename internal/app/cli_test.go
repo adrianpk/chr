@@ -32,6 +32,7 @@ import (
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/webui"
@@ -909,11 +910,11 @@ func newContextAgentWorkTestService(t *testing.T, ctx context.Context, devRoot, 
 func writeWebServeBoardTestTicket(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", core.Ticket{
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Ready frontend",
 		Synopsis:  "Build the browser board.",
-		Status:    core.TicketStatusReadyForDev,
+		Status:    ticketcore.TicketStatusReadyForDev,
 		Priority:  "high",
 		Severity:  "critical",
 		Type:      "feature",
@@ -3261,22 +3262,22 @@ func TestTicketBoardPrintsBoardColumns(t *testing.T) {
 	devRoot := t.TempDir()
 
 	addProject(t, devRoot, "example", projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Backlog.md", core.Ticket{
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Backlog.md", ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Backlog work",
 		Synopsis:  "Prepare backlog work.",
-		Status:    core.TicketStatusBacklog,
+		Status:    ticketcore.TicketStatusBacklog,
 		Priority:  "normal",
 		Severity:  "normal",
 		Type:      "task",
 		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	})
-	writeTicketMarkdownOnly(t, projectDir, "CHR-2-Review.md", core.Ticket{
+	writeTicketMarkdownOnly(t, projectDir, "CHR-2-Review.md", ticketcore.Ticket{
 		Key:       "CHR-2",
 		Title:     "Review work",
 		Synopsis:  "Review implemented work.",
-		Status:    core.TicketStatusReadyForReview,
+		Status:    ticketcore.TicketStatusReadyForReview,
 		Priority:  "high",
 		Severity:  "normal",
 		Type:      "feature",
@@ -3377,8 +3378,8 @@ func writeTicketLoopDryRunTickets(t *testing.T, projectDir string) {
 func testLoopTicket(
 	key, title, status, priority, severity, ticketType, useCase, projectArea string,
 	tags []string,
-) core.Ticket {
-	return core.Ticket{
+) ticketcore.Ticket {
+	return ticketcore.Ticket{
 		Key:         key,
 		Title:       title,
 		Status:      status,
@@ -3417,9 +3418,9 @@ Loop behavior.
 	`
 }
 
-func testReviewRepairTicket() core.Ticket {
+func testReviewRepairTicket() ticketcore.Ticket {
 	ticket := testLoopTicket(
-		"CHR-1", "Review repair", core.TicketStatusReadyForDev, "high", "critical", "bug", "review", "backend", []string{"repair"},
+		"CHR-1", "Review repair", ticketcore.TicketStatusReadyForDev, "high", "critical", "bug", "review", "backend", []string{"repair"},
 	)
 	ticket.Branch = "feat/chr-1-review-repair"
 	ticket.ReviewState = "changes_requested"
@@ -3437,7 +3438,7 @@ func testReviewRepairTicket() core.Ticket {
 	return ticket
 }
 
-func withLoopTicketCreatedAt(ticket core.Ticket, createdAt time.Time) core.Ticket {
+func withLoopTicketCreatedAt(ticket ticketcore.Ticket, createdAt time.Time) ticketcore.Ticket {
 	ticket.CreatedAt = createdAt
 	ticket.UpdatedAt = createdAt
 
@@ -4355,7 +4356,7 @@ func TestTicketShowPrintsIndexedTicket(t *testing.T) {
 	devRoot := t.TempDir()
 
 	addProject(t, devRoot, "example", projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", core.Ticket{
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", ticketcore.Ticket{
 		Key:         "CHR-1",
 		Title:       "Do something",
 		Status:      "open",
@@ -4435,8 +4436,8 @@ func TestTicketShowPrintsEvidenceStrategySummary(t *testing.T) {
 	}
 }
 
-func testTicketShowReviewTicket() core.Ticket {
-	return core.Ticket{
+func testTicketShowReviewTicket() ticketcore.Ticket {
+	return ticketcore.Ticket{
 		Key:         "CHR-1",
 		Title:       "Do something",
 		Status:      "open",
@@ -5045,7 +5046,7 @@ func assertApplyResultExecutionReportEvidence(t *testing.T, content string) {
 	}
 }
 
-func testTicketWithReviewRef() core.Ticket {
+func testTicketWithReviewRef() ticketcore.Ticket {
 	ticket := testTicket()
 	ticket.Branch = "feat/slice-2-pr-reference-workflow"
 	ticket.ReviewRefs = []ticketmetadata.ReviewRef{
@@ -5061,16 +5062,16 @@ func testTicketWithReviewRef() core.Ticket {
 	return ticket
 }
 
-func testTicketReadyForReview() core.Ticket {
+func testTicketReadyForReview() ticketcore.Ticket {
 	ticket := testTicketWithReviewRef()
-	ticket.Status = core.TicketStatusReadyForReview
+	ticket.Status = ticketcore.TicketStatusReadyForReview
 
 	return ticket
 }
 
-func testTicketReadyForMerge() core.Ticket {
+func testTicketReadyForMerge() ticketcore.Ticket {
 	ticket := testTicketWithReviewRef()
-	ticket.Status = core.TicketStatusReadyForMerge
+	ticket.Status = ticketcore.TicketStatusReadyForMerge
 	ticket.ReviewState = core.TicketReviewCommandResultPass
 	ticket.ReviewResult = core.TicketReviewCommandResultPass
 	ticket.ReviewRound = 1
@@ -5416,7 +5417,7 @@ func TestTicketShowRejectsMissingTicket(t *testing.T) {
 func TestTicketCommentAppendsComment(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", core.Ticket{
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
@@ -5469,7 +5470,7 @@ func writeIndexedTicketFile(t *testing.T, devRoot, projectDir string) string {
 
 	ticketPath := filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1-Do-something.md")
 
-	content, err := core.NewTicketRenderer().RenderTicket(core.Ticket{
+	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
@@ -5490,12 +5491,12 @@ func writeIndexedTicketFile(t *testing.T, devRoot, projectDir string) string {
 		t.Fatalf("write ticket: %v", err)
 	}
 
-	indexTicket(t, devRoot, projectDir, core.IndexedTicket{
-		IndexedTicketIdentity: core.IndexedTicketIdentity{
+	indexTicket(t, devRoot, projectDir, ticketcore.IndexedTicket{
+		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
 			Key:          "CHR-1",
 			RelativePath: filepath.Join(".chr", "default", "tickets", "CHR-1-Do-something.md"),
 			Path:         ticketPath,
-		}, IndexedTicketSummary: core.IndexedTicketSummary{Title: "Do something"}, IndexedTicketClassification: core.IndexedTicketClassification{Status: "open"},
+		}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Do something"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "open"},
 	})
 
 	return ticketPath
@@ -5525,7 +5526,7 @@ func TestTicketCommentRejectsMissingTicket(t *testing.T) {
 func TestTicketStatusUpdatesTicket(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", core.Ticket{
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
@@ -5609,7 +5610,7 @@ func TestTicketReviewRefAttachesBranchAndPullRequest(t *testing.T) {
 		"--dir",
 		projectDir,
 		"CHR-1",
-		core.TicketStatusReadyForReview,
+		ticketcore.TicketStatusReadyForReview,
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket status returned error: %v", err)
@@ -5643,7 +5644,7 @@ func TestTicketStatusBlocksReadyForReviewWithoutEvidenceStrategy(t *testing.T) {
 		"--dir",
 		projectDir,
 		"CHR-1",
-		core.TicketStatusReadyForReview,
+		ticketcore.TicketStatusReadyForReview,
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err == nil {
 		t.Fatal("ticket status returned nil error")
@@ -5676,7 +5677,7 @@ func TestTicketStatusAllowsReadyForReviewWithOptionalEvidenceStrategy(t *testing
 		"--dir",
 		projectDir,
 		"CHR-1",
-		core.TicketStatusReadyForReview,
+		ticketcore.TicketStatusReadyForReview,
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket status returned error: %v", err)
@@ -6291,7 +6292,7 @@ func TestTicketStatusRejectsReadyForReviewWithoutReviewRef(t *testing.T) {
 		"--dir",
 		projectDir,
 		"CHR-1",
-		core.TicketStatusReadyForReview,
+		ticketcore.TicketStatusReadyForReview,
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err == nil {
 		t.Fatal("ticket status returned nil error")
@@ -6322,19 +6323,19 @@ func TestTicketStatusRejectsMissingTicket(t *testing.T) {
 func TestIndexRebuildIndexesTicketFiles(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", core.Ticket{
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
 		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	})
-	indexTicket(t, devRoot, projectDir, core.IndexedTicket{
-		IndexedTicketIdentity: core.IndexedTicketIdentity{
+	indexTicket(t, devRoot, projectDir, ticketcore.IndexedTicket{
+		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
 			Key:          "CHR-9",
 			RelativePath: "CHR-9-Old.md",
 			Path:         filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-9-Old.md"),
-		}, IndexedTicketSummary: core.IndexedTicketSummary{Title: "Old"}, IndexedTicketClassification: core.IndexedTicketClassification{Status: "open"},
+		}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Old"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "open"},
 	})
 
 	var stdout bytes.Buffer
@@ -6414,7 +6415,7 @@ func TestIndexRebuildReportsParseErrors(t *testing.T) {
 func TestIndexStatusReportsCleanIndex(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", core.Ticket{
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
@@ -6463,7 +6464,7 @@ func TestIndexStatusReportsCleanIndex(t *testing.T) {
 func TestIndexStatusReportsMissingTickets(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", core.Ticket{
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
@@ -6498,7 +6499,7 @@ func TestIndexStatusReportsMissingTickets(t *testing.T) {
 func TestIndexStatusReportsStaleTickets(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", core.Ticket{
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
@@ -6518,7 +6519,7 @@ func TestIndexStatusReportsStaleTickets(t *testing.T) {
 		t.Fatalf("index rebuild returned error: %v", err)
 	}
 
-	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", core.Ticket{
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Do something else",
 		Status:    "open",
@@ -7618,7 +7619,7 @@ func newDaemonStateRepositoryForTest(t *testing.T, devRoot string) daemoncore.Re
 	return repository
 }
 
-func indexTicket(t *testing.T, devRoot, projectDir string, ticket core.IndexedTicket) {
+func indexTicket(t *testing.T, devRoot, projectDir string, ticket ticketcore.IndexedTicket) {
 	t.Helper()
 
 	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
@@ -7655,7 +7656,7 @@ func indexTicket(t *testing.T, devRoot, projectDir string, ticket core.IndexedTi
 	}
 }
 
-func listProjectTickets(t *testing.T, devRoot, projectDir string) []core.IndexedTicket {
+func listProjectTickets(t *testing.T, devRoot, projectDir string) []ticketcore.IndexedTicket {
 	t.Helper()
 
 	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
@@ -7877,8 +7878,8 @@ func readFile(t *testing.T, path string) string {
 	return string(content)
 }
 
-func testTicket() core.Ticket {
-	return core.Ticket{
+func testTicket() ticketcore.Ticket {
+	return ticketcore.Ticket{
 		Key:         "CHR-1",
 		Title:       "Do something",
 		Status:      "open",
@@ -8096,12 +8097,12 @@ func installFakeTicketStartWorktreePreparer(t *testing.T) *fakeTicketStartWorktr
 	return preparer
 }
 
-func writeTicketMarkdownOnly(t *testing.T, projectDir, relativePath string, ticket core.Ticket) string {
+func writeTicketMarkdownOnly(t *testing.T, projectDir, relativePath string, ticket ticketcore.Ticket) string {
 	t.Helper()
 
 	ticketPath := filepath.Join(projectDir, ".chr", "default", "tickets", filepath.FromSlash(relativePath))
 
-	content, err := core.NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

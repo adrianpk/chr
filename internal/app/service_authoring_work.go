@@ -10,6 +10,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -253,7 +254,7 @@ func guardAuthoringWorkOwner(prepared PreparedAuthoringWork, projectID string) e
 }
 
 func guardAuthoringWorkRecord(request core.WorkflowMutationRequest, scope authoringcore.WorkScope) error {
-	if request.Binding != scope.Binding || request.ExpectedRevision != 0 || request.Record.Task == nil || request.Record.Task.ContractHash != scope.ContractHash || request.Record.Task.Phase != "pending" || request.Record.Task.Status != core.TicketStatusBacklog {
+	if request.Binding != scope.Binding || request.ExpectedRevision != 0 || request.Record.Task == nil || request.Record.Task.ContractHash != scope.ContractHash || request.Record.Task.Phase != "pending" || request.Record.Task.Status != ticketcore.TicketStatusBacklog {
 		return workflowstate.ErrConflict
 	}
 

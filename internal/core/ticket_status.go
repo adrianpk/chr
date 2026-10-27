@@ -7,6 +7,7 @@ import (
 	"time"
 
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
@@ -20,54 +21,6 @@ type UpdateTicketStatusOptions struct {
 	Path      string
 	Status    string
 	UpdatedAt time.Time
-}
-
-const (
-	// TicketStatusBacklog defines a package boundary constant.
-	TicketStatusBacklog = "backlog"
-	// TicketStatusReadyForDev defines a package boundary constant.
-	TicketStatusReadyForDev = "ready_for_dev"
-	// TicketStatusInProgress defines a package boundary constant.
-	TicketStatusInProgress = "in_progress"
-	// TicketStatusReadyForReview defines a package boundary constant.
-	TicketStatusReadyForReview = "ready_for_review"
-	// TicketStatusReadyForMerge defines a package boundary constant.
-	TicketStatusReadyForMerge = "ready_for_merge"
-	// TicketStatusDone defines a package boundary constant.
-	TicketStatusDone = "done"
-
-	// TicketStatusOpenLegacy defines a package boundary constant.
-	TicketStatusOpenLegacy = "open"
-	// TicketStatusReadyLegacy defines a package boundary constant.
-	TicketStatusReadyLegacy = "ready"
-	// TicketStatusReviewingLegacy defines a package boundary constant.
-	TicketStatusReviewingLegacy = "reviewing"
-	// TicketStatusBlockedLegacy defines a package boundary constant.
-	TicketStatusBlockedLegacy = "blocked"
-	// TicketStatusSolvedLegacy defines a package boundary constant.
-	TicketStatusSolvedLegacy = "solved"
-	// TicketStatusMergedLegacy defines a package boundary constant.
-	TicketStatusMergedLegacy = "merged"
-	// TicketStatusClosedLegacy defines a package boundary constant.
-	TicketStatusClosedLegacy = "closed"
-)
-
-var normalBoardTicketStatuses = map[string]struct{}{
-	TicketStatusBacklog:        {},
-	TicketStatusReadyForDev:    {},
-	TicketStatusInProgress:     {},
-	TicketStatusReadyForReview: {},
-	TicketStatusReadyForMerge:  {},
-	TicketStatusDone:           {},
-}
-
-var legacyTicketStatusAliases = map[string]string{
-	TicketStatusOpenLegacy:      TicketStatusBacklog,
-	TicketStatusReadyLegacy:     TicketStatusReadyForDev,
-	TicketStatusReviewingLegacy: TicketStatusReadyForReview,
-	TicketStatusSolvedLegacy:    TicketStatusReadyForMerge,
-	TicketStatusMergedLegacy:    TicketStatusDone,
-	TicketStatusClosedLegacy:    TicketStatusDone,
 }
 
 type ticketStatusUpdater struct{}
@@ -85,7 +38,7 @@ func (u *ticketStatusUpdater) UpdateStatus(ctx context.Context, opts UpdateTicke
 	}
 
 	status := strings.TrimSpace(opts.Status)
-	if !IsValidTicketStatus(status) {
+	if !ticketcore.IsValidTicketStatus(status) {
 		return fmt.Errorf("invalid ticket status: %s", opts.Status)
 	}
 
@@ -121,7 +74,7 @@ func (u *ticketStatusUpdater) UpdateStatus(ctx context.Context, opts UpdateTicke
 }
 
 func validateTicketStatusTransitionMetadata(content, status string) error {
-	if status != TicketStatusReadyForReview && status != TicketStatusReadyForMerge {
+	if status != ticketcore.TicketStatusReadyForReview && status != ticketcore.TicketStatusReadyForMerge {
 		return nil
 	}
 
@@ -130,7 +83,7 @@ func validateTicketStatusTransitionMetadata(content, status string) error {
 		return err
 	}
 
-	if status == TicketStatusReadyForMerge {
+	if status == ticketcore.TicketStatusReadyForMerge {
 		return validateReadyForMergeTransitionMetadata(frontmatter)
 	}
 
@@ -147,13 +100,13 @@ func validateTicketStatusTransitionMetadata(content, status string) error {
 }
 
 func validateReadyForMergeTransitionMetadata(frontmatter ticketmetadata.Frontmatter) error {
-	reviewRound, err := optionalTicketInt(frontmatter.Metadata["review_round"])
+	reviewRound, err := ticketmetadata.OptionalTicketInt(frontmatter.Metadata["review_round"])
 	if err != nil {
 		return err
 	}
 
-	ticket := IndexedTicket{
-		IndexedTicketIdentity: IndexedTicketIdentity{Key: opsmetadata.Unquote(frontmatter.Metadata["key"])}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForMerge}, IndexedTicketSource: IndexedTicketSource{Branch: opsmetadata.Unquote(frontmatter.Metadata["branch"])}, IndexedTicketReview: IndexedTicketReview{
+	ticket := ticketcore.IndexedTicket{
+		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: opsmetadata.Unquote(frontmatter.Metadata["key"])}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForMerge}, IndexedTicketSource: ticketcore.IndexedTicketSource{Branch: opsmetadata.Unquote(frontmatter.Metadata["branch"])}, IndexedTicketReview: ticketcore.IndexedTicketReview{
 			ReviewRefs:   frontmatter.ReviewRefs,
 			ReviewState:  opsmetadata.Unquote(frontmatter.Metadata["review_state"]),
 			ReviewResult: opsmetadata.Unquote(frontmatter.Metadata["review_result"]),
@@ -174,37 +127,4 @@ func hasPullRequestReviewRef(refs []ticketmetadata.ReviewRef) bool {
 	}
 
 	return false
-}
-
-// IsValidTicketStatus executes the corresponding package operation.
-func IsValidTicketStatus(status string) bool {
-	status = strings.TrimSpace(status)
-	if _, ok := normalBoardTicketStatuses[status]; ok {
-		return true
-	}
-
-	if _, ok := legacyTicketStatusAliases[status]; ok {
-		return true
-	}
-
-	return status == TicketStatusBlockedLegacy
-}
-
-// IsNormalBoardTicketStatus executes the corresponding package operation.
-func IsNormalBoardTicketStatus(status string) bool {
-	_, ok := normalBoardTicketStatuses[strings.TrimSpace(status)]
-
-	return ok
-}
-
-// BoardTicketStatusFor executes the corresponding package operation.
-func BoardTicketStatusFor(status string) (string, bool) {
-	status = strings.TrimSpace(status)
-	if IsNormalBoardTicketStatus(status) {
-		return status, true
-	}
-
-	alias, ok := legacyTicketStatusAliases[status]
-
-	return alias, ok
 }

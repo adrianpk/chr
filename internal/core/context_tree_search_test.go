@@ -4,6 +4,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func TestLoadTreeSearchContextCapturesBoundedTree(t *testing.T) {
@@ -51,8 +53,8 @@ func TestLoadTreeSearchContextDerivesTermsAndSearchesFiles(t *testing.T) {
 
 	ctx, err := LoadTreeSearchContext(TreeSearchContextOptions{
 		ProjectDir: dir,
-		Ticket: IndexedTicket{
-			IndexedTicketIdentity: IndexedTicketIdentity{Key: "TODO-2"}, IndexedTicketSummary: IndexedTicketSummary{Title: "Complete task"}, IndexedTicketClassification: IndexedTicketClassification{
+		Ticket: ticketcore.IndexedTicket{
+			IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "TODO-2"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Complete task"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
 				UseCase:     "todo list",
 				ProjectArea: "todo",
 				Tags:        []string{"backend"},

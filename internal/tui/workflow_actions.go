@@ -7,6 +7,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -117,7 +118,7 @@ func (m *Model) planNativeWorkExtent(request *WorkActionRequest, extent string) 
 
 	native.Selection = workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: extent}, Limit: workflowstate.PageLimit}
 	if extent == "loose" {
-		native.Selection.Statuses = []string{core.TicketStatusReadyForDev}
+		native.Selection.Statuses = []string{ticketcore.TicketStatusReadyForDev}
 
 		native.Selection.Order = m.agentWorkOrder
 		if m.agentWorkPriorityFilter != "" {

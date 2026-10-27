@@ -7,6 +7,7 @@ import (
 	"sync"
 	"testing"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -243,7 +244,7 @@ func checkWorkflowPRTasks(t *testing.T, store *WorkflowStore, tasks []WorkflowRe
 
 	for _, task := range tasks {
 		record, err := store.Read(t.Context(), task.Path)
-		if err != nil || record.Task.Phase != "waiting_slice" || record.Task.Status != TicketStatusReadyForReview || record.Task.DeliveryRef != "" {
+		if err != nil || record.Task.Phase != "waiting_slice" || record.Task.Status != ticketcore.TicketStatusReadyForReview || record.Task.DeliveryRef != "" {
 			t.Fatal("PR binding changed task completion or failed to share review status")
 		}
 	}
@@ -426,7 +427,7 @@ func TestWorkflowSlicePRSource(t *testing.T) {
 
 	for _, task := range hierarchy.Tasks[:3] {
 		record, err := store.Read(t.Context(), task.Path)
-		if err != nil || record.Task.Status == TicketStatusDone || record.Task.DeliveryRef != "" {
+		if err != nil || record.Task.Status == ticketcore.TicketStatusDone || record.Task.DeliveryRef != "" {
 			t.Fatal("worker/provider metadata finalized task without host integration proof")
 		}
 	}

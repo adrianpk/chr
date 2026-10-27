@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -80,7 +81,7 @@ type Options struct {
 	Cases                []authoringcore.CaseMetadata
 	Stdin                io.Reader
 	Stdout               io.Writer
-	Tickets              []core.IndexedTicket
+	Tickets              []ticketcore.IndexedTicket
 	Documents            []DocumentView
 	Dumps                []DumpView
 	Quizzes              []QuizView

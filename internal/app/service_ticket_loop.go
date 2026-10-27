@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 type ticketLoopExecutionResult struct {
@@ -40,7 +41,7 @@ func selectTicketLoopTickets(ctx context.Context, index core.TicketIndex, projec
 	return ticketLoopSelection{Tickets: tickets, EligibleCount: len(eligibleTickets)}, nil
 }
 
-func applyTicketLoopPreflight(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, tickets []core.IndexedTicket) ([]core.IndexedTicket, error) {
+func applyTicketLoopPreflight(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, tickets []ticketcore.IndexedTicket) ([]ticketcore.IndexedTicket, error) {
 	allTickets, err := index.ListProjectTickets(ctx, projectContext.ProjectID)
 	if err != nil {
 		return nil, err
@@ -72,7 +73,7 @@ func applyTicketLoopPreflight(ctx context.Context, index core.TicketIndex, proje
 	return tickets, nil
 }
 
-func ticketsForTicketLoopRun(tickets []core.IndexedTicket, opts ticketLoopRunOptions) []core.IndexedTicket {
+func ticketsForTicketLoopRun(tickets []ticketcore.IndexedTicket, opts ticketLoopRunOptions) []ticketcore.IndexedTicket {
 	if opts.MaxIterations == 0 || len(tickets) <= opts.MaxIterations {
 		return tickets
 	}
@@ -80,8 +81,8 @@ func ticketsForTicketLoopRun(tickets []core.IndexedTicket, opts ticketLoopRunOpt
 	return tickets[:opts.MaxIterations]
 }
 
-func deduplicateTicketLoopTickets(tickets []core.IndexedTicket) []core.IndexedTicket {
-	selected := make([]core.IndexedTicket, 0, len(tickets))
+func deduplicateTicketLoopTickets(tickets []ticketcore.IndexedTicket) []ticketcore.IndexedTicket {
+	selected := make([]ticketcore.IndexedTicket, 0, len(tickets))
 	seen := map[string]struct{}{}
 
 	for _, ticket := range tickets {
@@ -97,7 +98,7 @@ func deduplicateTicketLoopTickets(tickets []core.IndexedTicket) []core.IndexedTi
 	return selected
 }
 
-func enforceWorkSelectionPreflight(ctx context.Context, projectContext commandProjectContext, tickets []core.IndexedTicket, selectedTicketKey string) error {
+func enforceWorkSelectionPreflight(ctx context.Context, projectContext commandProjectContext, tickets []ticketcore.IndexedTicket, selectedTicketKey string) error {
 	workConfig, err := workSelectionWorkConfig(projectContext.ProjectDir)
 	if err != nil {
 		return err
@@ -134,9 +135,9 @@ func formatWorkSelectionPreflightError(preflight core.WorkSelectionPreflightResu
 	return fmt.Errorf("work selection preflight blocked: %s detail=%s", reason.Code, reason.Detail)
 }
 
-func hasReviewRepairTicket(tickets []core.IndexedTicket) bool {
+func hasReviewRepairTicket(tickets []ticketcore.IndexedTicket) bool {
 	for _, ticket := range tickets {
-		readyForDev := ticket.Status == core.TicketStatusReadyForDev
+		readyForDev := ticket.Status == ticketcore.TicketStatusReadyForDev
 		changesRequested := ticket.ReviewState == "changes_requested" || ticket.ReviewResult == "needs_changes"
 
 		if readyForDev && changesRequested {
@@ -242,7 +243,7 @@ func (s service) finishTicketLoopExecution(ctx context.Context, loop ticketLoop)
 	return loop.Result, nil
 }
 
-func (s service) executeLoopTicket(ctx context.Context, ticket core.IndexedTicket, events ticketExecutionEvents) (ticketExecutionOutcome, error) {
+func (s service) executeLoopTicket(ctx context.Context, ticket ticketcore.IndexedTicket, events ticketExecutionEvents) (ticketExecutionOutcome, error) {
 	preflight, err := s.prepareTicketStart(ctx, ticket, ticketStartPreflightOptions{PrepareWorktree: true})
 	if err != nil {
 		return ticketExecutionOutcome{Record: core.ExecutionRecord{}, Application: core.ResultApplication{}}, err

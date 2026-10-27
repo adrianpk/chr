@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -82,7 +83,7 @@ func TestWorkflowSelectionPages(t *testing.T) {
 	}
 
 	task := result.Tasks[0]
-	task.Task.Status = TicketStatusBacklog
+	task.Task.Status = ticketcore.TicketStatusBacklog
 	workflowTestWrite(t, store, task)
 
 	if _, err := store.Preview(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
@@ -136,7 +137,7 @@ func TestWorkflowSelectionPendingJournal(t *testing.T) {
 	record := workflowTestCreate(t, store, "PRJ-1")
 	store.afterReplace = func(int) error { return errors.New("interrupted replacement") }
 
-	record.Task.Status = TicketStatusBacklog
+	record.Task.Status = ticketcore.TicketStatusBacklog
 	if _, err := store.Write(t.Context(), record, record.Revision); err == nil {
 		t.Fatal("interruption not injected")
 	}

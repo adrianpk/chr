@@ -3,6 +3,7 @@ package app
 import (
 	"forge.adrianpk.com/chr/internal/core"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 type ticketExecutionInput struct {
@@ -12,7 +13,7 @@ type ticketExecutionInput struct {
 }
 
 type ticketLoopSelection struct {
-	Tickets       []core.IndexedTicket
+	Tickets       []ticketcore.IndexedTicket
 	EligibleCount int
 }
 

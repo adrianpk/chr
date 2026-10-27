@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
@@ -19,14 +20,14 @@ func TestTicketParserParsesRenderedTicket(t *testing.T) {
 	updatedAt := time.Date(2026, 5, 18, 13, 30, 0, 0, time.UTC)
 	indexedAt := time.Date(2026, 5, 18, 14, 30, 0, 0, time.UTC)
 
-	content, err := NewTicketRenderer().RenderTicket(testParserRenderedTicket(createdAt, updatedAt))
+	content, err := ticketcore.NewTicketRenderer().RenderTicket(testParserRenderedTicket(createdAt, updatedAt))
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}
 
 	writeTicketFile(t, path, content)
 
-	ticket, err := NewTicketParser().ParseTicket(context.Background(), ParseTicketOptions{
+	ticket, err := ticketcore.NewTicketParser().ParseTicket(context.Background(), ticketcore.ParseTicketOptions{
 		ProjectID:  "project-1",
 		ProjectDir: dir,
 		TicketsDir: ticketsDir,
@@ -43,8 +44,8 @@ func TestTicketParserParsesRenderedTicket(t *testing.T) {
 	assertParsedTicketFileState(t, ticket)
 }
 
-func testParserRenderedTicket(createdAt, updatedAt time.Time) Ticket {
-	return Ticket{
+func testParserRenderedTicket(createdAt, updatedAt time.Time) ticketcore.Ticket {
+	return ticketcore.Ticket{
 		Key:         "CHR-1",
 		Title:       "Do something",
 		Synopsis:    "Implement the onboarding flow.",
@@ -88,14 +89,14 @@ func TestTicketParserRejectsMissingFrontmatter(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "ticket.md")
 	writeTicketFile(t, path, "# Description\n")
 
-	_, err := NewTicketParser().ParseTicket(context.Background(), ParseTicketOptions{Path: path})
+	_, err := ticketcore.NewTicketParser().ParseTicket(context.Background(), ticketcore.ParseTicketOptions{Path: path})
 	if err == nil {
 		t.Fatal("ParseTicket returned nil error")
 	}
 }
 
 func TestTicketParserRejectsInvalidMetadata(t *testing.T) {
-	content := renderParserTestTicket(t, Ticket{
+	content := renderParserTestTicket(t, ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
@@ -233,7 +234,7 @@ func assertParseTicketRejects(t *testing.T, content, wantErr string) {
 	path := filepath.Join(t.TempDir(), "ticket.md")
 	writeTicketFile(t, path, content)
 
-	_, err := NewTicketParser().ParseTicket(context.Background(), ParseTicketOptions{
+	_, err := ticketcore.NewTicketParser().ParseTicket(context.Background(), ticketcore.ParseTicketOptions{
 		Path:         path,
 		RelativeBase: filepath.Dir(path),
 	})
@@ -246,10 +247,10 @@ func assertParseTicketRejects(t *testing.T, content, wantErr string) {
 	}
 }
 
-func renderParserTestTicket(t *testing.T, ticket Ticket) string {
+func renderParserTestTicket(t *testing.T, ticket ticketcore.Ticket) string {
 	t.Helper()
 
-	content, err := NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}
@@ -271,7 +272,7 @@ func writeTicketFile(t *testing.T, path, content string) {
 	}
 }
 
-func assertParsedTicketMetadata(t *testing.T, ticket IndexedTicket) {
+func assertParsedTicketMetadata(t *testing.T, ticket ticketcore.IndexedTicket) {
 	t.Helper()
 
 	if ticket.ProjectID != "project-1" {
@@ -297,7 +298,7 @@ func assertParsedTicketMetadata(t *testing.T, ticket IndexedTicket) {
 	assertParsedTicketSourceMetadata(t, ticket)
 }
 
-func assertParsedTicketSourceMetadata(t *testing.T, ticket IndexedTicket) {
+func assertParsedTicketSourceMetadata(t *testing.T, ticket ticketcore.IndexedTicket) {
 	t.Helper()
 
 	sourceMetadataMatches := ticket.SourceKind == "plan_tracking" &&
@@ -309,7 +310,7 @@ func assertParsedTicketSourceMetadata(t *testing.T, ticket IndexedTicket) {
 	}
 }
 
-func assertParsedTicketReviewMetadata(t *testing.T, ticket IndexedTicket) {
+func assertParsedTicketReviewMetadata(t *testing.T, ticket ticketcore.IndexedTicket) {
 	t.Helper()
 
 	if ticket.Branch != "feat/slice-1-onboarding" {
@@ -343,7 +344,7 @@ func assertParsedTicketReviewRef(t *testing.T, ref ticketmetadata.ReviewRef) {
 	}
 }
 
-func assertParsedTicketReviewState(t *testing.T, ticket IndexedTicket) {
+func assertParsedTicketReviewState(t *testing.T, ticket ticketcore.IndexedTicket) {
 	t.Helper()
 
 	matches := ticket.ReviewState == "changes_requested" &&
@@ -355,7 +356,7 @@ func assertParsedTicketReviewState(t *testing.T, ticket IndexedTicket) {
 	}
 }
 
-func assertParsedTicketMergeMetadata(t *testing.T, ticket IndexedTicket) {
+func assertParsedTicketMergeMetadata(t *testing.T, ticket ticketcore.IndexedTicket) {
 	t.Helper()
 
 	matches := ticket.MergeState == "blocked" &&
@@ -372,7 +373,7 @@ func assertParsedTicketMergeMetadata(t *testing.T, ticket IndexedTicket) {
 	}
 }
 
-func assertParsedTicketTimes(t *testing.T, ticket IndexedTicket, createdAt, updatedAt time.Time) {
+func assertParsedTicketTimes(t *testing.T, ticket ticketcore.IndexedTicket, createdAt, updatedAt time.Time) {
 	t.Helper()
 
 	if ticket.CreatedAt == nil || !ticket.CreatedAt.Equal(createdAt) {
@@ -384,7 +385,7 @@ func assertParsedTicketTimes(t *testing.T, ticket IndexedTicket, createdAt, upda
 	}
 }
 
-func assertParsedTicketFileState(t *testing.T, ticket IndexedTicket) {
+func assertParsedTicketFileState(t *testing.T, ticket ticketcore.IndexedTicket) {
 	t.Helper()
 
 	if ticket.ContentHash == "" {

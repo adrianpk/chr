@@ -10,6 +10,7 @@ import (
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func telegramAuthoringPreparedFixture(t *testing.T, start string) (*telegramConversationAppFixture, string, *atomic.Int64) {
@@ -127,7 +128,7 @@ func telegramAuthoringPreparedRecord(t *testing.T, records []core.WorkflowRecord
 			t.Fatal(err)
 		}
 
-		if scope != result.Scope || record.Task.Status != core.TicketStatusBacklog || !strings.Contains(string(record.Body), "retry attempts") {
+		if scope != result.Scope || record.Task.Status != ticketcore.TicketStatusBacklog || !strings.Contains(string(record.Body), "retry attempts") {
 			t.Fatal("native scope or description lost", scope, record)
 		}
 

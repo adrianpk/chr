@@ -12,6 +12,7 @@ import (
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -24,7 +25,7 @@ const (
 // TreeSearchContextOptions describes a package boundary value.
 type TreeSearchContextOptions struct {
 	ProjectDir        string
-	Ticket            IndexedTicket
+	Ticket            ticketcore.IndexedTicket
 	ValidationCommand string
 	MaxTreeEntries    int
 	MaxSearchHits     int
@@ -82,7 +83,7 @@ func LoadTreeSearchContext(opts TreeSearchContextOptions) (TreeSearchContext, er
 }
 
 // DeriveContextSearchTerms executes the corresponding package operation.
-func DeriveContextSearchTerms(ticket IndexedTicket, validationCommand string) []string {
+func DeriveContextSearchTerms(ticket ticketcore.IndexedTicket, validationCommand string) []string {
 	seen := map[string]struct{}{}
 	terms := make([]string, 0, 16)
 

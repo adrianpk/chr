@@ -7,13 +7,14 @@ import (
 	"strings"
 	"time"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowWorkObservation is a coherent, non-recovering read of native work.
 // Queue members retain shared readiness and native slice/task order.
 type WorkflowWorkObservation struct {
-	Tickets     []IndexedTicket
+	Tickets     []ticketcore.IndexedTicket
 	Records     []WorkflowRecord
 	Invocations []WorkflowInvocation
 	Queue       []WorkflowPreviewMember

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -86,7 +87,7 @@ func workflowReviewCrashReady(t *testing.T, store *WorkflowStore, id, stage stri
 		t.Fatal(err)
 	}
 
-	return first.Task.Status == TicketStatusReadyForMerge && run.Attempts[len(run.Attempts)-1].Purpose == workflowSliceReviewPurpose
+	return first.Task.Status == ticketcore.TicketStatusReadyForMerge && run.Attempts[len(run.Attempts)-1].Purpose == workflowSliceReviewPurpose
 }
 
 func workflowReviewCrash(t *testing.T, store *WorkflowStore, id, stage string, index int) {

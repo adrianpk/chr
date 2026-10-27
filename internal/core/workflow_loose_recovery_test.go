@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 // TestWorkflowLooseCrashProcess is the owned process-death fixture for the
@@ -41,7 +42,7 @@ func TestWorkflowLooseCrashProcess(t *testing.T) {
 	id := os.Getenv("CHR_LOOSE_CRASH_ID")
 	switch os.Getenv("CHR_LOOSE_CRASH_ACTION") {
 	case "write":
-		workflowLooseClassify(t, store, workflowLooseRecord(t, store, "PRJ-91"), "critical", TicketStatusReadyForDev)
+		workflowLooseClassify(t, store, workflowLooseRecord(t, store, "PRJ-91"), "critical", ticketcore.TicketStatusReadyForDev)
 	case "select":
 		_, err = store.ReconcileWorkflowMembership(t.Context(), id)
 	case "block":
@@ -178,7 +179,7 @@ func prepareWorkflowLooseCrash(t *testing.T, f workflowIntegrationFixture, actio
 
 	if action == "select" {
 		workflowAdvanceFrontier(t, f)
-		workflowLooseClassify(t, f.store, workflowLooseRecord(t, f.store, "PRJ-92"), "critical", TicketStatusReadyForDev)
+		workflowLooseClassify(t, f.store, workflowLooseRecord(t, f.store, "PRJ-92"), "critical", ticketcore.TicketStatusReadyForDev)
 	}
 }
 

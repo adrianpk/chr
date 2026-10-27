@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -63,7 +64,7 @@ func checkServiceWorkflowOwnerStarts(t *testing.T, operations service, key strin
 		{"ready", func() error { _, err := operations.StartReadyAgentWorkLoop(); return err }, true},
 		{"all ready", func() error { _, err := operations.StartAllReadyAgentWork(); return err }, true},
 		{"running selection", func() error {
-			_, err := operations.StartAgentWorkLoop(t.Context(), AgentWorkSelectionOptions{Statuses: []string{core.TicketStatusInProgress}})
+			_, err := operations.StartAgentWorkLoop(t.Context(), AgentWorkSelectionOptions{Statuses: []string{ticketcore.TicketStatusInProgress}})
 
 			return err
 		}, false},

@@ -13,6 +13,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -27,7 +28,7 @@ func serviceWorkflowDependencyFixture(t *testing.T) (service, core.WorkflowRecor
 	}
 
 	task := *selected.Task
-	task.Key, task.Status = "PRJ-89", core.TicketStatusBacklog
+	task.Key, task.Status = "PRJ-89", ticketcore.TicketStatusBacklog
 
 	outside, err := store.Create(t.Context(), "Outside prerequisite", core.WorkflowRecord{Kind: "ticket", Task: &task, Body: selected.Body, Domain: maps.Clone(selected.Domain)})
 	if err != nil {
@@ -144,7 +145,7 @@ func serviceWorkflowDependencyReceipt(t *testing.T, operations service, outside 
 		t.Fatal(err)
 	}
 
-	outside.Task.Phase, outside.Task.Status, outside.Task.DeliveryRef = "integrated", core.TicketStatusDone, receipt.Path
+	outside.Task.Phase, outside.Task.Status, outside.Task.DeliveryRef = "integrated", ticketcore.TicketStatusDone, receipt.Path
 	if _, err := store.Write(t.Context(), outside, outside.Revision); err != nil {
 		t.Fatal(err)
 	}

@@ -5,12 +5,14 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func TestTicketIndexRebuilderRebuildsProjectTickets(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
-	writeRebuildTestTicket(t, projectDir, "nested/CHR-2-New.md", Ticket{
+	writeRebuildTestTicket(t, projectDir, "nested/CHR-2-New.md", ticketcore.Ticket{
 		Key:       "CHR-2",
 		Title:     "New",
 		Status:    "open",
@@ -59,7 +61,7 @@ func TestTicketIndexRebuilderRebuildsProjectTickets(t *testing.T) {
 func TestTicketIndexRebuilderPreservesParseErrors(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
-	writeRebuildTestTicket(t, projectDir, "CHR-1-Good.md", Ticket{
+	writeRebuildTestTicket(t, projectDir, "CHR-1-Good.md", ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Good",
 		Status:    "open",
@@ -92,10 +94,10 @@ func TestTicketIndexRebuilderPreservesParseErrors(t *testing.T) {
 	}
 }
 
-func writeRebuildTestTicket(t *testing.T, projectDir, relativePath string, ticket Ticket) {
+func writeRebuildTestTicket(t *testing.T, projectDir, relativePath string, ticket ticketcore.Ticket) {
 	t.Helper()
 
-	content, err := NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 // TicketIndexRebuilder defines a package boundary interface.
@@ -33,7 +35,7 @@ type TicketIndexRebuildParseError struct {
 
 type ticketIndexRebuilder struct {
 	discoverer TicketFileDiscoverer
-	parser     TicketParser
+	parser     ticketcore.TicketParser
 	index      TicketIndex
 	now        func() time.Time
 }
@@ -45,7 +47,7 @@ type TicketIndexRebuilderOption func(*ticketIndexRebuilder)
 func NewTicketIndexRebuilder(index TicketIndex, opts ...TicketIndexRebuilderOption) TicketIndexRebuilder {
 	rebuilder := &ticketIndexRebuilder{
 		discoverer: NewTicketFileDiscoverer(),
-		parser:     NewTicketParser(),
+		parser:     ticketcore.NewTicketParser(),
 		index:      index,
 		now:        time.Now,
 	}
@@ -67,7 +69,7 @@ func WithTicketIndexRebuilderDiscoverer(discoverer TicketFileDiscoverer) TicketI
 }
 
 // WithTicketIndexRebuilderParser executes the corresponding package operation.
-func WithTicketIndexRebuilderParser(parser TicketParser) TicketIndexRebuilderOption {
+func WithTicketIndexRebuilderParser(parser ticketcore.TicketParser) TicketIndexRebuilderOption {
 	return func(rebuilder *ticketIndexRebuilder) {
 		if parser != nil {
 			rebuilder.parser = parser
@@ -114,7 +116,7 @@ func (r *ticketIndexRebuilder) RebuildProjectTickets(
 	}
 
 	for _, file := range files {
-		ticket, err := r.parser.ParseTicket(ctx, ParseTicketOptions{
+		ticket, err := r.parser.ParseTicket(ctx, ticketcore.ParseTicketOptions{
 			ProjectID:    opts.ProjectID,
 			ProjectDir:   opts.ProjectDir,
 			Path:         file.Path,

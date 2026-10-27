@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -66,7 +67,7 @@ func TestIntegrationCyclePolicyFromReviewConfigRejectsInvalidConfig(t *testing.T
 }
 
 func TestPlanIntegrationCycleBuildsSelectedPendingPlan(t *testing.T) {
-	ticket := IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: IndexedTicketSummary{Title: "Add serialized loop"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}}
+	ticket := ticketcore.IndexedTicket{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Add serialized loop"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}}
 
 	got, err := PlanIntegrationCycle(IntegrationCyclePlanOptions{
 		ProjectID: "project-1",
@@ -101,7 +102,7 @@ func TestPlanIntegrationCycleRejectsInvalidInput(t *testing.T) {
 		{
 			name: "missing project id",
 			opts: IntegrationCyclePlanOptions{
-				Ticket:       IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}},
+				Ticket:       ticketcore.IndexedTicket{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}},
 				ReviewConfig: ReviewWorkflowConfig{Mode: workflowstate.ReviewHuman},
 			},
 			want: "integration cycle project id is required",
@@ -118,7 +119,7 @@ func TestPlanIntegrationCycleRejectsInvalidInput(t *testing.T) {
 			name: "invalid review config",
 			opts: IntegrationCyclePlanOptions{
 				ProjectID:    "project-1",
-				Ticket:       IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}},
+				Ticket:       ticketcore.IndexedTicket{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}},
 				ReviewConfig: ReviewWorkflowConfig{Mode: "unknown"},
 			},
 			want: "invalid review workflow mode: unknown",

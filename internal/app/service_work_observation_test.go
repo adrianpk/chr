@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 // The public service chooses native records even with an unrelated corrupt
@@ -33,7 +34,7 @@ func TestWorkObservationNative(t *testing.T) {
 // event cannot overwrite it. Completed results survive without phase events.
 func TestWorkObservationContexts(t *testing.T) {
 	at := time.Now().UTC()
-	tickets := map[string]core.IndexedTicket{"PRJ-1": {IndexedTicketIdentity: core.IndexedTicketIdentity{Key: "PRJ-1"}, IndexedTicketSummary: core.IndexedTicketSummary{Title: "First"}}, "PRJ-2": {IndexedTicketIdentity: core.IndexedTicketIdentity{Key: "PRJ-2"}, IndexedTicketSummary: core.IndexedTicketSummary{Title: "Second"}}}
+	tickets := map[string]ticketcore.IndexedTicket{"PRJ-1": {IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "PRJ-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "First"}}, "PRJ-2": {IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "PRJ-2"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Second"}}}
 	records := map[string]core.WorkflowRecord{"PRJ-1": {Task: &core.WorkflowTask{Phase: "validating", AttemptID: "one"}}, "PRJ-2": {Task: &core.WorkflowTask{Phase: "working", AttemptID: "two"}}}
 	result := WorkObservation{}
 

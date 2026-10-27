@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"slices"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -130,7 +131,7 @@ func (s *WorkflowStore) selectWorkflowLooseQueue(ctx context.Context, run workfl
 }
 
 func selectWorkflowLoosePending(run *workflowInvocationFile, selection workflowSelection) {
-	tickets := map[string]IndexedTicket{}
+	tickets := map[string]ticketcore.IndexedTicket{}
 	for _, ticket := range selection.tickets {
 		tickets[ticket.Key] = ticket
 	}

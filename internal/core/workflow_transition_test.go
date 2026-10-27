@@ -14,6 +14,7 @@ import (
 	"time"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -57,7 +58,7 @@ func TestWorkflowProcess(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		r.Task.Status = TicketStatusBacklog
+		r.Task.Status = ticketcore.TicketStatusBacklog
 		changes = append(changes, WorkflowChange{Record: r, ExpectedRevision: r.Revision})
 	}
 
@@ -99,7 +100,7 @@ func TestWorkflowCrash(t *testing.T) {
 			}
 
 			for _, r := range snapshot.Records {
-				if r.Revision != 2 || r.Task.Status != TicketStatusBacklog {
+				if r.Revision != 2 || r.Task.Status != ticketcore.TicketStatusBacklog {
 					t.Fatal("mixed transition survived recovery")
 				}
 			}
@@ -236,7 +237,7 @@ func TestWorkflowCompetingWriters(t *testing.T) {
 		group.Go(func() {
 			copyOf := r
 			task := *r.Task
-			task.Status = TicketStatusBacklog
+			task.Status = ticketcore.TicketStatusBacklog
 			copyOf.Task = &task
 
 			_, err := s.Write(context.Background(), copyOf, 1)

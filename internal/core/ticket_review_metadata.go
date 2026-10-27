@@ -8,6 +8,7 @@ import (
 	"time"
 
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
@@ -100,7 +101,7 @@ func updateTicketReviewMetadataContent(
 }
 
 func upsertTicketReviewRef(content string, ref ticketmetadata.ReviewRef) (string, error) {
-	if err := validateTicketReviewRef(ref); err != nil {
+	if err := ticketcore.ValidateTicketReviewRef(ref); err != nil {
 		return "", err
 	}
 
@@ -142,7 +143,7 @@ func reviewRefsMatch(existing, next ticketmetadata.ReviewRef) bool {
 func setTicketReviewRefsField(content string, refs []ticketmetadata.ReviewRef) (string, error) {
 	var rendered bytes.Buffer
 
-	err := writeTicketReviewRefsField(&rendered, refs)
+	err := ticketcore.WriteTicketReviewRefsField(&rendered, refs)
 	if err != nil {
 		return "", err
 	}

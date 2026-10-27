@@ -7,6 +7,7 @@ import (
 	"slices"
 	"time"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -145,9 +146,9 @@ func (s *WorkflowStore) commitWorkflowSliceRepair(run *workflowInvocationFile, o
 				continue
 			}
 
-			record.Task.Phase, record.Task.Status = "validated", TicketStatusInProgress
+			record.Task.Phase, record.Task.Status = "validated", ticketcore.TicketStatusInProgress
 		} else {
-			record.Task.Phase, record.Task.Status, record.Task.Evidence, record.Task.AttemptID = "pending", TicketStatusReadyForDev, nil, ""
+			record.Task.Phase, record.Task.Status, record.Task.Evidence, record.Task.AttemptID = "pending", ticketcore.TicketStatusReadyForDev, nil, ""
 		}
 
 		changes, err := s.workflowClaimRecordChanges(run, &record)

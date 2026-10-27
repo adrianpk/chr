@@ -4,13 +4,15 @@ import (
 	"context"
 	"slices"
 	"testing"
+
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func TestBoardQueryReturnsNormalColumnsAndCounts(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertBoardQueryTicket(t, index, "CHR-3", TicketStatusDone)
-	upsertBoardQueryTicket(t, index, "CHR-1", TicketStatusBacklog)
-	upsertBoardQueryTicket(t, index, "CHR-2", TicketStatusReadyForDev)
+	upsertBoardQueryTicket(t, index, "CHR-3", ticketcore.TicketStatusDone)
+	upsertBoardQueryTicket(t, index, "CHR-1", ticketcore.TicketStatusBacklog)
+	upsertBoardQueryTicket(t, index, "CHR-2", ticketcore.TicketStatusReadyForDev)
 
 	board, err := NewBoardQuery(index).ProjectBoard(context.Background(), BoardQueryOptions{
 		ProjectID: "project-1",
@@ -27,14 +29,14 @@ func TestBoardQueryReturnsNormalColumnsAndCounts(t *testing.T) {
 		t.Fatalf("columns = %d, want %d", len(board.Columns), len(NormalBoardColumns))
 	}
 
-	assertBoardColumn(t, board, TicketStatusBacklog, "Backlog", []string{"CHR-1"})
-	assertBoardColumn(t, board, TicketStatusReadyForDev, "Ready For Dev", []string{"CHR-2"})
-	assertBoardColumn(t, board, TicketStatusDone, "Done", []string{"CHR-3"})
+	assertBoardColumn(t, board, ticketcore.TicketStatusBacklog, "Backlog", []string{"CHR-1"})
+	assertBoardColumn(t, board, ticketcore.TicketStatusReadyForDev, "Ready For Dev", []string{"CHR-2"})
+	assertBoardColumn(t, board, ticketcore.TicketStatusDone, "Done", []string{"CHR-3"})
 }
 
 func TestBoardQueryMapsLegacyStatusesToBoardColumns(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertBoardQueryTicketWithMetadata(t, index, IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyLegacy}})
+	upsertBoardQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyLegacy}})
 
 	board, err := NewBoardQuery(index).ProjectBoard(context.Background(), BoardQueryOptions{
 		ProjectID: "project-1",
@@ -43,13 +45,13 @@ func TestBoardQueryMapsLegacyStatusesToBoardColumns(t *testing.T) {
 		t.Fatalf("ProjectBoard returned error: %v", err)
 	}
 
-	assertBoardColumn(t, board, TicketStatusReadyForDev, "Ready For Dev", []string{"CHR-1"})
+	assertBoardColumn(t, board, ticketcore.TicketStatusReadyForDev, "Ready For Dev", []string{"CHR-1"})
 }
 
 func TestBoardQuerySeparatesAttentionTickets(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertBoardQueryTicket(t, index, "CHR-1", TicketStatusBacklog)
-	upsertBoardQueryTicket(t, index, "CHR-2", TicketStatusBlockedLegacy)
+	upsertBoardQueryTicket(t, index, "CHR-1", ticketcore.TicketStatusBacklog)
+	upsertBoardQueryTicket(t, index, "CHR-2", ticketcore.TicketStatusBlockedLegacy)
 
 	board, err := NewBoardQuery(index).ProjectBoard(context.Background(), BoardQueryOptions{
 		ProjectID: "project-1",
@@ -82,7 +84,7 @@ func TestBoardQuerySeparatesAttentionTickets(t *testing.T) {
 
 func TestBoardQueryFlagsReviewStateAttention(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertBoardQueryTicketWithMetadata(t, index, IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForDev}, IndexedTicketReview: IndexedTicketReview{ReviewState: "changes_requested"}})
+	upsertBoardQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}, IndexedTicketReview: ticketcore.IndexedTicketReview{ReviewState: "changes_requested"}})
 
 	board, err := NewBoardQuery(index).ProjectBoard(context.Background(), BoardQueryOptions{
 		ProjectID: "project-1",
@@ -138,15 +140,15 @@ func assertBoardColumn(t *testing.T, board Board, columnID, title string, wantKe
 func upsertBoardQueryTicket(t *testing.T, index TicketIndex, key, status string) {
 	t.Helper()
 
-	upsertBoardQueryTicketWithMetadata(t, index, IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Key: key}, IndexedTicketClassification: IndexedTicketClassification{Status: status}})
+	upsertBoardQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: key}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: status}})
 }
 
-func upsertBoardQueryTicketWithMetadata(t *testing.T, index TicketIndex, metadata IndexedTicket) {
+func upsertBoardQueryTicketWithMetadata(t *testing.T, index TicketIndex, metadata ticketcore.IndexedTicket) {
 	t.Helper()
 
 	ticket := testIndexedTicket(metadata.Key, metadata.Tags)
 	ticket.Status = metadata.Status
-	ticket.BoardColumn, _ = BoardTicketStatusFor(metadata.Status)
+	ticket.BoardColumn, _ = ticketcore.BoardTicketStatusFor(metadata.Status)
 	ticket.ReviewState = metadata.ReviewState
 
 	err := index.UpsertTicket(context.Background(), ticket)

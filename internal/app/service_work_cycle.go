@@ -4,16 +4,17 @@ import (
 	"context"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 type agentWorkIntegrationCycleState struct {
 	Result        ticketLoopExecutionResult
 	Record        core.LoopRunRecord
-	SelectedQueue []core.IndexedTicket
+	SelectedQueue []ticketcore.IndexedTicket
 }
 
 type agentWorkPostDevelopmentOptions struct {
-	Ticket       core.IndexedTicket
+	Ticket       ticketcore.IndexedTicket
 	Policy       core.IntegrationCyclePolicy
 	Record       core.LoopRunRecord
 	Execution    core.ExecutionRecord
@@ -56,7 +57,7 @@ func (s service) runAgentWorkIntegrationCycles(ctx context.Context, opts AgentWo
 	state := agentWorkIntegrationCycleState{
 		Result:        ticketLoopExecutionResult{Record: record, AuthorityExcluded: selection.ExcludedAdopted},
 		Record:        record,
-		SelectedQueue: make([]core.IndexedTicket, 0),
+		SelectedQueue: make([]ticketcore.IndexedTicket, 0),
 	}
 	initialEligibleCount := selection.EligibleCount
 	processedCycles := 0
@@ -210,7 +211,7 @@ func agentWorkCycleRunsTrustedAutoMergeReview(policy core.IntegrationCyclePolicy
 	return policy.Mode == core.IntegrationCycleModeTrustedAutoMerge && application.TicketStatus != core.TicketResultStatusBlocked
 }
 
-func agentWorkCycleRunsRepair(policy core.IntegrationCyclePolicy, ticket core.IndexedTicket) bool {
+func agentWorkCycleRunsRepair(policy core.IntegrationCyclePolicy, ticket ticketcore.IndexedTicket) bool {
 	return policy.Mode == core.IntegrationCycleModeAgenticReview && core.IsTicketReviewRepair(ticket)
 }
 
@@ -218,16 +219,16 @@ func agentWorkCycleStopsBeforeMerge(policy core.IntegrationCyclePolicy) bool {
 	return policy.RequiresHumanReview
 }
 
-func agentWorkCycleTicketReadyForMerge(policy core.IntegrationCyclePolicy, ticket core.IndexedTicket) bool {
+func agentWorkCycleTicketReadyForMerge(policy core.IntegrationCyclePolicy, ticket ticketcore.IndexedTicket) bool {
 	if !policy.RequiresMerge {
 		return true
 	}
 
-	return ticket.Status == core.TicketStatusReadyForMerge
+	return ticket.Status == ticketcore.TicketStatusReadyForMerge
 }
 
 func agentWorkCycleMergeBlocked(result core.TicketMergeCommandResult) bool {
-	return result.MergeState != core.TicketMergeStateMerged || result.Status != core.TicketStatusDone
+	return result.MergeState != core.TicketMergeStateMerged || result.Status != ticketcore.TicketStatusDone
 }
 
 func (s service) finishAgentWorkIntegrationCycles(repository core.LoopRunRepository, state agentWorkIntegrationCycleState, loopSink core.AgentEventSink, initialEligibleCount int) (agentWorkIntegrationResult, error) {
@@ -240,7 +241,7 @@ func (s service) finishAgentWorkIntegrationCycles(repository core.LoopRunReposit
 
 type agentWorkIntegrationResult struct {
 	Execution     ticketLoopExecutionResult
-	SelectedQueue []core.IndexedTicket
+	SelectedQueue []ticketcore.IndexedTicket
 	EligibleCount int
 }
 

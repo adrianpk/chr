@@ -1,11 +1,10 @@
-package core
+package ticket
 
 import (
 	"context"
 	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
@@ -142,7 +141,7 @@ func parseIndexedTicketMetadataTimes(metadata map[string]string) (*time.Time, *t
 		return nil, nil, nil, 0, err
 	}
 
-	reviewRound, err := optionalTicketInt(metadata["review_round"])
+	reviewRound, err := ticketmetadata.OptionalTicketInt(metadata["review_round"])
 	if err != nil {
 		return nil, nil, nil, 0, err
 	}
@@ -166,20 +165,6 @@ func relativeTicketPath(opts ParseTicketOptions) (string, error) {
 	}
 
 	return filepath.ToSlash(relativePath), nil
-}
-
-func optionalTicketInt(value string) (int, error) {
-	value = opsmetadata.Unquote(value)
-	if value == "" {
-		return 0, nil
-	}
-
-	parsed, err := strconv.Atoi(value)
-	if err != nil {
-		return 0, fmt.Errorf("parse ticket integer: %w", err)
-	}
-
-	return parsed, nil
 }
 
 func indexedTicketSummaryFromMetadata(metadata map[string]string) IndexedTicketSummary {

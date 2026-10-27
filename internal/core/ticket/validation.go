@@ -1,4 +1,4 @@
-package core
+package ticket
 
 import (
 	"fmt"
@@ -49,15 +49,15 @@ func validateRequiredTicketMetadata(ticket IndexedTicket) error {
 }
 
 func validateTicketClassification(ticket IndexedTicket) error {
-	if !isValidTicketPriority(ticket.Priority) {
+	if !IsValidTicketPriority(ticket.Priority) {
 		return fmt.Errorf("invalid ticket priority: %s", ticket.Priority)
 	}
 
-	if !isValidTicketSeverity(ticket.Severity) {
+	if !IsValidTicketSeverity(ticket.Severity) {
 		return fmt.Errorf("invalid ticket severity: %s", ticket.Severity)
 	}
 
-	if !isValidTicketType(ticket.Type) {
+	if !IsValidTicketType(ticket.Type) {
 		return fmt.Errorf("invalid ticket type: %s", ticket.Type)
 	}
 
@@ -86,7 +86,8 @@ func validateTicketTimes(ticket IndexedTicket) error {
 	return nil
 }
 
-func isValidTicketPriority(priority string) bool {
+// IsValidTicketPriority preserves the shared ticket metadata contract.
+func IsValidTicketPriority(priority string) bool {
 	switch strings.TrimSpace(priority) {
 	case "", "unclassified", "low", "normal", "high", "critical":
 		return true
@@ -95,7 +96,8 @@ func isValidTicketPriority(priority string) bool {
 	}
 }
 
-func isValidTicketSeverity(severity string) bool {
+// IsValidTicketSeverity preserves the shared ticket metadata contract.
+func IsValidTicketSeverity(severity string) bool {
 	switch strings.TrimSpace(severity) {
 	case "", "unclassified", "low", "normal", "high", "critical":
 		return true
@@ -104,7 +106,8 @@ func isValidTicketSeverity(severity string) bool {
 	}
 }
 
-func isValidTicketType(ticketType string) bool {
+// IsValidTicketType preserves the shared ticket metadata contract.
+func IsValidTicketType(ticketType string) bool {
 	switch strings.TrimSpace(ticketType) {
 	case "", "task", "bug", "feature", "cleanup", "research", "docs":
 		return true
@@ -127,7 +130,7 @@ func validateTicketReviewMetadata(ticket IndexedTicket) error {
 	}
 
 	for _, ref := range ticket.ReviewRefs {
-		if err := validateTicketReviewRef(ref); err != nil {
+		if err := ValidateTicketReviewRef(ref); err != nil {
 			return err
 		}
 	}
@@ -141,7 +144,8 @@ func validateTicketReviewMetadata(ticket IndexedTicket) error {
 	return nil
 }
 
-func validateTicketReviewRef(ref ticketmetadata.ReviewRef) error {
+// ValidateTicketReviewRef preserves the shared ticket metadata contract.
+func ValidateTicketReviewRef(ref ticketmetadata.ReviewRef) error {
 	if strings.TrimSpace(ref.Type) == "" {
 		return fmt.Errorf("ticket review ref type is required")
 	}

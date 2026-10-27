@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 // ApplyTrustedAutoMergeReviewOptions describes trusted auto-merge handoff input.
 type ApplyTrustedAutoMergeReviewOptions struct {
-	Ticket     IndexedTicket
+	Ticket     ticketcore.IndexedTicket
 	ReviewedAt time.Time
 }
 
@@ -30,7 +32,7 @@ func ApplyTrustedAutoMergeReview(ctx context.Context, opts ApplyTrustedAutoMerge
 		ReviewState:  TicketReviewCommandResultPass,
 		ReviewResult: TicketReviewCommandResultPass,
 		ReviewRound:  opts.Ticket.ReviewRound + 1,
-		Status:       TicketStatusReadyForMerge,
+		Status:       ticketcore.TicketStatusReadyForMerge,
 	}
 
 	ticket := opts.Ticket

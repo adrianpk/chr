@@ -10,6 +10,7 @@ import (
 	"time"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -58,7 +59,7 @@ func writeSelectionProof(t *testing.T, store *WorkflowStore, record WorkflowReco
 		t.Fatal(err)
 	}
 
-	record.Task.Evidence, record.Task.Phase, record.Task.Status = []string{relative}, "validated", TicketStatusInProgress
+	record.Task.Evidence, record.Task.Phase, record.Task.Status = []string{relative}, "validated", ticketcore.TicketStatusInProgress
 
 	return workflowTestWrite(t, store, record)
 }

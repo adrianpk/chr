@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -118,7 +119,7 @@ func TestTicketDocumentRejections(t *testing.T) {
 	for _, fields := range []map[string]string{
 		{"priority": "urgent"},
 		{"type": "imaginary"},
-		{"status": TicketStatusDone},
+		{"status": ticketcore.TicketStatusDone},
 		{"claim_generation": "99"},
 		{"pr": "file:///secret"},
 		{"commits": "not-a-commit"},

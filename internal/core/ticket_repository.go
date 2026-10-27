@@ -12,6 +12,7 @@ import (
 
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	slugcore "forge.adrianpk.com/chr/internal/core/ops/slug"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -52,7 +53,7 @@ type TicketRepositoryOption func(*fileTicketRepository)
 type fileTicketRepository struct {
 	projectDir           string
 	keyPrefix            string
-	renderer             TicketRenderer
+	renderer             ticketcore.TicketRenderer
 	now                  func() time.Time
 	nextKeyNumberFactory func(context.Context) (int, error)
 }
@@ -62,7 +63,7 @@ func NewTicketRepository(projectDir string, opts ...TicketRepositoryOption) Tick
 	repository := &fileTicketRepository{
 		projectDir: projectDir,
 		keyPrefix:  DefaultTicketKeyPrefix,
-		renderer:   NewTicketRenderer(),
+		renderer:   ticketcore.NewTicketRenderer(),
 		now:        time.Now,
 	}
 
@@ -83,7 +84,7 @@ func WithTicketRepositoryKeyPrefix(keyPrefix string) TicketRepositoryOption {
 }
 
 // WithTicketRepositoryRenderer executes the corresponding package operation.
-func WithTicketRepositoryRenderer(renderer TicketRenderer) TicketRepositoryOption {
+func WithTicketRepositoryRenderer(renderer ticketcore.TicketRenderer) TicketRepositoryOption {
 	return func(repository *fileTicketRepository) {
 		if renderer != nil {
 			repository.renderer = renderer
@@ -133,7 +134,7 @@ func (r *fileTicketRepository) CreateTicket(ctx context.Context, opts CreateTick
 
 	now := r.now().UTC()
 	key := fmt.Sprintf("%s-%d", r.keyPrefix, nextNumber)
-	ticket := Ticket{
+	ticket := ticketcore.Ticket{
 		Key:         key,
 		Title:       opts.Title,
 		Synopsis:    opts.Synopsis,
@@ -195,7 +196,7 @@ func (r *fileTicketRepository) allocateKeyNumber(ctx context.Context) (int, erro
 func ticketStatusOrDefault(status string) string {
 	status = strings.TrimSpace(status)
 	if status == "" {
-		return TicketStatusBacklog
+		return ticketcore.TicketStatusBacklog
 	}
 
 	return status

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
@@ -37,7 +38,7 @@ const (
 type AgenticReviewContext struct {
 	ProjectID           string
 	ProjectDir          string
-	Ticket              IndexedTicket
+	Ticket              ticketcore.IndexedTicket
 	Execution           ExecutionRecord
 	Application         ResultApplication
 	ExecutionReportPath string
@@ -63,7 +64,7 @@ type AgenticReviewArtifact struct {
 
 // ApplyAgenticReviewResultOptions describes local ticket metadata application.
 type ApplyAgenticReviewResultOptions struct {
-	Ticket     IndexedTicket
+	Ticket     ticketcore.IndexedTicket
 	Artifact   AgenticReviewArtifact
 	ReviewedAt time.Time
 }
@@ -359,7 +360,7 @@ func ApplyAgenticReviewResult(ctx context.Context, opts ApplyAgenticReviewResult
 		BlockingFindings: agenticReviewBlockingFindingBodies(opts.Artifact.Result),
 	}
 
-	if result.Status == TicketStatusReadyForMerge {
+	if result.Status == ticketcore.TicketStatusReadyForMerge {
 		ticket := opts.Ticket
 		ticket.Status = result.Status
 		ticket.ReviewState = result.ReviewState
@@ -434,7 +435,7 @@ func ticketReviewStatusForResult(result string) string {
 	return status
 }
 
-func agenticReviewMetadataRef(ticket IndexedTicket, artifact AgenticReviewArtifact) ticketmetadata.ReviewRef {
+func agenticReviewMetadataRef(ticket ticketcore.IndexedTicket, artifact AgenticReviewArtifact) ticketmetadata.ReviewRef {
 	if ref, ok := firstTicketPullRequestReviewRef(ticket.ReviewRefs); ok {
 		return ref
 	}

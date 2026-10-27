@@ -6,7 +6,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func (factory commandFactory) ticketNewCommand() *cli.Command {
@@ -119,14 +119,14 @@ func (factory commandFactory) runTicketStatus(ctx context.Context, cmd *cli.Comm
 	return nil
 }
 
-func ticketOperationResultTicket(result TicketOperationResult, key string) (core.IndexedTicket, error) {
+func ticketOperationResultTicket(result TicketOperationResult, key string) (ticketcore.IndexedTicket, error) {
 	for _, ticket := range result.Tickets {
 		if ticket.Key == key {
 			return ticket, nil
 		}
 	}
 
-	return core.IndexedTicket{}, fmt.Errorf("ticket not found after operation: %s", key)
+	return ticketcore.IndexedTicket{}, fmt.Errorf("ticket not found after operation: %s", key)
 }
 
 func (factory commandFactory) runTicketComment(ctx context.Context, cmd *cli.Command) error {

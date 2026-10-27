@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
@@ -47,8 +48,8 @@ type TicketMergePreflightRemoteReader interface {
 
 // TicketMergePreflightOptions describes a package boundary value.
 type TicketMergePreflightOptions struct {
-	Ticket        IndexedTicket
-	Tickets       []IndexedTicket
+	Ticket        ticketcore.IndexedTicket
+	Tickets       []ticketcore.IndexedTicket
 	Remote        TicketMergePreflightRemoteReader
 	ExpectedBase  string
 	MergeStrategy string
@@ -174,7 +175,7 @@ func ticketMergeStrategyBlocker(strategy string) *TicketMergePreflightBlocker {
 	}
 }
 
-func ticketMergeSerialRepairBlocker(ticket IndexedTicket, tickets []IndexedTicket) *TicketMergePreflightBlocker {
+func ticketMergeSerialRepairBlocker(ticket ticketcore.IndexedTicket, tickets []ticketcore.IndexedTicket) *TicketMergePreflightBlocker {
 	for _, candidate := range tickets {
 		if candidate.Key == ticket.Key {
 			continue

@@ -12,6 +12,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -53,7 +54,7 @@ func TestWorkflowRoundTrip(t *testing.T) {
 	r.Metadata["custom"] = json.RawMessage(`{"native":true}`)
 	r.Metadata["title"] = json.RawMessage(`"Renamed ticket"`)
 	r.Domain["extra"] = json.RawMessage(`"preserved"`)
-	r.Task.Status = TicketStatusBacklog
+	r.Task.Status = ticketcore.TicketStatusBacklog
 
 	written, err := s.Write(ctx, r, r.Revision)
 	if err != nil {
@@ -151,7 +152,7 @@ func workflowTestWrite(t *testing.T, s *WorkflowStore, r WorkflowRecord) Workflo
 func workflowTestLegacyGuard(t *testing.T, ctx context.Context, path string) {
 	t.Helper()
 
-	if err := NewTicketStatusUpdater().UpdateStatus(ctx, UpdateTicketStatusOptions{Path: path, Status: TicketStatusBacklog}); err == nil {
+	if err := NewTicketStatusUpdater().UpdateStatus(ctx, UpdateTicketStatusOptions{Path: path, Status: ticketcore.TicketStatusBacklog}); err == nil {
 		t.Fatal("legacy writer bypassed workflow guards")
 	}
 }

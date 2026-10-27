@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness/codex"
@@ -15,7 +16,7 @@ var newAgenticReviewRunner = func() core.AgenticReviewRunner {
 	return core.HarnessAgenticReviewRunner{Runner: codex.Runner{}}
 }
 
-func (s service) repairAgentWorkCycleTicket(ctx context.Context, state *agentWorkIntegrationCycleState, opts agentWorkPostDevelopmentOptions, ticket core.IndexedTicket) (agentWorkRepairResult, error) {
+func (s service) repairAgentWorkCycleTicket(ctx context.Context, state *agentWorkIntegrationCycleState, opts agentWorkPostDevelopmentOptions, ticket ticketcore.IndexedTicket) (agentWorkRepairResult, error) {
 	if !agentWorkCycleRunsRepair(opts.Policy, ticket) {
 		return agentWorkRepairResult{Ticket: ticket, Execution: opts.Execution, Stop: true}, nil
 	}
@@ -58,7 +59,7 @@ func (s service) repairAgentWorkCycleTicket(ctx context.Context, state *agentWor
 
 	reviewedTicket, stop := reviewResult.Ticket, reviewResult.Stop
 	if err != nil {
-		return agentWorkRepairResult{Ticket: core.IndexedTicket{}, Execution: execution, Stop: false}, err
+		return agentWorkRepairResult{Ticket: ticketcore.IndexedTicket{}, Execution: execution, Stop: false}, err
 	}
 
 	emitRepairFinishedAgentEvent(ctx, opts.LoopSink, state.Record, execution, reviewedTicket)
@@ -86,7 +87,7 @@ func (s service) reviewAgentWorkCycleTicket(ctx context.Context, opts agentWorkP
 	}
 
 	if err != nil {
-		return agentWorkReviewResult{Ticket: core.IndexedTicket{}, Stop: false}, err
+		return agentWorkReviewResult{Ticket: ticketcore.IndexedTicket{}, Stop: false}, err
 	}
 
 	if runsAgenticReview || runsTrustedReview {
@@ -98,13 +99,13 @@ func (s service) reviewAgentWorkCycleTicket(ctx context.Context, opts agentWorkP
 	return agentWorkReviewResult{Ticket: cycleTicket, Stop: stop}, nil
 }
 
-func (s service) runAgenticReviewCycle(ctx context.Context, selected core.IndexedTicket, execution core.ExecutionRecord, application core.ResultApplication, config core.ReviewWorkflowConfig) (core.IndexedTicket, error) {
+func (s service) runAgenticReviewCycle(ctx context.Context, selected ticketcore.IndexedTicket, execution core.ExecutionRecord, application core.ResultApplication, config core.ReviewWorkflowConfig) (ticketcore.IndexedTicket, error) {
 	reviewedAt := s.now().UTC()
 	reviewProjectDir := agenticReviewProjectDir(s.projectContext, execution)
 
 	ticket, err := parseAgenticReviewTicket(ctx, s.projectContext.ProjectID, reviewProjectDir, application.TicketPath, reviewedAt)
 	if err != nil {
-		return core.IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	ticket = agentWorkTicketWithSelectedReviewMetadata(ticket, selected)
@@ -112,7 +113,7 @@ func (s service) runAgenticReviewCycle(ctx context.Context, selected core.Indexe
 
 	bound, err := s.bindGeneration(ctx, "review-"+execution.ID, "agentic_review")
 	if err != nil {
-		return core.IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	ctx = bound.context(ctx)
@@ -132,7 +133,7 @@ func (s service) runAgenticReviewCycle(ctx context.Context, selected core.Indexe
 		ExecutionReportPath: core.ExecutionReportPath(execution),
 	})
 	if err != nil {
-		return core.IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	result, err := core.ApplyAgenticReviewResult(ctx, core.ApplyAgenticReviewResultOptions{
@@ -141,16 +142,16 @@ func (s service) runAgenticReviewCycle(ctx context.Context, selected core.Indexe
 		ReviewedAt: reviewedAt,
 	})
 	if err != nil {
-		return core.IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	err = writeAgenticReviewNonBlockingComments(ctx, ticket.Path, artifact.Result.NonBlockingNotes, config.NonBlockingCommentLimit, reviewedAt)
 	if err != nil {
-		return core.IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	if err := s.refreshAgenticReviewTicketIndex(execution, ticket.Path, reviewedAt); err != nil {
-		return core.IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	ticket.Status = result.Status
@@ -161,13 +162,13 @@ func (s service) runAgenticReviewCycle(ctx context.Context, selected core.Indexe
 	return ticket, nil
 }
 
-func (s service) runTrustedAutoMergeReviewCycle(selected core.IndexedTicket, execution core.ExecutionRecord, application core.ResultApplication) (core.IndexedTicket, error) {
+func (s service) runTrustedAutoMergeReviewCycle(selected ticketcore.IndexedTicket, execution core.ExecutionRecord, application core.ResultApplication) (ticketcore.IndexedTicket, error) {
 	reviewedAt := s.now().UTC()
 	reviewProjectDir := agenticReviewProjectDir(s.projectContext, execution)
 
 	ticket, err := parseAgenticReviewTicket(s.ctx, s.projectContext.ProjectID, reviewProjectDir, application.TicketPath, reviewedAt)
 	if err != nil {
-		return core.IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	ticket = agentWorkTicketWithSelectedReviewMetadata(ticket, selected)
@@ -177,11 +178,11 @@ func (s service) runTrustedAutoMergeReviewCycle(selected core.IndexedTicket, exe
 		ReviewedAt: reviewedAt,
 	})
 	if err != nil {
-		return core.IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	if err := s.refreshAgenticReviewTicketIndex(execution, ticket.Path, reviewedAt); err != nil {
-		return core.IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	ticket.Status = result.Status
@@ -192,7 +193,7 @@ func (s service) runTrustedAutoMergeReviewCycle(selected core.IndexedTicket, exe
 	return ticket, nil
 }
 
-func agentWorkTicketWithSelectedReviewMetadata(ticket, selected core.IndexedTicket) core.IndexedTicket {
+func agentWorkTicketWithSelectedReviewMetadata(ticket, selected ticketcore.IndexedTicket) ticketcore.IndexedTicket {
 	if ticket.Branch == "" {
 		ticket.Branch = selected.Branch
 	}
@@ -204,8 +205,8 @@ func agentWorkTicketWithSelectedReviewMetadata(ticket, selected core.IndexedTick
 	return ticket
 }
 
-func parseAgenticReviewTicket(ctx context.Context, projectID, projectDir, ticketPath string, indexedAt time.Time) (core.IndexedTicket, error) {
-	return core.NewTicketParser().ParseTicket(ctx, core.ParseTicketOptions{
+func parseAgenticReviewTicket(ctx context.Context, projectID, projectDir, ticketPath string, indexedAt time.Time) (ticketcore.IndexedTicket, error) {
+	return ticketcore.NewTicketParser().ParseTicket(ctx, ticketcore.ParseTicketOptions{
 		ProjectID:  projectID,
 		ProjectDir: projectDir,
 		Path:       ticketPath,
@@ -279,12 +280,12 @@ func agenticReviewProjectDir(projectContext commandProjectContext, execution cor
 }
 
 type agentWorkRepairResult struct {
-	Ticket    core.IndexedTicket
+	Ticket    ticketcore.IndexedTicket
 	Execution core.ExecutionRecord
 	Stop      bool
 }
 
 type agentWorkReviewResult struct {
-	Ticket core.IndexedTicket
+	Ticket ticketcore.IndexedTicket
 	Stop   bool
 }

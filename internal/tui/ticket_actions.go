@@ -6,7 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
@@ -39,7 +39,7 @@ type TicketActionRequest struct {
 // TicketActionResult contains refreshed ticket state after an action.
 type TicketActionResult struct {
 	Message string
-	Tickets []core.IndexedTicket
+	Tickets []ticketcore.IndexedTicket
 }
 
 // TicketActionState stores pending confirmation state for a ticket action.

@@ -5,12 +5,14 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func TestTicketReconcilerRefreshesCleanProject(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
-	writeRebuildTestTicket(t, projectDir, "CHR-1-Good.md", Ticket{
+	writeRebuildTestTicket(t, projectDir, "CHR-1-Good.md", ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Good",
 		Status:    "open",
@@ -94,7 +96,7 @@ func TestTicketReconcilerReturnsParseErrorBlockers(t *testing.T) {
 func TestTicketReconcilerRefreshesAffectedTicket(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
-	writeRebuildTestTicket(t, projectDir, "CHR-1-Good.md", Ticket{
+	writeRebuildTestTicket(t, projectDir, "CHR-1-Good.md", ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Good",
 		Status:    "open",

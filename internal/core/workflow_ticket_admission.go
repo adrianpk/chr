@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -89,7 +90,7 @@ func (s *WorkflowStore) workflowTicketAdmissionFiles(run *workflowInvocationFile
 		return nil, workflowstate.ErrConflict
 	}
 
-	record.Task.Status = TicketStatusReadyForDev
+	record.Task.Status = ticketcore.TicketStatusReadyForDev
 
 	return s.workflowClaimRecordChanges(run, &record)
 }

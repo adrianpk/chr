@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -176,7 +177,7 @@ func TestWorkflowTicketFinalizationRecovery(t *testing.T) {
 			}
 
 			record, err := restarted.Read(t.Context(), fixture.hierarchy.Tasks[0].Path)
-			if err != nil || record.Task.Status != TicketStatusDone || record.Task.DeliveryRef != receipt.Path {
+			if err != nil || record.Task.Status != ticketcore.TicketStatusDone || record.Task.DeliveryRef != receipt.Path {
 				t.Fatal("ticket receipt projection did not replay", err)
 			}
 

@@ -16,6 +16,7 @@ import (
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -695,7 +696,7 @@ func TestServiceCreateDefaultTicketReloadsTickets(t *testing.T) {
 		t.Fatalf("ticket title = %q, want TUI created ticket", result.Tickets[0].Title)
 	}
 
-	if result.Tickets[0].Status != core.TicketStatusBacklog {
+	if result.Tickets[0].Status != ticketcore.TicketStatusBacklog {
 		t.Fatalf("ticket status = %q, want backlog", result.Tickets[0].Status)
 	}
 
@@ -710,11 +711,11 @@ func TestServiceCreateDefaultTicketReloadsTickets(t *testing.T) {
 
 func TestServiceBoardReturnsSharedBoardReadModel(t *testing.T) {
 	projectDir := newTestWorkspace(t)
-	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Backlog.md", core.Ticket{
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Backlog.md", ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Backlog work",
 		Synopsis:  "Prepare backlog work.",
-		Status:    core.TicketStatusBacklog,
+		Status:    ticketcore.TicketStatusBacklog,
 		Priority:  "normal",
 		Severity:  "normal",
 		Type:      "task",
@@ -772,7 +773,7 @@ func TestServiceCreateTUIAuthoringSessionReloadsSessions(t *testing.T) {
 
 func TestServiceMutatesSelectedTicket(t *testing.T) {
 	projectDir := newTestWorkspace(t)
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", core.Ticket{
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
@@ -902,11 +903,11 @@ func serviceTestEvidenceStrategyChecklist() core.EvidenceStrategyChecklist {
 func writeServiceEvidenceStrategyTicket(t *testing.T, projectDir string) string {
 	t.Helper()
 
-	return writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", core.Ticket{
+	return writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Do something",
 		Synopsis:  "Preserve ticket body while adding evidence strategy.",
-		Status:    core.TicketStatusReadyForDev,
+		Status:    ticketcore.TicketStatusReadyForDev,
 		CreatedAt: testTime(),
 		UpdatedAt: testTime(),
 		Body: `# Description
@@ -1077,7 +1078,7 @@ status: "ready"
 # Project Plan
 `)
 
-	ticket := core.Ticket{
+	ticket := ticketcore.Ticket{
 		Key:         "CHR-1",
 		Title:       "Write article",
 		Status:      "ready",
@@ -1091,7 +1092,7 @@ status: "ready"
 	}
 	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Write.md", ticket)
 
-	content, err := core.NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

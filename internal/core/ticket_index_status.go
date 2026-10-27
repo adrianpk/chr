@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 // TicketIndexStatusChecker defines a package boundary interface.
@@ -22,7 +24,7 @@ type CheckProjectTicketIndexOptions struct {
 type TicketIndexStatus struct {
 	Missing  []TicketIndexStatusFile
 	Stale    []TicketIndexStatusTicket
-	Orphaned []IndexedTicket
+	Orphaned []ticketcore.IndexedTicket
 	Invalid  []TicketIndexRebuildParseError
 }
 
@@ -34,13 +36,13 @@ type TicketIndexStatusFile struct {
 
 // TicketIndexStatusTicket describes a package boundary value.
 type TicketIndexStatusTicket struct {
-	Indexed IndexedTicket
-	Parsed  IndexedTicket
+	Indexed ticketcore.IndexedTicket
+	Parsed  ticketcore.IndexedTicket
 }
 
 type ticketIndexStatusChecker struct {
 	discoverer TicketFileDiscoverer
-	parser     TicketParser
+	parser     ticketcore.TicketParser
 	index      TicketIndex
 	now        func() time.Time
 }
@@ -52,7 +54,7 @@ type TicketIndexStatusCheckerOption func(*ticketIndexStatusChecker)
 func NewTicketIndexStatusChecker(index TicketIndex, opts ...TicketIndexStatusCheckerOption) TicketIndexStatusChecker {
 	checker := &ticketIndexStatusChecker{
 		discoverer: NewTicketFileDiscoverer(),
-		parser:     NewTicketParser(),
+		parser:     ticketcore.NewTicketParser(),
 		index:      index,
 		now:        time.Now,
 	}
@@ -102,7 +104,7 @@ func (c *ticketIndexStatusChecker) compareProjectTicketIndex(
 	ctx context.Context,
 	opts CheckProjectTicketIndexOptions,
 	files []DiscoveredTicketFile,
-	indexedTickets []IndexedTicket,
+	indexedTickets []ticketcore.IndexedTicket,
 ) TicketIndexStatus {
 	status := TicketIndexStatus{}
 	indexedByRelativePath := indexedTicketsByRelativePath(indexedTickets)
@@ -112,7 +114,7 @@ func (c *ticketIndexStatusChecker) compareProjectTicketIndex(
 	for _, file := range files {
 		seenRelativePaths[file.RelativePath] = struct{}{}
 
-		parsed, err := c.parser.ParseTicket(ctx, ParseTicketOptions{
+		parsed, err := c.parser.ParseTicket(ctx, ticketcore.ParseTicketOptions{
 			ProjectID:    opts.ProjectID,
 			ProjectDir:   opts.ProjectDir,
 			Path:         file.Path,
@@ -170,8 +172,8 @@ func validateCheckProjectTicketIndexOptions(opts CheckProjectTicketIndexOptions)
 	return nil
 }
 
-func indexedTicketsByRelativePath(tickets []IndexedTicket) map[string]IndexedTicket {
-	indexed := make(map[string]IndexedTicket, len(tickets))
+func indexedTicketsByRelativePath(tickets []ticketcore.IndexedTicket) map[string]ticketcore.IndexedTicket {
+	indexed := make(map[string]ticketcore.IndexedTicket, len(tickets))
 
 	for _, ticket := range tickets {
 		indexed[ticket.RelativePath] = ticket
@@ -180,13 +182,13 @@ func indexedTicketsByRelativePath(tickets []IndexedTicket) map[string]IndexedTic
 	return indexed
 }
 
-func ticketFileStateChanged(indexed, parsed IndexedTicket) bool {
+func ticketFileStateChanged(indexed, parsed ticketcore.IndexedTicket) bool {
 	return indexed.FileSize != parsed.FileSize ||
 		indexed.ContentHash != parsed.ContentHash
 }
 
-func orphanedIndexedTickets(tickets []IndexedTicket, seenRelativePaths map[string]struct{}) []IndexedTicket {
-	orphaned := []IndexedTicket{}
+func orphanedIndexedTickets(tickets []ticketcore.IndexedTicket, seenRelativePaths map[string]struct{}) []ticketcore.IndexedTicket {
+	orphaned := []ticketcore.IndexedTicket{}
 
 	for _, ticket := range tickets {
 		_, found := seenRelativePaths[ticket.RelativePath]

@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -150,9 +151,9 @@ func indexWorkflowTask(ctx context.Context, tx *sql.Tx, store *WorkflowStore, r 
 	return err
 }
 
-func workflowIndexedTicket(ctx context.Context, store *WorkflowStore, r WorkflowRecord) (IndexedTicket, error) {
+func workflowIndexedTicket(ctx context.Context, store *WorkflowStore, r WorkflowRecord) (ticketcore.IndexedTicket, error) {
 	if strings.HasSuffix(r.Path, ".md") {
-		parsed, err := NewTicketParser().ParseTicket(ctx, ParseTicketOptions{ProjectID: r.ProjectID, ProjectDir: store.layout.ProjectDir(), Path: filepath.Join(store.layout.Root(), r.Path), RelativeBase: store.layout.Root(), IndexedAt: time.Now().UTC()})
+		parsed, err := ticketcore.NewTicketParser().ParseTicket(ctx, ticketcore.ParseTicketOptions{ProjectID: r.ProjectID, ProjectDir: store.layout.ProjectDir(), Path: filepath.Join(store.layout.Root(), r.Path), RelativeBase: store.layout.Root(), IndexedAt: time.Now().UTC()})
 		parsed.Namespace = r.Namespace
 
 		return parsed, err
@@ -166,7 +167,7 @@ func workflowIndexedTicket(ctx context.Context, store *WorkflowStore, r Workflow
 
 	display, err := workflowPlainTicketDisplay(r)
 	if err != nil {
-		return IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	display.ProjectID, display.Namespace, display.Key = r.ProjectID, r.Namespace, r.Task.Key
@@ -178,12 +179,12 @@ func workflowIndexedTicket(ctx context.Context, store *WorkflowStore, r Workflow
 	return display, nil
 }
 
-func workflowCanonicalTicket(ctx context.Context, store *WorkflowStore, r WorkflowRecord) (IndexedTicket, error) {
+func workflowCanonicalTicket(ctx context.Context, store *WorkflowStore, r WorkflowRecord) (ticketcore.IndexedTicket, error) {
 	relative := filepath.Join(filepath.Dir(r.Path), "artifact.md")
 
-	parsed, err := NewTicketParser().ParseTicket(ctx, ParseTicketOptions{ProjectID: r.ProjectID, ProjectDir: store.layout.ProjectDir(), Path: filepath.Join(store.layout.Root(), relative), RelativeBase: store.layout.Root(), IndexedAt: time.Now().UTC()})
+	parsed, err := ticketcore.NewTicketParser().ParseTicket(ctx, ticketcore.ParseTicketOptions{ProjectID: r.ProjectID, ProjectDir: store.layout.ProjectDir(), Path: filepath.Join(store.layout.Root(), relative), RelativeBase: store.layout.Root(), IndexedAt: time.Now().UTC()})
 	if err != nil {
-		return IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	parsed.Namespace, parsed.Key, parsed.Status = r.Namespace, r.Task.Key, r.Task.Status

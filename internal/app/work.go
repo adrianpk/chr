@@ -13,6 +13,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -436,7 +437,7 @@ func printAgentWorkRunAllPreview(
 	return printAgentWorkTicketQueue(stdout, result.SelectedQueue)
 }
 
-func agentWorkPreviewCycleTicket(queue []core.IndexedTicket) string {
+func agentWorkPreviewCycleTicket(queue []ticketcore.IndexedTicket) string {
 	if len(queue) == 0 {
 		return "(none)"
 	}
@@ -587,7 +588,7 @@ func workLogPathExists(path string) (bool, error) {
 	return false, fmt.Errorf("inspect work log path %s: %w", path, err)
 }
 
-func printAgentWorkTicketQueue(stdout io.Writer, tickets []core.IndexedTicket) error {
+func printAgentWorkTicketQueue(stdout io.Writer, tickets []ticketcore.IndexedTicket) error {
 	for _, ticket := range tickets {
 		_, err := fmt.Fprintf(
 			stdout,

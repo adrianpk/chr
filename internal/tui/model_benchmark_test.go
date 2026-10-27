@@ -7,7 +7,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 // BenchmarkModelUpdate measures the event-loop interface with a populated board.
@@ -56,7 +56,7 @@ func BenchmarkModelView(b *testing.B) {
 }
 
 func benchmarkBoardModel() *Model {
-	tickets := make([]core.IndexedTicket, 128)
+	tickets := make([]ticketcore.IndexedTicket, 128)
 	for i := range tickets {
 		tickets[i].Key = fmt.Sprintf("TKT-%04d", i)
 		tickets[i].Title = fmt.Sprintf("Ticket %d", i)

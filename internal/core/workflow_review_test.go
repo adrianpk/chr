@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -147,11 +148,11 @@ func checkWorkflowReviewProjection(t *testing.T, store *WorkflowStore, tasks []W
 
 	for _, task := range tasks {
 		record, err := store.Read(t.Context(), task.Path)
-		if err != nil || record.Task.Status == TicketStatusDone {
+		if err != nil || record.Task.Status == ticketcore.TicketStatusDone {
 			t.Fatal("review completed a task without integration")
 		}
 
-		if (record.Task.Status == TicketStatusReadyForMerge) != (binding.State == "authorized") {
+		if (record.Task.Status == ticketcore.TicketStatusReadyForMerge) != (binding.State == "authorized") {
 			t.Fatal("task projection differs from review grant")
 		}
 	}

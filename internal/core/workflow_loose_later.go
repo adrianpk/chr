@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -60,7 +61,7 @@ func workflowLooseLaterMembers(run workflowInvocationFile, selection workflowSel
 			continue
 		}
 
-		if record.Task.Status == TicketStatusReadyForDev && record.Task.Phase == "pending" {
+		if record.Task.Status == ticketcore.TicketStatusReadyForDev && record.Task.Phase == "pending" {
 			later = append(later, workflowPreviewMember(record))
 		}
 	}

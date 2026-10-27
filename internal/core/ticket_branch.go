@@ -3,6 +3,8 @@ package core
 import (
 	"fmt"
 	"strings"
+
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 const (
@@ -19,7 +21,7 @@ type TicketBranchSelection struct {
 }
 
 // SelectTicketBranch resolves the implementation branch for one ticket.
-func SelectTicketBranch(ticket IndexedTicket) (TicketBranchSelection, error) {
+func SelectTicketBranch(ticket ticketcore.IndexedTicket) (TicketBranchSelection, error) {
 	key := strings.TrimSpace(ticket.Key)
 	if key == "" {
 		return TicketBranchSelection{}, fmt.Errorf("ticket key is required")

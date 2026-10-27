@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -40,7 +41,7 @@ func (s service) observeNativeWork(ctx context.Context, config core.WorkspaceCon
 }
 
 func projectNativeWork(result *WorkObservation, observation core.WorkflowWorkObservation) {
-	tickets := map[string]core.IndexedTicket{}
+	tickets := map[string]ticketcore.IndexedTicket{}
 	records := map[string]core.WorkflowRecord{}
 
 	for _, ticket := range observation.Tickets {
@@ -72,7 +73,7 @@ func projectNativeWork(result *WorkObservation, observation core.WorkflowWorkObs
 	}
 }
 
-func appendNativeWork(result *WorkObservation, run core.WorkflowInvocation, tickets map[string]core.IndexedTicket, records map[string]core.WorkflowRecord) {
+func appendNativeWork(result *WorkObservation, run core.WorkflowInvocation, tickets map[string]ticketcore.IndexedTicket, records map[string]core.WorkflowRecord) {
 	base := WorkContext{ID: run.ID, Kind: "native", InvocationID: run.ID, Status: run.Status, Outcome: run.Outcome, UpdatedAt: run.UpdatedAt, Validated: run.Cursor, Confirmed: run.ConfirmedCursor, Remaining: len(run.Members) - run.ConfirmedCursor}
 	if len(run.Members) > 0 {
 		base.TicketKey = run.Members[min(run.Cursor, len(run.Members)-1)].Admission.Key
@@ -112,7 +113,7 @@ func appendNativeWork(result *WorkObservation, run core.WorkflowInvocation, tick
 	result.Events = append(result.Events, WorkEvent{ID: fmt.Sprintf("%s:revision:%d", run.ID, run.Revision), ContextID: run.ID, TicketKey: base.TicketKey, Time: run.UpdatedAt, Phase: run.Status, Message: run.Outcome})
 }
 
-func bindNativeWorkContext(current *WorkContext, tickets map[string]core.IndexedTicket, records map[string]core.WorkflowRecord) {
+func bindNativeWorkContext(current *WorkContext, tickets map[string]ticketcore.IndexedTicket, records map[string]core.WorkflowRecord) {
 	ticket := tickets[current.TicketKey]
 
 	current.Title, current.Scope = ticket.Title, ticket.UseCase

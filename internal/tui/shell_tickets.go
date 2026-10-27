@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func (m *Model) renderTicketWorkspace(width, height int) string {
@@ -318,19 +319,19 @@ func compactTicketCell(value string, width int, center bool) string {
 
 func compactTicketStatusLabel(status string) string {
 	labels := map[string]string{
-		core.TicketStatusBacklog:         "BL",
-		core.TicketStatusReadyForDev:     "RFD",
-		core.TicketStatusInProgress:      "IP",
-		core.TicketStatusReadyForReview:  "RFR",
-		core.TicketStatusReadyForMerge:   "RFM",
-		core.TicketStatusDone:            "DONE",
-		core.TicketStatusOpenLegacy:      "OPN",
-		core.TicketStatusReadyLegacy:     "RDY",
-		core.TicketStatusReviewingLegacy: "REV",
-		core.TicketStatusBlockedLegacy:   "BLK",
-		core.TicketStatusSolvedLegacy:    "SLV",
-		core.TicketStatusMergedLegacy:    "DONE",
-		core.TicketStatusClosedLegacy:    "CLS",
+		ticketcore.TicketStatusBacklog:         "BL",
+		ticketcore.TicketStatusReadyForDev:     "RFD",
+		ticketcore.TicketStatusInProgress:      "IP",
+		ticketcore.TicketStatusReadyForReview:  "RFR",
+		ticketcore.TicketStatusReadyForMerge:   "RFM",
+		ticketcore.TicketStatusDone:            "DONE",
+		ticketcore.TicketStatusOpenLegacy:      "OPN",
+		ticketcore.TicketStatusReadyLegacy:     "RDY",
+		ticketcore.TicketStatusReviewingLegacy: "REV",
+		ticketcore.TicketStatusBlockedLegacy:   "BLK",
+		ticketcore.TicketStatusSolvedLegacy:    "SLV",
+		ticketcore.TicketStatusMergedLegacy:    "DONE",
+		ticketcore.TicketStatusClosedLegacy:    "CLS",
 	}
 
 	label, ok := labels[strings.TrimSpace(status)]
@@ -360,17 +361,17 @@ func compactBoardColumnLabel(column string) string {
 	switch strings.TrimSpace(column) {
 	case boardAttentionColumn:
 		return "ATT"
-	case core.TicketStatusBacklog:
+	case ticketcore.TicketStatusBacklog:
 		return "BL"
-	case core.TicketStatusReadyForDev:
+	case ticketcore.TicketStatusReadyForDev:
 		return "RFD"
-	case core.TicketStatusInProgress:
+	case ticketcore.TicketStatusInProgress:
 		return "IP"
-	case core.TicketStatusReadyForReview:
+	case ticketcore.TicketStatusReadyForReview:
 		return "RFR"
-	case core.TicketStatusReadyForMerge:
+	case ticketcore.TicketStatusReadyForMerge:
 		return "RFM"
-	case core.TicketStatusDone:
+	case ticketcore.TicketStatusDone:
 		return "Done"
 	default:
 		return truncatePlainLine(humanizeCompactToken(column), 5)

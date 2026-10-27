@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -82,13 +83,13 @@ func applyWorkflowTaskResult(run *workflowInvocationFile, record *WorkflowRecord
 	if !result.Successful {
 		attempt.Outcome, run.Status = "failed", "paused"
 		run.Outcome = result.Outcome
-		record.Task.Phase, record.Task.Status = "pending", TicketStatusReadyForDev
+		record.Task.Phase, record.Task.Status = "pending", ticketcore.TicketStatusReadyForDev
 
 		return
 	}
 
 	attempt.Outcome = "validated"
-	record.Task.Phase, record.Task.Status = "validated", TicketStatusInProgress
+	record.Task.Phase, record.Task.Status = "validated", ticketcore.TicketStatusInProgress
 	record.Task.Evidence = append(record.Task.Evidence, ref)
 	run.Cursor++
 

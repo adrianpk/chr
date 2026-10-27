@@ -15,6 +15,7 @@ import (
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -75,7 +76,7 @@ func workflowLegacyTicketFixture(t *testing.T, store *WorkflowStore, task genera
 
 	now := time.Date(2025, 1, 2, 3, 4, 5, 0, time.UTC)
 
-	text, err := NewTicketRenderer().RenderTicket(Ticket{Key: fmt.Sprintf("PRJ-%d", number), Title: task.Title, Synopsis: task.Outcome, Status: TicketStatusReadyForDev, Body: "Original instructions and history\n", CreatedAt: now, UpdatedAt: now})
+	text, err := ticketcore.NewTicketRenderer().RenderTicket(ticketcore.Ticket{Key: fmt.Sprintf("PRJ-%d", number), Title: task.Title, Synopsis: task.Outcome, Status: ticketcore.TicketStatusReadyForDev, Body: "Original instructions and history\n", CreatedAt: now, UpdatedAt: now})
 	if err != nil {
 		t.Fatal(err)
 	}

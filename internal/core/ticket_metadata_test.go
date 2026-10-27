@@ -8,15 +8,17 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func TestTicketMetadataUpdaterUpdatesEditableFields(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "CHR-1.md")
-	content, err := NewTicketRenderer().RenderTicket(Ticket{
+	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Old title",
 		Synopsis:  "Old synopsis.",
-		Status:    TicketStatusReadyForDev,
+		Status:    ticketcore.TicketStatusReadyForDev,
 		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 		Body:      "# Comments\n",

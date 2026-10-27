@@ -13,6 +13,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -65,14 +66,14 @@ func (s *WorkflowStore) readTicketBoard(ctx context.Context, opts TicketBoardRea
 	}
 
 	if opts.CaseSlug != "" {
-		tickets = slices.DeleteFunc(tickets, func(ticket IndexedTicket) bool { return ticket.UseCase != opts.CaseSlug })
+		tickets = slices.DeleteFunc(tickets, func(ticket ticketcore.IndexedTicket) bool { return ticket.UseCase != opts.CaseSlug })
 	}
 
 	return ticketBoardPage(s.projectID, tickets, opts.Offset, opts.Limit), nil
 }
 
-func (s *WorkflowStore) readBoardTickets(ctx context.Context, native bool) ([]IndexedTicket, error) {
-	tickets := map[string]IndexedTicket{}
+func (s *WorkflowStore) readBoardTickets(ctx context.Context, native bool) ([]ticketcore.IndexedTicket, error) {
+	tickets := map[string]ticketcore.IndexedTicket{}
 	paths := map[string]bool{}
 
 	if native {
@@ -87,7 +88,7 @@ func (s *WorkflowStore) readBoardTickets(ctx context.Context, native bool) ([]In
 		}
 	}
 
-	all := make([]IndexedTicket, 0, len(tickets))
+	all := make([]ticketcore.IndexedTicket, 0, len(tickets))
 	for _, ticket := range tickets {
 		all = append(all, ticket)
 	}
@@ -95,7 +96,7 @@ func (s *WorkflowStore) readBoardTickets(ctx context.Context, native bool) ([]In
 	return sortedBoardTickets(all), nil
 }
 
-func (s *WorkflowStore) readNativeBoardTickets(ctx context.Context, tickets map[string]IndexedTicket, paths map[string]bool) error {
+func (s *WorkflowStore) readNativeBoardTickets(ctx context.Context, tickets map[string]ticketcore.IndexedTicket, paths map[string]bool) error {
 	snapshot, err := s.readSnapshot(ctx)
 	if err != nil {
 		return err
@@ -115,7 +116,7 @@ func (s *WorkflowStore) readNativeBoardTickets(ctx context.Context, tickets map[
 		ticket.Key, ticket.Status, ticket.Slice = record.Task.Key, record.Task.Status, record.Task.SliceID
 		ticket.ContentHash, ticket.IndexedAt = record.SourceHash, time.Time{}
 
-		ticket.BoardColumn, _ = BoardTicketStatusFor(ticket.Status)
+		ticket.BoardColumn, _ = ticketcore.BoardTicketStatusFor(ticket.Status)
 		if ticket.Title == "" {
 			ticket.Title = record.Task.Key
 		}
@@ -131,7 +132,7 @@ func (s *WorkflowStore) readNativeBoardTickets(ctx context.Context, tickets map[
 	return nil
 }
 
-func (s *WorkflowStore) readLooseBoardTickets(ctx context.Context, root string, tickets map[string]IndexedTicket, paths map[string]bool) error {
+func (s *WorkflowStore) readLooseBoardTickets(ctx context.Context, root string, tickets map[string]ticketcore.IndexedTicket, paths map[string]bool) error {
 	files, err := boardMarkdownFiles(ctx, s.layout.ProjectDir(), root)
 	if err != nil {
 		return err
@@ -221,7 +222,7 @@ func checkBoardRoot(projectDir, root string) error {
 	return nil
 }
 
-func (s *WorkflowStore) appendLooseBoardTicket(root, path string, tickets map[string]IndexedTicket) error {
+func (s *WorkflowStore) appendLooseBoardTicket(root, path string, tickets map[string]ticketcore.IndexedTicket) error {
 	ticket, err := readBoardDocument(s.layout.ProjectDir(), path)
 	if err != nil {
 		return err
@@ -245,7 +246,7 @@ func (s *WorkflowStore) appendLooseBoardTicket(root, path string, tickets map[st
 	return nil
 }
 
-func ticketBoardPage(projectID string, tickets []IndexedTicket, offset, limit int) Board {
+func ticketBoardPage(projectID string, tickets []ticketcore.IndexedTicket, offset, limit int) Board {
 	board := buildBoard(projectID, tickets)
 	start, end := min(offset, len(tickets)), min(offset+limit, len(tickets))
 	page := buildBoard(projectID, tickets[start:end])

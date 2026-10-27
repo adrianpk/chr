@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func TestTicketResultStateWriterWritesReviewingState(t *testing.T) {
@@ -68,7 +70,7 @@ func writeResultStateTicket(t *testing.T, status string) string {
 	t.Helper()
 
 	path := filepath.Join(t.TempDir(), "ticket.md")
-	ticket := Ticket{
+	ticket := ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    status,
@@ -76,7 +78,7 @@ func writeResultStateTicket(t *testing.T, status string) string {
 		UpdatedAt: time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC),
 	}
 
-	content, err := NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

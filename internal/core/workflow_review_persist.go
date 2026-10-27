@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -107,9 +108,9 @@ func workflowReviewAttemptResult(run *workflowInvocationFile, data []byte) []wor
 }
 
 func (s *WorkflowStore) workflowReviewDomainChanges(run *workflowInvocationFile, observation workflowSliceObservation, authorized bool) ([]workflowstate.FileChange, error) {
-	status, phase := TicketStatusReadyForReview, "reviewing"
+	status, phase := ticketcore.TicketStatusReadyForReview, "reviewing"
 	if authorized {
-		status, phase = TicketStatusReadyForMerge, "ready_for_merge"
+		status, phase = ticketcore.TicketStatusReadyForMerge, "ready_for_merge"
 	}
 
 	files := []workflowstate.FileChange{}

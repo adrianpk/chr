@@ -8,6 +8,7 @@ import (
 	"sync"
 	"testing"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -51,7 +52,7 @@ func TestWorkflowWorkPending(t *testing.T) {
 	record := workflowTestCreate(t, store, "PRJ-1")
 	store.afterReplace = func(int) error { return errors.New("interrupted replacement") }
 
-	record.Task.Status = TicketStatusBacklog
+	record.Task.Status = ticketcore.TicketStatusBacklog
 	if _, err := store.Write(t.Context(), record, record.Revision); err == nil {
 		t.Fatal("interruption not injected")
 	}

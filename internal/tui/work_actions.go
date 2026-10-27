@@ -7,6 +7,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -42,7 +43,7 @@ type WorkActionResult struct {
 	WorkflowPage  *WorkflowPageView
 	Confirmation  *WorkActionState
 	Message       string
-	Tickets       []core.IndexedTicket
+	Tickets       []ticketcore.IndexedTicket
 	Observability ObservabilityView
 	Readiness     WorkReadinessView
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -44,7 +45,7 @@ func checkWorkflowPublicationFinalized(t *testing.T, f workflowPreparationFixtur
 
 	for _, member := range progress.Invocation.Members {
 		record, err := f.store.Read(t.Context(), member.Admission.Path)
-		if err != nil || record.Task.Status != TicketStatusDone || record.Task.DeliveryRef != progress.Receipt.Path {
+		if err != nil || record.Task.Status != ticketcore.TicketStatusDone || record.Task.DeliveryRef != progress.Receipt.Path {
 			t.Fatal("member task lacks the shared verified receipt", err)
 		}
 	}

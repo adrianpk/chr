@@ -7,6 +7,7 @@ import (
 	"time"
 
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -18,8 +19,8 @@ type TicketMergeCommandRemote interface {
 
 // TicketMergeCommandOptions describes a package boundary value.
 type TicketMergeCommandOptions struct {
-	Ticket        IndexedTicket
-	Tickets       []IndexedTicket
+	Ticket        ticketcore.IndexedTicket
+	Tickets       []ticketcore.IndexedTicket
 	Remote        TicketMergeCommandRemote
 	ExpectedBase  string
 	MergeStrategy string
@@ -89,7 +90,7 @@ func RunTicketMergeCommand(ctx context.Context, opts TicketMergeCommandOptions) 
 	}
 
 	result.Merge = merge
-	result.Status = TicketStatusDone
+	result.Status = ticketcore.TicketStatusDone
 	result.MergeState = TicketMergeStateMerged
 	result.MergeResult = TicketMergeResultMerged
 	result.MergeCommit = merge.SHA
@@ -126,7 +127,7 @@ func ticketMergeCommandResult(ticketKey string, preflight TicketMergePreflightRe
 	result := TicketMergeCommandResult{
 		TicketKey:     ticketKey,
 		Preflight:     preflight,
-		Status:        TicketStatusReadyForMerge,
+		Status:        ticketcore.TicketStatusReadyForMerge,
 		MergeState:    TicketMergeStatePending,
 		MergeResult:   "",
 		MergeActor:    TicketMergeActorMerger,

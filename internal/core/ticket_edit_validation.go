@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -62,7 +63,7 @@ func validateTicketResolution(document TicketDocument, request TicketEditRequest
 		status = value
 	}
 
-	if !slices.Contains([]string{"solved", "closed", TicketStatusDone}, status) {
+	if !slices.Contains([]string{"solved", "closed", ticketcore.TicketStatusDone}, status) {
 		return fmt.Errorf("resolution is available only for resolved tickets")
 	}
 
@@ -114,11 +115,11 @@ func validateTicketEditorClassification(document TicketDocument, name, value str
 	} else {
 		switch name {
 		case "priority":
-			valid = isValidTicketPriority(value)
+			valid = ticketcore.IsValidTicketPriority(value)
 		case "severity":
-			valid = isValidTicketSeverity(value)
+			valid = ticketcore.IsValidTicketSeverity(value)
 		case "type":
-			valid = isValidTicketType(value)
+			valid = ticketcore.IsValidTicketType(value)
 		}
 	}
 
@@ -135,19 +136,19 @@ func validateTicketEditStatus(document TicketDocument, request TicketEditRequest
 		return nil
 	}
 
-	if !IsNormalBoardTicketStatus(status) {
+	if !ticketcore.IsNormalBoardTicketStatus(status) {
 		return fmt.Errorf("unsupported ticket destination")
 	}
 
 	if document.native != nil {
-		if document.Phase != "pending" || !slices.Contains([]string{TicketStatusBacklog, TicketStatusReadyForDev}, status) {
+		if document.Phase != "pending" || !slices.Contains([]string{ticketcore.TicketStatusBacklog, ticketcore.TicketStatusReadyForDev}, status) {
 			return fmt.Errorf("workflow phase and integration evidence own this transition")
 		}
 
 		return nil
 	}
 
-	if status == TicketStatusDone {
+	if status == ticketcore.TicketStatusDone {
 		return fmt.Errorf("moving to Done requires recorded integration through the workflow owner")
 	}
 

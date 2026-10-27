@@ -7,6 +7,7 @@ import (
 	"time"
 
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
@@ -29,7 +30,7 @@ const (
 
 // TicketReviewCommandOptions describes a package boundary value.
 type TicketReviewCommandOptions struct {
-	Ticket     IndexedTicket
+	Ticket     ticketcore.IndexedTicket
 	Config     WorkspaceConfig
 	Result     string
 	Findings   []string
@@ -97,7 +98,7 @@ func RunTicketReviewCommand(ctx context.Context, opts TicketReviewCommandOptions
 	return plan, nil
 }
 
-func validateTicketReviewCommandInput(ticket IndexedTicket, result string, findings []string) error {
+func validateTicketReviewCommandInput(ticket ticketcore.IndexedTicket, result string, findings []string) error {
 	if strings.TrimSpace(ticket.Key) == "" {
 		return fmt.Errorf("ticket key is required")
 	}
@@ -106,8 +107,8 @@ func validateTicketReviewCommandInput(ticket IndexedTicket, result string, findi
 		return fmt.Errorf("ticket path is required")
 	}
 
-	if ticket.Status != TicketStatusReadyForReview {
-		return fmt.Errorf("ticket review requires status %s: %s", TicketStatusReadyForReview, ticket.Status)
+	if ticket.Status != ticketcore.TicketStatusReadyForReview {
+		return fmt.Errorf("ticket review requires status %s: %s", ticketcore.TicketStatusReadyForReview, ticket.Status)
 	}
 
 	if !isValidTicketReviewCommandResult(result) {
@@ -133,7 +134,7 @@ func isValidTicketReviewCommandResult(result string) bool {
 	}
 }
 
-func ticketReviewCommandPullRequestRef(ticket IndexedTicket) (ticketmetadata.ReviewRef, error) {
+func ticketReviewCommandPullRequestRef(ticket ticketcore.IndexedTicket) (ticketmetadata.ReviewRef, error) {
 	for _, ref := range ticket.ReviewRefs {
 		if ref.Type == "pull_request" && strings.TrimSpace(ref.URL) != "" {
 			return ref, nil
@@ -144,7 +145,7 @@ func ticketReviewCommandPullRequestRef(ticket IndexedTicket) (ticketmetadata.Rev
 }
 
 func ticketReviewCommandPlan(
-	ticket IndexedTicket,
+	ticket ticketcore.IndexedTicket,
 	ref ticketmetadata.ReviewRef,
 	snapshot RemoteReviewSnapshot,
 	result string,
@@ -169,15 +170,15 @@ func ticketReviewCommandPlan(
 func ticketReviewCommandStateAndStatus(result string) (string, string) {
 	switch result {
 	case TicketReviewCommandResultPass:
-		return "pass", TicketStatusReadyForMerge
+		return "pass", ticketcore.TicketStatusReadyForMerge
 	case TicketReviewCommandResultNeedsChanges:
-		return "changes_requested", TicketStatusReadyForDev
+		return "changes_requested", ticketcore.TicketStatusReadyForDev
 	case TicketReviewCommandResultInsufficientEvidence:
-		return "insufficient_evidence", TicketStatusReadyForDev
+		return "insufficient_evidence", ticketcore.TicketStatusReadyForDev
 	case TicketReviewCommandResultNeedsHumanDecision:
-		return "needs_human_decision", TicketStatusReadyForReview
+		return "needs_human_decision", ticketcore.TicketStatusReadyForReview
 	default:
-		return "", TicketStatusReadyForReview
+		return "", ticketcore.TicketStatusReadyForReview
 	}
 }
 

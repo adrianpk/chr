@@ -16,6 +16,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -60,7 +61,7 @@ type agentOperationLockRecord struct {
 // WorkSelectionPreflightOptions describes a package boundary value.
 type WorkSelectionPreflightOptions struct {
 	ProjectDir          string
-	Tickets             []IndexedTicket
+	Tickets             []ticketcore.IndexedTicket
 	SelectedTicketKey   string
 	BranchPolicy        WorkBranchPolicy
 	Workspace           workspacecore.ExecutionConfig
@@ -71,7 +72,7 @@ type WorkSelectionPreflightOptions struct {
 // WorkSelectionPreflightResult describes a package boundary value.
 type WorkSelectionPreflightResult struct {
 	Allowed         bool
-	SelectedTickets []IndexedTicket
+	SelectedTickets []ticketcore.IndexedTicket
 	BlockReasons    []WorkSelectionBlockReason
 }
 
@@ -328,8 +329,8 @@ func agentOperationLockPath(projectDir string) (string, error) {
 	return filepath.Join(layout.Root(), "lock", "agent-operation.lock"), nil
 }
 
-func reviewRepairTickets(tickets []IndexedTicket) []IndexedTicket {
-	repairs := make([]IndexedTicket, 0)
+func reviewRepairTickets(tickets []ticketcore.IndexedTicket) []ticketcore.IndexedTicket {
+	repairs := make([]ticketcore.IndexedTicket, 0)
 
 	for _, ticket := range tickets {
 		if isReviewRepairTicket(ticket) {
@@ -340,11 +341,11 @@ func reviewRepairTickets(tickets []IndexedTicket) []IndexedTicket {
 	return repairs
 }
 
-func isReviewRepairTicket(ticket IndexedTicket) bool {
+func isReviewRepairTicket(ticket ticketcore.IndexedTicket) bool {
 	return IsTicketReviewRepair(ticket)
 }
 
-func hasTicketKey(tickets []IndexedTicket, key string) bool {
+func hasTicketKey(tickets []ticketcore.IndexedTicket, key string) bool {
 	for _, ticket := range tickets {
 		if ticket.Key == key {
 			return true

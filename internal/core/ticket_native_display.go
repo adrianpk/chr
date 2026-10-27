@@ -1,11 +1,15 @@
 package core
 
-import "encoding/json"
+import (
+	"encoding/json"
 
-func workflowPlainTicketDisplay(record WorkflowRecord) (IndexedTicket, error) {
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+)
+
+func workflowPlainTicketDisplay(record WorkflowRecord) (ticketcore.IndexedTicket, error) {
 	data, err := json.Marshal(record.Metadata)
 	if err != nil {
-		return IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
 	var display struct {
@@ -22,18 +26,18 @@ func workflowPlainTicketDisplay(record WorkflowRecord) (IndexedTicket, error) {
 		SourceRef   string `json:"source_ref"`
 	}
 	if err := json.Unmarshal(data, &display); err != nil {
-		return IndexedTicket{}, err
+		return ticketcore.IndexedTicket{}, err
 	}
 
-	return IndexedTicket{
-		IndexedTicketSummary: IndexedTicketSummary{
+	return ticketcore.IndexedTicket{
+		IndexedTicketSummary: ticketcore.IndexedTicketSummary{
 			Title: display.Title, Synopsis: display.Synopsis,
 			Assignee: display.Assignee,
-		}, IndexedTicketClassification: IndexedTicketClassification{
+		}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
 			Priority: display.Priority,
 
 			Severity: display.Severity, Type: display.Type, Tags: display.Tags,
 			ProjectArea: display.ProjectArea,
-		}, IndexedTicketSource: IndexedTicketSource{Branch: display.Branch, SourceKind: display.SourceKind, SourceRef: display.SourceRef},
+		}, IndexedTicketSource: ticketcore.IndexedTicketSource{Branch: display.Branch, SourceKind: display.SourceKind, SourceRef: display.SourceRef},
 	}, nil
 }

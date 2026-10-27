@@ -10,12 +10,12 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -637,10 +637,10 @@ func assertMaterializedPlanTrackingTicketContent(t *testing.T, ticket string) {
 	}
 }
 
-func assertMaterializedPlanTrackingTicketMetadata(t *testing.T, ticket core.IndexedTicket) {
+func assertMaterializedPlanTrackingTicketMetadata(t *testing.T, ticket ticketcore.IndexedTicket) {
 	t.Helper()
 
-	if ticket.Status != core.TicketStatusReadyForDev {
+	if ticket.Status != ticketcore.TicketStatusReadyForDev {
 		t.Fatalf("ticket status = %q, want ready_for_dev", ticket.Status)
 	}
 

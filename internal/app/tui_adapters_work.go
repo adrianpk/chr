@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -80,7 +81,7 @@ func (e tuiWorkActionExecutor) requestStopResult() (tui.WorkActionResult, error)
 
 func agentWorkSelectionOptionsFromTUIRequest(request tui.WorkActionRequest) AgentWorkSelectionOptions {
 	opts := AgentWorkSelectionOptions{
-		Statuses: []string{core.TicketStatusReadyForDev},
+		Statuses: []string{ticketcore.TicketStatusReadyForDev},
 		Order:    request.Order,
 	}
 	if request.PriorityFilter != "" {

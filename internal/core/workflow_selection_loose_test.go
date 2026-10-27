@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -112,8 +113,8 @@ func TestWorkflowSelectionLooseFilters(t *testing.T) {
 func TestWorkflowSelectionNativeTies(t *testing.T) {
 	known := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 	later := known.Add(time.Hour)
-	tickets := []IndexedTicket{{IndexedTicketIdentity: IndexedTicketIdentity{Key: "PRJ-10"}, IndexedTicketClassification: IndexedTicketClassification{Priority: "high", Severity: "normal"}, IndexedTicketTimes: IndexedTicketTimes{CreatedAt: &known}}, {IndexedTicketIdentity: IndexedTicketIdentity{Key: "PRJ-2"}, IndexedTicketClassification: IndexedTicketClassification{Priority: "high", Severity: "normal"}, IndexedTicketTimes: IndexedTicketTimes{CreatedAt: &known}}, {IndexedTicketIdentity: IndexedTicketIdentity{Key: "PRJ-1"}, IndexedTicketClassification: IndexedTicketClassification{Priority: "high", Severity: "critical"}, IndexedTicketTimes: IndexedTicketTimes{CreatedAt: &later}}, {IndexedTicketIdentity: IndexedTicketIdentity{Key: "PRJ-3"}, IndexedTicketClassification: IndexedTicketClassification{Priority: "high", Severity: "normal"}}, {IndexedTicketIdentity: IndexedTicketIdentity{Key: "PRJ-4"}}}
-	slices.SortFunc(tickets, func(left, right IndexedTicket) int {
+	tickets := []ticketcore.IndexedTicket{{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "PRJ-10"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Priority: "high", Severity: "normal"}, IndexedTicketTimes: ticketcore.IndexedTicketTimes{CreatedAt: &known}}, {IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "PRJ-2"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Priority: "high", Severity: "normal"}, IndexedTicketTimes: ticketcore.IndexedTicketTimes{CreatedAt: &known}}, {IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "PRJ-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Priority: "high", Severity: "critical"}, IndexedTicketTimes: ticketcore.IndexedTicketTimes{CreatedAt: &later}}, {IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "PRJ-3"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Priority: "high", Severity: "normal"}}, {IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "PRJ-4"}}}
+	slices.SortFunc(tickets, func(left, right ticketcore.IndexedTicket) int {
 		return compareTicketLoopOrder(workflowstate.TicketOrderPrioritySeverity, left, right)
 	})
 
@@ -131,12 +132,12 @@ func TestWorkflowSelectionLooseOwnership(t *testing.T) {
 	record := workflowTestTask("PRJ-9")
 	record.Task.UseCase = "example"
 
-	record.Task.Phase, record.Task.Status, record.Task.DeliveryRef = "integrated", TicketStatusDone, "run/evidence/receipt.json"
+	record.Task.Phase, record.Task.Status, record.Task.DeliveryRef = "integrated", ticketcore.TicketStatusDone, "run/evidence/receipt.json"
 	if _, err := store.Create(t.Context(), "Done", record); err != nil {
 		t.Fatal(err)
 	}
 
-	request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "loose"}, Limit: 128, Statuses: []string{TicketStatusReadyForDev, TicketStatusDone}, Filters: workflowstate.TicketFilters{UseCases: []string{"example"}}}
+	request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "loose"}, Limit: 128, Statuses: []string{ticketcore.TicketStatusReadyForDev, ticketcore.TicketStatusDone}, Filters: workflowstate.TicketFilters{UseCases: []string{"example"}}}
 
 	preview, err := store.Preview(t.Context(), request)
 	if err != nil || preview.Total != 0 || preview.Excluded["slice_owned"] != len(result.Tasks) || preview.Excluded["integrated"] != 1 {
@@ -157,9 +158,9 @@ func TestWorkflowSelectionConcurrent(t *testing.T) {
 
 	go func() {
 		for i := 0; i < 10; i++ {
-			record.Task.Status = TicketStatusBacklog
+			record.Task.Status = ticketcore.TicketStatusBacklog
 			if i%2 == 0 {
-				record.Task.Status = TicketStatusReadyForDev
+				record.Task.Status = ticketcore.TicketStatusReadyForDev
 			}
 
 			next, err := store.Write(t.Context(), record, record.Revision)

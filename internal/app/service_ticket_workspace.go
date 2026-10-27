@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -21,7 +22,7 @@ var newTicketStartWorktreePreparer = func() ticketStartWorktreePreparer {
 	return service
 }
 
-func prepareTicketStartWorkspace(ctx context.Context, projectContext commandProjectContext, ticket core.IndexedTicket, config core.WorkspaceConfig, opts ticketStartPreflightOptions) (ticketStartWorkspace, error) {
+func prepareTicketStartWorkspace(ctx context.Context, projectContext commandProjectContext, ticket ticketcore.IndexedTicket, config core.WorkspaceConfig, opts ticketStartPreflightOptions) (ticketStartWorkspace, error) {
 	workspace := ticketStartWorkspace{
 		Ticket:     ticket,
 		TicketPath: ticket.Path,
@@ -51,7 +52,7 @@ func prepareTicketStartWorkspace(ctx context.Context, projectContext commandProj
 	return prepareTicketStartWorktree(ctx, ticket, selection, planOptions)
 }
 
-func previewTicketStartWorktree(ticket core.IndexedTicket, planOptions core.WorktreePlanOptions) (ticketStartWorkspace, error) {
+func previewTicketStartWorktree(ticket ticketcore.IndexedTicket, planOptions core.WorktreePlanOptions) (ticketStartWorkspace, error) {
 	plan, err := core.NewWorktreePlan(planOptions)
 	if err != nil {
 		return ticketStartWorkspace{}, err
@@ -60,7 +61,7 @@ func previewTicketStartWorktree(ticket core.IndexedTicket, planOptions core.Work
 	return ticketStartWorkspaceFromPlan(ticket, plan)
 }
 
-func prepareTicketStartWorktree(ctx context.Context, ticket core.IndexedTicket, selection core.TicketBranchSelection, planOptions core.WorktreePlanOptions) (ticketStartWorkspace, error) {
+func prepareTicketStartWorktree(ctx context.Context, ticket ticketcore.IndexedTicket, selection core.TicketBranchSelection, planOptions core.WorktreePlanOptions) (ticketStartWorkspace, error) {
 	result, err := newTicketStartWorktreePreparer().Prepare(ctx, planOptions)
 	if err != nil {
 		return ticketStartWorkspace{}, err
@@ -87,7 +88,7 @@ func prepareTicketStartWorktree(ctx context.Context, ticket core.IndexedTicket, 
 	return workspace, nil
 }
 
-func ticketStartWorkspaceFromPlan(ticket core.IndexedTicket, plan core.WorktreePlan) (ticketStartWorkspace, error) {
+func ticketStartWorkspaceFromPlan(ticket ticketcore.IndexedTicket, plan core.WorktreePlan) (ticketStartWorkspace, error) {
 	ticketPath, err := equivalentProjectPath(plan.ProjectDir, plan.WorktreePath, ticket.Path)
 	if err != nil {
 		return ticketStartWorkspace{}, err

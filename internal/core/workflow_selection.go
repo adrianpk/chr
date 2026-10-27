@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -43,7 +44,7 @@ type WorkflowPreview struct {
 
 type workflowSelection struct {
 	snapshot       WorkflowSnapshot
-	tickets        []IndexedTicket
+	tickets        []ticketcore.IndexedTicket
 	records        map[string]WorkflowRecord
 	sets           map[string]WorkflowRecord
 	slices         map[string]workflowstate.WorkflowSlice
@@ -201,7 +202,7 @@ func (selection workflowSelection) resolveSelector(selector workflowstate.Select
 	return nil
 }
 
-func (selection workflowSelection) matches(selector workflowstate.Selector, ticket IndexedTicket, record WorkflowRecord) bool {
+func (selection workflowSelection) matches(selector workflowstate.Selector, ticket ticketcore.IndexedTicket, record WorkflowRecord) bool {
 	switch selector.Extent {
 	case "ticket":
 		return ticket.Key == selector.Identity
@@ -288,7 +289,7 @@ func validateWorkflowPreviewContext(request workflowstate.PreviewRequest) error 
 	return nil
 }
 
-func workflowPreviewExclusion(request workflowstate.PreviewRequest, ticket IndexedTicket, record WorkflowRecord, prepared bool) string {
+func workflowPreviewExclusion(request workflowstate.PreviewRequest, ticket ticketcore.IndexedTicket, record WorkflowRecord, prepared bool) string {
 	reason := workflowSelectionExclusion(request.Selector, record, prepared)
 	if reason == "" && request.Selector.Extent == "loose" {
 		return workflowLooseExclusion(request, ticket)

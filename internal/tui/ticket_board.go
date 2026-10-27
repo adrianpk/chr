@@ -6,6 +6,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func (m *Model) filteredTickets() []TicketView {
@@ -68,11 +69,11 @@ func (m *Model) activeBoardColumn() string {
 		return m.previousNormalBoardColumn()
 	}
 
-	if core.IsNormalBoardTicketStatus(m.boardColumn) {
+	if ticketcore.IsNormalBoardTicketStatus(m.boardColumn) {
 		return m.boardColumn
 	}
 
-	return core.TicketStatusBacklog
+	return ticketcore.TicketStatusBacklog
 }
 
 func (m *Model) activeBoardColumnPosition() int {
@@ -133,11 +134,11 @@ func (m *Model) toggleBoardAttention() {
 }
 
 func (m *Model) previousNormalBoardColumn() string {
-	if core.IsNormalBoardTicketStatus(m.previousBoardColumn) {
+	if ticketcore.IsNormalBoardTicketStatus(m.previousBoardColumn) {
 		return m.previousBoardColumn
 	}
 
-	return core.TicketStatusBacklog
+	return ticketcore.TicketStatusBacklog
 }
 
 func (m *Model) selectPreviousBoardColumn() {
@@ -181,7 +182,7 @@ func (m *Model) boardColumnNavigationActive() bool {
 }
 
 func (m *Model) selectBoardColumn(column string) {
-	if !core.IsNormalBoardTicketStatus(column) {
+	if !ticketcore.IsNormalBoardTicketStatus(column) {
 		return
 	}
 
@@ -199,5 +200,5 @@ func defaultBoardColumn(tickets []TicketView) string {
 		}
 	}
 
-	return core.TicketStatusBacklog
+	return ticketcore.TicketStatusBacklog
 }

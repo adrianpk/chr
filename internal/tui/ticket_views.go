@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func (m *Model) selectedTicketView() (TicketView, bool) {
@@ -105,12 +106,12 @@ type TicketView struct {
 }
 
 // NewTicketViews converts indexed tickets into TUI rows.
-func NewTicketViews(tickets []core.IndexedTicket) []TicketView {
+func NewTicketViews(tickets []ticketcore.IndexedTicket) []TicketView {
 	views := make([]TicketView, 0, len(tickets))
 
 	for index, ticket := range tickets {
-		boardColumn, ok := core.BoardTicketStatusFor(ticket.Status)
-		if ok && core.IsNormalBoardTicketStatus(ticket.BoardColumn) {
+		boardColumn, ok := ticketcore.BoardTicketStatusFor(ticket.Status)
+		if ok && ticketcore.IsNormalBoardTicketStatus(ticket.BoardColumn) {
 			boardColumn = ticket.BoardColumn
 		}
 

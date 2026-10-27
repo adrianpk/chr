@@ -4,13 +4,15 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func TestDetectEvidenceGherkinContextUsesAcceptanceFeatureArtifacts(t *testing.T) {
 	projectDir := t.TempDir()
 	writeEvidencePolicyFeature(t, projectDir, ".chr/default/acceptance/checkout.feature")
 
-	ticket := testEvidencePolicyTicket(func(ticket *IndexedTicket) {
+	ticket := testEvidencePolicyTicket(func(ticket *ticketcore.IndexedTicket) {
 		ticket.Type = "feature"
 		ticket.UseCase = "checkout"
 		ticket.ProjectArea = "cli"
@@ -37,7 +39,7 @@ func TestDetectEvidenceGherkinContextHonorsDisabledPolicy(t *testing.T) {
 	config := DefaultEvidenceStrategyConfig()
 	config.GherkinPolicy = EvidenceGherkinPolicyDisabled
 
-	context, err := DetectEvidenceGherkinContext(projectDir, config, testEvidencePolicyTicket(func(ticket *IndexedTicket) {
+	context, err := DetectEvidenceGherkinContext(projectDir, config, testEvidencePolicyTicket(func(ticket *ticketcore.IndexedTicket) {
 		ticket.Type = "feature"
 		ticket.UseCase = "checkout"
 	}))
@@ -51,7 +53,7 @@ func TestDetectEvidenceGherkinContextHonorsDisabledPolicy(t *testing.T) {
 }
 
 func TestEvidenceGuidanceForTicketClassifiesDocsOnlyNoTests(t *testing.T) {
-	ticket := testEvidencePolicyTicket(func(ticket *IndexedTicket) {
+	ticket := testEvidencePolicyTicket(func(ticket *ticketcore.IndexedTicket) {
 		ticket.Type = "docs"
 		ticket.Title = "Update user guide"
 	})
@@ -62,7 +64,7 @@ func TestEvidenceGuidanceForTicketClassifiesDocsOnlyNoTests(t *testing.T) {
 }
 
 func TestEvidenceGuidanceForTicketRequiresBehaviorGherkinWhenActive(t *testing.T) {
-	ticket := testEvidencePolicyTicket(func(ticket *IndexedTicket) {
+	ticket := testEvidencePolicyTicket(func(ticket *ticketcore.IndexedTicket) {
 		ticket.Type = "feature"
 		ticket.Title = "Add CLI checkout command"
 		ticket.UseCase = "checkout"
@@ -80,7 +82,7 @@ func TestEvidenceGuidanceForTicketRequiresBehaviorGherkinWhenActive(t *testing.T
 }
 
 func TestEvidenceGuidanceForTicketPrefersParserTableFuzzCoverage(t *testing.T) {
-	ticket := testEvidencePolicyTicket(func(ticket *IndexedTicket) {
+	ticket := testEvidencePolicyTicket(func(ticket *ticketcore.IndexedTicket) {
 		ticket.Type = "bug"
 		ticket.Title = "Fix parser validation for quoted input"
 	})
@@ -101,7 +103,7 @@ func TestEvidenceGuidanceForTicketPrefersParserTableFuzzCoverage(t *testing.T) {
 }
 
 func TestEvidenceGuidanceForTicketClassifiesParserValidation(t *testing.T) {
-	ticket := testEvidencePolicyTicket(func(ticket *IndexedTicket) {
+	ticket := testEvidencePolicyTicket(func(ticket *ticketcore.IndexedTicket) {
 		ticket.Type = "task"
 		ticket.Title = "Add parser validation table"
 	})
@@ -137,9 +139,9 @@ func assertEvidenceGuidance(t *testing.T, guidance EvidenceStrategyGuidance, kin
 	}
 }
 
-func testEvidencePolicyTicket(edit func(*IndexedTicket)) IndexedTicket {
-	ticket := IndexedTicket{
-		IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: IndexedTicketSummary{Title: "Do work"}, IndexedTicketClassification: IndexedTicketClassification{
+func testEvidencePolicyTicket(edit func(*ticketcore.IndexedTicket)) ticketcore.IndexedTicket {
+	ticket := ticketcore.IndexedTicket{
+		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Do work"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
 			Type:     "task",
 			Priority: "normal",
 			Severity: "normal",

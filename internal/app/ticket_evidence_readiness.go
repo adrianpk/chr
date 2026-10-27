@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 type ticketEvidenceRequest struct {
@@ -28,7 +29,7 @@ func ticketEvidenceReadiness(ctx context.Context, request ticketEvidenceRequest)
 		return core.EvidenceReadinessResult{}, err
 	}
 
-	ticket, err := core.NewTicketParser().ParseTicket(ctx, core.ParseTicketOptions{
+	ticket, err := ticketcore.NewTicketParser().ParseTicket(ctx, ticketcore.ParseTicketOptions{
 		ProjectDir: request.ProjectDir,
 		Path:       request.TicketPath,
 		IndexedAt:  time.Now().UTC(),

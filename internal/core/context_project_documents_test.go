@@ -8,6 +8,7 @@ import (
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func TestLoadProjectDocumentContextLoadsTicketReferences(t *testing.T) {
@@ -18,7 +19,7 @@ func TestLoadProjectDocumentContextLoadsTicketReferences(t *testing.T) {
 
 	writeTestFile(t, specPath, "# Feature Spec\n")
 	writeTestFile(t, docsPath, "# Feature Reference\n")
-	writeTestFile(t, ticketPath, renderProjectDocumentTestTicket(t, Ticket{
+	writeTestFile(t, ticketPath, renderProjectDocumentTestTicket(t, ticketcore.Ticket{
 		Key:         "CHR-1",
 		Title:       "Example",
 		Status:      "open",
@@ -67,7 +68,7 @@ func TestLoadProjectDocumentContextRecordsMissingReferences(t *testing.T) {
 	dir := t.TempDir()
 	ticketPath := filepath.Join(dir, ".chr", "default", "tickets", "CHR-1-example.md")
 
-	writeTestFile(t, ticketPath, renderProjectDocumentTestTicket(t, Ticket{
+	writeTestFile(t, ticketPath, renderProjectDocumentTestTicket(t, ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Example",
 		Status:    "open",
@@ -131,7 +132,7 @@ func TestRenderSourceInventoryIncludesDocumentSources(t *testing.T) {
 	}
 }
 
-func renderProjectDocumentTestTicket(t *testing.T, ticket Ticket, body string) string {
+func renderProjectDocumentTestTicket(t *testing.T, ticket ticketcore.Ticket, body string) string {
 	t.Helper()
 
 	if ticket.CreatedAt.IsZero() {
@@ -142,7 +143,7 @@ func renderProjectDocumentTestTicket(t *testing.T, ticket Ticket, body string) s
 		ticket.UpdatedAt = time.Date(2026, 5, 20, 10, 30, 0, 0, time.UTC)
 	}
 
-	content, err := NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"time"
+
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 // TicketReconciler defines a package boundary interface.
@@ -64,7 +66,7 @@ func (r TicketReconciliationResult) FirstBlocker() (TicketReconciliationBlocker,
 
 type ticketReconciler struct {
 	rebuilder TicketIndexRebuilder
-	parser    TicketParser
+	parser    ticketcore.TicketParser
 	index     TicketIndex
 }
 
@@ -72,7 +74,7 @@ type ticketReconciler struct {
 func NewTicketReconciler(index TicketIndex) TicketReconciler {
 	return &ticketReconciler{
 		rebuilder: NewTicketIndexRebuilder(index),
-		parser:    NewTicketParser(),
+		parser:    ticketcore.NewTicketParser(),
 		index:     index,
 	}
 }
@@ -136,8 +138,8 @@ func (r *ticketReconciler) parseProjectTicket(
 	ctx context.Context,
 	opts ReconcileProjectTicketOptions,
 	indexedAt time.Time,
-) (IndexedTicket, TicketReconciliationBlocker, bool) {
-	ticket, err := r.parser.ParseTicket(ctx, ParseTicketOptions{
+) (ticketcore.IndexedTicket, TicketReconciliationBlocker, bool) {
+	ticket, err := r.parser.ParseTicket(ctx, ticketcore.ParseTicketOptions{
 		ProjectID:    opts.ProjectID,
 		ProjectDir:   opts.ProjectDir,
 		Path:         opts.TicketPath,
@@ -145,7 +147,7 @@ func (r *ticketReconciler) parseProjectTicket(
 		RelativeBase: ticketsDirectory(opts.ProjectDir),
 	})
 	if err != nil {
-		return IndexedTicket{}, TicketReconciliationBlocker{
+		return ticketcore.IndexedTicket{}, TicketReconciliationBlocker{
 			Kind:         TicketReconciliationBlockerParseError,
 			Path:         opts.TicketPath,
 			RelativePath: relativeTicketPathForBlocker(opts.ProjectDir, opts.TicketPath),

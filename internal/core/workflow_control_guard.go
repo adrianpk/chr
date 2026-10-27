@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -35,7 +36,7 @@ func (s *WorkflowStore) checkWorkflowSelectionGuard(ctx context.Context, request
 		return workflowstate.ErrConflict
 	}
 
-	ticket := IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Key: guard.Key}, IndexedTicketClassification: IndexedTicketClassification{UseCase: record.Task.UseCase}}
+	ticket := ticketcore.IndexedTicket{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: guard.Key}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{UseCase: record.Task.UseCase}}
 	if !selection.matches(request.Selection.Selector, ticket, record) {
 		return workflowstate.ErrConflict
 	}

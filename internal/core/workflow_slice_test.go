@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -60,7 +61,7 @@ func workflowTestValidatedSlice(t *testing.T, store *WorkflowStore, hierarchy Wo
 
 	for _, task := range hierarchy.Tasks[:3] {
 		record, err := store.Read(t.Context(), task.Path)
-		if err != nil || record.Task.Phase != "validated" || record.Task.Status != TicketStatusInProgress || len(record.Task.Evidence) != 1 || record.Task.AttemptID != "" {
+		if err != nil || record.Task.Phase != "validated" || record.Task.Status != ticketcore.TicketStatusInProgress || len(record.Task.Evidence) != 1 || record.Task.AttemptID != "" {
 			t.Fatal("aggregate validation changed task completion or evidence")
 		}
 	}

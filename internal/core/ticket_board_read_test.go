@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -67,12 +68,12 @@ func checkNativeBoardPage(t *testing.T, opts TicketBoardReadOptions, loaded, nex
 	return page
 }
 
-func checkNativeBoardTickets(t *testing.T, tickets []IndexedTicket) {
+func checkNativeBoardTickets(t *testing.T, tickets []ticketcore.IndexedTicket) {
 	t.Helper()
 
 	seen := map[string]bool{}
 	for _, ticket := range tickets {
-		if seen[ticket.Key] || !ticket.NativeWorkflow || ticket.Status != TicketStatusReadyForDev || !strings.HasPrefix(ticket.Title, "Native ") {
+		if seen[ticket.Key] || !ticket.NativeWorkflow || ticket.Status != ticketcore.TicketStatusReadyForDev || !strings.HasPrefix(ticket.Title, "Native ") {
 			t.Fatal("native identity duplicated or replaced by its projection", ticket)
 		}
 

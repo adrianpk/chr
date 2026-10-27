@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/database"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -82,7 +83,7 @@ func readObservedLoops(ctx context.Context, db *sql.DB, projectID string) ([]Loo
 
 // LegacyWorkQueue separates shared eligible order from display metadata.
 type LegacyWorkQueue struct {
-	Tickets, Eligible []IndexedTicket
+	Tickets, Eligible []ticketcore.IndexedTicket
 	Excluded          int
 }
 
@@ -111,7 +112,7 @@ func ReadLegacyWorkQueue(ctx context.Context, layout opscore.Layout, projectID s
 		return result, err
 	}
 
-	slices.SortFunc(result.Eligible, func(left, right IndexedTicket) int { return compareTicketLoopOrder(order, left, right) })
+	slices.SortFunc(result.Eligible, func(left, right ticketcore.IndexedTicket) int { return compareTicketLoopOrder(order, left, right) })
 
 	return result, nil
 }

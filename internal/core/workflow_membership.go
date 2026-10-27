@@ -6,6 +6,7 @@ import (
 	"maps"
 	"slices"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -107,7 +108,7 @@ func workflowLaterMembers(selection workflowSelection, run workflowInvocationFil
 			continue
 		}
 
-		if record.Task.Status != TicketStatusReadyForDev || record.Task.Phase != "pending" || selection.sets[record.Task.SetID].Set.Status == "completed" {
+		if record.Task.Status != ticketcore.TicketStatusReadyForDev || record.Task.Phase != "pending" || selection.sets[record.Task.SetID].Set.Status == "completed" {
 			continue
 		}
 

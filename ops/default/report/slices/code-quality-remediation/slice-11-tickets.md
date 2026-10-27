@@ -14,8 +14,10 @@ finish assigned signatures and typed states, and reconcile the six-parameter pha
 
 ## Delivered Behavior
 
-Implementation is in progress. Slice 10 integration was verified through PR #447
-at `add303a00a38df26dd23b25dbf5dc5dc59cf0e9a` before activation.
+Ticket and indexed-ticket models, exact rendering, parsing and field/status
+validation now have a direct ticket owner. Native status mutation retains its
+actual guarded file-write and transition admission. Shared integer decoding lives
+with the existing metadata codec. Implementation remains in progress.
 
 ## Implementation Notes
 
@@ -24,7 +26,10 @@ commits with direct consumers and preserved durable/wire contracts.
 
 ## Contracts Added or Changed
 
-Pending implementation.
+Sixty-five moved declaration/test preimages reconcile after namespace qualification.
+Fields, field order, text/JSON bytes, timestamps, empty values, legacy aliases and
+errors are unchanged. Five existing debt identities/type qualifications moved
+without adding an allowance; the global debt count remains 207.
 
 ## Files of Interest
 
@@ -34,8 +39,13 @@ Pending implementation.
 
 ## Validation
 
-No Slice 11 implementation checks have run. Required candidate validation is
-`make verify`, focused real SQLite/Git regressions and `git diff --check`.
+Ticket model/parser/validation move checks passed:
+
+- `go test ./internal/core/ticket/... ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(Ticket|ValidateIndexedTicket|QualityRecordWire|Board|Leaf)' -count=1 -timeout=3m`
+- `make check-go-style`: 9308 declarations, ceiling seven, 207 exact debts and one external exception.
+
+Required final candidate validation remains `make verify`, focused real SQLite/Git
+regressions and `git diff --check` through the controller.
 
 ## Risks and Follow-ups
 

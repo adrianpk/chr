@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func recordWireFactories() map[string]func() any {
@@ -16,7 +17,7 @@ func recordWireFactories() map[string]func() any {
 		"workflow-start":  func() any { return &WorkflowStartRequest{} },
 		"invocation":      func() any { return &WorkflowInvocation{} },
 		"merger-input":    func() any { return &WorkflowMergerInput{} },
-		"indexed-ticket":  func() any { return &IndexedTicket{} },
+		"indexed-ticket":  func() any { return &ticketcore.IndexedTicket{} },
 		"invocation-file": func() any { return &workflowInvocationFile{} },
 	}
 }

@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness"
@@ -111,13 +112,13 @@ func testAgenticReviewContext(projectDir, ticketPath string, now time.Time) Agen
 	}
 }
 
-func testAgenticReviewIndexedTicket(ticketPath string) IndexedTicket {
-	return IndexedTicket{
-		IndexedTicketIdentity: IndexedTicketIdentity{
+func testAgenticReviewIndexedTicket(ticketPath string) ticketcore.IndexedTicket {
+	return ticketcore.IndexedTicket{
+		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
 			Key: "CHR-1",
 
 			Path: ticketPath,
-		}, IndexedTicketSummary: IndexedTicketSummary{Title: "Implement feature"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForReview},
+		}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Implement feature"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForReview},
 	}
 }
 
@@ -159,19 +160,19 @@ func testAgenticReviewApplication() ResultApplication {
 }
 
 func TestApplyAgenticReviewResultPassRequiresMergeHandoff(t *testing.T) {
-	ticketPath := writeAgenticReviewTicket(t, Ticket{
+	ticketPath := writeAgenticReviewTicket(t, ticketcore.Ticket{
 		Key:    "CHR-1",
 		Title:  "Ready",
-		Status: TicketStatusReadyForReview,
+		Status: ticketcore.TicketStatusReadyForReview,
 		Branch: "feat/chr-1",
 	})
 
 	_, err := ApplyAgenticReviewResult(context.Background(), ApplyAgenticReviewResultOptions{
-		Ticket: IndexedTicket{
-			IndexedTicketIdentity: IndexedTicketIdentity{
+		Ticket: ticketcore.IndexedTicket{
+			IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
 				Key:  "CHR-1",
 				Path: ticketPath,
-			}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForReview}, IndexedTicketSource: IndexedTicketSource{Branch: "feat/chr-1"},
+			}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForReview}, IndexedTicketSource: ticketcore.IndexedTicketSource{Branch: "feat/chr-1"},
 		},
 		Artifact: agenticReviewArtifactForTest(AgenticReviewResult{
 			Decision: IntegrationReviewDecisionPass,
@@ -191,20 +192,20 @@ func TestApplyAgenticReviewResultPassMovesTicketToReadyForMerge(t *testing.T) {
 		ID:       "1",
 		Status:   "open",
 	}
-	ticketPath := writeAgenticReviewTicket(t, Ticket{
+	ticketPath := writeAgenticReviewTicket(t, ticketcore.Ticket{
 		Key:        "CHR-1",
 		Title:      "Ready",
-		Status:     TicketStatusReadyForReview,
+		Status:     ticketcore.TicketStatusReadyForReview,
 		Branch:     "feat/chr-1",
 		ReviewRefs: []ticketmetadata.ReviewRef{ref},
 	})
 
 	_, err := ApplyAgenticReviewResult(context.Background(), ApplyAgenticReviewResultOptions{
-		Ticket: IndexedTicket{
-			IndexedTicketIdentity: IndexedTicketIdentity{
+		Ticket: ticketcore.IndexedTicket{
+			IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
 				Key:  "CHR-1",
 				Path: ticketPath,
-			}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForReview}, IndexedTicketSource: IndexedTicketSource{Branch: "feat/chr-1"}, IndexedTicketReview: IndexedTicketReview{ReviewRefs: []ticketmetadata.ReviewRef{ref}},
+			}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForReview}, IndexedTicketSource: ticketcore.IndexedTicketSource{Branch: "feat/chr-1"}, IndexedTicketReview: ticketcore.IndexedTicketReview{ReviewRefs: []ticketmetadata.ReviewRef{ref}},
 		},
 		Artifact: agenticReviewArtifactForTest(AgenticReviewResult{
 			Decision: IntegrationReviewDecisionPass,
@@ -229,19 +230,19 @@ func TestApplyAgenticReviewResultPassMovesTicketToReadyForMerge(t *testing.T) {
 }
 
 func TestApplyAgenticReviewResultNeedsChangesMovesTicketToReadyForDev(t *testing.T) {
-	ticketPath := writeAgenticReviewTicket(t, Ticket{
+	ticketPath := writeAgenticReviewTicket(t, ticketcore.Ticket{
 		Key:    "CHR-1",
 		Title:  "Ready",
-		Status: TicketStatusReadyForReview,
+		Status: ticketcore.TicketStatusReadyForReview,
 		Branch: "feat/chr-1",
 	})
 
 	_, err := ApplyAgenticReviewResult(context.Background(), ApplyAgenticReviewResultOptions{
-		Ticket: IndexedTicket{
-			IndexedTicketIdentity: IndexedTicketIdentity{
+		Ticket: ticketcore.IndexedTicket{
+			IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
 				Key:  "CHR-1",
 				Path: ticketPath,
-			}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForReview}, IndexedTicketSource: IndexedTicketSource{Branch: "feat/chr-1"},
+			}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForReview}, IndexedTicketSource: ticketcore.IndexedTicketSource{Branch: "feat/chr-1"},
 		},
 		Artifact: agenticReviewArtifactForTest(AgenticReviewResult{
 			Decision: IntegrationReviewDecisionNeedsChanges,
@@ -300,13 +301,13 @@ func assertAgenticReviewArtifactExists(t *testing.T, path string) {
 	}
 }
 
-func writeAgenticReviewTicket(t *testing.T, ticket Ticket) string {
+func writeAgenticReviewTicket(t *testing.T, ticket ticketcore.Ticket) string {
 	t.Helper()
 
 	dir := t.TempDir()
 	path := filepath.Join(dir, "CHR-1.md")
 
-	content, err := NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

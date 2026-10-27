@@ -10,6 +10,7 @@ import (
 	_ "modernc.org/sqlite"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
@@ -184,36 +185,36 @@ func newTestTicketIndex(t *testing.T) TicketIndex {
 	return index
 }
 
-func testIndexedTicket(key string, tags []string) IndexedTicket {
+func testIndexedTicket(key string, tags []string) ticketcore.IndexedTicket {
 	createdAt := time.Date(2026, 5, 18, 12, 30, 0, 0, time.UTC)
 	updatedAt := time.Date(2026, 5, 18, 13, 30, 0, 0, time.UTC)
 
-	return IndexedTicket{
-		IndexedTicketIdentity: IndexedTicketIdentity{
+	return ticketcore.IndexedTicket{
+		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
 			ProjectID:    "project-1",
 			Path:         "/tmp/chr/.chr/default/tickets/" + key + ".md",
 			RelativePath: key + ".md",
 			Key:          key,
-		}, IndexedTicketSummary: IndexedTicketSummary{
+		}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{
 			Title:    "Do something",
 			Synopsis: "Implement indexed ticket enrichment.",
-		}, IndexedTicketClassification: IndexedTicketClassification{
-			Status:      TicketStatusReadyForDev,
-			BoardColumn: TicketStatusReadyForDev,
+		}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
+			Status:      ticketcore.TicketStatusReadyForDev,
+			BoardColumn: ticketcore.TicketStatusReadyForDev,
 			Priority:    "high",
 			Severity:    "critical",
 			Type:        "feature",
 			Tags:        tags,
 			UseCase:     "onboarding",
 			ProjectArea: "frontend",
-		}, IndexedTicketSource: IndexedTicketSource{
+		}, IndexedTicketSource: ticketcore.IndexedTicketSource{
 			SourceKind: "plan_tracking",
 			SourceRef:  ".chr/default/plans/onboarding-plan.md",
 			Slice:      "Slice 4",
-		}, IndexedTicketTimes: IndexedTicketTimes{
+		}, IndexedTicketTimes: ticketcore.IndexedTicketTimes{
 			CreatedAt: timePtr(createdAt),
 			UpdatedAt: timePtr(updatedAt),
-		}, IndexedTicketProjection: IndexedTicketProjection{
+		}, IndexedTicketProjection: ticketcore.IndexedTicketProjection{
 			FileMTime:   time.Date(2026, 5, 18, 14, 0, 0, 0, time.UTC),
 			FileSize:    123,
 			ContentHash: "hash",
@@ -222,7 +223,7 @@ func testIndexedTicket(key string, tags []string) IndexedTicket {
 	}
 }
 
-func assertIndexedTicket(t *testing.T, got, want IndexedTicket) {
+func assertIndexedTicket(t *testing.T, got, want ticketcore.IndexedTicket) {
 	t.Helper()
 
 	if got.ProjectID != want.ProjectID || got.Key != want.Key || got.Title != want.Title {
@@ -240,14 +241,14 @@ func assertIndexedTicket(t *testing.T, got, want IndexedTicket) {
 	assertIndexedTicketEnrichedMetadata(t, got, want)
 }
 
-func assertIndexedTicketEnrichedMetadata(t *testing.T, got, want IndexedTicket) {
+func assertIndexedTicketEnrichedMetadata(t *testing.T, got, want ticketcore.IndexedTicket) {
 	t.Helper()
 
 	assertIndexedTicketSourceMetadata(t, got, want)
 	assertIndexedTicketReviewMetadata(t, got, want)
 }
 
-func assertIndexedTicketSourceMetadata(t *testing.T, got, want IndexedTicket) {
+func assertIndexedTicketSourceMetadata(t *testing.T, got, want ticketcore.IndexedTicket) {
 	t.Helper()
 
 	matches := got.Synopsis == want.Synopsis &&
@@ -261,7 +262,7 @@ func assertIndexedTicketSourceMetadata(t *testing.T, got, want IndexedTicket) {
 	}
 }
 
-func assertIndexedTicketReviewMetadata(t *testing.T, got, want IndexedTicket) {
+func assertIndexedTicketReviewMetadata(t *testing.T, got, want ticketcore.IndexedTicket) {
 	t.Helper()
 
 	matches := got.Branch == want.Branch &&

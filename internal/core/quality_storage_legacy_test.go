@@ -11,13 +11,14 @@ import (
 	"forge.adrianpk.com/chr/internal/core/database"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 type qualityLegacyRecords struct {
 	Execution    ExecutionRecord           `json:"execution"`
 	Remote       RemoteCommandRecord       `json:"remote"`
 	Notification notifycore.AuditRecord    `json:"notification"`
-	Ticket       IndexedTicket             `json:"ticket"`
+	Ticket       ticketcore.IndexedTicket  `json:"ticket"`
 	Conversation telegramcore.Conversation `json:"conversation"`
 }
 

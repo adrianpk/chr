@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 type ticketMergeInput struct {
@@ -72,12 +73,12 @@ func (s service) mergeTicket(ctx context.Context, request ticketMergeInput) (cor
 func ticketMergeCommandTickets(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, key string) (ticketMergeSelection, error) {
 	tickets, err := index.ListProjectTickets(ctx, projectContext.ProjectID)
 	if err != nil {
-		return ticketMergeSelection{Ticket: core.IndexedTicket{}, Tickets: nil}, err
+		return ticketMergeSelection{Ticket: ticketcore.IndexedTicket{}, Tickets: nil}, err
 	}
 
 	ticket, err := index.GetProjectTicketByKey(ctx, projectContext.ProjectID, key)
 	if err != nil {
-		return ticketMergeSelection{Ticket: core.IndexedTicket{}, Tickets: nil}, err
+		return ticketMergeSelection{Ticket: ticketcore.IndexedTicket{}, Tickets: nil}, err
 	}
 
 	return ticketMergeSelection{Ticket: ticket, Tickets: tickets}, nil
@@ -115,6 +116,6 @@ func ticketMergeBase(policy core.WorkBranchPolicy, supplied *string) string {
 }
 
 type ticketMergeSelection struct {
-	Ticket  core.IndexedTicket
-	Tickets []core.IndexedTicket
+	Ticket  ticketcore.IndexedTicket
+	Tickets []ticketcore.IndexedTicket
 }

@@ -1,4 +1,4 @@
-package core
+package ticket
 
 import (
 	"strings"

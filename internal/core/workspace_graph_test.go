@@ -11,6 +11,7 @@ import (
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -53,7 +54,7 @@ status: "ready"
 
 # Project Plan
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "tickets", "CHR-1-Write.md"), ticketFixture(t, Ticket{
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "tickets", "CHR-1-Write.md"), ticketFixture(t, ticketcore.Ticket{
 		Key:         "CHR-1",
 		Title:       "Write article",
 		Status:      "ready",
@@ -314,10 +315,10 @@ func assertWorkspaceGraphNode(
 	t.Fatalf("nodes = %#v, missing %s %q", nodes, kind, title)
 }
 
-func ticketFixture(t *testing.T, ticket Ticket) string {
+func ticketFixture(t *testing.T, ticket ticketcore.Ticket) string {
 	t.Helper()
 
-	content, err := NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

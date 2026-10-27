@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -55,7 +56,7 @@ func checkWorkflowPlanOrderDeliveredHistory(t *testing.T, store *WorkflowStore, 
 
 	for _, task := range result.Tasks[:3] {
 		current, err := store.Read(t.Context(), task.Path)
-		if err != nil || current.Task.Status != TicketStatusDone || current.Task.DeliveryRef != receipt {
+		if err != nil || current.Task.Status != ticketcore.TicketStatusDone || current.Task.DeliveryRef != receipt {
 			t.Fatal("amendment reset delivered work", current, err)
 		}
 	}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 const indexedTicketColumns = `project_id, namespace, path, relative_path, key, title, synopsis, status, board_column,
@@ -58,7 +59,7 @@ func (f *indexedTicketRow) values() []any {
 }
 
 type indexedTicketRow struct {
-	ticket *IndexedTicket
+	ticket *ticketcore.IndexedTicket
 
 	createdAt            sql.NullString
 	updatedAt            sql.NullString

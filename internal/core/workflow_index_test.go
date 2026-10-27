@@ -11,6 +11,7 @@ import (
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -111,7 +112,7 @@ func TestWorkflowIndex(t *testing.T) {
 		t.Fatal("slice index lost owning set")
 	}
 
-	first.Task.Status = TicketStatusBacklog
+	first.Task.Status = ticketcore.TicketStatusBacklog
 	workflowTestWrite(t, store, first)
 
 	if _, err := index.QueryWorkflow(context.Background(), store, q); !errors.Is(err, workflowstate.ErrConflict) {

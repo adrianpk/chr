@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func TestTicketCommenterAddsComment(t *testing.T) {
@@ -14,7 +16,7 @@ func TestTicketCommenterAddsComment(t *testing.T) {
 	createdAt := time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC)
 	updatedAt := time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)
 
-	content, err := NewTicketRenderer().RenderTicket(Ticket{
+	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
