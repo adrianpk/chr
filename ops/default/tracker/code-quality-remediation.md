@@ -6,7 +6,7 @@ Delivery set: code-quality-remediation
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 6, Gate, notifications and project packages; reviewing in PR #443, with exact-head controller validation and integration pending.
+Active slice: Slice 7, Telegram transport, receiver and retained delivery; in progress after verified integration of PR #443.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b`
 
 Plan: [Single-cycle plan](../plan/code-quality-remediation.md)
@@ -17,7 +17,7 @@ Source: [Quality review](../report/code-quality-review-2026-10-26/report.md)
 
 ## Authority and state
 
-The maintainer approved implementation, conventional commit/push and startup of one Looper run on 2026-10-26. Merge delegation covers the exact 16 slice PRs into dev after their required checks. Slices 1 through 5 are delivered through verified PRs #438, #439, #440, #441 and #442. This tracker owns task/commit/validation evidence; slice tickets mirror verified delivery state. Existing completed/blocked sets and unrelated tickets are not modified.
+The maintainer approved implementation, conventional commit/push and startup of one Looper run on 2026-10-26. Merge delegation covers the exact 16 slice PRs into dev after their required checks. Slices 1 through 6 are delivered through verified PRs #438, #439, #440, #441, #442 and #443. This tracker owns task/commit/validation evidence; slice tickets mirror verified delivery state. Existing completed/blocked sets and unrelated tickets are not modified.
 
 ## Canonical slice map
 
@@ -101,12 +101,12 @@ The maintainer approved implementation, conventional commit/push and startup of 
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T6.1 | Move gate behavior into internal/core/gate with its narrow inputs and results. Resolve its shared-error and path dependencies before moving; update direct callers in the same compiling change. | implemented | cacbf861e1d3; aabf8c55c1bd; ca51bf101665 | 125 exact moved declarations; focused real Git/child validation and app gate regressions passed; four named result conversions, no root facade; strict core/app/gate/configvalue lint passed; final slice checks pending |
-| T6.2 | Move notification state, delivery ownership and persistence into internal/core/notify. Keep notification idempotency, event ordering, backoff and acknowledgement semantics; do not fold it into Telegram receiver storage. | implemented | b4f60d9e2612; ee3144d5d28c; 101ff15a3c7b; 241227d6066f; 439667cfd815 | 76 exact notification move proofs and 27 shared-payload token proofs; real SQLite/HTTP snapshot, quota, retention, uncertainty/reopen and conditional-delivery checks passed; strict lint passed |
-| T6.3 | Move project identity, registry and configuration behavior into internal/core/project as justified by the dependency ledger. Retain neutral shared primitives at their actual lowest owner, not copied package helpers. | implemented | aafd48f494c9; bb30375e56de; f4722f65a22e; 31c756cc3659 | 39 exact project move proofs; explicit directory inputs and root-binding digest; focused real SQLite/registry/active selection/Telegram and app maintenance checks passed; strict core/app/project/database lint and signature policy passed |
-| T6.4 | For each package, move files with git mv in one commit, then apply precise package-qualified names and typed inputs/results in subsequent commits. Remove old entrypoints, re-exports and duplicate ownership after callers move. | implemented | aabf8c55c1bd; ca51bf101665; f4722f65a22e; 31c756cc3659; 241227d6066f; 439667cfd815; 69d0358d9912 | 240 exact mechanical declarations, followed by separate qualified-name and named operation/result changes; direct callers and no root facades |
-| T6.5 | Finish assigned signature, state-constant, error-name, control-flag and suppression work. Add or update required package READMEs and the architecture glossary with code-backed meanings. | implemented | 69d0358d9912; 112fd73e0153 | All 19 assigned rows: 16 fixed, three cohesive five-input contracts; 410 debts and unchanged external exception; named authoring results preserve outer receipt binding; enforced import bounds and adversarial AST fixtures passed |
-| T6.6 | Validate this slice, update its ticket/tracker, produce its report, and verify integration into dev. | reviewing | bd553e812057d7d0d943c385ee99787c41cbdd59 | Focused real Git/child, SQLite/HTTP/authoring and frozen-wire checks passed; report and precise dispositions prepared; exact-head controller validation and dev integration pending |
+| T6.1 | Move gate behavior into internal/core/gate with its narrow inputs and results. Resolve its shared-error and path dependencies before moving; update direct callers in the same compiling change. | delivered | cacbf861e1d3; aabf8c55c1bd; ca51bf101665 | 125 exact moved declarations; focused real Git/child validation and app gate regressions passed; four named result conversions, no root facade; strict core/app/gate/configvalue lint passed; final slice checks pending |
+| T6.2 | Move notification state, delivery ownership and persistence into internal/core/notify. Keep notification idempotency, event ordering, backoff and acknowledgement semantics; do not fold it into Telegram receiver storage. | delivered | b4f60d9e2612; ee3144d5d28c; 101ff15a3c7b; 241227d6066f; 439667cfd815 | 76 exact notification move proofs and 27 shared-payload token proofs; real SQLite/HTTP snapshot, quota, retention, uncertainty/reopen and conditional-delivery checks passed; strict lint passed |
+| T6.3 | Move project identity, registry and configuration behavior into internal/core/project as justified by the dependency ledger. Retain neutral shared primitives at their actual lowest owner, not copied package helpers. | delivered | aafd48f494c9; bb30375e56de; f4722f65a22e; 31c756cc3659 | 39 exact project move proofs; explicit directory inputs and root-binding digest; focused real SQLite/registry/active selection/Telegram and app maintenance checks passed; strict core/app/project/database lint and signature policy passed |
+| T6.4 | For each package, move files with git mv in one commit, then apply precise package-qualified names and typed inputs/results in subsequent commits. Remove old entrypoints, re-exports and duplicate ownership after callers move. | delivered | aabf8c55c1bd; ca51bf101665; f4722f65a22e; 31c756cc3659; 241227d6066f; 439667cfd815; 69d0358d9912 | 240 exact mechanical declarations, followed by separate qualified-name and named operation/result changes; direct callers and no root facades |
+| T6.5 | Finish assigned signature, state-constant, error-name, control-flag and suppression work. Add or update required package READMEs and the architecture glossary with code-backed meanings. | delivered | 69d0358d9912; 112fd73e0153 | All 19 assigned rows: 16 fixed, three cohesive five-input contracts; 410 debts and unchanged external exception; named authoring results preserve outer receipt binding; enforced import bounds and adversarial AST fixtures passed |
+| T6.6 | Validate this slice, update its ticket/tracker, produce its report, and verify integration into dev. | delivered | bd553e812057d7d0d943c385ee99787c41cbdd59 | Controller make verify, focused non-short core/app regressions, focused notification/authoring race checks and git diff --check passed on c7d7040fde4385a64b20322da1bc5874a38c2deb; PR #443 integrated |
 
 ### Slice 7: Telegram transport, receiver and retained delivery
 
@@ -228,8 +228,8 @@ The maintainer approved implementation, conventional commit/push and startup of 
 | 3 | pending | TKT-20261026084823 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-3-storage.md` |
 | 4 | pending | TKT-20261026084824 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-4-commands.md` |
 | 5 | pending | TKT-20261026084825 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-5-views.md` |
-| 6 | reviewing | TKT-20261026084826 | #443 | — | `ops/default/report/slices/code-quality-remediation/slice-6-leaves.md` |
-| 7 | pending | TKT-20261026084827 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-7-telegram.md` |
+| 6 | delivered | TKT-20261026084826 | #443 | c7d7040fde4385a64b20322da1bc5874a38c2deb | `ops/default/report/slices/code-quality-remediation/slice-6-leaves.md` |
+| 7 | in_progress | TKT-20261026084827 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-7-telegram.md` |
 | 8 | pending | TKT-20261026084828 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-8-quiz.md` |
 | 9 | pending | TKT-20261026084829 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-9-authoring.md` |
 | 10 | pending | TKT-20261026084830 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-10-harness.md` |

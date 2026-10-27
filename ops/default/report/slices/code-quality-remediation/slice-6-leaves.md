@@ -1,6 +1,6 @@
 # Slice 6: Gate, notifications and project packages
 
-Status: reviewing
+Status: delivered
 Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
@@ -121,3 +121,5 @@ that record and PR Validation own final results. Integration remains pending.
 ## Risks and Follow-ups
 
 None recorded.
+
+Integration: PR #443 merged into dev at `c7d7040fde4385a64b20322da1bc5874a38c2deb`. The controller retains successful exact-head evidence for all four ordered commands.

@@ -1,7 +1,7 @@
 ---
 id: TKT-20261026084827
 title: "Quality slice 7: Telegram transport, receiver and retained delivery"
-status: ready
+status: in_progress
 kind: cleanup
 severity: unclassified
 priority: normal
@@ -10,6 +10,8 @@ tags: code-quality, remediation, slice-7
 source: review
 reported_at: 2026-10-26T08:48:27Z
 commits: []
+started_at: 2026-10-27T09:28:39Z
+branch: refactor/slice-7-quality-telegram
 ready_at: 2026-10-26T08:57:09Z
 ---
 
