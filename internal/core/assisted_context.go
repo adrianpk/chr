@@ -74,20 +74,20 @@ func LoadAssistedAuthoringContextPackage(
 		return AssistedAuthoringContextPackage{}, err
 	}
 
-	documents, documentSources, err := loadAuthoringSelectedDocuments(projectDir, opts.Session)
+	selected, err := loadAuthoringSelectedDocuments(projectDir, opts.Session)
 	if err != nil {
 		return AssistedAuthoringContextPackage{}, err
 	}
 
-	summary, transcriptSources, err := summarizeAssistedTranscript(projectDir, sessionPaths, opts.Session.ID, opts.TranscriptEvents)
+	transcript, err := summarizeAssistedTranscript(projectDir, sessionPaths, opts.Session.ID, opts.TranscriptEvents)
 	if err != nil {
 		return AssistedAuthoringContextPackage{}, err
 	}
 
 	sources := append([]ContextSourceInventoryEntry{}, agentProtocol.Sources...)
 	sources = append(sources, authoringSessionContextSources(projectDir, sessionPaths)...)
-	sources = append(sources, transcriptSources...)
-	sources = append(sources, documentSources...)
+	sources = append(sources, transcript.Sources...)
+	sources = append(sources, selected.Sources...)
 
 	return AssistedAuthoringContextPackage{
 		ProjectDir:        projectDir,
@@ -95,8 +95,8 @@ func LoadAssistedAuthoringContextPackage(
 		Session:           opts.Session,
 		SessionPaths:      sessionPaths,
 		AgentProtocol:     agentProtocol,
-		SelectedDocuments: documents,
-		TranscriptSummary: summary,
+		SelectedDocuments: selected.Documents,
+		TranscriptSummary: transcript.Summary,
 		Sources:           sources,
 	}, nil
 }
@@ -131,10 +131,22 @@ func normalizeAuthoringContextSessionPaths(
 	return paths
 }
 
-func loadAuthoringSelectedDocuments(
-	projectDir string,
-	session AuthoringSession,
-) ([]ContextDocument, []ContextSourceInventoryEntry, error) {
+type authoringSelectedDocuments struct {
+	Documents []ContextDocument
+	Sources   []ContextSourceInventoryEntry
+}
+
+type authoringSelectedDocument struct {
+	Document ContextDocument
+	Source   ContextSourceInventoryEntry
+}
+
+type assistedTranscriptContext struct {
+	Summary AssistedTranscriptSummary
+	Sources []ContextSourceInventoryEntry
+}
+
+func loadAuthoringSelectedDocuments(projectDir string, session AuthoringSession) (authoringSelectedDocuments, error) {
 	refs := append([]AuthoringArtifactRef{}, session.Inputs...)
 	refs = append(refs, session.Outputs...)
 	sort.SliceStable(refs, func(left, right int) bool {
@@ -149,25 +161,22 @@ func loadAuthoringSelectedDocuments(
 			continue
 		}
 
-		document, source, err := loadAuthoringSelectedDocument(projectDir, ref)
+		loaded, err := loadAuthoringSelectedDocument(projectDir, ref)
 		if err != nil {
-			return nil, nil, err
+			return authoringSelectedDocuments{}, err
 		}
 
-		if document.ID != "" {
-			documents = append(documents, document)
+		if loaded.Document.ID != "" {
+			documents = append(documents, loaded.Document)
 		}
 
-		sources = append(sources, source)
+		sources = append(sources, loaded.Source)
 	}
 
-	return documents, sources, nil
+	return authoringSelectedDocuments{Documents: documents, Sources: sources}, nil
 }
 
-func loadAuthoringSelectedDocument(
-	projectDir string,
-	ref AuthoringArtifactRef,
-) (ContextDocument, ContextSourceInventoryEntry, error) {
+func loadAuthoringSelectedDocument(projectDir string, ref AuthoringArtifactRef) (authoringSelectedDocument, error) {
 	path := ref.Path
 	if !filepath.IsAbs(path) {
 		path = filepath.Join(projectDir, filepath.FromSlash(path))
@@ -175,12 +184,12 @@ func loadAuthoringSelectedDocument(
 
 	path = filepath.Clean(path)
 	if !projectcore.ContainsPath(projectDir, path) {
-		return ContextDocument{}, ContextSourceInventoryEntry{}, fmt.Errorf("authoring context document is outside project: %s", path)
+		return authoringSelectedDocument{}, fmt.Errorf("authoring context document is outside project: %s", path)
 	}
 
 	relPath, err := filepath.Rel(projectDir, path)
 	if err != nil {
-		return ContextDocument{}, ContextSourceInventoryEntry{}, fmt.Errorf("resolve authoring context document relative path: %w", err)
+		return authoringSelectedDocument{}, fmt.Errorf("resolve authoring context document relative path: %w", err)
 	}
 
 	relPath = filepath.ToSlash(relPath)
@@ -200,35 +209,30 @@ func loadAuthoringSelectedDocument(
 			source.Included = false
 			source.Reason = "file was not found"
 
-			return ContextDocument{}, source, nil
+			return authoringSelectedDocument{Source: source}, nil
 		}
 
-		return ContextDocument{}, ContextSourceInventoryEntry{}, fmt.Errorf("read authoring context document: %w", err)
+		return authoringSelectedDocument{}, fmt.Errorf("read authoring context document: %w", err)
 	}
 
 	source.Included = true
 
-	return ContextDocument{
+	return authoringSelectedDocument{Document: ContextDocument{
 		ID:           id,
 		Path:         path,
 		RelativePath: relPath,
 		Content:      string(content),
-	}, source, nil
+	}, Source: source}, nil
 }
 
-func summarizeAssistedTranscript(
-	projectDir string,
-	paths AuthoringSessionPaths,
-	sessionID string,
-	events []AssistedTranscriptEvent,
-) (AssistedTranscriptSummary, []ContextSourceInventoryEntry, error) {
+func summarizeAssistedTranscript(projectDir string, paths AuthoringSessionPaths, sessionID string, events []AssistedTranscriptEvent) (assistedTranscriptContext, error) {
 	summary := AssistedTranscriptSummary{}
 	questions := map[string]AssistedTranscriptQuestionGap{}
 	answered := map[string]struct{}{}
 
 	for _, event := range events {
 		if event.SessionID != sessionID {
-			return AssistedTranscriptSummary{}, nil, fmt.Errorf("assisted transcript event session id does not match session")
+			return assistedTranscriptContext{}, fmt.Errorf("assisted transcript event session id does not match session")
 		}
 
 		switch event.Type {
@@ -264,7 +268,7 @@ func summarizeAssistedTranscript(
 		return summary.UnansweredQuestions[left].TurnIndex < summary.UnansweredQuestions[right].TurnIndex
 	})
 
-	return summary, []ContextSourceInventoryEntry{assistedTranscriptSource(projectDir, paths)}, nil
+	return assistedTranscriptContext{Summary: summary, Sources: []ContextSourceInventoryEntry{assistedTranscriptSource(projectDir, paths)}}, nil
 }
 
 func authoringSessionContextSources(projectDir string, paths AuthoringSessionPaths) []ContextSourceInventoryEntry {

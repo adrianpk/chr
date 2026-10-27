@@ -13,29 +13,29 @@ import (
 
 // The continuation builds dump images, never a nested publication. Its existing
 // session/transcript/receipt journal owns the entire resulting change set.
-func (r *fileAuthoringSessionRepository) prepareAuthoringDump(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session AuthoringSession, body string) (AuthoringArtifactRef, []workflowstate.FileChange, error) {
+func (r *fileAuthoringSessionRepository) prepareAuthoringDump(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session AuthoringSession, body string) (authoringOutputImages, error) {
 	observed, err := r.observeAuthoringDump(ctx, snapshot)
 	if err != nil {
-		return AuthoringArtifactRef{}, nil, err
+		return authoringOutputImages{}, err
 	}
 
 	if snapshot.dumpRevision != observed.Revision {
-		return AuthoringArtifactRef{}, nil, workflowstate.ErrConflict
+		return authoringOutputImages{}, workflowstate.ErrConflict
 	}
 
 	target, err := r.authoringDumpTarget(session, observed)
 	if err != nil {
-		return AuthoringArtifactRef{}, nil, err
+		return authoringOutputImages{}, err
 	}
 
 	mutation, err := authoringDumpBinding(binding, snapshot, session, target, body)
 	if err != nil {
-		return AuthoringArtifactRef{}, nil, err
+		return authoringOutputImages{}, err
 	}
 
 	images, err := r.dumpMutationChanges(mutation, target)
 	if err != nil {
-		return AuthoringArtifactRef{}, nil, err
+		return authoringOutputImages{}, err
 	}
 
 	changes := images.Changes
@@ -45,7 +45,7 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringDump(ctx context.Contex
 		changes = withoutAuthoringRawChanges(changes, target.RawReference)
 	}
 
-	return authoringDumpRef(target.Destination), changes, nil
+	return authoringOutputImages{Ref: authoringDumpRef(target.Destination), Changes: changes}, nil
 }
 
 func (r *fileAuthoringSessionRepository) authoringDumpTarget(session AuthoringSession, observed ProjectDumpObservation) (dumpMutationTarget, error) {

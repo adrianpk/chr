@@ -92,12 +92,12 @@ func AskNextAssistedQuizQuestion(
 	turnID := assistedQuizTurnID(nextIndex)
 	request := assistedQuizModelRequest(opts, summary, turnID, nextIndex, now)
 
-	response, paths, err := invokeAndRecordAssistedQuizModel(ctx, opts, request)
+	invocation, err := invokeAndRecordAssistedQuizModel(ctx, opts, request)
 	if err != nil {
 		return AssistedQuizAskResult{}, err
 	}
 
-	turn := assistedQuizTurnFromModelResponse(opts, turnID, nextIndex, response, now)
+	turn := assistedQuizTurnFromModelResponse(opts, turnID, nextIndex, invocation.Response, now)
 
 	err = appendAssistedQuizTurn(ctx, opts.Repository, turn)
 	if err != nil {
@@ -107,9 +107,9 @@ func AskNextAssistedQuizQuestion(
 	return AssistedQuizAskResult{
 		Turn:            turn,
 		Request:         request,
-		Response:        response,
-		InvocationPaths: paths,
-		StopReason:      assistedQuizResponseStopReason(response),
+		Response:        invocation.Response,
+		InvocationPaths: invocation.Paths,
+		StopReason:      assistedQuizResponseStopReason(invocation.Response),
 	}, nil
 }
 
@@ -201,19 +201,20 @@ func assistedQuizModelRequest(
 	}
 }
 
-func invokeAndRecordAssistedQuizModel(
-	ctx context.Context,
-	opts AssistedQuizLoopOptions,
-	request AssistedModelRequest,
-) (AssistedModelResponse, AssistedModelInvocationPaths, error) {
+type assistedQuizInvocation struct {
+	Response AssistedModelResponse
+	Paths    AssistedModelInvocationPaths
+}
+
+func invokeAndRecordAssistedQuizModel(ctx context.Context, opts AssistedQuizLoopOptions, request AssistedModelRequest) (assistedQuizInvocation, error) {
 	response, err := InvokeAssistedModel(ctx, opts.Adapter, request)
 	if err != nil {
-		return AssistedModelResponse{}, AssistedModelInvocationPaths{}, err
+		return assistedQuizInvocation{}, err
 	}
 
 	paths, err := PlanAssistedModelInvocationArtifacts(opts.SessionPaths, request)
 	if err != nil {
-		return AssistedModelResponse{}, AssistedModelInvocationPaths{}, err
+		return assistedQuizInvocation{}, err
 	}
 
 	err = RecordAssistedModelInvocation(ctx, AssistedModelInvocationArtifacts{
@@ -222,10 +223,10 @@ func invokeAndRecordAssistedQuizModel(
 		Response: response,
 	})
 	if err != nil {
-		return AssistedModelResponse{}, AssistedModelInvocationPaths{}, err
+		return assistedQuizInvocation{}, err
 	}
 
-	return response, paths, nil
+	return assistedQuizInvocation{Response: response, Paths: paths}, nil
 }
 
 func validateAssistedQuizAnswerOptions(opts AssistedQuizAnswerOptions) error {

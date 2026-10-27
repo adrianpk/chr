@@ -19,7 +19,7 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringContinuation(ctx contex
 	session.Target = AuthoringTarget(request.Target)
 	session.UpdatedAt = time.Now().UTC()
 
-	artifacts, events, err := r.prepareAuthoringContent(ctx, binding, snapshot, &session, draft)
+	prepared, err := r.prepareAuthoringContent(ctx, binding, snapshot, &session, draft)
 	if err != nil {
 		return nil, err
 	}
@@ -39,17 +39,28 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringContinuation(ctx contex
 		return nil, err
 	}
 
-	transcript, err := r.authoringTranscriptImage(binding, snapshot, relative.TranscriptPath, events)
+	transcript, err := r.authoringTranscriptImage(binding, snapshot, relative.TranscriptPath, prepared.Events)
 	if err != nil {
 		return nil, err
 	}
 
 	changes := []workflowstate.FileChange{{Path: relative.SessionPath, Before: snapshot.SessionHash, After: []byte(content)}, {Path: relative.TranscriptPath, Before: snapshot.TranscriptHash, After: transcript}}
 
-	return append(changes, artifacts...), nil
+	return append(changes, prepared.Changes...), nil
 }
 
-func (r *fileAuthoringSessionRepository) prepareAuthoringContent(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *AuthoringSession, draft AuthoringDraft) ([]workflowstate.FileChange, []AssistedTranscriptEvent, error) {
+// authoringContentImages joins changes and transcript events for one journal.
+type authoringContentImages struct {
+	Changes []workflowstate.FileChange
+	Events  []AssistedTranscriptEvent
+}
+
+type authoringOutputImages struct {
+	Ref     AuthoringArtifactRef
+	Changes []workflowstate.FileChange
+}
+
+func (r *fileAuthoringSessionRepository) prepareAuthoringContent(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *AuthoringSession, draft AuthoringDraft) (authoringContentImages, error) {
 	request := binding.Request
 
 	var (
@@ -64,7 +75,7 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringContent(ctx context.Con
 
 		prepared, err := r.authoringArtifactChanges(binding, snapshot, capture, raw)
 		if err != nil {
-			return nil, nil, err
+			return authoringContentImages{}, err
 		}
 
 		if request.Target != AuthoringArtifactKindDump || draft.Question != "" {
@@ -73,7 +84,7 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringContent(ctx context.Con
 	}
 
 	if request.Action == "answer" {
-		return changes, []AssistedTranscriptEvent{authoringAnswerEvent(snapshot, request, session.Revision)}, nil
+		return authoringContentImages{Changes: changes, Events: []AssistedTranscriptEvent{authoringAnswerEvent(snapshot, request, session.Revision)}}, nil
 	}
 
 	if request.Action == "respond" {
@@ -85,15 +96,15 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringContent(ctx context.Con
 		if request.Target == AuthoringArtifactKindQuiz {
 			prepared, err := r.prepareAuthoringOutput(ctx, binding, snapshot, session, renderAuthoringQuiz(*session, event))
 
-			return append(changes, prepared...), append(events, event), err
+			return authoringContentImages{Changes: append(changes, prepared...), Events: append(events, event)}, err
 		}
 
-		return changes, append(events, event), nil
+		return authoringContentImages{Changes: changes, Events: append(events, event)}, nil
 	}
 
 	prepared, err := r.prepareAuthoringOutput(ctx, binding, snapshot, session, draft.Body)
 
-	return append(changes, prepared...), events, err
+	return authoringContentImages{Changes: append(changes, prepared...), Events: events}, err
 }
 
 func (r *fileAuthoringSessionRepository) authoringTranscriptImage(binding authoringRequestBinding, snapshot AuthoringSnapshot, path string, events []AssistedTranscriptEvent) ([]byte, error) {
@@ -189,11 +200,12 @@ func AuthoringContinuationArtifact(namespace, sessionID string, kind AuthoringAr
 }
 
 func (r *fileAuthoringSessionRepository) prepareAuthoringOutput(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *AuthoringSession, body string) ([]workflowstate.FileChange, error) {
-	ref, changes, err := r.prepareAuthoringOutputChanges(ctx, binding, snapshot, session, body)
+	images, err := r.prepareAuthoringOutputChanges(ctx, binding, snapshot, session, body)
 	if err != nil {
 		return nil, err
 	}
 
+	ref := images.Ref
 	found := false
 
 	for _, existing := range session.Outputs {
@@ -216,10 +228,10 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringOutput(ctx context.Cont
 
 	session.Provenance = append(session.Provenance, AuthoringProvenanceLink{Relation: relation, Source: source, Target: ref, Decision: "Bound authoring request " + binding.Request.Binding.RequestID, RecordedAt: session.UpdatedAt})
 
-	return changes, nil
+	return images.Changes, nil
 }
 
-func (r *fileAuthoringSessionRepository) prepareAuthoringOutputChanges(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *AuthoringSession, body string) (AuthoringArtifactRef, []workflowstate.FileChange, error) {
+func (r *fileAuthoringSessionRepository) prepareAuthoringOutputChanges(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *AuthoringSession, body string) (authoringOutputImages, error) {
 	if binding.Request.Target == AuthoringArtifactKindDump {
 		return r.prepareAuthoringDump(ctx, binding, snapshot, *session, body)
 	}
@@ -227,5 +239,5 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringOutputChanges(ctx conte
 	ref := AuthoringContinuationArtifact(session.Namespace, session.ID, binding.Request.Target, false)
 	changes, err := r.authoringArtifactChanges(binding, snapshot, ref, body)
 
-	return ref, changes, err
+	return authoringOutputImages{Ref: ref, Changes: changes}, err
 }

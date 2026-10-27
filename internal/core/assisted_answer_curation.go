@@ -76,12 +76,12 @@ func curateAssistedAnswers(ctx context.Context, opts AssistedAnswerCurationOptio
 
 	draft.ModelSummary = strings.TrimSpace(response.RawText)
 
-	artifactRef, artifactPath, err := writeAssistedAnswerCurationArtifact(opts.Session, opts.SessionPaths, draft)
+	artifact, err := writeAssistedAnswerCurationArtifact(opts.Session, opts.SessionPaths, draft)
 	if err != nil {
 		return AssistedAnswerCurationResult{}, err
 	}
 
-	session, err := updateAssistedAnswerCurationSession(ctx, opts.Repository, opts.Session, artifactRef, now)
+	session, err := updateAssistedAnswerCurationSession(ctx, opts.Repository, opts.Session, artifact.Ref, now)
 	if err != nil {
 		return AssistedAnswerCurationResult{}, err
 	}
@@ -91,8 +91,8 @@ func curateAssistedAnswers(ctx context.Context, opts AssistedAnswerCurationOptio
 		Request:      request,
 		Response:     response,
 		Summary:      draft,
-		ArtifactRef:  artifactRef,
-		ArtifactPath: artifactPath,
+		ArtifactRef:  artifact.Ref,
+		ArtifactPath: artifact.Path,
 	}, nil
 }
 
@@ -209,25 +209,26 @@ func assistedAnswerCurationPrompt(session AuthoringSession, events []AssistedTra
 	)
 }
 
-func writeAssistedAnswerCurationArtifact(
-	session AuthoringSession,
-	paths AuthoringSessionPaths,
-	summary AssistedCuratedAnswerSummary,
-) (AuthoringArtifactRef, string, error) {
+type assistedCurationArtifact struct {
+	Ref  AuthoringArtifactRef
+	Path string
+}
+
+func writeAssistedAnswerCurationArtifact(session AuthoringSession, paths AuthoringSessionPaths, summary AssistedCuratedAnswerSummary) (assistedCurationArtifact, error) {
 	artifactPath := filepath.Join(paths.SessionDir, "curated-summary.md")
 
 	_, err := os.Stat(artifactPath)
 	if err == nil {
-		return AuthoringArtifactRef{}, "", fmt.Errorf("assisted answer curation artifact already exists: %s", artifactPath)
+		return assistedCurationArtifact{}, fmt.Errorf("assisted answer curation artifact already exists: %s", artifactPath)
 	}
 
 	if err != nil && !os.IsNotExist(err) {
-		return AuthoringArtifactRef{}, "", fmt.Errorf("stat assisted answer curation artifact: %w", err)
+		return assistedCurationArtifact{}, fmt.Errorf("stat assisted answer curation artifact: %w", err)
 	}
 
 	err = os.WriteFile(artifactPath, []byte(RenderAssistedCuratedAnswerSummary(summary)), 0o644)
 	if err != nil {
-		return AuthoringArtifactRef{}, "", fmt.Errorf("write assisted answer curation artifact: %w", err)
+		return assistedCurationArtifact{}, fmt.Errorf("write assisted answer curation artifact: %w", err)
 	}
 
 	ref := AuthoringArtifactRef{
@@ -238,7 +239,7 @@ func writeAssistedAnswerCurationArtifact(
 		Description: "Curated assisted authoring answer summary.",
 	}
 
-	return ref, artifactPath, nil
+	return assistedCurationArtifact{Ref: ref, Path: artifactPath}, nil
 }
 
 func updateAssistedAnswerCurationSession(
