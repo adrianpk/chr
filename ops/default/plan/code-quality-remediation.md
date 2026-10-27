@@ -160,7 +160,7 @@ Focused selection: Focused gate, notification delivery/retry and project-registr
 ### Slice 7: Telegram transport, receiver and retained delivery
 
 Findings: R1, R2, R3, R6, R7, R9, R10.
-Ticket: [TKT-20261026084827](../ticket/in_progress/20261026084827-quality-telegram.md).
+Ticket: [TKT-20261026084827](../ticket/reviewing/20261026084827-quality-telegram.md).
 
 1. **T7.1:** Move the core Telegram receiver, transport and retained operation/outbox behavior into internal/core/telegram. Introduce a nested outbox owner only if storage and transport separation actually need it; preserve one transactional owner for each existing operation.
 2. **T7.2:** Replace SendDocument, SendAction, presentation senders and notice insert argument lists with named request/row values. Convert all assigned result shapes while preserving missing, stale, duplicate and acknowledgement outcomes.
@@ -410,7 +410,7 @@ Cost: runtime gates were not rerun for this planning task. Budget each slice for
 | 4 | [TKT-20261026084824](../ticket/solved/20261026084824-quality-commands.md) | Typed commands and central application operations | ready; predecessor applies |
 | 5 | [TKT-20261026084825](../ticket/solved/20261026084825-quality-views.md) | TUI model ownership and Web view sections | ready; predecessor applies |
 | 6 | [TKT-20261026084826](../ticket/solved/20261026084826-quality-leaves.md) | Gate, notifications and project packages | ready; predecessor applies |
-| 7 | [TKT-20261026084827](../ticket/in_progress/20261026084827-quality-telegram.md) | Telegram transport, receiver and retained delivery | ready; predecessor applies |
+| 7 | [TKT-20261026084827](../ticket/reviewing/20261026084827-quality-telegram.md) | Telegram transport, receiver and retained delivery | ready; predecessor applies |
 | 8 | [TKT-20261026084828](../ticket/ready/20261026084828-quality-quiz.md) | Quiz domain and model adapter | ready; predecessor applies |
 | 9 | [TKT-20261026084829](../ticket/ready/20261026084829-quality-authoring.md) | Authoring, document generation and guided preparation | ready; predecessor applies |
 | 10 | [TKT-20261026084830](../ticket/ready/20261026084830-quality-harness.md) | Harness contracts and runtime lifecycle | ready; predecessor applies |

@@ -6,7 +6,7 @@ Delivery set: code-quality-remediation
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 7, Telegram transport, receiver and retained delivery; canonical PR preparation after verified integration of PR #443.
+Active slice: Slice 7, Telegram transport, receiver and retained delivery; reviewing PR #444 after verified integration of PR #443.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b`
 
 Plan: [Single-cycle plan](../plan/code-quality-remediation.md)
@@ -117,7 +117,7 @@ The maintainer approved implementation, conventional commit/push and startup of 
 | T7.3 | Apply the row mappings from Slice 3 to notice, document, action and response queues. Preserve exact original-document attachment bytes, captions, fallback behavior, finite quotas and restart reconciliation. | implemented | a11b75fa23c1; b9e70d85c053; cb61567da591 | Typed notice/action/response/document/delivery rows; 174 unchanged SQL expressions; distinct-column SQLite and swap mutation proof; original frozen bytes, caption fallback, quotas, uncertainty and restart regressions pass |
 | T7.4 | Resolve duplicate dispatch pair D06 through a narrow helper with separate handler tables. Verify that removing telegramGuidedResultExport and telegramHelpReply does not remove their live replacements or useful behavioral tests. | implemented | a055ba79f991 | D06 intake has one owner with distinct explanation/work route records; both test-only wrappers removed and live renderer/result guard tests retained; focused real work/explanation/help and guided-result guard checks plus pinned app lint pass |
 | T7.5 | Consolidate error type names, typed receiver/operation/outbox states, unused parameters and justified close handling. Update app adapters directly; do not re-export the moved package through core. | implemented | 71a0527b449c; cb61567da591 | Six transport state machines retain stored strings; explicit Error names, observable SQL cursor cleanup and one justified HTTP body-close suppression; unused serve inputs were resolved by Slice 4 |
-| T7.6 | Validate this slice, update its ticket/tracker, produce its report, and verify integration into dev. | in_progress | — | Focused task tests and pinned lint pass; report prepared for canonical PR; controller ledger and PR Validation own the final clean-head ordered batch; integration remains pending |
+| T7.6 | Validate this slice, update its ticket/tracker, produce its report, and verify integration into dev. | reviewing | 00546d27e408af797280a10377717603d9261b64 | Canonical PR #444 and immutable report introduced; controller ledger and PR Validation own final exact-head make verify, focused non-short/race checks and whitespace; integration pending |
 
 ### Slice 8: Quiz domain and model adapter
 
