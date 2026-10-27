@@ -11,7 +11,7 @@ import (
 
 func TestTicketRepositoryCreatesProjectWiseTicket(t *testing.T) {
 	dir := t.TempDir()
-	repository := NewTicketRepository(
+	repository := newTestTicketRepository(
 		dir,
 		WithTicketRepositoryClock(fixedTicketTime),
 	)
@@ -49,7 +49,7 @@ func TestTicketRepositoryCreatesProjectWiseTicket(t *testing.T) {
 
 func TestTicketRepositoryCreatesUseCaseTicket(t *testing.T) {
 	dir := t.TempDir()
-	repository := NewTicketRepository(dir, WithTicketRepositoryClock(fixedTicketTime))
+	repository := newTestTicketRepository(dir, WithTicketRepositoryClock(fixedTicketTime))
 
 	result, err := repository.CreateTicket(context.Background(), CreateTicketOptions{
 		Title:    "Add setup flow",
@@ -71,7 +71,7 @@ func TestTicketRepositoryDerivesNextKeyFromExistingTickets(t *testing.T) {
 	writeFile(t, filepath.Join(dir, ".chr", "default", "tickets", "CHR-3-Old.md"), "# Old\n")
 	writeFile(t, filepath.Join(dir, ".chr", "default", "tickets", "nested", "ticket.md"), "---\nkey: \"CHR-9\"\n---\n")
 
-	repository := NewTicketRepository(dir, WithTicketRepositoryClock(fixedTicketTime))
+	repository := newTestTicketRepository(dir, WithTicketRepositoryClock(fixedTicketTime))
 
 	result, err := repository.CreateTicket(context.Background(), CreateTicketOptions{
 		Title:    "Next",
@@ -90,7 +90,7 @@ func TestTicketRepositoryUsesCustomKeyPrefix(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, ".chr", "default", "tickets", "PRJ-4-Old.md"), "# Old\n")
 
-	repository := NewTicketRepository(
+	repository := newTestTicketRepository(
 		dir,
 		WithTicketRepositoryKeyPrefix("PRJ"),
 		WithTicketRepositoryClock(fixedTicketTime),
@@ -111,7 +111,11 @@ func TestTicketRepositoryUsesCustomKeyPrefix(t *testing.T) {
 
 func TestTicketRepositoryRejectsMissingSynopsis(t *testing.T) {
 	dir := t.TempDir()
-	repository := NewTicketRepository(dir, WithTicketRepositoryClock(fixedTicketTime))
+	repository := NewTicketRepository(dir, func(context.Context, string) (int, error) {
+		t.Fatal("missing synopsis reached the key allocator")
+
+		return 0, nil
+	}, WithTicketRepositoryClock(fixedTicketTime))
 
 	_, err := repository.CreateTicket(context.Background(), CreateTicketOptions{Title: "Next"})
 	if err == nil {
@@ -146,4 +150,10 @@ func writeFile(t *testing.T, path, content string) {
 	if err != nil {
 		t.Fatalf("write file %s: %v", path, err)
 	}
+}
+
+func newTestTicketRepository(projectDir string, opts ...TicketRepositoryOption) TicketRepository {
+	return NewTicketRepository(projectDir, func(ctx context.Context, prefix string) (int, error) {
+		return NextTicketKeyNumber(ctx, projectDir, prefix)
+	}, opts...)
 }

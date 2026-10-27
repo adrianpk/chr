@@ -108,6 +108,21 @@ This closes another assigned result-shape entry: 204 exact debts remain.
 - `make check-go-style`: 9309 declarations, ceiling seven, 204 exact debts and one external exception.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ticket/... ./internal/core ./internal/app`: zero issues.
 
+The filesystem writer receives its required key allocator explicitly. Application
+creation still reserves the durable key before constructing the writer, and the
+writer validates cancellation/title/synopsis before calling its allocator. Native
+key observation retains the complete native envelope/task decode, Board path and
+namespace bounds; it shares the ticket filename/text reader rather than moving
+workflow policy into ticket storage. The reader now returns a named number/presence
+observation plus error. The obsolete fixed-number option and allocation forwarding
+method were removed after their live caller moved to the injected allocator.
+
+- `go test ./internal/core/ticket/... ./internal/core ./internal/app -run '^Test(Ticket|ServiceWorkflowTicket|QualityRecordWire|Board)' -count=1 -timeout=3m`: passed, including native envelope/namespace key recovery.
+- `go test ./internal/core -run '^TestTicketRepositoryRejectsMissingSynopsis$' -count=1 -timeout=3m`: passed; invalid synopsis never reaches allocation.
+- `make check-go-style`: 9307 declarations, ceiling seven, 203 exact debts and one external exception.
+
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ticket/... ./internal/core ./internal/app`: zero issues after the allocator/number-reader change.
+
 ## Risks and Follow-ups
 
 Remaining work includes ticket filesystem repository rules, execution/readiness

@@ -147,11 +147,6 @@
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/ticket_repository.go::fileTicketRepository.ticketNumber",
-      "signature": "func(path string) (int, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/core/ticket_review_command.go::ticketReviewCommandPlan",
       "signature": "func(ticket ticketcore.Indexed, ref ticketmetadata.ReviewRef, snapshot RemoteReviewSnapshot, result string, findings []string, dryRun bool) TicketReviewCommandResult",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."

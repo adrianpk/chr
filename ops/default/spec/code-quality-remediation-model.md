@@ -647,3 +647,11 @@ reuse the same transactional row/tag operation on their existing transaction;
 workflow metadata, source authority and commit remain with native orchestration.
 Public index upserts retain validation and snapshot invalidation in their original
 order. No schema, migration, SQL binding or null/time contract changes.
+
+Ticket file creation stores an explicit key allocator, parameterized by the actual
+configured prefix. It retains cancellation and title/synopsis admission before
+allocation, UTC time/render/write order and file modes. Application creation passes
+its already reserved durable key. Native cross-namespace key observation retains
+its complete envelope/domain decoding and bounded path traversal with native
+workflow code; ticket-owned filename/text observation preserves number, presence
+and read-error meanings. No native schema copy is introduced in the ticket owner.

@@ -14,7 +14,19 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r *fileTicketRepository) nextKeyNumber(ctx context.Context) (int, error) {
+// NextTicketKeyNumber observes legacy tickets and native envelopes across namespaces.
+func NextTicketKeyNumber(ctx context.Context, projectDir, keyPrefix string) (int, error) {
+	observer := ticketKeyObserver{projectDir: projectDir, keyPrefix: DefaultTicketKeyPrefix}
+	if keyPrefix != "" {
+		observer.keyPrefix = keyPrefix
+	}
+
+	return observer.nextKeyNumber(ctx)
+}
+
+type ticketKeyObserver struct{ projectDir, keyPrefix string }
+
+func (r *ticketKeyObserver) nextKeyNumber(ctx context.Context) (int, error) {
 	roots, err := ticketKeyRoots(r.projectDir)
 	if err != nil {
 		return 0, err
@@ -66,15 +78,15 @@ func ticketKeyRoots(projectDir string) ([]string, error) {
 	return roots, nil
 }
 
-func (r *fileTicketRepository) observedTicketNumber(path string) (int, error) {
-	number, _, err := r.ticketNumber(path)
+func (r *ticketKeyObserver) observedTicketNumber(path string) (int, error) {
+	observed, err := ReadTicketNumber(path, r.keyPrefix)
 	if err != nil || filepath.Base(path) != opscore.ArtifactBodyFile() {
-		return number, err
+		return observed.Number, err
 	}
 
 	metadata, err := readWorkflowEnvelope(filepath.Join(filepath.Dir(path), "metadata.json"))
 	if errors.Is(err, os.ErrNotExist) {
-		return number, nil
+		return observed.Number, nil
 	}
 
 	if err != nil {
@@ -88,7 +100,7 @@ func (r *fileTicketRepository) observedTicketNumber(path string) (int, error) {
 		}
 	}
 
-	metadataNumber, _ := keyNumberFromText(r.keyPrefix, task.Key)
+	metadataNumber, _ := KeyNumberFromText(r.keyPrefix, task.Key)
 
-	return max(number, metadataNumber), err
+	return max(observed.Number, metadataNumber), err
 }

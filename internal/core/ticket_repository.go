@@ -51,20 +51,21 @@ type CreateTicketResult struct {
 type TicketRepositoryOption func(*fileTicketRepository)
 
 type fileTicketRepository struct {
-	projectDir           string
-	keyPrefix            string
-	renderer             ticketcore.Renderer
-	now                  func() time.Time
-	nextKeyNumberFactory func(context.Context) (int, error)
+	projectDir    string
+	keyPrefix     string
+	renderer      ticketcore.Renderer
+	now           func() time.Time
+	nextKeyNumber func(context.Context, string) (int, error)
 }
 
-// NewTicketRepository constructs the corresponding package service or value.
-func NewTicketRepository(projectDir string, opts ...TicketRepositoryOption) TicketRepository {
+// NewTicketRepository stores the required key allocator and document dependencies.
+func NewTicketRepository(projectDir string, nextKeyNumber func(context.Context, string) (int, error), opts ...TicketRepositoryOption) TicketRepository {
 	repository := &fileTicketRepository{
-		projectDir: projectDir,
-		keyPrefix:  DefaultTicketKeyPrefix,
-		renderer:   ticketcore.NewRenderer(),
-		now:        time.Now,
+		projectDir:    projectDir,
+		nextKeyNumber: nextKeyNumber,
+		keyPrefix:     DefaultTicketKeyPrefix,
+		renderer:      ticketcore.NewRenderer(),
+		now:           time.Now,
 	}
 
 	for _, opt := range opts {
@@ -101,17 +102,6 @@ func WithTicketRepositoryClock(now func() time.Time) TicketRepositoryOption {
 	}
 }
 
-// WithTicketRepositoryNextKeyNumber executes the corresponding package operation.
-func WithTicketRepositoryNextKeyNumber(nextNumber int) TicketRepositoryOption {
-	return func(repository *fileTicketRepository) {
-		if nextNumber > 0 {
-			repository.nextKeyNumberFactory = func(context.Context) (int, error) {
-				return nextNumber, nil
-			}
-		}
-	}
-}
-
 // CreateTicket executes the corresponding package operation.
 func (r *fileTicketRepository) CreateTicket(ctx context.Context, opts CreateTicketOptions) (CreateTicketResult, error) {
 	err := ctx.Err()
@@ -127,7 +117,7 @@ func (r *fileTicketRepository) CreateTicket(ctx context.Context, opts CreateTick
 		return CreateTicketResult{}, fmt.Errorf("ticket synopsis is required")
 	}
 
-	nextNumber, err := r.allocateKeyNumber(ctx)
+	nextNumber, err := r.nextKeyNumber(ctx, r.keyPrefix)
 	if err != nil {
 		return CreateTicketResult{}, err
 	}
@@ -173,26 +163,6 @@ func (r *fileTicketRepository) CreateTicket(ctx context.Context, opts CreateTick
 	return CreateTicketResult{Key: key, Path: path}, nil
 }
 
-// NextTicketKeyNumber executes the corresponding package operation.
-func NextTicketKeyNumber(ctx context.Context, projectDir, keyPrefix string) (int, error) {
-	repository := &fileTicketRepository{
-		projectDir: projectDir,
-		keyPrefix:  DefaultTicketKeyPrefix,
-	}
-
-	WithTicketRepositoryKeyPrefix(keyPrefix)(repository)
-
-	return repository.nextKeyNumber(ctx)
-}
-
-func (r *fileTicketRepository) allocateKeyNumber(ctx context.Context) (int, error) {
-	if r.nextKeyNumberFactory != nil {
-		return r.nextKeyNumberFactory(ctx)
-	}
-
-	return r.nextKeyNumber(ctx)
-}
-
 func ticketStatusOrDefault(status string) string {
 	status = strings.TrimSpace(status)
 	if status == "" {
@@ -202,23 +172,30 @@ func ticketStatusOrDefault(status string) string {
 	return status
 }
 
-func (r *fileTicketRepository) ticketNumber(path string) (int, bool, error) {
-	number, ok := keyNumberFromText(r.keyPrefix, filepath.Base(path))
+// TicketNumberObservation preserves whether a ticket key was present.
+type TicketNumberObservation struct {
+	Number int
+	Found  bool
+}
+
+// ReadTicketNumber observes a key in the filename before reading ticket metadata.
+func ReadTicketNumber(path, keyPrefix string) (TicketNumberObservation, error) {
+	number, ok := KeyNumberFromText(keyPrefix, filepath.Base(path))
 	if ok {
-		return number, true, nil
+		return TicketNumberObservation{Number: number, Found: true}, nil
 	}
 
 	content, err := opsfile.Read(path)
 	if err != nil {
-		return 0, false, fmt.Errorf("read ticket metadata: %w", err)
+		return TicketNumberObservation{}, fmt.Errorf("read ticket metadata: %w", err)
 	}
 
-	number, ok = keyNumberFromText(r.keyPrefix, string(content))
+	number, ok = KeyNumberFromText(keyPrefix, string(content))
 	if ok {
-		return number, true, nil
+		return TicketNumberObservation{Number: number, Found: true}, nil
 	}
 
-	return 0, false, nil
+	return TicketNumberObservation{}, nil
 }
 
 func (r *fileTicketRepository) ticketPath(useCase, key, title string) string {
@@ -234,7 +211,8 @@ func (r *fileTicketRepository) ticketPath(useCase, key, title string) string {
 	return filepath.Join(parts...)
 }
 
-func keyNumberFromText(prefix, text string) (int, bool) {
+// KeyNumberFromText observes the existing prefix-number spelling.
+func KeyNumberFromText(prefix, text string) (int, bool) {
 	pattern := regexp.MustCompile(regexp.QuoteMeta(prefix) + `-(\d+)`)
 
 	match := pattern.FindStringSubmatch(text)

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -72,8 +73,8 @@ func (s service) CreateTicket(request CreateTicketRequest) (CreateTicketResult, 
 
 	repository := core.NewTicketRepository(
 		s.projectContext.ProjectDir,
+		func(context.Context, string) (int, error) { return nextNumber, nil },
 		core.WithTicketRepositoryKeyPrefix(config.TicketKeyPrefix),
-		core.WithTicketRepositoryNextKeyNumber(nextNumber),
 	)
 
 	result, err := repository.CreateTicket(s.ctx, core.CreateTicketOptions{
