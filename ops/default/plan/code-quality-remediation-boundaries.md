@@ -682,3 +682,25 @@ is created. One tuple debt is removed; the temporary count is 300. Artifact path
 and write ownership, feature-round note/answer retention and static parser checks
 are split into artifact.go, round.go and check.go without a parser framework or
 new rule. The original code/hash ledger follows every relocated declaration.
+
+## Slice 9 generation and retained-input mechanics
+
+D04 shares live payload/context preparation for spec, acceptance and legacy
+tracking requests. Plan generation keeps its own captured-source payload and
+bounded native observation. Final model request assembly is shared across both
+paths; action/strategy/identity are one operation, and creation time still follows
+context preparation. This helper cannot load sources, invoke providers, approve,
+publish or record receipts. Artifact-specific context selectors remain explicit.
+
+All stages retain quiz/model.Invoke request/response validation and their existing
+harness binding/recording owner; the harness-binding regression verifies separate
+nested call evidence. Static feature checks, plan-outline/detail rules, readiness,
+committed guided input selection and target/source publication guards remain
+separate. No generation engine, second coordinator or root re-export was added.
+
+D05 shares only latest-in-scope index selection, with explicit spec/plan kind.
+Concrete catalog reads, lifecycle, archive, approval and native adoption remain
+with their original owners. Plan service source observation/publication, model
+requests, generation stages, tracking and views have separate files. Named plan
+and guided outcomes are ephemeral application values: persisted fields, ordering,
+JSON tags, hashes and receipt formats are unchanged.
