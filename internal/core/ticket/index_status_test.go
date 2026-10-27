@@ -1,4 +1,4 @@
-package core
+package ticket_test
 
 import (
 	"context"
@@ -124,11 +124,7 @@ func rebuildProjectTicketsForStatusTest(t *testing.T, index ticketcore.Index, pr
 	}
 }
 
-func checkProjectTicketIndexForStatusTest(
-	t *testing.T,
-	index ticketcore.Index,
-	projectDir string,
-) ticketcore.IndexStatus {
+func checkProjectTicketIndexForStatusTest(t *testing.T, index ticketcore.Index, projectDir string) ticketcore.IndexStatus {
 	t.Helper()
 
 	status, err := ticketcore.NewIndexStatusChecker(
@@ -145,14 +141,7 @@ func checkProjectTicketIndexForStatusTest(
 	return status
 }
 
-func assertTicketIndexStatusCounts(
-	t *testing.T,
-	status ticketcore.IndexStatus,
-	missing int,
-	stale int,
-	orphaned int,
-	invalid int,
-) {
+func assertTicketIndexStatusCounts(t *testing.T, status ticketcore.IndexStatus, missing, stale, orphaned, invalid int) {
 	t.Helper()
 
 	if len(status.Missing) != missing {

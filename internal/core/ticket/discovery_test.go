@@ -1,4 +1,4 @@
-package core
+package ticket_test
 
 import (
 	"context"
@@ -58,12 +58,7 @@ func writeDiscoveryTestFile(t *testing.T, projectDir, relativePath string) {
 	}
 }
 
-func assertDiscoveredTicketFile(
-	t *testing.T,
-	file ticketcore.DiscoveredFile,
-	projectDir string,
-	relativePath string,
-) {
+func assertDiscoveredTicketFile(t *testing.T, file ticketcore.DiscoveredFile, projectDir, relativePath string) {
 	t.Helper()
 
 	if file.RelativePath != relativePath {

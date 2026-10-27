@@ -64,7 +64,7 @@ Indexed metadata/time prerequisites passed:
 Metadata timestamp/round parsing returns one private outcome plus error, retaining
 parse order and zero failure results. The existing indexed SQL row assigns its
 own time fields instead of passing six positional inputs. timePtr now exists
-only in the test fixture. Index and key-sequence constructors consume the existing
+only in test fixtures. Index and key-sequence constructors consume the existing
 database.DataDirectory contract; their IO order, migrations and errors are unchanged.
 Two assigned signatures are fixed; the remaining slice work is not closed.
 
@@ -134,9 +134,20 @@ The same focused selection and strict lint pass after naming.
 - `go test ./internal/core/ticket/... ./internal/core ./internal/app ./scripts/goquality -run '^Test(Ticket|ServiceWorkflowTicket|QualityRecordWire|Board|Leaf)' -count=1 -timeout=3m`: passed.
 - `make check-go-style`: 9307 declarations, ceiling seven, 203 exact debts and one external exception.
 
+Twenty-four existing ticket component tests now live beside the ticket owner and
+use its public APIs with real SQLite, shipped migrations and temporary files.
+The coordinator retains native result-writer/key-observation integration tests and
+their private fixtures. No production exports were introduced for tests. Forty-eight
+test/fixture declarations reconcile unchanged after signature formatting, for
+226 total preimages. timePtr remains exclusively in test fixtures.
+
+- `go test ./internal/core/ticket/... ./internal/core ./internal/app ./scripts/goquality -run '^Test(Ticket|ServiceWorkflowTicket|QualityRecordWire|QualityStorage|Board|Leaf|WorkflowIndex|NativeQueueIndex|NativeIntegrationQueue)' -count=1 -timeout=3m`: passed after test placement.
+- `make check-go-style`: 9307 declarations, ceiling seven, 203 exact debts and one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ticket/... ./internal/core ./internal/app ./scripts/goquality`: zero issues.
+
 ## Risks and Follow-ups
 
-Remaining work includes ticket test ownership, execution/readiness
+Remaining work includes remaining ticket parser/validation test ownership, execution/readiness
 ownership and D03, other assigned signatures, typed state/preparation contracts,
 the six-parameter reconciliation and final exact-head controller validation.
 No Slice 11 PR has been opened.
