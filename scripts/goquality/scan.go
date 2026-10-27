@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -24,6 +25,7 @@ type declaration struct {
 }
 
 type sourceScan struct {
+	Imports      map[string][]string `json:"imports"`
 	Declarations []declaration       `json:"declarations"`
 	Calls        map[string][]string `json:"calls"`
 	aliases      map[string]ast.Expr
@@ -72,7 +74,7 @@ func ownedSource(path string) bool {
 }
 
 func scanSources(root string) (sourceScan, error) {
-	scan := sourceScan{files: token.NewFileSet(), aliases: map[string]ast.Expr{}, defined: map[string]bool{}, Calls: map[string][]string{}}
+	scan := sourceScan{Imports: map[string][]string{}, files: token.NewFileSet(), aliases: map[string]ast.Expr{}, defined: map[string]bool{}, Calls: map[string][]string{}}
 
 	paths, err := productionFiles(root)
 	if err != nil {
@@ -87,6 +89,15 @@ func scanSources(root string) (sourceScan, error) {
 		}
 
 		parsed[path] = file
+		for _, spec := range file.Imports {
+			dependency, importErr := strconv.Unquote(spec.Path.Value)
+			if importErr != nil {
+				return scan, fmt.Errorf("parse import in %s: %w", path, importErr)
+			}
+
+			scan.Imports[path] = append(scan.Imports[path], dependency)
+		}
+
 		scan.collectAliases(path, file)
 	}
 

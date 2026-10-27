@@ -19,7 +19,7 @@ func main() {
 
 func run() error {
 	root := flag.String("root", ".", "repository root")
-	inventory := flag.Bool("inventory", false, "print declarations and syntactic call sites as JSON")
+	inventory := flag.Bool("inventory", false, "print declarations, imports and syntactic call sites as JSON")
 
 	flag.Parse()
 
@@ -48,6 +48,10 @@ func validate(root string, scan sourceScan) error {
 
 	if failures := checkPolicy(scan, rules, exceptions); len(failures) != 0 {
 		return fmt.Errorf("production signature policy failed:\n%s", strings.Join(failures, "\n"))
+	}
+
+	if failures := checkLeafDependencies(scan.Imports); len(failures) != 0 {
+		return fmt.Errorf("production dependency policy failed:\n%s", strings.Join(failures, "\n"))
 	}
 
 	_, err := fmt.Fprintf(os.Stdout, "production signatures: %d declarations, ceiling %d, %d exact debt entries, %d external exceptions\n", len(scan.Declarations), rules.MaxParameters, len(rules.Debt), len(exceptions))

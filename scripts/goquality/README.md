@@ -40,3 +40,17 @@ narrow and individually justified.
 
 The existing signature-layout check and all defect-oriented lint rules remain
 unfiltered. `make verify` runs both checks, tests and the application build.
+
+
+Extracted leaf packages also have exact module import bounds in boundaries.go.
+The same production scan collects imports for every build variant and generated
+source. Gate, project, notify and their shared dependencies cannot import root
+core, application adapters or a workflow coordinator. Descendants inherit their
+owner's contract. Standard-library and existing external dependencies remain
+subject to the repository's ordinary module/lint rules. Tests are excluded; real
+consumer integration fixtures remain free to exercise public boundaries.
+
+The focused AST fixtures reject aliases, forbidden generated/build-variant imports
+and nested-directory bypasses. They also preserve valid shared values, external
+drivers and application assembly. A real new dependency requires updating the
+code-backed owner contract in the same approved task.
