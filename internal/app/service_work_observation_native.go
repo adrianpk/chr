@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -26,8 +27,8 @@ func (s service) observeNativeWork(ctx context.Context, config core.WorkspaceCon
 	// target proof is still evaluated by the shared prerequisite owner.
 	if targetErr != nil {
 		target = workflowstate.PreviewTarget{}
-		result.Readiness.Status = core.WorkReadinessStatusBlocked
-		result.Readiness.Diagnostics = append(result.Readiness.Diagnostics, core.WorkReadinessDiagnostic{Code: "target_unavailable", Severity: core.WorkReadinessSeverityBlocking, Detail: "Integration target proof is unavailable."})
+		result.Readiness.Status = executioncore.WorkReadinessStatusBlocked
+		result.Readiness.Diagnostics = append(result.Readiness.Diagnostics, executioncore.WorkReadinessDiagnostic{Code: "target_unavailable", Severity: executioncore.WorkReadinessSeverityBlocking, Detail: "Integration target proof is unavailable."})
 	}
 
 	observation, err := store.InspectWorkflowWork(ctx, target)

@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/configvalue"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
@@ -84,7 +85,7 @@ type WorkConfig struct {
 	MaxActiveWorkers         int
 	ReadyQueueCapacity       int
 	StateAuthority           WorkStateAuthority
-	BranchPolicy             WorkBranchPolicy
+	BranchPolicy             executioncore.WorkBranchPolicy
 	Workspace                workspacecore.ExecutionConfig
 }
 
@@ -112,20 +113,6 @@ type EvidenceTicketChecklistPolicy string
 
 // EvidenceGherkinPolicy defines a package boundary type.
 type EvidenceGherkinPolicy string
-
-// WorkBranchPolicy describes a package boundary value.
-type WorkBranchPolicy struct {
-	Mode                  WorkBranchPolicyMode
-	IntegrationBranch     string
-	CanonicalRemote       string
-	RequireCleanWorktree  bool
-	RequireRemoteTracking bool
-	AllowSafeRepair       bool
-	AllowBranchCreation   bool
-}
-
-// WorkBranchPolicyMode defines a package boundary type.
-type WorkBranchPolicyMode string
 
 const (
 
@@ -158,18 +145,6 @@ const (
 	DefaultWebTokenEnv = "CHR_WEB_TOKEN"
 	// DefaultWebRefreshIntervalSeconds defines a package boundary constant.
 	DefaultWebRefreshIntervalSeconds = 2
-
-	// WorkBranchPolicyModeIntegrationBranch defines a package boundary constant.
-	WorkBranchPolicyModeIntegrationBranch WorkBranchPolicyMode = "integration_branch"
-	// WorkBranchPolicyModeCurrentBranch defines a package boundary constant.
-	WorkBranchPolicyModeCurrentBranch WorkBranchPolicyMode = "current_branch"
-	// WorkBranchPolicyModeNoGitEnforcement defines a package boundary constant.
-	WorkBranchPolicyModeNoGitEnforcement WorkBranchPolicyMode = "no_git_enforcement"
-
-	// DefaultWorkIntegrationBranch defines a package boundary constant.
-	DefaultWorkIntegrationBranch = "dev"
-	// DefaultWorkCanonicalRemote defines a package boundary constant.
-	DefaultWorkCanonicalRemote = "origin"
 
 	// EvidenceStrategyModeInline defines a package boundary constant.
 	EvidenceStrategyModeInline EvidenceStrategyMode = "inline"
@@ -240,7 +215,7 @@ func DefaultWorkConfig() WorkConfig {
 		MaxIntegrationAttempts: 3,
 		MaxActiveWorkers:       1,
 		ReadyQueueCapacity:     64,
-		BranchPolicy:           DefaultWorkBranchPolicy(),
+		BranchPolicy:           executioncore.DefaultWorkBranchPolicy(),
 		Workspace:              workspacecore.DefaultExecutionConfig(),
 	}
 }
@@ -262,19 +237,6 @@ func DefaultEvidenceStrategyConfig() EvidenceStrategyConfig {
 		StrictReadyForReview: true,
 		AllowUserEdits:       true,
 		ExecutionReportCopy:  true,
-	}
-}
-
-// DefaultWorkBranchPolicy executes the corresponding package operation.
-func DefaultWorkBranchPolicy() WorkBranchPolicy {
-	return WorkBranchPolicy{
-		Mode:                  WorkBranchPolicyModeIntegrationBranch,
-		IntegrationBranch:     DefaultWorkIntegrationBranch,
-		CanonicalRemote:       DefaultWorkCanonicalRemote,
-		RequireCleanWorktree:  true,
-		RequireRemoteTracking: true,
-		AllowSafeRepair:       true,
-		AllowBranchCreation:   false,
 	}
 }
 
@@ -505,11 +467,11 @@ func setWorkConfigValue(config *WorkConfig, key, value string) {
 	setWorkWorkspaceConfigValue(&config.Workspace, key, value)
 }
 
-func setWorkBranchPolicyConfigValue(config *WorkBranchPolicy, key, value string) bool {
+func setWorkBranchPolicyConfigValue(config *executioncore.WorkBranchPolicy, key, value string) bool {
 	switch key {
 	case "mode":
 		if value != "" {
-			config.Mode = WorkBranchPolicyMode(value)
+			config.Mode = executioncore.WorkBranchPolicyMode(value)
 		}
 	case "integration_branch":
 		configvalue.SetString(&config.IntegrationBranch, value)

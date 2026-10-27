@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"testing"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
@@ -210,8 +211,8 @@ func TestLoadWorkspaceConfigParsesWorkConfig(t *testing.T) {
 		MaxIntegrationAttempts: 3,
 		MaxActiveWorkers:       1,
 		ReadyQueueCapacity:     64,
-		BranchPolicy: WorkBranchPolicy{
-			Mode:                  WorkBranchPolicyModeCurrentBranch,
+		BranchPolicy: executioncore.WorkBranchPolicy{
+			Mode:                  executioncore.WorkBranchPolicyModeCurrentBranch,
 			IntegrationBranch:     "develop",
 			CanonicalRemote:       "upstream",
 			RequireCleanWorktree:  false,
@@ -569,22 +570,22 @@ func TestValidateWorkConfigRejectsInvalidBranchPolicyConfig(t *testing.T) {
 		{
 			name: "mode",
 			config: WorkConfig{
-				BranchPolicy: WorkBranchPolicy{Mode: "unknown"},
+				BranchPolicy: executioncore.WorkBranchPolicy{Mode: "unknown"},
 			},
 			wantErr: "invalid work branch policy mode: unknown",
 		},
 		{
 			name: "integration branch",
 			config: WorkConfig{
-				BranchPolicy: WorkBranchPolicy{Mode: WorkBranchPolicyModeIntegrationBranch},
+				BranchPolicy: executioncore.WorkBranchPolicy{Mode: executioncore.WorkBranchPolicyModeIntegrationBranch},
 			},
 			wantErr: "work integration_branch is required",
 		},
 		{
 			name: "remote",
 			config: WorkConfig{
-				BranchPolicy: WorkBranchPolicy{
-					Mode:                  WorkBranchPolicyModeIntegrationBranch,
+				BranchPolicy: executioncore.WorkBranchPolicy{
+					Mode:                  executioncore.WorkBranchPolicyModeIntegrationBranch,
 					IntegrationBranch:     "dev",
 					RequireRemoteTracking: true,
 				},
@@ -602,7 +603,7 @@ func TestValidateWorkConfigRejectsInvalidBranchPolicyConfig(t *testing.T) {
 
 func TestValidateWorkConfigRejectsInvalidWorkspaceMode(t *testing.T) {
 	config := WorkConfig{
-		BranchPolicy: DefaultWorkBranchPolicy(),
+		BranchPolicy: executioncore.DefaultWorkBranchPolicy(),
 		Workspace:    workspacecore.ExecutionConfig{Mode: "unknown"},
 	}
 
@@ -658,7 +659,7 @@ func TestValidateWorkConfigRejectsInvalidWorktreeConfig(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			config := WorkConfig{BranchPolicy: DefaultWorkBranchPolicy(), Workspace: test.config}
+			config := WorkConfig{BranchPolicy: executioncore.DefaultWorkBranchPolicy(), Workspace: test.config}
 
 			assertValidateWorkConfigError(t, config, test.wantErr)
 		})

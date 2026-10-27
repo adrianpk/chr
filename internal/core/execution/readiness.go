@@ -1,4 +1,4 @@
-package core
+package execution
 
 import workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 

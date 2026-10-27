@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
@@ -131,7 +132,7 @@ func RunTicketMergePreflight(ctx context.Context, opts TicketMergePreflightOptio
 func newTicketMergePreflightResult(opts TicketMergePreflightOptions) TicketMergePreflightResult {
 	expectedBase := strings.TrimSpace(opts.ExpectedBase)
 	if expectedBase == "" {
-		expectedBase = DefaultWorkIntegrationBranch
+		expectedBase = executioncore.DefaultWorkIntegrationBranch
 	}
 
 	mergeStrategy := strings.TrimSpace(opts.MergeStrategy)

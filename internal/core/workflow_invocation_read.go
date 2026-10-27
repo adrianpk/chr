@@ -10,6 +10,7 @@ import (
 	"slices"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
@@ -185,7 +186,7 @@ func (s *WorkflowStore) appendObservedWorkflowInvocation(runs *[]workflowInvocat
 }
 
 func (s *WorkflowStore) workflowRepositoryLayouts(ctx context.Context) ([]opscore.Layout, error) {
-	worktrees, err := (OSWorktreeGit{}).WorktreeList(ctx, s.layout.ProjectDir())
+	worktrees, err := (executioncore.OSWorktreeGit{}).WorktreeList(ctx, s.layout.ProjectDir())
 	if err != nil {
 		return nil, err
 	}

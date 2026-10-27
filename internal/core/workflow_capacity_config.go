@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -61,7 +62,7 @@ func (s *WorkflowStore) workflowRepositoryCapacity(ctx context.Context, runs []w
 		return limits, err
 	}
 
-	worktrees, err := (OSWorktreeGit{}).WorktreeList(ctx, s.layout.ProjectDir())
+	worktrees, err := (executioncore.OSWorktreeGit{}).WorktreeList(ctx, s.layout.ProjectDir())
 	if err != nil {
 		return limits, err
 	}
@@ -73,7 +74,7 @@ func (s *WorkflowStore) workflowRepositoryCapacity(ctx context.Context, runs []w
 	return limits, checkWorkflowCapacityRoots(worktrees, workflowRetainedLanePaths(runs), limits)
 }
 
-func checkWorkflowCapacityRoots(worktrees []WorktreeGitEntry, lanes map[string]bool, limits workflowCapacityLimits) error {
+func checkWorkflowCapacityRoots(worktrees []executioncore.WorktreeGitEntry, lanes map[string]bool, limits workflowCapacityLimits) error {
 	for _, worktree := range worktrees {
 		if worktree.Bare || worktree.Prunable || lanes[worktree.Path] {
 			continue

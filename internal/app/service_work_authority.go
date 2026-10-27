@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
@@ -33,7 +34,7 @@ func (s service) checkLegacyAgentWorkKey(key string) error {
 }
 
 func (s service) nativeAgentWorkTarget(config core.WorkspaceConfig) (workflowstate.PreviewTarget, error) {
-	if config.Work.BranchPolicy.Mode != core.WorkBranchPolicyModeIntegrationBranch {
+	if config.Work.BranchPolicy.Mode != executioncore.WorkBranchPolicyModeIntegrationBranch {
 		return workflowstate.PreviewTarget{}, fmt.Errorf("ticket authority requires an explicit integration branch")
 	}
 

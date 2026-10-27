@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
@@ -84,7 +85,7 @@ func TestRunTicketMergeCommandCleansWorktreeAfterSuccessfulMerge(t *testing.T) {
 	projectDir := t.TempDir()
 	plan := testMergeCommandWorktreePlan(t, projectDir, ticket)
 	git := newFakeWorktreeGit()
-	git.entries = []WorktreeGitEntry{{Path: plan.WorktreePath, Branch: plan.Branch}}
+	git.entries = []executioncore.WorktreeGitEntry{{Path: plan.WorktreePath, Branch: plan.Branch}}
 	writeWorktreeTestMetadata(t, plan)
 
 	remote := fakeTicketMergeCommandRemote{
@@ -102,7 +103,7 @@ func TestRunTicketMergeCommandCleansWorktreeAfterSuccessfulMerge(t *testing.T) {
 		Remote:        remote,
 		MergeStrategy: TicketMergeStrategyRebase,
 		ProjectDir:    projectDir,
-		BranchPolicy:  DefaultWorkBranchPolicy(),
+		BranchPolicy:  executioncore.DefaultWorkBranchPolicy(),
 		Workspace:     testCleanupWorktreeWorkspace(),
 		WorktreeGit:   git,
 		MergedAt:      testMergeCommandTime(),
@@ -111,7 +112,7 @@ func TestRunTicketMergeCommandCleansWorktreeAfterSuccessfulMerge(t *testing.T) {
 		t.Fatalf("RunTicketMergeCommand returned error: %v", err)
 	}
 
-	if result.WorktreeCleanup.Status != WorktreeCleanupStatusRemoved {
+	if result.WorktreeCleanup.Status != executioncore.WorktreeCleanupStatusRemoved {
 		t.Fatalf("WorktreeCleanup = %#v, want removed", result.WorktreeCleanup)
 	}
 
@@ -278,14 +279,14 @@ func testMergeCommandTime() time.Time {
 	return time.Date(2026, 6, 2, 12, 0, 0, 0, time.UTC)
 }
 
-func testMergeCommandWorktreePlan(t *testing.T, projectDir string, ticket ticketcore.Indexed) WorktreePlan {
+func testMergeCommandWorktreePlan(t *testing.T, projectDir string, ticket ticketcore.Indexed) executioncore.WorktreePlan {
 	t.Helper()
 
-	plan, err := NewWorktreePlan(WorktreePlanOptions{
+	plan, err := executioncore.NewWorktreePlan(executioncore.WorktreePlanOptions{
 		ProjectDir:   projectDir,
 		TicketKey:    ticket.Key,
 		Branch:       ticket.Branch,
-		BranchPolicy: DefaultWorkBranchPolicy(),
+		BranchPolicy: executioncore.DefaultWorkBranchPolicy(),
 		Workspace:    testCleanupWorktreeWorkspace(),
 	})
 	if err != nil {

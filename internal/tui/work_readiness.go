@@ -1,6 +1,6 @@
 package tui
 
-import core "forge.adrianpk.com/chr/internal/core"
+import executioncore "forge.adrianpk.com/chr/internal/core/execution"
 
 // WorkReadinessView is the TUI projection of work readiness state.
 type WorkReadinessView struct {
@@ -46,7 +46,7 @@ type WorkReadinessAppliedRepairView struct {
 }
 
 // NewWorkReadinessView projects a core readiness report into the TUI model.
-func NewWorkReadinessView(report core.WorkReadinessReport) WorkReadinessView {
+func NewWorkReadinessView(report executioncore.WorkReadinessReport) WorkReadinessView {
 	return WorkReadinessView{
 		Status:            string(report.Status),
 		Mode:              string(report.Policy.Mode),
@@ -64,14 +64,14 @@ func NewWorkReadinessView(report core.WorkReadinessReport) WorkReadinessView {
 }
 
 // NewWorkReadinessRepairView projects a core repair result into the TUI model.
-func NewWorkReadinessRepairView(result core.WorkReadinessRepairResult) WorkReadinessView {
+func NewWorkReadinessRepairView(result executioncore.WorkReadinessRepairResult) WorkReadinessView {
 	view := NewWorkReadinessView(result.After)
 	view.RepairsApplied = newWorkReadinessAppliedRepairViews(result.Applied)
 
 	return view
 }
 
-func newWorkReadinessDiagnosticViews(diagnostics []core.WorkReadinessDiagnostic) []WorkReadinessDiagnosticView {
+func newWorkReadinessDiagnosticViews(diagnostics []executioncore.WorkReadinessDiagnostic) []WorkReadinessDiagnosticView {
 	views := make([]WorkReadinessDiagnosticView, 0, len(diagnostics))
 	for _, diagnostic := range diagnostics {
 		views = append(views, WorkReadinessDiagnosticView{
@@ -88,7 +88,7 @@ func newWorkReadinessDiagnosticViews(diagnostics []core.WorkReadinessDiagnostic)
 	return views
 }
 
-func newWorkReadinessWorkspaceView(state core.WorkReadinessWorkspaceState) WorkReadinessWorkspaceView {
+func newWorkReadinessWorkspaceView(state executioncore.WorkReadinessWorkspaceState) WorkReadinessWorkspaceView {
 	return WorkReadinessWorkspaceView{
 		Path:    state.Path,
 		State:   string(state.State),
@@ -98,7 +98,7 @@ func newWorkReadinessWorkspaceView(state core.WorkReadinessWorkspaceState) WorkR
 	}
 }
 
-func newWorkReadinessAppliedRepairViews(repairs []core.WorkReadinessAppliedRepair) []WorkReadinessAppliedRepairView {
+func newWorkReadinessAppliedRepairViews(repairs []executioncore.WorkReadinessAppliedRepair) []WorkReadinessAppliedRepairView {
 	views := make([]WorkReadinessAppliedRepairView, 0, len(repairs))
 	for _, repair := range repairs {
 		views = append(views, WorkReadinessAppliedRepairView{
@@ -111,11 +111,11 @@ func newWorkReadinessAppliedRepairViews(repairs []core.WorkReadinessAppliedRepai
 }
 
 func (view WorkReadinessView) ready() bool {
-	return view.Status == string(core.WorkReadinessStatusReady)
+	return view.Status == string(executioncore.WorkReadinessStatusReady)
 }
 
 func (view WorkReadinessView) blocked() bool {
-	return view.Status == string(core.WorkReadinessStatusBlocked)
+	return view.Status == string(executioncore.WorkReadinessStatusBlocked)
 }
 
 func (view WorkReadinessView) safeRepairAvailable() bool {

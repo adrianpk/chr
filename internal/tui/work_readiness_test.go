@@ -3,15 +3,15 @@ package tui
 import (
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestNewWorkReadinessViewProjectsWorkspaceState(t *testing.T) {
-	report := core.WorkReadinessReport{
-		Status: core.WorkReadinessStatusReady,
-		Policy: core.WorkBranchPolicy{
-			Mode:              core.WorkBranchPolicyModeIntegrationBranch,
+	report := executioncore.WorkReadinessReport{
+		Status: executioncore.WorkReadinessStatusReady,
+		Policy: executioncore.WorkBranchPolicy{
+			Mode:              executioncore.WorkBranchPolicyModeIntegrationBranch,
 			IntegrationBranch: "dev",
 			CanonicalRemote:   "origin",
 		},
@@ -21,13 +21,13 @@ func TestNewWorkReadinessViewProjectsWorkspaceState(t *testing.T) {
 		CurrentBranch: "feature/user-work",
 		TicketKey:     "CHR-1",
 		TicketBranch:  "feat/chr-1",
-		UserCheckout: core.WorkReadinessWorkspaceState{
+		UserCheckout: executioncore.WorkReadinessWorkspaceState{
 			Path:  "/repo",
-			State: core.WorktreeStateDirty,
+			State: executioncore.WorktreeStateDirty,
 		},
-		TicketWorktree: core.WorkReadinessWorkspaceState{
+		TicketWorktree: executioncore.WorkReadinessWorkspaceState{
 			Path:    "/repo/.chr/default/runtime/worktrees/chr-1",
-			State:   core.WorktreeStateClean,
+			State:   executioncore.WorktreeStateClean,
 			Branch:  "feat/chr-1",
 			BaseRef: "origin/dev",
 			BaseSHA: "base-sha",

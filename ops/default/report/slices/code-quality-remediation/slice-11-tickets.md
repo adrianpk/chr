@@ -27,11 +27,11 @@ commits with direct consumers and preserved durable/wire contracts.
 
 ## Contracts Added or Changed
 
-The move ledger reconciles 226 declaration/test preimages after explicit contract
+The move ledger reconciles 494 declaration/test preimages after explicit contract
 prerequisites, namespace qualification, naming and signature formatting. Durable
 fields, order, text/JSON bytes, timestamps, empty values, legacy aliases and error
 meanings are unchanged. Seventeen assigned signatures now use cohesive owner state or
-named outcomes. The partial disposition ledger starts with the four earlier fixes; remaining
+named outcomes. The partial disposition ledger records those 17 fixes; remaining
 assigned signatures and watches are open. The global policy remains at ceiling
 seven with 190 exact debts and one external exception.
 
@@ -173,10 +173,24 @@ tuples are fixed, leaving 190 exact debts at ceiling seven.
 - `make check-go-style`: 9307 declarations, ceiling seven, 190 exact debts and one external exception.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app ./internal/tui`: zero issues.
 
+Readiness, explicit safe repair, branch policy and worktree lifecycle now belong to
+`core/execution`. The service is split into check, repair, Git, status and diagnostic
+concerns after D03 removal; native configuration/admission imports that owner
+without compatibility facades. Original branch-policy specs/defaults move with
+validation. The dependency guard rejects coordinator imports. Component tests live
+with the owner; native merge fixtures retain private Git/metadata helpers without
+production test exports. Another 268 declaration/spec/test preimages reconcile,
+for 494 total. The disposition ledger now records all 17 completed signature fixes.
+
+- `go test ./internal/core/execution ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(CheckWorkReadiness|RepairWorkReadiness|OSWorkReadinessGit|NewWorktreePlan|Worktree|CleanupMergedTicketWorktree|EvidenceReadiness|WorkSelection|RunTicketMergeCommand|QualityRecordWire|QualityStorage|Leaf|NativeIntegrationQueue|NativeSourceDrift|WorkflowFrontier)' -count=1 -timeout=3m`: passed, including real Git native queue/source-drift fixtures; TUI compiled with no selected tests.
+- `make check-go-style`: 9307 declarations, ceiling seven, 190 exact debts and one external exception.
+- `make check-package-readmes`: passed.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/execution ./internal/core ./internal/app ./internal/tui ./scripts/goquality`: zero issues.
+
 ## Risks and Follow-ups
 
-Remaining work includes ticket parser/validation test ownership, execution/readiness
-ownership and readiness service splitting, other assigned signatures, typed
+Remaining work includes ticket parser/validation test ownership, execution record/runner
+ownership, other assigned signatures, typed
 state/preparation contracts, remaining watches/flags/legacy dispositions, the
 six-parameter phase and final exact-head controller validation.
 No Slice 11 PR has been opened.

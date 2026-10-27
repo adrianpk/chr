@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -34,7 +35,7 @@ type WorkEvent struct {
 type WorkObservation struct {
 	Warnings                        []string
 	Authority                       core.WorkStateAuthority
-	Readiness                       core.WorkReadinessReport
+	Readiness                       executioncore.WorkReadinessReport
 	Queue                           []WorkQueueItem
 	QueueTotal, Eligible, QueueNext int
 	Current, Results                []WorkContext
@@ -65,7 +66,7 @@ func (s service) ObserveWork(ctx context.Context, offset int) (result WorkObserv
 	result.Authority = core.WorkAuthority(config.Work)
 	result.ObservedAt = s.utcNow()
 
-	result.Readiness, err = core.CheckWorkReadiness(ctx, core.WorkReadinessOptions{ProjectDir: s.projectContext.ProjectDir, Policy: config.Work.BranchPolicy, Workspace: config.Work.Workspace})
+	result.Readiness, err = executioncore.CheckWorkReadiness(ctx, executioncore.WorkReadinessOptions{ProjectDir: s.projectContext.ProjectDir, Policy: config.Work.BranchPolicy, Workspace: config.Work.Workspace})
 	if err != nil {
 		return result, err
 	}
@@ -127,7 +128,7 @@ func bindWorkQueueReadiness(result *WorkObservation, item *WorkQueueItem) {
 		return
 	}
 
-	if result.Readiness.Status != core.WorkReadinessStatusReady {
+	if result.Readiness.Status != executioncore.WorkReadinessStatusReady {
 		item.Readiness = "blocked"
 		item.Reason = "Workspace readiness is blocked."
 

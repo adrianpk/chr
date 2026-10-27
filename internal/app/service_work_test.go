@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -121,7 +122,7 @@ func TestServiceStartAgentWorkTicketPreparesWorktreeWorkspace(t *testing.T) {
 	assertPreparedTicketWorktreeWorkspace(t, ticketPath, preparer.results[0], *result.Execution)
 }
 
-func assertPreparedTicketWorktreeWorkspace(t *testing.T, ticketPath string, prepared core.WorktreePrepareResult, execution core.ExecutionRecord) {
+func assertPreparedTicketWorktreeWorkspace(t *testing.T, ticketPath string, prepared executioncore.WorktreePrepareResult, execution core.ExecutionRecord) {
 	t.Helper()
 
 	if prepared.Plan.Branch != "chr/chr-1-ready-frontend" {
@@ -159,7 +160,7 @@ func assertPreparedTicketWorktreeWorkspace(t *testing.T, ticketPath string, prep
 		}
 	}
 
-	metadataPath, err := core.WorktreeMetadataPath(prepared.Plan)
+	metadataPath, err := executioncore.WorktreeMetadataPath(prepared.Plan)
 	if err != nil {
 		t.Fatalf("WorktreeMetadataPath returned error: %v", err)
 	}
@@ -212,7 +213,7 @@ func TestServiceStartAgentWorkLoopPreparesOnlySelectedWorktree(t *testing.T) {
 		t.Fatalf("prepared ticket = %q, want CHR-1", preparer.results[0].Plan.TicketKey)
 	}
 
-	plan, err := core.NewWorktreePlan(core.WorktreePlanOptions{
+	plan, err := executioncore.NewWorktreePlan(executioncore.WorktreePlanOptions{
 		ProjectDir: projectDir,
 		TicketKey:  "CHR-2",
 		Branch:     "chr/chr-2-ready-backend",

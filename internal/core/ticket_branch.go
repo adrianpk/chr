@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
@@ -36,7 +37,7 @@ func SelectTicketBranch(ticket ticketcore.Indexed) (TicketBranchSelection, error
 		}, nil
 	}
 
-	component := WorktreePathComponent(key + " " + ticket.Title)
+	component := executioncore.WorktreePathComponent(key + " " + ticket.Title)
 	if component == "" {
 		return TicketBranchSelection{}, fmt.Errorf("ticket %s cannot derive branch name", key)
 	}

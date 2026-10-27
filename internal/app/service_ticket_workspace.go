@@ -8,16 +8,17 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 type ticketStartWorktreePreparer interface {
-	Prepare(context.Context, core.WorktreePlanOptions) (core.WorktreePrepareResult, error)
+	Prepare(context.Context, executioncore.WorktreePlanOptions) (executioncore.WorktreePrepareResult, error)
 }
 
 var newTicketStartWorktreePreparer = func() ticketStartWorktreePreparer {
-	service := core.NewWorktreeService()
+	service := executioncore.NewWorktreeService()
 
 	return service
 }
@@ -36,7 +37,7 @@ func prepareTicketStartWorkspace(ctx context.Context, projectContext commandProj
 		return ticketStartWorkspace{}, err
 	}
 
-	planOptions := core.WorktreePlanOptions{
+	planOptions := executioncore.WorktreePlanOptions{
 		ProjectDir:   projectContext.ProjectDir,
 		TicketKey:    ticket.Key,
 		Branch:       selection.Branch,
@@ -52,8 +53,8 @@ func prepareTicketStartWorkspace(ctx context.Context, projectContext commandProj
 	return prepareTicketStartWorktree(ctx, ticket, selection, planOptions)
 }
 
-func previewTicketStartWorktree(ticket ticketcore.Indexed, planOptions core.WorktreePlanOptions) (ticketStartWorkspace, error) {
-	plan, err := core.NewWorktreePlan(planOptions)
+func previewTicketStartWorktree(ticket ticketcore.Indexed, planOptions executioncore.WorktreePlanOptions) (ticketStartWorkspace, error) {
+	plan, err := executioncore.NewWorktreePlan(planOptions)
 	if err != nil {
 		return ticketStartWorkspace{}, err
 	}
@@ -61,7 +62,7 @@ func previewTicketStartWorktree(ticket ticketcore.Indexed, planOptions core.Work
 	return ticketStartWorkspaceFromPlan(ticket, plan)
 }
 
-func prepareTicketStartWorktree(ctx context.Context, ticket ticketcore.Indexed, selection core.TicketBranchSelection, planOptions core.WorktreePlanOptions) (ticketStartWorkspace, error) {
+func prepareTicketStartWorktree(ctx context.Context, ticket ticketcore.Indexed, selection core.TicketBranchSelection, planOptions executioncore.WorktreePlanOptions) (ticketStartWorkspace, error) {
 	result, err := newTicketStartWorktreePreparer().Prepare(ctx, planOptions)
 	if err != nil {
 		return ticketStartWorkspace{}, err
@@ -88,7 +89,7 @@ func prepareTicketStartWorktree(ctx context.Context, ticket ticketcore.Indexed, 
 	return workspace, nil
 }
 
-func ticketStartWorkspaceFromPlan(ticket ticketcore.Indexed, plan core.WorktreePlan) (ticketStartWorkspace, error) {
+func ticketStartWorkspaceFromPlan(ticket ticketcore.Indexed, plan executioncore.WorktreePlan) (ticketStartWorkspace, error) {
 	ticketPath, err := equivalentProjectPath(plan.ProjectDir, plan.WorktreePath, ticket.Path)
 	if err != nil {
 		return ticketStartWorkspace{}, err
@@ -119,13 +120,13 @@ func writeDerivedTicketBranch(ctx context.Context, workspace ticketStartWorkspac
 	return workspace, nil
 }
 
-func writeTicketStartWorktreeMetadata(plan core.WorktreePlan) error {
-	path, err := core.WorktreeMetadataPath(plan)
+func writeTicketStartWorktreeMetadata(plan executioncore.WorktreePlan) error {
+	path, err := executioncore.WorktreeMetadataPath(plan)
 	if err != nil {
 		return err
 	}
 
-	return core.WriteWorktreeMetadata(path, core.NewWorktreeMetadata(plan, time.Now().UTC()))
+	return executioncore.WriteWorktreeMetadata(path, executioncore.NewWorktreeMetadata(plan, time.Now().UTC()))
 }
 
 func equivalentProjectPath(sourceRoot, targetRoot, path string) (string, error) {

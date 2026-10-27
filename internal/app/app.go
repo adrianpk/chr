@@ -12,6 +12,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
@@ -412,7 +413,7 @@ func loadTUIWorkReadiness(ctx context.Context, projectContext commandProjectCont
 		return tui.WorkReadinessView{}, err
 	}
 
-	report, err := core.CheckWorkReadiness(ctx, core.WorkReadinessOptions{
+	report, err := executioncore.CheckWorkReadiness(ctx, executioncore.WorkReadinessOptions{
 		ProjectDir: projectContext.ProjectDir,
 		Policy:     workConfig.BranchPolicy,
 		Workspace:  workConfig.Workspace,

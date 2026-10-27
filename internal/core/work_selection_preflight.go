@@ -14,6 +14,7 @@ import (
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
@@ -63,7 +64,7 @@ type WorkSelectionPreflightOptions struct {
 	ProjectDir          string
 	Tickets             []ticketcore.Indexed
 	SelectedTicketKey   string
-	BranchPolicy        WorkBranchPolicy
+	BranchPolicy        executioncore.WorkBranchPolicy
 	Workspace           workspacecore.ExecutionConfig
 	RequireBranchPolicy bool
 	Git                 WorkSelectionGit
@@ -356,7 +357,7 @@ func hasTicketKey(tickets []ticketcore.Indexed, key string) bool {
 }
 
 func shouldEvaluateWorkBranchPolicy(opts WorkSelectionPreflightOptions) bool {
-	return opts.RequireBranchPolicy || opts.BranchPolicy != (WorkBranchPolicy{})
+	return opts.RequireBranchPolicy || opts.BranchPolicy != (executioncore.WorkBranchPolicy{})
 }
 
 func workBranchPolicyBlockReason(ctx context.Context, opts WorkSelectionPreflightOptions) (*WorkSelectionBlockReason, error) {
@@ -371,8 +372,8 @@ func workBranchPolicyBlockReason(ctx context.Context, opts WorkSelectionPrefligh
 	}
 
 	policy := opts.BranchPolicy
-	if policy == (WorkBranchPolicy{}) {
-		policy = DefaultWorkBranchPolicy()
+	if policy == (executioncore.WorkBranchPolicy{}) {
+		policy = executioncore.DefaultWorkBranchPolicy()
 	}
 
 	workspace := opts.Workspace
@@ -393,12 +394,12 @@ func workBranchPolicyBlockReason(ctx context.Context, opts WorkSelectionPrefligh
 type workBranchPolicyCheck struct {
 	projectDir string
 	git        WorkSelectionGit
-	policy     WorkBranchPolicy
+	policy     executioncore.WorkBranchPolicy
 	workspace  workspacecore.ExecutionConfig
 }
 
 func workBranchPolicyBlockReasonForGit(ctx context.Context, check workBranchPolicyCheck) (*WorkSelectionBlockReason, error) {
-	err := ValidateWorkBranchPolicy(check.policy)
+	err := executioncore.ValidateWorkBranchPolicy(check.policy)
 	if err != nil {
 		return nil, err
 	}
@@ -408,7 +409,7 @@ func workBranchPolicyBlockReasonForGit(ctx context.Context, check workBranchPoli
 		return nil, err
 	}
 
-	if check.policy.Mode == WorkBranchPolicyModeNoGitEnforcement {
+	if check.policy.Mode == executioncore.WorkBranchPolicyModeNoGitEnforcement {
 		return nil, nil
 	}
 
@@ -452,15 +453,15 @@ func workBranchPolicyCleanBlockReasonIfNeeded(ctx context.Context, check workBra
 }
 
 func workBranchPolicyRemoteBlockReasonIfNeeded(ctx context.Context, check workBranchPolicyCheck, expectedBranch string) (*WorkSelectionBlockReason, error) {
-	if check.policy.Mode != WorkBranchPolicyModeIntegrationBranch || !check.policy.RequireRemoteTracking {
+	if check.policy.Mode != executioncore.WorkBranchPolicyModeIntegrationBranch || !check.policy.RequireRemoteTracking {
 		return nil, nil
 	}
 
 	return workBranchPolicyRemoteBlockReason(ctx, check.projectDir, check.git, check.policy, expectedBranch)
 }
 
-func workBranchPolicyCurrentBranchBlockReason(policy WorkBranchPolicy, branch, expectedBranch string) *WorkSelectionBlockReason {
-	if policy.Mode != WorkBranchPolicyModeIntegrationBranch || branch == expectedBranch {
+func workBranchPolicyCurrentBranchBlockReason(policy executioncore.WorkBranchPolicy, branch, expectedBranch string) *WorkSelectionBlockReason {
+	if policy.Mode != executioncore.WorkBranchPolicyModeIntegrationBranch || branch == expectedBranch {
 		return nil
 	}
 
@@ -474,7 +475,7 @@ func workBranchPolicyCurrentBranchBlockReason(policy WorkBranchPolicy, branch, e
 	}
 }
 
-func workBranchPolicyCleanBlockReason(ctx context.Context, projectDir string, git WorkSelectionGit, policy WorkBranchPolicy) (*WorkSelectionBlockReason, error) {
+func workBranchPolicyCleanBlockReason(ctx context.Context, projectDir string, git WorkSelectionGit, policy executioncore.WorkBranchPolicy) (*WorkSelectionBlockReason, error) {
 	clean, err := git.WorktreeClean(ctx, projectDir)
 	if err != nil {
 		return nilIfGitUnavailable(err)
@@ -490,7 +491,7 @@ func workBranchPolicyCleanBlockReason(ctx context.Context, projectDir string, gi
 	}, nil
 }
 
-func workBranchPolicyRemoteBlockReason(ctx context.Context, projectDir string, git WorkSelectionGit, policy WorkBranchPolicy, expectedBranch string) (*WorkSelectionBlockReason, error) {
+func workBranchPolicyRemoteBlockReason(ctx context.Context, projectDir string, git WorkSelectionGit, policy executioncore.WorkBranchPolicy, expectedBranch string) (*WorkSelectionBlockReason, error) {
 	remoteRef := strings.TrimSpace(policy.CanonicalRemote) + "/" + expectedBranch
 
 	contains, err := git.BranchContainsRef(ctx, projectDir, expectedBranch, remoteRef)
@@ -512,8 +513,8 @@ func workBranchPolicyRemoteBlockReason(ctx context.Context, projectDir string, g
 	}, nil
 }
 
-func workSelectionCleanWorktreeDetail(policy WorkBranchPolicy) string {
-	if policy.Mode == WorkBranchPolicyModeIntegrationBranch {
+func workSelectionCleanWorktreeDetail(policy executioncore.WorkBranchPolicy) string {
+	if policy.Mode == executioncore.WorkBranchPolicyModeIntegrationBranch {
 		return fmt.Sprintf("work selection requires a clean local %s worktree", policy.IntegrationBranch)
 	}
 

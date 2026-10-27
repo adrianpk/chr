@@ -663,3 +663,10 @@ non-nil runtime/user lists. Normalized worktree configuration keeps the existing
 branch policy and workspace together with zero results on admission failures.
 These in-memory results do not alter diagnostic/metadata wire fields, Git command
 order, filesystem effects, repair permission guards or workspace authority.
+
+Readiness/repair/worktree lifecycle and branch-policy data/defaults/validation are
+owned by `core/execution`, with direct native configuration/admission consumers.
+The root coordinator is excluded by dependency checks. Check, repair, Git adapter,
+status and diagnostic concerns share the same settings normalization after D03
+removal. Original serialized fields/specs, IO order and safe-repair/workspace
+authority remain unchanged; native fixture helpers stay test-only.

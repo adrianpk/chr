@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
@@ -105,7 +106,7 @@ func acquireTicketMergeLock(ctx context.Context, projectContext commandProjectCo
 	return releaseAgentOperationLock(lock), nil
 }
 
-func ticketMergeBase(policy core.WorkBranchPolicy, supplied *string) string {
+func ticketMergeBase(policy executioncore.WorkBranchPolicy, supplied *string) string {
 	if supplied != nil {
 		if base := strings.TrimSpace(*supplied); base != "" {
 			return base

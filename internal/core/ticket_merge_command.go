@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
@@ -25,9 +26,9 @@ type TicketMergeCommandOptions struct {
 	ExpectedBase  string
 	MergeStrategy string
 	ProjectDir    string
-	BranchPolicy  WorkBranchPolicy
+	BranchPolicy  executioncore.WorkBranchPolicy
 	Workspace     workspacecore.ExecutionConfig
-	WorktreeGit   WorktreeGit
+	WorktreeGit   executioncore.WorktreeGit
 	DryRun        bool
 	MergedAt      time.Time
 }
@@ -44,7 +45,7 @@ type TicketMergeCommandResult struct {
 	MergeStrategy   string
 	MergeCommit     string
 	MergeBlocker    string
-	WorktreeCleanup WorktreeCleanupResult
+	WorktreeCleanup executioncore.WorktreeCleanupResult
 	DryRun          bool
 }
 
@@ -108,12 +109,12 @@ func RunTicketMergeCommand(ctx context.Context, opts TicketMergeCommandOptions) 
 	return result, nil
 }
 
-func ticketMergeWorktreeCleanup(ctx context.Context, opts TicketMergeCommandOptions, result TicketMergeCommandResult) (WorktreeCleanupResult, error) {
+func ticketMergeWorktreeCleanup(ctx context.Context, opts TicketMergeCommandOptions, result TicketMergeCommandResult) (executioncore.WorktreeCleanupResult, error) {
 	if result.MergeState != TicketMergeStateMerged || opts.Workspace.Mode != workspacecore.ExecutionWorktree {
-		return WorktreeCleanupResult{}, nil
+		return executioncore.WorktreeCleanupResult{}, nil
 	}
 
-	return CleanupMergedTicketWorktree(ctx, WorktreeCleanupOptions{
+	return executioncore.CleanupMergedTicketWorktree(ctx, executioncore.WorktreeCleanupOptions{
 		ProjectDir:   opts.ProjectDir,
 		TicketKey:    opts.Ticket.Key,
 		Branch:       opts.Ticket.Branch,

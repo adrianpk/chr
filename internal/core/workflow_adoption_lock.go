@@ -11,13 +11,14 @@ import (
 	"syscall"
 	"time"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) acquireWorkflowAdoptionLocks(ctx context.Context) ([]*AgentOperationLock, error) {
-	worktrees, err := (OSWorktreeGit{}).WorktreeList(ctx, s.layout.ProjectDir())
+	worktrees, err := (executioncore.OSWorktreeGit{}).WorktreeList(ctx, s.layout.ProjectDir())
 	if err != nil {
 		return nil, err
 	}

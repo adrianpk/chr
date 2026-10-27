@@ -13,6 +13,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -193,7 +194,7 @@ func (factory commandFactory) workDoctorAction(ctx context.Context, cmd *cli.Com
 	}
 
 	if cmd.Bool("fix-safe") {
-		result, err := core.RepairWorkReadiness(ctx, core.WorkReadinessRepairOptions{
+		result, err := executioncore.RepairWorkReadiness(ctx, executioncore.WorkReadinessRepairOptions{
 			ProjectDir:   projectContext.ProjectDir,
 			Policy:       workConfig.BranchPolicy,
 			Workspace:    workConfig.Workspace,
@@ -207,7 +208,7 @@ func (factory commandFactory) workDoctorAction(ctx context.Context, cmd *cli.Com
 		return printWorkRepairResult(factory.io.Stdout, projectContext, result)
 	}
 
-	report, err := core.CheckWorkReadiness(ctx, core.WorkReadinessOptions{
+	report, err := executioncore.CheckWorkReadiness(ctx, executioncore.WorkReadinessOptions{
 		ProjectDir:   projectContext.ProjectDir,
 		Policy:       workConfig.BranchPolicy,
 		Workspace:    workConfig.Workspace,
@@ -610,7 +611,7 @@ func printAgentWorkTicketQueue(stdout io.Writer, tickets []ticketcore.Indexed) e
 	return nil
 }
 
-func printWorkReadinessReport(stdout io.Writer, projectContext commandProjectContext, report core.WorkReadinessReport) error {
+func printWorkReadinessReport(stdout io.Writer, projectContext commandProjectContext, report executioncore.WorkReadinessReport) error {
 	if err := printAgentWorkLines(stdout, workReadinessReportLines(projectContext, report)); err != nil {
 		return err
 	}
@@ -618,7 +619,7 @@ func printWorkReadinessReport(stdout io.Writer, projectContext commandProjectCon
 	return printWorkReadinessDiagnostics(stdout, report)
 }
 
-func printWorkRepairResult(stdout io.Writer, projectContext commandProjectContext, result core.WorkReadinessRepairResult) error {
+func printWorkRepairResult(stdout io.Writer, projectContext commandProjectContext, result executioncore.WorkReadinessRepairResult) error {
 	lines := workReadinessReportLines(projectContext, result.After)
 	lines = append(lines[:2], append([]string{
 		"fix_safe: true",
@@ -639,7 +640,7 @@ func printWorkRepairResult(stdout io.Writer, projectContext commandProjectContex
 	return printWorkReadinessDiagnostics(stdout, result.After)
 }
 
-func workReadinessReportLines(projectContext commandProjectContext, report core.WorkReadinessReport) []string {
+func workReadinessReportLines(projectContext commandProjectContext, report executioncore.WorkReadinessReport) []string {
 	lines := []string{
 		"work: doctor",
 		fmt.Sprintf("project: %s", projectContext.ProjectID),
@@ -665,7 +666,7 @@ func workReadinessReportLines(projectContext commandProjectContext, report core.
 	return lines
 }
 
-func printWorkReadinessDiagnostics(stdout io.Writer, report core.WorkReadinessReport) error {
+func printWorkReadinessDiagnostics(stdout io.Writer, report executioncore.WorkReadinessReport) error {
 	for _, diagnostic := range report.Diagnostics {
 		_, err := fmt.Fprintf(
 			stdout,
@@ -707,7 +708,7 @@ func emptyWorkDoctorField(value string) string {
 	return value
 }
 
-func emptyWorkDoctorState(value core.WorktreeState) string {
+func emptyWorkDoctorState(value executioncore.WorktreeState) string {
 	if value == "" {
 		return "unknown"
 	}

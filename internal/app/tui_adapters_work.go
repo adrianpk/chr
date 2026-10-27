@@ -3,7 +3,7 @@ package app
 import (
 	"errors"
 
-	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	"forge.adrianpk.com/chr/internal/tui"
 )
@@ -97,7 +97,7 @@ func (e tuiWorkActionExecutor) repairReadinessResult() (tui.WorkActionResult, er
 		return tui.WorkActionResult{}, err
 	}
 
-	result, err := core.RepairWorkReadiness(e.operations.ctx, core.WorkReadinessRepairOptions{
+	result, err := executioncore.RepairWorkReadiness(e.operations.ctx, executioncore.WorkReadinessRepairOptions{
 		ProjectDir: e.operations.projectContext.ProjectDir,
 		Policy:     workConfig.BranchPolicy,
 		Workspace:  workConfig.Workspace,

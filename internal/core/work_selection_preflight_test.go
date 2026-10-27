@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
@@ -144,8 +145,8 @@ func TestWorkSelectionPreflightAllowsConfiguredIntegrationBranch(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
 		Tickets:    []ticketcore.Indexed{{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}}},
-		BranchPolicy: WorkBranchPolicy{
-			Mode:                  WorkBranchPolicyModeIntegrationBranch,
+		BranchPolicy: executioncore.WorkBranchPolicy{
+			Mode:                  executioncore.WorkBranchPolicyModeIntegrationBranch,
 			IntegrationBranch:     "develop",
 			CanonicalRemote:       "upstream",
 			RequireCleanWorktree:  true,
@@ -170,8 +171,8 @@ func TestWorkSelectionPreflightBlocksConfiguredIntegrationBranchBehindRemote(t *
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
 		Tickets:    []ticketcore.Indexed{{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}}},
-		BranchPolicy: WorkBranchPolicy{
-			Mode:                  WorkBranchPolicyModeIntegrationBranch,
+		BranchPolicy: executioncore.WorkBranchPolicy{
+			Mode:                  executioncore.WorkBranchPolicyModeIntegrationBranch,
 			IntegrationBranch:     "develop",
 			CanonicalRemote:       "upstream",
 			RequireCleanWorktree:  true,
@@ -200,8 +201,8 @@ func TestWorkSelectionPreflightCurrentBranchModeAllowsAnyCleanBranch(t *testing.
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
 		Tickets:    []ticketcore.Indexed{{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}}},
-		BranchPolicy: WorkBranchPolicy{
-			Mode:                 WorkBranchPolicyModeCurrentBranch,
+		BranchPolicy: executioncore.WorkBranchPolicy{
+			Mode:                 executioncore.WorkBranchPolicyModeCurrentBranch,
 			RequireCleanWorktree: true,
 		},
 		Git: fakeWorkSelectionGit{
@@ -223,8 +224,8 @@ func TestWorkSelectionPreflightCurrentBranchModeRequiresCleanWorktree(t *testing
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
 		Tickets:    []ticketcore.Indexed{{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}}},
-		BranchPolicy: WorkBranchPolicy{
-			Mode:                 WorkBranchPolicyModeCurrentBranch,
+		BranchPolicy: executioncore.WorkBranchPolicy{
+			Mode:                 executioncore.WorkBranchPolicyModeCurrentBranch,
 			RequireCleanWorktree: true,
 		},
 		Git: fakeWorkSelectionGit{
@@ -249,8 +250,8 @@ func TestWorkSelectionPreflightWorktreeModeAllowsDirtyUserCheckout(t *testing.T)
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
 		Tickets:    []ticketcore.Indexed{{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}}},
-		BranchPolicy: WorkBranchPolicy{
-			Mode:                  WorkBranchPolicyModeIntegrationBranch,
+		BranchPolicy: executioncore.WorkBranchPolicy{
+			Mode:                  executioncore.WorkBranchPolicyModeIntegrationBranch,
 			IntegrationBranch:     "dev",
 			CanonicalRemote:       "origin",
 			RequireCleanWorktree:  true,
@@ -281,8 +282,8 @@ func TestWorkSelectionPreflightNoGitEnforcementSkipsGitChecks(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
 		Tickets:    []ticketcore.Indexed{{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}}},
-		BranchPolicy: WorkBranchPolicy{
-			Mode: WorkBranchPolicyModeNoGitEnforcement,
+		BranchPolicy: executioncore.WorkBranchPolicy{
+			Mode: executioncore.WorkBranchPolicyModeNoGitEnforcement,
 		},
 		Git: failingWorkSelectionGit{},
 	})
@@ -303,8 +304,8 @@ func TestWorkSelectionPreflightNoGitEnforcementKeepsReviewRepairOrdering(t *test
 			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}},
 		},
 		SelectedTicketKey: "CHR-2",
-		BranchPolicy: WorkBranchPolicy{
-			Mode: WorkBranchPolicyModeNoGitEnforcement,
+		BranchPolicy: executioncore.WorkBranchPolicy{
+			Mode: executioncore.WorkBranchPolicyModeNoGitEnforcement,
 		},
 		Git: failingWorkSelectionGit{},
 	})

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -85,7 +86,7 @@ func (s *WorkflowStore) newWorkflowLane(run workflowInvocationFile, record Workf
 }
 
 func (s *WorkflowStore) ensureWorkflowLane(ctx context.Context, lane WorkflowLane) error {
-	git := OSWorktreeGit{}
+	git := executioncore.OSWorktreeGit{}
 	branch := strings.TrimPrefix(lane.Branch, "refs/heads/")
 
 	exists, err := git.BranchExists(ctx, s.layout.ProjectDir(), branch)
@@ -139,14 +140,14 @@ func (s *WorkflowStore) workflowLaneCandidate(ctx context.Context, lane Workflow
 		return "", "", err
 	}
 
-	status, err := (OSWorktreeGit{}).WorktreeStatus(ctx, lane.Worktree)
+	status, err := (executioncore.OSWorktreeGit{}).WorktreeStatus(ctx, lane.Worktree)
 	if err != nil || len(status) != 0 {
 		return "", "", fmt.Errorf("workflow lane must be clean: %w", errorsOrConflict(err))
 	}
 
 	reader := workflowProofReader{store: s}
 
-	commit, err := (OSWorktreeGit{}).ResolveRef(ctx, lane.Worktree, "HEAD^{commit}")
+	commit, err := (executioncore.OSWorktreeGit{}).ResolveRef(ctx, lane.Worktree, "HEAD^{commit}")
 	if err != nil || !reader.isAncestor(ctx, lane.HeadCommit, commit) {
 		return "", "", fmt.Errorf("%w: lane history does not descend from its accepted head", workflowstate.ErrConflict)
 	}
@@ -155,7 +156,7 @@ func (s *WorkflowStore) workflowLaneCandidate(ctx context.Context, lane Workflow
 		return "", "", err
 	}
 
-	tree, err := (OSWorktreeGit{}).ResolveRef(ctx, lane.Worktree, "HEAD^{tree}")
+	tree, err := (executioncore.OSWorktreeGit{}).ResolveRef(ctx, lane.Worktree, "HEAD^{tree}")
 
 	return commit, tree, err
 }
@@ -183,7 +184,7 @@ func (s *WorkflowStore) checkWorkflowLaneRegistration(ctx context.Context, lane 
 		return fmt.Errorf("%w: lane belongs to a different coordinator", workflowstate.ErrConflict)
 	}
 
-	entries, err := (OSWorktreeGit{}).WorktreeList(ctx, s.layout.ProjectDir())
+	entries, err := (executioncore.OSWorktreeGit{}).WorktreeList(ctx, s.layout.ProjectDir())
 	if err != nil {
 		return err
 	}

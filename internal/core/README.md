@@ -27,6 +27,9 @@ SQL indexing/reconciliation, key reservation and field/status rules live in
 `core/ticket`. Native `WorkflowTicketIndex` composes ticket storage with
 workflow projections on one SQLite handle; source/cache authority and guarded
 ticket mutations remain with their actual native owners.
+`core/execution` owns branch policy, readiness observation, explicit safe repair
+and ticket worktree lifecycle. Native admission composes these operations directly;
+the capability cannot import the root coordinator.
 
 ## API
 

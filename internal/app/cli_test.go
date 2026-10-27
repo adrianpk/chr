@@ -24,6 +24,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	"forge.adrianpk.com/chr/internal/core/gate"
 	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
@@ -8002,22 +8003,22 @@ func installFakeTicketStartHarnessExecutor(t *testing.T, err error) *fakeTicketS
 }
 
 type fakeTicketStartWorktreePreparer struct {
-	results []core.WorktreePrepareResult
+	results []executioncore.WorktreePrepareResult
 }
 
-func (p *fakeTicketStartWorktreePreparer) Prepare(_ context.Context, opts core.WorktreePlanOptions) (core.WorktreePrepareResult, error) {
-	plan, err := core.NewWorktreePlan(opts)
+func (p *fakeTicketStartWorktreePreparer) Prepare(_ context.Context, opts executioncore.WorktreePlanOptions) (executioncore.WorktreePrepareResult, error) {
+	plan, err := executioncore.NewWorktreePlan(opts)
 	if err != nil {
-		return core.WorktreePrepareResult{}, err
+		return executioncore.WorktreePrepareResult{}, err
 	}
 
 	plan.BaseSHA = "base-sha"
 
 	if err := copyTicketStartWorktreeFixture(opts.ProjectDir, plan.WorktreePath); err != nil {
-		return core.WorktreePrepareResult{}, err
+		return executioncore.WorktreePrepareResult{}, err
 	}
 
-	result := core.WorktreePrepareResult{
+	result := executioncore.WorktreePrepareResult{
 		Plan:          plan,
 		CreatedBranch: true,
 		AddedWorktree: true,

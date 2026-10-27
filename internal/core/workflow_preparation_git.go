@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -206,7 +207,7 @@ func (reader workflowIntegrationReader) preparationCommit(ctx context.Context, t
 func attachWorkflowPreparation(ctx context.Context, reader workflowIntegrationReader, query WorkflowPreparationQuery, proof WorkflowIntegrationProof) error {
 	source := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: query.SourceDirectory}}
 	branch := strings.TrimPrefix(query.Lane.Branch, "refs/heads/")
-	git := OSWorktreeGit{}
+	git := executioncore.OSWorktreeGit{}
 
 	exists, err := git.BranchExists(ctx, query.SourceDirectory, branch)
 	if err != nil || exists {
