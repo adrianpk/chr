@@ -23,7 +23,7 @@ type TelegramTransportRetry struct {
 
 // RetryLocalTelegramTransport acquires receiver exclusion before opening or
 // migrating the store. A running receiver's schema and attempts stay untouched.
-func RetryLocalTelegramTransport(ctx context.Context, env UserEnvironment, assets fs.FS, request TelegramTransportRetry, now time.Time) (err error) {
+func RetryLocalTelegramTransport(ctx context.Context, env TelegramStoreDirectories, assets fs.FS, request TelegramTransportRetry, now time.Time) (err error) {
 	lock, err := AcquireTelegramConfigurationLock(env)
 	if err != nil {
 		return err

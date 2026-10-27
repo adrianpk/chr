@@ -14,7 +14,7 @@ import (
 // TelegramReceiverStore extends the existing user database with transport receipts.
 type TelegramReceiverStore struct {
 	db  *sql.DB
-	env UserEnvironment
+	env TelegramStateDirectory
 }
 
 // TelegramReceiverState is local transport evidence, not workflow completion.
@@ -35,7 +35,7 @@ type TelegramReceiverState struct {
 }
 
 // NewTelegramReceiverStore applies additive migrations and rejects future schemas.
-func NewTelegramReceiverStore(ctx context.Context, env UserEnvironment, assets fs.FS) (*TelegramReceiverStore, error) {
+func NewTelegramReceiverStore(ctx context.Context, env TelegramStoreDirectories, assets fs.FS) (*TelegramReceiverStore, error) {
 	status, err := database.NewMigrationStatusChecker(assets).Check(ctx, env)
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func NewTelegramReceiverStore(ctx context.Context, env UserEnvironment, assets f
 	return &TelegramReceiverStore{db: db, env: env}, nil
 }
 
-func createTelegramDatabase(env UserEnvironment) error {
+func createTelegramDatabase(env database.DataDirectory) error {
 	if err := os.MkdirAll(env.DataDir(), 0o700); err != nil {
 		return err
 	}

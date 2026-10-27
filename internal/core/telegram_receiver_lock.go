@@ -12,7 +12,7 @@ import (
 
 // AcquireTelegramReceiverLock holds OS exclusion for one verified bot.
 // Callers close the returned descriptor; the lock file must never be deleted.
-func AcquireTelegramReceiverLock(env UserEnvironment, botID int64) (*os.File, error) {
+func AcquireTelegramReceiverLock(env TelegramStateDirectory, botID int64) (*os.File, error) {
 	if botID <= 0 {
 		return nil, errors.New("verified telegram bot identity is required")
 	}
@@ -21,11 +21,11 @@ func AcquireTelegramReceiverLock(env UserEnvironment, botID int64) (*os.File, er
 }
 
 // AcquireTelegramConfigurationLock excludes setup replacement while a receiver runs.
-func AcquireTelegramConfigurationLock(env UserEnvironment) (*os.File, error) {
+func AcquireTelegramConfigurationLock(env TelegramStateDirectory) (*os.File, error) {
 	return acquireTelegramFileLock(env, "configuration.lock")
 }
 
-func acquireTelegramFileLock(env UserEnvironment, name string) (*os.File, error) {
+func acquireTelegramFileLock(env TelegramStateDirectory, name string) (*os.File, error) {
 	directory := filepath.Join(env.StateDir(), "telegram")
 	if err := os.MkdirAll(directory, 0o700); err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func acquireTelegramFileLock(env UserEnvironment, name string) (*os.File, error)
 
 // BindTelegramReceiverIdentity refuses silent bot replacement. Setup --replace
 // clears only this binding while holding the configuration lock.
-func BindTelegramReceiverIdentity(env UserEnvironment, botID int64) error {
+func BindTelegramReceiverIdentity(env TelegramStateDirectory, botID int64) error {
 	path := filepath.Join(env.StateDir(), "telegram", "bot-id")
 
 	prior, err := readTelegramPrivateFile(path, 32)
@@ -65,6 +65,6 @@ func BindTelegramReceiverIdentity(env UserEnvironment, botID int64) error {
 }
 
 // ResetTelegramReceiverIdentity is called only by explicit setup replacement.
-func ResetTelegramReceiverIdentity(env UserEnvironment) error {
+func ResetTelegramReceiverIdentity(env TelegramStateDirectory) error {
 	return removeTelegramTemp(filepath.Join(env.StateDir(), "telegram", "bot-id"))
 }

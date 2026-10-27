@@ -26,7 +26,7 @@ type TelegramOperationModel struct {
 // ResolveTelegramOperationModel reserves at most five attempts for an immutable
 // prepared request. No database transaction spans the provider call. OS exclusion
 // prevents a second owner stealing the call after a wall-clock jump.
-func (s *TelegramReceiverStore) ResolveTelegramOperationModel(ctx context.Context, env UserEnvironment, request TelegramOperationRequest, now time.Time, invoke func(context.Context) (json.RawMessage, error)) (result TelegramOperationModel, err error) {
+func (s *TelegramReceiverStore) ResolveTelegramOperationModel(ctx context.Context, env TelegramStateDirectory, request TelegramOperationRequest, now time.Time, invoke func(context.Context) (json.RawMessage, error)) (result TelegramOperationModel, err error) {
 	if err := validateTelegramOperationModel(request, invoke); err != nil {
 		return result, err
 	}

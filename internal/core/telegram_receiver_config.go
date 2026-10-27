@@ -150,7 +150,7 @@ func telegramMustJSON(value any) []byte {
 }
 
 // LoadTelegramReceiverConfig reads bounded, private YAML without changing files.
-func LoadTelegramReceiverConfig(env UserEnvironment) (TelegramReceiverConfig, error) {
+func LoadTelegramReceiverConfig(env TelegramConfigDirectory) (TelegramReceiverConfig, error) {
 	data, err := readTelegramPrivateFile(filepath.Join(env.ConfigDir(), "telegram.yml"), 64*1024)
 	if err != nil {
 		return TelegramReceiverConfig{}, err
@@ -165,7 +165,7 @@ func LoadTelegramReceiverConfig(env UserEnvironment) (TelegramReceiverConfig, er
 }
 
 // SaveTelegramReceiverConfig preserves a differing configuration unless replacement is explicit.
-func SaveTelegramReceiverConfig(env UserEnvironment, config TelegramReceiverConfig, replace bool) error {
+func SaveTelegramReceiverConfig(env TelegramConfigDirectory, config TelegramReceiverConfig, replace bool) error {
 	if err := config.Validate(); err != nil {
 		return err
 	}

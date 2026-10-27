@@ -11,7 +11,7 @@ type telegramModelClaim struct {
 	slot   *os.File
 }
 
-func acquireTelegramModelClaim(env UserEnvironment, botID int64, name string) (*telegramModelClaim, error) {
+func acquireTelegramModelClaim(env TelegramStateDirectory, botID int64, name string) (*telegramModelClaim, error) {
 	source, err := acquireTelegramFileLock(env, name)
 	if err != nil {
 		return nil, err
@@ -33,7 +33,7 @@ func (c *telegramModelClaim) Close() error {
 // slots. Source exclusion uses 16 fixed stripes per model purpose, so compaction
 // cannot accumulate lock files. Capacity never reserves an attempt, and process
 // death releases a slot. A stripe collision defers input without an attempt.
-func acquireTelegramModelSlot(env UserEnvironment, botID int64) (*os.File, error) {
+func acquireTelegramModelSlot(env TelegramStateDirectory, botID int64) (*os.File, error) {
 	for slot := range 2 {
 		lock, err := acquireTelegramFileLock(env, fmt.Sprintf("model-%d-%d.lock", botID, slot))
 		if err == nil {

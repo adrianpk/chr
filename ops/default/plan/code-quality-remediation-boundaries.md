@@ -96,7 +96,7 @@ constraints, not permission to rename an ambiguous domain concept.
 ## Root production-file dispositions
 
 [The exact file ledger](code-quality-remediation-core-owners.csv) enumerates all
-701 current non-test files under internal/core, their declared symbols,
+702 current non-test files under internal/core, their declared symbols,
 existing signature owners, final responsibility and migration/retention task.
 It provides a finite per-file handoff, including exact declarations. Multiple owners
 on a workflow file require separating store-owned atomic operations from stage
@@ -349,3 +349,13 @@ receipt IO, locking and atomic updates remain with the workflow mutation owner.
 Both receiver and workflow consumers use these actual value contracts directly.
 The state import bound admits only contenthash for the canonical receipt digest;
 it still rejects the coordinator, persistence and transport.
+
+
+Telegram configuration/token reads consume only ConfigDir. OS exclusion and
+model claims consume only StateDir. Receiver construction consumes DataDir and
+StateDir; the live store retains only the state-directory capability needed for
+retry exclusion. Read-only receiver/diagnostic inspection consumes the existing
+database.DataDirectory and creates no lock/configuration ownership. The broader
+UserEnvironment remains host composition and implements these narrow ports.
+Original database paths, file permissions, lock names, descriptor lifetimes,
+model slot limits and retry budgets are unchanged.

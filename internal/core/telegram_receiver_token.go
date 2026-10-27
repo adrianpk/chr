@@ -10,7 +10,7 @@ import (
 
 // TelegramReceiverToken reads an environment reference, then the private file.
 // It never includes the token or file content in an error.
-func TelegramReceiverToken(env UserEnvironment, config TelegramReceiverConfig) (string, error) {
+func TelegramReceiverToken(env TelegramConfigDirectory, config TelegramReceiverConfig) (string, error) {
 	if token := os.Getenv(config.BotTokenEnv); token != "" {
 		return validateTelegramReceiverToken(token)
 	}
@@ -42,7 +42,7 @@ func validateTelegramReceiverToken(token string) (string, error) {
 }
 
 // SaveTelegramReceiverToken stores a masked-input token without replacing another credential implicitly.
-func SaveTelegramReceiverToken(env UserEnvironment, config TelegramReceiverConfig, token string, replace bool) error {
+func SaveTelegramReceiverToken(env TelegramConfigDirectory, config TelegramReceiverConfig, token string, replace bool) error {
 	if _, err := validateTelegramReceiverToken(token); err != nil {
 		return err
 	}

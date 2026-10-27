@@ -34,14 +34,14 @@ type TelegramReceiverDiagnostics struct {
 }
 
 // InspectTelegramReceiverDiagnostics reads without migration or network IO.
-func InspectTelegramReceiverDiagnostics(ctx context.Context, env UserEnvironment, botID int64) (result TelegramReceiverDiagnostics, err error) {
+func InspectTelegramReceiverDiagnostics(ctx context.Context, env database.DataDirectory, botID int64) (result TelegramReceiverDiagnostics, err error) {
 	db, err := database.OpenReadOnly(ctx, env)
 	if err != nil {
 		return result, err
 	}
 	defer func() { err = errors.Join(err, db.Close()) }()
 
-	result.Receiver, err = (&TelegramReceiverStore{db: db, env: env}).Receiver(ctx, botID)
+	result.Receiver, err = (&TelegramReceiverStore{db: db}).Receiver(ctx, botID)
 	if err != nil {
 		return result, err
 	}

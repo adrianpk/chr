@@ -23,7 +23,7 @@ type TelegramInterpretation struct {
 // ResolveTelegramInterpretation reserves an attempt before calling a provider.
 // OS exclusion outlives every database transaction and is released on process
 // death. A timestamp never steals an active caller's interpretation claim.
-func (s *TelegramReceiverStore) ResolveTelegramInterpretation(ctx context.Context, env UserEnvironment, update TelegramReceivedUpdate, now time.Time, invoke func(context.Context) (json.RawMessage, error)) (result TelegramInterpretation, err error) {
+func (s *TelegramReceiverStore) ResolveTelegramInterpretation(ctx context.Context, env TelegramStateDirectory, update TelegramReceivedUpdate, now time.Time, invoke func(context.Context) (json.RawMessage, error)) (result TelegramInterpretation, err error) {
 	if err := validateTelegramInterpretationInput(update, invoke); err != nil {
 		return result, err
 	}

@@ -410,3 +410,12 @@ verification, containment, locks and durable mutation remain in the existing sto
 Two outstanding debt signatures explicitly follow the qualified type name, with
 no allowance or ceiling change. Frozen record and real receipt regressions
 protect the representations before the Telegram package move.
+
+
+Telegram directory capabilities replace the host-wide UserEnvironment dependency
+at each actual consumer. Configuration/credentials, OS identity/exclusion and SQL
+inspection receive only their corresponding paths. Store construction still
+performs the same schema checks, migration, private creation and connection setup;
+its retained environment supplies only exclusion paths. Read-only inspection uses
+the original database reader without configuration, state creation or locks.
+Receiver/configuration/token, recovery-environment and storage regressions pass.
