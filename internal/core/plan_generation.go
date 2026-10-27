@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // PlanDirectory defines a package boundary constant.
@@ -29,7 +31,7 @@ type GeneratedPlan struct {
 	SourceObservationHash string                    `json:"-"`
 	SourceInputs          []PlanSourceBinding       `json:"-"`
 	ArchiveAt             time.Time                 `json:"-"`
-	Scope                 QuizScope
+	Scope                 quizcore.QuizScope
 	Title                 string
 	Body                  string
 	SourcePaths           []string
@@ -53,8 +55,8 @@ type ArchivedPlanPaths struct {
 }
 
 // GeneratedPlanLayout executes the corresponding package operation.
-func GeneratedPlanLayout(projectDir string, scope QuizScope) (GeneratedPlanPaths, error) {
-	err := ValidateQuizScope(scope)
+func GeneratedPlanLayout(projectDir string, scope quizcore.QuizScope) (GeneratedPlanPaths, error) {
+	err := quizcore.ValidateQuizScope(scope)
 	if err != nil {
 		return GeneratedPlanPaths{}, err
 	}
@@ -77,8 +79,8 @@ func GeneratedPlanLayout(projectDir string, scope QuizScope) (GeneratedPlanPaths
 }
 
 // ArchivedPlanLayout executes the corresponding package operation.
-func ArchivedPlanLayout(projectDir string, scope QuizScope, archivedAt time.Time) (ArchivedPlanPaths, error) {
-	err := ValidateQuizScope(scope)
+func ArchivedPlanLayout(projectDir string, scope quizcore.QuizScope, archivedAt time.Time) (ArchivedPlanPaths, error) {
+	err := quizcore.ValidateQuizScope(scope)
 	if err != nil {
 		return ArchivedPlanPaths{}, err
 	}
@@ -132,7 +134,7 @@ func writeGeneratedPlan(ctx context.Context, projectDir string, plan GeneratedPl
 }
 
 // ArchiveGeneratedPlan executes the corresponding package operation.
-func archiveGeneratedPlan(ctx context.Context, projectDir string, scope QuizScope, archivedAt time.Time) (ArchivedPlanPaths, bool, error) {
+func archiveGeneratedPlan(ctx context.Context, projectDir string, scope quizcore.QuizScope, archivedAt time.Time) (ArchivedPlanPaths, bool, error) {
 	err := ctx.Err()
 	if err != nil {
 		return ArchivedPlanPaths{}, false, err
@@ -232,7 +234,7 @@ func ValidateGeneratedPlan(plan GeneratedPlan) error {
 		return fmt.Errorf("generated plan body is required")
 	}
 
-	err := ValidateQuizScope(plan.Scope)
+	err := quizcore.ValidateQuizScope(plan.Scope)
 	if err != nil {
 		return err
 	}
@@ -260,7 +262,7 @@ func ValidateGeneratedPlanModelContent(plan GeneratedPlan) error {
 		return fmt.Errorf("generated plan body is required")
 	}
 
-	return ValidateQuizScope(plan.Scope)
+	return quizcore.ValidateQuizScope(plan.Scope)
 }
 
 // HasContent executes the corresponding package operation.

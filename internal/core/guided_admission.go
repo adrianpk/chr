@@ -74,7 +74,7 @@ func GuidedPreparationCheckpoint(session AuthoringSession) (GuidedStageCheckpoin
 
 // ValidateGuidedWorkPreview rejects omissions, additions and replaced initial contracts.
 func ValidateGuidedWorkPreview(reference GuidedMaterializationReference, preview WorkflowPreview) error {
-	if preview.Selector != (WorkflowSelector{Extent: "slice_set", Identity: reference.SetID}) || preview.Total != len(reference.Members) || len(preview.Members) != preview.Total || preview.Total == 0 || preview.Total > WorkflowPageLimit {
+	if preview.Selector != (WorkflowSelector{Extent: "slice_set", Identity: reference.SetID}) || preview.Total != len(reference.Members) || len(preview.Members) != preview.Total || preview.Total == 0 || preview.Total > workflowstate.WorkflowPageLimit {
 		return workflowstate.ErrConflict
 	}
 

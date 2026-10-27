@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r *fileAuthoringSessionRepository) readProjectDumpArtifact(reference string) (projectDumpRead, error) {
@@ -42,7 +43,7 @@ func (r *fileAuthoringSessionRepository) readProjectDumpArtifact(reference strin
 }
 
 func (r *fileAuthoringSessionRepository) readAuthoringDocument(relative string) ([]byte, error) {
-	return r.readBoundedAuthoringDocument(relative, WorkflowFileLimit)
+	return r.readBoundedAuthoringDocument(relative, workflowstate.WorkflowFileLimit)
 }
 
 func (r *fileAuthoringSessionRepository) readBoundedAuthoringDocument(relative string, limit int) ([]byte, error) {

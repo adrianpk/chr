@@ -15,6 +15,7 @@ const (
 // Each extracted owner lists its actual module dependencies. Its descendants
 // inherit the same bounds; a new directory cannot bypass the owner contract.
 var leafImports = map[string]map[string]bool{
+	"internal/core/quiz":    {coreImportPath + "ops/namespace": true, coreImportPath + "workflow/state": true},
 	"internal/core/gate":    {coreImportPath + "configvalue": true},
 	"internal/core/project": {coreImportPath + "database": true},
 	"internal/core/notify": {

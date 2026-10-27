@@ -8,6 +8,7 @@ import (
 	"sort"
 
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ListPlanDocuments enumerates concrete canonical plans across namespaces,
@@ -36,7 +37,7 @@ func ListPlanDocuments(ctx context.Context, projectDir string) ([]PlanDocument, 
 		}
 
 		count += len(entries)
-		if count > WorkflowRecordLimit {
+		if count > workflowstate.WorkflowRecordLimit {
 			return nil, errors.New("plan inventory exceeds 4096 entries")
 		}
 
@@ -67,7 +68,7 @@ func (r *fileAuthoringSessionRepository) planDocumentsInDirectory(ctx context.Co
 		}
 
 		*size += document.size
-		if *size > 8*WorkflowFileLimit {
+		if *size > 8*workflowstate.WorkflowFileLimit {
 			return nil, errors.New("plan inventory exceeds 8 MiB")
 		}
 

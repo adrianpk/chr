@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -137,7 +137,7 @@ func checkWebPlanStale(t *testing.T, provider webViewProvider, handler http.Hand
 	stale := webPlanForm(after)
 
 	operations := provider.service(t.Context())
-	if _, err := operations.RegeneratePlan(t.Context(), PlanRegenerateRequest{Scope: core.QuizScope{CaseSlug: "named-work"}, ExpectedRevision: after.Plan.Revision}); err != nil {
+	if _, err := operations.RegeneratePlan(t.Context(), PlanRegenerateRequest{Scope: quizcore.QuizScope{CaseSlug: "named-work"}, ExpectedRevision: after.Plan.Revision}); err != nil {
 		t.Fatal(err)
 	}
 

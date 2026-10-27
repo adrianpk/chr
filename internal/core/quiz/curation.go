@@ -1,4 +1,4 @@
-package core
+package quiz
 
 import (
 	"encoding/base64"
@@ -8,16 +8,18 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ParseQuizRawCaptureEntries parses the corresponding package data.
 func ParseQuizRawCaptureEntries(content string) ([]QuizEntry, error) {
-	if len(content) > WorkflowFileLimit {
+	if len(content) > workflowstate.WorkflowFileLimit {
 		return nil, fmt.Errorf("quiz raw capture exceeds file limit")
 	}
 
 	blocks := strings.Split(content, "\n## Turn\n\n")
-	if len(blocks) > WorkflowRecordLimit+1 {
+	if len(blocks) > workflowstate.WorkflowRecordLimit+1 {
 		return nil, fmt.Errorf("quiz entry capacity exceeded")
 	}
 

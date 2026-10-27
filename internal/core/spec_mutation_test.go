@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -222,7 +223,7 @@ func specTestRead(t *testing.T, project, reference string) SpecDocument {
 func seedSpecGeneratedDocument(t *testing.T, project string) SpecDocument {
 	t.Helper()
 
-	spec := GeneratedSpec{Scope: QuizScope{ProjectID: "sample-project"}, Title: "Generated scope", Body: "Opening text.", SourceRequestID: "source-request", SourceResponseID: "source-response", SourcePaths: []string{"docs/context.md"}, CreatedAt: time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC)}
+	spec := GeneratedSpec{Scope: quizcore.QuizScope{ProjectID: "sample-project"}, Title: "Generated scope", Body: "Opening text.", SourceRequestID: "source-request", SourceResponseID: "source-response", SourcePaths: []string{"docs/context.md"}, CreatedAt: time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC)}
 
 	paths, err := WriteGeneratedSpec(t.Context(), project, spec)
 	if err != nil {
@@ -270,7 +271,7 @@ func TestSpecMutationGuards(t *testing.T) {
 	}{
 		{"title", func(r *SpecMutationRequest) { r.Title = "" }},
 		{"body", func(r *SpecMutationRequest) { r.Body = "" }},
-		{"body bound", func(r *SpecMutationRequest) { r.Body = strings.Repeat("x", WorkflowFileLimit+1) }},
+		{"body bound", func(r *SpecMutationRequest) { r.Body = strings.Repeat("x", workflowstate.WorkflowFileLimit+1) }},
 		{"alias write", func(r *SpecMutationRequest) { r.Status = "accepted" }},
 		{"namespace", func(r *SpecMutationRequest) { r.Namespace = "../other" }},
 		{"missing case", func(r *SpecMutationRequest) { r.CaseSlug = "missing" }},

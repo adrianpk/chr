@@ -12,7 +12,7 @@ func validateWorkflowTreeRepairs(proof WorkflowIntegrationProof) error {
 		return nil
 	}
 
-	if len(proof.Provenance.Repairs) > WorkflowPageLimit {
+	if len(proof.Provenance.Repairs) > workflowstate.WorkflowPageLimit {
 		return workflowstate.ErrConflict
 	}
 

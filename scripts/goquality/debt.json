@@ -18,12 +18,12 @@
     },
     {
       "id": "internal/app/service_guided_plan_context.go::service.guidedPlanSources",
-      "signature": "func(session core.AuthoringSession) (core.PlanSourceObservation, core.QuizRuntimeState, error)",
+      "signature": "func(session core.AuthoringSession) (core.PlanSourceObservation, quizcore.QuizRuntimeState, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/service_guided_quiz.go::guidedQuizNativeInput",
-      "signature": "func(operation *core.GuidedUseCaseOperation, action string, mode core.QuizMode) (string, core.QuizMode)",
+      "signature": "func(operation *core.GuidedUseCaseOperation, action string, mode quizcore.QuizMode) (string, quizcore.QuizMode)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -33,12 +33,12 @@
     },
     {
       "id": "internal/app/service_guided_spec.go::service.guidedSpecInputs",
-      "signature": "func(session core.AuthoringSession) ([]core.QuizModelContextSection, core.QuizRuntimeState, []core.QuizEntry, core.GuidedStageCheckpoint, error)",
+      "signature": "func(session core.AuthoringSession) ([]core.QuizModelContextSection, quizcore.QuizRuntimeState, []quizcore.QuizEntry, core.GuidedStageCheckpoint, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/service_guided_spec.go::service.guidedCommittedQuiz",
-      "signature": "func(session core.AuthoringSession) (core.QuizRuntimeState, core.GuidedStageCheckpoint, error)",
+      "signature": "func(session core.AuthoringSession) (quizcore.QuizRuntimeState, core.GuidedStageCheckpoint, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -108,37 +108,37 @@
     },
     {
       "id": "internal/app/service_plan.go::service.existingGeneratedPlan",
-      "signature": "func(scope core.QuizScope) (PlanView, bool, error)",
+      "signature": "func(scope quizcore.QuizScope) (PlanView, bool, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/service_plan.go::service.preparePlanGeneration",
-      "signature": "func(ctx context.Context, scope core.QuizScope, expected string) (core.PlanSourceObservation, core.QuizRuntimeState, string, error)",
+      "signature": "func(ctx context.Context, scope quizcore.QuizScope, expected string) (core.PlanSourceObservation, quizcore.QuizRuntimeState, string, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/service_plan.go::service.generatePlanWithConfiguredBackend",
-      "signature": "func(ctx context.Context, scope core.QuizScope, state core.QuizRuntimeState, sources core.PlanSourceObservation) (core.GeneratedPlan, []string, []string, error)",
+      "signature": "func(ctx context.Context, scope quizcore.QuizScope, state quizcore.QuizRuntimeState, sources core.PlanSourceObservation) (core.GeneratedPlan, []string, []string, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/service_plan.go::service.generateSinglePassPlan",
-      "signature": "func(ctx context.Context, scope core.QuizScope, state core.QuizRuntimeState, sources core.PlanSourceObservation) (core.GeneratedPlan, []string, []string, error)",
+      "signature": "func(ctx context.Context, scope quizcore.QuizScope, state quizcore.QuizRuntimeState, sources core.PlanSourceObservation) (core.GeneratedPlan, []string, []string, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/service_plan.go::service.generateStagedPlan",
-      "signature": "func(ctx context.Context, scope core.QuizScope, state core.QuizRuntimeState, sources core.PlanSourceObservation) (core.GeneratedPlan, []string, []string, error)",
+      "signature": "func(ctx context.Context, scope quizcore.QuizScope, state quizcore.QuizRuntimeState, sources core.PlanSourceObservation) (core.GeneratedPlan, []string, []string, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/service_plan.go::service.generatePlanOutline",
-      "signature": "func(ctx context.Context, scope core.QuizScope, state core.QuizRuntimeState, sources core.PlanSourceObservation) (core.GeneratedPlanOutline, []string, []string, []string, error)",
+      "signature": "func(ctx context.Context, scope quizcore.QuizScope, state quizcore.QuizRuntimeState, sources core.PlanSourceObservation) (core.GeneratedPlanOutline, []string, []string, []string, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/service_plan.go::service.generatePlanSliceDetail",
-      "signature": "func(ctx context.Context, state core.QuizRuntimeState, sources core.PlanSourceObservation, outline core.GeneratedPlanOutline, targetSliceID string) (core.GeneratedPlanSliceDetail, string, string, error)",
+      "signature": "func(ctx context.Context, state quizcore.QuizRuntimeState, sources core.PlanSourceObservation, outline core.GeneratedPlanOutline, targetSliceID string) (core.GeneratedPlanSliceDetail, string, string, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -278,7 +278,7 @@
     },
     {
       "id": "internal/core/authoring_writer_owner.go::ArchiveGeneratedPlan",
-      "signature": "func(ctx context.Context, projectDir string, scope QuizScope, at time.Time) (result ArchivedPlanPaths, found bool, err error)",
+      "signature": "func(ctx context.Context, projectDir string, scope quizcore.QuizScope, at time.Time) (result ArchivedPlanPaths, found bool, err error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -438,7 +438,7 @@
     },
     {
       "id": "internal/core/plan_generation.go::archiveGeneratedPlan",
-      "signature": "func(ctx context.Context, projectDir string, scope QuizScope, archivedAt time.Time) (ArchivedPlanPaths, bool, error)",
+      "signature": "func(ctx context.Context, projectDir string, scope quizcore.QuizScope, archivedAt time.Time) (ArchivedPlanPaths, bool, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -477,7 +477,7 @@
       "reason": "Existing production debt; assigned to Slice 8 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/quiz_curation.go::splitQuizTurnMetadata",
+      "id": "internal/core/quiz/curation.go::splitQuizTurnMetadata",
       "signature": "func(block string) (map[string]string, string)",
       "reason": "Existing production debt; assigned to Slice 8 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
@@ -498,7 +498,7 @@
     },
     {
       "id": "internal/core/quiz_openai_model.go::quizModelRoute",
-      "signature": "func(state QuizRuntimeState, depth int, fallbackTrunkID string) (string, string)",
+      "signature": "func(state quizcore.QuizRuntimeState, depth int, fallbackTrunkID string) (string, string)",
       "reason": "Existing production debt; assigned to Slice 8 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {

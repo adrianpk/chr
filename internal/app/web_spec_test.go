@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -33,7 +34,7 @@ func TestWebSpecAuthoring(t *testing.T) {
 
 	model.responses = []core.QuizModelResponse{serviceQuizDraftSpecResponse("generated", serviceQuizClock()())}
 
-	generated, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{Scope: core.QuizScope{CaseSlug: "named-work"}})
+	generated, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{Scope: quizcore.QuizScope{CaseSlug: "named-work"}})
 	if err != nil {
 		t.Fatal(err)
 	}

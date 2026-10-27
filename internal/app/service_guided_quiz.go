@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -76,7 +77,7 @@ func (s service) conductGuidedQuiz(ctx context.Context, session *core.AuthoringS
 	return s.finishGuidedQuizResult(ctx, session, result.State, digest)
 }
 
-func (s service) finishGuidedQuizResult(ctx context.Context, session *core.AuthoringSession, state core.QuizRuntimeState, digest string) error {
+func (s service) finishGuidedQuizResult(ctx context.Context, session *core.AuthoringSession, state quizcore.QuizRuntimeState, digest string) error {
 	session.Guided.Quiz = &core.GuidedQuizState{SessionID: state.SessionID, Revision: state.Revision, InputDigest: digest}
 	session.Guided.Status = "waiting_input"
 
@@ -90,7 +91,7 @@ func (s service) finishGuidedQuizResult(ctx context.Context, session *core.Autho
 		session.Guided.Status = "waiting_input"
 	}
 
-	if state.Status == core.QuizRuntimeStatusDone {
+	if state.Status == quizcore.QuizRuntimeStatusDone {
 		return core.SealGuidedQuiz(ctx, s.projectContext.ProjectDir, session)
 	}
 
@@ -98,7 +99,7 @@ func (s service) finishGuidedQuizResult(ctx context.Context, session *core.Autho
 }
 
 func (s service) prepareGuidedQuizAction(ctx context.Context, session core.AuthoringSession, digest string) (core.QuizActionRequest, error) {
-	scope := core.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
+	scope := quizcore.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
 
 	observed, err := s.quizRepository().Observe(ctx, scope)
 	if err != nil {
@@ -138,7 +139,7 @@ func guidedDumpCheckpoint(session core.AuthoringSession) (core.GuidedStageCheckp
 	return core.GuidedStageCheckpoint{}, errors.New("guided quiz requires a retained dump checkpoint")
 }
 
-func (s service) guidedQuizModelRequest(state core.QuizRuntimeState, entries []core.QuizEntry) (core.QuizModelRequest, error) {
+func (s service) guidedQuizModelRequest(state quizcore.QuizRuntimeState, entries []quizcore.QuizEntry) (core.QuizModelRequest, error) {
 	session := s.guidedContext.session
 
 	sections, err := s.guidedCommittedSections(session, "dump")
@@ -151,7 +152,7 @@ func (s service) guidedQuizModelRequest(state core.QuizRuntimeState, entries []c
 		return core.QuizModelRequest{}, err
 	}
 
-	if len(history) > core.WorkflowFileLimit {
+	if len(history) > workflowstate.WorkflowFileLimit {
 		return core.QuizModelRequest{}, errors.New("guided clarification history exceeds its bound")
 	}
 
@@ -166,7 +167,7 @@ func (s service) guidedQuizModelRequest(state core.QuizRuntimeState, entries []c
 
 	return core.QuizModelRequest{
 		ID: fmt.Sprintf("guided-%s-%d", session.ID, state.QuestionsAsked+1), Action: core.QuizModelActionNextQuestion, Strategy: quizModelStrategy(state.Mode),
-		Scope: core.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}, Mode: state.Mode,
+		Scope: quizcore.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}, Mode: state.Mode,
 		RuntimeState: state, Payload: payload, ContextSections: append(coreSections, sections...),
 		OutputContract: core.QuizModelOutputContract{RequiredFields: payload.OutputContract.RequiredFields}, CreatedAt: s.utcNow(),
 	}, nil
@@ -208,7 +209,7 @@ func guidedQuizAction(action string) bool {
 	}
 }
 
-func guidedQuizNativeInput(operation *core.GuidedUseCaseOperation, action string, mode core.QuizMode) (string, core.QuizMode) {
+func guidedQuizNativeInput(operation *core.GuidedUseCaseOperation, action string, mode quizcore.QuizMode) (string, quizcore.QuizMode) {
 	switch operation.Action {
 	case "answer":
 		action = "answer"
@@ -218,9 +219,9 @@ func guidedQuizNativeInput(operation *core.GuidedUseCaseOperation, action string
 
 	switch action {
 	case "start":
-		mode = core.QuizModeDeep
+		mode = quizcore.QuizModeDeep
 	case "mode":
-		mode = core.QuizMode(operation.Content)
+		mode = quizcore.QuizMode(operation.Content)
 	}
 
 	return action, mode

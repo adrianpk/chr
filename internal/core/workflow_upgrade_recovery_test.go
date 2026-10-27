@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowUpgradeRecovery checks each durable policy boundary. Ordinary
@@ -240,7 +241,7 @@ func TestWorkflowUpgradePath(t *testing.T) {
 func workflowUpgradeInvalidImage(kind string) []byte {
 	switch kind {
 	case "oversize":
-		return []byte(strings.Repeat("#", WorkflowFileLimit+1))
+		return []byte(strings.Repeat("#", workflowstate.WorkflowFileLimit+1))
 	case "versioned":
 		return []byte("workflow:\n  version: 1\n")
 	case "invalid":

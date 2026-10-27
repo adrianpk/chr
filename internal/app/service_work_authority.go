@@ -12,7 +12,7 @@ import (
 )
 
 func nativeAgentWorkSelection(opts AgentWorkSelectionOptions) core.WorkflowPreviewRequest {
-	return core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "loose"}, Statuses: agentWorkStatuses(opts.Statuses), Filters: opts.Filters, Order: agentWorkOrder(opts.Order), Limit: core.WorkflowPageLimit}
+	return core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "loose"}, Statuses: agentWorkStatuses(opts.Statuses), Filters: opts.Filters, Order: agentWorkOrder(opts.Order), Limit: workflowstate.WorkflowPageLimit}
 }
 
 func legacyAgentWorkResult(result AgentWorkResult) AgentWorkResult {
@@ -110,7 +110,7 @@ func retainedNativeAgentWorkRequest(request core.WorkflowStartRequest, previous 
 }
 
 func (s service) startNativeAgentWork(config core.WorkspaceConfig, selection core.WorkflowPreviewRequest, limit int, restriction core.ReviewWorkflowMode, selected ...*core.WorkflowSelectionGuard) (AgentWorkResult, error) {
-	if limit < 0 || limit > core.WorkflowPageLimit {
+	if limit < 0 || limit > workflowstate.WorkflowPageLimit {
 		return AgentWorkResult{}, fmt.Errorf("ticket authority max-iterations must contain 0..128 checkpoint steps")
 	}
 

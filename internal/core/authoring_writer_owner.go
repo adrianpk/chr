@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // WriteGeneratedSpec applies the existing writer under shared authoring exclusion.
@@ -23,7 +25,7 @@ func WriteGeneratedPlan(ctx context.Context, projectDir string, plan GeneratedPl
 }
 
 // ArchiveGeneratedPlan serializes the existing archive operation with generation.
-func ArchiveGeneratedPlan(ctx context.Context, projectDir string, scope QuizScope, at time.Time) (result ArchivedPlanPaths, found bool, err error) {
+func ArchiveGeneratedPlan(ctx context.Context, projectDir string, scope quizcore.QuizScope, at time.Time) (result ArchivedPlanPaths, found bool, err error) {
 	err = WithAuthoringMutation(ctx, projectDir, func(ctx context.Context) error {
 		result, found, err = archiveGeneratedPlan(ctx, projectDir, scope, at)
 

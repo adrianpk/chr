@@ -26,12 +26,12 @@ func (tools *workflowMergerTools) read(path string) (workflowMergerToolResponse,
 	}
 	defer func() { _ = file.Close() }() //nolint:errcheck
 
-	data, err := io.ReadAll(io.LimitReader(file, WorkflowFileLimit+1))
+	data, err := io.ReadAll(io.LimitReader(file, workflowstate.WorkflowFileLimit+1))
 	if err != nil {
 		return workflowMergerToolResponse{}, err
 	}
 
-	if len(data) > WorkflowFileLimit || !utf8.Valid(data) {
+	if len(data) > workflowstate.WorkflowFileLimit || !utf8.Valid(data) {
 		return workflowMergerToolResponse{}, workflowstate.ErrConflict
 	}
 
@@ -39,7 +39,7 @@ func (tools *workflowMergerTools) read(path string) (workflowMergerToolResponse,
 }
 
 func (tools *workflowMergerTools) write(path, content string) (err error) {
-	if len(content) > WorkflowFileLimit || !utf8.ValidString(content) {
+	if len(content) > workflowstate.WorkflowFileLimit || !utf8.ValidString(content) {
 		return workflowstate.ErrConflict
 	}
 

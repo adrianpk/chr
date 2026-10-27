@@ -33,7 +33,7 @@ func TestNativeGrantGuards(t *testing.T) {
 		{"overflow", func(r *WorkflowIntegrationGrantRequest) { r.Grant.Amount = math.MaxInt64 }},
 		{"role bound", func(r *WorkflowIntegrationGrantRequest) {
 			r.Grant.Kind = "executor"
-			r.Grant.Amount = WorkflowRecordLimit
+			r.Grant.Amount = workflowstate.WorkflowRecordLimit
 		}},
 		{"invocation revision", func(r *WorkflowIntegrationGrantRequest) { r.InvocationRevision++ }},
 		{"budget revision", func(r *WorkflowIntegrationGrantRequest) { r.BudgetRevision++ }},

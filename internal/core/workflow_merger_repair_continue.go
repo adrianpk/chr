@@ -20,7 +20,7 @@ func (git OSWorkflowPreparationGit) ContinueWorkflowMergerRepair(ctx context.Con
 	}
 
 	proof := workflowMergerRepairProof(state)
-	if len(state.Repairs) >= WorkflowPageLimit || validateWorkflowTreeRepair(proof, repair) != nil {
+	if len(state.Repairs) >= workflowstate.WorkflowPageLimit || validateWorkflowTreeRepair(proof, repair) != nil {
 		return state, workflowstate.ErrConflict
 	}
 

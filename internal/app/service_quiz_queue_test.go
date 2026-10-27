@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -15,14 +16,14 @@ import (
 func TestServiceQuizRetainedFastBatch(t *testing.T) {
 	operations, model := newRetainedQuizFixture(t)
 
-	started, err := operations.StartQuiz(QuizStartRequest{Mode: core.QuizModeFast})
+	started, err := operations.StartQuiz(QuizStartRequest{Mode: quizcore.QuizModeFast})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	initial := started.State.ActiveQuestion.ID
 
-	deep, err := operations.SwitchQuizMode(QuizModeRequest{Mode: core.QuizModeDeep})
+	deep, err := operations.SwitchQuizMode(QuizModeRequest{Mode: quizcore.QuizModeDeep})
 	if err != nil || deep.State.ActiveQuestion.ID != initial || len(deep.State.FastQueue) != 2 {
 		t.Fatal(deep, err)
 	}
@@ -32,7 +33,7 @@ func TestServiceQuizRetainedFastBatch(t *testing.T) {
 		t.Fatal(answered, err)
 	}
 
-	fast, err := operations.SwitchQuizMode(QuizModeRequest{Mode: core.QuizModeFast})
+	fast, err := operations.SwitchQuizMode(QuizModeRequest{Mode: quizcore.QuizModeFast})
 	if err != nil || fast.State.ActiveQuestion.ID != "deep-follow-up" {
 		t.Fatal(fast, err)
 	}
@@ -53,7 +54,7 @@ func checkResumedFastQueue(t *testing.T, operations service, model *fakeServiceQ
 		}
 
 		if want == "" {
-			if result.State.ActiveQuestion != nil || result.State.Status != core.QuizRuntimeStatusIdle {
+			if result.State.ActiveQuestion != nil || result.State.Status != quizcore.QuizRuntimeStatusIdle {
 				t.Fatal(result)
 			}
 		} else if result.State.ActiveQuestion == nil || result.State.ActiveQuestion.ID != want {
@@ -72,7 +73,7 @@ func checkFastQuizExhaustion(t *testing.T, restarted service, model *fakeService
 		t.Fatal("exhaustion generated another batch", resumed, model.requests, err)
 	}
 
-	observed, err := restarted.quizRepository().Observe(t.Context(), core.QuizScope{ProjectID: "service-project"})
+	observed, err := restarted.quizRepository().Observe(t.Context(), quizcore.QuizScope{ProjectID: "service-project"})
 	if err != nil || len(observed.Entries) != 4 || observed.Entries[0].Answer != "Retain ownership." {
 		t.Fatal(observed, err)
 	}
@@ -105,7 +106,7 @@ func TestServiceQuizContinuationFailure(t *testing.T) {
 	checkQuizRecoveredContinuation(t, restarted, provider, answered.State)
 }
 
-func checkQuizRecoveredContinuation(t *testing.T, restarted service, provider *quizContinuationFailureModel, state core.QuizRuntimeState) {
+func checkQuizRecoveredContinuation(t *testing.T, restarted service, provider *quizContinuationFailureModel, state quizcore.QuizRuntimeState) {
 	t.Helper()
 
 	provider.recovered = true
@@ -115,7 +116,7 @@ func checkQuizRecoveredContinuation(t *testing.T, restarted service, provider *q
 		t.Fatal(resumed, err)
 	}
 
-	entries, err := restarted.quizRepository().LoadRawCaptureEntries(t.Context(), core.QuizScope{ProjectID: "service-project"})
+	entries, err := restarted.quizRepository().LoadRawCaptureEntries(t.Context(), quizcore.QuizScope{ProjectID: "service-project"})
 	if err != nil || len(entries) != 1 || entries[0].Answer != "First paragraph.\n\nSecond paragraph." {
 		t.Fatal(entries, err)
 	}
@@ -135,7 +136,7 @@ func checkQuizGuardedLifecycle(t *testing.T, action string) {
 	operations, model := newRetainedQuizFixture(t)
 	model.responses[0].Candidates = append(model.responses[0].Candidates, serviceQuizCandidate("fast-4", "What final concern remains?", serviceQuizClock()()))
 
-	started, err := operations.StartQuiz(QuizStartRequest{Mode: core.QuizModeFast})
+	started, err := operations.StartQuiz(QuizStartRequest{Mode: quizcore.QuizModeFast})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -154,7 +155,7 @@ func checkQuizGuardedLifecycle(t *testing.T, action string) {
 		stopped, err = operations.CancelQuiz(QuizCancelRequest{Binding: quizStateBinding(answered.State, "stop")})
 	}
 
-	want := map[string]core.QuizRuntimeStatus{"done": core.QuizRuntimeStatusDone, "cancel": core.QuizRuntimeStatusCancelled}[action]
+	want := map[string]quizcore.QuizRuntimeStatus{"done": quizcore.QuizRuntimeStatusDone, "cancel": quizcore.QuizRuntimeStatusCancelled}[action]
 
 	if err != nil {
 		t.Fatal(err)
@@ -168,7 +169,7 @@ func checkQuizGuardedLifecycle(t *testing.T, action string) {
 
 	if action == "done" {
 		resumed, err := operations.ResumeQuiz(QuizResumeRequest{})
-		if err != nil || resumed.State.Status != core.QuizRuntimeStatusDone || len(model.requests) != 1 {
+		if err != nil || resumed.State.Status != quizcore.QuizRuntimeStatusDone || len(model.requests) != 1 {
 			t.Fatal(resumed, err)
 		}
 	}
@@ -183,15 +184,15 @@ func newRetainedQuizFixture(t *testing.T) (service, *fakeServiceQuizModel) {
 	operations := newTestService(t, project)
 	now := serviceQuizClock()()
 	model := &fakeServiceQuizModel{responses: []core.QuizModelResponse{
-		serviceQuizModelResponseWithCandidates("batch", "first", now, []core.QuizCandidate{serviceQuizCandidate("fast-2", "Which constraint applies?", now), serviceQuizCandidate("fast-3", "What remains open?", now)}),
-		serviceQuizModelResponseWithQuestion("adaptive", serviceQuizQuestion(core.QuizQuestion{ID: "deep-follow-up", Prompt: "Why does ownership matter?", Topic: "workflow", Depth: 2, ParentID: "first", TrunkID: "first", CreatedAt: now})),
+		serviceQuizModelResponseWithCandidates("batch", "first", now, []quizcore.QuizCandidate{serviceQuizCandidate("fast-2", "Which constraint applies?", now), serviceQuizCandidate("fast-3", "What remains open?", now)}),
+		serviceQuizModelResponseWithQuestion("adaptive", serviceQuizQuestion(quizcore.QuizQuestion{ID: "deep-follow-up", Prompt: "Why does ownership matter?", Topic: "workflow", Depth: 2, ParentID: "first", TrunkID: "first", CreatedAt: now})),
 	}}
 	operations.quizModel, operations.now = model, serviceQuizClock()
 
 	return operations, model
 }
 
-func quizStateBinding(state core.QuizRuntimeState, operationID string) core.QuizActionBinding {
+func quizStateBinding(state quizcore.QuizRuntimeState, operationID string) core.QuizActionBinding {
 	binding := core.QuizActionBinding{SessionID: state.SessionID, ExpectedRevision: state.Revision, OperationID: operationID}
 	if state.ActiveQuestion != nil {
 		binding.QuestionID = state.ActiveQuestion.ID
@@ -231,7 +232,7 @@ func checkQuizAnswerReplay(t *testing.T, restarted service, provider *quizContin
 	}
 }
 
-func checkQuizSkipReplay(t *testing.T, operations service, state core.QuizRuntimeState) QuizOperationResult {
+func checkQuizSkipReplay(t *testing.T, operations service, state quizcore.QuizRuntimeState) QuizOperationResult {
 	t.Helper()
 
 	request := QuizSkipRequest{Binding: quizStateBinding(state, "skip-once")}
@@ -253,7 +254,7 @@ func checkQuizSkipReplay(t *testing.T, operations service, state core.QuizRuntim
 	return first
 }
 
-func checkStoppedQuizState(t *testing.T, state core.QuizRuntimeState, want core.QuizRuntimeStatus) {
+func checkStoppedQuizState(t *testing.T, state quizcore.QuizRuntimeState, want quizcore.QuizRuntimeStatus) {
 	t.Helper()
 
 	if state.Status != want || state.ActiveQuestion != nil || state.AnswersRecorded != 1 || state.SkipsRecorded != 1 || len(state.FastQueue) != 1 {
@@ -285,11 +286,11 @@ func TestServiceQuizCoveredFastQuestion(t *testing.T) {
 	model.responses[1].Question.ID = "fast-2"
 	model.responses[1].Question.Prompt = "Which constraint applies?"
 
-	if _, err := operations.StartQuiz(QuizStartRequest{Mode: core.QuizModeFast}); err != nil {
+	if _, err := operations.StartQuiz(QuizStartRequest{Mode: quizcore.QuizModeFast}); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := operations.SwitchQuizMode(QuizModeRequest{Mode: core.QuizModeDeep}); err != nil {
+	if _, err := operations.SwitchQuizMode(QuizModeRequest{Mode: quizcore.QuizModeDeep}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -297,7 +298,7 @@ func TestServiceQuizCoveredFastQuestion(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	resumed, err := operations.SwitchQuizMode(QuizModeRequest{Mode: core.QuizModeFast})
+	resumed, err := operations.SwitchQuizMode(QuizModeRequest{Mode: quizcore.QuizModeFast})
 	if err != nil || resumed.State.ActiveQuestion.ID != "fast-2" || len(resumed.State.FastQueue) != 1 {
 		t.Fatal("covered Fast question remained queued", resumed, err)
 	}

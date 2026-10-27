@@ -7,14 +7,14 @@ Plan: [Approved delivery](code-quality-remediation.md).
 ## Observed production graph
 
 `go list -f '{{.ImportPath}}: {{join .Imports " "}}' ./internal/... ./cmd/...`
-confirms these module-local edges at the Slice 6 implementation checkpoint. Standard-library and external dependencies
+confirms these module-local edges at the Slice 8 runtime extraction checkpoint. Standard-library and external dependencies
 are omitted here; tests do not define production ownership.
 
 | Consumer | Existing dependencies |
 | --- | --- |
-| app | core, core/authoring/state, core/database, core/gate, core/model, core/notify, core/ops/namespace, core/project, core/telegram, core/telegram/message, core/workflow/state, core/workspace, harness, harness/codex, harness/pi, tui, webui, webui/ui |
+| app | core, core/authoring/state, core/database, core/gate, core/model, core/notify, core/ops/namespace, core/project, core/quiz, core/telegram, core/telegram/message, core/workflow/state, core/workspace, harness, harness/codex, harness/pi, tui, webui, webui/ui |
 | cmd/chr | app |
-| core | core/authoring/state, core/configvalue, core/contenthash, core/database, core/gate, core/model, core/notify, core/ops/namespace, core/project, core/workflow/state, core/workspace, harness, harness/process |
+| core | core/authoring/state, core/configvalue, core/contenthash, core/database, core/gate, core/model, core/notify, core/ops/namespace, core/project, core/quiz, core/workflow/state, core/workspace, harness, harness/process |
 | core/authoring/state | none |
 | core/configvalue | none |
 | core/contenthash | none |
@@ -24,6 +24,7 @@ are omitted here; tests do not define production ownership.
 | core/notify | core/contenthash, core/database, core/ops/namespace, core/project, core/telegram/message, core/workflow/state |
 | core/ops/namespace | none |
 | core/project | core/database |
+| core/quiz | core/ops/namespace, core/workflow/state |
 | core/telegram | core/authoring/state, core/contenthash, core/database, core/model, core/notify, core/ops/namespace, core/project, core/telegram/message, core/workflow/state, core/workspace |
 | core/telegram/message | core/contenthash, core/ops/namespace |
 | core/workflow/state | core/contenthash |
@@ -100,7 +101,7 @@ constraints, not permission to rename an ambiguous domain concept.
 ## Root production-file dispositions
 
 [The exact file ledger](code-quality-remediation-core-owners.csv) enumerates all
-714 current non-test files under internal/core, their declared symbols,
+716 current non-test files under internal/core, their declared symbols,
 existing signature owners, final responsibility and migration/retention task.
 It provides a finite per-file handoff, including exact declarations. Multiple owners
 on a workflow file require separating store-owned atomic operations from stage

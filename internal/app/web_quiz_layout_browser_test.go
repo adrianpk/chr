@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // Opening a new quiz prepares its first question once, with visible loading and
@@ -22,7 +22,7 @@ func TestWebQuizLayoutBrowser(t *testing.T) {
 	provider, model := newWebQuizFixture(t)
 	operations := provider.service(t.Context())
 
-	paths, err := operations.quizRepository().Paths(operations.quizScope(core.QuizScope{CaseSlug: "named-work"}))
+	paths, err := operations.quizRepository().Paths(operations.quizScope(quizcore.QuizScope{CaseSlug: "named-work"}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,7 +109,7 @@ func TestWebQuizFirstRetryBrowser(t *testing.T) {
 	provider, model := newWebQuizFixture(t)
 	operations := provider.service(t.Context())
 
-	paths, err := operations.quizRepository().Paths(operations.quizScope(core.QuizScope{}))
+	paths, err := operations.quizRepository().Paths(operations.quizScope(quizcore.QuizScope{}))
 	if err != nil {
 		t.Fatal(err)
 	}

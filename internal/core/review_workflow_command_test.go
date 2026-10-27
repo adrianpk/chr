@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowPRCommand bounds real provider streams without retaining excess
@@ -14,7 +16,7 @@ func TestWorkflowPRCommand(t *testing.T) {
 		size         int
 		fails        bool
 	}{
-		{"stdout limit", "head -c 1048576 /dev/zero", WorkflowFileLimit, false},
+		{"stdout limit", "head -c 1048576 /dev/zero", workflowstate.WorkflowFileLimit, false},
 		{"stdout overflow", "head -c 1048577 /dev/zero", 0, true},
 		{"stderr overflow", "head -c 1048577 /dev/zero >&2; printf ok", 2, false},
 		{"command failure", "exit 7", 0, true},

@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -24,7 +25,7 @@ func TestInvokeQuizModelValidatesRequestAndResponse(t *testing.T) {
 			Provider:  "fake",
 			Status:    QuizModelResponseReady,
 			Question:  validQuizQuestion(),
-			Candidates: []QuizCandidate{
+			Candidates: []quizcore.QuizCandidate{
 				validQuizCandidate(),
 			},
 			RawText:   "question",
@@ -87,7 +88,7 @@ func TestInvokeQuizModelAcceptsDraftSpecResponse(t *testing.T) {
 			Provider:  "fake",
 			Status:    QuizModelResponseReady,
 			DraftSpec: QuizDraftSpec{
-				Scope:          QuizScope{ProjectID: "project-1"},
+				Scope:          quizcore.QuizScope{ProjectID: "project-1"},
 				Title:          "Generated Spec",
 				Body:           "Generated behavior.",
 				SourceQuizPath: ".chr/default/quizzes/project-quiz.md",
@@ -1007,7 +1008,7 @@ func quizModelEntryPayloadWithTags(tags ...string) QuizModelEntryPayload {
 	return QuizModelEntryPayload{
 		Question: "Question?",
 		Answer:   "Answer.",
-		Status:   string(QuizEntryStatusAnswered),
+		Status:   string(quizcore.QuizEntryStatusAnswered),
 		Tags:     tags,
 	}
 }
@@ -1027,8 +1028,8 @@ func TestDecodeQuizModelQuestionPayloadEnforcesRedWrightContract(t *testing.T) {
 		t.Fatalf("normalized tag = %q, want editorial-review", payload.Tags[0])
 	}
 
-	if payload.FollowUpDepth != MaxQuizFollowUpDepth {
-		t.Fatalf("follow up depth = %d, want clamp to %d", payload.FollowUpDepth, MaxQuizFollowUpDepth)
+	if payload.FollowUpDepth != quizcore.MaxQuizFollowUpDepth {
+		t.Fatalf("follow up depth = %d, want clamp to %d", payload.FollowUpDepth, quizcore.MaxQuizFollowUpDepth)
 	}
 }
 
@@ -1209,7 +1210,7 @@ func TestQuizModelResponseFromDeepOutputAfterSkippedEntry(t *testing.T) {
 	request := validQuizModelRequest()
 	request.Payload.RecentEntries = append(request.Payload.RecentEntries, QuizModelEntryPayload{
 		Question: "Which publishing branch should we avoid?",
-		Status:   string(QuizEntryStatusSkipped),
+		Status:   string(quizcore.QuizEntryStatusSkipped),
 		Tags:     []string{"publishing"},
 	})
 	request.Payload.Quiz.EntryCount = len(request.Payload.RecentEntries)
@@ -1263,9 +1264,9 @@ func TestQuizModelRuntimeDepthForcesTrunkAfterBranchReturn(t *testing.T) {
 	state := validQuizRuntimeState()
 	state.ActiveQuestion = nil
 	state.Trail = nil
-	state.BranchReturnReason = QuizBranchReturnReasonSkipped
+	state.BranchReturnReason = quizcore.QuizBranchReturnReasonSkipped
 
-	depth := quizModelRuntimeDepth(state, MaxQuizFollowUpDepth)
+	depth := quizModelRuntimeDepth(state, quizcore.MaxQuizFollowUpDepth)
 	if depth != 1 {
 		t.Fatalf("depth = %d, want trunk depth after branch return", depth)
 	}
@@ -1273,10 +1274,10 @@ func TestQuizModelRuntimeDepthForcesTrunkAfterBranchReturn(t *testing.T) {
 
 func TestQuizModelResponseFromFastOutputBuffersCandidates(t *testing.T) {
 	request := validQuizModelRequest()
-	request.Mode = QuizModeFast
+	request.Mode = quizcore.QuizModeFast
 	request.Strategy = QuizModelFastStrategy
-	request.Payload.Quiz.Mode = string(QuizModeFast)
-	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionNextQuestion, QuizModeFast)
+	request.Payload.Quiz.Mode = string(quizcore.QuizModeFast)
+	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionNextQuestion, quizcore.QuizModeFast)
 
 	response, err := quizModelResponseFromOutput(request, []byte(`{
 		"questions": [
@@ -1381,7 +1382,7 @@ func TestValidateQuizModelResponseAcceptsDraftSpecBeforeServiceProvenance(t *tes
 		Provider:  "fake",
 		Status:    QuizModelResponseReady,
 		DraftSpec: QuizDraftSpec{
-			Scope:     QuizScope{ProjectID: "project-1"},
+			Scope:     quizcore.QuizScope{ProjectID: "project-1"},
 			Title:     "Draft Spec",
 			Body:      "Draft body.",
 			CreatedAt: quizRuntimeTestTime(),
@@ -1406,13 +1407,13 @@ func validQuizModelRequest() QuizModelRequest {
 		Quiz: QuizModelQuizPayload{
 			ID:         state.ID,
 			EntryCount: 1,
-			Mode:       string(QuizModeDeep),
+			Mode:       string(quizcore.QuizModeDeep),
 		},
 		RecentEntries: []QuizModelEntryPayload{
 			{
 				Question: "What should this workflow preserve?",
 				Answer:   "The workflow should preserve review.",
-				Status:   string(QuizEntryStatusAnswered),
+				Status:   string(quizcore.QuizEntryStatusAnswered),
 				Tags:     []string{"workflow"},
 			},
 		},
@@ -1423,15 +1424,15 @@ func validQuizModelRequest() QuizModelRequest {
 				"metadata": map[string]any{"follow_up_depth": 0},
 			},
 		},
-		OutputContract: NewQuizModelOutputContract(QuizModelActionNextQuestion, QuizModeDeep),
+		OutputContract: NewQuizModelOutputContract(QuizModelActionNextQuestion, quizcore.QuizModeDeep),
 	}
 
 	return QuizModelRequest{
 		ID:           "quiz-model-request-1",
 		Action:       QuizModelActionNextQuestion,
 		Strategy:     "deep",
-		Scope:        QuizScope{ProjectID: "project-1"},
-		Mode:         QuizModeDeep,
+		Scope:        quizcore.QuizScope{ProjectID: "project-1"},
+		Mode:         quizcore.QuizModeDeep,
 		RuntimeState: state,
 		Payload:      payload,
 		ContextSections: []QuizModelContextSection{
@@ -1446,7 +1447,7 @@ func validQuizModelRequest() QuizModelRequest {
 
 func validGeneratedPlanOutline(createdAt time.Time) GeneratedPlanOutline {
 	return GeneratedPlanOutline{
-		Scope:              QuizScope{ProjectID: "project-1"},
+		Scope:              quizcore.QuizScope{ProjectID: "project-1"},
 		Title:              "Staged Plan Generation",
 		Status:             "planned",
 		Summary:            "Generate an outline first.",
@@ -1473,7 +1474,7 @@ func validGeneratedPlanOutline(createdAt time.Time) GeneratedPlanOutline {
 
 func validGeneratedPlanSliceDetail(createdAt time.Time) GeneratedPlanSliceDetail {
 	return GeneratedPlanSliceDetail{
-		Scope:               QuizScope{ProjectID: "project-1"},
+		Scope:               quizcore.QuizScope{ProjectID: "project-1"},
 		SliceID:             "Slice 1",
 		ShortName:           "outline generation contract",
 		Objective:           "Add outline contracts.",

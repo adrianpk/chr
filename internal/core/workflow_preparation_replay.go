@@ -60,7 +60,7 @@ func (reader workflowIntegrationReader) preparationObject(ctx context.Context, t
 		return "", err
 	}
 
-	if len(data) >= WorkflowFileLimit {
+	if len(data) >= workflowstate.WorkflowFileLimit {
 		return "", workflowstate.ErrConflict
 	}
 
@@ -96,7 +96,7 @@ func (reader workflowIntegrationReader) prepareRebaseFix(ctx context.Context, pr
 		return proof, err
 	}
 
-	if tree == proof.PreparedTree || len(proof.Provenance.Prepared) >= WorkflowRecordLimit {
+	if tree == proof.PreparedTree || len(proof.Provenance.Prepared) >= workflowstate.WorkflowRecordLimit {
 		return proof, workflowstate.ErrConflict
 	}
 

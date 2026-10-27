@@ -47,7 +47,7 @@ func (s *WorkflowStore) finishWorkflowSliceValidation(ctx context.Context, claim
 
 func (s *WorkflowStore) commitWorkflowSliceCandidate(run workflowInvocationFile, record WorkflowRecord, candidate WorkflowSliceCandidate) error {
 	data, err := json.MarshalIndent(candidate, "", "  ")
-	if err != nil || len(data) >= WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
 		return fmt.Errorf("workflow slice candidate exceeds file bounds: %w", errorsOrConflict(err))
 	}
 

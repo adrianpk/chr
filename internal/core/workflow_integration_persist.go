@@ -42,7 +42,7 @@ func (s *WorkflowStore) persistWorkflowDeliveryProof(run *workflowInvocationFile
 	}
 
 	data, err := json.MarshalIndent(proof, "", "  ")
-	if err != nil || len(data) >= WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
 		return proof, fmt.Errorf("delivery proof exceeds file bounds")
 	}
 

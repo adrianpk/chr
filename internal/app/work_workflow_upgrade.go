@@ -12,6 +12,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (factory commandFactory) workUpgradeCommand() *cli.Command {
@@ -70,14 +71,14 @@ func readWorkflowUpgradeSelection(path string) (*core.WorkflowPlanAdoptionOption
 		return nil, err
 	}
 
-	data, err := io.ReadAll(io.LimitReader(file, core.WorkflowFileLimit+1))
+	data, err := io.ReadAll(io.LimitReader(file, workflowstate.WorkflowFileLimit+1))
 
 	err = errors.Join(err, file.Close())
 	if err != nil {
 		return nil, err
 	}
 
-	if len(data) > core.WorkflowFileLimit {
+	if len(data) > workflowstate.WorkflowFileLimit {
 		return nil, fmt.Errorf("workflow adoption envelope exceeds 1 MiB")
 	}
 

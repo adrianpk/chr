@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // QuizViewStatusNotStarted marks a quiz scope that has no active session yet.
@@ -19,9 +21,9 @@ type QuizView struct {
 	Binding               core.QuizActionBinding
 	Index                 int
 	Title                 string
-	Scope                 core.QuizScope
+	Scope                 quizcore.QuizScope
 	Status                string
-	Mode                  core.QuizMode
+	Mode                  quizcore.QuizMode
 	RawPath               string
 	CuratedPath           string
 	RuntimePath           string
@@ -37,7 +39,7 @@ type QuizView struct {
 	CuratedPreview        string
 }
 
-func (s service) quizViewsFromStates(states []core.QuizRuntimeState) ([]QuizView, error) {
+func (s service) quizViewsFromStates(states []quizcore.QuizRuntimeState) ([]QuizView, error) {
 	scopes, err := s.quizReadScopes()
 	if err != nil {
 		return nil, err
@@ -72,7 +74,7 @@ func (s service) quizViewsFromStates(states []core.QuizRuntimeState) ([]QuizView
 
 func (s service) quizViewFromScope(
 	scope quizReadScope,
-	stateByScope map[string]core.QuizRuntimeState,
+	stateByScope map[string]quizcore.QuizRuntimeState,
 ) (QuizView, error) {
 	state, ok := stateByScope[quizScopeKey(scope.scope)]
 	if ok {
@@ -84,11 +86,11 @@ func (s service) quizViewFromScope(
 
 func (s service) appendRuntimeOnlyQuizViews(
 	views []QuizView,
-	states []core.QuizRuntimeState,
+	states []quizcore.QuizRuntimeState,
 	knownScopes map[string]bool,
 ) ([]QuizView, error) {
 	for _, state := range states {
-		scope := core.QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug}
+		scope := quizcore.QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug}
 		if knownScopes[quizScopeKey(scope)] {
 			continue
 		}
@@ -118,10 +120,10 @@ func (s service) quizReadScopes() ([]quizReadScope, error) {
 
 	scopes := []quizReadScope{{
 		title: projectTitle,
-		scope: core.QuizScope{ProjectID: s.projectContext.ProjectID},
+		scope: quizcore.QuizScope{ProjectID: s.projectContext.ProjectID},
 	}}
 
-	cases, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).LoadBounded(s.ctx, core.WorkflowRecordLimit)
+	cases, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).LoadBounded(s.ctx, workflowstate.WorkflowRecordLimit)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +136,7 @@ func (s service) quizReadScopes() ([]quizReadScope, error) {
 
 		scopes = append(scopes, quizReadScope{
 			title: title,
-			scope: core.QuizScope{
+			scope: quizcore.QuizScope{
 				ProjectID: s.projectContext.ProjectID,
 				CaseSlug:  metadata.Slug,
 			},
@@ -155,8 +157,8 @@ func (s service) quizReadScopes() ([]quizReadScope, error) {
 	return scopes, nil
 }
 
-func (s service) quizViewFromState(title string, state core.QuizRuntimeState) (QuizView, error) {
-	scope := core.QuizScope{
+func (s service) quizViewFromState(title string, state quizcore.QuizRuntimeState) (QuizView, error) {
+	scope := quizcore.QuizScope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,
 	}
@@ -188,7 +190,7 @@ func (s service) quizViewFromState(title string, state core.QuizRuntimeState) (Q
 	}, nil
 }
 
-func (s service) notStartedQuizView(title string, scope core.QuizScope) (QuizView, error) {
+func (s service) notStartedQuizView(title string, scope quizcore.QuizScope) (QuizView, error) {
 	paths, err := s.quizRepository().Paths(scope)
 	if err != nil {
 		observed, err := s.quizRepository().Observe(s.ctx, scope)
@@ -205,11 +207,11 @@ func (s service) notStartedQuizView(title string, scope core.QuizScope) (QuizVie
 		Title:          title,
 		Scope:          scope,
 		Status:         QuizViewStatusNotStarted,
-		Mode:           core.QuizModeDeep,
+		Mode:           quizcore.QuizModeDeep,
 		RawPath:        paths.RawRelativePath,
 		CuratedPath:    paths.CuratedRelativePath,
 		RuntimePath:    paths.RuntimeRelativePath,
-		QuestionBudget: core.DefaultQuizQuestionBudget,
+		QuestionBudget: quizcore.DefaultQuizQuestionBudget,
 		CuratedPreview: s.quizCuratedPreview(paths.CuratedPath),
 	}, nil
 }
@@ -241,7 +243,7 @@ func (s service) quizCuratedPreview(path string) string {
 	return strings.Join(lines, "\n")
 }
 
-func quizActiveQuestionSummary(state core.QuizRuntimeState) string {
+func quizActiveQuestionSummary(state quizcore.QuizRuntimeState) string {
 	if state.ActiveQuestion == nil {
 		return ""
 	}
@@ -249,7 +251,7 @@ func quizActiveQuestionSummary(state core.QuizRuntimeState) string {
 	return state.ActiveQuestion.Prompt
 }
 
-func quizTrailSummary(state core.QuizRuntimeState) string {
+func quizTrailSummary(state quizcore.QuizRuntimeState) string {
 	if len(state.Trail) == 0 {
 		return ""
 	}
@@ -267,10 +269,10 @@ func quizTrailSummary(state core.QuizRuntimeState) string {
 	return strings.Join(segments, " > ")
 }
 
-func quizStateByScope(states []core.QuizRuntimeState) map[string]core.QuizRuntimeState {
-	stateByScope := map[string]core.QuizRuntimeState{}
+func quizStateByScope(states []quizcore.QuizRuntimeState) map[string]quizcore.QuizRuntimeState {
+	stateByScope := map[string]quizcore.QuizRuntimeState{}
 	for _, state := range states {
-		stateByScope[quizScopeKey(core.QuizScope{
+		stateByScope[quizScopeKey(quizcore.QuizScope{
 			ProjectID: state.ProjectID,
 			CaseSlug:  state.CaseSlug,
 		})] = state
@@ -279,7 +281,7 @@ func quizStateByScope(states []core.QuizRuntimeState) map[string]core.QuizRuntim
 	return stateByScope
 }
 
-func quizRuntimeOnlyTitle(state core.QuizRuntimeState) string {
+func quizRuntimeOnlyTitle(state quizcore.QuizRuntimeState) string {
 	if strings.TrimSpace(state.CaseSlug) != "" {
 		return state.CaseSlug
 	}
@@ -287,16 +289,16 @@ func quizRuntimeOnlyTitle(state core.QuizRuntimeState) string {
 	return state.ProjectID
 }
 
-func quizScopeKey(scope core.QuizScope) string {
+func quizScopeKey(scope quizcore.QuizScope) string {
 	return scope.ProjectID + "/" + scope.CaseSlug
 }
 
 type quizReadScope struct {
 	title string
-	scope core.QuizScope
+	scope quizcore.QuizScope
 }
 
-func quizStateObservationBinding(state core.QuizRuntimeState) core.QuizActionBinding {
+func quizStateObservationBinding(state quizcore.QuizRuntimeState) core.QuizActionBinding {
 	binding := core.QuizActionBinding{SessionID: state.SessionID, ExpectedRevision: state.Revision}
 	if state.ActiveQuestion != nil {
 		binding.QuestionID = state.ActiveQuestion.ID

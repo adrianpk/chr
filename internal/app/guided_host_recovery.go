@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // start installs recovery in the managed server lifetime, not in any GET or poll.
@@ -38,7 +39,7 @@ func (host *guidedWorkHost) recoverPage(ctx context.Context, operations service,
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	page, err := core.RecoverGuidedHostPage(ctx, operations.projectContext.ProjectDir, operations.projectContext.ProjectID, offset, core.WorkflowPageLimit)
+	page, err := core.RecoverGuidedHostPage(ctx, operations.projectContext.ProjectDir, operations.projectContext.ProjectID, offset, workflowstate.WorkflowPageLimit)
 	if err != nil {
 		if host.ctx.Err() == nil {
 			slog.WarnContext(ctx, "Guided recovery inventory is unavailable", "code", "guided_inventory_blocked")
@@ -51,7 +52,7 @@ func (host *guidedWorkHost) recoverPage(ctx context.Context, operations service,
 		host.recoverRun(ctx, operations, session)
 	}
 
-	if page.NextOffset < 0 || page.NextOffset > core.WorkflowRecordLimit {
+	if page.NextOffset < 0 || page.NextOffset > workflowstate.WorkflowRecordLimit {
 		return 0
 	}
 

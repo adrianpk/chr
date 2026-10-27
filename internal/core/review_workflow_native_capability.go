@@ -186,7 +186,7 @@ func (adapter RemoteReviewAdapter) readWorkflowNativePolicy(ctx context.Context,
 
 	for _, path := range paths {
 		data, err := adapter.workflowProviderRunner().Output(ctx, config.CLI, workflowRemoteAPIArgs(pr.Repository, reference, "GET", path, false)...)
-		if err != nil || len(data) > WorkflowFileLimit || !json.Valid(data) {
+		if err != nil || len(data) > workflowstate.WorkflowFileLimit || !json.Valid(data) {
 			return nil, nil, contract, fmt.Errorf("native publication policy could not be completely observed")
 		}
 

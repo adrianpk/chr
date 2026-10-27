@@ -322,7 +322,7 @@ func (s *WorkflowStore) appendSnapshotRecord(snapshot *WorkflowSnapshot, path st
 	}
 
 	snapshot.Records = append(snapshot.Records, r)
-	if len(snapshot.Records) > WorkflowRecordLimit {
+	if len(snapshot.Records) > workflowstate.WorkflowRecordLimit {
 		return fmt.Errorf("workflow namespace record limit exceeded")
 	}
 

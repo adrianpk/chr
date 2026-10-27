@@ -113,7 +113,7 @@ func (s *WorkflowStore) RecordWorkflowIntegrationDecisions(ctx context.Context, 
 // A resolved batch returns to merger work; validation and review remain required.
 func (s *WorkflowStore) AnswerWorkflowIntegrationDecision(ctx context.Context, request WorkflowIntegrationAnswerRequest, provider WorkflowPullRequestProvider) (result WorkflowIntegrationDecisions, err error) {
 	data, err := json.Marshal(request)
-	if err != nil || len(data) >= WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
 		return result, workflowstate.ErrConflict
 	}
 
@@ -138,7 +138,7 @@ func (s *WorkflowStore) AnswerWorkflowIntegrationDecision(ctx context.Context, r
 
 func freezeWorkflowDecisionRequest(request WorkflowIntegrationDecisionRequest) (WorkflowIntegrationDecisionRequest, error) {
 	data, err := json.Marshal(request)
-	if err != nil || len(data) >= WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
 		return WorkflowIntegrationDecisionRequest{}, workflowstate.ErrConflict
 	}
 

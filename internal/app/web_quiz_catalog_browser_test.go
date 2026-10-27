@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // One owned browser verifies bounded geometry, menu keyboard/pointer entry,
@@ -64,7 +65,7 @@ func webQuizCatalogFixture(t *testing.T) webViewProvider {
 
 	provider, _ := newWebQuizFixture(t)
 	operations := provider.service(t.Context())
-	seedQuizCatalogScope(t, operations, operations.quizScope(core.QuizScope{CaseSlug: "named-work"}), true, false, "")
+	seedQuizCatalogScope(t, operations, operations.quizScope(quizcore.QuizScope{CaseSlug: "named-work"}), true, false, "")
 
 	for _, item := range []struct{ slug, title, answer string }{
 		{"long-title", "Detailed research and retained decisions across several workflow boundaries", strings.Repeat("Opening context with useful decisions. ", 200)},
@@ -74,7 +75,7 @@ func webQuizCatalogFixture(t *testing.T) webViewProvider {
 			t.Fatal(err)
 		}
 
-		scope := operations.quizScope(core.QuizScope{CaseSlug: item.slug})
+		scope := operations.quizScope(quizcore.QuizScope{CaseSlug: item.slug})
 		seedQuizCatalogScope(t, operations, scope, false, false, "")
 
 		if _, err := operations.AnswerQuiz(QuizAnswerRequest{Scope: scope, Answer: item.answer}); err != nil {
@@ -86,7 +87,7 @@ func webQuizCatalogFixture(t *testing.T) webViewProvider {
 		t.Fatal(err)
 	}
 
-	seedQuizCatalogScope(t, operations, operations.quizScope(core.QuizScope{CaseSlug: "pending-work"}), false, false, "")
+	seedQuizCatalogScope(t, operations, operations.quizScope(quizcore.QuizScope{CaseSlug: "pending-work"}), false, false, "")
 
 	return provider
 }
@@ -122,7 +123,7 @@ func webQuizCatalogContinue(t *testing.T, browser *webWorkflowBrowser, provider 
 	t.Helper()
 
 	operations := provider.service(t.Context())
-	scope := operations.quizScope(core.QuizScope{CaseSlug: "pending-work"})
+	scope := operations.quizScope(quizcore.QuizScope{CaseSlug: "pending-work"})
 	before := quizCatalogObservation(t, operations, scope)
 	webBoardBrowserClick(t, browser, `.quiz-new__choices a[href*="pending-work-quiz"]`)
 	browser.wait(t, "#quiz-answer")
@@ -146,7 +147,7 @@ func webQuizCatalogAllAnswered(t *testing.T, browser *webWorkflowBrowser, provid
 	t.Helper()
 
 	operations := provider.service(t.Context())
-	seedQuizCatalogScope(t, operations, operations.quizScope(core.QuizScope{}), true, false, "done")
+	seedQuizCatalogScope(t, operations, operations.quizScope(quizcore.QuizScope{}), true, false, "done")
 	browser.navigate(t, baseURL+"/quizzes")
 	browser.wait(t, ".quiz-card")
 

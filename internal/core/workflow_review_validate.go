@@ -11,7 +11,7 @@ import (
 )
 
 func validateWorkflowReviewBinding(run workflowInvocationFile) error {
-	if run.ReviewCount < 0 || run.ReviewCount > WorkflowPageLimit || len(run.ReviewRepairs) > WorkflowRecordLimit {
+	if run.ReviewCount < 0 || run.ReviewCount > workflowstate.WorkflowPageLimit || len(run.ReviewRepairs) > workflowstate.WorkflowRecordLimit {
 		return fmt.Errorf("workflow review bounds exceeded")
 	}
 

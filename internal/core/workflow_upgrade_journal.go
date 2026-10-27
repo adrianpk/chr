@@ -58,7 +58,7 @@ func (s *WorkflowStore) upgradeWorkflowConfiguration(ctx context.Context, opts W
 
 func workflowUpgradeRequestHash(opts WorkflowUpgradeOptions) (string, error) {
 	data, err := json.Marshal(opts)
-	if err == nil && len(data) > WorkflowFileLimit {
+	if err == nil && len(data) > workflowstate.WorkflowFileLimit {
 		return "", fmt.Errorf("workflow upgrade request exceeds 1 MiB")
 	}
 

@@ -6,10 +6,11 @@ import (
 	"errors"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s service) guidedPlanSources(session core.AuthoringSession) (core.PlanSourceObservation, core.QuizRuntimeState, error) {
+func (s service) guidedPlanSources(session core.AuthoringSession) (core.PlanSourceObservation, quizcore.QuizRuntimeState, error) {
 	sections, state, entries, _, err := s.guidedSpecInputs(session)
 	if err != nil {
 		return core.PlanSourceObservation{}, state, err
@@ -20,7 +21,7 @@ func (s service) guidedPlanSources(session core.AuthoringSession) (core.PlanSour
 		return core.PlanSourceObservation{}, state, err
 	}
 
-	scope := core.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
+	scope := quizcore.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
 
 	sources := core.PlanSourceObservation{Scope: scope, Project: core.ProjectMetadata{Name: session.Guided.CaseName}, Quiz: core.QuizObservation{Exists: true, State: state, Entries: entries}, HasDiscovery: true}
 	for _, checkpoint := range session.Guided.Checkpoints {

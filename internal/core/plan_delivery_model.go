@@ -1,6 +1,10 @@
 package core
 
-import "sort"
+import (
+	"sort"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 const planDeliveryInstructions = `Complete executable ticket contracts for the supplied implementation plan and planned_workflow.
 Preserve exactly every supplied slice/task ID, title, slice_order and task_order. One task becomes one ticket; do not add, remove or combine tasks. Keep the supplied human labels.
@@ -55,7 +59,7 @@ func planDeliveryObject(properties map[string]any) map[string]any {
 }
 
 func planDeliveryArray(items map[string]any) map[string]any {
-	return map[string]any{"type": "array", "minItems": 1, "maxItems": WorkflowPageLimit, "items": items}
+	return map[string]any{"type": "array", "minItems": 1, "maxItems": workflowstate.WorkflowPageLimit, "items": items}
 }
 
 func planDeliveryString() map[string]any { return map[string]any{"type": "string", "minLength": 1} }

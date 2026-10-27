@@ -1,5 +1,7 @@
 package core
 
+import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+
 func validWorkflowIntegrationPolicyBounds(policy WorkflowExecutionPolicy) bool {
 	return policy.MaxMergerAttempts >= 0 && policy.MaxMergerAttempts <= 10 && policy.MaxDriftRevisions >= 0 && policy.MaxDriftRevisions <= 10
 }
@@ -22,7 +24,7 @@ func workflowDriftRevisionLimit(policy WorkflowExecutionPolicy) int {
 
 func workflowIntegrationAdmissionLimits(policy WorkflowExecutionPolicy) WorkflowIntegrationLimits {
 	return WorkflowIntegrationLimits{
-		Worker: int64(policy.MaxWorkerAttempts), Review: WorkflowPageLimit, Closing: WorkflowPageLimit,
+		Worker: int64(policy.MaxWorkerAttempts), Review: workflowstate.WorkflowPageLimit, Closing: workflowstate.WorkflowPageLimit,
 		Merger: int64(workflowMergerAttemptLimit(policy)), Drift: int64(workflowDriftRevisionLimit(policy)),
 		Submission: int64(workflowIntegrationAttemptLimit(policy)),
 	}

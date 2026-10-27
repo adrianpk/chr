@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -33,28 +34,14 @@ type QuizArtifactPaths struct {
 
 // QuizArtifactRepository defines a package boundary interface.
 type QuizArtifactRepository interface {
-	Paths(scope QuizScope) (QuizArtifactPaths, error)
-	AppendRawCapture(ctx context.Context, state QuizRuntimeState, entry QuizEntry) (QuizArtifactPaths, error)
-	LoadRawCaptureEntries(ctx context.Context, scope QuizScope) ([]QuizEntry, error)
-	WriteCuratedNotes(ctx context.Context, notes QuizCuratedNotes) (QuizArtifactPaths, error)
-	SaveRuntimeState(ctx context.Context, state QuizRuntimeState) (QuizArtifactPaths, error)
-	LoadRuntimeState(ctx context.Context, scope QuizScope) (QuizRuntimeState, error)
-	Observe(ctx context.Context, scope QuizScope) (QuizObservation, error)
+	Paths(scope quizcore.QuizScope) (QuizArtifactPaths, error)
+	AppendRawCapture(ctx context.Context, state quizcore.QuizRuntimeState, entry quizcore.QuizEntry) (QuizArtifactPaths, error)
+	LoadRawCaptureEntries(ctx context.Context, scope quizcore.QuizScope) ([]quizcore.QuizEntry, error)
+	WriteCuratedNotes(ctx context.Context, notes quizcore.QuizCuratedNotes) (QuizArtifactPaths, error)
+	SaveRuntimeState(ctx context.Context, state quizcore.QuizRuntimeState) (QuizArtifactPaths, error)
+	LoadRuntimeState(ctx context.Context, scope quizcore.QuizScope) (quizcore.QuizRuntimeState, error)
+	Observe(ctx context.Context, scope quizcore.QuizScope) (QuizObservation, error)
 	ApplyAction(ctx context.Context, request QuizActionRequest, transition QuizTransitionFunc) (QuizActionResult, error)
-}
-
-// QuizCuratedNotes describes a package boundary value.
-type QuizCuratedNotes struct {
-	Scope                      QuizScope
-	Status                     string
-	Decisions                  []string
-	AcceptanceReadiness        []string
-	Constraints                []string
-	Preferences                []string
-	OpenQuestions              []string
-	ImplementationImplications []string
-	Entries                    []QuizEntry
-	UpdatedAt                  string
 }
 
 type fileQuizArtifactRepository struct {
@@ -68,8 +55,8 @@ func NewQuizArtifactRepository(projectDir string) QuizArtifactRepository {
 }
 
 // QuizArtifactLayout executes the corresponding package operation.
-func QuizArtifactLayout(projectDir string, scope QuizScope) (QuizArtifactPaths, error) {
-	err := ValidateQuizScope(scope)
+func QuizArtifactLayout(projectDir string, scope quizcore.QuizScope) (QuizArtifactPaths, error) {
+	err := quizcore.ValidateQuizScope(scope)
 	if err != nil {
 		return QuizArtifactPaths{}, err
 	}
@@ -107,23 +94,23 @@ func QuizArtifactLayout(projectDir string, scope QuizScope) (QuizArtifactPaths, 
 }
 
 // Paths executes the corresponding package operation.
-func (r *fileQuizArtifactRepository) Paths(scope QuizScope) (QuizArtifactPaths, error) {
+func (r *fileQuizArtifactRepository) Paths(scope quizcore.QuizScope) (QuizArtifactPaths, error) {
 	return QuizArtifactLayout(r.projectDir, scope)
 }
 
 // AppendRawCapture executes the corresponding package operation.
-func (r *fileQuizArtifactRepository) appendRawCapture(ctx context.Context, state QuizRuntimeState, entry QuizEntry) (QuizArtifactPaths, error) {
+func (r *fileQuizArtifactRepository) appendRawCapture(ctx context.Context, state quizcore.QuizRuntimeState, entry quizcore.QuizEntry) (QuizArtifactPaths, error) {
 	err := ctx.Err()
 	if err != nil {
 		return QuizArtifactPaths{}, err
 	}
 
-	err = ValidateQuizRuntimeState(state)
+	err = quizcore.ValidateQuizRuntimeState(state)
 	if err != nil {
 		return QuizArtifactPaths{}, err
 	}
 
-	err = ValidateQuizEntry(entry)
+	err = quizcore.ValidateQuizEntry(entry)
 	if err != nil {
 		return QuizArtifactPaths{}, err
 	}
@@ -159,7 +146,7 @@ func (r *fileQuizArtifactRepository) appendRawCapture(ctx context.Context, state
 	return paths, nil
 }
 
-func (r *fileQuizArtifactRepository) prepareRawCaptureArtifact(state QuizRuntimeState) (QuizArtifactPaths, error) {
+func (r *fileQuizArtifactRepository) prepareRawCaptureArtifact(state quizcore.QuizRuntimeState) (QuizArtifactPaths, error) {
 	scope := quizScopeFromRuntime(state)
 
 	paths, err := r.Paths(scope)
@@ -180,19 +167,19 @@ func (r *fileQuizArtifactRepository) prepareRawCaptureArtifact(state QuizRuntime
 }
 
 // WriteCuratedNotes writes the requested output.
-func (r *fileQuizArtifactRepository) writeCuratedNotes(ctx context.Context, notes QuizCuratedNotes) (QuizArtifactPaths, error) {
+func (r *fileQuizArtifactRepository) writeCuratedNotes(ctx context.Context, notes quizcore.QuizCuratedNotes) (QuizArtifactPaths, error) {
 	err := ctx.Err()
 	if err != nil {
 		return QuizArtifactPaths{}, err
 	}
 
-	err = ValidateQuizScope(notes.Scope)
+	err = quizcore.ValidateQuizScope(notes.Scope)
 	if err != nil {
 		return QuizArtifactPaths{}, err
 	}
 
 	for _, entry := range notes.Entries {
-		err = ValidateQuizEntry(entry)
+		err = quizcore.ValidateQuizEntry(entry)
 		if err != nil {
 			return QuizArtifactPaths{}, err
 		}
@@ -230,8 +217,8 @@ func (r *fileQuizArtifactRepository) writeCuratedNotes(ctx context.Context, note
 // LoadRawCaptureEntries loads the requested data.
 func (r *fileQuizArtifactRepository) LoadRawCaptureEntries(
 	ctx context.Context,
-	scope QuizScope,
-) ([]QuizEntry, error) {
+	scope quizcore.QuizScope,
+) ([]quizcore.QuizEntry, error) {
 	err := ctx.Err()
 	if err != nil {
 		return nil, err
@@ -246,24 +233,24 @@ func (r *fileQuizArtifactRepository) LoadRawCaptureEntries(
 
 	content, err := owner.authoringRead(paths.RawRelativePath)
 	if os.IsNotExist(err) {
-		return []QuizEntry{}, nil
+		return []quizcore.QuizEntry{}, nil
 	}
 
 	if err != nil {
 		return nil, fmt.Errorf("read quiz raw capture: %w", err)
 	}
 
-	return ParseQuizRawCaptureEntries(string(content))
+	return quizcore.ParseQuizRawCaptureEntries(string(content))
 }
 
 // SaveRuntimeState persists the requested data.
-func (r *fileQuizArtifactRepository) saveRuntimeState(ctx context.Context, state QuizRuntimeState) (QuizArtifactPaths, error) {
+func (r *fileQuizArtifactRepository) saveRuntimeState(ctx context.Context, state quizcore.QuizRuntimeState) (QuizArtifactPaths, error) {
 	err := ctx.Err()
 	if err != nil {
 		return QuizArtifactPaths{}, err
 	}
 
-	err = ValidateQuizRuntimeState(state)
+	err = quizcore.ValidateQuizRuntimeState(state)
 	if err != nil {
 		return QuizArtifactPaths{}, err
 	}
@@ -292,7 +279,7 @@ func (r *fileQuizArtifactRepository) saveRuntimeState(ctx context.Context, state
 }
 
 // LoadRuntimeState loads the requested data.
-func (r *fileQuizArtifactRepository) LoadRuntimeState(ctx context.Context, scope QuizScope) (QuizRuntimeState, error) {
+func (r *fileQuizArtifactRepository) LoadRuntimeState(ctx context.Context, scope quizcore.QuizScope) (quizcore.QuizRuntimeState, error) {
 	observation, err := r.Observe(ctx, scope)
 	if err == nil && !observation.Exists {
 		err = fmt.Errorf("read quiz runtime state: %w", os.ErrNotExist)
@@ -302,7 +289,7 @@ func (r *fileQuizArtifactRepository) LoadRuntimeState(ctx context.Context, scope
 }
 
 // RenderQuizRawCapture renders the corresponding package data.
-func RenderQuizRawCapture(state QuizRuntimeState, entry QuizEntry) string {
+func RenderQuizRawCapture(state quizcore.QuizRuntimeState, entry quizcore.QuizEntry) string {
 	var output bytes.Buffer
 
 	output.WriteString("---\n")
@@ -344,7 +331,7 @@ func RenderQuizRawCapture(state QuizRuntimeState, entry QuizEntry) string {
 	output.WriteString("Question:\n\n")
 	output.WriteString(quizRawText(entry.Question) + "\n\n")
 
-	if entry.Status == QuizEntryStatusSkipped {
+	if entry.Status == quizcore.QuizEntryStatusSkipped {
 		output.WriteString("Skipped: true\n\n")
 
 		return output.String()
@@ -357,7 +344,7 @@ func RenderQuizRawCapture(state QuizRuntimeState, entry QuizEntry) string {
 }
 
 // RenderQuizCuratedNotes renders the corresponding package data.
-func RenderQuizCuratedNotes(paths QuizArtifactPaths, notes QuizCuratedNotes) string {
+func RenderQuizCuratedNotes(paths QuizArtifactPaths, notes quizcore.QuizCuratedNotes) string {
 	var output bytes.Buffer
 
 	output.WriteString("---\n")
@@ -402,11 +389,11 @@ func renderQuizCuratedSection(output *bytes.Buffer, title string, values []strin
 	output.WriteString("\n")
 }
 
-func quizScopeFromRuntime(state QuizRuntimeState) QuizScope {
-	return QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug}
+func quizScopeFromRuntime(state quizcore.QuizRuntimeState) quizcore.QuizScope {
+	return quizcore.QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug}
 }
 
-func quizScopeID(scope QuizScope) (string, error) {
+func quizScopeID(scope quizcore.QuizScope) (string, error) {
 	caseSlug := strings.TrimSpace(scope.CaseSlug)
 	if caseSlug == "" {
 		return "project", nil
@@ -439,7 +426,7 @@ func quizRawText(value string) string {
 	return strings.Join(lines, "\n")
 }
 
-func scopedQuizArtifactLayout(projectDir string, scope QuizScope) (QuizArtifactPaths, error) {
+func scopedQuizArtifactLayout(projectDir string, scope quizcore.QuizScope) (QuizArtifactPaths, error) {
 	id, err := quizScopeID(scope)
 	if err != nil {
 		return QuizArtifactPaths{}, err

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // GeneratedWorkflowPlan is explicit approved materialization input. Its request
@@ -68,7 +69,7 @@ func ValidateGeneratedWorkflowPlan(plan GeneratedWorkflowPlan) error {
 		return err
 	}
 
-	if len(plan.Slices) == 0 || len(plan.Slices) > WorkflowPageLimit {
+	if len(plan.Slices) == 0 || len(plan.Slices) > workflowstate.WorkflowPageLimit {
 		return fmt.Errorf("workflow slice bound exceeded or empty plan")
 	}
 
@@ -81,7 +82,7 @@ func ValidateGeneratedWorkflowPlan(plan GeneratedWorkflowPlan) error {
 		return err
 	}
 
-	if len(data) > WorkflowFileLimit {
+	if len(data) > workflowstate.WorkflowFileLimit {
 		return fmt.Errorf("workflow materialization input exceeds 1 MiB")
 	}
 
@@ -145,7 +146,7 @@ func validateWorkflowPlanSlice(slice GeneratedWorkflowSlice, tasks map[string]bo
 }
 
 func validateWorkflowPlanSliceContract(slice GeneratedWorkflowSlice) error {
-	if strings.TrimSpace(slice.Title) == "" || strings.TrimSpace(slice.Contract) == "" || len(slice.Tasks) == 0 || len(slice.Tasks) > WorkflowPageLimit {
+	if strings.TrimSpace(slice.Title) == "" || strings.TrimSpace(slice.Contract) == "" || len(slice.Tasks) == 0 || len(slice.Tasks) > workflowstate.WorkflowPageLimit {
 		return fmt.Errorf("slice %s requires a contract and bounded nonempty tasks", slice.ID)
 	}
 
@@ -159,7 +160,7 @@ func validateWorkflowPlanTask(task GeneratedWorkflowTask) error {
 		}
 	}
 
-	if len(task.Acceptance) == 0 || len(task.Acceptance) > WorkflowPageLimit {
+	if len(task.Acceptance) == 0 || len(task.Acceptance) > workflowstate.WorkflowPageLimit {
 		return fmt.Errorf("task %s requires bounded acceptance", task.ID)
 	}
 

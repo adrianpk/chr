@@ -28,7 +28,7 @@ func validateWorkflowMergerRequirements(requirements []WorkflowMergerRequirement
 }
 
 func validateWorkflowMergerRequirementIDs(ids []string, requirements []WorkflowMergerRequirement) error {
-	if len(ids) == 0 || len(ids) > WorkflowPageLimit {
+	if len(ids) == 0 || len(ids) > workflowstate.WorkflowPageLimit {
 		return workflowstate.ErrConflict
 	}
 
@@ -105,7 +105,7 @@ func validateWorkflowMergerCheckpoint(input WorkflowMergerInput) error {
 }
 
 func validWorkflowMergerCheckpointPosition(input WorkflowMergerInput, checkpoint WorkflowMergerCheckpoint) bool {
-	return input.Method == "rebase" && checkpoint.ReplayIndex >= 0 && checkpoint.ReplayIndex < WorkflowRecordLimit && len(checkpoint.Predecessors) == checkpoint.ReplayIndex
+	return input.Method == "rebase" && checkpoint.ReplayIndex >= 0 && checkpoint.ReplayIndex < workflowstate.WorkflowRecordLimit && len(checkpoint.Predecessors) == checkpoint.ReplayIndex
 }
 
 func validWorkflowMergerCheckpointObjects(input WorkflowMergerInput, checkpoint WorkflowMergerCheckpoint) bool {

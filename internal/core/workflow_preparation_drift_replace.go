@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) replaceWorkflowNativePreparation(ctx context.Context, run *workflowInvocationFile, entry WorkflowIntegrationEntry, previous WorkflowPreparationInput, source WorkflowReviewInput) error {
@@ -91,7 +92,7 @@ func reserveWorkflowNativeDrift(budget *WorkflowIntegrationBudget, entry Workflo
 		return nil
 	}
 
-	if len(budget.Reservations) >= WorkflowRecordLimit {
+	if len(budget.Reservations) >= workflowstate.WorkflowRecordLimit {
 		return ErrWorkflowIntegrationBudget
 	}
 

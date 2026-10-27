@@ -13,7 +13,7 @@ func validWorkflowMergerPath(path string) bool {
 }
 
 func validateWorkflowMergerPaths(paths []string) error {
-	if len(paths) > WorkflowPageLimit {
+	if len(paths) > workflowstate.WorkflowPageLimit {
 		return workflowstate.ErrConflict
 	}
 
@@ -91,7 +91,7 @@ func validateWorkflowMergerCommands(commands [][]string) error {
 }
 
 func validWorkflowMergerCommand(command []string) bool {
-	if len(command) == 0 || len(command) > WorkflowPageLimit || command[0] == "" {
+	if len(command) == 0 || len(command) > workflowstate.WorkflowPageLimit || command[0] == "" {
 		return false
 	}
 

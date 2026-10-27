@@ -214,7 +214,7 @@ func (s *WorkflowStore) checkLegacyWorkflowKeys(ctx context.Context, selected []
 		}
 
 		count++
-		if count > WorkflowRecordLimit {
+		if count > workflowstate.WorkflowRecordLimit {
 			return fmt.Errorf("legacy adoption scan bound exceeded")
 		}
 

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // QuizSpecDirectory defines a package boundary constant.
@@ -14,7 +16,7 @@ const QuizSpecDirectory = "specs/drafts"
 // QuizDraftSpec describes a package boundary value.
 type QuizDraftSpec struct {
 	ExpectedRevision string `json:"-"`
-	Scope            QuizScope
+	Scope            quizcore.QuizScope
 	Title            string
 	Body             string
 	Feature          AcceptanceFeatureGeneration
@@ -34,8 +36,8 @@ type QuizDraftSpecPaths struct {
 }
 
 // QuizDraftSpecLayout executes the corresponding package operation.
-func QuizDraftSpecLayout(projectDir string, scope QuizScope) (QuizDraftSpecPaths, error) {
-	err := ValidateQuizScope(scope)
+func QuizDraftSpecLayout(projectDir string, scope quizcore.QuizScope) (QuizDraftSpecPaths, error) {
+	err := quizcore.ValidateQuizScope(scope)
 	if err != nil {
 		return QuizDraftSpecPaths{}, err
 	}
@@ -144,7 +146,7 @@ func ValidateQuizDraftSpecModelContent(spec QuizDraftSpec) error {
 		return fmt.Errorf("quiz draft spec content is required")
 	}
 
-	err := ValidateQuizScope(spec.Scope)
+	err := quizcore.ValidateQuizScope(spec.Scope)
 	if err != nil {
 		return err
 	}

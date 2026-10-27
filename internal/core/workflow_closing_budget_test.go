@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowClosingBudget retains exhaustion across restart and rejects before
@@ -40,7 +41,7 @@ func TestWorkflowClosingBudget(t *testing.T) {
 	}
 
 	closed, err := restarted.CloseWorkflowInvocationSet(t.Context(), next.Invocation.ID, "dev", workflowFrontierPorts(fixture))
-	if err != nil || closed.Outcome != "completed" || len(closed.Set.Set.Closing.Attempts) != WorkflowPageLimit+1 {
+	if err != nil || closed.Outcome != "completed" || len(closed.Set.Set.Closing.Attempts) != workflowstate.WorkflowPageLimit+1 {
 		t.Fatal("new invocation lost prior attempts or inherited another invocation's exhausted budget", err)
 	}
 }
@@ -100,7 +101,7 @@ func workflowClosingBudgetImages(t *testing.T, set *WorkflowRecord, state workfl
 
 	files := []workflowFileChange{}
 
-	for generation := 2; generation <= WorkflowPageLimit; generation++ {
+	for generation := 2; generation <= workflowstate.WorkflowPageLimit; generation++ {
 		state.Generation = generation
 		state.Input.Ref = workflowClosingFile(set.ID, generation, "input.json")
 

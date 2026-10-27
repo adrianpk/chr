@@ -62,20 +62,20 @@ func (s *WorkflowStore) ContinueWorkflow(ctx context.Context, id string, request
 }
 
 func workflowContinuationLimit(run WorkflowInvocation, requested int) (int, error) {
-	if run.Continuation != nil && run.Continuation.Sequence >= WorkflowRecordLimit {
+	if run.Continuation != nil && run.Continuation.Sequence >= workflowstate.WorkflowRecordLimit {
 		return 0, fmt.Errorf("continuation checkpoint history exhausted")
 	}
 
 	limit := run.Policy.CheckpointStepLimit
 	if limit == 0 {
-		limit = WorkflowPageLimit
+		limit = workflowstate.WorkflowPageLimit
 	}
 
 	if requested == 0 {
 		requested = limit
 	}
 
-	if requested < 1 || requested > limit || requested > WorkflowPageLimit {
+	if requested < 1 || requested > limit || requested > workflowstate.WorkflowPageLimit {
 		return 0, fmt.Errorf("continuation step limit exceeds frozen bounds")
 	}
 

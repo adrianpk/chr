@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowTaskCommand(t *testing.T, mode string) []string {
@@ -163,7 +165,7 @@ func workflowProcessAggregateGate(t *testing.T, input WorkflowTaskInput) {
 func workflowProcessInput(t *testing.T) WorkflowTaskInput {
 	t.Helper()
 
-	data, err := io.ReadAll(io.LimitReader(os.Stdin, WorkflowFileLimit+1))
+	data, err := io.ReadAll(io.LimitReader(os.Stdin, workflowstate.WorkflowFileLimit+1))
 	if err != nil {
 		t.Fatal(err)
 	}

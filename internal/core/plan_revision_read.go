@@ -8,13 +8,14 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ObservePlanRevision reads the current retained order binding without repairing
 // or rewriting artifacts. Missing or edited companions require explicit repair.
 // A legacy or absent plan returns an empty binding without migration.
-func ObservePlanRevision(ctx context.Context, projectDir string, scope QuizScope) (PlanRevisionBinding, error) {
+func ObservePlanRevision(ctx context.Context, projectDir string, scope quizcore.QuizScope) (PlanRevisionBinding, error) {
 	paths, err := GeneratedPlanLayout(projectDir, scope)
 	if err != nil {
 		return PlanRevisionBinding{}, err
@@ -53,7 +54,7 @@ func ObservePlanRevision(ctx context.Context, projectDir string, scope QuizScope
 	return binding, r.checkProjectDumpInspection(ctx)
 }
 
-func (r *fileAuthoringSessionRepository) validatePlanReceiptResult(scope QuizScope, result PlanPublicationResult) error {
+func (r *fileAuthoringSessionRepository) validatePlanReceiptResult(scope quizcore.QuizScope, result PlanPublicationResult) error {
 	paths, err := GeneratedPlanLayout(r.projectDir, scope)
 	if err != nil {
 		return err

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // MaterializeWorkflowPlan explicitly opts approved input into ticket-owned
@@ -90,7 +91,7 @@ func (s service) checkWorkflowAdoptionExecutions(ctx context.Context, keys []str
 			return err
 		}
 
-		if len(records) > core.WorkflowRecordLimit {
+		if len(records) > workflowstate.WorkflowRecordLimit {
 			return fmt.Errorf("legacy execution observation bound exceeded")
 		}
 

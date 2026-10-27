@@ -73,7 +73,7 @@ func (s *WorkflowStore) commitWorkflowContinuation(run *workflowInvocationFile, 
 		checkpoint.ParentRef, checkpoint.ParentHash = previous.EvidenceRef, previous.EvidenceHash
 	}
 
-	if checkpoint.Sequence > WorkflowRecordLimit {
+	if checkpoint.Sequence > workflowstate.WorkflowRecordLimit {
 		return fmt.Errorf("continuation checkpoint history exhausted")
 	}
 
@@ -97,7 +97,7 @@ func encodeWorkflowContinuationCheckpoint(checkpoint WorkflowContinuationCheckpo
 	checkpoint.EvidenceRef, checkpoint.EvidenceHash = "", ""
 
 	data, err := json.MarshalIndent(checkpoint, "", "  ")
-	if err != nil || len(data) >= WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
 		return nil, errorsOrConflict(err)
 	}
 

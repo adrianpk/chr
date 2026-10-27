@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // Pi performs real readiness and plan calls before the tracking publication owner.
@@ -25,7 +26,7 @@ func TestPiGenerationPlan(t *testing.T) {
 	writeServiceQuizFixture(t, project)
 	harnessSelectionWrite(t, filepath.Join(driver, "plan-readiness"), "enabled")
 
-	generated, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{OperationID: "pi-plan", Scope: core.QuizScope{CaseSlug: "blog"}})
+	generated, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{OperationID: "pi-plan", Scope: quizcore.QuizScope{CaseSlug: "blog"}})
 	if err != nil {
 		t.Fatal("Pi plan failed", err)
 	}
@@ -36,7 +37,7 @@ func TestPiGenerationPlan(t *testing.T) {
 
 	writePiTrackingResponse(t, driver)
 
-	tracking, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{OperationID: "pi-tracking", Scope: core.QuizScope{CaseSlug: "blog"}})
+	tracking, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{OperationID: "pi-tracking", Scope: quizcore.QuizScope{CaseSlug: "blog"}})
 	if err != nil {
 		t.Fatal("Pi tracking failed", err)
 	}
@@ -72,7 +73,7 @@ func TestPiGenerationTracking(t *testing.T) {
 
 	writePiTrackingResponse(t, driver)
 
-	result, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{OperationID: "pi-legacy-tracking", Scope: core.QuizScope{CaseSlug: "blog"}})
+	result, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{OperationID: "pi-legacy-tracking", Scope: quizcore.QuizScope{CaseSlug: "blog"}})
 	if err != nil || len(result.Tickets) != 1 {
 		t.Fatal("Pi legacy tracking failed", result.Message, err)
 	}

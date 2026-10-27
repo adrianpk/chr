@@ -10,6 +10,8 @@ import (
 	"sort"
 	"syscall"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) acquireWorkflowAdoptionLocks(ctx context.Context) ([]*AgentOperationLock, error) {
@@ -18,7 +20,7 @@ func (s *WorkflowStore) acquireWorkflowAdoptionLocks(ctx context.Context) ([]*Ag
 		return nil, err
 	}
 
-	if len(worktrees) == 0 || len(worktrees) > WorkflowPageLimit {
+	if len(worktrees) == 0 || len(worktrees) > workflowstate.WorkflowPageLimit {
 		return nil, fmt.Errorf("legacy worktree ownership scan bound exceeded")
 	}
 

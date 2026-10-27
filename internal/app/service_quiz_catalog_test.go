@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 type quizCatalogScenario struct {
@@ -38,7 +39,7 @@ func checkQuizCatalogScenario(t *testing.T, tc quizCatalogScenario) {
 	provider, model := newWebQuizFixture(t)
 	operations := provider.service(t.Context())
 
-	scope := operations.quizScope(core.QuizScope{CaseSlug: "named-work"})
+	scope := operations.quizScope(quizcore.QuizScope{CaseSlug: "named-work"})
 	if tc.name != "absent" && !tc.curated {
 		seedQuizCatalogScope(t, operations, scope, tc.answer, tc.skip, tc.stop)
 	}
@@ -69,7 +70,7 @@ func checkQuizCatalogScenario(t *testing.T, tc quizCatalogScenario) {
 	}
 }
 
-func seedQuizCatalogMetadata(t *testing.T, operations service, scope core.QuizScope, tc quizCatalogScenario) {
+func seedQuizCatalogMetadata(t *testing.T, operations service, scope quizcore.QuizScope, tc quizCatalogScenario) {
 	t.Helper()
 
 	if tc.counter {
@@ -85,17 +86,17 @@ func seedQuizCatalogMetadata(t *testing.T, operations service, scope core.QuizSc
 	}
 
 	if tc.curated {
-		_, err := operations.quizRepository().WriteCuratedNotes(t.Context(), core.QuizCuratedNotes{Scope: scope, Status: "curated", Decisions: []string{"A document is not an answer."}, UpdatedAt: serviceQuizClock()().Format("2006-01-02T15:04:05Z")})
+		_, err := operations.quizRepository().WriteCuratedNotes(t.Context(), quizcore.QuizCuratedNotes{Scope: scope, Status: "curated", Decisions: []string{"A document is not an answer."}, UpdatedAt: serviceQuizClock()().Format("2006-01-02T15:04:05Z")})
 		if err != nil {
 			t.Fatal(err)
 		}
 	}
 }
 
-func seedQuizCatalogScope(t *testing.T, operations service, scope core.QuizScope, answer, skip bool, stop string) {
+func seedQuizCatalogScope(t *testing.T, operations service, scope quizcore.QuizScope, answer, skip bool, stop string) {
 	t.Helper()
 
-	if _, err := operations.StartQuiz(QuizStartRequest{Scope: scope, Mode: core.QuizModeFast}); err != nil {
+	if _, err := operations.StartQuiz(QuizStartRequest{Scope: scope, Mode: quizcore.QuizModeFast}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -130,7 +131,7 @@ func TestQuizCatalogNewCase(t *testing.T) {
 
 	operations := provider.service(t.Context())
 	for _, slug := range []string{"", "named-work"} {
-		scope := operations.quizScope(core.QuizScope{CaseSlug: slug})
+		scope := operations.quizScope(quizcore.QuizScope{CaseSlug: slug})
 		seedQuizCatalogScope(t, operations, scope, true, false, "done")
 
 		paths, err := operations.quizRepository().Paths(scope)
@@ -191,7 +192,7 @@ func TestQuizCatalogProjectOnly(t *testing.T) {
 		t.Fatal(catalog)
 	}
 
-	paths, err := operations.quizRepository().Paths(operations.quizScope(core.QuizScope{}))
+	paths, err := operations.quizRepository().Paths(operations.quizScope(quizcore.QuizScope{}))
 	if err != nil {
 		t.Fatal(err)
 	}

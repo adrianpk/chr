@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const workflowSliceValidationPurpose = "slice_validation"
@@ -45,7 +47,7 @@ type WorkflowSliceCandidate struct {
 // ExecuteWorkflowSlice runs remaining tasks on the retained lane and validates
 // one complete slice. It stops at that slice's integration barrier.
 func (s *WorkflowStore) ExecuteWorkflowSlice(ctx context.Context, id string, worker []string) (WorkflowSliceCandidate, error) {
-	for range WorkflowRecordLimit {
+	for range workflowstate.WorkflowRecordLimit {
 		run, err := s.ReadWorkflow(ctx, id)
 		if err != nil {
 			return WorkflowSliceCandidate{}, err

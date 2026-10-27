@@ -17,7 +17,7 @@ func telegramJourneyAdmissionFixture(t *testing.T) (*WorkflowStore, WorkflowReco
 	store, record, request := workflowTicketFixture(t, "ticket", workflowPreparationGate("test -f result.txt"))
 	record.Task.Status = TicketStatusBacklog
 	record = workflowTestWrite(t, store, record)
-	request.Selection.Limit = WorkflowPageLimit
+	request.Selection.Limit = workflowstate.WorkflowPageLimit
 
 	preview, err := store.Preview(t.Context(), request.Selection)
 	if err != nil || len(preview.Members) != 1 {

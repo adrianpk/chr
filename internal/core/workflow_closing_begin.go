@@ -90,7 +90,7 @@ func (s *WorkflowStore) prepareWorkflowClosing(ctx context.Context, set Workflow
 	}
 
 	data, err := json.MarshalIndent(input, "", "  ")
-	if err != nil || len(data) >= WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
 		return nil, fmt.Errorf("closing input exceeds file bounds: %w", errorsOrConflict(err))
 	}
 

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -113,7 +114,7 @@ func TestGuidedUseCasePreparationRetry(t *testing.T) {
 // TestGuidedUseCasePreparationExisting cannot adopt an independently generated plan.
 func TestGuidedUseCasePreparationExisting(t *testing.T) {
 	operations, session, model := guidedPreparationFixture(t, "default")
-	scope := core.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
+	scope := quizcore.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
 	plan := serviceQuizPlanResponse("manual-plan", operations.utcNow()).Plan
 	plan.Scope, plan.CreatedAt = scope, operations.utcNow()
 

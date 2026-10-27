@@ -7,12 +7,14 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 func TestAcceptanceFeatureLayoutUsesCanonicalPath(t *testing.T) {
 	projectDir := t.TempDir()
 
-	paths, err := AcceptanceFeatureLayout(projectDir, QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"})
+	paths, err := AcceptanceFeatureLayout(projectDir, quizcore.QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"})
 	if err != nil {
 		t.Fatalf("AcceptanceFeatureLayout returned error: %v", err)
 	}
@@ -32,7 +34,7 @@ func TestAcceptanceFeatureLayoutUsesCanonicalPath(t *testing.T) {
 }
 
 func TestAcceptanceFeatureLayoutRejectsNestedCaseSlug(t *testing.T) {
-	_, err := AcceptanceFeatureLayout(t.TempDir(), QuizScope{ProjectID: "project-1", CaseSlug: "../bad"})
+	_, err := AcceptanceFeatureLayout(t.TempDir(), quizcore.QuizScope{ProjectID: "project-1", CaseSlug: "../bad"})
 	if err == nil {
 		t.Fatal("AcceptanceFeatureLayout returned nil error")
 	}
@@ -41,7 +43,7 @@ func TestAcceptanceFeatureLayoutRejectsNestedCaseSlug(t *testing.T) {
 func TestAcceptanceFeatureRoundLayoutUsesCanonicalPath(t *testing.T) {
 	projectDir := t.TempDir()
 
-	paths, err := AcceptanceFeatureRoundLayout(projectDir, QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"})
+	paths, err := AcceptanceFeatureRoundLayout(projectDir, quizcore.QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"})
 	if err != nil {
 		t.Fatalf("AcceptanceFeatureRoundLayout returned error: %v", err)
 	}
@@ -341,7 +343,7 @@ func TestWriteAcceptanceFeatureRejectsInvalidArtifact(t *testing.T) {
 
 func TestMergeAcceptanceFeatureRoundAnswersPreservesExistingAnswers(t *testing.T) {
 	notes := AcceptanceFeatureRoundNotes{
-		Scope:           QuizScope{ProjectID: "project-1", CaseSlug: "followups"},
+		Scope:           quizcore.QuizScope{ProjectID: "project-1", CaseSlug: "followups"},
 		Status:          AcceptanceFeatureStatusNeedsMoreInfo,
 		RejectionReason: "More queue behavior is needed.",
 		Prompts: []AcceptanceFeaturePrompt{
@@ -392,7 +394,7 @@ func TestMergeAcceptanceFeatureRoundAnswersPreservesExistingAnswers(t *testing.T
 func TestWriteAcceptanceFeatureRoundNotesWritesDefaultPrompts(t *testing.T) {
 	projectDir := t.TempDir()
 	notes := AcceptanceFeatureRoundNotes{
-		Scope:           QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"},
+		Scope:           quizcore.QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"},
 		Status:          AcceptanceFeatureStatusNeedsMoreInfo,
 		RejectionReason: "The failure behavior is not explicit.",
 		Prompts: []AcceptanceFeaturePrompt{
@@ -449,7 +451,7 @@ func assertAcceptanceFeatureFinding(t *testing.T, result AcceptanceFeatureCheckR
 
 func validAcceptanceFeatureArtifact() AcceptanceFeatureArtifact {
 	return AcceptanceFeatureArtifact{
-		Scope:       QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"},
+		Scope:       quizcore.QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"},
 		SpecSlug:    "article-authoring-spec",
 		SpecPath:    ".chr/default/specs/article-authoring-spec.md",
 		UseCaseSlug: "article-authoring",

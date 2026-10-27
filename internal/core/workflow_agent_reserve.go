@@ -59,7 +59,7 @@ func (s *WorkflowStore) reserveWorkflowAgentInput(ctx context.Context, run *work
 		return nil, err
 	}
 
-	if len(budget.Reservations) >= WorkflowRecordLimit {
+	if len(budget.Reservations) >= workflowstate.WorkflowRecordLimit {
 		return nil, workflowstate.ErrConflict
 	}
 

@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) commitWorkflowFrontier(run *workflowInvocationFile, target WorkflowPreviewTarget, proof WorkflowIntegrationProof) error {
@@ -57,7 +58,7 @@ func encodeWorkflowUnitDelivery(delivery WorkflowUnitDelivery) ([]byte, error) {
 	delivery.EvidenceRef, delivery.EvidenceHash = "", ""
 
 	data, err := json.MarshalIndent(delivery, "", "  ")
-	if err != nil || len(data) >= WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
 		return nil, fmt.Errorf("workflow frontier evidence exceeds file bounds: %w", errorsOrConflict(err))
 	}
 

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TicketBoardReadOptions selects authority and one bounded page of the Board.
@@ -28,10 +29,10 @@ type TicketBoardReadOptions struct {
 // It never rebuilds SQL, adopts documents or recovers a workflow transition.
 func ReadTicketBoard(ctx context.Context, opts TicketBoardReadOptions) (board Board, err error) {
 	if opts.Limit == 0 {
-		opts.Limit = WorkflowPageLimit
+		opts.Limit = workflowstate.WorkflowPageLimit
 	}
 
-	if opts.ProjectID == "" || opts.Layout.ProjectDir() == "" || opts.Offset < 0 || opts.Offset > WorkflowRecordLimit || opts.Limit < 1 || opts.Limit > WorkflowPageLimit {
+	if opts.ProjectID == "" || opts.Layout.ProjectDir() == "" || opts.Offset < 0 || opts.Offset > workflowstate.WorkflowRecordLimit || opts.Limit < 1 || opts.Limit > workflowstate.WorkflowPageLimit {
 		return Board{}, fmt.Errorf("invalid ticket Board scope or page bounds")
 	}
 
@@ -174,7 +175,7 @@ func boardMarkdownFiles(ctx context.Context, projectDir, root string) ([]string,
 		}
 
 		files = append(files, path)
-		if len(files) > WorkflowRecordLimit {
+		if len(files) > workflowstate.WorkflowRecordLimit {
 			return fmt.Errorf("ticket Board observation bound exceeded")
 		}
 
@@ -233,7 +234,7 @@ func (s *WorkflowStore) appendLooseBoardTicket(root, path string, tickets map[st
 		return fmt.Errorf("duplicate canonical Board ticket key: %s", ticket.Key)
 	}
 
-	if len(tickets) >= WorkflowRecordLimit {
+	if len(tickets) >= workflowstate.WorkflowRecordLimit {
 		return fmt.Errorf("ticket Board observation bound exceeded")
 	}
 

@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -60,7 +61,7 @@ func orderedPlanCandidate() GeneratedPlan {
 	return plan
 }
 
-func readTestPlanBinding(t *testing.T, project string, scope QuizScope) PlanRevisionBinding {
+func readTestPlanBinding(t *testing.T, project string, scope quizcore.QuizScope) PlanRevisionBinding {
 	t.Helper()
 
 	binding, err := ObservePlanRevision(t.Context(), project, scope)

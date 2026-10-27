@@ -83,7 +83,7 @@ func validateWorkflowReplayPayload(answer WorkflowIntegrationAnswer) error {
 }
 
 func validWorkflowDecisionHeader(record WorkflowIntegrationDecisions) bool {
-	return record.SchemaVersion == 1 && workflowstate.ValidRequestKey(record.ID) && record.Revision >= 1 && record.Revision <= WorkflowPageLimit && record.CandidateRevision >= 1 && slices.Contains([]string{"waiting", "resolved"}, record.State) && len(record.Requests) != 0 && len(record.Answers) <= WorkflowPageLimit
+	return record.SchemaVersion == 1 && workflowstate.ValidRequestKey(record.ID) && record.Revision >= 1 && record.Revision <= workflowstate.WorkflowPageLimit && record.CandidateRevision >= 1 && slices.Contains([]string{"waiting", "resolved"}, record.State) && len(record.Requests) != 0 && len(record.Answers) <= workflowstate.WorkflowPageLimit
 }
 
 func validateWorkflowDecisionHistory(record WorkflowIntegrationDecisions) error {

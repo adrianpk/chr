@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -51,7 +52,7 @@ The implementation must preserve editorial review.
 	operations.now = clock
 
 	result, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
-		Scope: core.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GeneratePlan returned error: %v", err)
@@ -127,7 +128,7 @@ The implementation must preserve editorial review.
 	operations.now = clock
 
 	result, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
-		Scope: core.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GeneratePlan returned error: %v", err)
@@ -166,7 +167,7 @@ The implementation must preserve editorial review.
 `)
 
 	operations := newPlanTestService(t, projectDir)
-	scope := core.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
+	scope := quizcore.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
 	state, err := operations.specGenerationRuntimeState(scope)
 	if err != nil {
 		t.Fatalf("specGenerationRuntimeState returned error: %v", err)
@@ -221,7 +222,7 @@ The implementation must preserve editorial review.
 `)
 
 	operations := newPlanTestService(t, projectDir)
-	scope := core.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
+	scope := quizcore.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
 	state, err := operations.specGenerationRuntimeState(scope)
 	if err != nil {
 		t.Fatalf("specGenerationRuntimeState returned error: %v", err)
@@ -268,7 +269,7 @@ The implementation must preserve editorial review.
 `)
 
 	operations := newPlanTestService(t, projectDir)
-	scope := core.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
+	scope := quizcore.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
 	state, err := operations.specGenerationRuntimeState(scope)
 	if err != nil {
 		t.Fatalf("specGenerationRuntimeState returned error: %v", err)
@@ -336,7 +337,7 @@ Manual edits that must remain recoverable.
 	operations.now = clock
 
 	result, err := operations.RegeneratePlan(t.Context(), PlanRegenerateRequest{
-		Scope: core.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("RegeneratePlan returned error: %v", err)
@@ -384,7 +385,7 @@ func TestServiceRegeneratePlanWithoutExistingPlanCreatesCanonicalPlan(t *testing
 	operations.now = clock
 
 	_, err := operations.RegeneratePlan(t.Context(), PlanRegenerateRequest{
-		Scope: core.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("RegeneratePlan returned error: %v", err)
@@ -422,7 +423,7 @@ func TestServiceGeneratePlanDoesNotWritePlanWhenSliceDetailFails(t *testing.T) {
 	operations.now = clock
 
 	_, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
-		Scope: core.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.QuizScope{CaseSlug: "blog"},
 	})
 	if err == nil {
 		t.Fatal("GeneratePlan returned nil error, want slice detail validation failure")
@@ -462,7 +463,7 @@ Implement planning foundation.
 	operations.now = fixedServiceClock(now)
 
 	result, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{
-		Scope: core.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("MaterializePlanTracking returned error: %v", err)
@@ -536,7 +537,7 @@ case_slug: "blog"
 	operations.quizModel = model
 
 	_, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{
-		Scope: core.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.QuizScope{CaseSlug: "blog"},
 	})
 	if err == nil {
 		t.Fatal("MaterializePlanTracking returned nil error")
@@ -565,7 +566,7 @@ func TestServiceCreatePlanTrackingTicketsValidatesBatchBeforeWrites(t *testing.T
 	}
 
 	_, err := operations.createPlanTrackingTickets(
-		core.QuizScope{CaseSlug: "blog"},
+		quizcore.QuizScope{CaseSlug: "blog"},
 		"ops/default/plan/00000-blog-plan/artifact.md",
 		"ops/default/tracker/00000-blog-tracking/artifact.md",
 		payloads,
@@ -587,7 +588,7 @@ func TestServiceCreatePlanTrackingTicketsRejectsGeneratedKeyAndPath(t *testing.T
 	payload.Path = ".chr/default/tickets/blog/LLM-99-owned-by-model.md"
 
 	_, err := operations.createPlanTrackingTickets(
-		core.QuizScope{CaseSlug: "blog"},
+		quizcore.QuizScope{CaseSlug: "blog"},
 		"ops/default/plan/00000-blog-plan/artifact.md",
 		"ops/default/tracker/00000-blog-tracking/artifact.md",
 		[]core.GeneratedPlanTrackingTicket{payload},
@@ -660,7 +661,7 @@ func TestServiceMaterializePlanTrackingRequiresExistingPlan(t *testing.T) {
 	operations.quizModel = model
 
 	_, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{
-		Scope: core.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.QuizScope{CaseSlug: "blog"},
 	})
 	if err == nil || !strings.Contains(err.Error(), "plan is required before tracking can be created") {
 		t.Fatalf("MaterializePlanTracking error = %v, want missing plan error", err)
@@ -695,7 +696,7 @@ case_slug: "blog"
 	operations.quizModel = model
 
 	result, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{
-		Scope: core.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("MaterializePlanTracking returned error: %v", err)
@@ -741,7 +742,7 @@ Manual edits that must remain recoverable.
 	operations.now = clock
 
 	_, err := operations.RegeneratePlan(t.Context(), PlanRegenerateRequest{
-		Scope: core.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.QuizScope{CaseSlug: "blog"},
 	})
 	if err == nil {
 		t.Fatal("RegeneratePlan returned nil error, want archive failure")
@@ -796,7 +797,7 @@ case: "blog"
 	operations.now = clock
 
 	_, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
-		Scope: core.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GeneratePlan returned error: %v", err)
@@ -828,7 +829,7 @@ func TestServiceGeneratePlanUsesLongGenerationDeadline(t *testing.T) {
 	operations.quizModel = model
 
 	_, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
-		Scope: core.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GeneratePlan returned error: %v", err)
@@ -862,7 +863,7 @@ Manual plan content.
 	operations.quizModel = model
 
 	result, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
-		Scope: core.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GeneratePlan returned error: %v", err)
@@ -971,7 +972,7 @@ func TestServiceGeneratePlanBlocksConcurrentSameScopeGeneration(t *testing.T) {
 	done := make(chan error, 1)
 	go func() {
 		_, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
-			Scope: core.QuizScope{CaseSlug: "blog"},
+			Scope: quizcore.QuizScope{CaseSlug: "blog"},
 		})
 		done <- err
 	}()
@@ -979,7 +980,7 @@ func TestServiceGeneratePlanBlocksConcurrentSameScopeGeneration(t *testing.T) {
 	<-model.started
 
 	_, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
-		Scope: core.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.QuizScope{CaseSlug: "blog"},
 	})
 	if err == nil || !strings.Contains(err.Error(), "plan generation already running for scope blog") {
 		t.Fatalf("GeneratePlan error = %v, want guard error", err)
@@ -1036,7 +1037,7 @@ func fixedServiceClock(now time.Time) func() time.Time {
 	}
 }
 
-func validServiceGeneratedPlanOutline(scope core.QuizScope, createdAt time.Time) core.GeneratedPlanOutline {
+func validServiceGeneratedPlanOutline(scope quizcore.QuizScope, createdAt time.Time) core.GeneratedPlanOutline {
 	return core.GeneratedPlanOutline{
 		Scope:              scope,
 		Title:              "Staged Plan Generation",
@@ -1147,7 +1148,7 @@ func newPlanTestService(t *testing.T, project string) service {
 	return operations
 }
 
-func planTestSources(t *testing.T, operations service, scope core.QuizScope) core.PlanSourceObservation {
+func planTestSources(t *testing.T, operations service, scope quizcore.QuizScope) core.PlanSourceObservation {
 	t.Helper()
 	sources, err := operations.observePlanContext(t.Context(), scope)
 	if err != nil {

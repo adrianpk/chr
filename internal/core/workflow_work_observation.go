@@ -6,6 +6,8 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowWorkObservation is a coherent, non-recovering read of native work.
@@ -76,7 +78,7 @@ func (s *WorkflowStore) observeWorkflowQueues(ctx context.Context, selection wor
 
 	selectors = append(selectors, WorkflowSelector{Extent: "loose"})
 	for _, selector := range selectors {
-		request, err := normalizeWorkflowPreviewRequest(WorkflowPreviewRequest{Selector: selector, Limit: WorkflowPageLimit, Target: target})
+		request, err := normalizeWorkflowPreviewRequest(WorkflowPreviewRequest{Selector: selector, Limit: workflowstate.WorkflowPageLimit, Target: target})
 		if err != nil {
 			return err
 		}

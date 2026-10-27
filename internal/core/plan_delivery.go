@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	modelcore "forge.adrianpk.com/chr/internal/core/model"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -39,7 +40,7 @@ func ScopePlanDeliveryOrder(slices []PlanOrderSlice, operation PlanPublicationOp
 
 // ObservePlanWorkflow reads the immutable planned input even after tickets have
 // been bound, so a retry uses the same materialization identity and contracts.
-func ObservePlanWorkflow(ctx context.Context, projectDir string, scope QuizScope) (GeneratedWorkflowPlan, error) {
+func ObservePlanWorkflow(ctx context.Context, projectDir string, scope quizcore.QuizScope) (GeneratedWorkflowPlan, error) {
 	binding, err := ObservePlanRevision(ctx, projectDir, scope)
 	if err != nil {
 		return GeneratedWorkflowPlan{}, err
@@ -120,7 +121,7 @@ func (r *fileAuthoringSessionRepository) plannedWorkflowInput(ctx context.Contex
 func quizModelPlanDeliveryResponse(request QuizModelRequest, output []byte) (QuizModelResponse, error) {
 	var contracts GeneratedWorkflowPlan
 
-	if len(output) > WorkflowFileLimit {
+	if len(output) > workflowstate.WorkflowFileLimit {
 		return QuizModelResponse{}, modelcore.ErrOutput
 	}
 

@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -89,12 +90,12 @@ func harnessGenerationOperationCapacity(path string) error {
 
 	defer func() { _ = file.Close() }() //nolint:errcheck // Read-only directory close.
 
-	entries, err := file.ReadDir(WorkflowRecordLimit + 1)
+	entries, err := file.ReadDir(workflowstate.WorkflowRecordLimit + 1)
 	if err != nil && !errors.Is(err, io.EOF) {
 		return err
 	}
 
-	if len(entries) >= WorkflowRecordLimit {
+	if len(entries) >= workflowstate.WorkflowRecordLimit {
 		return errors.New("generation operation capacity exhausted")
 	}
 

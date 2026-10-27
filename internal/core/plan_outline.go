@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // GeneratedPlanOutline describes a package boundary value.
 type GeneratedPlanOutline struct {
-	Scope              QuizScope
+	Scope              quizcore.QuizScope
 	Title              string
 	Status             string
 	Summary            string
@@ -62,7 +64,7 @@ func (o GeneratedPlanOutline) Slice(sliceID string) (GeneratedPlanOutlineSlice, 
 
 // ValidateGeneratedPlanOutline validates the corresponding package boundary value.
 func ValidateGeneratedPlanOutline(outline GeneratedPlanOutline) error {
-	if err := ValidateQuizScope(outline.Scope); err != nil {
+	if err := quizcore.ValidateQuizScope(outline.Scope); err != nil {
 		return err
 	}
 

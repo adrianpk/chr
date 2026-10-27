@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -23,7 +24,7 @@ type PlanSourceInput struct {
 // includes absent quiz state and the selected source inventory, so newly added
 // discovery invalidates an in-flight generation just like an edited document.
 type PlanSourceObservation struct {
-	Scope        QuizScope
+	Scope        quizcore.QuizScope
 	Project      ProjectMetadata
 	Quiz         QuizObservation
 	Inputs       []PlanSourceInput
@@ -33,8 +34,8 @@ type PlanSourceObservation struct {
 
 // ObservePlanSources checks two complete observations without acquiring a
 // mutation owner, allocating artifacts, rebuilding indexes or recovering writes.
-func ObservePlanSources(ctx context.Context, projectDir string, scope QuizScope) (PlanSourceObservation, error) {
-	if err := ValidateQuizScope(scope); err != nil {
+func ObservePlanSources(ctx context.Context, projectDir string, scope quizcore.QuizScope) (PlanSourceObservation, error) {
+	if err := quizcore.ValidateQuizScope(scope); err != nil {
 		return PlanSourceObservation{}, err
 	}
 
@@ -51,7 +52,7 @@ func ObservePlanSources(ctx context.Context, projectDir string, scope QuizScope)
 	return first, err
 }
 
-func observePlanSources(ctx context.Context, projectDir string, scope QuizScope) (PlanSourceObservation, error) {
+func observePlanSources(ctx context.Context, projectDir string, scope quizcore.QuizScope) (PlanSourceObservation, error) {
 	dumps, err := ObserveProjectDump(ctx, projectDir)
 	if err != nil {
 		return PlanSourceObservation{}, err
@@ -87,7 +88,7 @@ func observePlanSources(ctx context.Context, projectDir string, scope QuizScope)
 
 	encoded, err := json.Marshal(struct {
 		Root, Policy string
-		Scope        QuizScope
+		Scope        quizcore.QuizScope
 		Inputs       []PlanSourceInput
 	}{root, "chr-plan-sources/v1", scope, observed.Inputs})
 	if len(encoded) > 96*1024 {

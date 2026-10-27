@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // Readiness, outline and slice detail are one real plan operation. A switch
@@ -43,7 +44,7 @@ func generationBindingPlanCase(t *testing.T, fixture func(*testing.T, string) (s
 	provider.API = api
 	operations.conversationModel = provider
 
-	scope := core.QuizScope{CaseSlug: "blog"}
+	scope := quizcore.QuizScope{CaseSlug: "blog"}
 	if _, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{OperationID: "freeze", Scope: scope}); err != nil {
 		t.Fatal("later plan stages rebound after the switch", err)
 	}

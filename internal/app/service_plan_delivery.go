@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -49,7 +50,7 @@ func (s service) GeneratePlanDelivery(ctx context.Context, request PlanGenerateR
 	return result, nil
 }
 
-func (s service) validatePlanDeliveryScope(ctx context.Context, scope core.QuizScope) error {
+func (s service) validatePlanDeliveryScope(ctx context.Context, scope quizcore.QuizScope) error {
 	if scope.CaseSlug == "" {
 		return fmt.Errorf("select an existing use case with a saved spec")
 	}
@@ -130,7 +131,7 @@ func (s service) planDeliveryInput(ctx context.Context, request PlanGenerateRequ
 	return input, layout, nil
 }
 
-func (s service) checkDeliveryTarget(ctx context.Context, scope core.QuizScope, expected string) error {
+func (s service) checkDeliveryTarget(ctx context.Context, scope quizcore.QuizScope, expected string) error {
 	current, err := core.PlanTargetRevision(ctx, s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return err

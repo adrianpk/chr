@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -16,7 +17,7 @@ import (
 func (p webViewProvider) casePlanningView(ctx context.Context, slug, title string) *webui.CasePlanView {
 	view := &webui.CasePlanView{OperationID: rand.Text(), CaseSlug: slug, CaseTitle: title, Action: webActionPlanGenerate, Label: "Generate Plan", DumpURL: "/dumps"}
 	operations := p.service(ctx)
-	scope := operations.quizScope(core.QuizScope{CaseSlug: slug})
+	scope := operations.quizScope(quizcore.QuizScope{CaseSlug: slug})
 
 	quiz, err := operations.quizRepository().Paths(scope)
 	if err != nil {
@@ -49,7 +50,7 @@ func (p webViewProvider) casePlanningView(ctx context.Context, slug, title strin
 	return view
 }
 
-func (p webViewProvider) observeCasePlan(ctx context.Context, operations service, scope core.QuizScope, view *webui.CasePlanView) error {
+func (p webViewProvider) observeCasePlan(ctx context.Context, operations service, scope quizcore.QuizScope, view *webui.CasePlanView) error {
 	revision, err := core.PlanTargetRevision(ctx, p.projectContext.ProjectDir, scope)
 	if err != nil {
 		return err
@@ -69,7 +70,7 @@ func (p webViewProvider) observeCasePlan(ctx context.Context, operations service
 	return nil
 }
 
-func webCasePlanScope(ctx context.Context, operations service, request webui.WriteActionRequest) (core.QuizScope, error) {
+func webCasePlanScope(ctx context.Context, operations service, request webui.WriteActionRequest) (quizcore.QuizScope, error) {
 	scope := webActionScope(request)
 	if request.Surface != "case-plan" || request.Family != "cases" || scope.CaseSlug == "" || request.ID != scope.CaseSlug || request.Revision == "" {
 		return scope, errors.New("open an existing named use case to generate its plan")
@@ -121,7 +122,7 @@ func planCatalog(operations service) (webui.ArtifactCatalogView, error) {
 }
 
 func planGenerationChoices(operations service) ([]webui.PlanGenerationChoice, error) {
-	cases, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, core.WorkflowRecordLimit)
+	cases, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, workflowstate.WorkflowRecordLimit)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +144,7 @@ func planGenerationChoices(operations service) ([]webui.PlanGenerationChoice, er
 			continue
 		}
 
-		revision, err := core.PlanTargetRevision(operations.ctx, operations.projectContext.ProjectDir, operations.quizScope(core.QuizScope{CaseSlug: item.Slug}))
+		revision, err := core.PlanTargetRevision(operations.ctx, operations.projectContext.ProjectDir, operations.quizScope(quizcore.QuizScope{CaseSlug: item.Slug}))
 		if err != nil {
 			return nil, err
 		}

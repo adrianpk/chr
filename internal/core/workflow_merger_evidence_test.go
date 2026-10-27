@@ -42,7 +42,7 @@ func mutateNativeMergerEvidence(t *testing.T, mode, path string, store *Workflow
 	case "corrupt", "oversized":
 		data := []byte("Changed target requirements")
 		if mode == "oversized" {
-			data = []byte(strings.Repeat("x", WorkflowFileLimit+1))
+			data = []byte(strings.Repeat("x", workflowstate.WorkflowFileLimit+1))
 		}
 
 		if err := os.WriteFile(path, data, 0o600); err != nil {

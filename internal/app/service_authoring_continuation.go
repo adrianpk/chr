@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	modelcore "forge.adrianpk.com/chr/internal/core/model"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -200,14 +201,14 @@ func renderAuthoringGeneration(snapshot core.AuthoringSnapshot, request core.Aut
 
 		return renderCuratedDumpMarkdown(snapshot.Session.Topic, DumpScope{}, raw.Path, DumpCurationResult{PolishedBody: body}), nil
 	case core.AuthoringArtifactKindSpec:
-		spec := core.GeneratedSpec{Scope: core.QuizScope{ProjectID: request.ProjectID}, Title: snapshot.Session.Topic, Body: core.NormalizeGeneratedSpecChrPathReferences(body), SourcePaths: paths, SourceRequestID: request.Binding.RequestID, SourceResponseID: request.Binding.RequestID + "-response", CreatedAt: time.Now().UTC()}
+		spec := core.GeneratedSpec{Scope: quizcore.QuizScope{ProjectID: request.ProjectID}, Title: snapshot.Session.Topic, Body: core.NormalizeGeneratedSpecChrPathReferences(body), SourcePaths: paths, SourceRequestID: request.Binding.RequestID, SourceResponseID: request.Binding.RequestID + "-response", CreatedAt: time.Now().UTC()}
 		if err := core.ValidateGeneratedSpec(spec); err != nil {
 			return "", err
 		}
 
 		return core.RenderGeneratedSpec(spec), nil
 	case core.AuthoringArtifactKindPlan:
-		plan := core.GeneratedPlan{Scope: core.QuizScope{ProjectID: request.ProjectID}, Title: snapshot.Session.Topic, Body: body, SourcePaths: paths, SourceRequestID: request.Binding.RequestID, SourceResponseID: request.Binding.RequestID + "-response", CreatedAt: time.Now().UTC()}
+		plan := core.GeneratedPlan{Scope: quizcore.QuizScope{ProjectID: request.ProjectID}, Title: snapshot.Session.Topic, Body: body, SourcePaths: paths, SourceRequestID: request.Binding.RequestID, SourceResponseID: request.Binding.RequestID + "-response", CreatedAt: time.Now().UTC()}
 		if err := core.ValidateGeneratedPlan(plan); err != nil {
 			return "", err
 		}

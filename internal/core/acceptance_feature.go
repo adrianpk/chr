@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 const (
@@ -44,7 +46,7 @@ type AcceptanceFeaturePrompt struct {
 
 // AcceptanceFeatureArtifact describes a generated Gherkin feature artifact.
 type AcceptanceFeatureArtifact struct {
-	Scope            QuizScope
+	Scope            quizcore.QuizScope
 	SpecSlug         string
 	SpecPath         string
 	UseCaseSlug      string
@@ -63,7 +65,7 @@ type AcceptanceFeaturePaths struct {
 
 // AcceptanceFeatureRoundNotes describes persisted feature-round clarification notes.
 type AcceptanceFeatureRoundNotes struct {
-	Scope            QuizScope
+	Scope            quizcore.QuizScope
 	Status           string
 	RejectionReason  string
 	Prompts          []AcceptanceFeaturePrompt
@@ -182,8 +184,8 @@ func normalizeAcceptanceFeaturePrompts(prompts []AcceptanceFeaturePrompt) []Acce
 }
 
 // AcceptanceFeatureLayout executes the corresponding package operation.
-func AcceptanceFeatureLayout(projectDir string, scope QuizScope) (AcceptanceFeaturePaths, error) {
-	err := ValidateQuizScope(scope)
+func AcceptanceFeatureLayout(projectDir string, scope quizcore.QuizScope) (AcceptanceFeaturePaths, error) {
+	err := quizcore.ValidateQuizScope(scope)
 	if err != nil {
 		return AcceptanceFeaturePaths{}, err
 	}
@@ -206,8 +208,8 @@ func AcceptanceFeatureLayout(projectDir string, scope QuizScope) (AcceptanceFeat
 }
 
 // AcceptanceFeatureRoundLayout executes the corresponding package operation.
-func AcceptanceFeatureRoundLayout(projectDir string, scope QuizScope) (AcceptanceFeatureRoundPaths, error) {
-	err := ValidateQuizScope(scope)
+func AcceptanceFeatureRoundLayout(projectDir string, scope quizcore.QuizScope) (AcceptanceFeatureRoundPaths, error) {
+	err := quizcore.ValidateQuizScope(scope)
 	if err != nil {
 		return AcceptanceFeatureRoundPaths{}, err
 	}
@@ -415,7 +417,7 @@ func acceptanceFeatureRoundAnswers(content string) map[string]string {
 
 // ValidateAcceptanceFeatureArtifact validates the corresponding package boundary value.
 func ValidateAcceptanceFeatureArtifact(feature AcceptanceFeatureArtifact) error {
-	err := ValidateQuizScope(feature.Scope)
+	err := quizcore.ValidateQuizScope(feature.Scope)
 	if err != nil {
 		return err
 	}
@@ -441,7 +443,7 @@ func ValidateAcceptanceFeatureArtifact(feature AcceptanceFeatureArtifact) error 
 
 // ValidateAcceptanceFeatureRoundNotes validates the corresponding package boundary value.
 func ValidateAcceptanceFeatureRoundNotes(notes AcceptanceFeatureRoundNotes) error {
-	err := ValidateQuizScope(notes.Scope)
+	err := quizcore.ValidateQuizScope(notes.Scope)
 	if err != nil {
 		return err
 	}

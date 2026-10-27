@@ -133,7 +133,7 @@ func workflowAttemptOwnsCandidate(run workflowInvocationFile, attempt WorkflowAt
 
 func (s *WorkflowStore) commitWorkflowTicketCandidate(run *workflowInvocationFile, candidate WorkflowSliceCandidate) error {
 	data, err := json.MarshalIndent(candidate, "", "  ")
-	if err != nil || len(data) >= WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
 		return fmt.Errorf("ticket candidate exceeds file bounds: %w", errorsOrConflict(err))
 	}
 

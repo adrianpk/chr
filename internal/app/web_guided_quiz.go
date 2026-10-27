@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -14,7 +15,7 @@ func projectGuidedWebQuiz(view *webui.GuidedUseCaseView, observed GuidedUseCaseI
 		return
 	}
 
-	quiz := QuizView{Scope: core.QuizScope{ProjectID: observed.Session.ProjectID, Namespace: observed.Namespace, CaseSlug: observed.Session.Guided.CaseSlug}, Mode: core.QuizModeDeep}
+	quiz := QuizView{Scope: quizcore.QuizScope{ProjectID: observed.Session.ProjectID, Namespace: observed.Namespace, CaseSlug: observed.Session.Guided.CaseSlug}, Mode: quizcore.QuizModeDeep}
 	view.Quiz = webQuizAnswerView(quiz, *observed.Quiz)
 	view.Quiz.DraftContext = observed.Namespace + ":" + observed.Session.ID
 

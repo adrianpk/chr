@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strings"
 
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -119,7 +120,7 @@ func guidedPublicationPlan(session AuthoringSession) (GeneratedPlan, error) {
 
 // GuidedMaterializationBinding retains owner identities without copying native task state.
 func GuidedMaterializationBinding(result WorkflowMaterializationResult, input GeneratedWorkflowPlan) (GuidedMaterializationReference, error) {
-	if result.Set.Set == nil || result.Set.Set.PlanRevision == nil || result.Set.Set.UseCase != input.UseCase || len(result.Tasks) == 0 || len(result.Tasks) > WorkflowPageLimit {
+	if result.Set.Set == nil || result.Set.Set.PlanRevision == nil || result.Set.Set.UseCase != input.UseCase || len(result.Tasks) == 0 || len(result.Tasks) > workflowstate.WorkflowPageLimit {
 		return GuidedMaterializationReference{}, workflowstate.ErrConflict
 	}
 
@@ -254,7 +255,7 @@ func guardGuidedPlanScope(session AuthoringSession) error {
 	operation := state.Work.PublicationOperation
 	prepared := state.PendingOperation.PreparedPlan
 
-	scope := QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: state.CaseSlug}
+	scope := quizcore.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: state.CaseSlug}
 	if prepared.Plan.Scope != scope || operation.Scope != scope || operation.ExpectedRevision != prepared.TargetRevision || operation.Replace || !operation.TicketDelivery {
 		return workflowstate.ErrConflict
 	}
@@ -288,7 +289,7 @@ func ValidateGuidedPlannedOrder(order []PlanOrderSlice) error {
 		total += len(slice.Tasks)
 	}
 
-	if total > WorkflowPageLimit {
+	if total > workflowstate.WorkflowPageLimit {
 		return errors.New("guided work requires at most 128 tasks")
 	}
 

@@ -3,11 +3,13 @@ package core
 import (
 	"fmt"
 	"sort"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Validate checks shared hierarchy and uniqueness independently of SQLite.
 func (s WorkflowSnapshot) Validate() error {
-	if len(s.Records) > WorkflowRecordLimit {
+	if len(s.Records) > workflowstate.WorkflowRecordLimit {
 		return fmt.Errorf("workflow namespace record limit exceeded")
 	}
 

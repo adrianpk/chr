@@ -106,7 +106,7 @@ func (s *WorkflowStore) appendWorkflowOrderTask(snapshot *WorkflowSnapshot, path
 		return workflowstate.ErrConflict
 	}
 
-	if len(snapshot.Records) >= WorkflowRecordLimit {
+	if len(snapshot.Records) >= workflowstate.WorkflowRecordLimit {
 		return fmt.Errorf("workflow order source bound exceeded")
 	}
 

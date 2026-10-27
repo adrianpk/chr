@@ -57,7 +57,7 @@ func (s *WorkflowStore) projectWorkflowNativeReceipt(run *workflowInvocationFile
 	}
 
 	data, err := json.MarshalIndent(proof, "", "  ")
-	if err != nil || len(data) >= WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
 		return nil, errorsOrConflict(err)
 	}
 

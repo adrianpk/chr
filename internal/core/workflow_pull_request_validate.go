@@ -90,7 +90,7 @@ func validateWorkflowPullRequestObservationRef(id string, binding WorkflowPullRe
 	legacy := workflowPullRequestObservationPath(id, binding.ObservationCount)
 
 	scoped := workflowUnitPullRequestObservationPath(id, binding.ID, binding.ObservationCount)
-	if binding.ObservationCount < 1 || binding.ObservationCount > WorkflowPageLimit || !slices.Contains([]string{legacy, scoped}, binding.ObservationRef) || len(binding.ObservationHash) != 64 {
+	if binding.ObservationCount < 1 || binding.ObservationCount > workflowstate.WorkflowPageLimit || !slices.Contains([]string{legacy, scoped}, binding.ObservationRef) || len(binding.ObservationHash) != 64 {
 		return workflowstate.ErrConflict
 	}
 

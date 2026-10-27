@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowUpgradeCLI exercises the actual root command, policy observation,
@@ -67,7 +68,7 @@ func TestWorkflowUpgradeCLIRejects(t *testing.T) {
 		{"unknown field", `{"unknown":true}`},
 		{"multiple objects", "{} {}"},
 		{"null", "null"},
-		{"oversize", strings.Repeat(" ", core.WorkflowFileLimit+1)},
+		{"oversize", strings.Repeat(" ", workflowstate.WorkflowFileLimit+1)},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

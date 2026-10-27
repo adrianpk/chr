@@ -136,7 +136,7 @@ func (s *WorkflowStore) readMaterializationReceipt(set WorkflowRecord, plan Gene
 }
 
 func (s *WorkflowStore) readMaterializationBindings(set WorkflowRecord, receipt workflowMaterializationReceipt) ([]WorkflowRecord, error) {
-	if len(receipt.Tasks) == 0 || len(receipt.Tasks) > WorkflowRecordLimit {
+	if len(receipt.Tasks) == 0 || len(receipt.Tasks) > workflowstate.WorkflowRecordLimit {
 		return nil, fmt.Errorf("invalid materialization receipt task bound")
 	}
 

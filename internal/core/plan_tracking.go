@@ -8,13 +8,15 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // GeneratedPlanTracking describes a package boundary value.
 type GeneratedPlanTracking struct {
 	Workflow *GeneratedWorkflowPlan
 
-	Scope       QuizScope
+	Scope       quizcore.QuizScope
 	PlanPath    string
 	Title       string
 	Body        string
@@ -47,8 +49,8 @@ type GeneratedPlanTrackingPaths struct {
 }
 
 // GeneratedPlanTrackingLayout executes the corresponding package operation.
-func GeneratedPlanTrackingLayout(projectDir string, scope QuizScope) (GeneratedPlanTrackingPaths, error) {
-	err := ValidateQuizScope(scope)
+func GeneratedPlanTrackingLayout(projectDir string, scope quizcore.QuizScope) (GeneratedPlanTrackingPaths, error) {
+	err := quizcore.ValidateQuizScope(scope)
 	if err != nil {
 		return GeneratedPlanTrackingPaths{}, err
 	}
@@ -173,7 +175,7 @@ func ValidateGeneratedPlanTracking(tracking GeneratedPlanTracking) error {
 		return fmt.Errorf("plan tracking plan path is required")
 	}
 
-	err := ValidateQuizScope(tracking.Scope)
+	err := quizcore.ValidateQuizScope(tracking.Scope)
 	if err != nil {
 		return err
 	}

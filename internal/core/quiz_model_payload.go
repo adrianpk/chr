@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 const (
@@ -224,7 +226,7 @@ type QuizModelPromptIntentPayload struct {
 }
 
 // NewQuizModelOutputContract constructs the corresponding package service or value.
-func NewQuizModelOutputContract(action QuizModelAction, mode QuizMode) QuizModelOutputContractPayload {
+func NewQuizModelOutputContract(action QuizModelAction, mode quizcore.QuizMode) QuizModelOutputContractPayload {
 	if action == QuizModelActionGeneratePlanSliceDetail {
 		return QuizModelOutputContractPayload{
 			RequiredFields:    quizModelPlanSliceDetailRequiredFields(),
@@ -264,7 +266,7 @@ func NewQuizModelOutputContract(action QuizModelAction, mode QuizMode) QuizModel
 		}
 	}
 
-	if mode == QuizModeFast {
+	if mode == quizcore.QuizModeFast {
 		return QuizModelOutputContractPayload{
 			RequiredFields:    []string{"questions"},
 			RenderedTextField: "questions",
@@ -595,7 +597,7 @@ func ValidateQuizModelPlanPayload(payload QuizModelPlanPayload) (QuizModelPlanPa
 // ValidateQuizModelPlanOutlinePayload validates the corresponding package boundary value.
 func ValidateQuizModelPlanOutlinePayload(payload QuizModelPlanOutlinePayload) (QuizModelPlanOutlinePayload, error) {
 	normalized := normalizeQuizModelPlanOutlinePayload(payload)
-	outline := generatedPlanOutlineFromPayload(QuizScope{ProjectID: "payload-validation"}, normalized)
+	outline := generatedPlanOutlineFromPayload(quizcore.QuizScope{ProjectID: "payload-validation"}, normalized)
 
 	if err := ValidateGeneratedPlanOutline(outline); err != nil {
 		return QuizModelPlanOutlinePayload{}, err
@@ -659,7 +661,7 @@ func normalizeQuizModelPlanOutlineDependencyPayload(
 }
 
 func generatedPlanOutlineFromPayload(
-	scope QuizScope,
+	scope quizcore.QuizScope,
 	payload QuizModelPlanOutlinePayload,
 ) GeneratedPlanOutline {
 	outline := GeneratedPlanOutline{
@@ -691,7 +693,7 @@ func ValidateQuizModelPlanSliceDetailPayload(
 	payload QuizModelPlanSliceDetailPayload,
 ) (QuizModelPlanSliceDetailPayload, error) {
 	normalized := normalizeQuizModelPlanSliceDetailPayload(payload)
-	detail := generatedPlanSliceDetailFromPayload(QuizScope{ProjectID: "payload-validation"}, normalized)
+	detail := generatedPlanSliceDetailFromPayload(quizcore.QuizScope{ProjectID: "payload-validation"}, normalized)
 
 	if err := ValidateGeneratedPlanSliceDetailContent(detail); err != nil {
 		return QuizModelPlanSliceDetailPayload{}, err
@@ -757,7 +759,7 @@ func normalizeQuizModelPlanSliceBranchMetadataPayload(
 }
 
 func generatedPlanSliceDetailFromPayload(
-	scope QuizScope,
+	scope quizcore.QuizScope,
 	payload QuizModelPlanSliceDetailPayload,
 ) GeneratedPlanSliceDetail {
 	detail := GeneratedPlanSliceDetail{
@@ -1163,7 +1165,7 @@ func validateQuizModelQuestionValues(payload QuizModelQuestionPayload) error {
 }
 
 func normalizeQuizModelFollowUpDepth(depth int) int {
-	maxFollowUpDepth := MaxQuizFollowUpDepth
+	maxFollowUpDepth := quizcore.MaxQuizFollowUpDepth
 	if depth > maxFollowUpDepth {
 		return maxFollowUpDepth
 	}

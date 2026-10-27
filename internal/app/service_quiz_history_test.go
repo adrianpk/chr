@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // Case discovery inherits project decisions while retaining its own pending
@@ -23,9 +24,9 @@ func TestServiceQuizInheritedHistory(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	entries := []core.QuizEntry{{Question: "Case constraint?", Answer: "CASE_DECISION", Status: core.QuizEntryStatusAnswered}}
+	entries := []quizcore.QuizEntry{{Question: "Case constraint?", Answer: "CASE_DECISION", Status: quizcore.QuizEntryStatusAnswered}}
 
-	section, err := operations.quizHistoryContext(operations.quizScope(core.QuizScope{CaseSlug: "blog"}), entries)
+	section, err := operations.quizHistoryContext(operations.quizScope(quizcore.QuizScope{CaseSlug: "blog"}), entries)
 	if err != nil || !strings.Contains(section.Content, "GENERAL_DECISION") || !strings.Contains(section.Content, "CASE_DECISION") {
 		t.Fatal("case discovery lost prior decisions", section, err)
 	}
@@ -37,12 +38,12 @@ func TestServiceQuizHistoryBounds(t *testing.T) {
 	operations, _ := newRetainedQuizFixture(t)
 	for _, name := range []string{"entries", "bytes"} {
 		t.Run(name, func(t *testing.T) {
-			entries := []core.QuizEntry{{Question: "Retained decision?", Answer: strings.Repeat("x", quizHistoryByteLimit), Status: core.QuizEntryStatusAnswered}}
+			entries := []quizcore.QuizEntry{{Question: "Retained decision?", Answer: strings.Repeat("x", quizHistoryByteLimit), Status: quizcore.QuizEntryStatusAnswered}}
 			if name == "entries" {
-				entries = make([]core.QuizEntry, quizHistoryEntryLimit+1)
+				entries = make([]quizcore.QuizEntry, quizHistoryEntryLimit+1)
 			}
 
-			_, err := operations.quizHistoryContext(operations.quizScope(core.QuizScope{}), entries)
+			_, err := operations.quizHistoryContext(operations.quizScope(quizcore.QuizScope{}), entries)
 			if err == nil || !strings.Contains(err.Error(), "quiz discovery history exceeds") {
 				t.Fatal("oversized history was truncated or accepted", err)
 			}

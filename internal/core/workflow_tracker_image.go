@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) workflowTrackerImage(snapshot WorkflowSnapshot, setID string) (WorkflowTrackerStatus, []byte, error) {
@@ -35,7 +36,7 @@ func (s *WorkflowStore) workflowTrackerImage(snapshot WorkflowSnapshot, setID st
 	result.SourceHash = contenthash.Sum(data)
 
 	output := renderWorkflowTracker(result, set, tasks)
-	if len(output) > WorkflowFileLimit {
+	if len(output) > workflowstate.WorkflowFileLimit {
 		return result, nil, fmt.Errorf("tracker output exceeds 1 MiB")
 	}
 

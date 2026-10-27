@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // Real Quiz, plan and conversational parsers reject selected Pi output without fallback.
@@ -20,11 +21,11 @@ func TestPiGenerationInvalidCallers(t *testing.T) {
 
 			switch family {
 			case "quiz":
-				_, err = operations.StartQuiz(QuizStartRequest{Mode: core.QuizModeDeep})
+				_, err = operations.StartQuiz(QuizStartRequest{Mode: quizcore.QuizModeDeep})
 			case "plan":
 				harnessSelectionWrite(t, filepath.Join(driver, "plan-readiness"), "enabled")
 
-				_, err = operations.GeneratePlan(t.Context(), PlanGenerateRequest{OperationID: "invalid-plan", Scope: core.QuizScope{CaseSlug: "blog"}})
+				_, err = operations.GeneratePlan(t.Context(), PlanGenerateRequest{OperationID: "invalid-plan", Scope: quizcore.QuizScope{CaseSlug: "blog"}})
 			case "conversation":
 				bound, ctx, bindErr := operations.bindGeneration(t.Context(), "invalid-conversation", "conversation")
 				if bindErr != nil {
@@ -73,7 +74,7 @@ func TestPiGenerationTrackingInvalid(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{OperationID: "invalid-tracking", Scope: core.QuizScope{CaseSlug: "blog"}}); err == nil {
+	if _, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{OperationID: "invalid-tracking", Scope: quizcore.QuizScope{CaseSlug: "blog"}}); err == nil {
 		t.Fatal("invalid Pi tracking accepted")
 	}
 

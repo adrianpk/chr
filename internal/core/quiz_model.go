@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // QuizModelAction defines a package boundary type.
@@ -44,9 +46,9 @@ type QuizModelRequest struct {
 	ID              string
 	Action          QuizModelAction
 	Strategy        string
-	Scope           QuizScope
-	Mode            QuizMode
-	RuntimeState    QuizRuntimeState
+	Scope           quizcore.QuizScope
+	Mode            quizcore.QuizMode
+	RuntimeState    quizcore.QuizRuntimeState
 	Payload         QuizModelPayload
 	ContextSections []QuizModelContextSection
 	OutputContract  QuizModelOutputContract
@@ -73,8 +75,8 @@ type QuizModelResponse struct {
 	RequestID    string
 	Provider     string
 	Status       QuizModelResponseStatus
-	Question     QuizQuestion
-	Candidates   []QuizCandidate
+	Question     quizcore.QuizQuestion
+	Candidates   []quizcore.QuizCandidate
 	DraftSpec    QuizDraftSpec
 	Feature      AcceptanceFeatureGeneration
 	Plan         GeneratedPlan
@@ -136,12 +138,12 @@ func ValidateQuizModelRequest(request QuizModelRequest) error {
 		return fmt.Errorf("quiz model request mode is invalid: %s", request.Mode)
 	}
 
-	err := ValidateQuizScope(request.Scope)
+	err := quizcore.ValidateQuizScope(request.Scope)
 	if err != nil {
 		return err
 	}
 
-	err = ValidateQuizRuntimeState(request.RuntimeState)
+	err = quizcore.ValidateQuizRuntimeState(request.RuntimeState)
 	if err != nil {
 		return err
 	}
@@ -196,7 +198,7 @@ func ValidateQuizModelResponse(response QuizModelResponse) error {
 	}
 
 	for index, candidate := range response.Candidates {
-		err := ValidateQuizCandidate(candidate)
+		err := quizcore.ValidateQuizCandidate(candidate)
 		if err != nil {
 			return fmt.Errorf("quiz model response candidate %d: %w", index+1, err)
 		}
@@ -253,7 +255,7 @@ func validateQuizModelReadyResponse(response QuizModelResponse) error {
 		return ValidateGeneratedPlanTrackingModelContent(response.PlanTracking)
 	}
 
-	return ValidateQuizQuestion(response.Question)
+	return quizcore.ValidateQuizQuestion(response.Question)
 }
 
 // Valid reports whether the value is one of the supported constants.

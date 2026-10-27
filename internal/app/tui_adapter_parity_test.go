@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -140,7 +141,7 @@ func TestTUIQuizAdapterDispatchesRuntimeQuizActions(t *testing.T) {
 	modeResult, err := executor.ExecuteQuizAction(tui.QuizActionRequest{
 		Action: tui.QuizActionFastMode,
 		Scope:  tui.QuizScope{CaseSlug: "blog"},
-		Mode:   string(core.QuizModeFast),
+		Mode:   string(quizcore.QuizModeFast),
 	})
 	if err != nil {
 		t.Fatalf("ExecuteQuizAction mode returned error: %v", err)

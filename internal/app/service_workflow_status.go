@@ -115,7 +115,7 @@ type WorkflowWorkPage struct {
 
 // WorkflowStatus is read-only, including when a transition needs reconciliation.
 func (s service) WorkflowStatus(ctx context.Context, id string, request WorkflowStatusRequest) (WorkflowWorkStatus, error) {
-	if request.Offset < 0 || request.Offset > core.WorkflowRecordLimit || request.Limit < 1 || request.Limit > core.WorkflowPageLimit {
+	if request.Offset < 0 || request.Offset > workflowstate.WorkflowRecordLimit || request.Limit < 1 || request.Limit > workflowstate.WorkflowPageLimit {
 		return WorkflowWorkStatus{}, fmt.Errorf("workflow status page bounds exceeded")
 	}
 
@@ -158,7 +158,7 @@ func workflowWorkStatus(inspection core.WorkflowInspection, request WorkflowStat
 
 	workflowWorkMembers(&result, inspection, request)
 
-	for _, attempt := range run.Attempts[max(0, len(run.Attempts)-core.WorkflowPageLimit):] {
+	for _, attempt := range run.Attempts[max(0, len(run.Attempts)-workflowstate.WorkflowPageLimit):] {
 		purpose := attempt.Purpose
 		if purpose == "" {
 			purpose = "task"

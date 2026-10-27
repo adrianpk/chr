@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -144,17 +145,17 @@ func (s service) guidedSpecModelRequest(session core.AuthoringSession) (core.Qui
 	digest, err := core.GuidedCheckpointDigest(checkpoint)
 	request := core.QuizModelRequest{
 		ID: core.HarnessGenerationRequestID(s.ctx, "guided-"+session.ID+"-spec"), Action: core.QuizModelActionGenerateSpec, Strategy: "guided_committed_inputs",
-		Scope: core.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}, Mode: core.QuizModeDeep,
+		Scope: quizcore.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}, Mode: quizcore.QuizModeDeep,
 		RuntimeState: state, Payload: payload, ContextSections: append(coreSections, sections...), OutputContract: core.QuizModelOutputContract{RequiredFields: payload.OutputContract.RequiredFields}, CreatedAt: s.utcNow(),
 	}
 
 	return request, digest, err
 }
 
-func (s service) guidedSpecInputs(session core.AuthoringSession) ([]core.QuizModelContextSection, core.QuizRuntimeState, []core.QuizEntry, core.GuidedStageCheckpoint, error) {
+func (s service) guidedSpecInputs(session core.AuthoringSession) ([]core.QuizModelContextSection, quizcore.QuizRuntimeState, []quizcore.QuizEntry, core.GuidedStageCheckpoint, error) {
 	var (
-		state   core.QuizRuntimeState
-		entries []core.QuizEntry
+		state   quizcore.QuizRuntimeState
+		entries []quizcore.QuizEntry
 		quiz    core.GuidedStageCheckpoint
 	)
 
@@ -175,7 +176,7 @@ func (s service) guidedSpecInputs(session core.AuthoringSession) ([]core.QuizMod
 
 	for _, section := range clarified {
 		if section.Name == state.RawPath {
-			entries, err = core.ParseQuizRawCaptureEntries(section.Content)
+			entries, err = quizcore.ParseQuizRawCaptureEntries(section.Content)
 		}
 	}
 
@@ -190,8 +191,8 @@ func (s service) guidedSpecInputs(session core.AuthoringSession) ([]core.QuizMod
 	return append(sections, clarified...), state, entries, quiz, nil
 }
 
-func (s service) guidedCommittedQuiz(session core.AuthoringSession) (core.QuizRuntimeState, core.GuidedStageCheckpoint, error) {
-	var state core.QuizRuntimeState
+func (s service) guidedCommittedQuiz(session core.AuthoringSession) (quizcore.QuizRuntimeState, core.GuidedStageCheckpoint, error) {
+	var state quizcore.QuizRuntimeState
 
 	for _, checkpoint := range session.Guided.Checkpoints {
 		if checkpoint.Stage != "quiz" {

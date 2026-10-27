@@ -128,7 +128,7 @@ func validWorkflowIntegrationAttribution(entry WorkflowIntegrationAttribution) b
 }
 
 func validWorkflowAttributionObjects(entry WorkflowIntegrationAttribution) bool {
-	if !workflowCommitID(entry.Commit) || !workflowCommitID(entry.Tree) || len(entry.Commit) != len(entry.Tree) || len(entry.Parents) > WorkflowRecordLimit || !validWorkflowNativeFingerprint(entry.MessageHash) {
+	if !workflowCommitID(entry.Commit) || !workflowCommitID(entry.Tree) || len(entry.Commit) != len(entry.Tree) || len(entry.Parents) > workflowstate.WorkflowRecordLimit || !validWorkflowNativeFingerprint(entry.MessageHash) {
 		return false
 	}
 
@@ -142,10 +142,10 @@ func validWorkflowAttributionObjects(entry WorkflowIntegrationAttribution) bool 
 }
 
 func (reader workflowIntegrationReader) sourceAttributions(ctx context.Context, proof WorkflowIntegrationProof) ([]WorkflowIntegrationAttribution, error) {
-	line, err := reader.output(ctx, "rev-list", "--reverse", "--topo-order", "--max-count="+strconv.Itoa(WorkflowRecordLimit+1), proof.OriginCommit+".."+proof.SourceCommit)
+	line, err := reader.output(ctx, "rev-list", "--reverse", "--topo-order", "--max-count="+strconv.Itoa(workflowstate.WorkflowRecordLimit+1), proof.OriginCommit+".."+proof.SourceCommit)
 
 	commits := strings.Fields(line)
-	if err != nil || len(commits) == 0 || len(commits) > WorkflowRecordLimit {
+	if err != nil || len(commits) == 0 || len(commits) > workflowstate.WorkflowRecordLimit {
 		return nil, fmt.Errorf("integration source manifest is empty or exceeds commit bounds")
 	}
 
@@ -159,7 +159,7 @@ func (reader workflowIntegrationReader) sourceAttributions(ctx context.Context, 
 		}
 
 		data, err := json.Marshal(entry)
-		if err != nil || len(data) >= WorkflowFileLimit-size {
+		if err != nil || len(data) >= workflowstate.WorkflowFileLimit-size {
 			return nil, fmt.Errorf("integration source attribution exceeds file bounds")
 		}
 

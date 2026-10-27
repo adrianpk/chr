@@ -26,7 +26,7 @@ func (s *WorkflowStore) workflowClosingRead(relative string) ([]byte, error) {
 
 func (s *WorkflowStore) workflowClosingEvidenceHashes(hashes map[string]string, refs []string) error {
 	for _, ref := range refs {
-		if len(hashes) >= WorkflowRecordLimit {
+		if len(hashes) >= workflowstate.WorkflowRecordLimit {
 			return fmt.Errorf("closing evidence observation bound exceeded")
 		}
 

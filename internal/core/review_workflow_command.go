@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os/exec"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowProviderCommandRunner struct{}
@@ -18,7 +20,7 @@ type workflowProviderOutput struct {
 func (output *workflowProviderOutput) Write(data []byte) (int, error) {
 	length := len(data)
 
-	remaining := WorkflowFileLimit - output.buffer.Len()
+	remaining := workflowstate.WorkflowFileLimit - output.buffer.Len()
 	if length > remaining {
 		data, output.overflow = data[:remaining], true
 	}

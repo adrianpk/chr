@@ -7,6 +7,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Native workflow actions select extents or operate on displayed authorization.
@@ -114,7 +115,7 @@ func (m *Model) planNativeWorkExtent(request *WorkActionRequest, extent string) 
 	native := request.Workflow
 	native.Preview = true
 
-	native.Selection = core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: extent}, Limit: core.WorkflowPageLimit}
+	native.Selection = core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: extent}, Limit: workflowstate.WorkflowPageLimit}
 	if extent == "loose" {
 		native.Selection.Statuses = []string{core.TicketStatusReadyForDev}
 

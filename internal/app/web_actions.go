@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -476,17 +477,17 @@ func fieldPointer(fields map[string]string, name string) *string {
 	return &value
 }
 
-func webActionScope(request webui.WriteActionRequest) core.QuizScope {
-	return core.QuizScope{CaseSlug: strings.TrimSpace(request.Fields["case_slug"])}
+func webActionScope(request webui.WriteActionRequest) quizcore.QuizScope {
+	return quizcore.QuizScope{CaseSlug: strings.TrimSpace(request.Fields["case_slug"])}
 }
 
-func webQuizMode(value string) core.QuizMode {
-	mode := core.QuizMode(strings.TrimSpace(value))
+func webQuizMode(value string) quizcore.QuizMode {
+	mode := quizcore.QuizMode(strings.TrimSpace(value))
 	if mode.Valid() {
 		return mode
 	}
 
-	return core.QuizModeDeep
+	return quizcore.QuizModeDeep
 }
 
 func webOperation(kind, status, id, detail string) webui.OperationStateView {
@@ -498,7 +499,7 @@ func webOperation(kind, status, id, detail string) webui.OperationStateView {
 	}
 }
 
-func quizOperationID(state core.QuizRuntimeState) string {
+func quizOperationID(state quizcore.QuizRuntimeState) string {
 	return firstNonEmptyString(state.CuratedPath, state.RawPath, state.CaseSlug, state.ProjectID)
 }
 

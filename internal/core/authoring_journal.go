@@ -205,7 +205,7 @@ func (r *fileAuthoringSessionRepository) replayAuthoringJournal(journal authorin
 func (r *fileAuthoringSessionRepository) checkAuthoringJournalImages(journal authoringMutationJournal) error {
 	seen := map[string]bool{}
 	for _, change := range journal.Changes {
-		if seen[change.Path] || len(change.After) > WorkflowFileLimit || !validAuthoringJournalVersionPath(journal.Schema, change.Path) {
+		if seen[change.Path] || len(change.After) > workflowstate.WorkflowFileLimit || !validAuthoringJournalVersionPath(journal.Schema, change.Path) {
 			return errors.New("invalid authoring journal target")
 		}
 

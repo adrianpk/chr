@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // Done asks the same clarification owner whether the saved answers suffice.
@@ -17,7 +18,7 @@ func (s service) prepareGuidedQuizDone(observed core.QuizObservation) (core.Quiz
 	}
 
 	check := state
-	check.Mode = core.QuizModeDeep
+	check.Mode = quizcore.QuizModeDeep
 
 	request, err := s.guidedQuizModelRequest(check, observed.Entries)
 	if err != nil {
@@ -35,10 +36,10 @@ func (s service) prepareGuidedQuizDone(observed core.QuizObservation) (core.Quiz
 		return core.QuizTransition{State: state, Message: state.ContinuationError}, nil
 	}
 
-	var entry *core.QuizEntry
+	var entry *quizcore.QuizEntry
 
 	if state.ActiveQuestion != nil {
-		skipped := quizEntryFromState(state, core.QuizEntryStatusSkipped, "", s.utcNow())
+		skipped := quizEntryFromState(state, quizcore.QuizEntryStatusSkipped, "", s.utcNow())
 		skipped.ID = fmt.Sprintf("%s-entry-%03d", state.SessionID, state.QuestionsAsked)
 		state = updateQuizStateAfterEntry(state, skipped)
 		entry = &skipped

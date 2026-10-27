@@ -12,6 +12,7 @@ import (
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // DumpMutationRequest binds a capture, append or full-body save to one operation.
@@ -138,7 +139,7 @@ func validateDumpMutation(request DumpMutationRequest) error {
 }
 
 func validateDumpMutationInput(request DumpMutationRequest) error {
-	if len(request.Content) > WorkflowFileLimit || strings.TrimSpace(request.Content) == "" || len(request.Title) > 512 {
+	if len(request.Content) > workflowstate.WorkflowFileLimit || strings.TrimSpace(request.Content) == "" || len(request.Title) > 512 {
 		return errors.New("dump content is required and bounded to 1 MiB; title is bounded to 512 bytes")
 	}
 

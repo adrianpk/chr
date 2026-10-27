@@ -66,7 +66,7 @@ func (s *WorkflowStore) repositoryWorkflowIntegrationEntries(runs []workflowInvo
 				return nil, err
 			}
 
-			if entry.CoordinatorID != coordinator.ID || sequences[entry.QueueSequence] || ids[entry.ID] || len(entries) >= WorkflowRecordLimit {
+			if entry.CoordinatorID != coordinator.ID || sequences[entry.QueueSequence] || ids[entry.ID] || len(entries) >= workflowstate.WorkflowRecordLimit {
 				return nil, workflowIntegrationConflict("has foreign, duplicate or excessive allocation")
 			}
 
@@ -210,7 +210,7 @@ func workflowIntegrationEntryChange(entry WorkflowIntegrationEntry, before strin
 	}
 
 	data, err := json.MarshalIndent(entry, "", "  ")
-	if err != nil || len(data) >= WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
 		return workflowFileChange{}, fmt.Errorf("integration entry exceeds file bounds: %w", errorsOrConflict(err))
 	}
 

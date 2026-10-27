@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // A durable group ledger complements flock when the supervisor is killed before
@@ -50,7 +51,7 @@ func guardWorkflowProcessCapacity(common string) error {
 		return err
 	}
 
-	if len(entries) > WorkflowRecordLimit {
+	if len(entries) > workflowstate.WorkflowRecordLimit {
 		return fmt.Errorf("workflow process observation limit exceeded")
 	}
 

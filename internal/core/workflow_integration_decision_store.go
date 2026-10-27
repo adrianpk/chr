@@ -104,7 +104,7 @@ func workflowDecisionFile(entry *WorkflowIntegrationEntry, record WorkflowIntegr
 	}
 
 	data, err := json.Marshal(record)
-	if err != nil || len(data) >= WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
 		return workflowFileChange{}, workflowstate.ErrConflict
 	}
 

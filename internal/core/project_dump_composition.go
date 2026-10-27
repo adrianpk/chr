@@ -60,7 +60,7 @@ func (r *fileAuthoringSessionRepository) composeProjectDumps(sources []ProjectDu
 		composed.Write(body)
 		composed.WriteByte('\n')
 
-		if composed.Len() > WorkflowFileLimit {
+		if composed.Len() > workflowstate.WorkflowFileLimit {
 			return nil, fmt.Errorf("reconciled dump exceeds 1 MiB")
 		}
 	}

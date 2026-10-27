@@ -97,7 +97,7 @@ func validateWorkflowIntegrationProvenance(proof WorkflowIntegrationProof) error
 	}
 
 	data, err := json.Marshal(p)
-	if err != nil || len(data) >= WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
 		return workflowstate.ErrConflict
 	}
 
@@ -126,7 +126,7 @@ func validWorkflowProvenanceEnvelope(proof WorkflowIntegrationProof, p WorkflowI
 }
 
 func validWorkflowProvenanceCount(p WorkflowIntegrationProvenance) bool {
-	return len(p.Source) > 0 && len(p.Source) <= WorkflowRecordLimit && len(p.Prepared) > 0 && len(p.Prepared) <= WorkflowRecordLimit
+	return len(p.Source) > 0 && len(p.Source) <= workflowstate.WorkflowRecordLimit && len(p.Prepared) > 0 && len(p.Prepared) <= workflowstate.WorkflowRecordLimit
 }
 
 func validWorkflowAttributedSources(proof WorkflowIntegrationProof, sources []WorkflowIntegrationAttribution) bool {

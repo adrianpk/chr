@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Event tails remain bounded and preserve structured context. A truncated
@@ -18,14 +20,14 @@ func TestRecentWorkEvents(t *testing.T) {
 	}
 
 	event := AgentEvent{SchemaVersion: 1, ProjectID: "sample", ExecutionID: "one", TicketKey: "PRJ-1", Phase: AgentEventPhaseValidationStarted, Level: AgentEventLevelInfo, Message: "Running validation", Timestamp: time.Now().UTC()}
-	for range WorkflowPageLimit + 2 {
+	for range workflowstate.WorkflowPageLimit + 2 {
 		if err := AppendAgentEvent(t.Context(), path, event); err != nil {
 			t.Fatal(err)
 		}
 	}
 
 	observed, err := ReadRecentAgentEvents(t.Context(), path)
-	if err != nil || len(observed.Events) != WorkflowPageLimit || len(observed.Malformed) != 0 {
+	if err != nil || len(observed.Events) != workflowstate.WorkflowPageLimit || len(observed.Malformed) != 0 {
 		t.Fatal(len(observed.Events), observed.Malformed, err)
 	}
 

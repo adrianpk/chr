@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Concrete reads retain every actual plan, including same-scope documents and
@@ -122,7 +124,7 @@ func mutatePlanCatalogSource(t *testing.T, path, kind string) {
 	case "frontmatter":
 		data = []byte("---\ntitle: broken\n")
 	case "size":
-		data = []byte(strings.Repeat("x", WorkflowFileLimit+1))
+		data = []byte(strings.Repeat("x", workflowstate.WorkflowFileLimit+1))
 	case "missing envelope":
 		if err := os.Remove(filepath.Join(filepath.Dir(path), "metadata.json")); err != nil {
 			t.Fatal(err)

@@ -111,7 +111,7 @@ func appendWorkflowNativeCanonicalObservation(native *WorkflowNativeSubmission, 
 		return nil
 	}
 
-	if len(refs) >= WorkflowPageLimit {
+	if len(refs) >= workflowstate.WorkflowPageLimit {
 		return ErrWorkflowObservationRequired
 	}
 

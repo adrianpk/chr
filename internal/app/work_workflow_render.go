@@ -9,6 +9,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (adapter workWorkflowCLI) preview(cmd *cli.Command, preview WorkflowWorkPreview) error {
@@ -34,7 +35,7 @@ func (adapter workWorkflowCLI) preview(cmd *cli.Command, preview WorkflowWorkPre
 }
 
 func (adapter workWorkflowCLI) status(ctx context.Context, cmd *cli.Command, operations service, id, action string) error {
-	request := WorkflowStatusRequest{Limit: core.WorkflowPageLimit}
+	request := WorkflowStatusRequest{Limit: workflowstate.WorkflowPageLimit}
 	if action == "status" {
 		request.Offset, request.Limit = cmd.Int("offset"), cmd.Int("limit")
 		request.ExpectedRevision = uint64(cmd.Int("revision"))

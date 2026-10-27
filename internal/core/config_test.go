@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func TestLoadWorkspaceConfigUsesDefaultsWhenMissing(t *testing.T) {
@@ -201,7 +202,7 @@ func TestLoadWorkspaceConfigParsesWorkConfig(t *testing.T) {
 		Integration:            WorkIntegrationConfig{PublicationProfile: WorkflowPublicationDisabled, MaxPreparedPerTarget: 2},
 		MergeStrategy:          TicketMergeStrategyRebase,
 		WorkerTimeoutSeconds:   3600,
-		CheckpointStepLimit:    WorkflowPageLimit,
+		CheckpointStepLimit:    workflowstate.WorkflowPageLimit,
 		MaxWorkerAttempts:      3,
 		MaxIntegrationAttempts: 3,
 		MaxActiveWorkers:       1,

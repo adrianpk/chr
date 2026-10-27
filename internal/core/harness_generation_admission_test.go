@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -111,7 +112,7 @@ func TestHarnessGenerationBindingCapacity(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for i := 1; i < WorkflowRecordLimit; i++ {
+	for i := 1; i < workflowstate.WorkflowRecordLimit; i++ {
 		if err := os.WriteFile(filepath.Join(filepath.Dir(path), "fixture-"+strconv.Itoa(i)+".json"), nil, 0o600); err != nil {
 			t.Fatal(err)
 		}

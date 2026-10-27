@@ -12,6 +12,7 @@ import (
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -75,7 +76,7 @@ func validateSpecMutation(request SpecMutationRequest) error {
 		return err
 	}
 
-	if err := ValidateQuizScope(QuizScope{ProjectID: request.ProjectID, CaseSlug: request.CaseSlug}); err != nil {
+	if err := quizcore.ValidateQuizScope(quizcore.QuizScope{ProjectID: request.ProjectID, CaseSlug: request.CaseSlug}); err != nil {
 		return err
 	}
 
@@ -176,7 +177,7 @@ func (r *fileAuthoringSessionRepository) newSpecDocument(request SpecMutationReq
 }
 
 func validateSpecMutationContent(request SpecMutationRequest) error {
-	if strings.TrimSpace(request.Title) == "" || len(request.Title) > 512 || strings.ContainsAny(request.Title, "\r\n") || strings.TrimSpace(request.Body) == "" || len(request.Body) > WorkflowFileLimit {
+	if strings.TrimSpace(request.Title) == "" || len(request.Title) > 512 || strings.ContainsAny(request.Title, "\r\n") || strings.TrimSpace(request.Body) == "" || len(request.Body) > workflowstate.WorkflowFileLimit {
 		return errors.New("spec title and body are required; title is at most 512 bytes and body at most 1 MiB")
 	}
 

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ProjectMetadataSchemaVersion defines a package boundary constant.
@@ -120,7 +121,7 @@ func (s ProjectMetadataService) save(metadata ProjectMetadata, bindDump bool) (P
 	path := ProjectMetadataPath(s.projectDir)
 
 	content := RenderProjectMetadata(metadata)
-	if len(content) > WorkflowFileLimit {
+	if len(content) > workflowstate.WorkflowFileLimit {
 		return ProjectMetadata{}, fmt.Errorf("project metadata exceeds the file limit")
 	}
 

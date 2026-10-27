@@ -139,7 +139,7 @@ func validateWorkflowLifecyclePayload(request WorkflowControlMutationRequest) er
 		return workflowstate.ErrConflict
 	}
 
-	if request.StepLimit < 0 || request.StepLimit > WorkflowPageLimit {
+	if request.StepLimit < 0 || request.StepLimit > workflowstate.WorkflowPageLimit {
 		return workflowstate.ErrConflict
 	}
 

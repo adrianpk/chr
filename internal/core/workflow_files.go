@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowFileChange struct {
@@ -18,7 +19,7 @@ type workflowFileChange struct {
 }
 
 func readWorkflowFile(path string) ([]byte, error) {
-	return readBoundedWorkflowFile(path, WorkflowFileLimit)
+	return readBoundedWorkflowFile(path, workflowstate.WorkflowFileLimit)
 }
 
 func readBoundedWorkflowFile(path string, limit int) ([]byte, error) {
@@ -65,7 +66,7 @@ func (s *WorkflowStore) safePath(relative string) (string, error) {
 }
 
 func atomicWorkflowFile(path string, content []byte) (err error) {
-	return atomicBoundedWorkflowFile(path, content, WorkflowFileLimit)
+	return atomicBoundedWorkflowFile(path, content, workflowstate.WorkflowFileLimit)
 }
 
 func atomicBoundedWorkflowFile(path string, content []byte, limit int) (err error) {

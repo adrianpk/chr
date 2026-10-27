@@ -8,13 +8,6 @@ import (
 // WorkflowSchema identifies explicitly executable workflow records.
 const WorkflowSchema = "chr-workflow/v1"
 
-// Workflow bounds apply to durable input, not just its derived index.
-const (
-	WorkflowRecordLimit = 4096
-	WorkflowFileLimit   = 1 << 20
-	WorkflowPageLimit   = 128
-)
-
 // WorkflowIdentity is a scoped durable identity independent of a checkout path.
 type WorkflowIdentity struct {
 	ID        string    `json:"id"`

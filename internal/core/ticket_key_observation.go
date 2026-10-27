@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r *fileTicketRepository) nextKeyNumber(ctx context.Context) (int, error) {
@@ -50,7 +51,7 @@ func ticketKeyRoots(projectDir string) ([]string, error) {
 		return nil, err
 	}
 
-	if len(entries) > WorkflowRecordLimit {
+	if len(entries) > workflowstate.WorkflowRecordLimit {
 		return nil, fmt.Errorf("ticket namespace observation bound exceeded")
 	}
 

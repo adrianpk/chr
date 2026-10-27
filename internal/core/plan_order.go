@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // PlanOrderTask describes stable intended order; ticket references are assigned
@@ -63,7 +64,7 @@ type PlanOrderDocument struct {
 // ValidatePlannedOrder requires bounded explicit identities and positive order,
 // and prevents a model from supplying allocated ticket references.
 func ValidatePlannedOrder(slices []PlanOrderSlice) error {
-	if len(slices) == 0 || len(slices) > WorkflowPageLimit {
+	if len(slices) == 0 || len(slices) > workflowstate.WorkflowPageLimit {
 		return fmt.Errorf("plan requires 1..128 ordered slices")
 	}
 
@@ -83,7 +84,7 @@ func ValidatePlannedOrder(slices []PlanOrderSlice) error {
 }
 
 func validatePlannedTasks(tasks []PlanOrderTask, ids map[string]bool) error {
-	if len(tasks) == 0 || len(tasks) > WorkflowPageLimit {
+	if len(tasks) == 0 || len(tasks) > workflowstate.WorkflowPageLimit {
 		return fmt.Errorf("plan slice requires 1..128 tasks")
 	}
 
@@ -98,7 +99,7 @@ func validatePlannedTasks(tasks []PlanOrderTask, ids map[string]bool) error {
 		}
 
 		ids[task.ID], orders[task.Order] = true, true
-		if len(ids) > WorkflowRecordLimit {
+		if len(ids) > workflowstate.WorkflowRecordLimit {
 			return fmt.Errorf("plan task capacity exceeded")
 		}
 	}
@@ -154,7 +155,7 @@ func planOrderBytes(document PlanOrderDocument) ([]byte, []byte, error) {
 		}
 	}
 
-	if len(encoded) > WorkflowFileLimit || output.Len() > WorkflowFileLimit {
+	if len(encoded) > workflowstate.WorkflowFileLimit || output.Len() > workflowstate.WorkflowFileLimit {
 		return nil, nil, fmt.Errorf("order map exceeds 1 MiB")
 	}
 

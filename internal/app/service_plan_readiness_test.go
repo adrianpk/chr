@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 type planReadinessTestProvider func(context.Context, core.StructuredModelRequest) (json.RawMessage, error)
@@ -140,7 +141,7 @@ func TestPlanSpecApproval(t *testing.T) {
 	}
 }
 
-func planApprovalFixture(t *testing.T, status, prose string) (service, core.QuizScope, core.GeneratedSpecPaths) {
+func planApprovalFixture(t *testing.T, status, prose string) (service, quizcore.QuizScope, core.GeneratedSpecPaths) {
 	t.Helper()
 
 	operations, scope, _ := planPublicationFixture(t, "Print hello once. Verify stdout is hello.")

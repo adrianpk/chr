@@ -135,7 +135,7 @@ func workflowMergerCheckpointMatches(record WorkflowMergerCheckpointRecord, inpu
 
 func (s *WorkflowStore) persistWorkflowMergerCheckpoint(record WorkflowMergerCheckpointRecord) (WorkflowEvidenceRef, error) {
 	data, err := json.MarshalIndent(record, "", "  ")
-	if err != nil || len(data) >= WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
 		return WorkflowEvidenceRef{}, workflowstate.ErrConflict
 	}
 
@@ -147,7 +147,7 @@ func (s *WorkflowStore) persistWorkflowMergerCheckpoint(record WorkflowMergerChe
 
 func freezeWorkflowMergerCheckpoint(state WorkflowMergerRepairState) (WorkflowMergerRepairState, error) {
 	data, err := json.Marshal(state)
-	if err != nil || len(data) >= WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
 		return WorkflowMergerRepairState{}, workflowstate.ErrConflict
 	}
 

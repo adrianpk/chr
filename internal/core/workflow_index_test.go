@@ -158,7 +158,7 @@ func TestWorkflowBounds(t *testing.T) {
 	store := workflowTestStore(t)
 	r := workflowTestTask("CHR-1")
 
-	r.Body = make([]byte, WorkflowFileLimit+1)
+	r.Body = make([]byte, workflowstate.WorkflowFileLimit+1)
 	if _, err := store.Create(context.Background(), "Oversized", r); err == nil {
 		t.Fatal("oversized workflow admitted")
 	}
@@ -167,7 +167,7 @@ func TestWorkflowBounds(t *testing.T) {
 		t.Fatal("invalid admission allocated a partial envelope")
 	}
 
-	if err := (WorkflowSnapshot{Records: make([]WorkflowRecord, WorkflowRecordLimit+1)}).Validate(); err == nil {
+	if err := (WorkflowSnapshot{Records: make([]WorkflowRecord, workflowstate.WorkflowRecordLimit+1)}).Validate(); err == nil {
 		t.Fatal("namespace record bound was ignored")
 	}
 }

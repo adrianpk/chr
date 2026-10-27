@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -231,7 +232,7 @@ func workflowOrderPlanFixture(t *testing.T) (*WorkflowStore, WorkflowMaterializa
 	}
 
 	generated := orderedPlanCandidate()
-	generated.Scope = QuizScope{ProjectID: store.projectID}
+	generated.Scope = quizcore.QuizScope{ProjectID: store.projectID}
 
 	generated.Order = plannedWorkflowOrder(opts.Plan)
 	if _, err := WriteGeneratedPlan(t.Context(), store.layout.ProjectDir(), generated); err != nil {

@@ -157,7 +157,7 @@ func (s *WorkflowStore) persistWorkflowPreparation(run *workflowInvocationFile, 
 	}
 
 	data, err := json.MarshalIndent(candidate, "", "  ")
-	if err != nil || len(data) >= WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
 		return fmt.Errorf("prepared candidate exceeds file bounds")
 	}
 

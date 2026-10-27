@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"fmt"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) admitWorkflowLooseLater(ctx context.Context, run *workflowInvocationFile, selection workflowSelection) error {
@@ -17,7 +19,7 @@ func (s *WorkflowStore) admitWorkflowLooseLater(ctx context.Context, run *workfl
 		return nil
 	}
 
-	if len(run.Members)+len(later) > WorkflowRecordLimit {
+	if len(run.Members)+len(later) > workflowstate.WorkflowRecordLimit {
 		return fmt.Errorf("workflow loose admission member bound exceeded")
 	}
 

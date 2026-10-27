@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -14,7 +15,7 @@ import (
 func TestGuidedUseCaseQuizSufficiency(t *testing.T) {
 	for _, variant := range []string{"complete", "complete-with-skip", "unconfirmed-skip", "empty", "budget", "skipped", "foreign"} {
 		t.Run(variant, func(t *testing.T) {
-			state := QuizRuntimeState{SessionID: "quiz", Status: QuizRuntimeStatusDone, ClarificationComplete: true, QuestionsAsked: 1, AnswersRecorded: 1}
+			state := quizcore.QuizRuntimeState{SessionID: "quiz", Status: quizcore.QuizRuntimeStatusDone, ClarificationComplete: true, QuestionsAsked: 1, AnswersRecorded: 1}
 			session := AuthoringSession{Guided: &GuidedUseCaseState{Quiz: &GuidedQuizState{SessionID: "quiz", Revision: "revision"}}}
 
 			switch variant {
@@ -41,12 +42,12 @@ func TestGuidedUseCaseQuizSufficiency(t *testing.T) {
 
 // TestGuidedUseCaseQuizLegacy preserves digest inputs when optional guided fields are absent.
 func TestGuidedUseCaseQuizLegacy(t *testing.T) {
-	scope, err := json.Marshal(QuizScope{ProjectID: "project", CaseSlug: "case"})
+	scope, err := json.Marshal(quizcore.QuizScope{ProjectID: "project", CaseSlug: "case"})
 	if err != nil || string(scope) != `{"ProjectID":"project","CaseSlug":"case"}` {
 		t.Fatalf("legacy scope encoding changed: %s %v", scope, err)
 	}
 
-	state, err := json.Marshal(QuizRuntimeState{})
+	state, err := json.Marshal(quizcore.QuizRuntimeState{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +79,7 @@ func TestGuidedUseCaseQuizCheckpoint(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	scope := QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
+	scope := quizcore.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
 	paths, result := completedGuidedQuizFixture(t, root, scope)
 	session.Guided.Quiz = &GuidedQuizState{SessionID: result.State.SessionID, Revision: result.State.Revision}
 	session.Guided.PendingOperation = &GuidedUseCaseOperation{ID: "seal-quiz", Action: "answer", Digest: contenthash.Sum([]byte("seal-quiz"))}
@@ -114,7 +115,7 @@ func TestGuidedUseCaseQuizCheckpoint(t *testing.T) {
 	}
 }
 
-func completedGuidedQuizFixture(t *testing.T, root string, scope QuizScope) (QuizArtifactPaths, QuizActionResult) {
+func completedGuidedQuizFixture(t *testing.T, root string, scope quizcore.QuizScope) (QuizArtifactPaths, QuizActionResult) {
 	t.Helper()
 
 	repo := NewQuizArtifactRepository(root)
@@ -152,7 +153,7 @@ func completedGuidedQuizFixture(t *testing.T, root string, scope QuizScope) (Qui
 
 	result, err := repo.ApplyAction(t.Context(), answer, func(ctx context.Context, before QuizObservation) (QuizTransition, error) {
 		next, err := answerQuizActionFixture(ctx, before)
-		next.State.Status, next.State.ClarificationComplete = QuizRuntimeStatusDone, true
+		next.State.Status, next.State.ClarificationComplete = quizcore.QuizRuntimeStatusDone, true
 		next.State.Candidates = nil
 
 		return next, err

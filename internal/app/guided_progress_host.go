@@ -63,7 +63,7 @@ func (host *guidedWorkHost) dispatchProgress(operations service, scope core.Guid
 		return nil
 	}
 
-	if len(host.progress) >= guidedHostActivationLimit || len(host.attempts) >= core.WorkflowRecordLimit && host.attempts[key] == "" {
+	if len(host.progress) >= guidedHostActivationLimit || len(host.attempts) >= workflowstate.WorkflowRecordLimit && host.attempts[key] == "" {
 		return core.ErrWorkflowCapacity
 	}
 

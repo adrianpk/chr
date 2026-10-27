@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // SpecView is the TUI-facing projection of a spec document.
@@ -19,7 +20,7 @@ type SpecView struct {
 	UseCaseTitle string
 	Title        string
 	Status       string
-	Scope        core.QuizScope
+	Scope        quizcore.QuizScope
 	RelativePath string
 	UpdatedAt    time.Time
 	Content      string
@@ -34,7 +35,7 @@ type SpecListResult struct {
 // SpecGenerateRequest selects the quiz scope used to generate a spec.
 type SpecGenerateRequest struct {
 	OperationID string
-	Scope       core.QuizScope
+	Scope       quizcore.QuizScope
 }
 
 // SpecOperationResult is the TUI-facing result for spec generation.
@@ -86,7 +87,7 @@ func (s service) GenerateSpec(ctx context.Context, request SpecGenerateRequest) 
 }
 
 //nolint:funlen,wsl_v5 // Generation flow is intentionally linear for logging and failure attribution.
-func (s service) generateSpec(ctx context.Context, scope core.QuizScope) (SpecOperationResult, error) {
+func (s service) generateSpec(ctx context.Context, scope quizcore.QuizScope) (SpecOperationResult, error) {
 	s.appendPlanGenerationLog("generate_spec_started", map[string]string{
 		"case_slug": scope.CaseSlug,
 		"timeout":   longGenerationTimeout.String(),
@@ -199,7 +200,7 @@ func (s service) specViewFromScope(scope quizReadScope, index core.WorkspaceInde
 }
 
 //nolint:wsl_v5 // Tight loop keeps filtering and candidate assignment together.
-func (s service) latestSpecNodeForScope(scope core.QuizScope, index core.WorkspaceIndex) (core.WorkspaceNode, bool) {
+func (s service) latestSpecNodeForScope(scope quizcore.QuizScope, index core.WorkspaceIndex) (core.WorkspaceNode, bool) {
 	nodes := []core.WorkspaceNode{}
 	for _, nodeID := range index.ByKind[core.WorkspaceNodeSpec] {
 		node, ok := index.NodesByID[nodeID]
@@ -225,7 +226,7 @@ func (s service) latestSpecNodeForScope(scope core.QuizScope, index core.Workspa
 	return nodes[0], true
 }
 
-func (s service) specViewFromNode(scope core.QuizScope, fallbackTitle string, node core.WorkspaceNode) SpecView {
+func (s service) specViewFromNode(scope quizcore.QuizScope, fallbackTitle string, node core.WorkspaceNode) SpecView {
 	title := node.Title
 	if strings.TrimSpace(title) == "" {
 		title = fallbackTitle
@@ -239,7 +240,7 @@ func (s service) specViewFromNode(scope core.QuizScope, fallbackTitle string, no
 	)
 }
 
-func (s service) specViewFromPath(scope core.QuizScope, relativePath, path string) SpecView {
+func (s service) specViewFromPath(scope quizcore.QuizScope, relativePath, path string) SpecView {
 	content, err := os.ReadFile(path)
 	if errors.Is(err, os.ErrNotExist) {
 		content = nil
@@ -280,30 +281,30 @@ func (v SpecView) withMetadata(useCaseTitle, title, status string, updatedAt tim
 	return v
 }
 
-func (s service) specGenerationRuntimeState(scope core.QuizScope) (core.QuizRuntimeState, error) {
+func (s service) specGenerationRuntimeState(scope quizcore.QuizScope) (quizcore.QuizRuntimeState, error) {
 	state, err := s.quizRepository().LoadRuntimeState(s.ctx, scope)
 	if err == nil {
 		return state, nil
 	}
 
 	if !errors.Is(err, os.ErrNotExist) {
-		return core.QuizRuntimeState{}, err
+		return quizcore.QuizRuntimeState{}, err
 	}
 
-	state, err = s.newQuizRuntimeState(scope, core.QuizModeDeep)
+	state, err = s.newQuizRuntimeState(scope, quizcore.QuizModeDeep)
 	if err != nil {
-		return core.QuizRuntimeState{}, err
+		return quizcore.QuizRuntimeState{}, err
 	}
 
-	state.Status = core.QuizRuntimeStatusDone
+	state.Status = quizcore.QuizRuntimeStatusDone
 	state.ActiveQuestion = nil
 	state.UpdatedAt = s.utcNow()
 
 	return state, nil
 }
 
-func (s service) newSpecGenerationModelRequest(state core.QuizRuntimeState) (core.QuizModelRequest, error) {
-	scope := core.QuizScope{
+func (s service) newSpecGenerationModelRequest(state quizcore.QuizRuntimeState) (core.QuizModelRequest, error) {
+	scope := quizcore.QuizScope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,
 	}
@@ -339,7 +340,7 @@ func (s service) newSpecGenerationModelRequest(state core.QuizRuntimeState) (cor
 	}, nil
 }
 
-func (s service) appendSpecGenerationContextSections(sections []core.QuizModelContextSection, scope core.QuizScope) ([]core.QuizModelContextSection, error) {
+func (s service) appendSpecGenerationContextSections(sections []core.QuizModelContextSection, scope quizcore.QuizScope) ([]core.QuizModelContextSection, error) {
 	dumps, err := s.specGenerationSources()
 	if err != nil {
 		return nil, err
@@ -350,7 +351,7 @@ func (s service) appendSpecGenerationContextSections(sections []core.QuizModelCo
 
 func (s service) appendGenerationContextSections(
 	sections []core.QuizModelContextSection,
-	scope core.QuizScope,
+	scope quizcore.QuizScope,
 	nodeIDs func(core.WorkspaceIndex) []string,
 ) ([]core.QuizModelContextSection, error) {
 	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "agent_protocol", "protocol", "AGENTS.md")
@@ -387,7 +388,7 @@ func (s service) appendGenerationContextSections(
 	return sections, nil
 }
 
-func generationContextNodeAllowed(scope core.QuizScope, node core.WorkspaceNode) bool {
+func generationContextNodeAllowed(scope quizcore.QuizScope, node core.WorkspaceNode) bool {
 	if strings.TrimSpace(scope.CaseSlug) == "" {
 		return true
 	}
@@ -459,7 +460,7 @@ func specSourcePaths(sections []core.QuizModelContextSection) []string {
 	return paths
 }
 
-func specScopeID(scope core.QuizScope) string {
+func specScopeID(scope quizcore.QuizScope) string {
 	if strings.TrimSpace(scope.CaseSlug) == "" {
 		return "project"
 	}
@@ -467,7 +468,7 @@ func specScopeID(scope core.QuizScope) string {
 	return scope.CaseSlug
 }
 
-func specUseCaseFallbackTitle(scope core.QuizScope) string {
+func specUseCaseFallbackTitle(scope quizcore.QuizScope) string {
 	if strings.TrimSpace(scope.CaseSlug) == "" {
 		return "Project-wide"
 	}

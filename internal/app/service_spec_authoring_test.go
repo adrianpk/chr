@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // Concrete listing preserves independent identities in one scope while the
@@ -28,7 +29,7 @@ func TestSpecDocumentCatalog(t *testing.T) {
 
 	model.responses = []core.QuizModelResponse{serviceQuizDraftSpecResponse("generated", serviceQuizClock()())}
 
-	if _, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{Scope: core.QuizScope{CaseSlug: "named-work"}}); err != nil {
+	if _, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{Scope: quizcore.QuizScope{CaseSlug: "named-work"}}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -58,7 +59,7 @@ func checkSpecGenerationScope(t *testing.T, slug string) {
 
 	model.responses = []core.QuizModelResponse{serviceQuizDraftSpecResponse("generated", serviceQuizClock()())}
 
-	if _, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{Scope: core.QuizScope{CaseSlug: slug}}); err != nil {
+	if _, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{Scope: quizcore.QuizScope{CaseSlug: slug}}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -105,7 +106,7 @@ func seedSpecGenerationScopes(t *testing.T, operations service) {
 	}
 
 	for _, item := range []struct{ slug, body string }{{"", "PROJECT_QUIZ"}, {"named-work", "NAMED_QUIZ"}, {"other", "OTHER_QUIZ"}} {
-		notes := core.QuizCuratedNotes{Scope: operations.quizScope(core.QuizScope{CaseSlug: item.slug}), Status: "curated", Decisions: []string{item.body}, UpdatedAt: serviceQuizClock()().Format("2006-01-02T15:04:05Z")}
+		notes := quizcore.QuizCuratedNotes{Scope: operations.quizScope(quizcore.QuizScope{CaseSlug: item.slug}), Status: "curated", Decisions: []string{item.body}, UpdatedAt: serviceQuizClock()().Format("2006-01-02T15:04:05Z")}
 		if _, err := operations.quizRepository().WriteCuratedNotes(t.Context(), notes); err != nil {
 			t.Fatal(err)
 		}

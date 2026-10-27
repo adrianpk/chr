@@ -10,6 +10,7 @@ import (
 	"sort"
 
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ListSpecDocuments enumerates actual canonical documents across namespaces,
@@ -38,7 +39,7 @@ func ListSpecDocuments(ctx context.Context, projectDir string) ([]SpecDocument, 
 		}
 
 		count += len(entries)
-		if count > WorkflowRecordLimit {
+		if count > workflowstate.WorkflowRecordLimit {
 			return nil, errors.New("spec inventory exceeds 4096 entries")
 		}
 
@@ -70,15 +71,15 @@ func (r *fileAuthoringSessionRepository) authoringDirectoryEntries(reference str
 		return nil, err
 	}
 
-	entries, readErr := directory.ReadDir(WorkflowRecordLimit + 1)
+	entries, readErr := directory.ReadDir(workflowstate.WorkflowRecordLimit + 1)
 
 	closeErr := directory.Close()
 	if readErr != nil && !errors.Is(readErr, io.EOF) || closeErr != nil {
 		return nil, errors.Join(readErr, closeErr)
 	}
 
-	if len(entries) > WorkflowRecordLimit {
-		return nil, fmt.Errorf("authoring directory exceeds %d entries", WorkflowRecordLimit)
+	if len(entries) > workflowstate.WorkflowRecordLimit {
+		return nil, fmt.Errorf("authoring directory exceeds %d entries", workflowstate.WorkflowRecordLimit)
 	}
 
 	return entries, nil
@@ -98,7 +99,7 @@ func (r *fileAuthoringSessionRepository) specDocumentsInDirectory(ctx context.Co
 		}
 
 		*size += len(document.images[0].After) + len(document.images[1].After)
-		if *size > 8*WorkflowFileLimit {
+		if *size > 8*workflowstate.WorkflowFileLimit {
 			return nil, errors.New("spec inventory exceeds 8 MiB")
 		}
 

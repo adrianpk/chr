@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 var ticketCommitReference = regexp.MustCompile(`^[0-9a-f]{7,64}$`)
@@ -41,7 +43,7 @@ func validateTicketDescription(document TicketDocument, body *string) error {
 		return fmt.Errorf("description is read-only: %s", reason)
 	}
 
-	if strings.TrimSpace(*body) == "" || len(*body) > WorkflowFileLimit/2 {
+	if strings.TrimSpace(*body) == "" || len(*body) > workflowstate.WorkflowFileLimit/2 {
 		return fmt.Errorf("ticket description is required and must fit the document bounds")
 	}
 

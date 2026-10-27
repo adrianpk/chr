@@ -38,7 +38,7 @@ func validateWorkflowIntegrationBudget(b WorkflowIntegrationBudget) error {
 }
 
 func validWorkflowIntegrationBudgetHeader(b WorkflowIntegrationBudget) bool {
-	return b.SchemaVersion == 1 && b.InvocationID != "" && b.Revision > 0 && len(b.UnitCounters) <= WorkflowRecordLimit && len(b.Reservations) <= WorkflowRecordLimit && len(b.Grants) <= WorkflowPageLimit
+	return b.SchemaVersion == 1 && b.InvocationID != "" && b.Revision > 0 && len(b.UnitCounters) <= workflowstate.WorkflowRecordLimit && len(b.Reservations) <= workflowstate.WorkflowRecordLimit && len(b.Grants) <= workflowstate.WorkflowPageLimit
 }
 
 func validateWorkflowIntegrationTokens(b WorkflowIntegrationBudget) error {
@@ -363,7 +363,7 @@ func validWorkflowIntegrationLimits(limits WorkflowIntegrationLimits) bool {
 }
 
 func validateWorkflowIntegrationUsage(usage WorkflowIntegrationUsage) error {
-	if usage.WorkerCount < 0 || usage.ReviewCount < 0 || usage.PreparationCount < 0 || len(usage.Attempts) > WorkflowRecordLimit || len(usage.ClosingAttempts) > WorkflowRecordLimit || len(usage.ReviewRepairs) > WorkflowRecordLimit {
+	if usage.WorkerCount < 0 || usage.ReviewCount < 0 || usage.PreparationCount < 0 || len(usage.Attempts) > workflowstate.WorkflowRecordLimit || len(usage.ClosingAttempts) > workflowstate.WorkflowRecordLimit || len(usage.ReviewRepairs) > workflowstate.WorkflowRecordLimit {
 		return workflowstate.ErrConflict
 	}
 

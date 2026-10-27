@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -80,7 +81,7 @@ func checkWebBoardRoutes(t *testing.T, provider webViewProvider) {
 func TestWebBoardPaging(t *testing.T) {
 	project := newTestWorkspace(t)
 
-	for i := 1; i <= core.WorkflowPageLimit+2; i++ {
+	for i := 1; i <= workflowstate.WorkflowPageLimit+2; i++ {
 		writeServiceWorkspaceFile(t, filepath.Join(project, "ops", "default", "ticket", fmt.Sprintf("CHR-%d.md", i)), fmt.Sprintf("---\nkey: CHR-%d\ntitle: Ticket %d\nstatus: backlog\n---\nBody.\n", i, i))
 	}
 

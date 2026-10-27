@@ -115,7 +115,7 @@ func (r *fileAuthoringSessionRepository) readAuthoringArtifacts(snapshot *Author
 		}
 
 		snapshot.artifactBytes += len(body) + len(metadata)
-		if snapshot.artifactBytes > WorkflowFileLimit {
+		if snapshot.artifactBytes > workflowstate.WorkflowFileLimit {
 			return errors.New("authoring canonical context exceeds 1 MiB")
 		}
 
@@ -130,7 +130,7 @@ func validateAuthoringArtifactContext(snapshot AuthoringSnapshot) error {
 		return errors.New("authoring artifact context capacity exceeded")
 	}
 
-	if snapshot.artifactBytes > WorkflowFileLimit {
+	if snapshot.artifactBytes > workflowstate.WorkflowFileLimit {
 		return errors.New("authoring canonical context exceeds 1 MiB")
 	}
 

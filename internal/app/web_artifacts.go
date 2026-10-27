@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/tui"
 	"forge.adrianpk.com/chr/internal/webui"
@@ -61,7 +62,7 @@ func dumpCatalog(operations service) (webui.ArtifactCatalogView, error) {
 		return webui.ArtifactCatalogView{}, err
 	}
 
-	cases, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, core.WorkflowRecordLimit)
+	cases, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, workflowstate.WorkflowRecordLimit)
 	if err != nil {
 		return webui.ArtifactCatalogView{}, err
 	}
@@ -105,7 +106,7 @@ func specCatalog(operations service) (webui.ArtifactCatalogView, error) {
 		cards = append(cards, card)
 	}
 
-	cases, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, core.WorkflowRecordLimit)
+	cases, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, workflowstate.WorkflowRecordLimit)
 	if err != nil {
 		return webui.ArtifactCatalogView{}, err
 	}

@@ -187,7 +187,7 @@ type WorkflowSubmissionQuery struct {
 
 // QueryWorkflowIntegrationSubmissions includes uncertain and sealed history.
 func (s *WorkflowStore) QueryWorkflowIntegrationSubmissions(ctx context.Context, q WorkflowSubmissionQuery) (result []WorkflowPublicationBarrier, err error) {
-	if q.Limit < 1 || q.Limit > WorkflowPageLimit {
+	if q.Limit < 1 || q.Limit > workflowstate.WorkflowPageLimit {
 		return nil, workflowstate.ErrConflict
 	}
 
@@ -225,7 +225,7 @@ func workflowPublicationBarrier(j workflowSubmissionJournal, submission Workflow
 }
 
 func workflowIntegrationQueryBounds(q WorkflowIntegrationQueueQuery) bool {
-	return q.Limit >= 1 && q.Limit <= WorkflowPageLimit && q.Offset >= 0 && len(q.States) <= WorkflowPageLimit
+	return q.Limit >= 1 && q.Limit <= workflowstate.WorkflowPageLimit && q.Offset >= 0 && len(q.States) <= workflowstate.WorkflowPageLimit
 }
 
 func workflowIntegrationQueryTarget(entry WorkflowIntegrationEntry, q WorkflowIntegrationQueueQuery) bool {

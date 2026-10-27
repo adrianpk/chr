@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 type planDeliveryTestModel struct {
@@ -170,7 +171,7 @@ func TestWebPlanDeliveryCases(t *testing.T) {
 	}
 
 	for _, slug := range []string{"named-work", "another-greeting"} {
-		if _, err := operations.GeneratePlanDelivery(t.Context(), PlanGenerateRequest{OperationID: "generate-" + slug, Scope: core.QuizScope{CaseSlug: slug}}); err != nil {
+		if _, err := operations.GeneratePlanDelivery(t.Context(), PlanGenerateRequest{OperationID: "generate-" + slug, Scope: quizcore.QuizScope{CaseSlug: slug}}); err != nil {
 			t.Fatal(slug, err)
 		}
 	}
@@ -206,7 +207,7 @@ func checkWebPlanDelivery(t *testing.T, provider webViewProvider) {
 		t.Fatal("generated ticket missing from Board", board)
 	}
 
-	binding, err := core.ObservePlanRevision(t.Context(), operations.projectContext.ProjectDir, operations.quizScope(core.QuizScope{CaseSlug: "named-work"}))
+	binding, err := core.ObservePlanRevision(t.Context(), operations.projectContext.ProjectDir, operations.quizScope(quizcore.QuizScope{CaseSlug: "named-work"}))
 	if err != nil {
 		t.Fatal(err)
 	}

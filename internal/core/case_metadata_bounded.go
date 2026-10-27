@@ -10,11 +10,12 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // LoadBounded observes at most the owner's fixed case-record ceiling.
 func (s CaseMetadataService) LoadBounded(ctx context.Context, limit int) ([]CaseMetadata, error) {
-	if limit < 1 || limit > WorkflowRecordLimit {
+	if limit < 1 || limit > workflowstate.WorkflowRecordLimit {
 		return nil, fmt.Errorf("invalid case record bound")
 	}
 

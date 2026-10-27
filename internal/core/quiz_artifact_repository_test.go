@@ -7,12 +7,14 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 func TestQuizArtifactLayoutResolvesProjectAndUseCasePaths(t *testing.T) {
 	projectDir := t.TempDir()
 
-	projectPaths, err := QuizArtifactLayout(projectDir, QuizScope{ProjectID: "project-1"})
+	projectPaths, err := QuizArtifactLayout(projectDir, quizcore.QuizScope{ProjectID: "project-1"})
 	if err != nil {
 		t.Fatalf("QuizArtifactLayout project returned error: %v", err)
 	}
@@ -29,7 +31,7 @@ func TestQuizArtifactLayoutResolvesProjectAndUseCasePaths(t *testing.T) {
 		t.Fatalf("project runtime path = %q", projectPaths.RuntimeRelativePath)
 	}
 
-	casePaths, err := QuizArtifactLayout(projectDir, QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"})
+	casePaths, err := QuizArtifactLayout(projectDir, quizcore.QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"})
 	if err != nil {
 		t.Fatalf("QuizArtifactLayout case returned error: %v", err)
 	}
@@ -48,7 +50,7 @@ func TestQuizArtifactLayoutResolvesProjectAndUseCasePaths(t *testing.T) {
 }
 
 func TestQuizArtifactLayoutRejectsNestedCaseSlug(t *testing.T) {
-	_, err := QuizArtifactLayout(t.TempDir(), QuizScope{ProjectID: "project-1", CaseSlug: "../bad"})
+	_, err := QuizArtifactLayout(t.TempDir(), quizcore.QuizScope{ProjectID: "project-1", CaseSlug: "../bad"})
 	if err == nil {
 		t.Fatal("QuizArtifactLayout returned nil error")
 	}
@@ -87,12 +89,12 @@ func TestQuizArtifactRepositoryWritesCuratedNotes(t *testing.T) {
 	dir := t.TempDir()
 	repository := NewQuizArtifactRepository(dir)
 
-	paths, err := repository.WriteCuratedNotes(context.Background(), QuizCuratedNotes{
-		Scope:               QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"},
+	paths, err := repository.WriteCuratedNotes(context.Background(), quizcore.QuizCuratedNotes{
+		Scope:               quizcore.QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"},
 		Decisions:           []string{"Use one visible question at a time."},
 		AcceptanceReadiness: []string{"Decision: needs_more_info; missing: actor"},
 		Constraints:         []string{"Do not expose fast candidate internals."},
-		Entries:             []QuizEntry{validQuizEntry()},
+		Entries:             []quizcore.QuizEntry{validQuizEntry()},
 		UpdatedAt:           quizRuntimeTestTime().Format(time.RFC3339),
 	})
 	if err != nil {
@@ -133,7 +135,7 @@ func TestQuizArtifactRepositorySavesAndLoadsRuntimeState(t *testing.T) {
 		t.Fatal("candidate id missing from runtime state")
 	}
 
-	loaded, err := repository.LoadRuntimeState(context.Background(), QuizScope{ProjectID: "project-1"})
+	loaded, err := repository.LoadRuntimeState(context.Background(), quizcore.QuizScope{ProjectID: "project-1"})
 	if err != nil {
 		t.Fatalf("LoadRuntimeState returned error: %v", err)
 	}
@@ -158,10 +160,10 @@ func TestQuizArtifactRepositoryKeepsCandidatesOutOfRawAndCuratedArtifacts(t *tes
 		t.Fatalf("AppendRawCapture returned error: %v", err)
 	}
 
-	curatedPaths, err := repository.WriteCuratedNotes(context.Background(), QuizCuratedNotes{
-		Scope:     QuizScope{ProjectID: "project-1"},
+	curatedPaths, err := repository.WriteCuratedNotes(context.Background(), quizcore.QuizCuratedNotes{
+		Scope:     quizcore.QuizScope{ProjectID: "project-1"},
 		Decisions: []string{"Use service-owned quiz state."},
-		Entries:   []QuizEntry{entry},
+		Entries:   []quizcore.QuizEntry{entry},
 		UpdatedAt: quizRuntimeTestTime().Format(time.RFC3339),
 	})
 	if err != nil {
@@ -188,7 +190,7 @@ func TestQuizArtifactRepositoryLoadsRawCaptureEntries(t *testing.T) {
 		t.Fatalf("AppendRawCapture returned error: %v", err)
 	}
 
-	entries, err := repository.LoadRawCaptureEntries(context.Background(), QuizScope{ProjectID: "project-1"})
+	entries, err := repository.LoadRawCaptureEntries(context.Background(), quizcore.QuizScope{ProjectID: "project-1"})
 	if err != nil {
 		t.Fatalf("LoadRawCaptureEntries returned error: %v", err)
 	}
@@ -210,9 +212,9 @@ func TestCurateQuizEntriesDistillsAnsweredTurns(t *testing.T) {
 	entry := validQuizEntry()
 	entry.Answer = "The TUI must preserve one visible question at a time. Extra raw detail."
 
-	notes := CurateQuizEntries(
-		QuizScope{ProjectID: "project-1"},
-		[]QuizEntry{entry},
+	notes := quizcore.CurateQuizEntries(
+		quizcore.QuizScope{ProjectID: "project-1"},
+		[]quizcore.QuizEntry{entry},
 		quizRuntimeTestTime(),
 	)
 
@@ -230,13 +232,13 @@ func TestCurateQuizEntriesDistillsAnsweredTurns(t *testing.T) {
 }
 
 func TestCurateQuizEntriesPreservesAcceptanceReadiness(t *testing.T) {
-	entry := quizEntryWith(func(entry *QuizEntry) {
+	entry := quizEntryWith(func(entry *quizcore.QuizEntry) {
 		entry.PromptIntent = `{"kind":"quiz_question","metadata":{"routing_state":{"acceptance_readiness":{"decision":"needs_more_info","missing":["actor","trigger"],"inferred_elements":{"observable_outcome":["Report is written."]}}}}}`
 	})
 
-	notes := CurateQuizEntries(
-		QuizScope{ProjectID: "project-1"},
-		[]QuizEntry{entry},
+	notes := quizcore.CurateQuizEntries(
+		quizcore.QuizScope{ProjectID: "project-1"},
+		[]quizcore.QuizEntry{entry},
 		quizRuntimeTestTime(),
 	)
 
@@ -248,7 +250,7 @@ func TestCurateQuizEntriesPreservesAcceptanceReadiness(t *testing.T) {
 func TestWriteQuizDraftSpecWritesSpecArtifactWithDraftStatus(t *testing.T) {
 	dir := t.TempDir()
 	spec := QuizDraftSpec{
-		Scope:           QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"},
+		Scope:           quizcore.QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"},
 		Title:           "Article Authoring Spec",
 		Body:            "Generated behavior.",
 		SourceQuizPath:  "ops/default/quiz/00000-article-authoring-quiz/artifact.md",

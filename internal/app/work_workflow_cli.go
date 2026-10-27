@@ -11,6 +11,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workWorkflowCLI struct {
@@ -42,7 +43,7 @@ func workWorkflowExtentFlags(loose bool) []cli.Flag {
 		&cli.BoolFlag{Name: "preview", Aliases: []string{"dry-run"}, Usage: "observe the selection without admission or execution"},
 		&cli.BoolFlag{Name: "json", Usage: "print the bounded operation result as JSON"},
 		&cli.IntFlag{Name: "offset", Usage: "preview member offset"},
-		&cli.IntFlag{Name: "limit", Value: core.WorkflowPageLimit, Usage: "preview page size, 1..128"},
+		&cli.IntFlag{Name: "limit", Value: workflowstate.WorkflowPageLimit, Usage: "preview page size, 1..128"},
 		&cli.StringFlag{Name: "snapshot", Usage: "exact preview snapshot for pagination or admission"},
 		&cli.IntFlag{Name: "max-steps", Usage: "bounded continuation steps, 0 uses the retained limit"},
 		&cli.BoolFlag{Name: "human-review", Usage: "require exact human approval for this invocation"},
@@ -134,7 +135,7 @@ func workWorkflowExtentInput(cmd *cli.Command, loose bool) error {
 }
 
 func workWorkflowPageInput(offset, limit int) error {
-	if offset < 0 || offset > core.WorkflowRecordLimit || limit < 1 || limit > core.WorkflowPageLimit {
+	if offset < 0 || offset > workflowstate.WorkflowRecordLimit || limit < 1 || limit > workflowstate.WorkflowPageLimit {
 		return fmt.Errorf("workflow page bounds exceeded")
 	}
 
@@ -142,7 +143,7 @@ func workWorkflowPageInput(offset, limit int) error {
 }
 
 func workWorkflowStepsInput(steps int) error {
-	if steps < 0 || steps > core.WorkflowPageLimit {
+	if steps < 0 || steps > workflowstate.WorkflowPageLimit {
 		return fmt.Errorf("max-steps must contain 0..128 checkpoint steps")
 	}
 
@@ -181,7 +182,7 @@ func workWorkflowControlFlags(action string) []cli.Flag {
 
 	switch action {
 	case "status":
-		return append(flags, &cli.IntFlag{Name: "offset", Usage: "retained member offset"}, &cli.IntFlag{Name: "limit", Value: core.WorkflowPageLimit, Usage: "status page size, 1..128"}, &cli.IntFlag{Name: "revision", Usage: "observed invocation revision for consistent pagination"})
+		return append(flags, &cli.IntFlag{Name: "offset", Usage: "retained member offset"}, &cli.IntFlag{Name: "limit", Value: workflowstate.WorkflowPageLimit, Usage: "status page size, 1..128"}, &cli.IntFlag{Name: "revision", Usage: "observed invocation revision for consistent pagination"})
 	case "continue":
 		return append(flags, &cli.IntFlag{Name: "max-steps", Usage: "bounded steps within the frozen invocation limit"})
 	case "approve":

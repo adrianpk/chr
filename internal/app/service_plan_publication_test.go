@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 type planPublicationTestModel func(context.Context, core.QuizModelRequest) (core.QuizModelResponse, error)
@@ -36,7 +37,7 @@ func TestPlanGenerationDiscovery(t *testing.T) {
 		t.Run(item.name, func(t *testing.T) {
 			operations, scope, _ := planPublicationFixture(t, item.dump)
 			if item.answer != "" {
-				appendPlanTestAnswer(t, operations, scope, item.answer, core.QuizEntryStatusAnswered)
+				appendPlanTestAnswer(t, operations, scope, item.answer, quizcore.QuizEntryStatusAnswered)
 			}
 
 			calls := 0
@@ -116,7 +117,7 @@ func TestPlanPublicationFailures(t *testing.T) {
 	}
 }
 
-func planPublicationFixture(t *testing.T, dump string) (service, core.QuizScope, string) {
+func planPublicationFixture(t *testing.T, dump string) (service, quizcore.QuizScope, string) {
 	t.Helper()
 
 	project := t.TempDir()
@@ -132,10 +133,10 @@ func planPublicationFixture(t *testing.T, dump string) (service, core.QuizScope,
 	operations.now, operations.quizModel = serviceQuizClock(), &fakeServiceQuizModel{}
 	operations.conversationModel = sufficientPlanReadinessProvider()
 
-	return operations, core.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}, reference
+	return operations, quizcore.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}, reference
 }
 
-func seedPlanPublicationTarget(t *testing.T, operations service, scope core.QuizScope) core.GeneratedPlanPaths {
+func seedPlanPublicationTarget(t *testing.T, operations service, scope quizcore.QuizScope) core.GeneratedPlanPaths {
 	t.Helper()
 
 	paths, err := core.WriteGeneratedPlan(t.Context(), operations.projectContext.ProjectDir, core.GeneratedPlan{Scope: scope, Title: "Retained plan", Body: "Keep this usable until a complete replacement is ready.", CreatedAt: operations.utcNow()})
@@ -146,15 +147,15 @@ func seedPlanPublicationTarget(t *testing.T, operations service, scope core.Quiz
 	return paths
 }
 
-func appendPlanTestAnswer(t *testing.T, operations service, scope core.QuizScope, answer string, status core.QuizEntryStatus) {
+func appendPlanTestAnswer(t *testing.T, operations service, scope quizcore.QuizScope, answer string, status quizcore.QuizEntryStatus) {
 	t.Helper()
 
-	state, err := operations.newQuizRuntimeState(scope, core.QuizModeDeep)
+	state, err := operations.newQuizRuntimeState(scope, quizcore.QuizModeDeep)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	entry := core.QuizEntry{ID: "entry-1", QuestionID: "question-1", Question: "What should this case deliver and how is it verified?", Answer: answer, Status: status, Mode: core.QuizModeDeep, Topic: "scope", Depth: 1, CreatedAt: operations.utcNow(), AnsweredAt: operations.utcNow()}
+	entry := quizcore.QuizEntry{ID: "entry-1", QuestionID: "question-1", Question: "What should this case deliver and how is it verified?", Answer: answer, Status: status, Mode: quizcore.QuizModeDeep, Topic: "scope", Depth: 1, CreatedAt: operations.utcNow(), AnsweredAt: operations.utcNow()}
 	if _, err := operations.quizRepository().AppendRawCapture(t.Context(), state, entry); err != nil {
 		t.Fatal(err)
 	}

@@ -262,7 +262,7 @@ func normalizeWorkflowStart(request WorkflowStartRequest) (WorkflowStartRequest,
 		return request, fmt.Errorf("workflow request key must contain 1..128 plain bytes")
 	}
 
-	request.Selection.Offset, request.Selection.Limit = 0, WorkflowPageLimit
+	request.Selection.Offset, request.Selection.Limit = 0, workflowstate.WorkflowPageLimit
 
 	selection, err := normalizeWorkflowPreviewRequest(request.Selection)
 	if err != nil {
@@ -301,7 +301,7 @@ func normalizeWorkflowExecutionPolicy(policy WorkflowExecutionPolicy) WorkflowEx
 		policy.MaxWorkerAttempts = 3
 	}
 
-	if policy.CheckpointStepLimit == WorkflowPageLimit {
+	if policy.CheckpointStepLimit == workflowstate.WorkflowPageLimit {
 		policy.CheckpointStepLimit = 0
 	}
 
@@ -309,7 +309,7 @@ func normalizeWorkflowExecutionPolicy(policy WorkflowExecutionPolicy) WorkflowEx
 }
 
 func validWorkflowExecutionPolicy(policy WorkflowExecutionPolicy) bool {
-	return policy.AgentTokenBudget >= 0 && validWorkflowWorkerPolicy(policy) && validWorkflowIntegrationPolicyBounds(policy) && policy.MaxIntegrationAttempts >= 0 && policy.MaxIntegrationAttempts <= 10 && policy.CheckpointStepLimit >= 0 && policy.CheckpointStepLimit <= WorkflowPageLimit && (policy.ConfigRevision == "" || len(policy.ConfigRevision) == 64)
+	return policy.AgentTokenBudget >= 0 && validWorkflowWorkerPolicy(policy) && validWorkflowIntegrationPolicyBounds(policy) && policy.MaxIntegrationAttempts >= 0 && policy.MaxIntegrationAttempts <= 10 && policy.CheckpointStepLimit >= 0 && policy.CheckpointStepLimit <= workflowstate.WorkflowPageLimit && (policy.ConfigRevision == "" || len(policy.ConfigRevision) == 64)
 }
 
 func validWorkflowWorkerPolicy(policy WorkflowExecutionPolicy) bool {
@@ -517,7 +517,7 @@ func (s *WorkflowStore) attachWorkflowInvocation(run workflowInvocationFile, key
 		return run, nil
 	}
 
-	if len(run.RequestKeys) >= WorkflowPageLimit {
+	if len(run.RequestKeys) >= workflowstate.WorkflowPageLimit {
 		return run, fmt.Errorf("workflow request key attachment bound exceeded")
 	}
 

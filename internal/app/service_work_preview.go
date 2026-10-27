@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s service) previewNativeAgentWork(config core.WorkspaceConfig, opts AgentWorkSelectionOptions) (AgentWorkResult, error) {
@@ -11,7 +12,7 @@ func (s service) previewNativeAgentWork(config core.WorkspaceConfig, opts AgentW
 		return AgentWorkResult{}, err
 	}
 
-	if opts.MaxIterations > core.WorkflowPageLimit {
+	if opts.MaxIterations > workflowstate.WorkflowPageLimit {
 		return AgentWorkResult{}, fmt.Errorf("ticket authority max-iterations must contain 0..128 checkpoint steps")
 	}
 
@@ -19,7 +20,7 @@ func (s service) previewNativeAgentWork(config core.WorkspaceConfig, opts AgentW
 }
 
 func (s service) previewNativeAgentWorkSelection(config core.WorkspaceConfig, selection core.WorkflowPreviewRequest) (AgentWorkResult, error) {
-	selection.Limit = core.WorkflowPageLimit
+	selection.Limit = workflowstate.WorkflowPageLimit
 
 	target, err := s.nativeAgentWorkTarget(config)
 	if err != nil {

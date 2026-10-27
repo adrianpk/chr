@@ -73,7 +73,7 @@ func guidedAdmissionProofFixture(t *testing.T) (AuthoringSession, WorkflowStartR
 
 	proof := GuidedWorkflowAdmission{RunID: "run", Actor: "operator", Policy: GuidedWorkAdmissionPolicy, OperationDigest: "operation", CheckpointDigest: digest, MaterializationID: "materialized"}
 
-	selection, err := normalizeWorkflowPreviewRequest(WorkflowPreviewRequest{Selector: WorkflowSelector{Extent: "slice_set", Identity: "set"}, Limit: WorkflowPageLimit})
+	selection, err := normalizeWorkflowPreviewRequest(WorkflowPreviewRequest{Selector: WorkflowSelector{Extent: "slice_set", Identity: "set"}, Limit: workflowstate.WorkflowPageLimit})
 	if err != nil {
 		t.Fatal(err)
 	}

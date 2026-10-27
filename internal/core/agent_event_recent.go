@@ -7,6 +7,8 @@ import (
 	"io"
 	"os"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ReadRecentAgentEvents reads at most the final 256 KiB and retains at most
@@ -56,8 +58,8 @@ func ReadRecentAgentEvents(ctx context.Context, path string) (stream AgentEventS
 
 		appendRecentAgentEvent(&stream, line, text)
 
-		stream.Events = stream.Events[max(0, len(stream.Events)-WorkflowPageLimit):]
-		stream.Malformed = stream.Malformed[max(0, len(stream.Malformed)-WorkflowPageLimit):]
+		stream.Events = stream.Events[max(0, len(stream.Events)-workflowstate.WorkflowPageLimit):]
+		stream.Malformed = stream.Malformed[max(0, len(stream.Malformed)-workflowstate.WorkflowPageLimit):]
 	}
 
 	return stream, scanner.Err()

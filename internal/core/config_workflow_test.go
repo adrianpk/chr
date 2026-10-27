@@ -6,6 +6,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowConfigDefaults keeps legacy absence distinct from version-one
@@ -134,7 +136,7 @@ func TestWorkflowConfigErrors(t *testing.T) {
 		{"bad indentation", "workflow:\n version: 1\n"},
 		{"native project workspace", "workflow:\n  version: 1\nwork:\n  workspace_mode: project\n"},
 		{"parallel legacy project", "work:\n  workspace_mode: project\n  max_active_workers: 2\n"},
-		{"oversized", strings.Repeat("#", WorkflowFileLimit+1)},
+		{"oversized", strings.Repeat("#", workflowstate.WorkflowFileLimit+1)},
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {

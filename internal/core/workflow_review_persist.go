@@ -24,7 +24,7 @@ func workflowReviewPath(id string, round int, name string) string {
 }
 
 func (s *WorkflowStore) persistWorkflowReviewInput(run *workflowInvocationFile, observation workflowSliceObservation, input WorkflowReviewInput) error {
-	if run.ReviewCount >= WorkflowPageLimit {
+	if run.ReviewCount >= workflowstate.WorkflowPageLimit {
 		return fmt.Errorf("workflow review history budget exhausted")
 	}
 
@@ -59,7 +59,7 @@ func (s *WorkflowStore) persistWorkflowReviewDecision(run *workflowInvocationFil
 	evidence := workflowReviewEvidence{Schema: "chr-workflow-review/v1", Origin: origin, Decision: decision, PreviousRef: run.Review.ResultRef, PreviousHash: run.Review.ResultHash, RecordedAt: time.Now().UTC()}
 
 	data, err := json.MarshalIndent(evidence, "", "  ")
-	if err != nil || len(data) >= WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
 		return fmt.Errorf("review decision exceeds file bounds")
 	}
 

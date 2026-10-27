@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -41,7 +42,7 @@ func TestPiGenerationFastQuiz(t *testing.T) {
 	operations, driver := piGenerationFixture(t, output)
 	writeServiceQuizFixture(t, operations.projectContext.ProjectDir)
 
-	started, err := operations.StartQuiz(QuizStartRequest{Mode: core.QuizModeFast})
+	started, err := operations.StartQuiz(QuizStartRequest{Mode: quizcore.QuizModeFast})
 	if err != nil || started.State.ActiveQuestion == nil {
 		t.Fatal("Pi fast batch failed", err)
 	}
@@ -67,7 +68,7 @@ func TestPiGenerationAcceptance(t *testing.T) {
 	project := operations.projectContext.ProjectDir
 	writeAcceptanceFeatureServiceFixture(t, project)
 
-	request := AcceptanceFeatureGenerateRequest{OperationID: "pi-feature", Scope: core.QuizScope{CaseSlug: "blog"}}
+	request := AcceptanceFeatureGenerateRequest{OperationID: "pi-feature", Scope: quizcore.QuizScope{CaseSlug: "blog"}}
 
 	result, err := operations.GenerateAcceptanceFeature(t.Context(), request)
 	if err != nil || result.Status != core.AcceptanceFeatureStatusGenerated {
@@ -158,7 +159,7 @@ func TestPiGenerationSpec(t *testing.T) {
 	project := operations.projectContext.ProjectDir
 	writeServiceQuizFixture(t, project)
 
-	request := SpecGenerateRequest{OperationID: "pi-spec", Scope: core.QuizScope{CaseSlug: "blog"}}
+	request := SpecGenerateRequest{OperationID: "pi-spec", Scope: quizcore.QuizScope{CaseSlug: "blog"}}
 
 	result, err := operations.GenerateSpec(t.Context(), request)
 	if err != nil {

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkQueueItem is a display observation, never an executable scheduler input.
@@ -45,7 +46,7 @@ type WorkObservation struct {
 // ObserveWork never starts, claims, recovers or stops work. Bounds apply to the
 // source reads and to the queue page, current contexts and retained timeline.
 func (s service) ObserveWork(ctx context.Context, offset int) (result WorkObservation, err error) {
-	if offset < 0 || offset > core.WorkflowRecordLimit {
+	if offset < 0 || offset > workflowstate.WorkflowRecordLimit {
 		return result, fmt.Errorf("work queue offset out of bounds")
 	}
 
@@ -92,7 +93,7 @@ func finishWorkObservation(result *WorkObservation, offset int) {
 	result.QueueTotal = len(result.Queue)
 	result.QueueNext = -1
 
-	end := min(len(result.Queue), offset+core.WorkflowPageLimit)
+	end := min(len(result.Queue), offset+workflowstate.WorkflowPageLimit)
 	if end < len(result.Queue) {
 		result.QueueNext = end
 	}
@@ -102,9 +103,9 @@ func finishWorkObservation(result *WorkObservation, offset int) {
 	slices.SortStableFunc(result.Results, func(a, b WorkContext) int { return b.UpdatedAt.Compare(a.UpdatedAt) })
 	slices.SortStableFunc(result.Events, func(a, b WorkEvent) int { return b.Time.Compare(a.Time) })
 
-	result.Current = result.Current[:min(len(result.Current), core.WorkflowPageLimit)]
+	result.Current = result.Current[:min(len(result.Current), workflowstate.WorkflowPageLimit)]
 	result.Results = result.Results[:min(len(result.Results), 16)]
-	result.Events = result.Events[:min(len(result.Events), core.WorkflowPageLimit)]
+	result.Events = result.Events[:min(len(result.Events), workflowstate.WorkflowPageLimit)]
 }
 
 func dedupeWorkEvents(events []WorkEvent) []WorkEvent {

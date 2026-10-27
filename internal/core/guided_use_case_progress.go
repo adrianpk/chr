@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -204,7 +205,7 @@ func guardGuidedQuizCompletion(session AuthoringSession, observed QuizObservatio
 		return workflowstate.ErrConflict
 	}
 
-	if state.Status != QuizRuntimeStatusDone || !state.ClarificationComplete || state.AnswersRecorded < 1 || state.AnswersRecorded+state.SkipsRecorded != state.QuestionsAsked || state.ActiveQuestion != nil {
+	if state.Status != quizcore.QuizRuntimeStatusDone || !state.ClarificationComplete || state.AnswersRecorded < 1 || state.AnswersRecorded+state.SkipsRecorded != state.QuestionsAsked || state.ActiveQuestion != nil {
 		return errors.New("quiz clarification is incomplete")
 	}
 
@@ -268,7 +269,7 @@ func guidedQuizSealReferences(ctx context.Context, root string, session Authorin
 		return nil, nil
 	}
 
-	scope := QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
+	scope := quizcore.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
 
 	observed, err := NewQuizArtifactRepository(root).Observe(ctx, scope)
 	if err != nil {
@@ -304,7 +305,7 @@ func guardGuidedQuizContent(operation GuidedUseCaseOperation) error {
 		return errors.New("quiz answer is required")
 	}
 
-	if operation.Action == "quiz-mode" && !QuizMode(operation.Content).Valid() {
+	if operation.Action == "quiz-mode" && !quizcore.QuizMode(operation.Content).Valid() {
 		return errors.New("quiz mode is invalid")
 	}
 

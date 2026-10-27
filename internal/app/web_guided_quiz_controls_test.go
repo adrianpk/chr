@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // TestGuidedUseCaseSharedQuizWeb checks that original quiz forms reach the
@@ -59,7 +59,7 @@ func TestGuidedUseCaseSharedQuizWeb(t *testing.T) {
 	updated := readWebGuidedSession(t, operations, current.ID)
 
 	quiz := observeGuidedQuiz(t, operations, updated)
-	if quiz.State.Mode != core.QuizModeFast || quiz.State.ActiveQuestion.ID != observed.State.ActiveQuestion.ID || model.requests[1].Mode != core.QuizModeFast {
+	if quiz.State.Mode != quizcore.QuizModeFast || quiz.State.ActiveQuestion.ID != observed.State.ActiveQuestion.ID || model.requests[1].Mode != quizcore.QuizModeFast {
 		t.Fatal("mode form bypassed the shared native quiz")
 	}
 }

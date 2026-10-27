@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Registration is journaled with the first explicit native authoring operation.
@@ -76,7 +77,7 @@ func (s *WorkflowStore) checkWorkflowCoordinatorTarget(ctx context.Context, targ
 		}
 
 		markers = append(markers, marker)
-		if len(markers) > WorkflowPageLimit {
+		if len(markers) > workflowstate.WorkflowPageLimit {
 			return fmt.Errorf("workflow target coordinator observation bound exceeded")
 		}
 	}

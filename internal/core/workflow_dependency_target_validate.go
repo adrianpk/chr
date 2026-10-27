@@ -11,7 +11,7 @@ import (
 )
 
 func validateWorkflowDependencyTargets(run workflowInvocationFile) error {
-	if len(run.DependencyTargets) > WorkflowPageLimit || len(run.DependencyTargets) > 0 && run.ExecutionTarget == nil {
+	if len(run.DependencyTargets) > workflowstate.WorkflowPageLimit || len(run.DependencyTargets) > 0 && run.ExecutionTarget == nil {
 		return workflowstate.ErrConflict
 	}
 
@@ -52,7 +52,7 @@ func validWorkflowDependencyTargetScope(run workflowInvocationFile, proof Workfl
 }
 
 func validWorkflowDependencyTargetEvidence(run workflowInvocationFile, proof WorkflowDependencyTarget, i int) bool {
-	if proof.EvidenceRef != workflowDependencyTargetPath(run.ID, i+1) || len(proof.EvidenceHash) != 64 || proof.ConfirmedAt.IsZero() || proof.Blocker.NextActionOwner != "prerequisite_owner" || len(proof.Receipts) == 0 || len(proof.Receipts) > WorkflowPageLimit {
+	if proof.EvidenceRef != workflowDependencyTargetPath(run.ID, i+1) || len(proof.EvidenceHash) != 64 || proof.ConfirmedAt.IsZero() || proof.Blocker.NextActionOwner != "prerequisite_owner" || len(proof.Receipts) == 0 || len(proof.Receipts) > workflowstate.WorkflowPageLimit {
 		return false
 	}
 

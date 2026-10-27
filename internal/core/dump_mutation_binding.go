@@ -12,7 +12,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-const dumpMutationBindingLimit = 8 * WorkflowFileLimit
+const dumpMutationBindingLimit = 8 * workflowstate.WorkflowFileLimit
 
 type dumpMutationBinding struct {
 	Schema, Digest, Checksum  string

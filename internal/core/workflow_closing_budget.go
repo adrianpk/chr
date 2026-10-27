@@ -1,6 +1,10 @@
 package core
 
-import "fmt"
+import (
+	"fmt"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 func workflowClosingBudgetID(set WorkflowRecord, invocationID string) string {
 	if invocationID != "" {
@@ -17,7 +21,7 @@ func (s *WorkflowStore) workflowClosingBudget(set WorkflowRecord, invocationID s
 		return nil
 	}
 
-	if len(set.Set.Closing.Attempts) >= WorkflowRecordLimit {
+	if len(set.Set.Closing.Attempts) >= workflowstate.WorkflowRecordLimit {
 		return fmt.Errorf("set closing history bound exhausted")
 	}
 
@@ -35,7 +39,7 @@ func (s *WorkflowStore) workflowClosingBudget(set WorkflowRecord, invocationID s
 		}
 	}
 
-	if count >= WorkflowPageLimit {
+	if count >= workflowstate.WorkflowPageLimit {
 		return fmt.Errorf("set invocation closing attempt budget exhausted")
 	}
 

@@ -103,7 +103,7 @@ func validateWorkflowNativeRecordBinding(b WorkflowNativeRecordBinding) error {
 		return err
 	}
 
-	if len(b.ValidationRefs) == 0 || len(b.evidenceRefs()) > WorkflowPageLimit {
+	if len(b.ValidationRefs) == 0 || len(b.evidenceRefs()) > workflowstate.WorkflowPageLimit {
 		return workflowstate.ErrConflict
 	}
 
@@ -293,5 +293,5 @@ func workflowNativeReceiptOwnerMatches(receipt WorkflowReceipt) bool {
 		return false
 	}
 
-	return native.Unit == receipt.Unit && native.CanonicalPR == receipt.PullRequest && validWorkflowNativeFingerprint(native.CandidateHash) && workflowNativeReceiptResultMatches(receipt) && len(native.ObservationRefs) > 0 && len(native.ObservationRefs) <= WorkflowPageLimit
+	return native.Unit == receipt.Unit && native.CanonicalPR == receipt.PullRequest && validWorkflowNativeFingerprint(native.CandidateHash) && workflowNativeReceiptResultMatches(receipt) && len(native.ObservationRefs) > 0 && len(native.ObservationRefs) <= workflowstate.WorkflowPageLimit
 }

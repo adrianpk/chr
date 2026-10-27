@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	modelcore "forge.adrianpk.com/chr/internal/core/model"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // PlanReadiness contains a semantic decision bound to one immutable observation.
@@ -43,7 +44,7 @@ func (s service) assessPlanReadiness(ctx context.Context, observed core.PlanSour
 	}
 
 	input, err := json.Marshal(struct {
-		Scope           core.QuizScope
+		Scope           quizcore.QuizScope
 		Inputs          []core.PlanSourceInput
 		ObservationHash string `json:"observation_hash"`
 	}{observed.Scope, observed.Inputs, observed.Hash})

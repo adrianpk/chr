@@ -9,6 +9,7 @@ import (
 
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -17,7 +18,7 @@ import (
 type PlanPublicationOperation struct {
 	TicketDelivery     bool `json:",omitempty"`
 	ID                 string
-	Scope              QuizScope
+	Scope              quizcore.QuizScope
 	ExpectedRevision   string
 	Replace            bool
 	TrackerReplaceHash string

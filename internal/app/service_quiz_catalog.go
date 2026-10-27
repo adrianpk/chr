@@ -3,13 +3,13 @@ package app
 import (
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // QuizCatalogItem describes a known scope using confirmed retained answers.
 // Reference opens the same scope without starting or replacing its session.
 type QuizCatalogItem struct {
-	Scope                       core.QuizScope
+	Scope                       quizcore.QuizScope
 	Title, Reference, Preview   string
 	SessionID, Revision, Status string
 	AnswerCount                 int
@@ -69,7 +69,7 @@ func (s service) quizCatalogItem(scope quizReadScope) (QuizCatalogItem, error) {
 	item.SessionID, item.Status = observed.State.SessionID, string(observed.State.Status)
 
 	for _, entry := range observed.Entries {
-		if entry.Status != core.QuizEntryStatusAnswered {
+		if entry.Status != quizcore.QuizEntryStatusAnswered {
 			continue
 		}
 
@@ -84,7 +84,7 @@ func (s service) quizCatalogItem(scope quizReadScope) (QuizCatalogItem, error) {
 	return item, nil
 }
 
-func quizCatalogPreview(entry core.QuizEntry) string {
+func quizCatalogPreview(entry quizcore.QuizEntry) string {
 	const previewLimit = 1024
 
 	text := []rune(strings.TrimSpace(entry.Question + "\n" + entry.Answer))

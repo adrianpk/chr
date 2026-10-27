@@ -3,6 +3,8 @@ package core
 import (
 	"fmt"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowBlocker identifies one prerequisite without adding it to the extent.
@@ -105,7 +107,7 @@ func (dependencies workflowDependencies) validateMembers(members []WorkflowPrevi
 		task := dependencies.selection.records[member.Key].Task
 
 		refs := dependencies.refs[WorkflowRef{Kind: "ticket", ID: member.Key}]
-		if len(refs) > WorkflowPageLimit {
+		if len(refs) > workflowstate.WorkflowPageLimit {
 			return fmt.Errorf("task prerequisite observation bound exceeded: %s", member.Key)
 		}
 

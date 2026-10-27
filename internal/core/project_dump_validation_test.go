@@ -97,7 +97,7 @@ func damageProjectDumpSource(t *testing.T, project, reference, defect string) {
 			t.Fatal(err)
 		}
 	case "oversized body":
-		writeTestFile(t, body, strings.Repeat("x", WorkflowFileLimit+1))
+		writeTestFile(t, body, strings.Repeat("x", workflowstate.WorkflowFileLimit+1))
 	case "incomplete frontmatter":
 		writeTestFile(t, body, "---\ntype: dump\nMissing closing delimiter.\n")
 	case "duplicate scope":

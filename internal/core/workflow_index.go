@@ -205,7 +205,7 @@ func workflowSnapshotHash(snapshot WorkflowSnapshot) string {
 
 // QueryWorkflow rejects stale SQL or pagination snapshots before returning work.
 func (i *sqliteTicketIndex) QueryWorkflow(ctx context.Context, store *WorkflowStore, q WorkflowQuery) (page WorkflowPage, err error) {
-	if q.Limit < 1 || q.Limit > WorkflowPageLimit || q.Offset < 0 {
+	if q.Limit < 1 || q.Limit > workflowstate.WorkflowPageLimit || q.Offset < 0 {
 		return WorkflowPage{}, fmt.Errorf("workflow query page bounds exceeded")
 	}
 

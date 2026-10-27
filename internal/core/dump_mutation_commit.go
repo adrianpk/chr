@@ -202,7 +202,7 @@ func appendDumpCaptureMetadata(metadata map[string]any, binding dumpMutationBind
 		}
 	}
 
-	if len(captures) >= WorkflowRecordLimit {
+	if len(captures) >= workflowstate.WorkflowRecordLimit {
 		return errors.New("dump capture provenance capacity exhausted")
 	}
 

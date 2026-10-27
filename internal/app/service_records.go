@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ReadRecords observes native records and use-case metadata through their existing owners.
@@ -17,7 +18,7 @@ func (s service) ReadRecords(ctx context.Context, namespace string, query Record
 		return RecordPage{}, err
 	}
 
-	if query.Offset < 0 || query.Offset > core.WorkflowRecordLimit || query.Limit < 0 || query.Limit > 50 {
+	if query.Offset < 0 || query.Offset > workflowstate.WorkflowRecordLimit || query.Limit < 0 || query.Limit > 50 {
 		return RecordPage{}, fmt.Errorf("invalid record page bounds")
 	}
 
@@ -148,12 +149,12 @@ func filterRecordViews(views []RecordView, query RecordQuery) ([]RecordView, err
 }
 
 func (s service) caseRecordViews(ctx context.Context, query RecordQuery) ([]RecordView, error) {
-	cases, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).LoadBounded(ctx, core.WorkflowRecordLimit)
+	cases, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).LoadBounded(ctx, workflowstate.WorkflowRecordLimit)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(cases) > core.WorkflowRecordLimit {
+	if len(cases) > workflowstate.WorkflowRecordLimit {
 		return nil, fmt.Errorf("case record capacity exceeded")
 	}
 

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // Generated order maps remain internal even through direct generic URLs or a
@@ -17,11 +18,11 @@ func TestWebPlanInternal(t *testing.T) {
 	addWebPlanDiscovery(t, provider)
 
 	operations := provider.service(t.Context())
-	if _, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{Scope: core.QuizScope{CaseSlug: "named-work"}}); err != nil {
+	if _, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{Scope: quizcore.QuizScope{CaseSlug: "named-work"}}); err != nil {
 		t.Fatal(err)
 	}
 
-	binding, err := core.ObservePlanRevision(t.Context(), provider.projectContext.ProjectDir, operations.quizScope(core.QuizScope{CaseSlug: "named-work"}))
+	binding, err := core.ObservePlanRevision(t.Context(), provider.projectContext.ProjectDir, operations.quizScope(quizcore.QuizScope{CaseSlug: "named-work"}))
 	if err != nil {
 		t.Fatal(err)
 	}

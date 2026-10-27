@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func defaultDumpCapture(request DumpMutationRequest) DumpCapturePreparer {
@@ -23,7 +25,7 @@ func defaultDumpCapture(request DumpMutationRequest) DumpCapturePreparer {
 }
 
 func validateDumpPreparation(binding dumpMutationBinding, prepared DumpCapturePreparation) error {
-	if len(prepared.Content) > WorkflowFileLimit || len(prepared.RawContent) > WorkflowFileLimit || strings.TrimSpace(prepared.Content) == "" || strings.TrimSpace(prepared.RawContent) == "" {
+	if len(prepared.Content) > workflowstate.WorkflowFileLimit || len(prepared.RawContent) > workflowstate.WorkflowFileLimit || strings.TrimSpace(prepared.Content) == "" || strings.TrimSpace(prepared.RawContent) == "" {
 		return errors.New("prepared dump components must be nonempty and at most 1 MiB each")
 	}
 

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // GuidedUseCaseInspection contains retained state and prospective local readiness.
@@ -180,7 +181,7 @@ func (s service) inspectGuidedQuestion(ctx context.Context, result *GuidedUseCas
 		return
 	}
 
-	observed, err := s.quizRepository().Observe(ctx, core.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: state.CaseSlug})
+	observed, err := s.quizRepository().Observe(ctx, quizcore.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: state.CaseSlug})
 	if err != nil {
 		result.Problems = append(result.Problems, "Clarification could not be read. Correct its stored inputs before retrying.")
 

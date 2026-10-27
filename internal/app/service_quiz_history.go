@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 const (
@@ -12,9 +13,9 @@ const (
 	quizHistoryByteLimit  = 128 * 1024
 )
 
-func (s service) quizHistoryContext(scope core.QuizScope, entries []core.QuizEntry) (core.QuizModelContextSection, error) {
+func (s service) quizHistoryContext(scope quizcore.QuizScope, entries []quizcore.QuizEntry) (core.QuizModelContextSection, error) {
 	if scope.CaseSlug != "" {
-		general, err := s.quizRepository().LoadRawCaptureEntries(s.ctx, core.QuizScope{ProjectID: scope.ProjectID})
+		general, err := s.quizRepository().LoadRawCaptureEntries(s.ctx, quizcore.QuizScope{ProjectID: scope.ProjectID})
 		if err != nil {
 			return core.QuizModelContextSection{}, err
 		}

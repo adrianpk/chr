@@ -1,10 +1,14 @@
 package core
 
-import "context"
+import (
+	"context"
+
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+)
 
 // AppendRawCapture retains the legacy explicit repository operation under the
 // shared writer exclusion. Interactive actions use ApplyAction for atomic state.
-func (r *fileQuizArtifactRepository) AppendRawCapture(ctx context.Context, state QuizRuntimeState, entry QuizEntry) (QuizArtifactPaths, error) {
+func (r *fileQuizArtifactRepository) AppendRawCapture(ctx context.Context, state quizcore.QuizRuntimeState, entry quizcore.QuizEntry) (QuizArtifactPaths, error) {
 	var paths QuizArtifactPaths
 
 	err := WithAuthoringMutation(ctx, r.projectDir, func(owned context.Context) error {
@@ -23,7 +27,7 @@ func (r *fileQuizArtifactRepository) AppendRawCapture(ctx context.Context, state
 }
 
 // WriteCuratedNotes shares exclusion with interactive quiz and authoring writes.
-func (r *fileQuizArtifactRepository) WriteCuratedNotes(ctx context.Context, notes QuizCuratedNotes) (QuizArtifactPaths, error) {
+func (r *fileQuizArtifactRepository) WriteCuratedNotes(ctx context.Context, notes quizcore.QuizCuratedNotes) (QuizArtifactPaths, error) {
 	var paths QuizArtifactPaths
 
 	err := WithAuthoringMutation(ctx, r.projectDir, func(owned context.Context) error {
@@ -43,7 +47,7 @@ func (r *fileQuizArtifactRepository) WriteCuratedNotes(ctx context.Context, note
 
 // SaveRuntimeState retains the legacy import boundary under shared exclusion.
 // Session actions must use ApplyAction with their observed binding.
-func (r *fileQuizArtifactRepository) SaveRuntimeState(ctx context.Context, state QuizRuntimeState) (QuizArtifactPaths, error) {
+func (r *fileQuizArtifactRepository) SaveRuntimeState(ctx context.Context, state quizcore.QuizRuntimeState) (QuizArtifactPaths, error) {
 	var paths QuizArtifactPaths
 
 	err := WithAuthoringMutation(ctx, r.projectDir, func(owned context.Context) error {
@@ -61,7 +65,7 @@ func (r *fileQuizArtifactRepository) SaveRuntimeState(ctx context.Context, state
 	return paths, err
 }
 
-func (r *fileQuizArtifactRepository) checkQuizWritePaths(scope QuizScope) error {
+func (r *fileQuizArtifactRepository) checkQuizWritePaths(scope quizcore.QuizScope) error {
 	paths, err := r.Paths(scope)
 	if err != nil {
 		return err

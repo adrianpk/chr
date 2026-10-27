@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 var errRepeatedQuizQuestion = errors.New("quiz provider repeated an answered question")
@@ -14,13 +14,13 @@ func sameQuizQuestion(left, right string) bool {
 	return strings.EqualFold(strings.Join(strings.Fields(left), " "), strings.Join(strings.Fields(right), " "))
 }
 
-func validateNextQuizQuestion(state core.QuizRuntimeState, entries []core.QuizEntry, question core.QuizQuestion) error {
+func validateNextQuizQuestion(state quizcore.QuizRuntimeState, entries []quizcore.QuizEntry, question quizcore.QuizQuestion) error {
 	for _, entry := range entries {
 		if quizSessionEntry(state, entry) && entry.QuestionID == question.ID {
 			return fmt.Errorf("quiz provider reused an answered question identity")
 		}
 
-		if entry.Status == core.QuizEntryStatusAnswered && sameQuizQuestion(entry.Question, question.Prompt) {
+		if entry.Status == quizcore.QuizEntryStatusAnswered && sameQuizQuestion(entry.Question, question.Prompt) {
 			return errRepeatedQuizQuestion
 		}
 	}
@@ -28,8 +28,8 @@ func validateNextQuizQuestion(state core.QuizRuntimeState, entries []core.QuizEn
 	return nil
 }
 
-func (s service) finishQuiz(state core.QuizRuntimeState) core.QuizRuntimeState {
-	state.Status = core.QuizRuntimeStatusDone
+func (s service) finishQuiz(state quizcore.QuizRuntimeState) quizcore.QuizRuntimeState {
+	state.Status = quizcore.QuizRuntimeStatusDone
 	state.ActiveQuestion, state.Candidates = nil, nil
 	state.ContinuationPending, state.ContinuationError = false, ""
 	state.UpdatedAt = s.utcNow()

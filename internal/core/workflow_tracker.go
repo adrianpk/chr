@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ErrWorkflowProjectionStale preserves domain progress when a derived export fails.
@@ -152,7 +153,7 @@ func (s *WorkflowStore) workflowTrackerPrevious(setID string) (WorkflowTrackerSt
 	}
 
 	ids, err := s.workflowTrackerRegistrations()
-	if err != nil || len(ids) >= WorkflowPageLimit {
+	if err != nil || len(ids) >= workflowstate.WorkflowPageLimit {
 		return previous, errors.Join(ErrWorkflowProjectionStale, fmt.Errorf("cannot register tracker within 128-projection bound"), err)
 	}
 

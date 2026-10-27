@@ -7,12 +7,13 @@ import (
 
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 const (
 	projectDumpJournalSchema = "chr-authoring-journal/v2"
-	projectDumpJournalBytes  = 24 * WorkflowFileLimit
+	projectDumpJournalBytes  = 24 * workflowstate.WorkflowFileLimit
 	projectDumpSourceLimit   = 32
 )
 
@@ -21,7 +22,7 @@ func authoringJournalLimit(schema string) int {
 		return projectDumpJournalBytes
 	}
 
-	return WorkflowFileLimit
+	return workflowstate.WorkflowFileLimit
 }
 
 func validAuthoringJournalBounds(journal authoringMutationJournal, size int) bool {

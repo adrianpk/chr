@@ -29,7 +29,7 @@ type workflowJournal struct {
 // Transition validates a complete namespace update before journaling its images.
 func (s *WorkflowStore) Transition(ctx context.Context, changes []WorkflowChange) error {
 	return s.withLock(ctx, func() error {
-		if len(changes) == 0 || len(changes) > WorkflowRecordLimit {
+		if len(changes) == 0 || len(changes) > workflowstate.WorkflowRecordLimit {
 			return fmt.Errorf("workflow transition record bound exceeded")
 		}
 
@@ -101,7 +101,7 @@ func (s *WorkflowStore) commitAllocatedFiles(changes []workflowFileChange, guard
 		return err
 	}
 
-	if len(encoded) > WorkflowFileLimit {
+	if len(encoded) > workflowstate.WorkflowFileLimit {
 		return fmt.Errorf("workflow transition journal exceeds 1 MiB")
 	}
 
@@ -162,7 +162,7 @@ func (s *WorkflowStore) checkJournalImages(journal workflowJournal) error {
 
 	seen := map[string]bool{}
 	for _, change := range journal.Changes {
-		if seen[change.Path] || len(change.After) > WorkflowFileLimit {
+		if seen[change.Path] || len(change.After) > workflowstate.WorkflowFileLimit {
 			return fmt.Errorf("invalid workflow journal replacement")
 		}
 

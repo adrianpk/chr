@@ -111,7 +111,7 @@ func checkWorkflowMergerExecutable(command []string, hash string) error {
 
 func encodeWorkflowMergerAttempt(attempt WorkflowMergerAttempt) ([]byte, error) {
 	data, err := json.MarshalIndent(attempt, "", "  ")
-	if err != nil || len(data) >= WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
 		return nil, workflowstate.ErrConflict
 	}
 

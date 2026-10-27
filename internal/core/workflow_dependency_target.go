@@ -67,7 +67,7 @@ func (s *WorkflowStore) resumeWorkflowDependencyTarget(ctx context.Context, run 
 }
 
 func workflowDependencyTargetReady(run workflowInvocationFile, ports WorkflowResumePorts) bool {
-	if ports.Target == nil || ports.Provider == nil || !validWorkflowPRBranch(ports.TargetBranch) || run.Lane != nil || len(run.DependencyTargets) >= WorkflowPageLimit {
+	if ports.Target == nil || ports.Provider == nil || !validWorkflowPRBranch(ports.TargetBranch) || run.Lane != nil || len(run.DependencyTargets) >= workflowstate.WorkflowPageLimit {
 		return false
 	}
 
@@ -121,7 +121,7 @@ func (s *WorkflowStore) workflowDependencyTargetReceipts(ctx context.Context, ru
 	key := run.Members[run.Cursor].Admission.Key
 
 	refs := dependencies.refs[WorkflowRef{Kind: "ticket", ID: key}]
-	if len(refs) == 0 || len(refs) > WorkflowPageLimit {
+	if len(refs) == 0 || len(refs) > workflowstate.WorkflowPageLimit {
 		return nil, workflowstate.ErrConflict
 	}
 
@@ -156,7 +156,7 @@ func encodeWorkflowDependencyTarget(proof WorkflowDependencyTarget) ([]byte, err
 	proof.EvidenceRef, proof.EvidenceHash = "", ""
 
 	data, err := json.MarshalIndent(proof, "", "  ")
-	if err != nil || len(data) >= WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
 		return nil, fmt.Errorf("workflow dependency target exceeds file bounds: %w", errorsOrConflict(err))
 	}
 

@@ -3,10 +3,12 @@ package core
 import (
 	"fmt"
 	"path/filepath"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func validateWorkflowAmendmentRefs(refs []WorkflowAmendmentRef) error {
-	if len(refs) > WorkflowRecordLimit {
+	if len(refs) > workflowstate.WorkflowRecordLimit {
 		return fmt.Errorf("workflow amendment history bound exceeded")
 	}
 
@@ -26,7 +28,7 @@ func validateWorkflowAmendmentRefs(refs []WorkflowAmendmentRef) error {
 }
 
 func validateWorkflowClosureRefs(current string, history []string) error {
-	if len(history) > WorkflowRecordLimit {
+	if len(history) > workflowstate.WorkflowRecordLimit {
 		return fmt.Errorf("workflow closure history bound exceeded")
 	}
 

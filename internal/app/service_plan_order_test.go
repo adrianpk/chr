@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // Both configured generation paths publish a complete unbound pair. Retrying
@@ -23,7 +24,7 @@ func TestServicePlanOrderPublication(t *testing.T) {
 			operations := newPlanTestService(t, project)
 			model := &fakeServiceQuizModel{}
 			operations.quizModel = model
-			request := PlanGenerateRequest{OperationID: "service-operation", Scope: core.QuizScope{CaseSlug: "blog"}}
+			request := PlanGenerateRequest{OperationID: "service-operation", Scope: quizcore.QuizScope{CaseSlug: "blog"}}
 
 			generated, err := operations.GeneratePlan(t.Context(), request)
 			if err != nil {
@@ -58,12 +59,12 @@ func TestServicePlanRequiresOrder(t *testing.T) {
 	response.Plan.Order = nil
 	operations.quizModel = &fakeServiceQuizModel{responses: []core.QuizModelResponse{response}}
 
-	_, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{Scope: core.QuizScope{CaseSlug: "blog"}})
+	_, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{Scope: quizcore.QuizScope{CaseSlug: "blog"}})
 	if err == nil || !strings.Contains(err.Error(), "ordered slices") {
 		t.Fatal("body-only generation succeeded", err)
 	}
 
-	if _, exists, err := operations.existingGeneratedPlan(operations.quizScope(core.QuizScope{CaseSlug: "blog"})); err != nil || exists {
+	if _, exists, err := operations.existingGeneratedPlan(operations.quizScope(quizcore.QuizScope{CaseSlug: "blog"})); err != nil || exists {
 		t.Fatal("invalid output was published", exists, err)
 	}
 }
@@ -80,7 +81,7 @@ func TestServicePlanOrderApprovalBoundary(t *testing.T) {
 	model := &fakeServiceQuizModel{}
 	operations.quizModel = model
 
-	scope := core.QuizScope{CaseSlug: "blog"}
+	scope := quizcore.QuizScope{CaseSlug: "blog"}
 	if _, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{Scope: scope}); err != nil {
 		t.Fatal(err)
 	}

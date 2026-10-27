@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func normalizeWorkflowPreviewRequest(request WorkflowPreviewRequest) (WorkflowPreviewRequest, error) {
@@ -58,7 +60,7 @@ func workflowHasLooseOptions(request WorkflowPreviewRequest) bool {
 func validateWorkflowLooseInputBounds(request WorkflowPreviewRequest) error {
 	filters := request.Filters
 	for _, values := range [][]string{filters.Priorities, filters.Severities, filters.ProjectAreas, filters.Tags, filters.Types, filters.UseCases, request.Statuses} {
-		if len(values) > WorkflowPageLimit {
+		if len(values) > workflowstate.WorkflowPageLimit {
 			return fmt.Errorf("workflow filter value bound exceeded")
 		}
 

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -188,7 +189,7 @@ func guidedQuizCommand(session core.AuthoringSession, id, action, content string
 func TestGuidedUseCaseQuizManual(t *testing.T) {
 	operations, session, model := guidedQuizFixture(t, "default")
 
-	scope := core.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
+	scope := quizcore.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
 	if _, err := operations.StartQuiz(QuizStartRequest{Scope: scope}); err != nil {
 		t.Fatal(err)
 	}

@@ -135,7 +135,7 @@ func TestWorkflowTrackerIO(t *testing.T) {
 			}
 		}},
 		{"oversize", func(t *testing.T, s *WorkflowStore, p WorkflowTrackerStatus) {
-			workflowTrackerWrite(t, filepath.Join(s.layout.Root(), p.Path), []byte(strings.Repeat("x", WorkflowFileLimit+1)))
+			workflowTrackerWrite(t, filepath.Join(s.layout.Root(), p.Path), []byte(strings.Repeat("x", workflowstate.WorkflowFileLimit+1)))
 		}},
 		{"metadata", func(t *testing.T, s *WorkflowStore, p WorkflowTrackerStatus) {
 			path := workflowTrackerTestMetadata(t, p.SetID)

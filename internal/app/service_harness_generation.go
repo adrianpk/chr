@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 	"forge.adrianpk.com/chr/internal/harness/pi"
 )
@@ -240,7 +241,7 @@ func (s service) singlePassPlan(ctx context.Context) bool {
 	return codexGenerationBackend("CHR_PLAN_GENERATION_BACKEND")
 }
 
-func (s service) materializeBoundPlanTracking(ctx context.Context, id string, scope core.QuizScope, plan PlanView, path string) (PlanTrackingResult, error) {
+func (s service) materializeBoundPlanTracking(ctx context.Context, id string, scope quizcore.QuizScope, plan PlanView, path string) (PlanTrackingResult, error) {
 	bound, ctx, err := s.bindGeneration(ctx, "tracking-"+dumpRequestID(id), string(core.QuizModelActionMaterializePlanTracking))
 	if err != nil {
 		return PlanTrackingResult{}, err

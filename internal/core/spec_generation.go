@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // SpecDirectory defines a package boundary constant.
@@ -17,7 +19,7 @@ var generatedSpecChrPathPattern = regexp.MustCompile(`\.chr(?:/[^\s\])"'` + "`" 
 // GeneratedSpec describes a package boundary value.
 type GeneratedSpec struct {
 	ExpectedRevision string `json:"-"`
-	Scope            QuizScope
+	Scope            quizcore.QuizScope
 	Title            string
 	Body             string
 	SourcePaths      []string
@@ -34,8 +36,8 @@ type GeneratedSpecPaths struct {
 }
 
 // GeneratedSpecLayout executes the corresponding package operation.
-func GeneratedSpecLayout(projectDir string, scope QuizScope) (GeneratedSpecPaths, error) {
-	err := ValidateQuizScope(scope)
+func GeneratedSpecLayout(projectDir string, scope quizcore.QuizScope) (GeneratedSpecPaths, error) {
+	err := quizcore.ValidateQuizScope(scope)
 	if err != nil {
 		return GeneratedSpecPaths{}, err
 	}
@@ -136,7 +138,7 @@ func ValidateGeneratedSpec(spec GeneratedSpec) error {
 		return err
 	}
 
-	err = ValidateQuizScope(spec.Scope)
+	err = quizcore.ValidateQuizScope(spec.Scope)
 	if err != nil {
 		return err
 	}
