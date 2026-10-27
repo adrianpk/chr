@@ -21,7 +21,7 @@ func TestHarnessGenerationConfigFence(t *testing.T) {
 			program := generationBindingProgram(t, project)
 			writeHarnessSelectionTestFile(t, workspacecore.UserPath(project, "config.yml"), "harnesses:\n  generation: alpha\n")
 
-			_, err := FreezeHarnessGeneration(t.Context(), harnesshost.HarnessGenerationFreezeInput{Project: project, ID: "configuration-fence", Purpose: "plan_generation"}, func(ctx context.Context, config WorkspaceConfig) (harnesshost.HarnessGenerationPreparation, error) {
+			_, err := FreezeHarnessGeneration(t.Context(), harnesshost.GenerationFreezeInput{Project: project, ID: "configuration-fence", Purpose: "plan_generation"}, func(ctx context.Context, config WorkspaceConfig) (harnesshost.GenerationPreparation, error) {
 				prepared, err := generationBindingResolver(program, "model-alpha")(ctx, config)
 				if err != nil {
 					return prepared, err

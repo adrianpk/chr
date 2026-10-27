@@ -16,24 +16,24 @@ import (
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
-func harnessGenerationOperationPath(project, id string) (string, error) {
+func generationOperationPath(project, id string) (string, error) {
 	return workspacecore.ConfigPath(project, filepath.Join("tmp", "agent-runs", "operations", contenthash.Sum([]byte(id))+".json"))
 }
 
-func readHarnessGenerationOperation(project, id, purpose string) (HarnessGenerationOperation, error) {
-	var record harnessGenerationOperationFile
+func readGenerationOperation(project, id, purpose string) (GenerationOperation, error) {
+	var record generationOperationFile
 
-	path, err := harnessGenerationOperationPath(project, id)
+	path, err := generationOperationPath(project, id)
 	if err != nil {
 		return record.Operation, err
 	}
 
-	data, err := readHarnessGenerationFile(path)
+	data, err := readGenerationFile(path)
 	if err != nil {
 		return record.Operation, err
 	}
 
-	if err := decodeHarnessGenerationFile(data, &record); err != nil {
+	if err := decodeGenerationFile(data, &record); err != nil {
 		return record.Operation, err
 	}
 
@@ -55,17 +55,17 @@ func readHarnessGenerationOperation(project, id, purpose string) (HarnessGenerat
 	return record.Operation, validateGenerationOperation(record.Operation)
 }
 
-func writeHarnessGenerationOperation(operation HarnessGenerationOperation) error {
-	path, err := harnessGenerationOperationPath(operation.project, operation.ID)
+func writeGenerationOperation(operation GenerationOperation) error {
+	path, err := generationOperationPath(operation.project, operation.ID)
 	if err != nil {
 		return err
 	}
 
-	if err := harnessGenerationOperationCapacity(filepath.Dir(path)); err != nil {
+	if err := generationOperationCapacity(filepath.Dir(path)); err != nil {
 		return err
 	}
 
-	record := harnessGenerationOperationFile{Schema: "chr-harness-operation/v1", Operation: operation, Program: operation.program, ConfigDir: operation.configDir, ExecutionDir: operation.executionDir}
+	record := generationOperationFile{Schema: "chr-harness-operation/v1", Operation: operation, Program: operation.program, ConfigDir: operation.configDir, ExecutionDir: operation.executionDir}
 	if operation.resources != (harness.GenerationResources{}) {
 		record.Resources = &operation.resources
 	}
@@ -77,10 +77,10 @@ func writeHarnessGenerationOperation(operation HarnessGenerationOperation) error
 
 	record.Checksum = contenthash.Sum(encoded)
 
-	return writeHarnessGenerationFile(path, record)
+	return writeGenerationFile(path, record)
 }
 
-func harnessGenerationOperationCapacity(path string) error {
+func generationOperationCapacity(path string) error {
 	file, err := os.Open(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil
@@ -104,7 +104,7 @@ func harnessGenerationOperationCapacity(path string) error {
 	return nil
 }
 
-func readHarnessGenerationFile(path string) ([]byte, error) {
+func readGenerationFile(path string) ([]byte, error) {
 	file, err := os.OpenFile(path, os.O_RDONLY|syscall.O_NOFOLLOW|syscall.O_NONBLOCK, 0)
 	if err != nil {
 		return nil, err
@@ -112,19 +112,19 @@ func readHarnessGenerationFile(path string) ([]byte, error) {
 	defer func() { _ = file.Close() }() //nolint:errcheck // The bounded read checks file IO.
 
 	info, err := file.Stat()
-	if err != nil || !info.Mode().IsRegular() || info.Mode().Perm()&0o077 != 0 || info.Size() > harnessGenerationRecordLimit {
+	if err != nil || !info.Mode().IsRegular() || info.Mode().Perm()&0o077 != 0 || info.Size() > generationRecordLimit {
 		return nil, errors.New("generation artifact must be a private regular file within 16 KiB")
 	}
 
-	data, err := io.ReadAll(io.LimitReader(file, harnessGenerationRecordLimit+1))
-	if err != nil || len(data) > harnessGenerationRecordLimit {
+	data, err := io.ReadAll(io.LimitReader(file, generationRecordLimit+1))
+	if err != nil || len(data) > generationRecordLimit {
 		return nil, errors.New("generation artifact exceeds read boundary")
 	}
 
 	return data, nil
 }
 
-func decodeHarnessGenerationFile(data []byte, target any) error {
+func decodeGenerationFile(data []byte, target any) error {
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
 
@@ -140,7 +140,7 @@ func decodeHarnessGenerationFile(data []byte, target any) error {
 	return nil
 }
 
-func writeHarnessGenerationFile(path string, record any) error {
+func writeGenerationFile(path string, record any) error {
 	data, err := json.Marshal(record)
 	if err != nil {
 		return err
@@ -150,5 +150,5 @@ func writeHarnessGenerationFile(path string, record any) error {
 		return err
 	}
 
-	return opsfile.WriteAtomicBounded(path, data, harnessGenerationRecordLimit)
+	return opsfile.WriteAtomicBounded(path, data, generationRecordLimit)
 }

@@ -23,7 +23,7 @@ func (s service) invokeQuizGeneration(ctx context.Context, state quizcore.Runtim
 	}
 
 	ctx = bound.context(ctx)
-	request.ID = harnesshost.HarnessGenerationRequestID(ctx, request.ID)
+	request.ID = harnesshost.GenerationRequestID(ctx, request.ID)
 
 	return quizmodel.Invoke(ctx, bound.quizModel, request)
 }

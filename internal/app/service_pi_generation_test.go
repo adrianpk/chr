@@ -141,14 +141,14 @@ func TestPiGenerationProtocolIdentity(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	op, err := core.FreezeHarnessGeneration(t.Context(), harnesshost.HarnessGenerationFreezeInput{Project: operations.projectContext.ProjectDir, ID: "unsupported-protocol", Purpose: "conversation"}, func(context.Context, core.WorkspaceConfig) (harnesshost.HarnessGenerationPreparation, error) {
-		return harnesshost.HarnessGenerationPreparation{Binding: prepared.Binding, Launch: prepared.Launch}, nil
+	op, err := core.FreezeHarnessGeneration(t.Context(), harnesshost.GenerationFreezeInput{Project: operations.projectContext.ProjectDir, ID: "unsupported-protocol", Purpose: "conversation"}, func(context.Context, core.WorkspaceConfig) (harnesshost.GenerationPreparation, error) {
+		return harnesshost.GenerationPreparation{Binding: prepared.Binding, Launch: prepared.Launch}, nil
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := operations.bindGeneration(harnesshost.WithHarnessGeneration(t.Context(), op), "ignored", "conversation"); err == nil || errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := operations.bindGeneration(harnesshost.WithGeneration(t.Context(), op), "ignored", "conversation"); err == nil || errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("unsupported Pi protocol did not reach its dispatch fence", err)
 	}
 
@@ -251,7 +251,7 @@ func checkPiGenerationMetadata(t *testing.T, project string, valid, invalid int)
 	}
 }
 
-func validPiGenerationMetadata(record harnesshost.HarnessRunMetadata) bool {
+func validPiGenerationMetadata(record harnesshost.RunMetadata) bool {
 	return record.Selection.Selection.Harness == "pi" && record.ProcessOutcome == "completed" && record.ObservedModel == "fixture/fixture-model" && record.Usage != nil && record.UsageStatus == "known"
 }
 

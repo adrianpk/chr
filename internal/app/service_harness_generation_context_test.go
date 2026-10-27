@@ -43,7 +43,7 @@ func TestHarnessGenerationCallerContext(t *testing.T) {
 
 	fresh := bound.context(t.Context())
 
-	generation, ok := harnesshost.HarnessGenerationSelection(fresh)
+	generation, ok := harnesshost.GenerationSelection(fresh)
 	if !ok || generation.ID != "caller-context" || fresh.Err() != nil {
 		t.Fatal("fresh caller did not retain the admitted operation", generation, fresh.Err())
 	}

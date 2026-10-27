@@ -46,7 +46,7 @@ func telegramAuthoringServiceFixture(t *testing.T, reply func(authoringModelInpu
 
 	operations := newTestService(t, t.TempDir())
 	provider := core.NewConfiguredStructuredModel(true)
-	provider.API = openaiquiz.Adapter{Host: harnesshost.QuizGenerationHost{}, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
+	provider.API = openaiquiz.Adapter{Host: harnesshost.QuizGeneration{}, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
 	operations.conversationModel = provider
 
 	return operations, &calls

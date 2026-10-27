@@ -31,7 +31,7 @@ func TestHarnessGenerationBindingFailures(t *testing.T) {
 			request := generationBindingRequest(project)
 
 			runner := &generationBindingRunner{result: harness.AgentRunResult{Output: []byte("partial")}, err: test.err}
-			if _, err := harnesshost.RunAgent(harnesshost.WithHarnessGeneration(t.Context(), operation), runner, request); !errors.Is(err, test.err) {
+			if _, err := harnesshost.RunAgent(harnesshost.WithGeneration(t.Context(), operation), runner, request); !errors.Is(err, test.err) {
 				t.Fatal("lost transport error", err)
 			}
 
@@ -62,7 +62,7 @@ func TestHarnessGenerationBindingUsage(t *testing.T) {
 			request := generationBindingRequest(project)
 
 			runner := &generationBindingRunner{result: harness.AgentRunResult{Output: []byte(`{}`), Usage: test.usage}}
-			if _, err := harnesshost.RunAgent(harnesshost.WithHarnessGeneration(t.Context(), operation), runner, request); err != nil {
+			if _, err := harnesshost.RunAgent(harnesshost.WithGeneration(t.Context(), operation), runner, request); err != nil {
 				t.Fatal(err)
 			}
 
@@ -82,7 +82,7 @@ func TestHarnessGenerationBindingPrivacy(t *testing.T) {
 	request.Prompt = "fixture-private-prompt"
 	runner := &generationBindingRunner{result: harness.AgentRunResult{Output: []byte(`{}`)}}
 
-	ctx := harnesshost.WithHarnessGeneration(t.Context(), operation)
+	ctx := harnesshost.WithGeneration(t.Context(), operation)
 	if _, err := harnesshost.RunAgent(ctx, runner, request); err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +94,7 @@ func TestHarnessGenerationBindingPrivacy(t *testing.T) {
 
 	checkGenerationMetadataPrivacy(t, data, request)
 
-	if err := harnesshost.ValidateHarnessGenerationOutput(ctx, request, nil); err != nil {
+	if err := harnesshost.ValidateGenerationOutput(ctx, request, nil); err != nil {
 		t.Fatal(err)
 	}
 
@@ -146,7 +146,7 @@ func TestHarnessGenerationBindingFiles(t *testing.T) {
 
 			test.replace(t, path)
 
-			if _, err := FreezeHarnessGeneration(t.Context(), harnesshost.HarnessGenerationFreezeInput{Project: project, ID: operation.ID, Purpose: operation.Purpose}, nil); err == nil {
+			if _, err := FreezeHarnessGeneration(t.Context(), harnesshost.GenerationFreezeInput{Project: project, ID: operation.ID, Purpose: operation.Purpose}, nil); err == nil {
 				t.Fatal("invalid artifact was treated as a fresh operation")
 			}
 		})
@@ -184,16 +184,16 @@ func TestHarnessGenerationBindingCallIdentity(t *testing.T) {
 	request := generationBindingRequest(project)
 
 	runner := &generationBindingRunner{result: harness.AgentRunResult{Output: []byte(`{}`)}}
-	if _, err := harnesshost.RunAgent(harnesshost.WithHarnessGeneration(t.Context(), operation), runner, request); err != nil {
+	if _, err := harnesshost.RunAgent(harnesshost.WithGeneration(t.Context(), operation), runner, request); err != nil {
 		t.Fatal(err)
 	}
 
-	second, err := FreezeHarnessGeneration(t.Context(), harnesshost.HarnessGenerationFreezeInput{Project: project, ID: "second-operation", Purpose: operation.Purpose}, generationBindingResolver(filepath.Join(project, "fixture-driver"), "model-alpha"))
+	second, err := FreezeHarnessGeneration(t.Context(), harnesshost.GenerationFreezeInput{Project: project, ID: "second-operation", Purpose: operation.Purpose}, generationBindingResolver(filepath.Join(project, "fixture-driver"), "model-alpha"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := harnesshost.RunAgent(harnesshost.WithHarnessGeneration(t.Context(), second), runner, request); err == nil || runner.calls != 1 {
+	if _, err := harnesshost.RunAgent(harnesshost.WithGeneration(t.Context(), second), runner, request); err == nil || runner.calls != 1 {
 		t.Fatal("reused call artifact was overwritten by another operation", err)
 	}
 

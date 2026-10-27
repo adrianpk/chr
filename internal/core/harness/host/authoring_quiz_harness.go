@@ -10,21 +10,21 @@ import (
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
-// HarnessAuthoringQuizQuestionProvider describes a package boundary value.
-type HarnessAuthoringQuizQuestionProvider struct {
+// AuthoringQuizQuestionProvider describes a package boundary value.
+type AuthoringQuizQuestionProvider struct {
 	Program string
 	Runner  harness.AgentRunner
 }
 
 // GenerateAuthoringQuizQuestions generates the requested artifact.
-func (p HarnessAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx context.Context, request authoringcore.QuizGenerationRequest) (authoringcore.QuizGenerationResult, error) {
+func (p AuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx context.Context, request authoringcore.QuizGenerationRequest) (authoringcore.QuizGenerationResult, error) {
 	err := authoringcore.ValidateQuizGenerationRequest(request)
 	if err != nil {
 		return authoringcore.QuizGenerationResult{}, err
 	}
 
 	program := strings.TrimSpace(p.Program)
-	if _, bound := HarnessGenerationSelection(ctx); bound {
+	if _, bound := GenerationSelection(ctx); bound {
 		program = ""
 	}
 
@@ -33,7 +33,7 @@ func (p HarnessAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx
 		return authoringcore.QuizGenerationResult{}, fmt.Errorf("marshal authoring quiz request: %w", err)
 	}
 
-	prompt := authoringQuizHarnessPrompt(string(payload))
+	prompt := authoringQuizPrompt(string(payload))
 
 	run, err := RunAgent(ctx, p.Runner, harness.AgentRunRequest{
 		ID:                 request.ID,
@@ -58,9 +58,9 @@ func (p HarnessAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx
 		err = authoringcore.ValidateQuizGenerationResult(result)
 	}
 
-	err = ValidateHarnessGenerationOutput(ctx, harness.AgentRunRequest{ID: request.ID, Purpose: request.Action, ProjectDir: request.ProjectDir}, err)
+	err = ValidateGenerationOutput(ctx, harness.AgentRunRequest{ID: request.ID, Purpose: request.Action, ProjectDir: request.ProjectDir}, err)
 	if err != nil {
-		recordAgentRunResponseEvent(ctx, harness.AgentRunRequest{
+		recordResponse(ctx, harness.AgentRunRequest{
 			ID:         request.ID,
 			Purpose:    request.Action,
 			ProjectDir: request.ProjectDir,
@@ -69,7 +69,7 @@ func (p HarnessAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx
 		return authoringcore.QuizGenerationResult{}, err
 	}
 
-	recordAgentRunResponseEvent(ctx, harness.AgentRunRequest{
+	recordResponse(ctx, harness.AgentRunRequest{
 		ID:         request.ID,
 		Purpose:    request.Action,
 		ProjectDir: request.ProjectDir,
@@ -78,7 +78,7 @@ func (p HarnessAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx
 	return result, nil
 }
 
-func authoringQuizHarnessPrompt(payload string) string {
+func authoringQuizPrompt(payload string) string {
 	return strings.TrimSpace(`
 You generate context-aware authoring quiz questions for chr.
 

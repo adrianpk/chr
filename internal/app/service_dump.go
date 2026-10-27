@@ -147,7 +147,7 @@ func (s service) curateDump(ctx context.Context, request DumpCreateRequest) (Dum
 		return normalizeDumpCurationResult(result, request.Content), nil
 	}
 
-	if generation, bound := harnesshost.HarnessGenerationSelection(ctx); bound && generation.Binding.Selection.Source == "project" {
+	if generation, bound := harnesshost.GenerationSelection(ctx); bound && generation.Binding.Selection.Source == "project" {
 		return DumpCurationResult{}, err
 	}
 

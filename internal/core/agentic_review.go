@@ -113,7 +113,7 @@ func (r HarnessAgenticReviewRunner) Review(ctx context.Context, review AgenticRe
 
 	result, err := ParseAgenticReviewResult(agentRun.Output)
 
-	err = harnesshost.ValidateHarnessGenerationOutput(ctx, harness.AgentRunRequest{ID: "review-" + review.Ticket.Key + "-" + review.Execution.ID, Purpose: "agentic_review", ProjectDir: review.ProjectDir, RunDir: runDir}, err)
+	err = harnesshost.ValidateGenerationOutput(ctx, harness.AgentRunRequest{ID: "review-" + review.Ticket.Key + "-" + review.Execution.ID, Purpose: "agentic_review", ProjectDir: review.ProjectDir, RunDir: runDir}, err)
 	if err != nil {
 		return AgenticReviewArtifact{}, err
 	}

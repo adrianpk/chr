@@ -177,7 +177,7 @@ printf '%s\n' '{"questions":[{"id":"Q1","question":"Which workflow should this s
 `)
 	request := validAuthoringQuizGenerationRequest(projectDir)
 
-	result, err := (harnesshost.HarnessAuthoringQuizQuestionProvider{Program: program, Runner: codex.Runner{}}).GenerateAuthoringQuizQuestions(context.Background(), request)
+	result, err := (harnesshost.AuthoringQuizQuestionProvider{Program: program, Runner: codex.Runner{}}).GenerateAuthoringQuizQuestions(context.Background(), request)
 	if err != nil {
 		t.Fatalf("GenerateAuthoringQuizQuestions returned error: %v", err)
 	}
@@ -203,7 +203,7 @@ printf '%s\n' '{"questions":[{"id":"Q1","question":"Which workflow should this s
 `)
 	request := validAuthoringQuizGenerationRequest(projectDir)
 
-	_, err := (harnesshost.HarnessAuthoringQuizQuestionProvider{Program: program, Runner: codex.Runner{}}).GenerateAuthoringQuizQuestions(context.Background(), request)
+	_, err := (harnesshost.AuthoringQuizQuestionProvider{Program: program, Runner: codex.Runner{}}).GenerateAuthoringQuizQuestions(context.Background(), request)
 	if err != nil {
 		t.Fatalf("GenerateAuthoringQuizQuestions returned error: %v", err)
 	}
@@ -229,7 +229,7 @@ printf '%s\n' 'not-json'
 `)
 	request := validAuthoringQuizGenerationRequest(projectDir)
 
-	_, err := (harnesshost.HarnessAuthoringQuizQuestionProvider{Program: program, Runner: codex.Runner{}}).GenerateAuthoringQuizQuestions(context.Background(), request)
+	_, err := (harnesshost.AuthoringQuizQuestionProvider{Program: program, Runner: codex.Runner{}}).GenerateAuthoringQuizQuestions(context.Background(), request)
 	if err == nil {
 		t.Fatal("GenerateAuthoringQuizQuestions returned nil error")
 	}

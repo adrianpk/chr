@@ -1188,6 +1188,6 @@ func testTime() time.Time {
 
 // Domain fixtures inject their model boundary independently of private setup.
 // Harness generation fixtures use production assembly and owned executable files.
-func testGenerationBinder(_ service, _ context.Context, _, _ string) (*harnesshost.HarnessGenerationOperation, error) {
+func testGenerationBinder(_ service, _ context.Context, _, _ string) (*harnesshost.GenerationOperation, error) {
 	return nil, nil
 }

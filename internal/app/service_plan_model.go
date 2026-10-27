@@ -66,7 +66,7 @@ func (s service) newPlanningModelRequest(ctx context.Context, state quizcore.Run
 	}
 
 	request := s.documentGenerationModelRequest(scope, state, payload, sections, operation)
-	request.ID = harnesshost.HarnessGenerationRequestID(ctx, request.ID)
+	request.ID = harnesshost.GenerationRequestID(ctx, request.ID)
 
 	return request, nil
 }

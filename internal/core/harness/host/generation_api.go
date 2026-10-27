@@ -13,7 +13,7 @@ import (
 // RunAPIGeneration extends the existing private agent-run bundle to direct API
 // calls. The original provider owns its network request, limits and accounting.
 func RunAPIGeneration(ctx context.Context, request harness.AgentRunRequest, invoke func(context.Context) ([]byte, error)) ([]byte, error) {
-	operation, bound := ctx.Value(harnessGenerationContextKey{}).(HarnessGenerationOperation)
+	operation, bound := ctx.Value(generationContextKey{}).(GenerationOperation)
 	if !bound {
 		return invoke(ctx)
 	}
@@ -30,7 +30,7 @@ func RunAPIGeneration(ctx context.Context, request harness.AgentRunRequest, invo
 		return nil, err
 	}
 
-	request.ID = HarnessGenerationRequestID(ctx, request.ID)
+	request.ID = GenerationRequestID(ctx, request.ID)
 	if request.RunDir == "" {
 		request.RunDir = workspacecore.UserPath(request.ProjectDir, "tmp", "agent-runs", request.ID)
 	}
@@ -39,18 +39,18 @@ func RunAPIGeneration(ctx context.Context, request harness.AgentRunRequest, invo
 		return nil, err
 	}
 
-	metadata, err := startHarnessGenerationRun(ctx, request)
+	metadata, err := startGenerationRun(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
 	if err := writeAPIGenerationInputs(request); err != nil {
-		return nil, finishHarnessGenerationRun(request, harness.AgentRunResult{}, metadata, err)
+		return nil, finishGenerationRun(request, harness.AgentRunResult{}, metadata, err)
 	}
 
 	output, err := invoke(ctx)
 
-	return output, finishHarnessGenerationRun(request, harness.AgentRunResult{Output: output}, metadata, err)
+	return output, finishGenerationRun(request, harness.AgentRunResult{Output: output}, metadata, err)
 }
 
 func writeAPIGenerationInputs(request harness.AgentRunRequest) error {

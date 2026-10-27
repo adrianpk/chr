@@ -12,33 +12,33 @@ import (
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
-type harnessGenerationContextKey struct{}
+type generationContextKey struct{}
 
-// WithHarnessGeneration threads one frozen operation through nested model calls.
+// WithGeneration threads one frozen operation through nested model calls.
 // The operation is host-owned; no command or identity is accepted from model output.
-func WithHarnessGeneration(ctx context.Context, operation HarnessGenerationOperation) context.Context {
-	return context.WithValue(ctx, harnessGenerationContextKey{}, operation)
+func WithGeneration(ctx context.Context, operation GenerationOperation) context.Context {
+	return context.WithValue(ctx, generationContextKey{}, operation)
 }
 
-// HarnessGenerationSelection returns a value copy without the private executable.
-func HarnessGenerationSelection(ctx context.Context) (harnesscore.GenerationSelection, bool) {
-	operation, ok := ctx.Value(harnessGenerationContextKey{}).(HarnessGenerationOperation)
+// GenerationSelection returns a value copy without the private executable.
+func GenerationSelection(ctx context.Context) (harnesscore.GenerationSelection, bool) {
+	operation, ok := ctx.Value(generationContextKey{}).(GenerationOperation)
 
 	return harnesscore.GenerationSelection{ID: operation.ID, Binding: operation.Binding}, ok
 }
 
-// HarnessGenerationLocationFromContext returns retained host routing for a call.
+// GenerationLocationFromContext returns retained host routing for a call.
 // Adapters must recheck access to ProjectRef before using an interrupted request.
-func HarnessGenerationLocationFromContext(ctx context.Context) (HarnessGenerationLocation, bool) {
-	operation, ok := ctx.Value(harnessGenerationContextKey{}).(HarnessGenerationOperation)
+func GenerationLocationFromContext(ctx context.Context) (GenerationLocation, bool) {
+	operation, ok := ctx.Value(generationContextKey{}).(GenerationOperation)
 
-	return HarnessGenerationLocation{ConfigDir: operation.configDir, ExecutionDir: operation.executionDir, ProjectRef: operation.ProjectRef}, ok
+	return GenerationLocation{ConfigDir: operation.configDir, ExecutionDir: operation.executionDir, ProjectRef: operation.ProjectRef}, ok
 }
 
-// HarnessGenerationRequestID namespaces a caller's logical call within its
+// GenerationRequestID namespaces a caller's logical call within its
 // owning operation. Retries are stable; independent requests cannot overwrite it.
-func HarnessGenerationRequestID(ctx context.Context, id string) string {
-	operation, ok := ctx.Value(harnessGenerationContextKey{}).(HarnessGenerationOperation)
+func GenerationRequestID(ctx context.Context, id string) string {
+	operation, ok := ctx.Value(generationContextKey{}).(GenerationOperation)
 	if !ok {
 		return id
 	}
@@ -52,7 +52,7 @@ func HarnessGenerationRequestID(ctx context.Context, id string) string {
 }
 
 func prepareBoundGenerationRequest(ctx context.Context, request harness.AgentRunRequest) (harness.AgentRunRequest, error) {
-	operation, ok := ctx.Value(harnessGenerationContextKey{}).(HarnessGenerationOperation)
+	operation, ok := ctx.Value(generationContextKey{}).(GenerationOperation)
 	if !ok {
 		return request, nil
 	}
@@ -78,7 +78,7 @@ func prepareBoundGenerationRequest(ctx context.Context, request harness.AgentRun
 	return request, checkGenerationExecutable(operation)
 }
 
-func checkGenerationRequestOwner(operation HarnessGenerationOperation, request harness.AgentRunRequest) error {
+func checkGenerationRequestOwner(operation GenerationOperation, request harness.AgentRunRequest) error {
 	project, err := filepath.Abs(request.ProjectDir)
 	if err != nil || project != operation.executionDir || !filepath.IsLocal(request.ID) || filepath.Base(request.ID) != request.ID || request.ID == "operations" {
 		return errors.New("generation call must belong to its owning project and a local request artifact")
@@ -87,7 +87,7 @@ func checkGenerationRequestOwner(operation HarnessGenerationOperation, request h
 	return nil
 }
 
-func applyGenerationRequestSelection(operation HarnessGenerationOperation, request harness.AgentRunRequest) (harness.AgentRunRequest, error) {
+func applyGenerationRequestSelection(operation GenerationOperation, request harness.AgentRunRequest) (harness.AgentRunRequest, error) {
 	model := operation.Binding.Selection.Model
 	if model == "cli_default" {
 		model = ""

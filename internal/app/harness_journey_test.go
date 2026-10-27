@@ -152,7 +152,7 @@ func (f *harnessJourney) generate(ctx context.Context, t *testing.T, id, profile
 		t.Fatal(err)
 	}
 
-	generation, ok := harnesshost.HarnessGenerationSelection(ctx)
+	generation, ok := harnesshost.GenerationSelection(ctx)
 	if !ok || generation.Binding.Selection.Profile != profile {
 		t.Fatal("generation resolved the wrong role", generation.Binding.Selection.Profile)
 	}

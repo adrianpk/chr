@@ -51,7 +51,7 @@ func (s service) newQuizModelRequestWithEntries(ctx context.Context, state quizc
 	}
 
 	return quizmodel.Request{
-		ID:              harnesshost.HarnessGenerationRequestID(ctx, fmt.Sprintf("quiz-request-%d", state.QuestionsAsked+1)),
+		ID:              harnesshost.GenerationRequestID(ctx, fmt.Sprintf("quiz-request-%d", state.QuestionsAsked+1)),
 		Action:          quizmodel.ActionNextQuestion,
 		Strategy:        quizModelStrategy(state.Mode),
 		Scope:           scope,

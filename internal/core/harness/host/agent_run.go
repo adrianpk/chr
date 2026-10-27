@@ -25,20 +25,20 @@ func RunAgent(ctx context.Context, runner harness.AgentRunner, request harness.A
 		return harness.AgentRunResult{}, err
 	}
 
-	request.ID = HarnessGenerationRequestID(ctx, request.ID)
+	request.ID = GenerationRequestID(ctx, request.ID)
 
 	if request.RunDir == "" {
 		request.RunDir = workspacecore.UserPath(request.ProjectDir, "tmp", "agent-runs", request.ID)
 	}
 
-	metadata, err := startHarnessGenerationRun(ctx, request)
+	metadata, err := startGenerationRun(ctx, request)
 	if err != nil {
 		return harness.AgentRunResult{}, err
 	}
 
-	request.OnStart = func(result harness.AgentRunResult) { recordAgentRequest(ctx, request, result) }
+	request.OnStart = func(result harness.AgentRunResult) { recordRequest(ctx, request, result) }
 	result, err := runner.RunAgent(ctx, request)
-	err = finishHarnessGenerationRun(request, result, metadata, err)
+	err = finishGenerationRun(request, result, metadata, err)
 
 	if !request.DeferResponseTrace {
 		status := "ready"
@@ -46,13 +46,13 @@ func RunAgent(ctx context.Context, runner harness.AgentRunner, request harness.A
 			status = "error"
 		}
 
-		recordAgentRunResponseEvent(ctx, request, result, status, err)
+		recordResponse(ctx, request, result, status, err)
 	}
 
 	return result, err
 }
 
-func recordAgentRequest(ctx context.Context, request harness.AgentRunRequest, result harness.AgentRunResult) {
+func recordRequest(ctx context.Context, request harness.AgentRunRequest, result harness.AgentRunResult) {
 	harnesstrace.Record(ctx, harnesstrace.LoadOptions{ProjectDir: request.ProjectDir}, map[string]any{
 		"event": "llm_request", "llm_call_id": request.ID, "request_id": request.ID,
 		"action": request.Purpose, "provider": result.Provider, "model": result.Model,
@@ -61,8 +61,8 @@ func recordAgentRequest(ctx context.Context, request harness.AgentRunRequest, re
 	})
 }
 
-func recordAgentRunResponseEvent(ctx context.Context, request harness.AgentRunRequest, result harness.AgentRunResult, status string, runErr error) {
-	request.ID = HarnessGenerationRequestID(ctx, request.ID)
+func recordResponse(ctx context.Context, request harness.AgentRunRequest, result harness.AgentRunResult, status string, runErr error) {
+	request.ID = GenerationRequestID(ctx, request.ID)
 
 	event := map[string]any{
 		"event":                  "llm_response",
@@ -87,7 +87,7 @@ func recordAgentRunResponseEvent(ctx context.Context, request harness.AgentRunRe
 	harnesstrace.Record(ctx, harnesstrace.LoadOptions{ProjectDir: request.ProjectDir}, event)
 }
 
-// RecordAgentRunResponseEvent records a deferred agent response trace event.
-func RecordAgentRunResponseEvent(ctx context.Context, request harness.AgentRunRequest, result harness.AgentRunResult, status string, runErr error) {
-	recordAgentRunResponseEvent(ctx, request, result, status, runErr)
+// RecordResponse records a deferred agent response trace event.
+func RecordResponse(ctx context.Context, request harness.AgentRunRequest, result harness.AgentRunResult, status string, runErr error) {
+	recordResponse(ctx, request, result, status, runErr)
 }

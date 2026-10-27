@@ -40,7 +40,7 @@ func generationBindingPlanCase(t *testing.T, fixture func(*testing.T, string) (s
 	}))
 	t.Cleanup(server.Close)
 
-	api := openaiquiz.Adapter{Host: harnesshost.QuizGenerationHost{}, ProjectDir: project, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
+	api := openaiquiz.Adapter{Host: harnesshost.QuizGeneration{}, ProjectDir: project, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
 	operations.quizModel = api
 	provider := core.NewConfiguredStructuredModel(true)
 	provider.API = api

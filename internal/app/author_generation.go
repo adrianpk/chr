@@ -11,7 +11,7 @@ import (
 
 func withContextualQuizGeneration(ctx context.Context, cmd *cli.Command, project commandProjectContext, sessionID string, use func(context.Context, authoringcore.QuizQuestionProvider) error) error {
 	provider := contextualQuizProviderFromCommand()
-	if _, native := provider.(harnesshost.HarnessAuthoringQuizQuestionProvider); !native {
+	if _, native := provider.(harnesshost.AuthoringQuizQuestionProvider); !native {
 		return use(ctx, provider)
 	}
 
@@ -25,7 +25,7 @@ func withContextualQuizGeneration(ctx context.Context, cmd *cli.Command, project
 	bound, err := operations.bindGeneration(ctx, "contextual-"+sessionID, "contextual_quiz")
 
 	callCtx := bound.context(ctx)
-	if native, ok := provider.(harnesshost.HarnessAuthoringQuizQuestionProvider); ok && bound.generationRunner != nil {
+	if native, ok := provider.(harnesshost.AuthoringQuizQuestionProvider); ok && bound.generationRunner != nil {
 		native.Runner = bound.generationRunner
 		provider = native
 	}

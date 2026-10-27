@@ -168,7 +168,7 @@ func (p openAIDumpCurationProvider) CurateDump(
 
 	curation, err := decodeDumpCurationPayload(result.Output)
 
-	err = harnesshost.ValidateHarnessGenerationOutput(ctx, p.dumpAPIRunRequest(request, trace), err)
+	err = harnesshost.ValidateGenerationOutput(ctx, p.dumpAPIRunRequest(request, trace), err)
 	if err != nil {
 		p.recordResponse(ctx, trace, result, "parse_error", err)
 

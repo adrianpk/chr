@@ -10,5 +10,5 @@ import (
 // ValidateStructuredModelOutput records the original caller's typed/schema
 // validation, independently of JSON framing and process/network success.
 func ValidateStructuredModelOutput(ctx context.Context, request StructuredModelRequest, validationErr error) error {
-	return harnesshost.ValidateHarnessGenerationOutput(ctx, harness.AgentRunRequest{ID: request.ID, Purpose: request.Purpose, ProjectDir: request.ProjectDir}, validationErr)
+	return harnesshost.ValidateGenerationOutput(ctx, harness.AgentRunRequest{ID: request.ID, Purpose: request.Purpose, ProjectDir: request.ProjectDir}, validationErr)
 }

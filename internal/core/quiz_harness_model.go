@@ -46,7 +46,7 @@ func (a ActionRoutingQuizModelAdapter) Invoke(ctx context.Context, request quizm
 
 // Invoke invokes the configured model adapter.
 func (a HarnessQuizModelAdapter) Invoke(ctx context.Context, request quizmodel.Request) (quizmodel.Response, error) {
-	request.ID = harnesshost.HarnessGenerationRequestID(ctx, request.ID)
+	request.ID = harnesshost.GenerationRequestID(ctx, request.ID)
 	if err := quizmodel.ValidateRequest(request); err != nil {
 		return quizmodel.Response{}, err
 	}
@@ -81,14 +81,14 @@ func (a HarnessQuizModelAdapter) Invoke(ctx context.Context, request quizmodel.R
 	response, err := quizmodel.ResponseFromOutput(request, run.Output, run.Provider)
 	err = quizmodel.ValidateParsedResponse(response, err)
 
-	err = harnesshost.ValidateHarnessGenerationOutput(ctx, a.agentRunRequest(request), err)
+	err = harnesshost.ValidateGenerationOutput(ctx, a.agentRunRequest(request), err)
 	if err != nil {
-		harnesshost.RecordAgentRunResponseEvent(ctx, a.agentRunRequest(request), run, "parse_error", err)
+		harnesshost.RecordResponse(ctx, a.agentRunRequest(request), run, "parse_error", err)
 
 		return quizmodel.Response{}, err
 	}
 
-	harnesshost.RecordAgentRunResponseEvent(ctx, a.agentRunRequest(request), run, "ready", nil)
+	harnesshost.RecordResponse(ctx, a.agentRunRequest(request), run, "ready", nil)
 
 	return response, nil
 }

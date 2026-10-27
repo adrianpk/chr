@@ -32,14 +32,14 @@ func (p harnessDumpCurationProvider) CurateDump(ctx context.Context, request Dum
 
 	curation, err := decodeDumpCurationPayload(run.Output)
 
-	err = harnesshost.ValidateHarnessGenerationOutput(ctx, runRequest, err)
+	err = harnesshost.ValidateGenerationOutput(ctx, runRequest, err)
 	if err != nil {
-		harnesshost.RecordAgentRunResponseEvent(ctx, runRequest, run, "parse_error", err)
+		harnesshost.RecordResponse(ctx, runRequest, run, "parse_error", err)
 
 		return DumpCurationResult{}, err
 	}
 
-	harnesshost.RecordAgentRunResponseEvent(ctx, runRequest, run, "ready", nil)
+	harnesshost.RecordResponse(ctx, runRequest, run, "ready", nil)
 
 	return curation, nil
 }

@@ -16,9 +16,9 @@ import (
 	"forge.adrianpk.com/chr/internal/harness/process"
 )
 
-// HarnessRunMetadata records host facts independently of semantic approval.
+// RunMetadata records host facts independently of semantic approval.
 // ObservedModel stays absent unless a transport supplies verified observation.
-type HarnessRunMetadata struct {
+type RunMetadata struct {
 	Schema            string                        `json:"schema"`
 	RequestID         string                        `json:"request_id"`
 	Purpose           string                        `json:"purpose"`
@@ -32,15 +32,15 @@ type HarnessRunMetadata struct {
 	OutputHash        string                        `json:"output_hash,omitempty"`
 	ProcessOutcome    string                        `json:"process_outcome"`
 	OutputValidation  string                        `json:"output_validation"`
-	Usage             *HarnessRunUsage              `json:"usage,omitempty"`
+	Usage             *RunUsage                     `json:"usage,omitempty"`
 	UsageStatus       string                        `json:"usage_status"`
 	StartedAt         time.Time                     `json:"started_at"`
 	FinishedAt        *time.Time                    `json:"finished_at,omitempty"`
 	DiagnosticsRef    string                        `json:"diagnostics_ref,omitempty"`
 }
 
-// HarnessRunUsage retains unknown counts as absent, never numeric zero.
-type HarnessRunUsage struct {
+// RunUsage retains unknown counts as absent, never numeric zero.
+type RunUsage struct {
 	Input              *int64 `json:"input,omitempty"`
 	Output             *int64 `json:"output,omitempty"`
 	CacheRead          *int64 `json:"cache_read,omitempty"`
@@ -48,8 +48,8 @@ type HarnessRunUsage struct {
 	AccountingRevision string `json:"accounting_revision"`
 }
 
-func startHarnessGenerationRun(ctx context.Context, request harness.AgentRunRequest) (*HarnessRunMetadata, error) {
-	generation, bound := HarnessGenerationSelection(ctx)
+func startGenerationRun(ctx context.Context, request harness.AgentRunRequest) (*RunMetadata, error) {
+	generation, bound := GenerationSelection(ctx)
 	if !bound {
 		return nil, nil
 	}
@@ -58,7 +58,7 @@ func startHarnessGenerationRun(ctx context.Context, request harness.AgentRunRequ
 		return nil, errors.New("generation call requires bounded request and purpose identities")
 	}
 
-	record := &HarnessRunMetadata{
+	record := &RunMetadata{
 		Schema: "chr-harness-run/v1", RequestID: request.ID, Purpose: request.Purpose,
 		OperationID: generation.ID, Selection: generation.Binding, SelectionRevision: generation.Binding.Selection.SelectionRevision,
 		InputRef:       "sha256:" + contenthash.Sum([]byte(request.Prompt)),
@@ -68,15 +68,15 @@ func startHarnessGenerationRun(ctx context.Context, request harness.AgentRunRequ
 		record.SchemaRef = "sha256:" + contenthash.Sum(request.OutputSchema)
 	}
 
-	if err := checkHarnessRunIdentity(request, *record); err != nil {
+	if err := checkRunIdentity(request, *record); err != nil {
 		return nil, err
 	}
 
-	return record, writeHarnessGenerationFile(harnessRunMetadataPath(request), record)
+	return record, writeGenerationFile(runMetadataPath(request), record)
 }
 
-func checkHarnessRunIdentity(request harness.AgentRunRequest, record HarnessRunMetadata) error {
-	data, err := readHarnessGenerationFile(harnessRunMetadataPath(request))
+func checkRunIdentity(request harness.AgentRunRequest, record RunMetadata) error {
+	data, err := readGenerationFile(runMetadataPath(request))
 	if errors.Is(err, os.ErrNotExist) {
 		return nil
 	}
@@ -85,37 +85,37 @@ func checkHarnessRunIdentity(request harness.AgentRunRequest, record HarnessRunM
 		return err
 	}
 
-	var retained HarnessRunMetadata
-	if err := decodeHarnessGenerationFile(data, &retained); err != nil {
+	var retained RunMetadata
+	if err := decodeGenerationFile(data, &retained); err != nil {
 		return err
 	}
 
-	if !sameHarnessRunCall(retained, record) {
+	if !sameRunCall(retained, record) {
 		return errors.New("generation call identity conflicts with its retained artifact")
 	}
 
 	return harnesscore.ValidateGenerationBinding(retained.Selection)
 }
 
-func sameHarnessRunCall(left, right HarnessRunMetadata) bool {
+func sameRunCall(left, right RunMetadata) bool {
 	return left.Schema == right.Schema && left.RequestID == right.RequestID && left.Purpose == right.Purpose && left.OperationID == right.OperationID &&
 		left.Selection.BindingHash == right.Selection.BindingHash
 }
 
-func finishHarnessGenerationRun(request harness.AgentRunRequest, result harness.AgentRunResult, record *HarnessRunMetadata, runErr error) error {
+func finishGenerationRun(request harness.AgentRunRequest, result harness.AgentRunResult, record *RunMetadata, runErr error) error {
 	if record == nil {
 		return runErr
 	}
 
 	finished := time.Now().UTC()
 	record.FinishedAt = &finished
-	record.ProcessOutcome = harnessRunProcessOutcome(runErr)
-	usage := harnessRunMeasuredUsage(result.Usage)
+	record.ProcessOutcome = runProcessOutcome(runErr)
+	usage := runMeasuredUsage(result.Usage)
 	record.Usage, record.UsageStatus = usage.Usage, usage.Status
 	record.ObservedModel = result.ObservedModel
 
 	if runErr == nil {
-		runErr = retainNormalizedHarnessOutput(request, result.Output, record)
+		runErr = retainNormalizedOutput(request, result.Output, record)
 		if runErr != nil {
 			record.ProcessOutcome = "protocol_error"
 		}
@@ -126,10 +126,10 @@ func finishHarnessGenerationRun(request harness.AgentRunRequest, result harness.
 		record.DiagnosticsRef = "stderr.log"
 	}
 
-	return errors.Join(runErr, writeHarnessGenerationFile(harnessRunMetadataPath(request), record))
+	return errors.Join(runErr, writeGenerationFile(runMetadataPath(request), record))
 }
 
-func retainNormalizedHarnessOutput(request harness.AgentRunRequest, output []byte, record *HarnessRunMetadata) error {
+func retainNormalizedOutput(request harness.AgentRunRequest, output []byte, record *RunMetadata) error {
 	limit := harness.MaxStructuredOutput
 	if request.OutputLimit > 0 && request.OutputLimit < limit {
 		limit = request.OutputLimit
@@ -153,7 +153,7 @@ func retainNormalizedHarnessOutput(request harness.AgentRunRequest, output []byt
 	return nil
 }
 
-func harnessRunProcessOutcome(err error) string {
+func runProcessOutcome(err error) string {
 	switch {
 	case err == nil:
 		return "completed"
@@ -170,25 +170,25 @@ func harnessRunProcessOutcome(err error) string {
 	}
 }
 
-type harnessMeasuredUsage struct {
-	Usage  *HarnessRunUsage
+type measuredRunUsage struct {
+	Usage  *RunUsage
 	Status string
 }
 
-func harnessRunMeasuredUsage(usage harness.Usage) harnessMeasuredUsage {
+func runMeasuredUsage(usage harness.Usage) measuredRunUsage {
 	if (usage.Input != nil && *usage.Input < 0) || (usage.Output != nil && *usage.Output < 0) || (usage.Input == nil && usage.Output == nil) {
-		return harnessMeasuredUsage{Status: "unknown"}
+		return measuredRunUsage{Status: "unknown"}
 	}
 
-	measured := &HarnessRunUsage{Input: usage.Input, Output: usage.Output, AccountingRevision: "chr-harness-observed/v1"}
+	measured := &RunUsage{Input: usage.Input, Output: usage.Output, AccountingRevision: "chr-harness-observed/v1"}
 	measured.CacheRead = optionalMeasuredCounter(usage.CacheRead)
 	measured.CacheWrite = optionalMeasuredCounter(usage.CacheWrite)
 
 	if usage.Input == nil || usage.Output == nil {
-		return harnessMeasuredUsage{Usage: measured, Status: "partial"}
+		return measuredRunUsage{Usage: measured, Status: "partial"}
 	}
 
-	return harnessMeasuredUsage{Usage: measured, Status: "known"}
+	return measuredRunUsage{Usage: measured, Status: "known"}
 }
 
 func optionalMeasuredCounter(value *int64) *int64 {
@@ -199,7 +199,7 @@ func optionalMeasuredCounter(value *int64) *int64 {
 	return nil
 }
 
-func harnessRunMetadataPath(request harness.AgentRunRequest) string {
+func runMetadataPath(request harness.AgentRunRequest) string {
 	runDir := request.RunDir
 	if runDir == "" {
 		runDir = workspacecore.UserPath(request.ProjectDir, "tmp", "agent-runs", request.ID)
@@ -208,27 +208,27 @@ func harnessRunMetadataPath(request harness.AgentRunRequest) string {
 	return filepath.Join(runDir, "harness-run.json")
 }
 
-// ValidateHarnessGenerationOutput records the caller's parser result. Process
+// ValidateGenerationOutput records the caller's parser result. Process
 // success never implies schema validity or approval of an authoring artifact.
-func ValidateHarnessGenerationOutput(ctx context.Context, request harness.AgentRunRequest, validationErr error) error {
-	request.ID = HarnessGenerationRequestID(ctx, request.ID)
+func ValidateGenerationOutput(ctx context.Context, request harness.AgentRunRequest, validationErr error) error {
+	request.ID = GenerationRequestID(ctx, request.ID)
 
-	generation, bound := HarnessGenerationSelection(ctx)
+	generation, bound := GenerationSelection(ctx)
 	if !bound {
 		return validationErr
 	}
 
-	data, err := readHarnessGenerationFile(harnessRunMetadataPath(request))
+	data, err := readGenerationFile(runMetadataPath(request))
 	if err != nil {
 		return errors.Join(validationErr, err)
 	}
 
-	var record HarnessRunMetadata
-	if err := decodeHarnessGenerationFile(data, &record); err != nil {
+	var record RunMetadata
+	if err := decodeGenerationFile(data, &record); err != nil {
 		return errors.Join(validationErr, err)
 	}
 
-	if err := validateHarnessRunForOperation(record, request, generation.ID, generation.Binding); err != nil {
+	if err := validateRunForOperation(record, request, generation.ID, generation.Binding); err != nil {
 		return errors.Join(validationErr, err)
 	}
 
@@ -237,10 +237,10 @@ func ValidateHarnessGenerationOutput(ctx context.Context, request harness.AgentR
 		record.OutputValidation = "invalid"
 	}
 
-	return errors.Join(validationErr, writeHarnessGenerationFile(harnessRunMetadataPath(request), record))
+	return errors.Join(validationErr, writeGenerationFile(runMetadataPath(request), record))
 }
 
-func validateHarnessRunForOperation(record HarnessRunMetadata, request harness.AgentRunRequest, id string, binding harnesscore.GenerationBinding) error {
+func validateRunForOperation(record RunMetadata, request harness.AgentRunRequest, id string, binding harnesscore.GenerationBinding) error {
 	if record.Schema != "chr-harness-run/v1" || record.RequestID != request.ID || record.Purpose != request.Purpose || record.OperationID != id || record.Selection.BindingHash != binding.BindingHash || record.ProcessOutcome != "completed" {
 		return errors.New("invalid generation validation evidence")
 	}

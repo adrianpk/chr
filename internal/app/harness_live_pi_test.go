@@ -111,7 +111,7 @@ func prepareHarnessLivePi(t *testing.T, operations service, options harnessLiveP
 	writeCLIWorkspaceConfig(t, operations.projectContext.ProjectDir, "ticket:\n  key_prefix: PRJ\nharnesses:\n  generation: proof-generation\n  worker: proof-worker\n")
 }
 
-func harnessLivePiGeneration(t *testing.T, operations service) harnesshost.HarnessRunMetadata {
+func harnessLivePiGeneration(t *testing.T, operations service) harnesshost.RunMetadata {
 	t.Helper()
 
 	bound, err := operations.bindGeneration(t.Context(), "live-pi-generation", "spec_generation")
@@ -168,7 +168,7 @@ func harnessLivePiWorker(t *testing.T, operations service, request core.Workflow
 	return retained, result
 }
 
-func writeHarnessLivePiEvidence(t *testing.T, options harnessLivePiOptions, generation harnesshost.HarnessRunMetadata, worker core.WorkflowInvocation, result core.WorkflowTaskResult) {
+func writeHarnessLivePiEvidence(t *testing.T, options harnessLivePiOptions, generation harnesshost.RunMetadata, worker core.WorkflowInvocation, result core.WorkflowTaskResult) {
 	t.Helper()
 
 	candidate, err := exec.CommandContext(t.Context(), "git", "rev-parse", "HEAD").Output()
@@ -180,7 +180,7 @@ func writeHarnessLivePiEvidence(t *testing.T, options harnessLivePiOptions, gene
 	evidence := struct {
 		Candidate, Provider, Model, PiVersion, Runtime, WorkerCommit, OutputHash string
 		WorkerAttempts, WorkerDeadlineSeconds                                    int
-		Generation                                                               harnesshost.HarnessRunMetadata
+		Generation                                                               harnesshost.RunMetadata
 	}{strings.TrimSpace(string(candidate)), options.provider, options.model, "1.3.0", worker.HarnessBinding.RuntimeRef, result.Commit, hex.EncodeToString(outputHash[:]), len(worker.Attempts), worker.Policy.WorkerTimeoutSeconds, generation}
 
 	data, err := json.MarshalIndent(evidence, "", "  ")

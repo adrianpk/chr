@@ -47,7 +47,7 @@ func conversationGenerationProjectAllowed(id string, input ConversationIntentCon
 	return false
 }
 
-func (s service) validateIntentGenerationProject(ctx context.Context, location harnesshost.HarnessGenerationLocation, input ConversationIntentContext) error {
+func (s service) validateIntentGenerationProject(ctx context.Context, location harnesshost.GenerationLocation, input ConversationIntentContext) error {
 	if !conversationGenerationProjectAllowed(location.ProjectRef, input) {
 		return workflowstate.ErrConflict
 	}
@@ -70,7 +70,7 @@ func (s service) validateIntentGenerationProject(ctx context.Context, location h
 }
 
 func (s service) intentGenerationProject(ctx context.Context, input ConversationIntentContext) (service, error) {
-	location, bound := harnesshost.HarnessGenerationLocationFromContext(ctx)
+	location, bound := harnesshost.GenerationLocationFromContext(ctx)
 	if !bound {
 		return s, nil
 	}

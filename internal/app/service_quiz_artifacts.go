@@ -115,7 +115,7 @@ func (s service) newQuizDraftSpecModelRequest(ctx context.Context, state quizcor
 	)
 
 	return quizmodel.Request{
-		ID:              harnesshost.HarnessGenerationRequestID(ctx, fmt.Sprintf("quiz-draft-spec-%s", paths.ScopeID)),
+		ID:              harnesshost.GenerationRequestID(ctx, fmt.Sprintf("quiz-draft-spec-%s", paths.ScopeID)),
 		Action:          quizmodel.ActionDraftSpec,
 		Strategy:        "draft_spec",
 		Scope:           scope,

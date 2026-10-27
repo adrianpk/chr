@@ -16,7 +16,7 @@ import (
 )
 
 var newAuthoringQuizQuestionProvider = func() authoringcore.QuizQuestionProvider {
-	return harnesshost.HarnessAuthoringQuizQuestionProvider{Program: codex.Program, Runner: codex.Runner{}}
+	return harnesshost.AuthoringQuizQuestionProvider{Program: codex.Program, Runner: codex.Runner{}}
 }
 
 func (factory commandFactory) authorQuizCommand() *cli.Command {

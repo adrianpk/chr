@@ -293,10 +293,17 @@ Generation host move checks passed:
 - `make check-go-style`: 9309 declarations, ceiling seven, 207 exact debts, one external exception.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/host ./internal/core ./internal/app ./scripts/goquality`: zero issues.
 
+The separate generation naming commit exposes host.GenerationOperation,
+GenerationPreparation, GenerationLaunch, GenerationLocation, GenerationFreezeInput,
+GenerationResolver, FreezeGeneration, WithGeneration, RunMetadata and RunUsage.
+Concrete QuizGeneration and AuthoringQuizQuestionProvider adapters keep their
+existing contracts. The same host/native/app/wire regressions, production style
+check and strict lint passed after naming; all 60 source declarations reconcile.
+
 ## Risks and Follow-ups
 
 The slice remains in progress; PR readiness is not established. All assigned
-signature occurrences are reconciled. Remaining work includes configuration/
-selection and generation admission ownership, runtime host boundaries, the
-remaining lifecycle/flag/wrapper review, and final exact-HEAD controller validation.
+signature occurrences are reconciled. Remaining work includes runtime planning
+and worker resource ownership, configuration selection projections, the remaining
+lifecycle/flag/wrapper dispositions, and final exact-HEAD controller validation.
 No Slice 10 PR has been opened.

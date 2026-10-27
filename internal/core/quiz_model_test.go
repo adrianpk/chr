@@ -313,7 +313,7 @@ func TestOpenAIQuizModelAdapterRecordsTraceEvents(t *testing.T) {
 	defer server.Close()
 
 	model := openaiquiz.Adapter{
-		Host:       harnesshost.QuizGenerationHost{},
+		Host:       harnesshost.QuizGeneration{},
 		APIKey:     "test-key",
 		BaseURL:    server.URL,
 		Model:      "test-model",
@@ -365,7 +365,7 @@ func TestOpenAIQuizModelAdapterRecordsTracePayloadsWhenEnabled(t *testing.T) {
 	defer server.Close()
 
 	model := openaiquiz.Adapter{
-		Host:       harnesshost.QuizGenerationHost{},
+		Host:       harnesshost.QuizGeneration{},
 		APIKey:     apiKey,
 		BaseURL:    server.URL,
 		Model:      "test-model",
@@ -408,7 +408,7 @@ func TestOpenAIQuizModelAdapterRecordsParseFailureTrace(t *testing.T) {
 	defer server.Close()
 
 	model := openaiquiz.Adapter{
-		Host:       harnesshost.QuizGenerationHost{},
+		Host:       harnesshost.QuizGeneration{},
 		APIKey:     "test-key",
 		BaseURL:    server.URL,
 		Model:      "test-model",
@@ -446,7 +446,7 @@ func TestOpenAIQuizModelAdapterRecordsProviderFailureTrace(t *testing.T) {
 	defer server.Close()
 
 	model := openaiquiz.Adapter{
-		Host:       harnesshost.QuizGenerationHost{},
+		Host:       harnesshost.QuizGeneration{},
 		APIKey:     "test-key",
 		BaseURL:    server.URL,
 		Model:      "test-model",

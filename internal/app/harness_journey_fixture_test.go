@@ -121,7 +121,7 @@ func (f *harnessJourney) configureAPI(t *testing.T) {
 	t.Cleanup(server.Close)
 
 	provider := core.NewConfiguredStructuredModel(false)
-	provider.API = openaiquiz.Adapter{Host: harnesshost.QuizGenerationHost{}, APIKey: "fixture-only", BaseURL: server.URL, Client: server.Client()}
+	provider.API = openaiquiz.Adapter{Host: harnesshost.QuizGeneration{}, APIKey: "fixture-only", BaseURL: server.URL, Client: server.Client()}
 	f.operations.conversationModel = provider
 }
 

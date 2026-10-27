@@ -75,7 +75,7 @@ func newDumpCurationProvider(projectDir string) DumpCurationProvider {
 }
 
 func newQuizModelAdapter(projectDir string) quizmodel.Adapter {
-	defaultAdapter := openaiquiz.Adapter{Host: harnesshost.QuizGenerationHost{}, ProjectDir: projectDir}
+	defaultAdapter := openaiquiz.Adapter{Host: harnesshost.QuizGeneration{}, ProjectDir: projectDir}
 	actionAdapters := map[quizmodel.Action]quizmodel.Adapter{}
 
 	if codexGenerationBackend("CHR_SPEC_GENERATION_BACKEND") {

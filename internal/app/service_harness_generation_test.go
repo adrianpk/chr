@@ -121,7 +121,7 @@ func changeGenerationFixture(ctx context.Context, operations service, profile st
 	return err
 }
 
-func generationFixtureMetadata(t *testing.T, project string) []harnesshost.HarnessRunMetadata {
+func generationFixtureMetadata(t *testing.T, project string) []harnesshost.RunMetadata {
 	t.Helper()
 
 	paths, err := filepath.Glob(workspacecore.UserPath(project, "tmp", "agent-runs", "*", "harness-run.json"))
@@ -129,7 +129,7 @@ func generationFixtureMetadata(t *testing.T, project string) []harnesshost.Harne
 		t.Fatal(err)
 	}
 
-	var records []harnesshost.HarnessRunMetadata
+	var records []harnesshost.RunMetadata
 
 	for _, path := range paths {
 		data, err := os.ReadFile(path)
@@ -137,7 +137,7 @@ func generationFixtureMetadata(t *testing.T, project string) []harnesshost.Harne
 			t.Fatal(err)
 		}
 
-		var record harnesshost.HarnessRunMetadata
+		var record harnesshost.RunMetadata
 		if err := json.Unmarshal(data, &record); err != nil {
 			t.Fatal(err)
 		}

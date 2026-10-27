@@ -10,13 +10,13 @@ import (
 )
 
 type generationBindingWire struct {
-	Schema       string                                 `json:"schema"`
-	Operation    harnesshost.HarnessGenerationOperation `json:"operation"`
-	Program      string                                 `json:"program,omitempty"`
-	Resources    *harness.GenerationResources           `json:"resources,omitempty"`
-	ConfigDir    string                                 `json:"config_dir"`
-	ExecutionDir string                                 `json:"execution_dir"`
-	Checksum     string                                 `json:"checksum"`
+	Schema       string                          `json:"schema"`
+	Operation    harnesshost.GenerationOperation `json:"operation"`
+	Program      string                          `json:"program,omitempty"`
+	Resources    *harness.GenerationResources    `json:"resources,omitempty"`
+	ConfigDir    string                          `json:"config_dir"`
+	ExecutionDir string                          `json:"execution_dir"`
+	Checksum     string                          `json:"checksum"`
 }
 
 func generationBindingOperationPath(project, id string) (string, error) {
