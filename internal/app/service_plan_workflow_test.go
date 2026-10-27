@@ -69,7 +69,7 @@ func checkServiceWorkflowProjection(t *testing.T, service service, project strin
 		}
 	})
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: project})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: project})
 	if err != nil {
 		t.Fatal(err)
 	}

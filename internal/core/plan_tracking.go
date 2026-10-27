@@ -32,7 +32,7 @@ func GeneratedPlanTrackingLayout(projectDir string, scope quizcore.Scope) (Gener
 		return GeneratedPlanTrackingPaths{}, err
 	}
 
-	body, err := opscore.NamedOpsArtifactBody(projectDir, "tracker", scopeID+"-tracking")
+	body, err := opscore.NamedArtifactBody(projectDir, "tracker", scopeID+"-tracking")
 	if err != nil {
 		return GeneratedPlanTrackingPaths{}, err
 	}
@@ -70,7 +70,7 @@ func WriteGeneratedPlanTracking(
 		return GeneratedPlanTrackingPaths{}, err
 	}
 
-	if err := opscore.EnsureNamedOpsArtifactMetadata(projectDir, "tracker", scopeID+"-tracking"); err != nil {
+	if err := opscore.EnsureNamedArtifactMetadata(projectDir, "tracker", scopeID+"-tracking"); err != nil {
 		return GeneratedPlanTrackingPaths{}, err
 	}
 

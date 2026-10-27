@@ -127,7 +127,7 @@ func validateAuthoringArtifactLayoutOptions(opts AuthoringArtifactLayoutOptions)
 
 // EnsureAuthoringArtifactMetadata ensures metadata for an authoring artifact body.
 func EnsureAuthoringArtifactMetadata(projectDir string, ref AuthoringArtifactRef) error {
-	return opscore.EnsureOpsArtifactBodyMetadata(projectDir, ref.Path)
+	return opscore.EnsureArtifactBodyMetadata(projectDir, ref.Path)
 }
 
 func authoringArtifactPath(opts AuthoringArtifactLayoutOptions) (string, string, error) {
@@ -139,7 +139,7 @@ func authoringArtifactPath(opts AuthoringArtifactLayoutOptions) (string, string,
 	fileName := authoringArtifactFileName(opts.SessionID, name)
 	artifactType := authoringArtifactType(opts.Kind)
 
-	body, err := opscore.NamedOpsArtifactBody(opts.ProjectDir, artifactType, strings.TrimSuffix(fileName, ".md"))
+	body, err := opscore.NamedArtifactBody(opts.ProjectDir, artifactType, strings.TrimSuffix(fileName, ".md"))
 
 	return body.RelativePath, body.Path, err
 }

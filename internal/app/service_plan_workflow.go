@@ -15,7 +15,7 @@ import (
 // MaterializeWorkflowPlan explicitly opts approved input into ticket-owned
 // workflow state. Ordinary legacy plan reads and defaults do not adopt it.
 func (s service) MaterializeWorkflowPlan(ctx context.Context, plan generationcore.GeneratedWorkflowPlan) (core.WorkflowMaterializationResult, error) {
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: s.workflowNamespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: s.workflowNamespace})
 	if err != nil {
 		return core.WorkflowMaterializationResult{}, err
 	}
@@ -64,7 +64,7 @@ func (s service) refreshWorkflowProjection(ctx context.Context, store *core.Work
 // AdoptWorkflowPlan observes legacy runtime state and adopts only the explicit
 // selections in the request. It never converts records while listing plans.
 func (s service) AdoptWorkflowPlan(ctx context.Context, opts core.WorkflowPlanAdoptionOptions) (core.WorkflowMaterializationResult, error) {
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: s.workflowNamespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: s.workflowNamespace})
 	if err != nil {
 		return core.WorkflowMaterializationResult{}, err
 	}
@@ -118,7 +118,7 @@ func (s service) materializeApprovedWorkflow(ctx context.Context, request PlanTr
 		return PlanTrackingResult{}, err
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: s.workflowNamespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: s.workflowNamespace})
 	if err != nil {
 		return PlanTrackingResult{}, err
 	}

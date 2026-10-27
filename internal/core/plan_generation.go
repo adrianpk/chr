@@ -137,7 +137,7 @@ func archiveGeneratedPlan(ctx context.Context, projectDir string, scope quizcore
 		return ArchivedPlanPaths{}, false, err
 	}
 
-	if err := opscore.EnsureOpsArtifactBodyMetadata(projectDir, archivePaths.RelativePath); err != nil {
+	if err := opscore.EnsureArtifactBodyMetadata(projectDir, archivePaths.RelativePath); err != nil {
 		return ArchivedPlanPaths{}, false, err
 	}
 
@@ -204,22 +204,22 @@ func RenderGeneratedPlan(plan generationcore.GeneratedPlan) string {
 
 func scopedPlanArtifactBody(projectDir, namespace, name string) (string, string, error) {
 	if namespace == "" {
-		body, err := opscore.NamedOpsArtifactBody(projectDir, "plan", name)
+		body, err := opscore.NamedArtifactBody(projectDir, "plan", name)
 
 		return body.RelativePath, body.Path, err
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: projectDir, Namespace: namespace})
 	if err != nil {
 		return "", "", err
 	}
 
-	dir, err := layout.ArtifactDirectory("plan", "00000-"+opscore.OpsArtifactSlugOrDefault(name))
+	dir, err := layout.ArtifactDirectory("plan", "00000-"+opscore.ArtifactSlugOrDefault(name))
 	if err != nil {
 		return "", "", err
 	}
 
-	path := filepath.Join(dir, opscore.OpsArtifactBodyFile())
+	path := filepath.Join(dir, opscore.ArtifactBodyFile())
 	relative, err := filepath.Rel(projectDir, path)
 
 	return filepath.ToSlash(relative), path, err

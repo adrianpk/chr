@@ -62,7 +62,7 @@ func ReadGuidedInvocation(ctx context.Context, root string, session AuthoringSes
 		return WorkflowInvocation{}, workflowstate.ErrConflict
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: root, Namespace: session.Namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: root, Namespace: session.Namespace})
 	if err != nil {
 		return WorkflowInvocation{}, err
 	}

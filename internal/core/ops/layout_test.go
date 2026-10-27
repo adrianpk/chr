@@ -10,7 +10,7 @@ import (
 func TestResolveOpsLayoutDefaultsToDefaultNamespace(t *testing.T) {
 	projectDir := t.TempDir()
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{
+	layout, err := ResolveLayout(LayoutOptions{
 		ProjectDir: projectDir,
 		LookupEnv:  func(string) string { return "" },
 	})
@@ -28,7 +28,7 @@ func TestResolveOpsLayoutDefaultsToDefaultNamespace(t *testing.T) {
 }
 
 func TestResolveOpsLayoutUsesExplicitNamespaceBeforeEnvironment(t *testing.T) {
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{
+	layout, err := ResolveLayout(LayoutOptions{
 		ProjectDir: t.TempDir(),
 		Namespace:  "team-a",
 		LookupEnv:  func(string) string { return "other-user" },
@@ -43,7 +43,7 @@ func TestResolveOpsLayoutUsesExplicitNamespaceBeforeEnvironment(t *testing.T) {
 }
 
 func TestResolveOpsLayoutUsesOpsUser(t *testing.T) {
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{
+	layout, err := ResolveLayout(LayoutOptions{
 		ProjectDir: t.TempDir(),
 		LookupEnv: func(name string) string {
 			if name == opsnamespace.UserEnv {
@@ -63,7 +63,7 @@ func TestResolveOpsLayoutUsesOpsUser(t *testing.T) {
 }
 
 func TestResolveOpsLayoutRejectsInvalidNamespace(t *testing.T) {
-	_, err := ResolveOpsLayout(ResolveOpsLayoutOptions{
+	_, err := ResolveLayout(LayoutOptions{
 		ProjectDir: t.TempDir(),
 		Namespace:  "../outside",
 	})
@@ -75,7 +75,7 @@ func TestResolveOpsLayoutRejectsInvalidNamespace(t *testing.T) {
 func TestOpsLayoutBuildsCanonicalArtifactAndWorktreePaths(t *testing.T) {
 	projectDir := t.TempDir()
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: "adrian"})
+	layout, err := ResolveLayout(LayoutOptions{ProjectDir: projectDir, Namespace: "adrian"})
 	if err != nil {
 		t.Fatalf("ResolveOpsLayout returned error: %v", err)
 	}
@@ -100,7 +100,7 @@ func TestOpsLayoutBuildsCanonicalArtifactAndWorktreePaths(t *testing.T) {
 }
 
 func TestOpsLayoutRejectsUnknownArtifactTypeAndUnsafeID(t *testing.T) {
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: t.TempDir()})
+	layout, err := ResolveLayout(LayoutOptions{ProjectDir: t.TempDir()})
 	if err != nil {
 		t.Fatalf("ResolveOpsLayout returned error: %v", err)
 	}

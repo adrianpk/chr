@@ -30,7 +30,7 @@ type GuidedUseCaseInspection struct {
 }
 
 func (s service) guidedUseCaseScope(id, namespace string) (core.GuidedUseCaseScope, error) {
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: namespace})
 	if err != nil {
 		return core.GuidedUseCaseScope{}, err
 	}

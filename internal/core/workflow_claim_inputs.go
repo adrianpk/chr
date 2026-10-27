@@ -21,7 +21,7 @@ func (s *WorkflowStore) nextWorkflowInvocationNumber(ctx context.Context) (int, 
 
 	number := 1
 	for _, layout := range layouts {
-		number = max(number, opscore.NextOpsArtifactNumber(layout.Root()))
+		number = max(number, opscore.NextArtifactNumber(layout.Root()))
 	}
 
 	return number, nil

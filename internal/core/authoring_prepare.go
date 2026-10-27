@@ -182,9 +182,9 @@ func AuthoringContinuationArtifact(namespace, sessionID string, kind AuthoringAr
 		role = AuthoringArtifactRoleInput
 	}
 
-	id := "00000-" + opscore.OpsArtifactSlugOrDefault(sessionID+"-"+suffix)
+	id := "00000-" + opscore.ArtifactSlugOrDefault(sessionID+"-"+suffix)
 
-	return AuthoringArtifactRef{ID: id, Kind: kind, Role: role, Path: filepath.ToSlash(filepath.Join(opscore.OpsDirectoryName, namespace, authoringArtifactType(kind), id, opscore.OpsArtifactBodyFile())), Description: "Shared authoring " + suffix + " artifact."}
+	return AuthoringArtifactRef{ID: id, Kind: kind, Role: role, Path: filepath.ToSlash(filepath.Join(opscore.DirectoryName, namespace, authoringArtifactType(kind), id, opscore.ArtifactBodyFile())), Description: "Shared authoring " + suffix + " artifact."}
 }
 
 func (r *fileAuthoringSessionRepository) prepareAuthoringOutput(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *AuthoringSession, body string) ([]workflowFileChange, error) {

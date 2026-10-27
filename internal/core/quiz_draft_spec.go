@@ -32,7 +32,7 @@ func QuizDraftSpecLayout(projectDir string, scope quizcore.Scope) (QuizDraftSpec
 		return QuizDraftSpecPaths{}, err
 	}
 
-	body, err := opscore.NamedOpsArtifactBody(projectDir, "spec", scopeID+"-quiz-spec")
+	body, err := opscore.NamedArtifactBody(projectDir, "spec", scopeID+"-quiz-spec")
 	if err != nil {
 		return QuizDraftSpecPaths{}, err
 	}

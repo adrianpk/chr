@@ -22,7 +22,7 @@ func ReadGuidedResult(ctx context.Context, root string, session AuthoringSession
 		return WorkflowResultInspection{}, workflowstate.ErrConflict
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: root, Namespace: session.Namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: root, Namespace: session.Namespace})
 	if err != nil {
 		return WorkflowResultInspection{}, err
 	}

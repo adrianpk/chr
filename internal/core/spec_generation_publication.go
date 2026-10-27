@@ -112,12 +112,12 @@ func prepareGeneratedSpecDocument(projectDir string, paths GeneratedSpecPaths, d
 		action = "create"
 		parts := strings.Split(paths.RelativePath, "/")
 
-		layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: parts[1]})
+		layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: projectDir, Namespace: parts[1]})
 		if err != nil {
 			return document, action, err
 		}
 
-		document.metadata = opscore.NewOpsArtifactMetadata(opscore.CreateOpsArtifactOptions{Layout: layout, Type: "spec", Title: spec.Title, Producer: "chr"}, parts[3], spec.CreatedAt)
+		document.metadata = opscore.NewArtifactMetadata(opscore.ArtifactOptions{Layout: layout, Type: "spec", Title: spec.Title, Producer: "chr"}, parts[3], spec.CreatedAt)
 	}
 
 	front, body, err := splitWorkflowMarkdown([]byte(content))

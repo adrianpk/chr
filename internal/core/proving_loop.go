@@ -315,7 +315,7 @@ func writeProvingRalphLoopSummary(projectDir string, result ProvingRalphLoopResu
 		return fmt.Errorf("write proving ralph loop summary: %w", err)
 	}
 
-	if err := opscore.RefreshOpsArtifactMetadata(artifact.Dir, result.Status, time.Now()); err != nil {
+	if err := opscore.RefreshArtifactMetadata(artifact.Dir, result.Status, time.Now()); err != nil {
 		return err
 	}
 

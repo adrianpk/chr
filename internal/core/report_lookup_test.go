@@ -13,7 +13,7 @@ import (
 func TestReportLookupFindsReportByExecutionID(t *testing.T) {
 	projectDir := t.TempDir()
 	writeReportListingFile(t, projectDir, filepath.Join(
-		opscore.OpsDirectoryName,
+		opscore.DirectoryName,
 		opsnamespace.Default,
 		"run",
 		"00001-ticket-run",
@@ -40,7 +40,7 @@ func TestReportLookupFindsReportByExecutionID(t *testing.T) {
 func TestReportLookupFindsReportByRelativePath(t *testing.T) {
 	projectDir := t.TempDir()
 	relativePath := filepath.Join(
-		opscore.OpsDirectoryName,
+		opscore.DirectoryName,
 		opsnamespace.Default,
 		"run",
 		"00001-agent-work-loop",
@@ -79,7 +79,7 @@ func TestReportLookupRejectsMissingReport(t *testing.T) {
 func TestReportLookupRejectsAmbiguousReport(t *testing.T) {
 	projectDir := t.TempDir()
 	writeReportListingFile(t, projectDir, filepath.Join(
-		opscore.OpsDirectoryName,
+		opscore.DirectoryName,
 		opsnamespace.Default,
 		"run",
 		"00001-ticket-run",
@@ -87,7 +87,7 @@ func TestReportLookupRejectsAmbiguousReport(t *testing.T) {
 		"execution-report.md",
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
-		opscore.OpsDirectoryName,
+		opscore.DirectoryName,
 		opsnamespace.Default,
 		"run",
 		"00002-ticket-run",

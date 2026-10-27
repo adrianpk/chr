@@ -369,7 +369,7 @@ func canonicalWorkspaceGraphFixturePath(path string) string {
 
 	projectDir := strings.TrimSuffix(parts[0], "/")
 	slug := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
-	artifactID := "00000-" + opscore.OpsArtifactSlugOrDefault(slug)
+	artifactID := "00000-" + opscore.ArtifactSlugOrDefault(slug)
 
-	return filepath.Join(projectDir, opscore.OpsDirectoryName, opsnamespace.Default, artifactType, artifactID, opscore.OpsArtifactBodyFile())
+	return filepath.Join(projectDir, opscore.DirectoryName, opsnamespace.Default, artifactType, artifactID, opscore.ArtifactBodyFile())
 }

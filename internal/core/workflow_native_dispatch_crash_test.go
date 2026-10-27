@@ -19,7 +19,7 @@ func TestNativeFaultProcess(t *testing.T) {
 		return
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: root, Namespace: "default"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: root, Namespace: "default"})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -61,7 +61,7 @@ func workflowCoordinatorClone(t *testing.T, store *WorkflowStore) *WorkflowStore
 		t.Fatalf("clone: %v: %s", err, output)
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: dir, Namespace: store.layout.Namespace()})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: dir, Namespace: store.layout.Namespace()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -184,7 +184,7 @@ func TestWorkflowCoordinatorMove(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: destination, Namespace: "default"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: destination, Namespace: "default"})
 	if err != nil {
 		t.Fatal(err)
 	}

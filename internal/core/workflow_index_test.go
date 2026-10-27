@@ -179,7 +179,7 @@ func TestWorkflowNamespaces(t *testing.T) {
 	index := workflowTestIndex(t, ":memory:")
 	workflowTestCreate(t, store, "CHR-1")
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: store.layout.ProjectDir(), Namespace: "team"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: store.layout.ProjectDir(), Namespace: "team"})
 	if err != nil {
 		t.Fatal(err)
 	}

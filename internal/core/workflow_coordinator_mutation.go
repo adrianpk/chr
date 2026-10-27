@@ -35,7 +35,7 @@ func (s *WorkflowStore) guardWorkflowCoordinatorMutation(ctx context.Context) er
 	return nil
 }
 
-func (s *WorkflowStore) guardUnregisteredWorkflowLayout(ctx context.Context, layout opscore.OpsLayout) error {
+func (s *WorkflowStore) guardUnregisteredWorkflowLayout(ctx context.Context, layout opscore.Layout) error {
 	_, err := readWorkflowCoordinator(filepath.Join(layout.Root(), workflowCoordinatorPath))
 	if !errors.Is(err, os.ErrNotExist) {
 		return errors.Join(ErrWorkflowCoordinator, err)

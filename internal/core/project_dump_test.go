@@ -237,17 +237,17 @@ func changeProjectDumpSource(t *testing.T, project, reference, change string) {
 func projectDumpTestArtifact(t *testing.T, project, namespace, title, body string) string {
 	t.Helper()
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: project, Namespace: namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: project, Namespace: namespace})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	artifact, err := opscore.CreateOpsArtifact(opscore.CreateOpsArtifactOptions{Layout: layout, Type: "dump", Title: title, Producer: "chr", Now: func() time.Time { return time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC) }})
+	artifact, err := opscore.CreateArtifact(opscore.ArtifactOptions{Layout: layout, Type: "dump", Title: title, Producer: "chr", Now: func() time.Time { return time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC) }})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	path := filepath.Join(artifact.Dir, opscore.OpsArtifactBodyFile())
+	path := filepath.Join(artifact.Dir, opscore.ArtifactBodyFile())
 	writeTestFile(t, path, body)
 
 	reference, err := filepath.Rel(project, path)
@@ -263,7 +263,7 @@ func projectDumpTestImage(t *testing.T, project string) map[string]string {
 
 	image := map[string]string{}
 
-	root := filepath.Join(project, opscore.OpsDirectoryName)
+	root := filepath.Join(project, opscore.DirectoryName)
 	if _, err := os.Stat(root); errors.Is(err, os.ErrNotExist) {
 		return image
 	}

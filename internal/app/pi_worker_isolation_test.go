@@ -248,7 +248,7 @@ func piIsolationInput(t *testing.T, operations service, id string) core.Workflow
 		t.Fatal("missing owned worker attempt", err)
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: operations.projectContext.ProjectDir})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: operations.projectContext.ProjectDir})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -63,7 +63,7 @@ func ValidateProjectDumpReference(reference string) error {
 }
 
 func validProjectDumpEnvelope(parts []string) bool {
-	return parts[0] == opscore.OpsDirectoryName && parts[2] == "dump" && parts[4] == opscore.OpsArtifactBodyFile() && opsnamespace.Valid(parts[1]) && strings.TrimSpace(parts[1]) == parts[1]
+	return parts[0] == opscore.DirectoryName && parts[2] == "dump" && parts[4] == opscore.ArtifactBodyFile() && opsnamespace.Valid(parts[1]) && strings.TrimSpace(parts[1]) == parts[1]
 }
 
 // ObserveProjectDump inspects canonical documents without creating metadata,

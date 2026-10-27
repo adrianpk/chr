@@ -1247,7 +1247,7 @@ func TestGateDevMainFailsWhenAgentEvidenceIsMissing(t *testing.T) {
 	baseSHA := gateCLIGitOutput(t, projectDir, "rev-parse", "HEAD")
 
 	writeGateCLIFile(t, projectDir, "README.md", "gate evidence\n")
-	writeGateCLIFile(t, projectDir, filepath.Join(opscore.OpsDirectoryName, opsnamespace.Default, "run", "00001-ticket-run", "evidence", "execution-report.md"), `# Execution Report
+	writeGateCLIFile(t, projectDir, filepath.Join(opscore.DirectoryName, opsnamespace.Default, "run", "00001-ticket-run", "evidence", "execution-report.md"), `# Execution Report
 
 ## Summary
 
@@ -1309,7 +1309,7 @@ func TestGateDevMainAllowsMissingAgentEvidenceWhenConfigured(t *testing.T) {
 	baseSHA := gateCLIGitOutput(t, projectDir, "rev-parse", "HEAD")
 
 	writeGateCLIFile(t, projectDir, "README.md", "gate evidence\n")
-	writeGateCLIFile(t, projectDir, filepath.Join(opscore.OpsDirectoryName, opsnamespace.Default, "run", "00001-ticket-run", "evidence", "execution-report.md"), `# Execution Report
+	writeGateCLIFile(t, projectDir, filepath.Join(opscore.DirectoryName, opsnamespace.Default, "run", "00001-ticket-run", "evidence", "execution-report.md"), `# Execution Report
 
 ## Summary
 
@@ -5204,7 +5204,7 @@ func TestReportListListsProjectReports(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
 	writeCLIReport(t, projectDir, filepath.Join(
-		opscore.OpsDirectoryName,
+		opscore.DirectoryName,
 		opsnamespace.Default,
 		"run",
 		"00001-ticket-run",
@@ -5212,7 +5212,7 @@ func TestReportListListsProjectReports(t *testing.T) {
 		"execution-report.md",
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n- status: succeeded\n")
 	writeCLIReport(t, projectDir, filepath.Join(
-		opscore.OpsDirectoryName,
+		opscore.DirectoryName,
 		opsnamespace.Default,
 		"run",
 		"00002-agent-work-loop",
@@ -5246,7 +5246,7 @@ func TestReportListFiltersReports(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
 	writeCLIReport(t, projectDir, filepath.Join(
-		opscore.OpsDirectoryName,
+		opscore.DirectoryName,
 		opsnamespace.Default,
 		"run",
 		"00001-ticket-run",
@@ -5254,7 +5254,7 @@ func TestReportListFiltersReports(t *testing.T) {
 		"execution-report.md",
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n- status: succeeded\n")
 	writeCLIReport(t, projectDir, filepath.Join(
-		opscore.OpsDirectoryName,
+		opscore.DirectoryName,
 		opsnamespace.Default,
 		"run",
 		"00002-ticket-run",
@@ -5293,7 +5293,7 @@ func TestReportShowPrintsReportBody(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
 	writeCLIReport(t, projectDir, filepath.Join(
-		opscore.OpsDirectoryName,
+		opscore.DirectoryName,
 		opsnamespace.Default,
 		"run",
 		"00001-ticket-run",
@@ -5324,7 +5324,7 @@ func TestReportShowPrintsReportMetadata(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
 	writeCLIReport(t, projectDir, filepath.Join(
-		opscore.OpsDirectoryName,
+		opscore.DirectoryName,
 		opsnamespace.Default,
 		"run",
 		"00001-agent-work-loop",
@@ -5356,7 +5356,7 @@ func TestReportShowRejectsAmbiguousLookup(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
 	writeCLIReport(t, projectDir, filepath.Join(
-		opscore.OpsDirectoryName,
+		opscore.DirectoryName,
 		opsnamespace.Default,
 		"run",
 		"00001-ticket-run",
@@ -5364,7 +5364,7 @@ func TestReportShowRejectsAmbiguousLookup(t *testing.T) {
 		"execution-report.md",
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n")
 	writeCLIReport(t, projectDir, filepath.Join(
-		opscore.OpsDirectoryName,
+		opscore.DirectoryName,
 		opsnamespace.Default,
 		"run",
 		"00002-ticket-run",

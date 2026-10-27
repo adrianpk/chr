@@ -84,7 +84,7 @@ func (s *WorkflowStore) locateWorkflowInvocationPrepared(ctx context.Context, id
 func (s *WorkflowStore) workflowOwnerStore(run workflowInvocationFile) (*WorkflowStore, error) {
 	projectDir := filepath.Dir(filepath.Dir(run.OwnerRoot))
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: run.Namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: projectDir, Namespace: run.Namespace})
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +183,7 @@ func (s *WorkflowStore) appendObservedWorkflowInvocation(runs *[]workflowInvocat
 	return nil
 }
 
-func (s *WorkflowStore) workflowRepositoryLayouts(ctx context.Context) ([]opscore.OpsLayout, error) {
+func (s *WorkflowStore) workflowRepositoryLayouts(ctx context.Context) ([]opscore.Layout, error) {
 	worktrees, err := (OSWorktreeGit{}).WorktreeList(ctx, s.layout.ProjectDir())
 	if err != nil {
 		return nil, err
@@ -193,7 +193,7 @@ func (s *WorkflowStore) workflowRepositoryLayouts(ctx context.Context) ([]opscor
 		return nil, fmt.Errorf("workflow worktree observation bound exceeded")
 	}
 
-	result := []opscore.OpsLayout{}
+	result := []opscore.Layout{}
 
 	for _, worktree := range worktrees {
 		if worktree.Bare || worktree.Prunable {
@@ -215,8 +215,8 @@ func (s *WorkflowStore) workflowRepositoryLayouts(ctx context.Context) ([]opscor
 	return result, nil
 }
 
-func (s *WorkflowStore) workflowWorktreeLayouts(projectDir string) ([]opscore.OpsLayout, error) {
-	entries, err := os.ReadDir(filepath.Join(projectDir, opscore.OpsDirectoryName))
+func (s *WorkflowStore) workflowWorktreeLayouts(projectDir string) ([]opscore.Layout, error) {
+	entries, err := os.ReadDir(filepath.Join(projectDir, opscore.DirectoryName))
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return nil, err
 	}
@@ -236,10 +236,10 @@ func (s *WorkflowStore) workflowWorktreeLayouts(projectDir string) ([]opscore.Op
 	slices.Sort(names)
 
 	names = slices.Compact(names)
-	result := []opscore.OpsLayout{}
+	result := []opscore.Layout{}
 
 	for _, name := range names {
-		layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: name})
+		layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: projectDir, Namespace: name})
 		if err != nil {
 			return nil, err
 		}

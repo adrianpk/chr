@@ -10,3 +10,6 @@ Metadata retains ops-layout/v1, original field names, timestamps, file indexing
 and private-extension exclusion. Known envelopes are preserved when present.
 Numeric path-prefix recognition intentionally retains its existing prefix rule;
 it is not a stronger complete artifact identity validator.
+
+Public callers use Layout, Artifact, ArtifactOptions and ResolveLayout, plus
+cohesive artifact operations. No root core aliases or forwarding methods remain.

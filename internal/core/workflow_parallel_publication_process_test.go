@@ -36,7 +36,7 @@ func TestWorkflowParallelPublisher(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: spec.ProjectDir, Namespace: spec.Namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: spec.ProjectDir, Namespace: spec.Namespace})
 	if err != nil {
 		t.Fatal(err)
 	}

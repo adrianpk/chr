@@ -90,7 +90,7 @@ func newPlanRevision(paths GeneratedPlanPaths, metadata map[string]any, plan gen
 func (r *fileAuthoringSessionRepository) planRetainedImages(namespace string, binding generationcore.PlanRevisionBinding, body, order, tracker []byte) ([]workflowFileChange, error) {
 	var changes []workflowFileChange
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: r.projectDir, Namespace: namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: r.projectDir, Namespace: namespace})
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func (r *fileAuthoringSessionRepository) planRetainedImages(namespace string, bi
 }
 
 func (r *fileAuthoringSessionRepository) planCurrentTrackerChanges(namespace string, target planTargetObservation, binding generationcore.PlanRevisionBinding, plan generationcore.GeneratedPlan, tracker []byte) ([]workflowFileChange, error) {
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: r.projectDir, Namespace: namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: r.projectDir, Namespace: namespace})
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +205,7 @@ func validPlanRevisionJournalPath(reference string) bool {
 func validPlanTrackerJournalPath(reference string) bool {
 	parts := strings.Split(filepath.ToSlash(reference), "/")
 
-	return len(parts) == 5 && parts[0] == "ops" && opsnamespace.Valid(parts[1]) && parts[2] == "tracker" && opscore.HasOpsArtifactNumberPrefix(parts[3]) && (parts[4] == "artifact.md" || parts[4] == "metadata.json")
+	return len(parts) == 5 && parts[0] == "ops" && opsnamespace.Valid(parts[1]) && parts[2] == "tracker" && opscore.HasArtifactNumberPrefix(parts[3]) && (parts[4] == "artifact.md" || parts[4] == "metadata.json")
 }
 
 func appendPlanRevisionManifest(paths GeneratedPlanPaths, metadata map[string]any, changes []workflowFileChange) error {
@@ -229,10 +229,10 @@ func appendPlanRevisionManifest(paths GeneratedPlanPaths, metadata map[string]an
 	return nil
 }
 
-func planCurrentTrackerMetadata(layout opscore.OpsLayout, reference string, plan generationcore.GeneratedPlan, previous []byte) (map[string]any, error) {
+func planCurrentTrackerMetadata(layout opscore.Layout, reference string, plan generationcore.GeneratedPlan, previous []byte) (map[string]any, error) {
 	parts := strings.Split(reference, "/")
 	if previous == nil {
-		return opscore.NewOpsArtifactMetadata(opscore.CreateOpsArtifactOptions{Layout: layout, Type: "tracker", Title: plan.Title + " tracking", Producer: "chr"}, parts[3], plan.CreatedAt), nil
+		return opscore.NewArtifactMetadata(opscore.ArtifactOptions{Layout: layout, Type: "tracker", Title: plan.Title + " tracking", Producer: "chr"}, parts[3], plan.CreatedAt), nil
 	}
 
 	var metadata map[string]any
@@ -252,7 +252,7 @@ func planCurrentTrackerMetadata(layout opscore.OpsLayout, reference string, plan
 }
 
 func validPlanRevisionDirectory(parts []string) bool {
-	return len(parts) == 8 && parts[0] == "ops" && opsnamespace.Valid(parts[1]) && parts[2] == "plan" && opscore.HasOpsArtifactNumberPrefix(parts[3]) && parts[4] == "files" && parts[5] == "plan-revisions"
+	return len(parts) == 8 && parts[0] == "ops" && opsnamespace.Valid(parts[1]) && parts[2] == "plan" && opscore.HasArtifactNumberPrefix(parts[3]) && parts[4] == "files" && parts[5] == "plan-revisions"
 }
 
 func validPlanRevisionKey(value string) bool {

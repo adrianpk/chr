@@ -88,7 +88,7 @@ func checkTelegramWorkRecoveryBinding(t *testing.T, f *telegramConversationAppFi
 func telegramWorkEditSource(t *testing.T, operations service, record core.WorkflowRecord) {
 	t.Helper()
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: operations.projectContext.ProjectDir, Namespace: "default"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: operations.projectContext.ProjectDir, Namespace: "default"})
 	if err != nil {
 		t.Fatal(err)
 	}

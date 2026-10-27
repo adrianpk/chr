@@ -55,12 +55,12 @@ func (s service) buildLegacyTicketStartPreflight(ctx context.Context, ticket cor
 		record.TicketPath = workspace.TicketPath
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir})
 	if err != nil {
 		return ticketStartPreflight{}, err
 	}
 
-	artifact, err := opscore.CreateOpsArtifact(opscore.CreateOpsArtifactOptions{
+	artifact, err := opscore.CreateArtifact(opscore.ArtifactOptions{
 		Layout:      layout,
 		Type:        "run",
 		Title:       ticketStartArtifactTitle(workspace.Ticket),

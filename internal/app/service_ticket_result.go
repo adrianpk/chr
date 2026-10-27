@@ -166,7 +166,7 @@ func refreshTicketArtifactMetadata(record core.ExecutionRecord) error {
 		return nil
 	}
 
-	return opscore.RefreshOpsArtifactMetadata(record.Artifacts.RunDir, string(record.Status), time.Now().UTC())
+	return opscore.RefreshArtifactMetadata(record.Artifacts.RunDir, string(record.Status), time.Now().UTC())
 }
 
 func refreshAppliedTicketIndex(ctx context.Context, env core.UserEnvironment, plan ticketApplyResultPlan, appliedAt time.Time, assetsFS fs.FS) error {

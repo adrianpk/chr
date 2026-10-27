@@ -19,7 +19,7 @@ func TestWorkflowFinalizationCrashProcess(t *testing.T) {
 		return
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: dir})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: dir})
 	if err != nil {
 		t.Fatal(err)
 	}

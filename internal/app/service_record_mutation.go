@@ -14,7 +14,7 @@ import (
 
 // PrepareRecordMutation freezes validated owner input before durable dispatch.
 func (s service) PrepareRecordMutation(ctx context.Context, namespace string, binding workflowstate.MutationBinding, request RecordMutationRequest) (PreparedRecordMutation, error) {
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: namespace})
 	if err != nil {
 		return PreparedRecordMutation{}, err
 	}

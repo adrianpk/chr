@@ -113,7 +113,7 @@ func serviceIntegrationDecisionEvidence(t *testing.T, operations service, id, na
 		t.Fatal(err)
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: operations.projectContext.ProjectDir})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: operations.projectContext.ProjectDir})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -145,7 +145,7 @@ func serviceIntegrationDecisionGate(t *testing.T, operations service, sliceID st
 		t.Fatal(err)
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: operations.projectContext.ProjectDir})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: operations.projectContext.ProjectDir})
 	if err != nil {
 		t.Fatal(err)
 	}

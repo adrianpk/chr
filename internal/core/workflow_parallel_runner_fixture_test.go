@@ -49,7 +49,7 @@ func TestWorkflowParallelRunner(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: spec.Directory, Namespace: spec.Namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: spec.Directory, Namespace: spec.Namespace})
 	if err != nil {
 		t.Fatal(err)
 	}

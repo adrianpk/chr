@@ -19,7 +19,7 @@ import (
 func ListSpecDocuments(ctx context.Context, projectDir string) ([]SpecDocument, error) {
 	r := &fileAuthoringSessionRepository{projectDir: projectDir}
 
-	namespaces, err := r.authoringDirectoryEntries(opscore.OpsDirectoryName)
+	namespaces, err := r.authoringDirectoryEntries(opscore.DirectoryName)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +32,7 @@ func ListSpecDocuments(ctx context.Context, projectDir string) ([]SpecDocument, 
 			continue
 		}
 
-		root := filepath.Join(opscore.OpsDirectoryName, namespace.Name(), "spec")
+		root := filepath.Join(opscore.DirectoryName, namespace.Name(), "spec")
 
 		entries, err := r.authoringDirectoryEntries(root)
 		if err != nil {
@@ -90,11 +90,11 @@ func (r *fileAuthoringSessionRepository) specDocumentsInDirectory(ctx context.Co
 	var documents []SpecDocument
 
 	for _, entry := range entries {
-		if !opscore.HasOpsArtifactNumberPrefix(entry.Name()) {
+		if !opscore.HasArtifactNumberPrefix(entry.Name()) {
 			continue
 		}
 
-		document, err := ReadSpecDocument(ctx, r.projectDir, filepath.ToSlash(filepath.Join(root, entry.Name(), opscore.OpsArtifactBodyFile())))
+		document, err := ReadSpecDocument(ctx, r.projectDir, filepath.ToSlash(filepath.Join(root, entry.Name(), opscore.ArtifactBodyFile())))
 		if err != nil {
 			return nil, err
 		}

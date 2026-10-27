@@ -115,7 +115,7 @@ func (s *WorkflowStore) guardWorkflowOperationLocks(ctx context.Context) error {
 	return nil
 }
 
-func (s *WorkflowStore) workflowOperationLayouts(ctx context.Context) ([]opscore.OpsLayout, error) {
+func (s *WorkflowStore) workflowOperationLayouts(ctx context.Context) ([]opscore.Layout, error) {
 	runs, err := s.repositoryWorkflowInvocations(ctx)
 	if err != nil {
 		return nil, err
@@ -128,7 +128,7 @@ func (s *WorkflowStore) workflowOperationLayouts(ctx context.Context) ([]opscore
 		return nil, err
 	}
 
-	result := []opscore.OpsLayout{}
+	result := []opscore.Layout{}
 
 	for _, layout := range layouts {
 		// The inherited common-directory reservation also excludes legacy starts

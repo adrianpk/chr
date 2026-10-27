@@ -13,21 +13,21 @@ import (
 	"time"
 )
 
-var opsArtifactIDPattern = regexp.MustCompile(`^(\d+)-`)
+var artifactIDPattern = regexp.MustCompile(`^(\d+)-`)
 
-// HasOpsArtifactNumberPrefix reports the existing numeric artifact path prefix.
-func HasOpsArtifactNumberPrefix(name string) bool { return opsArtifactIDPattern.MatchString(name) }
+// HasArtifactNumberPrefix reports the existing numeric artifact path prefix.
+func HasArtifactNumberPrefix(name string) bool { return artifactIDPattern.MatchString(name) }
 
-// OpsArtifact is one allocated shared artifact envelope.
-type OpsArtifact struct {
+// Artifact is one allocated shared artifact envelope.
+type Artifact struct {
 	ID   string
 	Type string
 	Dir  string
 }
 
-// CreateOpsArtifactOptions configures a new shared artifact envelope.
-type CreateOpsArtifactOptions struct {
-	Layout      OpsLayout
+// ArtifactOptions configures a new shared artifact envelope.
+type ArtifactOptions struct {
+	Layout      Layout
 	Type        string
 	Title       string
 	Producer    string
@@ -35,15 +35,15 @@ type CreateOpsArtifactOptions struct {
 	Now         func() time.Time
 }
 
-// CreateOpsArtifact allocates a namespace-global ID and creates its envelope.
-func CreateOpsArtifact(opts CreateOpsArtifactOptions) (artifact OpsArtifact, err error) {
-	if err := validateOpsArtifactOptions(opts); err != nil {
-		return OpsArtifact{}, err
+// CreateArtifact allocates a namespace-global ID and creates its envelope.
+func CreateArtifact(opts ArtifactOptions) (artifact Artifact, err error) {
+	if err := validateArtifactOptions(opts); err != nil {
+		return Artifact{}, err
 	}
 
 	lockPath := filepath.Join(opts.Layout.Root(), "lock", "id.lock")
-	if err := AcquireOpsArtifactLock(lockPath); err != nil {
-		return OpsArtifact{}, err
+	if err := AcquireArtifactLock(lockPath); err != nil {
+		return Artifact{}, err
 	}
 
 	defer func() {
@@ -52,57 +52,57 @@ func CreateOpsArtifact(opts CreateOpsArtifactOptions) (artifact OpsArtifact, err
 		}
 	}()
 
-	id := fmt.Sprintf("%05d-%s", NextOpsArtifactNumber(opts.Layout.Root()), OpsArtifactSlugOrDefault(opts.Title))
+	id := fmt.Sprintf("%05d-%s", NextArtifactNumber(opts.Layout.Root()), ArtifactSlugOrDefault(opts.Title))
 
 	dir, err := opts.Layout.ArtifactDirectory(opts.Type, id)
 	if err != nil {
-		return OpsArtifact{}, err
+		return Artifact{}, err
 	}
 
-	if err := CreateOpsArtifactEnvelope(dir, opts.Producer); err != nil {
-		return OpsArtifact{}, err
+	if err := CreateArtifactEnvelope(dir, opts.Producer); err != nil {
+		return Artifact{}, err
 	}
 
-	metadata := NewOpsArtifactMetadata(opts, id, opsArtifactNow(opts))
-	if err := writeOpsArtifactFiles(dir, opts.Title, metadata); err != nil {
-		return OpsArtifact{}, err
+	metadata := NewArtifactMetadata(opts, id, artifactNow(opts))
+	if err := writeArtifactFiles(dir, opts.Title, metadata); err != nil {
+		return Artifact{}, err
 	}
 
-	return OpsArtifact{ID: id, Type: opts.Type, Dir: dir}, nil
+	return Artifact{ID: id, Type: opts.Type, Dir: dir}, nil
 }
 
-// EnsureOpsArtifactEnvelope creates or refreshes a known shared artifact envelope.
-func EnsureOpsArtifactEnvelope(opts CreateOpsArtifactOptions, id string) (OpsArtifact, error) {
-	if err := validateOpsArtifactOptions(opts); err != nil {
-		return OpsArtifact{}, err
+// EnsureArtifactEnvelope creates or refreshes a known shared artifact envelope.
+func EnsureArtifactEnvelope(opts ArtifactOptions, id string) (Artifact, error) {
+	if err := validateArtifactOptions(opts); err != nil {
+		return Artifact{}, err
 	}
 
 	if strings.TrimSpace(id) == "" || filepath.Base(id) != id {
-		return OpsArtifact{}, fmt.Errorf("invalid ops artifact id: %s", id)
+		return Artifact{}, fmt.Errorf("invalid ops artifact id: %s", id)
 	}
 
 	dir, err := opts.Layout.ArtifactDirectory(opts.Type, id)
 	if err != nil {
-		return OpsArtifact{}, err
+		return Artifact{}, err
 	}
 
-	if err := CreateOpsArtifactEnvelope(dir, opts.Producer); err != nil {
-		return OpsArtifact{}, err
+	if err := CreateArtifactEnvelope(dir, opts.Producer); err != nil {
+		return Artifact{}, err
 	}
 
-	if err := ensureOpsArtifactBody(filepath.Join(dir, "artifact.md"), opts.Title); err != nil {
-		return OpsArtifact{}, err
+	if err := ensureArtifactBody(filepath.Join(dir, "artifact.md"), opts.Title); err != nil {
+		return Artifact{}, err
 	}
 
-	metadata := NewOpsArtifactMetadata(opts, id, opsArtifactNow(opts))
-	if err := ensureOpsArtifactMetadata(filepath.Join(dir, "metadata.json"), metadata); err != nil {
-		return OpsArtifact{}, err
+	metadata := NewArtifactMetadata(opts, id, artifactNow(opts))
+	if err := ensureArtifactMetadata(filepath.Join(dir, "metadata.json"), metadata); err != nil {
+		return Artifact{}, err
 	}
 
-	return OpsArtifact{ID: id, Type: opts.Type, Dir: dir}, nil
+	return Artifact{ID: id, Type: opts.Type, Dir: dir}, nil
 }
 
-func validateOpsArtifactOptions(opts CreateOpsArtifactOptions) error {
+func validateArtifactOptions(opts ArtifactOptions) error {
 	if _, err := opts.Layout.ArtifactRoot(opts.Type); err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func validateOpsArtifactOptions(opts CreateOpsArtifactOptions) error {
 	return nil
 }
 
-func opsArtifactNow(opts CreateOpsArtifactOptions) time.Time {
+func artifactNow(opts ArtifactOptions) time.Time {
 	if opts.Now != nil {
 		return opts.Now().UTC()
 	}
@@ -126,8 +126,8 @@ func opsArtifactNow(opts CreateOpsArtifactOptions) time.Time {
 	return time.Now().UTC()
 }
 
-// NewOpsArtifactMetadata constructs the original shared envelope metadata.
-func NewOpsArtifactMetadata(opts CreateOpsArtifactOptions, id string, now time.Time) map[string]any {
+// NewArtifactMetadata constructs the original shared envelope metadata.
+func NewArtifactMetadata(opts ArtifactOptions, id string, now time.Time) map[string]any {
 	timestamp := now.Format(time.RFC3339)
 
 	return map[string]any{
@@ -148,8 +148,8 @@ func NewOpsArtifactMetadata(opts CreateOpsArtifactOptions, id string, now time.T
 	}
 }
 
-// CreateOpsArtifactEnvelope creates the shared envelope directories.
-func CreateOpsArtifactEnvelope(dir, producer string) error {
+// CreateArtifactEnvelope creates the shared envelope directories.
+func CreateArtifactEnvelope(dir, producer string) error {
 	paths := []string{"", "files", "evidence", filepath.Join("extension", strings.TrimSpace(producer))}
 	for _, path := range paths {
 		if err := os.MkdirAll(filepath.Join(dir, path), 0o755); err != nil {
@@ -160,8 +160,8 @@ func CreateOpsArtifactEnvelope(dir, producer string) error {
 	return nil
 }
 
-func writeOpsArtifactFiles(dir, title string, metadata map[string]any) error {
-	if err := ensureOpsArtifactBody(filepath.Join(dir, "artifact.md"), title); err != nil {
+func writeArtifactFiles(dir, title string, metadata map[string]any) error {
+	if err := ensureArtifactBody(filepath.Join(dir, "artifact.md"), title); err != nil {
 		return err
 	}
 
@@ -177,7 +177,7 @@ func writeOpsArtifactFiles(dir, title string, metadata map[string]any) error {
 	return nil
 }
 
-func ensureOpsArtifactBody(path, title string) error {
+func ensureArtifactBody(path, title string) error {
 	if _, err := os.Stat(path); err == nil {
 		return nil
 	} else if !errors.Is(err, os.ErrNotExist) {
@@ -191,7 +191,7 @@ func ensureOpsArtifactBody(path, title string) error {
 	return nil
 }
 
-func ensureOpsArtifactMetadata(path string, metadata map[string]any) error {
+func ensureArtifactMetadata(path string, metadata map[string]any) error {
 	if _, err := os.Stat(path); err == nil {
 		return nil
 	} else if !errors.Is(err, os.ErrNotExist) {
@@ -210,9 +210,9 @@ func ensureOpsArtifactMetadata(path string, metadata map[string]any) error {
 	return nil
 }
 
-// AcquireOpsArtifactLock creates the shared exclusive allocation lock.
+// AcquireArtifactLock creates the shared exclusive allocation lock.
 // The caller owns guarded reclamation and removal after this returns.
-func AcquireOpsArtifactLock(path string) error {
+func AcquireArtifactLock(path string) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return fmt.Errorf("create ops lock directory: %w", err)
 	}
@@ -229,27 +229,27 @@ func AcquireOpsArtifactLock(path string) error {
 	return file.Close()
 }
 
-// NextOpsArtifactNumber observes the next namespace-wide artifact number.
+// NextArtifactNumber observes the next namespace-wide artifact number.
 // Callers that allocate must hold the namespace allocation lock.
-func NextOpsArtifactNumber(namespaceRoot string) int {
+func NextArtifactNumber(namespaceRoot string) int {
 	maximum := 0
 
-	for artifactType := range opsArtifactTypes {
+	for artifactType := range artifactTypes {
 		entries, err := os.ReadDir(filepath.Join(namespaceRoot, artifactType))
 		if err != nil {
 			continue
 		}
 
 		for _, entry := range entries {
-			maximum = max(maximum, opsArtifactNumber(entry.Name()))
+			maximum = max(maximum, artifactNumber(entry.Name()))
 		}
 	}
 
 	return maximum + 1
 }
 
-func opsArtifactNumber(name string) int {
-	match := opsArtifactIDPattern.FindStringSubmatch(name)
+func artifactNumber(name string) int {
+	match := artifactIDPattern.FindStringSubmatch(name)
 	if len(match) != 2 {
 		return 0
 	}
@@ -262,9 +262,9 @@ func opsArtifactNumber(name string) int {
 	return number
 }
 
-// OpsArtifactSlugOrDefault keeps the canonical ASCII ID slug and fallback.
-func OpsArtifactSlugOrDefault(value string) string {
-	slug := opsArtifactSlug(value)
+// ArtifactSlugOrDefault keeps the canonical ASCII ID slug and fallback.
+func ArtifactSlugOrDefault(value string) string {
+	slug := artifactSlug(value)
 	if slug == "" {
 		return "artifact"
 	}
@@ -272,15 +272,15 @@ func OpsArtifactSlugOrDefault(value string) string {
 	return slug
 }
 
-func opsArtifactSlug(value string) string {
+func artifactSlug(value string) string {
 	value = strings.ToLower(strings.TrimSpace(value))
 	value = regexp.MustCompile(`[^a-z0-9]+`).ReplaceAllString(value, "-")
 
 	return strings.Trim(value, "-")
 }
 
-// OpsArtifactFiles returns the shared, non-private files in deterministic order.
-func OpsArtifactFiles(dir string) ([]string, error) {
+// ArtifactFiles returns the shared, non-private files in deterministic order.
+func ArtifactFiles(dir string) ([]string, error) {
 	files := []string{}
 
 	err := filepath.WalkDir(dir, func(path string, entry os.DirEntry, walkErr error) error {
@@ -310,8 +310,8 @@ func OpsArtifactFiles(dir string) ([]string, error) {
 	return files, nil
 }
 
-// RefreshOpsArtifactMetadata updates the shared file index and terminal state.
-func RefreshOpsArtifactMetadata(dir, status string, now time.Time) error {
+// RefreshArtifactMetadata updates the shared file index and terminal state.
+func RefreshArtifactMetadata(dir, status string, now time.Time) error {
 	if strings.TrimSpace(status) == "" {
 		return fmt.Errorf("ops artifact status is required")
 	}
@@ -328,7 +328,7 @@ func RefreshOpsArtifactMetadata(dir, status string, now time.Time) error {
 		return fmt.Errorf("decode ops artifact metadata: %w", err)
 	}
 
-	files, err := OpsArtifactFiles(dir)
+	files, err := ArtifactFiles(dir)
 	if err != nil {
 		return err
 	}

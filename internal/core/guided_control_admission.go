@@ -93,7 +93,7 @@ func (s *WorkflowStore) lookupGuidedAdmission(ctx context.Context, session Autho
 }
 
 func findGuidedControlInvocation(ctx context.Context, root string, session AuthoringSession) (guidedAdmissionLookup, error) {
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: root, Namespace: session.Namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: root, Namespace: session.Namespace})
 	if err != nil {
 		return guidedAdmissionLookup{}, err
 	}

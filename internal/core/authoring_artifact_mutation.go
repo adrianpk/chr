@@ -41,12 +41,12 @@ func (r *fileAuthoringSessionRepository) authoringArtifactChanges(binding author
 }
 
 func (r *fileAuthoringSessionRepository) authoringArtifactMetadata(binding authoringRequestBinding, snapshot AuthoringSnapshot, ref AuthoringArtifactRef, observed *AuthoringArtifactObservation) ([]byte, error) {
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: r.projectDir, Namespace: binding.Request.Namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: r.projectDir, Namespace: binding.Request.Namespace})
 	if err != nil {
 		return nil, err
 	}
 
-	metadata := opscore.NewOpsArtifactMetadata(opscore.CreateOpsArtifactOptions{Layout: layout, Type: authoringArtifactType(ref.Kind), Title: snapshot.Session.Topic, Producer: "chr", ExternalIDs: []string{binding.Request.SessionID}}, ref.ID, time.Now().UTC())
+	metadata := opscore.NewArtifactMetadata(opscore.ArtifactOptions{Layout: layout, Type: authoringArtifactType(ref.Kind), Title: snapshot.Session.Topic, Producer: "chr", ExternalIDs: []string{binding.Request.SessionID}}, ref.ID, time.Now().UTC())
 	if observed != nil {
 		metadata, err = r.observedAuthoringMetadata(ref, *observed)
 		if err != nil {

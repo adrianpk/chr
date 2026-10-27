@@ -155,7 +155,7 @@ func (r *fileAuthoringSessionRepository) specSaveTarget(ctx context.Context, req
 
 func (r *fileAuthoringSessionRepository) newSpecDocument(request SpecMutationRequest, digest string) (SpecDocument, error) {
 	id := "00000-spec-" + digest[:32]
-	document := SpecDocument{Reference: strings.Join([]string{opscore.OpsDirectoryName, request.Namespace, "spec", id, opscore.OpsArtifactBodyFile()}, "/")}
+	document := SpecDocument{Reference: strings.Join([]string{opscore.DirectoryName, request.Namespace, "spec", id, opscore.ArtifactBodyFile()}, "/")}
 
 	path, err := r.authoringPath(filepath.Dir(document.Reference))
 	if err != nil {
@@ -166,12 +166,12 @@ func (r *fileAuthoringSessionRepository) newSpecDocument(request SpecMutationReq
 		return document, errors.Join(workflowstate.ErrConflict, err)
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: r.projectDir, Namespace: request.Namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: r.projectDir, Namespace: request.Namespace})
 	if err != nil {
 		return document, err
 	}
 
-	document.metadata = opscore.NewOpsArtifactMetadata(opscore.CreateOpsArtifactOptions{Layout: layout, Type: "spec", Title: request.Title, Producer: "chr"}, id, time.Now().UTC())
+	document.metadata = opscore.NewArtifactMetadata(opscore.ArtifactOptions{Layout: layout, Type: "spec", Title: request.Title, Producer: "chr"}, id, time.Now().UTC())
 	document.images = []workflowFileChange{{Path: document.Reference}, {Path: filepath.Join(filepath.Dir(document.Reference), "metadata.json")}}
 
 	return document, nil

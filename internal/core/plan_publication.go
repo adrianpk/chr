@@ -166,12 +166,12 @@ func generatedPlanChanges(projectDir string, paths GeneratedPlanPaths, target pl
 func generatedPlanMetadata(projectDir, reference, title string, plan generationcore.GeneratedPlan) (map[string]any, error) {
 	parts := strings.Split(reference, "/")
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: parts[1]})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: projectDir, Namespace: parts[1]})
 	if err != nil {
 		return nil, err
 	}
 
-	return opscore.NewOpsArtifactMetadata(opscore.CreateOpsArtifactOptions{Layout: layout, Type: "plan", Title: title, Producer: "chr"}, parts[3], plan.CreatedAt), nil
+	return opscore.NewArtifactMetadata(opscore.ArtifactOptions{Layout: layout, Type: "plan", Title: title, Producer: "chr"}, parts[3], plan.CreatedAt), nil
 }
 
 func generatedPlanArchiveChanges(projectDir string, current GeneratedPlanPaths, target planTargetObservation, plan generationcore.GeneratedPlan) ([]workflowFileChange, error) {

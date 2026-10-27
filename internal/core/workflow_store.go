@@ -20,12 +20,12 @@ var ErrNotWorkflow = errors.New("document is not an adopted workflow record")
 type WorkflowStore struct {
 	afterReplace        func(int) error
 	afterTrackerReplace func(int) error
-	layout              opscore.OpsLayout
+	layout              opscore.Layout
 	projectID           string
 }
 
 // NewWorkflowStore stores dependencies without performing IO.
-func NewWorkflowStore(layout opscore.OpsLayout, projectID string) *WorkflowStore {
+func NewWorkflowStore(layout opscore.Layout, projectID string) *WorkflowStore {
 	return &WorkflowStore{layout: layout, projectID: projectID}
 }
 
@@ -66,7 +66,7 @@ func (s *WorkflowStore) Create(ctx context.Context, title string, record Workflo
 			return err
 		}
 
-		artifact, createErr := opscore.CreateOpsArtifact(opscore.CreateOpsArtifactOptions{Layout: s.layout, Type: record.Kind, Title: title, Producer: "chr"})
+		artifact, createErr := opscore.CreateArtifact(opscore.ArtifactOptions{Layout: s.layout, Type: record.Kind, Title: title, Producer: "chr"})
 		if createErr != nil {
 			return createErr
 		}

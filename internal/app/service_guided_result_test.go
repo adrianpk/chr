@@ -148,7 +148,7 @@ func TestGuidedUseCaseResultCorrupt(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: operations.projectContext.ProjectDir, Namespace: session.Namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: operations.projectContext.ProjectDir, Namespace: session.Namespace})
 	if err != nil {
 		t.Fatal(err)
 	}

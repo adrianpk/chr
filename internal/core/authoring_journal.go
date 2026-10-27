@@ -168,7 +168,7 @@ func (r *fileAuthoringSessionRepository) applyAuthoringImage(change workflowFile
 
 func (r *fileAuthoringSessionRepository) ensureAuthoringEnvelope(relative string) error {
 	parts := strings.Split(filepath.ToSlash(relative), "/")
-	if len(parts) != 5 || parts[0] != opscore.OpsDirectoryName {
+	if len(parts) != 5 || parts[0] != opscore.DirectoryName {
 		return nil
 	}
 
@@ -184,7 +184,7 @@ func (r *fileAuthoringSessionRepository) ensureAuthoringEnvelope(relative string
 		return err
 	}
 
-	return opscore.CreateOpsArtifactEnvelope(path, "chr")
+	return opscore.CreateArtifactEnvelope(path, "chr")
 }
 
 func (r *fileAuthoringSessionRepository) replayAuthoringJournal(journal authoringMutationJournal) error {
@@ -222,7 +222,7 @@ func (r *fileAuthoringSessionRepository) checkAuthoringJournalImages(journal aut
 
 func validAuthoringOpsJournalPath(path string) bool {
 	parts := strings.Split(path, "/")
-	if len(parts) != 5 || parts[0] != opscore.OpsDirectoryName || !opsnamespace.Valid(parts[1]) {
+	if len(parts) != 5 || parts[0] != opscore.DirectoryName || !opsnamespace.Valid(parts[1]) {
 		return false
 	}
 

@@ -9,7 +9,7 @@ import (
 )
 
 func acquireLegacyWorkflowCapacity(ctx context.Context, projectDir string) (reservation *os.File, err error) {
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: projectDir})
 	if err != nil {
 		return nil, err
 	}

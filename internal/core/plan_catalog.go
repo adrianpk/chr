@@ -17,7 +17,7 @@ import (
 func ListPlanDocuments(ctx context.Context, projectDir string) ([]PlanDocument, error) {
 	r := &fileAuthoringSessionRepository{projectDir: projectDir}
 
-	namespaces, err := r.authoringDirectoryEntries(opscore.OpsDirectoryName)
+	namespaces, err := r.authoringDirectoryEntries(opscore.DirectoryName)
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +30,7 @@ func ListPlanDocuments(ctx context.Context, projectDir string) ([]PlanDocument, 
 			continue
 		}
 
-		root := filepath.Join(opscore.OpsDirectoryName, namespace.Name(), "plan")
+		root := filepath.Join(opscore.DirectoryName, namespace.Name(), "plan")
 
 		entries, err := r.authoringDirectoryEntries(root)
 		if err != nil {
@@ -59,11 +59,11 @@ func (r *fileAuthoringSessionRepository) planDocumentsInDirectory(ctx context.Co
 	var documents []PlanDocument
 
 	for _, entry := range entries {
-		if !opscore.HasOpsArtifactNumberPrefix(entry.Name()) {
+		if !opscore.HasArtifactNumberPrefix(entry.Name()) {
 			continue
 		}
 
-		document, err := ReadPlanDocument(ctx, r.projectDir, filepath.ToSlash(filepath.Join(root, entry.Name(), opscore.OpsArtifactBodyFile())))
+		document, err := ReadPlanDocument(ctx, r.projectDir, filepath.ToSlash(filepath.Join(root, entry.Name(), opscore.ArtifactBodyFile())))
 		if err != nil {
 			return nil, err
 		}

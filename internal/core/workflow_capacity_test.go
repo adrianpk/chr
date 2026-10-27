@@ -115,7 +115,7 @@ func TestWorkflowCapacityAliases(t *testing.T) {
 	workflowSelectionGit(t, store, "worktree", "add", "-qb", "capacity-linked", linkedPath, "HEAD")
 	writeWorkspaceConfig(t, store.layout.ProjectDir(), "work:\n  max_active_workers: 2\n")
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: linkedPath, Namespace: "other"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: linkedPath, Namespace: "other"})
 	if err != nil {
 		t.Fatal(err)
 	}

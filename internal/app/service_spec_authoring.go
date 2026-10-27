@@ -16,7 +16,7 @@ type SaveSpecRequest struct {
 }
 
 func (s service) CreateSpec(request CreateSpecRequest) (core.SpecMutationResult, error) {
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir})
 	if err != nil {
 		return core.SpecMutationResult{}, err
 	}

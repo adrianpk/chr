@@ -107,7 +107,7 @@ func workflowParallelPublicationTargets(t *testing.T, conflict bool, target stri
 func workflowParallelPublicationStore(t *testing.T, original *WorkflowStore) *WorkflowStore {
 	t.Helper()
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: original.layout.ProjectDir(), Namespace: "other"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: original.layout.ProjectDir(), Namespace: "other"})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -1117,13 +1117,13 @@ func writeServiceWorkspaceFile(t *testing.T, path, content string) {
 		root = filepath.Dir(root)
 	}
 
-	if kind, ok := opscore.OpsArtifactTypeForBodyPath(root, path); ok && kind == "dump" {
+	if kind, ok := opscore.ArtifactTypeForBodyPath(root, path); ok && kind == "dump" {
 		relative, err := filepath.Rel(root, path)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if err := opscore.EnsureOpsArtifactBodyMetadata(root, filepath.ToSlash(relative)); err != nil {
+		if err := opscore.EnsureArtifactBodyMetadata(root, filepath.ToSlash(relative)); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -1168,7 +1168,7 @@ func canonicalServiceWorkspaceFixturePath(path string) string {
 
 	artifactID := "00000-" + opsArtifactSlugForServiceFixture(slug)
 
-	return filepath.Join(projectDir, opscore.OpsDirectoryName, opsnamespace.Default, artifactType, artifactID, opscore.OpsArtifactBodyFile())
+	return filepath.Join(projectDir, opscore.DirectoryName, opsnamespace.Default, artifactType, artifactID, opscore.ArtifactBodyFile())
 }
 
 func opsArtifactSlugForServiceFixture(value string) string {

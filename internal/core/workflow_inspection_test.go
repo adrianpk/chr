@@ -87,7 +87,7 @@ func TestWorkflowInspectionLinked(t *testing.T) {
 	linked := filepath.Join(t.TempDir(), "linked")
 	workflowSelectionGit(t, store, "worktree", "add", "-qb", "inspection-linked", linked, "HEAD")
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: linked, Namespace: "other"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: linked, Namespace: "other"})
 	if err != nil {
 		t.Fatal(err)
 	}

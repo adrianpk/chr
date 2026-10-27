@@ -7,18 +7,18 @@ import (
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
-const opsArtifactBodyFile = "artifact.md"
+const artifactBodyFile = "artifact.md"
 
-// OpsArtifactBodyFile returns the canonical Markdown body filename for shared artifacts.
-func OpsArtifactBodyFile() string { return opsArtifactBodyFile }
+// ArtifactBodyFile returns the canonical Markdown body filename for shared artifacts.
+func ArtifactBodyFile() string { return artifactBodyFile }
 
-// DefaultOpsArtifactRoot returns the default namespace root for one artifact type.
-func DefaultOpsArtifactRoot(projectDir, artifactType string) string {
-	return filepath.Join(projectDir, OpsDirectoryName, opsnamespace.Default, artifactType)
+// DefaultArtifactRoot returns the default namespace root for one artifact type.
+func DefaultArtifactRoot(projectDir, artifactType string) string {
+	return filepath.Join(projectDir, DirectoryName, opsnamespace.Default, artifactType)
 }
 
-// IsOpsArtifactBodyPath reports whether path is an artifact.md body inside ops/.
-func IsOpsArtifactBodyPath(projectDir, path string) bool {
+// IsArtifactBodyPath reports whether path is an artifact.md body inside ops/.
+func IsArtifactBodyPath(projectDir, path string) bool {
 	relativePath, err := filepath.Rel(projectDir, path)
 	if err != nil {
 		return false
@@ -29,7 +29,7 @@ func IsOpsArtifactBodyPath(projectDir, path string) bool {
 		return false
 	}
 
-	if parts[0] != OpsDirectoryName || parts[4] != opsArtifactBodyFile {
+	if parts[0] != DirectoryName || parts[4] != artifactBodyFile {
 		return false
 	}
 
@@ -37,14 +37,14 @@ func IsOpsArtifactBodyPath(projectDir, path string) bool {
 		return false
 	}
 
-	_, ok := opsArtifactTypes[parts[2]]
+	_, ok := artifactTypes[parts[2]]
 
 	return ok
 }
 
-// OpsArtifactTypeForBodyPath returns the artifact type for a canonical artifact body path.
-func OpsArtifactTypeForBodyPath(projectDir, path string) (string, bool) {
-	if !IsOpsArtifactBodyPath(projectDir, path) {
+// ArtifactTypeForBodyPath returns the artifact type for a canonical artifact body path.
+func ArtifactTypeForBodyPath(projectDir, path string) (string, bool) {
+	if !IsArtifactBodyPath(projectDir, path) {
 		return "", false
 	}
 

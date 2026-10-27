@@ -115,7 +115,7 @@ func workflowSubmissionAlias(t *testing.T, f workflowPreparationFixture) *Workfl
 	linked := filepath.Join(t.TempDir(), "linked")
 	workflowIntegrationCommand(t, f.store.layout.ProjectDir(), "worktree", "add", "--detach", linked, "HEAD")
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: linked, Namespace: "other"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: linked, Namespace: "other"})
 	if err != nil {
 		t.Fatal(err)
 	}

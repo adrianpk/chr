@@ -91,7 +91,7 @@ func planDocumentOrigin(metadata map[string]any) (string, error) {
 		return "", errors.New("invalid plan namespace")
 	}
 
-	return filepath.ToSlash(filepath.Join(opscore.OpsDirectoryName, namespace, set.PlanRevision.Reference)), nil
+	return filepath.ToSlash(filepath.Join(opscore.DirectoryName, namespace, set.PlanRevision.Reference)), nil
 }
 
 func validatePlanDocumentReference(reference string) error {
@@ -100,7 +100,7 @@ func validatePlanDocumentReference(reference string) error {
 	}
 
 	parts := strings.Split(reference, "/")
-	if len(parts) != 5 || parts[0] != opscore.OpsDirectoryName || !opsnamespace.Valid(parts[1]) || parts[2] != "plan" || !opscore.HasOpsArtifactNumberPrefix(parts[3]) || parts[4] != opscore.OpsArtifactBodyFile() {
+	if len(parts) != 5 || parts[0] != opscore.DirectoryName || !opsnamespace.Valid(parts[1]) || parts[2] != "plan" || !opscore.HasArtifactNumberPrefix(parts[3]) || parts[4] != opscore.ArtifactBodyFile() {
 		return errors.New("plan reference must identify a canonical plan artifact")
 	}
 

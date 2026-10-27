@@ -317,7 +317,7 @@ func (OSWorkSelectionGit) BranchContainsRef(ctx context.Context, projectDir, bra
 }
 
 func agentOperationLockPath(projectDir string) (string, error) {
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: projectDir})
 	if err != nil {
 		return "", err
 	}

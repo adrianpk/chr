@@ -278,7 +278,7 @@ func checkDaemonWorkflowRecoveryCheckpoint(t *testing.T, operations service, bef
 func daemonWorkflowCrashOwner(t *testing.T, project string) {
 	t.Helper()
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: project})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: project})
 	if err != nil {
 		t.Fatal(err)
 	}

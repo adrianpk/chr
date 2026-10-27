@@ -172,18 +172,18 @@ func legacyTicketGitRoot(path string) (string, error) {
 	}
 }
 
-func legacyTicketOpsLayout(root, path string) (opscore.OpsLayout, error) {
+func legacyTicketOpsLayout(root, path string) (opscore.Layout, error) {
 	namespace := opsnamespace.Default
 
 	relative, err := filepath.Rel(root, path)
 	if err != nil {
-		return opscore.OpsLayout{}, err
+		return opscore.Layout{}, err
 	}
 
 	parts := strings.Split(filepath.ToSlash(relative), "/")
-	if len(parts) > 2 && parts[0] == opscore.OpsDirectoryName && opsnamespace.Valid(parts[1]) {
+	if len(parts) > 2 && parts[0] == opscore.DirectoryName && opsnamespace.Valid(parts[1]) {
 		namespace = parts[1]
 	}
 
-	return opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: root, Namespace: namespace})
+	return opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: root, Namespace: namespace})
 }

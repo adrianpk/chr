@@ -10,7 +10,7 @@ import (
 // ApplyWorkflowRecordMutation preserves caller-neutral request identity through
 // the shared record owner. Namespace may be frozen by a caller's retained scope.
 func (s service) ApplyWorkflowRecordMutation(ctx context.Context, namespace string, request core.WorkflowMutationRequest) (core.WorkflowMutationResult, error) {
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: namespace})
 	if err != nil {
 		return core.WorkflowMutationResult{}, err
 	}

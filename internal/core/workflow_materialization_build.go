@@ -50,10 +50,10 @@ func (s *WorkflowStore) buildMaterializationForSet(ctx context.Context, opts Wor
 }
 
 func (s *WorkflowStore) materializationEnvelope(kind, title string, number int, now time.Time) (WorkflowRecord, error) {
-	id := fmt.Sprintf("%05d-%s", number, opscore.OpsArtifactSlugOrDefault(title))
-	opts := opscore.CreateOpsArtifactOptions{Layout: s.layout, Type: kind, Title: title, Producer: "chr"}
+	id := fmt.Sprintf("%05d-%s", number, opscore.ArtifactSlugOrDefault(title))
+	opts := opscore.ArtifactOptions{Layout: s.layout, Type: kind, Title: title, Producer: "chr"}
 
-	metadata, err := workflowJSONFields(opscore.NewOpsArtifactMetadata(opts, id, now))
+	metadata, err := workflowJSONFields(opscore.NewArtifactMetadata(opts, id, now))
 	if err != nil {
 		return WorkflowRecord{}, err
 	}

@@ -14,7 +14,7 @@ import (
 func TestReportListerListsProjectReports(t *testing.T) {
 	projectDir := t.TempDir()
 	writeReportListingFile(t, projectDir, filepath.Join(
-		opscore.OpsDirectoryName,
+		opscore.DirectoryName,
 		opsnamespace.Default,
 		"run",
 		"00001-ticket-run",
@@ -22,7 +22,7 @@ func TestReportListerListsProjectReports(t *testing.T) {
 		"execution-report.md",
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n- status: succeeded\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
-		opscore.OpsDirectoryName,
+		opscore.DirectoryName,
 		opsnamespace.Default,
 		"run",
 		"00002-agent-work-loop",
@@ -30,7 +30,7 @@ func TestReportListerListsProjectReports(t *testing.T) {
 		"loop-report.md",
 	), "# Loop Report\n\n## Summary\n\n- loop: loop-1\n- status: blocked\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
-		opscore.OpsDirectoryName,
+		opscore.DirectoryName,
 		opsnamespace.Default,
 		"run",
 		"00001-ticket-run",
@@ -59,7 +59,7 @@ func TestReportListerListsProjectReports(t *testing.T) {
 func TestReportListerFiltersReports(t *testing.T) {
 	projectDir := t.TempDir()
 	writeReportListingFile(t, projectDir, filepath.Join(
-		opscore.OpsDirectoryName,
+		opscore.DirectoryName,
 		opsnamespace.Default,
 		"run",
 		"00001-ticket-run",
@@ -67,7 +67,7 @@ func TestReportListerFiltersReports(t *testing.T) {
 		"execution-report.md",
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n- status: succeeded\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
-		opscore.OpsDirectoryName,
+		opscore.DirectoryName,
 		opsnamespace.Default,
 		"run",
 		"00002-ticket-run",
@@ -111,7 +111,7 @@ func TestReportListerUsesActiveOpsNamespace(t *testing.T) {
 	t.Setenv(opsnamespace.UserEnv, "adrian")
 
 	writeReportListingFile(t, projectDir, filepath.Join(
-		opscore.OpsDirectoryName,
+		opscore.DirectoryName,
 		opsnamespace.Default,
 		"run",
 		"00001-default-run",
@@ -119,7 +119,7 @@ func TestReportListerUsesActiveOpsNamespace(t *testing.T) {
 		"execution-report.md",
 	), "# Execution Report\n\n## Summary\n\n- execution: default-exec\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
-		opscore.OpsDirectoryName,
+		opscore.DirectoryName,
 		"adrian",
 		"run",
 		"00002-adrian-run",

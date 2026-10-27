@@ -230,7 +230,7 @@ func TestNativeEntryFences(t *testing.T) {
 func nativeEntryNextNamespace(t *testing.T, store *WorkflowStore) (*WorkflowStore, WorkflowIntegrationAdmission) {
 	t.Helper()
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: store.layout.ProjectDir(), Namespace: "other"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: store.layout.ProjectDir(), Namespace: "other"})
 	if err != nil {
 		t.Fatal(err)
 	}

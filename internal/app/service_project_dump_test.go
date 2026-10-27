@@ -39,17 +39,17 @@ func newProjectDumpTestService(t *testing.T) (service, string) {
 
 	project := newTestWorkspace(t)
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: project, Namespace: "team-a"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: project, Namespace: "team-a"})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	artifact, err := opscore.CreateOpsArtifact(opscore.CreateOpsArtifactOptions{Layout: layout, Type: "dump", Title: "Existing project context", Producer: "chr"})
+	artifact, err := opscore.CreateArtifact(opscore.ArtifactOptions{Layout: layout, Type: "dump", Title: "Existing project context", Producer: "chr"})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	reference, err := filepath.Rel(project, filepath.Join(artifact.Dir, opscore.OpsArtifactBodyFile()))
+	reference, err := filepath.Rel(project, filepath.Join(artifact.Dir, opscore.ArtifactBodyFile()))
 	if err != nil {
 		t.Fatal(err)
 	}

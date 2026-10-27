@@ -208,7 +208,7 @@ func (s service) failTicketLoopExecution(ctx context.Context, loop ticketLoop, c
 	emitLoopFailedAgentEvents(ctx, loop.Events, loop.Record, cause)
 
 	if loop.Record.ArtifactID != "" {
-		if err := opscore.RefreshOpsArtifactMetadata(loop.Record.ArtifactDir, string(loop.Record.Status), time.Now().UTC()); err != nil {
+		if err := opscore.RefreshArtifactMetadata(loop.Record.ArtifactDir, string(loop.Record.Status), time.Now().UTC()); err != nil {
 			return ticketLoopExecutionResult{}, err
 		}
 	}
@@ -230,7 +230,7 @@ func (s service) finishTicketLoopExecution(ctx context.Context, loop ticketLoop)
 	emitLoopFinishedAgentEvent(ctx, loop.Events, loop.Record)
 
 	if loop.Record.ArtifactID != "" {
-		if err := opscore.RefreshOpsArtifactMetadata(loop.Record.ArtifactDir, string(loop.Record.Status), time.Now().UTC()); err != nil {
+		if err := opscore.RefreshArtifactMetadata(loop.Record.ArtifactDir, string(loop.Record.Status), time.Now().UTC()); err != nil {
 			return ticketLoopExecutionResult{}, err
 		}
 	}
@@ -283,12 +283,12 @@ func newRunningLoopRunRecord(projectID string, eligibleCount int) core.LoopRunRe
 }
 
 func allocateLoopRunArtifact(projectDir string, record core.LoopRunRecord) (core.LoopRunRecord, error) {
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: projectDir})
 	if err != nil {
 		return core.LoopRunRecord{}, err
 	}
 
-	artifact, err := opscore.CreateOpsArtifact(opscore.CreateOpsArtifactOptions{
+	artifact, err := opscore.CreateArtifact(opscore.ArtifactOptions{
 		Layout:      layout,
 		Type:        "run",
 		Title:       "Agent work loop",

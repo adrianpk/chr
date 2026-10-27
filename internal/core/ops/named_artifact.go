@@ -6,44 +6,44 @@ import (
 	"time"
 )
 
-// NamedOpsArtifactPath binds absolute and project-relative paths to the same body.
-type NamedOpsArtifactPath struct {
+// NamedArtifactPath binds absolute and project-relative paths to the same body.
+type NamedArtifactPath struct {
 	RelativePath string
 	Path         string
 }
 
-// NamedOpsArtifactBody resolves a deterministic Markdown artifact body path.
-func NamedOpsArtifactBody(projectDir, artifactType, name string) (NamedOpsArtifactPath, error) {
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir})
+// NamedArtifactBody resolves a deterministic Markdown artifact body path.
+func NamedArtifactBody(projectDir, artifactType, name string) (NamedArtifactPath, error) {
+	layout, err := ResolveLayout(LayoutOptions{ProjectDir: projectDir})
 	if err != nil {
-		return NamedOpsArtifactPath{}, err
+		return NamedArtifactPath{}, err
 	}
 
-	id := "00000-" + OpsArtifactSlugOrDefault(name)
+	id := "00000-" + ArtifactSlugOrDefault(name)
 
 	artifactDir, err := layout.ArtifactDirectory(artifactType, id)
 	if err != nil {
-		return NamedOpsArtifactPath{}, err
+		return NamedArtifactPath{}, err
 	}
 
-	bodyPath := filepath.Join(artifactDir, OpsArtifactBodyFile())
+	bodyPath := filepath.Join(artifactDir, ArtifactBodyFile())
 
 	relativePath, err := filepath.Rel(projectDir, bodyPath)
 	if err != nil {
-		return NamedOpsArtifactPath{}, err
+		return NamedArtifactPath{}, err
 	}
 
-	return NamedOpsArtifactPath{RelativePath: filepath.ToSlash(relativePath), Path: bodyPath}, nil
+	return NamedArtifactPath{RelativePath: filepath.ToSlash(relativePath), Path: bodyPath}, nil
 }
 
-// EnsureOpsArtifactBodyMetadata ensures metadata for a canonical ops artifact body.
-func EnsureOpsArtifactBodyMetadata(projectDir, relativePath string) error {
+// EnsureArtifactBodyMetadata ensures metadata for a canonical ops artifact body.
+func EnsureArtifactBodyMetadata(projectDir, relativePath string) error {
 	parts := strings.Split(filepath.ToSlash(relativePath), "/")
-	if len(parts) != 5 || parts[0] != OpsDirectoryName || parts[4] != OpsArtifactBodyFile() {
+	if len(parts) != 5 || parts[0] != DirectoryName || parts[4] != ArtifactBodyFile() {
 		return nil
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: parts[1]})
+	layout, err := ResolveLayout(LayoutOptions{ProjectDir: projectDir, Namespace: parts[1]})
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func EnsureOpsArtifactBodyMetadata(projectDir, relativePath string) error {
 	id := parts[3]
 	name := strings.TrimPrefix(id, "00000-")
 
-	artifact, err := EnsureOpsArtifactEnvelope(CreateOpsArtifactOptions{
+	artifact, err := EnsureArtifactEnvelope(ArtifactOptions{
 		Layout:      layout,
 		Type:        parts[2],
 		Title:       name,
@@ -63,19 +63,19 @@ func EnsureOpsArtifactBodyMetadata(projectDir, relativePath string) error {
 		return err
 	}
 
-	return RefreshOpsArtifactMetadata(artifact.Dir, "created", time.Now().UTC())
+	return RefreshArtifactMetadata(artifact.Dir, "created", time.Now().UTC())
 }
 
-// EnsureNamedOpsArtifactMetadata ensures metadata for a deterministic Markdown artifact body.
-func EnsureNamedOpsArtifactMetadata(projectDir, artifactType, name string) error {
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir})
+// EnsureNamedArtifactMetadata ensures metadata for a deterministic Markdown artifact body.
+func EnsureNamedArtifactMetadata(projectDir, artifactType, name string) error {
+	layout, err := ResolveLayout(LayoutOptions{ProjectDir: projectDir})
 	if err != nil {
 		return err
 	}
 
-	id := "00000-" + OpsArtifactSlugOrDefault(name)
+	id := "00000-" + ArtifactSlugOrDefault(name)
 
-	artifact, err := EnsureOpsArtifactEnvelope(CreateOpsArtifactOptions{
+	artifact, err := EnsureArtifactEnvelope(ArtifactOptions{
 		Layout:      layout,
 		Type:        artifactType,
 		Title:       strings.TrimSpace(name),
@@ -87,5 +87,5 @@ func EnsureNamedOpsArtifactMetadata(projectDir, artifactType, name string) error
 		return err
 	}
 
-	return RefreshOpsArtifactMetadata(artifact.Dir, "created", time.Now().UTC())
+	return RefreshArtifactMetadata(artifact.Dir, "created", time.Now().UTC())
 }

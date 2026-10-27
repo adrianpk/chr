@@ -83,7 +83,7 @@ func RunProvingValidationForObjective(ctx context.Context, projectDir string, ob
 		return ProvingValidationResult{}, fmt.Errorf("write proving validation log: %w", err)
 	}
 
-	if err := opscore.RefreshOpsArtifactMetadata(artifact.Dir, provingValidationArtifactStatus(result), time.Now()); err != nil {
+	if err := opscore.RefreshArtifactMetadata(artifact.Dir, provingValidationArtifactStatus(result), time.Now()); err != nil {
 		return ProvingValidationResult{}, err
 	}
 

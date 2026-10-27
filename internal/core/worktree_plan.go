@@ -79,7 +79,7 @@ func NewWorktreePlan(opts WorktreePlanOptions) (WorktreePlan, error) {
 }
 
 func resolvedWorktreeRoot(projectDir string) (string, error) {
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: projectDir})
 	if err != nil {
 		return "", err
 	}

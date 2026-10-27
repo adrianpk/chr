@@ -11,12 +11,12 @@ import (
 
 // newGateReportArtifacts constructs the corresponding package service or value.
 func newGateReportArtifacts(projectDir string, createdAt time.Time) (gate.ReportArtifacts, error) {
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: projectDir})
 	if err != nil {
 		return gate.ReportArtifacts{}, err
 	}
 
-	artifact, err := opscore.CreateOpsArtifact(opscore.CreateOpsArtifactOptions{
+	artifact, err := opscore.CreateArtifact(opscore.ArtifactOptions{
 		Layout:      layout,
 		Type:        "report",
 		Title:       "Dev main gate " + createdAt.UTC().Format("2006-01-02 15:04:05Z"),
@@ -30,7 +30,7 @@ func newGateReportArtifacts(projectDir string, createdAt time.Time) (gate.Report
 
 	return gate.ReportArtifacts{
 		JSONPath:     filepath.Join(artifact.Dir, "evidence", "gate-report.json"),
-		MarkdownPath: filepath.Join(artifact.Dir, opscore.OpsArtifactBodyFile()),
+		MarkdownPath: filepath.Join(artifact.Dir, opscore.ArtifactBodyFile()),
 	}, nil
 }
 
@@ -49,5 +49,5 @@ func refreshGateReportArtifactMetadata(path string) error {
 		return err
 	}
 
-	return opscore.RefreshOpsArtifactMetadata(artifactDir, "created", time.Now().UTC())
+	return opscore.RefreshArtifactMetadata(artifactDir, "created", time.Now().UTC())
 }

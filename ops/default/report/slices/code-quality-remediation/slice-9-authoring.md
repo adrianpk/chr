@@ -46,7 +46,9 @@ artifact IDs. The distinct ASCII artifact slug and Unicode quiz slug rules stay
 separate. Legacy ticket writers resolve an explicit path-owned/default namespace
 without consulting OPS_USER.
 
-Two debt signatures qualify their unchanged layout type through its new owner;
+Callers use ops.Layout, ArtifactOptions, ResolveLayout and artifact operations
+without repeated package prefixes. Two debt signatures qualify their unchanged
+layout type through its new owner;
 their parameter and result meanings are unchanged. Debt remains 301 with ceiling
 seven and the same one external-interface exception.
 
@@ -64,14 +66,17 @@ seven and the same one external-interface exception.
   — passed for the envelope prerequisite; the app package compiled with no matching tests.
 - `make check-go-style` — passed, 301 exact debts and one external exception.
 - `make check-package-readmes` — passed.
+- `go test ./internal/core -run '^Test(WorkflowLegacy|WorkflowMaterialization|LegacyWorkObservation)' -count=1 -timeout=3m`
+  — passed after the explicit legacy namespace resolver.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ops ./internal/core ./internal/app ./internal/tui ./scripts/goquality`
+  — passed with zero issues after package naming and import formatting.
 
 The first compile identified shared allocator calls and a legacy layout literal;
 those consumers now use the owned ops contracts. The first style scan identified
 two unchanged layout-type signatures; their exact reassociations are recorded.
-The first strict lint identified import formatting, the legacy layout branch
-complexity and old-name stutters at the mechanical move. Formatting is corrected
-and the namespace resolution has one small owner. The next separate naming
-commit removes stutters without a lint suppression. Final clean-head controller
+The mechanical move and package naming are separate commits. The original
+strict-lint findings for imports, the legacy namespace branch and old-name
+stutters are corrected without suppressions. Final clean-head controller
 validation has not run.
 
 ## Risks and Follow-ups

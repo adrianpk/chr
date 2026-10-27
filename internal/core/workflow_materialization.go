@@ -87,7 +87,7 @@ func (s *WorkflowStore) materializeNewPlan(ctx context.Context, opts WorkflowMat
 	}
 	defer func() { err = errors.Join(err, s.releaseWorkflowAllocation(guard)) }()
 
-	result, err = s.buildMaterialization(ctx, opts, body, opscore.NextOpsArtifactNumber(s.layout.Root()))
+	result, err = s.buildMaterialization(ctx, opts, body, opscore.NextArtifactNumber(s.layout.Root()))
 	if err != nil {
 		return result, err
 	}

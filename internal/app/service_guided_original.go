@@ -46,7 +46,7 @@ func guidedOriginalMatches(session core.AuthoringSession, stage, path, kind stri
 
 		ref := session.Guided.Work.Materialization.PlanRevision.CurrentTrackerRef
 
-		return stage == "preparation" && path == filepath.ToSlash(filepath.Join(opscore.OpsDirectoryName, session.Namespace, ref))
+		return stage == "preparation" && path == filepath.ToSlash(filepath.Join(opscore.DirectoryName, session.Namespace, ref))
 	}
 
 	stages := map[string]string{"dump": "dump", "quiz": "quiz", "specification": "specification", "plan": "preparation"}

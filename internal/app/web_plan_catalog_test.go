@@ -75,7 +75,7 @@ func checkWebPlanDocument(t *testing.T, provider webViewProvider, handler http.H
 func seedWebPlanCatalog(t *testing.T, provider webViewProvider) []string {
 	t.Helper()
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: provider.projectContext.ProjectDir, Namespace: "default"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: provider.projectContext.ProjectDir, Namespace: "default"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,7 +83,7 @@ func seedWebPlanCatalog(t *testing.T, provider webViewProvider) []string {
 	var refs []string
 
 	for _, item := range []struct{ title, body string }{{"Short plan", "Opening short body."}, {"Long plan", strings.Repeat("Opening long body.\n", 150)}, {strings.Repeat("UnbrokenTitle", 12), strings.Repeat("UnbrokenBody", 200)}} {
-		artifact, err := opscore.CreateOpsArtifact(opscore.CreateOpsArtifactOptions{Layout: layout, Type: "plan", Title: item.title, Producer: "test"})
+		artifact, err := opscore.CreateArtifact(opscore.ArtifactOptions{Layout: layout, Type: "plan", Title: item.title, Producer: "test"})
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -10,62 +10,62 @@ import (
 )
 
 const (
-	// OpsDirectoryName is the project-local root for shared operational artifacts.
-	OpsDirectoryName = "ops"
+	// DirectoryName is the project-local root for shared operational artifacts.
+	DirectoryName = "ops"
 )
 
-var opsArtifactTypes = map[string]struct{}{
+var artifactTypes = map[string]struct{}{
 	"dump": {}, "quiz": {}, "spec": {}, "plan": {}, "tracker": {},
 	"ticket": {}, "run": {}, "report": {}, "explanation": {}, "map": {},
 }
 
-// OpsLayout describes the project-local operational layout.
-type OpsLayout struct {
+// Layout describes the project-local operational layout.
+type Layout struct {
 	projectDir string
 	namespace  string
 }
 
-// ResolveOpsLayoutOptions configures shared operational layout resolution.
-type ResolveOpsLayoutOptions struct {
+// LayoutOptions configures shared operational layout resolution.
+type LayoutOptions struct {
 	ProjectDir string
 	Namespace  string
 	LookupEnv  func(string) string
 }
 
-// ResolveOpsLayout resolves an explicit namespace, OPS_USER, or default.
-func ResolveOpsLayout(opts ResolveOpsLayoutOptions) (OpsLayout, error) {
+// ResolveLayout resolves an explicit namespace, OPS_USER, or default.
+func ResolveLayout(opts LayoutOptions) (Layout, error) {
 	projectDir, err := projectcore.ResolveDirectory(opts.ProjectDir)
 	if err != nil {
-		return OpsLayout{}, err
+		return Layout{}, err
 	}
 
 	namespace, err := opsnamespace.Resolve(opts.Namespace, opts.LookupEnv)
 	if err != nil {
-		return OpsLayout{}, err
+		return Layout{}, err
 	}
 
-	return OpsLayout{projectDir: projectDir, namespace: namespace}, nil
+	return Layout{projectDir: projectDir, namespace: namespace}, nil
 }
 
 // ProjectDir returns the absolute project directory.
-func (l OpsLayout) ProjectDir() string { return l.projectDir }
+func (l Layout) ProjectDir() string { return l.projectDir }
 
 // Namespace returns the active shared namespace.
-func (l OpsLayout) Namespace() string { return l.namespace }
+func (l Layout) Namespace() string { return l.namespace }
 
 // Root returns the absolute namespace root.
-func (l OpsLayout) Root() string {
-	return filepath.Join(l.projectDir, OpsDirectoryName, l.namespace)
+func (l Layout) Root() string {
+	return filepath.Join(l.projectDir, DirectoryName, l.namespace)
 }
 
 // RelativeRoot returns the slash-separated namespace root relative to projectDir.
-func (l OpsLayout) RelativeRoot() string {
-	return filepath.ToSlash(filepath.Join(OpsDirectoryName, l.namespace))
+func (l Layout) RelativeRoot() string {
+	return filepath.ToSlash(filepath.Join(DirectoryName, l.namespace))
 }
 
 // ArtifactRoot returns the absolute directory for one canonical artifact type.
-func (l OpsLayout) ArtifactRoot(artifactType string) (string, error) {
-	if _, ok := opsArtifactTypes[artifactType]; !ok {
+func (l Layout) ArtifactRoot(artifactType string) (string, error) {
+	if _, ok := artifactTypes[artifactType]; !ok {
 		return "", fmt.Errorf("invalid ops artifact type: %s", artifactType)
 	}
 
@@ -73,7 +73,7 @@ func (l OpsLayout) ArtifactRoot(artifactType string) (string, error) {
 }
 
 // ArtifactDirectory returns the absolute directory for one canonical artifact.
-func (l OpsLayout) ArtifactDirectory(artifactType, id string) (string, error) {
+func (l Layout) ArtifactDirectory(artifactType, id string) (string, error) {
 	root, err := l.ArtifactRoot(artifactType)
 	if err != nil {
 		return "", err
@@ -87,12 +87,12 @@ func (l OpsLayout) ArtifactDirectory(artifactType, id string) (string, error) {
 }
 
 // WorktreeRoot returns the absolute root for code worktrees associated with artifacts.
-func (l OpsLayout) WorktreeRoot() string {
+func (l Layout) WorktreeRoot() string {
 	return filepath.Join(l.Root(), "worktree")
 }
 
 // WorktreeDirectory returns the absolute code worktree path for one artifact ID.
-func (l OpsLayout) WorktreeDirectory(id string) (string, error) {
+func (l Layout) WorktreeDirectory(id string) (string, error) {
 	if strings.TrimSpace(id) == "" || filepath.Base(id) != id {
 		return "", fmt.Errorf("invalid ops worktree id: %s", id)
 	}

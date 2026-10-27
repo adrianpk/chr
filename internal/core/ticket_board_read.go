@@ -19,7 +19,7 @@ import (
 // TicketBoardReadOptions selects authority and one bounded page of the Board.
 type TicketBoardReadOptions struct {
 	CaseSlug       string
-	Layout         opscore.OpsLayout
+	Layout         opscore.Layout
 	ProjectID      string
 	NativeWorkflow bool
 	Offset         int

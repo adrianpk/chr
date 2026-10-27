@@ -68,7 +68,7 @@ func TestPiGenerationTracking(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := opscore.EnsureOpsArtifactBodyMetadata(project, filepath.ToSlash(relative)); err != nil {
+	if err := opscore.EnsureArtifactBodyMetadata(project, filepath.ToSlash(relative)); err != nil {
 		t.Fatal(err)
 	}
 

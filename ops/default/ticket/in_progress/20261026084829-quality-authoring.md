@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-9
 source: review
 reported_at: 2026-10-26T08:48:29Z
-commits: []
+commits: [e63688b43071]
 branch: refactor/slice-9-quality-authoring
 started_at: 2026-10-27T13:06:46Z
 ready_at: 2026-10-26T08:57:09Z

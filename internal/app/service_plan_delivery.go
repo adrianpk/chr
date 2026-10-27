@@ -103,15 +103,15 @@ func (s service) materializeGeneratedPlan(ctx context.Context, request PlanGener
 	return s.MaterializeWorkflowPlan(ctx, plan)
 }
 
-func (s service) planDeliveryInput(ctx context.Context, request PlanGenerateRequest, generated PlanOperationResult) (generationcore.GeneratedWorkflowPlan, opscore.OpsLayout, error) {
+func (s service) planDeliveryInput(ctx context.Context, request PlanGenerateRequest, generated PlanOperationResult) (generationcore.GeneratedWorkflowPlan, opscore.Layout, error) {
 	scope := s.quizScope(request.Scope)
 
 	input, err := core.ObservePlanWorkflow(ctx, s.projectContext.ProjectDir, scope)
 	if err != nil {
-		return input, opscore.OpsLayout{}, err
+		return input, opscore.Layout{}, err
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: scope.Namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: scope.Namespace})
 	if err != nil {
 		return input, layout, err
 	}

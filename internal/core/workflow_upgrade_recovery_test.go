@@ -170,7 +170,7 @@ func TestWorkflowUpgradeOwned(t *testing.T) {
 		t.Fatal("native capacity did not block upgrade", blocked)
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: store.layout.ProjectDir(), Namespace: "other"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: store.layout.ProjectDir(), Namespace: "other"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -281,7 +281,7 @@ func TestWorkflowUpgradeProcess(t *testing.T) {
 		return
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: dir, Namespace: "default"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: dir, Namespace: "default"})
 	if err != nil {
 		t.Fatal(err)
 	}

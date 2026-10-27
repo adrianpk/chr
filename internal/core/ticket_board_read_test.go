@@ -85,7 +85,7 @@ func checkNativeBoardTickets(t *testing.T, tickets []IndexedTicket) {
 
 // Repository status aliases differ from runtime aliases, and invalid data stays visible.
 func TestTicketBoardAttention(t *testing.T) {
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: t.TempDir(), Namespace: "default"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: t.TempDir(), Namespace: "default"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -119,26 +119,26 @@ func TestTicketBoardAttention(t *testing.T) {
 func TestTicketBoardFailures(t *testing.T) {
 	for _, tc := range []struct {
 		name  string
-		setup func(*testing.T, opscore.OpsLayout)
+		setup func(*testing.T, opscore.Layout)
 	}{
-		{"duplicate", func(t *testing.T, layout opscore.OpsLayout) {
+		{"duplicate", func(t *testing.T, layout opscore.Layout) {
 			for _, name := range []string{"first.md", "second.md"} {
 				writeTicketFile(t, filepath.Join(layout.Root(), "ticket", name), "---\nkey: CHR-1\ntitle: Duplicate\nstatus: backlog\n---\n")
 			}
 		}},
-		{"symlink", func(t *testing.T, layout opscore.OpsLayout) {
+		{"symlink", func(t *testing.T, layout opscore.Layout) {
 			writeTicketFile(t, filepath.Join(layout.Root(), "ticket", "target.txt"), "body")
 
 			if err := os.Symlink("target.txt", filepath.Join(layout.Root(), "ticket", "linked.md")); err != nil {
 				t.Fatal(err)
 			}
 		}},
-		{"storage", func(t *testing.T, layout opscore.OpsLayout) {
+		{"storage", func(t *testing.T, layout opscore.Layout) {
 			writeTicketFile(t, filepath.Join(layout.Root(), "ticket"), "not a directory")
 		}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: t.TempDir(), Namespace: "default"})
+			layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: t.TempDir(), Namespace: "default"})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -151,7 +151,7 @@ func TestTicketBoardFailures(t *testing.T) {
 		})
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: t.TempDir(), Namespace: "default"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: t.TempDir(), Namespace: "default"})
 	if err != nil {
 		t.Fatal(err)
 	}

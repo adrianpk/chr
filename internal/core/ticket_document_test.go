@@ -49,7 +49,7 @@ func TestTicketDocumentRoundTrip(t *testing.T) {
 func ticketEditorFixture(t *testing.T, kind string) (TicketBoardReadOptions, TicketDocument) {
 	t.Helper()
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: t.TempDir(), Namespace: "default"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: t.TempDir(), Namespace: "default"})
 	if err != nil {
 		t.Fatal(err)
 	}

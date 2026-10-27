@@ -175,7 +175,7 @@ func guidedPreparationPaths(session AuthoringSession) ([]string, error) {
 	materialized := work.Materialization
 	binding := materialized.PlanRevision
 
-	root := filepath.ToSlash(filepath.Join(opscore.OpsDirectoryName, session.Namespace))
+	root := filepath.ToSlash(filepath.Join(opscore.DirectoryName, session.Namespace))
 	if validatePlanDocumentReference(work.Publication.Reference) != nil || !strings.HasPrefix(work.Publication.Reference, root+"/") {
 		return nil, workflowstate.ErrConflict
 	}

@@ -65,7 +65,7 @@ func nativeCoordinatorLinked(t *testing.T, store *WorkflowStore) *WorkflowStore 
 	dir := filepath.Join(t.TempDir(), "linked")
 	workflowSelectionGit(t, store, "worktree", "add", "-qb", "native-linked", dir, "HEAD")
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: dir, Namespace: "alias"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: dir, Namespace: "alias"})
 	if err != nil {
 		t.Fatal(err)
 	}

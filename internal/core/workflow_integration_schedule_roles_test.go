@@ -14,7 +14,7 @@ import (
 func nativeRolePeer(t *testing.T, store *WorkflowStore, namespace, key, target string) (*WorkflowStore, WorkflowIntegrationEntry) {
 	t.Helper()
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: store.layout.ProjectDir(), Namespace: namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: store.layout.ProjectDir(), Namespace: namespace})
 	if err != nil {
 		t.Fatal(err)
 	}

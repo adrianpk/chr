@@ -13,7 +13,7 @@ import (
 func (s service) observeLegacyWork(ctx context.Context, config core.WorkspaceConfig, result *WorkObservation) error {
 	// The same canonical/legacy document owner used by selection reads avoids a
 	// write-through index refresh during observation.
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: s.workflowNamespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: s.workflowNamespace})
 	if err != nil {
 		return err
 	}

@@ -23,7 +23,7 @@ func workflowPlanAdoptionFixture(t *testing.T) (*WorkflowStore, WorkflowPlanAdop
 	store := workflowTestStore(t)
 	plan := workflowPlanFixture()
 
-	artifact, err := opscore.CreateOpsArtifact(opscore.CreateOpsArtifactOptions{Layout: store.layout, Type: "plan", Title: "Original plan", Producer: "chr"})
+	artifact, err := opscore.CreateArtifact(opscore.ArtifactOptions{Layout: store.layout, Type: "plan", Title: "Original plan", Producer: "chr"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -268,7 +268,7 @@ func TestWorkflowPlanAdoptionProcess(t *testing.T) {
 
 	opts.CheckQuiescent = func(context.Context, []string) error { return nil }
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: dir, Namespace: "default"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: dir, Namespace: "default"})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -34,7 +34,7 @@ func (s *WorkflowStore) acquireWorkflowAdoptionLocks(ctx context.Context) ([]*Ag
 			continue
 		}
 
-		layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: worktree.Path, Namespace: s.layout.Namespace()})
+		layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: worktree.Path, Namespace: s.layout.Namespace()})
 		if err != nil {
 			return nil, errors.Join(err, releaseWorkflowAdoptionLocks(locks))
 		}
@@ -50,7 +50,7 @@ func (s *WorkflowStore) acquireWorkflowAdoptionLocks(ctx context.Context) ([]*Ag
 	return locks, nil
 }
 
-func acquireWorkflowAdoptionLock(layout opscore.OpsLayout) (*AgentOperationLock, error) {
+func acquireWorkflowAdoptionLock(layout opscore.Layout) (*AgentOperationLock, error) {
 	path := filepath.Join(layout.Root(), "lock", "agent-operation.lock")
 
 	if err := reclaimWorkflowAdoptionLock(path); err != nil {

@@ -20,7 +20,7 @@ type RuntimeValidationOptions struct {
 	WorkspaceBaseRef      string
 	WorkspaceBaseSHA      string
 	RunID                 string
-	OpsLayout             *opscore.OpsLayout
+	OpsLayout             *opscore.Layout
 	ArtifactID            string
 }
 

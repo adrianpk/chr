@@ -31,7 +31,7 @@ func workflowSelectionCommit(t *testing.T, store *WorkflowStore) (string, string
 	// Publish only the coordinator marker for an otherwise empty target fixture.
 	// Task files remain host-owned inputs synchronized into the isolated lane.
 	if _, err := os.Stat(filepath.Join(store.layout.Root(), workflowCoordinatorPath)); err == nil {
-		workflowSelectionGit(t, store, "add", filepath.Join(opscore.OpsDirectoryName, store.layout.Namespace(), workflowCoordinatorPath))
+		workflowSelectionGit(t, store, "add", filepath.Join(opscore.DirectoryName, store.layout.Namespace(), workflowCoordinatorPath))
 	}
 
 	workflowSelectionGit(t, store, "-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "--allow-empty", "-qm", "Fixture")

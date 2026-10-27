@@ -21,7 +21,7 @@ func (s service) replayPlanPublication(ctx context.Context, operation generation
 
 	reference := committed.Reference
 	if committed.Binding.BodyRef != "" {
-		layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: operation.Scope.Namespace})
+		layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: operation.Scope.Namespace})
 		if err != nil {
 			return PlanOperationResult{}, false, err
 		}
@@ -33,7 +33,7 @@ func (s service) replayPlanPublication(ctx context.Context, operation generation
 }
 
 func (s service) retainedPlanTracking(plan PlanView, binding generationcore.PlanRevisionBinding) (PlanTrackingResult, error) {
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: plan.Scope.Namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: plan.Scope.Namespace})
 	if err != nil {
 		return PlanTrackingResult{}, err
 	}

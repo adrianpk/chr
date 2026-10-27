@@ -91,7 +91,7 @@ func AcceptanceFeatureLayout(projectDir string, scope quizcore.Scope) (Acceptanc
 		return AcceptanceFeaturePaths{}, err
 	}
 
-	body, err := opscore.NamedOpsArtifactBody(projectDir, "spec", scopeID+"-acceptance-feature")
+	body, err := opscore.NamedArtifactBody(projectDir, "spec", scopeID+"-acceptance-feature")
 	if err != nil {
 		return AcceptanceFeaturePaths{}, err
 	}
@@ -115,7 +115,7 @@ func AcceptanceFeatureRoundLayout(projectDir string, scope quizcore.Scope) (Acce
 		return AcceptanceFeatureRoundPaths{}, err
 	}
 
-	body, err := opscore.NamedOpsArtifactBody(projectDir, "spec", scopeID+"-acceptance-feature-round")
+	body, err := opscore.NamedArtifactBody(projectDir, "spec", scopeID+"-acceptance-feature-round")
 	if err != nil {
 		return AcceptanceFeatureRoundPaths{}, err
 	}
@@ -157,7 +157,7 @@ func WriteAcceptanceFeature(
 		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, err
 	}
 
-	if err := opscore.EnsureNamedOpsArtifactMetadata(projectDir, "spec", scopeID+"-acceptance-feature"); err != nil {
+	if err := opscore.EnsureNamedArtifactMetadata(projectDir, "spec", scopeID+"-acceptance-feature"); err != nil {
 		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, err
 	}
 
@@ -196,7 +196,7 @@ func WriteAcceptanceFeatureRoundNotes(ctx context.Context, projectDir string, no
 		return AcceptanceFeatureRoundPaths{}, err
 	}
 
-	if err := opscore.EnsureNamedOpsArtifactMetadata(projectDir, "spec", scopeID+"-acceptance-feature-round"); err != nil {
+	if err := opscore.EnsureNamedArtifactMetadata(projectDir, "spec", scopeID+"-acceptance-feature-round"); err != nil {
 		return AcceptanceFeatureRoundPaths{}, err
 	}
 

@@ -84,7 +84,7 @@ func (scanner *documentScanner) append(ctx context.Context, path string, entry o
 		return nil
 	}
 
-	if strings.HasPrefix(filepath.ToSlash(path), filepath.ToSlash(filepath.Join(scanner.projectDir, opscore.OpsDirectoryName))+"/") && !opscore.IsOpsArtifactBodyPath(scanner.projectDir, path) {
+	if strings.HasPrefix(filepath.ToSlash(path), filepath.ToSlash(filepath.Join(scanner.projectDir, opscore.DirectoryName))+"/") && !opscore.IsArtifactBodyPath(scanner.projectDir, path) {
 		return nil
 	}
 
@@ -251,12 +251,12 @@ func documentRoots(projectDir string) []struct {
 		family string
 		path   string
 	}{
-		{family: "dump", path: opscore.DefaultOpsArtifactRoot(projectDir, "dump")},
-		{family: "quiz", path: opscore.DefaultOpsArtifactRoot(projectDir, "quiz")},
-		{family: "spec", path: opscore.DefaultOpsArtifactRoot(projectDir, "spec")},
-		{family: "plan", path: opscore.DefaultOpsArtifactRoot(projectDir, "plan")},
-		{family: "tracker", path: opscore.DefaultOpsArtifactRoot(projectDir, "tracker")},
-		{family: "report", path: opscore.DefaultOpsArtifactRoot(projectDir, "report")},
+		{family: "dump", path: opscore.DefaultArtifactRoot(projectDir, "dump")},
+		{family: "quiz", path: opscore.DefaultArtifactRoot(projectDir, "quiz")},
+		{family: "spec", path: opscore.DefaultArtifactRoot(projectDir, "spec")},
+		{family: "plan", path: opscore.DefaultArtifactRoot(projectDir, "plan")},
+		{family: "tracker", path: opscore.DefaultArtifactRoot(projectDir, "tracker")},
+		{family: "report", path: opscore.DefaultArtifactRoot(projectDir, "report")},
 		{family: "dump", path: filepath.Join(projectDir, ".prj", "dumps")},
 		{family: "quiz", path: filepath.Join(projectDir, ".prj", "quizzes")},
 		{family: "spec", path: filepath.Join(projectDir, ".prj", "specs")},

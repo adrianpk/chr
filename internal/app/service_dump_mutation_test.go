@@ -244,17 +244,17 @@ func checkServiceDumpAliases(t *testing.T, operations service, destination strin
 func serviceDumpArtifact(t *testing.T, project, namespace, title, body string) string {
 	t.Helper()
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: project, Namespace: namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: project, Namespace: namespace})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	artifact, err := opscore.CreateOpsArtifact(opscore.CreateOpsArtifactOptions{Layout: layout, Type: "dump", Title: title, Producer: "chr"})
+	artifact, err := opscore.CreateArtifact(opscore.ArtifactOptions{Layout: layout, Type: "dump", Title: title, Producer: "chr"})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	path := filepath.Join(artifact.Dir, opscore.OpsArtifactBodyFile())
+	path := filepath.Join(artifact.Dir, opscore.ArtifactBodyFile())
 	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}

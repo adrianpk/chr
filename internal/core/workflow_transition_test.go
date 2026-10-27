@@ -24,7 +24,7 @@ func TestWorkflowProcess(t *testing.T) {
 		return
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: os.Getenv("CHR_WORKFLOW_HELPER_DIR"), Namespace: "default"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: os.Getenv("CHR_WORKFLOW_HELPER_DIR"), Namespace: "default"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -216,7 +216,7 @@ func workflowTestLinkedStore(t *testing.T, store *WorkflowStore) *WorkflowStore 
 		}
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: destination, Namespace: "default"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: destination, Namespace: "default"})
 	if err != nil {
 		t.Fatal(err)
 	}

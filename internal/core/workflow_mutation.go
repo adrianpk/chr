@@ -351,7 +351,7 @@ func (s *WorkflowStore) prepareMutationRecord(request WorkflowMutationRequest) (
 	}
 
 	if request.ExpectedRevision == 0 {
-		allocated, err := s.materializationEnvelope(record.Kind, request.Title, opscore.NextOpsArtifactNumber(s.layout.Root()), time.Now().UTC())
+		allocated, err := s.materializationEnvelope(record.Kind, request.Title, opscore.NextArtifactNumber(s.layout.Root()), time.Now().UTC())
 		if err != nil {
 			return record, err
 		}

@@ -29,7 +29,7 @@ func (s service) ticketDocumentOptions() (core.TicketBoardReadOptions, error) {
 		return core.TicketBoardReadOptions{}, err
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: s.workflowNamespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: s.workflowNamespace})
 	if err != nil {
 		return core.TicketBoardReadOptions{}, err
 	}

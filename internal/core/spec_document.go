@@ -41,7 +41,7 @@ func validateSpecReference(reference string) error {
 	}
 
 	parts := strings.Split(reference, "/")
-	if len(parts) != 5 || parts[0] != opscore.OpsDirectoryName || !opsnamespace.Valid(parts[1]) || parts[2] != "spec" || parts[4] != opscore.OpsArtifactBodyFile() {
+	if len(parts) != 5 || parts[0] != opscore.DirectoryName || !opsnamespace.Valid(parts[1]) || parts[2] != "spec" || parts[4] != opscore.ArtifactBodyFile() {
 		return errors.New("spec reference must identify a canonical spec artifact")
 	}
 

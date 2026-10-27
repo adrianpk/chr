@@ -12,7 +12,7 @@ import (
 // UpgradeWorkflowConfiguration owns legacy runtime observation for the explicit
 // project upgrade. A supplied adoption map is checked by the same operation owner.
 func (s service) UpgradeWorkflowConfiguration(ctx context.Context, opts core.WorkflowUpgradeOptions) (core.WorkflowUpgradeResult, error) {
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir})
 	if err != nil {
 		return core.WorkflowUpgradeResult{}, err
 	}

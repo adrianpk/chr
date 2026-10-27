@@ -34,12 +34,12 @@ func TestPlanCatalogDocuments(t *testing.T) {
 func planCatalogSeed(t *testing.T, project, namespace, title string) string {
 	t.Helper()
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: project, Namespace: namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: project, Namespace: namespace})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	artifact, err := opscore.CreateOpsArtifact(opscore.CreateOpsArtifactOptions{Layout: layout, Type: "plan", Title: title, Producer: "test"})
+	artifact, err := opscore.CreateArtifact(opscore.ArtifactOptions{Layout: layout, Type: "plan", Title: title, Producer: "test"})
 	if err != nil {
 		t.Fatal(err)
 	}

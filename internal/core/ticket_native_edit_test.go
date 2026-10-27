@@ -162,7 +162,7 @@ func checkNativeTicketRejected(t *testing.T, opts TicketBoardReadOptions, docume
 func TestTicketDocumentCreation(t *testing.T) {
 	for _, native := range []bool{false, true} {
 		t.Run(map[bool]string{false: "unadopted", true: "native"}[native], func(t *testing.T) {
-			layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: t.TempDir(), Namespace: "default"})
+			layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: t.TempDir(), Namespace: "default"})
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -254,8 +254,8 @@ func (b WorkspaceGraphBuilder) loadDocument(graph *WorkspaceGraph, path string) 
 }
 
 func (b WorkspaceGraphBuilder) shouldSkipDocument(path string) bool {
-	opsPrefix := filepath.ToSlash(filepath.Join(b.projectDir, opscore.OpsDirectoryName)) + "/"
-	if strings.HasPrefix(filepath.ToSlash(path), opsPrefix) && !opscore.IsOpsArtifactBodyPath(b.projectDir, path) {
+	opsPrefix := filepath.ToSlash(filepath.Join(b.projectDir, opscore.DirectoryName)) + "/"
+	if strings.HasPrefix(filepath.ToSlash(path), opsPrefix) && !opscore.IsArtifactBodyPath(b.projectDir, path) {
 		return true
 	}
 
@@ -268,13 +268,13 @@ func (b WorkspaceGraphBuilder) shouldSkipDocument(path string) bool {
 
 func workspaceDocumentRoots(projectDir string) []string {
 	return []string{
-		opscore.DefaultOpsArtifactRoot(projectDir, "dump"),
-		opscore.DefaultOpsArtifactRoot(projectDir, "quiz"),
-		opscore.DefaultOpsArtifactRoot(projectDir, "spec"),
-		opscore.DefaultOpsArtifactRoot(projectDir, "plan"),
-		opscore.DefaultOpsArtifactRoot(projectDir, "tracker"),
-		opscore.DefaultOpsArtifactRoot(projectDir, "ticket"),
-		opscore.DefaultOpsArtifactRoot(projectDir, "report"),
+		opscore.DefaultArtifactRoot(projectDir, "dump"),
+		opscore.DefaultArtifactRoot(projectDir, "quiz"),
+		opscore.DefaultArtifactRoot(projectDir, "spec"),
+		opscore.DefaultArtifactRoot(projectDir, "plan"),
+		opscore.DefaultArtifactRoot(projectDir, "tracker"),
+		opscore.DefaultArtifactRoot(projectDir, "ticket"),
+		opscore.DefaultArtifactRoot(projectDir, "report"),
 	}
 }
 
@@ -474,7 +474,7 @@ func isCaseMetadataPath(projectDir, path string) bool {
 }
 
 func workspaceKindForPath(projectDir, path string) WorkspaceNodeKind {
-	if artifactType, ok := opscore.OpsArtifactTypeForBodyPath(projectDir, path); ok {
+	if artifactType, ok := opscore.ArtifactTypeForBodyPath(projectDir, path); ok {
 		return workspaceKindForOpsArtifactType(artifactType)
 	}
 

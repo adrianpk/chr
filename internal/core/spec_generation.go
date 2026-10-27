@@ -48,7 +48,7 @@ func GeneratedSpecLayout(projectDir string, scope quizcore.Scope) (GeneratedSpec
 		return GeneratedSpecPaths{}, err
 	}
 
-	body, err := opscore.NamedOpsArtifactBody(projectDir, "spec", scopeID+"-spec")
+	body, err := opscore.NamedArtifactBody(projectDir, "spec", scopeID+"-spec")
 	if err != nil {
 		return GeneratedSpecPaths{}, err
 	}

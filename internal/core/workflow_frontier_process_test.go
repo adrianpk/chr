@@ -25,7 +25,7 @@ func TestWorkflowFrontierProcess(t *testing.T) {
 		return
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: dir, Namespace: "default"})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: dir, Namespace: "default"})
 	if err != nil {
 		t.Fatal(err)
 	}

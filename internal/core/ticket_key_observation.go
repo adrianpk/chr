@@ -43,7 +43,7 @@ func (r *fileTicketRepository) nextKeyNumber(ctx context.Context) (int, error) {
 func ticketKeyRoots(projectDir string) ([]string, error) {
 	roots := []string{ticketsDirectory(projectDir)}
 
-	entries, err := os.ReadDir(filepath.Join(projectDir, opscore.OpsDirectoryName))
+	entries, err := os.ReadDir(filepath.Join(projectDir, opscore.DirectoryName))
 	if errors.Is(err, os.ErrNotExist) {
 		return roots, nil
 	}
@@ -58,7 +58,7 @@ func ticketKeyRoots(projectDir string) ([]string, error) {
 
 	for _, entry := range entries {
 		if opsnamespace.Valid(entry.Name()) {
-			roots = append(roots, filepath.Join(projectDir, opscore.OpsDirectoryName, entry.Name(), "ticket"))
+			roots = append(roots, filepath.Join(projectDir, opscore.DirectoryName, entry.Name(), "ticket"))
 		}
 	}
 
@@ -67,7 +67,7 @@ func ticketKeyRoots(projectDir string) ([]string, error) {
 
 func (r *fileTicketRepository) observedTicketNumber(path string) (int, error) {
 	number, _, err := r.ticketNumber(path)
-	if err != nil || filepath.Base(path) != opscore.OpsArtifactBodyFile() {
+	if err != nil || filepath.Base(path) != opscore.ArtifactBodyFile() {
 		return number, err
 	}
 

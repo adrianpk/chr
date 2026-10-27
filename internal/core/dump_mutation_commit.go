@@ -142,12 +142,12 @@ func (r *fileAuthoringSessionRepository) dumpCaptureChanges(binding dumpMutation
 func (r *fileAuthoringSessionRepository) newDumpMutationMetadata(reference string, request DumpMutationRequest) (map[string]any, error) {
 	parts := strings.Split(reference, "/")
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: r.projectDir, Namespace: parts[1]})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: r.projectDir, Namespace: parts[1]})
 	if err != nil {
 		return nil, err
 	}
 
-	metadata := opscore.NewOpsArtifactMetadata(opscore.CreateOpsArtifactOptions{Layout: layout, Type: "dump", Title: request.Title, Producer: "chr"}, parts[3], time.Now().UTC())
+	metadata := opscore.NewArtifactMetadata(opscore.ArtifactOptions{Layout: layout, Type: "dump", Title: request.Title, Producer: "chr"}, parts[3], time.Now().UTC())
 	if request.CaseSlug != "" {
 		metadata["case"] = request.CaseSlug
 	}

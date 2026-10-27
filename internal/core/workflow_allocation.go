@@ -28,7 +28,7 @@ func (s *WorkflowStore) acquireWorkflowAllocation() (string, error) {
 		return "", err
 	}
 
-	if err := opscore.AcquireOpsArtifactLock(path); err != nil {
+	if err := opscore.AcquireArtifactLock(path); err != nil {
 		return "", err
 	}
 

@@ -15,7 +15,7 @@ import (
 
 // ReadRecords observes native records and use-case metadata through their existing owners.
 func (s service) ReadRecords(ctx context.Context, namespace string, query RecordQuery) (RecordPage, error) {
-	if _, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: namespace}); err != nil {
+	if _, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: namespace}); err != nil {
 		return RecordPage{}, err
 	}
 
@@ -65,7 +65,7 @@ func (s service) recordViews(ctx context.Context, namespace string, query Record
 }
 
 func (s service) scopedRecordStore(namespace string) (*core.WorkflowStore, error) {
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: namespace})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: namespace})
 	if err != nil {
 		return nil, err
 	}

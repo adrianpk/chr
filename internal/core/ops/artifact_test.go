@@ -11,7 +11,7 @@ import (
 func TestCreateOpsArtifactAllocatesGlobalIDAndEnvelope(t *testing.T) {
 	projectDir := t.TempDir()
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir})
+	layout, err := ResolveLayout(LayoutOptions{ProjectDir: projectDir})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -20,7 +20,7 @@ func TestCreateOpsArtifactAllocatesGlobalIDAndEnvelope(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	artifact, err := CreateOpsArtifact(CreateOpsArtifactOptions{
+	artifact, err := CreateArtifact(ArtifactOptions{
 		Layout:      layout,
 		Type:        "run",
 		Title:       "Parser validation",
@@ -49,7 +49,7 @@ func TestCreateOpsArtifactAllocatesGlobalIDAndEnvelope(t *testing.T) {
 }
 
 func TestCreateOpsArtifactRejectsExistingAllocationLock(t *testing.T) {
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: t.TempDir()})
+	layout, err := ResolveLayout(LayoutOptions{ProjectDir: t.TempDir()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,18 +63,18 @@ func TestCreateOpsArtifactRejectsExistingAllocationLock(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := CreateOpsArtifact(CreateOpsArtifactOptions{Layout: layout, Type: "run", Title: "Parser", Producer: "chr"}); err == nil {
+	if _, err := CreateArtifact(ArtifactOptions{Layout: layout, Type: "run", Title: "Parser", Producer: "chr"}); err == nil {
 		t.Fatal("CreateOpsArtifact returned nil error")
 	}
 }
 
 func TestRefreshOpsArtifactMetadataIndexesSharedFiles(t *testing.T) {
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: t.TempDir()})
+	layout, err := ResolveLayout(LayoutOptions{ProjectDir: t.TempDir()})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	artifact, err := CreateOpsArtifact(CreateOpsArtifactOptions{Layout: layout, Type: "run", Title: "Parser", Producer: "chr"})
+	artifact, err := CreateArtifact(ArtifactOptions{Layout: layout, Type: "run", Title: "Parser", Producer: "chr"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -91,7 +91,7 @@ func TestRefreshOpsArtifactMetadataIndexesSharedFiles(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := RefreshOpsArtifactMetadata(artifact.Dir, "succeeded", time.Date(2026, 7, 13, 10, 0, 0, 0, time.UTC)); err != nil {
+	if err := RefreshArtifactMetadata(artifact.Dir, "succeeded", time.Date(2026, 7, 13, 10, 0, 0, 0, time.UTC)); err != nil {
 		t.Fatal(err)
 	}
 

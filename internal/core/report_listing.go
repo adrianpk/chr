@@ -62,7 +62,7 @@ func (l ReportLister) ListProjectReports(
 		return nil, err
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: projectDir})
 	if err != nil {
 		return nil, err
 	}

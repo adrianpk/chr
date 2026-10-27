@@ -1134,7 +1134,7 @@ func newPlanTestService(t *testing.T, project string) service {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if err := opscore.EnsureOpsArtifactBodyMetadata(project, filepath.ToSlash(reference)); err != nil {
+			if err := opscore.EnsureArtifactBodyMetadata(project, filepath.ToSlash(reference)); err != nil {
 				t.Fatal(err)
 			}
 		}

@@ -45,7 +45,7 @@ func (s *WorkflowStore) buildWorkflowAmendment(ctx context.Context, set Workflow
 }
 
 func (s *WorkflowStore) workflowAmendmentBuilder(ctx context.Context, set WorkflowRecord) (workflowAmendmentBuild, error) {
-	builder := workflowAmendmentBuild{old: set, tasks: map[string]WorkflowRecord{}, keys: map[string]string{}, number: opscore.NextOpsArtifactNumber(s.layout.Root()), root: filepath.ToSlash(filepath.Join("plan", set.ID, "extension", "chr", fmt.Sprintf("amendment-%04d", set.Revision+1)))}
+	builder := workflowAmendmentBuild{old: set, tasks: map[string]WorkflowRecord{}, keys: map[string]string{}, number: opscore.NextArtifactNumber(s.layout.Root()), root: filepath.ToSlash(filepath.Join("plan", set.ID, "extension", "chr", fmt.Sprintf("amendment-%04d", set.Revision+1)))}
 
 	data, err := json.Marshal(set.Set)
 	if err != nil {

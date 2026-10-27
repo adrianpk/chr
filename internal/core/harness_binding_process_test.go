@@ -21,7 +21,7 @@ func TestHarnessBindingHostProcess(t *testing.T) {
 		return
 	}
 
-	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: project})
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: project})
 	if err != nil {
 		t.Fatal(err)
 	}
