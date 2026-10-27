@@ -1,6 +1,10 @@
 package core
 
-import "fmt"
+import (
+	"fmt"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // IntegrationCycleMode defines the policy used by one ticket integration cycle.
 type IntegrationCycleMode string
@@ -199,20 +203,20 @@ func IntegrationCyclePolicyFromReviewConfig(config ReviewWorkflowConfig) (Integr
 	}
 
 	switch config.Mode {
-	case ReviewWorkflowModeHumanReview:
+	case workflowstate.ReviewWorkflowModeHumanReview:
 		return IntegrationCyclePolicy{
 			Mode:                IntegrationCycleModeHumanReview,
 			RequiresReview:      true,
 			RequiresHumanReview: true,
 			RequiresMerge:       false,
 		}, nil
-	case ReviewWorkflowModeAgenticReview:
+	case workflowstate.ReviewWorkflowModeAgenticReview:
 		return IntegrationCyclePolicy{
 			Mode:           IntegrationCycleModeAgenticReview,
 			RequiresReview: true,
 			RequiresMerge:  true,
 		}, nil
-	case ReviewWorkflowModeTrustedAutoMerge:
+	case workflowstate.ReviewWorkflowModeTrustedAutoMerge:
 		return IntegrationCyclePolicy{
 			Mode:          IntegrationCycleModeTrustedAutoMerge,
 			RequiresMerge: true,

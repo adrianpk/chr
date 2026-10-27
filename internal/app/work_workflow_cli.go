@@ -10,7 +10,6 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -81,7 +80,7 @@ func (adapter workWorkflowCLI) extent(ctx context.Context, cmd *cli.Command, ope
 		return err
 	}
 
-	request := core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: extent, Identity: cmd.Args().First()}, Offset: cmd.Int("offset"), Limit: cmd.Int("limit"), SnapshotHash: cmd.String("snapshot")}
+	request := workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: extent, Identity: cmd.Args().First()}, Offset: cmd.Int("offset"), Limit: cmd.Int("limit"), SnapshotHash: cmd.String("snapshot")}
 	if extent == "loose" {
 		selection := agentWorkSelectionOptionsFromCommand(cmd)
 		request.Statuses, request.Filters, request.Order = selection.Statuses, selection.Filters, selection.Order
@@ -97,9 +96,9 @@ func (adapter workWorkflowCLI) extent(ctx context.Context, cmd *cli.Command, ope
 		return adapter.preview(cmd, preview)
 	}
 
-	restriction := core.ReviewWorkflowMode("")
+	restriction := workflowstate.ReviewWorkflowMode("")
 	if cmd.Bool("human-review") {
-		restriction = core.ReviewWorkflowModeHumanReview
+		restriction = workflowstate.ReviewWorkflowModeHumanReview
 	}
 
 	result, err := operations.StartWorkExtent(ctx, request, cmd.Int("max-steps"), restriction)

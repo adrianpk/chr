@@ -9,6 +9,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (factory commandFactory) workConfigCommand() *cli.Command {
@@ -27,7 +28,7 @@ func (factory commandFactory) workConfigCommand() *cli.Command {
 			return err
 		}
 
-		result, err := operations.WorkflowConfiguration(ctx, core.ReviewWorkflowMode(cmd.String("review-restriction")))
+		result, err := operations.WorkflowConfiguration(ctx, workflowstate.ReviewWorkflowMode(cmd.String("review-restriction")))
 		if err != nil {
 			return err
 		}

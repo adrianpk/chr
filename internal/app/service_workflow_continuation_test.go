@@ -4,13 +4,14 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestServiceWorkflowContinuation runs one actual task through the shared bounded
 // operation and preserves that checkpoint on equivalent invocation attachment.
 func TestServiceWorkflowContinuation(t *testing.T) {
 	operations, hierarchy, target := serviceWorkflowSliceFixture(t)
-	request := core.WorkflowStartRequest{RequestKey: "bounded-service", Policy: core.WorkflowExecutionPolicy{CheckpointStepLimit: 1}, Selection: core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "slice_set", Identity: hierarchy.Set.ID}, Target: core.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
+	request := core.WorkflowStartRequest{RequestKey: "bounded-service", Policy: workflowstate.WorkflowExecutionPolicy{CheckpointStepLimit: 1}, Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "slice_set", Identity: hierarchy.Set.ID}, Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
 
 	run, err := operations.StartWorkflow(t.Context(), request)
 	if err != nil {

@@ -15,6 +15,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Actual Pi workers with different credentials reach a shared endpoint barrier
@@ -126,7 +127,7 @@ func clonePiIsolationTicket(t *testing.T, operations service, original core.Work
 func startPiIsolationInvocation(t *testing.T, operations service, key, target string) core.WorkflowInvocation {
 	t.Helper()
 
-	request := core.WorkflowStartRequest{RequestKey: key, Selection: core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "ticket", Identity: key}, Target: core.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
+	request := core.WorkflowStartRequest{RequestKey: key, Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: key}, Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
 
 	started, err := operations.StartWorkflow(t.Context(), request)
 	if err != nil {

@@ -4,6 +4,8 @@ import (
 	"errors"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeAgentReview counts source workers and a separate reviewer together,
@@ -14,7 +16,7 @@ func TestNativeAgentReview(t *testing.T) {
 	request.Policy.AgentTokenBudget = 300
 	request.Policy.MaxWorkerAttempts = 3
 
-	workflowReviewConfig(t, store, ReviewWorkflowModeAgenticReview)
+	workflowReviewConfig(t, store, workflowstate.ReviewWorkflowModeAgenticReview)
 
 	run := workflowTestStart(t, store, request)
 

@@ -3,13 +3,15 @@ package core
 import (
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Real Git rebase integration and receipt finalization complete three native
 // tickets without rewriting order bytes or generation metadata. Approved future
 // work then retains those completions, receipt references and historical maps.
 func TestWorkflowPlanOrderDelivery(t *testing.T) {
-	store, hierarchy, run, provider := workflowPRPlanFixture(t, "slice", WorkflowExecutionPolicy{}, workflowOrderPlanFixture)
+	store, hierarchy, run, provider := workflowPRPlanFixture(t, "slice", workflowstate.WorkflowExecutionPolicy{}, workflowOrderPlanFixture)
 
 	status, err := store.InspectWorkflowTracker(t.Context(), hierarchy.Set.ID)
 	if err != nil {

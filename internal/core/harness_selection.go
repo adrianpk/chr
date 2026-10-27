@@ -2,6 +2,7 @@ package core
 
 import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -23,19 +24,19 @@ func (r HarnessReadiness) Ready() bool {
 
 // HarnessSelection is a readable projection without executable or credential paths.
 type HarnessSelection struct {
-	Role              HarnessRole          `json:"role"`
-	Action            string               `json:"action,omitempty"`
-	Profile           string               `json:"profile,omitempty"`
-	Harness           string               `json:"harness,omitempty"`
-	Backend           string               `json:"backend"`
-	ModelProvider     string               `json:"model_provider,omitempty"`
-	Model             string               `json:"model"`
-	Thinking          string               `json:"thinking,omitempty"`
-	Source            string               `json:"source"`
-	SelectionRevision string               `json:"selection_revision"`
-	ProfileRevision   string               `json:"profile_revision,omitempty"`
-	Capabilities      harness.Capabilities `json:"capabilities"`
-	Readiness         HarnessReadiness     `json:"readiness"`
+	Role              harnesscore.HarnessRole `json:"role"`
+	Action            string                  `json:"action,omitempty"`
+	Profile           string                  `json:"profile,omitempty"`
+	Harness           string                  `json:"harness,omitempty"`
+	Backend           string                  `json:"backend"`
+	ModelProvider     string                  `json:"model_provider,omitempty"`
+	Model             string                  `json:"model"`
+	Thinking          string                  `json:"thinking,omitempty"`
+	Source            string                  `json:"source"`
+	SelectionRevision string                  `json:"selection_revision"`
+	ProfileRevision   string                  `json:"profile_revision,omitempty"`
+	Capabilities      harness.Capabilities    `json:"capabilities"`
+	Readiness         HarnessReadiness        `json:"readiness"`
 }
 
 // Revision identifies the complete persisted configuration image.

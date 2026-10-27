@@ -52,7 +52,7 @@ func TestNativeSourceDrift(t *testing.T) {
 func nativeSourceDrift(t *testing.T, name, path string) {
 	t.Helper()
 
-	f, _ := nativeReviewFixture(t, ReviewWorkflowModeTrustedAutoMerge)
+	f, _ := nativeReviewFixture(t, workflowstate.ReviewWorkflowModeTrustedAutoMerge)
 	nativeReviewAuthorize(t, f)
 
 	store, id := f.f.store, f.f.run.ID

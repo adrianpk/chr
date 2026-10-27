@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func serviceWorkflowTicketFixture(t *testing.T, plans ...generationcore.GeneratedWorkflowPlan) (service, core.WorkflowRecord, core.WorkflowStartRequest) {
@@ -42,7 +43,7 @@ func serviceWorkflowTicketFixture(t *testing.T, plans ...generationcore.Generate
 		t.Fatal(err)
 	}
 
-	request := core.WorkflowStartRequest{RequestKey: "independent", Selection: core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "ticket", Identity: task.Key}, Target: core.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
+	request := core.WorkflowStartRequest{RequestKey: "independent", Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: task.Key}, Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
 
 	return operations, record, request
 }

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	"forge.adrianpk.com/chr/internal/harness"
 	"forge.adrianpk.com/chr/internal/harness/pi"
 )
@@ -45,10 +46,10 @@ func piWorkerInputFixture(t *testing.T) (core.WorkflowTaskInput, pi.WorkerRuntim
 
 	digest := strings.Repeat("a", 64)
 
-	binding, err := core.SealHarnessBinding(core.HarnessBinding{
-		SchemaVersion: 1, Role: core.HarnessWorker, Harness: pi.Identity, Source: "project", SelectionRevision: digest,
+	binding, err := core.SealHarnessBinding(harnesscore.HarnessBinding{
+		SchemaVersion: 1, Role: harnesscore.HarnessWorker, Harness: pi.Identity, Source: "project", SelectionRevision: digest,
 		Profile: "worker", ProfileRevision: digest, ModelProvider: "fixture", Model: "model", RuntimeRef: "sha256:" + digest, ProtocolRevision: pi.ProtocolRevision,
-		ExecutableRef: core.HarnessExecutableRef{Hash: digest, CommandHash: digest}, Capabilities: harness.Capabilities{Worker: true},
+		ExecutableRef: harnesscore.HarnessExecutableRef{Hash: digest, CommandHash: digest}, Capabilities: harness.Capabilities{Worker: true},
 	})
 	if err != nil {
 		t.Fatal(err)

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowTicketValidated(t *testing.T) (*WorkflowStore, WorkflowRecord, WorkflowInvocation) {
@@ -244,7 +245,7 @@ func checkWorkflowTicketBoundedRestart(t *testing.T, store *WorkflowStore, recor
 // review and retains its PR and consumed repair budget for the next candidate.
 func TestWorkflowTicketRepair(t *testing.T) {
 	f, _ := workflowTicketPreparationFixture(t, "rebase", "ticket")
-	workflowTicketReviewConfig(t, f.store, "rebase", ReviewWorkflowModeAgenticReview)
+	workflowTicketReviewConfig(t, f.store, "rebase", workflowstate.ReviewWorkflowModeAgenticReview)
 
 	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git); err != nil {
 		t.Fatal(err)

@@ -116,16 +116,16 @@ func workflowPRFixture(t *testing.T) (*WorkflowStore, WorkflowMaterializationRes
 func workflowPRFixtureFor(t *testing.T, extent string) (*WorkflowStore, WorkflowMaterializationResult, WorkflowInvocation, *workflowPRProviderFixture) {
 	t.Helper()
 
-	return workflowPRPolicyFixture(t, extent, WorkflowExecutionPolicy{})
+	return workflowPRPolicyFixture(t, extent, workflowstate.WorkflowExecutionPolicy{})
 }
 
-func workflowPRPolicyFixture(t *testing.T, extent string, policy WorkflowExecutionPolicy) (*WorkflowStore, WorkflowMaterializationResult, WorkflowInvocation, *workflowPRProviderFixture) {
+func workflowPRPolicyFixture(t *testing.T, extent string, policy workflowstate.WorkflowExecutionPolicy) (*WorkflowStore, WorkflowMaterializationResult, WorkflowInvocation, *workflowPRProviderFixture) {
 	t.Helper()
 
 	return workflowPRPlanFixture(t, extent, policy, workflowMaterializationFixture)
 }
 
-func workflowPRPlanFixture(t *testing.T, extent string, policy WorkflowExecutionPolicy, planFixture func(*testing.T) (*WorkflowStore, WorkflowMaterializationOptions)) (*WorkflowStore, WorkflowMaterializationResult, WorkflowInvocation, *workflowPRProviderFixture) {
+func workflowPRPlanFixture(t *testing.T, extent string, policy workflowstate.WorkflowExecutionPolicy, planFixture func(*testing.T) (*WorkflowStore, WorkflowMaterializationOptions)) (*WorkflowStore, WorkflowMaterializationResult, WorkflowInvocation, *workflowPRProviderFixture) {
 	t.Helper()
 
 	store, opts := planFixture(t)
@@ -157,7 +157,7 @@ func workflowPRPlanFixture(t *testing.T, extent string, policy WorkflowExecution
 	}
 
 	commit, _ := workflowSelectionCommit(t, store)
-	request := WorkflowStartRequest{RequestKey: "slice-pr", Selection: WorkflowPreviewRequest{Selector: workflowClaimSelector(hierarchy, extent), Target: WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
+	request := WorkflowStartRequest{RequestKey: "slice-pr", Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowClaimSelector(hierarchy, extent), Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
 	request.Policy = policy
 	run := workflowTestStart(t, store, request)
 

@@ -28,7 +28,7 @@ func workflowContinuationFixture(t *testing.T) (*WorkflowStore, WorkflowStartReq
 	}
 
 	commit, _ := workflowSelectionCommit(t, store)
-	request := WorkflowStartRequest{RequestKey: "bounded-call", Policy: WorkflowExecutionPolicy{CheckpointStepLimit: 2}, Selection: WorkflowPreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice_set"), Target: WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
+	request := WorkflowStartRequest{RequestKey: "bounded-call", Policy: workflowstate.WorkflowExecutionPolicy{CheckpointStepLimit: 2}, Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice_set"), Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
 
 	return store, request, workflowTestStart(t, store, request).Invocation
 }
@@ -97,7 +97,7 @@ func TestWorkflowContinuationBounds(t *testing.T) {
 		}
 	}
 
-	request.Selection.Selector = WorkflowSelector{Extent: "use_case", Identity: "broader"}
+	request.Selection.Selector = workflowstate.WorkflowSelector{Extent: "use_case", Identity: "broader"}
 	if _, err := store.StartWorkflow(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("retry key broadened the original extent", err)
 	}
@@ -113,7 +113,7 @@ func TestWorkflowContinuationBounds(t *testing.T) {
 // without repeating a worker, PR creation or receipt fan-out.
 func TestWorkflowContinuationDelivery(t *testing.T) {
 	fixture := workflowDeliveryExtentFixture(t, "rebase", "slice_set")
-	workflowReviewConfig(t, fixture.store, ReviewWorkflowModeHumanReview)
+	workflowReviewConfig(t, fixture.store, workflowstate.ReviewWorkflowModeHumanReview)
 
 	ports := WorkflowContinuationPorts{Publication: WorkflowPublicationPorts{Provider: workflowFrontierProvider{fixture.provider, fixture.remote}, Observer: fixture.git}, Target: fixture.git}
 	restarted := NewWorkflowStore(fixture.store.layout, fixture.store.projectID)

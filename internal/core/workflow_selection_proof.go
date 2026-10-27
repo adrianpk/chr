@@ -13,12 +13,6 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// WorkflowPreviewTarget binds proof to an observed immutable canonical target.
-type WorkflowPreviewTarget struct {
-	Repository string
-	Commit     string
-}
-
 // WorkflowTaskValidation binds host validation to a cumulative lane commit.
 // Evidence files are immutable inputs; status text alone is never proof.
 type WorkflowTaskValidation struct {
@@ -34,7 +28,7 @@ type WorkflowTaskValidation struct {
 type workflowProofReader struct {
 	store        *WorkflowStore
 	selection    workflowSelection
-	request      WorkflowPreviewRequest
+	request      workflowstate.WorkflowPreviewRequest
 	observations map[workflowProofKey]string
 }
 
@@ -222,7 +216,7 @@ func workflowCommitID(value string) bool {
 	return true
 }
 
-func (s *WorkflowStore) observePrerequisites(ctx context.Context, selection workflowSelection, request WorkflowPreviewRequest, preview *WorkflowPreview) error {
+func (s *WorkflowStore) observePrerequisites(ctx context.Context, selection workflowSelection, request workflowstate.WorkflowPreviewRequest, preview *WorkflowPreview) error {
 	dependencies, err := newWorkflowDependencies(selection)
 	if err != nil {
 		return fmt.Errorf("workflow prerequisites: %w", err)

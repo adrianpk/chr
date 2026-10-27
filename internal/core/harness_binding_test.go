@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness"
@@ -64,7 +65,7 @@ func harnessBindingTestResolver(t *testing.T, command []string) WorkflowHarnessR
 	}
 
 	return func(_ context.Context, config WorkspaceConfig) (WorkflowHarnessResolution, error) {
-		binding, err := SealHarnessBinding(HarnessBinding{SchemaVersion: 1, Role: HarnessWorker, Harness: "codex", Source: "project", SelectionRevision: config.Revision(), Profile: config.Harnesses.Worker, ProfileRevision: contenthash.Sum([]byte("fixture-profile-" + config.Harnesses.Worker)), ModelProvider: "fixture-provider", Model: "fixture-model", ExecutableRef: executable, RuntimeRef: "native", ProtocolRevision: "fixture-exec/v1", Capabilities: harness.Capabilities{Worker: true}})
+		binding, err := SealHarnessBinding(harnesscore.HarnessBinding{SchemaVersion: 1, Role: harnesscore.HarnessWorker, Harness: "codex", Source: "project", SelectionRevision: config.Revision(), Profile: config.Harnesses.Worker, ProfileRevision: contenthash.Sum([]byte("fixture-profile-" + config.Harnesses.Worker)), ModelProvider: "fixture-provider", Model: "fixture-model", ExecutableRef: executable, RuntimeRef: "native", ProtocolRevision: "fixture-exec/v1", Capabilities: harness.Capabilities{Worker: true}})
 
 		return WorkflowHarnessResolution{Binding: &binding, Command: slices.Clone(frozen)}, err
 	}
@@ -207,7 +208,7 @@ func TestHarnessBindingRejects(t *testing.T) {
 	checkHarnessBindingReplayModel(t, store, request, *started.Invocation.HarnessBinding)
 }
 
-func checkHarnessBindingReplayModel(t *testing.T, store *WorkflowStore, request WorkflowStartRequest, binding HarnessBinding) {
+func checkHarnessBindingReplayModel(t *testing.T, store *WorkflowStore, request WorkflowStartRequest, binding harnesscore.HarnessBinding) {
 	t.Helper()
 
 	changed := request

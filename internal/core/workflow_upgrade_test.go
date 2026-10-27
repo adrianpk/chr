@@ -12,6 +12,7 @@ import (
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowUpgradeFixture(t *testing.T, body string) (*WorkflowStore, WorkflowUpgradeOptions) {
@@ -53,7 +54,7 @@ func TestWorkflowUpgradePolicy(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			store, opts := workflowUpgradeFixture(t, tc.body)
-			opts.ReviewMode = ReviewWorkflowMode(tc.choice)
+			opts.ReviewMode = workflowstate.ReviewWorkflowMode(tc.choice)
 
 			prior, err := ResolveWorkflowConfiguration(store.layout.ProjectDir(), "")
 			if err != nil {

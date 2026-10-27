@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type serviceWorkflowReviewFixture struct{ *serviceWorkflowPRFixture }
@@ -51,7 +52,7 @@ func serviceWorkflowReviewReady(t *testing.T) (service, string, *serviceWorkflow
 	t.Helper()
 
 	operations, hierarchy, target := serviceWorkflowSliceFixture(t)
-	request := core.WorkflowStartRequest{RequestKey: "slice-review", Selection: core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "slice", Identity: hierarchy.Set.Set.Slices[0].ID}, Target: core.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
+	request := core.WorkflowStartRequest{RequestKey: "slice-review", Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "slice", Identity: hierarchy.Set.Set.Slices[0].ID}, Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
 
 	run, err := operations.StartWorkflow(t.Context(), request)
 	if err != nil {

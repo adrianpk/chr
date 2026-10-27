@@ -16,7 +16,7 @@ func workflowClaimFixture(t *testing.T) (*WorkflowStore, WorkflowMaterialization
 
 	store, result := workflowSelectionFixture(t)
 	commit, _ := workflowSelectionCommit(t, store)
-	request := WorkflowStartRequest{RequestKey: "request-1", Selection: WorkflowPreviewRequest{Selector: WorkflowSelector{Extent: "ticket", Identity: result.Tasks[0].Task.Key}, Target: WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
+	request := WorkflowStartRequest{RequestKey: "request-1", Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: result.Tasks[0].Task.Key}, Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
 
 	return store, result, request
 }
@@ -120,10 +120,10 @@ func TestWorkflowInvocationOverlap(t *testing.T) {
 	}
 }
 
-func workflowClaimSelector(hierarchy WorkflowMaterializationResult, extent string) WorkflowSelector {
+func workflowClaimSelector(hierarchy WorkflowMaterializationResult, extent string) workflowstate.WorkflowSelector {
 	ids := map[string]string{"ticket": hierarchy.Tasks[0].Task.Key, "slice": hierarchy.Set.Set.Slices[0].ID, "slice_set": hierarchy.Set.ID, "use_case": hierarchy.Set.Set.UseCase}
 
-	return WorkflowSelector{Extent: extent, Identity: ids[extent]}
+	return workflowstate.WorkflowSelector{Extent: extent, Identity: ids[extent]}
 }
 
 // TestWorkflowClaimFence rejects counterfeit and superseded owners before writes.

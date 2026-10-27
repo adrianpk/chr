@@ -58,13 +58,10 @@ type WebTokenMode string
 
 // ReviewWorkflowConfig describes a package boundary value.
 type ReviewWorkflowConfig struct {
-	Mode                    ReviewWorkflowMode
+	Mode                    workflowstate.ReviewWorkflowMode
 	NonBlockingCommentLimit int
 	Providers               ReviewProviderConfig
 }
-
-// ReviewWorkflowMode defines a package boundary type.
-type ReviewWorkflowMode string
 
 // ReviewProviderConfig describes a package boundary value.
 type ReviewProviderConfig struct {
@@ -166,15 +163,6 @@ const (
 	// DefaultRuntimeValidationCommand defines a package boundary constant.
 	DefaultRuntimeValidationCommand = "make verify"
 
-	// ReviewWorkflowModeAgenticReview defines a package boundary constant.
-	ReviewWorkflowModeAgenticReview ReviewWorkflowMode = "agentic_review"
-	// ReviewWorkflowModeHumanReview defines a package boundary constant.
-	ReviewWorkflowModeHumanReview ReviewWorkflowMode = "human_review"
-	// ReviewWorkflowModeTrustedAutoMerge defines a package boundary constant.
-	ReviewWorkflowModeTrustedAutoMerge ReviewWorkflowMode = "trusted_auto_merge"
-
-	// DefaultReviewWorkflowMode defines a package boundary constant.
-	DefaultReviewWorkflowMode = ReviewWorkflowModeHumanReview
 	// DefaultReviewWorkflowNonBlockingCommentLimit defines a package boundary constant.
 	DefaultReviewWorkflowNonBlockingCommentLimit = 3
 
@@ -285,7 +273,7 @@ func DefaultWebConfig() WebConfig {
 // DefaultReviewWorkflowConfig executes the corresponding package operation.
 func DefaultReviewWorkflowConfig() ReviewWorkflowConfig {
 	return ReviewWorkflowConfig{
-		Mode:                    DefaultReviewWorkflowMode,
+		Mode:                    workflowstate.DefaultReviewWorkflowMode,
 		NonBlockingCommentLimit: DefaultReviewWorkflowNonBlockingCommentLimit,
 		Providers:               DefaultReviewProviderConfig(),
 	}
@@ -556,7 +544,7 @@ func setReviewWorkflowConfigValue(config *ReviewWorkflowConfig, key, value strin
 	switch key {
 	case "mode":
 		if value != "" {
-			config.Mode = ReviewWorkflowMode(value)
+			config.Mode = workflowstate.ReviewWorkflowMode(value)
 		}
 	case "non_blocking_comment_limit":
 		setPositiveInt(&config.NonBlockingCommentLimit, value)

@@ -40,7 +40,7 @@ func TestWorkflowOrderProgress(t *testing.T) {
 	output := workflowTrackerRead(t, filepath.Join(store.layout.Root(), projection.Path))
 	metadata := workflowTrackerRead(t, filepath.Join(store.layout.Root(), workflowTrackerTestMetadata(t, hierarchy.Set.ID)))
 	commit, _ := workflowSelectionCommit(t, store)
-	request := WorkflowStartRequest{RequestKey: "ordered-progress", Selection: WorkflowPreviewRequest{Selector: workflowClaimSelector(hierarchy, "ticket"), Target: WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
+	request := WorkflowStartRequest{RequestKey: "ordered-progress", Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowClaimSelector(hierarchy, "ticket"), Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
 	run := workflowTestStart(t, store, request)
 	claim := workflowTestClaim(t, store, run.Invocation.ID)
 	checkWorkflowOrderUnchanged(t, store, projection, output, metadata)

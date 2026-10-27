@@ -7,6 +7,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (factory commandFactory) runTicketStartAuthority(ctx context.Context, cmd *cli.Command) (bool, error) {
@@ -43,7 +44,7 @@ func (factory commandFactory) runTicketStartAuthority(ctx context.Context, cmd *
 }
 
 func printNativeTicketStartPreview(operations service, config core.WorkspaceConfig, key string, stdout io.Writer) error {
-	result, err := operations.previewNativeAgentWorkSelection(config, core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "ticket", Identity: key}})
+	result, err := operations.previewNativeAgentWorkSelection(config, workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: key}})
 	if err != nil {
 		return err
 	}

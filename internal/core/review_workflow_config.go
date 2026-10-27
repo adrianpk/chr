@@ -3,6 +3,8 @@ package core
 import (
 	"fmt"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ValidateReviewWorkflowConfig validates the corresponding package boundary value.
@@ -19,11 +21,11 @@ func ValidateReviewWorkflowConfig(config ReviewWorkflowConfig) error {
 }
 
 // IsValidReviewWorkflowMode executes the corresponding package operation.
-func IsValidReviewWorkflowMode(mode ReviewWorkflowMode) bool {
-	switch ReviewWorkflowMode(strings.TrimSpace(string(mode))) {
-	case ReviewWorkflowModeAgenticReview,
-		ReviewWorkflowModeHumanReview,
-		ReviewWorkflowModeTrustedAutoMerge:
+func IsValidReviewWorkflowMode(mode workflowstate.ReviewWorkflowMode) bool {
+	switch workflowstate.ReviewWorkflowMode(strings.TrimSpace(string(mode))) {
+	case workflowstate.ReviewWorkflowModeAgenticReview,
+		workflowstate.ReviewWorkflowModeHumanReview,
+		workflowstate.ReviewWorkflowModeTrustedAutoMerge:
 		return true
 	default:
 		return false
@@ -31,13 +33,13 @@ func IsValidReviewWorkflowMode(mode ReviewWorkflowMode) bool {
 }
 
 // ReviewWorkflowModeDescription executes the corresponding package operation.
-func ReviewWorkflowModeDescription(mode ReviewWorkflowMode) string {
+func ReviewWorkflowModeDescription(mode workflowstate.ReviewWorkflowMode) string {
 	switch mode {
-	case ReviewWorkflowModeAgenticReview:
+	case workflowstate.ReviewWorkflowModeAgenticReview:
 		return "agentic review inspects pull request evidence before merge"
-	case ReviewWorkflowModeHumanReview:
+	case workflowstate.ReviewWorkflowModeHumanReview:
 		return "human review waits for a person to inspect and approve the diff"
-	case ReviewWorkflowModeTrustedAutoMerge:
+	case workflowstate.ReviewWorkflowModeTrustedAutoMerge:
 		return "trusted auto-merge relies on the configured process without a review stop"
 	default:
 		return "unknown review mode"

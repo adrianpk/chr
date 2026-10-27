@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type nativePolicyFixture struct {
@@ -59,7 +60,7 @@ func newNativeCapabilityFixture(t *testing.T, forge string) nativeCapabilityFixt
 	runner := &workflowPRCommandFixture{fakeRemoteReviewRunner: newFakeRemoteReviewRunner()}
 	adapter := NewRemoteReviewAdapter(DefaultReviewProviderConfig(), runner)
 	policy := WorkflowNativePolicy{Repository: repository, SourceRef: publication.SourceRef, TargetRef: publication.TargetRef, OwnershipRevision: publication.OwnershipRevision, SourceRewriteAuthorized: true, FastForwardTargetAuthorized: true, HostCandidateReview: true, CredentialIdentityFingerprint: contenthash.Sum([]byte("fixture-role")), ObservationContract: contract, CertifiedMethods: []string{"rebase"}}
-	policy.ReviewMode = ReviewWorkflowModeHumanReview
+	policy.ReviewMode = workflowstate.ReviewWorkflowModeHumanReview
 	result := nativeCapabilityFixture{adapter: adapter, runner: runner, request: WorkflowNativeCapabilityRequest{Config: WorkIntegrationConfig{PublicationProfile: WorkflowPublicationGitAtomicDualRef}, PullRequest: pr, Publication: publication}, policy: &nativePolicyFixture{policy: policy}, git: &nativeInspectorFixture{WorkflowGitPublicationInspector: NewWorkflowGitPublisher(repository, fixture.remote)}, remote: fixture.remote}
 	result.prefix = nativePolicyCommand(t, result, "")
 

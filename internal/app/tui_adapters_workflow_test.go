@@ -31,7 +31,7 @@ func TestTUIWorkflowPreview(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			request := tui.WorkActionRequest{Action: tc.action, TicketKey: selected.Task.Key, Workflow: &tui.WorkflowActionRequest{Preview: true, Selection: core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: tc.extent}}}}
+			request := tui.WorkActionRequest{Action: tc.action, TicketKey: selected.Task.Key, Workflow: &tui.WorkflowActionRequest{Preview: true, Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: tc.extent}}}}
 			checkTUIWorkflowPreview(t, operations, executor, request, selected, tc.identity, before)
 		})
 	}
@@ -43,7 +43,7 @@ func TestTUIWorkflowStale(t *testing.T) {
 	operations, hierarchy, _ := workflowCLIFixture(t)
 	executor := newTUIWorkActionExecutor(operations)
 
-	preview, err := executor.ExecuteWorkAction(tui.WorkActionRequest{Action: tui.WorkActionWorkflowTicket, TicketKey: hierarchy.Tasks[0].Task.Key, Workflow: &tui.WorkflowActionRequest{Preview: true, Selection: core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "ticket"}}}})
+	preview, err := executor.ExecuteWorkAction(tui.WorkActionRequest{Action: tui.WorkActionWorkflowTicket, TicketKey: hierarchy.Tasks[0].Task.Key, Workflow: &tui.WorkflowActionRequest{Preview: true, Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket"}}}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -97,7 +97,7 @@ func TestTUIWorkflowStart(t *testing.T) {
 	operations, record, _, provider := serviceWorkNativeFixture(t)
 	executor := newTUIWorkActionExecutor(operations)
 
-	preview, err := executor.ExecuteWorkAction(tui.WorkActionRequest{Action: tui.WorkActionWorkflowTicket, TicketKey: record.Task.Key, Workflow: &tui.WorkflowActionRequest{Preview: true, Selection: core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "ticket"}}}})
+	preview, err := executor.ExecuteWorkAction(tui.WorkActionRequest{Action: tui.WorkActionWorkflowTicket, TicketKey: record.Task.Key, Workflow: &tui.WorkflowActionRequest{Preview: true, Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket"}}}})
 	if err != nil || preview.Confirmation == nil {
 		t.Fatal("preview failed", err)
 	}

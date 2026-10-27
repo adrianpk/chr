@@ -112,11 +112,11 @@ func TestLoadWorkspaceConfigParsesNotificationConfig(t *testing.T) {
 func TestLoadWorkspaceConfigParsesReviewWorkflowConfig(t *testing.T) {
 	tests := []struct {
 		name string
-		mode ReviewWorkflowMode
+		mode workflowstate.ReviewWorkflowMode
 	}{
-		{name: "agentic", mode: ReviewWorkflowModeAgenticReview},
-		{name: "human", mode: ReviewWorkflowModeHumanReview},
-		{name: "trusted", mode: ReviewWorkflowModeTrustedAutoMerge},
+		{name: "agentic", mode: workflowstate.ReviewWorkflowModeAgenticReview},
+		{name: "human", mode: workflowstate.ReviewWorkflowModeHumanReview},
+		{name: "trusted", mode: workflowstate.ReviewWorkflowModeTrustedAutoMerge},
 	}
 
 	for _, test := range tests {
@@ -501,7 +501,7 @@ func TestValidateReviewWorkflowConfigRejectsInvalidConfig(t *testing.T) {
 		},
 		{
 			name:    "limit",
-			config:  ReviewWorkflowConfig{Mode: ReviewWorkflowModeHumanReview, NonBlockingCommentLimit: -1},
+			config:  ReviewWorkflowConfig{Mode: workflowstate.ReviewWorkflowModeHumanReview, NonBlockingCommentLimit: -1},
 			wantErr: "review non_blocking_comment_limit cannot be negative",
 		},
 	}

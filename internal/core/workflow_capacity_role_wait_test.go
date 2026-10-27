@@ -3,6 +3,8 @@ package core
 import (
 	"errors"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowCapacityRoleWait proves aggregate, review, preparation, repair and
@@ -103,7 +105,7 @@ func workflowCapacityAggregateFixture(t *testing.T) (*WorkflowStore, string, fun
 func workflowCapacityReviewFixture(t *testing.T, role string) (*WorkflowStore, string, func() error) {
 	t.Helper()
 
-	store, hierarchy, run, provider := workflowReviewFixture(t, ReviewWorkflowModeAgenticReview)
+	store, hierarchy, run, provider := workflowReviewFixture(t, workflowstate.ReviewWorkflowModeAgenticReview)
 	if role == "repair" {
 		return store, run.ID, func() error {
 			_, err := store.RepairWorkflowSlice(t.Context(), run.ID, hierarchy.Tasks[0].Task.Key)

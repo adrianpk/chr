@@ -13,6 +13,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (factory commandFactory) workCommand() *cli.Command {
@@ -380,7 +381,7 @@ func resolveWorkEventStreamPath(projectDir, path string) string {
 func agentWorkSelectionOptionsFromCommand(cmd *cli.Command) AgentWorkSelectionOptions {
 	return AgentWorkSelectionOptions{
 		Statuses: cmd.StringSlice("status"),
-		Filters: core.TicketLoopFilters{
+		Filters: workflowstate.TicketLoopFilters{
 			Priorities:   cmd.StringSlice("priority"),
 			Severities:   cmd.StringSlice("severity"),
 			ProjectAreas: cmd.StringSlice("project-area"),
@@ -388,7 +389,7 @@ func agentWorkSelectionOptionsFromCommand(cmd *cli.Command) AgentWorkSelectionOp
 			Types:        cmd.StringSlice("type"),
 			UseCases:     cmd.StringSlice("use-case"),
 		},
-		Order:         core.TicketLoopOrder(cmd.String("order")),
+		Order:         workflowstate.TicketLoopOrder(cmd.String("order")),
 		MaxIterations: cmd.Int("max-iterations"),
 	}
 }

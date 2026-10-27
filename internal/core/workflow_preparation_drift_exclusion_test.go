@@ -27,7 +27,7 @@ func (git nativeDriftExclusionGit) PrepareWorkflowIntegration(ctx context.Contex
 // the target for another queue before preparing a changed-base replacement.
 // The sealed failed submission remains consumed and readable after restart.
 func TestNativeDriftExclusion(t *testing.T) {
-	f, candidate := nativeReviewFixture(t, ReviewWorkflowModeTrustedAutoMerge)
+	f, candidate := nativeReviewFixture(t, workflowstate.ReviewWorkflowModeTrustedAutoMerge)
 	nativeReviewAuthorize(t, f)
 
 	store, id := f.f.store, f.f.run.ID
@@ -88,7 +88,7 @@ func nativeDriftSealInputs(t *testing.T, submit nativeSubmissionFixture, submiss
 // atomic rejection caused by a new source. Non-application frees the target,
 // but cannot authorize the appended source content or refund submission usage.
 func TestNativeSealedSourceDrift(t *testing.T) {
-	f, candidate := nativeReviewFixture(t, ReviewWorkflowModeTrustedAutoMerge)
+	f, candidate := nativeReviewFixture(t, workflowstate.ReviewWorkflowModeTrustedAutoMerge)
 	nativeReviewAuthorize(t, f)
 
 	store, id := f.f.store, f.f.run.ID

@@ -6,13 +6,6 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// WorkflowSelectionGuard binds admission to the selected native ticket image.
-// It is admission input, not a retained credential or an execution override.
-type WorkflowSelectionGuard struct {
-	Key      string
-	Revision uint64
-}
-
 func checkWorkflowRevision(run WorkflowInvocation, expected []uint64) error {
 	if len(expected) == 0 {
 		return nil

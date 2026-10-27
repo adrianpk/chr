@@ -75,7 +75,7 @@ func (s service) reserveGuidedAdmission(ctx context.Context, session *core.Autho
 
 	work := session.Guided.Work
 
-	preview, err := s.PreviewSelectedWork(ctx, core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "slice_set", Identity: work.Materialization.SetID}}, "")
+	preview, err := s.PreviewSelectedWork(ctx, workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "slice_set", Identity: work.Materialization.SetID}}, "")
 	if err != nil {
 		return &core.GuidedPrerequisiteError{Action: "Correct native workflow authority and canonical target setup, then retry the retained admission.", Cause: err}
 	}
@@ -87,8 +87,8 @@ func (s service) reserveGuidedAdmission(ctx context.Context, session *core.Autho
 	policy := preview.View.ExecutionPolicy
 	policy.IncludeLaterTickets = false
 	includeLater := false
-	proof := &core.GuidedWorkflowAdmission{RunID: session.ID, Actor: session.Guided.Actor, Policy: core.GuidedWorkAdmissionPolicy, OperationDigest: session.Guided.PendingOperation.Digest, CheckpointDigest: digest, MaterializationID: work.Materialization.ID}
-	work.Admission = &core.WorkflowStartRequest{RequestKey: "guided-work-" + session.Guided.PendingOperation.Digest, Selection: preview.Request, IncludeLaterTickets: &includeLater, Admission: &core.WorkflowAdmissionGuard{Guided: proof, SnapshotHash: preview.Request.SnapshotHash, Policy: preview.View.Policy, ExecutionPolicy: policy}}
+	proof := &workflowstate.GuidedWorkflowAdmission{RunID: session.ID, Actor: session.Guided.Actor, Policy: core.GuidedWorkAdmissionPolicy, OperationDigest: session.Guided.PendingOperation.Digest, CheckpointDigest: digest, MaterializationID: work.Materialization.ID}
+	work.Admission = &core.WorkflowStartRequest{RequestKey: "guided-work-" + session.Guided.PendingOperation.Digest, Selection: preview.Request, IncludeLaterTickets: &includeLater, Admission: &workflowstate.WorkflowAdmissionGuard{Guided: proof, SnapshotHash: preview.Request.SnapshotHash, Policy: preview.View.Policy, ExecutionPolicy: policy}}
 
 	if err := core.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session); err != nil {
 		return err

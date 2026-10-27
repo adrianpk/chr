@@ -61,7 +61,7 @@ func workflowRunHasLane(run workflowInvocationFile, namespace string, unit workf
 	return run.Namespace == namespace && run.Lane != nil && run.Lane.Unit == unit
 }
 
-func (s *WorkflowStore) workflowLaneSelection(ctx context.Context, run workflowInvocationFile, record WorkflowRecord, request WorkflowPreviewRequest) (WorkflowPreviewRequest, error) {
+func (s *WorkflowStore) workflowLaneSelection(ctx context.Context, run workflowInvocationFile, record WorkflowRecord, request workflowstate.WorkflowPreviewRequest) (workflowstate.WorkflowPreviewRequest, error) {
 	lane, err := s.retainedWorkflowLane(ctx, run, record)
 	if err != nil || lane == nil {
 		return request, err
@@ -150,7 +150,7 @@ func (s *WorkflowStore) workflowLaneCandidate(ctx context.Context, lane Workflow
 		return "", "", fmt.Errorf("%w: lane history does not descend from its accepted head", workflowstate.ErrConflict)
 	}
 
-	if err := s.checkWorkflowCoordinatorTarget(ctx, WorkflowPreviewTarget{Commit: commit}); err != nil {
+	if err := s.checkWorkflowCoordinatorTarget(ctx, workflowstate.WorkflowPreviewTarget{Commit: commit}); err != nil {
 		return "", "", err
 	}
 

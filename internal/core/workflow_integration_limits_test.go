@@ -10,7 +10,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func nativeLimitFixture(t *testing.T, policy WorkflowExecutionPolicy) (*WorkflowStore, WorkflowIntegrationEntry) {
+func nativeLimitFixture(t *testing.T, policy workflowstate.WorkflowExecutionPolicy) (*WorkflowStore, WorkflowIntegrationEntry) {
 	t.Helper()
 
 	store, record, request := workflowTicketFixture(t, "ticket", workflowPreparationGate("true"))
@@ -36,7 +36,7 @@ func TestNativeLimitPolicy(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			store, entry := nativeLimitFixture(t, WorkflowExecutionPolicy{MaxMergerAttempts: tc.merger, MaxDriftRevisions: tc.drift})
+			store, entry := nativeLimitFixture(t, workflowstate.WorkflowExecutionPolicy{MaxMergerAttempts: tc.merger, MaxDriftRevisions: tc.drift})
 			store = NewWorkflowStore(store.layout, store.projectID)
 
 			budget, err := store.ReadWorkflowIntegrationBudget(t.Context(), entry.InvocationID)
@@ -68,7 +68,7 @@ func TestNativeLimitExhaustion(t *testing.T) {
 func testNativeLimitExhaustion(t *testing.T, kind string) {
 	t.Helper()
 
-	store, entry := nativeLimitFixture(t, WorkflowExecutionPolicy{MaxMergerAttempts: 2, MaxDriftRevisions: 1, MaxIntegrationAttempts: 2})
+	store, entry := nativeLimitFixture(t, workflowstate.WorkflowExecutionPolicy{MaxMergerAttempts: 2, MaxDriftRevisions: 1, MaxIntegrationAttempts: 2})
 
 	limit := 2
 	if kind == "drift" {
@@ -125,7 +125,7 @@ func nativeLimitReservation(entry WorkflowIntegrationEntry, kind string, number 
 // TestNativeDeadlineRetry retains an accepted deadline across restart and
 // rejects an extended retry without changing the original reserved charge.
 func TestNativeDeadlineRetry(t *testing.T) {
-	store, entry := nativeLimitFixture(t, WorkflowExecutionPolicy{WorkerTimeoutSeconds: 60})
+	store, entry := nativeLimitFixture(t, workflowstate.WorkflowExecutionPolicy{WorkerTimeoutSeconds: 60})
 	r := nativeLimitReservation(entry, "merger", 0)
 	r.RuntimeDeadline = time.Now().UTC().Add(30 * time.Second)
 	request := WorkflowIntegrationReserve{WorkflowIntegrationBudgetGuard: nativeBudgetGuard(t, store, entry.InvocationID), Reservation: r}
@@ -166,7 +166,7 @@ func TestNativeBudgetDeadline(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			store, entry := nativeLimitFixture(t, WorkflowExecutionPolicy{WorkerTimeoutSeconds: 5})
+			store, entry := nativeLimitFixture(t, workflowstate.WorkflowExecutionPolicy{WorkerTimeoutSeconds: 5})
 			store = NewWorkflowStore(store.layout, store.projectID)
 
 			before, err := store.ReadWorkflowIntegrationBudget(t.Context(), entry.InvocationID)

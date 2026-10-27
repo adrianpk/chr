@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowIntegrationFixture struct {
@@ -37,10 +39,10 @@ func workflowDeliveryFixture(t *testing.T, method string) workflowIntegrationFix
 func workflowDeliveryExtentFixture(t *testing.T, method, extent string) workflowIntegrationFixture {
 	t.Helper()
 
-	return workflowDeliveryPolicyFixture(t, method, extent, WorkflowExecutionPolicy{})
+	return workflowDeliveryPolicyFixture(t, method, extent, workflowstate.WorkflowExecutionPolicy{})
 }
 
-func workflowDeliveryPolicyFixture(t *testing.T, method, extent string, policy WorkflowExecutionPolicy) workflowIntegrationFixture {
+func workflowDeliveryPolicyFixture(t *testing.T, method, extent string, policy workflowstate.WorkflowExecutionPolicy) workflowIntegrationFixture {
 	t.Helper()
 
 	store, hierarchy, run, provider := workflowPRPolicyFixture(t, extent, policy)

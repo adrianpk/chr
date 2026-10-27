@@ -12,14 +12,14 @@ import (
 
 // WorkflowWorkPreview reports the exact scope and current publication policy.
 type WorkflowWorkPreview struct {
-	ExecutionPolicy core.WorkflowExecutionPolicy `json:"execution_policy"`
-	Preview         core.WorkflowPreview         `json:"selection"`
-	Target          core.WorkflowPreviewTarget   `json:"target"`
-	Policy          core.WorkflowReviewPolicy    `json:"publication_policy"`
+	ExecutionPolicy workflowstate.WorkflowExecutionPolicy `json:"execution_policy"`
+	Preview         core.WorkflowPreview                  `json:"selection"`
+	Target          workflowstate.WorkflowPreviewTarget   `json:"target"`
+	Policy          workflowstate.WorkflowReviewPolicy    `json:"publication_policy"`
 }
 
 // PreviewWorkExtent observes explicit native work without admission or fetching.
-func (s service) PreviewWorkExtent(ctx context.Context, request core.WorkflowPreviewRequest) (result WorkflowWorkPreview, err error) {
+func (s service) PreviewWorkExtent(ctx context.Context, request workflowstate.WorkflowPreviewRequest) (result WorkflowWorkPreview, err error) {
 	s.ctx = ctx
 
 	config, err := s.workflowExtentConfig()
@@ -67,8 +67,8 @@ func (s service) PreviewWorkExtent(ctx context.Context, request core.WorkflowPre
 	return result, err
 }
 
-func (s service) previewWorkTarget(config core.WorkspaceConfig, identity core.WorkflowPreviewTarget) (core.WorkflowPreviewTarget, error) {
-	run := core.WorkflowInvocation{WorkflowInvocationInput: core.WorkflowInvocationInput{Selection: core.WorkflowPreviewRequest{Target: identity}}}
+func (s service) previewWorkTarget(config core.WorkspaceConfig, identity workflowstate.WorkflowPreviewTarget) (workflowstate.WorkflowPreviewTarget, error) {
+	run := core.WorkflowInvocation{WorkflowInvocationInput: core.WorkflowInvocationInput{Selection: workflowstate.WorkflowPreviewRequest{Target: identity}}}
 
 	reader, ok := s.workflowIntegrationObserver(run).(core.WorkflowTargetReader)
 	if !ok {
@@ -88,7 +88,7 @@ func (s service) workflowExtentConfig() (core.WorkspaceConfig, error) {
 }
 
 // StartWorkExtent delegates admission and bounded execution to the common owner.
-func (s service) StartWorkExtent(ctx context.Context, request core.WorkflowPreviewRequest, steps int, restrictions ...core.ReviewWorkflowMode) (AgentWorkResult, error) {
+func (s service) StartWorkExtent(ctx context.Context, request workflowstate.WorkflowPreviewRequest, steps int, restrictions ...workflowstate.ReviewWorkflowMode) (AgentWorkResult, error) {
 	s.ctx = ctx
 
 	restriction, err := workflowInvocationRestriction(restrictions)
@@ -140,12 +140,12 @@ func (s service) continueWorkExtent(ctx context.Context, id string, steps int, c
 	return s.ContinueWorkflow(ctx, id, request, request.Worker)
 }
 
-func workflowInvocationRestriction(restrictions []core.ReviewWorkflowMode) (core.ReviewWorkflowMode, error) {
+func workflowInvocationRestriction(restrictions []workflowstate.ReviewWorkflowMode) (workflowstate.ReviewWorkflowMode, error) {
 	if len(restrictions) == 0 {
 		return "", nil
 	}
 
-	if len(restrictions) != 1 || restrictions[0] != "" && restrictions[0] != core.ReviewWorkflowModeHumanReview {
+	if len(restrictions) != 1 || restrictions[0] != "" && restrictions[0] != workflowstate.ReviewWorkflowModeHumanReview {
 		return "", fmt.Errorf("an invocation may restrict review to human_review only")
 	}
 

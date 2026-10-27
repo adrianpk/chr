@@ -6,6 +6,8 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 var defaultLoopEligibleStatuses = []string{TicketStatusReadyForDev}
@@ -14,35 +16,9 @@ var defaultLoopEligibleStatuses = []string{TicketStatusReadyForDev}
 type TicketLoopQueryOptions struct {
 	ProjectID string
 	Statuses  []string
-	Filters   TicketLoopFilters
-	Order     TicketLoopOrder
+	Filters   workflowstate.TicketLoopFilters
+	Order     workflowstate.TicketLoopOrder
 }
-
-// TicketLoopFilters describes a package boundary value.
-type TicketLoopFilters struct {
-	Priorities   []string
-	Severities   []string
-	ProjectAreas []string
-	Tags         []string
-	Types        []string
-	UseCases     []string
-}
-
-// TicketLoopOrder defines a package boundary type.
-type TicketLoopOrder string
-
-const (
-	// TicketLoopOrderKey defines a package boundary constant.
-	TicketLoopOrderKey TicketLoopOrder = "key"
-	// TicketLoopOrderCreatedAt defines a package boundary constant.
-	TicketLoopOrderCreatedAt TicketLoopOrder = "created_at"
-	// TicketLoopOrderPriority defines a package boundary constant.
-	TicketLoopOrderPriority TicketLoopOrder = "priority"
-	// TicketLoopOrderSeverity defines a package boundary constant.
-	TicketLoopOrderSeverity TicketLoopOrder = "severity"
-	// TicketLoopOrderPrioritySeverity defines a package boundary constant.
-	TicketLoopOrderPrioritySeverity TicketLoopOrder = "priority_severity"
-)
 
 // TicketLoopQuery describes a package boundary value.
 type TicketLoopQuery struct {
@@ -96,22 +72,22 @@ func (q TicketLoopQuery) EligibleTickets(ctx context.Context, opts TicketLoopQue
 	return eligible, nil
 }
 
-func normalizeTicketLoopFilters(filters TicketLoopFilters) (TicketLoopFilters, error) {
+func normalizeTicketLoopFilters(filters workflowstate.TicketLoopFilters) (workflowstate.TicketLoopFilters, error) {
 	var err error
 
 	filters.Priorities, err = normalizeTicketLoopValues(filters.Priorities, "priority", isValidTicketPriority)
 	if err != nil {
-		return TicketLoopFilters{}, err
+		return workflowstate.TicketLoopFilters{}, err
 	}
 
 	filters.Severities, err = normalizeTicketLoopValues(filters.Severities, "severity", isValidTicketSeverity)
 	if err != nil {
-		return TicketLoopFilters{}, err
+		return workflowstate.TicketLoopFilters{}, err
 	}
 
 	filters.Types, err = normalizeTicketLoopValues(filters.Types, "type", isValidTicketType)
 	if err != nil {
-		return TicketLoopFilters{}, err
+		return workflowstate.TicketLoopFilters{}, err
 	}
 
 	filters.ProjectAreas = normalizeTicketLoopFreeformValues(filters.ProjectAreas)
@@ -146,7 +122,7 @@ func normalizeTicketLoopFreeformValues(values []string) []string {
 	return normalized
 }
 
-func matchesTicketLoopFilters(filters TicketLoopFilters, ticket IndexedTicket) bool {
+func matchesTicketLoopFilters(filters workflowstate.TicketLoopFilters, ticket IndexedTicket) bool {
 	return matchesTicketLoopValues(filters.Priorities, ticket.Priority) &&
 		matchesTicketLoopValues(filters.Severities, ticket.Severity) &&
 		matchesTicketLoopValues(filters.ProjectAreas, ticket.ProjectArea) &&
@@ -173,32 +149,32 @@ func matchesTicketLoopTags(filters, ticketTags []string) bool {
 	return true
 }
 
-func normalizeTicketLoopOrder(order TicketLoopOrder) (TicketLoopOrder, error) {
+func normalizeTicketLoopOrder(order workflowstate.TicketLoopOrder) (workflowstate.TicketLoopOrder, error) {
 	if order == "" {
-		return TicketLoopOrderCreatedAt, nil
+		return workflowstate.TicketLoopOrderCreatedAt, nil
 	}
 
 	switch order {
-	case TicketLoopOrderKey,
-		TicketLoopOrderCreatedAt,
-		TicketLoopOrderPriority,
-		TicketLoopOrderSeverity,
-		TicketLoopOrderPrioritySeverity:
+	case workflowstate.TicketLoopOrderKey,
+		workflowstate.TicketLoopOrderCreatedAt,
+		workflowstate.TicketLoopOrderPriority,
+		workflowstate.TicketLoopOrderSeverity,
+		workflowstate.TicketLoopOrderPrioritySeverity:
 		return order, nil
 	default:
 		return "", fmt.Errorf("invalid ticket loop order: %s", order)
 	}
 }
 
-func compareTicketLoopOrder(order TicketLoopOrder, left, right IndexedTicket) int {
+func compareTicketLoopOrder(order workflowstate.TicketLoopOrder, left, right IndexedTicket) int {
 	switch order {
-	case TicketLoopOrderCreatedAt:
+	case workflowstate.TicketLoopOrderCreatedAt:
 		return compareIndexedTicketsByCreatedAt(left, right)
-	case TicketLoopOrderPriority:
+	case workflowstate.TicketLoopOrderPriority:
 		return compareIndexedTicketsByPriority(left, right)
-	case TicketLoopOrderSeverity:
+	case workflowstate.TicketLoopOrderSeverity:
 		return compareIndexedTicketsBySeverity(left, right)
-	case TicketLoopOrderPrioritySeverity:
+	case workflowstate.TicketLoopOrderPrioritySeverity:
 		return firstNonZero(
 			compareRank(priorityRank(left.Priority), priorityRank(right.Priority)),
 			compareRank(severityRank(left.Severity), severityRank(right.Severity)),

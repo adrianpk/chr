@@ -17,7 +17,7 @@ import (
 // projection, retaining frozen exclusions through the central operation service.
 func TestServiceWorkflowMembership(t *testing.T) {
 	operations, hierarchy, target := serviceWorkflowSliceFixture(t)
-	start := core.WorkflowStartRequest{RequestKey: "service-membership", Selection: core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "slice_set", Identity: hierarchy.Set.ID}, Target: core.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
+	start := core.WorkflowStartRequest{RequestKey: "service-membership", Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "slice_set", Identity: hierarchy.Set.ID}, Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
 
 	run, err := operations.StartWorkflow(t.Context(), start)
 	if err != nil {

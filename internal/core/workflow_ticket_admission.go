@@ -9,16 +9,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// WorkflowTicketAdmission binds the explicit transition of one independent
-// backlog ticket to ready, together with its existing executable contract.
-type WorkflowTicketAdmission struct {
-	Key          string                   `json:"key"`
-	Revision     uint64                   `json:"revision"`
-	ContractHash string                   `json:"contract_hash"`
-	Validation   workflowstate.Validation `json:"validation"`
-}
-
-func validateWorkflowTicketAdmission(guard *WorkflowAdmissionGuard, selection WorkflowPreviewRequest) error {
+func validateWorkflowTicketAdmission(guard *workflowstate.WorkflowAdmissionGuard, selection workflowstate.WorkflowPreviewRequest) error {
 	ticket := guard.ReadyTicket
 	if ticket == nil {
 		return nil
@@ -33,7 +24,7 @@ func validateWorkflowTicketAdmission(guard *WorkflowAdmissionGuard, selection Wo
 
 // PreviewWorkflowTicketAdmission observes a proposed readiness transition. It
 // never changes the ticket or admits work; non-backlog tickets need no transition.
-func (s *WorkflowStore) PreviewWorkflowTicketAdmission(ctx context.Context, member WorkflowPreviewMember) (result *WorkflowTicketAdmission, err error) {
+func (s *WorkflowStore) PreviewWorkflowTicketAdmission(ctx context.Context, member WorkflowPreviewMember) (result *workflowstate.WorkflowTicketAdmission, err error) {
 	err = s.withRepositoryLock(ctx, s.requireNoWorkflowTransition, func() error {
 		record, err := s.readRecord(member.Path)
 		if err != nil {
@@ -56,7 +47,7 @@ func (s *WorkflowStore) PreviewWorkflowTicketAdmission(ctx context.Context, memb
 	return result, err
 }
 
-func workflowTicketAdmission(record WorkflowRecord) (*WorkflowTicketAdmission, error) {
+func workflowTicketAdmission(record WorkflowRecord) (*workflowstate.WorkflowTicketAdmission, error) {
 	if err := validateWorkflowClaimContract(record); err != nil {
 		return nil, err
 	}
@@ -66,7 +57,7 @@ func workflowTicketAdmission(record WorkflowRecord) (*WorkflowTicketAdmission, e
 		return nil, err
 	}
 
-	return &WorkflowTicketAdmission{Key: record.Task.Key, Revision: record.Revision, ContractHash: record.Task.ContractHash, Validation: contract.Validation}, nil
+	return &workflowstate.WorkflowTicketAdmission{Key: record.Task.Key, Revision: record.Revision, ContractHash: record.Task.ContractHash, Validation: contract.Validation}, nil
 }
 
 func (s *WorkflowStore) workflowTicketAdmissionFiles(run *workflowInvocationFile) ([]workflowstate.FileChange, error) {

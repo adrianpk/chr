@@ -9,6 +9,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // View identifies one TUI screen.
@@ -221,7 +222,7 @@ func NewModel(opts Options) *Model {
 		workState: workState{
 			observability:  opts.Observability,
 			workReadiness:  opts.WorkReadiness,
-			agentWorkOrder: core.TicketLoopOrderCreatedAt,
+			agentWorkOrder: workflowstate.TicketLoopOrderCreatedAt,
 			workExecutor:   opts.WorkExecutor,
 		},
 		backgroundWorkState: backgroundWorkState{

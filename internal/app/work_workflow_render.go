@@ -86,7 +86,7 @@ func workflowStatusLines(status WorkflowWorkStatus) []string {
 	return lines
 }
 
-func workflowPublicationLines(target core.WorkflowPreviewTarget, policy core.WorkflowReviewPolicy) []string {
+func workflowPublicationLines(target workflowstate.WorkflowPreviewTarget, policy workflowstate.WorkflowReviewPolicy) []string {
 	return []string{
 		fmt.Sprintf("target: %s @ %s", target.Repository, target.Commit),
 		fmt.Sprintf("publication_policy: %s; method: %s; source: %s; revision: %s", policy.Mode, policy.Method, policy.Source, policy.Revision),

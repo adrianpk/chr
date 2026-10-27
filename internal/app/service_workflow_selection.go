@@ -12,15 +12,15 @@ import (
 
 // WorkflowBoundPreview freezes the displayed native selection for confirmation.
 type WorkflowBoundPreview struct {
-	ReadyTicket *core.WorkflowTicketAdmission `json:"ready_ticket,omitempty"`
-	Request     core.WorkflowPreviewRequest   `json:"request"`
-	Selected    *core.WorkflowSelectionGuard  `json:"selected,omitempty"`
-	View        WorkflowWorkPreview           `json:"preview"`
+	ReadyTicket *workflowstate.WorkflowTicketAdmission `json:"ready_ticket,omitempty"`
+	Request     workflowstate.WorkflowPreviewRequest   `json:"request"`
+	Selected    *workflowstate.WorkflowSelectionGuard  `json:"selected,omitempty"`
+	View        WorkflowWorkPreview                    `json:"preview"`
 }
 
 // PreviewSelectedWork resolves a selected ticket's native hierarchy identities.
 // An explicit use-case identity is supplied by the case view, without a ticket.
-func (s service) PreviewSelectedWork(ctx context.Context, request core.WorkflowPreviewRequest, key string) (result WorkflowBoundPreview, err error) {
+func (s service) PreviewSelectedWork(ctx context.Context, request workflowstate.WorkflowPreviewRequest, key string) (result WorkflowBoundPreview, err error) {
 	result.Request = request
 	result.Request.Limit = workflowstate.PageLimit
 
@@ -53,26 +53,26 @@ func (s service) PreviewSelectedWork(ctx context.Context, request core.WorkflowP
 	return result, err
 }
 
-func (s service) selectedWorkflowIdentity(ctx context.Context, extent, key string) (core.WorkflowSelector, core.WorkflowSelectionGuard, error) {
+func (s service) selectedWorkflowIdentity(ctx context.Context, extent, key string) (workflowstate.WorkflowSelector, workflowstate.WorkflowSelectionGuard, error) {
 	store, err := s.workflowStore()
 	if err != nil {
-		return core.WorkflowSelector{}, core.WorkflowSelectionGuard{}, err
+		return workflowstate.WorkflowSelector{}, workflowstate.WorkflowSelectionGuard{}, err
 	}
 
 	snapshot, err := store.InspectWorkflowRecords(ctx)
 	if err != nil {
-		return core.WorkflowSelector{}, core.WorkflowSelectionGuard{}, err
+		return workflowstate.WorkflowSelector{}, workflowstate.WorkflowSelectionGuard{}, err
 	}
 
 	for _, record := range snapshot.Records {
 		if record.Task != nil && record.Task.Key == key {
-			selector := core.WorkflowSelector{Extent: extent, Identity: workflowSelectedExtentID(extent, record.Task)}
+			selector := workflowstate.WorkflowSelector{Extent: extent, Identity: workflowSelectedExtentID(extent, record.Task)}
 
-			return selector, core.WorkflowSelectionGuard{Key: key, Revision: record.Revision}, nil
+			return selector, workflowstate.WorkflowSelectionGuard{Key: key, Revision: record.Revision}, nil
 		}
 	}
 
-	return core.WorkflowSelector{}, core.WorkflowSelectionGuard{}, fmt.Errorf("selected ticket has no native workflow identity: %s", key)
+	return workflowstate.WorkflowSelector{}, workflowstate.WorkflowSelectionGuard{}, fmt.Errorf("selected ticket has no native workflow identity: %s", key)
 }
 
 func workflowSelectedExtentID(extent string, task *core.WorkflowTask) string {
@@ -92,7 +92,7 @@ func workflowSelectedExtentID(extent string, task *core.WorkflowTask) string {
 
 // StartBoundWorkExtent requires the displayed snapshot and selected revision.
 // Domain admission compares both under exclusion before any attempt can start.
-func (s service) StartBoundWorkExtent(ctx context.Context, request core.WorkflowPreviewRequest, selected *core.WorkflowSelectionGuard, steps int, admission ...WorkflowBoundAdmission) (AgentWorkResult, error) {
+func (s service) StartBoundWorkExtent(ctx context.Context, request workflowstate.WorkflowPreviewRequest, selected *workflowstate.WorkflowSelectionGuard, steps int, admission ...WorkflowBoundAdmission) (AgentWorkResult, error) {
 	s.ctx = ctx
 
 	if len(admission) != 0 {
@@ -154,7 +154,7 @@ func (s service) WorkflowStatusPage(ctx context.Context, offset, limit int) (res
 }
 
 // PreviewWorkflow exposes one adapter-neutral, read-only selection operation.
-func (s service) PreviewWorkflow(ctx context.Context, request core.WorkflowPreviewRequest) (core.WorkflowPreview, error) {
+func (s service) PreviewWorkflow(ctx context.Context, request workflowstate.WorkflowPreviewRequest) (core.WorkflowPreview, error) {
 	store, err := s.workflowStore()
 	if err != nil {
 		return core.WorkflowPreview{}, err

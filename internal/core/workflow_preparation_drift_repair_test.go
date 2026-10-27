@@ -4,6 +4,8 @@ import (
 	"errors"
 	"strconv"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeRepairedTargetDrift cannot import a previous generation's accepted
@@ -61,7 +63,7 @@ func nativeRepairedDriftFacts(t *testing.T, f nativePreparationFixture, store *W
 // TestNativeDriftLimit retains the invocation-wide bound through reconstruction.
 // Exhaustion cannot launch a sixth replacement or refill earlier consumption.
 func TestNativeDriftLimit(t *testing.T) {
-	f, _ := nativeReviewFixture(t, ReviewWorkflowModeTrustedAutoMerge)
+	f, _ := nativeReviewFixture(t, workflowstate.ReviewWorkflowModeTrustedAutoMerge)
 
 	store, id := f.f.store, f.f.run.ID
 	for round := range 5 {

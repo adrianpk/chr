@@ -8,7 +8,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (selection workflowSelection) orderMembers(members []WorkflowPreviewMember, selector WorkflowSelector) (string, error) {
+func (selection workflowSelection) orderMembers(members []WorkflowPreviewMember, selector workflowstate.WorkflowSelector) (string, error) {
 	if err := selection.validateMemberInputs(members); err != nil {
 		return "", err
 	}
@@ -51,7 +51,7 @@ func (selection workflowSelection) compareSets(leftID, rightID, rule string) int
 	return strings.Compare(leftID, rightID)
 }
 
-func (selection workflowSelection) setOrderRule(selector WorkflowSelector) string {
+func (selection workflowSelection) setOrderRule(selector workflowstate.WorkflowSelector) string {
 	if selector.Extent != "use_case" {
 		return "slice_order"
 	}

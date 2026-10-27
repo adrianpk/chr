@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"testing"
 
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -80,7 +81,7 @@ func checkInitializedWorkflow(t *testing.T, project string) {
 		t.Fatal("initialized workflow differs from approved defaults", config, err)
 	}
 
-	checkWorkflowConfigDefaultValues(t, project, workflowConfigDefaultCase{"initialized", "", "version_default", 1, ReviewWorkflowModeTrustedAutoMerge, WorkStateAuthorityTickets, WorkWorkspaceModeWorktree})
+	checkWorkflowConfigDefaultValues(t, project, workflowConfigDefaultCase{"initialized", "", "version_default", 1, workflowstate.ReviewWorkflowModeTrustedAutoMerge, WorkStateAuthorityTickets, WorkWorkspaceModeWorktree})
 
 	effective, err := ResolveWorkflowConfiguration(project, "")
 	if err != nil || len(effective.Values) != 15 {

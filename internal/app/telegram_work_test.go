@@ -10,6 +10,7 @@ import (
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramWorkFixture(t *testing.T, plans ...generationcore.GeneratedWorkflowPlan) (*telegramConversationAppFixture, service, core.WorkflowRecord) {
@@ -73,10 +74,10 @@ func telegramWorkBindCase(t *testing.T, operations service) {
 	}
 }
 
-func telegramWorkSelector(t *testing.T, operations service, independent core.WorkflowRecord, extent string) core.WorkflowSelector {
+func telegramWorkSelector(t *testing.T, operations service, independent core.WorkflowRecord, extent string) workflowstate.WorkflowSelector {
 	t.Helper()
 
-	selector := core.WorkflowSelector{Extent: extent}
+	selector := workflowstate.WorkflowSelector{Extent: extent}
 	if extent == "ticket" {
 		selector.Identity = independent.Task.Key
 	}
@@ -229,7 +230,7 @@ func telegramWorkDecodeResult(t *testing.T, request telegramcore.OperationReques
 	return result
 }
 
-func checkTelegramWorkNative(t *testing.T, operations service, selector core.WorkflowSelector) {
+func checkTelegramWorkNative(t *testing.T, operations service, selector workflowstate.WorkflowSelector) {
 	t.Helper()
 
 	run := checkTelegramWorkRunCount(t, operations, 1)

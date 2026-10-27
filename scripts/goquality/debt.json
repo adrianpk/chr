@@ -38,17 +38,17 @@
     },
     {
       "id": "internal/app/service_harness_selection.go::resolveConfiguredHarnessSelection",
-      "signature": "func(ctx context.Context, config core.WorkspaceConfig, profiles map[string]core.HarnessProfile, name string, role core.HarnessRole, action, configDir string) (resolvedHarnessSelection, error)",
+      "signature": "func(ctx context.Context, config core.WorkspaceConfig, profiles map[string]core.HarnessProfile, name string, role harnesscore.HarnessRole, action, configDir string) (resolvedHarnessSelection, error)",
       "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/service_harness_selection.go::prepareHarnessSelection",
-      "signature": "func(ctx context.Context, config core.WorkspaceConfig, profile core.HarnessProfile, role core.HarnessRole, action, configDir string) resolvedHarnessSelection",
+      "signature": "func(ctx context.Context, config core.WorkspaceConfig, profile core.HarnessProfile, role harnesscore.HarnessRole, action, configDir string) resolvedHarnessSelection",
       "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/service_harness_selection.go::piProfileReadiness",
-      "signature": "func(ctx context.Context, profile core.HarnessProfile, role core.HarnessRole, configDir string) (core.HarnessReadiness, string)",
+      "signature": "func(ctx context.Context, profile core.HarnessProfile, role harnesscore.HarnessRole, configDir string) (core.HarnessReadiness, string)",
       "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -88,7 +88,7 @@
     },
     {
       "id": "internal/app/service_workflow_selection.go::service.selectedWorkflowIdentity",
-      "signature": "func(ctx context.Context, extent, key string) (core.WorkflowSelector, core.WorkflowSelectionGuard, error)",
+      "signature": "func(ctx context.Context, extent, key string) (workflowstate.WorkflowSelector, workflowstate.WorkflowSelectionGuard, error)",
       "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -133,7 +133,7 @@
     },
     {
       "id": "internal/core/harness_binding_executable.go::FreezeHarnessExecutable",
-      "signature": "func(command []string) (HarnessExecutableRef, []string, error)",
+      "signature": "func(command []string) (harnesscore.HarnessExecutableRef, []string, error)",
       "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -528,17 +528,17 @@
     },
     {
       "id": "internal/core/workflow_frontier_observe.go::WorkflowStore.observeWorkflowFrontier",
-      "signature": "func(ctx context.Context, run workflowInvocationFile, receipt WorkflowRecord, candidate WorkflowSliceCandidate, ports WorkflowFrontierPorts) (WorkflowPreviewTarget, WorkflowIntegrationProof, error)",
+      "signature": "func(ctx context.Context, run workflowInvocationFile, receipt WorkflowRecord, candidate WorkflowSliceCandidate, ports WorkflowFrontierPorts) (workflowstate.WorkflowPreviewTarget, WorkflowIntegrationProof, error)",
       "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_frontier_observe.go::WorkflowStore.workflowFrontierReceiptProof",
-      "signature": "func(ctx context.Context, run workflowInvocationFile, receipt WorkflowRecord, candidate WorkflowSliceCandidate, target WorkflowPreviewTarget, ports WorkflowFrontierPorts) (WorkflowIntegrationProof, error)",
+      "signature": "func(ctx context.Context, run workflowInvocationFile, receipt WorkflowRecord, candidate WorkflowSliceCandidate, target workflowstate.WorkflowPreviewTarget, ports WorkflowFrontierPorts) (WorkflowIntegrationProof, error)",
       "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_frontier_observe.go::observeWorkflowFrontierProof",
-      "signature": "func(ctx context.Context, run workflowInvocationFile, receipt WorkflowRecord, candidate WorkflowSliceCandidate, target WorkflowPreviewTarget, ports WorkflowFrontierPorts) (WorkflowIntegrationProof, error)",
+      "signature": "func(ctx context.Context, run workflowInvocationFile, receipt WorkflowRecord, candidate WorkflowSliceCandidate, target workflowstate.WorkflowPreviewTarget, ports WorkflowFrontierPorts) (WorkflowIntegrationProof, error)",
       "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {

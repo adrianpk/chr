@@ -6,15 +6,16 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 )
 
 // HarnessGenerationBinding retains a non-secret selection for one operation.
 // Readiness records admission-time local evidence, never remote authentication.
 type HarnessGenerationBinding struct {
-	Selection        HarnessSelection     `json:"selection"`
-	ExecutableRef    HarnessExecutableRef `json:"executable_ref"`
-	ProtocolRevision string               `json:"protocol_revision"`
-	BindingHash      string               `json:"binding_hash"`
+	Selection        HarnessSelection                 `json:"selection"`
+	ExecutableRef    harnesscore.HarnessExecutableRef `json:"executable_ref"`
+	ProtocolRevision string                           `json:"protocol_revision"`
+	BindingHash      string                           `json:"binding_hash"`
 }
 
 // SealHarnessGenerationBinding seals the complete admitted selection.
@@ -57,7 +58,7 @@ func ValidateHarnessGenerationBinding(binding HarnessGenerationBinding) error {
 }
 
 func validateGenerationBindingSelection(s HarnessSelection) error {
-	if s.Role != HarnessGeneration || !s.Readiness.Ready() || !harnessSelectionDigest(s.SelectionRevision) || !harnessSelectionDigest(s.ProfileRevision) {
+	if s.Role != harnesscore.HarnessGeneration || !s.Readiness.Ready() || !harnessSelectionDigest(s.SelectionRevision) || !harnessSelectionDigest(s.ProfileRevision) {
 		return errors.New("generation binding requires a ready versioned selection")
 	}
 
@@ -110,7 +111,7 @@ func validateGenerationBindingTransport(binding HarnessGenerationBinding) error 
 
 func validateGenerationBindingAPI(binding HarnessGenerationBinding) error {
 	s := binding.Selection
-	if s.Harness != "" || s.Source != "legacy" || s.ModelProvider != "openai" || binding.ExecutableRef != (HarnessExecutableRef{}) {
+	if s.Harness != "" || s.Source != "legacy" || s.ModelProvider != "openai" || binding.ExecutableRef != (harnesscore.HarnessExecutableRef{}) {
 		return errors.New("direct API generation cannot claim a harness executable")
 	}
 

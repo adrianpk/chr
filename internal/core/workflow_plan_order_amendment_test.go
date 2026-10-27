@@ -54,7 +54,7 @@ func TestWorkflowPlanOrderActiveAmendment(t *testing.T) {
 	store, hierarchy, _ := workflowOrderFixture(t)
 	request := workflowOrderAmendment(t, store, hierarchy.Set)
 	commit, _ := workflowSelectionCommit(t, store)
-	run := workflowTestStart(t, store, WorkflowStartRequest{RequestKey: "active-order", Selection: WorkflowPreviewRequest{Selector: workflowClaimSelector(hierarchy, "ticket"), Target: WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}})
+	run := workflowTestStart(t, store, WorkflowStartRequest{RequestKey: "active-order", Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowClaimSelector(hierarchy, "ticket"), Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}})
 	workflowTestClaim(t, store, run.Invocation.ID)
 
 	observed, err := store.Read(t.Context(), hierarchy.Set.Path)

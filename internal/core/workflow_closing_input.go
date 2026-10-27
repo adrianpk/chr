@@ -34,22 +34,22 @@ type WorkflowClosingSlice struct {
 
 // WorkflowClosingInput is the immutable member/plan/contract/target snapshot.
 type WorkflowClosingInput struct {
-	ValidationTimeoutSeconds int                           `json:"validation_timeout_seconds,omitempty"`
-	Schema                   string                        `json:"schema"`
-	SetID                    string                        `json:"set_id"`
-	SetRevision              uint64                        `json:"set_revision"`
-	SetSourceHash            string                        `json:"set_source_hash"`
-	ProjectID                string                        `json:"project_id"`
-	Namespace                string                        `json:"namespace"`
-	Plan                     workflowstate.ClosingEvidence `json:"plan"`
-	ContractHash             string                        `json:"closing_contract_hash"`
-	Validation               workflowstate.Validation      `json:"closing_validation"`
-	Members                  []WorkflowClosingMember       `json:"members"`
-	Slices                   []WorkflowClosingSlice        `json:"slices"`
-	Target                   WorkflowPreviewTarget         `json:"target"`
-	Branch                   string                        `json:"branch"`
-	Tree                     string                        `json:"tree"`
-	EvidenceHashes           map[string]string             `json:"evidence_hashes"`
+	ValidationTimeoutSeconds int                                 `json:"validation_timeout_seconds,omitempty"`
+	Schema                   string                              `json:"schema"`
+	SetID                    string                              `json:"set_id"`
+	SetRevision              uint64                              `json:"set_revision"`
+	SetSourceHash            string                              `json:"set_source_hash"`
+	ProjectID                string                              `json:"project_id"`
+	Namespace                string                              `json:"namespace"`
+	Plan                     workflowstate.ClosingEvidence       `json:"plan"`
+	ContractHash             string                              `json:"closing_contract_hash"`
+	Validation               workflowstate.Validation            `json:"closing_validation"`
+	Members                  []WorkflowClosingMember             `json:"members"`
+	Slices                   []WorkflowClosingSlice              `json:"slices"`
+	Target                   workflowstate.WorkflowPreviewTarget `json:"target"`
+	Branch                   string                              `json:"branch"`
+	Tree                     string                              `json:"tree"`
+	EvidenceHashes           map[string]string                   `json:"evidence_hashes"`
 }
 
 // WorkflowClosingReceipt retains exact inputs and host results, including an

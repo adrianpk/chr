@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -80,7 +81,7 @@ func generationBindingResolver(program, model string) HarnessGenerationResolver 
 		}
 
 		selection := HarnessSelection{
-			Role: HarnessGeneration, Action: "plan_generation", Source: "project", Profile: config.Harnesses.Generation,
+			Role: harnesscore.HarnessGeneration, Action: "plan_generation", Source: "project", Profile: config.Harnesses.Generation,
 			Harness: "codex", Backend: "codex", ModelProvider: "cli_default", Model: model,
 			SelectionRevision: config.Revision(), ProfileRevision: contenthash.Sum([]byte("fixture-profile-" + model)),
 			Capabilities: harness.Capabilities{Generation: true},

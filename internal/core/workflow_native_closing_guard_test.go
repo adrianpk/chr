@@ -214,7 +214,7 @@ type nativeClosingChangedTarget struct {
 	change func()
 }
 
-func (target *nativeClosingChangedTarget) ObserveWorkflowTarget(ctx context.Context, query WorkflowTargetQuery) (WorkflowPreviewTarget, error) {
+func (target *nativeClosingChangedTarget) ObserveWorkflowTarget(ctx context.Context, query WorkflowTargetQuery) (workflowstate.WorkflowPreviewTarget, error) {
 	target.calls++
 	if target.calls == 2 {
 		target.change()

@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowParallelPublication excludes a linked process in another
@@ -163,7 +165,7 @@ func TestWorkflowParallelPublicationConflict(t *testing.T) {
 func TestWorkflowParallelPublicationHuman(t *testing.T) {
 	lanes := workflowParallelPublicationFixture(t, false)
 	first := lanes[0]
-	workflowTicketReviewConfig(t, first.fixture.store, "rebase", ReviewWorkflowModeHumanReview)
+	workflowTicketReviewConfig(t, first.fixture.store, "rebase", workflowstate.ReviewWorkflowModeHumanReview)
 
 	if _, err := first.fixture.store.PrepareWorkflowSliceIntegration(t.Context(), first.fixture.run.ID, first.provider, first.fixture.git); err != nil {
 		t.Fatal(err)

@@ -26,3 +26,10 @@ ops/metadata splitter. ErrNotWorkflow retains the original not-adopted-record
 identity/message; native schema recognition still belongs to its caller. Legacy
 authoring selects the optional splitter directly. The dependency is one-way:
 metadata cannot import workflow state or a coordinator.
+
+Retained admission, selection and execution-policy values are shared with the
+authoring guided record. These values keep the original field order, JSON tags,
+enum spellings and zero/empty representation. Native owners still normalize and
+validate requests, filter/order indexed tickets, observe policy and hold locks.
+The shared values contain no host resolver, executable command or configuration
+snapshot. Configuration defaults retain their original explicit enum values.

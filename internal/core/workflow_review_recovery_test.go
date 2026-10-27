@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowReviewCrashProcess is the owned child writer used to terminate at
@@ -141,7 +142,7 @@ func TestWorkflowReviewRoleJournal(t *testing.T) {
 func TestWorkflowReviewRepairJournal(t *testing.T) {
 	for _, index := range []int{0, 8} {
 		t.Run(strconv.Itoa(index), func(t *testing.T) {
-			store, hierarchy, run, provider := workflowReviewFixture(t, ReviewWorkflowModeAgenticReview)
+			store, hierarchy, run, provider := workflowReviewFixture(t, workflowstate.ReviewWorkflowModeAgenticReview)
 			workflowReviewRepairCheckpoint(t, store, run.ID, hierarchy.Tasks[2].Task.Key, provider)
 			workflowReviewCrash(t, store, run.ID, "repair", index)
 
@@ -193,7 +194,7 @@ func workflowReviewRepairCheckpoint(t *testing.T, store *WorkflowStore, id, key 
 func testWorkflowReviewJournal(t *testing.T, stage string, index int) {
 	t.Helper()
 
-	store, _, run, provider := workflowReviewFixture(t, ReviewWorkflowModeHumanReview)
+	store, _, run, provider := workflowReviewFixture(t, workflowstate.ReviewWorkflowModeHumanReview)
 	if stage == "approval" {
 		if _, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, nil); err != nil {
 			t.Fatal(err)
@@ -220,7 +221,7 @@ func testWorkflowReviewJournal(t *testing.T, stage string, index int) {
 func testWorkflowReviewRoleJournal(t *testing.T, stage string, index int) {
 	t.Helper()
 
-	store, _, run, provider := workflowReviewFixture(t, ReviewWorkflowModeAgenticReview)
+	store, _, run, provider := workflowReviewFixture(t, workflowstate.ReviewWorkflowModeAgenticReview)
 	workflowReviewCrash(t, store, run.ID, stage, index)
 
 	retained, err := store.ReconcileWorkflow(t.Context(), run.ID)

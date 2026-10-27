@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness"
 )
@@ -207,7 +208,7 @@ func validateGenerationOperation(operation HarnessGenerationOperation) error {
 	}
 
 	// The generic command-image check does no worker-role or live-profile IO.
-	return checkHarnessCommandImage(HarnessBinding{ExecutableRef: operation.Binding.ExecutableRef}, []string{operation.program})
+	return checkHarnessCommandImage(harnesscore.HarnessBinding{ExecutableRef: operation.Binding.ExecutableRef}, []string{operation.program})
 }
 
 func validateGenerationResources(resources harness.GenerationResources, backend string) error {

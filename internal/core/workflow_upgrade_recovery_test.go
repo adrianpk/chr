@@ -64,7 +64,7 @@ func checkWorkflowUpgradePending(t *testing.T, store *WorkflowStore, opts Workfl
 
 	changed := opts
 
-	changed.ReviewMode = ReviewWorkflowModeTrustedAutoMerge
+	changed.ReviewMode = workflowstate.ReviewWorkflowModeTrustedAutoMerge
 	if _, err := store.UpgradeWorkflowConfiguration(t.Context(), changed); err == nil {
 		t.Fatal("foreign request resumed partial upgrade")
 	}

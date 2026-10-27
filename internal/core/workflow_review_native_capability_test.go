@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeReviewCapabilities re-observes ownership, exact refs and all trusted
@@ -33,7 +34,7 @@ func TestNativeReviewCapabilities(t *testing.T) {
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
-			f, _ := nativeReviewFixture(t, ReviewWorkflowModeHumanReview)
+			f, _ := nativeReviewFixture(t, workflowstate.ReviewWorkflowModeHumanReview)
 			binding := nativeReviewAuthorize(t, f)
 			provider := &nativeReviewProviderFixture{f.provider, test.change}
 			nativeReviewRejectEntryPoints(t, f, binding, provider)

@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowStop retains live intent, synced output and a fenced task checkpoint.
@@ -94,7 +95,7 @@ func TestWorkflowStopBarrier(t *testing.T) {
 // TestWorkflowOwnerExpiry rejects stale results and keeps a held reservation counted.
 func TestWorkflowOwnerExpiry(t *testing.T) {
 	store, _, request := workflowClaimFixture(t)
-	request.Policy = WorkflowExecutionPolicy{WorkerTimeoutSeconds: 1, MaxWorkerAttempts: 1}
+	request.Policy = workflowstate.WorkflowExecutionPolicy{WorkerTimeoutSeconds: 1, MaxWorkerAttempts: 1}
 	run := workflowTestStart(t, store, request)
 	claim := workflowTestClaim(t, store, run.Invocation.ID)
 

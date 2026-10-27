@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 )
 
 // Selecting native Pi, a missing program or a nonregular executable for the
@@ -18,7 +19,7 @@ func TestPiWorkerPreparation(t *testing.T) {
 			program, marker := piPreparationProgram(t, name)
 			profile := core.HarnessProfile{Harness: "pi", Command: program, ModelProvider: "fixture", Model: "model"}
 
-			readiness, image := piProfileReadiness(t.Context(), profile, core.HarnessWorker, "")
+			readiness, image := piProfileReadiness(t.Context(), profile, harnesscore.HarnessWorker, "")
 			if readiness.Ready() || image != "" || !strings.Contains(readiness.Problem, "chr worker bridge") {
 				t.Fatal("unprepared worker executable was accepted", readiness)
 			}

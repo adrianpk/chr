@@ -26,7 +26,7 @@ printf '{"input_hash":"%s","branch":"%s","commit":"%s","tree":"%s"}\n' "${input%
 func workflowCLIManualStart(t *testing.T, operations service, hierarchy core.WorkflowMaterializationResult) string {
 	t.Helper()
 
-	request := core.WorkflowStartRequest{RequestKey: "cli-manual", Selection: core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: core.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: serviceWorkflowDependencyGit(t, operations.projectContext.ProjectDir, "rev-parse", "HEAD")}}}
+	request := core.WorkflowStartRequest{RequestKey: "cli-manual", Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: serviceWorkflowDependencyGit(t, operations.projectContext.ProjectDir, "rev-parse", "HEAD")}}}
 
 	run, err := operations.StartWorkflow(t.Context(), request)
 	if err != nil {
@@ -130,7 +130,7 @@ func checkWorkflowCLIManualFailure(t *testing.T, operations service, id string) 
 func TestWorkflowCLIStart(t *testing.T) {
 	operations, record, _, provider := serviceWorkNativeFixture(t)
 
-	preview, err := operations.PreviewWorkExtent(t.Context(), core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "ticket", Identity: record.Task.Key}, Limit: 1})
+	preview, err := operations.PreviewWorkExtent(t.Context(), workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: record.Task.Key}, Limit: 1})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -154,7 +154,7 @@ func TestWorkflowCLIStart(t *testing.T) {
 // an invocation, consuming a worker attempt or publishing a source candidate.
 func TestWorkflowCLIAdmission(t *testing.T) {
 	operations, record, _, provider := serviceWorkNativeFixture(t)
-	request := core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "ticket", Identity: record.Task.Key}, Limit: 1}
+	request := workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: record.Task.Key}, Limit: 1}
 
 	preview, err := operations.PreviewWorkExtent(t.Context(), request)
 	if err != nil {

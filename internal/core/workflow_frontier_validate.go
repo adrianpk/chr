@@ -48,8 +48,8 @@ func validateWorkflowExecutionTarget(run workflowInvocationFile) error {
 	return validateWorkflowDependencyTargets(run)
 }
 
-func workflowRetainedExecutionTarget(run workflowInvocationFile) *WorkflowPreviewTarget {
-	var target *WorkflowPreviewTarget
+func workflowRetainedExecutionTarget(run workflowInvocationFile) *workflowstate.WorkflowPreviewTarget {
+	var target *workflowstate.WorkflowPreviewTarget
 
 	cursor := -1
 

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 )
 
 // Explicit workspace references outrank legacy dispatch and refresh per request.
@@ -15,12 +16,12 @@ func TestHarnessSelectionResolution(t *testing.T) {
 	operations, project, configDir, command := harnessSelectionFixture(t)
 	t.Setenv("CHR_SPEC_GENERATION_BACKEND", "openai")
 
-	view, err := operations.ResolveHarnessSelection(t.Context(), core.HarnessGeneration, "spec_generation")
+	view, err := operations.ResolveHarnessSelection(t.Context(), harnesscore.HarnessGeneration, "spec_generation")
 	assertHarnessSelection(t, view, err, "openai", "legacy", "", "cli_default")
 
 	harnessSelectionWrite(t, core.UserPath(project, "config.yml"), "harnesses:\n  generation: writing\n")
 
-	view, err = operations.ResolveHarnessSelection(t.Context(), core.HarnessGeneration, "spec_generation")
+	view, err = operations.ResolveHarnessSelection(t.Context(), harnesscore.HarnessGeneration, "spec_generation")
 	assertHarnessSelection(t, view, err, "codex", "project", "writing", "fixture-model")
 
 	if !view.Readiness.Ready() {
@@ -36,7 +37,7 @@ func TestHarnessSelectionResolution(t *testing.T) {
 
 	harnessSelectionWrite(t, core.UserPath(project, "config.yml"), "harnesses:\n  generation: null\n")
 
-	view, err = operations.ResolveHarnessSelection(t.Context(), core.HarnessGeneration, "spec_generation")
+	view, err = operations.ResolveHarnessSelection(t.Context(), harnesscore.HarnessGeneration, "spec_generation")
 	assertHarnessSelection(t, view, err, "openai", "legacy", "", "cli_default")
 
 	if view.SelectionRevision == prior {
@@ -55,7 +56,7 @@ func TestHarnessSelectionRejections(t *testing.T) {
 			operations, project, _, _ := harnessSelectionFixture(t)
 			harnessSelectionWrite(t, core.UserPath(project, "config.yml"), "harnesses:\n  generation: "+name+"\n")
 
-			view, err := operations.ResolveHarnessSelection(t.Context(), core.HarnessGeneration, "spec_generation")
+			view, err := operations.ResolveHarnessSelection(t.Context(), harnesscore.HarnessGeneration, "spec_generation")
 			if err == nil || view.Readiness.Ready() {
 				t.Fatalf("unprepared explicit selection = %#v, %v", view, err)
 			}
@@ -78,7 +79,7 @@ func TestHarnessSelectionLegacyDispatch(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Setenv(test.variable, test.value)
 
-			backend, err := legacyHarnessBackend(core.HarnessGeneration, test.action)
+			backend, err := legacyHarnessBackend(harnesscore.HarnessGeneration, test.action)
 			if backend != test.backend || (err != nil) != test.invalid {
 				t.Fatalf("backend = %q, %v", backend, err)
 			}

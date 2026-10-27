@@ -1,11 +1,15 @@
 package core
 
-import "testing"
+import (
+	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // TestNativeCandidateReviewRepair keeps accepted source tasks intact when a
 // candidate reviewer requests integration repair instead of task execution.
 func TestNativeCandidateReviewRepair(t *testing.T) {
-	f, _ := nativeReviewFixture(t, ReviewWorkflowModeAgenticReview)
+	f, _ := nativeReviewFixture(t, workflowstate.ReviewWorkflowModeAgenticReview)
 	store, id := f.f.store, f.f.run.ID
 	before := workflowTestRead(t, store, id)
 	key := before.Members[len(before.Members)-1].Admission.Key

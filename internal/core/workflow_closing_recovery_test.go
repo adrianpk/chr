@@ -29,7 +29,7 @@ func workflowClosingEmptyGate(t *testing.T, gate workflowstate.Validation) (work
 		t.Fatal(err)
 	}
 
-	start := WorkflowStartRequest{RequestKey: "closing-owner", Selection: WorkflowPreviewRequest{Selector: WorkflowSelector{Extent: "slice_set", Identity: set.ID}, Target: WorkflowPreviewTarget{Repository: fixture.provider.pr.Repository, Commit: fixture.target}}}
+	start := WorkflowStartRequest{RequestKey: "closing-owner", Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "slice_set", Identity: set.ID}, Target: workflowstate.WorkflowPreviewTarget{Repository: fixture.provider.pr.Repository, Commit: fixture.target}}}
 	run := workflowTestStart(t, fixture.store, start)
 
 	return fixture, set, run.Invocation

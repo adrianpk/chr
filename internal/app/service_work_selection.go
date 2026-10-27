@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type agentWorkLoopSelection struct {
@@ -155,7 +156,7 @@ func validateAgentWorkSelectionOptions(opts AgentWorkSelectionOptions) error {
 func defaultAgentWorkSelectionOptions(maxIterations int) AgentWorkSelectionOptions {
 	return AgentWorkSelectionOptions{
 		Statuses:      []string{core.TicketStatusReadyForDev},
-		Order:         core.TicketLoopOrderCreatedAt,
+		Order:         workflowstate.TicketLoopOrderCreatedAt,
 		MaxIterations: maxIterations,
 	}
 }
@@ -168,9 +169,9 @@ func agentWorkStatuses(statuses []string) []string {
 	return statuses
 }
 
-func agentWorkOrder(order core.TicketLoopOrder) core.TicketLoopOrder {
+func agentWorkOrder(order workflowstate.TicketLoopOrder) workflowstate.TicketLoopOrder {
 	if order == "" {
-		return core.TicketLoopOrderCreatedAt
+		return workflowstate.TicketLoopOrderCreatedAt
 	}
 
 	return order

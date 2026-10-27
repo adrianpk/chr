@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeProfileConfig keeps publication opt-in independent of version and
@@ -33,7 +34,7 @@ func TestNativeProfileConfig(t *testing.T) {
 				t.Fatal("publication policy default or explicit selection changed")
 			}
 
-			if test.name == "explicit" && (config.Work.MergeStrategy != "squash" || config.Review.Mode != ReviewWorkflowModeHumanReview) {
+			if test.name == "explicit" && (config.Work.MergeStrategy != "squash" || config.Review.Mode != workflowstate.ReviewWorkflowModeHumanReview) {
 				t.Fatal("nested publication config changed adjacent method or review policy")
 			}
 		})
@@ -56,7 +57,7 @@ func TestNativeProfileUpgrade(t *testing.T) {
 	}
 
 	upgraded, err := parseWorkflowConfig(image)
-	if err != nil || upgraded.Work.Integration.PublicationProfile != WorkflowPublicationDisabled || upgraded.Review.Mode != ReviewWorkflowModeHumanReview || upgraded.Work.MergeStrategy != "squash" {
+	if err != nil || upgraded.Work.Integration.PublicationProfile != WorkflowPublicationDisabled || upgraded.Review.Mode != workflowstate.ReviewWorkflowModeHumanReview || upgraded.Work.MergeStrategy != "squash" {
 		t.Fatal("upgrade activated publication or changed existing policy")
 	}
 }

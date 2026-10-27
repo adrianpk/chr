@@ -84,13 +84,13 @@ type WorkflowPreparationBinding struct {
 // WorkflowPublicationGuard contains the exact protected result a publisher may
 // submit after journaling intent. Providers must never substitute another method.
 type WorkflowPublicationGuard struct {
-	PullRequest     WorkflowPullRequestSnapshot   `json:"pull_request"`
-	Capability      WorkflowPublicationCapability `json:"capability"`
-	Git             WorkflowIntegrationProof      `json:"git"`
-	PreparationRef  string                        `json:"preparation_ref"`
-	PreparationHash string                        `json:"preparation_hash"`
-	ReviewHash      string                        `json:"review_hash"`
-	Policy          WorkflowReviewPolicy          `json:"policy"`
+	PullRequest     WorkflowPullRequestSnapshot        `json:"pull_request"`
+	Capability      WorkflowPublicationCapability      `json:"capability"`
+	Git             WorkflowIntegrationProof           `json:"git"`
+	PreparationRef  string                             `json:"preparation_ref"`
+	PreparationHash string                             `json:"preparation_hash"`
+	ReviewHash      string                             `json:"review_hash"`
+	Policy          workflowstate.WorkflowReviewPolicy `json:"policy"`
 }
 
 // PrepareWorkflowSliceIntegration validates the configured combined result on

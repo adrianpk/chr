@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -79,7 +78,7 @@ func (r telegramReceiver) prepareWorkAdmission(ctx context.Context, request tele
 }
 
 func (r telegramReceiver) previewWorkAdmission(ctx context.Context, operations telegramWorkService, request telegramcore.OperationRequest) (json.RawMessage, error) {
-	var selector core.WorkflowSelector
+	var selector workflowstate.WorkflowSelector
 	if err := decodeOperationJSON(string(request.Arguments), &selector); err != nil {
 		return nil, err
 	}

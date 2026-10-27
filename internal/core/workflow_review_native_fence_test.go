@@ -22,7 +22,7 @@ func TestNativeReviewFence(t *testing.T) {
 func nativeReviewFence(t *testing.T, change string) {
 	t.Helper()
 
-	f, _ := nativeReviewFixture(t, ReviewWorkflowModeAgenticReview)
+	f, _ := nativeReviewFixture(t, workflowstate.ReviewWorkflowModeAgenticReview)
 	store, id := f.f.store, f.f.run.ID
 	root := t.TempDir()
 	marker, release := filepath.Join(root, "started"), filepath.Join(root, "release")

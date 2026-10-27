@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const workflowUpgradePending = "tmp/workflow-upgrade.json"
@@ -71,7 +73,7 @@ func workflowUpgradeConfig(data []byte, prior WorkflowConfiguration, opts Workfl
 	if review == "" {
 		for _, value := range prior.Values {
 			if value.Key == "review.mode" {
-				review = ReviewWorkflowMode(value.Value)
+				review = workflowstate.ReviewWorkflowMode(value.Value)
 			}
 		}
 	}

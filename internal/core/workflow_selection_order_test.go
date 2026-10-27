@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func materializeSelectionSet(t *testing.T, store *WorkflowStore, opts WorkflowMaterializationOptions, suffix, useCase string, order int) WorkflowMaterializationResult {
@@ -125,7 +126,7 @@ func TestWorkflowSelectionMembership(t *testing.T) {
 	task.Task.Order = 9
 	workflowTestWrite(t, store, task)
 
-	if _, err := store.Preview(t.Context(), WorkflowPreviewRequest{Selector: WorkflowSelector{Extent: "slice_set", Identity: result.Set.ID}, Limit: 128}); err == nil {
+	if _, err := store.Preview(t.Context(), workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "slice_set", Identity: result.Set.ID}, Limit: 128}); err == nil {
 		t.Fatalf("changed membership admitted for %s", result.Set.ID)
 	}
 }

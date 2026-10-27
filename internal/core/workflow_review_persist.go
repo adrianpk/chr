@@ -204,7 +204,7 @@ func (s *WorkflowStore) workflowReviewOrigin(run workflowInvocationFile, state s
 		return "", err
 	}
 
-	if input.Policy.Mode == ReviewWorkflowModeTrustedAutoMerge {
+	if input.Policy.Mode == workflowstate.ReviewWorkflowModeTrustedAutoMerge {
 		return "trusted", nil
 	}
 

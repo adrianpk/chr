@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkOperationResult is the TUI-facing result for agent work operations.
@@ -33,8 +34,8 @@ type AgentWorkResult struct {
 // AgentWorkSelectionOptions filters agent work selection.
 type AgentWorkSelectionOptions struct {
 	Statuses      []string
-	Filters       core.TicketLoopFilters
-	Order         core.TicketLoopOrder
+	Filters       workflowstate.TicketLoopFilters
+	Order         workflowstate.TicketLoopOrder
 	MaxIterations int
 }
 
@@ -63,7 +64,7 @@ func (s service) StartAgentWorkTicket(ticketKey string) (AgentWorkResult, error)
 	}
 
 	if core.WorkAuthority(config.Work) == core.WorkStateAuthorityTickets {
-		return s.startNativeAgentWork(config, core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "ticket", Identity: ticketKey}}, 0, "")
+		return s.startNativeAgentWork(config, workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: ticketKey}}, 0, "")
 	}
 
 	result, err := s.startLegacyAgentWorkTicket(ticketKey)

@@ -7,11 +7,12 @@ import (
 	"slices"
 
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *WorkflowStore) workflowReviewPolicy(run workflowInvocationFile) (WorkflowReviewPolicy, error) {
+func (s *WorkflowStore) workflowReviewPolicy(run workflowInvocationFile) (workflowstate.WorkflowReviewPolicy, error) {
 	if err := requireNoWorkflowUpgrade(s.layout.ProjectDir()); err != nil {
-		return WorkflowReviewPolicy{}, err
+		return workflowstate.WorkflowReviewPolicy{}, err
 	}
 
 	data, err := opsfile.Read(UserPath(s.layout.ProjectDir(), "config.yml"))
@@ -20,7 +21,7 @@ func (s *WorkflowStore) workflowReviewPolicy(run workflowInvocationFile) (Workfl
 	}
 
 	if err != nil {
-		return WorkflowReviewPolicy{}, err
+		return workflowstate.WorkflowReviewPolicy{}, err
 	}
 
 	policy, err := parseWorkflowReviewPolicy(data)
@@ -28,26 +29,26 @@ func (s *WorkflowStore) workflowReviewPolicy(run workflowInvocationFile) (Workfl
 		return policy, err
 	}
 
-	if run.ReviewRestriction == ReviewWorkflowModeHumanReview {
-		policy.Mode, policy.Source = ReviewWorkflowModeHumanReview, "invocation_restriction"
+	if run.ReviewRestriction == workflowstate.ReviewWorkflowModeHumanReview {
+		policy.Mode, policy.Source = workflowstate.ReviewWorkflowModeHumanReview, "invocation_restriction"
 	}
 
 	return policy, nil
 }
 
-func parseWorkflowReviewPolicy(data []byte) (WorkflowReviewPolicy, error) {
+func parseWorkflowReviewPolicy(data []byte) (workflowstate.WorkflowReviewPolicy, error) {
 	config, err := parseWorkflowConfig(data)
 	if err != nil {
-		return WorkflowReviewPolicy{}, err
+		return workflowstate.WorkflowReviewPolicy{}, err
 	}
 
 	value := workflowConfigurationValue(config, "review.mode", string(config.Review.Mode))
-	policy := WorkflowReviewPolicy{Mode: config.Review.Mode, Method: config.Work.MergeStrategy, Source: value.Source, Revision: config.workflowRevision}
+	policy := workflowstate.WorkflowReviewPolicy{Mode: config.Review.Mode, Method: config.Work.MergeStrategy, Source: value.Source, Revision: config.workflowRevision}
 
 	return policy, validateWorkflowReviewPolicy(policy)
 }
 
-func validateWorkflowReviewPolicy(policy WorkflowReviewPolicy) error {
+func validateWorkflowReviewPolicy(policy workflowstate.WorkflowReviewPolicy) error {
 	if !IntegrationCycleMode(policy.Mode).Valid() || !slices.Contains([]string{"merge", "rebase", "squash"}, policy.Method) || !slices.Contains([]string{"legacy_default", "version_default", "project", "invocation_restriction"}, policy.Source) || len(policy.Revision) != 64 {
 		return fmt.Errorf("invalid current workflow review policy")
 	}

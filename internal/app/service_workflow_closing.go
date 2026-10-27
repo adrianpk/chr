@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // CloseWorkflowSet shares set-owned closing validation across operation adapters.
@@ -19,7 +20,7 @@ func (s service) CloseWorkflowSet(ctx context.Context, request core.WorkflowSetC
 		return core.WorkflowSetClosureResult{}, err
 	}
 
-	observer := s.workflowIntegrationObserver(core.WorkflowInvocation{WorkflowInvocationInput: core.WorkflowInvocationInput{Selection: core.WorkflowPreviewRequest{Target: core.WorkflowPreviewTarget{Repository: request.Repository}}}})
+	observer := s.workflowIntegrationObserver(core.WorkflowInvocation{WorkflowInvocationInput: core.WorkflowInvocationInput{Selection: workflowstate.WorkflowPreviewRequest{Target: workflowstate.WorkflowPreviewTarget{Repository: request.Repository}}}})
 
 	target, ok := observer.(core.WorkflowTargetGit)
 	if !ok {

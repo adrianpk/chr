@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type nativeSubmissionFixture struct {
@@ -19,7 +20,7 @@ type nativeSubmissionFixture struct {
 func newNativeSubmissionFixture(t *testing.T) nativeSubmissionFixture {
 	t.Helper()
 
-	fixture, candidate := nativeReviewFixture(t, ReviewWorkflowModeTrustedAutoMerge)
+	fixture, candidate := nativeReviewFixture(t, workflowstate.ReviewWorkflowModeTrustedAutoMerge)
 	store, id := fixture.f.store, fixture.f.run.ID
 
 	if _, err := store.ReviewWorkflowSlice(t.Context(), id, fixture.provider, nil); err != nil {

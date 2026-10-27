@@ -7,6 +7,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestTelegramWorkDecisionWait uses a real retained merger question to prove
@@ -73,7 +74,7 @@ func telegramWorkHoldCapacity(t *testing.T, operations service, ref telegramcore
 
 	for _, record := range snapshot.Records {
 		if record.Task != nil && record.Task.SetID != "" {
-			selection := core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "ticket", Identity: record.Task.Key}, Target: preview.Request.Target}
+			selection := workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: record.Task.Key}, Target: preview.Request.Target}
 
 			run, err := operations.StartWorkflow(t.Context(), core.WorkflowStartRequest{RequestKey: "another-adapter", Selection: selection})
 			if err != nil {

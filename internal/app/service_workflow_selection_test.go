@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestServiceWorkflowPreview proves the shared operation observes files without SQL or tracker authority.
@@ -25,12 +25,12 @@ func TestServiceWorkflowPreview(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	preview, err := operations.PreviewWorkflow(t.Context(), core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "slice_set", Identity: result.Set.ID}, Limit: 2})
+	preview, err := operations.PreviewWorkflow(t.Context(), workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "slice_set", Identity: result.Set.ID}, Limit: 2})
 	if err != nil || preview.Total != 6 || preview.Authority != "tickets" || preview.NextOffset != 2 {
 		t.Fatalf("preview = %+v, %v", preview, err)
 	}
 
-	if _, err := operations.PreviewWorkflow(t.Context(), core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "ticket"}, Limit: 1}); err == nil {
+	if _, err := operations.PreviewWorkflow(t.Context(), workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket"}, Limit: 1}); err == nil {
 		t.Fatal("missing exact identity became queue")
 	}
 }

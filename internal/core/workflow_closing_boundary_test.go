@@ -18,7 +18,7 @@ type workflowClosingTargetHook struct {
 	hook  func()
 }
 
-func (target *workflowClosingTargetHook) ObserveWorkflowTarget(ctx context.Context, query WorkflowTargetQuery) (WorkflowPreviewTarget, error) {
+func (target *workflowClosingTargetHook) ObserveWorkflowTarget(ctx context.Context, query WorkflowTargetQuery) (workflowstate.WorkflowPreviewTarget, error) {
 	target.calls++
 	if target.calls == 2 {
 		target.hook()
@@ -76,7 +76,7 @@ func TestWorkflowClosingUseCase(t *testing.T) {
 		sets = append(sets, set)
 	}
 
-	start := WorkflowStartRequest{RequestKey: "empty-case", Selection: WorkflowPreviewRequest{Selector: WorkflowSelector{Extent: "use_case", Identity: "empty-case"}, Target: WorkflowPreviewTarget{Repository: fixture.provider.pr.Repository, Commit: fixture.target}}}
+	start := WorkflowStartRequest{RequestKey: "empty-case", Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "use_case", Identity: "empty-case"}, Target: workflowstate.WorkflowPreviewTarget{Repository: fixture.provider.pr.Repository, Commit: fixture.target}}}
 	run := workflowTestStart(t, fixture.store, start)
 	ports := WorkflowContinuationPorts{Publication: WorkflowPublicationPorts{Provider: workflowFrontierPorts(fixture).Provider, Observer: fixture.git}, Target: fixture.git}
 

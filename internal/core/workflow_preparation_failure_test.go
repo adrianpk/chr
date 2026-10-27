@@ -131,7 +131,7 @@ func TestWorkflowPreparationConflict(t *testing.T) {
 // validation; a previously approved source-only hash cannot approve it.
 func TestWorkflowPreparationApproval(t *testing.T) {
 	f := newWorkflowPreparationFixture(t, "rebase", workflowstate.Validation{WaiverReason: "Manual combined approval fixture"})
-	workflowReviewConfig(t, f.store, ReviewWorkflowModeHumanReview)
+	workflowReviewConfig(t, f.store, workflowstate.ReviewWorkflowModeHumanReview)
 
 	old, err := f.store.ReviewWorkflowSlice(t.Context(), f.run.ID, f.provider, nil)
 	if err != nil {

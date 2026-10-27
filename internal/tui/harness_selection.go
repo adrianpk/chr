@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 )
 
 // HarnessSelectionExecutor observes shared project defaults and retained work.
@@ -36,7 +37,7 @@ type HarnessProfileView struct {
 // HarnessRetainedView separates a retained worker binding from current defaults.
 type HarnessRetainedView struct {
 	ID, Status string
-	Binding    *core.HarnessBinding
+	Binding    *harnesscore.HarnessBinding
 }
 
 const harnessKeepProfile = ":keep"

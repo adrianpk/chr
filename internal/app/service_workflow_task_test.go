@@ -14,7 +14,7 @@ import (
 // TestServiceWorkflowTask executes an isolated worker through the shared service.
 func TestServiceWorkflowTask(t *testing.T) {
 	operations, hierarchy, target := serviceWorkflowTaskFixture(t)
-	request := core.WorkflowStartRequest{RequestKey: "execute-task", Selection: core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: core.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
+	request := core.WorkflowStartRequest{RequestKey: "execute-task", Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
 
 	run, err := operations.StartWorkflow(t.Context(), request)
 	if err != nil {

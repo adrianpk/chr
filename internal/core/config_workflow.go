@@ -64,7 +64,7 @@ func parseWorkflowConfig(data []byte) (WorkspaceConfig, error) {
 		}
 
 		config.Workflow.Version = 1
-		config.Review.Mode = ReviewWorkflowModeTrustedAutoMerge
+		config.Review.Mode = workflowstate.ReviewWorkflowModeTrustedAutoMerge
 		config.Work.StateAuthority = WorkStateAuthorityTickets
 		config.Work.Workspace.Mode = WorkWorkspaceModeWorktree
 		config.Work.ValidationTimeoutSeconds = 3600
@@ -198,8 +198,8 @@ func workflowConfigChoice(value string, allowed []string) bool {
 
 // ResolveWorkflowConfiguration observes configuration without upgrading a project.
 // Only a human-review restriction may override the current publication policy.
-func ResolveWorkflowConfiguration(projectDir string, restriction ReviewWorkflowMode) (WorkflowConfiguration, error) {
-	if restriction != "" && restriction != ReviewWorkflowModeHumanReview {
+func ResolveWorkflowConfiguration(projectDir string, restriction workflowstate.ReviewWorkflowMode) (WorkflowConfiguration, error) {
+	if restriction != "" && restriction != workflowstate.ReviewWorkflowModeHumanReview {
 		return WorkflowConfiguration{}, fmt.Errorf("an invocation may restrict review to human_review only")
 	}
 
@@ -211,7 +211,7 @@ func ResolveWorkflowConfiguration(projectDir string, restriction ReviewWorkflowM
 	return effectiveWorkflowConfiguration(config, restriction), nil
 }
 
-func effectiveWorkflowConfiguration(config WorkspaceConfig, restriction ReviewWorkflowMode) WorkflowConfiguration {
+func effectiveWorkflowConfiguration(config WorkspaceConfig, restriction workflowstate.ReviewWorkflowMode) WorkflowConfiguration {
 	revision := config.workflowRevision
 	if revision == "" {
 		revision = contenthash.Sum(nil)

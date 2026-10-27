@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s service) observeNativeWork(ctx context.Context, config core.WorkspaceConfig, result *WorkObservation) error {
@@ -14,7 +15,7 @@ func (s service) observeNativeWork(ctx context.Context, config core.WorkspaceCon
 		return err
 	}
 
-	var target core.WorkflowPreviewTarget
+	var target workflowstate.WorkflowPreviewTarget
 
 	identity, targetErr := s.nativeAgentWorkTarget(config)
 	if targetErr == nil {
@@ -23,7 +24,7 @@ func (s service) observeNativeWork(ctx context.Context, config core.WorkspaceCon
 	// Queue records remain inspectable when Git readiness is blocked. Missing
 	// target proof is still evaluated by the shared prerequisite owner.
 	if targetErr != nil {
-		target = core.WorkflowPreviewTarget{}
+		target = workflowstate.WorkflowPreviewTarget{}
 		result.Readiness.Status = core.WorkReadinessStatusBlocked
 		result.Readiness.Diagnostics = append(result.Readiness.Diagnostics, core.WorkReadinessDiagnostic{Code: "target_unavailable", Severity: core.WorkReadinessSeverityBlocking, Detail: "Integration target proof is unavailable."})
 	}

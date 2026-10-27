@@ -9,6 +9,8 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Actual service admissions freeze the selected executable/model before claim.
@@ -16,7 +18,7 @@ import (
 func TestHarnessBindingService(t *testing.T) {
 	operations, hierarchy, target := serviceWorkflowTaskFixture(t)
 	profiles := prepareServiceHarnessBinding(t, operations)
-	request := core.WorkflowStartRequest{RequestKey: "profile-worker", Selection: core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: core.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
+	request := core.WorkflowStartRequest{RequestKey: "profile-worker", Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
 
 	started, err := operations.StartWorkflow(t.Context(), request)
 	if err != nil || started.Invocation.HarnessBinding == nil {
@@ -118,7 +120,7 @@ func TestHarnessBindingProviderReadiness(t *testing.T) {
 	harnessSelectionWrite(t, filepath.Join(configDir, "harnesses.yml"), "profiles:\n  writing:\n    harness: codex\n    command: "+command+"\n    model_provider: unsupported-provider\n    model: exact-model\n")
 	harnessSelectionWrite(t, core.UserPath(project, "config.yml"), "harnesses:\n  worker: writing\n")
 
-	view, err := operations.ResolveHarnessSelection(t.Context(), core.HarnessWorker, "")
+	view, err := operations.ResolveHarnessSelection(t.Context(), harnesscore.HarnessWorker, "")
 	if err == nil || view.Readiness.Ready() {
 		t.Fatal("unimplemented provider dispatch appeared ready")
 	}
@@ -130,7 +132,7 @@ func TestHarnessBindingLegacyWorkerModel(t *testing.T) {
 	operations, _, _, _ := harnessSelectionFixture(t)
 	t.Setenv("CHR_CODEX_MODEL", "generation-only-model")
 
-	view, err := operations.ResolveHarnessSelection(t.Context(), core.HarnessWorker, "")
+	view, err := operations.ResolveHarnessSelection(t.Context(), harnesscore.HarnessWorker, "")
 	if err != nil || view.Model != "cli_default" || view.Source != "legacy" {
 		t.Fatal("inspection misrepresented legacy worker model", view, err)
 	}

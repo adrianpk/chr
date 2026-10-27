@@ -14,18 +14,18 @@ import (
 // WorkflowDependencyTarget binds a resumed independent cursor to canonical
 // descendant history and the immutable prerequisite receipts observed there.
 type WorkflowDependencyTarget struct {
-	Schema       string                `json:"schema"`
-	InvocationID string                `json:"invocation_id"`
-	Cursor       int                   `json:"cursor"`
-	TicketKey    string                `json:"ticket_key"`
-	Previous     WorkflowPreviewTarget `json:"previous_target"`
-	Target       WorkflowPreviewTarget `json:"target"`
-	Branch       string                `json:"branch"`
-	Blocker      WorkflowBlocker       `json:"blocker"`
-	Receipts     map[string]string     `json:"receipt_hashes"`
-	ConfirmedAt  time.Time             `json:"confirmed_at"`
-	EvidenceRef  string                `json:"evidence_ref,omitempty"`
-	EvidenceHash string                `json:"evidence_hash,omitempty"`
+	Schema       string                              `json:"schema"`
+	InvocationID string                              `json:"invocation_id"`
+	Cursor       int                                 `json:"cursor"`
+	TicketKey    string                              `json:"ticket_key"`
+	Previous     workflowstate.WorkflowPreviewTarget `json:"previous_target"`
+	Target       workflowstate.WorkflowPreviewTarget `json:"target"`
+	Branch       string                              `json:"branch"`
+	Blocker      WorkflowBlocker                     `json:"blocker"`
+	Receipts     map[string]string                   `json:"receipt_hashes"`
+	ConfirmedAt  time.Time                           `json:"confirmed_at"`
+	EvidenceRef  string                              `json:"evidence_ref,omitempty"`
+	EvidenceHash string                              `json:"evidence_hash,omitempty"`
 }
 
 func (s *WorkflowStore) resumeWorkflowDependencyTarget(ctx context.Context, run *workflowInvocationFile, ports WorkflowResumePorts) ([]workflowstate.FileChange, error) {
@@ -86,7 +86,7 @@ func workflowDependencyBranchMatches(run workflowInvocationFile, branch string) 
 	return len(run.DependencyTargets) == 0 || run.DependencyTargets[0].Branch == branch
 }
 
-func (s *WorkflowStore) observeWorkflowDependencyTarget(ctx context.Context, run workflowInvocationFile, ports WorkflowResumePorts) (WorkflowPreviewTarget, error) {
+func (s *WorkflowStore) observeWorkflowDependencyTarget(ctx context.Context, run workflowInvocationFile, ports WorkflowResumePorts) (workflowstate.WorkflowPreviewTarget, error) {
 	query := WorkflowTargetQuery{Repository: run.Selection.Target.Repository, Branch: ports.TargetBranch, Directory: s.layout.ProjectDir()}
 
 	target, err := ports.Target.ObserveWorkflowTarget(ctx, query)

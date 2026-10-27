@@ -10,35 +10,22 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// WorkflowExecutionPolicy freezes finite execution limits at admission.
-type WorkflowExecutionPolicy struct {
-	AgentTokenBudget         int64  `json:"agent_token_budget,omitempty"`
-	ConfigRevision           string `json:"config_revision,omitempty"`
-	ValidationTimeoutSeconds int    `json:"validation_timeout_seconds,omitempty"`
-	IncludeLaterTickets      bool   `json:"include_later_tickets,omitempty"`
-	WorkerTimeoutSeconds     int    `json:"worker_timeout_seconds"`
-	MaxWorkerAttempts        int    `json:"max_worker_attempts"`
-	MaxIntegrationAttempts   int    `json:"max_integration_attempts,omitempty"`
-	MaxMergerAttempts        int    `json:"max_merger_attempts,omitempty"`
-	MaxDriftRevisions        int    `json:"max_drift_revisions,omitempty"`
-	CheckpointStepLimit      int    `json:"checkpoint_step_limit,omitempty"`
-}
-
 // WorkflowStartRequest admits an explicit finite selection with a retry key.
 type WorkflowStartRequest struct {
-	HarnessBinding      *HarnessBinding         `json:"harness_binding,omitempty"`
-	HarnessCommand      []string                `json:"-"`
-	ResolveHarness      WorkflowHarnessResolver `json:"-"`
-	Admission           *WorkflowAdmissionGuard `json:"admission_guard,omitempty"`
-	IncludeLaterTickets *bool                   `json:"include_later_tickets_override,omitempty"`
-	Selected            *WorkflowSelectionGuard `json:"-"`
+	HarnessBinding      *harnesscore.HarnessBinding           `json:"harness_binding,omitempty"`
+	HarnessCommand      []string                              `json:"-"`
+	ResolveHarness      WorkflowHarnessResolver               `json:"-"`
+	Admission           *workflowstate.WorkflowAdmissionGuard `json:"admission_guard,omitempty"`
+	IncludeLaterTickets *bool                                 `json:"include_later_tickets_override,omitempty"`
+	Selected            *workflowstate.WorkflowSelectionGuard `json:"-"`
 	RequestKey          string
-	Selection           WorkflowPreviewRequest
-	Policy              WorkflowExecutionPolicy
-	ReviewRestriction   ReviewWorkflowMode `json:"review_restriction,omitempty"`
+	Selection           workflowstate.WorkflowPreviewRequest
+	Policy              workflowstate.WorkflowExecutionPolicy
+	ReviewRestriction   workflowstate.ReviewWorkflowMode `json:"review_restriction,omitempty"`
 }
 
 // WorkflowMember retains admission facts and the latest accepted owned image.
@@ -99,8 +86,8 @@ type WorkflowInvocation struct {
 
 // WorkflowInvocationAdmission groups the retained admission fields without changing their wire order.
 type WorkflowInvocationAdmission struct {
-	HarnessBinding *HarnessBinding         `json:"harness_binding,omitempty"`
-	Admission      *WorkflowAdmissionGuard `json:"admission_guard,omitempty"`
+	HarnessBinding *harnesscore.HarnessBinding           `json:"harness_binding,omitempty"`
+	Admission      *workflowstate.WorkflowAdmissionGuard `json:"admission_guard,omitempty"`
 }
 
 // WorkflowInvocationIntegration groups the retained integration fields without changing their wire order.
@@ -112,11 +99,11 @@ type WorkflowInvocationIntegration struct {
 
 // WorkflowInvocationScope groups the retained scope fields without changing their wire order.
 type WorkflowInvocationScope struct {
-	DependencyTargets []WorkflowDependencyTarget  `json:"dependency_targets,omitempty"`
-	LooseQueue        *WorkflowLooseQueue         `json:"loose_queue,omitempty"`
-	Closures          []WorkflowInvocationClosure `json:"set_closures,omitempty"`
-	ClosingSet        string                      `json:"closing_set,omitempty"`
-	ExecutionTarget   *WorkflowPreviewTarget      `json:"execution_target,omitempty"`
+	DependencyTargets []WorkflowDependencyTarget           `json:"dependency_targets,omitempty"`
+	LooseQueue        *WorkflowLooseQueue                  `json:"loose_queue,omitempty"`
+	Closures          []WorkflowInvocationClosure          `json:"set_closures,omitempty"`
+	ClosingSet        string                               `json:"closing_set,omitempty"`
+	ExecutionTarget   *workflowstate.WorkflowPreviewTarget `json:"execution_target,omitempty"`
 }
 
 // WorkflowInvocationProgress groups the retained progress fields without changing their wire order.
@@ -128,16 +115,16 @@ type WorkflowInvocationProgress struct {
 
 // WorkflowInvocationInput groups the retained input fields without changing their wire order.
 type WorkflowInvocationInput struct {
-	Schema       string                  `json:"schema"`
-	RequestKey   string                  `json:"request_key"`
-	RequestHash  string                  `json:"request_hash"`
-	Authority    string                  `json:"authority"`
-	Selection    WorkflowPreviewRequest  `json:"selection"`
-	Policy       WorkflowExecutionPolicy `json:"policy"`
-	SetOrderRule string                  `json:"set_order_rule"`
-	Members      []WorkflowMember        `json:"members"`
-	SetImages    []WorkflowInputImage    `json:"set_images"`
-	Excluded     map[string]int          `json:"excluded"`
+	Schema       string                                `json:"schema"`
+	RequestKey   string                                `json:"request_key"`
+	RequestHash  string                                `json:"request_hash"`
+	Authority    string                                `json:"authority"`
+	Selection    workflowstate.WorkflowPreviewRequest  `json:"selection"`
+	Policy       workflowstate.WorkflowExecutionPolicy `json:"policy"`
+	SetOrderRule string                                `json:"set_order_rule"`
+	Members      []WorkflowMember                      `json:"members"`
+	SetImages    []WorkflowInputImage                  `json:"set_images"`
+	Excluded     map[string]int                        `json:"excluded"`
 }
 
 // WorkflowInvocationExecution groups the retained execution fields without changing their wire order.
@@ -170,10 +157,10 @@ type WorkflowInvocationDelivery struct {
 
 // WorkflowInvocationReview groups the retained review fields without changing their wire order.
 type WorkflowInvocationReview struct {
-	ReviewRestriction ReviewWorkflowMode           `json:"review_restriction,omitempty"`
-	Review            *WorkflowReviewBinding       `json:"review_binding,omitempty"`
-	ReviewCount       int                          `json:"review_count,omitempty"`
-	ReviewRepairs     []WorkflowReviewRepairBudget `json:"review_repairs,omitempty"`
+	ReviewRestriction workflowstate.ReviewWorkflowMode `json:"review_restriction,omitempty"`
+	Review            *WorkflowReviewBinding           `json:"review_binding,omitempty"`
+	ReviewCount       int                              `json:"review_count,omitempty"`
+	ReviewRepairs     []WorkflowReviewRepairBudget     `json:"review_repairs,omitempty"`
 }
 
 // WorkflowInvocationPreparation groups the retained preparation fields without changing their wire order.
@@ -254,7 +241,7 @@ func normalizeWorkflowStart(request WorkflowStartRequest) (WorkflowStartRequest,
 		request.Selection.SnapshotHash = request.Admission.SnapshotHash
 	}
 
-	if request.ReviewRestriction != "" && request.ReviewRestriction != ReviewWorkflowModeHumanReview {
+	if request.ReviewRestriction != "" && request.ReviewRestriction != workflowstate.ReviewWorkflowModeHumanReview {
 		return request, fmt.Errorf("an invocation may restrict review to human_review only")
 	}
 
@@ -292,7 +279,7 @@ func validateWorkflowStartGuards(request WorkflowStartRequest) error {
 	return validateWorkflowAdmissionGuard(request.Admission, request.Selection)
 }
 
-func normalizeWorkflowExecutionPolicy(policy WorkflowExecutionPolicy) WorkflowExecutionPolicy {
+func normalizeWorkflowExecutionPolicy(policy workflowstate.WorkflowExecutionPolicy) workflowstate.WorkflowExecutionPolicy {
 	if policy.WorkerTimeoutSeconds == 0 {
 		policy.WorkerTimeoutSeconds = 3600
 	}
@@ -308,11 +295,11 @@ func normalizeWorkflowExecutionPolicy(policy WorkflowExecutionPolicy) WorkflowEx
 	return policy
 }
 
-func validWorkflowExecutionPolicy(policy WorkflowExecutionPolicy) bool {
+func validWorkflowExecutionPolicy(policy workflowstate.WorkflowExecutionPolicy) bool {
 	return policy.AgentTokenBudget >= 0 && validWorkflowWorkerPolicy(policy) && validWorkflowIntegrationPolicyBounds(policy) && policy.MaxIntegrationAttempts >= 0 && policy.MaxIntegrationAttempts <= 10 && policy.CheckpointStepLimit >= 0 && policy.CheckpointStepLimit <= workflowstate.PageLimit && (policy.ConfigRevision == "" || len(policy.ConfigRevision) == 64)
 }
 
-func validWorkflowWorkerPolicy(policy WorkflowExecutionPolicy) bool {
+func validWorkflowWorkerPolicy(policy workflowstate.WorkflowExecutionPolicy) bool {
 	return policy.WorkerTimeoutSeconds >= 1 && policy.WorkerTimeoutSeconds <= 86400 && policy.MaxWorkerAttempts >= 1 && policy.MaxWorkerAttempts <= 128 && policy.ValidationTimeoutSeconds >= 0 && policy.ValidationTimeoutSeconds <= 86400
 }
 
@@ -383,7 +370,7 @@ func (s *WorkflowStore) startNewWorkflow(ctx context.Context, request WorkflowSt
 	return WorkflowStartResult{Invocation: run.WorkflowInvocation}, err
 }
 
-func (s *WorkflowStore) freezeWorkflowSelection(ctx context.Context, request WorkflowPreviewRequest) (WorkflowPreview, error) {
+func (s *WorkflowStore) freezeWorkflowSelection(ctx context.Context, request workflowstate.WorkflowPreviewRequest) (WorkflowPreview, error) {
 	selection, err := s.readWorkflowSelection(ctx)
 	if err != nil {
 		return WorkflowPreview{}, err

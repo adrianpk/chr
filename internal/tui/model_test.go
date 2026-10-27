@@ -13,6 +13,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func TestModelViewRendersProjectAndNavigation(t *testing.T) {
@@ -2442,7 +2443,7 @@ func TestModelDashRunAllUsesAgentWorkFilters(t *testing.T) {
 		t.Fatalf("PriorityFilter = %q, want critical", request.PriorityFilter)
 	}
 
-	if request.Order != core.TicketLoopOrderPriority {
+	if request.Order != workflowstate.TicketLoopOrderPriority {
 		t.Fatalf("Order = %q, want priority", request.Order)
 	}
 

@@ -31,10 +31,10 @@ func (p workflowClosingProvider) ReadWorkflowPullRequest(ctx context.Context, ur
 func workflowClosingFixture(t *testing.T) (workflowIntegrationFixture, WorkflowFrontierPorts) {
 	t.Helper()
 
-	return workflowClosingExtentFixture(t, "slice_set", WorkflowExecutionPolicy{})
+	return workflowClosingExtentFixture(t, "slice_set", workflowstate.WorkflowExecutionPolicy{})
 }
 
-func workflowClosingExtentFixture(t *testing.T, extent string, policy WorkflowExecutionPolicy) (workflowIntegrationFixture, WorkflowFrontierPorts) {
+func workflowClosingExtentFixture(t *testing.T, extent string, policy workflowstate.WorkflowExecutionPolicy) (workflowIntegrationFixture, WorkflowFrontierPorts) {
 	t.Helper()
 
 	fixture := workflowDeliveryPolicyFixture(t, "rebase", extent, policy)
@@ -233,10 +233,10 @@ type workflowClosingDeadlineTarget struct {
 	WorkflowTargetGit
 }
 
-func (target workflowClosingDeadlineTarget) ObserveWorkflowTarget(ctx context.Context, query WorkflowTargetQuery) (WorkflowPreviewTarget, error) {
+func (target workflowClosingDeadlineTarget) ObserveWorkflowTarget(ctx context.Context, query WorkflowTargetQuery) (workflowstate.WorkflowPreviewTarget, error) {
 	deadline, present := ctx.Deadline()
 	if !present || time.Until(deadline) > 3*time.Minute {
-		return WorkflowPreviewTarget{}, fmt.Errorf("closing observation has no finite host deadline")
+		return workflowstate.WorkflowPreviewTarget{}, fmt.Errorf("closing observation has no finite host deadline")
 	}
 
 	return target.WorkflowTargetGit.ObserveWorkflowTarget(ctx, query)

@@ -28,7 +28,7 @@ func telegramWorkAdmissionFixture(t *testing.T) (*WorkflowStore, WorkflowStartRe
 	}
 
 	request.Selection.SnapshotHash = preview.SnapshotHash
-	request.Admission = &WorkflowAdmissionGuard{SnapshotHash: preview.SnapshotHash, Selected: &WorkflowSelectionGuard{Key: hierarchy.Tasks[0].Task.Key, Revision: hierarchy.Tasks[0].Revision}, Policy: policy}
+	request.Admission = &workflowstate.WorkflowAdmissionGuard{SnapshotHash: preview.SnapshotHash, Selected: &workflowstate.WorkflowSelectionGuard{Key: hierarchy.Tasks[0].Task.Key, Revision: hierarchy.Tasks[0].Revision}, Policy: policy}
 
 	request.Admission.ExecutionPolicy, err = store.InspectWorkflowExecutionPolicy(t.Context())
 	if err != nil {

@@ -70,7 +70,7 @@ func validWorkflowDependencyReceipt(path, hash string) bool {
 	return strings.HasPrefix(path, "run/") && strings.Contains(path, "/evidence/") && strings.HasSuffix(path, ".json") && len(hash) == 64
 }
 
-func workflowDependencyPreviousTarget(run workflowInvocationFile, index int) WorkflowPreviewTarget {
+func workflowDependencyPreviousTarget(run workflowInvocationFile, index int) workflowstate.WorkflowPreviewTarget {
 	cursor := run.DependencyTargets[index].Cursor
 
 	target := run.Selection.Target

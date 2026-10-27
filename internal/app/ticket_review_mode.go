@@ -8,6 +8,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (factory commandFactory) ticketReviewModeCommand() *cli.Command {
@@ -170,9 +171,9 @@ func printTicketReviewModeStatus(stdout io.Writer, projectContext commandProject
 		"mode_status: " + status,
 		"description: " + core.ReviewWorkflowModeDescription(config.Mode),
 		fmt.Sprintf("dry_run: %t", dryRun),
-		fmt.Sprintf("requires_remote_review: %t", config.Mode == core.ReviewWorkflowModeAgenticReview),
-		fmt.Sprintf("requires_human_review: %t", config.Mode == core.ReviewWorkflowModeHumanReview),
-		fmt.Sprintf("trusted_auto_merge: %t", config.Mode == core.ReviewWorkflowModeTrustedAutoMerge),
+		fmt.Sprintf("requires_remote_review: %t", config.Mode == workflowstate.ReviewWorkflowModeAgenticReview),
+		fmt.Sprintf("requires_human_review: %t", config.Mode == workflowstate.ReviewWorkflowModeHumanReview),
+		fmt.Sprintf("trusted_auto_merge: %t", config.Mode == workflowstate.ReviewWorkflowModeTrustedAutoMerge),
 		"clean_pass_remote_comment: false",
 		fmt.Sprintf("non_blocking_comment_limit: %d", config.NonBlockingCommentLimit),
 	}

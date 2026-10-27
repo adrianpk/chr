@@ -1,11 +1,15 @@
 package core
 
-import "testing"
+import (
+	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // TestWorkflowReviewConcurrent serializes independent trusted-policy callers
 // and creates one immutable decision without consuming worker capacity.
 func TestWorkflowReviewConcurrent(t *testing.T) {
-	store, _, run, provider := workflowReviewFixture(t, ReviewWorkflowModeTrustedAutoMerge)
+	store, _, run, provider := workflowReviewFixture(t, workflowstate.ReviewWorkflowModeTrustedAutoMerge)
 	start := make(chan struct{})
 	results := make(chan error, 2)
 

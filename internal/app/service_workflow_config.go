@@ -4,10 +4,11 @@ import (
 	"context"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowConfiguration reports current values and sources without state changes.
-func (s service) WorkflowConfiguration(ctx context.Context, restriction core.ReviewWorkflowMode) (core.WorkflowConfiguration, error) {
+func (s service) WorkflowConfiguration(ctx context.Context, restriction workflowstate.ReviewWorkflowMode) (core.WorkflowConfiguration, error) {
 	if err := ctx.Err(); err != nil {
 		return core.WorkflowConfiguration{}, err
 	}

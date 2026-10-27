@@ -22,7 +22,7 @@ type WorkflowWorkObservation struct {
 
 // InspectWorkflowWork observes all bounded native records without recovering,
 // claiming, admitting work, rebuilding SQL or maintaining tracker projections.
-func (s *WorkflowStore) InspectWorkflowWork(ctx context.Context, target WorkflowPreviewTarget) (observation WorkflowWorkObservation, err error) {
+func (s *WorkflowStore) InspectWorkflowWork(ctx context.Context, target workflowstate.WorkflowPreviewTarget) (observation WorkflowWorkObservation, err error) {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
@@ -57,7 +57,7 @@ func (s *WorkflowStore) InspectWorkflowWork(ctx context.Context, target Workflow
 	return observation, err
 }
 
-func (s *WorkflowStore) observeWorkflowQueues(ctx context.Context, selection workflowSelection, target WorkflowPreviewTarget, observation *WorkflowWorkObservation) error {
+func (s *WorkflowStore) observeWorkflowQueues(ctx context.Context, selection workflowSelection, target workflowstate.WorkflowPreviewTarget, observation *WorkflowWorkObservation) error {
 	sets := slices.Collect(maps.Values(selection.sets))
 	slices.SortFunc(sets, func(a, b WorkflowRecord) int {
 		if a.CreatedAt.Before(b.CreatedAt) {
@@ -71,14 +71,14 @@ func (s *WorkflowStore) observeWorkflowQueues(ctx context.Context, selection wor
 		return strings.Compare(a.ID, b.ID)
 	})
 
-	selectors := []WorkflowSelector{}
+	selectors := []workflowstate.WorkflowSelector{}
 	for _, set := range sets {
-		selectors = append(selectors, WorkflowSelector{Extent: "slice_set", Identity: set.ID})
+		selectors = append(selectors, workflowstate.WorkflowSelector{Extent: "slice_set", Identity: set.ID})
 	}
 
-	selectors = append(selectors, WorkflowSelector{Extent: "loose"})
+	selectors = append(selectors, workflowstate.WorkflowSelector{Extent: "loose"})
 	for _, selector := range selectors {
-		request, err := normalizeWorkflowPreviewRequest(WorkflowPreviewRequest{Selector: selector, Limit: workflowstate.PageLimit, Target: target})
+		request, err := normalizeWorkflowPreviewRequest(workflowstate.WorkflowPreviewRequest{Selector: selector, Limit: workflowstate.PageLimit, Target: target})
 		if err != nil {
 			return err
 		}
@@ -91,7 +91,7 @@ func (s *WorkflowStore) observeWorkflowQueues(ctx context.Context, selection wor
 	return nil
 }
 
-func (s *WorkflowStore) observeWorkflowQueue(ctx context.Context, selection workflowSelection, request WorkflowPreviewRequest, observation *WorkflowWorkObservation) error {
+func (s *WorkflowStore) observeWorkflowQueue(ctx context.Context, selection workflowSelection, request workflowstate.WorkflowPreviewRequest, observation *WorkflowWorkObservation) error {
 	for {
 		preview, err := selection.preview(request)
 		if err != nil {

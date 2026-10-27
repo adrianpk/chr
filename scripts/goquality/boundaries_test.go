@@ -31,6 +31,8 @@ func TestLeafDependencies(t *testing.T) {
 		{"receipt digest", "internal/core/workflow/state/mutation.go", "package state\nimport _ \"" + coreImportPath + "contenthash\"\n", false},
 		{"native frontmatter", "internal/core/workflow/state/markdown.go", "package state\nimport _ \"" + coreImportPath + "ops/metadata\"\n", false},
 		{"metadata state cycle", "internal/core/ops/metadata/markdown.go", "package metadata\nimport _ \"" + coreImportPath + "workflow/state\"\n", true},
+		{"harness identity capability", "internal/core/harness/binding.go", "package harness\nimport _ \"" + moduleImportPath + "/internal/harness\"\n", false},
+		{"harness identity coordinator", "internal/core/harness/binding.go", "package harness\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
 		{"state coordinator", "internal/core/workflow/state/mutation.go", "package state\nimport _ \"" + coreImportPath + "workflow\"\n", true},
 		{"shared values", "internal/core/notify/store.go", "package notify\nimport db \"" + coreImportPath + "database\"\n", false},
 		{"shared model", "internal/core/model/value.go", "package value\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},

@@ -59,7 +59,7 @@ func (s *WorkflowStore) freezeWorkflowSets(ctx context.Context, run *workflowInv
 	return nil
 }
 
-func workflowFrozenSetMatches(set WorkflowRecord, selector WorkflowSelector, memberSets map[string]bool) bool {
+func workflowFrozenSetMatches(set WorkflowRecord, selector workflowstate.WorkflowSelector, memberSets map[string]bool) bool {
 	if selector.Extent == "slice_set" {
 		return set.ID == selector.Identity && set.Set.Status != "completed"
 	}
@@ -170,7 +170,7 @@ func validateWorkflowClaimContract(record WorkflowRecord) error {
 	return nil
 }
 
-func (s *WorkflowStore) checkWorkflowTarget(ctx context.Context, target WorkflowPreviewTarget) error {
+func (s *WorkflowStore) checkWorkflowTarget(ctx context.Context, target workflowstate.WorkflowPreviewTarget) error {
 	reader := workflowProofReader{store: s}
 
 	commit, err := reader.gitOutput(ctx, "rev-parse", "--verify", target.Commit+"^{commit}")

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func serviceWorkflowDeliveryFixture(t *testing.T) (service, string, *serviceWorkflowPRFixture) {
@@ -26,7 +27,7 @@ func serviceWorkflowDeliveryExtentFixture(t *testing.T, extent string) (service,
 		identity = hierarchy.Set.ID
 	}
 
-	request := core.WorkflowStartRequest{RequestKey: "external-delivery", Selection: core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: extent, Identity: identity}, Target: core.WorkflowPreviewTarget{Repository: repository, Commit: target}}}
+	request := core.WorkflowStartRequest{RequestKey: "external-delivery", Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: extent, Identity: identity}, Target: workflowstate.WorkflowPreviewTarget{Repository: repository, Commit: target}}}
 
 	run, err := operations.StartWorkflow(t.Context(), request)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"sort"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -58,11 +59,11 @@ func (s service) InspectHarnessSelections(ctx context.Context, action string) (H
 	}
 
 	for _, field := range []struct {
-		role         core.HarnessRole
+		role         harnesscore.HarnessRole
 		action, name string
 		target       *core.HarnessSelection
 	}{
-		{core.HarnessWorker, "", config.Harnesses.Worker, &result.Worker}, {core.HarnessGeneration, action, config.Harnesses.Generation, &result.Generation},
+		{harnesscore.HarnessWorker, "", config.Harnesses.Worker, &result.Worker}, {harnesscore.HarnessGeneration, action, config.Harnesses.Generation, &result.Generation},
 	} {
 		resolved, err := resolveConfiguredHarnessSelection(ctx, config, profiles, field.name, field.role, field.action, s.env.ConfigDir())
 		*field.target = resolved.View
@@ -80,8 +81,8 @@ func (s service) InspectHarnessSelections(ctx context.Context, action string) (H
 func harnessProfileChoices(ctx context.Context, config core.WorkspaceConfig, profiles map[string]core.HarnessProfile, configDir string) []HarnessProfileStatus {
 	choices := make([]HarnessProfileStatus, 0, len(profiles))
 	for _, profile := range profiles {
-		worker := prepareHarnessSelection(ctx, config, profile, core.HarnessWorker, "", configDir)
-		generation := prepareHarnessSelection(ctx, config, profile, core.HarnessGeneration, "", configDir)
+		worker := prepareHarnessSelection(ctx, config, profile, harnesscore.HarnessWorker, "", configDir)
+		generation := prepareHarnessSelection(ctx, config, profile, harnesscore.HarnessGeneration, "", configDir)
 		choices = append(choices, HarnessProfileStatus{Name: profile.Name, Harness: profile.Harness, ModelProvider: profile.ModelProvider, Model: worker.View.Model, Thinking: profile.Thinking, Revision: profile.Revision, Worker: worker.View.Readiness, Generation: generation.View.Readiness})
 	}
 
@@ -107,9 +108,9 @@ func (s service) ChangeHarnessSelections(ctx context.Context, request core.Harne
 
 func (s service) validateHarnessSelectionChange(ctx context.Context, config core.WorkspaceConfig, request core.HarnessSelectionChangeRequest) error {
 	for _, field := range []struct {
-		role   core.HarnessRole
+		role   harnesscore.HarnessRole
 		change *string
-	}{{core.HarnessWorker, request.Worker}, {core.HarnessGeneration, request.Generation}} {
+	}{{harnesscore.HarnessWorker, request.Worker}, {harnesscore.HarnessGeneration, request.Generation}} {
 		if field.change == nil || *field.change == "" {
 			continue
 		}

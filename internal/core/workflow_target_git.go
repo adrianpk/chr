@@ -20,18 +20,18 @@ type WorkflowTargetQuery struct {
 // WorkflowTargetGit refreshes a canonical branch and makes its commit available.
 // It is trusted host IO, never a worker-supplied target or source of authority.
 type WorkflowTargetGit interface {
-	ObserveWorkflowTarget(context.Context, WorkflowTargetQuery) (WorkflowPreviewTarget, error)
+	ObserveWorkflowTarget(context.Context, WorkflowTargetQuery) (workflowstate.WorkflowPreviewTarget, error)
 }
 
 // WorkflowTargetReader observes a remote target without hydrating local objects.
 type WorkflowTargetReader interface {
-	ReadWorkflowTarget(context.Context, WorkflowTargetQuery) (WorkflowPreviewTarget, error)
+	ReadWorkflowTarget(context.Context, WorkflowTargetQuery) (workflowstate.WorkflowPreviewTarget, error)
 }
 
 // ReadWorkflowTarget leaves local refs, objects and working files unchanged.
-func (git OSWorkflowIntegrationGit) ReadWorkflowTarget(ctx context.Context, query WorkflowTargetQuery) (WorkflowPreviewTarget, error) {
+func (git OSWorkflowIntegrationGit) ReadWorkflowTarget(ctx context.Context, query WorkflowTargetQuery) (workflowstate.WorkflowPreviewTarget, error) {
 	if err := git.checkWorkflowTargetQuery(query); err != nil {
-		return WorkflowPreviewTarget{}, err
+		return workflowstate.WorkflowPreviewTarget{}, err
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
@@ -40,14 +40,14 @@ func (git OSWorkflowIntegrationGit) ReadWorkflowTarget(ctx context.Context, quer
 	reader := workflowIntegrationReader{dir: query.Directory}
 	commit, err := reader.remoteTarget(ctx, git.transport, query.Branch)
 
-	return WorkflowPreviewTarget{Repository: query.Repository, Commit: commit}, err
+	return workflowstate.WorkflowPreviewTarget{Repository: query.Repository, Commit: commit}, err
 }
 
 // ObserveWorkflowTarget fetches objects while preserving checkout refs and files.
 // It observes the exact branch again after IO and rejects a moved observation.
-func (git OSWorkflowIntegrationGit) ObserveWorkflowTarget(ctx context.Context, query WorkflowTargetQuery) (WorkflowPreviewTarget, error) {
+func (git OSWorkflowIntegrationGit) ObserveWorkflowTarget(ctx context.Context, query WorkflowTargetQuery) (workflowstate.WorkflowPreviewTarget, error) {
 	if err := git.checkWorkflowTargetQuery(query); err != nil {
-		return WorkflowPreviewTarget{}, err
+		return workflowstate.WorkflowPreviewTarget{}, err
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
@@ -57,23 +57,23 @@ func (git OSWorkflowIntegrationGit) ObserveWorkflowTarget(ctx context.Context, q
 
 	commit, err := reader.remoteTarget(ctx, git.transport, query.Branch)
 	if err != nil {
-		return WorkflowPreviewTarget{}, err
+		return workflowstate.WorkflowPreviewTarget{}, err
 	}
 
 	if _, err := reader.output(ctx, "fetch", "--quiet", "--no-tags", "--no-recurse-submodules", "--no-write-fetch-head", "--", git.transport, "refs/heads/"+query.Branch); err != nil {
-		return WorkflowPreviewTarget{}, err
+		return workflowstate.WorkflowPreviewTarget{}, err
 	}
 
 	if _, err := reader.output(ctx, "cat-file", "-e", commit+"^{commit}"); err != nil {
-		return WorkflowPreviewTarget{}, err
+		return workflowstate.WorkflowPreviewTarget{}, err
 	}
 
 	again, err := reader.remoteTarget(ctx, git.transport, query.Branch)
 	if err != nil || again != commit {
-		return WorkflowPreviewTarget{}, errorsOrConflict(err)
+		return workflowstate.WorkflowPreviewTarget{}, errorsOrConflict(err)
 	}
 
-	return WorkflowPreviewTarget{Repository: query.Repository, Commit: commit}, nil
+	return workflowstate.WorkflowPreviewTarget{Repository: query.Repository, Commit: commit}, nil
 }
 
 func (git OSWorkflowIntegrationGit) checkWorkflowTargetQuery(query WorkflowTargetQuery) error {

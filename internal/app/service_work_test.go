@@ -186,7 +186,7 @@ func TestServiceStartAgentWorkLoopPreparesOnlySelectedWorktree(t *testing.T) {
 
 	result, err := operations.StartAgentWorkLoop(AgentWorkSelectionOptions{
 		Statuses:      []string{core.TicketStatusReadyForDev},
-		Order:         core.TicketLoopOrderCreatedAt,
+		Order:         workflowstate.TicketLoopOrderCreatedAt,
 		MaxIterations: 1,
 	})
 	if err != nil {
@@ -785,10 +785,10 @@ func TestServicePreviewAgentWorkLoopAppliesSelection(t *testing.T) {
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
 
 	result, err := operations.PreviewAgentWorkLoop(AgentWorkSelectionOptions{
-		Filters: core.TicketLoopFilters{
+		Filters: workflowstate.TicketLoopFilters{
 			Priorities: []string{"high"},
 		},
-		Order: core.TicketLoopOrderPriority,
+		Order: workflowstate.TicketLoopOrderPriority,
 	})
 	if err != nil {
 		t.Fatalf("PreviewAgentWorkLoop returned error: %v", err)

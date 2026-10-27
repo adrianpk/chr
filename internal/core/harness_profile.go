@@ -11,18 +11,10 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/configvalue"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 )
 
 const harnessProfilesLimit = 65_536
-
-// HarnessRole separates worker authority from structured generation.
-type HarnessRole string
-
-// Supported role identities are independent workspace selections.
-const (
-	HarnessWorker     HarnessRole = "worker"
-	HarnessGeneration HarnessRole = "generation"
-)
 
 // HarnessSelectionConfig stores named references, never executable or credential paths.
 type HarnessSelectionConfig struct {
@@ -31,11 +23,11 @@ type HarnessSelectionConfig struct {
 }
 
 // Profile returns the selected reference for one recognized role.
-func (c HarnessSelectionConfig) Profile(role HarnessRole) (string, error) {
+func (c HarnessSelectionConfig) Profile(role harnesscore.HarnessRole) (string, error) {
 	switch role {
-	case HarnessWorker:
+	case harnesscore.HarnessWorker:
 		return c.Worker, nil
-	case HarnessGeneration:
+	case harnesscore.HarnessGeneration:
 		return c.Generation, nil
 	default:
 		return "", errors.New("unsupported harness role")

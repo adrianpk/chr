@@ -4,13 +4,14 @@ import (
 	"context"
 	"slices"
 
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowHarnessResolution binds the prepared host command to its semantic identity.
 // This transient outcome does not change retained admission or invocation records.
 type WorkflowHarnessResolution struct {
-	Binding *HarnessBinding
+	Binding *harnesscore.HarnessBinding
 	Command []string
 }
 
@@ -81,7 +82,7 @@ func retainWorkflowHarnessRequest(request WorkflowStartRequest, run workflowInvo
 	return request, nil
 }
 
-func sameHarnessBinding(left, right *HarnessBinding) bool {
+func sameHarnessBinding(left, right *harnesscore.HarnessBinding) bool {
 	if left == nil || right == nil {
 		return left == right
 	}

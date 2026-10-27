@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s service) prepareGuidedWorkflowHarness(ctx context.Context, config core.WorkspaceConfig) (core.WorkflowHarnessResolution, error) {
@@ -15,7 +17,7 @@ func (s service) prepareGuidedWorkflowHarness(ctx context.Context, config core.W
 	return resolved, nil
 }
 
-func (s service) checkGuidedWorkPrerequisites(ctx context.Context, selection core.WorkflowPreviewRequest) error {
+func (s service) checkGuidedWorkPrerequisites(ctx context.Context, selection workflowstate.WorkflowPreviewRequest) error {
 	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
 	if err != nil {
 		return err
@@ -44,7 +46,7 @@ func (s service) checkGuidedWorker(ctx context.Context, config core.WorkspaceCon
 		return nil
 	}
 
-	selection, err := s.resolveHarnessSelection(ctx, config, core.HarnessWorker, "")
+	selection, err := s.resolveHarnessSelection(ctx, config, harnesscore.HarnessWorker, "")
 	if err != nil || !selection.View.Readiness.Ready() {
 		return &core.GuidedPrerequisiteError{Action: "Configure an available worker harness and credentials before retrying admission.", Cause: err}
 	}

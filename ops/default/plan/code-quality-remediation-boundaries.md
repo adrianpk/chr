@@ -12,9 +12,9 @@ are omitted here; tests do not define production ownership.
 
 | Consumer | Existing dependencies |
 | --- | --- |
-| app | core, core/authoring/acceptance, core/authoring/generation, core/authoring/state, core/database, core/gate, core/model, core/notify, core/ops, core/ops/namespace, core/project, core/quiz, core/quiz/model, core/quiz/openai, core/telegram, core/telegram/message, core/workflow/state, core/workspace, harness, harness/codex, harness/pi, tui, webui, webui/ui |
+| app | core, core/authoring/acceptance, core/authoring/generation, core/authoring/state, core/database, core/gate, core/harness, core/model, core/notify, core/ops, core/ops/namespace, core/project, core/quiz, core/quiz/model, core/quiz/openai, core/telegram, core/telegram/message, core/workflow/state, core/workspace, harness, harness/codex, harness/pi, tui, webui, webui/ui |
 | cmd/chr | app |
-| core | core/authoring/acceptance, core/authoring/generation, core/authoring/state, core/configvalue, core/contenthash, core/database, core/gate, core/model, core/notify, core/ops, core/ops/file, core/ops/metadata, core/ops/namespace, core/ops/slug, core/project, core/quiz, core/quiz/model, core/quiz/openai, core/workflow/state, core/workspace, harness, harness/process |
+| core | core/authoring/acceptance, core/authoring/generation, core/authoring/state, core/configvalue, core/contenthash, core/database, core/gate, core/harness, core/model, core/notify, core/ops, core/ops/file, core/ops/metadata, core/ops/namespace, core/ops/slug, core/project, core/quiz, core/quiz/model, core/quiz/openai, core/workflow/state, core/workspace, harness, harness/process |
 | core/authoring/acceptance | core/authoring/generation, core/ops, core/ops/metadata, core/quiz |
 | core/authoring/generation | core/quiz, core/workflow/state |
 | core/authoring/state | none |
@@ -22,6 +22,7 @@ are omitted here; tests do not define production ownership.
 | core/contenthash | none |
 | core/database | none |
 | core/gate | core/configvalue |
+| core/harness | harness |
 | core/model | none |
 | core/notify | core/contenthash, core/database, core/ops/namespace, core/project, core/telegram/message, core/workflow/state |
 | core/ops | core/ops/namespace, core/project |
@@ -41,7 +42,7 @@ are omitted here; tests do not define production ownership.
 | harness/codex | harness, harness/process |
 | harness/pi | harness, harness/process |
 | harness/process | harness |
-| tui | core, core/ops, core/workflow/state |
+| tui | core, core/harness, core/ops, core/workflow/state |
 | webui | webui/htmx, webui/render, webui/ui |
 | webui/htmx | none |
 | webui/render | webui/htmx, webui/ui |
@@ -109,7 +110,7 @@ constraints, not permission to rename an ambiguous domain concept.
 ## Root production-file dispositions
 
 [The exact file ledger](code-quality-remediation-core-owners.csv) enumerates all
-774 current non-test files under internal/core, their declared symbols,
+777 current non-test files under internal/core, their declared symbols,
 existing signature owners, final responsibility and migration/retention task.
 It provides a finite per-file handoff, including exact declarations. Multiple owners
 on a workflow file require separating store-owned atomic operations from stage

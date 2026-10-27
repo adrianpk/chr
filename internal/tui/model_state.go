@@ -4,6 +4,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type projectState struct {
@@ -116,7 +117,7 @@ type workState struct {
 	observability           ObservabilityView
 	workReadiness           WorkReadinessView
 	agentWorkPriorityFilter string
-	agentWorkOrder          core.TicketLoopOrder
+	agentWorkOrder          workflowstate.TicketLoopOrder
 	workflow                WorkflowView
 	workflowPage            WorkflowPageView
 	workAction              WorkActionState

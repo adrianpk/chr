@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 	"forge.adrianpk.com/chr/internal/harness/pi"
@@ -20,7 +21,7 @@ func (s service) prepareWorkflowHarness(ctx context.Context, config core.Workspa
 		return core.WorkflowHarnessResolution{}, nil
 	}
 
-	resolved, err := s.resolveHarnessSelection(ctx, config, core.HarnessWorker, "")
+	resolved, err := s.resolveHarnessSelection(ctx, config, harnesscore.HarnessWorker, "")
 	if err != nil {
 		return core.WorkflowHarnessResolution{}, err
 	}
@@ -39,8 +40,8 @@ func (s service) prepareWorkflowHarness(ctx context.Context, config core.Workspa
 		return core.WorkflowHarnessResolution{}, workflowstate.ErrConflict
 	}
 
-	binding, err := core.SealHarnessBinding(core.HarnessBinding{
-		SchemaVersion: 1, Role: core.HarnessWorker, Harness: resolved.View.Harness, Source: resolved.View.Source,
+	binding, err := core.SealHarnessBinding(harnesscore.HarnessBinding{
+		SchemaVersion: 1, Role: harnesscore.HarnessWorker, Harness: resolved.View.Harness, Source: resolved.View.Source,
 		SelectionRevision: resolved.View.SelectionRevision, Profile: resolved.View.Profile, ProfileRevision: resolved.View.ProfileRevision,
 		ModelProvider: harnessWorkerProvider(resolved.View.ModelProvider), Model: resolved.View.Model, Thinking: resolved.View.Thinking,
 		ExecutableRef: executable, RuntimeRef: runtimeRef, ProtocolRevision: protocol, Capabilities: resolved.View.Capabilities,

@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const (
@@ -25,18 +26,18 @@ type WorkIntegrationConfig struct {
 // WorkflowNativePolicy contains current host-owned grants and certification.
 // Workers cannot supply it. Ownership names one full ref, never a prefix grant.
 type WorkflowNativePolicy struct {
-	Repository                    string             `json:"repository"`
-	SourceRef                     string             `json:"source_ref"`
-	TargetRef                     string             `json:"target_ref"`
-	OwnershipRevision             string             `json:"ownership_revision"`
-	SourceRewriteAuthorized       bool               `json:"source_rewrite_authorized"`
-	FastForwardTargetAuthorized   bool               `json:"fast_forward_target_authorized"`
-	HostCandidateReview           bool               `json:"host_candidate_review"`
-	ReviewMode                    ReviewWorkflowMode `json:"review_mode"`
-	CredentialIdentityFingerprint string             `json:"credential_identity_fingerprint"`
-	APIIdentityFingerprint        string             `json:"api_identity_fingerprint,omitempty"`
-	ObservationContract           string             `json:"observation_contract"`
-	CertifiedMethods              []string           `json:"certified_methods"`
+	Repository                    string                           `json:"repository"`
+	SourceRef                     string                           `json:"source_ref"`
+	TargetRef                     string                           `json:"target_ref"`
+	OwnershipRevision             string                           `json:"ownership_revision"`
+	SourceRewriteAuthorized       bool                             `json:"source_rewrite_authorized"`
+	FastForwardTargetAuthorized   bool                             `json:"fast_forward_target_authorized"`
+	HostCandidateReview           bool                             `json:"host_candidate_review"`
+	ReviewMode                    workflowstate.ReviewWorkflowMode `json:"review_mode"`
+	CredentialIdentityFingerprint string                           `json:"credential_identity_fingerprint"`
+	APIIdentityFingerprint        string                           `json:"api_identity_fingerprint,omitempty"`
+	ObservationContract           string                           `json:"observation_contract"`
+	CertifiedMethods              []string                         `json:"certified_methods"`
 }
 
 // WorkflowNativePolicyReader rechecks trusted ownership, credential roles and
@@ -88,7 +89,7 @@ func workflowNativePolicyReasons(request WorkflowNativeCapabilityRequest, policy
 		{policy.SourceRewriteAuthorized && publication.SourceRewriteAuthorized && policy.OwnershipRevision != "" && policy.OwnershipRevision == publication.OwnershipRevision, "source_rewrite_unauthorized", "Authorize rewriting the exact owned source ref."},
 		{policy.FastForwardTargetAuthorized, "target_push_unauthorized", "Provide an authorized fast-forward target publication role."},
 		{policy.HostCandidateReview, "native_approval_required", "Select a policy permitting host-bound review of the prepared result."},
-		{workflowConfigChoice(string(policy.ReviewMode), []string{string(ReviewWorkflowModeHumanReview), string(ReviewWorkflowModeAgenticReview), string(ReviewWorkflowModeTrustedAutoMerge)}), "review_policy_unknown", "Resolve the current candidate review policy."},
+		{workflowConfigChoice(string(policy.ReviewMode), []string{string(workflowstate.ReviewWorkflowModeHumanReview), string(workflowstate.ReviewWorkflowModeAgenticReview), string(workflowstate.ReviewWorkflowModeTrustedAutoMerge)}), "review_policy_unknown", "Resolve the current candidate review policy."},
 		{validWorkflowNativeFingerprint(policy.CredentialIdentityFingerprint), "credential_identity_unknown", "Resolve the current publisher credential identity without secrets."},
 		{slices.Contains(policy.CertifiedMethods, publication.Git.Method), "method_uncertified", "Certify the configured method for this observation profile."},
 	}

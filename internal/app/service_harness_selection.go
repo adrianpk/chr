@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 	"forge.adrianpk.com/chr/internal/harness/pi"
@@ -25,7 +26,7 @@ type resolvedHarnessSelection struct {
 
 // ResolveHarnessSelection observes one coherent persisted role selection.
 // Profile setup is explicit; inspection never installs or authenticates a driver.
-func (s service) ResolveHarnessSelection(ctx context.Context, role core.HarnessRole, action string) (core.HarnessSelection, error) {
+func (s service) ResolveHarnessSelection(ctx context.Context, role harnesscore.HarnessRole, action string) (core.HarnessSelection, error) {
 	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
 	if err != nil {
 		return core.HarnessSelection{}, err
@@ -36,7 +37,7 @@ func (s service) ResolveHarnessSelection(ctx context.Context, role core.HarnessR
 	return resolved.View, err
 }
 
-func (s service) resolveHarnessSelection(ctx context.Context, config core.WorkspaceConfig, role core.HarnessRole, action string) (resolvedHarnessSelection, error) {
+func (s service) resolveHarnessSelection(ctx context.Context, config core.WorkspaceConfig, role harnesscore.HarnessRole, action string) (resolvedHarnessSelection, error) {
 	if err := ctx.Err(); err != nil {
 		return resolvedHarnessSelection{}, err
 	}
@@ -62,7 +63,7 @@ func (s service) resolveHarnessSelection(ctx context.Context, config core.Worksp
 	return resolveConfiguredHarnessSelection(ctx, config, profiles, name, role, action, s.env.ConfigDir())
 }
 
-func resolveConfiguredHarnessSelection(ctx context.Context, config core.WorkspaceConfig, profiles map[string]core.HarnessProfile, name string, role core.HarnessRole, action, configDir string) (resolvedHarnessSelection, error) {
+func resolveConfiguredHarnessSelection(ctx context.Context, config core.WorkspaceConfig, profiles map[string]core.HarnessProfile, name string, role harnesscore.HarnessRole, action, configDir string) (resolvedHarnessSelection, error) {
 	if name == "" {
 		return legacyHarnessSelection(ctx, config, role, action)
 	}
@@ -82,7 +83,7 @@ func resolveConfiguredHarnessSelection(ctx context.Context, config core.Workspac
 	return resolved, nil
 }
 
-func prepareHarnessSelection(ctx context.Context, config core.WorkspaceConfig, profile core.HarnessProfile, role core.HarnessRole, action, configDir string) resolvedHarnessSelection {
+func prepareHarnessSelection(ctx context.Context, config core.WorkspaceConfig, profile core.HarnessProfile, role harnesscore.HarnessRole, action, configDir string) resolvedHarnessSelection {
 	model := profile.Model
 	if model == "" {
 		model = "cli_default"
@@ -113,12 +114,12 @@ func prepareHarnessSelection(ctx context.Context, config core.WorkspaceConfig, p
 	return resolvedHarnessSelection{View: view, Profile: profile, Executable: executable, RuntimeImage: runtimeImage}
 }
 
-func harnessProfileReadiness(ctx context.Context, profile core.HarnessProfile, role core.HarnessRole, configDir string) core.HarnessReadiness {
+func harnessProfileReadiness(ctx context.Context, profile core.HarnessProfile, role harnesscore.HarnessRole, configDir string) core.HarnessReadiness {
 	r := core.HarnessReadiness{
 		Executable: "available", Credentials: "cli_managed", Runtime: "native",
 		Supported: profile.Harness == codex.Identity, RemoteAuthentication: "not_tested",
 	}
-	if role == core.HarnessGeneration {
+	if role == harnesscore.HarnessGeneration {
 		r.Runtime = "not_required"
 	} else if profile.RuntimeRef != "" {
 		r.Runtime = "unavailable"
@@ -144,7 +145,7 @@ func harnessProfileReadiness(ctx context.Context, profile core.HarnessProfile, r
 	return r
 }
 
-func piProfileReadiness(ctx context.Context, profile core.HarnessProfile, role core.HarnessRole, configDir string) (core.HarnessReadiness, string) {
+func piProfileReadiness(ctx context.Context, profile core.HarnessProfile, role harnesscore.HarnessRole, configDir string) (core.HarnessReadiness, string) {
 	r := core.HarnessReadiness{Executable: "available", Credentials: "missing", Runtime: "not_required", Supported: true, RemoteAuthentication: "not_tested"}
 	if err := pi.ValidateGenerationProfile(profile.ModelProvider, profile.Model, profile.Thinking); err != nil {
 		r.Supported, r.Problem = false, err.Error()
@@ -152,7 +153,7 @@ func piProfileReadiness(ctx context.Context, profile core.HarnessProfile, role c
 		return r, ""
 	}
 
-	if role == core.HarnessWorker {
+	if role == harnesscore.HarnessWorker {
 		return piWorkerReadiness(ctx, profile, configDir, r)
 	}
 
@@ -225,7 +226,7 @@ func privateHarnessReference(configDir, reference string) bool {
 	return err == nil && info.Mode().IsRegular() && info.Mode().Perm()&0o077 == 0
 }
 
-func legacyHarnessSelection(ctx context.Context, config core.WorkspaceConfig, role core.HarnessRole, action string) (resolvedHarnessSelection, error) {
+func legacyHarnessSelection(ctx context.Context, config core.WorkspaceConfig, role harnesscore.HarnessRole, action string) (resolvedHarnessSelection, error) {
 	backend, err := legacyHarnessBackend(role, action)
 
 	view := core.HarnessSelection{
@@ -244,13 +245,13 @@ func legacyHarnessSelection(ctx context.Context, config core.WorkspaceConfig, ro
 	}
 
 	profile := core.HarnessProfile{Harness: codex.Identity, Command: strings.TrimSpace(os.Getenv("CHR_CODEX_COMMAND")), Model: strings.TrimSpace(os.Getenv("CHR_CODEX_MODEL"))}
-	if profile.Command == "" || action == "contextual_quiz" || role == core.HarnessWorker {
+	if profile.Command == "" || action == "contextual_quiz" || role == harnesscore.HarnessWorker {
 		profile.Command = codex.Program
 	}
 
 	// Historical worker argv did not pass CHR_CODEX_MODEL. Preserve CLI-default
 	// provenance rather than advertising that generation-only setting as frozen.
-	if role == core.HarnessWorker {
+	if role == harnesscore.HarnessWorker {
 		profile.Model = ""
 	}
 
@@ -261,8 +262,8 @@ func legacyHarnessSelection(ctx context.Context, config core.WorkspaceConfig, ro
 	return resolved, nil
 }
 
-func legacyHarnessBackend(role core.HarnessRole, action string) (string, error) {
-	if role == core.HarnessWorker || action == "contextual_quiz" || action == "agentic_review" {
+func legacyHarnessBackend(role harnesscore.HarnessRole, action string) (string, error) {
+	if role == harnesscore.HarnessWorker || action == "contextual_quiz" || action == "agentic_review" {
 		return codex.Identity, nil
 	}
 

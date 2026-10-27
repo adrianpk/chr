@@ -12,27 +12,27 @@ import (
 // WorkflowUnitDelivery retains a delivered unit before its active bindings move.
 // EvidenceRef binds the exact frontier, target and receipt to an immutable image.
 type WorkflowUnitDelivery struct {
-	Schema            string                      `json:"schema"`
-	InvocationID      string                      `json:"invocation_id"`
-	Unit              workflowstate.Ref           `json:"unit"`
-	SetID             string                      `json:"set_id,omitempty"`
-	Cursor            int                         `json:"cursor"`
-	Target            WorkflowPreviewTarget       `json:"target"`
-	NextTarget        WorkflowPreviewTarget       `json:"next_target"`
-	Lane              WorkflowLane                `json:"lane"`
-	CandidateRef      string                      `json:"candidate_ref"`
-	CandidateHash     string                      `json:"candidate_hash"`
-	PullRequest       *WorkflowPullRequestBinding `json:"pull_request_binding"`
-	DeliveryProofRef  string                      `json:"delivery_proof_ref"`
-	DeliveryProofHash string                      `json:"delivery_proof_hash"`
-	DeliveryRef       string                      `json:"delivery_ref"`
-	DeliveryHash      string                      `json:"delivery_hash"`
-	Preparation       *WorkflowPreparationBinding `json:"preparation_binding,omitempty"`
-	Review            *WorkflowReviewBinding      `json:"review_binding,omitempty"`
-	Submission        *WorkflowSubmissionBinding  `json:"submission_binding,omitempty"`
-	Proof             WorkflowIntegrationProof    `json:"proof"`
-	EvidenceRef       string                      `json:"evidence_ref,omitempty"`
-	EvidenceHash      string                      `json:"evidence_hash,omitempty"`
+	Schema            string                              `json:"schema"`
+	InvocationID      string                              `json:"invocation_id"`
+	Unit              workflowstate.Ref                   `json:"unit"`
+	SetID             string                              `json:"set_id,omitempty"`
+	Cursor            int                                 `json:"cursor"`
+	Target            workflowstate.WorkflowPreviewTarget `json:"target"`
+	NextTarget        workflowstate.WorkflowPreviewTarget `json:"next_target"`
+	Lane              WorkflowLane                        `json:"lane"`
+	CandidateRef      string                              `json:"candidate_ref"`
+	CandidateHash     string                              `json:"candidate_hash"`
+	PullRequest       *WorkflowPullRequestBinding         `json:"pull_request_binding"`
+	DeliveryProofRef  string                              `json:"delivery_proof_ref"`
+	DeliveryProofHash string                              `json:"delivery_proof_hash"`
+	DeliveryRef       string                              `json:"delivery_ref"`
+	DeliveryHash      string                              `json:"delivery_hash"`
+	Preparation       *WorkflowPreparationBinding         `json:"preparation_binding,omitempty"`
+	Review            *WorkflowReviewBinding              `json:"review_binding,omitempty"`
+	Submission        *WorkflowSubmissionBinding          `json:"submission_binding,omitempty"`
+	Proof             WorkflowIntegrationProof            `json:"proof"`
+	EvidenceRef       string                              `json:"evidence_ref,omitempty"`
+	EvidenceHash      string                              `json:"evidence_hash,omitempty"`
 }
 
 // WorkflowFrontierPorts supplies trusted canonical observation and target hydration.
@@ -43,7 +43,7 @@ type WorkflowFrontierPorts struct {
 }
 
 // ExecutionSelection preserves admission identity while refreshing execution base.
-func (run WorkflowInvocation) ExecutionSelection() WorkflowPreviewRequest {
+func (run WorkflowInvocation) ExecutionSelection() workflowstate.WorkflowPreviewRequest {
 	selection := run.Selection
 	if run.ExecutionTarget != nil {
 		selection.Target = *run.ExecutionTarget

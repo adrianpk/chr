@@ -10,18 +10,7 @@ import (
 // or a guarded retained activation. Original admission replay bypasses the check.
 type WorkflowAdmissionCheck func(context.Context) error
 
-// WorkflowAdmissionGuard retains exactly what a caller displayed before admission.
-// It is part of the request identity; replay observes the original invocation.
-type WorkflowAdmissionGuard struct {
-	Guided          *GuidedWorkflowAdmission `json:"guided,omitempty"`
-	ReadyTicket     *WorkflowTicketAdmission `json:"ready_ticket,omitempty"`
-	ExecutionPolicy WorkflowExecutionPolicy  `json:"execution_policy"`
-	SnapshotHash    string                   `json:"snapshot_hash"`
-	Selected        *WorkflowSelectionGuard  `json:"selected,omitempty"`
-	Policy          WorkflowReviewPolicy     `json:"publication_policy"`
-}
-
-func validateWorkflowAdmissionGuard(guard *WorkflowAdmissionGuard, selection WorkflowPreviewRequest) error {
+func validateWorkflowAdmissionGuard(guard *workflowstate.WorkflowAdmissionGuard, selection workflowstate.WorkflowPreviewRequest) error {
 	if guard == nil {
 		return nil
 	}
@@ -41,7 +30,7 @@ func validateWorkflowAdmissionGuard(guard *WorkflowAdmissionGuard, selection Wor
 	return validateWorkflowAdmissionPolicy(guard)
 }
 
-func validateWorkflowAdmissionPolicy(guard *WorkflowAdmissionGuard) error {
+func validateWorkflowAdmissionPolicy(guard *workflowstate.WorkflowAdmissionGuard) error {
 	if !validWorkflowExecutionPolicy(guard.ExecutionPolicy) || guard.ExecutionPolicy.ConfigRevision != guard.Policy.Revision {
 		return workflowstate.ErrConflict
 	}

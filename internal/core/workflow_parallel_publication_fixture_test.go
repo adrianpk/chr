@@ -139,7 +139,7 @@ func workflowParallelPublicationTargetSource(t *testing.T, store *WorkflowStore,
 		t.Fatal(err)
 	}
 
-	workflowTicketReviewConfig(t, store, "rebase", ReviewWorkflowModeTrustedAutoMerge)
+	workflowTicketReviewConfig(t, store, "rebase", workflowstate.ReviewWorkflowModeTrustedAutoMerge)
 	workflowIntegrationCommand(t, store.layout.ProjectDir(), "push", remote, candidate.Result.Commit+":"+candidate.Lane.Branch)
 
 	pr := WorkflowPullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/" + strconv.Itoa(number), Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: target, HeadCommit: candidate.Result.Commit, BaseCommit: request.Selection.Target.Commit, State: "open"}

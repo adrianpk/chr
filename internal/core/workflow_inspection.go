@@ -14,7 +14,7 @@ import (
 type WorkflowInspection struct {
 	Integration *WorkflowIntegrationInspection
 	Invocation  WorkflowInvocation
-	Policy      WorkflowReviewPolicy
+	Policy      workflowstate.WorkflowReviewPolicy
 	Tasks       []WorkflowRecord
 }
 
@@ -52,7 +52,7 @@ func (s *WorkflowStore) InspectWorkflow(ctx context.Context, id string) (result 
 }
 
 // InspectWorkflowPolicy reports current publication policy without changing state.
-func (s *WorkflowStore) InspectWorkflowPolicy(ctx context.Context) (policy WorkflowReviewPolicy, err error) {
+func (s *WorkflowStore) InspectWorkflowPolicy(ctx context.Context) (policy workflowstate.WorkflowReviewPolicy, err error) {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 

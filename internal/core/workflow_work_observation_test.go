@@ -31,7 +31,7 @@ func TestWorkflowWorkObservation(t *testing.T) {
 	var group sync.WaitGroup
 	for range 4 {
 		group.Go(func() {
-			observed, err := store.InspectWorkflowWork(t.Context(), WorkflowPreviewTarget{})
+			observed, err := store.InspectWorkflowWork(t.Context(), workflowstate.WorkflowPreviewTarget{})
 			if err != nil || observed.Excluded["slice_owned"] != 0 || !reflect.DeepEqual(observed.Queue, expected.Members) {
 				t.Errorf("observation differs from shared selection: %v", err)
 			}
@@ -57,7 +57,7 @@ func TestWorkflowWorkPending(t *testing.T) {
 	}
 
 	before := nativeQueueImages(t, store.layout.ProjectDir())
-	if _, err := store.InspectWorkflowWork(t.Context(), WorkflowPreviewTarget{}); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := store.InspectWorkflowWork(t.Context(), workflowstate.WorkflowPreviewTarget{}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal(err)
 	}
 

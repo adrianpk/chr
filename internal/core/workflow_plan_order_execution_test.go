@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Worker input contains the current canonical order document. Missing required
@@ -14,7 +15,7 @@ import (
 func TestWorkflowPlanOrderContext(t *testing.T) {
 	store, hierarchy, status := workflowOrderFixture(t)
 	commit, _ := workflowSelectionCommit(t, store)
-	run := workflowTestStart(t, store, WorkflowStartRequest{RequestKey: "ordered-context", Selection: WorkflowPreviewRequest{Selector: workflowClaimSelector(hierarchy, "ticket"), Target: WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}})
+	run := workflowTestStart(t, store, WorkflowStartRequest{RequestKey: "ordered-context", Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowClaimSelector(hierarchy, "ticket"), Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}})
 	claim := workflowTestClaim(t, store, run.Invocation.ID)
 
 	path := filepath.Join(store.layout.Root(), status.PlanRevision.TrackerRef)

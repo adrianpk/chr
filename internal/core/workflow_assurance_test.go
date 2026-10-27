@@ -45,7 +45,7 @@ func TestWorkflowAssuranceOrdered(t *testing.T) {
 
 	target, _ := workflowSelectionCommit(t, store)
 	ports, provider := workflowAssurancePorts(t, store, target)
-	request := WorkflowStartRequest{RequestKey: "composed-ordered", Policy: WorkflowExecutionPolicy{CheckpointStepLimit: 1}, Selection: WorkflowPreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice_set"), Target: WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
+	request := WorkflowStartRequest{RequestKey: "composed-ordered", Policy: workflowstate.WorkflowExecutionPolicy{CheckpointStepLimit: 1}, Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice_set"), Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
 	run := workflowTestStart(t, store, request).Invocation
 	completed := workflowAssuranceRun(t, store, run.ID, ports)
 	checkWorkflowAssuranceDelivery(t, store, completed, provider, []string{"PRJ-1", "PRJ-2", "PRJ-3", "PRJ-4", "PRJ-5", "PRJ-6"}, 2)
@@ -189,7 +189,7 @@ func workflowAssuranceLooseFixture(t *testing.T) (*WorkflowStore, WorkflowStartR
 	workflowLooseCreate(t, store, first, "PRJ-91", "high", nil)
 	workflowLooseCreate(t, store, first, "PRJ-92", "normal", []workflowstate.Ref{{Kind: "ticket", ID: first.Task.Key}})
 
-	request.Selection.Order = TicketLoopOrderPriority
+	request.Selection.Order = workflowstate.TicketLoopOrderPriority
 	request.Policy.CheckpointStepLimit = 1
 	request.Selection.Target.Commit, _ = workflowSelectionCommit(t, store)
 	ports, provider := workflowAssurancePorts(t, store, request.Selection.Target.Commit)

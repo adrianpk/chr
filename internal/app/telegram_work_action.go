@@ -58,7 +58,7 @@ func telegramRetainedWorkPreview(request telegramcore.OperationRequest) (Workflo
 		return preview, err
 	}
 
-	var selector core.WorkflowSelector
+	var selector workflowstate.WorkflowSelector
 	if err := decodeOperationJSON(string(request.Arguments), &selector); err != nil {
 		return preview, err
 	}
@@ -101,7 +101,7 @@ func telegramWorkPreviewText(preview WorkflowBoundPreview) string {
 type telegramWorkAdmissionResult struct {
 	Invocation telegramcore.InvocationBinding `json:"invocation"`
 	RequestKey string                         `json:"request_key"`
-	Selector   core.WorkflowSelector          `json:"selector"`
+	Selector   workflowstate.WorkflowSelector `json:"selector"`
 	Status     string                         `json:"status"`
 	Members    int                            `json:"members"`
 }

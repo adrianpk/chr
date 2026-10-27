@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
@@ -133,7 +134,7 @@ func (s service) inspectGuidedReadiness(ctx context.Context, result *GuidedUseCa
 		result.Problems = append(result.Problems, err.Error())
 	}
 
-	for _, role := range []core.HarnessRole{core.HarnessGeneration, core.HarnessWorker} {
+	for _, role := range []harnesscore.HarnessRole{harnesscore.HarnessGeneration, harnesscore.HarnessWorker} {
 		selection, err := s.ResolveHarnessSelection(ctx, role, string(quizmodel.ActionNextQuestion))
 		if err != nil {
 			result.Problems = append(result.Problems, string(role)+" setup: "+err.Error())

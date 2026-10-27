@@ -6,6 +6,7 @@ import (
 	"maps"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -45,24 +46,24 @@ type WorkflowWorkStatus struct {
 
 // WorkflowWorkBindings groups the retained bindings fields without changing their wire order.
 type WorkflowWorkBindings struct {
-	HarnessBinding *core.HarnessBinding         `json:"harness_binding,omitempty"`
+	HarnessBinding *harnesscore.HarnessBinding  `json:"harness_binding,omitempty"`
 	ControlReceipt *workflowstate.ControlResult `json:"control_receipt,omitempty"`
 }
 
 // WorkflowWorkLifecycle groups the retained lifecycle fields without changing their wire order.
 type WorkflowWorkLifecycle struct {
-	FrozenPolicy         core.WorkflowExecutionPolicy         `json:"execution_policy"`
-	Continuation         *core.WorkflowContinuationCheckpoint `json:"continuation,omitempty"`
-	NextActionOwner      string                               `json:"next_action_owner"`
-	CapacityResumeStatus string                               `json:"capacity_resume_status,omitempty"`
-	SelectedTicket       string                               `json:"selected_ticket,omitempty"`
-	SelectedSlice        string                               `json:"selected_slice,omitempty"`
+	FrozenPolicy         workflowstate.WorkflowExecutionPolicy `json:"execution_policy"`
+	Continuation         *core.WorkflowContinuationCheckpoint  `json:"continuation,omitempty"`
+	NextActionOwner      string                                `json:"next_action_owner"`
+	CapacityResumeStatus string                                `json:"capacity_resume_status,omitempty"`
+	SelectedTicket       string                                `json:"selected_ticket,omitempty"`
+	SelectedSlice        string                                `json:"selected_slice,omitempty"`
 }
 
 // WorkflowWorkSelection groups the retained selection fields without changing their wire order.
 type WorkflowWorkSelection struct {
-	Selector  core.WorkflowSelector `json:"selector"`
-	Authority string                `json:"authority"`
+	Selector  workflowstate.WorkflowSelector `json:"selector"`
+	Authority string                         `json:"authority"`
 }
 
 // WorkflowWorkOutcome groups the retained outcome fields without changing their wire order.
@@ -73,10 +74,10 @@ type WorkflowWorkOutcome struct {
 
 // WorkflowWorkScope groups the retained scope fields without changing their wire order.
 type WorkflowWorkScope struct {
-	Target       core.WorkflowPreviewTarget `json:"target"`
-	Policy       core.WorkflowReviewPolicy  `json:"publication_policy"`
-	SetOrderRule string                     `json:"set_order_rule"`
-	Excluded     map[string]int             `json:"excluded"`
+	Target       workflowstate.WorkflowPreviewTarget `json:"target"`
+	Policy       workflowstate.WorkflowReviewPolicy  `json:"publication_policy"`
+	SetOrderRule string                              `json:"set_order_rule"`
+	Excluded     map[string]int                      `json:"excluded"`
 }
 
 // WorkflowWorkCounts groups the retained counts fields without changing their wire order.

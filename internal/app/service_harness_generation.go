@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
@@ -65,7 +66,7 @@ func (s service) prepareGenerationBinding(ctx context.Context, config core.Works
 		return prepareLegacyAPIGeneration(config, purpose, model)
 	}
 
-	resolved, err := s.resolveHarnessSelection(ctx, config, core.HarnessGeneration, purpose)
+	resolved, err := s.resolveHarnessSelection(ctx, config, harnesscore.HarnessGeneration, purpose)
 	if err != nil {
 		return core.HarnessGenerationBinding{}, core.HarnessGenerationLaunch{}, err
 	}
@@ -113,7 +114,7 @@ func (s service) legacyConversationModel(config core.WorkspaceConfig, purpose st
 
 func prepareLegacyAPIGeneration(config core.WorkspaceConfig, purpose, model string) (core.HarnessGenerationBinding, core.HarnessGenerationLaunch, error) {
 	selection := core.HarnessSelection{
-		Role: core.HarnessGeneration, Action: purpose, Backend: "openai", Source: "legacy", ModelProvider: "openai", Model: model,
+		Role: harnesscore.HarnessGeneration, Action: purpose, Backend: "openai", Source: "legacy", ModelProvider: "openai", Model: model,
 		SelectionRevision: config.Revision(), ProfileRevision: core.HarnessProfileRevision(core.HarnessProfile{ModelProvider: "openai", Model: model}),
 		Readiness: core.HarnessReadiness{Supported: true, Executable: "not_required", Credentials: "api_managed", Runtime: "not_required"},
 	}

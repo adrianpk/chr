@@ -41,7 +41,7 @@ func telegramJourneyAdmissionFixture(t *testing.T) (*WorkflowStore, WorkflowReco
 	}
 
 	request.Selection.SnapshotHash = preview.SnapshotHash
-	request.Admission = &WorkflowAdmissionGuard{SnapshotHash: preview.SnapshotHash, Selected: &WorkflowSelectionGuard{Key: record.Task.Key, Revision: record.Revision}, Policy: policy, ExecutionPolicy: execution, ReadyTicket: ticket}
+	request.Admission = &workflowstate.WorkflowAdmissionGuard{SnapshotHash: preview.SnapshotHash, Selected: &workflowstate.WorkflowSelectionGuard{Key: record.Task.Key, Revision: record.Revision}, Policy: policy, ExecutionPolicy: execution, ReadyTicket: ticket}
 
 	return store, record, request
 }
@@ -141,7 +141,7 @@ func telegramJourneyChangeAdmission(t *testing.T, store *WorkflowStore, record W
 	case "validation":
 		request.Admission.ReadyTicket.Validation.Commands = [][]string{{"true"}}
 	case "selector":
-		request.Selection.Selector = WorkflowSelector{Extent: "loose"}
+		request.Selection.Selector = workflowstate.WorkflowSelector{Extent: "loose"}
 	case "selected":
 		request.Admission.Selected = nil
 	}
