@@ -32,6 +32,10 @@ func (s service) newDocumentGenerationModelRequest(state quizcore.RuntimeState, 
 		return quizmodel.Request{}, err
 	}
 
+	return s.documentGenerationModelRequest(scope, state, payload, sections, operation), nil
+}
+
+func (s service) documentGenerationModelRequest(scope quizcore.Scope, state quizcore.RuntimeState, payload quizmodel.Payload, sections []quizmodel.ContextSection, operation documentModelOperation) quizmodel.Request {
 	return quizmodel.Request{
 		ID:              core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("%s-%s", operation.requestIDPrefix, specScopeID(scope))),
 		Action:          operation.action,
@@ -43,5 +47,5 @@ func (s service) newDocumentGenerationModelRequest(state quizcore.RuntimeState, 
 		ContextSections: sections,
 		OutputContract:  quizmodel.OutputContract{RequiredFields: payload.OutputContract.RequiredFields},
 		CreatedAt:       s.utcNow(),
-	}, nil
+	}
 }

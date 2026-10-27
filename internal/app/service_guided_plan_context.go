@@ -92,7 +92,7 @@ func (s service) guidedContractsRequest(session core.AuthoringSession, input gen
 		return quizmodel.Request{}, err
 	}
 
-	request, err := s.newPlanningModelRequest(state, sources, quizmodel.ActionMaterializePlanTracking, quizmodel.StrategyPlanDelivery, "guided-contracts")
+	request, err := s.newPlanningModelRequest(state, sources, documentModelOperation{action: quizmodel.ActionMaterializePlanTracking, strategy: quizmodel.StrategyPlanDelivery, requestIDPrefix: "guided-contracts"})
 	if err != nil {
 		return request, err
 	}

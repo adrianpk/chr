@@ -252,45 +252,23 @@ func relativeProjectPath(projectDir, path string) string {
 }
 
 func (s service) newPlanTrackingModelRequest(state quizcore.RuntimeState, plan PlanView) (quizmodel.Request, error) {
-	scope := quizcore.Scope{
-		ProjectID: state.ProjectID,
-		CaseSlug:  state.CaseSlug,
-	}
+	return s.newDocumentGenerationModelRequest(state, documentModelOperation{
+		action:          quizmodel.ActionMaterializePlanTracking,
+		strategy:        "plan_tracking_materialization",
+		requestIDPrefix: "plan-tracking",
+	}, func(sections []quizmodel.ContextSection, scope quizcore.Scope) ([]quizmodel.ContextSection, error) {
+		sections = append(sections, quizmodel.ContextSection{
+			Name:      "implementation_plan",
+			Layer:     "plan",
+			Authority: plan.RelativePath,
+			Content:   plan.Content,
+			Metadata: map[string]string{
+				"case_slug": scope.CaseSlug,
+				"title":     plan.Title,
+				"status":    plan.Status,
+			},
+		})
 
-	payload, err := s.newQuizModelPayload(scope, state, quizmodel.ActionMaterializePlanTracking)
-	if err != nil {
-		return quizmodel.Request{}, err
-	}
-
-	sections, err := quizmodel.ContextSectionsForPayload(payload)
-	if err != nil {
-		return quizmodel.Request{}, err
-	}
-
-	sections = append(sections, quizmodel.ContextSection{
-		Name:      "implementation_plan",
-		Layer:     "plan",
-		Authority: plan.RelativePath,
-		Content:   plan.Content,
-		Metadata: map[string]string{
-			"case_slug": scope.CaseSlug,
-			"title":     plan.Title,
-			"status":    plan.Status,
-		},
+		return sections, nil
 	})
-
-	return quizmodel.Request{
-		ID:              core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("plan-tracking-%s", specScopeID(scope))),
-		Action:          quizmodel.ActionMaterializePlanTracking,
-		Strategy:        "plan_tracking_materialization",
-		Scope:           scope,
-		Mode:            state.Mode,
-		RuntimeState:    state,
-		Payload:         payload,
-		ContextSections: sections,
-		OutputContract: quizmodel.OutputContract{
-			RequiredFields: payload.OutputContract.RequiredFields,
-		},
-		CreatedAt: s.utcNow(),
-	}, nil
 }

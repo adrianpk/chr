@@ -14,18 +14,14 @@ import (
 func (s service) newPlanOutlineGenerationModelRequest(state quizcore.RuntimeState, sources core.PlanSourceObservation) (quizmodel.Request, error) {
 	return s.newPlanningModelRequest(
 		state, sources,
-		quizmodel.ActionGeneratePlanOutline,
-		"plan_outline_generation",
-		"plan-outline-generation",
+		documentModelOperation{action: quizmodel.ActionGeneratePlanOutline, strategy: "plan_outline_generation", requestIDPrefix: "plan-outline-generation"},
 	)
 }
 
 func (s service) newPlanGenerationModelRequest(state quizcore.RuntimeState, sources core.PlanSourceObservation) (quizmodel.Request, error) {
 	return s.newPlanningModelRequest(
 		state, sources,
-		quizmodel.ActionGeneratePlan,
-		"plan_generation",
-		"plan-generation",
+		documentModelOperation{action: quizmodel.ActionGeneratePlan, strategy: "plan_generation", requestIDPrefix: "plan-generation"},
 	)
 }
 
@@ -39,7 +35,7 @@ func (s service) newPlanSliceDetailGenerationModelRequest(state quizcore.Runtime
 		return quizmodel.Request{}, fmt.Errorf("plan outline slice is unknown: %s", targetSliceID)
 	}
 
-	request, err := s.newPlanningModelRequest(state, sources, quizmodel.ActionGeneratePlanSliceDetail, "plan_slice_detail_generation", "plan-slice-detail-generation")
+	request, err := s.newPlanningModelRequest(state, sources, documentModelOperation{action: quizmodel.ActionGeneratePlanSliceDetail, strategy: "plan_slice_detail_generation", requestIDPrefix: "plan-slice-detail-generation"})
 	if err != nil {
 		return request, err
 	}
@@ -50,12 +46,12 @@ func (s service) newPlanSliceDetailGenerationModelRequest(state quizcore.Runtime
 	return request, err
 }
 
-func (s service) newPlanningModelRequest(state quizcore.RuntimeState, sources core.PlanSourceObservation, action quizmodel.Action, strategy, idPrefix string) (quizmodel.Request, error) {
+func (s service) newPlanningModelRequest(state quizcore.RuntimeState, sources core.PlanSourceObservation, operation documentModelOperation) (quizmodel.Request, error) {
 	scope := sources.Scope
 	payload := quizmodel.Payload{
 		Project: quizmodel.ProjectPayload{ID: scope.ProjectID, Name: sources.Project.Name, Description: sources.Project.Description},
 		Quiz:    quizModelQuizPayload(state), RecentEntries: quizModelRecentEntryPayloads(sources.Quiz.Entries, 5),
-		CurrentQuestion: quizModelCurrentQuestionPayload(state, sources.Quiz.Entries), OutputContract: quizmodel.NewOutputContract(action, state.Mode),
+		CurrentQuestion: quizModelCurrentQuestionPayload(state, sources.Quiz.Entries), OutputContract: quizmodel.NewOutputContract(operation.action, state.Mode),
 	}
 
 	sections, err := quizmodel.ContextSectionsForPayload(payload)
@@ -67,10 +63,7 @@ func (s service) newPlanningModelRequest(state quizcore.RuntimeState, sources co
 		sections = append(sections, quizmodel.ContextSection{Name: input.Kind, Layer: input.Kind, Authority: input.Reference, Content: input.Content, Metadata: map[string]string{"source_revision": input.Revision, "source_observation_hash": sources.Hash}})
 	}
 
-	return quizmodel.Request{
-		ID: core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("%s-%s", idPrefix, specScopeID(scope))), Action: action, Strategy: strategy, Scope: scope, Mode: state.Mode, RuntimeState: state, Payload: payload, ContextSections: sections,
-		OutputContract: quizmodel.OutputContract{RequiredFields: payload.OutputContract.RequiredFields}, CreatedAt: s.utcNow(),
-	}, nil
+	return s.documentGenerationModelRequest(scope, state, payload, sections, operation), nil
 }
 
 func appendPlanSliceDetailContextSections(sections []quizmodel.ContextSection, outline generationcore.GeneratedPlanOutline, targetSlice generationcore.GeneratedPlanOutlineSlice) ([]quizmodel.ContextSection, error) {
