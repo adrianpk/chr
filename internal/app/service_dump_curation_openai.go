@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 const (
@@ -258,7 +259,7 @@ func (p openAIDumpCurationProvider) openAIInput(request DumpCurationRequest) dum
 func (p openAIDumpCurationProvider) projectPayload(request DumpCurationRequest) dumpCurationOpenAIProject {
 	project := dumpCurationOpenAIProject{ID: request.ProjectID}
 
-	metadata, err := core.NewProjectMetadataService(request.ProjectDir).Load()
+	metadata, err := authoringcore.NewProjectMetadataService(request.ProjectDir).Load()
 	if err != nil {
 		return project
 	}
@@ -279,7 +280,7 @@ func (p openAIDumpCurationProvider) contextSections(
 		request.ProjectDir,
 		"project_document",
 		"project",
-		core.ProjectMetadataPath(""),
+		authoringcore.ProjectMetadataPath(""),
 	)
 
 	if strings.TrimSpace(request.Scope.CaseSlug) != "" {
@@ -288,7 +289,7 @@ func (p openAIDumpCurationProvider) contextSections(
 			request.ProjectDir,
 			"use_case_document",
 			"use_case",
-			core.CaseMetadataPath("", request.Scope.CaseSlug),
+			authoringcore.CaseMetadataPath("", request.Scope.CaseSlug),
 		)
 	}
 

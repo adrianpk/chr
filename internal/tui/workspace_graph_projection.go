@@ -4,22 +4,23 @@ import (
 	"sort"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
-func casesFromWorkspaceGraph(graph core.WorkspaceGraph, fallback []core.CaseMetadata) []core.CaseMetadata {
+func casesFromWorkspaceGraph(graph core.WorkspaceGraph, fallback []authoringcore.CaseMetadata) []authoringcore.CaseMetadata {
 	if len(graph.Cases) == 0 {
-		return append([]core.CaseMetadata(nil), fallback...)
+		return append([]authoringcore.CaseMetadata(nil), fallback...)
 	}
 
-	fallbackBySlug := make(map[string]core.CaseMetadata, len(fallback))
+	fallbackBySlug := make(map[string]authoringcore.CaseMetadata, len(fallback))
 	for _, metadata := range fallback {
 		fallbackBySlug[metadata.Slug] = metadata
 	}
 
-	cases := make([]core.CaseMetadata, 0, len(graph.Cases))
+	cases := make([]authoringcore.CaseMetadata, 0, len(graph.Cases))
 	for _, node := range graph.Cases {
 		metadata := fallbackBySlug[node.Slug]
-		metadata.SchemaVersion = core.CaseMetadataSchemaVersion
+		metadata.SchemaVersion = authoringcore.CaseMetadataSchemaVersion
 		metadata.Slug = node.Slug
 		metadata.Name = node.Name
 		metadata.Description = node.Description
@@ -35,22 +36,22 @@ func casesFromWorkspaceGraph(graph core.WorkspaceGraph, fallback []core.CaseMeta
 func casesFromWorkspaceIndex(
 	index core.WorkspaceIndex,
 	graph core.WorkspaceGraph,
-	fallback []core.CaseMetadata,
-) []core.CaseMetadata {
+	fallback []authoringcore.CaseMetadata,
+) []authoringcore.CaseMetadata {
 	suggestions := index.ListCases()
 	if len(suggestions) == 0 {
 		return casesFromWorkspaceGraph(graph, fallback)
 	}
 
-	fallbackBySlug := make(map[string]core.CaseMetadata, len(fallback))
+	fallbackBySlug := make(map[string]authoringcore.CaseMetadata, len(fallback))
 	for _, metadata := range fallback {
 		fallbackBySlug[metadata.Slug] = metadata
 	}
 
-	cases := make([]core.CaseMetadata, 0, len(suggestions))
+	cases := make([]authoringcore.CaseMetadata, 0, len(suggestions))
 	for _, suggestion := range suggestions {
 		metadata := fallbackBySlug[suggestion.Slug]
-		metadata.SchemaVersion = core.CaseMetadataSchemaVersion
+		metadata.SchemaVersion = authoringcore.CaseMetadataSchemaVersion
 		metadata.Slug = suggestion.Slug
 		metadata.Name = suggestion.Name
 		metadata.Description = suggestion.Description

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func telegramGuidedPrompt(observed GuidedUseCaseInspection) string {
@@ -22,7 +22,7 @@ func telegramGuidedPrompt(observed GuidedUseCaseInspection) string {
 		text += "\n" + state.Blocker
 	}
 
-	if core.GuidedDispatchAllowed(*session) {
+	if authoringcore.GuidedDispatchAllowed(*session) {
 		text += telegramGuidedInputPrompt(observed)
 	} else {
 		text += "\n\nSaved inputs and work limits are retained."

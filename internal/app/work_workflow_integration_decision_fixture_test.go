@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -153,7 +154,7 @@ func serviceIntegrationDecisionGate(t *testing.T, operations service, sliceID st
 	descriptor := serviceIntegrationSliceDescriptor(t, snapshot, sliceID)
 
 	data, err := os.ReadFile(filepath.Join(layout.Root(), descriptor.ContractRef))
-	if err != nil || core.WorkflowContentHash(data) != descriptor.ContractHash {
+	if err != nil || authoringcore.WorkflowContentHash(data) != descriptor.ContractHash {
 		t.Fatal("retained slice contract changed", err)
 	}
 

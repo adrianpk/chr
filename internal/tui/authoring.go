@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
@@ -31,7 +30,7 @@ func NewAuthoringSessionViews(sessions []authoringcore.Session) []AuthoringSessi
 	views := make([]AuthoringSessionView, 0, len(sessions))
 
 	for index, session := range sessions {
-		paths := core.AuthoringSessionLayout("", session.ID)
+		paths := authoringcore.AuthoringSessionLayout("", session.ID)
 		views = append(views, AuthoringSessionView{
 			Index:          index,
 			ID:             session.ID,

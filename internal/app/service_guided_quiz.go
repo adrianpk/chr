@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
@@ -36,7 +35,7 @@ func (s service) ConductGuidedQuiz(ctx context.Context, command authoringcore.Gu
 
 	command.GuidedUseCaseScope = scope
 
-	return core.ApplyGuidedUseCaseStep(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *authoringcore.Session) error {
+	return authoringcore.ApplyGuidedUseCaseStep(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *authoringcore.Session) error {
 		bounded := s
 		bounded.ctx = ctx
 		bounded.guidedContext = &guidedGenerationContext{session: *session}
@@ -55,7 +54,7 @@ func (s service) conductGuidedQuiz(ctx context.Context, session *authoringcore.S
 		return err
 	}
 
-	digest, err := core.GuidedCheckpointDigest(checkpoint)
+	digest, err := authoringcore.GuidedCheckpointDigest(checkpoint)
 	if err != nil {
 		return err
 	}
@@ -67,7 +66,7 @@ func (s service) conductGuidedQuiz(ctx context.Context, session *authoringcore.S
 		}
 
 		session.Guided.PendingOperation.QuizRequest = &request
-		if err := core.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session); err != nil {
+		if err := authoringcore.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session); err != nil {
 			return err
 		}
 	}
@@ -101,7 +100,7 @@ func (s service) finishGuidedQuizResult(ctx context.Context, session *authoringc
 	}
 
 	if state.Status == quizcore.RuntimeStatusDone {
-		return core.SealGuidedQuiz(ctx, s.projectContext.ProjectDir, session)
+		return authoringcore.SealGuidedQuiz(ctx, s.projectContext.ProjectDir, session)
 	}
 
 	return nil
@@ -191,7 +190,7 @@ func (s service) guidedCommittedSections(session authoringcore.Session, stage st
 		}
 
 		for _, artifact := range checkpoint.Artifacts {
-			content, err := core.ReadGuidedCommittedArtifact(s.ctx, s.projectContext.ProjectDir, checkpoint, artifact.Path)
+			content, err := authoringcore.ReadGuidedCommittedArtifact(s.ctx, s.projectContext.ProjectDir, checkpoint, artifact.Path)
 			if err != nil {
 				return nil, err
 			}

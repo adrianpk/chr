@@ -12,6 +12,9 @@ type leafDependencyCase struct {
 
 func leafDependencyCases() []leafDependencyCase {
 	return []leafDependencyCase{
+		{"authoring bounded journals", "internal/core/authoring/owner.go", "package authoring\nimport _ \"" + coreImportPath + "ops/file\"\n", false},
+		{"authoring native coordinator", "internal/core/authoring/guided_preparation.go", "package authoring\nimport _ \"" + coreImportPath + "workflow\"\n", true},
+		{"file authoring cycle", "internal/core/ops/file/io.go", "package file\nimport _ \"" + coreImportPath + "authoring\"\n", true},
 		{"project Git bounded output", "internal/core/project/git.go", "package project\nimport _ \"" + coreImportPath + "ops/file\"\n", false},
 		{"bounded output project cycle", "internal/core/ops/file/output.go", "package file\nimport _ \"" + coreImportPath + "project\"\n", true},
 		{"legacy fields scalar codec", "internal/core/ticket/metadata/parse.go", "package metadata\nimport _ \"" + coreImportPath + "ops/metadata\"\n", false},

@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func workflowTrackerCLI(t *testing.T, project, id, action string, extra ...string) (core.WorkflowTrackerStatus, error) {
@@ -51,7 +52,7 @@ func TestWorkflowTrackerCLI(t *testing.T) {
 	}
 
 	stale, err := workflowTrackerCLI(t, project, hierarchy.Set.ID, "repair")
-	if err == nil || stale.Reason != "projection_stale" || stale.ObservedHash != core.WorkflowContentHash(edited) {
+	if err == nil || stale.Reason != "projection_stale" || stale.ObservedHash != authoringcore.WorkflowContentHash(edited) {
 		t.Fatal("CLI omitted failure provenance", stale, err)
 	}
 
@@ -79,7 +80,7 @@ func checkWorkflowTrackerCLIService(t *testing.T, operations service, id string,
 func checkWorkflowTrackerCLIRepair(t *testing.T, project, id string, before map[string][32]byte, edited []byte) {
 	t.Helper()
 
-	repaired, err := workflowTrackerCLI(t, project, id, "repair", "--replace-hash", core.WorkflowContentHash(edited))
+	repaired, err := workflowTrackerCLI(t, project, id, "repair", "--replace-hash", authoringcore.WorkflowContentHash(edited))
 	if err != nil || repaired.Status != "current" {
 		t.Fatal("explicit CLI replacement failed", repaired, err)
 	}

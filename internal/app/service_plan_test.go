@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
@@ -1145,7 +1146,7 @@ func newPlanTestService(t *testing.T, project string) service {
 	return operations
 }
 
-func planTestSources(t *testing.T, operations service, scope quizcore.Scope) core.PlanSourceObservation {
+func planTestSources(t *testing.T, operations service, scope quizcore.Scope) authoringcore.PlanSourceObservation {
 	t.Helper()
 	sources, err := operations.observePlanContext(t.Context(), scope)
 	if err != nil {

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
@@ -125,7 +126,7 @@ func (b WorkspaceGraphBuilder) loadProject(ctx context.Context, graph *Workspace
 		return err
 	}
 
-	path := ProjectMetadataPath(b.projectDir)
+	path := authoringcore.ProjectMetadataPath(b.projectDir)
 
 	info, statErr := os.Stat(path)
 	if errors.Is(statErr, os.ErrNotExist) {
@@ -141,7 +142,7 @@ func (b WorkspaceGraphBuilder) loadProject(ctx context.Context, graph *Workspace
 		return fmt.Errorf("read project metadata: %w", err)
 	}
 
-	metadata, err := ParseProjectMetadata(string(content))
+	metadata, err := authoringcore.ParseProjectMetadata(string(content))
 	if err != nil {
 		graph.addDiagnostic(path, WorkspaceNodeProject, err)
 
@@ -165,7 +166,7 @@ func (b WorkspaceGraphBuilder) loadProject(ctx context.Context, graph *Workspace
 }
 
 func (b WorkspaceGraphBuilder) loadCases(ctx context.Context, graph *WorkspaceGraph) error {
-	root := CaseMetadataDirectory(b.projectDir)
+	root := authoringcore.CaseMetadataDirectory(b.projectDir)
 
 	err := walkMarkdownFiles(ctx, root, func(path string) error {
 		info, statErr := os.Stat(path)
@@ -178,14 +179,14 @@ func (b WorkspaceGraphBuilder) loadCases(ctx context.Context, graph *WorkspaceGr
 			return fmt.Errorf("read case metadata: %w", readErr)
 		}
 
-		metadata, parseErr := ParseCaseMetadata(string(content))
+		metadata, parseErr := authoringcore.ParseCaseMetadata(string(content))
 		if parseErr != nil {
 			graph.addDiagnostic(path, WorkspaceNodeCase, parseErr)
 
 			return nil
 		}
 
-		slug := CaseSlugFromPath(path)
+		slug := authoringcore.CaseSlugFromPath(path)
 		graph.Cases = append(graph.Cases, WorkspaceNode{
 			Kind:         WorkspaceNodeCase,
 			Path:         path,
@@ -262,7 +263,7 @@ func (b WorkspaceGraphBuilder) shouldSkipDocument(path string) bool {
 		return true
 	}
 
-	if path == ProjectMetadataPath(b.projectDir) || isCaseMetadataPath(b.projectDir, path) {
+	if path == authoringcore.ProjectMetadataPath(b.projectDir) || isCaseMetadataPath(b.projectDir, path) {
 		return true
 	}
 
@@ -301,14 +302,14 @@ func (b WorkspaceGraphBuilder) documentNode(path string) (WorkspaceNode, error) 
 
 	body := string(content)
 	if strings.HasPrefix(string(content), "---\n") {
-		markdown, splitErr := SplitMetadataMarkdown(string(content))
+		markdown, splitErr := authoringcore.SplitMetadataMarkdown(string(content))
 		frontmatter, nextBody := markdown.Frontmatter, markdown.Body
 
 		if splitErr != nil {
 			return WorkspaceNode{}, splitErr
 		}
 
-		fields = ParseSimpleYAMLFields(frontmatter)
+		fields = authoringcore.ParseSimpleYAMLFields(frontmatter)
 		body = nextBody
 	}
 
@@ -466,7 +467,7 @@ func walkMarkdownFiles(ctx context.Context, root string, visit func(path string)
 }
 
 func isCaseMetadataPath(projectDir, path string) bool {
-	relativePath, err := filepath.Rel(CaseMetadataDirectory(projectDir), path)
+	relativePath, err := filepath.Rel(authoringcore.CaseMetadataDirectory(projectDir), path)
 	if err != nil {
 		return false
 	}

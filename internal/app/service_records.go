@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -150,7 +151,7 @@ func filterRecordViews(views []RecordView, query RecordQuery) ([]RecordView, err
 }
 
 func (s service) caseRecordViews(ctx context.Context, query RecordQuery) ([]RecordView, error) {
-	cases, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).LoadBounded(ctx, workflowstate.RecordLimit)
+	cases, err := authoringcore.NewCaseMetadataService(s.projectContext.ProjectDir).LoadBounded(ctx, workflowstate.RecordLimit)
 	if err != nil {
 		return nil, err
 	}
@@ -173,7 +174,7 @@ func (s service) caseRecordViews(ctx context.Context, query RecordQuery) ([]Reco
 	return filterRecordViews(views, query)
 }
 
-func caseRecordView(projectDir string, metadata core.CaseMetadata) (RecordView, error) {
+func caseRecordView(projectDir string, metadata authoringcore.CaseMetadata) (RecordView, error) {
 	relative, err := filepath.Rel(projectDir, metadata.SourcePath)
 	if err != nil {
 		return RecordView{}, err

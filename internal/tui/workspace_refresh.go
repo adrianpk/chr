@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 // WorkspaceRefreshExecutor rebuilds workspace graph and index state for the
@@ -86,9 +87,9 @@ func workspaceIndexFromRefreshResult(result WorkspaceRefreshResult) core.Workspa
 }
 
 func projectMetadataFromWorkspaceGraph(
-	current core.ProjectMetadata,
+	current authoringcore.ProjectMetadata,
 	graph core.WorkspaceGraph,
-) core.ProjectMetadata {
+) authoringcore.ProjectMetadata {
 	if graph.Project == nil {
 		return current
 	}

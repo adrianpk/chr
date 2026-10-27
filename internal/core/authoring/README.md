@@ -12,8 +12,8 @@ move with their values: required identity/role, managed revision, namespace,
 actor/progression intent, finite retained-state bounds, valid stage/status and
 canonical naming retain their original guard order and diagnostics. Native
 admission still calls the original narrower intent predicate; it does not
-substitute full-session validation. Authoring journals and IO remain in their
-current owners until those behaviors can move with their genuine ports. No root alias or forwarding API is
+substitute full-session validation. The original file-backed session repository, artifact IO, journal/recovery and
+guided transitions now live here with their genuine ports. No root alias or forwarding API is
 provided for the relocated values.
 
 GuidedWorkflowObserver is the consumer-owned boundary for native stop,
@@ -46,3 +46,11 @@ and before model invocation. Request construction then uses the observed section
 without IO. The concrete workspace context and harness adapters retain graph
 projection, host binding/runner, output validation and trace behavior outside the
 authoring decisions. Existing real adapter fixtures retain their assertions.
+
+The complete original authoring aggregate and dump/spec/plan artifact behavior
+are owned here. Shared exclusion, scope/path guards, atomic journal replacement,
+recovery, exact source observations, retry receipts and Git checkpoint ordering
+remain one implementation. Native consumers call the actual artifact validators
+and codecs; the old root package has no compatibility aliases or forwarding API.
+Native integration tests remain beside the native owner; authoring journal fault
+and metadata tests move with this aggregate, retaining their original assertions.

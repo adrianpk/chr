@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
@@ -94,8 +94,8 @@ func seedSpecGenerationScopes(t *testing.T, operations service) {
 
 	operations.dumpCurator = fallbackDumpCurationProvider{Reason: "deterministic context fixture"}
 
-	metadata := core.CaseMetadata{SourcePath: core.CaseMetadataPath(operations.projectContext.ProjectDir, "other"), Name: "Other case"}
-	if _, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).Save(metadata); err != nil {
+	metadata := authoringcore.CaseMetadata{SourcePath: authoringcore.CaseMetadataPath(operations.projectContext.ProjectDir, "other"), Name: "Other case"}
+	if _, err := authoringcore.NewCaseMetadataService(operations.projectContext.ProjectDir).Save(metadata); err != nil {
 		t.Fatal(err)
 	}
 
@@ -122,7 +122,7 @@ func dumpSpecTestNamespace(slug string) string {
 	return "default"
 }
 
-func checkSpecDocumentCount(t *testing.T, documents []core.SpecDocument, err error, count int) {
+func checkSpecDocumentCount(t *testing.T, documents []authoringcore.SpecDocument, err error, count int) {
 	t.Helper()
 
 	if err != nil || len(documents) != count {

@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
@@ -123,8 +124,8 @@ func planPublicationFixture(t *testing.T, dump string) (service, quizcore.Scope,
 	t.Helper()
 
 	project := t.TempDir()
-	writeServiceWorkspaceFile(t, core.ProjectMetadataPath(project), core.RenderProjectMetadata(core.ProjectMetadata{Name: "Greeting", Description: "Deliver a bounded greeting command."}))
-	writeServiceWorkspaceFile(t, core.CaseMetadataPath(project, "blog"), core.RenderCaseMetadata(core.CaseMetadata{Name: "Greeting command", Description: "Print one greeting to stdout."}))
+	writeServiceWorkspaceFile(t, authoringcore.ProjectMetadataPath(project), authoringcore.RenderProjectMetadata(authoringcore.ProjectMetadata{Name: "Greeting", Description: "Deliver a bounded greeting command."}))
+	writeServiceWorkspaceFile(t, authoringcore.CaseMetadataPath(project, "blog"), authoringcore.RenderCaseMetadata(authoringcore.CaseMetadata{Name: "Greeting command", Description: "Print one greeting to stdout."}))
 
 	reference := "ops/default/dump/00000-context/artifact.md"
 	if dump != "" {
@@ -138,10 +139,10 @@ func planPublicationFixture(t *testing.T, dump string) (service, quizcore.Scope,
 	return operations, quizcore.Scope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}, reference
 }
 
-func seedPlanPublicationTarget(t *testing.T, operations service, scope quizcore.Scope) core.GeneratedPlanPaths {
+func seedPlanPublicationTarget(t *testing.T, operations service, scope quizcore.Scope) authoringcore.GeneratedPlanPaths {
 	t.Helper()
 
-	paths, err := core.WriteGeneratedPlan(t.Context(), operations.projectContext.ProjectDir, generationcore.GeneratedPlan{Scope: scope, Title: "Retained plan", Body: "Keep this usable until a complete replacement is ready.", CreatedAt: operations.utcNow()})
+	paths, err := authoringcore.WriteGeneratedPlan(t.Context(), operations.projectContext.ProjectDir, generationcore.GeneratedPlan{Scope: scope, Title: "Retained plan", Body: "Keep this usable until a complete replacement is ready.", CreatedAt: operations.utcNow()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -215,12 +216,12 @@ func applyPlanTestInterruption(ctx context.Context, t *testing.T, operations ser
 	case "cancelled":
 		cancel()
 	case "source changed":
-		observed, err := core.ReadDumpDocument(ctx, operations.projectContext.ProjectDir, dump)
+		observed, err := authoringcore.ReadDumpDocument(ctx, operations.projectContext.ProjectDir, dump)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if _, err := core.MutateDump(ctx, operations.projectContext.ProjectDir, core.DumpMutationRequest{Action: "save", OperationID: "source-change", Reference: dump, ExpectedRevision: observed.Revision, Title: "Context", Content: "Changed the result to goodbye."}, nil); err != nil {
+		if _, err := authoringcore.MutateDump(ctx, operations.projectContext.ProjectDir, authoringcore.DumpMutationRequest{Action: "save", OperationID: "source-change", Reference: dump, ExpectedRevision: observed.Revision, Title: "Context", Content: "Changed the result to goodbye."}, nil); err != nil {
 			t.Fatal(err)
 		}
 	case "target changed":

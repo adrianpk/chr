@@ -9,7 +9,6 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
@@ -190,7 +189,7 @@ func (factory commandFactory) runAuthorAssistedStart(ctx context.Context, cmd *c
 		return err
 	}
 
-	paths, err := core.NewAuthoringSessionRepository(projectContext.ProjectDir).CreateSession(ctx, session)
+	paths, err := authoringcore.NewAuthoringSessionRepository(projectContext.ProjectDir).CreateSession(ctx, session)
 	if err != nil {
 		return err
 	}
@@ -220,23 +219,23 @@ func (factory commandFactory) runAuthorAssistedResume(ctx context.Context, cmd *
 	}
 
 	now := time.Now().UTC()
-	response := core.AssistedModelResponse{
+	response := authoringcore.AssistedModelResponse{
 		ID:        "response-" + authoringSessionID(now),
 		Provider:  "fake",
-		Status:    core.AssistedModelResponseReady,
-		Question:  core.AssistedAuthoringQuestion{ID: "question-" + authoringSessionID(now), Prompt: question, Required: true},
+		Status:    authoringcore.AssistedModelResponseReady,
+		Question:  authoringcore.AssistedAuthoringQuestion{ID: "question-" + authoringSessionID(now), Prompt: question, Required: true},
 		RawText:   question,
 		CreatedAt: now,
 	}
 
-	result, err := core.AskNextAssistedQuizQuestion(ctx, core.AssistedQuizLoopOptions{
+	result, err := authoringcore.AskNextAssistedQuizQuestion(ctx, authoringcore.AssistedQuizLoopOptions{
 		Config:           assistedConfigFromCommand(cmd, state.Session),
 		Session:          state.Session,
 		SessionPaths:     state.Paths,
 		ContextPackage:   state.ContextPackage,
 		TranscriptEvents: state.Events,
 		Repository:       state.Repository,
-		Adapter:          &core.FakeAssistedModelAdapter{Responses: []core.AssistedModelResponse{response}},
+		Adapter:          &authoringcore.FakeAssistedModelAdapter{Responses: []authoringcore.AssistedModelResponse{response}},
 		Now:              func() time.Time { return now },
 	})
 	if err != nil {
@@ -256,12 +255,12 @@ func (factory commandFactory) runAuthorAssistedAnswer(ctx context.Context, cmd *
 		return err
 	}
 
-	result, err := core.AnswerAssistedQuizQuestion(ctx, core.AssistedQuizAnswerOptions{
+	result, err := authoringcore.AnswerAssistedQuizQuestion(ctx, authoringcore.AssistedQuizAnswerOptions{
 		SessionID:  state.Session.ID,
 		TurnID:     strings.TrimSpace(cmd.String("turn")),
 		TurnIndex:  cmd.Int("turn-index"),
-		Intent:     core.AssistedAuthoringIntentDiscover,
-		Question:   core.AssistedAuthoringQuestion{ID: strings.TrimSpace(cmd.String("question-id")), Prompt: strings.TrimSpace(cmd.String("question")), Required: true},
+		Intent:     authoringcore.AssistedAuthoringIntentDiscover,
+		Question:   authoringcore.AssistedAuthoringQuestion{ID: strings.TrimSpace(cmd.String("question-id")), Prompt: strings.TrimSpace(cmd.String("question")), Required: true},
 		AnswerText: strings.TrimSpace(cmd.String("answer")),
 		UserStop:   cmd.Bool("stop"),
 		Repository: state.Repository,
@@ -308,12 +307,12 @@ func (factory commandFactory) runAuthorAssistedFinalize(ctx context.Context, cmd
 		return err
 	}
 
-	curation, err := core.CurateAssistedAnswers(ctx, core.AssistedAnswerCurationOptions{
+	curation, err := authoringcore.CurateAssistedAnswers(ctx, authoringcore.AssistedAnswerCurationOptions{
 		Session:          state.Session,
 		SessionPaths:     state.Paths,
 		TranscriptEvents: state.Events,
 		Repository:       state.Repository,
-		Adapter: &core.FakeAssistedModelAdapter{Responses: []core.AssistedModelResponse{
+		Adapter: &authoringcore.FakeAssistedModelAdapter{Responses: []authoringcore.AssistedModelResponse{
 			authorAssistedCurationResponse(state.Session, summaryText, now),
 		}},
 		Now: func() time.Time { return now },
@@ -322,7 +321,7 @@ func (factory commandFactory) runAuthorAssistedFinalize(ctx context.Context, cmd
 		return err
 	}
 
-	synthesis, err := core.SynthesizeAssistedArtifact(ctx, core.AssistedArtifactSynthesisOptions{
+	synthesis, err := authoringcore.SynthesizeAssistedArtifact(ctx, authoringcore.AssistedArtifactSynthesisOptions{
 		ProjectDir:     state.ProjectDir,
 		OperationID:    cmd.String("operation-id"),
 		Session:        curation.Session,
@@ -344,10 +343,10 @@ func (factory commandFactory) runAuthorAssistedFinalize(ctx context.Context, cmd
 type authorAssistedState struct {
 	ProjectDir     string
 	Session        authoringcore.Session
-	Paths          core.AuthoringSessionPaths
-	Events         []core.AssistedTranscriptEvent
-	ContextPackage core.AssistedAuthoringContextPackage
-	Repository     core.AuthoringSessionRepository
+	Paths          authoringcore.AuthoringSessionPaths
+	Events         []authoringcore.AssistedTranscriptEvent
+	ContextPackage authoringcore.AssistedAuthoringContextPackage
+	Repository     authoringcore.AuthoringSessionRepository
 }
 
 func (factory commandFactory) loadAuthorAssistedState(ctx context.Context, cmd *cli.Command) (authorAssistedState, error) {
@@ -361,21 +360,21 @@ func (factory commandFactory) loadAuthorAssistedState(ctx context.Context, cmd *
 		return authorAssistedState{}, fmt.Errorf("authoring session is required")
 	}
 
-	repository := core.NewAuthoringSessionRepository(projectContext.ProjectDir)
+	repository := authoringcore.NewAuthoringSessionRepository(projectContext.ProjectDir)
 
 	session, err := resolveAuthoringSession(ctx, repository, sessionHandle)
 	if err != nil {
 		return authorAssistedState{}, err
 	}
 
-	paths := core.AuthoringSessionLayout(projectContext.ProjectDir, session.ID)
+	paths := authoringcore.AuthoringSessionLayout(projectContext.ProjectDir, session.ID)
 
 	events, err := repository.ListTranscriptEvents(ctx, session.ID)
 	if err != nil {
 		return authorAssistedState{}, err
 	}
 
-	contextPackage, err := core.LoadAssistedAuthoringContextPackage(core.AssistedAuthoringContextPackageOptions{
+	contextPackage, err := authoringcore.LoadAssistedAuthoringContextPackage(authoringcore.AssistedAuthoringContextPackageOptions{
 		ProjectDir:       projectContext.ProjectDir,
 		Session:          session,
 		SessionPaths:     paths,
@@ -422,26 +421,26 @@ func assistedSessionFromCommand(cmd *cli.Command, projectContext commandProjectC
 	return session, nil
 }
 
-func assistedConfigFromCommand(cmd *cli.Command, session authoringcore.Session) core.AssistedAuthoringConfig {
-	return core.AssistedAuthoringConfig{
+func assistedConfigFromCommand(cmd *cli.Command, session authoringcore.Session) authoringcore.AssistedAuthoringConfig {
+	return authoringcore.AssistedAuthoringConfig{
 		SessionID:    session.ID,
 		ProjectID:    session.ProjectID,
 		Target:       session.Target,
-		Intent:       core.AssistedAuthoringIntentDiscover,
+		Intent:       authoringcore.AssistedAuthoringIntentDiscover,
 		MaxTurns:     cmd.Int("max-turns"),
 		MaxFollowUps: cmd.Int("max-follow-ups"),
 	}
 }
 
-func authorAssistedCurationResponse(session authoringcore.Session, summary string, now time.Time) core.AssistedModelResponse {
-	return core.AssistedModelResponse{
+func authorAssistedCurationResponse(session authoringcore.Session, summary string, now time.Time) authoringcore.AssistedModelResponse {
+	return authoringcore.AssistedModelResponse{
 		ID:        "curation-response-" + session.ID,
 		RequestID: "curation-" + session.ID,
 		SessionID: session.ID,
 		TurnID:    "curation",
 		Provider:  "fake",
-		Status:    core.AssistedModelResponseReady,
-		Question: core.AssistedAuthoringQuestion{
+		Status:    authoringcore.AssistedModelResponseReady,
+		Question: authoringcore.AssistedAuthoringQuestion{
 			ID:       "curation-ready-" + session.ID,
 			Prompt:   "Curation is ready.",
 			Required: false,
@@ -451,7 +450,7 @@ func authorAssistedCurationResponse(session authoringcore.Session, summary strin
 	}
 }
 
-func printAuthorAssistedQuestion(stdout io.Writer, result core.AssistedQuizAskResult) error {
+func printAuthorAssistedQuestion(stdout io.Writer, result authoringcore.AssistedQuizAskResult) error {
 	lines := []string{
 		"assisted: question",
 		"turn: " + result.Turn.ID,
@@ -462,14 +461,14 @@ func printAuthorAssistedQuestion(stdout io.Writer, result core.AssistedQuizAskRe
 		"response: " + result.InvocationPaths.ResponsePath,
 	}
 
-	if result.StopReason != core.AssistedQuizLoopStopNone {
+	if result.StopReason != authoringcore.AssistedQuizLoopStopNone {
 		lines = append(lines, "stop_reason: "+string(result.StopReason))
 	}
 
 	return writeAuthorLines(stdout, lines)
 }
 
-func printAuthorAssistedAnswer(stdout io.Writer, result core.AssistedQuizAnswerResult) error {
+func printAuthorAssistedAnswer(stdout io.Writer, result authoringcore.AssistedQuizAnswerResult) error {
 	lines := []string{
 		"assisted: answer",
 		"turn: " + result.Turn.ID,
@@ -477,14 +476,14 @@ func printAuthorAssistedAnswer(stdout io.Writer, result core.AssistedQuizAnswerR
 		"question_id: " + result.Turn.Question.ID,
 	}
 
-	if result.StopReason != core.AssistedQuizLoopStopNone {
+	if result.StopReason != authoringcore.AssistedQuizLoopStopNone {
 		lines = append(lines, "stop_reason: "+string(result.StopReason))
 	}
 
 	return writeAuthorLines(stdout, lines)
 }
 
-func printAuthorAssistedStatus(stdout io.Writer, session authoringcore.Session, events []core.AssistedTranscriptEvent) error {
+func printAuthorAssistedStatus(stdout io.Writer, session authoringcore.Session, events []authoringcore.AssistedTranscriptEvent) error {
 	counts := assistedEventCounts(events)
 
 	return writeAuthorLines(stdout, []string{
@@ -498,7 +497,7 @@ func printAuthorAssistedStatus(stdout io.Writer, session authoringcore.Session, 
 	})
 }
 
-func printAuthorAssistedFinalized(stdout io.Writer, curation core.AssistedAnswerCurationResult, synthesis core.AssistedArtifactSynthesisResult) error {
+func printAuthorAssistedFinalized(stdout io.Writer, curation authoringcore.AssistedAnswerCurationResult, synthesis authoringcore.AssistedArtifactSynthesisResult) error {
 	return writeAuthorLines(stdout, []string{
 		"assisted: finalized",
 		"session: " + synthesis.Session.ID,
@@ -513,7 +512,7 @@ type assistedTranscriptCounts struct {
 	Results   int
 }
 
-func assistedEventCounts(events []core.AssistedTranscriptEvent) assistedTranscriptCounts {
+func assistedEventCounts(events []authoringcore.AssistedTranscriptEvent) assistedTranscriptCounts {
 	questions := map[string]struct{}{}
 	answers := map[string]struct{}{}
 
@@ -521,13 +520,13 @@ func assistedEventCounts(events []core.AssistedTranscriptEvent) assistedTranscri
 
 	for _, event := range events {
 		switch event.Type {
-		case core.AssistedTranscriptEventQuestion:
+		case authoringcore.AssistedTranscriptEventQuestion:
 			questions[event.Question.ID] = struct{}{}
-		case core.AssistedTranscriptEventAnswer:
+		case authoringcore.AssistedTranscriptEventAnswer:
 			answers[event.Answer.QuestionID] = struct{}{}
-		case core.AssistedTranscriptEventResult:
+		case authoringcore.AssistedTranscriptEventResult:
 			results++
-		case core.AssistedTranscriptEventState:
+		case authoringcore.AssistedTranscriptEventState:
 		}
 	}
 

@@ -20,7 +20,7 @@ func (s service) AdmitGuidedWork(ctx context.Context, command authoringcore.Guid
 
 func (s service) admitGuidedWork(ctx context.Context, session *authoringcore.Session) error {
 	if s.guidedWorkHost == nil {
-		return &core.GuidedPrerequisiteError{Action: "Start a managed workflow host, then retry this retained operation."}
+		return &authoringcore.GuidedPrerequisiteError{Action: "Start a managed workflow host, then retry this retained operation."}
 	}
 
 	if err := s.guidedWorkHost.ready(); err != nil {
@@ -64,12 +64,12 @@ func (s service) ensureGuidedInvocation(ctx context.Context, session *authoringc
 }
 
 func (s service) reserveGuidedAdmission(ctx context.Context, session *authoringcore.Session) error {
-	checkpoint, err := core.GuidedPreparationCheckpoint(*session)
+	checkpoint, err := authoringcore.GuidedPreparationCheckpoint(*session)
 	if err != nil {
 		return err
 	}
 
-	digest, err := core.GuidedCheckpointDigest(checkpoint)
+	digest, err := authoringcore.GuidedCheckpointDigest(checkpoint)
 	if err != nil {
 		return err
 	}
@@ -78,17 +78,17 @@ func (s service) reserveGuidedAdmission(ctx context.Context, session *authoringc
 
 	preview, err := s.PreviewSelectedWork(ctx, workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "slice_set", Identity: work.Materialization.SetID}}, "")
 	if err != nil {
-		return &core.GuidedPrerequisiteError{Action: "Correct native workflow authority and canonical target setup, then retry the retained admission.", Cause: err}
+		return &authoringcore.GuidedPrerequisiteError{Action: "Correct native workflow authority and canonical target setup, then retry the retained admission.", Cause: err}
 	}
 
 	if err := core.ValidateGuidedWorkPreview(*work.Materialization, preview.View.Preview); err != nil {
-		return &core.GuidedPrerequisiteError{Action: "Restore the sealed native task membership and contracts before retrying admission.", Cause: err}
+		return &authoringcore.GuidedPrerequisiteError{Action: "Restore the sealed native task membership and contracts before retrying admission.", Cause: err}
 	}
 
 	policy := preview.View.ExecutionPolicy
 	policy.IncludeLaterTickets = false
 	includeLater := false
-	proof := &workflowstate.GuidedAdmission{RunID: session.ID, Actor: session.Guided.Actor, Policy: core.GuidedWorkAdmissionPolicy, OperationDigest: session.Guided.PendingOperation.Digest, CheckpointDigest: digest, MaterializationID: work.Materialization.ID}
+	proof := &workflowstate.GuidedAdmission{RunID: session.ID, Actor: session.Guided.Actor, Policy: authoringcore.GuidedWorkAdmissionPolicy, OperationDigest: session.Guided.PendingOperation.Digest, CheckpointDigest: digest, MaterializationID: work.Materialization.ID}
 	work.Admission = &workflowstate.StartInput{
 		RequestKey:          "guided-work-" + session.Guided.PendingOperation.Digest,
 		Selection:           preview.Request,
@@ -96,7 +96,7 @@ func (s service) reserveGuidedAdmission(ctx context.Context, session *authoringc
 		Admission:           &workflowstate.AdmissionGuard{Guided: proof, SnapshotHash: preview.Request.SnapshotHash, Policy: preview.View.Policy, ExecutionPolicy: policy},
 	}
 
-	if err := core.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session); err != nil {
+	if err := authoringcore.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session); err != nil {
 		return err
 	}
 
@@ -115,12 +115,12 @@ func (s service) retainGuidedInvocation(ctx context.Context, session *authoringc
 		return s.checkGuidedWorkPrerequisites(ctx, request.Selection)
 	}))
 	if err != nil {
-		var prerequisite *core.GuidedPrerequisiteError
+		var prerequisite *authoringcore.GuidedPrerequisiteError
 		if errors.As(err, &prerequisite) {
 			return err
 		}
 
-		return &core.GuidedPrerequisiteError{Action: "Reconcile the retained admission with native policy, target and worker setup before retrying.", Cause: err}
+		return &authoringcore.GuidedPrerequisiteError{Action: "Reconcile the retained admission with native policy, target and worker setup before retrying.", Cause: err}
 	}
 
 	if err := s.guidedAdmissionEffect("admission"); err != nil {
@@ -130,7 +130,7 @@ func (s service) retainGuidedInvocation(ctx context.Context, session *authoringc
 	run := started.Invocation
 	session.Guided.Work.Invocation = &authoringcore.GuidedInvocationReference{ID: run.ID, RequestKey: run.RequestKey, Revision: run.Revision}
 
-	return core.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session)
+	return authoringcore.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session)
 }
 
 func (s service) guidedAdmissionEffect(phase string) error {

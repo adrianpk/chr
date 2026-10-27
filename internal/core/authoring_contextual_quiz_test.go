@@ -17,13 +17,13 @@ func TestPlanContextualQuizGenerationUsesProviderAndProjectContext(t *testing.T)
 	now := time.Date(2026, 5, 22, 9, 0, 0, 0, time.UTC)
 	session := validContextualQuizSession(now)
 	session.ID = "author-20260522-090000"
-	provider := &FakeAuthoringQuizQuestionProvider{
+	provider := &authoringcore.FakeAuthoringQuizQuestionProvider{
 		Result: validContextualQuizGenerationResult(),
 	}
 
 	writeContextualQuizProjectFixture(t, projectDir)
 
-	plan, err := PlanContextualQuizGeneration(context.Background(), ContextualQuizGenerationOptions{
+	plan, err := authoringcore.PlanContextualQuizGeneration(context.Background(), authoringcore.ContextualQuizGenerationOptions{
 		Context:       WorkspaceAuthoringQuizContext{},
 		ProjectDir:    projectDir,
 		Session:       session,
@@ -41,8 +41,8 @@ func TestPlanContextualQuizGenerationUsesProviderAndProjectContext(t *testing.T)
 
 func assertContextualQuizPlan(
 	t *testing.T,
-	plan ContextualQuizGenerationPlan,
-	provider *FakeAuthoringQuizQuestionProvider,
+	plan authoringcore.ContextualQuizGenerationPlan,
+	provider *authoringcore.FakeAuthoringQuizQuestionProvider,
 ) {
 	t.Helper()
 
@@ -73,15 +73,15 @@ func assertContextualQuizPlan(
 	}
 }
 
-func assertContextualQuizRequest(t *testing.T, request AuthoringQuizGenerationRequest) {
+func assertContextualQuizRequest(t *testing.T, request authoringcore.AuthoringQuizGenerationRequest) {
 	t.Helper()
 
-	if request.Action != AuthoringQuizActionGeneration {
-		t.Fatalf("Action = %q, want %q", request.Action, AuthoringQuizActionGeneration)
+	if request.Action != authoringcore.AuthoringQuizActionGeneration {
+		t.Fatalf("Action = %q, want %q", request.Action, authoringcore.AuthoringQuizActionGeneration)
 	}
 
-	if request.Strategy != AuthoringQuizGenerationStrategyDeep {
-		t.Fatalf("Strategy = %q, want %q", request.Strategy, AuthoringQuizGenerationStrategyDeep)
+	if request.Strategy != authoringcore.AuthoringQuizGenerationStrategyDeep {
+		t.Fatalf("Strategy = %q, want %q", request.Strategy, authoringcore.AuthoringQuizGenerationStrategyDeep)
 	}
 
 	if request.QuestionCount != 8 {
@@ -124,8 +124,8 @@ func writeContextualQuizProjectFixture(t *testing.T, projectDir string) {
 		t.Fatalf("WriteFile returned error: %v", err)
 	}
 
-	writeTestFile(t, ProjectMetadataPath(projectDir), RenderProjectMetadata(ProjectMetadata{
-		SchemaVersion: ProjectMetadataSchemaVersion,
+	writeTestFile(t, authoringcore.ProjectMetadataPath(projectDir), authoringcore.RenderProjectMetadata(authoringcore.ProjectMetadata{
+		SchemaVersion: authoringcore.ProjectMetadataSchemaVersion,
 		Name:          "Contextual Quiz Project",
 		Description:   "Project description.",
 		Context:       "Project body.",
@@ -142,7 +142,7 @@ func TestPlanContextualQuizGenerationRejectsMissingProvider(t *testing.T) {
 	now := time.Date(2026, 5, 22, 9, 0, 0, 0, time.UTC)
 	session := validContextualQuizSession(now)
 
-	_, err := PlanContextualQuizGeneration(context.Background(), ContextualQuizGenerationOptions{
+	_, err := authoringcore.PlanContextualQuizGeneration(context.Background(), authoringcore.ContextualQuizGenerationOptions{
 		Context:    WorkspaceAuthoringQuizContext{},
 		ProjectDir: t.TempDir(),
 		Session:    session,
@@ -157,7 +157,7 @@ func TestValidateAuthoringQuizGenerationResultRejectsGenericUnsafeOutput(t *test
 	result := validContextualQuizGenerationResult()
 	result.Questions[0].Text = "Which API token should this project use?"
 
-	err := ValidateAuthoringQuizGenerationResult(result)
+	err := authoringcore.ValidateAuthoringQuizGenerationResult(result)
 	if err == nil {
 		t.Fatal("ValidateAuthoringQuizGenerationResult returned nil error")
 	}
@@ -249,11 +249,11 @@ func TestWriteContextualQuizWritesArtifact(t *testing.T) {
 	projectDir := t.TempDir()
 	now := time.Date(2026, 5, 22, 9, 0, 0, 0, time.UTC)
 	session := validContextualQuizSession(now)
-	provider := &FakeAuthoringQuizQuestionProvider{
+	provider := &authoringcore.FakeAuthoringQuizQuestionProvider{
 		Result: validContextualQuizGenerationResult(),
 	}
 
-	plan, err := PlanContextualQuizGeneration(context.Background(), ContextualQuizGenerationOptions{
+	plan, err := authoringcore.PlanContextualQuizGeneration(context.Background(), authoringcore.ContextualQuizGenerationOptions{
 		Context:    WorkspaceAuthoringQuizContext{},
 		ProjectDir: projectDir,
 		Session:    session,
@@ -264,7 +264,7 @@ func TestWriteContextualQuizWritesArtifact(t *testing.T) {
 		t.Fatalf("PlanContextualQuizGeneration returned error: %v", err)
 	}
 
-	err = WriteContextualQuiz(plan)
+	err = authoringcore.WriteContextualQuiz(plan)
 	if err != nil {
 		t.Fatalf("WriteContextualQuiz returned error: %v", err)
 	}
@@ -281,7 +281,7 @@ func TestWriteContextualQuizWritesArtifact(t *testing.T) {
 
 func assertAuthoringQuizContextSection(
 	t *testing.T,
-	sections []AuthoringQuizContextSection,
+	sections []authoringcore.AuthoringQuizContextSection,
 	name string,
 ) {
 	t.Helper()
@@ -291,9 +291,9 @@ func assertAuthoringQuizContextSection(
 
 func authoringQuizContextSection(
 	t *testing.T,
-	sections []AuthoringQuizContextSection,
+	sections []authoringcore.AuthoringQuizContextSection,
 	name string,
-) AuthoringQuizContextSection {
+) authoringcore.AuthoringQuizContextSection {
 	t.Helper()
 
 	for _, section := range sections {
@@ -304,14 +304,14 @@ func authoringQuizContextSection(
 
 	t.Fatalf("context sections do not contain %q: %#v", name, sections)
 
-	return AuthoringQuizContextSection{}
+	return authoringcore.AuthoringQuizContextSection{}
 }
 
-func validContextualQuizGenerationResult() AuthoringQuizGenerationResult {
-	return AuthoringQuizGenerationResult{
+func validContextualQuizGenerationResult() authoringcore.AuthoringQuizGenerationResult {
+	return authoringcore.AuthoringQuizGenerationResult{
 		Provider: "fake",
-		Strategy: AuthoringQuizGenerationStrategyDeep,
-		Questions: []AuthoringQuizQuestion{
+		Strategy: authoringcore.AuthoringQuizGenerationStrategyDeep,
+		Questions: []authoringcore.AuthoringQuizQuestion{
 			{
 				ID:                    "Q1",
 				Text:                  "Which user workflow should the specification pin down first?",
@@ -338,22 +338,22 @@ func validContextualQuizGenerationResult() AuthoringQuizGenerationResult {
 	}
 }
 
-func validAuthoringQuizGenerationRequest(projectDir string) AuthoringQuizGenerationRequest {
+func validAuthoringQuizGenerationRequest(projectDir string) authoringcore.AuthoringQuizGenerationRequest {
 	now := time.Date(2026, 5, 22, 9, 0, 0, 0, time.UTC)
 
-	return AuthoringQuizGenerationRequest{
+	return authoringcore.AuthoringQuizGenerationRequest{
 		ID:            "authoring-quiz-request-1",
-		Action:        AuthoringQuizActionGeneration,
-		Strategy:      AuthoringQuizGenerationStrategyDeep,
+		Action:        authoringcore.AuthoringQuizActionGeneration,
+		Strategy:      authoringcore.AuthoringQuizGenerationStrategyDeep,
 		ProjectDir:    projectDir,
 		SessionID:     "author-20260522-090000",
 		Target:        authoringcore.TargetSpec,
 		Topic:         "Billing sync behavior",
 		QuestionCount: 1,
-		ContextSections: []AuthoringQuizContextSection{
+		ContextSections: []authoringcore.AuthoringQuizContextSection{
 			{Name: "project", Layer: "project", Authority: "project_metadata", Content: "Project context."},
 		},
-		OutputContract: AuthoringQuizOutputContract{
+		OutputContract: authoringcore.AuthoringQuizOutputContract{
 			RequiredFields: []string{"id", "question", "tags", "follow_up_depth", "completion_recommended"},
 		},
 		CreatedAt: now,

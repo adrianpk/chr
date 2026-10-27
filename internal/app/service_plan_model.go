@@ -5,27 +5,27 @@ import (
 	"fmt"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
-func (s service) newPlanOutlineGenerationModelRequest(state quizcore.RuntimeState, sources core.PlanSourceObservation) (quizmodel.Request, error) {
+func (s service) newPlanOutlineGenerationModelRequest(state quizcore.RuntimeState, sources authoringcore.PlanSourceObservation) (quizmodel.Request, error) {
 	return s.newPlanningModelRequest(
 		state, sources,
 		documentModelOperation{action: quizmodel.ActionGeneratePlanOutline, strategy: "plan_outline_generation", requestIDPrefix: "plan-outline-generation"},
 	)
 }
 
-func (s service) newPlanGenerationModelRequest(state quizcore.RuntimeState, sources core.PlanSourceObservation) (quizmodel.Request, error) {
+func (s service) newPlanGenerationModelRequest(state quizcore.RuntimeState, sources authoringcore.PlanSourceObservation) (quizmodel.Request, error) {
 	return s.newPlanningModelRequest(
 		state, sources,
 		documentModelOperation{action: quizmodel.ActionGeneratePlan, strategy: "plan_generation", requestIDPrefix: "plan-generation"},
 	)
 }
 
-func (s service) newPlanSliceDetailGenerationModelRequest(state quizcore.RuntimeState, sources core.PlanSourceObservation, outline generationcore.GeneratedPlanOutline, targetSliceID string) (quizmodel.Request, error) {
+func (s service) newPlanSliceDetailGenerationModelRequest(state quizcore.RuntimeState, sources authoringcore.PlanSourceObservation, outline generationcore.GeneratedPlanOutline, targetSliceID string) (quizmodel.Request, error) {
 	if err := generationcore.ValidateGeneratedPlanOutline(outline); err != nil {
 		return quizmodel.Request{}, err
 	}
@@ -46,7 +46,7 @@ func (s service) newPlanSliceDetailGenerationModelRequest(state quizcore.Runtime
 	return request, err
 }
 
-func (s service) newPlanningModelRequest(state quizcore.RuntimeState, sources core.PlanSourceObservation, operation documentModelOperation) (quizmodel.Request, error) {
+func (s service) newPlanningModelRequest(state quizcore.RuntimeState, sources authoringcore.PlanSourceObservation, operation documentModelOperation) (quizmodel.Request, error) {
 	scope := sources.Scope
 	payload := quizmodel.Payload{
 		Project: quizmodel.ProjectPayload{ID: scope.ProjectID, Name: sources.Project.Name, Description: sources.Project.Description},

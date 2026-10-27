@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
@@ -160,7 +160,7 @@ func (p webViewProvider) writeSpecGenerate(ctx context.Context, operations servi
 		return webValidationWrite(fmt.Errorf("select an existing use case to generate its spec")), nil
 	}
 
-	if _, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).ReadBounded(ctx, scope.CaseSlug); err != nil {
+	if _, err := authoringcore.NewCaseMetadataService(operations.projectContext.ProjectDir).ReadBounded(ctx, scope.CaseSlug); err != nil {
 		return webValidationWrite(err), nil
 	}
 
@@ -300,7 +300,7 @@ func (p webViewProvider) writeCaseCreate(operations service, request webui.Write
 		return webBlockedWrite("Create cases from the Cases page."), nil
 	}
 
-	result, err := operations.SaveCaseMetadata(core.CaseMetadata{
+	result, err := operations.SaveCaseMetadata(authoringcore.CaseMetadata{
 		Name:        strings.TrimSpace(request.Fields["name"]),
 		Description: request.Fields["description"],
 		Context:     request.Fields["context"],
@@ -318,8 +318,8 @@ func (p webViewProvider) writeCaseCreate(operations service, request webui.Write
 }
 
 func (p webViewProvider) writeCaseUpdate(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
-	current, err := core.NewCaseMetadataService(p.projectContext.ProjectDir).LoadPath(
-		core.CaseMetadataPath(p.projectContext.ProjectDir, request.ID),
+	current, err := authoringcore.NewCaseMetadataService(p.projectContext.ProjectDir).LoadPath(
+		authoringcore.CaseMetadataPath(p.projectContext.ProjectDir, request.ID),
 	)
 	if err != nil {
 		return webui.WriteActionResponse{}, err
@@ -433,7 +433,7 @@ func webDumpWriteFailure(err error, reference string) webui.WriteActionResponse 
 		return webui.WriteActionResponse{Status: webui.WriteStatusStale, Summary: "The dump changed after it was loaded. Reload before saving.", ReloadURL: reload, DiscardURL: "/dumps"}
 	}
 
-	if errors.Is(err, core.ErrProjectDumpReconciliation) {
+	if errors.Is(err, authoringcore.ErrProjectDumpReconciliation) {
 		return webBlockedWrite(err.Error())
 	}
 

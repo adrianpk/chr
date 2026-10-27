@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -50,7 +50,7 @@ func TestWebPlanCatalog(t *testing.T) {
 func checkWebPlanDocument(t *testing.T, provider webViewProvider, handler http.Handler, card webui.ArtifactCardView) {
 	t.Helper()
 
-	document, err := core.ReadPlanDocument(t.Context(), provider.projectContext.ProjectDir, card.ID)
+	document, err := authoringcore.ReadPlanDocument(t.Context(), provider.projectContext.ProjectDir, card.ID)
 	if err != nil {
 		t.Fatal(err)
 	}

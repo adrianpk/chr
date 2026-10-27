@@ -55,7 +55,7 @@ type ContextSearchHit struct {
 
 // LoadTreeSearchContext loads the corresponding package data.
 func LoadTreeSearchContext(opts TreeSearchContextOptions) (TreeSearchContext, error) {
-	projectDir, err := CleanContextProjectDir(opts.ProjectDir)
+	projectDir, err := authoringcore.CleanContextProjectDir(opts.ProjectDir)
 	if err != nil {
 		return TreeSearchContext{}, err
 	}

@@ -6,7 +6,7 @@ import (
 	"errors"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -128,7 +128,7 @@ func (r telegramReceiver) finishExplanationModel(ctx context.Context, request te
 
 	if len(model.Response) == 0 {
 		if model.Attempts >= 5 {
-			return r.finishAuthoringFailure(ctx, request, config, core.ErrAuthoringProviderExhausted)
+			return r.finishAuthoringFailure(ctx, request, config, authoringcore.ErrAuthoringProviderExhausted)
 		}
 
 		return nil

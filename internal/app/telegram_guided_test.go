@@ -9,7 +9,6 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
@@ -77,7 +76,7 @@ func TestGuidedUseCaseTelegramCapture(t *testing.T) {
 	scope := authoringcore.GuidedUseCaseScope{RunID: id, ProjectID: c.ProjectID, Namespace: c.Namespace}
 	root := guidedTelegramProject(t, operations, c.ProjectID)
 
-	before, err := core.ReadGuidedUseCase(t.Context(), root, scope)
+	before, err := authoringcore.ReadGuidedUseCase(t.Context(), root, scope)
 	if err != nil || strings.Count(before.Guided.Capture, "Retain exact") != 1 {
 		t.Fatal("capture was not retained once", err)
 	}
@@ -103,7 +102,7 @@ func assertGuidedTelegramReplay(t *testing.T, f *telegramConversationAppFixture,
 		t.Fatal("stale prompt was not rejected", stale.Text)
 	}
 
-	after, err := core.ReadGuidedUseCase(t.Context(), root, scope)
+	after, err := authoringcore.ReadGuidedUseCase(t.Context(), root, scope)
 	if err != nil || after.Revision != before.Revision || after.Guided.Capture != before.Guided.Capture {
 		t.Fatal("replay or stale prompt changed canonical state", err)
 	}
@@ -211,7 +210,7 @@ func readGuidedTelegramSession(t *testing.T, operations service, c telegramcore.
 
 	root := guidedTelegramProject(t, operations, c.ProjectID)
 
-	session, err := core.ReadGuidedUseCase(t.Context(), root, authoringcore.GuidedUseCaseScope{RunID: c.GuidedRunID, ProjectID: c.ProjectID, Namespace: c.Namespace})
+	session, err := authoringcore.ReadGuidedUseCase(t.Context(), root, authoringcore.GuidedUseCaseScope{RunID: c.GuidedRunID, ProjectID: c.ProjectID, Namespace: c.Namespace})
 	if err != nil {
 		t.Fatal(err)
 	}

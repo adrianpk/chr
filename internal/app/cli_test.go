@@ -22,6 +22,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/gate"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
@@ -504,7 +505,7 @@ func TestWebServeWriteActionUpdatesCaseMetadata(t *testing.T) {
 		t.Fatalf("Status = %q, want ok: %#v", result.Status, result)
 	}
 
-	metadata, err := core.NewCaseMetadataService(projectDir).LoadPath(core.CaseMetadataPath(projectDir, "blog"))
+	metadata, err := authoringcore.NewCaseMetadataService(projectDir).LoadPath(authoringcore.CaseMetadataPath(projectDir, "blog"))
 	if err != nil {
 		t.Fatalf("LoadPath returned error: %v", err)
 	}
@@ -922,8 +923,8 @@ func writeWebServeBoardTestTicket(t *testing.T, projectDir string) {
 func writeWebServeArtifactFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeServiceWorkspaceFile(t, core.CaseMetadataPath(projectDir, "blog"), core.RenderCaseMetadata(core.CaseMetadata{
-		SchemaVersion: core.CaseMetadataSchemaVersion,
+	writeServiceWorkspaceFile(t, authoringcore.CaseMetadataPath(projectDir, "blog"), authoringcore.RenderCaseMetadata(authoringcore.CaseMetadata{
+		SchemaVersion: authoringcore.CaseMetadataSchemaVersion,
 		Slug:          "blog",
 		Name:          "Blog Publishing",
 		Description:   "Publish articles.",
@@ -1587,7 +1588,7 @@ func TestMetadataProjectSetSavesProjectMetadata(t *testing.T) {
 		t.Fatalf("metadata project set returned error: %v", err)
 	}
 
-	metadata, err := core.NewProjectMetadataService(projectDir).Load()
+	metadata, err := authoringcore.NewProjectMetadataService(projectDir).Load()
 	if err != nil {
 		t.Fatalf("Load returned error: %v", err)
 	}
@@ -1688,7 +1689,7 @@ func TestMetadataCaseSetCreatesUseCaseMetadata(t *testing.T) {
 		t.Fatalf("metadata case set returned error: %v", err)
 	}
 
-	metadata, err := core.NewCaseMetadataService(projectDir).LoadPath(core.CaseMetadataPath(projectDir, "blog"))
+	metadata, err := authoringcore.NewCaseMetadataService(projectDir).LoadPath(authoringcore.CaseMetadataPath(projectDir, "blog"))
 	if err != nil {
 		t.Fatalf("LoadPath returned error: %v", err)
 	}
@@ -8264,12 +8265,12 @@ func installFakeAuthoringQuizProvider(t *testing.T) {
 	t.Helper()
 
 	previous := newAuthoringQuizQuestionProvider
-	newAuthoringQuizQuestionProvider = func() core.AuthoringQuizQuestionProvider {
-		return &core.FakeAuthoringQuizQuestionProvider{
-			Result: core.AuthoringQuizGenerationResult{
+	newAuthoringQuizQuestionProvider = func() authoringcore.AuthoringQuizQuestionProvider {
+		return &authoringcore.FakeAuthoringQuizQuestionProvider{
+			Result: authoringcore.AuthoringQuizGenerationResult{
 				Provider: "fake",
-				Strategy: core.AuthoringQuizGenerationStrategyDeep,
-				Questions: []core.AuthoringQuizQuestion{
+				Strategy: authoringcore.AuthoringQuizGenerationStrategyDeep,
+				Questions: []authoringcore.AuthoringQuizQuestion{
 					{
 						ID:                    "Q1",
 						Text:                  "Which user workflow should the specification pin down first?",

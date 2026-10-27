@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 // The actual single editor keeps pending input after lost acknowledgements,
@@ -134,7 +134,7 @@ func webDumpEditorStale(t *testing.T, browser *webWorkflowBrowser, provider webD
 	webDumpEditorOpen(t, browser)
 	webDumpEditorValue(t, browser, "Corrected body.\n\nAdded in the same editor.")
 
-	before, err := core.ReadDumpDocument(t.Context(), provider.projectContext.ProjectDir, reference)
+	before, err := authoringcore.ReadDumpDocument(t.Context(), provider.projectContext.ProjectDir, reference)
 	if err != nil {
 		t.Fatal(err)
 	}

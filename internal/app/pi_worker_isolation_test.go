@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -116,7 +117,7 @@ func clonePiIsolationTicket(t *testing.T, operations service, original core.Work
 		t.Fatal(err)
 	}
 
-	task.ContractHash = core.WorkflowContentHash(append([]byte("\x00\x00"), data...))
+	task.ContractHash = authoringcore.WorkflowContentHash(append([]byte("\x00\x00"), data...))
 	if _, err := store.Create(t.Context(), "Independent Pi isolation task", core.WorkflowRecord{Kind: "ticket", Task: &task, Domain: map[string]json.RawMessage{"execution_contract": data}, Body: original.Body}); err != nil {
 		t.Fatal(err)
 	}

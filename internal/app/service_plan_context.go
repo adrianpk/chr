@@ -7,12 +7,12 @@ import (
 	"encoding/json"
 	"errors"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
-func (s service) observePlanContext(ctx context.Context, scope quizcore.Scope) (core.PlanSourceObservation, error) {
-	sources, err := core.ObservePlanSources(ctx, s.projectContext.ProjectDir, scope)
+func (s service) observePlanContext(ctx context.Context, scope quizcore.Scope) (authoringcore.PlanSourceObservation, error) {
+	sources, err := authoringcore.ObservePlanSources(ctx, s.projectContext.ProjectDir, scope)
 	if err != nil || scope.CaseSlug != "" {
 		return sources, err
 	}
@@ -26,7 +26,7 @@ func (s service) observePlanContext(ctx context.Context, scope quizcore.Scope) (
 
 	for _, section := range sections {
 		hash := sha256.Sum256([]byte(section.Content))
-		sources.Inputs = append(sources.Inputs, core.PlanSourceInput{Kind: section.Name, Reference: section.Authority, Revision: hex.EncodeToString(hash[:]), Content: section.Content})
+		sources.Inputs = append(sources.Inputs, authoringcore.PlanSourceInput{Kind: section.Name, Reference: section.Authority, Revision: hex.EncodeToString(hash[:]), Content: section.Content})
 	}
 
 	encoded, err := json.Marshal(sources.Inputs)

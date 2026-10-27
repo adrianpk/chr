@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
@@ -13,7 +13,7 @@ import (
 )
 
 type planGenerationInputs struct {
-	Sources        core.PlanSourceObservation
+	Sources        authoringcore.PlanSourceObservation
 	State          quizcore.RuntimeState
 	TargetRevision string
 }
@@ -45,7 +45,7 @@ func (s service) prepareAndPublishPlan(ctx context.Context, operation generation
 	plan.ExpectedRevision, plan.SourceObservationHash = inputs.TargetRevision, sources.Hash
 
 	plan.RequireOrderMap = true
-	plan.Order = core.ScopePlanDeliveryOrder(plan.Order, operation)
+	plan.Order = authoringcore.ScopePlanDeliveryOrder(plan.Order, operation)
 
 	plan.TrackerReplaceHash = operation.TrackerReplaceHash
 	if operation.ID != "" {
@@ -82,11 +82,11 @@ func (s service) prepareAndPublishPlan(ctx context.Context, operation generation
 
 func (s service) preparePlanGeneration(ctx context.Context, scope quizcore.Scope, expected string) (planGenerationInputs, error) {
 	var (
-		sources core.PlanSourceObservation
+		sources authoringcore.PlanSourceObservation
 		state   quizcore.RuntimeState
 	)
 
-	target, err := core.PlanTargetRevision(ctx, s.projectContext.ProjectDir, scope)
+	target, err := authoringcore.PlanTargetRevision(ctx, s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return planGenerationInputs{Sources: sources, State: state, TargetRevision: target}, err
 	}
@@ -109,7 +109,7 @@ func (s service) preparePlanGeneration(ctx context.Context, scope quizcore.Scope
 	return planGenerationInputs{Sources: sources, State: state, TargetRevision: target}, err
 }
 
-func (s service) planObservedRuntimeState(sources core.PlanSourceObservation) (quizcore.RuntimeState, error) {
+func (s service) planObservedRuntimeState(sources authoringcore.PlanSourceObservation) (quizcore.RuntimeState, error) {
 	if sources.Quiz.Exists {
 		return sources.Quiz.State, nil
 	}
@@ -120,8 +120,8 @@ func (s service) planObservedRuntimeState(sources core.PlanSourceObservation) (q
 	return state, err
 }
 
-func (s service) publishObservedPlan(ctx context.Context, plan generationcore.GeneratedPlan, sources core.PlanSourceObservation) (paths core.GeneratedPlanPaths, err error) {
-	err = core.WithAuthoringMutation(ctx, s.projectContext.ProjectDir, func(ctx context.Context) error {
+func (s service) publishObservedPlan(ctx context.Context, plan generationcore.GeneratedPlan, sources authoringcore.PlanSourceObservation) (paths authoringcore.GeneratedPlanPaths, err error) {
+	err = authoringcore.WithAuthoringMutation(ctx, s.projectContext.ProjectDir, func(ctx context.Context) error {
 		current, readErr := s.observePlanContext(ctx, sources.Scope)
 		if readErr != nil {
 			return readErr
@@ -131,7 +131,7 @@ func (s service) publishObservedPlan(ctx context.Context, plan generationcore.Ge
 			return fmt.Errorf("plan sources changed; reload context and generate again: %w", workflowstate.ErrConflict)
 		}
 
-		paths, readErr = core.WriteGeneratedPlan(ctx, s.projectContext.ProjectDir, plan)
+		paths, readErr = authoringcore.WriteGeneratedPlan(ctx, s.projectContext.ProjectDir, plan)
 
 		return readErr
 	})

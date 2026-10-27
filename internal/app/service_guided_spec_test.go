@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -63,7 +62,7 @@ func assertGuidedSpecCheckpoint(t *testing.T, operations service, session author
 	approval := session.Guided.SpecApproval
 	checkpoint := session.Guided.Checkpoints[2]
 
-	content, err := core.ReadGuidedCommittedArtifact(t.Context(), operations.projectContext.ProjectDir, checkpoint, approval.Reference)
+	content, err := authoringcore.ReadGuidedCommittedArtifact(t.Context(), operations.projectContext.ProjectDir, checkpoint, approval.Reference)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,12 +119,12 @@ func TestGuidedUseCaseSpecChanged(t *testing.T) {
 
 	reference := singleGuidedSpec(t, operations.projectContext.ProjectDir)
 
-	document, err := core.ReadSpecDocument(t.Context(), operations.projectContext.ProjectDir, reference)
+	document, err := authoringcore.ReadSpecDocument(t.Context(), operations.projectContext.ProjectDir, reference)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = core.MutateSpec(t.Context(), operations.projectContext.ProjectDir, core.SpecMutationRequest{OperationID: "manual-edit", Action: "save", Reference: reference, ExpectedRevision: document.Revision, ProjectID: session.ProjectID, CaseSlug: session.Guided.CaseSlug, Title: document.Title, Body: "A later manual specification.", Status: "draft"})
+	_, err = authoringcore.MutateSpec(t.Context(), operations.projectContext.ProjectDir, authoringcore.SpecMutationRequest{OperationID: "manual-edit", Action: "save", Reference: reference, ExpectedRevision: document.Revision, ProjectID: session.ProjectID, CaseSlug: session.Guided.CaseSlug, Title: document.Title, Body: "A later manual specification.", Status: "draft"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -137,7 +136,7 @@ func TestGuidedUseCaseSpecChanged(t *testing.T) {
 		t.Fatalf("later content approved or generation repeated: %v", err)
 	}
 
-	document, err = core.ReadSpecDocument(t.Context(), operations.projectContext.ProjectDir, reference)
+	document, err = authoringcore.ReadSpecDocument(t.Context(), operations.projectContext.ProjectDir, reference)
 	if err != nil || document.Status != "draft" {
 		t.Fatalf("manual lifecycle changed: %v", err)
 	}

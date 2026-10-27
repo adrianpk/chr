@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
@@ -85,7 +86,7 @@ func (s service) quizModelPayloadWithEntries(state quizcore.RuntimeState, action
 func (s service) quizModelProjectPayload() quizmodel.ProjectPayload {
 	payload := quizmodel.ProjectPayload{ID: s.projectContext.ProjectID}
 
-	metadata, err := core.NewProjectMetadataService(s.projectContext.ProjectDir).Load()
+	metadata, err := authoringcore.NewProjectMetadataService(s.projectContext.ProjectDir).Load()
 	if err != nil {
 		return payload
 	}
@@ -98,7 +99,7 @@ func (s service) quizModelProjectPayload() quizmodel.ProjectPayload {
 
 func (s service) appendQuizSupplementalContextSections(sections []quizmodel.ContextSection, scope quizcore.Scope) ([]quizmodel.ContextSection, error) {
 	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "agent_protocol", "protocol", "AGENTS.md")
-	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "project_document", "project", core.ProjectMetadataPath(""))
+	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "project_document", "project", authoringcore.ProjectMetadataPath(""))
 
 	if scope.CaseSlug != "" {
 		sections = appendQuizFileContextSection(
@@ -106,7 +107,7 @@ func (s service) appendQuizSupplementalContextSections(sections []quizmodel.Cont
 			s.projectContext.ProjectDir,
 			"use_case_document",
 			"use_case",
-			core.CaseMetadataPath("", scope.CaseSlug),
+			authoringcore.CaseMetadataPath("", scope.CaseSlug),
 		)
 	}
 

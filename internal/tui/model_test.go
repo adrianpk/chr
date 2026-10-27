@@ -273,8 +273,8 @@ func TestModelNavigatesWithFunctionKeys(t *testing.T) {
 func TestModelEditsAndSavesProjectMetadata(t *testing.T) {
 	executor := &fakeProjectMetadataExecutor{}
 	model := NewModel(Options{
-		ProjectMetadata: core.ProjectMetadata{
-			SchemaVersion: core.ProjectMetadataSchemaVersion,
+		ProjectMetadata: authoringcore.ProjectMetadata{
+			SchemaVersion: authoringcore.ProjectMetadataSchemaVersion,
 			Name:          "Old",
 			Description:   "Old description.",
 		},
@@ -336,8 +336,8 @@ func TestModelRefreshesWorkspaceGraphAfterProjectSave(t *testing.T) {
 		},
 	}
 	model := NewModel(Options{
-		ProjectMetadata: core.ProjectMetadata{
-			SchemaVersion: core.ProjectMetadataSchemaVersion,
+		ProjectMetadata: authoringcore.ProjectMetadata{
+			SchemaVersion: authoringcore.ProjectMetadataSchemaVersion,
 			Name:          "Edited Project",
 			Context:       "Preserved context.",
 		},
@@ -367,8 +367,8 @@ func TestModelRefreshesWorkspaceGraphAfterProjectSave(t *testing.T) {
 
 func TestModelProjectEditAcceptsSpaces(t *testing.T) {
 	model := NewModel(Options{
-		ProjectMetadata: core.ProjectMetadata{
-			SchemaVersion: core.ProjectMetadataSchemaVersion,
+		ProjectMetadata: authoringcore.ProjectMetadata{
+			SchemaVersion: authoringcore.ProjectMetadataSchemaVersion,
 			Name:          "Old",
 			Description:   "Old description.",
 		},
@@ -398,8 +398,8 @@ func TestModelProjectEditAcceptsSpaces(t *testing.T) {
 
 func TestModelProjectEditInsertsAtCursor(t *testing.T) {
 	model := NewModel(Options{
-		ProjectMetadata: core.ProjectMetadata{
-			SchemaVersion: core.ProjectMetadataSchemaVersion,
+		ProjectMetadata: authoringcore.ProjectMetadata{
+			SchemaVersion: authoringcore.ProjectMetadataSchemaVersion,
 			Name:          "Old",
 			Description:   "Old description.",
 		},
@@ -503,9 +503,9 @@ func TestModelRefreshesWorkspaceGraphAfterCaseSave(t *testing.T) {
 		},
 	}
 	model := NewModel(Options{
-		Cases: []core.CaseMetadata{
+		Cases: []authoringcore.CaseMetadata{
 			{
-				SchemaVersion: core.CaseMetadataSchemaVersion,
+				SchemaVersion: authoringcore.CaseMetadataSchemaVersion,
 				Slug:          "blog-publishing",
 				Name:          "Edited Case",
 				Context:       "Preserved context.",
@@ -537,9 +537,9 @@ func TestModelRefreshesWorkspaceGraphAfterCaseSave(t *testing.T) {
 
 func TestModelFiltersCaseMetadata(t *testing.T) {
 	model := NewModel(Options{
-		Cases: []core.CaseMetadata{
-			{SchemaVersion: core.CaseMetadataSchemaVersion, Slug: "blog", Name: "Blog Publishing"},
-			{SchemaVersion: core.CaseMetadataSchemaVersion, Slug: "runtime", Name: "Runtime Observation"},
+		Cases: []authoringcore.CaseMetadata{
+			{SchemaVersion: authoringcore.CaseMetadataSchemaVersion, Slug: "blog", Name: "Blog Publishing"},
+			{SchemaVersion: authoringcore.CaseMetadataSchemaVersion, Slug: "runtime", Name: "Runtime Observation"},
 		},
 	})
 
@@ -564,9 +564,9 @@ func TestModelFiltersCaseMetadata(t *testing.T) {
 
 func TestCasesUseTabForPanesAndArrowsWithinFocusedPane(t *testing.T) {
 	model := NewModel(Options{
-		Cases: []core.CaseMetadata{
-			{SchemaVersion: core.CaseMetadataSchemaVersion, Slug: "blog", Name: "Blog Publishing"},
-			{SchemaVersion: core.CaseMetadataSchemaVersion, Slug: "runtime", Name: "Runtime Observation"},
+		Cases: []authoringcore.CaseMetadata{
+			{SchemaVersion: authoringcore.CaseMetadataSchemaVersion, Slug: "blog", Name: "Blog Publishing"},
+			{SchemaVersion: authoringcore.CaseMetadataSchemaVersion, Slug: "runtime", Name: "Runtime Observation"},
 		},
 	})
 
@@ -667,7 +667,7 @@ func TestCasesRefreshKeyRebuildsWorkspaceGraph(t *testing.T) {
 	model := NewModel(Options{
 		WorkspaceExecutor: executor,
 	})
-	model.cases = []core.CaseMetadata{{Slug: "blog", Name: "Blog"}}
+	model.cases = []authoringcore.CaseMetadata{{Slug: "blog", Name: "Blog"}}
 	model.selected = 1
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("r")})
@@ -684,11 +684,11 @@ func TestCasesRefreshKeyRebuildsWorkspaceGraph(t *testing.T) {
 
 func TestModelInitializesProjectAndCasesFromWorkspaceGraph(t *testing.T) {
 	model := NewModel(Options{
-		ProjectMetadata: core.ProjectMetadata{
+		ProjectMetadata: authoringcore.ProjectMetadata{
 			Name:        "Fallback",
 			Description: "Fallback description.",
 		},
-		Cases: []core.CaseMetadata{
+		Cases: []authoringcore.CaseMetadata{
 			{
 				Slug:        "fallback",
 				Name:        "Fallback Case",
@@ -1273,7 +1273,7 @@ func TestModelRendersDocumentRefreshHints(t *testing.T) {
 
 func TestModelPlansCreateDumpCommandWithCaseScope(t *testing.T) {
 	model := NewModel(Options{
-		Cases: []core.CaseMetadata{
+		Cases: []authoringcore.CaseMetadata{
 			{Slug: "blog", Name: "Blog"},
 		},
 		WorkspaceIndex: core.WorkspaceIndex{
@@ -1287,7 +1287,7 @@ func TestModelPlansCreateDumpCommandWithCaseScope(t *testing.T) {
 			CasesBySlug: map[string]string{"blog": "case:blog"},
 		},
 	})
-	model.cases = []core.CaseMetadata{{Slug: "blog", Name: "Blog"}}
+	model.cases = []authoringcore.CaseMetadata{{Slug: "blog", Name: "Blog"}}
 	model.selected = 1
 	model.commandPalette.Open = true
 	model.commandPalette.Filter = "create-dump"
@@ -5124,11 +5124,11 @@ func (e *fakePlanActionExecutor) ExecutePlanAction(request PlanActionRequest) (P
 }
 
 type fakeProjectMetadataExecutor struct {
-	saved core.ProjectMetadata
+	saved authoringcore.ProjectMetadata
 }
 
 func (e *fakeProjectMetadataExecutor) SaveProjectMetadata(
-	metadata core.ProjectMetadata,
+	metadata authoringcore.ProjectMetadata,
 ) (ProjectMetadataResult, error) {
 	e.saved = metadata
 
@@ -5139,15 +5139,15 @@ func (e *fakeProjectMetadataExecutor) SaveProjectMetadata(
 }
 
 type fakeCaseMetadataExecutor struct {
-	saved core.CaseMetadata
+	saved authoringcore.CaseMetadata
 }
 
 func (e *fakeCaseMetadataExecutor) SaveCaseMetadata(
-	metadata core.CaseMetadata,
+	metadata authoringcore.CaseMetadata,
 ) (CaseMetadataResult, error) {
 	e.saved = metadata
 
-	e.saved.SchemaVersion = core.CaseMetadataSchemaVersion
+	e.saved.SchemaVersion = authoringcore.CaseMetadataSchemaVersion
 	if e.saved.Slug == "" {
 		e.saved.Slug = "blog-publishing"
 	}
@@ -5157,7 +5157,7 @@ func (e *fakeCaseMetadataExecutor) SaveCaseMetadata(
 	return CaseMetadataResult{
 		Message: "Case metadata saved.",
 		Case:    e.saved,
-		Cases:   []core.CaseMetadata{e.saved},
+		Cases:   []authoringcore.CaseMetadata{e.saved},
 	}, nil
 }
 

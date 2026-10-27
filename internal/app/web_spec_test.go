@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	"forge.adrianpk.com/chr/internal/webui"
@@ -162,7 +162,7 @@ func checkWebSpecCreate(t *testing.T, provider webViewProvider, handler http.Han
 	}
 }
 
-func checkWebSpecCreatedStates(t *testing.T, documents []core.SpecDocument) {
+func checkWebSpecCreatedStates(t *testing.T, documents []authoringcore.SpecDocument) {
 	t.Helper()
 
 	for _, document := range documents {

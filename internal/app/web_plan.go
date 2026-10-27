@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
@@ -31,7 +31,7 @@ func (p webViewProvider) casePlanningView(ctx context.Context, slug, title strin
 		view.BlockedReason = "The plan is temporarily unavailable. Reload after the pending change completes."
 	}
 
-	dumps, err := core.ObserveProjectDump(ctx, p.projectContext.ProjectDir)
+	dumps, err := authoringcore.ObserveProjectDump(ctx, p.projectContext.ProjectDir)
 	if err == nil {
 		reference := dumps.Destination
 		for _, dump := range dumps.Scoped {
@@ -51,7 +51,7 @@ func (p webViewProvider) casePlanningView(ctx context.Context, slug, title strin
 }
 
 func (p webViewProvider) observeCasePlan(ctx context.Context, operations service, scope quizcore.Scope, view *webui.CasePlanView) error {
-	revision, err := core.PlanTargetRevision(ctx, p.projectContext.ProjectDir, scope)
+	revision, err := authoringcore.PlanTargetRevision(ctx, p.projectContext.ProjectDir, scope)
 	if err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func webCasePlanScope(ctx context.Context, operations service, request webui.Wri
 		return scope, errors.New("open an existing named use case to generate its plan")
 	}
 
-	_, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).ReadBounded(ctx, scope.CaseSlug)
+	_, err := authoringcore.NewCaseMetadataService(operations.projectContext.ProjectDir).ReadBounded(ctx, scope.CaseSlug)
 
 	return scope, err
 }
@@ -122,7 +122,7 @@ func planCatalog(operations service) (webui.ArtifactCatalogView, error) {
 }
 
 func planGenerationChoices(operations service) ([]webui.PlanGenerationChoice, error) {
-	cases, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, workflowstate.RecordLimit)
+	cases, err := authoringcore.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, workflowstate.RecordLimit)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func planGenerationChoices(operations service) ([]webui.PlanGenerationChoice, er
 			continue
 		}
 
-		revision, err := core.PlanTargetRevision(operations.ctx, operations.projectContext.ProjectDir, operations.quizScope(quizcore.Scope{CaseSlug: item.Slug}))
+		revision, err := authoringcore.PlanTargetRevision(operations.ctx, operations.projectContext.ProjectDir, operations.quizScope(quizcore.Scope{CaseSlug: item.Slug}))
 		if err != nil {
 			return nil, err
 		}
@@ -171,7 +171,7 @@ func (p webViewProvider) writePlanDelivery(ctx context.Context, operations servi
 		return response, nil
 	}
 
-	layout, err := core.GeneratedPlanLayout(operations.projectContext.ProjectDir, operations.quizScope(scope))
+	layout, err := authoringcore.GeneratedPlanLayout(operations.projectContext.ProjectDir, operations.quizScope(scope))
 	if err != nil {
 		return webValidationWrite(err), nil
 	}
@@ -179,7 +179,7 @@ func (p webViewProvider) writePlanDelivery(ctx context.Context, operations servi
 	return webui.WriteActionResponse{Status: webui.WriteStatusOK, Summary: fmt.Sprintf("Plan ready with %d tickets in %d slices. Work has not started.", len(result.Workflow.Tasks), len(result.Workflow.Set.Set.Slices)), RedirectURL: "/plans/detail?id=" + url.QueryEscape(layout.RelativePath), Operation: webOperation("plan.generate", "completed", layout.RelativePath, "tickets_created")}, nil
 }
 
-func webPlanPreview(document core.PlanDocument) string {
+func webPlanPreview(document authoringcore.PlanDocument) string {
 	body := strings.TrimSpace(document.Body)
 
 	heading, remaining, _ := strings.Cut(body, "\n")
@@ -196,7 +196,7 @@ func webPlanPreview(document core.PlanDocument) string {
 }
 
 func (p webViewProvider) planArtifactDetail(ctx context.Context, request webui.ArtifactDetailRequest) (webui.ArtifactDetailView, error) {
-	document, err := core.ReadPlanDocument(ctx, p.projectContext.ProjectDir, request.ID)
+	document, err := authoringcore.ReadPlanDocument(ctx, p.projectContext.ProjectDir, request.ID)
 	if err != nil {
 		return webui.ArtifactDetailView{}, err
 	}

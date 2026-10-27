@@ -5,7 +5,6 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
@@ -89,7 +88,7 @@ func telegramAuthoringParityCommands(t *testing.T, f *telegramConversationAppFix
 	f.send(t, plan, 0)
 }
 
-func telegramAuthoringParityAssertions(t *testing.T, f *telegramConversationAppFixture, snapshot core.AuthoringSnapshot, natural bool, interpretations int64) {
+func telegramAuthoringParityAssertions(t *testing.T, f *telegramConversationAppFixture, snapshot authoringcore.AuthoringSnapshot, natural bool, interpretations int64) {
 	t.Helper()
 
 	for _, artifact := range snapshot.Artifacts {

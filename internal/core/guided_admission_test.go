@@ -67,12 +67,12 @@ func guidedAdmissionProofFixture(t *testing.T) (authoringcore.Session, WorkflowS
 
 	checkpoint := authoringcore.GuidedStageCheckpoint{Stage: "preparation", Commit: strings.Repeat("a", 40), Artifacts: []authoringcore.GuidedCommittedArtifact{{Path: "ops/default/ticket/one/metadata.json", Hash: strings.Repeat("b", 64)}}}
 
-	digest, err := GuidedCheckpointDigest(checkpoint)
+	digest, err := authoringcore.GuidedCheckpointDigest(checkpoint)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	proof := workflowstate.GuidedAdmission{RunID: "run", Actor: "operator", Policy: GuidedWorkAdmissionPolicy, OperationDigest: "operation", CheckpointDigest: digest, MaterializationID: "materialized"}
+	proof := workflowstate.GuidedAdmission{RunID: "run", Actor: "operator", Policy: authoringcore.GuidedWorkAdmissionPolicy, OperationDigest: "operation", CheckpointDigest: digest, MaterializationID: "materialized"}
 
 	selection, err := normalizeWorkflowPreviewRequest(workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "slice_set", Identity: "set"}, Limit: workflowstate.PageLimit})
 	if err != nil {
@@ -122,7 +122,7 @@ func TestGuidedUseCaseControlAdmissionAuthority(t *testing.T) {
 				session.Guided.Status = status
 			}
 
-			if err := guardGuidedAdmissionProof(session, "project", "default", request); !errors.Is(err, ErrGuidedUseCaseStopped) {
+			if err := guardGuidedAdmissionProof(session, "project", "default", request); !errors.Is(err, authoringcore.ErrGuidedUseCaseStopped) {
 				t.Fatal("authorized stopped admission lost its lifecycle guard", err)
 			}
 		})

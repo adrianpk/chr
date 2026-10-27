@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	modelcore "forge.adrianpk.com/chr/internal/core/model"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
@@ -33,7 +34,7 @@ type planReadinessOutput struct {
 	ObservationHash string   `json:"observation_hash"`
 }
 
-func (s service) assessPlanReadiness(ctx context.Context, observed core.PlanSourceObservation) (PlanReadiness, error) {
+func (s service) assessPlanReadiness(ctx context.Context, observed authoringcore.PlanSourceObservation) (PlanReadiness, error) {
 	decision := PlanReadiness{Status: "absent", ObservationHash: observed.Hash, Missing: []string{"Provide meaningful dump content or at least one answered quiz question"}}
 	if !observed.HasDiscovery {
 		return decision, &PlanReadinessError{decision}
@@ -45,7 +46,7 @@ func (s service) assessPlanReadiness(ctx context.Context, observed core.PlanSour
 
 	input, err := json.Marshal(struct {
 		Scope           quizcore.Scope
-		Inputs          []core.PlanSourceInput
+		Inputs          []authoringcore.PlanSourceInput
 		ObservationHash string `json:"observation_hash"`
 	}{observed.Scope, observed.Inputs, observed.Hash})
 	if err != nil {

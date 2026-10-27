@@ -14,8 +14,8 @@ are omitted here; tests do not define production ownership.
 | --- | --- |
 | app | core, core/authoring, core/authoring/acceptance, core/authoring/generation, core/authoring/state, core/database, core/gate, core/harness, core/model, core/notify, core/ops, core/ops/namespace, core/project, core/quiz, core/quiz/model, core/quiz/openai, core/telegram, core/telegram/message, core/ticket/metadata, core/workflow/state, core/workspace, harness, harness/codex, harness/pi, tui, webui, webui/ui |
 | cmd/chr | app |
-| core | core/authoring, core/authoring/acceptance, core/authoring/generation, core/authoring/state, core/configvalue, core/contenthash, core/database, core/gate, core/harness, core/model, core/notify, core/ops, core/ops/file, core/ops/metadata, core/ops/namespace, core/ops/slug, core/project, core/quiz, core/quiz/model, core/quiz/openai, core/ticket/metadata, core/workflow/state, core/workspace, harness, harness/process |
-| core/authoring | core/authoring/generation, core/ops/metadata, core/ops/namespace, core/quiz, core/workflow/state |
+| core | core/authoring, core/authoring/acceptance, core/authoring/generation, core/authoring/state, core/configvalue, core/contenthash, core/database, core/gate, core/harness, core/model, core/notify, core/ops, core/ops/file, core/ops/metadata, core/ops/namespace, core/ops/slug, core/project, core/quiz/model, core/quiz/openai, core/ticket/metadata, core/workflow/state, core/workspace, harness, harness/process |
+| core/authoring | core/authoring/generation, core/authoring/state, core/contenthash, core/model, core/ops, core/ops/file, core/ops/metadata, core/ops/namespace, core/ops/slug, core/project, core/quiz, core/ticket/metadata, core/workflow/state, core/workspace |
 | core/authoring/acceptance | core/authoring/generation, core/ops, core/ops/metadata, core/quiz |
 | core/authoring/generation | core/quiz, core/workflow/state |
 | core/authoring/state | none |

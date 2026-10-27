@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func (s service) ListDumps() (DumpListResult, error) {
@@ -25,7 +26,7 @@ func (s service) ListDumps() (DumpListResult, error) {
 
 	result := DumpListResult{Message: "Dumps loaded.", Dumps: make([]DumpView, 0, len(artifacts))}
 	for _, artifact := range artifacts {
-		document, err := core.ReadDumpDocument(s.ctx, s.projectContext.ProjectDir, artifact.Reference)
+		document, err := authoringcore.ReadDumpDocument(s.ctx, s.projectContext.ProjectDir, artifact.Reference)
 		if err != nil {
 			return result, err
 		}
@@ -36,7 +37,7 @@ func (s service) ListDumps() (DumpListResult, error) {
 	return result, nil
 }
 
-func (s service) dumpView(document core.DumpDocumentObservation) DumpView {
+func (s service) dumpView(document authoringcore.DumpDocumentObservation) DumpView {
 	artifact := document.Artifact
 
 	return DumpView{
@@ -51,7 +52,7 @@ func (s service) dumpUseCaseTitle(slug string) string {
 		return "Project-wide"
 	}
 
-	metadata, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).ReadBounded(s.ctx, slug)
+	metadata, err := authoringcore.NewCaseMetadataService(s.projectContext.ProjectDir).ReadBounded(s.ctx, slug)
 	if err != nil || strings.TrimSpace(metadata.Name) == "" {
 		return slug
 	}

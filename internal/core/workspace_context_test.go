@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func TestAssembleWorkspaceContextLoadsCaseRootedDocuments(t *testing.T) {
@@ -168,14 +170,14 @@ func writeWorkspaceContextFixture(t *testing.T, projectDir string) {
 func writeWorkspaceContextMetadataFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeTestFile(t, ProjectMetadataPath(projectDir), RenderProjectMetadata(ProjectMetadata{
-		SchemaVersion: ProjectMetadataSchemaVersion,
+	writeTestFile(t, authoringcore.ProjectMetadataPath(projectDir), authoringcore.RenderProjectMetadata(authoringcore.ProjectMetadata{
+		SchemaVersion: authoringcore.ProjectMetadataSchemaVersion,
 		Name:          "Workspace Context",
 		Description:   "Project description.",
 		Context:       "Project context body.",
 	}))
-	writeTestFile(t, CaseMetadataPath(projectDir, "blog"), RenderCaseMetadata(CaseMetadata{
-		SchemaVersion: CaseMetadataSchemaVersion,
+	writeTestFile(t, authoringcore.CaseMetadataPath(projectDir, "blog"), authoringcore.RenderCaseMetadata(authoringcore.CaseMetadata{
+		SchemaVersion: authoringcore.CaseMetadataSchemaVersion,
 		Slug:          "blog",
 		Name:          "Blog",
 		Description:   "Case description.",

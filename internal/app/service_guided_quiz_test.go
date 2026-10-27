@@ -8,7 +8,6 @@ import (
 	"sync"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
@@ -91,7 +90,7 @@ func TestGuidedUseCaseQuizBinding(t *testing.T) {
 				t.Fatal("invalid answer accepted")
 			}
 
-			saved, err := core.ReadGuidedUseCase(t.Context(), operations.projectContext.ProjectDir, valid.GuidedUseCaseScope)
+			saved, err := authoringcore.ReadGuidedUseCase(t.Context(), operations.projectContext.ProjectDir, valid.GuidedUseCaseScope)
 			if err != nil || saved.Revision != current.Revision || saved.Guided.PendingOperation != nil {
 				t.Fatalf("invalid answer reserved effects: %v", err)
 			}
@@ -151,19 +150,19 @@ func guidedQuizFixture(t *testing.T, namespace string) (service, authoringcore.S
 	operations := newTestService(t, root)
 	scope := authoringcore.GuidedUseCaseScope{RunID: "guided-quiz", ProjectID: operations.projectContext.ProjectID, Namespace: namespace}
 
-	session, err := core.StartGuidedUseCase(t.Context(), root, authoringcore.GuidedUseCaseStart{GuidedUseCaseScope: scope, Actor: "operator", ProgressionIntent: true})
+	session, err := authoringcore.StartGuidedUseCase(t.Context(), root, authoringcore.GuidedUseCaseStart{GuidedUseCaseScope: scope, Actor: "operator", ProgressionIntent: true})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	for _, input := range []struct{ action, content string }{{"name", "Guided clarification"}, {"append", "Deliver a bounded workflow."}} {
-		session, err = core.MutateGuidedUseCase(t.Context(), root, authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: scope, OperationID: input.action, ExpectedRevision: session.Revision, Action: input.action, Content: input.content})
+		session, err = authoringcore.MutateGuidedUseCase(t.Context(), root, authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: scope, OperationID: input.action, ExpectedRevision: session.Revision, Action: input.action, Content: input.content})
 		if err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	session, err = core.FinishGuidedUseCaseDump(t.Context(), root, authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: scope, OperationID: "finish", ExpectedRevision: session.Revision, Action: "finish"})
+	session, err = authoringcore.FinishGuidedUseCaseDump(t.Context(), root, authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: scope, OperationID: "finish", ExpectedRevision: session.Revision, Action: "finish"})
 	if err != nil {
 		t.Fatal(err)
 	}

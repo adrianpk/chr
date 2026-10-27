@@ -6,7 +6,7 @@ import (
 	"errors"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/tui"
 )
@@ -68,7 +68,7 @@ func (e tuiGuidedExecutor) apply(ctx context.Context, request tui.GuidedRequest)
 		return workflowstate.ErrConflict
 	}
 
-	var prerequisite *core.GuidedPrerequisiteError
+	var prerequisite *authoringcore.GuidedPrerequisiteError
 	if errors.As(err, &prerequisite) {
 		return nil
 	}
@@ -89,7 +89,7 @@ func tuiGuidedView(observed GuidedUseCaseInspection) tui.GuidedView {
 		view.Problems = append(view.Problems, state.Blocker)
 	}
 
-	if !core.GuidedDispatchAllowed(*observed.Session) || state.PendingOperation != nil {
+	if !authoringcore.GuidedDispatchAllowed(*observed.Session) || state.PendingOperation != nil {
 		view.Prompt = "Saved input and the original operation are retained."
 
 		return view

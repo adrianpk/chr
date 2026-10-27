@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 // The actual modal retains its arguments and identity after a lost acknowledgement.
@@ -155,12 +155,12 @@ func webDumpCaptureBrowserNamed(t *testing.T, browser *webWorkflowBrowser, loseA
 func checkWebDumpCaptureBrowserInventory(t *testing.T, provider webViewProvider) {
 	t.Helper()
 
-	observed, err := core.ObserveProjectDump(t.Context(), provider.projectContext.ProjectDir)
+	observed, err := authoringcore.ObserveProjectDump(t.Context(), provider.projectContext.ProjectDir)
 	if err != nil || len(observed.Candidates) != 1 || len(observed.Components) != 1 || len(observed.Scoped) != 2 {
 		t.Fatal("browser retry or scope selection duplicated/collapsed captures", observed, err)
 	}
 
-	document, err := core.ReadDumpDocument(t.Context(), provider.projectContext.ProjectDir, observed.Destination)
+	document, err := authoringcore.ReadDumpDocument(t.Context(), provider.projectContext.ProjectDir, observed.Destination)
 	if err != nil || strings.Count(document.Content, "Retained project context.") != 1 {
 		t.Fatal("browser duplicated an acknowledged capture", document, err)
 	}

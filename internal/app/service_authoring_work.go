@@ -27,17 +27,17 @@ type AuthoringWorkRequest struct {
 // PreparedAuthoringWork is a preview to retain before dispatch. Preparing again
 // can reserve another ticket identity; callers replay the original retained input.
 type PreparedAuthoringWork struct {
-	Scope         core.AuthoringWorkScope          `json:"scope"`
-	Authorization *core.AuthoringWorkAuthorization `json:"authorization,omitempty"`
-	Mutation      PreparedRecordMutation           `json:"mutation"`
+	Scope         authoringcore.AuthoringWorkScope          `json:"scope"`
+	Authorization *authoringcore.AuthoringWorkAuthorization `json:"authorization,omitempty"`
+	Mutation      PreparedRecordMutation                    `json:"mutation"`
 }
 
 // AuthoringWorkResult reports the actual native owner receipt and retained scope.
 // It never reports admission or execution from preparation success.
 type AuthoringWorkResult struct {
-	Scope         core.AuthoringWorkScope          `json:"scope"`
-	Authorization *core.AuthoringWorkAuthorization `json:"authorization,omitempty"`
-	Result        RecordMutationResult             `json:"result"`
+	Scope         authoringcore.AuthoringWorkScope          `json:"scope"`
+	Authorization *authoringcore.AuthoringWorkAuthorization `json:"authorization,omitempty"`
+	Result        RecordMutationResult                      `json:"result"`
 }
 
 // PrepareAuthoringWork previews a backlog ticket through the shared record owner.
@@ -48,7 +48,7 @@ func (s service) PrepareAuthoringWork(ctx context.Context, request AuthoringWork
 		return result, err
 	}
 
-	err = core.WithAuthoringMutation(ctx, s.projectContext.ProjectDir, func(ctx context.Context) error {
+	err = authoringcore.WithAuthoringMutation(ctx, s.projectContext.ProjectDir, func(ctx context.Context) error {
 		snapshot, err := s.ObserveAuthoring(ctx, request.SessionID)
 		if err != nil {
 			return err
@@ -81,7 +81,7 @@ func (s service) PrepareAuthoringWork(ctx context.Context, request AuthoringWork
 			return err
 		}
 
-		scope, err := core.SealAuthoringWorkScope(core.AuthoringWorkScope{Binding: request.Binding, Intent: request.Intent, Instruction: request.Instruction, ProjectID: snapshot.Session.ProjectID, Namespace: snapshot.Session.Namespace, SessionID: snapshot.Session.ID, SessionRef: snapshot.SessionRef, SessionRevision: snapshot.Session.Revision, SourceHash: snapshot.SourceHash, DescriptionRef: source.Ref.Path, DescriptionHash: source.SourceHash, ContractHash: prepared.Native.Record.Task.ContractHash, RecordHash: recordDigest(image)})
+		scope, err := authoringcore.SealAuthoringWorkScope(authoringcore.AuthoringWorkScope{Binding: request.Binding, Intent: request.Intent, Instruction: request.Instruction, ProjectID: snapshot.Session.ProjectID, Namespace: snapshot.Session.Namespace, SessionID: snapshot.Session.ID, SessionRef: snapshot.SessionRef, SessionRevision: snapshot.Session.Revision, SourceHash: snapshot.SourceHash, DescriptionRef: source.Ref.Path, DescriptionHash: source.SourceHash, ContractHash: prepared.Native.Record.Task.ContractHash, RecordHash: recordDigest(image)})
 		result = PreparedAuthoringWork{Scope: scope, Mutation: prepared}
 
 		return err
@@ -99,7 +99,7 @@ func (s service) ApplyPreparedAuthoringWork(ctx context.Context, prepared Prepar
 // ApplyPreparedAuthoringWorkGuarded rechecks caller authority while holding the
 // authoring owner, immediately before a new native effect. An existing owner
 // receipt reconciles first without acquiring fresh authority for a changed scope.
-func (s service) ApplyPreparedAuthoringWorkGuarded(ctx context.Context, prepared PreparedAuthoringWork, guard core.AuthoringCommitGuard) (AuthoringWorkResult, error) {
+func (s service) ApplyPreparedAuthoringWorkGuarded(ctx context.Context, prepared PreparedAuthoringWork, guard authoringcore.AuthoringCommitGuard) (AuthoringWorkResult, error) {
 	if guard == nil {
 		return AuthoringWorkResult{}, workflowstate.ErrConflict
 	}
@@ -107,7 +107,7 @@ func (s service) ApplyPreparedAuthoringWorkGuarded(ctx context.Context, prepared
 	return s.applyPreparedAuthoringWork(ctx, prepared, guard)
 }
 
-func (s service) applyPreparedAuthoringWork(ctx context.Context, prepared PreparedAuthoringWork, guard core.AuthoringCommitGuard) (result AuthoringWorkResult, err error) {
+func (s service) applyPreparedAuthoringWork(ctx context.Context, prepared PreparedAuthoringWork, guard authoringcore.AuthoringCommitGuard) (result AuthoringWorkResult, err error) {
 	if err := validatePreparedAuthoringWork(prepared, s.projectContext.ProjectID); err != nil {
 		return result, err
 	}
@@ -117,7 +117,7 @@ func (s service) applyPreparedAuthoringWork(ctx context.Context, prepared Prepar
 		return result, err
 	}
 
-	err = core.WithAuthoringMutation(ctx, s.projectContext.ProjectDir, func(ctx context.Context) error {
+	err = authoringcore.WithAuthoringMutation(ctx, s.projectContext.ProjectDir, func(ctx context.Context) error {
 		var applyErr error
 
 		result, applyErr = s.applyAuthoringWork(ctx, prepared, mutation, guard)
@@ -128,7 +128,7 @@ func (s service) applyPreparedAuthoringWork(ctx context.Context, prepared Prepar
 	return result, err
 }
 
-func (s service) applyAuthoringWork(ctx context.Context, prepared PreparedAuthoringWork, mutation PreparedRecordMutation, guard core.AuthoringCommitGuard) (AuthoringWorkResult, error) {
+func (s service) applyAuthoringWork(ctx context.Context, prepared PreparedAuthoringWork, mutation PreparedRecordMutation, guard authoringcore.AuthoringCommitGuard) (AuthoringWorkResult, error) {
 	result := AuthoringWorkResult{Scope: prepared.Scope, Authorization: prepared.Authorization}
 
 	store, err := s.scopedRecordStore(prepared.Scope.Namespace)
@@ -163,7 +163,7 @@ func (s service) applyAuthoringWork(ctx context.Context, prepared PreparedAuthor
 	return result, err
 }
 
-func (s service) guardPreparedAuthoringSource(ctx context.Context, scope core.AuthoringWorkScope) error {
+func (s service) guardPreparedAuthoringSource(ctx context.Context, scope authoringcore.AuthoringWorkScope) error {
 	snapshot, err := s.ObserveAuthoring(ctx, scope.SessionID)
 	if err != nil {
 		return err
@@ -186,7 +186,7 @@ func (s service) guardPreparedAuthoringSource(ctx context.Context, scope core.Au
 	return nil
 }
 
-func guardAuthoringWorkSource(snapshot core.AuthoringSnapshot, request AuthoringWorkRequest, projectID string) error {
+func guardAuthoringWorkSource(snapshot authoringcore.AuthoringSnapshot, request AuthoringWorkRequest, projectID string) error {
 	if request.Intent != authoringstate.IntentPrepare && request.Intent != authoringstate.IntentDevelop {
 		return errors.New("explanation cannot prepare native work")
 	}
@@ -202,8 +202,8 @@ func guardAuthoringWorkSource(snapshot core.AuthoringSnapshot, request Authoring
 	return nil
 }
 
-func authoringWorkDescription(snapshot core.AuthoringSnapshot) (core.AuthoringArtifactObservation, error) {
-	var selected core.AuthoringArtifactObservation
+func authoringWorkDescription(snapshot authoringcore.AuthoringSnapshot) (authoringcore.AuthoringArtifactObservation, error) {
+	var selected authoringcore.AuthoringArtifactObservation
 
 	for _, artifact := range snapshot.Artifacts {
 		if artifact.Ref.Role != authoringcore.ArtifactRoleOutput {
@@ -223,7 +223,7 @@ func authoringWorkDescription(snapshot core.AuthoringSnapshot) (core.AuthoringAr
 }
 
 func validatePreparedAuthoringWork(prepared PreparedAuthoringWork, projectID string) error {
-	if err := core.ValidateAuthoringWorkAuthorization(prepared.Scope, prepared.Authorization); err != nil {
+	if err := authoringcore.ValidateAuthoringWorkAuthorization(prepared.Scope, prepared.Authorization); err != nil {
 		return err
 	}
 
@@ -252,7 +252,7 @@ func guardAuthoringWorkOwner(prepared PreparedAuthoringWork, projectID string) e
 	return guardAuthoringWorkRecord(*mutation.Native, scope)
 }
 
-func guardAuthoringWorkRecord(request core.WorkflowMutationRequest, scope core.AuthoringWorkScope) error {
+func guardAuthoringWorkRecord(request core.WorkflowMutationRequest, scope authoringcore.AuthoringWorkScope) error {
 	if request.Binding != scope.Binding || request.ExpectedRevision != 0 || request.Record.Task == nil || request.Record.Task.ContractHash != scope.ContractHash || request.Record.Task.Phase != "pending" || request.Record.Task.Status != core.TicketStatusBacklog {
 		return workflowstate.ErrConflict
 	}

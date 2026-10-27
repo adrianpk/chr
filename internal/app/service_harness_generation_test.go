@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -29,7 +30,7 @@ func generationBindingAuthoringCase(t *testing.T, fixture func(*testing.T, strin
 
 	harnessSelectionWrite(t, filepath.Join(driverDir, "fail-next"), "owned failure")
 
-	if _, err := operations.ContinueAuthoring(t.Context(), request); !errors.Is(err, core.ErrAuthoringProviderFailure) {
+	if _, err := operations.ContinueAuthoring(t.Context(), request); !errors.Is(err, authoringcore.ErrAuthoringProviderFailure) {
 		t.Fatal("expected retained provider failure", err)
 	}
 
@@ -175,7 +176,7 @@ func checkGenerationAuthoringAttempts(t *testing.T, project, id string, attempts
 	for _, path := range paths {
 		var request struct {
 			Attempts int
-			Request  core.AuthoringContinuationRequest
+			Request  authoringcore.AuthoringContinuationRequest
 		}
 
 		data, err := os.ReadFile(path)

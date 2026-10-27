@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"reflect"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
@@ -18,7 +19,7 @@ import (
 // Plan/map publication and approved binding share authoring exclusion before
 // taking workflow exclusion. Progress writes continue to use the workflow owner.
 func (s *WorkflowStore) withWorkflowPlanMutation(ctx context.Context, action func(context.Context) error) error {
-	return WithAuthoringMutation(ctx, s.layout.ProjectDir(), func(ctx context.Context) error {
+	return authoringcore.WithAuthoringMutation(ctx, s.layout.ProjectDir(), func(ctx context.Context) error {
 		return s.withLock(ctx, func() error { return action(ctx) })
 	})
 }
@@ -46,7 +47,7 @@ func (s *WorkflowStore) validateApprovedOrder(plan generationcore.GeneratedWorkf
 }
 
 func (s *WorkflowStore) validatePlannedApproval(plan generationcore.GeneratedWorkflowPlan, binding workflowstate.PlanRevisionBinding) error {
-	if !ValidPlanBindingPaths(s.layout.Namespace(), binding) || plan.PlanRef != binding.BodyRef || plan.PlanHash != binding.BodyHash {
+	if !authoringcore.ValidPlanBindingPaths(s.layout.Namespace(), binding) || plan.PlanRef != binding.BodyRef || plan.PlanHash != binding.BodyHash {
 		return workflowstate.ErrConflict
 	}
 
@@ -95,7 +96,7 @@ func (s *WorkflowStore) validateApprovalOrderImages(binding workflowstate.PlanRe
 
 func (s *WorkflowStore) requirePlanRevisionBinding(reference string) error {
 	full := filepath.ToSlash(filepath.Join(s.layout.RelativeRoot(), reference))
-	if ValidPlanRevisionJournalPath(full) {
+	if authoringcore.ValidPlanRevisionJournalPath(full) {
 		return fmt.Errorf("%w: generated plan requires its explicit revision binding", workflowstate.ErrConflict)
 	}
 
@@ -146,7 +147,7 @@ func (s *WorkflowStore) validateOrderScope(binding workflowstate.PlanRevisionBin
 		return err
 	}
 
-	fields, err := ProjectDocumentFields(front)
+	fields, err := authoringcore.ProjectDocumentFields(front)
 	if err != nil {
 		return err
 	}

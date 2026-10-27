@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -144,7 +145,7 @@ func (s service) applyPreparedCaseMutation(ctx context.Context, prepared Prepare
 		return RecordMutationResult{}, workflowstate.ErrConflict
 	}
 
-	result, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).SaveBound(ctx, *prepared.Case)
+	result, err := authoringcore.NewCaseMetadataService(s.projectContext.ProjectDir).SaveBound(ctx, *prepared.Case)
 	if err != nil {
 		return RecordMutationResult{}, err
 	}

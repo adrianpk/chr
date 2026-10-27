@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -71,7 +71,7 @@ func webQuizCatalogFixture(t *testing.T) webViewProvider {
 		{"long-title", "Detailed research and retained decisions across several workflow boundaries", strings.Repeat("Opening context with useful decisions. ", 200)},
 		{"unbroken-title", strings.Repeat("UnbrokenTitle", 12), strings.Repeat("UnbrokenContext", 200)},
 	} {
-		if _, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).Save(core.CaseMetadata{SourcePath: core.CaseMetadataPath(operations.projectContext.ProjectDir, item.slug), Name: item.title}); err != nil {
+		if _, err := authoringcore.NewCaseMetadataService(operations.projectContext.ProjectDir).Save(authoringcore.CaseMetadata{SourcePath: authoringcore.CaseMetadataPath(operations.projectContext.ProjectDir, item.slug), Name: item.title}); err != nil {
 			t.Fatal(err)
 		}
 
@@ -83,7 +83,7 @@ func webQuizCatalogFixture(t *testing.T) webViewProvider {
 		}
 	}
 
-	if _, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).Save(core.CaseMetadata{SourcePath: core.CaseMetadataPath(operations.projectContext.ProjectDir, "pending-work"), Name: "Pending named work"}); err != nil {
+	if _, err := authoringcore.NewCaseMetadataService(operations.projectContext.ProjectDir).Save(authoringcore.CaseMetadata{SourcePath: authoringcore.CaseMetadataPath(operations.projectContext.ProjectDir, "pending-work"), Name: "Pending named work"}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -157,7 +157,7 @@ func webQuizCatalogAllAnswered(t *testing.T, browser *webWorkflowBrowser, provid
 
 	webQuizCatalogCapture(t, browser, "all-answered", 4)
 
-	if _, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).Save(core.CaseMetadata{Slug: "new-case", Name: "Newly added case"}); err != nil {
+	if _, err := authoringcore.NewCaseMetadataService(operations.projectContext.ProjectDir).Save(authoringcore.CaseMetadata{Slug: "new-case", Name: "Newly added case"}); err != nil {
 		t.Fatal(err)
 	}
 

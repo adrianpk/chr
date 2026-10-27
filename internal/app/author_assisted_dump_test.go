@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -22,7 +22,7 @@ func TestAuthorAssistedDumpRetry(t *testing.T) {
 		t.Fatal("first finalization failed", err)
 	}
 
-	if _, err := core.MutateDump(t.Context(), root, core.DumpMutationRequest{OperationID: "ordinary", Action: "capture", Title: "Later context", Content: "Ordinary captured material."}, nil); err != nil {
+	if _, err := authoringcore.MutateDump(t.Context(), root, authoringcore.DumpMutationRequest{OperationID: "ordinary", Action: "capture", Title: "Later context", Content: "Ordinary captured material."}, nil); err != nil {
 		t.Fatal(err)
 	}
 
@@ -43,12 +43,12 @@ func TestAuthorAssistedDumpRetry(t *testing.T) {
 func checkAuthorAssistedDumpCapture(t *testing.T, root string) {
 	t.Helper()
 
-	observed, err := core.ObserveProjectDump(t.Context(), root)
+	observed, err := authoringcore.ObserveProjectDump(t.Context(), root)
 	if err != nil || len(observed.Candidates) != 1 || len(observed.Components) != 2 {
 		t.Fatal("finalization duplicated captures", observed, err)
 	}
 
-	document, err := core.ReadDumpDocument(t.Context(), root, observed.Destination)
+	document, err := authoringcore.ReadDumpDocument(t.Context(), root, observed.Destination)
 	if err != nil || strings.Count(document.Content, "Retain the retry ceiling.") != 1 || !strings.Contains(document.Content, "Ordinary captured material.") {
 		t.Fatal("retry overwrote later material or duplicated its contribution", document, err)
 	}

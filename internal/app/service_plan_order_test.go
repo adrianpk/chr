@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
@@ -32,7 +32,7 @@ func TestServicePlanOrderPublication(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			binding, err := core.ObservePlanRevision(t.Context(), project, operations.quizScope(request.Scope))
+			binding, err := authoringcore.ObservePlanRevision(t.Context(), project, operations.quizScope(request.Scope))
 			if err != nil || binding.Revision != 1 {
 				t.Fatal(binding, err)
 			}

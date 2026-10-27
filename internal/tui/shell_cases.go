@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func (m *Model) renderCasesWorkspace(width, height int) string {
@@ -227,25 +228,25 @@ func (m *Model) renderCaseArtifactLines() []string {
 	}
 }
 
-func (m *Model) selectedCaseMetadata() (core.CaseMetadata, bool) {
+func (m *Model) selectedCaseMetadata() (authoringcore.CaseMetadata, bool) {
 	if len(m.cases) == 0 || m.selectedCase < 0 || m.selectedCase >= len(m.cases) {
-		return core.CaseMetadata{}, false
+		return authoringcore.CaseMetadata{}, false
 	}
 
 	return m.cases[m.selectedCase], true
 }
 
-func (m *Model) filteredCases() []core.CaseMetadata {
+func (m *Model) filteredCases() []authoringcore.CaseMetadata {
 	filter := strings.ToLower(strings.TrimSpace(m.caseFilter))
 	if filter == "" {
-		return append([]core.CaseMetadata(nil), m.cases...)
+		return append([]authoringcore.CaseMetadata(nil), m.cases...)
 	}
 
 	if len(m.workspaceIndex.CasesBySlug) > 0 {
 		return m.caseMetadataFromSuggestions(m.workspaceIndex.SuggestCases(filter))
 	}
 
-	cases := []core.CaseMetadata{}
+	cases := []authoringcore.CaseMetadata{}
 	for _, metadata := range m.cases {
 		haystack := strings.ToLower(metadata.Name + " " + metadata.Description)
 		if strings.Contains(haystack, filter) {
@@ -256,16 +257,16 @@ func (m *Model) filteredCases() []core.CaseMetadata {
 	return cases
 }
 
-func (m *Model) caseMetadataFromSuggestions(suggestions []core.WorkspaceCaseSuggestion) []core.CaseMetadata {
-	bySlug := make(map[string]core.CaseMetadata, len(m.cases))
+func (m *Model) caseMetadataFromSuggestions(suggestions []core.WorkspaceCaseSuggestion) []authoringcore.CaseMetadata {
+	bySlug := make(map[string]authoringcore.CaseMetadata, len(m.cases))
 	for _, metadata := range m.cases {
 		bySlug[metadata.Slug] = metadata
 	}
 
-	cases := make([]core.CaseMetadata, 0, len(suggestions))
+	cases := make([]authoringcore.CaseMetadata, 0, len(suggestions))
 	for _, suggestion := range suggestions {
 		metadata := bySlug[suggestion.Slug]
-		metadata.SchemaVersion = core.CaseMetadataSchemaVersion
+		metadata.SchemaVersion = authoringcore.CaseMetadataSchemaVersion
 		metadata.Slug = suggestion.Slug
 		metadata.Name = suggestion.Name
 		metadata.Description = suggestion.Description

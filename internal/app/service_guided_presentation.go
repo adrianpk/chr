@@ -1,6 +1,9 @@
 package app
 
-import "forge.adrianpk.com/chr/internal/core"
+import (
+	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+)
 
 func guidedControlChoices(observed GuidedUseCaseInspection) []string {
 	session := *observed.Session
@@ -55,7 +58,7 @@ type guidedResultExport struct {
 	Deliveries                   []core.WorkflowResultReceipt
 	Validations                  []core.WorkflowResultValidation
 	Closures                     []core.WorkflowResultClosure
-	Ideas                        []core.GuidedLaterIdea
+	Ideas                        []authoringcore.GuidedLaterIdea
 }
 
 func guidedResultSnapshot(observed GuidedUseCaseInspection) guidedResultExport {

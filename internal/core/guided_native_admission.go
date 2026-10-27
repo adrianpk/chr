@@ -39,7 +39,7 @@ func (s *WorkflowStore) checkGuidedWorkflowAdmission(ctx context.Context, reques
 
 	proof := request.Admission.Guided
 
-	session, err := ReadOwnedAuthoringSession(ctx, s.layout.ProjectDir(), proof.RunID)
+	session, err := authoringcore.ReadOwnedAuthoringSession(ctx, s.layout.ProjectDir(), proof.RunID)
 	if err != nil {
 		return err
 	}
@@ -69,8 +69,8 @@ func guardGuidedAdmissionProof(session authoringcore.Session, project, namespace
 		return err
 	}
 
-	if !GuidedDispatchAllowed(session) {
-		return ErrGuidedUseCaseStopped
+	if !authoringcore.GuidedDispatchAllowed(session) {
+		return authoringcore.ErrGuidedUseCaseStopped
 	}
 
 	state := session.Guided
@@ -99,12 +99,12 @@ func guardGuidedAdmissionProof(session authoringcore.Session, project, namespace
 }
 
 func guardGuidedAdmissionCheckpoint(session authoringcore.Session, expected string) error {
-	checkpoint, err := GuidedPreparationCheckpoint(session)
+	checkpoint, err := authoringcore.GuidedPreparationCheckpoint(session)
 	if err != nil {
 		return err
 	}
 
-	digest, err := GuidedCheckpointDigest(checkpoint)
+	digest, err := authoringcore.GuidedCheckpointDigest(checkpoint)
 	if err != nil || digest != expected {
 		return errors.Join(workflowstate.ErrConflict, err)
 	}
@@ -123,7 +123,7 @@ func guardGuidedAdmissionState(session authoringcore.Session, project, namespace
 
 func guardGuidedAdmissionIntent(session authoringcore.Session, proof workflowstate.GuidedAdmission) error {
 	state := session.Guided
-	if proof.Policy != GuidedWorkAdmissionPolicy || proof.Actor != state.Actor || proof.RunID != session.ID || state.PendingOperation.Action != "admit" || proof.OperationDigest != state.PendingOperation.Digest || proof.MaterializationID != state.Work.Materialization.ID {
+	if proof.Policy != authoringcore.GuidedWorkAdmissionPolicy || proof.Actor != state.Actor || proof.RunID != session.ID || state.PendingOperation.Action != "admit" || proof.OperationDigest != state.PendingOperation.Digest || proof.MaterializationID != state.Work.Materialization.ID {
 		return workflowstate.ErrConflict
 	}
 
@@ -136,7 +136,7 @@ func validateGuidedControlProof(request workflowstate.ControlMutationRequest) er
 		return nil
 	}
 
-	if !ValidGuidedControlAction(request.Action) || authoringstate.ValidateSessionID(proof.RunID) != nil || !validWorkflowNativeFingerprint(proof.OperationDigest) {
+	if !authoringcore.ValidGuidedControlAction(request.Action) || authoringstate.ValidateSessionID(proof.RunID) != nil || !validWorkflowNativeFingerprint(proof.OperationDigest) {
 		return workflowstate.ErrConflict
 	}
 

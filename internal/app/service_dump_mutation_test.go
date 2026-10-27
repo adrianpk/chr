@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -192,7 +193,7 @@ func TestServiceDumpReconciliation(t *testing.T) {
 		t.Fatal(preview, err)
 	}
 
-	request := core.ProjectDumpReconciliationRequest{OperationID: "reconcile", ExpectedRevision: preview.Revision, Destination: preview.Destination}
+	request := authoringcore.ProjectDumpReconciliationRequest{OperationID: "reconcile", ExpectedRevision: preview.Revision, Destination: preview.Destination}
 	if _, err := operations.ReconcileProjectDump(request); err != nil {
 		t.Fatal(err)
 	}

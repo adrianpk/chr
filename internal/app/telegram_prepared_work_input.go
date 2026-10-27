@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -71,7 +71,7 @@ func (r telegramReceiver) bindInitialPreparedWorkAuthority(ctx context.Context, 
 		return prepared, nil
 	}
 
-	grant, err := core.AuthorizeAuthoringWork(prepared.Scope, workflowstate.MutationBinding{RequestID: instruction.DevelopmentRef, Operator: request.Operator}, prepared.Scope.Hash)
+	grant, err := authoringcore.AuthorizeAuthoringWork(prepared.Scope, workflowstate.MutationBinding{RequestID: instruction.DevelopmentRef, Operator: request.Operator}, prepared.Scope.Hash)
 	prepared.Authorization = &grant
 
 	return prepared, err
@@ -105,7 +105,7 @@ func telegramRetainedPreparedWork(request telegramcore.OperationRequest) (Prepar
 	}
 
 	scope := prepared.Scope
-	if err := core.ValidateAuthoringWorkScope(scope); err != nil {
+	if err := authoringcore.ValidateAuthoringWorkScope(scope); err != nil {
 		return prepared, err
 	}
 
@@ -116,6 +116,6 @@ func telegramRetainedPreparedWork(request telegramcore.OperationRequest) (Prepar
 	return prepared, nil
 }
 
-func telegramWorkScopeRequest(scope core.AuthoringWorkScope) AuthoringWorkRequest {
+func telegramWorkScopeRequest(scope authoringcore.AuthoringWorkScope) AuthoringWorkRequest {
 	return AuthoringWorkRequest{Binding: scope.Binding, SessionID: scope.SessionID, ExpectedRevision: scope.SessionRevision, ExpectedSourceHash: scope.SourceHash, Intent: scope.Intent, Instruction: scope.Instruction}
 }

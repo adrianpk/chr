@@ -98,10 +98,10 @@ func RenderDocumentsContext(ctx ProjectDocumentContext) string {
 
 	output.WriteString("# Document Context\n\n")
 	output.WriteString("## Ticket\n\n")
-	WriteContextDocuments(&output, []authoringcore.ContextDocument{ctx.TicketDocument}, "Ticket document was not loaded.")
+	authoringcore.WriteContextDocuments(&output, []authoringcore.ContextDocument{ctx.TicketDocument}, "Ticket document was not loaded.")
 
 	output.WriteString("## Referenced Documents\n\n")
-	WriteContextDocuments(&output, ctx.ReferencedDocs, "No referenced project documents were found.")
+	authoringcore.WriteContextDocuments(&output, ctx.ReferencedDocs, "No referenced project documents were found.")
 
 	output.WriteString("## Conversation History\n\n")
 	output.WriteString("Implicit conversation history is not included. Relevant prior discussion must be captured in project documents before execution.\n")
@@ -110,7 +110,7 @@ func RenderDocumentsContext(ctx ProjectDocumentContext) string {
 }
 
 func normalizeProjectDocumentContextOptions(opts ProjectDocumentContextOptions) (projectDocumentPaths, error) {
-	projectDir, err := CleanContextProjectDir(opts.ProjectDir)
+	projectDir, err := authoringcore.CleanContextProjectDir(opts.ProjectDir)
 	if err != nil {
 		return projectDocumentPaths{}, err
 	}

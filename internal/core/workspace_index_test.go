@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -79,7 +80,7 @@ func assertWorkspaceIndexEdges(t *testing.T, index WorkspaceIndex, graph Workspa
 
 func TestWorkspaceIndexTracksProjectWideAndUnresolvedCaseDocuments(t *testing.T) {
 	projectDir := t.TempDir()
-	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "valid"), RenderCaseMetadata(CaseMetadata{
+	writeWorkspaceGraphFile(t, authoringcore.CaseMetadataPath(projectDir, "valid"), authoringcore.RenderCaseMetadata(authoringcore.CaseMetadata{
 		Name: "Valid",
 	}))
 	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "plans", "project-plan.md"), `---
@@ -120,7 +121,7 @@ case: "missing"
 
 func TestWorkspaceIndexExcludesArchivedGeneratedDocuments(t *testing.T) {
 	projectDir := t.TempDir()
-	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "blog"), RenderCaseMetadata(CaseMetadata{
+	writeWorkspaceGraphFile(t, authoringcore.CaseMetadataPath(projectDir, "blog"), authoringcore.RenderCaseMetadata(authoringcore.CaseMetadata{
 		Name: "Blog Publishing",
 	}))
 	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "plans", "blog-plan.md"), `---

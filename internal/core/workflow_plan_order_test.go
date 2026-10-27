@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -99,7 +100,7 @@ func regenerateWorkflowOrder(t *testing.T, store *WorkflowStore, plan generation
 	generated.Order = generationcore.PlannedWorkflowOrder(plan)
 
 	generated.Body = body
-	if _, err := WriteGeneratedPlan(t.Context(), store.layout.ProjectDir(), generated); err != nil {
+	if _, err := authoringcore.WriteGeneratedPlan(t.Context(), store.layout.ProjectDir(), generated); err != nil {
 		t.Fatal(err)
 	}
 
@@ -133,7 +134,7 @@ func checkWorkflowPlanOrderRecovery(t *testing.T, stage int) {
 		t.Fatal("binding did not interrupt")
 	}
 
-	if _, err := PlanTargetRevision(t.Context(), store.layout.ProjectDir(), quizcore.Scope{ProjectID: store.projectID}); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := authoringcore.PlanTargetRevision(t.Context(), store.layout.ProjectDir(), quizcore.Scope{ProjectID: store.projectID}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("pending binding was readable", err)
 	}
 

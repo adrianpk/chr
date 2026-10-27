@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -68,7 +68,7 @@ func (r telegramReceiver) applyPreparedWork(ctx context.Context, operations tele
 
 		return err
 	})
-	if errors.Is(err, workflowstate.ErrConflict) || errors.Is(err, ErrRecordUnsupported) || errors.Is(err, core.ErrAuthoringAuthorityRequired) {
+	if errors.Is(err, workflowstate.ErrConflict) || errors.Is(err, ErrRecordUnsupported) || errors.Is(err, authoringcore.ErrAuthoringAuthorityRequired) {
 		return r.finishAuthoringFailure(ctx, request, config, err)
 	}
 
@@ -80,7 +80,7 @@ func (r telegramReceiver) applyPreparedWork(ctx context.Context, operations tele
 }
 
 func (r telegramReceiver) validateInitialPreparedWorkGrant(ctx context.Context, request telegramcore.OperationRequest, prepared PreparedAuthoringWork) error {
-	if err := core.ValidateAuthoringWorkAuthorization(prepared.Scope, prepared.Authorization); err != nil {
+	if err := authoringcore.ValidateAuthoringWorkAuthorization(prepared.Scope, prepared.Authorization); err != nil {
 		return err
 	}
 

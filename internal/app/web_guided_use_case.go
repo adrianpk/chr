@@ -7,7 +7,6 @@ import (
 	"net/url"
 	"strconv"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
@@ -83,7 +82,7 @@ func (p webViewProvider) writeGuidedUseCase(operations service, request webui.Wr
 		}
 	}
 
-	var prerequisite *core.GuidedPrerequisiteError
+	var prerequisite *authoringcore.GuidedPrerequisiteError
 	if errors.Is(err, workflowstate.ErrConflict) && !errors.As(err, &prerequisite) {
 		return webui.WriteActionResponse{Status: webui.WriteStatusStale, Summary: "The use case changed. Reload to continue.", ReloadURL: guidedUseCaseURL(request.ID, namespace)}, nil
 	}

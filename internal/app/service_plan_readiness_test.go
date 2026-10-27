@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -60,7 +61,7 @@ func TestPlanReadiness(t *testing.T) {
 
 				return json.RawMessage(item.output), item.providerError
 			})
-			observed := core.PlanSourceObservation{Hash: "bound", HasDiscovery: item.present, Inputs: []core.PlanSourceInput{{Kind: "dump", Content: "Print hello. Verify stdout."}}}
+			observed := authoringcore.PlanSourceObservation{Hash: "bound", HasDiscovery: item.present, Inputs: []authoringcore.PlanSourceInput{{Kind: "dump", Content: "Print hello. Verify stdout."}}}
 
 			decision, err := operations.assessPlanReadiness(t.Context(), observed)
 			checkPlanReadinessDecision(t, decision, err, item.status)
@@ -110,7 +111,7 @@ func TestPlanReadinessProviderBinding(t *testing.T) {
 		return sufficientPlanReadinessProvider()(ctx, request)
 	})
 
-	decision, err := operations.assessPlanReadiness(t.Context(), core.PlanSourceObservation{Hash: "binding", HasDiscovery: true})
+	decision, err := operations.assessPlanReadiness(t.Context(), authoringcore.PlanSourceObservation{Hash: "binding", HasDiscovery: true})
 	if err != nil || decision.ObservationHash != "binding" || !decision.Sufficient {
 		t.Fatal(decision, err)
 	}
@@ -141,23 +142,23 @@ func TestPlanSpecApproval(t *testing.T) {
 	}
 }
 
-func planApprovalFixture(t *testing.T, status, prose string) (service, quizcore.Scope, core.GeneratedSpecPaths) {
+func planApprovalFixture(t *testing.T, status, prose string) (service, quizcore.Scope, authoringcore.GeneratedSpecPaths) {
 	t.Helper()
 
 	operations, scope, _ := planPublicationFixture(t, "Print hello once. Verify stdout is hello.")
 	project := operations.projectContext.ProjectDir
 
-	generated, err := core.WriteGeneratedSpec(t.Context(), project, core.GeneratedSpec{Scope: scope, Title: "Greeting", Body: prose + "\n\nPrint hello once.", CreatedAt: operations.utcNow()})
+	generated, err := authoringcore.WriteGeneratedSpec(t.Context(), project, authoringcore.GeneratedSpec{Scope: scope, Title: "Greeting", Body: prose + "\n\nPrint hello once.", CreatedAt: operations.utcNow()})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	document, err := core.ReadSpecDocument(t.Context(), project, generated.RelativePath)
+	document, err := authoringcore.ReadSpecDocument(t.Context(), project, generated.RelativePath)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = core.MutateSpec(t.Context(), project, core.SpecMutationRequest{OperationID: "save-approval", Action: "save", Reference: document.Reference, ExpectedRevision: document.Revision, ProjectID: scope.ProjectID, CaseSlug: scope.CaseSlug, Title: document.Title, Body: document.Body, Status: status})
+	_, err = authoringcore.MutateSpec(t.Context(), project, authoringcore.SpecMutationRequest{OperationID: "save-approval", Action: "save", Reference: document.Reference, ExpectedRevision: document.Revision, ProjectID: scope.ProjectID, CaseSlug: scope.CaseSlug, Title: document.Title, Body: document.Body, Status: status})
 	if err != nil {
 		t.Fatal(err)
 	}

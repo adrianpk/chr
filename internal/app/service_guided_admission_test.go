@@ -147,7 +147,7 @@ func assertGuidedNativeProvenance(t *testing.T, run core.WorkflowInvocation, ses
 	work := session.Guided.Work
 
 	proof := run.Admission.Guided
-	if proof.Actor != session.Guided.Actor || proof.Policy != core.GuidedWorkAdmissionPolicy || proof.MaterializationID != work.Materialization.ID || run.Policy != work.Admission.Admission.ExecutionPolicy {
+	if proof.Actor != session.Guided.Actor || proof.Policy != authoringcore.GuidedWorkAdmissionPolicy || proof.MaterializationID != work.Materialization.ID || run.Policy != work.Admission.Admission.ExecutionPolicy {
 		t.Fatal("admission lost authority or policy provenance")
 	}
 }

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
@@ -28,7 +28,7 @@ func telegramIntentRegistry() []ConversationIntentOperation {
 
 	for _, descriptor := range telegramAuthoringRegistry() {
 		arguments := "Optional project/conversation; no text, action, namespace or record_json"
-		if descriptor.Action == core.AuthoringContinuationRefine {
+		if descriptor.Action == authoringcore.AuthoringContinuationRefine {
 			arguments = "conversation=exact session; action=dump|spec|plan; text=the original message"
 		}
 

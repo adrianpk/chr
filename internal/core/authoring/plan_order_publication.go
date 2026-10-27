@@ -1,0 +1,321 @@
+package authoring
+
+import (
+	"encoding/hex"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
+
+// planRevisionInput is one proposed revision and its observed metadata image.
+type planRevisionInput struct {
+	Paths    GeneratedPlanPaths
+	Metadata map[string]any
+	Plan     generationcore.GeneratedPlan
+	Body     []byte
+}
+
+type planRevision struct {
+	Binding  workflowstate.PlanRevisionBinding
+	Document generationcore.PlanOrderDocument
+}
+
+func preparePlanOrderChanges(projectDir string, target planTargetObservation, input planRevisionInput) ([]workflowstate.FileChange, error) {
+	paths, metadata, plan, body := input.Paths, input.Metadata, input.Plan, input.Body
+
+	if !plan.RequireOrderMap && len(plan.Order) == 0 {
+		if metadata["plan_binding"] != nil {
+			return nil, fmt.Errorf("replacement requires its revision-bound order map")
+		}
+
+		return nil, nil
+	}
+
+	if err := generationcore.ValidatePlannedOrder(plan.Order); err != nil {
+		return nil, err
+	}
+
+	revision, err := newPlanRevision(input)
+	if err != nil {
+		return nil, err
+	}
+
+	binding, document := revision.Binding, revision.Document
+
+	images, err := EncodePlanOrder(document)
+	if err != nil {
+		return nil, err
+	}
+
+	encoded, tracker := images.Order, images.Tracker
+	binding.OrderHash, binding.TrackerHash = contenthash.Sum(encoded), contenthash.Sum(tracker)
+	binding.PlannedOrderHash, binding.PlannedTrackerHash = binding.OrderHash, binding.TrackerHash
+	r := &fileAuthoringSessionRepository{projectDir: projectDir}
+
+	changes, err := r.planRetainedImages(document.Namespace, binding, body, encoded, tracker)
+	if err != nil {
+		return nil, err
+	}
+
+	current, err := r.planCurrentTrackerChanges(document.Namespace, target, binding, plan, tracker)
+	if err != nil {
+		return nil, err
+	}
+
+	metadata["plan_binding"] = binding
+	metadata["plan_revision"] = binding.Revision
+
+	if err := appendPlanRevisionManifest(paths, metadata, changes); err != nil {
+		return nil, err
+	}
+
+	return append(changes, current...), nil
+}
+
+func newPlanRevision(input planRevisionInput) (planRevision, error) {
+	paths, metadata, plan, body := input.Paths, input.Metadata, input.Plan, input.Body
+	revision := uint64(1)
+
+	if value, ok := metadata["plan_revision"]; ok {
+		number, ok := value.(float64)
+		if !ok || number < 1 || number >= 4096 || number != float64(uint64(number)) {
+			return planRevision{}, fmt.Errorf("invalid plan revision")
+		}
+
+		revision = uint64(number) + 1
+	}
+
+	parts := strings.Split(paths.RelativePath, "/")
+	reference := strings.Join(parts[2:], "/")
+	hash := contenthash.Sum(body)
+	retained := filepath.ToSlash(filepath.Join(filepath.Dir(reference), "files", "plan-revisions", fmt.Sprintf("%d-%s", revision, hash)))
+	binding := workflowstate.PlanRevisionBinding{Reference: reference, Revision: revision, BodyHash: hash, BodyRef: retained + "/plan.md", OrderRef: retained + "/order.json", TrackerRef: retained + "/tracker.md", CurrentTrackerRef: "tracker/00000-" + paths.ScopeID + "-tracking/artifact.md"}
+	document := generationcore.PlanOrderDocument{Schema: "chr-tracker/v2", ProjectID: plan.Scope.ProjectID, Namespace: parts[1], PlanRef: reference, PlanRevision: revision, PlanBodyHash: hash, SourceObservationHash: plan.SourceObservationHash, SourceInputs: plan.SourceInputs, Slices: generationcore.OrderedPlanSlices(plan.Order)}
+
+	return planRevision{Binding: binding, Document: document}, nil
+}
+
+func (r *fileAuthoringSessionRepository) planRetainedImages(namespace string, binding workflowstate.PlanRevisionBinding, body, order, tracker []byte) ([]workflowstate.FileChange, error) {
+	var changes []workflowstate.FileChange
+
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: r.projectDir, Namespace: namespace})
+	if err != nil {
+		return nil, err
+	}
+
+	root := layout.RelativeRoot()
+
+	bindingBytes, err := json.Marshal(binding)
+	if err != nil {
+		return nil, err
+	}
+
+	rootRef := filepath.Dir(binding.OrderRef)
+	refs := []string{binding.BodyRef, binding.OrderRef, binding.TrackerRef, filepath.ToSlash(filepath.Join(rootRef, "planned-order.json")), filepath.ToSlash(filepath.Join(rootRef, "planned-tracker.md")), filepath.ToSlash(filepath.Join(rootRef, "binding.json")), filepath.ToSlash(filepath.Join(rootRef, "planned-binding.json"))}
+	images := [][]byte{body, order, tracker, order, tracker, bindingBytes, bindingBytes}
+
+	for i, reference := range refs {
+		path := filepath.ToSlash(filepath.Join(root, reference))
+		if _, err := r.authoringRead(path); !errors.Is(err, os.ErrNotExist) {
+			return nil, errors.Join(workflowstate.ErrConflict, err)
+		}
+
+		changes = append(changes, workflowstate.FileChange{Path: path, After: images[i]})
+	}
+
+	return changes, nil
+}
+
+func (r *fileAuthoringSessionRepository) planCurrentTrackerChanges(namespace string, target planTargetObservation, binding workflowstate.PlanRevisionBinding, plan generationcore.GeneratedPlan, tracker []byte) ([]workflowstate.FileChange, error) {
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: r.projectDir, Namespace: namespace})
+	if err != nil {
+		return nil, err
+	}
+
+	reference := filepath.ToSlash(filepath.Join(layout.RelativeRoot(), binding.CurrentTrackerRef))
+	images := []workflowstate.FileChange{}
+
+	for _, path := range []string{reference, filepath.ToSlash(filepath.Join(filepath.Dir(reference), "metadata.json"))} {
+		image, err := r.quizImage(path)
+		if err != nil {
+			return nil, err
+		}
+
+		images = append(images, image)
+	}
+
+	if (images[0].After == nil) != (images[1].After == nil) {
+		return nil, workflowstate.ErrConflict
+	}
+
+	if err := checkPreviousPlanTracker(target, images[0], plan.TrackerReplaceHash); err != nil {
+		return nil, err
+	}
+
+	metadata, err := planCurrentTrackerMetadata(layout, reference, plan, images[1].After)
+	if err != nil {
+		return nil, err
+	}
+
+	metadata["plan_binding"], metadata["workflow_projection"] = binding, "chr-tracker/v2"
+
+	encoded, err := json.Marshal(metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	images[0].After, images[1].After = tracker, encoded
+
+	return images, nil
+}
+
+func checkPreviousPlanTracker(target planTargetObservation, image workflowstate.FileChange, replace string) error {
+	if image.After == nil {
+		return nil
+	}
+
+	if replace != "" && image.Before == replace {
+		return nil
+	}
+
+	var previous workflowstate.PlanRevisionBinding
+
+	encoded, err := json.Marshal(target.metadata["plan_binding"])
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(encoded, &previous); err != nil {
+		return err
+	}
+
+	if previous.TrackerHash == "" || previous.TrackerHash != image.Before {
+		return fmt.Errorf("%w: tracker edited; replacement requires its observed hash", workflowstate.ErrProjectionStale)
+	}
+
+	return nil
+}
+
+// ValidPlanRevisionJournalPath reports paths allowed by the original plan revision journal.
+func ValidPlanRevisionJournalPath(reference string) bool {
+	parts := strings.Split(filepath.ToSlash(reference), "/")
+	if !validPlanRevisionDirectory(parts) || !validPlanRevisionKey(parts[6]) {
+		return false
+	}
+
+	switch parts[7] {
+	case "plan.md", "order.json", "tracker.md", "planned-order.json", "planned-tracker.md", "binding.json", "planned-binding.json", "projection.json":
+		return true
+	default:
+		return false
+	}
+}
+
+func validPlanTrackerJournalPath(reference string) bool {
+	parts := strings.Split(filepath.ToSlash(reference), "/")
+
+	return len(parts) == 5 && parts[0] == "ops" && opsnamespace.Valid(parts[1]) && parts[2] == "tracker" && opscore.HasArtifactNumberPrefix(parts[3]) && (parts[4] == "artifact.md" || parts[4] == "metadata.json")
+}
+
+func appendPlanRevisionManifest(paths GeneratedPlanPaths, metadata map[string]any, changes []workflowstate.FileChange) error {
+	files, err := PlanManifestFiles(metadata["files"])
+	if err != nil {
+		return err
+	}
+
+	root := filepath.Dir(paths.RelativePath)
+	for _, change := range changes {
+		relative, err := filepath.Rel(root, change.Path)
+		if err != nil {
+			return err
+		}
+
+		files = append(files, filepath.ToSlash(relative))
+	}
+
+	metadata["files"] = files
+
+	return nil
+}
+
+func planCurrentTrackerMetadata(layout opscore.Layout, reference string, plan generationcore.GeneratedPlan, previous []byte) (map[string]any, error) {
+	parts := strings.Split(reference, "/")
+	if previous == nil {
+		return opscore.NewArtifactMetadata(opscore.ArtifactOptions{Layout: layout, Type: "tracker", Title: plan.Title + " tracking", Producer: "chr"}, parts[3], plan.CreatedAt), nil
+	}
+
+	var metadata map[string]any
+	if err := authoringstate.Decode(previous, &metadata); err != nil {
+		return nil, err
+	}
+
+	if err := ValidatePlanTrackerMetadata(metadata, reference); err != nil {
+		return nil, err
+	}
+
+	if err := AdvanceArtifactMetadata(metadata); err != nil {
+		return nil, err
+	}
+
+	return metadata, nil
+}
+
+func validPlanRevisionDirectory(parts []string) bool {
+	return len(parts) == 8 && parts[0] == "ops" && opsnamespace.Valid(parts[1]) && parts[2] == "plan" && opscore.HasArtifactNumberPrefix(parts[3]) && parts[4] == "files" && parts[5] == "plan-revisions"
+}
+
+func validPlanRevisionKey(value string) bool {
+	key := strings.SplitN(value, "-", 2)
+	if len(key) != 2 || len(key[1]) != 64 {
+		return false
+	}
+
+	revision, err := strconv.ParseUint(key[0], 10, 64)
+	if err != nil || revision < 1 || revision > 4096 {
+		return false
+	}
+
+	_, err = hex.DecodeString(key[1])
+
+	return err == nil
+}
+
+// PlanManifestFiles preserves nil, decoded and string manifest lists.
+func PlanManifestFiles(value any) ([]any, error) {
+	switch files := value.(type) {
+	case nil:
+		return nil, nil
+	case []any:
+		return files, nil
+	case []string:
+		result := make([]any, 0, len(files))
+		for _, file := range files {
+			result = append(result, file)
+		}
+
+		return result, nil
+	default:
+		return nil, workflowstate.ErrConflict
+	}
+}
+
+// ValidatePlanTrackerMetadata checks the existing tracker envelope identity.
+func ValidatePlanTrackerMetadata(metadata map[string]any, reference string) error {
+	parts := strings.Split(reference, "/")
+	if metadata["schema_version"] != "ops-layout/v1" || metadata["type"] != "tracker" || metadata["namespace"] != parts[1] || metadata["id"] != parts[3] {
+		return workflowstate.ErrConflict
+	}
+
+	return nil
+}

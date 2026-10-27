@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -81,13 +82,13 @@ type RecordMutationRequest struct {
 
 // PreparedRecordMutation freezes the exact owner input before any canonical effect.
 type PreparedRecordMutation struct {
-	ProjectID string                        `json:"project_id"`
-	Namespace string                        `json:"namespace"`
-	Kind      RecordKind                    `json:"kind"`
-	Identity  string                        `json:"identity,omitempty"`
-	ParentID  string                        `json:"parent_id,omitempty"`
-	Native    *core.WorkflowMutationRequest `json:"native,omitempty"`
-	Case      *core.CaseMutationRequest     `json:"case,omitempty"`
+	ProjectID string                             `json:"project_id"`
+	Namespace string                             `json:"namespace"`
+	Kind      RecordKind                         `json:"kind"`
+	Identity  string                             `json:"identity,omitempty"`
+	ParentID  string                             `json:"parent_id,omitempty"`
+	Native    *core.WorkflowMutationRequest      `json:"native,omitempty"`
+	Case      *authoringcore.CaseMutationRequest `json:"case,omitempty"`
 }
 
 // RecordMutationResult returns only confirmed owner facts and its replay receipt.

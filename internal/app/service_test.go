@@ -21,14 +21,14 @@ import (
 func TestServiceRefreshWorkspaceBuildsGraph(t *testing.T) {
 	projectDir := t.TempDir()
 
-	err := os.MkdirAll(filepath.Dir(core.ProjectMetadataPath(projectDir)), 0o755)
+	err := os.MkdirAll(filepath.Dir(authoringcore.ProjectMetadataPath(projectDir)), 0o755)
 	if err != nil {
 		t.Fatalf("create .chr: %v", err)
 	}
 
 	err = os.WriteFile(
-		core.ProjectMetadataPath(projectDir),
-		[]byte(core.RenderProjectMetadata(core.ProjectMetadata{
+		authoringcore.ProjectMetadataPath(projectDir),
+		[]byte(authoringcore.RenderProjectMetadata(authoringcore.ProjectMetadata{
 			Name:        "Service Project",
 			Description: "Loaded by service.",
 		})),
@@ -76,8 +76,8 @@ func TestServiceSaveProjectMetadata(t *testing.T) {
 	projectDir := t.TempDir()
 	operations := newTestService(t, projectDir)
 
-	result, err := operations.SaveProjectMetadata(core.ProjectMetadata{
-		SchemaVersion: core.ProjectMetadataSchemaVersion,
+	result, err := operations.SaveProjectMetadata(authoringcore.ProjectMetadata{
+		SchemaVersion: authoringcore.ProjectMetadataSchemaVersion,
 		Name:          "Saved Project",
 		Description:   "Saved through service.",
 	})
@@ -93,7 +93,7 @@ func TestServiceSaveProjectMetadata(t *testing.T) {
 		t.Fatalf("Metadata.Name = %q, want Saved Project", result.Metadata.Name)
 	}
 
-	loaded, err := core.NewProjectMetadataService(projectDir).Load()
+	loaded, err := authoringcore.NewProjectMetadataService(projectDir).Load()
 	if err != nil {
 		t.Fatalf("Load returned error: %v", err)
 	}
@@ -158,8 +158,8 @@ func TestServiceSaveCaseMetadataReloadsCases(t *testing.T) {
 	projectDir := t.TempDir()
 	operations := newTestService(t, projectDir)
 
-	result, err := operations.SaveCaseMetadata(core.CaseMetadata{
-		SchemaVersion: core.CaseMetadataSchemaVersion,
+	result, err := operations.SaveCaseMetadata(authoringcore.CaseMetadata{
+		SchemaVersion: authoringcore.CaseMetadataSchemaVersion,
 		Name:          "Saved Case",
 		Description:   "Saved through service.",
 	})
@@ -1052,11 +1052,11 @@ func assertWorkspaceIndexCacheMiss(t *testing.T, cache core.WorkspaceIndexCacheS
 func writeServiceWorkspaceQueryFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeServiceWorkspaceFile(t, core.ProjectMetadataPath(projectDir), core.RenderProjectMetadata(core.ProjectMetadata{
+	writeServiceWorkspaceFile(t, authoringcore.ProjectMetadataPath(projectDir), authoringcore.RenderProjectMetadata(authoringcore.ProjectMetadata{
 		Name:        "Example",
 		Description: "Example project.",
 	}))
-	writeServiceWorkspaceFile(t, core.CaseMetadataPath(projectDir, "blog"), core.RenderCaseMetadata(core.CaseMetadata{
+	writeServiceWorkspaceFile(t, authoringcore.CaseMetadataPath(projectDir, "blog"), authoringcore.RenderCaseMetadata(authoringcore.CaseMetadata{
 		Name:        "Blog Publishing",
 		Description: "Publish articles.",
 	}))

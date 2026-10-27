@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
@@ -162,7 +163,7 @@ func TestWebPlanDeliveryCases(t *testing.T) {
 	provider, _ := webPlanDeliveryFixture(t)
 
 	operations := provider.service(t.Context())
-	if _, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).Save(core.CaseMetadata{Name: "Another greeting", Slug: "another-greeting", Description: "Print another greeting."}); err != nil {
+	if _, err := authoringcore.NewCaseMetadataService(operations.projectContext.ProjectDir).Save(authoringcore.CaseMetadata{Name: "Another greeting", Slug: "another-greeting", Description: "Print another greeting."}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -211,7 +212,7 @@ func checkWebPlanDelivery(t *testing.T, provider webViewProvider) {
 		t.Fatal("generated ticket missing from Board", board)
 	}
 
-	binding, err := core.ObservePlanRevision(t.Context(), operations.projectContext.ProjectDir, operations.quizScope(quizcore.Scope{CaseSlug: "named-work"}))
+	binding, err := authoringcore.ObservePlanRevision(t.Context(), operations.projectContext.ProjectDir, operations.quizScope(quizcore.Scope{CaseSlug: "named-work"}))
 	if err != nil {
 		t.Fatal(err)
 	}

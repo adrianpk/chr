@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -90,7 +91,7 @@ func setTelegramRecoveryValidation(t *testing.T, store *core.WorkflowStore, reco
 
 	record.Domain["execution_contract"] = encoded
 
-	record.Task.ContractHash = core.WorkflowContentHash(append([]byte{0, 0}, encoded...))
+	record.Task.ContractHash = authoringcore.WorkflowContentHash(append([]byte{0, 0}, encoded...))
 	if _, err := store.Write(t.Context(), record, record.Revision); err != nil {
 		t.Fatal(err)
 	}

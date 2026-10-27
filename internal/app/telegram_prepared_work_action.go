@@ -6,7 +6,7 @@ import (
 	"errors"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -31,7 +31,7 @@ func (r telegramReceiver) applyPreparedWorkAction(ctx context.Context, claim tel
 		return r.finishPreparedWorkActionFailure(ctx, claim, current, workflowstate.ErrConflict)
 	}
 
-	grant, err := core.AuthorizeAuthoringWork(prepared.Scope, workflowstate.MutationBinding{RequestID: claim.Answer.ID, Operator: claim.Answer.Operator}, prepared.Scope.Hash)
+	grant, err := authoringcore.AuthorizeAuthoringWork(prepared.Scope, workflowstate.MutationBinding{RequestID: claim.Answer.ID, Operator: claim.Answer.Operator}, prepared.Scope.Hash)
 	if err != nil {
 		return r.finishPreparedWorkActionFailure(ctx, claim, current, err)
 	}
@@ -50,7 +50,7 @@ func (r telegramReceiver) dispatchPreparedWorkAction(ctx context.Context, operat
 
 		return err
 	})
-	if errors.Is(err, workflowstate.ErrConflict) || errors.Is(err, ErrRecordUnsupported) || errors.Is(err, core.ErrAuthoringAuthorityRequired) {
+	if errors.Is(err, workflowstate.ErrConflict) || errors.Is(err, ErrRecordUnsupported) || errors.Is(err, authoringcore.ErrAuthoringAuthorityRequired) {
 		return r.finishPreparedWorkActionFailure(ctx, claim, config, err)
 	}
 

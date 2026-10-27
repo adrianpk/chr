@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	"forge.adrianpk.com/chr/internal/webui"
@@ -111,7 +111,7 @@ func newWebQuizFixture(t *testing.T) (webViewProvider, *fakeServiceQuizModel) {
 	provider := webTicketEditorProvider(t, false)
 
 	operations := provider.service(t.Context())
-	if _, err := core.NewProjectMetadataService(provider.projectContext.ProjectDir).Save(core.ProjectMetadata{Name: "Workflow discovery", Description: "Clarify workflow boundaries and retained context."}); err != nil {
+	if _, err := authoringcore.NewProjectMetadataService(provider.projectContext.ProjectDir).Save(authoringcore.ProjectMetadata{Name: "Workflow discovery", Description: "Clarify workflow boundaries and retained context."}); err != nil {
 		t.Fatal(err)
 	}
 

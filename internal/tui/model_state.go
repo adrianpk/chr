@@ -4,13 +4,14 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type projectState struct {
 	projectDir           string
 	projectID            string
-	projectMetadata      core.ProjectMetadata
+	projectMetadata      authoringcore.ProjectMetadata
 	selectedProjectField int
 	projectEdit          ProjectEditState
 	projectDirty         bool
@@ -18,7 +19,7 @@ type projectState struct {
 }
 
 type caseState struct {
-	cases             []core.CaseMetadata
+	cases             []authoringcore.CaseMetadata
 	selectedCase      int
 	selectedCaseField int
 	caseEdit          ProjectEditState

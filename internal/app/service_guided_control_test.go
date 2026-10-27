@@ -210,7 +210,7 @@ func assertGuidedStopAccepted(t *testing.T, operations service, stopping authori
 func acknowledgeGuidedTestStop(t *testing.T, operations service, claim *core.WorkflowClaim, scope authoringcore.GuidedUseCaseScope) authoringcore.Session {
 	t.Helper()
 
-	unsettled, err := core.ReconcileGuidedStop(t.Context(), operations.projectContext.ProjectDir, scope, core.NewGuidedWorkflowObserver(operations.projectContext.ProjectDir))
+	unsettled, err := authoringcore.ReconcileGuidedStop(t.Context(), operations.projectContext.ProjectDir, scope, core.NewGuidedWorkflowObserver(operations.projectContext.ProjectDir))
 	if err != nil || unsettled.Guided.Status != "blocked" {
 		t.Fatal("running owner was falsely acknowledged", err)
 	}
@@ -247,7 +247,7 @@ func pendingGuidedAdmissionFixture(t *testing.T, admitted bool) (service, author
 	operations, prepared, _ := guidedAdmissionFixture(t)
 	command := guidedQuizCommand(prepared, "admit", "admit", "")
 
-	pending, err := core.ReserveGuidedUseCaseStep(t.Context(), operations.projectContext.ProjectDir, command)
+	pending, err := authoringcore.ReserveGuidedUseCaseStep(t.Context(), operations.projectContext.ProjectDir, command)
 	if err != nil {
 		t.Fatal(err)
 	}

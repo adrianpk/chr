@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
@@ -58,7 +59,7 @@ func (s service) validatePlanDeliveryScope(ctx context.Context, scope quizcore.S
 		return fmt.Errorf("select an existing use case with a saved spec")
 	}
 
-	if _, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).ReadBounded(ctx, scope.CaseSlug); err != nil {
+	if _, err := authoringcore.NewCaseMetadataService(s.projectContext.ProjectDir).ReadBounded(ctx, scope.CaseSlug); err != nil {
 		return err
 	}
 
@@ -113,7 +114,7 @@ type planDeliveryObservation struct {
 func (s service) planDeliveryInput(ctx context.Context, request PlanGenerateRequest, generated PlanOperationResult) (planDeliveryObservation, error) {
 	scope := s.quizScope(request.Scope)
 
-	input, err := core.ObservePlanWorkflow(ctx, s.projectContext.ProjectDir, scope)
+	input, err := authoringcore.ObservePlanWorkflow(ctx, s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return planDeliveryObservation{Input: input}, err
 	}
@@ -142,7 +143,7 @@ func (s service) planDeliveryInput(ctx context.Context, request PlanGenerateRequ
 }
 
 func (s service) checkDeliveryTarget(ctx context.Context, scope quizcore.Scope, expected string) error {
-	current, err := core.PlanTargetRevision(ctx, s.projectContext.ProjectDir, scope)
+	current, err := authoringcore.PlanTargetRevision(ctx, s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return err
 	}

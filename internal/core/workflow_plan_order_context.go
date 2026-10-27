@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -200,7 +201,7 @@ func (s *WorkflowStore) requiredOrderRepairImages(snapshot WorkflowSnapshot, sou
 		return nil, err
 	}
 
-	orderImages, err := EncodePlanOrder(document)
+	orderImages, err := authoringcore.EncodePlanOrder(document)
 	if err != nil {
 		return nil, err
 	}

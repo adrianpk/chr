@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
@@ -153,7 +154,7 @@ func acquireAgentOperationFile(lockPath, operation, owner string, createdAt time
 }
 
 func normalizeAgentOperationLockOptions(opts AgentOperationLockOptions) (string, string, time.Time, error) {
-	projectDir, err := CleanContextProjectDir(opts.ProjectDir)
+	projectDir, err := authoringcore.CleanContextProjectDir(opts.ProjectDir)
 	if err != nil {
 		return "", "", time.Time{}, err
 	}
@@ -357,7 +358,7 @@ func shouldEvaluateWorkBranchPolicy(opts WorkSelectionPreflightOptions) bool {
 }
 
 func workBranchPolicyBlockReason(ctx context.Context, opts WorkSelectionPreflightOptions) (*WorkSelectionBlockReason, error) {
-	projectDir, err := CleanContextProjectDir(opts.ProjectDir)
+	projectDir, err := authoringcore.CleanContextProjectDir(opts.ProjectDir)
 	if err != nil {
 		return nil, err
 	}

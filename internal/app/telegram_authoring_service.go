@@ -3,35 +3,35 @@ package app
 import (
 	"context"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type telegramAuthoringService interface {
-	ObserveTelegramAuthoring(context.Context, telegramcore.OperationTarget, string) (core.AuthoringSnapshot, error)
-	ContinueTelegramAuthoring(context.Context, telegramcore.OperationTarget, core.AuthoringContinuationRequest, core.AuthoringCommitGuard) (core.AuthoringContinuationResult, error)
+	ObserveTelegramAuthoring(context.Context, telegramcore.OperationTarget, string) (authoringcore.AuthoringSnapshot, error)
+	ContinueTelegramAuthoring(context.Context, telegramcore.OperationTarget, authoringcore.AuthoringContinuationRequest, authoringcore.AuthoringCommitGuard) (authoringcore.AuthoringContinuationResult, error)
 }
 
 // ObserveTelegramAuthoring resolves a frozen target before the shared operation.
-func (s service) ObserveTelegramAuthoring(ctx context.Context, target telegramcore.OperationTarget, id string) (core.AuthoringSnapshot, error) {
+func (s service) ObserveTelegramAuthoring(ctx context.Context, target telegramcore.OperationTarget, id string) (authoringcore.AuthoringSnapshot, error) {
 	scoped, err := s.telegramProjectService(ctx, target)
 	if err != nil {
-		return core.AuthoringSnapshot{}, err
+		return authoringcore.AuthoringSnapshot{}, err
 	}
 
 	return scoped.ObserveAuthoring(ctx, id)
 }
 
 // ContinueTelegramAuthoring adapts registry routing to the neutral guarded owner.
-func (s service) ContinueTelegramAuthoring(ctx context.Context, target telegramcore.OperationTarget, request core.AuthoringContinuationRequest, guard core.AuthoringCommitGuard) (core.AuthoringContinuationResult, error) {
+func (s service) ContinueTelegramAuthoring(ctx context.Context, target telegramcore.OperationTarget, request authoringcore.AuthoringContinuationRequest, guard authoringcore.AuthoringCommitGuard) (authoringcore.AuthoringContinuationResult, error) {
 	if request.ProjectID != target.ProjectID || request.Namespace != target.Namespace {
-		return core.AuthoringContinuationResult{}, workflowstate.ErrConflict
+		return authoringcore.AuthoringContinuationResult{}, workflowstate.ErrConflict
 	}
 
 	scoped, err := s.telegramProjectService(ctx, target)
 	if err != nil {
-		return core.AuthoringContinuationResult{}, err
+		return authoringcore.AuthoringContinuationResult{}, err
 	}
 
 	return scoped.ContinueAuthoringGuarded(ctx, request, guard)

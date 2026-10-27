@@ -46,7 +46,7 @@ func (s service) GenerateGuidedSpec(ctx context.Context, command authoringcore.G
 
 	command.GuidedUseCaseScope = scope
 
-	return core.ApplyGuidedUseCaseStep(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *authoringcore.Session) error {
+	return authoringcore.ApplyGuidedUseCaseStep(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *authoringcore.Session) error {
 		bounded := s
 		bounded.ctx = ctx
 
@@ -68,15 +68,15 @@ func (s service) generateGuidedSpec(ctx context.Context, session *authoringcore.
 
 		operation.PreparedSpec = &prepared
 
-		if err := core.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session); err != nil {
+		if err := authoringcore.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session); err != nil {
 			return err
 		}
 	}
 
 	prepared := operation.PreparedSpec
-	request := core.SpecMutationRequest{OperationID: "guided-" + operation.Digest + "-draft", Action: "create", Namespace: session.Namespace, ProjectID: session.ProjectID, CaseSlug: session.Guided.CaseSlug, Title: prepared.Title, Body: prepared.Body, Status: "draft"}
+	request := authoringcore.SpecMutationRequest{OperationID: "guided-" + operation.Digest + "-draft", Action: "create", Namespace: session.Namespace, ProjectID: session.ProjectID, CaseSlug: session.Guided.CaseSlug, Title: prepared.Title, Body: prepared.Body, Status: "draft"}
 
-	draft, err := core.MutateSpec(ctx, s.projectContext.ProjectDir, request)
+	draft, err := authoringcore.MutateSpec(ctx, s.projectContext.ProjectDir, request)
 	if err != nil {
 		return err
 	}
@@ -88,21 +88,21 @@ func (s service) generateGuidedSpec(ctx context.Context, session *authoringcore.
 	hash := sha256.Sum256([]byte(prepared.Body))
 
 	session.Guided.SpecDraft = &authoringcore.GuidedSpecDraftReference{Reference: draft.Reference, Revision: draft.Revision, ContentHash: hex.EncodeToString(hash[:])}
-	if err := core.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session); err != nil {
+	if err := authoringcore.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session); err != nil {
 		return err
 	}
 
 	return s.approveGuidedSpec(ctx, session, request, draft)
 }
 
-func (s service) approveGuidedSpec(ctx context.Context, session *authoringcore.Session, request core.SpecMutationRequest, draft core.SpecMutationResult) error {
+func (s service) approveGuidedSpec(ctx context.Context, session *authoringcore.Session, request authoringcore.SpecMutationRequest, draft authoringcore.SpecMutationResult) error {
 	operation := session.Guided.PendingOperation
 	approval := authoringcore.GuidedSpecApproval{RunID: session.ID, Actor: session.Guided.Actor, Policy: authoringcore.GuidedSpecApprovalPolicy, GeneratedRevision: draft.Revision, ContentHash: session.Guided.SpecDraft.ContentHash, InputDigest: operation.PreparedSpec.InputDigest}
 	request.OperationID, request.Action = "guided-"+operation.Digest+"-approve", "save"
 	request.Namespace, request.Reference, request.ExpectedRevision = "", draft.Reference, draft.Revision
 	request.Status, request.GuidedApproval = "approved", &approval
 
-	result, err := core.MutateSpec(ctx, s.projectContext.ProjectDir, request)
+	result, err := authoringcore.MutateSpec(ctx, s.projectContext.ProjectDir, request)
 	if err != nil {
 		return err
 	}
@@ -113,7 +113,7 @@ func (s service) approveGuidedSpec(ctx context.Context, session *authoringcore.S
 
 	session.Guided.SpecApproval = &authoringcore.GuidedSpecApprovalReference{GuidedSpecApproval: approval, Reference: result.Reference, Revision: result.Revision}
 
-	return core.SealGuidedSpec(ctx, s.projectContext.ProjectDir, session)
+	return authoringcore.SealGuidedSpec(ctx, s.projectContext.ProjectDir, session)
 }
 
 func (s service) guidedSpecEffect(phase string) error {
@@ -161,7 +161,7 @@ func (s service) guidedSpecModelRequest(session authoringcore.Session) (guidedSp
 		return guidedSpecRequest{}, err
 	}
 
-	digest, err := core.GuidedCheckpointDigest(inputs.Checkpoint)
+	digest, err := authoringcore.GuidedCheckpointDigest(inputs.Checkpoint)
 	request := quizmodel.Request{
 		ID: core.HarnessGenerationRequestID(s.ctx, "guided-"+session.ID+"-spec"), Action: quizmodel.ActionGenerateSpec, Strategy: "guided_committed_inputs",
 		Scope: quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}, Mode: quizcore.ModeDeep,
@@ -225,7 +225,7 @@ func (s service) guidedCommittedQuiz(session authoringcore.Session) (guidedCommi
 				continue
 			}
 
-			data, err := core.ReadGuidedCommittedArtifact(s.ctx, s.projectContext.ProjectDir, checkpoint, artifact.Path)
+			data, err := authoringcore.ReadGuidedCommittedArtifact(s.ctx, s.projectContext.ProjectDir, checkpoint, artifact.Path)
 			if err != nil {
 				return guidedCommittedQuizResult{State: state, Checkpoint: checkpoint}, err
 			}

@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -98,8 +99,8 @@ func recordString(value *string) string {
 
 func recordDigest(data []byte) string { sum := sha256.Sum256(data); return hex.EncodeToString(sum[:]) }
 
-func (s service) prepareCaseRecordMutation(ctx context.Context, binding workflowstate.MutationBinding, request RecordMutationRequest) (core.CaseMutationRequest, error) {
-	result := core.CaseMutationRequest{Binding: binding, ProjectID: s.projectContext.ProjectID, Namespace: "default"}
+func (s service) prepareCaseRecordMutation(ctx context.Context, binding workflowstate.MutationBinding, request RecordMutationRequest) (authoringcore.CaseMutationRequest, error) {
+	result := authoringcore.CaseMutationRequest{Binding: binding, ProjectID: s.projectContext.ProjectID, Namespace: "default"}
 	if unsupportedCaseRecordFields(request) {
 		return result, ErrRecordUnsupported
 	}
@@ -130,20 +131,20 @@ func unsupportedTicketCreation(request RecordMutationRequest) bool {
 	return request.Slice != nil || request.Validation != nil || request.PlanRef != "" || request.PlanHash != "" || request.Context != nil || request.ParentID != ""
 }
 
-func (s service) caseMutationTarget(ctx context.Context, request RecordMutationRequest) (core.CaseMetadata, error) {
+func (s service) caseMutationTarget(ctx context.Context, request RecordMutationRequest) (authoringcore.CaseMetadata, error) {
 	if request.Action == "create" {
 		if request.Identity != "" || request.ExpectedHash != "" || request.ExpectedRevision != 0 {
-			return core.CaseMetadata{}, errors.New("case creation reserves its identity")
+			return authoringcore.CaseMetadata{}, errors.New("case creation reserves its identity")
 		}
 
-		return core.CaseMetadata{SchemaVersion: core.CaseMetadataSchemaVersion}, nil
+		return authoringcore.CaseMetadata{SchemaVersion: authoringcore.CaseMetadataSchemaVersion}, nil
 	}
 
 	if !validRecordIdentity(request.Identity) || request.ExpectedHash == "" {
-		return core.CaseMetadata{}, workflowstate.ErrConflict
+		return authoringcore.CaseMetadata{}, workflowstate.ErrConflict
 	}
 
-	metadata, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).ReadBounded(ctx, request.Identity)
+	metadata, err := authoringcore.NewCaseMetadataService(s.projectContext.ProjectDir).ReadBounded(ctx, request.Identity)
 	if err != nil {
 		return metadata, err
 	}

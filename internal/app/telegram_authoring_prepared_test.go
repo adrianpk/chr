@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
@@ -121,7 +122,7 @@ func telegramAuthoringPreparedRecord(t *testing.T, records []core.WorkflowRecord
 			continue
 		}
 
-		var scope core.AuthoringWorkScope
+		var scope authoringcore.AuthoringWorkScope
 		if err := json.Unmarshal(record.Metadata["authoring_scope"], &scope); err != nil {
 			t.Fatal(err)
 		}

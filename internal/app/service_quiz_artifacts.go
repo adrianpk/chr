@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
@@ -35,24 +36,24 @@ func (s service) generateQuizDraftSpec(scope quizcore.Scope) (QuizOperationResul
 	return QuizOperationResult{Message: "Spec generated.", State: state}, nil
 }
 
-func (s service) writeQuizCuratedNotes(scope quizcore.Scope) (core.QuizArtifactPaths, error) {
+func (s service) writeQuizCuratedNotes(scope quizcore.Scope) (authoringcore.QuizArtifactPaths, error) {
 	repository := s.quizRepository()
 
 	entries, err := repository.LoadRawCaptureEntries(s.ctx, scope)
 	if err != nil {
-		return core.QuizArtifactPaths{}, err
+		return authoringcore.QuizArtifactPaths{}, err
 	}
 
 	return repository.WriteCuratedNotes(s.ctx, quizcore.CurateEntries(scope, entries, s.utcNow()))
 }
 
-func (s service) writeQuizDraftSpec(state quizcore.RuntimeState, paths core.QuizArtifactPaths) error {
-	target, err := core.QuizDraftSpecLayout(s.projectContext.ProjectDir, quizcore.Scope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug})
+func (s service) writeQuizDraftSpec(state quizcore.RuntimeState, paths authoringcore.QuizArtifactPaths) error {
+	target, err := authoringcore.QuizDraftSpecLayout(s.projectContext.ProjectDir, quizcore.Scope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug})
 	if err != nil {
 		return err
 	}
 
-	revision, err := core.SpecTargetRevision(s.ctx, s.projectContext.ProjectDir, target.RelativePath)
+	revision, err := authoringcore.SpecTargetRevision(s.ctx, s.projectContext.ProjectDir, target.RelativePath)
 	if err != nil {
 		return err
 	}
@@ -77,12 +78,12 @@ func (s service) writeQuizDraftSpec(state quizcore.RuntimeState, paths core.Quiz
 	spec.SourceResponseID = response.ID
 	spec.CreatedAt = response.CreatedAt.UTC()
 
-	_, err = core.WriteQuizDraftSpec(s.ctx, s.projectContext.ProjectDir, spec)
+	_, err = authoringcore.WriteQuizDraftSpec(s.ctx, s.projectContext.ProjectDir, spec)
 
 	return err
 }
 
-func (s service) newQuizDraftSpecModelRequest(state quizcore.RuntimeState, paths core.QuizArtifactPaths) (quizmodel.Request, error) {
+func (s service) newQuizDraftSpecModelRequest(state quizcore.RuntimeState, paths authoringcore.QuizArtifactPaths) (quizmodel.Request, error) {
 	scope := quizcore.Scope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,

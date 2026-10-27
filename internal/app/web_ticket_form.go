@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -12,7 +13,7 @@ func (p webViewProvider) completeTicketEditor(view webui.TicketDetailView) (webu
 	view.RequestID = webTicketMutationBinding("").RequestID
 	view.CommentRequestID = webTicketMutationBinding("").RequestID
 
-	cases, err := core.NewCaseMetadataService(p.projectContext.ProjectDir).LoadAll()
+	cases, err := authoringcore.NewCaseMetadataService(p.projectContext.ProjectDir).LoadAll()
 	if err != nil {
 		return view, err
 	}

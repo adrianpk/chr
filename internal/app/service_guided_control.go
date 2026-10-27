@@ -19,7 +19,7 @@ func (s service) ControlGuidedUseCase(ctx context.Context, command authoringcore
 
 	command.GuidedUseCaseScope = scope
 
-	return core.ApplyGuidedUseCaseControl(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *authoringcore.Session) error {
+	return authoringcore.ApplyGuidedUseCaseControl(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *authoringcore.Session) error {
 		bounded := s
 		bounded.ctx, bounded.workflowNamespace = ctx, session.Namespace
 
@@ -28,7 +28,7 @@ func (s service) ControlGuidedUseCase(ctx context.Context, command authoringcore
 }
 
 func (s service) controlGuidedWork(ctx context.Context, session *authoringcore.Session) error {
-	if err := core.BindGuidedControlInvocation(ctx, s.projectContext.ProjectDir, session, core.NewGuidedWorkflowObserver(s.projectContext.ProjectDir)); err != nil {
+	if err := authoringcore.BindGuidedControlInvocation(ctx, s.projectContext.ProjectDir, session, core.NewGuidedWorkflowObserver(s.projectContext.ProjectDir)); err != nil {
 		return err
 	}
 
@@ -101,7 +101,7 @@ func (s service) applyGuidedNativeControl(ctx context.Context, store *core.Workf
 		return prior, nil
 	}
 
-	return result, errors.Join(core.ErrGuidedControlRejected, err)
+	return result, errors.Join(authoringcore.ErrGuidedControlRejected, err)
 }
 
 func guidedControlCommand(session authoringcore.Session) (authoringcore.GuidedUseCaseCommand, bool) {

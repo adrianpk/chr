@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
@@ -29,7 +29,7 @@ type planSliceDetailGenerationResult struct {
 	ResponseID string
 }
 
-func (s service) generatePlanWithConfiguredBackend(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (planGenerationResult, error) {
+func (s service) generatePlanWithConfiguredBackend(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources authoringcore.PlanSourceObservation) (planGenerationResult, error) {
 	if s.singlePassPlan(ctx) {
 		return s.generateSinglePassPlan(ctx, scope, state, sources)
 	}
@@ -37,7 +37,7 @@ func (s service) generatePlanWithConfiguredBackend(ctx context.Context, scope qu
 	return s.generateStagedPlan(ctx, scope, state, sources)
 }
 
-func (s service) generateSinglePassPlan(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (planGenerationResult, error) {
+func (s service) generateSinglePassPlan(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources authoringcore.PlanSourceObservation) (planGenerationResult, error) {
 	modelRequest, err := s.newPlanGenerationModelRequest(state, sources)
 	if err != nil {
 		return planGenerationResult{}, err
@@ -69,7 +69,7 @@ func (s service) generateSinglePassPlan(ctx context.Context, scope quizcore.Scop
 	return planGenerationResult{Plan: plan, RequestIDs: []string{modelRequest.ID}, ResponseIDs: []string{response.ID}}, nil
 }
 
-func (s service) generateStagedPlan(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (planGenerationResult, error) {
+func (s service) generateStagedPlan(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources authoringcore.PlanSourceObservation) (planGenerationResult, error) {
 	generatedOutline, err := s.generatePlanOutline(ctx, scope, state, sources)
 	if err != nil {
 		return planGenerationResult{}, err
@@ -90,7 +90,7 @@ func (s service) generateStagedPlan(ctx context.Context, scope quizcore.Scope, s
 		responseIDs = append(responseIDs, generatedDetail.ResponseID)
 	}
 
-	body, err := core.AssembleGeneratedPlanBody(outline, details, requestIDs, responseIDs)
+	body, err := authoringcore.AssembleGeneratedPlanBody(outline, details, requestIDs, responseIDs)
 	if err != nil {
 		return planGenerationResult{}, err
 	}
@@ -99,7 +99,7 @@ func (s service) generateStagedPlan(ctx context.Context, scope quizcore.Scope, s
 		Scope:       scope,
 		Title:       outline.Title,
 		Body:        body,
-		Order:       core.PlannedOrderFromDetails(details),
+		Order:       authoringcore.PlannedOrderFromDetails(details),
 		SourcePaths: generatedOutline.SourcePaths,
 		CreatedAt:   outline.CreatedAt.UTC(),
 	}
@@ -107,7 +107,7 @@ func (s service) generateStagedPlan(ctx context.Context, scope quizcore.Scope, s
 	return planGenerationResult{Plan: plan, RequestIDs: requestIDs, ResponseIDs: responseIDs}, nil
 }
 
-func (s service) generatePlanOutline(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (planOutlineGenerationResult, error) {
+func (s service) generatePlanOutline(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources authoringcore.PlanSourceObservation) (planOutlineGenerationResult, error) {
 	modelRequest, err := s.newPlanOutlineGenerationModelRequest(state, sources)
 	if err != nil {
 		return planOutlineGenerationResult{}, err
@@ -142,7 +142,7 @@ func (s service) generatePlanOutline(ctx context.Context, scope quizcore.Scope, 
 	}, nil
 }
 
-func (s service) generatePlanSliceDetail(ctx context.Context, state quizcore.RuntimeState, sources core.PlanSourceObservation, outline generationcore.GeneratedPlanOutline, targetSliceID string) (planSliceDetailGenerationResult, error) {
+func (s service) generatePlanSliceDetail(ctx context.Context, state quizcore.RuntimeState, sources authoringcore.PlanSourceObservation, outline generationcore.GeneratedPlanOutline, targetSliceID string) (planSliceDetailGenerationResult, error) {
 	modelRequest, err := s.newPlanSliceDetailGenerationModelRequest(state, sources, outline, targetSliceID)
 	if err != nil {
 		return planSliceDetailGenerationResult{}, err

@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -56,7 +57,7 @@ func TestWorkspaceGraphBuilderBuildCachedIndexHitsValidCache(t *testing.T) {
 func TestWorkspaceGraphBuilderBuildCachedIndexPreservesDumpPairMetadata(t *testing.T) {
 	projectDir := t.TempDir()
 
-	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "blog"), RenderCaseMetadata(CaseMetadata{
+	writeWorkspaceGraphFile(t, authoringcore.CaseMetadataPath(projectDir, "blog"), authoringcore.RenderCaseMetadata(authoringcore.CaseMetadata{
 		Name: "Blog Publishing",
 	}))
 	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "dumps", "blog-notes.md"), `---
@@ -105,7 +106,7 @@ case: "blog"
 func TestWorkspaceGraphBuilderBuildCachedIndexPreservesQuizPairMetadata(t *testing.T) {
 	projectDir := t.TempDir()
 
-	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "blog"), RenderCaseMetadata(CaseMetadata{
+	writeWorkspaceGraphFile(t, authoringcore.CaseMetadataPath(projectDir, "blog"), authoringcore.RenderCaseMetadata(authoringcore.CaseMetadata{
 		Name: "Blog Publishing",
 	}))
 	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "quizzes", "blog-quiz.md"), `---

@@ -200,12 +200,12 @@ func loadTUIContentData(data *tuiOptionsData) error {
 }
 
 func loadTUIMetadataData(data *tuiOptionsData) error {
-	projectMetadata, err := core.NewProjectMetadataService(data.projectContext.ProjectDir).Load()
+	projectMetadata, err := authoringcore.NewProjectMetadataService(data.projectContext.ProjectDir).Load()
 	if err != nil {
 		return err
 	}
 
-	cases, err := core.NewCaseMetadataService(data.projectContext.ProjectDir).LoadAll()
+	cases, err := authoringcore.NewCaseMetadataService(data.projectContext.ProjectDir).LoadAll()
 	if err != nil {
 		return err
 	}
@@ -283,8 +283,8 @@ type tuiOptionsData struct {
 	quizzes              []tui.QuizView
 	specs                []tui.SpecView
 	plans                []tui.PlanView
-	projectMetadata      core.ProjectMetadata
-	cases                []core.CaseMetadata
+	projectMetadata      authoringcore.ProjectMetadata
+	cases                []authoringcore.CaseMetadata
 	authoringSessions    []authoringcore.Session
 	observability        tui.ObservabilityView
 	workReadiness        tui.WorkReadinessView
@@ -349,7 +349,7 @@ func loadTUIAuthoringSessions(
 	ctx context.Context,
 	projectContext commandProjectContext,
 ) ([]authoringcore.Session, error) {
-	sessions, err := core.NewAuthoringSessionRepository(projectContext.ProjectDir).ListSessions(ctx)
+	sessions, err := authoringcore.NewAuthoringSessionRepository(projectContext.ProjectDir).ListSessions(ctx)
 	if err != nil {
 		return nil, err
 	}

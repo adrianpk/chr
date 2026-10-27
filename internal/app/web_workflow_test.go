@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -305,7 +306,7 @@ func TestWebWorkflowViews(t *testing.T) {
 	operations, hierarchy, _ := workflowCLIFixture(t)
 
 	project := operations.projectContext.ProjectDir
-	if _, err := core.NewCaseMetadataService(project).Save(core.CaseMetadata{Name: "Delivery", Slug: "delivery", Description: "Deliver the approved work."}); err != nil {
+	if _, err := authoringcore.NewCaseMetadataService(project).Save(authoringcore.CaseMetadata{Name: "Delivery", Slug: "delivery", Description: "Deliver the approved work."}); err != nil {
 		t.Fatal(err)
 	}
 

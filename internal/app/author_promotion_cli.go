@@ -10,7 +10,6 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
@@ -71,7 +70,7 @@ func (factory commandFactory) runAuthorPromoteQuizToDraft(ctx context.Context, c
 		return fmt.Errorf("quiz path is required")
 	}
 
-	repository := core.NewAuthoringSessionRepository(projectContext.ProjectDir)
+	repository := authoringcore.NewAuthoringSessionRepository(projectContext.ProjectDir)
 
 	session, err := resolveAuthoringSessionForPromotion(
 		ctx,
@@ -84,7 +83,7 @@ func (factory commandFactory) runAuthorPromoteQuizToDraft(ctx context.Context, c
 		return err
 	}
 
-	plan, err := core.PlanQuizToDraftPromotion(core.QuizToDraftPromotionOptions{
+	plan, err := authoringcore.PlanQuizToDraftPromotion(authoringcore.QuizToDraftPromotionOptions{
 		ProjectDir:   projectContext.ProjectDir,
 		Session:      session,
 		QuizPath:     quizPath,
@@ -100,7 +99,7 @@ func (factory commandFactory) runAuthorPromoteQuizToDraft(ctx context.Context, c
 		return printAuthorPromotionPlan(factory.io.Stdout, plan, true)
 	}
 
-	err = core.WriteQuizToDraftPromotionContext(ctx, plan)
+	err = authoringcore.WriteQuizToDraftPromotionContext(ctx, plan)
 	if err != nil {
 		return err
 	}
@@ -113,7 +112,7 @@ func (factory commandFactory) runAuthorPromoteQuizToDraft(ctx context.Context, c
 	return printAuthorPromotionPlan(factory.io.Stdout, plan, false)
 }
 
-func resolveAuthoringSessionForPromotion(ctx context.Context, repository core.AuthoringSessionRepository, projectDir, handle, artifactPath string) (authoringcore.Session, error) {
+func resolveAuthoringSessionForPromotion(ctx context.Context, repository authoringcore.AuthoringSessionRepository, projectDir, handle, artifactPath string) (authoringcore.Session, error) {
 	if strings.TrimSpace(handle) != "" {
 		return resolveAuthoringSession(ctx, repository, handle)
 	}
@@ -121,7 +120,7 @@ func resolveAuthoringSessionForPromotion(ctx context.Context, repository core.Au
 	return resolveAuthoringSessionFromArtifact(ctx, repository, projectDir, artifactPath)
 }
 
-func resolveAuthoringSessionFromArtifact(ctx context.Context, repository core.AuthoringSessionRepository, projectDir, artifactPath string) (authoringcore.Session, error) {
+func resolveAuthoringSessionFromArtifact(ctx context.Context, repository authoringcore.AuthoringSessionRepository, projectDir, artifactPath string) (authoringcore.Session, error) {
 	sessions, err := repository.ListSessions(ctx)
 	if err != nil {
 		return authoringcore.Session{}, err
@@ -175,7 +174,7 @@ func normalizeAuthoringArtifactPath(projectDir, artifactPath string) string {
 	return filepath.ToSlash(path)
 }
 
-func printAuthorPromotionPlan(stdout io.Writer, plan core.QuizToDraftPromotionPlan, dryRun bool) error {
+func printAuthorPromotionPlan(stdout io.Writer, plan authoringcore.QuizToDraftPromotionPlan, dryRun bool) error {
 	lines := []string{
 		"promotion: quiz-to-draft",
 		fmt.Sprintf("dry_run: %t", dryRun),

@@ -14,7 +14,7 @@ import (
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
-var newAuthoringQuizQuestionProvider = func() core.AuthoringQuizQuestionProvider {
+var newAuthoringQuizQuestionProvider = func() authoringcore.AuthoringQuizQuestionProvider {
 	return core.HarnessAuthoringQuizQuestionProvider{Program: codex.Program, Runner: codex.Runner{}}
 }
 
@@ -84,8 +84,8 @@ func (factory commandFactory) runAuthorQuizNew(ctx context.Context, cmd *cli.Com
 }
 
 func (factory commandFactory) runAuthorContextualQuizNew(ctx context.Context, cmd *cli.Command, projectContext commandProjectContext, session authoringcore.Session, now time.Time) error {
-	return withContextualQuizGeneration(ctx, cmd, projectContext, session.ID, func(ctx context.Context, provider core.AuthoringQuizQuestionProvider) error {
-		plan, err := core.PlanContextualQuizGeneration(ctx, core.ContextualQuizGenerationOptions{
+	return withContextualQuizGeneration(ctx, cmd, projectContext, session.ID, func(ctx context.Context, provider authoringcore.AuthoringQuizQuestionProvider) error {
+		plan, err := authoringcore.PlanContextualQuizGeneration(ctx, authoringcore.ContextualQuizGenerationOptions{
 			Context:       core.WorkspaceAuthoringQuizContext{},
 			ProjectDir:    projectContext.ProjectDir,
 			Session:       session,
@@ -103,12 +103,12 @@ func (factory commandFactory) runAuthorContextualQuizNew(ctx context.Context, cm
 			return printAuthorContextualQuizPlan(factory.io.Stdout, plan, true, projectContext.ProjectDir)
 		}
 
-		err = core.WriteContextualQuizContext(ctx, plan)
+		err = authoringcore.WriteContextualQuizContext(ctx, plan)
 		if err != nil {
 			return err
 		}
 
-		_, err = core.NewAuthoringSessionRepository(projectContext.ProjectDir).CreateSession(ctx, plan.Session)
+		_, err = authoringcore.NewAuthoringSessionRepository(projectContext.ProjectDir).CreateSession(ctx, plan.Session)
 		if err != nil {
 			return err
 		}
@@ -142,11 +142,11 @@ func quizSessionFromCommand(cmd *cli.Command, projectContext commandProjectConte
 	return session, nil
 }
 
-func contextualQuizProviderFromCommand() core.AuthoringQuizQuestionProvider {
+func contextualQuizProviderFromCommand() authoringcore.AuthoringQuizQuestionProvider {
 	return newAuthoringQuizQuestionProvider()
 }
 
-func printAuthorContextualQuizPlan(stdout io.Writer, plan core.ContextualQuizGenerationPlan, dryRun bool, projectDir string) error {
+func printAuthorContextualQuizPlan(stdout io.Writer, plan authoringcore.ContextualQuizGenerationPlan, dryRun bool, projectDir string) error {
 	status := "created"
 	if dryRun {
 		status = "planned"

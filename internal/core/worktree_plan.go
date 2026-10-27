@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
@@ -32,7 +33,7 @@ type WorktreePlan struct {
 
 // NewWorktreePlan executes the corresponding package operation.
 func NewWorktreePlan(opts WorktreePlanOptions) (WorktreePlan, error) {
-	projectDir, err := CleanContextProjectDir(opts.ProjectDir)
+	projectDir, err := authoringcore.CleanContextProjectDir(opts.ProjectDir)
 	if err != nil {
 		return WorktreePlan{}, err
 	}

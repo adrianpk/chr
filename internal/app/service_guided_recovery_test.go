@@ -62,7 +62,7 @@ func assertGuidedRecoveryInspection(t *testing.T, operations service, session au
 
 	scope := authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}
 
-	before, err := core.ReadGuidedUseCase(t.Context(), operations.projectContext.ProjectDir, scope)
+	before, err := authoringcore.ReadGuidedUseCase(t.Context(), operations.projectContext.ProjectDir, scope)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +73,7 @@ func assertGuidedRecoveryInspection(t *testing.T, operations service, session au
 		}
 	}
 
-	after, err := core.ReadGuidedUseCase(t.Context(), operations.projectContext.ProjectDir, scope)
+	after, err := authoringcore.ReadGuidedUseCase(t.Context(), operations.projectContext.ProjectDir, scope)
 	if err != nil || !reflect.DeepEqual(before, after) {
 		t.Fatal("inspection mutated or reconciled an in-flight stage", err)
 	}
@@ -189,7 +189,7 @@ func waitGuidedRecovery(t *testing.T, operations service, session authoringcore.
 
 	deadline := time.Now().Add(30 * time.Second)
 	for time.Now().Before(deadline) {
-		current, err := core.ReadGuidedUseCase(t.Context(), operations.projectContext.ProjectDir, scope)
+		current, err := authoringcore.ReadGuidedUseCase(t.Context(), operations.projectContext.ProjectDir, scope)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -209,7 +209,7 @@ func waitGuidedRecovery(t *testing.T, operations service, session authoringcore.
 func failGuidedRecovery(t *testing.T, operations service, scope authoringcore.GuidedUseCaseScope) {
 	t.Helper()
 
-	current, readErr := core.ReadGuidedUseCase(t.Context(), operations.projectContext.ProjectDir, scope)
+	current, readErr := authoringcore.ReadGuidedUseCase(t.Context(), operations.projectContext.ProjectDir, scope)
 	if readErr == nil && current.Guided.Work != nil && current.Guided.Work.Invocation != nil {
 		run, err := core.ReadGuidedInvocation(t.Context(), operations.projectContext.ProjectDir, current)
 		t.Fatalf("managed recovery did not reach its expected state: guided=%s native=%s outcome=%s resume=%s blocker=%+v error=%v", current.Guided.Status, run.Status, run.Outcome, run.ResumeStatus, run.Blocker, err)

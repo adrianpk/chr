@@ -7,13 +7,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 // ProjectMetadataSaveResult reports the saved project metadata.
 type ProjectMetadataSaveResult struct {
 	Message  string
-	Metadata core.ProjectMetadata
+	Metadata authoringcore.ProjectMetadata
 }
 
 // ProjectMetadataPatchRequest carries editable project metadata fields.
@@ -24,9 +24,9 @@ type ProjectMetadataPatchRequest struct {
 }
 
 func (s service) SaveProjectMetadata(
-	metadata core.ProjectMetadata,
+	metadata authoringcore.ProjectMetadata,
 ) (ProjectMetadataSaveResult, error) {
-	saved, err := core.NewProjectMetadataService(s.projectContext.ProjectDir).SaveContext(s.ctx, metadata)
+	saved, err := authoringcore.NewProjectMetadataService(s.projectContext.ProjectDir).SaveContext(s.ctx, metadata)
 	if err != nil {
 		return ProjectMetadataSaveResult{}, err
 	}
@@ -38,7 +38,7 @@ func (s service) SaveProjectMetadata(
 }
 
 func (s service) PatchProjectMetadata(request ProjectMetadataPatchRequest) (ProjectMetadataSaveResult, error) {
-	metadata, err := core.NewProjectMetadataService(s.projectContext.ProjectDir).Load()
+	metadata, err := authoringcore.NewProjectMetadataService(s.projectContext.ProjectDir).Load()
 	if err != nil {
 		return ProjectMetadataSaveResult{}, err
 	}
@@ -51,8 +51,8 @@ func (s service) PatchProjectMetadata(request ProjectMetadataPatchRequest) (Proj
 // CaseMetadataSaveResult reports the saved use-case metadata.
 type CaseMetadataSaveResult struct {
 	Message string
-	Case    core.CaseMetadata
-	Cases   []core.CaseMetadata
+	Case    authoringcore.CaseMetadata
+	Cases   []authoringcore.CaseMetadata
 }
 
 // CaseMetadataPatchRequest carries editable use-case metadata fields.
@@ -63,8 +63,8 @@ type CaseMetadataPatchRequest struct {
 	Context     *string
 }
 
-func (s service) SaveCaseMetadata(metadata core.CaseMetadata) (CaseMetadataSaveResult, error) {
-	caseService := core.NewCaseMetadataService(s.projectContext.ProjectDir)
+func (s service) SaveCaseMetadata(metadata authoringcore.CaseMetadata) (CaseMetadataSaveResult, error) {
+	caseService := authoringcore.NewCaseMetadataService(s.projectContext.ProjectDir)
 
 	saved, err := caseService.SaveContext(s.ctx, metadata)
 	if err != nil {
@@ -97,13 +97,13 @@ func (s service) PatchCaseMetadata(request CaseMetadataPatchRequest) (CaseMetada
 	return s.SaveCaseMetadata(metadata)
 }
 
-func (s service) loadCaseMetadata(slug string) (core.CaseMetadata, error) {
-	path := core.CaseMetadataPath(s.projectContext.ProjectDir, slug)
+func (s service) loadCaseMetadata(slug string) (authoringcore.CaseMetadata, error) {
+	path := authoringcore.CaseMetadataPath(s.projectContext.ProjectDir, slug)
 
-	metadata, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).LoadPath(path)
+	metadata, err := authoringcore.NewCaseMetadataService(s.projectContext.ProjectDir).LoadPath(path)
 	if errors.Is(err, os.ErrNotExist) {
-		return core.CaseMetadata{
-			SchemaVersion: core.CaseMetadataSchemaVersion,
+		return authoringcore.CaseMetadata{
+			SchemaVersion: authoringcore.CaseMetadataSchemaVersion,
 			Slug:          slug,
 			SourcePath:    path,
 		}, nil
@@ -113,9 +113,9 @@ func (s service) loadCaseMetadata(slug string) (core.CaseMetadata, error) {
 }
 
 func applyProjectMetadataPatch(
-	metadata core.ProjectMetadata,
+	metadata authoringcore.ProjectMetadata,
 	request ProjectMetadataPatchRequest,
-) core.ProjectMetadata {
+) authoringcore.ProjectMetadata {
 	if request.Name != nil {
 		metadata.Name = *request.Name
 	}
@@ -132,9 +132,9 @@ func applyProjectMetadataPatch(
 }
 
 func applyCaseMetadataPatch(
-	metadata core.CaseMetadata,
+	metadata authoringcore.CaseMetadata,
 	request CaseMetadataPatchRequest,
-) core.CaseMetadata {
+) authoringcore.CaseMetadata {
 	if request.Name != nil {
 		metadata.Name = *request.Name
 	}

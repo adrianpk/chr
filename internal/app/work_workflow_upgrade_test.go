@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -80,7 +81,7 @@ func TestWorkflowUpgradeCLIRejects(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			args := []string{"work", "upgrade", "--dir", project, "--config-revision", core.WorkflowContentHash(nil), "--state-authority", "tickets", "--adopt-file", file}
+			args := []string{"work", "upgrade", "--dir", project, "--config-revision", authoringcore.WorkflowContentHash(nil), "--state-authority", "tickets", "--adopt-file", file}
 			if err := run(t.Context(), args, &bytes.Buffer{}, &bytes.Buffer{}); err == nil {
 				t.Fatal("invalid adoption accepted")
 			}
@@ -112,7 +113,7 @@ func TestWorkflowUpgradeServiceOwned(t *testing.T) {
 			operations := newTestService(t, project)
 			writeWorkflowUpgradeExecution(t, operations, tc.status)
 
-			opts := core.WorkflowUpgradeOptions{ExpectedRevision: core.WorkflowContentHash(nil), StateAuthority: core.WorkStateAuthorityTickets}
+			opts := core.WorkflowUpgradeOptions{ExpectedRevision: authoringcore.WorkflowContentHash(nil), StateAuthority: core.WorkStateAuthorityTickets}
 
 			_, err := operations.UpgradeWorkflowConfiguration(t.Context(), opts)
 			if (err != nil) != tc.blocked {

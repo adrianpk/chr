@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
@@ -29,11 +30,11 @@ func TestWorkspaceGraphBuilderBuildsCaseRootedViews(t *testing.T) {
 func writeCaseRootedWorkspaceGraphFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeWorkspaceGraphFile(t, ProjectMetadataPath(projectDir), RenderProjectMetadata(ProjectMetadata{
+	writeWorkspaceGraphFile(t, authoringcore.ProjectMetadataPath(projectDir), authoringcore.RenderProjectMetadata(authoringcore.ProjectMetadata{
 		Name:        "Example",
 		Description: "Example project.",
 	}))
-	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "blog"), RenderCaseMetadata(CaseMetadata{
+	writeWorkspaceGraphFile(t, authoringcore.CaseMetadataPath(projectDir, "blog"), authoringcore.RenderCaseMetadata(authoringcore.CaseMetadata{
 		Name:        "Blog Publishing",
 		Description: "Publish articles.",
 	}))
@@ -102,10 +103,10 @@ func assertCaseRootedWorkspaceGraph(t *testing.T, graph WorkspaceGraph) {
 func TestWorkspaceGraphBuilderTracksInvalidFilesAndUnresolvedCases(t *testing.T) {
 	projectDir := t.TempDir()
 
-	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "valid"), RenderCaseMetadata(CaseMetadata{
+	writeWorkspaceGraphFile(t, authoringcore.CaseMetadataPath(projectDir, "valid"), authoringcore.RenderCaseMetadata(authoringcore.CaseMetadata{
 		Name: "Valid",
 	}))
-	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "broken"), "# Missing frontmatter\n")
+	writeWorkspaceGraphFile(t, authoringcore.CaseMetadataPath(projectDir, "broken"), "# Missing frontmatter\n")
 	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "dumps", "missing-case.md"), `---
 title: "Missing Case Dump"
 case: "missing"
@@ -147,7 +148,7 @@ case: "missing"
 func TestWorkspaceGraphBuilderClassifiesDumpPairMetadata(t *testing.T) {
 	projectDir := t.TempDir()
 
-	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "blog"), RenderCaseMetadata(CaseMetadata{
+	writeWorkspaceGraphFile(t, authoringcore.CaseMetadataPath(projectDir, "blog"), authoringcore.RenderCaseMetadata(authoringcore.CaseMetadata{
 		Name: "Blog Publishing",
 	}))
 	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "dumps", "blog-notes.md"), `---
@@ -203,7 +204,7 @@ case: "blog"
 func TestWorkspaceGraphBuilderClassifiesQuizPairMetadata(t *testing.T) {
 	projectDir := t.TempDir()
 
-	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "blog"), RenderCaseMetadata(CaseMetadata{
+	writeWorkspaceGraphFile(t, authoringcore.CaseMetadataPath(projectDir, "blog"), authoringcore.RenderCaseMetadata(authoringcore.CaseMetadata{
 		Name: "Blog Publishing",
 	}))
 	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "quizzes", "blog-quiz.md"), `---

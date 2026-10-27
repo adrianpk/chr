@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -46,8 +45,8 @@ func (r telegramReceiver) reserveAuthoring(ctx context.Context, operations teleg
 	return r.store.ReservePreparedOperation(ctx, telegramcore.OperationRequest{Source: command.Input.Update, Operator: user.OperatorID, Target: target, OperationID: "authoring.continue", Arguments: arguments}, input, time.Now())
 }
 
-func (r telegramReceiver) authoringOwnerInput(ctx context.Context, operations telegramAuthoringService, command telegramAuthoringCommand, c telegramcore.Conversation, target telegramcore.OperationTarget) (core.AuthoringContinuationRequest, error) {
-	request := core.AuthoringContinuationRequest{ProjectID: target.ProjectID, Namespace: target.Namespace, Action: command.Action, Target: command.Target, Instructions: command.Instructions}
+func (r telegramReceiver) authoringOwnerInput(ctx context.Context, operations telegramAuthoringService, command telegramAuthoringCommand, c telegramcore.Conversation, target telegramcore.OperationTarget) (authoringcore.AuthoringContinuationRequest, error) {
+	request := authoringcore.AuthoringContinuationRequest{ProjectID: target.ProjectID, Namespace: target.Namespace, Action: command.Action, Target: command.Target, Instructions: command.Instructions}
 	if c.AuthoringSessionRef == "" {
 		return r.initialAuthoringInput(ctx, command, c, request)
 	}
@@ -67,15 +66,15 @@ func (r telegramReceiver) authoringOwnerInput(ctx context.Context, operations te
 	}
 
 	request.SessionID, request.ExpectedRevision, request.ExpectedSourceHash = id, snapshot.Session.Revision, snapshot.SourceHash
-	if command.Action == core.AuthoringContinuationAnswer {
+	if command.Action == authoringcore.AuthoringContinuationAnswer {
 		return telegramAuthoringAnswerInput(request, command.Input.Text, c.QuestionBinding, snapshot)
 	}
 
 	return request, nil
 }
 
-func (r telegramReceiver) initialAuthoringInput(ctx context.Context, command telegramAuthoringCommand, c telegramcore.Conversation, request core.AuthoringContinuationRequest) (core.AuthoringContinuationRequest, error) {
-	if command.Action == core.AuthoringContinuationRefine || command.Action == core.AuthoringContinuationAnswer {
+func (r telegramReceiver) initialAuthoringInput(ctx context.Context, command telegramAuthoringCommand, c telegramcore.Conversation, request authoringcore.AuthoringContinuationRequest) (authoringcore.AuthoringContinuationRequest, error) {
+	if command.Action == authoringcore.AuthoringContinuationRefine || command.Action == authoringcore.AuthoringContinuationAnswer {
 		return request, workflowstate.ErrConflict
 	}
 
@@ -87,7 +86,7 @@ func (r telegramReceiver) initialAuthoringInput(ctx context.Context, command tel
 		return request, err
 	}
 
-	request.Action, request.Topic, request.Capture = core.AuthoringContinuationCreate, c.Topic, c.Capture
+	request.Action, request.Topic, request.Capture = authoringcore.AuthoringContinuationCreate, c.Topic, c.Capture
 
 	request.OriginalInstruction = instruction.Text
 	if request.Capture == "" {
@@ -97,7 +96,7 @@ func (r telegramReceiver) initialAuthoringInput(ctx context.Context, command tel
 	return request, nil
 }
 
-func telegramAuthoringAnswerInput(request core.AuthoringContinuationRequest, answer, binding string, snapshot core.AuthoringSnapshot) (core.AuthoringContinuationRequest, error) {
+func telegramAuthoringAnswerInput(request authoringcore.AuthoringContinuationRequest, answer, binding string, snapshot authoringcore.AuthoringSnapshot) (authoringcore.AuthoringContinuationRequest, error) {
 	if snapshot.Question == nil {
 		return request, workflowstate.ErrConflict
 	}
@@ -116,13 +115,13 @@ func telegramAuthoringAnswerInput(request core.AuthoringContinuationRequest, ans
 
 	request.Question, request.Instructions = snapshot.Question, answer
 	if request.Target != authoringcore.ArtifactKindQuiz {
-		request.Action = core.AuthoringContinuationRespond
+		request.Action = authoringcore.AuthoringContinuationRespond
 	}
 
 	return request, nil
 }
 
-func telegramAuthoringQuestion(ref string, question *core.AuthoringQuestionBinding) *telegramcore.ConversationQuestion {
+func telegramAuthoringQuestion(ref string, question *authoringcore.AuthoringQuestionBinding) *telegramcore.ConversationQuestion {
 	if question == nil {
 		return nil
 	}

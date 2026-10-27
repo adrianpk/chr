@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"strconv"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -27,7 +26,7 @@ func guidedWebPending(session authoringcore.Session) bool {
 }
 
 func guidedWebControls(view *webui.GuidedUseCaseView, session authoringcore.Session, work *WorkflowWorkStatus) {
-	view.Suspended = !core.GuidedDispatchAllowed(session)
+	view.Suspended = !authoringcore.GuidedDispatchAllowed(session)
 	if command, ready := guidedControlCommand(session); ready {
 		view.Controls = []webui.GuidedUseCaseControl{guidedWebControl(command, "Retry "+command.Action)}
 		view.ControlStatus = "The control result is uncertain. Retry the retained request to reconcile it."

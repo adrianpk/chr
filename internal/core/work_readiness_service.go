@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
@@ -113,7 +114,7 @@ func newWorkReadinessSettings(ctx context.Context, opts WorkReadinessOptions) (w
 		return workReadinessSettings{}, err
 	}
 
-	projectDir, err := CleanContextProjectDir(opts.ProjectDir)
+	projectDir, err := authoringcore.CleanContextProjectDir(opts.ProjectDir)
 	if err != nil {
 		return workReadinessSettings{}, err
 	}
@@ -187,7 +188,7 @@ func newWorkReadinessRepairSettings(ctx context.Context, opts WorkReadinessRepai
 		return workReadinessRepairSettings{}, err
 	}
 
-	projectDir, err := CleanContextProjectDir(opts.ProjectDir)
+	projectDir, err := authoringcore.CleanContextProjectDir(opts.ProjectDir)
 	if err != nil {
 		return workReadinessRepairSettings{}, err
 	}

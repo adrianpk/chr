@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -19,7 +18,7 @@ func (s service) ReadGuidedUseCaseOriginal(ctx context.Context, id, namespace, k
 		return GuidedUseCaseArtifact{}, err
 	}
 
-	session, err := core.ReadGuidedUseCase(ctx, s.projectContext.ProjectDir, scope)
+	session, err := authoringcore.ReadGuidedUseCase(ctx, s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return GuidedUseCaseArtifact{}, err
 	}
@@ -30,7 +29,7 @@ func (s service) ReadGuidedUseCaseOriginal(ctx context.Context, id, namespace, k
 				continue
 			}
 
-			content, err := core.ReadGuidedCommittedArtifact(ctx, s.projectContext.ProjectDir, checkpoint, artifact.Path)
+			content, err := authoringcore.ReadGuidedCommittedArtifact(ctx, s.projectContext.ProjectDir, checkpoint, artifact.Path)
 
 			return GuidedUseCaseArtifact{Stage: checkpoint.Stage, Reference: artifact.Path, Commit: checkpoint.Commit, Content: string(content)}, err
 		}

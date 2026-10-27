@@ -16,7 +16,7 @@ import (
 // GuidedUseCaseInspection contains retained state and prospective local readiness.
 type GuidedUseCaseInspection struct {
 	Quiz          *quizcore.Observation
-	Ideas         []core.GuidedLaterIdea
+	Ideas         []authoringcore.GuidedLaterIdea
 	Result        *core.WorkflowResultInspection
 	ResultProblem string
 	Work          *WorkflowWorkStatus
@@ -47,7 +47,7 @@ func (s service) StartGuidedUseCase(ctx context.Context, id, namespace, actor st
 		return authoringcore.Session{}, err
 	}
 
-	return core.StartGuidedUseCase(ctx, s.projectContext.ProjectDir, authoringcore.GuidedUseCaseStart{GuidedUseCaseScope: scope, Actor: actor, ProgressionIntent: true})
+	return authoringcore.StartGuidedUseCase(ctx, s.projectContext.ProjectDir, authoringcore.GuidedUseCaseStart{GuidedUseCaseScope: scope, Actor: actor, ProgressionIntent: true})
 }
 
 // ChangeGuidedUseCase applies current input and advances through available authoring stages.
@@ -59,7 +59,7 @@ func (s service) ChangeGuidedUseCase(ctx context.Context, command authoringcore.
 
 	command.GuidedUseCaseScope = scope
 	if command.Action == "idea" {
-		return core.RetainGuidedIdea(ctx, s.projectContext.ProjectDir, command)
+		return authoringcore.RetainGuidedIdea(ctx, s.projectContext.ProjectDir, command)
 	}
 
 	if guidedControlAction(command.Action) {
@@ -89,12 +89,12 @@ func (s service) InspectGuidedUseCase(ctx context.Context, id, namespace string)
 	s.inspectGuidedReadiness(ctx, &result)
 
 	if id == "" {
-		result.Runs, err = core.ListGuidedUseCases(ctx, s.projectContext.ProjectDir, scope.ProjectID, scope.Namespace)
+		result.Runs, err = authoringcore.ListGuidedUseCases(ctx, s.projectContext.ProjectDir, scope.ProjectID, scope.Namespace)
 
 		return result, err
 	}
 
-	session, err := core.ReadGuidedUseCase(ctx, s.projectContext.ProjectDir, scope)
+	session, err := authoringcore.ReadGuidedUseCase(ctx, s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return result, err
 	}
@@ -108,7 +108,7 @@ func (s service) InspectGuidedUseCase(ctx context.Context, id, namespace string)
 	s.inspectGuidedWork(ctx, &result)
 	s.inspectGuidedResult(ctx, &result)
 
-	result.Ideas, err = core.ReadGuidedIdeas(ctx, s.projectContext.ProjectDir, session)
+	result.Ideas, err = authoringcore.ReadGuidedIdeas(ctx, s.projectContext.ProjectDir, session)
 
 	return result, err
 }
@@ -131,7 +131,7 @@ func (s service) inspectGuidedReadiness(ctx context.Context, result *GuidedUseCa
 		result.Problems = append(result.Problems, "Native workflow execution is not configured.")
 	}
 
-	if err := core.CheckGuidedCheckpointReadiness(ctx, s.projectContext.ProjectDir); err != nil {
+	if err := authoringcore.CheckGuidedCheckpointReadiness(ctx, s.projectContext.ProjectDir); err != nil {
 		result.Problems = append(result.Problems, err.Error())
 	}
 
@@ -159,7 +159,7 @@ func (s service) inspectGuidedArtifacts(ctx context.Context, result *GuidedUseCa
 				continue
 			}
 
-			content, err := core.ReadGuidedCommittedArtifact(ctx, s.projectContext.ProjectDir, checkpoint, artifact.Path)
+			content, err := authoringcore.ReadGuidedCommittedArtifact(ctx, s.projectContext.ProjectDir, checkpoint, artifact.Path)
 			if err != nil {
 				return err
 			}

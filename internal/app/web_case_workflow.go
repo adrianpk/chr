@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/url"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -19,7 +18,7 @@ func (p webViewProvider) CaseWorkflowView(ctx context.Context, slug, namespace s
 		return webui.GuidedUseCaseView{}, err
 	}
 
-	sessions, err := core.ListGuidedUseCases(ctx, operations.projectContext.ProjectDir, scope.ProjectID, scope.Namespace)
+	sessions, err := authoringcore.ListGuidedUseCases(ctx, operations.projectContext.ProjectDir, scope.ProjectID, scope.Namespace)
 	if err != nil {
 		return webui.GuidedUseCaseView{}, err
 	}

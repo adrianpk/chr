@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
@@ -49,7 +50,7 @@ func (s service) MaterializePlanTracking(ctx context.Context, request PlanTracki
 
 	plan := existing.Plan
 
-	binding, err := core.ObservePlanRevision(ctx, s.projectContext.ProjectDir, scope)
+	binding, err := authoringcore.ObservePlanRevision(ctx, s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return PlanTrackingResult{}, err
 	}
@@ -58,7 +59,7 @@ func (s service) MaterializePlanTracking(ctx context.Context, request PlanTracki
 		return s.retainedPlanTracking(plan, binding)
 	}
 
-	trackingPaths, err := core.GeneratedPlanTrackingLayout(s.projectContext.ProjectDir, scope)
+	trackingPaths, err := authoringcore.GeneratedPlanTrackingLayout(s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return PlanTrackingResult{}, err
 	}
@@ -118,7 +119,7 @@ func (s service) materializePlanTracking(ctx context.Context, scope quizcore.Sco
 
 	tracking.Tickets = createdTickets
 
-	paths, err := core.WriteGeneratedPlanTracking(ctx, s.projectContext.ProjectDir, tracking)
+	paths, err := authoringcore.WriteGeneratedPlanTracking(ctx, s.projectContext.ProjectDir, tracking)
 	if err != nil {
 		return PlanTrackingResult{}, err
 	}

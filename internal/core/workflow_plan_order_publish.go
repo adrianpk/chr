@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -27,7 +28,7 @@ func (s *WorkflowStore) materializedOrderChanges(result *WorkflowMaterialization
 		return nil, err
 	}
 
-	images, err := EncodePlanOrder(document)
+	images, err := authoringcore.EncodePlanOrder(document)
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +175,7 @@ func (s *WorkflowStore) currentPlanOrderMetadata(binding workflowstate.PlanRevis
 		return nil, workflowstate.FileChange{}, false, err
 	}
 
-	if err := ValidatePlanTargetMetadata(metadata, filepath.ToSlash(filepath.Join(s.layout.RelativeRoot(), binding.Reference))); err != nil {
+	if err := authoringcore.ValidatePlanTargetMetadata(metadata, filepath.ToSlash(filepath.Join(s.layout.RelativeRoot(), binding.Reference))); err != nil {
 		return nil, workflowstate.FileChange{}, false, err
 	}
 
@@ -238,7 +239,7 @@ func (s *WorkflowStore) boundCurrentPlanChanges(previous, next workflowstate.Pla
 		return nil, err
 	}
 
-	if err := AdvanceArtifactMetadata(metadata); err != nil {
+	if err := authoringcore.AdvanceArtifactMetadata(metadata); err != nil {
 		return nil, err
 	}
 
@@ -275,11 +276,11 @@ func (s *WorkflowStore) boundCurrentTrackerChanges(previous, next workflowstate.
 		return nil, err
 	}
 
-	if err := ValidatePlanTrackerMetadata(envelope, filepath.ToSlash(filepath.Join(s.layout.RelativeRoot(), metadataRef))); err != nil {
+	if err := authoringcore.ValidatePlanTrackerMetadata(envelope, filepath.ToSlash(filepath.Join(s.layout.RelativeRoot(), metadataRef))); err != nil {
 		return nil, err
 	}
 
-	if err := AdvanceArtifactMetadata(envelope); err != nil {
+	if err := authoringcore.AdvanceArtifactMetadata(envelope); err != nil {
 		return nil, err
 	}
 
@@ -301,7 +302,7 @@ func (s *WorkflowStore) registerBoundProjection(metadata map[string]any, binding
 		return err
 	}
 
-	files, err := PlanManifestFiles(metadata["files"])
+	files, err := authoringcore.PlanManifestFiles(metadata["files"])
 	if err != nil {
 		return err
 	}

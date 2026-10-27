@@ -3,7 +3,7 @@ package app
 import (
 	"errors"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -49,7 +49,7 @@ func newTUIProjectMetadataExecutor(
 }
 
 func (e tuiProjectMetadataExecutor) SaveProjectMetadata(
-	metadata core.ProjectMetadata,
+	metadata authoringcore.ProjectMetadata,
 ) (tui.ProjectMetadataResult, error) {
 	result, err := e.operations.SaveProjectMetadata(metadata)
 	if err != nil {
@@ -75,7 +75,7 @@ func newTUICaseMetadataExecutor(
 }
 
 func (e tuiCaseMetadataExecutor) SaveCaseMetadata(
-	metadata core.CaseMetadata,
+	metadata authoringcore.CaseMetadata,
 ) (tui.CaseMetadataResult, error) {
 	result, err := e.operations.SaveCaseMetadata(metadata)
 	if err != nil {

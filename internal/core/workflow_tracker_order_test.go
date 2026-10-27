@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
@@ -239,7 +240,7 @@ func workflowOrderPlanFixture(t *testing.T) (*WorkflowStore, WorkflowMaterializa
 	generated.Scope = quizcore.Scope{ProjectID: store.projectID}
 
 	generated.Order = generationcore.PlannedWorkflowOrder(opts.Plan)
-	if _, err := WriteGeneratedPlan(t.Context(), store.layout.ProjectDir(), generated); err != nil {
+	if _, err := authoringcore.WriteGeneratedPlan(t.Context(), store.layout.ProjectDir(), generated); err != nil {
 		t.Fatal(err)
 	}
 

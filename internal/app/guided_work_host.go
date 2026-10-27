@@ -41,7 +41,7 @@ func newGuidedWorkHost(ctx context.Context) *guidedWorkHost {
 
 func (host *guidedWorkHost) ready() error {
 	if host.ctx.Err() != nil {
-		return &core.GuidedPrerequisiteError{Action: "Start a managed workflow host, then retry this retained operation.", Cause: host.ctx.Err()}
+		return &authoringcore.GuidedPrerequisiteError{Action: "Start a managed workflow host, then retry this retained operation.", Cause: host.ctx.Err()}
 	}
 
 	return nil
@@ -61,7 +61,7 @@ func (host *guidedWorkHost) activate(operations service, id string) error {
 	}
 
 	if len(host.active) >= guidedHostActivationLimit {
-		return &core.GuidedPrerequisiteError{Action: "Managed host capacity is full. Retry this retained admission when capacity is available."}
+		return &authoringcore.GuidedPrerequisiteError{Action: "Managed host capacity is full. Retry this retained admission when capacity is available."}
 	}
 
 	host.active[key] = true
@@ -84,7 +84,7 @@ func (host *guidedWorkHost) activate(operations service, id string) error {
 }
 
 func guidedHostFailure(err error) bool {
-	return err != nil && !errors.Is(err, core.ErrWorkflowOwned) && !errors.Is(err, core.ErrWorkflowCapacity) && !errors.Is(err, workflowstate.ErrConflict) && !errors.Is(err, core.ErrGuidedUseCaseStopped) && !errors.Is(err, core.ErrWorkflowStop)
+	return err != nil && !errors.Is(err, core.ErrWorkflowOwned) && !errors.Is(err, core.ErrWorkflowCapacity) && !errors.Is(err, workflowstate.ErrConflict) && !errors.Is(err, authoringcore.ErrGuidedUseCaseStopped) && !errors.Is(err, core.ErrWorkflowStop)
 }
 
 func (host *guidedWorkHost) release(key string) {
@@ -125,7 +125,7 @@ func (host *guidedWorkHost) reportFailure(ctx context.Context, operations servic
 	run, err := operations.ReadWorkflow(ctx, id)
 	if err == nil && run.Admission != nil && run.Admission.Guided != nil {
 		scope := authoringcore.GuidedUseCaseScope{RunID: run.Admission.Guided.RunID, ProjectID: operations.projectContext.ProjectID, Namespace: operations.workflowNamespace}
-		err = core.RetainGuidedHostBlocker(ctx, operations.projectContext.ProjectDir, scope, id)
+		err = authoringcore.RetainGuidedHostBlocker(ctx, operations.projectContext.ProjectDir, scope, id)
 	}
 
 	if err != nil {

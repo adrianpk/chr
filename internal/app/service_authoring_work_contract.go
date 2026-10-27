@@ -5,11 +5,12 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s service) authoringWorkContract(record core.WorkflowRecord, title string, request AuthoringWorkRequest, source core.AuthoringArtifactObservation) (core.WorkflowRecord, error) {
+func (s service) authoringWorkContract(record core.WorkflowRecord, title string, request AuthoringWorkRequest, source authoringcore.AuthoringArtifactObservation) (core.WorkflowRecord, error) {
 	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
 	if err != nil {
 		return core.WorkflowRecord{}, err

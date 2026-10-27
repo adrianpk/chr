@@ -43,7 +43,7 @@ func (s service) changeGuidedOnHost(ctx context.Context, command authoringcore.G
 		err     error
 	)
 	if guidedProviderAction(command.Action) {
-		session, err = core.ReserveGuidedUseCaseStep(ctx, s.projectContext.ProjectDir, command)
+		session, err = authoringcore.ReserveGuidedUseCaseStep(ctx, s.projectContext.ProjectDir, command)
 	} else {
 		session, err = s.applyGuidedCommand(ctx, command)
 	}
@@ -64,7 +64,7 @@ func (s service) RecoverGuidedUseCase(ctx context.Context, scope authoringcore.G
 		}
 	}
 
-	session, err := core.ReadGuidedUseCase(ctx, s.projectContext.ProjectDir, scope)
+	session, err := authoringcore.ReadGuidedUseCase(ctx, s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return session, err
 	}
@@ -77,7 +77,7 @@ func (s service) RecoverGuidedUseCase(ctx context.Context, scope authoringcore.G
 		return s.recoverGuidedStop(ctx, session, scope)
 	}
 
-	if !core.GuidedDispatchAllowed(session) {
+	if !authoringcore.GuidedDispatchAllowed(session) {
 		return session, nil
 	}
 
@@ -102,7 +102,7 @@ func (s service) recoverGuidedStop(ctx context.Context, session authoringcore.Se
 		}
 	}
 
-	return core.ReconcileGuidedStop(ctx, s.projectContext.ProjectDir, scope, core.NewGuidedWorkflowObserver(s.projectContext.ProjectDir))
+	return authoringcore.ReconcileGuidedStop(ctx, s.projectContext.ProjectDir, scope, core.NewGuidedWorkflowObserver(s.projectContext.ProjectDir))
 }
 
 // recoverGuidedInterruptedWork resumes a quiescent host interruption under the

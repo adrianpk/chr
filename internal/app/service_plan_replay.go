@@ -4,7 +4,7 @@ import (
 	"context"
 	"path/filepath"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -20,7 +20,7 @@ func (s service) replayPlanPublication(ctx context.Context, operation generation
 		return planPublicationReplay{}, nil
 	}
 
-	observed, err := core.LookupPlanPublication(ctx, s.projectContext.ProjectDir, operation)
+	observed, err := authoringcore.LookupPlanPublication(ctx, s.projectContext.ProjectDir, operation)
 	if err != nil || !observed.Found {
 		return planPublicationReplay{Found: observed.Found}, err
 	}

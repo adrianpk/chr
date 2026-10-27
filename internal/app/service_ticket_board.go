@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
@@ -124,7 +125,7 @@ func (s service) validateTicketDocumentScope(slug string) error {
 		return nil
 	}
 
-	cases, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).LoadAll()
+	cases, err := authoringcore.NewCaseMetadataService(s.projectContext.ProjectDir).LoadAll()
 	if err != nil {
 		return err
 	}

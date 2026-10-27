@@ -10,7 +10,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -20,7 +20,7 @@ type telegramPreparedWorkLostAck struct {
 	lost *atomic.Bool
 }
 
-func (s telegramPreparedWorkLostAck) ApplyTelegramAuthoringWork(ctx context.Context, target telegramcore.OperationTarget, prepared PreparedAuthoringWork, guard core.AuthoringCommitGuard) (AuthoringWorkResult, error) {
+func (s telegramPreparedWorkLostAck) ApplyTelegramAuthoringWork(ctx context.Context, target telegramcore.OperationTarget, prepared PreparedAuthoringWork, guard authoringcore.AuthoringCommitGuard) (AuthoringWorkResult, error) {
 	result, err := s.service.ApplyTelegramAuthoringWork(ctx, target, prepared, guard)
 	if err == nil && s.lost.CompareAndSwap(false, true) {
 		return result, errTelegramAuthoringLostAck
@@ -119,7 +119,7 @@ func telegramAuthoringPreparedCheckEdit(t *testing.T, f *telegramConversationApp
 		t.Fatal("replay replaced later native edit")
 	}
 
-	var scope core.AuthoringWorkScope
+	var scope authoringcore.AuthoringWorkScope
 	if err := json.Unmarshal(records[0].Metadata["authoring_scope"], &scope); err != nil {
 		t.Fatal(err)
 	}
@@ -135,7 +135,7 @@ type telegramPreparedWorkChange struct {
 	change func()
 }
 
-func (s telegramPreparedWorkChange) ApplyTelegramAuthoringWork(ctx context.Context, target telegramcore.OperationTarget, prepared PreparedAuthoringWork, guard core.AuthoringCommitGuard) (AuthoringWorkResult, error) {
+func (s telegramPreparedWorkChange) ApplyTelegramAuthoringWork(ctx context.Context, target telegramcore.OperationTarget, prepared PreparedAuthoringWork, guard authoringcore.AuthoringCommitGuard) (AuthoringWorkResult, error) {
 	s.change()
 
 	return s.service.ApplyTelegramAuthoringWork(ctx, target, prepared, guard)

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
@@ -39,7 +39,7 @@ func (s service) newQuizRuntimeState(scope quizcore.Scope, mode quizcore.Mode) (
 }
 
 func (s service) listQuizRuntimeStates() ([]quizcore.RuntimeState, error) {
-	root := workspacecore.UserPath(s.projectContext.ProjectDir, filepath.FromSlash(core.QuizRuntimeDirectory))
+	root := workspacecore.UserPath(s.projectContext.ProjectDir, filepath.FromSlash(authoringcore.QuizRuntimeDirectory))
 
 	entries, err := readQuizRuntimeDirectory(root)
 	if errors.Is(err, os.ErrNotExist) {
@@ -77,8 +77,8 @@ func (s service) listQuizRuntimeStates() ([]quizcore.RuntimeState, error) {
 	return states, nil
 }
 
-func (s service) quizRepository() core.QuizArtifactRepository {
-	return core.NewQuizArtifactRepository(s.projectContext.ProjectDir)
+func (s service) quizRepository() authoringcore.QuizArtifactRepository {
+	return authoringcore.NewQuizArtifactRepository(s.projectContext.ProjectDir)
 }
 
 func (s service) quizScope(scope quizcore.Scope) quizcore.Scope {

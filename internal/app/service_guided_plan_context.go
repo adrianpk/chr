@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
@@ -14,7 +13,7 @@ import (
 )
 
 type guidedPlanSourcesResult struct {
-	Sources core.PlanSourceObservation
+	Sources authoringcore.PlanSourceObservation
 	State   quizcore.RuntimeState
 }
 
@@ -31,10 +30,10 @@ func (s service) guidedPlanSources(session authoringcore.Session) (guidedPlanSou
 
 	scope := quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
 
-	sources := core.PlanSourceObservation{Scope: scope, Project: core.ProjectMetadata{Name: session.Guided.CaseName}, Quiz: quizcore.Observation{Exists: true, State: inputs.State, Entries: inputs.Entries}, HasDiscovery: true}
+	sources := authoringcore.PlanSourceObservation{Scope: scope, Project: authoringcore.ProjectMetadata{Name: session.Guided.CaseName}, Quiz: quizcore.Observation{Exists: true, State: inputs.State, Entries: inputs.Entries}, HasDiscovery: true}
 	for _, checkpoint := range session.Guided.Checkpoints {
 		if checkpoint.Stage == "specification" {
-			sources.Hash, err = core.GuidedCheckpointDigest(checkpoint)
+			sources.Hash, err = authoringcore.GuidedCheckpointDigest(checkpoint)
 			if err != nil {
 				return guidedPlanSourcesResult{Sources: sources, State: inputs.State}, err
 			}
@@ -49,7 +48,7 @@ func (s service) guidedPlanSources(session authoringcore.Session) (guidedPlanSou
 			kind, status = "spec", "approved"
 		}
 
-		sources.Inputs = append(sources.Inputs, core.PlanSourceInput{Kind: kind, Reference: section.Name, Revision: section.Metadata["commit"] + ":" + section.Metadata["hash"], Content: section.Content, Status: status})
+		sources.Inputs = append(sources.Inputs, authoringcore.PlanSourceInput{Kind: kind, Reference: section.Name, Revision: section.Metadata["commit"] + ":" + section.Metadata["hash"], Content: section.Content, Status: status})
 	}
 
 	return guidedPlanSourcesResult{Sources: sources, State: inputs.State}, nil
@@ -58,7 +57,7 @@ func (s service) guidedPlanSources(session authoringcore.Session) (guidedPlanSou
 func (s service) generateGuidedContracts(ctx context.Context, session authoringcore.Session) (generationcore.GeneratedWorkflowPlan, error) {
 	scope := session.Guided.Work.PublicationOperation.Scope
 
-	input, err := core.ObservePlanWorkflow(ctx, s.projectContext.ProjectDir, scope)
+	input, err := authoringcore.ObservePlanWorkflow(ctx, s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return input, err
 	}
@@ -85,7 +84,7 @@ func (s service) generateGuidedContracts(ctx context.Context, session authoringc
 	}
 
 	generated := *response.PlanTracking.Workflow
-	if err := core.ValidateGuidedContracts(input, generated); err != nil {
+	if err := authoringcore.ValidateGuidedContracts(input, generated); err != nil {
 		return input, err
 	}
 
@@ -108,8 +107,8 @@ func (s service) guidedContractsRequest(session authoringcore.Session, input gen
 		return request, err
 	}
 
-	body := core.RenderGeneratedPlan(session.Guided.PendingOperation.PreparedPlan.Plan)
-	if core.WorkflowContentHash([]byte(body)) != input.PlanHash {
+	body := authoringcore.RenderGeneratedPlan(session.Guided.PendingOperation.PreparedPlan.Plan)
+	if authoringcore.WorkflowContentHash([]byte(body)) != input.PlanHash {
 		return request, workflowstate.ErrConflict
 	}
 

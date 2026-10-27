@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
@@ -104,11 +105,11 @@ func (s service) generateSpec(ctx context.Context, scope quizcore.Scope) (SpecOp
 		return SpecOperationResult{}, err
 	}
 
-	target, err := core.GeneratedSpecLayout(s.projectContext.ProjectDir, scope)
+	target, err := authoringcore.GeneratedSpecLayout(s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return SpecOperationResult{}, err
 	}
-	targetRevision, err := core.SpecTargetRevision(ctx, s.projectContext.ProjectDir, target.RelativePath)
+	targetRevision, err := authoringcore.SpecTargetRevision(ctx, s.projectContext.ProjectDir, target.RelativePath)
 	if err != nil {
 		return SpecOperationResult{}, err
 	}
@@ -147,7 +148,7 @@ func (s service) generateSpec(ctx context.Context, scope quizcore.Scope) (SpecOp
 		"title":       response.DraftSpec.Title,
 	})
 
-	spec := core.GeneratedSpec{
+	spec := authoringcore.GeneratedSpec{
 		ExpectedRevision: targetRevision,
 		Scope:            scope,
 		Title:            response.DraftSpec.Title,
@@ -158,7 +159,7 @@ func (s service) generateSpec(ctx context.Context, scope quizcore.Scope) (SpecOp
 		CreatedAt:        response.CreatedAt.UTC(),
 	}
 
-	paths, err := core.WriteGeneratedSpec(ctx, s.projectContext.ProjectDir, spec)
+	paths, err := authoringcore.WriteGeneratedSpec(ctx, s.projectContext.ProjectDir, spec)
 	if err != nil {
 		s.appendPlanGenerationLog("generate_spec_write_failed", map[string]string{
 			"case_slug":   scope.CaseSlug,
@@ -302,7 +303,7 @@ func (s service) appendGenerationContextSections(
 	nodeIDs func(core.WorkspaceIndex) []string,
 ) ([]quizmodel.ContextSection, error) {
 	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "agent_protocol", "protocol", "AGENTS.md")
-	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "project_document", "project", core.ProjectMetadataPath(""))
+	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "project_document", "project", authoringcore.ProjectMetadataPath(""))
 
 	if scope.CaseSlug != "" {
 		sections = appendQuizFileContextSection(
@@ -310,7 +311,7 @@ func (s service) appendGenerationContextSections(
 			s.projectContext.ProjectDir,
 			"use_case_document",
 			"use_case",
-			core.CaseMetadataPath("", scope.CaseSlug),
+			authoringcore.CaseMetadataPath("", scope.CaseSlug),
 		)
 	}
 

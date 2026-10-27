@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -11,7 +12,7 @@ import (
 func (s service) prepareGuidedWorkflowHarness(ctx context.Context, config core.WorkspaceConfig) (core.WorkflowHarnessResolution, error) {
 	resolved, err := s.prepareWorkflowHarness(ctx, config)
 	if err != nil {
-		return core.WorkflowHarnessResolution{}, &core.GuidedPrerequisiteError{Action: "Configure an available worker harness and credentials before retrying admission.", Cause: err}
+		return core.WorkflowHarnessResolution{}, &authoringcore.GuidedPrerequisiteError{Action: "Configure an available worker harness and credentials before retrying admission.", Cause: err}
 	}
 
 	return resolved, nil
@@ -34,7 +35,7 @@ func (s service) checkGuidedWorkPrerequisites(ctx context.Context, selection wor
 
 	if remote, ok := provider.(core.RemoteReviewAdapter); ok {
 		if err := remote.CheckWorkflowRepositoryProvider(ctx, selection.Target.Repository); err != nil {
-			return &core.GuidedPrerequisiteError{Action: "Configure the canonical review provider, CLI and credentials before retrying admission.", Cause: err}
+			return &authoringcore.GuidedPrerequisiteError{Action: "Configure the canonical review provider, CLI and credentials before retrying admission.", Cause: err}
 		}
 	}
 
@@ -48,7 +49,7 @@ func (s service) checkGuidedWorker(ctx context.Context, config core.WorkspaceCon
 
 	selection, err := s.resolveHarnessSelection(ctx, config, harnesscore.Worker, "")
 	if err != nil || !selection.View.Readiness.Ready() {
-		return &core.GuidedPrerequisiteError{Action: "Configure an available worker harness and credentials before retrying admission.", Cause: err}
+		return &authoringcore.GuidedPrerequisiteError{Action: "Configure an available worker harness and credentials before retrying admission.", Cause: err}
 	}
 
 	return nil
@@ -60,12 +61,12 @@ func (s service) checkGuidedPublisher(config core.WorkspaceConfig, repository st
 	}
 
 	if s.env == nil {
-		return &core.GuidedPrerequisiteError{Action: "Configure the private certified publisher for the canonical target before retrying admission."}
+		return &authoringcore.GuidedPrerequisiteError{Action: "Configure the private certified publisher for the canonical target before retrying admission."}
 	}
 
 	_, err := core.LoadWorkflowNativePublisher(s.env.ConfigDir(), repository, "refs/heads/"+config.Work.BranchPolicy.IntegrationBranch)
 	if err != nil {
-		return &core.GuidedPrerequisiteError{Action: "Configure the private certified publisher for the canonical target before retrying admission.", Cause: err}
+		return &authoringcore.GuidedPrerequisiteError{Action: "Configure the private certified publisher for the canonical target before retrying admission.", Cause: err}
 	}
 
 	return nil

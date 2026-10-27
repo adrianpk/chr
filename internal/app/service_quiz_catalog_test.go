@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -147,7 +147,7 @@ func TestQuizCatalogNewCase(t *testing.T) {
 	catalog, err := operations.ReadQuizCatalog()
 	checkQuizCatalogCounts(t, catalog, err, 2, 0)
 
-	if _, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).Save(core.CaseMetadata{SourcePath: core.CaseMetadataPath(operations.projectContext.ProjectDir, "new-case"), Name: "Newly named work"}); err != nil {
+	if _, err := authoringcore.NewCaseMetadataService(operations.projectContext.ProjectDir).Save(authoringcore.CaseMetadata{SourcePath: authoringcore.CaseMetadataPath(operations.projectContext.ProjectDir, "new-case"), Name: "Newly named work"}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -181,7 +181,7 @@ func TestQuizCatalogProjectOnly(t *testing.T) {
 	provider, model := newWebQuizFixture(t)
 
 	operations := provider.service(t.Context())
-	if err := os.Remove(core.CaseMetadataPath(operations.projectContext.ProjectDir, "named-work")); err != nil {
+	if err := os.Remove(authoringcore.CaseMetadataPath(operations.projectContext.ProjectDir, "named-work")); err != nil {
 		t.Fatal(err)
 	}
 

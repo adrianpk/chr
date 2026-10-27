@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 // DumpScope narrows a dump operation to an optional use-case scope.
@@ -85,7 +86,7 @@ type DumpEditorLauncher interface {
 // DumpOperationResult is the TUI-facing result for dump operations.
 type DumpOperationResult struct {
 	Committed, ProjectionStale bool
-	Mutation                   core.ProjectDumpMutationResult
+	Mutation                   authoringcore.ProjectDumpMutationResult
 	Revision, RelativePath     string
 	SourceHash, MetadataHash   string
 	Message                    string
@@ -95,7 +96,7 @@ type DumpOperationResult struct {
 }
 
 func (s service) ReadDump(request DumpReadRequest) (DumpOperationResult, error) {
-	observed, err := core.ReadDumpDocument(s.ctx, s.projectContext.ProjectDir, request.RelativePath)
+	observed, err := authoringcore.ReadDumpDocument(s.ctx, s.projectContext.ProjectDir, request.RelativePath)
 	if err != nil {
 		return DumpOperationResult{}, err
 	}
@@ -121,7 +122,7 @@ func (s service) OpenDump(request DumpOpenRequest) (DumpOperationResult, error) 
 }
 
 func (s service) resolveDumpPath(relativePath string) (string, error) {
-	observed, err := core.ResolveProjectDumpReference(s.ctx, s.projectContext.ProjectDir, relativePath)
+	observed, err := authoringcore.ResolveProjectDumpReference(s.ctx, s.projectContext.ProjectDir, relativePath)
 	if err != nil {
 		return "", err
 	}

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
@@ -74,7 +74,7 @@ func (s service) GeneratePlan(ctx context.Context, request PlanGenerateRequest) 
 }
 
 func (s service) existingGeneratedPlan(scope quizcore.Scope) (existingPlanResult, error) {
-	paths, err := core.GeneratedPlanLayout(s.projectContext.ProjectDir, scope)
+	paths, err := authoringcore.GeneratedPlanLayout(s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return existingPlanResult{}, err
 	}

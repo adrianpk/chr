@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -20,14 +19,14 @@ func validAuthoringDocumentKind(kind authoringcore.ArtifactKind) bool {
 	}
 }
 
-func (s service) authoringDocument(ctx context.Context, sessionID string, kind authoringcore.ArtifactKind) (core.AuthoringArtifactObservation, error) {
+func (s service) authoringDocument(ctx context.Context, sessionID string, kind authoringcore.ArtifactKind) (authoringcore.AuthoringArtifactObservation, error) {
 	snapshot, err := s.ObserveAuthoring(ctx, sessionID)
 	if err != nil {
-		return core.AuthoringArtifactObservation{}, err
+		return authoringcore.AuthoringArtifactObservation{}, err
 	}
 
 	if snapshot.Session.ProjectID != s.projectContext.ProjectID {
-		return core.AuthoringArtifactObservation{}, workflowstate.ErrConflict
+		return authoringcore.AuthoringArtifactObservation{}, workflowstate.ErrConflict
 	}
 
 	for index := len(snapshot.Artifacts) - 1; index >= 0; index-- {
@@ -37,18 +36,18 @@ func (s service) authoringDocument(ctx context.Context, sessionID string, kind a
 		}
 	}
 
-	return core.AuthoringArtifactObservation{}, errAuthoringDocumentUnavailable
+	return authoringcore.AuthoringArtifactObservation{}, errAuthoringDocumentUnavailable
 }
 
 // ReadPreparedAuthoringDocument reads the exact selected canonical artifact.
 // A changed source is a conflict; an excerpt or generated answer is never a substitute.
-func (s service) ReadPreparedAuthoringDocument(ctx context.Context, prepared PreparedAuthoringExplanation) (core.AuthoringArtifactObservation, error) {
+func (s service) ReadPreparedAuthoringDocument(ctx context.Context, prepared PreparedAuthoringExplanation) (authoringcore.AuthoringArtifactObservation, error) {
 	if err := validateAuthoringExplanation(prepared.Request, s.projectContext); err != nil {
-		return core.AuthoringArtifactObservation{}, err
+		return authoringcore.AuthoringArtifactObservation{}, err
 	}
 
 	if prepared.ProjectID != s.projectContext.ProjectID || !validAuthoringDocumentKind(prepared.Request.DocumentKind) || len(prepared.Sources) != 1 {
-		return core.AuthoringArtifactObservation{}, workflowstate.ErrConflict
+		return authoringcore.AuthoringArtifactObservation{}, workflowstate.ErrConflict
 	}
 
 	artifact, err := s.authoringDocument(ctx, prepared.Request.SessionID, prepared.Request.DocumentKind)
@@ -58,7 +57,7 @@ func (s service) ReadPreparedAuthoringDocument(ctx context.Context, prepared Pre
 
 	source := prepared.Sources[0]
 	if artifact.Ref.Path != source.Reference || artifact.SourceHash != source.SourceHash {
-		return core.AuthoringArtifactObservation{}, workflowstate.ErrConflict
+		return authoringcore.AuthoringArtifactObservation{}, workflowstate.ErrConflict
 	}
 
 	return artifact, nil

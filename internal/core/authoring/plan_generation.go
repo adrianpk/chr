@@ -1,0 +1,231 @@
+package authoring
+
+import (
+	"bytes"
+	"context"
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
+	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+)
+
+// PlanDirectory defines a package boundary constant.
+const PlanDirectory = "plans"
+
+// GeneratedPlanPaths describes a package boundary value.
+type GeneratedPlanPaths struct {
+	ScopeID      string
+	RelativePath string
+	Path         string
+}
+
+// ArchivedPlanPaths describes a package boundary value.
+type ArchivedPlanPaths struct {
+	ScopeID      string
+	RelativePath string
+	Path         string
+}
+
+// ArchivedPlanLookup distinguishes a missing canonical plan from an archive.
+type ArchivedPlanLookup struct {
+	Paths ArchivedPlanPaths
+	Found bool
+}
+
+// GeneratedPlanLayout executes the corresponding package operation.
+func GeneratedPlanLayout(projectDir string, scope quizcore.Scope) (GeneratedPlanPaths, error) {
+	err := quizcore.ValidateScope(scope)
+	if err != nil {
+		return GeneratedPlanPaths{}, err
+	}
+
+	scopeID, err := quizcore.ScopeID(scope)
+	if err != nil {
+		return GeneratedPlanPaths{}, err
+	}
+
+	body, err := scopedPlanArtifactBody(projectDir, scope.Namespace, scopeID+"-plan")
+	if err != nil {
+		return GeneratedPlanPaths{}, err
+	}
+
+	return GeneratedPlanPaths{
+		ScopeID:      scopeID,
+		RelativePath: body.RelativePath,
+		Path:         body.Path,
+	}, nil
+}
+
+// ArchivedPlanLayout executes the corresponding package operation.
+func ArchivedPlanLayout(projectDir string, scope quizcore.Scope, archivedAt time.Time) (ArchivedPlanPaths, error) {
+	err := quizcore.ValidateScope(scope)
+	if err != nil {
+		return ArchivedPlanPaths{}, err
+	}
+
+	if archivedAt.IsZero() {
+		return ArchivedPlanPaths{}, fmt.Errorf("plan archive time is required")
+	}
+
+	scopeID, err := quizcore.ScopeID(scope)
+	if err != nil {
+		return ArchivedPlanPaths{}, err
+	}
+
+	archivedAt = archivedAt.UTC()
+	timestamp := archivedAt.Format("20060102-150405") + fmt.Sprintf("%09d", archivedAt.Nanosecond())
+
+	body, err := scopedPlanArtifactBody(projectDir, scope.Namespace, scopeID+"-plan-"+timestamp)
+	if err != nil {
+		return ArchivedPlanPaths{}, err
+	}
+
+	return ArchivedPlanPaths{
+		ScopeID:      scopeID,
+		RelativePath: body.RelativePath,
+		Path:         body.Path,
+	}, nil
+}
+
+// WriteGeneratedPlan executes the corresponding package operation.
+func writeGeneratedPlan(ctx context.Context, projectDir string, plan generationcore.GeneratedPlan) (GeneratedPlanPaths, error) {
+	err := ctx.Err()
+	if err != nil {
+		return GeneratedPlanPaths{}, err
+	}
+
+	err = generationcore.ValidateGeneratedPlan(plan)
+	if err != nil {
+		return GeneratedPlanPaths{}, err
+	}
+
+	paths, err := GeneratedPlanLayout(projectDir, plan.Scope)
+	if err != nil {
+		return GeneratedPlanPaths{}, err
+	}
+
+	if err := (&fileAuthoringSessionRepository{projectDir: projectDir}).publishGeneratedPlan(ctx, paths, plan); err != nil {
+		return GeneratedPlanPaths{}, err
+	}
+
+	return paths, nil
+}
+
+// ArchiveGeneratedPlan executes the corresponding package operation.
+func archiveGeneratedPlan(ctx context.Context, projectDir string, scope quizcore.Scope, archivedAt time.Time) (ArchivedPlanLookup, error) {
+	err := ctx.Err()
+	if err != nil {
+		return ArchivedPlanLookup{}, err
+	}
+
+	canonicalPaths, err := GeneratedPlanLayout(projectDir, scope)
+	if err != nil {
+		return ArchivedPlanLookup{}, err
+	}
+
+	content, err := os.ReadFile(canonicalPaths.Path)
+	if errors.Is(err, os.ErrNotExist) {
+		return ArchivedPlanLookup{}, nil
+	}
+
+	if err != nil {
+		return ArchivedPlanLookup{}, fmt.Errorf("read generated plan before archive: %w", err)
+	}
+
+	archivePaths, err := ArchivedPlanLayout(projectDir, scope, archivedAt)
+	if err != nil {
+		return ArchivedPlanLookup{}, err
+	}
+
+	if err := opscore.EnsureArtifactBodyMetadata(projectDir, archivePaths.RelativePath); err != nil {
+		return ArchivedPlanLookup{}, err
+	}
+
+	err = os.MkdirAll(filepath.Dir(archivePaths.Path), 0o755)
+	if err != nil {
+		return ArchivedPlanLookup{}, fmt.Errorf("create plan archive directory: %w", err)
+	}
+
+	archiveContent := RenderArchivedPlan(string(content), canonicalPaths.RelativePath, archivedAt)
+
+	err = os.WriteFile(archivePaths.Path, []byte(archiveContent), 0o644)
+	if err != nil {
+		return ArchivedPlanLookup{}, fmt.Errorf("write archived plan: %w", err)
+	}
+
+	return ArchivedPlanLookup{Paths: archivePaths, Found: true}, nil
+}
+
+// RenderArchivedPlan renders the corresponding package data.
+func RenderArchivedPlan(content, sourceRelativePath string, archivedAt time.Time) string {
+	archiveMetadata := []string{
+		"archived_from: " + opsmetadata.Quote(filepath.ToSlash(sourceRelativePath)),
+		"archived_at: " + opsmetadata.Quote(archivedAt.UTC().Format(time.RFC3339Nano)),
+	}
+
+	trimmed := strings.TrimLeft(content, "\ufeff\r\n\t ")
+	if !strings.HasPrefix(trimmed, "---\n") {
+		return "---\n" + strings.Join(archiveMetadata, "\n") + "\n---\n\n" + strings.TrimSpace(content) + "\n"
+	}
+
+	frontmatterEnd := strings.Index(trimmed[len("---\n"):], "\n---")
+	if frontmatterEnd < 0 {
+		return "---\n" + strings.Join(archiveMetadata, "\n") + "\n---\n\n" + strings.TrimSpace(content) + "\n"
+	}
+
+	insertAt := len("---\n") + frontmatterEnd
+
+	return trimmed[:insertAt] + "\n" + strings.Join(archiveMetadata, "\n") + trimmed[insertAt:]
+}
+
+// RenderGeneratedPlan renders the corresponding package data.
+func RenderGeneratedPlan(plan generationcore.GeneratedPlan) string {
+	var output bytes.Buffer
+
+	output.WriteString("---\n")
+	output.WriteString("title: " + opsmetadata.Quote(plan.Title) + "\n")
+	output.WriteString("project_id: " + opsmetadata.Quote(plan.Scope.ProjectID) + "\n")
+	output.WriteString("case_slug: " + opsmetadata.Quote(plan.Scope.CaseSlug) + "\n")
+	output.WriteString("status: " + opsmetadata.Quote("planned") + "\n")
+	output.WriteString("source_request_id: " + opsmetadata.Quote(plan.SourceRequestID) + "\n")
+	output.WriteString("source_response_id: " + opsmetadata.Quote(plan.SourceResponseID) + "\n")
+	output.WriteString("created_at: " + opsmetadata.Timestamp(plan.CreatedAt) + "\n")
+	output.WriteString("---\n\n")
+	output.WriteString("# " + plan.Title + "\n\n")
+	output.WriteString(strings.TrimSpace(plan.Body) + "\n\n")
+	output.WriteString("## Provenance\n\n")
+
+	for _, path := range plan.SourcePaths {
+		output.WriteString("- source: " + path + "\n")
+	}
+
+	return output.String()
+}
+
+func scopedPlanArtifactBody(projectDir, namespace, name string) (opscore.NamedArtifactPath, error) {
+	if namespace == "" {
+		return opscore.NamedArtifactBody(projectDir, "plan", name)
+	}
+
+	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: projectDir, Namespace: namespace})
+	if err != nil {
+		return opscore.NamedArtifactPath{}, err
+	}
+
+	dir, err := layout.ArtifactDirectory("plan", "00000-"+opscore.ArtifactSlugOrDefault(name))
+	if err != nil {
+		return opscore.NamedArtifactPath{}, err
+	}
+
+	path := filepath.Join(dir, opscore.ArtifactBodyFile())
+	relative, err := filepath.Rel(projectDir, path)
+
+	return opscore.NamedArtifactPath{RelativePath: filepath.ToSlash(relative), Path: path}, err
+}

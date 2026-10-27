@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/webui"
 	"forge.adrianpk.com/chr/internal/webui/htmx"
 )
@@ -77,12 +77,12 @@ func webDumpEditorPost(handler http.Handler, form url.Values) *httptest.Response
 func checkWebDumpSavedDocument(t *testing.T, root, reference string) {
 	t.Helper()
 
-	document, err := core.ReadDumpDocument(t.Context(), root, reference)
+	document, err := authoringcore.ReadDumpDocument(t.Context(), root, reference)
 	if err != nil || !strings.Contains(document.Content, "custom: retained") || !strings.HasSuffix(document.Content, "Corrected material.\n\nAdded in the same editor.\n") || strings.Contains(document.Content, "Original material.") {
 		t.Fatal("Save lost frontmatter or failed to replace body", document, err)
 	}
 
-	observed, err := core.ObserveProjectDump(t.Context(), root)
+	observed, err := authoringcore.ObserveProjectDump(t.Context(), root)
 	if err != nil || observed.Destination != reference || len(observed.Candidates) != 1 || len(observed.Components) != 1 {
 		t.Fatal("Save changed identity or raw provenance", observed, err)
 	}

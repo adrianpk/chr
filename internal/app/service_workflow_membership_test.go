@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -49,7 +50,7 @@ func serviceWorkflowAmendmentRequest(t *testing.T, operations service, hierarchy
 
 	plan := serviceWorkflowPlanFixture()
 
-	plan.PlanRef, plan.PlanHash = "plan/approved-change.md", core.WorkflowContentHash([]byte("approved amendment\n"))
+	plan.PlanRef, plan.PlanHash = "plan/approved-change.md", authoringcore.WorkflowContentHash([]byte("approved amendment\n"))
 	for i := range plan.Slices {
 		data, err := os.ReadFile(filepath.Join(operations.projectContext.ProjectDir, "ops", "default", hierarchy.Set.Set.Slices[i].ContractRef))
 		if err != nil {

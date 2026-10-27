@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -22,7 +22,7 @@ func TestWebPlanInternal(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	binding, err := core.ObservePlanRevision(t.Context(), provider.projectContext.ProjectDir, operations.quizScope(quizcore.Scope{CaseSlug: "named-work"}))
+	binding, err := authoringcore.ObservePlanRevision(t.Context(), provider.projectContext.ProjectDir, operations.quizScope(quizcore.Scope{CaseSlug: "named-work"}))
 	if err != nil {
 		t.Fatal(err)
 	}

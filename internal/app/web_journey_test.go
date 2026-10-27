@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	"forge.adrianpk.com/chr/internal/webui"
@@ -75,7 +75,7 @@ func (j *webJourney) discovery(t *testing.T) {
 
 	root := j.provider.projectContext.ProjectDir
 
-	observed, err := core.ObserveProjectDump(t.Context(), root)
+	observed, err := authoringcore.ObserveProjectDump(t.Context(), root)
 	if err != nil || len(observed.Candidates) != 1 || len(observed.Components) != 2 || len(observed.Scoped) != 1 {
 		t.Fatal(observed, err)
 	}

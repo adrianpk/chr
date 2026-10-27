@@ -16,7 +16,7 @@ func TestPlanQuizToDraftPromotionCreatesDraftWithProvenance(t *testing.T) {
 	now := time.Date(2026, 5, 21, 16, 0, 0, 0, time.UTC)
 	session, quizPath := writePromotionQuizFixture(t, projectDir, now)
 
-	plan, err := PlanQuizToDraftPromotion(QuizToDraftPromotionOptions{
+	plan, err := authoringcore.PlanQuizToDraftPromotion(authoringcore.QuizToDraftPromotionOptions{
 		ProjectDir: projectDir,
 		Session:    session,
 		QuizPath:   quizPath,
@@ -54,7 +54,7 @@ func TestWriteQuizToDraftPromotionWritesDraft(t *testing.T) {
 	session, quizPath := writePromotionQuizFixture(t, projectDir, now)
 	plan := mustPlanQuizToDraftPromotion(t, projectDir, session, quizPath, now, false)
 
-	err := WriteQuizToDraftPromotion(plan)
+	err := authoringcore.WriteQuizToDraftPromotion(plan)
 	if err != nil {
 		t.Fatalf("WriteQuizToDraftPromotion returned error: %v", err)
 	}
@@ -87,7 +87,7 @@ func TestWriteQuizToDraftPromotionRejectsUnallowedCollision(t *testing.T) {
 
 	colliding := mustPlanQuizToDraftPromotion(t, projectDir, session, quizPath, now, false)
 
-	err = WriteQuizToDraftPromotion(colliding)
+	err = authoringcore.WriteQuizToDraftPromotion(colliding)
 	if err == nil {
 		t.Fatal("WriteQuizToDraftPromotion returned nil error")
 	}
@@ -99,15 +99,15 @@ func TestPlanQuizToDraftPromotionRejectsInvalidInput(t *testing.T) {
 
 	for _, test := range []struct {
 		name string
-		opts QuizToDraftPromotionOptions
+		opts authoringcore.QuizToDraftPromotionOptions
 	}{
-		{name: "project dir", opts: QuizToDraftPromotionOptions{Session: session, QuizPath: "quiz.md", Now: now}},
-		{name: "session", opts: QuizToDraftPromotionOptions{ProjectDir: "/tmp/project", QuizPath: "quiz.md", Now: now}},
-		{name: "quiz path", opts: QuizToDraftPromotionOptions{ProjectDir: "/tmp/project", Session: session, Now: now}},
-		{name: "time", opts: QuizToDraftPromotionOptions{ProjectDir: "/tmp/project", Session: session, QuizPath: "quiz.md"}},
+		{name: "project dir", opts: authoringcore.QuizToDraftPromotionOptions{Session: session, QuizPath: "quiz.md", Now: now}},
+		{name: "session", opts: authoringcore.QuizToDraftPromotionOptions{ProjectDir: "/tmp/project", QuizPath: "quiz.md", Now: now}},
+		{name: "quiz path", opts: authoringcore.QuizToDraftPromotionOptions{ProjectDir: "/tmp/project", Session: session, Now: now}},
+		{name: "time", opts: authoringcore.QuizToDraftPromotionOptions{ProjectDir: "/tmp/project", Session: session, QuizPath: "quiz.md"}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			_, err := PlanQuizToDraftPromotion(test.opts)
+			_, err := authoringcore.PlanQuizToDraftPromotion(test.opts)
 			if err == nil {
 				t.Fatal("PlanQuizToDraftPromotion returned nil error")
 			}
@@ -121,7 +121,7 @@ func writePromotionQuizFixture(t *testing.T, projectDir string, now time.Time) (
 	session := validContextualQuizSession(now)
 	quizPlan := mustPlanContextualQuiz(t, projectDir, session, now, false)
 
-	err := WriteContextualQuiz(quizPlan)
+	err := authoringcore.WriteContextualQuiz(quizPlan)
 	if err != nil {
 		t.Fatalf("WriteContextualQuiz returned error: %v", err)
 	}
@@ -142,16 +142,16 @@ func mustPlanContextualQuiz(
 	session authoringcore.Session,
 	now time.Time,
 	allowReplace bool,
-) ContextualQuizGenerationPlan {
+) authoringcore.ContextualQuizGenerationPlan {
 	t.Helper()
 
-	plan, err := PlanContextualQuizGeneration(context.Background(), ContextualQuizGenerationOptions{
+	plan, err := authoringcore.PlanContextualQuizGeneration(context.Background(), authoringcore.ContextualQuizGenerationOptions{
 		Context:      WorkspaceAuthoringQuizContext{},
 		ProjectDir:   projectDir,
 		Session:      session,
 		Now:          now,
 		AllowReplace: allowReplace,
-		Provider: &FakeAuthoringQuizQuestionProvider{
+		Provider: &authoringcore.FakeAuthoringQuizQuestionProvider{
 			Result: validContextualQuizGenerationResult(),
 		},
 	})
@@ -169,10 +169,10 @@ func mustPlanQuizToDraftPromotion(
 	quizPath string,
 	now time.Time,
 	allowReplace bool,
-) QuizToDraftPromotionPlan {
+) authoringcore.QuizToDraftPromotionPlan {
 	t.Helper()
 
-	plan, err := PlanQuizToDraftPromotion(QuizToDraftPromotionOptions{
+	plan, err := authoringcore.PlanQuizToDraftPromotion(authoringcore.QuizToDraftPromotionOptions{
 		ProjectDir:   projectDir,
 		Session:      session,
 		QuizPath:     quizPath,

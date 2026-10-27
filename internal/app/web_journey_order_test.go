@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -23,7 +23,7 @@ func (j *webJourney) planAndBind(t *testing.T) {
 	operations := j.provider.service(t.Context())
 	scope := operations.quizScope(quizcore.Scope{CaseSlug: "named-work"})
 
-	binding, err := core.ObservePlanRevision(t.Context(), operations.projectContext.ProjectDir, scope)
+	binding, err := authoringcore.ObservePlanRevision(t.Context(), operations.projectContext.ProjectDir, scope)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -6,7 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 const (
@@ -18,13 +18,13 @@ const (
 
 // ProjectMetadataExecutor persists project metadata edits.
 type ProjectMetadataExecutor interface {
-	SaveProjectMetadata(metadata core.ProjectMetadata) (ProjectMetadataResult, error)
+	SaveProjectMetadata(metadata authoringcore.ProjectMetadata) (ProjectMetadataResult, error)
 }
 
 // ProjectMetadataResult returns refreshed project metadata after a save.
 type ProjectMetadataResult struct {
 	Message  string
-	Metadata core.ProjectMetadata
+	Metadata authoringcore.ProjectMetadata
 }
 
 // ProjectEditState stores editable metadata form state.

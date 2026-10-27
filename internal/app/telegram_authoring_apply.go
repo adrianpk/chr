@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
@@ -77,8 +76,8 @@ func (r telegramReceiver) validateAuthoringAuthority(ctx context.Context, reques
 	return config, err
 }
 
-func telegramRetainedAuthoringInput(request telegramcore.OperationRequest) (core.AuthoringContinuationRequest, error) {
-	var owner core.AuthoringContinuationRequest
+func telegramRetainedAuthoringInput(request telegramcore.OperationRequest) (authoringcore.AuthoringContinuationRequest, error) {
+	var owner authoringcore.AuthoringContinuationRequest
 	if err := decodeBoundedOperationJSON(string(request.PreparedInput), &owner, 1048576); err != nil {
 		return owner, err
 	}
@@ -100,11 +99,11 @@ func (r telegramReceiver) authoringAttemptFailure(ctx context.Context, request t
 		return ctx.Err()
 	}
 
-	if errors.Is(failure, core.ErrAuthoringProviderFailure) || errors.Is(failure, core.ErrAuthoringProviderWait) {
+	if errors.Is(failure, authoringcore.ErrAuthoringProviderFailure) || errors.Is(failure, authoringcore.ErrAuthoringProviderWait) {
 		return nil
 	}
 
-	if errors.Is(failure, workflowstate.ErrConflict) || errors.Is(failure, core.ErrAuthoringProviderExhausted) {
+	if errors.Is(failure, workflowstate.ErrConflict) || errors.Is(failure, authoringcore.ErrAuthoringProviderExhausted) {
 		return r.finishAuthoringFailure(ctx, request, config, failure)
 	}
 
@@ -127,7 +126,7 @@ func telegramAuthoringFailure(err error) string {
 		return telegramRequestCapacityText
 	}
 
-	if errors.Is(err, core.ErrAuthoringProviderExhausted) {
+	if errors.Is(err, authoringcore.ErrAuthoringProviderExhausted) {
 		return "Authoring exhausted five retained provider attempts. Prior context and artifacts are preserved. Send a new corrected instruction; this request's budget cannot restart."
 	}
 
@@ -147,7 +146,7 @@ type telegramAuthoringFacts struct {
 	Question   *telegramcore.ConversationQuestion `json:"question,omitempty"`
 }
 
-func (r telegramReceiver) finishAuthoring(ctx context.Context, request telegramcore.OperationRequest, result core.AuthoringContinuationResult, config telegramcore.ReceiverConfig) error {
+func (r telegramReceiver) finishAuthoring(ctx context.Context, request telegramcore.OperationRequest, result authoringcore.AuthoringContinuationResult, config telegramcore.ReceiverConfig) error {
 	if result.RequestID != request.ID || result.ReceiptRef == "" {
 		return workflowstate.ErrConflict
 	}
@@ -185,7 +184,7 @@ func (r telegramReceiver) finishAuthoring(ctx context.Context, request telegramc
 	return err
 }
 
-func telegramAuthoringResultText(conversation string, result core.AuthoringContinuationResult) string {
+func telegramAuthoringResultText(conversation string, result authoringcore.AuthoringContinuationResult) string {
 	if result.Question != nil {
 		return tgmessage.Render(tgmessage.Blocks{Content: result.Prompt, SecondaryText: "Reply to this message to answer. Use /reply " + conversation + " <answer> when you cannot reply directly."}).PlainFallback
 	}

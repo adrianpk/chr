@@ -1,7 +1,7 @@
 package app
 
 import (
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
@@ -15,20 +15,20 @@ type SaveSpecRequest struct {
 	OperationID, Reference, Revision, Title, Body, Status, CaseSlug string
 }
 
-func (s service) CreateSpec(request CreateSpecRequest) (core.SpecMutationResult, error) {
+func (s service) CreateSpec(request CreateSpecRequest) (authoringcore.SpecMutationResult, error) {
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir})
 	if err != nil {
-		return core.SpecMutationResult{}, err
+		return authoringcore.SpecMutationResult{}, err
 	}
 
-	return core.MutateSpec(s.ctx, s.projectContext.ProjectDir, core.SpecMutationRequest{
+	return authoringcore.MutateSpec(s.ctx, s.projectContext.ProjectDir, authoringcore.SpecMutationRequest{
 		Action: "create", Namespace: layout.Namespace(), ProjectID: s.projectContext.ProjectID,
 		OperationID: request.OperationID, Title: request.Title, Body: request.Body, Status: request.Status, CaseSlug: request.CaseSlug,
 	})
 }
 
-func (s service) SaveSpec(request SaveSpecRequest) (core.SpecMutationResult, error) {
-	return core.MutateSpec(s.ctx, s.projectContext.ProjectDir, core.SpecMutationRequest{
+func (s service) SaveSpec(request SaveSpecRequest) (authoringcore.SpecMutationResult, error) {
+	return authoringcore.MutateSpec(s.ctx, s.projectContext.ProjectDir, authoringcore.SpecMutationRequest{
 		Action: "save", ProjectID: s.projectContext.ProjectID, OperationID: request.OperationID,
 		Reference: request.Reference, ExpectedRevision: request.Revision,
 		Title: request.Title, Body: request.Body, Status: request.Status, CaseSlug: request.CaseSlug,

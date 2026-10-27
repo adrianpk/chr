@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -42,7 +43,7 @@ func TestServiceWorkflowMaterialization(t *testing.T) {
 func serviceWorkflowPlanFixture() generationcore.GeneratedWorkflowPlan {
 	gate := workflowstate.Validation{Required: true, Commands: [][]string{{"go", "test", "./..."}}, TimeoutSeconds: 60}
 
-	plan := generationcore.GeneratedWorkflowPlan{MaterializationID: "generation-a", Title: "Delivery", PlanRef: "plan/approved.md", PlanHash: core.WorkflowContentHash([]byte("approved\n")), ClosingValidation: gate}
+	plan := generationcore.GeneratedWorkflowPlan{MaterializationID: "generation-a", Title: "Delivery", PlanRef: "plan/approved.md", PlanHash: authoringcore.WorkflowContentHash([]byte("approved\n")), ClosingValidation: gate}
 	for i := 1; i <= 2; i++ {
 		slice := generationcore.GeneratedWorkflowSlice{ID: fmt.Sprintf("slice-%d", i), Label: fmt.Sprintf("Slice %d", i), Order: i, Title: "Integration", Contract: "Deliver one integration unit", Validation: gate}
 		for j := 1; j <= 3; j++ {

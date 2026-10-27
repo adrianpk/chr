@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/tui"
@@ -48,7 +48,7 @@ func (p webViewProvider) CatalogView(ctx context.Context, family string) (webui.
 }
 
 func (p webViewProvider) caseCatalog() (webui.ArtifactCatalogView, error) {
-	cases, err := core.NewCaseMetadataService(p.projectContext.ProjectDir).LoadAll()
+	cases, err := authoringcore.NewCaseMetadataService(p.projectContext.ProjectDir).LoadAll()
 	if err != nil {
 		return webui.ArtifactCatalogView{}, err
 	}
@@ -62,7 +62,7 @@ func dumpCatalog(operations service) (webui.ArtifactCatalogView, error) {
 		return webui.ArtifactCatalogView{}, err
 	}
 
-	cases, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, workflowstate.RecordLimit)
+	cases, err := authoringcore.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, workflowstate.RecordLimit)
 	if err != nil {
 		return webui.ArtifactCatalogView{}, err
 	}
@@ -106,7 +106,7 @@ func specCatalog(operations service) (webui.ArtifactCatalogView, error) {
 		cards = append(cards, card)
 	}
 
-	cases, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, workflowstate.RecordLimit)
+	cases, err := authoringcore.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, workflowstate.RecordLimit)
 	if err != nil {
 		return webui.ArtifactCatalogView{}, err
 	}
@@ -192,7 +192,7 @@ func (p webViewProvider) readArtifactDetail(ctx context.Context, request webui.A
 }
 
 func (p webViewProvider) caseDetailView(ctx context.Context, card webui.ArtifactCardView) (webui.ArtifactDetailView, error) {
-	metadata, err := core.NewCaseMetadataService(p.projectContext.ProjectDir).ReadBounded(ctx, card.ID)
+	metadata, err := authoringcore.NewCaseMetadataService(p.projectContext.ProjectDir).ReadBounded(ctx, card.ID)
 	if err != nil {
 		return webui.ArtifactDetailView{}, err
 	}
@@ -237,7 +237,7 @@ func webArtifactCatalog(family string, items []webui.ArtifactCardView) webui.Art
 	return view
 }
 
-func webCaseCards(projectDir string, cases []core.CaseMetadata) []webui.ArtifactCardView {
+func webCaseCards(projectDir string, cases []authoringcore.CaseMetadata) []webui.ArtifactCardView {
 	cards := make([]webui.ArtifactCardView, 0, len(cases))
 	for _, metadata := range cases {
 		card := webui.ArtifactCardView{
@@ -460,7 +460,7 @@ func webContentState(available bool) string {
 	return "missing"
 }
 
-func caseRelativePath(projectDir string, metadata core.CaseMetadata) string {
+func caseRelativePath(projectDir string, metadata authoringcore.CaseMetadata) string {
 	if metadata.SourcePath == "" {
 		return ""
 	}
@@ -490,7 +490,7 @@ func webContentRevision(content string) string {
 }
 
 func (p webViewProvider) dumpArtifactDetail(ctx context.Context, request webui.ArtifactDetailRequest) (webui.ArtifactDetailView, error) {
-	document, err := core.ReadDumpDocument(ctx, p.projectContext.ProjectDir, request.ID)
+	document, err := authoringcore.ReadDumpDocument(ctx, p.projectContext.ProjectDir, request.ID)
 	if errors.Is(err, os.ErrNotExist) {
 		view := webui.ArtifactDetailView{Family: request.Family, ID: request.ID, Path: request.ID, Missing: true}
 		view.Revision = webStableRevision(view)

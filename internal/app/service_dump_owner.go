@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 func (s service) CreateDump(request DumpCreateRequest) (DumpOperationResult, error) {
-	mutation := core.DumpMutationRequest{OperationID: dumpRequestID(request.OperationID), ExpectedRevision: request.ExpectedRevision, Action: "capture", Namespace: request.Namespace, CaseSlug: request.Scope.CaseSlug, Title: strings.TrimSpace(request.Title), Content: request.Content}
+	mutation := authoringcore.DumpMutationRequest{OperationID: dumpRequestID(request.OperationID), ExpectedRevision: request.ExpectedRevision, Action: "capture", Namespace: request.Namespace, CaseSlug: request.Scope.CaseSlug, Title: strings.TrimSpace(request.Title), Content: request.Content}
 	if request.Scope.CaseSlug != "" {
 		layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: request.Namespace})
 		if err != nil {
@@ -22,11 +22,11 @@ func (s service) CreateDump(request DumpCreateRequest) (DumpOperationResult, err
 		mutation.Namespace = layout.Namespace()
 	}
 
-	result, err := core.MutateDump(s.ctx, s.projectContext.ProjectDir, mutation, func(ctx context.Context, destination, raw string) (core.DumpCapturePreparation, error) {
+	result, err := authoringcore.MutateDump(s.ctx, s.projectContext.ProjectDir, mutation, func(ctx context.Context, destination, raw string) (authoringcore.DumpCapturePreparation, error) {
 		preparer, _, err := s.bindGeneration(ctx, "dump-"+mutation.OperationID, "dump_curation")
 		if err != nil {
 			if !errors.Is(err, errLegacyGenerationUnavailable) {
-				return core.DumpCapturePreparation{}, err
+				return authoringcore.DumpCapturePreparation{}, err
 			}
 
 			preparer = s
@@ -36,10 +36,10 @@ func (s service) CreateDump(request DumpCreateRequest) (DumpOperationResult, err
 
 		curation, err := preparer.curateDump(request)
 		if err != nil {
-			return core.DumpCapturePreparation{}, err
+			return authoringcore.DumpCapturePreparation{}, err
 		}
 
-		return core.DumpCapturePreparation{Content: renderCuratedDumpMarkdown(mutation.Title, request.Scope, raw, curation), RawContent: renderRawDumpMarkdown(mutation.Title, request.Scope, destination, request.Content, curation)}, nil
+		return authoringcore.DumpCapturePreparation{Content: renderCuratedDumpMarkdown(mutation.Title, request.Scope, raw, curation), RawContent: renderRawDumpMarkdown(mutation.Title, request.Scope, destination, request.Content, curation)}, nil
 	})
 	if err != nil {
 		return DumpOperationResult{}, err
@@ -57,15 +57,15 @@ func dumpRequestID(id string) string {
 }
 
 func (s service) AppendDump(request DumpAppendRequest) (DumpOperationResult, error) {
-	return s.editDump(core.DumpMutationRequest{OperationID: request.OperationID, ExpectedRevision: request.ExpectedRevision, Action: "append", Reference: request.RelativePath, Content: request.Content}, "Appended")
+	return s.editDump(authoringcore.DumpMutationRequest{OperationID: request.OperationID, ExpectedRevision: request.ExpectedRevision, Action: "append", Reference: request.RelativePath, Content: request.Content}, "Appended")
 }
 
 func (s service) SaveDump(request DumpSaveRequest) (DumpOperationResult, error) {
-	return s.editDump(core.DumpMutationRequest{OperationID: request.OperationID, ExpectedRevision: request.ExpectedRevision, Action: "save", Reference: request.RelativePath, Content: request.Content}, "Saved")
+	return s.editDump(authoringcore.DumpMutationRequest{OperationID: request.OperationID, ExpectedRevision: request.ExpectedRevision, Action: "save", Reference: request.RelativePath, Content: request.Content}, "Saved")
 }
 
-func (s service) editDump(request core.DumpMutationRequest, action string) (DumpOperationResult, error) {
-	result, err := core.MutateDump(s.ctx, s.projectContext.ProjectDir, request, nil)
+func (s service) editDump(request authoringcore.DumpMutationRequest, action string) (DumpOperationResult, error) {
+	result, err := authoringcore.MutateDump(s.ctx, s.projectContext.ProjectDir, request, nil)
 	if err != nil {
 		return DumpOperationResult{}, err
 	}
@@ -73,7 +73,7 @@ func (s service) editDump(request core.DumpMutationRequest, action string) (Dump
 	return s.finishDumpMutation(result, action), nil
 }
 
-func (s service) finishDumpMutation(mutation core.ProjectDumpMutationResult, action string) DumpOperationResult {
+func (s service) finishDumpMutation(mutation authoringcore.ProjectDumpMutationResult, action string) DumpOperationResult {
 	ctx, cancel := context.WithTimeout(s.ctx, 10*time.Second)
 	defer cancel()
 

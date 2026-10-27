@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
@@ -90,7 +89,7 @@ func pauseGuidedWebStage(t *testing.T, provider webViewProvider, handler http.Ha
 	question := captureGuidedWebInput(t, provider, handler)
 	answer := guidedQuizCommand(question, "retained-answer", "answer", "Preserve the bounded scope.")
 
-	pending, err := core.ReserveGuidedUseCaseStep(t.Context(), operations.projectContext.ProjectDir, answer)
+	pending, err := authoringcore.ReserveGuidedUseCaseStep(t.Context(), operations.projectContext.ProjectDir, answer)
 	if err != nil {
 		t.Fatal(err)
 	}

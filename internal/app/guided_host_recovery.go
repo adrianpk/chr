@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -40,7 +39,7 @@ func (host *guidedWorkHost) recoverPage(ctx context.Context, operations service,
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	page, err := core.RecoverGuidedHostPage(ctx, operations.projectContext.ProjectDir, operations.projectContext.ProjectID, offset, workflowstate.PageLimit)
+	page, err := authoringcore.RecoverGuidedHostPage(ctx, operations.projectContext.ProjectDir, operations.projectContext.ProjectID, offset, workflowstate.PageLimit)
 	if err != nil {
 		if host.ctx.Err() == nil {
 			slog.WarnContext(ctx, "Guided recovery inventory is unavailable", "code", "guided_inventory_blocked")
@@ -71,7 +70,7 @@ func (host *guidedWorkHost) recoverRun(ctx context.Context, operations service, 
 		err = host.scheduleProgress(operations, scope, false)
 	}
 
-	if guidedHostFailure(err) && ctx.Err() == nil && !errors.Is(err, core.ErrGuidedUseCaseStopped) {
+	if guidedHostFailure(err) && ctx.Err() == nil && !errors.Is(err, authoringcore.ErrGuidedUseCaseStopped) {
 		slog.WarnContext(ctx, "Guided run needs recovery", "run", session.ID, "code", "guided_recovery_blocked")
 	}
 }

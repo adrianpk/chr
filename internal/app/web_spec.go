@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -15,7 +15,7 @@ import (
 func (p webViewProvider) specArtifactDetail(ctx context.Context, request webui.ArtifactDetailRequest) (webui.ArtifactDetailView, error) {
 	operations := p.service(ctx)
 
-	cases, err := core.NewCaseMetadataService(p.projectContext.ProjectDir).LoadBounded(ctx, workflowstate.RecordLimit)
+	cases, err := authoringcore.NewCaseMetadataService(p.projectContext.ProjectDir).LoadBounded(ctx, workflowstate.RecordLimit)
 	if err != nil {
 		return webui.ArtifactDetailView{}, err
 	}
@@ -30,7 +30,7 @@ func (p webViewProvider) specArtifactDetail(ctx context.Context, request webui.A
 		return view, nil
 	}
 
-	document, err := core.ReadSpecDocument(ctx, operations.projectContext.ProjectDir, request.ID)
+	document, err := authoringcore.ReadSpecDocument(ctx, operations.projectContext.ProjectDir, request.ID)
 	if err != nil {
 		return view, err
 	}
@@ -52,7 +52,7 @@ func (p webViewProvider) writeSpecAction(operations service, request webui.Write
 	}
 
 	var (
-		result core.SpecMutationResult
+		result authoringcore.SpecMutationResult
 		err    error
 	)
 

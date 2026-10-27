@@ -7,14 +7,13 @@ import (
 	"errors"
 	"strconv"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func (s service) applyGuidedCommand(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.Session, error) {
 	switch command.Action {
 	case "finish":
-		return core.FinishGuidedUseCaseDump(ctx, s.projectContext.ProjectDir, command)
+		return authoringcore.FinishGuidedUseCaseDump(ctx, s.projectContext.ProjectDir, command)
 	case "quiz", "answer", "quiz-mode", "quiz-skip", "quiz-done":
 		return s.ConductGuidedQuiz(ctx, command)
 	case "spec":
@@ -24,7 +23,7 @@ func (s service) applyGuidedCommand(ctx context.Context, command authoringcore.G
 	case "admit":
 		return s.AdmitGuidedWork(ctx, command)
 	default:
-		return core.MutateGuidedUseCase(ctx, s.projectContext.ProjectDir, command)
+		return authoringcore.MutateGuidedUseCase(ctx, s.projectContext.ProjectDir, command)
 	}
 }
 
@@ -48,7 +47,7 @@ func (s service) advanceGuidedUseCase(ctx context.Context, session authoringcore
 
 func guidedProgressCommand(session authoringcore.Session) (authoringcore.GuidedUseCaseCommand, bool) {
 	command := authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, ExpectedRevision: session.Revision}
-	if !core.GuidedDispatchAllowed(session) {
+	if !authoringcore.GuidedDispatchAllowed(session) {
 		return command, false
 	}
 
@@ -84,7 +83,7 @@ func guidedAutomaticAction(session authoringcore.Session) (string, bool) {
 	case "specification":
 		return "spec", true
 	case "preparation":
-		if _, err := core.GuidedPreparationCheckpoint(session); err == nil {
+		if _, err := authoringcore.GuidedPreparationCheckpoint(session); err == nil {
 			return "admit", true
 		}
 

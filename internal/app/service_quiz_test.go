@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
@@ -937,7 +937,7 @@ func findQuizViewByScope(t *testing.T, views []QuizView, caseSlug string) QuizVi
 func writeServiceQuizReadModelState(t *testing.T, projectDir string, updated time.Time) {
 	t.Helper()
 
-	repository := core.NewQuizArtifactRepository(projectDir)
+	repository := authoringcore.NewQuizArtifactRepository(projectDir)
 	state := serviceQuizReadModelRuntimeState(updated)
 
 	_, err := repository.SaveRuntimeState(t.Context(), state)
@@ -1035,11 +1035,11 @@ func writeServiceQuizFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
 	writeServiceWorkspaceFile(t, filepath.Join(projectDir, "AGENTS.md"), "Agent protocol context.\n")
-	writeServiceWorkspaceFile(t, core.ProjectMetadataPath(projectDir), core.RenderProjectMetadata(core.ProjectMetadata{
+	writeServiceWorkspaceFile(t, authoringcore.ProjectMetadataPath(projectDir), authoringcore.RenderProjectMetadata(authoringcore.ProjectMetadata{
 		Name:        "Quiz Project",
 		Description: "Project metadata for quiz context.",
 	}))
-	writeServiceWorkspaceFile(t, core.CaseMetadataPath(projectDir, "blog"), core.RenderCaseMetadata(core.CaseMetadata{
+	writeServiceWorkspaceFile(t, authoringcore.CaseMetadataPath(projectDir, "blog"), authoringcore.RenderCaseMetadata(authoringcore.CaseMetadata{
 		Name:        "Blog Publishing",
 		Description: "Publish articles.",
 	}))

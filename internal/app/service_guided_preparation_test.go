@@ -8,7 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -119,7 +118,7 @@ func TestGuidedUseCasePreparationExisting(t *testing.T) {
 	plan := serviceQuizPlanResponse("manual-plan", operations.utcNow()).Plan
 	plan.Scope, plan.CreatedAt = scope, operations.utcNow()
 
-	paths, err := core.WriteGeneratedPlan(t.Context(), operations.projectContext.ProjectDir, plan)
+	paths, err := authoringcore.WriteGeneratedPlan(t.Context(), operations.projectContext.ProjectDir, plan)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -257,7 +256,7 @@ func assertGuidedInitialContracts(t *testing.T, operations service, checkpoint a
 	t.Helper()
 
 	for _, member := range ref.Members {
-		content, err := core.ReadGuidedCommittedArtifact(t.Context(), operations.projectContext.ProjectDir, checkpoint, prefix+member.Path)
+		content, err := authoringcore.ReadGuidedCommittedArtifact(t.Context(), operations.projectContext.ProjectDir, checkpoint, prefix+member.Path)
 		if err != nil || !strings.Contains(string(content), member.ContractHash) {
 			t.Fatal("initial native contract not sealed", err)
 		}

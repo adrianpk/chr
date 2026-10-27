@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -43,12 +43,12 @@ func checkWebDumpCaptureInventory(t *testing.T, provider webViewProvider) {
 
 	root := provider.projectContext.ProjectDir
 
-	observed, err := core.ObserveProjectDump(t.Context(), root)
+	observed, err := authoringcore.ObserveProjectDump(t.Context(), root)
 	if err != nil || len(observed.Candidates) != 1 || len(observed.Components) != 2 || len(observed.Scoped) != 2 {
 		t.Fatal("capture scope fragmented or collapsed", observed, err)
 	}
 
-	document, err := core.ReadDumpDocument(t.Context(), root, observed.Destination)
+	document, err := authoringcore.ReadDumpDocument(t.Context(), root, observed.Destination)
 	if err != nil || strings.Count(document.Content, "First material.") != 1 || strings.Count(document.Content, "Second material.") != 1 || strings.Contains(document.Content, "Named material.") {
 		t.Fatal("capture duplicated or mixed scope", document, err)
 	}

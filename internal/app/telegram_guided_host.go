@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -85,7 +84,7 @@ func (h *telegramGuidedHost) recoverReference(ctx context.Context, ref telegramc
 	scoped.guidedHostCheck = func(ctx context.Context) error { return h.receiver.validateGuidedHostReference(ctx, ref) }
 	scope := authoringcore.GuidedUseCaseScope{RunID: ref.Conversation.GuidedRunID, ProjectID: ref.Request.Target.ProjectID, Namespace: ref.Request.Target.Namespace}
 
-	session, err := core.RecoverGuidedHostRun(ctx, scoped.projectContext.ProjectDir, scope)
+	session, err := authoringcore.RecoverGuidedHostRun(ctx, scoped.projectContext.ProjectDir, scope)
 	if err != nil {
 		return err
 	}

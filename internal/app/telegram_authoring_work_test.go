@@ -12,11 +12,12 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func telegramAuthoringWorkFixture(t *testing.T) (service, core.AuthoringContinuationResult) {
+func telegramAuthoringWorkFixture(t *testing.T) (service, authoringcore.AuthoringContinuationResult) {
 	t.Helper()
 
 	if testing.Short() {
@@ -42,7 +43,7 @@ func telegramAuthoringWorkFixture(t *testing.T) (service, core.AuthoringContinua
 	return operations, created
 }
 
-func telegramAuthoringWorkRequest(result core.AuthoringContinuationResult, intent authoringstate.Intent) AuthoringWorkRequest {
+func telegramAuthoringWorkRequest(result authoringcore.AuthoringContinuationResult, intent authoringstate.Intent) AuthoringWorkRequest {
 	return AuthoringWorkRequest{Binding: workflowstate.MutationBinding{RequestID: "work-description", Operator: "maintainer"}, SessionID: result.Session.ID, ExpectedRevision: result.Session.Revision, ExpectedSourceHash: result.SourceHash, Intent: intent, Instruction: "Retain the retry ceiling and existing defaults."}
 }
 
@@ -90,11 +91,11 @@ func telegramAuthoringWorkGrant(t *testing.T, operations service, prepared Prepa
 		return prepared
 	}
 
-	if _, err := operations.ApplyPreparedAuthoringWork(t.Context(), prepared); !errors.Is(err, core.ErrAuthoringAuthorityRequired) {
+	if _, err := operations.ApplyPreparedAuthoringWork(t.Context(), prepared); !errors.Is(err, authoringcore.ErrAuthoringAuthorityRequired) {
 		t.Fatal("missing development authority accepted", err)
 	}
 
-	grant, err := core.AuthorizeAuthoringWork(prepared.Scope, workflowstate.MutationBinding{RequestID: "explicit-instruction", Operator: "maintainer"}, prepared.Scope.Hash)
+	grant, err := authoringcore.AuthorizeAuthoringWork(prepared.Scope, workflowstate.MutationBinding{RequestID: "explicit-instruction", Operator: "maintainer"}, prepared.Scope.Hash)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -128,12 +129,12 @@ func telegramAuthoringWorkCheckRecord(t *testing.T, operations service, result A
 func telegramAuthoringWorkCheckProvenance(t *testing.T, record core.WorkflowRecord, result AuthoringWorkResult) {
 	t.Helper()
 
-	var scope core.AuthoringWorkScope
+	var scope authoringcore.AuthoringWorkScope
 	if err := json.Unmarshal(record.Metadata["authoring_scope"], &scope); err != nil || scope != result.Scope {
 		t.Fatal("canonical scope/provenance lost", scope, err)
 	}
 
-	var authority *core.AuthoringWorkAuthorization
+	var authority *authoringcore.AuthoringWorkAuthorization
 	if err := json.Unmarshal(record.Metadata["authoring_authorization"], &authority); err != nil || !reflect.DeepEqual(authority, result.Authorization) {
 		t.Fatal("canonical authority lost", authority, err)
 	}

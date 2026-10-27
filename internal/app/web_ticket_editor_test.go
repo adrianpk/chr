@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -41,7 +42,7 @@ func webTicketEditorProvider(t *testing.T, native bool) webViewProvider {
 		writeCLIWorkspaceConfig(t, project, "ticket:\n  key_prefix: CHR\nwork:\n  state_authority: tickets\n")
 	}
 
-	if _, err := core.NewCaseMetadataService(project).Save(core.CaseMetadata{Name: "Named work", Slug: "named-work", Description: "Selected work."}); err != nil {
+	if _, err := authoringcore.NewCaseMetadataService(project).Save(authoringcore.CaseMetadata{Name: "Named work", Slug: "named-work", Description: "Selected work."}); err != nil {
 		t.Fatal(err)
 	}
 

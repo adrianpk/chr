@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -152,7 +153,7 @@ func checkHarnessSelectionStatusInvalid(t *testing.T, mode string) {
 func TestHarnessSelectionAuthorityRechecked(t *testing.T) {
 	operations, _, _, _ := harnessSelectionFixture(t)
 	count := 0
-	request := core.HarnessSelectionChangeRequest{Binding: workflowstate.MutationBinding{RequestID: "revoked", Operator: "operator"}, ProjectRef: "fixture", ExpectedRevision: core.WorkflowContentHash(nil), Worker: harnessChoiceTestPointer("writing")}
+	request := core.HarnessSelectionChangeRequest{Binding: workflowstate.MutationBinding{RequestID: "revoked", Operator: "operator"}, ProjectRef: "fixture", ExpectedRevision: authoringcore.WorkflowContentHash(nil), Worker: harnessChoiceTestPointer("writing")}
 
 	_, err := operations.ChangeHarnessSelections(t.Context(), request, func(_ context.Context) error {
 		count++

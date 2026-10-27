@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
@@ -16,7 +16,7 @@ func (r telegramReceiver) guidedDocument(ctx context.Context, request telegramco
 	}
 
 	if kind == "" {
-		if !core.GuidedDispatchAllowed(*observed.Session) || len([]rune(observed.Question)) <= 600 {
+		if !authoringcore.GuidedDispatchAllowed(*observed.Session) || len([]rune(observed.Question)) <= 600 {
 			return nil, nil
 		}
 

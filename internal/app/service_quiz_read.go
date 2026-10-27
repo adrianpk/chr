@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -109,7 +109,7 @@ func (s service) appendRuntimeOnlyQuizViews(
 func (s service) quizReadScopes() ([]quizReadScope, error) {
 	projectTitle := s.projectContext.ProjectID
 
-	projectMetadata, err := core.NewProjectMetadataService(s.projectContext.ProjectDir).Load()
+	projectMetadata, err := authoringcore.NewProjectMetadataService(s.projectContext.ProjectDir).Load()
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +123,7 @@ func (s service) quizReadScopes() ([]quizReadScope, error) {
 		scope: quizcore.Scope{ProjectID: s.projectContext.ProjectID},
 	}}
 
-	cases, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).LoadBounded(s.ctx, workflowstate.RecordLimit)
+	cases, err := authoringcore.NewCaseMetadataService(s.projectContext.ProjectDir).LoadBounded(s.ctx, workflowstate.RecordLimit)
 	if err != nil {
 		return nil, err
 	}

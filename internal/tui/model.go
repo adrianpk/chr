@@ -76,8 +76,8 @@ var viewPlaceholders = map[View]string{
 type Options struct {
 	ProjectDir           string
 	ProjectID            string
-	ProjectMetadata      core.ProjectMetadata
-	Cases                []core.CaseMetadata
+	ProjectMetadata      authoringcore.ProjectMetadata
+	Cases                []authoringcore.CaseMetadata
 	Stdin                io.Reader
 	Stdout               io.Writer
 	Tickets              []core.IndexedTicket
@@ -156,7 +156,7 @@ func NewModel(opts Options) *Model {
 	}
 
 	if strings.TrimSpace(projectMetadata.SourcePath) == "" && strings.TrimSpace(opts.ProjectDir) != "" {
-		projectMetadata.SourcePath = core.ProjectMetadataPath(opts.ProjectDir)
+		projectMetadata.SourcePath = authoringcore.ProjectMetadataPath(opts.ProjectDir)
 	}
 
 	tickets := NewTicketViews(opts.Tickets)

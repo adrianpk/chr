@@ -67,7 +67,7 @@ func NewProjectWideWorkspaceContextRequest(projectDir string, graph WorkspaceGra
 
 // AssembleWorkspaceContext executes the corresponding package operation.
 func AssembleWorkspaceContext(request WorkspaceContextRequest) (WorkspaceContextAssembly, error) {
-	projectDir, err := CleanContextProjectDir(request.ProjectDir)
+	projectDir, err := authoringcore.CleanContextProjectDir(request.ProjectDir)
 	if err != nil {
 		return WorkspaceContextAssembly{}, err
 	}
@@ -131,15 +131,15 @@ func RenderWorkspaceContextAssembly(assembly WorkspaceContextAssembly) string {
 	}
 
 	output.WriteString("## Project\n\n")
-	WriteContextDocuments(&output, []authoringcore.ContextDocument{assembly.Project}, "Project document was not loaded.")
+	authoringcore.WriteContextDocuments(&output, []authoringcore.ContextDocument{assembly.Project}, "Project document was not loaded.")
 
 	if assembly.Scope == WorkspaceContextScopeCase {
 		output.WriteString("## Case\n\n")
-		WriteContextDocuments(&output, []authoringcore.ContextDocument{assembly.Case}, "Case document was not loaded.")
+		authoringcore.WriteContextDocuments(&output, []authoringcore.ContextDocument{assembly.Case}, "Case document was not loaded.")
 	}
 
 	output.WriteString("## Workspace Documents\n\n")
-	WriteContextDocuments(&output, assembly.Documents, "No workspace documents were selected.")
+	authoringcore.WriteContextDocuments(&output, assembly.Documents, "No workspace documents were selected.")
 
 	output.WriteString("## Diagnostics\n\n")
 	writeWorkspaceContextDiagnostics(&output, assembly.Diagnostics)

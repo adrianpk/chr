@@ -35,7 +35,7 @@ func (s service) prepareGuidedWork(ctx context.Context, session *authoringcore.S
 	}
 
 	if config.Workflow.Version != 1 {
-		return &core.GuidedPrerequisiteError{Action: "Configure native workflow version 1 before retrying work preparation."}
+		return &authoringcore.GuidedPrerequisiteError{Action: "Configure native workflow version 1 before retrying work preparation."}
 	}
 
 	if err := s.reserveGuidedPlan(ctx, session); err != nil {
@@ -51,7 +51,7 @@ func (s service) prepareGuidedWork(ctx context.Context, session *authoringcore.S
 
 		operation.PreparedPlan = &prepared
 
-		if err := core.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session); err != nil {
+		if err := authoringcore.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session); err != nil {
 			return err
 		}
 	}
@@ -70,7 +70,7 @@ func (s service) reserveGuidedPlan(ctx context.Context, session *authoringcore.S
 
 	scope := quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
 
-	paths, err := core.GeneratedPlanLayout(s.projectContext.ProjectDir, scope)
+	paths, err := authoringcore.GeneratedPlanLayout(s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return err
 	}
@@ -79,14 +79,14 @@ func (s service) reserveGuidedPlan(ctx context.Context, session *authoringcore.S
 		return errors.Join(workflowstate.ErrConflict, err)
 	}
 
-	revision, err := core.PlanTargetRevision(ctx, s.projectContext.ProjectDir, scope)
+	revision, err := authoringcore.PlanTargetRevision(ctx, s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return err
 	}
 
 	session.Guided.Work = &authoringcore.GuidedWorkState{PublicationOperation: generationcore.PlanPublicationOperation{ID: "guided-plan-" + session.Guided.PendingOperation.Digest, Scope: scope, ExpectedRevision: revision, TicketDelivery: true}}
 
-	return core.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session)
+	return authoringcore.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session)
 }
 
 func (s service) generateGuidedPlan(ctx context.Context, session authoringcore.Session) (authoringcore.GuidedPreparedPlan, error) {
@@ -113,10 +113,10 @@ func (s service) generateGuidedPlan(ctx context.Context, session authoringcore.S
 
 	plan := generated.Plan
 	plan.SourceRequestID, plan.SourceResponseID = strings.Join(generated.RequestIDs, ","), strings.Join(generated.ResponseIDs, ",")
-	plan.Order = core.ScopePlanDeliveryOrder(plan.Order, session.Guided.Work.PublicationOperation)
+	plan.Order = authoringcore.ScopePlanDeliveryOrder(plan.Order, session.Guided.Work.PublicationOperation)
 
 	plan.RequireOrderMap = true
-	if err := core.ValidateGuidedPlannedOrder(plan.Order); err != nil {
+	if err := authoringcore.ValidateGuidedPlannedOrder(plan.Order); err != nil {
 		return authoringcore.GuidedPreparedPlan{}, err
 	}
 
@@ -141,7 +141,7 @@ func (s service) publishGuidedPlan(ctx context.Context, session *authoringcore.S
 		return nil
 	}
 
-	result, err := core.PublishGuidedPlan(ctx, s.projectContext.ProjectDir, authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace})
+	result, err := authoringcore.PublishGuidedPlan(ctx, s.projectContext.ProjectDir, authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace})
 	if err != nil {
 		return err
 	}
@@ -152,7 +152,7 @@ func (s service) publishGuidedPlan(ctx context.Context, session *authoringcore.S
 
 	session.Guided.Work.Publication = &result
 
-	return core.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session)
+	return authoringcore.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session)
 }
 
 func (s service) materializeGuidedWork(ctx context.Context, session *authoringcore.Session) error {
@@ -160,12 +160,12 @@ func (s service) materializeGuidedWork(ctx context.Context, session *authoringco
 	if operation.PreparedWorkflow == nil {
 		input, err := s.generateGuidedContracts(ctx, *session)
 		if err != nil {
-			return &core.GuidedPrerequisiteError{Action: "Correct native contract generation or provider setup, then retry the retained preparation.", Cause: err}
+			return &authoringcore.GuidedPrerequisiteError{Action: "Correct native contract generation or provider setup, then retry the retained preparation.", Cause: err}
 		}
 
 		operation.PreparedWorkflow = &input
 
-		if err := core.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session); err != nil {
+		if err := authoringcore.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session); err != nil {
 			return err
 		}
 	}
@@ -176,7 +176,7 @@ func (s service) materializeGuidedWork(ctx context.Context, session *authoringco
 		}
 	}
 
-	return core.SealGuidedPreparation(ctx, s.projectContext.ProjectDir, session)
+	return authoringcore.SealGuidedPreparation(ctx, s.projectContext.ProjectDir, session)
 }
 
 func (s service) retainGuidedMaterialization(ctx context.Context, session *authoringcore.Session) error {
@@ -195,7 +195,7 @@ func (s service) retainGuidedMaterialization(ctx context.Context, session *autho
 	}
 
 	session.Guided.Work.Materialization = &reference
-	if err := core.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session); err != nil {
+	if err := authoringcore.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session); err != nil {
 		return err
 	}
 

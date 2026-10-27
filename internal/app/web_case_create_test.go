@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -49,7 +49,7 @@ func TestWebCaseCreate(t *testing.T) {
 func checkWebCaseCreated(t *testing.T, provider webViewProvider) {
 	t.Helper()
 
-	cases, err := core.NewCaseMetadataService(provider.projectContext.ProjectDir).LoadAll()
+	cases, err := authoringcore.NewCaseMetadataService(provider.projectContext.ProjectDir).LoadAll()
 	if err != nil || len(cases) != 1 || cases[0].Slug != "task-management" || cases[0].Context != "Keep task data local." {
 		t.Fatal("creation lost its canonical name, context or generated identity", cases, err)
 	}
