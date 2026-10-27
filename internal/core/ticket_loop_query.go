@@ -294,11 +294,11 @@ func firstNonZero(values ...int) int {
 }
 
 func compareIndexedTicketsByKey(left, right ticketcore.Indexed) int {
-	leftPrefix, leftNumber, leftOK := splitTicketKey(left.Key)
-	rightPrefix, rightNumber, rightOK := splitTicketKey(right.Key)
+	leftKey := splitTicketKey(left.Key)
+	rightKey := splitTicketKey(right.Key)
 
-	if leftOK && rightOK && leftPrefix == rightPrefix {
-		return compareRank(leftNumber, rightNumber)
+	if leftKey.valid && rightKey.valid && leftKey.prefix == rightKey.prefix {
+		return compareRank(leftKey.number, rightKey.number)
 	}
 
 	if left.Key < right.Key {
@@ -312,16 +312,22 @@ func compareIndexedTicketsByKey(left, right ticketcore.Indexed) int {
 	return 0
 }
 
-func splitTicketKey(key string) (string, int, bool) {
+type ticketKeyParts struct {
+	prefix string
+	number int
+	valid  bool
+}
+
+func splitTicketKey(key string) ticketKeyParts {
 	prefix, numberText, ok := strings.Cut(key, "-")
 	if !ok || prefix == "" || numberText == "" {
-		return "", 0, false
+		return ticketKeyParts{}
 	}
 
 	number, err := strconv.Atoi(numberText)
 	if err != nil {
-		return "", 0, false
+		return ticketKeyParts{}
 	}
 
-	return prefix, number, true
+	return ticketKeyParts{prefix: prefix, number: number, valid: true}
 }

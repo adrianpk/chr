@@ -690,3 +690,10 @@ exact debts and one external exception. Execution component tests use public own
 migrations; environment and native observation/evidence/cleanup integration tests
 retain their coordinator fixtures. Parser/validation placement and the remaining
 Slice 11 contracts are still pending.
+
+Ticket parsing helpers retain field presence, empty non-nil lists and next-line
+indexes in named outcomes. Native metadata writers retain byte/line ranges and
+-1 absence sentinels; document sections retain description/discussion bytes. Key
+comparison retains original prefix/integer admission and fallback ordering. These
+seven result changes leave 180 exact debts at ceiling seven; actual field/wire/
+SQL contracts and guarded write/transition admission remain unchanged.

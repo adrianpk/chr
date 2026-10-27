@@ -32,43 +32,53 @@ func Parse(content string) (Frontmatter, error) {
 
 	lines := strings.Split(frontmatter, "\n")
 	for index := 0; index < len(lines); index++ {
-		key, value, ok := ticketFrontmatterField(lines[index])
-		if !ok {
+		field := ticketFrontmatterField(lines[index])
+		if !field.found {
 			continue
 		}
 
-		if key == "commits" && value == "" {
-			values, next := parseTicketScalarList(lines, index+1)
-			metadata[key], index = opsmetadata.QuoteList(values), next-1
-
-			continue
-		}
-
-		if key == "review_refs" && value != "[]" {
-			parsedRefs, nextIndex := parseTicketReviewRefsBlock(lines, index+1)
-			reviewRefs = parsedRefs
-			index = nextIndex - 1
+		if field.key == "commits" && field.value == "" {
+			block := parseTicketScalarList(lines, index+1)
+			metadata[field.key], index = opsmetadata.QuoteList(block.values), block.next-1
 
 			continue
 		}
 
-		metadata[key] = value
+		if field.key == "review_refs" && field.value != "[]" {
+			block := parseTicketReviewRefsBlock(lines, index+1)
+			reviewRefs = block.refs
+			index = block.next - 1
+
+			continue
+		}
+
+		metadata[field.key] = field.value
 	}
 
 	return Frontmatter{Metadata: metadata, ReviewRefs: reviewRefs}, nil
 }
 
-func ticketFrontmatterField(line string) (string, string, bool) {
+type frontmatterField struct {
+	key, value string
+	found      bool
+}
+
+func ticketFrontmatterField(line string) frontmatterField {
 	if strings.HasPrefix(line, " ") || strings.HasPrefix(line, "\t") {
-		return "", "", false
+		return frontmatterField{}
 	}
 
 	key, value, found := strings.Cut(line, ":")
 
-	return strings.TrimSpace(key), strings.TrimSpace(value), found
+	return frontmatterField{key: strings.TrimSpace(key), value: strings.TrimSpace(value), found: found}
 }
 
-func parseTicketScalarList(lines []string, start int) ([]string, int) {
+type scalarListBlock struct {
+	values []string
+	next   int
+}
+
+func parseTicketScalarList(lines []string, start int) scalarListBlock {
 	values := []string{}
 	index := start
 
@@ -83,10 +93,15 @@ func parseTicketScalarList(lines []string, start int) ([]string, int) {
 		}
 	}
 
-	return values, index
+	return scalarListBlock{values: values, next: index}
 }
 
-func parseTicketReviewRefsBlock(lines []string, start int) ([]ReviewRef, int) {
+type reviewRefsBlock struct {
+	refs []ReviewRef
+	next int
+}
+
+func parseTicketReviewRefsBlock(lines []string, start int) reviewRefsBlock {
 	refs := []ReviewRef{}
 	current := ReviewRef{}
 	hasCurrent := false
@@ -121,7 +136,7 @@ func parseTicketReviewRefsBlock(lines []string, start int) ([]ReviewRef, int) {
 		refs = append(refs, current)
 	}
 
-	return refs, index
+	return reviewRefsBlock{refs: refs, next: index}
 }
 
 func assignTicketReviewRefField(ref *ReviewRef, key, value string) {

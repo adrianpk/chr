@@ -168,7 +168,7 @@ func editableTicketContent(document TicketDocument) (string, error) {
 }
 
 func replaceTicketDescription(content, description, discussion string) (string, error) {
-	_, end, err := ticketFrontmatterBounds(content)
+	bounds, err := ticketFrontmatterBounds(content)
 	if err != nil {
 		return "", err
 	}
@@ -182,7 +182,7 @@ func replaceTicketDescription(content, description, discussion string) (string, 
 		body += "\n" + strings.TrimSpace(discussion) + "\n"
 	}
 
-	return content[:end+len("\n---")] + "\n\n" + body, nil
+	return content[:bounds.end+len("\n---")] + "\n\n" + body, nil
 }
 
 func ticketEditFields(document TicketDocument, request TicketEditRequest, now time.Time) map[string]string {

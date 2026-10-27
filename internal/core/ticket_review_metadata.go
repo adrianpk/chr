@@ -33,10 +33,7 @@ func NewTicketReviewMetadataUpdater() TicketReviewMetadataUpdater {
 }
 
 // UpdateReviewMetadata executes the corresponding package operation.
-func (u *ticketReviewMetadataUpdater) UpdateReviewMetadata(
-	ctx context.Context,
-	opts UpdateTicketReviewMetadataOptions,
-) error {
+func (u *ticketReviewMetadataUpdater) UpdateReviewMetadata(ctx context.Context, opts UpdateTicketReviewMetadataOptions) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
@@ -63,10 +60,7 @@ func (u *ticketReviewMetadataUpdater) UpdateReviewMetadata(
 	return nil
 }
 
-func updateTicketReviewMetadataContent(
-	content string,
-	opts UpdateTicketReviewMetadataOptions,
-) (string, error) {
+func updateTicketReviewMetadataContent(content string, opts UpdateTicketReviewMetadataOptions) (string, error) {
 	updated := content
 
 	if strings.TrimSpace(opts.Branch) != "" {
@@ -155,8 +149,8 @@ func setTicketReviewRefsField(content string, refs []ticketmetadata.ReviewRef) (
 
 	replacement := strings.Split(strings.TrimRight(rendered.String(), "\n"), "\n")
 
-	start, end := ticketFrontmatterBlockRange(lines, "review_refs")
-	if start < 0 {
+	block := ticketFrontmatterBlockRange(lines, "review_refs")
+	if block.start < 0 {
 		insertAt := ticketFrontmatterInsertIndex(lines, []string{
 			"review_state",
 			"review_result",
@@ -171,17 +165,12 @@ func setTicketReviewRefsField(content string, refs []ticketmetadata.ReviewRef) (
 		return replaceTicketFrontmatterLines(content, lines)
 	}
 
-	lines = opsmetadata.ReplaceLines(lines, start, end, replacement)
+	lines = opsmetadata.ReplaceLines(lines, block.start, block.end, replacement)
 
 	return replaceTicketFrontmatterLines(content, lines)
 }
 
-func setTicketFrontmatterScalarField(
-	content string,
-	key string,
-	value string,
-	beforeKeys []string,
-) (string, error) {
+func setTicketFrontmatterScalarField(content, key, value string, beforeKeys []string) (string, error) {
 	lines, err := ticketFrontmatterLines(content)
 	if err != nil {
 		return "", err
@@ -203,39 +192,43 @@ func setTicketFrontmatterScalarField(
 }
 
 func ticketFrontmatterLines(content string) ([]string, error) {
-	start, end, err := ticketFrontmatterBounds(content)
+	bounds, err := ticketFrontmatterBounds(content)
 	if err != nil {
 		return nil, err
 	}
 
-	return strings.Split(content[start:end], "\n"), nil
+	return strings.Split(content[bounds.start:bounds.end], "\n"), nil
 }
 
-func ticketFrontmatterBounds(content string) (int, int, error) {
+type ticketTextRange struct {
+	start, end int
+}
+
+func ticketFrontmatterBounds(content string) (ticketTextRange, error) {
 	if !strings.HasPrefix(content, "---\n") {
-		return 0, 0, fmt.Errorf("ticket frontmatter opening delimiter is required")
+		return ticketTextRange{}, fmt.Errorf("ticket frontmatter opening delimiter is required")
 	}
 
 	start := len("---\n")
 
 	end := strings.Index(content[start:], "\n---")
 	if end < 0 {
-		return 0, 0, fmt.Errorf("ticket frontmatter closing delimiter is required")
+		return ticketTextRange{}, fmt.Errorf("ticket frontmatter closing delimiter is required")
 	}
 
-	return start, start + end, nil
+	return ticketTextRange{start: start, end: start + end}, nil
 }
 
 func replaceTicketFrontmatterLines(content string, lines []string) (string, error) {
-	start, end, err := ticketFrontmatterBounds(content)
+	bounds, err := ticketFrontmatterBounds(content)
 	if err != nil {
 		return "", err
 	}
 
-	return content[:start] + strings.Join(lines, "\n") + content[end:], nil
+	return content[:bounds.start] + strings.Join(lines, "\n") + content[bounds.end:], nil
 }
 
-func ticketFrontmatterBlockRange(lines []string, key string) (int, int) {
+func ticketFrontmatterBlockRange(lines []string, key string) ticketTextRange {
 	for index, line := range lines {
 		lineKey, _, ok := strings.Cut(line, ":")
 		if !ok || lineKey != key {
@@ -247,10 +240,10 @@ func ticketFrontmatterBlockRange(lines []string, key string) (int, int) {
 			end++
 		}
 
-		return index, end
+		return ticketTextRange{start: index, end: end}
 	}
 
-	return -1, -1
+	return ticketTextRange{start: -1, end: -1}
 }
 
 func ticketFrontmatterInsertIndex(lines, beforeKeys []string) int {

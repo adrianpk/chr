@@ -116,7 +116,9 @@ func loadTicketDocument(ticket ticketcore.Indexed) (TicketDocument, error) {
 }
 
 func completeTicketDocument(document TicketDocument, body []byte) TicketDocument {
-	document.Description, document.Discussion = splitTicketDiscussion(string(body))
+	sections := splitTicketDiscussion(string(body))
+	document.Description, document.Discussion = sections.description, sections.discussion
+
 	if document.Fields["title"] == "" {
 		document.Fields["title"] = document.Ticket.Title
 	}
@@ -251,10 +253,14 @@ func nativeTicketOrderReadOnly(document *TicketDocument, record WorkflowRecord, 
 	}
 }
 
-func splitTicketDiscussion(body string) (string, string) {
+type ticketBodySections struct {
+	description, discussion string
+}
+
+func splitTicketDiscussion(body string) ticketBodySections {
 	start := strings.Index("\n"+body, "\n# Comments\n")
 	if start < 0 {
-		return strings.TrimSpace(body), ""
+		return ticketBodySections{description: strings.TrimSpace(body)}
 	}
 
 	end := len(body)
@@ -262,5 +268,5 @@ func splitTicketDiscussion(body string) (string, string) {
 		end = start + len("# Comments\n") + next + 1
 	}
 
-	return strings.TrimSpace(body[:start] + body[end:]), body[start:end]
+	return ticketBodySections{description: strings.TrimSpace(body[:start] + body[end:]), discussion: body[start:end]}
 }
