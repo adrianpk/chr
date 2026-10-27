@@ -124,5 +124,5 @@ func validWorkflowDecisionInterpretation(question WorkflowMergerDecision, answer
 }
 
 func validWorkflowDecisionFix(finding *workflowstate.ReviewFinding) bool {
-	return finding != nil && validateAgenticReviewFinding(*finding) == nil && finding.Category != AgenticReviewFindingCosmetic
+	return finding != nil && workflowstate.ValidateReviewFinding(*finding) == nil && finding.Category != workflowstate.AgenticReviewFindingCosmetic
 }

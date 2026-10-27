@@ -110,7 +110,7 @@ func workflowMergerSemanticPlan(plan WorkflowMergerRepairPlan, input WorkflowMer
 	}
 
 	if fix != nil {
-		if validateAgenticReviewFinding(*fix) != nil || fix.Category == AgenticReviewFindingCosmetic {
+		if workflowstate.ValidateReviewFinding(*fix) != nil || fix.Category == workflowstate.AgenticReviewFindingCosmetic {
 			return plan, workflowstate.ErrConflict
 		}
 

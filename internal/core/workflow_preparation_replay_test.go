@@ -186,7 +186,7 @@ func nativeReplayFix(t *testing.T, proof WorkflowIntegrationProof, lane Workflow
 
 	tree := workflowIntegrationCommand(t, lane.Worktree, "write-tree")
 	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: lane.Worktree}}
-	finding := workflowstate.ReviewFinding{Category: AgenticReviewFindingCorrectness, Title: "Retain integration output", Detail: "The combined validation requires this repair output."}
+	finding := workflowstate.ReviewFinding{Category: workflowstate.AgenticReviewFindingCorrectness, Title: "Retain integration output", Detail: "The combined validation requires this repair output."}
 
 	fixed, err := reader.prepareRebaseFix(t.Context(), proof, tree, finding)
 	if err != nil {
@@ -216,7 +216,7 @@ func TestNativeReplayFix(t *testing.T) {
 			case "undeclared":
 				p.IntegrationFixes = nil
 			case "cosmetic":
-				p.IntegrationFixes[0].Finding.Category = AgenticReviewFindingCosmetic
+				p.IntegrationFixes[0].Finding.Category = workflowstate.AgenticReviewFindingCosmetic
 			case "parent":
 				p.Prepared[3].Parents[0] = fixed.BaseCommit
 			}

@@ -31,7 +31,7 @@ func TestParseAgenticReviewResultAcceptsCleanPassWithCosmeticNotes(t *testing.T)
 		t.Fatalf("ParseAgenticReviewResult returned error: %v", err)
 	}
 
-	if got.Decision != IntegrationReviewDecisionPass {
+	if got.Decision != workflowstate.IntegrationReviewDecisionPass {
 		t.Fatalf("Decision = %q, want pass", got.Decision)
 	}
 
@@ -88,7 +88,7 @@ func TestHarnessAgenticReviewRunnerWritesArtifacts(t *testing.T) {
 		t.Fatalf("Review returned error: %v", err)
 	}
 
-	if artifact.Result.Decision != IntegrationReviewDecisionPass {
+	if artifact.Result.Decision != workflowstate.IntegrationReviewDecisionPass {
 		t.Fatalf("Decision = %q, want pass", artifact.Result.Decision)
 	}
 
@@ -175,8 +175,8 @@ func TestApplyAgenticReviewResultPassRequiresMergeHandoff(t *testing.T) {
 				Path: ticketPath,
 			}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForReview}, IndexedSource: ticketcore.IndexedSource{Branch: "feat/chr-1"},
 		},
-		Artifact: agenticReviewArtifactForTest(AgenticReviewResult{
-			Decision: IntegrationReviewDecisionPass,
+		Artifact: agenticReviewArtifactForTest(workflowstate.AgenticReviewResult{
+			Decision: workflowstate.IntegrationReviewDecisionPass,
 			Summary:  "Ready to merge.",
 		}),
 	})
@@ -208,8 +208,8 @@ func TestApplyAgenticReviewResultPassMovesTicketToReadyForMerge(t *testing.T) {
 				Path: ticketPath,
 			}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForReview}, IndexedSource: ticketcore.IndexedSource{Branch: "feat/chr-1"}, IndexedReview: ticketcore.IndexedReview{ReviewRefs: []ticketmetadata.ReviewRef{ref}},
 		},
-		Artifact: agenticReviewArtifactForTest(AgenticReviewResult{
-			Decision: IntegrationReviewDecisionPass,
+		Artifact: agenticReviewArtifactForTest(workflowstate.AgenticReviewResult{
+			Decision: workflowstate.IntegrationReviewDecisionPass,
 			Summary:  "Ready to merge.",
 		}),
 	})
@@ -245,11 +245,11 @@ func TestApplyAgenticReviewResultNeedsChangesMovesTicketToReadyForDev(t *testing
 				Path: ticketPath,
 			}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForReview}, IndexedSource: ticketcore.IndexedSource{Branch: "feat/chr-1"},
 		},
-		Artifact: agenticReviewArtifactForTest(AgenticReviewResult{
-			Decision: IntegrationReviewDecisionNeedsChanges,
+		Artifact: agenticReviewArtifactForTest(workflowstate.AgenticReviewResult{
+			Decision: workflowstate.IntegrationReviewDecisionNeedsChanges,
 			Summary:  "Needs repair.",
 			BlockingFindings: []workflowstate.ReviewFinding{{
-				Category: AgenticReviewFindingCorrectness,
+				Category: workflowstate.AgenticReviewFindingCorrectness,
 				Title:    "Broken behavior",
 				Detail:   "The main flow fails.",
 			}},
@@ -331,7 +331,7 @@ func readAgenticReviewTicket(t *testing.T, path string) string {
 	return string(content)
 }
 
-func agenticReviewArtifactForTest(result AgenticReviewResult) AgenticReviewArtifact {
+func agenticReviewArtifactForTest(result workflowstate.AgenticReviewResult) AgenticReviewArtifact {
 	return AgenticReviewArtifact{
 		SummaryPath: "/tmp/chr-agentic-review-summary.md",
 		Run: harness.AgentRunResult{

@@ -6,6 +6,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type agentWorkIntegrationCycleState struct {
@@ -205,15 +206,15 @@ func agentWorkCycleLimitAllowsNext(opts AgentWorkSelectionOptions, processedCycl
 }
 
 func agentWorkCycleRunsAgenticReview(policy core.IntegrationCyclePolicy, application core.ResultApplication) bool {
-	return policy.Mode == core.IntegrationCycleModeAgenticReview && application.TicketStatus != core.TicketResultStatusBlocked
+	return policy.Mode == workflowstate.IntegrationCycleModeAgenticReview && application.TicketStatus != core.TicketResultStatusBlocked
 }
 
 func agentWorkCycleRunsTrustedAutoMergeReview(policy core.IntegrationCyclePolicy, application core.ResultApplication) bool {
-	return policy.Mode == core.IntegrationCycleModeTrustedAutoMerge && application.TicketStatus != core.TicketResultStatusBlocked
+	return policy.Mode == workflowstate.IntegrationCycleModeTrustedAutoMerge && application.TicketStatus != core.TicketResultStatusBlocked
 }
 
 func agentWorkCycleRunsRepair(policy core.IntegrationCyclePolicy, ticket ticketcore.Indexed) bool {
-	return policy.Mode == core.IntegrationCycleModeAgenticReview && ticketcore.NeedsReviewRepair(ticket)
+	return policy.Mode == workflowstate.IntegrationCycleModeAgenticReview && ticketcore.NeedsReviewRepair(ticket)
 }
 
 func agentWorkCycleStopsBeforeMerge(policy core.IntegrationCyclePolicy) bool {

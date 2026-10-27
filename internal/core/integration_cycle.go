@@ -7,9 +7,6 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// IntegrationCycleMode defines the policy used by one ticket integration cycle.
-type IntegrationCycleMode string
-
 // IntegrationCyclePhase defines the current or final phase of one integration cycle.
 type IntegrationCyclePhase string
 
@@ -19,12 +16,9 @@ type IntegrationCycleStatus string
 // IntegrationCycleBlocker defines the compact reason a cycle cannot continue.
 type IntegrationCycleBlocker string
 
-// IntegrationReviewDecision defines the outcome of an integration review phase.
-type IntegrationReviewDecision string
-
 // IntegrationCyclePolicy describes how one selected ticket should move through integration.
 type IntegrationCyclePolicy struct {
-	Mode                IntegrationCycleMode
+	Mode                workflowstate.IntegrationCycleMode
 	RequiresReview      bool
 	RequiresHumanReview bool
 	RequiresMerge       bool
@@ -46,15 +40,6 @@ type IntegrationCyclePlanOptions struct {
 	Ticket       ticketcore.Indexed
 	ReviewConfig ReviewWorkflowConfig
 }
-
-const (
-	// IntegrationCycleModeHumanReview stops after development handoff for human review.
-	IntegrationCycleModeHumanReview IntegrationCycleMode = "human_review"
-	// IntegrationCycleModeAgenticReview runs high-level agentic review before merge.
-	IntegrationCycleModeAgenticReview IntegrationCycleMode = "agentic_review"
-	// IntegrationCycleModeTrustedAutoMerge skips separate review but still merges before continuing.
-	IntegrationCycleModeTrustedAutoMerge IntegrationCycleMode = "trusted_auto_merge"
-)
 
 const (
 	// IntegrationCyclePhaseSelected identifies a selected ticket before execution.
@@ -111,29 +96,6 @@ const (
 	IntegrationCycleBlockerPolicyInvalid IntegrationCycleBlocker = "policy_invalid"
 )
 
-const (
-	// IntegrationReviewDecisionPass allows the ticket to proceed toward merge.
-	IntegrationReviewDecisionPass IntegrationReviewDecision = "pass"
-	// IntegrationReviewDecisionNeedsChanges sends the same ticket back to repair.
-	IntegrationReviewDecisionNeedsChanges IntegrationReviewDecision = "needs_changes"
-	// IntegrationReviewDecisionInsufficientEvidence blocks until evidence is improved.
-	IntegrationReviewDecisionInsufficientEvidence IntegrationReviewDecision = "insufficient_evidence"
-	// IntegrationReviewDecisionHumanRequired blocks for human judgement.
-	IntegrationReviewDecisionHumanRequired IntegrationReviewDecision = "human_required"
-)
-
-// Valid reports whether the cycle mode is supported.
-func (m IntegrationCycleMode) Valid() bool {
-	switch m {
-	case IntegrationCycleModeHumanReview,
-		IntegrationCycleModeAgenticReview,
-		IntegrationCycleModeTrustedAutoMerge:
-		return true
-	default:
-		return false
-	}
-}
-
 // Valid reports whether the cycle phase is supported.
 func (p IntegrationCyclePhase) Valid() bool {
 	switch p {
@@ -184,19 +146,6 @@ func (b IntegrationCycleBlocker) Valid() bool {
 	}
 }
 
-// Valid reports whether the review decision is supported.
-func (d IntegrationReviewDecision) Valid() bool {
-	switch d {
-	case IntegrationReviewDecisionPass,
-		IntegrationReviewDecisionNeedsChanges,
-		IntegrationReviewDecisionInsufficientEvidence,
-		IntegrationReviewDecisionHumanRequired:
-		return true
-	default:
-		return false
-	}
-}
-
 // IntegrationCyclePolicyFromReviewConfig maps review workflow config to cycle behavior.
 func IntegrationCyclePolicyFromReviewConfig(config ReviewWorkflowConfig) (IntegrationCyclePolicy, error) {
 	if err := ValidateReviewWorkflowConfig(config); err != nil {
@@ -206,20 +155,20 @@ func IntegrationCyclePolicyFromReviewConfig(config ReviewWorkflowConfig) (Integr
 	switch config.Mode {
 	case workflowstate.ReviewHuman:
 		return IntegrationCyclePolicy{
-			Mode:                IntegrationCycleModeHumanReview,
+			Mode:                workflowstate.IntegrationCycleModeHumanReview,
 			RequiresReview:      true,
 			RequiresHumanReview: true,
 			RequiresMerge:       false,
 		}, nil
 	case workflowstate.ReviewAgentic:
 		return IntegrationCyclePolicy{
-			Mode:           IntegrationCycleModeAgenticReview,
+			Mode:           workflowstate.IntegrationCycleModeAgenticReview,
 			RequiresReview: true,
 			RequiresMerge:  true,
 		}, nil
 	case workflowstate.ReviewTrustedAutoMerge:
 		return IntegrationCyclePolicy{
-			Mode:          IntegrationCycleModeTrustedAutoMerge,
+			Mode:          workflowstate.IntegrationCycleModeTrustedAutoMerge,
 			RequiresMerge: true,
 		}, nil
 	default:

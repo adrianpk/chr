@@ -50,7 +50,7 @@ func parseWorkflowReviewPolicy(data []byte) (workflowstate.ReviewPolicy, error) 
 }
 
 func validateWorkflowReviewPolicy(policy workflowstate.ReviewPolicy) error {
-	if !IntegrationCycleMode(policy.Mode).Valid() || !slices.Contains([]string{"merge", "rebase", "squash"}, policy.Method) || !slices.Contains([]string{"legacy_default", "version_default", "project", "invocation_restriction"}, policy.Source) || len(policy.Revision) != 64 {
+	if !workflowstate.IntegrationCycleMode(policy.Mode).Valid() || !slices.Contains([]string{"merge", "rebase", "squash"}, policy.Method) || !slices.Contains([]string{"legacy_default", "version_default", "project", "invocation_restriction"}, policy.Source) || len(policy.Revision) != 64 {
 		return fmt.Errorf("invalid current workflow review policy")
 	}
 

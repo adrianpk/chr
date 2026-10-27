@@ -770,3 +770,16 @@ The move ledger contains 789 exact current preimages. The owner map records 40
 actual native composition/authority retentions with a concrete reason per file;
 no competing ticket/execution repository, mutation authority or root facade was
 introduced. Focused domain/native, strict lint and signature checks pass.
+
+
+## Slice 12 shared review value prerequisite
+
+Cycle mode, integration review decision and structured agentic review/finding
+values have the existing workflow/state owner. The legacy cycle mode stays a
+distinct type from ReviewMode. All twelve moved declarations keep the same token
+sequence after owner qualification and the shared finding validator's public
+name. Field order/tags, enum strings, nil/empty lists, value guards and error
+messages remain unchanged. Native approval, source/revision checks, cosmetic
+blocking policy, configuration, IO and persistence keep their original owners.
+Existing frozen wire/storage and real Git replay/repair/native review/app tests
+pass; no root alias, type bridge or new dependency allowance was introduced.

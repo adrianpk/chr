@@ -48,7 +48,7 @@ func workflowMergerAnsweredPlan(plan WorkflowMergerRepairPlan, input WorkflowMer
 			return plan, true, nil
 		}
 
-		if answer.IntegrationFix == nil || validateAgenticReviewFinding(*answer.IntegrationFix) != nil || answer.IntegrationFix.Category == AgenticReviewFindingCosmetic {
+		if answer.IntegrationFix == nil || workflowstate.ValidateReviewFinding(*answer.IntegrationFix) != nil || answer.IntegrationFix.Category == workflowstate.AgenticReviewFindingCosmetic {
 			return plan, false, workflowstate.ErrConflict
 		}
 

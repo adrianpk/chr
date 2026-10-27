@@ -10,6 +10,7 @@ import (
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -418,5 +419,5 @@ type reviewStartedEvent struct {
 	Record    executioncore.LoopRunRecord
 	Execution executioncore.Record
 	Ticket    ticketcore.Indexed
-	Mode      core.IntegrationCycleMode
+	Mode      workflowstate.IntegrationCycleMode
 }

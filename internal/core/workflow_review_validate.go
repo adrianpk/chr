@@ -99,19 +99,19 @@ func validateWorkflowReviewDecision(decision WorkflowReviewDecision, input Workf
 		return fmt.Errorf("%w: review decision names another candidate", workflowstate.ErrConflict)
 	}
 
-	if err := ValidateAgenticReviewResult(decision.Result); err != nil {
+	if err := workflowstate.ValidateAgenticReviewResult(decision.Result); err != nil {
 		return err
 	}
 
-	if decision.Result.Decision == IntegrationReviewDecisionPass && len(decision.Result.BlockingFindings) != 0 {
+	if decision.Result.Decision == workflowstate.IntegrationReviewDecisionPass && len(decision.Result.BlockingFindings) != 0 {
 		return fmt.Errorf("passing review contains blocking findings")
 	}
 
-	if decision.Result.Decision != IntegrationReviewDecisionNeedsChanges && decision.RepairTaskKey != "" {
+	if decision.Result.Decision != workflowstate.IntegrationReviewDecisionNeedsChanges && decision.RepairTaskKey != "" {
 		return fmt.Errorf("review repair key requires needs_changes")
 	}
 
-	if decision.Result.Decision != IntegrationReviewDecisionNeedsChanges {
+	if decision.Result.Decision != workflowstate.IntegrationReviewDecisionNeedsChanges {
 		return nil
 	}
 
@@ -124,7 +124,7 @@ func validateWorkflowReviewRepairDecision(decision WorkflowReviewDecision, input
 	}
 
 	for _, finding := range decision.Result.BlockingFindings {
-		if finding.Category == AgenticReviewFindingCosmetic {
+		if finding.Category == workflowstate.AgenticReviewFindingCosmetic {
 			return fmt.Errorf("cosmetic findings cannot request automatic repair")
 		}
 	}
@@ -154,7 +154,7 @@ func (s *WorkflowStore) readWorkflowReviewDecisions(run workflowInvocationFile, 
 		return newest, workflowstate.ErrConflict
 	}
 
-	if run.Review.State == "authorized" && newest.Result.Decision != IntegrationReviewDecisionPass {
+	if run.Review.State == "authorized" && newest.Result.Decision != workflowstate.IntegrationReviewDecisionPass {
 		return newest, workflowstate.ErrConflict
 	}
 
@@ -197,7 +197,7 @@ func (s *WorkflowStore) readWorkflowReviewEvidence(run workflowInvocationFile, i
 
 func validateWorkflowReviewOrigin(mode workflowstate.ReviewMode, count int, evidence workflowReviewEvidence) error {
 	if count == 2 {
-		if mode != workflowstate.ReviewAgentic || evidence.Origin != "human" || evidence.Decision.Result.Decision != IntegrationReviewDecisionPass {
+		if mode != workflowstate.ReviewAgentic || evidence.Origin != "human" || evidence.Decision.Result.Decision != workflowstate.IntegrationReviewDecisionPass {
 			return workflowstate.ErrConflict
 		}
 
@@ -217,7 +217,7 @@ func validateWorkflowReviewOrigin(mode workflowstate.ReviewMode, count int, evid
 		return workflowstate.ErrConflict
 	}
 
-	if expected != "agentic" && evidence.Decision.Result.Decision != IntegrationReviewDecisionPass {
+	if expected != "agentic" && evidence.Decision.Result.Decision != workflowstate.IntegrationReviewDecisionPass {
 		return workflowstate.ErrConflict
 	}
 
@@ -229,7 +229,7 @@ func validateWorkflowReviewEvidenceHeader(run workflowInvocationFile, count int,
 		return workflowstate.ErrConflict
 	}
 
-	if run.Review.DecisionCount == 2 && count == 1 && evidence.Decision.Result.Decision != IntegrationReviewDecisionHumanRequired {
+	if run.Review.DecisionCount == 2 && count == 1 && evidence.Decision.Result.Decision != workflowstate.IntegrationReviewDecisionHumanRequired {
 		return workflowstate.ErrConflict
 	}
 

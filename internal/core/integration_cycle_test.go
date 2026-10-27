@@ -18,7 +18,7 @@ func TestIntegrationCyclePolicyFromReviewConfigMapsModes(t *testing.T) {
 			name: "human review",
 			mode: workflowstate.ReviewHuman,
 			policy: IntegrationCyclePolicy{
-				Mode:                IntegrationCycleModeHumanReview,
+				Mode:                workflowstate.IntegrationCycleModeHumanReview,
 				RequiresReview:      true,
 				RequiresHumanReview: true,
 				RequiresMerge:       false,
@@ -28,7 +28,7 @@ func TestIntegrationCyclePolicyFromReviewConfigMapsModes(t *testing.T) {
 			name: "agentic review",
 			mode: workflowstate.ReviewAgentic,
 			policy: IntegrationCyclePolicy{
-				Mode:           IntegrationCycleModeAgenticReview,
+				Mode:           workflowstate.IntegrationCycleModeAgenticReview,
 				RequiresReview: true,
 				RequiresMerge:  true,
 			},
@@ -37,7 +37,7 @@ func TestIntegrationCyclePolicyFromReviewConfigMapsModes(t *testing.T) {
 			name: "trusted auto merge",
 			mode: workflowstate.ReviewTrustedAutoMerge,
 			policy: IntegrationCyclePolicy{
-				Mode:          IntegrationCycleModeTrustedAutoMerge,
+				Mode:          workflowstate.IntegrationCycleModeTrustedAutoMerge,
 				RequiresMerge: true,
 			},
 		},
@@ -84,7 +84,7 @@ func TestPlanIntegrationCycleBuildsSelectedPendingPlan(t *testing.T) {
 		t.Fatalf("plan identity = %#v, want project and ticket identity", got)
 	}
 
-	if got.Policy.Mode != IntegrationCycleModeAgenticReview || !got.Policy.RequiresReview || !got.Policy.RequiresMerge {
+	if got.Policy.Mode != workflowstate.IntegrationCycleModeAgenticReview || !got.Policy.RequiresReview || !got.Policy.RequiresMerge {
 		t.Fatalf("policy = %#v, want agentic review policy", got.Policy)
 	}
 
@@ -136,7 +136,7 @@ func TestPlanIntegrationCycleRejectsInvalidInput(t *testing.T) {
 
 func TestIntegrationCycleValuesValidateSupportedConstants(t *testing.T) {
 	t.Run("mode", func(t *testing.T) {
-		assertIntegrationCycleValidity(t, IntegrationCycleModeAgenticReview.Valid(), IntegrationCycleMode("unknown").Valid())
+		assertIntegrationCycleValidity(t, workflowstate.IntegrationCycleModeAgenticReview.Valid(), workflowstate.IntegrationCycleMode("unknown").Valid())
 	})
 
 	t.Run("phase", func(t *testing.T) {
@@ -152,7 +152,7 @@ func TestIntegrationCycleValuesValidateSupportedConstants(t *testing.T) {
 	})
 
 	t.Run("review decision", func(t *testing.T) {
-		assertIntegrationCycleValidity(t, IntegrationReviewDecisionNeedsChanges.Valid(), IntegrationReviewDecision("unknown").Valid())
+		assertIntegrationCycleValidity(t, workflowstate.IntegrationReviewDecisionNeedsChanges.Valid(), workflowstate.IntegrationReviewDecision("unknown").Valid())
 	})
 }
 

@@ -45,7 +45,7 @@ func (s *WorkflowStore) checkWorkflowNativeSubmissionReview(submission WorkflowS
 		return err
 	}
 
-	if review.Decision.BindingHash != submission.Guard.ReviewHash || review.Decision.Result.Decision != IntegrationReviewDecisionPass {
+	if review.Decision.BindingHash != submission.Guard.ReviewHash || review.Decision.Result.Decision != workflowstate.IntegrationReviewDecisionPass {
 		return workflowstate.ErrConflict
 	}
 

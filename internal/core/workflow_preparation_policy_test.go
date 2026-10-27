@@ -116,7 +116,7 @@ func TestNativeSignedFix(t *testing.T) {
 	workflowIntegrationCommand(t, q.Lane.Worktree, "add", "repair.txt")
 
 	tree := workflowIntegrationCommand(t, q.Lane.Worktree, "write-tree")
-	finding := workflowstate.ReviewFinding{Category: AgenticReviewFindingCorrectness, Title: "Retain repaired behavior", Detail: "The prepared candidate requires this declared integration repair."}
+	finding := workflowstate.ReviewFinding{Category: workflowstate.AgenticReviewFindingCorrectness, Title: "Retain repaired behavior", Detail: "The prepared candidate requires this declared integration repair."}
 
 	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: q.Lane.Worktree}}
 	if _, err := reader.prepareRebaseFix(t.Context(), proof, tree, finding); err == nil {

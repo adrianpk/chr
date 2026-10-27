@@ -53,3 +53,12 @@ StopStatus retains the original cancel-to-cancelled mapping and paused fallback.
 TrackerMetadataPath retains the original set-identity check and projection path;
 ErrProjectionStale keeps the same error identity for committed domain progress
 with a failed derived export. These shared primitives perform no IO or recovery.
+
+
+IntegrationCycleMode, IntegrationReviewDecision, AgenticReviewResult and finding
+category values are shared by retained workflow review/repair records and the
+legacy integration-cycle consumer. Their existing enum types remain distinct
+from ReviewMode. The result keeps its original field order, JSON tags and
+nil/empty slices. Pure value validation preserves category/text/decision checks
+and error messages. Native callers still own approval, source/revision guards,
+cosmetic blocking policy, transport, configuration, persistence and mutations.

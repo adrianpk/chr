@@ -174,7 +174,7 @@ func (s *WorkflowStore) approveWorkflowSlice(ctx context.Context, run workflowIn
 		return *run.Review, err
 	}
 
-	decision := WorkflowReviewDecision{BindingHash: hash, Result: AgenticReviewResult{Decision: IntegrationReviewDecisionPass, Summary: "Explicit human approval of this exact candidate and current policy."}}
+	decision := WorkflowReviewDecision{BindingHash: hash, Result: workflowstate.AgenticReviewResult{Decision: workflowstate.IntegrationReviewDecisionPass, Summary: "Explicit human approval of this exact candidate and current policy."}}
 	err = s.persistWorkflowReviewDecision(&run, observation, decision, "authorized", files...)
 
 	return *run.Review, err

@@ -84,13 +84,13 @@ func (s *WorkflowStore) checkpointFailedWorkflowReview(claim *WorkflowClaim, run
 	return errors.Join(failure, err)
 }
 
-func workflowReviewDecisionState(decision IntegrationReviewDecision) string {
+func workflowReviewDecisionState(decision workflowstate.IntegrationReviewDecision) string {
 	switch decision {
-	case IntegrationReviewDecisionPass:
+	case workflowstate.IntegrationReviewDecisionPass:
 		return "authorized"
-	case IntegrationReviewDecisionNeedsChanges:
+	case workflowstate.IntegrationReviewDecisionNeedsChanges:
 		return "needs_repair"
-	case IntegrationReviewDecisionHumanRequired:
+	case workflowstate.IntegrationReviewDecisionHumanRequired:
 		return "human_required"
 	default:
 		return "insufficient_evidence"

@@ -165,7 +165,7 @@ func validWorkflowIntegrationFix(fix WorkflowIntegrationFix, entry WorkflowInteg
 		return false
 	}
 
-	return validateAgenticReviewFinding(fix.Finding) == nil && fix.Finding.Category != AgenticReviewFindingCosmetic
+	return workflowstate.ValidateReviewFinding(fix.Finding) == nil && fix.Finding.Category != workflowstate.AgenticReviewFindingCosmetic
 }
 
 func workflowReplayAttributionMatches(source, prepared WorkflowIntegrationAttribution) bool {

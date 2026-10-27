@@ -16,6 +16,8 @@ and recovery authority, direct consumers and cohesive stage contracts.
 
 Slice 11 is verified integrated through PR #448. Slice 12 implementation is active;
 the complete method/transaction/recovery map is frozen before package relocation.
+Shared cycle/review values and pure value-validation contracts now have the
+existing workflow/state owner with direct native, app and adapter consumers.
 
 ## Implementation Notes
 
@@ -31,7 +33,12 @@ direct root dependencies at the verified predecessor revision. All store methods
 retain one receiver owner; future policy consumers are recorded separately.
 All 71 assigned baseline signature rows map to 68 current declarations; 48 require
 refactoring, 22 are legal cohesion watches and one has a verified prior shared
-owner fix. Relocation and signature changes are not yet implemented.
+owner fix. Twelve review/cycle value/validator declarations have moved to workflow/state.
+Token comparison verifies their original enum strings, JSON field/tag order,
+nil/empty handling, branches and error messages after qualification/naming.
+The move resolves ten direct dependencies; 69 root couplings remain. No type
+bridge or coordinator/transport/persistence authority moved into the value owner.
+Full family relocation and assigned signature remediation remain open.
 
 ## Files of Interest
 
@@ -44,7 +51,14 @@ owner fix. Relocation and signature changes are not yet implemented.
 Activation documentation links, ticket lifecycle metadata and whitespace passed.
 The compiler-resolved source graph, complete method/dependency/signature identity
 coverage and exact frozen declaration hashes passed. These are mapping checks;
-runtime implementation and final controller validation have not run.
+the map is separate from runtime acceptance. The shared-value prerequisite passed:
+
+- `go test ./internal/core/workflow/state ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(IntegrationCycle|ParseAgenticReview|ApplyAgenticReview|QualityRecordWire|QualityStorage|NativeDecisionReplay|NativeReplayFix|NativeMergerFix|WorkflowReviewModes|WorkflowReviewDecisionChecks|ServiceStartAllReadyAgentWork|Leaf)' -count=1 -timeout=3m`: focused value, frozen wire/storage, real Git replay/repair and native review/app integration checks pass; TUI compiles.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/state ./internal/core ./internal/app ./internal/tui`: zero issues.
+- `make check-go-style`: pass; 9306 production declarations, ceiling six, 162 exact debts and one existing external exception.
+
+The twelve declaration token sequences match after namespace/validator naming.
+Final exact-head controller validation has not run.
 
 ## Risks and Follow-ups
 

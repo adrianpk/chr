@@ -94,7 +94,7 @@ func serviceIntegrationDecisionInput(t *testing.T, operations service, run core.
 	input.ValidationContractRef = serviceIntegrationDecisionEvidence(t, operations, run.ID, "validation", gate)
 	source := serviceIntegrationDecisionEvidence(t, operations, run.ID, "source-intent", map[string]string{"intent": "Preserve the original source behavior"})
 	target := serviceIntegrationDecisionEvidence(t, operations, run.ID, "target-intent", map[string]string{"intent": "Preserve the target validation requirements"})
-	finding := serviceIntegrationDecisionEvidence(t, operations, run.ID, "finding", workflowstate.ReviewFinding{Category: core.AgenticReviewFindingCorrectness, Title: "Reconcile declared requirements", Detail: "The source and target intent require an explicit compatible interpretation"})
+	finding := serviceIntegrationDecisionEvidence(t, operations, run.ID, "finding", workflowstate.ReviewFinding{Category: workflowstate.AgenticReviewFindingCorrectness, Title: "Reconcile declared requirements", Detail: "The source and target intent require an explicit compatible interpretation"})
 	input.IntentRefs, input.TargetChangeRefs, input.FindingRefs = []workflowstate.EvidenceRef{source}, []workflowstate.EvidenceRef{target}, []workflowstate.EvidenceRef{finding}
 	input.Requirements = []core.WorkflowMergerRequirement{{ID: "source-api", Origin: "source", Evidence: source, ConflictsWith: []string{"target-validation"}}, {ID: "target-validation", Origin: "target", Evidence: target}}
 

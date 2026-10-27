@@ -37,9 +37,9 @@ type WorkflowReviewInput struct {
 // WorkflowReviewDecision is returned by the distinct supervised review role.
 // Its binding hash must name the exact input supplied on stdin.
 type WorkflowReviewDecision struct {
-	BindingHash   string              `json:"binding_hash"`
-	Result        AgenticReviewResult `json:"result"`
-	RepairTaskKey string              `json:"repair_task_key,omitempty"`
+	BindingHash   string                            `json:"binding_hash"`
+	Result        workflowstate.AgenticReviewResult `json:"result"`
+	RepairTaskKey string                            `json:"repair_task_key,omitempty"`
 }
 
 // WorkflowReviewBinding retains one current decision and immutable evidence.

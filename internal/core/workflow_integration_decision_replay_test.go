@@ -26,7 +26,7 @@ func TestNativeDecisionReplay(t *testing.T) {
 	}{
 		{"owner", workflowstate.IntegrationAnswer{DecisionID: "replay-owner", Action: "resolve", OriginalCommit: state.Query.SourceCommit}, "replay_step", false},
 		{"foreign owner", workflowstate.IntegrationAnswer{DecisionID: "replay-owner", Action: "resolve", OriginalCommit: state.Query.BaseCommit}, "", true},
-		{"fix", workflowstate.IntegrationAnswer{DecisionID: "replay-owner", Action: "resolve", IntegrationFix: &workflowstate.ReviewFinding{Category: AgenticReviewFindingCorrectness, Title: "Retain compatible output", Detail: "Combined validation requires an explicit compatible integration repair"}}, "integration_fix", false},
+		{"fix", workflowstate.IntegrationAnswer{DecisionID: "replay-owner", Action: "resolve", IntegrationFix: &workflowstate.ReviewFinding{Category: workflowstate.AgenticReviewFindingCorrectness, Title: "Retain compatible output", Detail: "Combined validation requires an explicit compatible integration repair"}}, "integration_fix", false},
 		{"defer", workflowstate.IntegrationAnswer{DecisionID: "replay-owner", Action: "defer"}, "needs_decision", false},
 	}
 	for _, tc := range cases {

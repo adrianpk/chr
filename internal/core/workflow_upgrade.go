@@ -77,7 +77,7 @@ func validateWorkflowUpgradeOptions(opts WorkflowUpgradeOptions) error {
 		return fmt.Errorf("invalid configuration revision: %w", err)
 	}
 
-	if opts.ReviewMode != "" && !IntegrationCycleMode(opts.ReviewMode).Valid() {
+	if opts.ReviewMode != "" && !workflowstate.IntegrationCycleMode(opts.ReviewMode).Valid() {
 		return fmt.Errorf("unsupported upgrade review mode")
 	}
 

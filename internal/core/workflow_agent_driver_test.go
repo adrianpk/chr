@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeAgentHarness(t *testing.T, store *WorkflowStore, id, mode string) WorkflowAgentHarness {
@@ -143,7 +144,7 @@ func nativeAgentModelResult(t *testing.T, input WorkflowTaskInput) string {
 		return "worker complete"
 	}
 
-	decision := WorkflowReviewDecision{BindingHash: input.ReviewHash, Result: AgenticReviewResult{Decision: IntegrationReviewDecisionPass, Summary: "Inspect the current candidate and validation evidence."}}
+	decision := WorkflowReviewDecision{BindingHash: input.ReviewHash, Result: workflowstate.AgenticReviewResult{Decision: workflowstate.IntegrationReviewDecisionPass, Summary: "Inspect the current candidate and validation evidence."}}
 
 	data, err := json.Marshal(decision)
 	if err != nil {

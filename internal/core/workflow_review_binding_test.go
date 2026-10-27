@@ -60,7 +60,7 @@ func TestWorkflowReviewDecisionChecks(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	valid := WorkflowReviewDecision{BindingHash: file.Review.InputHash, Result: AgenticReviewResult{Decision: IntegrationReviewDecisionPass, Summary: "Required evidence inspected."}}
+	valid := WorkflowReviewDecision{BindingHash: file.Review.InputHash, Result: workflowstate.AgenticReviewResult{Decision: workflowstate.IntegrationReviewDecisionPass, Summary: "Required evidence inspected."}}
 
 	for _, test := range []struct {
 		name   string
@@ -71,12 +71,12 @@ func TestWorkflowReviewDecisionChecks(t *testing.T) {
 			d.Result.BlockingFindings = []workflowstate.ReviewFinding{{Category: "correctness", Title: "Broken", Detail: "Wrong result."}}
 		}},
 		{"cosmetic", func(d *WorkflowReviewDecision) {
-			d.Result.Decision = IntegrationReviewDecisionNeedsChanges
+			d.Result.Decision = workflowstate.IntegrationReviewDecisionNeedsChanges
 			d.RepairTaskKey = input.Slice.Tasks[0].Key
 			d.Result.BlockingFindings = []workflowstate.ReviewFinding{{Category: "cosmetic", Title: "Style", Detail: "Optional formatting."}}
 		}},
 		{"unknown task", func(d *WorkflowReviewDecision) {
-			d.Result.Decision = IntegrationReviewDecisionNeedsChanges
+			d.Result.Decision = workflowstate.IntegrationReviewDecisionNeedsChanges
 			d.RepairTaskKey = "another task"
 			d.Result.BlockingFindings = []workflowstate.ReviewFinding{{Category: "correctness", Title: "Broken", Detail: "Wrong result."}}
 		}},

@@ -18,23 +18,6 @@ import (
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
-const (
-	// AgenticReviewFindingCorrectness defines a package boundary constant.
-	AgenticReviewFindingCorrectness = "correctness"
-	// AgenticReviewFindingScope defines a package boundary constant.
-	AgenticReviewFindingScope = "scope"
-	// AgenticReviewFindingEvidence defines a package boundary constant.
-	AgenticReviewFindingEvidence = "evidence"
-	// AgenticReviewFindingContract defines a package boundary constant.
-	AgenticReviewFindingContract = "contract"
-	// AgenticReviewFindingSafety defines a package boundary constant.
-	AgenticReviewFindingSafety = "safety"
-	// AgenticReviewFindingMergeability defines a package boundary constant.
-	AgenticReviewFindingMergeability = "mergeability"
-	// AgenticReviewFindingCosmetic defines a package boundary constant.
-	AgenticReviewFindingCosmetic = "cosmetic"
-)
-
 // AgenticReviewContext describes the local evidence given to the reviewer.
 type AgenticReviewContext struct {
 	ProjectID           string
@@ -45,22 +28,13 @@ type AgenticReviewContext struct {
 	ExecutionReportPath string
 }
 
-// AgenticReviewResult describes the structured agentic review decision.
-type AgenticReviewResult struct {
-	Decision          IntegrationReviewDecision     `json:"decision"`
-	Summary           string                        `json:"summary"`
-	BlockingFindings  []workflowstate.ReviewFinding `json:"blocking_findings,omitempty"`
-	NonBlockingNotes  []workflowstate.ReviewFinding `json:"non_blocking_notes,omitempty"`
-	ReviewedArtifacts []string                      `json:"reviewed_artifacts,omitempty"`
-}
-
 // AgenticReviewArtifact describes files produced by one local review.
 type AgenticReviewArtifact struct {
 	ContextPath string
 	ResultPath  string
 	SummaryPath string
 	Run         harness.AgentRunResult
-	Result      AgenticReviewResult
+	Result      workflowstate.AgenticReviewResult
 }
 
 // ApplyAgenticReviewResultOptions describes local ticket metadata application.
@@ -303,44 +277,21 @@ func AgenticReviewOutputSchema() []byte {
 }
 
 // ParseAgenticReviewResult parses and validates JSON review output.
-func ParseAgenticReviewResult(payload []byte) (AgenticReviewResult, error) {
-	var result AgenticReviewResult
+func ParseAgenticReviewResult(payload []byte) (workflowstate.AgenticReviewResult, error) {
+	var result workflowstate.AgenticReviewResult
 
 	decoder := json.NewDecoder(strings.NewReader(string(payload)))
 	decoder.DisallowUnknownFields()
 
 	if err := decoder.Decode(&result); err != nil {
-		return AgenticReviewResult{}, fmt.Errorf("decode agentic review result: %w", err)
+		return workflowstate.AgenticReviewResult{}, fmt.Errorf("decode agentic review result: %w", err)
 	}
 
-	if err := ValidateAgenticReviewResult(result); err != nil {
-		return AgenticReviewResult{}, err
+	if err := workflowstate.ValidateAgenticReviewResult(result); err != nil {
+		return workflowstate.AgenticReviewResult{}, err
 	}
 
 	return result, nil
-}
-
-// ValidateAgenticReviewResult validates one structured review result.
-func ValidateAgenticReviewResult(result AgenticReviewResult) error {
-	if !result.Decision.Valid() {
-		return fmt.Errorf("invalid agentic review decision: %s", result.Decision)
-	}
-
-	if strings.TrimSpace(result.Summary) == "" {
-		return fmt.Errorf("agentic review summary is required")
-	}
-
-	if result.Decision == IntegrationReviewDecisionNeedsChanges && len(result.BlockingFindings) == 0 {
-		return fmt.Errorf("agentic review needs_changes requires blocking findings")
-	}
-
-	for _, finding := range agenticReviewFindings(result) {
-		if err := validateAgenticReviewFinding(finding); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 // ApplyAgenticReviewResult writes local review metadata to the ticket.
@@ -401,23 +352,15 @@ func WriteAgenticReviewSummary(artifact AgenticReviewArtifact) error {
 	return nil
 }
 
-func agenticReviewFindings(result AgenticReviewResult) []workflowstate.ReviewFinding {
-	findings := make([]workflowstate.ReviewFinding, 0, len(result.BlockingFindings)+len(result.NonBlockingNotes))
-	findings = append(findings, result.BlockingFindings...)
-	findings = append(findings, result.NonBlockingNotes...)
-
-	return findings
-}
-
-func ticketReviewResultForAgenticDecision(decision IntegrationReviewDecision) ticketcore.ReviewResult {
+func ticketReviewResultForAgenticDecision(decision workflowstate.IntegrationReviewDecision) ticketcore.ReviewResult {
 	switch decision {
-	case IntegrationReviewDecisionPass:
+	case workflowstate.IntegrationReviewDecisionPass:
 		return ticketcore.ReviewResultPass
-	case IntegrationReviewDecisionNeedsChanges:
+	case workflowstate.IntegrationReviewDecisionNeedsChanges:
 		return ticketcore.ReviewResultNeedsChanges
-	case IntegrationReviewDecisionInsufficientEvidence:
+	case workflowstate.IntegrationReviewDecisionInsufficientEvidence:
 		return ticketcore.ReviewResultInsufficientEvidence
-	case IntegrationReviewDecisionHumanRequired:
+	case workflowstate.IntegrationReviewDecisionHumanRequired:
 		return ticketcore.ReviewResultNeedsHumanDecision
 	default:
 		return ticketcore.ReviewResultNeedsHumanDecision
@@ -456,8 +399,8 @@ func firstTicketPullRequestReviewRef(refs []ticketmetadata.ReviewRef) (ticketmet
 	return ticketmetadata.ReviewRef{}, false
 }
 
-func agenticReviewBlockingFindingBodies(result AgenticReviewResult) []string {
-	if len(result.BlockingFindings) == 0 && result.Decision != IntegrationReviewDecisionPass {
+func agenticReviewBlockingFindingBodies(result workflowstate.AgenticReviewResult) []string {
+	if len(result.BlockingFindings) == 0 && result.Decision != workflowstate.IntegrationReviewDecisionPass {
 		return []string{result.Summary}
 	}
 
@@ -467,37 +410,6 @@ func agenticReviewBlockingFindingBodies(result AgenticReviewResult) []string {
 	}
 
 	return findings
-}
-
-func validateAgenticReviewFinding(finding workflowstate.ReviewFinding) error {
-	if !validAgenticReviewFindingCategory(finding.Category) {
-		return fmt.Errorf("invalid agentic review finding category: %s", finding.Category)
-	}
-
-	if strings.TrimSpace(finding.Title) == "" {
-		return fmt.Errorf("agentic review finding title is required")
-	}
-
-	if strings.TrimSpace(finding.Detail) == "" {
-		return fmt.Errorf("agentic review finding detail is required")
-	}
-
-	return nil
-}
-
-func validAgenticReviewFindingCategory(category string) bool {
-	switch strings.TrimSpace(category) {
-	case AgenticReviewFindingCorrectness,
-		AgenticReviewFindingScope,
-		AgenticReviewFindingEvidence,
-		AgenticReviewFindingContract,
-		AgenticReviewFindingSafety,
-		AgenticReviewFindingMergeability,
-		AgenticReviewFindingCosmetic:
-		return true
-	default:
-		return false
-	}
 }
 
 func writeAgenticReviewFindings(output *strings.Builder, findings []workflowstate.ReviewFinding) {

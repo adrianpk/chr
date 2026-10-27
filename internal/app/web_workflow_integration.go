@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -39,7 +38,7 @@ func webWorkflowIntegrationControls(status WorkflowWorkStatus) *webui.WorkflowIn
 	}
 
 	view.DecisionRevision, view.DecisionHash = strconv.FormatUint(decision.Revision, 10), decision.Hash
-	view.FindingCategories = []string{core.AgenticReviewFindingCorrectness, core.AgenticReviewFindingScope, core.AgenticReviewFindingEvidence, core.AgenticReviewFindingContract, core.AgenticReviewFindingSafety, core.AgenticReviewFindingMergeability}
+	view.FindingCategories = []string{workflowstate.AgenticReviewFindingCorrectness, workflowstate.AgenticReviewFindingScope, workflowstate.AgenticReviewFindingEvidence, workflowstate.AgenticReviewFindingContract, workflowstate.AgenticReviewFindingSafety, workflowstate.AgenticReviewFindingMergeability}
 
 	for _, question := range decision.Requests {
 		view.Questions = append(view.Questions, webui.WorkflowIntegrationQuestionView{ID: question.ID, Issue: question.Issue, Authority: question.Authority, Options: question.Options, ReplayOwnership: question.ID == "replay-owner", AnswerID: workflowIntegrationResponseID("answer", status.ID, status.Revision, question.ID)})

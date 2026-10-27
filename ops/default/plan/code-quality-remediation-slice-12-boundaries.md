@@ -49,7 +49,8 @@ review/harness interfaces must preserve retained identity and authority; guided
 proofs and ticket/board projections must keep their guards and actual operation
 owner. Shared immutable values belong in an existing cohesive value owner.
 Configuration/transport behavior must cross a real consumer-owned operation
-boundary. A temporary compile-time bridge, if necessary, must be recorded with
+boundary. The current resolution fields record ten review/cycle value dependencies
+now owned directly by workflow/state; 69 root couplings remain before relocation. A temporary compile-time bridge, if necessary, must be recorded with
 its explicit approved removal owner by Slice 15.
 
 The [signature entry map](code-quality-remediation-slice-12-signatures.csv)

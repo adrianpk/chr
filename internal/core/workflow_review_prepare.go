@@ -104,7 +104,7 @@ func (s *WorkflowStore) prepareWorkflowReviewPolicy(ctx context.Context, run *wo
 
 		return nil, workflowPreparedTask{}, s.commitWorkflowState(run)
 	case workflowstate.ReviewTrustedAutoMerge:
-		decision := WorkflowReviewDecision{BindingHash: run.Review.InputHash, Result: AgenticReviewResult{Decision: IntegrationReviewDecisionPass, Summary: "Required host validation accepted under current trusted policy."}}
+		decision := WorkflowReviewDecision{BindingHash: run.Review.InputHash, Result: workflowstate.AgenticReviewResult{Decision: workflowstate.IntegrationReviewDecisionPass, Summary: "Required host validation accepted under current trusted policy."}}
 
 		return nil, workflowPreparedTask{}, s.persistWorkflowReviewDecision(run, observation, decision, "authorized")
 	case workflowstate.ReviewAgentic:

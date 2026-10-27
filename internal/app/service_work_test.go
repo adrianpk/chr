@@ -302,11 +302,11 @@ func TestServiceStartAllReadyAgentWorkRunsAgenticReviewPass(t *testing.T) {
 	devRoot := t.TempDir()
 	installFakeTicketStartHarnessExecutor(t, nil)
 
-	runner := installFakeAgenticReviewRunner(t, core.AgenticReviewResult{
-		Decision: core.IntegrationReviewDecisionPass,
+	runner := installFakeAgenticReviewRunner(t, workflowstate.AgenticReviewResult{
+		Decision: workflowstate.IntegrationReviewDecisionPass,
 		Summary:  "Implementation is correct and validation evidence is sufficient.",
 		NonBlockingNotes: []workflowstate.ReviewFinding{{
-			Category: core.AgenticReviewFindingCosmetic,
+			Category: workflowstate.AgenticReviewFindingCosmetic,
 			Title:    "Optional wording cleanup",
 			Detail:   "One help sentence could be clearer, but behavior is correct.",
 		}},
@@ -358,8 +358,8 @@ func TestServiceStartAllReadyAgentWorkStopsWhenMergePreflightBlocks(t *testing.T
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 	installFakeTicketStartHarnessExecutor(t, nil)
-	installFakeAgenticReviewRunner(t, core.AgenticReviewResult{
-		Decision: core.IntegrationReviewDecisionPass,
+	installFakeAgenticReviewRunner(t, workflowstate.AgenticReviewResult{
+		Decision: workflowstate.IntegrationReviewDecisionPass,
 		Summary:  "Implementation is correct and validation evidence is sufficient.",
 	})
 
@@ -403,8 +403,8 @@ func TestServiceStartAllReadyAgentWorkStopsWhenMergeProviderFails(t *testing.T) 
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 	installFakeTicketStartHarnessExecutor(t, nil)
-	installFakeAgenticReviewRunner(t, core.AgenticReviewResult{
-		Decision: core.IntegrationReviewDecisionPass,
+	installFakeAgenticReviewRunner(t, workflowstate.AgenticReviewResult{
+		Decision: workflowstate.IntegrationReviewDecisionPass,
 		Summary:  "Implementation is correct and validation evidence is sufficient.",
 	})
 
@@ -450,8 +450,8 @@ func TestServiceStartAllReadyAgentWorkTrustedAutoMergeMergesBeforeNextTicket(t *
 	devRoot := t.TempDir()
 	installFakeTicketStartHarnessExecutor(t, nil)
 
-	runner := installFakeAgenticReviewRunner(t, core.AgenticReviewResult{
-		Decision: core.IntegrationReviewDecisionNeedsChanges,
+	runner := installFakeAgenticReviewRunner(t, workflowstate.AgenticReviewResult{
+		Decision: workflowstate.IntegrationReviewDecisionNeedsChanges,
 		Summary:  "This runner must not be called in trusted auto-merge mode.",
 	})
 
@@ -500,14 +500,14 @@ func TestServiceStartAllReadyAgentWorkRepairsAgenticReviewNeedsChangesBeforeNext
 	devRoot := t.TempDir()
 	installFakeTicketStartHarnessExecutor(t, nil)
 
-	runner := installFakeAgenticReviewRunnerSequence(t, []core.AgenticReviewResult{
+	runner := installFakeAgenticReviewRunnerSequence(t, []workflowstate.AgenticReviewResult{
 		agenticReviewNeedsChangesResult("Missing invalid input handling"),
 		{
-			Decision: core.IntegrationReviewDecisionPass,
+			Decision: workflowstate.IntegrationReviewDecisionPass,
 			Summary:  "Repair is correct and validation evidence is sufficient.",
 		},
 		{
-			Decision: core.IntegrationReviewDecisionPass,
+			Decision: workflowstate.IntegrationReviewDecisionPass,
 			Summary:  "Implementation is correct and validation evidence is sufficient.",
 		},
 	})
@@ -558,7 +558,7 @@ func TestServiceStartAllReadyAgentWorkBlocksAfterRepairReviewNeedsChanges(t *tes
 	devRoot := t.TempDir()
 	installFakeTicketStartHarnessExecutor(t, nil)
 
-	runner := installFakeAgenticReviewRunnerSequence(t, []core.AgenticReviewResult{
+	runner := installFakeAgenticReviewRunnerSequence(t, []workflowstate.AgenticReviewResult{
 		agenticReviewNeedsChangesResult("Missing invalid input handling"),
 		agenticReviewNeedsChangesResult("Still missing invalid input handling"),
 	})
@@ -824,8 +824,8 @@ func newAgentWorkTestService(t *testing.T, devRoot, projectDir string) service {
 }
 
 type fakeServiceAgenticReviewRunner struct {
-	result  core.AgenticReviewResult
-	results []core.AgenticReviewResult
+	result  workflowstate.AgenticReviewResult
+	results []workflowstate.AgenticReviewResult
 	reviews []core.AgenticReviewContext
 }
 
@@ -871,7 +871,7 @@ func (r *fakeServiceAgenticReviewRunner) Review(_ context.Context, review core.A
 	return artifact, nil
 }
 
-func (r *fakeServiceAgenticReviewRunner) resultForReview(index int) core.AgenticReviewResult {
+func (r *fakeServiceAgenticReviewRunner) resultForReview(index int) workflowstate.AgenticReviewResult {
 	if len(r.results) == 0 {
 		return r.result
 	}
@@ -883,7 +883,7 @@ func (r *fakeServiceAgenticReviewRunner) resultForReview(index int) core.Agentic
 	return r.results[index]
 }
 
-func installFakeAgenticReviewRunner(t *testing.T, result core.AgenticReviewResult) *fakeServiceAgenticReviewRunner {
+func installFakeAgenticReviewRunner(t *testing.T, result workflowstate.AgenticReviewResult) *fakeServiceAgenticReviewRunner {
 	t.Helper()
 
 	runner := &fakeServiceAgenticReviewRunner{result: result}
@@ -899,7 +899,7 @@ func installFakeAgenticReviewRunner(t *testing.T, result core.AgenticReviewResul
 	return runner
 }
 
-func installFakeAgenticReviewRunnerSequence(t *testing.T, results []core.AgenticReviewResult) *fakeServiceAgenticReviewRunner {
+func installFakeAgenticReviewRunnerSequence(t *testing.T, results []workflowstate.AgenticReviewResult) *fakeServiceAgenticReviewRunner {
 	t.Helper()
 
 	runner := &fakeServiceAgenticReviewRunner{results: results}
@@ -1014,12 +1014,12 @@ func assertRepairExecutionContextContains(t *testing.T, execution executioncore.
 	}
 }
 
-func agenticReviewNeedsChangesResult(title string) core.AgenticReviewResult {
-	return core.AgenticReviewResult{
-		Decision: core.IntegrationReviewDecisionNeedsChanges,
+func agenticReviewNeedsChangesResult(title string) workflowstate.AgenticReviewResult {
+	return workflowstate.AgenticReviewResult{
+		Decision: workflowstate.IntegrationReviewDecisionNeedsChanges,
 		Summary:  "The implementation is missing a required behavior.",
 		BlockingFindings: []workflowstate.ReviewFinding{{
-			Category: core.AgenticReviewFindingCorrectness,
+			Category: workflowstate.AgenticReviewFindingCorrectness,
 			Title:    title,
 			Detail:   "The ticket requires invalid input recovery, but the implementation accepts bad moves.",
 		}},
