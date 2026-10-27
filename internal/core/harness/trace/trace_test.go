@@ -15,7 +15,7 @@ import (
 func TestLoadLLMTraceConfigDisabledDoesNotRequireUserspace(t *testing.T) {
 	dir := t.TempDir()
 
-	config, err := LoadLLMTraceConfig(LoadLLMTraceConfigOptions{
+	config, err := Load(LoadOptions{
 		ProjectDir: dir,
 		LookupEnv:  func(string) string { return "" },
 	})
@@ -39,11 +39,11 @@ func TestLoadLLMTraceConfigDisabledDoesNotRequireUserspace(t *testing.T) {
 func TestLoadLLMTraceConfigEnabledResolvesUserspaceLogPath(t *testing.T) {
 	dir := t.TempDir()
 
-	config, err := LoadLLMTraceConfig(LoadLLMTraceConfigOptions{
+	config, err := Load(LoadOptions{
 		ProjectDir: dir,
 		LookupEnv: traceTestLookupEnv(map[string]string{
 			workspacecore.ActiveOperatorIDEnv: "adrian",
-			LLMTraceEnabledEnv:                "1",
+			EnabledEnv:                        "1",
 		}),
 	})
 	if err != nil {
@@ -55,7 +55,7 @@ func TestLoadLLMTraceConfigEnabledResolvesUserspaceLogPath(t *testing.T) {
 		t.Fatalf("Dir = %q, want %q", config.Dir, wantDir)
 	}
 
-	if config.FilePath != filepath.Join(wantDir, defaultLLMTraceFileName) {
+	if config.FilePath != filepath.Join(wantDir, defaultFileName) {
 		t.Fatalf("FilePath = %q, want llm trace file under userspace", config.FilePath)
 	}
 }
@@ -63,14 +63,14 @@ func TestLoadLLMTraceConfigEnabledResolvesUserspaceLogPath(t *testing.T) {
 func TestLoadLLMTraceConfigReadsEnvironmentOverrides(t *testing.T) {
 	dir := t.TempDir()
 
-	config, err := LoadLLMTraceConfig(LoadLLMTraceConfigOptions{
+	config, err := Load(LoadOptions{
 		ProjectDir: dir,
 		LookupEnv: traceTestLookupEnv(map[string]string{
 			workspacecore.ActiveOperatorIDEnv: "adrian",
-			LLMTraceEnabledEnv:                "true",
-			LLMTracePayloadsEnv:               "yes",
-			LLMTraceMaxBytesEnv:               "2048",
-			LLMTraceKeepFilesEnv:              "3",
+			EnabledEnv:                        "true",
+			PayloadsEnv:                       "yes",
+			MaxBytesEnv:                       "2048",
+			KeepFilesEnv:                      "3",
 			"UNRELATED_ENVIRONMENT":           "ignored",
 		}),
 	})
@@ -99,7 +99,7 @@ func TestWriteLLMTraceEventWritesJSONL(t *testing.T) {
 	dir := t.TempDir()
 	config := traceTestConfig(t, dir, true)
 
-	err := WriteLLMTraceEvent(context.Background(), config, map[string]any{
+	err := Write(context.Background(), config, map[string]any{
 		"event":       "llm_request",
 		"llm_call_id": "llm-001",
 		"payload":     map[string]any{"input": "hidden by default"},
@@ -136,7 +136,7 @@ func TestWriteLLMTraceEventIncludesPayloadsWhenEnabled(t *testing.T) {
 	config := traceTestConfig(t, dir, true)
 	config.IncludePayloads = true
 
-	err := WriteLLMTraceEvent(context.Background(), config, map[string]any{
+	err := Write(context.Background(), config, map[string]any{
 		"event":   "llm_response",
 		"payload": map[string]any{"output": "visible"},
 	})
@@ -167,7 +167,7 @@ func TestWriteLLMTraceEventRedactsSecretFieldsAndEnvironmentValues(t *testing.T)
 		}
 	}
 
-	err := WriteLLMTraceEvent(context.Background(), config, map[string]any{
+	err := Write(context.Background(), config, map[string]any{
 		"event": "llm_request",
 		"headers": map[string]any{
 			"Authorization": "Bearer direct-secret",
@@ -207,7 +207,7 @@ func TestWriteLLMTraceEventRotatesTraceFile(t *testing.T) {
 	config.KeepFiles = 2
 
 	for index := 0; index < 4; index++ {
-		err := WriteLLMTraceEvent(context.Background(), config, map[string]any{
+		err := Write(context.Background(), config, map[string]any{
 			"event":       "llm_request",
 			"llm_call_id": "llm-rotation",
 			"payload":     strings.Repeat("x", 120),
@@ -227,17 +227,17 @@ func TestWriteLLMTraceEventRotatesTraceFile(t *testing.T) {
 }
 
 func TestRecordLLMTraceEventIsBestEffort(t *testing.T) {
-	RecordLLMTraceEvent(context.Background(), LoadLLMTraceConfigOptions{
+	Record(context.Background(), LoadOptions{
 		ProjectDir: t.TempDir(),
 		LookupEnv: traceTestLookupEnv(map[string]string{
-			LLMTraceEnabledEnv: "1",
+			EnabledEnv: "1",
 		}),
 	}, map[string]any{
 		"event": "llm_request",
 	})
 }
 
-func traceTestConfig(t *testing.T, dir string, enabled bool) LLMTraceConfig {
+func traceTestConfig(t *testing.T, dir string, enabled bool) Config {
 	t.Helper()
 
 	enabledValue := ""
@@ -245,11 +245,11 @@ func traceTestConfig(t *testing.T, dir string, enabled bool) LLMTraceConfig {
 		enabledValue = "1"
 	}
 
-	config, err := LoadLLMTraceConfig(LoadLLMTraceConfigOptions{
+	config, err := Load(LoadOptions{
 		ProjectDir: dir,
 		LookupEnv: traceTestLookupEnv(map[string]string{
 			workspacecore.ActiveOperatorIDEnv: "adrian",
-			LLMTraceEnabledEnv:                enabledValue,
+			EnabledEnv:                        enabledValue,
 		}),
 		Environ: func() []string { return nil },
 		Now: func() time.Time {

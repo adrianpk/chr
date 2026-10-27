@@ -90,7 +90,7 @@ func (p webViewProvider) writeHarnessSelection(ctx context.Context, operations s
 		return webValidationWrite(errors.New("choose a change for at least one role"))
 	}
 
-	actor, err := workspacecore.ResolveProjectUserspace(workspacecore.ResolveProjectUserspaceOptions{ProjectDir: operations.projectContext.ProjectDir})
+	actor, err := workspacecore.ResolveUserspace(workspacecore.ResolveUserspaceOptions{ProjectDir: operations.projectContext.ProjectDir})
 	if err != nil {
 		return webBlockedWrite("The active local operator is unavailable.")
 	}

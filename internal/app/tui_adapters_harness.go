@@ -57,7 +57,7 @@ func (e tuiHarnessSelectionExecutor) retainedHarnessBindings(ctx context.Context
 }
 
 func (e tuiHarnessSelectionExecutor) SaveHarnessSelections(request tui.HarnessSelectionRequest) (tui.HarnessSelectionView, error) {
-	actor, err := workspacecore.ResolveProjectUserspace(workspacecore.ResolveProjectUserspaceOptions{ProjectDir: e.operations.projectContext.ProjectDir})
+	actor, err := workspacecore.ResolveUserspace(workspacecore.ResolveUserspaceOptions{ProjectDir: e.operations.projectContext.ProjectDir})
 	if err != nil {
 		return tui.HarnessSelectionView{}, err
 	}

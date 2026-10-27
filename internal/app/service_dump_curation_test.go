@@ -53,8 +53,8 @@ func TestOpenAIDumpCurationProviderRecordsTracePayloads(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceWorkspaceQueryFixture(t, projectDir)
 
-	t.Setenv(harnesstrace.LLMTraceEnabledEnv, "1")
-	t.Setenv(harnesstrace.LLMTracePayloadsEnv, "1")
+	t.Setenv(harnesstrace.EnabledEnv, "1")
+	t.Setenv(harnesstrace.PayloadsEnv, "1")
 	t.Setenv(workspacecore.ActiveOperatorIDEnv, "test-user")
 
 	server := newDumpCurationTraceTestServer(t)

@@ -38,7 +38,7 @@ func applyHarnessSelectionAudit(config *WorkspaceConfig, values map[string]strin
 }
 
 func validateHarnessSelectionAudit(audit HarnessSelectionAudit) error {
-	if (workflowstate.MutationBinding{RequestID: audit.ProjectRef, Operator: audit.ChangedBy}).Validate() != nil || !workspacecore.IsValidOperatorID(audit.ChangedBy) {
+	if (workflowstate.MutationBinding{RequestID: audit.ProjectRef, Operator: audit.ChangedBy}).Validate() != nil || !workspacecore.ValidOperatorID(audit.ChangedBy) {
 		return errors.New("invalid harness selection project or actor")
 	}
 

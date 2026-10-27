@@ -77,7 +77,7 @@ func (factory commandFactory) harnessChangeCommand(clearChoice bool) *cli.Comman
 			return err
 		}
 
-		userspace, err := workspacecore.ResolveProjectUserspace(workspacecore.ResolveProjectUserspaceOptions{ProjectDir: project.ProjectDir})
+		userspace, err := workspacecore.ResolveUserspace(workspacecore.ResolveUserspaceOptions{ProjectDir: project.ProjectDir})
 		if err != nil {
 			return err
 		}

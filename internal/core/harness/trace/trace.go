@@ -16,24 +16,24 @@ import (
 )
 
 const (
-	// LLMTraceEnabledEnv defines a package boundary constant.
-	LLMTraceEnabledEnv = "CHR_LLM_TRACE"
-	// LLMTracePayloadsEnv defines a package boundary constant.
-	LLMTracePayloadsEnv = "CHR_LLM_TRACE_PAYLOADS"
-	// LLMTraceMaxBytesEnv defines a package boundary constant.
-	LLMTraceMaxBytesEnv = "CHR_LLM_TRACE_MAX_BYTES"
-	// LLMTraceKeepFilesEnv defines a package boundary constant.
-	LLMTraceKeepFilesEnv = "CHR_LLM_TRACE_KEEP_FILES"
+	// EnabledEnv defines a package boundary constant.
+	EnabledEnv = "CHR_LLM_TRACE"
+	// PayloadsEnv defines a package boundary constant.
+	PayloadsEnv = "CHR_LLM_TRACE_PAYLOADS"
+	// MaxBytesEnv defines a package boundary constant.
+	MaxBytesEnv = "CHR_LLM_TRACE_MAX_BYTES"
+	// KeepFilesEnv defines a package boundary constant.
+	KeepFilesEnv = "CHR_LLM_TRACE_KEEP_FILES"
 
-	defaultLLMTraceFileName  = "llm.ndjson"
-	defaultLLMTraceMaxBytes  = 10 * 1024 * 1024
-	defaultLLMTraceKeepFiles = 5
+	defaultFileName  = "llm.ndjson"
+	defaultMaxBytes  = 10 * 1024 * 1024
+	defaultKeepFiles = 5
 )
 
 var secretLikeFieldPattern = regexp.MustCompile(`(?i)(token|secret|password|authorization|api[_-]?key)`)
 
-// LLMTraceConfig describes a package boundary value.
-type LLMTraceConfig struct {
+// Config describes a package boundary value.
+type Config struct {
 	Enabled         bool
 	IncludePayloads bool
 	Dir             string
@@ -44,26 +44,26 @@ type LLMTraceConfig struct {
 	Now             func() time.Time
 }
 
-// LoadLLMTraceConfigOptions describes a package boundary value.
-type LoadLLMTraceConfigOptions struct {
+// LoadOptions describes a package boundary value.
+type LoadOptions struct {
 	ProjectDir string
 	LookupEnv  func(string) string
 	Environ    func() []string
 	Now        func() time.Time
 }
 
-// LoadLLMTraceConfig loads the corresponding package data.
-func LoadLLMTraceConfig(opts LoadLLMTraceConfigOptions) (LLMTraceConfig, error) {
+// Load loads the corresponding package data.
+func Load(opts LoadOptions) (Config, error) {
 	lookupEnv := opts.LookupEnv
 	if lookupEnv == nil {
 		lookupEnv = os.Getenv
 	}
 
-	config := LLMTraceConfig{
-		Enabled:         truthyEnv(lookupEnv(LLMTraceEnabledEnv)),
-		IncludePayloads: truthyEnv(lookupEnv(LLMTracePayloadsEnv)),
-		MaxBytes:        envInt64(lookupEnv(LLMTraceMaxBytesEnv), defaultLLMTraceMaxBytes),
-		KeepFiles:       envInt(lookupEnv(LLMTraceKeepFilesEnv), defaultLLMTraceKeepFiles),
+	config := Config{
+		Enabled:         truthyEnv(lookupEnv(EnabledEnv)),
+		IncludePayloads: truthyEnv(lookupEnv(PayloadsEnv)),
+		MaxBytes:        envInt64(lookupEnv(MaxBytesEnv), defaultMaxBytes),
+		KeepFiles:       envInt(lookupEnv(KeepFilesEnv), defaultKeepFiles),
 		Environ:         opts.Environ,
 		Now:             opts.Now,
 	}
@@ -79,34 +79,34 @@ func LoadLLMTraceConfig(opts LoadLLMTraceConfigOptions) (LLMTraceConfig, error) 
 		return config, nil
 	}
 
-	userspace, err := workspacecore.ResolveProjectUserspace(workspacecore.ResolveProjectUserspaceOptions{
+	userspace, err := workspacecore.ResolveUserspace(workspacecore.ResolveUserspaceOptions{
 		ProjectDir: opts.ProjectDir,
 		LookupEnv:  lookupEnv,
 	})
 	if err != nil {
-		return LLMTraceConfig{}, fmt.Errorf("resolve LLM trace userspace: %w", err)
+		return Config{}, fmt.Errorf("resolve LLM trace userspace: %w", err)
 	}
 
 	config.Dir = filepath.Join(userspace.Path, "log", "llm")
-	config.FilePath = filepath.Join(config.Dir, defaultLLMTraceFileName)
+	config.FilePath = filepath.Join(config.Dir, defaultFileName)
 
 	return config, nil
 }
 
-// RecordLLMTraceEvent executes the corresponding package operation.
-func RecordLLMTraceEvent(ctx context.Context, opts LoadLLMTraceConfigOptions, event map[string]any) {
-	config, err := LoadLLMTraceConfig(opts)
+// Record executes the corresponding package operation.
+func Record(ctx context.Context, opts LoadOptions, event map[string]any) {
+	config, err := Load(opts)
 	if err != nil {
 		return
 	}
 
-	if err := WriteLLMTraceEvent(ctx, config, event); err != nil {
+	if err := Write(ctx, config, event); err != nil {
 		return
 	}
 }
 
-// WriteLLMTraceEvent executes the corresponding package operation.
-func WriteLLMTraceEvent(ctx context.Context, config LLMTraceConfig, event map[string]any) error {
+// Write executes the corresponding package operation.
+func Write(ctx context.Context, config Config, event map[string]any) error {
 	err := ctx.Err()
 	if err != nil {
 		return err
@@ -120,7 +120,7 @@ func WriteLLMTraceEvent(ctx context.Context, config LLMTraceConfig, event map[st
 		return fmt.Errorf("LLM trace path is required when tracing is enabled")
 	}
 
-	line, err := encodeLLMTraceEvent(config, event)
+	line, err := encodeEvent(config, event)
 	if err != nil {
 		return err
 	}
@@ -130,12 +130,12 @@ func WriteLLMTraceEvent(ctx context.Context, config LLMTraceConfig, event map[st
 		return fmt.Errorf("create LLM trace directory: %w", err)
 	}
 
-	err = rotateLLMTraceFile(config.FilePath, config.MaxBytes, config.KeepFiles, int64(len(line)))
+	err = rotateFile(config.FilePath, config.MaxBytes, config.KeepFiles, int64(len(line)))
 	if err != nil {
 		return fmt.Errorf("rotate LLM trace file: %w", err)
 	}
 
-	err = appendLLMTraceLine(config.FilePath, line)
+	err = appendLine(config.FilePath, line)
 	if err != nil {
 		return err
 	}
@@ -143,7 +143,7 @@ func WriteLLMTraceEvent(ctx context.Context, config LLMTraceConfig, event map[st
 	return nil
 }
 
-func appendLLMTraceLine(filePath string, line []byte) error {
+func appendLine(filePath string, line []byte) error {
 	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
 		return fmt.Errorf("open LLM trace file: %w", err)
@@ -167,20 +167,20 @@ func appendLLMTraceLine(filePath string, line []byte) error {
 	return nil
 }
 
-func encodeLLMTraceEvent(config LLMTraceConfig, event map[string]any) ([]byte, error) {
+func encodeEvent(config Config, event map[string]any) ([]byte, error) {
 	normalized := make(map[string]any, len(event)+1)
-	secretValues := llmTraceSecretValues(config.Environ)
+	secretValues := secretValues(config.Environ)
 
 	for key, value := range event {
 		if value == nil {
 			continue
 		}
 
-		if !config.IncludePayloads && llmTracePayloadField(key) {
+		if !config.IncludePayloads && payloadField(key) {
 			continue
 		}
 
-		normalized[key] = redactLLMTraceValue(key, value, secretValues)
+		normalized[key] = redactValue(key, value, secretValues)
 	}
 
 	if _, ok := normalized["timestamp"]; !ok {
@@ -200,9 +200,9 @@ func encodeLLMTraceEvent(config LLMTraceConfig, event map[string]any) ([]byte, e
 	return append(content, '\n'), nil
 }
 
-func rotateLLMTraceFile(filePath string, maxBytes int64, keepFiles int, incomingBytes int64) error {
-	maxBytes = normalizedLLMTraceMaxBytes(maxBytes)
-	keepFiles = normalizedLLMTraceKeepFiles(keepFiles)
+func rotateFile(filePath string, maxBytes int64, keepFiles int, incomingBytes int64) error {
+	maxBytes = normalizedMaxBytes(maxBytes)
+	keepFiles = normalizedKeepFiles(keepFiles)
 
 	info, err := os.Stat(filePath)
 	if err != nil && !os.IsNotExist(err) {
@@ -217,43 +217,43 @@ func rotateLLMTraceFile(filePath string, maxBytes int64, keepFiles int, incoming
 		return nil
 	}
 
-	return rotateExistingLLMTraceFile(filePath, keepFiles)
+	return rotateExistingFile(filePath, keepFiles)
 }
 
-func normalizedLLMTraceMaxBytes(maxBytes int64) int64 {
+func normalizedMaxBytes(maxBytes int64) int64 {
 	if maxBytes > 0 {
 		return maxBytes
 	}
 
-	return defaultLLMTraceMaxBytes
+	return defaultMaxBytes
 }
 
-func normalizedLLMTraceKeepFiles(keepFiles int) int {
+func normalizedKeepFiles(keepFiles int) int {
 	if keepFiles > 0 {
 		return keepFiles
 	}
 
-	return defaultLLMTraceKeepFiles
+	return defaultKeepFiles
 }
 
-func rotateExistingLLMTraceFile(filePath string, keepFiles int) error {
-	err := removeLLMTraceRotation(filePath, keepFiles)
+func rotateExistingFile(filePath string, keepFiles int) error {
+	err := removeRotation(filePath, keepFiles)
 	if err != nil {
 		return err
 	}
 
 	for index := keepFiles - 1; index >= 1; index-- {
-		err = renameLLMTraceRotation(filePath, index, index+1)
+		err = renameRotation(filePath, index, index+1)
 		if err != nil {
 			return err
 		}
 	}
 
-	return renameLLMTraceRotation(filePath, 0, 1)
+	return renameRotation(filePath, 0, 1)
 }
 
-func removeLLMTraceRotation(filePath string, index int) error {
-	err := os.Remove(llmTraceRotationPath(filePath, index))
+func removeRotation(filePath string, index int) error {
+	err := os.Remove(rotationPath(filePath, index))
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
@@ -261,8 +261,8 @@ func removeLLMTraceRotation(filePath string, index int) error {
 	return nil
 }
 
-func renameLLMTraceRotation(filePath string, sourceIndex, targetIndex int) error {
-	err := os.Rename(llmTraceRotationPath(filePath, sourceIndex), llmTraceRotationPath(filePath, targetIndex))
+func renameRotation(filePath string, sourceIndex, targetIndex int) error {
+	err := os.Rename(rotationPath(filePath, sourceIndex), rotationPath(filePath, targetIndex))
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
@@ -270,7 +270,7 @@ func renameLLMTraceRotation(filePath string, sourceIndex, targetIndex int) error
 	return nil
 }
 
-func llmTraceRotationPath(filePath string, index int) string {
+func rotationPath(filePath string, index int) string {
 	if index == 0 {
 		return filePath
 	}
@@ -278,7 +278,7 @@ func llmTraceRotationPath(filePath string, index int) string {
 	return filePath + "." + strconv.Itoa(index)
 }
 
-func llmTracePayloadField(key string) bool {
+func payloadField(key string) bool {
 	normalized := strings.ToLower(strings.TrimSpace(key))
 
 	return normalized == "payload" ||
@@ -289,7 +289,7 @@ func llmTracePayloadField(key string) bool {
 		normalized == "raw_response"
 }
 
-func redactLLMTraceValue(key string, value any, secretValues []string) any {
+func redactValue(key string, value any, secretValues []string) any {
 	if secretLikeFieldPattern.MatchString(key) {
 		return "[REDACTED]"
 	}
@@ -298,25 +298,25 @@ func redactLLMTraceValue(key string, value any, secretValues []string) any {
 	case map[string]any:
 		redacted := make(map[string]any, len(typed))
 		for childKey, childValue := range typed {
-			redacted[childKey] = redactLLMTraceValue(childKey, childValue, secretValues)
+			redacted[childKey] = redactValue(childKey, childValue, secretValues)
 		}
 
 		return redacted
 	case []any:
 		redacted := make([]any, 0, len(typed))
 		for _, childValue := range typed {
-			redacted = append(redacted, redactLLMTraceValue("", childValue, secretValues))
+			redacted = append(redacted, redactValue("", childValue, secretValues))
 		}
 
 		return redacted
 	case string:
-		return redactLLMTraceString(typed, secretValues)
+		return redactString(typed, secretValues)
 	default:
 		return value
 	}
 }
 
-func redactLLMTraceString(value string, secretValues []string) string {
+func redactString(value string, secretValues []string) string {
 	redacted := redactBearerToken(value)
 
 	for _, secret := range secretValues {
@@ -339,7 +339,7 @@ func redactBearerToken(value string) string {
 	return value
 }
 
-func llmTraceSecretValues(environ func() []string) []string {
+func secretValues(environ func() []string) []string {
 	if environ == nil {
 		return nil
 	}

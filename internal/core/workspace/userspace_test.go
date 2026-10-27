@@ -10,7 +10,7 @@ import (
 func TestResolveProjectUserspaceUsesActiveOperatorEnvironment(t *testing.T) {
 	dir := t.TempDir()
 
-	userspace, err := ResolveProjectUserspace(ResolveProjectUserspaceOptions{
+	userspace, err := ResolveUserspace(ResolveUserspaceOptions{
 		ProjectDir: dir,
 		LookupEnv: func(key string) string {
 			if key != ActiveOperatorIDEnv {
@@ -38,7 +38,7 @@ func TestResolveProjectUserspaceUsesActiveOperatorEnvironment(t *testing.T) {
 }
 
 func TestResolveProjectUserspaceRequiresOperatorEnvironment(t *testing.T) {
-	_, err := ResolveProjectUserspace(ResolveProjectUserspaceOptions{
+	_, err := ResolveUserspace(ResolveUserspaceOptions{
 		ProjectDir: t.TempDir(),
 		LookupEnv:  func(string) string { return "" },
 	})
@@ -48,7 +48,7 @@ func TestResolveProjectUserspaceRequiresOperatorEnvironment(t *testing.T) {
 }
 
 func TestResolveProjectUserspaceRejectsInvalidOperatorID(t *testing.T) {
-	_, err := ResolveProjectUserspace(ResolveProjectUserspaceOptions{
+	_, err := ResolveUserspace(ResolveUserspaceOptions{
 		ProjectDir: t.TempDir(),
 		LookupEnv:  func(string) string { return "../adrian" },
 	})
@@ -61,7 +61,7 @@ func TestEnsureProjectUserspaceCreatesDirectory(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv(ActiveOperatorIDEnv, "adrian")
 
-	userspace, err := EnsureProjectUserspace(context.Background(), EnsureProjectUserspaceOptions{
+	userspace, err := EnsureUserspace(context.Background(), EnsureUserspaceOptions{
 		ProjectDir: dir,
 	})
 	if err != nil {
@@ -96,7 +96,7 @@ func TestIsValidOperatorID(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.value, func(t *testing.T) {
-			if got := IsValidOperatorID(tt.value); got != tt.want {
+			if got := ValidOperatorID(tt.value); got != tt.want {
 				t.Fatalf("IsValidOperatorID(%q) = %v, want %v", tt.value, got, tt.want)
 			}
 		})

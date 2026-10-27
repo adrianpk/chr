@@ -27,5 +27,5 @@ func (QuizGenerationHost) ValidateOutput(ctx context.Context, request harness.Ag
 
 // Trace uses the existing configured redaction and payload policy.
 func (QuizGenerationHost) Trace(ctx context.Context, projectDir string, event map[string]any) {
-	harnesstrace.RecordLLMTraceEvent(ctx, harnesstrace.LoadLLMTraceConfigOptions{ProjectDir: projectDir}, event)
+	harnesstrace.Record(ctx, harnesstrace.LoadOptions{ProjectDir: projectDir}, event)
 }

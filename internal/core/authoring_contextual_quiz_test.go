@@ -168,7 +168,7 @@ func TestValidateAuthoringQuizGenerationResultRejectsGenericUnsafeOutput(t *test
 func TestHarnessAuthoringQuizQuestionProviderRecordsTraceEvents(t *testing.T) {
 	projectDir := t.TempDir()
 	t.Setenv(workspacecore.ActiveOperatorIDEnv, "adrian")
-	t.Setenv(harnesstrace.LLMTraceEnabledEnv, "1")
+	t.Setenv(harnesstrace.EnabledEnv, "1")
 
 	program := writeAuthoringQuizProviderScript(t, projectDir, `#!/bin/sh
 cat >/dev/null
@@ -193,8 +193,8 @@ printf '%s\n' '{"questions":[{"id":"Q1","question":"Which workflow should this s
 func TestHarnessAuthoringQuizQuestionProviderRecordsTracePayloadsWhenEnabled(t *testing.T) {
 	projectDir := t.TempDir()
 	t.Setenv(workspacecore.ActiveOperatorIDEnv, "adrian")
-	t.Setenv(harnesstrace.LLMTraceEnabledEnv, "1")
-	t.Setenv(harnesstrace.LLMTracePayloadsEnv, "1")
+	t.Setenv(harnesstrace.EnabledEnv, "1")
+	t.Setenv(harnesstrace.PayloadsEnv, "1")
 
 	program := writeAuthoringQuizProviderScript(t, projectDir, `#!/bin/sh
 cat >/dev/null
@@ -220,7 +220,7 @@ printf '%s\n' '{"questions":[{"id":"Q1","question":"Which workflow should this s
 func TestHarnessAuthoringQuizQuestionProviderRecordsParseFailureTrace(t *testing.T) {
 	projectDir := t.TempDir()
 	t.Setenv(workspacecore.ActiveOperatorIDEnv, "adrian")
-	t.Setenv(harnesstrace.LLMTraceEnabledEnv, "1")
+	t.Setenv(harnesstrace.EnabledEnv, "1")
 
 	program := writeAuthoringQuizProviderScript(t, projectDir, `#!/bin/sh
 cat >/dev/null

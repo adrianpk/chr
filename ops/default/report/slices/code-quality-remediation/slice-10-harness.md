@@ -259,6 +259,11 @@ Workspace and trace owner move checks passed:
 - `make check-go-style`: 9304 declarations, ceiling seven, 207 exact debts, one external exception.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workspace ./internal/core/harness/trace ./internal/core ./internal/app ./scripts/goquality`: zero issues.
 
+A separate naming commit exposes workspace.Userspace, ResolveUserspace,
+EnsureUserspace and ValidOperatorID, and trace.Config, LoadOptions, Load, Record
+and Write. The same focused owner/native/app checks and strict lint passed after
+renaming; all 49 preimages remain reconciled with unchanged wire/env values.
+
 ## Risks and Follow-ups
 
 The slice remains in progress; PR readiness is not established. All assigned

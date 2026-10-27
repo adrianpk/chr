@@ -14,30 +14,30 @@ import (
 // ActiveOperatorIDEnv defines a package boundary constant.
 const ActiveOperatorIDEnv = "CHR_OPERATOR_ID"
 
-// ProjectUserspace describes a package boundary value.
-type ProjectUserspace struct {
+// Userspace describes a package boundary value.
+type Userspace struct {
 	ProjectDir  string
 	OperatorID  string
 	Path        string
 	RelativeDir string
 }
 
-// ResolveProjectUserspaceOptions describes a package boundary value.
-type ResolveProjectUserspaceOptions struct {
+// ResolveUserspaceOptions describes a package boundary value.
+type ResolveUserspaceOptions struct {
 	ProjectDir string
 	LookupEnv  func(string) string
 }
 
-// EnsureProjectUserspaceOptions describes a package boundary value.
-type EnsureProjectUserspaceOptions struct {
+// EnsureUserspaceOptions describes a package boundary value.
+type EnsureUserspaceOptions struct {
 	ProjectDir string
 }
 
-// ResolveProjectUserspace executes the corresponding package operation.
-func ResolveProjectUserspace(opts ResolveProjectUserspaceOptions) (ProjectUserspace, error) {
+// ResolveUserspace executes the corresponding package operation.
+func ResolveUserspace(opts ResolveUserspaceOptions) (Userspace, error) {
 	projectDir, err := projectcore.ResolveDirectory(opts.ProjectDir)
 	if err != nil {
-		return ProjectUserspace{}, err
+		return Userspace{}, err
 	}
 
 	lookupEnv := opts.LookupEnv
@@ -47,16 +47,16 @@ func ResolveProjectUserspace(opts ResolveProjectUserspaceOptions) (ProjectUsersp
 
 	operatorID := strings.TrimSpace(lookupEnv(ActiveOperatorIDEnv))
 	if operatorID == "" {
-		return ProjectUserspace{}, fmt.Errorf("%s is required", ActiveOperatorIDEnv)
+		return Userspace{}, fmt.Errorf("%s is required", ActiveOperatorIDEnv)
 	}
 
-	if !IsValidOperatorID(operatorID) {
-		return ProjectUserspace{}, fmt.Errorf("invalid operator id: %s", operatorID)
+	if !ValidOperatorID(operatorID) {
+		return Userspace{}, fmt.Errorf("invalid operator id: %s", operatorID)
 	}
 
 	relativeDir := UserRelativePath()
 
-	return ProjectUserspace{
+	return Userspace{
 		ProjectDir:  projectDir,
 		OperatorID:  operatorID,
 		Path:        UserPath(projectDir),
@@ -64,30 +64,30 @@ func ResolveProjectUserspace(opts ResolveProjectUserspaceOptions) (ProjectUsersp
 	}, nil
 }
 
-// EnsureProjectUserspace executes the corresponding package operation.
-func EnsureProjectUserspace(ctx context.Context, opts EnsureProjectUserspaceOptions) (ProjectUserspace, error) {
+// EnsureUserspace executes the corresponding package operation.
+func EnsureUserspace(ctx context.Context, opts EnsureUserspaceOptions) (Userspace, error) {
 	err := ctx.Err()
 	if err != nil {
-		return ProjectUserspace{}, err
+		return Userspace{}, err
 	}
 
-	userspace, err := ResolveProjectUserspace(ResolveProjectUserspaceOptions{
+	userspace, err := ResolveUserspace(ResolveUserspaceOptions{
 		ProjectDir: opts.ProjectDir,
 	})
 	if err != nil {
-		return ProjectUserspace{}, err
+		return Userspace{}, err
 	}
 
 	err = os.MkdirAll(userspace.Path, 0o755)
 	if err != nil {
-		return ProjectUserspace{}, fmt.Errorf("create project userspace: %w", err)
+		return Userspace{}, fmt.Errorf("create project userspace: %w", err)
 	}
 
 	return userspace, nil
 }
 
-// IsValidOperatorID executes the corresponding package operation.
-func IsValidOperatorID(value string) bool {
+// ValidOperatorID executes the corresponding package operation.
+func ValidOperatorID(value string) bool {
 	value = strings.TrimSpace(value)
 	if value == "" || value == "." || value == ".." {
 		return false

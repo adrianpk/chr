@@ -135,7 +135,7 @@ func localHarnessSelectionAuthority(project, actor string) func(context.Context)
 			return err
 		}
 
-		userspace, err := workspacecore.ResolveProjectUserspace(workspacecore.ResolveProjectUserspaceOptions{ProjectDir: project})
+		userspace, err := workspacecore.ResolveUserspace(workspacecore.ResolveUserspaceOptions{ProjectDir: project})
 		if err != nil {
 			return err
 		}

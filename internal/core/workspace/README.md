@@ -17,6 +17,6 @@ has no dependency on the configuration or workflow coordinator.
 
 Userspace resolution validates the active operator and resolves the project
 through the existing project directory owner. It retains the default userspace
-path and original environment/error contract. EnsureProjectUserspace honors the
+path and original environment/error contract. EnsureUserspace honors the
 caller context before creating that directory. Host trace consumers use this
 owner directly without importing the root configuration package.

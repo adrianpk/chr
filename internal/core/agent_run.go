@@ -53,7 +53,7 @@ func RunAgent(ctx context.Context, runner harness.AgentRunner, request harness.A
 }
 
 func recordAgentRequest(ctx context.Context, request harness.AgentRunRequest, result harness.AgentRunResult) {
-	harnesstrace.RecordLLMTraceEvent(ctx, harnesstrace.LoadLLMTraceConfigOptions{ProjectDir: request.ProjectDir}, map[string]any{
+	harnesstrace.Record(ctx, harnesstrace.LoadOptions{ProjectDir: request.ProjectDir}, map[string]any{
 		"event": "llm_request", "llm_call_id": request.ID, "request_id": request.ID,
 		"action": request.Purpose, "provider": result.Provider, "model": result.Model,
 		"prompt_path": filepath.Join(request.RunDir, "prompt.md"), "output_path": result.OutputPath,
@@ -84,7 +84,7 @@ func recordAgentRunResponseEvent(ctx context.Context, request harness.AgentRunRe
 		event["error"] = runErr.Error()
 	}
 
-	harnesstrace.RecordLLMTraceEvent(ctx, harnesstrace.LoadLLMTraceConfigOptions{ProjectDir: request.ProjectDir}, event)
+	harnesstrace.Record(ctx, harnesstrace.LoadOptions{ProjectDir: request.ProjectDir}, event)
 }
 
 // RecordAgentRunResponseEvent records a deferred agent response trace event.

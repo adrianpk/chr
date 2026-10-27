@@ -442,7 +442,7 @@ func (p openAIDumpCurationProvider) recordRequest(
 	ctx context.Context,
 	trace dumpCurationOpenAITrace,
 ) {
-	harnesstrace.RecordLLMTraceEvent(ctx, harnesstrace.LoadLLMTraceConfigOptions{ProjectDir: p.ProjectDir}, map[string]any{
+	harnesstrace.Record(ctx, harnesstrace.LoadOptions{ProjectDir: p.ProjectDir}, map[string]any{
 		"event":                 "llm_request",
 		"llm_call_id":           trace.CallID,
 		"request_id":            trace.RequestID,
@@ -482,7 +482,7 @@ func (p openAIDumpCurationProvider) recordResponse(
 		event["error"] = responseErr.Error()
 	}
 
-	harnesstrace.RecordLLMTraceEvent(ctx, harnesstrace.LoadLLMTraceConfigOptions{ProjectDir: p.ProjectDir}, event)
+	harnesstrace.Record(ctx, harnesstrace.LoadOptions{ProjectDir: p.ProjectDir}, event)
 }
 
 func dumpCurationInstructions() string {

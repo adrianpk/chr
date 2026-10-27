@@ -299,7 +299,7 @@ func TestQuizModelProviderPayloadKeepsPlanOutlineContextInProviderText(t *testin
 func TestOpenAIQuizModelAdapterRecordsTraceEvents(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv(workspacecore.ActiveOperatorIDEnv, "adrian")
-	t.Setenv(harnesstrace.LLMTraceEnabledEnv, "1")
+	t.Setenv(harnesstrace.EnabledEnv, "1")
 
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		if request.URL.Path != "/responses" {
@@ -341,8 +341,8 @@ func TestOpenAIQuizModelAdapterRecordsTracePayloadsWhenEnabled(t *testing.T) {
 	apiKey := "sk-header-only-test-secret"
 
 	t.Setenv(workspacecore.ActiveOperatorIDEnv, "adrian")
-	t.Setenv(harnesstrace.LLMTraceEnabledEnv, "1")
-	t.Setenv(harnesstrace.LLMTracePayloadsEnv, "1")
+	t.Setenv(harnesstrace.EnabledEnv, "1")
+	t.Setenv(harnesstrace.PayloadsEnv, "1")
 
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		if request.Header.Get("Authorization") != "Bearer "+apiKey {
@@ -398,7 +398,7 @@ func TestOpenAIQuizModelAdapterRecordsTracePayloadsWhenEnabled(t *testing.T) {
 func TestOpenAIQuizModelAdapterRecordsParseFailureTrace(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv(workspacecore.ActiveOperatorIDEnv, "adrian")
-	t.Setenv(harnesstrace.LLMTraceEnabledEnv, "1")
+	t.Setenv(harnesstrace.EnabledEnv, "1")
 
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
 		writer.Header().Set("Content-Type", "application/json")
@@ -437,7 +437,7 @@ func TestOpenAIQuizModelAdapterRecordsParseFailureTrace(t *testing.T) {
 func TestOpenAIQuizModelAdapterRecordsProviderFailureTrace(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv(workspacecore.ActiveOperatorIDEnv, "adrian")
-	t.Setenv(harnesstrace.LLMTraceEnabledEnv, "1")
+	t.Setenv(harnesstrace.EnabledEnv, "1")
 
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
 		http.Error(writer, "provider failed", http.StatusBadGateway)
