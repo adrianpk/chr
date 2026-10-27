@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 )
 
-// WorkflowUpgradePath preserves the existing guarded configuration filesystem contract.
+// ConfigPath preserves the existing guarded configuration filesystem contract.
 // Configuration has its own owner; workflow record safePath never gains access
 // to parent directories. Every upgrade file stays inside .chr/default.
-func WorkflowUpgradePath(project, relative string) (string, error) {
+func ConfigPath(project, relative string) (string, error) {
 	if !filepath.IsLocal(relative) || filepath.Clean(relative) != relative {
 		return "", fmt.Errorf("invalid workflow upgrade path")
 	}
@@ -28,7 +28,7 @@ func WorkflowUpgradePath(project, relative string) (string, error) {
 		}
 
 		if err == nil {
-			if err := checkWorkflowUpgradeFile(info, parent == path); err != nil {
+			if err := checkConfigPathEntry(info, parent == path); err != nil {
 				return "", err
 			}
 		}
@@ -37,7 +37,7 @@ func WorkflowUpgradePath(project, relative string) (string, error) {
 	return path, nil
 }
 
-func checkWorkflowUpgradeFile(info os.FileInfo, leaf bool) error {
+func checkConfigPathEntry(info os.FileInfo, leaf bool) error {
 	if info.Mode()&os.ModeSymlink != 0 {
 		return fmt.Errorf("workflow upgrade path cannot traverse a symlink")
 	}

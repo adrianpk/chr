@@ -50,7 +50,7 @@ func (s *WorkflowStore) UpgradeWorkflowConfiguration(ctx context.Context, opts W
 	defer func() { err = errors.Join(err, releaseWorkflowAdoptionLocks(locks)) }()
 
 	err = s.withLock(ctx, func() (err error) {
-		return workspacecore.WithWorkspaceConfigLock(ctx, s.layout.ProjectDir(), func() error {
+		return workspacecore.WithConfigLock(ctx, s.layout.ProjectDir(), func() error {
 			if err := requireNoHarnessSelectionChange(s.layout.ProjectDir()); err != nil {
 				return err
 			}

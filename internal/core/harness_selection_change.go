@@ -81,7 +81,7 @@ func ChangeHarnessSelections(ctx context.Context, project string, opts HarnessSe
 		return result, err
 	}
 
-	err = workspacecore.WithWorkspaceConfigLock(ctx, project, func() error {
+	err = workspacecore.WithConfigLock(ctx, project, func() error {
 		if err := opts.Authorize(ctx); err != nil {
 			return err
 		}

@@ -197,7 +197,7 @@ func (s *WorkflowStore) StartWorkflowGuarded(ctx context.Context, request Workfl
 	}
 
 	err = s.withLock(ctx, func() error {
-		return workspacecore.WithWorkspaceConfigLock(ctx, s.layout.ProjectDir(), func() error {
+		return workspacecore.WithConfigLock(ctx, s.layout.ProjectDir(), func() error {
 			policy, resolveErr := s.resolveWorkflowExecutionPolicy(ctx, request.RequestKey, requestedPolicy, request.IncludeLaterTickets)
 			if resolveErr != nil {
 				return resolveErr

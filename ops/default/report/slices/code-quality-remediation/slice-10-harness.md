@@ -94,6 +94,11 @@ ProfileRevision, SealGenerationBinding and ValidateGenerationBinding. Native
 configuration-only files now use configuration names. Direct consumers retain
 all field names and JSON tags; the preimage ledger follows each current name.
 
+A separate naming commit exposes workspace.ConfigPath and WithConfigLock for
+those shared filesystem operations. Original error messages, authority decisions
+and configuration interpretation remain at their existing boundaries. Native
+upgrade and host consumers use the shared operations directly.
+
 ## Contracts Added or Changed
 
 Pure binding validation and lexical identity predicates moved without a root
@@ -173,6 +178,10 @@ Shared configuration filesystem checks passed:
 - `go test ./internal/core/workspace ./internal/core ./internal/app ./scripts/goquality -run '^Test(WorkflowUpgrade|WorkspaceConfig|HarnessSelection|HarnessGeneration|HarnessBinding|QualityRecordWire|ServiceHarness|Leaf|Dependency)' -count=1 -timeout=3m`
 - `make check-go-style`: 9303 declarations, ceiling seven, 208 exact debts, one external exception.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workspace ./internal/core ./internal/app ./scripts/goquality`: zero issues.
+
+Configuration API naming check passed:
+
+- `go test ./internal/core/workspace ./internal/core ./internal/app -run '^Test(WorkflowUpgrade|HarnessSelection|HarnessGeneration)' -count=1 -timeout=3m`
 
 ## Risks and Follow-ups
 

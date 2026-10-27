@@ -32,7 +32,7 @@ type harnessSelectionJournal struct {
 }
 
 func readHarnessSelectionConfig(project string) ([]byte, error) {
-	path, err := workspacecore.WorkflowUpgradePath(project, "config.yml")
+	path, err := workspacecore.ConfigPath(project, "config.yml")
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func requireNoHarnessSelectionChange(project string) error {
 }
 
 func readHarnessSelectionFile(project, relative string) ([]byte, error) {
-	path, err := workspacecore.WorkflowUpgradePath(project, relative)
+	path, err := workspacecore.ConfigPath(project, relative)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func writeHarnessSelectionJournal(project string, journal harnessSelectionJourna
 }
 
 func writeHarnessSelectionFile(project, relative string, journal harnessSelectionJournal) error {
-	path, err := workspacecore.WorkflowUpgradePath(project, relative)
+	path, err := workspacecore.ConfigPath(project, relative)
 	if err != nil {
 		return err
 	}
@@ -233,7 +233,7 @@ func publishRetainedHarnessSelectionImage(project string, current []byte, journa
 		return workflowstate.ErrConflict
 	}
 
-	path, err := workspacecore.WorkflowUpgradePath(project, "config.yml")
+	path, err := workspacecore.ConfigPath(project, "config.yml")
 	if err != nil {
 		return err
 	}
@@ -246,7 +246,7 @@ func finishHarnessSelectionReceipt(project string, journal harnessSelectionJourn
 		return err
 	}
 
-	path, err := workspacecore.WorkflowUpgradePath(project, harnessSelectionPending)
+	path, err := workspacecore.ConfigPath(project, harnessSelectionPending)
 	if err != nil {
 		return err
 	}
@@ -283,7 +283,7 @@ func retainHarnessSelectionReceipt(project string, journal harnessSelectionJourn
 }
 
 func checkHarnessSelectionReceiptCapacity(project string) error {
-	path, err := workspacecore.WorkflowUpgradePath(project, filepath.Join("harness-selection-receipts", ".capacity"))
+	path, err := workspacecore.ConfigPath(project, filepath.Join("harness-selection-receipts", ".capacity"))
 	if err != nil {
 		return err
 	}

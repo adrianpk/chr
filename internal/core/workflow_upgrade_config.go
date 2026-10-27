@@ -13,7 +13,7 @@ import (
 const workflowUpgradePending = "tmp/workflow-upgrade.json"
 
 func requireNoWorkflowUpgrade(project string) error {
-	path, err := workspacecore.WorkflowUpgradePath(project, workflowUpgradePending)
+	path, err := workspacecore.ConfigPath(project, workflowUpgradePending)
 	if err != nil {
 		return err
 	}

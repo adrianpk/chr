@@ -17,7 +17,7 @@ import (
 )
 
 func harnessGenerationOperationPath(project, id string) (string, error) {
-	return workspacecore.WorkflowUpgradePath(project, filepath.Join("tmp", "agent-runs", "operations", contenthash.Sum([]byte(id))+".json"))
+	return workspacecore.ConfigPath(project, filepath.Join("tmp", "agent-runs", "operations", contenthash.Sum([]byte(id))+".json"))
 }
 
 func readHarnessGenerationOperation(project, id, purpose string) (HarnessGenerationOperation, error) {

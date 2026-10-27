@@ -343,7 +343,7 @@ func (s *WorkflowStore) writeWorkflowUpgradeSnapshot(journal workflowUpgradeJour
 }
 
 func (s *WorkflowStore) finishWorkflowUpgrade(journal workflowUpgradeJournal, image []byte) error {
-	path, err := workspacecore.WorkflowUpgradePath(s.layout.ProjectDir(), "config.yml")
+	path, err := workspacecore.ConfigPath(s.layout.ProjectDir(), "config.yml")
 	if err != nil {
 		return err
 	}
@@ -369,7 +369,7 @@ func (s *WorkflowStore) finishWorkflowUpgrade(journal workflowUpgradeJournal, im
 }
 
 func (s *WorkflowStore) removeWorkflowUpgradePending() error {
-	pending, err := workspacecore.WorkflowUpgradePath(s.layout.ProjectDir(), workflowUpgradePending)
+	pending, err := workspacecore.ConfigPath(s.layout.ProjectDir(), workflowUpgradePending)
 	if err != nil {
 		return err
 	}
@@ -382,7 +382,7 @@ func (s *WorkflowStore) removeWorkflowUpgradePending() error {
 }
 
 func (s *WorkflowStore) readWorkflowUpgradeFile(relative string) ([]byte, error) {
-	path, err := workspacecore.WorkflowUpgradePath(s.layout.ProjectDir(), relative)
+	path, err := workspacecore.ConfigPath(s.layout.ProjectDir(), relative)
 	if err != nil {
 		return nil, err
 	}
@@ -391,7 +391,7 @@ func (s *WorkflowStore) readWorkflowUpgradeFile(relative string) ([]byte, error)
 }
 
 func (s *WorkflowStore) writeWorkflowUpgradeFile(relative string, value workflowUpgradeJournal) error {
-	path, err := workspacecore.WorkflowUpgradePath(s.layout.ProjectDir(), relative)
+	path, err := workspacecore.ConfigPath(s.layout.ProjectDir(), relative)
 	if err != nil {
 		return err
 	}

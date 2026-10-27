@@ -1,10 +1,16 @@
-# Workspace identity
+# Workspace identity and configuration files
 
-DirectoryName retains the existing .chr directory spelling shared by initialization, retained references and consumers. This value owns no layout selection, configuration, IO or capability policy.
+DirectoryName retains the .chr directory spelling. UserDirectoryName,
+UserRelativePath and UserPath retain the existing default pseudo-user spelling
+and lexical filepath composition, including variadic elements. These values
+select no authority or layout and perform no IO.
 
-UserDirectoryName, UserRelativePath and UserPath own the existing default
-pseudo-user spelling and lexical filepath composition used by authoring,
-initialization and native consumers. They retain the original append, Join,
-FromSlash and ToSlash sequence, including variadic elements. They validate no
-authority and perform no IO; operation owners retain layout selection, path
-permission, locking, transactions and recovery. This package remains stdlib-only.
+ConfigPath owns the existing contained .chr/default configuration path guard.
+It preserves absolute path resolution, lexical bounds, ancestor symlink rejection,
+regular-file checks and original errors. WithConfigLock owns the existing
+config.lock file, cancellation-aware acquisition, private creation, callback,
+unlock and joined cleanup errors. Configuration interpretation, authorization,
+revision checks, upgrades and retained journals stay with their operation owners.
+
+This package uses the existing operational file owner for advisory locking and
+has no dependency on the configuration or workflow coordinator.

@@ -109,7 +109,7 @@ func FreezeHarnessGeneration(ctx context.Context, input HarnessGenerationFreezeI
 
 	input.Project = root
 
-	err = workspacecore.WithWorkspaceConfigLock(ctx, root, func() error {
+	err = workspacecore.WithConfigLock(ctx, root, func() error {
 		var err error
 
 		operation, err = freezeHarnessGenerationLocked(ctx, input, resolve, location)
@@ -136,7 +136,7 @@ func freezeHarnessGenerationLocked(ctx context.Context, input HarnessGenerationF
 		return prepareHarnessGenerationOperation(ctx, input, resolve, location)
 	}
 
-	err = workspacecore.WithWorkspaceConfigLock(ctx, location.ConfigDir, func() error {
+	err = workspacecore.WithConfigLock(ctx, location.ConfigDir, func() error {
 		var prepareErr error
 
 		operation, prepareErr = prepareHarnessGenerationOperation(ctx, input, resolve, location)
