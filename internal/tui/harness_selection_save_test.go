@@ -1,7 +1,5 @@
 package tui
 
-import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
-
 import (
 	"errors"
 	"strings"
@@ -11,6 +9,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // A submitted choice is frozen until acknowledgement. Rejection keeps the

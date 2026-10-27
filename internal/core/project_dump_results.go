@@ -11,6 +11,7 @@ type (
 		Result  ProjectDumpMutationResult
 	}
 )
+
 type projectDumpReceiptLookup struct {
 	Result ProjectDumpMutationResult
 	Found  bool

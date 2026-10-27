@@ -1,7 +1,5 @@
 package tui
 
-import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
-
 import (
 	"errors"
 	"strings"
@@ -10,6 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type guidedTestExecutor func(GuidedRequest) (GuidedView, error)

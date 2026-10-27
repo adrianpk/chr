@@ -107,6 +107,11 @@ while allowing actual shared values, external drivers and application compositio
   Original focused gate/Git/child, registry/selection, SQL and maintenance checks
   passed at their task checkpoints.
 
+Initial controller `make verify` on `7a78164e6632720d4d38b87b15aa28b57475c827`
+stopped at four import/type-layout formatting errors. Those files are corrected;
+pinned core/TUI lint passes. The retained controller diagnostics identify that
+failed candidate, and the following final batch validates its replacement.
+
 Final validation runs through the controller after the PR-reference commit:
 make verify, focused non-short leaf/core/application regressions, focused retained
 notification/authoring concurrency and recovery race checks, then git diff --check.

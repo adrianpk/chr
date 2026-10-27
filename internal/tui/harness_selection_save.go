@@ -1,11 +1,11 @@
 package tui
 
-import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
-
 import (
 	"errors"
 
 	tea "github.com/charmbracelet/bubbletea"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // HarnessSelectionRequest carries exact choices; the application resolves the
