@@ -38,6 +38,15 @@ recovery decisions stay with their operation owners. Workflow/state also owns
 nine pure control/evidence values retained by guided state. Native policy,
 authority, receipt validation and store recovery remain in their existing owners.
 
+Retained admission/selection values belong to workflow/state. Retained harness
+identity belongs to core/harness and uses only the adapter-neutral capability
+value. Ticket filtering and ordering stay native-owned. StartInput retains the
+original serializable start fields; the native request embeds it and supplies
+command, resolver and transient selection separately. Guided state stores only
+StartInput, and app supplies its existing resolver at native admission. Frozen
+guided-session, workflow-start and invocation bytes remain unchanged. The one-way
+state-to-harness dependency has positive and cycle-rejection checks.
+
 D02 shares bounded concrete catalog traversal with typed native readers. D04
 shares live payload/context preparation and D05 shares latest scoped index
 selection. Final model request assembly serves spec, acceptance, observed plan
@@ -50,12 +59,16 @@ artifact rules, action/collision diagnostics, provenance, authority and receipts
 
 Mechanical relocation, package naming/result conversion and the acceptance file
 split are separate commits. The plan service separates API, generation, model
-requests, publication, tracking and views. The move ledger retains 142 declaration
+requests, publication, tracking and views. The move ledger retains 164 declaration
 preimages with current names/files and extraction stages. The 60 tuple
 dispositions, three parameter fixes, 26 cohesion dispositions and six duplicate
-comparisons link exact source commits and validation. Original guided-session/control and workflow-start
-wire images were frozen before the nine-value move. Mechanical relocation and
-package-qualified naming have separate commits, with no root aliases.
+comparisons link exact source commits and validation. Original guided-session,
+control and workflow-start wire images were frozen before the nine-value move.
+Mechanical relocation and
+package-qualified naming have separate commits, with no root aliases. The later
+admission-value move retains 21 declaration/constant-spec preimages; StartInput
+retains its original complete host-request declaration before field extraction.
+All 47 keyed native request constructors use the shared value explicitly.
 
 The initial scan of 101 assigned root authoring files identified 78 external
 shared declarations. This is dependency evidence, not completion of the session
@@ -152,17 +165,25 @@ The completed task checkpoints passed these focused real-boundary commands:
 - `go test ./internal/core ./internal/core/telegram ./internal/app -run '^Test(Authoring|PlanAuthoringArtifact|Telegram(OperationCase|Authoring)|CaseMetadata|ServiceCase)' -count=1 -timeout=3m`
 - `go test ./internal/core ./internal/core/telegram ./internal/app -run '^Test(Authoring|PlanAuthoringArtifact|LoadAssistedAuthoring|RenderAssistedAuthoring|CurateAssisted|AskNextAssisted|AnswerAssisted|TelegramAuthoring|AuthorAssisted|GuidedUseCase(Capture|Quiz|SharedQuiz))' -count=1 -timeout=3m`
 - `go test ./internal/core ./internal/app -run '^Test(LoadGoGraphContext|PlanContextualQuizGeneration|WriteContextualQuiz|PlanQuizToDraft|WriteQuizToDraft|AuthorContextual|AuthorAssistedDump)' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/app -run '^Test(TicketLoop|WorkflowLoose|WorkflowSelection|ServiceWork)' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/core/harness ./internal/core/workflow/state ./internal/app ./internal/tui ./scripts/goquality -run '^Test(QualityRecordWire|LeafDependencies|HarnessBinding|HarnessSelection|GuidedUseCase(Admission|Preparation|Capture)|Workflow(Config|Admission|ControlCAS|Selection|Loose)|TicketLoop|LegacyWorkObservation)' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/core/harness ./internal/core/workflow/state ./internal/app ./internal/tui ./scripts/goquality -run '^Test(QualityRecordWire|LeafDependencies|GuidedUseCase(Admission|Preparation|RecoveryAdmission|ControlAdmission|ControlCAS|Capture)|HarnessBinding|Workflow(Admission|ConfigAdmission|Selection|Start|Request))' -count=1 -timeout=3m`
+- `go test ./scripts/goquality -run '^TestLeafDependencies$' -count=1`
 - `make check-go-style` — passed with 237 exact debts and one external exception.
 - `make check-package-readmes` — passed at the package extraction checkpoints.
 - Pinned v2.14 strict lint passed for changed core/app, acceptance/quiz and checker
   owners at their completed checkpoints; the latest core/application command was
-  `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app`.
+  `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/core/harness ./internal/core/workflow/state ./internal/app ./internal/tui ./scripts/goquality`.
 - `git diff --check` — passed at task commits.
 
 Initial compile/style diagnostics for moved allocator privacy, exact type debt
 qualification, package naming, signature layout, direct-caller adaptation and
 whitespace were corrected
-without suppressions or relaxed checks. Final clean-head controller validation
+without suppressions or relaxed checks. Original harness name prefixes were
+retained in the mechanical move and corrected in the separate naming commit. The
+expanded dependency case table moved into a fixture helper to keep its test
+within the existing function bound, preserving every case and assertion.
+Final clean-head controller validation
 has not run; this slice is not PR-ready.
 
 ## Risks and Follow-ups
