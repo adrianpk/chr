@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 	"time"
 
@@ -677,31 +676,8 @@ func (s service) planViewFromScope(scope quizReadScope, index core.WorkspaceInde
 	return s.planViewFromNode(scope.scope, scope.title, node)
 }
 
-//nolint:wsl_v5 // Tight loop keeps filtering and candidate assignment together.
 func (s service) latestPlanNodeForScope(scope quizcore.Scope, index core.WorkspaceIndex) (core.WorkspaceNode, bool) {
-	nodes := []core.WorkspaceNode{}
-	for _, nodeID := range index.ByKind[core.WorkspaceNodePlan] {
-		node, ok := index.NodesByID[nodeID]
-		if !ok {
-			continue
-		}
-
-		if node.CaseSlug != scope.CaseSlug {
-			continue
-		}
-
-		nodes = append(nodes, node)
-	}
-
-	if len(nodes) == 0 {
-		return core.WorkspaceNode{}, false
-	}
-
-	sort.SliceStable(nodes, func(i, j int) bool {
-		return nodes[i].ModifiedAt.After(nodes[j].ModifiedAt)
-	})
-
-	return nodes[0], true
+	return latestDocumentNodeForScope(scope, index, core.WorkspaceNodePlan)
 }
 
 func (s service) planViewFromNode(scope quizcore.Scope, fallbackTitle string, node core.WorkspaceNode) PlanView {
