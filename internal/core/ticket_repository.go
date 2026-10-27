@@ -1,5 +1,7 @@
 package core
 
+import slugcore "forge.adrianpk.com/chr/internal/core/ops/slug"
+
 import (
 	"context"
 	"fmt"
@@ -9,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode"
 )
 
 // DefaultTicketKeyPrefix defines a package boundary constant.
@@ -220,7 +221,7 @@ func (r *fileTicketRepository) ticketNumber(path string) (int, bool, error) {
 func (r *fileTicketRepository) ticketPath(useCase, key, title string) string {
 	parts := []string{UserPath(r.projectDir, "tickets")}
 
-	slug := slugify(useCase)
+	slug := slugcore.Normalize(useCase)
 	if slug != "" {
 		parts = append(parts, slug)
 	}
@@ -249,36 +250,10 @@ func keyNumberFromText(prefix, text string) (int, bool) {
 func truncatedName(value string) string {
 	const maxLength = 48
 
-	slug := slugify(value)
+	slug := slugcore.Normalize(value)
 	if len(slug) <= maxLength {
 		return slug
 	}
 
 	return strings.Trim(slug[:maxLength], "-")
-}
-
-func slugify(value string) string {
-	value = strings.TrimSpace(value)
-
-	var output strings.Builder
-
-	lastDash := false
-
-	for _, char := range value {
-		if unicode.IsLetter(char) || unicode.IsDigit(char) {
-			output.WriteRune(char)
-
-			lastDash = false
-
-			continue
-		}
-
-		if !lastDash && output.Len() > 0 {
-			output.WriteByte('-')
-
-			lastDash = true
-		}
-	}
-
-	return strings.Trim(output.String(), "-")
 }

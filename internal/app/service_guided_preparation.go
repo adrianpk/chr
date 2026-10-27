@@ -1,5 +1,7 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"context"
 	"encoding/json"
@@ -100,7 +102,7 @@ func (s service) reserveGuidedPlan(ctx context.Context, session *core.AuthoringS
 }
 
 func (s service) generateGuidedPlan(ctx context.Context, session core.AuthoringSession) (core.GuidedPreparedPlan, error) {
-	bound, ctx, err := s.bindGeneration(ctx, session.Guided.Work.PublicationOperation.ID, string(core.QuizModelActionGeneratePlan))
+	bound, ctx, err := s.bindGeneration(ctx, session.Guided.Work.PublicationOperation.ID, string(quizmodel.QuizModelActionGeneratePlan))
 	if err != nil {
 		return core.GuidedPreparedPlan{}, err
 	}

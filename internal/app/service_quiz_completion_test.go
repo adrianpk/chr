@@ -1,12 +1,13 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"encoding/json"
 	"fmt"
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -35,7 +36,7 @@ func TestServiceQuizFullHistory(t *testing.T) {
 			continue
 		}
 
-		var history []core.QuizModelEntryPayload
+		var history []quizmodel.QuizModelEntryPayload
 		if err := json.Unmarshal([]byte(section.Content), &history); err != nil {
 			t.Fatal(err)
 		}
@@ -70,7 +71,7 @@ func checkQuizNaturalStop(t *testing.T, name string) {
 		second.Question.Prompt = "  " + strings.ToUpper(first.Question.Prompt) + "  "
 	}
 
-	model.responses = []core.QuizModelResponse{first, second}
+	model.responses = []quizmodel.QuizModelResponse{first, second}
 
 	started, err := operations.StartQuiz(QuizStartRequest{Mode: quizcore.ModeDeep})
 	if err != nil {
@@ -108,7 +109,7 @@ func checkQuizDuplicateRecovery(t *testing.T, operations service, model *fakeSer
 		t.Fatal("resume would replay the rejected provider output")
 	}
 
-	model.responses = []core.QuizModelResponse{serviceQuizModelResponse("third", "third", serviceQuizClock()())}
+	model.responses = []quizmodel.QuizModelResponse{serviceQuizModelResponse("third", "third", serviceQuizClock()())}
 
 	resumed, err := operations.ResumeQuiz(QuizResumeRequest{})
 	if err != nil || resumed.State.ActiveQuestion == nil || resumed.State.AnswersRecorded != 1 || resumed.State.ContinuationPending {

@@ -1,5 +1,7 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"errors"
 	"os"
@@ -146,7 +148,7 @@ func TestGuidedUseCaseSpecInvalid(t *testing.T) {
 	operations, session, model := guidedSpecFixture(t)
 	response := serviceQuizDraftSpecResponse("invalid", operations.utcNow())
 	response.DraftSpec.Body = ""
-	model.responses = []core.QuizModelResponse{response}
+	model.responses = []quizmodel.QuizModelResponse{response}
 
 	blocked, err := operations.GenerateGuidedSpec(t.Context(), guidedQuizCommand(session, "generate-spec", "spec", ""))
 	if err == nil || blocked.Guided.SpecApproval != nil || len(blocked.Guided.Checkpoints) != 2 {

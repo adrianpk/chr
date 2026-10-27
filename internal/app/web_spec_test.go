@@ -1,5 +1,7 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"net/http"
 	"net/http/httptest"
@@ -32,7 +34,7 @@ func TestWebSpecAuthoring(t *testing.T) {
 	checkSpecDocumentCount(t, documents, err, 2)
 	checkWebSpecCreatedStates(t, documents)
 
-	model.responses = []core.QuizModelResponse{serviceQuizDraftSpecResponse("generated", serviceQuizClock()())}
+	model.responses = []quizmodel.QuizModelResponse{serviceQuizDraftSpecResponse("generated", serviceQuizClock()())}
 
 	generated, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{Scope: quizcore.Scope{CaseSlug: "named-work"}})
 	if err != nil {

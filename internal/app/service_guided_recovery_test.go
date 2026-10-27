@@ -1,5 +1,7 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"context"
 	"errors"
@@ -12,9 +14,9 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-type guidedRecoveryModel func(context.Context, core.QuizModelRequest) (core.QuizModelResponse, error)
+type guidedRecoveryModel func(context.Context, quizmodel.QuizModelRequest) (quizmodel.QuizModelResponse, error)
 
-func (model guidedRecoveryModel) InvokeQuizModel(ctx context.Context, request core.QuizModelRequest) (core.QuizModelResponse, error) {
+func (model guidedRecoveryModel) InvokeQuizModel(ctx context.Context, request quizmodel.QuizModelRequest) (quizmodel.QuizModelResponse, error) {
 	return model(ctx, request)
 }
 
@@ -118,9 +120,9 @@ func TestGuidedUseCaseRecoveryBlocked(t *testing.T) {
 
 	var calls atomic.Int32
 
-	operations.quizModel = guidedRecoveryModel(func(ctx context.Context, request core.QuizModelRequest) (core.QuizModelResponse, error) {
+	operations.quizModel = guidedRecoveryModel(func(ctx context.Context, request quizmodel.QuizModelRequest) (quizmodel.QuizModelResponse, error) {
 		if calls.Add(1) == 1 {
-			return core.QuizModelResponse{}, errors.New("provider unavailable")
+			return quizmodel.QuizModelResponse{}, errors.New("provider unavailable")
 		}
 
 		return model.InvokeQuizModel(ctx, request)
@@ -225,14 +227,14 @@ func guidedBlockedRecoveryModel(t *testing.T, operations *service, model *fakeSe
 
 	unblock := func() { once.Do(func() { close(release) }) }
 
-	operations.quizModel = guidedRecoveryModel(func(ctx context.Context, request core.QuizModelRequest) (core.QuizModelResponse, error) {
+	operations.quizModel = guidedRecoveryModel(func(ctx context.Context, request quizmodel.QuizModelRequest) (quizmodel.QuizModelResponse, error) {
 		entered <- ctx
 
 		select {
 		case <-release:
 			return model.InvokeQuizModel(ctx, request)
 		case <-ctx.Done():
-			return core.QuizModelResponse{}, ctx.Err()
+			return quizmodel.QuizModelResponse{}, ctx.Err()
 		}
 	})
 

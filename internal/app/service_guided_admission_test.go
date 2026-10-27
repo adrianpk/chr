@@ -1,5 +1,7 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"context"
 	"errors"
@@ -12,7 +14,7 @@ import (
 
 type guidedAdmissionModel struct{ planDeliveryTestModel }
 
-func (model *guidedAdmissionModel) InvokeQuizModel(ctx context.Context, request core.QuizModelRequest) (core.QuizModelResponse, error) {
+func (model *guidedAdmissionModel) InvokeQuizModel(ctx context.Context, request quizmodel.QuizModelRequest) (quizmodel.QuizModelResponse, error) {
 	response, err := model.planDeliveryTestModel.InvokeQuizModel(ctx, request)
 	if err != nil || response.PlanTracking.Workflow == nil {
 		return response, err

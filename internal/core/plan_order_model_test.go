@@ -1,5 +1,7 @@
 package core
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"encoding/json"
 	"testing"
@@ -23,7 +25,7 @@ func TestPlanOrderModelPayload(t *testing.T) {
 		t.Run(item.name, func(t *testing.T) {
 			content := []byte(`{"title":"A plan","body":"Bounded work","status":"planned","order":` + item.order + `}`)
 
-			payload, err := DecodeQuizModelPlanPayload(content)
+			payload, err := quizmodel.DecodeQuizModelPlanPayload(content)
 			if (err == nil) != item.valid {
 				t.Fatal(payload, err)
 			}
@@ -32,9 +34,9 @@ func TestPlanOrderModelPayload(t *testing.T) {
 				return
 			}
 
-			request := QuizModelRequest{Scope: quizcore.Scope{ProjectID: "example"}}
+			request := quizmodel.QuizModelRequest{Action: quizmodel.QuizModelActionGeneratePlan, Scope: quizcore.Scope{ProjectID: "example"}}
 
-			response, err := quizModelPlanResponseFromOutput(request, content)
+			response, err := quizmodel.ResponseFromOutput(request, content)
 			if err != nil || len(response.Plan.Order) != 1 || response.Plan.Order[0].Tasks[0].ID != "task-t1.1" {
 				t.Fatal(response, err)
 			}
@@ -45,12 +47,12 @@ func TestPlanOrderModelPayload(t *testing.T) {
 // Captured body-only v1 output remains readable, while new provider schemas
 // and output contracts require structured order for generation.
 func TestPlanOrderModelCompatibility(t *testing.T) {
-	payload, err := DecodeQuizModelPlanPayload([]byte(`{"title":"Legacy","body":"Retained historical body","status":"planned"}`))
+	payload, err := quizmodel.DecodeQuizModelPlanPayload([]byte(`{"title":"Legacy","body":"Retained historical body","status":"planned"}`))
 	if err != nil || payload.Order != nil {
 		t.Fatal(payload, err)
 	}
 
-	encoded, err := json.Marshal(quizModelPlanJSONSchema())
+	encoded, err := json.Marshal(quizmodel.OutputFormat(quizmodel.QuizModelRequest{Action: quizmodel.QuizModelActionGeneratePlan}).Schema)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,7 +68,7 @@ func TestPlanOrderModelCompatibility(t *testing.T) {
 		t.Fatal("provider schema omitted map", schema)
 	}
 
-	contract := NewQuizModelOutputContract(QuizModelActionGeneratePlan, quizcore.ModeDeep)
+	contract := quizmodel.NewQuizModelOutputContract(quizmodel.QuizModelActionGeneratePlan, quizcore.ModeDeep)
 	if len(contract.RequiredFields) != 4 || contract.RequiredFields[3] != "order" {
 		t.Fatal("shared generation contract omitted map", contract)
 	}

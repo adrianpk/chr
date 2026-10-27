@@ -1,5 +1,7 @@
 package core
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"bytes"
 	"context"
@@ -19,7 +21,7 @@ func (p *ConfiguredStructuredModel) invokeOpenAI(ctx context.Context, request St
 	body, err := json.Marshal(openAIResponsesRequest{
 		Model: p.API.openAIModel(), Instructions: request.Instructions,
 		Input: string(request.Input), Store: false,
-		Text: openAIResponsesText{Format: quizModelJSONSchemaTextFormat(request.Purpose, "Typed application response", request.Schema)},
+		Text: openAIResponsesText{Format: quizmodel.NewOutputFormat(request.Purpose, "Typed application response", request.Schema)},
 	})
 	if err != nil {
 		return nil, err

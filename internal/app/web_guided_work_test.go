@@ -1,5 +1,7 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"context"
 	"net/http"
@@ -15,8 +17,8 @@ type guidedWebWorkModel struct {
 	plan guidedAdmissionModel
 }
 
-func (model *guidedWebWorkModel) InvokeQuizModel(ctx context.Context, request core.QuizModelRequest) (core.QuizModelResponse, error) {
-	if request.Action == core.QuizModelActionGeneratePlan || request.Strategy == core.QuizModelStrategyPlanDelivery {
+func (model *guidedWebWorkModel) InvokeQuizModel(ctx context.Context, request quizmodel.QuizModelRequest) (quizmodel.QuizModelResponse, error) {
+	if request.Action == quizmodel.QuizModelActionGeneratePlan || request.Strategy == quizmodel.QuizModelStrategyPlanDelivery {
 		return model.plan.InvokeQuizModel(ctx, request)
 	}
 
@@ -30,7 +32,7 @@ func guidedWebWorkFixture(t *testing.T) (webViewProvider, *guidedWorkHost, *guid
 	now := operations.utcNow()
 	completion := serviceQuizModelResponse("complete", "complete", now)
 	completion.Question.Required = false
-	model := &guidedWebWorkModel{quiz: fakeServiceQuizModel{responses: []core.QuizModelResponse{serviceQuizModelResponse("first", "question-1", now), completion}}}
+	model := &guidedWebWorkModel{quiz: fakeServiceQuizModel{responses: []quizmodel.QuizModelResponse{serviceQuizModelResponse("first", "question-1", now), completion}}}
 	operations.quizModel = model
 	host := newGuidedWorkHost(t.Context())
 	t.Cleanup(host.close)

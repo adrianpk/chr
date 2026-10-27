@@ -1,5 +1,7 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"context"
 	"encoding/json"
@@ -41,7 +43,7 @@ func guidedTelegramFixture(t *testing.T) (*telegramConversationAppFixture, servi
 	initializeGuidedWebGit(t, root)
 
 	now := operations.utcNow()
-	operations.quizModel = &fakeServiceQuizModel{responses: []core.QuizModelResponse{serviceQuizModelResponse("question", "question-1", now)}}
+	operations.quizModel = &fakeServiceQuizModel{responses: []quizmodel.QuizModelResponse{serviceQuizModelResponse("question", "question-1", now)}}
 	f.receiver.operations = operations
 
 	return f, operations
@@ -198,7 +200,7 @@ func guidedTelegramModel(t *testing.T, operations *service) *fakeServiceQuizMode
 	now := operations.utcNow()
 	completion := serviceQuizModelResponse("completion", "complete", now)
 	completion.Question.Required = false
-	model := &fakeServiceQuizModel{responses: []core.QuizModelResponse{serviceQuizModelResponse("question", "question-1", now), completion, serviceQuizDraftSpecResponse("specification", now)}}
+	model := &fakeServiceQuizModel{responses: []quizmodel.QuizModelResponse{serviceQuizModelResponse("question", "question-1", now), completion, serviceQuizDraftSpecResponse("specification", now)}}
 	operations.quizModel = model
 
 	return model

@@ -1,5 +1,7 @@
 package core
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"context"
 	"strings"
@@ -15,7 +17,7 @@ type fakeAgentRunner struct {
 }
 
 type fakeRoutingQuizModelAdapter struct {
-	Request QuizModelRequest
+	Request quizmodel.QuizModelRequest
 	Called  bool
 }
 
@@ -28,15 +30,15 @@ func (r *fakeAgentRunner) RunAgent(_ context.Context, request harness.AgentRunRe
 	return result, r.Err
 }
 
-func (a *fakeRoutingQuizModelAdapter) InvokeQuizModel(_ context.Context, request QuizModelRequest) (QuizModelResponse, error) {
+func (a *fakeRoutingQuizModelAdapter) InvokeQuizModel(_ context.Context, request quizmodel.QuizModelRequest) (quizmodel.QuizModelResponse, error) {
 	a.Request = request
 	a.Called = true
 
-	return QuizModelResponse{
+	return quizmodel.QuizModelResponse{
 		ID:        "response",
 		RequestID: request.ID,
 		Provider:  "fake",
-		Status:    QuizModelResponseReady,
+		Status:    quizmodel.QuizModelResponseReady,
 		Question:  validQuizQuestion(),
 		CreatedAt: request.CreatedAt,
 	}, nil
@@ -49,7 +51,7 @@ func TestHarnessQuizModelAdapterGeneratesSpecThroughAgentRunner(t *testing.T) {
 			Output: []byte(`{"title":"Blog Spec","body":"Spec body.","status":"draft"}`),
 		},
 	}
-	request := validCodexQuizModelRequest(QuizModelActionGenerateSpec)
+	request := validCodexQuizModelRequest(quizmodel.QuizModelActionGenerateSpec)
 
 	response, err := (HarnessQuizModelAdapter{
 		ProjectDir: t.TempDir(),
@@ -89,7 +91,7 @@ func TestHarnessQuizModelAdapterGeneratesPlanThroughAgentRunner(t *testing.T) {
 			Output: []byte(`{"title":"Blog Plan","body":"Plan body.","status":"planned"}`),
 		},
 	}
-	request := validCodexQuizModelRequest(QuizModelActionGeneratePlan)
+	request := validCodexQuizModelRequest(quizmodel.QuizModelActionGeneratePlan)
 
 	response, err := (HarnessQuizModelAdapter{
 		ProjectDir: t.TempDir(),
@@ -137,7 +139,7 @@ func TestHarnessQuizModelAdapterGeneratesPlanTrackingThroughAgentRunner(t *testi
 			}`),
 		},
 	}
-	request := validCodexQuizModelRequest(QuizModelActionMaterializePlanTracking)
+	request := validCodexQuizModelRequest(quizmodel.QuizModelActionMaterializePlanTracking)
 
 	response, err := (HarnessQuizModelAdapter{
 		ProjectDir: t.TempDir(),
@@ -164,7 +166,7 @@ func TestHarnessQuizModelAdapterGeneratesPlanTrackingThroughAgentRunner(t *testi
 }
 
 func TestCodexWorkspaceDiscoveryOmitsQuestionActions(t *testing.T) {
-	if got := workspaceDiscoveryInstructions(QuizModelActionNextQuestion); got != "" {
+	if got := workspaceDiscoveryInstructions(quizmodel.QuizModelActionNextQuestion); got != "" {
 		t.Fatalf("discovery instructions = %q, want empty", got)
 	}
 }
@@ -173,13 +175,13 @@ func TestActionRoutingQuizModelAdapterRoutesConfiguredActions(t *testing.T) {
 	specAdapter := &fakeRoutingQuizModelAdapter{}
 	defaultAdapter := &fakeRoutingQuizModelAdapter{}
 	adapter := ActionRoutingQuizModelAdapter{
-		ActionAdapters: map[QuizModelAction]QuizModelAdapter{
-			QuizModelActionGenerateSpec: specAdapter,
+		ActionAdapters: map[quizmodel.QuizModelAction]quizmodel.QuizModelAdapter{
+			quizmodel.QuizModelActionGenerateSpec: specAdapter,
 		},
 		DefaultAdapter: defaultAdapter,
 	}
 
-	_, err := adapter.InvokeQuizModel(context.Background(), validCodexQuizModelRequest(QuizModelActionGenerateSpec))
+	_, err := adapter.InvokeQuizModel(context.Background(), validCodexQuizModelRequest(quizmodel.QuizModelActionGenerateSpec))
 	if err != nil {
 		t.Fatalf("InvokeQuizModel returned error: %v", err)
 	}
@@ -188,7 +190,7 @@ func TestActionRoutingQuizModelAdapterRoutesConfiguredActions(t *testing.T) {
 		t.Fatal("spec adapter was not called")
 	}
 
-	_, err = adapter.InvokeQuizModel(context.Background(), validCodexQuizModelRequest(QuizModelActionNextQuestion))
+	_, err = adapter.InvokeQuizModel(context.Background(), validCodexQuizModelRequest(quizmodel.QuizModelActionNextQuestion))
 	if err != nil {
 		t.Fatalf("InvokeQuizModel fallback returned error: %v", err)
 	}
@@ -198,19 +200,19 @@ func TestActionRoutingQuizModelAdapterRoutesConfiguredActions(t *testing.T) {
 	}
 }
 
-func validCodexQuizModelRequest(action QuizModelAction) QuizModelRequest {
+func validCodexQuizModelRequest(action quizmodel.QuizModelAction) quizmodel.QuizModelRequest {
 	request := validQuizModelRequest()
 	request.Action = action
 	request.Strategy = string(action)
 	request.ID = string(action) + "-blog"
 
-	request.Payload.OutputContract = NewQuizModelOutputContract(action, request.Mode)
-	request.OutputContract = QuizModelOutputContract{
+	request.Payload.OutputContract = quizmodel.NewQuizModelOutputContract(action, request.Mode)
+	request.OutputContract = quizmodel.QuizModelOutputContract{
 		RequiredFields: request.Payload.OutputContract.RequiredFields,
 	}
 
-	if action == QuizModelActionGeneratePlan {
-		request.OutputContract = QuizModelOutputContract{RequiredFields: []string{"title", "body", "status"}}
+	if action == quizmodel.QuizModelActionGeneratePlan {
+		request.OutputContract = quizmodel.QuizModelOutputContract{RequiredFields: []string{"title", "body", "status"}}
 	}
 
 	return request

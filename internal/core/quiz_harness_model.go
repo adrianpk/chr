@@ -1,5 +1,7 @@
 package core
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"context"
 	"encoding/json"
@@ -21,42 +23,42 @@ type HarnessQuizModelAdapter struct {
 
 // ActionRoutingQuizModelAdapter describes a package boundary value.
 type ActionRoutingQuizModelAdapter struct {
-	ActionAdapters map[QuizModelAction]QuizModelAdapter
-	DefaultAdapter QuizModelAdapter
+	ActionAdapters map[quizmodel.QuizModelAction]quizmodel.QuizModelAdapter
+	DefaultAdapter quizmodel.QuizModelAdapter
 }
 
 // InvokeQuizModel invokes the configured model adapter.
-func (a ActionRoutingQuizModelAdapter) InvokeQuizModel(ctx context.Context, request QuizModelRequest) (QuizModelResponse, error) {
+func (a ActionRoutingQuizModelAdapter) InvokeQuizModel(ctx context.Context, request quizmodel.QuizModelRequest) (quizmodel.QuizModelResponse, error) {
 	if adapter, ok := a.ActionAdapters[request.Action]; ok {
 		if adapter == nil {
-			return QuizModelResponse{}, fmt.Errorf("%s quiz model adapter is required", request.Action)
+			return quizmodel.QuizModelResponse{}, fmt.Errorf("%s quiz model adapter is required", request.Action)
 		}
 
 		return adapter.InvokeQuizModel(ctx, request)
 	}
 
 	if a.DefaultAdapter == nil {
-		return QuizModelResponse{}, fmt.Errorf("default quiz model adapter is required")
+		return quizmodel.QuizModelResponse{}, fmt.Errorf("default quiz model adapter is required")
 	}
 
 	return a.DefaultAdapter.InvokeQuizModel(ctx, request)
 }
 
 // InvokeQuizModel invokes the configured model adapter.
-func (a HarnessQuizModelAdapter) InvokeQuizModel(ctx context.Context, request QuizModelRequest) (QuizModelResponse, error) {
+func (a HarnessQuizModelAdapter) InvokeQuizModel(ctx context.Context, request quizmodel.QuizModelRequest) (quizmodel.QuizModelResponse, error) {
 	request.ID = HarnessGenerationRequestID(ctx, request.ID)
-	if err := ValidateQuizModelRequest(request); err != nil {
-		return QuizModelResponse{}, err
+	if err := quizmodel.ValidateQuizModelRequest(request); err != nil {
+		return quizmodel.QuizModelResponse{}, err
 	}
 
 	schema, err := harnessQuizModelOutputSchema(request)
 	if err != nil {
-		return QuizModelResponse{}, err
+		return quizmodel.QuizModelResponse{}, err
 	}
 
 	prompt, err := harnessQuizModelPrompt(request)
 	if err != nil {
-		return QuizModelResponse{}, err
+		return quizmodel.QuizModelResponse{}, err
 	}
 
 	run, err := RunAgent(ctx, a.Runner, harness.AgentRunRequest{
@@ -73,18 +75,18 @@ func (a HarnessQuizModelAdapter) InvokeQuizModel(ctx context.Context, request Qu
 		DeferResponseTrace: true,
 	})
 	if err != nil {
-		return QuizModelResponse{}, err
+		return quizmodel.QuizModelResponse{}, err
 	}
 
-	response, err := quizModelResponseFromOutput(request, run.Output)
+	response, err := quizmodel.ResponseFromOutput(request, run.Output)
 	response.Provider = run.Provider
-	err = validateParsedQuizModelResponse(response, err)
+	err = quizmodel.ValidateParsedResponse(response, err)
 
 	err = ValidateHarnessGenerationOutput(ctx, a.agentRunRequest(request), err)
 	if err != nil {
 		recordAgentRunResponseEvent(ctx, a.agentRunRequest(request), run, "parse_error", err)
 
-		return QuizModelResponse{}, err
+		return quizmodel.QuizModelResponse{}, err
 	}
 
 	recordAgentRunResponseEvent(ctx, a.agentRunRequest(request), run, "ready", nil)
@@ -92,7 +94,7 @@ func (a HarnessQuizModelAdapter) InvokeQuizModel(ctx context.Context, request Qu
 	return response, nil
 }
 
-func (a HarnessQuizModelAdapter) agentRunRequest(request QuizModelRequest) harness.AgentRunRequest {
+func (a HarnessQuizModelAdapter) agentRunRequest(request quizmodel.QuizModelRequest) harness.AgentRunRequest {
 	return harness.AgentRunRequest{
 		ID:         request.ID,
 		Purpose:    string(request.Action),
@@ -100,8 +102,8 @@ func (a HarnessQuizModelAdapter) agentRunRequest(request QuizModelRequest) harne
 	}
 }
 
-func harnessQuizModelOutputSchema(request QuizModelRequest) ([]byte, error) {
-	schema := quizModelOpenAIFormat(request).Schema
+func harnessQuizModelOutputSchema(request quizmodel.QuizModelRequest) ([]byte, error) {
+	schema := quizmodel.OutputFormat(request).Schema
 
 	content, err := json.MarshalIndent(schema, "", "  ")
 	if err != nil {
@@ -111,8 +113,8 @@ func harnessQuizModelOutputSchema(request QuizModelRequest) ([]byte, error) {
 	return content, nil
 }
 
-func harnessQuizModelPrompt(request QuizModelRequest) (string, error) {
-	payload, err := json.MarshalIndent(quizModelProviderPayload(request), "", "  ")
+func harnessQuizModelPrompt(request quizmodel.QuizModelRequest) (string, error) {
+	payload, err := json.MarshalIndent(quizmodel.ProviderPayload(request), "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("marshal harness quiz payload: %w", err)
 	}
@@ -125,7 +127,7 @@ func harnessQuizModelPrompt(request QuizModelRequest) (string, error) {
 	prompt.WriteString("You may inspect workspace files with read-only operations when the instructions require additional project context.\n")
 	prompt.WriteString("Do not edit files, create commits, open pull requests, or ask follow-up questions.\n\n")
 	prompt.WriteString("Instructions:\n")
-	prompt.WriteString(quizModelInstructions(request))
+	prompt.WriteString(quizmodel.Instructions(request))
 
 	if discovery := workspaceDiscoveryInstructions(request.Action); discovery != "" {
 		prompt.WriteString("\n\nWorkspace discovery:\n")
@@ -139,17 +141,17 @@ func harnessQuizModelPrompt(request QuizModelRequest) (string, error) {
 	return prompt.String(), nil
 }
 
-func workspaceDiscoveryInstructions(action QuizModelAction) string {
+func workspaceDiscoveryInstructions(action quizmodel.QuizModelAction) string {
 	switch action {
-	case QuizModelActionGenerateSpec:
+	case quizmodel.QuizModelActionGenerateSpec:
 		return decisionDocumentDiscoveryInstructions("the generated spec")
-	case QuizModelActionGenerateAcceptanceFeature:
+	case quizmodel.QuizModelActionGenerateAcceptanceFeature:
 		return decisionDocumentDiscoveryInstructions("the generated acceptance feature")
-	case QuizModelActionGeneratePlan,
-		QuizModelActionGeneratePlanOutline,
-		QuizModelActionGeneratePlanSliceDetail:
+	case quizmodel.QuizModelActionGeneratePlan,
+		quizmodel.QuizModelActionGeneratePlanOutline,
+		quizmodel.QuizModelActionGeneratePlanSliceDetail:
 		return decisionDocumentDiscoveryInstructions("the generated plan")
-	case QuizModelActionMaterializePlanTracking:
+	case quizmodel.QuizModelActionMaterializePlanTracking:
 		return decisionDocumentDiscoveryInstructions("the generated tracking and tickets")
 	default:
 		return ""

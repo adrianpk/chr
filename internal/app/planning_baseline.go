@@ -1,6 +1,8 @@
 //nolint:wsl_v5 // Baseline extraction keeps small parsing steps intentionally adjacent.
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"encoding/json"
 	"fmt"
@@ -9,7 +11,6 @@ import (
 	"sort"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -44,7 +45,7 @@ type projectWidePlanningReadiness struct {
 	RequireProvisionalLabel bool     `json:"require_provisional_label"`
 }
 
-func (s service) projectWidePlanningSections() ([]core.QuizModelContextSection, error) {
+func (s service) projectWidePlanningSections() ([]quizmodel.QuizModelContextSection, error) {
 	baseline, err := s.projectWidePlanningBaseline()
 	if err != nil {
 		return nil, err
@@ -67,7 +68,7 @@ func (s service) projectWidePlanningSections() ([]core.QuizModelContextSection, 
 		return nil, fmt.Errorf("marshal project-wide planning slots: %w", err)
 	}
 
-	return []core.QuizModelContextSection{
+	return []quizmodel.QuizModelContextSection{
 		{
 			Name:      "project_wide_planning_baseline",
 			Layer:     "project",

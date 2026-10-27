@@ -1,5 +1,7 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"context"
 	"encoding/json"
@@ -151,7 +153,7 @@ func (s service) existingGeneratedPlan(scope quizcore.Scope) (PlanView, bool, er
 }
 
 func (s service) prepareAndPublishPlan(ctx context.Context, operation generationcore.PlanPublicationOperation) (PlanOperationResult, error) {
-	bound, ctx, err := s.bindGeneration(ctx, "plan-"+dumpRequestID(operation.ID), string(core.QuizModelActionGeneratePlan))
+	bound, ctx, err := s.bindGeneration(ctx, "plan-"+dumpRequestID(operation.ID), string(quizmodel.QuizModelActionGeneratePlan))
 	if err != nil {
 		return PlanOperationResult{}, err
 	}
@@ -288,7 +290,7 @@ func (s service) generateSinglePassPlan(ctx context.Context, scope quizcore.Scop
 		"context_sections": fmt.Sprintf("%d", len(modelRequest.ContextSections)),
 	})
 
-	response, err := core.InvokeQuizModel(ctx, s.quizModel, modelRequest)
+	response, err := quizmodel.InvokeQuizModel(ctx, s.quizModel, modelRequest)
 	if err != nil {
 		return generationcore.GeneratedPlan{}, nil, nil, err
 	}
@@ -355,7 +357,7 @@ func (s service) generatePlanOutline(ctx context.Context, scope quizcore.Scope, 
 		"context_sections": fmt.Sprintf("%d", len(modelRequest.ContextSections)),
 	})
 
-	response, err := core.InvokeQuizModel(ctx, s.quizModel, modelRequest)
+	response, err := quizmodel.InvokeQuizModel(ctx, s.quizModel, modelRequest)
 	if err != nil {
 		return generationcore.GeneratedPlanOutline{}, nil, nil, nil, err
 	}
@@ -391,7 +393,7 @@ func (s service) generatePlanSliceDetail(ctx context.Context, state quizcore.Run
 		"slice_id":   targetSliceID,
 	})
 
-	response, err := core.InvokeQuizModel(ctx, s.quizModel, modelRequest)
+	response, err := quizmodel.InvokeQuizModel(ctx, s.quizModel, modelRequest)
 	if err != nil {
 		return generationcore.GeneratedPlanSliceDetail{}, "", "", err
 	}
@@ -506,7 +508,7 @@ func (s service) materializePlanTracking(
 		return PlanTrackingResult{}, err
 	}
 
-	response, err := core.InvokeQuizModel(ctx, s.quizModel, modelRequest)
+	response, err := quizmodel.InvokeQuizModel(ctx, s.quizModel, modelRequest)
 	if err != nil {
 		return PlanTrackingResult{}, err
 	}
@@ -758,35 +760,35 @@ func (v PlanView) withMetadata(useCaseTitle, title, status string, updatedAt tim
 	return v
 }
 
-func (s service) newPlanOutlineGenerationModelRequest(state quizcore.RuntimeState, sources core.PlanSourceObservation) (core.QuizModelRequest, error) {
+func (s service) newPlanOutlineGenerationModelRequest(state quizcore.RuntimeState, sources core.PlanSourceObservation) (quizmodel.QuizModelRequest, error) {
 	return s.newPlanningModelRequest(
 		state, sources,
-		core.QuizModelActionGeneratePlanOutline,
+		quizmodel.QuizModelActionGeneratePlanOutline,
 		"plan_outline_generation",
 		"plan-outline-generation",
 	)
 }
 
-func (s service) newPlanGenerationModelRequest(state quizcore.RuntimeState, sources core.PlanSourceObservation) (core.QuizModelRequest, error) {
+func (s service) newPlanGenerationModelRequest(state quizcore.RuntimeState, sources core.PlanSourceObservation) (quizmodel.QuizModelRequest, error) {
 	return s.newPlanningModelRequest(
 		state, sources,
-		core.QuizModelActionGeneratePlan,
+		quizmodel.QuizModelActionGeneratePlan,
 		"plan_generation",
 		"plan-generation",
 	)
 }
 
-func (s service) newPlanSliceDetailGenerationModelRequest(state quizcore.RuntimeState, sources core.PlanSourceObservation, outline generationcore.GeneratedPlanOutline, targetSliceID string) (core.QuizModelRequest, error) {
+func (s service) newPlanSliceDetailGenerationModelRequest(state quizcore.RuntimeState, sources core.PlanSourceObservation, outline generationcore.GeneratedPlanOutline, targetSliceID string) (quizmodel.QuizModelRequest, error) {
 	if err := generationcore.ValidateGeneratedPlanOutline(outline); err != nil {
-		return core.QuizModelRequest{}, err
+		return quizmodel.QuizModelRequest{}, err
 	}
 
 	target, ok := outline.Slice(targetSliceID)
 	if !ok {
-		return core.QuizModelRequest{}, fmt.Errorf("plan outline slice is unknown: %s", targetSliceID)
+		return quizmodel.QuizModelRequest{}, fmt.Errorf("plan outline slice is unknown: %s", targetSliceID)
 	}
 
-	request, err := s.newPlanningModelRequest(state, sources, core.QuizModelActionGeneratePlanSliceDetail, "plan_slice_detail_generation", "plan-slice-detail-generation")
+	request, err := s.newPlanningModelRequest(state, sources, quizmodel.QuizModelActionGeneratePlanSliceDetail, "plan_slice_detail_generation", "plan-slice-detail-generation")
 	if err != nil {
 		return request, err
 	}
@@ -797,34 +799,34 @@ func (s service) newPlanSliceDetailGenerationModelRequest(state quizcore.Runtime
 	return request, err
 }
 
-func (s service) newPlanningModelRequest(state quizcore.RuntimeState, sources core.PlanSourceObservation, action core.QuizModelAction, strategy, idPrefix string) (core.QuizModelRequest, error) {
+func (s service) newPlanningModelRequest(state quizcore.RuntimeState, sources core.PlanSourceObservation, action quizmodel.QuizModelAction, strategy, idPrefix string) (quizmodel.QuizModelRequest, error) {
 	scope := sources.Scope
-	payload := core.QuizModelPayload{
-		Project: core.QuizModelProjectPayload{ID: scope.ProjectID, Name: sources.Project.Name, Description: sources.Project.Description},
+	payload := quizmodel.QuizModelPayload{
+		Project: quizmodel.QuizModelProjectPayload{ID: scope.ProjectID, Name: sources.Project.Name, Description: sources.Project.Description},
 		Quiz:    quizModelQuizPayload(state), RecentEntries: quizModelRecentEntryPayloads(sources.Quiz.Entries, 5),
-		CurrentQuestion: quizModelCurrentQuestionPayload(state, sources.Quiz.Entries), OutputContract: core.NewQuizModelOutputContract(action, state.Mode),
+		CurrentQuestion: quizModelCurrentQuestionPayload(state, sources.Quiz.Entries), OutputContract: quizmodel.NewQuizModelOutputContract(action, state.Mode),
 	}
 
-	sections, err := core.QuizModelContextSectionsForPayload(payload)
+	sections, err := quizmodel.QuizModelContextSectionsForPayload(payload)
 	if err != nil {
-		return core.QuizModelRequest{}, err
+		return quizmodel.QuizModelRequest{}, err
 	}
 
 	for _, input := range sources.Inputs {
-		sections = append(sections, core.QuizModelContextSection{Name: input.Kind, Layer: input.Kind, Authority: input.Reference, Content: input.Content, Metadata: map[string]string{"source_revision": input.Revision, "source_observation_hash": sources.Hash}})
+		sections = append(sections, quizmodel.QuizModelContextSection{Name: input.Kind, Layer: input.Kind, Authority: input.Reference, Content: input.Content, Metadata: map[string]string{"source_revision": input.Revision, "source_observation_hash": sources.Hash}})
 	}
 
-	return core.QuizModelRequest{
+	return quizmodel.QuizModelRequest{
 		ID: core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("%s-%s", idPrefix, specScopeID(scope))), Action: action, Strategy: strategy, Scope: scope, Mode: state.Mode, RuntimeState: state, Payload: payload, ContextSections: sections,
-		OutputContract: core.QuizModelOutputContract{RequiredFields: payload.OutputContract.RequiredFields}, CreatedAt: s.utcNow(),
+		OutputContract: quizmodel.QuizModelOutputContract{RequiredFields: payload.OutputContract.RequiredFields}, CreatedAt: s.utcNow(),
 	}, nil
 }
 
 func appendPlanSliceDetailContextSections(
-	sections []core.QuizModelContextSection,
+	sections []quizmodel.QuizModelContextSection,
 	outline generationcore.GeneratedPlanOutline,
 	targetSlice generationcore.GeneratedPlanOutlineSlice,
-) ([]core.QuizModelContextSection, error) {
+) ([]quizmodel.QuizModelContextSection, error) {
 	outlineContent, err := json.MarshalIndent(outline, "", "  ")
 	if err != nil {
 		return nil, err
@@ -835,7 +837,7 @@ func appendPlanSliceDetailContextSections(
 		return nil, err
 	}
 
-	sections = append(sections, core.QuizModelContextSection{
+	sections = append(sections, quizmodel.QuizModelContextSection{
 		Name:      "plan_outline",
 		Layer:     "plan",
 		Authority: "generated_plan_outline",
@@ -845,7 +847,7 @@ func appendPlanSliceDetailContextSections(
 			"status": outline.Status,
 		},
 	})
-	sections = append(sections, core.QuizModelContextSection{
+	sections = append(sections, quizmodel.QuizModelContextSection{
 		Name:      "target_slice",
 		Layer:     "plan",
 		Authority: targetSlice.ID,
@@ -870,23 +872,23 @@ func planSliceIDSlug(sliceID string) string {
 func (s service) newPlanTrackingModelRequest(
 	state quizcore.RuntimeState,
 	plan PlanView,
-) (core.QuizModelRequest, error) {
+) (quizmodel.QuizModelRequest, error) {
 	scope := quizcore.Scope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,
 	}
 
-	payload, err := s.newQuizModelPayload(scope, state, core.QuizModelActionMaterializePlanTracking)
+	payload, err := s.newQuizModelPayload(scope, state, quizmodel.QuizModelActionMaterializePlanTracking)
 	if err != nil {
-		return core.QuizModelRequest{}, err
+		return quizmodel.QuizModelRequest{}, err
 	}
 
-	sections, err := core.QuizModelContextSectionsForPayload(payload)
+	sections, err := quizmodel.QuizModelContextSectionsForPayload(payload)
 	if err != nil {
-		return core.QuizModelRequest{}, err
+		return quizmodel.QuizModelRequest{}, err
 	}
 
-	sections = append(sections, core.QuizModelContextSection{
+	sections = append(sections, quizmodel.QuizModelContextSection{
 		Name:      "implementation_plan",
 		Layer:     "plan",
 		Authority: plan.RelativePath,
@@ -898,16 +900,16 @@ func (s service) newPlanTrackingModelRequest(
 		},
 	})
 
-	return core.QuizModelRequest{
+	return quizmodel.QuizModelRequest{
 		ID:              core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("plan-tracking-%s", specScopeID(scope))),
-		Action:          core.QuizModelActionMaterializePlanTracking,
+		Action:          quizmodel.QuizModelActionMaterializePlanTracking,
 		Strategy:        "plan_tracking_materialization",
 		Scope:           scope,
 		Mode:            state.Mode,
 		RuntimeState:    state,
 		Payload:         payload,
 		ContextSections: sections,
-		OutputContract: core.QuizModelOutputContract{
+		OutputContract: quizmodel.QuizModelOutputContract{
 			RequiredFields: payload.OutputContract.RequiredFields,
 		},
 		CreatedAt: s.utcNow(),

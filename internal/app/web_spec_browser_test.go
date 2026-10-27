@@ -1,5 +1,7 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"net/http"
 	"net/http/httptest"
@@ -11,7 +13,6 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -74,7 +75,7 @@ func webSpecBrowserFixture(t *testing.T) (webViewProvider, *fakeServiceQuizModel
 		}
 	}
 
-	model.responses = []core.QuizModelResponse{serviceQuizDraftSpecResponse("generated", serviceQuizClock()())}
+	model.responses = []quizmodel.QuizModelResponse{serviceQuizDraftSpecResponse("generated", serviceQuizClock()())}
 
 	generated, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{Scope: quizcore.Scope{CaseSlug: "named-work"}})
 	if err != nil {

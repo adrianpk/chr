@@ -1,5 +1,7 @@
 package core
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"context"
 	"os"
@@ -80,7 +82,7 @@ func TestValidateAcceptanceFeatureGenerationRequiresPromptsForNeedsMoreInfo(t *t
 }
 
 func TestDecodeQuizModelFeaturePayloadKeepsClarificationPrompts(t *testing.T) {
-	payload, err := DecodeQuizModelFeaturePayload([]byte(`{
+	payload, err := quizmodel.DecodeQuizModelFeaturePayload([]byte(`{
 		"status": "needs_more_info",
 		"rejection_reason": "The failure behavior is missing.",
 		"clarification_prompts": [

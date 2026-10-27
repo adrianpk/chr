@@ -1,5 +1,7 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"context"
 	"errors"
@@ -266,10 +268,10 @@ func legacyHarnessBackend(role core.HarnessRole, action string) (string, error) 
 	}
 
 	variable := map[string]string{
-		string(core.QuizModelActionGenerateSpec):              "CHR_SPEC_GENERATION_BACKEND",
-		string(core.QuizModelActionGenerateAcceptanceFeature): "CHR_ACCEPTANCE_FEATURE_GENERATION_BACKEND",
-		string(core.QuizModelActionGeneratePlan):              "CHR_PLAN_GENERATION_BACKEND",
-		string(core.QuizModelActionMaterializePlanTracking):   "CHR_PLAN_TRACKING_GENERATION_BACKEND",
+		string(quizmodel.QuizModelActionGenerateSpec):              "CHR_SPEC_GENERATION_BACKEND",
+		string(quizmodel.QuizModelActionGenerateAcceptanceFeature): "CHR_ACCEPTANCE_FEATURE_GENERATION_BACKEND",
+		string(quizmodel.QuizModelActionGeneratePlan):              "CHR_PLAN_GENERATION_BACKEND",
+		string(quizmodel.QuizModelActionMaterializePlanTracking):   "CHR_PLAN_TRACKING_GENERATION_BACKEND",
 		"dump_curation": "CHR_DUMP_GENERATION_BACKEND", "conversation": "CHR_CONVERSATION_GENERATION_BACKEND",
 	}[action]
 	if variable == "" {

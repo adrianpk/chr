@@ -28,12 +28,12 @@
     },
     {
       "id": "internal/app/service_guided_spec.go::service.guidedSpecModelRequest",
-      "signature": "func(session core.AuthoringSession) (core.QuizModelRequest, string, error)",
+      "signature": "func(session core.AuthoringSession) (quizmodel.QuizModelRequest, string, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/service_guided_spec.go::service.guidedSpecInputs",
-      "signature": "func(session core.AuthoringSession) ([]core.QuizModelContextSection, quizcore.RuntimeState, []quizcore.Entry, core.GuidedStageCheckpoint, error)",
+      "signature": "func(session core.AuthoringSession) ([]quizmodel.QuizModelContextSection, quizcore.RuntimeState, []quizcore.Entry, core.GuidedStageCheckpoint, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -478,21 +478,21 @@
     },
     {
       "id": "internal/core/quiz_generation_binding.go::OpenAIQuizModelAdapter.invokeBoundQuizAPI",
-      "signature": "func(ctx context.Context, request QuizModelRequest, trace openAIQuizTrace) ([]byte, openAIQuizExecutionResult, error)",
+      "signature": "func(ctx context.Context, request quizmodel.QuizModelRequest, trace openAIQuizTrace) ([]byte, openAIQuizExecutionResult, error)",
       "reason": "Existing production debt; assigned to Slice 8 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/core/quiz_openai_model.go::OpenAIQuizModelAdapter.invokeOpenAI",
-      "signature": "func(ctx context.Context, request QuizModelRequest, trace openAIQuizTrace) ([]byte, openAIQuizExecutionResult, error)",
+      "signature": "func(ctx context.Context, request quizmodel.QuizModelRequest, trace openAIQuizTrace) ([]byte, openAIQuizExecutionResult, error)",
       "reason": "Existing production debt; assigned to Slice 8 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/core/quiz_openai_model.go::OpenAIQuizModelAdapter.recordOpenAIQuizResponse",
-      "signature": "func(ctx context.Context, request QuizModelRequest, trace openAIQuizTrace, result openAIQuizExecutionResult, status string, responseErr error, response QuizModelResponse)",
+      "signature": "func(ctx context.Context, request quizmodel.QuizModelRequest, trace openAIQuizTrace, result openAIQuizExecutionResult, status string, responseErr error, response quizmodel.QuizModelResponse)",
       "reason": "Existing production debt; assigned to Slice 8 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/quiz_openai_model.go::quizModelRoute",
+      "id": "internal/core/quiz/model/response.go::quizModelRoute",
       "signature": "func(state quizcore.RuntimeState, depth int, fallbackTrunkID string) (string, string)",
       "reason": "Existing production debt; assigned to Slice 8 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },

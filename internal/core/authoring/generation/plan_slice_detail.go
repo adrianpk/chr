@@ -126,11 +126,7 @@ func validateGeneratedPlanSliceDetailLists(detail GeneratedPlanSliceDetail) erro
 }
 
 // ValidateGeneratedPlanSliceDetailAgainstOutline validates the corresponding package boundary value.
-func ValidateGeneratedPlanSliceDetailAgainstOutline(
-	detail GeneratedPlanSliceDetail,
-	outline GeneratedPlanOutline,
-	targetSliceID string,
-) error {
+func ValidateGeneratedPlanSliceDetailAgainstOutline(detail GeneratedPlanSliceDetail, outline GeneratedPlanOutline, targetSliceID string) error {
 	if err := ValidateGeneratedPlanSliceDetailContent(detail); err != nil {
 		return err
 	}

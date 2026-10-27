@@ -1,22 +1,22 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"context"
 	"strings"
 	"sync"
 	"testing"
 	"time"
-
-	"forge.adrianpk.com/chr/internal/core"
 )
 
 type telegramGuidedWaitingModel struct {
-	base    core.QuizModelAdapter
+	base    quizmodel.QuizModelAdapter
 	entered chan struct{}
 	release chan struct{}
 }
 
-func (model telegramGuidedWaitingModel) InvokeQuizModel(ctx context.Context, request core.QuizModelRequest) (core.QuizModelResponse, error) {
+func (model telegramGuidedWaitingModel) InvokeQuizModel(ctx context.Context, request quizmodel.QuizModelRequest) (quizmodel.QuizModelResponse, error) {
 	select {
 	case model.entered <- struct{}{}:
 	default:
@@ -25,7 +25,7 @@ func (model telegramGuidedWaitingModel) InvokeQuizModel(ctx context.Context, req
 	select {
 	case <-model.release:
 	case <-ctx.Done():
-		return core.QuizModelResponse{}, ctx.Err()
+		return quizmodel.QuizModelResponse{}, ctx.Err()
 	}
 
 	return model.base.InvokeQuizModel(ctx, request)

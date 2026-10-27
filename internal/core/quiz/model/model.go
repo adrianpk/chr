@@ -1,4 +1,4 @@
-package core
+package model
 
 import (
 	"context"
@@ -94,11 +94,7 @@ type QuizModelAdapter interface {
 }
 
 // InvokeQuizModel executes the corresponding package operation.
-func InvokeQuizModel(
-	ctx context.Context,
-	adapter QuizModelAdapter,
-	request QuizModelRequest,
-) (QuizModelResponse, error) {
+func InvokeQuizModel(ctx context.Context, adapter QuizModelAdapter, request QuizModelRequest) (QuizModelResponse, error) {
 	err := ValidateQuizModelRequest(request)
 	if err != nil {
 		return QuizModelResponse{}, err

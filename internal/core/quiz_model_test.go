@@ -1,5 +1,7 @@
 package core
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"context"
 	"encoding/json"
@@ -20,11 +22,11 @@ import (
 func TestInvokeQuizModelValidatesRequestAndResponse(t *testing.T) {
 	request := validQuizModelRequest()
 	adapter := &fakeQuizModelAdapter{
-		response: QuizModelResponse{
+		response: quizmodel.QuizModelResponse{
 			ID:        "response-1",
 			RequestID: request.ID,
 			Provider:  "fake",
-			Status:    QuizModelResponseReady,
+			Status:    quizmodel.QuizModelResponseReady,
 			Question:  validQuizQuestion(),
 			Candidates: []quizcore.Candidate{
 				validQuizCandidate(),
@@ -34,7 +36,7 @@ func TestInvokeQuizModelValidatesRequestAndResponse(t *testing.T) {
 		},
 	}
 
-	response, err := InvokeQuizModel(context.Background(), adapter, request)
+	response, err := quizmodel.InvokeQuizModel(context.Background(), adapter, request)
 	if err != nil {
 		t.Fatalf("InvokeQuizModel returned error: %v", err)
 	}
@@ -52,7 +54,7 @@ func TestInvokeQuizModelRejectsInvalidRequest(t *testing.T) {
 	request := validQuizModelRequest()
 	request.ContextSections = nil
 
-	_, err := InvokeQuizModel(context.Background(), &fakeQuizModelAdapter{}, request)
+	_, err := quizmodel.InvokeQuizModel(context.Background(), &fakeQuizModelAdapter{}, request)
 	if err == nil {
 		t.Fatal("InvokeQuizModel returned nil error")
 	}
@@ -61,12 +63,12 @@ func TestInvokeQuizModelRejectsInvalidRequest(t *testing.T) {
 func TestInvokeQuizModelRejectsInvalidResponse(t *testing.T) {
 	request := validQuizModelRequest()
 
-	_, err := InvokeQuizModel(context.Background(), &fakeQuizModelAdapter{
-		response: QuizModelResponse{
+	_, err := quizmodel.InvokeQuizModel(context.Background(), &fakeQuizModelAdapter{
+		response: quizmodel.QuizModelResponse{
 			ID:        "response-1",
 			RequestID: request.ID,
 			Provider:  "fake",
-			Status:    QuizModelResponseReady,
+			Status:    quizmodel.QuizModelResponseReady,
 			CreatedAt: quizRuntimeTestTime(),
 		},
 	}, request)
@@ -77,17 +79,17 @@ func TestInvokeQuizModelRejectsInvalidResponse(t *testing.T) {
 
 func TestInvokeQuizModelAcceptsDraftSpecResponse(t *testing.T) {
 	request := validQuizModelRequest()
-	request.Action = QuizModelActionDraftSpec
+	request.Action = quizmodel.QuizModelActionDraftSpec
 	request.Strategy = "draft_spec"
 	request.OutputContract.RequiredFields = []string{"title", "body", "status"}
-	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionDraftSpec, request.Mode)
+	request.Payload.OutputContract = quizmodel.NewQuizModelOutputContract(quizmodel.QuizModelActionDraftSpec, request.Mode)
 
 	adapter := &fakeQuizModelAdapter{
-		response: QuizModelResponse{
+		response: quizmodel.QuizModelResponse{
 			ID:        "response-1",
 			RequestID: request.ID,
 			Provider:  "fake",
-			Status:    QuizModelResponseReady,
+			Status:    quizmodel.QuizModelResponseReady,
 			DraftSpec: generationcore.QuizDraftSpec{
 				Scope:          quizcore.Scope{ProjectID: "project-1"},
 				Title:          "Generated Spec",
@@ -100,7 +102,7 @@ func TestInvokeQuizModelAcceptsDraftSpecResponse(t *testing.T) {
 		},
 	}
 
-	response, err := InvokeQuizModel(context.Background(), adapter, request)
+	response, err := quizmodel.InvokeQuizModel(context.Background(), adapter, request)
 	if err != nil {
 		t.Fatalf("InvokeQuizModel returned error: %v", err)
 	}
@@ -112,26 +114,26 @@ func TestInvokeQuizModelAcceptsDraftSpecResponse(t *testing.T) {
 
 func TestInvokeQuizModelAcceptsPlanOutlineResponse(t *testing.T) {
 	request := validQuizModelRequest()
-	request.Action = QuizModelActionGeneratePlanOutline
+	request.Action = quizmodel.QuizModelActionGeneratePlanOutline
 	request.Strategy = "plan_outline_generation"
-	request.OutputContract.RequiredFields = NewQuizModelOutputContract(
-		QuizModelActionGeneratePlanOutline,
+	request.OutputContract.RequiredFields = quizmodel.NewQuizModelOutputContract(
+		quizmodel.QuizModelActionGeneratePlanOutline,
 		request.Mode,
 	).RequiredFields
-	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGeneratePlanOutline, request.Mode)
+	request.Payload.OutputContract = quizmodel.NewQuizModelOutputContract(quizmodel.QuizModelActionGeneratePlanOutline, request.Mode)
 
 	adapter := &fakeQuizModelAdapter{
-		response: QuizModelResponse{
+		response: quizmodel.QuizModelResponse{
 			ID:          "response-1",
 			RequestID:   request.ID,
 			Provider:    "fake",
-			Status:      QuizModelResponseReady,
+			Status:      quizmodel.QuizModelResponseReady,
 			PlanOutline: validGeneratedPlanOutline(request.CreatedAt),
 			CreatedAt:   quizRuntimeTestTime(),
 		},
 	}
 
-	response, err := InvokeQuizModel(context.Background(), adapter, request)
+	response, err := quizmodel.InvokeQuizModel(context.Background(), adapter, request)
 	if err != nil {
 		t.Fatalf("InvokeQuizModel returned error: %v", err)
 	}
@@ -143,26 +145,26 @@ func TestInvokeQuizModelAcceptsPlanOutlineResponse(t *testing.T) {
 
 func TestInvokeQuizModelAcceptsPlanSliceDetailResponse(t *testing.T) {
 	request := validQuizModelRequest()
-	request.Action = QuizModelActionGeneratePlanSliceDetail
+	request.Action = quizmodel.QuizModelActionGeneratePlanSliceDetail
 	request.Strategy = "plan_slice_detail_generation"
-	request.OutputContract.RequiredFields = NewQuizModelOutputContract(
-		QuizModelActionGeneratePlanSliceDetail,
+	request.OutputContract.RequiredFields = quizmodel.NewQuizModelOutputContract(
+		quizmodel.QuizModelActionGeneratePlanSliceDetail,
 		request.Mode,
 	).RequiredFields
-	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGeneratePlanSliceDetail, request.Mode)
+	request.Payload.OutputContract = quizmodel.NewQuizModelOutputContract(quizmodel.QuizModelActionGeneratePlanSliceDetail, request.Mode)
 
 	adapter := &fakeQuizModelAdapter{
-		response: QuizModelResponse{
+		response: quizmodel.QuizModelResponse{
 			ID:          "response-1",
 			RequestID:   request.ID,
 			Provider:    "fake",
-			Status:      QuizModelResponseReady,
+			Status:      quizmodel.QuizModelResponseReady,
 			SliceDetail: validGeneratedPlanSliceDetail(request.CreatedAt),
 			CreatedAt:   quizRuntimeTestTime(),
 		},
 	}
 
-	response, err := InvokeQuizModel(context.Background(), adapter, request)
+	response, err := quizmodel.InvokeQuizModel(context.Background(), adapter, request)
 	if err != nil {
 		t.Fatalf("InvokeQuizModel returned error: %v", err)
 	}
@@ -175,7 +177,7 @@ func TestInvokeQuizModelAcceptsPlanSliceDetailResponse(t *testing.T) {
 func TestQuizModelContextSectionsForPayloadMatchesRedWrightShape(t *testing.T) {
 	request := validQuizModelRequest()
 
-	sections, err := QuizModelContextSectionsForPayload(request.Payload)
+	sections, err := quizmodel.QuizModelContextSectionsForPayload(request.Payload)
 	if err != nil {
 		t.Fatalf("QuizModelContextSectionsForPayload returned error: %v", err)
 	}
@@ -203,14 +205,14 @@ func TestQuizModelContextSectionsForPayloadMatchesRedWrightShape(t *testing.T) {
 
 func TestQuizModelProviderPayloadIncludesNextQuestionContext(t *testing.T) {
 	request := validQuizModelRequest()
-	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
+	request.ContextSections = append(request.ContextSections, quizmodel.QuizModelContextSection{
 		Name:      "project_dump",
 		Layer:     "dump",
 		Authority: ".chr/default/dumps/project-context.md",
 		Content:   "Detailed project dump that should guide next-question generation.",
 	})
 
-	payload := quizModelProviderPayload(request)
+	payload := quizmodel.ProviderPayload(request)
 
 	contextSections, ok := payload["context_sections"].([]map[string]any)
 	if !ok {
@@ -236,7 +238,7 @@ func TestQuizModelProviderPayloadCarriesAcceptanceReadiness(t *testing.T) {
 		Missing:    []generationcore.AcceptanceReadinessSlot{generationcore.AcceptanceReadinessSlotActor},
 	}
 
-	payload := quizModelProviderPayload(request)
+	payload := quizmodel.ProviderPayload(request)
 
 	if _, ok := payload["context_sections"]; !ok {
 		t.Fatalf("next-question provider payload missing context_sections: %#v", payload)
@@ -254,7 +256,7 @@ func TestQuizModelProviderPayloadCarriesAcceptanceReadiness(t *testing.T) {
 
 func TestOpenAIQuizModelRequestBodySerializesContextualNextQuestionPayload(t *testing.T) {
 	request := validQuizModelRequest()
-	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
+	request.ContextSections = append(request.ContextSections, quizmodel.QuizModelContextSection{
 		Name:      "project_dump",
 		Layer:     "dump",
 		Authority: ".chr/default/dumps/project-context.md",
@@ -276,7 +278,7 @@ func TestOpenAIQuizModelRequestBodySerializesContextualNextQuestionPayload(t *te
 		t.Fatal("store = true, want false")
 	}
 
-	if envelope.Metadata["chr_action"] != string(QuizModelActionNextQuestion) {
+	if envelope.Metadata["chr_action"] != string(quizmodel.QuizModelActionNextQuestion) {
 		t.Fatalf("metadata = %#v, want next-question action", envelope.Metadata)
 	}
 
@@ -297,18 +299,18 @@ func TestOpenAIQuizModelRequestBodySerializesContextualNextQuestionPayload(t *te
 
 func TestQuizModelProviderPayloadKeepsDraftSpecContextInProviderText(t *testing.T) {
 	request := validQuizModelRequest()
-	request.Action = QuizModelActionDraftSpec
+	request.Action = quizmodel.QuizModelActionDraftSpec
 	request.Strategy = "draft_spec"
-	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionDraftSpec, request.Mode)
+	request.Payload.OutputContract = quizmodel.NewQuizModelOutputContract(quizmodel.QuizModelActionDraftSpec, request.Mode)
 	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
-	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
+	request.ContextSections = append(request.ContextSections, quizmodel.QuizModelContextSection{
 		Name:      "project_dump",
 		Layer:     "dump",
 		Authority: ".chr/default/dumps/project-context.md",
 		Content:   "Detailed project dump for draft spec synthesis.",
 	})
 
-	payload := quizModelProviderPayload(request)
+	payload := quizmodel.ProviderPayload(request)
 
 	if _, ok := payload["context_sections"]; !ok {
 		t.Fatalf("draft-spec provider payload omitted context_sections: %#v", payload)
@@ -317,11 +319,11 @@ func TestQuizModelProviderPayloadKeepsDraftSpecContextInProviderText(t *testing.
 
 func TestOpenAIQuizModelRequestBodySerializesDraftSpecContextSections(t *testing.T) {
 	request := validQuizModelRequest()
-	request.Action = QuizModelActionDraftSpec
+	request.Action = quizmodel.QuizModelActionDraftSpec
 	request.Strategy = "draft_spec"
-	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionDraftSpec, request.Mode)
+	request.Payload.OutputContract = quizmodel.NewQuizModelOutputContract(quizmodel.QuizModelActionDraftSpec, request.Mode)
 	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
-	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
+	request.ContextSections = append(request.ContextSections, quizmodel.QuizModelContextSection{
 		Name:      "project_dump",
 		Layer:     "dump",
 		Authority: ".chr/default/dumps/project-context.md",
@@ -336,7 +338,7 @@ func TestOpenAIQuizModelRequestBodySerializesDraftSpecContextSections(t *testing
 
 	envelope, input := decodeOpenAIQuizRequestBody(t, body)
 
-	if envelope.Metadata["chr_action"] != string(QuizModelActionDraftSpec) {
+	if envelope.Metadata["chr_action"] != string(quizmodel.QuizModelActionDraftSpec) {
 		t.Fatalf("metadata = %#v, want draft-spec action", envelope.Metadata)
 	}
 
@@ -356,9 +358,9 @@ func TestOpenAIQuizModelRequestBodySerializesDraftSpecContextSections(t *testing
 
 func TestOpenAIQuizModelRequestBodySerializesGeneratedSpecSchemaWithoutFeature(t *testing.T) {
 	request := validQuizModelRequest()
-	request.Action = QuizModelActionGenerateSpec
+	request.Action = quizmodel.QuizModelActionGenerateSpec
 	request.Strategy = "spec_generation"
-	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGenerateSpec, request.Mode)
+	request.Payload.OutputContract = quizmodel.NewQuizModelOutputContract(quizmodel.QuizModelActionGenerateSpec, request.Mode)
 	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
 
 	body, err := (OpenAIQuizModelAdapter{APIKey: "test-key", Model: "test-model"}).openAIRequestBody(request)
@@ -384,18 +386,18 @@ func TestOpenAIQuizModelRequestBodySerializesGeneratedSpecSchemaWithoutFeature(t
 
 func TestQuizModelProviderPayloadKeepsPlanOutlineContextInProviderText(t *testing.T) {
 	request := validQuizModelRequest()
-	request.Action = QuizModelActionGeneratePlanOutline
+	request.Action = quizmodel.QuizModelActionGeneratePlanOutline
 	request.Strategy = "plan_outline_generation"
-	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGeneratePlanOutline, request.Mode)
+	request.Payload.OutputContract = quizmodel.NewQuizModelOutputContract(quizmodel.QuizModelActionGeneratePlanOutline, request.Mode)
 	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
-	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
+	request.ContextSections = append(request.ContextSections, quizmodel.QuizModelContextSection{
 		Name:      "spec",
 		Layer:     "spec",
 		Authority: ".chr/default/specs/blog.md",
 		Content:   "Spec context for outline generation.",
 	})
 
-	payload := quizModelProviderPayload(request)
+	payload := quizmodel.ProviderPayload(request)
 
 	if _, ok := payload["context_sections"]; !ok {
 		t.Fatalf("plan-outline provider payload omitted context_sections: %#v", payload)
@@ -404,9 +406,9 @@ func TestQuizModelProviderPayloadKeepsPlanOutlineContextInProviderText(t *testin
 
 func TestOpenAIQuizModelRequestBodySerializesPlanOutlineContract(t *testing.T) {
 	request := validQuizModelRequest()
-	request.Action = QuizModelActionGeneratePlanOutline
+	request.Action = quizmodel.QuizModelActionGeneratePlanOutline
 	request.Strategy = "plan_outline_generation"
-	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGeneratePlanOutline, request.Mode)
+	request.Payload.OutputContract = quizmodel.NewQuizModelOutputContract(quizmodel.QuizModelActionGeneratePlanOutline, request.Mode)
 	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
 
 	body, err := (OpenAIQuizModelAdapter{APIKey: "test-key", Model: "test-model"}).openAIRequestBody(request)
@@ -416,7 +418,7 @@ func TestOpenAIQuizModelRequestBodySerializesPlanOutlineContract(t *testing.T) {
 
 	envelope, input := decodeOpenAIQuizRequestBody(t, body)
 
-	if envelope.Metadata["chr_action"] != string(QuizModelActionGeneratePlanOutline) {
+	if envelope.Metadata["chr_action"] != string(quizmodel.QuizModelActionGeneratePlanOutline) {
 		t.Fatalf("metadata = %#v, want plan-outline action", envelope.Metadata)
 	}
 
@@ -435,11 +437,11 @@ func TestOpenAIQuizModelRequestBodySerializesPlanOutlineContract(t *testing.T) {
 
 func TestOpenAIQuizModelRequestBodySerializesPlanSliceDetailContract(t *testing.T) {
 	request := validQuizModelRequest()
-	request.Action = QuizModelActionGeneratePlanSliceDetail
+	request.Action = quizmodel.QuizModelActionGeneratePlanSliceDetail
 	request.Strategy = "plan_slice_detail_generation"
-	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGeneratePlanSliceDetail, request.Mode)
+	request.Payload.OutputContract = quizmodel.NewQuizModelOutputContract(quizmodel.QuizModelActionGeneratePlanSliceDetail, request.Mode)
 	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
-	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
+	request.ContextSections = append(request.ContextSections, quizmodel.QuizModelContextSection{
 		Name:      "plan_outline",
 		Layer:     "plan",
 		Authority: "generated_plan_outline",
@@ -453,7 +455,7 @@ func TestOpenAIQuizModelRequestBodySerializesPlanSliceDetailContract(t *testing.
 
 	envelope, input := decodeOpenAIQuizRequestBody(t, body)
 
-	if envelope.Metadata["chr_action"] != string(QuizModelActionGeneratePlanSliceDetail) {
+	if envelope.Metadata["chr_action"] != string(quizmodel.QuizModelActionGeneratePlanSliceDetail) {
 		t.Fatalf("metadata = %#v, want plan-slice-detail action", envelope.Metadata)
 	}
 
@@ -633,35 +635,35 @@ func TestOpenAIQuizModelAdapterRecordsProviderFailureTrace(t *testing.T) {
 }
 
 func TestOpenAIQuizModelTimeoutUsesLongerTimeoutForGeneration(t *testing.T) {
-	if got := openAIQuizModelTimeout(QuizModelActionNextQuestion); got != 60*time.Second {
+	if got := openAIQuizModelTimeout(quizmodel.QuizModelActionNextQuestion); got != 60*time.Second {
 		t.Fatalf("next question timeout = %s, want 60s", got)
 	}
 
-	if got := openAIQuizModelTimeout(QuizModelActionGenerateSpec); got != 5*time.Minute {
+	if got := openAIQuizModelTimeout(quizmodel.QuizModelActionGenerateSpec); got != 5*time.Minute {
 		t.Fatalf("spec generation timeout = %s, want 5m", got)
 	}
 
-	if got := openAIQuizModelTimeout(QuizModelActionGeneratePlan); got != 5*time.Minute {
+	if got := openAIQuizModelTimeout(quizmodel.QuizModelActionGeneratePlan); got != 5*time.Minute {
 		t.Fatalf("plan generation timeout = %s, want 5m", got)
 	}
 
-	if got := openAIQuizModelTimeout(QuizModelActionGeneratePlanOutline); got != 5*time.Minute {
+	if got := openAIQuizModelTimeout(quizmodel.QuizModelActionGeneratePlanOutline); got != 5*time.Minute {
 		t.Fatalf("plan outline generation timeout = %s, want 5m", got)
 	}
 
-	if got := openAIQuizModelTimeout(QuizModelActionGeneratePlanSliceDetail); got != 5*time.Minute {
+	if got := openAIQuizModelTimeout(quizmodel.QuizModelActionGeneratePlanSliceDetail); got != 5*time.Minute {
 		t.Fatalf("plan slice detail generation timeout = %s, want 5m", got)
 	}
 }
 
 func TestQuizModelPlanOutlineResponseFromOutput(t *testing.T) {
 	request := validQuizModelRequest()
-	request.Action = QuizModelActionGeneratePlanOutline
+	request.Action = quizmodel.QuizModelActionGeneratePlanOutline
 	request.Strategy = "plan_outline_generation"
-	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGeneratePlanOutline, request.Mode)
+	request.Payload.OutputContract = quizmodel.NewQuizModelOutputContract(quizmodel.QuizModelActionGeneratePlanOutline, request.Mode)
 	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
 
-	response, err := quizModelResponseFromOutput(request, []byte(`{
+	response, err := quizmodel.ResponseFromOutput(request, []byte(`{
 		"title":"Staged Plan Generation",
 		"status":"planned",
 		"summary":"Generate an outline first.",
@@ -693,7 +695,7 @@ func TestQuizModelPlanOutlineResponseFromOutput(t *testing.T) {
 }
 
 func TestValidateQuizModelPlanOutlinePayloadRejectsNonSequentialSlices(t *testing.T) {
-	_, err := DecodeQuizModelPlanOutlinePayload([]byte(`{
+	_, err := quizmodel.DecodeQuizModelPlanOutlinePayload([]byte(`{
 		"title":"Staged Plan Generation",
 		"status":"planned",
 		"summary":"Generate an outline first.",
@@ -722,12 +724,12 @@ func TestValidateQuizModelPlanOutlinePayloadRejectsNonSequentialSlices(t *testin
 
 func TestQuizModelPlanSliceDetailResponseFromOutput(t *testing.T) {
 	request := validQuizModelRequest()
-	request.Action = QuizModelActionGeneratePlanSliceDetail
+	request.Action = quizmodel.QuizModelActionGeneratePlanSliceDetail
 	request.Strategy = "plan_slice_detail_generation"
-	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGeneratePlanSliceDetail, request.Mode)
+	request.Payload.OutputContract = quizmodel.NewQuizModelOutputContract(quizmodel.QuizModelActionGeneratePlanSliceDetail, request.Mode)
 	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
 
-	response, err := quizModelResponseFromOutput(request, []byte(`{
+	response, err := quizmodel.ResponseFromOutput(request, []byte(`{
 		"slice_id":"Slice 1",
 		"short_name":"outline generation contract",
 		"objective":"Add outline contracts.",
@@ -773,7 +775,7 @@ func TestValidateGeneratedPlanSliceDetailRejectsRenamedSlice(t *testing.T) {
 }
 
 func TestQuizModelSpecGenerationInstructionsAvoidTopLevelBodyHeading(t *testing.T) {
-	instructions := quizModelSpecGenerationInstructions()
+	instructions := quizmodel.Instructions(quizmodel.QuizModelRequest{Action: quizmodel.QuizModelActionGenerateSpec})
 
 	if !strings.Contains(instructions, "body without a top-level title heading") {
 		t.Fatalf("spec generation instructions do not prevent duplicate title headings: %q", instructions)
@@ -781,7 +783,7 @@ func TestQuizModelSpecGenerationInstructionsAvoidTopLevelBodyHeading(t *testing.
 }
 
 func TestQuizModelSpecGenerationInstructionsSeparateGroundedRequirementsFromProposals(t *testing.T) {
-	instructions := quizModelSpecGenerationInstructions()
+	instructions := quizmodel.Instructions(quizmodel.QuizModelRequest{Action: quizmodel.QuizModelActionGenerateSpec})
 
 	for _, want := range []string{
 		"Do not convert unresolved open questions into canonical requirements",
@@ -796,7 +798,7 @@ func TestQuizModelSpecGenerationInstructionsSeparateGroundedRequirementsFromProp
 }
 
 func TestQuizModelSpecGenerationInstructionsFenceMultilineExamples(t *testing.T) {
-	instructions := quizModelSpecGenerationInstructions()
+	instructions := quizmodel.Instructions(quizmodel.QuizModelRequest{Action: quizmodel.QuizModelActionGenerateSpec})
 
 	for _, want := range []string{
 		"Fence every multi-line example in a Markdown code block",
@@ -809,7 +811,7 @@ func TestQuizModelSpecGenerationInstructionsFenceMultilineExamples(t *testing.T)
 }
 
 func TestQuizModelSpecGenerationInstructionsDoNotMentionFeatureGeneration(t *testing.T) {
-	instructions := quizModelSpecGenerationInstructions()
+	instructions := quizmodel.Instructions(quizmodel.QuizModelRequest{Action: quizmodel.QuizModelActionGenerateSpec})
 
 	for _, forbidden := range []string{
 		"Gherkin",
@@ -824,7 +826,7 @@ func TestQuizModelSpecGenerationInstructionsDoNotMentionFeatureGeneration(t *tes
 }
 
 func TestQuizModelFeatureSchemaRequiresAllStrictProperties(t *testing.T) {
-	schema := quizModelFeatureJSONSchema()
+	schema := quizmodel.OutputFormat(quizmodel.QuizModelRequest{Action: quizmodel.QuizModelActionGenerateAcceptanceFeature}).Schema
 
 	required, ok := schema["required"].([]string)
 	if !ok {
@@ -839,7 +841,7 @@ func TestQuizModelFeatureSchemaRequiresAllStrictProperties(t *testing.T) {
 }
 
 func TestQuizModelFeatureInstructionsRequireEmptyFallbackFields(t *testing.T) {
-	instructions := quizModelFeatureGenerationInstructions()
+	instructions := quizmodel.Instructions(quizmodel.QuizModelRequest{Action: quizmodel.QuizModelActionGenerateAcceptanceFeature})
 
 	for _, want := range []string{
 		"Always include status, body, rejection_reason, and clarification_prompts",
@@ -853,7 +855,7 @@ func TestQuizModelFeatureInstructionsRequireEmptyFallbackFields(t *testing.T) {
 }
 
 func TestQuizModelFeatureInstructionsDescribeTraceabilityAndRoundAnswers(t *testing.T) {
-	instructions := quizModelFeatureGenerationInstructions()
+	instructions := quizmodel.Instructions(quizmodel.QuizModelRequest{Action: quizmodel.QuizModelActionGenerateAcceptanceFeature})
 
 	for _, want := range []string{
 		"@spec:",
@@ -870,7 +872,7 @@ func TestQuizModelFeatureInstructionsDescribeTraceabilityAndRoundAnswers(t *test
 }
 
 func TestQuizModelFeatureInstructionsRejectTrivialHappyPathCoverage(t *testing.T) {
-	instructions := quizModelFeatureGenerationInstructions()
+	instructions := quizmodel.Instructions(quizmodel.QuizModelRequest{Action: quizmodel.QuizModelActionGenerateAcceptanceFeature})
 
 	for _, want := range []string{
 		"trivial hardcoded happy-path implementation",
@@ -886,7 +888,7 @@ func TestQuizModelFeatureInstructionsRejectTrivialHappyPathCoverage(t *testing.T
 }
 
 func TestQuizModelSpecGenerationInstructionsDoNotOverfitPathPolicy(t *testing.T) {
-	instructions := quizModelSpecGenerationInstructions()
+	instructions := quizmodel.Instructions(quizmodel.QuizModelRequest{Action: quizmodel.QuizModelActionGenerateSpec})
 
 	for _, forbidden := range []string{
 		"Do not propose arbitrary domain directories",
@@ -900,8 +902,8 @@ func TestQuizModelSpecGenerationInstructionsDoNotOverfitPathPolicy(t *testing.T)
 
 func TestQuizModelQuestionInstructionsMatchRedWrightContextBoundary(t *testing.T) {
 	instructions := []string{
-		quizModelDeepQuestionInstructions(),
-		quizModelFastQuestionInstructions(),
+		quizmodel.Instructions(quizmodel.QuizModelRequest{Mode: quizcore.ModeDeep}),
+		quizmodel.Instructions(quizmodel.QuizModelRequest{Mode: quizcore.ModeFast}),
 	}
 
 	for _, instruction := range instructions {
@@ -931,91 +933,8 @@ func assertQuizModelQuestionInstructionBoundary(t *testing.T, instruction string
 	}
 }
 
-func TestQuizModelRoutingStateCarriesTopicConductorSignals(t *testing.T) {
-	request := validQuizModelRequest()
-	request.Payload.RecentEntries = []QuizModelEntryPayload{
-		quizModelEntryPayloadWithTags("identity"),
-		quizModelEntryPayloadWithTags("identity"),
-		quizModelEntryPayloadWithTags("storage"),
-		quizModelEntryPayloadWithTags("identity"),
-		quizModelEntryPayloadWithTags("identity"),
-	}
-
-	state := quizModelRoutingState(request, QuizModelQuestionPayload{
-		Question:      "What identifier should appear in public paths?",
-		Tags:          []string{"identity"},
-		FollowUpDepth: 1,
-	})
-
-	coverage, ok := state["topic_coverage"].(map[string]int)
-	if !ok {
-		t.Fatalf("topic_coverage = %#v, want map[string]int", state["topic_coverage"])
-	}
-
-	if coverage["identity"] != 4 {
-		t.Fatalf("identity coverage = %d, want 4", coverage["identity"])
-	}
-
-	streak, ok := state["recent_topic_streak"].(map[string]any)
-	if !ok {
-		t.Fatalf("recent_topic_streak = %#v, want map[string]any", state["recent_topic_streak"])
-	}
-
-	if streak["topic"] != "identity" {
-		t.Fatalf("recent topic = %#v, want identity", streak["topic"])
-	}
-
-	if streak["count"] != 2 {
-		t.Fatalf("recent topic count = %#v, want 2", streak["count"])
-	}
-}
-
-func TestQuizModelRoutingStateCarriesAcceptanceReadinessPromptIntent(t *testing.T) {
-	request := validQuizModelRequest()
-	request.Payload.AcceptanceReadiness = &generationcore.AcceptanceReadiness{
-		Decision:   generationcore.AcceptanceReadinessNeedsMoreInfo,
-		Confidence: 0.66,
-		Reasons:    []string{"Need actor details."},
-		Missing:    []generationcore.AcceptanceReadinessSlot{generationcore.AcceptanceReadinessSlotActor},
-	}
-
-	state := quizModelRoutingState(request, QuizModelQuestionPayload{
-		Question:              "Who starts this workflow?",
-		Tags:                  []string{"actor"},
-		FollowUpDepth:         1,
-		CompletionRecommended: false,
-	})
-
-	readiness, ok := state["acceptance_readiness"].(*generationcore.AcceptanceReadiness)
-	if !ok {
-		t.Fatalf("acceptance_readiness = %#v, want readiness payload", state["acceptance_readiness"])
-	}
-
-	if readiness.Decision != generationcore.AcceptanceReadinessNeedsMoreInfo {
-		t.Fatalf("decision = %q, want needs_more_info", readiness.Decision)
-	}
-
-	intent, ok := state["acceptance_prompt_intent"].(generationcore.AcceptanceReadinessPromptIntent)
-	if !ok {
-		t.Fatalf("acceptance_prompt_intent = %#v, want prompt intent", state["acceptance_prompt_intent"])
-	}
-
-	if intent.Slot != string(generationcore.AcceptanceReadinessSlotActor) {
-		t.Fatalf("slot = %q, want actor", intent.Slot)
-	}
-}
-
-func quizModelEntryPayloadWithTags(tags ...string) QuizModelEntryPayload {
-	return QuizModelEntryPayload{
-		Question: "Question?",
-		Answer:   "Answer.",
-		Status:   string(quizcore.EntryStatusAnswered),
-		Tags:     tags,
-	}
-}
-
 func TestDecodeQuizModelQuestionPayloadEnforcesRedWrightContract(t *testing.T) {
-	payload, err := DecodeQuizModelQuestionPayload([]byte(`{
+	payload, err := quizmodel.DecodeQuizModelQuestionPayload([]byte(`{
 		"question": "What should editorial review clarify before publishing?",
 		"tags": ["Editorial Review", "review"],
 		"follow_up_depth": 12,
@@ -1071,7 +990,7 @@ func TestDecodeQuizModelQuestionPayloadRejectsMalformedOutput(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			_, err := DecodeQuizModelQuestionPayload([]byte(test.content))
+			_, err := quizmodel.DecodeQuizModelQuestionPayload([]byte(test.content))
 			if err == nil {
 				t.Fatal("DecodeQuizModelQuestionPayload returned nil error")
 			}
@@ -1080,7 +999,7 @@ func TestDecodeQuizModelQuestionPayloadRejectsMalformedOutput(t *testing.T) {
 }
 
 func TestDecodeQuizModelPlanTrackingPayloadRequiresTicketSynopsis(t *testing.T) {
-	payload, err := DecodeQuizModelPlanTrackingPayload([]byte(`{
+	payload, err := quizmodel.DecodeQuizModelPlanTrackingPayload([]byte(`{
 		"title": "Tracking",
 		"body": "Track implementation slices.",
 		"status": "tracking",
@@ -1109,7 +1028,7 @@ func TestDecodeQuizModelPlanTrackingPayloadRequiresTicketSynopsis(t *testing.T) 
 }
 
 func TestDecodeQuizModelPlanTrackingPayloadRejectsMissingTicketSynopsis(t *testing.T) {
-	_, err := DecodeQuizModelPlanTrackingPayload([]byte(`{
+	_, err := quizmodel.DecodeQuizModelPlanTrackingPayload([]byte(`{
 		"title": "Tracking",
 		"body": "Track implementation slices.",
 		"status": "tracking",
@@ -1133,7 +1052,7 @@ func TestDecodeQuizModelPlanTrackingPayloadRejectsMissingTicketSynopsis(t *testi
 }
 
 func TestDecodeQuizModelFastQuestionPayloadValidatesCandidates(t *testing.T) {
-	payload, err := DecodeQuizModelFastQuestionPayload([]byte(`{
+	payload, err := quizmodel.DecodeQuizModelFastQuestionPayload([]byte(`{
 		"questions": [
 			{
 				"question": "What should editorial review clarify first?",
@@ -1159,7 +1078,7 @@ func TestDecodeQuizModelFastQuestionPayloadValidatesCandidates(t *testing.T) {
 }
 
 func TestNewQuizModelPromptIntentMatchesRedWrightShape(t *testing.T) {
-	intent := NewQuizModelPromptIntent(QuizModelQuestionPayload{
+	intent := quizmodel.NewQuizModelPromptIntent(quizmodel.QuizModelQuestionPayload{
 		Question:              "What should editorial review clarify?",
 		Tags:                  []string{"review"},
 		FollowUpDepth:         1,
@@ -1184,7 +1103,7 @@ func TestQuizModelResponseFromDeepOutput(t *testing.T) {
 	request.RuntimeState.ActiveQuestion = nil
 	request.RuntimeState.Trail = nil
 
-	response, err := quizModelResponseFromOutput(request, []byte(`{
+	response, err := quizmodel.ResponseFromOutput(request, []byte(`{
 		"question": "What should editorial review clarify before publishing?",
 		"tags": ["Editorial Review"],
 		"follow_up_depth": 2,
@@ -1209,14 +1128,14 @@ func TestQuizModelResponseFromDeepOutput(t *testing.T) {
 
 func TestQuizModelResponseFromDeepOutputAfterSkippedEntry(t *testing.T) {
 	request := validQuizModelRequest()
-	request.Payload.RecentEntries = append(request.Payload.RecentEntries, QuizModelEntryPayload{
+	request.Payload.RecentEntries = append(request.Payload.RecentEntries, quizmodel.QuizModelEntryPayload{
 		Question: "Which publishing branch should we avoid?",
 		Status:   string(quizcore.EntryStatusSkipped),
 		Tags:     []string{"publishing"},
 	})
 	request.Payload.Quiz.EntryCount = len(request.Payload.RecentEntries)
 
-	response, err := quizModelResponseFromOutput(request, []byte(`{
+	response, err := quizmodel.ResponseFromOutput(request, []byte(`{
 		"question": "What should the next useful publishing checkpoint clarify?",
 		"tags": ["publishing"],
 		"follow_up_depth": 0,
@@ -1242,7 +1161,7 @@ func TestQuizModelResponseFromDeepOutputAfterSkippedEntry(t *testing.T) {
 func TestQuizModelResponseFromDeepOutputCarriesCompletionRecommendation(t *testing.T) {
 	request := validQuizModelRequest()
 
-	response, err := quizModelResponseFromOutput(request, []byte(`{
+	response, err := quizmodel.ResponseFromOutput(request, []byte(`{
 		"question": "Is there anything else this quiz must capture before drafting?",
 		"tags": ["completion"],
 		"follow_up_depth": 1,
@@ -1261,26 +1180,14 @@ func TestQuizModelResponseFromDeepOutputCarriesCompletionRecommendation(t *testi
 	}
 }
 
-func TestQuizModelRuntimeDepthForcesTrunkAfterBranchReturn(t *testing.T) {
-	state := validQuizRuntimeState()
-	state.ActiveQuestion = nil
-	state.Trail = nil
-	state.BranchReturnReason = quizcore.BranchReturnReasonSkipped
-
-	depth := quizModelRuntimeDepth(state, quizcore.MaxFollowUpDepth)
-	if depth != 1 {
-		t.Fatalf("depth = %d, want trunk depth after branch return", depth)
-	}
-}
-
 func TestQuizModelResponseFromFastOutputBuffersCandidates(t *testing.T) {
 	request := validQuizModelRequest()
 	request.Mode = quizcore.ModeFast
-	request.Strategy = QuizModelFastStrategy
+	request.Strategy = quizmodel.QuizModelFastStrategy
 	request.Payload.Quiz.Mode = string(quizcore.ModeFast)
-	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionNextQuestion, quizcore.ModeFast)
+	request.Payload.OutputContract = quizmodel.NewQuizModelOutputContract(quizmodel.QuizModelActionNextQuestion, quizcore.ModeFast)
 
-	response, err := quizModelResponseFromOutput(request, []byte(`{
+	response, err := quizmodel.ResponseFromOutput(request, []byte(`{
 		"questions": [
 			{
 				"question": "What should editorial review clarify first?",
@@ -1315,12 +1222,12 @@ func TestQuizModelResponseFromFastOutputBuffersCandidates(t *testing.T) {
 
 func TestQuizModelResponseFromDraftSpecOutput(t *testing.T) {
 	request := validQuizModelRequest()
-	request.Action = QuizModelActionDraftSpec
+	request.Action = quizmodel.QuizModelActionDraftSpec
 	request.Strategy = "draft_spec"
-	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionDraftSpec, request.Mode)
+	request.Payload.OutputContract = quizmodel.NewQuizModelOutputContract(quizmodel.QuizModelActionDraftSpec, request.Mode)
 	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
 
-	response, err := quizModelResponseFromOutput(request, []byte(`{
+	response, err := quizmodel.ResponseFromOutput(request, []byte(`{
 		"title": "Editorial Review Spec",
 		"body": "The workflow must preserve editorial review.",
 		"status": "draft"
@@ -1336,12 +1243,12 @@ func TestQuizModelResponseFromDraftSpecOutput(t *testing.T) {
 
 func TestQuizModelResponseFromGeneratedSpecOutputRejectsFeatureField(t *testing.T) {
 	request := validQuizModelRequest()
-	request.Action = QuizModelActionGenerateSpec
+	request.Action = quizmodel.QuizModelActionGenerateSpec
 	request.Strategy = "spec_generation"
-	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGenerateSpec, request.Mode)
+	request.Payload.OutputContract = quizmodel.NewQuizModelOutputContract(quizmodel.QuizModelActionGenerateSpec, request.Mode)
 	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
 
-	_, err := quizModelResponseFromOutput(request, []byte(`{
+	_, err := quizmodel.ResponseFromOutput(request, []byte(`{
 		"title": "Editorial Review Spec",
 		"body": "The workflow must preserve editorial review.",
 		"status": "draft",
@@ -1357,12 +1264,12 @@ func TestQuizModelResponseFromGeneratedSpecOutputRejectsFeatureField(t *testing.
 
 func TestQuizModelResponseFromGeneratedSpecOutputAllowsGherkinExampleInBody(t *testing.T) {
 	request := validQuizModelRequest()
-	request.Action = QuizModelActionGenerateSpec
+	request.Action = quizmodel.QuizModelActionGenerateSpec
 	request.Strategy = "spec_generation"
-	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGenerateSpec, request.Mode)
+	request.Payload.OutputContract = quizmodel.NewQuizModelOutputContract(quizmodel.QuizModelActionGenerateSpec, request.Mode)
 	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
 
-	response, err := quizModelResponseFromOutput(request, []byte("{\n"+
+	response, err := quizmodel.ResponseFromOutput(request, []byte("{\n"+
 		`"title": "Editorial Review Spec",`+"\n"+
 		`"body": "Acceptance Criteria\n\n`+"```gherkin"+`\nFeature: Editorial review\n`+"```"+`\n",`+"\n"+
 		`"status": "draft"`+"\n"+
@@ -1377,11 +1284,11 @@ func TestQuizModelResponseFromGeneratedSpecOutputAllowsGherkinExampleInBody(t *t
 }
 
 func TestValidateQuizModelResponseAcceptsDraftSpecBeforeServiceProvenance(t *testing.T) {
-	response := QuizModelResponse{
+	response := quizmodel.QuizModelResponse{
 		ID:        "response-1",
 		RequestID: "request-1",
 		Provider:  "fake",
-		Status:    QuizModelResponseReady,
+		Status:    quizmodel.QuizModelResponseReady,
 		DraftSpec: generationcore.QuizDraftSpec{
 			Scope:     quizcore.Scope{ProjectID: "project-1"},
 			Title:     "Draft Spec",
@@ -1391,26 +1298,26 @@ func TestValidateQuizModelResponseAcceptsDraftSpecBeforeServiceProvenance(t *tes
 		CreatedAt: quizRuntimeTestTime(),
 	}
 
-	err := ValidateQuizModelResponse(response)
+	err := quizmodel.ValidateQuizModelResponse(response)
 	if err != nil {
 		t.Fatalf("ValidateQuizModelResponse returned error: %v", err)
 	}
 }
 
-func validQuizModelRequest() QuizModelRequest {
+func validQuizModelRequest() quizmodel.QuizModelRequest {
 	state := validQuizRuntimeState()
-	payload := QuizModelPayload{
-		Project: QuizModelProjectPayload{
+	payload := quizmodel.QuizModelPayload{
+		Project: quizmodel.QuizModelProjectPayload{
 			ID:          "project-1",
 			Name:        "Project",
 			Description: "Project context.",
 		},
-		Quiz: QuizModelQuizPayload{
+		Quiz: quizmodel.QuizModelQuizPayload{
 			ID:         state.ID,
 			EntryCount: 1,
 			Mode:       string(quizcore.ModeDeep),
 		},
-		RecentEntries: []QuizModelEntryPayload{
+		RecentEntries: []quizmodel.QuizModelEntryPayload{
 			{
 				Question: "What should this workflow preserve?",
 				Answer:   "The workflow should preserve review.",
@@ -1418,28 +1325,28 @@ func validQuizModelRequest() QuizModelRequest {
 				Tags:     []string{"workflow"},
 			},
 		},
-		CurrentQuestion: QuizModelCurrentQuestionPayload{
+		CurrentQuestion: quizmodel.QuizModelCurrentQuestionPayload{
 			Question: "What should this workflow preserve?",
 			Tags:     []string{"workflow"},
 			PromptIntent: map[string]any{
 				"metadata": map[string]any{"follow_up_depth": 0},
 			},
 		},
-		OutputContract: NewQuizModelOutputContract(QuizModelActionNextQuestion, quizcore.ModeDeep),
+		OutputContract: quizmodel.NewQuizModelOutputContract(quizmodel.QuizModelActionNextQuestion, quizcore.ModeDeep),
 	}
 
-	return QuizModelRequest{
+	return quizmodel.QuizModelRequest{
 		ID:           "quiz-model-request-1",
-		Action:       QuizModelActionNextQuestion,
+		Action:       quizmodel.QuizModelActionNextQuestion,
 		Strategy:     "deep",
 		Scope:        quizcore.Scope{ProjectID: "project-1"},
 		Mode:         quizcore.ModeDeep,
 		RuntimeState: state,
 		Payload:      payload,
-		ContextSections: []QuizModelContextSection{
+		ContextSections: []quizmodel.QuizModelContextSection{
 			{Name: "project", Layer: "project", Authority: "project_metadata", Content: "Project context."},
 		},
-		OutputContract: QuizModelOutputContract{
+		OutputContract: quizmodel.QuizModelOutputContract{
 			RequiredFields: []string{"id", "prompt", "topic", "depth"},
 		},
 		CreatedAt: quizRuntimeTestTime(),
@@ -1625,18 +1532,18 @@ func assertQuizModelTraceOmitsField(t *testing.T, event map[string]any, key stri
 }
 
 type fakeQuizModelAdapter struct {
-	response QuizModelResponse
+	response quizmodel.QuizModelResponse
 	err      error
-	request  QuizModelRequest
+	request  quizmodel.QuizModelRequest
 }
 
 func (a *fakeQuizModelAdapter) InvokeQuizModel(
 	_ context.Context,
-	request QuizModelRequest,
-) (QuizModelResponse, error) {
+	request quizmodel.QuizModelRequest,
+) (quizmodel.QuizModelResponse, error) {
 	a.request = request
 	if a.err != nil {
-		return QuizModelResponse{}, a.err
+		return quizmodel.QuizModelResponse{}, a.err
 	}
 
 	return a.response, nil

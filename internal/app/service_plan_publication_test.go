@@ -1,5 +1,7 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"context"
 	"encoding/json"
@@ -14,9 +16,9 @@ import (
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
-type planPublicationTestModel func(context.Context, core.QuizModelRequest) (core.QuizModelResponse, error)
+type planPublicationTestModel func(context.Context, quizmodel.QuizModelRequest) (quizmodel.QuizModelResponse, error)
 
-func (f planPublicationTestModel) InvokeQuizModel(ctx context.Context, request core.QuizModelRequest) (core.QuizModelResponse, error) {
+func (f planPublicationTestModel) InvokeQuizModel(ctx context.Context, request quizmodel.QuizModelRequest) (quizmodel.QuizModelResponse, error) {
 	return f(ctx, request)
 }
 
@@ -190,11 +192,11 @@ func configurePlanPublicationFailure(t *testing.T, operations *service, failure,
 			return nil, errors.New("provider unavailable")
 		})
 	default:
-		operations.quizModel = planPublicationTestModel(func(ctx context.Context, request core.QuizModelRequest) (core.QuizModelResponse, error) {
+		operations.quizModel = planPublicationTestModel(func(ctx context.Context, request quizmodel.QuizModelRequest) (quizmodel.QuizModelResponse, error) {
 			applyPlanTestInterruption(ctx, t, *operations, failure, dump, plan, cancel)
 
 			if failure == "model failure" {
-				return core.QuizModelResponse{}, errors.New("model unavailable")
+				return quizmodel.QuizModelResponse{}, errors.New("model unavailable")
 			}
 
 			response, err := (&fakeServiceQuizModel{}).InvokeQuizModel(ctx, request)

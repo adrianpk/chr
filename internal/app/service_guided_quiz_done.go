@@ -1,5 +1,7 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"fmt"
 
@@ -30,7 +32,7 @@ func (s service) prepareGuidedQuizDone(observed core.QuizObservation) (core.Quiz
 		return core.QuizTransition{}, err
 	}
 
-	if response.Status != core.QuizModelResponseReady || response.Question.Required {
+	if response.Status != quizmodel.QuizModelResponseReady || response.Question.Required {
 		state.ContinuationError = "Clarification still needs an answer. Continue the quiz before finishing."
 
 		return core.QuizTransition{State: state, Message: state.ContinuationError}, nil

@@ -1,5 +1,7 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"context"
 	"errors"
@@ -183,7 +185,7 @@ func newRetainedQuizFixture(t *testing.T) (service, *fakeServiceQuizModel) {
 
 	operations := newTestService(t, project)
 	now := serviceQuizClock()()
-	model := &fakeServiceQuizModel{responses: []core.QuizModelResponse{
+	model := &fakeServiceQuizModel{responses: []quizmodel.QuizModelResponse{
 		serviceQuizModelResponseWithCandidates("batch", "first", now, []quizcore.Candidate{serviceQuizCandidate("fast-2", "Which constraint applies?", now), serviceQuizCandidate("fast-3", "What remains open?", now)}),
 		serviceQuizModelResponseWithQuestion("adaptive", serviceQuizQuestion(quizcore.Question{ID: "deep-follow-up", Prompt: "Why does ownership matter?", Topic: "workflow", Depth: 2, ParentID: "first", TrunkID: "first", CreatedAt: now})),
 	}}
@@ -206,10 +208,10 @@ type quizContinuationFailureModel struct {
 	recovered bool
 }
 
-func (m *quizContinuationFailureModel) InvokeQuizModel(_ context.Context, request core.QuizModelRequest) (core.QuizModelResponse, error) {
+func (m *quizContinuationFailureModel) InvokeQuizModel(_ context.Context, request quizmodel.QuizModelRequest) (quizmodel.QuizModelResponse, error) {
 	m.calls++
 	if m.calls > 1 && !m.recovered {
-		return core.QuizModelResponse{}, fmt.Errorf("fixture provider unavailable")
+		return quizmodel.QuizModelResponse{}, fmt.Errorf("fixture provider unavailable")
 	}
 
 	response := serviceQuizModelResponse(fmt.Sprintf("response-%d", m.calls), fmt.Sprintf("question-%d", m.calls), request.CreatedAt)

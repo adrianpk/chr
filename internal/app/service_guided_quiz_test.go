@@ -1,5 +1,7 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"errors"
 	"os"
@@ -170,7 +172,7 @@ func guidedQuizFixture(t *testing.T, namespace string) (service, core.AuthoringS
 	question := serviceQuizModelResponse("question-response", "question-1", now)
 	completion := serviceQuizModelResponse("completion-response", "complete", now)
 	completion.Question.Required = false
-	model := &fakeServiceQuizModel{responses: []core.QuizModelResponse{question, completion}}
+	model := &fakeServiceQuizModel{responses: []quizmodel.QuizModelResponse{question, completion}}
 	operations.quizModel = model
 
 	return operations, session, model

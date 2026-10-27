@@ -1,5 +1,7 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"crypto/rand"
 	"encoding/json"
@@ -137,7 +139,7 @@ func (s service) SwitchQuizMode(request QuizModeRequest) (QuizOperationResult, e
 }
 
 func (s service) generateQuizDraftSpec(scope quizcore.Scope) (QuizOperationResult, error) {
-	bound, _, err := s.bindGeneration(s.ctx, "", string(core.QuizModelActionDraftSpec))
+	bound, _, err := s.bindGeneration(s.ctx, "", string(quizmodel.QuizModelActionDraftSpec))
 	if err != nil {
 		return QuizOperationResult{}, err
 	}
@@ -174,16 +176,16 @@ func (s service) writeQuizCuratedNotes(scope quizcore.Scope) (core.QuizArtifactP
 	return repository.WriteCuratedNotes(s.ctx, quizcore.CurateEntries(scope, entries, s.utcNow()))
 }
 
-func (s service) newQuizModelRequest(state quizcore.RuntimeState) (core.QuizModelRequest, error) {
+func (s service) newQuizModelRequest(state quizcore.RuntimeState) (quizmodel.QuizModelRequest, error) {
 	entries, err := s.quizRepository().LoadRawCaptureEntries(s.ctx, quizcore.Scope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug})
 	if err != nil {
-		return core.QuizModelRequest{}, err
+		return quizmodel.QuizModelRequest{}, err
 	}
 
 	return s.newQuizModelRequestWithEntries(state, entries)
 }
 
-func (s service) newQuizModelRequestWithEntries(state quizcore.RuntimeState, entries []quizcore.Entry) (core.QuizModelRequest, error) {
+func (s service) newQuizModelRequestWithEntries(state quizcore.RuntimeState, entries []quizcore.Entry) (quizmodel.QuizModelRequest, error) {
 	if s.guidedContext != nil {
 		return s.guidedQuizModelRequest(state, entries)
 	}
@@ -193,21 +195,21 @@ func (s service) newQuizModelRequestWithEntries(state quizcore.RuntimeState, ent
 		CaseSlug:  state.CaseSlug,
 	}
 
-	payload := s.quizModelPayloadWithEntries(state, core.QuizModelActionNextQuestion, entries)
+	payload := s.quizModelPayloadWithEntries(state, quizmodel.QuizModelActionNextQuestion, entries)
 
-	coreSections, err := core.QuizModelContextSectionsForPayload(payload)
+	coreSections, err := quizmodel.QuizModelContextSectionsForPayload(payload)
 	if err != nil {
-		return core.QuizModelRequest{}, err
+		return quizmodel.QuizModelRequest{}, err
 	}
 
 	supplementalSections, err := s.appendQuizSupplementalContextSections(nil, scope)
 	if err != nil {
-		return core.QuizModelRequest{}, err
+		return quizmodel.QuizModelRequest{}, err
 	}
 
 	history, err := s.quizHistoryContext(scope, entries)
 	if err != nil {
-		return core.QuizModelRequest{}, err
+		return quizmodel.QuizModelRequest{}, err
 	}
 
 	supplementalSections = append(supplementalSections, history)
@@ -215,21 +217,21 @@ func (s service) newQuizModelRequestWithEntries(state quizcore.RuntimeState, ent
 	readiness := quizAcceptanceReadinessFromContext(state, append(coreSections, supplementalSections...))
 	payload.AcceptanceReadiness = &readiness
 
-	coreSections, err = core.QuizModelContextSectionsForPayload(payload)
+	coreSections, err = quizmodel.QuizModelContextSectionsForPayload(payload)
 	if err != nil {
-		return core.QuizModelRequest{}, err
+		return quizmodel.QuizModelRequest{}, err
 	}
 
-	return core.QuizModelRequest{
+	return quizmodel.QuizModelRequest{
 		ID:              core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("quiz-request-%d", state.QuestionsAsked+1)),
-		Action:          core.QuizModelActionNextQuestion,
+		Action:          quizmodel.QuizModelActionNextQuestion,
 		Strategy:        quizModelStrategy(state.Mode),
 		Scope:           scope,
 		Mode:            state.Mode,
 		RuntimeState:    state,
 		Payload:         payload,
 		ContextSections: append(coreSections, supplementalSections...),
-		OutputContract: core.QuizModelOutputContract{
+		OutputContract: quizmodel.QuizModelOutputContract{
 			RequiredFields: payload.OutputContract.RequiredFields,
 		},
 		CreatedAt: s.utcNow(),
@@ -252,7 +254,7 @@ func (s service) writeQuizDraftSpec(state quizcore.RuntimeState, paths core.Quiz
 		return err
 	}
 
-	response, err := core.InvokeQuizModel(s.ctx, s.quizModel, request)
+	response, err := quizmodel.InvokeQuizModel(s.ctx, s.quizModel, request)
 	if err != nil {
 		return err
 	}
@@ -275,25 +277,25 @@ func (s service) writeQuizDraftSpec(state quizcore.RuntimeState, paths core.Quiz
 func (s service) newQuizDraftSpecModelRequest(
 	state quizcore.RuntimeState,
 	paths core.QuizArtifactPaths,
-) (core.QuizModelRequest, error) {
+) (quizmodel.QuizModelRequest, error) {
 	scope := quizcore.Scope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,
 	}
 
-	payload, err := s.newQuizModelPayload(scope, state, core.QuizModelActionDraftSpec)
+	payload, err := s.newQuizModelPayload(scope, state, quizmodel.QuizModelActionDraftSpec)
 	if err != nil {
-		return core.QuizModelRequest{}, err
+		return quizmodel.QuizModelRequest{}, err
 	}
 
-	sections, err := core.QuizModelContextSectionsForPayload(payload)
+	sections, err := quizmodel.QuizModelContextSectionsForPayload(payload)
 	if err != nil {
-		return core.QuizModelRequest{}, err
+		return quizmodel.QuizModelRequest{}, err
 	}
 
 	sections, err = s.appendQuizSupplementalContextSections(sections, scope)
 	if err != nil {
-		return core.QuizModelRequest{}, err
+		return quizmodel.QuizModelRequest{}, err
 	}
 
 	sections = appendQuizFileContextSection(
@@ -304,16 +306,16 @@ func (s service) newQuizDraftSpecModelRequest(
 		paths.CuratedRelativePath,
 	)
 
-	return core.QuizModelRequest{
+	return quizmodel.QuizModelRequest{
 		ID:              core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("quiz-draft-spec-%s", paths.ScopeID)),
-		Action:          core.QuizModelActionDraftSpec,
+		Action:          quizmodel.QuizModelActionDraftSpec,
 		Strategy:        "draft_spec",
 		Scope:           scope,
 		Mode:            state.Mode,
 		RuntimeState:    state,
 		Payload:         payload,
 		ContextSections: sections,
-		OutputContract: core.QuizModelOutputContract{
+		OutputContract: quizmodel.QuizModelOutputContract{
 			RequiredFields: payload.OutputContract.RequiredFields,
 		},
 		CreatedAt: s.utcNow(),
@@ -323,23 +325,23 @@ func (s service) newQuizDraftSpecModelRequest(
 func (s service) newQuizModelPayload(
 	scope quizcore.Scope,
 	state quizcore.RuntimeState,
-	action core.QuizModelAction,
-) (core.QuizModelPayload, error) {
+	action quizmodel.QuizModelAction,
+) (quizmodel.QuizModelPayload, error) {
 	entries, err := s.quizRepository().LoadRawCaptureEntries(s.ctx, scope)
 	if err != nil {
-		return core.QuizModelPayload{}, err
+		return quizmodel.QuizModelPayload{}, err
 	}
 
 	return s.quizModelPayloadWithEntries(state, action, entries), nil
 }
 
-func (s service) quizModelPayloadWithEntries(state quizcore.RuntimeState, action core.QuizModelAction, entries []quizcore.Entry) core.QuizModelPayload {
-	return core.QuizModelPayload{
+func (s service) quizModelPayloadWithEntries(state quizcore.RuntimeState, action quizmodel.QuizModelAction, entries []quizcore.Entry) quizmodel.QuizModelPayload {
+	return quizmodel.QuizModelPayload{
 		Project:         s.quizModelProjectPayload(),
 		Quiz:            quizModelQuizPayload(state),
 		RecentEntries:   quizModelRecentEntryPayloads(entries, 5),
 		CurrentQuestion: quizModelCurrentQuestionPayload(state, entries),
-		OutputContract:  core.NewQuizModelOutputContract(action, state.Mode),
+		OutputContract:  quizmodel.NewQuizModelOutputContract(action, state.Mode),
 	}
 }
 
@@ -365,8 +367,8 @@ func (s service) newQuizRuntimeState(scope quizcore.Scope, mode quizcore.Mode) (
 	}, nil
 }
 
-func (s service) quizModelProjectPayload() core.QuizModelProjectPayload {
-	payload := core.QuizModelProjectPayload{ID: s.projectContext.ProjectID}
+func (s service) quizModelProjectPayload() quizmodel.QuizModelProjectPayload {
+	payload := quizmodel.QuizModelProjectPayload{ID: s.projectContext.ProjectID}
 
 	metadata, err := core.NewProjectMetadataService(s.projectContext.ProjectDir).Load()
 	if err != nil {
@@ -380,9 +382,9 @@ func (s service) quizModelProjectPayload() core.QuizModelProjectPayload {
 }
 
 func (s service) appendQuizSupplementalContextSections(
-	sections []core.QuizModelContextSection,
+	sections []quizmodel.QuizModelContextSection,
 	scope quizcore.Scope,
-) ([]core.QuizModelContextSection, error) {
+) ([]quizmodel.QuizModelContextSection, error) {
 	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "agent_protocol", "protocol", "AGENTS.md")
 	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "project_document", "project", core.ProjectMetadataPath(""))
 
@@ -417,8 +419,8 @@ func (s service) appendQuizSupplementalContextSections(
 	return sections, nil
 }
 
-func quizModelQuizPayload(state quizcore.RuntimeState) core.QuizModelQuizPayload {
-	return core.QuizModelQuizPayload{
+func quizModelQuizPayload(state quizcore.RuntimeState) quizmodel.QuizModelQuizPayload {
+	return quizmodel.QuizModelQuizPayload{
 		ID:         state.ID,
 		UseCaseID:  state.CaseSlug,
 		EntryCount: state.AnswersRecorded + state.SkipsRecorded,
@@ -426,9 +428,9 @@ func quizModelQuizPayload(state quizcore.RuntimeState) core.QuizModelQuizPayload
 	}
 }
 
-func quizModelRecentEntryPayloads(entries []quizcore.Entry, limit int) []core.QuizModelEntryPayload {
+func quizModelRecentEntryPayloads(entries []quizcore.Entry, limit int) []quizmodel.QuizModelEntryPayload {
 	if limit <= 0 {
-		return []core.QuizModelEntryPayload{}
+		return []quizmodel.QuizModelEntryPayload{}
 	}
 
 	start := len(entries) - limit
@@ -436,9 +438,9 @@ func quizModelRecentEntryPayloads(entries []quizcore.Entry, limit int) []core.Qu
 		start = 0
 	}
 
-	payloads := make([]core.QuizModelEntryPayload, 0, len(entries[start:]))
+	payloads := make([]quizmodel.QuizModelEntryPayload, 0, len(entries[start:]))
 	for _, entry := range entries[start:] {
-		payloads = append(payloads, core.QuizModelEntryPayload{
+		payloads = append(payloads, quizmodel.QuizModelEntryPayload{
 			Question: entry.Question,
 			Answer:   entry.Answer,
 			Status:   string(entry.Status),
@@ -452,13 +454,13 @@ func quizModelRecentEntryPayloads(entries []quizcore.Entry, limit int) []core.Qu
 func quizModelCurrentQuestionPayload(
 	state quizcore.RuntimeState,
 	entries []quizcore.Entry,
-) core.QuizModelCurrentQuestionPayload {
+) quizmodel.QuizModelCurrentQuestionPayload {
 	if state.ActiveQuestion != nil {
 		return quizModelQuestionPayloadFromQuestion(*state.ActiveQuestion)
 	}
 
 	if len(entries) == 0 {
-		return core.QuizModelCurrentQuestionPayload{PromptIntent: map[string]any{}}
+		return quizmodel.QuizModelCurrentQuestionPayload{PromptIntent: map[string]any{}}
 	}
 
 	entry := entries[len(entries)-1]
@@ -473,14 +475,14 @@ func quizModelCurrentQuestionPayload(
 		}
 	}
 
-	return core.QuizModelCurrentQuestionPayload{
+	return quizmodel.QuizModelCurrentQuestionPayload{
 		Question:     entry.Question,
 		Tags:         quizModelEntryTags(entry),
 		PromptIntent: promptIntent,
 	}
 }
 
-func quizModelQuestionPayloadFromQuestion(question quizcore.Question) core.QuizModelCurrentQuestionPayload {
+func quizModelQuestionPayloadFromQuestion(question quizcore.Question) quizmodel.QuizModelCurrentQuestionPayload {
 	promptIntent := quizModelPromptIntentFromJSON(question.Rationale)
 	if len(promptIntent) == 0 {
 		promptIntent = map[string]any{
@@ -491,7 +493,7 @@ func quizModelQuestionPayloadFromQuestion(question quizcore.Question) core.QuizM
 		}
 	}
 
-	return core.QuizModelCurrentQuestionPayload{
+	return quizmodel.QuizModelCurrentQuestionPayload{
 		Question:     question.Prompt,
 		Tags:         quizModelQuestionTags(question),
 		PromptIntent: promptIntent,
@@ -516,7 +518,7 @@ func quizModelPromptIntentFromJSON(value string) map[string]any {
 
 func quizAcceptanceReadinessFromContext(
 	state quizcore.RuntimeState,
-	sections []core.QuizModelContextSection,
+	sections []quizmodel.QuizModelContextSection,
 ) generationcore.AcceptanceReadiness {
 	content := strings.ToLower(quizContextText(sections))
 	reasons := []string{"The quiz context was inspected for acceptance-test readiness."}
@@ -552,7 +554,7 @@ func quizAcceptanceReadinessFromContext(
 	}
 }
 
-func quizContextText(sections []core.QuizModelContextSection) string {
+func quizContextText(sections []quizmodel.QuizModelContextSection) string {
 	var output strings.Builder
 	for _, section := range sections {
 		output.WriteString(section.Content)
@@ -665,10 +667,10 @@ func quizModelEntryTags(entry quizcore.Entry) []string {
 
 func quizModelStrategy(mode quizcore.Mode) string {
 	if mode == quizcore.ModeFast {
-		return core.QuizModelFastStrategy
+		return quizmodel.QuizModelFastStrategy
 	}
 
-	return core.QuizModelDeepStrategy
+	return quizmodel.QuizModelDeepStrategy
 }
 
 func (s service) listQuizRuntimeStates() ([]quizcore.RuntimeState, error) {
@@ -729,12 +731,12 @@ func (s service) utcNow() time.Time {
 }
 
 func appendQuizFileContextSection(
-	sections []core.QuizModelContextSection,
+	sections []quizmodel.QuizModelContextSection,
 	projectDir string,
 	name string,
 	layer string,
 	path string,
-) []core.QuizModelContextSection {
+) []quizmodel.QuizModelContextSection {
 	if !filepath.IsAbs(path) {
 		path = filepath.Join(projectDir, path)
 	}
@@ -744,7 +746,7 @@ func appendQuizFileContextSection(
 		return sections
 	}
 
-	return append(sections, core.QuizModelContextSection{
+	return append(sections, quizmodel.QuizModelContextSection{
 		Name:      name,
 		Layer:     layer,
 		Authority: filepath.ToSlash(path),
@@ -753,10 +755,10 @@ func appendQuizFileContextSection(
 }
 
 func appendQuizNodeContextSection(
-	sections []core.QuizModelContextSection,
+	sections []quizmodel.QuizModelContextSection,
 	projectDir string,
 	node core.WorkspaceNode,
-) []core.QuizModelContextSection {
+) []quizmodel.QuizModelContextSection {
 	content, err := os.ReadFile(filepath.Join(projectDir, filepath.FromSlash(node.RelativePath)))
 	if err != nil {
 		return sections
@@ -767,7 +769,7 @@ func appendQuizNodeContextSection(
 		name = "use_case_dump"
 	}
 
-	return append(sections, core.QuizModelContextSection{
+	return append(sections, quizmodel.QuizModelContextSection{
 		Name:      name,
 		Layer:     "dump",
 		Authority: node.RelativePath,
@@ -775,7 +777,7 @@ func appendQuizNodeContextSection(
 	})
 }
 
-func quizDumpSourcePaths(sections []core.QuizModelContextSection) []string {
+func quizDumpSourcePaths(sections []quizmodel.QuizModelContextSection) []string {
 	paths := []string{}
 
 	for _, section := range sections {

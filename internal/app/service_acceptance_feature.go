@@ -1,5 +1,7 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"context"
 	"fmt"
@@ -33,7 +35,7 @@ func (s service) GenerateAcceptanceFeature(ctx context.Context, request Acceptan
 	var result AcceptanceFeatureOperationResult
 
 	err := s.withGenerationRuntime(ctx, "acceptance_feature", scope, func(ctx context.Context) error {
-		bound, ctx, err := s.bindGeneration(ctx, "acceptance_feature-"+dumpRequestID(request.OperationID), string(core.QuizModelActionGenerateAcceptanceFeature))
+		bound, ctx, err := s.bindGeneration(ctx, "acceptance_feature-"+dumpRequestID(request.OperationID), string(quizmodel.QuizModelActionGenerateAcceptanceFeature))
 		if err != nil {
 			return err
 		}
@@ -89,7 +91,7 @@ func (s service) generateAcceptanceFeature(ctx context.Context, scope quizcore.S
 		"context_sections": fmt.Sprintf("%d", len(modelRequest.ContextSections)),
 	})
 
-	response, err := core.InvokeQuizModel(ctx, s.quizModel, modelRequest)
+	response, err := quizmodel.InvokeQuizModel(ctx, s.quizModel, modelRequest)
 	if err != nil {
 		s.appendPlanGenerationLog("generate_acceptance_feature_model_invocation_failed", map[string]string{
 			"case_slug":  scope.CaseSlug,
@@ -147,7 +149,7 @@ func (s service) generateAcceptanceFeature(ctx context.Context, scope quizcore.S
 	}, nil
 }
 
-func (s service) acceptanceFeatureNonGeneratedResult(ctx context.Context, scope quizcore.Scope, request core.QuizModelRequest, response core.QuizModelResponse, feature generationcore.AcceptanceFeatureGeneration) (AcceptanceFeatureOperationResult, error) {
+func (s service) acceptanceFeatureNonGeneratedResult(ctx context.Context, scope quizcore.Scope, request quizmodel.QuizModelRequest, response quizmodel.QuizModelResponse, feature generationcore.AcceptanceFeatureGeneration) (AcceptanceFeatureOperationResult, error) {
 	s.appendPlanGenerationLog("generate_acceptance_feature_status", map[string]string{
 		"case_slug": scope.CaseSlug,
 		"status":    feature.Status,
@@ -167,7 +169,7 @@ func (s service) acceptanceFeatureNonGeneratedResult(ctx context.Context, scope 
 	}, nil
 }
 
-func (s service) acceptanceFeatureRoundPath(ctx context.Context, scope quizcore.Scope, request core.QuizModelRequest, response core.QuizModelResponse, feature generationcore.AcceptanceFeatureGeneration) (string, error) {
+func (s service) acceptanceFeatureRoundPath(ctx context.Context, scope quizcore.Scope, request quizmodel.QuizModelRequest, response quizmodel.QuizModelResponse, feature generationcore.AcceptanceFeatureGeneration) (string, error) {
 	if feature.Status != generationcore.AcceptanceFeatureStatusNeedsMoreInfo {
 		return "", nil
 	}
@@ -194,44 +196,44 @@ func (s service) latestSpecNodeForFeatureScope(scope quizcore.Scope) (core.Works
 	return node, nil
 }
 
-func (s service) newAcceptanceFeatureModelRequest(state quizcore.RuntimeState) (core.QuizModelRequest, error) {
+func (s service) newAcceptanceFeatureModelRequest(state quizcore.RuntimeState) (quizmodel.QuizModelRequest, error) {
 	scope := quizcore.Scope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,
 	}
 
-	payload, err := s.newQuizModelPayload(scope, state, core.QuizModelActionGenerateAcceptanceFeature)
+	payload, err := s.newQuizModelPayload(scope, state, quizmodel.QuizModelActionGenerateAcceptanceFeature)
 	if err != nil {
-		return core.QuizModelRequest{}, err
+		return quizmodel.QuizModelRequest{}, err
 	}
 
-	sections, err := core.QuizModelContextSectionsForPayload(payload)
+	sections, err := quizmodel.QuizModelContextSectionsForPayload(payload)
 	if err != nil {
-		return core.QuizModelRequest{}, err
+		return quizmodel.QuizModelRequest{}, err
 	}
 
 	sections, err = s.appendAcceptanceFeatureGenerationContextSections(sections, scope)
 	if err != nil {
-		return core.QuizModelRequest{}, err
+		return quizmodel.QuizModelRequest{}, err
 	}
 
-	return core.QuizModelRequest{
+	return quizmodel.QuizModelRequest{
 		ID:              core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("acceptance-feature-generation-%s", specScopeID(scope))),
-		Action:          core.QuizModelActionGenerateAcceptanceFeature,
+		Action:          quizmodel.QuizModelActionGenerateAcceptanceFeature,
 		Strategy:        "acceptance_feature_generation",
 		Scope:           scope,
 		Mode:            state.Mode,
 		RuntimeState:    state,
 		Payload:         payload,
 		ContextSections: sections,
-		OutputContract: core.QuizModelOutputContract{
+		OutputContract: quizmodel.QuizModelOutputContract{
 			RequiredFields: payload.OutputContract.RequiredFields,
 		},
 		CreatedAt: s.utcNow(),
 	}, nil
 }
 
-func (s service) appendAcceptanceFeatureGenerationContextSections(sections []core.QuizModelContextSection, scope quizcore.Scope) ([]core.QuizModelContextSection, error) {
+func (s service) appendAcceptanceFeatureGenerationContextSections(sections []quizmodel.QuizModelContextSection, scope quizcore.Scope) ([]quizmodel.QuizModelContextSection, error) {
 	sections, err := s.appendGenerationContextSections(sections, scope, sortedAcceptanceFeatureContextNodeIDs)
 	if err != nil {
 		return nil, err
@@ -240,7 +242,7 @@ func (s service) appendAcceptanceFeatureGenerationContextSections(sections []cor
 	return s.appendAcceptanceFeatureRoundContextSection(sections, scope)
 }
 
-func (s service) appendAcceptanceFeatureRoundContextSection(sections []core.QuizModelContextSection, scope quizcore.Scope) ([]core.QuizModelContextSection, error) {
+func (s service) appendAcceptanceFeatureRoundContextSection(sections []quizmodel.QuizModelContextSection, scope quizcore.Scope) ([]quizmodel.QuizModelContextSection, error) {
 	paths, err := core.AcceptanceFeatureRoundLayout(s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return nil, err
@@ -255,7 +257,7 @@ func (s service) appendAcceptanceFeatureRoundContextSection(sections []core.Quiz
 		return nil, fmt.Errorf("read acceptance feature round notes: %w", err)
 	}
 
-	sections = append(sections, core.QuizModelContextSection{
+	sections = append(sections, quizmodel.QuizModelContextSection{
 		Name:      "acceptance_feature_round",
 		Layer:     "acceptance",
 		Authority: "user",
@@ -268,7 +270,7 @@ func (s service) appendAcceptanceFeatureRoundContextSection(sections []core.Quiz
 	return sections, nil
 }
 
-func (s service) writeAcceptanceFeatureRoundNotes(ctx context.Context, scope quizcore.Scope, request core.QuizModelRequest, response core.QuizModelResponse, feature generationcore.AcceptanceFeatureGeneration) (core.AcceptanceFeatureRoundPaths, error) {
+func (s service) writeAcceptanceFeatureRoundNotes(ctx context.Context, scope quizcore.Scope, request quizmodel.QuizModelRequest, response quizmodel.QuizModelResponse, feature generationcore.AcceptanceFeatureGeneration) (core.AcceptanceFeatureRoundPaths, error) {
 	notes := core.AcceptanceFeatureRoundNotes{
 		Scope:            scope,
 		Status:           feature.Status,

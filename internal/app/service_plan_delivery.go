@@ -1,5 +1,7 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"context"
 	"encoding/json"
@@ -146,7 +148,7 @@ func (s service) checkDeliveryTarget(ctx context.Context, scope quizcore.Scope, 
 }
 
 func (s service) generatePlanTicketContracts(ctx context.Context, input generationcore.GeneratedWorkflowPlan, plan PlanView) (generationcore.GeneratedWorkflowPlan, error) {
-	bound, ctx, err := s.bindGeneration(ctx, input.MaterializationID, string(core.QuizModelActionMaterializePlanTracking))
+	bound, ctx, err := s.bindGeneration(ctx, input.MaterializationID, string(quizmodel.QuizModelActionMaterializePlanTracking))
 	if err != nil {
 		return input, err
 	}
@@ -166,10 +168,10 @@ func (s service) generatePlanTicketContracts(ctx context.Context, input generati
 		return input, err
 	}
 
-	request.Strategy = core.QuizModelStrategyPlanDelivery
-	request.ContextSections = append(request.ContextSections, core.QuizModelContextSection{Name: "planned_workflow", Layer: "plan", Authority: input.PlanRef, Content: string(encoded)})
+	request.Strategy = quizmodel.QuizModelStrategyPlanDelivery
+	request.ContextSections = append(request.ContextSections, quizmodel.QuizModelContextSection{Name: "planned_workflow", Layer: "plan", Authority: input.PlanRef, Content: string(encoded)})
 
-	response, err := core.InvokeQuizModel(ctx, bound.quizModel, request)
+	response, err := quizmodel.InvokeQuizModel(ctx, bound.quizModel, request)
 	if err != nil {
 		return input, err
 	}

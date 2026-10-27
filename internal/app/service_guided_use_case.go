@@ -1,5 +1,7 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"context"
 	"fmt"
@@ -132,7 +134,7 @@ func (s service) inspectGuidedReadiness(ctx context.Context, result *GuidedUseCa
 	}
 
 	for _, role := range []core.HarnessRole{core.HarnessGeneration, core.HarnessWorker} {
-		selection, err := s.ResolveHarnessSelection(ctx, role, string(core.QuizModelActionNextQuestion))
+		selection, err := s.ResolveHarnessSelection(ctx, role, string(quizmodel.QuizModelActionNextQuestion))
 		if err != nil {
 			result.Problems = append(result.Problems, string(role)+" setup: "+err.Error())
 

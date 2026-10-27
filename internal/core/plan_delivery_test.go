@@ -1,5 +1,7 @@
 package core
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"encoding/json"
 	"testing"
@@ -27,9 +29,9 @@ func checkPlanDeliveryModel(t *testing.T, changed bool) {
 		t.Fatal(err)
 	}
 
-	request := validCodexQuizModelRequest(QuizModelActionMaterializePlanTracking)
-	request.Strategy = QuizModelStrategyPlanDelivery
-	request.ContextSections = append(request.ContextSections, QuizModelContextSection{Name: "planned_workflow", Content: string(input)})
+	request := validCodexQuizModelRequest(quizmodel.QuizModelActionMaterializePlanTracking)
+	request.Strategy = quizmodel.QuizModelStrategyPlanDelivery
+	request.ContextSections = append(request.ContextSections, quizmodel.QuizModelContextSection{Name: "planned_workflow", Content: string(input)})
 
 	if changed {
 		plan.Slices[0].Tasks[0].Title = "Unplanned work"
@@ -40,7 +42,7 @@ func checkPlanDeliveryModel(t *testing.T, changed bool) {
 		t.Fatal(err)
 	}
 
-	response, err := quizModelResponseFromOutput(request, output)
+	response, err := quizmodel.ResponseFromOutput(request, output)
 	if changed {
 		if err == nil {
 			t.Fatal("changed hierarchy was accepted")
@@ -49,11 +51,11 @@ func checkPlanDeliveryModel(t *testing.T, changed bool) {
 		return
 	}
 
-	if err != nil || response.PlanTracking.Workflow == nil || ValidateQuizModelResponse(response) != nil {
+	if err != nil || response.PlanTracking.Workflow == nil || quizmodel.ValidateQuizModelResponse(response) != nil {
 		t.Fatal(response, err)
 	}
 
-	if quizModelOpenAIFormat(request).Name != "plan_delivery" {
+	if quizmodel.OutputFormat(request).Name != "plan_delivery" {
 		t.Fatal("native contracts used the legacy tracking schema")
 	}
 }

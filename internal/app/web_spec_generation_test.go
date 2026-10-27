@@ -1,5 +1,7 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"net/http"
 	"net/http/httptest"
@@ -9,8 +11,6 @@ import (
 	"strings"
 	"sync"
 	"testing"
-
-	"forge.adrianpk.com/chr/internal/core"
 )
 
 // Named generation is reachable from an empty catalog, remains read-only until
@@ -37,7 +37,7 @@ func TestWebSpecGeneration(t *testing.T) {
 		t.Fatal("project context was offered as a spec generation target")
 	}
 
-	model.responses = []core.QuizModelResponse{serviceQuizDraftSpecResponse("generated", serviceQuizClock()())}
+	model.responses = []quizmodel.QuizModelResponse{serviceQuizDraftSpecResponse("generated", serviceQuizClock()())}
 
 	form := url.Values{"action": {"spec.generate"}, "family": {"specs"}, "surface": {"spec"}, "modal": {"true"}, "confirm": {"true"}, "case_slug": {"named-work"}, "request_id": {"generate-named-spec"}}
 
@@ -98,7 +98,7 @@ func TestWebSpecGenerationBrowser(t *testing.T) {
 	}
 
 	provider, model := newWebQuizFixture(t)
-	model.responses = []core.QuizModelResponse{serviceQuizDraftSpecResponse("generated", serviceQuizClock()())}
+	model.responses = []quizmodel.QuizModelResponse{serviceQuizDraftSpecResponse("generated", serviceQuizClock()())}
 	gate := make(chan struct{})
 	release := sync.OnceFunc(func() { close(gate) })
 	handler := webQuizHandler(t, provider)
@@ -163,7 +163,7 @@ func TestWebSpecGenerationErrorBrowser(t *testing.T) {
 	provider, model := newWebQuizFixture(t)
 	response := serviceQuizDraftSpecResponse("invalid-path", serviceQuizClock()())
 	response.DraftSpec.Body = "Store app data in .chr/default/invented/data.json."
-	model.responses = []core.QuizModelResponse{response}
+	model.responses = []quizmodel.QuizModelResponse{response}
 
 	server := httptest.NewServer(webQuizHandler(t, provider))
 	defer server.Close()

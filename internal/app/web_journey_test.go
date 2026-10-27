@@ -1,5 +1,7 @@
 package app
 
+import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+
 import (
 	"net/http"
 	"net/url"
@@ -45,7 +47,7 @@ func newWebJourney(t *testing.T) *webJourney {
 
 	provider, model := webPlanFixture(t)
 	now := serviceQuizClock()()
-	model.responses = []core.QuizModelResponse{serviceQuizModelResponseWithCandidates("journey-batch", "question-1", now, []quizcore.Candidate{serviceQuizCandidate("question-2", "What verifies the output?", now)})}
+	model.responses = []quizmodel.QuizModelResponse{serviceQuizModelResponseWithCandidates("journey-batch", "question-1", now, []quizcore.Candidate{serviceQuizCandidate("question-2", "What verifies the output?", now)})}
 
 	return &webJourney{provider: provider, model: model, handler: webQuizHandler(t, provider)}
 }

@@ -1,4 +1,6 @@
-package core
+package model
+
+import slugcore "forge.adrianpk.com/chr/internal/core/ops/slug"
 
 import (
 	"bytes"
@@ -634,9 +636,7 @@ func normalizeQuizModelPlanOutlinePayload(payload QuizModelPlanOutlinePayload) Q
 	return normalized
 }
 
-func normalizeQuizModelPlanOutlineSlicePayload(
-	slice QuizModelPlanOutlineSlicePayload,
-) QuizModelPlanOutlineSlicePayload {
+func normalizeQuizModelPlanOutlineSlicePayload(slice QuizModelPlanOutlineSlicePayload) QuizModelPlanOutlineSlicePayload {
 	return QuizModelPlanOutlineSlicePayload{
 		ID:                     strings.TrimSpace(slice.ID),
 		ShortName:              strings.TrimSpace(slice.ShortName),
@@ -651,9 +651,7 @@ func normalizeQuizModelPlanOutlineSlicePayload(
 	}
 }
 
-func normalizeQuizModelPlanOutlineDependencyPayload(
-	dependency QuizModelPlanOutlineDependencyPayload,
-) QuizModelPlanOutlineDependencyPayload {
+func normalizeQuizModelPlanOutlineDependencyPayload(dependency QuizModelPlanOutlineDependencyPayload) QuizModelPlanOutlineDependencyPayload {
 	return QuizModelPlanOutlineDependencyPayload{
 		FromSliceID: strings.TrimSpace(dependency.FromSliceID),
 		ToSliceID:   strings.TrimSpace(dependency.ToSliceID),
@@ -661,10 +659,7 @@ func normalizeQuizModelPlanOutlineDependencyPayload(
 	}
 }
 
-func generatedPlanOutlineFromPayload(
-	scope quizcore.Scope,
-	payload QuizModelPlanOutlinePayload,
-) generationcore.GeneratedPlanOutline {
+func generatedPlanOutlineFromPayload(scope quizcore.Scope, payload QuizModelPlanOutlinePayload) generationcore.GeneratedPlanOutline {
 	outline := generationcore.GeneratedPlanOutline{
 		Scope:              scope,
 		Title:              payload.Title,
@@ -690,9 +685,7 @@ func generatedPlanOutlineFromPayload(
 }
 
 // ValidateQuizModelPlanSliceDetailPayload validates the corresponding package boundary value.
-func ValidateQuizModelPlanSliceDetailPayload(
-	payload QuizModelPlanSliceDetailPayload,
-) (QuizModelPlanSliceDetailPayload, error) {
+func ValidateQuizModelPlanSliceDetailPayload(payload QuizModelPlanSliceDetailPayload) (QuizModelPlanSliceDetailPayload, error) {
 	normalized := normalizeQuizModelPlanSliceDetailPayload(payload)
 	detail := generatedPlanSliceDetailFromPayload(quizcore.Scope{ProjectID: "payload-validation"}, normalized)
 
@@ -703,9 +696,7 @@ func ValidateQuizModelPlanSliceDetailPayload(
 	return normalized, nil
 }
 
-func normalizeQuizModelPlanSliceDetailPayload(
-	payload QuizModelPlanSliceDetailPayload,
-) QuizModelPlanSliceDetailPayload {
+func normalizeQuizModelPlanSliceDetailPayload(payload QuizModelPlanSliceDetailPayload) QuizModelPlanSliceDetailPayload {
 	normalized := QuizModelPlanSliceDetailPayload{
 		SliceID:                strings.TrimSpace(payload.SliceID),
 		ShortName:              strings.TrimSpace(payload.ShortName),
@@ -728,9 +719,7 @@ func normalizeQuizModelPlanSliceDetailPayload(
 	return normalized
 }
 
-func normalizeQuizModelPlanSliceTaskPayload(
-	task QuizModelPlanSliceTaskPayload,
-) QuizModelPlanSliceTaskPayload {
+func normalizeQuizModelPlanSliceTaskPayload(task QuizModelPlanSliceTaskPayload) QuizModelPlanSliceTaskPayload {
 	return QuizModelPlanSliceTaskPayload{
 		ID:         strings.TrimSpace(task.ID),
 		Summary:    strings.TrimSpace(task.Summary),
@@ -738,9 +727,7 @@ func normalizeQuizModelPlanSliceTaskPayload(
 	}
 }
 
-func normalizeQuizModelPlanSliceTicketMetadataPayload(
-	metadata QuizModelPlanSliceTicketMetadataPayload,
-) QuizModelPlanSliceTicketMetadataPayload {
+func normalizeQuizModelPlanSliceTicketMetadataPayload(metadata QuizModelPlanSliceTicketMetadataPayload) QuizModelPlanSliceTicketMetadataPayload {
 	return QuizModelPlanSliceTicketMetadataPayload{
 		Title:    strings.TrimSpace(metadata.Title),
 		Synopsis: strings.TrimSpace(metadata.Synopsis),
@@ -751,18 +738,13 @@ func normalizeQuizModelPlanSliceTicketMetadataPayload(
 	}
 }
 
-func normalizeQuizModelPlanSliceBranchMetadataPayload(
-	metadata QuizModelPlanSliceBranchMetadataPayload,
-) QuizModelPlanSliceBranchMetadataPayload {
+func normalizeQuizModelPlanSliceBranchMetadataPayload(metadata QuizModelPlanSliceBranchMetadataPayload) QuizModelPlanSliceBranchMetadataPayload {
 	return QuizModelPlanSliceBranchMetadataPayload{
 		BranchName: strings.TrimSpace(metadata.BranchName),
 	}
 }
 
-func generatedPlanSliceDetailFromPayload(
-	scope quizcore.Scope,
-	payload QuizModelPlanSliceDetailPayload,
-) generationcore.GeneratedPlanSliceDetail {
+func generatedPlanSliceDetailFromPayload(scope quizcore.Scope, payload QuizModelPlanSliceDetailPayload) generationcore.GeneratedPlanSliceDetail {
 	detail := generationcore.GeneratedPlanSliceDetail{
 		Scope:                  scope,
 		SliceID:                payload.SliceID,
@@ -787,9 +769,7 @@ func generatedPlanSliceDetailFromPayload(
 }
 
 // ValidateQuizModelPlanTrackingPayload validates the corresponding package boundary value.
-func ValidateQuizModelPlanTrackingPayload(
-	payload QuizModelPlanTrackingPayload,
-) (QuizModelPlanTrackingPayload, error) {
+func ValidateQuizModelPlanTrackingPayload(payload QuizModelPlanTrackingPayload) (QuizModelPlanTrackingPayload, error) {
 	normalized := QuizModelPlanTrackingPayload{
 		Title:  strings.TrimSpace(payload.Title),
 		Body:   strings.TrimSpace(payload.Body),
@@ -826,9 +806,7 @@ func ValidateQuizModelPlanTrackingPayload(
 }
 
 // ValidateQuizModelPlanTrackingTicketPayload validates the corresponding package boundary value.
-func ValidateQuizModelPlanTrackingTicketPayload(
-	payload QuizModelPlanTrackingTicketPayload,
-) (QuizModelPlanTrackingTicketPayload, error) {
+func ValidateQuizModelPlanTrackingTicketPayload(payload QuizModelPlanTrackingTicketPayload) (QuizModelPlanTrackingTicketPayload, error) {
 	normalized := QuizModelPlanTrackingTicketPayload{
 		SliceID:      strings.TrimSpace(payload.SliceID),
 		Title:        strings.TrimSpace(payload.Title),
@@ -1179,7 +1157,7 @@ func normalizeQuizModelTags(tags []string) []string {
 	seen := map[string]bool{}
 
 	for _, tag := range tags {
-		value := strings.ToLower(slugify(tag))
+		value := strings.ToLower(slugcore.Normalize(tag))
 		if value == "" || seen[value] {
 			continue
 		}

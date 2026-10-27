@@ -1,4 +1,4 @@
-package core
+package model
 
 import (
 	"sort"
@@ -76,10 +76,10 @@ func quizModelTrackingInstructions(request QuizModelRequest) string {
 	return quizModelPlanTrackingInstructions()
 }
 
-func quizModelTrackingFormat(request QuizModelRequest) openAIResponsesTextFormat {
+func quizModelTrackingFormat(request QuizModelRequest) OutputFormatDefinition {
 	if request.Strategy == QuizModelStrategyPlanDelivery {
-		return quizModelJSONSchemaTextFormat("plan_delivery", "Ticket contracts for the retained plan and declared order.", planDeliveryJSONSchema())
+		return NewOutputFormat("plan_delivery", "Ticket contracts for the retained plan and declared order.", planDeliveryJSONSchema())
 	}
 
-	return quizModelJSONSchemaTextFormat("plan_tracking_artifacts", "Plan tracking and ticket payloads derived from an existing implementation plan.", quizModelPlanTrackingJSONSchema())
+	return NewOutputFormat("plan_tracking_artifacts", "Plan tracking and ticket payloads derived from an existing implementation plan.", quizModelPlanTrackingJSONSchema())
 }
