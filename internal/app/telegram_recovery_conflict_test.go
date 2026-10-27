@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // TestTelegramRecoveryRemote detects a competing remote poller at the real
@@ -30,7 +30,7 @@ func TestTelegramRecoveryRemote(t *testing.T) {
 	}))
 	defer server.Close()
 
-	receiver, _ := telegramAppTestReceiver(t, core.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
+	receiver, _ := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
 
 	_, err := receiver.step(t.Context())
 	if err != nil && strings.Contains(err.Error(), "private") {

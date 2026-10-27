@@ -193,52 +193,52 @@
     },
     {
       "id": "internal/app/telegram_authoring_command.go::parseTelegramAuthoring",
-      "signature": "func(update core.TelegramReceivedUpdate) (telegramAuthoringCommand, bool, error)",
+      "signature": "func(update telegramcore.TelegramReceivedUpdate) (telegramAuthoringCommand, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_authoring_command.go::telegramIntentAuthoring",
-      "signature": "func(update core.TelegramReceivedUpdate, intent ConversationIntent) (telegramAuthoringCommand, bool, error)",
+      "signature": "func(update telegramcore.TelegramReceivedUpdate, intent ConversationIntent) (telegramAuthoringCommand, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_confirmation_document.go::telegramReceiver.offerConfirmationDocument",
-      "signature": "func(ctx context.Context, request core.TelegramOperationRequest, offer core.TelegramActionOffer, family, text, complete string) error",
+      "signature": "func(ctx context.Context, request telegramcore.TelegramOperationRequest, offer telegramcore.TelegramActionOffer, family, text, complete string) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_control_command.go::parseTelegramControl",
-      "signature": "func(update core.TelegramReceivedUpdate) (telegramControlCommand, bool, error)",
+      "signature": "func(update telegramcore.TelegramReceivedUpdate) (telegramControlCommand, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_control_command.go::telegramIntentControl",
-      "signature": "func(update core.TelegramReceivedUpdate, intent ConversationIntent) (telegramControlCommand, bool, error)",
+      "signature": "func(update telegramcore.TelegramReceivedUpdate, intent ConversationIntent) (telegramControlCommand, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_control_intent.go::telegramReceiver.intentControlTarget",
-      "signature": "func(ctx context.Context, input core.TelegramConversationInput, intent ConversationIntent) (core.TelegramOperationTarget, bool, error)",
+      "signature": "func(ctx context.Context, input telegramcore.TelegramConversationInput, intent ConversationIntent) (telegramcore.TelegramOperationTarget, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_control_intent.go::telegramReceiver.intentNativeWorkTarget",
-      "signature": "func(ctx context.Context, input core.TelegramConversationInput, intent ConversationIntent) (core.TelegramOperationTarget, bool, error)",
+      "signature": "func(ctx context.Context, input telegramcore.TelegramConversationInput, intent ConversationIntent) (telegramcore.TelegramOperationTarget, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_control_service.go::telegramControlService.ReadTelegramControlReceipt",
-      "signature": "func(context.Context, core.TelegramOperationTarget, workflowstate.MutationBinding, WorkflowControlRequest) (WorkflowWorkStatus, bool, error)",
+      "signature": "func(context.Context, telegramcore.TelegramOperationTarget, workflowstate.MutationBinding, WorkflowControlRequest) (WorkflowWorkStatus, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 7 shared binding qualification; see slice-7-signatures ledger."
     },
     {
       "id": "internal/app/telegram_control_service.go::service.ReadTelegramControlReceipt",
-      "signature": "func(ctx context.Context, target core.TelegramOperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest) (WorkflowWorkStatus, bool, error)",
+      "signature": "func(ctx context.Context, target telegramcore.TelegramOperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest) (WorkflowWorkStatus, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 7 shared binding qualification; see slice-7-signatures ledger."
     },
     {
       "id": "internal/app/telegram_conversation.go::telegramConversationInput",
-      "signature": "func(update core.TelegramReceivedUpdate) (core.TelegramConversationInput, bool, string)",
+      "signature": "func(update telegramcore.TelegramReceivedUpdate) (telegramcore.TelegramConversationInput, bool, string)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -248,27 +248,27 @@
     },
     {
       "id": "internal/app/telegram_document_results.go::telegramDocumentForTarget",
-      "signature": "func(target core.TelegramOperationTarget, ref, hash, filename, mediaType string, payload []byte) tgmessage.Document",
+      "signature": "func(target telegramcore.TelegramOperationTarget, ref, hash, filename, mediaType string, payload []byte) tgmessage.Document",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger."
     },
     {
       "id": "internal/app/telegram_explanation_command.go::parseTelegramExplanation",
-      "signature": "func(update core.TelegramReceivedUpdate) (telegramExplanationCommand, bool, error)",
+      "signature": "func(update telegramcore.TelegramReceivedUpdate) (telegramExplanationCommand, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_explanation_command.go::telegramIntentExplanation",
-      "signature": "func(update core.TelegramReceivedUpdate, intent ConversationIntent) (telegramExplanationCommand, bool, error)",
+      "signature": "func(update telegramcore.TelegramReceivedUpdate, intent ConversationIntent) (telegramExplanationCommand, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_guided_action.go::telegramReceiver.prepareGuidedAction",
-      "signature": "func(ctx context.Context, claim core.TelegramActionClaim) (telegramGuidedInput, core.TelegramReceiverConfig, error)",
+      "signature": "func(ctx context.Context, claim telegramcore.TelegramActionClaim) (telegramGuidedInput, telegramcore.TelegramReceiverConfig, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_guided_apply.go::telegramGuidedResult",
-      "signature": "func(observed GuidedUseCaseInspection) (core.TelegramGuidedProgress, json.RawMessage, error)",
+      "signature": "func(observed GuidedUseCaseInspection) (telegramcore.TelegramGuidedProgress, json.RawMessage, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -283,27 +283,27 @@
     },
     {
       "id": "internal/app/telegram_guided_selection.go::telegramReceiver.resolveTelegramGuidedInput",
-      "signature": "func(ctx context.Context, user core.TelegramAllowedUser, config core.TelegramReceiverConfig, update core.TelegramReceivedUpdate) (core.TelegramConversationInput, bool, error)",
+      "signature": "func(ctx context.Context, user telegramcore.TelegramAllowedUser, config telegramcore.TelegramReceiverConfig, update telegramcore.TelegramReceivedUpdate) (telegramcore.TelegramConversationInput, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_harness_action.go::telegramReceiver.finishHarnessAction",
-      "signature": "func(ctx context.Context, claim core.TelegramActionClaim, config core.TelegramReceiverConfig, state string, snapshot *core.HarnessSelectionSnapshot, text string) error",
+      "signature": "func(ctx context.Context, claim telegramcore.TelegramActionClaim, config telegramcore.TelegramReceiverConfig, state string, snapshot *core.HarnessSelectionSnapshot, text string) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_harness_command.go::parseTelegramHarness",
-      "signature": "func(update core.TelegramReceivedUpdate) (telegramHarnessChoices, bool, error)",
+      "signature": "func(update telegramcore.TelegramReceivedUpdate) (telegramHarnessChoices, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_harness_prepare.go::telegramReceiver.prepareHarnessChange",
-      "signature": "func(ctx context.Context, operations telegramHarnessService, user core.TelegramAllowedUser, input core.TelegramConversationInput, target core.TelegramOperationTarget, choices telegramHarnessChoices) error",
+      "signature": "func(ctx context.Context, operations telegramHarnessService, user telegramcore.TelegramAllowedUser, input telegramcore.TelegramConversationInput, target telegramcore.TelegramOperationTarget, choices telegramHarnessChoices) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_harness_prepare.go::telegramReceiver.reserveHarnessChange",
-      "signature": "func(ctx context.Context, operations telegramHarnessService, user core.TelegramAllowedUser, input core.TelegramConversationInput, target core.TelegramOperationTarget, choices telegramHarnessChoices) (core.TelegramOperationRequest, error)",
+      "signature": "func(ctx context.Context, operations telegramHarnessService, user telegramcore.TelegramAllowedUser, input telegramcore.TelegramConversationInput, target telegramcore.TelegramOperationTarget, choices telegramHarnessChoices) (telegramcore.TelegramOperationRequest, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -313,32 +313,32 @@
     },
     {
       "id": "internal/app/telegram_intent_dispatch.go::telegramReceiver.intentContext",
-      "signature": "func(ctx context.Context, input core.TelegramConversationInput) (ConversationIntentContext, string, error)",
+      "signature": "func(ctx context.Context, input telegramcore.TelegramConversationInput) (ConversationIntentContext, string, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_intent_guard.go::telegramReceiver.intentTarget",
-      "signature": "func(ctx context.Context, input core.TelegramConversationInput, intent ConversationIntent) (core.TelegramOperationTarget, bool, error)",
+      "signature": "func(ctx context.Context, input telegramcore.TelegramConversationInput, intent ConversationIntent) (telegramcore.TelegramOperationTarget, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_intent_guard.go::telegramReceiver.intentPreparationTarget",
-      "signature": "func(ctx context.Context, input core.TelegramConversationInput, intent ConversationIntent) (core.TelegramOperationTarget, bool, error)",
+      "signature": "func(ctx context.Context, input telegramcore.TelegramConversationInput, intent ConversationIntent) (telegramcore.TelegramOperationTarget, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_intent_registry.go::telegramIntentConversation",
-      "signature": "func(update core.TelegramReceivedUpdate, intent ConversationIntent) (core.TelegramConversationInput, bool, error)",
+      "signature": "func(update telegramcore.TelegramReceivedUpdate, intent ConversationIntent) (telegramcore.TelegramConversationInput, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_intent_registry.go::telegramIntentRecord",
-      "signature": "func(update core.TelegramReceivedUpdate, intent ConversationIntent) (telegramRecordCommand, bool, error)",
+      "signature": "func(update telegramcore.TelegramReceivedUpdate, intent ConversationIntent) (telegramRecordCommand, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_lifecycle.go::startTelegramReceiverHosts",
-      "signature": "func(ctx context.Context, hosts []func(context.Context) error) (\u003c-chan error, \u003c-chan struct{})",
+      "signature": "func(ctx context.Context, hosts []func(context.Context) error) (<-chan error, <-chan struct{})",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -348,32 +348,32 @@
     },
     {
       "id": "internal/app/telegram_prepared_work_command.go::parseTelegramPreparedWork",
-      "signature": "func(update core.TelegramReceivedUpdate) (core.TelegramConversationInput, bool, error)",
+      "signature": "func(update telegramcore.TelegramReceivedUpdate) (telegramcore.TelegramConversationInput, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_prepared_work_command.go::telegramIntentPreparedWork",
-      "signature": "func(update core.TelegramReceivedUpdate, intent ConversationIntent) (core.TelegramConversationInput, bool, error)",
+      "signature": "func(update telegramcore.TelegramReceivedUpdate, intent ConversationIntent) (telegramcore.TelegramConversationInput, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_prepared_work_dispatch.go::telegramReceiver.preparedWorkInput",
-      "signature": "func(ctx context.Context, operations telegramAuthoringService, input core.TelegramConversationInput, c core.TelegramConversation, target core.TelegramOperationTarget, operator string) (AuthoringWorkRequest, error)",
+      "signature": "func(ctx context.Context, operations telegramAuthoringService, input telegramcore.TelegramConversationInput, c telegramcore.TelegramConversation, target telegramcore.TelegramOperationTarget, operator string) (AuthoringWorkRequest, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_record_command.go::parseTelegramRecord",
-      "signature": "func(update core.TelegramReceivedUpdate) (telegramRecordCommand, bool, error)",
+      "signature": "func(update telegramcore.TelegramReceivedUpdate) (telegramRecordCommand, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_work_command.go::parseTelegramWork",
-      "signature": "func(update core.TelegramReceivedUpdate) (telegramWorkCommand, bool, error)",
+      "signature": "func(update telegramcore.TelegramReceivedUpdate) (telegramWorkCommand, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/app/telegram_work_command.go::telegramIntentWork",
-      "signature": "func(update core.TelegramReceivedUpdate, intent ConversationIntent) (telegramWorkCommand, bool, error)",
+      "signature": "func(update telegramcore.TelegramReceivedUpdate, intent ConversationIntent) (telegramWorkCommand, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -752,332 +752,332 @@
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_action_answer.go::TelegramReceiverStore.ResolveTelegramActionAnswer",
+      "id": "internal/core/telegram/action_answer.go::TelegramReceiverStore.ResolveTelegramActionAnswer",
       "signature": "func(ctx context.Context, update TelegramReceivedUpdate) (TelegramActionAnswer, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_action_answer.go::checkTelegramActionAnswer",
+      "id": "internal/core/telegram/action_answer.go::checkTelegramActionAnswer",
       "signature": "func(answer TelegramActionAnswer) (TelegramActionAnswer, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_action_answer.go::TelegramReceiverStore.telegramReplyActionAnswer",
+      "id": "internal/core/telegram/action_answer.go::TelegramReceiverStore.telegramReplyActionAnswer",
       "signature": "func(ctx context.Context, update TelegramReceivedUpdate, text string) (TelegramActionAnswer, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_action_finish.go::telegramActionResponseSource",
+      "id": "internal/core/telegram/action_finish.go::telegramActionResponseSource",
       "signature": "func(ctx context.Context, tx *sql.Tx, claim TelegramActionClaim, result TelegramActionResult) (TelegramReceivedUpdate, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_action_presentation.go::telegramActionManifestValid",
+      "id": "internal/core/telegram/action_presentation.go::telegramActionManifestValid",
       "signature": "func(payload, hash, configDigest string, delivery *TelegramReceiverDelivery, action TelegramAction, request TelegramOperationRequest) bool",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_authoring_finish.go::TelegramReceiverStore.FinishTelegramAuthoring",
+      "id": "internal/core/telegram/authoring_finish.go::TelegramReceiverStore.FinishTelegramAuthoring",
       "signature": "func(ctx context.Context, request TelegramOperationRequest, progress TelegramAuthoringProgress, receipt string, facts json.RawMessage, text, configDigest string, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_authoring_target.go::TelegramReceiverStore.ResolveTelegramAuthoringTarget",
+      "id": "internal/core/telegram/authoring_target.go::TelegramReceiverStore.ResolveTelegramAuthoringTarget",
       "signature": "func(ctx context.Context, input TelegramConversationInput) (conversation TelegramConversation, target TelegramOperationTarget, err error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_authoring_work_request.go::TelegramReceiverStore.LatestTelegramAuthoringWork",
+      "id": "internal/core/telegram/authoring_work_request.go::TelegramReceiverStore.LatestTelegramAuthoringWork",
       "signature": "func(ctx context.Context, input TelegramConversationInput, target TelegramOperationTarget) (TelegramOperationRequest, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_conversation.go::telegramConversationTransaction.apply",
+      "id": "internal/core/telegram/conversation.go::telegramConversationTransaction.apply",
       "signature": "func() (string, *TelegramConversation, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_conversation.go::telegramConversationTransaction.peerSelection",
+      "id": "internal/core/telegram/conversation.go::telegramConversationTransaction.peerSelection",
       "signature": "func() (string, string, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_conversation.go::telegramConversationTransaction.selectProject",
+      "id": "internal/core/telegram/conversation.go::telegramConversationTransaction.selectProject",
       "signature": "func() (string, *TelegramConversation, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_conversation.go::telegramConversationTransaction.start",
+      "id": "internal/core/telegram/conversation.go::telegramConversationTransaction.start",
       "signature": "func() (string, *TelegramConversation, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_conversation.go::telegramConversationTransaction.insertConversation",
+      "id": "internal/core/telegram/conversation.go::telegramConversationTransaction.insertConversation",
       "signature": "func(project projectcore.Project, binding, namespace string) (string, *TelegramConversation, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger."
     },
     {
-      "id": "internal/core/telegram_conversation_capture.go::telegramConversationTransaction.applyCapture",
+      "id": "internal/core/telegram/conversation_capture.go::telegramConversationTransaction.applyCapture",
       "signature": "func() (string, *TelegramConversation, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_conversation_capture.go::telegramConversationTransaction.applyCaptureAction",
+      "id": "internal/core/telegram/conversation_capture.go::telegramConversationTransaction.applyCaptureAction",
       "signature": "func(c *TelegramConversation) (string, *TelegramConversation, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_conversation_capture.go::telegramConversationTransaction.appendCapture",
+      "id": "internal/core/telegram/conversation_capture.go::telegramConversationTransaction.appendCapture",
       "signature": "func(c *TelegramConversation) (string, *TelegramConversation, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_conversation_capture.go::telegramConversationTransaction.finishCapture",
+      "id": "internal/core/telegram/conversation_capture.go::telegramConversationTransaction.finishCapture",
       "signature": "func(c *TelegramConversation) (string, *TelegramConversation, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_conversation_capture.go::telegramConversationTransaction.cancelCapture",
+      "id": "internal/core/telegram/conversation_capture.go::telegramConversationTransaction.cancelCapture",
       "signature": "func(c *TelegramConversation) (string, *TelegramConversation, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_conversation_reference.go::TelegramReceiverStore.TelegramConversationReference",
+      "id": "internal/core/telegram/conversation_reference.go::TelegramReceiverStore.TelegramConversationReference",
       "signature": "func(ctx context.Context, peer TelegramPeerIdentity, id string) (TelegramConversation, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_conversation_target.go::telegramConversationTransaction.focus",
+      "id": "internal/core/telegram/conversation_target.go::telegramConversationTransaction.focus",
       "signature": "func() (string, *TelegramConversation, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_conversation_target.go::telegramConversationTransaction.list",
+      "id": "internal/core/telegram/conversation_target.go::telegramConversationTransaction.list",
       "signature": "func() (string, *TelegramConversation, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_document_http.go::TelegramReceiverAPI.SendDocument",
+      "id": "internal/core/telegram/document_http.go::TelegramReceiverAPI.SendDocument",
       "signature": "func(ctx context.Context, token string, peer TelegramPeerIdentity, document tgmessage.Document, caption string, entities []tgmessage.Entity, actionToken string, choices []string, labels ...[]string) (tgmessage.Acknowledgement, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger."
     },
     {
-      "id": "internal/core/telegram_document_http.go::telegramDocumentMultipart",
+      "id": "internal/core/telegram/document_http.go::telegramDocumentMultipart",
       "signature": "func(peer TelegramPeerIdentity, document tgmessage.Document, caption string, entities []tgmessage.Entity, keyboard *telegramInlineKeyboard) ([]byte, string, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger."
     },
     {
-      "id": "internal/core/telegram_document_http.go::telegramDocumentMultipartDestination",
+      "id": "internal/core/telegram/document_http.go::telegramDocumentMultipartDestination",
       "signature": "func(destination string, topic int64, document tgmessage.Document, caption string, entities []tgmessage.Entity, keyboard *telegramInlineKeyboard) ([]byte, string, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger."
     },
     {
-      "id": "internal/core/telegram_document_outbox.go::queueTelegramDocument",
+      "id": "internal/core/telegram/document_outbox.go::queueTelegramDocument",
       "signature": "func(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, response tgmessage.DocumentResponse, configDigest string, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger."
     },
     {
-      "id": "internal/core/telegram_document_outbox.go::bindTelegramDocumentImage",
+      "id": "internal/core/telegram/document_outbox.go::bindTelegramDocumentImage",
       "signature": "func(ctx context.Context, tx *sql.Tx, deliveryID string, peer TelegramPeerIdentity, response tgmessage.DocumentResponse, configDigest string, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger."
     },
     {
-      "id": "internal/core/telegram_document_outbox.go::retainTelegramDocument",
+      "id": "internal/core/telegram/document_outbox.go::retainTelegramDocument",
       "signature": "func(ctx context.Context, tx *sql.Tx, id, owner string, peer TelegramPeerIdentity, configDigest string, document tgmessage.Document, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger."
     },
     {
-      "id": "internal/core/telegram_document_result.go::queueTelegramOperationResult",
+      "id": "internal/core/telegram/document_result.go::queueTelegramOperationResult",
       "signature": "func(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, text, receipt, configDigest string, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_guided_binding.go::TelegramReceiverStore.ReserveTelegramGuidedConversation",
+      "id": "internal/core/telegram/guided_binding.go::TelegramReceiverStore.ReserveTelegramGuidedConversation",
       "signature": "func(ctx context.Context, input TelegramConversationInput, now time.Time) (conversation TelegramConversation, target TelegramOperationTarget, err error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_guided_binding.go::TelegramReceiverStore.BindTelegramGuidedConversation",
+      "id": "internal/core/telegram/guided_binding.go::TelegramReceiverStore.BindTelegramGuidedConversation",
       "signature": "func(ctx context.Context, input TelegramConversationInput, association TelegramGuidedAssociation, now time.Time) (TelegramConversation, TelegramOperationTarget, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 7 validated routing projection."
     },
     {
-      "id": "internal/core/telegram_guided_binding.go::TelegramReceiverStore.reserveTelegramGuidedAssociation",
+      "id": "internal/core/telegram/guided_binding.go::TelegramReceiverStore.reserveTelegramGuidedAssociation",
       "signature": "func(ctx context.Context, input TelegramConversationInput, runID string, now time.Time) (conversation TelegramConversation, target TelegramOperationTarget, err error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_guided_binding.go::TelegramReceiverStore.ResolveTelegramGuidedTarget",
+      "id": "internal/core/telegram/guided_binding.go::TelegramReceiverStore.ResolveTelegramGuidedTarget",
       "signature": "func(ctx context.Context, input TelegramConversationInput) (conversation TelegramConversation, target TelegramOperationTarget, err error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_guided_finish.go::TelegramReceiverStore.FinishTelegramGuided",
+      "id": "internal/core/telegram/guided_finish.go::TelegramReceiverStore.FinishTelegramGuided",
       "signature": "func(ctx context.Context, request TelegramOperationRequest, progress TelegramGuidedProgress, facts json.RawMessage, text, configDigest string, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_guided_projection.go::TelegramReceiverStore.ProjectTelegramGuided",
+      "id": "internal/core/telegram/guided_projection.go::TelegramReceiverStore.ProjectTelegramGuided",
       "signature": "func(ctx context.Context, ref TelegramGuidedReference, progress TelegramGuidedProgress, message tgmessage.Blocks, delivery *tgmessage.DocumentResponse, configDigest string, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger."
     },
     {
-      "id": "internal/core/telegram_guided_projection.go::telegramGuidedProjectionReady",
+      "id": "internal/core/telegram/guided_projection.go::telegramGuidedProjectionReady",
       "signature": "func(ctx context.Context, tx *sql.Tx, ref TelegramGuidedReference, progress TelegramGuidedProgress) (TelegramConversation, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_guided_projection.go::bindTelegramGuidedNoticeDocument",
+      "id": "internal/core/telegram/guided_projection.go::bindTelegramGuidedNoticeDocument",
       "signature": "func(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, key string, message tgmessage.Blocks, delivery *tgmessage.DocumentResponse, configDigest string, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger."
     },
     {
-      "id": "internal/core/telegram_help_outbox.go::TelegramReceiverStore.QueueFormattedReadResponse",
+      "id": "internal/core/telegram/help_outbox.go::TelegramReceiverStore.QueueFormattedReadResponse",
       "signature": "func(ctx context.Context, update TelegramReceivedUpdate, text, plain, configDigest string, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_interpretation.go::TelegramReceiverStore.reserveTelegramInterpretation",
+      "id": "internal/core/telegram/interpretation.go::TelegramReceiverStore.reserveTelegramInterpretation",
       "signature": "func(ctx context.Context, update TelegramReceivedUpdate, now time.Time) (TelegramInterpretation, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_operation_model.go::TelegramReceiverStore.reserveTelegramOperationModel",
+      "id": "internal/core/telegram/operation_model.go::TelegramReceiverStore.reserveTelegramOperationModel",
       "signature": "func(ctx context.Context, request TelegramOperationRequest, now time.Time) (TelegramOperationModel, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_operation_request.go::TelegramReceiverStore.TelegramOperation",
+      "id": "internal/core/telegram/operation_request.go::TelegramReceiverStore.TelegramOperation",
       "signature": "func(ctx context.Context, update TelegramReceivedUpdate, ordinal int) (TelegramOperationRequest, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_operation_transition.go::TelegramReceiverStore.FinishTelegramOperation",
+      "id": "internal/core/telegram/operation_transition.go::TelegramReceiverStore.FinishTelegramOperation",
       "signature": "func(ctx context.Context, request TelegramOperationRequest, state, receipt string, facts json.RawMessage, text, configDigest string, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_operation_transition.go::finishTelegramOperation",
+      "id": "internal/core/telegram/operation_transition.go::finishTelegramOperation",
       "signature": "func(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, state, receipt string, facts json.RawMessage, text, configDigest string, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_presentation_outbox.go::queueTelegramPresentation",
+      "id": "internal/core/telegram/presentation_outbox.go::queueTelegramPresentation",
       "signature": "func(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, message tgmessage.Blocks, configDigest string, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger."
     },
     {
-      "id": "internal/core/telegram_processing_lane.go::telegramInputLane",
+      "id": "internal/core/telegram/processing_lane.go::telegramInputLane",
       "signature": "func(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate) (TelegramProcessingLane, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_processing_lane.go::telegramActionInputLane",
+      "id": "internal/core/telegram/processing_lane.go::telegramActionInputLane",
       "signature": "func(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, token string) (TelegramProcessingLane, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_processing_lane.go::telegramUnboundReplyLane",
+      "id": "internal/core/telegram/processing_lane.go::telegramUnboundReplyLane",
       "signature": "func(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate) (TelegramProcessingLane, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_processing_lane.go::telegramInputActionToken",
+      "id": "internal/core/telegram/processing_lane.go::telegramInputActionToken",
       "signature": "func(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate) (string, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_receiver_action_http.go::TelegramReceiverAPI.SendAction",
+      "id": "internal/core/telegram/receiver_action_http.go::TelegramReceiverAPI.SendAction",
       "signature": "func(ctx context.Context, token string, peer TelegramPeerIdentity, text, actionToken string, choices []string) (int64, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_receiver_action_http.go::TelegramReceiverAPI.sendAction",
+      "id": "internal/core/telegram/receiver_action_http.go::TelegramReceiverAPI.sendAction",
       "signature": "func(ctx context.Context, token string, peer TelegramPeerIdentity, text, parseMode, actionToken string, choices []string, entities []tgmessage.Entity, labels ...[]string) (int64, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger."
     },
     {
-      "id": "internal/core/telegram_receiver_action_http.go::TelegramReceiverAPI.SendActionPresentation",
+      "id": "internal/core/telegram/receiver_action_http.go::TelegramReceiverAPI.SendActionPresentation",
       "signature": "func(ctx context.Context, token string, peer TelegramPeerIdentity, text string, entities []tgmessage.Entity, actionToken string, choices, labels []string) (int64, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger."
     },
     {
-      "id": "internal/core/telegram_receiver_config_yaml.go::telegramConfigParser.fieldHeader",
+      "id": "internal/core/telegram/receiver_config_yaml.go::telegramConfigParser.fieldHeader",
       "signature": "func(line string) (string, string, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_receiver_http.go::TelegramReceiverAPI.callBody",
+      "id": "internal/core/telegram/receiver_http.go::TelegramReceiverAPI.callBody",
       "signature": "func(ctx context.Context, token, method string, body io.Reader, contentType string, timeout time.Duration) (json.RawMessage, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_receiver_http.go::TelegramReceiverAPI.postBody",
+      "id": "internal/core/telegram/receiver_http.go::TelegramReceiverAPI.postBody",
       "signature": "func(ctx context.Context, token, method string, body io.Reader, contentType string, timeout time.Duration) (json.RawMessage, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_receiver_inbox.go::retainTelegramBatchUpdates",
+      "id": "internal/core/telegram/receiver_inbox.go::retainTelegramBatchUpdates",
       "signature": "func(ctx context.Context, tx *sql.Tx, botID, epoch int64, next sql.NullInt64, updates []TelegramReceivedUpdate, now time.Time) (sql.NullInt64, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_receiver_inbox.go::retainTelegramUpdate",
+      "id": "internal/core/telegram/receiver_inbox.go::retainTelegramUpdate",
       "signature": "func(ctx context.Context, tx *sql.Tx, botID, epoch int64, update TelegramReceivedUpdate, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_receiver_outbox.go::TelegramReceiverStore.QueueReferencedResponse",
+      "id": "internal/core/telegram/receiver_outbox.go::TelegramReceiverStore.QueueReferencedResponse",
       "signature": "func(ctx context.Context, update TelegramReceivedUpdate, text, reference, configDigest string, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_receiver_outbox.go::queueTelegramResponse",
+      "id": "internal/core/telegram/receiver_outbox.go::queueTelegramResponse",
       "signature": "func(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, text, configDigest string, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_receiver_outbox.go::queueTelegramReferencedResponse",
+      "id": "internal/core/telegram/receiver_outbox.go::queueTelegramReferencedResponse",
       "signature": "func(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, text, reference, configDigest string, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_receiver_outbox.go::queueTelegramResponseParts",
+      "id": "internal/core/telegram/receiver_outbox.go::queueTelegramResponseParts",
       "signature": "func(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, parts []string, configDigest string, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_receiver_store.go::telegramFailureState",
+      "id": "internal/core/telegram/receiver_store.go::telegramFailureState",
       "signature": "func(failure error, attempt int) (string, bool, time.Duration)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_reply_resolution.go::TelegramReceiverStore.telegramUnboundReply",
+      "id": "internal/core/telegram/reply_resolution.go::TelegramReceiverStore.telegramUnboundReply",
       "signature": "func(ctx context.Context, update TelegramReceivedUpdate) (TelegramActionAnswer, bool, error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_work_projection.go::projectTelegramWork",
+      "id": "internal/core/telegram/work_projection.go::projectTelegramWork",
       "signature": "func(ctx context.Context, tx *sql.Tx, ref TelegramWorkReference, observation TelegramWorkObservation, configDigest string, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_work_projection.go::queueTelegramWorkObservation",
+      "id": "internal/core/telegram/work_projection.go::queueTelegramWorkObservation",
       "signature": "func(ctx context.Context, tx *sql.Tx, ref TelegramWorkReference, observation TelegramWorkObservation, configDigest string, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_work_projection.go::insertTelegramWorkNotice",
+      "id": "internal/core/telegram/work_projection.go::insertTelegramWorkNotice",
       "signature": "func(ctx context.Context, tx *sql.Tx, ref TelegramWorkReference, kind, key, text, configDigest string, part, parts int, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_work_reference.go::scanTelegramWorkReferences",
+      "id": "internal/core/telegram/work_reference.go::scanTelegramWorkReferences",
       "signature": "func(rows *sql.Rows) (result []TelegramWorkReference, ids []string, err error)",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/telegram_work_status.go::TelegramReceiverStore.QueueTelegramWorkStatus",
+      "id": "internal/core/telegram/work_status.go::TelegramReceiverStore.QueueTelegramWorkStatus",
       "signature": "func(ctx context.Context, input TelegramConversationInput, target TelegramOperationTarget, invocation string, message tgmessage.Blocks, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger."
     },

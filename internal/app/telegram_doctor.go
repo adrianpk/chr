@@ -14,6 +14,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 func (factory commandFactory) telegramDoctorCommand() *cli.Command {
@@ -21,23 +22,23 @@ func (factory commandFactory) telegramDoctorCommand() *cli.Command {
 		Name: "doctor", Usage: "Check local project/provider readiness; optional getMe/webhook checks send no message",
 		Flags: append(projectRegistryFlags(), &cli.BoolFlag{Name: "check-connection"}),
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			return factory.runTelegramDoctor(ctx, cmd, core.NewTelegramReceiverAPI())
+			return factory.runTelegramDoctor(ctx, cmd, telegramcore.NewTelegramReceiverAPI())
 		},
 	}
 }
 
-func (factory commandFactory) runTelegramDoctor(ctx context.Context, cmd *cli.Command, api core.TelegramReceiverAPI) (err error) {
+func (factory commandFactory) runTelegramDoctor(ctx context.Context, cmd *cli.Command, api telegramcore.TelegramReceiverAPI) (err error) {
 	env, err := newUserEnvironmentFromCommand(cmd)
 	if err != nil {
 		return err
 	}
 
-	config, err := core.LoadTelegramReceiverConfig(env)
+	config, err := telegramcore.LoadTelegramReceiverConfig(env)
 	if err != nil {
 		return errors.New("telegram configuration is unavailable or invalid; run telegram setup")
 	}
 
-	token, err := core.TelegramReceiverToken(env, config)
+	token, err := telegramcore.TelegramReceiverToken(env, config)
 	if err != nil {
 		return errors.New("telegram token reference is unavailable or invalid; correct private configuration")
 	}
@@ -61,28 +62,28 @@ func (factory commandFactory) runTelegramDoctor(ctx context.Context, cmd *cli.Co
 	return telegramDoctorFailure(checkTelegramConnection(ctx, env, token, api, factory.io.Stdout))
 }
 
-func checkTelegramConnection(ctx context.Context, env core.UserEnvironment, token string, api core.TelegramReceiverAPI, stdout io.Writer) (err error) {
+func checkTelegramConnection(ctx context.Context, env core.UserEnvironment, token string, api telegramcore.TelegramReceiverAPI, stdout io.Writer) (err error) {
 	botID, err := api.CheckConnection(ctx, token)
 	if err != nil {
 		return err
 	}
 
-	bound, bindingErr := core.TelegramBoundBotID(env)
+	bound, bindingErr := telegramcore.TelegramBoundBotID(env)
 	if bindingErr != nil && !errors.Is(bindingErr, os.ErrNotExist) {
 		return bindingErr
 	}
 
 	if bound != 0 && bound != botID {
-		return &core.TelegramAPIError{Code: "bot_identity_changed", Permanent: true}
+		return &telegramcore.TelegramAPIError{Code: "bot_identity_changed", Permanent: true}
 	}
 
-	configurationLock, err := core.AcquireTelegramConfigurationLock(env)
+	configurationLock, err := telegramcore.AcquireTelegramConfigurationLock(env)
 	if err != nil {
 		return err
 	}
 	defer func() { err = errors.Join(err, configurationLock.Close()) }()
 
-	lock, err := core.AcquireTelegramReceiverLock(env, botID)
+	lock, err := telegramcore.AcquireTelegramReceiverLock(env, botID)
 	if err != nil {
 		return err
 	}
@@ -93,7 +94,7 @@ func checkTelegramConnection(ctx context.Context, env core.UserEnvironment, toke
 	return err
 }
 
-func printTelegramProjectReadiness(stdout io.Writer, operations service, config core.TelegramReceiverConfig) error {
+func printTelegramProjectReadiness(stdout io.Writer, operations service, config telegramcore.TelegramReceiverConfig) error {
 	ids := telegramDoctorProjectIDs(config)
 
 	projects, err := operations.ListRegisteredProjects(ids)
@@ -125,7 +126,7 @@ func telegramDoctorFailure(err error) error {
 		return nil
 	}
 
-	var apiFailure *core.TelegramAPIError
+	var apiFailure *telegramcore.TelegramAPIError
 	if errors.As(err, &apiFailure) {
 		remedies := map[string]string{
 			"bot_identity_changed":    "run setup --replace only after confirming the intended bot",
@@ -174,7 +175,7 @@ func printTelegramProviderReadiness(stdout io.Writer) error {
 	return nil
 }
 
-func telegramDoctorProjectIDs(config core.TelegramReceiverConfig) []string {
+func telegramDoctorProjectIDs(config telegramcore.TelegramReceiverConfig) []string {
 	var ids []string
 
 	for _, user := range config.AllowedUsers {

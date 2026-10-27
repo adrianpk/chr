@@ -4,10 +4,11 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 type telegramExplanationCommand struct {
-	Input        core.TelegramConversationInput
+	Input        telegramcore.TelegramConversationInput
 	Question     string
 	DocumentKind core.AuthoringArtifactKind
 }
@@ -24,8 +25,8 @@ func telegramExplanationUsage() string {
 	return "/" + telegramExplanationRegistry()[0].ID + " [--project <id>|--conversation <id>] <question>"
 }
 
-func parseTelegramExplanation(update core.TelegramReceivedUpdate) (telegramExplanationCommand, bool, error) {
-	command := telegramExplanationCommand{Input: core.TelegramConversationInput{Update: update}}
+func parseTelegramExplanation(update telegramcore.TelegramReceivedUpdate) (telegramExplanationCommand, bool, error) {
+	command := telegramExplanationCommand{Input: telegramcore.TelegramConversationInput{Update: update}}
 
 	name, body := telegramCommandWord(strings.TrimSpace(update.Text))
 	if update.Kind != "message" || name != "/"+telegramExplanationRegistry()[0].ID {
@@ -48,10 +49,10 @@ func parseTelegramExplanation(update core.TelegramReceivedUpdate) (telegramExpla
 	return command, true, nil
 }
 
-func telegramIntentExplanation(update core.TelegramReceivedUpdate, intent ConversationIntent) (telegramExplanationCommand, bool, error) {
+func telegramIntentExplanation(update telegramcore.TelegramReceivedUpdate, intent ConversationIntent) (telegramExplanationCommand, bool, error) {
 	a := intent.Arguments
 
-	command := telegramExplanationCommand{Input: core.TelegramConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation}, Question: update.Text, DocumentKind: core.AuthoringArtifactKind(a.Action)}
+	command := telegramExplanationCommand{Input: telegramcore.TelegramConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation}, Question: update.Text, DocumentKind: core.AuthoringArtifactKind(a.Action)}
 	if intent.OperationID != telegramExplanationRegistry()[0].ID {
 		return command, false, nil
 	}

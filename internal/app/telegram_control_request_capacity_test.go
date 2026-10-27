@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	"forge.adrianpk.com/chr/internal/core/database"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // TestTelegramControlRequestCapacity returns durable diagnostics for records,
@@ -48,10 +48,10 @@ func TestTelegramControlRequestCapacity(t *testing.T) {
 	}
 }
 
-func checkTelegramCapacityAction(t *testing.T, f *telegramConversationAppFixture, action core.TelegramAction) {
+func checkTelegramCapacityAction(t *testing.T, f *telegramConversationAppFixture, action telegramcore.TelegramAction) {
 	t.Helper()
 
-	request, err := f.receiver.store.TelegramActionRequest(t.Context(), action.Peer, core.TelegramActionAnswer{Token: action.Token, Choice: "confirm"})
+	request, err := f.receiver.store.TelegramActionRequest(t.Context(), action.Peer, telegramcore.TelegramActionAnswer{Token: action.Token, Choice: "confirm"})
 	if err != nil {
 		t.Fatal(err)
 	}

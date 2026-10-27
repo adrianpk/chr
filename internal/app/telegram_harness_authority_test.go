@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // Even a configured model's response cannot synthesize a configuration command
@@ -43,8 +44,8 @@ func TestTelegramHarnessSelectionForeignActor(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	config.AllowedUsers = append(config.AllowedUsers, core.TelegramAllowedUser{TelegramUserID: 100002, OperatorID: "other-operator", ProjectIDs: []string{"example-project"}})
-	if err := core.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+	config.AllowedUsers = append(config.AllowedUsers, telegramcore.TelegramAllowedUser{TelegramUserID: 100002, OperatorID: "other-operator", ProjectIDs: []string{"example-project"}})
+	if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -68,7 +69,7 @@ type telegramHarnessAuthorityProbe struct {
 	change func()
 }
 
-func (s telegramHarnessAuthorityProbe) ChangeTelegramHarnessSelections(ctx context.Context, target core.TelegramOperationTarget, request core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (core.HarnessSelectionSnapshot, error) {
+func (s telegramHarnessAuthorityProbe) ChangeTelegramHarnessSelections(ctx context.Context, target telegramcore.TelegramOperationTarget, request core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (core.HarnessSelectionSnapshot, error) {
 	calls := 0
 
 	return s.service.ChangeTelegramHarnessSelections(ctx, target, request, func(ctx context.Context) error {

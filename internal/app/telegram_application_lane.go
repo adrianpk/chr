@@ -3,17 +3,17 @@ package app
 import (
 	"errors"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 var errTelegramLaneChanged = errors.New("telegram input requires another application lane")
 
-func (r telegramReceiver) checkActionLane(claim core.TelegramActionClaim) error {
+func (r telegramReceiver) checkActionLane(claim telegramcore.TelegramActionClaim) error {
 	if r.processingLane == nil {
 		return nil
 	}
 
-	lane, err := core.TelegramActionChoiceProcessingLane(claim.Request, claim.Choice)
+	lane, err := telegramcore.TelegramActionChoiceProcessingLane(claim.Request, claim.Choice)
 	if err != nil {
 		return err
 	}
@@ -25,17 +25,17 @@ func (r telegramReceiver) checkActionLane(claim core.TelegramActionClaim) error 
 	return nil
 }
 
-func (r telegramReceiver) checkCaptureReplyLane(update core.TelegramReceivedUpdate) error {
+func (r telegramReceiver) checkCaptureReplyLane(update telegramcore.TelegramReceivedUpdate) error {
 	if update.ReplyToMessageID <= 0 || r.processingLane == nil {
 		return nil
 	}
 
-	lane, control := core.TelegramExplicitControlLane(update)
-	if control && lane != core.TelegramProcessingOrdinary {
+	lane, control := telegramcore.TelegramExplicitControlLane(update)
+	if control && lane != telegramcore.TelegramProcessingOrdinary {
 		return nil
 	}
 
-	if *r.processingLane != core.TelegramProcessingOrdinary {
+	if *r.processingLane != telegramcore.TelegramProcessingOrdinary {
 		return errTelegramLaneChanged
 	}
 

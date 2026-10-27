@@ -9,9 +9,10 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
-func telegramHarnessOffer(t *testing.T, f *telegramConversationAppFixture, text string) (core.TelegramOperationRequest, core.TelegramAction, telegramConversationNotice) {
+func telegramHarnessOffer(t *testing.T, f *telegramConversationAppFixture, text string) (telegramcore.TelegramOperationRequest, telegramcore.TelegramAction, telegramConversationNotice) {
 	t.Helper()
 
 	input := telegramOperationRetainInput(t, f, text)
@@ -147,7 +148,7 @@ func telegramHarnessOtherProject(t *testing.T, f *telegramConversationAppFixture
 	}
 
 	config.AllowedUsers[0].ProjectIDs = append(config.AllowedUsers[0].ProjectIDs, "private-project")
-	if err := core.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+	if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -195,7 +196,7 @@ func telegramHarnessOtherActor(t *testing.T, f *telegramConversationAppFixture, 
 	}
 
 	config.AllowedUsers[0].OperatorID = "different-operator"
-	if err := core.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+	if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -209,7 +210,7 @@ func telegramHarnessRevokeProject(t *testing.T, f *telegramConversationAppFixtur
 	}
 
 	config.AllowedUsers[0].ProjectIDs = []string{"disabled-project"}
-	if err := core.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+	if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -229,13 +230,13 @@ func TestTelegramHarnessSelectionEnvelope(t *testing.T) {
 
 	for _, test := range []struct {
 		name   string
-		change func(*core.TelegramOperationRequest)
+		change func(*telegramcore.TelegramOperationRequest)
 	}{
-		{"model only", func(r *core.TelegramOperationRequest) { r.Source.Text = "Switch the worker to beta" }},
-		{"changed arguments", func(r *core.TelegramOperationRequest) { r.Arguments = json.RawMessage(`{"worker":"alpha"}`) }},
-		{"changed actor", func(r *core.TelegramOperationRequest) { r.Operator = "foreign" }},
-		{"changed request", func(r *core.TelegramOperationRequest) { r.ID = "foreign" }},
-		{"changed project", func(r *core.TelegramOperationRequest) { r.Target.ProjectID = "private-project" }},
+		{"model only", func(r *telegramcore.TelegramOperationRequest) { r.Source.Text = "Switch the worker to beta" }},
+		{"changed arguments", func(r *telegramcore.TelegramOperationRequest) { r.Arguments = json.RawMessage(`{"worker":"alpha"}`) }},
+		{"changed actor", func(r *telegramcore.TelegramOperationRequest) { r.Operator = "foreign" }},
+		{"changed request", func(r *telegramcore.TelegramOperationRequest) { r.ID = "foreign" }},
+		{"changed project", func(r *telegramcore.TelegramOperationRequest) { r.Target.ProjectID = "private-project" }},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			changed := request
@@ -248,7 +249,7 @@ func TestTelegramHarnessSelectionEnvelope(t *testing.T) {
 	}
 }
 
-func checkTelegramHarnessReplay(t *testing.T, f *telegramConversationAppFixture, operations service, action core.TelegramAction, saved core.HarnessSelectionSnapshot) {
+func checkTelegramHarnessReplay(t *testing.T, f *telegramConversationAppFixture, operations service, action telegramcore.TelegramAction, saved core.HarnessSelectionSnapshot) {
 	t.Helper()
 
 	notice := f.send(t, "/answer "+action.Token+" confirm", 0)

@@ -5,13 +5,14 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type telegramGuidedService interface {
-	InspectTelegramGuided(context.Context, core.TelegramOperationTarget, string) (GuidedUseCaseInspection, error)
-	ReadTelegramGuidedOriginal(context.Context, core.TelegramOperationTarget, string, string) (GuidedUseCaseArtifact, error)
-	ApplyTelegramGuided(context.Context, core.TelegramOperationTarget, telegramGuidedInput) (core.AuthoringSession, error)
+	InspectTelegramGuided(context.Context, telegramcore.TelegramOperationTarget, string) (GuidedUseCaseInspection, error)
+	ReadTelegramGuidedOriginal(context.Context, telegramcore.TelegramOperationTarget, string, string) (GuidedUseCaseArtifact, error)
+	ApplyTelegramGuided(context.Context, telegramcore.TelegramOperationTarget, telegramGuidedInput) (core.AuthoringSession, error)
 }
 
 type telegramGuidedInput struct {
@@ -26,7 +27,7 @@ type telegramGuidedInput struct {
 	Command  core.GuidedUseCaseCommand `json:"command"`
 }
 
-func (s service) telegramGuidedProject(ctx context.Context, target core.TelegramOperationTarget) (service, error) {
+func (s service) telegramGuidedProject(ctx context.Context, target telegramcore.TelegramOperationTarget) (service, error) {
 	scoped, err := s.telegramProjectService(ctx, target)
 	if err != nil {
 		return scoped, err
@@ -34,11 +35,11 @@ func (s service) telegramGuidedProject(ctx context.Context, target core.Telegram
 
 	project := projectcore.Project{ID: scoped.projectContext.ProjectID, Path: scoped.projectContext.ProjectDir, Enabled: true}
 
-	return scoped, core.ValidateTelegramProjectTarget(project, target)
+	return scoped, telegramcore.ValidateTelegramProjectTarget(project, target)
 }
 
 // InspectTelegramGuided reads the canonical run after checking registry identity.
-func (s service) InspectTelegramGuided(ctx context.Context, target core.TelegramOperationTarget, id string) (GuidedUseCaseInspection, error) {
+func (s service) InspectTelegramGuided(ctx context.Context, target telegramcore.TelegramOperationTarget, id string) (GuidedUseCaseInspection, error) {
 	scoped, err := s.telegramGuidedProject(ctx, target)
 	if err != nil {
 		return GuidedUseCaseInspection{}, err
@@ -48,7 +49,7 @@ func (s service) InspectTelegramGuided(ctx context.Context, target core.Telegram
 }
 
 // ApplyTelegramGuided maps a frozen transport request to shared guided commands.
-func (s service) ApplyTelegramGuided(ctx context.Context, target core.TelegramOperationTarget, input telegramGuidedInput) (core.AuthoringSession, error) {
+func (s service) ApplyTelegramGuided(ctx context.Context, target telegramcore.TelegramOperationTarget, input telegramGuidedInput) (core.AuthoringSession, error) {
 	command := input.Command
 	if command.ProjectID != target.ProjectID || command.Namespace != target.Namespace || command.RunID == "" {
 		return core.AuthoringSession{}, workflowstate.ErrConflict
@@ -76,7 +77,7 @@ func (s service) ApplyTelegramGuided(ctx context.Context, target core.TelegramOp
 }
 
 // ReadTelegramGuidedOriginal checks the registered scope before reading sealed bytes.
-func (s service) ReadTelegramGuidedOriginal(ctx context.Context, target core.TelegramOperationTarget, id, kind string) (GuidedUseCaseArtifact, error) {
+func (s service) ReadTelegramGuidedOriginal(ctx context.Context, target telegramcore.TelegramOperationTarget, id, kind string) (GuidedUseCaseArtifact, error) {
 	scoped, err := s.telegramGuidedProject(ctx, target)
 	if err != nil {
 		return GuidedUseCaseArtifact{}, err

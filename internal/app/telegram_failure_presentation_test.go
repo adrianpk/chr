@@ -10,12 +10,13 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 type telegramUnavailableRead struct{ telegramReadService }
 
-func (telegramUnavailableRead) InspectTelegramReceiver(int64) (core.TelegramReceiverState, error) {
-	return core.TelegramReceiverState{}, errors.New("private unavailable-service body")
+func (telegramUnavailableRead) InspectTelegramReceiver(int64) (telegramcore.TelegramReceiverState, error) {
+	return telegramcore.TelegramReceiverState{}, errors.New("private unavailable-service body")
 }
 
 // An actual failed read produces one bounded recovery message without leaking
@@ -23,7 +24,7 @@ func (telegramUnavailableRead) InspectTelegramReceiver(int64) (core.TelegramRece
 func TestTelegramPresentationFailureRead(t *testing.T) {
 	payloads := make(chan telegramHelpHTTPBody, 2)
 	server := telegramHelpHTTPServer(t, payloads, 0, "")
-	receiver, _ := telegramAppTestReceiver(t, core.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
+	receiver, _ := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
 	seedTelegramSavedHandoff(t, receiver.env)
 
 	receiver.operations = telegramUnavailableRead{receiver.operations}

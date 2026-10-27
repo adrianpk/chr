@@ -9,10 +9,11 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r telegramReceiver) applyWorkAdmission(ctx context.Context, claim core.TelegramActionClaim, config core.TelegramReceiverConfig) error {
+func (r telegramReceiver) applyWorkAdmission(ctx context.Context, claim telegramcore.TelegramActionClaim, config telegramcore.TelegramReceiverConfig) error {
 	operations, ok := r.operations.(telegramWorkService)
 	if !ok || claim.Choice != "start" {
 		return r.finishWorkActionFailure(ctx, claim, ErrRecordUnsupported, config)
@@ -41,7 +42,7 @@ func (r telegramReceiver) applyWorkAdmission(ctx context.Context, claim core.Tel
 	return r.finishWorkAdmission(ctx, claim, result, config)
 }
 
-func (r telegramReceiver) workAdmissionCheck(claim core.TelegramActionClaim) core.WorkflowAdmissionCheck {
+func (r telegramReceiver) workAdmissionCheck(claim telegramcore.TelegramActionClaim) core.WorkflowAdmissionCheck {
 	return func(ctx context.Context) error {
 		if !claim.Action.ExpiresAt.After(time.Now()) {
 			return workflowstate.ErrConflict
@@ -51,7 +52,7 @@ func (r telegramReceiver) workAdmissionCheck(claim core.TelegramActionClaim) cor
 	}
 }
 
-func telegramRetainedWorkPreview(request core.TelegramOperationRequest) (WorkflowBoundPreview, error) {
+func telegramRetainedWorkPreview(request telegramcore.TelegramOperationRequest) (WorkflowBoundPreview, error) {
 	var preview WorkflowBoundPreview
 	if err := decodeBoundedOperationJSON(string(request.PreparedInput), &preview, 1048576); err != nil {
 		return preview, err
@@ -98,20 +99,20 @@ func telegramWorkPreviewText(preview WorkflowBoundPreview) string {
 }
 
 type telegramWorkAdmissionResult struct {
-	Invocation core.TelegramInvocationBinding `json:"invocation"`
-	RequestKey string                         `json:"request_key"`
-	Selector   core.WorkflowSelector          `json:"selector"`
-	Status     string                         `json:"status"`
-	Members    int                            `json:"members"`
+	Invocation telegramcore.TelegramInvocationBinding `json:"invocation"`
+	RequestKey string                                 `json:"request_key"`
+	Selector   core.WorkflowSelector                  `json:"selector"`
+	Status     string                                 `json:"status"`
+	Members    int                                    `json:"members"`
 }
 
-func (r telegramReceiver) finishWorkAdmission(ctx context.Context, claim core.TelegramActionClaim, result AgentWorkResult, config core.TelegramReceiverConfig) error {
+func (r telegramReceiver) finishWorkAdmission(ctx context.Context, claim telegramcore.TelegramActionClaim, result AgentWorkResult, config telegramcore.TelegramReceiverConfig) error {
 	if result.Workflow == nil || result.Workflow.ID == "" {
 		return workflowstate.ErrConflict
 	}
 
 	run := result.Workflow
-	binding := core.TelegramInvocationBinding{ID: run.ID, Revision: run.Revision}
+	binding := telegramcore.TelegramInvocationBinding{ID: run.ID, Revision: run.Revision}
 
 	facts, err := json.Marshal(telegramWorkAdmissionResult{Invocation: binding, RequestKey: run.RequestKey, Selector: run.Selection.Selector, Status: run.Status, Members: len(run.Members)})
 	if err != nil {
@@ -120,5 +121,5 @@ func (r telegramReceiver) finishWorkAdmission(ctx context.Context, claim core.Te
 
 	text := fmt.Sprintf("Work admitted: %s %s.\n\nState: %s; selected tickets: %d. Execution, validation and integration are reported separately.\nUse /status %s to inspect this work.", run.Selection.Selector.Extent, run.Selection.Selector.Identity, run.Status, len(run.Members), run.ID)
 
-	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{Message: telegramOutcomeMessage("32", text), State: "confirmed", ReceiptRef: "workflow:" + run.ID, Facts: facts, Text: text, ConfigDigest: config.Digest(), Invocation: &binding}, time.Now())
+	return r.store.FinishTelegramAction(ctx, claim, telegramcore.TelegramActionResult{Message: telegramOutcomeMessage("32", text), State: "confirmed", ReceiptRef: "workflow:" + run.ID, Facts: facts, Text: text, ConfigDigest: config.Digest(), Invocation: &binding}, time.Now())
 }

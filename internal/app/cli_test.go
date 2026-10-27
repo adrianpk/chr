@@ -25,6 +25,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/gate"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -3133,7 +3134,7 @@ func installTestTelegramSender(t *testing.T) *testTelegramPayload {
 	t.Cleanup(server.Close)
 
 	previousSender := notifyTelegramSender
-	notifyTelegramSender = core.TelegramSender{
+	notifyTelegramSender = telegramcore.TelegramSender{
 		Client:  server.Client(),
 		BaseURL: server.URL,
 	}

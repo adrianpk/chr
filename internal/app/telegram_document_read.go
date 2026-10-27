@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
-func (r telegramReceiver) finishOriginalDocument(ctx context.Context, operations telegramExplanationService, request core.TelegramOperationRequest, prepared PreparedAuthoringExplanation, config core.TelegramReceiverConfig) error {
+func (r telegramReceiver) finishOriginalDocument(ctx context.Context, operations telegramExplanationService, request telegramcore.TelegramOperationRequest, prepared PreparedAuthoringExplanation, config telegramcore.TelegramReceiverConfig) error {
 	artifact, err := operations.ReadPreparedTelegramDocument(ctx, request.Target, prepared)
 	if err != nil {
 		return r.finishAuthoringFailure(ctx, request, config, err)

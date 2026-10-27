@@ -7,6 +7,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // ListRegisteredProjects is a bounded, read-only registry operation for explicit IDs.
@@ -15,8 +16,8 @@ func (s service) ListRegisteredProjects(ids []string) ([]projectcore.Project, er
 }
 
 // InspectTelegramReceiver exposes transport health to local and remote readers.
-func (s service) InspectTelegramReceiver(botID int64) (core.TelegramReceiverState, error) {
-	return core.InspectTelegramReceiver(s.ctx, s.env, botID)
+func (s service) InspectTelegramReceiver(botID int64) (telegramcore.TelegramReceiverState, error) {
+	return telegramcore.InspectTelegramReceiver(s.ctx, s.env, botID)
 }
 
 type projectReadiness struct {

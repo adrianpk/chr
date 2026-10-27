@@ -6,10 +6,11 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 func TestDecodeTelegramUpdatesParsesCommandRecords(t *testing.T) {
-	updates, err := core.DecodeTelegramUpdates(strings.NewReader(telegramUpdateFixture()))
+	updates, err := telegramcore.DecodeTelegramUpdates(strings.NewReader(telegramUpdateFixture()))
 	if err != nil {
 		t.Fatalf("DecodeTelegramUpdates returned error: %v", err)
 	}
@@ -33,10 +34,10 @@ func TestDecodeTelegramUpdatesParsesCommandRecords(t *testing.T) {
 }
 
 func TestRemoteCommandRecordFromTelegramUpdateRejectsUnsupportedText(t *testing.T) {
-	update := core.TelegramUpdate{
-		Message: core.TelegramUpdateMessage{
-			From: core.TelegramSenderUser{ID: 10, Username: "ops"},
-			Chat: core.TelegramChat{ID: 20},
+	update := telegramcore.TelegramUpdate{
+		Message: telegramcore.TelegramUpdateMessage{
+			From: telegramcore.TelegramSenderUser{ID: 10, Username: "ops"},
+			Chat: telegramcore.TelegramChat{ID: 20},
 			Date: 1_768_000_000,
 			Text: "merge dev",
 		},

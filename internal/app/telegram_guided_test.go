@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 func guidedTelegramFixture(t *testing.T) (*telegramConversationAppFixture, service) {
@@ -203,7 +204,7 @@ func guidedTelegramModel(t *testing.T, operations *service) *fakeServiceQuizMode
 	return model
 }
 
-func readGuidedTelegramSession(t *testing.T, operations service, c core.TelegramConversation) core.AuthoringSession {
+func readGuidedTelegramSession(t *testing.T, operations service, c telegramcore.TelegramConversation) core.AuthoringSession {
 	t.Helper()
 
 	root := guidedTelegramProject(t, operations, c.ProjectID)
@@ -257,7 +258,7 @@ func TestGuidedUseCaseTelegramButtons(t *testing.T) {
 	}
 }
 
-func guidedTelegramAction(t *testing.T, f *telegramConversationAppFixture, prompt telegramConversationNotice) (core.TelegramOperationRequest, core.TelegramAction) {
+func guidedTelegramAction(t *testing.T, f *telegramConversationAppFixture, prompt telegramConversationNotice) (telegramcore.TelegramOperationRequest, telegramcore.TelegramAction) {
 	t.Helper()
 
 	var keyboard struct {
@@ -286,7 +287,7 @@ func guidedTelegramAction(t *testing.T, f *telegramConversationAppFixture, promp
 
 	peer := f.sessions(t)[0].Peer
 
-	request, err := f.receiver.store.TelegramActionRequest(t.Context(), peer, core.TelegramActionAnswer{Token: parts[1], Choice: parts[2]})
+	request, err := f.receiver.store.TelegramActionRequest(t.Context(), peer, telegramcore.TelegramActionAnswer{Token: parts[1], Choice: parts[2]})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -299,7 +300,7 @@ func guidedTelegramAction(t *testing.T, f *telegramConversationAppFixture, promp
 	return request, action
 }
 
-func sendGuidedTelegramCallback(t *testing.T, f *telegramConversationAppFixture, action core.TelegramAction, choice string, user int64) telegramConversationNotice {
+func sendGuidedTelegramCallback(t *testing.T, f *telegramConversationAppFixture, action telegramcore.TelegramAction, choice string, user int64) telegramConversationNotice {
 	t.Helper()
 
 	queueGuidedTelegramCallback(t, f, action, choice, user)
@@ -316,10 +317,10 @@ func sendGuidedTelegramCallback(t *testing.T, f *telegramConversationAppFixture,
 	}
 }
 
-func queueGuidedTelegramCallback(t *testing.T, f *telegramConversationAppFixture, action core.TelegramAction, choice string, user int64) {
+func queueGuidedTelegramCallback(t *testing.T, f *telegramConversationAppFixture, action telegramcore.TelegramAction, choice string, user int64) {
 	t.Helper()
 
-	callback, err := core.TelegramActionCallbackData(core.TelegramActionAnswer{Token: action.Token, Choice: choice})
+	callback, err := telegramcore.TelegramActionCallbackData(telegramcore.TelegramActionAnswer{Token: action.Token, Choice: choice})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -378,7 +379,7 @@ type telegramGuidedLostAck struct {
 	calls int
 }
 
-func (s *telegramGuidedLostAck) ApplyTelegramGuided(ctx context.Context, target core.TelegramOperationTarget, input telegramGuidedInput) (core.AuthoringSession, error) {
+func (s *telegramGuidedLostAck) ApplyTelegramGuided(ctx context.Context, target telegramcore.TelegramOperationTarget, input telegramGuidedInput) (core.AuthoringSession, error) {
 	session, err := s.service.ApplyTelegramGuided(ctx, target, input)
 	if err == nil && input.Command.Action == "pause" {
 		s.calls++
@@ -436,13 +437,13 @@ func TestGuidedUseCaseTelegramProjectChoice(t *testing.T) {
 
 	f, _ := guidedTelegramFixture(t)
 
-	config, err := core.LoadTelegramReceiverConfig(f.receiver.env)
+	config, err := telegramcore.LoadTelegramReceiverConfig(f.receiver.env)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	config.AllowedUsers[0].ProjectIDs = append(config.AllowedUsers[0].ProjectIDs, "private-project")
-	if err := core.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+	if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -472,7 +473,7 @@ func assertGuidedTelegramChosenProject(t *testing.T, f *telegramConversationAppF
 
 type telegramInvalidGuidedScope struct{ service }
 
-func (s telegramInvalidGuidedScope) InspectTelegramGuided(ctx context.Context, target core.TelegramOperationTarget, id string) (GuidedUseCaseInspection, error) {
+func (s telegramInvalidGuidedScope) InspectTelegramGuided(ctx context.Context, target telegramcore.TelegramOperationTarget, id string) (GuidedUseCaseInspection, error) {
 	observed, err := s.service.InspectTelegramGuided(ctx, target, id)
 	for i := range observed.Runs {
 		if observed.Runs[i].Guided != nil && observed.Runs[i].Topic == "First guarded scope" {

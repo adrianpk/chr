@@ -12,9 +12,9 @@ are omitted here; tests do not define production ownership.
 
 | Consumer | Existing dependencies |
 | --- | --- |
-| app | core, core/authoring/state, core/database, core/gate, core/model, core/notify, core/ops/namespace, core/project, core/telegram/message, core/workflow/state, core/workspace, harness, harness/codex, harness/pi, tui, webui, webui/ui |
+| app | core, core/authoring/state, core/database, core/gate, core/model, core/notify, core/ops/namespace, core/project, core/telegram, core/telegram/message, core/workflow/state, core/workspace, harness, harness/codex, harness/pi, tui, webui, webui/ui |
 | cmd/chr | app |
-| core | core/authoring/state, core/configvalue, core/contenthash, core/database, core/gate, core/model, core/notify, core/ops/namespace, core/project, core/telegram/message, core/workflow/state, core/workspace, harness, harness/process |
+| core | core/authoring/state, core/configvalue, core/contenthash, core/database, core/gate, core/model, core/notify, core/ops/namespace, core/project, core/workflow/state, core/workspace, harness, harness/process |
 | core/authoring/state | none |
 | core/configvalue | none |
 | core/contenthash | none |
@@ -24,6 +24,7 @@ are omitted here; tests do not define production ownership.
 | core/notify | core/contenthash, core/database, core/ops/namespace, core/project, core/telegram/message, core/workflow/state |
 | core/ops/namespace | none |
 | core/project | core/database |
+| core/telegram | core/authoring/state, core/contenthash, core/database, core/model, core/notify, core/ops/namespace, core/project, core/telegram/message, core/workflow/state, core/workspace |
 | core/telegram/message | core/contenthash, core/ops/namespace |
 | core/workflow/state | core/contenthash |
 | core/workspace | none |
@@ -99,7 +100,7 @@ constraints, not permission to rename an ambiguous domain concept.
 ## Root production-file dispositions
 
 [The exact file ledger](code-quality-remediation-core-owners.csv) enumerates all
-707 current non-test files under internal/core, their declared symbols,
+708 current non-test files under internal/core, their declared symbols,
 existing signature owners, final responsibility and migration/retention task.
 It provides a finite per-file handoff, including exact declarations. Multiple owners
 on a workflow file require separating store-owned atomic operations from stage
@@ -436,3 +437,27 @@ Telegram. Its live notify consumer and original record/clock tests follow the
 mapping without adding transport dependencies on command authority. The root
 production declaration scan now finds no unresolved coordinator dependencies
 in the Telegram source set. The package move and typed signature work remain.
+
+
+### Mechanical Telegram relocation
+
+All 71 receiver/transport production files and 51 focused test files move to
+core/telegram. The move ledger records 453 byte-identical production declarations
+before subsequent contract edits. Direct app/core consumers import the owner; no
+core facade remains. Mixed migration, harness-preparation and workflow authority
+tests keep their original domain owner. Notification integration tests remain
+with their notify/domain fixtures; private receiver SQL tests move with the
+receiver. Test-only directory fixtures reproduce the original config/data/state
+paths without importing root core. Root integration fixtures own a separate SQL
+inspection connection and feed retained input through the public polling codec.
+
+The frozen legacy SQLite bytes remain unchanged. Its public receiver fixture
+opens a second connection to the same image. Conversation reads retain the full
+peer binding and every decoded-field comparison. The document fault trigger is
+database-scoped so it fires on that owned connection; the same original-column
+rollback assertions remain. No production DB escape hatch is introduced.
+
+The import policy enforces the actual Telegram dependencies and rejects root,
+workflow coordinator and adapter imports, including descendants. message retains
+its more restrictive pure-value policy. No nested outbox is needed because
+conversation/request/action/document admission share the existing transaction.

@@ -7,6 +7,7 @@ import (
 
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -110,7 +111,7 @@ func TestTelegramAuthoringInstructionReference(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			f := newTelegramConversationFixture(t)
-			f.apply(t, TelegramConversationStart, func(input *TelegramConversationInput) {
+			f.apply(t, telegramcore.TelegramConversationStart, func(input *telegramcore.TelegramConversationInput) {
 				input.Project, input.Intent = "alpha", tt.intent
 				input.Update = telegramRetainedTestUpdate(t, input.Update.UpdateID, tt.text)
 			})
@@ -138,7 +139,7 @@ func TestTelegramAuthoringInstructionReference(t *testing.T) {
 	}
 }
 
-func telegramAuthoringCheckInstruction(t *testing.T, f *telegramConversationFixture, c TelegramConversation, original string) {
+func telegramAuthoringCheckInstruction(t *testing.T, f *telegramConversationFixture, c telegramcore.TelegramConversation, original string) {
 	t.Helper()
 
 	input := f.input

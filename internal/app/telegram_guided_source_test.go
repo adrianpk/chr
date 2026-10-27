@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // TestGuidedUseCaseTelegramSourceGuards rejects another allowed peer's button
@@ -22,13 +23,13 @@ func checkGuidedTelegramSourceGuard(t *testing.T, fault string) {
 
 	f, operations := guidedTelegramFixture(t)
 
-	config, err := core.LoadTelegramReceiverConfig(f.receiver.env)
+	config, err := telegramcore.LoadTelegramReceiverConfig(f.receiver.env)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	config.AllowedUsers = append(config.AllowedUsers, core.TelegramAllowedUser{TelegramUserID: 100002, OperatorID: "other", ProjectIDs: []string{"example-project"}})
-	if err := core.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+	config.AllowedUsers = append(config.AllowedUsers, telegramcore.TelegramAllowedUser{TelegramUserID: 100002, OperatorID: "other", ProjectIDs: []string{"example-project"}})
+	if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 

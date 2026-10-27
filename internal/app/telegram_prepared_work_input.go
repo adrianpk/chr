@@ -7,10 +7,11 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r telegramReceiver) prepareTelegramWork(ctx context.Context, operations telegramPreparedWorkService, request core.TelegramOperationRequest) (PreparedAuthoringWork, error) {
+func (r telegramReceiver) prepareTelegramWork(ctx context.Context, operations telegramPreparedWorkService, request telegramcore.TelegramOperationRequest) (PreparedAuthoringWork, error) {
 	if request.State != "prepared" {
 		return telegramRetainedPreparedWork(request)
 	}
@@ -46,7 +47,7 @@ func (r telegramReceiver) prepareTelegramWork(ctx context.Context, operations te
 	return prepared, nil
 }
 
-func (r telegramReceiver) bindInitialPreparedWorkAuthority(ctx context.Context, request core.TelegramOperationRequest, prepared PreparedAuthoringWork) (PreparedAuthoringWork, error) {
+func (r telegramReceiver) bindInitialPreparedWorkAuthority(ctx context.Context, request telegramcore.TelegramOperationRequest, prepared PreparedAuthoringWork) (PreparedAuthoringWork, error) {
 	if prepared.Scope.Intent != authoringstate.IntentDevelop {
 		return prepared, nil
 	}
@@ -76,23 +77,23 @@ func (r telegramReceiver) bindInitialPreparedWorkAuthority(ctx context.Context, 
 	return prepared, err
 }
 
-func (r telegramReceiver) preparedWorkAuthorityInput(request core.TelegramOperationRequest) (core.TelegramConversationInput, error) {
+func (r telegramReceiver) preparedWorkAuthorityInput(request telegramcore.TelegramOperationRequest) (telegramcore.TelegramConversationInput, error) {
 	config, err := r.currentConfig()
 	if err != nil {
-		return core.TelegramConversationInput{}, err
+		return telegramcore.TelegramConversationInput{}, err
 	}
 
 	user, allowed := config.AuthorizedUser(request.Source.Peer.ChatID, request.Source.Peer.TopicID, request.Source.Peer.UserID, request.Source.ChatType)
 	if !allowed || user.OperatorID != request.Operator {
-		return core.TelegramConversationInput{}, workflowstate.ErrConflict
+		return telegramcore.TelegramConversationInput{}, workflowstate.ErrConflict
 	}
 
 	projects, err := r.operations.ListRegisteredProjects(user.ProjectIDs)
 
-	return core.TelegramConversationInput{Update: request.Source, Config: config, Projects: projects, Conversation: request.Target.ConversationID}, err
+	return telegramcore.TelegramConversationInput{Update: request.Source, Config: config, Projects: projects, Conversation: request.Target.ConversationID}, err
 }
 
-func telegramRetainedPreparedWork(request core.TelegramOperationRequest) (PreparedAuthoringWork, error) {
+func telegramRetainedPreparedWork(request telegramcore.TelegramOperationRequest) (PreparedAuthoringWork, error) {
 	var prepared PreparedAuthoringWork
 	if err := decodeBoundedOperationJSON(string(request.PreparedInput), &prepared, 1048576); err != nil {
 		return prepared, err

@@ -7,10 +7,11 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r telegramReceiver) applyPreparedWorkAction(ctx context.Context, claim core.TelegramActionClaim, config core.TelegramReceiverConfig) error {
+func (r telegramReceiver) applyPreparedWorkAction(ctx context.Context, claim telegramcore.TelegramActionClaim, config telegramcore.TelegramReceiverConfig) error {
 	operations, ok := r.operations.(telegramPreparedWorkService)
 	if !ok || claim.Choice != "develop" {
 		return r.finishPreparedWorkActionFailure(ctx, claim, config, ErrRecordUnsupported)
@@ -40,7 +41,7 @@ func (r telegramReceiver) applyPreparedWorkAction(ctx context.Context, claim cor
 	return r.dispatchPreparedWorkAction(ctx, operations, claim, prepared, current)
 }
 
-func (r telegramReceiver) dispatchPreparedWorkAction(ctx context.Context, operations telegramPreparedWorkService, claim core.TelegramActionClaim, prepared PreparedAuthoringWork, config core.TelegramReceiverConfig) error {
+func (r telegramReceiver) dispatchPreparedWorkAction(ctx context.Context, operations telegramPreparedWorkService, claim telegramcore.TelegramActionClaim, prepared PreparedAuthoringWork, config telegramcore.TelegramReceiverConfig) error {
 	applyContext, cancel := context.WithDeadline(ctx, claim.Action.ExpiresAt)
 	defer cancel()
 
@@ -67,10 +68,10 @@ func (r telegramReceiver) dispatchPreparedWorkAction(ctx context.Context, operat
 		phase = "prepared"
 	}
 
-	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{Message: telegramOutcomeMessage("26", telegramPreparedWorkResultText(result)), State: "confirmed", ReceiptRef: result.Result.ReceiptRef, Facts: facts, Text: telegramPreparedWorkResultText(result), ConfigDigest: config.Digest(), ConversationPhase: phase}, time.Now())
+	return r.store.FinishTelegramAction(ctx, claim, telegramcore.TelegramActionResult{Message: telegramOutcomeMessage("26", telegramPreparedWorkResultText(result)), State: "confirmed", ReceiptRef: result.Result.ReceiptRef, Facts: facts, Text: telegramPreparedWorkResultText(result), ConfigDigest: config.Digest(), ConversationPhase: phase}, time.Now())
 }
 
-func (r telegramReceiver) finishPreparedWorkActionFailure(ctx context.Context, claim core.TelegramActionClaim, config core.TelegramReceiverConfig, failure error) error {
+func (r telegramReceiver) finishPreparedWorkActionFailure(ctx context.Context, claim telegramcore.TelegramActionClaim, config telegramcore.TelegramReceiverConfig, failure error) error {
 	text := telegramAuthoringFailure(failure)
 
 	facts, err := json.Marshal(map[string]string{"state": "blocked", "message": text})
@@ -78,5 +79,5 @@ func (r telegramReceiver) finishPreparedWorkActionFailure(ctx context.Context, c
 		return err
 	}
 
-	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{Message: telegramOutcomeMessage("27", text), State: "blocked", Facts: facts, Text: text, ConfigDigest: config.Digest()}, time.Now())
+	return r.store.FinishTelegramAction(ctx, claim, telegramcore.TelegramActionResult{Message: telegramOutcomeMessage("27", text), State: "blocked", Facts: facts, Text: text, ConfigDigest: config.Digest()}, time.Now())
 }

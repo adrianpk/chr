@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // TestTelegramControlCheckpoint preserves an operator stop when a live worker
@@ -49,7 +50,7 @@ func checkTelegramControlCheckpoint(t *testing.T, action string) {
 	}
 }
 
-func telegramControlStartWorker(t *testing.T, operations service, run core.TelegramInvocationBinding) <-chan error {
+func telegramControlStartWorker(t *testing.T, operations service, run telegramcore.TelegramInvocationBinding) <-chan error {
 	t.Helper()
 
 	ctx, cancel := context.WithCancel(t.Context())

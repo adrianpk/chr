@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // TestTelegramControlActivationBound runs real inbox calls with all ordinary
@@ -16,10 +16,10 @@ func TestTelegramControlActivationBound(t *testing.T) {
 
 	f.receiver.slots = newTelegramActivationSlots()
 	for range 12 {
-		if !f.receiver.slots.acquire(core.TelegramProcessingOrdinary) {
+		if !f.receiver.slots.acquire(telegramcore.TelegramProcessingOrdinary) {
 			t.Fatal("ordinary allowance unavailable")
 		}
-		defer f.receiver.slots.release(core.TelegramProcessingOrdinary)
+		defer f.receiver.slots.release(telegramcore.TelegramProcessingOrdinary)
 	}
 
 	for _, text := range []string{"/help", "/status", "/status", "/status", "/answer unknown confirm", "/answer unknown confirm", "/answer unknown confirm"} {
@@ -59,7 +59,7 @@ func TestTelegramControlActivationBound(t *testing.T) {
 func checkTelegramControlSlotCeiling(t *testing.T, slots *telegramActivationSlots) {
 	t.Helper()
 
-	for _, lane := range []core.TelegramProcessingLane{core.TelegramProcessingOrdinary, core.TelegramProcessingDecision, core.TelegramProcessingUrgent} {
+	for _, lane := range []telegramcore.TelegramProcessingLane{telegramcore.TelegramProcessingOrdinary, telegramcore.TelegramProcessingDecision, telegramcore.TelegramProcessingUrgent} {
 		if slots.acquire(lane) {
 			slots.release(lane)
 			t.Fatal("application ceiling exceeded", lane)

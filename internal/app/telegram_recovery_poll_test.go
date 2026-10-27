@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	"forge.adrianpk.com/chr/internal/core/database"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // TestTelegramRecoveryPollEpoch checks the actual HTTP poll after a long
@@ -22,7 +22,7 @@ func TestTelegramRecoveryPollEpoch(t *testing.T) {
 	server := telegramRecoveryEpochServer(t, polled)
 	defer server.Close()
 
-	receiver, _ := telegramAppTestReceiver(t, core.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
+	receiver, _ := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
 	receiver.slots = newTelegramActivationSlots()
 
 	expireTelegramRecoveryCursor(t, receiver)

@@ -7,11 +7,11 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r telegramReceiver) applyRecordAction(ctx context.Context, claim core.TelegramActionClaim, config core.TelegramReceiverConfig) error {
+func (r telegramReceiver) applyRecordAction(ctx context.Context, claim telegramcore.TelegramActionClaim, config telegramcore.TelegramReceiverConfig) error {
 	operations, ok := r.operations.(telegramRecordService)
 	if !ok || !strings.HasPrefix(claim.Request.OperationID, "records.") || claim.Choice != "confirm" {
 		return r.finishRecordActionFailure(ctx, claim, ErrRecordUnsupported, config)
@@ -45,10 +45,10 @@ func (r telegramReceiver) applyRecordAction(ctx context.Context, claim core.Tele
 		return err
 	}
 
-	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{Message: telegramOutcomeMessage("29", telegramRecordResultText(result)), State: "confirmed", ReceiptRef: result.ReceiptRef, Facts: facts, Text: telegramRecordResultText(result), ConfigDigest: config.Digest()}, time.Now())
+	return r.store.FinishTelegramAction(ctx, claim, telegramcore.TelegramActionResult{Message: telegramOutcomeMessage("29", telegramRecordResultText(result)), State: "confirmed", ReceiptRef: result.ReceiptRef, Facts: facts, Text: telegramRecordResultText(result), ConfigDigest: config.Digest()}, time.Now())
 }
 
-func (r telegramReceiver) finishRecordActionFailure(ctx context.Context, claim core.TelegramActionClaim, failure error, config core.TelegramReceiverConfig) error {
+func (r telegramReceiver) finishRecordActionFailure(ctx context.Context, claim telegramcore.TelegramActionClaim, failure error, config telegramcore.TelegramReceiverConfig) error {
 	text := telegramRecordFailure(failure)
 
 	facts, err := json.Marshal(struct {
@@ -59,10 +59,10 @@ func (r telegramReceiver) finishRecordActionFailure(ctx context.Context, claim c
 		return err
 	}
 
-	return r.store.FinishTelegramAction(ctx, claim, core.TelegramActionResult{Message: telegramOutcomeMessage("30", text), State: "blocked", Facts: facts, Text: text, ConfigDigest: config.Digest()}, time.Now())
+	return r.store.FinishTelegramAction(ctx, claim, telegramcore.TelegramActionResult{Message: telegramOutcomeMessage("30", text), State: "blocked", Facts: facts, Text: text, ConfigDigest: config.Digest()}, time.Now())
 }
 
-func (r telegramReceiver) prepareRecordAction(ctx context.Context, claim core.TelegramActionClaim) (PreparedRecordMutation, error) {
+func (r telegramReceiver) prepareRecordAction(ctx context.Context, claim telegramcore.TelegramActionClaim) (PreparedRecordMutation, error) {
 	if !claim.Action.ExpiresAt.After(time.Now()) {
 		return PreparedRecordMutation{}, workflowstate.ErrConflict
 	}

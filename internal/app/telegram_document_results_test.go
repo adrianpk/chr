@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 func telegramLatestDocument(t *testing.T, f *telegramConversationAppFixture, prefix string) telegramDocumentUpload {
@@ -118,7 +119,7 @@ type telegramAdvanceAfterAuthoring struct {
 	advance func() error
 }
 
-func (s telegramAdvanceAfterAuthoring) ContinueTelegramAuthoring(ctx context.Context, target core.TelegramOperationTarget, request core.AuthoringContinuationRequest, guard core.AuthoringCommitGuard) (core.AuthoringContinuationResult, error) {
+func (s telegramAdvanceAfterAuthoring) ContinueTelegramAuthoring(ctx context.Context, target telegramcore.TelegramOperationTarget, request core.AuthoringContinuationRequest, guard core.AuthoringCommitGuard) (core.AuthoringContinuationResult, error) {
 	result, err := s.service.ContinueTelegramAuthoring(ctx, target, request, guard)
 	if err == nil {
 		err = s.advance()
@@ -140,7 +141,7 @@ func TestTelegramPresentationDocumentAdvancedConversation(t *testing.T) {
 	operations := telegramOperationConcreteService(t, f.receiver)
 	f.receiver.operations = telegramAdvanceAfterAuthoring{service: operations, advance: func() error {
 		input := telegramOperationRetainInput(t, f, "/cancel "+original.ID)
-		input.Action, input.Conversation = core.TelegramConversationCancel, original.ID
+		input.Action, input.Conversation = telegramcore.TelegramConversationCancel, original.ID
 
 		return f.receiver.store.ApplyTelegramConversation(t.Context(), input, time.Now())
 	}}
@@ -162,7 +163,7 @@ func TestTelegramPresentationDocumentAdvancedConversation(t *testing.T) {
 	checkTelegramAdvancedDocument(t, f, original)
 }
 
-func checkTelegramAdvancedDocument(t *testing.T, f *telegramConversationAppFixture, original core.TelegramConversation) {
+func checkTelegramAdvancedDocument(t *testing.T, f *telegramConversationAppFixture, original telegramcore.TelegramConversation) {
 	t.Helper()
 
 	current := f.session(t, original.ID)

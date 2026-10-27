@@ -10,14 +10,15 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // TestTelegramRecoveryGrace bounds a caller that ignores cancellation and keeps
 // real configuration exclusion until that caller actually returns.
 func TestTelegramRecoveryGrace(t *testing.T) {
-	receiver, _ := telegramAppTestReceiver(t, core.TelegramReceiverAPI{})
+	receiver, _ := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{})
 
-	lock, err := core.AcquireTelegramConfigurationLock(receiver.env)
+	lock, err := telegramcore.AcquireTelegramConfigurationLock(receiver.env)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,7 +46,7 @@ func TestTelegramRecoveryGrace(t *testing.T) {
 		t.Fatal("shutdown failure was lost")
 	}
 
-	if other, err := core.AcquireTelegramConfigurationLock(receiver.env); err == nil {
+	if other, err := telegramcore.AcquireTelegramConfigurationLock(receiver.env); err == nil {
 		if err := other.Close(); err != nil {
 			t.Error(err)
 		}
@@ -69,7 +70,7 @@ func waitTelegramRecoveryLock(t *testing.T, env core.UserEnvironment) {
 
 	deadline := time.Now().Add(time.Second)
 	for time.Now().Before(deadline) {
-		lock, err := core.AcquireTelegramConfigurationLock(env)
+		lock, err := telegramcore.AcquireTelegramConfigurationLock(env)
 		if err == nil {
 			if err := lock.Close(); err != nil {
 				t.Fatal(err)

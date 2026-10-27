@@ -7,23 +7,23 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 const telegramIntentDecisionSchema = "chr.telegram.intent.v1"
 
 type telegramIntentDecision struct {
-	Schema   string                        `json:"schema"`
-	Operator string                        `json:"operator"`
-	Intent   ConversationIntent            `json:"intent"`
-	Target   *core.TelegramOperationTarget `json:"target,omitempty"`
+	Schema   string                                `json:"schema"`
+	Operator string                                `json:"operator"`
+	Intent   ConversationIntent                    `json:"intent"`
+	Target   *telegramcore.TelegramOperationTarget `json:"target,omitempty"`
 }
 
 func telegramIntentClarification(text string) ConversationIntent {
 	return ConversationIntent{OperationID: "clarify", Explanation: text, Unresolved: []string{"operation_or_target"}}
 }
 
-func (r telegramReceiver) freezeIntent(ctx context.Context, input core.TelegramConversationInput, intent ConversationIntent) (json.RawMessage, error) {
+func (r telegramReceiver) freezeIntent(ctx context.Context, input telegramcore.TelegramConversationInput, intent ConversationIntent) (json.RawMessage, error) {
 	user, _ := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType)
 	decision := telegramIntentDecision{Schema: telegramIntentDecisionSchema, Intent: intent, Operator: user.OperatorID}
 
@@ -41,7 +41,7 @@ func (r telegramReceiver) freezeIntent(ctx context.Context, input core.TelegramC
 	return json.Marshal(decision)
 }
 
-func (r telegramReceiver) intentTarget(ctx context.Context, input core.TelegramConversationInput, intent ConversationIntent) (core.TelegramOperationTarget, bool, error) {
+func (r telegramReceiver) intentTarget(ctx context.Context, input telegramcore.TelegramConversationInput, intent ConversationIntent) (telegramcore.TelegramOperationTarget, bool, error) {
 	if target, needed, err := r.intentPreparationTarget(ctx, input, intent); needed || err != nil {
 		return target, needed, err
 	}
@@ -49,16 +49,16 @@ func (r telegramReceiver) intentTarget(ctx context.Context, input core.TelegramC
 	conversation, recognized, err := telegramIntentConversation(input.Update, intent)
 	if recognized {
 		if err != nil {
-			return core.TelegramOperationTarget{}, false, err
+			return telegramcore.TelegramOperationTarget{}, false, err
 		}
 
 		conversation.Config, conversation.Projects = input.Config, input.Projects
 
 		conversation.ContextDigest = input.ContextDigest
 		switch conversation.Action {
-		case core.TelegramConversationList:
-			return core.TelegramOperationTarget{}, false, nil
-		case core.TelegramConversationStart, core.TelegramConversationSelect:
+		case telegramcore.TelegramConversationList:
+			return telegramcore.TelegramOperationTarget{}, false, nil
+		case telegramcore.TelegramConversationStart, telegramcore.TelegramConversationSelect:
 			target, err := r.store.ResolveTelegramOperationTarget(ctx, conversation, time.Now())
 
 			return target, true, err
@@ -72,7 +72,7 @@ func (r telegramReceiver) intentTarget(ctx context.Context, input core.TelegramC
 	record, recognized, err := telegramIntentRecord(input.Update, intent)
 	if recognized {
 		if err != nil {
-			return core.TelegramOperationTarget{}, false, err
+			return telegramcore.TelegramOperationTarget{}, false, err
 		}
 
 		record.Input.Config, record.Input.Projects = input.Config, input.Projects
@@ -82,22 +82,22 @@ func (r telegramReceiver) intentTarget(ctx context.Context, input core.TelegramC
 		return target, true, err
 	}
 
-	return core.TelegramOperationTarget{}, false, nil
+	return telegramcore.TelegramOperationTarget{}, false, nil
 }
 
 func telegramIntentTargetFailure(err error) string {
-	if errors.Is(err, core.ErrTelegramRequestCapacity) {
+	if errors.Is(err, telegramcore.ErrTelegramRequestCapacity) {
 		return telegramRequestCapacityText
 	}
 
-	if diagnostic, ok := core.TelegramConversationFailure(err); ok {
+	if diagnostic, ok := telegramcore.TelegramConversationFailure(err); ok {
 		return diagnostic
 	}
 
 	return "Which current project or conversation should I use? Send /sessions to see your conversations; a reply must match its original target."
 }
 
-func freezeTelegramIntentArguments(intent ConversationIntent, target core.TelegramOperationTarget) ConversationIntent {
+func freezeTelegramIntentArguments(intent ConversationIntent, target telegramcore.TelegramOperationTarget) ConversationIntent {
 	switch intent.OperationID {
 	case "work", "control":
 		intent.Arguments.Project, intent.Arguments.Namespace = target.ProjectID, target.Namespace
@@ -121,7 +121,7 @@ func freezeTelegramIntentArguments(intent ConversationIntent, target core.Telegr
 	return intent
 }
 
-func (r telegramReceiver) intentPreparationTarget(ctx context.Context, input core.TelegramConversationInput, intent ConversationIntent) (core.TelegramOperationTarget, bool, error) {
+func (r telegramReceiver) intentPreparationTarget(ctx context.Context, input telegramcore.TelegramConversationInput, intent ConversationIntent) (telegramcore.TelegramOperationTarget, bool, error) {
 	if target, needed, err := r.intentNativeWorkTarget(ctx, input, intent); needed || err != nil {
 		return target, needed, err
 	}
@@ -129,7 +129,7 @@ func (r telegramReceiver) intentPreparationTarget(ctx context.Context, input cor
 	work, recognized, err := telegramIntentPreparedWork(input.Update, intent)
 	if recognized {
 		if err != nil {
-			return core.TelegramOperationTarget{}, false, err
+			return telegramcore.TelegramOperationTarget{}, false, err
 		}
 
 		work.Config, work.Projects = input.Config, input.Projects
@@ -142,7 +142,7 @@ func (r telegramReceiver) intentPreparationTarget(ctx context.Context, input cor
 	explanation, recognized, err := telegramIntentExplanation(input.Update, intent)
 	if recognized {
 		if err != nil {
-			return core.TelegramOperationTarget{}, false, err
+			return telegramcore.TelegramOperationTarget{}, false, err
 		}
 
 		explanation.Input.Config, explanation.Input.Projects = input.Config, input.Projects
@@ -155,7 +155,7 @@ func (r telegramReceiver) intentPreparationTarget(ctx context.Context, input cor
 	authoring, recognized, err := telegramIntentAuthoring(input.Update, intent)
 	if recognized {
 		if err != nil {
-			return core.TelegramOperationTarget{}, false, err
+			return telegramcore.TelegramOperationTarget{}, false, err
 		}
 
 		authoring.Input.Config, authoring.Input.Projects = input.Config, input.Projects
@@ -165,5 +165,5 @@ func (r telegramReceiver) intentPreparationTarget(ctx context.Context, input cor
 		return target, true, err
 	}
 
-	return core.TelegramOperationTarget{}, false, nil
+	return telegramcore.TelegramOperationTarget{}, false, nil
 }

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // TestTelegramAuthoringPreparedOfferReplay keeps a consumed prompt's token,
@@ -23,13 +23,13 @@ func TestTelegramAuthoringPreparedOfferReplay(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	again, err := f.receiver.store.OfferTelegramAction(t.Context(), core.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"develop"}, Text: "The retained scope.", ExpiresAt: time.Now().Add(time.Hour), ConversationPhase: "awaiting_confirmation"}, time.Now())
+	again, err := f.receiver.store.OfferTelegramAction(t.Context(), telegramcore.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"develop"}, Text: "The retained scope.", ExpiresAt: time.Now().Add(time.Hour), ConversationPhase: "awaiting_confirmation"}, time.Now())
 	if err != nil || again.Token != action.Token || !again.ExpiresAt.Equal(action.ExpiresAt) || f.session(t, id).Phase != "prepared" {
 		t.Fatal("offer replay regressed consumed state", again, err)
 	}
 }
 
-func telegramAuthoringPreparedOffer(t *testing.T, f *telegramConversationAppFixture, id string) (core.TelegramAction, telegramConversationNotice) {
+func telegramAuthoringPreparedOffer(t *testing.T, f *telegramConversationAppFixture, id string) (telegramcore.TelegramAction, telegramConversationNotice) {
 	t.Helper()
 
 	prompt := f.send(t, "/prepare-work "+id, 0)
@@ -43,7 +43,7 @@ func telegramAuthoringPreparedOffer(t *testing.T, f *telegramConversationAppFixt
 	return action, prompt
 }
 
-func telegramAuthoringPreparedAnswer(t *testing.T, f *telegramConversationAppFixture, action core.TelegramAction, prompt telegramConversationNotice, mode string) telegramConversationNotice {
+func telegramAuthoringPreparedAnswer(t *testing.T, f *telegramConversationAppFixture, action telegramcore.TelegramAction, prompt telegramConversationNotice, mode string) telegramConversationNotice {
 	t.Helper()
 
 	switch mode {
@@ -52,7 +52,7 @@ func telegramAuthoringPreparedAnswer(t *testing.T, f *telegramConversationAppFix
 	case "text":
 		return f.send(t, "/answer "+action.Token+" develop", 0)
 	default:
-		data, err := core.TelegramActionCallbackData(core.TelegramActionAnswer{Token: action.Token, Choice: "develop"})
+		data, err := telegramcore.TelegramActionCallbackData(telegramcore.TelegramActionAnswer{Token: action.Token, Choice: "develop"})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -167,7 +167,7 @@ func TestTelegramAuthoringPreparedStale(t *testing.T) {
 	telegramAuthoringPreparedCheck(t, f, id, true, 1)
 }
 
-func telegramAuthoringPreparedReplay(t *testing.T, f *telegramConversationAppFixture, id string, action core.TelegramAction, original AuthoringWorkResult) {
+func telegramAuthoringPreparedReplay(t *testing.T, f *telegramConversationAppFixture, id string, action telegramcore.TelegramAction, original AuthoringWorkResult) {
 	t.Helper()
 
 	if f.session(t, id).Phase != "prepared" {

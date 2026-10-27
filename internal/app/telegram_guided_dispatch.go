@@ -7,13 +7,13 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // An explicit new-project instruction can answer the project-choice diagnostic,
 // which intentionally carries no authority-bearing conversation or action reply.
-func (r telegramReceiver) respondGuidedStart(ctx context.Context, user core.TelegramAllowedUser, config core.TelegramReceiverConfig, update core.TelegramReceivedUpdate) (bool, error) {
+func (r telegramReceiver) respondGuidedStart(ctx context.Context, user telegramcore.TelegramAllowedUser, config telegramcore.TelegramReceiverConfig, update telegramcore.TelegramReceivedUpdate) (bool, error) {
 	if update.Kind != "message" || !telegramGuidedStart(update.Text) {
 		return false, nil
 	}
@@ -21,7 +21,7 @@ func (r telegramReceiver) respondGuidedStart(ctx context.Context, user core.Tele
 	return r.respondGuided(ctx, user, config, update)
 }
 
-func (r telegramReceiver) respondGuided(ctx context.Context, user core.TelegramAllowedUser, config core.TelegramReceiverConfig, update core.TelegramReceivedUpdate) (bool, error) {
+func (r telegramReceiver) respondGuided(ctx context.Context, user telegramcore.TelegramAllowedUser, config telegramcore.TelegramReceiverConfig, update telegramcore.TelegramReceivedUpdate) (bool, error) {
 	request, found, err := r.store.TelegramOperation(ctx, update, 0)
 	if err != nil {
 		return true, err
@@ -47,7 +47,7 @@ func (r telegramReceiver) respondGuided(ctx context.Context, user core.TelegramA
 	return r.routeTelegramGuided(ctx, operations, user, config, update)
 }
 
-func (r telegramReceiver) routeTelegramGuided(ctx context.Context, operations telegramGuidedService, user core.TelegramAllowedUser, config core.TelegramReceiverConfig, update core.TelegramReceivedUpdate) (bool, error) {
+func (r telegramReceiver) routeTelegramGuided(ctx context.Context, operations telegramGuidedService, user telegramcore.TelegramAllowedUser, config telegramcore.TelegramReceiverConfig, update telegramcore.TelegramReceivedUpdate) (bool, error) {
 	input, start, err := r.resolveTelegramGuidedInput(ctx, user, config, update)
 	if err != nil {
 		return true, r.guidedDiagnostic(ctx, update, config, err)
@@ -63,7 +63,7 @@ func (r telegramReceiver) routeTelegramGuided(ctx context.Context, operations te
 	}
 
 	request, err := r.reserveTelegramGuided(ctx, operations, user, input, start)
-	if errors.Is(err, core.ErrTelegramNotGuided) {
+	if errors.Is(err, telegramcore.ErrTelegramNotGuided) {
 		return false, nil
 	}
 
@@ -82,7 +82,7 @@ func (r telegramReceiver) routeTelegramGuided(ctx context.Context, operations te
 	return true, r.continueTelegramGuided(ctx, request, config)
 }
 
-func (r telegramReceiver) hasGuidedConversation(ctx context.Context, peer core.TelegramPeerIdentity) (bool, error) {
+func (r telegramReceiver) hasGuidedConversation(ctx context.Context, peer telegramcore.TelegramPeerIdentity) (bool, error) {
 	sessions, err := r.store.Conversations(ctx, peer)
 	if err != nil {
 		return false, err
@@ -97,10 +97,10 @@ func (r telegramReceiver) hasGuidedConversation(ctx context.Context, peer core.T
 	return false, nil
 }
 
-func (r telegramReceiver) reserveTelegramGuided(ctx context.Context, operations telegramGuidedService, user core.TelegramAllowedUser, input core.TelegramConversationInput, start bool) (core.TelegramOperationRequest, error) {
+func (r telegramReceiver) reserveTelegramGuided(ctx context.Context, operations telegramGuidedService, user telegramcore.TelegramAllowedUser, input telegramcore.TelegramConversationInput, start bool) (telegramcore.TelegramOperationRequest, error) {
 	var (
-		c      core.TelegramConversation
-		target core.TelegramOperationTarget
+		c      telegramcore.TelegramConversation
+		target telegramcore.TelegramOperationTarget
 		err    error
 	)
 	if start {
@@ -110,29 +110,29 @@ func (r telegramReceiver) reserveTelegramGuided(ctx context.Context, operations 
 	}
 
 	if err != nil {
-		return core.TelegramOperationRequest{}, err
+		return telegramcore.TelegramOperationRequest{}, err
 	}
 
 	owner, err := telegramGuidedOwner(c, input, start, user.OperatorID)
 	if err != nil {
-		return core.TelegramOperationRequest{}, err
+		return telegramcore.TelegramOperationRequest{}, err
 	}
 
 	if !start {
 		owner, err = prepareTelegramGuidedInput(ctx, operations, target, owner)
 		if err != nil {
-			return core.TelegramOperationRequest{}, err
+			return telegramcore.TelegramOperationRequest{}, err
 		}
 	}
 
 	data, err := json.Marshal(owner)
 	if err != nil {
-		return core.TelegramOperationRequest{}, err
+		return telegramcore.TelegramOperationRequest{}, err
 	}
 
 	args, err := json.Marshal(telegramAuthoringArguments{PayloadHash: recordDigest(data)})
 	if err != nil {
-		return core.TelegramOperationRequest{}, err
+		return telegramcore.TelegramOperationRequest{}, err
 	}
 
 	operation := "guided.continue"
@@ -140,10 +140,10 @@ func (r telegramReceiver) reserveTelegramGuided(ctx context.Context, operations 
 		operation = "guided.step"
 	}
 
-	return r.store.ReservePreparedTelegramOperation(ctx, core.TelegramOperationRequest{Source: input.Update, Operator: user.OperatorID, Target: target, OperationID: operation, Arguments: args}, data, time.Now())
+	return r.store.ReservePreparedTelegramOperation(ctx, telegramcore.TelegramOperationRequest{Source: input.Update, Operator: user.OperatorID, Target: target, OperationID: operation, Arguments: args}, data, time.Now())
 }
 
-func (r telegramReceiver) guidedDiagnostic(ctx context.Context, update core.TelegramReceivedUpdate, config core.TelegramReceiverConfig, failure error) error {
+func (r telegramReceiver) guidedDiagnostic(ctx context.Context, update telegramcore.TelegramReceivedUpdate, config telegramcore.TelegramReceiverConfig, failure error) error {
 	text := "The guided use case changed or is waiting for its current owner. Reopen its current prompt; saved input is unchanged."
 
 	var routing telegramGuidedRoutingFailure
@@ -151,7 +151,7 @@ func (r telegramReceiver) guidedDiagnostic(ctx context.Context, update core.Tele
 		text = string(routing)
 	}
 
-	if safe, ok := core.TelegramConversationFailure(failure); ok {
+	if safe, ok := telegramcore.TelegramConversationFailure(failure); ok {
 		text = safe
 	}
 
@@ -167,7 +167,7 @@ func telegramGuidedMessage(text string) bool {
 	return body == "" && (name == "/cancel" || name == "/pause" || name == "/resume" || name == "/done")
 }
 
-func (r telegramReceiver) validateGuidedRunBinding(ctx context.Context, request core.TelegramOperationRequest, config core.TelegramReceiverConfig, id string) error {
+func (r telegramReceiver) validateGuidedRunBinding(ctx context.Context, request telegramcore.TelegramOperationRequest, config telegramcore.TelegramReceiverConfig, id string) error {
 	user, _ := config.AuthorizedUser(request.Source.Peer.ChatID, request.Source.Peer.TopicID, request.Source.Peer.UserID, request.Source.ChatType)
 
 	projects, err := r.operations.ListRegisteredProjects(user.ProjectIDs)
@@ -175,7 +175,7 @@ func (r telegramReceiver) validateGuidedRunBinding(ctx context.Context, request 
 		return err
 	}
 
-	c, err := r.store.ReadTelegramConversationBinding(ctx, core.TelegramConversationInput{Update: request.Source, Config: config, Projects: projects}, request.Target)
+	c, err := r.store.ReadTelegramConversationBinding(ctx, telegramcore.TelegramConversationInput{Update: request.Source, Config: config, Projects: projects}, request.Target)
 	if err != nil {
 		return err
 	}

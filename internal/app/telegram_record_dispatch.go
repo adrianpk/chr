@@ -7,14 +7,14 @@ import (
 	"fmt"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 var errTelegramRecordTarget = errors.New("telegram record target is unavailable")
 
-func (r telegramReceiver) respondRecord(ctx context.Context, user core.TelegramAllowedUser, config core.TelegramReceiverConfig, update core.TelegramReceivedUpdate) (bool, error) {
+func (r telegramReceiver) respondRecord(ctx context.Context, user telegramcore.TelegramAllowedUser, config telegramcore.TelegramReceiverConfig, update telegramcore.TelegramReceivedUpdate) (bool, error) {
 	command, recognized, parseErr := parseTelegramRecord(update)
 	if !recognized {
 		return false, nil
@@ -36,7 +36,7 @@ func (r telegramReceiver) respondRecord(ctx context.Context, user core.TelegramA
 	return true, r.dispatchRecord(ctx, user, command)
 }
 
-func (r telegramReceiver) dispatchRecord(ctx context.Context, user core.TelegramAllowedUser, command telegramRecordCommand) error {
+func (r telegramReceiver) dispatchRecord(ctx context.Context, user telegramcore.TelegramAllowedUser, command telegramRecordCommand) error {
 	operations, ok := r.operations.(telegramRecordService)
 	if !ok {
 		return r.recordDiagnostic(ctx, command.Input.Update, command.Input.Config, "Record operations are unavailable.")
@@ -79,7 +79,7 @@ func (r telegramReceiver) readRecord(ctx context.Context, operations telegramRec
 	return err
 }
 
-func (r telegramReceiver) recordDiagnostic(ctx context.Context, update core.TelegramReceivedUpdate, config core.TelegramReceiverConfig, text string) error {
+func (r telegramReceiver) recordDiagnostic(ctx context.Context, update telegramcore.TelegramReceivedUpdate, config telegramcore.TelegramReceiverConfig, text string) error {
 	return r.store.QueueReadResponse(ctx, update, text, config.Digest(), time.Now())
 }
 
@@ -95,7 +95,7 @@ func telegramRecordFailure(err error) string {
 	return "The record owner is unavailable. Inspect local diagnostics; the retained request cannot be treated as successful."
 }
 
-func (r telegramReceiver) mutateRecord(ctx context.Context, operations telegramRecordService, user core.TelegramAllowedUser, command telegramRecordCommand) error {
+func (r telegramReceiver) mutateRecord(ctx context.Context, operations telegramRecordService, user telegramcore.TelegramAllowedUser, command telegramRecordCommand) error {
 	request, found, err := r.store.TelegramOperation(ctx, command.Input.Update, 0)
 	if err != nil {
 		return err
@@ -131,16 +131,16 @@ func (r telegramReceiver) mutateRecord(ctx context.Context, operations telegramR
 	return r.applyRecord(ctx, operations, request, command.Input.Config)
 }
 
-func (r telegramReceiver) reserveRecord(ctx context.Context, user core.TelegramAllowedUser, command telegramRecordCommand) (core.TelegramOperationRequest, error) {
+func (r telegramReceiver) reserveRecord(ctx context.Context, user telegramcore.TelegramAllowedUser, command telegramRecordCommand) (telegramcore.TelegramOperationRequest, error) {
 	target, err := r.store.ResolveTelegramOperationTarget(ctx, command.Input, time.Now())
 	if err != nil {
-		return core.TelegramOperationRequest{}, fmt.Errorf("%w: %w", errTelegramRecordTarget, err)
+		return telegramcore.TelegramOperationRequest{}, fmt.Errorf("%w: %w", errTelegramRecordTarget, err)
 	}
 
 	arguments, err := json.Marshal(command.Mutation)
 	if err != nil {
-		return core.TelegramOperationRequest{}, err
+		return telegramcore.TelegramOperationRequest{}, err
 	}
 
-	return r.store.ReserveTelegramOperation(ctx, core.TelegramOperationRequest{Source: command.Input.Update, Operator: user.OperatorID, Target: target, OperationID: fmt.Sprintf("records.%s.%s", command.Kind, command.Action), Arguments: arguments}, time.Now())
+	return r.store.ReserveTelegramOperation(ctx, telegramcore.TelegramOperationRequest{Source: command.Input.Update, Operator: user.OperatorID, Target: target, OperationID: fmt.Sprintf("records.%s.%s", command.Kind, command.Action), Arguments: arguments}, time.Now())
 }

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // TestTelegramRecoveryStartup replays an interrupted authoring acknowledgement
@@ -71,7 +72,7 @@ func telegramRecoveryRetainedWork(t *testing.T, state string) (*telegramConversa
 		f, operations, id = telegramControlDecisionFixture(t, "approve")
 		telegramControlOffer(t, f, "/approve "+id)
 	} else {
-		var ref core.TelegramWorkReference
+		var ref telegramcore.TelegramWorkReference
 
 		f, operations, ref = telegramWorkAdmitted(t)
 

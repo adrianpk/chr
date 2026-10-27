@@ -4,10 +4,11 @@ import (
 	"context"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func prepareTelegramGuidedInput(ctx context.Context, operations telegramGuidedService, target core.TelegramOperationTarget, input telegramGuidedInput) (telegramGuidedInput, error) {
+func prepareTelegramGuidedInput(ctx context.Context, operations telegramGuidedService, target telegramcore.TelegramOperationTarget, input telegramGuidedInput) (telegramGuidedInput, error) {
 	observed, err := operations.InspectTelegramGuided(ctx, target, input.Command.RunID)
 	if err != nil {
 		return input, err
@@ -43,13 +44,13 @@ func prepareTelegramGuidedInput(ctx context.Context, operations telegramGuidedSe
 	return input, nil
 }
 
-func telegramGuidedOwner(c core.TelegramConversation, input core.TelegramConversationInput, start bool, actor string) (telegramGuidedInput, error) {
+func telegramGuidedOwner(c telegramcore.TelegramConversation, input telegramcore.TelegramConversationInput, start bool, actor string) (telegramGuidedInput, error) {
 	if start {
 		return telegramGuidedInput{Actor: actor, Start: true, Command: core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: c.ID, ProjectID: c.ProjectID, Namespace: c.Namespace}}}, nil
 	}
 
 	if input.Conversation != "" {
-		return telegramGuidedInput{Actor: actor, Inspect: true, Command: core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: c.GuidedRunID, ProjectID: c.ProjectID, Namespace: c.Namespace}, OperationID: core.TelegramOperationID(input.Update, 0)}}, nil
+		return telegramGuidedInput{Actor: actor, Inspect: true, Command: core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: c.GuidedRunID, ProjectID: c.ProjectID, Namespace: c.Namespace}, OperationID: telegramcore.TelegramOperationID(input.Update, 0)}}, nil
 	}
 
 	return telegramGuidedCommand(c, input.Update, actor)

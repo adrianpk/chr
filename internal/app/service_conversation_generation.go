@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -20,7 +21,7 @@ func (s service) conversationGenerationScope(ctx context.Context, input Conversa
 			return s, workflowstate.ErrConflict
 		}
 
-		return s.telegramProjectService(ctx, core.TelegramOperationTarget{ProjectID: input.SelectedProject})
+		return s.telegramProjectService(ctx, telegramcore.TelegramOperationTarget{ProjectID: input.SelectedProject})
 	}
 
 	if s.projectContext.ProjectDir == "" {
@@ -55,7 +56,7 @@ func (s service) validateIntentGenerationProject(ctx context.Context, location c
 		return nil
 	}
 
-	current, err := s.telegramProjectService(ctx, core.TelegramOperationTarget{ProjectID: location.ProjectRef})
+	current, err := s.telegramProjectService(ctx, telegramcore.TelegramOperationTarget{ProjectID: location.ProjectRef})
 	if err != nil {
 		return err
 	}

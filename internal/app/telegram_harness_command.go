@@ -3,7 +3,7 @@ package app
 import (
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 const telegramHarnessUsage = "/harness [worker=PROFILE|-] [generation=PROFILE|-]"
@@ -13,7 +13,7 @@ type telegramHarnessChoices struct {
 	Generation *string `json:"generation,omitempty"`
 }
 
-func parseTelegramHarness(update core.TelegramReceivedUpdate) (telegramHarnessChoices, bool, error) {
+func parseTelegramHarness(update telegramcore.TelegramReceivedUpdate) (telegramHarnessChoices, bool, error) {
 	var choices telegramHarnessChoices
 
 	words := strings.Fields(update.Text)

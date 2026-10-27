@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 type telegramAuthoringDescriptor struct {
@@ -13,7 +14,7 @@ type telegramAuthoringDescriptor struct {
 }
 
 type telegramAuthoringCommand struct {
-	Input        core.TelegramConversationInput
+	Input        telegramcore.TelegramConversationInput
 	Action       core.AuthoringContinuationAction
 	Target       core.AuthoringArtifactKind
 	Instructions string
@@ -28,8 +29,8 @@ func telegramAuthoringRegistry() []telegramAuthoringDescriptor {
 	}
 }
 
-func parseTelegramAuthoring(update core.TelegramReceivedUpdate) (telegramAuthoringCommand, bool, error) {
-	command := telegramAuthoringCommand{Input: core.TelegramConversationInput{Update: update}}
+func parseTelegramAuthoring(update telegramcore.TelegramReceivedUpdate) (telegramAuthoringCommand, bool, error) {
+	command := telegramAuthoringCommand{Input: telegramcore.TelegramConversationInput{Update: update}}
 	if update.Kind != "message" {
 		return command, false, nil
 	}
@@ -73,9 +74,9 @@ func validateTelegramAuthoringCommand(command telegramAuthoringCommand) error {
 	return nil
 }
 
-func telegramIntentAuthoring(update core.TelegramReceivedUpdate, intent ConversationIntent) (telegramAuthoringCommand, bool, error) {
+func telegramIntentAuthoring(update telegramcore.TelegramReceivedUpdate, intent ConversationIntent) (telegramAuthoringCommand, bool, error) {
 	a := intent.Arguments
-	command := telegramAuthoringCommand{Input: core.TelegramConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation}}
+	command := telegramAuthoringCommand{Input: telegramcore.TelegramConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation}}
 
 	for _, descriptor := range telegramAuthoringRegistry() {
 		if intent.OperationID != strings.TrimPrefix(descriptor.Name, "/") {
@@ -103,7 +104,7 @@ func telegramIntentAuthoring(update core.TelegramReceivedUpdate, intent Conversa
 	return command, false, nil
 }
 
-func telegramAuthoringUsage(update core.TelegramReceivedUpdate) string {
+func telegramAuthoringUsage(update telegramcore.TelegramReceivedUpdate) string {
 	name, _ := telegramCommandWord(strings.TrimSpace(update.Text))
 	for _, descriptor := range telegramAuthoringRegistry() {
 		if descriptor.Name == name {

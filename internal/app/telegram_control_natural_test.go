@@ -3,7 +3,7 @@ package app
 import (
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // TestTelegramControlPayload rejects extra model authority fields and malformed
@@ -23,14 +23,14 @@ func TestTelegramControlPayload(t *testing.T) {
 		{"unknown answer", "/answer-decision run question approve 1 Preserve intent", false},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			_, recognized, err := parseTelegramControl(core.TelegramReceivedUpdate{Kind: "message", Text: test.command})
+			_, recognized, err := parseTelegramControl(telegramcore.TelegramReceivedUpdate{Kind: "message", Text: test.command})
 			if !recognized || (err == nil) != test.valid {
 				t.Fatal("unexpected bounded control parse", recognized, err)
 			}
 		})
 	}
 
-	_, _, err := telegramIntentControl(core.TelegramReceivedUpdate{}, ConversationIntent{OperationID: "control", Arguments: ConversationIntentArguments{Action: "grant", Text: "run", RecordJSON: `{"kind":"submission","amount":1,"reason":"More capacity","actor":"model-chosen"}`}})
+	_, _, err := telegramIntentControl(telegramcore.TelegramReceivedUpdate{}, ConversationIntent{OperationID: "control", Arguments: ConversationIntentArguments{Action: "grant", Text: "run", RecordJSON: `{"kind":"submission","amount":1,"reason":"More capacity","actor":"model-chosen"}`}})
 	if err == nil {
 		t.Fatal("model supplied mutation authority")
 	}

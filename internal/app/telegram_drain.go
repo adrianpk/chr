@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
@@ -43,7 +43,7 @@ func (r telegramReceiver) drainDeliveries(ctx context.Context) error {
 	return nil
 }
 
-func (r telegramReceiver) respond(ctx context.Context, update core.TelegramReceivedUpdate) error {
+func (r telegramReceiver) respond(ctx context.Context, update telegramcore.TelegramReceivedUpdate) error {
 	config, err := r.currentConfig()
 	if err != nil {
 		return err
@@ -58,9 +58,9 @@ func (r telegramReceiver) respond(ctx context.Context, update core.TelegramRecei
 		return r.queueReadReply(ctx, update, config, reply)
 	}
 
-	for _, handler := range []func(context.Context, core.TelegramAllowedUser, core.TelegramReceiverConfig, core.TelegramReceivedUpdate) (bool, error){r.respondGuidedStart, r.respondAction, r.respondGuided, r.respondHarness, r.respondControl, r.respondWork, r.respondRecord, r.respondPreparedWork, r.respondExplanation, r.respondAuthoring, r.respondIntent, r.respondConversation} {
+	for _, handler := range []func(context.Context, telegramcore.TelegramAllowedUser, telegramcore.TelegramReceiverConfig, telegramcore.TelegramReceivedUpdate) (bool, error){r.respondGuidedStart, r.respondAction, r.respondGuided, r.respondHarness, r.respondControl, r.respondWork, r.respondRecord, r.respondPreparedWork, r.respondExplanation, r.respondAuthoring, r.respondIntent, r.respondConversation} {
 		if handled, err := handler(ctx, user, config, update); handled || err != nil {
-			if errors.Is(err, core.ErrTelegramRequestCapacity) {
+			if errors.Is(err, telegramcore.ErrTelegramRequestCapacity) {
 				return r.store.QueuePresentationResponse(ctx, update, tgmessage.Blocks{Family: "42", InitialText: telegramRequestCapacityText}, config.Digest(), time.Now())
 			}
 
@@ -76,7 +76,7 @@ func (r telegramReceiver) respond(ctx context.Context, update core.TelegramRecei
 	return r.queueReadReply(ctx, update, config, reply)
 }
 
-func (r telegramReceiver) deliver(ctx context.Context, delivery core.TelegramReceiverDelivery) error {
+func (r telegramReceiver) deliver(ctx context.Context, delivery telegramcore.TelegramReceiverDelivery) error {
 	config, err := r.currentConfig()
 	if err != nil {
 		return err
@@ -103,9 +103,9 @@ func (r telegramReceiver) deliver(ctx context.Context, delivery core.TelegramRec
 	return r.sendReservedDelivery(ctx, delivery)
 }
 
-func (r telegramReceiver) sendReservedDelivery(ctx context.Context, delivery core.TelegramReceiverDelivery) error {
+func (r telegramReceiver) sendReservedDelivery(ctx context.Context, delivery telegramcore.TelegramReceiverDelivery) error {
 	if err := r.store.ValidateTelegramActionDelivery(ctx, delivery); err != nil {
-		return r.failedDelivery(ctx, delivery, &core.TelegramAPIError{Code: "action_presentation_unavailable", Permanent: true})
+		return r.failedDelivery(ctx, delivery, &telegramcore.TelegramAPIError{Code: "action_presentation_unavailable", Permanent: true})
 	}
 
 	text := delivery.Text
@@ -114,7 +114,7 @@ func (r telegramReceiver) sendReservedDelivery(ctx context.Context, delivery cor
 	}
 
 	if delivery.State == "sending" || delivery.State == "uncertain" {
-		text = core.BoundTelegramReceiverText(telegramUncertainDeliveryText + "\n" + text)
+		text = telegramcore.BoundTelegramReceiverText(telegramUncertainDeliveryText + "\n" + text)
 	}
 
 	if delivery.DocumentID != "" {
@@ -133,7 +133,7 @@ func (r telegramReceiver) sendReservedDelivery(ctx context.Context, delivery cor
 	return r.store.DeliverySent(ctx, delivery.ID, messageID, time.Now())
 }
 
-func (r telegramReceiver) sendDeliveryBody(ctx context.Context, delivery core.TelegramReceiverDelivery, text string) (int64, error) {
+func (r telegramReceiver) sendDeliveryBody(ctx context.Context, delivery telegramcore.TelegramReceiverDelivery, text string) (int64, error) {
 	if delivery.Presentation != nil && !delivery.PlainFallback {
 		entities := telegramDeliveryEntities(delivery, text)
 
@@ -151,8 +151,8 @@ func (r telegramReceiver) sendDeliveryBody(ctx context.Context, delivery core.Te
 	return r.api.SendAction(ctx, r.token, delivery.Peer, text, delivery.ActionToken, delivery.ActionChoices)
 }
 
-func (r telegramReceiver) failedDelivery(ctx context.Context, delivery core.TelegramReceiverDelivery, failure error) error {
-	var apiErr *core.TelegramAPIError
+func (r telegramReceiver) failedDelivery(ctx context.Context, delivery telegramcore.TelegramReceiverDelivery, failure error) error {
+	var apiErr *telegramcore.TelegramAPIError
 	if (delivery.ParseMode == "Markdown" || delivery.Presentation != nil) && !delivery.PlainFallback && errors.As(failure, &apiErr) && apiErr.Code == "format_rejected" {
 		selected, err := r.store.SelectTelegramPlainFallback(ctx, delivery.ID, time.Now())
 		if err != nil {

@@ -12,17 +12,18 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 type telegramReceiver struct {
 	env            core.UserEnvironment
-	api            core.TelegramReceiverAPI
-	store          *core.TelegramReceiverStore
+	api            telegramcore.TelegramReceiverAPI
+	store          *telegramcore.TelegramReceiverStore
 	operations     telegramReadService
 	botID          int64
 	token          string
 	slots          *telegramActivationSlots
-	processingLane *core.TelegramProcessingLane
+	processingLane *telegramcore.TelegramProcessingLane
 }
 
 func (factory commandFactory) telegramServeCommand() *cli.Command {
@@ -38,13 +39,13 @@ func (factory commandFactory) telegramServeCommand() *cli.Command {
 			ctx, cancel := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 			defer cancel()
 
-			return telegramCommandFailure(serveTelegramReceiver(ctx, env, factory.deps.assetsFS, core.NewTelegramReceiverAPI()))
+			return telegramCommandFailure(serveTelegramReceiver(ctx, env, factory.deps.assetsFS, telegramcore.NewTelegramReceiverAPI()))
 		},
 	}
 }
 
-func serveTelegramReceiver(ctx context.Context, env core.UserEnvironment, assets fs.FS, api core.TelegramReceiverAPI) (err error) {
-	configurationLock, err := core.AcquireTelegramConfigurationLock(env)
+func serveTelegramReceiver(ctx context.Context, env core.UserEnvironment, assets fs.FS, api telegramcore.TelegramReceiverAPI) (err error) {
+	configurationLock, err := telegramcore.AcquireTelegramConfigurationLock(env)
 	if err != nil {
 		return err
 	}
@@ -52,12 +53,12 @@ func serveTelegramReceiver(ctx context.Context, env core.UserEnvironment, assets
 	resources := telegramReceiverResources{closers: []io.Closer{configurationLock}}
 	defer func() { err = resources.finish(err) }()
 
-	config, err := core.LoadTelegramReceiverConfig(env)
+	config, err := telegramcore.LoadTelegramReceiverConfig(env)
 	if err != nil {
 		return &telegramServiceFailure{code: "configuration_invalid", permanent: true}
 	}
 
-	token, err := core.TelegramReceiverToken(env, config)
+	token, err := telegramcore.TelegramReceiverToken(env, config)
 	if err != nil {
 		return &telegramServiceFailure{code: "token_unavailable_or_invalid", permanent: true}
 	}
@@ -67,18 +68,18 @@ func serveTelegramReceiver(ctx context.Context, env core.UserEnvironment, assets
 		return err
 	}
 
-	botLock, err := core.AcquireTelegramReceiverLock(env, botID)
+	botLock, err := telegramcore.AcquireTelegramReceiverLock(env, botID)
 	if err != nil {
 		return err
 	}
 
 	resources.closers = append(resources.closers, botLock)
 
-	if err := core.BindTelegramReceiverIdentity(env, botID); err != nil {
+	if err := telegramcore.BindTelegramReceiverIdentity(env, botID); err != nil {
 		return err
 	}
 
-	store, err := core.NewTelegramReceiverStore(ctx, env, assets)
+	store, err := telegramcore.NewTelegramReceiverStore(ctx, env, assets)
 	if err != nil {
 		return &telegramServiceFailure{code: "retained_schema_or_store_invalid", permanent: true}
 	}
@@ -157,7 +158,7 @@ func (r telegramReceiver) step(ctx context.Context) (time.Duration, error) {
 	return r.receiveBatch(ctx, config, state)
 }
 
-func (r telegramReceiver) receiveBatch(ctx context.Context, config core.TelegramReceiverConfig, state core.TelegramReceiverState) (time.Duration, error) {
+func (r telegramReceiver) receiveBatch(ctx context.Context, config telegramcore.TelegramReceiverConfig, state telegramcore.TelegramReceiverState) (time.Duration, error) {
 	updates, err := r.api.Poll(ctx, r.token, state.NextUpdateID, config.PollTimeoutSeconds)
 	if err != nil {
 		return r.pollFailed(ctx, state, err)
@@ -169,7 +170,7 @@ func (r telegramReceiver) receiveBatch(ctx context.Context, config core.Telegram
 	}
 
 	for index, update := range updates {
-		updates[index] = core.AuthorizeTelegramReceiverUpdate(config, r.botID, update)
+		updates[index] = telegramcore.AuthorizeTelegramReceiverUpdate(config, r.botID, update)
 	}
 
 	if err := r.store.RetainBatch(ctx, r.botID, updates, time.Now()); err != nil {
@@ -187,7 +188,7 @@ func (r telegramReceiver) drainSynchronous(ctx context.Context) error {
 	return r.drain(ctx)
 }
 
-func (r telegramReceiver) pollFailed(ctx context.Context, prior core.TelegramReceiverState, failure error) (time.Duration, error) {
+func (r telegramReceiver) pollFailed(ctx context.Context, prior telegramcore.TelegramReceiverState, failure error) (time.Duration, error) {
 	if ctx.Err() != nil {
 		return 0, ctx.Err()
 	}
@@ -196,7 +197,7 @@ func (r telegramReceiver) pollFailed(ctx context.Context, prior core.TelegramRec
 		return 0, errors.Join(failure, err)
 	}
 
-	var apiErr *core.TelegramAPIError
+	var apiErr *telegramcore.TelegramAPIError
 
 	if prior.RetryAttempt+1 >= 5 {
 		return 0, &telegramServiceFailure{code: "poll_retry_exhausted", permanent: true}
@@ -209,13 +210,13 @@ func (r telegramReceiver) pollFailed(ctx context.Context, prior core.TelegramRec
 	return time.Second, nil
 }
 
-func (r telegramReceiver) currentConfig() (core.TelegramReceiverConfig, error) {
-	config, err := core.LoadTelegramReceiverConfig(r.env)
+func (r telegramReceiver) currentConfig() (telegramcore.TelegramReceiverConfig, error) {
+	config, err := telegramcore.LoadTelegramReceiverConfig(r.env)
 	if err != nil {
 		return config, &telegramServiceFailure{code: "configuration_or_token_invalid", permanent: true}
 	}
 
-	token, err := core.TelegramReceiverToken(r.env, config)
+	token, err := telegramcore.TelegramReceiverToken(r.env, config)
 	if err != nil {
 		return config, &telegramServiceFailure{code: "configuration_or_token_invalid", permanent: true}
 	}

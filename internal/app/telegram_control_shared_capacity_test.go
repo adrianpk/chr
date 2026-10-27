@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 type telegramControlWorker struct {
@@ -65,7 +66,7 @@ func checkTelegramControlSharedCapacity(t *testing.T, capacity int) {
 	checkTelegramControlResults(t, operations, append([]string{first.Invocation.ID, waiting.Invocation.ID}, telegramControlRunIDs(runs)...))
 }
 
-func telegramControlCapacityAdmission(t *testing.T, f *telegramConversationAppFixture, key string) core.TelegramWorkReference {
+func telegramControlCapacityAdmission(t *testing.T, f *telegramConversationAppFixture, key string) telegramcore.TelegramWorkReference {
 	t.Helper()
 
 	action, _ := telegramWorkOffer(t, f, "/work ticket "+key)
@@ -89,7 +90,7 @@ func telegramControlCapacityAdmission(t *testing.T, f *telegramConversationAppFi
 
 	t.Fatal("native conversation admission missing", key)
 
-	return core.TelegramWorkReference{}
+	return telegramcore.TelegramWorkReference{}
 }
 
 func telegramControlRunIDs(runs []core.WorkflowInvocation) []string {
@@ -101,7 +102,7 @@ func telegramControlRunIDs(runs []core.WorkflowInvocation) []string {
 	return ids
 }
 
-func telegramControlCapacityRuns(t *testing.T, f *telegramConversationAppFixture, operations service, first core.TelegramWorkReference, capacity int) ([]core.WorkflowInvocation, core.TelegramWorkReference) {
+func telegramControlCapacityRuns(t *testing.T, f *telegramConversationAppFixture, operations service, first telegramcore.TelegramWorkReference, capacity int) ([]core.WorkflowInvocation, telegramcore.TelegramWorkReference) {
 	t.Helper()
 
 	store, err := operations.workflowStore()
@@ -125,7 +126,7 @@ func telegramControlCapacityRuns(t *testing.T, f *telegramConversationAppFixture
 	}
 
 	runs := []core.WorkflowInvocation{}
-	waiting := core.TelegramWorkReference{}
+	waiting := telegramcore.TelegramWorkReference{}
 
 	for index := 1; index <= capacity; index++ {
 		task := *original.Task
@@ -157,7 +158,7 @@ func telegramControlCapacityRuns(t *testing.T, f *telegramConversationAppFixture
 	return runs, waiting
 }
 
-func telegramControlSharedWorker(t *testing.T, receiver telegramReceiver, operations service, id string, ref *core.TelegramWorkReference, daemon bool) *telegramControlWorker {
+func telegramControlSharedWorker(t *testing.T, receiver telegramReceiver, operations service, id string, ref *telegramcore.TelegramWorkReference, daemon bool) *telegramControlWorker {
 	t.Helper()
 
 	root := t.TempDir()
@@ -181,7 +182,7 @@ func telegramControlSharedWorker(t *testing.T, receiver telegramReceiver, operat
 	return worker
 }
 
-func telegramControlWorkerCall(t *testing.T, receiver telegramReceiver, operations service, id string, ref *core.TelegramWorkReference, daemon bool) (func(context.Context) error, func(context.Context) error) {
+func telegramControlWorkerCall(t *testing.T, receiver telegramReceiver, operations service, id string, ref *telegramcore.TelegramWorkReference, daemon bool) (func(context.Context) error, func(context.Context) error) {
 	t.Helper()
 
 	if ref != nil {
@@ -335,7 +336,7 @@ func checkTelegramControlPool(t *testing.T, operations service, maximum, availab
 	}
 }
 
-func checkTelegramControlCapacityWait(t *testing.T, f *telegramConversationAppFixture, operations service, ref core.TelegramWorkReference) {
+func checkTelegramControlCapacityWait(t *testing.T, f *telegramConversationAppFixture, operations service, ref telegramcore.TelegramWorkReference) {
 	t.Helper()
 
 	result := f.receiver.activateWork(t.Context(), ref)
@@ -360,7 +361,7 @@ func checkTelegramControlCapacityWait(t *testing.T, f *telegramConversationAppFi
 	}
 }
 
-func checkTelegramControlDuplicate(t *testing.T, f *telegramConversationAppFixture, operations service, ref core.TelegramWorkReference) {
+func checkTelegramControlDuplicate(t *testing.T, f *telegramConversationAppFixture, operations service, ref telegramcore.TelegramWorkReference) {
 	t.Helper()
 
 	result := f.receiver.activateWork(t.Context(), ref)

@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // TestTelegramRecoverySignal sends SIGTERM only to its own receiver process.
@@ -90,7 +91,7 @@ func telegramRecoveryServeChild(t *testing.T, root string) {
 	ctx, cancel := signal.NotifyContext(t.Context(), syscall.SIGTERM)
 	defer cancel()
 
-	api := core.TelegramReceiverAPI{Client: &http.Client{}, BaseURL: os.Getenv("CHR_TEST_RECOVERY_SERVE_API")}
+	api := telegramcore.TelegramReceiverAPI{Client: &http.Client{}, BaseURL: os.Getenv("CHR_TEST_RECOVERY_SERVE_API")}
 	if err := serveTelegramReceiver(ctx, env, testAssetsFS(), api); err != nil {
 		t.Fatal(err)
 	}

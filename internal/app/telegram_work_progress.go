@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
-func telegramWorkObservation(status WorkflowWorkStatus, projectName string) core.TelegramWorkObservation {
+func telegramWorkObservation(status WorkflowWorkStatus, projectName string) telegramcore.TelegramWorkObservation {
 	phase, kind := "executing", "progress"
 
 	switch status.Status {
@@ -29,7 +29,7 @@ func telegramWorkObservation(status WorkflowWorkStatus, projectName string) core
 
 	message := telegramWorkProgressMessage(status, projectName)
 
-	return core.TelegramWorkObservation{Revision: status.Revision, Phase: phase, Kind: kind, Text: tgmessage.Render(message).PlainFallback, Message: &message}
+	return telegramcore.TelegramWorkObservation{Revision: status.Revision, Phase: phase, Kind: kind, Text: tgmessage.Render(message).PlainFallback, Message: &message}
 }
 
 func telegramWorkProgressText(status WorkflowWorkStatus) string {

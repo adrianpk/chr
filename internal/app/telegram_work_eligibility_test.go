@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // TestTelegramWorkDecisionWait uses a real retained merger question to prove
@@ -52,7 +53,7 @@ func TestTelegramWorkCapacity(t *testing.T) {
 	}
 }
 
-func telegramWorkHoldCapacity(t *testing.T, operations service, ref core.TelegramWorkReference) {
+func telegramWorkHoldCapacity(t *testing.T, operations service, ref telegramcore.TelegramWorkReference) {
 	t.Helper()
 
 	store, err := operations.workflowStore()

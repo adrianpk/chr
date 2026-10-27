@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
@@ -21,7 +22,7 @@ func TestTelegramPresentationFailureSharedQuota(t *testing.T) {
 	seedTelegramDocumentQuota(t, store, 31)
 
 	update := telegramRetainedTestUpdate(t, 1, "document")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, time.Now()); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []telegramcore.TelegramReceivedUpdate{update}, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -72,7 +73,7 @@ func checkTelegramNotificationQuota(t *testing.T, repository *notificationTestRe
 	}
 }
 
-func checkTelegramNotificationQuotaRollback(t *testing.T, repository *notificationTestRepository, store *TelegramReceiverStore) {
+func checkTelegramNotificationQuotaRollback(t *testing.T, repository *notificationTestRepository, store *telegramFixtureStore) {
 	t.Helper()
 
 	var events, documents, replies int

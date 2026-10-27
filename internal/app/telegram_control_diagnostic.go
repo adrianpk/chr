@@ -4,12 +4,12 @@ import (
 	"context"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 const telegramActionUnavailableText = "This action is unavailable, expired or stale for this exact peer and prompt. Read the current state before requesting a new action."
 
-func (r telegramReceiver) staleActionDiagnostic(ctx context.Context, update core.TelegramReceivedUpdate, answer core.TelegramActionAnswer, config core.TelegramReceiverConfig) error {
+func (r telegramReceiver) staleActionDiagnostic(ctx context.Context, update telegramcore.TelegramReceivedUpdate, answer telegramcore.TelegramActionAnswer, config telegramcore.TelegramReceiverConfig) error {
 	text := telegramActionUnavailableText
 	if status, ok := r.staleControlStatus(ctx, update, answer); ok {
 		text += "\nCurrent state:\n" + telegramWorkProgressText(status)
@@ -18,7 +18,7 @@ func (r telegramReceiver) staleActionDiagnostic(ctx context.Context, update core
 	return r.store.QueuePresentationResponse(ctx, update, *telegramOutcomeMessage("40", text), config.Digest(), time.Now())
 }
 
-func (r telegramReceiver) staleControlStatus(ctx context.Context, update core.TelegramReceivedUpdate, answer core.TelegramActionAnswer) (WorkflowWorkStatus, bool) {
+func (r telegramReceiver) staleControlStatus(ctx context.Context, update telegramcore.TelegramReceivedUpdate, answer telegramcore.TelegramActionAnswer) (WorkflowWorkStatus, bool) {
 	request, err := r.store.TelegramActionRequest(ctx, update.Peer, answer)
 	if err != nil || request.OperationID != "work.control" {
 		return WorkflowWorkStatus{}, false

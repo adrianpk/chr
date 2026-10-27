@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // The model and deterministic parser obtain operation identities from the same
@@ -42,12 +43,12 @@ func telegramIntentRegistry() []ConversationIntentOperation {
 	return result
 }
 
-func telegramIntentConversation(update core.TelegramReceivedUpdate, intent ConversationIntent) (core.TelegramConversationInput, bool, error) {
+func telegramIntentConversation(update telegramcore.TelegramReceivedUpdate, intent ConversationIntent) (telegramcore.TelegramConversationInput, bool, error) {
 	a := intent.Arguments
 
-	input := core.TelegramConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation, Namespace: a.Namespace, Text: a.Text}
+	input := telegramcore.TelegramConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation, Namespace: a.Namespace, Text: a.Text}
 	if intent.OperationID == "capture" {
-		input.Action = core.TelegramConversationCapture
+		input.Action = telegramcore.TelegramConversationCapture
 		if !validTelegramIntentCapture(a, update.Text) {
 			return input, true, ErrRecordUnsupported
 		}
@@ -71,15 +72,15 @@ func telegramIntentConversation(update core.TelegramReceivedUpdate, intent Conve
 	return input, false, nil
 }
 
-func validateTelegramIntentConversation(input core.TelegramConversationInput) error {
+func validateTelegramIntentConversation(input telegramcore.TelegramConversationInput) error {
 	var valid bool
 
 	switch input.Action {
-	case core.TelegramConversationStart:
+	case telegramcore.TelegramConversationStart:
 		valid = validTelegramIntentStart(input)
-	case core.TelegramConversationSelect:
+	case telegramcore.TelegramConversationSelect:
 		valid = input.Project != "" && input.Conversation == "" && input.Text == ""
-	case core.TelegramConversationCapture:
+	case telegramcore.TelegramConversationCapture:
 		valid = input.Conversation != "" && input.Text == input.Update.Text && input.Project == ""
 	default:
 		valid = validTelegramIntentControl(input)
@@ -96,28 +97,28 @@ func validTelegramIntentCapture(a ConversationIntentArguments, text string) bool
 	return a.Text == text && a.Project == "" && a.Namespace == "" && a.Action == "" && a.RecordJSON == ""
 }
 
-func validTelegramIntentStart(input core.TelegramConversationInput) bool {
+func validTelegramIntentStart(input telegramcore.TelegramConversationInput) bool {
 	return input.Text != "" && len(input.Text) <= 512 && input.Conversation == ""
 }
 
-func validTelegramIntentControl(input core.TelegramConversationInput) bool {
+func validTelegramIntentControl(input telegramcore.TelegramConversationInput) bool {
 	if input.Text != "" || input.Project != "" {
 		return false
 	}
 
 	switch input.Action {
-	case core.TelegramConversationList:
+	case telegramcore.TelegramConversationList:
 		return input.Conversation == ""
-	case core.TelegramConversationFocus:
+	case telegramcore.TelegramConversationFocus:
 		return input.Conversation != ""
 	default:
 		return true
 	}
 }
 
-func telegramIntentRecord(update core.TelegramReceivedUpdate, intent ConversationIntent) (telegramRecordCommand, bool, error) {
+func telegramIntentRecord(update telegramcore.TelegramReceivedUpdate, intent ConversationIntent) (telegramRecordCommand, bool, error) {
 	a := intent.Arguments
-	command := telegramRecordCommand{Input: core.TelegramConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation, Namespace: a.Namespace}, Action: a.Action}
+	command := telegramRecordCommand{Input: telegramcore.TelegramConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation, Namespace: a.Namespace}, Action: a.Action}
 
 	for _, descriptor := range telegramRecordRegistry() {
 		if intent.OperationID != strings.TrimPrefix(descriptor.Name, "/") {

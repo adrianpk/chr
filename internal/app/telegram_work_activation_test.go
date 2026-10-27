@@ -8,10 +8,11 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func telegramWorkAdmitted(t *testing.T, extents ...string) (*telegramConversationAppFixture, service, core.TelegramWorkReference) {
+func telegramWorkAdmitted(t *testing.T, extents ...string) (*telegramConversationAppFixture, service, telegramcore.TelegramWorkReference) {
 	t.Helper()
 
 	extent := "ticket"
@@ -95,7 +96,7 @@ func checkTelegramWorkActivation(t *testing.T, extent string) {
 	checkTelegramWorkActivated(t, f, operations, ref, result)
 }
 
-func checkTelegramWorkActivated(t *testing.T, f *telegramConversationAppFixture, operations service, ref core.TelegramWorkReference, result telegramWorkCompletion) {
+func checkTelegramWorkActivated(t *testing.T, f *telegramConversationAppFixture, operations service, ref telegramcore.TelegramWorkReference, result telegramWorkCompletion) {
 	t.Helper()
 
 	run := checkTelegramWorkRunCount(t, operations, 1)
@@ -128,7 +129,7 @@ func TestTelegramWorkWaits(t *testing.T) {
 	}
 }
 
-func checkTelegramWorkWait(t *testing.T, f *telegramConversationAppFixture, operations service, ref core.TelegramWorkReference) {
+func checkTelegramWorkWait(t *testing.T, f *telegramConversationAppFixture, operations service, ref telegramcore.TelegramWorkReference) {
 	t.Helper()
 
 	before, err := operations.ReadWorkflow(t.Context(), ref.Invocation.ID)
@@ -183,7 +184,7 @@ type telegramWorkFinalAuthority struct {
 	change func()
 }
 
-func (s telegramWorkFinalAuthority) ResumeTelegramWork(ctx context.Context, target core.TelegramOperationTarget, reference WorkflowRetainedReference, preview WorkflowBoundPreview, check core.WorkflowAdmissionCheck) (RetainedWorkProgress, error) {
+func (s telegramWorkFinalAuthority) ResumeTelegramWork(ctx context.Context, target telegramcore.TelegramOperationTarget, reference WorkflowRetainedReference, preview WorkflowBoundPreview, check core.WorkflowAdmissionCheck) (RetainedWorkProgress, error) {
 	calls := 0
 	guard := func(ctx context.Context) error {
 		calls++

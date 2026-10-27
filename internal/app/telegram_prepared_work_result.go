@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -43,7 +44,7 @@ func telegramPreparedWorkResultText(result AuthoringWorkResult) string {
 	return fmt.Sprintf("Ticket prepared in backlog: %s — %s.\n\nExecution has not started. Use /work ticket %s to review its exact start confirmation.", result.Result.Record.Identity, result.Result.Record.Title, result.Result.Record.Identity)
 }
 
-func (r telegramReceiver) finishPreparedWork(ctx context.Context, request core.TelegramOperationRequest, result AuthoringWorkResult, config core.TelegramReceiverConfig) error {
+func (r telegramReceiver) finishPreparedWork(ctx context.Context, request telegramcore.TelegramOperationRequest, result AuthoringWorkResult, config telegramcore.TelegramReceiverConfig) error {
 	if result.Scope.Binding != (workflowstate.MutationBinding{RequestID: request.ID, Operator: request.Operator}) || result.Result.ReceiptRef == "" {
 		return workflowstate.ErrConflict
 	}
@@ -56,7 +57,7 @@ func (r telegramReceiver) finishPreparedWork(ctx context.Context, request core.T
 	text := telegramPreparedWorkResultText(result)
 	request.Message = telegramOutcomeMessage("26", text)
 
-	err = r.store.FinishTelegramAuthoring(ctx, request, core.TelegramAuthoringProgress{SessionRef: result.Scope.SessionRef}, result.Result.ReceiptRef, facts, text, config.Digest(), time.Now())
+	err = r.store.FinishTelegramAuthoring(ctx, request, telegramcore.TelegramAuthoringProgress{SessionRef: result.Scope.SessionRef}, result.Result.ReceiptRef, facts, text, config.Digest(), time.Now())
 	if errors.Is(err, workflowstate.ErrConflict) {
 		request.Message = telegramOutcomeMessage("26", "Ticket preparation is confirmed; the advanced conversation is unchanged.\n"+text)
 

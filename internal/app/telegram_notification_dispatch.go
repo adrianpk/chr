@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
@@ -22,7 +23,7 @@ func createTelegramNotification(ctx context.Context, repository notifycore.Repos
 	}
 	// A failed notification presentation cannot undo completed domain work. Keep a
 	// truthful failed audit record, without a partial view or a different send.
-	code, _ := core.TelegramNotificationFailure(err)
+	code, _ := telegramcore.TelegramNotificationFailure(err)
 	record.Event.Status = notifycore.StatusFailed
 
 	record.Event.FailureReason = code
@@ -33,19 +34,19 @@ func createTelegramNotification(ctx context.Context, repository notifycore.Repos
 	return notifycore.TelegramTarget{}, err
 }
 
-func dispatchTelegramNotification(ctx context.Context, repository notifycore.Repository, record notifycore.AuditRecord, project commandProjectContext, target notifycore.TelegramTarget) (core.TelegramSendResult, error) {
+func dispatchTelegramNotification(ctx context.Context, repository notifycore.Repository, record notifycore.AuditRecord, project commandProjectContext, target notifycore.TelegramTarget) (telegramcore.TelegramSendResult, error) {
 	lookup, err := repository.ReadTelegram(ctx, record.Event.ID, target)
 	delivery, frozen := lookup.Delivery, lookup.Frozen
 
 	if err != nil {
-		code, uncertain := core.TelegramNotificationFailure(err)
+		code, uncertain := telegramcore.TelegramNotificationFailure(err)
 		saveErr := repository.FinishTelegram(ctx, notifycore.TelegramCompletion{ID: record.Event.ID, Target: target, Acknowledgement: tgmessage.Acknowledgement{}, Failure: notifycore.DeliveryFailure{Code: code, Uncertain: uncertain}, At: time.Now().UTC()})
 
-		return core.TelegramSendResult{}, errors.Join(err, saveErr)
+		return telegramcore.TelegramSendResult{}, errors.Join(err, saveErr)
 	}
 
 	if delivery.Status != notifycore.StatusPending {
-		return core.TelegramSendResult{}, nil
+		return telegramcore.TelegramSendResult{}, nil
 	}
 
 	if !frozen {
@@ -54,27 +55,27 @@ func dispatchTelegramNotification(ctx context.Context, repository notifycore.Rep
 
 	reserved, err := repository.ReserveTelegram(ctx, record.Event.ID, target, false)
 	if err != nil || !reserved {
-		return core.TelegramSendResult{}, err
+		return telegramcore.TelegramSendResult{}, err
 	}
 
 	ack, sendErr := sendTelegramNotificationWithFallback(ctx, repository, record.Event.ID, project, target, delivery)
 
 	code, uncertain := "", false
 	if sendErr != nil {
-		code, uncertain = core.TelegramNotificationFailure(sendErr)
+		code, uncertain = telegramcore.TelegramNotificationFailure(sendErr)
 	}
 
 	if err := repository.FinishTelegram(ctx, notifycore.TelegramCompletion{ID: record.Event.ID, Target: target, Acknowledgement: ack, Failure: notifycore.DeliveryFailure{Code: code, Uncertain: uncertain}, At: time.Now().UTC()}); err != nil {
-		return core.TelegramSendResult{}, err
+		return telegramcore.TelegramSendResult{}, err
 	}
 
-	return core.TelegramSendResult{StatusCode: 200}, sendErr
+	return telegramcore.TelegramSendResult{StatusCode: 200}, sendErr
 }
 
 func sendTelegramNotificationWithFallback(ctx context.Context, repository notifycore.Repository, id string, project commandProjectContext, target notifycore.TelegramTarget, delivery notifycore.TelegramDelivery) (tgmessage.Acknowledgement, error) {
 	ack, sendErr := sendTelegramNotification(ctx, project, target, delivery)
 
-	var apiFailure *core.TelegramAPIError
+	var apiFailure *telegramcore.TelegramAPIError
 	if errors.As(sendErr, &apiFailure) && apiFailure.Code == "format_rejected" {
 		fallback, fallbackErr := repository.ReserveTelegram(ctx, id, target, true)
 		if fallbackErr != nil {
@@ -104,18 +105,18 @@ func sendTelegramNotification(ctx context.Context, project commandProjectContext
 	return notifyTelegramSender.SendPresentation(ctx, os.Getenv(config.Notifications.Telegram.BotTokenEnv), target.Destination, delivery)
 }
 
-func dispatchLegacyTelegramNotification(ctx context.Context, repository notifycore.Repository, record notifycore.AuditRecord, project commandProjectContext) (core.TelegramSendResult, error) {
+func dispatchLegacyTelegramNotification(ctx context.Context, repository notifycore.Repository, record notifycore.AuditRecord, project commandProjectContext) (telegramcore.TelegramSendResult, error) {
 	record, err := repository.Get(ctx, record.Event.ID)
 	if err != nil {
-		return core.TelegramSendResult{}, err
+		return telegramcore.TelegramSendResult{}, err
 	}
 
 	config, err := core.LoadWorkspaceConfig(project.ProjectDir)
 	if err != nil {
-		return core.TelegramSendResult{}, err
+		return telegramcore.TelegramSendResult{}, err
 	}
 
-	message := core.RenderTelegramNotificationMessage(record.Event)
+	message := telegramcore.RenderTelegramNotificationMessage(record.Event)
 	message.ChatID = config.Notifications.Telegram.ChatID
 	result, sendErr := notifyTelegramSender.SendMessage(ctx, os.Getenv(config.Notifications.Telegram.BotTokenEnv), message)
 	now := time.Now().UTC()
@@ -123,7 +124,7 @@ func dispatchLegacyTelegramNotification(ctx context.Context, repository notifyco
 
 	record.Event.Status = notifycore.StatusFailed
 	if sendErr != nil {
-		record.Event.FailureReason, _ = core.TelegramNotificationFailure(sendErr)
+		record.Event.FailureReason, _ = telegramcore.TelegramNotificationFailure(sendErr)
 	} else {
 		record.Event.Status = notifycore.StatusDelivered
 		record.Event.DeliveredAt = &now

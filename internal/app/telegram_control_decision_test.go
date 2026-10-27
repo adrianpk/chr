@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 func telegramControlDecisionFixture(t *testing.T, action string) (*telegramConversationAppFixture, service, string) {
@@ -45,7 +45,7 @@ func telegramControlDecisionFixture(t *testing.T, action string) (*telegramConve
 	}
 
 	config.AllowedUsers[0].ProjectIDs = []string{project.ID}
-	if err := core.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+	if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 

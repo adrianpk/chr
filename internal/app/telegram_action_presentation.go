@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
@@ -51,7 +52,7 @@ func telegramRecordResultText(result RecordMutationResult) string {
 	return fmt.Sprintf("Record saved: %s %s — %s.\nState: %s.\nCanonical record: %s", record.Kind, record.Identity, record.Title, record.Phase, record.Reference)
 }
 
-func telegramPreparedWorkReplay(request core.TelegramOperationRequest) string {
+func telegramPreparedWorkReplay(request telegramcore.TelegramOperationRequest) string {
 	var result AuthoringWorkResult
 	if json.Unmarshal(request.Result, &result) != nil {
 		return "This ticket preparation was already confirmed. Inspect the original result before requesting another preparation."
@@ -60,7 +61,7 @@ func telegramPreparedWorkReplay(request core.TelegramOperationRequest) string {
 	return "This ticket preparation was already confirmed.\n\n" + telegramPreparedWorkResultText(result)
 }
 
-func telegramActionReplayText(request core.TelegramOperationRequest) string {
+func telegramActionReplayText(request telegramcore.TelegramOperationRequest) string {
 	if request.OperationID == "authoring.work" {
 		return telegramPreparedWorkReplay(request)
 	}
@@ -81,7 +82,7 @@ func telegramActionReplayText(request core.TelegramOperationRequest) string {
 	return text
 }
 
-func telegramActionReplayDetails(request core.TelegramOperationRequest) string {
+func telegramActionReplayDetails(request telegramcore.TelegramOperationRequest) string {
 	switch request.OperationID {
 	case "work.admit":
 		var result telegramWorkAdmissionResult
@@ -93,7 +94,7 @@ func telegramActionReplayDetails(request core.TelegramOperationRequest) string {
 		if json.Unmarshal(request.Result, &status) == nil {
 			return fmt.Sprintf("Original control receipt retained for work %s. Retained result state: %s. Use /status %s for current state.", status.ID, status.Status, status.ID)
 		}
-	case core.TelegramHarnessSelectionOperation:
+	case telegramcore.TelegramHarnessSelectionOperation:
 		var facts struct {
 			Snapshot *core.HarnessSelectionSnapshot `json:"snapshot"`
 		}

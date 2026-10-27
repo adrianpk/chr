@@ -8,11 +8,12 @@ import (
 	"time"
 
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 func qualityStorageNow() time.Time { return time.Date(2026, 10, 26, 11, 12, 13, 0, time.UTC) }
 
-func qualityReceiverInput(t *testing.T) TelegramReceivedUpdate {
+func qualityReceiverInput(t *testing.T) telegramcore.TelegramReceivedUpdate {
 	t.Helper()
 
 	update := telegramRetainedTestUpdate(t, 31, "distinct document request")
@@ -50,10 +51,10 @@ func TestQualityStorageTelegram(t *testing.T) {
 		qualityStorageExec(t, db, "DELETE FROM telegram_document_snapshots")
 		qualityStorageExec(t, db, "DELETE FROM telegram_updates")
 
-		store := &TelegramReceiverStore{db: db}
+		store := qualityReceiverStore(t, db)
 
 		update := qualityReceiverInput(t)
-		if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, qualityStorageNow()); err != nil {
+		if err := store.RetainBatch(t.Context(), 12345, []telegramcore.TelegramReceivedUpdate{update}, qualityStorageNow()); err != nil {
 			t.Fatal(err)
 		}
 
@@ -113,14 +114,14 @@ func TestQualityStorageRollback(t *testing.T) {
 func qualityDocumentFault(t *testing.T, db *sql.DB) func() error {
 	t.Helper()
 
-	store := &TelegramReceiverStore{db: db}
+	store := qualityReceiverStore(t, db)
 
 	update := telegramRetainedTestUpdate(t, 41, "rollback document")
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, qualityStorageNow()); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []telegramcore.TelegramReceivedUpdate{update}, qualityStorageNow()); err != nil {
 		t.Fatal(err)
 	}
 
-	qualityStorageExec(t, db, `CREATE TEMP TRIGGER quality_abort BEFORE UPDATE OF document_id ON telegram_outbox BEGIN SELECT RAISE(ABORT,'injected document bind failure'); END`)
+	qualityStorageExec(t, db, `CREATE TRIGGER quality_abort BEFORE UPDATE OF document_id ON telegram_outbox BEGIN SELECT RAISE(ABORT,'injected document bind failure'); END`)
 
 	return func() error {
 		return store.QueueDocumentResponse(t.Context(), update, telegramTestDocumentResponse(), telegramReceiverTestConfig().Digest(), qualityStorageNow())

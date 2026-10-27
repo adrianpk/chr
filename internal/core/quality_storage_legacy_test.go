@@ -10,14 +10,15 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/database"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 type qualityLegacyRecords struct {
-	Execution    ExecutionRecord        `json:"execution"`
-	Remote       RemoteCommandRecord    `json:"remote"`
-	Notification notifycore.AuditRecord `json:"notification"`
-	Ticket       IndexedTicket          `json:"ticket"`
-	Conversation TelegramConversation   `json:"conversation"`
+	Execution    ExecutionRecord                   `json:"execution"`
+	Remote       RemoteCommandRecord               `json:"remote"`
+	Notification notifycore.AuditRecord            `json:"notification"`
+	Ticket       IndexedTicket                     `json:"ticket"`
+	Conversation telegramcore.TelegramConversation `json:"conversation"`
 }
 
 func openQualityLegacyDB(t *testing.T) *sql.DB {
@@ -28,7 +29,7 @@ func openQualityLegacyDB(t *testing.T) *sql.DB {
 		t.Fatal(err)
 	}
 
-	path := filepath.Join(t.TempDir(), "legacy.sqlite")
+	path := filepath.Join(t.TempDir(), "core.db")
 	if err := os.WriteFile(path, data, 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -82,10 +83,7 @@ func readQualityLegacyRecords(t *testing.T, db *sql.DB, want qualityLegacyRecord
 		t.Fatal(err)
 	}
 
-	got.Conversation, err = scanTelegramConversation(db.QueryRowContext(t.Context(), "SELECT "+telegramConversationColumns+" FROM telegram_conversations WHERE id=?", want.Conversation.ID))
-	if err != nil {
-		t.Fatal(err)
-	}
+	got.Conversation = qualityReadConversation(t, db, want.Conversation)
 
 	return got
 }

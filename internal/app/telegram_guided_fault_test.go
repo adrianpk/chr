@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 type telegramGuidedAppendAck struct {
@@ -25,7 +26,7 @@ func applyGuidedTelegramControls(t *testing.T, f *telegramConversationAppFixture
 	}
 }
 
-func (s telegramGuidedAppendAck) ApplyTelegramGuided(ctx context.Context, target core.TelegramOperationTarget, input telegramGuidedInput) (core.AuthoringSession, error) {
+func (s telegramGuidedAppendAck) ApplyTelegramGuided(ctx context.Context, target telegramcore.TelegramOperationTarget, input telegramGuidedInput) (core.AuthoringSession, error) {
 	session, err := s.service.ApplyTelegramGuided(ctx, target, input)
 	if err == nil && input.Command.Action == "append" {
 		return core.AuthoringSession{}, s.lost

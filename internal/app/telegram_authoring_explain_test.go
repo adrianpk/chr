@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -115,15 +115,15 @@ func telegramAuthoringExplainReply(t *testing.T, input authoringModelInput) stri
 	return `{"explanation":"The configured retry ceiling is retained."}`
 }
 
-func telegramAuthoringExplainMessage(t *testing.T, f *telegramConversationAppFixture, mode string) (string, core.TelegramConversation) {
+func telegramAuthoringExplainMessage(t *testing.T, f *telegramConversationAppFixture, mode string) (string, telegramcore.TelegramConversation) {
 	t.Helper()
 
 	if mode == "natural" {
-		return "Explain how retries are bounded.", core.TelegramConversation{}
+		return "Explain how retries are bounded.", telegramcore.TelegramConversation{}
 	}
 
 	if mode != "session" {
-		return "/explain How are retries bounded?", core.TelegramConversation{}
+		return "/explain How are retries bounded?", telegramcore.TelegramConversation{}
 	}
 
 	f.send(t, "/prepare retry ceiling", 0)
@@ -202,7 +202,7 @@ func TestTelegramAuthoringExplainRecovery(t *testing.T) {
 	telegramAuthoringBridgeNoWork(t, f)
 }
 
-func telegramAuthoringExplainReserve(t *testing.T, f *telegramConversationAppFixture) (core.TelegramOperationRequest, PreparedAuthoringExplanation) {
+func telegramAuthoringExplainReserve(t *testing.T, f *telegramConversationAppFixture) (telegramcore.TelegramOperationRequest, PreparedAuthoringExplanation) {
 	t.Helper()
 
 	input := telegramOperationRetainInput(t, f, "/explain How are retries bounded?")
@@ -253,7 +253,7 @@ func TestTelegramAuthoringExplainAuthority(t *testing.T) {
 	}
 }
 
-func telegramAuthoringExplainCache(t *testing.T, f *telegramConversationAppFixture, request core.TelegramOperationRequest, prepared PreparedAuthoringExplanation) {
+func telegramAuthoringExplainCache(t *testing.T, f *telegramConversationAppFixture, request telegramcore.TelegramOperationRequest, prepared PreparedAuthoringExplanation) {
 	t.Helper()
 
 	if err := f.receiver.store.BeginTelegramOperation(t.Context(), request, time.Now()); err != nil {

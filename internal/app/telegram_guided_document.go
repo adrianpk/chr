@@ -6,10 +6,11 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
-func (r telegramReceiver) guidedDocument(ctx context.Context, request core.TelegramOperationRequest, observed GuidedUseCaseInspection, kind string) (*tgmessage.DocumentResponse, error) {
+func (r telegramReceiver) guidedDocument(ctx context.Context, request telegramcore.TelegramOperationRequest, observed GuidedUseCaseInspection, kind string) (*tgmessage.DocumentResponse, error) {
 	if kind == "results" {
 		return telegramGuidedResultDocument(request.Target, observed)
 	}
@@ -38,14 +39,14 @@ func (r telegramReceiver) guidedDocument(ctx context.Context, request core.Teleg
 	return &tgmessage.DocumentResponse{Message: message, Document: telegramDocumentForTarget(request.Target, "committed/"+original.Commit+"/"+original.Reference, recordDigest(payload), telegramDocumentName(kind, observed.Session.Topic), "text/markdown", payload)}, nil
 }
 
-func telegramGuidedQuestionDocument(target core.TelegramOperationTarget, observed GuidedUseCaseInspection) *tgmessage.DocumentResponse {
+func telegramGuidedQuestionDocument(target telegramcore.TelegramOperationTarget, observed GuidedUseCaseInspection) *tgmessage.DocumentResponse {
 	payload := []byte(observed.Question)
 	message := tgmessage.Blocks{Family: "43", InitialText: "Clarification for " + observed.Session.Topic, Content: tgmessage.DocumentExcerpt(payload), SecondaryText: "Complete current question attached. Reply here with its answer."}
 
 	return &tgmessage.DocumentResponse{Message: message, Document: telegramDocumentForTarget(target, "exports/guided-questions/"+observed.Session.ID+".md", recordDigest(payload), telegramDocumentName("question", observed.Session.Topic), "text/markdown", payload)}
 }
 
-func telegramGuidedResultDocument(target core.TelegramOperationTarget, observed GuidedUseCaseInspection) (*tgmessage.DocumentResponse, error) {
+func telegramGuidedResultDocument(target telegramcore.TelegramOperationTarget, observed GuidedUseCaseInspection) (*tgmessage.DocumentResponse, error) {
 	snapshot := guidedResultSnapshot(observed)
 
 	payload, err := json.MarshalIndent(snapshot, "", "  ")

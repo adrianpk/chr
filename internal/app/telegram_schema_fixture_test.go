@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	"forge.adrianpk.com/chr/internal/core/database"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // The image is constructed by the production migrator once per test process,
@@ -33,7 +34,7 @@ func newTelegramAppSchemaImage() (_ []byte, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
-	store, err := core.NewTelegramReceiverStore(ctx, env, testAssetsFS())
+	store, err := telegramcore.NewTelegramReceiverStore(ctx, env, testAssetsFS())
 	if err != nil {
 		return nil, err
 	}

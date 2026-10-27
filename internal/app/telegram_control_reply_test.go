@@ -14,11 +14,11 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 type telegramHoldControlAck struct {
-	client  core.TelegramHTTPClient
+	client  telegramcore.TelegramHTTPClient
 	release <-chan struct{}
 	held    atomic.Bool
 }
@@ -115,14 +115,14 @@ func checkTelegramControlReplyWaiting(t *testing.T, f *telegramConversationAppFi
 
 	deadline := time.Now().Add(3 * time.Second)
 	for time.Now().Before(deadline) {
-		pending, err := f.receiver.store.PendingApplicationInputs(t.Context(), f.receiver.botID, core.TelegramProcessingDecision, time.Now())
+		pending, err := f.receiver.store.PendingApplicationInputs(t.Context(), f.receiver.botID, telegramcore.TelegramProcessingDecision, time.Now())
 		if err != nil {
 			t.Fatal(err)
 		}
 
 		if len(pending) == 1 {
 			_, recognized, err := f.receiver.store.ResolveTelegramActionAnswer(t.Context(), pending[0])
-			if !recognized || !errors.Is(err, core.ErrTelegramReplyPending) {
+			if !recognized || !errors.Is(err, telegramcore.ErrTelegramReplyPending) {
 				t.Fatal("reply escaped pending definite acknowledgement", recognized, err)
 			}
 
@@ -141,7 +141,7 @@ func TestTelegramControlLaneFence(t *testing.T) {
 	f, operations, ref := telegramWorkAdmitted(t)
 	token := telegramControlOffer(t, f, "/continue "+ref.Invocation.ID)
 	input := telegramOperationRetainInput(t, f, "/answer "+token+" continue")
-	lane := core.TelegramProcessingDecision
+	lane := telegramcore.TelegramProcessingDecision
 	f.receiver.processingLane = &lane
 
 	images := workflowCLIImage(t, operations.projectContext.ProjectDir)
@@ -149,7 +149,7 @@ func TestTelegramControlLaneFence(t *testing.T) {
 		t.Fatal("continuation executed in a reserved slot", err)
 	}
 
-	lane = core.TelegramProcessingOrdinary
+	lane = telegramcore.TelegramProcessingOrdinary
 
 	if err := f.receiver.respond(t.Context(), input.Update); err != nil {
 		t.Fatal(err)
@@ -171,14 +171,14 @@ func TestTelegramControlAuthoringLane(t *testing.T) {
 	prompt := f.send(t, "/reply "+c.ID+" Keep bounded retries.", 0)
 	queueTelegramControlReply(t, f, prompt.ID, "/done "+c.ID)
 
-	lane := core.TelegramProcessingDecision
+	lane := telegramcore.TelegramProcessingDecision
 
 	f.receiver.processingLane = &lane
 	if _, err := f.receiver.step(t.Context()); !errors.Is(err, errTelegramLaneChanged) || calls.Load() != 0 {
 		t.Fatal("authoring entered the provider from a reserved activation", calls.Load(), err)
 	}
 
-	lane = core.TelegramProcessingOrdinary
+	lane = telegramcore.TelegramProcessingOrdinary
 
 	if err := f.receiver.drain(t.Context()); err != nil {
 		t.Fatal(err)

@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 func telegramAuthoringPreparedFixture(t *testing.T, start string) (*telegramConversationAppFixture, string, *atomic.Int64) {
@@ -36,7 +37,7 @@ func telegramAuthoringPreparedFixture(t *testing.T, start string) (*telegramConv
 	return f, c.ID, calls
 }
 
-func telegramAuthoringPreparedLatest(t *testing.T, f *telegramConversationAppFixture, id string) core.TelegramOperationRequest {
+func telegramAuthoringPreparedLatest(t *testing.T, f *telegramConversationAppFixture, id string) telegramcore.TelegramOperationRequest {
 	t.Helper()
 
 	c := f.session(t, id)
@@ -51,8 +52,8 @@ func telegramAuthoringPreparedLatest(t *testing.T, f *telegramConversationAppFix
 		t.Fatal(err)
 	}
 
-	input := core.TelegramConversationInput{Update: core.TelegramReceivedUpdate{Peer: c.Peer, Kind: "message", ChatType: "private"}, Config: config, Projects: projects, Conversation: id}
-	target := core.TelegramOperationTarget{ProjectID: c.ProjectID, ProjectBindingDigest: c.ProjectBindingDigest, Namespace: c.Namespace, ConversationID: c.ID, ConversationRevision: c.Revision}
+	input := telegramcore.TelegramConversationInput{Update: telegramcore.TelegramReceivedUpdate{Peer: c.Peer, Kind: "message", ChatType: "private"}, Config: config, Projects: projects, Conversation: id}
+	target := telegramcore.TelegramOperationTarget{ProjectID: c.ProjectID, ProjectBindingDigest: c.ProjectBindingDigest, Namespace: c.Namespace, ConversationID: c.ID, ConversationRevision: c.Revision}
 
 	request, found, err := f.receiver.store.LatestTelegramAuthoringWork(t.Context(), input, target)
 	if err != nil || !found {
@@ -67,7 +68,7 @@ func telegramAuthoringPreparedStore(t *testing.T, f *telegramConversationAppFixt
 
 	operations := telegramOperationConcreteService(t, f.receiver)
 
-	scoped, err := operations.telegramProjectService(t.Context(), core.TelegramOperationTarget{ProjectID: "example-project", Namespace: "original"})
+	scoped, err := operations.telegramProjectService(t.Context(), telegramcore.TelegramOperationTarget{ProjectID: "example-project", Namespace: "original"})
 	if err != nil {
 		t.Fatal(err)
 	}

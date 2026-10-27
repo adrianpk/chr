@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // TestTelegramControlLifecycleAck exercises all five lifecycle controls on a
@@ -77,7 +77,7 @@ func checkTelegramLifecycleAckEffect(t *testing.T, operations service, id, actio
 	}
 }
 
-func checkTelegramLifecycleAckRecovery(t *testing.T, f *telegramConversationAppFixture, operations service, input core.TelegramConversationInput) {
+func checkTelegramLifecycleAckRecovery(t *testing.T, f *telegramConversationAppFixture, operations service, input telegramcore.TelegramConversationInput) {
 	t.Helper()
 
 	images := workflowCLIImage(t, operations.projectContext.ProjectDir)

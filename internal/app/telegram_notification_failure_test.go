@@ -15,6 +15,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	"forge.adrianpk.com/chr/internal/core/database"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 func installTelegramNotificationSender(t *testing.T, handler http.HandlerFunc) {
@@ -24,7 +25,7 @@ func installTelegramNotificationSender(t *testing.T, handler http.HandlerFunc) {
 	t.Cleanup(server.Close)
 
 	previous := notifyTelegramSender
-	notifyTelegramSender = core.TelegramSender{Client: server.Client(), BaseURL: server.URL}
+	notifyTelegramSender = telegramcore.TelegramSender{Client: server.Client(), BaseURL: server.URL}
 
 	t.Cleanup(func() { notifyTelegramSender = previous })
 }

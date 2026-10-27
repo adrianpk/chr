@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -41,13 +42,13 @@ func telegramGuidedStartProject(text string) (string, bool) {
 	return "", false
 }
 
-func telegramGuidedCommand(c core.TelegramConversation, update core.TelegramReceivedUpdate, actor string) (telegramGuidedInput, error) {
+func telegramGuidedCommand(c telegramcore.TelegramConversation, update telegramcore.TelegramReceivedUpdate, actor string) (telegramGuidedInput, error) {
 	var binding telegramGuidedBinding
 	if err := decodeOperationJSON(c.QuestionBinding, &binding); err != nil {
 		return telegramGuidedInput{}, err
 	}
 
-	command := core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: c.GuidedRunID, ProjectID: c.ProjectID, Namespace: c.Namespace}, ExpectedRevision: binding.Revision, NativeRevision: binding.NativeRevision, OperationID: core.TelegramOperationID(update, 0), Content: update.Text, QuestionID: binding.QuestionID, InputDigest: binding.InputDigest}
+	command := core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: c.GuidedRunID, ProjectID: c.ProjectID, Namespace: c.Namespace}, ExpectedRevision: binding.Revision, NativeRevision: binding.NativeRevision, OperationID: telegramcore.TelegramOperationID(update, 0), Content: update.Text, QuestionID: binding.QuestionID, InputDigest: binding.InputDigest}
 	input := telegramGuidedInput{Actor: actor, Command: command}
 	text := strings.ToLower(strings.TrimSpace(update.Text))
 	input.Document = telegramGuidedDocumentKind(text)
@@ -105,7 +106,7 @@ func telegramGuidedStageAction(binding telegramGuidedBinding, text string) (stri
 	return "", "", workflowstate.ErrConflict
 }
 
-func telegramGuidedProgress(observed GuidedUseCaseInspection) (core.TelegramGuidedProgress, error) {
+func telegramGuidedProgress(observed GuidedUseCaseInspection) (telegramcore.TelegramGuidedProgress, error) {
 	session := *observed.Session
 
 	binding := telegramGuidedBinding{Revision: session.Revision, Stage: session.Guided.Stage, ViewDigest: recordDigest([]byte(telegramGuidedPrompt(observed)))}
@@ -119,7 +120,7 @@ func telegramGuidedProgress(observed GuidedUseCaseInspection) (core.TelegramGuid
 
 	data, err := json.Marshal(binding)
 
-	return core.TelegramGuidedProgress{SessionRef: workspacecore.DirectoryName + "/authoring/sessions/" + session.ID + "/session.md", Topic: session.Topic, Binding: string(data), Phase: telegramGuidedTransportPhase(observed)}, err
+	return telegramcore.TelegramGuidedProgress{SessionRef: workspacecore.DirectoryName + "/authoring/sessions/" + session.ID + "/session.md", Topic: session.Topic, Binding: string(data), Phase: telegramGuidedTransportPhase(observed)}, err
 }
 
 func telegramGuidedDocumentKind(text string) string {

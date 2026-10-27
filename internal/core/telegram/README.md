@@ -1,0 +1,16 @@
+# Telegram
+
+This package owns bounded receiver HTTP, configuration and OS exclusion, peer
+routing, retained operations, confirmations and delivery. Existing operations
+keep their one SQL transaction across conversations, requests, notices, actions
+and document snapshots. A separate outbox package would split that transaction
+without supplying an independent consumer, so it is not introduced.
+
+Application operations perform domain execution and full domain validation.
+The receiver binds validated routing values and frozen outcomes; it does not
+import the root coordinator or an adapter. The separate message child owns
+pure render/document values and cannot import this store or notification IO.
+
+Imports are bounded by the syntax quality check. Native domain integration tests
+remain with root core. Receiver SQL/HTTP/restart/retention tests live here;
+integration fixtures own their independent SQL inspection connections.

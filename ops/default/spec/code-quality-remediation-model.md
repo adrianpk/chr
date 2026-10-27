@@ -471,3 +471,13 @@ and proves failed attachment cannot change peer focus or either canonical run;
 removing the guard makes that test fail. Legacy update decoding remains transport
 owned, while generic remote-command classification and record construction move
 to app composition with their existing tests and time/error semantics.
+
+
+Mechanical Telegram relocation preserves all 453 production declarations across
+71 files byte-for-byte, recorded in slice-7-moves.csv. The 51 moved tests keep
+private persistence checks at their owner; mixed domain integration tests retain
+root placement and use independent fixture SQL connections. Frozen legacy bytes,
+identity columns, cross-table rollback, receiver HTTP/actions/documents, lost-ack
+restart and actual app/native integration regressions pass after relocation.
+Naming cleanup and all assigned signature dispositions remain pending; no final
+slice validation or PR readiness is claimed by this task checkpoint.

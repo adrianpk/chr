@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // TestQualityStorageIdentity uses distinct peer integers and distinct hashes,
@@ -25,10 +27,7 @@ func qualityConversationIdentity(t *testing.T) {
 	qualityStorageExec(t, db, `INSERT INTO telegram_peers(bot_id,chat_id,topic_id,user_id,updated_at) VALUES(12345,-202,303,404,'2026-10-26T11:12:13Z')`)
 	qualityStorageExec(t, db, `UPDATE telegram_conversations SET chat_id=-202,topic_id=303,user_id=404`)
 
-	got, err := scanTelegramConversation(db.QueryRowContext(t.Context(), "SELECT "+telegramConversationColumns+" FROM telegram_conversations WHERE id=?", want.ID))
-	if err != nil {
-		t.Fatal(err)
-	}
+	got := qualityReadConversation(t, db, want)
 
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("conversation peer fields changed: %#v", got)
@@ -37,14 +36,14 @@ func qualityConversationIdentity(t *testing.T) {
 
 func qualityReceiverIdentity(t *testing.T) {
 	db := openQualityLegacyDB(t)
-	store := &TelegramReceiverStore{db: db}
+	store := qualityReceiverStore(t, db)
 	update := telegramRetainedTestUpdate(t, 505, "distinct retained identity")
 	update.Peer.ChatID = -202
 	update.Peer.TopicID = 303
 	update.MessageID = 404
 
 	update.ReplyToMessageID = 606
-	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{update}, qualityStorageNow()); err != nil {
+	if err := store.RetainBatch(t.Context(), 12345, []telegramcore.TelegramReceivedUpdate{update}, qualityStorageNow()); err != nil {
 		t.Fatal(err)
 	}
 

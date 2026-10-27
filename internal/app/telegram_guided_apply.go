@@ -8,10 +8,11 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r telegramReceiver) continueTelegramGuided(ctx context.Context, request core.TelegramOperationRequest, config core.TelegramReceiverConfig) error {
+func (r telegramReceiver) continueTelegramGuided(ctx context.Context, request telegramcore.TelegramOperationRequest, config telegramcore.TelegramReceiverConfig) error {
 	switch request.State {
 	case "confirmed", "blocked":
 		return nil
@@ -59,7 +60,7 @@ func (r telegramReceiver) continueTelegramGuided(ctx context.Context, request co
 	return r.finishTelegramGuided(ctx, request, observed, current, owner.Document)
 }
 
-func (r telegramReceiver) finishTelegramGuided(ctx context.Context, request core.TelegramOperationRequest, observed GuidedUseCaseInspection, current core.TelegramReceiverConfig, kind string) error {
+func (r telegramReceiver) finishTelegramGuided(ctx context.Context, request telegramcore.TelegramOperationRequest, observed GuidedUseCaseInspection, current telegramcore.TelegramReceiverConfig, kind string) error {
 	progress, facts, err := telegramGuidedResult(observed)
 	if err != nil {
 		return err
@@ -85,7 +86,7 @@ func (r telegramReceiver) finishTelegramGuided(ctx context.Context, request core
 	return err
 }
 
-func telegramGuidedResult(observed GuidedUseCaseInspection) (core.TelegramGuidedProgress, json.RawMessage, error) {
+func telegramGuidedResult(observed GuidedUseCaseInspection) (telegramcore.TelegramGuidedProgress, json.RawMessage, error) {
 	progress, err := telegramGuidedProgress(observed)
 	if err != nil {
 		return progress, nil, err
@@ -97,7 +98,7 @@ func telegramGuidedResult(observed GuidedUseCaseInspection) (core.TelegramGuided
 	return progress, facts, err
 }
 
-func (r telegramReceiver) finishGuidedFailure(ctx context.Context, request core.TelegramOperationRequest, config core.TelegramReceiverConfig, failure error) error {
+func (r telegramReceiver) finishGuidedFailure(ctx context.Context, request telegramcore.TelegramOperationRequest, config telegramcore.TelegramReceiverConfig, failure error) error {
 	text := telegramGuidedFailure(failure)
 
 	facts, err := json.Marshal(map[string]string{"state": "blocked", "message": text})
@@ -116,14 +117,14 @@ func telegramGuidedFailure(failure error) string {
 		return string(routing)
 	}
 
-	if safe, ok := core.TelegramConversationFailure(failure); ok {
+	if safe, ok := telegramcore.TelegramConversationFailure(failure); ok {
 		return safe
 	}
 
 	return "The use case changed or its current step needs recovery. Saved inputs and work are retained. Send Show current step to read the current prompt."
 }
 
-func telegramRetainedGuidedInput(request core.TelegramOperationRequest) (telegramGuidedInput, error) {
+func telegramRetainedGuidedInput(request telegramcore.TelegramOperationRequest) (telegramGuidedInput, error) {
 	var owner telegramGuidedInput
 	if err := decodeOperationJSON(string(request.PreparedInput), &owner); err != nil {
 		return owner, err
@@ -145,11 +146,11 @@ func telegramRetainedGuidedInput(request core.TelegramOperationRequest) (telegra
 	return owner, nil
 }
 
-func telegramGuidedOwnerMatches(owner telegramGuidedInput, request core.TelegramOperationRequest, args telegramAuthoringArguments) bool {
+func telegramGuidedOwnerMatches(owner telegramGuidedInput, request telegramcore.TelegramOperationRequest, args telegramAuthoringArguments) bool {
 	return args.PayloadHash == recordDigest(request.PreparedInput) && owner.Actor == request.Operator && owner.Command.ProjectID == request.Target.ProjectID && owner.Command.Namespace == request.Target.Namespace
 }
 
-func telegramGuidedSourceMatches(owner telegramGuidedInput, request core.TelegramOperationRequest) bool {
+func telegramGuidedSourceMatches(owner telegramGuidedInput, request telegramcore.TelegramOperationRequest) bool {
 	if owner.Start {
 		return telegramGuidedStart(request.Source.Text) && owner.Command.RunID == request.Target.ConversationID
 	}
@@ -163,7 +164,7 @@ func telegramGuidedSourceMatches(owner telegramGuidedInput, request core.Telegra
 	return owner.Command.OperationID == request.ID
 }
 
-func applyTelegramGuided(ctx context.Context, operations telegramGuidedService, target core.TelegramOperationTarget, input telegramGuidedInput) (core.AuthoringSession, error) {
+func applyTelegramGuided(ctx context.Context, operations telegramGuidedService, target telegramcore.TelegramOperationTarget, input telegramGuidedInput) (core.AuthoringSession, error) {
 	session, err := operations.ApplyTelegramGuided(ctx, target, input)
 	// A missing prerequisite is a retained stage outcome, not a failed input.
 	var prerequisite *core.GuidedPrerequisiteError

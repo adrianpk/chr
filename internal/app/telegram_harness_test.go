@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 func telegramHarnessFixture(t *testing.T) (*telegramConversationAppFixture, service, string) {
@@ -73,7 +73,7 @@ func TestTelegramHarnessSelectionCommand(t *testing.T) {
 		{"too many fields", "/harness worker=alpha generation=beta extra=x", false},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			choices, recognized, err := parseTelegramHarness(core.TelegramReceivedUpdate{Kind: "message", Text: test.text})
+			choices, recognized, err := parseTelegramHarness(telegramcore.TelegramReceivedUpdate{Kind: "message", Text: test.text})
 			if !recognized || (err == nil) != test.valid {
 				t.Fatal("incorrect deterministic parsing", choices, recognized, err)
 			}

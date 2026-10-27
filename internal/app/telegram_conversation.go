@@ -5,40 +5,40 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 type telegramConversationCommand struct {
 	Name      string
 	Arguments string
 	Help      string
-	Action    core.TelegramConversationAction
+	Action    telegramcore.TelegramConversationAction
 	Intent    string
 }
 
 func telegramConversationRegistry() []telegramConversationCommand {
 	return []telegramConversationCommand{
-		{"/project", "<project>", "Select an exact allowed project ID or unique name", core.TelegramConversationSelect, ""},
-		{"/prepare", "[--project <id>] <topic>", "Start a preparation-only capture", core.TelegramConversationStart, "prepare"},
-		{"/develop", "[--project <id>] <topic>", "Start a development-intent capture", core.TelegramConversationStart, "develop"},
-		{"/sessions", "", "List your retained sessions", core.TelegramConversationList, ""},
-		{"/focus", "<conversation>", "Focus a collecting session", core.TelegramConversationFocus, ""},
-		{"/reply", "<conversation> <text>", "Append text to an exact session", core.TelegramConversationCapture, ""},
-		{"/dump", "[conversation]", "Show bounded retained capture", core.TelegramConversationShow, ""},
-		{"/done", "[conversation]", "Finish capture and prepare a canonical dump", core.TelegramConversationDone, ""},
-		{"/cancel", "[conversation]", "Discard an unstarted session's capture", core.TelegramConversationCancel, ""},
+		{"/project", "<project>", "Select an exact allowed project ID or unique name", telegramcore.TelegramConversationSelect, ""},
+		{"/prepare", "[--project <id>] <topic>", "Start a preparation-only capture", telegramcore.TelegramConversationStart, "prepare"},
+		{"/develop", "[--project <id>] <topic>", "Start a development-intent capture", telegramcore.TelegramConversationStart, "develop"},
+		{"/sessions", "", "List your retained sessions", telegramcore.TelegramConversationList, ""},
+		{"/focus", "<conversation>", "Focus a collecting session", telegramcore.TelegramConversationFocus, ""},
+		{"/reply", "<conversation> <text>", "Append text to an exact session", telegramcore.TelegramConversationCapture, ""},
+		{"/dump", "[conversation]", "Show bounded retained capture", telegramcore.TelegramConversationShow, ""},
+		{"/done", "[conversation]", "Finish capture and prepare a canonical dump", telegramcore.TelegramConversationDone, ""},
+		{"/cancel", "[conversation]", "Discard an unstarted session's capture", telegramcore.TelegramConversationCancel, ""},
 	}
 }
 
-func telegramConversationInput(update core.TelegramReceivedUpdate) (core.TelegramConversationInput, bool, string) {
-	input := core.TelegramConversationInput{Update: update}
+func telegramConversationInput(update telegramcore.TelegramReceivedUpdate) (telegramcore.TelegramConversationInput, bool, string) {
+	input := telegramcore.TelegramConversationInput{Update: update}
 	if update.Kind != "message" {
 		return input, false, ""
 	}
 
 	text := strings.TrimSpace(update.Text)
 	if !strings.HasPrefix(text, "/") {
-		input.Action, input.Text = core.TelegramConversationCapture, update.Text
+		input.Action, input.Text = telegramcore.TelegramConversationCapture, update.Text
 
 		return input, true, ""
 	}
@@ -69,28 +69,28 @@ func telegramCommandWord(text string) (string, string) {
 	return words[0], strings.TrimSpace(strings.TrimPrefix(text, words[0]))
 }
 
-func parseTelegramConversationArguments(input *core.TelegramConversationInput, body string) bool {
+func parseTelegramConversationArguments(input *telegramcore.TelegramConversationInput, body string) bool {
 	switch input.Action {
-	case core.TelegramConversationSelect:
+	case telegramcore.TelegramConversationSelect:
 		input.Project = body
 
 		return body != ""
-	case core.TelegramConversationStart:
+	case telegramcore.TelegramConversationStart:
 		return parseTelegramConversationStart(input, body)
-	case core.TelegramConversationList:
+	case telegramcore.TelegramConversationList:
 		return body == ""
-	case core.TelegramConversationCapture:
+	case telegramcore.TelegramConversationCapture:
 		input.Conversation, input.Text = telegramCommandWord(body)
 
 		return input.Conversation != "" && input.Text != ""
 	default:
 		input.Conversation = body
 
-		return len(strings.Fields(body)) <= 1 && (body != "" || input.Action != core.TelegramConversationFocus)
+		return len(strings.Fields(body)) <= 1 && (body != "" || input.Action != telegramcore.TelegramConversationFocus)
 	}
 }
 
-func parseTelegramConversationStart(input *core.TelegramConversationInput, body string) bool {
+func parseTelegramConversationStart(input *telegramcore.TelegramConversationInput, body string) bool {
 	first, rest := telegramCommandWord(body)
 	if first == "--project" {
 		input.Project, body = telegramCommandWord(rest)
@@ -106,7 +106,7 @@ func parseTelegramConversationStart(input *core.TelegramConversationInput, body 
 	return input.Text != ""
 }
 
-func (r telegramReceiver) respondConversation(ctx context.Context, user core.TelegramAllowedUser, config core.TelegramReceiverConfig, update core.TelegramReceivedUpdate) (bool, error) {
+func (r telegramReceiver) respondConversation(ctx context.Context, user telegramcore.TelegramAllowedUser, config telegramcore.TelegramReceiverConfig, update telegramcore.TelegramReceivedUpdate) (bool, error) {
 	input, recognized, diagnostic := telegramConversationInput(update)
 	if !recognized {
 		return false, nil
@@ -131,7 +131,7 @@ func (r telegramReceiver) respondConversation(ctx context.Context, user core.Tel
 
 func telegramConversationUsage(command telegramConversationCommand) string {
 	usage := "Usage: " + telegramCommandSyntax(command.Name, command.Arguments)
-	if command.Action == core.TelegramConversationStart {
+	if command.Action == telegramcore.TelegramConversationStart {
 		usage += "\n\nExample: " + command.Name + " update the README"
 	}
 

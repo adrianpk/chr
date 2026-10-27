@@ -4,11 +4,11 @@ import (
 	"strconv"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 type telegramControlCommand struct {
-	Input      core.TelegramConversationInput
+	Input      telegramcore.TelegramConversationInput
 	Action     string
 	Invocation string
 	Parameters *telegramControlParameters
@@ -45,8 +45,8 @@ func telegramControlHelp() string {
 	return strings.Join(lines, "\n")
 }
 
-func parseTelegramControl(update core.TelegramReceivedUpdate) (telegramControlCommand, bool, error) {
-	command := telegramControlCommand{Input: core.TelegramConversationInput{Update: update}}
+func parseTelegramControl(update telegramcore.TelegramReceivedUpdate) (telegramControlCommand, bool, error) {
+	command := telegramControlCommand{Input: telegramcore.TelegramConversationInput{Update: update}}
 	name, body := telegramCommandWord(strings.TrimSpace(update.Text))
 
 	command.Action = strings.ReplaceAll(strings.TrimPrefix(name, "/"), "-", "_")
@@ -88,10 +88,10 @@ func validateTelegramControlCommand(command telegramControlCommand) error {
 	return validateTelegramControlParameters(command.Action, command.Parameters)
 }
 
-func telegramIntentControl(update core.TelegramReceivedUpdate, intent ConversationIntent) (telegramControlCommand, bool, error) {
+func telegramIntentControl(update telegramcore.TelegramReceivedUpdate, intent ConversationIntent) (telegramControlCommand, bool, error) {
 	a := intent.Arguments
 
-	command := telegramControlCommand{Input: core.TelegramConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation, Namespace: a.Namespace}, Action: a.Action, Invocation: a.Text}
+	command := telegramControlCommand{Input: telegramcore.TelegramConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation, Namespace: a.Namespace}, Action: a.Action, Invocation: a.Text}
 	if intent.OperationID != "control" {
 		return command, false, nil
 	}

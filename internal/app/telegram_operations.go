@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
@@ -33,10 +33,10 @@ func telegramReadRegistry() []telegramOperationDescriptor {
 
 type telegramReadService interface {
 	ListRegisteredProjects(ids []string) ([]projectcore.Project, error)
-	InspectTelegramReceiver(botID int64) (core.TelegramReceiverState, error)
+	InspectTelegramReceiver(botID int64) (telegramcore.TelegramReceiverState, error)
 }
 
-func telegramReadResponse(operations telegramReadService, user core.TelegramAllowedUser, update core.TelegramReceivedUpdate) (telegramReadReply, error) {
+func telegramReadResponse(operations telegramReadService, user telegramcore.TelegramAllowedUser, update telegramcore.TelegramReceivedUpdate) (telegramReadReply, error) {
 	if update.Kind == "callback_query" {
 		return telegramReadReply{Text: "This action is unavailable. Use /help for current commands."}, nil
 	}
@@ -52,7 +52,7 @@ func telegramReadResponse(operations telegramReadService, user core.TelegramAllo
 	return telegramReadReply{Text: "I could not use that command. Send /help to see available commands."}, nil
 }
 
-func telegramReadOperationResponse(operations telegramReadService, user core.TelegramAllowedUser, update core.TelegramReceivedUpdate, operation telegramReadOperation) (telegramReadReply, error) {
+func telegramReadOperationResponse(operations telegramReadService, user telegramcore.TelegramAllowedUser, update telegramcore.TelegramReceivedUpdate, operation telegramReadOperation) (telegramReadReply, error) {
 	switch operation {
 	case telegramReadProjects:
 		text, err := telegramProjectResponse(operations, user.ProjectIDs)
@@ -93,7 +93,7 @@ func telegramProjectResponse(operations telegramReadService, ids []string) (stri
 	return tgmessage.Render(tgmessage.Blocks{InitialText: "Available projects", ContentKind: "list", Content: strings.Join(lines, "\n"), SecondaryText: "Select one with /project <name>."}).PlainFallback, nil
 }
 
-func telegramReceiverHealthText(state core.TelegramReceiverState) string {
+func telegramReceiverHealthText(state telegramcore.TelegramReceiverState) string {
 	text := fmt.Sprintf("Receiver: %s", state.Health)
 	if state.RetryAttempt > 0 {
 		text += fmt.Sprintf("\nPolling retry attempt: %d of 5.", state.RetryAttempt)

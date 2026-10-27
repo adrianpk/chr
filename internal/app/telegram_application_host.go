@@ -5,13 +5,13 @@ import (
 	"errors"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	modelcore "forge.adrianpk.com/chr/internal/core/model"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 type telegramApplicationCompletion struct {
 	updateID int64
-	lane     core.TelegramProcessingLane
+	lane     telegramcore.TelegramProcessingLane
 	err      error
 }
 
@@ -58,7 +58,7 @@ func (h *telegramApplicationHost) run(ctx context.Context) (err error) {
 }
 
 func (h *telegramApplicationHost) pump(ctx context.Context) error {
-	for _, lane := range []core.TelegramProcessingLane{core.TelegramProcessingUrgent, core.TelegramProcessingDecision, core.TelegramProcessingOrdinary} {
+	for _, lane := range []telegramcore.TelegramProcessingLane{telegramcore.TelegramProcessingUrgent, telegramcore.TelegramProcessingDecision, telegramcore.TelegramProcessingOrdinary} {
 		updates, err := h.receiver.store.PendingApplicationInputs(ctx, h.receiver.botID, lane, time.Now())
 		if err != nil {
 			return err
@@ -99,7 +99,7 @@ func (h *telegramApplicationHost) complete(result telegramApplicationCompletion)
 		return nil
 	}
 
-	var apiErr *core.TelegramAPIError
+	var apiErr *telegramcore.TelegramAPIError
 	if errors.As(result.err, &apiErr) && apiErr.Code == "local_receiver_conflict" {
 		return nil
 	}
@@ -108,7 +108,7 @@ func (h *telegramApplicationHost) complete(result telegramApplicationCompletion)
 }
 
 func telegramApplicationDeferred(err error) bool {
-	for _, expected := range []error{modelcore.ErrCapacity, core.ErrTelegramReplyPending, errTelegramLaneChanged, context.Canceled} {
+	for _, expected := range []error{modelcore.ErrCapacity, telegramcore.ErrTelegramReplyPending, errTelegramLaneChanged, context.Canceled} {
 		err = telegramHostFailure(err, expected)
 	}
 

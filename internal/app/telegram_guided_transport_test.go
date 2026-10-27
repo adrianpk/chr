@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 type telegramGuidedUploadAck struct {
-	base core.TelegramHTTPClient
+	base telegramcore.TelegramHTTPClient
 	lost atomic.Bool
 }
 

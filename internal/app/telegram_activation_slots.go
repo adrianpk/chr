@@ -1,6 +1,6 @@
 package app
 
-import "forge.adrianpk.com/chr/internal/core"
+import telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 
 // These slots account for in-flight adapter calls only. Native workflow leases
 // and project execution capacity remain owned by the common application service.
@@ -14,18 +14,18 @@ func newTelegramActivationSlots() *telegramActivationSlots {
 	return &telegramActivationSlots{ordinary: make(chan struct{}, 12), decision: make(chan struct{}, 2), urgent: make(chan struct{}, 2)}
 }
 
-func (s *telegramActivationSlots) lane(lane core.TelegramProcessingLane) chan struct{} {
+func (s *telegramActivationSlots) lane(lane telegramcore.TelegramProcessingLane) chan struct{} {
 	switch lane {
-	case core.TelegramProcessingUrgent:
+	case telegramcore.TelegramProcessingUrgent:
 		return s.urgent
-	case core.TelegramProcessingDecision:
+	case telegramcore.TelegramProcessingDecision:
 		return s.decision
 	default:
 		return s.ordinary
 	}
 }
 
-func (s *telegramActivationSlots) acquire(lane core.TelegramProcessingLane) bool {
+func (s *telegramActivationSlots) acquire(lane telegramcore.TelegramProcessingLane) bool {
 	if s == nil {
 		return true
 	}
@@ -38,7 +38,7 @@ func (s *telegramActivationSlots) acquire(lane core.TelegramProcessingLane) bool
 	}
 }
 
-func (s *telegramActivationSlots) release(lane core.TelegramProcessingLane) {
+func (s *telegramActivationSlots) release(lane telegramcore.TelegramProcessingLane) {
 	if s != nil {
 		<-s.lane(lane)
 	}

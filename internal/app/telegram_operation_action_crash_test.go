@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	"forge.adrianpk.com/chr/internal/core/database"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 func reopenTelegramOperationReceiver(t *testing.T, f *telegramConversationAppFixture) {
@@ -20,7 +21,7 @@ func reopenTelegramOperationReceiver(t *testing.T, f *telegramConversationAppFix
 		t.Fatal(err)
 	}
 
-	store, err := core.NewTelegramReceiverStore(t.Context(), f.receiver.env, testAssetsFS())
+	store, err := telegramcore.NewTelegramReceiverStore(t.Context(), f.receiver.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +64,7 @@ func TestTelegramOperationActionLostAcknowledgement(t *testing.T) {
 }
 
 type telegramDropSendAck struct {
-	client  core.TelegramHTTPClient
+	client  telegramcore.TelegramHTTPClient
 	dropped bool
 	skip    int
 }
@@ -94,7 +95,7 @@ type telegramCountRecordApply struct {
 	calls *int
 }
 
-func (s telegramCountRecordApply) ApplyTelegramRecord(ctx context.Context, target core.TelegramOperationTarget, prepared PreparedRecordMutation) (RecordMutationResult, error) {
+func (s telegramCountRecordApply) ApplyTelegramRecord(ctx context.Context, target telegramcore.TelegramOperationTarget, prepared PreparedRecordMutation) (RecordMutationResult, error) {
 	*s.calls++
 
 	return s.service.ApplyTelegramRecord(ctx, target, prepared)

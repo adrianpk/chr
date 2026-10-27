@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // TestTelegramReceiverSetup proves setup uses private environment references and never echoes tokens.
@@ -47,7 +47,7 @@ func TestTelegramReceiverSetup(t *testing.T) {
 
 // TestTelegramReceiverDoctor reports unavailable project runtime without calling a model or changing the registry.
 func TestTelegramReceiverDoctor(t *testing.T) {
-	receiver, _ := telegramAppTestReceiver(t, core.TelegramReceiverAPI{})
+	receiver, _ := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{})
 	addTelegramAppTestProjects(t, receiver.env)
 
 	var output bytes.Buffer
@@ -65,7 +65,7 @@ func TestTelegramReceiverDoctor(t *testing.T) {
 		}
 	}
 
-	if _, err := core.TelegramBoundBotID(receiver.env); !errors.Is(err, os.ErrNotExist) {
+	if _, err := telegramcore.TelegramBoundBotID(receiver.env); !errors.Is(err, os.ErrNotExist) {
 		t.Fatal("local doctor bound a bot", err)
 	}
 }

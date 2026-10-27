@@ -3,7 +3,7 @@ package app
 import (
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 func telegramPreparedWorkRegistry() []ConversationIntentOperation {
@@ -18,8 +18,8 @@ func telegramPreparedWorkUsage() string {
 	return "/" + telegramPreparedWorkRegistry()[0].ID + " [conversation]"
 }
 
-func parseTelegramPreparedWork(update core.TelegramReceivedUpdate) (core.TelegramConversationInput, bool, error) {
-	input := core.TelegramConversationInput{Update: update}
+func parseTelegramPreparedWork(update telegramcore.TelegramReceivedUpdate) (telegramcore.TelegramConversationInput, bool, error) {
+	input := telegramcore.TelegramConversationInput{Update: update}
 
 	name, body := telegramCommandWord(strings.TrimSpace(update.Text))
 	if update.Kind != "message" || name != "/"+telegramPreparedWorkRegistry()[0].ID {
@@ -34,10 +34,10 @@ func parseTelegramPreparedWork(update core.TelegramReceivedUpdate) (core.Telegra
 	return input, true, nil
 }
 
-func telegramIntentPreparedWork(update core.TelegramReceivedUpdate, intent ConversationIntent) (core.TelegramConversationInput, bool, error) {
+func telegramIntentPreparedWork(update telegramcore.TelegramReceivedUpdate, intent ConversationIntent) (telegramcore.TelegramConversationInput, bool, error) {
 	a := intent.Arguments
 
-	input := core.TelegramConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation}
+	input := telegramcore.TelegramConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation}
 	if intent.OperationID != telegramPreparedWorkRegistry()[0].ID {
 		return input, false, nil
 	}

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -102,7 +103,7 @@ func TestTelegramPresentationDocumentReadRecovery(t *testing.T) {
 	checkTelegramNoWork(t, f.receiver.env)
 }
 
-func queueTelegramOriginalDocumentRead(t *testing.T, f *telegramConversationAppFixture, request core.TelegramOperationRequest) (string, []byte) {
+func queueTelegramOriginalDocumentRead(t *testing.T, f *telegramConversationAppFixture, request telegramcore.TelegramOperationRequest) (string, []byte) {
 	t.Helper()
 
 	prepared, err := telegramRetainedExplanation(request)
@@ -145,7 +146,7 @@ func telegramOriginalDocumentFixture(t *testing.T) (*telegramConversationAppFixt
 	return f, conversation, calls.Load
 }
 
-func reserveTelegramOriginalDocument(t *testing.T, f *telegramConversationAppFixture, conversation, kind string) (core.TelegramOperationRequest, error) {
+func reserveTelegramOriginalDocument(t *testing.T, f *telegramConversationAppFixture, conversation, kind string) (telegramcore.TelegramOperationRequest, error) {
 	t.Helper()
 
 	input := telegramOperationRetainInput(t, f, "Show the "+kind+" document.")

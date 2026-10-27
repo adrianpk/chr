@@ -8,10 +8,11 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r telegramReceiver) applyControlAction(ctx context.Context, claim core.TelegramActionClaim, config core.TelegramReceiverConfig) error {
+func (r telegramReceiver) applyControlAction(ctx context.Context, claim telegramcore.TelegramActionClaim, config telegramcore.TelegramReceiverConfig) error {
 	preview, err := telegramRetainedControl(claim.Request)
 	if err != nil {
 		return err
@@ -38,7 +39,7 @@ func (r telegramReceiver) applyControlAction(ctx context.Context, claim core.Tel
 	}
 
 	if claim.ReceiptOnly {
-		return r.staleActionDiagnostic(ctx, claim.ResponseSource, core.TelegramActionAnswer{Token: claim.Action.Token, Choice: claim.Choice}, config)
+		return r.staleActionDiagnostic(ctx, claim.ResponseSource, telegramcore.TelegramActionAnswer{Token: claim.Action.Token, Choice: claim.Choice}, config)
 	}
 
 	if err := r.validateRecordAuthority(ctx, claim.Request); err != nil {
@@ -57,7 +58,7 @@ func (r telegramReceiver) applyControlAction(ctx context.Context, claim core.Tel
 	return r.completeControlAction(ctx, claim, status, err, config)
 }
 
-func (r telegramReceiver) completeControlAction(ctx context.Context, claim core.TelegramActionClaim, status WorkflowWorkStatus, err error, config core.TelegramReceiverConfig) error {
+func (r telegramReceiver) completeControlAction(ctx context.Context, claim telegramcore.TelegramActionClaim, status WorkflowWorkStatus, err error, config telegramcore.TelegramReceiverConfig) error {
 	if err != nil && status.ControlReceipt != nil {
 		return &telegramControlReceiptPending{failure: err}
 	}
@@ -69,7 +70,7 @@ func (r telegramReceiver) completeControlAction(ctx context.Context, claim core.
 	return r.finishControlAction(ctx, claim, status, err, config)
 }
 
-func (r telegramReceiver) controlRecoveryFailure(ctx context.Context, claim core.TelegramActionClaim, err error, config core.TelegramReceiverConfig) error {
+func (r telegramReceiver) controlRecoveryFailure(ctx context.Context, claim telegramcore.TelegramActionClaim, err error, config telegramcore.TelegramReceiverConfig) error {
 	if !telegramControlExpectedFailure(err) {
 		return err
 	}
@@ -89,7 +90,7 @@ func (e *telegramControlReceiptPending) Error() string { return e.failure.Error(
 
 func (e *telegramControlReceiptPending) Unwrap() error { return e.failure }
 
-func (r telegramReceiver) finishControlAction(ctx context.Context, claim core.TelegramActionClaim, status WorkflowWorkStatus, failure error, config core.TelegramReceiverConfig) error {
+func (r telegramReceiver) finishControlAction(ctx context.Context, claim telegramcore.TelegramActionClaim, status WorkflowWorkStatus, failure error, config telegramcore.TelegramReceiverConfig) error {
 	state, receipt := "blocked", ""
 	text := "Native control is unavailable or stale. Read current state before requesting a new control."
 
@@ -113,9 +114,9 @@ func (r telegramReceiver) finishControlAction(ctx context.Context, claim core.Te
 		return err
 	}
 
-	result := core.TelegramActionResult{Message: telegramOutcomeMessage("36", text), State: state, ReceiptRef: receipt, Facts: facts, Text: text, ConfigDigest: config.Digest()}
+	result := telegramcore.TelegramActionResult{Message: telegramOutcomeMessage("36", text), State: state, ReceiptRef: receipt, Facts: facts, Text: text, ConfigDigest: config.Digest()}
 	if state == "confirmed" {
-		result.Invocation = &core.TelegramInvocationBinding{ID: status.ID, Revision: status.Revision}
+		result.Invocation = &telegramcore.TelegramInvocationBinding{ID: status.ID, Revision: status.Revision}
 		result.InvocationPhase = telegramWorkObservation(status, "").Phase
 	}
 

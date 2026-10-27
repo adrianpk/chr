@@ -7,23 +7,24 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type telegramWorkCompletion struct {
-	Reference core.TelegramWorkReference
+	Reference telegramcore.TelegramWorkReference
 	Progress  RetainedWorkProgress
 	Failure   error
 }
 
-func (r telegramReceiver) activateWork(ctx context.Context, ref core.TelegramWorkReference) telegramWorkCompletion {
+func (r telegramReceiver) activateWork(ctx context.Context, ref telegramcore.TelegramWorkReference) telegramWorkCompletion {
 	result := telegramWorkCompletion{Reference: ref}
 	result.Progress, result.Failure = r.resumeWorkReference(ctx, ref)
 
 	return result
 }
 
-func (r telegramReceiver) resumeWorkReference(ctx context.Context, ref core.TelegramWorkReference) (RetainedWorkProgress, error) {
+func (r telegramReceiver) resumeWorkReference(ctx context.Context, ref telegramcore.TelegramWorkReference) (RetainedWorkProgress, error) {
 	operations, ok := r.operations.(telegramWorkContinuationService)
 	if !ok {
 		return RetainedWorkProgress{}, ErrRecordUnsupported
@@ -53,7 +54,7 @@ func (r telegramReceiver) resumeWorkReference(ctx context.Context, ref core.Tele
 	return operations.ResumeTelegramWork(ctx, ref.Request.Target, bound, preview, check)
 }
 
-func (r telegramReceiver) validateWorkReference(ctx context.Context, ref core.TelegramWorkReference) error {
+func (r telegramReceiver) validateWorkReference(ctx context.Context, ref telegramcore.TelegramWorkReference) error {
 	request := ref.Request
 	request.Target.ConversationRevision = ref.ConversationRevision
 
@@ -89,7 +90,7 @@ func (r telegramReceiver) completeWorkActivation(ctx context.Context, result tel
 	return r.projectWorkProgress(ctx, ref, status)
 }
 
-func (r telegramReceiver) projectWorkProgress(ctx context.Context, ref core.TelegramWorkReference, status WorkflowWorkStatus) error {
+func (r telegramReceiver) projectWorkProgress(ctx context.Context, ref telegramcore.TelegramWorkReference, status WorkflowWorkStatus) error {
 	if err := r.validateWorkReference(ctx, ref); err != nil {
 		if ctx.Err() != nil {
 			return ctx.Err()

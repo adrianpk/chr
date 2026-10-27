@@ -11,22 +11,22 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	"forge.adrianpk.com/chr/internal/core/database"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // TestTelegramRecoveryOperator exercises CLI poll/delivery retries and read-only
 // status against the same real store, retaining counters, payloads and identity.
 func TestTelegramRecoveryOperator(t *testing.T) {
-	receiver, config := telegramAppTestReceiver(t, core.TelegramReceiverAPI{})
-	if err := core.BindTelegramReceiverIdentity(receiver.env, receiver.botID); err != nil {
+	receiver, config := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{})
+	if err := telegramcore.BindTelegramReceiverIdentity(receiver.env, receiver.botID); err != nil {
 		t.Fatal(err)
 	}
 
-	update := core.TelegramReceivedUpdate{UpdateID: 1, Digest: strings.Repeat("a", 64), Kind: "message", Peer: core.TelegramPeerIdentity{BotID: 12345, ChatID: 100001, UserID: 100001}, MessageID: 1, ChatType: "private", Text: "/help"}
+	update := telegramcore.TelegramReceivedUpdate{UpdateID: 1, Digest: strings.Repeat("a", 64), Kind: "message", Peer: telegramcore.TelegramPeerIdentity{BotID: 12345, ChatID: 100001, UserID: 100001}, MessageID: 1, ChatType: "private", Text: "/help"}
 
 	now := time.Now()
-	if err := receiver.store.RetainBatch(t.Context(), receiver.botID, []core.TelegramReceivedUpdate{update}, now); err != nil {
+	if err := receiver.store.RetainBatch(t.Context(), receiver.botID, []telegramcore.TelegramReceivedUpdate{update}, now); err != nil {
 		t.Fatal(err)
 	}
 
@@ -36,7 +36,7 @@ func TestTelegramRecoveryOperator(t *testing.T) {
 
 	seedTelegramRecoveryOperator(t, receiver)
 
-	diagnostics, err := core.InspectTelegramReceiverDiagnostics(t.Context(), receiver.env, receiver.botID)
+	diagnostics, err := telegramcore.InspectTelegramReceiverDiagnostics(t.Context(), receiver.env, receiver.botID)
 	if err != nil || len(diagnostics.Deliveries) != 1 {
 		t.Fatal(diagnostics, err)
 	}
@@ -102,7 +102,7 @@ func checkTelegramRecoveryOperatorRetries(t *testing.T, receiver telegramReceive
 func checkTelegramRecoveryOperatorHistory(t *testing.T, receiver telegramReceiver) {
 	t.Helper()
 
-	after, err := core.InspectTelegramReceiverDiagnostics(t.Context(), receiver.env, receiver.botID)
+	after, err := telegramcore.InspectTelegramReceiverDiagnostics(t.Context(), receiver.env, receiver.botID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -115,7 +115,7 @@ func checkTelegramRecoveryOperatorHistory(t *testing.T, receiver telegramReceive
 	checkTelegramRecoveryDeliveryHistory(t, after.Deliveries[0], actor)
 }
 
-func checkTelegramRecoveryDeliveryHistory(t *testing.T, item core.TelegramDeliveryDiagnostic, actor string) {
+func checkTelegramRecoveryDeliveryHistory(t *testing.T, item telegramcore.TelegramDeliveryDiagnostic, actor string) {
 	t.Helper()
 
 	if item.Cycle != 4 || item.Attempts != 0 || item.TotalAttempts != 7 || item.RetryActor != actor || item.RetryStartedAt.IsZero() {
@@ -126,7 +126,7 @@ func checkTelegramRecoveryDeliveryHistory(t *testing.T, item core.TelegramDelive
 func checkTelegramRecoveryLiveRetry(t *testing.T, receiver telegramReceiver, poll []string) {
 	t.Helper()
 
-	lock, err := core.AcquireTelegramConfigurationLock(receiver.env)
+	lock, err := telegramcore.AcquireTelegramConfigurationLock(receiver.env)
 	if err != nil {
 		t.Fatal(err)
 	}

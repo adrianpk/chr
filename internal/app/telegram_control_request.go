@@ -4,10 +4,11 @@ import (
 	"slices"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func telegramControlRequest(request core.TelegramOperationRequest, args telegramControlArguments, status WorkflowWorkStatus) (WorkflowControlRequest, error) {
+func telegramControlRequest(request telegramcore.TelegramOperationRequest, args telegramControlArguments, status WorkflowWorkStatus) (WorkflowControlRequest, error) {
 	control := WorkflowControlRequest{Action: args.Action, ID: args.ID, ExpectedRevision: status.Revision, StepLimit: 1}
 	if status.Revision == 0 || !validTelegramControlAction(args.Action) {
 		return control, workflowstate.ErrConflict
@@ -24,7 +25,7 @@ func telegramControlRequest(request core.TelegramOperationRequest, args telegram
 	return telegramBoundDecisionControlRequest(request, control, args.Parameters, status)
 }
 
-func telegramBoundDecisionControlRequest(request core.TelegramOperationRequest, control WorkflowControlRequest, parameters *telegramControlParameters, status WorkflowWorkStatus) (WorkflowControlRequest, error) {
+func telegramBoundDecisionControlRequest(request telegramcore.TelegramOperationRequest, control WorkflowControlRequest, parameters *telegramControlParameters, status WorkflowWorkStatus) (WorkflowControlRequest, error) {
 	control.BindingHash = status.ApprovalHash
 	if current := status.Integration; current != nil && current.EntryID != "" {
 		control.Integration = &WorkflowIntegrationControlGuard{EntryID: current.EntryID, EntryRevision: current.EntryRevision, BudgetRevision: current.Budget.Revision, CandidateHash: current.CandidateHash}
@@ -52,7 +53,7 @@ func telegramBoundDecisionControlRequest(request core.TelegramOperationRequest, 
 	return telegramDecisionAnswerRequest(request, control, *p, status.Integration.Decision)
 }
 
-func telegramDecisionAnswerRequest(request core.TelegramOperationRequest, control WorkflowControlRequest, p telegramControlParameters, decision *WorkflowIntegrationDecisionStatus) (WorkflowControlRequest, error) {
+func telegramDecisionAnswerRequest(request telegramcore.TelegramOperationRequest, control WorkflowControlRequest, p telegramControlParameters, decision *WorkflowIntegrationDecisionStatus) (WorkflowControlRequest, error) {
 	if decision == nil || decision.State != "waiting" {
 		return control, workflowstate.ErrConflict
 	}

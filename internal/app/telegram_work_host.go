@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 const telegramWorkActivationLimit = 16
@@ -85,7 +85,7 @@ func (h *telegramWorkHost) pump(ctx context.Context) error {
 			break
 		}
 
-		if !h.receiver.slots.acquire(core.TelegramProcessingOrdinary) {
+		if !h.receiver.slots.acquire(telegramcore.TelegramProcessingOrdinary) {
 			break
 		}
 
@@ -111,7 +111,7 @@ func (h *telegramWorkHost) collect(ctx context.Context) error {
 
 func (h *telegramWorkHost) complete(ctx context.Context, result telegramWorkCompletion) error {
 	delete(h.active, telegramWorkFlightKey(result.Reference))
-	h.receiver.slots.release(core.TelegramProcessingOrdinary)
+	h.receiver.slots.release(telegramcore.TelegramProcessingOrdinary)
 
 	return h.receiver.completeWorkActivation(ctx, result)
 }
@@ -126,7 +126,7 @@ func (h *telegramWorkHost) waitOwned(ctx context.Context) (err error) {
 			// Native checkpoints survive shutdown. Reopen will project them;
 			// cancelled authority readers cannot authorize a new notice here.
 			delete(h.active, telegramWorkFlightKey(result.Reference))
-			h.receiver.slots.release(core.TelegramProcessingOrdinary)
+			h.receiver.slots.release(telegramcore.TelegramProcessingOrdinary)
 
 			continue
 		}
@@ -137,7 +137,7 @@ func (h *telegramWorkHost) waitOwned(ctx context.Context) (err error) {
 	return err
 }
 
-func telegramWorkFlightKey(ref core.TelegramWorkReference) string {
+func telegramWorkFlightKey(ref telegramcore.TelegramWorkReference) string {
 	target := ref.Request.Target
 
 	return target.ProjectID + ":" + target.ProjectBindingDigest + ":" + target.Namespace + ":" + ref.Invocation.ID

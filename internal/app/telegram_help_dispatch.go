@@ -5,11 +5,11 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
-func (r telegramReceiver) queueReadReply(ctx context.Context, update core.TelegramReceivedUpdate, config core.TelegramReceiverConfig, reply telegramReadReply) error {
+func (r telegramReceiver) queueReadReply(ctx context.Context, update telegramcore.TelegramReceivedUpdate, config telegramcore.TelegramReceiverConfig, reply telegramReadReply) error {
 	if reply.PlainText != "" {
 		return r.store.QueueFormattedReadResponse(ctx, update, reply.Text, reply.PlainText, config.Digest(), time.Now())
 	}
@@ -17,7 +17,7 @@ func (r telegramReceiver) queueReadReply(ctx context.Context, update core.Telegr
 	return r.store.QueuePresentationResponse(ctx, update, tgmessage.Blocks{InitialText: reply.Text}, config.Digest(), time.Now())
 }
 
-func telegramHelpRequest(update core.TelegramReceivedUpdate) (telegramReadReply, bool) {
+func telegramHelpRequest(update telegramcore.TelegramReceivedUpdate) (telegramReadReply, bool) {
 	if update.Kind != "message" {
 		return telegramReadReply{}, false
 	}

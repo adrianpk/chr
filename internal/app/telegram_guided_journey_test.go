@@ -7,6 +7,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 func guidedTelegramSharedFixture(t *testing.T) (*telegramConversationAppFixture, service, webViewProvider, *guidedWorkHost, *guidedWebPublicationFixture) {
@@ -30,13 +31,13 @@ func guidedTelegramSharedFixture(t *testing.T) (*telegramConversationAppFixture,
 		t.Fatal(err)
 	}
 
-	config, err := core.LoadTelegramReceiverConfig(f.receiver.env)
+	config, err := telegramcore.LoadTelegramReceiverConfig(f.receiver.env)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	config.AllowedUsers[0].ProjectIDs = append(config.AllowedUsers[0].ProjectIDs, project.ID)
-	if err := core.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+	if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 

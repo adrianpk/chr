@@ -14,6 +14,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 type telegramNotificationCapture struct {
@@ -124,7 +125,7 @@ func TestTelegramPresentationNotificationDispatch(t *testing.T) {
 	t.Cleanup(server.Close)
 
 	previous := notifyTelegramSender
-	notifyTelegramSender = core.TelegramSender{Client: server.Client(), BaseURL: server.URL}
+	notifyTelegramSender = telegramcore.TelegramSender{Client: server.Client(), BaseURL: server.URL}
 
 	t.Cleanup(func() { notifyTelegramSender = previous })
 

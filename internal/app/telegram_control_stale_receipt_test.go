@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	"forge.adrianpk.com/chr/internal/core/database"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 type telegramStaleControlFixture struct {
@@ -83,7 +83,7 @@ func checkTelegramStaleReceipt(t *testing.T, fixture telegramStaleControlFixture
 	checkTelegramStaleReceiptResult(t, f, update, accepted)
 }
 
-func checkTelegramStaleReceiptResult(t *testing.T, f *telegramConversationAppFixture, update core.TelegramReceivedUpdate, accepted bool) {
+func checkTelegramStaleReceiptResult(t *testing.T, f *telegramConversationAppFixture, update telegramcore.TelegramReceivedUpdate, accepted bool) {
 	t.Helper()
 
 	request, found, err := f.receiver.store.TelegramOperation(t.Context(), update, 0)
@@ -121,7 +121,7 @@ func checkTelegramStaleDiagnostic(t *testing.T, notice telegramConversationNotic
 	}
 }
 
-func telegramControlRetainAnswer(t *testing.T, f *telegramConversationAppFixture, token, kind string) core.TelegramReceivedUpdate {
+func telegramControlRetainAnswer(t *testing.T, f *telegramConversationAppFixture, token, kind string) telegramcore.TelegramReceivedUpdate {
 	t.Helper()
 
 	message := map[string]any{"message_id": f.next, "from": map[string]any{"id": 100001}, "chat": map[string]any{"id": 100001, "type": "private"}, "text": "/answer " + token + " pause"}
@@ -158,12 +158,12 @@ func telegramControlRetainAnswer(t *testing.T, f *telegramConversationAppFixture
 		t.Fatal(err)
 	}
 
-	update := core.AuthorizeTelegramReceiverUpdate(config, 12345, updates[0])
+	update := telegramcore.AuthorizeTelegramReceiverUpdate(config, 12345, updates[0])
 	if update.Kind == "rejected" {
 		t.Fatal("control fixture rejected", update.Reason)
 	}
 
-	if err := f.receiver.store.RetainBatch(t.Context(), 12345, []core.TelegramReceivedUpdate{update}, time.Now()); err != nil {
+	if err := f.receiver.store.RetainBatch(t.Context(), 12345, []telegramcore.TelegramReceivedUpdate{update}, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 

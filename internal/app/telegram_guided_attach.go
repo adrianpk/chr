@@ -6,10 +6,11 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r telegramReceiver) attachTelegramGuidedName(ctx context.Context, input core.TelegramConversationInput, title, projectName string) (string, error) {
+func (r telegramReceiver) attachTelegramGuidedName(ctx context.Context, input telegramcore.TelegramConversationInput, title, projectName string) (string, error) {
 	operations, ok := r.operations.(telegramGuidedService)
 	if !ok {
 		return "", ErrRecordUnsupported
@@ -57,10 +58,10 @@ func (r telegramReceiver) attachTelegramGuidedName(ctx context.Context, input co
 	return conversation.ID, err
 }
 
-func telegramGuidedAssociation(session core.AuthoringSession) (core.TelegramGuidedAssociation, error) {
+func telegramGuidedAssociation(session core.AuthoringSession) (telegramcore.TelegramGuidedAssociation, error) {
 	if session.Guided == nil || core.ValidateGuidedUseCase(session) != nil {
-		return core.TelegramGuidedAssociation{}, workflowstate.ErrConflict
+		return telegramcore.TelegramGuidedAssociation{}, workflowstate.ErrConflict
 	}
 
-	return core.TelegramGuidedAssociation{SessionID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace, Topic: session.Topic}, nil
+	return telegramcore.TelegramGuidedAssociation{SessionID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace, Topic: session.Topic}, nil
 }

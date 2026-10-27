@@ -10,6 +10,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 func (factory commandFactory) telegramCommand() *cli.Command {
@@ -61,7 +62,7 @@ func (factory commandFactory) runTelegramSetup(cmd *cli.Command) (err error) {
 		return err
 	}
 
-	lock, err := core.AcquireTelegramConfigurationLock(env)
+	lock, err := telegramcore.AcquireTelegramConfigurationLock(env)
 	if err != nil {
 		return err
 	}
@@ -75,7 +76,7 @@ func (factory commandFactory) runTelegramSetup(cmd *cli.Command) (err error) {
 		return err
 	}
 
-	if err := core.SaveTelegramReceiverConfig(env, config, cmd.Bool("replace")); err != nil {
+	if err := telegramcore.SaveTelegramReceiverConfig(env, config, cmd.Bool("replace")); err != nil {
 		return err
 	}
 
@@ -84,7 +85,7 @@ func (factory commandFactory) runTelegramSetup(cmd *cli.Command) (err error) {
 
 func (factory commandFactory) finishTelegramSetup(cmd *cli.Command, env core.UserEnvironment) (err error) {
 	if cmd.Bool("replace") {
-		if err := core.ResetTelegramReceiverIdentity(env); err != nil {
+		if err := telegramcore.ResetTelegramReceiverIdentity(env); err != nil {
 			return err
 		}
 	}
@@ -101,9 +102,9 @@ func (factory commandFactory) finishTelegramSetup(cmd *cli.Command, env core.Use
 	return err
 }
 
-func guardTelegramSetupReplacement(env core.UserEnvironment, config core.TelegramReceiverConfig, replace bool) error {
+func guardTelegramSetupReplacement(env core.UserEnvironment, config telegramcore.TelegramReceiverConfig, replace bool) error {
 	// Check replacement authority before prompting or storing any credential.
-	prior, loadErr := core.LoadTelegramReceiverConfig(env)
+	prior, loadErr := telegramcore.LoadTelegramReceiverConfig(env)
 	if !replace && !errors.Is(loadErr, os.ErrNotExist) && (loadErr != nil || prior.Digest() != config.Digest()) {
 		return errors.New("telegram configuration exists; use --replace to change it")
 	}
@@ -111,22 +112,22 @@ func guardTelegramSetupReplacement(env core.UserEnvironment, config core.Telegra
 	return nil
 }
 
-func telegramSetupConfig(cmd *cli.Command) core.TelegramReceiverConfig {
+func telegramSetupConfig(cmd *cli.Command) telegramcore.TelegramReceiverConfig {
 	name := cmd.String("bot-token-env")
 	if name == "" {
 		name = "CHR_TELEGRAM_BOT_TOKEN"
 	}
 
-	return core.TelegramReceiverConfig{
+	return telegramcore.TelegramReceiverConfig{
 		Enabled: true, BotTokenEnv: name, PollTimeoutSeconds: cmd.Int("poll-timeout-seconds"),
 		AllowedChatIDs: cmd.Int64Slice("chat-id"), AllowedTopicIDs: cmd.Int64Slice("topic-id"),
-		AllowedUsers: []core.TelegramAllowedUser{{TelegramUserID: cmd.Int64("user-id"), OperatorID: cmd.String("operator-id"), ProjectIDs: cmd.StringSlice("project-id")}},
+		AllowedUsers: []telegramcore.TelegramAllowedUser{{TelegramUserID: cmd.Int64("user-id"), OperatorID: cmd.String("operator-id"), ProjectIDs: cmd.StringSlice("project-id")}},
 	}
 }
 
-func (factory commandFactory) storeTelegramSetupToken(cmd *cli.Command, env core.UserEnvironment, config core.TelegramReceiverConfig) error {
+func (factory commandFactory) storeTelegramSetupToken(cmd *cli.Command, env core.UserEnvironment, config telegramcore.TelegramReceiverConfig) error {
 	if cmd.IsSet("bot-token-env") {
-		_, err := core.TelegramReceiverToken(env, config)
+		_, err := telegramcore.TelegramReceiverToken(env, config)
 
 		return err
 	}
@@ -152,5 +153,5 @@ func (factory commandFactory) storeTelegramSetupToken(cmd *cli.Command, env core
 		return err
 	}
 
-	return core.SaveTelegramReceiverToken(env, config, string(token), cmd.Bool("replace"))
+	return telegramcore.SaveTelegramReceiverToken(env, config, string(token), cmd.Bool("replace"))
 }

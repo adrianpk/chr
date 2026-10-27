@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 // TestTelegramWorkResponsive runs the actual receiver and a real blocked worker.
@@ -110,7 +111,7 @@ func telegramWorkRunReceiver(t *testing.T, receiver telegramReceiver, release st
 	})
 }
 
-func checkTelegramWorkSharedOwner(t *testing.T, operations service, ref core.TelegramWorkReference) {
+func checkTelegramWorkSharedOwner(t *testing.T, operations service, ref telegramcore.TelegramWorkReference) {
 	t.Helper()
 
 	status, err := operations.WorkflowStatus(t.Context(), ref.Invocation.ID, WorkflowStatusRequest{Limit: 8})

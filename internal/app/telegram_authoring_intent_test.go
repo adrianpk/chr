@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 func telegramAuthoringIntentHTTP(t *testing.T, f *telegramConversationAppFixture, reply func(ConversationIntentContext) string) *atomic.Int64 {
@@ -273,7 +274,7 @@ func TestTelegramAuthoringIntentRootChange(t *testing.T) {
 func TestTelegramAuthoringIntentRevocation(t *testing.T) {
 	f := newTelegramConversationAppFixture(t)
 	telegramAuthoringIntentHTTP(t, f, func(ConversationIntentContext) string {
-		config, err := core.LoadTelegramReceiverConfig(f.receiver.env)
+		config, err := telegramcore.LoadTelegramReceiverConfig(f.receiver.env)
 		if err != nil {
 			t.Error(err)
 
@@ -281,7 +282,7 @@ func TestTelegramAuthoringIntentRevocation(t *testing.T) {
 		}
 
 		config.AllowedUsers[0].TelegramUserID = 100002
-		if err := core.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+		if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
 			t.Error(err)
 		}
 
@@ -352,7 +353,7 @@ func TestTelegramAuthoringIntentReplayScope(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	reopened, err := core.NewTelegramReceiverStore(t.Context(), f.receiver.env, testAssetsFS())
+	reopened, err := telegramcore.NewTelegramReceiverStore(t.Context(), f.receiver.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}

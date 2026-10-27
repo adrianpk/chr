@@ -1,6 +1,6 @@
 package app
 
-import "forge.adrianpk.com/chr/internal/core"
+import telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 
 type telegramHelpEntry struct {
 	ID, Category, Syntax string
@@ -21,7 +21,7 @@ func telegramHelpMetadata() []telegramHelpEntry {
 
 	for _, command := range telegramConversationRegistry() {
 		category := "Conversations"
-		if command.Action == core.TelegramConversationSelect {
+		if command.Action == telegramcore.TelegramConversationSelect {
 			category = "Projects"
 		}
 
@@ -37,7 +37,7 @@ func telegramHelpMetadata() []telegramHelpEntry {
 		telegramHelpEntry{"prepare-work", "Authoring", telegramPreparedWorkUsage()},
 		telegramHelpEntry{"work", "Execution", telegramWorkUsage()},
 		telegramHelpEntry{"harness", "Projects", telegramHarnessUsage},
-		telegramHelpEntry{core.TelegramActionAnswerCommand, "System controls", core.TelegramActionAnswerUsage},
+		telegramHelpEntry{telegramcore.TelegramActionAnswerCommand, "System controls", telegramcore.TelegramActionAnswerUsage},
 	)
 
 	return append(entries, telegramRecordControlMetadata()...)

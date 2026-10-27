@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -82,7 +83,7 @@ type telegramControlReplaceAfterApply struct {
 	replace func()
 }
 
-func (s telegramControlReplaceAfterApply) ApplyTelegramControl(ctx context.Context, target core.TelegramOperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest, check core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error) {
+func (s telegramControlReplaceAfterApply) ApplyTelegramControl(ctx context.Context, target telegramcore.TelegramOperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest, check core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error) {
 	status, err := s.service.ApplyTelegramControl(ctx, target, binding, request, check)
 	if err == nil {
 		s.replace()
@@ -99,7 +100,7 @@ func TestTelegramControlReceiptProjection(t *testing.T) {
 	f, operations, ref := telegramWorkAdmitted(t)
 	token := telegramControlOffer(t, f, "/pause "+ref.Invocation.ID)
 
-	var replacement core.TelegramConversation
+	var replacement telegramcore.TelegramConversation
 
 	f.receiver.operations = telegramControlReplaceAfterApply{service: operations, replace: func() {
 		staleTelegramControlPrompt(t, f, token, "replaced")

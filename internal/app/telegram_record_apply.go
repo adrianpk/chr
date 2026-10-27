@@ -6,15 +6,15 @@ import (
 	"errors"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r telegramReceiver) validateRecordAuthority(ctx context.Context, request core.TelegramOperationRequest) error {
+func (r telegramReceiver) validateRecordAuthority(ctx context.Context, request telegramcore.TelegramOperationRequest) error {
 	return r.validateRecordTargetAuthority(ctx, request, false)
 }
 
-func (r telegramReceiver) validateRecordTargetAuthority(ctx context.Context, request core.TelegramOperationRequest, receiptOnly bool) error {
+func (r telegramReceiver) validateRecordTargetAuthority(ctx context.Context, request telegramcore.TelegramOperationRequest, receiptOnly bool) error {
 	config, err := r.currentConfig()
 	if err != nil {
 		return err
@@ -30,7 +30,7 @@ func (r telegramReceiver) validateRecordTargetAuthority(ctx context.Context, req
 		return err
 	}
 
-	input := core.TelegramConversationInput{Update: request.Source, Config: config, Projects: projects}
+	input := telegramcore.TelegramConversationInput{Update: request.Source, Config: config, Projects: projects}
 	if receiptOnly {
 		return r.store.ValidateTelegramControlReceiptTarget(ctx, input, request)
 	}
@@ -38,7 +38,7 @@ func (r telegramReceiver) validateRecordTargetAuthority(ctx context.Context, req
 	return r.store.ValidateTelegramOperationTarget(ctx, input, request.Target)
 }
 
-func (r telegramReceiver) prepareRecord(ctx context.Context, operations telegramRecordService, request core.TelegramOperationRequest) (core.TelegramOperationRequest, error) {
+func (r telegramReceiver) prepareRecord(ctx context.Context, operations telegramRecordService, request telegramcore.TelegramOperationRequest) (telegramcore.TelegramOperationRequest, error) {
 	var mutation RecordMutationRequest
 	if err := json.Unmarshal(request.Arguments, &mutation); err != nil {
 		return request, err
@@ -63,7 +63,7 @@ func (r telegramReceiver) prepareRecord(ctx context.Context, operations telegram
 	return request, nil
 }
 
-func (r telegramReceiver) applyRecord(ctx context.Context, operations telegramRecordService, request core.TelegramOperationRequest, config core.TelegramReceiverConfig) error {
+func (r telegramReceiver) applyRecord(ctx context.Context, operations telegramRecordService, request telegramcore.TelegramOperationRequest, config telegramcore.TelegramReceiverConfig) error {
 	if err := r.validateRecordAuthority(ctx, request); err != nil {
 		return r.finishRecordFailure(ctx, request, "blocked", err, config)
 	}
@@ -103,7 +103,7 @@ func (r telegramReceiver) applyRecord(ctx context.Context, operations telegramRe
 	return r.store.FinishTelegramOperation(ctx, request, "confirmed", result.ReceiptRef, facts, text, config.Digest(), time.Now())
 }
 
-func telegramPreparedRecordBinding(prepared PreparedRecordMutation, request core.TelegramOperationRequest) bool {
+func telegramPreparedRecordBinding(prepared PreparedRecordMutation, request telegramcore.TelegramOperationRequest) bool {
 	expected := workflowstate.MutationBinding{RequestID: request.ID, Operator: request.Operator}
 	if prepared.Native != nil {
 		return prepared.Native.Binding == expected && prepared.Case == nil
@@ -112,7 +112,7 @@ func telegramPreparedRecordBinding(prepared PreparedRecordMutation, request core
 	return prepared.Case != nil && prepared.Case.Binding == expected
 }
 
-func (r telegramReceiver) finishRecordFailure(ctx context.Context, request core.TelegramOperationRequest, state string, failure error, config core.TelegramReceiverConfig) error {
+func (r telegramReceiver) finishRecordFailure(ctx context.Context, request telegramcore.TelegramOperationRequest, state string, failure error, config telegramcore.TelegramReceiverConfig) error {
 	text := telegramRecordFailure(failure)
 	request.Message = telegramOutcomeMessage("30", text)
 

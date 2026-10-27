@@ -9,6 +9,7 @@ import (
 	"time"
 
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 func qualityLegacyExpected(t *testing.T) qualityLegacyRecords {
@@ -147,7 +148,7 @@ func changeQualityOptionalTimes(records *qualityLegacyRecords, populated bool) {
 	}
 }
 
-func qualityConversationDefaults(t *testing.T, db *sql.DB, want TelegramConversation) {
+func qualityConversationDefaults(t *testing.T, db *sql.DB, want telegramcore.TelegramConversation) {
 	t.Helper()
 	qualityStorageExec(t, db, "UPDATE telegram_conversations SET authoring_session_ref=NULL,authorization_ref=NULL,invocation_id=NULL,last_observed_revision=NULL,guided_run_id=NULL")
 
@@ -157,10 +158,7 @@ func qualityConversationDefaults(t *testing.T, db *sql.DB, want TelegramConversa
 	want.LastObservedRevision = 0
 	want.GuidedRunID = ""
 
-	got, err := scanTelegramConversation(db.QueryRowContext(t.Context(), "SELECT "+telegramConversationColumns+" FROM telegram_conversations WHERE id=?", want.ID))
-	if err != nil {
-		t.Fatal(err)
-	}
+	got := qualityReadConversation(t, db, want)
 
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("conversation defaults changed: %#v", got)

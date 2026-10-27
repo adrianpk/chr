@@ -5,16 +5,17 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 type telegramExplanationService interface {
-	PrepareTelegramExplanation(context.Context, core.TelegramOperationTarget, AuthoringExplanationRequest) (PreparedAuthoringExplanation, error)
-	ExplainPreparedTelegram(context.Context, core.TelegramOperationTarget, PreparedAuthoringExplanation) (AuthoringExplanation, error)
-	ReadPreparedTelegramDocument(context.Context, core.TelegramOperationTarget, PreparedAuthoringExplanation) (core.AuthoringArtifactObservation, error)
+	PrepareTelegramExplanation(context.Context, telegramcore.TelegramOperationTarget, AuthoringExplanationRequest) (PreparedAuthoringExplanation, error)
+	ExplainPreparedTelegram(context.Context, telegramcore.TelegramOperationTarget, PreparedAuthoringExplanation) (AuthoringExplanation, error)
+	ReadPreparedTelegramDocument(context.Context, telegramcore.TelegramOperationTarget, PreparedAuthoringExplanation) (core.AuthoringArtifactObservation, error)
 }
 
 // PrepareTelegramExplanation maps registry routing to the neutral source reader.
-func (s service) PrepareTelegramExplanation(ctx context.Context, target core.TelegramOperationTarget, request AuthoringExplanationRequest) (PreparedAuthoringExplanation, error) {
+func (s service) PrepareTelegramExplanation(ctx context.Context, target telegramcore.TelegramOperationTarget, request AuthoringExplanationRequest) (PreparedAuthoringExplanation, error) {
 	scoped, err := s.telegramBoundProjectService(ctx, target)
 	if err != nil {
 		return PreparedAuthoringExplanation{}, err
@@ -24,7 +25,7 @@ func (s service) PrepareTelegramExplanation(ctx context.Context, target core.Tel
 }
 
 // ExplainPreparedTelegram uses the same configured provider as other adapters.
-func (s service) ExplainPreparedTelegram(ctx context.Context, target core.TelegramOperationTarget, prepared PreparedAuthoringExplanation) (AuthoringExplanation, error) {
+func (s service) ExplainPreparedTelegram(ctx context.Context, target telegramcore.TelegramOperationTarget, prepared PreparedAuthoringExplanation) (AuthoringExplanation, error) {
 	scoped, err := s.telegramBoundProjectService(ctx, target)
 	if err != nil {
 		return AuthoringExplanation{}, err
@@ -34,7 +35,7 @@ func (s service) ExplainPreparedTelegram(ctx context.Context, target core.Telegr
 }
 
 // ReadPreparedTelegramDocument resolves the current registry before reading the original.
-func (s service) ReadPreparedTelegramDocument(ctx context.Context, target core.TelegramOperationTarget, prepared PreparedAuthoringExplanation) (core.AuthoringArtifactObservation, error) {
+func (s service) ReadPreparedTelegramDocument(ctx context.Context, target telegramcore.TelegramOperationTarget, prepared PreparedAuthoringExplanation) (core.AuthoringArtifactObservation, error) {
 	scoped, err := s.telegramBoundProjectService(ctx, target)
 	if err != nil {
 		return core.AuthoringArtifactObservation{}, err
@@ -43,14 +44,14 @@ func (s service) ReadPreparedTelegramDocument(ctx context.Context, target core.T
 	return scoped.ReadPreparedAuthoringDocument(ctx, prepared)
 }
 
-func (s service) telegramBoundProjectService(ctx context.Context, target core.TelegramOperationTarget) (service, error) {
+func (s service) telegramBoundProjectService(ctx context.Context, target telegramcore.TelegramOperationTarget) (service, error) {
 	scoped, err := s.telegramProjectService(ctx, target)
 	if err != nil {
 		return scoped, err
 	}
 
 	project := projectcore.Project{ID: scoped.projectContext.ProjectID, Path: scoped.projectContext.ProjectDir, Enabled: true}
-	if err := core.ValidateTelegramProjectTarget(project, target); err != nil {
+	if err := telegramcore.ValidateTelegramProjectTarget(project, target); err != nil {
 		return scoped, err
 	}
 

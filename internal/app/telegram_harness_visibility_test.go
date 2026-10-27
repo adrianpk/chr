@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 func telegramHarnessWorkerFixture(t *testing.T) (*telegramConversationAppFixture, service, core.WorkflowRecord, core.WorkflowStartRequest, string) {
@@ -38,7 +39,7 @@ func telegramHarnessWorkerFixture(t *testing.T) (*telegramConversationAppFixture
 	}
 
 	config.AllowedUsers[0].ProjectIDs = append(config.AllowedUsers[0].ProjectIDs, operations.projectContext.ProjectID)
-	if err := core.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
+	if err := telegramcore.SaveTelegramReceiverConfig(f.receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 

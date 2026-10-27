@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -19,7 +20,7 @@ type telegramPreparedWorkLostAck struct {
 	lost *atomic.Bool
 }
 
-func (s telegramPreparedWorkLostAck) ApplyTelegramAuthoringWork(ctx context.Context, target core.TelegramOperationTarget, prepared PreparedAuthoringWork, guard core.AuthoringCommitGuard) (AuthoringWorkResult, error) {
+func (s telegramPreparedWorkLostAck) ApplyTelegramAuthoringWork(ctx context.Context, target telegramcore.TelegramOperationTarget, prepared PreparedAuthoringWork, guard core.AuthoringCommitGuard) (AuthoringWorkResult, error) {
 	result, err := s.service.ApplyTelegramAuthoringWork(ctx, target, prepared, guard)
 	if err == nil && s.lost.CompareAndSwap(false, true) {
 		return result, errTelegramAuthoringLostAck
@@ -134,7 +135,7 @@ type telegramPreparedWorkChange struct {
 	change func()
 }
 
-func (s telegramPreparedWorkChange) ApplyTelegramAuthoringWork(ctx context.Context, target core.TelegramOperationTarget, prepared PreparedAuthoringWork, guard core.AuthoringCommitGuard) (AuthoringWorkResult, error) {
+func (s telegramPreparedWorkChange) ApplyTelegramAuthoringWork(ctx context.Context, target telegramcore.TelegramOperationTarget, prepared PreparedAuthoringWork, guard core.AuthoringCommitGuard) (AuthoringWorkResult, error) {
 	s.change()
 
 	return s.service.ApplyTelegramAuthoringWork(ctx, target, prepared, guard)

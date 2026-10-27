@@ -3,7 +3,7 @@ package app
 import (
 	"errors"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 type telegramServiceFailure struct {
@@ -36,7 +36,7 @@ func telegramCommandFailure(err error) error {
 		return serviceFailure
 	}
 
-	var apiFailure *core.TelegramAPIError
+	var apiFailure *telegramcore.TelegramAPIError
 	if errors.As(err, &apiFailure) {
 		return &telegramServiceFailure{code: telegramAPIFailureCode(apiFailure.Code), permanent: apiFailure.Permanent}
 	}

@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
@@ -41,7 +41,7 @@ func TestTelegramHelpHTTP(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			payloads := make(chan telegramHelpHTTPBody, 4)
 			server := telegramHelpHTTPServer(t, payloads, test.status, test.failure)
-			receiver, _ := telegramAppTestReceiver(t, core.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
+			receiver, _ := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
 
 			update := retainTelegramHelpInput(t, receiver, 1, test.text)
 			if err := receiver.respond(t.Context(), update); err != nil {
@@ -142,7 +142,7 @@ func TestTelegramHelpQuestion(t *testing.T) {
 // Current authorization is checked again before a formatted response reaches HTTP.
 func TestTelegramHelpRevocation(t *testing.T) {
 	client := &telegramHelpTransportFailure{}
-	receiver, config := telegramAppTestReceiver(t, core.TelegramReceiverAPI{Client: client})
+	receiver, config := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{Client: client})
 
 	update := retainTelegramHelpInput(t, receiver, 1, "/help")
 	if err := receiver.respond(t.Context(), update); err != nil {
@@ -150,7 +150,7 @@ func TestTelegramHelpRevocation(t *testing.T) {
 	}
 
 	config.AllowedUsers[0].ProjectIDs = []string{"other-project"}
-	if err := core.SaveTelegramReceiverConfig(receiver.env, config, true); err != nil {
+	if err := telegramcore.SaveTelegramReceiverConfig(receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -161,11 +161,11 @@ func TestTelegramHelpRevocation(t *testing.T) {
 	assertTelegramHelpDelivery(t, receiver, "blocked", 0)
 }
 
-func retainTelegramHelpInput(t *testing.T, receiver telegramReceiver, id int64, text string) core.TelegramReceivedUpdate {
+func retainTelegramHelpInput(t *testing.T, receiver telegramReceiver, id int64, text string) telegramcore.TelegramReceivedUpdate {
 	t.Helper()
 
-	update := core.TelegramReceivedUpdate{UpdateID: id, Digest: fmt.Sprintf("%064x", id), Kind: "message", Peer: core.TelegramPeerIdentity{BotID: 12345, ChatID: 100001, UserID: 100001}, MessageID: id, ChatType: "private", Text: text}
-	if err := receiver.store.RetainBatch(t.Context(), 12345, []core.TelegramReceivedUpdate{update}, time.Now()); err != nil {
+	update := telegramcore.TelegramReceivedUpdate{UpdateID: id, Digest: fmt.Sprintf("%064x", id), Kind: "message", Peer: telegramcore.TelegramPeerIdentity{BotID: 12345, ChatID: 100001, UserID: 100001}, MessageID: id, ChatType: "private", Text: text}
+	if err := receiver.store.RetainBatch(t.Context(), 12345, []telegramcore.TelegramReceivedUpdate{update}, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -217,12 +217,12 @@ func assertTelegramHelpBody(t *testing.T, payload telegramHelpHTTPBody, command 
 // Revoked intake authority cannot enqueue help or invoke any application service.
 func TestTelegramHelpUnauthorized(t *testing.T) {
 	client := &telegramHelpTransportFailure{}
-	receiver, config := telegramAppTestReceiver(t, core.TelegramReceiverAPI{Client: client})
+	receiver, config := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{Client: client})
 	update := retainTelegramHelpInput(t, receiver, 1, "/help")
 	receiver.operations = telegramConversationNoReads{}
 
 	config.AllowedUsers[0].TelegramUserID = 200002
-	if err := core.SaveTelegramReceiverConfig(receiver.env, config, true); err != nil {
+	if err := telegramcore.SaveTelegramReceiverConfig(receiver.env, config, true); err != nil {
 		t.Fatal(err)
 	}
 
@@ -240,7 +240,7 @@ func TestTelegramHelpUnauthorized(t *testing.T) {
 func assertTelegramHelpDelivery(t *testing.T, receiver telegramReceiver, state string, attempts int) {
 	t.Helper()
 
-	diagnostics, err := core.InspectTelegramReceiverDiagnostics(t.Context(), receiver.env, 12345)
+	diagnostics, err := telegramcore.InspectTelegramReceiverDiagnostics(t.Context(), receiver.env, 12345)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -269,7 +269,7 @@ func (c *telegramHelpTransportFailure) Do(*http.Request) (*http.Response, error)
 // A lost HTTP response never authorizes an immediate second plain send.
 func TestTelegramHelpTransportLoss(t *testing.T) {
 	client := &telegramHelpTransportFailure{}
-	receiver, _ := telegramAppTestReceiver(t, core.TelegramReceiverAPI{Client: client, BaseURL: "http://example.invalid"})
+	receiver, _ := telegramAppTestReceiver(t, telegramcore.TelegramReceiverAPI{Client: client, BaseURL: "http://example.invalid"})
 
 	update := retainTelegramHelpInput(t, receiver, 1, "/help")
 	if err := receiver.respond(t.Context(), update); err != nil {

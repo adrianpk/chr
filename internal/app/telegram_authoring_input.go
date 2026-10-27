@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -16,33 +17,33 @@ type telegramAuthoringArguments struct {
 	PayloadHash string `json:"payload_hash"`
 }
 
-func (r telegramReceiver) reserveAuthoring(ctx context.Context, operations telegramAuthoringService, user core.TelegramAllowedUser, command telegramAuthoringCommand) (core.TelegramOperationRequest, error) {
+func (r telegramReceiver) reserveAuthoring(ctx context.Context, operations telegramAuthoringService, user telegramcore.TelegramAllowedUser, command telegramAuthoringCommand) (telegramcore.TelegramOperationRequest, error) {
 	c, target, err := r.store.ResolveTelegramAuthoringTarget(ctx, command.Input)
 	if err != nil {
-		return core.TelegramOperationRequest{}, err
+		return telegramcore.TelegramOperationRequest{}, err
 	}
 
 	owner, err := r.authoringOwnerInput(ctx, operations, command, c, target)
 	if err != nil {
-		return core.TelegramOperationRequest{}, err
+		return telegramcore.TelegramOperationRequest{}, err
 	}
 
-	owner.Binding = workflowstate.MutationBinding{RequestID: core.TelegramOperationID(command.Input.Update, 0), Operator: user.OperatorID}
+	owner.Binding = workflowstate.MutationBinding{RequestID: telegramcore.TelegramOperationID(command.Input.Update, 0), Operator: user.OperatorID}
 
 	input, err := json.Marshal(owner)
 	if err != nil {
-		return core.TelegramOperationRequest{}, err
+		return telegramcore.TelegramOperationRequest{}, err
 	}
 
 	arguments, err := json.Marshal(telegramAuthoringArguments{PayloadHash: recordDigest(input)})
 	if err != nil {
-		return core.TelegramOperationRequest{}, err
+		return telegramcore.TelegramOperationRequest{}, err
 	}
 
-	return r.store.ReservePreparedTelegramOperation(ctx, core.TelegramOperationRequest{Source: command.Input.Update, Operator: user.OperatorID, Target: target, OperationID: "authoring.continue", Arguments: arguments}, input, time.Now())
+	return r.store.ReservePreparedTelegramOperation(ctx, telegramcore.TelegramOperationRequest{Source: command.Input.Update, Operator: user.OperatorID, Target: target, OperationID: "authoring.continue", Arguments: arguments}, input, time.Now())
 }
 
-func (r telegramReceiver) authoringOwnerInput(ctx context.Context, operations telegramAuthoringService, command telegramAuthoringCommand, c core.TelegramConversation, target core.TelegramOperationTarget) (core.AuthoringContinuationRequest, error) {
+func (r telegramReceiver) authoringOwnerInput(ctx context.Context, operations telegramAuthoringService, command telegramAuthoringCommand, c telegramcore.TelegramConversation, target telegramcore.TelegramOperationTarget) (core.AuthoringContinuationRequest, error) {
 	request := core.AuthoringContinuationRequest{ProjectID: target.ProjectID, Namespace: target.Namespace, Action: command.Action, Target: command.Target, Instructions: command.Instructions}
 	if c.AuthoringSessionRef == "" {
 		return r.initialAuthoringInput(ctx, command, c, request)
@@ -70,7 +71,7 @@ func (r telegramReceiver) authoringOwnerInput(ctx context.Context, operations te
 	return request, nil
 }
 
-func (r telegramReceiver) initialAuthoringInput(ctx context.Context, command telegramAuthoringCommand, c core.TelegramConversation, request core.AuthoringContinuationRequest) (core.AuthoringContinuationRequest, error) {
+func (r telegramReceiver) initialAuthoringInput(ctx context.Context, command telegramAuthoringCommand, c telegramcore.TelegramConversation, request core.AuthoringContinuationRequest) (core.AuthoringContinuationRequest, error) {
 	if command.Action == core.AuthoringContinuationRefine || command.Action == core.AuthoringContinuationAnswer {
 		return request, workflowstate.ErrConflict
 	}
@@ -98,7 +99,7 @@ func telegramAuthoringAnswerInput(request core.AuthoringContinuationRequest, ans
 		return request, workflowstate.ErrConflict
 	}
 
-	var question core.TelegramConversationQuestion
+	var question telegramcore.TelegramConversationQuestion
 	if err := decodeOperationJSON(binding, &question); err != nil {
 		return request, err
 	}
@@ -118,12 +119,12 @@ func telegramAuthoringAnswerInput(request core.AuthoringContinuationRequest, ans
 	return request, nil
 }
 
-func telegramAuthoringQuestion(ref string, question *core.AuthoringQuestionBinding) *core.TelegramConversationQuestion {
+func telegramAuthoringQuestion(ref string, question *core.AuthoringQuestionBinding) *telegramcore.TelegramConversationQuestion {
 	if question == nil {
 		return nil
 	}
 
-	return &core.TelegramConversationQuestion{SessionRef: ref, QuestionID: question.QuestionID, TurnID: question.TurnID, Revision: question.Revision, ContentDigest: question.ContentDigest}
+	return &telegramcore.TelegramConversationQuestion{SessionRef: ref, QuestionID: question.QuestionID, TurnID: question.TurnID, Revision: question.Revision, ContentDigest: question.ContentDigest}
 }
 
 func telegramAuthoringSessionID(ref string) (string, error) {
