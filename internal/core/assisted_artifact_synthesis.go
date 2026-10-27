@@ -140,7 +140,7 @@ func validateAssistedArtifactSynthesisOptions(opts AssistedArtifactSynthesisOpti
 		return fmt.Errorf("assisted artifact synthesis summary session id does not match session")
 	}
 
-	if err := validateAuthoringArtifactRef(opts.SourceRef); err != nil {
+	if err := ValidateAuthoringArtifactRef(opts.SourceRef); err != nil {
 		return err
 	}
 

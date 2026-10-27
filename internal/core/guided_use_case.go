@@ -21,7 +21,7 @@ func ValidateGuidedUseCase(session authoringcore.Session) error {
 		return nil
 	}
 
-	if !validGuidedIntent(session) {
+	if !ValidGuidedIntent(session) {
 		return errors.New("invalid guided use-case schema, scope or progression intent")
 	}
 
@@ -100,7 +100,8 @@ func renderGuidedState(output *bytes.Buffer, state *authoringcore.GuidedUseCaseS
 	return err
 }
 
-func validGuidedIntent(session authoringcore.Session) bool {
+// ValidGuidedIntent checks the original managed intent fields of a guided session.
+func ValidGuidedIntent(session authoringcore.Session) bool {
 	state := session.Guided
 
 	return state.SchemaVersion == 1 && session.Revision > 0 && opsnamespace.Valid(session.Namespace) && strings.TrimSpace(state.Actor) != "" && len(state.Actor) <= 128 && state.ProgressionIntent

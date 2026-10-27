@@ -53,7 +53,7 @@ func ValidateAuthoringSession(session authoringcore.Session) error {
 
 func validateAuthoringArtifactRefs(name string, refs []authoringcore.ArtifactRef, expectedRole authoringcore.ArtifactRole) error {
 	for index, ref := range refs {
-		err := validateAuthoringArtifactRef(ref)
+		err := ValidateAuthoringArtifactRef(ref)
 		if err != nil {
 			return fmt.Errorf("authoring %s artifact %d: %w", name, index+1, err)
 		}
@@ -66,7 +66,8 @@ func validateAuthoringArtifactRefs(name string, refs []authoringcore.ArtifactRef
 	return nil
 }
 
-func validateAuthoringArtifactRef(ref authoringcore.ArtifactRef) error {
+// ValidateAuthoringArtifactRef checks the existing required artifact identity and role.
+func ValidateAuthoringArtifactRef(ref authoringcore.ArtifactRef) error {
 	if ref.ID == "" {
 		return fmt.Errorf("artifact id is required")
 	}
@@ -92,12 +93,12 @@ func validateAuthoringProvenanceLinks(links []authoringcore.ProvenanceLink) erro
 			return fmt.Errorf("authoring provenance link %d relation is invalid: %s", index+1, link.Relation)
 		}
 
-		err := validateAuthoringArtifactRef(link.Source)
+		err := ValidateAuthoringArtifactRef(link.Source)
 		if err != nil {
 			return fmt.Errorf("authoring provenance link %d source: %w", index+1, err)
 		}
 
-		err = validateAuthoringArtifactRef(link.Target)
+		err = ValidateAuthoringArtifactRef(link.Target)
 		if err != nil {
 			return fmt.Errorf("authoring provenance link %d target: %w", index+1, err)
 		}

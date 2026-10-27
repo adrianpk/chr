@@ -170,7 +170,7 @@ func guardGuidedAdmissionCheckpoint(session authoringcore.Session, expected stri
 
 func guardGuidedAdmissionState(session authoringcore.Session, project, namespace string) error {
 	state := session.Guided
-	if state == nil || !validGuidedIntent(session) || session.ProjectID != project || session.Namespace != namespace || state.Stage != "preparation" || state.Work == nil || state.Work.Materialization == nil || state.Work.Admission == nil || state.PendingOperation == nil {
+	if state == nil || !ValidGuidedIntent(session) || session.ProjectID != project || session.Namespace != namespace || state.Stage != "preparation" || state.Work == nil || state.Work.Materialization == nil || state.Work.Admission == nil || state.PendingOperation == nil {
 		return workflowstate.ErrConflict
 	}
 
