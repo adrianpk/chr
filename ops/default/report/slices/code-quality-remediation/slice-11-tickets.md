@@ -30,10 +30,10 @@ commits with direct consumers and preserved durable/wire contracts.
 The move ledger reconciles 494 declaration/test preimages after explicit contract
 prerequisites, namespace qualification, naming and signature formatting. Durable
 fields, order, text/JSON bytes, timestamps, empty values, legacy aliases and error
-meanings are unchanged. Seventeen assigned signatures now use cohesive owner state or
+meanings are unchanged. Twenty-one assigned signatures now use cohesive owner state or
 named outcomes. The partial disposition ledger records those 17 fixes; remaining
 assigned signatures and watches are open. The global policy remains at ceiling
-seven with 190 exact debts and one external exception.
+seven with 187 exact debts and one external exception.
 
 ## Files of Interest
 
@@ -186,6 +186,19 @@ for 494 total. The disposition ledger now records all 17 completed signature fix
 - `make check-go-style`: 9307 declarations, ceiling seven, 190 exact debts and one external exception.
 - `make check-package-readmes`: passed.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/execution ./internal/core ./internal/app ./internal/tui ./scripts/goquality`: zero issues.
+
+Execution output files are one owned resource value, retaining open/close/error
+order and the same writers for build/worker/validation. Event emission takes a
+cohesive phase/level/message value while preserving identity, UTC timestamp and
+artifact refs. Event-line decoding returns a named valid/malformed outcome used
+by both full and bounded recent readers. Execution and loop repository factories
+consume the existing database.DataDirectory contract with unchanged IO/migrations.
+Four more assigned signatures are fixed; 187 exact debts remain at ceiling seven.
+
+- `go test ./internal/core ./internal/app ./internal/tui -run '^Test(Execution|AgentEvent|LoopRun|QualityRecordWire|QualityStorage|WorkObservation)' -count=1 -timeout=3m`: passed; TUI compiled with no selected tests.
+- `go test ./internal/core -run '^Test(ValidateAgentEvent|FileAgentEvent|ReadAgentEvent|RecentWorkEvents|SummarizeAgentEvent|AgentEventReadback)' -count=1 -timeout=3m`: passed.
+- `make check-go-style`: 9307 declarations, ceiling seven, 187 exact debts and one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app ./internal/tui`: zero issues.
 
 ## Risks and Follow-ups
 

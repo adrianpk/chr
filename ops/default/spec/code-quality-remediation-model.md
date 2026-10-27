@@ -670,3 +670,11 @@ The root coordinator is excluded by dependency checks. Check, repair, Git adapte
 status and diagnostic concerns share the same settings normalization after D03
 removal. Original serialized fields/specs, IO order and safe-repair/workspace
 authority remain unchanged; native fixture helpers stay test-only.
+
+Execution output file ownership travels as one value; opening the validation file
+still closes the runtime log on failure, and the caller retains deferred close
+order. Runner messages group phase/level/text independently from execution/loop
+identity and preserve schema, UTC timestamp and refs. Full and bounded recent
+event readers share a named valid/malformed-line result with unchanged diagnostics,
+ordering and limits. Execution/loop SQL constructors consume DataDirectory without
+changing directory/open/configure/migrate/cleanup semantics.

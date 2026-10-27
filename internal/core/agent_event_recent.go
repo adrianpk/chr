@@ -66,10 +66,10 @@ func ReadRecentAgentEvents(ctx context.Context, path string) (stream AgentEventS
 }
 
 func appendRecentAgentEvent(stream *AgentEventStream, line int, text string) {
-	event, malformed := decodeAgentEventLine(line, text)
-	if malformed != nil {
-		stream.Malformed = append(stream.Malformed, *malformed)
+	decoded := decodeAgentEventLine(line, text)
+	if decoded.malformed != nil {
+		stream.Malformed = append(stream.Malformed, *decoded.malformed)
 	} else {
-		stream.Events = append(stream.Events, event)
+		stream.Events = append(stream.Events, decoded.event)
 	}
 }

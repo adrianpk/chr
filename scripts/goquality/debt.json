@@ -42,11 +42,6 @@
       "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/agent_event_stream.go::decodeAgentEventLine",
-      "signature": "func(lineNumber int, line string) (AgentEvent, *AgentEventMalformedLine)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/core/evidence_strategy_checklist.go::evidenceStrategyChecklistBlock",
       "signature": "func(content string) (string, bool, error)",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
@@ -64,16 +59,6 @@
     {
       "id": "internal/core/execution_report.go::executionReportChangedFiles",
       "signature": "func(result ExecutionResult) ([]ExecutionReportChangedFile, ExecutionReportChangedFilesSummary)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/execution_runner.go::openExecutionOutputArtifacts",
-      "signature": "func(artifacts ExecutionArtifacts) (*os.File, *os.File, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/execution_runner.go::ExecutionRunner.emitExecutionAgentEvent",
-      "signature": "func(ctx context.Context, loopID string, record ExecutionRecord, phase AgentEventPhase, level AgentEventLevel, message string)",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {

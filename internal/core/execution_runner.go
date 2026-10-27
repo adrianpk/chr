@@ -77,18 +77,18 @@ func (r ExecutionRunner) Run(ctx context.Context, opts RunExecutionOptions) (Exe
 		return ExecutionRecord{}, err
 	}
 
-	logFile, validationFile, err := openExecutionOutputArtifacts(record.Artifacts)
+	output, err := openExecutionOutputArtifacts(record.Artifacts)
 	if err != nil {
 		return ExecutionRecord{}, err
 	}
 
 	defer func() {
 		//nolint:errcheck // Main command result is already determined by execution.
-		_ = logFile.Close()
+		_ = output.log.Close()
 	}()
 	defer func() {
 		//nolint:errcheck // Main command result is already determined by execution.
-		_ = validationFile.Close()
+		_ = output.validation.Close()
 	}()
 
 	record, err = r.markExecutionRunning(ctx, record)
@@ -96,15 +96,14 @@ func (r ExecutionRunner) Run(ctx context.Context, opts RunExecutionOptions) (Exe
 		return ExecutionRecord{}, err
 	}
 
-	err = r.runHarness(ctx, opts, record, logFile, validationFile)
+	err = r.runHarness(ctx, opts, record, output)
 	if err != nil {
 		return r.failExecution(ctx, record, err)
 	}
 
 	result, err := captureExecutionResult(record)
 	if err != nil {
-		r.emitExecutionAgentEvent(ctx, opts.LoopID, record, AgentEventPhaseWorkFailed, AgentEventLevelError,
-			fmt.Sprintf("%s result capture failed", record.TicketKey))
+		r.emitExecutionAgentEvent(ctx, opts.LoopID, record, executionEventMessage{phase: AgentEventPhaseWorkFailed, level: AgentEventLevelError, message: fmt.Sprintf("%s result capture failed", record.TicketKey)})
 
 		return r.failExecution(ctx, record, err)
 	}
@@ -169,70 +168,67 @@ func (r ExecutionRunner) markExecutionSucceeded(
 	return record, nil
 }
 
-func openExecutionOutputArtifacts(artifacts ExecutionArtifacts) (*os.File, *os.File, error) {
+type executionOutputArtifacts struct {
+	log        *os.File
+	validation *os.File
+}
+
+func openExecutionOutputArtifacts(artifacts ExecutionArtifacts) (executionOutputArtifacts, error) {
 	logFile, err := os.OpenFile(artifacts.LogPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
-		return nil, nil, fmt.Errorf("open execution log artifact: %w", err)
+		return executionOutputArtifacts{}, fmt.Errorf("open execution log artifact: %w", err)
 	}
 
 	validationFile, err := os.OpenFile(artifacts.ValidationPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
 		closeErr := logFile.Close()
 		if closeErr != nil {
-			return nil, nil, fmt.Errorf("open validation artifact: %w; close execution log artifact: %w", err, closeErr)
+			return executionOutputArtifacts{}, fmt.Errorf("open validation artifact: %w; close execution log artifact: %w", err, closeErr)
 		}
 
-		return nil, nil, fmt.Errorf("open validation artifact: %w", err)
+		return executionOutputArtifacts{}, fmt.Errorf("open validation artifact: %w", err)
 	}
 
-	return logFile, validationFile, nil
+	return executionOutputArtifacts{log: logFile, validation: validationFile}, nil
 }
 
-func (r ExecutionRunner) runHarness(ctx context.Context, opts RunExecutionOptions, record ExecutionRecord, log, validationLog io.Writer) error {
-	err := r.Executor.Run(ctx, opts.Invocation.Build, log, log)
+func (r ExecutionRunner) runHarness(ctx context.Context, opts RunExecutionOptions, record ExecutionRecord, output executionOutputArtifacts) error {
+	err := r.Executor.Run(ctx, opts.Invocation.Build, output.log, output.log)
 	if err != nil {
 		failure := harnessFailure(err)
 
-		r.emitExecutionAgentEvent(ctx, opts.LoopID, record, AgentEventPhaseWorkFailed, AgentEventLevelError,
-			fmt.Sprintf("%s runtime preparation failed", record.TicketKey))
+		r.emitExecutionAgentEvent(ctx, opts.LoopID, record, executionEventMessage{phase: AgentEventPhaseWorkFailed, level: AgentEventLevelError, message: fmt.Sprintf("%s runtime preparation failed", record.TicketKey)})
 
 		return failure
 	}
 
-	r.emitExecutionAgentEvent(ctx, opts.LoopID, record, AgentEventPhaseRuntimePrepared, AgentEventLevelInfo,
-		fmt.Sprintf("%s runtime prepared", record.TicketKey))
+	r.emitExecutionAgentEvent(ctx, opts.LoopID, record, executionEventMessage{phase: AgentEventPhaseRuntimePrepared, level: AgentEventLevelInfo, message: fmt.Sprintf("%s runtime prepared", record.TicketKey)})
 
-	r.emitExecutionAgentEvent(ctx, opts.LoopID, record, AgentEventPhaseWorkerStarted, AgentEventLevelInfo,
-		fmt.Sprintf("%s worker started", record.TicketKey))
+	r.emitExecutionAgentEvent(ctx, opts.LoopID, record, executionEventMessage{phase: AgentEventPhaseWorkerStarted, level: AgentEventLevelInfo, message: fmt.Sprintf("%s worker started", record.TicketKey)})
 
-	err = r.Executor.Run(ctx, opts.Invocation.Run, log, log)
+	err = r.Executor.Run(ctx, opts.Invocation.Run, output.log, output.log)
 	if err != nil {
 		failure := workerFailure(err)
 
-		r.emitExecutionAgentEvent(ctx, opts.LoopID, record, AgentEventPhaseWorkerFinished, AgentEventLevelError,
-			fmt.Sprintf("%s worker failed", record.TicketKey))
+		r.emitExecutionAgentEvent(ctx, opts.LoopID, record, executionEventMessage{phase: AgentEventPhaseWorkerFinished, level: AgentEventLevelError, message: fmt.Sprintf("%s worker failed", record.TicketKey)})
 
 		return failure
 	}
 
-	r.emitExecutionAgentEvent(ctx, opts.LoopID, record, AgentEventPhaseWorkerFinished, AgentEventLevelInfo,
-		fmt.Sprintf("%s worker finished", record.TicketKey))
+	r.emitExecutionAgentEvent(ctx, opts.LoopID, record, executionEventMessage{phase: AgentEventPhaseWorkerFinished, level: AgentEventLevelInfo, message: fmt.Sprintf("%s worker finished", record.TicketKey)})
 
-	r.emitExecutionAgentEvent(ctx, opts.LoopID, record, AgentEventPhaseValidationStarted, AgentEventLevelInfo,
-		fmt.Sprintf("%s validation started: %s", record.TicketKey, record.Runtime.ValidationCommand))
+	r.emitExecutionAgentEvent(ctx, opts.LoopID, record, executionEventMessage{phase: AgentEventPhaseValidationStarted, level: AgentEventLevelInfo, message: fmt.Sprintf("%s validation started: %s", record.TicketKey, record.Runtime.ValidationCommand)})
 
-	err = r.Executor.Run(ctx, opts.Invocation.Validation, validationLog, validationLog)
+	err = r.Executor.Run(ctx, opts.Invocation.Validation, output.validation, output.validation)
 	if err != nil {
 		failure := validationFailure(err)
 
-		r.emitExecutionAgentEvent(ctx, opts.LoopID, record, AgentEventPhaseValidationFinished, AgentEventLevelError,
-			fmt.Sprintf("%s validation failed: %s", record.TicketKey, record.Runtime.ValidationCommand))
+		r.emitExecutionAgentEvent(ctx, opts.LoopID, record, executionEventMessage{phase: AgentEventPhaseValidationFinished, level: AgentEventLevelError, message: fmt.Sprintf("%s validation failed: %s", record.TicketKey, record.Runtime.ValidationCommand)})
 
 		return failure
 	}
 
-	r.emitExecutionAgentEvent(ctx, opts.LoopID, record, AgentEventPhaseValidationFinished, AgentEventLevelInfo,
-		fmt.Sprintf("%s validation passed: %s", record.TicketKey, record.Runtime.ValidationCommand))
+	r.emitExecutionAgentEvent(ctx, opts.LoopID, record, executionEventMessage{phase: AgentEventPhaseValidationFinished, level: AgentEventLevelInfo, message: fmt.Sprintf("%s validation passed: %s", record.TicketKey, record.Runtime.ValidationCommand)})
 
 	return nil
 }
@@ -328,11 +324,16 @@ func (r ExecutionRunner) emitChangedFilesDetected(ctx context.Context, loopID st
 		return
 	}
 
-	r.emitExecutionAgentEvent(ctx, loopID, record, AgentEventPhaseChangedFilesDetected, AgentEventLevelInfo,
-		fmt.Sprintf("%s changed files detected: %d", record.TicketKey, len(result.ChangedFiles)))
+	r.emitExecutionAgentEvent(ctx, loopID, record, executionEventMessage{phase: AgentEventPhaseChangedFilesDetected, level: AgentEventLevelInfo, message: fmt.Sprintf("%s changed files detected: %d", record.TicketKey, len(result.ChangedFiles))})
 }
 
-func (r ExecutionRunner) emitExecutionAgentEvent(ctx context.Context, loopID string, record ExecutionRecord, phase AgentEventPhase, level AgentEventLevel, message string) {
+type executionEventMessage struct {
+	phase   AgentEventPhase
+	level   AgentEventLevel
+	message string
+}
+
+func (r ExecutionRunner) emitExecutionAgentEvent(ctx context.Context, loopID string, record ExecutionRecord, message executionEventMessage) {
 	if r.EventSink == nil {
 		return
 	}
@@ -344,9 +345,9 @@ func (r ExecutionRunner) emitExecutionAgentEvent(ctx context.Context, loopID str
 		LoopID:        loopID,
 		ExecutionID:   record.ID,
 		TicketKey:     record.TicketKey,
-		Phase:         phase,
-		Level:         level,
-		Message:       message,
+		Phase:         message.phase,
+		Level:         message.level,
+		Message:       message.message,
 		Refs:          executionAgentEventRefs(record),
 	})
 	if err != nil {

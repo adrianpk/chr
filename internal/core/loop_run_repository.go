@@ -32,7 +32,7 @@ type sqliteLoopRunRepository struct {
 }
 
 // NewLoopRunRepository constructs the corresponding package service or value.
-func NewLoopRunRepository(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (LoopRunRepository, error) {
+func NewLoopRunRepository(ctx context.Context, env database.DataDirectory, assetsFS fs.FS) (LoopRunRepository, error) {
 	err := os.MkdirAll(env.DataDir(), 0o755)
 	if err != nil {
 		return nil, fmt.Errorf("create user data directory: %w", err)

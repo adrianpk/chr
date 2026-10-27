@@ -169,14 +169,14 @@ func ReadAgentEventStream(ctx context.Context, path string) (AgentEventStream, e
 			continue
 		}
 
-		event, malformed := decodeAgentEventLine(lineNumber, line)
-		if malformed != nil {
-			stream.Malformed = append(stream.Malformed, *malformed)
+		decoded := decodeAgentEventLine(lineNumber, line)
+		if decoded.malformed != nil {
+			stream.Malformed = append(stream.Malformed, *decoded.malformed)
 
 			continue
 		}
 
-		stream.Events = append(stream.Events, event)
+		stream.Events = append(stream.Events, decoded.event)
 	}
 
 	err = scanner.Err()
@@ -187,28 +187,33 @@ func ReadAgentEventStream(ctx context.Context, path string) (AgentEventStream, e
 	return stream, nil
 }
 
-func decodeAgentEventLine(lineNumber int, line string) (AgentEvent, *AgentEventMalformedLine) {
+type agentEventLineResult struct {
+	event     AgentEvent
+	malformed *AgentEventMalformedLine
+}
+
+func decodeAgentEventLine(lineNumber int, line string) agentEventLineResult {
 	var event AgentEvent
 
 	err := json.Unmarshal([]byte(line), &event)
 	if err != nil {
-		return AgentEvent{}, &AgentEventMalformedLine{
+		return agentEventLineResult{malformed: &AgentEventMalformedLine{
 			Line:  lineNumber,
 			Text:  line,
 			Error: err.Error(),
-		}
+		}}
 	}
 
 	err = ValidateAgentEvent(event)
 	if err != nil {
-		return AgentEvent{}, &AgentEventMalformedLine{
+		return agentEventLineResult{malformed: &AgentEventMalformedLine{
 			Line:  lineNumber,
 			Text:  line,
 			Error: err.Error(),
-		}
+		}}
 	}
 
 	event.Timestamp = event.Timestamp.UTC()
 
-	return event, nil
+	return agentEventLineResult{event: event}
 }

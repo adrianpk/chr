@@ -51,7 +51,7 @@ func (r *sqliteExecutionRepository) RequireProjectQuiescent(ctx context.Context,
 }
 
 // NewExecutionRepository constructs the corresponding package service or value.
-func NewExecutionRepository(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (ExecutionRepository, error) {
+func NewExecutionRepository(ctx context.Context, env database.DataDirectory, assetsFS fs.FS) (ExecutionRepository, error) {
 	err := os.MkdirAll(env.DataDir(), 0o755)
 	if err != nil {
 		return nil, fmt.Errorf("create user data directory: %w", err)
