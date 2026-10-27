@@ -31,9 +31,9 @@ func (r telegramReceiver) finishOriginalDocument(ctx context.Context, operations
 	payload := []byte(artifact.Body)
 	response := tgmessage.DocumentResponse{
 		Message:  tgmessage.Blocks{Family: "24", InitialText: "Original " + string(artifact.Ref.Kind) + " document.", ContentKind: "markdown", Content: tgmessage.DocumentExcerpt(payload), SecondaryText: "Complete original document attached."},
-		Document: telegramDocumentForTarget(request.Target, artifact.Ref.Path, artifact.SourceHash, string(artifact.Ref.Kind)+".md", "text/markdown", payload),
+		Document: telegramDocumentForTarget(request.Target, telegramDocumentSource{Reference: artifact.Ref.Path, Hash: artifact.SourceHash, Filename: string(artifact.Ref.Kind) + ".md", MediaType: "text/markdown", Payload: payload}),
 	}
 	request.Delivery = &response
 
-	return r.store.FinishOperation(ctx, request, "confirmed", "authoring-document:"+request.ID, result, response.Message.InitialText, current.Digest(), time.Now())
+	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: "confirmed", ReceiptRef: "authoring-document:" + request.ID, Facts: result, Text: response.Message.InitialText, ConfigDigest: current.Digest(), At: time.Now()})
 }

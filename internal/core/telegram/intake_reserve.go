@@ -24,7 +24,7 @@ func rejectIntakeOverflow(ctx context.Context, tx *sql.Tx, update ReceivedUpdate
 	}
 
 	text := "The input queue is full. This request was not accepted. Retry after pending requests finish. Existing work is unchanged; status, stop and reconciliation retain reserved capacity."
-	if err := queuePresentation(ctx, tx, update, tgmessage.Blocks{Family: "42", InitialText: text}, digest, now); err != nil {
+	if err := queuePresentation(ctx, tx, presentationReply{Source: update, Message: tgmessage.Blocks{Family: "42", InitialText: text}, ConfigDigest: digest, At: now}); err != nil {
 		return err
 	}
 

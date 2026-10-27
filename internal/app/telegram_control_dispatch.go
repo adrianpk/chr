@@ -161,5 +161,5 @@ func (r telegramReceiver) respondNativeStatus(ctx context.Context, operations te
 		return err
 	}
 
-	return r.store.QueueWorkStatus(ctx, input, target, id, telegramWorkProgressMessage(status, telegramWorkProjectName(input.Projects, status.ProjectID)), time.Now())
+	return r.store.QueueWorkStatus(ctx, telegramcore.WorkStatusRequest{Input: input, Target: target, Invocation: id, Message: telegramWorkProgressMessage(status, telegramWorkProjectName(input.Projects, status.ProjectID)), At: time.Now()})
 }

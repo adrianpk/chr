@@ -11,7 +11,7 @@ import (
 
 func (r telegramReceiver) queueReadReply(ctx context.Context, update telegramcore.ReceivedUpdate, config telegramcore.ReceiverConfig, reply telegramReadReply) error {
 	if reply.PlainText != "" {
-		return r.store.QueueFormattedReadResponse(ctx, update, reply.Text, reply.PlainText, config.Digest(), time.Now())
+		return r.store.QueueFormattedReadResponse(ctx, telegramcore.FormattedReply{Source: update, Markdown: reply.Text, Plain: reply.PlainText, ConfigDigest: config.Digest(), At: time.Now()})
 	}
 
 	return r.store.QueuePresentationResponse(ctx, update, tgmessage.Blocks{InitialText: reply.Text}, config.Digest(), time.Now())

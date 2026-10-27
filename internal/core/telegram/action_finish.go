@@ -200,12 +200,12 @@ func queueActionResultResponse(ctx context.Context, tx *sql.Tx, retained ActionC
 		response.Source = retained.ResponseSource
 		response.Delivery = result.Delivery
 
-		return queueOperationResult(ctx, tx, response, result.Text, result.ReceiptRef, result.ConfigDigest, now)
+		return queueOperationResult(ctx, tx, operationReply{Request: response, Text: result.Text, ReceiptRef: result.ReceiptRef, ConfigDigest: result.ConfigDigest, At: now})
 	}
 
 	if result.Message != nil {
-		return queuePresentation(ctx, tx, retained.ResponseSource, *result.Message, result.ConfigDigest, now)
+		return queuePresentation(ctx, tx, presentationReply{Source: retained.ResponseSource, Message: *result.Message, ConfigDigest: result.ConfigDigest, At: now})
 	}
 
-	return queueReferencedResponse(ctx, tx, retained.ResponseSource, result.Text, retained.Request.ID, result.ConfigDigest, now)
+	return queueReferencedResponse(ctx, tx, ReferencedReply{Source: retained.ResponseSource, Text: result.Text, Reference: retained.Request.ID, ConfigDigest: result.ConfigDigest, At: now})
 }

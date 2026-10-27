@@ -37,20 +37,20 @@ func (s *ReceiverStore) ProjectWork(ctx context.Context, ref WorkReference, obse
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		return projectWork(ctx, tx, ref, observation, configDigest, now)
+		return projectWork(ctx, tx, workProjection{Reference: ref, Observation: observation, ConfigDigest: configDigest, At: now})
 	})
 }
 
-func projectWork(ctx context.Context, tx *sql.Tx, ref WorkReference, observation WorkObservation, configDigest string, now time.Time) error {
-	target := ref.Request.Target
-	key := fmt.Sprintf("work:%s:%d", target.ConversationID, observation.Revision)
+func projectWork(ctx context.Context, tx *sql.Tx, projection workProjection) error {
+	target := projection.Reference.Request.Target
+	key := fmt.Sprintf("work:%s:%d", target.ConversationID, projection.Observation.Revision)
 
-	unchanged, err := sameWorkNotice(ctx, tx, ref, observation)
+	unchanged, err := sameWorkNotice(ctx, tx, projection.Reference, projection.Observation)
 	if err != nil {
 		return err
 	}
 
-	changed, err := tx.ExecContext(ctx, `UPDATE telegram_conversations SET last_observed_revision=?,phase=?,updated_at=? WHERE id=? AND revision=? AND invocation_id=? AND authorization_ref=? AND phase IN ('executing','waiting') AND COALESCE(last_observed_revision,0)<=? AND NOT EXISTS(SELECT 1 FROM telegram_outbox WHERE conversation_id=? AND event_key=?)`, observation.Revision, observation.Phase, database.FormatTime(now), target.ConversationID, ref.ConversationRevision, ref.Invocation.ID, ref.Request.ID, observation.Revision, target.ConversationID, key)
+	changed, err := tx.ExecContext(ctx, `UPDATE telegram_conversations SET last_observed_revision=?,phase=?,updated_at=? WHERE id=? AND revision=? AND invocation_id=? AND authorization_ref=? AND phase IN ('executing','waiting') AND COALESCE(last_observed_revision,0)<=? AND NOT EXISTS(SELECT 1 FROM telegram_outbox WHERE conversation_id=? AND event_key=?)`, projection.Observation.Revision, projection.Observation.Phase, database.FormatTime(projection.At), target.ConversationID, projection.Reference.ConversationRevision, projection.Reference.Invocation.ID, projection.Reference.Request.ID, projection.Observation.Revision, target.ConversationID, key)
 	if err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func projectWork(ctx context.Context, tx *sql.Tx, ref WorkReference, observation
 		return err
 	}
 
-	return queueWorkObservation(ctx, tx, ref, observation, configDigest, now)
+	return queueWorkObservation(ctx, tx, workProjection{Reference: projection.Reference, Observation: projection.Observation, ConfigDigest: projection.ConfigDigest, At: projection.At})
 }
 
 func sameWorkNotice(ctx context.Context, tx *sql.Tx, ref WorkReference, observation WorkObservation) (bool, error) {
@@ -104,26 +104,26 @@ func validWorkObservation(observation WorkObservation) bool {
 	}
 }
 
-func queueWorkObservation(ctx context.Context, tx *sql.Tx, ref WorkReference, observation WorkObservation, configDigest string, now time.Time) error {
+func queueWorkObservation(ctx context.Context, tx *sql.Tx, projection workProjection) error {
 	// Only never-attempted routine notices can coalesce. Questions, terminal
 	// results, sending rows and uncertain retries keep their exact identity.
-	if _, err := tx.ExecContext(ctx, `DELETE FROM telegram_outbox WHERE conversation_id=? AND kind='progress' AND state='pending' AND attempts=0 AND total_attempts=0`, ref.Request.Target.ConversationID); err != nil {
+	if _, err := tx.ExecContext(ctx, `DELETE FROM telegram_outbox WHERE conversation_id=? AND kind='progress' AND state='pending' AND attempts=0 AND total_attempts=0`, projection.Reference.Request.Target.ConversationID); err != nil {
 		return err
 	}
 
 	var pending int
-	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM telegram_outbox WHERE bot_id=? AND state!='delivered'`, ref.Request.Source.Peer.BotID).Scan(&pending); err != nil {
+	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM telegram_outbox WHERE bot_id=? AND state!='delivered'`, projection.Reference.Request.Source.Peer.BotID).Scan(&pending); err != nil {
 		return err
 	}
 
-	key := fmt.Sprintf("work:%s:%d", ref.Request.Target.ConversationID, observation.Revision)
+	key := fmt.Sprintf("work:%s:%d", projection.Reference.Request.Target.ConversationID, projection.Observation.Revision)
 
-	parts := tgmessage.ResponseParts(observation.Text, "workflow:"+ref.Invocation.ID)
+	parts := tgmessage.ResponseParts(projection.Observation.Text, "workflow:"+projection.Reference.Invocation.ID)
 
 	var presentation []byte
 
-	if observation.Message != nil {
-		view := tgmessage.Render(*observation.Message)
+	if projection.Observation.Message != nil {
+		view := tgmessage.Render(*projection.Observation.Message)
 		parts = []string{view.PlainFallback}
 
 		var err error
@@ -139,22 +139,29 @@ func queueWorkObservation(ctx context.Context, tx *sql.Tx, ref WorkReference, ob
 	}
 
 	for index, part := range parts {
-		if err := insertWorkNotice(ctx, tx, workNoticeRow{ref: ref, kind: observation.Kind, key: key, text: part, configDigest: configDigest, part: index + 1, parts: len(parts), at: now}); err != nil {
+		if err := insertWorkNotice(ctx, tx, workNoticeRow{ref: projection.Reference, kind: projection.Observation.Kind, key: key, text: part, configDigest: projection.ConfigDigest, part: index + 1, parts: len(parts), at: projection.At}); err != nil {
 			return err
 		}
 
 		if len(presentation) != 0 {
-			if _, err := tx.ExecContext(ctx, "UPDATE telegram_outbox SET presentation=?,presentation_hash=? WHERE bot_id=? AND event_key=?", string(presentation), contenthash.Sum(presentation), ref.Request.Source.Peer.BotID, key); err != nil {
+			if _, err := tx.ExecContext(ctx, "UPDATE telegram_outbox SET presentation=?,presentation_hash=? WHERE bot_id=? AND event_key=?", string(presentation), contenthash.Sum(presentation), projection.Reference.Request.Source.Peer.BotID, key); err != nil {
 				return err
 			}
 		}
 	}
 
-	return checkIntakeCapacity(ctx, tx, ref.Request.Source.Peer.BotID)
+	return checkIntakeCapacity(ctx, tx, projection.Reference.Request.Source.Peer.BotID)
 }
 
 func insertWorkNotice(ctx context.Context, tx *sql.Tx, row workNoticeRow) error {
 	_, err := tx.ExecContext(ctx, insertWorkNoticeSQL, row.values()...)
 
 	return err
+}
+
+type workProjection struct {
+	Reference    WorkReference
+	Observation  WorkObservation
+	ConfigDigest string
+	At           time.Time
 }

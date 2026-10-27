@@ -77,20 +77,20 @@ func (s *ReceiverStore) ResolveWorkStatusTarget(ctx context.Context, input Conve
 
 // QueueWorkStatus keeps a conversation-bound read reply inspectable
 // without creating a control request or changing the execution or conversation.
-func (s *ReceiverStore) QueueWorkStatus(ctx context.Context, input ConversationInput, target OperationTarget, invocation string, message tgmessage.Blocks, now time.Time) error {
-	if target.ConversationID == "" {
-		return s.QueuePresentationResponse(ctx, input.Update, message, input.Config.Digest(), now)
+func (s *ReceiverStore) QueueWorkStatus(ctx context.Context, status WorkStatusRequest) error {
+	if status.Target.ConversationID == "" {
+		return s.QueuePresentationResponse(ctx, status.Input.Update, status.Message, status.Input.Config.Digest(), status.At)
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		pending, err := readResponsePending(ctx, tx, input.Update)
+		pending, err := readResponsePending(ctx, tx, status.Input.Update)
 		if err != nil || !pending {
 			return err
 		}
 
-		op := conversationTransaction{ctx: ctx, tx: tx, input: input, now: now}
+		op := conversationTransaction{ctx: ctx, tx: tx, input: status.Input, now: status.At}
 
-		conversation, err := op.conversation(target.ConversationID)
+		conversation, err := op.conversation(status.Target.ConversationID)
 		if err != nil {
 			return err
 		}
@@ -100,16 +100,25 @@ func (s *ReceiverStore) QueueWorkStatus(ctx context.Context, input ConversationI
 			return err
 		}
 
-		if current != target || invocation == "" || conversation.InvocationID != invocation {
+		if current != status.Target || status.Invocation == "" || conversation.InvocationID != status.Invocation {
 			return workflowstate.ErrConflict
 		}
 
-		if err := queuePresentation(ctx, tx, input.Update, message, input.Config.Digest(), now); err != nil {
+		if err := queuePresentation(ctx, tx, presentationReply{Source: status.Input.Update, Message: status.Message, ConfigDigest: status.Input.Config.Digest(), At: status.At}); err != nil {
 			return err
 		}
 
-		_, err = tx.ExecContext(ctx, `UPDATE telegram_outbox SET conversation_id=?,conversation_revision=?,request_id=? WHERE bot_id=? AND event_key=?`, target.ConversationID, target.ConversationRevision, conversation.AuthorizationRef, input.Update.Peer.BotID, fmt.Sprintf("update:%d", input.Update.UpdateID))
+		_, err = tx.ExecContext(ctx, `UPDATE telegram_outbox SET conversation_id=?,conversation_revision=?,request_id=? WHERE bot_id=? AND event_key=?`, status.Target.ConversationID, status.Target.ConversationRevision, conversation.AuthorizationRef, status.Input.Update.Peer.BotID, fmt.Sprintf("update:%d", status.Input.Update.UpdateID))
 
 		return err
 	})
+}
+
+// WorkStatusRequest retains an inspectable status reply without control authority.
+type WorkStatusRequest struct {
+	Input      ConversationInput
+	Target     OperationTarget
+	Invocation string
+	Message    tgmessage.Blocks
+	At         time.Time
 }

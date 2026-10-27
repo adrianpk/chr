@@ -120,7 +120,7 @@ func (s *ReceiverStore) ApplyConversation(ctx context.Context, input Conversatio
 			return err
 		}
 
-		if err := queuePresentation(ctx, tx, input.Update, operation.presentation(text, conversation), input.Config.Digest(), now); err != nil {
+		if err := queuePresentation(ctx, tx, presentationReply{Source: input.Update, Message: operation.presentation(text, conversation), ConfigDigest: input.Config.Digest(), At: now}); err != nil {
 			return err
 		}
 

@@ -34,7 +34,7 @@ func TestTelegramPresentationMigrationDocuments(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := store.QueueFormattedReadResponse(t.Context(), updates[0], "*Commands*", "Commands", config.Digest(), now); err != nil {
+	if err := store.QueueFormattedReadResponse(t.Context(), FormattedReply{Source: updates[0], Markdown: "*Commands*", Plain: "Commands", ConfigDigest: config.Digest(), At: now}); err != nil {
 		t.Fatal(err)
 	}
 

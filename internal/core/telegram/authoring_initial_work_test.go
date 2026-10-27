@@ -40,7 +40,7 @@ func TestTelegramAuthoringInitialWork(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := f.store.FinishOperation(t.Context(), first, "blocked", "", json.RawMessage(`{}`), "Correct the scope.", f.input.Config.Digest(), time.Now()); err != nil {
+	if err := f.store.FinishOperation(t.Context(), first, OperationCompletion{State: "blocked", ReceiptRef: "", Facts: json.RawMessage(`{}`), Text: "Correct the scope.", ConfigDigest: f.input.Config.Digest(), At: time.Now()}); err != nil {
 		t.Fatal(err)
 	}
 

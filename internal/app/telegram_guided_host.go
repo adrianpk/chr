@@ -111,7 +111,7 @@ func (h *telegramGuidedHost) recoverReference(ctx context.Context, ref telegramc
 		return err
 	}
 
-	return h.receiver.store.ProjectGuided(ctx, ref, progress, *telegramOutcomeMessage("43", telegramGuidedPrompt(observed)), delivery, config.Digest(), time.Now())
+	return h.receiver.store.ProjectGuided(ctx, telegramcore.GuidedProjectionRequest{Reference: ref, Progress: progress, Message: *telegramOutcomeMessage("43", telegramGuidedPrompt(observed)), Delivery: delivery, ConfigDigest: config.Digest(), At: time.Now()})
 }
 
 func (r telegramReceiver) validateGuidedHostReference(ctx context.Context, ref telegramcore.GuidedReference) error {

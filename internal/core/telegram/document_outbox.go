@@ -21,55 +21,55 @@ func (s *ReceiverStore) QueueDocumentResponse(ctx context.Context, update Receiv
 			return err
 		}
 
-		return queueDocument(ctx, tx, update, response, configDigest, now)
+		return queueDocument(ctx, tx, documentReply{Source: update, Response: response, ConfigDigest: configDigest, At: now})
 	})
 }
 
-func queueDocument(ctx context.Context, tx *sql.Tx, update ReceivedUpdate, response tgmessage.DocumentResponse, configDigest string, now time.Time) error {
-	if err := tgmessage.ValidateDocument(response.Document); err != nil {
+func queueDocument(ctx context.Context, tx *sql.Tx, reply documentReply) error {
+	if err := tgmessage.ValidateDocument(reply.Response.Document); err != nil {
 		return err
 	}
 
-	presentation := tgmessage.RenderDocument(response.Message)
-	if presentation.PlainFallback == "" || len(configDigest) != 64 {
+	presentation := tgmessage.RenderDocument(reply.Response.Message)
+	if presentation.PlainFallback == "" || len(reply.ConfigDigest) != 64 {
 		return tgmessage.ErrDocumentUnavailable
 	}
 
-	if err := queueResponse(ctx, tx, update, presentation.PlainFallback, configDigest, now); err != nil {
+	if err := queueResponse(ctx, tx, responseContent{Source: reply.Source, Text: presentation.PlainFallback, ConfigDigest: reply.ConfigDigest, At: reply.At}); err != nil {
 		return err
 	}
 
-	key := fmt.Sprintf("update:%d", update.UpdateID)
+	key := fmt.Sprintf("update:%d", reply.Source.UpdateID)
 
 	var deliveryID string
-	if err := tx.QueryRowContext(ctx, "SELECT id FROM telegram_outbox WHERE bot_id=? AND event_key=?", update.Peer.BotID, key).Scan(&deliveryID); err != nil {
+	if err := tx.QueryRowContext(ctx, "SELECT id FROM telegram_outbox WHERE bot_id=? AND event_key=?", reply.Source.Peer.BotID, key).Scan(&deliveryID); err != nil {
 		return err
 	}
 
-	return bindDocumentImage(ctx, tx, deliveryID, update.Peer, response, configDigest, now)
+	return bindDocumentImage(ctx, tx, documentImageBinding{DeliveryID: deliveryID, Peer: reply.Source.Peer, Response: reply.Response, ConfigDigest: reply.ConfigDigest, At: reply.At})
 }
 
 // The caller owns the outbox row and has validated the complete source image.
-func bindDocumentImage(ctx context.Context, tx *sql.Tx, deliveryID string, peer PeerIdentity, response tgmessage.DocumentResponse, configDigest string, now time.Time) error {
-	id := "tgdoc-" + contenthash.Sum([]byte(deliveryID))[:32]
-	if err := retainDocument(ctx, tx, documentSnapshotRow{id: id, owner: deliveryID, peer: peer, configDigest: configDigest, document: response.Document, createdAt: now}); err != nil {
+func bindDocumentImage(ctx context.Context, tx *sql.Tx, binding documentImageBinding) error {
+	id := "tgdoc-" + contenthash.Sum([]byte(binding.DeliveryID))[:32]
+	if err := retainDocument(ctx, tx, documentSnapshotRow{id: id, owner: binding.DeliveryID, peer: binding.Peer, configDigest: binding.ConfigDigest, document: binding.Response.Document, createdAt: binding.At}); err != nil {
 		return err
 	}
 
-	presentation := tgmessage.RenderDocument(response.Message)
-	presentation.DocumentID, presentation.DocumentHash = id, contenthash.Sum(response.Document.Payload)
+	presentation := tgmessage.RenderDocument(binding.Response.Message)
+	presentation.DocumentID, presentation.DocumentHash = id, contenthash.Sum(binding.Response.Document.Payload)
 
 	payload, err := json.Marshal(presentation)
 	if err != nil {
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx, `UPDATE telegram_outbox SET text=?,presentation=?,presentation_hash=?,document_id=? WHERE id=?`, presentation.PlainFallback, string(payload), contenthash.Sum(payload), id, deliveryID)
+	_, err = tx.ExecContext(ctx, `UPDATE telegram_outbox SET text=?,presentation=?,presentation_hash=?,document_id=? WHERE id=?`, presentation.PlainFallback, string(payload), contenthash.Sum(payload), id, binding.DeliveryID)
 	if err != nil {
 		return err
 	}
 
-	return checkIntakeCapacity(ctx, tx, peer.BotID)
+	return checkIntakeCapacity(ctx, tx, binding.Peer.BotID)
 }
 
 func retainDocument(ctx context.Context, tx *sql.Tx, row documentSnapshotRow) error {
@@ -121,4 +121,19 @@ func purgeDocuments(ctx context.Context, tx *sql.Tx, botID int64, now time.Time)
  ORDER BY s.terminal_at,s.id LIMIT 20)`, database.FormatTime(now), botID, database.FormatTime(now.Add(-7*24*time.Hour)))
 
 	return err
+}
+
+type documentImageBinding struct {
+	DeliveryID   string
+	Peer         PeerIdentity
+	Response     tgmessage.DocumentResponse
+	ConfigDigest string
+	At           time.Time
+}
+
+type documentReply struct {
+	Source       ReceivedUpdate
+	Response     tgmessage.DocumentResponse
+	ConfigDigest string
+	At           time.Time
 }

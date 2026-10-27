@@ -98,7 +98,7 @@ func checkTelegramDocumentReceipt(t *testing.T, store *ReceiverStore) {
 
 	request.Delivery = &response
 	for range 2 {
-		if err := store.FinishOperation(t.Context(), request, "confirmed", "receipts/original.json", json.RawMessage(`{"saved":true}`), "Result saved.", telegramReceiverTestConfig().Digest(), time.Now()); err != nil {
+		if err := store.FinishOperation(t.Context(), request, OperationCompletion{State: "confirmed", ReceiptRef: "receipts/original.json", Facts: json.RawMessage(`{"saved":true}`), Text: "Result saved.", ConfigDigest: telegramReceiverTestConfig().Digest(), At: time.Now()}); err != nil {
 			t.Fatal(err)
 		}
 	}

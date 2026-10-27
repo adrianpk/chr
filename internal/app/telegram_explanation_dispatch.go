@@ -148,7 +148,7 @@ func (r telegramReceiver) finishExplanationModel(ctx context.Context, request te
 	request.Delivery = &response
 	text := response.Message.InitialText
 
-	return r.store.FinishOperation(ctx, request, "confirmed", "telegram-model:"+request.ID, model.Response, text, current.Digest(), time.Now())
+	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: "confirmed", ReceiptRef: "telegram-model:" + request.ID, Facts: model.Response, Text: text, ConfigDigest: current.Digest(), At: time.Now()})
 }
 
 func telegramRetainedExplanation(request telegramcore.OperationRequest) (PreparedAuthoringExplanation, error) {

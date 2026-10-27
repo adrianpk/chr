@@ -125,7 +125,7 @@ func (r telegramReceiver) offerPreparedWorkScope(ctx context.Context, request te
 		complete = "## Complete proposed ticket\n\n" + string(prepared.Mutation.Native.Record.Body)
 	}
 
-	return r.offerConfirmationDocument(ctx, request, telegramcore.ActionOffer{Input: input, RequestID: request.ID, Choices: []string{"develop"}, ExpiresAt: time.Now().Add(time.Hour), ConversationPhase: "awaiting_confirmation"}, "25", telegramPreparedWorkPreview(prepared), complete)
+	return r.offerConfirmationDocument(ctx, request, telegramcore.ActionOffer{Input: input, RequestID: request.ID, Choices: []string{"develop"}, ExpiresAt: time.Now().Add(time.Hour), ConversationPhase: "awaiting_confirmation"}, telegramConfirmationDocument{Family: "25", Text: telegramPreparedWorkPreview(prepared), Complete: complete})
 }
 
 func telegramPreparedWorkFinished(state string) bool {

@@ -12,11 +12,11 @@ import (
 
 func queueActionView(op conversationTransaction, request OperationRequest, offer ActionOffer, token, legacy string) error {
 	if offer.Message != nil {
-		return queuePresentation(op.ctx, op.tx, request.Source, *offer.Message, offer.Input.Config.Digest(), op.now)
+		return queuePresentation(op.ctx, op.tx, presentationReply{Source: request.Source, Message: *offer.Message, ConfigDigest: offer.Input.Config.Digest(), At: op.now})
 	}
 
 	if offer.Delivery == nil {
-		return queueReferencedResponse(op.ctx, op.tx, request.Source, legacy, request.ID, offer.Input.Config.Digest(), op.now)
+		return queueReferencedResponse(op.ctx, op.tx, ReferencedReply{Source: request.Source, Text: legacy, Reference: request.ID, ConfigDigest: offer.Input.Config.Digest(), At: op.now})
 	}
 
 	document := offer.Delivery.Document
@@ -27,7 +27,7 @@ func queueActionView(op conversationTransaction, request OperationRequest, offer
 	response := *offer.Delivery
 	response.Message.SecondaryText = "Shortened view; complete scope attached. Reply with " + offer.Choices[0] + " or use /answer " + token + " <choice>."
 
-	return queueDocument(op.ctx, op.tx, request.Source, response, offer.Input.Config.Digest(), op.now)
+	return queueDocument(op.ctx, op.tx, documentReply{Source: request.Source, Response: response, ConfigDigest: offer.Input.Config.Digest(), At: op.now})
 }
 
 func sealActionPresentation(op conversationTransaction, request OperationRequest, token string, choices []string) error {
@@ -94,7 +94,7 @@ func validateActionPresentation(ctx context.Context, reader conversationReader, 
 		return err
 	}
 
-	if !actionManifestValid(payload, hash, configDigest, &delivery, action, request) {
+	if !actionManifestValid(actionManifestInput{Payload: payload, Hash: hash, ConfigDigest: configDigest, Delivery: &delivery, Action: action, Request: request}) {
 		return ErrActionUnavailable
 	}
 
@@ -105,14 +105,14 @@ func validateActionPresentation(ctx context.Context, reader conversationReader, 
 	return validateActionDocument(ctx, reader, delivery, request)
 }
 
-func actionManifestValid(payload, hash, configDigest string, delivery *ReceiverDelivery, action Action, request OperationRequest) bool {
-	if delivery.ConfigDigest != configDigest || hash != action.PresentationHash || decodePresentationHash(payload, hash, delivery) != nil || delivery.Presentation == nil {
+func actionManifestValid(input actionManifestInput) bool {
+	if input.Delivery.ConfigDigest != input.ConfigDigest || input.Hash != input.Action.PresentationHash || decodePresentationHash(input.Payload, input.Hash, input.Delivery) != nil || input.Delivery.Presentation == nil {
 		return false
 	}
 
-	presentation := delivery.Presentation
+	presentation := input.Delivery.Presentation
 
-	return presentation.ActionRef == action.Token && presentation.ScopeDigest == actionGuard(request) && slices.Equal(presentation.ActionChoices, action.Choices) && len(presentation.ActionLabels) == len(action.Choices)
+	return presentation.ActionRef == input.Action.Token && presentation.ScopeDigest == actionGuard(input.Request) && slices.Equal(presentation.ActionChoices, input.Action.Choices) && len(presentation.ActionLabels) == len(input.Action.Choices)
 }
 
 func validateActionDocument(ctx context.Context, reader conversationReader, delivery ReceiverDelivery, request OperationRequest) error {
@@ -163,4 +163,11 @@ func sealOfferedAction(op conversationTransaction, request OperationRequest, off
 	}
 
 	return sealActionPresentation(op, request, token, offer.Choices)
+}
+
+type actionManifestInput struct {
+	Payload, Hash, ConfigDigest string
+	Delivery                    *ReceiverDelivery
+	Action                      Action
+	Request                     OperationRequest
 }

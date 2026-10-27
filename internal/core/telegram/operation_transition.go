@@ -43,8 +43,8 @@ func (s *ReceiverStore) BeginOperation(ctx context.Context, request OperationReq
 
 // FinishOperation records confirmed facts or an explicit failure with the
 // source acknowledgement and outbox in one transaction. It never retries a domain effect.
-func (s *ReceiverStore) FinishOperation(ctx context.Context, request OperationRequest, state, receipt string, facts json.RawMessage, text, configDigest string, now time.Time) error {
-	if !validOperationFinish(state, receipt, facts) {
+func (s *ReceiverStore) FinishOperation(ctx context.Context, request OperationRequest, completion OperationCompletion) error {
+	if !validOperationFinish(completion.State, completion.ReceiptRef, completion.Facts) {
 		return errReceiverConflict
 	}
 
@@ -54,12 +54,12 @@ func (s *ReceiverStore) FinishOperation(ctx context.Context, request OperationRe
 			return err
 		}
 
-		return finishOperation(ctx, tx, request, state, receipt, facts, text, configDigest, now)
+		return finishOperation(ctx, tx, request, OperationCompletion{State: completion.State, ReceiptRef: completion.ReceiptRef, Facts: completion.Facts, Text: completion.Text, ConfigDigest: completion.ConfigDigest, At: completion.At})
 	})
 }
 
-func finishOperation(ctx context.Context, tx *sql.Tx, request OperationRequest, state, receipt string, facts json.RawMessage, text, configDigest string, now time.Time) error {
-	result, err := tx.ExecContext(ctx, `UPDATE telegram_requests SET state=?,domain_receipt_ref=NULLIF(?,''),result=?,updated_at=? WHERE id=? AND argument_digest=? AND ((?='confirmed' AND state='applying') OR (?='rejected' AND state='prepared') OR (?='blocked' AND state IN ('prepared','ready','applying'))) `, state, receipt, string(facts), database.FormatTime(now), request.ID, request.ArgumentDigest, state, state, state)
+func finishOperation(ctx context.Context, tx *sql.Tx, request OperationRequest, completion OperationCompletion) error {
+	result, err := tx.ExecContext(ctx, `UPDATE telegram_requests SET state=?,domain_receipt_ref=NULLIF(?,''),result=?,updated_at=? WHERE id=? AND argument_digest=? AND ((?='confirmed' AND state='applying') OR (?='rejected' AND state='prepared') OR (?='blocked' AND state IN ('prepared','ready','applying'))) `, completion.State, completion.ReceiptRef, string(completion.Facts), database.FormatTime(completion.At), request.ID, request.ArgumentDigest, completion.State, completion.State, completion.State)
 	if err != nil {
 		return err
 	}
@@ -68,11 +68,11 @@ func finishOperation(ctx context.Context, tx *sql.Tx, request OperationRequest, 
 		return err
 	}
 
-	if err := finishHarnessConversation(ctx, tx, request, state, now); err != nil {
+	if err := finishHarnessConversation(ctx, tx, request, completion.State, completion.At); err != nil {
 		return err
 	}
 
-	if err := queueOperationResult(ctx, tx, request, text, receipt, configDigest, now); err != nil {
+	if err := queueOperationResult(ctx, tx, operationReply{Request: request, Text: completion.Text, ReceiptRef: completion.ReceiptRef, ConfigDigest: completion.ConfigDigest, At: completion.At}); err != nil {
 		return err
 	}
 
@@ -98,4 +98,12 @@ func bindOperationResponse(ctx context.Context, tx *sql.Tx, request OperationReq
 	}
 
 	return nil
+}
+
+// OperationCompletion records one guarded owner outcome and its retained reply.
+type OperationCompletion struct {
+	State, ReceiptRef  string
+	Facts              json.RawMessage
+	Text, ConfigDigest string
+	At                 time.Time
 }

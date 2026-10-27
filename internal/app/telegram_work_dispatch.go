@@ -124,7 +124,7 @@ func (r telegramReceiver) offerWorkAdmission(ctx context.Context, request telegr
 	text := telegramWorkPreviewText(preview)
 	text = strings.Replace(text, "\n\n", "\n\n"+strings.Join(complete.Titles[:min(3, len(complete.Titles))], "\n")+"\n", 1)
 
-	return r.offerConfirmationDocument(ctx, request, telegramcore.ActionOffer{Input: input, RequestID: request.ID, Choices: []string{"start"}, ExpiresAt: time.Now().Add(24 * time.Hour)}, "31", text, complete.Complete)
+	return r.offerConfirmationDocument(ctx, request, telegramcore.ActionOffer{Input: input, RequestID: request.ID, Choices: []string{"start"}, ExpiresAt: time.Now().Add(24 * time.Hour)}, telegramConfirmationDocument{Family: "31", Text: text, Complete: complete.Complete})
 }
 
 func (r telegramReceiver) validateWorkAdmissionAuthority(ctx context.Context, request telegramcore.OperationRequest) error {

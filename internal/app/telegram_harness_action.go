@@ -70,7 +70,7 @@ func sameTelegramHarnessChoice(a, b *string) bool {
 
 func (r telegramReceiver) applyHarnessAction(ctx context.Context, claim telegramcore.ActionClaim, config telegramcore.ReceiverConfig) error {
 	if claim.Choice == "cancel" {
-		return r.finishHarnessAction(ctx, claim, config, "blocked", nil, "Harness change cancelled. Defaults are unchanged.")
+		return r.finishHarnessAction(ctx, claim, config, telegramHarnessCompletion{State: "blocked", Snapshot: nil, Text: "Harness change cancelled. Defaults are unchanged."})
 	}
 
 	operations, ok := r.operations.(telegramHarnessService)
@@ -96,7 +96,7 @@ func (r telegramReceiver) applyHarnessAction(ctx context.Context, claim telegram
 
 	text := fmt.Sprintf("Harness defaults saved for %s.\nWorker: %s\nGeneration: %s\nNew operations only; admitted work keeps its binding.", result.ProjectRef, telegramHarnessSavedRole(result.Worker), telegramHarnessSavedRole(result.Generation))
 
-	return r.finishHarnessAction(ctx, claim, config, "confirmed", &result, text)
+	return r.finishHarnessAction(ctx, claim, config, telegramHarnessCompletion{State: "confirmed", Snapshot: &result, Text: text})
 }
 
 func (r telegramReceiver) harnessPublishAuthority(claim telegramcore.ActionClaim) func(context.Context) error {
@@ -123,24 +123,24 @@ func (r telegramReceiver) finishHarnessActionFailure(ctx context.Context, claim 
 		return failure
 	}
 
-	return r.finishHarnessAction(ctx, claim, config, "blocked", nil, text)
+	return r.finishHarnessAction(ctx, claim, config, telegramHarnessCompletion{State: "blocked", Snapshot: nil, Text: text})
 }
 
-func (r telegramReceiver) finishHarnessAction(ctx context.Context, claim telegramcore.ActionClaim, config telegramcore.ReceiverConfig, state string, snapshot *core.HarnessSelectionSnapshot, text string) error {
+func (r telegramReceiver) finishHarnessAction(ctx context.Context, claim telegramcore.ActionClaim, config telegramcore.ReceiverConfig, completion telegramHarnessCompletion) error {
 	facts, err := json.Marshal(struct {
 		State    string                         `json:"state"`
 		Snapshot *core.HarnessSelectionSnapshot `json:"snapshot,omitempty"`
-	}{state, snapshot})
+	}{completion.State, completion.Snapshot})
 	if err != nil {
 		return err
 	}
 
 	receipt := ""
-	if snapshot != nil {
+	if completion.Snapshot != nil {
 		receipt = "harness-selection:" + claim.Request.ID
 	}
 
-	return r.store.FinishAction(ctx, claim, telegramcore.ActionResult{Message: telegramOutcomeMessage("39", text), State: state, ReceiptRef: receipt, Facts: facts, Text: text, ConfigDigest: config.Digest()}, time.Now())
+	return r.store.FinishAction(ctx, claim, telegramcore.ActionResult{Message: telegramOutcomeMessage("39", completion.Text), State: completion.State, ReceiptRef: receipt, Facts: facts, Text: completion.Text, ConfigDigest: config.Digest()}, time.Now())
 }
 
 func telegramHarnessSavedRole(profile string) string {
@@ -149,4 +149,10 @@ func telegramHarnessSavedRole(profile string) string {
 	}
 
 	return profile
+}
+
+type telegramHarnessCompletion struct {
+	State    string
+	Snapshot *core.HarnessSelectionSnapshot
+	Text     string
 }

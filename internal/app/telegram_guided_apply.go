@@ -80,7 +80,7 @@ func (r telegramReceiver) finishTelegramGuided(ctx context.Context, request tele
 		return err
 	}
 
-	err = r.store.FinishGuided(ctx, request, progress, facts, text, current.Digest(), time.Now())
+	err = r.store.FinishGuided(ctx, request, telegramcore.GuidedCompletion{Progress: progress, Facts: facts, Text: text, ConfigDigest: current.Digest(), At: time.Now()})
 	if errors.Is(err, workflowstate.ErrConflict) {
 		return r.finishOvertakenGuided(ctx, request, progress, facts, current)
 	}
@@ -110,7 +110,7 @@ func (r telegramReceiver) finishGuidedFailure(ctx context.Context, request teleg
 
 	request.Message = telegramOutcomeMessage("43", text)
 
-	return r.store.FinishOperation(ctx, request, "blocked", "", facts, text, config.Digest(), time.Now())
+	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: "blocked", ReceiptRef: "", Facts: facts, Text: text, ConfigDigest: config.Digest(), At: time.Now()})
 }
 
 func telegramGuidedFailure(failure error) string {

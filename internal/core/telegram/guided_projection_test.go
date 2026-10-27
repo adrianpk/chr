@@ -34,7 +34,7 @@ func TestGuidedUseCaseTelegramProjection(t *testing.T) {
 	}
 
 	progress.Binding = `{"revision":2,"view_digest":"second view"}`
-	if err := f.store.ProjectGuided(t.Context(), ref, progress, tgmessage.Blocks{InitialText: "Second view"}, nil, f.input.Config.Digest(), time.Now()); err != nil {
+	if err := f.store.ProjectGuided(t.Context(), GuidedProjectionRequest{Reference: ref, Progress: progress, Message: tgmessage.Blocks{InitialText: "Second view"}, Delivery: nil, ConfigDigest: f.input.Config.Digest(), At: time.Now()}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -45,11 +45,11 @@ func TestGuidedUseCaseTelegramProjection(t *testing.T) {
 		t.Fatal("projection overtook an unacknowledged owner", err)
 	}
 
-	if err := f.store.FinishOperation(t.Context(), pending, "blocked", "", json.RawMessage(`{}`), "Pending input rejected.", f.input.Config.Digest(), time.Now()); err != nil {
+	if err := f.store.FinishOperation(t.Context(), pending, OperationCompletion{State: "blocked", ReceiptRef: "", Facts: json.RawMessage(`{}`), Text: "Pending input rejected.", ConfigDigest: f.input.Config.Digest(), At: time.Now()}); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := f.store.ProjectGuided(t.Context(), ref, progress, tgmessage.Blocks{InitialText: "Second view"}, nil, f.input.Config.Digest(), time.Now()); err != nil {
+	if err := f.store.ProjectGuided(t.Context(), GuidedProjectionRequest{Reference: ref, Progress: progress, Message: tgmessage.Blocks{InitialText: "Second view"}, Delivery: nil, ConfigDigest: f.input.Config.Digest(), At: time.Now()}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -85,7 +85,7 @@ func guidedTelegramProjectionFixture(t *testing.T) (*telegramConversationFixture
 	}
 
 	progress := GuidedProgress{SessionRef: c.AuthoringSessionRef, Topic: c.Topic, Binding: `{"revision":1,"view_digest":"first view"}`, Phase: "collecting"}
-	if err := f.store.FinishGuided(t.Context(), request, progress, json.RawMessage(`{}`), "First view", input.Config.Digest(), time.Now()); err != nil {
+	if err := f.store.FinishGuided(t.Context(), request, GuidedCompletion{Progress: progress, Facts: json.RawMessage(`{}`), Text: "First view", ConfigDigest: input.Config.Digest(), At: time.Now()}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -103,7 +103,7 @@ func assertGuidedTelegramCoalesced(t *testing.T, f *telegramConversationFixture,
 	before := refs[0].Conversation
 
 	progress.Binding = `{"revision":2,"native_revision":99,"view_digest":"second view"}`
-	if err := f.store.ProjectGuided(t.Context(), refs[0], progress, tgmessage.Blocks{InitialText: "Second view"}, nil, f.input.Config.Digest(), time.Now()); err != nil {
+	if err := f.store.ProjectGuided(t.Context(), GuidedProjectionRequest{Reference: refs[0], Progress: progress, Message: tgmessage.Blocks{InitialText: "Second view"}, Delivery: nil, ConfigDigest: f.input.Config.Digest(), At: time.Now()}); err != nil {
 		t.Fatal(err)
 	}
 

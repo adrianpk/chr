@@ -18,8 +18,8 @@ type telegramHarnessPrepared struct {
 	ExpiresAt time.Time                          `json:"expires_at"`
 }
 
-func (r telegramReceiver) prepareHarnessChange(ctx context.Context, operations telegramHarnessService, user telegramcore.AllowedUser, input telegramcore.ConversationInput, target telegramcore.OperationTarget, choices telegramHarnessChoices) error {
-	operationLookup, err := r.store.Operation(ctx, input.Update, 0)
+func (r telegramReceiver) prepareHarnessChange(ctx context.Context, operations telegramHarnessService, change telegramHarnessChange) error {
+	operationLookup, err := r.store.Operation(ctx, change.Input.Update, 0)
 	request, found := operationLookup.Request, operationLookup.Found
 
 	if err != nil {
@@ -27,9 +27,9 @@ func (r telegramReceiver) prepareHarnessChange(ctx context.Context, operations t
 	}
 
 	if !found {
-		request, err = r.reserveHarnessChange(ctx, operations, user, input, target, choices)
+		request, err = r.reserveHarnessChange(ctx, operations, telegramHarnessChange{User: change.User, Input: change.Input, Target: change.Target, Choices: change.Choices})
 		if err != nil {
-			return r.recordDiagnostic(ctx, input.Update, input.Config, "The selection could not be prepared. Choose configured, locally ready profiles for the selected project and retry. Defaults are unchanged.")
+			return r.recordDiagnostic(ctx, change.Input.Update, change.Input.Config, "The selection could not be prepared. Choose configured, locally ready profiles for the selected project and retry. Defaults are unchanged.")
 		}
 	}
 
@@ -44,18 +44,18 @@ func (r telegramReceiver) prepareHarnessChange(ctx context.Context, operations t
 	return r.offerHarnessChange(ctx, request)
 }
 
-func (r telegramReceiver) reserveHarnessChange(ctx context.Context, operations telegramHarnessService, user telegramcore.AllowedUser, input telegramcore.ConversationInput, target telegramcore.OperationTarget, choices telegramHarnessChoices) (telegramcore.OperationRequest, error) {
-	status, err := operations.InspectTelegramHarnessSelections(ctx, target)
+func (r telegramReceiver) reserveHarnessChange(ctx context.Context, operations telegramHarnessService, change telegramHarnessChange) (telegramcore.OperationRequest, error) {
+	status, err := operations.InspectTelegramHarnessSelections(ctx, change.Target)
 	if err != nil {
 		return telegramcore.OperationRequest{}, err
 	}
 
-	prepared, err := prepareTelegramHarnessChange(status.Selections, workflowstate.MutationBinding{RequestID: telegramcore.OperationID(input.Update, 0), Operator: user.OperatorID}, choices)
+	prepared, err := prepareTelegramHarnessChange(status.Selections, workflowstate.MutationBinding{RequestID: telegramcore.OperationID(change.Input.Update, 0), Operator: change.User.OperatorID}, change.Choices)
 	if err != nil {
 		return telegramcore.OperationRequest{}, err
 	}
 
-	arguments, err := json.Marshal(choices)
+	arguments, err := json.Marshal(change.Choices)
 	if err != nil {
 		return telegramcore.OperationRequest{}, err
 	}
@@ -65,7 +65,7 @@ func (r telegramReceiver) reserveHarnessChange(ctx context.Context, operations t
 		return telegramcore.OperationRequest{}, err
 	}
 
-	return r.store.ReserveHarnessOperation(ctx, input, telegramcore.OperationRequest{Source: input.Update, Operator: user.OperatorID, Target: target, OperationID: telegramcore.HarnessSelectionOperation, Arguments: arguments}, data, time.Now())
+	return r.store.ReserveHarnessOperation(ctx, change.Input, telegramcore.OperationRequest{Source: change.Input.Update, Operator: change.User.OperatorID, Target: change.Target, OperationID: telegramcore.HarnessSelectionOperation, Arguments: arguments}, data, time.Now())
 }
 
 func prepareTelegramHarnessChange(status HarnessSelectionStatus, binding workflowstate.MutationBinding, choices telegramHarnessChoices) (telegramHarnessPrepared, error) {
@@ -133,7 +133,7 @@ func (r telegramReceiver) offerHarnessChange(ctx context.Context, request telegr
 		return r.finishHarnessPreparationFailure(ctx, request, input.Config, workflowstate.ErrConflict)
 	}
 
-	return r.offerConfirmationDocument(ctx, request, telegramcore.ActionOffer{Input: input, RequestID: request.ID, Choices: []string{"confirm", "cancel"}, ExpiresAt: prepared.ExpiresAt}, "39", prepared.Preview, "Only new operations use these defaults. Admitted work keeps its original binding.")
+	return r.offerConfirmationDocument(ctx, request, telegramcore.ActionOffer{Input: input, RequestID: request.ID, Choices: []string{"confirm", "cancel"}, ExpiresAt: prepared.ExpiresAt}, telegramConfirmationDocument{Family: "39", Text: prepared.Preview, Complete: "Only new operations use these defaults. Admitted work keeps its original binding."})
 }
 
 func (r telegramReceiver) finishHarnessPreparationFailure(ctx context.Context, request telegramcore.OperationRequest, config telegramcore.ReceiverConfig, failure error) error {
@@ -143,7 +143,7 @@ func (r telegramReceiver) finishHarnessPreparationFailure(ctx context.Context, r
 
 	text := "The selected project or confirmation binding changed. Inspect /harness before issuing a new change."
 
-	return r.store.FinishOperation(ctx, request, "blocked", "", json.RawMessage(`{"state":"blocked"}`), text, config.Digest(), time.Now())
+	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: "blocked", ReceiptRef: "", Facts: json.RawMessage(`{"state":"blocked"}`), Text: text, ConfigDigest: config.Digest(), At: time.Now()})
 }
 
 func (r telegramReceiver) harnessAuthorityInput(request telegramcore.OperationRequest) (telegramcore.ConversationInput, error) {
@@ -152,4 +152,11 @@ func (r telegramReceiver) harnessAuthorityInput(request telegramcore.OperationRe
 	input.Conversation = ""
 
 	return input, err
+}
+
+type telegramHarnessChange struct {
+	User    telegramcore.AllowedUser
+	Input   telegramcore.ConversationInput
+	Target  telegramcore.OperationTarget
+	Choices telegramHarnessChoices
 }

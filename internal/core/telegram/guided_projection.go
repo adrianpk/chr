@@ -14,49 +14,49 @@ import (
 
 // ProjectGuided retains a changed human view and its next reply binding.
 // It does not acknowledge input, recover owners, or advance canonical work.
-func (s *ReceiverStore) ProjectGuided(ctx context.Context, ref GuidedReference, progress GuidedProgress, message tgmessage.Blocks, delivery *tgmessage.DocumentResponse, configDigest string, now time.Time) error {
-	if err := validateGuidedProgress(progress, json.RawMessage(`{}`)); err != nil {
+func (s *ReceiverStore) ProjectGuided(ctx context.Context, projectionInput GuidedProjectionRequest) error {
+	if err := validateGuidedProgress(projectionInput.Progress, json.RawMessage(`{}`)); err != nil {
 		return err
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		projection, err := guidedProjectionReady(ctx, tx, ref, progress)
+		projection, err := guidedProjectionReady(ctx, tx, projectionInput.Reference, projectionInput.Progress)
 
 		current, ready := projection.Conversation, projection.Ready
 		if err != nil || !ready {
 			return err
 		}
 
-		ref.Request.Target.ConversationRevision = current.Revision
+		projectionInput.Reference.Request.Target.ConversationRevision = current.Revision
 
-		updated, err := updateGuidedBinding(ctx, tx, ref.Request, progress, now)
+		updated, err := updateGuidedBinding(ctx, tx, projectionInput.Reference.Request, projectionInput.Progress, projectionInput.At)
 		if err != nil {
 			return err
 		}
 
-		native := WorkReference{Request: ref.Request, ConversationRevision: updated.Revision}
+		native := WorkReference{Request: projectionInput.Reference.Request, ConversationRevision: updated.Revision}
 		native.Request.Target.ConversationRevision = updated.Revision
 
 		kind := "progress"
-		if progress.Phase != "collecting" {
+		if projectionInput.Progress.Phase != "collecting" {
 			kind = "result"
-		} else if delivery != nil {
+		} else if projectionInput.Delivery != nil {
 			kind = "question"
 		}
 
-		observation := WorkObservation{Revision: uint64(updated.Revision), Phase: progress.Phase, Kind: kind, Text: tgmessage.Render(message).PlainFallback, Message: &message}
-		if err := queueWorkObservation(ctx, tx, native, observation, configDigest, now); err != nil {
+		observation := WorkObservation{Revision: uint64(updated.Revision), Phase: projectionInput.Progress.Phase, Kind: kind, Text: tgmessage.Render(projectionInput.Message).PlainFallback, Message: &projectionInput.Message}
+		if err := queueWorkObservation(ctx, tx, workProjection{Reference: native, Observation: observation, ConfigDigest: projectionInput.ConfigDigest, At: projectionInput.At}); err != nil {
 			return err
 		}
 
 		key := fmt.Sprintf("work:%s:%d", current.ID, updated.Revision)
 
-		_, err = tx.ExecContext(ctx, `UPDATE telegram_outbox SET question_binding=? WHERE bot_id=? AND event_key=?`, progress.Binding, current.Peer.BotID, key)
+		_, err = tx.ExecContext(ctx, `UPDATE telegram_outbox SET question_binding=? WHERE bot_id=? AND event_key=?`, projectionInput.Progress.Binding, current.Peer.BotID, key)
 		if err != nil {
 			return err
 		}
 
-		return bindGuidedNoticeDocument(ctx, tx, native.Request, key, message, delivery, configDigest, now)
+		return bindGuidedNoticeDocument(ctx, tx, guidedDocumentBinding{Request: native.Request, Key: key, Message: projectionInput.Message, Delivery: projectionInput.Delivery, ConfigDigest: projectionInput.ConfigDigest, At: projectionInput.At})
 	})
 }
 
@@ -94,31 +94,31 @@ func sameGuidedView(before, after string) bool {
 	return prior.ViewDigest != "" && prior.ViewDigest == current.ViewDigest
 }
 
-func bindGuidedNoticeDocument(ctx context.Context, tx *sql.Tx, request OperationRequest, key string, message tgmessage.Blocks, delivery *tgmessage.DocumentResponse, configDigest string, now time.Time) error {
-	if delivery == nil {
+func bindGuidedNoticeDocument(ctx context.Context, tx *sql.Tx, binding guidedDocumentBinding) error {
+	if binding.Delivery == nil {
 		return nil
 	}
 
 	var id string
-	if err := tx.QueryRowContext(ctx, `SELECT id FROM telegram_outbox WHERE bot_id=? AND event_key=?`, request.Source.Peer.BotID, key).Scan(&id); err != nil {
+	if err := tx.QueryRowContext(ctx, `SELECT id FROM telegram_outbox WHERE bot_id=? AND event_key=?`, binding.Request.Source.Peer.BotID, binding.Key).Scan(&id); err != nil {
 		return err
 	}
 
-	err := tgmessage.ValidateDocument(delivery.Document)
-	if err == nil && (delivery.Document.ProjectID != request.Target.ProjectID || delivery.Document.Namespace != request.Target.Namespace || delivery.Document.ProjectBindingDigest != request.Target.ProjectBindingDigest) {
+	err := tgmessage.ValidateDocument(binding.Delivery.Document)
+	if err == nil && (binding.Delivery.Document.ProjectID != binding.Request.Target.ProjectID || binding.Delivery.Document.Namespace != binding.Request.Target.Namespace || binding.Delivery.Document.ProjectBindingDigest != binding.Request.Target.ProjectBindingDigest) {
 		err = tgmessage.ErrDocumentUnavailable
 	}
 
 	if err == nil {
-		err = bindDocumentImage(ctx, tx, id, request.Source.Peer, *delivery, configDigest, now)
+		err = bindDocumentImage(ctx, tx, documentImageBinding{DeliveryID: id, Peer: binding.Request.Source.Peer, Response: *binding.Delivery, ConfigDigest: binding.ConfigDigest, At: binding.At})
 	}
 
 	if !errors.Is(err, tgmessage.ErrDocumentUnavailable) {
 		return err
 	}
 
-	message.SecondaryText = "The complete original could not be attached. Saved input is retained; restore document storage before requesting its complete image."
-	presentation := tgmessage.Render(message)
+	binding.Message.SecondaryText = "The complete original could not be attached. Saved input is retained; restore document storage before requesting its complete image."
+	presentation := tgmessage.Render(binding.Message)
 
 	payload, err := json.Marshal(presentation)
 	if err != nil {
@@ -128,4 +128,23 @@ func bindGuidedNoticeDocument(ctx context.Context, tx *sql.Tx, request Operation
 	_, err = tx.ExecContext(ctx, `UPDATE telegram_outbox SET text=?,presentation=?,presentation_hash=? WHERE id=?`, presentation.PlainFallback, string(payload), contenthash.Sum(payload), id)
 
 	return err
+}
+
+// GuidedProjectionRequest retains one verified human view and optional original image.
+type GuidedProjectionRequest struct {
+	Reference    GuidedReference
+	Progress     GuidedProgress
+	Message      tgmessage.Blocks
+	Delivery     *tgmessage.DocumentResponse
+	ConfigDigest string
+	At           time.Time
+}
+
+type guidedDocumentBinding struct {
+	Request      OperationRequest
+	Key          string
+	Message      tgmessage.Blocks
+	Delivery     *tgmessage.DocumentResponse
+	ConfigDigest string
+	At           time.Time
 }

@@ -117,9 +117,9 @@ func (r telegramReceiver) offerControl(ctx context.Context, request telegramcore
 
 	text := telegramControlPreviewText(preview)
 
-	return r.offerConfirmationDocument(ctx, request, telegramcore.ActionOffer{Input: input, RequestID: request.ID, Choices: []string{preview.Request.Action}, ExpiresAt: time.Now().Add(24 * time.Hour)}, "35", text, "The complete retained control, decision options, grant and candidate binding follow.")
+	return r.offerConfirmationDocument(ctx, request, telegramcore.ActionOffer{Input: input, RequestID: request.ID, Choices: []string{preview.Request.Action}, ExpiresAt: time.Now().Add(24 * time.Hour)}, telegramConfirmationDocument{Family: "35", Text: text, Complete: "The complete retained control, decision options, grant and candidate binding follow."})
 }
 
 func (r telegramReceiver) finishControlPreparation(ctx context.Context, request telegramcore.OperationRequest, config telegramcore.ReceiverConfig) error {
-	return r.store.FinishOperation(ctx, request, "blocked", "", json.RawMessage(`{"state":"blocked"}`), "The exact native control is unavailable for this peer, project or revision. Read current state before requesting a new control.", config.Digest(), time.Now())
+	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: "blocked", ReceiptRef: "", Facts: json.RawMessage(`{"state":"blocked"}`), Text: "The exact native control is unavailable for this peer, project or revision. Read current state before requesting a new control.", ConfigDigest: config.Digest(), At: time.Now()})
 }

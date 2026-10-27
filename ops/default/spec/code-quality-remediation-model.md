@@ -528,3 +528,15 @@ action guards, receiver and retained recovery regressions and pinned lint pass.
 Two more allowances disappear, leaving 335 repository-wide. All 67 assigned
 result rows and 52 baseline B rows now conform to the approved policy; 28 A
 inputs and the remaining state/error/close work still precede PR readiness.
+
+
+All 28 remaining assigned long inputs now group exactly one existing completion,
+projection, retained reply, intake batch/update, image binding or app dispatch.
+Context and active SQL transactions remain explicit arguments; no capability,
+guard, source, timestamp or cursor mutation is relocated across its original
+boundary. Result flags retain their distinct named meanings. All 156 assigned
+A/B/C rows now meet five parameters excluding the receiver and the final result
+policy. The non-short receiver/domain/app Telegram/guided suite, frozen wire and
+SQLite fixtures and pinned lint pass; 28 allowances disappear, leaving 307 for
+other recorded owners. State/error names, close handling, final reporting and
+clean-head controller evidence remain before opening the Slice 7 PR.

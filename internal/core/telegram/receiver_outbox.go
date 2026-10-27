@@ -34,44 +34,44 @@ type ReceiverDelivery struct {
 // QueueReadResponse records a response and acknowledges its retained input atomically.
 // Replaying an already processed source never replaces or duplicates its response.
 func (s *ReceiverStore) QueueReadResponse(ctx context.Context, update ReceivedUpdate, text, configDigest string, now time.Time) error {
-	return s.QueueReferencedResponse(ctx, update, text, fmt.Sprintf("update:%d", update.UpdateID), configDigest, now)
+	return s.QueueReferencedResponse(ctx, ReferencedReply{Source: update, Text: text, Reference: fmt.Sprintf("update:%d", update.UpdateID), ConfigDigest: configDigest, At: now})
 }
 
 // QueueReferencedResponse retains bounded output with a canonical or paged reference.
-func (s *ReceiverStore) QueueReferencedResponse(ctx context.Context, update ReceivedUpdate, text, reference, configDigest string, now time.Time) error {
-	if text == "" || len(configDigest) != 64 {
+func (s *ReceiverStore) QueueReferencedResponse(ctx context.Context, reply ReferencedReply) error {
+	if reply.Text == "" || len(reply.ConfigDigest) != 64 {
 		return errors.New("telegram response exceeds its Unicode bounds")
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		pendingSource, err := readResponsePending(ctx, tx, update)
+		pendingSource, err := readResponsePending(ctx, tx, reply.Source)
 		if err != nil || !pendingSource {
 			return err
 		}
 
-		return queueReferencedResponse(ctx, tx, update, text, reference, configDigest, now)
+		return queueReferencedResponse(ctx, tx, ReferencedReply{Source: reply.Source, Text: reply.Text, Reference: reply.Reference, ConfigDigest: reply.ConfigDigest, At: reply.At})
 	})
 }
 
-func queueResponse(ctx context.Context, tx *sql.Tx, update ReceivedUpdate, text, configDigest string, now time.Time) error {
-	return queueReferencedResponse(ctx, tx, update, text, fmt.Sprintf("update:%d", update.UpdateID), configDigest, now)
+func queueResponse(ctx context.Context, tx *sql.Tx, reply responseContent) error {
+	return queueReferencedResponse(ctx, tx, ReferencedReply{Source: reply.Source, Text: reply.Text, Reference: fmt.Sprintf("update:%d", reply.Source.UpdateID), ConfigDigest: reply.ConfigDigest, At: reply.At})
 }
 
-func queueReferencedResponse(ctx context.Context, tx *sql.Tx, update ReceivedUpdate, text, reference, configDigest string, now time.Time) error {
-	return queueResponseParts(ctx, tx, update, tgmessage.ResponseParts(text, reference), configDigest, now)
+func queueReferencedResponse(ctx context.Context, tx *sql.Tx, reply ReferencedReply) error {
+	return queueResponseParts(ctx, tx, responseParts{Source: reply.Source, Parts: tgmessage.ResponseParts(reply.Text, reply.Reference), ConfigDigest: reply.ConfigDigest, At: reply.At})
 }
 
-func queueResponseParts(ctx context.Context, tx *sql.Tx, update ReceivedUpdate, parts []string, configDigest string, now time.Time) error {
+func queueResponseParts(ctx context.Context, tx *sql.Tx, reply responseParts) error {
 	var pending int
-	if err := tx.QueryRowContext(ctx, "SELECT COUNT(*) FROM telegram_outbox WHERE bot_id=? AND state!='delivered'", update.Peer.BotID).Scan(&pending); err != nil {
+	if err := tx.QueryRowContext(ctx, "SELECT COUNT(*) FROM telegram_outbox WHERE bot_id=? AND state!='delivered'", reply.Source.Peer.BotID).Scan(&pending); err != nil {
 		return err
 	}
 
-	if pending+len(parts) > 1024 {
+	if pending+len(reply.Parts) > 1024 {
 		return errors.New("telegram outbox capacity exhausted")
 	}
 
-	result, err := tx.ExecContext(ctx, "UPDATE telegram_updates SET state='processed',updated_at=? WHERE bot_id=? AND update_id=? AND payload_digest=? AND state='pending'", database.FormatTime(now), update.Peer.BotID, update.UpdateID, update.Digest)
+	result, err := tx.ExecContext(ctx, "UPDATE telegram_updates SET state='processed',updated_at=? WHERE bot_id=? AND update_id=? AND payload_digest=? AND state='pending'", database.FormatTime(reply.At), reply.Source.Peer.BotID, reply.Source.UpdateID, reply.Source.Digest)
 	if err != nil {
 		return err
 	}
@@ -80,12 +80,12 @@ func queueResponseParts(ctx context.Context, tx *sql.Tx, update ReceivedUpdate, 
 		return err
 	}
 
-	key := fmt.Sprintf("update:%d", update.UpdateID)
-	for index, part := range parts {
-		sum := sha256.Sum256(fmt.Appendf(nil, "%d:%s:%d", update.Peer.BotID, key, index+1))
+	key := fmt.Sprintf("update:%d", reply.Source.UpdateID)
+	for index, part := range reply.Parts {
+		sum := sha256.Sum256(fmt.Appendf(nil, "%d:%s:%d", reply.Source.Peer.BotID, key, index+1))
 		id := "tgd-" + hex.EncodeToString(sum[:16])
 
-		row := responsePartRow{id: id, peer: update.Peer, key: key, configDigest: configDigest, text: part, part: index + 1, parts: len(parts), at: now}
+		row := responsePartRow{id: id, peer: reply.Source.Peer, key: key, configDigest: reply.ConfigDigest, text: part, part: index + 1, parts: len(reply.Parts), at: reply.At}
 
 		_, err = tx.ExecContext(ctx, insertResponsePartSQL, row.values()...)
 		if err != nil {
@@ -93,7 +93,7 @@ func queueResponseParts(ctx context.Context, tx *sql.Tx, update ReceivedUpdate, 
 		}
 	}
 
-	return checkIntakeCapacity(ctx, tx, update.Peer.BotID)
+	return checkIntakeCapacity(ctx, tx, reply.Source.Peer.BotID)
 }
 
 func readResponsePending(ctx context.Context, tx *sql.Tx, update ReceivedUpdate) (bool, error) {
@@ -277,4 +277,24 @@ func (s *ReceiverStore) BlockDelivery(ctx context.Context, id string, now time.T
 
 		return err
 	})
+}
+
+// ReferencedReply retains one peer-bound response with its paging/canonical reference.
+type ReferencedReply struct {
+	Source                        ReceivedUpdate
+	Text, Reference, ConfigDigest string
+	At                            time.Time
+}
+
+type responseContent struct {
+	Source             ReceivedUpdate
+	Text, ConfigDigest string
+	At                 time.Time
+}
+
+type responseParts struct {
+	Source       ReceivedUpdate
+	Parts        []string
+	ConfigDigest string
+	At           time.Time
 }

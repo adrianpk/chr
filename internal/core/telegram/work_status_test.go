@@ -37,7 +37,7 @@ func checkTelegramWorkStatusQueue(t *testing.T, f *telegramConversationFixture, 
 	before := f.sessions(t)
 	message := tgmessage.Blocks{Family: "33", InitialText: "Work has finished."}
 
-	if err := f.store.QueueWorkStatus(t.Context(), input, target, "run-status", message, time.Now()); err != nil {
+	if err := f.store.QueueWorkStatus(t.Context(), WorkStatusRequest{Input: input, Target: target, Invocation: "run-status", Message: message, At: time.Now()}); err != nil {
 		t.Fatal(err)
 	}
 

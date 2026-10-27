@@ -40,7 +40,7 @@ func (r telegramReceiver) respondHarness(ctx context.Context, user telegramcore.
 	}
 
 	if choices.Worker != nil || choices.Generation != nil {
-		return true, r.prepareHarnessChange(ctx, operations, user, input, target, choices)
+		return true, r.prepareHarnessChange(ctx, operations, telegramHarnessChange{User: user, Input: input, Target: target, Choices: choices})
 	}
 
 	status, err := operations.InspectTelegramHarnessSelections(ctx, target)

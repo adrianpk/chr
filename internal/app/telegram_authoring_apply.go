@@ -118,7 +118,7 @@ func (r telegramReceiver) finishAuthoringFailure(ctx context.Context, request te
 		return err
 	}
 
-	return r.store.FinishOperation(ctx, request, "blocked", "", facts, text, config.Digest(), time.Now())
+	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: "blocked", ReceiptRef: "", Facts: facts, Text: text, ConfigDigest: config.Digest(), At: time.Now()})
 }
 
 func telegramAuthoringFailure(err error) string {
@@ -169,7 +169,7 @@ func (r telegramReceiver) finishAuthoring(ctx context.Context, request telegramc
 
 	progress := telegramcore.AuthoringProgress{SessionRef: result.SessionRef, Question: question}
 
-	err = r.store.FinishAuthoring(ctx, request, progress, result.ReceiptRef, facts, text, config.Digest(), time.Now())
+	err = r.store.FinishAuthoring(ctx, request, telegramcore.AuthoringCompletion{Progress: progress, ReceiptRef: result.ReceiptRef, Facts: facts, Text: text, ConfigDigest: config.Digest(), At: time.Now()})
 	if errors.Is(err, workflowstate.ErrConflict) {
 		text += "\n\nThis conversation has moved on; its current selection is preserved."
 
@@ -178,7 +178,7 @@ func (r telegramReceiver) finishAuthoring(ctx context.Context, request telegramc
 			request.Delivery.Message.SecondaryText = "Complete document attached. This conversation has moved on; its current selection is preserved."
 		}
 
-		return r.store.FinishOperation(ctx, request, "confirmed", result.ReceiptRef, facts, text, config.Digest(), time.Now())
+		return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: "confirmed", ReceiptRef: result.ReceiptRef, Facts: facts, Text: text, ConfigDigest: config.Digest(), At: time.Now()})
 	}
 
 	return err

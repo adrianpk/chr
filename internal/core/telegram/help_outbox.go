@@ -13,28 +13,28 @@ import (
 
 // QueueFormattedReadResponse freezes both help renderings with source acknowledgement.
 // Existing plain responses and replayed sources keep their original contents.
-func (s *ReceiverStore) QueueFormattedReadResponse(ctx context.Context, update ReceivedUpdate, text, plain, configDigest string, now time.Time) error {
-	if !validReceiverText(text) || !validReceiverText(plain) || len(tgmessage.SplitResponse(text)) != 1 || len(tgmessage.SplitResponse(plain)) != 1 || len(configDigest) != 64 {
+func (s *ReceiverStore) QueueFormattedReadResponse(ctx context.Context, reply FormattedReply) error {
+	if !validReceiverText(reply.Markdown) || !validReceiverText(reply.Plain) || len(tgmessage.SplitResponse(reply.Markdown)) != 1 || len(tgmessage.SplitResponse(reply.Plain)) != 1 || len(reply.ConfigDigest) != 64 {
 		return errors.New("formatted telegram reply exceeds its single-message bounds")
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		pending, err := readResponsePending(ctx, tx, update)
+		pending, err := readResponsePending(ctx, tx, reply.Source)
 		if err != nil || !pending {
 			return err
 		}
 
-		key := fmt.Sprintf("update:%d", update.UpdateID)
-		if err := queueResponseParts(ctx, tx, update, []string{text}, configDigest, now); err != nil {
+		key := fmt.Sprintf("update:%d", reply.Source.UpdateID)
+		if err := queueResponseParts(ctx, tx, responseParts{Source: reply.Source, Parts: []string{reply.Markdown}, ConfigDigest: reply.ConfigDigest, At: reply.At}); err != nil {
 			return err
 		}
 
-		_, err = tx.ExecContext(ctx, "UPDATE telegram_outbox SET parse_mode='Markdown',plain_text=? WHERE bot_id=? AND event_key=?", plain, update.Peer.BotID, key)
+		_, err = tx.ExecContext(ctx, "UPDATE telegram_outbox SET parse_mode='Markdown',plain_text=? WHERE bot_id=? AND event_key=?", reply.Plain, reply.Source.Peer.BotID, key)
 		if err != nil {
 			return err
 		}
 
-		return checkIntakeCapacity(ctx, tx, update.Peer.BotID)
+		return checkIntakeCapacity(ctx, tx, reply.Source.Peer.BotID)
 	})
 }
 
@@ -50,4 +50,11 @@ WHERE id=? AND state='sending' AND (parse_mode='Markdown' OR presentation IS NOT
 	count, err := result.RowsAffected()
 
 	return count == 1, err
+}
+
+// FormattedReply freezes the original legacy-Markdown help and its plain fallback.
+type FormattedReply struct {
+	Source                        ReceivedUpdate
+	Markdown, Plain, ConfigDigest string
+	At                            time.Time
 }

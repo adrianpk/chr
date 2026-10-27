@@ -14,7 +14,7 @@ func TestTelegramAuthoringAtomicFinish(t *testing.T) {
 	f, c, request, progress := telegramAuthoringFinishFixture(t)
 
 	facts := json.RawMessage(`{"request":"confirmed"}`)
-	if err := f.store.FinishAuthoring(t.Context(), request, progress, "receipt", facts, "A canonical question", f.input.Config.Digest(), time.Now()); err == nil {
+	if err := f.store.FinishAuthoring(t.Context(), request, AuthoringCompletion{Progress: progress, ReceiptRef: "receipt", Facts: facts, Text: "A canonical question", ConfigDigest: f.input.Config.Digest(), At: time.Now()}); err == nil {
 		t.Fatal("a ready request was confirmed before beginning application")
 	}
 
@@ -26,7 +26,7 @@ func TestTelegramAuthoringAtomicFinish(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := f.store.FinishAuthoring(t.Context(), request, progress, "receipt", facts, "A canonical question", f.input.Config.Digest(), time.Now()); err != nil {
+	if err := f.store.FinishAuthoring(t.Context(), request, AuthoringCompletion{Progress: progress, ReceiptRef: "receipt", Facts: facts, Text: "A canonical question", ConfigDigest: f.input.Config.Digest(), At: time.Now()}); err != nil {
 		t.Fatal(err)
 	}
 

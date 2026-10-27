@@ -23,12 +23,12 @@ type AuthoringProgress struct {
 // FinishAuthoring atomically links the confirmed owner result, current
 // question, source acknowledgement and reply association. A failed CAS changes
 // none of them; the caller can reconcile the immutable owner receipt separately.
-func (s *ReceiverStore) FinishAuthoring(ctx context.Context, request OperationRequest, progress AuthoringProgress, receipt string, facts json.RawMessage, text, configDigest string, now time.Time) error {
-	if err := validateAuthoringProgress(progress); err != nil {
+func (s *ReceiverStore) FinishAuthoring(ctx context.Context, request OperationRequest, completion AuthoringCompletion) error {
+	if err := validateAuthoringProgress(completion.Progress); err != nil {
 		return err
 	}
 
-	if !validOperationFinish("confirmed", receipt, facts) {
+	if !validOperationFinish("confirmed", completion.ReceiptRef, completion.Facts) {
 		return workflowstate.ErrConflict
 	}
 
@@ -38,13 +38,13 @@ func (s *ReceiverStore) FinishAuthoring(ctx context.Context, request OperationRe
 			return err
 		}
 
-		updated, err := updateAuthoringConversation(ctx, tx, request, progress, now)
+		updated, err := updateAuthoringConversation(ctx, tx, request, completion.Progress, completion.At)
 		if err != nil {
 			return err
 		}
 
 		request.Target.ConversationRevision = updated.Revision
-		if err := finishOperation(ctx, tx, request, "confirmed", receipt, facts, text, configDigest, now); err != nil {
+		if err := finishOperation(ctx, tx, request, OperationCompletion{State: "confirmed", ReceiptRef: completion.ReceiptRef, Facts: completion.Facts, Text: completion.Text, ConfigDigest: completion.ConfigDigest, At: completion.At}); err != nil {
 			return err
 		}
 
@@ -125,4 +125,13 @@ func validateAuthoringSessionRef(ref string) error {
 	}
 
 	return nil
+}
+
+// AuthoringCompletion binds confirmed authoring progress and its original receipt/reply.
+type AuthoringCompletion struct {
+	Progress           AuthoringProgress
+	ReceiptRef         string
+	Facts              json.RawMessage
+	Text, ConfigDigest string
+	At                 time.Time
 }

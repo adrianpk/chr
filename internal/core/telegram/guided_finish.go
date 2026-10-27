@@ -17,8 +17,8 @@ type GuidedProgress struct {
 
 // FinishGuided atomically binds a confirmed application result, replies,
 // source acknowledgement and delivery; transport failure never repeats the owner.
-func (s *ReceiverStore) FinishGuided(ctx context.Context, request OperationRequest, progress GuidedProgress, facts json.RawMessage, text, configDigest string, now time.Time) error {
-	if err := validateGuidedProgress(progress, facts); err != nil {
+func (s *ReceiverStore) FinishGuided(ctx context.Context, request OperationRequest, completion GuidedCompletion) error {
+	if err := validateGuidedProgress(completion.Progress, completion.Facts); err != nil {
 		return err
 	}
 
@@ -28,17 +28,17 @@ func (s *ReceiverStore) FinishGuided(ctx context.Context, request OperationReque
 			return err
 		}
 
-		updated, err := updateGuidedBinding(ctx, tx, request, progress, now)
+		updated, err := updateGuidedBinding(ctx, tx, request, completion.Progress, completion.At)
 		if err != nil {
 			return err
 		}
 
 		request.Target.ConversationRevision = updated.Revision
-		if err := finishOperation(ctx, tx, request, "confirmed", progress.SessionRef, facts, text, configDigest, now); err != nil {
+		if err := finishOperation(ctx, tx, request, OperationCompletion{State: "confirmed", ReceiptRef: completion.Progress.SessionRef, Facts: completion.Facts, Text: completion.Text, ConfigDigest: completion.ConfigDigest, At: completion.At}); err != nil {
 			return err
 		}
 
-		_, err = tx.ExecContext(ctx, `UPDATE telegram_outbox SET question_binding=? WHERE request_id=?`, progress.Binding, request.ID)
+		_, err = tx.ExecContext(ctx, `UPDATE telegram_outbox SET question_binding=? WHERE request_id=?`, completion.Progress.Binding, request.ID)
 
 		return err
 	})
@@ -105,4 +105,12 @@ func projectGuidedAction(ctx context.Context, tx *sql.Tx, retained ActionClaim, 
 	retained.Request.Target.ConversationRevision = updated.Revision
 
 	return retained, err
+}
+
+// GuidedCompletion binds verified guided progress with its retained facts and reply.
+type GuidedCompletion struct {
+	Progress           GuidedProgress
+	Facts              json.RawMessage
+	Text, ConfigDigest string
+	At                 time.Time
 }

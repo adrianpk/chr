@@ -33,7 +33,7 @@ func (s *ReceiverStore) RetainBatch(ctx context.Context, botID int64, updates []
 
 		var err error
 
-		next, err = retainBatchUpdates(ctx, tx, botID, epoch, next, updates, now)
+		next, err = retainBatchUpdates(ctx, tx, inboxBatch{BotID: botID, Epoch: epoch, Next: next, Updates: updates, At: now})
 		if err != nil {
 			return err
 		}
@@ -49,41 +49,41 @@ retry_attempt=0,retry_at=NULL,last_error_code='',updated_at=? WHERE bot_id=?`, n
 	})
 }
 
-func retainBatchUpdates(ctx context.Context, tx *sql.Tx, botID, epoch int64, next sql.NullInt64, updates []ReceivedUpdate, now time.Time) (sql.NullInt64, error) {
-	intervals, err := readRetired(ctx, tx, botID)
+func retainBatchUpdates(ctx context.Context, tx *sql.Tx, batch inboxBatch) (sql.NullInt64, error) {
+	intervals, err := readRetired(ctx, tx, batch.BotID)
 	if err != nil {
-		return next, err
+		return batch.Next, err
 	}
 
-	for _, update := range updates {
-		if err := validateRetainedUpdate(botID, update); err != nil {
-			return next, err
+	for _, update := range batch.Updates {
+		if err := validateRetainedUpdate(batch.BotID, update); err != nil {
+			return batch.Next, err
 		}
 
 		if !updateRetired(intervals, update.UpdateID) {
-			if err := retainUpdate(ctx, tx, botID, epoch, update, now); err != nil {
-				return next, err
+			if err := retainUpdate(ctx, tx, inboxInput{BotID: batch.BotID, Epoch: batch.Epoch, Update: update, At: batch.At}); err != nil {
+				return batch.Next, err
 			}
 		}
 
-		if !next.Valid || update.UpdateID >= next.Int64 {
-			next = sql.NullInt64{Int64: update.UpdateID + 1, Valid: true}
+		if !batch.Next.Valid || update.UpdateID >= batch.Next.Int64 {
+			batch.Next = sql.NullInt64{Int64: update.UpdateID + 1, Valid: true}
 		}
 	}
 
-	return next, nil
+	return batch.Next, nil
 }
 
-func retainUpdate(ctx context.Context, tx *sql.Tx, botID, epoch int64, update ReceivedUpdate, now time.Time) error {
-	if err := validateRetainedUpdate(botID, update); err != nil {
+func retainUpdate(ctx context.Context, tx *sql.Tx, input inboxInput) error {
+	if err := validateRetainedUpdate(input.BotID, input.Update); err != nil {
 		return err
 	}
 
 	var prior string
 
-	err := tx.QueryRowContext(ctx, "SELECT payload_digest FROM telegram_updates WHERE bot_id=? AND update_id=?", botID, update.UpdateID).Scan(&prior)
+	err := tx.QueryRowContext(ctx, "SELECT payload_digest FROM telegram_updates WHERE bot_id=? AND update_id=?", input.BotID, input.Update.UpdateID).Scan(&prior)
 	if err == nil {
-		if prior != update.Digest {
+		if prior != input.Update.Digest {
 			return errReceiverConflict
 		}
 
@@ -95,18 +95,18 @@ func retainUpdate(ctx context.Context, tx *sql.Tx, botID, epoch int64, update Re
 	}
 
 	state := "pending"
-	if update.Kind == "ignored" || update.Kind == "rejected" {
-		state = update.Kind
+	if input.Update.Kind == "ignored" || input.Update.Kind == "rejected" {
+		state = input.Update.Kind
 	}
 
-	lane2, err := inputLane(ctx, tx, update)
+	lane2, err := inputLane(ctx, tx, input.Update)
 	lane, control := lane2.Lane, lane2.Determined
 
 	if err != nil {
 		return err
 	}
 
-	row := updateRow{botID: botID, epoch: epoch, update: update, state: state, lane: lane, control: control, receivedAt: now}
+	row := updateRow{botID: input.BotID, epoch: input.Epoch, update: input.Update, state: state, lane: lane, control: control, receivedAt: input.At}
 
 	_, err = tx.ExecContext(ctx, insertUpdateSQL, row.values()...)
 	if err != nil {
@@ -114,10 +114,10 @@ func retainUpdate(ctx context.Context, tx *sql.Tx, botID, epoch int64, update Re
 	}
 
 	if state == "pending" {
-		return rejectIntakeOverflow(ctx, tx, update, control, now)
+		return rejectIntakeOverflow(ctx, tx, input.Update, control, input.At)
 	}
 
-	return revokeRejectedActions(ctx, tx, update, now)
+	return revokeRejectedActions(ctx, tx, input.Update, input.At)
 }
 
 func validateRetainedUpdate(botID int64, update ReceivedUpdate) error {
@@ -178,4 +178,17 @@ FROM telegram_updates WHERE bot_id=? AND state='pending' ORDER BY update_id LIMI
 	}
 
 	return readPendingRows(rows, botID)
+}
+
+type inboxBatch struct {
+	BotID, Epoch int64
+	Next         sql.NullInt64
+	Updates      []ReceivedUpdate
+	At           time.Time
+}
+
+type inboxInput struct {
+	BotID, Epoch int64
+	Update       ReceivedUpdate
+	At           time.Time
 }

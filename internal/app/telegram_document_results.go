@@ -28,8 +28,8 @@ func telegramDocumentName(kind, topic string) string {
 	return kind + "-" + slug + ".md"
 }
 
-func telegramDocumentForTarget(target telegramcore.OperationTarget, ref, hash, filename, mediaType string, payload []byte) tgmessage.Document {
-	return tgmessage.Document{ProjectID: target.ProjectID, Namespace: target.Namespace, ProjectBindingDigest: target.ProjectBindingDigest, SourceRef: ref, SourceHash: hash, Filename: filename, MediaType: mediaType, Payload: payload}
+func telegramDocumentForTarget(target telegramcore.OperationTarget, source telegramDocumentSource) tgmessage.Document {
+	return tgmessage.Document{ProjectID: target.ProjectID, Namespace: target.Namespace, ProjectBindingDigest: target.ProjectBindingDigest, SourceRef: source.Reference, SourceHash: source.Hash, Filename: source.Filename, MediaType: source.MediaType, Payload: source.Payload}
 }
 
 func (r telegramReceiver) authoringDocument(ctx context.Context, request telegramcore.OperationRequest, result core.AuthoringContinuationResult) (*tgmessage.DocumentResponse, error) {
@@ -85,7 +85,7 @@ func telegramPrimaryAuthoringDocument(target telegramcore.OperationTarget, resul
 			headline = "Your request and details are saved as a dump for " + result.Session.Topic + "."
 		}
 
-		return &tgmessage.DocumentResponse{Message: tgmessage.Blocks{Family: "21", InitialText: headline, ContentKind: "markdown", Content: tgmessage.DocumentExcerpt(payload), SecondaryText: "Complete document attached."}, Document: telegramDocumentForTarget(target, artifact.Ref.Path, artifact.SourceHash, telegramDocumentName(string(kind), result.Session.Topic), "text/markdown", payload)}, nil
+		return &tgmessage.DocumentResponse{Message: tgmessage.Blocks{Family: "21", InitialText: headline, ContentKind: "markdown", Content: tgmessage.DocumentExcerpt(payload), SecondaryText: "Complete document attached."}, Document: telegramDocumentForTarget(target, telegramDocumentSource{Reference: artifact.Ref.Path, Hash: artifact.SourceHash, Filename: telegramDocumentName(string(kind), result.Session.Topic), MediaType: "text/markdown", Payload: payload})}, nil
 	}
 
 	return nil, workflowstate.ErrConflict
@@ -99,7 +99,7 @@ func telegramExplanationDocument(target telegramcore.OperationTarget, requestID 
 
 	payload := []byte(text)
 
-	return tgmessage.DocumentResponse{Message: tgmessage.Blocks{Family: "24", InitialText: "Explanation ready.", ContentKind: "markdown", Content: tgmessage.DocumentExcerpt([]byte(result.Text)), SecondaryText: "Complete explanation attached."}, Document: telegramDocumentForTarget(target, "exports/explanation-"+requestID+".md", recordDigest(source), "explanation.md", "text/markdown", payload)}
+	return tgmessage.DocumentResponse{Message: tgmessage.Blocks{Family: "24", InitialText: "Explanation ready.", ContentKind: "markdown", Content: tgmessage.DocumentExcerpt([]byte(result.Text)), SecondaryText: "Complete explanation attached."}, Document: telegramDocumentForTarget(target, telegramDocumentSource{Reference: "exports/explanation-" + requestID + ".md", Hash: recordDigest(source), Filename: "explanation.md", MediaType: "text/markdown", Payload: payload})}
 }
 
 func telegramRecordDocument(target telegramcore.OperationTarget, command telegramRecordCommand, page RecordPage) (tgmessage.DocumentResponse, error) {
@@ -126,5 +126,10 @@ func telegramRecordDocument(target telegramcore.OperationTarget, command telegra
 
 	filename := fmt.Sprintf("records-%s-page-%d.json", command.Kind, command.Query.Offset)
 
-	return tgmessage.DocumentResponse{Message: tgmessage.Blocks{Family: "28", InitialText: "Records in " + target.Namespace, ContentKind: "list", Content: strings.Join(lines, "\n"), SecondaryText: secondary}, Document: telegramDocumentForTarget(target, "exports/"+filename, recordDigest(payload), filename, "application/json", payload)}, nil
+	return tgmessage.DocumentResponse{Message: tgmessage.Blocks{Family: "28", InitialText: "Records in " + target.Namespace, ContentKind: "list", Content: strings.Join(lines, "\n"), SecondaryText: secondary}, Document: telegramDocumentForTarget(target, telegramDocumentSource{Reference: "exports/" + filename, Hash: recordDigest(payload), Filename: filename, MediaType: "application/json", Payload: payload})}, nil
+}
+
+type telegramDocumentSource struct {
+	Reference, Hash, Filename, MediaType string
+	Payload                              []byte
 }

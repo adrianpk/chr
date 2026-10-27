@@ -100,7 +100,7 @@ func (r telegramReceiver) applyRecord(ctx context.Context, operations telegramRe
 	text := telegramRecordResultText(result)
 	request.Message = telegramOutcomeMessage("29", text)
 
-	return r.store.FinishOperation(ctx, request, "confirmed", result.ReceiptRef, facts, text, config.Digest(), time.Now())
+	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: "confirmed", ReceiptRef: result.ReceiptRef, Facts: facts, Text: text, ConfigDigest: config.Digest(), At: time.Now()})
 }
 
 func telegramPreparedRecordBinding(prepared PreparedRecordMutation, request telegramcore.OperationRequest) bool {
@@ -124,5 +124,5 @@ func (r telegramReceiver) finishRecordFailure(ctx context.Context, request teleg
 		return err
 	}
 
-	return r.store.FinishOperation(ctx, request, state, "", facts, text, config.Digest(), time.Now())
+	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: state, ReceiptRef: "", Facts: facts, Text: text, ConfigDigest: config.Digest(), At: time.Now()})
 }

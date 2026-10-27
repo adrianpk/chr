@@ -58,7 +58,7 @@ func dispatchTelegramNotification(ctx context.Context, repository notifycore.Rep
 		return telegramcore.SendResult{}, err
 	}
 
-	ack, sendErr := sendTelegramNotificationWithFallback(ctx, repository, record.Event.ID, project, target, delivery)
+	ack, sendErr := sendTelegramNotificationWithFallback(ctx, repository, telegramNotificationAttempt{ID: record.Event.ID, Project: project, Target: target, Delivery: delivery})
 
 	code, uncertain := "", false
 	if sendErr != nil {
@@ -72,19 +72,19 @@ func dispatchTelegramNotification(ctx context.Context, repository notifycore.Rep
 	return telegramcore.SendResult{StatusCode: 200}, sendErr
 }
 
-func sendTelegramNotificationWithFallback(ctx context.Context, repository notifycore.Repository, id string, project commandProjectContext, target notifycore.TelegramTarget, delivery notifycore.TelegramDelivery) (tgmessage.Acknowledgement, error) {
-	ack, sendErr := sendTelegramNotification(ctx, project, target, delivery)
+func sendTelegramNotificationWithFallback(ctx context.Context, repository notifycore.Repository, attempt telegramNotificationAttempt) (tgmessage.Acknowledgement, error) {
+	ack, sendErr := sendTelegramNotification(ctx, attempt.Project, attempt.Target, attempt.Delivery)
 
 	var apiFailure *telegramcore.APIError
 	if errors.As(sendErr, &apiFailure) && apiFailure.Code == "format_rejected" {
-		fallback, fallbackErr := repository.ReserveTelegram(ctx, id, target, true)
+		fallback, fallbackErr := repository.ReserveTelegram(ctx, attempt.ID, attempt.Target, true)
 		if fallbackErr != nil {
 			return tgmessage.Acknowledgement{}, fallbackErr
 		}
 
 		if fallback {
-			delivery.PlainFallback = true
-			ack, sendErr = sendTelegramNotification(ctx, project, target, delivery)
+			attempt.Delivery.PlainFallback = true
+			ack, sendErr = sendTelegramNotification(ctx, attempt.Project, attempt.Target, attempt.Delivery)
 		}
 	}
 
@@ -131,4 +131,11 @@ func dispatchLegacyTelegramNotification(ctx context.Context, repository notifyco
 	}
 
 	return result, errors.Join(sendErr, repository.Update(ctx, record))
+}
+
+type telegramNotificationAttempt struct {
+	ID       string
+	Project  commandProjectContext
+	Target   notifycore.TelegramTarget
+	Delivery notifycore.TelegramDelivery
 }

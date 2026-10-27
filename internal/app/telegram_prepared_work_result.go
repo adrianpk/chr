@@ -57,11 +57,11 @@ func (r telegramReceiver) finishPreparedWork(ctx context.Context, request telegr
 	text := telegramPreparedWorkResultText(result)
 	request.Message = telegramOutcomeMessage("26", text)
 
-	err = r.store.FinishAuthoring(ctx, request, telegramcore.AuthoringProgress{SessionRef: result.Scope.SessionRef}, result.Result.ReceiptRef, facts, text, config.Digest(), time.Now())
+	err = r.store.FinishAuthoring(ctx, request, telegramcore.AuthoringCompletion{Progress: telegramcore.AuthoringProgress{SessionRef: result.Scope.SessionRef}, ReceiptRef: result.Result.ReceiptRef, Facts: facts, Text: text, ConfigDigest: config.Digest(), At: time.Now()})
 	if errors.Is(err, workflowstate.ErrConflict) {
 		request.Message = telegramOutcomeMessage("26", "Ticket preparation is confirmed; the advanced conversation is unchanged.\n"+text)
 
-		return r.store.FinishOperation(ctx, request, "confirmed", result.Result.ReceiptRef, facts, "Canonical work preparation is confirmed; the advanced conversation is unchanged.\n"+text, config.Digest(), time.Now())
+		return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: "confirmed", ReceiptRef: result.Result.ReceiptRef, Facts: facts, Text: "Canonical work preparation is confirmed; the advanced conversation is unchanged.\n" + text, ConfigDigest: config.Digest(), At: time.Now()})
 	}
 
 	return err

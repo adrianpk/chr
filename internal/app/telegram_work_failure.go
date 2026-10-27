@@ -38,7 +38,7 @@ func (r telegramReceiver) finishWorkFailure(ctx context.Context, request telegra
 		return err
 	}
 
-	return r.store.FinishOperation(ctx, request, state, "", facts, text, config.Digest(), time.Now())
+	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: state, ReceiptRef: "", Facts: facts, Text: text, ConfigDigest: config.Digest(), At: time.Now()})
 }
 
 func (r telegramReceiver) finishWorkActionFailure(ctx context.Context, claim telegramcore.ActionClaim, failure error, config telegramcore.ReceiverConfig) error {

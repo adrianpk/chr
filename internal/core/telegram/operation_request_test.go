@@ -60,7 +60,7 @@ func checkTelegramOperationFinish(t *testing.T, store *ReceiverStore, request Op
 
 	now := time.Now()
 	for range 2 {
-		if err := store.FinishOperation(t.Context(), request, "confirmed", "run/receipts/original.json", json.RawMessage(`{"identity":"PRJ-1"}`), "Confirmed PRJ-1", telegramReceiverTestConfig().Digest(), now); err != nil {
+		if err := store.FinishOperation(t.Context(), request, OperationCompletion{State: "confirmed", ReceiptRef: "run/receipts/original.json", Facts: json.RawMessage(`{"identity":"PRJ-1"}`), Text: "Confirmed PRJ-1", ConfigDigest: telegramReceiverTestConfig().Digest(), At: now}); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -121,7 +121,7 @@ func TestTelegramOperationRequestRollback(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := store.FinishOperation(t.Context(), request, "confirmed", "receipt", json.RawMessage(`{}`), "confirmed", telegramReceiverTestConfig().Digest(), time.Now()); err == nil {
+	if err := store.FinishOperation(t.Context(), request, OperationCompletion{State: "confirmed", ReceiptRef: "receipt", Facts: json.RawMessage(`{}`), Text: "confirmed", ConfigDigest: telegramReceiverTestConfig().Digest(), At: time.Now()}); err == nil {
 		t.Fatal("outbox capacity did not abort acknowledgement")
 	}
 
@@ -143,7 +143,7 @@ func TestTelegramOperationRejectedBinding(t *testing.T) {
 	store := openTelegramReceiverTestStore(t, telegramReceiverTestEnv(t))
 
 	request := telegramOperationTestRequest(t, store, 1)
-	if err := store.FinishOperation(t.Context(), request, "rejected", "", json.RawMessage(`{"reason":"unsupported"}`), "Unsupported", telegramReceiverTestConfig().Digest(), time.Now()); err != nil {
+	if err := store.FinishOperation(t.Context(), request, OperationCompletion{State: "rejected", ReceiptRef: "", Facts: json.RawMessage(`{"reason":"unsupported"}`), Text: "Unsupported", ConfigDigest: telegramReceiverTestConfig().Digest(), At: time.Now()}); err != nil {
 		t.Fatal(err)
 	}
 

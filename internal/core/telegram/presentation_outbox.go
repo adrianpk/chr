@@ -21,13 +21,13 @@ func (s *ReceiverStore) QueuePresentationResponse(ctx context.Context, update Re
 			return err
 		}
 
-		return queuePresentation(ctx, tx, update, message, configDigest, now)
+		return queuePresentation(ctx, tx, presentationReply{Source: update, Message: message, ConfigDigest: configDigest, At: now})
 	})
 }
 
-func queuePresentation(ctx context.Context, tx *sql.Tx, update ReceivedUpdate, message tgmessage.Blocks, configDigest string, now time.Time) error {
-	presentation := tgmessage.Render(message)
-	if presentation.PlainFallback == "" || len(configDigest) != 64 {
+func queuePresentation(ctx context.Context, tx *sql.Tx, reply presentationReply) error {
+	presentation := tgmessage.Render(reply.Message)
+	if presentation.PlainFallback == "" || len(reply.ConfigDigest) != 64 {
 		return errors.New("invalid telegram presentation")
 	}
 
@@ -36,16 +36,16 @@ func queuePresentation(ctx context.Context, tx *sql.Tx, update ReceivedUpdate, m
 		return err
 	}
 
-	if err := queueResponse(ctx, tx, update, presentation.PlainFallback, configDigest, now); err != nil {
+	if err := queueResponse(ctx, tx, responseContent{Source: reply.Source, Text: presentation.PlainFallback, ConfigDigest: reply.ConfigDigest, At: reply.At}); err != nil {
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx, "UPDATE telegram_outbox SET presentation=?,presentation_hash=? WHERE bot_id=? AND event_key=?", string(payload), contenthash.Sum(payload), update.Peer.BotID, fmt.Sprintf("update:%d", update.UpdateID))
+	_, err = tx.ExecContext(ctx, "UPDATE telegram_outbox SET presentation=?,presentation_hash=? WHERE bot_id=? AND event_key=?", string(payload), contenthash.Sum(payload), reply.Source.Peer.BotID, fmt.Sprintf("update:%d", reply.Source.UpdateID))
 	if err != nil {
 		return err
 	}
 
-	return checkIntakeCapacity(ctx, tx, update.Peer.BotID)
+	return checkIntakeCapacity(ctx, tx, reply.Source.Peer.BotID)
 }
 
 func decodePresentationHash(payload, hash string, delivery *ReceiverDelivery) error {
@@ -60,4 +60,11 @@ func decodePresentationHash(payload, hash string, delivery *ReceiverDelivery) er
 	}
 
 	return nil
+}
+
+type presentationReply struct {
+	Source       ReceivedUpdate
+	Message      tgmessage.Blocks
+	ConfigDigest string
+	At           time.Time
 }

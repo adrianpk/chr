@@ -18,7 +18,7 @@ func TestTelegramHelpOutbox(t *testing.T) {
 	}
 
 	for _, bodies := range [][2]string{{"*Commands*\n`/original`", "Commands\n/original"}, {"`/changed`", "/changed"}} {
-		if err := store.QueueFormattedReadResponse(t.Context(), update, bodies[0], bodies[1], telegramReceiverTestConfig().Digest(), now); err != nil {
+		if err := store.QueueFormattedReadResponse(t.Context(), FormattedReply{Source: update, Markdown: bodies[0], Plain: bodies[1], ConfigDigest: telegramReceiverTestConfig().Digest(), At: now}); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -114,7 +114,7 @@ func TestTelegramHelpOutboxBounds(t *testing.T) {
 	}
 
 	for _, bodies := range [][2]string{{strings.Repeat("a", 3201), "plain"}, {"formatted", strings.Repeat("😀", 1601)}, {"", "plain"}} {
-		if err := store.QueueFormattedReadResponse(t.Context(), update, bodies[0], bodies[1], telegramReceiverTestConfig().Digest(), now); err == nil {
+		if err := store.QueueFormattedReadResponse(t.Context(), FormattedReply{Source: update, Markdown: bodies[0], Plain: bodies[1], ConfigDigest: telegramReceiverTestConfig().Digest(), At: now}); err == nil {
 			t.Fatal("invalid help snapshot accepted")
 		}
 	}
