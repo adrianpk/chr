@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ValidateGuided checks the existing complete guided session contract.
@@ -64,4 +65,13 @@ func boundedGuidedState(state *GuidedUseCaseState) bool {
 
 func boundedGuidedControls(control *GuidedControlState) bool {
 	return control == nil || len(control.CompletedOperations) <= 128
+}
+
+// ValidateGuidedScope checks the retained run, project and namespace identity.
+func ValidateGuidedScope(session Session, scope GuidedUseCaseScope) error {
+	if session.Guided == nil || session.ProjectID != scope.ProjectID || session.Namespace != scope.Namespace || session.ID != scope.RunID {
+		return workflowstate.ErrConflict
+	}
+
+	return nil
 }

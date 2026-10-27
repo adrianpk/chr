@@ -24,3 +24,12 @@ acceptance and quiescence stay distinct; absence stays separate from read error.
 Result projection reuses GuidedResultReference and the original native update
 time. Authoring retains its lock, transition and journal order; the port admits
 no work and changes no native policy or dispatch.
+
+Native admission, preview membership, materialization projection and result proof
+checks remain with the existing workflow owner in separate native files. The
+original guided scope guard is shared here. Native admission and control read a
+session only through ReadOwnedAuthoringSession while the same active authoring
+claim is held; native proofs and inner store locking remain with their owner.
+Plan delivery resume also remains native because it reads the locked workflow
+snapshot and original materialization contracts/receipt. No second repository or
+coordinator is introduced by the separation.

@@ -30,7 +30,7 @@ func (r *fileAuthoringSessionRepository) finishGuidedUseCaseDump(ctx context.Con
 		return session, err
 	}
 
-	if err := guardGuidedScope(session, command.GuidedUseCaseScope); err != nil {
+	if err := authoringcore.ValidateGuidedScope(session, command.GuidedUseCaseScope); err != nil {
 		return session, err
 	}
 

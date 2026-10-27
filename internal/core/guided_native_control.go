@@ -17,18 +17,16 @@ func (s *WorkflowStore) checkGuidedWorkflowControl(ctx context.Context, run Work
 	}
 
 	absolute, err := filepath.Abs(s.layout.ProjectDir())
-	if err != nil || !holdsAuthoringOwner(ctx, absolute) {
+	if err != nil {
 		return errors.Join(workflowstate.ErrConflict, err)
 	}
 
-	r := &fileAuthoringSessionRepository{projectDir: absolute}
-
-	session, err := r.getGuardedSession(ctx, request.Guided.RunID)
+	session, err := ReadOwnedAuthoringSession(ctx, absolute, request.Guided.RunID)
 	if err != nil {
 		return err
 	}
 
-	if err := guardGuidedScope(session, authoringcore.GuidedUseCaseScope{RunID: request.Guided.RunID, ProjectID: s.projectID, Namespace: s.layout.Namespace()}); err != nil {
+	if err := authoringcore.ValidateGuidedScope(session, authoringcore.GuidedUseCaseScope{RunID: request.Guided.RunID, ProjectID: s.projectID, Namespace: s.layout.Namespace()}); err != nil {
 		return err
 	}
 
@@ -88,46 +86,6 @@ func guidedNativeReferenceMatches(run WorkflowInvocation, session authoringcore.
 	proof := run.Admission.Guided
 
 	return run.ProjectID == session.ProjectID && run.Namespace == session.Namespace && run.RequestKey == session.Guided.Work.Invocation.RequestKey && proof.RunID == session.ID && proof.Actor == session.Guided.Actor && proof.MaterializationID == session.Guided.Work.Materialization.ID
-}
-
-// ReconcileGuidedStop acknowledges quiescence only from the original native owner.
-func ReconcileGuidedStop(ctx context.Context, root string, scope authoringcore.GuidedUseCaseScope, workflow authoringcore.GuidedWorkflowObserver) (session authoringcore.Session, err error) {
-	r := &fileAuthoringSessionRepository{projectDir: root}
-	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
-		session, err = r.getGuardedSession(ctx, scope.RunID)
-		if err != nil {
-			return err
-		}
-
-		if err := guardGuidedScope(session, scope); err != nil {
-			return err
-		}
-
-		control := session.Guided.Control
-		if !guidedStopNeedsAcknowledgement(control) {
-			return nil
-		}
-
-		run, err := workflow.ObserveStop(ctx, session, control.StopIntent)
-		if err != nil {
-			return err
-		}
-
-		if !run.Acknowledged {
-			return nil
-		}
-
-		control.AcknowledgedRevision = run.Revision
-		session.Guided.Status, session.Guided.Blocker = run.Status, ""
-
-		return RetainGuidedUseCaseProgress(ctx, root, &session)
-	})
-
-	return session, err
-}
-
-func guidedStopNeedsAcknowledgement(control *authoringcore.GuidedControlState) bool {
-	return control != nil && control.PendingOperation == nil && control.StopIntent != "" && control.NativeReceipt != nil && control.AcknowledgedRevision == 0
 }
 
 func guidedNativeControlAuthority(session authoringcore.Session, run WorkflowInvocation, request workflowstate.ControlMutationRequest) bool {

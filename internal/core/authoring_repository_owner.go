@@ -2,6 +2,8 @@ package core
 
 import (
 	"context"
+	"errors"
+	"path/filepath"
 	"time"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
@@ -118,4 +120,17 @@ func (r *fileAuthoringSessionRepository) ListTranscriptEvents(ctx context.Contex
 	})
 
 	return events, err
+}
+
+// ReadOwnedAuthoringSession reads a guarded session only inside the active
+// authoring mutation. Native admission and control retain their own proof checks.
+func ReadOwnedAuthoringSession(ctx context.Context, projectDir, id string) (authoringcore.Session, error) {
+	absolute, err := filepath.Abs(projectDir)
+	if err != nil || !holdsAuthoringOwner(ctx, absolute) {
+		return authoringcore.Session{}, errors.Join(workflowstate.ErrConflict, err)
+	}
+
+	r := &fileAuthoringSessionRepository{projectDir: projectDir}
+
+	return r.getGuardedSession(ctx, id)
 }

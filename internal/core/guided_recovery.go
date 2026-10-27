@@ -118,7 +118,7 @@ func RecoverGuidedHostRun(ctx context.Context, root string, scope authoringcore.
 			return readErr
 		}
 
-		return guardGuidedScope(session, scope)
+		return authoringcore.ValidateGuidedScope(session, scope)
 	})
 
 	return session, err

@@ -26,7 +26,7 @@ func PublishGuidedPlan(ctx context.Context, root string, scope authoringcore.Gui
 			return readErr
 		}
 
-		if err := guardGuidedScope(session, scope); err != nil {
+		if err := authoringcore.ValidateGuidedScope(session, scope); err != nil {
 			return err
 		}
 
@@ -92,24 +92,6 @@ func guidedPublicationPlan(session authoringcore.Session) (generationcore.Genera
 	}
 
 	return plan, generationcore.ValidateGeneratedPlan(plan)
-}
-
-// GuidedMaterializationBinding retains owner identities without copying native task state.
-func GuidedMaterializationBinding(result WorkflowMaterializationResult, input generationcore.GeneratedWorkflowPlan) (authoringcore.GuidedMaterializationReference, error) {
-	if result.Set.Set == nil || result.Set.Set.PlanRevision == nil || result.Set.Set.UseCase != input.UseCase || len(result.Tasks) == 0 || len(result.Tasks) > workflowstate.PageLimit {
-		return authoringcore.GuidedMaterializationReference{}, workflowstate.ErrConflict
-	}
-
-	ref := authoringcore.GuidedMaterializationReference{ID: input.MaterializationID, ReceiptRef: result.ReceiptRef, SetID: result.Set.ID, SetPath: result.Set.Path, PlanRevision: *result.Set.Set.PlanRevision}
-	for _, task := range result.Tasks {
-		if task.Task == nil || task.Task.SetID != ref.SetID {
-			return ref, workflowstate.ErrConflict
-		}
-
-		ref.Members = append(ref.Members, authoringcore.GuidedWorkMember{Key: task.Task.Key, Path: task.Path, ContractHash: task.Task.ContractHash, SourceHash: task.SourceHash, Revision: task.Revision})
-	}
-
-	return ref, nil
 }
 
 // SealGuidedPreparation freezes the initial plan, bound tracker and native contracts.

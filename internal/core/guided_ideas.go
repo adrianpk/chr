@@ -36,7 +36,7 @@ func RetainGuidedIdea(ctx context.Context, root string, command authoringcore.Gu
 			return err
 		}
 
-		if err := guardGuidedScope(session, command.GuidedUseCaseScope); err != nil {
+		if err := authoringcore.ValidateGuidedScope(session, command.GuidedUseCaseScope); err != nil {
 			return err
 		}
 

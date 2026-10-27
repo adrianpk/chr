@@ -78,7 +78,7 @@ func guardGuidedApprovalRun(session authoringcore.Session, request SpecMutationR
 	}
 
 	scope := authoringcore.GuidedUseCaseScope{RunID: approval.RunID, ProjectID: request.ProjectID, Namespace: strings.Split(request.Reference, "/")[1]}
-	if err := guardGuidedScope(session, scope); err != nil {
+	if err := authoringcore.ValidateGuidedScope(session, scope); err != nil {
 		return err
 	}
 

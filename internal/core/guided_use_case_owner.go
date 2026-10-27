@@ -33,7 +33,7 @@ func (r *fileAuthoringSessionRepository) startGuidedUseCase(ctx context.Context,
 
 	current, err := r.getGuardedSession(ctx, request.RunID)
 	if err == nil {
-		if err := guardGuidedScope(current, request.GuidedUseCaseScope); err != nil {
+		if err := authoringcore.ValidateGuidedScope(current, request.GuidedUseCaseScope); err != nil {
 			return current, err
 		}
 
@@ -76,15 +76,7 @@ func ReadGuidedUseCase(ctx context.Context, root string, scope authoringcore.Gui
 		return session, err
 	}
 
-	return session, guardGuidedScope(session, scope)
-}
-
-func guardGuidedScope(session authoringcore.Session, scope authoringcore.GuidedUseCaseScope) error {
-	if session.Guided == nil || session.ProjectID != scope.ProjectID || session.Namespace != scope.Namespace || session.ID != scope.RunID {
-		return workflowstate.ErrConflict
-	}
-
-	return nil
+	return session, authoringcore.ValidateGuidedScope(session, scope)
 }
 
 func (r *fileAuthoringSessionRepository) guidedFileChange(path string, content []byte, create bool) (workflowstate.FileChange, error) {
@@ -161,7 +153,7 @@ func MutateGuidedUseCase(ctx context.Context, root string, command authoringcore
 			return err
 		}
 
-		if err := guardGuidedScope(session, command.GuidedUseCaseScope); err != nil {
+		if err := authoringcore.ValidateGuidedScope(session, command.GuidedUseCaseScope); err != nil {
 			return err
 		}
 

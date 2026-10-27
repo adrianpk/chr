@@ -44,7 +44,7 @@ func ReserveGuidedUseCaseStep(ctx context.Context, root string, command authorin
 			return err
 		}
 
-		if err := guardGuidedScope(session, command.GuidedUseCaseScope); err != nil {
+		if err := authoringcore.ValidateGuidedScope(session, command.GuidedUseCaseScope); err != nil {
 			return err
 		}
 
