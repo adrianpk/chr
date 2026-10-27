@@ -246,7 +246,7 @@ func renderAgenticReviewNonBlockingComment(note workflowstate.ReviewFinding) str
 }
 
 func (s service) refreshAgenticReviewTicketIndex(execution core.ExecutionRecord, ticketPath string, reviewedAt time.Time) error {
-	if execution.Workspace.Mode == workspacecore.WorkWorkspaceModeWorktree {
+	if execution.Workspace.Mode == workspacecore.ExecutionWorktree {
 		return nil
 	}
 
@@ -271,7 +271,7 @@ func (s service) refreshAgenticReviewTicketIndex(execution core.ExecutionRecord,
 }
 
 func agenticReviewProjectDir(projectContext commandProjectContext, execution core.ExecutionRecord) string {
-	if execution.Workspace.Mode == workspacecore.WorkWorkspaceModeWorktree && execution.Workspace.ExecutionWorkspaceDir != "" {
+	if execution.Workspace.Mode == workspacecore.ExecutionWorktree && execution.Workspace.ExecutionWorkspaceDir != "" {
 		return execution.Workspace.ExecutionWorkspaceDir
 	}
 

@@ -24,7 +24,7 @@ type WorktreeCleanupOptions struct {
 	TicketKey    string
 	Branch       string
 	BranchPolicy WorkBranchPolicy
-	Workspace    workspacecore.WorkWorkspaceConfig
+	Workspace    workspacecore.ExecutionConfig
 	Git          WorktreeGit
 }
 
@@ -56,13 +56,13 @@ func CleanupMergedTicketWorktree(ctx context.Context, opts WorktreeCleanupOption
 	}
 
 	result := WorktreeCleanupResult{Plan: settings.plan, Status: WorktreeCleanupStatusSkipped}
-	if settings.workspace.Mode != workspacecore.WorkWorkspaceModeWorktree {
+	if settings.workspace.Mode != workspacecore.ExecutionWorktree {
 		result.Detail = "workspace mode is project"
 
 		return result, nil
 	}
 
-	if settings.workspace.WorktreeCleanup != workspacecore.WorktreeCleanupPolicyAfterMerge {
+	if settings.workspace.WorktreeCleanup != workspacecore.CleanupAfterMerge {
 		result.Detail = fmt.Sprintf("worktree cleanup policy is %s", settings.workspace.WorktreeCleanup)
 
 		return result, nil

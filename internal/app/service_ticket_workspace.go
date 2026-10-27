@@ -26,7 +26,7 @@ func prepareTicketStartWorkspace(ctx context.Context, projectContext commandProj
 		Ticket:     ticket,
 		TicketPath: ticket.Path,
 	}
-	if config.Work.Workspace.Mode != workspacecore.WorkWorkspaceModeWorktree {
+	if config.Work.Workspace.Mode != workspacecore.ExecutionWorktree {
 		return workspace, nil
 	}
 

@@ -15,14 +15,14 @@ import (
 
 // HarnessExecutor defines a package boundary interface.
 type HarnessExecutor interface {
-	Run(ctx context.Context, command harnessruntime.HarnessCommand, stdout, stderr io.Writer) error
+	Run(ctx context.Context, command harnessruntime.Command, stdout, stderr io.Writer) error
 }
 
 // OSHarnessExecutor describes a package boundary value.
 type OSHarnessExecutor struct{}
 
 // Run executes the configured operation.
-func (e OSHarnessExecutor) Run(ctx context.Context, command harnessruntime.HarnessCommand, stdout, stderr io.Writer) error {
+func (e OSHarnessExecutor) Run(ctx context.Context, command harnessruntime.Command, stdout, stderr io.Writer) error {
 	cmd := exec.CommandContext(ctx, command.Program, command.Args...)
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
@@ -46,7 +46,7 @@ type ExecutionRunner struct {
 // RunExecutionOptions describes a package boundary value.
 type RunExecutionOptions struct {
 	Record     ExecutionRecord
-	Invocation harnessruntime.HarnessInvocation
+	Invocation harnessruntime.Invocation
 	LoopID     string
 	DryRun     bool
 }

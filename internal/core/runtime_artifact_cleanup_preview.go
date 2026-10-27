@@ -46,7 +46,7 @@ func (s RuntimeArtifactCleanupPreviewService) Preview(
 		return RuntimeArtifactCleanupPreview{}, err
 	}
 
-	config.Runtime = harnessruntime.FillRuntimeConfigDefaults(config.Runtime)
+	config.Runtime = harnessruntime.FillConfigDefaults(config.Runtime)
 	artifactDir := projectcore.ResolvePath(projectDir, config.Runtime.ArtifactDir)
 
 	records, err := s.repository.ListProjectExecutions(ctx, projectID)

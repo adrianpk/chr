@@ -16,7 +16,7 @@ type WorktreePlanOptions struct {
 	TicketKey    string
 	Branch       string
 	BranchPolicy WorkBranchPolicy
-	Workspace    workspacecore.WorkWorkspaceConfig
+	Workspace    workspacecore.ExecutionConfig
 	BaseSHA      string
 	WorktreePath string
 }
@@ -89,33 +89,33 @@ func resolvedWorktreeRoot(projectDir string) (string, error) {
 	return layout.WorktreeRoot(), nil
 }
 
-func normalizedWorktreePlanConfig(opts WorktreePlanOptions) (WorkBranchPolicy, workspacecore.WorkWorkspaceConfig, error) {
+func normalizedWorktreePlanConfig(opts WorktreePlanOptions) (WorkBranchPolicy, workspacecore.ExecutionConfig, error) {
 	branchPolicy := opts.BranchPolicy
 	if branchPolicy == (WorkBranchPolicy{}) {
 		branchPolicy = DefaultWorkBranchPolicy()
 	}
 
 	if err := ValidateWorkBranchPolicy(branchPolicy); err != nil {
-		return WorkBranchPolicy{}, workspacecore.WorkWorkspaceConfig{}, err
+		return WorkBranchPolicy{}, workspacecore.ExecutionConfig{}, err
 	}
 
 	workspace := opts.Workspace
-	if workspace == (workspacecore.WorkWorkspaceConfig{}) {
-		workspace = workspacecore.DefaultWorkWorkspaceConfig()
+	if workspace == (workspacecore.ExecutionConfig{}) {
+		workspace = workspacecore.DefaultExecutionConfig()
 	} else {
-		workspace = workspacecore.FillWorkWorkspaceConfigDefaults(workspace)
+		workspace = workspacecore.FillExecutionDefaults(workspace)
 	}
 
-	if err := workspacecore.ValidateWorkWorkspaceConfig(workspace); err != nil {
-		return WorkBranchPolicy{}, workspacecore.WorkWorkspaceConfig{}, err
+	if err := workspacecore.ValidateExecutionConfig(workspace); err != nil {
+		return WorkBranchPolicy{}, workspacecore.ExecutionConfig{}, err
 	}
 
 	return branchPolicy, workspace, nil
 }
 
-func worktreeBaseRef(policy WorkBranchPolicy, workspace workspacecore.WorkWorkspaceConfig) (string, error) {
+func worktreeBaseRef(policy WorkBranchPolicy, workspace workspacecore.ExecutionConfig) (string, error) {
 	switch workspace.WorktreeBase {
-	case workspacecore.WorktreeBasePolicyRemoteIntegrationBranch:
+	case workspacecore.BaseRemoteIntegrationBranch:
 		remote := strings.TrimSpace(policy.CanonicalRemote)
 		branch := strings.TrimSpace(policy.IntegrationBranch)
 
@@ -124,14 +124,14 @@ func worktreeBaseRef(policy WorkBranchPolicy, workspace workspacecore.WorkWorksp
 		}
 
 		return remote + "/" + branch, nil
-	case workspacecore.WorktreeBasePolicyLocalIntegrationBranch:
+	case workspacecore.BaseLocalIntegrationBranch:
 		branch := strings.TrimSpace(policy.IntegrationBranch)
 		if branch == "" {
 			return "", fmt.Errorf("local integration branch base requires integration branch")
 		}
 
 		return branch, nil
-	case workspacecore.WorktreeBasePolicyCurrentBranch:
+	case workspacecore.BaseCurrentBranch:
 		return "HEAD", nil
 	default:
 		return "", fmt.Errorf("invalid work worktree_base: %s", workspace.WorktreeBase)

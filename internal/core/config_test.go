@@ -74,7 +74,7 @@ runtime:
 		t.Fatalf("TicketKeyPrefix = %q, want PRJ", config.TicketKeyPrefix)
 	}
 
-	want := harnessruntime.RuntimeConfig{
+	want := harnessruntime.Config{
 		Image:             "custom-agent:latest",
 		DockerfilePath:    ".chr/default/runtime/custom.Dockerfile",
 		Workdir:           "/repo",
@@ -218,11 +218,11 @@ func TestLoadWorkspaceConfigParsesWorkConfig(t *testing.T) {
 			AllowSafeRepair:       false,
 			AllowBranchCreation:   true,
 		},
-		Workspace: workspacecore.WorkWorkspaceConfig{
-			Mode:            workspacecore.WorkWorkspaceModeWorktree,
+		Workspace: workspacecore.ExecutionConfig{
+			Mode:            workspacecore.ExecutionWorktree,
 			WorktreeRoot:    workspacecore.DefaultWorktreeRoot,
-			WorktreeBase:    workspacecore.WorktreeBasePolicyLocalIntegrationBranch,
-			WorktreeCleanup: workspacecore.WorktreeCleanupPolicyManual,
+			WorktreeBase:    workspacecore.BaseLocalIntegrationBranch,
+			WorktreeCleanup: workspacecore.CleanupManual,
 		},
 	}
 	if config.Work != want {
@@ -242,7 +242,7 @@ func TestLoadWorkspaceConfigKeepsWorkWorkspaceDefaultsForMissingKeys(t *testing.
 	}
 
 	want := DefaultWorkConfig()
-	want.Workspace.Mode = workspacecore.WorkWorkspaceModeWorktree
+	want.Workspace.Mode = workspacecore.ExecutionWorktree
 
 	if config.Work != want {
 		t.Fatalf("Work = %#v, want %#v", config.Work, want)
@@ -602,7 +602,7 @@ func TestValidateWorkConfigRejectsInvalidBranchPolicyConfig(t *testing.T) {
 func TestValidateWorkConfigRejectsInvalidWorkspaceMode(t *testing.T) {
 	config := WorkConfig{
 		BranchPolicy: DefaultWorkBranchPolicy(),
-		Workspace:    workspacecore.WorkWorkspaceConfig{Mode: "unknown"},
+		Workspace:    workspacecore.ExecutionConfig{Mode: "unknown"},
 	}
 
 	assertValidateWorkConfigError(t, config, "invalid work workspace_mode: unknown")
@@ -611,44 +611,44 @@ func TestValidateWorkConfigRejectsInvalidWorkspaceMode(t *testing.T) {
 func TestValidateWorkConfigRejectsInvalidWorktreeConfig(t *testing.T) {
 	tests := []struct {
 		name    string
-		config  workspacecore.WorkWorkspaceConfig
+		config  workspacecore.ExecutionConfig
 		wantErr string
 	}{
 		{
 			name: "worktree root",
-			config: workspacecore.WorkWorkspaceConfig{
-				Mode:            workspacecore.WorkWorkspaceModeWorktree,
-				WorktreeBase:    workspacecore.WorktreeBasePolicyRemoteIntegrationBranch,
-				WorktreeCleanup: workspacecore.WorktreeCleanupPolicyAfterMerge,
+			config: workspacecore.ExecutionConfig{
+				Mode:            workspacecore.ExecutionWorktree,
+				WorktreeBase:    workspacecore.BaseRemoteIntegrationBranch,
+				WorktreeCleanup: workspacecore.CleanupAfterMerge,
 			},
 			wantErr: "work worktree_root is required",
 		},
 		{
 			name: "legacy worktree root",
-			config: workspacecore.WorkWorkspaceConfig{
-				Mode:            workspacecore.WorkWorkspaceModeWorktree,
+			config: workspacecore.ExecutionConfig{
+				Mode:            workspacecore.ExecutionWorktree,
 				WorktreeRoot:    ".chr/default/runtime/worktrees",
-				WorktreeBase:    workspacecore.WorktreeBasePolicyRemoteIntegrationBranch,
-				WorktreeCleanup: workspacecore.WorktreeCleanupPolicyAfterMerge,
+				WorktreeBase:    workspacecore.BaseRemoteIntegrationBranch,
+				WorktreeCleanup: workspacecore.CleanupAfterMerge,
 			},
 			wantErr: "work worktree_root must be " + workspacecore.DefaultWorktreeRoot,
 		},
 		{
 			name: "worktree base",
-			config: workspacecore.WorkWorkspaceConfig{
-				Mode:            workspacecore.WorkWorkspaceModeWorktree,
+			config: workspacecore.ExecutionConfig{
+				Mode:            workspacecore.ExecutionWorktree,
 				WorktreeRoot:    workspacecore.DefaultWorktreeRoot,
 				WorktreeBase:    "unknown",
-				WorktreeCleanup: workspacecore.WorktreeCleanupPolicyAfterMerge,
+				WorktreeCleanup: workspacecore.CleanupAfterMerge,
 			},
 			wantErr: "invalid work worktree_base: unknown",
 		},
 		{
 			name: "worktree cleanup",
-			config: workspacecore.WorkWorkspaceConfig{
-				Mode:            workspacecore.WorkWorkspaceModeWorktree,
+			config: workspacecore.ExecutionConfig{
+				Mode:            workspacecore.ExecutionWorktree,
 				WorktreeRoot:    workspacecore.DefaultWorktreeRoot,
-				WorktreeBase:    workspacecore.WorktreeBasePolicyRemoteIntegrationBranch,
+				WorktreeBase:    workspacecore.BaseRemoteIntegrationBranch,
 				WorktreeCleanup: "unknown",
 			},
 			wantErr: "invalid work worktree_cleanup: unknown",
@@ -709,8 +709,8 @@ func TestLoadWorkspaceConfigKeepsRuntimeDefaultsForMissingKeys(t *testing.T) {
 		t.Fatalf("Runtime.Image = %q, want custom-agent:latest", config.Runtime.Image)
 	}
 
-	if config.Runtime.DockerfilePath != harnessruntime.DefaultRuntimeDockerfilePath {
-		t.Fatalf("Runtime.DockerfilePath = %q, want %q", config.Runtime.DockerfilePath, harnessruntime.DefaultRuntimeDockerfilePath)
+	if config.Runtime.DockerfilePath != harnessruntime.DefaultDockerfilePath {
+		t.Fatalf("Runtime.DockerfilePath = %q, want %q", config.Runtime.DockerfilePath, harnessruntime.DefaultDockerfilePath)
 	}
 }
 
@@ -790,11 +790,11 @@ func TestValidateNotificationConfigRejectsIncompleteTelegramConfig(t *testing.T)
 	}
 }
 
-func assertDefaultRuntimeConfig(t *testing.T, config harnessruntime.RuntimeConfig) {
+func assertDefaultRuntimeConfig(t *testing.T, config harnessruntime.Config) {
 	t.Helper()
 
-	if config != harnessruntime.DefaultRuntimeConfig() {
-		t.Fatalf("Runtime = %#v, want %#v", config, harnessruntime.DefaultRuntimeConfig())
+	if config != harnessruntime.DefaultConfig() {
+		t.Fatalf("Runtime = %#v, want %#v", config, harnessruntime.DefaultConfig())
 	}
 }
 

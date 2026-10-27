@@ -23,7 +23,7 @@ type WorkspaceConfig struct {
 	HarnessAudit    HarnessSelectionAudit
 	Workflow        WorkflowConfig
 	TicketKeyPrefix string
-	Runtime         harnessruntime.RuntimeConfig
+	Runtime         harnessruntime.Config
 	Notifications   notifycore.Config
 	Review          ReviewWorkflowConfig
 	Work            WorkConfig
@@ -84,7 +84,7 @@ type WorkConfig struct {
 	ReadyQueueCapacity       int
 	StateAuthority           WorkStateAuthority
 	BranchPolicy             WorkBranchPolicy
-	Workspace                workspacecore.WorkWorkspaceConfig
+	Workspace                workspacecore.ExecutionConfig
 }
 
 // EvidenceConfig describes a package boundary value.
@@ -240,7 +240,7 @@ func DefaultWorkConfig() WorkConfig {
 		MaxActiveWorkers:       1,
 		ReadyQueueCapacity:     64,
 		BranchPolicy:           DefaultWorkBranchPolicy(),
-		Workspace:              workspacecore.DefaultWorkWorkspaceConfig(),
+		Workspace:              workspacecore.DefaultExecutionConfig(),
 	}
 }
 
@@ -281,7 +281,7 @@ func DefaultWorkBranchPolicy() WorkBranchPolicy {
 func defaultWorkspaceConfig() WorkspaceConfig {
 	return WorkspaceConfig{
 		TicketKeyPrefix: DefaultTicketKeyPrefix,
-		Runtime:         harnessruntime.DefaultRuntimeConfig(),
+		Runtime:         harnessruntime.DefaultConfig(),
 		Notifications:   notifycore.DefaultConfig(),
 		Review:          DefaultReviewWorkflowConfig(),
 		Work:            DefaultWorkConfig(),
@@ -437,7 +437,7 @@ func workspaceConfigSiblingSection(section string, indent int) string {
 	return section
 }
 
-func setRuntimeConfigValue(config *harnessruntime.RuntimeConfig, key, value string) {
+func setRuntimeConfigValue(config *harnessruntime.Config, key, value string) {
 	switch key {
 	case "image":
 		configvalue.SetString(&config.Image, value)
@@ -529,21 +529,21 @@ func setWorkBranchPolicyConfigValue(config *WorkBranchPolicy, key, value string)
 	return true
 }
 
-func setWorkWorkspaceConfigValue(config *workspacecore.WorkWorkspaceConfig, key, value string) {
+func setWorkWorkspaceConfigValue(config *workspacecore.ExecutionConfig, key, value string) {
 	switch key {
 	case "workspace_mode":
 		if value != "" {
-			config.Mode = workspacecore.WorkWorkspaceMode(value)
+			config.Mode = workspacecore.ExecutionMode(value)
 		}
 	case "worktree_root":
 		configvalue.SetString(&config.WorktreeRoot, value)
 	case "worktree_base":
 		if value != "" {
-			config.WorktreeBase = workspacecore.WorktreeBasePolicy(value)
+			config.WorktreeBase = workspacecore.BasePolicy(value)
 		}
 	case "worktree_cleanup":
 		if value != "" {
-			config.WorktreeCleanup = workspacecore.WorktreeCleanupPolicy(value)
+			config.WorktreeCleanup = workspacecore.CleanupPolicy(value)
 		}
 	}
 }

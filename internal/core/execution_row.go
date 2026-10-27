@@ -95,7 +95,7 @@ func (row executionRow) decoded() (ExecutionRecord, error) {
 
 	record := row.record
 	record.Status = ExecutionStatus(row.status)
-	record.Workspace.Mode = workspacecore.WorkWorkspaceMode(row.workspaceMode)
+	record.Workspace.Mode = workspacecore.ExecutionMode(row.workspaceMode)
 	record.CreatedAt, record.UpdatedAt = times.CreatedAt, times.UpdatedAt
 	record.StartedAt, record.FinishedAt = times.StartedAt, times.FinishedAt
 

@@ -4802,7 +4802,7 @@ func TestTicketApplyResultDiscoversWorktreeChangedFiles(t *testing.T) {
 
 	record := testApplyResultExecutionRecord(projectDir, core.ExecutionStatusSucceeded, "")
 	record.Workspace = core.ExecutionWorkspaceRef{
-		Mode:                  workspacecore.WorkWorkspaceModeWorktree,
+		Mode:                  workspacecore.ExecutionWorktree,
 		ProjectCheckoutDir:    projectDir,
 		ExecutionWorkspaceDir: worktreeDir,
 		BaseRef:               "origin/dev",
@@ -7901,7 +7901,7 @@ type fakeTicketStartHarnessExecutor struct {
 
 func (e *fakeTicketStartHarnessExecutor) Run(
 	_ context.Context,
-	command harnessruntime.HarnessCommand,
+	command harnessruntime.Command,
 	stdout io.Writer,
 	stderr io.Writer,
 ) error {
@@ -7930,11 +7930,11 @@ func (e *fakeTicketStartHarnessExecutor) Run(
 	return e.err
 }
 
-func isFakeTicketStartWorkerCommand(command harnessruntime.HarnessCommand) bool {
+func isFakeTicketStartWorkerCommand(command harnessruntime.Command) bool {
 	return command.Args[0] == "run" && harnessEnvValue(command, "CHR_RESULT_PATH") != ""
 }
 
-func (e *fakeTicketStartHarnessExecutor) writeFakeTicketStartResult(command harnessruntime.HarnessCommand) error {
+func (e *fakeTicketStartHarnessExecutor) writeFakeTicketStartResult(command harnessruntime.Command) error {
 	if command.Args[0] != "run" {
 		return nil
 	}
@@ -7960,7 +7960,7 @@ func (e *fakeTicketStartHarnessExecutor) writeFakeTicketStartResult(command harn
 	return os.WriteFile(containerPathToProjectPath(command, resultPath), []byte(content), 0o644)
 }
 
-func harnessEnvValue(command harnessruntime.HarnessCommand, name string) string {
+func harnessEnvValue(command harnessruntime.Command, name string) string {
 	prefix := name + "="
 	for _, arg := range command.Args {
 		if strings.HasPrefix(arg, prefix) {
@@ -7971,7 +7971,7 @@ func harnessEnvValue(command harnessruntime.HarnessCommand, name string) string 
 	return ""
 }
 
-func containerPathToProjectPath(command harnessruntime.HarnessCommand, path string) string {
+func containerPathToProjectPath(command harnessruntime.Command, path string) string {
 	for index, arg := range command.Args {
 		if arg == "--volume" && index+1 < len(command.Args) {
 			parts := strings.SplitN(command.Args[index+1], ":", 2)

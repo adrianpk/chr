@@ -15,13 +15,13 @@ import (
 // defaults, independent of key order, and reports explicit policy sources.
 func TestWorkflowConfigDefaults(t *testing.T) {
 	cases := []workflowConfigDefaultCase{
-		{"missing", "", "legacy_default", 0, workflowstate.ReviewHuman, WorkStateAuthorityTrackerCompat, workspacecore.WorkWorkspaceModeProject},
-		{"old root version", "version: 1\n", "legacy_default", 0, workflowstate.ReviewHuman, WorkStateAuthorityTrackerCompat, workspacecore.WorkWorkspaceModeProject},
-		{"new version", "workflow:\n  version: 1\n", "version_default", 1, workflowstate.ReviewTrustedAutoMerge, WorkStateAuthorityTickets, workspacecore.WorkWorkspaceModeWorktree},
-		{"explicit human", "workflow:\n  version: 1\nreview:\n  mode: human_review\n", "project", 1, workflowstate.ReviewHuman, WorkStateAuthorityTickets, workspacecore.WorkWorkspaceModeWorktree},
-		{"marker last", "review:\n  mode: agentic_review\nworkflow:\n  version: 1\n", "project", 1, workflowstate.ReviewAgentic, WorkStateAuthorityTickets, workspacecore.WorkWorkspaceModeWorktree},
-		{"legacy explicit", "review:\n  mode: trusted_auto_merge\n", "project", 0, workflowstate.ReviewTrustedAutoMerge, WorkStateAuthorityTrackerCompat, workspacecore.WorkWorkspaceModeProject},
-		{"explicit serial", "workflow:\n  version: 1\nwork:\n  state_authority: tracker_compat\n  workspace_mode: project\n", "version_default", 1, workflowstate.ReviewTrustedAutoMerge, WorkStateAuthorityTrackerCompat, workspacecore.WorkWorkspaceModeProject},
+		{"missing", "", "legacy_default", 0, workflowstate.ReviewHuman, WorkStateAuthorityTrackerCompat, workspacecore.ExecutionProject},
+		{"old root version", "version: 1\n", "legacy_default", 0, workflowstate.ReviewHuman, WorkStateAuthorityTrackerCompat, workspacecore.ExecutionProject},
+		{"new version", "workflow:\n  version: 1\n", "version_default", 1, workflowstate.ReviewTrustedAutoMerge, WorkStateAuthorityTickets, workspacecore.ExecutionWorktree},
+		{"explicit human", "workflow:\n  version: 1\nreview:\n  mode: human_review\n", "project", 1, workflowstate.ReviewHuman, WorkStateAuthorityTickets, workspacecore.ExecutionWorktree},
+		{"marker last", "review:\n  mode: agentic_review\nworkflow:\n  version: 1\n", "project", 1, workflowstate.ReviewAgentic, WorkStateAuthorityTickets, workspacecore.ExecutionWorktree},
+		{"legacy explicit", "review:\n  mode: trusted_auto_merge\n", "project", 0, workflowstate.ReviewTrustedAutoMerge, WorkStateAuthorityTrackerCompat, workspacecore.ExecutionProject},
+		{"explicit serial", "workflow:\n  version: 1\nwork:\n  state_authority: tracker_compat\n  workspace_mode: project\n", "version_default", 1, workflowstate.ReviewTrustedAutoMerge, WorkStateAuthorityTrackerCompat, workspacecore.ExecutionProject},
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
@@ -174,7 +174,7 @@ type workflowConfigDefaultCase struct {
 	version            int
 	mode               workflowstate.ReviewMode
 	authority          WorkStateAuthority
-	workspace          workspacecore.WorkWorkspaceMode
+	workspace          workspacecore.ExecutionMode
 }
 
 func checkWorkflowConfigDefaultValues(t *testing.T, project string, test workflowConfigDefaultCase) {

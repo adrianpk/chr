@@ -37,7 +37,7 @@ Use .prj/specs/specs/feature.md and docs/reference/feature.md.
 		ProjectID:  "project-1",
 		ProjectDir: dir,
 		TicketPath: ticketPath,
-		Plan: harnessruntime.RuntimePlan{
+		Plan: harnessruntime.Plan{
 			ValidationCommand: "go test ./...",
 		},
 		IndexedAt: time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC),

@@ -385,7 +385,7 @@ func loadTUIObservability(
 		return tui.ObservabilityView{}, err
 	}
 
-	runtime, err := validateCodexRuntime(harnessruntime.RuntimeValidationOptions{
+	runtime, err := validateCodexRuntime(harnessruntime.ValidationOptions{
 		ProjectDir: projectContext.ProjectDir,
 		Config:     config.Runtime,
 	})
@@ -423,12 +423,12 @@ func loadTUIWorkReadiness(ctx context.Context, projectContext commandProjectCont
 	return tui.NewWorkReadinessView(report), nil
 }
 
-func loadTUIAgentEvents(ctx context.Context, projectDir string, config harnessruntime.RuntimeConfig, executions []core.ExecutionRecord, loops []core.LoopRunRecord) []core.AgentEvent {
+func loadTUIAgentEvents(ctx context.Context, projectDir string, config harnessruntime.Config, executions []core.ExecutionRecord, loops []core.LoopRunRecord) []core.AgentEvent {
 	events := []core.AgentEvent{}
 
 	loop := latestTUILoopRun(loops)
 	if loop.ID != "" {
-		plan, err := harnessruntime.PlanRuntime(harnessruntime.RuntimePlanOptions{
+		plan, err := harnessruntime.ResolvePlan(harnessruntime.PlanOptions{
 			ExtraMounts: legacyCodexMounts(),
 			ProjectDir:  projectDir,
 			Config:      config,

@@ -24,7 +24,7 @@ type ProjectDocumentContextOptions struct {
 	ProjectID  string
 	ProjectDir string
 	TicketPath string
-	Plan       harnessruntime.RuntimePlan
+	Plan       harnessruntime.Plan
 	IndexedAt  time.Time
 }
 
@@ -294,10 +294,10 @@ func missingDocumentSource(id, path string) authoringcore.ContextSourceInventory
 	}
 }
 
-func projectValidationCommand(plan harnessruntime.RuntimePlan) string {
+func projectValidationCommand(plan harnessruntime.Plan) string {
 	if strings.TrimSpace(plan.ValidationCommand) != "" {
 		return plan.ValidationCommand
 	}
 
-	return harnessruntime.DefaultRuntimeValidationCommand
+	return harnessruntime.DefaultValidationCommand
 }

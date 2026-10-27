@@ -43,8 +43,8 @@ func (s service) InspectProjectReadiness(project projectcore.Project) projectRea
 		return result
 	}
 
-	runtime, err := harnessruntime.ValidateRuntime(harnessruntime.RuntimeValidationOptions{ExtraMounts: legacyCodexMounts(), ProjectDir: project.Path, Config: config.Runtime, Workspace: config.Work.Workspace})
-	result.RuntimeReady = err == nil && harnessruntime.RuntimeValidationPassed(runtime.Checks)
+	runtime, err := harnessruntime.Validate(harnessruntime.ValidationOptions{ExtraMounts: legacyCodexMounts(), ProjectDir: project.Path, Config: config.Runtime, Workspace: config.Work.Workspace})
+	result.RuntimeReady = err == nil && harnessruntime.ValidationPassed(runtime.Checks)
 
 	return result
 }

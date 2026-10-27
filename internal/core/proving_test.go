@@ -361,12 +361,12 @@ func writeTestFile(t *testing.T, path, content string) {
 }
 
 type recordingHarnessExecutor struct {
-	commands []harnessruntime.HarnessCommand
+	commands []harnessruntime.Command
 }
 
 func (e *recordingHarnessExecutor) Run(
 	_ context.Context,
-	command harnessruntime.HarnessCommand,
+	command harnessruntime.Command,
 	_, _ io.Writer,
 ) error {
 	e.commands = append(e.commands, command)

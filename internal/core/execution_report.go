@@ -52,7 +52,7 @@ type ExecutionReportRuntime struct {
 
 // ExecutionReportWorkspace describes execution workspace metadata.
 type ExecutionReportWorkspace struct {
-	Mode                  workspacecore.WorkWorkspaceMode
+	Mode                  workspacecore.ExecutionMode
 	ProjectCheckoutDir    string
 	ExecutionWorkspaceDir string
 	BaseRef               string

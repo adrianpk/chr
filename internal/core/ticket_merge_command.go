@@ -25,7 +25,7 @@ type TicketMergeCommandOptions struct {
 	MergeStrategy string
 	ProjectDir    string
 	BranchPolicy  WorkBranchPolicy
-	Workspace     workspacecore.WorkWorkspaceConfig
+	Workspace     workspacecore.ExecutionConfig
 	WorktreeGit   WorktreeGit
 	DryRun        bool
 	MergedAt      time.Time
@@ -108,7 +108,7 @@ func RunTicketMergeCommand(ctx context.Context, opts TicketMergeCommandOptions) 
 }
 
 func ticketMergeWorktreeCleanup(ctx context.Context, opts TicketMergeCommandOptions, result TicketMergeCommandResult) (WorktreeCleanupResult, error) {
-	if result.MergeState != TicketMergeStateMerged || opts.Workspace.Mode != workspacecore.WorkWorkspaceModeWorktree {
+	if result.MergeState != TicketMergeStateMerged || opts.Workspace.Mode != workspacecore.ExecutionWorktree {
 		return WorktreeCleanupResult{}, nil
 	}
 

@@ -20,3 +20,9 @@ through the existing project directory owner. It retains the default userspace
 path and original environment/error contract. EnsureUserspace honors the
 caller context before creating that directory. Host trace consumers use this
 owner directly without importing the root configuration package.
+
+ExecutionConfig contains the shared execution mode, worktree base and cleanup
+policy. DefaultExecutionConfig, FillExecutionDefaults and ValidateExecutionConfig
+retain the original zero value, field defaults, fixed worktree root and error
+contracts. Runtime planning and native worktree execution consume these values;
+this owner does not choose tickets or acquire workflow capacity.

@@ -21,7 +21,7 @@ func ValidateWorkConfig(config WorkConfig) error {
 		return err
 	}
 
-	return workspacecore.ValidateWorkWorkspaceConfig(config.Workspace)
+	return workspacecore.ValidateExecutionConfig(config.Workspace)
 }
 
 // ValidateWorkBranchPolicy validates the corresponding package boundary value.

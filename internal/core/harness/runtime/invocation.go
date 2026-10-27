@@ -10,68 +10,68 @@ import (
 	"forge.adrianpk.com/chr/internal/harness/process"
 )
 
-// HarnessInvocationOptions describes a package boundary value.
-type HarnessInvocationOptions struct {
+// InvocationOptions describes a package boundary value.
+type InvocationOptions struct {
 	Worker      harness.Worker
 	ExecutionID string
 	TicketKey   string
 	TicketPath  string
-	Plan        RuntimePlan
+	Plan        Plan
 }
 
-// HarnessInvocation describes a package boundary value.
-type HarnessInvocation struct {
+// Invocation describes a package boundary value.
+type Invocation struct {
 	ExecutionID string
 	TicketKey   string
-	Build       HarnessCommand
-	Run         HarnessCommand
-	Validation  HarnessCommand
+	Build       Command
+	Run         Command
+	Validation  Command
 	ResultPath  string
 	LogPath     string
 }
 
-// HarnessCommand describes a package boundary value.
-type HarnessCommand struct {
+// Command describes a package boundary value.
+type Command struct {
 	Program string
 	Args    []string
 }
 
-// NewHarnessInvocation constructs the corresponding package service or value.
-func NewHarnessInvocation(opts HarnessInvocationOptions) (HarnessInvocation, error) {
+// NewInvocation constructs the corresponding package service or value.
+func NewInvocation(opts InvocationOptions) (Invocation, error) {
 	if opts.ExecutionID == "" {
-		return HarnessInvocation{}, fmt.Errorf("execution id is required")
+		return Invocation{}, fmt.Errorf("execution id is required")
 	}
 
 	if opts.TicketKey == "" {
-		return HarnessInvocation{}, fmt.Errorf("ticket key is required")
+		return Invocation{}, fmt.Errorf("ticket key is required")
 	}
 
 	if opts.TicketPath == "" {
-		return HarnessInvocation{}, fmt.Errorf("ticket path is required")
+		return Invocation{}, fmt.Errorf("ticket path is required")
 	}
 
 	if opts.Plan.ProjectDir == "" {
-		return HarnessInvocation{}, fmt.Errorf("runtime project dir is required")
+		return Invocation{}, fmt.Errorf("runtime project dir is required")
 	}
 
-	run, err := harnessRunCommand(opts)
+	run, err := runCommand(opts)
 	if err != nil {
-		return HarnessInvocation{}, err
+		return Invocation{}, err
 	}
 
-	return HarnessInvocation{
+	return Invocation{
 		ExecutionID: opts.ExecutionID,
 		TicketKey:   opts.TicketKey,
-		Build:       harnessBuildCommand(opts.Plan),
+		Build:       buildCommand(opts.Plan),
 		Run:         run,
-		Validation:  harnessValidationCommand(opts.ExecutionID, opts.Plan),
+		Validation:  validationCommand(opts.ExecutionID, opts.Plan),
 		ResultPath:  opts.Plan.ResultPath,
 		LogPath:     opts.Plan.LogPath,
 	}, nil
 }
 
-func harnessBuildCommand(plan RuntimePlan) HarnessCommand {
-	return HarnessCommand{
+func buildCommand(plan Plan) Command {
+	return Command{
 		Program: "docker",
 		Args: []string{
 			"build",
@@ -84,12 +84,12 @@ func harnessBuildCommand(plan RuntimePlan) HarnessCommand {
 	}
 }
 
-func harnessRunCommand(opts HarnessInvocationOptions) (HarnessCommand, error) {
+func runCommand(opts InvocationOptions) (Command, error) {
 	executionID, ticketKey, ticketPath, plan := opts.ExecutionID, opts.TicketKey, opts.TicketPath, opts.Plan
 
-	workerCommand, err := harnessWorkerCommand(opts)
+	workerCommand, err := workerCommand(opts)
 	if err != nil {
-		return HarnessCommand{}, err
+		return Command{}, err
 	}
 
 	args := []string{
@@ -124,13 +124,13 @@ func harnessRunCommand(opts HarnessInvocationOptions) (HarnessCommand, error) {
 		process.WorkerShellScript(workerCommand),
 	)
 
-	return HarnessCommand{
+	return Command{
 		Program: "docker",
 		Args:    args,
 	}, nil
 }
 
-func harnessValidationCommand(executionID string, plan RuntimePlan) HarnessCommand {
+func validationCommand(executionID string, plan Plan) Command {
 	args := []string{
 		"run",
 		"--rm",
@@ -152,13 +152,13 @@ func harnessValidationCommand(executionID string, plan RuntimePlan) HarnessComma
 		plan.ValidationCommand,
 	)
 
-	return HarnessCommand{
+	return Command{
 		Program: "docker",
 		Args:    args,
 	}
 }
 
-func harnessWorkerCommand(opts HarnessInvocationOptions) (harness.WorkerCommand, error) {
+func workerCommand(opts InvocationOptions) (harness.WorkerCommand, error) {
 	executionID, ticketKey, ticketPath, plan, worker := opts.ExecutionID, opts.TicketKey, opts.TicketPath, opts.Plan, opts.Worker
 
 	if worker == nil {
@@ -196,7 +196,7 @@ func dockerVolumeArg(mount harness.RuntimeMount) string {
 }
 
 // ContainerProjectPath maps a mounted host path to its container path.
-func ContainerProjectPath(plan RuntimePlan, path string) string {
+func ContainerProjectPath(plan Plan, path string) string {
 	relative, err := filepath.Rel(plan.ContainerPathHostRoot(), path)
 	if err != nil || strings.HasPrefix(relative, "..") || filepath.IsAbs(relative) {
 		return filepath.ToSlash(path)
@@ -206,8 +206,8 @@ func ContainerProjectPath(plan RuntimePlan, path string) string {
 }
 
 // ContainerPathHostRoot returns the host path mounted at ContainerWorkdir.
-func (plan RuntimePlan) ContainerPathHostRoot() string {
-	if plan.WorkspaceMode == workspacecore.WorkWorkspaceModeWorktree && strings.TrimSpace(plan.ExecutionWorkspaceDir) != "" {
+func (plan Plan) ContainerPathHostRoot() string {
+	if plan.WorkspaceMode == workspacecore.ExecutionWorktree && strings.TrimSpace(plan.ExecutionWorkspaceDir) != "" {
 		return plan.ExecutionWorkspaceDir
 	}
 

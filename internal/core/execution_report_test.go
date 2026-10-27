@@ -357,7 +357,7 @@ func testExecutionReportRecord(dir string) ExecutionRecord {
 			ValidationCommand: "make verify",
 		},
 		Workspace: ExecutionWorkspaceRef{
-			Mode:                  workspacecore.WorkWorkspaceModeWorktree,
+			Mode:                  workspacecore.ExecutionWorktree,
 			ProjectCheckoutDir:    dir,
 			ExecutionWorkspaceDir: filepath.Join(dir, ".chr", "default", "worktrees", "CHR-1"),
 			BaseRef:               "origin/dev",

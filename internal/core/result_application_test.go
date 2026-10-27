@@ -120,7 +120,7 @@ func TestNewResultApplicationBlocksEvidenceReadinessWithWorkspaceMetadata(t *tes
 	worktreeDir := t.TempDir()
 	record := testResultApplicationExecutionRecord(projectDir)
 	record.Workspace = ExecutionWorkspaceRef{
-		Mode:                  workspacecore.WorkWorkspaceModeWorktree,
+		Mode:                  workspacecore.ExecutionWorktree,
 		ProjectCheckoutDir:    projectDir,
 		ExecutionWorkspaceDir: worktreeDir,
 		BaseRef:               "origin/dev",

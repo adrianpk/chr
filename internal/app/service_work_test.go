@@ -127,7 +127,7 @@ func assertPreparedTicketWorktreeWorkspace(t *testing.T, ticketPath string, prep
 		t.Fatalf("prepared branch = %q, want derived branch", prepared.Plan.Branch)
 	}
 
-	if execution.Workspace.Mode != workspacecore.WorkWorkspaceModeWorktree {
+	if execution.Workspace.Mode != workspacecore.ExecutionWorktree {
 		t.Fatalf("Workspace.Mode = %q, want worktree", execution.Workspace.Mode)
 	}
 

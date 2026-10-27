@@ -3663,15 +3663,15 @@ func TestNewObservabilityViewSelectsLatestRecords(t *testing.T) {
 	}
 }
 
-func testObservabilityRuntimeResult(projectDir string) harnessruntime.RuntimeValidationResult {
-	return harnessruntime.RuntimeValidationResult{
-		Plan: harnessruntime.RuntimePlan{
+func testObservabilityRuntimeResult(projectDir string) harnessruntime.ValidationResult {
+	return harnessruntime.ValidationResult{
+		Plan: harnessruntime.Plan{
 			Image:             "image",
 			DockerfilePath:    filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile"),
 			ArtifactDir:       filepath.Join(projectDir, ".chr", "default", "runtime", "runs"),
 			ValidationCommand: "make verify",
 		},
-		Checks: []harnessruntime.RuntimeValidationCheck{
+		Checks: []harnessruntime.ValidationCheck{
 			{Name: "dockerfile", Path: filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile"), OK: true, Message: "ok"},
 		},
 	}

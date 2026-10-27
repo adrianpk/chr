@@ -49,7 +49,7 @@ type closedProvingLogExecutor struct {
 	err error
 }
 
-func (e closedProvingLogExecutor) Run(_ context.Context, _ harnessruntime.HarnessCommand, stdout, _ io.Writer) error {
+func (e closedProvingLogExecutor) Run(_ context.Context, _ harnessruntime.Command, stdout, _ io.Writer) error {
 	file, ok := stdout.(*os.File)
 	if !ok {
 		return fmt.Errorf("expected owned log file, got %T", stdout)

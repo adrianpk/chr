@@ -6,44 +6,44 @@ import (
 	"strings"
 )
 
-// WorkWorkspaceConfig describes workspace ownership for agent execution.
-type WorkWorkspaceConfig struct {
-	Mode            WorkWorkspaceMode
+// ExecutionConfig describes workspace ownership for agent execution.
+type ExecutionConfig struct {
+	Mode            ExecutionMode
 	WorktreeRoot    string
-	WorktreeBase    WorktreeBasePolicy
-	WorktreeCleanup WorktreeCleanupPolicy
+	WorktreeBase    BasePolicy
+	WorktreeCleanup CleanupPolicy
 }
 
-// WorkWorkspaceMode defines a package boundary type.
-type WorkWorkspaceMode string
+// ExecutionMode defines a package boundary type.
+type ExecutionMode string
 
-// WorktreeBasePolicy defines a package boundary type.
-type WorktreeBasePolicy string
+// BasePolicy defines a package boundary type.
+type BasePolicy string
 
-// WorktreeCleanupPolicy defines a package boundary type.
-type WorktreeCleanupPolicy string
+// CleanupPolicy defines a package boundary type.
+type CleanupPolicy string
 
-// DefaultWorkWorkspaceConfig executes the corresponding package operation.
-func DefaultWorkWorkspaceConfig() WorkWorkspaceConfig {
-	return WorkWorkspaceConfig{
-		Mode:            WorkWorkspaceModeProject,
+// DefaultExecutionConfig executes the corresponding package operation.
+func DefaultExecutionConfig() ExecutionConfig {
+	return ExecutionConfig{
+		Mode:            ExecutionProject,
 		WorktreeRoot:    DefaultWorktreeRoot,
-		WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
-		WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
+		WorktreeBase:    BaseRemoteIntegrationBranch,
+		WorktreeCleanup: CleanupAfterMerge,
 	}
 }
 
-// ValidateWorkWorkspaceConfig validates the corresponding package boundary value.
-func ValidateWorkWorkspaceConfig(config WorkWorkspaceConfig) error {
-	if config == (WorkWorkspaceConfig{}) {
+// ValidateExecutionConfig validates the corresponding package boundary value.
+func ValidateExecutionConfig(config ExecutionConfig) error {
+	if config == (ExecutionConfig{}) {
 		return nil
 	}
 
-	if !IsValidWorkWorkspaceMode(config.Mode) {
+	if !ValidExecutionMode(config.Mode) {
 		return fmt.Errorf("invalid work workspace_mode: %s", config.Mode)
 	}
 
-	if config.Mode != WorkWorkspaceModeWorktree {
+	if config.Mode != ExecutionWorktree {
 		return nil
 	}
 
@@ -55,55 +55,54 @@ func ValidateWorkWorkspaceConfig(config WorkWorkspaceConfig) error {
 		return fmt.Errorf("work worktree_root must be %s", DefaultWorktreeRoot)
 	}
 
-	if !IsValidWorktreeBasePolicy(config.WorktreeBase) {
+	if !ValidBasePolicy(config.WorktreeBase) {
 		return fmt.Errorf("invalid work worktree_base: %s", config.WorktreeBase)
 	}
 
-	if !IsValidWorktreeCleanupPolicy(config.WorktreeCleanup) {
+	if !ValidCleanupPolicy(config.WorktreeCleanup) {
 		return fmt.Errorf("invalid work worktree_cleanup: %s", config.WorktreeCleanup)
 	}
 
 	return nil
 }
 
-// IsValidWorkWorkspaceMode executes the corresponding package operation.
-func IsValidWorkWorkspaceMode(mode WorkWorkspaceMode) bool {
-	switch WorkWorkspaceMode(strings.TrimSpace(string(mode))) {
-	case WorkWorkspaceModeProject,
-		WorkWorkspaceModeWorktree:
+// ValidExecutionMode executes the corresponding package operation.
+func ValidExecutionMode(mode ExecutionMode) bool {
+	switch ExecutionMode(strings.TrimSpace(string(mode))) {
+	case ExecutionProject, ExecutionWorktree:
 		return true
 	default:
 		return false
 	}
 }
 
-// IsValidWorktreeBasePolicy executes the corresponding package operation.
-func IsValidWorktreeBasePolicy(policy WorktreeBasePolicy) bool {
-	switch WorktreeBasePolicy(strings.TrimSpace(string(policy))) {
-	case WorktreeBasePolicyRemoteIntegrationBranch,
-		WorktreeBasePolicyLocalIntegrationBranch,
-		WorktreeBasePolicyCurrentBranch:
+// ValidBasePolicy executes the corresponding package operation.
+func ValidBasePolicy(policy BasePolicy) bool {
+	switch BasePolicy(strings.TrimSpace(string(policy))) {
+	case BaseRemoteIntegrationBranch,
+		BaseLocalIntegrationBranch,
+		BaseCurrentBranch:
 		return true
 	default:
 		return false
 	}
 }
 
-// IsValidWorktreeCleanupPolicy executes the corresponding package operation.
-func IsValidWorktreeCleanupPolicy(policy WorktreeCleanupPolicy) bool {
-	switch WorktreeCleanupPolicy(strings.TrimSpace(string(policy))) {
-	case WorktreeCleanupPolicyAfterMerge,
-		WorktreeCleanupPolicyManual,
-		WorktreeCleanupPolicyNever:
+// ValidCleanupPolicy executes the corresponding package operation.
+func ValidCleanupPolicy(policy CleanupPolicy) bool {
+	switch CleanupPolicy(strings.TrimSpace(string(policy))) {
+	case CleanupAfterMerge,
+		CleanupManual,
+		CleanupNever:
 		return true
 	default:
 		return false
 	}
 }
 
-// FillWorkWorkspaceConfigDefaults preserves the existing field defaults.
-func FillWorkWorkspaceConfigDefaults(config WorkWorkspaceConfig) WorkWorkspaceConfig {
-	defaults := DefaultWorkWorkspaceConfig()
+// FillExecutionDefaults preserves the existing field defaults.
+func FillExecutionDefaults(config ExecutionConfig) ExecutionConfig {
+	defaults := DefaultExecutionConfig()
 
 	if config.Mode == "" {
 		config.Mode = defaults.Mode
@@ -125,22 +124,22 @@ func FillWorkWorkspaceConfigDefaults(config WorkWorkspaceConfig) WorkWorkspaceCo
 }
 
 const (
-	// WorkWorkspaceModeProject defines a package boundary constant.
-	WorkWorkspaceModeProject WorkWorkspaceMode = "project"
-	// WorkWorkspaceModeWorktree defines a package boundary constant.
-	WorkWorkspaceModeWorktree WorkWorkspaceMode = "worktree"
-	// WorktreeBasePolicyRemoteIntegrationBranch defines a package boundary constant.
-	WorktreeBasePolicyRemoteIntegrationBranch WorktreeBasePolicy = "remote_integration_branch"
-	// WorktreeBasePolicyLocalIntegrationBranch defines a package boundary constant.
-	WorktreeBasePolicyLocalIntegrationBranch WorktreeBasePolicy = "local_integration_branch"
-	// WorktreeBasePolicyCurrentBranch defines a package boundary constant.
-	WorktreeBasePolicyCurrentBranch WorktreeBasePolicy = "current_branch"
-	// WorktreeCleanupPolicyAfterMerge defines a package boundary constant.
-	WorktreeCleanupPolicyAfterMerge WorktreeCleanupPolicy = "after_merge"
-	// WorktreeCleanupPolicyManual defines a package boundary constant.
-	WorktreeCleanupPolicyManual WorktreeCleanupPolicy = "manual"
-	// WorktreeCleanupPolicyNever defines a package boundary constant.
-	WorktreeCleanupPolicyNever WorktreeCleanupPolicy = "never"
+	// ExecutionProject defines a package boundary constant.
+	ExecutionProject ExecutionMode = "project"
+	// ExecutionWorktree defines a package boundary constant.
+	ExecutionWorktree ExecutionMode = "worktree"
+	// BaseRemoteIntegrationBranch defines a package boundary constant.
+	BaseRemoteIntegrationBranch BasePolicy = "remote_integration_branch"
+	// BaseLocalIntegrationBranch defines a package boundary constant.
+	BaseLocalIntegrationBranch BasePolicy = "local_integration_branch"
+	// BaseCurrentBranch defines a package boundary constant.
+	BaseCurrentBranch BasePolicy = "current_branch"
+	// CleanupAfterMerge defines a package boundary constant.
+	CleanupAfterMerge CleanupPolicy = "after_merge"
+	// CleanupManual defines a package boundary constant.
+	CleanupManual CleanupPolicy = "manual"
+	// CleanupNever defines a package boundary constant.
+	CleanupNever CleanupPolicy = "never"
 	// DefaultWorktreeRoot defines a package boundary constant.
 	DefaultWorktreeRoot = "ops/default/worktree"
 )

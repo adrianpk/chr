@@ -84,7 +84,7 @@ type WorkReadinessRepairCode string
 type WorkReadinessReport struct {
 	ProjectDir     string
 	Policy         WorkBranchPolicy
-	Workspace      workspacecore.WorkWorkspaceConfig
+	Workspace      workspacecore.ExecutionConfig
 	Status         WorkReadinessStatus
 	Diagnostics    []WorkReadinessDiagnostic
 	CurrentBranch  string

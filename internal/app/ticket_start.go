@@ -43,7 +43,7 @@ func (factory commandFactory) runTicketStart(ctx context.Context, cmd *cli.Comma
 		return core.NewExecutionFailure(core.ExecutionFailurePreflight, err)
 	}
 
-	if !harnessruntime.RuntimeValidationPassed(preflight.Runtime.Checks) {
+	if !harnessruntime.ValidationPassed(preflight.Runtime.Checks) {
 		preflight.Record.Status = core.ExecutionStatusBlocked
 		preflight.Record.FailureReason = core.NewExecutionFailure(
 			core.ExecutionFailureRuntime,
@@ -86,7 +86,7 @@ func runAndPrintTicketStartExecution(ctx context.Context, stdout io.Writer, pref
 	return record, err
 }
 
-func printTicketStartResult(stdout io.Writer, ticket core.IndexedTicket, record core.ExecutionRecord, result harnessruntime.RuntimeValidationResult, dryRun bool) error {
+func printTicketStartResult(stdout io.Writer, ticket core.IndexedTicket, record core.ExecutionRecord, result harnessruntime.ValidationResult, dryRun bool) error {
 	lines := []string{
 		fmt.Sprintf("execution: %s", record.ID),
 		fmt.Sprintf("ticket: %s", ticket.Key),

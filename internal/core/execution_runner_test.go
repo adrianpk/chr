@@ -357,7 +357,7 @@ type fakeHarnessExecutor struct {
 	resultContent  string
 }
 
-func (e *fakeHarnessExecutor) Run(_ context.Context, command harnessruntime.HarnessCommand, stdout, stderr io.Writer) error {
+func (e *fakeHarnessExecutor) Run(_ context.Context, command harnessruntime.Command, stdout, stderr io.Writer) error {
 	name := command.Program + " " + command.Args[0]
 	e.commands = append(e.commands, name)
 
@@ -391,7 +391,7 @@ func (e *fakeHarnessExecutor) Run(_ context.Context, command harnessruntime.Harn
 	return nil
 }
 
-func (e *fakeHarnessExecutor) writeResultForWorkerRun(command harnessruntime.HarnessCommand) error {
+func (e *fakeHarnessExecutor) writeResultForWorkerRun(command harnessruntime.Command) error {
 	if command.Args[0] != "run" || isValidationHarnessCommand(command) || e.resultPath == "" {
 		return nil
 	}
@@ -404,11 +404,11 @@ func (e *fakeHarnessExecutor) writeResultForWorkerRun(command harnessruntime.Har
 	return os.WriteFile(e.resultPath, []byte(content), 0o644)
 }
 
-func isWorkerHarnessCommand(command harnessruntime.HarnessCommand) bool {
+func isWorkerHarnessCommand(command harnessruntime.Command) bool {
 	return command.Args[0] == "run" && !isValidationHarnessCommand(command)
 }
 
-func isValidationHarnessCommand(command harnessruntime.HarnessCommand) bool {
+func isValidationHarnessCommand(command harnessruntime.Command) bool {
 	return slices.Contains(command.Args, "chr-exec-1-validation")
 }
 
@@ -462,19 +462,19 @@ func testRunnerExecutionRecord(dir string) ExecutionRecord {
 	}
 }
 
-func testRunnerInvocation(record ExecutionRecord) harnessruntime.HarnessInvocation {
-	return harnessruntime.HarnessInvocation{
+func testRunnerInvocation(record ExecutionRecord) harnessruntime.Invocation {
+	return harnessruntime.Invocation{
 		ExecutionID: record.ID,
 		TicketKey:   record.TicketKey,
-		Build: harnessruntime.HarnessCommand{
+		Build: harnessruntime.Command{
 			Program: "docker",
 			Args:    []string{"build"},
 		},
-		Run: harnessruntime.HarnessCommand{
+		Run: harnessruntime.Command{
 			Program: "docker",
 			Args:    []string{"run"},
 		},
-		Validation: harnessruntime.HarnessCommand{
+		Validation: harnessruntime.Command{
 			Program: "docker",
 			Args:    []string{"run", "--name", "chr-exec-1-validation"},
 		},

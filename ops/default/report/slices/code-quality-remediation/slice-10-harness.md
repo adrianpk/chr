@@ -317,6 +317,15 @@ Generation lifecycle concurrency checks passed:
 
 - `go test -race ./internal/core ./internal/app -run '^Test(HarnessGenerationBindingSelectionOrder|HarnessGenerationCallerContext|PiGenerationCapacity)$' -count=1 -timeout=3m`
 
+The separate runtime naming change exposes Config, Plan, PlanOptions,
+ResolvePlan, Invocation, Command, NewInvocation and ValidationResult in the
+runtime namespace. Workspace exposes ExecutionConfig, ExecutionMode, BasePolicy
+and CleanupPolicy with explicit default/validation operations. The same focused
+runtime/native/app/dependency tests and production signature check passed; all
+85 declaration/constant preimages remain reconciled.
+
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/runtime ./internal/core/workspace ./internal/core ./internal/app ./scripts/goquality`: zero issues.
+
 ## Risks and Follow-ups
 
 The slice remains in progress; PR readiness is not established. All assigned

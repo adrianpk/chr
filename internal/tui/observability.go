@@ -312,7 +312,7 @@ func newLoopRunView(loop core.LoopRunRecord) LoopRunView {
 	}
 }
 
-func newRuntimeCheckViews(projectDir string, checks []harnessruntime.RuntimeValidationCheck) []RuntimeCheckView {
+func newRuntimeCheckViews(projectDir string, checks []harnessruntime.ValidationCheck) []RuntimeCheckView {
 	views := make([]RuntimeCheckView, 0, len(checks))
 	for _, check := range checks {
 		views = append(views, RuntimeCheckView{
@@ -384,6 +384,6 @@ type ObservabilityRecords struct {
 	Daemon     daemoncore.State
 	Executions []core.ExecutionRecord
 	Loops      []core.LoopRunRecord
-	Runtime    harnessruntime.RuntimeValidationResult
+	Runtime    harnessruntime.ValidationResult
 	Events     []core.AgentEvent
 }

@@ -43,7 +43,7 @@ func (s WorktreeService) Prepare(ctx context.Context, opts WorktreePlanOptions) 
 type worktreeServiceSettings struct {
 	plan      WorktreePlan
 	policy    WorkBranchPolicy
-	workspace workspacecore.WorkWorkspaceConfig
+	workspace workspacecore.ExecutionConfig
 	git       WorktreeGit
 }
 
@@ -92,7 +92,7 @@ func prepareWorktree(ctx context.Context, settings worktreeServiceSettings) (Wor
 }
 
 func (settings worktreeServiceSettings) prepareBase(ctx context.Context, result *WorktreePrepareResult) error {
-	if settings.workspace.WorktreeBase == workspacecore.WorktreeBasePolicyRemoteIntegrationBranch {
+	if settings.workspace.WorktreeBase == workspacecore.BaseRemoteIntegrationBranch {
 		if err := settings.git.FetchRemote(ctx, settings.plan.ProjectDir, settings.policy.CanonicalRemote); err != nil {
 			return fmt.Errorf("fetch worktree base: %w", err)
 		}

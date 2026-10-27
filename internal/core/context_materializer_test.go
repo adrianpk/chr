@@ -72,7 +72,7 @@ func TestRenderMainContextPackageUsesWorktreeDockerVisiblePaths(t *testing.T) {
 	plan := testContextPackageRuntimePlan(projectDir, runDir)
 	plan.ProjectCheckoutDir = projectDir
 	plan.ExecutionWorkspaceDir = executionWorkspaceDir
-	plan.WorkspaceMode = workspacecore.WorkWorkspaceModeWorktree
+	plan.WorkspaceMode = workspacecore.ExecutionWorktree
 	composition := testContextPackageComposition(t, plan)
 
 	rendered := RenderMainContextPackage(MaterializeContextPackageOptions{
@@ -120,8 +120,8 @@ func TestRenderContextPackageDryRunShowsIncludedAndSkippedSources(t *testing.T) 
 	}
 }
 
-func testContextPackageRuntimePlan(dir, runDir string) harnessruntime.RuntimePlan {
-	return harnessruntime.RuntimePlan{
+func testContextPackageRuntimePlan(dir, runDir string) harnessruntime.Plan {
+	return harnessruntime.Plan{
 		ProjectDir:        dir,
 		ContainerWorkdir:  "/workspace",
 		RunArtifactDir:    runDir,
@@ -132,7 +132,7 @@ func testContextPackageRuntimePlan(dir, runDir string) harnessruntime.RuntimePla
 	}
 }
 
-func testContextPackageComposition(t *testing.T, plan harnessruntime.RuntimePlan) ContextCompositionPlan {
+func testContextPackageComposition(t *testing.T, plan harnessruntime.Plan) ContextCompositionPlan {
 	t.Helper()
 
 	composition, err := PlanContextComposition(ContextComposerOptions{

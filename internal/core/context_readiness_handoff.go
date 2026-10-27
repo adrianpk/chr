@@ -12,7 +12,7 @@ import (
 // ContextReadinessHandoffOptions describes a package boundary value.
 type ContextReadinessHandoffOptions struct {
 	Composition   ContextCompositionPlan
-	Plan          harnessruntime.RuntimePlan
+	Plan          harnessruntime.Plan
 	RequiredKinds []authoringcore.ContextSourceKind
 }
 
@@ -220,7 +220,7 @@ func contextReadinessWarnings(composition ContextCompositionPlan) []string {
 	return warnings
 }
 
-func contextArtifactLinks(plan harnessruntime.RuntimePlan, paths ContextArtifactPaths) []ContextArtifactLink {
+func contextArtifactLinks(plan harnessruntime.Plan, paths ContextArtifactPaths) []ContextArtifactLink {
 	return []ContextArtifactLink{
 		contextArtifactLink(plan, "context", paths.MainContextPath),
 		contextArtifactLink(plan, "agent", paths.AgentPath),
@@ -236,7 +236,7 @@ func contextArtifactLinks(plan harnessruntime.RuntimePlan, paths ContextArtifact
 	}
 }
 
-func contextArtifactLink(plan harnessruntime.RuntimePlan, name, hostPath string) ContextArtifactLink {
+func contextArtifactLink(plan harnessruntime.Plan, name, hostPath string) ContextArtifactLink {
 	return ContextArtifactLink{
 		Name:          name,
 		HostPath:      hostPath,

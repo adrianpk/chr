@@ -15,7 +15,7 @@ type ticketStartPreflight struct {
 	ProjectContext commandProjectContext
 	Ticket         core.IndexedTicket
 	Record         core.ExecutionRecord
-	Runtime        harnessruntime.RuntimeValidationResult
+	Runtime        harnessruntime.ValidationResult
 }
 
 type ticketStartPreflightOptions struct {
@@ -74,7 +74,7 @@ func (s service) buildLegacyTicketStartPreflight(ctx context.Context, ticket cor
 
 	record.Artifacts.ArtifactID = artifact.ID
 
-	result, err := validateCodexRuntime(harnessruntime.RuntimeValidationOptions{
+	result, err := validateCodexRuntime(harnessruntime.ValidationOptions{
 		ProjectDir:            s.projectContext.ProjectDir,
 		Config:                config.Runtime,
 		Workspace:             config.Work.Workspace,

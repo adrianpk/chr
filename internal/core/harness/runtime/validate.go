@@ -9,12 +9,12 @@ import (
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
-// RuntimeValidationOptions describes a package boundary value.
-type RuntimeValidationOptions struct {
+// ValidationOptions describes a package boundary value.
+type ValidationOptions struct {
 	ExtraMounts           []harness.RuntimeMount
 	ProjectDir            string
-	Config                RuntimeConfig
-	Workspace             workspacecore.WorkWorkspaceConfig
+	Config                Config
+	Workspace             workspacecore.ExecutionConfig
 	ExecutionWorkspaceDir string
 	TicketKey             string
 	TicketBranch          string
@@ -25,42 +25,42 @@ type RuntimeValidationOptions struct {
 	ArtifactID            string
 }
 
-// RuntimeValidationResult describes a package boundary value.
-type RuntimeValidationResult struct {
-	Plan   RuntimePlan
-	Checks []RuntimeValidationCheck
+// ValidationResult describes a package boundary value.
+type ValidationResult struct {
+	Plan   Plan
+	Checks []ValidationCheck
 }
 
-// RuntimeValidationCheck describes a package boundary value.
-type RuntimeValidationCheck struct {
+// ValidationCheck describes a package boundary value.
+type ValidationCheck struct {
 	Name    string
 	Path    string
 	OK      bool
 	Message string
 }
 
-// ValidateRuntime validates the corresponding package boundary value.
-func ValidateRuntime(opts RuntimeValidationOptions) (RuntimeValidationResult, error) {
-	plan, err := PlanRuntime(RuntimePlanOptions(opts))
+// Validate validates the corresponding package boundary value.
+func Validate(opts ValidationOptions) (ValidationResult, error) {
+	plan, err := ResolvePlan(PlanOptions(opts))
 	if err != nil {
-		return RuntimeValidationResult{}, err
+		return ValidationResult{}, err
 	}
 
-	checks := []RuntimeValidationCheck{
+	checks := []ValidationCheck{
 		checkDirectory("execution_workspace", plan.ExecutionWorkspaceDir),
 		checkDirectory("workspace", plan.WorkspaceDir),
 		checkFile("dockerfile", plan.DockerfilePath),
 		checkDirectory("artifact_dir", plan.ArtifactDir),
 	}
 
-	return RuntimeValidationResult{
+	return ValidationResult{
 		Plan:   plan,
 		Checks: checks,
 	}, nil
 }
 
-// RuntimeValidationPassed executes the corresponding package operation.
-func RuntimeValidationPassed(checks []RuntimeValidationCheck) bool {
+// ValidationPassed executes the corresponding package operation.
+func ValidationPassed(checks []ValidationCheck) bool {
 	for _, check := range checks {
 		if !check.OK {
 			return false
@@ -70,14 +70,14 @@ func RuntimeValidationPassed(checks []RuntimeValidationCheck) bool {
 	return true
 }
 
-func checkDirectory(name, path string) RuntimeValidationCheck {
+func checkDirectory(name, path string) ValidationCheck {
 	info, err := os.Stat(path)
 	if err != nil {
-		return failedRuntimeCheck(name, path, err)
+		return failedCheck(name, path, err)
 	}
 
 	if !info.IsDir() {
-		return RuntimeValidationCheck{
+		return ValidationCheck{
 			Name:    name,
 			Path:    path,
 			OK:      false,
@@ -85,17 +85,17 @@ func checkDirectory(name, path string) RuntimeValidationCheck {
 		}
 	}
 
-	return passedRuntimeCheck(name, path)
+	return passedCheck(name, path)
 }
 
-func checkFile(name, path string) RuntimeValidationCheck {
+func checkFile(name, path string) ValidationCheck {
 	info, err := os.Stat(path)
 	if err != nil {
-		return failedRuntimeCheck(name, path, err)
+		return failedCheck(name, path, err)
 	}
 
 	if info.IsDir() {
-		return RuntimeValidationCheck{
+		return ValidationCheck{
 			Name:    name,
 			Path:    path,
 			OK:      false,
@@ -103,11 +103,11 @@ func checkFile(name, path string) RuntimeValidationCheck {
 		}
 	}
 
-	return passedRuntimeCheck(name, path)
+	return passedCheck(name, path)
 }
 
-func passedRuntimeCheck(name, path string) RuntimeValidationCheck {
-	return RuntimeValidationCheck{
+func passedCheck(name, path string) ValidationCheck {
+	return ValidationCheck{
 		Name:    name,
 		Path:    path,
 		OK:      true,
@@ -115,8 +115,8 @@ func passedRuntimeCheck(name, path string) RuntimeValidationCheck {
 	}
 }
 
-func failedRuntimeCheck(name, path string, err error) RuntimeValidationCheck {
-	return RuntimeValidationCheck{
+func failedCheck(name, path string, err error) ValidationCheck {
+	return ValidationCheck{
 		Name:    name,
 		Path:    path,
 		OK:      false,

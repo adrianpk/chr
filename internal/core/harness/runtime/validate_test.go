@@ -12,12 +12,12 @@ func TestValidateRuntimePassesWhenRequiredPathsExist(t *testing.T) {
 	dir := t.TempDir()
 	createRuntimeValidationWorkspace(t, dir)
 
-	result, err := ValidateRuntime(RuntimeValidationOptions{ProjectDir: dir})
+	result, err := Validate(ValidationOptions{ProjectDir: dir})
 	if err != nil {
 		t.Fatalf("ValidateRuntime returned error: %v", err)
 	}
 
-	if !RuntimeValidationPassed(result.Checks) {
+	if !ValidationPassed(result.Checks) {
 		t.Fatalf("RuntimeValidationPassed = false, checks = %#v", result.Checks)
 	}
 }
@@ -31,12 +31,12 @@ func TestValidateRuntimeFailsWhenDockerfileIsMissing(t *testing.T) {
 		t.Fatalf("create artifact dir: %v", err)
 	}
 
-	result, err := ValidateRuntime(RuntimeValidationOptions{ProjectDir: dir})
+	result, err := Validate(ValidationOptions{ProjectDir: dir})
 	if err != nil {
 		t.Fatalf("ValidateRuntime returned error: %v", err)
 	}
 
-	if RuntimeValidationPassed(result.Checks) {
+	if ValidationPassed(result.Checks) {
 		t.Fatalf("RuntimeValidationPassed = true, checks = %#v", result.Checks)
 	}
 }
@@ -64,9 +64,9 @@ func TestValidateRuntimeUsesCustomConfig(t *testing.T) {
 		t.Fatalf("create artifact dir: %v", err)
 	}
 
-	result, err := ValidateRuntime(RuntimeValidationOptions{
+	result, err := Validate(ValidationOptions{
 		ProjectDir: dir,
-		Config: RuntimeConfig{
+		Config: Config{
 			DockerfilePath: "ops/runtime.Dockerfile",
 			ArtifactDir:    "var/chr/runs",
 		},
@@ -75,7 +75,7 @@ func TestValidateRuntimeUsesCustomConfig(t *testing.T) {
 		t.Fatalf("ValidateRuntime returned error: %v", err)
 	}
 
-	if !RuntimeValidationPassed(result.Checks) {
+	if !ValidationPassed(result.Checks) {
 		t.Fatalf("RuntimeValidationPassed = false, checks = %#v", result.Checks)
 	}
 
@@ -95,13 +95,13 @@ func TestValidateRuntimeChecksExecutionWorkspace(t *testing.T) {
 
 	createRuntimeValidationWorkspace(t, executionWorkspaceDir)
 
-	result, err := ValidateRuntime(RuntimeValidationOptions{
+	result, err := Validate(ValidationOptions{
 		ProjectDir: projectDir,
-		Workspace: workspacecore.WorkWorkspaceConfig{
-			Mode:            workspacecore.WorkWorkspaceModeWorktree,
+		Workspace: workspacecore.ExecutionConfig{
+			Mode:            workspacecore.ExecutionWorktree,
 			WorktreeRoot:    workspacecore.DefaultWorktreeRoot,
-			WorktreeBase:    workspacecore.WorktreeBasePolicyRemoteIntegrationBranch,
-			WorktreeCleanup: workspacecore.WorktreeCleanupPolicyAfterMerge,
+			WorktreeBase:    workspacecore.BaseRemoteIntegrationBranch,
+			WorktreeCleanup: workspacecore.CleanupAfterMerge,
 		},
 		ExecutionWorkspaceDir: executionWorkspaceDir,
 		TicketKey:             "CHR-1",
@@ -111,7 +111,7 @@ func TestValidateRuntimeChecksExecutionWorkspace(t *testing.T) {
 		t.Fatalf("ValidateRuntime returned error: %v", err)
 	}
 
-	if !RuntimeValidationPassed(result.Checks) {
+	if !ValidationPassed(result.Checks) {
 		t.Fatalf("RuntimeValidationPassed = false, checks = %#v", result.Checks)
 	}
 
@@ -147,7 +147,7 @@ func createRuntimeValidationWorkspace(t *testing.T, dir string) {
 	}
 }
 
-func assertRuntimeValidationCheck(t *testing.T, checks []RuntimeValidationCheck, name, path string) {
+func assertRuntimeValidationCheck(t *testing.T, checks []ValidationCheck, name, path string) {
 	t.Helper()
 
 	for _, check := range checks {
@@ -171,6 +171,7 @@ func assertRuntimeValidationCheck(t *testing.T, checks []RuntimeValidationCheck,
 
 func createWorkspaceRoot(t *testing.T, dir string) {
 	t.Helper()
+
 	if err := os.Mkdir(filepath.Join(dir, workspacecore.DirectoryName), 0o755); err != nil {
 		t.Fatalf("create workspace root: %v", err)
 	}

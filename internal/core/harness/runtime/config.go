@@ -1,8 +1,8 @@
 // Package runtime owns host runtime plans, launch commands and filesystem validation.
 package runtime
 
-// RuntimeConfig describes a package boundary value.
-type RuntimeConfig struct {
+// Config describes a package boundary value.
+type Config struct {
 	Image             string
 	DockerfilePath    string
 	Workdir           string
@@ -10,28 +10,28 @@ type RuntimeConfig struct {
 	ValidationCommand string
 }
 
-// DefaultRuntimeConfig executes the corresponding package operation.
-func DefaultRuntimeConfig() RuntimeConfig {
-	return RuntimeConfig{
-		Image:             DefaultRuntimeImage,
-		DockerfilePath:    DefaultRuntimeDockerfilePath,
-		Workdir:           DefaultRuntimeWorkdir,
-		ArtifactDir:       DefaultRuntimeArtifactDir,
-		ValidationCommand: DefaultRuntimeValidationCommand,
+// DefaultConfig executes the corresponding package operation.
+func DefaultConfig() Config {
+	return Config{
+		Image:             DefaultImage,
+		DockerfilePath:    DefaultDockerfilePath,
+		Workdir:           DefaultWorkdir,
+		ArtifactDir:       DefaultArtifactDir,
+		ValidationCommand: DefaultValidationCommand,
 	}
 }
 
 const (
-	// DefaultRuntimeImage defines a package boundary constant.
-	DefaultRuntimeImage = "chr-agent-runtime:local"
-	// DefaultRuntimeDockerfilePath defines a package boundary constant.
-	DefaultRuntimeDockerfilePath = ".chr/default/runtime/agent/Dockerfile"
-	// DefaultRuntimeWorkdir defines a package boundary constant.
-	DefaultRuntimeWorkdir = "/workspace"
-	// DefaultRuntimeArtifactDir defines the zero-configuration shared run artifact root.
-	DefaultRuntimeArtifactDir = "ops/default/run"
-	// PrivateRuntimeArtifactDir is the retired private run artifact root accepted only for migration to ops layout.
-	PrivateRuntimeArtifactDir = ".chr/default/runtime/runs"
-	// DefaultRuntimeValidationCommand defines a package boundary constant.
-	DefaultRuntimeValidationCommand = "make verify"
+	// DefaultImage defines a package boundary constant.
+	DefaultImage = "chr-agent-runtime:local"
+	// DefaultDockerfilePath defines a package boundary constant.
+	DefaultDockerfilePath = ".chr/default/runtime/agent/Dockerfile"
+	// DefaultWorkdir defines a package boundary constant.
+	DefaultWorkdir = "/workspace"
+	// DefaultArtifactDir defines the zero-configuration shared run artifact root.
+	DefaultArtifactDir = "ops/default/run"
+	// PrivateArtifactDir is the retired private run artifact root accepted only for migration to ops layout.
+	PrivateArtifactDir = ".chr/default/runtime/runs"
+	// DefaultValidationCommand defines a package boundary constant.
+	DefaultValidationCommand = "make verify"
 )

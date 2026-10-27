@@ -255,11 +255,11 @@ func TestWorkSelectionPreflightWorktreeModeAllowsDirtyUserCheckout(t *testing.T)
 			RequireCleanWorktree:  true,
 			RequireRemoteTracking: true,
 		},
-		Workspace: workspacecore.WorkWorkspaceConfig{
-			Mode:            workspacecore.WorkWorkspaceModeWorktree,
+		Workspace: workspacecore.ExecutionConfig{
+			Mode:            workspacecore.ExecutionWorktree,
 			WorktreeRoot:    workspacecore.DefaultWorktreeRoot,
-			WorktreeBase:    workspacecore.WorktreeBasePolicyRemoteIntegrationBranch,
-			WorktreeCleanup: workspacecore.WorktreeCleanupPolicyAfterMerge,
+			WorktreeBase:    workspacecore.BaseRemoteIntegrationBranch,
+			WorktreeCleanup: workspacecore.CleanupAfterMerge,
 		},
 		Git: fakeWorkSelectionGit{
 			branch:      "feature/user-work",

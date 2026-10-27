@@ -84,7 +84,7 @@ func (s service) startLegacyAgentWorkTicket(ticketKey string) (AgentWorkResult, 
 
 	defer release()
 
-	if !harnessruntime.RuntimeValidationPassed(preflight.Runtime.Checks) {
+	if !harnessruntime.ValidationPassed(preflight.Runtime.Checks) {
 		return AgentWorkResult{}, core.NewExecutionFailure(
 			core.ExecutionFailureRuntime,
 			errors.New("runtime validation failed"),

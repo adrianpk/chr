@@ -45,7 +45,7 @@ func (s service) runAgentWorkMergeCycle(opts agentWorkMergeCycleOptions) (core.T
 }
 
 func (s service) agentWorkMergeTickets(execution core.ExecutionRecord, indexedAt time.Time) ([]core.IndexedTicket, error) {
-	if execution.Workspace.Mode == workspacecore.WorkWorkspaceModeWorktree {
+	if execution.Workspace.Mode == workspacecore.ExecutionWorktree {
 		return parseProjectTicketsFromDir(s.ctx, s.projectContext.ProjectID, agenticReviewProjectDir(s.projectContext, execution), indexedAt)
 	}
 

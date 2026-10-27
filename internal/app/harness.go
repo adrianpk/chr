@@ -21,8 +21,8 @@ func newCodexWorker() codex.Runner {
 	return codex.Runner{Mounts: legacyCodexMounts()}
 }
 
-func validateCodexRuntime(opts harnessruntime.RuntimeValidationOptions) (harnessruntime.RuntimeValidationResult, error) {
+func validateCodexRuntime(opts harnessruntime.ValidationOptions) (harnessruntime.ValidationResult, error) {
 	opts.ExtraMounts = legacyCodexMounts()
 
-	return harnessruntime.ValidateRuntime(opts)
+	return harnessruntime.Validate(opts)
 }

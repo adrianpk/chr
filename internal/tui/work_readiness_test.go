@@ -15,8 +15,8 @@ func TestNewWorkReadinessViewProjectsWorkspaceState(t *testing.T) {
 			IntegrationBranch: "dev",
 			CanonicalRemote:   "origin",
 		},
-		Workspace: workspacecore.WorkWorkspaceConfig{
-			Mode: workspacecore.WorkWorkspaceModeWorktree,
+		Workspace: workspacecore.ExecutionConfig{
+			Mode: workspacecore.ExecutionWorktree,
 		},
 		CurrentBranch: "feature/user-work",
 		TicketKey:     "CHR-1",

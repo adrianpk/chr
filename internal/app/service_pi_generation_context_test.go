@@ -116,7 +116,7 @@ func piGenerationReviewCase(t *testing.T, valid bool) {
 
 	execution := core.ExecutionRecord{
 		ID: "pi-review", ProjectID: operations.projectContext.ProjectID, TicketKey: "CHR-1", TicketPath: path,
-		Workspace: core.ExecutionWorkspaceRef{Mode: workspacecore.WorkWorkspaceModeWorktree, ExecutionWorkspaceDir: worktree},
+		Workspace: core.ExecutionWorkspaceRef{Mode: workspacecore.ExecutionWorktree, ExecutionWorkspaceDir: worktree},
 		Artifacts: core.ExecutionArtifacts{ArtifactID: "00001-review", RunDir: filepath.Join(worktree, "ops", "default", "run", "00001-review"), ResultPath: "result.json"},
 	}
 

@@ -14,7 +14,7 @@ func TestNewHarnessInvocationRendersDockerBuildCommand(t *testing.T) {
 	dir := t.TempDir()
 	plan := testHarnessRuntimePlan(dir)
 
-	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
+	invocation, err := NewInvocation(InvocationOptions{
 		Worker:      codex.Runner{},
 		ExecutionID: "exec-123",
 		TicketKey:   "CHR-1",
@@ -47,7 +47,7 @@ func TestNewHarnessInvocationRendersDockerRunCommand(t *testing.T) {
 	dir := t.TempDir()
 	plan := testHarnessRuntimePlan(dir)
 
-	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
+	invocation, err := NewInvocation(InvocationOptions{
 		Worker:      codex.Runner{},
 		ExecutionID: "exec-123",
 		TicketKey:   "CHR-1",
@@ -102,7 +102,7 @@ func TestNewHarnessInvocationRendersDockerValidationCommand(t *testing.T) {
 	dir := t.TempDir()
 	plan := testHarnessRuntimePlan(dir)
 
-	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
+	invocation, err := NewInvocation(InvocationOptions{
 		Worker:      codex.Runner{},
 		ExecutionID: "exec-123",
 		TicketKey:   "CHR-1",
@@ -145,13 +145,13 @@ func TestNewHarnessInvocationRendersWorktreeDockerRunCommand(t *testing.T) {
 	projectDir := t.TempDir()
 	executionWorkspaceDir := filepath.Join(projectDir, ".chr", "default", "worktrees", "CHR-1")
 
-	plan, err := PlanRuntime(RuntimePlanOptions{
+	plan, err := ResolvePlan(PlanOptions{
 		ProjectDir: projectDir,
-		Workspace: workspacecore.WorkWorkspaceConfig{
-			Mode:            workspacecore.WorkWorkspaceModeWorktree,
+		Workspace: workspacecore.ExecutionConfig{
+			Mode:            workspacecore.ExecutionWorktree,
 			WorktreeRoot:    workspacecore.DefaultWorktreeRoot,
-			WorktreeBase:    workspacecore.WorktreeBasePolicyRemoteIntegrationBranch,
-			WorktreeCleanup: workspacecore.WorktreeCleanupPolicyAfterMerge,
+			WorktreeBase:    workspacecore.BaseRemoteIntegrationBranch,
+			WorktreeCleanup: workspacecore.CleanupAfterMerge,
 		},
 		ExecutionWorkspaceDir: executionWorkspaceDir,
 		TicketKey:             "CHR-1",
@@ -161,7 +161,7 @@ func TestNewHarnessInvocationRendersWorktreeDockerRunCommand(t *testing.T) {
 		t.Fatalf("PlanRuntime returned error: %v", err)
 	}
 
-	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
+	invocation, err := NewInvocation(InvocationOptions{
 		Worker:      codex.Runner{},
 		ExecutionID: "exec-123",
 		TicketKey:   "CHR-1",
@@ -194,16 +194,16 @@ func TestNewHarnessInvocationRendersWorktreeDockerValidationCommand(t *testing.T
 	projectDir := t.TempDir()
 	executionWorkspaceDir := filepath.Join(projectDir, ".chr", "default", "worktrees", "CHR-1")
 
-	plan, err := PlanRuntime(RuntimePlanOptions{
+	plan, err := ResolvePlan(PlanOptions{
 		ProjectDir: projectDir,
-		Config: RuntimeConfig{
+		Config: Config{
 			ValidationCommand: "go test ./...",
 		},
-		Workspace: workspacecore.WorkWorkspaceConfig{
-			Mode:            workspacecore.WorkWorkspaceModeWorktree,
+		Workspace: workspacecore.ExecutionConfig{
+			Mode:            workspacecore.ExecutionWorktree,
 			WorktreeRoot:    workspacecore.DefaultWorktreeRoot,
-			WorktreeBase:    workspacecore.WorktreeBasePolicyRemoteIntegrationBranch,
-			WorktreeCleanup: workspacecore.WorktreeCleanupPolicyAfterMerge,
+			WorktreeBase:    workspacecore.BaseRemoteIntegrationBranch,
+			WorktreeCleanup: workspacecore.CleanupAfterMerge,
 		},
 		ExecutionWorkspaceDir: executionWorkspaceDir,
 		TicketKey:             "CHR-1",
@@ -213,7 +213,7 @@ func TestNewHarnessInvocationRendersWorktreeDockerValidationCommand(t *testing.T
 		t.Fatalf("PlanRuntime returned error: %v", err)
 	}
 
-	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
+	invocation, err := NewInvocation(InvocationOptions{
 		Worker:      codex.Runner{},
 		ExecutionID: "exec-123",
 		TicketKey:   "CHR-1",
@@ -239,7 +239,7 @@ func TestNewHarnessInvocationRendersWorktreeDockerValidationCommand(t *testing.T
 }
 
 func TestNewHarnessInvocationRejectsMissingIdentity(t *testing.T) {
-	_, err := NewHarnessInvocation(HarnessInvocationOptions{
+	_, err := NewInvocation(InvocationOptions{
 		Worker:     codex.Runner{},
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(t.TempDir(), ".chr", "default", "tickets", "CHR-1.md"),
@@ -250,10 +250,10 @@ func TestNewHarnessInvocationRejectsMissingIdentity(t *testing.T) {
 	}
 }
 
-func testHarnessRuntimePlan(projectDir string) RuntimePlan {
+func testHarnessRuntimePlan(projectDir string) Plan {
 	runDir := filepath.Join(projectDir, "ops", "default", "run", "CHR-1", "exec-123")
 
-	return RuntimePlan{
+	return Plan{
 		ProjectDir:       projectDir,
 		DockerfilePath:   filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile"),
 		Image:            "chr-agent-runtime:local",

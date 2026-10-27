@@ -14,7 +14,7 @@ type ContextComposerOptions struct {
 	TicketKey   string
 	TicketPath  string
 	ExecutionID string
-	Plan        harnessruntime.RuntimePlan
+	Plan        harnessruntime.Plan
 	Sources     []authoringcore.ContextSourceInventoryEntry
 }
 
@@ -83,7 +83,7 @@ func PlanContextComposition(opts ContextComposerOptions) (ContextCompositionPlan
 	}, nil
 }
 
-func contextArtifactPaths(plan harnessruntime.RuntimePlan) ContextArtifactPaths {
+func contextArtifactPaths(plan harnessruntime.Plan) ContextArtifactPaths {
 	contextDir := filepath.Join(plan.RunArtifactDir, "context")
 
 	return ContextArtifactPaths{

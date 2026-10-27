@@ -11,12 +11,12 @@ import (
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
-// RuntimePlanOptions describes a package boundary value.
-type RuntimePlanOptions struct {
+// PlanOptions describes a package boundary value.
+type PlanOptions struct {
 	ExtraMounts           []harness.RuntimeMount
 	ProjectDir            string
-	Config                RuntimeConfig
-	Workspace             workspacecore.WorkWorkspaceConfig
+	Config                Config
+	Workspace             workspacecore.ExecutionConfig
 	ExecutionWorkspaceDir string
 	TicketKey             string
 	TicketBranch          string
@@ -27,12 +27,12 @@ type RuntimePlanOptions struct {
 	ArtifactID            string
 }
 
-// RuntimePlan describes a package boundary value.
-type RuntimePlan struct {
+// Plan describes a package boundary value.
+type Plan struct {
 	ProjectDir            string
 	ProjectCheckoutDir    string
 	ExecutionWorkspaceDir string
-	WorkspaceMode         workspacecore.WorkWorkspaceMode
+	WorkspaceMode         workspacecore.ExecutionMode
 	TicketKey             string
 	TicketBranch          string
 	WorkspaceBaseRef      string
@@ -52,42 +52,42 @@ type RuntimePlan struct {
 	ValidationCommand     string
 }
 
-// PlanRuntime executes the corresponding package operation.
-func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
+// ResolvePlan executes the corresponding package operation.
+func ResolvePlan(opts PlanOptions) (Plan, error) {
 	projectDir, err := projectcore.ResolveDirectory(opts.ProjectDir)
 	if err != nil {
-		return RuntimePlan{}, err
+		return Plan{}, err
 	}
 
 	config := opts.Config
-	if config == (RuntimeConfig{}) {
-		config = DefaultRuntimeConfig()
+	if config == (Config{}) {
+		config = DefaultConfig()
 	}
 
-	config = FillRuntimeConfigDefaults(config)
+	config = FillConfigDefaults(config)
 
 	workspace := opts.Workspace
-	if workspace == (workspacecore.WorkWorkspaceConfig{}) {
-		workspace = workspacecore.DefaultWorkWorkspaceConfig()
+	if workspace == (workspacecore.ExecutionConfig{}) {
+		workspace = workspacecore.DefaultExecutionConfig()
 	} else {
-		workspace = workspacecore.FillWorkWorkspaceConfigDefaults(workspace)
+		workspace = workspacecore.FillExecutionDefaults(workspace)
 	}
 
-	if err := workspacecore.ValidateWorkWorkspaceConfig(workspace); err != nil {
-		return RuntimePlan{}, err
+	if err := workspacecore.ValidateExecutionConfig(workspace); err != nil {
+		return Plan{}, err
 	}
 
-	executionWorkspaceDir := runtimeExecutionWorkspaceDir(projectDir, workspace.Mode, opts.ExecutionWorkspaceDir)
+	executionWorkspaceDir := executionWorkspaceDir(projectDir, workspace.Mode, opts.ExecutionWorkspaceDir)
 
 	workspaceDir := filepath.Join(executionWorkspaceDir, workspacecore.DirectoryName)
 	dockerfilePath := projectcore.ResolvePath(projectDir, config.DockerfilePath)
 
-	paths, err := runtimeArtifactPaths(projectDir, executionWorkspaceDir, config.ArtifactDir, opts)
+	paths, err := artifactPaths(projectDir, executionWorkspaceDir, config.ArtifactDir, opts)
 	if err != nil {
-		return RuntimePlan{}, err
+		return Plan{}, err
 	}
 
-	return RuntimePlan{
+	return Plan{
 		ProjectDir:            projectDir,
 		ProjectCheckoutDir:    projectDir,
 		ExecutionWorkspaceDir: executionWorkspaceDir,
@@ -101,7 +101,7 @@ func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 		DockerfilePath:        dockerfilePath,
 		Image:                 config.Image,
 		ContainerWorkdir:      config.Workdir,
-		Mounts:                append(runtimeMounts(projectDir, executionWorkspaceDir, workspace.Mode, config.Workdir), opts.ExtraMounts...),
+		Mounts:                append(mounts(projectDir, executionWorkspaceDir, workspace.Mode, config.Workdir), opts.ExtraMounts...),
 		ArtifactDir:           paths.artifactDir,
 		RunArtifactDir:        paths.runArtifactDir,
 		WorkerContextPath:     paths.workerContextPath,
@@ -112,9 +112,9 @@ func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 	}, nil
 }
 
-// FillRuntimeConfigDefaults preserves the existing field defaults.
-func FillRuntimeConfigDefaults(config RuntimeConfig) RuntimeConfig {
-	defaults := DefaultRuntimeConfig()
+// FillConfigDefaults preserves the existing field defaults.
+func FillConfigDefaults(config Config) Config {
+	defaults := DefaultConfig()
 
 	if config.Image == "" {
 		config.Image = defaults.Image
@@ -139,15 +139,15 @@ func FillRuntimeConfigDefaults(config RuntimeConfig) RuntimeConfig {
 	return config
 }
 
-func runtimeExecutionWorkspaceDir(projectDir string, mode workspacecore.WorkWorkspaceMode, configuredPath string) string {
-	if mode != workspacecore.WorkWorkspaceModeWorktree || strings.TrimSpace(configuredPath) == "" {
+func executionWorkspaceDir(projectDir string, mode workspacecore.ExecutionMode, configuredPath string) string {
+	if mode != workspacecore.ExecutionWorktree || strings.TrimSpace(configuredPath) == "" {
 		return projectDir
 	}
 
 	return projectcore.ResolvePath(projectDir, configuredPath)
 }
 
-type runtimeArtifactPathSet struct {
+type artifactPathSet struct {
 	artifactDir       string
 	runArtifactDir    string
 	workerContextPath string
@@ -156,31 +156,31 @@ type runtimeArtifactPathSet struct {
 	validationPath    string
 }
 
-func runtimeArtifactPaths(projectDir, executionWorkspaceDir, configuredArtifactDir string, opts RuntimePlanOptions) (runtimeArtifactPathSet, error) {
-	selected, err := runtimeOpsLayout(projectDir, configuredArtifactDir, opts)
+func artifactPaths(projectDir, executionWorkspaceDir, configuredArtifactDir string, opts PlanOptions) (artifactPathSet, error) {
+	selected, err := opsLayout(projectDir, configuredArtifactDir, opts)
 	if err != nil {
-		return runtimeArtifactPathSet{}, err
+		return artifactPathSet{}, err
 	}
 
 	if selected.canonical {
-		return canonicalRuntimeArtifactPaths(selected.layout, selected.artifactID, opts)
+		return canonicalArtifactPaths(selected.layout, selected.artifactID, opts)
 	}
 
-	return privateRuntimeArtifactPaths(executionWorkspaceDir, configuredArtifactDir, opts), nil
+	return privateArtifactPaths(executionWorkspaceDir, configuredArtifactDir, opts), nil
 }
 
-func canonicalRuntimeArtifactPaths(layout opscore.Layout, artifactID string, opts RuntimePlanOptions) (runtimeArtifactPathSet, error) {
+func canonicalArtifactPaths(layout opscore.Layout, artifactID string, opts PlanOptions) (artifactPathSet, error) {
 	artifactDir, err := layout.ArtifactRoot("run")
 	if err != nil {
-		return runtimeArtifactPathSet{}, err
+		return artifactPathSet{}, err
 	}
 
 	runArtifactDir, err := canonicalRunArtifactDir(layout, artifactDir, artifactID, opts)
 	if err != nil {
-		return runtimeArtifactPathSet{}, err
+		return artifactPathSet{}, err
 	}
 
-	return runtimeArtifactPathSet{
+	return artifactPathSet{
 		artifactDir:       artifactDir,
 		runArtifactDir:    runArtifactDir,
 		workerContextPath: filepath.Join(runArtifactDir, "files", "context.md"),
@@ -190,7 +190,7 @@ func canonicalRuntimeArtifactPaths(layout opscore.Layout, artifactID string, opt
 	}, nil
 }
 
-func canonicalRunArtifactDir(layout opscore.Layout, artifactDir, artifactID string, opts RuntimePlanOptions) (string, error) {
+func canonicalRunArtifactDir(layout opscore.Layout, artifactDir, artifactID string, opts PlanOptions) (string, error) {
 	switch {
 	case artifactID != "":
 		return layout.ArtifactDirectory("run", artifactID)
@@ -203,11 +203,11 @@ func canonicalRunArtifactDir(layout opscore.Layout, artifactDir, artifactID stri
 	}
 }
 
-func privateRuntimeArtifactPaths(executionWorkspaceDir, configuredArtifactDir string, opts RuntimePlanOptions) runtimeArtifactPathSet {
+func privateArtifactPaths(executionWorkspaceDir, configuredArtifactDir string, opts PlanOptions) artifactPathSet {
 	artifactDir := projectcore.ResolvePath(executionWorkspaceDir, configuredArtifactDir)
 	runArtifactDir := privateRunArtifactDir(artifactDir, opts)
 
-	return runtimeArtifactPathSet{
+	return artifactPathSet{
 		artifactDir:       artifactDir,
 		runArtifactDir:    runArtifactDir,
 		workerContextPath: filepath.Join(runArtifactDir, "context.md"),
@@ -217,7 +217,7 @@ func privateRuntimeArtifactPaths(executionWorkspaceDir, configuredArtifactDir st
 	}
 }
 
-func privateRunArtifactDir(artifactDir string, opts RuntimePlanOptions) string {
+func privateRunArtifactDir(artifactDir string, opts PlanOptions) string {
 	if opts.TicketKey != "" && opts.RunID != "" {
 		return filepath.Join(artifactDir, opts.TicketKey, opts.RunID)
 	}
@@ -229,39 +229,39 @@ func privateRunArtifactDir(artifactDir string, opts RuntimePlanOptions) string {
 	return artifactDir
 }
 
-type runtimeArtifactLayout struct {
+type artifactLayout struct {
 	layout     opscore.Layout
 	artifactID string
 	canonical  bool
 }
 
-func runtimeOpsLayout(projectDir, configuredArtifactDir string, opts RuntimePlanOptions) (runtimeArtifactLayout, error) {
+func opsLayout(projectDir, configuredArtifactDir string, opts PlanOptions) (artifactLayout, error) {
 	if opts.OpsLayout != nil || opts.ArtifactID != "" {
 		if opts.OpsLayout == nil || strings.TrimSpace(opts.ArtifactID) == "" {
-			return runtimeArtifactLayout{}, fmt.Errorf("canonical ops layout and artifact id are required together")
+			return artifactLayout{}, fmt.Errorf("canonical ops layout and artifact id are required together")
 		}
 
-		return runtimeArtifactLayout{layout: *opts.OpsLayout, artifactID: strings.TrimSpace(opts.ArtifactID), canonical: true}, nil
+		return artifactLayout{layout: *opts.OpsLayout, artifactID: strings.TrimSpace(opts.ArtifactID), canonical: true}, nil
 	}
 
 	artifactDir := filepath.ToSlash(filepath.Clean(filepath.FromSlash(strings.TrimSpace(configuredArtifactDir))))
-	if artifactDir == PrivateRuntimeArtifactDir {
+	if artifactDir == PrivateArtifactDir {
 		layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: projectDir})
 		if err != nil {
-			return runtimeArtifactLayout{}, err
+			return artifactLayout{}, err
 		}
 
-		return runtimeArtifactLayout{layout: layout, canonical: true}, nil
+		return artifactLayout{layout: layout, canonical: true}, nil
 	}
 
-	return runtimeArtifactLayout{}, nil
+	return artifactLayout{}, nil
 }
 
-func runtimeMounts(projectDir, executionWorkspaceDir string, mode workspacecore.WorkWorkspaceMode, workdir string) []harness.RuntimeMount {
+func mounts(projectDir, executionWorkspaceDir string, mode workspacecore.ExecutionMode, workdir string) []harness.RuntimeMount {
 	mountSource := projectDir
 	mountDescription := "project workspace"
 
-	if mode == workspacecore.WorkWorkspaceModeWorktree {
+	if mode == workspacecore.ExecutionWorktree {
 		mountSource = executionWorkspaceDir
 		mountDescription = "execution workspace"
 	}

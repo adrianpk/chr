@@ -11,13 +11,13 @@ import (
 func TestPlanRuntimeUsesDefaultConfig(t *testing.T) {
 	dir := t.TempDir()
 
-	plan, err := PlanRuntime(RuntimePlanOptions{ProjectDir: dir})
+	plan, err := ResolvePlan(PlanOptions{ProjectDir: dir})
 	if err != nil {
 		t.Fatalf("PlanRuntime returned error: %v", err)
 	}
 
-	if plan.WorkspaceMode != workspacecore.WorkWorkspaceModeProject {
-		t.Fatalf("WorkspaceMode = %q, want %q", plan.WorkspaceMode, workspacecore.WorkWorkspaceModeProject)
+	if plan.WorkspaceMode != workspacecore.ExecutionProject {
+		t.Fatalf("WorkspaceMode = %q, want %q", plan.WorkspaceMode, workspacecore.ExecutionProject)
 	}
 
 	wantPaths := map[string]string{
@@ -45,19 +45,19 @@ func TestPlanRuntimeUsesDefaultConfig(t *testing.T) {
 		}
 	}
 
-	if plan.Image != DefaultRuntimeImage {
-		t.Fatalf("Image = %q, want %q", plan.Image, DefaultRuntimeImage)
+	if plan.Image != DefaultImage {
+		t.Fatalf("Image = %q, want %q", plan.Image, DefaultImage)
 	}
 
-	if plan.ContainerWorkdir != DefaultRuntimeWorkdir {
-		t.Fatalf("ContainerWorkdir = %q, want %q", plan.ContainerWorkdir, DefaultRuntimeWorkdir)
+	if plan.ContainerWorkdir != DefaultWorkdir {
+		t.Fatalf("ContainerWorkdir = %q, want %q", plan.ContainerWorkdir, DefaultWorkdir)
 	}
 }
 
 func TestPlanRuntimeUsesDefaultArtifactPaths(t *testing.T) {
 	dir := t.TempDir()
 
-	plan, err := PlanRuntime(RuntimePlanOptions{ProjectDir: dir})
+	plan, err := ResolvePlan(PlanOptions{ProjectDir: dir})
 	if err != nil {
 		t.Fatalf("PlanRuntime returned error: %v", err)
 	}
@@ -74,9 +74,9 @@ func TestPlanRuntimeUsesDefaultArtifactPaths(t *testing.T) {
 func TestPlanRuntimeUsesCustomConfig(t *testing.T) {
 	dir := t.TempDir()
 
-	plan, err := PlanRuntime(RuntimePlanOptions{
+	plan, err := ResolvePlan(PlanOptions{
 		ProjectDir: dir,
-		Config: RuntimeConfig{
+		Config: Config{
 			Image:             "example/runtime:dev",
 			DockerfilePath:    "ops/runtime.Dockerfile",
 			Workdir:           "/repo",
@@ -116,7 +116,7 @@ func TestPlanRuntimeUsesCustomConfig(t *testing.T) {
 func TestPlanRuntimeUsesRunArtifactPaths(t *testing.T) {
 	dir := t.TempDir()
 
-	plan, err := PlanRuntime(RuntimePlanOptions{
+	plan, err := ResolvePlan(PlanOptions{
 		ProjectDir: dir,
 		RunID:      "run-123",
 	})
@@ -154,7 +154,7 @@ func TestPlanRuntimeUsesCanonicalOpsArtifactPaths(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	plan, err := PlanRuntime(RuntimePlanOptions{
+	plan, err := ResolvePlan(PlanOptions{
 		ProjectDir: dir,
 		OpsLayout:  &layout,
 		ArtifactID: "00001-ticket-run",
@@ -182,7 +182,7 @@ func TestPlanRuntimeUsesCanonicalOpsArtifactPaths(t *testing.T) {
 func TestPlanRuntimeUsesTicketScopedRunArtifactPaths(t *testing.T) {
 	dir := t.TempDir()
 
-	plan, err := PlanRuntime(RuntimePlanOptions{
+	plan, err := ResolvePlan(PlanOptions{
 		ProjectDir: dir,
 		TicketKey:  "CHR-1",
 		RunID:      "exec-123",
@@ -208,9 +208,9 @@ func TestPlanRuntimeUsesTicketScopedRunArtifactPaths(t *testing.T) {
 func TestPlanRuntimeNormalizesRelativeContainerWorkdirMount(t *testing.T) {
 	dir := t.TempDir()
 
-	plan, err := PlanRuntime(RuntimePlanOptions{
+	plan, err := ResolvePlan(PlanOptions{
 		ProjectDir: dir,
-		Config: RuntimeConfig{
+		Config: Config{
 			Workdir: "workspace",
 		},
 	})
@@ -235,13 +235,13 @@ func TestPlanRuntimeRecordsConfiguredExecutionWorkspace(t *testing.T) {
 	dir := t.TempDir()
 	executionWorkspaceDir := filepath.Join(dir, ".chr", "default", "runtime", "worktrees", "CHR-1")
 
-	plan, err := PlanRuntime(RuntimePlanOptions{
+	plan, err := ResolvePlan(PlanOptions{
 		ProjectDir: dir,
-		Workspace: workspacecore.WorkWorkspaceConfig{
-			Mode:            workspacecore.WorkWorkspaceModeWorktree,
+		Workspace: workspacecore.ExecutionConfig{
+			Mode:            workspacecore.ExecutionWorktree,
 			WorktreeRoot:    workspacecore.DefaultWorktreeRoot,
-			WorktreeBase:    workspacecore.WorktreeBasePolicyRemoteIntegrationBranch,
-			WorktreeCleanup: workspacecore.WorktreeCleanupPolicyAfterMerge,
+			WorktreeBase:    workspacecore.BaseRemoteIntegrationBranch,
+			WorktreeCleanup: workspacecore.CleanupAfterMerge,
 		},
 		ExecutionWorkspaceDir: executionWorkspaceDir,
 		TicketKey:             "CHR-1",
@@ -260,7 +260,7 @@ func TestPlanRuntimeRecordsConfiguredExecutionWorkspace(t *testing.T) {
 		"WorkspaceDir":          filepath.Join(executionWorkspaceDir, ".chr"),
 		"ArtifactDir":           wantArtifactDir,
 		"ResultPath":            filepath.Join(wantArtifactDir, "result.json"),
-		"WorkspaceMode":         string(workspacecore.WorkWorkspaceModeWorktree),
+		"WorkspaceMode":         string(workspacecore.ExecutionWorktree),
 		"TicketKey":             "CHR-1",
 		"TicketBranch":          "chr/CHR-1",
 		"WorkspaceBaseRef":      "origin/dev",
@@ -294,10 +294,10 @@ func TestPlanRuntimePreservesProjectModeWorkspaceMount(t *testing.T) {
 	dir := t.TempDir()
 	executionWorkspaceDir := filepath.Join(dir, ".chr", "default", "runtime", "worktrees", "CHR-1")
 
-	plan, err := PlanRuntime(RuntimePlanOptions{
+	plan, err := ResolvePlan(PlanOptions{
 		ProjectDir: dir,
-		Workspace: workspacecore.WorkWorkspaceConfig{
-			Mode: workspacecore.WorkWorkspaceModeProject,
+		Workspace: workspacecore.ExecutionConfig{
+			Mode: workspacecore.ExecutionProject,
 		},
 		ExecutionWorkspaceDir: executionWorkspaceDir,
 	})

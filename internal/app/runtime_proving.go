@@ -191,7 +191,7 @@ func (factory commandFactory) runRuntimeValidate(ctx context.Context, cmd *cli.C
 		return err
 	}
 
-	result, err := validateCodexRuntime(harnessruntime.RuntimeValidationOptions{
+	result, err := validateCodexRuntime(harnessruntime.ValidationOptions{
 		ProjectDir: projectContext.ProjectDir,
 		Config:     config.Runtime,
 	})
@@ -204,7 +204,7 @@ func (factory commandFactory) runRuntimeValidate(ctx context.Context, cmd *cli.C
 		return err
 	}
 
-	if !harnessruntime.RuntimeValidationPassed(result.Checks) {
+	if !harnessruntime.ValidationPassed(result.Checks) {
 		return fmt.Errorf("runtime validation failed")
 	}
 
@@ -383,7 +383,7 @@ func printProvingValidationResult(stdout io.Writer, result core.ProvingValidatio
 	return nil
 }
 
-func formatHarnessCommand(command harnessruntime.HarnessCommand) string {
+func formatHarnessCommand(command harnessruntime.Command) string {
 	parts := append([]string{command.Program}, command.Args...)
 
 	return strings.Join(parts, " ")
@@ -391,7 +391,7 @@ func formatHarnessCommand(command harnessruntime.HarnessCommand) string {
 
 func printRuntimeValidateResult(
 	stdout io.Writer,
-	result harnessruntime.RuntimeValidationResult,
+	result harnessruntime.ValidationResult,
 	dryRun bool,
 ) error {
 	plan := result.Plan
@@ -436,7 +436,7 @@ func printRuntimeValidateResult(
 func printRuntimeValidationChecks(
 	stdout io.Writer,
 	projectDir string,
-	checks []harnessruntime.RuntimeValidationCheck,
+	checks []harnessruntime.ValidationCheck,
 ) error {
 	_, err := fmt.Fprintln(stdout, "checks:")
 	if err != nil {

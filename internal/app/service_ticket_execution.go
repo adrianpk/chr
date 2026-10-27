@@ -68,7 +68,7 @@ func (s service) runTicketStartExecution(ctx context.Context, input ticketExecut
 		return core.ExecutionRecord{}, core.NewExecutionFailure(core.ExecutionFailurePreflight, err)
 	}
 
-	invocation, err := harnessruntime.NewHarnessInvocation(harnessruntime.HarnessInvocationOptions{
+	invocation, err := harnessruntime.NewInvocation(harnessruntime.InvocationOptions{
 		Worker:      codex.Runner{},
 		ExecutionID: input.Record.ID,
 		TicketKey:   input.Record.TicketKey,

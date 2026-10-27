@@ -157,7 +157,7 @@ func testExecutionRecord(now time.Time) ExecutionRecord {
 			ValidationCommand: "make verify",
 		},
 		Workspace: ExecutionWorkspaceRef{
-			Mode:                  workspacecore.WorkWorkspaceModeWorktree,
+			Mode:                  workspacecore.ExecutionWorktree,
 			ProjectCheckoutDir:    "/tmp/project",
 			ExecutionWorkspaceDir: "/tmp/project/.chr/default/worktrees/CHR-1",
 			BaseRef:               "origin/dev",

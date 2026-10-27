@@ -51,7 +51,7 @@ type ExecutionRuntimeRef struct {
 
 // ExecutionWorkspaceRef describes where the agent work ran.
 type ExecutionWorkspaceRef struct {
-	Mode                  workspacecore.WorkWorkspaceMode
+	Mode                  workspacecore.ExecutionMode
 	ProjectCheckoutDir    string
 	ExecutionWorkspaceDir string
 	BaseRef               string
@@ -69,7 +69,7 @@ type ExecutionArtifacts struct {
 }
 
 // ExecutionRecordFromRuntimePlan executes the corresponding package operation.
-func ExecutionRecordFromRuntimePlan(record ExecutionRecord, plan harnessruntime.RuntimePlan) ExecutionRecord {
+func ExecutionRecordFromRuntimePlan(record ExecutionRecord, plan harnessruntime.Plan) ExecutionRecord {
 	record.Runtime = ExecutionRuntimeRef{
 		Image:             plan.Image,
 		DockerfilePath:    plan.DockerfilePath,

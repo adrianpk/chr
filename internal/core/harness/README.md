@@ -25,4 +25,6 @@ execution and configuration responsibilities.
 The `host` child owns executable resolution, streaming fingerprints and retained
 command admission. The `daemon` child owns lifecycle state, persistent heartbeat
 and stop requests, start guards and project loading. These children consume the
-parent's values; the parent cannot import either child.
+parent's values; the parent cannot import either child. The `runtime` child owns
+host launch plans, artifact layout, command assembly and filesystem validation;
+`trace` owns bounded host trace records and retention.

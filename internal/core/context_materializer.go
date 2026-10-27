@@ -19,7 +19,7 @@ type ContextPackageMaterializer interface {
 // MaterializeContextPackageOptions describes a package boundary value.
 type MaterializeContextPackageOptions struct {
 	Composition       ContextCompositionPlan
-	Plan              harnessruntime.RuntimePlan
+	Plan              harnessruntime.Plan
 	Agent             string
 	Project           string
 	Protocols         string
@@ -241,7 +241,7 @@ func validateMaterializeContextPackageOptions(opts MaterializeContextPackageOpti
 	return nil
 }
 
-func writeContextArtifactLink(output *strings.Builder, plan harnessruntime.RuntimePlan, name, hostPath string) {
+func writeContextArtifactLink(output *strings.Builder, plan harnessruntime.Plan, name, hostPath string) {
 	output.WriteString("- ")
 	output.WriteString(name)
 	output.WriteString(": `")

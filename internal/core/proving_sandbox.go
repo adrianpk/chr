@@ -30,9 +30,9 @@ type ProvingSandboxRunOptions struct {
 // ProvingSandboxRunResult describes a package boundary value.
 type ProvingSandboxRunResult struct {
 	Objective  ProvingObjective
-	Plan       harnessruntime.RuntimePlan
-	Build      harnessruntime.HarnessCommand
-	Run        harnessruntime.HarnessCommand
+	Plan       harnessruntime.Plan
+	Build      harnessruntime.Command
+	Run        harnessruntime.Command
 	TicketPath string
 	DryRun     bool
 }
@@ -156,7 +156,7 @@ func PlanProvingSandboxRunForObjective(projectDir string, objective ProvingObjec
 		return ProvingSandboxRunResult{}, err
 	}
 
-	invocation, err := harnessruntime.NewHarnessInvocation(harnessruntime.HarnessInvocationOptions{
+	invocation, err := harnessruntime.NewInvocation(harnessruntime.InvocationOptions{
 		ExecutionID: objective.ID, TicketKey: objective.TicketKey,
 		TicketPath: result.TicketPath, Plan: result.Plan, Worker: worker,
 	})
@@ -175,7 +175,7 @@ func planProvingRuntime(projectDir string, objective ProvingObjective, mounts []
 		return ProvingSandboxRunResult{}, err
 	}
 
-	plan, err := harnessruntime.PlanRuntime(harnessruntime.RuntimePlanOptions{
+	plan, err := harnessruntime.ResolvePlan(harnessruntime.PlanOptions{
 		ExtraMounts: mounts,
 		ProjectDir:  projectDir,
 		Config:      config.Runtime,

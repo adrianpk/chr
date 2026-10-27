@@ -67,7 +67,7 @@ func parseWorkflowConfig(data []byte) (WorkspaceConfig, error) {
 		config.Workflow.Version = 1
 		config.Review.Mode = workflowstate.ReviewTrustedAutoMerge
 		config.Work.StateAuthority = WorkStateAuthorityTickets
-		config.Work.Workspace.Mode = workspacecore.WorkWorkspaceModeWorktree
+		config.Work.Workspace.Mode = workspacecore.ExecutionWorktree
 		config.Work.ValidationTimeoutSeconds = 3600
 	}
 

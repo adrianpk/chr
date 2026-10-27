@@ -63,7 +63,7 @@ type WorkSelectionPreflightOptions struct {
 	Tickets             []IndexedTicket
 	SelectedTicketKey   string
 	BranchPolicy        WorkBranchPolicy
-	Workspace           workspacecore.WorkWorkspaceConfig
+	Workspace           workspacecore.ExecutionConfig
 	RequireBranchPolicy bool
 	Git                 WorkSelectionGit
 }
@@ -375,10 +375,10 @@ func workBranchPolicyBlockReason(ctx context.Context, opts WorkSelectionPrefligh
 	}
 
 	workspace := opts.Workspace
-	if workspace == (workspacecore.WorkWorkspaceConfig{}) {
-		workspace = workspacecore.DefaultWorkWorkspaceConfig()
+	if workspace == (workspacecore.ExecutionConfig{}) {
+		workspace = workspacecore.DefaultExecutionConfig()
 	} else {
-		workspace = workspacecore.FillWorkWorkspaceConfigDefaults(workspace)
+		workspace = workspacecore.FillExecutionDefaults(workspace)
 	}
 
 	return workBranchPolicyBlockReasonForGit(ctx, workBranchPolicyCheck{
@@ -393,7 +393,7 @@ type workBranchPolicyCheck struct {
 	projectDir string
 	git        WorkSelectionGit
 	policy     WorkBranchPolicy
-	workspace  workspacecore.WorkWorkspaceConfig
+	workspace  workspacecore.ExecutionConfig
 }
 
 func workBranchPolicyBlockReasonForGit(ctx context.Context, check workBranchPolicyCheck) (*WorkSelectionBlockReason, error) {
@@ -402,7 +402,7 @@ func workBranchPolicyBlockReasonForGit(ctx context.Context, check workBranchPoli
 		return nil, err
 	}
 
-	err = workspacecore.ValidateWorkWorkspaceConfig(check.workspace)
+	err = workspacecore.ValidateExecutionConfig(check.workspace)
 	if err != nil {
 		return nil, err
 	}
@@ -415,7 +415,7 @@ func workBranchPolicyBlockReasonForGit(ctx context.Context, check workBranchPoli
 }
 
 func runWorkBranchPolicyChecks(ctx context.Context, check workBranchPolicyCheck) (*WorkSelectionBlockReason, error) {
-	if check.workspace.Mode == workspacecore.WorkWorkspaceModeWorktree {
+	if check.workspace.Mode == workspacecore.ExecutionWorktree {
 		return nil, nil
 	}
 

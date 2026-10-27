@@ -28,7 +28,7 @@ type MaterializeWorkerContextOptions struct {
 	ResultPath            string
 	LogPath               string
 	ValidationPath        string
-	WorkspaceMode         workspacecore.WorkWorkspaceMode
+	WorkspaceMode         workspacecore.ExecutionMode
 	ProjectCheckoutDir    string
 	ExecutionWorkspaceDir string
 	TicketBranch          string
@@ -65,7 +65,7 @@ func NewWorkerContextMaterializer() WorkerContextMaterializer {
 }
 
 // MaterializeWorkerContextForExecution executes the corresponding package operation.
-func MaterializeWorkerContextForExecution(ctx context.Context, record ExecutionRecord, plan harnessruntime.RuntimePlan) error {
+func MaterializeWorkerContextForExecution(ctx context.Context, record ExecutionRecord, plan harnessruntime.Plan) error {
 	repairHandoff, err := workerRepairHandoff(ctx, plan.ProjectDir, record.TicketPath)
 	if err != nil {
 		return err
@@ -170,7 +170,7 @@ func RenderWorkerContext(opts MaterializeWorkerContextOptions) string {
 func writeWorkerWorkspaceContext(output *strings.Builder, opts MaterializeWorkerContextOptions) {
 	output.WriteString("## Workspace\n\n")
 	output.WriteString("- workspace_mode: ")
-	output.WriteString(nonEmptyWorkerContextValue(string(opts.WorkspaceMode), string(workspacecore.WorkWorkspaceModeProject)))
+	output.WriteString(nonEmptyWorkerContextValue(string(opts.WorkspaceMode), string(workspacecore.ExecutionProject)))
 	output.WriteString("\n")
 	output.WriteString("- project_checkout_dir: ")
 	output.WriteString(nonEmptyWorkerContextValue(opts.ProjectCheckoutDir, "unknown"))

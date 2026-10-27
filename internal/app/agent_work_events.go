@@ -21,7 +21,7 @@ func agentWorkLoopEventSink(projectDir string, record core.LoopRunRecord) core.A
 		return nil
 	}
 
-	plan, err := harnessruntime.PlanRuntime(harnessruntime.RuntimePlanOptions{
+	plan, err := harnessruntime.ResolvePlan(harnessruntime.PlanOptions{
 		ExtraMounts: legacyCodexMounts(),
 		ProjectDir:  projectDir,
 		Config:      config.Runtime,
@@ -272,7 +272,7 @@ func emitMergeFinishedAgentEvent(ctx context.Context, sink core.AgentEventSink, 
 }
 
 func emitBranchPreparedAgentEvent(ctx context.Context, events ticketExecutionEvents, record core.ExecutionRecord) {
-	if record.Workspace.Mode != workspacecore.WorkWorkspaceModeWorktree {
+	if record.Workspace.Mode != workspacecore.ExecutionWorktree {
 		return
 	}
 

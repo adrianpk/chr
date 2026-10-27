@@ -585,16 +585,16 @@ func assertNotAppliedWorkReadinessRepair(t *testing.T, result WorkReadinessRepai
 	}
 }
 
-func testWorktreeWorkspaceConfig() workspacecore.WorkWorkspaceConfig {
-	return workspacecore.WorkWorkspaceConfig{
-		Mode:            workspacecore.WorkWorkspaceModeWorktree,
+func testWorktreeWorkspaceConfig() workspacecore.ExecutionConfig {
+	return workspacecore.ExecutionConfig{
+		Mode:            workspacecore.ExecutionWorktree,
 		WorktreeRoot:    workspacecore.DefaultWorktreeRoot,
-		WorktreeBase:    workspacecore.WorktreeBasePolicyRemoteIntegrationBranch,
-		WorktreeCleanup: workspacecore.WorktreeCleanupPolicyAfterMerge,
+		WorktreeBase:    workspacecore.BaseRemoteIntegrationBranch,
+		WorktreeCleanup: workspacecore.CleanupAfterMerge,
 	}
 }
 
-func testWorkReadinessPlan(t *testing.T, projectDir string, workspace workspacecore.WorkWorkspaceConfig) WorktreePlan {
+func testWorkReadinessPlan(t *testing.T, projectDir string, workspace workspacecore.ExecutionConfig) WorktreePlan {
 	t.Helper()
 
 	plan, err := NewWorktreePlan(WorktreePlanOptions{

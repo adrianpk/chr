@@ -374,9 +374,9 @@ func TestCleanupMergedTicketWorktreeBlocksBranchInUse(t *testing.T) {
 	}
 }
 
-func testCleanupWorktreeWorkspace() workspacecore.WorkWorkspaceConfig {
-	workspace := workspacecore.DefaultWorkWorkspaceConfig()
-	workspace.Mode = workspacecore.WorkWorkspaceModeWorktree
+func testCleanupWorktreeWorkspace() workspacecore.ExecutionConfig {
+	workspace := workspacecore.DefaultExecutionConfig()
+	workspace.Mode = workspacecore.ExecutionWorktree
 
 	return workspace
 }

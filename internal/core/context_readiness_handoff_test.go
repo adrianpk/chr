@@ -86,10 +86,10 @@ func TestEvaluateContextReadinessHandoffSupportsCustomRequiredKinds(t *testing.T
 	}
 }
 
-func testReadinessRuntimePlan(dir string) harnessruntime.RuntimePlan {
+func testReadinessRuntimePlan(dir string) harnessruntime.Plan {
 	runDir := filepath.Join(dir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 
-	return harnessruntime.RuntimePlan{
+	return harnessruntime.Plan{
 		ProjectDir:        dir,
 		ContainerWorkdir:  "/workspace",
 		RunArtifactDir:    runDir,
@@ -103,7 +103,7 @@ func testReadinessRuntimePlan(dir string) harnessruntime.RuntimePlan {
 
 func testReadinessComposition(
 	t *testing.T,
-	plan harnessruntime.RuntimePlan,
+	plan harnessruntime.Plan,
 	sources []authoringcore.ContextSourceInventoryEntry,
 ) ContextCompositionPlan {
 	t.Helper()
