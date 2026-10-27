@@ -175,7 +175,7 @@ func refreshAppliedTicketIndex(ctx context.Context, env core.UserEnvironment, pl
 		return nil
 	}
 
-	index, err := core.NewTicketIndex(ctx, env, assetsFS)
+	index, err := core.NewWorkflowTicketIndex(ctx, env, assetsFS)
 	if err != nil {
 		return err
 	}

@@ -32,7 +32,7 @@ func workflowTestIndex(t *testing.T, path string) WorkflowIndex {
 
 	addTestProject(t, registry, projectcore.Project{ID: "project-1", Name: "example", Path: "/tmp/example", Enabled: true, RegisteredAt: time.Now().UTC()})
 
-	index, err := NewTicketIndexFromDB(context.Background(), db, testMigrationFS())
+	index, err := NewWorkflowTicketIndexFromDB(context.Background(), db, testMigrationFS())
 	if err != nil {
 		t.Fatal(err)
 	}

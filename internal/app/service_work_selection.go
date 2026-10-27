@@ -45,7 +45,7 @@ func parseProjectTicketsFromDir(ctx context.Context, projectID, projectDir strin
 }
 
 func (s service) agentWorkLoopSelection(opts AgentWorkSelectionOptions) (agentWorkLoopSelection, error) {
-	index, err := core.NewTicketIndex(s.ctx, s.env, s.assetsFS)
+	index, err := core.NewWorkflowTicketIndex(s.ctx, s.env, s.assetsFS)
 	if err != nil {
 		return agentWorkLoopSelection{}, err
 	}

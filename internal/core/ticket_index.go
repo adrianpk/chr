@@ -7,8 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"os"
-	"path/filepath"
 	"strings"
 
 	_ "modernc.org/sqlite"
@@ -32,31 +30,6 @@ type TicketIndex interface {
 
 type sqliteTicketIndex struct {
 	db *sql.DB
-}
-
-// NewTicketIndex constructs the corresponding package service or value.
-func NewTicketIndex(ctx context.Context, env database.DataDirectory, assetsFS fs.FS) (TicketIndex, error) {
-	err := os.MkdirAll(env.DataDir(), 0o755)
-	if err != nil {
-		return nil, fmt.Errorf("create user data directory: %w", err)
-	}
-
-	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), database.UserFileName))
-	if err != nil {
-		return nil, fmt.Errorf("open ticket index database: %w", err)
-	}
-
-	err = database.Configure(ctx, db)
-	if err != nil {
-		return nil, database.CloseOnError(db, err)
-	}
-
-	index, err := NewTicketIndexFromDB(ctx, db, assetsFS)
-	if err != nil {
-		return nil, database.CloseOnError(db, err)
-	}
-
-	return index, nil
 }
 
 // NewTicketIndexFromDB constructs the corresponding package service or value.

@@ -15,7 +15,7 @@ func TestNativeQueueIndex(t *testing.T) {
 	store, admission := nativeEntryFixture(t)
 	entry := nativeEntryAdmit(t, store, admission)
 
-	index, ok := workflowTestIndex(t, filepath.Join(t.TempDir(), "queue.sqlite")).(*sqliteTicketIndex)
+	index, ok := workflowTestIndex(t, filepath.Join(t.TempDir(), "queue.sqlite")).(*workflowTicketIndex)
 	if !ok {
 		t.Fatal("index lacks SQLite owner")
 	}
@@ -41,7 +41,7 @@ func TestNativeQueueIndex(t *testing.T) {
 	nativeQueueStaleIndex(t, index, store, entry, q)
 }
 
-func nativeQueueStaleIndex(t *testing.T, index *sqliteTicketIndex, store *WorkflowStore, entry WorkflowIntegrationEntry, q WorkflowIntegrationQueueQuery) {
+func nativeQueueStaleIndex(t *testing.T, index *workflowTicketIndex, store *WorkflowStore, entry WorkflowIntegrationEntry, q WorkflowIntegrationQueueQuery) {
 	t.Helper()
 
 	if _, err := store.TransitionWorkflowIntegration(t.Context(), nativeEntryTransition(t, store, entry, "preparing")); err != nil {
@@ -62,7 +62,7 @@ func nativeQueueStaleIndex(t *testing.T, index *sqliteTicketIndex, store *Workfl
 	}
 }
 
-func nativeQueueRepairCache(t *testing.T, index *sqliteTicketIndex, store *WorkflowStore, q WorkflowIntegrationQueueQuery) {
+func nativeQueueRepairCache(t *testing.T, index *workflowTicketIndex, store *WorkflowStore, q WorkflowIntegrationQueueQuery) {
 	t.Helper()
 
 	for _, query := range []string{"DELETE FROM workflow_integration_entries", "UPDATE workflow_integration_entries SET image_hash = 'corrupt'", "DELETE FROM workflow_integration_snapshots"} {

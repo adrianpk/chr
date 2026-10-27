@@ -348,7 +348,7 @@ type ticketLoopOperationResult struct {
 }
 
 func (s service) runLegacyTicketLoop(ctx context.Context, request ticketLoopRequest) (ticketLoopOperationResult, error) {
-	index, err := core.NewTicketIndex(ctx, s.env, s.assetsFS)
+	index, err := core.NewWorkflowTicketIndex(ctx, s.env, s.assetsFS)
 	if err != nil {
 		return ticketLoopOperationResult{}, err
 	}

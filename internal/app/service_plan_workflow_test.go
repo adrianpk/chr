@@ -59,7 +59,7 @@ func serviceWorkflowPlanFixture() generationcore.GeneratedWorkflowPlan {
 func checkServiceWorkflowProjection(t *testing.T, service service, project string) {
 	t.Helper()
 
-	index, err := core.NewTicketIndex(t.Context(), service.env, service.assetsFS)
+	index, err := core.NewWorkflowTicketIndex(t.Context(), service.env, service.assetsFS)
 	if err != nil {
 		t.Fatal(err)
 	}

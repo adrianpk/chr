@@ -42,7 +42,7 @@ func (s service) MaterializeWorkflowPlan(ctx context.Context, plan generationcor
 }
 
 func (s service) refreshWorkflowProjection(ctx context.Context, store *core.WorkflowStore) (err error) {
-	index, err := core.NewTicketIndex(ctx, s.env, s.assetsFS)
+	index, err := core.NewWorkflowTicketIndex(ctx, s.env, s.assetsFS)
 	if err != nil {
 		return err
 	}

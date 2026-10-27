@@ -1,6 +1,6 @@
 package tui
 
-import "forge.adrianpk.com/chr/internal/core"
+import core "forge.adrianpk.com/chr/internal/core"
 
 // WorkReadinessView is the TUI projection of work readiness state.
 type WorkReadinessView struct {

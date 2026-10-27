@@ -105,7 +105,7 @@ func (s service) buildLegacyTicketStartPreflight(ctx context.Context, ticket tic
 }
 
 func (s service) selectTicketStartTicket(ctx context.Context, key string) (ticketcore.Indexed, error) {
-	index, err := core.NewTicketIndex(ctx, s.env, s.assetsFS)
+	index, err := core.NewWorkflowTicketIndex(ctx, s.env, s.assetsFS)
 	if err != nil {
 		return ticketcore.Indexed{}, err
 	}

@@ -22,7 +22,7 @@ func workflowQuerySQL(q WorkflowQuery) (string, error) {
 	return "", fmt.Errorf("unsupported workflow query kind: %s", q.Kind)
 }
 
-func (i *sqliteTicketIndex) queryWorkflowPage(ctx context.Context, store *WorkflowStore, snapshot WorkflowSnapshot, q WorkflowQuery) (WorkflowPage, error) {
+func (i *workflowTicketIndex) queryWorkflowPage(ctx context.Context, store *WorkflowStore, snapshot WorkflowSnapshot, q WorkflowQuery) (WorkflowPage, error) {
 	query, err := workflowQuerySQL(q)
 	if err != nil {
 		return WorkflowPage{}, err

@@ -251,7 +251,7 @@ func (s service) refreshAgenticReviewTicketIndex(execution core.ExecutionRecord,
 		return nil
 	}
 
-	index, err := core.NewTicketIndex(s.ctx, s.env, s.assetsFS)
+	index, err := core.NewWorkflowTicketIndex(s.ctx, s.env, s.assetsFS)
 	if err != nil {
 		return err
 	}

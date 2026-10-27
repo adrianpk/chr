@@ -7630,7 +7630,7 @@ func indexTicket(t *testing.T, devRoot, projectDir string, ticket ticketcore.Ind
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	index, err := core.NewTicketIndex(t.Context(), env, testAssetsFS())
+	index, err := core.NewWorkflowTicketIndex(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewTicketIndex returned error: %v", err)
 	}
@@ -7667,7 +7667,7 @@ func listProjectTickets(t *testing.T, devRoot, projectDir string) []ticketcore.I
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	index, err := core.NewTicketIndex(t.Context(), env, testAssetsFS())
+	index, err := core.NewWorkflowTicketIndex(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewTicketIndex returned error: %v", err)
 	}

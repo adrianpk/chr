@@ -155,7 +155,7 @@ func (s service) CreateDefaultTicket() (ArtifactOperationResult, error) {
 }
 
 func (s service) refreshCreatedTicketIndex(ticketPath string) error {
-	index, err := core.NewTicketIndex(s.ctx, s.env, s.assetsFS)
+	index, err := core.NewWorkflowTicketIndex(s.ctx, s.env, s.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -462,7 +462,7 @@ func (s service) listProjectTickets() ([]ticketcore.Indexed, error) {
 }
 
 func (s service) Board() (core.Board, error) {
-	index, err := core.NewTicketIndex(s.ctx, s.env, s.assetsFS)
+	index, err := core.NewWorkflowTicketIndex(s.ctx, s.env, s.assetsFS)
 	if err != nil {
 		return core.Board{}, err
 	}
@@ -483,7 +483,7 @@ func (s service) Board() (core.Board, error) {
 }
 
 func (s service) ticketByKey(key string) (ticketcore.Indexed, error) {
-	index, err := core.NewTicketIndex(s.ctx, s.env, s.assetsFS)
+	index, err := core.NewWorkflowTicketIndex(s.ctx, s.env, s.assetsFS)
 	if err != nil {
 		return ticketcore.Indexed{}, err
 	}

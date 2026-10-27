@@ -21,7 +21,7 @@ type WorkflowIntegrationIndex interface {
 
 // RebuildWorkflowIntegrationIndex replaces derived rows after validating records.
 // Failed or interrupted cache work never repairs domain or publication journals.
-func (i *sqliteTicketIndex) RebuildWorkflowIntegrationIndex(ctx context.Context, store *WorkflowStore) error {
+func (i *workflowTicketIndex) RebuildWorkflowIntegrationIndex(ctx context.Context, store *WorkflowStore) error {
 	err := store.withRepositoryLock(ctx, store.requireNoWorkflowTransition, func() error {
 		snapshot, err := store.readWorkflowIntegrationSnapshot(ctx)
 		if err != nil {
@@ -39,7 +39,7 @@ func (i *sqliteTicketIndex) RebuildWorkflowIntegrationIndex(ctx context.Context,
 	return integrationRecordError("integration index rebuild", err)
 }
 
-func (i *sqliteTicketIndex) replaceWorkflowIntegrationIndex(ctx context.Context, projectID, coordinatorID string, snapshot workflowIntegrationSnapshot) error {
+func (i *workflowTicketIndex) replaceWorkflowIntegrationIndex(ctx context.Context, projectID, coordinatorID string, snapshot workflowIntegrationSnapshot) error {
 	tx, err := i.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -87,7 +87,7 @@ func indexWorkflowIntegrationView(ctx context.Context, tx *sql.Tx, view Workflow
 
 // QueryWorkflowIntegrationQueue rejects stale, missing or corrupted projection
 // rows before returning the same domain page as the source-only query.
-func (i *sqliteTicketIndex) QueryWorkflowIntegrationQueue(ctx context.Context, store *WorkflowStore, q WorkflowIntegrationQueueQuery) (page WorkflowIntegrationQueuePage, err error) {
+func (i *workflowTicketIndex) QueryWorkflowIntegrationQueue(ctx context.Context, store *WorkflowStore, q WorkflowIntegrationQueueQuery) (page WorkflowIntegrationQueuePage, err error) {
 	if err := validateWorkflowIntegrationQueueQuery(q); err != nil {
 		return page, err
 	}
@@ -115,7 +115,7 @@ func (i *sqliteTicketIndex) QueryWorkflowIntegrationQueue(ctx context.Context, s
 	return page, integrationRecordError("integration index", err)
 }
 
-func (i *sqliteTicketIndex) checkWorkflowIntegrationIndex(ctx context.Context, projectID, coordinatorID string, snapshot workflowIntegrationSnapshot) (err error) {
+func (i *workflowTicketIndex) checkWorkflowIntegrationIndex(ctx context.Context, projectID, coordinatorID string, snapshot workflowIntegrationSnapshot) (err error) {
 	var hash string
 
 	query := "SELECT source_hash FROM workflow_integration_snapshots WHERE project_id = ? AND coordinator_id = ?"

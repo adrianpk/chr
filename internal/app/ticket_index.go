@@ -20,7 +20,7 @@ func (factory commandFactory) openTicketIndexForCommand(ctx context.Context, cmd
 		return commandTicketIndex{Project: commandProjectContext{}, Index: nil}, err
 	}
 
-	index, err := core.NewTicketIndex(ctx, env, factory.deps.assetsFS)
+	index, err := core.NewWorkflowTicketIndex(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return commandTicketIndex{Project: commandProjectContext{}, Index: nil}, err
 	}

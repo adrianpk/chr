@@ -17,7 +17,7 @@ type ticketMergeInput struct {
 }
 
 func (s service) mergeTicket(ctx context.Context, request ticketMergeInput) (core.TicketMergeCommandResult, error) {
-	index, err := core.NewTicketIndex(ctx, s.env, s.assetsFS)
+	index, err := core.NewWorkflowTicketIndex(ctx, s.env, s.assetsFS)
 	if err != nil {
 		return core.TicketMergeCommandResult{}, err
 	}

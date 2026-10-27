@@ -15,7 +15,7 @@ type ticketReviewInput struct {
 }
 
 func (s service) reviewTicket(ctx context.Context, request ticketReviewInput) (core.TicketReviewCommandResult, error) {
-	index, err := core.NewTicketIndex(ctx, s.env, s.assetsFS)
+	index, err := core.NewWorkflowTicketIndex(ctx, s.env, s.assetsFS)
 	if err != nil {
 		return core.TicketReviewCommandResult{}, err
 	}

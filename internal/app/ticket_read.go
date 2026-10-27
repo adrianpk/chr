@@ -124,7 +124,7 @@ func (factory commandFactory) runTicketList(ctx context.Context, cmd *cli.Comman
 		return err
 	}
 
-	index, err := core.NewTicketIndex(ctx, env, factory.deps.assetsFS)
+	index, err := core.NewWorkflowTicketIndex(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}

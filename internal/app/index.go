@@ -59,7 +59,7 @@ func (factory commandFactory) runIndexRebuild(ctx context.Context, cmd *cli.Comm
 		return err
 	}
 
-	index, err := core.NewTicketIndex(ctx, env, factory.deps.assetsFS)
+	index, err := core.NewWorkflowTicketIndex(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -121,7 +121,7 @@ func (factory commandFactory) runIndexStatus(ctx context.Context, cmd *cli.Comma
 		return err
 	}
 
-	index, err := core.NewTicketIndex(ctx, env, factory.deps.assetsFS)
+	index, err := core.NewWorkflowTicketIndex(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}

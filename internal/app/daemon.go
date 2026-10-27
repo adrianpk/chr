@@ -270,7 +270,7 @@ func (runner daemonWorkflowRunner) foregroundIterations(ctx context.Context, max
 		_ = registry.Close()
 	}()
 
-	index, err := core.NewTicketIndex(ctx, runner.env, runner.assets)
+	index, err := core.NewWorkflowTicketIndex(ctx, runner.env, runner.assets)
 	if err != nil {
 		return daemonForegroundLoopResult{}, err
 	}

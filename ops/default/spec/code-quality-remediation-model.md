@@ -633,3 +633,10 @@ time fields in the original order and returns the same errors. No SQL column,
 transaction, cache invalidation, schema, null handling or durable value changes.
 timePtr is test-only. Constructors accept the existing database.DataDirectory
 port without changing open/configure/migration or failure-cleanup behavior.
+
+Native workflow projection methods now belong to an explicit storage composition
+that embeds the existing ticket index and holds the same SQLite handle. Native
+source locks, integration/cache hashes, query validation and corruption recovery
+remain at the workflow owner. Ticket updates retain their original transactional
+workflow-snapshot invalidation. No second database pool, cache authority or
+forwarding API was introduced; application assembly uses the actual native owner.

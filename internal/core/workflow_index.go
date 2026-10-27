@@ -41,7 +41,7 @@ type WorkflowPage struct {
 }
 
 // RebuildWorkflowIndex replaces only the requested namespace's derived rows.
-func (i *sqliteTicketIndex) RebuildWorkflowIndex(ctx context.Context, store *WorkflowStore) error {
+func (i *workflowTicketIndex) RebuildWorkflowIndex(ctx context.Context, store *WorkflowStore) error {
 	return store.withRepositoryLock(ctx, store.requireNoWorkflowTransition, func() error {
 		snapshot, err := store.readSnapshot(ctx)
 		if err != nil {
@@ -205,7 +205,7 @@ func workflowSnapshotHash(snapshot WorkflowSnapshot) string {
 }
 
 // QueryWorkflow rejects stale SQL or pagination snapshots before returning work.
-func (i *sqliteTicketIndex) QueryWorkflow(ctx context.Context, store *WorkflowStore, q WorkflowQuery) (page WorkflowPage, err error) {
+func (i *workflowTicketIndex) QueryWorkflow(ctx context.Context, store *WorkflowStore, q WorkflowQuery) (page WorkflowPage, err error) {
 	if q.Limit < 1 || q.Limit > workflowstate.PageLimit || q.Offset < 0 {
 		return WorkflowPage{}, fmt.Errorf("workflow query page bounds exceeded")
 	}

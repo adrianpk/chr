@@ -68,6 +68,19 @@ only in the test fixture. Index and key-sequence constructors consume the existi
 database.DataDirectory contract; their IO order, migrations and errors are unchanged.
 Two assigned signatures are fixed; the remaining slice work is not closed.
 
+Native index composition prerequisite checks passed:
+
+- `go test ./internal/core ./internal/app ./scripts/goquality -run '^Test(WorkflowIndex|NativeQueueIndex|NativeIntegrationQueue|TicketIndex|QualityRecordWire|QualityStorage|Board|Leaf)' -count=1 -timeout=3m`
+- `make check-go-style`: 9308 declarations, ceiling seven, 205 exact debts and one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app ./scripts/goquality`: zero issues.
+
+WorkflowTicketIndex composes the existing ticket storage with native workflow
+projection capabilities on the same SQLite handle. Native projection methods
+retain their actual owner and unchanged SQL, locks, source hashes, bounds and
+recovery behavior. Existing database initialization, migration, cleanup and
+transactional cache invalidation remain intact. Eight additional constructor/
+receiver preimages reconcile, for 73 recorded declarations/tests in total.
+
 ## Risks and Follow-ups
 
 T11.1–T11.6 remain open; no Slice 11 PR is prepared yet.
