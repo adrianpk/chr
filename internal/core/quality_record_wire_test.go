@@ -9,6 +9,9 @@ import (
 
 func recordWireFactories() map[string]func() any {
 	return map[string]func() any{
+		"guided-session":  func() any { return &AuthoringSession{} },
+		"guided-control":  func() any { return &GuidedControlState{} },
+		"workflow-start":  func() any { return &WorkflowStartRequest{} },
 		"invocation":      func() any { return &WorkflowInvocation{} },
 		"merger-input":    func() any { return &WorkflowMergerInput{} },
 		"indexed-ticket":  func() any { return &IndexedTicket{} },

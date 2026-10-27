@@ -1,0 +1,267 @@
+{
+  "guided-control": [
+    {
+      "anonymous": false,
+      "name": "StopIntent",
+      "order": 0,
+      "tag": "json:\"stop_intent,omitempty\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "ResumeStatus",
+      "order": 1,
+      "tag": "json:\"resume_status,omitempty\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "PreviousStatus",
+      "order": 2,
+      "tag": "json:\"previous_status,omitempty\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "PreviousIntent",
+      "order": 3,
+      "tag": "json:\"previous_intent,omitempty\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "PreviousBlocker",
+      "order": 4,
+      "tag": "json:\"previous_blocker,omitempty\"",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "AcknowledgedRevision",
+      "order": 5,
+      "tag": "json:\"acknowledged_revision,omitempty\"",
+      "type": "uint64"
+    },
+    {
+      "anonymous": false,
+      "name": "PendingOperation",
+      "order": 6,
+      "tag": "json:\"pending_operation,omitempty\"",
+      "type": "*core.GuidedUseCaseOperation"
+    },
+    {
+      "anonymous": false,
+      "name": "NativeRequest",
+      "order": 7,
+      "tag": "json:\"native_request,omitempty\"",
+      "type": "*core.WorkflowControlMutationRequest"
+    },
+    {
+      "anonymous": false,
+      "name": "NativeReceipt",
+      "order": 8,
+      "tag": "json:\"native_receipt,omitempty\"",
+      "type": "*core.WorkflowControlResult"
+    },
+    {
+      "anonymous": false,
+      "name": "CompletedOperations",
+      "order": 9,
+      "tag": "json:\"completed_operations,omitempty\"",
+      "type": "[]core.GuidedControlReceipt"
+    }
+  ],
+  "guided-session": [
+    {
+      "anonymous": false,
+      "name": "Guided",
+      "order": 0,
+      "tag": "json:\",omitempty\"",
+      "type": "*core.GuidedUseCaseState"
+    },
+    {
+      "anonymous": false,
+      "name": "ID",
+      "order": 1,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Namespace",
+      "order": 2,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Revision",
+      "order": 3,
+      "tag": "",
+      "type": "int64"
+    },
+    {
+      "anonymous": false,
+      "name": "ProjectID",
+      "order": 4,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Status",
+      "order": 5,
+      "tag": "",
+      "type": "core.AuthoringSessionStatus"
+    },
+    {
+      "anonymous": false,
+      "name": "Mode",
+      "order": 6,
+      "tag": "",
+      "type": "core.AuthoringSessionMode"
+    },
+    {
+      "anonymous": false,
+      "name": "Target",
+      "order": 7,
+      "tag": "",
+      "type": "core.AuthoringTarget"
+    },
+    {
+      "anonymous": false,
+      "name": "Topic",
+      "order": 8,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Inputs",
+      "order": 9,
+      "tag": "",
+      "type": "[]core.AuthoringArtifactRef"
+    },
+    {
+      "anonymous": false,
+      "name": "Outputs",
+      "order": 10,
+      "tag": "",
+      "type": "[]core.AuthoringArtifactRef"
+    },
+    {
+      "anonymous": false,
+      "name": "Provenance",
+      "order": 11,
+      "tag": "",
+      "type": "[]core.AuthoringProvenanceLink"
+    },
+    {
+      "anonymous": false,
+      "name": "CreatedAt",
+      "order": 12,
+      "tag": "",
+      "type": "time.Time"
+    },
+    {
+      "anonymous": false,
+      "name": "StartedAt",
+      "order": 13,
+      "tag": "",
+      "type": "*time.Time"
+    },
+    {
+      "anonymous": false,
+      "name": "FinishedAt",
+      "order": 14,
+      "tag": "",
+      "type": "*time.Time"
+    },
+    {
+      "anonymous": false,
+      "name": "UpdatedAt",
+      "order": 15,
+      "tag": "",
+      "type": "time.Time"
+    },
+    {
+      "anonymous": false,
+      "name": "Description",
+      "order": 16,
+      "tag": "",
+      "type": "string"
+    }
+  ],
+  "workflow-start": [
+    {
+      "anonymous": false,
+      "name": "HarnessBinding",
+      "order": 0,
+      "tag": "json:\"harness_binding,omitempty\"",
+      "type": "*core.HarnessBinding"
+    },
+    {
+      "anonymous": false,
+      "name": "HarnessCommand",
+      "order": 1,
+      "tag": "json:\"-\"",
+      "type": "[]string"
+    },
+    {
+      "anonymous": false,
+      "name": "ResolveHarness",
+      "order": 2,
+      "tag": "json:\"-\"",
+      "type": "core.WorkflowHarnessResolver"
+    },
+    {
+      "anonymous": false,
+      "name": "Admission",
+      "order": 3,
+      "tag": "json:\"admission_guard,omitempty\"",
+      "type": "*core.WorkflowAdmissionGuard"
+    },
+    {
+      "anonymous": false,
+      "name": "IncludeLaterTickets",
+      "order": 4,
+      "tag": "json:\"include_later_tickets_override,omitempty\"",
+      "type": "*bool"
+    },
+    {
+      "anonymous": false,
+      "name": "Selected",
+      "order": 5,
+      "tag": "json:\"-\"",
+      "type": "*core.WorkflowSelectionGuard"
+    },
+    {
+      "anonymous": false,
+      "name": "RequestKey",
+      "order": 6,
+      "tag": "",
+      "type": "string"
+    },
+    {
+      "anonymous": false,
+      "name": "Selection",
+      "order": 7,
+      "tag": "",
+      "type": "core.WorkflowPreviewRequest"
+    },
+    {
+      "anonymous": false,
+      "name": "Policy",
+      "order": 8,
+      "tag": "",
+      "type": "core.WorkflowExecutionPolicy"
+    },
+    {
+      "anonymous": false,
+      "name": "ReviewRestriction",
+      "order": 9,
+      "tag": "json:\"review_restriction,omitempty\"",
+      "type": "core.ReviewWorkflowMode"
+    }
+  ]
+}
