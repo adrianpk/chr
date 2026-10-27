@@ -1,13 +1,13 @@
 package core
 
-import "forge.adrianpk.com/chr/internal/core/gate"
-
 import (
 	"context"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/gate"
 )
 
 func TestGateEvidenceClassifierClassifiesAgentManagedAndManualChanges(t *testing.T) {
@@ -27,9 +27,9 @@ func TestGateEvidenceClassifierClassifiesAgentManagedAndManualChanges(t *testing
 		},
 	})
 
-	classification, err := gate.NewGateEvidenceClassifier(NewReportLister().ListGateExecutionReports).Classify(context.Background(), gate.GateEvidenceClassificationRequest{
+	classification, err := gate.NewEvidenceClassifier(NewReportLister().ListGateExecutionReports).Classify(context.Background(), gate.EvidenceClassificationRequest{
 		ProjectDir: projectDir,
-		Files: []gate.GateGitChangedFile{
+		Files: []gate.GitChangedFile{
 			{Status: "M", Path: "internal/core/gate.go"},
 			{Status: "M", Path: "README.md"},
 		},
@@ -59,9 +59,9 @@ func TestGateEvidenceClassifierClassifiesAgentManagedAndManualChanges(t *testing
 func TestGateEvidenceClassifierClassifiesHighRiskManualChanges(t *testing.T) {
 	projectDir := t.TempDir()
 
-	classification, err := gate.NewGateEvidenceClassifier(NewReportLister().ListGateExecutionReports).Classify(context.Background(), gate.GateEvidenceClassificationRequest{
+	classification, err := gate.NewEvidenceClassifier(NewReportLister().ListGateExecutionReports).Classify(context.Background(), gate.EvidenceClassificationRequest{
 		ProjectDir: projectDir,
-		Files: []gate.GateGitChangedFile{
+		Files: []gate.GitChangedFile{
 			{Status: "M", Path: "internal/runtime/runner.go"},
 			{Status: "M", Path: "README.md"},
 		},
@@ -104,9 +104,9 @@ func TestGateEvidenceClassifierRecordsMissingExecutionResultEvidence(t *testing.
 - result: ops/default/run/00001-ticket-run/evidence/result.json
 `)
 
-	classification, err := gate.NewGateEvidenceClassifier(NewReportLister().ListGateExecutionReports).Classify(context.Background(), gate.GateEvidenceClassificationRequest{
+	classification, err := gate.NewEvidenceClassifier(NewReportLister().ListGateExecutionReports).Classify(context.Background(), gate.EvidenceClassificationRequest{
 		ProjectDir: projectDir,
-		Files: []gate.GateGitChangedFile{
+		Files: []gate.GitChangedFile{
 			{Status: "M", Path: "internal/core/gate.go"},
 		},
 	})

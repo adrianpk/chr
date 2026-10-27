@@ -22,6 +22,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/core/gate"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -1131,7 +1132,7 @@ func TestGateDevMainWritesReportsWhenValidationPasses(t *testing.T) {
 	}
 
 	report := readOnlyGateCLIJSONReport(t, projectDir)
-	if report.Status != core.GateReportStatusPassed {
+	if report.Status != gate.ReportStatusPassed {
 		t.Fatalf("Status = %q, want passed", report.Status)
 	}
 
@@ -1185,7 +1186,7 @@ func TestFailure(t *testing.T) {
 	}
 
 	report := readOnlyGateCLIJSONReport(t, projectDir)
-	if report.Status != core.GateReportStatusFailed {
+	if report.Status != gate.ReportStatusFailed {
 		t.Fatalf("Status = %q, want failed", report.Status)
 	}
 
@@ -1220,7 +1221,7 @@ func TestGateDevMainWritesReportsWhenRefResolutionFails(t *testing.T) {
 	}
 
 	report := readOnlyGateCLIJSONReport(t, projectDir)
-	if report.Status != core.GateReportStatusFailed {
+	if report.Status != gate.ReportStatusFailed {
 		t.Fatalf("Status = %q, want failed", report.Status)
 	}
 
@@ -1273,7 +1274,7 @@ func TestGateDevMainFailsWhenAgentEvidenceIsMissing(t *testing.T) {
 	}
 
 	report := readOnlyGateCLIJSONReport(t, projectDir)
-	if report.Status != core.GateReportStatusFailed {
+	if report.Status != gate.ReportStatusFailed {
 		t.Fatalf("Status = %q, want failed", report.Status)
 	}
 
@@ -1331,7 +1332,7 @@ func TestGateDevMainAllowsMissingAgentEvidenceWhenConfigured(t *testing.T) {
 	}
 
 	report := readOnlyGateCLIJSONReport(t, projectDir)
-	if report.Status != core.GateReportStatusPassed {
+	if report.Status != gate.ReportStatusPassed {
 		t.Fatalf("Status = %q, want passed", report.Status)
 	}
 }
@@ -8661,7 +8662,7 @@ func gateCLIGitOutput(t *testing.T, projectDir string, args ...string) string {
 	return strings.TrimSpace(string(output))
 }
 
-func readOnlyGateCLIJSONReport(t *testing.T, projectDir string) core.GateReport {
+func readOnlyGateCLIJSONReport(t *testing.T, projectDir string) gate.Report {
 	t.Helper()
 
 	matches, err := filepath.Glob(filepath.Join(projectDir, "ops", "default", "report", "*", "evidence", "gate-report.json"))
@@ -8675,7 +8676,7 @@ func readOnlyGateCLIJSONReport(t *testing.T, projectDir string) core.GateReport 
 
 	content := readFile(t, matches[0])
 
-	var report core.GateReport
+	var report gate.Report
 
 	err = json.Unmarshal([]byte(content), &report)
 	if err != nil {

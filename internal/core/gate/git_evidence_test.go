@@ -24,7 +24,7 @@ func TestGateGitEvidenceServiceCollectsRangeEvidence(t *testing.T) {
 
 	headSHA := gateGitEvidenceOutput(t, projectDir, "rev-parse", "HEAD")
 
-	evidence, err := NewGateGitEvidenceService().Collect(t.Context(), GateGitEvidenceRequest{
+	evidence, err := NewGitEvidenceService().Collect(t.Context(), GitEvidenceRequest{
 		ProjectDir: projectDir,
 		BaseRef:    baseSHA,
 		HeadRef:    "HEAD",
@@ -46,7 +46,7 @@ func TestGateGitEvidenceServiceCollectsRangeEvidence(t *testing.T) {
 	}
 
 	assertGateGitCommits(t, evidence.Commits, []string{"gate evidence"})
-	assertGateGitFiles(t, evidence.Files, []GateGitChangedFile{
+	assertGateGitFiles(t, evidence.Files, []GitChangedFile{
 		{Status: "M", Path: "README.md"},
 		{Status: "A", Path: "internal/core/gate.go"},
 	})
@@ -62,7 +62,7 @@ func TestGateGitEvidenceServiceRejectsInvalidRefs(t *testing.T) {
 	runGateGitEvidenceGit(t, projectDir, "add", ".")
 	runGateGitEvidenceGit(t, projectDir, "commit", "-m", "base commit")
 
-	_, err := NewGateGitEvidenceService().Collect(t.Context(), GateGitEvidenceRequest{
+	_, err := NewGitEvidenceService().Collect(t.Context(), GitEvidenceRequest{
 		ProjectDir: projectDir,
 		BaseRef:    "missing-ref",
 		HeadRef:    "HEAD",
@@ -77,15 +77,15 @@ func TestGateGitEvidenceServiceRejectsInvalidRefs(t *testing.T) {
 }
 
 func TestParseGateGitChangedFilesHandlesRenames(t *testing.T) {
-	files := parseGateGitChangedFiles("R100\told/name.go\tnew/name.go\n")
+	files := parseGitChangedFiles("R100\told/name.go\tnew/name.go\n")
 
-	assertGateGitFiles(t, files, []GateGitChangedFile{
+	assertGateGitFiles(t, files, []GitChangedFile{
 		{Status: "R100", Old: "old/name.go", Path: "new/name.go"},
 	})
 }
 
 func TestGateGitEvidenceServiceRejectsMissingProjectDir(t *testing.T) {
-	_, err := NewGateGitEvidenceService().Collect(context.Background(), GateGitEvidenceRequest{
+	_, err := NewGitEvidenceService().Collect(context.Background(), GitEvidenceRequest{
 		BaseRef: "main",
 		HeadRef: "dev",
 	})
@@ -148,7 +148,7 @@ func writeGateGitEvidenceFile(t *testing.T, projectDir, relativePath, content st
 	}
 }
 
-func assertGateGitCommits(t *testing.T, commits []GateGitCommit, wantSubjects []string) {
+func assertGateGitCommits(t *testing.T, commits []GitCommit, wantSubjects []string) {
 	t.Helper()
 
 	if len(commits) != len(wantSubjects) {
@@ -162,7 +162,7 @@ func assertGateGitCommits(t *testing.T, commits []GateGitCommit, wantSubjects []
 	}
 }
 
-func assertGateGitFiles(t *testing.T, files, want []GateGitChangedFile) {
+func assertGateGitFiles(t *testing.T, files, want []GitChangedFile) {
 	t.Helper()
 
 	if len(files) != len(want) {

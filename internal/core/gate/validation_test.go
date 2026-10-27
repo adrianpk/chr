@@ -10,7 +10,7 @@ import (
 func TestGateValidationRunnerPassesDefaultGoTest(t *testing.T) {
 	projectDir := newGateValidationGoProject(t, "package gatevalidation\n")
 
-	result, err := NewGateValidationRunner().Run(t.Context(), GateValidationRequest{
+	result, err := NewValidationRunner().Run(t.Context(), ValidationRequest{
 		ProjectDir: projectDir,
 	})
 	if err != nil {
@@ -21,8 +21,8 @@ func TestGateValidationRunnerPassesDefaultGoTest(t *testing.T) {
 		t.Fatalf("Passed = false, want true: %#v", result)
 	}
 
-	if result.Command != DefaultGateValidationCommand {
-		t.Fatalf("Command = %q, want %q", result.Command, DefaultGateValidationCommand)
+	if result.Command != DefaultValidationCommand {
+		t.Fatalf("Command = %q, want %q", result.Command, DefaultValidationCommand)
 	}
 }
 
@@ -36,7 +36,7 @@ func TestFailure(t *testing.T) {
 }
 `)
 
-	result, err := NewGateValidationRunner().Run(t.Context(), GateValidationRequest{
+	result, err := NewValidationRunner().Run(t.Context(), ValidationRequest{
 		ProjectDir: projectDir,
 	})
 	if err != nil {
@@ -59,7 +59,7 @@ func TestFailure(t *testing.T) {
 func TestGateValidationRunnerUsesConfiguredCommand(t *testing.T) {
 	projectDir := newGateValidationGoProject(t, "package gatevalidation\n")
 
-	result, err := NewGateValidationRunner().Run(t.Context(), GateValidationRequest{
+	result, err := NewValidationRunner().Run(t.Context(), ValidationRequest{
 		ProjectDir: projectDir,
 		Command:    "go test ./...",
 	})
@@ -73,7 +73,7 @@ func TestGateValidationRunnerUsesConfiguredCommand(t *testing.T) {
 }
 
 func TestGateValidationRunnerRejectsMissingProjectDir(t *testing.T) {
-	_, err := NewGateValidationRunner().Run(t.Context(), GateValidationRequest{})
+	_, err := NewValidationRunner().Run(t.Context(), ValidationRequest{})
 	if err == nil {
 		t.Fatal("Run returned nil error")
 	}

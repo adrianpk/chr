@@ -8,78 +8,79 @@ import (
 	"strings"
 )
 
-// GateGitEvidenceService describes a package boundary value.
-type GateGitEvidenceService struct{}
+// GitEvidenceService describes a package boundary value.
+type GitEvidenceService struct{}
 
-// GateGitEvidenceRequest describes a package boundary value.
-type GateGitEvidenceRequest struct {
+// GitEvidenceRequest describes a package boundary value.
+type GitEvidenceRequest struct {
 	ProjectDir string
 	BaseRef    string
 	HeadRef    string
 }
 
-// GateGitEvidence describes a package boundary value.
-type GateGitEvidence struct {
-	Base      GateGitRef
-	Head      GateGitRef
+// GitEvidence describes a package boundary value.
+type GitEvidence struct {
+	Base      GitRef
+	Head      GitRef
 	MergeBase string
-	Commits   []GateGitCommit
-	Files     []GateGitChangedFile
+	Commits   []GitCommit
+	Files     []GitChangedFile
 	DiffStat  string
 }
 
-// GateGitRef describes a package boundary value.
-type GateGitRef struct {
+// GitRef describes a package boundary value.
+type GitRef struct {
 	Ref string
 	SHA string
 }
 
-// GateGitCommit describes a package boundary value.
-type GateGitCommit struct {
+// GitCommit describes a package boundary value.
+type GitCommit struct {
 	SHA     string
 	Subject string
 }
 
-// GateGitChangedFile describes a package boundary value.
-type GateGitChangedFile struct {
+// GitChangedFile describes a package boundary value.
+type GitChangedFile struct {
 	Status string
 	Path   string
 	Old    string
 }
 
-type gateGitEvidenceRequest struct {
+type gitEvidenceRequest struct {
 	projectDir string
 	baseRef    string
 	headRef    string
 	rangeRef   string
 }
 
-// NewGateGitEvidenceService constructs the corresponding package service or value.
-func NewGateGitEvidenceService() GateGitEvidenceService {
-	return GateGitEvidenceService{}
+// NewGitEvidenceService constructs the corresponding package service or value.
+func NewGitEvidenceService() GitEvidenceService {
+	return GitEvidenceService{}
 }
 
 // Collect executes the corresponding package operation.
-func (s GateGitEvidenceService) Collect(
-	ctx context.Context,
-	request GateGitEvidenceRequest,
-) (GateGitEvidence, error) {
-	normalized, err := normalizeGateGitEvidenceRequest(request)
+func (s GitEvidenceService) Collect(ctx context.Context, request GitEvidenceRequest) (GitEvidence, error) {
+	normalized, err := normalizeGitEvidenceRequest(request)
 	if err != nil {
-		return GateGitEvidence{}, err
+		return GitEvidence{}, err
 	}
 
-	base, head, err := collectGateGitRefs(ctx, normalized)
+	refs, err := collectGitRefs(ctx, normalized)
+	base, head := refs.Base, refs.Head
+
 	if err != nil {
-		return GateGitEvidence{}, err
+		return GitEvidence{}, err
 	}
 
-	mergeBase, commits, files, diffStat, err := collectGateGitRange(ctx, normalized)
+	gitRangeResult, err := collectGitRange(ctx, normalized)
+	mergeBase, commits, files, diffStat := gitRangeResult.MergeBase, gitRangeResult.Commits, gitRangeResult.Files, gitRangeResult.DiffStat
+
 	if err != nil {
-		return GateGitEvidence{}, err
+		return GitEvidence{}, err
 	}
 
-	return GateGitEvidence{
+	return GitEvidence{
 		Base:      base,
 		Head:      head,
 		MergeBase: mergeBase,
@@ -89,23 +90,23 @@ func (s GateGitEvidenceService) Collect(
 	}, nil
 }
 
-func normalizeGateGitEvidenceRequest(request GateGitEvidenceRequest) (gateGitEvidenceRequest, error) {
-	normalized := gateGitEvidenceRequest{
+func normalizeGitEvidenceRequest(request GitEvidenceRequest) (gitEvidenceRequest, error) {
+	normalized := gitEvidenceRequest{
 		projectDir: strings.TrimSpace(request.ProjectDir),
 		baseRef:    strings.TrimSpace(request.BaseRef),
 		headRef:    strings.TrimSpace(request.HeadRef),
 	}
 
 	if normalized.projectDir == "" {
-		return gateGitEvidenceRequest{}, fmt.Errorf("project directory is required")
+		return gitEvidenceRequest{}, fmt.Errorf("project directory is required")
 	}
 
 	if normalized.baseRef == "" {
-		return gateGitEvidenceRequest{}, fmt.Errorf("base ref is required")
+		return gitEvidenceRequest{}, fmt.Errorf("base ref is required")
 	}
 
 	if normalized.headRef == "" {
-		return gateGitEvidenceRequest{}, fmt.Errorf("head ref is required")
+		return gitEvidenceRequest{}, fmt.Errorf("head ref is required")
 	}
 
 	normalized.rangeRef = normalized.baseRef + ".." + normalized.headRef
@@ -113,71 +114,65 @@ func normalizeGateGitEvidenceRequest(request GateGitEvidenceRequest) (gateGitEvi
 	return normalized, nil
 }
 
-func collectGateGitRefs(
-	ctx context.Context,
-	request gateGitEvidenceRequest,
-) (GateGitRef, GateGitRef, error) {
+func collectGitRefs(ctx context.Context, request gitEvidenceRequest) (gitRefs, error) {
 	baseSHA, err := gitOutput(ctx, request.projectDir, "rev-parse", "--verify", request.baseRef)
 	if err != nil {
-		return GateGitRef{}, GateGitRef{}, fmt.Errorf("resolve base ref %q: %w", request.baseRef, err)
+		return gitRefs{Base: GitRef{}, Head: GitRef{}}, fmt.Errorf("resolve base ref %q: %w", request.baseRef, err)
 	}
 
 	headSHA, err := gitOutput(ctx, request.projectDir, "rev-parse", "--verify", request.headRef)
 	if err != nil {
-		return GateGitRef{}, GateGitRef{}, fmt.Errorf("resolve head ref %q: %w", request.headRef, err)
+		return gitRefs{Base: GitRef{}, Head: GitRef{}}, fmt.Errorf("resolve head ref %q: %w", request.headRef, err)
 	}
 
-	return GateGitRef{Ref: request.baseRef, SHA: baseSHA}, GateGitRef{Ref: request.headRef, SHA: headSHA}, nil
+	return gitRefs{Base: GitRef{Ref: request.baseRef, SHA: baseSHA}, Head: GitRef{Ref: request.headRef, SHA: headSHA}}, nil
 }
 
-func collectGateGitRange(
-	ctx context.Context,
-	request gateGitEvidenceRequest,
-) (string, []GateGitCommit, []GateGitChangedFile, string, error) {
+func collectGitRange(ctx context.Context, request gitEvidenceRequest) (gitRange, error) {
 	mergeBase, err := gitOutput(ctx, request.projectDir, "merge-base", request.baseRef, request.headRef)
 	if err != nil {
-		return "", nil, nil, "", fmt.Errorf("resolve merge base for %q and %q: %w", request.baseRef, request.headRef, err)
+		return gitRange{MergeBase: "", Commits: nil, Files: nil, DiffStat: ""}, fmt.Errorf("resolve merge base for %q and %q: %w", request.baseRef, request.headRef, err)
 	}
 
 	commitsOutput, err := gitOutput(ctx, request.projectDir, "log", "--format=%H%x09%s", request.rangeRef)
 	if err != nil {
-		return "", nil, nil, "", fmt.Errorf("collect commits for %q: %w", request.rangeRef, err)
+		return gitRange{MergeBase: "", Commits: nil, Files: nil, DiffStat: ""}, fmt.Errorf("collect commits for %q: %w", request.rangeRef, err)
 	}
 
 	filesOutput, err := gitOutput(ctx, request.projectDir, "diff", "--name-status", request.rangeRef)
 	if err != nil {
-		return "", nil, nil, "", fmt.Errorf("collect changed files for %q: %w", request.rangeRef, err)
+		return gitRange{MergeBase: "", Commits: nil, Files: nil, DiffStat: ""}, fmt.Errorf("collect changed files for %q: %w", request.rangeRef, err)
 	}
 
 	diffStat, err := gitOutput(ctx, request.projectDir, "diff", "--shortstat", request.rangeRef)
 	if err != nil {
-		return "", nil, nil, "", fmt.Errorf("collect diff stat for %q: %w", request.rangeRef, err)
+		return gitRange{MergeBase: "", Commits: nil, Files: nil, DiffStat: ""}, fmt.Errorf("collect diff stat for %q: %w", request.rangeRef, err)
 	}
 
-	return mergeBase, parseGateGitCommits(commitsOutput), parseGateGitChangedFiles(filesOutput), diffStat, nil
+	return gitRange{MergeBase: mergeBase, Commits: parseGitCommits(commitsOutput), Files: parseGitChangedFiles(filesOutput), DiffStat: diffStat}, nil
 }
 
-func parseGateGitCommits(output string) []GateGitCommit {
-	commits := []GateGitCommit{}
+func parseGitCommits(output string) []GitCommit {
+	commits := []GitCommit{}
 
-	for _, line := range gateNonEmptyLines(output) {
+	for _, line := range nonEmptyLines(output) {
 		sha, subject, ok := strings.Cut(line, "\t")
 		if !ok {
-			commits = append(commits, GateGitCommit{SHA: line})
+			commits = append(commits, GitCommit{SHA: line})
 
 			continue
 		}
 
-		commits = append(commits, GateGitCommit{SHA: sha, Subject: subject})
+		commits = append(commits, GitCommit{SHA: sha, Subject: subject})
 	}
 
 	return commits
 }
 
-func parseGateGitChangedFiles(output string) []GateGitChangedFile {
-	files := []GateGitChangedFile{}
+func parseGitChangedFiles(output string) []GitChangedFile {
+	files := []GitChangedFile{}
 
-	for _, line := range gateNonEmptyLines(output) {
+	for _, line := range nonEmptyLines(output) {
 		parts := strings.Split(line, "\t")
 		if len(parts) < 2 {
 			continue
@@ -185,7 +180,7 @@ func parseGateGitChangedFiles(output string) []GateGitChangedFile {
 
 		status := strings.TrimSpace(parts[0])
 		if strings.HasPrefix(status, "R") && len(parts) >= 3 {
-			files = append(files, GateGitChangedFile{
+			files = append(files, GitChangedFile{
 				Status: status,
 				Old:    filepath.ToSlash(parts[1]),
 				Path:   filepath.ToSlash(parts[2]),
@@ -194,7 +189,7 @@ func parseGateGitChangedFiles(output string) []GateGitChangedFile {
 			continue
 		}
 
-		files = append(files, GateGitChangedFile{
+		files = append(files, GitChangedFile{
 			Status: status,
 			Path:   filepath.ToSlash(parts[1]),
 		})
@@ -203,7 +198,7 @@ func parseGateGitChangedFiles(output string) []GateGitChangedFile {
 	return files
 }
 
-func gateNonEmptyLines(output string) []string {
+func nonEmptyLines(output string) []string {
 	lines := []string{}
 
 	for _, line := range strings.Split(output, "\n") {
@@ -228,3 +223,13 @@ func gitOutput(ctx context.Context, projectDir string, args ...string) (string, 
 
 	return strings.TrimSpace(string(output)), nil
 }
+
+type (
+	gitRefs  struct{ Base, Head GitRef }
+	gitRange struct {
+		MergeBase string
+		Commits   []GitCommit
+		Files     []GitChangedFile
+		DiffStat  string
+	}
+)

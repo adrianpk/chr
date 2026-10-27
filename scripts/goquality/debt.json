@@ -567,26 +567,6 @@
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/gate/config.go::parseGateConfigLine",
-      "signature": "func(rawLine, section, listKey string) (string, string, string, string, bool)",
-      "reason": "Existing production debt; assigned to Slice 6 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Mechanical Slice 6 move from internal/core/gate_config.go with unchanged name and signature."
-    },
-    {
-      "id": "internal/core/gate/evidence_classification.go::collectGateExecutionEvidence",
-      "signature": "func(reports []GateExecutionReport) (map[string]gateExecutionEvidence, []GateMissingAgentEvidence)",
-      "reason": "Existing production debt; assigned to Slice 6 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 6 evidence source port changes ReportListEntry to GateExecutionReport before the mechanical package move; result debt remains owned by T6.5. Mechanical Slice 6 move from internal/core/gate_evidence_classification.go with unchanged name and signature."
-    },
-    {
-      "id": "internal/core/gate/git_evidence.go::collectGateGitRefs",
-      "signature": "func(ctx context.Context, request gateGitEvidenceRequest) (GateGitRef, GateGitRef, error)",
-      "reason": "Existing production debt; assigned to Slice 6 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Mechanical Slice 6 move from internal/core/gate_git_evidence.go with unchanged name and signature."
-    },
-    {
-      "id": "internal/core/gate/git_evidence.go::collectGateGitRange",
-      "signature": "func(ctx context.Context, request gateGitEvidenceRequest) (string, []GateGitCommit, []GateGitChangedFile, string, error)",
-      "reason": "Existing production debt; assigned to Slice 6 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Mechanical Slice 6 move from internal/core/gate_git_evidence.go with unchanged name and signature."
-    },
-    {
       "id": "internal/core/harness_binding_executable.go::FreezeHarnessExecutable",
       "signature": "func(command []string) (HarnessExecutableRef, []string, error)",
       "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."

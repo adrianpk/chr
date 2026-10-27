@@ -10,59 +10,59 @@ import (
 	"time"
 )
 
-// GateReportStatus defines a package boundary type.
-type GateReportStatus string
+// ReportStatus defines a package boundary type.
+type ReportStatus string
 
 const (
-	// GateReportStatusPassed defines a package boundary constant.
-	GateReportStatusPassed GateReportStatus = "passed"
-	// GateReportStatusFailed defines a package boundary constant.
-	GateReportStatusFailed GateReportStatus = "failed"
+	// ReportStatusPassed defines a package boundary constant.
+	ReportStatusPassed ReportStatus = "passed"
+	// ReportStatusFailed defines a package boundary constant.
+	ReportStatusFailed ReportStatus = "failed"
 )
 
-// GateReport describes a package boundary value.
-type GateReport struct {
-	CreatedAt               time.Time                          `json:"created_at"`
-	Status                  GateReportStatus                   `json:"status"`
-	Base                    GateReportRef                      `json:"base"`
-	Head                    GateReportRef                      `json:"head"`
-	MergeBase               string                             `json:"merge_base"`
-	Commits                 []GateReportCommit                 `json:"commits"`
-	ChangedFiles            []GateReportChangedFile            `json:"changed_files"`
-	DiffStat                string                             `json:"diff_stat"`
-	AgentManagedWork        []GateReportAgentManagedWork       `json:"agent_managed_work"`
-	ManualOrExternalChanges []GateReportManualOrExternalChange `json:"manual_or_external_changes"`
-	MissingAgentEvidence    []GateReportMissingAgentEvidence   `json:"missing_agent_evidence"`
-	HighRiskManualChanges   []GateReportHighRiskManualChange   `json:"high_risk_manual_changes"`
-	Validation              GateReportValidation               `json:"validation"`
-	Artifacts               GateReportArtifacts                `json:"artifacts"`
-	Failures                []string                           `json:"failures"`
-	Warnings                []string                           `json:"warnings"`
-	Info                    []string                           `json:"info"`
-	Metadata                map[string]string                  `json:"metadata,omitempty"`
+// Report describes a package boundary value.
+type Report struct {
+	CreatedAt               time.Time                      `json:"created_at"`
+	Status                  ReportStatus                   `json:"status"`
+	Base                    ReportRef                      `json:"base"`
+	Head                    ReportRef                      `json:"head"`
+	MergeBase               string                         `json:"merge_base"`
+	Commits                 []ReportCommit                 `json:"commits"`
+	ChangedFiles            []ReportChangedFile            `json:"changed_files"`
+	DiffStat                string                         `json:"diff_stat"`
+	AgentManagedWork        []ReportAgentManagedWork       `json:"agent_managed_work"`
+	ManualOrExternalChanges []ReportManualOrExternalChange `json:"manual_or_external_changes"`
+	MissingAgentEvidence    []ReportMissingAgentEvidence   `json:"missing_agent_evidence"`
+	HighRiskManualChanges   []ReportHighRiskManualChange   `json:"high_risk_manual_changes"`
+	Validation              ReportValidation               `json:"validation"`
+	Artifacts               ReportArtifacts                `json:"artifacts"`
+	Failures                []string                       `json:"failures"`
+	Warnings                []string                       `json:"warnings"`
+	Info                    []string                       `json:"info"`
+	Metadata                map[string]string              `json:"metadata,omitempty"`
 }
 
-// GateReportRef describes a package boundary value.
-type GateReportRef struct {
+// ReportRef describes a package boundary value.
+type ReportRef struct {
 	Ref string `json:"ref"`
 	SHA string `json:"sha"`
 }
 
-// GateReportCommit describes a package boundary value.
-type GateReportCommit struct {
+// ReportCommit describes a package boundary value.
+type ReportCommit struct {
 	SHA     string `json:"sha"`
 	Subject string `json:"subject"`
 }
 
-// GateReportChangedFile describes a package boundary value.
-type GateReportChangedFile struct {
+// ReportChangedFile describes a package boundary value.
+type ReportChangedFile struct {
 	Status string `json:"status"`
 	Path   string `json:"path"`
 	Old    string `json:"old,omitempty"`
 }
 
-// GateReportAgentManagedWork describes a package boundary value.
-type GateReportAgentManagedWork struct {
+// ReportAgentManagedWork describes a package boundary value.
+type ReportAgentManagedWork struct {
 	Path        string `json:"path"`
 	Status      string `json:"status"`
 	TicketKey   string `json:"ticket_key"`
@@ -70,100 +70,88 @@ type GateReportAgentManagedWork struct {
 	ReportPath  string `json:"report_path"`
 }
 
-// GateReportManualOrExternalChange describes a package boundary value.
-type GateReportManualOrExternalChange struct {
+// ReportManualOrExternalChange describes a package boundary value.
+type ReportManualOrExternalChange struct {
 	Path   string `json:"path"`
 	Status string `json:"status"`
 }
 
-// GateReportMissingAgentEvidence describes a package boundary value.
-type GateReportMissingAgentEvidence struct {
+// ReportMissingAgentEvidence describes a package boundary value.
+type ReportMissingAgentEvidence struct {
 	TicketKey   string `json:"ticket_key"`
 	ExecutionID string `json:"execution_id"`
 	ReportPath  string `json:"report_path"`
 	Reason      string `json:"reason"`
 }
 
-// GateReportHighRiskManualChange describes a package boundary value.
-type GateReportHighRiskManualChange struct {
+// ReportHighRiskManualChange describes a package boundary value.
+type ReportHighRiskManualChange struct {
 	Path    string `json:"path"`
 	Status  string `json:"status"`
 	Pattern string `json:"pattern"`
 }
 
-// GateReportValidation describes a package boundary value.
-type GateReportValidation struct {
+// ReportValidation describes a package boundary value.
+type ReportValidation struct {
 	Command  string `json:"command"`
 	ExitCode int    `json:"exit_code"`
 	Output   string `json:"output"`
 	Passed   bool   `json:"passed"`
 }
 
-// GateReportArtifacts describes a package boundary value.
-type GateReportArtifacts struct {
+// ReportArtifacts describes a package boundary value.
+type ReportArtifacts struct {
 	JSONPath     string `json:"json_path"`
 	MarkdownPath string `json:"markdown_path"`
 }
 
-// GateReportWriter describes a package boundary value.
-type GateReportWriter struct{}
+// ReportWriter describes a package boundary value.
+type ReportWriter struct{}
 
-// NewGateReportWriter constructs the corresponding package service or value.
-func NewGateReportWriter() GateReportWriter {
-	return GateReportWriter{}
+// NewReportWriter constructs the corresponding package service or value.
+func NewReportWriter() ReportWriter {
+	return ReportWriter{}
 }
 
-// NewGateReport constructs the corresponding package service or value.
-func NewGateReport(
-	createdAt time.Time,
-	evidence GateGitEvidence,
-	validation GateValidationResult,
-	classification GateEvidenceClassification,
-	artifacts GateReportArtifacts,
-) GateReport {
-	status := GateReportStatusFailed
+// NewReport constructs the corresponding package service or value.
+func NewReport(createdAt time.Time, evidence GitEvidence, validation ValidationResult, classification EvidenceClassification, artifacts ReportArtifacts) Report {
+	status := ReportStatusFailed
 	if validation.Passed {
-		status = GateReportStatusPassed
+		status = ReportStatusPassed
 	}
 
-	return GateReport{
+	return Report{
 		CreatedAt:               createdAt.UTC(),
 		Status:                  status,
-		Base:                    GateReportRef(evidence.Base),
-		Head:                    GateReportRef(evidence.Head),
+		Base:                    ReportRef(evidence.Base),
+		Head:                    ReportRef(evidence.Head),
 		MergeBase:               evidence.MergeBase,
-		Commits:                 gateReportCommits(evidence.Commits),
-		ChangedFiles:            gateReportChangedFiles(evidence.Files),
+		Commits:                 reportCommits(evidence.Commits),
+		ChangedFiles:            reportChangedFiles(evidence.Files),
 		DiffStat:                evidence.DiffStat,
-		AgentManagedWork:        gateReportAgentManagedWork(classification.AgentManagedWork),
-		ManualOrExternalChanges: gateReportManualOrExternalChanges(classification.ManualOrExternalChanges),
-		MissingAgentEvidence:    gateReportMissingAgentEvidence(classification.MissingAgentEvidence),
-		HighRiskManualChanges:   gateReportHighRiskManualChanges(classification.HighRiskManualChanges),
-		Validation:              GateReportValidation(validation),
+		AgentManagedWork:        reportAgentManagedWork(classification.AgentManagedWork),
+		ManualOrExternalChanges: reportManualOrExternalChanges(classification.ManualOrExternalChanges),
+		MissingAgentEvidence:    reportMissingAgentEvidence(classification.MissingAgentEvidence),
+		HighRiskManualChanges:   reportHighRiskManualChanges(classification.HighRiskManualChanges),
+		Validation:              ReportValidation(validation),
 		Artifacts:               artifacts,
 	}
 }
 
-// NewFailedGateReport constructs the corresponding package service or value.
-func NewFailedGateReport(
-	createdAt time.Time,
-	baseRef string,
-	headRef string,
-	artifacts GateReportArtifacts,
-	failures []string,
-) GateReport {
-	return GateReport{
+// NewFailedReport constructs the corresponding package service or value.
+func NewFailedReport(createdAt time.Time, baseRef string, headRef string, artifacts ReportArtifacts, failures []string) Report {
+	return Report{
 		CreatedAt: createdAt.UTC(),
-		Status:    GateReportStatusFailed,
-		Base:      GateReportRef{Ref: strings.TrimSpace(baseRef)},
-		Head:      GateReportRef{Ref: strings.TrimSpace(headRef)},
+		Status:    ReportStatusFailed,
+		Base:      ReportRef{Ref: strings.TrimSpace(baseRef)},
+		Head:      ReportRef{Ref: strings.TrimSpace(headRef)},
 		Artifacts: artifacts,
 		Failures:  failures,
 	}
 }
 
 // WriteJSON writes the requested output.
-func (w GateReportWriter) WriteJSON(ctx context.Context, report GateReport) (string, error) {
+func (w ReportWriter) WriteJSON(ctx context.Context, report Report) (string, error) {
 	err := ctx.Err()
 	if err != nil {
 		return "", err
@@ -174,7 +162,7 @@ func (w GateReportWriter) WriteJSON(ctx context.Context, report GateReport) (str
 		return "", fmt.Errorf("gate JSON report path is required")
 	}
 
-	err = ensureGateReportWriteTarget(path)
+	err = ensureReportWriteTarget(path)
 	if err != nil {
 		return "", err
 	}
@@ -198,7 +186,7 @@ func (w GateReportWriter) WriteJSON(ctx context.Context, report GateReport) (str
 }
 
 // WriteMarkdown writes the requested output.
-func (w GateReportWriter) WriteMarkdown(ctx context.Context, report GateReport) (string, error) {
+func (w ReportWriter) WriteMarkdown(ctx context.Context, report Report) (string, error) {
 	err := ctx.Err()
 	if err != nil {
 		return "", err
@@ -209,12 +197,12 @@ func (w GateReportWriter) WriteMarkdown(ctx context.Context, report GateReport) 
 		return "", fmt.Errorf("gate Markdown report path is required")
 	}
 
-	err = ensureGateReportWriteTarget(path)
+	err = ensureReportWriteTarget(path)
 	if err != nil {
 		return "", err
 	}
 
-	content := RenderGateReportMarkdown(report)
+	content := RenderReportMarkdown(report)
 
 	err = os.MkdirAll(filepath.Dir(path), 0o755)
 	if err != nil {
@@ -229,27 +217,27 @@ func (w GateReportWriter) WriteMarkdown(ctx context.Context, report GateReport) 
 	return path, nil
 }
 
-// RenderGateReportMarkdown renders a human-readable gate report.
-func RenderGateReportMarkdown(report GateReport) string {
+// RenderReportMarkdown renders a human-readable gate report.
+func RenderReportMarkdown(report Report) string {
 	var output strings.Builder
 
 	output.WriteString("# Dev to Main Gate Report\n\n")
-	writeGateReportSummary(&output, report)
-	writeGateReportGitEvidence(&output, report)
-	writeGateReportAgentManagedWork(&output, report.AgentManagedWork)
-	writeGateReportManualOrExternalChanges(&output, report.ManualOrExternalChanges)
-	writeGateReportHighRiskManualChanges(&output, report.HighRiskManualChanges)
-	writeGateReportMissingAgentEvidence(&output, report.MissingAgentEvidence)
-	writeGateReportValidation(&output, report.Validation)
-	writeGateReportMessages(&output, "Failures", report.Failures)
-	writeGateReportMessages(&output, "Warnings", report.Warnings)
-	writeGateReportMessages(&output, "Info", report.Info)
-	writeGateReportArtifacts(&output, report.Artifacts)
+	writeReportSummary(&output, report)
+	writeReportGitEvidence(&output, report)
+	writeReportAgentManagedWork(&output, report.AgentManagedWork)
+	writeReportManualOrExternalChanges(&output, report.ManualOrExternalChanges)
+	writeReportHighRiskManualChanges(&output, report.HighRiskManualChanges)
+	writeReportMissingAgentEvidence(&output, report.MissingAgentEvidence)
+	writeReportValidation(&output, report.Validation)
+	writeReportMessages(&output, "Failures", report.Failures)
+	writeReportMessages(&output, "Warnings", report.Warnings)
+	writeReportMessages(&output, "Info", report.Info)
+	writeReportArtifacts(&output, report.Artifacts)
 
 	return output.String()
 }
 
-func ensureGateReportWriteTarget(path string) error {
+func ensureReportWriteTarget(path string) error {
 	info, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -266,28 +254,28 @@ func ensureGateReportWriteTarget(path string) error {
 	return nil
 }
 
-func writeGateReportSummary(output *strings.Builder, report GateReport) {
+func writeReportSummary(output *strings.Builder, report Report) {
 	output.WriteString("## Summary\n\n")
-	writeGateReportField(output, "status", string(report.Status))
-	writeGateReportField(output, "created_at", report.CreatedAt.UTC().Format(time.RFC3339))
+	writeReportField(output, "status", string(report.Status))
+	writeReportField(output, "created_at", report.CreatedAt.UTC().Format(time.RFC3339))
 	output.WriteString("\n")
 }
 
-func writeGateReportGitEvidence(output *strings.Builder, report GateReport) {
+func writeReportGitEvidence(output *strings.Builder, report Report) {
 	output.WriteString("## Git Evidence\n\n")
-	writeGateReportField(output, "base", report.Base.Ref+" "+report.Base.SHA)
-	writeGateReportField(output, "head", report.Head.Ref+" "+report.Head.SHA)
-	writeGateReportField(output, "merge_base", report.MergeBase)
-	writeGateReportField(output, "diff_stat", report.DiffStat)
-	writeGateReportField(output, "commits", fmt.Sprintf("%d", len(report.Commits)))
-	writeGateReportField(output, "changed_files", fmt.Sprintf("%d", len(report.ChangedFiles)))
+	writeReportField(output, "base", report.Base.Ref+" "+report.Base.SHA)
+	writeReportField(output, "head", report.Head.Ref+" "+report.Head.SHA)
+	writeReportField(output, "merge_base", report.MergeBase)
+	writeReportField(output, "diff_stat", report.DiffStat)
+	writeReportField(output, "commits", fmt.Sprintf("%d", len(report.Commits)))
+	writeReportField(output, "changed_files", fmt.Sprintf("%d", len(report.ChangedFiles)))
 	output.WriteString("\n")
 
 	if len(report.Commits) > 0 {
 		output.WriteString("### Commits\n\n")
 
 		for _, commit := range report.Commits {
-			output.WriteString("- `" + emptyGateReportValue(commit.SHA) + "` " + emptyGateReportValue(commit.Subject) + "\n")
+			output.WriteString("- `" + emptyReportValue(commit.SHA) + "` " + emptyReportValue(commit.Subject) + "\n")
 		}
 
 		output.WriteString("\n")
@@ -310,11 +298,11 @@ func writeGateReportGitEvidence(output *strings.Builder, report GateReport) {
 	}
 }
 
-func writeGateReportValidation(output *strings.Builder, validation GateReportValidation) {
+func writeReportValidation(output *strings.Builder, validation ReportValidation) {
 	output.WriteString("## Validation\n\n")
-	writeGateReportField(output, "command", validation.Command)
-	writeGateReportField(output, "passed", fmt.Sprintf("%t", validation.Passed))
-	writeGateReportField(output, "exit_code", fmt.Sprintf("%d", validation.ExitCode))
+	writeReportField(output, "command", validation.Command)
+	writeReportField(output, "passed", fmt.Sprintf("%t", validation.Passed))
+	writeReportField(output, "exit_code", fmt.Sprintf("%d", validation.ExitCode))
 
 	if validation.Output != "" {
 		output.WriteString("\n```text\n")
@@ -325,7 +313,7 @@ func writeGateReportValidation(output *strings.Builder, validation GateReportVal
 	output.WriteString("\n")
 }
 
-func writeGateReportAgentManagedWork(output *strings.Builder, work []GateReportAgentManagedWork) {
+func writeReportAgentManagedWork(output *strings.Builder, work []ReportAgentManagedWork) {
 	output.WriteString("## Agent-Managed Work\n\n")
 
 	if len(work) == 0 {
@@ -340,18 +328,18 @@ func writeGateReportAgentManagedWork(output *strings.Builder, work []GateReportA
 		output.WriteString(" ")
 		output.WriteString(item.Path)
 		output.WriteString(" ticket=")
-		output.WriteString(emptyGateReportValue(item.TicketKey))
+		output.WriteString(emptyReportValue(item.TicketKey))
 		output.WriteString(" execution=")
-		output.WriteString(emptyGateReportValue(item.ExecutionID))
+		output.WriteString(emptyReportValue(item.ExecutionID))
 		output.WriteString(" report=")
-		output.WriteString(emptyGateReportValue(item.ReportPath))
+		output.WriteString(emptyReportValue(item.ReportPath))
 		output.WriteString("\n")
 	}
 
 	output.WriteString("\n")
 }
 
-func writeGateReportManualOrExternalChanges(output *strings.Builder, changes []GateReportManualOrExternalChange) {
+func writeReportManualOrExternalChanges(output *strings.Builder, changes []ReportManualOrExternalChange) {
 	output.WriteString("## Manual or External Changes\n\n")
 
 	if len(changes) == 0 {
@@ -371,7 +359,7 @@ func writeGateReportManualOrExternalChanges(output *strings.Builder, changes []G
 	output.WriteString("\n")
 }
 
-func writeGateReportMissingAgentEvidence(output *strings.Builder, missing []GateReportMissingAgentEvidence) {
+func writeReportMissingAgentEvidence(output *strings.Builder, missing []ReportMissingAgentEvidence) {
 	output.WriteString("## Missing Agent Evidence\n\n")
 
 	if len(missing) == 0 {
@@ -382,20 +370,20 @@ func writeGateReportMissingAgentEvidence(output *strings.Builder, missing []Gate
 
 	for _, item := range missing {
 		output.WriteString("- ticket=")
-		output.WriteString(emptyGateReportValue(item.TicketKey))
+		output.WriteString(emptyReportValue(item.TicketKey))
 		output.WriteString(" execution=")
-		output.WriteString(emptyGateReportValue(item.ExecutionID))
+		output.WriteString(emptyReportValue(item.ExecutionID))
 		output.WriteString(" report=")
-		output.WriteString(emptyGateReportValue(item.ReportPath))
+		output.WriteString(emptyReportValue(item.ReportPath))
 		output.WriteString(" reason=")
-		output.WriteString(emptyGateReportValue(item.Reason))
+		output.WriteString(emptyReportValue(item.Reason))
 		output.WriteString("\n")
 	}
 
 	output.WriteString("\n")
 }
 
-func writeGateReportHighRiskManualChanges(output *strings.Builder, changes []GateReportHighRiskManualChange) {
+func writeReportHighRiskManualChanges(output *strings.Builder, changes []ReportHighRiskManualChange) {
 	output.WriteString("## High-Risk Manual Changes\n\n")
 
 	if len(changes) == 0 {
@@ -410,14 +398,14 @@ func writeGateReportHighRiskManualChanges(output *strings.Builder, changes []Gat
 		output.WriteString(" ")
 		output.WriteString(item.Path)
 		output.WriteString(" pattern=")
-		output.WriteString(emptyGateReportValue(item.Pattern))
+		output.WriteString(emptyReportValue(item.Pattern))
 		output.WriteString("\n")
 	}
 
 	output.WriteString("\n")
 }
 
-func writeGateReportMessages(output *strings.Builder, title string, messages []string) {
+func writeReportMessages(output *strings.Builder, title string, messages []string) {
 	output.WriteString("## " + title + "\n\n")
 
 	if len(messages) == 0 {
@@ -433,22 +421,22 @@ func writeGateReportMessages(output *strings.Builder, title string, messages []s
 	output.WriteString("\n")
 }
 
-func writeGateReportArtifacts(output *strings.Builder, artifacts GateReportArtifacts) {
+func writeReportArtifacts(output *strings.Builder, artifacts ReportArtifacts) {
 	output.WriteString("## Artifacts\n\n")
-	writeGateReportField(output, "json", artifacts.JSONPath)
-	writeGateReportField(output, "markdown", artifacts.MarkdownPath)
+	writeReportField(output, "json", artifacts.JSONPath)
+	writeReportField(output, "markdown", artifacts.MarkdownPath)
 	output.WriteString("\n")
 }
 
-func writeGateReportField(output *strings.Builder, name, value string) {
+func writeReportField(output *strings.Builder, name, value string) {
 	output.WriteString("- ")
 	output.WriteString(name)
 	output.WriteString(": ")
-	output.WriteString(emptyGateReportValue(value))
+	output.WriteString(emptyReportValue(value))
 	output.WriteString("\n")
 }
 
-func emptyGateReportValue(value string) string {
+func emptyReportValue(value string) string {
 	value = strings.TrimSpace(value)
 	if value == "" {
 		return "none"
@@ -457,61 +445,61 @@ func emptyGateReportValue(value string) string {
 	return value
 }
 
-func gateReportCommits(commits []GateGitCommit) []GateReportCommit {
-	reportCommits := make([]GateReportCommit, 0, len(commits))
+func reportCommits(commits []GitCommit) []ReportCommit {
+	reportCommits := make([]ReportCommit, 0, len(commits))
 
 	for _, commit := range commits {
-		reportCommits = append(reportCommits, GateReportCommit(commit))
+		reportCommits = append(reportCommits, ReportCommit(commit))
 	}
 
 	return reportCommits
 }
 
-func gateReportChangedFiles(files []GateGitChangedFile) []GateReportChangedFile {
-	reportFiles := make([]GateReportChangedFile, 0, len(files))
+func reportChangedFiles(files []GitChangedFile) []ReportChangedFile {
+	reportFiles := make([]ReportChangedFile, 0, len(files))
 
 	for _, file := range files {
-		reportFiles = append(reportFiles, GateReportChangedFile(file))
+		reportFiles = append(reportFiles, ReportChangedFile(file))
 	}
 
 	return reportFiles
 }
 
-func gateReportAgentManagedWork(work []GateAgentManagedWork) []GateReportAgentManagedWork {
-	reportWork := make([]GateReportAgentManagedWork, 0, len(work))
+func reportAgentManagedWork(work []AgentManagedWork) []ReportAgentManagedWork {
+	reportWork := make([]ReportAgentManagedWork, 0, len(work))
 
 	for _, item := range work {
-		reportWork = append(reportWork, GateReportAgentManagedWork(item))
+		reportWork = append(reportWork, ReportAgentManagedWork(item))
 	}
 
 	return reportWork
 }
 
-func gateReportManualOrExternalChanges(changes []GateManualOrExternalChange) []GateReportManualOrExternalChange {
-	reportChanges := make([]GateReportManualOrExternalChange, 0, len(changes))
+func reportManualOrExternalChanges(changes []ManualOrExternalChange) []ReportManualOrExternalChange {
+	reportChanges := make([]ReportManualOrExternalChange, 0, len(changes))
 
 	for _, item := range changes {
-		reportChanges = append(reportChanges, GateReportManualOrExternalChange(item))
+		reportChanges = append(reportChanges, ReportManualOrExternalChange(item))
 	}
 
 	return reportChanges
 }
 
-func gateReportMissingAgentEvidence(missing []GateMissingAgentEvidence) []GateReportMissingAgentEvidence {
-	reportMissing := make([]GateReportMissingAgentEvidence, 0, len(missing))
+func reportMissingAgentEvidence(missing []MissingAgentEvidence) []ReportMissingAgentEvidence {
+	reportMissing := make([]ReportMissingAgentEvidence, 0, len(missing))
 
 	for _, item := range missing {
-		reportMissing = append(reportMissing, GateReportMissingAgentEvidence(item))
+		reportMissing = append(reportMissing, ReportMissingAgentEvidence(item))
 	}
 
 	return reportMissing
 }
 
-func gateReportHighRiskManualChanges(changes []GateHighRiskManualChange) []GateReportHighRiskManualChange {
-	reportChanges := make([]GateReportHighRiskManualChange, 0, len(changes))
+func reportHighRiskManualChanges(changes []HighRiskManualChange) []ReportHighRiskManualChange {
+	reportChanges := make([]ReportHighRiskManualChange, 0, len(changes))
 
 	for _, item := range changes {
-		reportChanges = append(reportChanges, GateReportHighRiskManualChange(item))
+		reportChanges = append(reportChanges, ReportHighRiskManualChange(item))
 	}
 
 	return reportChanges

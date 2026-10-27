@@ -1,3 +1,4 @@
+// Package gate owns Git evidence, validation and release-gate reports.
 package gate
 
 import (
@@ -10,59 +11,59 @@ import (
 	"forge.adrianpk.com/chr/internal/core/configvalue"
 )
 
-// GateTraceabilityMode defines a package boundary type.
-type GateTraceabilityMode string
+// TraceabilityMode defines a package boundary type.
+type TraceabilityMode string
 
 const (
-	// GateTraceabilityModeAgentOnly defines a package boundary constant.
-	GateTraceabilityModeAgentOnly GateTraceabilityMode = "agent_only"
+	// TraceabilityModeAgentOnly defines a package boundary constant.
+	TraceabilityModeAgentOnly TraceabilityMode = "agent_only"
 )
 
-// GateConfig describes a package boundary value.
-type GateConfig struct {
-	DevMain GateDevMainConfig
+// Config describes a package boundary value.
+type Config struct {
+	DevMain DevMainConfig
 }
 
-// GateDevMainConfig describes a package boundary value.
-type GateDevMainConfig struct {
+// DevMainConfig describes a package boundary value.
+type DevMainConfig struct {
 	ValidationCommand string
-	Traceability      GateTraceabilityConfig
-	ManualChanges     GateManualChangesConfig
+	Traceability      TraceabilityConfig
+	ManualChanges     ManualChangesConfig
 	HighRiskPaths     []string
 }
 
-// GateTraceabilityConfig describes a package boundary value.
-type GateTraceabilityConfig struct {
-	Mode                       GateTraceabilityMode
+// TraceabilityConfig describes a package boundary value.
+type TraceabilityConfig struct {
+	Mode                       TraceabilityMode
 	FailOnMissingAgentEvidence bool
 	WarnOnManualChanges        bool
 }
 
-// GateManualChangesConfig describes a package boundary value.
-type GateManualChangesConfig struct {
+// ManualChangesConfig describes a package boundary value.
+type ManualChangesConfig struct {
 	List                bool
 	WarnOnHighRiskPaths bool
 }
 
-// DefaultGateConfig executes the corresponding package operation.
-func DefaultGateConfig() GateConfig {
-	return GateConfig{
-		DevMain: GateDevMainConfig{
-			ValidationCommand: DefaultGateValidationCommand,
-			Traceability: GateTraceabilityConfig{
-				Mode:                       GateTraceabilityModeAgentOnly,
+// DefaultConfig executes the corresponding package operation.
+func DefaultConfig() Config {
+	return Config{
+		DevMain: DevMainConfig{
+			ValidationCommand: DefaultValidationCommand,
+			Traceability: TraceabilityConfig{
+				Mode:                       TraceabilityModeAgentOnly,
 				FailOnMissingAgentEvidence: true,
 			},
-			ManualChanges: GateManualChangesConfig{
+			ManualChanges: ManualChangesConfig{
 				List: true,
 			},
 		},
 	}
 }
 
-// LoadGateConfig loads the corresponding package data.
-func LoadGateConfig(path string) (GateConfig, error) {
-	config := DefaultGateConfig()
+// LoadConfig loads the corresponding package data.
+func LoadConfig(path string) (Config, error) {
+	config := DefaultConfig()
 
 	file, err := os.Open(path)
 	if errors.Is(err, os.ErrNotExist) {
@@ -70,30 +71,31 @@ func LoadGateConfig(path string) (GateConfig, error) {
 	}
 
 	if err != nil {
-		return GateConfig{}, fmt.Errorf("open gate config: %w", err)
+		return Config{}, fmt.Errorf("open gate config: %w", err)
 	}
 
 	defer func() {
-		//nolint:errcheck // Scanner errors are checked below.
+		//nolint:errcheck // Read-only file; scanner errors are checked before returning.
 		_ = file.Close()
 	}()
 
-	err = readGateConfig(file, &config)
+	err = readConfig(file, &config)
 	if err != nil {
-		return GateConfig{}, err
+		return Config{}, err
 	}
 
 	return config, nil
 }
 
-func readGateConfig(file *os.File, config *GateConfig) error {
+func readConfig(file *os.File, config *Config) error {
 	scanner := bufio.NewScanner(file)
 	section := ""
 	listKey := ""
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		key, value, updatedSection, updatedListKey, ok := parseGateConfigLine(line, section, listKey)
+		lineResult := parseConfigLine(line, section, listKey)
+		updatedSection, updatedListKey, ok := lineResult.Section, lineResult.ListKey, lineResult.Present
 		section = updatedSection
 		listKey = updatedListKey
 
@@ -101,7 +103,7 @@ func readGateConfig(file *os.File, config *GateConfig) error {
 			continue
 		}
 
-		setGateConfigValue(config, section, listKey, key, value)
+		setConfigValue(config, lineResult)
 	}
 
 	err := scanner.Err()
@@ -112,37 +114,37 @@ func readGateConfig(file *os.File, config *GateConfig) error {
 	return nil
 }
 
-func parseGateConfigLine(rawLine, section, listKey string) (string, string, string, string, bool) {
+func parseConfigLine(rawLine, section, listKey string) configLine {
 	line := strings.TrimSpace(rawLine)
 	if line == "" || strings.HasPrefix(line, "#") {
-		return "", "", section, listKey, false
+		return configLine{Key: "", Value: "", Section: section, ListKey: listKey, Present: false}
 	}
 
 	indent := len(rawLine) - len(strings.TrimLeft(rawLine, " "))
 	if indent == 4 && line == "high_risk_paths:" {
-		return "", "", section, "high_risk_paths", false
+		return configLine{Key: "", Value: "", Section: section, ListKey: "high_risk_paths", Present: false}
 	}
 
 	if strings.HasSuffix(line, ":") {
-		return "", "", gateConfigSection(indent, strings.TrimSuffix(line, ":")), "", false
+		return configLine{Key: "", Value: "", Section: configSection(indent, strings.TrimSuffix(line, ":")), ListKey: "", Present: false}
 	}
 
 	if strings.HasPrefix(line, "- ") {
-		return "", configvalue.String(strings.TrimPrefix(line, "- ")), section, listKey, true
+		return configLine{Key: "", Value: configvalue.String(strings.TrimPrefix(line, "- ")), Section: section, ListKey: listKey, Present: true}
 	}
 
 	key, value, ok := strings.Cut(line, ":")
 	if !ok {
-		return "", "", section, listKey, false
+		return configLine{Key: "", Value: "", Section: section, ListKey: listKey, Present: false}
 	}
 
 	key = strings.TrimSpace(key)
 	value = configvalue.String(value)
 
-	return key, value, section, "", true
+	return configLine{Key: key, Value: value, Section: section, ListKey: "", Present: true}
 }
 
-func gateConfigSection(indent int, key string) string {
+func configSection(indent int, key string) string {
 	switch {
 	case indent == 0 && key == "gates":
 		return ""
@@ -157,34 +159,34 @@ func gateConfigSection(indent int, key string) string {
 	}
 }
 
-func setGateConfigValue(config *GateConfig, section, listKey, key, value string) {
-	if listKey == "high_risk_paths" && value != "" {
-		config.DevMain.HighRiskPaths = append(config.DevMain.HighRiskPaths, value)
+func setConfigValue(config *Config, line configLine) {
+	if line.ListKey == "high_risk_paths" && line.Value != "" {
+		config.DevMain.HighRiskPaths = append(config.DevMain.HighRiskPaths, line.Value)
 
 		return
 	}
 
-	switch section {
+	switch line.Section {
 	case "dev_main":
-		setGateDevMainConfigValue(&config.DevMain, key, value)
+		setDevMainConfigValue(&config.DevMain, line.Key, line.Value)
 	case "traceability":
-		setGateTraceabilityConfigValue(&config.DevMain.Traceability, key, value)
+		setTraceabilityConfigValue(&config.DevMain.Traceability, line.Key, line.Value)
 	case "manual_changes":
-		setGateManualChangesConfigValue(&config.DevMain.ManualChanges, key, value)
+		setManualChangesConfigValue(&config.DevMain.ManualChanges, line.Key, line.Value)
 	}
 }
 
-func setGateDevMainConfigValue(config *GateDevMainConfig, key, value string) {
+func setDevMainConfigValue(config *DevMainConfig, key, value string) {
 	if key == "validation_command" {
 		configvalue.SetString(&config.ValidationCommand, value)
 	}
 }
 
-func setGateTraceabilityConfigValue(config *GateTraceabilityConfig, key, value string) {
+func setTraceabilityConfigValue(config *TraceabilityConfig, key, value string) {
 	switch key {
 	case "mode":
 		if value != "" {
-			config.Mode = GateTraceabilityMode(value)
+			config.Mode = TraceabilityMode(value)
 		}
 	case "fail_on_missing_agent_evidence":
 		config.FailOnMissingAgentEvidence = configvalue.Bool(value)
@@ -193,11 +195,16 @@ func setGateTraceabilityConfigValue(config *GateTraceabilityConfig, key, value s
 	}
 }
 
-func setGateManualChangesConfigValue(config *GateManualChangesConfig, key, value string) {
+func setManualChangesConfigValue(config *ManualChangesConfig, key, value string) {
 	switch key {
 	case "list":
 		config.List = configvalue.Bool(value)
 	case "warn_on_high_risk_paths":
 		config.WarnOnHighRiskPaths = configvalue.Bool(value)
 	}
+}
+
+type configLine struct {
+	Key, Value, Section, ListKey string
+	Present                      bool
 }

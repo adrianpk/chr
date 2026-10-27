@@ -157,3 +157,19 @@ The project_dump prefix does not establish project-registry ownership. Its actua
 receivers are fileAuthoringSessionRepository and its writes use authoring locks,
 journals and receipts. These boundaries stay atomic during the project extraction;
 T6.3 will record the exact dependency-backed owner rather than copy storage code.
+
+### Gate boundary delivered in T6.1
+
+core/gate imports only core/configvalue and the standard library. Root report
+storage implements the gate-owned loaded-report port; app composition supplies
+paths, artifact allocation and metadata refresh. There are no core aliases or
+forwarding entrypoints for gate behavior. The mechanical move ledger proves all
+125 production/test declaration texts unchanged before package-qualified renames.
+
+The gate-owned parser, Git refs, Git range and execution-evidence collection now
+return named values. Parser presence remains distinct from section/list state;
+Git failures retain their original error context. setConfigValue consumes the
+parsed line, and report constructors retain five coherent report inputs. Report
+status and Woodpecker configuration outcomes have typed constants with the same
+serialized spellings. Preview and overwrite flags retain the supported init
+contract: DryRun takes precedence, and Write replaces only an existing owned file.

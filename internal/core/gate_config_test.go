@@ -1,22 +1,22 @@
 package core
 
-import "forge.adrianpk.com/chr/internal/core/gate"
-
 import (
 	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/gate"
 )
 
 func TestLoadGateConfigUsesDefaultsWhenMissing(t *testing.T) {
-	config, err := gate.LoadGateConfig(filepath.Join(t.TempDir(), "gates.yml"))
+	config, err := gate.LoadConfig(filepath.Join(t.TempDir(), "gates.yml"))
 	if err != nil {
 		t.Fatalf("LoadGateConfig returned error: %v", err)
 	}
 
-	if !reflect.DeepEqual(config, gate.DefaultGateConfig()) {
-		t.Fatalf("config = %#v, want defaults %#v", config, gate.DefaultGateConfig())
+	if !reflect.DeepEqual(config, gate.DefaultConfig()) {
+		t.Fatalf("config = %#v, want defaults %#v", config, gate.DefaultConfig())
 	}
 }
 
@@ -37,7 +37,7 @@ func TestLoadGateConfigParsesDevMainConfig(t *testing.T) {
       - docs/reference/**
 `)
 
-	config, err := gate.LoadGateConfig(UserPath(projectDir, "config", "gates.yml"))
+	config, err := gate.LoadConfig(UserPath(projectDir, "config", "gates.yml"))
 	if err != nil {
 		t.Fatalf("LoadGateConfig returned error: %v", err)
 	}

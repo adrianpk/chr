@@ -8,28 +8,28 @@ import (
 	"strings"
 )
 
-// GateEvidenceClassifier describes a package boundary value.
-type GateEvidenceClassifier struct {
-	LoadReports func(context.Context, string) ([]GateExecutionReport, error)
+// EvidenceClassifier describes a package boundary value.
+type EvidenceClassifier struct {
+	LoadReports func(context.Context, string) ([]ExecutionReport, error)
 }
 
-// GateEvidenceClassificationRequest describes a package boundary value.
-type GateEvidenceClassificationRequest struct {
+// EvidenceClassificationRequest describes a package boundary value.
+type EvidenceClassificationRequest struct {
 	ProjectDir    string
-	Files         []GateGitChangedFile
+	Files         []GitChangedFile
 	HighRiskPaths []string
 }
 
-// GateEvidenceClassification describes a package boundary value.
-type GateEvidenceClassification struct {
-	AgentManagedWork        []GateAgentManagedWork
-	ManualOrExternalChanges []GateManualOrExternalChange
-	MissingAgentEvidence    []GateMissingAgentEvidence
-	HighRiskManualChanges   []GateHighRiskManualChange
+// EvidenceClassification describes a package boundary value.
+type EvidenceClassification struct {
+	AgentManagedWork        []AgentManagedWork
+	ManualOrExternalChanges []ManualOrExternalChange
+	MissingAgentEvidence    []MissingAgentEvidence
+	HighRiskManualChanges   []HighRiskManualChange
 }
 
-// GateAgentManagedWork describes a package boundary value.
-type GateAgentManagedWork struct {
+// AgentManagedWork describes a package boundary value.
+type AgentManagedWork struct {
 	Path        string
 	Status      string
 	TicketKey   string
@@ -37,62 +37,60 @@ type GateAgentManagedWork struct {
 	ReportPath  string
 }
 
-// GateManualOrExternalChange describes a package boundary value.
-type GateManualOrExternalChange struct {
+// ManualOrExternalChange describes a package boundary value.
+type ManualOrExternalChange struct {
 	Path   string
 	Status string
 }
 
-// GateMissingAgentEvidence describes a package boundary value.
-type GateMissingAgentEvidence struct {
+// MissingAgentEvidence describes a package boundary value.
+type MissingAgentEvidence struct {
 	TicketKey   string
 	ExecutionID string
 	ReportPath  string
 	Reason      string
 }
 
-// GateHighRiskManualChange describes a package boundary value.
-type GateHighRiskManualChange struct {
+// HighRiskManualChange describes a package boundary value.
+type HighRiskManualChange struct {
 	Path    string
 	Status  string
 	Pattern string
 }
 
-type gateExecutionEvidence struct {
+type executionEvidence struct {
 	ticketKey   string
 	executionID string
 	reportPath  string
 }
 
-// NewGateEvidenceClassifier constructs the corresponding package service or value.
-func NewGateEvidenceClassifier(loadReports func(context.Context, string) ([]GateExecutionReport, error)) GateEvidenceClassifier {
-	return GateEvidenceClassifier{LoadReports: loadReports}
+// NewEvidenceClassifier constructs the corresponding package service or value.
+func NewEvidenceClassifier(loadReports func(context.Context, string) ([]ExecutionReport, error)) EvidenceClassifier {
+	return EvidenceClassifier{LoadReports: loadReports}
 }
 
-// GateExecutionReport contains the report identity and the loaded result paths or diagnostic.
-type GateExecutionReport struct {
+// ExecutionReport contains the report identity and the loaded result paths or diagnostic.
+type ExecutionReport struct {
 	TicketKey, ExecutionID, RelativePath string
 	ChangedPaths                         []string
 	FailureReason                        string
 }
 
 // Classify executes the corresponding package operation.
-func (c GateEvidenceClassifier) Classify(
-	ctx context.Context,
-	request GateEvidenceClassificationRequest,
-) (GateEvidenceClassification, error) {
+func (c EvidenceClassifier) Classify(ctx context.Context, request EvidenceClassificationRequest) (EvidenceClassification, error) {
 	projectDir := strings.TrimSpace(request.ProjectDir)
 	if projectDir == "" {
-		return GateEvidenceClassification{}, fmt.Errorf("project directory is required")
+		return EvidenceClassification{}, fmt.Errorf("project directory is required")
 	}
 
 	reports, err := c.LoadReports(ctx, projectDir)
 	if err != nil {
-		return GateEvidenceClassification{}, err
+		return EvidenceClassification{}, err
 	}
 
-	evidenceByPath, missingEvidence := collectGateExecutionEvidence(reports)
-	classification := GateEvidenceClassification{
+	evidenceSet := collectExecutionEvidence(reports)
+	evidenceByPath, missingEvidence := evidenceSet.ByPath, evidenceSet.Missing
+	classification := EvidenceClassification{
 		MissingAgentEvidence: missingEvidence,
 	}
 
@@ -101,7 +99,7 @@ func (c GateEvidenceClassifier) Classify(
 
 		evidence, ok := evidenceByPath[path]
 		if ok {
-			classification.AgentManagedWork = append(classification.AgentManagedWork, GateAgentManagedWork{
+			classification.AgentManagedWork = append(classification.AgentManagedWork, AgentManagedWork{
 				Path:        path,
 				Status:      file.Status,
 				TicketKey:   evidence.ticketKey,
@@ -112,14 +110,14 @@ func (c GateEvidenceClassifier) Classify(
 			continue
 		}
 
-		classification.ManualOrExternalChanges = append(classification.ManualOrExternalChanges, GateManualOrExternalChange{
+		classification.ManualOrExternalChanges = append(classification.ManualOrExternalChanges, ManualOrExternalChange{
 			Path:   path,
 			Status: file.Status,
 		})
 
-		pattern, ok := gateHighRiskPattern(path, request.HighRiskPaths)
+		pattern, ok := highRiskPattern(path, request.HighRiskPaths)
 		if ok {
-			classification.HighRiskManualChanges = append(classification.HighRiskManualChanges, GateHighRiskManualChange{
+			classification.HighRiskManualChanges = append(classification.HighRiskManualChanges, HighRiskManualChange{
 				Path:    path,
 				Status:  file.Status,
 				Pattern: pattern,
@@ -130,14 +128,14 @@ func (c GateEvidenceClassifier) Classify(
 	return classification, nil
 }
 
-func gateHighRiskPattern(filePath string, patterns []string) (string, bool) {
+func highRiskPattern(filePath string, patterns []string) (string, bool) {
 	for _, pattern := range patterns {
 		pattern = filepath.ToSlash(strings.TrimSpace(pattern))
 		if pattern == "" {
 			continue
 		}
 
-		if gatePathMatchesPattern(filePath, pattern) {
+		if pathMatchesPattern(filePath, pattern) {
 			return pattern, true
 		}
 	}
@@ -145,7 +143,7 @@ func gateHighRiskPattern(filePath string, patterns []string) (string, bool) {
 	return "", false
 }
 
-func gatePathMatchesPattern(filePath, pattern string) bool {
+func pathMatchesPattern(filePath, pattern string) bool {
 	if strings.HasSuffix(pattern, "/**") {
 		prefix := strings.TrimSuffix(pattern, "/**")
 
@@ -160,22 +158,20 @@ func gatePathMatchesPattern(filePath, pattern string) bool {
 	return filePath == pattern
 }
 
-func collectGateExecutionEvidence(
-	reports []GateExecutionReport,
-) (map[string]gateExecutionEvidence, []GateMissingAgentEvidence) {
-	evidenceByPath := map[string]gateExecutionEvidence{}
-	missingEvidence := []GateMissingAgentEvidence{}
+func collectExecutionEvidence(reports []ExecutionReport) executionEvidenceSet {
+	evidenceByPath := map[string]executionEvidence{}
+	missingEvidence := []MissingAgentEvidence{}
 
 	for _, report := range reports {
 		if report.FailureReason != "" {
-			missingEvidence = append(missingEvidence, gateMissingEvidence(report, report.FailureReason))
+			missingEvidence = append(missingEvidence, reportMissingEvidence(report, report.FailureReason))
 
 			continue
 		}
 
 		for _, changedPath := range report.ChangedPaths {
 			path := filepath.ToSlash(changedPath)
-			evidenceByPath[path] = gateExecutionEvidence{
+			evidenceByPath[path] = executionEvidence{
 				ticketKey:   report.TicketKey,
 				executionID: report.ExecutionID,
 				reportPath:  report.RelativePath,
@@ -183,14 +179,19 @@ func collectGateExecutionEvidence(
 		}
 	}
 
-	return evidenceByPath, missingEvidence
+	return executionEvidenceSet{ByPath: evidenceByPath, Missing: missingEvidence}
 }
 
-func gateMissingEvidence(report GateExecutionReport, reason string) GateMissingAgentEvidence {
-	return GateMissingAgentEvidence{
+func reportMissingEvidence(report ExecutionReport, reason string) MissingAgentEvidence {
+	return MissingAgentEvidence{
 		TicketKey:   report.TicketKey,
 		ExecutionID: report.ExecutionID,
 		ReportPath:  report.RelativePath,
 		Reason:      reason,
 	}
+}
+
+type executionEvidenceSet struct {
+	ByPath  map[string]executionEvidence
+	Missing []MissingAgentEvidence
 }

@@ -10,44 +10,44 @@ import (
 	"strings"
 )
 
-// DefaultGateValidationCommand defines a package boundary constant.
-const DefaultGateValidationCommand = "go test ./..."
+// DefaultValidationCommand defines a package boundary constant.
+const DefaultValidationCommand = "go test ./..."
 
-// GateValidationRunner describes a package boundary value.
-type GateValidationRunner struct{}
+// ValidationRunner describes a package boundary value.
+type ValidationRunner struct{}
 
-// GateValidationRequest describes a package boundary value.
-type GateValidationRequest struct {
+// ValidationRequest describes a package boundary value.
+type ValidationRequest struct {
 	ProjectDir string
 	Command    string
 }
 
-// GateValidationResult describes a package boundary value.
-type GateValidationResult struct {
+// ValidationResult describes a package boundary value.
+type ValidationResult struct {
 	Command  string
 	ExitCode int
 	Output   string
 	Passed   bool
 }
 
-// NewGateValidationRunner constructs the corresponding package service or value.
-func NewGateValidationRunner() GateValidationRunner {
-	return GateValidationRunner{}
+// NewValidationRunner constructs the corresponding package service or value.
+func NewValidationRunner() ValidationRunner {
+	return ValidationRunner{}
 }
 
 // Run executes the configured operation.
-func (r GateValidationRunner) Run(ctx context.Context, request GateValidationRequest) (GateValidationResult, error) {
+func (r ValidationRunner) Run(ctx context.Context, request ValidationRequest) (ValidationResult, error) {
 	projectDir := strings.TrimSpace(request.ProjectDir)
 	if projectDir == "" {
-		return GateValidationResult{}, fmt.Errorf("project directory is required")
+		return ValidationResult{}, fmt.Errorf("project directory is required")
 	}
 
-	command := gateValidationCommand(request.Command)
+	command := validationCommand(request.Command)
 	if len(command) == 0 {
-		return GateValidationResult{}, fmt.Errorf("validation command is required")
+		return ValidationResult{}, fmt.Errorf("validation command is required")
 	}
 
-	cmd := exec.CommandContext(ctx, gateValidationShell(), gateValidationShellArgs(command)...)
+	cmd := exec.CommandContext(ctx, validationShell(), validationShellArgs(command)...)
 	cmd.Dir = projectDir
 
 	var output bytes.Buffer
@@ -57,7 +57,7 @@ func (r GateValidationRunner) Run(ctx context.Context, request GateValidationReq
 
 	err := cmd.Run()
 
-	result := GateValidationResult{
+	result := ValidationResult{
 		Command: strings.Join(command, " "),
 		Output:  strings.TrimSpace(output.String()),
 		Passed:  err == nil,
@@ -73,19 +73,19 @@ func (r GateValidationRunner) Run(ctx context.Context, request GateValidationReq
 		return result, nil
 	}
 
-	return GateValidationResult{}, fmt.Errorf("run validation command %q: %w", result.Command, err)
+	return ValidationResult{}, fmt.Errorf("run validation command %q: %w", result.Command, err)
 }
 
-func gateValidationCommand(command string) []string {
+func validationCommand(command string) []string {
 	command = strings.TrimSpace(command)
 	if command == "" {
-		command = DefaultGateValidationCommand
+		command = DefaultValidationCommand
 	}
 
 	return strings.Fields(command)
 }
 
-func gateValidationShell() string {
+func validationShell() string {
 	if runtime.GOOS == "windows" {
 		return "cmd"
 	}
@@ -93,7 +93,7 @@ func gateValidationShell() string {
 	return "sh"
 }
 
-func gateValidationShellArgs(command []string) []string {
+func validationShellArgs(command []string) []string {
 	joined := strings.Join(command, " ")
 	if runtime.GOOS == "windows" {
 		return []string{"/C", joined}
