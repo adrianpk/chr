@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/configvalue"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
@@ -17,7 +18,7 @@ import (
 
 // WorkspaceConfig describes a package boundary value.
 type WorkspaceConfig struct {
-	Harnesses       HarnessSelectionConfig
+	Harnesses       harnesscore.HarnessSelectionConfig
 	HarnessAudit    HarnessSelectionAudit
 	Workflow        WorkflowConfig
 	TicketKeyPrefix string

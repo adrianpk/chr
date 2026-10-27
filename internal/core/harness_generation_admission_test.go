@@ -27,7 +27,7 @@ func TestHarnessGenerationBindingSelectionOrder(t *testing.T) {
 	finished := make(chan generationBindingAdmissionResult, 1)
 
 	go func() {
-		operation, err := FreezeHarnessGeneration(t.Context(), project, "ordered-operation", "plan_generation", func(ctx context.Context, c WorkspaceConfig) (HarnessGenerationBinding, HarnessGenerationLaunch, error) {
+		operation, err := FreezeHarnessGeneration(t.Context(), project, "ordered-operation", "plan_generation", func(ctx context.Context, c WorkspaceConfig) (harnesscore.HarnessGenerationBinding, HarnessGenerationLaunch, error) {
 			close(entered)
 			<-release
 
@@ -78,12 +78,12 @@ type generationBindingAdmissionResult struct {
 func TestHarnessGenerationBindingDirectAPI(t *testing.T) {
 	project := t.TempDir()
 
-	operation, err := FreezeHarnessGeneration(t.Context(), project, "api-operation", "quiz_next_question", func(_ context.Context, c WorkspaceConfig) (HarnessGenerationBinding, HarnessGenerationLaunch, error) {
-		binding, err := SealHarnessGenerationBinding(HarnessGenerationBinding{
-			Selection: HarnessSelection{
+	operation, err := FreezeHarnessGeneration(t.Context(), project, "api-operation", "quiz_next_question", func(_ context.Context, c WorkspaceConfig) (harnesscore.HarnessGenerationBinding, HarnessGenerationLaunch, error) {
+		binding, err := harnesscore.SealHarnessGenerationBinding(harnesscore.HarnessGenerationBinding{
+			Selection: harnesscore.HarnessSelection{
 				Role: harnesscore.Generation, Action: "quiz_next_question", Backend: "openai", Source: "legacy", ModelProvider: "openai", Model: "fixture-api-model",
 				SelectionRevision: c.Revision(), ProfileRevision: contenthash.Sum([]byte("fixture-api-profile")),
-				Readiness: HarnessReadiness{Supported: true, Executable: "not_required", Credentials: "api_managed", Runtime: "not_required"},
+				Readiness: harnesscore.HarnessReadiness{Supported: true, Executable: "not_required", Credentials: "api_managed", Runtime: "not_required"},
 			}, ProtocolRevision: "responses/v1",
 		})
 

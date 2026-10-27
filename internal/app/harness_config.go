@@ -10,6 +10,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -157,7 +158,7 @@ func renderHarnessSelectionStatus(stdout io.Writer, status HarnessSelectionStatu
 		return err
 	}
 
-	for _, role := range []core.HarnessSelection{status.Worker, status.Generation} {
+	for _, role := range []harnesscore.HarnessSelection{status.Worker, status.Generation} {
 		if _, err := fmt.Fprintf(stdout, "%s: %s; backend: %s; provider: %s; model: %s; locally ready: %t\n", role.Role, harnessChoiceLabel(role.Profile), role.Backend, role.ModelProvider, role.Model, role.Readiness.Ready()); err != nil {
 			return err
 		}

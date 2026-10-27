@@ -12,6 +12,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
@@ -134,12 +135,12 @@ func TestPiGenerationProtocolIdentity(t *testing.T) {
 
 	binding.ProtocolRevision = "pi-rpc/future"
 
-	binding, err = core.SealHarnessGenerationBinding(binding)
+	binding, err = harnesscore.SealHarnessGenerationBinding(binding)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	op, err := core.FreezeHarnessGeneration(t.Context(), operations.projectContext.ProjectDir, "unsupported-protocol", "conversation", func(context.Context, core.WorkspaceConfig) (core.HarnessGenerationBinding, core.HarnessGenerationLaunch, error) {
+	op, err := core.FreezeHarnessGeneration(t.Context(), operations.projectContext.ProjectDir, "unsupported-protocol", "conversation", func(context.Context, core.WorkspaceConfig) (harnesscore.HarnessGenerationBinding, core.HarnessGenerationLaunch, error) {
 		return binding, launch, nil
 	})
 	if err != nil {

@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
 )
@@ -37,7 +38,7 @@ func newHarnessJourney(t *testing.T) *harnessJourney {
 	telegram, operations, record, start, _ := telegramHarnessWorkerFixture(t)
 	workerProfiles := prepareServiceHarnessBinding(t, operations)
 
-	profiles, err := core.LoadHarnessProfiles(filepath.Dir(workerProfiles))
+	profiles, err := harnesscore.LoadHarnessProfiles(filepath.Dir(workerProfiles))
 	if err != nil {
 		t.Fatal(err)
 	}

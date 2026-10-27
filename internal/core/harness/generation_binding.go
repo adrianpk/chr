@@ -1,21 +1,21 @@
-package core
+package harness
 
 import (
 	"encoding/json"
 	"errors"
+	"slices"
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
-	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 )
 
 // HarnessGenerationBinding retains a non-secret selection for one operation.
 // Readiness records admission-time local evidence, never remote authentication.
 type HarnessGenerationBinding struct {
-	Selection        HarnessSelection          `json:"selection"`
-	ExecutableRef    harnesscore.ExecutableRef `json:"executable_ref"`
-	ProtocolRevision string                    `json:"protocol_revision"`
-	BindingHash      string                    `json:"binding_hash"`
+	Selection        HarnessSelection `json:"selection"`
+	ExecutableRef    ExecutableRef    `json:"executable_ref"`
+	ProtocolRevision string           `json:"protocol_revision"`
+	BindingHash      string           `json:"binding_hash"`
 }
 
 // SealHarnessGenerationBinding seals the complete admitted selection.
@@ -58,7 +58,7 @@ func ValidateHarnessGenerationBinding(binding HarnessGenerationBinding) error {
 }
 
 func validateGenerationBindingSelection(s HarnessSelection) error {
-	if s.Role != harnesscore.Generation || !s.Readiness.Ready() || !harnesscore.SelectionDigest(s.SelectionRevision) || !harnesscore.SelectionDigest(s.ProfileRevision) {
+	if s.Role != Generation || !s.Readiness.Ready() || !SelectionDigest(s.SelectionRevision) || !SelectionDigest(s.ProfileRevision) {
 		return errors.New("generation binding requires a ready versioned selection")
 	}
 
@@ -81,7 +81,7 @@ func validateGenerationBindingText(binding HarnessGenerationBinding) error {
 }
 
 func validateGenerationBindingSource(s HarnessSelection) error {
-	if s.Source == "project" && harnesscore.ValidProfileName(s.Profile) {
+	if s.Source == "project" && ValidProfileName(s.Profile) {
 		return nil
 	}
 
@@ -98,11 +98,11 @@ func validateGenerationBindingTransport(binding HarnessGenerationBinding) error 
 		return validateGenerationBindingAPI(binding)
 	}
 
-	if !workflowConfigChoice(s.Backend, []string{"codex", "pi"}) || s.Harness != s.Backend || !s.Capabilities.Generation {
+	if !slices.Contains([]string{"codex", "pi"}, s.Backend) || s.Harness != s.Backend || !s.Capabilities.Generation {
 		return errors.New("generation binding requires executable and capability evidence")
 	}
 
-	if !harnesscore.SelectionDigest(binding.ExecutableRef.Hash) || !harnesscore.SelectionDigest(binding.ExecutableRef.CommandHash) {
+	if !SelectionDigest(binding.ExecutableRef.Hash) || !SelectionDigest(binding.ExecutableRef.CommandHash) {
 		return errors.New("generation binding requires executable fingerprints")
 	}
 
@@ -111,7 +111,7 @@ func validateGenerationBindingTransport(binding HarnessGenerationBinding) error 
 
 func validateGenerationBindingAPI(binding HarnessGenerationBinding) error {
 	s := binding.Selection
-	if s.Harness != "" || s.Source != "legacy" || s.ModelProvider != "openai" || binding.ExecutableRef != (harnesscore.ExecutableRef{}) {
+	if s.Harness != "" || s.Source != "legacy" || s.ModelProvider != "openai" || binding.ExecutableRef != (ExecutableRef{}) {
 		return errors.New("direct API generation cannot claim a harness executable")
 	}
 

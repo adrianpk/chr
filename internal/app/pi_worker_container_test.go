@@ -60,7 +60,7 @@ func TestPiWorkerContainer(t *testing.T) {
 func assertPiBridgeGenerationRejection(t *testing.T, operations service) {
 	t.Helper()
 
-	profiles, err := core.LoadHarnessProfiles(operations.env.ConfigDir())
+	profiles, err := harnesscore.LoadHarnessProfiles(operations.env.ConfigDir())
 	if err != nil {
 		t.Fatal(err)
 	}

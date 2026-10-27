@@ -117,11 +117,11 @@ func harnessAssertFrame(t *testing.T, view string, width int) {
 }
 
 func harnessSaveFixture() *harnessSelectionFixture {
-	ready := core.HarnessReadiness{Supported: true, Executable: "available", Runtime: "native", Credentials: "cli_managed", RemoteAuthentication: "not_tested"}
+	ready := harnesscore.HarnessReadiness{Supported: true, Executable: "available", Runtime: "native", Credentials: "cli_managed", RemoteAuthentication: "not_tested"}
 
 	return &harnessSelectionFixture{view: HarnessSelectionView{
 		RequestID: "exact-request", Snapshot: core.HarnessSelectionSnapshot{HarnessSelectionAudit: core.HarnessSelectionAudit{ProjectRef: "project-1"}, Revision: strings.Repeat("a", 64)},
-		Worker: core.HarnessSelection{Profile: "alpha", Harness: "codex", Model: "model-a", Readiness: ready}, Generation: core.HarnessSelection{Readiness: ready},
+		Worker: harnesscore.HarnessSelection{Profile: "alpha", Harness: "codex", Model: "model-a", Readiness: ready}, Generation: harnesscore.HarnessSelection{Readiness: ready},
 		Profiles: []HarnessProfileView{{Name: "alpha", Harness: "codex", Model: "model-a", Worker: ready, Generation: ready}, {Name: "beta", Harness: "codex", Model: "model-b", Worker: ready, Generation: ready}},
 	}}
 }

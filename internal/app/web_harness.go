@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -57,7 +58,7 @@ func (p webViewProvider) HarnessSelectionView(ctx context.Context) (webui.Harnes
 	return view, nil
 }
 
-func webHarnessRole(selection core.HarnessSelection, profile string, generation bool) webui.HarnessRoleView {
+func webHarnessRole(selection harnesscore.HarnessSelection, profile string, generation bool) webui.HarnessRoleView {
 	view := webui.HarnessRoleView{Current: webHarnessLabel(profile, selection.Harness, selection.ModelProvider, selection.Model), Problem: selection.Readiness.Problem}
 
 	view.Selected = webui.HarnessKeepProfile
@@ -135,7 +136,7 @@ func webHarnessChoice(value string) *string {
 	return &value
 }
 
-func webHarnessChoiceSetup(readiness core.HarnessReadiness) string {
+func webHarnessChoiceSetup(readiness harnesscore.HarnessReadiness) string {
 	if readiness.Ready() {
 		return " · ready"
 	}

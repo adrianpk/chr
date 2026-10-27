@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness"
 )
@@ -20,7 +21,7 @@ func WithHarnessGeneration(ctx context.Context, operation HarnessGenerationOpera
 }
 
 // HarnessGenerationSelection returns a value copy without the private executable.
-func HarnessGenerationSelection(ctx context.Context) (string, HarnessGenerationBinding, bool) {
+func HarnessGenerationSelection(ctx context.Context) (string, harnesscore.HarnessGenerationBinding, bool) {
 	operation, ok := ctx.Value(harnessGenerationContextKey{}).(HarnessGenerationOperation)
 
 	return operation.ID, operation.Binding, ok

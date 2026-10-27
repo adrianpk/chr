@@ -21,7 +21,7 @@ type HarnessSelectionExecutor interface {
 type HarnessSelectionView struct {
 	RequestID          string
 	Snapshot           core.HarnessSelectionSnapshot
-	Worker, Generation core.HarnessSelection
+	Worker, Generation harnesscore.HarnessSelection
 	Profiles           []HarnessProfileView
 	Retained           []HarnessRetainedView
 	More               bool
@@ -31,7 +31,7 @@ type HarnessSelectionView struct {
 // HarnessProfileView offers named choices with role-specific local readiness.
 type HarnessProfileView struct {
 	Name, Harness, Provider, Model string
-	Worker, Generation             core.HarnessReadiness
+	Worker, Generation             harnesscore.HarnessReadiness
 }
 
 // HarnessRetainedView separates a retained worker binding from current defaults.
@@ -223,7 +223,7 @@ func (m *Model) harnessSelectionLines(width int) []string {
 	return lines
 }
 
-func harnessRoleLines(name string, selection core.HarnessSelection, generation bool, width int) []string {
+func harnessRoleLines(name string, selection harnesscore.HarnessSelection, generation bool, width int) []string {
 	label := harnessIdentity(selection.Profile, selection.Harness, selection.ModelProvider, selection.Model)
 	if selection.Profile == "" {
 		label = "Legacy dispatch · Codex CLI default"
@@ -275,7 +275,7 @@ func (m *Model) harnessChoiceLine(role, choice string, focused bool) string {
 	return prefix + role + " choice: " + label
 }
 
-func harnessReadyLabel(readiness core.HarnessReadiness) string {
+func harnessReadyLabel(readiness harnesscore.HarnessReadiness) string {
 	if readiness.Ready() {
 		return "ready"
 	}

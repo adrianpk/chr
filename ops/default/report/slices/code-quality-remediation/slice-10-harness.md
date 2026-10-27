@@ -39,9 +39,16 @@ reference with its private resolved command. Binding fields and serialized
 executable/argv hashes are unchanged; the new value is never serialized into a
 retained binding. Every native and application consumer uses its explicit fields.
 
+Profile parsing, role references, readiness/selection projections and generation
+binding sealing/validation now live under core/harness. Workspace configuration
+field interpretation and whole-image Revision stay with their actual configuration
+owner. Three profile tests move beside the parser. The 29 moved declarations and
+tests match their source preimages after namespace qualification and equivalent
+standard-library enum membership. No serialized field or profile hash changes.
+
 ## Implementation Notes
 
-The approved inventory assigns 38 signature occurrences and 30 current root
+The approved inventory assigns 38 signature occurrences and 30 initial root
 files to this slice. Each current owner and consumer is checked before moving.
 The seven declaration preimages in slice-10-moves.csv match after namespace
 qualification and the equivalent standard-library membership predicate.
@@ -93,6 +100,10 @@ Executable preparation checks passed:
 
 - `make check-go-style`: 9303 declarations, ceiling seven, 226 exact debts, one external exception.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/... ./internal/core ./internal/app`: zero issues.
+
+Profile owner move checks passed:
+
+- `go test ./internal/core/harness ./internal/core ./internal/app ./internal/tui ./internal/webui -run '^Test(Harness|ServiceHarness|QualityRecordWire|TelegramHarness|WebHarness)' -count=1 -timeout=3m`: TUI compiled with no matching tests; domain, native, app and Web checks passed.
 
 ## Risks and Follow-ups
 

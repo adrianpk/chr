@@ -1,11 +1,9 @@
-package core
+package harness
 
 import (
 	"errors"
 	"io"
 	"strings"
-
-	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 )
 
 func readHarnessProfileBytes(reader io.Reader) ([]byte, error) {
@@ -86,7 +84,7 @@ func (p *harnessProfileParser) line(raw string) error {
 }
 
 func (p *harnessProfileParser) profile(name string) error {
-	if !harnesscore.ValidProfileName(name) || len(p.profiles) >= 100 {
+	if !ValidProfileName(name) || len(p.profiles) >= 100 {
 		return errors.New("harness profiles require names of 1..128 plain bytes and at most 100 entries")
 	}
 

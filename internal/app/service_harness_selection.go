@@ -18,18 +18,18 @@ import (
 )
 
 type resolvedHarnessSelection struct {
-	View         core.HarnessSelection
-	Profile      core.HarnessProfile
+	View         harnesscore.HarnessSelection
+	Profile      harnesscore.HarnessProfile
 	Executable   string
 	RuntimeImage string
 }
 
 // ResolveHarnessSelection observes one coherent persisted role selection.
 // Profile setup is explicit; inspection never installs or authenticates a driver.
-func (s service) ResolveHarnessSelection(ctx context.Context, role harnesscore.Role, action string) (core.HarnessSelection, error) {
+func (s service) ResolveHarnessSelection(ctx context.Context, role harnesscore.Role, action string) (harnesscore.HarnessSelection, error) {
 	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
 	if err != nil {
-		return core.HarnessSelection{}, err
+		return harnesscore.HarnessSelection{}, err
 	}
 
 	resolved, err := s.resolveHarnessSelection(ctx, config, role, action)
@@ -55,7 +55,7 @@ func (s service) resolveHarnessSelection(ctx context.Context, config core.Worksp
 		return resolvedHarnessSelection{}, errors.New("private user configuration is required to resolve harness profiles")
 	}
 
-	profiles, err := core.LoadHarnessProfiles(s.env.ConfigDir())
+	profiles, err := harnesscore.LoadHarnessProfiles(s.env.ConfigDir())
 	if err != nil {
 		return resolvedHarnessSelection{}, err
 	}
@@ -63,14 +63,14 @@ func (s service) resolveHarnessSelection(ctx context.Context, config core.Worksp
 	return resolveConfiguredHarnessSelection(ctx, config, profiles, name, role, action, s.env.ConfigDir())
 }
 
-func resolveConfiguredHarnessSelection(ctx context.Context, config core.WorkspaceConfig, profiles map[string]core.HarnessProfile, name string, role harnesscore.Role, action, configDir string) (resolvedHarnessSelection, error) {
+func resolveConfiguredHarnessSelection(ctx context.Context, config core.WorkspaceConfig, profiles map[string]harnesscore.HarnessProfile, name string, role harnesscore.Role, action, configDir string) (resolvedHarnessSelection, error) {
 	if name == "" {
 		return legacyHarnessSelection(ctx, config, role, action)
 	}
 
 	profile, found := profiles[name]
 	if !found {
-		view := core.HarnessSelection{Role: role, Action: action, Profile: name, Source: "project", SelectionRevision: config.Revision()}
+		view := harnesscore.HarnessSelection{Role: role, Action: action, Profile: name, Source: "project", SelectionRevision: config.Revision()}
 
 		return resolvedHarnessSelection{View: view}, fmt.Errorf("unknown harness profile %q; configure it in private harnesses.yml", name)
 	}
@@ -83,13 +83,13 @@ func resolveConfiguredHarnessSelection(ctx context.Context, config core.Workspac
 	return resolved, nil
 }
 
-func prepareHarnessSelection(ctx context.Context, config core.WorkspaceConfig, profile core.HarnessProfile, role harnesscore.Role, action, configDir string) resolvedHarnessSelection {
+func prepareHarnessSelection(ctx context.Context, config core.WorkspaceConfig, profile harnesscore.HarnessProfile, role harnesscore.Role, action, configDir string) resolvedHarnessSelection {
 	model := profile.Model
 	if model == "" {
 		model = "cli_default"
 	}
 
-	view := core.HarnessSelection{
+	view := harnesscore.HarnessSelection{
 		Role: role, Action: action, Source: "project", Profile: profile.Name,
 		Harness: profile.Harness, Backend: profile.Harness, Model: model, ModelProvider: profile.ModelProvider,
 		Thinking: profile.Thinking, SelectionRevision: config.Revision(), ProfileRevision: profile.Revision,
@@ -114,8 +114,8 @@ func prepareHarnessSelection(ctx context.Context, config core.WorkspaceConfig, p
 	return resolvedHarnessSelection{View: view, Profile: profile, Executable: executable, RuntimeImage: runtimeImage}
 }
 
-func harnessProfileReadiness(ctx context.Context, profile core.HarnessProfile, role harnesscore.Role, configDir string) core.HarnessReadiness {
-	r := core.HarnessReadiness{
+func harnessProfileReadiness(ctx context.Context, profile harnesscore.HarnessProfile, role harnesscore.Role, configDir string) harnesscore.HarnessReadiness {
+	r := harnesscore.HarnessReadiness{
 		Executable: "available", Credentials: "cli_managed", Runtime: "native",
 		Supported: profile.Harness == codex.Identity, RemoteAuthentication: "not_tested",
 	}
@@ -145,8 +145,8 @@ func harnessProfileReadiness(ctx context.Context, profile core.HarnessProfile, r
 	return r
 }
 
-func piProfileReadiness(ctx context.Context, profile core.HarnessProfile, role harnesscore.Role, configDir string) (core.HarnessReadiness, string) {
-	r := core.HarnessReadiness{Executable: "available", Credentials: "missing", Runtime: "not_required", Supported: true, RemoteAuthentication: "not_tested"}
+func piProfileReadiness(ctx context.Context, profile harnesscore.HarnessProfile, role harnesscore.Role, configDir string) (harnesscore.HarnessReadiness, string) {
+	r := harnesscore.HarnessReadiness{Executable: "available", Credentials: "missing", Runtime: "not_required", Supported: true, RemoteAuthentication: "not_tested"}
 	if err := pi.ValidateGenerationProfile(profile.ModelProvider, profile.Model, profile.Thinking); err != nil {
 		r.Supported, r.Problem = false, err.Error()
 
@@ -172,7 +172,7 @@ func piProfileReadiness(ctx context.Context, profile core.HarnessProfile, role h
 	return r, ""
 }
 
-func piWorkerReadiness(ctx context.Context, profile core.HarnessProfile, configDir string, r core.HarnessReadiness) (core.HarnessReadiness, string) {
+func piWorkerReadiness(ctx context.Context, profile harnesscore.HarnessProfile, configDir string, r harnesscore.HarnessReadiness) (harnesscore.HarnessReadiness, string) {
 	r.Runtime = "unavailable"
 	if runtime.GOOS != "linux" {
 		r.Supported, r.Problem = false, "prepare the Pi worker bridge on a supported Linux host"
@@ -212,7 +212,7 @@ func piWorkerReadiness(ctx context.Context, profile core.HarnessProfile, configD
 	return r, image.ID
 }
 
-func harnessProfileOptionsSupported(profile core.HarnessProfile) bool {
+func harnessProfileOptionsSupported(profile harnesscore.HarnessProfile) bool {
 	return profile.Thinking == "" && profile.CredentialRef == "" && profile.ModelConfigRef == "" && (profile.Harness != codex.Identity || profile.ModelProvider == "")
 }
 
@@ -229,10 +229,10 @@ func privateHarnessReference(configDir, reference string) bool {
 func legacyHarnessSelection(ctx context.Context, config core.WorkspaceConfig, role harnesscore.Role, action string) (resolvedHarnessSelection, error) {
 	backend, err := legacyHarnessBackend(role, action)
 
-	view := core.HarnessSelection{
+	view := harnesscore.HarnessSelection{
 		Role: role, Action: action, Source: "legacy", Backend: backend,
 		Model: "cli_default", SelectionRevision: config.Revision(),
-		Readiness: core.HarnessReadiness{Executable: "not_required", Credentials: "api_managed", Runtime: "not_required", Supported: true, RemoteAuthentication: "not_tested"},
+		Readiness: harnesscore.HarnessReadiness{Executable: "not_required", Credentials: "api_managed", Runtime: "not_required", Supported: true, RemoteAuthentication: "not_tested"},
 	}
 	if err != nil {
 		view.Readiness.Supported = false
@@ -244,7 +244,7 @@ func legacyHarnessSelection(ctx context.Context, config core.WorkspaceConfig, ro
 		return resolvedHarnessSelection{View: view}, nil
 	}
 
-	profile := core.HarnessProfile{Harness: codex.Identity, Command: strings.TrimSpace(os.Getenv("CHR_CODEX_COMMAND")), Model: strings.TrimSpace(os.Getenv("CHR_CODEX_MODEL"))}
+	profile := harnesscore.HarnessProfile{Harness: codex.Identity, Command: strings.TrimSpace(os.Getenv("CHR_CODEX_COMMAND")), Model: strings.TrimSpace(os.Getenv("CHR_CODEX_MODEL"))}
 	if profile.Command == "" || action == "contextual_quiz" || role == harnesscore.Worker {
 		profile.Command = codex.Program
 	}
@@ -255,7 +255,7 @@ func legacyHarnessSelection(ctx context.Context, config core.WorkspaceConfig, ro
 		profile.Model = ""
 	}
 
-	profile.Revision = core.HarnessProfileRevision(profile)
+	profile.Revision = harnesscore.HarnessProfileRevision(profile)
 	resolved := prepareHarnessSelection(ctx, config, profile, role, action, "")
 	resolved.View.Source = "legacy"
 

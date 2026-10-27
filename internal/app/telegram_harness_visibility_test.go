@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
@@ -113,7 +114,7 @@ func telegramHarnessCheckGeneration(ctx context.Context, t *testing.T, operation
 	}
 }
 
-func telegramHarnessGenerationBinding(ctx context.Context, t *testing.T, operations service, id string) core.HarnessGenerationBinding {
+func telegramHarnessGenerationBinding(ctx context.Context, t *testing.T, operations service, id string) harnesscore.HarnessGenerationBinding {
 	t.Helper()
 
 	ctx, err := operations.bindHarnessGeneration(ctx, id, "spec_generation")

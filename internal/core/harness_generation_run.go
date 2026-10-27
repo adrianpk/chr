@@ -9,6 +9,7 @@ import (
 
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
@@ -18,24 +19,24 @@ import (
 // HarnessRunMetadata records host facts independently of semantic approval.
 // ObservedModel stays absent unless a transport supplies verified observation.
 type HarnessRunMetadata struct {
-	Schema            string                   `json:"schema"`
-	RequestID         string                   `json:"request_id"`
-	Purpose           string                   `json:"purpose"`
-	OperationID       string                   `json:"operation_id"`
-	Selection         HarnessGenerationBinding `json:"selection"`
-	SelectionRevision string                   `json:"selection_revision"`
-	ObservedModel     string                   `json:"observed_model,omitempty"`
-	InputRef          string                   `json:"input_ref"`
-	SchemaRef         string                   `json:"schema_ref,omitempty"`
-	OutputRef         string                   `json:"output_ref,omitempty"`
-	OutputHash        string                   `json:"output_hash,omitempty"`
-	ProcessOutcome    string                   `json:"process_outcome"`
-	OutputValidation  string                   `json:"output_validation"`
-	Usage             *HarnessRunUsage         `json:"usage,omitempty"`
-	UsageStatus       string                   `json:"usage_status"`
-	StartedAt         time.Time                `json:"started_at"`
-	FinishedAt        *time.Time               `json:"finished_at,omitempty"`
-	DiagnosticsRef    string                   `json:"diagnostics_ref,omitempty"`
+	Schema            string                               `json:"schema"`
+	RequestID         string                               `json:"request_id"`
+	Purpose           string                               `json:"purpose"`
+	OperationID       string                               `json:"operation_id"`
+	Selection         harnesscore.HarnessGenerationBinding `json:"selection"`
+	SelectionRevision string                               `json:"selection_revision"`
+	ObservedModel     string                               `json:"observed_model,omitempty"`
+	InputRef          string                               `json:"input_ref"`
+	SchemaRef         string                               `json:"schema_ref,omitempty"`
+	OutputRef         string                               `json:"output_ref,omitempty"`
+	OutputHash        string                               `json:"output_hash,omitempty"`
+	ProcessOutcome    string                               `json:"process_outcome"`
+	OutputValidation  string                               `json:"output_validation"`
+	Usage             *HarnessRunUsage                     `json:"usage,omitempty"`
+	UsageStatus       string                               `json:"usage_status"`
+	StartedAt         time.Time                            `json:"started_at"`
+	FinishedAt        *time.Time                           `json:"finished_at,omitempty"`
+	DiagnosticsRef    string                               `json:"diagnostics_ref,omitempty"`
 }
 
 // HarnessRunUsage retains unknown counts as absent, never numeric zero.
@@ -93,7 +94,7 @@ func checkHarnessRunIdentity(request harness.AgentRunRequest, record HarnessRunM
 		return errors.New("generation call identity conflicts with its retained artifact")
 	}
 
-	return ValidateHarnessGenerationBinding(retained.Selection)
+	return harnesscore.ValidateHarnessGenerationBinding(retained.Selection)
 }
 
 func sameHarnessRunCall(left, right HarnessRunMetadata) bool {
@@ -233,10 +234,10 @@ func ValidateHarnessGenerationOutput(ctx context.Context, request harness.AgentR
 	return errors.Join(validationErr, writeHarnessGenerationFile(harnessRunMetadataPath(request), record))
 }
 
-func validateHarnessRunForOperation(record HarnessRunMetadata, request harness.AgentRunRequest, id string, binding HarnessGenerationBinding) error {
+func validateHarnessRunForOperation(record HarnessRunMetadata, request harness.AgentRunRequest, id string, binding harnesscore.HarnessGenerationBinding) error {
 	if record.Schema != "chr-harness-run/v1" || record.RequestID != request.ID || record.Purpose != request.Purpose || record.OperationID != id || record.Selection.BindingHash != binding.BindingHash || record.ProcessOutcome != "completed" {
 		return errors.New("invalid generation validation evidence")
 	}
 
-	return ValidateHarnessGenerationBinding(record.Selection)
+	return harnesscore.ValidateHarnessGenerationBinding(record.Selection)
 }

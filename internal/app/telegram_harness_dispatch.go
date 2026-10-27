@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
@@ -89,7 +89,7 @@ func telegramHarnessText(status telegramHarnessStatus) string {
 	return telegramcore.BoundReceiverText(text.String())
 }
 
-func telegramHarnessRole(role string, selection core.HarnessSelection, generation bool) string {
+func telegramHarnessRole(role string, selection harnesscore.HarnessSelection, generation bool) string {
 	label := telegramHarnessLabel(selection.Profile, selection.Harness, selection.ModelProvider, selection.Model)
 	if selection.Profile == "" {
 		label = "Legacy dispatch · Codex CLI default"
@@ -101,7 +101,7 @@ func telegramHarnessRole(role string, selection core.HarnessSelection, generatio
 	return fmt.Sprintf("%s: %s · local %s\n", role, label, telegramHarnessReady(selection.Readiness))
 }
 
-func telegramHarnessReady(readiness core.HarnessReadiness) string {
+func telegramHarnessReady(readiness harnesscore.HarnessReadiness) string {
 	if readiness.Ready() {
 		return "ready"
 	}

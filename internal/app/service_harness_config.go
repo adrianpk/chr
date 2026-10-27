@@ -12,21 +12,21 @@ import (
 
 // HarnessProfileStatus offers only named choices and local readiness evidence.
 type HarnessProfileStatus struct {
-	Name          string                `json:"name"`
-	Harness       string                `json:"harness"`
-	ModelProvider string                `json:"model_provider,omitempty"`
-	Model         string                `json:"model"`
-	Thinking      string                `json:"thinking,omitempty"`
-	Revision      string                `json:"revision"`
-	Worker        core.HarnessReadiness `json:"worker"`
-	Generation    core.HarnessReadiness `json:"generation"`
+	Name          string                       `json:"name"`
+	Harness       string                       `json:"harness"`
+	ModelProvider string                       `json:"model_provider,omitempty"`
+	Model         string                       `json:"model"`
+	Thinking      string                       `json:"thinking,omitempty"`
+	Revision      string                       `json:"revision"`
+	Worker        harnesscore.HarnessReadiness `json:"worker"`
+	Generation    harnesscore.HarnessReadiness `json:"generation"`
 }
 
 // HarnessSelectionStatus presents defaults for new operations, not retained runs.
 type HarnessSelectionStatus struct {
 	Snapshot   core.HarnessSelectionSnapshot `json:"snapshot"`
-	Worker     core.HarnessSelection         `json:"worker"`
-	Generation core.HarnessSelection         `json:"generation"`
+	Worker     harnesscore.HarnessSelection  `json:"worker"`
+	Generation harnesscore.HarnessSelection  `json:"generation"`
 	Profiles   []HarnessProfileStatus        `json:"profiles"`
 	Problems   []string                      `json:"problems,omitempty"`
 }
@@ -53,7 +53,7 @@ func (s service) InspectHarnessSelections(ctx context.Context, action string) (H
 		return result, errors.New("private user configuration is required to inspect harness choices")
 	}
 
-	profiles, err := core.LoadHarnessProfiles(s.env.ConfigDir())
+	profiles, err := harnesscore.LoadHarnessProfiles(s.env.ConfigDir())
 	if err != nil {
 		return result, err
 	}
@@ -61,7 +61,7 @@ func (s service) InspectHarnessSelections(ctx context.Context, action string) (H
 	for _, field := range []struct {
 		role         harnesscore.Role
 		action, name string
-		target       *core.HarnessSelection
+		target       *harnesscore.HarnessSelection
 	}{
 		{harnesscore.Worker, "", config.Harnesses.Worker, &result.Worker}, {harnesscore.Generation, action, config.Harnesses.Generation, &result.Generation},
 	} {
@@ -78,7 +78,7 @@ func (s service) InspectHarnessSelections(ctx context.Context, action string) (H
 	return result, nil
 }
 
-func harnessProfileChoices(ctx context.Context, config core.WorkspaceConfig, profiles map[string]core.HarnessProfile, configDir string) []HarnessProfileStatus {
+func harnessProfileChoices(ctx context.Context, config core.WorkspaceConfig, profiles map[string]harnesscore.HarnessProfile, configDir string) []HarnessProfileStatus {
 	choices := make([]HarnessProfileStatus, 0, len(profiles))
 	for _, profile := range profiles {
 		worker := prepareHarnessSelection(ctx, config, profile, harnesscore.Worker, "", configDir)
