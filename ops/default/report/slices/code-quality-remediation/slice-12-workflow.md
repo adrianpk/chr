@@ -28,7 +28,8 @@ The approved T12.1–T12.6 tasks own this slice. The shared review prerequisite 
 implemented in `f4be8551581dbec43746e5b676b714911af24e2c`. All methods of the store move with
 their owning Go type. The ticket-projection prerequisite is implemented in
 `a96c05cee2000654f23e2ce0b0347b1155ec17ca`. Shared stage data belongs in workflow/state when needed
-without transferring persistence, coordination or transport behavior.
+without transferring persistence, coordination or transport behavior. The shared
+configuration prerequisite is implemented in `bedb07a4cca4d39c5f7099d594a83c6650002398`.
 
 ## Contracts Added or Changed
 
