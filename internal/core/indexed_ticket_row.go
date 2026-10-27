@@ -126,3 +126,47 @@ func (f *indexedTicketRow) assignReviewMetadata() error {
 
 	return nil
 }
+
+func (f *indexedTicketRow) assignTimes() error {
+	if f.createdAt.Valid {
+		parsedCreatedAt, err := database.ParseTime(f.createdAt.String)
+		if err != nil {
+			return err
+		}
+
+		f.ticket.CreatedAt = &parsedCreatedAt
+	}
+
+	if f.updatedAt.Valid {
+		parsedUpdatedAt, err := database.ParseTime(f.updatedAt.String)
+		if err != nil {
+			return err
+		}
+
+		f.ticket.UpdatedAt = &parsedUpdatedAt
+	}
+
+	if f.mergedAt.Valid {
+		parsedMergedAt, err := database.ParseTime(f.mergedAt.String)
+		if err != nil {
+			return err
+		}
+
+		f.ticket.MergedAt = &parsedMergedAt
+	}
+
+	parsedFileMTime, err := database.ParseTime(f.fileMTime)
+	if err != nil {
+		return err
+	}
+
+	parsedIndexedAt, err := database.ParseTime(f.indexedAt)
+	if err != nil {
+		return err
+	}
+
+	f.ticket.FileMTime = parsedFileMTime
+	f.ticket.IndexedAt = parsedIndexedAt
+
+	return nil
+}

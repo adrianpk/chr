@@ -301,3 +301,7 @@ func assertBlockingFindings(t *testing.T, got, want []string) {
 		t.Fatalf("BlockingFindings = %#v, want %#v", got, want)
 	}
 }
+
+func timePtr(value time.Time) *time.Time {
+	return &value
+}

@@ -127,11 +127,6 @@
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/ticket_index.go::assignIndexedTicketTimes",
-      "signature": "func(ticket *ticketcore.Indexed, createdAt sql.NullString, updatedAt sql.NullString, mergedAt sql.NullString, fileMTime string, indexedAt string) error",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/core/ticket_loop_query.go::splitTicketKey",
       "signature": "func(key string) (string, int, bool)",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
@@ -149,11 +144,6 @@
     {
       "id": "internal/core/ticket/metadata/parse.go::parseTicketReviewRefsBlock",
       "signature": "func(lines []string, start int) ([]ReviewRef, int)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/ticket/parser.go::parseIndexedTicketMetadataTimes",
-      "signature": "func(metadata map[string]string) (*time.Time, *time.Time, *time.Time, int, error)",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {

@@ -55,6 +55,19 @@ same focused tests/signature-policy checks pass after naming.
 
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ticket/... ./internal/core ./internal/app ./internal/tui ./scripts/goquality`: zero issues after naming.
 
+Indexed metadata/time prerequisites passed:
+
+- `go test ./internal/core/ticket/... ./internal/core ./internal/app ./scripts/goquality -run '^Test(Ticket|ValidateIndexedTicket|QualityRecordWire|QualityStorage|Board|Leaf)' -count=1 -timeout=3m`
+- `make check-go-style`: 9307 declarations, ceiling seven, 205 exact debts and one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ticket/... ./internal/core ./internal/app ./scripts/goquality`: zero issues.
+
+Metadata timestamp/round parsing returns one private outcome plus error, retaining
+parse order and zero failure results. The existing indexed SQL row assigns its
+own time fields instead of passing six positional inputs. timePtr now exists
+only in the test fixture. Index and key-sequence constructors consume the existing
+database.DataDirectory contract; their IO order, migrations and errors are unchanged.
+Two assigned signatures are fixed; the remaining slice work is not closed.
+
 ## Risks and Follow-ups
 
 T11.1–T11.6 remain open; no Slice 11 PR is prepared yet.

@@ -74,7 +74,7 @@ func indexedTicketFromMetadata(
 ) (Indexed, error) {
 	metadata := frontmatter.Metadata
 
-	createdAt, updatedAt, mergedAt, reviewRound, err := parseIndexedTicketMetadataTimes(metadata)
+	times, err := parseIndexedTicketMetadataTimes(metadata)
 	if err != nil {
 		return Indexed{}, err
 	}
@@ -93,7 +93,7 @@ func indexedTicketFromMetadata(
 		}, IndexedReview: IndexedReview{
 			ReviewRefs:        frontmatter.ReviewRefs,
 			ReviewState:       opsmetadata.Unquote(metadata["review_state"]),
-			ReviewRound:       reviewRound,
+			ReviewRound:       times.ReviewRound,
 			ReviewResult:      opsmetadata.Unquote(metadata["review_result"]),
 			ReviewCommentsURL: opsmetadata.Unquote(metadata["review_comments_url"]),
 			BlockingFindings:  opsmetadata.ParseList(metadata["blocking_findings"]),
@@ -102,11 +102,11 @@ func indexedTicketFromMetadata(
 			MergeResult:  opsmetadata.Unquote(metadata["merge_result"]),
 			MergeActor:   opsmetadata.Unquote(metadata["merge_actor"]),
 			MergeCommit:  opsmetadata.Unquote(metadata["merge_commit"]),
-			MergedAt:     mergedAt,
+			MergedAt:     times.MergedAt,
 			MergeBlocker: opsmetadata.Unquote(metadata["merge_blocker"]),
 		}, IndexedTimes: IndexedTimes{
-			CreatedAt: createdAt,
-			UpdatedAt: updatedAt,
+			CreatedAt: times.CreatedAt,
+			UpdatedAt: times.UpdatedAt,
 		}, IndexedProjection: IndexedProjection{
 			FileMTime:   info.ModTime().UTC(),
 			FileSize:    info.Size(),
@@ -125,28 +125,35 @@ func indexedTicketFromMetadata(
 	return ticket, nil
 }
 
-func parseIndexedTicketMetadataTimes(metadata map[string]string) (*time.Time, *time.Time, *time.Time, int, error) {
+type indexedTicketMetadataTimes struct {
+	CreatedAt   *time.Time
+	UpdatedAt   *time.Time
+	MergedAt    *time.Time
+	ReviewRound int
+}
+
+func parseIndexedTicketMetadataTimes(metadata map[string]string) (indexedTicketMetadataTimes, error) {
 	createdAt, err := opsmetadata.OptionalTimestamp(metadata["created_at"])
 	if err != nil {
-		return nil, nil, nil, 0, err
+		return indexedTicketMetadataTimes{}, err
 	}
 
 	updatedAt, err := opsmetadata.OptionalTimestamp(metadata["updated_at"])
 	if err != nil {
-		return nil, nil, nil, 0, err
+		return indexedTicketMetadataTimes{}, err
 	}
 
 	mergedAt, err := opsmetadata.OptionalTimestamp(metadata["merged_at"])
 	if err != nil {
-		return nil, nil, nil, 0, err
+		return indexedTicketMetadataTimes{}, err
 	}
 
 	reviewRound, err := ticketmetadata.OptionalInteger(metadata["review_round"])
 	if err != nil {
-		return nil, nil, nil, 0, err
+		return indexedTicketMetadataTimes{}, err
 	}
 
-	return createdAt, updatedAt, mergedAt, reviewRound, nil
+	return indexedTicketMetadataTimes{CreatedAt: createdAt, UpdatedAt: updatedAt, MergedAt: mergedAt, ReviewRound: reviewRound}, nil
 }
 
 func relativeTicketPath(opts ParseOptions) (string, error) {

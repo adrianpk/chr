@@ -36,7 +36,7 @@ type sqliteTicketKeySequenceRepository struct {
 // NewTicketKeySequenceRepository constructs the corresponding package service or value.
 func NewTicketKeySequenceRepository(
 	ctx context.Context,
-	env UserEnvironment,
+	env database.DataDirectory,
 	assetsFS fs.FS,
 ) (TicketKeySequenceRepository, error) {
 	err := os.MkdirAll(env.DataDir(), 0o755)

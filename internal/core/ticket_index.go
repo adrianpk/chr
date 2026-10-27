@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	_ "modernc.org/sqlite"
 
@@ -36,7 +35,7 @@ type sqliteTicketIndex struct {
 }
 
 // NewTicketIndex constructs the corresponding package service or value.
-func NewTicketIndex(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (TicketIndex, error) {
+func NewTicketIndex(ctx context.Context, env database.DataDirectory, assetsFS fs.FS) (TicketIndex, error) {
 	err := os.MkdirAll(env.DataDir(), 0o755)
 	if err != nil {
 		return nil, fmt.Errorf("create user data directory: %w", err)
@@ -333,14 +332,7 @@ func scanIndexedTicket(scanner indexedTicketScanner) (ticketcore.Indexed, error)
 		return ticketcore.Indexed{}, err
 	}
 
-	err = assignIndexedTicketTimes(
-		&ticket,
-		fields.createdAt,
-		fields.updatedAt,
-		fields.mergedAt,
-		fields.fileMTime,
-		fields.indexedAt,
-	)
+	err = fields.assignTimes()
 	if err != nil {
 		return ticketcore.Indexed{}, err
 	}
@@ -365,57 +357,6 @@ func defaultJSONList(value string) string {
 	return value
 }
 
-func assignIndexedTicketTimes(
-	ticket *ticketcore.Indexed,
-	createdAt sql.NullString,
-	updatedAt sql.NullString,
-	mergedAt sql.NullString,
-	fileMTime string,
-	indexedAt string,
-) error {
-	if createdAt.Valid {
-		parsedCreatedAt, err := database.ParseTime(createdAt.String)
-		if err != nil {
-			return err
-		}
-
-		ticket.CreatedAt = &parsedCreatedAt
-	}
-
-	if updatedAt.Valid {
-		parsedUpdatedAt, err := database.ParseTime(updatedAt.String)
-		if err != nil {
-			return err
-		}
-
-		ticket.UpdatedAt = &parsedUpdatedAt
-	}
-
-	if mergedAt.Valid {
-		parsedMergedAt, err := database.ParseTime(mergedAt.String)
-		if err != nil {
-			return err
-		}
-
-		ticket.MergedAt = &parsedMergedAt
-	}
-
-	parsedFileMTime, err := database.ParseTime(fileMTime)
-	if err != nil {
-		return err
-	}
-
-	parsedIndexedAt, err := database.ParseTime(indexedAt)
-	if err != nil {
-		return err
-	}
-
-	ticket.FileMTime = parsedFileMTime
-	ticket.IndexedAt = parsedIndexedAt
-
-	return nil
-}
-
 func validateIndexedTicket(ticket ticketcore.Indexed) error {
 	if ticket.ProjectID == "" {
 		return fmt.Errorf("indexed ticket project id is required")
@@ -438,10 +379,6 @@ func validateIndexedTicket(ticket ticketcore.Indexed) error {
 	}
 
 	return nil
-}
-
-func timePtr(value time.Time) *time.Time {
-	return &value
 }
 
 func indexedTicketNamespace(ticket ticketcore.Indexed) string {

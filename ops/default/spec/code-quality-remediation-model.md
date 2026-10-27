@@ -617,3 +617,19 @@ five-input contracts retained. Two additional owned resolver contracts return
 one preparation value plus error. The global exact debt count is 207 with the
 same ceiling seven and one external exception. Boundary dispositions distinguish
 actual binary data/dispatch from redundant forwarding and record real regressions.
+
+## Slice 11 ticket record and parse compatibility
+
+Ticket records and indexed projection groups retain their original field order,
+text/JSON bytes, timestamps, optional metadata and legacy status aliases under
+the ticket owner. Renderer/parser/validation APIs have direct consumers; native
+guarded status mutation retains its actual edit authority. Shared integer decoding
+belongs to the existing metadata codec with the same empty and error outcomes.
+
+A private timestamp/review-round parse result replaces the five-result helper.
+All four source fields are parsed in the original order; any parse failure still
+returns no usable data. The indexed SQL row assigns its own nullable/required
+time fields in the original order and returns the same errors. No SQL column,
+transaction, cache invalidation, schema, null handling or durable value changes.
+timePtr is test-only. Constructors accept the existing database.DataDirectory
+port without changing open/configure/migration or failure-cleanup behavior.
