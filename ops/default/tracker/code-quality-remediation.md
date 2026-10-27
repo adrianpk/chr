@@ -6,7 +6,7 @@ Delivery set: code-quality-remediation
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 8, Quiz domain and model adapter; reviewing PR #445 after verified integration of PR #444.
+Active slice: Slice 9, Authoring, document generation and guided preparation; activated after verified integration of PR #445.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b`
 
 Plan: [Single-cycle plan](../plan/code-quality-remediation.md)
@@ -17,7 +17,7 @@ Source: [Quality review](../report/code-quality-review-2026-10-26/report.md)
 
 ## Authority and state
 
-The maintainer approved implementation, conventional commit/push and startup of one Looper run on 2026-10-26. Merge delegation covers the exact 16 slice PRs into dev after their required checks. Slices 1 through 7 are delivered through verified PRs #438, #439, #440, #441, #442, #443 and #444. This tracker owns task/commit/validation evidence; slice tickets mirror verified delivery state. Existing completed/blocked sets and unrelated tickets are not modified.
+The maintainer approved implementation, conventional commit/push and startup of one Looper run on 2026-10-26. Merge delegation covers the exact 16 slice PRs into dev after their required checks. Slices 1 through 8 are delivered through verified PRs #438, #439, #440, #441, #442, #443, #444 and #445. This tracker owns task/commit/validation evidence; slice tickets mirror verified delivery state. Existing completed/blocked sets and unrelated tickets are not modified.
 
 ## Canonical slice map
 
@@ -123,12 +123,12 @@ The maintainer approved implementation, conventional commit/push and startup of 
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T8.1 | Move quiz state, transitions and domain payloads to internal/core/quiz; move OpenAI-specific request/schema/response behavior to internal/core/quiz/openai. Keep provider-specific IO out of the quiz domain. | implemented | 2bd2c3156e3c; 3e12b10d2219; 83c1efb4677f; 4b8b1869f972; 0a751d414f31; be31a8b01b75 | Direct domain/model/OpenAI owners, shared generated values and private journal images; 404 extraction entries; enforced imports and focused real-boundary checks pass |
-| T8.2 | Split quiz_openai_model.go by schema, request and response responsibilities; split quiz_model_payload.go and service_quiz.go where cohesion warrants it. Retain the justified schema-literal complexity exception rather than creating artificial fragments. | implemented | 83c1efb4677f; ecf4baf844ac; 4b8b1869f972; be31a8b01b75 | Cohesive schema/instructions/decoding/context/payload and API request/response/trace files; service split; justified schema literal exception retained; strict lint and focused checks pass |
-| T8.3 | Replace assigned quiz model argument/result tuples with domain inputs and outputs, preserving question identity, answer sufficiency, model errors, token accounting and finite round limits. | implemented | d8782c80998f; ecf4baf844ac; be31a8b01b75 | All eight dispositions: six fixed, two cohesive legal five-input operations; named raw/bound output, trace observation, receipt lookup, metadata and parent/trunk results; 301 debts belong to other slices |
-| T8.4 | Remove service.newQuizModelRequest if its production path is still unused; update tests to the live request path. Preserve Deep/Fast/manual/guided behavior and existing provider selection. | implemented | 4b8b1869f972 | Production-unused newQuizModelRequest removed; four readiness tests use real persisted entries with newQuizModelRequestWithEntries; focused manual, Deep/Fast and guided service checks pass |
-| T8.5 | Keep cancellation explicit and secrets out of payloads/logs. Finish local signature, flag, state and suppression entries and update the dependency ledger and glossary. | implemented | 3e12b10d2219; 0a751d414f31; be31a8b01b75 | Explicit host/cancellation and actual provider identity; fixed OpenAI wire flags; original states, body limits and cleanup semantics; HTTP authorization/trace secrecy and owner policy checks pass |
-| T8.6 | Validate this slice, update its ticket/tracker, produce its report, and verify integration into dev. | reviewing | 300a3c956d8e | Canonical PR #445, immutable report introduction d8782c80998f381db8d26e3c048317758aa1a464; controller ledger and PR Validation own final exact clean-head make verify, focused non-short/race checks and whitespace; integration pending |
+| T8.1 | Move quiz state, transitions and domain payloads to internal/core/quiz; move OpenAI-specific request/schema/response behavior to internal/core/quiz/openai. Keep provider-specific IO out of the quiz domain. | delivered | 2bd2c3156e3c; 3e12b10d2219; 83c1efb4677f; 4b8b1869f972; 0a751d414f31; be31a8b01b75 | Direct domain/model/OpenAI owners, shared generated values and private journal images; 404 extraction entries; enforced imports and focused real-boundary checks pass |
+| T8.2 | Split quiz_openai_model.go by schema, request and response responsibilities; split quiz_model_payload.go and service_quiz.go where cohesion warrants it. Retain the justified schema-literal complexity exception rather than creating artificial fragments. | delivered | 83c1efb4677f; ecf4baf844ac; 4b8b1869f972; be31a8b01b75 | Cohesive schema/instructions/decoding/context/payload and API request/response/trace files; service split; justified schema literal exception retained; strict lint and focused checks pass |
+| T8.3 | Replace assigned quiz model argument/result tuples with domain inputs and outputs, preserving question identity, answer sufficiency, model errors, token accounting and finite round limits. | delivered | d8782c80998f; ecf4baf844ac; be31a8b01b75 | All eight dispositions: six fixed, two cohesive legal five-input operations; named raw/bound output, trace observation, receipt lookup, metadata and parent/trunk results; 301 debts belong to other slices |
+| T8.4 | Remove service.newQuizModelRequest if its production path is still unused; update tests to the live request path. Preserve Deep/Fast/manual/guided behavior and existing provider selection. | delivered | 4b8b1869f972 | Production-unused newQuizModelRequest removed; four readiness tests use real persisted entries with newQuizModelRequestWithEntries; focused manual, Deep/Fast and guided service checks pass |
+| T8.5 | Keep cancellation explicit and secrets out of payloads/logs. Finish local signature, flag, state and suppression entries and update the dependency ledger and glossary. | delivered | 3e12b10d2219; 0a751d414f31; be31a8b01b75 | Explicit host/cancellation and actual provider identity; fixed OpenAI wire flags; original states, body limits and cleanup semantics; HTTP authorization/trace secrecy and owner policy checks pass |
+| T8.6 | Validate this slice, update its ticket/tracker, produce its report, and verify integration into dev. | delivered | 300a3c956d8e | PR #445 merged at 2c649d98d3297914ac7c118cf3aecd46fd8276d1; controller ledger: make verify, focused non-short model/service/wire tests, focused recovery/capacity race and whitespace all pass on that exact HEAD |
 
 ### Slice 9: Authoring, document generation and guided preparation
 
@@ -225,13 +225,13 @@ The maintainer approved implementation, conventional commit/push and startup of 
 | --- | --- | --- | --- | --- | --- |
 | 1 | delivered | TKT-20261026084821 | #438 | 0d609b0c590c7e23a184513393fa64ab8d394b67 | `ops/default/report/slices/code-quality-remediation/slice-1-policy.md` |
 | 2 | delivered | TKT-20261026084822 | #439 | de3691d3b0155f850006f242ee2d99062a995ce0 | `ops/default/report/slices/code-quality-remediation/slice-2-values.md` |
-| 3 | pending | TKT-20261026084823 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-3-storage.md` |
-| 4 | pending | TKT-20261026084824 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-4-commands.md` |
-| 5 | pending | TKT-20261026084825 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-5-views.md` |
+| 3 | delivered | TKT-20261026084823 | #440 | fec20d73396156cf8f389fb11e68de8ca0cadcf1 | `ops/default/report/slices/code-quality-remediation/slice-3-storage.md` |
+| 4 | delivered | TKT-20261026084824 | #441 | 6b287a79bbe8b545a4d36633d24ceccea01469d0 | `ops/default/report/slices/code-quality-remediation/slice-4-commands.md` |
+| 5 | delivered | TKT-20261026084825 | #442 | 5a84d1af3d6a855ac1ce1e3f767080db3ef101c3 | `ops/default/report/slices/code-quality-remediation/slice-5-views.md` |
 | 6 | delivered | TKT-20261026084826 | #443 | c7d7040fde4385a64b20322da1bc5874a38c2deb | `ops/default/report/slices/code-quality-remediation/slice-6-leaves.md` |
-| 7 | in_progress | TKT-20261026084827 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-7-telegram.md` |
-| 8 | pending | TKT-20261026084828 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-8-quiz.md` |
-| 9 | pending | TKT-20261026084829 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-9-authoring.md` |
+| 7 | delivered | TKT-20261026084827 | #444 | 92f91847ffdc374c53b8044e9435b7af6d1cb722 | `ops/default/report/slices/code-quality-remediation/slice-7-telegram.md` |
+| 8 | delivered | TKT-20261026084828 | #445 | 2c649d98d3297914ac7c118cf3aecd46fd8276d1 | `ops/default/report/slices/code-quality-remediation/slice-8-quiz.md` |
+| 9 | in_progress | TKT-20261026084829 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-9-authoring.md` |
 | 10 | pending | TKT-20261026084830 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-10-harness.md` |
 | 11 | pending | TKT-20261026084831 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-11-tickets.md` |
 | 12 | pending | TKT-20261026084832 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-12-workflow.md` |

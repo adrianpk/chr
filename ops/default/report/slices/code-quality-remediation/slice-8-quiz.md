@@ -1,11 +1,12 @@
 # Slice 8: Quiz domain and model adapter
 
-Status: reviewing
+Status: delivered
 Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
 Branch: `refactor/slice-8-quality-quiz`
 PR: `#445`
+Integrated commit: `2c649d98d3297914ac7c118cf3aecd46fd8276d1`
 
 ## Purpose
 
@@ -97,10 +98,14 @@ The first controller `make verify` on `d3e7dd850007fbc1d4e10d40a4b002bbc078cdd2`
 stopped at the missing slug package README check. The package contract is now
 present; the focused package README check passes.
 
-Final clean-head validation uses make verify, focused non-short model/provider/
-service/retained-state checks, a focused capacity/deadline/recovery race selection,
-then git diff --check. The controller ledger and PR Validation own the exact
-ordered commands, HEAD, outcomes and logs. Integration remains controller-owned.
+Controller validation passed on clean HEAD `2c649d98d3297914ac7c118cf3aecd46fd8276d1`:
+
+- `make verify` — passed.
+- `go test ./internal/core/quiz/... ./internal/core ./internal/app -run '^Test(HostRequired|InvokeQuiz|ValidateQuiz|Quiz|OpenAIQuiz|Structured|HarnessGeneration|Service.*(Quiz|Spec|Plan|Acceptance)|Guided.*Quiz|PlanOrderModel|QualityRecordWire)' -count=1 -timeout=3m` — passed.
+- `go test -race ./internal/core -run '^Test(QuizActionRecovery|QuizActionBindings|HarnessGenerationBindingCapacityPool|StructuredHarnessDeadline)$' -count=1 -timeout=3m` — passed.
+- `git diff --check` — passed.
+
+Canonical PR #445 was verified merged into dev at that exact commit.
 
 ## Risks and Follow-ups
 

@@ -1,7 +1,7 @@
 ---
 id: TKT-20261026084829
 title: "Quality slice 9: Authoring, document generation and guided preparation"
-status: ready
+status: in_progress
 kind: cleanup
 severity: unclassified
 priority: normal
@@ -10,6 +10,7 @@ tags: code-quality, remediation, slice-9
 source: review
 reported_at: 2026-10-26T08:48:29Z
 commits: []
+started_at: 2026-10-27T13:06:46Z
 ready_at: 2026-10-26T08:57:09Z
 ---
 
