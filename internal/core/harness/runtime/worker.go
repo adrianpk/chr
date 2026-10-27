@@ -14,11 +14,11 @@ import (
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
-// WorkerRuntimeMounts grants the execution checkout and its Git metadata at
+// WorkerMounts grants the execution checkout and its Git metadata at
 // their actual paths. Linked worktrees need the common Git directory as well
 // as their checkout; no other project files or home directories are imported.
-func WorkerRuntimeMounts(ctx context.Context, directory string) ([]harness.RuntimeMount, error) {
-	root, err := workerRuntimeRoot(directory)
+func WorkerMounts(ctx context.Context, directory string) ([]harness.RuntimeMount, error) {
+	root, err := workerRoot(directory)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +28,7 @@ func WorkerRuntimeMounts(ctx context.Context, directory string) ([]harness.Runti
 		return nil, errors.New("worker execution checkout requires available Git metadata")
 	}
 
-	if workerRuntimeHome(common) {
+	if workerHome(common) {
 		return nil, errors.New("worker Git metadata cannot mount the developer home")
 	}
 
@@ -46,9 +46,9 @@ func WorkerRuntimeMounts(ctx context.Context, directory string) ([]harness.Runti
 	return mounts, nil
 }
 
-// WorkerRuntimeInstructions supplies the checkout's explicit project contract.
+// WorkerInstructions supplies the checkout's explicit project contract.
 // It does not discover model resources or follow a linked instruction file.
-func WorkerRuntimeInstructions(directory string) (data []byte, err error) {
+func WorkerInstructions(directory string) (data []byte, err error) {
 	file, err := os.OpenFile(filepath.Join(directory, "AGENTS.md"), os.O_RDONLY|syscall.O_NOFOLLOW|syscall.O_NONBLOCK, 0)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, nil
@@ -82,20 +82,20 @@ func validWorkerInstructionFile(info os.FileInfo) bool {
 	return ok && stat.Nlink == 1
 }
 
-func workerRuntimeRoot(directory string) (string, error) {
+func workerRoot(directory string) (string, error) {
 	root, err := filepath.EvalSymlinks(directory)
 	if err != nil || !filepath.IsAbs(root) || root == string(filepath.Separator) {
 		return "", errors.New("worker requires an existing absolute execution checkout")
 	}
 
-	if workerRuntimeHome(root) {
+	if workerHome(root) {
 		return "", errors.New("worker checkout cannot mount the developer home")
 	}
 
 	return root, nil
 }
 
-func workerRuntimeHome(path string) bool {
+func workerHome(path string) bool {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return false

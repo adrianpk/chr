@@ -59,12 +59,12 @@ func runPiWorker(ctx context.Context, stdin io.Reader, stdout io.Writer, options
 		return err
 	}
 
-	mounts, err := harnessruntime.WorkerRuntimeMounts(ctx, directory)
+	mounts, err := harnessruntime.WorkerMounts(ctx, directory)
 	if err != nil {
 		return err
 	}
 
-	instructions, err := harnessruntime.WorkerRuntimeInstructions(directory)
+	instructions, err := harnessruntime.WorkerInstructions(directory)
 	if err != nil {
 		return err
 	}
@@ -149,7 +149,7 @@ func (factory commandFactory) runPiBridge(ctx context.Context, cmd *cli.Command)
 		return err
 	}
 
-	release, err := harnessruntime.HoldWorkerRuntimeReservation(ctx, harnessruntime.WorkerRuntimeReservation{Slot: cmd.String("slot"), Guard: cmd.String("guard")})
+	release, err := harnessruntime.HoldReservation(ctx, harnessruntime.Reservation{Slot: cmd.String("slot"), Guard: cmd.String("guard")})
 	if err != nil {
 		return err
 	}

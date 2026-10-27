@@ -34,7 +34,7 @@ func TestPiWorkerIsolationReservation(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	release, err := harnessruntime.HoldWorkerRuntimeReservation(t.Context(), harnessruntime.WorkerRuntimeReservation{Slot: slot.Name(), Guard: guard.Name()})
+	release, err := harnessruntime.HoldReservation(t.Context(), harnessruntime.Reservation{Slot: slot.Name(), Guard: guard.Name()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +79,7 @@ func TestPiWorkerIsolationCanceled(t *testing.T) {
 	ctx, cancel := context.WithCancel(t.Context())
 	cancel()
 
-	if release, err := harnessruntime.HoldWorkerRuntimeReservation(ctx, harnessruntime.WorkerRuntimeReservation{Slot: slot.Name(), Guard: guard}); !errors.Is(err, context.Canceled) || release != nil {
+	if release, err := harnessruntime.HoldReservation(ctx, harnessruntime.Reservation{Slot: slot.Name(), Guard: guard}); !errors.Is(err, context.Canceled) || release != nil {
 		t.Fatalf("abandoned runtime acquired capacity: %v", err)
 	}
 }

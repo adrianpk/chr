@@ -8,17 +8,17 @@ import (
 	"time"
 )
 
-// WorkerRuntimeReservation extends an admitted slot to an independently owned
+// Reservation extends an admitted slot to an independently owned
 // runtime. It names the existing capacity files, never a second worker pool.
-type WorkerRuntimeReservation struct {
+type Reservation struct {
 	Slot  string
 	Guard string
 }
 
-// HoldWorkerRuntimeReservation holds only shared references to an admitted
+// HoldReservation holds only shared references to an admitted
 // reservation. A competing exclusive admission blocks it; cancellation prevents
 // abandoned startup from running after a later claim acquired the slot.
-func HoldWorkerRuntimeReservation(ctx context.Context, reservation WorkerRuntimeReservation) (release func() error, err error) {
+func HoldReservation(ctx context.Context, reservation Reservation) (release func() error, err error) {
 	files := []*os.File{}
 	closeFiles := func() error {
 		var err error
@@ -36,13 +36,13 @@ func HoldWorkerRuntimeReservation(ctx context.Context, reservation WorkerRuntime
 	}()
 
 	for _, path := range []string{reservation.Slot, reservation.Guard} {
-		file, err := openRuntimeReservationFile(path)
+		file, err := openReservationFile(path)
 		if err != nil {
 			return nil, err
 		}
 
 		files = append(files, file)
-		if err := holdRuntimeReservationFile(ctx, file); err != nil {
+		if err := holdReservationFile(ctx, file); err != nil {
 			return nil, err
 		}
 	}
@@ -50,7 +50,7 @@ func HoldWorkerRuntimeReservation(ctx context.Context, reservation WorkerRuntime
 	return closeFiles, nil
 }
 
-func holdRuntimeReservationFile(ctx context.Context, file *os.File) error {
+func holdReservationFile(ctx context.Context, file *os.File) error {
 	for {
 		if err := ctx.Err(); err != nil {
 			return err
@@ -73,7 +73,7 @@ func holdRuntimeReservationFile(ctx context.Context, file *os.File) error {
 	}
 }
 
-func openRuntimeReservationFile(path string) (*os.File, error) {
+func openReservationFile(path string) (*os.File, error) {
 	file, err := os.OpenFile(path, os.O_RDONLY|syscall.O_NOFOLLOW|syscall.O_NONBLOCK, 0)
 	if err != nil {
 		return nil, err

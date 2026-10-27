@@ -18,7 +18,7 @@ func TestPiWorkerInstructions(t *testing.T) {
 			root := t.TempDir()
 			prepareWorkerInstructionFixture(t, root, scenario)
 
-			data, err := WorkerRuntimeInstructions(root)
+			data, err := WorkerInstructions(root)
 			if scenario == "text" || scenario == "missing" {
 				if err != nil || (scenario == "text" && string(data) != "Project instructions") {
 					t.Fatalf("explicit instructions: %q, %v", data, err)
@@ -71,7 +71,7 @@ func TestPiWorkerHome(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 
-	if _, err := WorkerRuntimeMounts(t.Context(), home); err == nil || !strings.Contains(err.Error(), "home") {
+	if _, err := WorkerMounts(t.Context(), home); err == nil || !strings.Contains(err.Error(), "home") {
 		t.Fatalf("home mount was accepted: %v", err)
 	}
 }

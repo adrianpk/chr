@@ -338,6 +338,15 @@ actual FD3/FD5 identity checks, slot numbering and guarded lock conversion.
 Thirteen source/test preimages reconcile; existing no-follow, link, size, UTF-8,
 cancellation and early-close behavior is unchanged.
 
+A separate naming commit exposes runtime.WorkerMounts, WorkerInstructions,
+Reservation and HoldReservation. The native capacity implementation is named
+workflow_runtime_reservation.go; it retains its actual authority and behavior.
+The same focused owner/native/app/dependency tests and production signature
+policy pass after naming, with these additional successful checks:
+
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/runtime ./internal/core/project ./internal/core ./internal/app ./scripts/goquality`: zero issues.
+- `go test -race ./internal/core/harness/runtime ./internal/core -run '^Test(PiWorkerIsolation(Reservation|Canceled)|WorkflowCoordinatorCopies)$' -count=1 -timeout=3m`: native reservation cancellation and retained-slot checks passed; runtime compiled.
+
 ## Risks and Follow-ups
 
 The slice remains in progress; PR readiness is not established. All assigned

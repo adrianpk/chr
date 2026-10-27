@@ -15,3 +15,10 @@ Canonical ops paths, retained private migration paths, container argv and
 mounts, default image/workdir and validation command retain their existing
 values. Planning does not launch containers or discover provider resources.
 The package cannot import the root configuration or workflow coordinator.
+
+WorkerMounts grants only the explicit checkout and its Git common directory.
+WorkerInstructions reads the explicit project contract within the original
+regular-file, single-link, UTF-8 and size bounds. Reservation and HoldReservation
+hold shared references to existing admitted slot/guard files, release on early
+errors and observe caller cancellation. Native workflow admission supplies those
+paths; this package cannot create a second capacity pool or choose a slot.

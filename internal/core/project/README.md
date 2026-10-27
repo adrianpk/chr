@@ -25,3 +25,8 @@ and native workflow Git readers. It retains the same flags, directory/environmen
 selection, process-group cancellation, wait delay, output bounds and diagnostics.
 Native integration keeps preparation, credentials, signing and proof policy;
 authoring keeps checkpoint selection, hashes, references and mutation order.
+
+ResolveRepositoryDirectory preserves the existing Git common-directory lookup,
+caller context, symlink resolution and error contract. Runtime checkout mounts
+and native workflow coordination share that path identity. Capacity admission,
+slot ownership and lock conversion remain native workflow responsibilities.
