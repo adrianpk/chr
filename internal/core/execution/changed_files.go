@@ -1,4 +1,4 @@
-package core
+package execution
 
 import (
 	"context"
@@ -8,17 +8,16 @@ import (
 	"slices"
 	"strings"
 
-	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // ChangedFileDiscoverer defines a package boundary interface.
 type ChangedFileDiscoverer interface {
-	DiscoverChangedFiles(ctx context.Context, opts DiscoverChangedFilesOptions) ([]executioncore.ResultChangedFile, error)
+	DiscoverChangedFiles(ctx context.Context, opts ChangedFilesOptions) ([]ResultChangedFile, error)
 }
 
-// DiscoverChangedFilesOptions describes a package boundary value.
-type DiscoverChangedFilesOptions struct {
+// ChangedFilesOptions describes a package boundary value.
+type ChangedFilesOptions struct {
 	ProjectDir   string
 	WorkspaceDir string
 }
@@ -31,10 +30,7 @@ func NewChangedFileDiscoverer() ChangedFileDiscoverer {
 }
 
 // DiscoverChangedFiles executes the corresponding package operation.
-func (d *gitChangedFileDiscoverer) DiscoverChangedFiles(
-	ctx context.Context,
-	opts DiscoverChangedFilesOptions,
-) ([]executioncore.ResultChangedFile, error) {
+func (d *gitChangedFileDiscoverer) DiscoverChangedFiles(ctx context.Context, opts ChangedFilesOptions) ([]ResultChangedFile, error) {
 	workspaceDir := changedFileDiscoveryWorkspaceDir(opts)
 	if strings.TrimSpace(workspaceDir) == "" {
 		return nil, fmt.Errorf("project directory is required")
@@ -56,7 +52,7 @@ func (d *gitChangedFileDiscoverer) DiscoverChangedFiles(
 	return parseGitStatusChangedFiles(string(output)), nil
 }
 
-func changedFileDiscoveryWorkspaceDir(opts DiscoverChangedFilesOptions) string {
+func changedFileDiscoveryWorkspaceDir(opts ChangedFilesOptions) string {
 	if strings.TrimSpace(opts.WorkspaceDir) != "" {
 		return opts.WorkspaceDir
 	}
@@ -64,8 +60,8 @@ func changedFileDiscoveryWorkspaceDir(opts DiscoverChangedFilesOptions) string {
 	return opts.ProjectDir
 }
 
-func parseGitStatusChangedFiles(output string) []executioncore.ResultChangedFile {
-	changedFiles := []executioncore.ResultChangedFile{}
+func parseGitStatusChangedFiles(output string) []ResultChangedFile {
+	changedFiles := []ResultChangedFile{}
 	seen := map[string]struct{}{}
 
 	for _, line := range strings.Split(output, "\n") {
@@ -80,10 +76,10 @@ func parseGitStatusChangedFiles(output string) []executioncore.ResultChangedFile
 		}
 
 		seen[path] = struct{}{}
-		changedFiles = append(changedFiles, executioncore.ResultChangedFile{Path: path})
+		changedFiles = append(changedFiles, ResultChangedFile{Path: path})
 	}
 
-	slices.SortFunc(changedFiles, func(left, right executioncore.ResultChangedFile) int {
+	slices.SortFunc(changedFiles, func(left, right ResultChangedFile) int {
 		if left.Path < right.Path {
 			return -1
 		}

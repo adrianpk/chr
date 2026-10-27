@@ -73,7 +73,7 @@ func discoverTicketApplyResultChangedFiles(ctx context.Context, record execution
 		return nil, nil
 	}
 
-	changedFiles, err := core.NewChangedFileDiscoverer().DiscoverChangedFiles(ctx, core.DiscoverChangedFilesOptions{
+	changedFiles, err := executioncore.NewChangedFileDiscoverer().DiscoverChangedFiles(ctx, executioncore.ChangedFilesOptions{
 		ProjectDir:   record.Workspace.ProjectCheckoutDir,
 		WorkspaceDir: record.Workspace.ExecutionWorkspaceDir,
 	})

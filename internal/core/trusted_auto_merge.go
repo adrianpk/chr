@@ -40,7 +40,7 @@ func ApplyTrustedAutoMergeReview(ctx context.Context, opts ApplyTrustedAutoMerge
 	ticket.ReviewState = result.ReviewState
 	ticket.ReviewResult = result.ReviewResult
 
-	if _, err := ValidateTicketMergeHandoff(ticket); err != nil {
+	if _, err := ticketcore.ValidateMergeHandoff(ticket); err != nil {
 		return TicketReviewCommandResult{}, err
 	}
 

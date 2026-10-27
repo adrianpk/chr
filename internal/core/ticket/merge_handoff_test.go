@@ -1,4 +1,4 @@
-package core
+package ticket_test
 
 import (
 	"strings"
@@ -24,7 +24,7 @@ func TestValidateTicketMergeHandoffAcceptsPassedReview(t *testing.T) {
 		Status:   "open",
 	}}
 
-	handoff, err := ValidateTicketMergeHandoff(ticket)
+	handoff, err := ticketcore.ValidateMergeHandoff(ticket)
 	if err != nil {
 		t.Fatalf("ValidateTicketMergeHandoff returned error: %v", err)
 	}
@@ -51,7 +51,7 @@ func TestValidateTicketMergeHandoffRejectsMissingPassedReview(t *testing.T) {
 		URL:      "https://forge.example.com/owner/repo/pulls/281",
 	}}
 
-	_, err := ValidateTicketMergeHandoff(ticket)
+	_, err := ticketcore.ValidateMergeHandoff(ticket)
 	if err == nil {
 		t.Fatal("ValidateTicketMergeHandoff returned nil error")
 	}
@@ -69,7 +69,7 @@ func TestValidateTicketMergeHandoffRejectsMissingPullRequestRef(t *testing.T) {
 	ticket.ReviewState = ticketcore.ReviewStatePass
 	ticket.ReviewResult = ticketcore.ReviewResultPass
 
-	_, err := ValidateTicketMergeHandoff(ticket)
+	_, err := ticketcore.ValidateMergeHandoff(ticket)
 	if err == nil {
 		t.Fatal("ValidateTicketMergeHandoff returned nil error")
 	}

@@ -348,7 +348,7 @@ func reviewRepairTickets(tickets []ticketcore.Indexed) []ticketcore.Indexed {
 }
 
 func isReviewRepairTicket(ticket ticketcore.Indexed) bool {
-	return IsTicketReviewRepair(ticket)
+	return ticketcore.NeedsReviewRepair(ticket)
 }
 
 func hasTicketKey(tickets []ticketcore.Indexed, key string) bool {

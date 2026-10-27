@@ -89,7 +89,7 @@ func RunTicketMergePreflight(ctx context.Context, opts TicketMergePreflightOptio
 
 	result := newTicketMergePreflightResult(opts)
 
-	handoff, err := ValidateTicketMergeHandoff(opts.Ticket)
+	handoff, err := ticketcore.ValidateMergeHandoff(opts.Ticket)
 	if err != nil {
 		result.addBlocker(TicketMergePreflightBlockMissingHandoff, TicketMergePreflightBlockKindOperational, err.Error())
 
@@ -196,7 +196,7 @@ func ticketMergeSerialRepairBlocker(ticket ticketcore.Indexed, tickets []ticketc
 	return nil
 }
 
-func ticketMergeRemoteBlockers(handoff TicketMergeHandoff, expectedBase string, snapshot RemoteReviewSnapshot) []TicketMergePreflightBlocker {
+func ticketMergeRemoteBlockers(handoff ticketcore.MergeHandoff, expectedBase string, snapshot RemoteReviewSnapshot) []TicketMergePreflightBlocker {
 	metadata := parseTicketMergeRemoteMetadata(snapshot)
 	blockers := []TicketMergePreflightBlocker{}
 

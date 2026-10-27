@@ -213,7 +213,7 @@ func agentWorkCycleRunsTrustedAutoMergeReview(policy core.IntegrationCyclePolicy
 }
 
 func agentWorkCycleRunsRepair(policy core.IntegrationCyclePolicy, ticket ticketcore.Indexed) bool {
-	return policy.Mode == core.IntegrationCycleModeAgenticReview && core.IsTicketReviewRepair(ticket)
+	return policy.Mode == core.IntegrationCycleModeAgenticReview && ticketcore.NeedsReviewRepair(ticket)
 }
 
 func agentWorkCycleStopsBeforeMerge(policy core.IntegrationCyclePolicy) bool {

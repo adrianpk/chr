@@ -114,7 +114,7 @@ func validateReadyForMergeTransitionMetadata(frontmatter ticketmetadata.Frontmat
 		},
 	}
 
-	_, err = ValidateTicketMergeHandoff(ticket)
+	_, err = ticketcore.ValidateMergeHandoff(ticket)
 
 	return err
 }

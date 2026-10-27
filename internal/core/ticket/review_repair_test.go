@@ -1,4 +1,4 @@
-package core
+package ticket_test
 
 import (
 	"testing"
@@ -53,7 +53,7 @@ func TestTicketReviewRepairCountUsesReviewRound(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := TicketReviewRepairCount(tt.ticket); got != tt.want {
+			if got := ticketcore.ReviewRepairCount(tt.ticket); got != tt.want {
 				t.Fatalf("TicketReviewRepairCount() = %d, want %d", got, tt.want)
 			}
 		})
@@ -69,16 +69,16 @@ func TestTicketReviewRepairAllowedUsesLimit(t *testing.T) {
 		},
 	}
 
-	if !TicketReviewRepairAllowed(ticket, DefaultTicketReviewRepairLimit) {
+	if !ticketcore.ReviewRepairAllowed(ticket, ticketcore.DefaultReviewRepairLimit) {
 		t.Fatal("TicketReviewRepairAllowed() = false, want true before the first repair")
 	}
 
 	ticket.ReviewRound = 2
-	if TicketReviewRepairAllowed(ticket, DefaultTicketReviewRepairLimit) {
+	if ticketcore.ReviewRepairAllowed(ticket, ticketcore.DefaultReviewRepairLimit) {
 		t.Fatal("TicketReviewRepairAllowed() = true, want false after the default repair limit")
 	}
 
-	if !TicketReviewRepairLimitExceeded(ticket, DefaultTicketReviewRepairLimit) {
+	if !ticketcore.ReviewRepairLimitExceeded(ticket, ticketcore.DefaultReviewRepairLimit) {
 		t.Fatal("TicketReviewRepairLimitExceeded() = false, want true after the default repair limit")
 	}
 }

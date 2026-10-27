@@ -22,7 +22,7 @@ func (s service) repairAgentWorkCycleTicket(ctx context.Context, state *agentWor
 		return agentWorkRepairResult{Ticket: ticket, Execution: opts.Execution, Stop: true}, nil
 	}
 
-	if !core.TicketReviewRepairAllowed(ticket, core.DefaultTicketReviewRepairLimit) {
+	if !ticketcore.ReviewRepairAllowed(ticket, ticketcore.DefaultReviewRepairLimit) {
 		return agentWorkRepairResult{Ticket: ticket, Execution: opts.Execution, Stop: true}, nil
 	}
 

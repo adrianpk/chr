@@ -1,4 +1,4 @@
-package core
+package execution
 
 import (
 	"context"
@@ -6,8 +6,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
-
-	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 )
 
 func TestChangedFileDiscovererDiscoversWorkspaceChanges(t *testing.T) {
@@ -18,7 +16,7 @@ func TestChangedFileDiscovererDiscoversWorkspaceChanges(t *testing.T) {
 
 	changedFiles, err := NewChangedFileDiscoverer().DiscoverChangedFiles(
 		context.Background(),
-		DiscoverChangedFilesOptions{ProjectDir: projectDir},
+		ChangedFilesOptions{ProjectDir: projectDir},
 	)
 	if err != nil {
 		t.Fatalf("DiscoverChangedFiles returned error: %v", err)
@@ -35,7 +33,7 @@ func TestChangedFileDiscovererHandlesCleanWorktree(t *testing.T) {
 
 	changedFiles, err := NewChangedFileDiscoverer().DiscoverChangedFiles(
 		context.Background(),
-		DiscoverChangedFilesOptions{ProjectDir: projectDir},
+		ChangedFilesOptions{ProjectDir: projectDir},
 	)
 	if err != nil {
 		t.Fatalf("DiscoverChangedFiles returned error: %v", err)
@@ -54,7 +52,7 @@ func TestChangedFileDiscovererUsesExplicitWorkspaceDir(t *testing.T) {
 
 	changedFiles, err := NewChangedFileDiscoverer().DiscoverChangedFiles(
 		context.Background(),
-		DiscoverChangedFilesOptions{
+		ChangedFilesOptions{
 			ProjectDir:   projectDir,
 			WorkspaceDir: workspaceDir,
 		},
@@ -71,7 +69,7 @@ func TestChangedFileDiscovererUsesExplicitWorkspaceDir(t *testing.T) {
 func TestChangedFileDiscovererRejectsMissingProjectDir(t *testing.T) {
 	_, err := NewChangedFileDiscoverer().DiscoverChangedFiles(
 		context.Background(),
-		DiscoverChangedFilesOptions{},
+		ChangedFilesOptions{},
 	)
 	if err == nil {
 		t.Fatal("DiscoverChangedFiles returned nil error")
@@ -122,7 +120,7 @@ func writeChangedFileDiscoveryFile(t *testing.T, projectDir, relativePath, conte
 	}
 }
 
-func assertChangedFilePaths(t *testing.T, changedFiles []executioncore.ResultChangedFile, want []string) {
+func assertChangedFilePaths(t *testing.T, changedFiles []ResultChangedFile, want []string) {
 	t.Helper()
 
 	if len(changedFiles) != len(want) {

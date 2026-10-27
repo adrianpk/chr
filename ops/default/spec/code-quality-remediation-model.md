@@ -759,3 +759,14 @@ ticket/parser/validation/review/merge guards and selected native record/index/
 review/manual tests pass. Ten more parser/validation tests are colocated without
 production test-only exports. The ledger now records 756 exact preimages;
 owner reconciliation and exact-candidate validation remain before PR readiness.
+
+
+Ticket review-repair classification/count/limits and merge-handoff invariants now
+have direct ticket owners. Git changed-file discovery has the execution owner;
+its explicit workspace selection, operational-artifact exclusion, path rejection,
+sorting and errors remain unchanged. Their ten component tests are colocated,
+including private Git parsing coverage without a production test-only export.
+The move ledger contains 789 exact current preimages. The owner map records 40
+actual native composition/authority retentions with a concrete reason per file;
+no competing ticket/execution repository, mutation authority or root facade was
+introduced. Focused domain/native, strict lint and signature checks pass.
