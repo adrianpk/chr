@@ -194,32 +194,13 @@ func (factory commandFactory) runDumpSave(ctx context.Context, cmd *cli.Command)
 		return fmt.Errorf("dump save requires exactly one path argument")
 	}
 
-	operations, err := factory.projectService(ctx, cmd)
-	if err != nil {
-		return err
-	}
-
-	revision, err := dumpCLIRevision(operations, cmd)
-	if err != nil {
-		return err
-	}
-
-	result, err := operations.SaveDump(DumpSaveRequest{
-		OperationID: dumpRequestID(cmd.String("operation-id")), ExpectedRevision: revision,
-		RelativePath: cmd.Args().First(),
-		Content:      cmd.String("content"),
+	return factory.runDumpUpdate(ctx, cmd, "save", func(operations service, revision string) (DumpOperationResult, error) {
+		return operations.SaveDump(DumpSaveRequest{
+			OperationID: dumpRequestID(cmd.String("operation-id")), ExpectedRevision: revision,
+			RelativePath: cmd.Args().First(),
+			Content:      cmd.String("content"),
+		})
 	})
-	if err != nil {
-		return err
-	}
-
-	_, err = fmt.Fprintln(factory.io.Stdout,
-		result.Message)
-	if err != nil {
-		return fmt.Errorf("write dump save result: %w", err)
-	}
-
-	return nil
 }
 
 func (factory commandFactory) runDumpAppend(ctx context.Context, cmd *cli.Command) error {
@@ -227,32 +208,13 @@ func (factory commandFactory) runDumpAppend(ctx context.Context, cmd *cli.Comman
 		return fmt.Errorf("dump append requires exactly one path argument")
 	}
 
-	operations, err := factory.projectService(ctx, cmd)
-	if err != nil {
-		return err
-	}
-
-	revision, err := dumpCLIRevision(operations, cmd)
-	if err != nil {
-		return err
-	}
-
-	result, err := operations.AppendDump(DumpAppendRequest{
-		OperationID: dumpRequestID(cmd.String("operation-id")), ExpectedRevision: revision,
-		RelativePath: cmd.Args().First(),
-		Content:      cmd.String("content"),
+	return factory.runDumpUpdate(ctx, cmd, "append", func(operations service, revision string) (DumpOperationResult, error) {
+		return operations.AppendDump(DumpAppendRequest{
+			OperationID: dumpRequestID(cmd.String("operation-id")), ExpectedRevision: revision,
+			RelativePath: cmd.Args().First(),
+			Content:      cmd.String("content"),
+		})
 	})
-	if err != nil {
-		return err
-	}
-
-	_, err = fmt.Fprintln(factory.io.Stdout,
-		result.Message)
-	if err != nil {
-		return fmt.Errorf("write dump append result: %w", err)
-	}
-
-	return nil
 }
 
 func (factory commandFactory) runDumpOpen(ctx context.Context, cmd *cli.Command) error {

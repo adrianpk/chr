@@ -31,6 +31,12 @@ in progress or pending. No Slice 9 completion or PR readiness is claimed.
 
 ## Implementation Notes
 
+D10 compares the shared revision-bound CLI mechanics against the documented
+Dump Mutation API. Save and append retain their separate argument guards, typed
+service requests, replacement/extension semantics and exact diagnostics. One
+command helper owns service resolution, revision lookup and result printing; it
+does not decide mutation policy. Existing tests are unchanged for this pair.
+
 D09 compares the documented context-aware quiz and legacy quiz-to-draft paths.
 Their shared metadata/envelope, directory and body write step has one owner.
 Each caller retains its collision guard and exact error, while the helper
@@ -176,6 +182,9 @@ owners rather than an imposed file-size cap.
   — passed after D09; the app package compiled with no matching tests.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app`
   — passed with zero issues after D09; signature policy keeps 300 debts.
+
+- `go test ./internal/app -run '^Test(DumpCLIWriteBinding|DumpNewAndShowUseServiceCommands|ServiceAppendAndOpenDump|ServiceDumpWriteGuards|ServiceDumpProjectionFailure|ServiceDumpCapture|ServiceProjectDump)' -count=1 -timeout=3m`
+  — passed after D10; app strict lint and signature policy also pass with 300 debts.
 
 The first compile identified shared allocator calls and a legacy layout literal;
 those consumers now use the owned ops contracts. The first style scan identified
