@@ -10,14 +10,14 @@ import (
 )
 
 // ReadTicketBoard uses the selected authority without rebuilding the legacy index.
-func (s service) ReadTicketBoard(offset int) (core.Board, error) {
+func (s service) ReadTicketBoard(offset int) (ticketcore.Board, error) {
 	return s.readTicketBoardPage(offset, "")
 }
 
-func (s service) readTicketBoardPage(offset int, caseSlug string) (core.Board, error) {
+func (s service) readTicketBoardPage(offset int, caseSlug string) (ticketcore.Board, error) {
 	opts, err := s.ticketDocumentOptions()
 	if err != nil {
-		return core.Board{}, err
+		return ticketcore.Board{}, err
 	}
 
 	opts.Offset, opts.CaseSlug = offset, caseSlug

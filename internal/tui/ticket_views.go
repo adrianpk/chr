@@ -135,7 +135,7 @@ func NewTicketViews(tickets []ticketcore.Indexed) []TicketView {
 			ReviewResult:      string(ticket.ReviewResult),
 			ReviewCommentsURL: ticket.ReviewCommentsURL,
 			BoardColumn:       string(boardColumn),
-			AttentionReasons:  core.BoardAttentionReasons(ticket),
+			AttentionReasons:  ticketcore.BoardAttentionReasons(ticket),
 			RelativePath:      ticket.RelativePath,
 		}
 

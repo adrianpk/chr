@@ -24,17 +24,17 @@ func normalizeWorkflowPreviewRequest(request workflowstate.PreviewRequest) (work
 
 	var err error
 
-	request.Filters, err = normalizeTicketLoopFilters(request.Filters)
+	request.Filters, err = ticketcore.NormalizeLoopFilters(request.Filters)
 	if err != nil {
 		return workflowstate.PreviewRequest{}, err
 	}
 
-	request.Statuses, err = loopEligibleStatuses(request.Statuses)
+	request.Statuses, err = ticketcore.LoopEligibleStatuses(request.Statuses)
 	if err != nil {
 		return workflowstate.PreviewRequest{}, err
 	}
 
-	request.Order, err = normalizeTicketLoopOrder(request.Order)
+	request.Order, err = ticketcore.NormalizeLoopOrder(request.Order)
 	if err != nil {
 		return workflowstate.PreviewRequest{}, err
 	}
@@ -87,7 +87,7 @@ func workflowLooseExclusion(request workflowstate.PreviewRequest, ticket ticketc
 	ticket.Priority, ticket.Severity = workflowRank(ticket.Priority), workflowRank(ticket.Severity)
 
 	ticket.ProjectArea = strings.TrimSpace(ticket.ProjectArea)
-	if !matchesTicketLoopFilters(request.Filters, ticket) {
+	if !ticketcore.MatchesLoopFilters(request.Filters, ticket) {
 		return "filter_mismatch"
 	}
 
@@ -112,7 +112,7 @@ func workflowMeetsMinimum(value, minimum string) bool {
 		return true
 	}
 
-	return value != "unclassified" && priorityRank(value) <= priorityRank(minimum)
+	return value != "unclassified" && ticketcore.PriorityRank(value) <= ticketcore.PriorityRank(minimum)
 }
 
 func (selection workflowSelection) orderLooseMembers(members []WorkflowPreviewMember, order workflowstate.TicketOrder) {
@@ -123,7 +123,7 @@ func (selection workflowSelection) orderLooseMembers(members []WorkflowPreviewMe
 	}
 
 	slices.SortFunc(members, func(left, right WorkflowPreviewMember) int {
-		return compareTicketLoopOrder(order, tickets[left.Key], tickets[right.Key])
+		return ticketcore.CompareLoopOrder(order, tickets[left.Key], tickets[right.Key])
 	})
 }
 

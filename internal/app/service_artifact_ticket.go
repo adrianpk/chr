@@ -462,10 +462,10 @@ func (s service) listProjectTickets() ([]ticketcore.Indexed, error) {
 	return board.Tickets, nil
 }
 
-func (s service) Board() (core.Board, error) {
+func (s service) Board() (ticketcore.Board, error) {
 	index, err := core.NewWorkflowTicketIndex(s.ctx, s.env, s.assetsFS)
 	if err != nil {
-		return core.Board{}, err
+		return ticketcore.Board{}, err
 	}
 
 	defer func() {
@@ -475,10 +475,10 @@ func (s service) Board() (core.Board, error) {
 
 	err = refreshProjectTicketIndex(s.ctx, index, s.projectContext)
 	if err != nil {
-		return core.Board{}, err
+		return ticketcore.Board{}, err
 	}
 
-	return core.NewBoardQuery(index).ProjectBoard(s.ctx, core.BoardQueryOptions{
+	return ticketcore.NewBoardQuery(index).ProjectBoard(s.ctx, ticketcore.BoardQueryOptions{
 		ProjectID: s.projectContext.ProjectID,
 	})
 }

@@ -52,7 +52,9 @@ proofs and ticket/board projections must keep their guards and actual operation
 owner. Shared immutable values belong in an existing cohesive value owner.
 Configuration/transport behavior must cross a real consumer-owned operation
 boundary. The current resolution fields record ten review/cycle value dependencies
-now owned directly by workflow/state; 69 root couplings remain before relocation. A temporary compile-time bridge, if necessary, must be recorded with
+owned directly by workflow/state, eleven ticket projection dependencies owned by
+core/ticket and one integer comparator supplied by the standard library. There
+are 57 direct root couplings before family relocation. A temporary compile-time bridge, if necessary, must be recorded with
 its explicit approved removal owner by Slice 15.
 
 The [signature entry map](code-quality-remediation-slice-12-signatures.csv)
@@ -75,6 +77,7 @@ a generic receipt writer cannot be inferred from this duplicate.
 ## Validation
 
 The compiler-resolved source graph and exact CSV coverage/hash checks passed.
-No runtime implementation is changed by this map. Package relocation, stage
-ports, assigned signature remediation and final candidate validation remain
-active Slice 12 work.
+The frozen entry map is separate from runtime acceptance. The move ledger
+records shared review values and ticket projections with exact declaration
+preimages and current resolutions. Family relocation, stage ports, assigned
+signature remediation and final candidate validation remain active Slice 12 work.

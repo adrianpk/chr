@@ -65,7 +65,7 @@ func (s service) agentWorkLoopSelection(opts AgentWorkSelectionOptions) (agentWo
 		return agentWorkLoopSelection{}, err
 	}
 
-	tickets, err := core.NewTicketLoopQuery(index).EligibleTickets(s.ctx, core.TicketLoopQueryOptions{
+	tickets, err := ticketcore.NewLoopQuery(index).EligibleTickets(s.ctx, ticketcore.LoopQueryOptions{
 		ProjectID: s.projectContext.ProjectID,
 		Statuses:  agentWorkStatuses(opts.Statuses),
 		Filters:   opts.Filters,

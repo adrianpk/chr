@@ -783,3 +783,18 @@ messages remain unchanged. Native approval, source/revision checks, cosmetic
 blocking policy, configuration, IO and persistence keep their original owners.
 Existing frozen wire/storage and real Git replay/repair/native review/app tests
 pass; no root alias, type bridge or new dependency allowance was introduced.
+
+
+## Slice 12 ticket projection prerequisite
+
+Ticket eligibility/filter/order and Board/document projections have the existing
+core/ticket owner. App and adapters consume Board and query APIs directly; native
+workflow reads retain inspection, paging and revision/source guards while sharing
+the same rules. Forty-two moved declaration token sequences match after owner
+qualification, semantic API names and the standard integer comparator. The local
+integer rank comparator is replaced by cmp.Compare, preserving -1/0/1 without
+subtraction or overflow. Original metadata filter sets, numeric/lexical key order,
+priority/severity/created-at ties, nil handling, Board attention and synopsis bounds
+remain unchanged. Ticket imports only the shared workflow/state request values;
+the dependency guard explicitly permits those values and rejects the coordinator.
+No store method, lock, journal or native mutation authority moves in this batch.

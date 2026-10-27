@@ -174,7 +174,7 @@ func (factory commandFactory) runTicketBoard(ctx context.Context, cmd *cli.Comma
 	return printTicketBoard(factory.io.Stdout, board)
 }
 
-func printTicketBoard(stdout io.Writer, board core.Board) error {
+func printTicketBoard(stdout io.Writer, board ticketcore.Board) error {
 	lines := []string{
 		fmt.Sprintf("total: %d", board.TotalCount),
 		fmt.Sprintf("normal: %d", board.NormalCount),
@@ -196,7 +196,7 @@ func printTicketBoard(stdout io.Writer, board core.Board) error {
 	return nil
 }
 
-func printTicketBoardColumn(stdout io.Writer, column core.BoardColumn) error {
+func printTicketBoardColumn(stdout io.Writer, column ticketcore.BoardColumn) error {
 	_, err := fmt.Fprintf(stdout, "column: %s\t%s\t%d\n", column.ID, column.Title, column.Count)
 	if err != nil {
 		return fmt.Errorf("write ticket board column: %w", err)

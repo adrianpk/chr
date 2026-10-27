@@ -49,7 +49,7 @@ func prepareTicketCreation(opts TicketBoardReadOptions, key string, request Tick
 	}
 
 	now := time.Now().UTC()
-	ticket := ticketcore.Ticket{Key: key, Title: request.Fields["title"], Body: *request.Body, Synopsis: boardDescription([]byte(*request.Body)), Status: ticketcore.StatusBacklog, Priority: "normal", Severity: "normal", Type: "task", CreatedAt: now, UpdatedAt: now}
+	ticket := ticketcore.Ticket{Key: key, Title: request.Fields["title"], Body: *request.Body, Synopsis: ticketcore.BoardDescription([]byte(*request.Body)), Status: ticketcore.StatusBacklog, Priority: "normal", Severity: "normal", Type: "task", CreatedAt: now, UpdatedAt: now}
 
 	content, err := ticketcore.NewRenderer().Render(ticket)
 	if err != nil {

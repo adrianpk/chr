@@ -1,6 +1,7 @@
 package core
 
 import (
+	"cmp"
 	"fmt"
 	"slices"
 	"strings"
@@ -25,10 +26,10 @@ func (selection workflowSelection) orderMembers(members []WorkflowPreviewMember,
 		}
 
 		if left.SliceID != right.SliceID {
-			return compareRank(selection.slices[left.SliceID].Order, selection.slices[right.SliceID].Order)
+			return cmp.Compare(selection.slices[left.SliceID].Order, selection.slices[right.SliceID].Order)
 		}
 
-		return compareRank(left.TaskOrder, right.TaskOrder)
+		return cmp.Compare(left.TaskOrder, right.TaskOrder)
 	})
 
 	return rule, nil
@@ -37,7 +38,7 @@ func (selection workflowSelection) orderMembers(members []WorkflowPreviewMember,
 func (selection workflowSelection) compareSets(leftID, rightID, rule string) int {
 	left, right := selection.sets[leftID], selection.sets[rightID]
 	if rule == "use_case_order" {
-		return compareRank(left.Set.UseCaseOrder, right.Set.UseCaseOrder)
+		return cmp.Compare(left.Set.UseCaseOrder, right.Set.UseCaseOrder)
 	}
 
 	if left.CreatedAt.Before(right.CreatedAt) {

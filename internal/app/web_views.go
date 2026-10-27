@@ -180,7 +180,7 @@ func webTicketCommentHeader(header string) *webui.TicketCommentView {
 	return &webui.TicketCommentView{Author: header}
 }
 
-func webBoardView(board core.Board) webui.BoardView {
+func webBoardView(board ticketcore.Board) webui.BoardView {
 	columns := make([]webui.BoardColumnView, 0, len(board.Columns))
 	for _, column := range board.Columns {
 		columns = append(columns, webui.BoardColumnView{

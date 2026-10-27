@@ -37,9 +37,15 @@ refactoring, 22 are legal cohesion watches and one has a verified prior shared
 owner fix. Twelve review/cycle value/validator declarations have moved to workflow/state.
 Token comparison verifies their original enum strings, JSON field/tag order,
 nil/empty handling, branches and error messages after qualification/naming.
-The move resolves ten direct dependencies; 69 root couplings remain. No type
+Shared review values resolve ten direct dependencies. Ticket eligibility/order,
+Board values and document projections now have their existing ticket owner with
+direct app, adapter and native read consumers. Forty-two declaration moves retain
+exact tokens after qualification, API naming and cmp.Compare substitution; the
+removed integer comparator has the same standard-library result. These resolve
+another twelve dependencies; 57 direct root couplings remain. No type
 bridge or coordinator/transport/persistence authority moved into the value owner.
-Full family relocation and assigned signature remediation remain open.
+All 908 store methods still retain their original root receiver. Full family
+relocation and assigned signature remediation remain open.
 
 ## Files of Interest
 
@@ -59,6 +65,17 @@ the map is separate from runtime acceptance. The shared-value prerequisite passe
 - `make check-go-style`: pass; 9306 production declarations, ceiling six, 162 exact debts and one existing external exception.
 
 The twelve declaration token sequences match after namespace/validator naming.
+The ticket-projection prerequisite also passed:
+
+- `go test ./internal/core/ticket/... -count=1 -timeout=3m`: complete ticket-owner suite, including SQLite query/filter/order and Board regressions.
+- `go test ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(TicketBoard|TicketDocument|WorkflowSelection|WorkflowOrder|QualityRecordWire|QualityStorage|TicketLoopDryRunPrintsEligibleTickets|Leaf)' -count=1 -timeout=3m`: native filesystem/Git, selection/order, frozen wire/storage, CLI and dependency boundaries pass; TUI compiles.
+- `go test ./internal/core/ticket/... ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(TicketLoopQuery|BoardQuery|BoardObservation|TicketDocument|LegacyWorkObservation|WorkflowSelection|WorkflowOrder|WorkflowRoundTrip|QualityRecordWire|QualityStorage|TicketBoardPrintsBoardColumns|TicketLoopDryRunPrintsEligibleTickets|LeafDependencies)$' -count=1 -timeout=3m`: the anchored exact-name selection includes WorkflowRoundTrip, LegacyWorkObservation, CLI Board output and dependency checks. Prefix cases are covered by the two commands above.
+- `make check-go-style`: pass; 9305 production declarations, ceiling six, 162 exact debts and one existing external exception.
+
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ticket/... ./internal/core ./internal/app ./internal/tui ./scripts/goquality`: zero issues after removing two exact duplicate, newly unused root fixture helpers and splitting the boundary case list.
+
+The move ledger records 42 matching declaration token sequences and the exact
+standard-library replacement. The frozen entry map is unchanged.
 Final exact-head controller validation has not run.
 
 ## Risks and Follow-ups

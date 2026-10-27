@@ -115,7 +115,7 @@ func TestWorkflowSelectionNativeTies(t *testing.T) {
 	later := known.Add(time.Hour)
 	tickets := []ticketcore.Indexed{{IndexedIdentity: ticketcore.IndexedIdentity{Key: "PRJ-10"}, IndexedClassification: ticketcore.IndexedClassification{Priority: "high", Severity: "normal"}, IndexedTimes: ticketcore.IndexedTimes{CreatedAt: &known}}, {IndexedIdentity: ticketcore.IndexedIdentity{Key: "PRJ-2"}, IndexedClassification: ticketcore.IndexedClassification{Priority: "high", Severity: "normal"}, IndexedTimes: ticketcore.IndexedTimes{CreatedAt: &known}}, {IndexedIdentity: ticketcore.IndexedIdentity{Key: "PRJ-1"}, IndexedClassification: ticketcore.IndexedClassification{Priority: "high", Severity: "critical"}, IndexedTimes: ticketcore.IndexedTimes{CreatedAt: &later}}, {IndexedIdentity: ticketcore.IndexedIdentity{Key: "PRJ-3"}, IndexedClassification: ticketcore.IndexedClassification{Priority: "high", Severity: "normal"}}, {IndexedIdentity: ticketcore.IndexedIdentity{Key: "PRJ-4"}}}
 	slices.SortFunc(tickets, func(left, right ticketcore.Indexed) int {
-		return compareTicketLoopOrder(workflowstate.TicketOrderPrioritySeverity, left, right)
+		return ticketcore.CompareLoopOrder(workflowstate.TicketOrderPrioritySeverity, left, right)
 	})
 
 	expected := []string{"PRJ-1", "PRJ-2", "PRJ-10", "PRJ-3", "PRJ-4"}

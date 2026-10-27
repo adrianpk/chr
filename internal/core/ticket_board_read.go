@@ -29,13 +29,13 @@ type TicketBoardReadOptions struct {
 
 // ReadTicketBoard observes canonical documents and supported legacy tickets.
 // It never rebuilds SQL, adopts documents or recovers a workflow transition.
-func ReadTicketBoard(ctx context.Context, opts TicketBoardReadOptions) (board Board, err error) {
+func ReadTicketBoard(ctx context.Context, opts TicketBoardReadOptions) (board ticketcore.Board, err error) {
 	if opts.Limit == 0 {
 		opts.Limit = workflowstate.PageLimit
 	}
 
 	if opts.ProjectID == "" || opts.Layout.ProjectDir() == "" || opts.Offset < 0 || opts.Offset > workflowstate.RecordLimit || opts.Limit < 1 || opts.Limit > workflowstate.PageLimit {
-		return Board{}, fmt.Errorf("invalid ticket Board scope or page bounds")
+		return ticketcore.Board{}, fmt.Errorf("invalid ticket Board scope or page bounds")
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
@@ -59,10 +59,10 @@ func ReadTicketBoard(ctx context.Context, opts TicketBoardReadOptions) (board Bo
 	return board, err
 }
 
-func (s *WorkflowStore) readTicketBoard(ctx context.Context, opts TicketBoardReadOptions) (Board, error) {
+func (s *WorkflowStore) readTicketBoard(ctx context.Context, opts TicketBoardReadOptions) (ticketcore.Board, error) {
 	tickets, err := s.readBoardTickets(ctx, opts.NativeWorkflow)
 	if err != nil {
-		return Board{}, err
+		return ticketcore.Board{}, err
 	}
 
 	if opts.CaseSlug != "" {
@@ -93,7 +93,7 @@ func (s *WorkflowStore) readBoardTickets(ctx context.Context, native bool) ([]ti
 		all = append(all, ticket)
 	}
 
-	return sortedBoardTickets(all), nil
+	return ticketcore.SortedBoardTickets(all), nil
 }
 
 func (s *WorkflowStore) readNativeBoardTickets(ctx context.Context, tickets map[string]ticketcore.Indexed, paths map[string]bool) error {
@@ -122,7 +122,7 @@ func (s *WorkflowStore) readNativeBoardTickets(ctx context.Context, tickets map[
 		}
 
 		if ticket.Synopsis == "" {
-			ticket.Synopsis = boardDescription(record.Body)
+			ticket.Synopsis = ticketcore.BoardDescription(record.Body)
 		}
 
 		paths[ticket.Path] = true
@@ -223,7 +223,7 @@ func checkBoardRoot(projectDir, root string) error {
 }
 
 func (s *WorkflowStore) appendLooseBoardTicket(root, path string, tickets map[string]ticketcore.Indexed) error {
-	ticket, err := readBoardDocument(s.layout.ProjectDir(), path)
+	ticket, err := ticketcore.ReadBoardDocument(s.layout.ProjectDir(), path)
 	if err != nil {
 		return err
 	}
@@ -246,10 +246,10 @@ func (s *WorkflowStore) appendLooseBoardTicket(root, path string, tickets map[st
 	return nil
 }
 
-func ticketBoardPage(projectID string, tickets []ticketcore.Indexed, offset, limit int) Board {
-	board := buildBoard(projectID, tickets)
+func ticketBoardPage(projectID string, tickets []ticketcore.Indexed, offset, limit int) ticketcore.Board {
+	board := ticketcore.BuildBoard(projectID, tickets)
 	start, end := min(offset, len(tickets)), min(offset+limit, len(tickets))
-	page := buildBoard(projectID, tickets[start:end])
+	page := ticketcore.BuildBoard(projectID, tickets[start:end])
 
 	images := make([]string, 0, len(tickets))
 	for _, ticket := range tickets {

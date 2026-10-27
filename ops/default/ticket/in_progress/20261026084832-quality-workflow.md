@@ -79,3 +79,14 @@ review/app regressions pass; strict lint is clean and the signature policy stays
 at 9306 declarations, ceiling six, 162 exact debts and one external exception.
 Ten frozen direct dependencies resolve; 69 root couplings remain before family
 relocation. Stage ports, assigned signatures and final validation stay open.
+
+
+The next T12.2 prerequisite moves ticket queries and Board/document projections
+to their existing ticket owner with actual native, app and adapter consumers.
+Forty-two moved declaration token sequences match after qualification/naming and
+cmp.Compare substitution; one local generic integer comparator is removed.
+Public query tests colocate with their owner and share its existing SQLite
+fixtures. Twelve more direct dependencies resolve, leaving 57 root couplings;
+all 908 store methods remain together at their original receiver. Native writes,
+locks and journals retain their authority. Focused ticket, native filesystem/Git,
+wire/storage, app and boundary checks and the ceiling-six policy pass.

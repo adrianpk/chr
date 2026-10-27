@@ -7,7 +7,6 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -98,8 +97,8 @@ func (factory commandFactory) runTicketLoop(ctx context.Context, cmd *cli.Comman
 	return err
 }
 
-func ticketLoopQueryOptionsFromCommand(cmd *cli.Command, projectID string) core.TicketLoopQueryOptions {
-	return core.TicketLoopQueryOptions{
+func ticketLoopQueryOptionsFromCommand(cmd *cli.Command, projectID string) ticketcore.LoopQueryOptions {
+	return ticketcore.LoopQueryOptions{
 		ProjectID: projectID,
 		Statuses:  cmd.StringSlice("status"),
 		Filters: workflowstate.TicketFilters{
@@ -114,7 +113,7 @@ func ticketLoopQueryOptionsFromCommand(cmd *cli.Command, projectID string) core.
 	}
 }
 
-func printTicketLoopPlan(stdout io.Writer, projectContext commandProjectContext, opts core.TicketLoopQueryOptions, tickets []ticketcore.Indexed, dryRun bool) error {
+func printTicketLoopPlan(stdout io.Writer, projectContext commandProjectContext, opts ticketcore.LoopQueryOptions, tickets []ticketcore.Indexed, dryRun bool) error {
 	order := opts.Order
 	if order == "" {
 		order = workflowstate.TicketOrderCreatedAt

@@ -57,7 +57,7 @@ func nativeBoardStore(t *testing.T) *WorkflowStore {
 	return store
 }
 
-func checkNativeBoardPage(t *testing.T, opts TicketBoardReadOptions, loaded, next int) Board {
+func checkNativeBoardPage(t *testing.T, opts TicketBoardReadOptions, loaded, next int) ticketcore.Board {
 	t.Helper()
 
 	page, err := ReadTicketBoard(t.Context(), opts)

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func (m *Model) renderTicketBoard() string {
@@ -56,9 +56,9 @@ func (m *Model) renderBoardHeaderColumnLine() string {
 
 	return fmt.Sprintf(
 		"  %s (%d/%d)\n",
-		core.BoardColumnTitle(m.activeBoardColumn()),
+		ticketcore.BoardColumnTitle(m.activeBoardColumn()),
 		m.activeBoardColumnPosition()+1,
-		len(core.NormalBoardColumns),
+		len(ticketcore.NormalBoardColumns),
 	)
 }
 

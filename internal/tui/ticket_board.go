@@ -5,7 +5,6 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chr/internal/core"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
@@ -77,7 +76,7 @@ func (m *Model) activeBoardColumn() string {
 }
 
 func (m *Model) activeBoardColumnPosition() int {
-	for index, column := range core.NormalBoardColumns {
+	for index, column := range ticketcore.NormalBoardColumns {
 		if column == m.activeBoardColumn() {
 			return index
 		}
@@ -152,12 +151,12 @@ func (m *Model) selectPreviousBoardColumn() {
 
 	position := m.activeBoardColumnPosition()
 	if position == 0 {
-		position = len(core.NormalBoardColumns) - 1
+		position = len(ticketcore.NormalBoardColumns) - 1
 	} else {
 		position--
 	}
 
-	m.selectBoardColumn(core.NormalBoardColumns[position])
+	m.selectBoardColumn(ticketcore.NormalBoardColumns[position])
 }
 
 func (m *Model) selectNextBoardColumn() {
@@ -170,11 +169,11 @@ func (m *Model) selectNextBoardColumn() {
 	}
 
 	position := m.activeBoardColumnPosition() + 1
-	if position >= len(core.NormalBoardColumns) {
+	if position >= len(ticketcore.NormalBoardColumns) {
 		position = 0
 	}
 
-	m.selectBoardColumn(core.NormalBoardColumns[position])
+	m.selectBoardColumn(ticketcore.NormalBoardColumns[position])
 }
 
 func (m *Model) boardColumnNavigationActive() bool {
@@ -192,7 +191,7 @@ func (m *Model) selectBoardColumn(column string) {
 }
 
 func defaultBoardColumn(tickets []TicketView) string {
-	for _, column := range core.NormalBoardColumns {
+	for _, column := range ticketcore.NormalBoardColumns {
 		for _, ticket := range tickets {
 			if ticket.BoardColumn == column {
 				return column

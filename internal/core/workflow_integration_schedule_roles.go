@@ -1,6 +1,7 @@
 package core
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
 	"errors"
@@ -114,7 +115,7 @@ func (s *WorkflowStore) workflowIntegrationRoles(ctx context.Context, snapshot w
 	}
 	// Stable sorting retains admission sequence and ID within each priority class.
 	slices.SortStableFunc(items, func(a, b WorkflowIntegrationRoleSelection) int {
-		return compareRank(workflowIntegrationRoleRank(a.Role), workflowIntegrationRoleRank(b.Role))
+		return cmp.Compare(workflowIntegrationRoleRank(a.Role), workflowIntegrationRoleRank(b.Role))
 	})
 
 	return items, nil

@@ -1,4 +1,4 @@
-package core
+package ticket_test
 
 import (
 	"context"
@@ -18,7 +18,7 @@ func TestTicketLoopQuerySelectsDefaultReadyForDevTicketsOldestFirst(t *testing.T
 	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}, IndexedTimes: ticketcore.IndexedTimes{CreatedAt: testLoopQueryTime("2026-05-18T12:00:00Z")}})
 	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-4"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForReview}, IndexedTimes: ticketcore.IndexedTimes{CreatedAt: testLoopQueryTime("2026-05-18T09:00:00Z")}})
 
-	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
+	got, err := ticketcore.NewLoopQuery(index).EligibleTickets(context.Background(), ticketcore.LoopQueryOptions{
 		ProjectID: "project-1",
 	})
 	if err != nil {
@@ -38,7 +38,7 @@ func TestTicketLoopQuerySelectsExplicitStatuses(t *testing.T) {
 	upsertLoopQueryTicket(t, index, "CHR-3", "reviewing")
 	upsertLoopQueryTicket(t, index, "CHR-4", "blocked")
 
-	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
+	got, err := ticketcore.NewLoopQuery(index).EligibleTickets(context.Background(), ticketcore.LoopQueryOptions{
 		ProjectID: "project-1",
 		Statuses:  []string{"open", "ready"},
 		Order:     workflowstate.TicketOrderKey,
@@ -57,7 +57,7 @@ func TestTicketLoopQueryScopesToProject(t *testing.T) {
 	index := newTestTicketIndex(t)
 	upsertLoopQueryTicket(t, index, "CHR-1", string(ticketcore.StatusReadyForDev))
 
-	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
+	got, err := ticketcore.NewLoopQuery(index).EligibleTickets(context.Background(), ticketcore.LoopQueryOptions{
 		ProjectID: "other-project",
 	})
 	if err != nil {
@@ -105,7 +105,7 @@ func TestTicketLoopQueryFiltersByMetadata(t *testing.T) {
 		},
 	})
 
-	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
+	got, err := ticketcore.NewLoopQuery(index).EligibleTickets(context.Background(), ticketcore.LoopQueryOptions{
 		ProjectID: "project-1",
 		Filters: workflowstate.TicketFilters{
 			Priorities:   []string{"high"},
@@ -145,7 +145,7 @@ func TestTicketLoopQueryAllowsAnyValueForEmptyFilterDimensions(t *testing.T) {
 		},
 	})
 
-	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
+	got, err := ticketcore.NewLoopQuery(index).EligibleTickets(context.Background(), ticketcore.LoopQueryOptions{
 		ProjectID: "project-1",
 		Filters: workflowstate.TicketFilters{
 			Priorities: []string{"normal"},
@@ -182,7 +182,7 @@ func TestTicketLoopQueryOrdersByPriority(t *testing.T) {
 		},
 	})
 
-	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
+	got, err := ticketcore.NewLoopQuery(index).EligibleTickets(context.Background(), ticketcore.LoopQueryOptions{
 		ProjectID: "project-1",
 		Order:     workflowstate.TicketOrderPriority,
 	})
@@ -217,7 +217,7 @@ func TestTicketLoopQueryOrdersBySeverity(t *testing.T) {
 		},
 	})
 
-	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
+	got, err := ticketcore.NewLoopQuery(index).EligibleTickets(context.Background(), ticketcore.LoopQueryOptions{
 		ProjectID: "project-1",
 		Order:     workflowstate.TicketOrderSeverity,
 	})
@@ -255,7 +255,7 @@ func TestTicketLoopQueryOrdersByPrioritySeverityAndKey(t *testing.T) {
 		},
 	})
 
-	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
+	got, err := ticketcore.NewLoopQuery(index).EligibleTickets(context.Background(), ticketcore.LoopQueryOptions{
 		ProjectID: "project-1",
 		Order:     workflowstate.TicketOrderPrioritySeverity,
 	})
@@ -279,7 +279,7 @@ func TestTicketLoopQueryOrdersByCreatedAt(t *testing.T) {
 	upsertLoopQueryTicketWithMetadata(t, index, middle)
 	upsertLoopQueryTicketWithMetadata(t, index, older)
 
-	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
+	got, err := ticketcore.NewLoopQuery(index).EligibleTickets(context.Background(), ticketcore.LoopQueryOptions{
 		ProjectID: "project-1",
 		Order:     workflowstate.TicketOrderCreatedAt,
 	})
@@ -301,7 +301,7 @@ func TestTicketLoopQueryOrdersByCreatedAtThenKey(t *testing.T) {
 	upsertLoopQueryTicketWithMetadata(t, index, testLoopQueryTicketWithCreatedAt("CHR-2", createdAt))
 	upsertLoopQueryTicketWithMetadata(t, index, testLoopQueryTicketWithCreatedAt("CHR-10", createdAt))
 
-	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
+	got, err := ticketcore.NewLoopQuery(index).EligibleTickets(context.Background(), ticketcore.LoopQueryOptions{
 		ProjectID: "project-1",
 		Order:     workflowstate.TicketOrderCreatedAt,
 	})
@@ -320,22 +320,22 @@ func TestTicketLoopQueryRejectsInvalidOptions(t *testing.T) {
 
 	for _, testCase := range []struct {
 		name string
-		opts TicketLoopQueryOptions
+		opts ticketcore.LoopQueryOptions
 		want string
 	}{
 		{
 			name: "missing project id",
-			opts: TicketLoopQueryOptions{},
+			opts: ticketcore.LoopQueryOptions{},
 			want: "project id is required",
 		},
 		{
 			name: "invalid status",
-			opts: TicketLoopQueryOptions{ProjectID: "project-1", Statuses: []string{"unknown"}},
+			opts: ticketcore.LoopQueryOptions{ProjectID: "project-1", Statuses: []string{"unknown"}},
 			want: "invalid ticket status: unknown",
 		},
 		{
 			name: "invalid priority",
-			opts: TicketLoopQueryOptions{
+			opts: ticketcore.LoopQueryOptions{
 				ProjectID: "project-1",
 				Filters:   workflowstate.TicketFilters{Priorities: []string{"urgent"}},
 			},
@@ -343,7 +343,7 @@ func TestTicketLoopQueryRejectsInvalidOptions(t *testing.T) {
 		},
 		{
 			name: "invalid severity",
-			opts: TicketLoopQueryOptions{
+			opts: ticketcore.LoopQueryOptions{
 				ProjectID: "project-1",
 				Filters:   workflowstate.TicketFilters{Severities: []string{"maximum"}},
 			},
@@ -351,7 +351,7 @@ func TestTicketLoopQueryRejectsInvalidOptions(t *testing.T) {
 		},
 		{
 			name: "invalid type",
-			opts: TicketLoopQueryOptions{
+			opts: ticketcore.LoopQueryOptions{
 				ProjectID: "project-1",
 				Filters:   workflowstate.TicketFilters{Types: []string{"unknown"}},
 			},
@@ -359,7 +359,7 @@ func TestTicketLoopQueryRejectsInvalidOptions(t *testing.T) {
 		},
 		{
 			name: "invalid order",
-			opts: TicketLoopQueryOptions{
+			opts: ticketcore.LoopQueryOptions{
 				ProjectID: "project-1",
 				Order:     workflowstate.TicketOrder("unknown"),
 			},
@@ -367,7 +367,7 @@ func TestTicketLoopQueryRejectsInvalidOptions(t *testing.T) {
 		},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
-			_, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), testCase.opts)
+			_, err := ticketcore.NewLoopQuery(index).EligibleTickets(context.Background(), testCase.opts)
 			if err == nil || err.Error() != testCase.want {
 				t.Fatalf("err = %v, want %q", err, testCase.want)
 			}

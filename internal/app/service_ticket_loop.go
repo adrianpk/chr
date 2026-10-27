@@ -25,8 +25,8 @@ type ticketLoopRunOptions struct {
 	MaxIterations int
 }
 
-func selectTicketLoopTickets(ctx context.Context, index ticketcore.Index, projectContext commandProjectContext, queryOptions core.TicketLoopQueryOptions, runOptions ticketLoopRunOptions) (ticketLoopSelection, error) {
-	tickets, err := core.NewTicketLoopQuery(index).EligibleTickets(ctx, queryOptions)
+func selectTicketLoopTickets(ctx context.Context, index ticketcore.Index, projectContext commandProjectContext, queryOptions ticketcore.LoopQueryOptions, runOptions ticketLoopRunOptions) (ticketLoopSelection, error) {
+	tickets, err := ticketcore.NewLoopQuery(index).EligibleTickets(ctx, queryOptions)
 	if err != nil {
 		return ticketLoopSelection{Tickets: nil, EligibleCount: 0}, err
 	}
@@ -338,7 +338,7 @@ func loopRunID(projectID string, createdAt time.Time) string {
 }
 
 type ticketLoopRequest struct {
-	Query  core.TicketLoopQueryOptions
+	Query  ticketcore.LoopQueryOptions
 	Run    ticketLoopRunOptions
 	DryRun bool
 }

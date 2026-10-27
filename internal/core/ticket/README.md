@@ -38,3 +38,12 @@ allocator after validation. WithKeyPrefix, WithRenderer and WithRepositoryClock
 configure the existing writer dependencies. Native namespace/envelope observation
 remains outside this package. ReadNumber returns NumberObservation plus error;
 NumberFromText and DefaultKeyPrefix share the original lexical key contract.
+
+LoopQuery owns eligible-status validation, normalized filters and deterministic
+ordering over the ticket index. BoardQuery, BuildBoard and ReadBoardDocument own
+status/review attention and the bounded synopsis projection. App and adapters use
+the same Board values; native workflow reads use the same selection and projection
+rules while retaining their inspection locks, paging and source-hash guards.
+Shared workflow/state filter/order values do not introduce a coordinator import.
+CompareKeys preserves numeric same-prefix keys and lexical fallback; priority,
+severity and timestamp ties retain their previous order and nil handling.

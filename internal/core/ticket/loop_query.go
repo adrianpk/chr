@@ -1,38 +1,38 @@
-package core
+package ticket
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"slices"
 	"strconv"
 	"strings"
 
-	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-var defaultLoopEligibleStatuses = []string{string(ticketcore.StatusReadyForDev)}
+var defaultLoopEligibleStatuses = []string{string(StatusReadyForDev)}
 
-// TicketLoopQueryOptions describes a package boundary value.
-type TicketLoopQueryOptions struct {
+// LoopQueryOptions selects the project, eligible statuses, metadata filters and order.
+type LoopQueryOptions struct {
 	ProjectID string
 	Statuses  []string
 	Filters   workflowstate.TicketFilters
 	Order     workflowstate.TicketOrder
 }
 
-// TicketLoopQuery describes a package boundary value.
-type TicketLoopQuery struct {
-	Index ticketcore.Index
+// LoopQuery reads eligible tickets through the existing index boundary.
+type LoopQuery struct {
+	Index Index
 }
 
-// NewTicketLoopQuery constructs the corresponding package service or value.
-func NewTicketLoopQuery(index ticketcore.Index) TicketLoopQuery {
-	return TicketLoopQuery{Index: index}
+// NewLoopQuery constructs a query over the supplied ticket index.
+func NewLoopQuery(index Index) LoopQuery {
+	return LoopQuery{Index: index}
 }
 
 // EligibleTickets executes the corresponding package operation.
-func (q TicketLoopQuery) EligibleTickets(ctx context.Context, opts TicketLoopQueryOptions) ([]ticketcore.Indexed, error) {
+func (q LoopQuery) EligibleTickets(ctx context.Context, opts LoopQueryOptions) ([]Indexed, error) {
 	if opts.ProjectID == "" {
 		return nil, fmt.Errorf("project id is required")
 	}
@@ -41,17 +41,17 @@ func (q TicketLoopQuery) EligibleTickets(ctx context.Context, opts TicketLoopQue
 		return nil, fmt.Errorf("ticket index is required")
 	}
 
-	statuses, err := loopEligibleStatuses(opts.Statuses)
+	statuses, err := LoopEligibleStatuses(opts.Statuses)
 	if err != nil {
 		return nil, err
 	}
 
-	filters, err := normalizeTicketLoopFilters(opts.Filters)
+	filters, err := NormalizeLoopFilters(opts.Filters)
 	if err != nil {
 		return nil, err
 	}
 
-	order, err := normalizeTicketLoopOrder(opts.Order)
+	order, err := NormalizeLoopOrder(opts.Order)
 	if err != nil {
 		return nil, err
 	}
@@ -61,32 +61,33 @@ func (q TicketLoopQuery) EligibleTickets(ctx context.Context, opts TicketLoopQue
 		return nil, err
 	}
 
-	eligible := make([]ticketcore.Indexed, 0, len(tickets))
+	eligible := make([]Indexed, 0, len(tickets))
 	for _, ticket := range tickets {
-		if slices.Contains(statuses, string(ticket.Status)) && matchesTicketLoopFilters(filters, ticket) {
+		if slices.Contains(statuses, string(ticket.Status)) && MatchesLoopFilters(filters, ticket) {
 			eligible = append(eligible, ticket)
 		}
 	}
 
-	slices.SortFunc(eligible, func(left, right ticketcore.Indexed) int { return compareTicketLoopOrder(order, left, right) })
+	slices.SortFunc(eligible, func(left, right Indexed) int { return CompareLoopOrder(order, left, right) })
 
 	return eligible, nil
 }
 
-func normalizeTicketLoopFilters(filters workflowstate.TicketFilters) (workflowstate.TicketFilters, error) {
+// NormalizeLoopFilters validates discrete filters and preserves their original set order.
+func NormalizeLoopFilters(filters workflowstate.TicketFilters) (workflowstate.TicketFilters, error) {
 	var err error
 
-	filters.Priorities, err = normalizeTicketLoopValues(filters.Priorities, "priority", ticketcore.ValidPriority)
+	filters.Priorities, err = normalizeTicketLoopValues(filters.Priorities, "priority", ValidPriority)
 	if err != nil {
 		return workflowstate.TicketFilters{}, err
 	}
 
-	filters.Severities, err = normalizeTicketLoopValues(filters.Severities, "severity", ticketcore.ValidSeverity)
+	filters.Severities, err = normalizeTicketLoopValues(filters.Severities, "severity", ValidSeverity)
 	if err != nil {
 		return workflowstate.TicketFilters{}, err
 	}
 
-	filters.Types, err = normalizeTicketLoopValues(filters.Types, "type", ticketcore.ValidType)
+	filters.Types, err = normalizeTicketLoopValues(filters.Types, "type", ValidType)
 	if err != nil {
 		return workflowstate.TicketFilters{}, err
 	}
@@ -123,7 +124,8 @@ func normalizeTicketLoopFreeformValues(values []string) []string {
 	return normalized
 }
 
-func matchesTicketLoopFilters(filters workflowstate.TicketFilters, ticket ticketcore.Indexed) bool {
+// MatchesLoopFilters applies the shared ticket selection predicate.
+func MatchesLoopFilters(filters workflowstate.TicketFilters, ticket Indexed) bool {
 	return matchesTicketLoopValues(filters.Priorities, ticket.Priority) &&
 		matchesTicketLoopValues(filters.Severities, ticket.Severity) &&
 		matchesTicketLoopValues(filters.ProjectAreas, ticket.ProjectArea) &&
@@ -150,7 +152,8 @@ func matchesTicketLoopTags(filters, ticketTags []string) bool {
 	return true
 }
 
-func normalizeTicketLoopOrder(order workflowstate.TicketOrder) (workflowstate.TicketOrder, error) {
+// NormalizeLoopOrder selects the legacy default and rejects unsupported order modes.
+func NormalizeLoopOrder(order workflowstate.TicketOrder) (workflowstate.TicketOrder, error) {
 	if order == "" {
 		return workflowstate.TicketOrderCreatedAt, nil
 	}
@@ -167,7 +170,8 @@ func normalizeTicketLoopOrder(order workflowstate.TicketOrder) (workflowstate.Ti
 	}
 }
 
-func compareTicketLoopOrder(order workflowstate.TicketOrder, left, right ticketcore.Indexed) int {
+// CompareLoopOrder applies the selected ticket order with the existing deterministic ties.
+func CompareLoopOrder(order workflowstate.TicketOrder, left, right Indexed) int {
 	switch order {
 	case workflowstate.TicketOrderCreatedAt:
 		return compareIndexedTicketsByCreatedAt(left, right)
@@ -177,30 +181,30 @@ func compareTicketLoopOrder(order workflowstate.TicketOrder, left, right ticketc
 		return compareIndexedTicketsBySeverity(left, right)
 	case workflowstate.TicketOrderPrioritySeverity:
 		return firstNonZero(
-			compareRank(priorityRank(left.Priority), priorityRank(right.Priority)),
-			compareRank(severityRank(left.Severity), severityRank(right.Severity)),
+			cmp.Compare(PriorityRank(left.Priority), PriorityRank(right.Priority)),
+			cmp.Compare(severityRank(left.Severity), severityRank(right.Severity)),
 			compareIndexedTicketsByCreatedAt(left, right),
 		)
 	default:
-		return compareIndexedTicketsByKey(left, right)
+		return CompareKeys(left, right)
 	}
 }
 
-func compareIndexedTicketsByPriority(left, right ticketcore.Indexed) int {
+func compareIndexedTicketsByPriority(left, right Indexed) int {
 	return firstNonZero(
-		compareRank(priorityRank(left.Priority), priorityRank(right.Priority)),
+		cmp.Compare(PriorityRank(left.Priority), PriorityRank(right.Priority)),
 		compareIndexedTicketsByCreatedAt(left, right),
 	)
 }
 
-func compareIndexedTicketsBySeverity(left, right ticketcore.Indexed) int {
+func compareIndexedTicketsBySeverity(left, right Indexed) int {
 	return firstNonZero(
-		compareRank(severityRank(left.Severity), severityRank(right.Severity)),
+		cmp.Compare(severityRank(left.Severity), severityRank(right.Severity)),
 		compareIndexedTicketsByCreatedAt(left, right),
 	)
 }
 
-func compareIndexedTicketsByCreatedAt(left, right ticketcore.Indexed) int {
+func compareIndexedTicketsByCreatedAt(left, right Indexed) int {
 	if left.CreatedAt != nil && right.CreatedAt != nil {
 		switch {
 		case left.CreatedAt.Before(*right.CreatedAt):
@@ -208,7 +212,7 @@ func compareIndexedTicketsByCreatedAt(left, right ticketcore.Indexed) int {
 		case left.CreatedAt.After(*right.CreatedAt):
 			return 1
 		default:
-			return compareIndexedTicketsByKey(left, right)
+			return CompareKeys(left, right)
 		}
 	}
 
@@ -220,17 +224,18 @@ func compareIndexedTicketsByCreatedAt(left, right ticketcore.Indexed) int {
 		return 1
 	}
 
-	return compareIndexedTicketsByKey(left, right)
+	return CompareKeys(left, right)
 }
 
-func loopEligibleStatuses(statuses []string) ([]string, error) {
+// LoopEligibleStatuses validates the requested statuses and copies the default when absent.
+func LoopEligibleStatuses(statuses []string) ([]string, error) {
 	if len(statuses) == 0 {
 		return slices.Clone(defaultLoopEligibleStatuses), nil
 	}
 
 	eligible := make([]string, 0, len(statuses))
 	for _, status := range statuses {
-		if !ticketcore.ValidStatus(ticketcore.Status(status)) {
+		if !ValidStatus(Status(status)) {
 			return nil, fmt.Errorf("invalid ticket status: %s", status)
 		}
 
@@ -242,7 +247,8 @@ func loopEligibleStatuses(statuses []string) ([]string, error) {
 	return eligible, nil
 }
 
-func priorityRank(priority string) int {
+// PriorityRank orders ticket priorities, placing unclassified values last.
+func PriorityRank(priority string) int {
 	switch priority {
 	case "critical":
 		return 0
@@ -272,17 +278,6 @@ func severityRank(severity string) int {
 	}
 }
 
-func compareRank(left, right int) int {
-	switch {
-	case left < right:
-		return -1
-	case left > right:
-		return 1
-	default:
-		return 0
-	}
-}
-
 func firstNonZero(values ...int) int {
 	for _, value := range values {
 		if value != 0 {
@@ -293,12 +288,13 @@ func firstNonZero(values ...int) int {
 	return 0
 }
 
-func compareIndexedTicketsByKey(left, right ticketcore.Indexed) int {
+// CompareKeys orders same-prefix numeric keys numerically and other keys lexically.
+func CompareKeys(left, right Indexed) int {
 	leftKey := splitTicketKey(left.Key)
 	rightKey := splitTicketKey(right.Key)
 
 	if leftKey.valid && rightKey.valid && leftKey.prefix == rightKey.prefix {
-		return compareRank(leftKey.number, rightKey.number)
+		return cmp.Compare(leftKey.number, rightKey.number)
 	}
 
 	if left.Key < right.Key {

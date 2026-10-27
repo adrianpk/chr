@@ -30,17 +30,17 @@ func ReadLegacyWorkQueue(ctx context.Context, layout opscore.Layout, projectID s
 	result.Excluded = excluded
 
 	for _, ticket := range tickets {
-		if slices.Contains(defaultLoopEligibleStatuses, string(ticket.Status)) {
+		if ticket.Status == ticketcore.StatusReadyForDev {
 			result.Eligible = append(result.Eligible, ticket)
 		}
 	}
 
-	order, err := normalizeTicketLoopOrder(workflowstate.TicketOrderCreatedAt)
+	order, err := ticketcore.NormalizeLoopOrder(workflowstate.TicketOrderCreatedAt)
 	if err != nil {
 		return result, err
 	}
 
-	slices.SortFunc(result.Eligible, func(left, right ticketcore.Indexed) int { return compareTicketLoopOrder(order, left, right) })
+	slices.SortFunc(result.Eligible, func(left, right ticketcore.Indexed) int { return ticketcore.CompareLoopOrder(order, left, right) })
 
 	return result, nil
 }

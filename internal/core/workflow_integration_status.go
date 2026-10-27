@@ -1,6 +1,7 @@
 package core
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"os"
@@ -395,7 +396,7 @@ func (s *WorkflowStore) QueryWorkflowPublicationBarriers(ctx context.Context, ta
 	}
 
 	slices.SortFunc(result, func(a, b WorkflowPublicationBarrier) int {
-		return compareRank(a.Submission.Attempt, b.Submission.Attempt)
+		return cmp.Compare(a.Submission.Attempt, b.Submission.Attempt)
 	})
 
 	return result, integrationRecordError("publication barriers", err)

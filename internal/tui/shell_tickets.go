@@ -6,7 +6,6 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 
-	"forge.adrianpk.com/chr/internal/core"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
@@ -70,20 +69,20 @@ func (m *Model) renderMaximizedBoardWorkspace(width, height int) string {
 	}
 
 	columnsPerRow := boardMaximizedColumnsPerRow(width)
-	rows := boardMaximizedRows(len(core.NormalBoardColumns), columnsPerRow)
+	rows := boardMaximizedRows(len(ticketcore.NormalBoardColumns), columnsPerRow)
 	rowHeight := maxInt(height/rows, 1)
 	renderedRows := make([]string, 0, rows)
 
 	for row := range rows {
 		start := row * columnsPerRow
 
-		end := minInt(start+columnsPerRow, len(core.NormalBoardColumns))
+		end := minInt(start+columnsPerRow, len(ticketcore.NormalBoardColumns))
 		if start >= end {
 			break
 		}
 
 		renderedRows = append(renderedRows, m.renderMaximizedBoardRow(
-			core.NormalBoardColumns[start:end],
+			ticketcore.NormalBoardColumns[start:end],
 			width,
 			rowHeight,
 		))
@@ -104,7 +103,7 @@ func (m *Model) renderMaximizedBoardRow(columns []string, width, height int) str
 
 		tickets := m.ticketsForBoardColumn(column)
 		lines := m.renderMaximizedBoardColumnLines(tickets, maxInt(columnWidth-4, 1), height-2)
-		title := fmt.Sprintf("%s (%d)", core.BoardColumnTitle(column), len(tickets))
+		title := fmt.Sprintf("%s (%d)", ticketcore.BoardColumnTitle(column), len(tickets))
 
 		panels = append(panels, renderPanel(title, lines, columnWidth, height, m.activeBoardColumn() == column))
 	}
@@ -408,7 +407,7 @@ func (m *Model) renderBoardFocusHeaderLines(limit int) []string {
 		fmt.Sprintf("%s (%d/%d)",
 			compactBoardColumnLabel(m.activeBoardColumn()),
 			m.activeBoardColumnPosition()+1,
-			len(core.NormalBoardColumns),
+			len(ticketcore.NormalBoardColumns),
 		),
 		"",
 	}, limit)

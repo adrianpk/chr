@@ -1,4 +1,4 @@
-package core
+package ticket_test
 
 import (
 	"context"
@@ -14,7 +14,7 @@ func TestBoardQueryReturnsNormalColumnsAndCounts(t *testing.T) {
 	upsertBoardQueryTicket(t, index, "CHR-1", string(ticketcore.StatusBacklog))
 	upsertBoardQueryTicket(t, index, "CHR-2", string(ticketcore.StatusReadyForDev))
 
-	board, err := NewBoardQuery(index).ProjectBoard(context.Background(), BoardQueryOptions{
+	board, err := ticketcore.NewBoardQuery(index).ProjectBoard(context.Background(), ticketcore.BoardQueryOptions{
 		ProjectID: "project-1",
 	})
 	if err != nil {
@@ -25,8 +25,8 @@ func TestBoardQueryReturnsNormalColumnsAndCounts(t *testing.T) {
 		t.Fatalf("board counts = %#v, want three normal tickets", board)
 	}
 
-	if len(board.Columns) != len(NormalBoardColumns) {
-		t.Fatalf("columns = %d, want %d", len(board.Columns), len(NormalBoardColumns))
+	if len(board.Columns) != len(ticketcore.NormalBoardColumns) {
+		t.Fatalf("columns = %d, want %d", len(board.Columns), len(ticketcore.NormalBoardColumns))
 	}
 
 	assertBoardColumn(t, board, string(ticketcore.StatusBacklog), "Backlog", []string{"CHR-1"})
@@ -38,7 +38,7 @@ func TestBoardQueryMapsLegacyStatusesToBoardColumns(t *testing.T) {
 	index := newTestTicketIndex(t)
 	upsertBoardQueryTicketWithMetadata(t, index, ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyLegacy}})
 
-	board, err := NewBoardQuery(index).ProjectBoard(context.Background(), BoardQueryOptions{
+	board, err := ticketcore.NewBoardQuery(index).ProjectBoard(context.Background(), ticketcore.BoardQueryOptions{
 		ProjectID: "project-1",
 	})
 	if err != nil {
@@ -53,7 +53,7 @@ func TestBoardQuerySeparatesAttentionTickets(t *testing.T) {
 	upsertBoardQueryTicket(t, index, "CHR-1", string(ticketcore.StatusBacklog))
 	upsertBoardQueryTicket(t, index, "CHR-2", string(ticketcore.StatusBlockedLegacy))
 
-	board, err := NewBoardQuery(index).ProjectBoard(context.Background(), BoardQueryOptions{
+	board, err := ticketcore.NewBoardQuery(index).ProjectBoard(context.Background(), ticketcore.BoardQueryOptions{
 		ProjectID: "project-1",
 	})
 	if err != nil {
@@ -86,7 +86,7 @@ func TestBoardQueryFlagsReviewStateAttention(t *testing.T) {
 	index := newTestTicketIndex(t)
 	upsertBoardQueryTicketWithMetadata(t, index, ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}, IndexedReview: ticketcore.IndexedReview{ReviewState: "changes_requested"}})
 
-	board, err := NewBoardQuery(index).ProjectBoard(context.Background(), BoardQueryOptions{
+	board, err := ticketcore.NewBoardQuery(index).ProjectBoard(context.Background(), ticketcore.BoardQueryOptions{
 		ProjectID: "project-1",
 	})
 	if err != nil {
@@ -104,13 +104,13 @@ func TestBoardQueryFlagsReviewStateAttention(t *testing.T) {
 }
 
 func TestBoardQueryRejectsInvalidOptions(t *testing.T) {
-	_, err := NewBoardQuery(nil).ProjectBoard(context.Background(), BoardQueryOptions{})
+	_, err := ticketcore.NewBoardQuery(nil).ProjectBoard(context.Background(), ticketcore.BoardQueryOptions{})
 	if err == nil {
 		t.Fatal("ProjectBoard returned nil error")
 	}
 }
 
-func assertBoardColumn(t *testing.T, board Board, columnID, title string, wantKeys []string) {
+func assertBoardColumn(t *testing.T, board ticketcore.Board, columnID, title string, wantKeys []string) {
 	t.Helper()
 
 	for _, column := range board.Columns {

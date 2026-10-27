@@ -52,44 +52,6 @@ func newTestTicketIndex(t *testing.T) ticketcore.Index {
 	return index
 }
 
-func testIndexedTicket(key string, tags []string) ticketcore.Indexed {
-	createdAt := time.Date(2026, 5, 18, 12, 30, 0, 0, time.UTC)
-	updatedAt := time.Date(2026, 5, 18, 13, 30, 0, 0, time.UTC)
-
-	return ticketcore.Indexed{
-		IndexedIdentity: ticketcore.IndexedIdentity{
-			ProjectID:    "project-1",
-			Path:         "/tmp/chr/.chr/default/tickets/" + key + ".md",
-			RelativePath: key + ".md",
-			Key:          key,
-		}, IndexedSummary: ticketcore.IndexedSummary{
-			Title:    "Do something",
-			Synopsis: "Implement indexed ticket enrichment.",
-		}, IndexedClassification: ticketcore.IndexedClassification{
-			Status:      ticketcore.StatusReadyForDev,
-			BoardColumn: ticketcore.StatusReadyForDev,
-			Priority:    "high",
-			Severity:    "critical",
-			Type:        "feature",
-			Tags:        tags,
-			UseCase:     "onboarding",
-			ProjectArea: "frontend",
-		}, IndexedSource: ticketcore.IndexedSource{
-			SourceKind: "plan_tracking",
-			SourceRef:  ".chr/default/plans/onboarding-plan.md",
-			Slice:      "Slice 4",
-		}, IndexedTimes: ticketcore.IndexedTimes{
-			CreatedAt: timePtr(createdAt),
-			UpdatedAt: timePtr(updatedAt),
-		}, IndexedProjection: ticketcore.IndexedProjection{
-			FileMTime:   time.Date(2026, 5, 18, 14, 0, 0, 0, time.UTC),
-			FileSize:    123,
-			ContentHash: "hash",
-			IndexedAt:   time.Date(2026, 5, 18, 15, 0, 0, 0, time.UTC),
-		},
-	}
-}
-
 func writeRebuildTestTicket(t *testing.T, projectDir, relativePath string, ticket ticketcore.Ticket) {
 	t.Helper()
 
@@ -114,10 +76,6 @@ func rebuildTestUpdatedAt() time.Time {
 
 func rebuildTestIndexedAt() time.Time {
 	return time.Date(2026, 5, 19, 11, 0, 0, 0, time.UTC)
-}
-
-func timePtr(value time.Time) *time.Time {
-	return &value
 }
 
 func writeDiscoveryTestFile(t *testing.T, projectDir, relativePath string) {

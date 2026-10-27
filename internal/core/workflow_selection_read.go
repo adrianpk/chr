@@ -61,7 +61,7 @@ func (s *WorkflowStore) readWorkflowSelectionSources(ctx context.Context, unprep
 		return workflowSelection{}, err
 	}
 
-	sort.Slice(selection.tickets, func(i, j int) bool { return compareIndexedTicketsByKey(selection.tickets[i], selection.tickets[j]) < 0 })
+	sort.Slice(selection.tickets, func(i, j int) bool { return ticketcore.CompareKeys(selection.tickets[i], selection.tickets[j]) < 0 })
 
 	if err := s.hashWorkflowEvidence(ctx, &selection); err != nil {
 		return workflowSelection{}, err

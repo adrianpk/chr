@@ -1,6 +1,7 @@
 package core
 
 import (
+	"cmp"
 	"fmt"
 	"slices"
 
@@ -30,14 +31,14 @@ func newWorkflowDependencies(selection workflowSelection) (workflowDependencies,
 	}
 
 	for id, tasks := range dependencies.tasks {
-		slices.SortFunc(tasks, func(left, right WorkflowRecord) int { return compareRank(left.Task.Order, right.Task.Order) })
+		slices.SortFunc(tasks, func(left, right WorkflowRecord) int { return cmp.Compare(left.Task.Order, right.Task.Order) })
 
 		dependencies.tasks[id] = tasks
 	}
 
 	for id, set := range selection.sets {
 		ordered := slices.Clone(set.Set.Slices)
-		slices.SortFunc(ordered, func(left, right workflowstate.WorkflowSlice) int { return compareRank(left.Order, right.Order) })
+		slices.SortFunc(ordered, func(left, right workflowstate.WorkflowSlice) int { return cmp.Compare(left.Order, right.Order) })
 
 		dependencies.orderedSlices[id] = ordered
 	}

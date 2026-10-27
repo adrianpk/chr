@@ -1,4 +1,4 @@
-package core
+package ticket
 
 import (
 	"fmt"
@@ -8,23 +8,23 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
-	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func readBoardDocument(projectDir, path string) (ticketcore.Indexed, error) {
+// ReadBoardDocument reads a ticket card, retaining malformed documents as attention cards.
+func ReadBoardDocument(projectDir, path string) (Indexed, error) {
 	data, err := opsfile.Read(path)
 	if err != nil {
-		return ticketcore.Indexed{}, err
+		return Indexed{}, err
 	}
 
 	relative, err := filepath.Rel(projectDir, path)
 	if err != nil {
-		return ticketcore.Indexed{}, err
+		return Indexed{}, err
 	}
 
-	ticket := ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Path: path, RelativePath: filepath.ToSlash(relative), Key: filepath.ToSlash(relative)}, IndexedSummary: ticketcore.IndexedSummary{Title: filepath.Base(path)}, IndexedProjection: ticketcore.IndexedProjection{ContentHash: contenthash.Sum(data)}}
+	ticket := Indexed{IndexedIdentity: IndexedIdentity{Path: path, RelativePath: filepath.ToSlash(relative), Key: filepath.ToSlash(relative)}, IndexedSummary: IndexedSummary{Title: filepath.Base(path)}, IndexedProjection: IndexedProjection{ContentHash: contenthash.Sum(data)}}
 
 	front, err := ticketmetadata.Parse(string(data))
 	if err != nil {
@@ -35,13 +35,13 @@ func readBoardDocument(projectDir, path string) (ticketcore.Indexed, error) {
 
 	ticket = boardTicketMetadata(ticket, front.Metadata)
 	if ticket.Synopsis == "" {
-		ticket.Synopsis = boardDescription(data)
+		ticket.Synopsis = BoardDescription(data)
 	}
 
 	return ticket, nil
 }
 
-func boardTicketMetadata(ticket ticketcore.Indexed, metadata map[string]string) ticketcore.Indexed {
+func boardTicketMetadata(ticket Indexed, metadata map[string]string) Indexed {
 	value := func(name string) string { return opsmetadata.Unquote(metadata[name]) }
 	if value("key") != "" {
 		ticket.Key = value("key")
@@ -57,21 +57,21 @@ func boardTicketMetadata(ticket ticketcore.Indexed, metadata map[string]string) 
 		ticket.AttentionReasons = append(ticket.AttentionReasons, "ticket title is missing")
 	}
 
-	ticket.Status, ticket.Synopsis = ticketcore.Status(value("status")), value("synopsis")
+	ticket.Status, ticket.Synopsis = Status(value("status")), value("synopsis")
 	ticket.Assignee = value("assignee")
 	ticket.Priority, ticket.Severity, ticket.Type = value("priority"), value("severity"), value("type")
 	ticket.UseCase, ticket.ProjectArea, ticket.Slice = value("use_case"), value("project_area"), value("slice")
 	ticket.SourceKind, ticket.SourceRef, ticket.Branch = value("source_kind"), value("source_ref"), value("branch")
-	ticket.ReviewState, ticket.ReviewResult = ticketcore.ReviewState(value("review_state")), ticketcore.ReviewResult(value("review_result"))
+	ticket.ReviewState, ticket.ReviewResult = ReviewState(value("review_state")), ReviewResult(value("review_result"))
 	ticket.Tags = opsmetadata.ParseList(metadata["tags"])
-	ticket.BoardColumn, _ = ticketcore.BoardStatus(ticket.Status)
+	ticket.BoardColumn, _ = BoardStatus(ticket.Status)
 
 	// Repository tickets have their own status-directory vocabulary. In that
 	// contract solved means implemented, whereas legacy runtime solved awaits merge.
 	if value("key") == "" && strings.HasPrefix(value("id"), "TKT-") {
 		ticket.Type, ticket.ProjectArea, ticket.SourceKind = value("kind"), value("scope"), value("source")
 		if ticket.Status == "solved" || ticket.Status == "closed" {
-			ticket.BoardColumn = ticketcore.StatusDone
+			ticket.BoardColumn = StatusDone
 		}
 
 		if filepath.Base(filepath.Dir(ticket.Path)) != string(ticket.Status) {
@@ -82,7 +82,8 @@ func boardTicketMetadata(ticket ticketcore.Indexed, metadata map[string]string) 
 	return ticket
 }
 
-func boardDescription(data []byte) string {
+// BoardDescription extracts the bounded ticket synopsis before discussion sections.
+func BoardDescription(data []byte) string {
 	text := string(data)
 	if parsed, err := workflowstate.RequireMarkdown(data); err == nil {
 		text = string(parsed.Body)

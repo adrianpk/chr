@@ -11,7 +11,7 @@ type leafDependencyCase struct {
 }
 
 func leafDependencyCases() []leafDependencyCase {
-	return append([]leafDependencyCase{
+	return append(ticketProjectionDependencyCases(), append([]leafDependencyCase{
 		{"authoring bounded journals", "internal/core/authoring/owner.go", "package authoring\nimport _ \"" + coreImportPath + "ops/file\"\n", false},
 		{"authoring native coordinator", "internal/core/authoring/guided_preparation.go", "package authoring\nimport _ \"" + coreImportPath + "workflow\"\n", true},
 		{"file authoring cycle", "internal/core/ops/file/io.go", "package file\nimport _ \"" + coreImportPath + "authoring\"\n", true},
@@ -69,7 +69,14 @@ func leafDependencyCases() []leafDependencyCase {
 		{"external", "internal/core/database/driver.go", "package database\nimport _ \"modernc.org/sqlite\"\n", false},
 		{"assembly", "internal/app/app.go", "package app\nimport _ \"" + moduleImportPath + "/internal/core\"\n", false},
 		{"similar sibling", "internal/core/notifyx/store.go", "package notifyx\nimport _ \"" + moduleImportPath + "/internal/app\"\n", false},
-	}, harnessLifecycleDependencyCases()...)
+	}, harnessLifecycleDependencyCases()...)...)
+}
+
+func ticketProjectionDependencyCases() []leafDependencyCase {
+	return []leafDependencyCase{
+		{"ticket selection values", "internal/core/ticket/loop_query.go", "package ticket\nimport _ \"" + coreImportPath + "workflow/state\"\n", false},
+		{"ticket workflow coordinator", "internal/core/ticket/board_query.go", "package ticket\nimport _ \"" + coreImportPath + "workflow\"\n", true},
+	}
 }
 
 func harnessLifecycleDependencyCases() []leafDependencyCase {
