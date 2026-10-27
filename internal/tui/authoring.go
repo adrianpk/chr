@@ -30,7 +30,7 @@ func NewAuthoringSessionViews(sessions []authoringcore.Session) []AuthoringSessi
 	views := make([]AuthoringSessionView, 0, len(sessions))
 
 	for index, session := range sessions {
-		paths := authoringcore.AuthoringSessionLayout("", session.ID)
+		paths := authoringcore.SessionLayout("", session.ID)
 		views = append(views, AuthoringSessionView{
 			Index:          index,
 			ID:             session.ID,

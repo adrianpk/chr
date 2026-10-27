@@ -122,7 +122,7 @@ func telegramAuthoringPreparedRecord(t *testing.T, records []core.WorkflowRecord
 			continue
 		}
 
-		var scope authoringcore.AuthoringWorkScope
+		var scope authoringcore.WorkScope
 		if err := json.Unmarshal(record.Metadata["authoring_scope"], &scope); err != nil {
 			t.Fatal(err)
 		}

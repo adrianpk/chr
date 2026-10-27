@@ -10,7 +10,7 @@ import (
 
 type telegramPreparedWorkService interface {
 	PrepareTelegramAuthoringWork(context.Context, telegramcore.OperationTarget, AuthoringWorkRequest) (PreparedAuthoringWork, error)
-	ApplyTelegramAuthoringWork(context.Context, telegramcore.OperationTarget, PreparedAuthoringWork, authoringcore.AuthoringCommitGuard) (AuthoringWorkResult, error)
+	ApplyTelegramAuthoringWork(context.Context, telegramcore.OperationTarget, PreparedAuthoringWork, authoringcore.CommitGuard) (AuthoringWorkResult, error)
 }
 
 // PrepareTelegramAuthoringWork resolves the current bound root before entering
@@ -30,7 +30,7 @@ func (s service) PrepareTelegramAuthoringWork(ctx context.Context, target telegr
 }
 
 // ApplyTelegramAuthoringWork uses the shared guarded owner and cannot admit work.
-func (s service) ApplyTelegramAuthoringWork(ctx context.Context, target telegramcore.OperationTarget, prepared PreparedAuthoringWork, guard authoringcore.AuthoringCommitGuard) (AuthoringWorkResult, error) {
+func (s service) ApplyTelegramAuthoringWork(ctx context.Context, target telegramcore.OperationTarget, prepared PreparedAuthoringWork, guard authoringcore.CommitGuard) (AuthoringWorkResult, error) {
 	if prepared.Scope.ProjectID != target.ProjectID || prepared.Scope.Namespace != target.Namespace {
 		return AuthoringWorkResult{}, workflowstate.ErrConflict
 	}

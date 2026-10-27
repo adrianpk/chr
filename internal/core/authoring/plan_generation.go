@@ -111,7 +111,7 @@ func writeGeneratedPlan(ctx context.Context, projectDir string, plan generationc
 		return GeneratedPlanPaths{}, err
 	}
 
-	if err := (&fileAuthoringSessionRepository{projectDir: projectDir}).publishGeneratedPlan(ctx, paths, plan); err != nil {
+	if err := (&fileSessionRepository{projectDir: projectDir}).publishGeneratedPlan(ctx, paths, plan); err != nil {
 		return GeneratedPlanPaths{}, err
 	}
 

@@ -21,8 +21,8 @@ func (e *GuidedPrerequisiteError) Unwrap() error { return e.Cause }
 
 // RetainGuidedHostBlocker reports a stopped activation without changing native facts.
 func RetainGuidedHostBlocker(ctx context.Context, root string, scope GuidedUseCaseScope, invocation string) error {
-	return WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
-		r := &fileAuthoringSessionRepository{projectDir: root}
+	return WithMutation(ctx, root, func(ctx context.Context) error {
+		r := &fileSessionRepository{projectDir: root}
 
 		session, err := r.getGuardedSession(ctx, scope.RunID)
 		if err != nil {

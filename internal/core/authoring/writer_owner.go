@@ -13,21 +13,21 @@ import (
 
 // WriteGeneratedSpec applies the existing writer under shared authoring exclusion.
 func WriteGeneratedSpec(ctx context.Context, projectDir string, spec GeneratedSpec) (result GeneratedSpecPaths, err error) {
-	err = WithAuthoringMutation(ctx, projectDir, func(ctx context.Context) error { result, err = writeGeneratedSpec(ctx, projectDir, spec); return err })
+	err = WithMutation(ctx, projectDir, func(ctx context.Context) error { result, err = writeGeneratedSpec(ctx, projectDir, spec); return err })
 
 	return result, err
 }
 
 // WriteGeneratedPlan applies the existing writer under shared authoring exclusion.
 func WriteGeneratedPlan(ctx context.Context, projectDir string, plan generationcore.GeneratedPlan) (result GeneratedPlanPaths, err error) {
-	err = WithAuthoringMutation(ctx, projectDir, func(ctx context.Context) error { result, err = writeGeneratedPlan(ctx, projectDir, plan); return err })
+	err = WithMutation(ctx, projectDir, func(ctx context.Context) error { result, err = writeGeneratedPlan(ctx, projectDir, plan); return err })
 
 	return result, err
 }
 
 // ArchiveGeneratedPlan serializes the existing archive operation with generation.
 func ArchiveGeneratedPlan(ctx context.Context, projectDir string, scope quizcore.Scope, at time.Time) (result ArchivedPlanLookup, err error) {
-	err = WithAuthoringMutation(ctx, projectDir, func(ctx context.Context) error {
+	err = WithMutation(ctx, projectDir, func(ctx context.Context) error {
 		result, err = archiveGeneratedPlan(ctx, projectDir, scope, at)
 
 		return err
@@ -49,7 +49,7 @@ func SynthesizeAssistedArtifact(ctx context.Context, opts AssistedArtifactSynthe
 		defer cancel()
 	}
 
-	err = WithAuthoringMutation(ctx, opts.ProjectDir, func(ctx context.Context) error { result, err = synthesizeAssistedArtifact(ctx, opts); return err })
+	err = WithMutation(ctx, opts.ProjectDir, func(ctx context.Context) error { result, err = synthesizeAssistedArtifact(ctx, opts); return err })
 
 	return result, err
 }
@@ -60,7 +60,7 @@ func CurateAssistedAnswers(ctx context.Context, opts AssistedAnswerCurationOptio
 		return result, err
 	}
 
-	err = WithAuthoringMutation(ctx, filepath.Dir(filepath.Dir(filepath.Dir(filepath.Dir(opts.SessionPaths.SessionDir)))), func(ctx context.Context) error { result, err = curateAssistedAnswers(ctx, opts); return err })
+	err = WithMutation(ctx, filepath.Dir(filepath.Dir(filepath.Dir(filepath.Dir(opts.SessionPaths.SessionDir)))), func(ctx context.Context) error { result, err = curateAssistedAnswers(ctx, opts); return err })
 
 	return result, err
 }
@@ -77,7 +77,7 @@ func WriteContextualQuiz(plan ContextualQuizGenerationPlan) error {
 func WriteContextualQuizContext(ctx context.Context, plan ContextualQuizGenerationPlan) error {
 	root := strings.TrimSuffix(plan.Layout.FullPath, string(os.PathSeparator)+filepath.FromSlash(plan.Layout.Ref.Path))
 
-	return WithAuthoringMutation(ctx, root, func(context.Context) error { return writeContextualQuiz(plan) })
+	return WithMutation(ctx, root, func(context.Context) error { return writeContextualQuiz(plan) })
 }
 
 // WriteQuizToDraftPromotion preserves the standalone writer with a bounded lock wait.
@@ -92,12 +92,12 @@ func WriteQuizToDraftPromotion(plan QuizToDraftPromotionPlan) error {
 func WriteQuizToDraftPromotionContext(ctx context.Context, plan QuizToDraftPromotionPlan) error {
 	root := strings.TrimSuffix(plan.Layout.FullPath, string(os.PathSeparator)+filepath.FromSlash(plan.Layout.Ref.Path))
 
-	return WithAuthoringMutation(ctx, root, func(context.Context) error { return writeQuizToDraftPromotion(plan) })
+	return WithMutation(ctx, root, func(context.Context) error { return writeQuizToDraftPromotion(plan) })
 }
 
 // WriteQuizDraftSpec publishes quiz-generated specs under the shared owner.
 func WriteQuizDraftSpec(ctx context.Context, projectDir string, spec generationcore.QuizDraftSpec) (result QuizDraftSpecPaths, err error) {
-	err = WithAuthoringMutation(ctx, projectDir, func(ctx context.Context) error { result, err = writeQuizDraftSpec(ctx, projectDir, spec); return err })
+	err = WithMutation(ctx, projectDir, func(ctx context.Context) error { result, err = writeQuizDraftSpec(ctx, projectDir, spec); return err })
 
 	return result, err
 }

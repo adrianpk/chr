@@ -17,7 +17,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func telegramAuthoringWorkFixture(t *testing.T) (service, authoringcore.AuthoringContinuationResult) {
+func telegramAuthoringWorkFixture(t *testing.T) (service, authoringcore.ContinuationResult) {
 	t.Helper()
 
 	if testing.Short() {
@@ -43,7 +43,7 @@ func telegramAuthoringWorkFixture(t *testing.T) (service, authoringcore.Authorin
 	return operations, created
 }
 
-func telegramAuthoringWorkRequest(result authoringcore.AuthoringContinuationResult, intent authoringstate.Intent) AuthoringWorkRequest {
+func telegramAuthoringWorkRequest(result authoringcore.ContinuationResult, intent authoringstate.Intent) AuthoringWorkRequest {
 	return AuthoringWorkRequest{Binding: workflowstate.MutationBinding{RequestID: "work-description", Operator: "maintainer"}, SessionID: result.Session.ID, ExpectedRevision: result.Session.Revision, ExpectedSourceHash: result.SourceHash, Intent: intent, Instruction: "Retain the retry ceiling and existing defaults."}
 }
 
@@ -91,7 +91,7 @@ func telegramAuthoringWorkGrant(t *testing.T, operations service, prepared Prepa
 		return prepared
 	}
 
-	if _, err := operations.ApplyPreparedAuthoringWork(t.Context(), prepared); !errors.Is(err, authoringcore.ErrAuthoringAuthorityRequired) {
+	if _, err := operations.ApplyPreparedAuthoringWork(t.Context(), prepared); !errors.Is(err, authoringcore.ErrAuthorityRequired) {
 		t.Fatal("missing development authority accepted", err)
 	}
 
@@ -129,12 +129,12 @@ func telegramAuthoringWorkCheckRecord(t *testing.T, operations service, result A
 func telegramAuthoringWorkCheckProvenance(t *testing.T, record core.WorkflowRecord, result AuthoringWorkResult) {
 	t.Helper()
 
-	var scope authoringcore.AuthoringWorkScope
+	var scope authoringcore.WorkScope
 	if err := json.Unmarshal(record.Metadata["authoring_scope"], &scope); err != nil || scope != result.Scope {
 		t.Fatal("canonical scope/provenance lost", scope, err)
 	}
 
-	var authority *authoringcore.AuthoringWorkAuthorization
+	var authority *authoringcore.WorkAuthorization
 	if err := json.Unmarshal(record.Metadata["authoring_authorization"], &authority); err != nil || !reflect.DeepEqual(authority, result.Authorization) {
 		t.Fatal("canonical authority lost", authority, err)
 	}

@@ -101,7 +101,7 @@ func testGuidedIdeaRecovery(t *testing.T, position int) {
 	}
 
 	lost := errors.New("lost idea journal acknowledgement")
-	r := &fileAuthoringSessionRepository{projectDir: root, afterMutationReplace: func(index int) error {
+	r := &fileSessionRepository{projectDir: root, afterMutationReplace: func(index int) error {
 		if index == position {
 			return lost
 		}
@@ -109,7 +109,7 @@ func testGuidedIdeaRecovery(t *testing.T, position int) {
 		return nil
 	}}
 
-	err = WithAuthoringMutation(t.Context(), root, func(context.Context) error { return r.retainGuidedIdea(&session, operation) })
+	err = WithMutation(t.Context(), root, func(context.Context) error { return r.retainGuidedIdea(&session, operation) })
 	if !errors.Is(err, lost) {
 		t.Fatal("idea fault not reached", err)
 	}

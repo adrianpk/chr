@@ -54,7 +54,7 @@ func (s ProjectMetadataService) Load() (ProjectMetadata, error) {
 		return ProjectMetadata{}, err
 	}
 
-	content, err := (&fileAuthoringSessionRepository{projectDir: s.projectDir}).readAuthoringDocument(relative)
+	content, err := (&fileSessionRepository{projectDir: s.projectDir}).readAuthoringDocument(relative)
 	if errors.Is(err, os.ErrNotExist) {
 		return defaultProjectMetadata(s.projectDir), nil
 	}
@@ -85,7 +85,7 @@ func (s ProjectMetadataService) Save(metadata ProjectMetadata) (ProjectMetadata,
 
 // SaveContext compares the source image inside the shared authoring owner.
 func (s ProjectMetadataService) SaveContext(ctx context.Context, metadata ProjectMetadata) (saved ProjectMetadata, err error) {
-	err = WithAuthoringMutation(ctx, s.projectDir, func(context.Context) error {
+	err = WithMutation(ctx, s.projectDir, func(context.Context) error {
 		saved, err = s.save(metadata, false)
 
 		return err

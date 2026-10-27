@@ -168,7 +168,7 @@ func checkSpecMutationRecovery(t *testing.T, stop int) {
 	}
 
 	digest := contenthash.Sum(append([]byte(project+"\x00spec-write\x00"), encoded...))
-	r := &fileAuthoringSessionRepository{projectDir: project, afterMutationReplace: func(index int) error {
+	r := &fileSessionRepository{projectDir: project, afterMutationReplace: func(index int) error {
 		if index == stop {
 			return errors.New("interrupted")
 		}
@@ -178,7 +178,7 @@ func checkSpecMutationRecovery(t *testing.T, stop int) {
 
 	var partial SpecMutationResult
 
-	err = WithAuthoringMutation(t.Context(), project, func(ctx context.Context) error { partial, err = r.commitSpec(ctx, request, digest); return err })
+	err = WithMutation(t.Context(), project, func(ctx context.Context) error { partial, err = r.commitSpec(ctx, request, digest); return err })
 	if err == nil {
 		t.Fatal("fault not reached")
 	}

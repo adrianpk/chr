@@ -54,13 +54,13 @@ func TestGuidedUseCaseSpecLegacy(t *testing.T) {
 // TestGuidedUseCaseSpecCheckpoint reuses the committed approved bytes after a lost seal acknowledgement.
 func TestGuidedUseCaseSpecCheckpoint(t *testing.T) {
 	root, session := guidedSpecSealFixture(t)
-	r := &fileAuthoringSessionRepository{projectDir: root}
+	r := &fileSessionRepository{projectDir: root}
 	approval := session.Guided.SpecApproval
 	paths := []string{approval.Reference, filepath.ToSlash(filepath.Join(filepath.Dir(approval.Reference), "metadata.json"))}
 
 	var original string
 
-	err := WithAuthoringMutation(t.Context(), root, func(ctx context.Context) error {
+	err := WithMutation(t.Context(), root, func(ctx context.Context) error {
 		checkpoint, err := r.observeGuidedCheckpoint(ctx, session.ID, *session.Guided.PendingOperation, "specification", paths)
 		if err != nil {
 			return err
@@ -82,7 +82,7 @@ func TestGuidedUseCaseSpecCheckpoint(t *testing.T) {
 
 	guidedWriteFile(t, root, approval.Reference, "Later working-copy replacement")
 
-	err = WithAuthoringMutation(t.Context(), root, func(ctx context.Context) error { return SealGuidedSpec(ctx, root, &session) })
+	err = WithMutation(t.Context(), root, func(ctx context.Context) error { return SealGuidedSpec(ctx, root, &session) })
 	if err != nil || session.Guided.Checkpoints[2].Commit != original {
 		t.Fatalf("approved seal replaced or blocked by working copy: %v", err)
 	}

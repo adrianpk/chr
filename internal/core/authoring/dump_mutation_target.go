@@ -20,7 +20,7 @@ type dumpMutationTarget struct {
 	Destination, RawReference string
 }
 
-func (r *fileAuthoringSessionRepository) dumpMutationTarget(ctx context.Context, request DumpMutationRequest) (dumpMutationTarget, error) {
+func (r *fileSessionRepository) dumpMutationTarget(ctx context.Context, request DumpMutationRequest) (dumpMutationTarget, error) {
 	if request.Action != "capture" {
 		return r.dumpEditTarget(ctx, request)
 	}
@@ -64,7 +64,7 @@ func (r *fileAuthoringSessionRepository) dumpMutationTarget(ctx context.Context,
 	return target, nil
 }
 
-func (r *fileAuthoringSessionRepository) dumpEditTarget(ctx context.Context, request DumpMutationRequest) (dumpMutationTarget, error) {
+func (r *fileSessionRepository) dumpEditTarget(ctx context.Context, request DumpMutationRequest) (dumpMutationTarget, error) {
 	observed, err := ReadDumpDocument(ctx, r.projectDir, request.Reference)
 	if err != nil {
 		return dumpMutationTarget{}, err
@@ -93,7 +93,7 @@ func (r *fileAuthoringSessionRepository) dumpEditTarget(ctx context.Context, req
 	return target, nil
 }
 
-func (r *fileAuthoringSessionRepository) validateDumpCase(ctx context.Context, slug, expectedHash string) error {
+func (r *fileSessionRepository) validateDumpCase(ctx context.Context, slug, expectedHash string) error {
 	metadata, err := NewCaseMetadataService(r.projectDir).ReadBounded(ctx, slug)
 	if err != nil {
 		return err
@@ -106,7 +106,7 @@ func (r *fileAuthoringSessionRepository) validateDumpCase(ctx context.Context, s
 	return nil
 }
 
-func (r *fileAuthoringSessionRepository) newDumpMutationTarget(namespace, title string) (dumpMutationTarget, error) {
+func (r *fileSessionRepository) newDumpMutationTarget(namespace, title string) (dumpMutationTarget, error) {
 	slug := opscore.ArtifactSlugOrDefault(title)
 	for attempt := 1; attempt <= 100; attempt++ {
 		id := "00000-" + slug
@@ -135,7 +135,7 @@ func (r *fileAuthoringSessionRepository) newDumpMutationTarget(namespace, title 
 	return dumpMutationTarget{}, errors.New("dump artifact allocation exceeds 100 candidates")
 }
 
-func (r *fileAuthoringSessionRepository) requireNewDumpEnvelope(reference string) error {
+func (r *fileSessionRepository) requireNewDumpEnvelope(reference string) error {
 	if err := ValidateProjectDumpReference(reference); err != nil {
 		return err
 	}

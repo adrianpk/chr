@@ -72,7 +72,7 @@ func TestRecordAssistedModelInvocationWritesRequestAndResponseArtifacts(t *testi
 	request := testAssistedModelRequest()
 	response := testAssistedModelResponse(request)
 
-	paths, err := PlanAssistedModelInvocationArtifacts(AuthoringSessionLayout(dir, request.SessionID), request)
+	paths, err := PlanAssistedModelInvocationArtifacts(SessionLayout(dir, request.SessionID), request)
 	if err != nil {
 		t.Fatalf("PlanAssistedModelInvocationArtifacts returned error: %v", err)
 	}

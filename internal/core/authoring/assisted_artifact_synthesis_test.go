@@ -129,10 +129,10 @@ func TestRenderAssistedSynthesizedArtifactIsDeterministic(t *testing.T) {
 func setupAssistedArtifactSynthesisTest(
 	t *testing.T,
 	dir string,
-) (AuthoringSessionRepository, Session, ArtifactRef, AssistedCuratedAnswerSummary) {
+) (SessionRepository, Session, ArtifactRef, AssistedCuratedAnswerSummary) {
 	t.Helper()
 
-	repository := NewAuthoringSessionRepository(dir)
+	repository := NewSessionRepository(dir)
 	session := testAssistedContextSession(dir)
 	sourcePath := filepath.Join(dir, ".chr", "authoring", "sessions", session.ID, "curated-summary.md")
 	sourceRef := ArtifactRef{
@@ -163,10 +163,10 @@ func planAssistedArtifactSynthesisLayout(
 	t *testing.T,
 	dir string,
 	session Session,
-) AuthoringArtifactLayout {
+) ArtifactLayout {
 	t.Helper()
 
-	layout, err := PlanAuthoringArtifactLayout(AuthoringArtifactLayoutOptions{
+	layout, err := PlanArtifactLayout(ArtifactLayoutOptions{
 		ProjectDir: dir,
 		SessionID:  session.ID,
 		Kind:       ArtifactKindSpec,

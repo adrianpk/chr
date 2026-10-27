@@ -70,7 +70,7 @@ func (factory commandFactory) runAuthorPromoteQuizToDraft(ctx context.Context, c
 		return fmt.Errorf("quiz path is required")
 	}
 
-	repository := authoringcore.NewAuthoringSessionRepository(projectContext.ProjectDir)
+	repository := authoringcore.NewSessionRepository(projectContext.ProjectDir)
 
 	session, err := resolveAuthoringSessionForPromotion(
 		ctx,
@@ -112,7 +112,7 @@ func (factory commandFactory) runAuthorPromoteQuizToDraft(ctx context.Context, c
 	return printAuthorPromotionPlan(factory.io.Stdout, plan, false)
 }
 
-func resolveAuthoringSessionForPromotion(ctx context.Context, repository authoringcore.AuthoringSessionRepository, projectDir, handle, artifactPath string) (authoringcore.Session, error) {
+func resolveAuthoringSessionForPromotion(ctx context.Context, repository authoringcore.SessionRepository, projectDir, handle, artifactPath string) (authoringcore.Session, error) {
 	if strings.TrimSpace(handle) != "" {
 		return resolveAuthoringSession(ctx, repository, handle)
 	}
@@ -120,7 +120,7 @@ func resolveAuthoringSessionForPromotion(ctx context.Context, repository authori
 	return resolveAuthoringSessionFromArtifact(ctx, repository, projectDir, artifactPath)
 }
 
-func resolveAuthoringSessionFromArtifact(ctx context.Context, repository authoringcore.AuthoringSessionRepository, projectDir, artifactPath string) (authoringcore.Session, error) {
+func resolveAuthoringSessionFromArtifact(ctx context.Context, repository authoringcore.SessionRepository, projectDir, artifactPath string) (authoringcore.Session, error) {
 	sessions, err := repository.ListSessions(ctx)
 	if err != nil {
 		return authoringcore.Session{}, err

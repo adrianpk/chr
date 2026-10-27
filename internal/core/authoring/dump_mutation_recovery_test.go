@@ -62,7 +62,7 @@ func checkDumpMutationFault(t *testing.T, action string, fault int) {
 
 		return defaultDumpCapture(request)(ctx, destination, raw)
 	}
-	repo := &fileAuthoringSessionRepository{projectDir: project, afterMutationReplace: func(index int) error {
+	repo := &fileSessionRepository{projectDir: project, afterMutationReplace: func(index int) error {
 		if index == fault {
 			return errors.New("lost acknowledgement")
 		}
@@ -148,7 +148,7 @@ func TestDumpMutationPreparationBudget(t *testing.T) {
 		t.Fatal("preparation budget was reset", calls)
 	}
 
-	if _, err := MutateDump(t.Context(), project, request, prepare); !errors.Is(err, ErrAuthoringProviderExhausted) {
+	if _, err := MutateDump(t.Context(), project, request, prepare); !errors.Is(err, ErrProviderExhausted) {
 		t.Fatal("exhaustion not retained", err)
 	}
 }
@@ -158,7 +158,7 @@ func TestDumpMutationPointerConflict(t *testing.T) {
 	project := t.TempDir()
 	request := dumpCaptureRequest("pointer", "Original material.")
 
-	repo := &fileAuthoringSessionRepository{projectDir: project, afterMutationReplace: func(index int) error {
+	repo := &fileSessionRepository{projectDir: project, afterMutationReplace: func(index int) error {
 		if index == 4 {
 			return errors.New("lost acknowledgement")
 		}

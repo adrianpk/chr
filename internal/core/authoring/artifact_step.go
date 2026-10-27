@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func writeAuthoringArtifactStep(layout AuthoringArtifactLayout, content, description string) error {
+func writeAuthoringArtifactStep(layout ArtifactLayout, content, description string) error {
 	projectDir := strings.TrimSuffix(layout.FullPath, string(os.PathSeparator)+filepath.FromSlash(layout.Ref.Path))
 	if err := EnsureAuthoringArtifactMetadata(projectDir, layout.Ref); err != nil {
 		return err

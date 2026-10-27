@@ -138,18 +138,18 @@ func TestPlanOrderArchiveRecovery(t *testing.T) {
 	plan.Body = "Replacement work with its own retained map."
 	plan.ArchiveAt = plan.CreatedAt
 
-	r := &fileAuthoringSessionRepository{projectDir: project, afterMutationReplace: func(index int) error {
+	r := &fileSessionRepository{projectDir: project, afterMutationReplace: func(index int) error {
 		if index == 10 {
 			return errors.New("interrupted replacement")
 		}
 
 		return nil
 	}}
-	if err := WithAuthoringMutation(t.Context(), project, func(ctx context.Context) error { return r.publishGeneratedPlan(ctx, paths, plan) }); err == nil {
+	if err := WithMutation(t.Context(), project, func(ctx context.Context) error { return r.publishGeneratedPlan(ctx, paths, plan) }); err == nil {
 		t.Fatal("replacement did not interrupt")
 	}
 
-	if err := WithAuthoringMutation(t.Context(), project, func(context.Context) error { return nil }); err != nil {
+	if err := WithMutation(t.Context(), project, func(context.Context) error { return nil }); err != nil {
 		t.Fatal(err)
 	}
 
@@ -186,14 +186,14 @@ func checkPlanOrderRecovery(t *testing.T, after int) {
 		t.Fatal(err)
 	}
 
-	r := &fileAuthoringSessionRepository{projectDir: project, afterMutationReplace: func(index int) error {
+	r := &fileSessionRepository{projectDir: project, afterMutationReplace: func(index int) error {
 		if index == after {
 			return errors.New("interrupted")
 		}
 
 		return nil
 	}}
-	if err := WithAuthoringMutation(t.Context(), project, func(ctx context.Context) error { return r.publishGeneratedPlan(ctx, paths, plan) }); err == nil {
+	if err := WithMutation(t.Context(), project, func(ctx context.Context) error { return r.publishGeneratedPlan(ctx, paths, plan) }); err == nil {
 		t.Fatal("publication did not interrupt")
 	}
 

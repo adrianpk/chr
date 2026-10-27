@@ -128,7 +128,7 @@ func (r telegramReceiver) finishExplanationModel(ctx context.Context, request te
 
 	if len(model.Response) == 0 {
 		if model.Attempts >= 5 {
-			return r.finishAuthoringFailure(ctx, request, config, authoringcore.ErrAuthoringProviderExhausted)
+			return r.finishAuthoringFailure(ctx, request, config, authoringcore.ErrProviderExhausted)
 		}
 
 		return nil

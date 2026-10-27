@@ -49,7 +49,7 @@ func ReadDumpDocument(ctx context.Context, projectDir, reference string) (DumpDo
 		return DumpDocumentObservation{}, err
 	}
 
-	r := &fileAuthoringSessionRepository{projectDir: root}
+	r := &fileSessionRepository{projectDir: root}
 	fileImages, err := r.projectDumpImages(artifact)
 	body := fileImages.Body
 
@@ -80,10 +80,10 @@ func MutateDump(ctx context.Context, projectDir string, request DumpMutationRequ
 		return ProjectDumpMutationResult{}, errors.New("project directory is required")
 	}
 
-	return (&fileAuthoringSessionRepository{projectDir: root}).mutateDump(ctx, request, prepare)
+	return (&fileSessionRepository{projectDir: root}).mutateDump(ctx, request, prepare)
 }
 
-func (r *fileAuthoringSessionRepository) mutateDump(ctx context.Context, request DumpMutationRequest, prepare DumpCapturePreparer) (result ProjectDumpMutationResult, err error) {
+func (r *fileSessionRepository) mutateDump(ctx context.Context, request DumpMutationRequest, prepare DumpCapturePreparer) (result ProjectDumpMutationResult, err error) {
 	if err := validateDumpMutation(request); err != nil {
 		return result, err
 	}
@@ -96,7 +96,7 @@ func (r *fileAuthoringSessionRepository) mutateDump(ctx context.Context, request
 	ctx, cancel := context.WithTimeout(ctx, 90*time.Second)
 	defer cancel()
 
-	err = WithAuthoringMutation(ctx, r.projectDir, func(ctx context.Context) error {
+	err = WithMutation(ctx, r.projectDir, func(ctx context.Context) error {
 		var found bool
 
 		receiptLookup, receiptErr := r.projectDumpReceipt(request.OperationID, digest)

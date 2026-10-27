@@ -42,7 +42,7 @@ func PreviewProjectDumpReconciliation(ctx context.Context, projectDir string) (P
 		return ProjectDumpReconciliationPreview{}, err
 	}
 
-	r := &fileAuthoringSessionRepository{projectDir: projectDir}
+	r := &fileSessionRepository{projectDir: projectDir}
 
 	preview, err := r.projectDumpReconciliationPreview(observed)
 	if err != nil {
@@ -52,7 +52,7 @@ func PreviewProjectDumpReconciliation(ctx context.Context, projectDir string) (P
 	return preview, r.checkProjectDumpInspection(ctx)
 }
 
-func (r *fileAuthoringSessionRepository) projectDumpReconciliationPreview(observed ProjectDumpObservation) (ProjectDumpReconciliationPreview, error) {
+func (r *fileSessionRepository) projectDumpReconciliationPreview(observed ProjectDumpObservation) (ProjectDumpReconciliationPreview, error) {
 	preview := ProjectDumpReconciliationPreview{Revision: observed.Revision, Sources: slices.Clone(observed.Candidates)}
 	if len(preview.Sources) < 2 || len(preview.Sources) > projectDumpSourceLimit {
 		return preview, fmt.Errorf("%w: reconciliation requires between 2 and %d general dumps", ErrProjectDumpReconciliation, projectDumpSourceLimit)
@@ -91,10 +91,10 @@ func ReconcileProjectDump(ctx context.Context, projectDir string, request Projec
 		return ProjectDumpMutationResult{}, errors.New("project directory is required")
 	}
 
-	return (&fileAuthoringSessionRepository{projectDir: root}).reconcileProjectDump(ctx, request)
+	return (&fileSessionRepository{projectDir: root}).reconcileProjectDump(ctx, request)
 }
 
-func (r *fileAuthoringSessionRepository) reconcileProjectDump(ctx context.Context, request ProjectDumpReconciliationRequest) (result ProjectDumpMutationResult, err error) {
+func (r *fileSessionRepository) reconcileProjectDump(ctx context.Context, request ProjectDumpReconciliationRequest) (result ProjectDumpMutationResult, err error) {
 	if err := validateProjectDumpReconciliation(request); err != nil {
 		return result, err
 	}
@@ -107,7 +107,7 @@ func (r *fileAuthoringSessionRepository) reconcileProjectDump(ctx context.Contex
 		return result, err
 	}
 
-	err = WithAuthoringMutation(ctx, r.projectDir, func(ctx context.Context) error {
+	err = WithMutation(ctx, r.projectDir, func(ctx context.Context) error {
 		var found bool
 
 		receiptLookup, receiptErr := r.projectDumpReceipt(request.OperationID, digest)
@@ -145,7 +145,7 @@ func validateProjectDumpReconciliation(request ProjectDumpReconciliationRequest)
 	return ValidateProjectDumpReference(request.Destination)
 }
 
-func (r *fileAuthoringSessionRepository) applyProjectDumpReconciliation(ctx context.Context, request ProjectDumpReconciliationRequest, digest string) (ProjectDumpMutationResult, error) {
+func (r *fileSessionRepository) applyProjectDumpReconciliation(ctx context.Context, request ProjectDumpReconciliationRequest, digest string) (ProjectDumpMutationResult, error) {
 	observed, err := observeProjectDump(ctx, r.projectDir)
 	if err != nil {
 		return ProjectDumpMutationResult{}, err

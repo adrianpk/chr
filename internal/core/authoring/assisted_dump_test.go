@@ -17,10 +17,10 @@ import (
 func assistedDumpTestOptions(t *testing.T, root, id string) AssistedArtifactSynthesisOptions {
 	t.Helper()
 
-	repository := NewAuthoringSessionRepository(root)
+	repository := NewSessionRepository(root)
 	session := testAssistedContextSession(root)
 	session.ID = id
-	path := filepath.Join(AuthoringSessionLayout(root, id).SessionDir, "curated-summary.md")
+	path := filepath.Join(SessionLayout(root, id).SessionDir, "curated-summary.md")
 	ref := ArtifactRef{ID: "curated-summary-" + id, Kind: ArtifactKindDraft, Role: ArtifactRoleOutput, Path: filepath.ToSlash(path)}
 
 	session.Outputs = []ArtifactRef{ref}
@@ -119,7 +119,7 @@ func checkAssistedDumpRecovery(t *testing.T, mode string, fault int) {
 	}
 
 	opts := assistedDumpTestOptions(t, root, "session")
-	opts.Repository = &fileAuthoringSessionRepository{projectDir: root, afterMutationReplace: func(index int) error {
+	opts.Repository = &fileSessionRepository{projectDir: root, afterMutationReplace: func(index int) error {
 		if index == fault {
 			return errors.New("interrupted publication")
 		}
@@ -132,7 +132,7 @@ func checkAssistedDumpRecovery(t *testing.T, mode string, fault int) {
 		t.Fatal("fault not exercised", mode, fault)
 	}
 
-	opts.Repository = NewAuthoringSessionRepository(root)
+	opts.Repository = NewSessionRepository(root)
 
 	replayed, err := SynthesizeAssistedArtifact(t.Context(), opts)
 	if err != nil || !reflect.DeepEqual(first.Mutation, replayed.Mutation) {
@@ -193,14 +193,14 @@ func TestAssistedDumpDivergence(t *testing.T) {
 	root := t.TempDir()
 	opts := assistedDumpTestOptions(t, root, "session")
 
-	opts.Repository = &fileAuthoringSessionRepository{projectDir: root, afterMutationReplace: func(int) error { return errors.New("interrupt") }}
+	opts.Repository = &fileSessionRepository{projectDir: root, afterMutationReplace: func(int) error { return errors.New("interrupt") }}
 	if _, err := SynthesizeAssistedArtifact(t.Context(), opts); err == nil {
 		t.Fatal("fault not exercised")
 	}
 
 	writeTestFile(t, opts.SourceRef.Path, "Independent source.")
 
-	opts.Repository = NewAuthoringSessionRepository(root)
+	opts.Repository = NewSessionRepository(root)
 	if _, err := opts.Repository.GetSession(t.Context(), opts.Session.ID); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("divergent source did not block recovery", err)
 	}

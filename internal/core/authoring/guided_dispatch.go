@@ -35,8 +35,8 @@ func ReserveGuidedUseCaseStep(ctx context.Context, root string, command GuidedUs
 		return session, err
 	}
 
-	r := &fileAuthoringSessionRepository{projectDir: root}
-	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
+	r := &fileSessionRepository{projectDir: root}
+	err = WithMutation(ctx, root, func(ctx context.Context) error {
 		session, err = r.getGuardedSession(ctx, command.RunID)
 		if err != nil {
 			return err

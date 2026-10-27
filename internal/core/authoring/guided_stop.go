@@ -6,8 +6,8 @@ import (
 
 // ReconcileGuidedStop acknowledges quiescence only from the original native owner.
 func ReconcileGuidedStop(ctx context.Context, root string, scope GuidedUseCaseScope, workflow GuidedWorkflowObserver) (session Session, err error) {
-	r := &fileAuthoringSessionRepository{projectDir: root}
-	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
+	r := &fileSessionRepository{projectDir: root}
+	err = WithMutation(ctx, root, func(ctx context.Context) error {
 		session, err = r.getGuardedSession(ctx, scope.RunID)
 		if err != nil {
 			return err

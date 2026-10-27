@@ -37,7 +37,7 @@ func (r *fileQuizArtifactRepository) observeImages(ctx context.Context, scope qu
 		return observed, err
 	}
 
-	owner := &fileAuthoringSessionRepository{projectDir: r.projectDir}
+	owner := &fileSessionRepository{projectDir: r.projectDir}
 	if err := owner.checkQuizRead(); err != nil {
 		return observed, err
 	}
@@ -75,7 +75,7 @@ func quizImageReferences(paths QuizArtifactPaths) []string {
 	}
 }
 
-func (r *fileAuthoringSessionRepository) quizImage(reference string) (workflowstate.FileChange, error) {
+func (r *fileSessionRepository) quizImage(reference string) (workflowstate.FileChange, error) {
 	image := workflowstate.FileChange{Path: filepath.FromSlash(reference)}
 
 	data, err := r.authoringRead(image.Path)
@@ -88,7 +88,7 @@ func (r *fileAuthoringSessionRepository) quizImage(reference string) (workflowst
 	return image, err
 }
 
-func (r *fileAuthoringSessionRepository) checkQuizRead() error {
+func (r *fileSessionRepository) checkQuizRead() error {
 	path, err := r.authoringPath(authoringRuntimeRef("pending.json"))
 	if err != nil {
 		return err
@@ -106,7 +106,7 @@ func (r *fileAuthoringSessionRepository) checkQuizRead() error {
 	return err
 }
 
-func (r *fileAuthoringSessionRepository) checkQuizImages(images []workflowstate.FileChange) error {
+func (r *fileSessionRepository) checkQuizImages(images []workflowstate.FileChange) error {
 	for _, image := range images {
 		current, err := r.quizImage(image.Path)
 		if err != nil {
@@ -121,7 +121,7 @@ func (r *fileAuthoringSessionRepository) checkQuizImages(images []workflowstate.
 	return r.checkQuizRead()
 }
 
-func (r *fileAuthoringSessionRepository) quizRevision(scope quizcore.Scope, images []workflowstate.FileChange) (string, error) {
+func (r *fileSessionRepository) quizRevision(scope quizcore.Scope, images []workflowstate.FileChange) (string, error) {
 	root, err := filepath.Abs(r.projectDir)
 	if err != nil {
 		return "", err

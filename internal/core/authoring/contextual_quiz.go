@@ -15,11 +15,11 @@ import (
 )
 
 const (
-	// AuthoringQuizGenerationStrategyDeep defines a package boundary constant.
-	AuthoringQuizGenerationStrategyDeep = "deep"
+	// QuizGenerationStrategyDeep defines a package boundary constant.
+	QuizGenerationStrategyDeep = "deep"
 
-	// AuthoringQuizActionGeneration defines a package boundary constant.
-	AuthoringQuizActionGeneration = "authoring_quiz_generation"
+	// QuizActionGeneration defines a package boundary constant.
+	QuizActionGeneration = "authoring_quiz_generation"
 )
 
 // ContextualQuizGenerationOptions describes a package boundary value.
@@ -30,32 +30,32 @@ type ContextualQuizGenerationOptions struct {
 	AllowReplace  bool
 	DryRun        bool
 	QuestionCount int
-	Provider      AuthoringQuizQuestionProvider
+	Provider      QuizQuestionProvider
 	Context       QuizContextProvider
 }
 
 // ContextualQuizGenerationPlan describes a package boundary value.
 type ContextualQuizGenerationPlan struct {
 	Session                Session
-	Layout                 AuthoringArtifactLayout
-	Request                AuthoringQuizGenerationRequest
-	Result                 AuthoringQuizGenerationResult
+	Layout                 ArtifactLayout
+	Request                QuizGenerationRequest
+	Result                 QuizGenerationResult
 	Content                string
 	WouldWrite             bool
 	RequestedQuestionCount int
 	GeneratedQuestionCount int
 }
 
-// AuthoringQuizQuestionProvider defines a package boundary interface.
-type AuthoringQuizQuestionProvider interface {
+// QuizQuestionProvider defines a package boundary interface.
+type QuizQuestionProvider interface {
 	GenerateAuthoringQuizQuestions(
 		ctx context.Context,
-		request AuthoringQuizGenerationRequest,
-	) (AuthoringQuizGenerationResult, error)
+		request QuizGenerationRequest,
+	) (QuizGenerationResult, error)
 }
 
-// AuthoringQuizGenerationRequest describes a package boundary value.
-type AuthoringQuizGenerationRequest struct {
+// QuizGenerationRequest describes a package boundary value.
+type QuizGenerationRequest struct {
 	ID              string
 	Action          string
 	Strategy        string
@@ -64,34 +64,34 @@ type AuthoringQuizGenerationRequest struct {
 	Target          Target
 	Topic           string
 	QuestionCount   int
-	ContextSections []AuthoringQuizContextSection
-	OutputContract  AuthoringQuizOutputContract
+	ContextSections []QuizContextSection
+	OutputContract  QuizOutputContract
 	CreatedAt       time.Time
 }
 
-// AuthoringQuizContextSection describes a package boundary value.
-type AuthoringQuizContextSection struct {
+// QuizContextSection describes a package boundary value.
+type QuizContextSection struct {
 	Name      string
 	Layer     string
 	Authority string
 	Content   string
 }
 
-// AuthoringQuizOutputContract describes a package boundary value.
-type AuthoringQuizOutputContract struct {
+// QuizOutputContract describes a package boundary value.
+type QuizOutputContract struct {
 	RequiredFields []string
 }
 
-// AuthoringQuizGenerationResult describes a package boundary value.
-type AuthoringQuizGenerationResult struct {
+// QuizGenerationResult describes a package boundary value.
+type QuizGenerationResult struct {
 	Provider  string
 	Strategy  string
-	Questions []AuthoringQuizQuestion
+	Questions []QuizQuestion
 	RawText   string
 }
 
-// AuthoringQuizQuestion describes a package boundary value.
-type AuthoringQuizQuestion struct {
+// QuizQuestion describes a package boundary value.
+type QuizQuestion struct {
 	ID                    string
 	Text                  string
 	Tags                  []string
@@ -101,8 +101,8 @@ type AuthoringQuizQuestion struct {
 
 // FakeAuthoringQuizQuestionProvider describes a package boundary value.
 type FakeAuthoringQuizQuestionProvider struct {
-	Result   AuthoringQuizGenerationResult
-	Requests []AuthoringQuizGenerationRequest
+	Result   QuizGenerationResult
+	Requests []QuizGenerationRequest
 	Err      error
 }
 
@@ -116,7 +116,7 @@ func PlanContextualQuizGeneration(
 		return ContextualQuizGenerationPlan{}, err
 	}
 
-	layout, err := PlanAuthoringArtifactLayout(contextualQuizLayoutOptions(opts))
+	layout, err := PlanArtifactLayout(contextualQuizLayoutOptions(opts))
 	if err != nil {
 		return ContextualQuizGenerationPlan{}, err
 	}
@@ -126,14 +126,14 @@ func PlanContextualQuizGeneration(
 		return ContextualQuizGenerationPlan{}, err
 	}
 
-	request := NewAuthoringQuizGenerationRequest(opts.ProjectDir, opts.Session, opts.QuestionCount, opts.Now, sections)
+	request := NewQuizGenerationRequest(opts.ProjectDir, opts.Session, opts.QuestionCount, opts.Now, sections)
 
 	result, err := opts.Provider.GenerateAuthoringQuizQuestions(ctx, request)
 	if err != nil {
 		return ContextualQuizGenerationPlan{}, err
 	}
 
-	err = ValidateAuthoringQuizGenerationResult(result)
+	err = ValidateQuizGenerationResult(result)
 	if err != nil {
 		return ContextualQuizGenerationPlan{}, err
 	}
@@ -162,19 +162,19 @@ func writeContextualQuiz(plan ContextualQuizGenerationPlan) error {
 	return writeAuthoringArtifactStep(plan.Layout, plan.Content, "contextual quiz")
 }
 
-// NewAuthoringQuizGenerationRequest constructs the original request from observed context.
-func NewAuthoringQuizGenerationRequest(projectDir string, session Session, questionCount int, now time.Time, sections []AuthoringQuizContextSection) AuthoringQuizGenerationRequest {
-	return AuthoringQuizGenerationRequest{
+// NewQuizGenerationRequest constructs the original request from observed context.
+func NewQuizGenerationRequest(projectDir string, session Session, questionCount int, now time.Time, sections []QuizContextSection) QuizGenerationRequest {
+	return QuizGenerationRequest{
 		ID:              "quiz-request-" + session.ID,
-		Action:          AuthoringQuizActionGeneration,
-		Strategy:        AuthoringQuizGenerationStrategyDeep,
+		Action:          QuizActionGeneration,
+		Strategy:        QuizGenerationStrategyDeep,
 		ProjectDir:      projectDir,
 		SessionID:       session.ID,
 		Target:          session.Target,
 		Topic:           session.Topic,
 		QuestionCount:   normalizedAuthoringQuizQuestionCount(questionCount),
 		ContextSections: sections,
-		OutputContract: AuthoringQuizOutputContract{
+		OutputContract: QuizOutputContract{
 			RequiredFields: []string{
 				"id",
 				"question",
@@ -191,8 +191,8 @@ func NewAuthoringQuizGenerationRequest(projectDir string, session Session, quest
 func RenderContextualQuizMarkdown(
 	session Session,
 	artifact ArtifactRef,
-	request AuthoringQuizGenerationRequest,
-	result AuthoringQuizGenerationResult,
+	request QuizGenerationRequest,
+	result QuizGenerationResult,
 ) string {
 	var output bytes.Buffer
 
@@ -227,8 +227,8 @@ func RenderContextualQuizMarkdown(
 	return output.String()
 }
 
-// ValidateAuthoringQuizGenerationResult validates the corresponding package boundary value.
-func ValidateAuthoringQuizGenerationResult(result AuthoringQuizGenerationResult) error {
+// ValidateQuizGenerationResult validates the corresponding package boundary value.
+func ValidateQuizGenerationResult(result QuizGenerationResult) error {
 	if strings.TrimSpace(result.Provider) == "" {
 		return fmt.Errorf("authoring quiz provider is required")
 	}
@@ -254,23 +254,23 @@ func ValidateAuthoringQuizGenerationResult(result AuthoringQuizGenerationResult)
 // GenerateAuthoringQuizQuestions generates the requested artifact.
 func (p *FakeAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(
 	ctx context.Context,
-	request AuthoringQuizGenerationRequest,
-) (AuthoringQuizGenerationResult, error) {
+	request QuizGenerationRequest,
+) (QuizGenerationResult, error) {
 	err := ctx.Err()
 	if err != nil {
-		return AuthoringQuizGenerationResult{}, err
+		return QuizGenerationResult{}, err
 	}
 
 	p.Requests = append(p.Requests, request)
 	if p.Err != nil {
-		return AuthoringQuizGenerationResult{}, p.Err
+		return QuizGenerationResult{}, p.Err
 	}
 
 	return p.Result, nil
 }
 
-// ValidateAuthoringQuizGenerationRequest validates the corresponding package boundary value.
-func ValidateAuthoringQuizGenerationRequest(request AuthoringQuizGenerationRequest) error {
+// ValidateQuizGenerationRequest validates the corresponding package boundary value.
+func ValidateQuizGenerationRequest(request QuizGenerationRequest) error {
 	required := []struct {
 		name  string
 		value string
@@ -297,7 +297,7 @@ func ValidateAuthoringQuizGenerationRequest(request AuthoringQuizGenerationReque
 	return nil
 }
 
-func validateAuthoringQuizGenerationRequestShape(request AuthoringQuizGenerationRequest) error {
+func validateAuthoringQuizGenerationRequestShape(request QuizGenerationRequest) error {
 	if !request.Target.Valid() {
 		return fmt.Errorf("authoring quiz request target is invalid: %s", request.Target)
 	}
@@ -317,8 +317,8 @@ func validateAuthoringQuizGenerationRequestShape(request AuthoringQuizGeneration
 	return nil
 }
 
-// ParseAuthoringQuizGenerationResult parses the corresponding package data.
-func ParseAuthoringQuizGenerationResult(output []byte) (AuthoringQuizGenerationResult, error) {
+// ParseQuizGenerationResult parses the corresponding package data.
+func ParseQuizGenerationResult(output []byte) (QuizGenerationResult, error) {
 	var payload struct {
 		Questions []struct {
 			ID                    string   `json:"id"`
@@ -331,12 +331,12 @@ func ParseAuthoringQuizGenerationResult(output []byte) (AuthoringQuizGenerationR
 
 	err := json.Unmarshal(modelcore.ExtractJSONObject(output), &payload)
 	if err != nil {
-		return AuthoringQuizGenerationResult{}, fmt.Errorf("parse authoring quiz provider response: %w", err)
+		return QuizGenerationResult{}, fmt.Errorf("parse authoring quiz provider response: %w", err)
 	}
 
-	questions := make([]AuthoringQuizQuestion, 0, len(payload.Questions))
+	questions := make([]QuizQuestion, 0, len(payload.Questions))
 	for _, question := range payload.Questions {
-		questions = append(questions, AuthoringQuizQuestion{
+		questions = append(questions, QuizQuestion{
 			ID:                    question.ID,
 			Text:                  question.Question,
 			Tags:                  question.Tags,
@@ -345,8 +345,8 @@ func ParseAuthoringQuizGenerationResult(output []byte) (AuthoringQuizGenerationR
 		})
 	}
 
-	return AuthoringQuizGenerationResult{
-		Strategy:  AuthoringQuizGenerationStrategyDeep,
+	return QuizGenerationResult{
+		Strategy:  QuizGenerationStrategyDeep,
 		Questions: questions,
 		RawText:   string(output),
 	}, nil
@@ -377,7 +377,7 @@ func validateContextualQuizGenerationOptions(opts ContextualQuizGenerationOption
 	return nil
 }
 
-func validateAuthoringQuizQuestion(question AuthoringQuizQuestion) error {
+func validateAuthoringQuizQuestion(question QuizQuestion) error {
 	if strings.TrimSpace(question.ID) == "" {
 		return fmt.Errorf("authoring quiz question id is required")
 	}
@@ -404,8 +404,8 @@ func validateAuthoringQuizQuestion(question AuthoringQuizQuestion) error {
 	return nil
 }
 
-func contextualQuizLayoutOptions(opts ContextualQuizGenerationOptions) AuthoringArtifactLayoutOptions {
-	return AuthoringArtifactLayoutOptions{
+func contextualQuizLayoutOptions(opts ContextualQuizGenerationOptions) ArtifactLayoutOptions {
+	return ArtifactLayoutOptions{
 		ProjectDir:   opts.ProjectDir,
 		SessionID:    opts.Session.ID,
 		Kind:         ArtifactKindQuiz,
@@ -444,7 +444,7 @@ func authoringQuizSourceArtifact(session Session) ArtifactRef {
 		ID:          "session:" + session.ID,
 		Kind:        ArtifactKindSession,
 		Role:        ArtifactRoleInput,
-		Path:        filepath.ToSlash(filepath.Join(workspacecore.DirectoryName, filepath.FromSlash(AuthoringSessionsDirectory), session.ID, "session.md")),
+		Path:        filepath.ToSlash(filepath.Join(workspacecore.DirectoryName, filepath.FromSlash(SessionsDirectory), session.ID, "session.md")),
 		Description: "Authoring session metadata.",
 	}
 }
@@ -482,5 +482,5 @@ func authoringQuizContainsSensitivePrompt(value string) bool {
 // QuizContextProvider supplies the existing native workspace/index observations.
 // Authoring retains request shape, generation validation and artifact decisions.
 type QuizContextProvider interface {
-	Load(context.Context, string, Session) ([]AuthoringQuizContextSection, error)
+	Load(context.Context, string, Session) ([]QuizContextSection, error)
 }

@@ -92,9 +92,9 @@ func assertGuidedCheckpointRecovery(t *testing.T, root string, command GuidedUse
 	t.Helper()
 
 	lost := errors.New("lost Git acknowledgement")
-	r := &fileAuthoringSessionRepository{projectDir: root, afterGuidedCheckpoint: func() error { return lost }}
+	r := &fileSessionRepository{projectDir: root, afterGuidedCheckpoint: func() error { return lost }}
 
-	err := WithAuthoringMutation(t.Context(), root, func(ctx context.Context) error { _, err := r.finishGuidedUseCaseDump(ctx, command); return err })
+	err := WithMutation(t.Context(), root, func(ctx context.Context) error { _, err := r.finishGuidedUseCaseDump(ctx, command); return err })
 	if !errors.Is(err, lost) {
 		t.Fatalf("checkpoint fault not reached: %v", err)
 	}

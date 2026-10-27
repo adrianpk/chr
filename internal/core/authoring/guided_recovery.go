@@ -23,8 +23,8 @@ func RecoverGuidedHostPage(ctx context.Context, root, project string, offset, li
 		return page, workflowstate.ErrConflict
 	}
 
-	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
-		r := &fileAuthoringSessionRepository{projectDir: root}
+	err = WithMutation(ctx, root, func(ctx context.Context) error {
+		r := &fileSessionRepository{projectDir: root}
 
 		var readErr error
 
@@ -36,7 +36,7 @@ func RecoverGuidedHostPage(ctx context.Context, root, project string, offset, li
 	return page, err
 }
 
-func (r *fileAuthoringSessionRepository) guidedHostPage(ctx context.Context, project string, offset, limit int) (page GuidedHostPage, err error) {
+func (r *fileSessionRepository) guidedHostPage(ctx context.Context, project string, offset, limit int) (page GuidedHostPage, err error) {
 	page = GuidedHostPage{NextOffset: -1}
 
 	path, err := r.authoringPath(authoringRuntimeRef("sessions"))
@@ -87,7 +87,7 @@ func guidedDirectoryError(err error) error {
 	return err
 }
 
-func (r *fileAuthoringSessionRepository) appendGuidedHostRun(ctx context.Context, project string, entry os.DirEntry, page *GuidedHostPage) error {
+func (r *fileSessionRepository) appendGuidedHostRun(ctx context.Context, project string, entry os.DirEntry, page *GuidedHostPage) error {
 	if !entry.IsDir() {
 		return nil
 	}
@@ -107,8 +107,8 @@ func (r *fileAuthoringSessionRepository) appendGuidedHostRun(ctx context.Context
 // RecoverGuidedHostRun reconciles the authoring journal before reading one exact
 // association. Only a managed lifecycle calls this mutating recovery operation.
 func RecoverGuidedHostRun(ctx context.Context, root string, scope GuidedUseCaseScope) (session Session, err error) {
-	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
-		repository := &fileAuthoringSessionRepository{projectDir: root}
+	err = WithMutation(ctx, root, func(ctx context.Context) error {
+		repository := &fileSessionRepository{projectDir: root}
 
 		var readErr error
 

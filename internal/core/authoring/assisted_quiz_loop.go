@@ -29,10 +29,10 @@ const (
 type AssistedQuizLoopOptions struct {
 	Config           AssistedAuthoringConfig
 	Session          Session
-	SessionPaths     AuthoringSessionPaths
+	SessionPaths     SessionPaths
 	ContextPackage   AssistedAuthoringContextPackage
 	TranscriptEvents []AssistedTranscriptEvent
-	Repository       AuthoringSessionRepository
+	Repository       SessionRepository
 	Adapter          AssistedModelAdapter
 	Now              func() time.Time
 }
@@ -55,7 +55,7 @@ type AssistedQuizAnswerOptions struct {
 	Question   AssistedAuthoringQuestion
 	AnswerText string
 	UserStop   bool
-	Repository AuthoringSessionRepository
+	Repository SessionRepository
 	Now        func() time.Time
 }
 
@@ -383,7 +383,7 @@ func assistedQuizTurnFromModelResponse(
 
 func appendAssistedQuizTurn(
 	ctx context.Context,
-	repository AuthoringSessionRepository,
+	repository SessionRepository,
 	turn AssistedAuthoringTurn,
 ) error {
 	events, err := AssistedTranscriptEventsFromTurn(turn)

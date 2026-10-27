@@ -23,7 +23,7 @@ type ArtifactOperationResult struct {
 // the files created for it.
 type CreateAuthoringSessionResult struct {
 	Session authoringcore.Session
-	Paths   authoringcore.AuthoringSessionPaths
+	Paths   authoringcore.SessionPaths
 }
 
 // CreateTicketRequest carries the metadata and body for a new repository
@@ -213,7 +213,7 @@ func (s service) CreateTUIAuthoringSession() (ArtifactOperationResult, error) {
 }
 
 func (s service) CreateAuthoringSession(session authoringcore.Session) (CreateAuthoringSessionResult, error) {
-	paths, err := authoringcore.NewAuthoringSessionRepository(s.projectContext.ProjectDir).CreateSession(s.ctx, session)
+	paths, err := authoringcore.NewSessionRepository(s.projectContext.ProjectDir).CreateSession(s.ctx, session)
 	if err != nil {
 		return CreateAuthoringSessionResult{}, err
 	}

@@ -12,7 +12,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r *fileAuthoringSessionRepository) prepareAuthoringContinuation(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, draft AuthoringDraft) ([]workflowstate.FileChange, error) {
+func (r *fileSessionRepository) prepareAuthoringContinuation(ctx context.Context, binding authoringRequestBinding, snapshot Snapshot, draft Draft) ([]workflowstate.FileChange, error) {
 	request := binding.Request
 	session := snapshot.Session
 	session.Revision++
@@ -34,7 +34,7 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringContinuation(ctx contex
 		return nil, err
 	}
 
-	content, err := RenderAuthoringSession(session, relative)
+	content, err := RenderSession(session, relative)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ type authoringOutputImages struct {
 	Changes []workflowstate.FileChange
 }
 
-func (r *fileAuthoringSessionRepository) prepareAuthoringContent(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *Session, draft AuthoringDraft) (authoringContentImages, error) {
+func (r *fileSessionRepository) prepareAuthoringContent(ctx context.Context, binding authoringRequestBinding, snapshot Snapshot, session *Session, draft Draft) (authoringContentImages, error) {
 	request := binding.Request
 
 	var (
@@ -69,7 +69,7 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringContent(ctx context.Con
 	)
 
 	if request.Action == "create" {
-		capture := AuthoringContinuationArtifact(request.Namespace, request.SessionID, ArtifactKindDump, true)
+		capture := ContinuationArtifact(request.Namespace, request.SessionID, ArtifactKindDump, true)
 		session.Inputs = []ArtifactRef{capture}
 		raw := renderAuthoringCapture(*session, request.Capture, request.OriginalInstruction)
 
@@ -107,7 +107,7 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringContent(ctx context.Con
 	return authoringContentImages{Changes: append(changes, prepared...), Events: events}, err
 }
 
-func (r *fileAuthoringSessionRepository) authoringTranscriptImage(binding authoringRequestBinding, snapshot AuthoringSnapshot, path string, events []AssistedTranscriptEvent) ([]byte, error) {
+func (r *fileSessionRepository) authoringTranscriptImage(binding authoringRequestBinding, snapshot Snapshot, path string, events []AssistedTranscriptEvent) ([]byte, error) {
 	text := "# Transcript\n\n"
 
 	if binding.Request.Action != "create" {
@@ -135,7 +135,7 @@ func (r *fileAuthoringSessionRepository) authoringTranscriptImage(binding author
 	return []byte(text), nil
 }
 
-func authoringQuestionEvent(snapshot AuthoringSnapshot, session *Session, draft AuthoringDraft) AssistedTranscriptEvent {
+func authoringQuestionEvent(snapshot Snapshot, session *Session, draft Draft) AssistedTranscriptEvent {
 	index := 1
 
 	for _, event := range snapshot.Events {
@@ -149,7 +149,7 @@ func authoringQuestionEvent(snapshot AuthoringSnapshot, session *Session, draft 
 	return AssistedTranscriptEvent{ID: turn + "-question", SessionID: session.ID, TurnID: turn, TurnIndex: index, Revision: session.Revision, Type: AssistedTranscriptEventQuestion, Intent: AssistedAuthoringIntentClarify, Status: AssistedAuthoringTurnAsked, Question: AssistedAuthoringQuestion{ID: fmt.Sprintf("question-%d", index), Prompt: draft.Question, Rationale: draft.Rationale, Required: true}, CreatedAt: session.UpdatedAt}
 }
 
-func authoringAnswerEvent(snapshot AuthoringSnapshot, request AuthoringContinuationRequest, revision int64) AssistedTranscriptEvent {
+func authoringAnswerEvent(snapshot Snapshot, request ContinuationRequest, revision int64) AssistedTranscriptEvent {
 	var question AssistedTranscriptEvent
 
 	for _, event := range snapshot.Events {
@@ -169,9 +169,9 @@ func authoringAnswerEvent(snapshot AuthoringSnapshot, request AuthoringContinuat
 }
 
 func renderAuthoringQuiz(session Session, event AssistedTranscriptEvent) string {
-	result := AuthoringQuizGenerationResult{Provider: "configured", Strategy: "bounded_continuation", Questions: []AuthoringQuizQuestion{{ID: event.Question.ID, Text: event.Question.Prompt}}}
+	result := QuizGenerationResult{Provider: "configured", Strategy: "bounded_continuation", Questions: []QuizQuestion{{ID: event.Question.ID, Text: event.Question.Prompt}}}
 
-	return RenderContextualQuizMarkdown(session, AuthoringContinuationArtifact(session.Namespace, session.ID, ArtifactKindQuiz, false), AuthoringQuizGenerationRequest{ID: event.ID, SessionID: session.ID, Topic: session.Topic, Target: session.Target}, result)
+	return RenderContextualQuizMarkdown(session, ContinuationArtifact(session.Namespace, session.ID, ArtifactKindQuiz, false), QuizGenerationRequest{ID: event.ID, SessionID: session.ID, Topic: session.Topic, Target: session.Target}, result)
 }
 
 func renderAuthoringCapture(session Session, capture, instruction string) string {
@@ -183,9 +183,9 @@ func renderAuthoringCapture(session Session, capture, instruction string) string
 	return body + "\n## Raw Capture\n\n" + capture + "\n"
 }
 
-// AuthoringContinuationArtifact reserves a deterministic canonical artifact ref.
+// ContinuationArtifact reserves a deterministic canonical artifact ref.
 // Its identity is derived from the shared session, never from model output.
-func AuthoringContinuationArtifact(namespace, sessionID string, kind ArtifactKind, capture bool) ArtifactRef {
+func ContinuationArtifact(namespace, sessionID string, kind ArtifactKind, capture bool) ArtifactRef {
 	suffix := string(kind)
 	role := ArtifactRoleOutput
 
@@ -199,7 +199,7 @@ func AuthoringContinuationArtifact(namespace, sessionID string, kind ArtifactKin
 	return ArtifactRef{ID: id, Kind: kind, Role: role, Path: filepath.ToSlash(filepath.Join(opscore.DirectoryName, namespace, authoringArtifactType(kind), id, opscore.ArtifactBodyFile())), Description: "Shared authoring " + suffix + " artifact."}
 }
 
-func (r *fileAuthoringSessionRepository) prepareAuthoringOutput(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *Session, body string) ([]workflowstate.FileChange, error) {
+func (r *fileSessionRepository) prepareAuthoringOutput(ctx context.Context, binding authoringRequestBinding, snapshot Snapshot, session *Session, body string) ([]workflowstate.FileChange, error) {
 	images, err := r.prepareAuthoringOutputChanges(ctx, binding, snapshot, session, body)
 	if err != nil {
 		return nil, err
@@ -231,12 +231,12 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringOutput(ctx context.Cont
 	return images.Changes, nil
 }
 
-func (r *fileAuthoringSessionRepository) prepareAuthoringOutputChanges(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *Session, body string) (authoringOutputImages, error) {
+func (r *fileSessionRepository) prepareAuthoringOutputChanges(ctx context.Context, binding authoringRequestBinding, snapshot Snapshot, session *Session, body string) (authoringOutputImages, error) {
 	if binding.Request.Target == ArtifactKindDump {
 		return r.prepareAuthoringDump(ctx, binding, snapshot, *session, body)
 	}
 
-	ref := AuthoringContinuationArtifact(session.Namespace, session.ID, binding.Request.Target, false)
+	ref := ContinuationArtifact(session.Namespace, session.ID, binding.Request.Target, false)
 	changes, err := r.authoringArtifactChanges(binding, snapshot, ref, body)
 
 	return authoringOutputImages{Ref: ref, Changes: changes}, err

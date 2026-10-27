@@ -16,9 +16,9 @@ import (
 // AssistedAnswerCurationOptions describes a package boundary value.
 type AssistedAnswerCurationOptions struct {
 	Session          Session
-	SessionPaths     AuthoringSessionPaths
+	SessionPaths     SessionPaths
 	TranscriptEvents []AssistedTranscriptEvent
-	Repository       AuthoringSessionRepository
+	Repository       SessionRepository
 	Adapter          AssistedModelAdapter
 	Now              func() time.Time
 }
@@ -214,7 +214,7 @@ type assistedCurationArtifact struct {
 	Path string
 }
 
-func writeAssistedAnswerCurationArtifact(session Session, paths AuthoringSessionPaths, summary AssistedCuratedAnswerSummary) (assistedCurationArtifact, error) {
+func writeAssistedAnswerCurationArtifact(session Session, paths SessionPaths, summary AssistedCuratedAnswerSummary) (assistedCurationArtifact, error) {
 	artifactPath := filepath.Join(paths.SessionDir, "curated-summary.md")
 
 	_, err := os.Stat(artifactPath)
@@ -244,7 +244,7 @@ func writeAssistedAnswerCurationArtifact(session Session, paths AuthoringSession
 
 func updateAssistedAnswerCurationSession(
 	ctx context.Context,
-	repository AuthoringSessionRepository,
+	repository SessionRepository,
 	session Session,
 	ref ArtifactRef,
 	now time.Time,
@@ -256,7 +256,7 @@ func updateAssistedAnswerCurationSession(
 			ID:          "transcript-" + session.ID,
 			Kind:        ArtifactKindTranscript,
 			Role:        ArtifactRoleInput,
-			Path:        filepath.ToSlash(AuthoringSessionLayout("", session.ID).TranscriptPath),
+			Path:        filepath.ToSlash(SessionLayout("", session.ID).TranscriptPath),
 			Description: "Assisted authoring transcript.",
 		},
 		Target:     ref,

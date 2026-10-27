@@ -23,14 +23,14 @@ type authoringCatalogDocument[T any] struct {
 type authoringCatalogReader[T any] func(context.Context, string, string) (authoringCatalogDocument[T], error)
 
 type authoringCatalog[T any] struct {
-	repository *fileAuthoringSessionRepository
+	repository *fileSessionRepository
 	kind       string
 	read       authoringCatalogReader[T]
 	size       int
 }
 
 func listAuthoringDocuments[T any](ctx context.Context, projectDir, kind string, read authoringCatalogReader[T]) ([]T, error) {
-	catalog := authoringCatalog[T]{repository: &fileAuthoringSessionRepository{projectDir: projectDir}, kind: kind, read: read}
+	catalog := authoringCatalog[T]{repository: &fileSessionRepository{projectDir: projectDir}, kind: kind, read: read}
 
 	return catalog.list(ctx)
 }
@@ -103,7 +103,7 @@ func (c *authoringCatalog[T]) readDirectory(ctx context.Context, root string, en
 	return documents, nil
 }
 
-func (r *fileAuthoringSessionRepository) authoringDirectoryEntries(reference string) ([]os.DirEntry, error) {
+func (r *fileSessionRepository) authoringDirectoryEntries(reference string) ([]os.DirEntry, error) {
 	path, err := r.authoringPath(reference)
 	if err != nil {
 		return nil, err

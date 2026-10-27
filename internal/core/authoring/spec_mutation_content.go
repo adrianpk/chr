@@ -80,7 +80,7 @@ type specReceiptLookup struct {
 	Found  bool
 }
 
-func (r *fileAuthoringSessionRepository) specReceipt(operationID, digest string) (specReceiptLookup, error) {
+func (r *fileSessionRepository) specReceipt(operationID, digest string) (specReceiptLookup, error) {
 	var receipt specMutationReceipt
 
 	encoded, err := r.readAuthoringDocument(authoringReceiptRef(operationID))

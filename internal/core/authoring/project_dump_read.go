@@ -19,12 +19,12 @@ import (
 const projectDumpInventoryBytes = 8 * workflowstate.FileLimit
 
 type projectDumpInventory struct {
-	repository     *fileAuthoringSessionRepository
+	repository     *fileSessionRepository
 	entries, bytes int
 	artifacts      []ProjectDumpArtifact
 }
 
-func (r *fileAuthoringSessionRepository) checkProjectDumpInspection(ctx context.Context) error {
+func (r *fileSessionRepository) checkProjectDumpInspection(ctx context.Context) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
@@ -41,7 +41,7 @@ func (r *fileAuthoringSessionRepository) checkProjectDumpInspection(ctx context.
 	return nil
 }
 
-func (r *fileAuthoringSessionRepository) projectDumpArtifacts(ctx context.Context) ([]ProjectDumpArtifact, error) {
+func (r *fileSessionRepository) projectDumpArtifacts(ctx context.Context) ([]ProjectDumpArtifact, error) {
 	scan := projectDumpInventory{repository: r}
 
 	namespaces, err := scan.readEntries(opscore.DirectoryName)

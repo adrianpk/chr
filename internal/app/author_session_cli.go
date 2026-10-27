@@ -118,7 +118,7 @@ func (factory commandFactory) runAuthorSessionList(ctx context.Context, cmd *cli
 		return err
 	}
 
-	sessions, err := authoringcore.NewAuthoringSessionRepository(projectContext.ProjectDir).ListSessions(ctx)
+	sessions, err := authoringcore.NewSessionRepository(projectContext.ProjectDir).ListSessions(ctx)
 	if err != nil {
 		return err
 	}
@@ -156,7 +156,7 @@ func (factory commandFactory) runAuthorSessionShow(ctx context.Context, cmd *cli
 		return err
 	}
 
-	repository := authoringcore.NewAuthoringSessionRepository(projectContext.ProjectDir)
+	repository := authoringcore.NewSessionRepository(projectContext.ProjectDir)
 
 	session, err := resolveAuthoringSession(ctx, repository, cmd.Args().First())
 	if err != nil {
@@ -196,7 +196,7 @@ func authoringSessionID(now time.Time) string {
 	return "author-" + now.UTC().Format("20060102-150405")
 }
 
-func resolveAuthoringSession(ctx context.Context, repository authoringcore.AuthoringSessionRepository, handle string) (authoringcore.Session, error) {
+func resolveAuthoringSession(ctx context.Context, repository authoringcore.SessionRepository, handle string) (authoringcore.Session, error) {
 	handle = strings.TrimSpace(handle)
 	if handle == "" {
 		return authoringcore.Session{}, fmt.Errorf("authoring session is required")
@@ -207,7 +207,7 @@ func resolveAuthoringSession(ctx context.Context, repository authoringcore.Autho
 		return session, nil
 	}
 
-	if !errors.Is(err, authoringcore.ErrAuthoringSessionNotFound) {
+	if !errors.Is(err, authoringcore.ErrSessionNotFound) {
 		return authoringcore.Session{}, err
 	}
 
@@ -225,7 +225,7 @@ func resolveAuthoringSession(ctx context.Context, repository authoringcore.Autho
 		return authoringcore.Session{}, fmt.Errorf("authoring session handle is ambiguous: %s", handle)
 	}
 
-	return authoringcore.Session{}, fmt.Errorf("%w: %s", authoringcore.ErrAuthoringSessionNotFound, handle)
+	return authoringcore.Session{}, fmt.Errorf("%w: %s", authoringcore.ErrSessionNotFound, handle)
 }
 
 func matchingAuthoringSessions(sessions []authoringcore.Session, handle string) []authoringcore.Session {
@@ -279,7 +279,7 @@ func authoringHandleSlug(value string) string {
 	return strings.Trim(builder.String(), "-")
 }
 
-func printAuthorSessionCreated(stdout io.Writer, session authoringcore.Session, paths authoringcore.AuthoringSessionPaths, projectDir string) error {
+func printAuthorSessionCreated(stdout io.Writer, session authoringcore.Session, paths authoringcore.SessionPaths, projectDir string) error {
 	lines := []string{
 		"session: created " + session.ID,
 		"target: " + string(session.Target),

@@ -55,7 +55,7 @@ func ReadSpecDocument(ctx context.Context, projectDir, reference string) (SpecDo
 		return SpecDocument{}, err
 	}
 
-	r := &fileAuthoringSessionRepository{projectDir: projectDir}
+	r := &fileSessionRepository{projectDir: projectDir}
 	if err := r.checkProjectDumpInspection(ctx); err != nil {
 		return SpecDocument{}, err
 	}

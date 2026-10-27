@@ -19,7 +19,7 @@ import (
 // Plan/map publication and approved binding share authoring exclusion before
 // taking workflow exclusion. Progress writes continue to use the workflow owner.
 func (s *WorkflowStore) withWorkflowPlanMutation(ctx context.Context, action func(context.Context) error) error {
-	return authoringcore.WithAuthoringMutation(ctx, s.layout.ProjectDir(), func(ctx context.Context) error {
+	return authoringcore.WithMutation(ctx, s.layout.ProjectDir(), func(ctx context.Context) error {
 		return s.withLock(ctx, func() error { return action(ctx) })
 	})
 }

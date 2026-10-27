@@ -70,7 +70,7 @@ func checkAuthoringDumpRecovery(t *testing.T, mode string, fault int) {
 	t.Helper()
 
 	root := t.TempDir()
-	repo := &fileAuthoringSessionRepository{projectDir: root}
+	repo := &fileSessionRepository{projectDir: root}
 	request := authoringDumpRecoveryRequest(t, repo, mode)
 
 	repo.afterMutationReplace = func(index int) error {
@@ -81,7 +81,7 @@ func checkAuthoringDumpRecovery(t *testing.T, mode string, fault int) {
 		return nil
 	}
 	calls := 0
-	generate := func(ctx context.Context, snapshot AuthoringSnapshot, request AuthoringContinuationRequest) (AuthoringDraft, error) {
+	generate := func(ctx context.Context, snapshot Snapshot, request ContinuationRequest) (Draft, error) {
 		calls++
 
 		return telegramAuthoringOwnerDraft(ctx, snapshot, request)
@@ -92,7 +92,7 @@ func checkAuthoringDumpRecovery(t *testing.T, mode string, fault int) {
 		t.Fatal("publication fault not exercised", mode, fault)
 	}
 
-	reopened := NewAuthoringSessionRepository(root)
+	reopened := NewSessionRepository(root)
 	if _, err := reopened.ObserveContinuation(t.Context(), first.Session.ID); err != nil {
 		t.Fatal("session/dump recovery failed", err)
 	}
@@ -112,7 +112,7 @@ func checkAuthoringDumpRecovery(t *testing.T, mode string, fault int) {
 // Re-observation permits replacement and preserves the exact prior body/history.
 func TestAuthoringDumpRefine(t *testing.T) {
 	root := t.TempDir()
-	repo := NewAuthoringSessionRepository(root)
+	repo := NewSessionRepository(root)
 	first := telegramAuthoringCreateOwner(t, repo, "initial")
 	reference := first.Session.Outputs[0].Path
 
@@ -121,10 +121,10 @@ func TestAuthoringDumpRefine(t *testing.T) {
 	}
 
 	request := telegramAuthoringNextOwner(first, "stale", "refine", ArtifactKindDump)
-	if _, err := repo.ContinueAuthoring(t.Context(), request, func(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error) {
+	if _, err := repo.ContinueAuthoring(t.Context(), request, func(context.Context, Snapshot, ContinuationRequest) (Draft, error) {
 		t.Fatal("stale continuation invoked its provider")
 
-		return AuthoringDraft{}, nil
+		return Draft{}, nil
 	}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale shared body accepted", err)
 	}
@@ -140,8 +140,8 @@ func TestAuthoringDumpRefine(t *testing.T) {
 	}
 
 	request.Binding.RequestID, request.ExpectedSourceHash = "current", current.SourceHash
-	if _, err := repo.ContinueAuthoring(t.Context(), request, func(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error) {
-		return AuthoringDraft{Body: "Replacement context."}, nil
+	if _, err := repo.ContinueAuthoring(t.Context(), request, func(context.Context, Snapshot, ContinuationRequest) (Draft, error) {
+		return Draft{Body: "Replacement context."}, nil
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -158,11 +158,11 @@ func TestAuthoringDumpRefine(t *testing.T) {
 // unrelated orphan captures continue to require explicit reconciliation.
 func TestAuthoringDumpQuestion(t *testing.T) {
 	root := t.TempDir()
-	repo := NewAuthoringSessionRepository(root)
+	repo := NewSessionRepository(root)
 	request := telegramAuthoringOwnerRequest()
 
-	first, err := repo.ContinueAuthoring(t.Context(), request, func(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error) {
-		return AuthoringDraft{Question: "Which limit?"}, nil
+	first, err := repo.ContinueAuthoring(t.Context(), request, func(context.Context, Snapshot, ContinuationRequest) (Draft, error) {
+		return Draft{Question: "Which limit?"}, nil
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -196,7 +196,7 @@ func TestAuthoringDumpQuestion(t *testing.T) {
 // The returned guard must be immediately usable after publication, including a
 // shared destination outside the session's namespace.
 func TestAuthoringDumpSnapshot(t *testing.T) {
-	repo := NewAuthoringSessionRepository(t.TempDir())
+	repo := NewSessionRepository(t.TempDir())
 	request := telegramAuthoringOwnerRequest()
 	request.Namespace = "team"
 
@@ -215,7 +215,7 @@ func TestAuthoringDumpSnapshot(t *testing.T) {
 // and work descriptions use its resolved canonical body in another namespace.
 func TestAuthoringDumpAlias(t *testing.T) {
 	root := t.TempDir()
-	repo := NewAuthoringSessionRepository(root)
+	repo := NewSessionRepository(root)
 	first := telegramAuthoringCreateOwner(t, repo, "initial")
 	old := first.Session.Outputs[0].Path
 	destination := reconcileAuthoringDump(t, root)
@@ -253,10 +253,10 @@ func TestAuthoringDumpProviderGuard(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	repo := NewAuthoringSessionRepository(root)
+	repo := NewSessionRepository(root)
 	request := telegramAuthoringOwnerRequest()
 
-	_, err = repo.ContinueAuthoring(t.Context(), request, func(ctx context.Context, snapshot AuthoringSnapshot, request AuthoringContinuationRequest) (AuthoringDraft, error) {
+	_, err = repo.ContinueAuthoring(t.Context(), request, func(ctx context.Context, snapshot Snapshot, request ContinuationRequest) (Draft, error) {
 		if err := os.WriteFile(filepath.Join(root, first.Destination), []byte("Independent edited image."), 0o600); err != nil {
 			t.Fatal(err)
 		}
@@ -284,12 +284,12 @@ func TestAuthoringDumpOrphan(t *testing.T) {
 	root := t.TempDir()
 	projectDumpTestArtifact(t, root, "team", "Orphan", "---\ntype: dump_raw\n---\nRetained original.\n")
 
-	repo := NewAuthoringSessionRepository(root)
+	repo := NewSessionRepository(root)
 
-	_, err := repo.ContinueAuthoring(t.Context(), telegramAuthoringOwnerRequest(), func(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error) {
+	_, err := repo.ContinueAuthoring(t.Context(), telegramAuthoringOwnerRequest(), func(context.Context, Snapshot, ContinuationRequest) (Draft, error) {
 		t.Fatal("unresolved ownership invoked provider")
 
-		return AuthoringDraft{}, nil
+		return Draft{}, nil
 	})
 	if !errors.Is(err, ErrProjectDumpReconciliation) {
 		t.Fatal("orphaned input adopted implicitly", err)
@@ -302,15 +302,15 @@ func captureAuthoringDumpNamespace(t *testing.T, root, namespace, destination st
 	request := telegramAuthoringOwnerRequest()
 	request.Binding.RequestID, request.Namespace = namespace, namespace
 
-	result, err := NewAuthoringSessionRepository(root).ContinueAuthoring(t.Context(), request, func(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error) {
-		return AuthoringDraft{Body: namespace + " contribution."}, nil
+	result, err := NewSessionRepository(root).ContinueAuthoring(t.Context(), request, func(context.Context, Snapshot, ContinuationRequest) (Draft, error) {
+		return Draft{Body: namespace + " contribution."}, nil
 	})
 	if err != nil || len(result.Session.Outputs) != 1 || result.Session.Outputs[0].Path != destination {
 		t.Error("bound session allocated another dump", result, err)
 	}
 }
 
-func authoringDumpRecoveryRequest(t *testing.T, repo AuthoringSessionRepository, mode string) AuthoringContinuationRequest {
+func authoringDumpRecoveryRequest(t *testing.T, repo SessionRepository, mode string) ContinuationRequest {
 	t.Helper()
 
 	request := telegramAuthoringOwnerRequest()
@@ -357,11 +357,11 @@ func reconcileAuthoringDump(t *testing.T, root string) string {
 func TestAuthoringDumpAdopt(t *testing.T) {
 	root := t.TempDir()
 	reference := projectDumpTestArtifact(t, root, "legacy", "Existing", "# Existing context\nRetain this material.\n")
-	repo := NewAuthoringSessionRepository(root)
+	repo := NewSessionRepository(root)
 	request := telegramAuthoringOwnerRequest()
 	request.Namespace = "another"
 
-	result, err := repo.ContinueAuthoring(t.Context(), request, func(ctx context.Context, snapshot AuthoringSnapshot, request AuthoringContinuationRequest) (AuthoringDraft, error) {
+	result, err := repo.ContinueAuthoring(t.Context(), request, func(ctx context.Context, snapshot Snapshot, request ContinuationRequest) (Draft, error) {
 		if authoringArtifactObservation(snapshot, reference) == nil {
 			t.Fatal("existing canonical context was omitted")
 		}
@@ -381,10 +381,10 @@ func TestAuthoringDumpAdopt(t *testing.T) {
 // Refinement requires this session's observed output, rather than creating one
 // from a pending raw input or borrowing another session's dump context.
 func TestAuthoringDumpMissingOutput(t *testing.T) {
-	repo := NewAuthoringSessionRepository(t.TempDir())
+	repo := NewSessionRepository(t.TempDir())
 
-	first, err := repo.ContinueAuthoring(t.Context(), telegramAuthoringOwnerRequest(), func(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error) {
-		return AuthoringDraft{Question: "Which limit?"}, nil
+	first, err := repo.ContinueAuthoring(t.Context(), telegramAuthoringOwnerRequest(), func(context.Context, Snapshot, ContinuationRequest) (Draft, error) {
+		return Draft{Question: "Which limit?"}, nil
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -400,10 +400,10 @@ func TestAuthoringDumpMissingOutput(t *testing.T) {
 
 	request := telegramAuthoringNextOwner(answered, "refine", "refine", ArtifactKindDump)
 
-	_, err = repo.ContinueAuthoring(t.Context(), request, func(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error) {
+	_, err = repo.ContinueAuthoring(t.Context(), request, func(context.Context, Snapshot, ContinuationRequest) (Draft, error) {
 		t.Fatal("refinement without an output invoked provider")
 
-		return AuthoringDraft{}, nil
+		return Draft{}, nil
 	})
 	if !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("refinement created a new output", err)

@@ -231,7 +231,7 @@ func (r *fileQuizArtifactRepository) LoadRawCaptureEntries(
 		return nil, err
 	}
 
-	owner := &fileAuthoringSessionRepository{projectDir: r.projectDir}
+	owner := &fileSessionRepository{projectDir: r.projectDir}
 
 	content, err := owner.authoringRead(paths.RawRelativePath)
 	if os.IsNotExist(err) {

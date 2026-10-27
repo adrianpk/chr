@@ -15,7 +15,7 @@ func TestLoadAssistedAuthoringContextPackageIncludesProtocolsDocumentsAndTranscr
 	writeTestFile(t, filepath.Join(dir, "docs", "reference", "authoring.md"), "# Authoring Reference\n")
 
 	session := testAssistedContextSession(dir)
-	paths := AuthoringSessionLayout(dir, session.ID)
+	paths := SessionLayout(dir, session.ID)
 	events := testAssistedContextTranscriptEvents(t, session.ID)
 
 	pkg, err := LoadAssistedAuthoringContextPackage(AssistedAuthoringContextPackageOptions{
@@ -63,7 +63,7 @@ func TestRenderAssistedAuthoringContextPackageIsDeterministic(t *testing.T) {
 	writeTestFile(t, filepath.Join(dir, "docs", "reference", "authoring.md"), "# Authoring Reference\n")
 
 	session := testAssistedContextSession(dir)
-	paths := AuthoringSessionLayout(dir, session.ID)
+	paths := SessionLayout(dir, session.ID)
 	events := testAssistedContextTranscriptEvents(t, session.ID)
 
 	pkg, err := LoadAssistedAuthoringContextPackage(AssistedAuthoringContextPackageOptions{

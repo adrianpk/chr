@@ -25,7 +25,7 @@ type dumpMutationBeforeImage struct {
 	History  []workflowstate.FileChange
 }
 
-func (r *fileAuthoringSessionRepository) commitDumpMutation(ctx context.Context, binding dumpMutationBinding) (ProjectDumpMutationResult, error) {
+func (r *fileSessionRepository) commitDumpMutation(ctx context.Context, binding dumpMutationBinding) (ProjectDumpMutationResult, error) {
 	target, err := r.dumpMutationTarget(ctx, binding.Request)
 	if err != nil {
 		return ProjectDumpMutationResult{}, err
@@ -60,7 +60,7 @@ func (r *fileAuthoringSessionRepository) commitDumpMutation(ctx context.Context,
 	return result, r.recoverAuthoringMutation()
 }
 
-func (r *fileAuthoringSessionRepository) dumpMutationChanges(binding dumpMutationBinding, target dumpMutationTarget) (dumpMutationImages, error) {
+func (r *fileSessionRepository) dumpMutationChanges(binding dumpMutationBinding, target dumpMutationTarget) (dumpMutationImages, error) {
 	result := ProjectDumpMutationResult{OperationID: binding.Request.OperationID, Destination: target.Destination}
 
 	before, err := r.dumpMutationBefore(target)
@@ -98,7 +98,7 @@ func (r *fileAuthoringSessionRepository) dumpMutationChanges(binding dumpMutatio
 	return dumpMutationImages{Changes: changes, Result: result}, nil
 }
 
-func (r *fileAuthoringSessionRepository) dumpMutationBefore(target dumpMutationTarget) (dumpMutationBeforeImage, error) {
+func (r *fileSessionRepository) dumpMutationBefore(target dumpMutationTarget) (dumpMutationBeforeImage, error) {
 	if target.Artifact.Reference == "" {
 		return dumpMutationBeforeImage{}, nil
 	}
@@ -127,7 +127,7 @@ func (r *fileAuthoringSessionRepository) dumpMutationBefore(target dumpMutationT
 	return dumpMutationBeforeImage{Body: body, Metadata: metadata, History: changes}, nil
 }
 
-func (r *fileAuthoringSessionRepository) dumpCaptureChanges(binding dumpMutationBinding, target dumpMutationTarget) ([]workflowstate.FileChange, error) {
+func (r *fileSessionRepository) dumpCaptureChanges(binding dumpMutationBinding, target dumpMutationTarget) ([]workflowstate.FileChange, error) {
 	if binding.Prepared == nil {
 		return nil, nil
 	}
@@ -152,7 +152,7 @@ func (r *fileAuthoringSessionRepository) dumpCaptureChanges(binding dumpMutation
 	}, nil
 }
 
-func (r *fileAuthoringSessionRepository) newDumpMutationMetadata(reference string, request DumpMutationRequest) (map[string]any, error) {
+func (r *fileSessionRepository) newDumpMutationMetadata(reference string, request DumpMutationRequest) (map[string]any, error) {
 	parts := strings.Split(reference, "/")
 
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: r.projectDir, Namespace: parts[1]})
@@ -168,7 +168,7 @@ func (r *fileAuthoringSessionRepository) newDumpMutationMetadata(reference strin
 	return metadata, nil
 }
 
-func (r *fileAuthoringSessionRepository) dumpMutationMetadata(binding dumpMutationBinding, target dumpMutationTarget, before []byte) ([]byte, error) {
+func (r *fileSessionRepository) dumpMutationMetadata(binding dumpMutationBinding, target dumpMutationTarget, before []byte) ([]byte, error) {
 	var (
 		metadata map[string]any
 		err      error

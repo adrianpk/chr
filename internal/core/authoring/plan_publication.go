@@ -36,7 +36,7 @@ func PlanTargetRevision(ctx context.Context, projectDir string, scope quizcore.S
 }
 
 func observePlanTarget(ctx context.Context, projectDir, reference string) (planTargetObservation, error) {
-	r := &fileAuthoringSessionRepository{projectDir: projectDir}
+	r := &fileSessionRepository{projectDir: projectDir}
 
 	target := planTargetObservation{}
 	if err := r.checkPlanWorkflowPending(reference); err != nil {
@@ -80,7 +80,7 @@ func observePlanTarget(ctx context.Context, projectDir, reference string) (planT
 	return target, r.checkQuizImages(target.images)
 }
 
-func (r *fileAuthoringSessionRepository) publishGeneratedPlan(ctx context.Context, paths GeneratedPlanPaths, plan generationcore.GeneratedPlan) error {
+func (r *fileSessionRepository) publishGeneratedPlan(ctx context.Context, paths GeneratedPlanPaths, plan generationcore.GeneratedPlan) error {
 	projectDir := r.projectDir
 
 	if found, err := r.completedPlanOperation(plan); err != nil || found {
@@ -180,7 +180,7 @@ func generatedPlanArchiveChanges(projectDir string, current GeneratedPlanPaths, 
 		return nil, err
 	}
 
-	r := &fileAuthoringSessionRepository{projectDir: projectDir}
+	r := &fileSessionRepository{projectDir: projectDir}
 	for _, reference := range []string{archive.RelativePath, filepath.Join(filepath.Dir(archive.RelativePath), "metadata.json")} {
 		if _, err := r.authoringRead(reference); !errors.Is(err, os.ErrNotExist) {
 			return nil, errors.Join(workflowstate.ErrConflict, err)

@@ -137,10 +137,10 @@ func TestRenderAssistedCuratedAnswerSummaryIsDeterministic(t *testing.T) {
 func setupAssistedAnswerCurationTest(
 	t *testing.T,
 	dir string,
-) (AuthoringSessionRepository, Session, AuthoringSessionPaths) {
+) (SessionRepository, Session, SessionPaths) {
 	t.Helper()
 
-	repository := NewAuthoringSessionRepository(dir)
+	repository := NewSessionRepository(dir)
 	session := testAssistedContextSession(dir)
 
 	paths, err := repository.CreateSession(context.Background(), session)

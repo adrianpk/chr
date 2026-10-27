@@ -20,14 +20,14 @@ type AssistedArtifactSynthesisOptions struct {
 	TargetKind     ArtifactKind
 	TargetName     string
 	AllowReplace   bool
-	Repository     AuthoringSessionRepository
+	Repository     SessionRepository
 	Now            func() time.Time
 }
 
 // AssistedArtifactSynthesisResult describes a package boundary value.
 type AssistedArtifactSynthesisResult struct {
 	Session Session
-	Layout  AuthoringArtifactLayout
+	Layout  ArtifactLayout
 	Content string
 	// Mutation retains committed dump hashes independently of later edits.
 	Mutation *ProjectDumpMutationResult
@@ -44,7 +44,7 @@ func synthesizeAssistedArtifact(ctx context.Context, opts AssistedArtifactSynthe
 		return synthesizeAssistedDump(ctx, opts)
 	}
 
-	layout, err := PlanAuthoringArtifactLayout(AuthoringArtifactLayoutOptions{
+	layout, err := PlanArtifactLayout(ArtifactLayoutOptions{
 		ProjectDir:   opts.ProjectDir,
 		SessionID:    opts.Session.ID,
 		Kind:         opts.TargetKind,

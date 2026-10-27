@@ -13,8 +13,8 @@ import (
 
 // StartGuidedUseCase creates or replays one explicitly authorized guided session.
 func StartGuidedUseCase(ctx context.Context, root string, request GuidedUseCaseStart) (session Session, err error) {
-	r := &fileAuthoringSessionRepository{projectDir: root}
-	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
+	r := &fileSessionRepository{projectDir: root}
+	err = WithMutation(ctx, root, func(ctx context.Context) error {
 		var startErr error
 
 		session, startErr = r.startGuidedUseCase(ctx, request)
@@ -25,7 +25,7 @@ func StartGuidedUseCase(ctx context.Context, root string, request GuidedUseCaseS
 	return session, err
 }
 
-func (r *fileAuthoringSessionRepository) startGuidedUseCase(ctx context.Context, request GuidedUseCaseStart) (Session, error) {
+func (r *fileSessionRepository) startGuidedUseCase(ctx context.Context, request GuidedUseCaseStart) (Session, error) {
 	if _, err := r.authoringSessionPaths(request.RunID); err != nil {
 		return Session{}, err
 	}
@@ -43,7 +43,7 @@ func (r *fileAuthoringSessionRepository) startGuidedUseCase(ctx context.Context,
 		return current, nil
 	}
 
-	if !errors.Is(err, ErrAuthoringSessionNotFound) {
+	if !errors.Is(err, ErrSessionNotFound) {
 		return current, err
 	}
 
@@ -68,7 +68,7 @@ func (r *fileAuthoringSessionRepository) startGuidedUseCase(ctx context.Context,
 
 // ReadGuidedUseCase reads retained state without recovery, writes or dispatch.
 func ReadGuidedUseCase(ctx context.Context, root string, scope GuidedUseCaseScope) (Session, error) {
-	r := &fileAuthoringSessionRepository{projectDir: root}
+	r := &fileSessionRepository{projectDir: root}
 
 	session, err := r.getGuardedSession(ctx, scope.RunID)
 	if err != nil {
@@ -78,7 +78,7 @@ func ReadGuidedUseCase(ctx context.Context, root string, scope GuidedUseCaseScop
 	return session, ValidateGuidedScope(session, scope)
 }
 
-func (r *fileAuthoringSessionRepository) guidedFileChange(path string, content []byte, create bool) (workflowstate.FileChange, error) {
+func (r *fileSessionRepository) guidedFileChange(path string, content []byte, create bool) (workflowstate.FileChange, error) {
 	relative, err := filepath.Rel(r.projectDir, path)
 	if err != nil {
 		return workflowstate.FileChange{}, err
@@ -99,13 +99,13 @@ func (r *fileAuthoringSessionRepository) guidedFileChange(path string, content [
 	return change, nil
 }
 
-func (r *fileAuthoringSessionRepository) saveGuidedSession(session Session, create bool, extra ...workflowstate.FileChange) error {
+func (r *fileSessionRepository) saveGuidedSession(session Session, create bool, extra ...workflowstate.FileChange) error {
 	paths, err := r.authoringSessionPaths(session.ID)
 	if err != nil {
 		return err
 	}
 
-	content, err := RenderAuthoringSession(session, paths)
+	content, err := RenderSession(session, paths)
 	if err != nil {
 		return err
 	}
@@ -145,8 +145,8 @@ func MutateGuidedUseCase(ctx context.Context, root string, command GuidedUseCase
 		return session, err
 	}
 
-	r := &fileAuthoringSessionRepository{projectDir: root}
-	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
+	r := &fileSessionRepository{projectDir: root}
+	err = WithMutation(ctx, root, func(ctx context.Context) error {
 		session, err = r.getGuardedSession(ctx, command.RunID)
 		if err != nil {
 			return err
@@ -211,7 +211,7 @@ func guidedDigestConflict(retained, received GuidedUseCaseOperation) error {
 	return nil
 }
 
-func (r *fileAuthoringSessionRepository) applyGuidedInput(ctx context.Context, session *Session, command GuidedUseCaseCommand, operation GuidedUseCaseOperation) error {
+func (r *fileSessionRepository) applyGuidedInput(ctx context.Context, session *Session, command GuidedUseCaseCommand, operation GuidedUseCaseOperation) error {
 	switch command.Action {
 	case "name":
 		if session.Guided.Stage != "name" {
@@ -243,7 +243,7 @@ func (r *fileAuthoringSessionRepository) applyGuidedInput(ctx context.Context, s
 	return r.saveGuidedSession(*session, false)
 }
 
-func (r *fileAuthoringSessionRepository) nameGuidedUseCase(ctx context.Context, session *Session, operation GuidedUseCaseOperation) error {
+func (r *fileSessionRepository) nameGuidedUseCase(ctx context.Context, session *Session, operation GuidedUseCaseOperation) error {
 	metadata := CaseMetadata{SchemaVersion: CaseMetadataSchemaVersion, Name: operation.Content}
 	if len(operation.Content) > 512 {
 		return errors.New("use-case name exceeds 512 bytes")
@@ -281,7 +281,7 @@ func (r *fileAuthoringSessionRepository) nameGuidedUseCase(ctx context.Context, 
 
 // ListGuidedUseCases inspects scoped sessions without recovering effects.
 func ListGuidedUseCases(ctx context.Context, root, project, namespace string) ([]Session, error) {
-	r := &fileAuthoringSessionRepository{projectDir: root}
+	r := &fileSessionRepository{projectDir: root}
 	if _, err := r.authoringPath(authoringRuntimeRef("sessions")); err != nil {
 		return nil, err
 	}

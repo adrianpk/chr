@@ -71,7 +71,7 @@ func telegramAuthoringBridgeCapture(input ConversationIntentContext) Conversatio
 	return ConversationIntent{OperationID: "capture", Arguments: ConversationIntentArguments{Text: input.Message}}
 }
 
-func telegramAuthoringBridgeSnapshot(t *testing.T, f *telegramConversationAppFixture, conversation string) authoringcore.AuthoringSnapshot {
+func telegramAuthoringBridgeSnapshot(t *testing.T, f *telegramConversationAppFixture, conversation string) authoringcore.Snapshot {
 	t.Helper()
 
 	c := f.session(t, conversation)

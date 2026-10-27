@@ -11,7 +11,7 @@ func TestPlanAuthoringArtifactLayoutResolvesCanonicalPaths(t *testing.T) {
 
 	for _, test := range authoringArtifactKindPathTests(projectDir) {
 		t.Run(string(test.kind), func(t *testing.T) {
-			layout, err := PlanAuthoringArtifactLayout(AuthoringArtifactLayoutOptions{
+			layout, err := PlanArtifactLayout(ArtifactLayoutOptions{
 				ProjectDir:  projectDir,
 				SessionID:   "auth-20260521-120000",
 				Kind:        test.kind,
@@ -135,7 +135,7 @@ func TestPlanAuthoringArtifactLayoutAllowsExplicitReplace(t *testing.T) {
 func TestPlanAuthoringArtifactLayoutRejectsInvalidInput(t *testing.T) {
 	for _, test := range invalidAuthoringArtifactLayoutTests(t.TempDir()) {
 		t.Run(test.name, func(t *testing.T) {
-			_, err := PlanAuthoringArtifactLayout(test.opts)
+			_, err := PlanArtifactLayout(test.opts)
 			if err == nil {
 				t.Fatal("PlanAuthoringArtifactLayout returned nil error")
 			}
@@ -145,15 +145,15 @@ func TestPlanAuthoringArtifactLayoutRejectsInvalidInput(t *testing.T) {
 
 func invalidAuthoringArtifactLayoutTests(projectDir string) []struct {
 	name string
-	opts AuthoringArtifactLayoutOptions
+	opts ArtifactLayoutOptions
 } {
 	return []struct {
 		name string
-		opts AuthoringArtifactLayoutOptions
+		opts ArtifactLayoutOptions
 	}{
 		{
 			name: "project dir",
-			opts: AuthoringArtifactLayoutOptions{
+			opts: ArtifactLayoutOptions{
 				SessionID: "auth-1",
 				Kind:      ArtifactKindQuiz,
 				Role:      ArtifactRoleOutput,
@@ -162,7 +162,7 @@ func invalidAuthoringArtifactLayoutTests(projectDir string) []struct {
 		},
 		{
 			name: "session id",
-			opts: AuthoringArtifactLayoutOptions{
+			opts: ArtifactLayoutOptions{
 				ProjectDir: projectDir,
 				Kind:       ArtifactKindQuiz,
 				Role:       ArtifactRoleOutput,
@@ -171,7 +171,7 @@ func invalidAuthoringArtifactLayoutTests(projectDir string) []struct {
 		},
 		{
 			name: "session-owned kind",
-			opts: AuthoringArtifactLayoutOptions{
+			opts: ArtifactLayoutOptions{
 				ProjectDir: projectDir,
 				SessionID:  "auth-1",
 				Kind:       ArtifactKindSession,
@@ -181,7 +181,7 @@ func invalidAuthoringArtifactLayoutTests(projectDir string) []struct {
 		},
 		{
 			name: "topic or name",
-			opts: AuthoringArtifactLayoutOptions{
+			opts: ArtifactLayoutOptions{
 				ProjectDir: projectDir,
 				SessionID:  "auth-1",
 				Kind:       ArtifactKindQuiz,
@@ -197,7 +197,7 @@ func TestAuthoringArtifactInventoryMarksCollisions(t *testing.T) {
 	layout.Collision.Exists = true
 	layout.Collision.Allowed = false
 
-	entries := AuthoringArtifactInventory("auth-1", []AuthoringArtifactLayout{layout})
+	entries := ArtifactInventory("auth-1", []ArtifactLayout{layout})
 	if len(entries) != 1 {
 		t.Fatalf("len(entries) = %d, want 1", len(entries))
 	}
@@ -211,10 +211,10 @@ func planAuthoringArtifactLayoutForTest(
 	t *testing.T,
 	projectDir string,
 	allowReplace bool,
-) AuthoringArtifactLayout {
+) ArtifactLayout {
 	t.Helper()
 
-	layout, err := PlanAuthoringArtifactLayout(AuthoringArtifactLayoutOptions{
+	layout, err := PlanArtifactLayout(ArtifactLayoutOptions{
 		ProjectDir:   projectDir,
 		SessionID:    "auth-1",
 		Kind:         ArtifactKindQuiz,

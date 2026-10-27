@@ -83,11 +83,11 @@ func TestGuidedUseCaseQuizCheckpoint(t *testing.T) {
 	paths, result := completedGuidedQuizFixture(t, root, scope)
 	session.Guided.Quiz = &GuidedQuizState{SessionID: result.State.SessionID, Revision: result.State.Revision}
 	session.Guided.PendingOperation = &GuidedUseCaseOperation{ID: "seal-quiz", Action: "answer", Digest: contenthash.Sum([]byte("seal-quiz"))}
-	r := &fileAuthoringSessionRepository{projectDir: root}
+	r := &fileSessionRepository{projectDir: root}
 
 	var original string
 
-	err = WithAuthoringMutation(t.Context(), root, func(ctx context.Context) error {
+	err = WithMutation(t.Context(), root, func(ctx context.Context) error {
 		checkpoint, err := r.observeGuidedCheckpoint(ctx, session.ID, *session.Guided.PendingOperation, "quiz", quizImageReferences(paths))
 		if err != nil {
 			return err
@@ -109,7 +109,7 @@ func TestGuidedUseCaseQuizCheckpoint(t *testing.T) {
 
 	guidedWriteFile(t, root, paths.CuratedRelativePath, "Later working-copy replacement")
 
-	err = WithAuthoringMutation(t.Context(), root, func(ctx context.Context) error { return SealGuidedQuiz(ctx, root, &session) })
+	err = WithMutation(t.Context(), root, func(ctx context.Context) error { return SealGuidedQuiz(ctx, root, &session) })
 	if err != nil || session.Guided.Checkpoints[1].Commit != original {
 		t.Fatalf("retained quiz seal replaced or blocked by working copy: %v", err)
 	}

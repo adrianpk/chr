@@ -17,7 +17,7 @@ type AssistedAuthoringContextPackageOptions struct {
 	ProjectDir       string
 	TargetPath       string
 	Session          Session
-	SessionPaths     AuthoringSessionPaths
+	SessionPaths     SessionPaths
 	TranscriptEvents []AssistedTranscriptEvent
 }
 
@@ -26,7 +26,7 @@ type AssistedAuthoringContextPackage struct {
 	ProjectDir        string
 	WorkspaceDir      string
 	Session           Session
-	SessionPaths      AuthoringSessionPaths
+	SessionPaths      SessionPaths
 	AgentProtocol     AgentProtocolContext
 	SelectedDocuments []ContextDocument
 	TranscriptSummary AssistedTranscriptSummary
@@ -123,10 +123,10 @@ func RenderAssistedAuthoringContextPackage(pkg AssistedAuthoringContextPackage) 
 func normalizeAuthoringContextSessionPaths(
 	projectDir string,
 	sessionID string,
-	paths AuthoringSessionPaths,
-) AuthoringSessionPaths {
+	paths SessionPaths,
+) SessionPaths {
 	if paths.SessionDir == "" {
-		return AuthoringSessionLayout(projectDir, sessionID)
+		return SessionLayout(projectDir, sessionID)
 	}
 
 	return paths
@@ -226,7 +226,7 @@ func loadAuthoringSelectedDocument(projectDir string, ref ArtifactRef) (authorin
 	}, Source: source}, nil
 }
 
-func summarizeAssistedTranscript(projectDir string, paths AuthoringSessionPaths, sessionID string, events []AssistedTranscriptEvent) (assistedTranscriptContext, error) {
+func summarizeAssistedTranscript(projectDir string, paths SessionPaths, sessionID string, events []AssistedTranscriptEvent) (assistedTranscriptContext, error) {
 	summary := AssistedTranscriptSummary{}
 	questions := map[string]AssistedTranscriptQuestionGap{}
 	answered := map[string]struct{}{}
@@ -272,7 +272,7 @@ func summarizeAssistedTranscript(projectDir string, paths AuthoringSessionPaths,
 	return assistedTranscriptContext{Summary: summary, Sources: []ContextSourceInventoryEntry{assistedTranscriptSource(projectDir, paths)}}, nil
 }
 
-func authoringSessionContextSources(projectDir string, paths AuthoringSessionPaths) []ContextSourceInventoryEntry {
+func authoringSessionContextSources(projectDir string, paths SessionPaths) []ContextSourceInventoryEntry {
 	sessionPath := relativeContextPath(projectDir, paths.SessionPath)
 	artifactsPath := relativeContextPath(projectDir, paths.ArtifactsPath)
 
@@ -298,7 +298,7 @@ func authoringSessionContextSources(projectDir string, paths AuthoringSessionPat
 	}
 }
 
-func assistedTranscriptSource(projectDir string, paths AuthoringSessionPaths) ContextSourceInventoryEntry {
+func assistedTranscriptSource(projectDir string, paths SessionPaths) ContextSourceInventoryEntry {
 	return ContextSourceInventoryEntry{
 		ID:          "authoring-session:transcript",
 		Kind:        ContextSourceKindDocument,
@@ -375,7 +375,7 @@ func writeAssistedContextSession(output *strings.Builder, pkg AssistedAuthoringC
 	output.WriteString("\n\n")
 }
 
-func writeAssistedContextArtifacts(output *strings.Builder, paths AuthoringSessionPaths) {
+func writeAssistedContextArtifacts(output *strings.Builder, paths SessionPaths) {
 	output.WriteString("## Session Artifacts\n\n")
 	output.WriteString("- session: ")
 	output.WriteString(filepath.ToSlash(paths.SessionPath))

@@ -13,12 +13,12 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func telegramAuthoringOwnerRequest() AuthoringContinuationRequest {
-	return AuthoringContinuationRequest{Binding: workflowstate.MutationBinding{RequestID: "authoring-fixture", Operator: "maintainer"}, ProjectID: "example-project", Namespace: "default", Action: "create", Target: ArtifactKindDump, Topic: "Timeout behavior", Capture: "Keep bounded retries."}
+func telegramAuthoringOwnerRequest() ContinuationRequest {
+	return ContinuationRequest{Binding: workflowstate.MutationBinding{RequestID: "authoring-fixture", Operator: "maintainer"}, ProjectID: "example-project", Namespace: "default", Action: "create", Target: ArtifactKindDump, Topic: "Timeout behavior", Capture: "Keep bounded retries."}
 }
 
-func telegramAuthoringOwnerDraft(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error) {
-	return AuthoringDraft{Body: "# Curated context\n\nKeep bounded retries.\n"}, nil
+func telegramAuthoringOwnerDraft(context.Context, Snapshot, ContinuationRequest) (Draft, error) {
+	return Draft{Body: "# Curated context\n\nKeep bounded retries.\n"}, nil
 }
 
 // TestTelegramAuthoringOwnerReplay recovers each partial journal through ordinary
@@ -34,7 +34,7 @@ func TestTelegramAuthoringOwnerReplay(t *testing.T) {
 // TestTelegramAuthoringOwnerQuestions binds real canonical prompt content and
 // multiline answers to a revision, preserving independent managed sessions.
 func TestTelegramAuthoringOwnerQuestions(t *testing.T) {
-	repo := NewAuthoringSessionRepository(t.TempDir())
+	repo := NewSessionRepository(t.TempDir())
 	first := telegramAuthoringCreateOwner(t, repo, "first")
 	second := telegramAuthoringCreateOwner(t, repo, "second")
 
@@ -77,7 +77,7 @@ func TestTelegramAuthoringOwnerQuestions(t *testing.T) {
 	}
 }
 
-func telegramAuthoringCreateOwner(t *testing.T, repo AuthoringSessionRepository, id string) AuthoringContinuationResult {
+func telegramAuthoringCreateOwner(t *testing.T, repo SessionRepository, id string) ContinuationResult {
 	t.Helper()
 
 	request := telegramAuthoringOwnerRequest()
@@ -91,17 +91,17 @@ func telegramAuthoringCreateOwner(t *testing.T, repo AuthoringSessionRepository,
 	return result
 }
 
-func telegramAuthoringNextOwner(result AuthoringContinuationResult, id, action string, target ArtifactKind) AuthoringContinuationRequest {
-	return AuthoringContinuationRequest{Binding: workflowstate.MutationBinding{RequestID: id, Operator: "maintainer"}, ProjectID: result.Session.ProjectID, Namespace: result.Session.Namespace, SessionID: result.Session.ID, Action: AuthoringContinuationAction(action), Target: target, ExpectedRevision: result.Session.Revision, ExpectedSourceHash: result.SourceHash}
+func telegramAuthoringNextOwner(result ContinuationResult, id, action string, target ArtifactKind) ContinuationRequest {
+	return ContinuationRequest{Binding: workflowstate.MutationBinding{RequestID: id, Operator: "maintainer"}, ProjectID: result.Session.ProjectID, Namespace: result.Session.Namespace, SessionID: result.Session.ID, Action: ContinuationAction(action), Target: target, ExpectedRevision: result.Session.Revision, ExpectedSourceHash: result.SourceHash}
 }
 
-func telegramAuthoringQuestionOwner(t *testing.T, repo AuthoringSessionRepository, previous AuthoringContinuationResult) AuthoringContinuationResult {
+func telegramAuthoringQuestionOwner(t *testing.T, repo SessionRepository, previous ContinuationResult) ContinuationResult {
 	t.Helper()
 
 	request := telegramAuthoringNextOwner(previous, "question-"+previous.Session.ID, "ask", ArtifactKindQuiz)
 
-	result, err := repo.ContinueAuthoring(t.Context(), request, func(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error) {
-		return AuthoringDraft{Question: "Which policy?\nKeep the old default?", Rationale: "Avoid scope expansion."}, nil
+	result, err := repo.ContinueAuthoring(t.Context(), request, func(context.Context, Snapshot, ContinuationRequest) (Draft, error) {
+		return Draft{Question: "Which policy?\nKeep the old default?", Rationale: "Avoid scope expansion."}, nil
 	})
 	if err != nil || result.Question == nil {
 		t.Fatalf("result=%+v err=%v", result, err)
@@ -118,7 +118,7 @@ func TestTelegramAuthoringOwnerConcurrent(t *testing.T) {
 
 	var calls atomic.Int64
 
-	generate := func(ctx context.Context, snapshot AuthoringSnapshot, request AuthoringContinuationRequest) (AuthoringDraft, error) {
+	generate := func(ctx context.Context, snapshot Snapshot, request ContinuationRequest) (Draft, error) {
 		if calls.Add(1) == 1 {
 			close(entered)
 		}
@@ -131,7 +131,7 @@ func TestTelegramAuthoringOwnerConcurrent(t *testing.T) {
 
 	for range 2 {
 		go func() {
-			_, err := NewAuthoringSessionRepository(root).ContinueAuthoring(t.Context(), telegramAuthoringOwnerRequest(), generate)
+			_, err := NewSessionRepository(root).ContinueAuthoring(t.Context(), telegramAuthoringOwnerRequest(), generate)
 			done <- err
 		}()
 	}
@@ -154,7 +154,7 @@ func TestTelegramAuthoringOwnerConcurrent(t *testing.T) {
 // file images; neither recovery nor a new ordinary mutation overwrites them.
 func TestTelegramAuthoringOwnerDivergence(t *testing.T) {
 	root := t.TempDir()
-	repo := &fileAuthoringSessionRepository{projectDir: root, afterMutationReplace: func(int) error { return errors.New("lost acknowledgement") }}
+	repo := &fileSessionRepository{projectDir: root, afterMutationReplace: func(int) error { return errors.New("lost acknowledgement") }}
 
 	result, err := repo.ContinueAuthoring(t.Context(), telegramAuthoringOwnerRequest(), telegramAuthoringOwnerDraft)
 	if err == nil {
@@ -166,7 +166,7 @@ func TestTelegramAuthoringOwnerDivergence(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	reopened := NewAuthoringSessionRepository(root)
+	reopened := NewSessionRepository(root)
 	if _, err := reopened.GetSession(t.Context(), result.Session.ID); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("divergent recovery err=%v", err)
 	}
@@ -185,7 +185,7 @@ func checkTelegramAuthoringOwnerFault(t *testing.T, fault int) {
 	t.Helper()
 
 	root := t.TempDir()
-	repo := &fileAuthoringSessionRepository{projectDir: root, afterMutationReplace: func(index int) error {
+	repo := &fileSessionRepository{projectDir: root, afterMutationReplace: func(index int) error {
 		if index == fault {
 			return errors.New("lost acknowledgement")
 		}
@@ -194,7 +194,7 @@ func checkTelegramAuthoringOwnerFault(t *testing.T, fault int) {
 	}}
 	request := telegramAuthoringOwnerRequest()
 	calls := 0
-	generate := func(ctx context.Context, snapshot AuthoringSnapshot, request AuthoringContinuationRequest) (AuthoringDraft, error) {
+	generate := func(ctx context.Context, snapshot Snapshot, request ContinuationRequest) (Draft, error) {
 		calls++
 
 		return telegramAuthoringOwnerDraft(ctx, snapshot, request)
@@ -205,7 +205,7 @@ func checkTelegramAuthoringOwnerFault(t *testing.T, fault int) {
 		t.Fatal("fault was not exercised")
 	}
 
-	reopened := NewAuthoringSessionRepository(root)
+	reopened := NewSessionRepository(root)
 
 	session, err := reopened.GetSession(t.Context(), first.Session.ID)
 	if err != nil {
@@ -228,7 +228,7 @@ func checkTelegramAuthoringOwnerFault(t *testing.T, fault int) {
 	}
 }
 
-func telegramAuthoringCheckAnswer(t *testing.T, repo AuthoringSessionRepository, id, expected string) {
+func telegramAuthoringCheckAnswer(t *testing.T, repo SessionRepository, id, expected string) {
 	t.Helper()
 
 	after, err := repo.ObserveContinuation(t.Context(), id)
@@ -244,7 +244,7 @@ func TestTelegramAuthoringOwnerLifetime(t *testing.T) {
 
 	var retained context.Context
 
-	if err := WithAuthoringMutation(t.Context(), root, func(ctx context.Context) error { retained = ctx; return nil }); err != nil {
+	if err := WithMutation(t.Context(), root, func(ctx context.Context) error { retained = ctx; return nil }); err != nil {
 		t.Fatal(err)
 	}
 
@@ -252,7 +252,7 @@ func TestTelegramAuthoringOwnerLifetime(t *testing.T) {
 
 	done := make(chan error, 1)
 	go func() {
-		done <- WithAuthoringMutation(t.Context(), root, func(context.Context) error { close(entered); <-release; return nil })
+		done <- WithMutation(t.Context(), root, func(context.Context) error { close(entered); <-release; return nil })
 	}()
 
 	<-entered
@@ -260,7 +260,7 @@ func TestTelegramAuthoringOwnerLifetime(t *testing.T) {
 	ctx, cancel := context.WithTimeout(retained, 20*time.Millisecond)
 	defer cancel()
 
-	err := WithAuthoringMutation(ctx, root, func(context.Context) error { t.Error("expired owner context bypassed exclusion"); return nil })
+	err := WithMutation(ctx, root, func(context.Context) error { t.Error("expired owner context bypassed exclusion"); return nil })
 
 	close(release)
 
@@ -277,14 +277,14 @@ func TestTelegramAuthoringOwnerLifetime(t *testing.T) {
 // identity, while retries preserve all prior canonical state and emit no artifact.
 func TestTelegramAuthoringOwnerBudget(t *testing.T) {
 	root := t.TempDir()
-	repo := &fileAuthoringSessionRepository{projectDir: root}
+	repo := &fileSessionRepository{projectDir: root}
 	request := telegramAuthoringOwnerRequest()
 	calls := 0
 
-	generate := func(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error) {
+	generate := func(context.Context, Snapshot, ContinuationRequest) (Draft, error) {
 		calls++
 
-		return AuthoringDraft{}, errors.New("provider unavailable")
+		return Draft{}, errors.New("provider unavailable")
 	}
 	for attempt := 1; attempt <= 5; attempt++ {
 		if _, err := repo.ContinueAuthoring(t.Context(), request, generate); err == nil {
@@ -297,7 +297,7 @@ func TestTelegramAuthoringOwnerBudget(t *testing.T) {
 		}
 
 		if attempt < 5 {
-			if _, err := repo.ContinueAuthoring(t.Context(), request, generate); !errors.Is(err, ErrAuthoringProviderWait) {
+			if _, err := repo.ContinueAuthoring(t.Context(), request, generate); !errors.Is(err, ErrProviderWait) {
 				t.Fatalf("retry deadline err=%v", err)
 			}
 		}
@@ -308,7 +308,7 @@ func TestTelegramAuthoringOwnerBudget(t *testing.T) {
 		}
 	}
 
-	if _, err := NewAuthoringSessionRepository(root).ContinueAuthoring(t.Context(), request, generate); !errors.Is(err, ErrAuthoringProviderExhausted) {
+	if _, err := NewSessionRepository(root).ContinueAuthoring(t.Context(), request, generate); !errors.Is(err, ErrProviderExhausted) {
 		t.Fatalf("reopened exhaustion err=%v", err)
 	}
 
@@ -322,7 +322,7 @@ func TestTelegramAuthoringOwnerBudget(t *testing.T) {
 	}
 }
 
-func telegramAuthoringTestBinding(t *testing.T, repo *fileAuthoringSessionRepository, id string) authoringRequestBinding {
+func telegramAuthoringTestBinding(t *testing.T, repo *fileSessionRepository, id string) authoringRequestBinding {
 	t.Helper()
 
 	data, err := repo.authoringRead(authoringRequestRef(id))
@@ -342,7 +342,7 @@ func telegramAuthoringTestBinding(t *testing.T, repo *fileAuthoringSessionReposi
 // identity changed; observing its path cannot authorize writing another session.
 func TestTelegramAuthoringOwnerPhysicalBinding(t *testing.T) {
 	root := t.TempDir()
-	repo := NewAuthoringSessionRepository(root)
+	repo := NewSessionRepository(root)
 	result := telegramAuthoringCreateOwner(t, repo, "physical-binding")
 	path := filepath.Join(root, result.SessionRef)
 
@@ -351,14 +351,14 @@ func TestTelegramAuthoringOwnerPhysicalBinding(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	session, err := ParseAuthoringSession(string(data))
+	session, err := ParseSession(string(data))
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	session.ID = "another-session"
 
-	content, err := RenderAuthoringSession(session, AuthoringSessionLayout(root, result.Session.ID))
+	content, err := RenderSession(session, SessionLayout(root, result.Session.ID))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -7,8 +7,8 @@ import (
 // ReconcileGuidedResult is an owned lifecycle transition. Only complete native
 // receipts can finish a run; pending operations and explicit stops take priority.
 func ReconcileGuidedResult(ctx context.Context, root string, scope GuidedUseCaseScope, workflow GuidedWorkflowObserver) (session Session, err error) {
-	r := &fileAuthoringSessionRepository{projectDir: root}
-	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
+	r := &fileSessionRepository{projectDir: root}
+	err = WithMutation(ctx, root, func(ctx context.Context) error {
 		session, err = r.getGuardedSession(ctx, scope.RunID)
 		if err != nil {
 			return err

@@ -14,7 +14,7 @@ import (
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
-var newAuthoringQuizQuestionProvider = func() authoringcore.AuthoringQuizQuestionProvider {
+var newAuthoringQuizQuestionProvider = func() authoringcore.QuizQuestionProvider {
 	return core.HarnessAuthoringQuizQuestionProvider{Program: codex.Program, Runner: codex.Runner{}}
 }
 
@@ -84,7 +84,7 @@ func (factory commandFactory) runAuthorQuizNew(ctx context.Context, cmd *cli.Com
 }
 
 func (factory commandFactory) runAuthorContextualQuizNew(ctx context.Context, cmd *cli.Command, projectContext commandProjectContext, session authoringcore.Session, now time.Time) error {
-	return withContextualQuizGeneration(ctx, cmd, projectContext, session.ID, func(ctx context.Context, provider authoringcore.AuthoringQuizQuestionProvider) error {
+	return withContextualQuizGeneration(ctx, cmd, projectContext, session.ID, func(ctx context.Context, provider authoringcore.QuizQuestionProvider) error {
 		plan, err := authoringcore.PlanContextualQuizGeneration(ctx, authoringcore.ContextualQuizGenerationOptions{
 			Context:       core.WorkspaceAuthoringQuizContext{},
 			ProjectDir:    projectContext.ProjectDir,
@@ -108,7 +108,7 @@ func (factory commandFactory) runAuthorContextualQuizNew(ctx context.Context, cm
 			return err
 		}
 
-		_, err = authoringcore.NewAuthoringSessionRepository(projectContext.ProjectDir).CreateSession(ctx, plan.Session)
+		_, err = authoringcore.NewSessionRepository(projectContext.ProjectDir).CreateSession(ctx, plan.Session)
 		if err != nil {
 			return err
 		}
@@ -142,7 +142,7 @@ func quizSessionFromCommand(cmd *cli.Command, projectContext commandProjectConte
 	return session, nil
 }
 
-func contextualQuizProviderFromCommand() authoringcore.AuthoringQuizQuestionProvider {
+func contextualQuizProviderFromCommand() authoringcore.QuizQuestionProvider {
 	return newAuthoringQuizQuestionProvider()
 }
 

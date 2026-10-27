@@ -28,8 +28,8 @@ func ApplyGuidedUseCaseStep(ctx context.Context, root string, command GuidedUseC
 		return session, err
 	}
 
-	r := &fileAuthoringSessionRepository{projectDir: root}
-	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
+	r := &fileSessionRepository{projectDir: root}
+	err = WithMutation(ctx, root, func(ctx context.Context) error {
 		session, err = r.getGuardedSession(ctx, command.RunID)
 		if err != nil {
 			return err
@@ -50,7 +50,7 @@ func ApplyGuidedUseCaseStep(ctx context.Context, root string, command GuidedUseC
 	return session, err
 }
 
-func (r *fileAuthoringSessionRepository) applyGuidedStep(ctx context.Context, session *Session, operation GuidedUseCaseOperation, apply GuidedUseCaseStep) error {
+func (r *fileSessionRepository) applyGuidedStep(ctx context.Context, session *Session, operation GuidedUseCaseOperation, apply GuidedUseCaseStep) error {
 	if session.Guided.PendingOperation == nil {
 		if err := guardGuidedStepInput(*session, operation); err != nil {
 			return err
@@ -149,7 +149,7 @@ func RetainGuidedUseCaseProgress(ctx context.Context, root string, session *Sess
 		return errors.New("guided progress requires its authoring owner")
 	}
 
-	r := &fileAuthoringSessionRepository{projectDir: root}
+	r := &fileSessionRepository{projectDir: root}
 	if err := r.recoverAuthoringMutation(); err != nil {
 		return err
 	}
@@ -219,7 +219,7 @@ type guidedStageSeal struct {
 }
 
 func sealGuidedStage(ctx context.Context, root string, session *Session, seal guidedStageSeal) error {
-	r := &fileAuthoringSessionRepository{projectDir: root}
+	r := &fileSessionRepository{projectDir: root}
 
 	operation := session.Guided.PendingOperation
 	if operation == nil {

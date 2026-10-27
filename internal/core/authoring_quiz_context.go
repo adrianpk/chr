@@ -12,13 +12,13 @@ import (
 )
 
 // Load assembles the original workspace, session and filesystem context.
-func (WorkspaceAuthoringQuizContext) Load(ctx context.Context, projectDir string, session authoringcore.Session) ([]authoringcore.AuthoringQuizContextSection, error) {
+func (WorkspaceAuthoringQuizContext) Load(ctx context.Context, projectDir string, session authoringcore.Session) ([]authoringcore.QuizContextSection, error) {
 	projectDir, err := authoringcore.CleanContextProjectDir(projectDir)
 	if err != nil {
 		return nil, err
 	}
 
-	sections := []authoringcore.AuthoringQuizContextSection{
+	sections := []authoringcore.QuizContextSection{
 		{
 			Name:      "project",
 			Layer:     "project",
@@ -54,7 +54,7 @@ func authoringQuizSessionContext(session authoringcore.Session) string {
 	return strings.Join(lines, "\n")
 }
 
-func authoringQuizOptionalFileSection(projectDir, name, layer, relPath string) authoringcore.AuthoringQuizContextSection {
+func authoringQuizOptionalFileSection(projectDir, name, layer, relPath string) authoringcore.QuizContextSection {
 	fullPath := filepath.Join(projectDir, filepath.FromSlash(relPath))
 
 	content, err := os.ReadFile(fullPath)
@@ -62,7 +62,7 @@ func authoringQuizOptionalFileSection(projectDir, name, layer, relPath string) a
 		content = []byte("missing: " + relPath)
 	}
 
-	return authoringcore.AuthoringQuizContextSection{
+	return authoringcore.QuizContextSection{
 		Name:      name,
 		Layer:     layer,
 		Authority: relPath,
@@ -70,10 +70,10 @@ func authoringQuizOptionalFileSection(projectDir, name, layer, relPath string) a
 	}
 }
 
-func authoringQuizWorkspaceGraphSection(ctx context.Context, projectDir string) authoringcore.AuthoringQuizContextSection {
+func authoringQuizWorkspaceGraphSection(ctx context.Context, projectDir string) authoringcore.QuizContextSection {
 	graph, err := NewWorkspaceGraphBuilder(projectDir).Build(ctx)
 	if err != nil {
-		return authoringcore.AuthoringQuizContextSection{
+		return authoringcore.QuizContextSection{
 			Name:      "workspace_graph_context",
 			Layer:     "workspace",
 			Authority: "WorkspaceGraph",
@@ -83,7 +83,7 @@ func authoringQuizWorkspaceGraphSection(ctx context.Context, projectDir string) 
 
 	assembly, err := AssembleWorkspaceContext(NewProjectWideWorkspaceContextRequest(projectDir, graph))
 	if err != nil {
-		return authoringcore.AuthoringQuizContextSection{
+		return authoringcore.QuizContextSection{
 			Name:      "workspace_graph_context",
 			Layer:     "workspace",
 			Authority: "WorkspaceGraph",
@@ -91,7 +91,7 @@ func authoringQuizWorkspaceGraphSection(ctx context.Context, projectDir string) 
 		}
 	}
 
-	return authoringcore.AuthoringQuizContextSection{
+	return authoringcore.QuizContextSection{
 		Name:      "workspace_graph_context",
 		Layer:     "workspace",
 		Authority: "WorkspaceGraph",
@@ -99,11 +99,11 @@ func authoringQuizWorkspaceGraphSection(ctx context.Context, projectDir string) 
 	}
 }
 
-func authoringQuizPathInventorySection(projectDir, name, layer, relPath string) authoringcore.AuthoringQuizContextSection {
+func authoringQuizPathInventorySection(projectDir, name, layer, relPath string) authoringcore.QuizContextSection {
 	root := filepath.Join(projectDir, filepath.FromSlash(relPath))
 	paths := authoringQuizRelativePaths(projectDir, root, authoringQuizMarkdownPath)
 
-	return authoringcore.AuthoringQuizContextSection{
+	return authoringcore.QuizContextSection{
 		Name:      name,
 		Layer:     layer,
 		Authority: relPath,
@@ -111,10 +111,10 @@ func authoringQuizPathInventorySection(projectDir, name, layer, relPath string) 
 	}
 }
 
-func authoringQuizTreeSection(projectDir string) authoringcore.AuthoringQuizContextSection {
+func authoringQuizTreeSection(projectDir string) authoringcore.QuizContextSection {
 	paths := authoringQuizRelativePaths(projectDir, projectDir, authoringQuizTreePath)
 
-	return authoringcore.AuthoringQuizContextSection{
+	return authoringcore.QuizContextSection{
 		Name:      "tree",
 		Layer:     "tree",
 		Authority: "project_tree",
@@ -122,10 +122,10 @@ func authoringQuizTreeSection(projectDir string) authoringcore.AuthoringQuizCont
 	}
 }
 
-func authoringQuizGoInventorySection(projectDir string) authoringcore.AuthoringQuizContextSection {
+func authoringQuizGoInventorySection(projectDir string) authoringcore.QuizContextSection {
 	paths := authoringQuizRelativePaths(projectDir, projectDir, authoringQuizGoPath)
 
-	return authoringcore.AuthoringQuizContextSection{
+	return authoringcore.QuizContextSection{
 		Name:      "go_inventory",
 		Layer:     "code",
 		Authority: "go_files",

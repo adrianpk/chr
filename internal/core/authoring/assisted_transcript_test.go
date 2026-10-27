@@ -91,7 +91,7 @@ func invalidAssistedTranscriptEventTests() []struct {
 func TestAuthoringSessionRepositoryAppendsTranscriptEvents(t *testing.T) {
 	ctx := context.Background()
 	projectDir := t.TempDir()
-	repository := NewAuthoringSessionRepository(projectDir)
+	repository := NewSessionRepository(projectDir)
 	session := validAssistedTranscriptSession()
 
 	_, err := repository.CreateSession(ctx, session)
@@ -122,7 +122,7 @@ func TestAuthoringSessionRepositoryAppendsTranscriptEvents(t *testing.T) {
 func TestAuthoringSessionRepositoryDoesNotRewriteSessionWhenAppendingTranscript(t *testing.T) {
 	ctx := context.Background()
 	projectDir := t.TempDir()
-	repository := NewAuthoringSessionRepository(projectDir)
+	repository := NewSessionRepository(projectDir)
 	session := validAssistedTranscriptSession()
 
 	paths, err := repository.CreateSession(ctx, session)
@@ -147,11 +147,11 @@ func TestAuthoringSessionRepositoryDoesNotRewriteSessionWhenAppendingTranscript(
 func TestAuthoringSessionRepositoryRejectsMissingTranscriptSession(t *testing.T) {
 	ctx := context.Background()
 	projectDir := t.TempDir()
-	repository := NewAuthoringSessionRepository(projectDir)
+	repository := NewSessionRepository(projectDir)
 	events := []AssistedTranscriptEvent{validAssistedTranscriptEvent(AssistedTranscriptEventQuestion)}
 
 	err := repository.AppendTranscriptEvents(ctx, "missing", events)
-	if !errors.Is(err, ErrAuthoringSessionNotFound) {
+	if !errors.Is(err, ErrSessionNotFound) {
 		t.Fatalf("AppendTranscriptEvents error = %v, want ErrAuthoringSessionNotFound", err)
 	}
 }

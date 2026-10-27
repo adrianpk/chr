@@ -21,7 +21,7 @@ type telegramAuthoringLostAck struct {
 	lost *atomic.Bool
 }
 
-func (s telegramAuthoringLostAck) ContinueTelegramAuthoring(ctx context.Context, target telegramcore.OperationTarget, request authoringcore.AuthoringContinuationRequest, guard authoringcore.AuthoringCommitGuard) (authoringcore.AuthoringContinuationResult, error) {
+func (s telegramAuthoringLostAck) ContinueTelegramAuthoring(ctx context.Context, target telegramcore.OperationTarget, request authoringcore.ContinuationRequest, guard authoringcore.CommitGuard) (authoringcore.ContinuationResult, error) {
 	result, err := s.service.ContinueTelegramAuthoring(ctx, target, request, guard)
 	if err == nil && s.lost.CompareAndSwap(false, true) {
 		return result, errTelegramAuthoringLostAck
@@ -86,7 +86,7 @@ func telegramAuthoringLostAckEdit(t *testing.T, operations service) (string, str
 	}
 
 	root := projects[0].Path
-	repository := authoringcore.NewAuthoringSessionRepository(root)
+	repository := authoringcore.NewSessionRepository(root)
 
 	sessions, err := repository.ListSessions(t.Context())
 	if err != nil || len(sessions) != 1 || len(sessions[0].Outputs) != 1 {
@@ -160,7 +160,7 @@ func TestTelegramAuthoringBridgeAuthority(t *testing.T) {
 				t.Fatal("changed authority advanced the conversation")
 			}
 
-			sessions, err := authoringcore.NewAuthoringSessionRepository(root).ListSessions(t.Context())
+			sessions, err := authoringcore.NewSessionRepository(root).ListSessions(t.Context())
 			if err != nil || len(sessions) != 0 {
 				t.Fatal("changed authority committed canonical authoring", sessions, err)
 			}

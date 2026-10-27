@@ -10,8 +10,8 @@ import (
 	slugcore "forge.adrianpk.com/chr/internal/core/ops/slug"
 )
 
-// AuthoringArtifactLayoutOptions describes a package boundary value.
-type AuthoringArtifactLayoutOptions struct {
+// ArtifactLayoutOptions describes a package boundary value.
+type ArtifactLayoutOptions struct {
 	ProjectDir   string
 	SessionID    string
 	Kind         ArtifactKind
@@ -22,23 +22,23 @@ type AuthoringArtifactLayoutOptions struct {
 	AllowReplace bool
 }
 
-// AuthoringArtifactLayout describes a package boundary value.
-type AuthoringArtifactLayout struct {
+// ArtifactLayout describes a package boundary value.
+type ArtifactLayout struct {
 	Ref       ArtifactRef
 	FullPath  string
 	Dir       string
-	Collision AuthoringArtifactCollision
+	Collision ArtifactCollision
 }
 
-// AuthoringArtifactCollision describes a package boundary value.
-type AuthoringArtifactCollision struct {
+// ArtifactCollision describes a package boundary value.
+type ArtifactCollision struct {
 	Exists  bool
 	Path    string
 	Allowed bool
 }
 
-// AuthoringArtifactInventoryEntry describes a package boundary value.
-type AuthoringArtifactInventoryEntry struct {
+// ArtifactInventoryEntry describes a package boundary value.
+type ArtifactInventoryEntry struct {
 	SessionID  string
 	ArtifactID string
 	Kind       ArtifactKind
@@ -48,24 +48,24 @@ type AuthoringArtifactInventoryEntry struct {
 	Collision  bool
 }
 
-// PlanAuthoringArtifactLayout executes the corresponding package operation.
-func PlanAuthoringArtifactLayout(opts AuthoringArtifactLayoutOptions) (AuthoringArtifactLayout, error) {
+// PlanArtifactLayout executes the corresponding package operation.
+func PlanArtifactLayout(opts ArtifactLayoutOptions) (ArtifactLayout, error) {
 	err := validateAuthoringArtifactLayoutOptions(opts)
 	if err != nil {
-		return AuthoringArtifactLayout{}, err
+		return ArtifactLayout{}, err
 	}
 
 	body, err := authoringArtifactPath(opts)
 	if err != nil {
-		return AuthoringArtifactLayout{}, err
+		return ArtifactLayout{}, err
 	}
 
 	collision, err := authoringArtifactCollision(body.Path, opts.AllowReplace)
 	if err != nil {
-		return AuthoringArtifactLayout{}, err
+		return ArtifactLayout{}, err
 	}
 
-	return AuthoringArtifactLayout{
+	return ArtifactLayout{
 		Ref: ArtifactRef{
 			ID:          authoringArtifactID(opts),
 			Kind:        opts.Kind,
@@ -79,12 +79,12 @@ func PlanAuthoringArtifactLayout(opts AuthoringArtifactLayoutOptions) (Authoring
 	}, nil
 }
 
-// AuthoringArtifactInventory executes the corresponding package operation.
-func AuthoringArtifactInventory(sessionID string, layouts []AuthoringArtifactLayout) []AuthoringArtifactInventoryEntry {
-	entries := make([]AuthoringArtifactInventoryEntry, 0, len(layouts))
+// ArtifactInventory executes the corresponding package operation.
+func ArtifactInventory(sessionID string, layouts []ArtifactLayout) []ArtifactInventoryEntry {
+	entries := make([]ArtifactInventoryEntry, 0, len(layouts))
 
 	for _, layout := range layouts {
-		entries = append(entries, AuthoringArtifactInventoryEntry{
+		entries = append(entries, ArtifactInventoryEntry{
 			SessionID:  sessionID,
 			ArtifactID: layout.Ref.ID,
 			Kind:       layout.Ref.Kind,
@@ -98,7 +98,7 @@ func AuthoringArtifactInventory(sessionID string, layouts []AuthoringArtifactLay
 	return entries
 }
 
-func validateAuthoringArtifactLayoutOptions(opts AuthoringArtifactLayoutOptions) error {
+func validateAuthoringArtifactLayoutOptions(opts ArtifactLayoutOptions) error {
 	if opts.ProjectDir == "" {
 		return fmt.Errorf("authoring artifact project dir is required")
 	}
@@ -131,7 +131,7 @@ func EnsureAuthoringArtifactMetadata(projectDir string, ref ArtifactRef) error {
 	return opscore.EnsureArtifactBodyMetadata(projectDir, ref.Path)
 }
 
-func authoringArtifactPath(opts AuthoringArtifactLayoutOptions) (opscore.NamedArtifactPath, error) {
+func authoringArtifactPath(opts ArtifactLayoutOptions) (opscore.NamedArtifactPath, error) {
 	name := strings.TrimSpace(opts.Name)
 	if name == "" {
 		name = opts.Topic
@@ -178,7 +178,7 @@ func authoringArtifactFileName(sessionID, name string) string {
 	return sessionSlug + "-" + slug + ".md"
 }
 
-func authoringArtifactID(opts AuthoringArtifactLayoutOptions) string {
+func authoringArtifactID(opts ArtifactLayoutOptions) string {
 	name := strings.TrimSpace(opts.Name)
 	if name == "" {
 		name = opts.Topic
@@ -187,14 +187,14 @@ func authoringArtifactID(opts AuthoringArtifactLayoutOptions) string {
 	return string(opts.Kind) + ":" + strings.ToLower(slugcore.ArtifactName(opts.SessionID)) + ":" + strings.ToLower(slugcore.ArtifactName(name))
 }
 
-func authoringArtifactCollision(path string, allowReplace bool) (AuthoringArtifactCollision, error) {
+func authoringArtifactCollision(path string, allowReplace bool) (ArtifactCollision, error) {
 	info, err := os.Stat(path)
 	if err == nil {
 		if info.Size() == 0 {
-			return AuthoringArtifactCollision{Path: path, Allowed: true}, nil
+			return ArtifactCollision{Path: path, Allowed: true}, nil
 		}
 
-		return AuthoringArtifactCollision{
+		return ArtifactCollision{
 			Exists:  true,
 			Path:    path,
 			Allowed: allowReplace,
@@ -202,8 +202,8 @@ func authoringArtifactCollision(path string, allowReplace bool) (AuthoringArtifa
 	}
 
 	if !os.IsNotExist(err) {
-		return AuthoringArtifactCollision{}, fmt.Errorf("stat authoring artifact: %w", err)
+		return ArtifactCollision{}, fmt.Errorf("stat authoring artifact: %w", err)
 	}
 
-	return AuthoringArtifactCollision{Path: path, Allowed: true}, nil
+	return ArtifactCollision{Path: path, Allowed: true}, nil
 }

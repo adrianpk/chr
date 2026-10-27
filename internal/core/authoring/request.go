@@ -17,11 +17,11 @@ import (
 )
 
 type normalizedAuthoringRequest struct {
-	Request AuthoringContinuationRequest
+	Request ContinuationRequest
 	Digest  string
 }
 
-func normalizeAuthoringRequest(request AuthoringContinuationRequest) (normalizedAuthoringRequest, error) {
+func normalizeAuthoringRequest(request ContinuationRequest) (normalizedAuthoringRequest, error) {
 	if err := request.Binding.Validate(); err != nil {
 		return normalizedAuthoringRequest{Request: request}, err
 	}
@@ -50,7 +50,7 @@ func normalizeAuthoringRequest(request AuthoringContinuationRequest) (normalized
 	return normalizedAuthoringRequest{Request: request, Digest: contenthash.Sum(encoded)}, nil
 }
 
-func validateAuthoringRequest(request AuthoringContinuationRequest) error {
+func validateAuthoringRequest(request ContinuationRequest) error {
 	if len(request.Topic) > 512 || len(request.Capture) > 65536 || len(request.Instructions) > 16384 || len(request.OriginalInstruction) > 16384 {
 		return errors.New("authoring input exceeds its bound")
 	}
@@ -70,7 +70,7 @@ func validateAuthoringRequest(request AuthoringContinuationRequest) error {
 	return validateAuthoringActionArguments(request)
 }
 
-func validateAuthoringActionArguments(request AuthoringContinuationRequest) error {
+func validateAuthoringActionArguments(request ContinuationRequest) error {
 	switch request.Action {
 	case "ask", "generate", "refine":
 		if request.Question != nil {
@@ -87,7 +87,7 @@ func validateAuthoringActionArguments(request AuthoringContinuationRequest) erro
 	return nil
 }
 
-func (r *fileAuthoringSessionRepository) reserveAuthoringRequest(request AuthoringContinuationRequest, digest string) (authoringRequestBinding, error) {
+func (r *fileSessionRepository) reserveAuthoringRequest(request ContinuationRequest, digest string) (authoringRequestBinding, error) {
 	binding := authoringRequestBinding{Schema: "chr-authoring-request/v1", Digest: digest, Request: request}
 
 	data, err := r.authoringRead(authoringRequestRef(request.Binding.RequestID))
@@ -108,7 +108,7 @@ func (r *fileAuthoringSessionRepository) reserveAuthoringRequest(request Authori
 	return binding, r.saveAuthoringRequest(binding)
 }
 
-func (r *fileAuthoringSessionRepository) saveAuthoringRequest(binding authoringRequestBinding) error {
+func (r *fileSessionRepository) saveAuthoringRequest(binding authoringRequestBinding) error {
 	path, err := r.authoringPath(authoringRequestRef(binding.Request.Binding.RequestID))
 	if err != nil {
 		return err
@@ -122,11 +122,11 @@ func (r *fileAuthoringSessionRepository) saveAuthoringRequest(binding authoringR
 	return opsfile.WriteAtomic(path, encoded)
 }
 
-func (r *fileAuthoringSessionRepository) authoringRequestCapacity() error {
+func (r *fileSessionRepository) authoringRequestCapacity() error {
 	return r.authoringStateCapacity("requests")
 }
 
-func (r *fileAuthoringSessionRepository) authoringStateCapacity(directory string) error {
+func (r *fileSessionRepository) authoringStateCapacity(directory string) error {
 	path, err := r.authoringPath(authoringRuntimeRef(directory))
 	if err != nil {
 		return err
@@ -159,11 +159,11 @@ func (r *fileAuthoringSessionRepository) authoringStateCapacity(directory string
 }
 
 type authoringReceiptLookup struct {
-	Result AuthoringContinuationResult
+	Result ContinuationResult
 	Found  bool
 }
 
-func (r *fileAuthoringSessionRepository) readAuthoringReceipt(request AuthoringContinuationRequest, digest string) (authoringReceiptLookup, error) {
+func (r *fileSessionRepository) readAuthoringReceipt(request ContinuationRequest, digest string) (authoringReceiptLookup, error) {
 	var receipt authoringMutationReceipt
 
 	data, err := r.authoringRead(authoringReceiptRef(request.Binding.RequestID))
@@ -204,7 +204,7 @@ func readExistingAuthoringBinding(data []byte, digest string) (authoringRequestB
 	return binding, nil
 }
 
-func validateAuthoringReceipt(receipt authoringMutationReceipt, request AuthoringContinuationRequest, digest string) error {
+func validateAuthoringReceipt(receipt authoringMutationReceipt, request ContinuationRequest, digest string) error {
 	checksum := receipt.Checksum
 	receipt.Checksum = ""
 
@@ -233,7 +233,7 @@ func validAuthoringContinuationKind(kind ArtifactKind) bool {
 	}
 }
 
-func validateAuthoringCreation(request AuthoringContinuationRequest) error {
+func validateAuthoringCreation(request ContinuationRequest) error {
 	if request.Topic == "" || request.Capture == "" || request.ExpectedRevision != 0 || request.ExpectedSourceHash != "" || request.Question != nil {
 		return workflowstate.ErrConflict
 	}
@@ -241,6 +241,6 @@ func validateAuthoringCreation(request AuthoringContinuationRequest) error {
 	return nil
 }
 
-func validAuthoringObservation(request AuthoringContinuationRequest) bool {
+func validAuthoringObservation(request ContinuationRequest) bool {
 	return request.ExpectedRevision > 0 && len(request.ExpectedSourceHash) == 64 && request.Topic == "" && request.Capture == "" && request.OriginalInstruction == ""
 }

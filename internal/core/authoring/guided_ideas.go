@@ -28,8 +28,8 @@ func RetainGuidedIdea(ctx context.Context, root string, command GuidedUseCaseCom
 		return session, errors.Join(workflowstate.ErrConflict, err)
 	}
 
-	r := &fileAuthoringSessionRepository{projectDir: root}
-	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
+	r := &fileSessionRepository{projectDir: root}
+	err = WithMutation(ctx, root, func(ctx context.Context) error {
 		session, err = r.getGuardedSession(ctx, command.RunID)
 		if err != nil {
 			return err
@@ -82,7 +82,7 @@ func guidedIdeaOwnsID(state *GuidedUseCaseState, id string) bool {
 	return false
 }
 
-func (r *fileAuthoringSessionRepository) retainGuidedIdea(session *Session, operation GuidedUseCaseOperation) error {
+func (r *fileSessionRepository) retainGuidedIdea(session *Session, operation GuidedUseCaseOperation) error {
 	idea := GuidedLaterIdea{GuidedIdeaReference: GuidedIdeaReference{ID: operation.ID, Digest: operation.Digest, Actor: session.Guided.Actor, CreatedAt: time.Now().UTC()}, Content: operation.Content, State: "pending_review"}
 	idea.Path = authoringRuntimeRef(filepath.Join("sessions", session.ID, "later-ideas", operation.ID+".json"))
 
@@ -116,7 +116,7 @@ func ReadGuidedIdeas(ctx context.Context, root string, session Session) ([]Guide
 		return nil, workflowstate.ErrConflict
 	}
 
-	r := &fileAuthoringSessionRepository{projectDir: root}
+	r := &fileSessionRepository{projectDir: root}
 
 	result := make([]GuidedLaterIdea, 0, len(session.Guided.LaterIdeas))
 	for _, ref := range session.Guided.LaterIdeas {
@@ -135,7 +135,7 @@ func ReadGuidedIdeas(ctx context.Context, root string, session Session) ([]Guide
 	return result, nil
 }
 
-func (r *fileAuthoringSessionRepository) readGuidedIdea(id string, ref GuidedIdeaReference) (GuidedLaterIdea, error) {
+func (r *fileSessionRepository) readGuidedIdea(id string, ref GuidedIdeaReference) (GuidedLaterIdea, error) {
 	if ref.Path != authoringRuntimeRef(filepath.Join("sessions", id, "later-ideas", ref.ID+".json")) {
 		return GuidedLaterIdea{}, workflowstate.ErrConflict
 	}

@@ -12,12 +12,12 @@ import (
 // artifact together, then recovers the original receipt without another model call.
 func TestTelegramAuthoringRespondRecovery(t *testing.T) {
 	root := t.TempDir()
-	repo := &fileAuthoringSessionRepository{projectDir: root}
+	repo := &fileSessionRepository{projectDir: root}
 	request := telegramAuthoringOwnerRequest()
 	request.Target = ArtifactKindSpec
 
-	asked, err := repo.ContinueAuthoring(t.Context(), request, func(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error) {
-		return AuthoringDraft{Question: "Which timeout?"}, nil
+	asked, err := repo.ContinueAuthoring(t.Context(), request, func(context.Context, Snapshot, ContinuationRequest) (Draft, error) {
+		return Draft{Question: "Which timeout?"}, nil
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -26,10 +26,10 @@ func TestTelegramAuthoringRespondRecovery(t *testing.T) {
 	respond := telegramAuthoringNextOwner(asked, "respond", "respond", ArtifactKindSpec)
 	respond.Question, respond.Instructions = asked.Question, "Sixty seconds."
 	providerCalls := 0
-	generate := func(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error) {
+	generate := func(context.Context, Snapshot, ContinuationRequest) (Draft, error) {
 		providerCalls++
 
-		return AuthoringDraft{Body: "# Requirements\n\nSixty seconds.\n"}, nil
+		return Draft{Body: "# Requirements\n\nSixty seconds.\n"}, nil
 	}
 	repo.afterMutationReplace = func(index int) error {
 		if index == 1 {
@@ -44,7 +44,7 @@ func TestTelegramAuthoringRespondRecovery(t *testing.T) {
 		t.Fatal("journal interruption was not exercised")
 	}
 
-	reopened := NewAuthoringSessionRepository(root)
+	reopened := NewSessionRepository(root)
 
 	snapshot, err := reopened.ObserveContinuation(t.Context(), asked.Session.ID)
 	if err != nil || snapshot.Question != nil || len(snapshot.Session.Outputs) != 1 {
@@ -56,7 +56,7 @@ func TestTelegramAuthoringRespondRecovery(t *testing.T) {
 	telegramAuthoringCheckRespondReplay(t, reopened, respond, confirmed, generate, &providerCalls)
 }
 
-func telegramAuthoringCheckRespondReplay(t *testing.T, reopened AuthoringSessionRepository, respond AuthoringContinuationRequest, confirmed AuthoringContinuationResult, generate AuthoringGenerator, providerCalls *int) {
+func telegramAuthoringCheckRespondReplay(t *testing.T, reopened SessionRepository, respond ContinuationRequest, confirmed ContinuationResult, generate Generator, providerCalls *int) {
 	t.Helper()
 
 	guardCalls := 0
@@ -74,14 +74,14 @@ func telegramAuthoringCheckRespondReplay(t *testing.T, reopened AuthoringSession
 // TestTelegramAuthoringCommitGuard checks authority after provider preparation
 // and keeps its failed request binding immutable without canonical file effects.
 func TestTelegramAuthoringCommitGuard(t *testing.T) {
-	repo := NewAuthoringSessionRepository(t.TempDir())
+	repo := NewSessionRepository(t.TempDir())
 	request := telegramAuthoringOwnerRequest()
 	generated := false
 
-	_, err := repo.ContinueAuthoring(t.Context(), request, func(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error) {
+	_, err := repo.ContinueAuthoring(t.Context(), request, func(context.Context, Snapshot, ContinuationRequest) (Draft, error) {
 		generated = true
 
-		return AuthoringDraft{Body: "Unconfirmed preparation"}, nil
+		return Draft{Body: "Unconfirmed preparation"}, nil
 	}, func(context.Context) error {
 		if !generated {
 			t.Error("authority was not checked after generation")

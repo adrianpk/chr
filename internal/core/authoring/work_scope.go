@@ -14,9 +14,9 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// AuthoringWorkScope binds a proposed native description to canonical inputs.
+// WorkScope binds a proposed native description to canonical inputs.
 // It does not authorize admission, alter policy or replace a workflow preview.
-type AuthoringWorkScope struct {
+type WorkScope struct {
 	Schema          string                        `json:"schema"`
 	Binding         workflowstate.MutationBinding `json:"binding"`
 	Intent          authoringstate.Intent         `json:"intent"`
@@ -34,15 +34,15 @@ type AuthoringWorkScope struct {
 	Hash            string                        `json:"scope_hash"`
 }
 
-// AuthoringWorkAuthorization retains a host-validated explicit decision for the
+// WorkAuthorization retains a host-validated explicit decision for the
 // exact displayed scope. Provider output cannot supply this value.
-type AuthoringWorkAuthorization struct {
+type WorkAuthorization struct {
 	Binding   workflowstate.MutationBinding `json:"binding"`
 	ScopeHash string                        `json:"scope_hash"`
 }
 
 // SealAuthoringWorkScope computes the immutable scope binding after validation.
-func SealAuthoringWorkScope(scope AuthoringWorkScope) (AuthoringWorkScope, error) {
+func SealAuthoringWorkScope(scope WorkScope) (WorkScope, error) {
 	scope.Schema, scope.Hash = "chr-authoring-work/v1", ""
 	if err := validateAuthoringWorkScope(scope); err != nil {
 		return scope, err
@@ -54,8 +54,8 @@ func SealAuthoringWorkScope(scope AuthoringWorkScope) (AuthoringWorkScope, error
 	return scope, err
 }
 
-// ValidateAuthoringWorkScope checks the original scope and its complete digest.
-func ValidateAuthoringWorkScope(scope AuthoringWorkScope) error {
+// ValidateWorkScope checks the original scope and its complete digest.
+func ValidateWorkScope(scope WorkScope) error {
 	expected, err := SealAuthoringWorkScope(scope)
 	if err != nil {
 		return err
@@ -70,26 +70,26 @@ func ValidateAuthoringWorkScope(scope AuthoringWorkScope) error {
 
 // AuthorizeAuthoringWork binds an explicit caller decision to the observed scope.
 // A changed description or source requires a new decision for the changed hash.
-func AuthorizeAuthoringWork(scope AuthoringWorkScope, decision workflowstate.MutationBinding, observed string) (AuthoringWorkAuthorization, error) {
-	if err := ValidateAuthoringWorkScope(scope); err != nil {
-		return AuthoringWorkAuthorization{}, err
+func AuthorizeAuthoringWork(scope WorkScope, decision workflowstate.MutationBinding, observed string) (WorkAuthorization, error) {
+	if err := ValidateWorkScope(scope); err != nil {
+		return WorkAuthorization{}, err
 	}
 
 	if err := decision.Validate(); err != nil {
-		return AuthoringWorkAuthorization{}, err
+		return WorkAuthorization{}, err
 	}
 
 	if scope.Intent != authoringstate.IntentDevelop || decision.Operator != scope.Binding.Operator || observed != scope.Hash {
-		return AuthoringWorkAuthorization{}, workflowstate.ErrConflict
+		return WorkAuthorization{}, workflowstate.ErrConflict
 	}
 
-	return AuthoringWorkAuthorization{Binding: decision, ScopeHash: observed}, nil
+	return WorkAuthorization{Binding: decision, ScopeHash: observed}, nil
 }
 
-// ValidateAuthoringWorkAuthorization rejects widening a preparation or reusing
+// ValidateWorkAuthorization rejects widening a preparation or reusing
 // a decision for another operator or changed canonical requirements.
-func ValidateAuthoringWorkAuthorization(scope AuthoringWorkScope, authority *AuthoringWorkAuthorization) error {
-	if err := ValidateAuthoringWorkScope(scope); err != nil {
+func ValidateWorkAuthorization(scope WorkScope, authority *WorkAuthorization) error {
+	if err := ValidateWorkScope(scope); err != nil {
 		return err
 	}
 
@@ -102,7 +102,7 @@ func ValidateAuthoringWorkAuthorization(scope AuthoringWorkScope, authority *Aut
 	}
 
 	if authority == nil {
-		return ErrAuthoringAuthorityRequired
+		return ErrAuthorityRequired
 	}
 
 	_, err := AuthorizeAuthoringWork(scope, authority.Binding, authority.ScopeHash)
@@ -110,10 +110,10 @@ func ValidateAuthoringWorkAuthorization(scope AuthoringWorkScope, authority *Aut
 	return err
 }
 
-// ErrAuthoringAuthorityRequired requests one explicit decision for displayed work.
-var ErrAuthoringAuthorityRequired = errors.New("the prepared scope requires explicit development authority")
+// ErrAuthorityRequired requests one explicit decision for displayed work.
+var ErrAuthorityRequired = errors.New("the prepared scope requires explicit development authority")
 
-func validateAuthoringWorkScope(scope AuthoringWorkScope) error {
+func validateAuthoringWorkScope(scope WorkScope) error {
 	if err := scope.Binding.Validate(); err != nil {
 		return err
 	}
@@ -140,7 +140,7 @@ func validateAuthoringWorkScope(scope AuthoringWorkScope) error {
 	return nil
 }
 
-func validateAuthoringWorkBounds(scope AuthoringWorkScope) error {
+func validateAuthoringWorkBounds(scope WorkScope) error {
 	if strings.TrimSpace(scope.Instruction) == "" || len(scope.Instruction) > 8192 || !utf8.ValidString(scope.Instruction) || scope.ProjectID == "" || len(scope.ProjectID) > 128 || !opsnamespace.Valid(scope.Namespace) || scope.SessionRevision < 1 {
 		return errors.New("invalid bounded authoring work scope")
 	}
@@ -148,7 +148,7 @@ func validateAuthoringWorkBounds(scope AuthoringWorkScope) error {
 	return authoringstate.ValidateSessionID(scope.SessionID)
 }
 
-func validateAuthoringWorkPaths(scope AuthoringWorkScope) error {
+func validateAuthoringWorkPaths(scope WorkScope) error {
 	if scope.SessionRef != filepath.ToSlash(filepath.Join(".chr", "authoring", "sessions", scope.SessionID, "session.md")) || scope.DescriptionRef == "" || len(scope.DescriptionRef) > 1024 {
 		return workflowstate.ErrConflict
 	}

@@ -13,7 +13,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r *fileAuthoringSessionRepository) readProjectDumpArtifact(reference string) (projectDumpRead, error) {
+func (r *fileSessionRepository) readProjectDumpArtifact(reference string) (projectDumpRead, error) {
 	if err := ValidateProjectDumpReference(reference); err != nil {
 		return projectDumpRead{Artifact: ProjectDumpArtifact{}, Bytes: 0}, err
 	}
@@ -43,11 +43,11 @@ func (r *fileAuthoringSessionRepository) readProjectDumpArtifact(reference strin
 	return projectDumpRead{Artifact: artifact, Bytes: len(body) + len(encoded)}, err
 }
 
-func (r *fileAuthoringSessionRepository) readAuthoringDocument(relative string) ([]byte, error) {
+func (r *fileSessionRepository) readAuthoringDocument(relative string) ([]byte, error) {
 	return r.readBoundedAuthoringDocument(relative, workflowstate.FileLimit)
 }
 
-func (r *fileAuthoringSessionRepository) readBoundedAuthoringDocument(relative string, limit int) ([]byte, error) {
+func (r *fileSessionRepository) readBoundedAuthoringDocument(relative string, limit int) ([]byte, error) {
 	path, err := r.authoringPath(filepath.FromSlash(relative))
 	if err != nil {
 		return nil, err

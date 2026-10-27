@@ -10,7 +10,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r *fileAuthoringSessionRepository) guardGuidedSpecApproval(ctx context.Context, request SpecMutationRequest, document SpecDocument) error {
+func (r *fileSessionRepository) guardGuidedSpecApproval(ctx context.Context, request SpecMutationRequest, document SpecDocument) error {
 	approval := request.GuidedApproval
 	if approval == nil {
 		return nil

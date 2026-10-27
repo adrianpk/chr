@@ -77,8 +77,8 @@ func TestPlanPublicationRecovery(t *testing.T) {
 	plan.Title, plan.Body = "New plan", "New bounded work."
 	plan.ArchiveAt = plan.CreatedAt.Add(time.Minute)
 
-	r := &fileAuthoringSessionRepository{projectDir: project, afterMutationReplace: func(int) error { return errors.New("publication interrupted") }}
-	if err := WithAuthoringMutation(t.Context(), project, func(ctx context.Context) error { return r.publishGeneratedPlan(ctx, paths, plan) }); err == nil {
+	r := &fileSessionRepository{projectDir: project, afterMutationReplace: func(int) error { return errors.New("publication interrupted") }}
+	if err := WithMutation(t.Context(), project, func(ctx context.Context) error { return r.publishGeneratedPlan(ctx, paths, plan) }); err == nil {
 		t.Fatal("publication interruption was ignored")
 	}
 
@@ -86,7 +86,7 @@ func TestPlanPublicationRecovery(t *testing.T) {
 		t.Fatal("pending publication was readable", err)
 	}
 
-	if err := WithAuthoringMutation(t.Context(), project, func(context.Context) error { return nil }); err != nil {
+	if err := WithMutation(t.Context(), project, func(context.Context) error { return nil }); err != nil {
 		t.Fatal("recover publication", err)
 	}
 

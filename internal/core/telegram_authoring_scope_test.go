@@ -12,12 +12,12 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func telegramAuthoringScope(t *testing.T) authoringcore.AuthoringWorkScope {
+func telegramAuthoringScope(t *testing.T) authoringcore.WorkScope {
 	t.Helper()
 
 	digest := contenthash.Sum([]byte("canonical source"))
 
-	scope, err := authoringcore.SealAuthoringWorkScope(authoringcore.AuthoringWorkScope{Binding: workflowstate.MutationBinding{RequestID: "description", Operator: "maintainer"}, Intent: authoringstate.IntentDevelop, Instruction: "Develop the bounded retry fix.", ProjectID: "example", Namespace: "team", SessionID: "session", SessionRef: ".chr/authoring/sessions/session/session.md", SessionRevision: 3, SourceHash: digest, DescriptionRef: "ops/team/spec/00000-source/artifact.md", DescriptionHash: digest, ContractHash: digest, RecordHash: digest})
+	scope, err := authoringcore.SealAuthoringWorkScope(authoringcore.WorkScope{Binding: workflowstate.MutationBinding{RequestID: "description", Operator: "maintainer"}, Intent: authoringstate.IntentDevelop, Instruction: "Develop the bounded retry fix.", ProjectID: "example", Namespace: "team", SessionID: "session", SessionRef: ".chr/authoring/sessions/session/session.md", SessionRevision: 3, SourceHash: digest, DescriptionRef: "ops/team/spec/00000-source/artifact.md", DescriptionHash: digest, ContractHash: digest, RecordHash: digest})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -31,7 +31,7 @@ func TestTelegramAuthoringScopeAuthority(t *testing.T) {
 	scope := telegramAuthoringScope(t)
 	decision := workflowstate.MutationBinding{RequestID: "explicit-decision", Operator: "maintainer"}
 
-	if err := authoringcore.ValidateAuthoringWorkAuthorization(scope, nil); !errors.Is(err, authoringcore.ErrAuthoringAuthorityRequired) {
+	if err := authoringcore.ValidateWorkAuthorization(scope, nil); !errors.Is(err, authoringcore.ErrAuthorityRequired) {
 		t.Fatalf("missing authority: %v", err)
 	}
 
@@ -40,35 +40,14 @@ func TestTelegramAuthoringScopeAuthority(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	tests := []struct {
-		name   string
-		change func(*authoringcore.AuthoringWorkScope, *authoringcore.AuthoringWorkAuthorization)
-	}{
-		{"instruction", func(s *authoringcore.AuthoringWorkScope, _ *authoringcore.AuthoringWorkAuthorization) {
-			s.Instruction += " Also redesign scheduling."
-		}},
-		{"source", func(s *authoringcore.AuthoringWorkScope, _ *authoringcore.AuthoringWorkAuthorization) {
-			s.SourceHash = contenthash.Sum([]byte("changed"))
-		}},
-		{"scope", func(_ *authoringcore.AuthoringWorkScope, a *authoringcore.AuthoringWorkAuthorization) {
-			a.ScopeHash = contenthash.Sum([]byte("changed"))
-		}},
-		{"operator", func(_ *authoringcore.AuthoringWorkScope, a *authoringcore.AuthoringWorkAuthorization) {
-			a.Binding.Operator = "other"
-		}},
-		{"prepare", func(s *authoringcore.AuthoringWorkScope, _ *authoringcore.AuthoringWorkAuthorization) {
-			s.Intent = authoringstate.IntentPrepare
-		}},
-		{"explain", func(s *authoringcore.AuthoringWorkScope, _ *authoringcore.AuthoringWorkAuthorization) {
-			s.Intent = authoringstate.IntentExplain
-		}},
-	}
+	tests := telegramAuthoringScopeChanges()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			changed, grant := scope, authority
 			tt.change(&changed, &grant)
 
-			if err := authoringcore.ValidateAuthoringWorkAuthorization(changed, &grant); err == nil {
+			if err := authoringcore.ValidateWorkAuthorization(changed, &grant); err == nil {
 				t.Fatal("changed scope or authority accepted")
 			}
 		})
@@ -82,12 +61,40 @@ func TestTelegramAuthoringScopeAuthority(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := authoringcore.ValidateAuthoringWorkAuthorization(changed, &authority); !errors.Is(err, workflowstate.ErrConflict) {
+	if err := authoringcore.ValidateWorkAuthorization(changed, &authority); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("old decision accepted a refreshed scope: %v", err)
 	}
 
 	if _, err := authoringcore.AuthorizeAuthoringWork(changed, decision, changed.Hash); err != nil {
 		t.Fatal("explicit changed-scope decision rejected", err)
+	}
+}
+
+type telegramAuthoringScopeChange struct {
+	name   string
+	change func(*authoringcore.WorkScope, *authoringcore.WorkAuthorization)
+}
+
+func telegramAuthoringScopeChanges() []telegramAuthoringScopeChange {
+	return []telegramAuthoringScopeChange{
+		{"instruction", func(s *authoringcore.WorkScope, _ *authoringcore.WorkAuthorization) {
+			s.Instruction += " Also redesign scheduling."
+		}},
+		{"source", func(s *authoringcore.WorkScope, _ *authoringcore.WorkAuthorization) {
+			s.SourceHash = contenthash.Sum([]byte("changed"))
+		}},
+		{"scope", func(_ *authoringcore.WorkScope, a *authoringcore.WorkAuthorization) {
+			a.ScopeHash = contenthash.Sum([]byte("changed"))
+		}},
+		{"operator", func(_ *authoringcore.WorkScope, a *authoringcore.WorkAuthorization) {
+			a.Binding.Operator = "other"
+		}},
+		{"prepare", func(s *authoringcore.WorkScope, _ *authoringcore.WorkAuthorization) {
+			s.Intent = authoringstate.IntentPrepare
+		}},
+		{"explain", func(s *authoringcore.WorkScope, _ *authoringcore.WorkAuthorization) {
+			s.Intent = authoringstate.IntentExplain
+		}},
 	}
 }
 
@@ -98,7 +105,7 @@ func TestTelegramAuthoringScopePreparation(t *testing.T) {
 	scope.Intent = authoringstate.IntentPrepare
 
 	scope, err := authoringcore.SealAuthoringWorkScope(scope)
-	if err != nil || authoringcore.ValidateAuthoringWorkAuthorization(scope, nil) != nil {
+	if err != nil || authoringcore.ValidateWorkAuthorization(scope, nil) != nil {
 		t.Fatal("preparation unexpectedly needs execution authority", err)
 	}
 }

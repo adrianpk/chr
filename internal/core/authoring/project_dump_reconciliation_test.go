@@ -109,7 +109,7 @@ func patchProjectDumpTestMetadata(t *testing.T, project, reference string, updat
 func checkProjectDumpReconciliationImages(t *testing.T, project string, preview ProjectDumpReconciliationPreview, before map[string]string) {
 	t.Helper()
 
-	r := &fileAuthoringSessionRepository{projectDir: project}
+	r := &fileSessionRepository{projectDir: project}
 	for _, source := range preview.Sources {
 		checkProjectDumpOriginalImages(t, r, source, before)
 
@@ -147,7 +147,7 @@ func projectDumpReconciliationChangedPath(project, path string, preview ProjectD
 	return false
 }
 
-func checkProjectDumpOriginalImages(t *testing.T, r *fileAuthoringSessionRepository, source ProjectDumpArtifact, before map[string]string) {
+func checkProjectDumpOriginalImages(t *testing.T, r *fileSessionRepository, source ProjectDumpArtifact, before map[string]string) {
 	t.Helper()
 
 	project := r.projectDir
@@ -209,7 +209,7 @@ func checkProjectDumpReconciliationFault(t *testing.T, fault int) {
 	}
 
 	request := ProjectDumpReconciliationRequest{OperationID: "recover", ExpectedRevision: preview.Revision, Destination: preview.Destination}
-	repo := &fileAuthoringSessionRepository{projectDir: project, afterMutationReplace: func(index int) error {
+	repo := &fileSessionRepository{projectDir: project, afterMutationReplace: func(index int) error {
 		if index == fault {
 			return errors.New("lost acknowledgement")
 		}

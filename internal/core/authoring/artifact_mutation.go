@@ -11,7 +11,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r *fileAuthoringSessionRepository) authoringArtifactChanges(binding authoringRequestBinding, snapshot AuthoringSnapshot, ref ArtifactRef, body string) ([]workflowstate.FileChange, error) {
+func (r *fileSessionRepository) authoringArtifactChanges(binding authoringRequestBinding, snapshot Snapshot, ref ArtifactRef, body string) ([]workflowstate.FileChange, error) {
 	if !validAuthoringArtifactRef(binding.Request.Namespace, ref) {
 		return nil, workflowstate.ErrConflict
 	}
@@ -40,7 +40,7 @@ func (r *fileAuthoringSessionRepository) authoringArtifactChanges(binding author
 	return changes, nil
 }
 
-func (r *fileAuthoringSessionRepository) authoringArtifactMetadata(binding authoringRequestBinding, snapshot AuthoringSnapshot, ref ArtifactRef, observed *AuthoringArtifactObservation) ([]byte, error) {
+func (r *fileSessionRepository) authoringArtifactMetadata(binding authoringRequestBinding, snapshot Snapshot, ref ArtifactRef, observed *ArtifactObservation) ([]byte, error) {
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: r.projectDir, Namespace: binding.Request.Namespace})
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func AdvanceArtifactMetadata(metadata map[string]any) error {
 	return nil
 }
 
-func authoringArtifactObservation(snapshot AuthoringSnapshot, path string) *AuthoringArtifactObservation {
+func authoringArtifactObservation(snapshot Snapshot, path string) *ArtifactObservation {
 	for index := range snapshot.Artifacts {
 		if snapshot.Artifacts[index].Ref.Path == path {
 			return &snapshot.Artifacts[index]
@@ -84,7 +84,7 @@ func authoringArtifactObservation(snapshot AuthoringSnapshot, path string) *Auth
 	return nil
 }
 
-func (r *fileAuthoringSessionRepository) observedAuthoringMetadata(ref ArtifactRef, observed AuthoringArtifactObservation) (map[string]any, error) {
+func (r *fileSessionRepository) observedAuthoringMetadata(ref ArtifactRef, observed ArtifactObservation) (map[string]any, error) {
 	encoded, err := r.authoringRead(filepath.Join(filepath.Dir(ref.Path), "metadata.json"))
 	if err != nil {
 		return nil, err

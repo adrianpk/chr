@@ -11,7 +11,7 @@ import (
 
 // Dump observations include every alias image and the resolved canonical body.
 // This keeps an old session reference usable without dropping its edit guard.
-func (r *fileAuthoringSessionRepository) readAuthoringDumpObservations(snapshot *AuthoringSnapshot, ref ArtifactRef, images map[string][]byte) (ProjectDumpArtifact, error) {
+func (r *fileSessionRepository) readAuthoringDumpObservations(snapshot *Snapshot, ref ArtifactRef, images map[string][]byte) (ProjectDumpArtifact, error) {
 	if err := ValidateProjectDumpReference(ref.Path); err != nil || ref.Path == "" || strings.Split(ref.Path, "/")[3] != ref.ID {
 		return ProjectDumpArtifact{}, workflowstate.ErrConflict
 	}
@@ -45,7 +45,7 @@ func (r *fileAuthoringSessionRepository) readAuthoringDumpObservations(snapshot 
 	return resolved, nil
 }
 
-func (r *fileAuthoringSessionRepository) readAuthoringDumpImage(snapshot *AuthoringSnapshot, original ArtifactRef, reference string, images map[string][]byte) (ProjectDumpArtifact, error) {
+func (r *fileSessionRepository) readAuthoringDumpImage(snapshot *Snapshot, original ArtifactRef, reference string, images map[string][]byte) (ProjectDumpArtifact, error) {
 	body, err := r.readAuthoringDumpBytes(reference, images)
 	if err != nil {
 		return ProjectDumpArtifact{}, err
@@ -78,7 +78,7 @@ func (r *fileAuthoringSessionRepository) readAuthoringDumpImage(snapshot *Author
 	return artifact, nil
 }
 
-func (r *fileAuthoringSessionRepository) authoringDumpProject(images map[string][]byte) (ProjectMetadata, error) {
+func (r *fileSessionRepository) authoringDumpProject(images map[string][]byte) (ProjectMetadata, error) {
 	reference := filepath.Join(workspacecore.DirectoryName, workspacecore.UserDirectoryName, "project.md")
 	if content, found := images[reference]; found {
 		project, err := ParseProjectMetadata(string(content))
@@ -90,7 +90,7 @@ func (r *fileAuthoringSessionRepository) authoringDumpProject(images map[string]
 	return NewProjectMetadataService(r.projectDir).Load()
 }
 
-func (r *fileAuthoringSessionRepository) readAuthoringDumpBytes(reference string, images map[string][]byte) ([]byte, error) {
+func (r *fileSessionRepository) readAuthoringDumpBytes(reference string, images map[string][]byte) ([]byte, error) {
 	if content, found := images[reference]; found {
 		return content, nil
 	}
@@ -110,7 +110,7 @@ func guardAuthoringDumpReference(namespace string, ref ArtifactRef, resolved Pro
 	return nil
 }
 
-func appendAuthoringDumpObservation(snapshot *AuthoringSnapshot, original ArtifactRef, artifact ProjectDumpArtifact, body, encoded []byte) error {
+func appendAuthoringDumpObservation(snapshot *Snapshot, original ArtifactRef, artifact ProjectDumpArtifact, body, encoded []byte) error {
 	if authoringArtifactObservation(*snapshot, artifact.Reference) != nil {
 		return nil
 	}
@@ -123,7 +123,7 @@ func appendAuthoringDumpObservation(snapshot *AuthoringSnapshot, original Artifa
 
 	ref := authoringDumpRef(artifact.Reference)
 	ref.Role = original.Role
-	observed := AuthoringArtifactObservation{Ref: ref, SourceHash: artifact.SourceHash, MetadataHash: artifact.MetadataHash}
+	observed := ArtifactObservation{Ref: ref, SourceHash: artifact.SourceHash, MetadataHash: artifact.MetadataHash}
 
 	snapshot.artifactBytes += len(body) + len(encoded)
 	if artifact.CanonicalReference != "" {

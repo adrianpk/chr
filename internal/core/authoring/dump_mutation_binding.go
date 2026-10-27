@@ -29,7 +29,7 @@ type dumpMutationBindingLookup struct {
 	Exists  bool
 }
 
-func (r *fileAuthoringSessionRepository) prepareDumpMutation(ctx context.Context, request DumpMutationRequest, digest string, prepare DumpCapturePreparer) (dumpMutationBinding, error) {
+func (r *fileSessionRepository) prepareDumpMutation(ctx context.Context, request DumpMutationRequest, digest string, prepare DumpCapturePreparer) (dumpMutationBinding, error) {
 	observed, err := r.readDumpMutationBinding(request, digest)
 	if err != nil {
 		return observed.Binding, err
@@ -60,7 +60,7 @@ func (r *fileAuthoringSessionRepository) prepareDumpMutation(ctx context.Context
 	return r.prepareDumpCapture(ctx, binding, prepare)
 }
 
-func (r *fileAuthoringSessionRepository) readDumpMutationBinding(request DumpMutationRequest, digest string) (dumpMutationBindingLookup, error) {
+func (r *fileSessionRepository) readDumpMutationBinding(request DumpMutationRequest, digest string) (dumpMutationBindingLookup, error) {
 	var binding dumpMutationBinding
 
 	data, err := r.readBoundedAuthoringDocument(filepath.ToSlash(authoringRequestRef(request.OperationID)), dumpMutationBindingLimit)
@@ -79,7 +79,7 @@ func (r *fileAuthoringSessionRepository) readDumpMutationBinding(request DumpMut
 	return dumpMutationBindingLookup{Binding: binding, Exists: true}, r.validateDumpMutationBinding(binding, digest)
 }
 
-func (r *fileAuthoringSessionRepository) validateDumpMutationBinding(binding dumpMutationBinding, digest string) error {
+func (r *fileSessionRepository) validateDumpMutationBinding(binding dumpMutationBinding, digest string) error {
 	checksum := binding.Checksum
 	binding.Checksum = ""
 
@@ -100,7 +100,7 @@ func (r *fileAuthoringSessionRepository) validateDumpMutationBinding(binding dum
 	return nil
 }
 
-func (r *fileAuthoringSessionRepository) reserveDumpMutation(binding dumpMutationBinding) error {
+func (r *fileSessionRepository) reserveDumpMutation(binding dumpMutationBinding) error {
 	if err := r.projectDumpOperationAvailable(binding.Request.OperationID); err != nil {
 		return err
 	}
@@ -112,7 +112,7 @@ func (r *fileAuthoringSessionRepository) reserveDumpMutation(binding dumpMutatio
 	return r.saveDumpMutationBinding(binding)
 }
 
-func (r *fileAuthoringSessionRepository) saveDumpMutationBinding(binding dumpMutationBinding) error {
+func (r *fileSessionRepository) saveDumpMutationBinding(binding dumpMutationBinding) error {
 	binding.Checksum = ""
 
 	encoded, err := json.Marshal(binding)
@@ -135,9 +135,9 @@ func (r *fileAuthoringSessionRepository) saveDumpMutationBinding(binding dumpMut
 	return opsfile.WriteAtomicBounded(path, encoded, dumpMutationBindingLimit)
 }
 
-func (r *fileAuthoringSessionRepository) prepareDumpCapture(ctx context.Context, binding dumpMutationBinding, prepare DumpCapturePreparer) (dumpMutationBinding, error) {
+func (r *fileSessionRepository) prepareDumpCapture(ctx context.Context, binding dumpMutationBinding, prepare DumpCapturePreparer) (dumpMutationBinding, error) {
 	if binding.Attempts >= 5 {
-		return binding, ErrAuthoringProviderExhausted
+		return binding, ErrProviderExhausted
 	}
 
 	binding.Attempts++

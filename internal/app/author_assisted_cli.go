@@ -189,7 +189,7 @@ func (factory commandFactory) runAuthorAssistedStart(ctx context.Context, cmd *c
 		return err
 	}
 
-	paths, err := authoringcore.NewAuthoringSessionRepository(projectContext.ProjectDir).CreateSession(ctx, session)
+	paths, err := authoringcore.NewSessionRepository(projectContext.ProjectDir).CreateSession(ctx, session)
 	if err != nil {
 		return err
 	}
@@ -343,10 +343,10 @@ func (factory commandFactory) runAuthorAssistedFinalize(ctx context.Context, cmd
 type authorAssistedState struct {
 	ProjectDir     string
 	Session        authoringcore.Session
-	Paths          authoringcore.AuthoringSessionPaths
+	Paths          authoringcore.SessionPaths
 	Events         []authoringcore.AssistedTranscriptEvent
 	ContextPackage authoringcore.AssistedAuthoringContextPackage
-	Repository     authoringcore.AuthoringSessionRepository
+	Repository     authoringcore.SessionRepository
 }
 
 func (factory commandFactory) loadAuthorAssistedState(ctx context.Context, cmd *cli.Command) (authorAssistedState, error) {
@@ -360,14 +360,14 @@ func (factory commandFactory) loadAuthorAssistedState(ctx context.Context, cmd *
 		return authorAssistedState{}, fmt.Errorf("authoring session is required")
 	}
 
-	repository := authoringcore.NewAuthoringSessionRepository(projectContext.ProjectDir)
+	repository := authoringcore.NewSessionRepository(projectContext.ProjectDir)
 
 	session, err := resolveAuthoringSession(ctx, repository, sessionHandle)
 	if err != nil {
 		return authorAssistedState{}, err
 	}
 
-	paths := authoringcore.AuthoringSessionLayout(projectContext.ProjectDir, session.ID)
+	paths := authoringcore.SessionLayout(projectContext.ProjectDir, session.ID)
 
 	events, err := repository.ListTranscriptEvents(ctx, session.ID)
 	if err != nil {

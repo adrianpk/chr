@@ -14,7 +14,7 @@ func ResolveProjectDumpReference(ctx context.Context, projectDir, reference stri
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	r := &fileAuthoringSessionRepository{projectDir: projectDir}
+	r := &fileSessionRepository{projectDir: projectDir}
 	if err := r.checkProjectDumpInspection(ctx); err != nil {
 		return ProjectDumpArtifact{}, err
 	}

@@ -50,7 +50,7 @@ func (r telegramReceiver) dispatchPreparedWorkAction(ctx context.Context, operat
 
 		return err
 	})
-	if errors.Is(err, workflowstate.ErrConflict) || errors.Is(err, ErrRecordUnsupported) || errors.Is(err, authoringcore.ErrAuthoringAuthorityRequired) {
+	if errors.Is(err, workflowstate.ErrConflict) || errors.Is(err, ErrRecordUnsupported) || errors.Is(err, authoringcore.ErrAuthorityRequired) {
 		return r.finishPreparedWorkActionFailure(ctx, claim, config, err)
 	}
 

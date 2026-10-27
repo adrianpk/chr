@@ -18,7 +18,7 @@ type quizActionReceipt struct {
 	Revision                 string
 }
 
-func (r *fileAuthoringSessionRepository) quizActionDigest(request quizcore.ActionRequest) (string, error) {
+func (r *fileSessionRepository) quizActionDigest(request quizcore.ActionRequest) (string, error) {
 	root, err := filepath.Abs(r.projectDir)
 	if err != nil {
 		return "", err
@@ -51,7 +51,7 @@ func quizReceiptChange(digest string, result quizcore.ActionResult) (workflowsta
 	return workflowstate.FileChange{Path: authoringReceiptRef(result.OperationID), After: encoded}, err
 }
 
-func (r *fileAuthoringSessionRepository) quizReceipt(operationID, digest string) (quizReceiptLookup, error) {
+func (r *fileSessionRepository) quizReceipt(operationID, digest string) (quizReceiptLookup, error) {
 	var receipt quizActionReceipt
 
 	encoded, err := r.authoringRead(authoringReceiptRef(operationID))

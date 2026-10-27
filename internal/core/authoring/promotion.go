@@ -23,7 +23,7 @@ type QuizToDraftPromotionOptions struct {
 // QuizToDraftPromotionPlan describes a package boundary value.
 type QuizToDraftPromotionPlan struct {
 	Session    Session
-	Layout     AuthoringArtifactLayout
+	Layout     ArtifactLayout
 	Source     ArtifactRef
 	Content    string
 	WouldWrite bool
@@ -36,7 +36,7 @@ func PlanQuizToDraftPromotion(opts QuizToDraftPromotionOptions) (QuizToDraftProm
 		return QuizToDraftPromotionPlan{}, err
 	}
 
-	layout, err := PlanAuthoringArtifactLayout(quizToDraftLayoutOptions(opts))
+	layout, err := PlanArtifactLayout(quizToDraftLayoutOptions(opts))
 	if err != nil {
 		return QuizToDraftPromotionPlan{}, err
 	}
@@ -123,8 +123,8 @@ func validateQuizToDraftPromotionOptions(opts QuizToDraftPromotionOptions) error
 	return nil
 }
 
-func quizToDraftLayoutOptions(opts QuizToDraftPromotionOptions) AuthoringArtifactLayoutOptions {
-	return AuthoringArtifactLayoutOptions{
+func quizToDraftLayoutOptions(opts QuizToDraftPromotionOptions) ArtifactLayoutOptions {
+	return ArtifactLayoutOptions{
 		ProjectDir:   opts.ProjectDir,
 		SessionID:    opts.Session.ID,
 		Kind:         ArtifactKindDraft,

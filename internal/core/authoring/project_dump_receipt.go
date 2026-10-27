@@ -41,7 +41,7 @@ func projectDumpReceiptChange(digest string, result ProjectDumpMutationResult) (
 	return workflowstate.FileChange{Path: authoringReceiptRef(result.OperationID), After: encoded}, err
 }
 
-func (r *fileAuthoringSessionRepository) projectDumpReceipt(operationID, digest string) (projectDumpReceiptLookup, error) {
+func (r *fileSessionRepository) projectDumpReceipt(operationID, digest string) (projectDumpReceiptLookup, error) {
 	var receipt projectDumpMutationReceipt
 
 	encoded, err := r.readAuthoringDocument(filepath.ToSlash(authoringReceiptRef(operationID)))
@@ -72,7 +72,7 @@ func (r *fileAuthoringSessionRepository) projectDumpReceipt(operationID, digest 
 	return projectDumpReceiptLookup{Result: receipt.Result, Found: true}, nil
 }
 
-func (r *fileAuthoringSessionRepository) projectDumpOperationAvailable(operationID string) error {
+func (r *fileSessionRepository) projectDumpOperationAvailable(operationID string) error {
 	_, err := r.readAuthoringDocument(filepath.ToSlash(authoringRequestRef(operationID)))
 	if err == nil {
 		return workflowstate.ErrConflict

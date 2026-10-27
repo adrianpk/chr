@@ -30,7 +30,7 @@ func generationBindingAuthoringCase(t *testing.T, fixture func(*testing.T, strin
 
 	harnessSelectionWrite(t, filepath.Join(driverDir, "fail-next"), "owned failure")
 
-	if _, err := operations.ContinueAuthoring(t.Context(), request); !errors.Is(err, authoringcore.ErrAuthoringProviderFailure) {
+	if _, err := operations.ContinueAuthoring(t.Context(), request); !errors.Is(err, authoringcore.ErrProviderFailure) {
 		t.Fatal("expected retained provider failure", err)
 	}
 
@@ -176,7 +176,7 @@ func checkGenerationAuthoringAttempts(t *testing.T, project, id string, attempts
 	for _, path := range paths {
 		var request struct {
 			Attempts int
-			Request  authoringcore.AuthoringContinuationRequest
+			Request  authoringcore.ContinuationRequest
 		}
 
 		data, err := os.ReadFile(path)

@@ -103,7 +103,7 @@ func TestDumpMutationSave(t *testing.T) {
 func checkDumpMutationSaveHistory(t *testing.T, project string, before DumpDocumentObservation) {
 	t.Helper()
 
-	r := &fileAuthoringSessionRepository{projectDir: project}
+	r := &fileSessionRepository{projectDir: project}
 
 	history, err := r.readAuthoringDocument(projectDumpHistoryRef(before.Artifact) + "/artifact.md")
 	if err != nil || string(history) != before.Content {

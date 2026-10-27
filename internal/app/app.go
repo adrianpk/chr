@@ -349,7 +349,7 @@ func loadTUIAuthoringSessions(
 	ctx context.Context,
 	projectContext commandProjectContext,
 ) ([]authoringcore.Session, error) {
-	sessions, err := authoringcore.NewAuthoringSessionRepository(projectContext.ProjectDir).ListSessions(ctx)
+	sessions, err := authoringcore.NewSessionRepository(projectContext.ProjectDir).ListSessions(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -195,13 +195,13 @@ func TestAskNextAssistedQuizQuestionStopsOnBlockedModelResponse(t *testing.T) {
 func setupAssistedQuizLoopTest(
 	t *testing.T,
 	dir string,
-) (AuthoringSessionRepository, Session, AuthoringSessionPaths, AssistedAuthoringContextPackage) {
+) (SessionRepository, Session, SessionPaths, AssistedAuthoringContextPackage) {
 	t.Helper()
 
 	writeTestFile(t, filepath.Join(dir, "AGENTS.md"), "# Workspace Protocol\n")
 	writeTestFile(t, filepath.Join(dir, "docs", "reference", "authoring.md"), "# Authoring Reference\n")
 
-	repository := NewAuthoringSessionRepository(dir)
+	repository := NewSessionRepository(dir)
 	session := testAssistedContextSession(dir)
 
 	paths, err := repository.CreateSession(context.Background(), session)

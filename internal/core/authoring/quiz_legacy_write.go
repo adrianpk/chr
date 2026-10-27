@@ -11,7 +11,7 @@ import (
 func (r *fileQuizArtifactRepository) AppendRawCapture(ctx context.Context, state quizcore.RuntimeState, entry quizcore.Entry) (QuizArtifactPaths, error) {
 	var paths QuizArtifactPaths
 
-	err := WithAuthoringMutation(ctx, r.projectDir, func(owned context.Context) error {
+	err := WithMutation(ctx, r.projectDir, func(owned context.Context) error {
 		if err := r.checkQuizWritePaths(quizScopeFromRuntime(state)); err != nil {
 			return err
 		}
@@ -30,7 +30,7 @@ func (r *fileQuizArtifactRepository) AppendRawCapture(ctx context.Context, state
 func (r *fileQuizArtifactRepository) WriteCuratedNotes(ctx context.Context, notes quizcore.CuratedNotes) (QuizArtifactPaths, error) {
 	var paths QuizArtifactPaths
 
-	err := WithAuthoringMutation(ctx, r.projectDir, func(owned context.Context) error {
+	err := WithMutation(ctx, r.projectDir, func(owned context.Context) error {
 		if err := r.checkQuizWritePaths(notes.Scope); err != nil {
 			return err
 		}
@@ -50,7 +50,7 @@ func (r *fileQuizArtifactRepository) WriteCuratedNotes(ctx context.Context, note
 func (r *fileQuizArtifactRepository) SaveRuntimeState(ctx context.Context, state quizcore.RuntimeState) (QuizArtifactPaths, error) {
 	var paths QuizArtifactPaths
 
-	err := WithAuthoringMutation(ctx, r.projectDir, func(owned context.Context) error {
+	err := WithMutation(ctx, r.projectDir, func(owned context.Context) error {
 		if err := r.checkQuizWritePaths(quizScopeFromRuntime(state)); err != nil {
 			return err
 		}
@@ -71,7 +71,7 @@ func (r *fileQuizArtifactRepository) checkQuizWritePaths(scope quizcore.Scope) e
 		return err
 	}
 
-	owner := &fileAuthoringSessionRepository{projectDir: r.projectDir}
+	owner := &fileSessionRepository{projectDir: r.projectDir}
 	for _, reference := range quizImageReferences(paths) {
 		if _, err := owner.authoringPath(reference); err != nil {
 			return err

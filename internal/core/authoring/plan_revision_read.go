@@ -41,7 +41,7 @@ func ObservePlanRevision(ctx context.Context, projectDir string, scope quizcore.
 		return binding, err
 	}
 
-	r := &fileAuthoringSessionRepository{projectDir: projectDir}
+	r := &fileSessionRepository{projectDir: projectDir}
 	namespace := strings.Split(paths.RelativePath, "/")[1]
 
 	if binding.BodyHash != target.images[0].Before {
@@ -55,7 +55,7 @@ func ObservePlanRevision(ctx context.Context, projectDir string, scope quizcore.
 	return binding, r.checkProjectDumpInspection(ctx)
 }
 
-func (r *fileAuthoringSessionRepository) validatePlanReceiptResult(scope quizcore.Scope, result PlanPublicationResult) error {
+func (r *fileSessionRepository) validatePlanReceiptResult(scope quizcore.Scope, result PlanPublicationResult) error {
 	paths, err := GeneratedPlanLayout(r.projectDir, scope)
 	if err != nil {
 		return err
@@ -78,7 +78,7 @@ func (r *fileAuthoringSessionRepository) validatePlanReceiptResult(scope quizcor
 	return r.checkPlanImages(root, images)
 }
 
-func (r *fileAuthoringSessionRepository) validatePlanRevisionImages(namespace string, binding workflowstate.PlanRevisionBinding) error {
+func (r *fileSessionRepository) validatePlanRevisionImages(namespace string, binding workflowstate.PlanRevisionBinding) error {
 	if !ValidPlanBindingPaths(namespace, binding) {
 		return workflowstate.ErrConflict
 	}
@@ -89,7 +89,7 @@ func (r *fileAuthoringSessionRepository) validatePlanRevisionImages(namespace st
 	return r.checkPlanImages(root, images)
 }
 
-func (r *fileAuthoringSessionRepository) checkPlanImages(root string, images map[string]string) error {
+func (r *fileSessionRepository) checkPlanImages(root string, images map[string]string) error {
 	for reference, hash := range images {
 		data, err := r.authoringRead(filepath.ToSlash(filepath.Join(root, reference)))
 		if err != nil {

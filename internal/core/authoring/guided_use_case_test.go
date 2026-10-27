@@ -58,7 +58,7 @@ func TestGuidedUseCaseCaptureManual(t *testing.T) {
 	root, first := guidedCaptureFixture(t)
 
 	first.ID, first.Guided = "manual", nil
-	if _, err := NewAuthoringSessionRepository(root).CreateSession(t.Context(), first); err != nil {
+	if _, err := NewSessionRepository(root).CreateSession(t.Context(), first); err != nil {
 		t.Fatal(err)
 	}
 
@@ -67,7 +67,7 @@ func TestGuidedUseCaseCaptureManual(t *testing.T) {
 		t.Fatalf("adopted manual session: %v", err)
 	}
 
-	saved, err := NewAuthoringSessionRepository(root).GetSession(t.Context(), first.ID)
+	saved, err := NewSessionRepository(root).GetSession(t.Context(), first.ID)
 	if err != nil || saved.Guided != nil {
 		t.Fatalf("manual session changed: %v", err)
 	}
@@ -143,7 +143,7 @@ func TestGuidedUseCaseCaptureInspect(t *testing.T) {
 	root := t.TempDir()
 
 	scope := GuidedUseCaseScope{RunID: "missing", ProjectID: "project", Namespace: "default"}
-	if _, err := ReadGuidedUseCase(t.Context(), root, scope); !errors.Is(err, ErrAuthoringSessionNotFound) {
+	if _, err := ReadGuidedUseCase(t.Context(), root, scope); !errors.Is(err, ErrSessionNotFound) {
 		t.Fatalf("missing query: %v", err)
 	}
 
@@ -184,7 +184,7 @@ func TestGuidedUseCaseCaptureRecovery(t *testing.T) {
 			}
 
 			interrupted := errors.New("lost owner acknowledgement")
-			r := &fileAuthoringSessionRepository{projectDir: root, afterMutationReplace: func(index int) error {
+			r := &fileSessionRepository{projectDir: root, afterMutationReplace: func(index int) error {
 				if index == phase {
 					return interrupted
 				}
@@ -192,7 +192,7 @@ func TestGuidedUseCaseCaptureRecovery(t *testing.T) {
 				return nil
 			}}
 
-			err = WithAuthoringMutation(t.Context(), root, func(ctx context.Context) error { return r.applyGuidedInput(ctx, &session, command, operation) })
+			err = WithMutation(t.Context(), root, func(ctx context.Context) error { return r.applyGuidedInput(ctx, &session, command, operation) })
 			if !errors.Is(err, interrupted) {
 				t.Fatalf("fault not reached: %v", err)
 			}

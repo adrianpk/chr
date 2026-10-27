@@ -19,8 +19,8 @@ func ApplyGuidedUseCaseControl(ctx context.Context, root string, command GuidedU
 		return session, errors.Join(workflowstate.ErrConflict, err)
 	}
 
-	r := &fileAuthoringSessionRepository{projectDir: root}
-	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
+	r := &fileSessionRepository{projectDir: root}
+	err = WithMutation(ctx, root, func(ctx context.Context) error {
 		session, err = r.getGuardedSession(ctx, command.RunID)
 		if err != nil {
 			return err
@@ -88,7 +88,7 @@ func guidedNativeControlRequest(session Session, operation GuidedUseCaseOperatio
 	return &workflowstate.ControlMutationRequest{Guided: &workflowstate.GuidedControlProof{RunID: session.ID, OperationDigest: operation.Digest}, Binding: workflowstate.MutationBinding{RequestID: "guided-control-" + operation.Digest, Operator: session.Guided.Actor}, Action: operation.Action, ID: work.Invocation.ID, ExpectedRevision: operation.NativeRevision}
 }
 
-func (r *fileAuthoringSessionRepository) retainGuidedControlFailure(ctx context.Context, session *Session, operation GuidedUseCaseOperation, cause error) error {
+func (r *fileSessionRepository) retainGuidedControlFailure(ctx context.Context, session *Session, operation GuidedUseCaseOperation, cause error) error {
 	if errors.Is(cause, ErrGuidedControlRejected) {
 		completeGuidedControl(session, operation, true)
 	} else {

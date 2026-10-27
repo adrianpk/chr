@@ -32,7 +32,7 @@ func telegramDocumentForTarget(target telegramcore.OperationTarget, source teleg
 	return tgmessage.Document{ProjectID: target.ProjectID, Namespace: target.Namespace, ProjectBindingDigest: target.ProjectBindingDigest, SourceRef: source.Reference, SourceHash: source.Hash, Filename: source.Filename, MediaType: source.MediaType, Payload: source.Payload}
 }
 
-func (r telegramReceiver) authoringDocument(ctx context.Context, request telegramcore.OperationRequest, result authoringcore.AuthoringContinuationResult) (*tgmessage.DocumentResponse, error) {
+func (r telegramReceiver) authoringDocument(ctx context.Context, request telegramcore.OperationRequest, result authoringcore.ContinuationResult) (*tgmessage.DocumentResponse, error) {
 	if result.Question != nil {
 		return nil, nil
 	}
@@ -68,7 +68,7 @@ func (r telegramReceiver) authoringDocument(ctx context.Context, request telegra
 	return telegramPrimaryAuthoringDocument(request.Target, result, snapshot, owner.Target)
 }
 
-func telegramPrimaryAuthoringDocument(target telegramcore.OperationTarget, result authoringcore.AuthoringContinuationResult, snapshot authoringcore.AuthoringSnapshot, kind authoringcore.ArtifactKind) (*tgmessage.DocumentResponse, error) {
+func telegramPrimaryAuthoringDocument(target telegramcore.OperationTarget, result authoringcore.ContinuationResult, snapshot authoringcore.Snapshot, kind authoringcore.ArtifactKind) (*tgmessage.DocumentResponse, error) {
 	for index := len(snapshot.Artifacts) - 1; index >= 0; index-- {
 		artifact := snapshot.Artifacts[index]
 		if artifact.Ref.Kind != kind || artifact.Body == "" {

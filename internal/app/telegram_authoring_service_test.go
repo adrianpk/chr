@@ -62,12 +62,12 @@ func telegramAuthoringServiceOutput(t *testing.T, body, question string) string 
 	return string(data)
 }
 
-func telegramAuthoringServiceRequest() authoringcore.AuthoringContinuationRequest {
-	return authoringcore.AuthoringContinuationRequest{Binding: workflowstate.MutationBinding{RequestID: "service-capture", Operator: "maintainer"}, ProjectID: "service-project", Namespace: "original", Action: "create", Target: authoringcore.ArtifactKindDump, Topic: "Bounded request retries", Capture: "Preserve the retry ceiling and existing defaults."}
+func telegramAuthoringServiceRequest() authoringcore.ContinuationRequest {
+	return authoringcore.ContinuationRequest{Binding: workflowstate.MutationBinding{RequestID: "service-capture", Operator: "maintainer"}, ProjectID: "service-project", Namespace: "original", Action: "create", Target: authoringcore.ArtifactKindDump, Topic: "Bounded request retries", Capture: "Preserve the retry ceiling and existing defaults."}
 }
 
-func telegramAuthoringServiceNext(previous authoringcore.AuthoringContinuationResult, id, action string, target authoringcore.ArtifactKind) authoringcore.AuthoringContinuationRequest {
-	return authoringcore.AuthoringContinuationRequest{Binding: workflowstate.MutationBinding{RequestID: id, Operator: "maintainer"}, ProjectID: previous.Session.ProjectID, Namespace: previous.Session.Namespace, SessionID: previous.Session.ID, ExpectedRevision: previous.Session.Revision, ExpectedSourceHash: previous.SourceHash, Action: authoringcore.AuthoringContinuationAction(action), Target: target}
+func telegramAuthoringServiceNext(previous authoringcore.ContinuationResult, id, action string, target authoringcore.ArtifactKind) authoringcore.ContinuationRequest {
+	return authoringcore.ContinuationRequest{Binding: workflowstate.MutationBinding{RequestID: id, Operator: "maintainer"}, ProjectID: previous.Session.ProjectID, Namespace: previous.Session.Namespace, SessionID: previous.Session.ID, ExpectedRevision: previous.Session.Revision, ExpectedSourceHash: previous.SourceHash, Action: authoringcore.ContinuationAction(action), Target: target}
 }
 
 // TestTelegramAuthoringServiceJourney generates real canonical dump/quiz/spec/plan
@@ -113,7 +113,7 @@ func TestTelegramAuthoringServiceJourney(t *testing.T) {
 	telegramAuthoringServiceNoWork(t, operations)
 }
 
-func telegramAuthoringServiceGenerate(t *testing.T, operations service, previous authoringcore.AuthoringContinuationResult, id, action string, target authoringcore.ArtifactKind) authoringcore.AuthoringContinuationResult {
+func telegramAuthoringServiceGenerate(t *testing.T, operations service, previous authoringcore.ContinuationResult, id, action string, target authoringcore.ArtifactKind) authoringcore.ContinuationResult {
 	t.Helper()
 
 	result, err := operations.ContinueAuthoring(t.Context(), telegramAuthoringServiceNext(previous, id, action, target))
@@ -124,7 +124,7 @@ func telegramAuthoringServiceGenerate(t *testing.T, operations service, previous
 	return result
 }
 
-func telegramAuthoringCheckArtifacts(t *testing.T, operations service, result authoringcore.AuthoringContinuationResult) {
+func telegramAuthoringCheckArtifacts(t *testing.T, operations service, result authoringcore.ContinuationResult) {
 	t.Helper()
 
 	snapshot, err := operations.ObserveAuthoring(t.Context(), result.Session.ID)

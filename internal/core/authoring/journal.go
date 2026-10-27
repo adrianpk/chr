@@ -21,11 +21,11 @@ type authoringMutationJournal struct {
 	Checksum string
 }
 
-func (r *fileAuthoringSessionRepository) writeAuthoringJournal(changes []workflowstate.FileChange) error {
+func (r *fileSessionRepository) writeAuthoringJournal(changes []workflowstate.FileChange) error {
 	return r.writeAuthoringJournalVersion("chr-authoring-journal/v1", changes)
 }
 
-func (r *fileAuthoringSessionRepository) writeAuthoringJournalVersion(schema string, changes []workflowstate.FileChange) error {
+func (r *fileSessionRepository) writeAuthoringJournalVersion(schema string, changes []workflowstate.FileChange) error {
 	journal := authoringMutationJournal{Schema: schema, Changes: changes}
 
 	encoded, err := json.Marshal(journal)
@@ -52,7 +52,7 @@ func (r *fileAuthoringSessionRepository) writeAuthoringJournalVersion(schema str
 	return opsfile.WriteAtomicBounded(path, encoded, authoringJournalLimit(schema))
 }
 
-func (r *fileAuthoringSessionRepository) recoverAuthoringMutation() error {
+func (r *fileSessionRepository) recoverAuthoringMutation() error {
 	path, err := r.authoringPath(authoringRuntimeRef("pending.json"))
 	if err != nil {
 		return err
@@ -91,7 +91,7 @@ func (r *fileAuthoringSessionRepository) recoverAuthoringMutation() error {
 	return opsfile.SyncDirectory(filepath.Dir(path))
 }
 
-func (r *fileAuthoringSessionRepository) checkAuthoringJournal(journal authoringMutationJournal) error {
+func (r *fileSessionRepository) checkAuthoringJournal(journal authoringMutationJournal) error {
 	checksum := journal.Checksum
 	journal.Checksum = ""
 
@@ -120,7 +120,7 @@ func validAuthoringJournalPath(path string) bool {
 	return validAuthoringOpsJournalPath(normalized)
 }
 
-func (r *fileAuthoringSessionRepository) authoringJournalImage(change workflowstate.FileChange) (bool, error) {
+func (r *fileSessionRepository) authoringJournalImage(change workflowstate.FileChange) (bool, error) {
 	data, err := r.authoringRead(change.Path)
 	if errors.Is(err, os.ErrNotExist) && change.Before == "" {
 		return false, nil
@@ -141,7 +141,7 @@ func (r *fileAuthoringSessionRepository) authoringJournalImage(change workflowst
 	return false, nil
 }
 
-func (r *fileAuthoringSessionRepository) applyAuthoringImage(change workflowstate.FileChange, index int) error {
+func (r *fileSessionRepository) applyAuthoringImage(change workflowstate.FileChange, index int) error {
 	applied, err := r.authoringJournalImage(change)
 	if err != nil || applied {
 		return err
@@ -167,7 +167,7 @@ func (r *fileAuthoringSessionRepository) applyAuthoringImage(change workflowstat
 	return nil
 }
 
-func (r *fileAuthoringSessionRepository) ensureAuthoringEnvelope(relative string) error {
+func (r *fileSessionRepository) ensureAuthoringEnvelope(relative string) error {
 	parts := strings.Split(filepath.ToSlash(relative), "/")
 	if len(parts) != 5 || parts[0] != opscore.DirectoryName {
 		return nil
@@ -188,7 +188,7 @@ func (r *fileAuthoringSessionRepository) ensureAuthoringEnvelope(relative string
 	return opscore.CreateArtifactEnvelope(path, "chr")
 }
 
-func (r *fileAuthoringSessionRepository) replayAuthoringJournal(journal authoringMutationJournal) error {
+func (r *fileSessionRepository) replayAuthoringJournal(journal authoringMutationJournal) error {
 	for index, change := range journal.Changes {
 		if err := r.applyAuthoringImage(change, index); err != nil {
 			return err
@@ -205,7 +205,7 @@ func (r *fileAuthoringSessionRepository) replayAuthoringJournal(journal authorin
 	return nil
 }
 
-func (r *fileAuthoringSessionRepository) checkAuthoringJournalImages(journal authoringMutationJournal) error {
+func (r *fileSessionRepository) checkAuthoringJournalImages(journal authoringMutationJournal) error {
 	seen := map[string]bool{}
 	for _, change := range journal.Changes {
 		if seen[change.Path] || len(change.After) > workflowstate.FileLimit || !validAuthoringJournalVersionPath(journal.Schema, change.Path) {

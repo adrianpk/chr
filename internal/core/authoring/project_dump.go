@@ -96,12 +96,12 @@ func observeProjectDump(ctx context.Context, projectDir string) (ProjectDumpObse
 		return ProjectDumpObservation{}, err
 	}
 
-	repository := &fileAuthoringSessionRepository{projectDir: projectDir}
+	repository := &fileSessionRepository{projectDir: projectDir}
 
 	return repository.observeProjectDump(ctx, project)
 }
 
-func (r *fileAuthoringSessionRepository) observeProjectDump(ctx context.Context, project ProjectMetadata) (ProjectDumpObservation, error) {
+func (r *fileSessionRepository) observeProjectDump(ctx context.Context, project ProjectMetadata) (ProjectDumpObservation, error) {
 	if err := r.checkProjectDumpInspection(ctx); err != nil {
 		return ProjectDumpObservation{}, err
 	}
@@ -142,7 +142,7 @@ func (s ProjectMetadataService) AdoptProjectDump(ctx context.Context, expectedRe
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	err = WithAuthoringMutation(ctx, s.projectDir, func(ctx context.Context) error {
+	err = WithMutation(ctx, s.projectDir, func(ctx context.Context) error {
 		observed, readErr := observeProjectDump(ctx, s.projectDir)
 		if readErr != nil {
 			return readErr

@@ -43,7 +43,7 @@ func guidedRepositoryIdentity(ctx context.Context, reader projectcore.GitReader)
 	return "git-common:" + contenthash.Sum([]byte(common)), nil
 }
 
-func (r *fileAuthoringSessionRepository) observeGuidedCheckpoint(ctx context.Context, id string, operation GuidedUseCaseOperation, stage string, paths []string) (GuidedStageCheckpoint, error) {
+func (r *fileSessionRepository) observeGuidedCheckpoint(ctx context.Context, id string, operation GuidedUseCaseOperation, stage string, paths []string) (GuidedStageCheckpoint, error) {
 	if len(paths) == 0 || len(paths) > 1024 {
 		return GuidedStageCheckpoint{}, errors.New("guided checkpoint requires 1..1024 owned files")
 	}
@@ -81,7 +81,7 @@ func (r *fileAuthoringSessionRepository) observeGuidedCheckpoint(ctx context.Con
 	return checkpoint, nil
 }
 
-func (r *fileAuthoringSessionRepository) commitGuidedCheckpoint(ctx context.Context, checkpoint GuidedStageCheckpoint, digest string) (result GuidedStageCheckpoint, err error) {
+func (r *fileSessionRepository) commitGuidedCheckpoint(ctx context.Context, checkpoint GuidedStageCheckpoint, digest string) (result GuidedStageCheckpoint, err error) {
 	if !validGuidedCheckpointRef(checkpoint.Ref, digest) {
 		return checkpoint, workflowstate.ErrConflict
 	}
@@ -137,7 +137,7 @@ func (r *fileAuthoringSessionRepository) commitGuidedCheckpoint(ctx context.Cont
 	return result, validateGuidedCheckpoint(ctx, r.projectDir, result)
 }
 
-func (r *fileAuthoringSessionRepository) guidedCheckpointTree(ctx context.Context, reader projectcore.GitReader, checkpoint GuidedStageCheckpoint) (string, error) {
+func (r *fileSessionRepository) guidedCheckpointTree(ctx context.Context, reader projectcore.GitReader, checkpoint GuidedStageCheckpoint) (string, error) {
 	if _, err := reader.Output(ctx, "read-tree", checkpoint.BaseCommit); err != nil {
 		return "", err
 	}

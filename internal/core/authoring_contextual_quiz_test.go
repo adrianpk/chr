@@ -73,15 +73,15 @@ func assertContextualQuizPlan(
 	}
 }
 
-func assertContextualQuizRequest(t *testing.T, request authoringcore.AuthoringQuizGenerationRequest) {
+func assertContextualQuizRequest(t *testing.T, request authoringcore.QuizGenerationRequest) {
 	t.Helper()
 
-	if request.Action != authoringcore.AuthoringQuizActionGeneration {
-		t.Fatalf("Action = %q, want %q", request.Action, authoringcore.AuthoringQuizActionGeneration)
+	if request.Action != authoringcore.QuizActionGeneration {
+		t.Fatalf("Action = %q, want %q", request.Action, authoringcore.QuizActionGeneration)
 	}
 
-	if request.Strategy != authoringcore.AuthoringQuizGenerationStrategyDeep {
-		t.Fatalf("Strategy = %q, want %q", request.Strategy, authoringcore.AuthoringQuizGenerationStrategyDeep)
+	if request.Strategy != authoringcore.QuizGenerationStrategyDeep {
+		t.Fatalf("Strategy = %q, want %q", request.Strategy, authoringcore.QuizGenerationStrategyDeep)
 	}
 
 	if request.QuestionCount != 8 {
@@ -157,7 +157,7 @@ func TestValidateAuthoringQuizGenerationResultRejectsGenericUnsafeOutput(t *test
 	result := validContextualQuizGenerationResult()
 	result.Questions[0].Text = "Which API token should this project use?"
 
-	err := authoringcore.ValidateAuthoringQuizGenerationResult(result)
+	err := authoringcore.ValidateQuizGenerationResult(result)
 	if err == nil {
 		t.Fatal("ValidateAuthoringQuizGenerationResult returned nil error")
 	}
@@ -281,7 +281,7 @@ func TestWriteContextualQuizWritesArtifact(t *testing.T) {
 
 func assertAuthoringQuizContextSection(
 	t *testing.T,
-	sections []authoringcore.AuthoringQuizContextSection,
+	sections []authoringcore.QuizContextSection,
 	name string,
 ) {
 	t.Helper()
@@ -291,9 +291,9 @@ func assertAuthoringQuizContextSection(
 
 func authoringQuizContextSection(
 	t *testing.T,
-	sections []authoringcore.AuthoringQuizContextSection,
+	sections []authoringcore.QuizContextSection,
 	name string,
-) authoringcore.AuthoringQuizContextSection {
+) authoringcore.QuizContextSection {
 	t.Helper()
 
 	for _, section := range sections {
@@ -304,14 +304,14 @@ func authoringQuizContextSection(
 
 	t.Fatalf("context sections do not contain %q: %#v", name, sections)
 
-	return authoringcore.AuthoringQuizContextSection{}
+	return authoringcore.QuizContextSection{}
 }
 
-func validContextualQuizGenerationResult() authoringcore.AuthoringQuizGenerationResult {
-	return authoringcore.AuthoringQuizGenerationResult{
+func validContextualQuizGenerationResult() authoringcore.QuizGenerationResult {
+	return authoringcore.QuizGenerationResult{
 		Provider: "fake",
-		Strategy: authoringcore.AuthoringQuizGenerationStrategyDeep,
-		Questions: []authoringcore.AuthoringQuizQuestion{
+		Strategy: authoringcore.QuizGenerationStrategyDeep,
+		Questions: []authoringcore.QuizQuestion{
 			{
 				ID:                    "Q1",
 				Text:                  "Which user workflow should the specification pin down first?",
@@ -338,22 +338,22 @@ func validContextualQuizGenerationResult() authoringcore.AuthoringQuizGeneration
 	}
 }
 
-func validAuthoringQuizGenerationRequest(projectDir string) authoringcore.AuthoringQuizGenerationRequest {
+func validAuthoringQuizGenerationRequest(projectDir string) authoringcore.QuizGenerationRequest {
 	now := time.Date(2026, 5, 22, 9, 0, 0, 0, time.UTC)
 
-	return authoringcore.AuthoringQuizGenerationRequest{
+	return authoringcore.QuizGenerationRequest{
 		ID:            "authoring-quiz-request-1",
-		Action:        authoringcore.AuthoringQuizActionGeneration,
-		Strategy:      authoringcore.AuthoringQuizGenerationStrategyDeep,
+		Action:        authoringcore.QuizActionGeneration,
+		Strategy:      authoringcore.QuizGenerationStrategyDeep,
 		ProjectDir:    projectDir,
 		SessionID:     "author-20260522-090000",
 		Target:        authoringcore.TargetSpec,
 		Topic:         "Billing sync behavior",
 		QuestionCount: 1,
-		ContextSections: []authoringcore.AuthoringQuizContextSection{
+		ContextSections: []authoringcore.QuizContextSection{
 			{Name: "project", Layer: "project", Authority: "project_metadata", Content: "Project context."},
 		},
-		OutputContract: authoringcore.AuthoringQuizOutputContract{
+		OutputContract: authoringcore.QuizOutputContract{
 			RequiredFields: []string{"id", "question", "tags", "follow_up_depth", "completion_recommended"},
 		},
 		CreatedAt: now,

@@ -9,7 +9,7 @@ import (
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
-func withContextualQuizGeneration(ctx context.Context, cmd *cli.Command, project commandProjectContext, sessionID string, use func(context.Context, authoringcore.AuthoringQuizQuestionProvider) error) error {
+func withContextualQuizGeneration(ctx context.Context, cmd *cli.Command, project commandProjectContext, sessionID string, use func(context.Context, authoringcore.QuizQuestionProvider) error) error {
 	provider := contextualQuizProviderFromCommand()
 	if _, native := provider.(core.HarnessAuthoringQuizQuestionProvider); !native {
 		return use(ctx, provider)

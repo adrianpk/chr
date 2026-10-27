@@ -76,8 +76,8 @@ func (r telegramReceiver) validateAuthoringAuthority(ctx context.Context, reques
 	return config, err
 }
 
-func telegramRetainedAuthoringInput(request telegramcore.OperationRequest) (authoringcore.AuthoringContinuationRequest, error) {
-	var owner authoringcore.AuthoringContinuationRequest
+func telegramRetainedAuthoringInput(request telegramcore.OperationRequest) (authoringcore.ContinuationRequest, error) {
+	var owner authoringcore.ContinuationRequest
 	if err := decodeBoundedOperationJSON(string(request.PreparedInput), &owner, 1048576); err != nil {
 		return owner, err
 	}
@@ -99,11 +99,11 @@ func (r telegramReceiver) authoringAttemptFailure(ctx context.Context, request t
 		return ctx.Err()
 	}
 
-	if errors.Is(failure, authoringcore.ErrAuthoringProviderFailure) || errors.Is(failure, authoringcore.ErrAuthoringProviderWait) {
+	if errors.Is(failure, authoringcore.ErrProviderFailure) || errors.Is(failure, authoringcore.ErrProviderWait) {
 		return nil
 	}
 
-	if errors.Is(failure, workflowstate.ErrConflict) || errors.Is(failure, authoringcore.ErrAuthoringProviderExhausted) {
+	if errors.Is(failure, workflowstate.ErrConflict) || errors.Is(failure, authoringcore.ErrProviderExhausted) {
 		return r.finishAuthoringFailure(ctx, request, config, failure)
 	}
 
@@ -126,7 +126,7 @@ func telegramAuthoringFailure(err error) string {
 		return telegramRequestCapacityText
 	}
 
-	if errors.Is(err, authoringcore.ErrAuthoringProviderExhausted) {
+	if errors.Is(err, authoringcore.ErrProviderExhausted) {
 		return "Authoring exhausted five retained provider attempts. Prior context and artifacts are preserved. Send a new corrected instruction; this request's budget cannot restart."
 	}
 
@@ -146,7 +146,7 @@ type telegramAuthoringFacts struct {
 	Question   *telegramcore.ConversationQuestion `json:"question,omitempty"`
 }
 
-func (r telegramReceiver) finishAuthoring(ctx context.Context, request telegramcore.OperationRequest, result authoringcore.AuthoringContinuationResult, config telegramcore.ReceiverConfig) error {
+func (r telegramReceiver) finishAuthoring(ctx context.Context, request telegramcore.OperationRequest, result authoringcore.ContinuationResult, config telegramcore.ReceiverConfig) error {
 	if result.RequestID != request.ID || result.ReceiptRef == "" {
 		return workflowstate.ErrConflict
 	}
@@ -184,7 +184,7 @@ func (r telegramReceiver) finishAuthoring(ctx context.Context, request telegramc
 	return err
 }
 
-func telegramAuthoringResultText(conversation string, result authoringcore.AuthoringContinuationResult) string {
+func telegramAuthoringResultText(conversation string, result authoringcore.ContinuationResult) string {
 	if result.Question != nil {
 		return tgmessage.Render(tgmessage.Blocks{Content: result.Prompt, SecondaryText: "Reply to this message to answer. Use /reply " + conversation + " <answer> when you cannot reply directly."}).PlainFallback
 	}

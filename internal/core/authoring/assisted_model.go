@@ -292,7 +292,7 @@ func ValidateAssistedModelResponse(response AssistedModelResponse) error {
 
 // PlanAssistedModelInvocationArtifacts executes the corresponding package operation.
 func PlanAssistedModelInvocationArtifacts(
-	sessionPaths AuthoringSessionPaths,
+	sessionPaths SessionPaths,
 	request AssistedModelRequest,
 ) (AssistedModelInvocationPaths, error) {
 	err := ValidateAssistedModelRequest(request)

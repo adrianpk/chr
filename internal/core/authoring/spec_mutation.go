@@ -51,8 +51,8 @@ func MutateSpec(ctx context.Context, projectDir string, request SpecMutationRequ
 	}
 
 	digest := contenthash.Sum(append([]byte(root+"\x00spec-write\x00"), encoded...))
-	r := &fileAuthoringSessionRepository{projectDir: root}
-	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
+	r := &fileSessionRepository{projectDir: root}
+	err = WithMutation(ctx, root, func(ctx context.Context) error {
 		lookup, readErr := r.specReceipt(request.OperationID, digest)
 		result, err = lookup.Result, readErr
 
@@ -91,7 +91,7 @@ func validateSpecMutation(request SpecMutationRequest) error {
 	}
 }
 
-func (r *fileAuthoringSessionRepository) commitSpec(ctx context.Context, request SpecMutationRequest, digest string) (SpecMutationResult, error) {
+func (r *fileSessionRepository) commitSpec(ctx context.Context, request SpecMutationRequest, digest string) (SpecMutationResult, error) {
 	result := SpecMutationResult{OperationID: request.OperationID}
 	if err := r.authoringStateCapacity("receipts"); err != nil {
 		return result, err
@@ -126,7 +126,7 @@ func (r *fileAuthoringSessionRepository) commitSpec(ctx context.Context, request
 	return result, r.recoverAuthoringMutation()
 }
 
-func (r *fileAuthoringSessionRepository) specMutationTarget(ctx context.Context, request SpecMutationRequest, digest string) (SpecDocument, error) {
+func (r *fileSessionRepository) specMutationTarget(ctx context.Context, request SpecMutationRequest, digest string) (SpecDocument, error) {
 	if request.CaseSlug != "" {
 		if _, err := NewCaseMetadataService(r.projectDir).ReadBounded(ctx, request.CaseSlug); err != nil {
 			return SpecDocument{}, err
@@ -140,7 +140,7 @@ func (r *fileAuthoringSessionRepository) specMutationTarget(ctx context.Context,
 	return r.newSpecDocument(request, digest)
 }
 
-func (r *fileAuthoringSessionRepository) specSaveTarget(ctx context.Context, request SpecMutationRequest) (SpecDocument, error) {
+func (r *fileSessionRepository) specSaveTarget(ctx context.Context, request SpecMutationRequest) (SpecDocument, error) {
 	document, err := ReadSpecDocument(ctx, r.projectDir, request.Reference)
 	if err != nil {
 		return document, err
@@ -153,7 +153,7 @@ func (r *fileAuthoringSessionRepository) specSaveTarget(ctx context.Context, req
 	return document, r.guardGuidedSpecApproval(ctx, request, document)
 }
 
-func (r *fileAuthoringSessionRepository) newSpecDocument(request SpecMutationRequest, digest string) (SpecDocument, error) {
+func (r *fileSessionRepository) newSpecDocument(request SpecMutationRequest, digest string) (SpecDocument, error) {
 	id := "00000-spec-" + digest[:32]
 	document := SpecDocument{Reference: strings.Join([]string{opscore.DirectoryName, request.Namespace, "spec", id, opscore.ArtifactBodyFile()}, "/")}
 

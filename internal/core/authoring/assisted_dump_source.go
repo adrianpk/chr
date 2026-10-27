@@ -12,7 +12,7 @@ import (
 )
 
 func normalizeAssistedDumpSource(opts *AssistedArtifactSynthesisOptions) error {
-	expected := filepath.Join(AuthoringSessionLayout(opts.ProjectDir, opts.Session.ID).SessionDir, "curated-summary.md")
+	expected := filepath.Join(SessionLayout(opts.ProjectDir, opts.Session.ID).SessionDir, "curated-summary.md")
 
 	path := filepath.FromSlash(opts.SourceRef.Path)
 	if !filepath.IsAbs(path) {
@@ -29,7 +29,7 @@ func normalizeAssistedDumpSource(opts *AssistedArtifactSynthesisOptions) error {
 	return err
 }
 
-func (r *fileAuthoringSessionRepository) assistedDumpSourceImage(opts AssistedArtifactSynthesisOptions) (workflowstate.FileChange, error) {
+func (r *fileSessionRepository) assistedDumpSourceImage(opts AssistedArtifactSynthesisOptions) (workflowstate.FileChange, error) {
 	content, err := r.readAuthoringDocument(opts.SourceRef.Path)
 	if errors.Is(err, os.ErrNotExist) {
 		return workflowstate.FileChange{}, ErrAssistedCurationMissing
@@ -59,7 +59,7 @@ func (r *fileAuthoringSessionRepository) assistedDumpSourceImage(opts AssistedAr
 	return workflowstate.FileChange{Path: filepath.FromSlash(opts.SourceRef.Path), Before: contenthash.Sum(content), After: content}, nil
 }
 
-func (r *fileAuthoringSessionRepository) assistedDumpSessionImage(session Session) (workflowstate.FileChange, error) {
+func (r *fileSessionRepository) assistedDumpSessionImage(session Session) (workflowstate.FileChange, error) {
 	paths, err := r.authoringSessionPaths(session.ID)
 	if err != nil {
 		return workflowstate.FileChange{}, err
@@ -75,12 +75,12 @@ func (r *fileAuthoringSessionRepository) assistedDumpSessionImage(session Sessio
 		return workflowstate.FileChange{}, err
 	}
 
-	full, err := RenderAuthoringSession(session, paths)
+	full, err := RenderSession(session, paths)
 	if err != nil {
 		return workflowstate.FileChange{}, err
 	}
 
-	local, err := RenderAuthoringSession(session, relative)
+	local, err := RenderSession(session, relative)
 	if err != nil {
 		return workflowstate.FileChange{}, err
 	}

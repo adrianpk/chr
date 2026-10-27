@@ -24,10 +24,10 @@ type authoringOwnerClaim struct {
 	active *atomic.Bool
 }
 
-// WithAuthoringMutation excludes every shared authoring writer and recovers its
+// WithMutation excludes every shared authoring writer and recovers its
 // pending journal before a new change. The context permits nested owner calls;
 // no lock identity is serialized or supplied by model output.
-func WithAuthoringMutation(ctx context.Context, projectDir string, action func(context.Context) error) (err error) {
+func WithMutation(ctx context.Context, projectDir string, action func(context.Context) error) (err error) {
 	if projectDir == "" {
 		return errors.New("authoring project directory is required")
 	}
@@ -45,7 +45,7 @@ func WithAuthoringMutation(ctx context.Context, projectDir string, action func(c
 		return action(ctx)
 	}
 
-	r := &fileAuthoringSessionRepository{projectDir: root}
+	r := &fileSessionRepository{projectDir: root}
 
 	lockPath, err := r.authoringPath(filepath.Join(workspacecore.DirectoryName, "authoring", "owner.lock"))
 	if err != nil {
@@ -78,7 +78,7 @@ func WithAuthoringMutation(ctx context.Context, projectDir string, action func(c
 	return action(context.WithValue(ctx, authoringOwnerContextKey{}, claim))
 }
 
-func (r *fileAuthoringSessionRepository) authoringPath(relative string) (string, error) {
+func (r *fileSessionRepository) authoringPath(relative string) (string, error) {
 	if !filepath.IsLocal(relative) || filepath.Clean(relative) != relative {
 		return "", errors.New("invalid authoring relative path")
 	}
@@ -115,12 +115,12 @@ func authoringReceiptRef(id string) string {
 	return authoringRuntimeRef("receipts/" + contenthash.Sum([]byte(id)) + ".json")
 }
 
-func (r *fileAuthoringSessionRepository) authoringSessionPaths(id string) (AuthoringSessionPaths, error) {
+func (r *fileSessionRepository) authoringSessionPaths(id string) (SessionPaths, error) {
 	if err := authoringstate.ValidateSessionID(id); err != nil {
-		return AuthoringSessionPaths{}, err
+		return SessionPaths{}, err
 	}
 
-	paths := AuthoringSessionLayout(r.projectDir, id)
+	paths := SessionLayout(r.projectDir, id)
 	for _, path := range []string{paths.SessionPath, paths.TranscriptPath, paths.ArtifactsPath} {
 		relative, err := filepath.Rel(r.projectDir, path)
 		if err != nil {
@@ -135,7 +135,7 @@ func (r *fileAuthoringSessionRepository) authoringSessionPaths(id string) (Autho
 	return paths, nil
 }
 
-func (r *fileAuthoringSessionRepository) authoringRead(relative string) ([]byte, error) {
+func (r *fileSessionRepository) authoringRead(relative string) ([]byte, error) {
 	path, err := r.authoringPath(relative)
 	if err != nil {
 		return nil, err
@@ -144,7 +144,7 @@ func (r *fileAuthoringSessionRepository) authoringRead(relative string) ([]byte,
 	return opsfile.Read(path)
 }
 
-func authoringRelativePaths(projectDir string, paths AuthoringSessionPaths) (AuthoringSessionPaths, error) {
+func authoringRelativePaths(projectDir string, paths SessionPaths) (SessionPaths, error) {
 	result := paths
 
 	pairs := []struct {

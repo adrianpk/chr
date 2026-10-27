@@ -39,7 +39,7 @@ func (s *WorkflowStore) checkGuidedWorkflowAdmission(ctx context.Context, reques
 
 	proof := request.Admission.Guided
 
-	session, err := authoringcore.ReadOwnedAuthoringSession(ctx, s.layout.ProjectDir(), proof.RunID)
+	session, err := authoringcore.ReadOwnedSession(ctx, s.layout.ProjectDir(), proof.RunID)
 	if err != nil {
 		return err
 	}

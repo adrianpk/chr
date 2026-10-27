@@ -11,7 +11,7 @@ import (
 func TestAuthoringSessionRepositoryCreatesSessionFiles(t *testing.T) {
 	ctx := context.Background()
 	projectDir := t.TempDir()
-	repository := NewAuthoringSessionRepository(projectDir)
+	repository := NewSessionRepository(projectDir)
 	session := validAuthoringSession()
 
 	paths, err := repository.CreateSession(ctx, session)
@@ -35,7 +35,7 @@ func TestAuthoringSessionRepositoryCreatesSessionFiles(t *testing.T) {
 func TestAuthoringSessionRepositoryLoadsCreatedSession(t *testing.T) {
 	ctx := context.Background()
 	projectDir := t.TempDir()
-	repository := NewAuthoringSessionRepository(projectDir)
+	repository := NewSessionRepository(projectDir)
 	session := validAuthoringSession()
 
 	_, err := repository.CreateSession(ctx, session)
@@ -54,7 +54,7 @@ func TestAuthoringSessionRepositoryLoadsCreatedSession(t *testing.T) {
 func TestAuthoringSessionRepositoryUpdatesSession(t *testing.T) {
 	ctx := context.Background()
 	projectDir := t.TempDir()
-	repository := NewAuthoringSessionRepository(projectDir)
+	repository := NewSessionRepository(projectDir)
 	session := validAuthoringSession()
 
 	_, err := repository.CreateSession(ctx, session)
@@ -82,7 +82,7 @@ func TestAuthoringSessionRepositoryUpdatesSession(t *testing.T) {
 func TestAuthoringSessionRepositoryListsSessions(t *testing.T) {
 	ctx := context.Background()
 	projectDir := t.TempDir()
-	repository := NewAuthoringSessionRepository(projectDir)
+	repository := NewSessionRepository(projectDir)
 	first := validAuthoringSession()
 	second := validAuthoringSession()
 	second.ID = "auth-20260521-130000"
@@ -111,7 +111,7 @@ func TestAuthoringSessionRepositoryListsSessions(t *testing.T) {
 func TestAuthoringSessionRepositoryRejectsDuplicateSession(t *testing.T) {
 	ctx := context.Background()
 	projectDir := t.TempDir()
-	repository := NewAuthoringSessionRepository(projectDir)
+	repository := NewSessionRepository(projectDir)
 	session := validAuthoringSession()
 
 	_, err := repository.CreateSession(ctx, session)
@@ -128,10 +128,10 @@ func TestAuthoringSessionRepositoryRejectsDuplicateSession(t *testing.T) {
 func TestAuthoringSessionRepositoryReportsMissingSession(t *testing.T) {
 	ctx := context.Background()
 	projectDir := t.TempDir()
-	repository := NewAuthoringSessionRepository(projectDir)
+	repository := NewSessionRepository(projectDir)
 
 	_, err := repository.GetSession(ctx, "missing")
-	if !errors.Is(err, ErrAuthoringSessionNotFound) {
+	if !errors.Is(err, ErrSessionNotFound) {
 		t.Fatalf("GetSession error = %v, want ErrAuthoringSessionNotFound", err)
 	}
 }
@@ -139,25 +139,25 @@ func TestAuthoringSessionRepositoryReportsMissingSession(t *testing.T) {
 func TestAuthoringSessionRepositoryReportsMissingSessionOnUpdate(t *testing.T) {
 	ctx := context.Background()
 	projectDir := t.TempDir()
-	repository := NewAuthoringSessionRepository(projectDir)
+	repository := NewSessionRepository(projectDir)
 	session := validAuthoringSession()
 
 	_, err := repository.UpdateSession(ctx, session)
-	if !errors.Is(err, ErrAuthoringSessionNotFound) {
+	if !errors.Is(err, ErrSessionNotFound) {
 		t.Fatalf("UpdateSession error = %v, want ErrAuthoringSessionNotFound", err)
 	}
 }
 
 func TestRenderAndParseAuthoringSession(t *testing.T) {
 	session := validAuthoringSession()
-	paths := AuthoringSessionLayout("/workspace/project", session.ID)
+	paths := SessionLayout("/workspace/project", session.ID)
 
-	content, err := RenderAuthoringSession(session, paths)
+	content, err := RenderSession(session, paths)
 	if err != nil {
 		t.Fatalf("RenderAuthoringSession returned error: %v", err)
 	}
 
-	parsed, err := ParseAuthoringSession(content)
+	parsed, err := ParseSession(content)
 	if err != nil {
 		t.Fatalf("ParseAuthoringSession returned error: %v", err)
 	}

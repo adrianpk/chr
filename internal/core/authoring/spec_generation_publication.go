@@ -29,7 +29,7 @@ func observeSpecTarget(ctx context.Context, projectDir, reference string) (SpecD
 		return document, err
 	}
 
-	r := &fileAuthoringSessionRepository{projectDir: projectDir}
+	r := &fileSessionRepository{projectDir: projectDir}
 
 	document = SpecDocument{Reference: reference}
 	for _, path := range []string{reference, filepath.Join(filepath.Dir(reference), "metadata.json")} {
@@ -74,7 +74,7 @@ func publishSpecContent(ctx context.Context, projectDir string, paths GeneratedS
 		return err
 	}
 
-	r := &fileAuthoringSessionRepository{projectDir: projectDir}
+	r := &fileSessionRepository{projectDir: projectDir}
 
 	if err := ctx.Err(); err != nil {
 		return err

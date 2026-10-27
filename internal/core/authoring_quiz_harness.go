@@ -17,10 +17,10 @@ type HarnessAuthoringQuizQuestionProvider struct {
 }
 
 // GenerateAuthoringQuizQuestions generates the requested artifact.
-func (p HarnessAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx context.Context, request authoringcore.AuthoringQuizGenerationRequest) (authoringcore.AuthoringQuizGenerationResult, error) {
-	err := authoringcore.ValidateAuthoringQuizGenerationRequest(request)
+func (p HarnessAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx context.Context, request authoringcore.QuizGenerationRequest) (authoringcore.QuizGenerationResult, error) {
+	err := authoringcore.ValidateQuizGenerationRequest(request)
 	if err != nil {
-		return authoringcore.AuthoringQuizGenerationResult{}, err
+		return authoringcore.QuizGenerationResult{}, err
 	}
 
 	program := strings.TrimSpace(p.Program)
@@ -30,7 +30,7 @@ func (p HarnessAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx
 
 	payload, err := json.MarshalIndent(request, "", "  ")
 	if err != nil {
-		return authoringcore.AuthoringQuizGenerationResult{}, fmt.Errorf("marshal authoring quiz request: %w", err)
+		return authoringcore.QuizGenerationResult{}, fmt.Errorf("marshal authoring quiz request: %w", err)
 	}
 
 	prompt := authoringQuizHarnessPrompt(string(payload))
@@ -46,16 +46,16 @@ func (p HarnessAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx
 		DeferResponseTrace: true,
 	})
 	if err != nil {
-		return authoringcore.AuthoringQuizGenerationResult{}, fmt.Errorf("invoke authoring quiz provider: %w", err)
+		return authoringcore.QuizGenerationResult{}, fmt.Errorf("invoke authoring quiz provider: %w", err)
 	}
 
-	result, err := authoringcore.ParseAuthoringQuizGenerationResult(run.Output)
+	result, err := authoringcore.ParseQuizGenerationResult(run.Output)
 	result.Provider = run.Provider
-	result.Strategy = authoringcore.AuthoringQuizGenerationStrategyDeep
+	result.Strategy = authoringcore.QuizGenerationStrategyDeep
 
 	result.RawText = string(run.Output)
 	if err == nil {
-		err = authoringcore.ValidateAuthoringQuizGenerationResult(result)
+		err = authoringcore.ValidateQuizGenerationResult(result)
 	}
 
 	err = ValidateHarnessGenerationOutput(ctx, harness.AgentRunRequest{ID: request.ID, Purpose: request.Action, ProjectDir: request.ProjectDir}, err)
@@ -66,7 +66,7 @@ func (p HarnessAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx
 			ProjectDir: request.ProjectDir,
 		}, run, "parse_error", err)
 
-		return authoringcore.AuthoringQuizGenerationResult{}, err
+		return authoringcore.QuizGenerationResult{}, err
 	}
 
 	recordAgentRunResponseEvent(ctx, harness.AgentRunRequest{

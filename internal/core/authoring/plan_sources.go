@@ -64,7 +64,7 @@ func observePlanSources(ctx context.Context, projectDir string, scope quizcore.S
 
 	observed := PlanSourceObservation{Scope: scope, Project: dumps.Project}
 
-	r := &fileAuthoringSessionRepository{projectDir: projectDir}
+	r := &fileSessionRepository{projectDir: projectDir}
 	if err := r.appendPlanMetadata(ctx, &observed); err != nil {
 		return observed, err
 	}
@@ -100,7 +100,7 @@ func observePlanSources(ctx context.Context, projectDir string, scope quizcore.S
 	return observed, errors.Join(err, r.checkProjectDumpInspection(ctx))
 }
 
-func (r *fileAuthoringSessionRepository) appendPlanMetadata(ctx context.Context, observed *PlanSourceObservation) error {
+func (r *fileSessionRepository) appendPlanMetadata(ctx context.Context, observed *PlanSourceObservation) error {
 	paths := []PlanSourceInput{
 		{Kind: "agent_protocol", Reference: "AGENTS.md"},
 		{Kind: "project_document", Reference: ProjectMetadataPath("")},

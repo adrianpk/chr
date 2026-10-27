@@ -86,7 +86,7 @@ func TestTelegramPresentationDocumentAuthoring(t *testing.T) {
 	checkTelegramNoWork(t, f.receiver.env)
 }
 
-func checkTelegramOriginalDocumentRead(t *testing.T, f *telegramConversationAppFixture, snapshot authoringcore.AuthoringSnapshot, kind authoringcore.ArtifactKind, conversation string) {
+func checkTelegramOriginalDocumentRead(t *testing.T, f *telegramConversationAppFixture, snapshot authoringcore.Snapshot, kind authoringcore.ArtifactKind, conversation string) {
 	t.Helper()
 
 	notice := f.send(t, "Show the "+string(kind)+" document.", 0)
@@ -102,7 +102,7 @@ func checkTelegramOriginalDocumentRead(t *testing.T, f *telegramConversationAppF
 	}
 }
 
-func assertTelegramArtifactUpload(t *testing.T, document telegramDocumentUpload, snapshot authoringcore.AuthoringSnapshot, kind authoringcore.ArtifactKind) {
+func assertTelegramArtifactUpload(t *testing.T, document telegramDocumentUpload, snapshot authoringcore.Snapshot, kind authoringcore.ArtifactKind) {
 	t.Helper()
 
 	for _, artifact := range snapshot.Artifacts {
@@ -119,7 +119,7 @@ type telegramAdvanceAfterAuthoring struct {
 	advance func() error
 }
 
-func (s telegramAdvanceAfterAuthoring) ContinueTelegramAuthoring(ctx context.Context, target telegramcore.OperationTarget, request authoringcore.AuthoringContinuationRequest, guard authoringcore.AuthoringCommitGuard) (authoringcore.AuthoringContinuationResult, error) {
+func (s telegramAdvanceAfterAuthoring) ContinueTelegramAuthoring(ctx context.Context, target telegramcore.OperationTarget, request authoringcore.ContinuationRequest, guard authoringcore.CommitGuard) (authoringcore.ContinuationResult, error) {
 	result, err := s.service.ContinueTelegramAuthoring(ctx, target, request, guard)
 	if err == nil {
 		err = s.advance()

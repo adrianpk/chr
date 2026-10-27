@@ -121,7 +121,7 @@ func (s service) planObservedRuntimeState(sources authoringcore.PlanSourceObserv
 }
 
 func (s service) publishObservedPlan(ctx context.Context, plan generationcore.GeneratedPlan, sources authoringcore.PlanSourceObservation) (paths authoringcore.GeneratedPlanPaths, err error) {
-	err = authoringcore.WithAuthoringMutation(ctx, s.projectContext.ProjectDir, func(ctx context.Context) error {
+	err = authoringcore.WithMutation(ctx, s.projectContext.ProjectDir, func(ctx context.Context) error {
 		current, readErr := s.observePlanContext(ctx, sources.Scope)
 		if readErr != nil {
 			return readErr

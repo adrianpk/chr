@@ -37,7 +37,7 @@ func assistedDumpReceiptChange(digest string, result AssistedArtifactSynthesisRe
 	return workflowstate.FileChange{Path: authoringReceiptRef(receipt.Mutation.OperationID), After: encoded}, err
 }
 
-func (r *fileAuthoringSessionRepository) assistedDumpReceipt(operationID, digest string) (assistedDumpReceiptLookup, error) {
+func (r *fileSessionRepository) assistedDumpReceipt(operationID, digest string) (assistedDumpReceiptLookup, error) {
 	var receipt assistedDumpMutationReceipt
 
 	encoded, err := r.readAuthoringDocument(filepath.ToSlash(authoringReceiptRef(operationID)))
@@ -63,7 +63,7 @@ func (r *fileAuthoringSessionRepository) assistedDumpReceipt(operationID, digest
 	}
 
 	fullPath := filepath.Join(r.projectDir, filepath.FromSlash(receipt.Reference.Path))
-	result := AssistedArtifactSynthesisResult{Session: receipt.Session, Layout: AuthoringArtifactLayout{Ref: receipt.Reference, FullPath: fullPath, Dir: filepath.Dir(fullPath)}, Content: string(content), Mutation: &receipt.Mutation}
+	result := AssistedArtifactSynthesisResult{Session: receipt.Session, Layout: ArtifactLayout{Ref: receipt.Reference, FullPath: fullPath, Dir: filepath.Dir(fullPath)}, Content: string(content), Mutation: &receipt.Mutation}
 
 	return assistedDumpReceiptLookup{Result: result, Exists: true}, nil
 }
@@ -88,7 +88,7 @@ func validateAssistedDumpReceipt(receipt assistedDumpMutationReceipt, operationI
 	return ValidateProjectDumpReference(receipt.Reference.Path)
 }
 
-func (r *fileAuthoringSessionRepository) assistedDumpReceiptContent(mutation ProjectDumpMutationResult) ([]byte, error) {
+func (r *fileSessionRepository) assistedDumpReceiptContent(mutation ProjectDumpMutationResult) ([]byte, error) {
 	artifact := ProjectDumpArtifact{Reference: mutation.Destination, SourceHash: mutation.SourceHash, MetadataHash: mutation.MetadataHash}
 
 	body, err := r.readAuthoringDocument(projectDumpHistoryRef(artifact) + "/artifact.md")

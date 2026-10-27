@@ -17,8 +17,8 @@ import (
 
 // PublishGuidedPlan composes the canonical publication owner using only retained run inputs.
 func PublishGuidedPlan(ctx context.Context, root string, scope GuidedUseCaseScope) (result PlanPublicationResult, err error) {
-	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
-		r := &fileAuthoringSessionRepository{projectDir: root}
+	err = WithMutation(ctx, root, func(ctx context.Context) error {
+		r := &fileSessionRepository{projectDir: root}
 
 		session, readErr := r.getGuardedSession(ctx, scope.RunID)
 		if readErr != nil {

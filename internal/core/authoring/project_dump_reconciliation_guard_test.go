@@ -96,7 +96,7 @@ func checkProjectDumpLargeJournal(t *testing.T) {
 
 	request := ProjectDumpReconciliationRequest{OperationID: "large", ExpectedRevision: preview.Revision, Destination: preview.Destination}
 
-	repo := &fileAuthoringSessionRepository{projectDir: project, afterMutationReplace: func(int) error { return errors.New("lost acknowledgement") }}
+	repo := &fileSessionRepository{projectDir: project, afterMutationReplace: func(int) error { return errors.New("lost acknowledgement") }}
 	if _, err := repo.reconcileProjectDump(t.Context(), request); err == nil {
 		t.Fatal("journal fault not exercised")
 	}
@@ -123,7 +123,7 @@ func TestProjectDumpReconcileDivergence(t *testing.T) {
 
 	request := ProjectDumpReconciliationRequest{OperationID: "divergence", ExpectedRevision: preview.Revision, Destination: preview.Destination}
 
-	repo := &fileAuthoringSessionRepository{projectDir: project, afterMutationReplace: func(int) error { return errors.New("lost acknowledgement") }}
+	repo := &fileSessionRepository{projectDir: project, afterMutationReplace: func(int) error { return errors.New("lost acknowledgement") }}
 	if _, err := repo.reconcileProjectDump(t.Context(), request); err == nil {
 		t.Fatal("fault not exercised")
 	}

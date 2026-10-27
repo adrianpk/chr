@@ -62,7 +62,7 @@ func (r telegramReceiver) dispatchAuthoringConversation(ctx context.Context, use
 	command := telegramAuthoringCommand{Input: input}
 	switch input.Action {
 	case telegramcore.ConversationDone:
-		command.Action, command.Target = authoringcore.AuthoringContinuationGenerate, authoringcore.ArtifactKindDump
+		command.Action, command.Target = authoringcore.ContinuationGenerate, authoringcore.ArtifactKindDump
 	case telegramcore.ConversationCapture:
 		bindingResult, err := r.store.ResolveAuthoringTarget(ctx, input)
 		c := bindingResult.Conversation
@@ -75,7 +75,7 @@ func (r telegramReceiver) dispatchAuthoringConversation(ctx context.Context, use
 			return false, nil
 		}
 
-		command.Action = authoringcore.AuthoringContinuationAnswer
+		command.Action = authoringcore.ContinuationAnswer
 	default:
 		return false, nil
 	}

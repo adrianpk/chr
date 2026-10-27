@@ -8265,12 +8265,12 @@ func installFakeAuthoringQuizProvider(t *testing.T) {
 	t.Helper()
 
 	previous := newAuthoringQuizQuestionProvider
-	newAuthoringQuizQuestionProvider = func() authoringcore.AuthoringQuizQuestionProvider {
+	newAuthoringQuizQuestionProvider = func() authoringcore.QuizQuestionProvider {
 		return &authoringcore.FakeAuthoringQuizQuestionProvider{
-			Result: authoringcore.AuthoringQuizGenerationResult{
+			Result: authoringcore.QuizGenerationResult{
 				Provider: "fake",
-				Strategy: authoringcore.AuthoringQuizGenerationStrategyDeep,
-				Questions: []authoringcore.AuthoringQuizQuestion{
+				Strategy: authoringcore.QuizGenerationStrategyDeep,
+				Questions: []authoringcore.QuizQuestion{
 					{
 						ID:                    "Q1",
 						Text:                  "Which user workflow should the specification pin down first?",

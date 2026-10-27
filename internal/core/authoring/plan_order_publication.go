@@ -61,7 +61,7 @@ func preparePlanOrderChanges(projectDir string, target planTargetObservation, in
 	encoded, tracker := images.Order, images.Tracker
 	binding.OrderHash, binding.TrackerHash = contenthash.Sum(encoded), contenthash.Sum(tracker)
 	binding.PlannedOrderHash, binding.PlannedTrackerHash = binding.OrderHash, binding.TrackerHash
-	r := &fileAuthoringSessionRepository{projectDir: projectDir}
+	r := &fileSessionRepository{projectDir: projectDir}
 
 	changes, err := r.planRetainedImages(document.Namespace, binding, body, encoded, tracker)
 	if err != nil {
@@ -106,7 +106,7 @@ func newPlanRevision(input planRevisionInput) (planRevision, error) {
 	return planRevision{Binding: binding, Document: document}, nil
 }
 
-func (r *fileAuthoringSessionRepository) planRetainedImages(namespace string, binding workflowstate.PlanRevisionBinding, body, order, tracker []byte) ([]workflowstate.FileChange, error) {
+func (r *fileSessionRepository) planRetainedImages(namespace string, binding workflowstate.PlanRevisionBinding, body, order, tracker []byte) ([]workflowstate.FileChange, error) {
 	var changes []workflowstate.FileChange
 
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: r.projectDir, Namespace: namespace})
@@ -137,7 +137,7 @@ func (r *fileAuthoringSessionRepository) planRetainedImages(namespace string, bi
 	return changes, nil
 }
 
-func (r *fileAuthoringSessionRepository) planCurrentTrackerChanges(namespace string, target planTargetObservation, binding workflowstate.PlanRevisionBinding, plan generationcore.GeneratedPlan, tracker []byte) ([]workflowstate.FileChange, error) {
+func (r *fileSessionRepository) planCurrentTrackerChanges(namespace string, target planTargetObservation, binding workflowstate.PlanRevisionBinding, plan generationcore.GeneratedPlan, tracker []byte) ([]workflowstate.FileChange, error) {
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: r.projectDir, Namespace: namespace})
 	if err != nil {
 		return nil, err

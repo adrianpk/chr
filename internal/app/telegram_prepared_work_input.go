@@ -105,7 +105,7 @@ func telegramRetainedPreparedWork(request telegramcore.OperationRequest) (Prepar
 	}
 
 	scope := prepared.Scope
-	if err := authoringcore.ValidateAuthoringWorkScope(scope); err != nil {
+	if err := authoringcore.ValidateWorkScope(scope); err != nil {
 		return prepared, err
 	}
 
@@ -116,6 +116,6 @@ func telegramRetainedPreparedWork(request telegramcore.OperationRequest) (Prepar
 	return prepared, nil
 }
 
-func telegramWorkScopeRequest(scope authoringcore.AuthoringWorkScope) AuthoringWorkRequest {
+func telegramWorkScopeRequest(scope authoringcore.WorkScope) AuthoringWorkRequest {
 	return AuthoringWorkRequest{Binding: scope.Binding, SessionID: scope.SessionID, ExpectedRevision: scope.SessionRevision, ExpectedSourceHash: scope.SourceHash, Intent: scope.Intent, Instruction: scope.Instruction}
 }

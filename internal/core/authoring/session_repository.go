@@ -17,48 +17,48 @@ import (
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
-// AuthoringSessionsDirectory defines a package boundary constant.
-const AuthoringSessionsDirectory = "authoring/sessions"
+// SessionsDirectory defines a package boundary constant.
+const SessionsDirectory = "authoring/sessions"
 
-// ErrAuthoringSessionNotFound identifies a package boundary error.
-var ErrAuthoringSessionNotFound = errors.New("authoring session not found")
+// ErrSessionNotFound identifies a package boundary error.
+var ErrSessionNotFound = errors.New("authoring session not found")
 
-// AuthoringSessionRepository defines a package boundary interface.
-type AuthoringSessionRepository interface {
-	CreateSession(ctx context.Context, session Session) (AuthoringSessionPaths, error)
-	UpdateSession(ctx context.Context, session Session) (AuthoringSessionPaths, error)
+// SessionRepository defines a package boundary interface.
+type SessionRepository interface {
+	CreateSession(ctx context.Context, session Session) (SessionPaths, error)
+	UpdateSession(ctx context.Context, session Session) (SessionPaths, error)
 	GetSession(ctx context.Context, id string) (Session, error)
 	ListSessions(ctx context.Context) ([]Session, error)
 	AppendTranscriptEvents(ctx context.Context, sessionID string, events []AssistedTranscriptEvent) error
 	ListTranscriptEvents(ctx context.Context, sessionID string) ([]AssistedTranscriptEvent, error)
-	ObserveContinuation(context.Context, string) (AuthoringSnapshot, error)
-	ContinueAuthoring(context.Context, AuthoringContinuationRequest, AuthoringGenerator, ...AuthoringCommitGuard) (AuthoringContinuationResult, error)
+	ObserveContinuation(context.Context, string) (Snapshot, error)
+	ContinueAuthoring(context.Context, ContinuationRequest, Generator, ...CommitGuard) (ContinuationResult, error)
 }
 
-// AuthoringSessionPaths describes a package boundary value.
-type AuthoringSessionPaths struct {
+// SessionPaths describes a package boundary value.
+type SessionPaths struct {
 	SessionDir     string
 	SessionPath    string
 	TranscriptPath string
 	ArtifactsPath  string
 }
 
-type fileAuthoringSessionRepository struct {
+type fileSessionRepository struct {
 	projectDir            string
 	afterMutationReplace  func(int) error
 	afterGuidedCheckpoint func() error
 }
 
-// NewAuthoringSessionRepository constructs the corresponding package service or value.
-func NewAuthoringSessionRepository(projectDir string) AuthoringSessionRepository {
-	return &fileAuthoringSessionRepository{projectDir: projectDir}
+// NewSessionRepository constructs the corresponding package service or value.
+func NewSessionRepository(projectDir string) SessionRepository {
+	return &fileSessionRepository{projectDir: projectDir}
 }
 
-// AuthoringSessionLayout executes the corresponding package operation.
-func AuthoringSessionLayout(projectDir, id string) AuthoringSessionPaths {
-	sessionDir := filepath.Join(projectDir, workspacecore.DirectoryName, filepath.FromSlash(AuthoringSessionsDirectory), id)
+// SessionLayout executes the corresponding package operation.
+func SessionLayout(projectDir, id string) SessionPaths {
+	sessionDir := filepath.Join(projectDir, workspacecore.DirectoryName, filepath.FromSlash(SessionsDirectory), id)
 
-	return AuthoringSessionPaths{
+	return SessionPaths{
 		SessionDir:     sessionDir,
 		SessionPath:    filepath.Join(sessionDir, "session.md"),
 		TranscriptPath: filepath.Join(sessionDir, "transcript.md"),
@@ -67,102 +67,102 @@ func AuthoringSessionLayout(projectDir, id string) AuthoringSessionPaths {
 }
 
 // CreateSession executes the corresponding package operation.
-func (r *fileAuthoringSessionRepository) createSession(ctx context.Context, session Session) (AuthoringSessionPaths, error) {
+func (r *fileSessionRepository) createSession(ctx context.Context, session Session) (SessionPaths, error) {
 	err := ctx.Err()
 	if err != nil {
-		return AuthoringSessionPaths{}, err
+		return SessionPaths{}, err
 	}
 
 	err = ValidateSession(session)
 	if err != nil {
-		return AuthoringSessionPaths{}, err
+		return SessionPaths{}, err
 	}
 
-	paths := AuthoringSessionLayout(r.projectDir, session.ID)
+	paths := SessionLayout(r.projectDir, session.ID)
 
 	err = os.MkdirAll(paths.SessionDir, 0o755)
 	if err != nil {
-		return AuthoringSessionPaths{}, fmt.Errorf("create authoring session directory: %w", err)
+		return SessionPaths{}, fmt.Errorf("create authoring session directory: %w", err)
 	}
 
-	content, err := RenderAuthoringSession(session, paths)
+	content, err := RenderSession(session, paths)
 	if err != nil {
-		return AuthoringSessionPaths{}, err
+		return SessionPaths{}, err
 	}
 
 	err = writeNewAuthoringFile(paths.SessionPath, content)
 	if err != nil {
-		return AuthoringSessionPaths{}, err
+		return SessionPaths{}, err
 	}
 
 	err = writeNewAuthoringFile(paths.TranscriptPath, "# Transcript\n\n")
 	if err != nil {
-		return AuthoringSessionPaths{}, err
+		return SessionPaths{}, err
 	}
 
 	err = writeNewAuthoringFile(paths.ArtifactsPath, "# Artifacts\n\n")
 	if err != nil {
-		return AuthoringSessionPaths{}, err
+		return SessionPaths{}, err
 	}
 
 	return paths, nil
 }
 
 // UpdateSession executes the corresponding package operation.
-func (r *fileAuthoringSessionRepository) updateSession(ctx context.Context, session Session) (AuthoringSessionPaths, error) {
+func (r *fileSessionRepository) updateSession(ctx context.Context, session Session) (SessionPaths, error) {
 	err := ctx.Err()
 	if err != nil {
-		return AuthoringSessionPaths{}, err
+		return SessionPaths{}, err
 	}
 
 	err = ValidateSession(session)
 	if err != nil {
-		return AuthoringSessionPaths{}, err
+		return SessionPaths{}, err
 	}
 
-	paths := AuthoringSessionLayout(r.projectDir, session.ID)
+	paths := SessionLayout(r.projectDir, session.ID)
 
 	_, err = os.Stat(paths.SessionPath)
 	if errors.Is(err, os.ErrNotExist) {
-		return AuthoringSessionPaths{}, fmt.Errorf("%w: %s", ErrAuthoringSessionNotFound, session.ID)
+		return SessionPaths{}, fmt.Errorf("%w: %s", ErrSessionNotFound, session.ID)
 	}
 
 	if err != nil {
-		return AuthoringSessionPaths{}, fmt.Errorf("stat authoring session: %w", err)
+		return SessionPaths{}, fmt.Errorf("stat authoring session: %w", err)
 	}
 
-	content, err := RenderAuthoringSession(session, paths)
+	content, err := RenderSession(session, paths)
 	if err != nil {
-		return AuthoringSessionPaths{}, err
+		return SessionPaths{}, err
 	}
 
 	err = os.WriteFile(paths.SessionPath, []byte(content), 0o644)
 	if err != nil {
-		return AuthoringSessionPaths{}, fmt.Errorf("update authoring session: %w", err)
+		return SessionPaths{}, fmt.Errorf("update authoring session: %w", err)
 	}
 
 	return paths, nil
 }
 
 // GetSession executes the corresponding package operation.
-func (r *fileAuthoringSessionRepository) getSession(ctx context.Context, id string) (Session, error) {
+func (r *fileSessionRepository) getSession(ctx context.Context, id string) (Session, error) {
 	err := ctx.Err()
 	if err != nil {
 		return Session{}, err
 	}
 
-	paths := AuthoringSessionLayout(r.projectDir, id)
+	paths := SessionLayout(r.projectDir, id)
 
 	content, err := opsfile.Read(paths.SessionPath)
 	if errors.Is(err, os.ErrNotExist) {
-		return Session{}, fmt.Errorf("%w: %s", ErrAuthoringSessionNotFound, id)
+		return Session{}, fmt.Errorf("%w: %s", ErrSessionNotFound, id)
 	}
 
 	if err != nil {
 		return Session{}, fmt.Errorf("read authoring session: %w", err)
 	}
 
-	session, err := ParseAuthoringSession(string(content))
+	session, err := ParseSession(string(content))
 	if err != nil {
 		return Session{}, err
 	}
@@ -171,8 +171,8 @@ func (r *fileAuthoringSessionRepository) getSession(ctx context.Context, id stri
 }
 
 // ListSessions lists the requested data.
-func (r *fileAuthoringSessionRepository) listSessions(ctx context.Context) ([]Session, error) {
-	sessionsDir := filepath.Join(r.projectDir, workspacecore.DirectoryName, filepath.FromSlash(AuthoringSessionsDirectory))
+func (r *fileSessionRepository) listSessions(ctx context.Context) ([]Session, error) {
+	sessionsDir := filepath.Join(r.projectDir, workspacecore.DirectoryName, filepath.FromSlash(SessionsDirectory))
 	sessions := []Session{}
 
 	visited := 0
@@ -201,7 +201,7 @@ func (r *fileAuthoringSessionRepository) listSessions(ctx context.Context) ([]Se
 }
 
 // AppendTranscriptEvents executes the corresponding package operation.
-func (r *fileAuthoringSessionRepository) appendTranscriptEvents(ctx context.Context, sessionID string, events []AssistedTranscriptEvent) error {
+func (r *fileSessionRepository) appendTranscriptEvents(ctx context.Context, sessionID string, events []AssistedTranscriptEvent) error {
 	err := ctx.Err()
 	if err != nil {
 		return err
@@ -211,7 +211,7 @@ func (r *fileAuthoringSessionRepository) appendTranscriptEvents(ctx context.Cont
 		return fmt.Errorf("authoring session id is required")
 	}
 
-	paths := AuthoringSessionLayout(r.projectDir, sessionID)
+	paths := SessionLayout(r.projectDir, sessionID)
 
 	err = requireAuthoringSessionFile(paths.SessionPath, sessionID)
 	if err != nil {
@@ -253,7 +253,7 @@ func (r *fileAuthoringSessionRepository) appendTranscriptEvents(ctx context.Cont
 }
 
 // ListTranscriptEvents lists the requested data.
-func (r *fileAuthoringSessionRepository) listTranscriptEvents(ctx context.Context, sessionID string) ([]AssistedTranscriptEvent, error) {
+func (r *fileSessionRepository) listTranscriptEvents(ctx context.Context, sessionID string) ([]AssistedTranscriptEvent, error) {
 	err := ctx.Err()
 	if err != nil {
 		return nil, err
@@ -263,7 +263,7 @@ func (r *fileAuthoringSessionRepository) listTranscriptEvents(ctx context.Contex
 		return nil, fmt.Errorf("authoring session id is required")
 	}
 
-	paths := AuthoringSessionLayout(r.projectDir, sessionID)
+	paths := SessionLayout(r.projectDir, sessionID)
 
 	err = requireAuthoringSessionFile(paths.SessionPath, sessionID)
 	if err != nil {
@@ -285,7 +285,7 @@ func (r *fileAuthoringSessionRepository) listTranscriptEvents(ctx context.Contex
 func requireAuthoringSessionFile(path, sessionID string) error {
 	_, err := os.Stat(path)
 	if errors.Is(err, os.ErrNotExist) {
-		return fmt.Errorf("%w: %s", ErrAuthoringSessionNotFound, sessionID)
+		return fmt.Errorf("%w: %s", ErrSessionNotFound, sessionID)
 	}
 
 	if err != nil {
@@ -295,8 +295,8 @@ func requireAuthoringSessionFile(path, sessionID string) error {
 	return nil
 }
 
-// RenderAuthoringSession renders the corresponding package data.
-func RenderAuthoringSession(session Session, paths AuthoringSessionPaths) (string, error) {
+// RenderSession renders the corresponding package data.
+func RenderSession(session Session, paths SessionPaths) (string, error) {
 	err := ValidateSession(session)
 	if err != nil {
 		return "", err
@@ -314,8 +314,8 @@ func RenderAuthoringSession(session Session, paths AuthoringSessionPaths) (strin
 	return output.String(), nil
 }
 
-// ParseAuthoringSession parses the corresponding package data.
-func ParseAuthoringSession(content string) (Session, error) {
+// ParseSession parses the corresponding package data.
+func ParseSession(content string) (Session, error) {
 	metadata, err := ticketmetadata.Parse(content)
 	if err != nil {
 		return Session{}, err
@@ -401,7 +401,7 @@ func renderAuthoringSessionFrontmatter(output *bytes.Buffer, session Session) er
 	return nil
 }
 
-func renderAuthoringSessionBody(output *bytes.Buffer, session Session, paths AuthoringSessionPaths) {
+func renderAuthoringSessionBody(output *bytes.Buffer, session Session, paths SessionPaths) {
 	output.WriteString("# Authoring Session\n\n")
 	output.WriteString("## Files\n\n")
 	output.WriteString("| Role | Path |\n")
@@ -681,7 +681,7 @@ func optionalAuthoringRevision(metadata map[string]string) (int64, error) {
 	return revision, nil
 }
 
-func (r *fileAuthoringSessionRepository) appendListedAuthoringSession(ctx context.Context, sessions *[]Session, path string, entry os.DirEntry) error {
+func (r *fileSessionRepository) appendListedAuthoringSession(ctx context.Context, sessions *[]Session, path string, entry os.DirEntry) error {
 	err := ctx.Err()
 	if err != nil {
 		return err
@@ -705,7 +705,7 @@ func (r *fileAuthoringSessionRepository) appendListedAuthoringSession(ctx contex
 		return fmt.Errorf("read authoring session: %w", err)
 	}
 
-	session, err := ParseAuthoringSession(string(content))
+	session, err := ParseSession(string(content))
 	if err != nil {
 		return err
 	}

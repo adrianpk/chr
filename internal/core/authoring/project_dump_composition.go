@@ -14,7 +14,7 @@ import (
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
-func (r *fileAuthoringSessionRepository) projectDumpImages(source ProjectDumpArtifact) (projectDumpFileImages, error) {
+func (r *fileSessionRepository) projectDumpImages(source ProjectDumpArtifact) (projectDumpFileImages, error) {
 	body, err := r.readAuthoringDocument(source.Reference)
 	if err != nil {
 		return projectDumpFileImages{Body: nil, Metadata: nil}, err
@@ -32,7 +32,7 @@ func (r *fileAuthoringSessionRepository) projectDumpImages(source ProjectDumpArt
 	return projectDumpFileImages{Body: body, Metadata: metadata}, nil
 }
 
-func (r *fileAuthoringSessionRepository) composeProjectDumps(sources []ProjectDumpArtifact) ([]byte, error) {
+func (r *fileSessionRepository) composeProjectDumps(sources []ProjectDumpArtifact) ([]byte, error) {
 	var composed bytes.Buffer
 
 	for index, source := range sources {
@@ -76,7 +76,7 @@ func projectDumpHistoryRef(source ProjectDumpArtifact) string {
 	return filepath.ToSlash(filepath.Join(filepath.Dir(source.Reference), "files", "history", image))
 }
 
-func (r *fileAuthoringSessionRepository) projectDumpHistoryChange(reference string, content []byte) (workflowstate.FileChange, error) {
+func (r *fileSessionRepository) projectDumpHistoryChange(reference string, content []byte) (workflowstate.FileChange, error) {
 	change := workflowstate.FileChange{Path: filepath.FromSlash(reference), After: content}
 
 	before, err := r.readAuthoringDocument(reference)
@@ -137,7 +137,7 @@ func projectDumpReconciliationProvenance(preview ProjectDumpReconciliationPrevie
 	}
 }
 
-func (r *fileAuthoringSessionRepository) projectDumpReconciliationChanges(observed ProjectDumpObservation, preview ProjectDumpReconciliationPreview, operationID string) (projectDumpChanges, error) {
+func (r *fileSessionRepository) projectDumpReconciliationChanges(observed ProjectDumpObservation, preview ProjectDumpReconciliationPreview, operationID string) (projectDumpChanges, error) {
 	result := ProjectDumpMutationResult{OperationID: operationID, Destination: preview.Destination, SourceHash: contenthash.Sum([]byte(preview.Content))}
 
 	changes := []workflowstate.FileChange{{Path: filepath.FromSlash(preview.Destination), Before: preview.Sources[0].SourceHash, After: []byte(preview.Content)}}
@@ -163,7 +163,7 @@ func (r *fileAuthoringSessionRepository) projectDumpReconciliationChanges(observ
 	return projectDumpChanges{Changes: changes, Result: result}, nil
 }
 
-func (r *fileAuthoringSessionRepository) projectDumpReconciliationSourceChanges(source ProjectDumpArtifact, preview ProjectDumpReconciliationPreview, operationID string) ([]workflowstate.FileChange, error) {
+func (r *fileSessionRepository) projectDumpReconciliationSourceChanges(source ProjectDumpArtifact, preview ProjectDumpReconciliationPreview, operationID string) ([]workflowstate.FileChange, error) {
 	fileImages, err := r.projectDumpImages(source)
 	body, metadata := fileImages.Body, fileImages.Metadata
 

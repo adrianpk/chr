@@ -21,7 +21,7 @@ func (s *WorkflowStore) checkGuidedWorkflowControl(ctx context.Context, run Work
 		return errors.Join(workflowstate.ErrConflict, err)
 	}
 
-	session, err := authoringcore.ReadOwnedAuthoringSession(ctx, absolute, request.Guided.RunID)
+	session, err := authoringcore.ReadOwnedSession(ctx, absolute, request.Guided.RunID)
 	if err != nil {
 		return err
 	}

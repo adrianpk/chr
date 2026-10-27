@@ -43,7 +43,7 @@ func guidedRecoveryInventoryFixture(t *testing.T) (string, Session) {
 	manual := original
 
 	manual.ID, manual.Guided = "manual", nil
-	if _, err := NewAuthoringSessionRepository(root).CreateSession(t.Context(), manual); err != nil {
+	if _, err := NewSessionRepository(root).CreateSession(t.Context(), manual); err != nil {
 		t.Fatal(err)
 	}
 

@@ -10,7 +10,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s service) authoringWorkContract(record core.WorkflowRecord, title string, request AuthoringWorkRequest, source authoringcore.AuthoringArtifactObservation) (core.WorkflowRecord, error) {
+func (s service) authoringWorkContract(record core.WorkflowRecord, title string, request AuthoringWorkRequest, source authoringcore.ArtifactObservation) (core.WorkflowRecord, error) {
 	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
 	if err != nil {
 		return core.WorkflowRecord{}, err
